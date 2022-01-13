@@ -193,37 +193,6 @@ func (o *ElementMeta) GetIdentityDigest(accessor ElementMetaAccessor) []byte {
 	return o.GetIdentity(accessor).Digest()
 }
 
-// NameAccessor describes a accessor for a named object.
-type NameAccessor interface {
-	// GetName returns the name of the object.
-	GetName() string
-	// SetName sets the name of the object.
-	SetName(name string)
-}
-
-// VersionAccessor describes a accessor for a versioned object.
-type VersionAccessor interface {
-	// GetVersion returns the version of the object.
-	GetVersion() string
-	// SetVersion sets the version of the object.
-	SetVersion(version string)
-}
-
-// LabelsAccessor describes a accessor for a labeled object.
-type LabelsAccessor interface {
-	// GetLabels returns the labels of the object.
-	GetLabels() metav1.Labels
-	// SetLabels sets the labels of the object.
-	SetLabels(labels []metav1.Label)
-}
-
-// ObjectMetaAccessor describes a accessor for named and versioned object.
-type ObjectMetaAccessor interface {
-	NameAccessor
-	VersionAccessor
-	LabelsAccessor
-}
-
 // ElementMetaAccessor describes an accessor for the set of meta information for a set of elements.
 type ElementMetaAccessor interface {
 	// Get all the meta information for a set of elements

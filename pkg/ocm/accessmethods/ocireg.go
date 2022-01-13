@@ -15,15 +15,17 @@
 package accessmethods
 
 import (
-	"github.com/gardener/ocm/pkg/ocm"
+	"github.com/gardener/ocm/pkg/ocm/core"
 	"github.com/gardener/ocm/pkg/ocm/runtime"
 )
 
 // OCIRegistryType is the access type of a oci registry.
 const OCIRegistryType = "ociRegistry"
+const OCIRegistryTypeV1 = OCIRegistryType + "/v1"
 
 func init() {
-	ocm.RegisterAccessType(NewAccessType(OCIRegistryType, &OCIRegistryAccessSpec{}))
+	core.RegisterAccessType(NewAccessType(OCIRegistryType, &OCIRegistryAccessSpec{}))
+	core.RegisterAccessType(NewAccessType(OCIRegistryTypeV1, &OCIRegistryAccessSpec{}))
 }
 
 // OCIRegistryAccessSpec describes the access for a oci registry.
@@ -34,21 +36,35 @@ type OCIRegistryAccessSpec struct {
 	ImageReference string `json:"imageReference"`
 }
 
+// NewOCIRegistryAccessSpecV1 creates a new oci registry access spec version v1
+func NewOCIRegistryAccessSpecV1(ref string) *OCIRegistryAccessSpec {
+	return &OCIRegistryAccessSpec{
+		ObjectType: runtime.ObjectType{
+			Type: OCIRegistryType,
+		},
+		ImageReference: ref,
+	}
+}
+
 func (a *OCIRegistryAccessSpec) GetName() string {
 	return OCIRegistryType
 }
 
-func (a *OCIRegistryAccessSpec) AccessMethod(c ocm.ComponentAccess) (ocm.AccessMethod, error) {
+func (a *OCIRegistryAccessSpec) GetVersion() string {
+	return "v1"
+}
+
+func (a *OCIRegistryAccessSpec) AccessMethod(c core.ComponentAccess) (core.AccessMethod, error) {
 	return newOCIRegistryAccessMethod(a)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type OCIRegistryAccessMethod struct {
-  spec *OCIRegistryAccessSpec
+	spec *OCIRegistryAccessSpec
 }
 
-var _ ocm.AccessMethod = &OCIRegistryAccessMethod{}
+var _ core.AccessMethod = &OCIRegistryAccessMethod{}
 
 func newOCIRegistryAccessMethod(a *OCIRegistryAccessSpec) (*OCIRegistryAccessMethod, error) {
 	return &OCIRegistryAccessMethod{

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ocm
+package core
 
 import (
 	"fmt"
@@ -20,15 +20,15 @@ import (
 	"github.com/gardener/ocm/pkg/ocm/runtime"
 )
 
-
 type AccessType interface {
 	runtime.TypedObjectCodec
 	GetName() string
+	GetVersion() string
 }
 
 type AccessSpec interface {
 	runtime.TypedObject
-	AccessMethod() (AccessMethod, error)
+	AccessMethod(access ComponentAccess) (AccessMethod, error)
 }
 
 type AccessMethod interface {
@@ -40,6 +40,9 @@ type KnownAccessTypes interface {
 
 	GetAccessType(name string) AccessType
 	Register(name string, atype AccessType)
+
+	DecodeAccessSpec(data []byte) (AccessSpec, error)
+	CreateAccessSpec(obj runtime.TypedObject) (AccessSpec, error)
 }
 
 type knownAccessTypes struct {
@@ -78,11 +81,29 @@ func (t *knownAccessTypes) DecodeAccessSpec(data []byte) (AccessSpec, error) {
 	return nil, fmt.Errorf("invalid access spec type: yield %T instead of AccessSpec")
 }
 
+func (t *knownAccessTypes) CreateAccessSpec(obj runtime.TypedObject) (AccessSpec, error) {
+	if s, ok := obj.(AccessSpec); ok {
+		return s, nil
+	}
+	if u, ok := obj.(*runtime.UnstructuredTypedObject); ok {
+		raw, err := u.GetRaw()
+		if err != nil {
+			return nil, err
+		}
+		return t.DecodeAccessSpec(raw)
+	}
+	return nil, fmt.Errorf("invalid object type %T for access specs", obj)
+}
+
 // DefaultKnownAccessTypes contains all globally known access serializer
 var DefaultKnownAccessTypes = NewKnownAccessTypes()
 
 func RegisterAccessType(atype AccessType) {
 	DefaultKnownAccessTypes.Register(atype.GetName(), atype)
+}
+
+func CreateAccessSpec(t runtime.TypedObject) (AccessSpec, error) {
+	return DefaultKnownAccessTypes.CreateAccessSpec(t)
 }
 
 // DefaultJSONTAccessSpecDecoder is a simple decoder that implements the TypedObjectDecoder interface.
@@ -108,7 +129,7 @@ type UnknownAccessSpec struct {
 	*runtime.UnstructuredTypedObject
 }
 
-func (s *UnknownAccessSpec) AccessMethod() (AccessMethod, error) {
+func (s *UnknownAccessSpec) AccessMethod(ComponentAccess) (AccessMethod, error) {
 	return nil, fmt.Errorf("unknown access method type")
 }
 

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ocm
+package core
 
 import (
 	"fmt"
@@ -27,7 +27,7 @@ type RepositoryType interface {
 type RepositorySpec interface {
 	runtime.TypedObject
 
-	Repository() (ComponentRepository, error)
+	Repository() (Repository, error)
 }
 
 type KnownRepositoryTypes interface {
@@ -35,6 +35,9 @@ type KnownRepositoryTypes interface {
 
 	GetRepositoryType(name string) RepositoryType
 	Register(name string, atype RepositoryType)
+
+	DecodeRepositorySpec(data []byte) (RepositorySpec, error)
+	CreateRepositorySpec(obj runtime.TypedObject) (RepositorySpec, error)
 }
 
 type knownRepositoryTypes struct {
@@ -73,11 +76,29 @@ func (t *knownRepositoryTypes) DecodeRepositorySpec(data []byte) (RepositorySpec
 	return nil, fmt.Errorf("invalid access spec type: yield %T instead of RepositorySpec")
 }
 
+func (t *knownRepositoryTypes) CreateRepositorySpec(obj runtime.TypedObject) (RepositorySpec, error) {
+	if s, ok := obj.(RepositorySpec); ok {
+		return s, nil
+	}
+	if u, ok := obj.(*runtime.UnstructuredTypedObject); ok {
+		raw, err := u.GetRaw()
+		if err != nil {
+			return nil, err
+		}
+		return t.DecodeRepositorySpec(raw)
+	}
+	return nil, fmt.Errorf("invalid object type %T for repository specs", obj)
+}
+
 // DefaultKnownAccessTypes contains all globally known access serializer
 var DefaultKnownRepositoryTypes = NewKnownRepositoryTypes()
 
 func RegisterRepositoryType(name string, atype RepositoryType) {
 	DefaultKnownRepositoryTypes.Register(name, atype)
+}
+
+func CreateRepositorySpec(t runtime.TypedObject) (RepositorySpec, error) {
+	return DefaultKnownRepositoryTypes.CreateRepositorySpec(t)
 }
 
 // DefaultJSONTRepositorySpecDecoder is a simple decoder that implements the TypedObjectDecoder interface.
@@ -105,6 +126,6 @@ type UnknownRepositorySpec struct {
 
 var _ RepositorySpec = &UnknownRepositorySpec{}
 
-func (r *UnknownRepositorySpec) Repository() (ComponentRepository, error) {
+func (r *UnknownRepositorySpec) Repository() (Repository, error) {
 	return nil, fmt.Errorf("unknown respository type %q", r.GetType())
 }

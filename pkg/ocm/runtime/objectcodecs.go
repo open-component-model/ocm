@@ -174,9 +174,8 @@ func (c *codec) Encode(acc TypedObject) ([]byte, error) {
 	return codec.Encode(acc)
 }
 
-
 // JSONTypedObjectCodecBase can be used a s base object to provide default codec implementations.
-type JSONTypedObjectCodecBase struct {}
+type JSONTypedObjectCodecBase struct{}
 
 func (_ JSONTypedObjectCodecBase) Encode(obj TypedObject) ([]byte, error) {
 	return DefaultJSONTypedObjectCodec.Encode(obj)
@@ -186,8 +185,8 @@ func (_ JSONTypedObjectCodecBase) Decode(data []byte) (TypedObject, error) {
 	return DefaultJSONTypedObjectCodec.Decode(data)
 }
 
-func JSONUnmarshalInto(data []byte, obj TypedObject) (TypedObject, error) {
-	err:= json.Unmarshal(data, obj)
+func UnmarshalInto(data []byte, obj TypedObject) (TypedObject, error) {
+	err := json.Unmarshal(data, obj)
 	if err != nil {
 		return nil, err
 	}

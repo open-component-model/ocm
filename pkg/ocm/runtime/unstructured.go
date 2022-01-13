@@ -158,6 +158,7 @@ func (u *UnstructuredTypedObject) Decode(types KnownTypes) (TypedObject, error) 
 
 // UnmarshalJSON implements a custom json unmarshal method for a unstructured typed object.
 func (u *UnstructuredTypedObject) UnmarshalJSON(data []byte) error {
+	fmt.Printf("unmarshal raw: %s\n", string(data))
 	typedObj := ObjectType{}
 	if err := json.Unmarshal(data, &typedObj); err != nil {
 		return err
@@ -208,4 +209,15 @@ func ToUnstructuredTypedObject(obj TypedObject) (*UnstructuredTypedObject, error
 		return nil, err
 	}
 	return uObj, nil
+}
+
+type UnstructuredTypedObjectList []*UnstructuredTypedObject
+
+func (l UnstructuredTypedObjectList) Copy() UnstructuredTypedObjectList {
+	n := make(UnstructuredTypedObjectList, len(l), len(l))
+	for i, u := range l {
+		copy := *u
+		n[i] = &copy
+	}
+	return n
 }

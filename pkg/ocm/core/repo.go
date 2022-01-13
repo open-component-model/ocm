@@ -12,32 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ocm
+package core
 
 import (
 	"io"
 
+	"github.com/gardener/ocm/pkg/common"
+	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
+	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 )
 
-type ComponentRepository interface {
+type Repository interface {
+	oci.Repository
 	GetSpecification() RepositorySpec
-	GetComponent(name string, version string) (ComponentAccess, error)
+	LookupComponent(name string, version string) (ComponentAccess, error)
 	WriteComponent(ComponentAccess) (ComponentAccess, error)
 }
 
-type DataAccess interface {
+type DataAccess = common.DataAccess
+type BlobAccess = common.BlobAccess
+
+type ResourceAccess interface {
+	AccessMethod() AccessMethod
 	Get() ([]byte, error)
 	Reader() (io.Reader, error)
 }
 
 type ComponentAccess interface {
-	GetRepository() ComponentRepository
+	GetRepository() Repository
 
 	GetName() string
 	GetVersion() string
 
 	GetDescriptor() (*compdesc.ComponentDescriptor, error)
-	GetResource(meta *compdesc.Identity) (DataAccess, error)
-	GetSource(meta *compdesc.Identity) (DataAccess, error)
+	GetResource(meta *metav1.Identity) (ResourceAccess, error)
+	GetSource(meta *metav1.Identity) (ResourceAccess, error)
 }
