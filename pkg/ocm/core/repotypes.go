@@ -16,16 +16,20 @@ package core
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/ocm/runtime"
 )
 
 type RepositoryType interface {
 	runtime.TypedObjectCodec
+	common.VersionedElement
 }
 
 type RepositorySpec interface {
 	runtime.TypedObject
+	common.VersionedElement
 
 	Repository() (Repository, error)
 }
@@ -128,4 +132,22 @@ var _ RepositorySpec = &UnknownRepositorySpec{}
 
 func (r *UnknownRepositorySpec) Repository() (Repository, error) {
 	return nil, fmt.Errorf("unknown respository type %q", r.GetType())
+}
+
+func (r *UnknownRepositorySpec) GetName() string {
+	t := r.GetType()
+	i := strings.LastIndex(t, "/")
+	if i < 0 {
+		return t
+	}
+	return t[:i]
+}
+
+func (r *UnknownRepositorySpec) GetVersion() string {
+	t := r.GetType()
+	i := strings.LastIndex(t, "/")
+	if i < 0 {
+		return "v1"
+	}
+	return t[i+1:]
 }

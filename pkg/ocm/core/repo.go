@@ -33,17 +33,31 @@ type Repository interface {
 type DataAccess = common.DataAccess
 type BlobAccess = common.BlobAccess
 
+type ResourceMeta = compdesc.ResourceMeta
+
 type ResourceAccess interface {
+	ResourceMeta() ResourceMeta
 	AccessMethod() AccessMethod
-	Get() ([]byte, error)
-	Reader() (io.Reader, error)
+	BlobAccess
+}
+
+type SourceMeta = compdesc.SourceMeta
+
+type SourceAccess interface {
+	SourceMeta() SourceMeta
+	AccessMethod() AccessMethod
+	BlobAccess
 }
 
 type ComponentAccess interface {
-	GetRepository() Repository
+	common.VersionedElement
+	io.Closer
 
-	GetName() string
-	GetVersion() string
+	// GetAccessType returns the storage type of the component, which is the type of the repository
+	// it is taken from
+	GetAccessType() string
+
+	GetRepository() Repository
 
 	GetDescriptor() (*compdesc.ComponentDescriptor, error)
 	GetResource(meta *metav1.Identity) (ResourceAccess, error)

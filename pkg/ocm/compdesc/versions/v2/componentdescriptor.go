@@ -110,8 +110,6 @@ type ElementMeta struct {
 	Name string `json:"name"`
 	// Version is the semver version of the object.
 	Version string `json:"version"`
-	// Type describes the type of the object.
-	Type string `json:"type"`
 	// ExtraIdentity is the identity of an object.
 	// An additional label with key "name" ist not allowed
 	ExtraIdentity metav1.Identity `json:"extraIdentity,omitempty"`
@@ -139,16 +137,6 @@ func (o ElementMeta) GetVersion() string {
 // SetVersion sets the version of the object.
 func (o *ElementMeta) SetVersion(version string) {
 	o.Version = version
-}
-
-// GetType returns the type of the object.
-func (o ElementMeta) GetType() string {
-	return o.Type
-}
-
-// SetType sets the type of the object.
-func (o *ElementMeta) SetType(ttype string) {
-	o.Type = ttype
 }
 
 // GetLabels returns the label of the object.
@@ -214,8 +202,28 @@ func (s Sources) GetMetas() []ElementMeta {
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
 type Source struct {
-	ElementMeta `json:",inline"`
-	Access      *runtime.UnstructuredTypedObject `json:"access"`
+	SourceMeta `json:",inline"`
+
+	Access *runtime.UnstructuredTypedObject `json:"access"`
+}
+
+// SourceMeta is the definition of the meta data of a source.
+// +k8s:deepcopy-gen=true
+// +k8s:openapi-gen=true
+type SourceMeta struct {
+	ElementMeta
+	// Type describes the type of the object.
+	Type string `json:"type"`
+}
+
+// GetType returns the type of the object.
+func (o SourceMeta) GetType() string {
+	return o.Type
+}
+
+// SetType sets the type of the object.
+func (o *SourceMeta) SetType(ttype string) {
+	o.Type = ttype
 }
 
 // SourceRef defines a reference to a source
@@ -247,6 +255,9 @@ func (r Resources) GetMetas() []ElementMeta {
 type Resource struct {
 	ElementMeta `json:",inline"`
 
+	// Type describes the type of the object.
+	Type string `json:"type"`
+
 	// Relation describes the relation of the resource to the component.
 	// Can be a local or external resource
 	Relation metav1.ResourceRelation `json:"relation,omitempty"`
@@ -258,6 +269,16 @@ type Resource struct {
 	// Access describes the type specific method to
 	// access the defined resource.
 	Access *runtime.UnstructuredTypedObject `json:"access"`
+}
+
+// GetType returns the type of the object.
+func (o Resource) GetType() string {
+	return o.Type
+}
+
+// SetType sets the type of the object.
+func (o *Resource) SetType(ttype string) {
+	o.Type = ttype
 }
 
 // ComponentReference describes the reference to another component in the registry.

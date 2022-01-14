@@ -18,6 +18,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+
+	"github.com/modern-go/reflect2"
 )
 
 // UnstructuredTypesEqual compares two unstructured object.
@@ -192,7 +194,7 @@ func (_ UnstructuredTypedObject) OpenAPISchemaFormat() string { return "" }
 
 // ToUnstructuredTypedObject converts a typed object to a unstructured object.
 func ToUnstructuredTypedObject(obj TypedObject) (*UnstructuredTypedObject, error) {
-	if obj == nil {
+	if reflect2.IsNil(obj) {
 		return nil, nil
 	}
 	if un, ok := obj.(*UnstructuredTypedObject); ok {

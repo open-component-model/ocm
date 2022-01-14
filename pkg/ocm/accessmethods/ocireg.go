@@ -15,6 +15,10 @@
 package accessmethods
 
 import (
+	"io"
+	"io/ioutil"
+
+	"github.com/gardener/ocm/pkg/ocm/common"
 	"github.com/gardener/ocm/pkg/ocm/core"
 	"github.com/gardener/ocm/pkg/ocm/runtime"
 )
@@ -24,13 +28,13 @@ const OCIRegistryType = "ociRegistry"
 const OCIRegistryTypeV1 = OCIRegistryType + "/v1"
 
 func init() {
-	core.RegisterAccessType(NewAccessType(OCIRegistryType, &OCIRegistryAccessSpec{}))
-	core.RegisterAccessType(NewAccessType(OCIRegistryTypeV1, &OCIRegistryAccessSpec{}))
+	core.RegisterAccessType(common.NewAccessType(OCIRegistryType, &OCIRegistryAccessSpec{}))
+	core.RegisterAccessType(common.NewAccessType(OCIRegistryTypeV1, &OCIRegistryAccessSpec{}))
 }
 
 // OCIRegistryAccessSpec describes the access for a oci registry.
 type OCIRegistryAccessSpec struct {
-	runtime.ObjectType `json:",inline"`
+	runtime.ObjectTypeVersion `json:",inline"`
 
 	// ImageReference is the actual reference to the oci image repository and tag.
 	ImageReference string `json:"imageReference"`
@@ -39,19 +43,13 @@ type OCIRegistryAccessSpec struct {
 // NewOCIRegistryAccessSpecV1 creates a new oci registry access spec version v1
 func NewOCIRegistryAccessSpecV1(ref string) *OCIRegistryAccessSpec {
 	return &OCIRegistryAccessSpec{
-		ObjectType: runtime.ObjectType{
-			Type: OCIRegistryType,
-		},
-		ImageReference: ref,
+		ObjectTypeVersion: runtime.NewObjectTypeVersion(OCIRegistryType),
+		ImageReference:    ref,
 	}
 }
 
-func (a *OCIRegistryAccessSpec) GetName() string {
+func (_ *OCIRegistryAccessSpec) GetType() string {
 	return OCIRegistryType
-}
-
-func (a *OCIRegistryAccessSpec) GetVersion() string {
-	return "v1"
 }
 
 func (a *OCIRegistryAccessSpec) AccessMethod(c core.ComponentAccess) (core.AccessMethod, error) {
@@ -72,6 +70,27 @@ func newOCIRegistryAccessMethod(a *OCIRegistryAccessSpec) (*OCIRegistryAccessMet
 	}, nil
 }
 
-func (m *OCIRegistryAccessMethod) GetType() string {
+func (m *OCIRegistryAccessMethod) GetName() string {
 	return OCIRegistryType
+}
+
+func (m *OCIRegistryAccessMethod) Open() (io.ReadCloser, error) {
+	panic("no implemented") // TODO
+}
+
+func (m *OCIRegistryAccessMethod) Get() ([]byte, error) {
+	file, err := m.Open()
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	return ioutil.ReadAll(file)
+}
+
+func (m *OCIRegistryAccessMethod) Reader() (io.ReadCloser, error) {
+	return m.Open()
+}
+
+func (m *OCIRegistryAccessMethod) MimeType() string {
+	return ""
 }

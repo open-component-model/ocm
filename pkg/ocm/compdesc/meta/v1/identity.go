@@ -30,6 +30,20 @@ func (i Identity) Digest() []byte {
 	return data
 }
 
+// Equals compares two identities
+func (i Identity) Equals(o Identity) bool {
+	if len(i) != len(o) {
+		return false
+	}
+
+	for k, v := range i {
+		if v2, ok := o[k]; !ok || v != v2 {
+			return false
+		}
+	}
+	return true
+}
+
 // Match implements the selector interface.
 func (i Identity) Match(obj map[string]string) (bool, error) {
 	for k, v := range i {

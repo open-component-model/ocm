@@ -124,8 +124,11 @@ func convert_Source_to(in *Source) *compdesc.Source {
 		return nil
 	}
 	out := &compdesc.Source{
-		ElementMeta: *convert_ElementMeta_to(&in.ElementMeta),
-		Access:      in.Access.DeepCopy(),
+		SourceMeta: compdesc.SourceMeta{
+			ElementMeta: *convert_ElementMeta_to(&in.ElementMeta),
+			Type:        in.Type,
+		},
+		Access: in.Access.DeepCopy(),
 	}
 	return out
 }
@@ -148,7 +151,6 @@ func convert_ElementMeta_to(in *ElementMeta) *compdesc.ElementMeta {
 	out := &compdesc.ElementMeta{
 		Name:          in.Name,
 		Version:       in.Version,
-		Type:          in.Type,
 		ExtraIdentity: in.ExtraIdentity.Copy(),
 		Labels:        in.Labels.Copy(),
 	}
@@ -160,10 +162,13 @@ func convert_Resource_to(in *Resource) *compdesc.Resource {
 		return nil
 	}
 	out := &compdesc.Resource{
-		ElementMeta: *convert_ElementMeta_to(&in.ElementMeta),
-		Relation:    in.Relation,
-		SourceRef:   convert_SourceRefs_to(in.SourceRef),
-		Access:      in.Access.DeepCopy(),
+		ResourceMeta: compdesc.ResourceMeta{
+			ElementMeta: *convert_ElementMeta_to(&in.ElementMeta),
+			Type:        in.Type,
+			Relation:    in.Relation,
+			SourceRef:   convert_SourceRefs_to(in.SourceRef),
+		},
+		Access: in.Access.DeepCopy(),
 	}
 	return out
 }
@@ -257,8 +262,11 @@ func convert_Source_from(in *compdesc.Source) *Source {
 		return nil
 	}
 	out := &Source{
-		ElementMeta: *convert_ElementMeta_from(&in.ElementMeta),
-		Access:      in.Access.DeepCopy(),
+		SourceMeta: SourceMeta{
+			ElementMeta: *convert_ElementMeta_from(&in.ElementMeta),
+			Type:        in.Type,
+		},
+		Access: in.Access.DeepCopy(),
 	}
 	return out
 }
@@ -281,7 +289,6 @@ func convert_ElementMeta_from(in *compdesc.ElementMeta) *ElementMeta {
 	out := &ElementMeta{
 		Name:          in.Name,
 		Version:       in.Version,
-		Type:          in.Type,
 		ExtraIdentity: in.ExtraIdentity.Copy(),
 		Labels:        in.Labels.Copy(),
 	}
@@ -294,6 +301,7 @@ func convert_Resource_from(in *compdesc.Resource) *Resource {
 	}
 	out := &Resource{
 		ElementMeta: *convert_ElementMeta_from(&in.ElementMeta),
+		Type:        in.Type,
 		Relation:    in.Relation,
 		SourceRef:   convert_SourceRefs_from(in.SourceRef),
 		Access:      in.Access.DeepCopy(),

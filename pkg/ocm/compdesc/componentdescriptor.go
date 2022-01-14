@@ -110,8 +110,6 @@ type ElementMeta struct {
 	Name string `json:"name"`
 	// Version is the semver version of the object.
 	Version string `json:"version"`
-	// Type describes the type of the object.
-	Type string `json:"type"`
 	// ExtraIdentity is the identity of an object.
 	// An additional label with key "name" ist not allowed
 	ExtraIdentity metav1.Identity `json:"extraIdentity,omitempty"`
@@ -141,16 +139,6 @@ func (o *ElementMeta) SetVersion(version string) {
 	o.Version = version
 }
 
-// GetType returns the type of the object.
-func (o ElementMeta) GetType() string {
-	return o.Type
-}
-
-// SetType sets the type of the object.
-func (o *ElementMeta) SetType(ttype string) {
-	o.Type = ttype
-}
-
 // GetLabels returns the label of the object.
 func (o ElementMeta) GetLabels() metav1.Labels {
 	return o.Labels
@@ -168,15 +156,12 @@ func (o *ElementMeta) SetExtraIdentity(identity metav1.Identity) {
 
 // GetIdentity returns the identity of the object.
 func (o *ElementMeta) GetIdentity(accessor ElementMetaAccessor) metav1.Identity {
-	identity := map[string]string{}
-	for k, v := range o.ExtraIdentity {
-		identity[k] = v
-	}
+	identity := o.ExtraIdentity.Copy()
 	identity[SystemIdentityName] = o.Name
 	if accessor != nil {
 		found := false
 		for _, m := range accessor.GetMetas() {
-			if m.Name == o.Name {
+			if m.Name == o.Name && m.ExtraIdentity.Equals(o.ExtraIdentity) {
 				if found {
 					identity[SystemIdentityVersion] = o.Version
 					break
@@ -245,8 +230,27 @@ func (s Sources) GetMetas() []ElementMeta {
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
 type Source struct {
-	ElementMeta `json:",inline"`
-	Access      *runtime.UnstructuredTypedObject `json:"access"`
+	SourceMeta `json:",inline"`
+	Access     *runtime.UnstructuredTypedObject `json:"access"`
+}
+
+// SourceMeta is the definition of the meta data of a source.
+// +k8s:deepcopy-gen=true
+// +k8s:openapi-gen=true
+type SourceMeta struct {
+	ElementMeta
+	// Type describes the type of the object.
+	Type string `json:"type"`
+}
+
+// GetType returns the type of the object.
+func (o SourceMeta) GetType() string {
+	return o.Type
+}
+
+// SetType sets the type of the object.
+func (o *SourceMeta) SetType(ttype string) {
+	o.Type = ttype
 }
 
 // SourceRef defines a reference to a source
@@ -276,7 +280,20 @@ func (r Resources) GetMetas() []ElementMeta {
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
 type Resource struct {
+	ResourceMeta `json:",inline"`
+	// Access describes the type specific method to
+	// access the defined resource.
+	Access *runtime.UnstructuredTypedObject `json:"access"`
+}
+
+// ResourceMeta describes the meta data of a resource.
+// +k8s:deepcopy-gen=true
+// +k8s:openapi-gen=true
+type ResourceMeta struct {
 	ElementMeta `json:",inline"`
+
+	// Type describes the type of the object.
+	Type string `json:"type"`
 
 	// Relation describes the relation of the resource to the component.
 	// Can be a local or external resource
@@ -285,10 +302,16 @@ type Resource struct {
 	// SourceRef defines a list of source names.
 	// These names reference the sources defines in `component.sources`.
 	SourceRef []SourceRef `json:"srcRef,omitempty"`
+}
 
-	// Access describes the type specific method to
-	// access the defined resource.
-	Access *runtime.UnstructuredTypedObject `json:"access"`
+// GetType returns the type of the object.
+func (o ResourceMeta) GetType() string {
+	return o.Type
+}
+
+// SetType sets the type of the object.
+func (o *ResourceMeta) SetType(ttype string) {
+	o.Type = ttype
 }
 
 // ComponentReference describes the reference to another component in the registry.

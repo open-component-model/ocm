@@ -16,23 +16,26 @@ package core
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/ocm/runtime"
 )
 
 type AccessType interface {
 	runtime.TypedObjectCodec
-	GetName() string
-	GetVersion() string
+	common.VersionedElement
 }
 
 type AccessSpec interface {
 	runtime.TypedObject
+	common.VersionedElement
 	AccessMethod(access ComponentAccess) (AccessMethod, error)
 }
 
 type AccessMethod interface {
-	GetType() string
+	GetName() string
+	BlobAccess
 }
 
 type KnownAccessTypes interface {
@@ -131,6 +134,24 @@ type UnknownAccessSpec struct {
 
 func (s *UnknownAccessSpec) AccessMethod(ComponentAccess) (AccessMethod, error) {
 	return nil, fmt.Errorf("unknown access method type")
+}
+
+func (s *UnknownAccessSpec) GetName() string {
+	t := s.GetType()
+	i := strings.LastIndex(t, "/")
+	if i < 0 {
+		return t
+	}
+	return t[:i]
+}
+
+func (s *UnknownAccessSpec) GetVersion() string {
+	t := s.GetType()
+	i := strings.LastIndex(t, "/")
+	if i < 0 {
+		return "v1"
+	}
+	return t[i+1:]
 }
 
 var _ AccessSpec = &UnknownAccessSpec{}

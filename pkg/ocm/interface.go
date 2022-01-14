@@ -3,7 +3,7 @@ package ocm
 import (
 	_ "github.com/gardener/ocm/pkg/ocm/accessmethods"
 	_ "github.com/gardener/ocm/pkg/ocm/compdesc/versions"
-	_ "github.com/gardener/ocm/pkg/ocm/registries"
+	_ "github.com/gardener/ocm/pkg/ocm/repositories"
 
 	"github.com/gardener/ocm/pkg/ocm/core"
 )
