@@ -18,7 +18,9 @@ import (
 	"fmt"
 
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
+	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/gardener/ocm/pkg/ocm/compdesc/versions/v2/jsonscheme"
+	"github.com/gardener/ocm/pkg/ocm/runtime"
 )
 
 const SchemaVersion = "v2"
@@ -67,7 +69,7 @@ func (v *DescriptorVersion) Decode(data []byte, opts *compdesc.DecodeOptions) (i
 // convert to internal version
 ////////////////////////////////////////////////////////////////////////////////
 
-func (v *DescriptorVersion) ConvertTo(obj interface{}) (*compdesc.ComponentDescriptor, error) {
+func (v *DescriptorVersion) ConvertTo(obj interface{}) (out *compdesc.ComponentDescriptor, err error) {
 	if obj == nil {
 		return nil, nil
 	}
@@ -76,8 +78,9 @@ func (v *DescriptorVersion) ConvertTo(obj interface{}) (*compdesc.ComponentDescr
 		return nil, fmt.Errorf("%T is no version v2 descriptor", obj)
 	}
 
-	out := &compdesc.ComponentDescriptor{
-		Metadata: in.Metadata,
+	defer compdesc.CatchConversionError(&err)
+	out = &compdesc.ComponentDescriptor{
+		Metadata: compdesc.Metadata{in.Metadata.Version},
 		ComponentSpec: compdesc.ComponentSpec{
 			ObjectMeta: compdesc.ObjectMeta{
 				Name:    in.Name,
@@ -128,7 +131,7 @@ func convert_Source_to(in *Source) *compdesc.Source {
 			ElementMeta: *convert_ElementMeta_to(&in.ElementMeta),
 			Type:        in.Type,
 		},
-		Access: in.Access.DeepCopy(),
+		Access: compdesc.GenericAccessSpec(in.Access.DeepCopy()),
 	}
 	return out
 }
@@ -168,7 +171,7 @@ func convert_Resource_to(in *Resource) *compdesc.Resource {
 			Relation:    in.Relation,
 			SourceRef:   convert_SourceRefs_to(in.SourceRef),
 		},
-		Access: in.Access.DeepCopy(),
+		Access: compdesc.GenericAccessSpec(in.Access),
 	}
 	return out
 }
@@ -215,7 +218,9 @@ func (v *DescriptorVersion) ConvertFrom(in *compdesc.ComponentDescriptor) (inter
 		return nil, nil
 	}
 	out := &ComponentDescriptor{
-		Metadata: in.Metadata,
+		Metadata: metav1.Metadata{
+			SchemaVersion,
+		},
 		ComponentSpec: ComponentSpec{
 			ObjectMeta: ObjectMeta{
 				Name:    in.Name,
@@ -261,12 +266,16 @@ func convert_Source_from(in *compdesc.Source) *Source {
 	if in == nil {
 		return nil
 	}
+	acc, err := runtime.ToUnstructuredTypedObject(in.Access)
+	if err != nil {
+		compdesc.ThrowConversionError(err)
+	}
 	out := &Source{
 		SourceMeta: SourceMeta{
 			ElementMeta: *convert_ElementMeta_from(&in.ElementMeta),
 			Type:        in.Type,
 		},
-		Access: in.Access.DeepCopy(),
+		Access: acc,
 	}
 	return out
 }
@@ -299,12 +308,16 @@ func convert_Resource_from(in *compdesc.Resource) *Resource {
 	if in == nil {
 		return nil
 	}
+	acc, err := runtime.ToUnstructuredTypedObject(in.Access)
+	if err != nil {
+		compdesc.ThrowConversionError(err)
+	}
 	out := &Resource{
 		ElementMeta: *convert_ElementMeta_from(&in.ElementMeta),
 		Type:        in.Type,
 		Relation:    in.Relation,
 		SourceRef:   convert_SourceRefs_from(in.SourceRef),
-		Access:      in.Access.DeepCopy(),
+		Access:      acc,
 	}
 	return out
 }

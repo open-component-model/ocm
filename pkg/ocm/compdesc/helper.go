@@ -85,11 +85,11 @@ func (c *ComponentDescriptor) GetEffectiveRepositoryContext() *runtime.Unstructu
 // InjectRepositoryContext appends the given repository context to components descriptor repository history.
 // The context is not appended if the effective repository context already matches the current context.
 func (c *ComponentDescriptor) InjectRepositoryContext(repoCtx runtime.TypedObject) error {
-	effective, err := runtime.NewUnstructured(c.GetEffectiveRepositoryContext())
+	effective, err := runtime.ToUnstructuredTypedObject(c.GetEffectiveRepositoryContext())
 	if err != nil {
 		return err
 	}
-	uRepoCtx, err := runtime.NewUnstructured(repoCtx)
+	uRepoCtx, err := runtime.ToUnstructuredTypedObject(repoCtx)
 	if err != nil {
 		return err
 	}

@@ -16,6 +16,16 @@ func CheckErr(err error, msg string, args ...interface{}) {
 	}
 }
 
+func C() (err error) {
+	defer compdesc.CatchConversionError(&err)
+	C1()
+	return
+}
+
+func C1() {
+	compdesc.ThrowConversionError(fmt.Errorf("occured"))
+}
+
 func main() {
 	data, err := os.ReadFile("component-descriptor.yaml")
 	CheckErr(err, "read")
@@ -29,4 +39,7 @@ func main() {
 	data, err = compdesc.Encode(cd, v2.SchemaVersion, compdesc.DefaultYAMLCodec)
 	CheckErr(err, "marshal")
 	fmt.Printf("%s\n", string(data))
+
+	err = C()
+	fmt.Printf("catched error %s", err)
 }

@@ -12,38 +12,26 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package runtime
+package compdesc
 
-import (
-	"strings"
-
-	"github.com/gardener/ocm/pkg/common"
-)
-
-type UnstructuredVersionedTypedObject struct {
-	*UnstructuredTypedObject `json:",inline"`
+type conversionError struct {
+	error
 }
 
-func (s *UnstructuredVersionedTypedObject) ToUnstructured() (*UnstructuredTypedObject, error) {
-	return s.UnstructuredTypedObject, nil
+func ThrowConversionError(err error) {
+	panic(conversionError{err})
 }
 
-func (s *UnstructuredVersionedTypedObject) GetName() string {
-	t := s.GetType()
-	i := strings.LastIndex(t, "/")
-	if i < 0 {
-		return t
+func (e conversionError) Error() string {
+	return "conversion error: " + e.Error()
+}
+
+func CatchConversionError(errp *error) {
+	if r := recover(); r != nil {
+		if je, ok := r.(conversionError); ok {
+			*errp = je.error
+		} else {
+			panic(r)
+		}
 	}
-	return t[:i]
 }
-
-func (s *UnstructuredVersionedTypedObject) GetVersion() string {
-	t := s.GetType()
-	i := strings.LastIndex(t, "/")
-	if i < 0 {
-		return "v1"
-	}
-	return t[i+1:]
-}
-
-var _ common.VersionedElement = &UnstructuredVersionedTypedObject{}

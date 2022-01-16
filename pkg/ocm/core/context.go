@@ -17,6 +17,9 @@ package core
 import (
 	"context"
 	"reflect"
+
+	"github.com/gardener/ocm/pkg/ocm/compdesc"
+	"github.com/gardener/ocm/pkg/ocm/runtime"
 )
 
 type Context interface {
@@ -26,6 +29,8 @@ type Context interface {
 
 	RepositoryForSpec(spec RepositorySpec) (Repository, error)
 	RepositoryForConfig(data []byte) (Repository, error)
+	AccessSpecForSpec(spec compdesc.AccessSpec) (AccessSpec, error)
+	AccessSpecForConfig(data []byte) (AccessSpec, error)
 }
 
 type _context struct {
@@ -71,4 +76,28 @@ func (c *_context) RepositoryForConfig(data []byte) (Repository, error) {
 		return nil, err
 	}
 	return spec.Repository(c)
+}
+
+func (c *_context) AccessSpecForConfig(data []byte) (AccessSpec, error) {
+	return c.knownAccessTypes.DecodeAccessSpec(data)
+}
+
+func (c *_context) AccessSpecForSpec(spec compdesc.AccessSpec) (AccessSpec, error) {
+	if spec == nil {
+		return nil, nil
+	}
+	if n, ok := spec.(AccessSpec); ok {
+		return n, nil
+	}
+	un, err := runtime.ToUnstructuredTypedObject(spec)
+	if err != nil {
+		return nil, err
+	}
+
+	raw, err := un.GetRaw()
+	if err != nil {
+		return nil, err
+	}
+
+	return c.knownAccessTypes.DecodeAccessSpec(raw)
 }

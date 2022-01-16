@@ -18,6 +18,7 @@ import (
 	"fmt"
 
 	"github.com/gardener/ocm/pkg/common"
+	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/runtime"
 )
 
@@ -27,8 +28,7 @@ type AccessType interface {
 }
 
 type AccessSpec interface {
-	runtime.TypedObject
-	common.VersionedElement
+	compdesc.AccessSpec
 	ValidFor(ctx Context, repotype string) bool
 	AccessMethod(access ComponentAccess) (AccessMethod, error)
 }
@@ -40,6 +40,8 @@ type AccessMethod interface {
 
 type KnownAccessTypes interface {
 	runtime.TypedObjectCodec
+
+	GetCodec(name string) runtime.TypedObjectCodec
 
 	GetAccessType(name string) AccessType
 	Register(name string, atype AccessType)

@@ -112,7 +112,12 @@ func (v DisableValidation) ApplyOption(options *DecodeOptions) {
 
 // Encode encodes a component into the given object.
 // The obj is expected to be of type v2.ComponentDescriptor or v2.ComponentDescriptorList.
+// If the serialization version is left blank, the schema version configured in the
+// component descriptor will be used.
 func Encode(obj *ComponentDescriptor, version string, codec Codec) ([]byte, error) {
+	if version == "" {
+		version = obj.Metadata.ConfiguredVersion
+	}
 	cv := DefaultSchemes[version]
 	if cv == nil {
 		if cv == nil {

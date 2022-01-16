@@ -28,7 +28,6 @@ import (
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/gardener/ocm/pkg/ocm/core"
-	"github.com/gardener/ocm/pkg/ocm/runtime"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
@@ -249,15 +248,9 @@ func (ca *ComponentArchive) AddSource(meta *core.SourceMeta, acc core.BlobAccess
 		}
 	}
 
-	localFsAccess := NewLocalFilesystemBlobAccessSpecV1(string(digest), acc.MimeType())
-	unstructuredType, err := runtime.NewUnstructured(localFsAccess)
-	if err != nil {
-		return fmt.Errorf("unable to convert local filesystem type to untructured type: %w", err)
-	}
-
 	src := &compdesc.Source{
 		SourceMeta: *meta.Copy(),
-		Access:     unstructuredType,
+		Access:     NewLocalFilesystemBlobAccessSpecV1(string(digest), acc.MimeType()),
 	}
 
 	if id == -1 {
@@ -308,15 +301,9 @@ func (ca *ComponentArchive) AddResource(meta *core.ResourceMeta, acc core.BlobAc
 		return nil
 	}
 
-	localFsAccess := NewLocalFilesystemBlobAccessSpecV1(string(digest), acc.MimeType())
-	unstructuredType, err := runtime.NewUnstructured(localFsAccess)
-	if err != nil {
-		return fmt.Errorf("unable to convert local filesystem type to untructured type: %w", err)
-	}
-
 	res := &compdesc.Resource{
 		ResourceMeta: *meta.Copy(),
-		Access:       unstructuredType,
+		Access:       NewLocalFilesystemBlobAccessSpecV1(string(digest), acc.MimeType()),
 	}
 
 	if idx == -1 {

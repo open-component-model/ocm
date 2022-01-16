@@ -49,24 +49,15 @@ func TypedObjectEqual(a, b TypedObject) bool {
 	if a.GetType() != b.GetType() {
 		return false
 	}
-	uA, err := NewUnstructured(a)
+	uA, err := ToUnstructuredTypedObject(a)
 	if err != nil {
 		return false
 	}
-	uB, err := NewUnstructured(b)
+	uB, err := ToUnstructuredTypedObject(b)
 	if err != nil {
 		return false
 	}
 	return UnstructuredTypesEqual(uA, uB)
-}
-
-// NewUnstructured creates a new unstructured object from a typed object using the default codec.
-func NewUnstructured(obj TypedObject) (*UnstructuredTypedObject, error) {
-	uObj, err := ToUnstructuredTypedObject(obj)
-	if err != nil {
-		return &UnstructuredTypedObject{}, err
-	}
-	return uObj, nil
 }
 
 // NewEmptyUnstructured creates a new typed object without additional data.
@@ -82,12 +73,21 @@ func NewUnstructuredType(ttype string, data map[string]interface{}) *Unstructure
 	return unstr
 }
 
+// UnstructuredConverter converts the actual object to an UnstructuredTypedObject
+type UnstructuredConverter interface {
+	ToUnstructured() (*UnstructuredTypedObject, error)
+}
+
 // UnstructuredTypedObject describes a generic typed object.
 // +k8s:openapi-gen=true
 type UnstructuredTypedObject struct {
 	ObjectType `json:",inline"`
 	Raw        []byte                 `json:"-"`
 	Object     map[string]interface{} `json:"-"`
+}
+
+func (s *UnstructuredTypedObject) ToUnstructured() (*UnstructuredTypedObject, error) {
+	return s, nil
 }
 
 func (u *UnstructuredTypedObject) SetType(ttype string) {
@@ -197,8 +197,8 @@ func ToUnstructuredTypedObject(obj TypedObject) (*UnstructuredTypedObject, error
 	if reflect2.IsNil(obj) {
 		return nil, nil
 	}
-	if un, ok := obj.(*UnstructuredTypedObject); ok {
-		return un, nil
+	if un, ok := obj.(UnstructuredConverter); ok {
+		return un.ToUnstructured()
 	}
 
 	data, err := json.Marshal(obj)

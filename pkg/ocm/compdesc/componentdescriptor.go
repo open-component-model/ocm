@@ -17,6 +17,7 @@ package compdesc
 import (
 	"errors"
 
+	"github.com/gardener/ocm/pkg/common"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/gardener/ocm/pkg/ocm/runtime"
 )
@@ -25,12 +26,19 @@ var (
 	NotFound = errors.New("NotFound")
 )
 
+// Metadata defines the configured metadata of the component descriptor.
+// It is taken from the original serialization format. It can be set
+// to define a default serialization version.
+type Metadata struct {
+	ConfiguredVersion string `json:"configuredSchemaVersion"`
+}
+
 // ComponentDescriptor defines a versioned component with a source and dependencies.
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
 type ComponentDescriptor struct {
 	// Metadata specifies the schema version of the component.
-	Metadata metav1.Metadata `json:"meta"`
+	Metadata Metadata `json:"meta"`
 	// Spec contains the specification of the component.
 	ComponentSpec `json:"component"`
 }
@@ -223,8 +231,25 @@ type ObjectMetaAccessor interface {
 
 // ElementMetaAccessor describes an accessor for the set of meta information for a set of elements.
 type ElementMetaAccessor interface {
-	// Get all the meta information for a set of elements
+	// GetMetas all the meta information for a set of elements
 	GetMetas() []ElementMeta
+}
+
+// AccessSpec is an abstract specification of an access method
+// The outbound object is typicall a runtime.UnstructuredTypedObject.
+// Inbound any serializable AccessSpec implementation is possible.
+type AccessSpec interface {
+	runtime.TypedObject
+	common.VersionedElement
+}
+
+// GenericAccessSpec returns a generic AccessSpec implementation for an unstructured object.
+// It can always be used instead of a dedicated access spec implementation. The core
+// methods will map these spec into effective ones before an access is returned to the caller.
+func GenericAccessSpec(un *runtime.UnstructuredTypedObject) AccessSpec {
+	return &runtime.UnstructuredVersionedTypedObject{
+		un.DeepCopy(),
+	}
 }
 
 // Sources describes a set of source specifications
@@ -243,7 +268,7 @@ func (s Sources) GetMetas() []ElementMeta {
 // +k8s:openapi-gen=true
 type Source struct {
 	SourceMeta `json:",inline"`
-	Access     *runtime.UnstructuredTypedObject `json:"access"`
+	Access     AccessSpec `json:"access"`
 }
 
 // SourceMeta is the definition of the meta data of a source.
@@ -332,7 +357,7 @@ type Resource struct {
 	ResourceMeta `json:",inline"`
 	// Access describes the type specific method to
 	// access the defined resource.
-	Access *runtime.UnstructuredTypedObject `json:"access"`
+	Access AccessSpec `json:"access"`
 }
 
 // ResourceMeta describes the meta data of a resource.
