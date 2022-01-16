@@ -265,7 +265,7 @@ func (c *ComponentDescriptor) GetResourcesByName(name string, selectors ...Ident
 
 // GetResourceIndex returns the index of a given resource.
 // If the index is not found -1 is returned.
-func (c *ComponentDescriptor) GetResourceIndex(res ResourceMeta) int {
+func (c *ComponentDescriptor) GetResourceIndex(res *ResourceMeta) int {
 	id := res.GetIdentity(c.Resources)
 	for i, cur := range c.Resources {
 		if cur.GetIdentity(c.Resources).Equals(id) {
@@ -289,7 +289,7 @@ func (c *ComponentDescriptor) GetComponentReferenceIndex(ref ComponentReference)
 
 // GetSourceIndex returns the index of a given source.
 // If the index is not found -1 is returned.
-func (c *ComponentDescriptor) GetSourceIndex(src SourceMeta) int {
+func (c *ComponentDescriptor) GetSourceIndex(src *SourceMeta) int {
 	id := src.GetIdentityDigest(c.Sources)
 	for i, cur := range c.Sources {
 		if bytes.Equal(cur.GetIdentityDigest(c.Sources), id) {

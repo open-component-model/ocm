@@ -19,7 +19,9 @@ import (
 )
 
 type Repository interface {
+	ExistsArtefact(name string, version string) (bool, error)
 	LookupArtefact(name string, version string) (ArtefactAccess, error)
+	ComposeArtefact(name string, version string) (ArtefactComposer, error)
 	WriteArtefact(ArtefactAccess) (ArtefactAccess, error)
 }
 
@@ -28,4 +30,9 @@ type BlobAccess = common.BlobAccess
 type ArtefactAccess interface {
 	GetManifest() *Manifest
 	GetBlob(digest string) BlobAccess
+}
+
+type ArtefactComposer interface {
+	ArtefactAccess
+	AddBlob(BlobAccess) error
 }

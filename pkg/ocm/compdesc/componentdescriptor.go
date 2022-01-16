@@ -178,6 +178,18 @@ func (o *ElementMeta) GetIdentityDigest(accessor ElementMetaAccessor) []byte {
 	return o.GetIdentity(accessor).Digest()
 }
 
+func (o *ElementMeta) Copy() *ElementMeta {
+	if o == nil {
+		return nil
+	}
+	return &ElementMeta{
+		Name:          o.Name,
+		Version:       o.Version,
+		ExtraIdentity: o.ExtraIdentity.Copy(),
+		Labels:        o.Labels.Copy(),
+	}
+}
+
 // NameAccessor describes a accessor for a named object.
 type NameAccessor interface {
 	// GetName returns the name of the object.
@@ -253,6 +265,17 @@ func (o *SourceMeta) SetType(ttype string) {
 	o.Type = ttype
 }
 
+// Copy copies a source meta
+func (o *SourceMeta) Copy() *SourceMeta {
+	if o == nil {
+		return nil
+	}
+	return &SourceMeta{
+		ElementMeta: *o.ElementMeta.Copy(),
+		Type:        o.Type,
+	}
+}
+
 // SourceRef defines a reference to a source
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
@@ -263,6 +286,32 @@ type SourceRef struct {
 	// describing the object.
 	// +optional
 	Labels metav1.Labels `json:"labels,omitempty"`
+}
+
+// Copy copy a source ref
+func (r *SourceRef) Copy() *SourceRef {
+	if r == nil {
+		return nil
+	}
+	return &SourceRef{
+		IdentitySelector: r.IdentitySelector.Copy(),
+		Labels:           r.Labels.Copy(),
+	}
+}
+
+type SourceRefs []SourceRef
+
+// Copy copies a list of source refs
+func (r SourceRefs) Copy() SourceRefs {
+	if r == nil {
+		return nil
+	}
+
+	result := make(SourceRefs, len(r))
+	for i, v := range r {
+		result[i] = *v.Copy()
+	}
+	return result
 }
 
 // Resources describes a set of resource specifications
@@ -301,7 +350,7 @@ type ResourceMeta struct {
 
 	// SourceRef defines a list of source names.
 	// These names reference the sources defines in `component.sources`.
-	SourceRef []SourceRef `json:"srcRef,omitempty"`
+	SourceRef SourceRefs `json:"srcRef,omitempty"`
 }
 
 // GetType returns the type of the object.
@@ -312,6 +361,20 @@ func (o ResourceMeta) GetType() string {
 // SetType sets the type of the object.
 func (o *ResourceMeta) SetType(ttype string) {
 	o.Type = ttype
+}
+
+// Copy copies a resource meta
+func (o *ResourceMeta) Copy() *ResourceMeta {
+	if o == nil {
+		return nil
+	}
+	r := &ResourceMeta{
+		ElementMeta: *o.ElementMeta.Copy(),
+		Type:        o.Type,
+		Relation:    o.Relation,
+		SourceRef:   o.SourceRef.Copy(),
+	}
+	return r
 }
 
 // ComponentReference describes the reference to another component in the registry.

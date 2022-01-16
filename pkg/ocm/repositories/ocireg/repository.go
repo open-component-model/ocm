@@ -64,6 +64,6 @@ func NewOCIRegistryRepositorySpec(baseURL string, mapping ComponentNameMapping) 
 func (a *OCIRegistryRepositorySpec) GetType() string {
 	return OCIRegistryRepositoryType
 }
-func (a *OCIRegistryRepositorySpec) Repository() (core.Repository, error) {
+func (a *OCIRegistryRepositorySpec) Repository(ctx core.Context) (core.Repository, error) {
 	return nil, fmt.Errorf("NOT IMPLEMENTED") // TODO
 }

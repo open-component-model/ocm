@@ -52,6 +52,10 @@ func (_ *OCIRegistryAccessSpec) GetType() string {
 	return OCIRegistryType
 }
 
+func (a *OCIRegistryAccessSpec) ValidFor(ctx core.Context, repotype string) bool {
+	return true
+}
+
 func (a *OCIRegistryAccessSpec) AccessMethod(c core.ComponentAccess) (core.AccessMethod, error) {
 	return newOCIRegistryAccessMethod(a)
 }

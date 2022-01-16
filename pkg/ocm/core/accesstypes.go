@@ -16,7 +16,6 @@ package core
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/ocm/runtime"
@@ -30,6 +29,7 @@ type AccessType interface {
 type AccessSpec interface {
 	runtime.TypedObject
 	common.VersionedElement
+	ValidFor(ctx Context, repotype string) bool
 	AccessMethod(access ComponentAccess) (AccessMethod, error)
 }
 
@@ -119,7 +119,7 @@ func (e DefaultJSONAccessSpecDecoder) Decode(data []byte) (runtime.TypedObject, 
 	if err != nil {
 		return nil, err
 	}
-	return &UnknownAccessSpec{obj.(*runtime.UnstructuredTypedObject)}, nil
+	return &UnknownAccessSpec{&runtime.UnstructuredVersionedTypedObject{obj.(*runtime.UnstructuredTypedObject)}}, nil
 }
 
 // defaultJSONAccessSpecCodec implements TypedObjectCodec interface with the json decoder and json encoder.
@@ -128,30 +128,50 @@ var defaultJSONAccessSpecCodec = runtime.TypedObjectCodecWrapper{
 	TypedObjectEncoder: runtime.DefaultJSONTypedObjectEncoder{},
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 type UnknownAccessSpec struct {
-	*runtime.UnstructuredTypedObject
+	*runtime.UnstructuredVersionedTypedObject `json:",inline"`
 }
 
-func (s *UnknownAccessSpec) AccessMethod(ComponentAccess) (AccessMethod, error) {
+func (_ *UnknownAccessSpec) AccessMethod(ComponentAccess) (AccessMethod, error) {
 	return nil, fmt.Errorf("unknown access method type")
 }
 
-func (s *UnknownAccessSpec) GetName() string {
-	t := s.GetType()
-	i := strings.LastIndex(t, "/")
-	if i < 0 {
-		return t
-	}
-	return t[:i]
-}
-
-func (s *UnknownAccessSpec) GetVersion() string {
-	t := s.GetType()
-	i := strings.LastIndex(t, "/")
-	if i < 0 {
-		return "v1"
-	}
-	return t[i+1:]
+func (_ *UnknownAccessSpec) ValidFor(ctx Context, repotype string) bool {
+	return false
 }
 
 var _ AccessSpec = &UnknownAccessSpec{}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type GenericAccessSpec struct {
+	*runtime.UnstructuredVersionedTypedObject `json:",inline"`
+}
+
+func (s *GenericAccessSpec) Evaluate(ctx Context) (AccessSpec, error) {
+	raw, err := s.GetRaw()
+	if err != nil {
+		return nil, err
+	}
+	return ctx.AccessMethods().DecodeAccessSpec(raw)
+}
+
+func (s *GenericAccessSpec) AccessMethod(acc ComponentAccess) (AccessMethod, error) {
+	spec, err := s.Evaluate(acc.GetContext())
+	if err != nil {
+		return nil, err
+	}
+	return spec.AccessMethod(acc)
+}
+
+func (s *GenericAccessSpec) ValidFor(ctx Context, repotype string) bool {
+	spec, err := s.Evaluate(ctx)
+	if err != nil {
+		return false
+	}
+	return spec.ValidFor(ctx, repotype)
+}
+
+var _ AccessSpec = &GenericAccessSpec{}

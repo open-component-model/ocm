@@ -31,7 +31,7 @@ type RepositorySpec interface {
 	runtime.TypedObject
 	common.VersionedElement
 
-	Repository() (Repository, error)
+	Repository(Context) (Repository, error)
 }
 
 type KnownRepositoryTypes interface {
@@ -130,7 +130,7 @@ type UnknownRepositorySpec struct {
 
 var _ RepositorySpec = &UnknownRepositorySpec{}
 
-func (r *UnknownRepositorySpec) Repository() (Repository, error) {
+func (r *UnknownRepositorySpec) Repository(Context) (Repository, error) {
 	return nil, fmt.Errorf("unknown respository type %q", r.GetType())
 }
 

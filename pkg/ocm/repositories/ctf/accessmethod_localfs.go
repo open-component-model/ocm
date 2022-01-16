@@ -51,6 +51,10 @@ func (_ *LocalFilesystemBlobAccessSpec) GetType() string {
 	return LocalFilesystemBlobType
 }
 
+func (a *LocalFilesystemBlobAccessSpec) ValidFor(ctx core.Context, repotype string) bool {
+	return repotype == CTFRepositoryType
+}
+
 func (a *LocalFilesystemBlobAccessSpec) AccessMethod(c core.ComponentAccess) (core.AccessMethod, error) {
 	rtype := c.GetAccessType()
 	if rtype != CTFRepositoryType {

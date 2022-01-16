@@ -137,8 +137,8 @@ func (u *UnstructuredTypedObject) setRaw(data []byte) error {
 	return nil
 }
 
-// Decode converts a unstructured object into a typed object.
-func (u *UnstructuredTypedObject) Decode(types KnownTypes) (TypedObject, error) {
+// Evaluate converts a unstructured object into a typed object.
+func (u *UnstructuredTypedObject) Evaluate(types KnownTypes) (TypedObject, error) {
 	data, err := u.GetRaw()
 	if err != nil {
 		return nil, fmt.Errorf("unable to get data from unstructured object: %w", err)

@@ -46,32 +46,25 @@ const BlobsDirectoryName = "blobs"
 
 var UnsupportedResolveType = errors.New("UnsupportedResolveType")
 
-// BlobInfo describes a blob.
-type BlobInfo struct {
-	// MediaType is the media type of the object this schema refers to.
-	MediaType string `json:"mediaType,omitempty"`
-
-	// Digest is the digest of the targeted content.
-	Digest string `json:"digest"`
-
-	// Size specifies the size in bytes of the blob.
-	Size int64 `json:"size"`
-}
-
 // ComponentArchive is the go representation for a component artefact
 type ComponentArchive struct {
 	ComponentDescriptor *compdesc.ComponentDescriptor
 	fs                  vfs.FileSystem
+	ctx                 core.Context
 }
 
 var _ core.ComponentAccess = &ComponentArchive{}
 
 // NewComponentArchive returns a new component descriptor with a filesystem
-func NewComponentArchive(cd *compdesc.ComponentDescriptor, fs vfs.FileSystem) *ComponentArchive {
+func NewComponentArchive(ctx core.Context, cd *compdesc.ComponentDescriptor, fs vfs.FileSystem) *ComponentArchive {
 	return &ComponentArchive{
 		ComponentDescriptor: cd,
 		fs:                  fs,
+		ctx:                 ctx,
 	}
+}
+func (c *ComponentArchive) GetContext() core.Context {
+	return c.ctx
 }
 
 func (c *ComponentArchive) GetAccessType() string {
@@ -119,7 +112,7 @@ func FileSystem(ofs []vfs.FileSystem) vfs.FileSystem {
 }
 
 // OpenComponentArchiveFromDirectory creates a component archive from a path
-func OpenComponentArchiveFromDirectory(path string, ofs ...vfs.FileSystem) (*ComponentArchive, error) {
+func OpenComponentArchiveFromDirectory(ctx core.Context, path string, ofs ...vfs.FileSystem) (*ComponentArchive, error) {
 	fs := FileSystem(ofs)
 
 	fs, err := projectionfs.New(fs, path)
@@ -127,11 +120,11 @@ func OpenComponentArchiveFromDirectory(path string, ofs ...vfs.FileSystem) (*Com
 		return nil, fmt.Errorf("unable to create projected filesystem from path %s: %w", path, err)
 	}
 
-	return OpenComponentArchiveFromFilesystem(fs)
+	return OpenComponentArchiveFromFilesystem(ctx, fs)
 }
 
 // OpenComponentArchive creates a new component archive from a file path.
-func OpenComponentArchive(path string, ofs ...vfs.FileSystem) (*ComponentArchive, error) {
+func OpenComponentArchive(ctx core.Context, path string, ofs ...vfs.FileSystem) (*ComponentArchive, error) {
 	fs := FileSystem(ofs)
 
 	fi, err := fs.Stat(path)
@@ -139,17 +132,17 @@ func OpenComponentArchive(path string, ofs ...vfs.FileSystem) (*ComponentArchive
 		return nil, err
 	}
 	if fi.IsDir() {
-		return OpenComponentArchiveFromDirectory(path, fs)
+		return OpenComponentArchiveFromDirectory(ctx, path, fs)
 	}
 
-	ca, err := OpenComponentArchiveFromTGZ(path, fs)
+	ca, err := OpenComponentArchiveFromTGZ(ctx, path, fs)
 	if err != nil {
-		ca, err = OpenComponentArchiveFromTAR(path, fs)
+		ca, err = OpenComponentArchiveFromTAR(ctx, path, fs)
 	}
 	return ca, err
 }
 
-func OpenComponentArchiveFromTGZ(path string, ofs ...vfs.FileSystem) (*ComponentArchive, error) {
+func OpenComponentArchiveFromTGZ(ctx core.Context, path string, ofs ...vfs.FileSystem) (*ComponentArchive, error) {
 	fs := FileSystem(ofs)
 	// we expect that the path point to a tar or tgz
 	file, err := fs.Open(path)
@@ -161,11 +154,11 @@ func OpenComponentArchiveFromTGZ(path string, ofs ...vfs.FileSystem) (*Component
 	if err != nil {
 		return nil, fmt.Errorf("unable to open gzip reader for %s: %w", path, err)
 	}
-	return OpenComponentArchiveFromTarReader(reader)
+	return OpenComponentArchiveFromTarReader(ctx, reader)
 }
 
 // OpenComponentArchiveFromTAR creates a new componet archive from a component tar file.
-func OpenComponentArchiveFromTAR(path string, ofs ...vfs.FileSystem) (*ComponentArchive, error) {
+func OpenComponentArchiveFromTAR(ctx core.Context, path string, ofs ...vfs.FileSystem) (*ComponentArchive, error) {
 	fs := FileSystem(ofs)
 	// we expect that the path point to a tar
 	file, err := fs.Open(path)
@@ -173,11 +166,11 @@ func OpenComponentArchiveFromTAR(path string, ofs ...vfs.FileSystem) (*Component
 		return nil, fmt.Errorf("unable to open tar archive from %s: %w", path, err)
 	}
 	defer file.Close()
-	return OpenComponentArchiveFromTarReader(file)
+	return OpenComponentArchiveFromTarReader(ctx, file)
 }
 
 // OpenComponentArchiveFromTarReader creates a new manifest builder from a input reader.
-func OpenComponentArchiveFromTarReader(in io.Reader, tfs ...vfs.FileSystem) (*ComponentArchive, error) {
+func OpenComponentArchiveFromTarReader(ctx core.Context, in io.Reader, tfs ...vfs.FileSystem) (*ComponentArchive, error) {
 	// the archive is untared to a memory fs that the builder can work
 	// as it would be a default filesystem.
 	var fs vfs.FileSystem
@@ -191,11 +184,11 @@ func OpenComponentArchiveFromTarReader(in io.Reader, tfs ...vfs.FileSystem) (*Co
 		return nil, fmt.Errorf("unable to extract tar: %w", err)
 	}
 
-	return OpenComponentArchiveFromFilesystem(fs)
+	return OpenComponentArchiveFromFilesystem(ctx, fs)
 }
 
 // NewComponentArchiveFromFilesystem creates a new component archive from a filesystem.
-func OpenComponentArchiveFromFilesystem(fs vfs.FileSystem, decodeOpts ...compdesc.DecodeOption) (*ComponentArchive, error) {
+func OpenComponentArchiveFromFilesystem(ctx core.Context, fs vfs.FileSystem, decodeOpts ...compdesc.DecodeOption) (*ComponentArchive, error) {
 	data, err := vfs.ReadFile(fs, filepath.Join("/", ComponentDescriptorFileName))
 	if err != nil {
 		return nil, fmt.Errorf("unable to read the component descriptor from %s: %w", ComponentDescriptorFileName, err)
@@ -205,7 +198,7 @@ func OpenComponentArchiveFromFilesystem(fs vfs.FileSystem, decodeOpts ...compdes
 		return nil, fmt.Errorf("unable to parse component descriptor read from %s: %w", ComponentDescriptorFileName, err)
 	}
 
-	return NewComponentArchive(cd, fs), nil
+	return NewComponentArchive(ctx, cd, fs), nil
 }
 
 // Digest returns the digest of the component archive.
@@ -220,11 +213,11 @@ func (ca *ComponentArchive) Digest() (string, error) {
 
 // AddSource adds a blob source to the current archive.
 // If the specified source already exists it will be overwritten.
-func (ca *ComponentArchive) AddSource(acc core.SourceAccess) error {
+func (ca *ComponentArchive) AddSource(meta *core.SourceMeta, acc core.BlobAccess) error {
 	if acc == nil {
 		return errors.New("a source has to be defined")
 	}
-	id := ca.ComponentDescriptor.GetSourceIndex(acc.SourceMeta())
+	id := ca.ComponentDescriptor.GetSourceIndex(meta)
 	if err := ca.ensureBlobsPath(); err != nil {
 		return err
 	}
@@ -263,7 +256,7 @@ func (ca *ComponentArchive) AddSource(acc core.SourceAccess) error {
 	}
 
 	src := &compdesc.Source{
-		SourceMeta: acc.SourceMeta(),
+		SourceMeta: *meta.Copy(),
 		Access:     unstructuredType,
 	}
 
@@ -276,11 +269,11 @@ func (ca *ComponentArchive) AddSource(acc core.SourceAccess) error {
 }
 
 // AddResource adds a blob resource to the current archive.
-func (ca *ComponentArchive) AddResource(acc core.ResourceAccess) error {
+func (ca *ComponentArchive) AddResource(meta *core.ResourceMeta, acc core.BlobAccess) error {
 	if acc == nil {
 		return errors.New("a resource has to be defined")
 	}
-	idx := ca.ComponentDescriptor.GetResourceIndex(acc.ResourceMeta())
+	idx := ca.ComponentDescriptor.GetResourceIndex(meta)
 	if err := ca.ensureBlobsPath(); err != nil {
 		return err
 	}
@@ -322,7 +315,7 @@ func (ca *ComponentArchive) AddResource(acc core.ResourceAccess) error {
 	}
 
 	res := &compdesc.Resource{
-		ResourceMeta: acc.ResourceMeta(),
+		ResourceMeta: *meta.Copy(),
 		Access:       unstructuredType,
 	}
 

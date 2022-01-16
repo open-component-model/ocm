@@ -8,6 +8,7 @@ import (
 	"github.com/gardener/ocm/pkg/ocm/core"
 )
 
+type Context = core.Context
 type ComponentRepository = core.Repository
 type ComponentAccess = core.ComponentAccess
 type AccessSpec = core.AccessSpec

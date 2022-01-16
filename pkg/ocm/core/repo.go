@@ -25,8 +25,12 @@ import (
 
 type Repository interface {
 	oci.Repository
+	GetContext() Context
+
 	GetSpecification() RepositorySpec
+	ExistsComponent(name string, version string) (bool, error)
 	LookupComponent(name string, version string) (ComponentAccess, error)
+	ComposeComponent(name string, version string) (ComponentComposer, error)
 	WriteComponent(ComponentAccess) (ComponentAccess, error)
 }
 
@@ -53,6 +57,8 @@ type ComponentAccess interface {
 	common.VersionedElement
 	io.Closer
 
+	GetContext() Context
+
 	// GetAccessType returns the storage type of the component, which is the type of the repository
 	// it is taken from
 	GetAccessType() string
@@ -62,4 +68,13 @@ type ComponentAccess interface {
 	GetDescriptor() (*compdesc.ComponentDescriptor, error)
 	GetResource(meta *metav1.Identity) (ResourceAccess, error)
 	GetSource(meta *metav1.Identity) (ResourceAccess, error)
+}
+
+type ComponentComposer interface {
+	ComponentAccess
+	AddResourceBlob(*ResourceMeta, BlobAccess) error
+	AddResource(*ResourceMeta, AccessSpec)
+
+	AddSourceBlob(*SourceMeta, BlobAccess) error
+	AddSource(*SourceMeta, AccessSpec)
 }
