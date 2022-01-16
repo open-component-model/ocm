@@ -34,6 +34,16 @@ type CodecWrapper struct {
 	Encoder
 }
 
+// ApplyEncodeOption applies the configured codec.
+func (o CodecWrapper) ApplyEncodeOption(options *EncodeOptions) {
+	options.Codec = o
+}
+
+// ApplyDecodeOption applies the configured codec.
+func (o CodecWrapper) ApplyDecodeOption(options *DecodeOptions) {
+	options.Codec = o
+}
+
 // Decoder defines a decoder for an object.
 type Decoder interface {
 	Decode(data []byte, obj interface{}) error

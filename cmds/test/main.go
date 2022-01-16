@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	v2 "github.com/gardener/component-spec/bindings-go/apis/v2"
 	_ "github.com/gardener/ocm/pkg/ocm"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 )
@@ -36,7 +35,7 @@ func main() {
 	CheckErr(err, "raw ctx")
 	fmt.Printf("ctx: %s\n", string(raw))
 	_ = cd
-	data, err = compdesc.Encode(cd, v2.SchemaVersion, compdesc.DefaultYAMLCodec)
+	data, err = compdesc.Encode(cd)
 	CheckErr(err, "marshal")
 	fmt.Printf("%s\n", string(data))
 

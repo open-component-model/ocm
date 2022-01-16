@@ -23,13 +23,13 @@ func ThrowConversionError(err error) {
 }
 
 func (e conversionError) Error() string {
-	return "conversion error: " + e.Error()
+	return "conversion error: " + e.error.Error()
 }
 
 func CatchConversionError(errp *error) {
 	if r := recover(); r != nil {
 		if je, ok := r.(conversionError); ok {
-			*errp = je.error
+			*errp = je
 		} else {
 			panic(r)
 		}

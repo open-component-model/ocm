@@ -20,7 +20,7 @@ import (
 )
 
 // DefaultComponent applies defaults to a component
-func DefaultComponent(component *ComponentDescriptor) error {
+func DefaultComponent(component *ComponentDescriptor) {
 	if component.RepositoryContexts == nil {
 		component.RepositoryContexts = make([]*runtime.UnstructuredTypedObject, 0)
 	}
@@ -34,8 +34,10 @@ func DefaultComponent(component *ComponentDescriptor) error {
 		component.Resources = make([]Resource, 0)
 	}
 
+	if component.Metadata.ConfiguredVersion == "" {
+		component.Metadata.ConfiguredVersion = DefaultSchemeVersion
+	}
 	DefaultResources(component)
-	return nil
 }
 
 // DefaultResources defaults a list of resources.

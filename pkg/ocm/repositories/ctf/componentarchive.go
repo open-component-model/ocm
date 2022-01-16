@@ -16,21 +16,16 @@ package ctf
 
 import (
 	"archive/tar"
-	"bytes"
-	"compress/gzip"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/gardener/ocm/pkg/ocm/core"
-	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
@@ -45,23 +40,170 @@ const BlobsDirectoryName = "blobs"
 
 var UnsupportedResolveType = errors.New("UnsupportedResolveType")
 
+////////////////////////////////////////////////////////////////////////////////
+
+type ComponentArchiveOptions struct {
+	PathFileSystem      vfs.FileSystem
+	ComponentFileSystem vfs.FileSystem
+	ArchiveFormat       ArchiveFormat
+	DecodeOptions       *compdesc.DecodeOptions
+	EncodeOptions       *compdesc.EncodeOptions
+}
+
+var _ ComponentArchiveOption = &ComponentArchiveOptions{}
+
+func (o *ComponentArchiveOptions) ApplyOption(options *ComponentArchiveOptions) {
+	if o == nil {
+		return
+	}
+	if o.PathFileSystem != nil {
+		options.PathFileSystem = o.PathFileSystem
+	}
+	if o.ComponentFileSystem != nil {
+		options.ComponentFileSystem = o.ComponentFileSystem
+	}
+	if o.ArchiveFormat != nil {
+		options.ArchiveFormat = o.ArchiveFormat
+	}
+}
+
+func (o *ComponentArchiveOptions) Default() *ComponentArchiveOptions {
+	if o.PathFileSystem == nil {
+		o.PathFileSystem = _osfs
+	}
+	if o.ArchiveFormat == nil {
+		o.ArchiveFormat = CA_DIRECTORY
+	}
+	return o
+}
+
+// ApplyOptions applies the given list options on these options,
+// and then returns itself (for convenient chaining).
+func (o *ComponentArchiveOptions) ApplyOptions(opts []ComponentArchiveOption) *ComponentArchiveOptions {
+	for _, opt := range opts {
+		if opt != nil {
+			opt.ApplyOption(o)
+		}
+	}
+	return o
+}
+
+// ComponentArchiveOption is the interface to specify different archive options
+type ComponentArchiveOption interface {
+	ApplyOption(options *ComponentArchiveOptions)
+}
+
+// PathFileSystem set the evaltuation filesystem for the path name
+func PathFileSystem(fs vfs.FileSystem) ComponentArchiveOption {
+	return opt_PFS{fs}
+}
+
+type opt_PFS struct {
+	vfs.FileSystem
+}
+
+// ApplyOption applies the configured path filesystem.
+func (o opt_PFS) ApplyOption(options *ComponentArchiveOptions) {
+	options.PathFileSystem = o.FileSystem
+}
+
+// ComponentFileSystem set the evaltuation filesystem for the path name
+func ComponentFileSystem(fs vfs.FileSystem) ComponentArchiveOption {
+	return opt_CFS{fs}
+}
+
+type opt_CFS struct {
+	vfs.FileSystem
+}
+
+// ApplyOption applies the configured path filesystem.
+func (o opt_CFS) ApplyOption(options *ComponentArchiveOptions) {
+	options.ComponentFileSystem = o.FileSystem
+}
+
+type ArchiveFormat interface {
+	String() string
+	ComponentArchiveOption
+
+	Open(ctx core.Context, path string, opts ComponentArchiveOptions) (*ComponentArchive, error)
+	Create(ctx core.Context, path string, cd *compdesc.ComponentDescriptor, opts ComponentArchiveOptions) (*ComponentArchive, error)
+	Write(ca *ComponentArchive, path string, opts ComponentArchiveOptions) error
+}
+
+type ComponentInfo struct {
+	Path    string
+	Options ComponentArchiveOptions
+}
+
+type ComponentCloser interface {
+	Close(ca *ComponentArchive) error
+}
+
+type ComponentCloserFunction func(ca *ComponentArchive) error
+
+func (f ComponentCloserFunction) Close(ca *ComponentArchive) error {
+	return f(ca)
+}
+
+var formats = map[string]ArchiveFormat{}
+
+func RegisterComponentArchiveFormat(f ArchiveFormat) {
+	formats[f.String()] = f
+}
+
+func GetCompnentArchiceFormat(name string) ArchiveFormat {
+	return formats[name]
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 // ComponentArchive is the go representation for a component artefact
 type ComponentArchive struct {
 	ComponentDescriptor *compdesc.ComponentDescriptor
 	fs                  vfs.FileSystem
 	ctx                 core.Context
+	closer              ComponentCloser
 }
 
 var _ core.ComponentAccess = &ComponentArchive{}
 
 // NewComponentArchive returns a new component descriptor with a filesystem
-func NewComponentArchive(ctx core.Context, cd *compdesc.ComponentDescriptor, fs vfs.FileSystem) *ComponentArchive {
+func NewComponentArchive(ctx core.Context, cd *compdesc.ComponentDescriptor, fs vfs.FileSystem, closer ComponentCloser) *ComponentArchive {
 	return &ComponentArchive{
 		ComponentDescriptor: cd,
 		fs:                  fs,
 		ctx:                 ctx,
+		closer:              closer,
 	}
 }
+
+func evaluateOptions(opts []ComponentArchiveOption) ComponentArchiveOptions {
+	return *(&ComponentArchiveOptions{}).ApplyOptions(opts).Default()
+}
+
+func CreateComponentArchive(ctx core.Context, cd *compdesc.ComponentDescriptor, path string, opts ...ComponentArchiveOption) (*ComponentArchive, error) {
+	o := evaluateOptions(opts)
+	return o.ArchiveFormat.Create(ctx, path, cd, o)
+}
+
+// OpenComponentArchive creates a new component archive from a file path.
+func OpenComponentArchive(ctx core.Context, path string, opts ...ComponentArchiveOption) (*ComponentArchive, error) {
+	o := evaluateOptions(opts)
+	fi, err := o.PathFileSystem.Stat(path)
+	if err != nil {
+		return nil, err
+	}
+	if fi.IsDir() {
+		return CA_DIRECTORY.Open(ctx, path, o)
+	}
+
+	ca, err := CA_TGZ.Open(ctx, path, o)
+	if err != nil {
+		ca, err = CA_TAR.Open(ctx, path, o)
+	}
+	return ca, err
+}
+
 func (c *ComponentArchive) GetContext() core.Context {
 	return c.ctx
 }
@@ -71,8 +213,10 @@ func (c *ComponentArchive) GetAccessType() string {
 }
 
 func (c *ComponentArchive) Close() error {
-	// TODO
-	return vfs.Cleanup(c.fs)
+	if c.closer != nil {
+		return c.closer.Close(c)
+	}
+	return nil
 }
 
 func (c *ComponentArchive) GetRepository() core.Repository {
@@ -110,96 +254,6 @@ func FileSystem(ofs []vfs.FileSystem) vfs.FileSystem {
 	return _osfs
 }
 
-// OpenComponentArchiveFromDirectory creates a component archive from a path
-func OpenComponentArchiveFromDirectory(ctx core.Context, path string, ofs ...vfs.FileSystem) (*ComponentArchive, error) {
-	fs := FileSystem(ofs)
-
-	fs, err := projectionfs.New(fs, path)
-	if err != nil {
-		return nil, fmt.Errorf("unable to create projected filesystem from path %s: %w", path, err)
-	}
-
-	return OpenComponentArchiveFromFilesystem(ctx, fs)
-}
-
-// OpenComponentArchive creates a new component archive from a file path.
-func OpenComponentArchive(ctx core.Context, path string, ofs ...vfs.FileSystem) (*ComponentArchive, error) {
-	fs := FileSystem(ofs)
-
-	fi, err := fs.Stat(path)
-	if err != nil {
-		return nil, err
-	}
-	if fi.IsDir() {
-		return OpenComponentArchiveFromDirectory(ctx, path, fs)
-	}
-
-	ca, err := OpenComponentArchiveFromTGZ(ctx, path, fs)
-	if err != nil {
-		ca, err = OpenComponentArchiveFromTAR(ctx, path, fs)
-	}
-	return ca, err
-}
-
-func OpenComponentArchiveFromTGZ(ctx core.Context, path string, ofs ...vfs.FileSystem) (*ComponentArchive, error) {
-	fs := FileSystem(ofs)
-	// we expect that the path point to a tar or tgz
-	file, err := fs.Open(path)
-	if err != nil {
-		return nil, fmt.Errorf("unable to open tar archive from %s: %w", path, err)
-	}
-	defer file.Close()
-	reader, err := gzip.NewReader(file)
-	if err != nil {
-		return nil, fmt.Errorf("unable to open gzip reader for %s: %w", path, err)
-	}
-	return OpenComponentArchiveFromTarReader(ctx, reader)
-}
-
-// OpenComponentArchiveFromTAR creates a new componet archive from a component tar file.
-func OpenComponentArchiveFromTAR(ctx core.Context, path string, ofs ...vfs.FileSystem) (*ComponentArchive, error) {
-	fs := FileSystem(ofs)
-	// we expect that the path point to a tar
-	file, err := fs.Open(path)
-	if err != nil {
-		return nil, fmt.Errorf("unable to open tar archive from %s: %w", path, err)
-	}
-	defer file.Close()
-	return OpenComponentArchiveFromTarReader(ctx, file)
-}
-
-// OpenComponentArchiveFromTarReader creates a new manifest builder from a input reader.
-func OpenComponentArchiveFromTarReader(ctx core.Context, in io.Reader, tfs ...vfs.FileSystem) (*ComponentArchive, error) {
-	// the archive is untared to a memory fs that the builder can work
-	// as it would be a default filesystem.
-	var fs vfs.FileSystem
-	if len(tfs) == 0 {
-		fs = memoryfs.New()
-	} else {
-		fs = tfs[0]
-	}
-
-	if err := ExtractTarToFs(fs, in); err != nil {
-		return nil, fmt.Errorf("unable to extract tar: %w", err)
-	}
-
-	return OpenComponentArchiveFromFilesystem(ctx, fs)
-}
-
-// NewComponentArchiveFromFilesystem creates a new component archive from a filesystem.
-func OpenComponentArchiveFromFilesystem(ctx core.Context, fs vfs.FileSystem, decodeOpts ...compdesc.DecodeOption) (*ComponentArchive, error) {
-	data, err := vfs.ReadFile(fs, filepath.Join("/", ComponentDescriptorFileName))
-	if err != nil {
-		return nil, fmt.Errorf("unable to read the component descriptor from %s: %w", ComponentDescriptorFileName, err)
-	}
-	cd, err := compdesc.Decode(data, decodeOpts...)
-	if err != nil {
-		return nil, fmt.Errorf("unable to parse component descriptor read from %s: %w", ComponentDescriptorFileName, err)
-	}
-
-	return NewComponentArchive(ctx, cd, fs), nil
-}
-
 // Digest returns the digest of the component archive.
 // The digest is computed serializing the included component descriptor into json and compute sha hash.
 func (ca *ComponentArchive) Digest() (string, error) {
@@ -208,6 +262,17 @@ func (ca *ComponentArchive) Digest() (string, error) {
 		return "", err
 	}
 	return digest.FromBytes(data).String(), nil
+}
+
+func (ca *ComponentArchive) writeCD() error {
+	cdBytes, err := compdesc.Encode(ca.ComponentDescriptor)
+	if err != nil {
+		return fmt.Errorf("unable to encode component descriptor: %w", err)
+	}
+	if err := vfs.WriteFile(ca.fs, ComponentDescriptorFileName, cdBytes, os.ModePerm); err != nil {
+		return fmt.Errorf("unable to copy component descritptor to %q: %w", ComponentDescriptorFileName, err)
+	}
+	return nil
 }
 
 // AddSource adds a blob source to the current archive.
@@ -258,7 +323,7 @@ func (ca *ComponentArchive) AddSource(meta *core.SourceMeta, acc core.BlobAccess
 	} else {
 		ca.ComponentDescriptor.Sources[id] = *src
 	}
-	return nil
+	return ca.writeCD()
 }
 
 // AddResource adds a blob resource to the current archive.
@@ -311,7 +376,7 @@ func (ca *ComponentArchive) AddResource(meta *core.ResourceMeta, acc core.BlobAc
 	} else {
 		ca.ComponentDescriptor.Resources[idx] = *res
 	}
-	return nil
+	return ca.writeCD()
 }
 
 // ensureBlobsPath ensures that the blob directory exists
@@ -322,134 +387,6 @@ func (ca *ComponentArchive) ensureBlobsPath() error {
 		}
 		return ca.fs.Mkdir(BlobsDirectoryName, os.ModePerm)
 	}
-	return nil
-}
-
-// WriteTarGzip tars the current components descriptor and its artifacts.
-func (ca *ComponentArchive) WriteTarGzip(writer io.Writer) error {
-	gw := gzip.NewWriter(writer)
-	if err := ca.WriteTar(gw); err != nil {
-		return err
-	}
-	return gw.Close()
-}
-
-// WriteTar tars the current components descriptor and its artifacts.
-func (ca *ComponentArchive) WriteTar(writer io.Writer) error {
-	tw := tar.NewWriter(writer)
-
-	// write component descriptor
-	cdBytes, err := codec.Encode(ca.ComponentDescriptor)
-	if err != nil {
-		return fmt.Errorf("unable to encode component descriptor: %w", err)
-	}
-	cdHeader := &tar.Header{
-		Name:    ComponentDescriptorFileName,
-		Size:    int64(len(cdBytes)),
-		Mode:    0644,
-		ModTime: time.Now(),
-	}
-
-	if err := tw.WriteHeader(cdHeader); err != nil {
-		return fmt.Errorf("unable to write component descriptor header: %w", err)
-	}
-	if _, err := io.Copy(tw, bytes.NewBuffer(cdBytes)); err != nil {
-		return fmt.Errorf("unable to write component descriptor content: %w", err)
-	}
-
-	// add all blobs
-	err = tw.WriteHeader(&tar.Header{
-		Typeflag: tar.TypeDir,
-		Name:     BlobsDirectoryName,
-		Mode:     0644,
-		ModTime:  time.Now(),
-	})
-	if err != nil {
-		return fmt.Errorf("unable to write blob directory: %w", err)
-	}
-
-	blobs, err := vfs.ReadDir(ca.fs, BlobsDirectoryName)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil
-		}
-		return fmt.Errorf("unable to read blob directory: %w", err)
-	}
-	for _, blobInfo := range blobs {
-		blobpath := BlobPath(blobInfo.Name())
-		header := &tar.Header{
-			Name:    blobpath,
-			Size:    blobInfo.Size(),
-			Mode:    0644,
-			ModTime: time.Now(),
-		}
-		if err := tw.WriteHeader(header); err != nil {
-			return fmt.Errorf("unable to write blob header: %w", err)
-		}
-
-		blob, err := ca.fs.Open(blobpath)
-		if err != nil {
-			return fmt.Errorf("unable to open blob: %w", err)
-		}
-		if _, err := io.Copy(tw, blob); err != nil {
-			return fmt.Errorf("unable to write blob content: %w", err)
-		}
-		if err := blob.Close(); err != nil {
-			return fmt.Errorf("unable to close blob %s: %w", blobpath, err)
-		}
-	}
-
-	return tw.Close()
-}
-
-// WriteToFilesystem writes the current component archive to a filesystem
-func (ca *ComponentArchive) WriteToFilesystem(fs vfs.FileSystem, path string) error {
-	// create the directory structure with the blob directory
-	if err := fs.MkdirAll(filepath.Join(path, BlobsDirectoryName), os.ModePerm); err != nil {
-		return fmt.Errorf("unable to create output directory %q: %s", path, err.Error())
-	}
-	// copy component-descriptor
-	cdBytes, err := codec.Encode(ca.ComponentDescriptor)
-	if err != nil {
-		return fmt.Errorf("unable to encode component descriptor: %w", err)
-	}
-	if err := vfs.WriteFile(fs, filepath.Join(path, ComponentDescriptorFileName), cdBytes, os.ModePerm); err != nil {
-		return fmt.Errorf("unable to copy component descritptor to %q: %w", filepath.Join(path, ComponentDescriptorFileName), err)
-	}
-
-	// copy all blobs
-	blobInfos, err := vfs.ReadDir(ca.fs, BlobsDirectoryName)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil
-		}
-		return fmt.Errorf("unable to read blobs: %w", err)
-	}
-	for _, blobInfo := range blobInfos {
-		if blobInfo.IsDir() {
-			continue
-		}
-		inpath := BlobPath(blobInfo.Name())
-		outpath := filepath.Join(path, BlobsDirectoryName, blobInfo.Name())
-		blob, err := ca.fs.Open(inpath)
-		if err != nil {
-			return fmt.Errorf("unable to open input blob %q: %w", inpath, err)
-		}
-		out, err := fs.OpenFile(outpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
-		if err != nil {
-			return fmt.Errorf("unable to open output blob %q: %w", outpath, err)
-		}
-		if _, err := io.Copy(out, blob); err != nil {
-			return fmt.Errorf("unable to copy blob from %q to %q: %w", inpath, outpath, err)
-		}
-		if err := out.Close(); err != nil {
-			return fmt.Errorf("unable to close output blob %s: %w", outpath, err)
-		}
-		if err := blob.Close(); err != nil {
-			return fmt.Errorf("unable to close input blob %s: %w", outpath, err)
-		}
-	}
-
 	return nil
 }
 

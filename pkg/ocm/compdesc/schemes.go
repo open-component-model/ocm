@@ -21,6 +21,8 @@ import (
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 )
 
+const DefaultSchemeVersion = "v2"
+
 type ComponentDescriptorVersion interface {
 	GetVersion() string
 	Decode(data []byte, opts *DecodeOptions) (interface{}, error)
@@ -76,12 +78,26 @@ type DecodeOptions struct {
 	StrictMode        bool
 }
 
+var _ DecodeOption = &DecodeOptions{}
+
+// ApplyDecodeOption applies the actual options.
+func (o *DecodeOptions) ApplyDecodeOption(options *DecodeOptions) {
+	if o == nil {
+		return
+	}
+	if o.Codec != nil {
+		options.Codec = o.Codec
+	}
+	options.DisableValidation = o.DisableValidation
+	options.StrictMode = o.StrictMode
+}
+
 // ApplyOptions applies the given list options on these options,
 // and then returns itself (for convenient chaining).
 func (o *DecodeOptions) ApplyOptions(opts []DecodeOption) *DecodeOptions {
 	for _, opt := range opts {
 		if opt != nil {
-			opt.ApplyOption(o)
+			opt.ApplyDecodeOption(o)
 		}
 	}
 	return o
@@ -89,22 +105,22 @@ func (o *DecodeOptions) ApplyOptions(opts []DecodeOption) *DecodeOptions {
 
 // DecodeOption is the interface to specify different cache options
 type DecodeOption interface {
-	ApplyOption(options *DecodeOptions)
+	ApplyDecodeOption(options *DecodeOptions)
 }
 
 // StrictMode enables or disables strict mode parsing.
 type StrictMode bool
 
-// ApplyOption applies the configured strict mode.
-func (s StrictMode) ApplyOption(options *DecodeOptions) {
+// ApplyDecodeOption applies the configured strict mode.
+func (s StrictMode) ApplyDecodeOption(options *DecodeOptions) {
 	options.StrictMode = bool(s)
 }
 
 // DisableValidation enables or disables validation of the component descriptor.
 type DisableValidation bool
 
-// ApplyOption applies the validation disable option.
-func (v DisableValidation) ApplyOption(options *DecodeOptions) {
+// ApplyDecodeOption applies the validation disable option.
+func (v DisableValidation) ApplyDecodeOption(options *DecodeOptions) {
 	options.DisableValidation = bool(v)
 }
 
@@ -114,19 +130,78 @@ func (v DisableValidation) ApplyOption(options *DecodeOptions) {
 // The obj is expected to be of type v2.ComponentDescriptor or v2.ComponentDescriptorList.
 // If the serialization version is left blank, the schema version configured in the
 // component descriptor will be used.
-func Encode(obj *ComponentDescriptor, version string, codec Codec) ([]byte, error) {
-	if version == "" {
-		version = obj.Metadata.ConfiguredVersion
-	}
-	cv := DefaultSchemes[version]
+func Encode(obj *ComponentDescriptor, opts ...EncodeOption) ([]byte, error) {
+	o := (&EncodeOptions{}).ApplyOptions(opts).DefaultFor(obj)
+	cv := DefaultSchemes[o.SchemaVersion]
 	if cv == nil {
 		if cv == nil {
-			return nil, fmt.Errorf("unsupported schema version %q", version)
+			return nil, fmt.Errorf("unsupported schema version %q", o.SchemaVersion)
 		}
 	}
 	v, err := cv.ConvertFrom(obj)
 	if err != nil {
 		return nil, err
 	}
-	return codec.Encode(v)
+	return o.Codec.Encode(v)
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+type EncodeOptions struct {
+	Codec         Codec
+	SchemaVersion string
+}
+
+var _ EncodeOption = &EncodeOptions{}
+
+// ApplyDecodeOption applies the actual options.
+func (o *EncodeOptions) ApplyEncodeOption(options *EncodeOptions) {
+	if o == nil {
+		return
+	}
+	if o.Codec != nil {
+		options.Codec = o.Codec
+	}
+	if o.SchemaVersion != "" {
+		options.SchemaVersion = o.SchemaVersion
+	}
+}
+
+func (o *EncodeOptions) DefaultFor(cd *ComponentDescriptor) *EncodeOptions {
+	if o.Codec == nil {
+		o.Codec = DefaultYAMLCodec
+	}
+	if o.SchemaVersion == "" {
+		o.SchemaVersion = cd.Metadata.ConfiguredVersion
+	}
+	if o.SchemaVersion == "" {
+		o.SchemaVersion = DefaultSchemeVersion
+	}
+	return o
+}
+
+// ApplyOptions applies the given list options on these options,
+// and then returns itself (for convenient chaining).
+func (o *EncodeOptions) ApplyOptions(opts []EncodeOption) *EncodeOptions {
+	for _, opt := range opts {
+		if opt != nil {
+			opt.ApplyEncodeOption(o)
+		}
+	}
+	return o
+}
+
+// EncodeOption is the interface to specify different encode options
+type EncodeOption interface {
+	ApplyEncodeOption(options *EncodeOptions)
+}
+
+// SchemaVersion enforces a dedicated schema version .
+type SchemaVersion string
+
+// ApplyEncodeOption applies the configured schema version.
+func (o SchemaVersion) ApplyEncodeOption(options *EncodeOptions) {
+	options.SchemaVersion = string(o)
+}
+
+// CodecWrappers can be used as EncodeOption, also
