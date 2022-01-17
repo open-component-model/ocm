@@ -24,6 +24,11 @@ import (
 // +k8s:openapi-gen=true
 type Identity map[string]string
 
+// IdentityByName return a simple name identity
+func IdentityByName(name string) Identity {
+	return Identity{"name": name}
+}
+
 // Digest returns the object digest of an identity
 func (i Identity) Digest() []byte {
 	data, _ := json.Marshal(i)

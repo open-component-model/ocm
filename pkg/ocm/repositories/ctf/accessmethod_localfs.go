@@ -19,7 +19,10 @@ import (
 	"io"
 	"io/ioutil"
 
+	"github.com/gardener/ocm/pkg/errors"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/core"
+	"github.com/gardener/ocm/pkg/ocm/core/accesstypes"
 	"github.com/gardener/ocm/pkg/ocm/runtime"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
@@ -28,43 +31,69 @@ import (
 const LocalFilesystemBlobType = "localFilesystemBlob"
 const LocalFilesystemBlobTypeV1 = LocalFilesystemBlobType + "/v1"
 
+// Keep old access method and map generic one to this implementation for component archives
+
+func init() {
+	core.RegisterAccessType(accesstypes.NewConvertedType(LocalFilesystemBlobType, LocalFilesystemBlobV1))
+	core.RegisterAccessType(accesstypes.NewConvertedType(LocalFilesystemBlobTypeV1, LocalFilesystemBlobV1))
+}
+
 // NewLocalFilesystemBlobAccessSpecV1 creates a new localFilesystemBlob accessor.
 func NewLocalFilesystemBlobAccessSpecV1(path string, mediaType string) *LocalFilesystemBlobAccessSpec {
 	return &LocalFilesystemBlobAccessSpec{
-		ObjectTypeVersion: runtime.NewObjectTypeVersion(LocalFilesystemBlobType),
-		Filename:          path,
-		MediaType:         mediaType,
+		LocalBlobAccessSpec: accessmethods.LocalBlobAccessSpec{
+			ObjectTypeVersion: runtime.NewObjectTypeVersion(LocalFilesystemBlobType),
+			Filename:          path,
+			MediaType:         mediaType,
+		},
 	}
 }
 
 // LocalFilesystemBlobAccessSpec describes the access for a blob on the filesystem.
 type LocalFilesystemBlobAccessSpec struct {
-	runtime.ObjectTypeVersion `json:",inline"`
-	// Filename is the name of the blob in the local filesystem.
-	// The blob is expected to be at <fs-root>/blobs/<name>
-	Filename string `json:"filename"`
-	// MediaType is the media type of the object this filename refers to.
-	MediaType string `json:"mediaType,omitempty"`
+	accessmethods.LocalBlobAccessSpec `json:",inline"`
 }
 
-func (_ *LocalFilesystemBlobAccessSpec) GetType() string {
-	return LocalFilesystemBlobType
-}
-
-func (a *LocalFilesystemBlobAccessSpec) ValidFor(ctx core.Context, repotype string) bool {
-	return repotype == CTFRepositoryType
+func (a *LocalFilesystemBlobAccessSpec) ValidFor(repo core.Repository) bool {
+	return repo.GetSpecification().GetName() == CTFRepositoryType
 }
 
 func (a *LocalFilesystemBlobAccessSpec) AccessMethod(c core.ComponentAccess) (core.AccessMethod, error) {
 	rtype := c.GetAccessType()
 	if rtype != CTFRepositoryType {
-		return nil, fmt.Errorf("access method not applicable for repository type %q", rtype)
+		return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, c.GetName(), rtype)
 	}
 	acc, ok := c.(*ComponentArchive)
 	if !ok {
 		return nil, fmt.Errorf("implementation error: expected type ComponentArchive but got %T", c)
 	}
 	return newLocalFilesystemBlobAccessMethod(a, acc)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type localfsblobConverterV1 struct{}
+
+var LocalFilesystemBlobV1 = accesstypes.NewAccessSpecVersion(&accessmethods.LocalBlobAccessSpecV1{}, localfsblobConverterV1{})
+
+func (_ localfsblobConverterV1) ConvertFrom(object core.AccessSpec) (runtime.TypedObject, error) {
+	in := object.(*LocalFilesystemBlobAccessSpec)
+	return &accessmethods.LocalBlobAccessSpecV1{
+		ObjectTypeVersion: runtime.NewObjectTypeVersion(in.Type),
+		Filename:          in.Filename,
+		MediaType:         in.MediaType,
+	}, nil
+}
+
+func (_ localfsblobConverterV1) ConvertTo(object runtime.TypedObject) (core.AccessSpec, error) {
+	in := object.(*accessmethods.LocalBlobAccessSpecV1)
+	return &LocalFilesystemBlobAccessSpec{
+		LocalBlobAccessSpec: accessmethods.LocalBlobAccessSpec{
+			ObjectTypeVersion: runtime.NewObjectTypeVersion(in.Type),
+			Filename:          in.Filename,
+			MediaType:         in.MediaType,
+		},
+	}, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////

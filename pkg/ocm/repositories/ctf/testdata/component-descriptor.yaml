@@ -55,3 +55,13 @@ component:
       access:
         type: 'ociRegistry'
         imageReference: 'registry-1.docker.io/grafana/grafana/7.0.3'
+    - name: 'local'
+      version: 'v1.7.2'
+      extraIdentity: { }
+      type: 'blueprint'
+      relation: 'local'
+      labels: [ ]
+      access:
+        type: 'localBlob'
+        path: 'anydigest'
+        mediaType: 'application/json'

@@ -19,12 +19,18 @@ import (
 	"strings"
 
 	"github.com/gardener/ocm/pkg/common"
+	"github.com/gardener/ocm/pkg/errors"
+	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/runtime"
 )
 
 type RepositoryType interface {
 	runtime.TypedObjectCodec
 	common.VersionedElement
+
+	// LocalSupportForAccessSpec checks whether a repository
+	// provides a local version for the access spec.
+	LocalSupportForAccessSpec(ctx Context, a compdesc.AccessSpec) bool
 }
 
 type RepositorySpec interface {
@@ -131,7 +137,7 @@ type UnknownRepositorySpec struct {
 var _ RepositorySpec = &UnknownRepositorySpec{}
 
 func (r *UnknownRepositorySpec) Repository(Context) (Repository, error) {
-	return nil, fmt.Errorf("unknown respository type %q", r.GetType())
+	return nil, errors.ErrUnknown("respository type", r.GetType())
 }
 
 func (r *UnknownRepositorySpec) GetName() string {

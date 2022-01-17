@@ -12,43 +12,38 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package common
+package accesstypes
 
 import (
 	"reflect"
 	"strings"
 
-	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/core"
 	"github.com/gardener/ocm/pkg/ocm/runtime"
 )
 
-type RepositoryType struct {
+type accessType struct {
 	runtime.JSONTypedObjectCodecBase
-	spectype reflect.Type
-	name     string
-	checker  RepositoryAccessMethodChecker
+	factory func() runtime.TypedObject
+	name    string
 }
 
-type RepositoryAccessMethodChecker func(core.Context, compdesc.AccessSpec) bool
-
-func NewRepositoryType(name string, proto core.RepositorySpec, checker RepositoryAccessMethodChecker) core.RepositoryType {
+func NewType(name string, proto core.AccessSpec) core.AccessType {
 	t := reflect.TypeOf(proto)
 	for t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
-	return &RepositoryType{
-		spectype: t,
-		name:     name,
-		checker:  checker,
+	return &accessType{
+		factory: TypedObjectFactory(proto),
+		name:    name,
 	}
 }
 
-func (t *RepositoryType) GetSpecType() reflect.Type {
-	return t.spectype
+func (t *accessType) CreateData() runtime.TypedObject {
+	return t.factory()
 }
 
-func (t *RepositoryType) GetName() string {
+func (t *accessType) GetName() string {
 	i := strings.LastIndex(t.name, "/")
 	if i < 0 {
 		return t.name
@@ -56,7 +51,7 @@ func (t *RepositoryType) GetName() string {
 	return t.name[:i]
 }
 
-func (t *RepositoryType) GetVersion() string {
+func (t *accessType) GetVersion() string {
 	i := strings.LastIndex(t.name, "/")
 	if i < 0 {
 		return "v1"
@@ -64,14 +59,7 @@ func (t *RepositoryType) GetVersion() string {
 	return t.name[i+1:]
 }
 
-func (t *RepositoryType) Decode(data []byte) (runtime.TypedObject, error) {
-	obj := reflect.New(t.spectype)
-	return runtime.UnmarshalInto(data, obj.Interface().(runtime.TypedObject))
-}
-
-func (t *RepositoryType) LocalSupportForAccessSpec(ctx core.Context, a compdesc.AccessSpec) bool {
-	if t.checker != nil {
-		return t.checker(ctx, a)
-	}
-	return false
+func (t *accessType) Decode(data []byte) (runtime.TypedObject, error) {
+	obj := t.factory()
+	return runtime.UnmarshalInto(data, obj)
 }

@@ -126,7 +126,7 @@ func newComponentArchiveFromFilesystem(ctx core.Context, opts ComponentArchiveOp
 		return nil, fmt.Errorf("unable to parse component descriptor read from %s: %w", ComponentDescriptorFileName, err)
 	}
 
-	return NewComponentArchive(ctx, cd, opts.ComponentFileSystem, closer), nil
+	return NewComponentArchive(ctx, nil, cd, opts.ComponentFileSystem, closer), nil
 }
 
 func newComponentArchiveForFilesystem(ctx core.Context, cd *compdesc.ComponentDescriptor, opts ComponentArchiveOptions, closer ComponentCloser) (*ComponentArchive, error) {
@@ -135,7 +135,7 @@ func newComponentArchiveForFilesystem(ctx core.Context, cd *compdesc.ComponentDe
 	}
 	compdesc.DefaultComponent(cd)
 
-	ca := NewComponentArchive(ctx, cd, opts.ComponentFileSystem, closer)
+	ca := NewComponentArchive(ctx, nil, cd, opts.ComponentFileSystem, closer)
 	err := ca.writeCD()
 	if err != nil {
 		return nil, err

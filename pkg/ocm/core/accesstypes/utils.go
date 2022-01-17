@@ -12,54 +12,23 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package common
+package accesstypes
 
 import (
 	"reflect"
-	"strings"
 
-	"github.com/gardener/ocm/pkg/ocm/core"
 	"github.com/gardener/ocm/pkg/ocm/runtime"
 )
 
-type AccessType struct {
-	runtime.JSONTypedObjectCodecBase
-	spectype reflect.Type
-	name     string
-}
-
-func NewAccessType(name string, proto core.AccessSpec) core.AccessType {
+func ProtoType(proto interface{}) reflect.Type {
 	t := reflect.TypeOf(proto)
 	for t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
-	return &AccessType{
-		spectype: t,
-		name:     name,
-	}
+	return t
 }
 
-func (t *AccessType) GetSpecType() reflect.Type {
-	return t.spectype
-}
-
-func (t *AccessType) GetName() string {
-	i := strings.LastIndex(t.name, "/")
-	if i < 0 {
-		return t.name
-	}
-	return t.name[:i]
-}
-
-func (t *AccessType) GetVersion() string {
-	i := strings.LastIndex(t.name, "/")
-	if i < 0 {
-		return "v1"
-	}
-	return t.name[i+1:]
-}
-
-func (t *AccessType) Decode(data []byte) (runtime.TypedObject, error) {
-	obj := reflect.New(t.spectype)
-	return runtime.UnmarshalInto(data, obj.Interface().(runtime.TypedObject))
+func TypedObjectFactory(proto runtime.TypedObject) func() runtime.TypedObject {
+	t := ProtoType(proto)
+	return func() runtime.TypedObject { return reflect.New(t).Interface().(runtime.TypedObject) }
 }

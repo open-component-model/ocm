@@ -15,9 +15,10 @@
 package ocireg
 
 import (
-	"fmt"
-
+	"github.com/gardener/ocm/pkg/errors"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/common"
+	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/core"
 	"github.com/gardener/ocm/pkg/ocm/runtime"
 )
@@ -35,8 +36,8 @@ const (
 )
 
 func init() {
-	core.RegisterRepositoryType(OCIRegistryRepositoryType, common.NewRepositoryType(OCIRegistryRepositoryType, &OCIRegistryRepositorySpec{}))
-	core.RegisterRepositoryType(OCIRegistryRepositoryTypeV1, common.NewRepositoryType(OCIRegistryRepositoryTypeV1, &OCIRegistryRepositorySpec{}))
+	core.RegisterRepositoryType(OCIRegistryRepositoryType, common.NewRepositoryType(OCIRegistryRepositoryType, &OCIRegistryRepositorySpec{}, localAccessChecker))
+	core.RegisterRepositoryType(OCIRegistryRepositoryTypeV1, common.NewRepositoryType(OCIRegistryRepositoryTypeV1, &OCIRegistryRepositorySpec{}, localAccessChecker))
 }
 
 // OCIRegistryRepositorySpec describes a component repository backed by a oci registry.
@@ -65,5 +66,10 @@ func (a *OCIRegistryRepositorySpec) GetType() string {
 	return OCIRegistryRepositoryType
 }
 func (a *OCIRegistryRepositorySpec) Repository(ctx core.Context) (core.Repository, error) {
-	return nil, fmt.Errorf("NOT IMPLEMENTED") // TODO
+	return nil, errors.ErrNotImplemented() // TODO
+}
+
+func localAccessChecker(ctx core.Context, a compdesc.AccessSpec) bool {
+	name := a.GetName()
+	return name == accessmethods.LocalBlobType
 }

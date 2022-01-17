@@ -24,7 +24,7 @@ func (t *ObjectType) SetType(ttype string) {
 // ObjectTypeVersion describes the type of a object
 // +k8s:deepcopy-gen=true
 type ObjectTypeVersion struct {
-	ObjectType `json:"type"`
+	ObjectType `json:",inline"`
 }
 
 // NewObjectTypeVersion returns a type version object

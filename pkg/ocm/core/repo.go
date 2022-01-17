@@ -28,6 +28,7 @@ type Repository interface {
 	GetContext() Context
 
 	GetSpecification() RepositorySpec
+	LocalSupportForAccessSpec(a compdesc.AccessSpec) bool
 	ExistsComponent(name string, version string) (bool, error)
 	LookupComponent(name string, version string) (ComponentAccess, error)
 	ComposeComponent(name string, version string) (ComponentComposer, error)
@@ -66,15 +67,24 @@ type ComponentAccess interface {
 	GetRepository() Repository
 
 	GetDescriptor() (*compdesc.ComponentDescriptor, error)
-	GetResource(meta *metav1.Identity) (ResourceAccess, error)
-	GetSource(meta *metav1.Identity) (ResourceAccess, error)
+	GetResource(meta metav1.Identity) (ResourceAccess, error)
+	GetSource(meta metav1.Identity) (ResourceAccess, error)
+
+	// AccessMethod provides an access method implementation for
+	// an access spec. This might be a repository local implementation
+	// or a global one. It might be called by the AccessSpec method
+	// to map itself to a local implementation or called directly, which
+	// potentially results in calling the method on the access spec.
+	// The access spec implementation must here
+	// cooperate with this implementation to avoid endless recursion.
+	AccessMethod(AccessSpec) (AccessMethod, error)
 }
 
 type ComponentComposer interface {
 	ComponentAccess
 	AddResourceBlob(*ResourceMeta, BlobAccess) error
-	AddResource(*ResourceMeta, AccessSpec)
+	AddResource(*ResourceMeta, compdesc.AccessSpec) error
 
 	AddSourceBlob(*SourceMeta, BlobAccess) error
-	AddSource(*SourceMeta, AccessSpec)
+	AddSource(*SourceMeta, compdesc.AccessSpec) error
 }

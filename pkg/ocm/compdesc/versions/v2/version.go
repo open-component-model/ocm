@@ -15,8 +15,7 @@
 package compdesc
 
 import (
-	"fmt"
-
+	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/gardener/ocm/pkg/ocm/compdesc/versions/v2/jsonscheme"
@@ -75,7 +74,7 @@ func (v *DescriptorVersion) ConvertTo(obj interface{}) (out *compdesc.ComponentD
 	}
 	in, ok := obj.(*ComponentDescriptor)
 	if !ok {
-		return nil, fmt.Errorf("%T is no version v2 descriptor", obj)
+		return nil, errors.Newf("%T is no version v2 descriptor", obj)
 	}
 
 	defer compdesc.CatchConversionError(&err)

@@ -18,6 +18,7 @@ import (
 	"fmt"
 
 	"github.com/gardener/ocm/pkg/common"
+	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/runtime"
 )
@@ -29,7 +30,7 @@ type AccessType interface {
 
 type AccessSpec interface {
 	compdesc.AccessSpec
-	ValidFor(ctx Context, repotype string) bool
+	ValidFor(repo Repository) bool
 	AccessMethod(access ComponentAccess) (AccessMethod, error)
 }
 
@@ -97,7 +98,7 @@ func (t *knownAccessTypes) CreateAccessSpec(obj runtime.TypedObject) (AccessSpec
 		}
 		return t.DecodeAccessSpec(raw)
 	}
-	return nil, fmt.Errorf("invalid object type %T for access specs", obj)
+	return nil, errors.ErrInvalid("object type", fmt.Sprintf("%T", obj), "access specs")
 }
 
 // DefaultKnownAccessTypes contains all globally known access serializer
@@ -105,6 +106,10 @@ var DefaultKnownAccessTypes = NewKnownAccessTypes()
 
 func RegisterAccessType(atype AccessType) {
 	DefaultKnownAccessTypes.Register(atype.GetName(), atype)
+}
+
+func GetAccessType(name string) AccessType {
+	return DefaultKnownAccessTypes.GetAccessType(name)
 }
 
 func CreateAccessSpec(t runtime.TypedObject) (AccessSpec, error) {
@@ -136,11 +141,11 @@ type UnknownAccessSpec struct {
 	*runtime.UnstructuredVersionedTypedObject `json:",inline"`
 }
 
-func (_ *UnknownAccessSpec) AccessMethod(ComponentAccess) (AccessMethod, error) {
-	return nil, fmt.Errorf("unknown access method type")
+func (s *UnknownAccessSpec) AccessMethod(ComponentAccess) (AccessMethod, error) {
+	return nil, errors.ErrUnknown(errors.KIND_ACCESSMETHOD, s.GetType())
 }
 
-func (_ *UnknownAccessSpec) ValidFor(ctx Context, repotype string) bool {
+func (_ *UnknownAccessSpec) ValidFor(Repository) bool {
 	return false
 }
 
@@ -168,12 +173,12 @@ func (s *GenericAccessSpec) AccessMethod(acc ComponentAccess) (AccessMethod, err
 	return spec.AccessMethod(acc)
 }
 
-func (s *GenericAccessSpec) ValidFor(ctx Context, repotype string) bool {
-	spec, err := s.Evaluate(ctx)
+func (s *GenericAccessSpec) ValidFor(repo Repository) bool {
+	spec, err := s.Evaluate(repo.GetContext())
 	if err != nil {
 		return false
 	}
-	return spec.ValidFor(ctx, repotype)
+	return spec.ValidFor(repo)
 }
 
 var _ AccessSpec = &GenericAccessSpec{}

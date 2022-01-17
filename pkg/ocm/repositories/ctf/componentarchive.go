@@ -16,12 +16,13 @@ package ctf
 
 import (
 	"archive/tar"
-	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 
+	"github.com/gardener/ocm/pkg/errors"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/gardener/ocm/pkg/ocm/core"
@@ -37,8 +38,6 @@ const ComponentDescriptorFileName = "component-descriptor.yaml"
 
 // BlobsDirectoryName is the name of the blob directory in the tar.
 const BlobsDirectoryName = "blobs"
-
-var UnsupportedResolveType = errors.New("UnsupportedResolveType")
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -151,7 +150,7 @@ func RegisterComponentArchiveFormat(f ArchiveFormat) {
 	formats[f.String()] = f
 }
 
-func GetCompnentArchiceFormat(name string) ArchiveFormat {
+func GetCompnentArchiveFormat(name string) ArchiveFormat {
 	return formats[name]
 }
 
@@ -160,6 +159,7 @@ func GetCompnentArchiceFormat(name string) ArchiveFormat {
 // ComponentArchive is the go representation for a component artefact
 type ComponentArchive struct {
 	ComponentDescriptor *compdesc.ComponentDescriptor
+	repo                core.Repository
 	fs                  vfs.FileSystem
 	ctx                 core.Context
 	closer              ComponentCloser
@@ -168,13 +168,18 @@ type ComponentArchive struct {
 var _ core.ComponentAccess = &ComponentArchive{}
 
 // NewComponentArchive returns a new component descriptor with a filesystem
-func NewComponentArchive(ctx core.Context, cd *compdesc.ComponentDescriptor, fs vfs.FileSystem, closer ComponentCloser) *ComponentArchive {
-	return &ComponentArchive{
+func NewComponentArchive(ctx core.Context, repo core.Repository, cd *compdesc.ComponentDescriptor, fs vfs.FileSystem, closer ComponentCloser) *ComponentArchive {
+	ca := &ComponentArchive{
+		repo:                repo,
 		ComponentDescriptor: cd,
 		fs:                  fs,
 		ctx:                 ctx,
 		closer:              closer,
 	}
+	if repo == nil {
+		ca.repo = newPlainComponent(ca, ctx)
+	}
+	return ca
 }
 
 func evaluateOptions(opts []ComponentArchiveOption) ComponentArchiveOptions {
@@ -204,6 +209,24 @@ func OpenComponentArchive(ctx core.Context, path string, opts ...ComponentArchiv
 	return ca, err
 }
 
+func (c *ComponentArchive) AccessMethod(a core.AccessSpec) (core.AccessMethod, error) {
+	if a.GetName() == accessmethods.LocalBlobType {
+		a, err := c.ctx.AccessSpecForSpec(a)
+		if err != nil {
+			return nil, err
+		}
+		if a.GetVersion() == "v1" {
+			conv := &LocalFilesystemBlobAccessSpec{
+				*a.(*accessmethods.LocalBlobAccessSpec),
+			}
+			return newLocalFilesystemBlobAccessMethod(conv, c)
+		}
+		return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), CTFRepositoryType)
+	}
+	// fall back to original version
+	return a.AccessMethod(c)
+}
+
 func (c *ComponentArchive) GetContext() core.Context {
 	return c.ctx
 }
@@ -220,8 +243,7 @@ func (c *ComponentArchive) Close() error {
 }
 
 func (c *ComponentArchive) GetRepository() core.Repository {
-	// TODO
-	return nil
+	return c.repo
 }
 
 func (c *ComponentArchive) GetName() string {
@@ -236,11 +258,11 @@ func (c *ComponentArchive) GetDescriptor() (*compdesc.ComponentDescriptor, error
 	return c.ComponentDescriptor, nil
 }
 
-func (c *ComponentArchive) GetResource(meta *metav1.Identity) (core.ResourceAccess, error) {
+func (c *ComponentArchive) GetResource(meta metav1.Identity) (core.ResourceAccess, error) {
 	// TODO
 	return nil, fmt.Errorf("not implemented")
 }
-func (c *ComponentArchive) GetSource(meta *metav1.Identity) (core.ResourceAccess, error) {
+func (c *ComponentArchive) GetSource(meta metav1.Identity) (core.ResourceAccess, error) {
 	// TODO
 	return nil, fmt.Errorf("not implemented")
 }
@@ -275,13 +297,40 @@ func (ca *ComponentArchive) writeCD() error {
 	return nil
 }
 
+func (ca *ComponentArchive) checkAccessSpec(acc compdesc.AccessSpec) error {
+	spec, err := ca.GetContext().AccessSpecForSpec(acc)
+	if err != nil {
+		return err
+	}
+	if spec.ValidFor(ca.repo) {
+		return nil
+	}
+	return errors.ErrInvalid(errors.KIND_ACCESSMETHOD, acc.GetName(), ca.repo.GetSpecification().GetName())
+}
+
+func (ca *ComponentArchive) AddSource(meta *core.SourceMeta, acc compdesc.AccessSpec) error {
+	if err := ca.checkAccessSpec(acc); err != nil {
+		return err
+	}
+	src := &compdesc.Source{
+		SourceMeta: *meta.Copy(),
+		Access:     acc,
+	}
+
+	if idx := ca.ComponentDescriptor.GetSourceIndex(meta); idx == -1 {
+		ca.ComponentDescriptor.Sources = append(ca.ComponentDescriptor.Sources, *src)
+	} else {
+		ca.ComponentDescriptor.Sources[idx] = *src
+	}
+	return ca.writeCD()
+}
+
 // AddSource adds a blob source to the current archive.
 // If the specified source already exists it will be overwritten.
-func (ca *ComponentArchive) AddSource(meta *core.SourceMeta, acc core.BlobAccess) error {
+func (ca *ComponentArchive) AddSourceBlob(meta *core.SourceMeta, acc core.BlobAccess) error {
 	if acc == nil {
 		return errors.New("a source has to be defined")
 	}
-	id := ca.ComponentDescriptor.GetSourceIndex(meta)
 	if err := ca.ensureBlobsPath(); err != nil {
 		return err
 	}
@@ -313,25 +362,31 @@ func (ca *ComponentArchive) AddSource(meta *core.SourceMeta, acc core.BlobAccess
 		}
 	}
 
-	src := &compdesc.Source{
-		SourceMeta: *meta.Copy(),
-		Access:     NewLocalFilesystemBlobAccessSpecV1(string(digest), acc.MimeType()),
+	return ca.AddSource(meta, NewLocalFilesystemBlobAccessSpecV1(string(digest), acc.MimeType()))
+}
+
+func (ca *ComponentArchive) AddResource(meta *core.ResourceMeta, acc compdesc.AccessSpec) error {
+	if err := ca.checkAccessSpec(acc); err != nil {
+		return err
+	}
+	res := &compdesc.Resource{
+		ResourceMeta: *meta.Copy(),
+		Access:       acc,
 	}
 
-	if id == -1 {
-		ca.ComponentDescriptor.Sources = append(ca.ComponentDescriptor.Sources, *src)
+	if idx := ca.ComponentDescriptor.GetResourceIndex(meta); idx == -1 {
+		ca.ComponentDescriptor.Resources = append(ca.ComponentDescriptor.Resources, *res)
 	} else {
-		ca.ComponentDescriptor.Sources[id] = *src
+		ca.ComponentDescriptor.Resources[idx] = *res
 	}
 	return ca.writeCD()
 }
 
 // AddResource adds a blob resource to the current archive.
-func (ca *ComponentArchive) AddResource(meta *core.ResourceMeta, acc core.BlobAccess) error {
+func (ca *ComponentArchive) AddResourceBlob(meta *core.ResourceMeta, acc core.BlobAccess) error {
 	if acc == nil {
 		return errors.New("a resource has to be defined")
 	}
-	idx := ca.ComponentDescriptor.GetResourceIndex(meta)
 	if err := ca.ensureBlobsPath(); err != nil {
 		return err
 	}
@@ -366,17 +421,7 @@ func (ca *ComponentArchive) AddResource(meta *core.ResourceMeta, acc core.BlobAc
 		return nil
 	}
 
-	res := &compdesc.Resource{
-		ResourceMeta: *meta.Copy(),
-		Access:       NewLocalFilesystemBlobAccessSpecV1(string(digest), acc.MimeType()),
-	}
-
-	if idx == -1 {
-		ca.ComponentDescriptor.Resources = append(ca.ComponentDescriptor.Resources, *res)
-	} else {
-		ca.ComponentDescriptor.Resources[idx] = *res
-	}
-	return ca.writeCD()
+	return ca.AddResource(meta, NewLocalFilesystemBlobAccessSpecV1(string(digest), acc.MimeType()))
 }
 
 // ensureBlobsPath ensures that the blob directory exists

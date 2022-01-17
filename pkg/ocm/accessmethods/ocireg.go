@@ -18,8 +18,8 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/gardener/ocm/pkg/ocm/common"
 	"github.com/gardener/ocm/pkg/ocm/core"
+	"github.com/gardener/ocm/pkg/ocm/core/accesstypes"
 	"github.com/gardener/ocm/pkg/ocm/runtime"
 )
 
@@ -28,8 +28,8 @@ const OCIRegistryType = "ociRegistry"
 const OCIRegistryTypeV1 = OCIRegistryType + "/v1"
 
 func init() {
-	core.RegisterAccessType(common.NewAccessType(OCIRegistryType, &OCIRegistryAccessSpec{}))
-	core.RegisterAccessType(common.NewAccessType(OCIRegistryTypeV1, &OCIRegistryAccessSpec{}))
+	core.RegisterAccessType(accesstypes.NewType(OCIRegistryType, &OCIRegistryAccessSpec{}))
+	core.RegisterAccessType(accesstypes.NewType(OCIRegistryTypeV1, &OCIRegistryAccessSpec{}))
 }
 
 // OCIRegistryAccessSpec describes the access for a oci registry.
@@ -52,7 +52,7 @@ func (_ *OCIRegistryAccessSpec) GetType() string {
 	return OCIRegistryType
 }
 
-func (a *OCIRegistryAccessSpec) ValidFor(ctx core.Context, repotype string) bool {
+func (a *OCIRegistryAccessSpec) ValidFor(core.Repository) bool {
 	return true
 }
 

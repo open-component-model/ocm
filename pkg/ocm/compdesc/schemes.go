@@ -16,8 +16,8 @@ package compdesc
 
 import (
 	"encoding/json"
-	"fmt"
 
+	"github.com/gardener/ocm/pkg/errors"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 )
 
@@ -61,7 +61,7 @@ func Decode(data []byte, opts ...DecodeOption) (*ComponentDescriptor, error) {
 
 	version := DefaultSchemes[metadata.Version]
 	if version == nil {
-		return nil, fmt.Errorf("unsupported schema version %q", metadata.Version)
+		return nil, errors.ErrNotSupported(errors.KIND_SCHEMAVERSION, metadata.Version)
 	}
 
 	versioned, err := version.Decode(data, o)
@@ -135,7 +135,7 @@ func Encode(obj *ComponentDescriptor, opts ...EncodeOption) ([]byte, error) {
 	cv := DefaultSchemes[o.SchemaVersion]
 	if cv == nil {
 		if cv == nil {
-			return nil, fmt.Errorf("unsupported schema version %q", o.SchemaVersion)
+			return nil, errors.ErrNotSupported(errors.KIND_SCHEMAVERSION, o.SchemaVersion)
 		}
 	}
 	v, err := cv.ConvertFrom(obj)
