@@ -18,6 +18,7 @@ const KIND_FUNCTION = "function"
 const KIND_SCHEMAVERSION = "schema version"
 const KIND_COMPONENT = "component"
 const KIND_ACCESSMETHOD = "access method"
+const KIND_OBJECTTYPE = "object type"
 
 type errNotImplemented struct {
 	errinfo

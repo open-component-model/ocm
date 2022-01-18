@@ -25,7 +25,7 @@ import (
 )
 
 type RepositoryType interface {
-	runtime.TypedObjectCodec
+	runtime.TypedObjectDecoder
 	common.VersionedElement
 
 	// LocalSupportForAccessSpec checks whether a repository
@@ -40,43 +40,40 @@ type RepositorySpec interface {
 	Repository(Context) (Repository, error)
 }
 
-type KnownRepositoryTypes interface {
-	runtime.TypedObjectCodec
+type RepositoryTypeScheme interface {
+	runtime.Scheme
 
 	GetRepositoryType(name string) RepositoryType
 	Register(name string, atype RepositoryType)
 
-	DecodeRepositorySpec(data []byte) (RepositorySpec, error)
+	DecodeRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error)
 	CreateRepositorySpec(obj runtime.TypedObject) (RepositorySpec, error)
 }
 
-type knownRepositoryTypes struct {
-	runtime.TypedObjectCodec
-	types map[string]RepositoryType
+type repositoryTypeScheme struct {
+	runtime.Scheme
 }
 
-func NewKnownRepositoryTypes() KnownRepositoryTypes {
-	types := &knownRepositoryTypes{
-		types: map[string]RepositoryType{},
+func NewRepositoryTypeScheme() RepositoryTypeScheme {
+	var rt RepositorySpec
+	scheme := runtime.MustNewDefaultScheme(&rt, &UnknownRepositorySpec{}, true)
+	return &repositoryTypeScheme{scheme}
+}
+
+func (t *repositoryTypeScheme) GetRepositoryType(name string) RepositoryType {
+	d := t.GetDecoder(name)
+	if d == nil {
+		return nil
 	}
-	types.TypedObjectCodec = runtime.NewCodec(types, defaultJSONRepositoryCodec, nil)
-	return types
+	return d.(RepositoryType)
 }
 
-func (t *knownRepositoryTypes) GetCodec(name string) runtime.TypedObjectCodec {
-	return t.types[name]
+func (t *repositoryTypeScheme) Register(name string, rtype RepositoryType) {
+	t.RegisterByDecoder(name, rtype)
 }
 
-func (t *knownRepositoryTypes) GetRepositoryType(name string) RepositoryType {
-	return t.types[name]
-}
-
-func (t *knownRepositoryTypes) Register(name string, rtype RepositoryType) {
-	t.types[name] = rtype
-}
-
-func (t *knownRepositoryTypes) DecodeRepositorySpec(data []byte) (RepositorySpec, error) {
-	obj, err := t.Decode(data)
+func (t *repositoryTypeScheme) DecodeRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
+	obj, err := t.Decode(data, unmarshaler)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +83,7 @@ func (t *knownRepositoryTypes) DecodeRepositorySpec(data []byte) (RepositorySpec
 	return nil, fmt.Errorf("invalid access spec type: yield %T instead of RepositorySpec")
 }
 
-func (t *knownRepositoryTypes) CreateRepositorySpec(obj runtime.TypedObject) (RepositorySpec, error) {
+func (t *repositoryTypeScheme) CreateRepositorySpec(obj runtime.TypedObject) (RepositorySpec, error) {
 	if s, ok := obj.(RepositorySpec); ok {
 		return s, nil
 	}
@@ -95,43 +92,24 @@ func (t *knownRepositoryTypes) CreateRepositorySpec(obj runtime.TypedObject) (Re
 		if err != nil {
 			return nil, err
 		}
-		return t.DecodeRepositorySpec(raw)
+		return t.DecodeRepositorySpec(raw, runtime.DefaultJSONEncoding)
 	}
 	return nil, fmt.Errorf("invalid object type %T for repository specs", obj)
 }
 
-// DefaultKnownAccessTypes contains all globally known access serializer
-var DefaultKnownRepositoryTypes = NewKnownRepositoryTypes()
+// DefaultRepositoryTypeScheme contains all globally known access serializer
+var DefaultRepositoryTypeScheme = NewRepositoryTypeScheme()
 
 func RegisterRepositoryType(name string, atype RepositoryType) {
-	DefaultKnownRepositoryTypes.Register(name, atype)
+	DefaultRepositoryTypeScheme.Register(name, atype)
 }
 
 func CreateRepositorySpec(t runtime.TypedObject) (RepositorySpec, error) {
-	return DefaultKnownRepositoryTypes.CreateRepositorySpec(t)
-}
-
-// DefaultJSONTRepositorySpecDecoder is a simple decoder that implements the TypedObjectDecoder interface.
-// It simply decodes the access using the json marshaller.
-type DefaultJSONRepositorySpecDecoder struct{}
-
-// Decode is the Decode implementation of the TypedObjectDecoder interface.
-func (e DefaultJSONRepositorySpecDecoder) Decode(data []byte) (runtime.TypedObject, error) {
-	obj, err := runtime.DefaultJSONTypedObjectCodec.Decode(data)
-	if err != nil {
-		return nil, err
-	}
-	return &UnknownRepositorySpec{obj.(*runtime.UnstructuredTypedObject)}, nil
-}
-
-// defaultJSONTypedObjectCodec implements TypedObjectCodec interface with the json decoder and json encoder.
-var defaultJSONRepositoryCodec = runtime.TypedObjectCodecWrapper{
-	TypedObjectDecoder: DefaultJSONRepositorySpecDecoder{},
-	TypedObjectEncoder: runtime.DefaultJSONTypedObjectEncoder{},
+	return DefaultRepositoryTypeScheme.CreateRepositorySpec(t)
 }
 
 type UnknownRepositorySpec struct {
-	*runtime.UnstructuredTypedObject
+	runtime.UnstructuredTypedObject
 }
 
 var _ RepositorySpec = &UnknownRepositorySpec{}

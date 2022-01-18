@@ -21,11 +21,11 @@ import (
 )
 
 type UnstructuredVersionedTypedObject struct {
-	*UnstructuredTypedObject `json:",inline"`
+	UnstructuredTypedObject `json:",inline"`
 }
 
 func (s *UnstructuredVersionedTypedObject) ToUnstructured() (*UnstructuredTypedObject, error) {
-	return s.UnstructuredTypedObject, nil
+	return &s.UnstructuredTypedObject, nil
 }
 
 func (s *UnstructuredVersionedTypedObject) GetName() string {

@@ -22,6 +22,10 @@ import (
 	"github.com/modern-go/reflect2"
 )
 
+// Unstructured is the interface to represent generic object data for
+// types handled by schemes.
+type Unstructured TypeGetter
+
 // UnstructuredTypesEqual compares two unstructured object.
 func UnstructuredTypesEqual(a, b *UnstructuredTypedObject) bool {
 	if a == nil && b == nil {
@@ -138,20 +142,20 @@ func (u *UnstructuredTypedObject) setRaw(data []byte) error {
 }
 
 // Evaluate converts a unstructured object into a typed object.
-func (u *UnstructuredTypedObject) Evaluate(types KnownTypes) (TypedObject, error) {
+func (u *UnstructuredTypedObject) Evaluate(types Scheme) (TypedObject, error) {
 	data, err := u.GetRaw()
 	if err != nil {
 		return nil, fmt.Errorf("unable to get data from unstructured object: %w", err)
 	}
-	var codec TypedObjectCodec
+	var decoder TypedObjectDecoder
 	if types != nil {
-		codec = types.GetCodec(u.GetType())
+		decoder = types.GetDecoder(u.GetType())
 	}
-	if codec == nil {
+	if decoder == nil {
 		return u, nil
 	}
 
-	if obj, err := codec.Decode(data); err != nil {
+	if obj, err := decoder.Decode(data, DefaultJSONEncoding); err != nil {
 		return nil, fmt.Errorf("unable to decode object %q: %w", u.GetType(), err)
 	} else {
 		return obj, nil

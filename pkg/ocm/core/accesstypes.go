@@ -24,7 +24,7 @@ import (
 )
 
 type AccessType interface {
-	runtime.TypedObjectCodec
+	runtime.TypedObjectDecoder
 	common.VersionedElement
 }
 
@@ -39,45 +39,40 @@ type AccessMethod interface {
 	BlobAccess
 }
 
-type KnownAccessTypes interface {
-	runtime.TypedObjectCodec
-
-	GetCodec(name string) runtime.TypedObjectCodec
+type AccessTypeScheme interface {
+	runtime.Scheme
 
 	GetAccessType(name string) AccessType
 	Register(name string, atype AccessType)
 
-	DecodeAccessSpec(data []byte) (AccessSpec, error)
+	DecodeAccessSpec(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error)
 	CreateAccessSpec(obj runtime.TypedObject) (AccessSpec, error)
 }
 
-type knownAccessTypes struct {
-	runtime.TypedObjectCodec
-	types map[string]AccessType
+type accessTypeScheme struct {
+	runtime.Scheme
 }
 
-func NewKnownAccessTypes() KnownAccessTypes {
-	types := &knownAccessTypes{
-		types: map[string]AccessType{},
+func NewAccessTypeScheme() AccessTypeScheme {
+	var at AccessSpec
+	scheme := runtime.MustNewDefaultScheme(&at, &UnknownAccessSpec{}, true)
+	return &accessTypeScheme{scheme}
+}
+
+func (t *accessTypeScheme) GetAccessType(name string) AccessType {
+	decoder := t.GetDecoder(name)
+	if decoder == nil {
+		return nil
 	}
-	types.TypedObjectCodec = runtime.NewCodec(types, defaultJSONAccessSpecCodec, nil)
-	return types
+	return decoder.(AccessType)
 }
 
-func (t *knownAccessTypes) GetCodec(name string) runtime.TypedObjectCodec {
-	return t.types[name]
+func (t *accessTypeScheme) Register(name string, atype AccessType) {
+	t.RegisterByDecoder(name, atype)
 }
 
-func (t *knownAccessTypes) GetAccessType(name string) AccessType {
-	return t.types[name]
-}
-
-func (t *knownAccessTypes) Register(name string, atype AccessType) {
-	t.types[name] = atype
-}
-
-func (t *knownAccessTypes) DecodeAccessSpec(data []byte) (AccessSpec, error) {
-	obj, err := t.Decode(data)
+func (t *accessTypeScheme) DecodeAccessSpec(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error) {
+	obj, err := t.Decode(data, unmarshaler)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +82,7 @@ func (t *knownAccessTypes) DecodeAccessSpec(data []byte) (AccessSpec, error) {
 	return nil, fmt.Errorf("invalid access spec type: yield %T instead of AccessSpec")
 }
 
-func (t *knownAccessTypes) CreateAccessSpec(obj runtime.TypedObject) (AccessSpec, error) {
+func (t *accessTypeScheme) CreateAccessSpec(obj runtime.TypedObject) (AccessSpec, error) {
 	if s, ok := obj.(AccessSpec); ok {
 		return s, nil
 	}
@@ -96,50 +91,33 @@ func (t *knownAccessTypes) CreateAccessSpec(obj runtime.TypedObject) (AccessSpec
 		if err != nil {
 			return nil, err
 		}
-		return t.DecodeAccessSpec(raw)
+		return t.DecodeAccessSpec(raw, runtime.DefaultJSONEncoding)
 	}
 	return nil, errors.ErrInvalid("object type", fmt.Sprintf("%T", obj), "access specs")
 }
 
-// DefaultKnownAccessTypes contains all globally known access serializer
-var DefaultKnownAccessTypes = NewKnownAccessTypes()
+// DefaultAccessTypeScheme contains all globally known access serializer
+var DefaultAccessTypeScheme = NewAccessTypeScheme()
 
 func RegisterAccessType(atype AccessType) {
-	DefaultKnownAccessTypes.Register(atype.GetName(), atype)
+	DefaultAccessTypeScheme.Register(atype.GetName(), atype)
 }
 
 func GetAccessType(name string) AccessType {
-	return DefaultKnownAccessTypes.GetAccessType(name)
+	return DefaultAccessTypeScheme.GetAccessType(name)
 }
 
 func CreateAccessSpec(t runtime.TypedObject) (AccessSpec, error) {
-	return DefaultKnownAccessTypes.CreateAccessSpec(t)
-}
-
-// DefaultJSONTAccessSpecDecoder is a simple decoder that implements the TypedObjectDecoder interface.
-// It simply decodes the access using the json marshaller.
-type DefaultJSONAccessSpecDecoder struct{}
-
-// Decode is the Decode implementation of the TypedObjectDecoder interface.
-func (e DefaultJSONAccessSpecDecoder) Decode(data []byte) (runtime.TypedObject, error) {
-	obj, err := runtime.DefaultJSONTypedObjectCodec.Decode(data)
-	if err != nil {
-		return nil, err
-	}
-	return &UnknownAccessSpec{&runtime.UnstructuredVersionedTypedObject{obj.(*runtime.UnstructuredTypedObject)}}, nil
-}
-
-// defaultJSONAccessSpecCodec implements TypedObjectCodec interface with the json decoder and json encoder.
-var defaultJSONAccessSpecCodec = runtime.TypedObjectCodecWrapper{
-	TypedObjectDecoder: DefaultJSONAccessSpecDecoder{},
-	TypedObjectEncoder: runtime.DefaultJSONTypedObjectEncoder{},
+	return DefaultAccessTypeScheme.CreateAccessSpec(t)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type UnknownAccessSpec struct {
-	*runtime.UnstructuredVersionedTypedObject `json:",inline"`
+	runtime.UnstructuredVersionedTypedObject `json:",inline"`
 }
+
+var _ runtime.TypedObject = &UnknownAccessSpec{}
 
 func (s *UnknownAccessSpec) AccessMethod(ComponentAccess) (AccessMethod, error) {
 	return nil, errors.ErrUnknown(errors.KIND_ACCESSMETHOD, s.GetType())
@@ -154,7 +132,7 @@ var _ AccessSpec = &UnknownAccessSpec{}
 ////////////////////////////////////////////////////////////////////////////////
 
 type GenericAccessSpec struct {
-	*runtime.UnstructuredVersionedTypedObject `json:",inline"`
+	runtime.UnstructuredVersionedTypedObject `json:",inline"`
 }
 
 func (s *GenericAccessSpec) Evaluate(ctx Context) (AccessSpec, error) {
@@ -162,7 +140,7 @@ func (s *GenericAccessSpec) Evaluate(ctx Context) (AccessSpec, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ctx.AccessMethods().DecodeAccessSpec(raw)
+	return ctx.AccessMethods().DecodeAccessSpec(raw, runtime.DefaultJSONEncoding)
 }
 
 func (s *GenericAccessSpec) AccessMethod(acc ComponentAccess) (AccessMethod, error) {

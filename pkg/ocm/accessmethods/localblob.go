@@ -92,7 +92,7 @@ func (_ localblobConverterV1) ConvertFrom(object core.AccessSpec) (runtime.Typed
 	}, nil
 }
 
-func (_ localblobConverterV1) ConvertTo(object runtime.TypedObject) (core.AccessSpec, error) {
+func (_ localblobConverterV1) ConvertTo(object interface{}) (core.AccessSpec, error) {
 	in := object.(*LocalBlobAccessSpecV1)
 	return &LocalBlobAccessSpec{
 		ObjectTypeVersion: runtime.NewObjectTypeVersion(in.Type),

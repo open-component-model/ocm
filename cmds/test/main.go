@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/gardener/ocm/cmds/test/x"
 	_ "github.com/gardener/ocm/pkg/ocm"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 )
@@ -40,5 +41,7 @@ func main() {
 	fmt.Printf("%s\n", string(data))
 
 	err = C()
-	fmt.Printf("catched error %s", err)
+	fmt.Printf("catched error %s\n", err)
+
+	x.DoReflect()
 }

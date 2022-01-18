@@ -85,7 +85,7 @@ func (_ localfsblobConverterV1) ConvertFrom(object core.AccessSpec) (runtime.Typ
 	}, nil
 }
 
-func (_ localfsblobConverterV1) ConvertTo(object runtime.TypedObject) (core.AccessSpec, error) {
+func (_ localfsblobConverterV1) ConvertTo(object interface{}) (core.AccessSpec, error) {
 	in := object.(*accessmethods.LocalBlobAccessSpecV1)
 	return &LocalFilesystemBlobAccessSpec{
 		LocalBlobAccessSpec: accessmethods.LocalBlobAccessSpec{

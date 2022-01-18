@@ -248,7 +248,7 @@ type AccessSpec interface {
 // methods will map these spec into effective ones before an access is returned to the caller.
 func GenericAccessSpec(un *runtime.UnstructuredTypedObject) AccessSpec {
 	return &runtime.UnstructuredVersionedTypedObject{
-		un.DeepCopy(),
+		*un.DeepCopy(),
 	}
 }
 

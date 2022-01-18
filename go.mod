@@ -11,6 +11,7 @@ require (
 	github.com/onsi/gomega v1.17.0
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/xeipuuv/gojsonschema v1.2.0
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 	k8s.io/apimachinery v0.23.1
 	sigs.k8s.io/yaml v1.3.0
 )

@@ -16,7 +16,6 @@ package common
 
 import (
 	"reflect"
-	"strings"
 
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/core"
@@ -24,10 +23,9 @@ import (
 )
 
 type RepositoryType struct {
-	runtime.JSONTypedObjectCodecBase
-	spectype reflect.Type
-	name     string
-	checker  RepositoryAccessMethodChecker
+	runtime.ObjectTypeVersion
+	runtime.TypedObjectDecoder
+	checker RepositoryAccessMethodChecker
 }
 
 type RepositoryAccessMethodChecker func(core.Context, compdesc.AccessSpec) bool
@@ -38,35 +36,10 @@ func NewRepositoryType(name string, proto core.RepositorySpec, checker Repositor
 		t = t.Elem()
 	}
 	return &RepositoryType{
-		spectype: t,
-		name:     name,
-		checker:  checker,
+		ObjectTypeVersion:  runtime.NewObjectTypeVersion(name),
+		TypedObjectDecoder: runtime.MustNewDirectDecoder(proto),
+		checker:            checker,
 	}
-}
-
-func (t *RepositoryType) GetSpecType() reflect.Type {
-	return t.spectype
-}
-
-func (t *RepositoryType) GetName() string {
-	i := strings.LastIndex(t.name, "/")
-	if i < 0 {
-		return t.name
-	}
-	return t.name[:i]
-}
-
-func (t *RepositoryType) GetVersion() string {
-	i := strings.LastIndex(t.name, "/")
-	if i < 0 {
-		return "v1"
-	}
-	return t.name[i+1:]
-}
-
-func (t *RepositoryType) Decode(data []byte) (runtime.TypedObject, error) {
-	obj := reflect.New(t.spectype)
-	return runtime.UnmarshalInto(data, obj.Interface().(runtime.TypedObject))
 }
 
 func (t *RepositoryType) LocalSupportForAccessSpec(ctx core.Context, a compdesc.AccessSpec) bool {

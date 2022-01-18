@@ -17,7 +17,6 @@ package accesstypes
 import (
 	"encoding/json"
 	"fmt"
-	"reflect"
 
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm/core"
@@ -26,57 +25,52 @@ import (
 
 type AccessSpecConverter interface {
 	ConvertFrom(object core.AccessSpec) (runtime.TypedObject, error)
-	ConvertTo(object runtime.TypedObject) (core.AccessSpec, error)
+	ConvertTo(object interface{}) (core.AccessSpec, error)
 }
 
 type AccessSpecVersion interface {
 	AccessSpecConverter
-	CreateData() runtime.TypedObject
+	runtime.TypedObjectDecoder
+	CreateData() interface{}
 }
 
 type accessSpecVersion struct {
+	*runtime.ConvertingDecoder
 	AccessSpecConverter
-	spectype reflect.Type
+}
+
+type typedObjectConverter struct {
+	converter AccessSpecConverter
+}
+
+func (c *typedObjectConverter) ConvertTo(object interface{}) (runtime.TypedObject, error) {
+	return c.converter.ConvertTo(object)
 }
 
 func NewAccessSpecVersion(proto runtime.TypedObject, converter AccessSpecConverter) AccessSpecVersion {
 	return &accessSpecVersion{
-		spectype:            ProtoType(proto),
+		ConvertingDecoder:   runtime.MustNewConvertingDecoder(proto, &typedObjectConverter{converter}),
 		AccessSpecConverter: converter,
 	}
-}
-
-func (v *accessSpecVersion) CreateData() runtime.TypedObject {
-	return reflect.New(v.spectype).Interface().(runtime.TypedObject)
-}
-
-func (v *accessSpecVersion) Converter() AccessSpecConverter {
-	return v.AccessSpecConverter
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type ConvertedAccessType struct {
+	AccessSpecVersion
 	accessType
-	AccessSpecConverter
 }
+
+var _ AccessSpecVersion = &ConvertedAccessType{}
 
 func NewConvertedType(name string, v AccessSpecVersion) *ConvertedAccessType {
 	return &ConvertedAccessType{
 		accessType: accessType{
-			factory: v.CreateData,
-			name:    name,
+			ObjectTypeVersion:  runtime.NewObjectTypeVersion(name),
+			TypedObjectDecoder: v,
 		},
-		AccessSpecConverter: v,
+		AccessSpecVersion: v,
 	}
-}
-
-func (t *ConvertedAccessType) Decode(data []byte) (runtime.TypedObject, error) {
-	obj, err := t.accessType.Decode(data)
-	if err != nil {
-		return nil, err
-	}
-	return t.ConvertTo(obj)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

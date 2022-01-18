@@ -15,51 +15,18 @@
 package accesstypes
 
 import (
-	"reflect"
-	"strings"
-
 	"github.com/gardener/ocm/pkg/ocm/core"
 	"github.com/gardener/ocm/pkg/ocm/runtime"
 )
 
 type accessType struct {
-	runtime.JSONTypedObjectCodecBase
-	factory func() runtime.TypedObject
-	name    string
+	runtime.ObjectTypeVersion
+	runtime.TypedObjectDecoder
 }
 
 func NewType(name string, proto core.AccessSpec) core.AccessType {
-	t := reflect.TypeOf(proto)
-	for t.Kind() == reflect.Ptr {
-		t = t.Elem()
-	}
 	return &accessType{
-		factory: TypedObjectFactory(proto),
-		name:    name,
+		ObjectTypeVersion:  runtime.NewObjectTypeVersion(name),
+		TypedObjectDecoder: runtime.MustNewDirectDecoder(proto),
 	}
-}
-
-func (t *accessType) CreateData() runtime.TypedObject {
-	return t.factory()
-}
-
-func (t *accessType) GetName() string {
-	i := strings.LastIndex(t.name, "/")
-	if i < 0 {
-		return t.name
-	}
-	return t.name[:i]
-}
-
-func (t *accessType) GetVersion() string {
-	i := strings.LastIndex(t.name, "/")
-	if i < 0 {
-		return "v1"
-	}
-	return t.name[i+1:]
-}
-
-func (t *accessType) Decode(data []byte) (runtime.TypedObject, error) {
-	obj := t.factory()
-	return runtime.UnmarshalInto(data, obj)
 }

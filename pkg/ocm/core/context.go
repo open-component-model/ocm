@@ -24,27 +24,27 @@ import (
 
 type Context interface {
 	context.Context
-	RepositoryTypes() KnownRepositoryTypes
-	AccessMethods() KnownAccessTypes
+	RepositoryTypes() RepositoryTypeScheme
+	AccessMethods() AccessTypeScheme
 
 	RepositoryForSpec(spec RepositorySpec) (Repository, error)
-	RepositoryForConfig(data []byte) (Repository, error)
+	RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler) (Repository, error)
 	AccessSpecForSpec(spec compdesc.AccessSpec) (AccessSpec, error)
-	AccessSpecForConfig(data []byte) (AccessSpec, error)
+	AccessSpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error)
 }
 
 type _context struct {
 	context.Context
-	knownRepositoryTypes KnownRepositoryTypes
-	knownAccessTypes     KnownAccessTypes
+	knownRepositoryTypes RepositoryTypeScheme
+	knownAccessTypes     AccessTypeScheme
 }
 
 var key = reflect.TypeOf(_context{})
 
 func NewDefaultContext(ctx context.Context) Context {
 	c := &_context{
-		knownAccessTypes:     DefaultKnownAccessTypes,
-		knownRepositoryTypes: DefaultKnownRepositoryTypes,
+		knownAccessTypes:     DefaultAccessTypeScheme,
+		knownRepositoryTypes: DefaultRepositoryTypeScheme,
 	}
 	c.Context = context.WithValue(ctx, key, c)
 	return c
@@ -58,11 +58,11 @@ func RepositoryContext(ctx context.Context) Context {
 	return c.(Context)
 }
 
-func (c *_context) RepositoryTypes() KnownRepositoryTypes {
+func (c *_context) RepositoryTypes() RepositoryTypeScheme {
 	return c.knownRepositoryTypes
 }
 
-func (c *_context) AccessMethods() KnownAccessTypes {
+func (c *_context) AccessMethods() AccessTypeScheme {
 	return c.knownAccessTypes
 }
 
@@ -70,16 +70,16 @@ func (c *_context) RepositoryForSpec(spec RepositorySpec) (Repository, error) {
 	return spec.Repository(c)
 }
 
-func (c *_context) RepositoryForConfig(data []byte) (Repository, error) {
-	spec, err := c.knownRepositoryTypes.DecodeRepositorySpec(data)
+func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler) (Repository, error) {
+	spec, err := c.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
 	if err != nil {
 		return nil, err
 	}
 	return spec.Repository(c)
 }
 
-func (c *_context) AccessSpecForConfig(data []byte) (AccessSpec, error) {
-	return c.knownAccessTypes.DecodeAccessSpec(data)
+func (c *_context) AccessSpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error) {
+	return c.knownAccessTypes.DecodeAccessSpec(data, unmarshaler)
 }
 
 func (c *_context) AccessSpecForSpec(spec compdesc.AccessSpec) (AccessSpec, error) {
@@ -99,5 +99,5 @@ func (c *_context) AccessSpecForSpec(spec compdesc.AccessSpec) (AccessSpec, erro
 		return nil, err
 	}
 
-	return c.knownAccessTypes.DecodeAccessSpec(raw)
+	return c.knownAccessTypes.DecodeAccessSpec(raw, runtime.DefaultJSONEncoding)
 }

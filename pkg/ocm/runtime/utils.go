@@ -12,23 +12,36 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package accesstypes
+package runtime
 
 import (
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/ocm/runtime"
+	"github.com/gardener/ocm/pkg/errors"
 )
 
-func ProtoType(proto interface{}) reflect.Type {
-	t := reflect.TypeOf(proto)
-	for t.Kind() == reflect.Ptr {
-		t = t.Elem()
+func MustProtoType(proto interface{}) reflect.Type {
+	t, err := ProtoType(proto)
+	if err != nil {
+		panic(err.Error())
 	}
 	return t
 }
 
-func TypedObjectFactory(proto runtime.TypedObject) func() runtime.TypedObject {
-	t := ProtoType(proto)
-	return func() runtime.TypedObject { return reflect.New(t).Interface().(runtime.TypedObject) }
+func ProtoType(proto interface{}) (reflect.Type, error) {
+	if proto == nil {
+		return nil, errors.New("prototype required")
+	}
+	t := reflect.TypeOf(proto)
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	if t.Kind() != reflect.Struct {
+		return nil, errors.Newf("prototype %q must be a struct", t)
+	}
+	return t, nil
+}
+
+func TypedObjectFactory(proto TypedObject) func() TypedObject {
+	return func() TypedObject { return reflect.New(MustProtoType(proto)).Interface().(TypedObject) }
 }

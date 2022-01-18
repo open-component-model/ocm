@@ -47,8 +47,8 @@ func IsA(err error, target error) bool {
 ////////////////////////////////////////////////////////////////////////////////
 
 type wrappedError struct {
-	parent error
-	msg    string
+	wrapped error
+	msg     string
 }
 
 func Wrapf(err error, msg string, args ...interface{}) error {
@@ -56,17 +56,17 @@ func Wrapf(err error, msg string, args ...interface{}) error {
 		msg = fmt.Sprintf(msg, args...)
 	}
 	return &wrappedError{
-		parent: err,
-		msg:    msg,
+		wrapped: err,
+		msg:     msg,
 	}
 }
 
 func (e *wrappedError) Error() string {
-	return fmt.Sprintf("%s: %s", e.msg, e.parent)
+	return fmt.Sprintf("%s: %s", e.msg, e.wrapped)
 }
 
 func (e *wrappedError) Unwrap() error {
-	return e.parent
+	return e.wrapped
 }
 
 var errorType = reflect.TypeOf((*error)(nil)).Elem()
