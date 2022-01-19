@@ -18,12 +18,14 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	"github.com/gardener/ocm/pkg/ocm/runtime"
+	"github.com/gardener/ocm/pkg/runtime"
 )
 
 type Context interface {
 	context.Context
+	OCIContext() oci.Context
 	RepositoryTypes() RepositoryTypeScheme
 	AccessMethods() AccessTypeScheme
 
@@ -33,18 +35,22 @@ type Context interface {
 	AccessSpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error)
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 type _context struct {
 	context.Context
+	ocictx               oci.Context
 	knownRepositoryTypes RepositoryTypeScheme
 	knownAccessTypes     AccessTypeScheme
 }
 
 var key = reflect.TypeOf(_context{})
 
-func NewDefaultContext(ctx context.Context) Context {
+func NewDefaultContext(ctx context.Context, ocictx oci.Context, accessScheme AccessTypeScheme, repoScheme RepositoryTypeScheme) Context {
 	c := &_context{
-		knownAccessTypes:     DefaultAccessTypeScheme,
-		knownRepositoryTypes: DefaultRepositoryTypeScheme,
+		ocictx:               ocictx,
+		knownAccessTypes:     accessScheme,
+		knownRepositoryTypes: repoScheme,
 	}
 	c.Context = context.WithValue(ctx, key, c)
 	return c
@@ -56,6 +62,10 @@ func RepositoryContext(ctx context.Context) Context {
 		return nil
 	}
 	return c.(Context)
+}
+
+func (c *_context) OCIContext() oci.Context {
+	return c.ocictx
 }
 
 func (c *_context) RepositoryTypes() RepositoryTypeScheme {

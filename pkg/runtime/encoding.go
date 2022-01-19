@@ -19,7 +19,7 @@ package runtime
 import (
 	"encoding/json"
 
-	"gopkg.in/yaml.v3"
+	"sigs.k8s.io/yaml"
 )
 
 type Marshaler interface {
@@ -55,5 +55,5 @@ var DefaultJSONEncoding = &EncodingWrapper{
 
 var DefaultYAMLEncoding = &EncodingWrapper{
 	Marshaler:   MarshalFunction(yaml.Marshal),
-	Unmarshaler: UnmarshalFunction(yaml.Unmarshal),
+	Unmarshaler: UnmarshalFunction(func(data []byte, obj interface{}) error { return yaml.Unmarshal(data, obj) }),
 }

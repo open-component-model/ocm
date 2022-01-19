@@ -18,7 +18,7 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/ocm/runtime"
+	"github.com/gardener/ocm/pkg/runtime"
 )
 
 type Context interface {

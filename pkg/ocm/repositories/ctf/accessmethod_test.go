@@ -20,18 +20,17 @@ import (
 	"os"
 	"reflect"
 
-	_ "github.com/gardener/ocm/pkg/ocm"
+	"github.com/gardener/ocm/pkg/ocm"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
-	"github.com/gardener/ocm/pkg/ocm/core"
 	"github.com/gardener/ocm/pkg/ocm/repositories/ctf"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-var DefaultContext = core.NewDefaultContext(context.TODO())
+var DefaultContext = ocm.NewDefaultContext(context.TODO())
 
 var _ = Describe("access method", func() {
 

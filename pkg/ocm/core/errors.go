@@ -12,24 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package errors
+package core
 
-type errUnknown struct {
-	errinfo
-}
+import (
+	"fmt"
 
-func ErrUnknown(spec ...string) error {
-	return &errUnknown{newErrInfo("is unknown", "for", spec...)}
-}
+	"github.com/gardener/ocm/pkg/errors"
+)
 
-func IsErrUnknown(err error) bool {
-	return IsA(err, &errUnknown{})
-}
+const KIND_COMPONENTVERSION = "component version"
 
-func IsErrUnknownKind(err error, kind string) bool {
-	var uerr *errUnknown
-	if err == nil || !As(err, &uerr) {
-		return false
-	}
-	return uerr.kind == kind
+func ErrUnknownComponentVersion(name, version string) error {
+	return errors.ErrUnknown(KIND_COMPONENTVERSION, fmt.Sprintf("%s:%s", name, version))
 }

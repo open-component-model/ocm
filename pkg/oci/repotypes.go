@@ -16,11 +16,12 @@ package oci
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/ocm/runtime"
+	"github.com/gardener/ocm/pkg/runtime"
 )
 
 type RepositoryType interface {
@@ -49,10 +50,14 @@ type repositoryTypeScheme struct {
 	runtime.Scheme
 }
 
-func NewRepositoryTypeScheme() RepositoryTypeScheme {
+func NewRepositoryTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) RepositoryTypeScheme {
 	var rt RepositorySpec
-	scheme := runtime.MustNewDefaultScheme(&rt, &UnknownRepositorySpec{}, true)
+	scheme := runtime.MustNewDefaultScheme(&rt, &UnknownRepositorySpec{}, true, defaultRepoDecoder)
 	return &repositoryTypeScheme{scheme}
+}
+
+func (t *repositoryTypeScheme) AddKnowntypes(s RepositoryTypeScheme) {
+	t.Scheme.AddKnownTypes(s)
 }
 
 func (t *repositoryTypeScheme) GetRepositoryType(name string) RepositoryType {
@@ -63,8 +68,22 @@ func (t *repositoryTypeScheme) GetRepositoryType(name string) RepositoryType {
 	return d.(RepositoryType)
 }
 
+func (t *repositoryTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedObjectDecoder) error {
+	if _, ok := decoder.(RepositoryType); !ok {
+		errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
+	}
+	return t.Scheme.RegisterByDecoder(name, decoder)
+}
+
+func (t *repositoryTypeScheme) AddKnownTypes(scheme runtime.Scheme) {
+	if _, ok := scheme.(RepositoryTypeScheme); !ok {
+		panic("can only add RepositoryTypeSchemes")
+	}
+	t.Scheme.AddKnownTypes(scheme)
+}
+
 func (t *repositoryTypeScheme) Register(name string, rtype RepositoryType) {
-	t.RegisterByDecoder(name, rtype)
+	t.Scheme.RegisterByDecoder(name, rtype)
 }
 
 func (t *repositoryTypeScheme) DecodeRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
@@ -93,7 +112,7 @@ func (t *repositoryTypeScheme) CreateRepositorySpec(obj runtime.TypedObject) (Re
 }
 
 // DefaultRepositoryTypeScheme contains all globally known access serializer
-var DefaultRepositoryTypeScheme = NewRepositoryTypeScheme()
+var DefaultRepositoryTypeScheme = NewRepositoryTypeScheme(nil)
 
 func RegisterRepositoryType(name string, atype RepositoryType) {
 	DefaultRepositoryTypeScheme.Register(name, atype)

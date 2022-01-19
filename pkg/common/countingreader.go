@@ -12,24 +12,30 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package errors
+package common
 
-type errUnknown struct {
-	errinfo
+import (
+	"io"
+)
+
+type CountingReader struct {
+	reader io.Reader
+	count  int64
 }
 
-func ErrUnknown(spec ...string) error {
-	return &errUnknown{newErrInfo("is unknown", "for", spec...)}
+func (r *CountingReader) Size() int64 {
+	return r.count
 }
 
-func IsErrUnknown(err error) bool {
-	return IsA(err, &errUnknown{})
+func (r *CountingReader) Read(buf []byte) (int, error) {
+	c, err := r.reader.Read(buf)
+	r.count += int64(c)
+	return c, err
 }
 
-func IsErrUnknownKind(err error, kind string) bool {
-	var uerr *errUnknown
-	if err == nil || !As(err, &uerr) {
-		return false
+func NewCountingReader(r io.Reader) *CountingReader {
+	return &CountingReader{
+		reader: r,
+		count:  0,
 	}
-	return uerr.kind == kind
 }

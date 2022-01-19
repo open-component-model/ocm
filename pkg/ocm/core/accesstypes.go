@@ -20,7 +20,7 @@ import (
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	"github.com/gardener/ocm/pkg/ocm/runtime"
+	"github.com/gardener/ocm/pkg/runtime"
 )
 
 type AccessType interface {
@@ -55,7 +55,7 @@ type accessTypeScheme struct {
 
 func NewAccessTypeScheme() AccessTypeScheme {
 	var at AccessSpec
-	scheme := runtime.MustNewDefaultScheme(&at, &UnknownAccessSpec{}, true)
+	scheme := runtime.MustNewDefaultScheme(&at, &UnknownAccessSpec{}, true, nil)
 	return &accessTypeScheme{scheme}
 }
 

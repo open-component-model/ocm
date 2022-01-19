@@ -16,11 +16,11 @@ package ocireg
 
 import (
 	"github.com/gardener/ocm/pkg/errors"
+	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
-	"github.com/gardener/ocm/pkg/ocm/common"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	"github.com/gardener/ocm/pkg/ocm/core"
-	"github.com/gardener/ocm/pkg/ocm/runtime"
+	area "github.com/gardener/ocm/pkg/ocm/core"
+	areautils "github.com/gardener/ocm/pkg/ocm/ocmutils"
 )
 
 // ComponentNameMapping describes the method that is used to map the "Component Name", "Component Version"-tuples
@@ -28,26 +28,36 @@ import (
 type ComponentNameMapping string
 
 const (
-	OCIRegistryRepositoryType   = "OCIRegistry"
-	OCIRegistryRepositoryTypeV1 = OCIRegistryRepositoryType + "/v1"
+	OCIRegistryRepositoryType   = ocireg.OCIRegistryRepositoryType
+	OCIRegistryRepositoryTypeV1 = ocireg.OCIRegistryRepositoryTypeV1
 
 	OCIRegistryURLPathMapping ComponentNameMapping = "urlPath"
 	OCIRegistryDigestMapping  ComponentNameMapping = "sha256-digest"
 )
 
 func init() {
-	core.RegisterRepositoryType(OCIRegistryRepositoryType, common.NewRepositoryType(OCIRegistryRepositoryType, &OCIRegistryRepositorySpec{}, localAccessChecker))
-	core.RegisterRepositoryType(OCIRegistryRepositoryTypeV1, common.NewRepositoryType(OCIRegistryRepositoryTypeV1, &OCIRegistryRepositorySpec{}, localAccessChecker))
+	area.RegisterRepositoryType(OCIRegistryRepositoryType, areautils.NewRepositoryType(OCIRegistryRepositoryType, &OCIRegistryRepositorySpec{}, localAccessChecker))
+	area.RegisterRepositoryType(OCIRegistryRepositoryTypeV1, areautils.NewRepositoryType(OCIRegistryRepositoryTypeV1, &OCIRegistryRepositorySpec{}, localAccessChecker))
+}
+
+// ComponentRepositoryMeta describes config special for a mapping of
+// a component repository to an oci registry
+type ComponentRepositoryMeta struct {
+	// ComponentNameMapping describes the method that is used to map the "Component Name", "Component Version"-tuples
+	// to OCI Image References.
+	ComponentNameMapping ComponentNameMapping `json:"componentNameMapping"`
 }
 
 // OCIRegistryRepositorySpec describes a component repository backed by a oci registry.
 type OCIRegistryRepositorySpec struct {
-	runtime.ObjectTypeVersion `json:",inline"`
-	// BaseURL is the base url of the repository to resolve components.
-	BaseURL string `json:"baseUrl"`
-	// ComponentNameMapping describes the method that is used to map the "Component Name", "Component Version"-tuples
-	// to OCI Image References.
-	ComponentNameMapping ComponentNameMapping `json:"componentNameMapping"`
+	ocireg.OCIRegistryRepositorySpec `json:",inline"`
+	ComponentRepositoryMeta          `json:",inline"`
+}
+
+func NewComponentRepositoryMeta(mapping ComponentNameMapping) ComponentRepositoryMeta {
+	return ComponentRepositoryMeta{
+		ComponentNameMapping: mapping,
+	}
 }
 
 // NewOCIRegistryRepositorySpec creates a new OCIRegistryRepositorySpec
@@ -56,20 +66,19 @@ func NewOCIRegistryRepositorySpec(baseURL string, mapping ComponentNameMapping) 
 		mapping = OCIRegistryURLPathMapping
 	}
 	return &OCIRegistryRepositorySpec{
-		ObjectTypeVersion:    runtime.NewObjectTypeVersion(OCIRegistryRepositoryType),
-		BaseURL:              baseURL,
-		ComponentNameMapping: mapping,
+		OCIRegistryRepositorySpec: *ocireg.NewOCIRegistryRepositorySpec(baseURL),
+		ComponentRepositoryMeta:   NewComponentRepositoryMeta(mapping),
 	}
 }
 
 func (a *OCIRegistryRepositorySpec) GetType() string {
 	return OCIRegistryRepositoryType
 }
-func (a *OCIRegistryRepositorySpec) Repository(ctx core.Context) (core.Repository, error) {
+func (a *OCIRegistryRepositorySpec) Repository(ctx area.Context) (area.Repository, error) {
 	return nil, errors.ErrNotImplemented() // TODO
 }
 
-func localAccessChecker(ctx core.Context, a compdesc.AccessSpec) bool {
+func localAccessChecker(ctx area.Context, a compdesc.AccessSpec) bool {
 	name := a.GetName()
 	return name == accessmethods.LocalBlobType
 }

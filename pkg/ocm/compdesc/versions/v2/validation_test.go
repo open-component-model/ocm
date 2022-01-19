@@ -262,7 +262,7 @@ var _ = Describe("Validation", func() {
 						Version: "0.0.1",
 					},
 					Relation: metav1.LocalRelation,
-					Access:   runtime.NewEmptyUnstructured(accessmethods.OCIImageType),
+					Access:   runtime.NewEmptyUnstructured(accessmethods.OCIRegistryType),
 				},
 			}
 			errList := validate(nil, comp)

@@ -12,24 +12,32 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package errors
+package ocimutils
 
-type errUnknown struct {
-	errinfo
+import (
+	"reflect"
+
+	area "github.com/gardener/ocm/pkg/oci"
+	"github.com/gardener/ocm/pkg/ocm/compdesc"
+	"github.com/gardener/ocm/pkg/runtime"
+)
+
+type RepositoryType struct {
+	runtime.ObjectTypeVersion
+	runtime.TypedObjectDecoder
+	checker RepositoryAccessMethodChecker
 }
 
-func ErrUnknown(spec ...string) error {
-	return &errUnknown{newErrInfo("is unknown", "for", spec...)}
-}
+type RepositoryAccessMethodChecker func(area.Context, compdesc.AccessSpec) bool
 
-func IsErrUnknown(err error) bool {
-	return IsA(err, &errUnknown{})
-}
-
-func IsErrUnknownKind(err error, kind string) bool {
-	var uerr *errUnknown
-	if err == nil || !As(err, &uerr) {
-		return false
+func NewRepositoryType(name string, proto area.RepositorySpec, checker RepositoryAccessMethodChecker) area.RepositoryType {
+	t := reflect.TypeOf(proto)
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
 	}
-	return uerr.kind == kind
+	return &RepositoryType{
+		ObjectTypeVersion:  runtime.NewObjectTypeVersion(name),
+		TypedObjectDecoder: runtime.MustNewDirectDecoder(proto),
+		checker:            checker,
+	}
 }

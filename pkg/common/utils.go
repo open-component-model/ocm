@@ -12,24 +12,22 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package errors
+package common
 
-type errUnknown struct {
-	errinfo
-}
+import (
+	"github.com/opencontainers/go-digest"
+)
 
-func ErrUnknown(spec ...string) error {
-	return &errUnknown{newErrInfo("is unknown", "for", spec...)}
-}
-
-func IsErrUnknown(err error) bool {
-	return IsA(err, &errUnknown{})
-}
-
-func IsErrUnknownKind(err error, kind string) bool {
-	var uerr *errUnknown
-	if err == nil || !As(err, &uerr) {
-		return false
+func Digest(access DataAccess) (digest.Digest, error) {
+	reader, err := access.Reader()
+	if err != nil {
+		return "", err
 	}
-	return uerr.kind == kind
+	defer reader.Close()
+
+	dig, err := digest.FromReader(reader)
+	if err != nil {
+		return "", err
+	}
+	return dig, nil
 }

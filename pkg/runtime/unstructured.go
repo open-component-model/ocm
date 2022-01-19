@@ -24,7 +24,10 @@ import (
 
 // Unstructured is the interface to represent generic object data for
 // types handled by schemes.
-type Unstructured TypeGetter
+type Unstructured interface {
+	TypeGetter
+	GetRaw() ([]byte, error)
+}
 
 // UnstructuredTypesEqual compares two unstructured object.
 func UnstructuredTypesEqual(a, b *UnstructuredTypedObject) bool {
@@ -67,6 +70,11 @@ func TypedObjectEqual(a, b TypedObject) bool {
 // NewEmptyUnstructured creates a new typed object without additional data.
 func NewEmptyUnstructured(ttype string) *UnstructuredTypedObject {
 	return NewUnstructuredType(ttype, nil)
+}
+
+// NewEmptyUnstructuredVersioned creates a new typed object without additional data.
+func NewEmptyUnstructuredVersioned(ttype string) *UnstructuredVersionedTypedObject {
+	return &UnstructuredVersionedTypedObject{*NewUnstructuredType(ttype, nil)}
 }
 
 // NewUnstructuredType creates a new unstructured typed object.

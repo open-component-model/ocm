@@ -20,7 +20,7 @@ import (
 
 	"github.com/gardener/ocm/pkg/ocm/core"
 	"github.com/gardener/ocm/pkg/ocm/core/accesstypes"
-	"github.com/gardener/ocm/pkg/ocm/runtime"
+	"github.com/gardener/ocm/pkg/runtime"
 	"github.com/opencontainers/go-digest"
 )
 

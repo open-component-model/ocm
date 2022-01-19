@@ -12,24 +12,24 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package errors
+package genericocireg
 
-type errUnknown struct {
-	errinfo
+import (
+	"github.com/gardener/ocm/pkg/errors"
+	"github.com/gardener/ocm/pkg/oci"
+	"github.com/gardener/ocm/pkg/ocm/core"
+)
+
+type Repository struct {
+	ctx     core.Context
+	ocirepo oci.Repository
 }
 
-func ErrUnknown(spec ...string) error {
-	return &errUnknown{newErrInfo("is unknown", "for", spec...)}
-}
-
-func IsErrUnknown(err error) bool {
-	return IsA(err, &errUnknown{})
-}
-
-func IsErrUnknownKind(err error, kind string) bool {
-	var uerr *errUnknown
-	if err == nil || !As(err, &uerr) {
-		return false
+func NewRepository(ctx core.Context, ocirepo oci.Repository) (core.Repository, error) {
+	repo := &Repository{
+		ctx:     ctx,
+		ocirepo: ocirepo,
 	}
-	return uerr.kind == kind
+	_ = repo
+	return nil, errors.ErrNotImplemented("comprepo", "genericoci")
 }

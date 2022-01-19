@@ -137,6 +137,18 @@ func (d *ConvertingDecoder) CreateData() interface{} {
 	return reflect.New(d.proto).Interface()
 }
 
+// KnownTypes is a set of known type names mapped to appropriate object decoders.
+type KnownTypes map[string]TypedObjectDecoder
+
+// Copy provides a copy of the actually known types
+func (t KnownTypes) Copy() KnownTypes {
+	n := KnownTypes{}
+	for k, v := range t {
+		n[k] = v
+	}
+	return n
+}
+
 // Scheme is the interface to describe a set of object types
 // that implement a dedicated interface.
 // As such it knows about the desired interface of the instances
@@ -145,32 +157,35 @@ func (d *ConvertingDecoder) CreateData() interface{} {
 // any serialized from of object candidates and provide the
 // effective type.
 type Scheme interface {
-	RegisterByType(typ string, proto TypedObject) error
 	RegisterByDecoder(typ string, decoder TypedObjectDecoder) error
 
 	ValidateInterface(object TypedObject) error
 	CreateUnstructured() Unstructured
 	GetDecoder(otype string) TypedObjectDecoder
 	Decode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
+	EnforceDecode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
+	AddKnownTypes(scheme Scheme)
+	KnownTypes() KnownTypes
 }
 
 type defaultScheme struct {
-	lock          sync.RWMutex
-	instance      reflect.Type
-	unstructured  reflect.Type
-	acceptUnknown bool
-	types         map[string]TypedObjectDecoder
+	lock           sync.RWMutex
+	instance       reflect.Type
+	unstructured   reflect.Type
+	defaultdecoder TypedObjectDecoder
+	acceptUnknown  bool
+	types          KnownTypes
 }
 
-func MustNewDefaultScheme(proto_ifce interface{}, proto_unstr Unstructured, acceptUnknown bool) Scheme {
-	s, err := NewDefaultScheme(proto_ifce, proto_unstr, acceptUnknown)
+func MustNewDefaultScheme(proto_ifce interface{}, proto_unstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder) Scheme {
+	s, err := NewDefaultScheme(proto_ifce, proto_unstr, acceptUnknown, defaultdecoder)
 	if err != nil {
 		panic(err)
 	}
 	return s
 }
 
-func NewDefaultScheme(proto_ifce interface{}, proto_unstr Unstructured, acceptUnknown bool) (Scheme, error) {
+func NewDefaultScheme(proto_ifce interface{}, proto_unstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder) (Scheme, error) {
 	if proto_ifce == nil {
 		return nil, fmt.Errorf("object interface must be given by pointer to interace (is nil)")
 	}
@@ -197,22 +212,30 @@ func NewDefaultScheme(proto_ifce interface{}, proto_unstr Unstructured, acceptUn
 	}
 
 	return &defaultScheme{
-		instance:      it,
-		unstructured:  ut,
-		types:         map[string]TypedObjectDecoder{},
-		acceptUnknown: acceptUnknown,
+		instance:       it,
+		unstructured:   ut,
+		defaultdecoder: defaultdecoder,
+		types:          KnownTypes{},
+		acceptUnknown:  acceptUnknown,
 	}, nil
 }
 
-func (d *defaultScheme) RegisterByType(typ string, proto TypedObject) error {
+func (d *defaultScheme) AddKnownTypes(s Scheme) {
+	for k, v := range s.KnownTypes() {
+		d.types[k] = v
+	}
+}
+
+func (d *defaultScheme) KnownTypes() KnownTypes {
+	return d.types.Copy()
+}
+
+func RegisterByType(s Scheme, typ string, proto TypedObject) error {
 	t, err := NewDirectDecoder(proto)
 	if err != nil {
 		return err
 	}
-	d.lock.Lock()
-	defer d.lock.Unlock()
-	d.types[typ] = t
-	return nil
+	return s.RegisterByDecoder(typ, t)
 }
 
 func (d *defaultScheme) RegisterByDecoder(typ string, decoder TypedObjectDecoder) error {
@@ -260,12 +283,59 @@ func (d *defaultScheme) Decode(data []byte, unmarshal Unmarshaler) (TypedObject,
 	}
 	decoder := d.GetDecoder(un.GetType())
 	if decoder == nil {
+		if d.defaultdecoder != nil {
+			o, err := d.defaultdecoder.Decode(data, unmarshal)
+			if err == nil {
+				return o, nil
+			}
+			if !errors.IsErrUnknownKind(err, errors.KIND_OBJECTTYPE) {
+				return nil, err
+			}
+		}
 		if d.acceptUnknown {
 			return un.(TypedObject), nil
 		}
 		return nil, errors.ErrUnknown(errors.KIND_OBJECTTYPE, un.GetType())
 	}
 	return decoder.Decode(data, unmarshal)
+}
+
+func (d *defaultScheme) EnforceDecode(data []byte, unmarshal Unmarshaler) (TypedObject, error) {
+	un := d.CreateUnstructured()
+	if unmarshal == nil {
+		unmarshal = DefaultYAMLEncoding.Unmarshaler
+	}
+	err := unmarshal.Unmarshal(data, un)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot unmarshal unstructured")
+	}
+	if un.GetType() == "" {
+		if d.acceptUnknown {
+			return un.(TypedObject), nil
+		}
+		return un.(TypedObject), errors.Newf("no type found")
+	}
+	decoder := d.GetDecoder(un.GetType())
+	if decoder == nil {
+		if d.defaultdecoder != nil {
+			o, err := d.defaultdecoder.Decode(data, unmarshal)
+			if err == nil {
+				return o, nil
+			}
+			if !errors.IsErrUnknownKind(err, errors.KIND_OBJECTTYPE) {
+				return un.(TypedObject), err
+			}
+		}
+		if d.acceptUnknown {
+			return un.(TypedObject), nil
+		}
+		return un.(TypedObject), errors.ErrUnknown(errors.KIND_OBJECTTYPE, un.GetType())
+	}
+	o, err := decoder.Decode(data, unmarshal)
+	if err != nil {
+		return un.(TypedObject), err
+	}
+	return o, err
 }
 
 ////////////////////////////////////////////////////////////////////////////////

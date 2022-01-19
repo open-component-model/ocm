@@ -19,8 +19,9 @@ import (
 	"io/ioutil"
 	"sync"
 
+	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/ocm/core"
-	"github.com/gardener/ocm/pkg/ocm/runtime"
+	"github.com/gardener/ocm/pkg/runtime"
 	"github.com/opencontainers/go-digest"
 )
 
@@ -55,28 +56,6 @@ func NewDefaultAccessMethod(typ string, impl AccessImplementation) core.AccessMe
 	}
 }
 
-type CountingReader struct {
-	reader io.Reader
-	count  int64
-}
-
-func (r *CountingReader) Size() int64 {
-	return r.count
-}
-
-func (r *CountingReader) Read(buf []byte) (int, error) {
-	c, err := r.reader.Read(buf)
-	r.count += int64(c)
-	return c, err
-}
-
-func NewCountingReader(r io.Reader) *CountingReader {
-	return &CountingReader{
-		reader: r,
-		count:  0,
-	}
-}
-
 func (m *DefaultAccessMethod) Digest() digest.Digest {
 	m.lock.Lock()
 	defer m.lock.Unlock()
@@ -84,7 +63,7 @@ func (m *DefaultAccessMethod) Digest() digest.Digest {
 		reader, err := m.impl.Open()
 		defer reader.Close()
 		if err == nil {
-			count := NewCountingReader(reader)
+			count := common.NewCountingReader(reader)
 			m.digest, err = digest.Canonical.FromReader(count)
 			if err == nil {
 				m.size = count.Size()
@@ -104,7 +83,7 @@ func (m *DefaultAccessMethod) Size() int64 {
 			if err == nil {
 				defer reader.Close()
 				var buf [8000]byte
-				count := NewCountingReader(reader)
+				count := common.NewCountingReader(reader)
 				for err == nil {
 					_, err = count.Read(buf[:])
 				}

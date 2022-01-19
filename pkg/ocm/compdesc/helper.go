@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
-	"github.com/gardener/ocm/pkg/ocm/runtime"
+	"github.com/gardener/ocm/pkg/runtime"
 	"github.com/gardener/ocm/pkg/utils/selector"
 )
 

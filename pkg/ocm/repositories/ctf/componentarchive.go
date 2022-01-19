@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
@@ -333,7 +334,7 @@ func (ca *ComponentArchive) AddSourceBlob(meta *core.SourceMeta, acc core.BlobAc
 		return err
 	}
 
-	digest, err := core.Digest(acc)
+	digest, err := common.Digest(acc)
 	if err != nil {
 		return err
 	}
@@ -389,10 +390,7 @@ func (ca *ComponentArchive) AddResourceBlob(meta *core.ResourceMeta, acc core.Bl
 		return err
 	}
 
-	digest, err := core.Digest(acc)
-	if err != nil {
-		return err
-	}
+	digest := acc.Digest()
 
 	blobpath := BlobPath(string(digest))
 	if _, err := ca.fs.Stat(blobpath); err != nil {

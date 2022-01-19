@@ -12,21 +12,33 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package accesstypes
+package empty
 
 import (
-	"github.com/gardener/ocm/pkg/ocm/core"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/gardener/ocm/pkg/errors"
+	"github.com/gardener/ocm/pkg/oci"
 )
 
-type accessType struct {
-	runtime.ObjectTypeVersion
-	runtime.TypedObjectDecoder
+type Repository struct{}
+
+func NewEmptyRepository() oci.Repository {
+	return &Repository{}
 }
 
-func NewType(name string, proto core.AccessSpec) core.AccessType {
-	return &accessType{
-		ObjectTypeVersion:  runtime.NewObjectTypeVersion(name),
-		TypedObjectDecoder: runtime.MustNewDirectDecoder(proto),
-	}
+func (r Repository) ExistsArtefact(name string, version string) (bool, error) {
+	return false, nil
 }
+
+func (r Repository) LookupArtefact(name string, version string) (oci.ArtefactAccess, error) {
+	return nil, oci.ErrUnknownArtefact(name, version)
+}
+
+func (r Repository) ComposeArtefact(name string, version string) (oci.ArtefactComposer, error) {
+	return nil, errors.ErrNotSupported("artefact composition")
+}
+
+func (r Repository) WriteArtefact(access oci.ArtefactAccess) (oci.ArtefactAccess, error) {
+	return nil, errors.ErrNotSupported("write access")
+}
+
+var _ oci.Repository = &Repository{}

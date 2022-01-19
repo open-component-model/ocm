@@ -12,24 +12,41 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package errors
+package common
 
-type errUnknown struct {
-	errinfo
+import (
+	"io"
+
+	"github.com/opencontainers/go-digest"
+)
+
+type DigestReader struct {
+	reader   io.Reader
+	digester digest.Digester
+	count    int64
 }
 
-func ErrUnknown(spec ...string) error {
-	return &errUnknown{newErrInfo("is unknown", "for", spec...)}
+func (r *DigestReader) Size() int64 {
+	return r.count
 }
 
-func IsErrUnknown(err error) bool {
-	return IsA(err, &errUnknown{})
+func (r *DigestReader) Digest() digest.Digest {
+	return r.digester.Digest()
 }
 
-func IsErrUnknownKind(err error, kind string) bool {
-	var uerr *errUnknown
-	if err == nil || !As(err, &uerr) {
-		return false
+func (r *DigestReader) Read(buf []byte) (int, error) {
+	c, err := r.reader.Read(buf)
+	if c > 0 {
+		r.count += int64(c)
+		r.digester.Hash().Write(buf[:c])
 	}
-	return uerr.kind == kind
+	return c, err
+}
+
+func NewDigestReaderWith(algorithm digest.Algorithm, r io.Reader) *DigestReader {
+	return &DigestReader{
+		reader:   r,
+		digester: algorithm.Digester(),
+		count:    0,
+	}
 }

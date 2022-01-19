@@ -25,7 +25,6 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 	k8s.io/api v0.23.1
 	k8s.io/apimachinery v0.23.1
 	sigs.k8s.io/yaml v1.3.0

@@ -12,24 +12,30 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package errors
+package errors_test
 
-type errUnknown struct {
-	errinfo
-}
+import (
+	"github.com/gardener/ocm/pkg/errors"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+)
 
-func ErrUnknown(spec ...string) error {
-	return &errUnknown{newErrInfo("is unknown", "for", spec...)}
-}
+var _ = Describe("errors", func() {
+	Context("ErrUnkown", func() {
+		It("identifies kind error", func() {
+			uerr := errors.ErrUnknown("KIND", "obj")
 
-func IsErrUnknown(err error) bool {
-	return IsA(err, &errUnknown{})
-}
+			Expect(errors.IsErrUnknownKind(uerr, "KIND")).To(BeTrue())
+			Expect(errors.IsErrUnknownKind(uerr, "other")).To(BeFalse())
 
-func IsErrUnknownKind(err error, kind string) bool {
-	var uerr *errUnknown
-	if err == nil || !As(err, &uerr) {
-		return false
-	}
-	return uerr.kind == kind
-}
+		})
+		It("find error in history", func() {
+			uerr := errors.ErrUnknown("KIND", "obj")
+			werr := errors.Wrapf(uerr, "wrapped")
+
+			Expect(errors.IsErrUnknownKind(werr, "KIND")).To(BeTrue())
+			Expect(errors.IsErrUnknownKind(werr, "other")).To(BeFalse())
+		})
+	})
+
+})

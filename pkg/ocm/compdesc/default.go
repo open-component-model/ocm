@@ -16,7 +16,7 @@ package compdesc
 
 import (
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
-	"github.com/gardener/ocm/pkg/ocm/runtime"
+	"github.com/gardener/ocm/pkg/runtime"
 )
 
 // DefaultComponent applies defaults to a component

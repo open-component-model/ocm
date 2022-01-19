@@ -12,22 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package core
+package ocm_test
 
 import (
-	"github.com/opencontainers/go-digest"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-func Digest(access DataAccess) (digest.Digest, error) {
-	reader, err := access.Reader()
-	if err != nil {
-		return "", err
-	}
-	defer reader.Close()
-
-	dig, err := digest.FromReader(reader)
-	if err != nil {
-		return "", err
-	}
-	return dig, nil
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "CTF Test Suite")
 }
