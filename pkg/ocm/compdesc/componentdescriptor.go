@@ -57,7 +57,7 @@ type ComponentSpec struct {
 	// Sources defines sources that produced the component
 	Sources Sources `json:"sources"`
 	// ComponentReferences references component dependencies that can be resolved in the current context.
-	ComponentReferences []ComponentReference `json:"componentReferences"`
+	ComponentReferences ComponentReferences `json:"componentReferences"`
 	// Resources defines all resources that are created by the component and by a third party.
 	Resources Resources `json:"resources"`
 }
@@ -103,6 +103,12 @@ func (o ObjectMeta) GetLabels() metav1.Labels {
 // SetLabels sets the labels of the object.
 func (o *ObjectMeta) SetLabels(labels []metav1.Label) {
 	o.Labels = labels
+}
+
+// Copy copies the ObjectMeta value
+func (o ObjectMeta) Copy() ObjectMeta {
+	o.Labels = o.Labels.Copy()
+	return o
 }
 
 const (
@@ -263,12 +269,30 @@ func (s Sources) GetMetas() []ElementMeta {
 	return metas
 }
 
+func (s Sources) Copy() Sources {
+	if s == nil {
+		return nil
+	}
+	out := make(Sources, len(s))
+	for i, v := range s {
+		out[i] = *v.Copy()
+	}
+	return out
+}
+
 // Source is the definition of a component's source.
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
 type Source struct {
 	SourceMeta `json:",inline"`
 	Access     AccessSpec `json:"access"`
+}
+
+func (s *Source) Copy() *Source {
+	return &Source{
+		SourceMeta: *s.SourceMeta.Copy(),
+		Access:     s.Access,
+	}
 }
 
 // SourceMeta is the definition of the meta data of a source.
@@ -350,6 +374,17 @@ func (r Resources) GetMetas() []ElementMeta {
 	return metas
 }
 
+func (r Resources) Copy() Resources {
+	if r == nil {
+		return nil
+	}
+	out := make(Resources, len(r))
+	for i, v := range r {
+		out[i] = *v.Copy()
+	}
+	return out
+}
+
 // Resource describes a resource dependency of a component.
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
@@ -358,6 +393,13 @@ type Resource struct {
 	// Access describes the type specific method to
 	// access the defined resource.
 	Access AccessSpec `json:"access"`
+}
+
+func (r *Resource) Copy() *Resource {
+	return &Resource{
+		ResourceMeta: *r.ResourceMeta.Copy(),
+		Access:       r.Access,
+	}
 }
 
 // ResourceMeta describes the meta data of a resource.
@@ -400,6 +442,19 @@ func (o *ResourceMeta) Copy() *ResourceMeta {
 		SourceRef:   o.SourceRef.Copy(),
 	}
 	return r
+}
+
+type ComponentReferences []ComponentReference
+
+func (r ComponentReferences) Copy() ComponentReferences {
+	if r == nil {
+		return nil
+	}
+	out := make(ComponentReferences, len(r))
+	for i, v := range r {
+		out[i] = *v.Copy()
+	}
+	return out
 }
 
 // ComponentReference describes the reference to another component in the registry.
@@ -464,4 +519,14 @@ func (o *ComponentReference) GetIdentity() metav1.Identity {
 // GetIdentityDigest returns the digest of the object's identity.
 func (o *ComponentReference) GetIdentityDigest() []byte {
 	return o.GetIdentity().Digest()
+}
+
+func (o *ComponentReference) Copy() *ComponentReference {
+	return &ComponentReference{
+		Name:          o.Name,
+		ComponentName: o.ComponentName,
+		Version:       o.Version,
+		ExtraIdentity: o.ExtraIdentity.Copy(),
+		Labels:        o.Labels.Copy(),
+	}
 }

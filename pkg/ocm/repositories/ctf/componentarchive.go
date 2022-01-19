@@ -29,8 +29,6 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
-
-	"github.com/gardener/component-spec/bindings-go/codec"
 )
 
 // ComponentDescriptorFileName is the name of the component-descriptor file.
@@ -279,7 +277,7 @@ func FileSystem(ofs []vfs.FileSystem) vfs.FileSystem {
 // Digest returns the digest of the component archive.
 // The digest is computed serializing the included component descriptor into json and compute sha hash.
 func (ca *ComponentArchive) Digest() (string, error) {
-	data, err := codec.Encode(ca.ComponentDescriptor)
+	data, err := compdesc.Encode(ca.ComponentDescriptor)
 	if err != nil {
 		return "", err
 	}

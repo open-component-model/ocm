@@ -18,9 +18,9 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/gardener/component-spec/bindings-go/utils/selector"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/gardener/ocm/pkg/ocm/runtime"
+	"github.com/gardener/ocm/pkg/utils/selector"
 )
 
 type IdentitySelector = selector.Interface
@@ -82,9 +82,9 @@ func (c *ComponentDescriptor) GetEffectiveRepositoryContext() *runtime.Unstructu
 	return c.RepositoryContexts[len(c.RepositoryContexts)-1]
 }
 
-// InjectRepositoryContext appends the given repository context to components descriptor repository history.
+// AddRepositoryContext appends the given repository context to components descriptor repository history.
 // The context is not appended if the effective repository context already matches the current context.
-func (c *ComponentDescriptor) InjectRepositoryContext(repoCtx runtime.TypedObject) error {
+func (c *ComponentDescriptor) AddRepositoryContext(repoCtx runtime.TypedObject) error {
 	effective, err := runtime.ToUnstructuredTypedObject(c.GetEffectiveRepositoryContext())
 	if err != nil {
 		return err
@@ -297,4 +297,18 @@ func (c *ComponentDescriptor) GetSourceIndex(src *SourceMeta) int {
 		}
 	}
 	return -1
+}
+func (c *ComponentDescriptor) Copy() *ComponentDescriptor {
+	out := &ComponentDescriptor{
+		Metadata: c.Metadata,
+		ComponentSpec: ComponentSpec{
+			ObjectMeta:          c.ObjectMeta.Copy(),
+			RepositoryContexts:  c.RepositoryContexts.Copy(),
+			Provider:            c.Provider,
+			Sources:             c.Sources.Copy(),
+			ComponentReferences: c.ComponentReferences.Copy(),
+			Resources:           c.Resources.Copy(),
+		},
+	}
+	return out
 }

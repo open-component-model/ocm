@@ -29,14 +29,14 @@ var _ = Describe("helper", func() {
 		Expect(compdesc.DefaultComponent(cd)).To(Succeed())
 
 		repoCtx := ocireg.NewOCIRegistryRepositorySpec("example.com", "")
-		Expect(cd.InjectRepositoryContext(repoCtx)).To(Succeed())
+		Expect(cd.AddRepositoryContext(repoCtx)).To(Succeed())
 		Expect(cd.RepositoryContexts).To(HaveLen(1))
 
-		Expect(cd.InjectRepositoryContext(repoCtx)).To(Succeed())
+		Expect(cd.AddRepositoryContext(repoCtx)).To(Succeed())
 		Expect(cd.RepositoryContexts).To(HaveLen(1))
 
 		repoCtx2 := ocireg.NewOCIRegistryRepositorySpec("example.com/dev", "")
-		Expect(cd.InjectRepositoryContext(repoCtx2)).To(Succeed())
+		Expect(cd.AddRepositoryContext(repoCtx2)).To(Succeed())
 		Expect(cd.RepositoryContexts).To(HaveLen(2))
 	})
 

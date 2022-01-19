@@ -16,6 +16,8 @@ package common
 
 import (
 	"io"
+
+	"github.com/opencontainers/go-digest"
 )
 
 // VersionedElement describes an element that has a name and a version
@@ -38,6 +40,10 @@ type DataAccess interface {
 type BlobAccess interface {
 	DataAccess
 
-	// MimeType return the mime type of the blob
+	// MimeType returns the mime type of the blob
 	MimeType() string
+	// Digest returns the blob digest
+	Digest() digest.Digest
+	// Size returns the blob size
+	Size() int64
 }

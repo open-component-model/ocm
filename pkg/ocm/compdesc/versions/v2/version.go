@@ -110,11 +110,11 @@ func convert_ComponentReference_to(in *ComponentReference) *compdesc.ComponentRe
 	return out
 }
 
-func convert_ComponentReferences_to(in []ComponentReference) []compdesc.ComponentReference {
+func convert_ComponentReferences_to(in []ComponentReference) compdesc.ComponentReferences {
 	if in == nil {
 		return nil
 	}
-	out := make([]compdesc.ComponentReference, len(in))
+	out := make(compdesc.ComponentReferences, len(in))
 	for i, v := range in {
 		out[i] = *convert_ComponentReference_to(&v)
 	}

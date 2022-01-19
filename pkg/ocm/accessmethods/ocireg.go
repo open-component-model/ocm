@@ -21,6 +21,7 @@ import (
 	"github.com/gardener/ocm/pkg/ocm/core"
 	"github.com/gardener/ocm/pkg/ocm/core/accesstypes"
 	"github.com/gardener/ocm/pkg/ocm/runtime"
+	"github.com/opencontainers/go-digest"
 )
 
 // OCIRegistryType is the access type of a oci registry.
@@ -79,6 +80,14 @@ func (m *OCIRegistryAccessMethod) GetName() string {
 }
 
 func (m *OCIRegistryAccessMethod) Open() (io.ReadCloser, error) {
+	panic("no implemented") // TODO
+}
+
+func (m *OCIRegistryAccessMethod) Digest() digest.Digest {
+	panic("no implemented") // TODO
+}
+
+func (m *OCIRegistryAccessMethod) Size() int64 {
 	panic("no implemented") // TODO
 }
 

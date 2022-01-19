@@ -17,12 +17,13 @@ package compdesc
 import (
 	"testing"
 
+	"github.com/gardener/ocm/pkg/ocm/accessmethods"
+	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
+	"github.com/gardener/ocm/pkg/ocm/runtime"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-
-	v2 "github.com/gardener/component-spec/bindings-go/apis/v2"
 )
 
 func TestConfig(t *testing.T) {
@@ -33,64 +34,54 @@ func TestConfig(t *testing.T) {
 var _ = Describe("Validation", func() {
 
 	var (
-		comp *v2.ComponentDescriptor
+		comp *ComponentDescriptor
 
-		ociImage1    *v2.Resource
-		ociRegistry1 *v2.OCIRegistryAccess
-		ociImage2    *v2.Resource
-		ociRegistry2 *v2.OCIRegistryAccess
+		ociImage1    *Resource
+		ociRegistry1 *accessmethods.OCIRegistryAccessSpec
+		ociImage2    *Resource
+		ociRegistry2 *accessmethods.OCIRegistryAccessSpec
 	)
 
 	BeforeEach(func() {
-		ociRegistry1 = &v2.OCIRegistryAccess{
-			ObjectType: v2.ObjectType{
-				Type: v2.OCIRegistryType,
-			},
-			ImageReference: "docker/image1:1.2.3",
-		}
+		ociRegistry1 = accessmethods.NewOCIRegistryAccessSpecV1("docker/image1:1.2.3")
 
-		unstrucOCIRegistry1, err := v2.NewUnstructured(ociRegistry1)
+		unstrucOCIRegistry1, err := runtime.ToUnstructuredTypedObject(ociRegistry1)
 		Expect(err).ToNot(HaveOccurred())
 
-		ociImage1 = &v2.Resource{
-			IdentityObjectMeta: v2.IdentityObjectMeta{
+		ociImage1 = &Resource{
+			ElementMeta: ElementMeta{
 				Name:    "image1",
 				Version: "1.2.3",
 			},
-			Relation: v2.ExternalRelation,
+			Relation: metav1.ExternalRelation,
 			Access:   unstrucOCIRegistry1,
 		}
-		ociRegistry2 = &v2.OCIRegistryAccess{
-			ObjectType: v2.ObjectType{
-				Type: v2.OCIRegistryType,
-			},
-			ImageReference: "docker/image1:1.2.3",
-		}
-		unstrucOCIRegistry2, err := v2.NewUnstructured(ociRegistry2)
+		ociRegistry2 = accessmethods.NewOCIRegistryAccessSpecV1("docker/image1:1.2.3")
+		unstrucOCIRegistry2, err := runtime.ToUnstructuredTypedObject(ociRegistry2)
 		Expect(err).ToNot(HaveOccurred())
-		ociImage2 = &v2.Resource{
-			IdentityObjectMeta: v2.IdentityObjectMeta{
+		ociImage2 = &Resource{
+			ElementMeta: ElementMeta{
 				Name:    "image2",
 				Version: "1.2.3",
 			},
-			Relation: v2.ExternalRelation,
+			Relation: metav1.ExternalRelation,
 			Access:   unstrucOCIRegistry2,
 		}
 
-		comp = &v2.ComponentDescriptor{
-			Metadata: v2.Metadata{
-				Version: v2.SchemaVersion,
+		comp = &ComponentDescriptor{
+			Metadata: metav1.Metadata{
+				Version: SchemaVersion,
 			},
-			ComponentSpec: v2.ComponentSpec{
-				ObjectMeta: v2.ObjectMeta{
+			ComponentSpec: ComponentSpec{
+				ObjectMeta: ObjectMeta{
 					Name:    "my-comp",
 					Version: "1.2.3",
 				},
-				Provider:            v2.ExternalProvider,
+				Provider:            "external",
 				RepositoryContexts:  nil,
 				Sources:             nil,
 				ComponentReferences: nil,
-				Resources:           []v2.Resource{*ociImage1, *ociImage2},
+				Resources:           []Resource{*ociImage1, *ociImage2},
 			},
 		}
 	})
@@ -98,8 +89,8 @@ var _ = Describe("Validation", func() {
 	Context("#Metadata", func() {
 
 		It("should forbid if the component schemaVersion is missing", func() {
-			comp := v2.ComponentDescriptor{
-				Metadata: v2.Metadata{},
+			comp := ComponentDescriptor{
+				Metadata: metav1.Metadata{},
 			}
 
 			errList := validate(nil, &comp)
@@ -132,7 +123,7 @@ var _ = Describe("Validation", func() {
 
 	Context("#ObjectMeta", func() {
 		It("should forbid if the component's version is missing", func() {
-			comp := v2.ComponentDescriptor{}
+			comp := ComponentDescriptor{}
 			errList := validate(nil, &comp)
 			Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 				"Type":  Equal(field.ErrorTypeRequired),
@@ -145,7 +136,7 @@ var _ = Describe("Validation", func() {
 		})
 
 		It("should forbid if the component's name is missing", func() {
-			comp := v2.ComponentDescriptor{}
+			comp := ComponentDescriptor{}
 			errList := validate(nil, &comp)
 			Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 				"Type":  Equal(field.ErrorTypeRequired),
@@ -157,18 +148,22 @@ var _ = Describe("Validation", func() {
 
 	Context("#Sources", func() {
 		It("should forbid if a duplicated component's source is defined", func() {
-			comp.Sources = []v2.Source{
+			comp.Sources = []Source{
 				{
-					IdentityObjectMeta: v2.IdentityObjectMeta{
-						Name: "a",
+					SourceMeta: SourceMeta{
+						ElementMeta: ElementMeta{
+							Name: "a",
+						},
 					},
-					Access: v2.NewEmptyUnstructured("custom"),
+					Access: runtime.NewEmptyUnstructured("custom"),
 				},
 				{
-					IdentityObjectMeta: v2.IdentityObjectMeta{
-						Name: "a",
+					SourceMeta: SourceMeta{
+						ElementMeta: ElementMeta{
+							Name: "a",
+						},
 					},
-					Access: v2.NewEmptyUnstructured("custom"),
+					Access: runtime.NewEmptyUnstructured("custom"),
 				},
 			}
 			errList := validate(nil, comp)
@@ -181,7 +176,7 @@ var _ = Describe("Validation", func() {
 
 	Context("#ComponentReferences", func() {
 		It("should pass if a reference is set", func() {
-			comp.ComponentReferences = []v2.ComponentReference{
+			comp.ComponentReferences = []ComponentReference{
 				{
 					Name:          "test",
 					ComponentName: "test",
@@ -200,7 +195,7 @@ var _ = Describe("Validation", func() {
 		})
 
 		It("should forbid if a reference's name is missing", func() {
-			comp.ComponentReferences = []v2.ComponentReference{
+			comp.ComponentReferences = []ComponentReference{
 				{
 					ComponentName: "test",
 					Version:       "1.2.3",
@@ -214,7 +209,7 @@ var _ = Describe("Validation", func() {
 		})
 
 		It("should forbid if a reference's component name is missing", func() {
-			comp.ComponentReferences = []v2.ComponentReference{
+			comp.ComponentReferences = []ComponentReference{
 				{
 					Name:    "test",
 					Version: "1.2.3",
@@ -228,7 +223,7 @@ var _ = Describe("Validation", func() {
 		})
 
 		It("should forbid if a reference's version is missing", func() {
-			comp.ComponentReferences = []v2.ComponentReference{
+			comp.ComponentReferences = []ComponentReference{
 				{
 					ComponentName: "test",
 					Name:          "test",
@@ -242,7 +237,7 @@ var _ = Describe("Validation", func() {
 		})
 
 		It("should forbid if a duplicated component reference is defined", func() {
-			comp.ComponentReferences = []v2.ComponentReference{
+			comp.ComponentReferences = []ComponentReference{
 				{
 					Name: "test",
 				},
@@ -260,14 +255,14 @@ var _ = Describe("Validation", func() {
 
 	Context("#Resources", func() {
 		It("should forbid if a local resource's version differs from the version of the parent", func() {
-			comp.Resources = []v2.Resource{
+			comp.Resources = []Resource{
 				{
-					IdentityObjectMeta: v2.IdentityObjectMeta{
+					ElementMeta: ElementMeta{
 						Name:    "locRes",
 						Version: "0.0.1",
 					},
-					Relation: v2.LocalRelation,
-					Access:   v2.NewEmptyUnstructured(v2.OCIImageType),
+					Relation: metav1.LocalRelation,
+					Access:   runtime.NewEmptyUnstructured(accessmethods.OCIImageType),
 				},
 			}
 			errList := validate(nil, comp)
@@ -278,14 +273,14 @@ var _ = Describe("Validation", func() {
 		})
 
 		It("should forbid if a resource name contains invalid characters", func() {
-			comp.Resources = []v2.Resource{
+			comp.Resources = []Resource{
 				{
-					IdentityObjectMeta: v2.IdentityObjectMeta{
+					ElementMeta: ElementMeta{
 						Name: "test$",
 					},
 				},
 				{
-					IdentityObjectMeta: v2.IdentityObjectMeta{
+					ElementMeta: ElementMeta{
 						Name: "test🙅",
 					},
 				},
@@ -302,14 +297,14 @@ var _ = Describe("Validation", func() {
 		})
 
 		It("should forbid if a duplicated local resource is defined", func() {
-			comp.Resources = []v2.Resource{
+			comp.Resources = []Resource{
 				{
-					IdentityObjectMeta: v2.IdentityObjectMeta{
+					ElementMeta: ElementMeta{
 						Name: "test",
 					},
 				},
 				{
-					IdentityObjectMeta: v2.IdentityObjectMeta{
+					ElementMeta: ElementMeta{
 						Name: "test",
 					},
 				},
@@ -322,19 +317,19 @@ var _ = Describe("Validation", func() {
 		})
 
 		It("should forbid if a duplicated resource with additional identity labels is defined", func() {
-			comp.Resources = []v2.Resource{
+			comp.Resources = []Resource{
 				{
-					IdentityObjectMeta: v2.IdentityObjectMeta{
+					ElementMeta: ElementMeta{
 						Name: "test",
-						ExtraIdentity: v2.Identity{
+						ExtraIdentity: metav1.Identity{
 							"my-id": "some-id",
 						},
 					},
 				},
 				{
-					IdentityObjectMeta: v2.IdentityObjectMeta{
+					ElementMeta: ElementMeta{
 						Name: "test",
-						ExtraIdentity: v2.Identity{
+						ExtraIdentity: metav1.Identity{
 							"my-id": "some-id",
 						},
 					},
@@ -348,17 +343,17 @@ var _ = Describe("Validation", func() {
 		})
 
 		It("should pass if a duplicated resource has the same name but with different additional identity labels", func() {
-			comp.Resources = []v2.Resource{
+			comp.Resources = []Resource{
 				{
-					IdentityObjectMeta: v2.IdentityObjectMeta{
+					ElementMeta: ElementMeta{
 						Name: "test",
-						ExtraIdentity: v2.Identity{
+						ExtraIdentity: metav1.Identity{
 							"my-id": "some-id",
 						},
 					},
 				},
 				{
-					IdentityObjectMeta: v2.IdentityObjectMeta{
+					ElementMeta: ElementMeta{
 						Name: "test",
 					},
 				},
@@ -378,12 +373,12 @@ var _ = Describe("Validation", func() {
 	Context("#labels", func() {
 
 		It("should forbid if labels are defined multiple times in the same context", func() {
-			comp.ComponentReferences = []v2.ComponentReference{
+			comp.ComponentReferences = []ComponentReference{
 				{
 					ComponentName: "test",
 					Name:          "test",
 					Version:       "1.2.3",
-					Labels: []v2.Label{
+					Labels: []metav1.Label{
 						{
 							Name:  "l1",
 							Value: []byte{},
@@ -404,12 +399,12 @@ var _ = Describe("Validation", func() {
 		})
 
 		It("should pass if labels are defined multiple times in the same context with differnet names", func() {
-			comp.ComponentReferences = []v2.ComponentReference{
+			comp.ComponentReferences = []ComponentReference{
 				{
 					ComponentName: "test",
 					Name:          "test",
 					Version:       "1.2.3",
-					Labels: []v2.Label{
+					Labels: []metav1.Label{
 						{
 							Name:  "l1",
 							Value: []byte{},
@@ -432,7 +427,7 @@ var _ = Describe("Validation", func() {
 
 	Context("#Identity", func() {
 		It("should pass valid identity labels", func() {
-			identity := v2.Identity{
+			identity := metav1.Identity{
 				"my-l1": "test",
 				"my-l2": "test",
 			}
@@ -441,7 +436,7 @@ var _ = Describe("Validation", func() {
 		})
 
 		It("should forbid if a identity label define the name", func() {
-			identity := v2.Identity{
+			identity := metav1.Identity{
 				"name": "test",
 			}
 			errList := ValidateIdentity(field.NewPath("identity"), identity)
@@ -452,7 +447,7 @@ var _ = Describe("Validation", func() {
 		})
 
 		It("should forbid if a identity label defines a key with invalid characters", func() {
-			identity := v2.Identity{
+			identity := metav1.Identity{
 				"my-l1!": "test",
 			}
 			errList := ValidateIdentity(field.NewPath("identity"), identity)

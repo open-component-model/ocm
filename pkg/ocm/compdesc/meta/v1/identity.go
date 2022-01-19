@@ -61,6 +61,9 @@ func (i Identity) Match(obj map[string]string) (bool, error) {
 
 // Copy copies identity
 func (l Identity) Copy() Identity {
+	if l == nil {
+		return nil
+	}
 	n := Identity{}
 	for k, v := range l {
 		n[k] = v

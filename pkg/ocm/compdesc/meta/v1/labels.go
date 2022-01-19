@@ -45,6 +45,9 @@ func (l Labels) Get(name string) ([]byte, bool) {
 
 // Copy copies labels
 func (l Labels) Copy() Labels {
+	if l == nil {
+		return nil
+	}
 	n := make(Labels, len(l))
 	for k, v := range l {
 		n[k] = v

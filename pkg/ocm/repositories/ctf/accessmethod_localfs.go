@@ -17,14 +17,12 @@ package ctf
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/core"
 	"github.com/gardener/ocm/pkg/ocm/core/accesstypes"
 	"github.com/gardener/ocm/pkg/ocm/runtime"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 // LocalFilesystemBlobType is the access type of a blob in a local filesystem.
@@ -98,25 +96,21 @@ func (_ localfsblobConverterV1) ConvertTo(object interface{}) (core.AccessSpec, 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type LocalFilesystemBlobAccessMethod struct {
+type localFilesystemBlobAccessMethod struct {
 	spec *LocalFilesystemBlobAccessSpec
 	comp *ComponentArchive
 }
 
-var _ core.AccessMethod = &LocalFilesystemBlobAccessMethod{}
+var _ accessmethods.AccessImplementation = &localFilesystemBlobAccessMethod{}
 
-func newLocalFilesystemBlobAccessMethod(a *LocalFilesystemBlobAccessSpec, comp *ComponentArchive) (*LocalFilesystemBlobAccessMethod, error) {
-	return &LocalFilesystemBlobAccessMethod{
+func newLocalFilesystemBlobAccessMethod(a *LocalFilesystemBlobAccessSpec, comp *ComponentArchive) (core.AccessMethod, error) {
+	return accessmethods.NewDefaultAccessMethod(LocalFilesystemBlobType, &localFilesystemBlobAccessMethod{
 		spec: a,
 		comp: comp,
-	}, nil
+	}), nil
 }
 
-func (m *LocalFilesystemBlobAccessMethod) GetName() string {
-	return LocalFilesystemBlobType
-}
-
-func (m *LocalFilesystemBlobAccessMethod) Open() (vfs.File, error) {
+func (m *localFilesystemBlobAccessMethod) Open() (io.ReadCloser, error) {
 	blobpath := BlobPath(m.spec.Filename)
 
 	info, err := m.comp.fs.Stat(blobpath)
@@ -133,19 +127,14 @@ func (m *LocalFilesystemBlobAccessMethod) Open() (vfs.File, error) {
 	return file, nil
 }
 
-func (m *LocalFilesystemBlobAccessMethod) Get() ([]byte, error) {
-	file, err := m.Open()
-	if err != nil {
-		return nil, err
+func (m *localFilesystemBlobAccessMethod) Size() int64 {
+	info, err := m.comp.fs.Stat(BlobPath(m.spec.Filename))
+	if err == nil {
+		return info.Size()
 	}
-	defer file.Close()
-	return ioutil.ReadAll(file)
+	return -1
 }
 
-func (m *LocalFilesystemBlobAccessMethod) Reader() (io.ReadCloser, error) {
-	return m.Open()
-}
-
-func (m *LocalFilesystemBlobAccessMethod) MimeType() string {
+func (m *localFilesystemBlobAccessMethod) MimeType() string {
 	return m.spec.MediaType
 }

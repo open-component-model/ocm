@@ -16,6 +16,7 @@ package oci
 
 import (
 	"github.com/gardener/ocm/pkg/common"
+	"github.com/gardener/ocm/pkg/oci/artdesc"
 )
 
 type Repository interface {
@@ -28,8 +29,11 @@ type Repository interface {
 type BlobAccess = common.BlobAccess
 
 type ArtefactAccess interface {
-	GetManifest() *Manifest
+	GetArtefactDescriptor() artdesc.ArtefactDescriptor
+	GetManifest(digest string) artdesc.Manifest
 	GetBlob(digest string) BlobAccess
+
+	GetRepository() Repository
 }
 
 type ArtefactComposer interface {

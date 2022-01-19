@@ -12,7 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package oci
+package artdesc
 
-type Manifest struct {
+import (
+	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+)
+
+type Manifest ociv1.Manifest
+type Index ociv1.Index
+
+type ArtefactDescriptor struct {
+	Manifest *Manifest
+	Index    *Index
 }
