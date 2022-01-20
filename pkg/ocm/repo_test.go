@@ -23,12 +23,12 @@ import (
 	"github.com/gardener/ocm/pkg/oci/repositories/empty"
 	"github.com/gardener/ocm/pkg/ocm"
 	"github.com/gardener/ocm/pkg/ocm/core"
+	"github.com/gardener/ocm/pkg/ocm/repositories/genericocireg"
+	"github.com/gardener/ocm/pkg/ocm/repositories/ocireg"
 	"github.com/gardener/ocm/pkg/runtime"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
-
-var DefaultContext = ocm.NewDefaultContext(context.TODO())
 
 func InOut(in runtime.TypedObject, encoding runtime.Encoding) (runtime.TypedObject, error) {
 	out := reflect.New(reflect.TypeOf(in).Elem()).Interface().(runtime.TypedObject)
@@ -40,6 +40,9 @@ func InOut(in runtime.TypedObject, encoding runtime.Encoding) (runtime.TypedObje
 	err = encoding.Unmarshal(data, out)
 	return out, err
 }
+
+
+var DefaultContext = ocm.NewDefaultContext(context.TODO())
 
 var _ = Describe("access method", func() {
 	It("unmarshal json test", func() {
@@ -68,14 +71,26 @@ var _ = Describe("access method", func() {
 		out, err = InOut(&core.UnknownRepositorySpec{*runtime.NewEmptyUnstructuredVersioned("test")}, runtime.DefaultYAMLEncoding)
 		Expect(err).To(Succeed())
 		Expect(out.GetType()).To(Equal("test"))
-
 	})
+
 	It("instantiate local blob access method for component archive", func() {
-		data, err := json.Marshal(empty.NewEmptyRepositorySpec())
+		backendSpec := genericocireg.NewGenericOCIBackendSpec(
+			empty.NewEmptyRepositorySpec(),
+			&ocireg.ComponentRepositoryMeta{
+				ComponentNameMapping: ocireg.OCIRegistryDigestMapping,
+			})
+		data, err := json.Marshal(backendSpec)
+		data2, err := json.Marshal(backendSpec.ComponentRepositoryMeta)
+
+		other:=ocireg.NewOCIRegistryRepositorySpec("X", ocireg.OCIRegistryDigestMapping)
+		data3, err := json.Marshal(other)
+
 		Expect(err).To(Succeed())
 		Expect(data).NotTo(BeNil())
 
-		fmt.Printf("spec: %s\n", string(data))
+		fmt.Printf("*** spec: %s\n", string(data))
+		fmt.Printf("*** data2: %s\n", string(data2))
+		fmt.Printf("*** data3: %s\n", string(data3))
 		repo, err := DefaultContext.RepositoryForConfig(data, runtime.DefaultYAMLEncoding)
 		Expect(err).To(Succeed())
 		Expect(repo).NotTo(BeNil())

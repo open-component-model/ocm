@@ -62,17 +62,7 @@ func (t *GenericOCIRepositoryBackendType) Decode(data []byte, unmarshal runtime.
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot unmarshal component repository meta information")
 	}
-	return newGenericOCIBackendSpec(ospec, meta), nil
-}
-
-func newGenericOCIBackendSpec(ospec oci.RepositorySpec, meta *compreg.ComponentRepositoryMeta) *GenericOCIBackendSpec {
-	if meta.ComponentNameMapping == "" {
-		meta.ComponentNameMapping = compreg.OCIRegistryURLPathMapping
-	}
-	return &GenericOCIBackendSpec{
-		RepositorySpec:          ospec,
-		ComponentRepositoryMeta: *meta,
-	}
+	return NewGenericOCIBackendSpec(ospec, meta), nil
 }
 
 func (t *GenericOCIRepositoryBackendType) LocalSupportForAccessSpec(ctx area.Context, a compdesc.AccessSpec) bool {
@@ -83,12 +73,39 @@ func (t *GenericOCIRepositoryBackendType) LocalSupportForAccessSpec(ctx area.Con
 ////////////////////////////////////////////////////////////////////////////////
 
 type GenericOCIBackendSpec struct {
-	oci.RepositorySpec
-	compreg.ComponentRepositoryMeta `json:",inline"`
+	oci.GenericRepositorySpecWrapper `json:",inline"`
+	compreg.ComponentRepositoryMeta  `json:",inline"`
 }
 
-func (a *GenericOCIBackendSpec) Repository(ctx area.Context) (area.Repository, error) {
-	r, err := a.RepositorySpec.Repository(ctx.OCIContext())
+func NewGenericOCIBackendSpec(spec oci.RepositorySpec, meta *compreg.ComponentRepositoryMeta) *GenericOCIBackendSpec {
+	if meta.ComponentNameMapping == "" {
+		meta.ComponentNameMapping = compreg.OCIRegistryURLPathMapping
+	}
+	return &GenericOCIBackendSpec{
+		GenericRepositorySpecWrapper: oci.WrapRepositorySpec(spec),
+		ComponentRepositoryMeta:      *meta,
+	}
+}
+
+func (s *GenericOCIBackendSpec) GetType() string {
+	return s.RepositorySpec.GetType()
+}
+
+func (s *GenericOCIBackendSpec) SetType(typ string) {
+	s.RepositorySpec.SetType(typ)
+}
+
+
+func (s *GenericOCIBackendSpec) GetName() string {
+	return s.RepositorySpec.GetName()
+}
+
+func (s *GenericOCIBackendSpec) GetVersion() string {
+	return s.RepositorySpec.GetVersion()
+}
+
+func (s *GenericOCIBackendSpec) Repository(ctx area.Context) (area.Repository, error) {
+	r, err := s.RepositorySpec.Repository(ctx.OCIContext())
 	if err != nil {
 		return nil, err
 	}

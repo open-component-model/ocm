@@ -13,9 +13,10 @@ import (
 	dockerreference "github.com/containerd/containerd/reference/docker"
 	dockercreds "github.com/docker/cli/cli/config/credentials"
 	dockerconfigtypes "github.com/docker/cli/cli/config/types"
+	"github.com/gardener/component-cli/pkg/logcontext"
 	"github.com/google/go-containerregistry/pkg/authn"
 
-	"github.com/gardener/ocm/pkg/logcontext"
+	"github.com/gardener/ocm/pkg/utils"
 )
 
 // to find a suitable secret for images on Docker Hub, we need its two domains to do matching
@@ -321,11 +322,11 @@ func (o *GeneralOciKeyring) Resolve(resource authn.Resource) (authn.Authenticato
 func (o *GeneralOciKeyring) ResolveWithContext(ctx context.Context, resource authn.Resource) (authn.Authenticator, error) {
 	authconfig := o.Get(resource.String())
 	if authconfig == nil {
-		logcontext.AddContextValue(ctx, UsedUserLogKey, "anonymous")
+		utils.AddLogContextValue(ctx, UsedUserLogKey, "anonymous")
 		return authn.FromConfig(authn.AuthConfig{}), nil
 	}
 
-	if ctxVal := logcontext.FromContext(ctx); ctxVal != nil {
+	if ctxVal := utils.LogContextValuesFromContext(ctx); ctxVal != nil {
 		(*ctxVal)[UsedUserLogKey] = authconfig.GetUsername()
 		if informer, ok := authconfig.(Informer); ok {
 			ctxVal := logcontext.FromContext(ctx)

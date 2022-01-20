@@ -28,11 +28,12 @@ type Repository interface {
 	GetContext() Context
 
 	GetSpecification() RepositorySpec
-	LocalSupportForAccessSpec(a compdesc.AccessSpec) bool
 	ExistsComponent(name string, version string) (bool, error)
 	LookupComponent(name string, version string) (ComponentAccess, error)
 	ComposeComponent(name string, version string) (ComponentComposer, error)
 	WriteComponent(ComponentAccess) (ComponentAccess, error)
+
+	LocalSupportForAccessSpec(a compdesc.AccessSpec) bool
 }
 
 type DataAccess = common.DataAccess

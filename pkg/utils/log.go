@@ -23,30 +23,30 @@ import (
 // logContextKey is the unique key for storing additional logging contexts
 type logContextKey struct{}
 
-// ContextValues describes the context values.
-type ContextValues map[string]interface{}
+// LogContextValues describes the context values.
+type LogContextValues map[string]interface{}
 
-func NewContext(parent context.Context) (context.Context, *ContextValues) {
-	vals := &ContextValues{}
+func ContextWithLogContextValues(parent context.Context) (context.Context, *LogContextValues) {
+	vals := &LogContextValues{}
 	return context.WithValue(parent, logContextKey{}, vals), vals
 }
 
-// FromContext returns the context values of a ctx.
+// LogContextValuesFromContext returns the context values of a ctx.
 // If nothing is defined nil is returned.
-func FromContext(ctx context.Context) *ContextValues {
-	c, ok := ctx.Value(logContextKey{}).(*ContextValues)
+func LogContextValuesFromContext(ctx context.Context) *LogContextValues {
+	c, ok := ctx.Value(logContextKey{}).(*LogContextValues)
 	if !ok {
 		return nil
 	}
 	return c
 }
 
-// AddContextValue adds a key value pair to the logging context.
+// AddLogContextValue adds a key value pair to the logging context.
 // If none is defined it will be added.
-func AddContextValue(ctx context.Context, key string, value interface{}) context.Context {
-	logCtx := FromContext(ctx)
+func AddLogContextValue(ctx context.Context, key string, value interface{}) context.Context {
+	logCtx := LogContextValuesFromContext(ctx)
 	if logCtx == nil {
-		ctx, logCtx = NewContext(ctx)
+		ctx, logCtx = ContextWithLogContextValues(ctx)
 	}
 	(*logCtx)[key] = value
 	return ctx
@@ -56,20 +56,20 @@ func AddContextValue(ctx context.Context, key string, value interface{}) context
 // and delegates the actual logging to a delegate.
 type ctxSink struct {
 	logr.LogSink
-	ctx *ContextValues
+	ctx *LogContextValues
 }
 
-// New creates a new context logger that delegates the actual requests to the delegate
+// LoggerWithContextContextValues creates a new context logger that delegates the actual requests to the delegate
 // but injects the context log values.
-func New(ctx context.Context, delegate logr.Logger) logr.Logger {
-	val := FromContext(ctx)
+func LoggerWithContextContextValues(ctx context.Context, delegate logr.Logger) logr.Logger {
+	val := LogContextValuesFromContext(ctx)
 	if val == nil {
 		return delegate
 	}
 	return delegate.WithSink(newWithContextValues(val, delegate.GetSink()))
 }
 
-func newWithContextValues(ctx *ContextValues, del logr.LogSink) logr.LogSink {
+func newWithContextValues(ctx *LogContextValues, del logr.LogSink) logr.LogSink {
 	return &ctxSink{
 		LogSink: del,
 		ctx:     ctx,

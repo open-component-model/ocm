@@ -15,9 +15,9 @@
 package oci
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
-	"strings"
 
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/errors"
@@ -123,7 +123,7 @@ func CreateRepositorySpec(t runtime.TypedObject) (RepositorySpec, error) {
 }
 
 type UnknownRepositorySpec struct {
-	runtime.UnstructuredTypedObject
+	runtime.UnstructuredVersionedTypedObject `json:",inline"`
 }
 
 var _ RepositorySpec = &UnknownRepositorySpec{}
@@ -132,20 +132,63 @@ func (r *UnknownRepositorySpec) Repository(Context) (Repository, error) {
 	return nil, errors.ErrUnknown("respository type", r.GetType())
 }
 
-func (r *UnknownRepositorySpec) GetName() string {
-	t := r.GetType()
-	i := strings.LastIndex(t, "/")
-	if i < 0 {
-		return t
-	}
-	return t[:i]
+////////////////////////////////////////////////////////////////////////////////
+
+type GenericRepositorySpec struct {
+	runtime.UnstructuredVersionedTypedObject `json:",inline"`
 }
 
-func (r *UnknownRepositorySpec) GetVersion() string {
-	t := r.GetType()
-	i := strings.LastIndex(t, "/")
-	if i < 0 {
-		return "v1"
+func (s *GenericRepositorySpec) Evaluate(ctx Context) (RepositorySpec, error) {
+	raw, err := s.GetRaw()
+	if err != nil {
+		return nil, err
 	}
-	return t[i+1:]
+	return ctx.RepositoryTypes().DecodeRepositorySpec(raw, runtime.DefaultJSONEncoding)
 }
+
+func (s *GenericRepositorySpec) Repository(ctx Context) (Repository, error) {
+	spec, err := s.Evaluate(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return spec.Repository(ctx)
+}
+
+var _ RepositorySpec = &GenericRepositorySpec{}
+
+////////////////////////////////////////////////////////////////////////////////
+
+// GenericRepositorySpecWrapper can be used in a containing spec
+// to represent any other spec.
+// it can only be marshalled, but not unmarshalled to the same
+// object, because the contained spec type is not known.
+// This is required, because an embedded interface field cannot be marshalled
+// by the json marshaller with inline mode.
+// The second wrapping with the internal type is required to support
+// specs with a marshal function, which would be inherited from embedded fields
+// which results in ignoring the additional field for marshalling.
+type GenericRepositorySpecWrapper struct {
+	RepositorySpec genericRepositorySpecWrapper`json:",inline"`
+}
+
+func WrapRepositorySpec(spec RepositorySpec) GenericRepositorySpecWrapper {
+	return GenericRepositorySpecWrapper{
+		RepositorySpec: genericRepositorySpecWrapper{spec},
+	}
+}
+
+type genericRepositorySpecWrapper struct {
+	RepositorySpec
+}
+
+// UnmarshalJSON implements a custom json unmarshal method for a unstructured typed object.
+func (u *genericRepositorySpecWrapper) UnmarshalJSON(data []byte) error {
+	panic("cannot unmarshal GenericRepositorySpecWrapper")
+}
+
+// MarshalJSON implements a custom json unmarshal method for a generic spec.
+func (u *genericRepositorySpecWrapper) MarshalJSON() ([]byte, error) {
+	return json.Marshal(u.RepositorySpec)
+}
+
+var _ RepositorySpec = &genericRepositorySpecWrapper{}
