@@ -29,6 +29,17 @@ type Unstructured interface {
 	GetRaw() ([]byte, error)
 }
 
+// UnstructuredMap is a generic data map
+type UnstructuredMap map[string]interface{}
+
+// FlatMerge just joins the direct attribute set
+func (m UnstructuredMap) FlatMerge(o UnstructuredMap) UnstructuredMap {
+	for k, v := range o {
+		m[k] = v
+	}
+	return m
+}
+
 // UnstructuredTypesEqual compares two unstructured object.
 func UnstructuredTypesEqual(a, b *UnstructuredTypedObject) bool {
 	if a == nil && b == nil {
@@ -78,7 +89,7 @@ func NewEmptyUnstructuredVersioned(ttype string) *UnstructuredVersionedTypedObje
 }
 
 // NewUnstructuredType creates a new unstructured typed object.
-func NewUnstructuredType(ttype string, data map[string]interface{}) *UnstructuredTypedObject {
+func NewUnstructuredType(ttype string, data UnstructuredMap) *UnstructuredTypedObject {
 	unstr := &UnstructuredTypedObject{}
 	unstr.Object = data
 	unstr.SetType(ttype)
@@ -94,8 +105,8 @@ type UnstructuredConverter interface {
 // +k8s:openapi-gen=true
 type UnstructuredTypedObject struct {
 	ObjectType `json:",inline"`
-	Raw        []byte                 `json:"-"`
-	Object     map[string]interface{} `json:"-"`
+	Raw        []byte          `json:"-"`
+	Object     UnstructuredMap `json:"-"`
 }
 
 func (s *UnstructuredTypedObject) ToUnstructured() (*UnstructuredTypedObject, error) {
@@ -105,7 +116,7 @@ func (s *UnstructuredTypedObject) ToUnstructured() (*UnstructuredTypedObject, er
 func (u *UnstructuredTypedObject) SetType(ttype string) {
 	u.ObjectType.SetType(ttype)
 	if u.Object == nil {
-		u.Object = make(map[string]interface{})
+		u.Object = UnstructuredMap{}
 	}
 	u.Object["type"] = ttype
 }
@@ -140,7 +151,7 @@ func (u UnstructuredTypedObject) GetRaw() ([]byte, error) {
 }
 
 func (u *UnstructuredTypedObject) setRaw(data []byte) error {
-	obj := map[string]interface{}{}
+	obj := UnstructuredMap{}
 	if err := json.Unmarshal(data, &obj); err != nil {
 		return err
 	}
@@ -220,6 +231,27 @@ func ToUnstructuredTypedObject(obj TypedObject) (*UnstructuredTypedObject, error
 
 	uObj := &UnstructuredTypedObject{}
 	if err := json.Unmarshal(data, uObj); err != nil {
+		return nil, err
+	}
+	return uObj, nil
+}
+
+// ToUnstructuredObject converts any object into a structure map.
+func ToUnstructuredObject(obj interface{}) (UnstructuredMap, error) {
+	if reflect2.IsNil(obj) {
+		return nil, nil
+	}
+	if un, ok := obj.(map[string]interface{}); ok {
+		return UnstructuredMap(un), nil
+	}
+
+	data, err := json.Marshal(obj)
+	if err != nil {
+		return nil, err
+	}
+
+	uObj := UnstructuredMap{}
+	if err := json.Unmarshal(data, &uObj); err != nil {
 		return nil, err
 	}
 	return uObj, nil

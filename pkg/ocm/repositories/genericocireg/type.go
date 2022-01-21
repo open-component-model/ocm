@@ -15,6 +15,9 @@
 package genericocireg
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
@@ -73,8 +76,8 @@ func (t *GenericOCIRepositoryBackendType) LocalSupportForAccessSpec(ctx area.Con
 ////////////////////////////////////////////////////////////////////////////////
 
 type GenericOCIBackendSpec struct {
-	oci.GenericRepositorySpecWrapper `json:",inline"`
-	compreg.ComponentRepositoryMeta  `json:",inline"`
+	oci.RepositorySpec
+	compreg.ComponentRepositoryMeta
 }
 
 func NewGenericOCIBackendSpec(spec oci.RepositorySpec, meta *compreg.ComponentRepositoryMeta) *GenericOCIBackendSpec {
@@ -82,26 +85,38 @@ func NewGenericOCIBackendSpec(spec oci.RepositorySpec, meta *compreg.ComponentRe
 		meta.ComponentNameMapping = compreg.OCIRegistryURLPathMapping
 	}
 	return &GenericOCIBackendSpec{
-		GenericRepositorySpecWrapper: oci.WrapRepositorySpec(spec),
-		ComponentRepositoryMeta:      *meta,
+		RepositorySpec:          spec,
+		ComponentRepositoryMeta: *meta,
 	}
 }
 
-func (s *GenericOCIBackendSpec) GetType() string {
-	return s.RepositorySpec.GetType()
+func (u *GenericOCIBackendSpec) UnmarshalJSON(data []byte) error {
+	fmt.Printf("unmarshal generic ocireg spec %s\n", string(data))
+	ocispec := &oci.GenericRepositorySpec{}
+	if err := json.Unmarshal(data, ocispec); err != nil {
+		return err
+	}
+	compmeta := &compreg.ComponentRepositoryMeta{}
+	if err := json.Unmarshal(data, ocispec); err != nil {
+		return err
+	}
+
+	u.RepositorySpec = ocispec
+	u.ComponentRepositoryMeta = *compmeta
+	return nil
 }
 
-func (s *GenericOCIBackendSpec) SetType(typ string) {
-	s.RepositorySpec.SetType(typ)
-}
-
-
-func (s *GenericOCIBackendSpec) GetName() string {
-	return s.RepositorySpec.GetName()
-}
-
-func (s *GenericOCIBackendSpec) GetVersion() string {
-	return s.RepositorySpec.GetVersion()
+// MarshalJSON implements a custom json unmarshal method for a unstructured type.
+func (u *GenericOCIBackendSpec) MarshalJSON() ([]byte, error) {
+	ocispec, err := runtime.ToUnstructuredTypedObject(u.RepositorySpec)
+	if err != nil {
+		return nil, err
+	}
+	compmeta, err := runtime.ToUnstructuredObject(u.ComponentRepositoryMeta)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(compmeta.FlatMerge(ocispec.Object))
 }
 
 func (s *GenericOCIBackendSpec) Repository(ctx area.Context) (area.Repository, error) {

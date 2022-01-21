@@ -9,7 +9,6 @@ require (
 	github.com/gardener/component-spec/bindings-go v0.0.56
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.2.0
-	github.com/golang/mock v1.6.0
 	github.com/google/go-containerregistry v0.8.0
 	github.com/google/uuid v1.2.0
 	github.com/mandelsoft/vfs v0.0.0-20210530103237-5249dc39ce91

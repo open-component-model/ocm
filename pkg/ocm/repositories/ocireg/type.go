@@ -54,8 +54,8 @@ type OCIRegistryRepositorySpec struct {
 	ComponentRepositoryMeta          `json:",inline"`
 }
 
-func NewComponentRepositoryMeta(mapping ComponentNameMapping) ComponentRepositoryMeta {
-	return ComponentRepositoryMeta{
+func NewComponentRepositoryMeta(mapping ComponentNameMapping) *ComponentRepositoryMeta {
+	return &ComponentRepositoryMeta{
 		ComponentNameMapping: mapping,
 	}
 }
@@ -67,7 +67,7 @@ func NewOCIRegistryRepositorySpec(baseURL string, mapping ComponentNameMapping) 
 	}
 	return &OCIRegistryRepositorySpec{
 		OCIRegistryRepositorySpec: *ocireg.NewOCIRegistryRepositorySpec(baseURL),
-		ComponentRepositoryMeta:   NewComponentRepositoryMeta(mapping),
+		ComponentRepositoryMeta:   *NewComponentRepositoryMeta(mapping),
 	}
 }
 

@@ -15,8 +15,8 @@
 package genericocireg
 
 import (
-	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
+	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/core"
 )
 
@@ -31,5 +31,49 @@ func NewRepository(ctx core.Context, ocirepo oci.Repository) (core.Repository, e
 		ocirepo: ocirepo,
 	}
 	_ = repo
-	return nil, errors.ErrNotImplemented("comprepo", "genericoci")
+	return repo, nil
+}
+
+func (r Repository) ExistsArtefact(name string, version string) (bool, error) {
+	panic("implement me")
+}
+
+func (r Repository) LookupArtefact(name string, version string) (oci.ArtefactAccess, error) {
+	panic("implement me")
+}
+
+func (r Repository) ComposeArtefact(name string, version string) (oci.ArtefactComposer, error) {
+	panic("implement me")
+}
+
+func (r Repository) WriteArtefact(access oci.ArtefactAccess) (oci.ArtefactAccess, error) {
+	panic("implement me")
+}
+
+func (r Repository) GetContext() core.Context {
+	panic("implement me")
+}
+
+func (r Repository) GetSpecification() core.RepositorySpec {
+	panic("implement me")
+}
+
+func (r Repository) ExistsComponent(name string, version string) (bool, error) {
+	panic("implement me")
+}
+
+func (r Repository) LookupComponent(name string, version string) (core.ComponentAccess, error) {
+	panic("implement me")
+}
+
+func (r Repository) ComposeComponent(name string, version string) (core.ComponentComposer, error) {
+	panic("implement me")
+}
+
+func (r Repository) WriteComponent(access core.ComponentAccess) (core.ComponentAccess, error) {
+	panic("implement me")
+}
+
+func (r Repository) LocalSupportForAccessSpec(a compdesc.AccessSpec) bool {
+	panic("implement me")
 }
