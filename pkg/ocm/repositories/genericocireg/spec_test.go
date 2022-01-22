@@ -35,7 +35,7 @@ var _ = Describe("access method", func() {
 
 	It("marshal mapped spec", func() {
 		gen := genericocireg.NewGenericOCIBackendSpec(
-			ocireg.NewOCIRegistryRepositorySpec("X"),
+			ocireg.NewRepositorySpec("X"),
 			ocmreg.NewComponentRepositoryMeta(ocmreg.OCIRegistryDigestMapping))
 		data, err := json.Marshal(gen)
 		Expect(err).To(Succeed())
@@ -51,11 +51,11 @@ var _ = Describe("access method", func() {
 
 		eff, ok := spec.(*genericocireg.GenericOCIBackendSpec)
 		Expect(ok).To(BeTrue())
-		Expect(reflect.TypeOf(eff.RepositorySpec).String()).To(Equal("*ocireg.OCIRegistryRepositorySpec"))
+		Expect(reflect.TypeOf(eff.RepositorySpec).String()).To(Equal("*ocireg.RepositorySpec"))
 		Expect(eff.ComponentNameMapping).To(Equal(ocmreg.OCIRegistryDigestMapping))
 
 		Expect(spec.GetType()).To(Equal(ocireg.OCIRegistryRepositoryType))
-		effoci, ok := eff.RepositorySpec.(*ocireg.OCIRegistryRepositorySpec)
+		effoci, ok := eff.RepositorySpec.(*ocireg.RepositorySpec)
 		Expect(ok).To(BeTrue())
 		Expect(effoci.BaseURL).To(Equal("X"))
 	})

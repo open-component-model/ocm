@@ -21,7 +21,7 @@ import (
 	"path/filepath"
 
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	"github.com/gardener/ocm/pkg/ocm/core"
+	cpi "github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
@@ -43,7 +43,7 @@ func (_ ComponentDirectory) String() string {
 	return "directory"
 }
 
-func (_ ComponentDirectory) Open(ctx core.Context, path string, opts ComponentArchiveOptions) (*ComponentArchive, error) {
+func (_ ComponentDirectory) Open(ctx cpi.Context, path string, opts ComponentArchiveOptions) (*ComponentArchive, error) {
 	fs, err := projectionfs.New(opts.PathFileSystem, path)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create projected filesystem from path %s: %w", path, err)
@@ -52,7 +52,7 @@ func (_ ComponentDirectory) Open(ctx core.Context, path string, opts ComponentAr
 	return newComponentArchiveFromFilesystem(ctx, opts, nil)
 }
 
-func (_ ComponentDirectory) Create(ctx core.Context, path string, cd *compdesc.ComponentDescriptor, opts ComponentArchiveOptions) (*ComponentArchive, error) {
+func (_ ComponentDirectory) Create(ctx cpi.Context, path string, cd *compdesc.ComponentDescriptor, opts ComponentArchiveOptions) (*ComponentArchive, error) {
 	err := opts.PathFileSystem.Mkdir(path, 0660)
 	if err != nil {
 		return nil, err
@@ -116,7 +116,7 @@ func (_ ComponentDirectory) Write(ca *ComponentArchive, path string, opts Compon
 }
 
 // newComponentArchiveFromFilesystem creates a component archive object from a filesyste,
-func newComponentArchiveFromFilesystem(ctx core.Context, opts ComponentArchiveOptions, closer ComponentCloser) (*ComponentArchive, error) {
+func newComponentArchiveFromFilesystem(ctx cpi.Context, opts ComponentArchiveOptions, closer ComponentCloser) (*ComponentArchive, error) {
 	data, err := vfs.ReadFile(opts.ComponentFileSystem, filepath.Join("/", ComponentDescriptorFileName))
 	if err != nil {
 		return nil, fmt.Errorf("unable to read the component descriptor from %s: %w", ComponentDescriptorFileName, err)
@@ -129,7 +129,7 @@ func newComponentArchiveFromFilesystem(ctx core.Context, opts ComponentArchiveOp
 	return NewComponentArchive(ctx, nil, cd, opts.ComponentFileSystem, closer), nil
 }
 
-func newComponentArchiveForFilesystem(ctx core.Context, cd *compdesc.ComponentDescriptor, opts ComponentArchiveOptions, closer ComponentCloser) (*ComponentArchive, error) {
+func newComponentArchiveForFilesystem(ctx cpi.Context, cd *compdesc.ComponentDescriptor, opts ComponentArchiveOptions, closer ComponentCloser) (*ComponentArchive, error) {
 	if cd == nil {
 		cd = &compdesc.ComponentDescriptor{}
 	}

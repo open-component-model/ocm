@@ -18,45 +18,36 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/gardener/ocm/pkg/credentials"
+	"github.com/gardener/ocm/pkg/datacontext"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
 type Context interface {
-	context.Context
+	datacontext.Context
+	// With return the actual context for incorporating the given context.Context
+	With(ctx context.Context) Context
+
+	CredentialsContext() credentials.Context
 	OCIContext() oci.Context
+
 	RepositoryTypes() RepositoryTypeScheme
 	AccessMethods() AccessTypeScheme
 
-	RepositoryForSpec(spec RepositorySpec) (Repository, error)
-	RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler) (Repository, error)
+	RepositoryForSpec(spec RepositorySpec, creds ...credentials.CredentialsSource) (Repository, error)
+	RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...credentials.CredentialsSource) (Repository, error)
 	AccessSpecForSpec(spec compdesc.AccessSpec) (AccessSpec, error)
 	AccessSpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type _context struct {
-	context.Context
-	ocictx               oci.Context
-	knownRepositoryTypes RepositoryTypeScheme
-	knownAccessTypes     AccessTypeScheme
-}
-
 var key = reflect.TypeOf(_context{})
 
-func NewDefaultContext(ctx context.Context, ocictx oci.Context, accessScheme AccessTypeScheme, repoScheme RepositoryTypeScheme) Context {
-	c := &_context{
-		ocictx:               ocictx,
-		knownAccessTypes:     accessScheme,
-		knownRepositoryTypes: repoScheme,
-	}
-	c.Context = context.WithValue(ctx, key, c)
-	return c
-}
-
-func RepositoryContext(ctx context.Context) Context {
+// ForContextInternal returns the Context to use for context.Context.
+func ForContextInternal(ctx context.Context) Context {
 	c := ctx.Value(key)
 	if c == nil {
 		return nil
@@ -64,32 +55,56 @@ func RepositoryContext(ctx context.Context) Context {
 	return c.(Context)
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+type _context struct {
+	datacontext.DefaultContext
+	data *_contextData // cache for correctly typed context data, repölaces
+	// c.DefaultAccess().DataContext().(*_contextData)
+}
+
+func NewContext(ctx context.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme) Context {
+	return datacontext.NewContext(ctx, newDataContext(ctx, reposcheme, accessscheme)).(Context)
+}
+
+func (c *_context) With(ctx context.Context) Context {
+	return c.DefaultAccess().With(ctx).(Context)
+}
+
+func (c *_context) CredentialsContext() credentials.Context {
+	return c.data.ocictx.CredentialsContext()
+}
+
 func (c *_context) OCIContext() oci.Context {
-	return c.ocictx
+	return c.data.ocictx
 }
 
 func (c *_context) RepositoryTypes() RepositoryTypeScheme {
-	return c.knownRepositoryTypes
+	return c.data.knownRepositoryTypes
 }
 
-func (c *_context) AccessMethods() AccessTypeScheme {
-	return c.knownAccessTypes
-}
-
-func (c *_context) RepositoryForSpec(spec RepositorySpec) (Repository, error) {
-	return spec.Repository(c)
-}
-
-func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler) (Repository, error) {
-	spec, err := c.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
+func (c *_context) RepositoryForSpec(spec RepositorySpec, creds ...credentials.CredentialsSource) (Repository, error) {
+	cred, err := credentials.CredentialsChain(creds).Credentials(c.CredentialsContext())
 	if err != nil {
 		return nil, err
 	}
-	return spec.Repository(c)
+	return spec.Repository(c, cred)
+}
+
+func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...credentials.CredentialsSource) (Repository, error) {
+	spec, err := c.data.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
+	if err != nil {
+		return nil, err
+	}
+	return c.RepositoryForSpec(spec, creds...)
+}
+
+func (c *_context) AccessMethods() AccessTypeScheme {
+	return c.data.knownAccessTypes
 }
 
 func (c *_context) AccessSpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error) {
-	return c.knownAccessTypes.DecodeAccessSpec(data, unmarshaler)
+	return c.data.knownAccessTypes.DecodeAccessSpec(data, unmarshaler)
 }
 
 func (c *_context) AccessSpecForSpec(spec compdesc.AccessSpec) (AccessSpec, error) {
@@ -109,5 +124,35 @@ func (c *_context) AccessSpecForSpec(spec compdesc.AccessSpec) (AccessSpec, erro
 		return nil, err
 	}
 
-	return c.knownAccessTypes.DecodeAccessSpec(raw, runtime.DefaultJSONEncoding)
+	return c.data.knownAccessTypes.DecodeAccessSpec(raw, runtime.DefaultJSONEncoding)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type _contextData struct {
+	datacontext.AttributesContext
+
+	ocictx oci.Context
+
+	knownRepositoryTypes RepositoryTypeScheme
+	knownAccessTypes     AccessTypeScheme
+}
+
+func newDataContext(ctx context.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme) *_contextData {
+	if accessscheme == nil {
+		accessscheme = DefaultAccessTypeScheme
+	}
+	if reposcheme == nil {
+		reposcheme = DefaultRepositoryTypeScheme
+	}
+	return &_contextData{
+		AttributesContext:    datacontext.NewAttributes(nil),
+		ocictx:               oci.ForContext(ctx),
+		knownAccessTypes:     accessscheme,
+		knownRepositoryTypes: reposcheme,
+	}
+}
+
+func (c *_contextData) Wrap(defaultContext datacontext.DefaultContext) (datacontext.DefaultContext, interface{}) {
+	return &_context{defaultContext, defaultContext.DefaultAccess().DataContext().(*_contextData)}, key
 }

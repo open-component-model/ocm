@@ -17,20 +17,16 @@ package ocimutils
 import (
 	"reflect"
 
-	area "github.com/gardener/ocm/pkg/oci"
-	"github.com/gardener/ocm/pkg/ocm/compdesc"
+	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
 type RepositoryType struct {
 	runtime.ObjectTypeVersion
 	runtime.TypedObjectDecoder
-	checker RepositoryAccessMethodChecker
 }
 
-type RepositoryAccessMethodChecker func(area.Context, compdesc.AccessSpec) bool
-
-func NewRepositoryType(name string, proto area.RepositorySpec, checker RepositoryAccessMethodChecker) area.RepositoryType {
+func NewRepositoryType(name string, proto cpi.RepositorySpec) cpi.RepositoryType {
 	t := reflect.TypeOf(proto)
 	for t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -38,6 +34,5 @@ func NewRepositoryType(name string, proto area.RepositorySpec, checker Repositor
 	return &RepositoryType{
 		ObjectTypeVersion:  runtime.NewObjectTypeVersion(name),
 		TypedObjectDecoder: runtime.MustNewDirectDecoder(proto),
-		checker:            checker,
 	}
 }

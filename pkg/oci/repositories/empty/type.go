@@ -15,10 +15,9 @@
 package empty
 
 import (
-	area "github.com/gardener/ocm/pkg/oci"
+	"github.com/gardener/ocm/pkg/credentials"
+	"github.com/gardener/ocm/pkg/oci/cpi"
 	areautils "github.com/gardener/ocm/pkg/oci/ociutils"
-	"github.com/gardener/ocm/pkg/ocm/accessmethods"
-	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
@@ -27,32 +26,29 @@ const (
 	EmptyRepositoryTypeV1 = EmptyRepositoryType + "/v1"
 )
 
+const ATTR_REPOS = "github.com/gardener/ocm/pkg/oci/repositories/empty"
+
 func init() {
-	area.RegisterRepositoryType(EmptyRepositoryType, areautils.NewRepositoryType(EmptyRepositoryType, &EmptyRepositorySpec{}, localAccessChecker))
-	area.RegisterRepositoryType(EmptyRepositoryTypeV1, areautils.NewRepositoryType(EmptyRepositoryTypeV1, &EmptyRepositorySpec{}, localAccessChecker))
+	cpi.RegisterRepositoryType(EmptyRepositoryType, areautils.NewRepositoryType(EmptyRepositoryType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(EmptyRepositoryTypeV1, areautils.NewRepositoryType(EmptyRepositoryTypeV1, &RepositorySpec{}))
 }
 
-// EmptyRepositorySpec describes an OCI registry interface backed by an oci registry.
-type EmptyRepositorySpec struct {
+// RepositorySpec describes an OCI registry interface backed by an oci registry.
+type RepositorySpec struct {
 	runtime.ObjectTypeVersion `json:",inline"`
 }
 
-// NewEmptyRepositorySpec creates a new EmptyRepositorySpec
-func NewEmptyRepositorySpec() *EmptyRepositorySpec {
-	return &EmptyRepositorySpec{
+// NewRepositorySpec creates a new RepositorySpec
+func NewRepositorySpec() *RepositorySpec {
+	return &RepositorySpec{
 		ObjectTypeVersion: runtime.NewObjectTypeVersion(EmptyRepositoryType),
 	}
 }
 
-func (a *EmptyRepositorySpec) GetType() string {
+func (a *RepositorySpec) GetType() string {
 	return EmptyRepositoryType
 }
 
-func (a *EmptyRepositorySpec) Repository(ctx area.Context) (area.Repository, error) {
-	return NewEmptyRepository(), nil
-}
-
-func localAccessChecker(ctx area.Context, a compdesc.AccessSpec) bool {
-	name := a.GetName()
-	return name == accessmethods.LocalBlobType
+func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
+	return ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepository).(*Repository), nil
 }

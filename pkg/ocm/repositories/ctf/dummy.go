@@ -17,18 +17,19 @@ package ctf
 import (
 	"fmt"
 
+	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	"github.com/gardener/ocm/pkg/ocm/core"
+	"github.com/gardener/ocm/pkg/ocm/cpi"
 )
 
 var ErrOCIArtefatsNotSupported = errors.ErrNotSupported("oci artefacts", "plain component")
 
 type plainComponentSpec struct{}
 
-var _ core.RepositorySpec = &plainComponentSpec{}
+var _ cpi.RepositorySpec = &plainComponentSpec{}
 
 func (_ plainComponentSpec) GetType() string {
 	return "DummyRepo"
@@ -46,20 +47,20 @@ func (_ plainComponentSpec) GetVersion() string {
 	return "no version"
 }
 
-func (p plainComponentSpec) Repository(context core.Context) (core.Repository, error) {
+func (p plainComponentSpec) Repository(context cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	return &plainComponent{}, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type plainComponent struct {
-	ctx core.Context
+	ctx cpi.Context
 	ca  *ComponentArchive
 }
 
-var _ core.Repository = &plainComponent{}
+var _ cpi.Repository = &plainComponent{}
 
-func newPlainComponent(ca *ComponentArchive, ctx core.Context) core.Repository {
+func newPlainComponent(ca *ComponentArchive, ctx cpi.Context) cpi.Repository {
 	if ctx == nil {
 		ctx = ca.GetContext()
 	}
@@ -89,11 +90,11 @@ func (_ plainComponent) WriteArtefact(access oci.ArtefactAccess) (oci.ArtefactAc
 	return nil, ErrOCIArtefatsNotSupported
 }
 
-func (p *plainComponent) GetContext() core.Context {
+func (p *plainComponent) GetContext() cpi.Context {
 	return p.ca.GetContext()
 }
 
-func (_ plainComponent) GetSpecification() core.RepositorySpec {
+func (_ plainComponent) GetSpecification() cpi.RepositorySpec {
 	return &plainComponentSpec{}
 }
 
@@ -101,20 +102,20 @@ func (p *plainComponent) ExistsComponent(name string, version string) (bool, err
 	return p.ca != nil && p.ca.GetName() == name && p.ca.GetVersion() == version, nil
 }
 
-func (p *plainComponent) LookupComponent(name string, version string) (core.ComponentAccess, error) {
+func (p *plainComponent) LookupComponent(name string, version string) (cpi.ComponentAccess, error) {
 	if ok, _ := p.ExistsComponent(name, version); ok {
 		return p.ca, nil
 	}
 	return nil, errors.ErrNotFound(errors.KIND_COMPONENT, fmt.Sprintf("%s/%s", name, version))
 }
 
-func (p *plainComponent) ComposeComponent(name string, version string) (core.ComponentComposer, error) {
+func (p *plainComponent) ComposeComponent(name string, version string) (cpi.ComponentComposer, error) {
 	if ok, _ := p.ExistsComponent(name, version); ok {
 		return p.ca, nil
 	}
 	return nil, errors.ErrNotFound(errors.KIND_COMPONENT, fmt.Sprintf("%s/%s", name, version))
 }
 
-func (_ plainComponent) WriteComponent(access core.ComponentAccess) (core.ComponentAccess, error) {
+func (_ plainComponent) WriteComponent(access cpi.ComponentAccess) (cpi.ComponentAccess, error) {
 	return nil, errors.ErrNotSupported("write component", "plain component")
 }

@@ -15,11 +15,12 @@
 package ocireg
 
 import (
+	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	area "github.com/gardener/ocm/pkg/ocm/core"
+	"github.com/gardener/ocm/pkg/ocm/cpi"
 	areautils "github.com/gardener/ocm/pkg/ocm/ocmutils"
 )
 
@@ -36,8 +37,8 @@ const (
 )
 
 func init() {
-	area.RegisterRepositoryType(OCIRegistryRepositoryType, areautils.NewRepositoryType(OCIRegistryRepositoryType, &OCIRegistryRepositorySpec{}, localAccessChecker))
-	area.RegisterRepositoryType(OCIRegistryRepositoryTypeV1, areautils.NewRepositoryType(OCIRegistryRepositoryTypeV1, &OCIRegistryRepositorySpec{}, localAccessChecker))
+	cpi.RegisterRepositoryType(OCIRegistryRepositoryType, areautils.NewRepositoryType(OCIRegistryRepositoryType, &RepositorySpec{}, localAccessChecker))
+	cpi.RegisterRepositoryType(OCIRegistryRepositoryTypeV1, areautils.NewRepositoryType(OCIRegistryRepositoryTypeV1, &RepositorySpec{}, localAccessChecker))
 }
 
 // ComponentRepositoryMeta describes config special for a mapping of
@@ -48,10 +49,10 @@ type ComponentRepositoryMeta struct {
 	ComponentNameMapping ComponentNameMapping `json:"componentNameMapping"`
 }
 
-// OCIRegistryRepositorySpec describes a component repository backed by a oci registry.
-type OCIRegistryRepositorySpec struct {
-	ocireg.OCIRegistryRepositorySpec `json:",inline"`
-	ComponentRepositoryMeta          `json:",inline"`
+// RepositorySpec describes a component repository backed by a oci registry.
+type RepositorySpec struct {
+	ocireg.RepositorySpec   `json:",inline"`
+	ComponentRepositoryMeta `json:",inline"`
 }
 
 func NewComponentRepositoryMeta(mapping ComponentNameMapping) *ComponentRepositoryMeta {
@@ -60,25 +61,25 @@ func NewComponentRepositoryMeta(mapping ComponentNameMapping) *ComponentReposito
 	}
 }
 
-// NewOCIRegistryRepositorySpec creates a new OCIRegistryRepositorySpec
-func NewOCIRegistryRepositorySpec(baseURL string, mapping ComponentNameMapping) *OCIRegistryRepositorySpec {
+// NewRepositorySpec creates a new RepositorySpec
+func NewRepositorySpec(baseURL string, mapping ComponentNameMapping) *RepositorySpec {
 	if len(mapping) == 0 {
 		mapping = OCIRegistryURLPathMapping
 	}
-	return &OCIRegistryRepositorySpec{
-		OCIRegistryRepositorySpec: *ocireg.NewOCIRegistryRepositorySpec(baseURL),
-		ComponentRepositoryMeta:   *NewComponentRepositoryMeta(mapping),
+	return &RepositorySpec{
+		RepositorySpec:          *ocireg.NewRepositorySpec(baseURL),
+		ComponentRepositoryMeta: *NewComponentRepositoryMeta(mapping),
 	}
 }
 
-func (a *OCIRegistryRepositorySpec) GetType() string {
+func (a *RepositorySpec) GetType() string {
 	return OCIRegistryRepositoryType
 }
-func (a *OCIRegistryRepositorySpec) Repository(ctx area.Context) (area.Repository, error) {
+func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	return nil, errors.ErrNotImplemented() // TODO
 }
 
-func localAccessChecker(ctx area.Context, a compdesc.AccessSpec) bool {
+func localAccessChecker(ctx cpi.Context, a compdesc.AccessSpec) bool {
 	name := a.GetName()
 	return name == accessmethods.LocalBlobType
 }

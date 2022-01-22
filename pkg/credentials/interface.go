@@ -1,0 +1,67 @@
+// Copyright 2022 SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+
+package credentials
+
+import (
+	"context"
+
+	"github.com/gardener/ocm/pkg/common"
+	_ "github.com/gardener/ocm/pkg/credentials/repositories"
+
+	"github.com/gardener/ocm/pkg/credentials/core"
+)
+
+const KIND_CREDENTIALS = core.KIND_CREDENTIALS
+
+type Context = core.Context
+type RepositoryTypeScheme = core.RepositoryTypeScheme
+type Repository = core.Repository
+type Credentials = core.Credentials
+type CredentialsSource = core.CredentialsSource
+type CredentialsChain = core.CredentialsChain
+type CredentialsSpec = core.CredentialsSpec
+type RepositorySpec = core.RepositorySpec
+
+type GenericRepositorySpec = core.GenericRepositorySpec
+
+var DefaultContext = core.DefaultContext
+
+func ForContext(ctx context.Context) Context {
+	return core.ForContext(ctx)
+}
+
+func NewContext(ctx context.Context, reposcheme core.RepositoryTypeScheme) Context {
+	return core.NewContext(ctx, reposcheme)
+}
+
+func NewDefaultContext(ctx context.Context) Context {
+	return core.NewContext(ctx, nil)
+}
+
+func NewCredentialsSpec(name string, repospec RepositorySpec) CredentialsSpec {
+	return core.NewCredentialsSpec(name, repospec)
+}
+
+func NewGenericCredentialsSpec(name string, repospec GenericRepositorySpec) CredentialsSpec {
+	return core.NewGenericCredentialsSpec(name, repospec)
+}
+
+func NewCredentials(props common.Properties) Credentials {
+	return core.NewCredentials(props)
+}
+
+func ErrUnknownCredentials(name string) error {
+	return core.ErrUnknownCredentials(name)
+}

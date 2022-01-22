@@ -21,7 +21,7 @@ import (
 	"os"
 
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	"github.com/gardener/ocm/pkg/ocm/core"
+	cpi "github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
@@ -42,7 +42,7 @@ func (_ ComponentTGZ) String() string {
 	return "tgz"
 }
 
-func (c ComponentTGZ) Open(ctx core.Context, path string, opts ComponentArchiveOptions) (*ComponentArchive, error) {
+func (c ComponentTGZ) Open(ctx cpi.Context, path string, opts ComponentArchiveOptions) (*ComponentArchive, error) {
 	// we expect that the path point to a tar
 	file, err := opts.PathFileSystem.Open(path)
 	if err != nil {
@@ -52,7 +52,7 @@ func (c ComponentTGZ) Open(ctx core.Context, path string, opts ComponentArchiveO
 	return newComponentArchiveFromTGZReader(ctx, file, opts, ComponentCloserFunction(func(ca *ComponentArchive) error { return c.close(ca, ComponentInfo{path, opts}) }))
 }
 
-func (c ComponentTGZ) Create(ctx core.Context, path string, cd *compdesc.ComponentDescriptor, opts ComponentArchiveOptions) (*ComponentArchive, error) {
+func (c ComponentTGZ) Create(ctx cpi.Context, path string, cd *compdesc.ComponentDescriptor, opts ComponentArchiveOptions) (*ComponentArchive, error) {
 	ok, err := vfs.Exists(opts.PathFileSystem, path)
 	if err != nil {
 		return nil, err
@@ -94,7 +94,7 @@ func (c ComponentTGZ) close(ca *ComponentArchive, info ComponentInfo) error {
 }
 
 // newComponentArchiveFromTarReader creates a new manifest builder from a input reader.
-func newComponentArchiveFromTGZReader(ctx core.Context, in io.Reader, opts ComponentArchiveOptions, closer ComponentCloser) (*ComponentArchive, error) {
+func newComponentArchiveFromTGZReader(ctx cpi.Context, in io.Reader, opts ComponentArchiveOptions, closer ComponentCloser) (*ComponentArchive, error) {
 	// the archive is untared to a memory fs that the builder can work
 	// as it would be a default filesystem.
 

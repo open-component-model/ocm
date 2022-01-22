@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	"github.com/gardener/ocm/pkg/ocm/core"
+	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
@@ -45,7 +45,7 @@ func (_ ComponentTAR) String() string {
 	return "tar"
 }
 
-func (c ComponentTAR) Open(ctx core.Context, path string, opts ComponentArchiveOptions) (*ComponentArchive, error) {
+func (c ComponentTAR) Open(ctx cpi.Context, path string, opts ComponentArchiveOptions) (*ComponentArchive, error) {
 	// we expect that the path point to a tar
 	file, err := opts.PathFileSystem.Open(path)
 	if err != nil {
@@ -55,7 +55,7 @@ func (c ComponentTAR) Open(ctx core.Context, path string, opts ComponentArchiveO
 	return newComponentArchiveFromTarReader(ctx, file, opts, ComponentCloserFunction(func(ca *ComponentArchive) error { return c.close(ca, ComponentInfo{path, opts}) }))
 }
 
-func (c ComponentTAR) Create(ctx core.Context, path string, cd *compdesc.ComponentDescriptor, opts ComponentArchiveOptions) (*ComponentArchive, error) {
+func (c ComponentTAR) Create(ctx cpi.Context, path string, cd *compdesc.ComponentDescriptor, opts ComponentArchiveOptions) (*ComponentArchive, error) {
 	ok, err := vfs.Exists(opts.PathFileSystem, path)
 	if err != nil {
 		return nil, err
@@ -156,7 +156,7 @@ func (c ComponentTAR) close(ca *ComponentArchive, info ComponentInfo) error {
 }
 
 // newComponentArchiveFromTarReader creates a new manifest builder from a input reader.
-func newComponentArchiveFromTarReader(ctx core.Context, in io.Reader, opts ComponentArchiveOptions, closer ComponentCloser) (*ComponentArchive, error) {
+func newComponentArchiveFromTarReader(ctx cpi.Context, in io.Reader, opts ComponentArchiveOptions, closer ComponentCloser) (*ComponentArchive, error) {
 	// the archive is untared to a memory fs that the builder can work
 	// as it would be a default filesystem.
 

@@ -20,7 +20,7 @@ import (
 	"sync"
 
 	"github.com/gardener/ocm/pkg/common"
-	"github.com/gardener/ocm/pkg/ocm/core"
+	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/gardener/ocm/pkg/runtime"
 	"github.com/opencontainers/go-digest"
 )
@@ -31,7 +31,7 @@ type AccessImplementation interface {
 	MimeType() string
 }
 
-func GetImplementation(m core.AccessMethod) AccessImplementation {
+func GetImplementation(m cpi.AccessMethod) AccessImplementation {
 	if d, ok := m.(*DefaultAccessMethod); ok {
 		return d.impl
 	}
@@ -46,9 +46,9 @@ type DefaultAccessMethod struct {
 	size   int64
 }
 
-var _ core.AccessMethod = &DefaultAccessMethod{}
+var _ cpi.AccessMethod = &DefaultAccessMethod{}
 
-func NewDefaultAccessMethod(typ string, impl AccessImplementation) core.AccessMethod {
+func NewDefaultAccessMethod(typ string, impl AccessImplementation) cpi.AccessMethod {
 	return &DefaultAccessMethod{
 		ObjectTypeVersion: runtime.NewObjectTypeVersion(typ),
 		impl:              impl,

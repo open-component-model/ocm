@@ -20,8 +20,8 @@ import (
 
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
-	"github.com/gardener/ocm/pkg/ocm/core"
-	"github.com/gardener/ocm/pkg/ocm/core/accesstypes"
+	"github.com/gardener/ocm/pkg/ocm/cpi"
+	"github.com/gardener/ocm/pkg/ocm/cpi/accesstypes"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
@@ -32,8 +32,8 @@ const LocalFilesystemBlobTypeV1 = LocalFilesystemBlobType + "/v1"
 // Keep old access method and map generic one to this implementation for component archives
 
 func init() {
-	core.RegisterAccessType(accesstypes.NewConvertedType(LocalFilesystemBlobType, LocalFilesystemBlobV1))
-	core.RegisterAccessType(accesstypes.NewConvertedType(LocalFilesystemBlobTypeV1, LocalFilesystemBlobV1))
+	cpi.RegisterAccessType(accesstypes.NewConvertedType(LocalFilesystemBlobType, LocalFilesystemBlobV1))
+	cpi.RegisterAccessType(accesstypes.NewConvertedType(LocalFilesystemBlobTypeV1, LocalFilesystemBlobV1))
 }
 
 // NewLocalFilesystemBlobAccessSpecV1 creates a new localFilesystemBlob accessor.
@@ -52,11 +52,11 @@ type LocalFilesystemBlobAccessSpec struct {
 	accessmethods.LocalBlobAccessSpec `json:",inline"`
 }
 
-func (a *LocalFilesystemBlobAccessSpec) ValidFor(repo core.Repository) bool {
+func (a *LocalFilesystemBlobAccessSpec) ValidFor(repo cpi.Repository) bool {
 	return repo.GetSpecification().GetName() == CTFRepositoryType
 }
 
-func (a *LocalFilesystemBlobAccessSpec) AccessMethod(c core.ComponentAccess) (core.AccessMethod, error) {
+func (a *LocalFilesystemBlobAccessSpec) AccessMethod(c cpi.ComponentAccess) (cpi.AccessMethod, error) {
 	rtype := c.GetAccessType()
 	if rtype != CTFRepositoryType {
 		return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, c.GetName(), rtype)
@@ -74,7 +74,7 @@ type localfsblobConverterV1 struct{}
 
 var LocalFilesystemBlobV1 = accesstypes.NewAccessSpecVersion(&accessmethods.LocalBlobAccessSpecV1{}, localfsblobConverterV1{})
 
-func (_ localfsblobConverterV1) ConvertFrom(object core.AccessSpec) (runtime.TypedObject, error) {
+func (_ localfsblobConverterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, error) {
 	in := object.(*LocalFilesystemBlobAccessSpec)
 	return &accessmethods.LocalBlobAccessSpecV1{
 		ObjectTypeVersion: runtime.NewObjectTypeVersion(in.Type),
@@ -83,7 +83,7 @@ func (_ localfsblobConverterV1) ConvertFrom(object core.AccessSpec) (runtime.Typ
 	}, nil
 }
 
-func (_ localfsblobConverterV1) ConvertTo(object interface{}) (core.AccessSpec, error) {
+func (_ localfsblobConverterV1) ConvertTo(object interface{}) (cpi.AccessSpec, error) {
 	in := object.(*accessmethods.LocalBlobAccessSpecV1)
 	return &LocalFilesystemBlobAccessSpec{
 		LocalBlobAccessSpec: accessmethods.LocalBlobAccessSpec{
@@ -103,7 +103,7 @@ type localFilesystemBlobAccessMethod struct {
 
 var _ accessmethods.AccessImplementation = &localFilesystemBlobAccessMethod{}
 
-func newLocalFilesystemBlobAccessMethod(a *LocalFilesystemBlobAccessSpec, comp *ComponentArchive) (core.AccessMethod, error) {
+func newLocalFilesystemBlobAccessMethod(a *LocalFilesystemBlobAccessSpec, comp *ComponentArchive) (cpi.AccessMethod, error) {
 	return accessmethods.NewDefaultAccessMethod(LocalFilesystemBlobType, &localFilesystemBlobAccessMethod{
 		spec: a,
 		comp: comp,

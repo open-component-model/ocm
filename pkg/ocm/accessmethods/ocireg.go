@@ -18,8 +18,8 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/gardener/ocm/pkg/ocm/core"
-	"github.com/gardener/ocm/pkg/ocm/core/accesstypes"
+	"github.com/gardener/ocm/pkg/ocm/cpi"
+	"github.com/gardener/ocm/pkg/ocm/cpi/accesstypes"
 	"github.com/gardener/ocm/pkg/runtime"
 	"github.com/opencontainers/go-digest"
 )
@@ -29,8 +29,8 @@ const OCIRegistryType = "ociRegistry"
 const OCIRegistryTypeV1 = OCIRegistryType + "/v1"
 
 func init() {
-	core.RegisterAccessType(accesstypes.NewType(OCIRegistryType, &OCIRegistryAccessSpec{}))
-	core.RegisterAccessType(accesstypes.NewType(OCIRegistryTypeV1, &OCIRegistryAccessSpec{}))
+	cpi.RegisterAccessType(accesstypes.NewType(OCIRegistryType, &OCIRegistryAccessSpec{}))
+	cpi.RegisterAccessType(accesstypes.NewType(OCIRegistryTypeV1, &OCIRegistryAccessSpec{}))
 }
 
 // OCIRegistryAccessSpec describes the access for a oci registry.
@@ -53,11 +53,11 @@ func (_ *OCIRegistryAccessSpec) GetType() string {
 	return OCIRegistryType
 }
 
-func (a *OCIRegistryAccessSpec) ValidFor(core.Repository) bool {
+func (a *OCIRegistryAccessSpec) ValidFor(cpi.Repository) bool {
 	return true
 }
 
-func (a *OCIRegistryAccessSpec) AccessMethod(c core.ComponentAccess) (core.AccessMethod, error) {
+func (a *OCIRegistryAccessSpec) AccessMethod(c cpi.ComponentAccess) (cpi.AccessMethod, error) {
 	return newOCIRegistryAccessMethod(a)
 }
 
@@ -67,7 +67,7 @@ type OCIRegistryAccessMethod struct {
 	spec *OCIRegistryAccessSpec
 }
 
-var _ core.AccessMethod = &OCIRegistryAccessMethod{}
+var _ cpi.AccessMethod = &OCIRegistryAccessMethod{}
 
 func newOCIRegistryAccessMethod(a *OCIRegistryAccessSpec) (*OCIRegistryAccessMethod, error) {
 	return &OCIRegistryAccessMethod{

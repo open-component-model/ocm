@@ -18,11 +18,12 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	area "github.com/gardener/ocm/pkg/ocm/core"
+	"github.com/gardener/ocm/pkg/ocm/cpi"
 	compreg "github.com/gardener/ocm/pkg/ocm/repositories/ocireg"
 	"github.com/gardener/ocm/pkg/runtime"
 )
@@ -41,7 +42,7 @@ type GenericOCIRepositoryBackendType struct {
 	ocictx oci.Context
 }
 
-var _ area.RepositoryType = &GenericOCIRepositoryBackendType{}
+var _ cpi.RepositoryType = &GenericOCIRepositoryBackendType{}
 
 // NewOCIRepositoryBackendType creates generic type for any OCI Repository Backend
 func NewOCIRepositoryBackendType(ocictx oci.Context) *GenericOCIRepositoryBackendType {
@@ -68,7 +69,7 @@ func (t *GenericOCIRepositoryBackendType) Decode(data []byte, unmarshal runtime.
 	return NewGenericOCIBackendSpec(ospec, meta), nil
 }
 
-func (t *GenericOCIRepositoryBackendType) LocalSupportForAccessSpec(ctx area.Context, a compdesc.AccessSpec) bool {
+func (t *GenericOCIRepositoryBackendType) LocalSupportForAccessSpec(ctx cpi.Context, a compdesc.AccessSpec) bool {
 	name := a.GetName()
 	return name == accessmethods.LocalBlobType
 }
@@ -119,8 +120,8 @@ func (u *GenericOCIBackendSpec) MarshalJSON() ([]byte, error) {
 	return json.Marshal(compmeta.FlatMerge(ocispec.Object))
 }
 
-func (s *GenericOCIBackendSpec) Repository(ctx area.Context) (area.Repository, error) {
-	r, err := s.RepositorySpec.Repository(ctx.OCIContext())
+func (s *GenericOCIBackendSpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
+	r, err := s.RepositorySpec.Repository(ctx.OCIContext(), creds)
 	if err != nil {
 		return nil, err
 	}

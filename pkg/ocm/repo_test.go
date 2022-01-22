@@ -32,7 +32,7 @@ var DefaultContext = ocm.NewDefaultContext(context.TODO())
 var _ = Describe("access method", func() {
 	It("instantiate repo mapped to empty oci repo", func() {
 		backendSpec := genericocireg.NewGenericOCIBackendSpec(
-			empty.NewEmptyRepositorySpec(),
+			empty.NewRepositorySpec(),
 			ocmreg.NewComponentRepositoryMeta(ocmreg.OCIRegistryDigestMapping))
 		data, err := json.Marshal(backendSpec)
 		Expect(err).To(Succeed())

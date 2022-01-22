@@ -15,11 +15,10 @@
 package ocireg
 
 import (
+	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/errors"
-	area "github.com/gardener/ocm/pkg/oci"
+	cpi "github.com/gardener/ocm/pkg/oci/cpi"
 	areautils "github.com/gardener/ocm/pkg/oci/ociutils"
-	"github.com/gardener/ocm/pkg/ocm/accessmethods"
-	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
@@ -29,33 +28,28 @@ const (
 )
 
 func init() {
-	area.RegisterRepositoryType(OCIRegistryRepositoryType, areautils.NewRepositoryType(OCIRegistryRepositoryType, &OCIRegistryRepositorySpec{}, localAccessChecker))
-	area.RegisterRepositoryType(OCIRegistryRepositoryTypeV1, areautils.NewRepositoryType(OCIRegistryRepositoryTypeV1, &OCIRegistryRepositorySpec{}, localAccessChecker))
+	cpi.RegisterRepositoryType(OCIRegistryRepositoryType, areautils.NewRepositoryType(OCIRegistryRepositoryType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(OCIRegistryRepositoryTypeV1, areautils.NewRepositoryType(OCIRegistryRepositoryTypeV1, &RepositorySpec{}))
 }
 
-// OCIRegistryRepositorySpec describes an OCI registry interface backed by an oci registry.
-type OCIRegistryRepositorySpec struct {
+// RepositorySpec describes an OCI registry interface backed by an oci registry.
+type RepositorySpec struct {
 	runtime.ObjectTypeVersion `json:",inline"`
 	// BaseURL is the base url of the repository to resolve artefacts.
 	BaseURL string `json:"baseUrl"`
 }
 
-// NewOCIRegistryRepositorySpec creates a new OCIRegistryRepositorySpec
-func NewOCIRegistryRepositorySpec(baseURL string) *OCIRegistryRepositorySpec {
-	return &OCIRegistryRepositorySpec{
+// NewRepositorySpec creates a new RepositorySpec
+func NewRepositorySpec(baseURL string) *RepositorySpec {
+	return &RepositorySpec{
 		ObjectTypeVersion: runtime.NewObjectTypeVersion(OCIRegistryRepositoryType),
 		BaseURL:           baseURL,
 	}
 }
 
-func (a *OCIRegistryRepositorySpec) GetType() string {
+func (a *RepositorySpec) GetType() string {
 	return OCIRegistryRepositoryType
 }
-func (a *OCIRegistryRepositorySpec) Repository(ctx area.Context) (area.Repository, error) {
+func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	return nil, errors.ErrNotImplemented() // TODO
-}
-
-func localAccessChecker(ctx area.Context, a compdesc.AccessSpec) bool {
-	name := a.GetName()
-	return name == accessmethods.LocalBlobType
 }

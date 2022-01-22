@@ -19,6 +19,7 @@ import (
 	"reflect"
 
 	"github.com/gardener/ocm/pkg/common"
+	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/runtime"
@@ -37,7 +38,7 @@ type RepositorySpec interface {
 	runtime.TypedObject
 	common.VersionedElement
 
-	Repository(Context) (Repository, error)
+	Repository(Context, credentials.Credentials) (Repository, error)
 }
 
 type RepositoryTypeScheme interface {
@@ -98,7 +99,7 @@ func (t *repositoryTypeScheme) DecodeRepositorySpec(data []byte, unmarshaler run
 	if spec, ok := obj.(RepositorySpec); ok {
 		return spec, nil
 	}
-	return nil, fmt.Errorf("invalid access spec type: yield %T instead of RepositorySpec")
+	return nil, fmt.Errorf("invalid access spec type: yield %T instead of RepositorySpec", obj)
 }
 
 func (t *repositoryTypeScheme) CreateRepositorySpec(obj runtime.TypedObject) (RepositorySpec, error) {
@@ -118,10 +119,6 @@ func (t *repositoryTypeScheme) CreateRepositorySpec(obj runtime.TypedObject) (Re
 // DefaultRepositoryTypeScheme contains all globally known access serializer
 var DefaultRepositoryTypeScheme = NewRepositoryTypeScheme(nil)
 
-func RegisterRepositoryType(name string, atype RepositoryType) {
-	DefaultRepositoryTypeScheme.Register(name, atype)
-}
-
 func CreateRepositorySpec(t runtime.TypedObject) (RepositorySpec, error) {
 	return DefaultRepositoryTypeScheme.CreateRepositorySpec(t)
 }
@@ -132,6 +129,32 @@ type UnknownRepositorySpec struct {
 
 var _ RepositorySpec = &UnknownRepositorySpec{}
 
-func (r *UnknownRepositorySpec) Repository(Context) (Repository, error) {
+func (r *UnknownRepositorySpec) Repository(Context, credentials.Credentials) (Repository, error) {
 	return nil, errors.ErrUnknown("respository type", r.GetType())
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+type GenericRepositorySpec struct {
+	runtime.UnstructuredVersionedTypedObject `json:",inline"`
+}
+
+var _ RepositorySpec = &GenericRepositorySpec{}
+
+func (s *GenericRepositorySpec) Evaluate(ctx Context) (RepositorySpec, error) {
+	raw, err := s.GetRaw()
+	if err != nil {
+		return nil, err
+	}
+	return ctx.RepositoryTypes().DecodeRepositorySpec(raw, runtime.DefaultJSONEncoding)
+}
+
+func (s *GenericRepositorySpec) Repository(ctx Context, creds credentials.Credentials) (Repository, error) {
+	spec, err := s.Evaluate(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return spec.Repository(ctx, creds)
+}
+
+var _ RepositorySpec = &GenericRepositorySpec{}

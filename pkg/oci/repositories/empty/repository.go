@@ -15,13 +15,15 @@
 package empty
 
 import (
+	"context"
+
 	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/oci"
+	"github.com/gardener/ocm/pkg/oci/cpi"
 )
 
 type Repository struct{}
 
-func NewEmptyRepository() oci.Repository {
+func newRepository(ctx context.Context) interface{} {
 	return &Repository{}
 }
 
@@ -29,16 +31,16 @@ func (r Repository) ExistsArtefact(name string, version string) (bool, error) {
 	return false, nil
 }
 
-func (r Repository) LookupArtefact(name string, version string) (oci.ArtefactAccess, error) {
-	return nil, oci.ErrUnknownArtefact(name, version)
+func (r Repository) LookupArtefact(name string, version string) (cpi.ArtefactAccess, error) {
+	return nil, cpi.ErrUnknownArtefact(name, version)
 }
 
-func (r Repository) ComposeArtefact(name string, version string) (oci.ArtefactComposer, error) {
+func (r Repository) ComposeArtefact(name string, version string) (cpi.ArtefactComposer, error) {
 	return nil, errors.ErrNotSupported("artefact composition")
 }
 
-func (r Repository) WriteArtefact(access oci.ArtefactAccess) (oci.ArtefactAccess, error) {
+func (r Repository) WriteArtefact(access cpi.ArtefactAccess) (cpi.ArtefactAccess, error) {
 	return nil, errors.ErrNotSupported("write access")
 }
 
-var _ oci.Repository = &Repository{}
+var _ cpi.Repository = &Repository{}

@@ -99,10 +99,6 @@ func (t *accessTypeScheme) CreateAccessSpec(obj runtime.TypedObject) (AccessSpec
 // DefaultAccessTypeScheme contains all globally known access serializer
 var DefaultAccessTypeScheme = NewAccessTypeScheme()
 
-func RegisterAccessType(atype AccessType) {
-	DefaultAccessTypeScheme.Register(atype.GetName(), atype)
-}
-
 func GetAccessType(name string) AccessType {
 	return DefaultAccessTypeScheme.GetAccessType(name)
 }

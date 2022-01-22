@@ -17,15 +17,17 @@ package genericocireg
 import (
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	"github.com/gardener/ocm/pkg/ocm/core"
+	"github.com/gardener/ocm/pkg/ocm/cpi"
 )
 
 type Repository struct {
-	ctx     core.Context
+	ctx     cpi.Context
 	ocirepo oci.Repository
 }
 
-func NewRepository(ctx core.Context, ocirepo oci.Repository) (core.Repository, error) {
+var _ cpi.Repository = &Repository{}
+
+func NewRepository(ctx cpi.Context, ocirepo oci.Repository) (cpi.Repository, error) {
 	repo := &Repository{
 		ctx:     ctx,
 		ocirepo: ocirepo,
@@ -50,11 +52,11 @@ func (r Repository) WriteArtefact(access oci.ArtefactAccess) (oci.ArtefactAccess
 	panic("implement me")
 }
 
-func (r Repository) GetContext() core.Context {
+func (r Repository) GetContext() cpi.Context {
 	panic("implement me")
 }
 
-func (r Repository) GetSpecification() core.RepositorySpec {
+func (r Repository) GetSpecification() cpi.RepositorySpec {
 	panic("implement me")
 }
 
@@ -62,15 +64,15 @@ func (r Repository) ExistsComponent(name string, version string) (bool, error) {
 	panic("implement me")
 }
 
-func (r Repository) LookupComponent(name string, version string) (core.ComponentAccess, error) {
+func (r Repository) LookupComponent(name string, version string) (cpi.ComponentAccess, error) {
 	panic("implement me")
 }
 
-func (r Repository) ComposeComponent(name string, version string) (core.ComponentComposer, error) {
+func (r Repository) ComposeComponent(name string, version string) (cpi.ComponentComposer, error) {
 	panic("implement me")
 }
 
-func (r Repository) WriteComponent(access core.ComponentAccess) (core.ComponentAccess, error) {
+func (r Repository) WriteComponent(access cpi.ComponentAccess) (cpi.ComponentAccess, error) {
 	panic("implement me")
 }
 
