@@ -19,6 +19,7 @@ import (
 	"reflect"
 
 	"github.com/gardener/ocm/pkg/datacontext"
+	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
@@ -36,6 +37,11 @@ type Context interface {
 
 	CredentialsForSpec(spec CredentialsSpec, creds ...CredentialsSource) (Credentials, error)
 	CredentialsForConfig(data []byte, unmarshaler runtime.Unmarshaler, cred ...CredentialsSource) (Credentials, error)
+
+	CredentialsForConsumer(ConsumerIdentity) (Credentials, error)
+	SetCredentialsForConsumer(identity ConsumerIdentity, creds CredentialsSource)
+
+	SetAlias(name string, spec RepositorySpec, creds ...CredentialsSource) error
 }
 
 // DefaultContext is the default context initialized by init functions
@@ -61,6 +67,8 @@ type _context struct {
 	data *_contextData // cache for correctly typed context data, repölaces
 	// c.DefaultAccess().DataContext().(*_contextData)
 }
+
+var _ Context = &_context{}
 
 func NewContext(ctx context.Context, reposcheme RepositoryTypeScheme) Context {
 	return datacontext.NewContext(ctx, newDataContext(reposcheme)).(Context)
@@ -113,12 +121,36 @@ func (c *_context) CredentialsForConfig(data []byte, unmarshaler runtime.Unmarsh
 	return c.CredentialsForSpec(spec, creds...)
 }
 
+func (c *_context) CredentialsForConsumer(identity ConsumerIdentity) (Credentials, error) {
+	consumer := c.data.consumers.Get(identity)
+	if consumer == nil {
+		return nil, ErrUnknownConsumer(identity.String())
+	}
+	return consumer.GetCredentials(c)
+}
+
+func (c *_context) SetCredentialsForConsumer(identity ConsumerIdentity, creds CredentialsSource) {
+	c.data.consumers.Set(identity, creds)
+}
+
+func (c *_context) SetAlias(name string, spec RepositorySpec, creds ...CredentialsSource) error {
+	t := c.data.knownRepositoryTypes.GetRepositoryType(AliasRepositoryType)
+	if t == nil {
+		return errors.ErrNotSupported("aliases")
+	}
+	if a, ok := t.(AliasRegistry); ok {
+		return a.SetAlias(c, name, spec, CredentialsChain(creds))
+	}
+	return errors.ErrNotImplemented("interface", "AliasRegistry", reflect.TypeOf(t).String())
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type _contextData struct {
 	datacontext.AttributesContext
 
 	knownRepositoryTypes RepositoryTypeScheme
+	consumers            *_consumers
 }
 
 var _ datacontext.DataContext = &_contextData{}
@@ -130,6 +162,7 @@ func newDataContext(reposcheme RepositoryTypeScheme) *_contextData {
 	return &_contextData{
 		AttributesContext:    datacontext.NewAttributes(nil),
 		knownRepositoryTypes: reposcheme,
+		consumers:            newConsumers(),
 	}
 }
 

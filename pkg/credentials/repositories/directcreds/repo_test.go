@@ -26,7 +26,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var DefaultContext = credentials.NewContext(context.TODO())
+var DefaultContext = credentials.NewDefaultContext(context.TODO())
 
 var _ = Describe("direct credentials", func() {
 	props := common.Properties{

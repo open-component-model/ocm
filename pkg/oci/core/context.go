@@ -60,6 +60,8 @@ type _context struct {
 	// c.DefaultAccess().DataContext().(*_contextData)
 }
 
+var _ Context = &_context{}
+
 func NewContext(ctx context.Context, reposcheme RepositoryTypeScheme) Context {
 	return datacontext.NewContext(ctx, newDataContext(ctx, reposcheme)).(Context)
 }

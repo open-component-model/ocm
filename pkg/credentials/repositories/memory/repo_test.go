@@ -21,12 +21,13 @@ import (
 
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/credentials"
-	"github.com/gardener/ocm/pkg/credentials/repositories/memory"
+	local "github.com/gardener/ocm/pkg/credentials/repositories/memory"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-var DefaultContext = credentials.NewContext(context.TODO())
+var DefaultContext = credentials.NewDefaultContext(context.TODO())
 
 var _ = Describe("direct credentials", func() {
 	props := common.Properties{
@@ -44,7 +45,7 @@ var _ = Describe("direct credentials", func() {
 	_ = props
 
 	It("serializes repo spec", func() {
-		spec := memory.NewRepositorySpec("test")
+		spec := local.NewRepositorySpec("test")
 		data, err := json.Marshal(spec)
 		Expect(err).To(Succeed())
 		Expect(data).To(Equal([]byte(specdata)))
@@ -53,7 +54,7 @@ var _ = Describe("direct credentials", func() {
 		spec, err := DefaultContext.RepositorySpecForConfig([]byte(specdata), nil)
 		Expect(err).To(Succeed())
 		Expect(reflect.TypeOf(spec).String()).To(Equal("*memory.RepositorySpec"))
-		Expect(spec.(*memory.RepositorySpec).RepositoryName).To(Equal("test"))
+		Expect(spec.(*local.RepositorySpec).RepositoryName).To(Equal("test"))
 	})
 
 	It("resolves repository", func() {
@@ -100,7 +101,7 @@ var _ = Describe("direct credentials", func() {
 
 	It("caches repo in two contexts", func() {
 		ctx1 := DefaultContext
-		ctx2 := credentials.NewContext(ctx1)
+		ctx2 := credentials.NewDefaultContext(ctx1)
 
 		// write to first context
 		repo1, err := ctx1.RepositoryForConfig([]byte(specdata), nil)

@@ -15,27 +15,40 @@
 package core
 
 import (
-	"github.com/modern-go/reflect2"
+	"sync"
 )
 
-// CredentialsSource is a factory for effective credentials.
-type CredentialsSource interface {
-	Credentials(Context, ...CredentialsSource) (Credentials, error)
+type _consumers struct {
+	sync.RWMutex
+	data map[string]*_consumer
 }
 
-// CredentialsChain is a chain of credentials, where the
-// credential i+1 (is present) is used to resolve credential i
-type CredentialsChain []CredentialsSource
-
-var _ CredentialsSource = CredentialsChain{}
-
-func (c CredentialsChain) Credentials(ctx Context, creds ...CredentialsSource) (Credentials, error) {
-	if len(c) == 0 || reflect2.IsNil(c[0]) {
-		return nil, nil
+func newConsumers() *_consumers {
+	return &_consumers{
+		data: map[string]*_consumer{},
 	}
+}
 
-	if len(creds) == 0 {
-		return c[0].Credentials(ctx, c[1:]...)
+func (c *_consumers) Get(id ConsumerIdentity) *_consumer {
+	c.RLock()
+	defer c.RUnlock()
+	return c.data[string(id.Key())]
+}
+
+func (c *_consumers) Set(id ConsumerIdentity, creds CredentialsSource) {
+	c.Lock()
+	defer c.Unlock()
+	c.data[string(id.Key())] = &_consumer{
+		identity:    id,
+		credentials: creds,
 	}
-	return c[0].Credentials(ctx, append(append(c[:0:len(c)-1+len(creds)], c[1:]...), creds...))
+}
+
+type _consumer struct {
+	identity    ConsumerIdentity
+	credentials CredentialsSource
+}
+
+func (c *_consumer) GetCredentials(ctx Context) (Credentials, error) {
+	return c.credentials.Credentials(ctx)
 }

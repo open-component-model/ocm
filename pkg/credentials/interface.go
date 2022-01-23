@@ -19,11 +19,16 @@ import (
 
 	"github.com/gardener/ocm/pkg/common"
 	_ "github.com/gardener/ocm/pkg/credentials/repositories"
+	"github.com/gardener/ocm/pkg/runtime"
 
 	"github.com/gardener/ocm/pkg/credentials/core"
 )
 
 const KIND_CREDENTIALS = core.KIND_CREDENTIALS
+const KIND_CONSUMER = core.KIND_CREDENTIALS
+const KIND_REPOSITORY = core.KIND_REPOSITORY
+
+const AliasRepositoryType = core.AliasRepositoryType
 
 type Context = core.Context
 type RepositoryTypeScheme = core.RepositoryTypeScheme
@@ -35,6 +40,7 @@ type CredentialsSpec = core.CredentialsSpec
 type RepositorySpec = core.RepositorySpec
 
 type GenericRepositorySpec = core.GenericRepositorySpec
+type DirectCredentials = core.DirectCredentials
 
 var DefaultContext = core.DefaultContext
 
@@ -56,6 +62,10 @@ func NewCredentialsSpec(name string, repospec RepositorySpec) CredentialsSpec {
 
 func NewGenericCredentialsSpec(name string, repospec GenericRepositorySpec) CredentialsSpec {
 	return core.NewGenericCredentialsSpec(name, repospec)
+}
+
+func NewGenericRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
+	return core.NewGenericRepositorySpec(data, unmarshaler)
 }
 
 func NewCredentials(props common.Properties) Credentials {

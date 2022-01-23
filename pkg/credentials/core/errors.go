@@ -19,7 +19,17 @@ import (
 )
 
 const KIND_CREDENTIALS = "credentials"
+const KIND_CONSUMER = "consumer"
+const KIND_REPOSITORY = "repository"
 
 func ErrUnknownCredentials(name string) error {
 	return errors.ErrUnknown(KIND_CREDENTIALS, name)
+}
+
+func ErrUnknownConsumer(name string) error {
+	return errors.ErrUnknown(KIND_CONSUMER, name)
+}
+
+func ErrUnknownRepository(kind, name string) error {
+	return errors.ErrUnknown(KIND_REPOSITORY, name, kind)
 }

@@ -133,6 +133,18 @@ type GenericRepositorySpec struct {
 	runtime.UnstructuredVersionedTypedObject `json:",inline"`
 }
 
+func NewGenericRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
+	unstr := &runtime.UnstructuredVersionedTypedObject{}
+	if unmarshaler == nil {
+		unmarshaler = runtime.DefaultYAMLEncoding
+	}
+	err := unmarshaler.Unmarshal(data, unstr)
+	if err != nil {
+		return nil, err
+	}
+	return &GenericRepositorySpec{*unstr}, nil
+}
+
 func (s *GenericRepositorySpec) Evaluate(ctx Context) (RepositorySpec, error) {
 	raw, err := s.GetRaw()
 	if err != nil {

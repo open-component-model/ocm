@@ -21,9 +21,8 @@ import (
 	"github.com/gardener/ocm/pkg/credentials/core"
 )
 
-const DirectCredentialsType = core.DirectCredentialsType
-
 const KIND_CREDENTIALS = core.KIND_CREDENTIALS
+const KIND_REPOSITORY = core.KIND_REPOSITORY
 
 type Context = core.Context
 type Repository = core.Repository
@@ -54,4 +53,8 @@ func NewCredentials(props common.Properties) Credentials {
 
 func ErrUnknownCredentials(name string) error {
 	return core.ErrUnknownCredentials(name)
+}
+
+func ErrUnknownRepository(kind, name string) error {
+	return core.ErrUnknownRepository(kind, name)
 }

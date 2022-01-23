@@ -17,23 +17,23 @@ package memory
 import (
 	"sync"
 
-	area "github.com/gardener/ocm/pkg/credentials/core"
+	"github.com/gardener/ocm/pkg/credentials/cpi"
 )
 
 type Repository struct {
 	lock        sync.RWMutex
 	name        string
-	credentials map[string]*area.DirectCredentials
+	credentials map[string]cpi.Credentials
 }
 
 func NewRepository(name string) *Repository {
 	return &Repository{
 		name:        name,
-		credentials: map[string]*area.DirectCredentials{},
+		credentials: map[string]cpi.Credentials{},
 	}
 }
 
-var _ area.Repository = &Repository{}
+var _ cpi.Repository = &Repository{}
 
 func (r *Repository) ExistsCredentials(name string) (bool, error) {
 	r.lock.RLock()
@@ -42,22 +42,22 @@ func (r *Repository) ExistsCredentials(name string) (bool, error) {
 	return ok, nil
 }
 
-func (r Repository) LookupCredentials(name string) (area.Credentials, error) {
+func (r Repository) LookupCredentials(name string) (cpi.Credentials, error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 	c, ok := r.credentials[name]
 	if ok {
-		return c.Copy(), nil
+		return cpi.NewCredentials(c.Properties()), nil
 	}
-	return nil, area.ErrUnknownCredentials(name)
+	return nil, cpi.ErrUnknownCredentials(name)
 }
 
-func (r Repository) WriteCredentials(name string, creds area.Credentials) (area.Credentials, error) {
-	c := area.NewCredentials(creds.Properties())
+func (r Repository) WriteCredentials(name string, creds cpi.Credentials) (cpi.Credentials, error) {
+	c := cpi.NewCredentials(creds.Properties())
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	r.credentials[name] = c
 	return c, nil
 }
 
-var _ area.Repository = &Repository{}
+var _ cpi.Repository = &Repository{}

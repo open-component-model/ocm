@@ -12,30 +12,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package core
+package cpi
 
 import (
-	"github.com/modern-go/reflect2"
+	"github.com/gardener/ocm/pkg/credentials/core"
 )
 
-// CredentialsSource is a factory for effective credentials.
-type CredentialsSource interface {
-	Credentials(Context, ...CredentialsSource) (Credentials, error)
-}
+const DirectCredentialsType = core.DirectCredentialsType
+const AliasRepositoryType = core.AliasRepositoryType
 
-// CredentialsChain is a chain of credentials, where the
-// credential i+1 (is present) is used to resolve credential i
-type CredentialsChain []CredentialsSource
-
-var _ CredentialsSource = CredentialsChain{}
-
-func (c CredentialsChain) Credentials(ctx Context, creds ...CredentialsSource) (Credentials, error) {
-	if len(c) == 0 || reflect2.IsNil(c[0]) {
-		return nil, nil
-	}
-
-	if len(creds) == 0 {
-		return c[0].Credentials(ctx, c[1:]...)
-	}
-	return c[0].Credentials(ctx, append(append(c[:0:len(c)-1+len(creds)], c[1:]...), creds...))
-}
+type AliasRegistry = core.AliasRegistry
+type CredentialsSource = core.CredentialsSource
