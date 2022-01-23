@@ -22,14 +22,14 @@ import (
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/credentials"
 	local "github.com/gardener/ocm/pkg/credentials/repositories/dockerconfig"
+	"github.com/gardener/ocm/pkg/oci/identity"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-var DefaultContext = credentials.NewDefaultContext(context.TODO())
-
 var _ = Describe("docker config", func() {
+
 	props := common.Properties{
 		"username":      "mandelsoft",
 		"password":      "password",
@@ -43,14 +43,24 @@ var _ = Describe("docker config", func() {
 	}
 
 	specdata := "{\"type\":\"DockerConfig\",\"dockerConfigFile\":\"testdata/dockerconfig.json\"}"
+	specdata2 := "{\"type\":\"DockerConfig\",\"dockerConfigFile\":\"testdata/dockerconfig.json\",\"propagateConsumerIdentity\":true}"
 
-	_ = props
+	var DefaultContext credentials.Context
+
+	BeforeEach(func() {
+		DefaultContext = credentials.NewDefaultContext(context.TODO())
+	})
 
 	It("serializes repo spec", func() {
 		spec := local.NewRepositorySpec("testdata/dockerconfig.json")
 		data, err := json.Marshal(spec)
 		Expect(err).To(Succeed())
 		Expect(data).To(Equal([]byte(specdata)))
+
+		spec = local.NewRepositorySpec("testdata/dockerconfig.json").WithConsumerPropagation(true)
+		data, err = json.Marshal(spec)
+		Expect(err).To(Succeed())
+		Expect(data).To(Equal([]byte(specdata2)))
 	})
 	It("deserializes repo spec", func() {
 		spec, err := DefaultContext.RepositorySpecForConfig([]byte(specdata), nil)
@@ -77,4 +87,16 @@ var _ = Describe("docker config", func() {
 		Expect(err).To(Succeed())
 		Expect(creds.Properties()).To(Equal(props2))
 	})
+
+	It("propagates credentials to consumer identity", func() {
+		_, err := DefaultContext.RepositoryForConfig([]byte(specdata2), nil)
+		Expect(err).To(Succeed())
+
+		creds, err := DefaultContext.GetCredentialsForConsumer(credentials.ConsumerIdentity{
+			identity.ID_HOSTNAME: "ghcr.io",
+		})
+		Expect(err).To(Succeed())
+		Expect(creds.Properties()).To(Equal(props2))
+	})
+
 })

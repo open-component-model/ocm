@@ -39,6 +39,8 @@ type CredentialsChain = core.CredentialsChain
 type CredentialsSpec = core.CredentialsSpec
 type RepositorySpec = core.RepositorySpec
 
+type ConsumerIdentity = core.ConsumerIdentity
+
 type GenericRepositorySpec = core.GenericRepositorySpec
 type DirectCredentials = core.DirectCredentials
 

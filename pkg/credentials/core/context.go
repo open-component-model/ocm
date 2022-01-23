@@ -38,7 +38,7 @@ type Context interface {
 	CredentialsForSpec(spec CredentialsSpec, creds ...CredentialsSource) (Credentials, error)
 	CredentialsForConfig(data []byte, unmarshaler runtime.Unmarshaler, cred ...CredentialsSource) (Credentials, error)
 
-	CredentialsForConsumer(ConsumerIdentity) (Credentials, error)
+	GetCredentialsForConsumer(ConsumerIdentity) (Credentials, error)
 	SetCredentialsForConsumer(identity ConsumerIdentity, creds CredentialsSource)
 
 	SetAlias(name string, spec RepositorySpec, creds ...CredentialsSource) error
@@ -121,7 +121,7 @@ func (c *_context) CredentialsForConfig(data []byte, unmarshaler runtime.Unmarsh
 	return c.CredentialsForSpec(spec, creds...)
 }
 
-func (c *_context) CredentialsForConsumer(identity ConsumerIdentity) (Credentials, error) {
+func (c *_context) GetCredentialsForConsumer(identity ConsumerIdentity) (Credentials, error) {
 	consumer := c.data.consumers.Get(identity)
 	if consumer == nil {
 		return nil, ErrUnknownConsumer(identity.String())

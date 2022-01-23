@@ -12,36 +12,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package dockerconfig
+package identity
 
-import (
-	"context"
-	"sync"
+// ID_HOSTNAME is the hostname of an OCT repository
+const ID_HOSTNAME = "hostname"
 
-	"github.com/gardener/ocm/pkg/credentials/cpi"
-)
+// ID_PORT is the port number of an OCT repository
+const ID_PORT = "port"
 
-const ATTR_REPOS = "github.com/gardener/ocm/pkg/credentials/repositories/dockercofig"
-
-type Repositories struct {
-	lock  sync.Mutex
-	repos map[string]*Repository
-}
-
-func newRepositories(context.Context) interface{} {
-	return &Repositories{
-		repos: map[string]*Repository{},
-	}
-}
-
-func (r *Repositories) GetRepository(ctx cpi.Context, name string, propagate bool) (*Repository, error) {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-	var err error = nil
-	repo := r.repos[name]
-	if repo == nil {
-		repo, err = NewRepository(ctx, name, propagate)
-		r.repos[name] = repo
-	}
-	return repo, err
-}
+// ID_PATHPREFIX is the artefact prefix
+const ID_PATHPREFIX = "pathprefix"

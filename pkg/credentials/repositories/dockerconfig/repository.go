@@ -16,26 +16,34 @@ package dockerconfig
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"sync"
 
 	"github.com/docker/cli/cli/config"
 	"github.com/docker/cli/cli/config/configfile"
+	dockercred "github.com/docker/cli/cli/config/credentials"
+	"github.com/docker/cli/cli/config/types"
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/errors"
+	"github.com/gardener/ocm/pkg/oci/identity"
 
 	"github.com/gardener/ocm/pkg/credentials/cpi"
 )
 
 type Repository struct {
-	lock   sync.RWMutex
-	path   string
-	config *configfile.ConfigFile
+	lock      sync.RWMutex
+	ctx       cpi.Context
+	propagate bool
+	path      string
+	config    *configfile.ConfigFile
 }
 
-func NewRepository(path string) (*Repository, error) {
+func NewRepository(ctx cpi.Context, path string, propagate bool) (*Repository, error) {
 	r := &Repository{
-		path: path,
+		ctx:       ctx,
+		propagate: propagate,
+		path:      path,
 	}
 	err := r.Read(true)
 	return r, err
@@ -67,17 +75,9 @@ func (r Repository) LookupCredentials(name string) (cpi.Credentials, error) {
 	if err != nil {
 		return nil, err
 	}
-	props := common.Properties{
-		"username": auth.Username,
-		"password": auth.Password,
-	}
-	props.SetNonEmptyValue("auth", auth.Auth)
-	props.SetNonEmptyValue("serverAddress", auth.ServerAddress)
-	props.SetNonEmptyValue("identityToken", auth.IdentityToken)
-	props.SetNonEmptyValue("registryToken", auth.RegistryToken)
-	return cpi.NewCredentials(props), nil
+	return newCredentials(auth), nil
 
-	return nil, cpi.ErrUnknownCredentials(name)
+	return newCredentials(auth), cpi.ErrUnknownCredentials(name)
 }
 
 func (r Repository) WriteCredentials(name string, creds cpi.Credentials) (cpi.Credentials, error) {
@@ -99,7 +99,28 @@ func (r *Repository) Read(force bool) error {
 	if err != nil {
 		return err
 	}
-
+	if r.propagate {
+		all := cfg.GetAuthConfigs()
+		for h, a := range all {
+			id := cpi.ConsumerIdentity{
+				identity.ID_HOSTNAME: dockercred.ConvertToHostname(h),
+			}
+			fmt.Printf("propgate id %s\n", id)
+			r.ctx.SetCredentialsForConsumer(id, newCredentials(a))
+		}
+	}
 	r.config = cfg
 	return nil
+}
+
+func newCredentials(auth types.AuthConfig) cpi.Credentials {
+	props := common.Properties{
+		"username": auth.Username,
+		"password": auth.Password,
+	}
+	props.SetNonEmptyValue("auth", auth.Auth)
+	props.SetNonEmptyValue("serverAddress", auth.ServerAddress)
+	props.SetNonEmptyValue("identityToken", auth.IdentityToken)
+	props.SetNonEmptyValue("registryToken", auth.RegistryToken)
+	return cpi.NewCredentials(props)
 }

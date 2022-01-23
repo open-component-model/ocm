@@ -34,6 +34,12 @@ func init() {
 type RepositorySpec struct {
 	runtime.ObjectTypeVersion `json:",inline"`
 	DockerConfigFile          string `json:"dockerConfigFile"`
+	PropgateConsumerIdentity  bool   `json:"propagateConsumerIdentity,omitempty"`
+}
+
+func (s RepositorySpec) WithConsumerPropagation(propagate bool) *RepositorySpec {
+	s.PropgateConsumerIdentity = propagate
+	return &s
 }
 
 // NewRepositorySpec creates a new memory RepositorySpec
@@ -50,5 +56,5 @@ func (a *RepositorySpec) GetType() string {
 
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi.Repository, error) {
 	repos := ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories).(*Repositories)
-	return repos.GetRepository(a.DockerConfigFile)
+	return repos.GetRepository(ctx, a.DockerConfigFile, a.PropgateConsumerIdentity)
 }
