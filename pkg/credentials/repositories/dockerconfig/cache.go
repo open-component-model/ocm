@@ -12,16 +12,34 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package memory_test
+package dockerconfig
 
 import (
-	"testing"
-
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"context"
+	"sync"
 )
 
-func TestConfig(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Memory Credentials Test Suite")
+const ATTR_REPOS = "github.com/gardener/ocm/pkg/credentials/repositories/dockercofig"
+
+type Repositories struct {
+	lock  sync.Mutex
+	repos map[string]*Repository
+}
+
+func newRepositories(context.Context) interface{} {
+	return &Repositories{
+		repos: map[string]*Repository{},
+	}
+}
+
+func (r *Repositories) GetRepository(name string) (*Repository, error) {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	var err error = nil
+	repo := r.repos[name]
+	if repo == nil {
+		repo, err = NewRepository(name)
+		r.repos[name] = repo
+	}
+	return repo, err
 }

@@ -121,6 +121,29 @@ func NewContext(ctx context.Context, data DataContext) DefaultContext {
 	return forContext(ctx, data)
 }
 
+// ForContext is a rebase utility for data context.
+// It can be used by data context implementations using this default implementation
+// to implement the data context access based on context.Context.
+//
+// Every such data context type should support such a ForContext operation for
+// its consumers yielding the appropriate type.
+//
+// This default support implementation returns never nil, if the default is
+// set. Otherwise, nit is returned, if there is no data context found for the
+// actual context.
+//
+// The returned value is a data context rebased to the actual context.
+func ForContext(ctx context.Context, key interface{}, def Context) DefaultContext {
+	data := ctx.Value(key)
+	if data == nil {
+		data = def
+	}
+	if data == nil {
+		return nil
+	}
+	return forContext(ctx, data.(DefaultContext).DefaultAccess().DataContext())
+}
+
 func forContext(ctx context.Context, data DataContext) DefaultContext {
 	c := &_context{
 		data: data,

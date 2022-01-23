@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package memory_test
+package credentials_test
 
 import (
 	"testing"
@@ -23,5 +23,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Memory Credentials Test Suite")
+	RunSpecs(t, "CTF Test Suite")
 }

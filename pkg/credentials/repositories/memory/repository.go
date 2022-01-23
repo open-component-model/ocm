@@ -59,5 +59,3 @@ func (r Repository) WriteCredentials(name string, creds cpi.Credentials) (cpi.Cr
 	r.credentials[name] = c
 	return c, nil
 }
-
-var _ cpi.Repository = &Repository{}

@@ -12,16 +12,32 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package memory_test
+package credentials_test
 
 import (
-	"testing"
+	"context"
+	"reflect"
+
+	"github.com/gardener/ocm/pkg/credentials"
+	"github.com/gardener/ocm/pkg/datacontext"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-func TestConfig(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Memory Credentials Test Suite")
-}
+var DefaultContext = credentials.NewDefaultContext(context.TODO())
+
+var _ = Describe("area test", func() {
+	It("can access the default context", func() {
+		ctx := credentials.ForContext(context.TODO())
+		Expect(ctx).NotTo(BeNil())
+		Expect(reflect.TypeOf(ctx).String()).To(Equal("*core._context"))
+	})
+	It("can access the set context", func() {
+		ctx := credentials.ForContext(DefaultContext)
+		Expect(ctx).NotTo(BeNil())
+		Expect(reflect.TypeOf(ctx).String()).To(Equal("*core._context"))
+		Expect(ctx.(datacontext.DefaultContext).DefaultAccess().DataContext()).To(BeIdenticalTo(DefaultContext.(datacontext.DefaultContext).DefaultAccess().DataContext()))
+	})
+
+})

@@ -42,14 +42,10 @@ var DefaultContext = NewContext(credentials.DefaultContext, DefaultRepositoryTyp
 var key = reflect.TypeOf(_context{})
 
 // ForContext returns the Context to use for context.Context.
-// This is eiter an explicit context or the default context.
+// This is either an explicit context or the default context.
 // The returned context incorporates the given context.
 func ForContext(ctx context.Context) Context {
-	c := ctx.Value(key)
-	if c == nil {
-		c = DefaultContext
-	}
-	return c.(Context).With(ctx)
+	return datacontext.ForContext(ctx, key, DefaultContext).(Context)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -48,7 +48,7 @@ var key = reflect.TypeOf(_context{})
 
 // ForContextInternal returns the Context to use for context.Context.
 func ForContextInternal(ctx context.Context) Context {
-	c := ctx.Value(key)
+	c := datacontext.ForContext(ctx, key, nil)
 	if c == nil {
 		return nil
 	}

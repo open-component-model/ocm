@@ -29,6 +29,12 @@ func (p Properties) Digest() []byte {
 	return data
 }
 
+func (p Properties) SetNonEmptyValue(name, value string) {
+	if value != "" {
+		p[name] = value
+	}
+}
+
 // Equals compares two identities
 func (p Properties) Equals(o Properties) bool {
 	if len(p) != len(o) {
