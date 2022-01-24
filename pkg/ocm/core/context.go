@@ -27,9 +27,8 @@ import (
 
 type Context interface {
 	datacontext.Context
-	// With return the actual context for incorporating the given context.Context
-	With(ctx context.Context) Context
 
+	AttributesContext() datacontext.AttributesContext
 	CredentialsContext() credentials.Context
 	OCIContext() oci.Context
 
@@ -46,43 +45,54 @@ type Context interface {
 
 var key = reflect.TypeOf(_context{})
 
-// ForContextInternal returns the Context to use for context.Context.
-func ForContextInternal(ctx context.Context) Context {
-	c := datacontext.ForContext(ctx, key, nil)
-	if c == nil {
-		return nil
-	}
-	return c.(Context)
+// DefaultContext is the default context initialized by init functions
+var DefaultContext = Builder{}.New()
+
+// ForContext returns the Context to use for context.Context.
+// This is eiter an explicit context or the default context.
+func ForContext(ctx context.Context) Context {
+	return datacontext.ForContextByKey(ctx, key, DefaultContext).(Context)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type _context struct {
-	datacontext.DefaultContext
-	data *_contextData // cache for correctly typed context data, repölaces
-	// c.DefaultAccess().DataContext().(*_contextData)
+	datacontext.Context
+
+	attrctx datacontext.AttributesContext
+	credctx credentials.Context
+	ocictx  oci.Context
+
+	knownRepositoryTypes RepositoryTypeScheme
+	knownAccessTypes     AccessTypeScheme
 }
 
 var _ Context = &_context{}
 
-func NewContext(ctx context.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme) Context {
-	return datacontext.NewContext(ctx, newDataContext(ctx, reposcheme, accessscheme)).(Context)
+func newContext(attrctx datacontext.AttributesContext, credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme) Context {
+	return &_context{
+		attrctx:              attrctx,
+		credctx:              credctx,
+		ocictx:               ocictx,
+		knownAccessTypes:     accessscheme,
+		knownRepositoryTypes: reposcheme,
+	}
 }
 
-func (c *_context) With(ctx context.Context) Context {
-	return c.DefaultAccess().With(ctx).(Context)
+func (c *_context) AttributesContext() datacontext.AttributesContext {
+	return c.ocictx.AttributesContext()
 }
 
 func (c *_context) CredentialsContext() credentials.Context {
-	return c.data.ocictx.CredentialsContext()
+	return c.ocictx.CredentialsContext()
 }
 
 func (c *_context) OCIContext() oci.Context {
-	return c.data.ocictx
+	return c.ocictx
 }
 
 func (c *_context) RepositoryTypes() RepositoryTypeScheme {
-	return c.data.knownRepositoryTypes
+	return c.knownRepositoryTypes
 }
 
 func (c *_context) RepositoryForSpec(spec RepositorySpec, creds ...credentials.CredentialsSource) (Repository, error) {
@@ -94,7 +104,7 @@ func (c *_context) RepositoryForSpec(spec RepositorySpec, creds ...credentials.C
 }
 
 func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...credentials.CredentialsSource) (Repository, error) {
-	spec, err := c.data.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
+	spec, err := c.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
 	if err != nil {
 		return nil, err
 	}
@@ -102,11 +112,11 @@ func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarsha
 }
 
 func (c *_context) AccessMethods() AccessTypeScheme {
-	return c.data.knownAccessTypes
+	return c.knownAccessTypes
 }
 
 func (c *_context) AccessSpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error) {
-	return c.data.knownAccessTypes.DecodeAccessSpec(data, unmarshaler)
+	return c.knownAccessTypes.DecodeAccessSpec(data, unmarshaler)
 }
 
 func (c *_context) AccessSpecForSpec(spec compdesc.AccessSpec) (AccessSpec, error) {
@@ -126,35 +136,5 @@ func (c *_context) AccessSpecForSpec(spec compdesc.AccessSpec) (AccessSpec, erro
 		return nil, err
 	}
 
-	return c.data.knownAccessTypes.DecodeAccessSpec(raw, runtime.DefaultJSONEncoding)
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-type _contextData struct {
-	datacontext.AttributesContext
-
-	ocictx oci.Context
-
-	knownRepositoryTypes RepositoryTypeScheme
-	knownAccessTypes     AccessTypeScheme
-}
-
-func newDataContext(ctx context.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme) *_contextData {
-	if accessscheme == nil {
-		accessscheme = DefaultAccessTypeScheme
-	}
-	if reposcheme == nil {
-		reposcheme = DefaultRepositoryTypeScheme
-	}
-	return &_contextData{
-		AttributesContext:    datacontext.NewAttributes(nil),
-		ocictx:               oci.ForContext(ctx),
-		knownAccessTypes:     accessscheme,
-		knownRepositoryTypes: reposcheme,
-	}
-}
-
-func (c *_contextData) Wrap(defaultContext datacontext.DefaultContext) (datacontext.DefaultContext, interface{}) {
-	return &_context{defaultContext, defaultContext.DefaultAccess().DataContext().(*_contextData)}, key
+	return c.knownAccessTypes.DecodeAccessSpec(raw, runtime.DefaultJSONEncoding)
 }

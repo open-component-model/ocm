@@ -37,11 +37,3 @@ var DefaultContext = core.DefaultContext
 func ForContext(ctx context.Context) Context {
 	return core.ForContext(ctx)
 }
-
-func NewDefaultContext(ctx context.Context) Context {
-	return core.NewContext(ctx, core.DefaultRepositoryTypeScheme)
-}
-
-func NewContext(ctx context.Context, reposcheme RepositoryTypeScheme) Context {
-	return core.NewContext(ctx, reposcheme)
-}

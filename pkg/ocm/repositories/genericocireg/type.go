@@ -37,6 +37,12 @@ const (
 	OCIRegistryDigestMapping  ComponentNameMapping = "sha256-digest"
 )
 
+func init() {
+	cpi.RegisterOCIImplementation(func(ctx oci.Context) (cpi.RepositoryType, error) {
+		return NewOCIRepositoryBackendType(ctx), nil
+	})
+}
+
 type GenericOCIRepositoryBackendType struct {
 	runtime.ObjectTypeVersion
 	ocictx oci.Context

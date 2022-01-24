@@ -15,8 +15,9 @@
 package memory
 
 import (
-	"context"
 	"sync"
+
+	"github.com/gardener/ocm/pkg/datacontext"
 )
 
 const ATTR_REPOS = "github.com/gardener/ocm/pkg/credentials/repositories/memory"
@@ -26,7 +27,7 @@ type Repositories struct {
 	repos map[string]*Repository
 }
 
-func newRepositories(context.Context) interface{} {
+func newRepositories(datacontext.Context) interface{} {
 	return &Repositories{
 		repos: map[string]*Repository{},
 	}

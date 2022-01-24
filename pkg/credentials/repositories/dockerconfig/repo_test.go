@@ -15,7 +15,6 @@
 package dockerconfig_test
 
 import (
-	"context"
 	"encoding/json"
 	"reflect"
 
@@ -48,7 +47,7 @@ var _ = Describe("docker config", func() {
 	var DefaultContext credentials.Context
 
 	BeforeEach(func() {
-		DefaultContext = credentials.NewDefaultContext(context.TODO())
+		DefaultContext = credentials.New()
 	})
 
 	It("serializes repo spec", func() {

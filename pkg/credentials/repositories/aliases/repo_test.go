@@ -15,7 +15,6 @@
 package aliases_test
 
 import (
-	"context"
 	"encoding/json"
 	"reflect"
 
@@ -26,7 +25,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var DefaultContext = credentials.NewDefaultContext(context.TODO())
+var DefaultContext = credentials.New()
 
 var _ = Describe("alias credentials", func() {
 

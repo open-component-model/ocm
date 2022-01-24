@@ -12,36 +12,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package dockerconfig
+package cpi
 
 import (
-	"sync"
-
-	"github.com/gardener/ocm/pkg/credentials/cpi"
-	"github.com/gardener/ocm/pkg/datacontext"
+	"github.com/gardener/ocm/pkg/ocm/core"
 )
 
-const ATTR_REPOS = "github.com/gardener/ocm/pkg/credentials/repositories/dockercofig"
+type OCISpecFunction = core.OCISpecFunction
 
-type Repositories struct {
-	lock  sync.Mutex
-	repos map[string]*Repository
-}
-
-func newRepositories(datacontext.Context) interface{} {
-	return &Repositories{
-		repos: map[string]*Repository{},
-	}
-}
-
-func (r *Repositories) GetRepository(ctx cpi.Context, name string, propagate bool) (*Repository, error) {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-	var err error = nil
-	repo := r.repos[name]
-	if repo == nil {
-		repo, err = NewRepository(ctx, name, propagate)
-		r.repos[name] = repo
-	}
-	return repo, err
+func RegisterOCIImplementation(impl OCISpecFunction) {
+	core.RegisterOCIImplementation(impl)
 }

@@ -50,14 +50,6 @@ func ForContext(ctx context.Context) Context {
 	return core.ForContext(ctx)
 }
 
-func NewContext(ctx context.Context, reposcheme RepositoryTypeScheme) Context {
-	return core.NewContext(ctx, reposcheme)
-}
-
-func NewDefaultContext(ctx context.Context) Context {
-	return core.NewContext(ctx, nil)
-}
-
 func NewCredentialsSpec(name string, repospec RepositorySpec) CredentialsSpec {
 	return core.NewCredentialsSpec(name, repospec)
 }

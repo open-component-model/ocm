@@ -15,7 +15,6 @@
 package genericocireg_test
 
 import (
-	"context"
 	"encoding/json"
 	"reflect"
 
@@ -28,7 +27,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var DefaultOCIContext = oci.NewDefaultContext(context.TODO())
+var DefaultOCIContext = oci.New()
 
 var _ = Describe("access method", func() {
 	specData := "{\"baseUrl\":\"X\",\"componentNameMapping\":\"sha256-digest\",\"type\":\"OCIRegistry\"}"

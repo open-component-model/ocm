@@ -15,7 +15,6 @@
 package ocm_test
 
 import (
-	"context"
 	"encoding/json"
 
 	"github.com/gardener/ocm/pkg/oci/repositories/empty"
@@ -27,7 +26,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var DefaultContext = ocm.NewDefaultContext(context.TODO())
+var DefaultContext = ocm.New()
 
 var _ = Describe("access method", func() {
 	It("instantiate repo mapped to empty oci repo", func() {

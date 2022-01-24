@@ -25,9 +25,8 @@ import (
 
 type Context interface {
 	datacontext.Context
-	// With return the actual context for incorporating the given context.Context
-	With(ctx context.Context) Context
 
+	AttributesContext() datacontext.AttributesContext
 	CredentialsContext() credentials.Context
 
 	RepositoryTypes() RepositoryTypeScheme
@@ -39,43 +38,51 @@ type Context interface {
 var key = reflect.TypeOf(_context{})
 
 // DefaultContext is the default context initialized by init functions
-var DefaultContext = NewContext(credentials.DefaultContext, DefaultRepositoryTypeScheme)
+var DefaultContext = Builder{}.New()
 
 // ForContext returns the Context to use for context.Context.
 // This is either an explicit context or the default context.
-// The returned context incorporates the given context.
 func ForContext(ctx context.Context) Context {
-	return datacontext.ForContext(ctx, key, DefaultContext).(Context)
+	return datacontext.ForContextByKey(ctx, key, DefaultContext).(Context)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type _context struct {
-	datacontext.DefaultContext
-	data *_contextData // cache for correctly typed context data, repölaces
-	// c.DefaultAccess().DataContext().(*_contextData)
+	datacontext.Context
+
+	sharedattributes datacontext.AttributesContext
+	credentials      credentials.Context
+
+	knownRepositoryTypes RepositoryTypeScheme
+}
+
+func newContext(shared datacontext.AttributesContext, creds credentials.Context, reposcheme RepositoryTypeScheme) Context {
+	c := &_context{
+		sharedattributes:     shared,
+		credentials:          creds,
+		knownRepositoryTypes: reposcheme,
+	}
+	c.Context = datacontext.NewContextBase(c, key, shared.GetAttributes())
+	return c
 }
 
 var _ Context = &_context{}
 
-func NewContext(ctx context.Context, reposcheme RepositoryTypeScheme) Context {
-	return datacontext.NewContext(ctx, newDataContext(ctx, reposcheme)).(Context)
-}
-
-func (c *_context) With(ctx context.Context) Context {
-	return c.DefaultAccess().With(ctx).(Context)
+func (c *_context) AttributesContext() datacontext.AttributesContext {
+	return c.sharedattributes
 }
 
 func (c *_context) CredentialsContext() credentials.Context {
-	return c.data.credentials
+	return c.credentials
 }
 
 func (c *_context) RepositoryTypes() RepositoryTypeScheme {
-	return c.data.knownRepositoryTypes
+	return c.knownRepositoryTypes
 }
 
 func (c *_context) RepositorySpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
-	return c.data.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
+	return c.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
 }
 
 func (c *_context) RepositoryForSpec(spec RepositorySpec, creds ...credentials.CredentialsSource) (Repository, error) {
@@ -87,31 +94,9 @@ func (c *_context) RepositoryForSpec(spec RepositorySpec, creds ...credentials.C
 }
 
 func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...credentials.CredentialsSource) (Repository, error) {
-	spec, err := c.data.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
+	spec, err := c.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
 	if err != nil {
 		return nil, err
 	}
 	return c.RepositoryForSpec(spec, creds...)
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-type _contextData struct {
-	datacontext.AttributesContext
-
-	credentials credentials.Context
-
-	knownRepositoryTypes RepositoryTypeScheme
-}
-
-func newDataContext(ctx context.Context, reposcheme RepositoryTypeScheme) *_contextData {
-	return &_contextData{
-		AttributesContext:    datacontext.NewAttributes(nil),
-		credentials:          credentials.ForContext(ctx),
-		knownRepositoryTypes: reposcheme,
-	}
-}
-
-func (c *_contextData) Wrap(defaultContext datacontext.DefaultContext) (datacontext.DefaultContext, interface{}) {
-	return &_context{defaultContext, defaultContext.DefaultAccess().DataContext().(*_contextData)}, key
 }

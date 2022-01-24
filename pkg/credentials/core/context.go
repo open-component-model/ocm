@@ -25,8 +25,8 @@ import (
 
 type Context interface {
 	datacontext.Context
-	// With returns the actual context for incorporating the given context.Context
-	With(ctx context.Context) Context
+
+	AttributesContext() datacontext.AttributesContext
 
 	RepositoryTypes() RepositoryTypeScheme
 
@@ -47,43 +47,46 @@ type Context interface {
 var key = reflect.TypeOf(_context{})
 
 // DefaultContext is the default context initialized by init functions
-var DefaultContext = NewContext(context.Background(), nil)
+var DefaultContext = Builder{}.New()
 
 // ForContext returns the Context to use for context.Context.
 // This is eiter an explicit context or the default context.
-// The returned context incorporates the given context.
 func ForContext(ctx context.Context) Context {
-	c := ctx.Value(key)
-	if c == nil {
-		c = DefaultContext
-	}
-	return c.(Context).With(ctx)
+	return datacontext.ForContextByKey(ctx, key, DefaultContext).(Context)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type _context struct {
-	datacontext.DefaultContext
-	data *_contextData // cache for correctly typed context data, repölaces
-	// c.DefaultAccess().DataContext().(*_contextData)
+	datacontext.Context
+
+	sharedattributes     datacontext.AttributesContext
+	knownRepositoryTypes RepositoryTypeScheme
+	consumers            *_consumers
 }
 
 var _ Context = &_context{}
 
-func NewContext(ctx context.Context, reposcheme RepositoryTypeScheme) Context {
-	return datacontext.NewContext(ctx, newDataContext(reposcheme)).(Context)
+func newContext(shared datacontext.AttributesContext, reposcheme RepositoryTypeScheme) Context {
+	c := &_context{
+		sharedattributes:     shared,
+		knownRepositoryTypes: reposcheme,
+		consumers:            newConsumers(),
+	}
+	c.Context = datacontext.NewContextBase(c, key, shared.GetAttributes())
+	return c
 }
 
-func (c *_context) With(ctx context.Context) Context {
-	return c.DefaultAccess().With(ctx).(Context)
+func (c *_context) AttributesContext() datacontext.AttributesContext {
+	return c.sharedattributes
 }
 
 func (c *_context) RepositoryTypes() RepositoryTypeScheme {
-	return c.data.knownRepositoryTypes
+	return c.knownRepositoryTypes
 }
 
 func (c *_context) RepositorySpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
-	return c.data.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
+	return c.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
 }
 
 func (c *_context) RepositoryForSpec(spec RepositorySpec, creds ...CredentialsSource) (Repository, error) {
@@ -95,7 +98,7 @@ func (c *_context) RepositoryForSpec(spec RepositorySpec, creds ...CredentialsSo
 }
 
 func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...CredentialsSource) (Repository, error) {
-	spec, err := c.data.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
+	spec, err := c.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +125,7 @@ func (c *_context) CredentialsForConfig(data []byte, unmarshaler runtime.Unmarsh
 }
 
 func (c *_context) GetCredentialsForConsumer(identity ConsumerIdentity) (Credentials, error) {
-	consumer := c.data.consumers.Get(identity)
+	consumer := c.consumers.Get(identity)
 	if consumer == nil {
 		return nil, ErrUnknownConsumer(identity.String())
 	}
@@ -130,11 +133,11 @@ func (c *_context) GetCredentialsForConsumer(identity ConsumerIdentity) (Credent
 }
 
 func (c *_context) SetCredentialsForConsumer(identity ConsumerIdentity, creds CredentialsSource) {
-	c.data.consumers.Set(identity, creds)
+	c.consumers.Set(identity, creds)
 }
 
 func (c *_context) SetAlias(name string, spec RepositorySpec, creds ...CredentialsSource) error {
-	t := c.data.knownRepositoryTypes.GetRepositoryType(AliasRepositoryType)
+	t := c.knownRepositoryTypes.GetRepositoryType(AliasRepositoryType)
 	if t == nil {
 		return errors.ErrNotSupported("aliases")
 	}
@@ -142,30 +145,4 @@ func (c *_context) SetAlias(name string, spec RepositorySpec, creds ...Credentia
 		return a.SetAlias(c, name, spec, CredentialsChain(creds))
 	}
 	return errors.ErrNotImplemented("interface", "AliasRegistry", reflect.TypeOf(t).String())
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-type _contextData struct {
-	datacontext.AttributesContext
-
-	knownRepositoryTypes RepositoryTypeScheme
-	consumers            *_consumers
-}
-
-var _ datacontext.DataContext = &_contextData{}
-
-func newDataContext(reposcheme RepositoryTypeScheme) *_contextData {
-	if reposcheme == nil {
-		reposcheme = DefaultRepositoryTypeScheme
-	}
-	return &_contextData{
-		AttributesContext:    datacontext.NewAttributes(nil),
-		knownRepositoryTypes: reposcheme,
-		consumers:            newConsumers(),
-	}
-}
-
-func (c *_contextData) Wrap(defaultContext datacontext.DefaultContext) (datacontext.DefaultContext, interface{}) {
-	return &_context{defaultContext, defaultContext.DefaultAccess().DataContext().(*_contextData)}, key
 }

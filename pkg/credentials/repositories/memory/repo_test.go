@@ -15,7 +15,6 @@
 package memory_test
 
 import (
-	"context"
 	"encoding/json"
 	"reflect"
 
@@ -27,7 +26,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var DefaultContext = credentials.NewDefaultContext(context.TODO())
+var DefaultContext = credentials.New()
 
 var _ = Describe("direct credentials", func() {
 	props := common.Properties{
@@ -101,7 +100,7 @@ var _ = Describe("direct credentials", func() {
 
 	It("caches repo in two contexts", func() {
 		ctx1 := DefaultContext
-		ctx2 := credentials.NewDefaultContext(ctx1)
+		ctx2 := credentials.New()
 
 		// write to first context
 		repo1, err := ctx1.RepositoryForConfig([]byte(specdata), nil)

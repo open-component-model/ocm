@@ -16,6 +16,7 @@ package datacontext
 
 import (
 	"context"
+	"reflect"
 	"sync"
 )
 
@@ -24,186 +25,96 @@ import (
 // Such a context incorporates a context.Context and some context
 // specific attribute store
 type Context interface {
-	context.Context
+	BindTo(ctx context.Context) context.Context
 	GetAttributes() Attributes
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+type AttributesContext interface {
+	Context
+
+	BindTo(ctx context.Context) context.Context
+}
+
+// AttributeFactory is used to atomicly create a new attribute for a context
+type AttributeFactory func(Context) interface{}
 
 type Attributes interface {
 	GetAttribute(name string) interface{}
 	SetAttribute(name string, value interface{})
-	GetOrCreateAttribute(name string, creator func(context.Context) interface{}) interface{}
+	GetOrCreateAttribute(name string, creator AttributeFactory) interface{}
+}
+
+var key = reflect.TypeOf(_context{})
+
+// DefaultContext is the default context initialized by init functions
+var DefaultContext = New(nil)
+
+// ForContext returns the Context to use for context.Context.
+// This is eiter an explicit context or the default context.
+func ForContext(ctx context.Context) AttributesContext {
+	return ForContextByKey(ctx, key, DefaultContext).(AttributesContext)
+}
+
+// WithContext create a new Context bound to a context.Context
+func WithContext(ctx context.Context, parentAttrs Attributes) (Context, context.Context) {
+	c := New(parentAttrs)
+	return c, c.BindTo(ctx)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Here we provide a default implementation for the data context mechanics.
-//
-// The context.Context always provides access to a dedicated instance of
-// a data context. This is done by a context values and a type specif key.
-//
-// Such a context always incorporates a regular context.Context and can
-// therefore be used and passed as regular context.Context
-//
-// To support this the effective data can be rebased to any leaf context it is
-// taken from. After rebasing the context object represents the same data context
-// but with the effective latest context.Context
-//
-// The following default implementation implements this behaviour in a generic way.
-// Therefore is provides a base context implementation that should be used
-// as only anonymous field in the effective context type. This one implements
-// the dedicated context api based on a context data object.
-// The context data is separated into a dedicated type which must fulfill the
-// DataContext interface. It must provide a Wrap function to Wrap
-// an new instance of the DefaultContext into an appropriate context type.
-//
-// The default implementation provides a DefaultContext, which acts as link
-// between the context.Context and the context data. It will then handle
-// the rebase mechanics for the context data.
-
-// DataContext is the interface for the context data described by a data context:
-// It is used by the default context base implementation
-// for providing access to the context data up the context hierarchy for context.Context
-// objects down the hierarchy.
-type DataContext interface {
-	AttributesContext
-
-	// Wrap returns a new type specific implementation for the data context and the value key
-	// to make it accessible by the context.Context
-	Wrap(DefaultContext) (DefaultContext, interface{})
-}
-
-// AttributesContext is the attribute access interface of the DataContext contract.
-// The default implementation assures thet the create functionality is always
-// used with the latest rebased/known context.Context
-type AttributesContext interface {
-	GetAttribute(name string) interface{}
-	SetAttribute(name string, value interface{})
-	GetOrCreateAttribute(ctx context.Context, name string, creator func(context.Context) interface{}) interface{}
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-// DefaultContext is the interface provided the default rebase implementation
-// It supports the rebasing and the attribute access of the context based on the
-// DataContext interface provided by the context provider.
-type DefaultContext interface {
-	Context
-
-	// DefaultAccess provides access to the functionality of the default implementation
-	DefaultAccess() DefaultAccess
-}
-
-// DefaultAccess provides access to the default implementation.
-// It cannot be  part of the context interface, because the signature
-// of the with method would violate the signature of the effective type.
-// Basically this separated the method namespace of the default implementation
-// from the one of the effective context type.
-type DefaultAccess interface {
-	// With implements a standard behaviour for the With interface of a dedicated data context
-	// using this standard implementation. It must be forwarded to the With method
-	// of the actual context type with an appropriate type cast.
-	// It works together with the Wrap function of the DataContext interface.
-	// The dedicated context type should just use a single field with this type
-	// and provide With method with an appropriately typed one.
-	With(ctx context.Context) Context
-
-	// DataContext returns the actual context data
-	DataContext() DataContext
-}
 
 type _context struct {
-	context.Context
-	data DataContext
+	key        interface{}
+	effective  Context
+	attributes Attributes
 }
 
-// NewContext provides a default base implementation for a data context.
-// featuring context and attribute access.
-func NewContext(ctx context.Context, data DataContext) DefaultContext {
-	return forContext(ctx, data)
-}
-
-// ForContext is a rebase utility for data context.
-// It can be used by data context implementations using this default implementation
-// to implement the data context access based on context.Context.
-//
-// Every such data context type should support such a ForContext operation for
-// its consumers yielding the appropriate type.
-//
-// This default support implementation returns never nil, if the default is
-// set. Otherwise, nit is returned, if there is no data context found for the
-// actual context.
-//
-// The returned value is a data context rebased to the actual context.
-func ForContext(ctx context.Context, key interface{}, def Context) DefaultContext {
-	data := ctx.Value(key)
-	if data == nil {
-		data = def
-	}
-	if data == nil {
-		return nil
-	}
-	return forContext(ctx, data.(DefaultContext).DefaultAccess().DataContext())
-}
-
-func forContext(ctx context.Context, data DataContext) DefaultContext {
-	c := &_context{
-		data: data,
-	}
-	eff, key := c.data.Wrap(c)
-	c.Context = context.WithValue(ctx, key, eff)
-	return eff
-}
-
-func (c *_context) GetAttributes() Attributes {
-	return &_attributesContext{c}
-}
-
-func (c *_context) DefaultAccess() DefaultAccess {
+// New provides a default base implementation for a data context.
+// It can also be used as root attribute context
+func New(parentAttrs Attributes) AttributesContext {
+	c := &_context{key: key}
+	c.effective = c
+	c.attributes = newAttributes(c, parentAttrs)
 	return c
 }
 
-func (c *_context) With(ctx context.Context) Context {
-	if ctx == c.Context {
-		return c
-	}
-	return forContext(ctx, c.data)
+// NewContextBase creates a context base implementation supporting
+// context attributes
+func NewContextBase(eff Context, key interface{}, parentAttrs Attributes) Context {
+	c := &_context{key: key, effective: eff}
+	c.attributes = newAttributes(eff, parentAttrs)
+	return c
 }
 
-func (c *_context) DataContext() DataContext {
-	return c.data
+// BindTo make the Context reachable via the resulting context.Context
+func (c *_context) BindTo(ctx context.Context) context.Context {
+	return context.WithValue(ctx, c.key, c.effective)
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-type _attributesContext struct {
-	ctx *_context
-}
-
-var _ Attributes = &_attributesContext{}
-
-func (a *_attributesContext) GetAttribute(name string) interface{} {
-	return a.ctx.data.GetAttribute(name)
-}
-
-func (a *_attributesContext) SetAttribute(name string, value interface{}) {
-	a.ctx.data.SetAttribute(name, value)
-}
-
-func (a *_attributesContext) GetOrCreateAttribute(name string, creator func(context.Context) interface{}) interface{} {
-	return a.ctx.data.GetOrCreateAttribute(a.ctx.Context, name, creator)
+func (c *_context) GetAttributes() Attributes {
+	return c.attributes
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type _attributes struct {
 	sync.RWMutex
+	ctx        Context
 	parent     Attributes
 	attributes map[string]interface{}
 }
 
-var _ AttributesContext = &_attributes{}
+var _ Attributes = &_attributes{}
 
-func NewAttributes(parent Attributes) AttributesContext {
+func NewAttributes(ctx Context, parent Attributes) Attributes {
+	return newAttributes(ctx, parent)
+}
+
+func newAttributes(ctx Context, parent Attributes) *_attributes {
 	return &_attributes{
+		ctx:        ctx,
 		parent:     parent,
 		attributes: map[string]interface{}{},
 	}
@@ -228,13 +139,13 @@ func (c *_attributes) SetAttribute(name string, value interface{}) {
 	c.attributes[name] = value
 }
 
-func (c *_attributes) GetOrCreateAttribute(ctx context.Context, name string, creator func(context.Context) interface{}) interface{} {
+func (c *_attributes) GetOrCreateAttribute(name string, creator AttributeFactory) interface{} {
 	c.Lock()
 	defer c.Unlock()
 	if v, ok := c.attributes[name]; ok {
 		return v
 	}
-	v := creator(ctx)
+	v := creator(c.ctx)
 	c.attributes[name] = v
 	return v
 }

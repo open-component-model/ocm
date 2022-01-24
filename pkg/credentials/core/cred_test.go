@@ -15,7 +15,6 @@
 package core_test
 
 import (
-	"context"
 	"encoding/json"
 	"reflect"
 
@@ -27,7 +26,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var DefaultContext = credentials.NewContext(context.TODO())
+var DefaultContext = credentials.New()
 
 var _ = Describe("generic credentials", func() {
 	props := common.Properties{
@@ -50,7 +49,7 @@ var _ = Describe("generic credentials", func() {
 		err = json.Unmarshal(data, credspec)
 		Expect(err).To(Succeed())
 		s := credspec.(*core.DefaultCredentialsSpec)
-		Expect(reflect.TypeOf(s.RepositorySpec).String()).To(Equal("*memory.ConfigSpec"))
+		Expect(reflect.TypeOf(s.RepositorySpec).String()).To(Equal("*memory.RepositorySpec"))
 		Expect(s.CredentialsName).To(Equal("cred"))
 		Expect(s.RepositorySpec.(*memory.RepositorySpec).RepositoryName).To(Equal("test"))
 	})

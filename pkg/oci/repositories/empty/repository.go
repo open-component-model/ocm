@@ -15,15 +15,14 @@
 package empty
 
 import (
-	"context"
-
+	"github.com/gardener/ocm/pkg/datacontext"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 )
 
 type Repository struct{}
 
-func newRepository(ctx context.Context) interface{} {
+func newRepository(ctx datacontext.Context) interface{} {
 	return &Repository{}
 }
 

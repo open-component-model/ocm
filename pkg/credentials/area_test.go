@@ -19,13 +19,11 @@ import (
 	"reflect"
 
 	"github.com/gardener/ocm/pkg/credentials"
-	"github.com/gardener/ocm/pkg/datacontext"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-var DefaultContext = credentials.NewDefaultContext(context.TODO())
+var DefaultContext = credentials.New()
 
 var _ = Describe("area test", func() {
 	It("can access the default context", func() {
@@ -34,10 +32,11 @@ var _ = Describe("area test", func() {
 		Expect(reflect.TypeOf(ctx).String()).To(Equal("*core._context"))
 	})
 	It("can access the set context", func() {
-		ctx := credentials.ForContext(DefaultContext)
-		Expect(ctx).NotTo(BeNil())
-		Expect(reflect.TypeOf(ctx).String()).To(Equal("*core._context"))
-		Expect(ctx.(datacontext.DefaultContext).DefaultAccess().DataContext()).To(BeIdenticalTo(DefaultContext.(datacontext.DefaultContext).DefaultAccess().DataContext()))
+		ctx := DefaultContext.BindTo(context.TODO())
+		dctx := credentials.ForContext(ctx)
+		Expect(dctx).NotTo(BeNil())
+		Expect(reflect.TypeOf(dctx).String()).To(Equal("*core._context"))
+		Expect(dctx).To(BeIdenticalTo(DefaultContext))
 	})
 
 })

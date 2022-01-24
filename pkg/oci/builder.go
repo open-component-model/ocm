@@ -12,36 +12,32 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package dockerconfig
+package oci
 
 import (
-	"sync"
+	"context"
 
-	"github.com/gardener/ocm/pkg/credentials/cpi"
+	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/datacontext"
+	"github.com/gardener/ocm/pkg/oci/core"
 )
 
-const ATTR_REPOS = "github.com/gardener/ocm/pkg/credentials/repositories/dockercofig"
-
-type Repositories struct {
-	lock  sync.Mutex
-	repos map[string]*Repository
+func WithContext(ctx context.Context) core.Builder {
+	return core.Builder{}.WithContext(ctx)
 }
 
-func newRepositories(datacontext.Context) interface{} {
-	return &Repositories{
-		repos: map[string]*Repository{},
-	}
+func WithSharedAttributes(ctx datacontext.AttributesContext) core.Builder {
+	return core.Builder{}.WithSharedAttributes(ctx)
 }
 
-func (r *Repositories) GetRepository(ctx cpi.Context, name string, propagate bool) (*Repository, error) {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-	var err error = nil
-	repo := r.repos[name]
-	if repo == nil {
-		repo, err = NewRepository(ctx, name, propagate)
-		r.repos[name] = repo
-	}
-	return repo, err
+func WithCredentials(ctx credentials.Context) core.Builder {
+	return core.Builder{}.WithCredentials(ctx)
+}
+
+func WithRepositoyTypeScheme(scheme RepositoryTypeScheme) core.Builder {
+	return core.Builder{}.WithRepositoyTypeScheme(scheme)
+}
+
+func New() Context {
+	return core.Builder{}.New()
 }
