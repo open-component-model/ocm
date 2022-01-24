@@ -21,7 +21,6 @@ import (
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
-	"github.com/gardener/ocm/pkg/ocm/cpi/accesstypes"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
@@ -32,8 +31,8 @@ const LocalFilesystemBlobTypeV1 = LocalFilesystemBlobType + "/v1"
 // Keep old access method and map generic one to this implementation for component archives
 
 func init() {
-	cpi.RegisterAccessType(accesstypes.NewConvertedType(LocalFilesystemBlobType, LocalFilesystemBlobV1))
-	cpi.RegisterAccessType(accesstypes.NewConvertedType(LocalFilesystemBlobTypeV1, LocalFilesystemBlobV1))
+	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(LocalFilesystemBlobType, LocalFilesystemBlobV1))
+	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(LocalFilesystemBlobTypeV1, LocalFilesystemBlobV1))
 }
 
 // NewLocalFilesystemBlobAccessSpecV1 creates a new localFilesystemBlob accessor.
@@ -72,7 +71,7 @@ func (a *LocalFilesystemBlobAccessSpec) AccessMethod(c cpi.ComponentAccess) (cpi
 
 type localfsblobConverterV1 struct{}
 
-var LocalFilesystemBlobV1 = accesstypes.NewAccessSpecVersion(&accessmethods.LocalBlobAccessSpecV1{}, localfsblobConverterV1{})
+var LocalFilesystemBlobV1 = cpi.NewAccessSpecVersion(&accessmethods.LocalBlobAccessSpecV1{}, localfsblobConverterV1{})
 
 func (_ localfsblobConverterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, error) {
 	in := object.(*LocalFilesystemBlobAccessSpec)

@@ -44,10 +44,10 @@ type Context interface {
 	SetAlias(name string, spec RepositorySpec, creds ...CredentialsSource) error
 }
 
+var key = reflect.TypeOf(_context{})
+
 // DefaultContext is the default context initialized by init functions
 var DefaultContext = NewContext(context.Background(), nil)
-
-var key = reflect.TypeOf(_context{})
 
 // ForContext returns the Context to use for context.Context.
 // This is eiter an explicit context or the default context.

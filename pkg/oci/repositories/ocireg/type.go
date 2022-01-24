@@ -18,7 +18,6 @@ import (
 	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/errors"
 	cpi "github.com/gardener/ocm/pkg/oci/cpi"
-	areautils "github.com/gardener/ocm/pkg/oci/ociutils"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
@@ -28,8 +27,8 @@ const (
 )
 
 func init() {
-	cpi.RegisterRepositoryType(OCIRegistryRepositoryType, areautils.NewRepositoryType(OCIRegistryRepositoryType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(OCIRegistryRepositoryTypeV1, areautils.NewRepositoryType(OCIRegistryRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(OCIRegistryRepositoryType, cpi.NewRepositoryType(OCIRegistryRepositoryType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(OCIRegistryRepositoryTypeV1, cpi.NewRepositoryType(OCIRegistryRepositoryTypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes an OCI registry interface backed by an oci registry.

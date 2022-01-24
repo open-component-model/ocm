@@ -50,7 +50,7 @@ var _ = Describe("generic credentials", func() {
 		err = json.Unmarshal(data, credspec)
 		Expect(err).To(Succeed())
 		s := credspec.(*core.DefaultCredentialsSpec)
-		Expect(reflect.TypeOf(s.RepositorySpec).String()).To(Equal("*memory.RepositorySpec"))
+		Expect(reflect.TypeOf(s.RepositorySpec).String()).To(Equal("*memory.ConfigSpec"))
 		Expect(s.CredentialsName).To(Equal("cred"))
 		Expect(s.RepositorySpec.(*memory.RepositorySpec).RepositoryName).To(Equal("test"))
 	})

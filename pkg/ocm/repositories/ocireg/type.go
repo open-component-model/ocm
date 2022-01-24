@@ -21,7 +21,6 @@ import (
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
-	areautils "github.com/gardener/ocm/pkg/ocm/ocmutils"
 )
 
 // ComponentNameMapping describes the method that is used to map the "Component Name", "Component Version"-tuples
@@ -37,8 +36,8 @@ const (
 )
 
 func init() {
-	cpi.RegisterRepositoryType(OCIRegistryRepositoryType, areautils.NewRepositoryType(OCIRegistryRepositoryType, &RepositorySpec{}, localAccessChecker))
-	cpi.RegisterRepositoryType(OCIRegistryRepositoryTypeV1, areautils.NewRepositoryType(OCIRegistryRepositoryTypeV1, &RepositorySpec{}, localAccessChecker))
+	cpi.RegisterRepositoryType(OCIRegistryRepositoryType, cpi.NewRepositoryType(OCIRegistryRepositoryType, &RepositorySpec{}, localAccessChecker))
+	cpi.RegisterRepositoryType(OCIRegistryRepositoryTypeV1, cpi.NewRepositoryType(OCIRegistryRepositoryTypeV1, &RepositorySpec{}, localAccessChecker))
 }
 
 // ComponentRepositoryMeta describes config special for a mapping of

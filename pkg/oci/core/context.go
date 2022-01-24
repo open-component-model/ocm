@@ -36,10 +36,10 @@ type Context interface {
 	RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...credentials.CredentialsSource) (Repository, error)
 }
 
+var key = reflect.TypeOf(_context{})
+
 // DefaultContext is the default context initialized by init functions
 var DefaultContext = NewContext(credentials.DefaultContext, DefaultRepositoryTypeScheme)
-
-var key = reflect.TypeOf(_context{})
 
 // ForContext returns the Context to use for context.Context.
 // This is either an explicit context or the default context.

@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package accesstypes
+package cpi
 
 import (
 	"encoding/json"
@@ -63,7 +63,7 @@ type ConvertedAccessType struct {
 
 var _ AccessSpecVersion = &ConvertedAccessType{}
 
-func NewConvertedType(name string, v AccessSpecVersion) *ConvertedAccessType {
+func NewConvertedAccessSpecType(name string, v AccessSpecVersion) *ConvertedAccessType {
 	return &ConvertedAccessType{
 		accessType: accessType{
 			ObjectTypeVersion:  runtime.NewObjectTypeVersion(name),

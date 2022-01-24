@@ -19,7 +19,6 @@ import (
 
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
-	"github.com/gardener/ocm/pkg/ocm/cpi/accesstypes"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
@@ -28,8 +27,8 @@ const LocalBlobType = "localBlob"
 const LocalBlobTypeV1 = LocalBlobType + "/v1"
 
 func init() {
-	cpi.RegisterAccessType(accesstypes.NewConvertedType(LocalBlobType, LocalBlobV1))
-	cpi.RegisterAccessType(accesstypes.NewConvertedType(LocalBlobTypeV1, LocalBlobV1))
+	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(LocalBlobType, LocalBlobV1))
+	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(LocalBlobTypeV1, LocalBlobV1))
 }
 
 // NewLocalBlobAccessSpecV1 creates a new localFilesystemBlob accessor.
@@ -54,7 +53,7 @@ type LocalBlobAccessSpec struct {
 var _ json.Marshaler = &LocalBlobAccessSpec{}
 
 func (s *LocalBlobAccessSpec) MarshalJSON() ([]byte, error) {
-	return accesstypes.MarshalConvertedAccessSpec(s)
+	return cpi.MarshalConvertedAccessSpec(s)
 }
 
 func (a *LocalBlobAccessSpec) ValidFor(repo cpi.Repository) bool {
@@ -81,7 +80,7 @@ type LocalBlobAccessSpecV1 struct {
 
 type localblobConverterV1 struct{}
 
-var LocalBlobV1 = accesstypes.NewAccessSpecVersion(&LocalBlobAccessSpecV1{}, localblobConverterV1{})
+var LocalBlobV1 = cpi.NewAccessSpecVersion(&LocalBlobAccessSpecV1{}, localblobConverterV1{})
 
 func (_ localblobConverterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, error) {
 	in := object.(*LocalBlobAccessSpec)

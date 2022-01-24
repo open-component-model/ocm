@@ -42,6 +42,6 @@ func NewDefaultContext(ctx context.Context) Context {
 	return core.NewContext(ctx, core.DefaultRepositoryTypeScheme)
 }
 
-func NewContext(ctx context.Context, reposcheme core.RepositoryTypeScheme) Context {
+func NewContext(ctx context.Context, reposcheme RepositoryTypeScheme) Context {
 	return core.NewContext(ctx, reposcheme)
 }

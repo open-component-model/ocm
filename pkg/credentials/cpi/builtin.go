@@ -23,3 +23,21 @@ const AliasRepositoryType = core.AliasRepositoryType
 
 type AliasRegistry = core.AliasRegistry
 type CredentialsSource = core.CredentialsSource
+
+type aliasRegistry struct {
+	RepositoryType
+	setter core.SetAliasFunction
+}
+
+var _ AliasRegistry = &aliasRegistry{}
+
+func NewAliasRegistry(t RepositoryType, setter core.SetAliasFunction) RepositoryType {
+	return &aliasRegistry{
+		RepositoryType: t,
+		setter:         setter,
+	}
+}
+
+func (a *aliasRegistry) SetAlias(ctx Context, name string, spec RepositorySpec, creds CredentialsSource) error {
+	return a.setter(ctx, name, spec, creds)
+}

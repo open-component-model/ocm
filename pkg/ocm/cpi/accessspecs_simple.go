@@ -12,26 +12,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package ocimutils
+package cpi
 
 import (
-	"reflect"
-
-	area "github.com/gardener/ocm/pkg/credentials/core"
+	"github.com/gardener/ocm/pkg/ocm/core"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
-type RepositoryType struct {
+type accessType struct {
 	runtime.ObjectTypeVersion
 	runtime.TypedObjectDecoder
 }
 
-func NewRepositoryType(name string, proto area.RepositorySpec) area.RepositoryType {
-	t := reflect.TypeOf(proto)
-	for t.Kind() == reflect.Ptr {
-		t = t.Elem()
-	}
-	return &RepositoryType{
+func NewAccessSpecType(name string, proto core.AccessSpec) core.AccessType {
+	return &accessType{
 		ObjectTypeVersion:  runtime.NewObjectTypeVersion(name),
 		TypedObjectDecoder: runtime.MustNewDirectDecoder(proto),
 	}

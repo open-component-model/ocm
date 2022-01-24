@@ -16,7 +16,6 @@ package memory
 
 import (
 	"github.com/gardener/ocm/pkg/credentials/cpi"
-	areautils "github.com/gardener/ocm/pkg/credentials/utils"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
@@ -26,8 +25,8 @@ const (
 )
 
 func init() {
-	cpi.RegisterRepositoryType(MemoryRepositoryType, areautils.NewRepositoryType(MemoryRepositoryType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(MemoryRepositoryTypeV1, areautils.NewRepositoryType(MemoryRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(MemoryRepositoryType, cpi.NewRepositoryType(MemoryRepositoryType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(MemoryRepositoryTypeV1, cpi.NewRepositoryType(MemoryRepositoryTypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes a memory based repository interface.

@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package ocmutils
+package cpi
 
 import (
 	"reflect"
@@ -22,7 +22,7 @@ import (
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
-type RepositoryType struct {
+type DefaultRepositoryType struct {
 	runtime.ObjectTypeVersion
 	runtime.TypedObjectDecoder
 	checker RepositoryAccessMethodChecker
@@ -35,14 +35,14 @@ func NewRepositoryType(name string, proto core.RepositorySpec, checker Repositor
 	for t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
-	return &RepositoryType{
+	return &DefaultRepositoryType{
 		ObjectTypeVersion:  runtime.NewObjectTypeVersion(name),
 		TypedObjectDecoder: runtime.MustNewDirectDecoder(proto),
 		checker:            checker,
 	}
 }
 
-func (t *RepositoryType) LocalSupportForAccessSpec(ctx core.Context, a compdesc.AccessSpec) bool {
+func (t *DefaultRepositoryType) LocalSupportForAccessSpec(ctx core.Context, a compdesc.AccessSpec) bool {
 	if t.checker != nil {
 		return t.checker(ctx, a)
 	}

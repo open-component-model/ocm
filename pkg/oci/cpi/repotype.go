@@ -12,20 +12,25 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package accesstypes
+package cpi
 
 import (
-	"github.com/gardener/ocm/pkg/ocm/core"
+	"reflect"
+
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
-type accessType struct {
+type DefaultRepositoryType struct {
 	runtime.ObjectTypeVersion
 	runtime.TypedObjectDecoder
 }
 
-func NewType(name string, proto core.AccessSpec) core.AccessType {
-	return &accessType{
+func NewRepositoryType(name string, proto RepositorySpec) RepositoryType {
+	t := reflect.TypeOf(proto)
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+	return &DefaultRepositoryType{
 		ObjectTypeVersion:  runtime.NewObjectTypeVersion(name),
 		TypedObjectDecoder: runtime.MustNewDirectDecoder(proto),
 	}

@@ -16,7 +16,6 @@ package aliases
 
 import (
 	"github.com/gardener/ocm/pkg/credentials/cpi"
-	areautils "github.com/gardener/ocm/pkg/credentials/utils"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
@@ -26,17 +25,11 @@ const (
 )
 
 func init() {
-	cpi.RegisterRepositoryType(AliasRepositoryType, &aliasRegistry{areautils.NewRepositoryType(AliasRepositoryType, &RepositorySpec{})})
-	cpi.RegisterRepositoryType(AliasRepositoryTypeV1, areautils.NewRepositoryType(AliasRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(AliasRepositoryType, cpi.NewAliasRegistry(cpi.NewRepositoryType(AliasRepositoryType, &RepositorySpec{}), setAlias))
+	cpi.RegisterRepositoryType(AliasRepositoryTypeV1, cpi.NewRepositoryType(AliasRepositoryTypeV1, &RepositorySpec{}))
 }
 
-type aliasRegistry struct {
-	cpi.RepositoryType
-}
-
-var _ cpi.AliasRegistry = &aliasRegistry{}
-
-func (a *aliasRegistry) SetAlias(ctx cpi.Context, name string, spec cpi.RepositorySpec, creds cpi.CredentialsSource) error {
+func setAlias(ctx cpi.Context, name string, spec cpi.RepositorySpec, creds cpi.CredentialsSource) error {
 	repos := ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories).(*Repositories)
 	repos.Set(name, spec, creds)
 	return nil

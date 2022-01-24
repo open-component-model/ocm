@@ -16,7 +16,6 @@ package dockerconfig
 
 import (
 	"github.com/gardener/ocm/pkg/credentials/cpi"
-	areautils "github.com/gardener/ocm/pkg/credentials/utils"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
@@ -26,8 +25,8 @@ const (
 )
 
 func init() {
-	cpi.RegisterRepositoryType(DockerConfigRepositoryType, areautils.NewRepositoryType(DockerConfigRepositoryType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(DockerConfigRepositoryTypeV1, areautils.NewRepositoryType(DockerConfigRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(DockerConfigRepositoryType, cpi.NewRepositoryType(DockerConfigRepositoryType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(DockerConfigRepositoryTypeV1, cpi.NewRepositoryType(DockerConfigRepositoryTypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes a cocker config based credential repository interface.

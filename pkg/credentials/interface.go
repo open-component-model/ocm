@@ -50,7 +50,7 @@ func ForContext(ctx context.Context) Context {
 	return core.ForContext(ctx)
 }
 
-func NewContext(ctx context.Context, reposcheme core.RepositoryTypeScheme) Context {
+func NewContext(ctx context.Context, reposcheme RepositoryTypeScheme) Context {
 	return core.NewContext(ctx, reposcheme)
 }
 

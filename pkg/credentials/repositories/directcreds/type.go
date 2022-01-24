@@ -17,7 +17,6 @@ package directcreds
 import (
 	"github.com/gardener/ocm/pkg/common"
 	cpi "github.com/gardener/ocm/pkg/credentials/cpi"
-	areautils "github.com/gardener/ocm/pkg/credentials/utils"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
@@ -27,8 +26,8 @@ const (
 )
 
 func init() {
-	cpi.RegisterRepositoryType(DirectCredentialsRepositoryType, areautils.NewRepositoryType(DirectCredentialsRepositoryType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(DirectCredentialsRepositoryTypeV1, areautils.NewRepositoryType(DirectCredentialsRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(DirectCredentialsRepositoryType, cpi.NewRepositoryType(DirectCredentialsRepositoryType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(DirectCredentialsRepositoryTypeV1, cpi.NewRepositoryType(DirectCredentialsRepositoryTypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes a repository interface for single direct credentials.

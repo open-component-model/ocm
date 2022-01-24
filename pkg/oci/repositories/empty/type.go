@@ -17,7 +17,6 @@ package empty
 import (
 	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/oci/cpi"
-	areautils "github.com/gardener/ocm/pkg/oci/ociutils"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
@@ -29,8 +28,8 @@ const (
 const ATTR_REPOS = "github.com/gardener/ocm/pkg/oci/repositories/empty"
 
 func init() {
-	cpi.RegisterRepositoryType(EmptyRepositoryType, areautils.NewRepositoryType(EmptyRepositoryType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(EmptyRepositoryTypeV1, areautils.NewRepositoryType(EmptyRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(EmptyRepositoryType, cpi.NewRepositoryType(EmptyRepositoryType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(EmptyRepositoryTypeV1, cpi.NewRepositoryType(EmptyRepositoryTypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
