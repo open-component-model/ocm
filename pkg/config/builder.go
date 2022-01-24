@@ -12,13 +12,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package credentials
+package config
 
 import (
 	"context"
 
-	"github.com/gardener/ocm/pkg/config"
-	"github.com/gardener/ocm/pkg/credentials/core"
+	"github.com/gardener/ocm/pkg/config/core"
 	"github.com/gardener/ocm/pkg/datacontext"
 )
 
@@ -30,12 +29,8 @@ func WithSharedAttributes(ctx datacontext.AttributesContext) core.Builder {
 	return core.Builder{}.WithSharedAttributes(ctx)
 }
 
-func WithConfigs(ctx config.Context) core.Builder {
-	return core.Builder{}.WithConfig(ctx)
-}
-
-func WithRepositoyTypeScheme(scheme RepositoryTypeScheme) core.Builder {
-	return core.Builder{}.WithRepositoyTypeScheme(scheme)
+func WithConfigTypeScheme(scheme ConfigTypeScheme) core.Builder {
+	return core.Builder{}.WithConfigTypeScheme(scheme)
 }
 
 func New() Context {

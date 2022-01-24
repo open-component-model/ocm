@@ -12,32 +12,52 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package credentials
+package errors
 
 import (
-	"context"
-
-	"github.com/gardener/ocm/pkg/config"
-	"github.com/gardener/ocm/pkg/credentials/core"
-	"github.com/gardener/ocm/pkg/datacontext"
+	"fmt"
 )
 
-func WithContext(ctx context.Context) core.Builder {
-	return core.Builder{}.WithContext(ctx)
+type ErrorList struct {
+	msg    string
+	errors []error
 }
 
-func WithSharedAttributes(ctx datacontext.AttributesContext) core.Builder {
-	return core.Builder{}.WithSharedAttributes(ctx)
+func (l *ErrorList) Error() string {
+	msg := l.msg
+	sep := ""
+	if msg != "" {
+		sep = ":="
+	}
+	for _, e := range l.errors {
+		if e != nil {
+			msg = fmt.Sprintf("%s%s%s", msg, sep, e)
+			sep = ", "
+		}
+	}
+	return msg
 }
 
-func WithConfigs(ctx config.Context) core.Builder {
-	return core.Builder{}.WithConfig(ctx)
+func (l *ErrorList) Add(e error) *ErrorList {
+	if e != nil {
+		l.errors = append(l.errors, e)
+	}
+	return l
 }
 
-func WithRepositoyTypeScheme(scheme RepositoryTypeScheme) core.Builder {
-	return core.Builder{}.WithRepositoyTypeScheme(scheme)
+func (l *ErrorList) Len() int {
+	return len(l.errors)
 }
 
-func New() Context {
-	return core.Builder{}.New()
+func (l *ErrorList) Result() error {
+	if len(l.errors) == 0 {
+		return nil
+	}
+	return l
+}
+
+func ErrListf(msg string, args ...interface{}) *ErrorList {
+	return &ErrorList{
+		msg: fmt.Sprintf(msg, args...),
+	}
 }

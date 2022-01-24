@@ -12,32 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package credentials
+package core
 
 import (
-	"context"
-
-	"github.com/gardener/ocm/pkg/config"
-	"github.com/gardener/ocm/pkg/credentials/core"
-	"github.com/gardener/ocm/pkg/datacontext"
+	"github.com/gardener/ocm/pkg/common"
+	"github.com/gardener/ocm/pkg/runtime"
 )
 
-func WithContext(ctx context.Context) core.Builder {
-	return core.Builder{}.WithContext(ctx)
-}
+type Config interface {
+	runtime.TypedObject
+	common.VersionedElement
 
-func WithSharedAttributes(ctx datacontext.AttributesContext) core.Builder {
-	return core.Builder{}.WithSharedAttributes(ctx)
-}
-
-func WithConfigs(ctx config.Context) core.Builder {
-	return core.Builder{}.WithConfig(ctx)
-}
-
-func WithRepositoyTypeScheme(scheme RepositoryTypeScheme) core.Builder {
-	return core.Builder{}.WithRepositoyTypeScheme(scheme)
-}
-
-func New() Context {
-	return core.Builder{}.New()
+	ApplyTo(Context, interface{}) error
 }

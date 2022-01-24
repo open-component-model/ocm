@@ -17,8 +17,10 @@ package credentials
 import (
 	"context"
 
-	"github.com/gardener/ocm/pkg/common"
+	_ "github.com/gardener/ocm/pkg/credentials/config"
 	_ "github.com/gardener/ocm/pkg/credentials/repositories"
+
+	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/runtime"
 
 	"github.com/gardener/ocm/pkg/credentials/core"

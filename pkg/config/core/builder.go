@@ -17,15 +17,13 @@ package core
 import (
 	"context"
 
-	"github.com/gardener/ocm/pkg/config"
 	"github.com/gardener/ocm/pkg/datacontext"
 )
 
 type Builder struct {
 	ctx        context.Context
 	shared     datacontext.AttributesContext
-	config     config.Context
-	reposcheme RepositoryTypeScheme
+	reposcheme ConfigTypeScheme
 }
 
 func (b *Builder) getContext() context.Context {
@@ -45,12 +43,7 @@ func (b Builder) WithSharedAttributes(ctx datacontext.AttributesContext) Builder
 	return b
 }
 
-func (b Builder) WithConfig(ctx config.Context) Builder {
-	b.config = ctx
-	return b
-}
-
-func (b Builder) WithRepositoyTypeScheme(scheme RepositoryTypeScheme) Builder {
+func (b Builder) WithConfigTypeScheme(scheme ConfigTypeScheme) Builder {
 	b.reposcheme = scheme
 	return b
 }
@@ -62,15 +55,12 @@ func (b Builder) Bound() (Context, context.Context) {
 
 func (b Builder) New() Context {
 	ctx := b.getContext()
-	if b.config == nil {
-		b.config = config.ForContext(ctx)
-	}
 	if b.shared == nil {
-		b.shared = b.config.AttributesContext()
+		b.shared = datacontext.ForContext(ctx)
 	}
 	if b.reposcheme == nil {
-		b.reposcheme = DefaultRepositoryTypeScheme
+		b.reposcheme = DefaultConfigTypeScheme
 	}
-	return newContext(b.shared, b.config, b.reposcheme)
+	return newContext(b.shared, b.reposcheme)
 
 }

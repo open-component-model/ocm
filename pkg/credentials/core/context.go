@@ -17,7 +17,9 @@ package core
 import (
 	"context"
 	"reflect"
+	"sync"
 
+	"github.com/gardener/ocm/pkg/config"
 	"github.com/gardener/ocm/pkg/datacontext"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/runtime"
@@ -61,20 +63,32 @@ type _context struct {
 	datacontext.Context
 
 	sharedattributes     datacontext.AttributesContext
+	configctx            config.Context
+	lock                 sync.RWMutex
+	lastGeneration       int64
 	knownRepositoryTypes RepositoryTypeScheme
 	consumers            *_consumers
 }
 
 var _ Context = &_context{}
 
-func newContext(shared datacontext.AttributesContext, reposcheme RepositoryTypeScheme) Context {
+func newContext(shared datacontext.AttributesContext, configctx config.Context, reposcheme RepositoryTypeScheme) Context {
 	c := &_context{
 		sharedattributes:     shared,
+		configctx:            configctx,
 		knownRepositoryTypes: reposcheme,
 		consumers:            newConsumers(),
 	}
 	c.Context = datacontext.NewContextBase(c, key, shared.GetAttributes())
 	return c
+}
+
+func (c *_context) Update() error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	gen, err := c.configctx.ApplyTo(c.lastGeneration, c)
+	c.lastGeneration = gen
+	return err
 }
 
 func (c *_context) AttributesContext() datacontext.AttributesContext {
@@ -94,6 +108,7 @@ func (c *_context) RepositoryForSpec(spec RepositorySpec, creds ...CredentialsSo
 	if err != nil {
 		return nil, err
 	}
+	c.Update()
 	return spec.Repository(c, cred)
 }
 
@@ -125,6 +140,7 @@ func (c *_context) CredentialsForConfig(data []byte, unmarshaler runtime.Unmarsh
 }
 
 func (c *_context) GetCredentialsForConsumer(identity ConsumerIdentity) (Credentials, error) {
+	c.Update()
 	consumer := c.consumers.Get(identity)
 	if consumer == nil {
 		return nil, ErrUnknownConsumer(identity.String())
@@ -133,10 +149,12 @@ func (c *_context) GetCredentialsForConsumer(identity ConsumerIdentity) (Credent
 }
 
 func (c *_context) SetCredentialsForConsumer(identity ConsumerIdentity, creds CredentialsSource) {
+	c.Update()
 	c.consumers.Set(identity, creds)
 }
 
 func (c *_context) SetAlias(name string, spec RepositorySpec, creds ...CredentialsSource) error {
+	c.Update()
 	t := c.knownRepositoryTypes.GetRepositoryType(AliasRepositoryType)
 	if t == nil {
 		return errors.ErrNotSupported("aliases")
