@@ -37,11 +37,9 @@ type TypeSetter interface {
 // TypedObject defines the accessor for a typed object with additional data.
 type TypedObject interface {
 	TypeGetter
-	TypeSetter
 }
 
-var to TypedObject
-var typeTypedObject = reflect.TypeOf(&to).Elem()
+var typeTypedObject = reflect.TypeOf((*TypedObject)(nil)).Elem()
 
 // TypedObjectDecoder is able to provide an effective typed object for some
 // serilaized form. The technical deserialization is done by an Unmarshaler.

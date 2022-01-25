@@ -27,6 +27,7 @@ func C1() {
 }
 
 func main() {
+	x.Vtest()
 	data, err := os.ReadFile("component-descriptor.yaml")
 	CheckErr(err, "read")
 	cd, err := compdesc.Decode(data)

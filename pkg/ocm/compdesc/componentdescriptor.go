@@ -17,7 +17,6 @@ package compdesc
 import (
 	"errors"
 
-	"github.com/gardener/ocm/pkg/common"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/gardener/ocm/pkg/runtime"
 )
@@ -245,8 +244,7 @@ type ElementMetaAccessor interface {
 // The outbound object is typicall a runtime.UnstructuredTypedObject.
 // Inbound any serializable AccessSpec implementation is possible.
 type AccessSpec interface {
-	runtime.TypedObject
-	common.VersionedElement
+	runtime.VersionedTypedObject
 }
 
 // GenericAccessSpec returns a generic AccessSpec implementation for an unstructured object.
@@ -477,7 +475,7 @@ type ComponentReference struct {
 }
 
 // GetName returns the name of the object.
-func (o ComponentReference) GetName() string {
+func (o ComponentReference) GetKind() string {
 	return o.Name
 }
 

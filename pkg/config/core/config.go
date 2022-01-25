@@ -15,13 +15,11 @@
 package core
 
 import (
-	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
 type Config interface {
-	runtime.TypedObject
-	common.VersionedElement
+	runtime.VersionedTypedObject
 
 	ApplyTo(Context, interface{}) error
 }

@@ -15,7 +15,6 @@
 package ctf_test
 
 import (
-	"context"
 	"encoding/json"
 	"os"
 	"reflect"
@@ -30,7 +29,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-var DefaultContext = ocm.NewDefaultContext(context.TODO())
+var DefaultContext = ocm.New()
 
 var _ = Describe("access method", func() {
 
@@ -51,7 +50,7 @@ var _ = Describe("access method", func() {
 		Expect(spec).To(Not(BeNil()))
 
 		Expect(spec.GetType()).To(Equal(accessmethods.LocalBlobType))
-		Expect(spec.GetName()).To(Equal(accessmethods.LocalBlobType))
+		Expect(spec.GetKind()).To(Equal(accessmethods.LocalBlobType))
 		Expect(spec.GetVersion()).To(Equal("v1"))
 		Expect(reflect.TypeOf(spec).String()).To(Equal("*accessmethods.LocalBlobAccessSpec"))
 
@@ -63,7 +62,7 @@ var _ = Describe("access method", func() {
 		Expect(err).To(Succeed())
 		Expect(m).To(Not(BeNil()))
 		Expect(reflect.TypeOf(m).String()).To(Equal("*accessmethods.DefaultAccessMethod"))
-		Expect(m.GetName()).To(Equal("localFilesystemBlob"))
+		Expect(m.GetKind()).To(Equal("localFilesystemBlob"))
 		Expect(accessmethods.GetImplementation(m)).To(Not(BeNil()))
 		Expect(reflect.TypeOf(accessmethods.GetImplementation(m)).String()).To(Equal("*ctf.localFilesystemBlobAccessMethod"))
 	})

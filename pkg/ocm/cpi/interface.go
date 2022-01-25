@@ -41,7 +41,7 @@ func RegisterRepositoryType(name string, atype RepositoryType) {
 }
 
 func RegisterAccessType(atype AccessType) {
-	core.DefaultAccessTypeScheme.Register(atype.GetName(), atype)
+	core.DefaultAccessTypeScheme.Register(atype.GetKind(), atype)
 }
 
 const KIND_COMPONENTVERSION = core.KIND_COMPONENTVERSION

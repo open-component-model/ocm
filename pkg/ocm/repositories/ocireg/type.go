@@ -79,6 +79,6 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 }
 
 func localAccessChecker(ctx cpi.Context, a compdesc.AccessSpec) bool {
-	name := a.GetName()
+	name := a.GetKind()
 	return name == accessmethods.LocalBlobType
 }

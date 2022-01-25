@@ -21,7 +21,7 @@ import (
 )
 
 type DefaultConfigType struct {
-	runtime.ObjectTypeVersion
+	runtime.ObjectVersionedType
 	runtime.TypedObjectDecoder
 }
 
@@ -31,7 +31,7 @@ func NewConfigType(name string, proto Config) ConfigType {
 		t = t.Elem()
 	}
 	return &DefaultConfigType{
-		ObjectTypeVersion:  runtime.NewObjectTypeVersion(name),
-		TypedObjectDecoder: runtime.MustNewDirectDecoder(proto),
+		ObjectVersionedType: runtime.NewVersionedObjectType(name),
+		TypedObjectDecoder:  runtime.MustNewDirectDecoder(proto),
 	}
 }

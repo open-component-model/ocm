@@ -26,7 +26,7 @@ var _ = Describe("helper", func() {
 
 	It("should inject a new repository context if none is defined", func() {
 		cd := &compdesc.ComponentDescriptor{}
-		Expect(compdesc.DefaultComponent(cd)).To(Succeed())
+		compdesc.DefaultComponent(cd)
 
 		repoCtx := ocireg.NewRepositorySpec("example.com", "")
 		Expect(cd.AddRepositoryContext(repoCtx)).To(Succeed())

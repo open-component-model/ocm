@@ -21,7 +21,7 @@ import (
 )
 
 type DefaultRepositoryType struct {
-	runtime.ObjectTypeVersion
+	runtime.ObjectVersionedType
 	runtime.TypedObjectDecoder
 }
 
@@ -31,7 +31,7 @@ func NewRepositoryType(name string, proto RepositorySpec) RepositoryType {
 		t = t.Elem()
 	}
 	return &DefaultRepositoryType{
-		ObjectTypeVersion:  runtime.NewObjectTypeVersion(name),
-		TypedObjectDecoder: runtime.MustNewDirectDecoder(proto),
+		ObjectVersionedType: runtime.NewVersionedObjectType(name),
+		TypedObjectDecoder:  runtime.MustNewDirectDecoder(proto),
 	}
 }

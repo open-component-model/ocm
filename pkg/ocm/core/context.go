@@ -59,9 +59,9 @@ func ForContext(ctx context.Context) Context {
 type _context struct {
 	datacontext.Context
 
-	attrctx datacontext.AttributesContext
-	credctx credentials.Context
-	ocictx  oci.Context
+	sharedattributes datacontext.AttributesContext
+	credctx          credentials.Context
+	ocictx           oci.Context
 
 	knownRepositoryTypes RepositoryTypeScheme
 	knownAccessTypes     AccessTypeScheme
@@ -69,22 +69,24 @@ type _context struct {
 
 var _ Context = &_context{}
 
-func newContext(attrctx datacontext.AttributesContext, credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme) Context {
-	return &_context{
-		attrctx:              attrctx,
+func newContext(shared datacontext.AttributesContext, credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme) Context {
+	c := &_context{
+		sharedattributes:     shared,
 		credctx:              credctx,
 		ocictx:               ocictx,
 		knownAccessTypes:     accessscheme,
 		knownRepositoryTypes: reposcheme,
 	}
+	c.Context = datacontext.NewContextBase(c, key, shared.GetAttributes())
+	return c
 }
 
 func (c *_context) AttributesContext() datacontext.AttributesContext {
-	return c.ocictx.AttributesContext()
+	return c.sharedattributes
 }
 
 func (c *_context) CredentialsContext() credentials.Context {
-	return c.ocictx.CredentialsContext()
+	return c.credctx
 }
 
 func (c *_context) OCIContext() oci.Context {

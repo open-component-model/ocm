@@ -25,7 +25,7 @@ import (
 
 // OCIRegistryType is the access type of a oci registry.
 const OCIRegistryType = "ociRegistry"
-const OCIRegistryTypeV1 = OCIRegistryType + "/v1"
+const OCIRegistryTypeV1 = OCIRegistryType + runtime.VersionSeparator + "v1"
 
 func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(OCIRegistryType, &OCIRegistryAccessSpec{}))
@@ -34,7 +34,7 @@ func init() {
 
 // OCIRegistryAccessSpec describes the access for a oci registry.
 type OCIRegistryAccessSpec struct {
-	runtime.ObjectTypeVersion `json:",inline"`
+	runtime.ObjectVersionedType `json:",inline"`
 
 	// ImageReference is the actual reference to the oci image repository and tag.
 	ImageReference string `json:"imageReference"`
@@ -43,8 +43,8 @@ type OCIRegistryAccessSpec struct {
 // NewOCIRegistryAccessSpecV1 creates a new oci registry access spec version v1
 func NewOCIRegistryAccessSpecV1(ref string) *OCIRegistryAccessSpec {
 	return &OCIRegistryAccessSpec{
-		ObjectTypeVersion: runtime.NewObjectTypeVersion(OCIRegistryType),
-		ImageReference:    ref,
+		ObjectVersionedType: runtime.NewVersionedObjectType(OCIRegistryType),
+		ImageReference:      ref,
 	}
 }
 
@@ -74,7 +74,7 @@ func newOCIRegistryAccessMethod(a *OCIRegistryAccessSpec) (*OCIRegistryAccessMet
 	}, nil
 }
 
-func (m *OCIRegistryAccessMethod) GetName() string {
+func (m *OCIRegistryAccessMethod) GetKind() string {
 	return OCIRegistryType
 }
 

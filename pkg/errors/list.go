@@ -27,7 +27,7 @@ func (l *ErrorList) Error() string {
 	msg := l.msg
 	sep := ""
 	if msg != "" {
-		sep = ":="
+		sep = ": "
 	}
 	for _, e := range l.errors {
 		if e != nil {

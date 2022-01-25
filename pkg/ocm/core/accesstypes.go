@@ -17,7 +17,6 @@ package core
 import (
 	"fmt"
 
-	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/runtime"
@@ -25,7 +24,7 @@ import (
 
 type AccessType interface {
 	runtime.TypedObjectDecoder
-	common.VersionedElement
+	runtime.VersionedTypedObject
 }
 
 type AccessSpec interface {
@@ -35,7 +34,7 @@ type AccessSpec interface {
 }
 
 type AccessMethod interface {
-	GetName() string
+	GetKind() string
 	BlobAccess
 }
 
@@ -79,7 +78,7 @@ func (t *accessTypeScheme) DecodeAccessSpec(data []byte, unmarshaler runtime.Unm
 	if spec, ok := obj.(AccessSpec); ok {
 		return spec, nil
 	}
-	return nil, fmt.Errorf("invalid access spec type: yield %T instead of AccessSpec")
+	return nil, fmt.Errorf("invalid access spec type: yield %T instead of AccessSpec", obj)
 }
 
 func (t *accessTypeScheme) CreateAccessSpec(obj runtime.TypedObject) (AccessSpec, error) {

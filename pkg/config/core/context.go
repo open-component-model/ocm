@@ -42,12 +42,17 @@ type Context interface {
 	ConfigTypes() ConfigTypeScheme
 
 	GetConfigForData(data []byte, unmarshaler runtime.Unmarshaler) (Config, error)
+
+	// ApplyData applies the config given by a byte stream to the config store
+	// If the config type is not known, a generic config is stored and returned.
+	// In this case an unknown error for kind KIND_CONFIGTYPE is returned.
 	ApplyData(data []byte, unmarshaler runtime.Unmarshaler) (Config, error)
+	// ApplyConfig applies the config to the config store
 	ApplyConfig(spec Config) error
 
 	GetConfigForType(generation int64, typ string) (int64, []Config)
 	GetConfigForName(generation int64, name string) (int64, []Config)
-	GetConfigForSelector(generation int64, selector ConfigSelector) (int64, []Config)
+	GetConfig(generation int64, selector ConfigSelector) (int64, []Config)
 
 	Generation() int64
 	ApplyTo(gen int64, target interface{}) (int64, error)
@@ -110,8 +115,18 @@ func (c *_context) GetConfigForData(data []byte, unmarshaler runtime.Unmarshaler
 }
 
 func (c *_context) ApplyConfig(spec Config) error {
+	var unknown error
+	spec = (&AppliedConfig{config: spec}).eval(c)
+	if IsGeneric(spec) {
+		unknown = errors.ErrUnknown(KIND_CONFIGTYPE, spec.GetType())
+	}
+
+	err := spec.ApplyTo(c, c)
+	if IsErrNoContext(err) {
+		err = unknown
+	}
 	c.configs.Apply(spec)
-	return nil
+	return err
 }
 
 func (c *_context) ApplyData(data []byte, unmarshaler runtime.Unmarshaler) (Config, error) {
@@ -150,7 +165,7 @@ func (c *_context) ApplyTo(gen int64, target interface{}) (int64, error) {
 	return cur, list.Result()
 }
 
-func (c *_context) GetConfigForSelector(gen int64, selector ConfigSelector) (int64, []Config) {
+func (c *_context) GetConfig(gen int64, selector ConfigSelector) (int64, []Config) {
 	gen, cfgs := c.configs.GetConfigForSelector(c, c.selector(gen, selector))
 	return gen, cfgs.Configs()
 }

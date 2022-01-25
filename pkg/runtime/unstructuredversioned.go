@@ -15,35 +15,37 @@
 package runtime
 
 import (
-	"strings"
-
-	"github.com/gardener/ocm/pkg/common"
+	"github.com/modern-go/reflect2"
 )
 
 type UnstructuredVersionedTypedObject struct {
 	UnstructuredTypedObject `json:",inline"`
 }
 
+func ToUnstructuredVersionedTypedObject(obj TypedObject) (*UnstructuredVersionedTypedObject, error) {
+	if reflect2.IsNil(obj) {
+		return nil, nil
+	}
+	if v, ok := obj.(*UnstructuredVersionedTypedObject); ok {
+		return v, nil
+	}
+	u, err := ToUnstructuredTypedObject(obj)
+	if err != nil {
+		return nil, err
+	}
+	return &UnstructuredVersionedTypedObject{*u}, nil
+}
+
 func (s *UnstructuredVersionedTypedObject) ToUnstructured() (*UnstructuredTypedObject, error) {
 	return &s.UnstructuredTypedObject, nil
 }
 
-func (s *UnstructuredVersionedTypedObject) GetName() string {
-	t := s.GetType()
-	i := strings.LastIndex(t, "/")
-	if i < 0 {
-		return t
-	}
-	return t[:i]
+func (s *UnstructuredVersionedTypedObject) GetKind() string {
+	return ObjectVersionedType(s.ObjectType).GetKind()
 }
 
 func (s *UnstructuredVersionedTypedObject) GetVersion() string {
-	t := s.GetType()
-	i := strings.LastIndex(t, "/")
-	if i < 0 {
-		return "v1"
-	}
-	return t[i+1:]
+	return ObjectVersionedType(s.ObjectType).GetVersion()
 }
 
-var _ common.VersionedElement = &UnstructuredVersionedTypedObject{}
+var _ VersionedTypedObject = &UnstructuredVersionedTypedObject{}

@@ -21,7 +21,7 @@ import (
 
 const (
 	AliasRepositoryType   = cpi.AliasRepositoryType
-	AliasRepositoryTypeV1 = AliasRepositoryType + "/v1"
+	AliasRepositoryTypeV1 = AliasRepositoryType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
@@ -37,15 +37,15 @@ func setAlias(ctx cpi.Context, name string, spec cpi.RepositorySpec, creds cpi.C
 
 // RepositorySpec describes a memory based repository interface.
 type RepositorySpec struct {
-	runtime.ObjectTypeVersion `json:",inline"`
-	Alias                     string `json:"alias"`
+	runtime.ObjectVersionedType `json:",inline"`
+	Alias                       string `json:"alias"`
 }
 
 // NewRepositorySpec creates a new memory RepositorySpec
 func NewRepositorySpec(name string) *RepositorySpec {
 	return &RepositorySpec{
-		ObjectTypeVersion: runtime.NewObjectTypeVersion(AliasRepositoryType),
-		Alias:             name,
+		ObjectVersionedType: runtime.NewVersionedObjectType(AliasRepositoryType),
+		Alias:               name,
 	}
 }
 

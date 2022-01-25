@@ -39,9 +39,9 @@ func init() {
 func NewLocalFilesystemBlobAccessSpecV1(path string, mediaType string) *LocalFilesystemBlobAccessSpec {
 	return &LocalFilesystemBlobAccessSpec{
 		LocalBlobAccessSpec: accessmethods.LocalBlobAccessSpec{
-			ObjectTypeVersion: runtime.NewObjectTypeVersion(LocalFilesystemBlobType),
-			Filename:          path,
-			MediaType:         mediaType,
+			ObjectVersionedType: runtime.NewVersionedObjectType(LocalFilesystemBlobType),
+			Filename:            path,
+			MediaType:           mediaType,
 		},
 	}
 }
@@ -52,13 +52,13 @@ type LocalFilesystemBlobAccessSpec struct {
 }
 
 func (a *LocalFilesystemBlobAccessSpec) ValidFor(repo cpi.Repository) bool {
-	return repo.GetSpecification().GetName() == CTFRepositoryType
+	return repo.GetSpecification().GetKind() == CTFRepositoryType
 }
 
 func (a *LocalFilesystemBlobAccessSpec) AccessMethod(c cpi.ComponentAccess) (cpi.AccessMethod, error) {
 	rtype := c.GetAccessType()
 	if rtype != CTFRepositoryType {
-		return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, c.GetName(), rtype)
+		return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetKind(), rtype)
 	}
 	acc, ok := c.(*ComponentArchive)
 	if !ok {
@@ -76,9 +76,9 @@ var LocalFilesystemBlobV1 = cpi.NewAccessSpecVersion(&accessmethods.LocalBlobAcc
 func (_ localfsblobConverterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, error) {
 	in := object.(*LocalFilesystemBlobAccessSpec)
 	return &accessmethods.LocalBlobAccessSpecV1{
-		ObjectTypeVersion: runtime.NewObjectTypeVersion(in.Type),
-		Filename:          in.Filename,
-		MediaType:         in.MediaType,
+		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
+		Filename:            in.Filename,
+		MediaType:           in.MediaType,
 	}, nil
 }
 
@@ -86,9 +86,9 @@ func (_ localfsblobConverterV1) ConvertTo(object interface{}) (cpi.AccessSpec, e
 	in := object.(*accessmethods.LocalBlobAccessSpecV1)
 	return &LocalFilesystemBlobAccessSpec{
 		LocalBlobAccessSpec: accessmethods.LocalBlobAccessSpec{
-			ObjectTypeVersion: runtime.NewObjectTypeVersion(in.Type),
-			Filename:          in.Filename,
-			MediaType:         in.MediaType,
+			ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
+			Filename:            in.Filename,
+			MediaType:           in.MediaType,
 		},
 	}, nil
 }

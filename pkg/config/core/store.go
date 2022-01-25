@@ -115,8 +115,8 @@ func (s *ConfigStore) Apply(c Config) {
 	defer s.lock.Unlock()
 	s.generation++
 	a := &AppliedConfig{s.generation, c}
-	configs := s.types[c.GetName()]
-	s.types[c.GetName()] = append(configs, a)
+	configs := s.types[c.GetKind()]
+	s.types[c.GetKind()] = append(configs, a)
 	s.configs = append(s.configs, a)
 }
 

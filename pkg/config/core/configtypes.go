@@ -18,14 +18,14 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/modern-go/reflect2"
 )
 
 type ConfigType interface {
 	runtime.TypedObjectDecoder
-	common.VersionedElement
+	runtime.VersionedTypedObject
 }
 
 type ConfigTypeScheme interface {
@@ -131,6 +131,20 @@ func NewGenericConfig(data []byte, unmarshaler runtime.Unmarshaler) (Config, err
 		return nil, err
 	}
 	return &GenericConfig{*unstr}, nil
+}
+
+func ToGenericConfig(c Config) (*GenericConfig, error) {
+	if reflect2.IsNil(c) {
+		return nil, nil
+	}
+	if g, ok := c.(*GenericConfig); ok {
+		return g, nil
+	}
+	u, err := runtime.ToUnstructuredVersionedTypedObject(c)
+	if err != nil {
+		return nil, err
+	}
+	return &GenericConfig{*u}, nil
 }
 
 func (s *GenericConfig) Evaluate(ctx Context) (Config, error) {

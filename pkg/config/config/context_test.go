@@ -15,88 +15,70 @@
 package config_test
 
 import (
-	"encoding/json"
+	"io/ioutil"
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/config"
-	"github.com/gardener/ocm/pkg/errors"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	"github.com/gardener/ocm/pkg/config"
+	"sigs.k8s.io/yaml"
 )
 
-var _ = Describe("config handling", func() {
+var _ = Describe("generic config handling", func() {
 
 	var scheme config.ConfigTypeScheme
 	var cfgctx config.Context
 
+	testdataconfig, _ := ioutil.ReadFile("testdata/config.yaml")
+	testdatajson, _ := yaml.YAMLToJSON(testdataconfig)
+
+	_ = testdatajson
+
 	BeforeEach(func() {
 		scheme = config.NewConfigTypeScheme()
+		scheme.AddKnownTypes(config.DefaultContext.ConfigTypes())
 		cfgctx = config.WithConfigTypeScheme(scheme).New()
 	})
 
-	It("can deserialize unknown", func() {
-		cfg := NewConfig("a", "b")
-		data, err := json.Marshal(cfg)
-		Expect(err).To(Succeed())
-
-		result, err := cfgctx.GetConfigForData(data, nil)
-		Expect(err).To(Succeed())
-		Expect(config.IsGeneric(result)).To(BeTrue())
-	})
-
-	It("can deserialize known", func() {
-		RegisterAt(scheme)
-
-		cfg := NewConfig("a", "b")
-		data, err := json.Marshal(cfg)
-		Expect(err).To(Succeed())
-
-		result, err := cfgctx.GetConfigForData(data, nil)
+	It("can deserialize config", func() {
+		result, err := cfgctx.GetConfigForData(testdataconfig, nil)
 		Expect(err).To(Succeed())
 		Expect(config.IsGeneric(result)).To(BeFalse())
-		Expect(reflect.TypeOf(result).String()).To(Equal("*config_test.Config"))
+		Expect(reflect.TypeOf(result).String()).To(Equal("*config.Config"))
 	})
 
 	It("it applies to existing context", func() {
 		RegisterAt(scheme)
-
 		d := newDummy(cfgctx)
 
-		cfg := NewConfig("a", "b")
-
-		err := cfgctx.ApplyConfig(cfg)
-
+		cfg, err := cfgctx.GetConfigForData(testdataconfig, nil)
 		Expect(err).To(Succeed())
 
-		Expect(d.getApplied()).To(Equal([]*Config{cfg}))
+		err = cfgctx.ApplyConfig(cfg)
+		Expect(err).To(Succeed())
+		gen, cfgs := cfgctx.GetConfig(config.AllGenerations, nil)
+		Expect(gen).To(Equal(int64(3)))
+		Expect(len(cfgs)).To(Equal(3))
+
+		Expect(d.getApplied()).To(Equal([]*Config{NewConfig("alice", ""), NewConfig("", "bob")}))
 	})
 
-	It("it applies to new context", func() {
-		RegisterAt(scheme)
+	It("it applies to existing context", func() {
 
-		cfg := NewConfig("a", "b")
-
-		err := cfgctx.ApplyConfig(cfg)
+		cfg, err := cfgctx.GetConfigForData(testdataconfig, nil)
 		Expect(err).To(Succeed())
 
-		d := newDummy(cfgctx)
-		Expect(d.applied).To(Equal([]*Config{cfg}))
-	})
-
-	It("it applies generic to new context", func() {
-
-		cfg := NewConfig("a", "b")
-		data, err := json.Marshal(cfg)
-		Expect(err).To(Succeed())
-
-		gen, err := cfgctx.ApplyData(data, nil)
+		err = cfgctx.ApplyConfig(cfg)
 		Expect(err).To(HaveOccurred())
-		Expect(errors.IsErrUnknownKind(err, config.KIND_CONFIGTYPE)).To(BeTrue())
-		Expect(config.IsGeneric(gen)).To(BeTrue())
+		Expect(err.Error()).To(Equal("applying generic config list: config type Dummy is unknown, config type Dummy is unknown"))
+		gen, cfgs := cfgctx.GetConfig(config.AllGenerations, nil)
+		Expect(gen).To(Equal(int64(3)))
+		Expect(len(cfgs)).To(Equal(3))
 
 		RegisterAt(scheme)
 		d := newDummy(cfgctx)
-		Expect(d.getApplied()).To(Equal([]*Config{cfg}))
+		Expect(d.getApplied()).To(Equal([]*Config{NewConfig("alice", ""), NewConfig("", "bob")}))
 	})
 
 })

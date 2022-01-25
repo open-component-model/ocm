@@ -12,21 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package cpi
+package config_test
 
 import (
-	"github.com/gardener/ocm/pkg/ocm/core"
-	"github.com/gardener/ocm/pkg/runtime"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-type accessType struct {
-	runtime.ObjectVersionedType
-	runtime.TypedObjectDecoder
-}
-
-func NewAccessSpecType(name string, proto core.AccessSpec) core.AccessType {
-	return &accessType{
-		ObjectVersionedType: runtime.NewVersionedObjectType(name),
-		TypedObjectDecoder:  runtime.MustNewDirectDecoder(proto),
-	}
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Generic Config Test Suite")
 }

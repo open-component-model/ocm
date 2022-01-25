@@ -24,11 +24,17 @@ import (
 
 const KIND_CONFIGTYPE = core.KIND_CONFIGTYPE
 
+var AllConfigs = core.AllConfigs
+
+const AllGenerations = core.AllGenerations
+
 type Context = core.Context
 type Config = core.Config
 type ConfigType = core.ConfigType
 type ConfigTypeScheme = core.ConfigTypeScheme
 type GenericConfig = core.GenericConfig
+type ConfigSelector = core.ConfigSelector
+type ConfigSelectorFunction = core.ConfigSelectorFunction
 
 var DefaultContext = core.DefaultContext
 
@@ -38,6 +44,10 @@ func ForContext(ctx context.Context) Context {
 
 func NewGenericConfig(data []byte, unmarshaler runtime.Unmarshaler) (Config, error) {
 	return core.NewGenericConfig(data, unmarshaler)
+}
+
+func ToGenericConfig(c Config) (*GenericConfig, error) {
+	return core.ToGenericConfig(c)
 }
 
 func NewConfigTypeScheme() ConfigTypeScheme {

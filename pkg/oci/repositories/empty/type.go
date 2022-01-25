@@ -22,7 +22,7 @@ import (
 
 const (
 	EmptyRepositoryType   = "Empty"
-	EmptyRepositoryTypeV1 = EmptyRepositoryType + "/v1"
+	EmptyRepositoryTypeV1 = EmptyRepositoryType + runtime.VersionSeparator + "v1"
 )
 
 const ATTR_REPOS = "github.com/gardener/ocm/pkg/oci/repositories/empty"
@@ -34,13 +34,13 @@ func init() {
 
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
 type RepositorySpec struct {
-	runtime.ObjectTypeVersion `json:",inline"`
+	runtime.ObjectVersionedType `json:",inline"`
 }
 
 // NewRepositorySpec creates a new RepositorySpec
 func NewRepositorySpec() *RepositorySpec {
 	return &RepositorySpec{
-		ObjectTypeVersion: runtime.NewObjectTypeVersion(EmptyRepositoryType),
+		ObjectVersionedType: runtime.NewVersionedObjectType(EmptyRepositoryType),
 	}
 }
 

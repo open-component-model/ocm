@@ -66,8 +66,8 @@ var _ AccessSpecVersion = &ConvertedAccessType{}
 func NewConvertedAccessSpecType(name string, v AccessSpecVersion) *ConvertedAccessType {
 	return &ConvertedAccessType{
 		accessType: accessType{
-			ObjectTypeVersion:  runtime.NewObjectTypeVersion(name),
-			TypedObjectDecoder: v,
+			ObjectVersionedType: runtime.NewVersionedObjectType(name),
+			TypedObjectDecoder:  v,
 		},
 		AccessSpecVersion: v,
 	}
@@ -85,5 +85,5 @@ func MarshalConvertedAccessSpec(s core.AccessSpec) ([]byte, error) {
 		}
 		return json.Marshal(out)
 	}
-	return nil, errors.ErrNotImplemented("converted access version type", s.GetType(), s.GetName())
+	return nil, errors.ErrNotImplemented("converted access version type", s.GetType(), s.GetKind())
 }

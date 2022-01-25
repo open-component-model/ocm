@@ -44,7 +44,7 @@ func init() {
 }
 
 type GenericOCIRepositoryBackendType struct {
-	runtime.ObjectTypeVersion
+	runtime.ObjectVersionedType
 	ocictx oci.Context
 }
 
@@ -53,8 +53,8 @@ var _ cpi.RepositoryType = &GenericOCIRepositoryBackendType{}
 // NewOCIRepositoryBackendType creates generic type for any OCI Repository Backend
 func NewOCIRepositoryBackendType(ocictx oci.Context) *GenericOCIRepositoryBackendType {
 	return &GenericOCIRepositoryBackendType{
-		ObjectTypeVersion: runtime.NewObjectTypeVersion("genericOCIRepositoryBackend"),
-		ocictx:            ocictx,
+		ObjectVersionedType: runtime.NewVersionedObjectType("genericOCIRepositoryBackend"),
+		ocictx:              ocictx,
 	}
 }
 
@@ -76,7 +76,7 @@ func (t *GenericOCIRepositoryBackendType) Decode(data []byte, unmarshal runtime.
 }
 
 func (t *GenericOCIRepositoryBackendType) LocalSupportForAccessSpec(ctx cpi.Context, a compdesc.AccessSpec) bool {
-	name := a.GetName()
+	name := a.GetKind()
 	return name == accessmethods.LocalBlobType
 }
 

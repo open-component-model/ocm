@@ -12,21 +12,25 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package cpi
+package x
 
 import (
-	"github.com/gardener/ocm/pkg/ocm/core"
+	"fmt"
+	"reflect"
+
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
-type accessType struct {
-	runtime.ObjectVersionedType
-	runtime.TypedObjectDecoder
+type FUNC func() string
+
+func (f FUNC) String() string {
+	return fmt.Sprintf("{function %+v}", (func() string)(f))
 }
 
-func NewAccessSpecType(name string, proto core.AccessSpec) core.AccessType {
-	return &accessType{
-		ObjectVersionedType: runtime.NewVersionedObjectType(name),
-		TypedObjectDecoder:  runtime.MustNewDirectDecoder(proto),
-	}
+func x() string { return "x" }
+
+func Vtest() {
+
+	fmt.Printf("type: %s\n", reflect.TypeOf((*runtime.TypedObject)(nil)).Elem())
+	fmt.Printf("%s\n", FUNC(x))
 }

@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/runtime"
@@ -26,12 +25,11 @@ import (
 
 type RepositoryType interface {
 	runtime.TypedObjectDecoder
-	common.VersionedElement
+	runtime.VersionedTypedObject
 }
 
 type RepositorySpec interface {
-	runtime.TypedObject
-	common.VersionedElement
+	runtime.VersionedTypedObject
 
 	Repository(Context, credentials.Credentials) (Repository, error)
 }

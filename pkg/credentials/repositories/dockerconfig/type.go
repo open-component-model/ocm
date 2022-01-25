@@ -21,7 +21,7 @@ import (
 
 const (
 	DockerConfigRepositoryType   = "DockerConfig"
-	DockerConfigRepositoryTypeV1 = DockerConfigRepositoryType + "/v1"
+	DockerConfigRepositoryTypeV1 = DockerConfigRepositoryType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
@@ -31,9 +31,9 @@ func init() {
 
 // RepositorySpec describes a cocker config based credential repository interface.
 type RepositorySpec struct {
-	runtime.ObjectTypeVersion `json:",inline"`
-	DockerConfigFile          string `json:"dockerConfigFile"`
-	PropgateConsumerIdentity  bool   `json:"propagateConsumerIdentity,omitempty"`
+	runtime.ObjectVersionedType `json:",inline"`
+	DockerConfigFile            string `json:"dockerConfigFile"`
+	PropgateConsumerIdentity    bool   `json:"propagateConsumerIdentity,omitempty"`
 }
 
 func (s RepositorySpec) WithConsumerPropagation(propagate bool) *RepositorySpec {
@@ -44,8 +44,8 @@ func (s RepositorySpec) WithConsumerPropagation(propagate bool) *RepositorySpec 
 // NewRepositorySpec creates a new memory RepositorySpec
 func NewRepositorySpec(path string) *RepositorySpec {
 	return &RepositorySpec{
-		ObjectTypeVersion: runtime.NewObjectTypeVersion(DockerConfigRepositoryType),
-		DockerConfigFile:  path,
+		ObjectVersionedType: runtime.NewVersionedObjectType(DockerConfigRepositoryType),
+		DockerConfigFile:    path,
 	}
 }
 

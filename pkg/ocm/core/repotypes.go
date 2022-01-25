@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
@@ -27,7 +26,7 @@ import (
 
 type RepositoryType interface {
 	runtime.TypedObjectDecoder
-	common.VersionedElement
+	runtime.VersionedTypedObject
 
 	// LocalSupportForAccessSpec checks whether a repository
 	// provides a local version for the access spec.
@@ -35,8 +34,7 @@ type RepositoryType interface {
 }
 
 type RepositorySpec interface {
-	runtime.TypedObject
-	common.VersionedElement
+	runtime.VersionedTypedObject
 
 	Repository(Context, credentials.Credentials) (Repository, error)
 }

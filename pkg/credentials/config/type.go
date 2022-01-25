@@ -15,13 +15,14 @@
 package config
 
 import (
+	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/config/cpi"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
 const (
-	CredentialsConfigType   = "github.com/mandelsoft/ocm/pkg/credentials"
-	CredentialsConfigTypeV1 = CredentialsConfigType + "/v1"
+	CredentialsConfigType   = "credentials.config" + common.TypeGroupSuffix
+	CredentialsConfigTypeV1 = CredentialsConfigType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
@@ -31,15 +32,15 @@ func init() {
 
 // ConfigSpec describes a memory based repository interface.
 type ConfigSpec struct {
-	runtime.ObjectTypeVersion `json:",inline"`
-	Test                      string `json:"test"`
+	runtime.ObjectVersionedType `json:",inline"`
+	Test                        string `json:"test"`
 }
 
 // NewConfigSpec creates a new memory ConfigSpec
 func NewConfigSpec(name string) *ConfigSpec {
 	return &ConfigSpec{
-		ObjectTypeVersion: runtime.NewObjectTypeVersion(CredentialsConfigType),
-		Test:              name,
+		ObjectVersionedType: runtime.NewVersionedObjectType(CredentialsConfigType),
+		Test:                name,
 	}
 }
 

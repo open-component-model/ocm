@@ -89,6 +89,9 @@ func (b Builder) New() Context {
 	if b.reposcheme == nil {
 		b.reposcheme = DefaultRepositoryTypeScheme
 	}
+	if b.accessscheme == nil {
+		b.accessscheme = DefaultAccessTypeScheme
+	}
 	if ociimpl != nil {
 		def, err := ociimpl(b.oci)
 		if err != nil {

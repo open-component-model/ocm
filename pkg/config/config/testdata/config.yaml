@@ -1,0 +1,6 @@
+type: generic.configocm.gardener.cloud/v1
+configurations:
+  - type: Dummy
+    alice: alice
+  - type: Dummy
+    bob: bob

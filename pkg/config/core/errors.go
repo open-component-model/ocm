@@ -14,4 +14,32 @@
 
 package core
 
+import (
+	"fmt"
+
+	"github.com/gardener/ocm/pkg/errors"
+)
+
 const KIND_CONFIGTYPE = "config type"
+
+////////////////////////////////////////////////////////////////////////////////
+
+type errNoContext struct {
+	name string
+}
+
+func (e *errNoContext) Error() string {
+	return fmt.Sprintf("unknown context %q", e.name)
+}
+
+func ErrNoContext(name string) error {
+	return &errNoContext{name}
+}
+
+func IsErrNoContext(err error) bool {
+	return errors.IsA(err, &errNoContext{})
+}
+
+func IsErrConfigNotApplicable(err error) bool {
+	return errors.IsErrUnknownKind(err, KIND_CONFIGTYPE) || IsErrNoContext(err)
+}

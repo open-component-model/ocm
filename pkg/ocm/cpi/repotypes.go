@@ -23,7 +23,7 @@ import (
 )
 
 type DefaultRepositoryType struct {
-	runtime.ObjectTypeVersion
+	runtime.ObjectVersionedType
 	runtime.TypedObjectDecoder
 	checker RepositoryAccessMethodChecker
 }
@@ -36,9 +36,9 @@ func NewRepositoryType(name string, proto core.RepositorySpec, checker Repositor
 		t = t.Elem()
 	}
 	return &DefaultRepositoryType{
-		ObjectTypeVersion:  runtime.NewObjectTypeVersion(name),
-		TypedObjectDecoder: runtime.MustNewDirectDecoder(proto),
-		checker:            checker,
+		ObjectVersionedType: runtime.NewVersionedObjectType(name),
+		TypedObjectDecoder:  runtime.MustNewDirectDecoder(proto),
+		checker:             checker,
 	}
 }
 

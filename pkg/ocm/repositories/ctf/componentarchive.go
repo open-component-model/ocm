@@ -209,7 +209,7 @@ func OpenComponentArchive(ctx cpi.Context, path string, opts ...ComponentArchive
 }
 
 func (c *ComponentArchive) AccessMethod(a cpi.AccessSpec) (cpi.AccessMethod, error) {
-	if a.GetName() == accessmethods.LocalBlobType {
+	if a.GetKind() == accessmethods.LocalBlobType {
 		a, err := c.ctx.AccessSpecForSpec(a)
 		if err != nil {
 			return nil, err
@@ -304,7 +304,7 @@ func (ca *ComponentArchive) checkAccessSpec(acc compdesc.AccessSpec) error {
 	if spec.ValidFor(ca.repo) {
 		return nil
 	}
-	return errors.ErrInvalid(errors.KIND_ACCESSMETHOD, acc.GetName(), ca.repo.GetSpecification().GetName())
+	return errors.ErrInvalid(errors.KIND_ACCESSMETHOD, acc.GetKind(), ca.repo.GetSpecification().GetKind())
 }
 
 func (ca *ComponentArchive) AddSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec) error {

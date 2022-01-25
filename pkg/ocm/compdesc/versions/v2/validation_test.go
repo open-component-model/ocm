@@ -110,17 +110,6 @@ var _ = Describe("Validation", func() {
 
 	})
 
-	Context("#Provider", func() {
-		It("should forbid if a component's provider is invalid", func() {
-			comp.Provider = "custom"
-			errList := validate(nil, comp)
-			Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
-				"Type":  Equal(field.ErrorTypeInvalid),
-				"Field": Equal("component.provider"),
-			}))))
-		})
-	})
-
 	Context("#ObjectMeta", func() {
 		It("should forbid if the component's version is missing", func() {
 			comp := ComponentDescriptor{}

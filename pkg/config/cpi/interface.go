@@ -17,10 +17,7 @@ package cpi
 // This is the Context Provider Interface for credential providers
 
 import (
-	"fmt"
-
 	"github.com/gardener/ocm/pkg/config/core"
-	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
@@ -48,22 +45,14 @@ func IsGeneric(cfg Config) bool {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type errNoContext struct {
-	name string
-}
-
-func (e *errNoContext) Error() string {
-	return fmt.Sprintf("unknown context %q", e.name)
-}
-
 func ErrNoContext(name string) error {
-	return &errNoContext{name}
+	return core.ErrNoContext(name)
 }
 
 func IsErrNoContext(err error) bool {
-	return errors.IsA(err, &errNoContext{})
+	return core.IsErrNoContext(err)
 }
 
 func IsErrConfigNotApplicable(err error) bool {
-	return errors.IsErrUnknownKind(err, KIND_CONFIGTYPE) || IsErrNoContext(err)
+	return core.IsErrConfigNotApplicable(err)
 }

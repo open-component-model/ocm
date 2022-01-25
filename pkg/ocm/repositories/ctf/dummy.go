@@ -39,7 +39,7 @@ func (_ plainComponentSpec) SetType(ttype string) {
 	panic("not supported")
 }
 
-func (_ plainComponentSpec) GetName() string {
+func (_ plainComponentSpec) GetKind() string {
 	return "DummyRepo"
 }
 
@@ -71,7 +71,7 @@ func newPlainComponent(ca *ComponentArchive, ctx cpi.Context) cpi.Repository {
 }
 
 func (_ plainComponent) LocalSupportForAccessSpec(a compdesc.AccessSpec) bool {
-	return a.GetName() == accessmethods.LocalBlobType
+	return a.GetKind() == accessmethods.LocalBlobType
 }
 
 func (_ plainComponent) ExistsArtefact(name string, version string) (bool, error) {

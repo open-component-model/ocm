@@ -22,7 +22,7 @@ import (
 
 const (
 	DirectCredentialsRepositoryType   = cpi.DirectCredentialsType
-	DirectCredentialsRepositoryTypeV1 = DirectCredentialsRepositoryType + "/v1"
+	DirectCredentialsRepositoryTypeV1 = DirectCredentialsRepositoryType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
@@ -32,8 +32,8 @@ func init() {
 
 // RepositorySpec describes a repository interface for single direct credentials.
 type RepositorySpec struct {
-	runtime.ObjectTypeVersion `json:",inline"`
-	Properties                common.Properties `json:"properties"`
+	runtime.ObjectVersionedType `json:",inline"`
+	Properties                  common.Properties `json:"properties"`
 }
 
 var _ cpi.RepositorySpec = &RepositorySpec{}
@@ -41,8 +41,8 @@ var _ cpi.RepositorySpec = &RepositorySpec{}
 // NewRepositorySpec creates a new RepositorySpec
 func NewRepositorySpec(credentials common.Properties) *RepositorySpec {
 	return &RepositorySpec{
-		ObjectTypeVersion: runtime.NewObjectTypeVersion(DirectCredentialsRepositoryType),
-		Properties:        credentials,
+		ObjectVersionedType: runtime.NewVersionedObjectType(DirectCredentialsRepositoryType),
+		Properties:          credentials,
 	}
 }
 

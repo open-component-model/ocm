@@ -39,7 +39,7 @@ func GetImplementation(m cpi.AccessMethod) AccessImplementation {
 }
 
 type DefaultAccessMethod struct {
-	runtime.ObjectTypeVersion
+	runtime.ObjectVersionedType
 	lock   sync.Mutex
 	impl   AccessImplementation
 	digest digest.Digest
@@ -50,9 +50,9 @@ var _ cpi.AccessMethod = &DefaultAccessMethod{}
 
 func NewDefaultAccessMethod(typ string, impl AccessImplementation) cpi.AccessMethod {
 	return &DefaultAccessMethod{
-		ObjectTypeVersion: runtime.NewObjectTypeVersion(typ),
-		impl:              impl,
-		size:              -1,
+		ObjectVersionedType: runtime.NewVersionedObjectType(typ),
+		impl:                impl,
+		size:                -1,
 	}
 }
 

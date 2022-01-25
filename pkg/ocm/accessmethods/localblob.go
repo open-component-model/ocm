@@ -24,7 +24,7 @@ import (
 
 // LocalBlobType is the access type of a blob local to a component.
 const LocalBlobType = "localBlob"
-const LocalBlobTypeV1 = LocalBlobType + "/v1"
+const LocalBlobTypeV1 = LocalBlobType + runtime.VersionSeparator + "v1"
 
 func init() {
 	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(LocalBlobType, LocalBlobV1))
@@ -34,15 +34,15 @@ func init() {
 // NewLocalBlobAccessSpecV1 creates a new localFilesystemBlob accessor.
 func NewLocalBlobAccessSpecV1(path string, mediaType string) *LocalBlobAccessSpec {
 	return &LocalBlobAccessSpec{
-		ObjectTypeVersion: runtime.NewObjectTypeVersion(LocalBlobType),
-		Filename:          path,
-		MediaType:         mediaType,
+		ObjectVersionedType: runtime.NewVersionedObjectType(LocalBlobType),
+		Filename:            path,
+		MediaType:           mediaType,
 	}
 }
 
 // LocalBlobAccessSpec describes the access for a blob on the filesystem.
 type LocalBlobAccessSpec struct {
-	runtime.ObjectTypeVersion
+	runtime.ObjectVersionedType
 	// Filename is the name of the blob in the local filesystem.
 	// The blob is expected to be at <fs-root>/blobs/<name>
 	Filename string
@@ -64,13 +64,13 @@ func (a *LocalBlobAccessSpec) AccessMethod(c cpi.ComponentAccess) (cpi.AccessMet
 	if a.ValidFor(c.GetRepository()) {
 		return c.AccessMethod(a)
 	}
-	return nil, errors.ErrNotImplemented(errors.KIND_ACCESSMETHOD, LocalBlobType, c.GetRepository().GetSpecification().GetName())
+	return nil, errors.ErrNotImplemented(errors.KIND_ACCESSMETHOD, LocalBlobType, c.GetRepository().GetSpecification().GetKind())
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type LocalBlobAccessSpecV1 struct {
-	runtime.ObjectTypeVersion `json:",inline"`
+	runtime.ObjectVersionedType `json:",inline"`
 	// Filename is the name of the blob in the local filesystem.
 	// The blob is expected to be at <fs-root>/blobs/<name>
 	Filename string `json:"filename"`
@@ -85,17 +85,17 @@ var LocalBlobV1 = cpi.NewAccessSpecVersion(&LocalBlobAccessSpecV1{}, localblobCo
 func (_ localblobConverterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, error) {
 	in := object.(*LocalBlobAccessSpec)
 	return &LocalBlobAccessSpecV1{
-		ObjectTypeVersion: runtime.NewObjectTypeVersion(in.Type),
-		Filename:          in.Filename,
-		MediaType:         in.MediaType,
+		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
+		Filename:            in.Filename,
+		MediaType:           in.MediaType,
 	}, nil
 }
 
 func (_ localblobConverterV1) ConvertTo(object interface{}) (cpi.AccessSpec, error) {
 	in := object.(*LocalBlobAccessSpecV1)
 	return &LocalBlobAccessSpec{
-		ObjectTypeVersion: runtime.NewObjectTypeVersion(in.Type),
-		Filename:          in.Filename,
-		MediaType:         in.MediaType,
+		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
+		Filename:            in.Filename,
+		MediaType:           in.MediaType,
 	}, nil
 }

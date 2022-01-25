@@ -12,21 +12,6 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package cpi
+package common
 
-import (
-	"github.com/gardener/ocm/pkg/ocm/core"
-	"github.com/gardener/ocm/pkg/runtime"
-)
-
-type accessType struct {
-	runtime.ObjectVersionedType
-	runtime.TypedObjectDecoder
-}
-
-func NewAccessSpecType(name string, proto core.AccessSpec) core.AccessType {
-	return &accessType{
-		ObjectVersionedType: runtime.NewVersionedObjectType(name),
-		TypedObjectDecoder:  runtime.MustNewDirectDecoder(proto),
-	}
-}
+const TypeGroupSuffix = "ocm.gardener.cloud"

@@ -21,7 +21,7 @@ import (
 
 const (
 	MemoryRepositoryType   = "Memory"
-	MemoryRepositoryTypeV1 = MemoryRepositoryType + "/v1"
+	MemoryRepositoryTypeV1 = MemoryRepositoryType + "/v1" + runtime.VersionSeparator + "v1"
 )
 
 func init() {
@@ -31,15 +31,15 @@ func init() {
 
 // RepositorySpec describes a memory based repository interface.
 type RepositorySpec struct {
-	runtime.ObjectTypeVersion `json:",inline"`
-	RepositoryName            string `json:"repoName"`
+	runtime.ObjectVersionedType `json:",inline"`
+	RepositoryName              string `json:"repoName"`
 }
 
 // NewRepositorySpec creates a new memory RepositorySpec
 func NewRepositorySpec(name string) *RepositorySpec {
 	return &RepositorySpec{
-		ObjectTypeVersion: runtime.NewObjectTypeVersion(MemoryRepositoryType),
-		RepositoryName:    name,
+		ObjectVersionedType: runtime.NewVersionedObjectType(MemoryRepositoryType),
+		RepositoryName:      name,
 	}
 }
 

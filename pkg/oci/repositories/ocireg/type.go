@@ -23,7 +23,7 @@ import (
 
 const (
 	OCIRegistryRepositoryType   = "OCIRegistry"
-	OCIRegistryRepositoryTypeV1 = OCIRegistryRepositoryType + "/v1"
+	OCIRegistryRepositoryTypeV1 = OCIRegistryRepositoryType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
@@ -33,7 +33,7 @@ func init() {
 
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
 type RepositorySpec struct {
-	runtime.ObjectTypeVersion `json:",inline"`
+	runtime.ObjectVersionedType `json:",inline"`
 	// BaseURL is the base url of the repository to resolve artefacts.
 	BaseURL string `json:"baseUrl"`
 }
@@ -41,8 +41,8 @@ type RepositorySpec struct {
 // NewRepositorySpec creates a new RepositorySpec
 func NewRepositorySpec(baseURL string) *RepositorySpec {
 	return &RepositorySpec{
-		ObjectTypeVersion: runtime.NewObjectTypeVersion(OCIRegistryRepositoryType),
-		BaseURL:           baseURL,
+		ObjectVersionedType: runtime.NewVersionedObjectType(OCIRegistryRepositoryType),
+		BaseURL:             baseURL,
 	}
 }
 
