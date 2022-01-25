@@ -17,7 +17,6 @@ package credentials
 import (
 	"context"
 
-	_ "github.com/gardener/ocm/pkg/credentials/config"
 	_ "github.com/gardener/ocm/pkg/credentials/repositories"
 
 	"github.com/gardener/ocm/pkg/common"
@@ -44,6 +43,7 @@ type RepositorySpec = core.RepositorySpec
 type ConsumerIdentity = core.ConsumerIdentity
 
 type GenericRepositorySpec = core.GenericRepositorySpec
+type GenericCredentialsSpec = core.GenericCredentialsSpec
 type DirectCredentials = core.DirectCredentials
 
 var DefaultContext = core.DefaultContext
@@ -56,7 +56,7 @@ func NewCredentialsSpec(name string, repospec RepositorySpec) CredentialsSpec {
 	return core.NewCredentialsSpec(name, repospec)
 }
 
-func NewGenericCredentialsSpec(name string, repospec GenericRepositorySpec) CredentialsSpec {
+func NewGenericCredentialsSpec(name string, repospec *GenericRepositorySpec) CredentialsSpec {
 	return core.NewGenericCredentialsSpec(name, repospec)
 }
 
@@ -66,6 +66,14 @@ func NewGenericRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (Rep
 
 func NewCredentials(props common.Properties) Credentials {
 	return core.NewCredentials(props)
+}
+
+func ToGenericCredentialsSpec(spec CredentialsSpec) (*GenericCredentialsSpec, error) {
+	return core.ToGenericCredentialsSpec(spec)
+}
+
+func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {
+	return core.ToGenericRepositorySpec(spec)
 }
 
 func ErrUnknownCredentials(name string) error {

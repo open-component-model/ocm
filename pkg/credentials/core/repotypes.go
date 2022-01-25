@@ -15,11 +15,13 @@
 package core
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/modern-go/reflect2"
 )
 
 type RepositoryType interface {
@@ -131,7 +133,29 @@ type GenericRepositorySpec struct {
 	runtime.UnstructuredVersionedTypedObject `json:",inline"`
 }
 
+func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {
+	if reflect2.IsNil(spec) {
+		return nil, nil
+	}
+	if g, ok := spec.(*GenericRepositorySpec); ok {
+		return g, nil
+	}
+	data, err := json.Marshal(spec)
+	if err != nil {
+		return nil, err
+	}
+	return newGenericRepositorySpec(data, runtime.DefaultJSONEncoding)
+}
+
 func NewGenericRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
+	s, err := newGenericRepositorySpec(data, unmarshaler)
+	if err != nil {
+		return nil, err // GO is great
+	}
+	return s, nil
+}
+
+func newGenericRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (*GenericRepositorySpec, error) {
 	unstr := &runtime.UnstructuredVersionedTypedObject{}
 	if unmarshaler == nil {
 		unmarshaler = runtime.DefaultYAMLEncoding

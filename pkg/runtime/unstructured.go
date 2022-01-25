@@ -22,6 +22,22 @@ import (
 	"github.com/modern-go/reflect2"
 )
 
+// ATTENTION: UnstructuredTypedObject CANNOT be be used as anonymous
+// field together with the default struct marshalling with the
+// great json marshallers.
+// Anonymous inline struct fields are always marshaled by the default struct
+// marshales in a depth first manner without observing the Marshal interface!!!!
+//
+// Therefore all structs in this module deriving from UnstructuedTypedObject
+// are explicitly implementing the marshal/unmarshal interface.
+//
+// Side Fact: Marshaling a map[interface{}] filled by unmarshaling a marshaled
+// object with anonymous fields is not stable, because the inline fields
+// are sorted depth firt for marshalling, while maps key are marshaled
+// completely in order.
+// Therefore we do not store the raw bytes but marshal them always from
+// the UnstructuedMap.
+
 // Unstructured is the interface to represent generic object data for
 // types handled by schemes.
 type Unstructured interface {
@@ -102,10 +118,8 @@ type UnstructuredConverter interface {
 }
 
 // UnstructuredTypedObject describes a generic typed object.
-// +k8s:openapi-gen=true
 type UnstructuredTypedObject struct {
 	ObjectType `json:",inline"`
-	Raw        []byte          `json:"-"`
 	Object     UnstructuredMap `json:"-"`
 }
 
@@ -124,8 +138,7 @@ func (u *UnstructuredTypedObject) SetType(ttype string) {
 // DeepCopyInto is deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (u *UnstructuredTypedObject) DeepCopyInto(out *UnstructuredTypedObject) {
 	*out = *u
-	raw := make([]byte, len(u.Raw))
-	copy(raw, u.Raw)
+	raw, _ := json.Marshal(u.Object)
 	_ = out.setRaw(raw)
 }
 
@@ -140,14 +153,7 @@ func (u *UnstructuredTypedObject) DeepCopy() *UnstructuredTypedObject {
 }
 
 func (u UnstructuredTypedObject) GetRaw() ([]byte, error) {
-	data, err := json.Marshal(u.Object)
-	if err != nil {
-		return nil, err
-	}
-	if !bytes.Equal(data, u.Raw) {
-		u.Raw = data
-	}
-	return u.Raw, nil
+	return json.Marshal(u.Object)
 }
 
 func (u *UnstructuredTypedObject) setRaw(data []byte) error {
@@ -155,7 +161,6 @@ func (u *UnstructuredTypedObject) setRaw(data []byte) error {
 	if err := json.Unmarshal(data, &obj); err != nil {
 		return err
 	}
-	u.Raw = data
 	u.Object = obj
 	return nil
 }

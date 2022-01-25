@@ -65,4 +65,24 @@ var _ = Describe("generic credentials", func() {
 		Expect(data).To(Equal([]byte(memdata)))
 	})
 
+	It("converts credentials spec to generic ones", func() {
+		repospec := memory.NewRepositorySpec("test")
+		credspec := credentials.NewCredentialsSpec("cred", repospec)
+		data, err := json.Marshal(credspec)
+		Expect(err).To(Succeed())
+
+		gen, err := credentials.ToGenericCredentialsSpec(credspec)
+		Expect(err).To(Succeed())
+
+		Expect(reflect.TypeOf(gen).String()).To(Equal("*core.GenericCredentialsSpec"))
+		Expect(reflect.TypeOf(gen.RepositorySpec).String()).To(Equal("*core.GenericRepositorySpec"))
+
+		gen2, err := credentials.ToGenericCredentialsSpec(gen)
+		Expect(err).To(Succeed())
+		Expect(gen2).To(BeIdenticalTo(gen))
+
+		data3, err := json.Marshal(gen)
+		Expect(err).To(Succeed())
+		Expect(data3).To(Equal(data))
+	})
 })

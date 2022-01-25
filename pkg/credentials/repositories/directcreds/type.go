@@ -16,6 +16,7 @@ package directcreds
 
 import (
 	"github.com/gardener/ocm/pkg/common"
+	"github.com/gardener/ocm/pkg/credentials/core"
 	cpi "github.com/gardener/ocm/pkg/credentials/cpi"
 	"github.com/gardener/ocm/pkg/runtime"
 )
@@ -37,6 +38,7 @@ type RepositorySpec struct {
 }
 
 var _ cpi.RepositorySpec = &RepositorySpec{}
+var _ cpi.CredentialsSpec = &RepositorySpec{}
 
 // NewRepositorySpec creates a new RepositorySpec
 func NewRepositorySpec(credentials common.Properties) *RepositorySpec {
@@ -52,4 +54,16 @@ func (a *RepositorySpec) GetType() string {
 
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi.Repository, error) {
 	return NewRepository(cpi.NewCredentials(a.Properties)), nil
+}
+
+func (a *RepositorySpec) Credentials(context core.Context, source ...core.CredentialsSource) (core.Credentials, error) {
+	return cpi.NewCredentials(a.Properties), nil
+}
+
+func (a *RepositorySpec) GetCredentialsName() string {
+	return ""
+}
+
+func (a *RepositorySpec) GetRepositorySpec(context core.Context) core.RepositorySpec {
+	return a
 }

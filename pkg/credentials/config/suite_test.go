@@ -12,25 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package x
+package config_test
 
 import (
-	"encoding/json"
-	"fmt"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-type A struct {
-	C string
-}
-
-type B struct {
-	A
-	D string
-	B string
-}
-
-func Vtest() {
-
-	data, _ := json.Marshal(&B{})
-	fmt.Printf("type: %s\n", string(data))
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Credential Cnfig Test Suite")
 }

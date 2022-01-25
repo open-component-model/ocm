@@ -36,7 +36,7 @@ type ConsumerIdentity = core.ConsumerIdentity
 
 var DefaultContext = core.DefaultContext
 
-func NewGenericCredentialsSpec(name string, repospec GenericRepositorySpec) *GenericCredentialsSpec {
+func NewGenericCredentialsSpec(name string, repospec *GenericRepositorySpec) *GenericCredentialsSpec {
 	return core.NewGenericCredentialsSpec(name, repospec)
 }
 

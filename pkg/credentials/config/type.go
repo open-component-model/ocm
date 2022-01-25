@@ -17,6 +17,7 @@ package config
 import (
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/config/cpi"
+	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
@@ -33,19 +34,60 @@ func init() {
 // ConfigSpec describes a memory based repository interface.
 type ConfigSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
-	Test                        string `json:"test"`
+	Consumers                   []ConsumerSpec                                 `json:"consumers,omitempty"`
+	Repositories                []RepositorySpec                               `json:"repositories,omitempty"`
+	Aliases                     map[string]*credentials.GenericCredentialsSpec `json:"aliases,omitempty"`
+}
+
+type ConsumerSpec struct {
+	Identity    credentials.ConsumerIdentity        `json:"identity"`
+	Credentials *credentials.GenericCredentialsSpec `json:"credentials"`
+}
+
+type RepositorySpec struct {
+	Repository  credentials.GenericRepositorySpec   `json:"repository"`
+	Credentials *credentials.GenericCredentialsSpec `json:"credentials,omitempty"`
 }
 
 // NewConfigSpec creates a new memory ConfigSpec
-func NewConfigSpec(name string) *ConfigSpec {
+func NewConfigSpec() *ConfigSpec {
 	return &ConfigSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(CredentialsConfigType),
-		Test:                name,
 	}
 }
 
 func (a *ConfigSpec) GetType() string {
 	return CredentialsConfigType
+}
+
+func (a *ConfigSpec) AddConsumer(id credentials.ConsumerIdentity, creds credentials.CredentialsSpec) error {
+	gen, err := credentials.ToGenericCredentialsSpec(creds)
+	if err != nil {
+		return err
+	}
+	spec := &ConsumerSpec{
+		Identity:    id,
+		Credentials: gen,
+	}
+	a.Consumers = append(a.Consumers, *spec)
+	return nil
+}
+
+func (a *ConfigSpec) AddRepository(repo credentials.RepositorySpec, creds credentials.CredentialsSpec) error {
+	rgen, err := credentials.ToGenericRepositorySpec(repo)
+	if err != nil {
+		return err
+	}
+	cgen, err := credentials.ToGenericCredentialsSpec(creds)
+	if err != nil {
+		return err
+	}
+	spec := &RepositorySpec{
+		Repository:  *rgen,
+		Credentials: cgen,
+	}
+	a.Repositories = append(a.Repositories, *spec)
+	return nil
 }
 
 func (a *ConfigSpec) ApplyTo(ctx cpi.Context, target interface{}) error {

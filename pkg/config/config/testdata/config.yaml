@@ -1,4 +1,4 @@
-type: generic.configocm.gardener.cloud/v1
+type: generic.config.ocm.gardener.cloud/v1
 configurations:
   - type: Dummy
     alice: alice
