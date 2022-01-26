@@ -117,6 +117,8 @@ func CreateRepositorySpec(t runtime.TypedObject) (RepositorySpec, error) {
 	return DefaultRepositoryTypeScheme.CreateRepositorySpec(t)
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 type UnknownRepositorySpec struct {
 	runtime.UnstructuredVersionedTypedObject `json:",inline"`
 }
@@ -132,6 +134,8 @@ func (r *UnknownRepositorySpec) Repository(Context, Credentials) (Repository, er
 type GenericRepositorySpec struct {
 	runtime.UnstructuredVersionedTypedObject `json:",inline"`
 }
+
+var _ RepositorySpec = &GenericRepositorySpec{}
 
 func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {
 	if reflect2.IsNil(spec) {
@@ -182,7 +186,5 @@ func (s *GenericRepositorySpec) Repository(ctx Context, creds Credentials) (Repo
 	}
 	return spec.Repository(ctx, creds)
 }
-
-var _ RepositorySpec = &GenericRepositorySpec{}
 
 ////////////////////////////////////////////////////////////////////////////////

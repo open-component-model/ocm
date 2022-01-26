@@ -33,7 +33,8 @@ var _ = Describe("generic credentials", func() {
 		"user":     "USER",
 		"password": "PASSWORD",
 	}
-	memdata := "{\"credentialsName\":\"cred\",\"repoName\":\"test\",\"type\":\"Memory\"}"
+	credmemdata := "{\"credentialsName\":\"cred\",\"repoName\":\"test\",\"type\":\"Memory\"}"
+	memdata := "{\"repoName\":\"test\",\"type\":\"Memory\"}"
 
 	_ = props
 
@@ -43,7 +44,7 @@ var _ = Describe("generic credentials", func() {
 
 		data, err := json.Marshal(credspec)
 		Expect(err).To(Succeed())
-		Expect(data).To(Equal([]byte(memdata)))
+		Expect(data).To(Equal([]byte(credmemdata)))
 
 		credspec = &core.DefaultCredentialsSpec{}
 		err = json.Unmarshal(data, credspec)
@@ -56,6 +57,17 @@ var _ = Describe("generic credentials", func() {
 
 	It("de/serializes generic credentials spec", func() {
 		credspec := &core.GenericCredentialsSpec{}
+
+		err := json.Unmarshal([]byte(credmemdata), credspec)
+		Expect(err).To(Succeed())
+
+		data, err := json.Marshal(credspec)
+		Expect(err).To(Succeed())
+		Expect(data).To(Equal([]byte(credmemdata)))
+	})
+
+	It("de/serializes generic repository spec", func() {
+		credspec := &core.GenericRepositorySpec{}
 
 		err := json.Unmarshal([]byte(memdata), credspec)
 		Expect(err).To(Succeed())

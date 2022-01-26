@@ -30,14 +30,64 @@ type BlobAccess = common.BlobAccess
 type DataAccess = common.DataAccess
 
 type ArtefactAccess interface {
-	GetArtefactDescriptor() artdesc.ArtefactDescriptor
-	GetManifest(digest string) artdesc.Manifest
-	GetBlob(digest string) BlobAccess
-
 	GetRepository() Repository
+
+	GetArtefactDescriptor() artdesc.ArtefactDescriptor
+	GetManifest(digest string) ManifestAccess
+	GetBlob(digest string) BlobAccess
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// technical abstraction
+
+type ManifestAccess interface {
+	GetManifest() artdesc.Manifest
+	GetBlob(digest string) BlobAccess
 }
 
 type ArtefactComposer interface {
 	ArtefactAccess
-	AddBlob(BlobAccess) error
+
+	AddManifest(artdesc.Manifest) (digest string, err error)
+	AddBlob(BlobAccess) (digest string, err error)
+	Update() error
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// logical abstraction
+
+/*
+type ManifestAccess interface {
+	GetManifestMeta() *ManifestMeta  // for index members
+	GetManifest() artdesc.Manifest
+	GetBlob(digest string) BlobAccess
+}
+
+type ArtefactComposer interface {
+	ArtefactAccess
+
+	AsManifest(bool) ManifestComposer
+	AsIndex(keepManifest bool) ManifestComposer
+}
+
+type LayerMeta struct {
+}
+
+type ManifestMeta struct {
+}
+
+type IndexComposer interface {
+	GetIndex() artdesc.Index
+	GetBlob(digest string) BlobAccess
+	GetManifest(digest string) artdesc.Manifest
+	ComposeManifest(*ManifestMeta) (ManifestComposer, error)
+	AddManifest(ArtefactAccess) error
+	Update() error
+}
+
+type ManifestComposer interface {
+	ManifestAccess
+	AddLayer(*LayerMeta,BlobAccess) error
+	Update() error
+}
+*/

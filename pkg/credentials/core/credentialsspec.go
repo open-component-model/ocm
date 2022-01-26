@@ -53,7 +53,7 @@ func (s *DefaultCredentialsSpec) Credentials(ctx Context, creds ...CredentialsSo
 }
 
 // MarshalJSON implements a custom json unmarshal method
-func (s *DefaultCredentialsSpec) MarshalJSON() ([]byte, error) {
+func (s DefaultCredentialsSpec) MarshalJSON() ([]byte, error) {
 	ocispec, err := runtime.ToUnstructuredTypedObject(s.RepositorySpec)
 	if err != nil {
 		return nil, err
@@ -142,7 +142,7 @@ func (s *GenericCredentialsSpec) Credentials(ctx Context, creds ...CredentialsSo
 }
 
 // MarshalJSON implements a custom json unmarshal method
-func (s *GenericCredentialsSpec) MarshalJSON() ([]byte, error) {
+func (s GenericCredentialsSpec) MarshalJSON() ([]byte, error) {
 	specdata, err := runtime.ToUnstructuredObject(struct {
 		Name string `json:"credentialsName,omitempty"`
 	}{Name: s.CredentialsName})

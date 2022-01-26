@@ -114,7 +114,7 @@ func (u *GenericOCIBackendSpec) UnmarshalJSON(data []byte) error {
 }
 
 // MarshalJSON implements a custom json unmarshal method for a unstructured type.
-func (u *GenericOCIBackendSpec) MarshalJSON() ([]byte, error) {
+func (u GenericOCIBackendSpec) MarshalJSON() ([]byte, error) {
 	ocispec, err := runtime.ToUnstructuredTypedObject(u.RepositorySpec)
 	if err != nil {
 		return nil, err

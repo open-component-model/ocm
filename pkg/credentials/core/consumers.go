@@ -49,6 +49,6 @@ type _consumer struct {
 	credentials CredentialsSource
 }
 
-func (c *_consumer) GetCredentials(ctx Context) (Credentials, error) {
-	return c.credentials.Credentials(ctx)
+func (c *_consumer) GetCredentials() CredentialsSource {
+	return c.credentials
 }

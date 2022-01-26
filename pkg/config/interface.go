@@ -58,6 +58,10 @@ func IsGeneric(cfg Config) bool {
 	return core.IsGeneric(cfg)
 }
 
+func ErrNoContext(name string) error {
+	return core.ErrNoContext(name)
+}
+
 func IsErrNoContext(err error) bool {
 	return cpi.IsErrNoContext(err)
 }

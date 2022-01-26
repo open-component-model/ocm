@@ -52,8 +52,8 @@ type LocalBlobAccessSpec struct {
 
 var _ json.Marshaler = &LocalBlobAccessSpec{}
 
-func (s *LocalBlobAccessSpec) MarshalJSON() ([]byte, error) {
-	return cpi.MarshalConvertedAccessSpec(s)
+func (a LocalBlobAccessSpec) MarshalJSON() ([]byte, error) {
+	return cpi.MarshalConvertedAccessSpec(&a)
 }
 
 func (a *LocalBlobAccessSpec) ValidFor(repo cpi.Repository) bool {

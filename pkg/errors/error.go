@@ -77,7 +77,7 @@ type errinfo struct {
 	msg         string
 	preposition string
 	kind        string
-	elem        string
+	elem        *string
 	ctx         string
 }
 
@@ -89,17 +89,17 @@ func newErrInfo(msg, preposition string, spec ...string) errinfo {
 
 	if len(spec) > 2 {
 		e.kind = spec[0]
-		e.elem = spec[1]
+		e.elem = &spec[1]
 		e.ctx = spec[2]
 		return e
 	}
 	if len(spec) > 1 {
 		e.kind = spec[0]
-		e.elem = spec[1]
+		e.elem = &spec[1]
 		return e
 	}
 	if len(spec) > 0 {
-		e.elem = spec[0]
+		e.elem = &spec[0]
 	}
 	return e
 }
@@ -110,8 +110,8 @@ func (e *errinfo) Error() string {
 		ctx = " " + e.preposition + " " + e.ctx
 	}
 	elem := ""
-	if e.elem != "" {
-		elem = e.elem + " "
+	if e.elem != nil {
+		elem = "\"" + *e.elem + "\" "
 	}
 	kind := ""
 	if e.kind != "" {
@@ -120,7 +120,7 @@ func (e *errinfo) Error() string {
 	return kind + elem + e.msg + ctx
 }
 
-func (e *errinfo) Elem() string {
+func (e *errinfo) Elem() *string {
 	return e.elem
 }
 

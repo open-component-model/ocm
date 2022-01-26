@@ -91,9 +91,11 @@ var _ = Describe("docker config", func() {
 		_, err := DefaultContext.RepositoryForConfig([]byte(specdata2), nil)
 		Expect(err).To(Succeed())
 
-		creds, err := DefaultContext.GetCredentialsForConsumer(credentials.ConsumerIdentity{
+		csrc, err := DefaultContext.GetCredentialsForConsumer(credentials.ConsumerIdentity{
 			identity.ID_HOSTNAME: "ghcr.io",
 		})
+		Expect(err).To(Succeed())
+		creds, err := csrc.Credentials(DefaultContext)
 		Expect(err).To(Succeed())
 		Expect(creds.Properties()).To(Equal(props2))
 	})

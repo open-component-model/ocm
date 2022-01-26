@@ -45,6 +45,10 @@ type Unstructured interface {
 	GetRaw() ([]byte, error)
 }
 
+type JSONMarhaler interface {
+	MarshalJSON() ([]byte, error)
+}
+
 // UnstructuredMap is a generic data map
 type UnstructuredMap map[string]interface{}
 
@@ -205,7 +209,7 @@ func (u *UnstructuredTypedObject) UnmarshalJSON(data []byte) error {
 }
 
 // MarshalJSON implements a custom json unmarshal method for a unstructured type.
-func (u *UnstructuredTypedObject) MarshalJSON() ([]byte, error) {
+func (u UnstructuredTypedObject) MarshalJSON() ([]byte, error) {
 	data, err := json.Marshal(u.Object)
 	if err != nil {
 		return nil, err

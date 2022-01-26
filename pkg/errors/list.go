@@ -24,7 +24,7 @@ type ErrorList struct {
 }
 
 func (l *ErrorList) Error() string {
-	msg := l.msg
+	msg := "{" + l.msg
 	sep := ""
 	if msg != "" {
 		sep = ": "
@@ -35,7 +35,7 @@ func (l *ErrorList) Error() string {
 			sep = ", "
 		}
 	}
-	return msg
+	return msg + "}"
 }
 
 func (l *ErrorList) Add(e error) *ErrorList {
@@ -54,6 +54,10 @@ func (l *ErrorList) Result() error {
 		return nil
 	}
 	return l
+}
+
+func (l *ErrorList) Clear() {
+	l.errors = nil
 }
 
 func ErrListf(msg string, args ...interface{}) *ErrorList {

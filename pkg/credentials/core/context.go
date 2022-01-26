@@ -29,7 +29,7 @@ type Context interface {
 	datacontext.Context
 
 	AttributesContext() datacontext.AttributesContext
-
+	ConfigContext() config.Context
 	RepositoryTypes() RepositoryTypeScheme
 
 	RepositorySpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error)
@@ -40,7 +40,7 @@ type Context interface {
 	CredentialsForSpec(spec CredentialsSpec, creds ...CredentialsSource) (Credentials, error)
 	CredentialsForConfig(data []byte, unmarshaler runtime.Unmarshaler, cred ...CredentialsSource) (Credentials, error)
 
-	GetCredentialsForConsumer(ConsumerIdentity) (Credentials, error)
+	GetCredentialsForConsumer(ConsumerIdentity) (CredentialsSource, error)
 	SetCredentialsForConsumer(identity ConsumerIdentity, creds CredentialsSource)
 
 	SetAlias(name string, spec RepositorySpec, creds ...CredentialsSource) error
@@ -68,6 +68,7 @@ type _context struct {
 	lastGeneration       int64
 	knownRepositoryTypes RepositoryTypeScheme
 	consumers            *_consumers
+	inupdate             bool
 }
 
 var _ Context = &_context{}
@@ -85,14 +86,28 @@ func newContext(shared datacontext.AttributesContext, configctx config.Context, 
 
 func (c *_context) Update() error {
 	c.lock.Lock()
-	defer c.lock.Unlock()
+	if c.inupdate {
+		c.lock.Unlock()
+		return nil
+	}
+	c.inupdate = true
+	c.lock.Unlock()
+
 	gen, err := c.configctx.ApplyTo(c.lastGeneration, c)
+
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	c.inupdate = false
 	c.lastGeneration = gen
 	return err
 }
 
 func (c *_context) AttributesContext() datacontext.AttributesContext {
 	return c.sharedattributes
+}
+
+func (c *_context) ConfigContext() config.Context {
+	return c.configctx
 }
 
 func (c *_context) RepositoryTypes() RepositoryTypeScheme {
@@ -139,13 +154,13 @@ func (c *_context) CredentialsForConfig(data []byte, unmarshaler runtime.Unmarsh
 	return c.CredentialsForSpec(spec, creds...)
 }
 
-func (c *_context) GetCredentialsForConsumer(identity ConsumerIdentity) (Credentials, error) {
+func (c *_context) GetCredentialsForConsumer(identity ConsumerIdentity) (CredentialsSource, error) {
 	c.Update()
 	consumer := c.consumers.Get(identity)
 	if consumer == nil {
 		return nil, ErrUnknownConsumer(identity.String())
 	}
-	return consumer.GetCredentials(c)
+	return consumer.GetCredentials(), nil
 }
 
 func (c *_context) SetCredentialsForConsumer(identity ConsumerIdentity, creds CredentialsSource) {

@@ -34,7 +34,7 @@ func (r *Repository) ExistsCredentials(name string) (bool, error) {
 }
 
 func (r *Repository) LookupCredentials(name string) (cpi.Credentials, error) {
-	if name != DirectCredentialsRepositoryType {
+	if name != DirectCredentialsRepositoryType && name != "" {
 		return nil, cpi.ErrUnknownCredentials(name)
 	}
 	return r.Credentials, nil
