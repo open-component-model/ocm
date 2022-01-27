@@ -12,23 +12,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package common
+package accessio
 
-import (
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/opencontainers/go-digest"
+type FileFormat string
+
+const (
+	FormatTar       FileFormat = "tar"
+	FormatTGZ       FileFormat = "tgz"
+	FormatDirectory FileFormat = "directory"
 )
-
-func Digest(access accessio.DataAccess) (digest.Digest, error) {
-	reader, err := access.Reader()
-	if err != nil {
-		return "", err
-	}
-	defer reader.Close()
-
-	dig, err := digest.FromReader(reader)
-	if err != nil {
-		return "", err
-	}
-	return dig, nil
-}

@@ -12,23 +12,30 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package common
+package accessio
 
 import (
-	"github.com/gardener/ocm/pkg/common/accessio"
+	"io"
+
 	"github.com/opencontainers/go-digest"
 )
 
-func Digest(access accessio.DataAccess) (digest.Digest, error) {
-	reader, err := access.Reader()
-	if err != nil {
-		return "", err
-	}
-	defer reader.Close()
+//  DataAccess describes the access to sequence of bytes
+type DataAccess interface {
+	// Get returns the content of the blob as byte array
+	Get() ([]byte, error)
+	// Reader returns a reader to incrementally access the blob content
+	Reader() (io.ReadCloser, error)
+}
 
-	dig, err := digest.FromReader(reader)
-	if err != nil {
-		return "", err
-	}
-	return dig, nil
+//  BlobAccess describes the access to a blob
+type BlobAccess interface {
+	DataAccess
+
+	// MimeType returns the mime type of the blob
+	MimeType() string
+	// Digest returns the blob digest
+	Digest() digest.Digest
+	// Size returns the blob size
+	Size() int64
 }

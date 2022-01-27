@@ -15,7 +15,7 @@
 package core
 
 import (
-	"github.com/gardener/ocm/pkg/common"
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 )
 
@@ -26,8 +26,8 @@ type Repository interface {
 	WriteArtefact(ArtefactAccess) (ArtefactAccess, error)
 }
 
-type BlobAccess = common.BlobAccess
-type DataAccess = common.DataAccess
+type BlobAccess = accessio.BlobAccess
+type DataAccess = accessio.DataAccess
 
 type ArtefactAccess interface {
 	GetRepository() Repository

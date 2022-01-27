@@ -14,36 +14,10 @@
 
 package common
 
-import (
-	"io"
-
-	"github.com/opencontainers/go-digest"
-)
-
 // VersionedElement describes an element that has a name and a version
 type VersionedElement interface {
 	// GetName gets the name of the element
 	GetName() string
 	// GetVersion gets the version of the element
 	GetVersion() string
-}
-
-//  DataAccess describes the access to sequence of bytes
-type DataAccess interface {
-	// Get returns the content of the blob as byte array
-	Get() ([]byte, error)
-	// Reader returns a reader to incrementally access the blob content
-	Reader() (io.ReadCloser, error)
-}
-
-//  BlobAccess describes the access to a blob
-type BlobAccess interface {
-	DataAccess
-
-	// MimeType returns the mime type of the blob
-	MimeType() string
-	// Digest returns the blob digest
-	Digest() digest.Digest
-	// Size returns the blob size
-	Size() int64
 }

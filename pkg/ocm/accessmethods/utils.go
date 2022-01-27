@@ -19,7 +19,7 @@ import (
 	"io/ioutil"
 	"sync"
 
-	"github.com/gardener/ocm/pkg/common"
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/gardener/ocm/pkg/runtime"
 	"github.com/opencontainers/go-digest"
@@ -63,7 +63,7 @@ func (m *DefaultAccessMethod) Digest() digest.Digest {
 		reader, err := m.impl.Open()
 		defer reader.Close()
 		if err == nil {
-			count := common.NewCountingReader(reader)
+			count := accessio.NewCountingReader(reader)
 			m.digest, err = digest.Canonical.FromReader(count)
 			if err == nil {
 				m.size = count.Size()
@@ -83,7 +83,7 @@ func (m *DefaultAccessMethod) Size() int64 {
 			if err == nil {
 				defer reader.Close()
 				var buf [8000]byte
-				count := common.NewCountingReader(reader)
+				count := accessio.NewCountingReader(reader)
 				for err == nil {
 					_, err = count.Read(buf[:])
 				}

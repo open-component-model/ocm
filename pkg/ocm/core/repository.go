@@ -18,6 +18,7 @@ import (
 	"io"
 
 	"github.com/gardener/ocm/pkg/common"
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
@@ -36,8 +37,8 @@ type Repository interface {
 	LocalSupportForAccessSpec(a compdesc.AccessSpec) bool
 }
 
-type DataAccess = common.DataAccess
-type BlobAccess = common.BlobAccess
+type DataAccess = accessio.DataAccess
+type BlobAccess = accessio.BlobAccess
 
 type ResourceMeta = compdesc.ResourceMeta
 

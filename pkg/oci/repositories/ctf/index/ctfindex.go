@@ -12,41 +12,19 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package common
+package index
 
 import (
-	"io"
-
-	"github.com/opencontainers/go-digest"
+	"github.com/opencontainers/image-spec/specs-go"
 )
 
-type DigestReader struct {
-	reader   io.Reader
-	digester digest.Digester
-	count    int64
+type ArtefactIndex struct {
+	specs.Versioned
+	Index []ArtefactMeta `json:"artefacts"`
 }
 
-func (r *DigestReader) Size() int64 {
-	return r.count
-}
-
-func (r *DigestReader) Digest() digest.Digest {
-	return r.digester.Digest()
-}
-
-func (r *DigestReader) Read(buf []byte) (int, error) {
-	c, err := r.reader.Read(buf)
-	if c > 0 {
-		r.count += int64(c)
-		r.digester.Hash().Write(buf[:c])
-	}
-	return c, err
-}
-
-func NewDigestReaderWith(algorithm digest.Algorithm, r io.Reader) *DigestReader {
-	return &DigestReader{
-		reader:   r,
-		digester: algorithm.Digester(),
-		count:    0,
-	}
+type ArtefactMeta struct {
+	Repository string `json:"repository"`
+	Tag        string `json:"tag,omitempty"`
+	Digest     string `json:"tag,omitempty"`
 }
