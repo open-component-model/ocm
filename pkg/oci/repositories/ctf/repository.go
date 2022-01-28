@@ -39,7 +39,7 @@ import (
    artefact-descriptor.json and a folder blobs containing
    the flat blob files with the name according to the blob digest.
 
-   Digests used as filename will replace the ":" by a "-"
+   Digests used as filename will replace the ":" by a "."
 */
 
 const ArtefactDescriptor = "artefact-descriptor.json"
