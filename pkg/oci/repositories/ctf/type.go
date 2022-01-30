@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package ocireg
+package ctf
 
 import (
+	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/errors"
 	cpi "github.com/gardener/ocm/pkg/oci/cpi"
@@ -34,20 +35,20 @@ func init() {
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
-	CTFOptions                  `json:",inline"`
+	accessobj.Options           `json:",inline"`
 
 	// FileFormat is the format of the repository file
 	FilePath string `json:"filePath"`
 }
 
 // NewRepositorySpec creates a new RepositorySpec
-func NewRepositorySpec(filePath string, opts ...CTFOption) *RepositorySpec {
-	o := CTFOptions{}
+func NewRepositorySpec(filePath string, opts ...accessobj.Option) *RepositorySpec {
+	o := accessobj.Options{}
 	o.ApplyOptions(opts...)
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(CommonTransportFormatRepositoryType),
 		FilePath:            filePath,
-		CTFOptions:          o.Default(),
+		Options:             o.Default(),
 	}
 }
 

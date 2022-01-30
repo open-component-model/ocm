@@ -291,8 +291,8 @@ github.com/mailru/easyjson v0.0.0-20190614124828-94de47d64c63/go.mod h1:C1wdFJiN
 github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e/go.mod h1:C1wdFJiN94OJF2b5HbByQZoLdCWB1Yqtg26g4irojpc=
 github.com/mandelsoft/filepath v0.0.0-20200909114706-3df73d378d55 h1:mFdiUG86O2iW+iDEpZKXf64efMWO4JvDT+zN3znUGIc=
 github.com/mandelsoft/filepath v0.0.0-20200909114706-3df73d378d55/go.mod h1:n4xEiUD2HNHnn2w5ZKF0qgjDecHVCWAl5DxZ7+pcFU8=
-github.com/mandelsoft/vfs v0.0.0-20210530103237-5249dc39ce91 h1:IW3qfn0AelV/4nLyVxFqZ5mJGTv7jGdqEWcFXiybLJs=
-github.com/mandelsoft/vfs v0.0.0-20210530103237-5249dc39ce91/go.mod h1:74aV7kulg9C434HiI3zNALN79QHc9IZMN+SI4UdLn14=
+github.com/mandelsoft/vfs v0.0.0-20220201135517-cf1272e4bfd9 h1:PBh44eR5g83KXHa+xVVyQCfoxn6WN7hVU24gb9mKL0g=
+github.com/mandelsoft/vfs v0.0.0-20220201135517-cf1272e4bfd9/go.mod h1:74aV7kulg9C434HiI3zNALN79QHc9IZMN+SI4UdLn14=
 github.com/mattn/go-colorable v0.0.9/go.mod h1:9vuHe8Xs5qXnSaW/c/ABM9alt+Vo+STaOChaDxuIBZU=
 github.com/mattn/go-colorable v0.1.4/go.mod h1:U0ppj6V5qS13XJ6of8GYAs25YV2eR4EVcfRqFIhoBtE=
 github.com/mattn/go-colorable v0.1.6/go.mod h1:u6P/XSegPjTcexA+o6vUJrdnUu04hMope9wVRipJSqc=

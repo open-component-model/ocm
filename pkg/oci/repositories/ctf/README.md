@@ -11,14 +11,14 @@ It is a flat directory containing
 
   This JSON file describes the contained artefact (versions).
 
-- **`<digest>`** *[Artefact Archive](#atefact archive-format)
+- **`artefacts`** *directory*
 
-  Additionally to the artefact index there may be anny number of archive files
-  containing the content described by a dedicated artefact version. The filename
-  MUST be digest of the *[Manifest](https://github.com/opencontainers/image-spec/blob/main/manifest.md)*
-  of the artefact. This might be an image or index manifest.
+  The *artefacts* directory contains the [Artefact Archives](#atefact archive-format)
+  for the artefact versions described by the artefact descriptor as a flat file
+  list. The filename MUST be the digest of the *[Manifest](https://github.com/opencontainers/image-spec/blob/main/manifest.md)*
+  of the artefact version. This might be an image or index manifest.
 
-  Hereby the algorithm separator character is replaced by a dor (".").
+  Hereby the algorithm separator character is replaced by a dot (".").
   Every file SHOULD be referenced in the artefact index. Files not referenced
   here are ignored.
 
@@ -81,7 +81,7 @@ The *Artefact Archive* Format describes a file system structure that can be
 used for the representation of a dedicated [artefact version](https://github.com/opencontainers/image-spec)
 of an OCI repository. The filesystem content is then packed into a *tar* or *tgz* archive.
 
-It is a flat directory containing
+It is a directory containing
 
 - **`artefact-descriptor.json`** *[oci artefact manifest](https://github.com/opencontainers/image-spec/blob/main/manifest.md)*
 

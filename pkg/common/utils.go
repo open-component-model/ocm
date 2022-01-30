@@ -15,7 +15,10 @@
 package common
 
 import (
+	"strings"
+
 	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/opencontainers/go-digest"
 )
 
@@ -31,4 +34,19 @@ func Digest(access accessio.DataAccess) (digest.Digest, error) {
 		return "", err
 	}
 	return dig, nil
+}
+
+// DigestToFileName returns teh file name for a digest
+func DigestToFileName(digest digest.Digest) string {
+	return strings.Replace(digest.String(), ":", "+", 1)
+}
+
+// PathToDigest retuurns the digest encoded into a file name
+func PathToDigest(path string) digest.Digest {
+	n := filepath.Base(path)
+	idx := strings.LastIndex(n, "+")
+	if idx < 0 {
+		return ""
+	}
+	return digest.Digest(n[:idx] + ":" + n[idx+1:])
 }

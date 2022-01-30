@@ -74,17 +74,22 @@ var errorType = reflect.TypeOf((*error)(nil)).Elem()
 ////////////////////////////////////////////////////////////////////////////////
 
 type errinfo struct {
-	msg         string
-	preposition string
-	kind        string
-	elem        *string
-	ctx         string
+	wrapped error
+	format  ErrorFormatter
+	kind    string
+	elem    *string
+	ctx     string
 }
 
-func newErrInfo(msg, preposition string, spec ...string) errinfo {
+func wrapErrInfo(err error, fmt ErrorFormatter, spec ...string) errinfo {
+	e := newErrInfo(fmt, spec...)
+	e.wrapped = err
+	return e
+}
+
+func newErrInfo(fmt ErrorFormatter, spec ...string) errinfo {
 	e := errinfo{
-		msg:         msg,
-		preposition: preposition,
+		format: fmt,
 	}
 
 	if len(spec) > 2 {
@@ -105,19 +110,15 @@ func newErrInfo(msg, preposition string, spec ...string) errinfo {
 }
 
 func (e *errinfo) Error() string {
-	ctx := ""
-	if e.ctx != "" {
-		ctx = " " + e.preposition + " " + e.ctx
+	msg := e.format.Format(e.kind, e.elem, e.ctx)
+	if e.wrapped != nil {
+		return msg + ": " + e.wrapped.Error()
 	}
-	elem := ""
-	if e.elem != nil {
-		elem = "\"" + *e.elem + "\" "
-	}
-	kind := ""
-	if e.kind != "" {
-		kind = e.kind + " "
-	}
-	return kind + elem + e.msg + ctx
+	return msg
+}
+
+func (e *errinfo) Unwrap() error {
+	return e.wrapped
 }
 
 func (e *errinfo) Elem() *string {

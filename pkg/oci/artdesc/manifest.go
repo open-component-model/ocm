@@ -17,12 +17,27 @@ package artdesc
 import (
 	"encoding/json"
 
+	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/artdesc/helper"
+	"github.com/opencontainers/go-digest"
+	"github.com/opencontainers/image-spec/specs-go"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+)
+
+const SchemeVersion = helper.SchemeVersion
+
+const (
+	MediaTypeImageManifest  = ociv1.MediaTypeImageManifest
+	MediaTypeImageIndex     = ociv1.MediaTypeImageIndex
+	MediaTypeImageLayer     = ociv1.MediaTypeImageLayer
+	MediaTypeImageLayerGzip = ociv1.MediaTypeImageLayerGzip
 )
 
 type Manifest = ociv1.Manifest
 type Index = ociv1.Index
+type Descriptor = ociv1.Descriptor
+type Platform = ociv1.Platform
 
 type ArtefactDescriptor struct {
 	manifest *Manifest
@@ -31,6 +46,30 @@ type ArtefactDescriptor struct {
 
 var _ json.Marshaler = &ArtefactDescriptor{}
 var _ json.Unmarshaler = &ArtefactDescriptor{}
+
+func New() *ArtefactDescriptor {
+	return &ArtefactDescriptor{}
+}
+
+func (d *ArtefactDescriptor) SetManifest(m *Manifest) error {
+	if d.IsIndex() || d.IsManifest() {
+		return errors.Newf("artefact descriptor already instantiated")
+	}
+	d.manifest = m
+	return nil
+}
+
+func (d *ArtefactDescriptor) SetIndex(i *Index) error {
+	if d.IsIndex() || d.IsManifest() {
+		return errors.Newf("artefact descriptor already instantiated")
+	}
+	d.index = i
+	return nil
+}
+
+func (d *ArtefactDescriptor) IsValid() bool {
+	return d.manifest != nil || d.index != nil
+}
 
 func (d *ArtefactDescriptor) IsManifest() bool {
 	return d.manifest != nil
@@ -48,6 +87,26 @@ func (d *ArtefactDescriptor) Manifest() *Manifest {
 	return d.manifest
 }
 
+func (d *ArtefactDescriptor) ToBlobAccess() (accessio.BlobAccess, error) {
+	if d.IsManifest() {
+		return BlobAccessForManifest(d.manifest)
+	}
+	if d.IsIndex() {
+		return BlobAccessForIndex(d.index)
+	}
+	return nil, errors.ErrInvalid("artefact descriptor")
+}
+
+func (d *ArtefactDescriptor) GetBlobDescriptor(digest digest.Digest) *Descriptor {
+	if d.IsManifest() {
+		return GetBlobDescriptorFromManifest(digest, d.Manifest())
+	}
+	if d.IsIndex() {
+		return GetBlobDescriptorFromIndex(digest, d.Index())
+	}
+	return nil
+}
+
 func (d ArtefactDescriptor) MarshalJSON() ([]byte, error) {
 	if d.manifest != nil {
 		d.manifest.MediaType = ociv1.MediaTypeImageManifest
@@ -57,7 +116,7 @@ func (d ArtefactDescriptor) MarshalJSON() ([]byte, error) {
 		d.manifest.MediaType = ociv1.MediaTypeImageIndex
 		return json.Marshal(d.index)
 	}
-	return []byte("null"), nil
+	return []byte("{}"), nil
 }
 
 func (d ArtefactDescriptor) UnmarshalJSON(data []byte) error {
@@ -92,4 +151,49 @@ func Decode(data []byte) (*ArtefactDescriptor, error) {
 
 func Encode(d *ArtefactDescriptor) ([]byte, error) {
 	return json.Marshal(d)
+}
+
+func NewIndex() *Index {
+	return &Index{
+		Versioned:   specs.Versioned{SchemeVersion},
+		MediaType:   MediaTypeImageIndex,
+		Manifests:   nil,
+		Annotations: nil,
+	}
+}
+
+func NewManifest() *Manifest {
+	return &Manifest{
+		Versioned:   specs.Versioned{SchemeVersion},
+		MediaType:   MediaTypeImageManifest,
+		Layers:      nil,
+		Annotations: nil,
+	}
+}
+
+func DefaultBlobDescriptor(blob accessio.BlobAccess) *Descriptor {
+	return &Descriptor{
+		MediaType:   blob.MimeType(),
+		Digest:      blob.Digest(),
+		Size:        blob.Size(),
+		URLs:        nil,
+		Annotations: nil,
+		Platform:    nil,
+	}
+}
+
+func BlobAccessForManifest(m *Manifest) (accessio.BlobAccess, error) {
+	data, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return accessio.BlobAccessForData(MediaTypeImageManifest, data), nil
+}
+
+func BlobAccessForIndex(m *Index) (accessio.BlobAccess, error) {
+	data, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return accessio.BlobAccessForData(MediaTypeImageIndex, data), nil
 }

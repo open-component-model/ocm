@@ -15,7 +15,6 @@
 package ctf
 
 import (
-	"archive/tar"
 	"fmt"
 	"io"
 	"os"
@@ -434,36 +433,4 @@ func (ca *ComponentArchive) ensureBlobsPath() error {
 // BlobPath returns the path to the blob for a given name.
 func BlobPath(name string) string {
 	return filepath.Join(BlobsDirectoryName, name)
-}
-
-// ExtractTarToFs writes a tar stream to a filesystem.
-func ExtractTarToFs(fs vfs.FileSystem, in io.Reader) error {
-	tr := tar.NewReader(in)
-	for {
-		header, err := tr.Next()
-		if err != nil {
-			if err == io.EOF {
-				return nil
-			}
-			return err
-		}
-
-		switch header.Typeflag {
-		case tar.TypeDir:
-			if err := fs.MkdirAll(header.Name, os.FileMode(header.Mode)); err != nil {
-				return fmt.Errorf("unable to create directory %s: %w", header.Name, err)
-			}
-		case tar.TypeReg:
-			file, err := fs.OpenFile(header.Name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.FileMode(header.Mode))
-			if err != nil {
-				return fmt.Errorf("unable to open file %s: %w", header.Name, err)
-			}
-			if _, err := io.Copy(file, tr); err != nil {
-				return fmt.Errorf("unable to copy tar file to filesystem: %w", err)
-			}
-			if err := file.Close(); err != nil {
-				return fmt.Errorf("unable to close file %s: %w", header.Name, err)
-			}
-		}
-	}
 }

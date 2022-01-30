@@ -18,6 +18,8 @@ package cpi
 
 import (
 	"github.com/gardener/ocm/pkg/oci/core"
+	"github.com/opencontainers/go-digest"
+	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
 type Context = core.Context
@@ -27,7 +29,15 @@ type RepositorySpec = core.RepositorySpec
 type GenericRepositorySpec = core.GenericRepositorySpec
 type ArtefactAccess = core.ArtefactAccess
 type ArtefactComposer = core.ArtefactComposer
+type ManifestAccess = core.ManifestAccess
+type BlobAccess = core.BlobAccess
 type DataAccess = core.DataAccess
+
+type Descriptor = ociv1.Descriptor
+
+type RepositorySource interface {
+	GetRepository() Repository
+}
 
 var DefaultContext = core.DefaultContext
 
@@ -36,7 +46,17 @@ func RegisterRepositoryType(name string, atype RepositoryType) {
 }
 
 const KIND_OCIARTEFACT = core.KIND_OCIARTEFACT
+const KIND_MEDIATYPE = core.KIND_MEDIATYPE
+const KIND_BLOB = core.KIND_BLOB
 
 func ErrUnknownArtefact(name, version string) error {
 	return core.ErrUnknownArtefact(name, version)
+}
+
+func ErrBlobNotFound(digest digest.Digest) error {
+	return core.ErrBlobNotFound(digest)
+}
+
+func IsErrBlobNotFound(err error) bool {
+	return core.IsErrBlobNotFound(err)
 }

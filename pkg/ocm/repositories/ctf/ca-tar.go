@@ -24,6 +24,7 @@ import (
 
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
+	"github.com/gardener/ocm/pkg/utils"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
@@ -164,7 +165,7 @@ func newComponentArchiveFromTarReader(ctx cpi.Context, in io.Reader, opts Compon
 		opts.ComponentFileSystem = memoryfs.New()
 	}
 
-	if err := ExtractTarToFs(opts.ComponentFileSystem, in); err != nil {
+	if err := utils.ExtractTarToFs(opts.ComponentFileSystem, in); err != nil {
 		return nil, fmt.Errorf("unable to extract tar: %w", err)
 	}
 

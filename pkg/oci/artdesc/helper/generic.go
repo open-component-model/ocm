@@ -21,6 +21,8 @@ import (
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
+const SchemeVersion = 2
+
 type GenericDescriptor struct {
 	ociv1.Manifest
 	// Manifests references platform specific manifests.
@@ -28,7 +30,7 @@ type GenericDescriptor struct {
 }
 
 func (g *GenericDescriptor) Validate() error {
-	if g.SchemaVersion != 2 {
+	if g.SchemaVersion != SchemeVersion {
 		return errors.ErrUnknown("schema version", fmt.Sprintf("%d", g.SchemaVersion))
 	}
 	switch g.MediaType {

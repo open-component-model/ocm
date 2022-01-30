@@ -18,10 +18,21 @@ import (
 	"fmt"
 
 	"github.com/gardener/ocm/pkg/errors"
+	"github.com/opencontainers/go-digest"
 )
 
 const KIND_OCIARTEFACT = "oci artefact"
+const KIND_BLOB = "blob"
+const KIND_MEDIATYPE = "media type"
 
 func ErrUnknownArtefact(name, version string) error {
 	return errors.ErrUnknown(KIND_OCIARTEFACT, fmt.Sprintf("%s:%s", name, version))
+}
+
+func ErrBlobNotFound(digest digest.Digest) error {
+	return errors.ErrNotFound(KIND_BLOB, digest.String())
+}
+
+func IsErrBlobNotFound(err error) bool {
+	return errors.IsErrNotFoundKind(err, KIND_BLOB)
 }

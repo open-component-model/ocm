@@ -22,6 +22,8 @@ import (
 )
 
 const KIND_OCIARTEFACT = core.KIND_OCIARTEFACT
+const KIND_MEDIATYPE = core.KIND_MEDIATYPE
+const KIND_BLOB = core.KIND_BLOB
 
 type Context = core.Context
 type Repository = core.Repository
@@ -30,10 +32,15 @@ type RepositorySpec = core.RepositorySpec
 type GenericRepositorySpec = core.GenericRepositorySpec
 type ArtefactAccess = core.ArtefactAccess
 type ArtefactComposer = core.ArtefactComposer
+type BlobAccess = core.BlobAccess
 type DataAccess = core.DataAccess
 
 var DefaultContext = core.DefaultContext
 
 func ForContext(ctx context.Context) Context {
 	return core.ForContext(ctx)
+}
+
+func IsErrBlobNotFound(err error) bool {
+	return core.IsErrBlobNotFound(err)
 }

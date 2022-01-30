@@ -14,20 +14,24 @@
 
 package errors
 
-const KIND_FUNCTION = "function"
-const KIND_SCHEMAVERSION = "schema version"
-const KIND_COMPONENT = "component"
-const KIND_ACCESSMETHOD = "access method"
-const KIND_OBJECTTYPE = "object type"
-
 type errNotImplemented struct {
 	errinfo
 }
 
+var formatNotImplemented = NewDefaultFormatter("", "not implemented", "by")
+
 func ErrNotImplemented(spec ...string) error {
-	return &errNotImplemented{newErrInfo("not implemented", "by", spec...)}
+	return &errNotImplemented{newErrInfo(formatNotImplemented, spec...)}
 }
 
 func IsErrNotImplemented(err error) bool {
 	return IsA(err, &errNotImplemented{})
+}
+
+func IsErrNotImplementedKind(err error, kind string) bool {
+	var uerr *errNotImplemented
+	if err == nil || !As(err, &uerr) {
+		return false
+	}
+	return uerr.kind == kind
 }

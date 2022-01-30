@@ -14,6 +14,12 @@
 
 package index
 
+import (
+	"sort"
+
+	"github.com/opencontainers/image-spec/specs-go"
+)
+
 type RepositoryIndex struct {
 	byDigest     map[string][]*ArtefactMeta
 	byRepository map[string]map[string]*ArtefactMeta
@@ -51,6 +57,15 @@ func (r *RepositoryIndex) AddArtefact(n *ArtefactMeta) {
 	repos[m.Tag] = &m
 }
 
+func (r *RepositoryIndex) HasArtefact(repo, tag string) bool {
+	repos := r.byRepository[repo]
+	if repos == nil {
+		return false
+	}
+	m := repos[tag]
+	return m != nil
+}
+
 func (r *RepositoryIndex) GetArtefacts(digest string) []*ArtefactMeta {
 	return r.byDigest[digest]
 }
@@ -66,4 +81,39 @@ func (r *RepositoryIndex) GetArtefact(repo, tag string) *ArtefactMeta {
 	}
 	result := *m
 	return &result
+}
+
+func (r *RepositoryIndex) GetDescriptor() *ArtefactIndex {
+	index := &ArtefactIndex{
+		Versioned: specs.Versioned{SchemaVersion},
+	}
+
+	repos := make([]string, len(r.byRepository))
+	i := 0
+	for repo := range r.byRepository {
+		repos[i] = repo
+		i++
+	}
+	sort.Strings(repos)
+	for _, name := range repos {
+		repo := r.byRepository[name]
+		versions := make([]string, len(repo))
+		i := 0
+		for vers := range repo {
+			versions[i] = vers
+			i++
+		}
+		sort.Strings(repos)
+
+		for _, name := range versions {
+			vers := repo[name]
+			d := &ArtefactMeta{
+				Repository: vers.Repository,
+				Tag:        vers.Tag,
+				Digest:     vers.Digest,
+			}
+			index.Index = append(index.Index, *d)
+		}
+	}
+	return index
 }

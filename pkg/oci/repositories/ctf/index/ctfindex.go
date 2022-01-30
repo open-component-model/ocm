@@ -15,8 +15,12 @@
 package index
 
 import (
+	"encoding/json"
+
 	"github.com/opencontainers/image-spec/specs-go"
 )
+
+const SchemaVersion = 1
 
 type ArtefactIndex struct {
 	specs.Versioned
@@ -26,5 +30,18 @@ type ArtefactIndex struct {
 type ArtefactMeta struct {
 	Repository string `json:"repository"`
 	Tag        string `json:"tag,omitempty"`
-	Digest     string `json:"tag,omitempty"`
+	Digest     string `json:"digest,omitempty"`
+}
+
+func Decode(data []byte) (*ArtefactIndex, error) {
+	var d ArtefactIndex
+
+	if err := json.Unmarshal(data, &d); err != nil {
+		return nil, err
+	}
+	return &d, nil
+}
+
+func Encode(d *ArtefactIndex) ([]byte, error) {
+	return json.Marshal(d)
 }

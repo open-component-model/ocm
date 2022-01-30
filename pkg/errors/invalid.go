@@ -18,8 +18,10 @@ type errInvalid struct {
 	errinfo
 }
 
+var formatInvalid = NewDefaultFormatter("is", "invalid", "for")
+
 func ErrInvalid(spec ...string) error {
-	return &errInvalid{newErrInfo("is invalid", "for", spec...)}
+	return &errInvalid{newErrInfo(formatInvalid, spec...)}
 }
 
 func IsErrInvalid(err error) bool {

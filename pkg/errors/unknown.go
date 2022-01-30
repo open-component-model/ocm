@@ -18,8 +18,10 @@ type errUnknown struct {
 	errinfo
 }
 
+var formatUnknown = NewDefaultFormatter("is", "unknown", "for")
+
 func ErrUnknown(spec ...string) error {
-	return &errUnknown{newErrInfo("is unknown", "for", spec...)}
+	return &errUnknown{newErrInfo(formatUnknown, spec...)}
 }
 
 func IsErrUnknown(err error) bool {

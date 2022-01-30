@@ -17,6 +17,7 @@ package core
 import (
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
+	"github.com/opencontainers/go-digest"
 )
 
 type Repository interface {
@@ -32,25 +33,27 @@ type DataAccess = accessio.DataAccess
 type ArtefactAccess interface {
 	GetRepository() Repository
 
-	GetArtefactDescriptor() artdesc.ArtefactDescriptor
-	GetManifest(digest string) ManifestAccess
-	GetBlob(digest string) BlobAccess
+	GetDescriptor() *artdesc.ArtefactDescriptor
+	GetManifest(digest digest.Digest) (ManifestAccess, error)
+	GetBlob(digest digest.Digest) (BlobAccess, error)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // technical abstraction
 
 type ManifestAccess interface {
-	GetManifest() artdesc.Manifest
-	GetBlob(digest string) BlobAccess
+	GetManifest() *artdesc.Manifest
+	GetBlob(digest digest.Digest) (BlobAccess, error)
 }
 
 type ArtefactComposer interface {
 	ArtefactAccess
 
-	AddManifest(artdesc.Manifest) (digest string, err error)
-	AddBlob(BlobAccess) (digest string, err error)
+	AddManifest(*artdesc.ArtefactDescriptor, *artdesc.Platform) (BlobAccess, error)
+	AddLayer(blob BlobAccess, d *artdesc.Descriptor) (int, error)
+	AddBlob(BlobAccess) error
 	Update() error
+	Close() error
 }
 
 ////////////////////////////////////////////////////////////////////////////////
