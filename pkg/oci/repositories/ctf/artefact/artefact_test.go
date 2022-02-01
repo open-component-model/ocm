@@ -49,11 +49,13 @@ func defaultManifestFill(a *artefact.Artefact) {
 
 var _ = Describe("artefact managmenet", func() {
 	var tempfs vfs.FileSystem
+	var opts accessobj.Options
 
 	BeforeEach(func() {
 		t, err := osfs.NewTempFileSystem()
 		Expect(err).To(Succeed())
 		tempfs = t
+		opts = accessobj.AccessOptions(accessobj.PathFileSystem(tempfs))
 	})
 
 	AfterEach(func() {
@@ -61,7 +63,7 @@ var _ = Describe("artefact managmenet", func() {
 	})
 
 	It("instantiate filesystem artefact", func() {
-		a, err := artefact.FormatDirectory.Create("test", accessobj.AccessOptions(accessobj.PathFileSystem(tempfs)), 0700)
+		a, err := artefact.FormatDirectory.Create("test", opts, 0700)
 		Expect(err).To(Succeed())
 		Expect(vfs.DirExists(tempfs, "test/"+artefact.BlobsDirectoryName)).To(BeTrue())
 
@@ -72,7 +74,7 @@ var _ = Describe("artefact managmenet", func() {
 	})
 
 	It("instantiate tgz artefact", func() {
-		a, err := artefact.FormatTGZ.Create("test.tgz", accessobj.AccessOptions(accessobj.PathFileSystem(tempfs)), 0600)
+		a, err := artefact.FormatTGZ.Create("test.tgz", opts, 0600)
 		Expect(err).To(Succeed())
 
 		defaultManifestFill(a)
@@ -109,5 +111,26 @@ var _ = Describe("artefact managmenet", func() {
 			"artefact-descriptor.json",
 			"blobs/sha256+44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
 			"blobs/sha256+810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
+	})
+
+	Context("manifest", func() {
+		It("read from filesystem artefact", func() {
+			a, err := artefact.FormatDirectory.Create("test", opts, 0700)
+			Expect(err).To(Succeed())
+			Expect(vfs.DirExists(tempfs, "test/"+artefact.BlobsDirectoryName)).To(BeTrue())
+			defaultManifestFill(a)
+			Expect(a.Close()).To(Succeed())
+
+			a, err = artefact.FormatDirectory.Open(accessobj.ACC_READONLY, "test", opts)
+			defer a.Close()
+			Expect(a.GetDescriptor().IsManifest()).To(BeTrue())
+			blob, err := a.GetBlob("sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50")
+			Expect(err).To(Succeed())
+			Expect(blob.Get()).To(Equal([]byte("testdata")))
+			Expect(blob.MimeType()).To(Equal(MimeTypeOctetStream))
+		})
+	})
+	Context("index", func() {
+
 	})
 })

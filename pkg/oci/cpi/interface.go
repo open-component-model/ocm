@@ -30,6 +30,7 @@ type GenericRepositorySpec = core.GenericRepositorySpec
 type ArtefactAccess = core.ArtefactAccess
 type ArtefactComposer = core.ArtefactComposer
 type ManifestAccess = core.ManifestAccess
+type IndexAccess = core.IndexAccess
 type BlobAccess = core.BlobAccess
 type DataAccess = core.DataAccess
 

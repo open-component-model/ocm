@@ -119,7 +119,7 @@ func (d ArtefactDescriptor) MarshalJSON() ([]byte, error) {
 	return []byte("{}"), nil
 }
 
-func (d ArtefactDescriptor) UnmarshalJSON(data []byte) error {
+func (d *ArtefactDescriptor) UnmarshalJSON(data []byte) error {
 	var m helper.GenericDescriptor
 
 	err := json.Unmarshal(data, &m)
@@ -134,9 +134,10 @@ func (d ArtefactDescriptor) UnmarshalJSON(data []byte) error {
 	if m.IsManifest() {
 		d.manifest = m.AsManifest()
 		d.index = nil
+	} else {
+		d.index = m.AsIndex()
+		d.manifest = nil
 	}
-	d.index = m.AsIndex()
-	d.manifest = nil
 	return nil
 }
 

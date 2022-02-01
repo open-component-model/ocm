@@ -26,7 +26,6 @@ import (
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
-	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
 type Artefact struct {
@@ -92,30 +91,18 @@ func (a *Artefact) GetDescriptor() *artdesc.ArtefactDescriptor {
 	return a.base.GetState().GetState().(*artdesc.ArtefactDescriptor)
 }
 
+func (a *Artefact) GetIndex(digest digest.Digest) (core.IndexAccess, error) {
+	if a.IsClosed() {
+		return nil, accessio.ErrClosed
+	}
+	return NewBlobContainer(a, a).GetIndex(digest)
+}
+
 func (a *Artefact) GetManifest(digest digest.Digest) (core.ManifestAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
-	blob, err := a.GetBlob(digest)
-	if err != nil {
-		return nil, err
-	}
-
-	if blob.MimeType() != ociv1.MediaTypeImageManifest {
-		return nil, errors.ErrInvalid(cpi.KIND_MEDIATYPE, blob.MimeType())
-	}
-	data, err := blob.Get()
-	if err != nil {
-		return nil, err
-	}
-	d, err := artdesc.Decode(data)
-	if err != nil {
-		return nil, err
-	}
-	if !d.IsManifest() {
-		return nil, errors.Newf("blob is no manifest")
-	}
-	return &Manifest{a, d.Manifest()}, nil
+	return NewBlobContainer(a, a).GetManifest(digest)
 }
 
 func (a *Artefact) GetBlob(digest digest.Digest) (core.BlobAccess, error) {

@@ -42,8 +42,17 @@ type ArtefactAccess interface {
 // technical abstraction
 
 type ManifestAccess interface {
-	GetManifest() *artdesc.Manifest
+	GetDescriptor() *artdesc.Manifest
+	GetBlobDescriptor(digest digest.Digest) *artdesc.Descriptor
 	GetBlob(digest digest.Digest) (BlobAccess, error)
+}
+
+type IndexAccess interface {
+	GetDescriptor() *artdesc.Index
+	GetBlobDescriptor(digest digest.Digest) *artdesc.Descriptor
+	GetBlob(digest digest.Digest) (BlobAccess, error)
+	GetIndex(digest digest.Digest) (IndexAccess, error)
+	GetManifest(digest digest.Digest) (ManifestAccess, error)
 }
 
 type ArtefactComposer interface {
