@@ -44,7 +44,11 @@ func (i *Index) GetDescriptor() *artdesc.Index {
 }
 
 func (i *Index) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
-	return artdesc.GetBlobDescriptorFromIndex(digest, i.index)
+	d:=  artdesc.GetBlobDescriptorFromIndex(digest, i.index)
+	if d!=nil {
+		return d;
+	}
+	return i.artefact.GetBlobDescriptor(digest)
 }
 
 func (i *Index) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
@@ -54,7 +58,7 @@ func (i *Index) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
 		if err != nil {
 			return nil, err
 		}
-		return accessio.BlobAccessForFile(d.Digest, d.Size, d.MediaType, data), nil
+		return accessio.BlobAccessForDataAccess(d.Digest, d.Size, d.MediaType, data), nil
 	}
 	return nil, cpi.ErrBlobNotFound(digest)
 }

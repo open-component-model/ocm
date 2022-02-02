@@ -115,7 +115,7 @@ func (a *Artefact) GetBlob(digest digest.Digest) (core.BlobAccess, error) {
 		if err != nil {
 			return nil, err
 		}
-		return accessio.BlobAccessForFile(d.Digest, d.Size, d.MediaType, data), nil
+		return accessio.BlobAccessForDataAccess(d.Digest, d.Size, d.MediaType, data), nil
 	}
 	return nil, errors.ErrNotFound("blob", string(digest))
 }

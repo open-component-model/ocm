@@ -108,7 +108,7 @@ type blobAccess struct {
 const BLOB_UNKNOWN_SIZE = -1
 const BLOB_UNKNOWN_DIGEST = digest.Digest("")
 
-func BlobAccessForFile(digest digest.Digest, size int64, mimeType string, access DataAccess) BlobAccess {
+func BlobAccessForDataAccess(digest digest.Digest, size int64, mimeType string, access DataAccess) BlobAccess {
 	return &blobAccess{
 		digest:   digest,
 		size:     size,

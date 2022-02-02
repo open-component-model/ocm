@@ -31,7 +31,11 @@ func (m *Manifest) GetDescriptor() *artdesc.Manifest {
 }
 
 func (m *Manifest) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
-	return artdesc.GetBlobDescriptorFromManifest(digest, m.manifest)
+	d := artdesc.GetBlobDescriptorFromManifest(digest, m.manifest)
+	if d != nil {
+		return d
+	}
+	return m.artefact.GetBlobDescriptor(digest)
 }
 
 func (m *Manifest) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
@@ -42,7 +46,7 @@ func (m *Manifest) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
 		if err != nil {
 			return nil, err
 		}
-		return accessio.BlobAccessForFile(d.Digest, d.Size, d.MediaType, data), nil
+		return accessio.BlobAccessForDataAccess(d.Digest, d.Size, d.MediaType, data), nil
 	}
 	return nil, cpi.ErrBlobNotFound(digest)
 }
