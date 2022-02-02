@@ -33,7 +33,7 @@ type DataAccess = accessio.DataAccess
 type ArtefactAccess interface {
 	GetRepository() Repository
 
-	GetDescriptor() *artdesc.ArtefactDescriptor
+	GetDescriptor() *artdesc.Artefact
 	GetManifest(digest digest.Digest) (ManifestAccess, error)
 	GetBlob(digest digest.Digest) (BlobAccess, error)
 }
@@ -58,7 +58,7 @@ type IndexAccess interface {
 type ArtefactComposer interface {
 	ArtefactAccess
 
-	AddManifest(*artdesc.ArtefactDescriptor, *artdesc.Platform) (BlobAccess, error)
+	AddManifest(*artdesc.Artefact, *artdesc.Platform) (BlobAccess, error)
 	AddLayer(blob BlobAccess, d *artdesc.Descriptor) (int, error)
 	AddBlob(BlobAccess) error
 	Update() error

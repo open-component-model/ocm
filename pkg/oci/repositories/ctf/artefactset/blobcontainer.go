@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package artefact
+package artefactset
 
 import (
 	"github.com/gardener/ocm/pkg/errors"
@@ -24,22 +24,41 @@ import (
 )
 
 type BlobSource interface {
-	GetBlob(digest digest.Digest) (core.BlobAccess, error)
-}
-
-type BlobSourceFunction func(digest digest.Digest) (core.BlobAccess, error)
-
-func (f BlobSourceFunction) GetBlob(digest digest.Digest) (core.BlobAccess, error) {
-	return f(digest)
+	GetBlob(digest digest.Digest) (cpi.BlobAccess, error)
 }
 
 type BlobContainer struct {
-	artefact *Artefact
+	set *ArtefactSet
 	BlobSource
 }
 
-func NewBlobContainer(artefact *Artefact, src BlobSource) *BlobContainer {
+func NewBlobContainer(artefact *ArtefactSet, src BlobSource) *BlobContainer {
 	return &BlobContainer{artefact, src}
+}
+
+func (i *BlobContainer) AddBlob(blob cpi.BlobAccess) error {
+	return i.set.AddBlob(blob)
+}
+
+func (i *BlobContainer) getArtefact(blob cpi.BlobAccess) (*artdesc.Artefact, error) {
+	data, err := blob.Get()
+	if err != nil {
+		return nil, err
+	}
+	return artdesc.Decode(data)
+}
+
+func (i *BlobContainer) GetArtefact(digest digest.Digest) (*Artefact, error) {
+	blob, err := i.GetBlob(digest)
+	if err != nil {
+		return nil, err
+	}
+
+	d, err := i.getArtefact(blob)
+	if err != nil {
+		return nil, err
+	}
+	return NewArtefact(i.set, d), nil
 }
 
 func (i *BlobContainer) GetIndex(digest digest.Digest) (core.IndexAccess, error) {
@@ -51,18 +70,11 @@ func (i *BlobContainer) GetIndex(digest digest.Digest) (core.IndexAccess, error)
 		return nil, errors.ErrInvalid(cpi.KIND_MEDIATYPE, blob.MimeType())
 	}
 
-	data, err := blob.Get()
-	if err != nil {
-		return nil, err
-	}
-	d, err := artdesc.Decode(data)
-	if err != nil {
-		return nil, err
-	}
+	d, err := i.getArtefact(blob)
 	if !d.IsIndex() {
 		return nil, errors.Newf("blob is no index")
 	}
-	return NewIndex(i.artefact, d.Index()), nil
+	return NewIndex(i.set, d.Index()), nil
 }
 
 func (i *BlobContainer) GetManifest(digest digest.Digest) (core.ManifestAccess, error) {
@@ -74,16 +86,12 @@ func (i *BlobContainer) GetManifest(digest digest.Digest) (core.ManifestAccess, 
 	if blob.MimeType() != ociv1.MediaTypeImageManifest {
 		return nil, errors.ErrInvalid(cpi.KIND_MEDIATYPE, blob.MimeType())
 	}
-	data, err := blob.Get()
-	if err != nil {
-		return nil, err
-	}
-	d, err := artdesc.Decode(data)
+	d, err := i.getArtefact(blob)
 	if err != nil {
 		return nil, err
 	}
 	if !d.IsManifest() {
 		return nil, errors.Newf("blob is no manifest")
 	}
-	return &Manifest{i.artefact, d.Manifest()}, nil
+	return &Manifest{i.set, d.Manifest()}, nil
 }

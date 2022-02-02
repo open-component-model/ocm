@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package artefact_test
+package artefactset_test
 
 import (
 	"testing"

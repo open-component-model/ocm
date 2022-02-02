@@ -29,7 +29,7 @@ var (
 
 const (
 	// The artefact descriptor name for artefact format
-	ArtefactDescriptorFileName = "artefact-descriptor.json"
+	ArtefactSetDescriptorFileName = "artefact-descriptor.json"
 	// BlobsDirectoryName is the name of the directory holding the artefact archives
 	BlobsDirectoryName = "blobs"
 	// ArtefactIndexFileName is the artefact index descriptor name for CommanTransportFormat

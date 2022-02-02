@@ -38,13 +38,13 @@ func Digest(access accessio.DataAccess) (digest.Digest, error) {
 
 // DigestToFileName returns teh file name for a digest
 func DigestToFileName(digest digest.Digest) string {
-	return strings.Replace(digest.String(), ":", "+", 1)
+	return strings.Replace(digest.String(), ":", ".", 1)
 }
 
 // PathToDigest retuurns the digest encoded into a file name
 func PathToDigest(path string) digest.Digest {
 	n := filepath.Base(path)
-	idx := strings.LastIndex(n, "+")
+	idx := strings.LastIndex(n, ".")
 	if idx < 0 {
 		return ""
 	}

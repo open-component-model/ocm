@@ -23,36 +23,47 @@ import (
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
-type Manifest ociv1.Manifest
+type Index ociv1.Index
 
 var _ BlobDescriptorSource = (*Manifest)(nil)
 
-func NewManifest() *Manifest {
-	return &Manifest{
+func NewIndex() *Index {
+	return &Index{
 		Versioned:   specs.Versioned{SchemeVersion},
-		MediaType:   MediaTypeImageManifest,
-		Layers:      nil,
+		MediaType:   MediaTypeImageIndex,
+		Manifests:   nil,
 		Annotations: nil,
 	}
 }
 
-func (m *Manifest) GetBlobDescriptor(digest digest.Digest) *Descriptor {
-	if m.Config.Digest == digest {
-		d := m.Config
-		return &d
-	}
-	for _, l := range m.Layers {
-		if l.Digest == digest {
-			return &l
+func (i *Index) GetBlobDescriptor(digest digest.Digest) *Descriptor {
+	for _, m := range i.Manifests {
+		if m.Digest == digest {
+			return &m
 		}
 	}
 	return nil
 }
 
-func (m *Manifest) ToBlobAccess() (accessio.BlobAccess, error) {
-	data, err := json.Marshal(m)
+func (i *Index) ToBlobAccess() (accessio.BlobAccess, error) {
+	data, err := json.Marshal(i)
 	if err != nil {
 		return nil, err
 	}
-	return accessio.BlobAccessForData(MediaTypeImageManifest, data), nil
+	return accessio.BlobAccessForData(MediaTypeImageIndex, data), nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func DecodeIndex(data []byte) (*Index, error) {
+	var d Index
+
+	if err := json.Unmarshal(data, &d); err != nil {
+		return nil, err
+	}
+	return &d, nil
+}
+
+func EncodeIndex(d *Index) ([]byte, error) {
+	return json.Marshal(d)
 }

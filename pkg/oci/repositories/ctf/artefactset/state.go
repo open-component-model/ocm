@@ -12,14 +12,38 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package artefact
+package artefactset
 
 import (
-	"github.com/gardener/ocm/pkg/common"
-	"github.com/opencontainers/go-digest"
+	"reflect"
+
+	"github.com/gardener/ocm/pkg/common/accessobj"
+	"github.com/gardener/ocm/pkg/oci/artdesc"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
-// DigestPath returns the path to the blob for a given name.
-func DigestPath(digest digest.Digest) string {
-	return accessObjectInfo.SubPath(common.DigestToFileName(digest))
+type StateHandler struct {
+	fs vfs.FileSystem
+}
+
+var _ accessobj.StateHandler = &StateHandler{}
+
+func NewStateHandler(fs vfs.FileSystem) accessobj.StateHandler {
+	return &StateHandler{fs}
+}
+
+func (i StateHandler) Initial() interface{} {
+	return artdesc.NewIndex()
+}
+
+func (i StateHandler) Encode(d interface{}) ([]byte, error) {
+	return artdesc.EncodeIndex(d.(*artdesc.Index))
+}
+
+func (i StateHandler) Decode(data []byte) (interface{}, error) {
+	return artdesc.DecodeIndex(data)
+}
+
+func (i StateHandler) Equivalent(a, b interface{}) bool {
+	return reflect.DeepEqual(a, b)
 }

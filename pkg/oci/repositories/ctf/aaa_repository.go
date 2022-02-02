@@ -80,7 +80,7 @@ func (r *Repository) Close() error {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// methods for Access
+// methods for BlobContainer
 
 func (r *Repository) getIndex() *index.RepositoryIndex {
 	return r.base.GetState().GetState().(*index.RepositoryIndex)

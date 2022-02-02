@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package artefact
+package artefactset
 
 import (
 	"github.com/gardener/ocm/pkg/common/accessobj"
@@ -20,18 +20,18 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
-const ArtefactDescriptorFileName = format.ArtefactDescriptorFileName
+const ArtefactSetDescriptorFileName = format.ArtefactSetDescriptorFileName
 const BlobsDirectoryName = format.BlobsDirectoryName
 
 var accessObjectInfo = &accessobj.AccessObjectInfo{
-	DescriptorFileName:       ArtefactDescriptorFileName,
-	ObjectTypeName:           "artefact",
+	DescriptorFileName:       ArtefactSetDescriptorFileName,
+	ObjectTypeName:           "artefactset",
 	ElementDirectoryName:     BlobsDirectoryName,
 	ElementTypeName:          "blob",
 	DescriptorHandlerFactory: NewStateHandler,
 }
 
-type Object = Artefact
+type Object = ArtefactSet
 
 type FormatHandler struct {
 	accessobj.FormatHandler

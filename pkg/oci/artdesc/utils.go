@@ -15,27 +15,16 @@
 package artdesc
 
 import (
-	"github.com/opencontainers/go-digest"
+	"github.com/gardener/ocm/pkg/common/accessio"
 )
 
-func GetBlobDescriptorFromManifest(digest digest.Digest, manifest *Manifest) *Descriptor {
-	if manifest.Config.Digest == digest {
-		d := manifest.Config
-		return &d
+func DefaultBlobDescriptor(blob accessio.BlobAccess) *Descriptor {
+	return &Descriptor{
+		MediaType:   blob.MimeType(),
+		Digest:      blob.Digest(),
+		Size:        blob.Size(),
+		URLs:        nil,
+		Annotations: nil,
+		Platform:    nil,
 	}
-	for _, l := range manifest.Layers {
-		if l.Digest == digest {
-			return &l
-		}
-	}
-	return nil
-}
-
-func GetBlobDescriptorFromIndex(digest digest.Digest, index *Index) *Descriptor {
-	for _, m := range index.Manifests {
-		if m.Digest == digest {
-			return &m
-		}
-	}
-	return nil
 }

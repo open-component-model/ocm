@@ -75,6 +75,10 @@ func NewAccessObject(info *AccessObjectInfo, acc AccessMode, fs vfs.FileSystem, 
 	return obj, nil
 }
 
+func (a *AccessObject) GetInfo() *AccessObjectInfo {
+	return a.info
+}
+
 func (a *AccessObject) GetFileSystem() vfs.FileSystem {
 	return a.fs
 }

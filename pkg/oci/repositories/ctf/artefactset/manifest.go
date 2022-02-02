@@ -12,53 +12,47 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package artefact
+package artefactset
 
 import (
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
-	"github.com/gardener/ocm/pkg/oci/core"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/opencontainers/go-digest"
 )
 
-type Index struct {
-	artefact *Artefact
-	index    *artdesc.Index
-	BlobContainer
+type Manifest struct {
+	set      *ArtefactSet
+	manifest *artdesc.Manifest
 }
 
-var _ cpi.IndexAccess = &Index{}
+var _ cpi.ManifestAccess = (*Manifest)(nil)
 
-func NewIndex(artefact *Artefact, index *artdesc.Index) core.IndexAccess {
-	i := &Index{
-		artefact: artefact,
-		index:    index,
-	}
-	i.BlobSource = i
-	return i
+func (m *Manifest) GetDescriptor() *artdesc.Manifest {
+	return m.manifest
 }
 
-func (i *Index) GetDescriptor() *artdesc.Index {
-	return i.index
-}
-
-func (i *Index) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
-	d:=  artdesc.GetBlobDescriptorFromIndex(digest, i.index)
-	if d!=nil {
-		return d;
-	}
-	return i.artefact.GetBlobDescriptor(digest)
-}
-
-func (i *Index) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
-	d := i.GetBlobDescriptor(digest)
+func (m *Manifest) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
+	d := m.manifest.GetBlobDescriptor(digest)
 	if d != nil {
-		data, err := i.artefact.GetBlobData(digest)
+		return d
+	}
+	return m.set.GetBlobDescriptor(digest)
+}
+
+func (m *Manifest) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
+	d := m.GetBlobDescriptor(digest)
+
+	if d != nil {
+		data, err := m.set.GetBlobData(digest)
 		if err != nil {
 			return nil, err
 		}
 		return accessio.BlobAccessForDataAccess(d.Digest, d.Size, d.MediaType, data), nil
 	}
 	return nil, cpi.ErrBlobNotFound(digest)
+}
+
+func (m *Manifest) AddBlob(blob cpi.BlobAccess) error {
+	return m.set.AddBlob(blob)
 }
