@@ -36,7 +36,8 @@ const MimeTypeOctetStream = "application/octet-stream"
 func defaultManifestFill(a *artefactset.ArtefactSet) {
 	art := artefactset.NewArtefact(a, nil)
 	Expect(art.AddLayer(accessio.BlobAccessForData(MimeTypeOctetStream, []byte("testdata")), nil)).To(Equal(0))
-	desc := art.GetDescriptor().Manifest()
+	desc, err := art.Manifest()
+	Expect(err).To(Succeed())
 	Expect(desc).NotTo(BeNil())
 
 	Expect(desc.Layers[0].Digest).To(Equal(digest.FromString("testdata")))

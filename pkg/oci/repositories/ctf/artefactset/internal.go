@@ -21,38 +21,16 @@ import (
 	"github.com/opencontainers/go-digest"
 )
 
-type Manifest struct {
-	set      *ArtefactSet
-	manifest *artdesc.Manifest
-}
+// ArtefactSetContainer is the interface used by subsequent access objects
+// to access the base implementation
+type ArtefactSetContainer interface {
+	IsReadOnly() bool
+	IsClosed() bool
 
-var _ cpi.ManifestAccess = (*Manifest)(nil)
+	GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor
+	GetBlobData(digest digest.Digest) (cpi.DataAccess, error)
+	AddBlob(blob cpi.BlobAccess) error
 
-func (m *Manifest) GetDescriptor() *artdesc.Manifest {
-	return m.manifest
-}
-
-func (m *Manifest) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
-	d := m.manifest.GetBlobDescriptor(digest)
-	if d != nil {
-		return d
-	}
-	return m.set.GetBlobDescriptor(digest)
-}
-
-func (m *Manifest) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
-	d := m.GetBlobDescriptor(digest)
-
-	if d != nil {
-		data, err := m.set.GetBlobData(digest)
-		if err != nil {
-			return nil, err
-		}
-		return accessio.BlobAccessForDataAccess(d.Digest, d.Size, d.MediaType, data), nil
-	}
-	return nil, cpi.ErrBlobNotFound(digest)
-}
-
-func (m *Manifest) AddBlob(blob cpi.BlobAccess) error {
-	return m.set.AddBlob(blob)
+	GetArtefact(digest digest.Digest) (*Artefact, error)
+	AddArtefact(artefact *Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error)
 }

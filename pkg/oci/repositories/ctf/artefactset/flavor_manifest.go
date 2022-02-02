@@ -15,50 +15,44 @@
 package artefactset
 
 import (
-	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
-	"github.com/gardener/ocm/pkg/oci/core"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/opencontainers/go-digest"
 )
 
-type Index struct {
-	set   *ArtefactSet
-	index *artdesc.Index
-	*BlobContainer
+type Manifest struct {
+	access   ArtefactSetContainer
+	manifest *artdesc.Manifest
+	handler  *BlobHandler // not inherited because only blob access should be offered
 }
 
-var _ cpi.IndexAccess = (*Index)(nil)
+var _ cpi.ManifestAccess = (*Manifest)(nil)
 
-func NewIndex(artefact *ArtefactSet, index *artdesc.Index) core.IndexAccess {
-	i := &Index{
-		set:   artefact,
-		index: index,
+func NewManifest(access ArtefactSetContainer, manifest *artdesc.Manifest) *Manifest {
+	m := &Manifest{
+		access:   access,
+		manifest: manifest,
 	}
-	i.BlobContainer = NewBlobContainer(artefact, i)
-	return i
+	m.handler = NewBlobHandler(access, m)
+	return m
 }
 
-func (i *Index) GetDescriptor() *artdesc.Index {
-	return i.index
+func (m *Manifest) GetDescriptor() *artdesc.Manifest {
+	return m.manifest
 }
 
-func (i *Index) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
-	d := i.index.GetBlobDescriptor(digest)
+func (m *Manifest) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
+	d := m.manifest.GetBlobDescriptor(digest)
 	if d != nil {
 		return d
 	}
-	return i.set.GetBlobDescriptor(digest)
+	return m.access.GetBlobDescriptor(digest)
 }
 
-func (i *Index) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
-	d := i.GetBlobDescriptor(digest)
-	if d != nil {
-		data, err := i.set.GetBlobData(digest)
-		if err != nil {
-			return nil, err
-		}
-		return accessio.BlobAccessForDataAccess(d.Digest, d.Size, d.MediaType, data), nil
-	}
-	return nil, cpi.ErrBlobNotFound(digest)
+func (i *Manifest) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
+	return i.handler.GetBlob(digest)
+}
+
+func (m *Manifest) AddBlob(blob cpi.BlobAccess) error {
+	return m.access.AddBlob(blob)
 }

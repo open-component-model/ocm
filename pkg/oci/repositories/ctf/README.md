@@ -85,7 +85,7 @@ In the archive form the artefact set descriptor SHOULD be the first file.
 
 The file structure is a directory containing
 
-- **`artefact-set-descriptor.json`** *[oci artefact manifest](https://github.com/opencontainers/image-spec/blob/main/image-index.md)*
+- **`artefact-set-descriptor.json`** *[oci image index](https://github.com/opencontainers/image-spec/blob/main/image-index.md)*
 
   This JSON file describes the contained artefact (version). It MUST be an index manifest.
   It MUST describe all *[artefacts](https://github.com/opencontainers/image-spec/blob/main/manifest.md)*
