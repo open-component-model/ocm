@@ -17,6 +17,7 @@ package accessobj
 import (
 	"fmt"
 
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
@@ -40,7 +41,7 @@ func (m AccessMode) IsCreate() bool {
 	return (m & ACC_CREATE) != 0
 }
 
-var ErrReadOnly = errors.ErrReadOnly()
+var ErrReadOnly = accessio.ErrReadOnly
 
 // StateHandler is responsible to handle the technical representation of state
 // carrying object as byte array.

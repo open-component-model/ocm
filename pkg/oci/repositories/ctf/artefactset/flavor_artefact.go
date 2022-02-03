@@ -126,37 +126,33 @@ func (a *Artefact) Manifest() (*artdesc.Manifest, error) {
 ////////////////////////////////////////////////////////////////////////////////
 // from BlobHandler
 
-func (i *Artefact) GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {
-	if !i.IsIndex() {
+func (a *Artefact) GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {
+	if !a.IsIndex() {
 		return nil, ErrNoIndex
 	}
-	return i.handler.GetArtefact(digest)
+	return a.handler.GetArtefact(digest)
 }
 
-func (i *Artefact) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
-	return i.handler.GetBlob(digest)
+func (a *Artefact) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
+	return a.handler.GetBlob(digest)
 }
 
-func (i *Artefact) GetManifest(digest digest.Digest) (cpi.ManifestAccess, error) {
-	if !i.IsIndex() {
+func (a *Artefact) GetManifest(digest digest.Digest) (cpi.ManifestAccess, error) {
+	if !a.IsIndex() {
 		return nil, ErrNoIndex
 	}
-	return i.handler.GetManifest(digest)
+	return a.handler.GetManifest(digest)
 }
 
-func (i *Artefact) GetIndex(digest digest.Digest) (cpi.IndexAccess, error) {
-	if !i.IsIndex() {
+func (a *Artefact) GetIndex(digest digest.Digest) (cpi.IndexAccess, error) {
+	if !a.IsIndex() {
 		return nil, ErrNoIndex
 	}
-	return i.handler.GetIndex(digest)
+	return a.handler.GetIndex(digest)
 }
 
-func (i *Artefact) NewManifest(manifest ...*artdesc.Manifest) cpi.ManifestAccess {
-	return i.handler.NewManifest(manifest...)
-}
-
-func (i *Artefact) NewIndex(index ...*artdesc.Index) cpi.IndexAccess {
-	return i.handler.NewIndex(index...)
+func (a *Artefact) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
+	return a.handler.NewArtefact(art...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

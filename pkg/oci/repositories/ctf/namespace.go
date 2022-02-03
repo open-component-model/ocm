@@ -96,11 +96,16 @@ func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, platform *artdes
 	return blob, nil
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 func (n *Namespace) GetRepository() cpi.Repository {
 	return n.access.repo
 }
 
 func (n *Namespace) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
+	if n.access.IsReadOnly() {
+		return nil, accessio.ErrReadOnly
+	}
 	return artefactset.NewArtefact(n.access, art...), nil
 }
 
@@ -118,4 +123,8 @@ func (n *Namespace) GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error
 
 func (n *Namespace) AddArtefact(artefact cpi.Artefact) (access accessio.BlobAccess, err error) {
 	return n.access.AddArtefact(artefact, nil)
+}
+
+func (n *Namespace) AddBlob(blob cpi.BlobAccess) error {
+	return n.access.AddBlob(blob)
 }

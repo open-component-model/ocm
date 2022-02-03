@@ -16,7 +16,6 @@ package ctf
 
 import (
 	"github.com/gardener/ocm/pkg/common/accessobj"
-	"github.com/gardener/ocm/pkg/oci/core"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/index"
@@ -105,6 +104,6 @@ func (r *Repository) LookupArtefact(name string, tag string) (cpi.ArtefactAccess
 	panic("implement me")
 }
 
-func (r *Repository) LookupNamespace(name string) (core.NamespaceAccess, error) {
-	panic("implement me")
+func (r *Repository) LookupNamespace(name string) (cpi.NamespaceAccess, error) {
+	return NewNamespace(r, name), nil
 }

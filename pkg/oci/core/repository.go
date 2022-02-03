@@ -39,8 +39,11 @@ type NamespaceAccess interface {
 
 	GetArtefactByTag(tag string) (ArtefactAccess, error)
 	GetArtefact(digest.Digest) (ArtefactAccess, error)
-	NewArtefact(...*artdesc.Artefact) (ArtefactAccess, error)
+
+	AddBlob(BlobAccess) error
 	AddArtefact(Artefact) (BlobAccess, error)
+
+	NewArtefact(...*artdesc.Artefact) (ArtefactAccess, error)
 }
 
 type Artefact interface {

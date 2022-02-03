@@ -35,14 +35,14 @@ func NewBlobHandler(set ArtefactSetContainer, src BlobDescriptorSource) *BlobHan
 	return &BlobHandler{set, src}
 }
 
-func (i *BlobHandler) AddBlob(blob cpi.BlobAccess) error {
-	return i.access.AddBlob(blob)
+func (h *BlobHandler) AddBlob(blob cpi.BlobAccess) error {
+	return h.access.AddBlob(blob)
 }
 
-func (i *BlobHandler) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
-	d := i.GetBlobDescriptor(digest)
+func (h *BlobHandler) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
+	d := h.GetBlobDescriptor(digest)
 	if d != nil {
-		data, err := i.access.GetBlobData(digest)
+		data, err := h.access.GetBlobData(digest)
 		if err != nil {
 			return nil, err
 		}
@@ -51,36 +51,35 @@ func (i *BlobHandler) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
 	return nil, cpi.ErrBlobNotFound(digest)
 }
 
-func (i *BlobHandler) GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {
-	return i.access.GetArtefact(digest)
+func (h *BlobHandler) GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {
+	return h.access.GetArtefact(digest)
 }
 
-func (i *BlobHandler) GetIndex(digest digest.Digest) (cpi.IndexAccess, error) {
-	a, err := i.GetArtefact(digest)
+func (h *BlobHandler) GetIndex(digest digest.Digest) (cpi.IndexAccess, error) {
+	a, err := h.GetArtefact(digest)
 	if err != nil {
 		return nil, err
 	}
 	if idx, err := a.Index(); err == nil {
-		return NewIndex(i.access, idx), nil
+		return NewIndex(h.access, idx), nil
 	}
 	return nil, errors.New("no index")
 }
 
-func (i *BlobHandler) GetManifest(digest digest.Digest) (cpi.ManifestAccess, error) {
-	a, err := i.GetArtefact(digest)
+func (h *BlobHandler) GetManifest(digest digest.Digest) (cpi.ManifestAccess, error) {
+	a, err := h.GetArtefact(digest)
 	if err != nil {
 		return nil, err
 	}
 	if m, err := a.Manifest(); err == nil {
-		return NewManifest(i.access, m), nil
+		return NewManifest(h.access, m), nil
 	}
 	return nil, errors.New("no manifest")
 }
 
-func (i *BlobHandler) NewManifest(def ...*artdesc.Manifest) cpi.ManifestAccess {
-	return NewManifest(i.access, def...)
-}
-
-func (i *BlobHandler) NewIndex(def ...*artdesc.Index) cpi.IndexAccess {
-	return NewIndex(i.access, def...)
+func (h *BlobHandler) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
+	if h.access.IsReadOnly() {
+		return nil, accessio.ErrReadOnly
+	}
+	return NewArtefact(h.access, art...), nil
 }
