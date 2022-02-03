@@ -23,83 +23,69 @@ import (
 type Repository interface {
 	ExistsArtefact(name string, version string) (bool, error)
 	LookupArtefact(name string, version string) (ArtefactAccess, error)
-	ComposeArtefact(name string, version string) (ArtefactComposer, error)
-	WriteArtefact(ArtefactAccess) (ArtefactAccess, error)
+	LookupNamespace(name string) (NamespaceAccess, error)
+	Close() error
+}
+
+type RepositorySource interface {
+	GetRepository() Repository
 }
 
 type BlobAccess = accessio.BlobAccess
 type DataAccess = accessio.DataAccess
 
+type NamespaceAccess interface {
+	RepositorySource
+
+	GetArtefactByTag(tag string) (ArtefactAccess, error)
+	GetArtefact(digest.Digest) (ArtefactAccess, error)
+	NewArtefact(...*artdesc.Artefact) (ArtefactAccess, error)
+	AddArtefact(Artefact) (BlobAccess, error)
+}
+
+type Artefact interface {
+	IsManifest() bool
+	IsIndex() bool
+
+	Artefact() *artdesc.Artefact
+	Manifest() (*artdesc.Manifest, error)
+	Index() (*artdesc.Index, error)
+}
+
 type ArtefactAccess interface {
-	GetRepository() Repository
+	Artefact
 
 	GetDescriptor() *artdesc.Artefact
 	GetManifest(digest digest.Digest) (ManifestAccess, error)
 	GetBlob(digest digest.Digest) (BlobAccess, error)
+
+	AddBlob(BlobAccess) error
+	AddArtefact(Artefact, *artdesc.Platform) (BlobAccess, error)
+	AddLayer(BlobAccess, *artdesc.Descriptor) (int, error)
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// technical abstraction
-
 type ManifestAccess interface {
+	Artefact
+
 	GetDescriptor() *artdesc.Manifest
 	GetBlobDescriptor(digest digest.Digest) *artdesc.Descriptor
 	GetBlob(digest digest.Digest) (BlobAccess, error)
+
+	AddBlob(BlobAccess) error
+	AddLayer(BlobAccess, *artdesc.Descriptor) (int, error)
 }
 
 type IndexAccess interface {
+	Artefact
+
 	GetDescriptor() *artdesc.Index
 	GetBlobDescriptor(digest digest.Digest) *artdesc.Descriptor
 	GetBlob(digest digest.Digest) (BlobAccess, error)
+
+	GetArtefact(digest digest.Digest) (ArtefactAccess, error)
 	GetIndex(digest digest.Digest) (IndexAccess, error)
 	GetManifest(digest digest.Digest) (ManifestAccess, error)
-}
 
-type ArtefactComposer interface {
-	ArtefactAccess
-
-	AddManifest(*artdesc.Artefact, *artdesc.Platform) (BlobAccess, error)
-	AddLayer(blob BlobAccess, d *artdesc.Descriptor) (int, error)
 	AddBlob(BlobAccess) error
-	Update() error
-	Close() error
+	AddArtefact(Artefact, *artdesc.Platform) (BlobAccess, error)
 }
-
-////////////////////////////////////////////////////////////////////////////////
-// logical abstraction
-
-/*
-type ManifestAccess interface {
-	GetManifestMeta() *ManifestMeta  // for index members
-	GetManifest() artdesc.Manifest
-	GetBlob(digest string) BlobAccess
-}
-
-type ArtefactComposer interface {
-	ArtefactAccess
-
-	AsManifest(bool) ManifestComposer
-	AsIndex(keepManifest bool) ManifestComposer
-}
-
-type LayerMeta struct {
-}
-
-type ManifestMeta struct {
-}
-
-type IndexComposer interface {
-	GetIndex() artdesc.Index
-	GetBlob(digest string) BlobAccess
-	GetManifest(digest string) artdesc.Manifest
-	ComposeManifest(*ManifestMeta) (ManifestComposer, error)
-	AddManifest(ArtefactAccess) error
-	Update() error
-}
-
-type ManifestComposer interface {
-	ManifestAccess
-	AddLayer(*LayerMeta,BlobAccess) error
-	Update() error
-}
-*/

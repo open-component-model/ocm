@@ -16,6 +16,7 @@ package genericocireg
 
 import (
 	"github.com/gardener/ocm/pkg/oci"
+	"github.com/gardener/ocm/pkg/oci/core"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 )
@@ -44,11 +45,11 @@ func (r Repository) LookupArtefact(name string, version string) (oci.ArtefactAcc
 	panic("implement me")
 }
 
-func (r Repository) ComposeArtefact(name string, version string) (oci.ArtefactComposer, error) {
+func (r Repository) LookupNamespace(name string) (core.NamespaceAccess, error) {
 	panic("implement me")
 }
 
-func (r Repository) WriteArtefact(access oci.ArtefactAccess) (oci.ArtefactAccess, error) {
+func (r Repository) Close() error {
 	panic("implement me")
 }
 

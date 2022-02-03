@@ -42,10 +42,10 @@ func (r Repository) LookupArtefact(name string, version string) (core.ArtefactAc
 	panic("implement me")
 }
 
-func (r Repository) ComposeArtefact(name string, version string) (core.ArtefactComposer, error) {
+func (r Repository) LookupNamespace(name string) (core.NamespaceAccess, error) {
 	panic("implement me")
 }
 
-func (r Repository) WriteArtefact(access core.ArtefactAccess) (core.ArtefactAccess, error) {
+func (r Repository) Close() error {
 	panic("implement me")
 }

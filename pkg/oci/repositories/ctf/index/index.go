@@ -17,17 +17,18 @@ package index
 import (
 	"sort"
 
+	"github.com/opencontainers/go-digest"
 	"github.com/opencontainers/image-spec/specs-go"
 )
 
 type RepositoryIndex struct {
-	byDigest     map[string][]*ArtefactMeta
+	byDigest     map[digest.Digest][]*ArtefactMeta
 	byRepository map[string]map[string]*ArtefactMeta
 }
 
 func NewRepositoryIndex() *RepositoryIndex {
 	return &RepositoryIndex{
-		byDigest:     map[string][]*ArtefactMeta{},
+		byDigest:     map[digest.Digest][]*ArtefactMeta{},
 		byRepository: map[string]map[string]*ArtefactMeta{},
 	}
 }
@@ -53,7 +54,7 @@ func (r *RepositoryIndex) AddArtefact(n *ArtefactMeta) {
 		repos = map[string]*ArtefactMeta{}
 		r.byRepository[m.Repository] = repos
 	}
-	repos[m.Digest] = &m
+	repos[m.Digest.String()] = &m
 	repos[m.Tag] = &m
 }
 
@@ -66,7 +67,7 @@ func (r *RepositoryIndex) HasArtefact(repo, tag string) bool {
 	return m != nil
 }
 
-func (r *RepositoryIndex) GetArtefacts(digest string) []*ArtefactMeta {
+func (r *RepositoryIndex) GetArtefacts(digest digest.Digest) []*ArtefactMeta {
 	return r.byDigest[digest]
 }
 

@@ -17,6 +17,7 @@ package index
 import (
 	"encoding/json"
 
+	"github.com/opencontainers/go-digest"
 	"github.com/opencontainers/image-spec/specs-go"
 )
 
@@ -28,9 +29,9 @@ type ArtefactIndex struct {
 }
 
 type ArtefactMeta struct {
-	Repository string `json:"repository"`
-	Tag        string `json:"tag,omitempty"`
-	Digest     string `json:"digest,omitempty"`
+	Repository string        `json:"repository"`
+	Tag        string        `json:"tag,omitempty"`
+	Digest     digest.Digest `json:"digest,omitempty"`
 }
 
 func Decode(data []byte) (*ArtefactIndex, error) {

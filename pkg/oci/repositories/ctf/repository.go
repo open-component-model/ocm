@@ -18,6 +18,7 @@ import (
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/oci/core"
 	"github.com/gardener/ocm/pkg/oci/cpi"
+	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/index"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
@@ -35,7 +36,7 @@ import (
 */
 
 type Repository struct {
-	base *accessobj.AccessObject
+	base *artefactset.FileSystemBlobAccess
 	ctx  cpi.Context
 }
 
@@ -51,9 +52,11 @@ func _Wrap(ctx cpi.Context, obj *accessobj.AccessObject, err error) (*Repository
 	if err != nil {
 		return nil, err
 	}
-	return &Repository{
-		base: obj,
-	}, nil
+	r := &Repository{
+		base: artefactset.NewFileSystemBlobAccess(obj),
+		ctx:  ctx,
+	}
+	return r, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -79,11 +82,11 @@ func (r *Repository) Close() error {
 	return r.base.Close()
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// methods for BlobHandler
-
-func (r *Repository) getIndex() *index.RepositoryIndex {
-	return r.base.GetState().GetState().(*index.RepositoryIndex)
+func (a *Repository) getIndex() *index.RepositoryIndex {
+	if a.IsReadOnly() {
+		return a.base.GetState().GetOriginalState().(*index.RepositoryIndex)
+	}
+	return a.base.GetState().GetState().(*index.RepositoryIndex)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -93,7 +96,7 @@ func (r *Repository) ExistsArtefact(name string, tag string) (bool, error) {
 	return r.getIndex().HasArtefact(name, tag), nil
 }
 
-func (r *Repository) LookupArtefact(name string, tag string) (core.ArtefactAccess, error) {
+func (r *Repository) LookupArtefact(name string, tag string) (cpi.ArtefactAccess, error) {
 	a := r.getIndex().GetArtefact(name, tag)
 	if a == nil {
 		return nil, cpi.ErrUnknownArtefact(name, tag)
@@ -102,10 +105,6 @@ func (r *Repository) LookupArtefact(name string, tag string) (core.ArtefactAcces
 	panic("implement me")
 }
 
-func (r *Repository) ComposeArtefact(name string, tag string) (core.ArtefactComposer, error) {
-	panic("implement me")
-}
-
-func (r *Repository) WriteArtefact(access core.ArtefactAccess) (core.ArtefactAccess, error) {
+func (r *Repository) LookupNamespace(name string) (core.NamespaceAccess, error) {
 	panic("implement me")
 }

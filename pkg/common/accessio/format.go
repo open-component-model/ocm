@@ -16,6 +16,10 @@ package accessio
 
 type FileFormat string
 
+func (f FileFormat) String() string {
+	return string(f)
+}
+
 const (
 	FormatTar       FileFormat = "tar"
 	FormatTGZ       FileFormat = "tgz"

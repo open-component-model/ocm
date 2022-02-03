@@ -22,6 +22,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
+const KIND_FILEFORMAT = "file format"
+
 type FormatHandler interface {
 	Option
 

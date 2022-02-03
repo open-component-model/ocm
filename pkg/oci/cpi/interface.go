@@ -28,17 +28,15 @@ type RepositoryType = core.RepositoryType
 type RepositorySpec = core.RepositorySpec
 type GenericRepositorySpec = core.GenericRepositorySpec
 type ArtefactAccess = core.ArtefactAccess
-type ArtefactComposer = core.ArtefactComposer
+type Artefact = core.Artefact
+type NamespaceAccess = core.NamespaceAccess
 type ManifestAccess = core.ManifestAccess
 type IndexAccess = core.IndexAccess
 type BlobAccess = core.BlobAccess
 type DataAccess = core.DataAccess
+type RepositorySource = core.RepositorySource
 
 type Descriptor = ociv1.Descriptor
-
-type RepositorySource interface {
-	GetRepository() Repository
-}
 
 var DefaultContext = core.DefaultContext
 

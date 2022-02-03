@@ -15,7 +15,11 @@
 package artefactset
 
 import (
+	"sync"
+
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
+	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/format"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
@@ -38,10 +42,59 @@ type FormatHandler struct {
 }
 
 var (
-	FormatDirectory = FormatHandler{accessobj.FormatDirectory}
-	FormatTAR       = FormatHandler{accessobj.FormatTAR}
-	FormatTGZ       = FormatHandler{accessobj.FormatTGZ}
+	FormatDirectory = RegisterFormat(accessobj.FormatDirectory)
+	FormatTAR       = RegisterFormat(accessobj.FormatTAR)
+	FormatTGZ       = RegisterFormat(accessobj.FormatTGZ)
 )
+
+////////////////////////////////////////////////////////////////////////////////
+
+var fileFormats = map[accessio.FileFormat]FormatHandler{}
+var lock sync.RWMutex
+
+func RegisterFormat(f accessobj.FormatHandler) FormatHandler {
+	lock.Lock()
+	defer lock.Unlock()
+	h := FormatHandler{f}
+	fileFormats[f.Format()] = h
+	return h
+}
+
+func GetFormat(name accessio.FileFormat) FormatHandler {
+	lock.RLock()
+	defer lock.RUnlock()
+	return fileFormats[name]
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func Open(acc accessobj.AccessMode, path string, opts ...accessobj.Option) (*Object, error) {
+	o := accessobj.AccessOptions(opts...)
+	h, ok := fileFormats[*o.FileFormat]
+	if !ok {
+		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.FileFormat.String())
+	}
+
+	ok, err := vfs.Exists(o.PathFileSystem, path)
+	if err != nil {
+		return nil, err
+	}
+	if !ok && acc.IsCreate() {
+		return h.Create(path, o, 0700)
+	}
+	return h.Open(acc, path, o)
+}
+
+func Create(acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessobj.Option) (*Object, error) {
+	o := accessobj.AccessOptions(opts...)
+	h, ok := fileFormats[*o.FileFormat]
+	if !ok {
+		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.FileFormat.String())
+	}
+	return h.Create(path, o, mode)
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 func (h FormatHandler) Open(acc accessobj.AccessMode, path string, opts accessobj.Options) (*Object, error) {
 
@@ -54,5 +107,5 @@ func (h *FormatHandler) Create(path string, opts accessobj.Options, mode vfs.Fil
 
 // WriteToFilesystem writes the current object to a filesystem
 func (h *FormatHandler) Write(obj *Object, path string, opts accessobj.Options, mode vfs.FileMode) error {
-	return h.FormatHandler.Write(obj.base, path, opts, mode)
+	return h.FormatHandler.Write(obj.base.Access(), path, opts, mode)
 }

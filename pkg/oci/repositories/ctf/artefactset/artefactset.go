@@ -15,7 +15,6 @@
 package artefactset
 
 import (
-	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
@@ -25,7 +24,7 @@ import (
 )
 
 type ArtefactSet struct {
-	base *accessobj.AccessObject
+	base *FileSystemBlobAccess
 	*ArtefactSetAccess
 }
 
@@ -41,7 +40,7 @@ func _Wrap(obj *accessobj.AccessObject, err error) (*ArtefactSet, error) {
 		return nil, err
 	}
 	s := &ArtefactSet{
-		base: obj,
+		base: NewFileSystemBlobAccess(obj),
 	}
 	s.ArtefactSetAccess = NewArtefactSetAccess(s)
 	return s, nil
@@ -49,14 +48,6 @@ func _Wrap(obj *accessobj.AccessObject, err error) (*ArtefactSet, error) {
 
 ////////////////////////////////////////////////////////////////////////////////
 // forward
-
-func (a *ArtefactSet) GetFileSystem() vfs.FileSystem {
-	return a.base.GetFileSystem()
-}
-
-func (a *ArtefactSet) GetInfo() *accessobj.AccessObjectInfo {
-	return a.base.GetInfo()
-}
 
 func (a *ArtefactSet) IsReadOnly() bool {
 	return a.base.IsReadOnly()
@@ -78,12 +69,7 @@ func (a *ArtefactSet) Close() error {
 	return a.base.Close()
 }
 
-// DigestPath returns the path to the blob for a given name.
-func (a *ArtefactSet) DigestPath(digest digest.Digest) string {
-	return a.base.GetInfo().SubPath(common.DigestToFileName(digest))
-}
-
-func (a *ArtefactSet) GetDescriptor() *artdesc.Index {
+func (a *ArtefactSet) GetIndex() *artdesc.Index {
 	if a.IsReadOnly() {
 		return a.base.GetState().GetOriginalState().(*artdesc.Index)
 	}
@@ -91,99 +77,34 @@ func (a *ArtefactSet) GetDescriptor() *artdesc.Index {
 }
 
 func (a *ArtefactSet) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
-	return a.GetDescriptor().GetBlobDescriptor(digest)
+	return a.GetIndex().GetBlobDescriptor(digest)
 }
 
 func (a *ArtefactSet) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
-	if a.IsClosed() {
-		return nil, accessio.ErrClosed
-	}
-	path := a.DigestPath(digest)
-	if ok, err := vfs.FileExists(a.base.GetFileSystem(), path); ok {
-		return accessio.DataAccessForFile(a.base.GetFileSystem(), path), nil
-	} else {
-		if err != nil {
-			return nil, err
-		}
-		return nil, cpi.ErrBlobNotFound(digest)
-	}
+	return a.base.GetBlobData(digest)
 }
 
 func (a *ArtefactSet) AddBlob(blob cpi.BlobAccess) error {
-	if a.IsClosed() {
-		return accessio.ErrClosed
-	}
-	if a.IsReadOnly() {
-		return accessio.ErrReadOnly
-	}
-	a.lock.Lock()
-	defer a.lock.Unlock()
-
-	return a.addBlob(blob)
+	a.base.Lock()
+	defer a.base.Unlock()
+	return a.base.AddBlob(blob)
 }
 
-func (a *ArtefactSet) addBlob(blob cpi.BlobAccess) error {
-	path := a.DigestPath(blob.Digest())
-	if ok, err := vfs.FileExists(a.base.GetFileSystem(), path); ok {
-		return nil
-	} else {
-		if err != nil {
-			return err
-		}
-	}
-	data, err := blob.Get()
-	if err != nil {
-		return err
-	}
-	err = vfs.WriteFile(a.base.GetFileSystem(), path, data, a.base.GetMode()&0666)
-	if err != nil {
-		return err
-	}
-	a.blobinfos[blob.Digest()] = &artdesc.Descriptor{
-		MediaType: blob.MimeType(),
-		Digest:    blob.Digest(),
-		Size:      blob.Size(),
-	}
-	return nil
+func (i *ArtefactSet) GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {
+	return i.base.GetArtefact(i, digest)
 }
 
-func (i *ArtefactSet) getArtefact(blob cpi.BlobAccess) (*artdesc.Artefact, error) {
-	data, err := blob.Get()
-	if err != nil {
-		return nil, err
-	}
-	return artdesc.Decode(data)
-}
-
-func (i *ArtefactSet) GetArtefact(digest digest.Digest) (*Artefact, error) {
-	blob, err := i.GetBlob(digest)
-	if err != nil {
-		return nil, err
-	}
-
-	d, err := i.getArtefact(blob)
-	if err != nil {
-		return nil, err
-	}
-	return NewArtefact(i.set, d), nil
-}
-
-func (a *ArtefactSet) AddArtefact(artefact *Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
+func (a *ArtefactSet) AddArtefact(artefact cpi.Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
 	if a.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	a.lock.Lock()
-	defer a.lock.Unlock()
-	idx := a.GetDescriptor()
-	blob, err := artefact.ToBlobAccess()
-	if err != nil {
-		return nil, err
-	}
-
-	err = a.addBlob(blob)
+	a.base.Lock()
+	defer a.base.Unlock()
+	idx := a.GetIndex()
+	blob, err := a.base.AddArtefactBlob(artefact)
 	if err != nil {
 		return nil, err
 	}

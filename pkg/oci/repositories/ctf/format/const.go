@@ -34,6 +34,4 @@ const (
 	BlobsDirectoryName = "blobs"
 	// ArtefactIndexFileName is the artefact index descriptor name for CommanTransportFormat
 	ArtefactIndexFileName = "artefact-index.json"
-	// ArtefactsDirectoryName is the name of the directory holding the artefact archives
-	ArtefactsDirectoryName = "artefacts"
 )

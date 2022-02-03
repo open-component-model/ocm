@@ -20,6 +20,7 @@ import (
 	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
+	"github.com/gardener/ocm/pkg/oci/core"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
@@ -58,6 +59,14 @@ type plainComponent struct {
 	ca  *ComponentArchive
 }
 
+func (_ plainComponent) LookupNamespace(name string) (core.NamespaceAccess, error) {
+	panic("implement me")
+}
+
+func (_ plainComponent) Close() error {
+	panic("implement me")
+}
+
 var _ cpi.Repository = &plainComponent{}
 
 func newPlainComponent(ca *ComponentArchive, ctx cpi.Context) cpi.Repository {
@@ -79,10 +88,6 @@ func (_ plainComponent) ExistsArtefact(name string, version string) (bool, error
 }
 
 func (_ plainComponent) LookupArtefact(name string, version string) (oci.ArtefactAccess, error) {
-	return nil, ErrOCIArtefatsNotSupported
-}
-
-func (_ plainComponent) ComposeArtefact(name string, version string) (oci.ArtefactComposer, error) {
 	return nil, ErrOCIArtefatsNotSupported
 }
 

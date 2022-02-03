@@ -34,7 +34,7 @@ import (
 const MimeTypeOctetStream = "application/octet-stream"
 
 func defaultManifestFill(a *artefactset.ArtefactSet) {
-	art := artefactset.NewArtefact(a, nil)
+	art := artefactset.NewArtefact(a)
 	Expect(art.AddLayer(accessio.BlobAccessForData(MimeTypeOctetStream, []byte("testdata")), nil)).To(Equal(0))
 	desc, err := art.Manifest()
 	Expect(err).To(Succeed())
@@ -140,8 +140,8 @@ var _ = Describe("artefact management", func() {
 
 			a, err = artefactset.FormatDirectory.Open(accessobj.ACC_READONLY, "test", opts)
 			defer a.Close()
-			Expect(len(a.GetDescriptor().Manifests)).To(Equal(1))
-			art, err := a.GetArtefact(a.GetDescriptor().Manifests[0].Digest)
+			Expect(len(a.GetIndex().Manifests)).To(Equal(1))
+			art, err := a.GetArtefact(a.GetIndex().Manifests[0].Digest)
 			Expect(err).To(Succeed())
 			Expect(art.IsManifest()).To(BeTrue())
 			blob, err := art.GetBlob("sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50")

@@ -17,7 +17,7 @@ package artefactset
 import (
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/oci/core"
+	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/opencontainers/go-digest"
 )
@@ -27,7 +27,7 @@ type BlobDescriptorSource interface {
 }
 
 type BlobHandler struct {
-	set ArtefactSetContainer
+	access ArtefactSetContainer
 	BlobDescriptorSource
 }
 
@@ -36,13 +36,13 @@ func NewBlobHandler(set ArtefactSetContainer, src BlobDescriptorSource) *BlobHan
 }
 
 func (i *BlobHandler) AddBlob(blob cpi.BlobAccess) error {
-	return i.set.AddBlob(blob)
+	return i.access.AddBlob(blob)
 }
 
 func (i *BlobHandler) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
 	d := i.GetBlobDescriptor(digest)
 	if d != nil {
-		data, err := i.set.GetBlobData(digest)
+		data, err := i.access.GetBlobData(digest)
 		if err != nil {
 			return nil, err
 		}
@@ -51,28 +51,36 @@ func (i *BlobHandler) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
 	return nil, cpi.ErrBlobNotFound(digest)
 }
 
-func (i *BlobHandler) GetArtefact(digest digest.Digest) (*Artefact, error) {
-	return i.set.GetArtefact(digest)
+func (i *BlobHandler) GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {
+	return i.access.GetArtefact(digest)
 }
 
-func (i *BlobHandler) GetIndex(digest digest.Digest) (core.IndexAccess, error) {
+func (i *BlobHandler) GetIndex(digest digest.Digest) (cpi.IndexAccess, error) {
 	a, err := i.GetArtefact(digest)
 	if err != nil {
 		return nil, err
 	}
 	if idx, err := a.Index(); err == nil {
-		return NewIndex(i.set, idx), nil
+		return NewIndex(i.access, idx), nil
 	}
 	return nil, errors.New("no index")
 }
 
-func (i *BlobHandler) GetManifest(digest digest.Digest) (core.ManifestAccess, error) {
+func (i *BlobHandler) GetManifest(digest digest.Digest) (cpi.ManifestAccess, error) {
 	a, err := i.GetArtefact(digest)
 	if err != nil {
 		return nil, err
 	}
 	if m, err := a.Manifest(); err == nil {
-		return NewManifest(i.set, m), nil
+		return NewManifest(i.access, m), nil
 	}
 	return nil, errors.New("no manifest")
+}
+
+func (i *BlobHandler) NewManifest(def ...*artdesc.Manifest) cpi.ManifestAccess {
+	return NewManifest(i.access, def...)
+}
+
+func (i *BlobHandler) NewIndex(def ...*artdesc.Index) cpi.IndexAccess {
+	return NewIndex(i.access, def...)
 }

@@ -17,7 +17,6 @@ package ctf
 import (
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/credentials"
-	"github.com/gardener/ocm/pkg/errors"
 	cpi "github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/gardener/ocm/pkg/runtime"
 )
@@ -56,5 +55,5 @@ func (a *RepositorySpec) GetType() string {
 	return CommonTransportFormatRepositoryType
 }
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
-	return nil, errors.ErrNotImplemented() // TODO
+	return Open(ctx, accessobj.ACC_CREATE, a.FilePath, a.Options)
 }

@@ -17,10 +17,13 @@ package empty
 import (
 	"github.com/gardener/ocm/pkg/datacontext"
 	"github.com/gardener/ocm/pkg/errors"
+	"github.com/gardener/ocm/pkg/oci/core"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 )
 
 type Repository struct{}
+
+var _ cpi.Repository = &Repository{}
 
 func newRepository(ctx datacontext.Context) interface{} {
 	return &Repository{}
@@ -34,12 +37,10 @@ func (r Repository) LookupArtefact(name string, version string) (cpi.ArtefactAcc
 	return nil, cpi.ErrUnknownArtefact(name, version)
 }
 
-func (r Repository) ComposeArtefact(name string, version string) (cpi.ArtefactComposer, error) {
-	return nil, errors.ErrNotSupported("artefact composition")
-}
-
-func (r Repository) WriteArtefact(access cpi.ArtefactAccess) (cpi.ArtefactAccess, error) {
+func (r Repository) LookupNamespace(name string) (core.NamespaceAccess, error) {
 	return nil, errors.ErrNotSupported("write access")
 }
 
-var _ cpi.Repository = &Repository{}
+func (r Repository) Close() error {
+	return nil
+}

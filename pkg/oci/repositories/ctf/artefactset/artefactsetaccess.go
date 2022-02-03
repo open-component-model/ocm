@@ -53,9 +53,6 @@ func (a *ArtefactSetAccess) IsClosed() bool {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Object functionality
-
-////////////////////////////////////////////////////////////////////////////////
 // methods for BlobHandler
 
 func (a *ArtefactSetAccess) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
@@ -88,13 +85,17 @@ func (a *ArtefactSetAccess) GetBlobDescriptor(digest digest.Digest) *cpi.Descrip
 	return d
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// methods for Composer
-
-func (a *ArtefactSetAccess) AddArtefact(artefact *Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
+func (a *ArtefactSetAccess) AddArtefact(artefact cpi.Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
 	return a.base.AddArtefact(artefact, platform)
 }
 
 func (a *ArtefactSetAccess) AddBlob(blob cpi.BlobAccess) error {
-	return a.base.AddBlob(blob)
+	a.lock.RLock()
+	defer a.lock.RUnlock()
+	err := a.base.AddBlob(blob)
+	if err != nil {
+		return err
+	}
+	a.blobinfos[blob.Digest()] = artdesc.DefaultBlobDescriptor(blob)
+	return nil
 }

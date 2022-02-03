@@ -31,6 +31,6 @@ type ArtefactSetContainer interface {
 	GetBlobData(digest digest.Digest) (cpi.DataAccess, error)
 	AddBlob(blob cpi.BlobAccess) error
 
-	GetArtefact(digest digest.Digest) (*Artefact, error)
-	AddArtefact(artefact *Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error)
+	GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error)
+	AddArtefact(artefact cpi.Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error)
 }
