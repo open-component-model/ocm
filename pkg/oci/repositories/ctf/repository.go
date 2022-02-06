@@ -96,7 +96,7 @@ func (r *Repository) ExistsArtefact(name string, tag string) (bool, error) {
 }
 
 func (r *Repository) LookupArtefact(name string, tag string) (cpi.ArtefactAccess, error) {
-	a := r.getIndex().GetArtefact(name, tag)
+	a := r.getIndex().GetArtefactInfo(name, tag)
 	if a == nil {
 		return nil, cpi.ErrUnknownArtefact(name, tag)
 	}

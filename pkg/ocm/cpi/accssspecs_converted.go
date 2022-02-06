@@ -75,8 +75,8 @@ func NewConvertedAccessSpecType(name string, v AccessSpecVersion) *ConvertedAcce
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func MarshalConvertedAccessSpec(s core.AccessSpec) ([]byte, error) {
-	t := core.GetAccessType(s.GetType())
+func MarshalConvertedAccessSpec(ctx Context, s AccessSpec) ([]byte, error) {
+	t := ctx.AccessMethods().GetAccessType(s.GetType())
 	fmt.Printf("found spec type %s: %T\n", s.GetType(), t)
 	if c, ok := t.(AccessSpecConverter); ok {
 		out, err := c.ConvertFrom(s)

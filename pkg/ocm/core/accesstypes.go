@@ -27,15 +27,21 @@ type AccessType interface {
 	runtime.VersionedTypedObject
 }
 
+type AccessMethodSupport interface {
+	GetContext() Context
+	LocalSupportForAccessSpec(spec AccessSpec) bool
+}
+
 type AccessSpec interface {
 	compdesc.AccessSpec
-	ValidFor(repo Repository) bool
-	AccessMethod(access ComponentAccess) (AccessMethod, error)
+	IsLocal(Context) bool
+	AccessMethod(access ComponentVersionAccess) (AccessMethod, error)
 }
 
 type AccessMethod interface {
 	GetKind() string
-	BlobAccess
+	DataAccess
+	MimeType
 }
 
 type AccessTypeScheme interface {
@@ -114,11 +120,11 @@ type UnknownAccessSpec struct {
 
 var _ runtime.TypedObject = &UnknownAccessSpec{}
 
-func (s *UnknownAccessSpec) AccessMethod(ComponentAccess) (AccessMethod, error) {
+func (s *UnknownAccessSpec) AccessMethod(ComponentVersionAccess) (AccessMethod, error) {
 	return nil, errors.ErrUnknown(errors.KIND_ACCESSMETHOD, s.GetType())
 }
 
-func (_ *UnknownAccessSpec) ValidFor(Repository) bool {
+func (_ *UnknownAccessSpec) IsLocal(Context) bool {
 	return false
 }
 
@@ -138,20 +144,26 @@ func (s *GenericAccessSpec) Evaluate(ctx Context) (AccessSpec, error) {
 	return ctx.AccessMethods().DecodeAccessSpec(raw, runtime.DefaultJSONEncoding)
 }
 
-func (s *GenericAccessSpec) AccessMethod(acc ComponentAccess) (AccessMethod, error) {
+func (s *GenericAccessSpec) AccessMethod(acc ComponentVersionAccess) (AccessMethod, error) {
 	spec, err := s.Evaluate(acc.GetContext())
 	if err != nil {
 		return nil, err
 	}
+	if _, ok := spec.(*GenericAccessSpec); ok {
+		return nil, errors.ErrUnknown(errors.KIND_ACCESSMETHOD, s.GetType())
+	}
 	return spec.AccessMethod(acc)
 }
 
-func (s *GenericAccessSpec) ValidFor(repo Repository) bool {
-	spec, err := s.Evaluate(repo.GetContext())
+func (s *GenericAccessSpec) IsLocal(ctx Context) bool {
+	spec, err := s.Evaluate(ctx)
 	if err != nil {
 		return false
 	}
-	return spec.ValidFor(repo)
+	if _, ok := spec.(*GenericAccessSpec); ok {
+		return false
+	}
+	return spec.IsLocal(ctx)
 }
 
 var _ AccessSpec = &GenericAccessSpec{}

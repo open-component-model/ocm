@@ -12,14 +12,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package ctf
+package comparch
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/index"
+	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
@@ -38,23 +38,11 @@ func (i StateHandler) Initial() interface{} {
 }
 
 func (i StateHandler) Encode(d interface{}) ([]byte, error) {
-	return index.Encode(d.(*index.RepositoryIndex).GetDescriptor())
+	return compdesc.Encode(d.(*compdesc.ComponentDescriptor))
 }
 
 func (i StateHandler) Decode(data []byte) (interface{}, error) {
-	idx, err := index.Decode(data)
-	if err != nil {
-		return nil, fmt.Errorf("unable to parse artefact index read from %s: %w", ArtefactIndexFileName, err)
-	}
-	if idx.SchemaVersion != index.SchemaVersion {
-		return nil, fmt.Errorf("unknown schema version %d for artefact index %s", index.SchemaVersion, ArtefactIndexFileName)
-	}
-
-	artefacts := index.NewRepositoryIndex()
-	for _, a := range idx.Index {
-		artefacts.AddArtefactInfo(&a)
-	}
-	return artefacts, nil
+	return compdesc.Decode(data)
 }
 
 func (i StateHandler) Equivalent(a, b interface{}) bool {

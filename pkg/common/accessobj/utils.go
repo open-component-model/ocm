@@ -15,6 +15,7 @@
 package accessobj
 
 import (
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
@@ -38,4 +39,22 @@ func InternalRepresentationFilesystem(acc AccessMode, fs vfs.FileSystem, dir str
 		}
 	}
 	return tmp, fs, err
+}
+
+func HandleAccessMode(acc AccessMode, path string, opts ...Option) (Options, bool, error) {
+	o := AccessOptions(opts...)
+	ok, err := vfs.Exists(o.PathFileSystem, path)
+	if err != nil {
+		return o, false, err
+	}
+	if !ok {
+		if o.FileFormat == nil {
+			fmt := accessio.FormatDirectory
+			o.FileFormat = &fmt
+		}
+		return o, true, nil
+	}
+
+	o, err = AccessOptions(opts...).DefaultForPath(path)
+	return o, false, err
 }

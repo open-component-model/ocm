@@ -15,7 +15,7 @@ const KIND_COMPONENTVERSION = core.KIND_COMPONENTVERSION
 
 type Context = core.Context
 type Repository = core.Repository
-type ComponentAccess = core.ComponentAccess
+type ComponentAccess = core.ComponentVersionAccess
 type AccessSpec = core.AccessSpec
 type AccessMethod = core.AccessMethod
 type AccessType = core.AccessType

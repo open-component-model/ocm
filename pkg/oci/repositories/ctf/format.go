@@ -69,25 +69,23 @@ func GetFormat(name accessio.FileFormat) FormatHandler {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func Open(ctx cpi.Context, acc accessobj.AccessMode, path string, opts ...accessobj.Option) (*Object, error) {
-	o := accessobj.AccessOptions(opts...)
-
+func Open(ctx cpi.Context, acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessobj.Option) (*Object, error) {
+	o, create, err := accessobj.HandleAccessMode(acc, path, opts...)
+	if err != nil {
+		return nil, err
+	}
 	h, ok := fileFormats[*o.FileFormat]
 	if !ok {
 		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.FileFormat.String())
 	}
-	ok, err := vfs.Exists(o.PathFileSystem, path)
-	if err != nil {
-		return nil, err
-	}
-	if !ok && acc.IsCreate() {
-		return h.Create(ctx, path, o, 0700)
+	if create {
+		return h.Create(ctx, path, o, mode)
 	}
 	return h.Open(ctx, acc, path, o)
 }
 
 func Create(ctx cpi.Context, acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessobj.Option) (*Object, error) {
-	o := accessobj.AccessOptions(opts...)
+	o := accessobj.AccessOptions(opts...).DefaultFormat(accessio.FormatDirectory)
 	h, ok := fileFormats[*o.FileFormat]
 	if !ok {
 		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.FileFormat.String())

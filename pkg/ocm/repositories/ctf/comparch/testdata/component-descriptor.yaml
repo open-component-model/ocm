@@ -62,6 +62,6 @@ component:
       relation: 'local'
       labels: [ ]
       access:
-        type: 'localBlob'
-        path: 'anydigest'
+        type: 'localFilesystemBlob'
+        filename: 'anydigest'
         mediaType: 'application/json'

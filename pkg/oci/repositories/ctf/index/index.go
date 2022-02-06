@@ -16,14 +16,25 @@ package index
 
 import (
 	"sort"
+	"sync"
 
+	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/opencontainers/go-digest"
 	"github.com/opencontainers/image-spec/specs-go"
 )
 
 type RepositoryIndex struct {
+	lock         sync.RWMutex
 	byDigest     map[digest.Digest][]*ArtefactMeta
 	byRepository map[string]map[string]*ArtefactMeta
+}
+
+func NewMeta(repo string, tag string, digest digest.Digest) *ArtefactMeta {
+	return &ArtefactMeta{
+		Repository: repo,
+		Tag:        tag,
+		Digest:     digest,
+	}
 }
 
 func NewRepositoryIndex() *RepositoryIndex {
@@ -33,32 +44,65 @@ func NewRepositoryIndex() *RepositoryIndex {
 	}
 }
 
-func (r *RepositoryIndex) AddArtefact(n *ArtefactMeta) {
-	m := *n
+func (r *RepositoryIndex) AddTagsFor(repo string, digest digest.Digest, tags ...string) error {
+	r.lock.Lock()
+	defer r.lock.Unlock()
 
-	list := r.byDigest[m.Digest]
-	if list == nil {
-		list = []*ArtefactMeta{&m}
-	} else {
-		for _, e := range list {
-			if *e == m {
-				return
-			}
-		}
-		list = append(list, &m)
+	a := r.getArtefactInfo(repo, digest.String())
+	if a == nil {
+		return cpi.ErrUnknownArtefact(repo, digest.String())
 	}
-	r.byDigest[m.Digest] = list
+	for _, tag := range tags {
+		n := *a
+		n.Tag = tag
+		r.addArtefactInfo(&n)
+	}
+	return nil
+}
+
+func (r *RepositoryIndex) AddArtefactInfo(n *ArtefactMeta) {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	r.addArtefactInfo(n)
+}
+
+func (r *RepositoryIndex) addArtefactInfo(n *ArtefactMeta) {
+	m := *n
 
 	repos := r.byRepository[m.Repository]
 	if len(repos) == 0 {
 		repos = map[string]*ArtefactMeta{}
 		r.byRepository[m.Repository] = repos
 	}
+
+	list := r.byDigest[m.Digest]
+	if list == nil {
+		list = []*ArtefactMeta{&m}
+	} else {
+		for _, e := range list {
+			if m.Repository == e.Repository && m.Digest == e.Digest {
+				if e.Tag == "" || e.Tag == m.Tag {
+					e.Tag = m.Tag
+					if e.Tag != "" {
+						repos[m.Tag] = e
+					}
+					return
+				}
+			}
+		}
+		list = append(list, &m)
+	}
+	r.byDigest[m.Digest] = list
+
 	repos[m.Digest.String()] = &m
-	repos[m.Tag] = &m
+	if m.Tag != "" {
+		repos[m.Tag] = &m
+	}
 }
 
 func (r *RepositoryIndex) HasArtefact(repo, tag string) bool {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
 	repos := r.byRepository[repo]
 	if repos == nil {
 		return false
@@ -67,16 +111,24 @@ func (r *RepositoryIndex) HasArtefact(repo, tag string) bool {
 	return m != nil
 }
 
-func (r *RepositoryIndex) GetArtefacts(digest digest.Digest) []*ArtefactMeta {
+func (r *RepositoryIndex) GetArtefactInfos(digest digest.Digest) []*ArtefactMeta {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
 	return r.byDigest[digest]
 }
 
-func (r *RepositoryIndex) GetArtefact(repo, tag string) *ArtefactMeta {
+func (r *RepositoryIndex) GetArtefactInfo(repo, reference string) *ArtefactMeta {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+	return r.getArtefactInfo(repo, reference)
+}
+
+func (r *RepositoryIndex) getArtefactInfo(repo, reference string) *ArtefactMeta {
 	repos := r.byRepository[repo]
 	if repos == nil {
 		return nil
 	}
-	m := repos[tag]
+	m := repos[reference]
 	if m == nil {
 		return nil
 	}
@@ -85,6 +137,8 @@ func (r *RepositoryIndex) GetArtefact(repo, tag string) *ArtefactMeta {
 }
 
 func (r *RepositoryIndex) GetDescriptor() *ArtefactIndex {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
 	index := &ArtefactIndex{
 		Versioned: specs.Versioned{SchemaVersion},
 	}
@@ -104,16 +158,18 @@ func (r *RepositoryIndex) GetDescriptor() *ArtefactIndex {
 			versions[i] = vers
 			i++
 		}
-		sort.Strings(repos)
+		sort.Strings(versions)
 
 		for _, name := range versions {
 			vers := repo[name]
-			d := &ArtefactMeta{
-				Repository: vers.Repository,
-				Tag:        vers.Tag,
-				Digest:     vers.Digest,
+			if vers.Digest.String() != name || vers.Tag == "" {
+				d := &ArtefactMeta{
+					Repository: vers.Repository,
+					Tag:        vers.Tag,
+					Digest:     vers.Digest,
+				}
+				index.Index = append(index.Index, *d)
 			}
-			index.Index = append(index.Index, *d)
 		}
 	}
 	return index

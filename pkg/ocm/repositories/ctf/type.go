@@ -17,21 +17,26 @@ package ctf
 import (
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/credentials"
-	cpi "github.com/gardener/ocm/pkg/oci/cpi"
+	"github.com/gardener/ocm/pkg/oci"
+	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
 const (
-	CommonTransportFormatRepositoryType   = "CommonTransportFormat"
-	CommonTransportFormatRepositoryTypeV1 = CommonTransportFormatRepositoryType + runtime.VersionSeparator + "v1"
+	CTFComponentArchiveType   = "Component Archive"
+	CTFComponentArchiveTypeV1 = CTFComponentArchiveType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
-	cpi.RegisterRepositoryType(CommonTransportFormatRepositoryType, cpi.NewRepositoryType(CommonTransportFormatRepositoryType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(CommonTransportFormatRepositoryTypeV1, cpi.NewRepositoryType(CommonTransportFormatRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(CTFComponentArchiveType, cpi.NewRepositoryType(CTFComponentArchiveType, &RepositorySpec{}, nil))
+	cpi.RegisterRepositoryType(CTFComponentArchiveTypeV1, cpi.NewRepositoryType(CTFComponentArchiveTypeV1, &RepositorySpec{}, nil))
 }
 
-// RepositorySpec describes an OCI registry interface backed by an oci registry.
+type GenericOCIRepositoryBackendType struct {
+	runtime.ObjectVersionedType
+	ocictx oci.Context
+}
+
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	accessobj.Options           `json:",inline"`
@@ -47,15 +52,15 @@ func NewRepositorySpec(filePath string, opts ...accessobj.Option) *RepositorySpe
 	o := accessobj.Options{}
 	o.ApplyOptions(opts...)
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(CommonTransportFormatRepositoryType),
+		ObjectVersionedType: runtime.NewVersionedObjectType(CTFComponentArchiveType),
 		FilePath:            filePath,
 		Options:             o.Default(),
 	}
 }
 
 func (a *RepositorySpec) GetType() string {
-	return CommonTransportFormatRepositoryType
+	return CTFComponentArchiveType
 }
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
-	return Open(ctx, a.AccessMode, a.FilePath, 0700, a.Options)
+	return NewRepository(ctx, a)
 }

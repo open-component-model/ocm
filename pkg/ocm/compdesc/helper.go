@@ -287,6 +287,16 @@ func (c *ComponentDescriptor) GetComponentReferenceIndex(ref ComponentReference)
 	return -1
 }
 
+// GetSourceByIdentity returns source that match the given identity.
+func (c *ComponentDescriptor) GetSourceByIdentity(id metav1.Identity) (Source, error) {
+	for _, res := range c.Sources {
+		if bytes.Equal(res.GetIdentityDigest(c.Resources), id.Digest()) {
+			return res, nil
+		}
+	}
+	return Source{}, NotFound
+}
+
 // GetSourceIndex returns the index of a given source.
 // If the index is not found -1 is returned.
 func (c *ComponentDescriptor) GetSourceIndex(src *SourceMeta) int {

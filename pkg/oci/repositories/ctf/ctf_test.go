@@ -21,6 +21,7 @@ import (
 
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
+	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf"
@@ -38,7 +39,7 @@ const MimeTypeOctetStream = "application/octet-stream"
 func defaultManifestFill(n cpi.NamespaceAccess) {
 	art, err := n.NewArtefact()
 	Expect(err).To(Succeed())
-	Expect(art.AddLayer(accessio.BlobAccessForData(MimeTypeOctetStream, []byte("testdata")), nil)).To(Equal(0))
+	Expect(art.AddLayer(accessio.BlobAccessForString(MimeTypeOctetStream, "testdata"), nil)).To(Equal(0))
 	desc, err := art.Manifest()
 	Expect(err).To(Succeed())
 	Expect(desc).NotTo(BeNil())
@@ -47,14 +48,16 @@ func defaultManifestFill(n cpi.NamespaceAccess) {
 	Expect(desc.Layers[0].MediaType).To(Equal(MimeTypeOctetStream))
 	Expect(desc.Layers[0].Size).To(Equal(int64(8)))
 
-	config := accessio.BlobAccessForData(MimeTypeOctetStream, []byte("{}"))
+	config := accessio.BlobAccessForString(MimeTypeOctetStream, "{}")
 	Expect(n.AddBlob(config)).To(Succeed())
 	desc.Config = *artdesc.DefaultBlobDescriptor(config)
 
-	n.AddArtefact(art)
+	blob, err := n.AddArtefact(art)
+	Expect(err).To(Succeed())
+	n.AddTags(blob.Digest(), "v1")
 }
 
-var _ = Describe("artefact management", func() {
+var _ = Describe("ctf management", func() {
 	var tempfs vfs.FileSystem
 
 	var spec *ctf.RepositorySpec
@@ -66,13 +69,14 @@ var _ = Describe("artefact management", func() {
 
 		spec = ctf.NewRepositorySpec("test", accessobj.PathFileSystem(tempfs), accessobj.FormatDirectory)
 		spec.PathFileSystem = tempfs
+		spec.AccessMode = accessobj.ACC_CREATE
 	})
 
 	AfterEach(func() {
 		vfs.Cleanup(tempfs)
 	})
 
-	It("instantiate filesystem artefact", func() {
+	It("instantiate filesystem ctf", func() {
 		r, err := spec.Repository(nil, nil)
 		Expect(err).To(Succeed())
 		Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
@@ -141,7 +145,7 @@ var _ = Describe("artefact management", func() {
 	})
 
 	Context("manifest", func() {
-		It("read from filesystem artefact", func() {
+		It("read from filesystem ctf", func() {
 			r, err := spec.Repository(nil, nil)
 			Expect(err).To(Succeed())
 			Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
@@ -149,7 +153,7 @@ var _ = Describe("artefact management", func() {
 			defaultManifestFill(n)
 			Expect(r.Close()).To(Succeed())
 
-			r, err = spec.Repository(nil, nil)
+			r, err = ctf.Open(nil, accessobj.ACC_READONLY, "test", 0, accessobj.PathFileSystem(tempfs))
 			Expect(err).To(Succeed())
 			defer r.Close()
 
@@ -163,9 +167,22 @@ var _ = Describe("artefact management", func() {
 			Expect(err).To(Succeed())
 			Expect(blob.Get()).To(Equal([]byte("testdata")))
 			Expect(blob.MimeType()).To(Equal(MimeTypeOctetStream))
-		})
-	})
-	Context("index", func() {
 
+			art, err = n.GetArtefact("v1")
+			Expect(err).To(Succeed())
+			b, err := art.Artefact().ToBlobAccess()
+			Expect(err).To(Succeed())
+			Expect(b.Digest()).To(Equal(digest.Digest("sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")))
+
+			_, err = n.GetArtefact("dummy")
+			Expect(err).To(Equal(errors.ErrNotFound(cpi.KIND_OCIARTEFACT, "dummy", "mandelsoft/test")))
+
+			Expect(n.AddBlob(accessio.BlobAccessForString("", "dummy"))).To(Equal(accessobj.ErrReadOnly))
+
+			n, err = r.LookupNamespace("mandelsoft/other")
+			Expect(err).To(Succeed())
+			_, err = n.GetArtefact("sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")
+			Expect(err).To(Equal(errors.ErrNotFound(cpi.KIND_OCIARTEFACT, "sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", "mandelsoft/other")))
+		})
 	})
 })

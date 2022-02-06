@@ -126,6 +126,9 @@ func (c *_context) AccessSpecForSpec(spec compdesc.AccessSpec) (AccessSpec, erro
 		return nil, nil
 	}
 	if n, ok := spec.(AccessSpec); ok {
+		if g, ok := spec.(*GenericAccessSpec); ok {
+			return g.Evaluate(c)
+		}
 		return n, nil
 	}
 	un, err := runtime.ToUnstructuredTypedObject(spec)

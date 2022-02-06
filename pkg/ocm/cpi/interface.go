@@ -23,9 +23,10 @@ import (
 type Context = core.Context
 type Repository = core.Repository
 type ComponentAccess = core.ComponentAccess
-type ComponentComposer = core.ComponentComposer
+type ComponentVersionAccess = core.ComponentVersionAccess
 type AccessSpec = core.AccessSpec
 type AccessMethod = core.AccessMethod
+type AccessMethodSupport = core.AccessMethodSupport
 type AccessType = core.AccessType
 type DataAccess = core.DataAccess
 type BlobAccess = core.BlobAccess

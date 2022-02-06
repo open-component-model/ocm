@@ -15,75 +15,74 @@
 package core
 
 import (
-	"io"
-
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 )
 
 type Repository interface {
-	oci.Repository
 	GetContext() Context
 
 	GetSpecification() RepositorySpec
-	ExistsComponent(name string, version string) (bool, error)
-	LookupComponent(name string, version string) (ComponentAccess, error)
-	ComposeComponent(name string, version string) (ComponentComposer, error)
-	WriteComponent(ComponentAccess) (ComponentAccess, error)
-
-	LocalSupportForAccessSpec(a compdesc.AccessSpec) bool
+	ExistsComponentVersion(name string, version string) (bool, error)
+	LookupComponentVersion(name string, version string) (ComponentVersionAccess, error)
+	LookupComponent(name string) (ComponentAccess, error)
 }
 
 type DataAccess = accessio.DataAccess
 type BlobAccess = accessio.BlobAccess
+type MimeType = accessio.MimeType
 
+type ComponentAccess interface {
+	GetContext() Context
+
+	GetVersion(version string) (ComponentVersionAccess, error)
+	AddVersion(ComponentVersionAccess) error
+	NewVersion(version string) (ComponentVersionAccess, error)
+}
 type ResourceMeta = compdesc.ResourceMeta
 
+type BaseAccess interface {
+	AccessMethod() (AccessMethod, error)
+	DataAccess
+}
+
 type ResourceAccess interface {
-	ResourceMeta() ResourceMeta
-	AccessMethod() AccessMethod
-	BlobAccess
+	Meta() ResourceMeta
+	BaseAccess
 }
 
 type SourceMeta = compdesc.SourceMeta
 
 type SourceAccess interface {
-	SourceMeta() SourceMeta
-	AccessMethod() AccessMethod
-	BlobAccess
+	Meta() SourceMeta
+	BaseAccess
 }
 
-type ComponentAccess interface {
+type ComponentVersionAccess interface {
 	common.VersionedElement
-	io.Closer
 
 	GetContext() Context
 
-	// GetAccessType returns the storage type of the component, which is the type of the repository
-	// it is taken from
-	GetAccessType() string
-
-	GetRepository() Repository
-
-	GetDescriptor() (*compdesc.ComponentDescriptor, error)
+	GetDescriptor() *compdesc.ComponentDescriptor
 	GetResource(meta metav1.Identity) (ResourceAccess, error)
-	GetSource(meta metav1.Identity) (ResourceAccess, error)
+	GetSource(meta metav1.Identity) (SourceAccess, error)
 
 	// AccessMethod provides an access method implementation for
 	// an access spec. This might be a repository local implementation
 	// or a global one. It might be called by the AccessSpec method
-	// to map itself to a local implementation or called directly, which
-	// potentially results in calling the method on the access spec.
-	// The access spec implementation must here
-	// cooperate with this implementation to avoid endless recursion.
+	// to map itself to a local implementation or called directly.
+	// If callled it should forward the call to the AccessSpec
+	// if and only if this specs NOT states to be local IsLocal()==false
+	// If the spec states to be local, the repository is responsible for
+	// providing a local implementation or return nil if this is
+	// not supported by the actual repository type.
 	AccessMethod(AccessSpec) (AccessMethod, error)
 }
 
 type ComponentComposer interface {
-	ComponentAccess
+	ComponentVersionAccess
 	AddResourceBlob(*ResourceMeta, BlobAccess) error
 	AddResource(*ResourceMeta, compdesc.AccessSpec) error
 

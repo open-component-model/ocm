@@ -35,12 +35,16 @@ type DataAccess interface {
 	Reader() (io.ReadCloser, error)
 }
 
+type MimeType interface {
+	// MimeType returns the mime type of the blob
+	MimeType() string
+}
+
 //  BlobAccess describes the access to a blob
 type BlobAccess interface {
 	DataAccess
+	MimeType
 
-	// MimeType returns the mime type of the blob
-	MimeType() string
 	// Digest returns the blob digest
 	Digest() digest.Digest
 	// Size returns the blob size
@@ -105,7 +109,7 @@ type blobAccess struct {
 	access   DataAccess
 }
 
-const BLOB_UNKNOWN_SIZE = -1
+const BLOB_UNKNOWN_SIZE = int64(-1)
 const BLOB_UNKNOWN_DIGEST = digest.Digest("")
 
 func BlobAccessForDataAccess(digest digest.Digest, size int64, mimeType string, access DataAccess) BlobAccess {
@@ -115,6 +119,23 @@ func BlobAccessForDataAccess(digest digest.Digest, size int64, mimeType string, 
 		mimeType: mimeType,
 		access:   access,
 	}
+}
+
+func BlobAccessForFile(mimeType string, path string, fs vfs.FileSystem) BlobAccess {
+	size := BLOB_UNKNOWN_SIZE
+	fi, err := fs.Stat(path)
+	if err == nil {
+		size = fi.Size()
+	}
+	return &blobAccess{
+		size:     size,
+		mimeType: mimeType,
+		access:   DataAccessForFile(fs, path),
+	}
+}
+
+func BlobAccessForString(mimeType string, data string) BlobAccess {
+	return BlobAccessForData(mimeType, []byte(data))
 }
 
 func BlobAccessForData(mimeType string, data []byte) BlobAccess {

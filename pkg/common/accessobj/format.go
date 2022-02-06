@@ -15,6 +15,9 @@
 package accessobj
 
 import (
+	"archive/tar"
+	"compress/gzip"
+	"io"
 	"sync"
 
 	"github.com/gardener/ocm/pkg/common/accessio"
@@ -23,6 +26,8 @@ import (
 )
 
 const KIND_FILEFORMAT = "file format"
+
+type FileFormat = accessio.FileFormat
 
 type FormatHandler interface {
 	Option
@@ -36,7 +41,7 @@ type FormatHandler interface {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-var fileFormats = map[accessio.FileFormat]FormatHandler{}
+var fileFormats = map[FileFormat]FormatHandler{}
 var lock sync.RWMutex
 
 func RegisterFormat(f FormatHandler) {
@@ -45,7 +50,7 @@ func RegisterFormat(f FormatHandler) {
 	fileFormats[f.Format()] = f
 }
 
-func GetFormat(name accessio.FileFormat) FormatHandler {
+func GetFormat(name FileFormat) FormatHandler {
 	lock.RLock()
 	defer lock.RUnlock()
 	return fileFormats[name]
@@ -80,4 +85,43 @@ func (f fsCloser) Close(obj *AccessObject) error {
 	}
 	err.Add(vfs.Cleanup(obj.fs))
 	return err.Result()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func DetectFormat(path string, fs vfs.FileSystem) (*FileFormat, error) {
+	if fs == nil {
+		fs = _osfs
+	}
+
+	fi, err := fs.Stat(path)
+	if err != nil {
+		return nil, err
+	}
+
+	format := accessio.FormatDirectory
+	if !fi.IsDir() {
+		var r io.Reader
+		file, err := fs.Open(path)
+		if err != nil {
+			return nil, err
+		}
+		defer file.Close()
+		zip, err := gzip.NewReader(file)
+		if err == nil {
+			format = accessio.FormatTGZ
+			defer zip.Close()
+			r = zip
+		} else {
+			file.Seek(0, io.SeekStart)
+			format = accessio.FormatTar
+			r = file
+		}
+		t := tar.NewReader(r)
+		_, err = t.Next()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &format, nil
 }

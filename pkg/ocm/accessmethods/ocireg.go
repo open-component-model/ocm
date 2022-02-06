@@ -16,11 +16,9 @@ package accessmethods
 
 import (
 	"io"
-	"io/ioutil"
 
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/gardener/ocm/pkg/runtime"
-	"github.com/opencontainers/go-digest"
 )
 
 // OCIRegistryType is the access type of a oci registry.
@@ -48,15 +46,15 @@ func NewOCIRegistryAccessSpecV1(ref string) *OCIRegistryAccessSpec {
 	}
 }
 
+func (_ *OCIRegistryAccessSpec) IsLocal(cpi.Context) bool {
+	return false
+}
+
 func (_ *OCIRegistryAccessSpec) GetType() string {
 	return OCIRegistryType
 }
 
-func (a *OCIRegistryAccessSpec) ValidFor(cpi.Repository) bool {
-	return true
-}
-
-func (a *OCIRegistryAccessSpec) AccessMethod(c cpi.ComponentAccess) (cpi.AccessMethod, error) {
+func (a *OCIRegistryAccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
 	return newOCIRegistryAccessMethod(a)
 }
 
@@ -78,29 +76,12 @@ func (m *OCIRegistryAccessMethod) GetKind() string {
 	return OCIRegistryType
 }
 
-func (m *OCIRegistryAccessMethod) Open() (io.ReadCloser, error) {
-	panic("no implemented") // TODO
-}
-
-func (m *OCIRegistryAccessMethod) Digest() digest.Digest {
-	panic("no implemented") // TODO
-}
-
-func (m *OCIRegistryAccessMethod) Size() int64 {
-	panic("no implemented") // TODO
-}
-
 func (m *OCIRegistryAccessMethod) Get() ([]byte, error) {
-	file, err := m.Open()
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	return ioutil.ReadAll(file)
+	panic("implement me")
 }
 
 func (m *OCIRegistryAccessMethod) Reader() (io.ReadCloser, error) {
-	return m.Open()
+	panic("implement me")
 }
 
 func (m *OCIRegistryAccessMethod) MimeType() string {

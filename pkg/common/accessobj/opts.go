@@ -55,11 +55,25 @@ func (o Options) Default() Options {
 	if o.PathFileSystem == nil {
 		o.PathFileSystem = _osfs
 	}
+	return o
+}
+
+func (o Options) DefaultFormat(fmt accessio.FileFormat) Options {
 	if o.FileFormat == nil {
-		fmt := accessio.FormatDirectory
 		o.FileFormat = &fmt
 	}
 	return o
+}
+
+func (o Options) DefaultForPath(path string) (Options, error) {
+	if o.FileFormat == nil {
+		fmt, err := DetectFormat(path, o.PathFileSystem)
+		if err == nil {
+			o.FileFormat = fmt
+		}
+		return o, err
+	}
+	return o, nil
 }
 
 // ApplyOptions applies the given list options on these options,

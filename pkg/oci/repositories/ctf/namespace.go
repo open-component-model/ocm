@@ -72,7 +72,7 @@ func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
 }
 
 func (n *NamespaceContainer) GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {
-	for _, a := range n.repo.getIndex().GetArtefacts(digest) {
+	for _, a := range n.repo.getIndex().GetArtefactInfos(digest) {
 		if a.Repository == n.namespace {
 			return n.repo.base.GetArtefact(n, digest)
 		}
@@ -88,12 +88,16 @@ func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, platform *artdes
 	if err != nil {
 		return nil, err
 	}
-	n.repo.getIndex().AddArtefact(&index.ArtefactMeta{
+	n.repo.getIndex().AddArtefactInfo(&index.ArtefactMeta{
 		Repository: n.namespace,
 		Tag:        "",
 		Digest:     blob.Digest(),
 	})
 	return blob, nil
+}
+
+func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error {
+	return n.repo.getIndex().AddTagsFor(n.namespace, digest, tags...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -109,20 +113,20 @@ func (n *Namespace) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, e
 	return artefactset.NewArtefact(n.access, art...), nil
 }
 
-func (n *Namespace) GetArtefactByTag(tag string) (cpi.ArtefactAccess, error) {
-	meta := n.access.repo.getIndex().GetArtefact(n.access.namespace, tag)
+func (n *Namespace) GetArtefact(ref string) (cpi.ArtefactAccess, error) {
+	meta := n.access.repo.getIndex().GetArtefactInfo(n.access.namespace, ref)
 	if meta != nil {
 		return n.access.repo.base.GetArtefact(n.access, meta.Digest)
 	}
-	return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, tag, n.access.namespace)
+	return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, ref, n.access.namespace)
 }
 
-func (n *Namespace) GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {
-	return n.access.GetArtefact(digest)
-}
-
-func (n *Namespace) AddArtefact(artefact cpi.Artefact) (access accessio.BlobAccess, err error) {
+func (n *Namespace) AddArtefact(artefact cpi.Artefact, tags ...string) (access accessio.BlobAccess, err error) {
 	return n.access.AddArtefact(artefact, nil)
+}
+
+func (n *Namespace) AddTags(digest digest.Digest, tags ...string) error {
+	return n.access.AddTags(digest, tags...)
 }
 
 func (n *Namespace) AddBlob(blob cpi.BlobAccess) error {

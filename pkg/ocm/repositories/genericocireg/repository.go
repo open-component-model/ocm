@@ -16,8 +16,6 @@ package genericocireg
 
 import (
 	"github.com/gardener/ocm/pkg/oci"
-	"github.com/gardener/ocm/pkg/oci/core"
-	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 )
 
@@ -37,18 +35,6 @@ func NewRepository(ctx cpi.Context, ocirepo oci.Repository) (cpi.Repository, err
 	return repo, nil
 }
 
-func (r Repository) ExistsArtefact(name string, version string) (bool, error) {
-	panic("implement me")
-}
-
-func (r Repository) LookupArtefact(name string, version string) (oci.ArtefactAccess, error) {
-	panic("implement me")
-}
-
-func (r Repository) LookupNamespace(name string) (core.NamespaceAccess, error) {
-	panic("implement me")
-}
-
 func (r Repository) Close() error {
 	panic("implement me")
 }
@@ -61,22 +47,18 @@ func (r Repository) GetSpecification() cpi.RepositorySpec {
 	panic("implement me")
 }
 
-func (r Repository) ExistsComponent(name string, version string) (bool, error) {
+func (r Repository) ExistsComponentVersion(name string, version string) (bool, error) {
 	panic("implement me")
 }
 
-func (r Repository) LookupComponent(name string, version string) (cpi.ComponentAccess, error) {
+func (r Repository) LookupComponent(name string) (cpi.ComponentAccess, error) {
 	panic("implement me")
 }
 
-func (r Repository) ComposeComponent(name string, version string) (cpi.ComponentComposer, error) {
+func (r Repository) LookupComponentVersion(name string, version string) (cpi.ComponentVersionAccess, error) {
 	panic("implement me")
 }
 
 func (r Repository) WriteComponent(access cpi.ComponentAccess) (cpi.ComponentAccess, error) {
-	panic("implement me")
-}
-
-func (r Repository) LocalSupportForAccessSpec(a compdesc.AccessSpec) bool {
 	panic("implement me")
 }

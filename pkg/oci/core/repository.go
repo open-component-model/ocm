@@ -21,8 +21,8 @@ import (
 )
 
 type Repository interface {
-	ExistsArtefact(name string, version string) (bool, error)
-	LookupArtefact(name string, version string) (ArtefactAccess, error)
+	ExistsArtefact(name string, ref string) (bool, error)
+	LookupArtefact(name string, ref string) (ArtefactAccess, error)
 	LookupNamespace(name string) (NamespaceAccess, error)
 	Close() error
 }
@@ -37,12 +37,11 @@ type DataAccess = accessio.DataAccess
 type NamespaceAccess interface {
 	RepositorySource
 
-	GetArtefactByTag(tag string) (ArtefactAccess, error)
-	GetArtefact(digest.Digest) (ArtefactAccess, error)
+	GetArtefact(ref string) (ArtefactAccess, error)
 
 	AddBlob(BlobAccess) error
-	AddArtefact(Artefact) (BlobAccess, error)
-
+	AddArtefact(art Artefact, tags ...string) (BlobAccess, error)
+	AddTags(digest digest.Digest, tags ...string) error
 	NewArtefact(...*artdesc.Artefact) (ArtefactAccess, error)
 }
 

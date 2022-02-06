@@ -12,19 +12,19 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package ctf_test
+package comparch_test
 
 import (
 	"encoding/json"
 	"os"
 	"reflect"
 
+	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/ocm"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
-	"github.com/gardener/ocm/pkg/ocm/repositories/ctf"
-
+	"github.com/gardener/ocm/pkg/ocm/repositories/ctf/comparch"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -33,13 +33,22 @@ var DefaultContext = ocm.New()
 
 var _ = Describe("access method", func() {
 
+	legacy := "{\"type\":\"localFilesystemBlob\",\"fileName\":\"anydigest\",\"mediaType\":\"application/json\"}"
+
+	It("decodes legacy methood", func() {
+		spec, err := DefaultContext.AccessSpecForConfig([]byte(legacy), nil)
+		Expect(err).To(Succeed())
+		Expect(reflect.TypeOf(spec).String()).To(Equal("*accessmethods.LocalBlobAccessSpec"))
+		Expect(spec.(*accessmethods.LocalBlobAccessSpec).ReferenceName).To(Equal("anydigest"))
+	})
+
 	It("instantiate local blob access method for component archive", func() {
 		data, err := os.ReadFile("testdata/component-descriptor.yaml")
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
 		Expect(err).To(Succeed())
 
-		ca := ctf.NewComponentArchive(DefaultContext, nil, cd, nil, nil)
+		ca, err := comparch.New(DefaultContext, accessobj.ACC_CREATE, nil, nil, 0600)
 
 		res, err := cd.GetResourceByIdentity(metav1.IdentityByName("local"))
 		Expect(err).To(Succeed())
@@ -49,21 +58,19 @@ var _ = Describe("access method", func() {
 		Expect(err).To(Succeed())
 		Expect(spec).To(Not(BeNil()))
 
-		Expect(spec.GetType()).To(Equal(accessmethods.LocalBlobType))
-		Expect(spec.GetKind()).To(Equal(accessmethods.LocalBlobType))
+		Expect(spec.GetType()).To(Equal(comparch.LocalFilesystemBlobType))
+		Expect(spec.GetKind()).To(Equal(comparch.LocalFilesystemBlobType))
 		Expect(spec.GetVersion()).To(Equal("v1"))
 		Expect(reflect.TypeOf(spec).String()).To(Equal("*accessmethods.LocalBlobAccessSpec"))
 
 		data, err = json.Marshal(spec)
 		Expect(err).To(Succeed())
-		Expect(string(data)).To(Equal("{\"type\":\"localBlob\",\"filename\":\"\",\"mediaType\":\"application/json\"}"))
+		Expect(string(data)).To(Equal(legacy))
 
 		m, err := spec.AccessMethod(ca)
 		Expect(err).To(Succeed())
 		Expect(m).To(Not(BeNil()))
-		Expect(reflect.TypeOf(m).String()).To(Equal("*accessmethods.DefaultAccessMethod"))
-		Expect(m.GetKind()).To(Equal("localFilesystemBlob"))
-		Expect(accessmethods.GetImplementation(m)).To(Not(BeNil()))
-		Expect(reflect.TypeOf(accessmethods.GetImplementation(m)).String()).To(Equal("*ctf.localFilesystemBlobAccessMethod"))
+		Expect(reflect.TypeOf(m).String()).To(Equal("*comparch.localFilesystemBlobAccessMethod"))
+		Expect(m.GetKind()).To(Equal("localBlob"))
 	})
 })

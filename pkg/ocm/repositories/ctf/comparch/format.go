@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package artefactset
+package comparch
 
 import (
 	"sync"
@@ -20,22 +20,25 @@ import (
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/oci/repositories/ctf/format"
+	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
-const ArtefactSetDescriptorFileName = format.ArtefactSetDescriptorFileName
-const BlobsDirectoryName = format.BlobsDirectoryName
+// ComponentDescriptorFileName is the name of the component-descriptor file.
+const ComponentDescriptorFileName = "component-descriptor.yaml"
+
+// BlobsDirectoryName is the name of the blob directory in the tar.
+const BlobsDirectoryName = "blobs"
 
 var accessObjectInfo = &accessobj.AccessObjectInfo{
-	DescriptorFileName:       ArtefactSetDescriptorFileName,
+	DescriptorFileName:       ComponentDescriptorFileName,
 	ObjectTypeName:           "artefactset",
 	ElementDirectoryName:     BlobsDirectoryName,
 	ElementTypeName:          "blob",
 	DescriptorHandlerFactory: NewStateHandler,
 }
 
-type Object = ArtefactSet
+type Object = ComponentArchive
 
 type FormatHandler struct {
 	accessobj.FormatHandler
@@ -68,7 +71,7 @@ func GetFormat(name accessio.FileFormat) FormatHandler {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func Open(acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessobj.Option) (*Object, error) {
+func Open(ctx cpi.Context, acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessobj.Option) (*Object, error) {
 	o, create, err := accessobj.HandleAccessMode(acc, path, opts...)
 	if err != nil {
 		return nil, err
@@ -78,29 +81,30 @@ func Open(acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...acce
 		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.FileFormat.String())
 	}
 	if create {
-		return h.Create(path, o, mode)
+		return h.Create(ctx, path, o, mode)
 	}
-	return h.Open(acc, path, o)
+	return h.Open(ctx, acc, path, o)
 }
 
-func Create(acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessobj.Option) (*Object, error) {
+func Create(ctx cpi.Context, acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessobj.Option) (*Object, error) {
 	o := accessobj.AccessOptions(opts...).DefaultFormat(accessio.FormatDirectory)
 	h, ok := fileFormats[*o.FileFormat]
 	if !ok {
 		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.FileFormat.String())
 	}
-	return h.Create(path, o, mode)
+	return h.Create(ctx, path, o, mode)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (h FormatHandler) Open(acc accessobj.AccessMode, path string, opts accessobj.Options) (*Object, error) {
-
-	return _Wrap(h.FormatHandler.Open(accessObjectInfo, acc, path, opts))
+func (h FormatHandler) Open(ctx cpi.Context, acc accessobj.AccessMode, path string, opts accessobj.Options) (*Object, error) {
+	obj, err := h.FormatHandler.Open(accessObjectInfo, acc, path, opts)
+	return _Wrap(ctx, obj, err)
 }
 
-func (h *FormatHandler) Create(path string, opts accessobj.Options, mode vfs.FileMode) (*Object, error) {
-	return _Wrap(h.FormatHandler.Create(accessObjectInfo, path, opts, mode))
+func (h *FormatHandler) Create(ctx cpi.Context, path string, opts accessobj.Options, mode vfs.FileMode) (*Object, error) {
+	obj, err := h.FormatHandler.Create(accessObjectInfo, path, opts, mode)
+	return _Wrap(ctx, obj, err)
 }
 
 // WriteToFilesystem writes the current object to a filesystem
