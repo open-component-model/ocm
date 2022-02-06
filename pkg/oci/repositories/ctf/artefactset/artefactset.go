@@ -17,11 +17,15 @@ package artefactset
 import (
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
+	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 )
+
+const TAGS_ANNOTATION = "ocm.gardener.cloud/tags"
+const TYPE_ANNOTATION = "ocm.gardener.cloud/type"
 
 type ArtefactSet struct {
 	base *FileSystemBlobAccess
@@ -91,7 +95,46 @@ func (a *ArtefactSet) AddBlob(blob cpi.BlobAccess) error {
 }
 
 func (i *ArtefactSet) GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {
-	return i.base.GetArtefact(i, digest)
+	if i.IsClosed() {
+		return nil, accessio.ErrClosed
+	}
+	i.base.Lock()
+	defer i.base.Unlock()
+	return i.getArtefact(digest)
+}
+
+func (i *ArtefactSet) getArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {
+	idx := i.GetIndex()
+	for _, e := range idx.Manifests {
+		if e.Digest == digest {
+			return i.base.GetArtefact(i, e.Digest)
+		}
+	}
+	return nil, errors.ErrUnknown(cpi.KIND_OCIARTEFACT, digest.String())
+}
+
+func (a *ArtefactSet) AnnotateArtefact(digest digest.Digest, name, value string) error {
+	if a.IsClosed() {
+		return accessio.ErrClosed
+	}
+	if a.IsReadOnly() {
+		return accessio.ErrReadOnly
+	}
+	a.base.Lock()
+	defer a.base.Unlock()
+	idx := a.GetIndex()
+	for i, e := range idx.Manifests {
+		if e.Digest == digest {
+			annos := e.Annotations
+			if annos == nil {
+				annos = map[string]string{}
+				idx.Manifests[i].Annotations = annos
+			}
+			annos[name] = value
+			return nil
+		}
+	}
+	return errors.ErrUnknown(cpi.KIND_OCIARTEFACT, digest.String())
 }
 
 func (a *ArtefactSet) AddArtefact(artefact cpi.Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {

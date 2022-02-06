@@ -101,3 +101,44 @@ The file structure is a directory containing
   [descriptor according the OCI Image Specification](https://github.com/opencontainers/image-spec/blob/main/descriptor.md).
 
   Files not referenced by the artefacts described by the index are ignored.
+
+The artefact set index describes the manifest entries that should be registered
+via the manifest endpoint according to the distribution spec.
+
+### Extension Models
+
+Any artefacts described by this format is addressable only by digests.
+The entries in the index are intended to be registered via the manifest
+endpoint according to the [OCI Distribution Specification](https://github.com/opencontainers/distribution-spec).
+
+Additionally this specification described two special annotations:
+
+- **`ocm.gardener.cloud/tags`**
+  
+  This annotation can be used to describe a comma-separated list of tags.
+  that should be added for this index entry, when imported into an OCI registry.
+
+- **`ocm.gardener.cloud/type`**
+
+  This annotation can be used some additional type information.
+
+This way the format can be used to attach elements according to various extension
+models for the OCI specification:
+
+ - *[cosign](https://github.com/sigstore/cosign)*
+
+   For *cosign* addtional signatures are represented as dedicated artefacts
+   with special tags establishing the relation to the original artefact they
+   refer to by deriving the tag from the digest of the related object.
+
+   This is supported by this format by providing a possibility to describe
+   additional tags by an annotation in the index
+
+ - [*ORAS*](https://github.com/oras-project/artifacts-spec)
+
+   Here a new third top-level manifest type is introduced, that can be 
+   stored via the manifest endpoint of the distribution spec. No addtional
+   tags are required, the relation to the annotated object is established
+   by a dedicated digest based field. Those artefacts can directly be 
+   described by this format. But language bindings basically have to support
+   this additional type.
