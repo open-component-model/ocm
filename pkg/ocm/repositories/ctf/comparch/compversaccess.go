@@ -28,6 +28,8 @@ type ComponentVersionAccess struct {
 	base ComponentVersionContainer
 }
 
+var _ cpi.ComponentVersionAccess = (*ComponentVersionAccess)(nil)
+
 func NewComponentVersionAccess(container ComponentVersionContainer) *ComponentVersionAccess {
 	s := &ComponentVersionAccess{
 		base: container,
@@ -139,17 +141,46 @@ func (c *ComponentVersionAccess) AddResource(meta *cpi.ResourceMeta, acc compdes
 	return c.base.Update()
 }
 
+func (c *ComponentVersionAccess) AddSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec) error {
+	if err := c.checkAccessSpec(acc); err != nil {
+		return err
+	}
+	res := &compdesc.Source{
+		SourceMeta: *meta.Copy(),
+		Access:     acc,
+	}
+
+	if idx := c.GetDescriptor().GetSourceIndex(meta); idx == -1 {
+		c.GetDescriptor().Sources = append(c.GetDescriptor().Sources, *res)
+	} else {
+		c.GetDescriptor().Sources[idx] = *res
+	}
+	return c.base.Update()
+}
+
 // AddResource adds a blob resource to the current archive.
-func (c *ComponentVersionAccess) AddResourceBlob(meta *cpi.ResourceMeta, blob cpi.BlobAccess) error {
+func (c *ComponentVersionAccess) AddResourceBlob(meta *cpi.ResourceMeta, blob cpi.BlobAccess, refName string) error {
 	if blob == nil {
 		return errors.New("a resource has to be defined")
 	}
-
 	name, err := c.base.AddBlob(blob)
 	if err != nil {
 		return err
 	}
-	return c.AddResource(meta, NewLocalFilesystemBlobAccessSpecV1(name, blob.MimeType()))
+	acc := accessmethods.NewLocalBlobAccessSpecV1(name, refName, blob.MimeType())
+	return c.AddResource(meta, acc)
+}
+
+func (c *ComponentVersionAccess) AddSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string) error {
+	if blob == nil {
+		return errors.New("a resource has to be defined")
+	}
+	name, err := c.base.AddBlob(blob)
+	if err != nil {
+		return err
+	}
+	acc := accessmethods.NewLocalBlobAccessSpecV1(name, refName, blob.MimeType())
+	return c.AddSource(meta, acc)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

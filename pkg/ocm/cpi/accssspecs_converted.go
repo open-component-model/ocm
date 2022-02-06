@@ -62,6 +62,7 @@ type ConvertedAccessType struct {
 }
 
 var _ AccessSpecVersion = &ConvertedAccessType{}
+var _ runtime.TypedObjectEncoder = &ConvertedAccessType{}
 
 func NewConvertedAccessSpecType(name string, v AccessSpecVersion) *ConvertedAccessType {
 	return &ConvertedAccessType{
@@ -71,6 +72,14 @@ func NewConvertedAccessSpecType(name string, v AccessSpecVersion) *ConvertedAcce
 		},
 		AccessSpecVersion: v,
 	}
+}
+
+func (t *ConvertedAccessType) Encode(obj runtime.TypedObject, m runtime.Marshaler) ([]byte, error) {
+	c, err := t.ConvertFrom(obj.(AccessSpec))
+	if err != nil {
+		return nil, err
+	}
+	return m.Marshal(c)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

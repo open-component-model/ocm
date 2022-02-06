@@ -79,13 +79,10 @@ type ComponentVersionAccess interface {
 	// providing a local implementation or return nil if this is
 	// not supported by the actual repository type.
 	AccessMethod(AccessSpec) (AccessMethod, error)
-}
 
-type ComponentComposer interface {
-	ComponentVersionAccess
-	AddResourceBlob(*ResourceMeta, BlobAccess) error
+	AddResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string) error
 	AddResource(*ResourceMeta, compdesc.AccessSpec) error
 
-	AddSourceBlob(*SourceMeta, BlobAccess) error
+	AddSourceBlob(meta *SourceMeta, blob BlobAccess, refname string) error
 	AddSource(*SourceMeta, compdesc.AccessSpec) error
 }

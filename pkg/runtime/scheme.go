@@ -47,6 +47,12 @@ type TypedObjectDecoder interface {
 	Decode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
 }
 
+// TypedObjectEncoder is able to provide a versioned representation of
+// of an effective TypedObject
+type TypedObjectEncoder interface {
+	Encode(TypedObject, Marshaler) ([]byte, error)
+}
+
 type DirectDecoder struct {
 	proto reflect.Type
 }
@@ -86,6 +92,10 @@ func (d *DirectDecoder) Decode(data []byte, unmarshaler Unmarshaler) (TypedObjec
 	}
 
 	return inst.(TypedObject), nil
+}
+
+func (d *DirectDecoder) Encode(obj TypedObject, marshaler Marshaler) ([]byte, error) {
+	return marshaler.Marshal(obj)
 }
 
 // TypedObjectConverter converts a versioned representation into the
@@ -161,6 +171,7 @@ type Scheme interface {
 	CreateUnstructured() Unstructured
 	GetDecoder(otype string) TypedObjectDecoder
 	Decode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
+	Encode(obj TypedObject, marshaler Marshaler) ([]byte, error)
 	EnforceDecode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
 	AddKnownTypes(scheme Scheme)
 	KnownTypes() KnownTypes
@@ -264,10 +275,21 @@ func (d *defaultScheme) CreateUnstructured() Unstructured {
 	return reflect.New(d.unstructured).Interface().(Unstructured)
 }
 
+func (d *defaultScheme) Encode(obj TypedObject, marshaler Marshaler) ([]byte, error) {
+	if marshaler == nil {
+		marshaler = DefaultYAMLEncoding
+	}
+	decoder := d.GetDecoder(obj.GetType())
+	if encoder, ok := decoder.(TypedObjectEncoder); ok {
+		return encoder.Encode(obj, marshaler)
+	}
+	return marshaler.Marshal(obj)
+}
+
 func (d *defaultScheme) Decode(data []byte, unmarshal Unmarshaler) (TypedObject, error) {
 	un := d.CreateUnstructured()
 	if unmarshal == nil {
-		unmarshal = DefaultYAMLEncoding.Unmarshaler
+		unmarshal = DefaultYAMLEncoding
 	}
 	err := unmarshal.Unmarshal(data, un)
 	if err != nil {

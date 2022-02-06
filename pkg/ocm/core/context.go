@@ -39,6 +39,8 @@ type Context interface {
 	RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...credentials.CredentialsSource) (Repository, error)
 	AccessSpecForSpec(spec compdesc.AccessSpec) (AccessSpec, error)
 	AccessSpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error)
+
+	Encode(AccessSpec, runtime.Marshaler) ([]byte, error)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -142,4 +144,8 @@ func (c *_context) AccessSpecForSpec(spec compdesc.AccessSpec) (AccessSpec, erro
 	}
 
 	return c.knownAccessTypes.DecodeAccessSpec(raw, runtime.DefaultJSONEncoding)
+}
+
+func (c *_context) Encode(spec AccessSpec, marshaler runtime.Marshaler) ([]byte, error) {
+	return c.knownAccessTypes.Encode(spec, marshaler)
 }
