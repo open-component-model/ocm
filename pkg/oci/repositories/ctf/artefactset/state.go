@@ -22,28 +22,88 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
-type StateHandler struct {
-	fs vfs.FileSystem
-}
-
-var _ accessobj.StateHandler = &StateHandler{}
-
+// NewStateHandler implements the factory interface for the artefact set
+// state descriptor handling
+// Basically this is an index state
 func NewStateHandler(fs vfs.FileSystem) accessobj.StateHandler {
-	return &StateHandler{fs}
+	return &IndexStateHandler{}
 }
 
-func (i StateHandler) Initial() interface{} {
+type ManifestStateHandler struct {
+}
+
+var _ accessobj.StateHandler = &ManifestStateHandler{}
+
+func NewManifestStateHandler() accessobj.StateHandler {
+	return &ManifestStateHandler{}
+}
+
+func (i ManifestStateHandler) Initial() interface{} {
+	return artdesc.NewManifest()
+}
+
+func (i ManifestStateHandler) Encode(d interface{}) ([]byte, error) {
+	return artdesc.EncodeManifest(d.(*artdesc.Manifest))
+}
+
+func (i ManifestStateHandler) Decode(data []byte) (interface{}, error) {
+	return artdesc.DecodeManifest(data)
+}
+
+func (i ManifestStateHandler) Equivalent(a, b interface{}) bool {
+	return reflect.DeepEqual(a, b)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type IndexStateHandler struct {
+}
+
+var _ accessobj.StateHandler = &IndexStateHandler{}
+
+func NewIndexStateHandler() accessobj.StateHandler {
+	return &IndexStateHandler{}
+}
+
+func (i IndexStateHandler) Initial() interface{} {
 	return artdesc.NewIndex()
 }
 
-func (i StateHandler) Encode(d interface{}) ([]byte, error) {
+func (i IndexStateHandler) Encode(d interface{}) ([]byte, error) {
 	return artdesc.EncodeIndex(d.(*artdesc.Index))
 }
 
-func (i StateHandler) Decode(data []byte) (interface{}, error) {
+func (i IndexStateHandler) Decode(data []byte) (interface{}, error) {
 	return artdesc.DecodeIndex(data)
 }
 
-func (i StateHandler) Equivalent(a, b interface{}) bool {
+func (i IndexStateHandler) Equivalent(a, b interface{}) bool {
+	return reflect.DeepEqual(a, b)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type ArtefactStateHandler struct {
+}
+
+var _ accessobj.StateHandler = &ArtefactStateHandler{}
+
+func NewArtefactStateHandler() accessobj.StateHandler {
+	return &ArtefactStateHandler{}
+}
+
+func (i ArtefactStateHandler) Initial() interface{} {
+	return artdesc.New()
+}
+
+func (i ArtefactStateHandler) Encode(d interface{}) ([]byte, error) {
+	return artdesc.Encode(d.(*artdesc.Artefact))
+}
+
+func (i ArtefactStateHandler) Decode(data []byte) (interface{}, error) {
+	return artdesc.Decode(data)
+}
+
+func (i ArtefactStateHandler) Equivalent(a, b interface{}) bool {
 	return reflect.DeepEqual(a, b)
 }

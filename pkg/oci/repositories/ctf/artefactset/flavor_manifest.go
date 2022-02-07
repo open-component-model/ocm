@@ -16,8 +16,8 @@ package artefactset
 
 import (
 	"compress/gzip"
-	"sync"
 
+	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
@@ -25,26 +25,57 @@ import (
 )
 
 type Manifest struct {
-	access   ArtefactSetContainer
-	manifest *artdesc.Manifest
-	lock     sync.RWMutex
-	handler  *BlobHandler // not inherited because only blob access should be offered
+	artefactBase
+	handler *BlobHandler // not inherited because only blob access should be offered
 }
 
 var _ cpi.ManifestAccess = (*Manifest)(nil)
 
-func NewManifest(access ArtefactSetContainer, def ...*artdesc.Manifest) *Manifest {
-	var manifest *artdesc.Manifest
-	if len(def) == 0 || def[0] == nil {
-		manifest = artdesc.NewManifest()
-	} else {
-		manifest = def[0]
+func NewManifest(access ArtefactSetContainer, defs ...*artdesc.Manifest) *Manifest {
+	var def *artdesc.Manifest
+	if len(defs) != 0 && defs[0] != nil {
+		def = defs[0]
 	}
+	mode := accessobj.ACC_WRITABLE
+	if access.IsReadOnly() {
+		mode = accessobj.ACC_READONLY
+	}
+	state, err := accessobj.NewBlobStateForObject(mode, def, NewManifestStateHandler())
+	if err != nil {
+		panic("oops")
+	}
+
 	m := &Manifest{
-		access:   access,
-		manifest: manifest,
+		artefactBase: artefactBase{
+			access: access,
+			state:  state,
+		},
 	}
 	m.handler = NewBlobHandler(access, m)
+	return m
+}
+
+type manifestMapper struct {
+	accessobj.State
+}
+
+var _ accessobj.State = (*manifestMapper)(nil)
+
+func (m *manifestMapper) GetState() interface{} {
+	return m.State.GetState().(*artdesc.Artefact).Manifest()
+}
+func (m *manifestMapper) GetOriginalState() interface{} {
+	return m.State.GetOriginalState().(*artdesc.Artefact).Manifest()
+}
+
+func NewManifestForArtefact(a *Artefact) *Manifest {
+	m := &Manifest{
+		artefactBase: artefactBase{
+			access: a.access,
+			state:  &manifestMapper{a.state},
+		},
+	}
+	m.handler = NewBlobHandler(a.access, m)
 	return m
 }
 
@@ -57,7 +88,7 @@ func (m *Manifest) IsIndex() bool {
 }
 
 func (m *Manifest) Manifest() (*artdesc.Manifest, error) {
-	return m.manifest, nil
+	return m.GetDescriptor(), nil
 }
 
 func (m *Manifest) Index() (*artdesc.Index, error) {
@@ -66,20 +97,27 @@ func (m *Manifest) Index() (*artdesc.Index, error) {
 
 func (m *Manifest) Artefact() *artdesc.Artefact {
 	a := artdesc.New()
-	_ = a.SetManifest(m.manifest)
+	_ = a.SetManifest(m.GetDescriptor())
 	return a
 }
 
 func (m *Manifest) GetDescriptor() *artdesc.Manifest {
-	return m.manifest
+	return m.state.GetState().(*artdesc.Manifest)
 }
 
 func (m *Manifest) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
-	d := m.manifest.GetBlobDescriptor(digest)
+	d := m.GetDescriptor().GetBlobDescriptor(digest)
 	if d != nil {
 		return d
 	}
 	return m.access.GetBlobDescriptor(digest)
+}
+
+func (m *Manifest) GetConfigBlob() (cpi.BlobAccess, error) {
+	if m.GetDescriptor().Config.Digest == "" {
+		return nil, nil
+	}
+	return m.handler.GetBlob(m.GetDescriptor().Config.Digest)
 }
 
 func (m *Manifest) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
@@ -122,6 +160,7 @@ func (m *Manifest) AddLayer(blob cpi.BlobAccess, d *artdesc.Descriptor) (int, er
 		return -1, err
 	}
 
-	m.manifest.Layers = append(m.manifest.Layers, *d)
-	return len(m.manifest.Layers) - 1, nil
+	manifest := m.GetDescriptor()
+	manifest.Layers = append(manifest.Layers, *d)
+	return len(manifest.Layers) - 1, nil
 }

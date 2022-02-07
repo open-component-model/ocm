@@ -18,7 +18,6 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/format"
@@ -44,12 +43,21 @@ func (_ TGZHandler) Format() accessio.FileFormat {
 }
 
 func (c TGZHandler) Open(info *AccessObjectInfo, acc AccessMode, path string, opts Options) (*AccessObject, error) {
-	// we expect that the path point to a tar
-	file, err := opts.PathFileSystem.Open(path)
-	if err != nil {
-		return nil, fmt.Errorf("unable to open tgz archive from %s: %w", path, err)
+	if err := opts.ValidForPath(path); err != nil {
+		return nil, err
 	}
-	defer file.Close()
+	var file vfs.File
+	var err error
+	if opts.File == nil {
+		// we expect that the path point to a tar
+		file, err = opts.PathFileSystem.Open(path)
+		if err != nil {
+			return nil, fmt.Errorf("unable to open tgz archive from %s: %w", path, err)
+		}
+		defer file.Close()
+	} else {
+		file = opts.File
+	}
 	fi, err := file.Stat()
 	if err != nil {
 		return nil, err
@@ -58,12 +66,17 @@ func (c TGZHandler) Open(info *AccessObjectInfo, acc AccessMode, path string, op
 }
 
 func (c TGZHandler) Create(info *AccessObjectInfo, path string, opts Options, mode vfs.FileMode) (*AccessObject, error) {
-	ok, err := vfs.Exists(opts.PathFileSystem, path)
-	if err != nil {
+	if err := opts.ValidForPath(path); err != nil {
 		return nil, err
 	}
-	if ok {
-		return nil, vfs.ErrExist
+	if opts.File == nil {
+		ok, err := vfs.Exists(opts.PathFileSystem, path)
+		if err != nil {
+			return nil, err
+		}
+		if ok {
+			return nil, vfs.ErrExist
+		}
 	}
 
 	return NewAccessObject(info, ACC_CREATE, opts.Representation, CloserFunction(func(obj *AccessObject) error { return c.close(obj, path, opts, mode) }), format.DirMode)
@@ -71,7 +84,7 @@ func (c TGZHandler) Create(info *AccessObjectInfo, path string, opts Options, mo
 
 // Write tars the current object and its artifacts.
 func (c TGZHandler) Write(obj *AccessObject, path string, opts Options, mode vfs.FileMode) error {
-	writer, err := opts.PathFileSystem.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode&0666)
+	writer, err := opts.WriterFor(path, mode)
 	if err != nil {
 		return err
 	}

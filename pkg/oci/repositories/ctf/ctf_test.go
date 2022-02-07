@@ -52,7 +52,7 @@ func defaultManifestFill(n cpi.NamespaceAccess) {
 	Expect(n.AddBlob(config)).To(Succeed())
 	desc.Config = *artdesc.DefaultBlobDescriptor(config)
 
-	blob, err := n.AddArtefact(art)
+	blob, err := n.AddTaggedArtefact(art)
 	Expect(err).To(Succeed())
 	n.AddTags(blob.Digest(), "v1")
 }

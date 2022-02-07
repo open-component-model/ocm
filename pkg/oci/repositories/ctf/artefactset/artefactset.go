@@ -15,15 +15,19 @@
 package artefactset
 
 import (
+	"strings"
+
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
+	"github.com/gardener/ocm/pkg/oci/core"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 )
 
+const TAGS_MAINARTEFACT = "ocm.gardener.cloud/main"
 const TAGS_ANNOTATION = "ocm.gardener.cloud/tags"
 const TYPE_ANNOTATION = "ocm.gardener.cloud/type"
 
@@ -33,6 +37,7 @@ type ArtefactSet struct {
 }
 
 var _ ArtefactSetContainer = (*ArtefactSet)(nil)
+var _ cpi.ArtefactSink = (*ArtefactSet)(nil)
 
 // New returns a new representation based element
 func New(acc accessobj.AccessMode, fs vfs.FileSystem, closer accessobj.Closer, mode vfs.FileMode) (*ArtefactSet, error) {
@@ -48,6 +53,57 @@ func _Wrap(obj *accessobj.AccessObject, err error) (*ArtefactSet, error) {
 	}
 	s.ArtefactSetAccess = NewArtefactSetAccess(s)
 	return s, nil
+}
+
+func (a *ArtefactSet) Annotate(name string, value string) {
+	a.lock.Lock()
+	defer a.lock.Unlock()
+
+	d := a.GetIndex()
+	if d.Annotations == nil {
+		d.Annotations = map[string]string{}
+	}
+	d.Annotations[name] = value
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// sink
+
+func (a *ArtefactSet) AddTaggedArtefact(art core.Artefact, tags ...string) (core.BlobAccess, error) {
+	blob, err := a.AddArtefact(art, nil)
+	if err != nil {
+		return nil, err
+	}
+	err = a.AnnotateArtefact(blob.Digest(), TAGS_ANNOTATION, strings.Join(tags, ","))
+	return blob, err
+}
+
+func (i *ArtefactSet) AddTags(digest digest.Digest, tags ...string) error {
+	if i.IsClosed() {
+		return accessio.ErrClosed
+	}
+	i.base.Lock()
+	defer i.base.Unlock()
+
+	idx := i.GetIndex()
+	for _, e := range idx.Manifests {
+		if e.Digest == digest {
+			if e.Annotations == nil {
+				e.Annotations = map[string]string{}
+			}
+			cur := e.Annotations[TAGS_ANNOTATION]
+			if cur != "" {
+				cur = strings.Join(append([]string{cur}, tags...), ",")
+			} else {
+				cur = strings.Join(tags, ",")
+			}
+			if cur != "" {
+				e.Annotations[TYPE_ANNOTATION] = cur
+			}
+			return nil
+		}
+	}
+	return errors.ErrUnknown(cpi.KIND_OCIARTEFACT, digest.String())
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -89,6 +145,9 @@ func (a *ArtefactSet) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) 
 }
 
 func (a *ArtefactSet) AddBlob(blob cpi.BlobAccess) error {
+	if blob == nil {
+		return nil
+	}
 	a.base.Lock()
 	defer a.base.Unlock()
 	return a.base.AddBlob(blob)

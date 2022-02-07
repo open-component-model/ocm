@@ -27,7 +27,7 @@ type BlobDescriptorSource interface {
 }
 
 type BlobHandler struct {
-	access ArtefactSetContainer
+	container ArtefactSetContainer
 	BlobDescriptorSource
 }
 
@@ -36,13 +36,13 @@ func NewBlobHandler(set ArtefactSetContainer, src BlobDescriptorSource) *BlobHan
 }
 
 func (h *BlobHandler) AddBlob(blob cpi.BlobAccess) error {
-	return h.access.AddBlob(blob)
+	return h.container.AddBlob(blob)
 }
 
 func (h *BlobHandler) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
 	d := h.GetBlobDescriptor(digest)
 	if d != nil {
-		data, err := h.access.GetBlobData(digest)
+		data, err := h.container.GetBlobData(digest)
 		if err != nil {
 			return nil, err
 		}
@@ -52,7 +52,7 @@ func (h *BlobHandler) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
 }
 
 func (h *BlobHandler) GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {
-	return h.access.GetArtefact(digest)
+	return h.container.GetArtefact(digest)
 }
 
 func (h *BlobHandler) GetIndex(digest digest.Digest) (cpi.IndexAccess, error) {
@@ -61,7 +61,7 @@ func (h *BlobHandler) GetIndex(digest digest.Digest) (cpi.IndexAccess, error) {
 		return nil, err
 	}
 	if idx, err := a.Index(); err == nil {
-		return NewIndex(h.access, idx), nil
+		return NewIndex(h.container, idx), nil
 	}
 	return nil, errors.New("no index")
 }
@@ -72,14 +72,14 @@ func (h *BlobHandler) GetManifest(digest digest.Digest) (cpi.ManifestAccess, err
 		return nil, err
 	}
 	if m, err := a.Manifest(); err == nil {
-		return NewManifest(h.access, m), nil
+		return NewManifest(h.container, m), nil
 	}
 	return nil, errors.New("no manifest")
 }
 
 func (h *BlobHandler) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
-	if h.access.IsReadOnly() {
+	if h.container.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	return NewArtefact(h.access, art...), nil
+	return NewArtefact(h.container, art...), nil
 }

@@ -130,6 +130,52 @@ var _ = Describe("artefact management", func() {
 			"blobs/sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
 	})
 
+	It("instantiate tgz artefact for open file object", func() {
+		file, err := vfs.TempFile(opts.PathFileSystem, "", "*.tgz")
+		Expect(err).To(Succeed())
+		defer file.Close()
+
+		opts := accessobj.AccessOptions(opts, accessobj.File(file))
+
+		a, err := artefactset.FormatTGZ.Create("", opts, 0600)
+		Expect(err).To(Succeed())
+
+		defaultManifestFill(a)
+
+		Expect(a.Close()).To(Succeed())
+		Expect(vfs.FileExists(tempfs, file.Name())).To(BeTrue())
+
+		_, err = file.Seek(0, io.SeekStart)
+		Expect(err).To(Succeed())
+		zip, err := gzip.NewReader(file)
+		Expect(err).To(Succeed())
+		defer zip.Close()
+		tr := tar.NewReader(zip)
+
+		files := []string{}
+		for {
+			header, err := tr.Next()
+			if err != nil {
+				if err == io.EOF {
+					break
+				}
+				Fail(err.Error())
+			}
+
+			switch header.Typeflag {
+			case tar.TypeDir:
+				Expect(header.Name).To(Equal(artefactset.BlobsDirectoryName))
+			case tar.TypeReg:
+				files = append(files, header.Name)
+			}
+		}
+		Expect(files).To(ContainElements(
+			artefactset.ArtefactSetDescriptorFileName,
+			"blobs/sha256.3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
+			"blobs/sha256.44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+			"blobs/sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
+	})
+
 	Context("manifest", func() {
 		It("read from filesystem artefact", func() {
 			a, err := artefactset.FormatDirectory.Create("test", opts, 0700)

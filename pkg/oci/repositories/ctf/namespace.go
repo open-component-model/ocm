@@ -28,6 +28,10 @@ type Namespace struct {
 	access *NamespaceContainer
 }
 
+func (n *Namespace) Close() error {
+	panic("implement me")
+}
+
 type NamespaceContainer struct {
 	repo              *Repository
 	namespace         string
@@ -113,6 +117,10 @@ func (n *Namespace) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, e
 	return artefactset.NewArtefact(n.access, art...), nil
 }
 
+func (n *Namespace) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
+	return n.access.GetBlobData(digest)
+}
+
 func (n *Namespace) GetArtefact(ref string) (cpi.ArtefactAccess, error) {
 	meta := n.access.repo.getIndex().GetArtefactInfo(n.access.namespace, ref)
 	if meta != nil {
@@ -121,7 +129,7 @@ func (n *Namespace) GetArtefact(ref string) (cpi.ArtefactAccess, error) {
 	return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, ref, n.access.namespace)
 }
 
-func (n *Namespace) AddArtefact(artefact cpi.Artefact, tags ...string) (access accessio.BlobAccess, err error) {
+func (n *Namespace) AddTaggedArtefact(artefact cpi.Artefact, tags ...string) (access accessio.BlobAccess, err error) {
 	return n.access.AddArtefact(artefact, nil)
 }
 

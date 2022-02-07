@@ -15,6 +15,8 @@
 package artdesc
 
 import (
+	"strings"
+
 	"github.com/gardener/ocm/pkg/common/accessio"
 )
 
@@ -26,5 +28,29 @@ func DefaultBlobDescriptor(blob accessio.BlobAccess) *Descriptor {
 		URLs:        nil,
 		Annotations: nil,
 		Platform:    nil,
+	}
+}
+
+func IsDigest(ref string) bool {
+	return strings.Index(ref, ":") >= 0
+}
+
+func IsOCIMediaType(media string) bool {
+	last := strings.LastIndex(media, "+")
+	if last >= 0 {
+		switch media[last+1:] {
+		case "tar":
+			fallthrough
+		case "tgz":
+			media = media[:last]
+		}
+	}
+	switch media {
+	case MediaTypeImageIndex:
+		fallthrough
+	case MediaTypeImageManifest:
+		return true
+	default:
+		return false
 	}
 }

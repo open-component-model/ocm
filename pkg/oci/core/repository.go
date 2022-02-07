@@ -34,15 +34,25 @@ type RepositorySource interface {
 type BlobAccess = accessio.BlobAccess
 type DataAccess = accessio.DataAccess
 
+type ArtefactSink interface {
+	AddBlob(BlobAccess) error
+	AddTaggedArtefact(art Artefact, tags ...string) (BlobAccess, error)
+	AddTags(digest digest.Digest, tags ...string) error
+}
+
+type ArtefactSource interface {
+	GetArtefact(ref string) (ArtefactAccess, error)
+	GetBlobData(digest digest.Digest) (DataAccess, error)
+}
+
 type NamespaceAccess interface {
 	RepositorySource
+	ArtefactSource
+	ArtefactSink
 
-	GetArtefact(ref string) (ArtefactAccess, error)
-
-	AddBlob(BlobAccess) error
-	AddArtefact(art Artefact, tags ...string) (BlobAccess, error)
-	AddTags(digest digest.Digest, tags ...string) error
 	NewArtefact(...*artdesc.Artefact) (ArtefactAccess, error)
+
+	Close() error
 }
 
 type Artefact interface {
@@ -57,7 +67,10 @@ type Artefact interface {
 type ArtefactAccess interface {
 	Artefact
 
+	Blob() (BlobAccess, error)
 	GetDescriptor() *artdesc.Artefact
+	ManifestAccess() ManifestAccess
+	IndexAccess() IndexAccess
 	GetManifest(digest digest.Digest) (ManifestAccess, error)
 	GetBlob(digest digest.Digest) (BlobAccess, error)
 
@@ -71,6 +84,7 @@ type ManifestAccess interface {
 
 	GetDescriptor() *artdesc.Manifest
 	GetBlobDescriptor(digest digest.Digest) *artdesc.Descriptor
+	GetConfigBlob() (BlobAccess, error)
 	GetBlob(digest digest.Digest) (BlobAccess, error)
 
 	AddBlob(BlobAccess) error

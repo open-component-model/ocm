@@ -46,7 +46,7 @@ type BlobAccess interface {
 	MimeType
 
 	// Digest returns the blob digest
-	Digest() digest.Digest
+	Digest() digest.Digest // TODO; add error
 	// Size returns the blob size
 	Size() int64
 }
@@ -121,19 +121,6 @@ func BlobAccessForDataAccess(digest digest.Digest, size int64, mimeType string, 
 	}
 }
 
-func BlobAccessForFile(mimeType string, path string, fs vfs.FileSystem) BlobAccess {
-	size := BLOB_UNKNOWN_SIZE
-	fi, err := fs.Stat(path)
-	if err == nil {
-		size = fi.Size()
-	}
-	return &blobAccess{
-		size:     size,
-		mimeType: mimeType,
-		access:   DataAccessForFile(fs, path),
-	}
-}
-
 func BlobAccessForString(mimeType string, data string) BlobAccess {
 	return BlobAccessForData(mimeType, []byte(data))
 }
@@ -189,4 +176,61 @@ func (b *blobAccess) update() error {
 		}
 	}
 	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type mimeBlob struct {
+	BlobAccess
+	mimetype string
+}
+
+func BlobWithMimeType(mimeType string, blob BlobAccess) BlobAccess {
+	return &mimeBlob{blob, mimeType}
+}
+
+func (b *mimeBlob) MimeType() string {
+	return b.mimetype
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type fileBlobAccess struct {
+	dataAccess
+	mimeType string
+}
+
+var _ BlobAccess = (*fileBlobAccess)(nil)
+
+func BlobAccessForFile(mimeType string, path string, fs vfs.FileSystem) BlobAccess {
+	return &fileBlobAccess{
+		mimeType:   mimeType,
+		dataAccess: dataAccess{fs, path},
+	}
+}
+
+func (f *fileBlobAccess) Size() int64 {
+	size := BLOB_UNKNOWN_SIZE
+	fi, err := f.fs.Stat(f.path)
+	if err == nil {
+		size = fi.Size()
+	}
+	return size
+}
+
+func (f *fileBlobAccess) MimeType() string {
+	return f.mimeType
+}
+
+func (f *fileBlobAccess) Digest() digest.Digest {
+	r, err := f.Reader()
+	if err != nil {
+		return ""
+	}
+	defer r.Close()
+	d, err := digest.FromReader(r)
+	if err != nil {
+		return ""
+	}
+	return d
 }

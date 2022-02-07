@@ -16,10 +16,13 @@ package accessobj
 
 import (
 	"fmt"
+	"sync"
 
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/modern-go/reflect2"
+	"github.com/opencontainers/go-digest"
 )
 
 // These objects deal with descriptor based state descriptions
@@ -58,18 +61,60 @@ type StateAccess interface {
 	// Get returns the technical representation of a state object from its persistence
 	// It MUST return an errors.IsErrNotFound compatible error
 	// if the persistence not yet exists.
-	Get() ([]byte, error)
+	Get() (accessio.BlobAccess, error)
+	Digest() digest.Digest
 	Put(data []byte) error
+}
+
+// BlobStateAccess provides state handling for data given by a blob access
+type BlobStateAccess struct {
+	lock sync.RWMutex
+	blob accessio.BlobAccess
+}
+
+var _ StateAccess = (*BlobStateAccess)(nil)
+
+func NewBlobStateAccess(blob accessio.BlobAccess) StateAccess {
+	return &BlobStateAccess{
+		blob: blob,
+	}
+}
+
+func NewBlobStateAccessForData(mimeType string, data []byte) StateAccess {
+	return &BlobStateAccess{
+		blob: accessio.BlobAccessForData(mimeType, data),
+	}
+}
+
+func (b *BlobStateAccess) Get() (accessio.BlobAccess, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+	return b.blob, nil
+}
+
+func (b *BlobStateAccess) Put(data []byte) error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	b.blob = accessio.BlobAccessForData(b.blob.MimeType(), data)
+	return nil
+}
+
+func (b *BlobStateAccess) Digest() digest.Digest {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+	return b.blob.Digest()
 }
 
 // State manages the modification and access of state
 // with a technical representation as byte array
+// It tries to keep the byte representation unchanged as long as
+// possible
 type State interface {
 	IsReadOnly() bool
 	IsCreate() bool
 
-	GetOriginalData() []byte
-	GetData() ([]byte, error)
+	GetOriginalBlob() accessio.BlobAccess
+	GetBlob() (accessio.BlobAccess, error)
 
 	HasChanged() bool
 	GetOriginalState() interface{}
@@ -83,15 +128,26 @@ type state struct {
 	mode         AccessMode
 	access       StateAccess
 	handler      StateHandler
-	originalData []byte
+	originalBlob accessio.BlobAccess
 	original     interface{}
 	current      interface{}
 }
 
+var _ State = (*state)(nil)
+
 // NewState creates a new State based on its persistence handling
 // and the management of its technical representation as byte array
-func NewState(mode AccessMode, a StateAccess, p StateHandler) (*state, error) {
-	data, err := a.Get()
+func NewState(mode AccessMode, a StateAccess, p StateHandler) (State, error) {
+	state, err := newState(mode, a, p)
+	// avoid nil pinter problem: go is great
+	if err != nil {
+		return nil, err
+	}
+	return state, nil
+}
+
+func newState(mode AccessMode, a StateAccess, p StateHandler) (*state, error) {
+	blob, err := a.Get()
 	if err != nil {
 		if (mode&ACC_CREATE) == 0 || !errors.IsErrNotFound(err) {
 			return nil, err
@@ -99,9 +155,13 @@ func NewState(mode AccessMode, a StateAccess, p StateHandler) (*state, error) {
 	}
 	var current interface{}
 	var original interface{}
-	if data == nil {
+	if blob == nil {
 		current = p.Initial()
 	} else {
+		data, err := blob.Get()
+		if err != nil {
+			return nil, err
+		}
 		current, err = p.Decode(data)
 		if err != nil {
 			return nil, err
@@ -114,10 +174,37 @@ func NewState(mode AccessMode, a StateAccess, p StateHandler) (*state, error) {
 		mode:         mode,
 		access:       a,
 		handler:      p,
-		originalData: data,
+		originalBlob: blob,
 		original:     original,
 		current:      current,
 	}, nil
+}
+
+// NewBlobState provides state handling for and object persisted as a blob.
+// It tries to keep the blob representation unchanged as long as possible
+// consulting the state handler responsible for analysing the binary blob data
+// and the object.
+func NewBlobStateForBlob(mode AccessMode, blob accessio.BlobAccess, p StateHandler) (State, error) {
+	if blob == nil {
+		data, err := p.Encode(p.Initial())
+		if err != nil {
+			return nil, err
+		}
+		blob = accessio.BlobAccessForData("", data)
+	}
+	return NewState(mode, NewBlobStateAccess(blob), p)
+}
+
+// NewBlobStateForObject returns a representation state handling for a given object
+func NewBlobStateForObject(mode AccessMode, obj interface{}, p StateHandler) (State, error) {
+	if reflect2.IsNil(obj) {
+		obj = p.Initial()
+	}
+	data, err := p.Encode(obj)
+	if err != nil {
+		return nil, err
+	}
+	return NewBlobStateForBlob(mode, accessio.BlobAccessForData("", data), p)
 }
 
 func (s *state) IsReadOnly() bool {
@@ -129,7 +216,7 @@ func (s *state) IsCreate() bool {
 }
 
 func (s *state) Refresh() error {
-	n, err := NewState(s.mode, s.access, s.handler)
+	n, err := newState(s.mode, s.access, s.handler)
 	if err != nil {
 		return err
 	}
@@ -138,13 +225,17 @@ func (s *state) Refresh() error {
 }
 
 func (s *state) GetOriginalState() interface{} {
-	if s.originalData == nil {
+	if s.originalBlob == nil {
 		return nil
 	}
 	// always provide a private copy to not corrupt the internal state
-	original, err := s.handler.Decode(s.originalData)
+	var original interface{}
+	data, err := s.originalBlob.Get()
+	if err == nil {
+		original, err = s.handler.Decode(data)
+	}
 	if err != nil {
-		panic("use of invalid state")
+		panic("use of invalid state: " + err.Error())
 	}
 	return original
 }
@@ -153,19 +244,26 @@ func (s *state) GetState() interface{} {
 	return s.current
 }
 
-func (s *state) GetOriginalData() []byte {
-	return s.originalData
+func (s *state) GetOriginalBlob() accessio.BlobAccess {
+	return s.originalBlob
 }
 
 func (s *state) HasChanged() bool {
 	return s.handler.Equivalent(s.original, s.current)
 }
 
-func (s *state) GetData() ([]byte, error) {
+func (s *state) GetBlob() (accessio.BlobAccess, error) {
 	if s.handler.Equivalent(s.original, s.current) {
-		return s.originalData, nil
+		return s.originalBlob, nil
 	}
-	return s.handler.Encode(s.current)
+	data, err := s.handler.Encode(s.current)
+	if err != nil {
+		return nil, err
+	}
+	if s.originalBlob != nil {
+		return accessio.BlobAccessForData(s.originalBlob.MimeType(), data), nil
+	}
+	return accessio.BlobAccessForData("", data), nil
 }
 
 func (s *state) Update() (bool, error) {
@@ -188,7 +286,11 @@ func (s *state) Update() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	s.originalData = data
+	mimeType := ""
+	if s.originalBlob != nil {
+		mimeType = s.originalBlob.MimeType()
+	}
+	s.originalBlob = accessio.BlobAccessForData(mimeType, data)
 	s.original = original
 	return true, nil
 }
@@ -198,17 +300,19 @@ func (s *state) Update() (bool, error) {
 type fileBasedAccess struct {
 	filesystem vfs.FileSystem
 	path       string
+	mimeType   string
 	mode       vfs.FileMode
 }
 
-func (f *fileBasedAccess) Get() ([]byte, error) {
-	data, err := vfs.ReadFile(f.filesystem, f.path)
+func (f *fileBasedAccess) Get() (accessio.BlobAccess, error) {
+	ok, err := vfs.FileExists(f.filesystem, f.path)
 	if err != nil {
-		if vfs.IsErrNotExist(err) {
-			return nil, errors.ErrNotFoundWrap(err, "file", f.path)
-		}
+		return nil, err
 	}
-	return data, err
+	if !ok {
+		return nil, errors.ErrNotFoundWrap(vfs.ErrNotExist, "file", f.path)
+	}
+	return accessio.BlobAccessForFile(f.mimeType, f.path, f.filesystem), nil
 }
 
 func (f *fileBasedAccess) Put(data []byte) error {
@@ -218,11 +322,27 @@ func (f *fileBasedAccess) Put(data []byte) error {
 	return nil
 }
 
+func (f *fileBasedAccess) Digest() digest.Digest {
+	data, err := f.filesystem.Open(f.path)
+	if err == nil {
+		defer data.Close()
+		d, err := digest.FromReader(data)
+		if err == nil {
+			return d
+		}
+	}
+	return ""
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // NewFileBasedState create a new State object based on a file based persistence
 // of the state carrying object.
-func NewFileBasedState(acc AccessMode, fs vfs.FileSystem, path string, h StateHandler, mode vfs.FileMode) (State, error) {
-	return NewState(acc, &fileBasedAccess{fs, path, mode}, h)
-
+func NewFileBasedState(acc AccessMode, fs vfs.FileSystem, path string, mimeType string, h StateHandler, mode vfs.FileMode) (State, error) {
+	return NewState(acc, &fileBasedAccess{
+		filesystem: fs,
+		path:       path,
+		mode:       mode,
+		mimeType:   mimeType,
+	}, h)
 }

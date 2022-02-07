@@ -16,7 +16,6 @@ package accessobj
 
 import (
 	"archive/tar"
-	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -46,12 +45,21 @@ func (_ TarHandler) Format() accessio.FileFormat {
 }
 
 func (c TarHandler) Open(info *AccessObjectInfo, acc AccessMode, path string, opts Options) (*AccessObject, error) {
-	// we expect that the path point to a tar
-	file, err := opts.PathFileSystem.Open(path)
-	if err != nil {
-		return nil, fmt.Errorf("unable to open tar archive from %s: %w", path, err)
+	if err := opts.ValidForPath(path); err != nil {
+		return nil, err
 	}
-	defer file.Close()
+	var file vfs.File
+	var err error
+	if opts.File == nil {
+		// we expect that the path point to a tar
+		file, err = opts.PathFileSystem.Open(path)
+		if err != nil {
+			return nil, fmt.Errorf("unable to open tar archive from %s: %w", path, err)
+		}
+		defer file.Close()
+	} else {
+		file = opts.File
+	}
 	fi, err := file.Stat()
 	if err != nil {
 		return nil, err
@@ -60,12 +68,17 @@ func (c TarHandler) Open(info *AccessObjectInfo, acc AccessMode, path string, op
 }
 
 func (c TarHandler) Create(info *AccessObjectInfo, path string, opts Options, mode vfs.FileMode) (*AccessObject, error) {
-	ok, err := vfs.Exists(opts.PathFileSystem, path)
-	if err != nil {
+	if err := opts.ValidForPath(path); err != nil {
 		return nil, err
 	}
-	if ok {
-		return nil, vfs.ErrExist
+	if opts.File == nil {
+		ok, err := vfs.Exists(opts.PathFileSystem, path)
+		if err != nil {
+			return nil, err
+		}
+		if ok {
+			return nil, vfs.ErrExist
+		}
 	}
 
 	return NewAccessObject(info, ACC_CREATE, opts.Representation, CloserFunction(func(obj *AccessObject) error { return c.close(obj, path, opts, mode) }), format.DirMode)
@@ -73,7 +86,7 @@ func (c TarHandler) Create(info *AccessObjectInfo, path string, opts Options, mo
 
 // Write tars the current descriptor and its artifacts.
 func (c TarHandler) Write(obj *AccessObject, path string, opts Options, mode vfs.FileMode) error {
-	writer, err := opts.PathFileSystem.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode&0666)
+	writer, err := opts.WriterFor(path, mode)
 	if err != nil {
 		return err
 	}
@@ -86,14 +99,14 @@ func (_ TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts Opti
 	if err != nil {
 		return err
 	}
-	data, err := obj.state.GetData()
+	data, err := obj.state.GetBlob()
 	if err != nil {
 		return err
 	}
 	tw := tar.NewWriter(writer)
 	cdHeader := &tar.Header{
 		Name:    obj.info.DescriptorFileName,
-		Size:    int64(len(data)),
+		Size:    data.Size(),
 		Mode:    format.FileMode,
 		ModTime: format.ModTime,
 	}
@@ -101,7 +114,12 @@ func (_ TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts Opti
 	if err := tw.WriteHeader(cdHeader); err != nil {
 		return fmt.Errorf("unable to write descriptor header: %w", err)
 	}
-	if _, err := io.Copy(tw, bytes.NewBuffer(data)); err != nil {
+	r, err := data.Reader()
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+	if _, err := io.Copy(tw, r); err != nil {
 		return fmt.Errorf("unable to write descriptor content: %w", err)
 	}
 

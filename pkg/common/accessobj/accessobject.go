@@ -57,7 +57,7 @@ func NewAccessObject(info *AccessObjectInfo, acc AccessMode, fs vfs.FileSystem, 
 		closer = FSCloser(closer)
 	}
 
-	s, err := NewFileBasedState(acc, fs, info.DescriptorFileName, info.DescriptorHandlerFactory(fs), mode)
+	s, err := NewFileBasedState(acc, fs, info.DescriptorFileName, "", info.DescriptorHandlerFactory(fs), mode)
 	if err != nil {
 		return nil, err
 	}

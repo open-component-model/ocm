@@ -15,7 +15,11 @@
 package accessobj
 
 import (
+	"io"
+	"os"
+
 	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/errors"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -33,6 +37,9 @@ type Options struct {
 	// This configuration option is not available for the textual representation of
 	// the repository specification
 	Representation vfs.FileSystem `json:"-"`
+	// File is an opened file object to use instead of the path and path filesystem
+	// It should never be closed if given to support temporary files
+	File vfs.File `json:"-"`
 }
 
 var _ Option = &Options{}
@@ -65,15 +72,46 @@ func (o Options) DefaultFormat(fmt accessio.FileFormat) Options {
 	return o
 }
 
+func (o Options) ValidForPath(path string) error {
+	if path != "" && o.File != nil {
+		return errors.ErrInvalid("option", "path", "combination with file")
+	}
+	return nil
+}
+
 func (o Options) DefaultForPath(path string) (Options, error) {
+	if err := o.ValidForPath(path); err != nil {
+		return o, err
+	}
 	if o.FileFormat == nil {
-		fmt, err := DetectFormat(path, o.PathFileSystem)
+		var fmt *accessio.FileFormat
+		var err error
+		if o.File != nil {
+			fmt, err = DetectFormatForFile(o.File)
+		} else {
+			fmt, err = DetectFormat(path, o.PathFileSystem)
+		}
 		if err == nil {
 			o.FileFormat = fmt
 		}
 		return o, err
 	}
 	return o, nil
+}
+
+func (o Options) WriterFor(path string, mode vfs.FileMode) (io.Writer, error) {
+	if err := o.ValidForPath(path); err != nil {
+		return nil, err
+	}
+	var writer io.Writer
+	var err error
+	if o.File == nil {
+		writer, err = o.PathFileSystem.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode&0666)
+	} else {
+		writer = o.File
+		err = o.File.Truncate(0)
+	}
+	return writer, err
 }
 
 // ApplyOptions applies the given list options on these options,
@@ -92,7 +130,7 @@ type Option interface {
 	ApplyOption(options *Options)
 }
 
-// PathFileSystem set the evaltuation filesystem for the path name
+// PathFileSystem set the evaluation filesystem for the path name
 func PathFileSystem(fs vfs.FileSystem) Option {
 	return opt_PFS{fs}
 }
@@ -118,6 +156,20 @@ type opt_RFS struct {
 // ApplyOption applies the configured path filesystem.
 func (o opt_RFS) ApplyOption(options *Options) {
 	options.Representation = o.FileSystem
+}
+
+// File set open file to use
+func File(file vfs.File) Option {
+	return opt_F{file}
+}
+
+type opt_F struct {
+	vfs.File
+}
+
+// ApplyOption applies the configured open file
+func (o opt_F) ApplyOption(options *Options) {
+	options.File = o.File
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -31,6 +31,7 @@ type RepositoryTypeScheme = core.RepositoryTypeScheme
 type RepositorySpec = core.RepositorySpec
 type GenericRepositorySpec = core.GenericRepositorySpec
 type ArtefactAccess = core.ArtefactAccess
+type NamespaceAccess = core.NamespaceAccess
 type BlobAccess = core.BlobAccess
 type DataAccess = core.DataAccess
 

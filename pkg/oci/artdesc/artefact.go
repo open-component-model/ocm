@@ -123,10 +123,14 @@ func (d Artefact) MarshalJSON() ([]byte, error) {
 		d.manifest.MediaType = ociv1.MediaTypeImageIndex
 		return json.Marshal(d.index)
 	}
-	return []byte("{}"), nil
+	return []byte("null"), nil
 }
 
 func (d *Artefact) UnmarshalJSON(data []byte) error {
+
+	if string(data) == "null" {
+		return nil
+	}
 	var m helper.GenericDescriptor
 
 	err := json.Unmarshal(data, &m)

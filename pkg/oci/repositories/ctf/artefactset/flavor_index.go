@@ -15,9 +15,8 @@
 package artefactset
 
 import (
-	"sync"
-
 	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/core"
@@ -26,27 +25,58 @@ import (
 )
 
 type Index struct {
-	access       ArtefactSetContainer
-	index        *artdesc.Index
-	lock         sync.RWMutex
+	artefactBase
 	*BlobHandler // Index offers all: blobs, artefacts, manifests and indices
 }
 
 var _ cpi.IndexAccess = (*Index)(nil)
 
-func NewIndex(access ArtefactSetContainer, def ...*artdesc.Index) core.IndexAccess {
-	var index *artdesc.Index
-	if len(def) == 0 || def[0] == nil {
-		index = artdesc.NewIndex()
-	} else {
-		index = def[0]
+func NewIndex(access ArtefactSetContainer, defs ...*artdesc.Index) core.IndexAccess {
+	var def *artdesc.Index
+	if len(defs) != 0 && defs[0] != nil {
+		def = defs[0]
 	}
+	mode := accessobj.ACC_WRITABLE
+	if access.IsReadOnly() {
+		mode = accessobj.ACC_READONLY
+	}
+	state, err := accessobj.NewBlobStateForObject(mode, def, NewIndexStateHandler())
+	if err != nil {
+		panic("oops")
+	}
+
 	i := &Index{
-		access: access,
-		index:  index,
+		artefactBase: artefactBase{
+			access: access,
+			state:  state,
+		},
 	}
 	i.BlobHandler = NewBlobHandler(access, i)
 	return i
+}
+
+type indexMapper struct {
+	accessobj.State
+}
+
+var _ accessobj.State = (*indexMapper)(nil)
+
+func (m *indexMapper) GetState() interface{} {
+	return m.State.GetState().(*artdesc.Artefact).Index()
+}
+func (m *indexMapper) GetOriginalState() interface{} {
+	return m.State.GetOriginalState().(*artdesc.Artefact).Index()
+}
+
+func NewIndexForArtefact(a *Artefact) *Index {
+	m := &Index{
+		artefactBase: artefactBase{
+			access: a.access,
+			state:  &indexMapper{a.state},
+		},
+	}
+	m.BlobHandler = NewBlobHandler(a.access, m)
+	return m
 }
 
 func (i *Index) IsManifest() bool {
@@ -62,29 +92,29 @@ func (i *Index) Manifest() (*artdesc.Manifest, error) {
 }
 
 func (i *Index) Index() (*artdesc.Index, error) {
-	return i.index, nil
+	return i.GetDescriptor(), nil
 }
 
 func (i *Index) Artefact() *artdesc.Artefact {
 	a := artdesc.New()
-	_ = a.SetIndex(i.index)
+	_ = a.SetIndex(i.GetDescriptor())
 	return a
 }
 
 func (i *Index) GetDescriptor() *artdesc.Index {
-	return i.index
+	return i.state.GetState().(*artdesc.Index)
 }
 
 func (i *Index) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
-	d := i.index.GetBlobDescriptor(digest)
+	d := i.GetDescriptor().GetBlobDescriptor(digest)
 	if d != nil {
 		return d
 	}
-	return i.access.GetBlobDescriptor(digest)
+	return i.container.GetBlobDescriptor(digest)
 }
 
 func (a *Index) AddArtefact(art cpi.Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
-	blob, err := a.access.AddArtefact(art, platform)
+	blob, err := a.container.AddArtefact(art, platform)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +122,8 @@ func (a *Index) AddArtefact(art cpi.Artefact, platform *artdesc.Platform) (acces
 	a.lock.Lock()
 	defer a.lock.Unlock()
 
-	a.index.Manifests = append(a.index.Manifests, cpi.Descriptor{
+	d := a.GetDescriptor()
+	d.Manifests = append(d.Manifests, cpi.Descriptor{
 		MediaType:   blob.MimeType(),
 		Digest:      blob.Digest(),
 		Size:        blob.Size(),

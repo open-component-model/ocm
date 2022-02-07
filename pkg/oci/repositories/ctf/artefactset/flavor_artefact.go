@@ -18,33 +18,52 @@ import (
 	"sync"
 
 	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
+	"github.com/gardener/ocm/pkg/oci/core"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/opencontainers/go-digest"
 )
 
 var ErrNoIndex = errors.New("manifest does not support access to subsequent artefacts")
 
+type artefactBase struct {
+	lock   sync.RWMutex
+	access ArtefactSetContainer
+	state  accessobj.State
+}
+
+func (a *artefactBase) Blob() (accessio.BlobAccess, error) {
+	return a.state.GetBlob()
+}
+
 type Artefact struct {
-	lock     sync.RWMutex
-	access   ArtefactSetContainer
-	artefact *artdesc.Artefact
-	handler  *BlobHandler
+	artefactBase
+	handler *BlobHandler
 }
 
 var _ cpi.ArtefactAccess = (*Artefact)(nil)
 
-func NewArtefact(access ArtefactSetContainer, def ...*artdesc.Artefact) *Artefact {
-	var artefact *artdesc.Artefact
-	if len(def) == 0 || def[0] == nil {
-		artefact = artdesc.New()
-	} else {
-		artefact = def[0]
+func NewArtefact(access ArtefactSetContainer, defs ...*artdesc.Artefact) *Artefact {
+	var def *artdesc.Artefact
+	if len(defs) != 0 && defs[0] != nil {
+		def = defs[0]
 	}
+	mode := accessobj.ACC_WRITABLE
+	if access.IsReadOnly() {
+		mode = accessobj.ACC_READONLY
+	}
+	state, err := accessobj.NewBlobStateForObject(mode, def, NewArtefactStateHandler())
+	if err != nil {
+		panic("oops: " + err.Error())
+	}
+
 	a := &Artefact{
-		access:   access,
-		artefact: artefact,
+		artefactBase: artefactBase{
+			access: access,
+			state:  state,
+		},
 	}
 	a.handler = NewBlobHandler(access, a)
 	return a
@@ -59,17 +78,13 @@ func (a *Artefact) IsReadOnly() bool {
 }
 
 func (a *Artefact) Artefact() *artdesc.Artefact {
-	a.lock.RLock()
-	defer a.lock.RUnlock()
-	if a.artefact.IsValid() {
-		return a.artefact
-	}
-	return nil
+	return a.GetDescriptor()
 }
 
 func (a *Artefact) GetDescriptor() *artdesc.Artefact {
-	if a.artefact.IsValid() {
-		return a.artefact
+	d := a.state.GetState().(*artdesc.Artefact)
+	if d.IsValid() {
+		return d
 	}
 	return nil
 }
@@ -78,7 +93,7 @@ func (a *Artefact) GetDescriptor() *artdesc.Artefact {
 // from artdesc.Artefact
 
 func (a *Artefact) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
-	d := a.artefact.GetBlobDescriptor(digest)
+	d := a.GetDescriptor().GetBlobDescriptor(digest)
 	if d != nil {
 		return d
 	}
@@ -86,24 +101,23 @@ func (a *Artefact) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 }
 
 func (a *Artefact) IsIndex() bool {
-	a.lock.RLock()
-	defer a.lock.RUnlock()
-	return a.artefact.IsIndex()
+	d := a.state.GetState().(*artdesc.Artefact)
+	return d.IsIndex()
 }
 
 func (a *Artefact) IsManifest() bool {
-	a.lock.RLock()
-	defer a.lock.RUnlock()
-	return a.artefact.IsManifest()
+	d := a.state.GetState().(*artdesc.Artefact)
+	return d.IsManifest()
 }
 
 func (a *Artefact) Index() (*artdesc.Index, error) {
 	a.lock.Lock()
 	defer a.lock.Unlock()
-	idx := a.artefact.Index()
+	d := a.state.GetState().(*artdesc.Artefact)
+	idx := d.Index()
 	if idx == nil {
 		idx = artdesc.NewIndex()
-		if err := a.artefact.SetIndex(idx); err != nil {
+		if err := d.SetIndex(idx); err != nil {
 			return nil, err
 		}
 	}
@@ -113,14 +127,43 @@ func (a *Artefact) Index() (*artdesc.Index, error) {
 func (a *Artefact) Manifest() (*artdesc.Manifest, error) {
 	a.lock.Lock()
 	defer a.lock.Unlock()
-	m := a.artefact.Manifest()
+	d := a.state.GetState().(*artdesc.Artefact)
+	m := d.Manifest()
 	if m == nil {
 		m = artdesc.NewManifest()
-		if err := a.artefact.SetManifest(m); err != nil {
+		if err := d.SetManifest(m); err != nil {
 			return nil, err
 		}
 	}
 	return m, nil
+}
+
+func (a *Artefact) ManifestAccess() core.ManifestAccess {
+	a.lock.Lock()
+	defer a.lock.Unlock()
+	d := a.state.GetState().(*artdesc.Artefact)
+	m := d.Manifest()
+	if m == nil {
+		m = artdesc.NewManifest()
+		if err := d.SetManifest(m); err != nil {
+			return nil
+		}
+	}
+	return NewManifestForArtefact(a)
+}
+
+func (a *Artefact) IndexAccess() core.IndexAccess {
+	a.lock.Lock()
+	defer a.lock.Unlock()
+	d := a.state.GetState().(*artdesc.Artefact)
+	m := d.Manifest()
+	if m == nil {
+		m = artdesc.NewManifest()
+		if err := d.SetManifest(m); err != nil {
+			return nil
+		}
+	}
+	return NewIndexForArtefact(a)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -161,18 +204,18 @@ func (a *Artefact) AddBlob(access cpi.BlobAccess) error {
 	return a.access.AddBlob(access)
 }
 
-func (a *Artefact) AddArtefact(art cpi.Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
+func (a *Artefact) AddArtefact(art cpi.Artefact, platform *artdesc.Platform) (accessio.BlobAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
 	if a.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	idx, err := a.Index()
+	_, err := a.Index()
 	if err != nil {
 		return nil, err
 	}
-	return NewIndex(a.access, idx).AddArtefact(art, platform)
+	return NewIndexForArtefact(a).AddArtefact(art, platform)
 }
 
 func (a *Artefact) AddLayer(blob cpi.BlobAccess, d *cpi.Descriptor) (int, error) {
@@ -182,9 +225,9 @@ func (a *Artefact) AddLayer(blob cpi.BlobAccess, d *cpi.Descriptor) (int, error)
 	if a.IsReadOnly() {
 		return -1, accessio.ErrReadOnly
 	}
-	manifest, err := a.Manifest()
+	_, err := a.Manifest()
 	if err != nil {
 		return -1, err
 	}
-	return NewManifest(a.access, manifest).AddLayer(blob, d)
+	return NewManifestForArtefact(a).AddLayer(blob, d)
 }

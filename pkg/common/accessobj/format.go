@@ -101,12 +101,28 @@ func DetectFormat(path string, fs vfs.FileSystem) (*FileFormat, error) {
 
 	format := accessio.FormatDirectory
 	if !fi.IsDir() {
-		var r io.Reader
 		file, err := fs.Open(path)
 		if err != nil {
 			return nil, err
 		}
 		defer file.Close()
+		return DetectFormatForFile(file)
+	}
+	return &format, nil
+}
+
+func DetectFormatForFile(file vfs.File) (*FileFormat, error) {
+
+	fi, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
+
+	format := accessio.FormatDirectory
+	if !fi.IsDir() {
+		var r io.Reader
+
+		defer file.Seek(0, io.SeekStart)
 		zip, err := gzip.NewReader(file)
 		if err == nil {
 			format = accessio.FormatTGZ

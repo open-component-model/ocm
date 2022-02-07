@@ -122,6 +122,13 @@ Additionally this specification described two special annotations:
 
   This annotation can be used some additional type information.
 
+For the annotations of the index itself the following keys are defined:
+
+- **`ocm.gardener.cloud/main`** *digest*
+
+  This annotation describes the digest of the main artefact of the set, if used as blob
+  format for an artefact
+  
 This way the format can be used to attach elements according to various extension
 models for the OCI specification:
 

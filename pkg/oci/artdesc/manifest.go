@@ -56,3 +56,18 @@ func (m *Manifest) ToBlobAccess() (accessio.BlobAccess, error) {
 	}
 	return accessio.BlobAccessForData(MediaTypeImageManifest, data), nil
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+func DecodeManifest(data []byte) (*Manifest, error) {
+	var d Manifest
+
+	if err := json.Unmarshal(data, &d); err != nil {
+		return nil, err
+	}
+	return &d, nil
+}
+
+func EncodeManifest(d *Manifest) ([]byte, error) {
+	return json.Marshal(d)
+}
