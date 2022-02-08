@@ -15,50 +15,94 @@
 package genericocireg
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"fmt"
+	"path"
+
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
+	"github.com/gardener/ocm/pkg/ocm/repositories/ocireg"
 )
 
 type Repository struct {
 	ctx     cpi.Context
+	meta    ocireg.ComponentRepositoryMeta
 	ocirepo oci.Repository
 }
 
 var _ cpi.Repository = &Repository{}
 
-func NewRepository(ctx cpi.Context, ocirepo oci.Repository) (cpi.Repository, error) {
+func NewRepository(ctx cpi.Context, meta ocireg.ComponentRepositoryMeta, ocirepo oci.Repository) (cpi.Repository, error) {
 	repo := &Repository{
 		ctx:     ctx,
+		meta:    meta,
 		ocirepo: ocirepo,
 	}
 	_ = repo
 	return repo, nil
 }
 
-func (r Repository) Close() error {
-	panic("implement me")
+func (r *Repository) Close() error {
+	return r.ocirepo.Close()
 }
 
-func (r Repository) GetContext() cpi.Context {
-	panic("implement me")
+func (r *Repository) GetContext() cpi.Context {
+	return r.GetContext()
 }
 
-func (r Repository) GetSpecification() cpi.RepositorySpec {
-	panic("implement me")
+func (r *Repository) GetSpecification() cpi.RepositorySpec {
+	return &RepositorySpec{
+		RepositorySpec:          r.ocirepo.GetSpecification(),
+		ComponentRepositoryMeta: r.meta,
+	}
 }
 
-func (r Repository) ExistsComponentVersion(name string, version string) (bool, error) {
-	panic("implement me")
+func (r *Repository) ExistsComponentVersion(name string, version string) (bool, error) {
+	namespace, err := r.MapComponentNameToNamespace(name)
+	if err != nil {
+		return false, err
+	}
+	ns, err := r.ocirepo.LookupNamespace(namespace)
+	if err != nil {
+		return false, err
+	}
+	a, err := ns.GetArtefact(version)
+	if err != nil {
+		return false, err
+	}
+	desc, err := a.Manifest()
+	if err != nil {
+		return false, err
+	}
+	switch desc.Config.MediaType {
+	case ComponentDescriptorConfigMimeType, ComponentDescriptorLegacyConfigMimeType:
+		return true, nil
+	}
+	return false, nil
 }
 
-func (r Repository) LookupComponent(name string) (cpi.ComponentAccess, error) {
-	panic("implement me")
+func (r *Repository) LookupComponent(name string) (cpi.ComponentAccess, error) {
+	return NewComponentAccess(r, name)
 }
 
-func (r Repository) LookupComponentVersion(name string, version string) (cpi.ComponentVersionAccess, error) {
-	panic("implement me")
+func (r *Repository) LookupComponentVersion(name string, version string) (cpi.ComponentVersionAccess, error) {
+	c, err := r.LookupComponent(name)
+	if err != nil {
+		return nil, err
+	}
+	return c.LookupVersion(version)
 }
 
-func (r Repository) WriteComponent(access cpi.ComponentAccess) (cpi.ComponentAccess, error) {
-	panic("implement me")
+func (r *Repository) MapComponentNameToNamespace(name string) (string, error) {
+	switch r.meta.ComponentNameMapping {
+	case ocireg.OCIRegistryURLPathMapping, "":
+		return path.Join(ComponentDescriptorNamespace, name), nil
+	case ocireg.OCIRegistryDigestMapping:
+		h := sha256.New()
+		_, _ = h.Write([]byte(name))
+		return path.Join(hex.EncodeToString(h.Sum(nil))), nil
+	default:
+		return "", fmt.Errorf("unknown component name mapping method %s", r.meta.ComponentNameMapping)
+	}
 }

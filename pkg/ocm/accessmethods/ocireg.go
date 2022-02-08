@@ -17,6 +17,10 @@ package accessmethods
 import (
 	"io"
 
+	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/oci"
+	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
+	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/gardener/ocm/pkg/runtime"
 )
@@ -55,20 +59,22 @@ func (_ *OCIRegistryAccessSpec) GetType() string {
 }
 
 func (a *OCIRegistryAccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
-	return newOCIRegistryAccessMethod(a)
+	return newOCIRegistryAccessMethod(c, a)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type OCIRegistryAccessMethod struct {
+	comp cpi.ComponentVersionAccess
 	spec *OCIRegistryAccessSpec
 }
 
 var _ cpi.AccessMethod = &OCIRegistryAccessMethod{}
 
-func newOCIRegistryAccessMethod(a *OCIRegistryAccessSpec) (*OCIRegistryAccessMethod, error) {
+func newOCIRegistryAccessMethod(c cpi.ComponentVersionAccess, a *OCIRegistryAccessSpec) (*OCIRegistryAccessMethod, error) {
 	return &OCIRegistryAccessMethod{
 		spec: a,
+		comp: c,
 	}, nil
 }
 
@@ -77,13 +83,61 @@ func (m *OCIRegistryAccessMethod) GetKind() string {
 }
 
 func (m *OCIRegistryAccessMethod) Get() ([]byte, error) {
-	panic("implement me")
+	blob, err := m.getBlob()
+	if err != nil {
+		return nil, err
+	}
+	defer blob.Close()
+	return m.Get()
 }
 
 func (m *OCIRegistryAccessMethod) Reader() (io.ReadCloser, error) {
-	panic("implement me")
+	b, err := m.getBlob()
+	if err != nil {
+		return nil, err
+	}
+	r, err := b.Reader()
+	if err != nil {
+		return nil, err
+	}
+	return accessio.AddCloser(r, b), nil
 }
 
 func (m *OCIRegistryAccessMethod) MimeType() string {
-	return ""
+	ref, err := oci.ParseOCIReference(m.spec.ImageReference)
+	if err != nil {
+		return ""
+	}
+	spec := ocireg.NewRepositorySpec(ref.HostPort())
+	ocirepo, err := m.comp.GetContext().OCIContext().RepositoryForSpec(spec)
+	if err != nil {
+		return ""
+	}
+	art, err := ocirepo.LookupArtefact(ref.Repository, ref.Reference)
+	if err != nil {
+		return ""
+	}
+	return art.GetDescriptor().MimeType()
+
+}
+
+func (m *OCIRegistryAccessMethod) getBlob() (artefactset.ArtefactBlob, error) {
+	ref, err := oci.ParseOCIReference(m.spec.ImageReference)
+	if err != nil {
+		return nil, err
+	}
+	spec := ocireg.NewRepositorySpec(ref.HostPort())
+	ocirepo, err := m.comp.GetContext().OCIContext().RepositoryForSpec(spec)
+	if err != nil {
+		return nil, err
+	}
+	ns, err := ocirepo.LookupNamespace(ref.Repository)
+	if err != nil {
+		return nil, err
+	}
+	blob, err := artefactset.SynthesizeArtefactBlob(ns, ref.Reference)
+	if err != nil {
+		return nil, err
+	}
+	return blob, nil
 }

@@ -21,6 +21,10 @@ import (
 )
 
 type Repository interface {
+	SupportsDistributionSpec() bool
+
+	GetSpecification() RepositorySpec
+
 	ExistsArtefact(name string, ref string) (bool, error)
 	LookupArtefact(name string, ref string) (ArtefactAccess, error)
 	LookupNamespace(name string) (NamespaceAccess, error)
@@ -59,6 +63,7 @@ type Artefact interface {
 	IsManifest() bool
 	IsIndex() bool
 
+	Blob() (BlobAccess, error)
 	Artefact() *artdesc.Artefact
 	Manifest() (*artdesc.Manifest, error)
 	Index() (*artdesc.Index, error)

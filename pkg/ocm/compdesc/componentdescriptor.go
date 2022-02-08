@@ -42,6 +42,21 @@ type ComponentDescriptor struct {
 	ComponentSpec `json:"component"`
 }
 
+func New(name, version string) *ComponentDescriptor {
+	return DefaultComponent(&ComponentDescriptor{
+		Metadata: Metadata{
+			ConfiguredVersion: "v2",
+		},
+		ComponentSpec: ComponentSpec{
+			ObjectMeta: ObjectMeta{
+				Name:    name,
+				Version: version,
+			},
+			Provider: "acme",
+		},
+	})
+}
+
 // ComponentSpec defines a virtual component with
 // a repository context, source and dependencies.
 // +k8s:deepcopy-gen=true

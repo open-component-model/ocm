@@ -30,35 +30,30 @@ import (
 
 // ComponentNameMapping describes the method that is used to map the "Component Name", "Component Version"-tuples
 // to OCI Image References.
-type ComponentNameMapping string
-
-const (
-	OCIRegistryURLPathMapping ComponentNameMapping = "urlPath"
-	OCIRegistryDigestMapping  ComponentNameMapping = "sha256-digest"
-)
+type ComponentNameMapping = compreg.ComponentNameMapping
 
 func init() {
 	cpi.RegisterOCIImplementation(func(ctx oci.Context) (cpi.RepositoryType, error) {
-		return NewOCIRepositoryBackendType(ctx), nil
+		return NewRepositoryType(ctx), nil
 	})
 }
 
-type GenericOCIRepositoryBackendType struct {
+type RepositoryType struct {
 	runtime.ObjectVersionedType
 	ocictx oci.Context
 }
 
-var _ cpi.RepositoryType = &GenericOCIRepositoryBackendType{}
+var _ cpi.RepositoryType = &RepositoryType{}
 
-// NewOCIRepositoryBackendType creates generic type for any OCI Repository Backend
-func NewOCIRepositoryBackendType(ocictx oci.Context) *GenericOCIRepositoryBackendType {
-	return &GenericOCIRepositoryBackendType{
+// NewRepositoryType creates generic type for any OCI Repository Backend
+func NewRepositoryType(ocictx oci.Context) *RepositoryType {
+	return &RepositoryType{
 		ObjectVersionedType: runtime.NewVersionedObjectType("genericOCIRepositoryBackend"),
 		ocictx:              ocictx,
 	}
 }
 
-func (t *GenericOCIRepositoryBackendType) Decode(data []byte, unmarshal runtime.Unmarshaler) (runtime.TypedObject, error) {
+func (t *RepositoryType) Decode(data []byte, unmarshal runtime.Unmarshaler) (runtime.TypedObject, error) {
 	ospec, err := t.ocictx.RepositoryTypes().DecodeRepositorySpec(data, unmarshal)
 	if err != nil {
 		return nil, err
@@ -72,32 +67,35 @@ func (t *GenericOCIRepositoryBackendType) Decode(data []byte, unmarshal runtime.
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot unmarshal component repository meta information")
 	}
-	return NewGenericOCIBackendSpec(ospec, meta), nil
+	return NewRepositorySpec(ospec, meta), nil
 }
 
-func (t *GenericOCIRepositoryBackendType) LocalSupportForAccessSpec(ctx cpi.Context, a compdesc.AccessSpec) bool {
+func (t *RepositoryType) LocalSupportForAccessSpec(ctx cpi.Context, a compdesc.AccessSpec) bool {
 	name := a.GetKind()
 	return name == accessmethods.LocalBlobType
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type GenericOCIBackendSpec struct {
+type RepositorySpec struct {
 	oci.RepositorySpec
 	compreg.ComponentRepositoryMeta
 }
 
-func NewGenericOCIBackendSpec(spec oci.RepositorySpec, meta *compreg.ComponentRepositoryMeta) *GenericOCIBackendSpec {
+func NewRepositorySpec(spec oci.RepositorySpec, meta *compreg.ComponentRepositoryMeta) *RepositorySpec {
+	if meta == nil {
+		meta = &compreg.ComponentRepositoryMeta{}
+	}
 	if meta.ComponentNameMapping == "" {
 		meta.ComponentNameMapping = compreg.OCIRegistryURLPathMapping
 	}
-	return &GenericOCIBackendSpec{
+	return &RepositorySpec{
 		RepositorySpec:          spec,
 		ComponentRepositoryMeta: *meta,
 	}
 }
 
-func (u *GenericOCIBackendSpec) UnmarshalJSON(data []byte) error {
+func (u *RepositorySpec) UnmarshalJSON(data []byte) error {
 	fmt.Printf("unmarshal generic ocireg spec %s\n", string(data))
 	ocispec := &oci.GenericRepositorySpec{}
 	if err := json.Unmarshal(data, ocispec); err != nil {
@@ -114,7 +112,7 @@ func (u *GenericOCIBackendSpec) UnmarshalJSON(data []byte) error {
 }
 
 // MarshalJSON implements a custom json unmarshal method for a unstructured type.
-func (u GenericOCIBackendSpec) MarshalJSON() ([]byte, error) {
+func (u RepositorySpec) MarshalJSON() ([]byte, error) {
 	ocispec, err := runtime.ToUnstructuredTypedObject(u.RepositorySpec)
 	if err != nil {
 		return nil, err
@@ -126,10 +124,10 @@ func (u GenericOCIBackendSpec) MarshalJSON() ([]byte, error) {
 	return json.Marshal(compmeta.FlatMerge(ocispec.Object))
 }
 
-func (s *GenericOCIBackendSpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
+func (s *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	r, err := s.RepositorySpec.Repository(ctx.OCIContext(), creds)
 	if err != nil {
 		return nil, err
 	}
-	return NewRepository(ctx, r)
+	return NewRepository(ctx, s.ComponentRepositoryMeta, r)
 }

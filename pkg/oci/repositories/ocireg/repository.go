@@ -34,18 +34,26 @@ func NewRepository(ctx cpi.Context, spec *RepositorySpec, creds credentials.Cred
 	}, nil
 }
 
-func (r Repository) ExistsArtefact(name string, version string) (bool, error) {
+func (r *Repository) GetSpecification() cpi.RepositorySpec {
+	return r.spec
+}
+
+func (r *Repository) SupportsDistributionSpec() bool {
+	return true
+}
+
+func (r *Repository) ExistsArtefact(name string, version string) (bool, error) {
 	panic("implement me")
 }
 
-func (r Repository) LookupArtefact(name string, version string) (core.ArtefactAccess, error) {
+func (r *Repository) LookupArtefact(name string, version string) (core.ArtefactAccess, error) {
 	panic("implement me")
 }
 
-func (r Repository) LookupNamespace(name string) (core.NamespaceAccess, error) {
+func (r *Repository) LookupNamespace(name string) (core.NamespaceAccess, error) {
 	panic("implement me")
 }
 
-func (r Repository) Close() error {
+func (r *Repository) Close() error {
 	panic("implement me")
 }

@@ -129,8 +129,12 @@ func (n *Namespace) GetArtefact(ref string) (cpi.ArtefactAccess, error) {
 	return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, ref, n.access.namespace)
 }
 
-func (n *Namespace) AddTaggedArtefact(artefact cpi.Artefact, tags ...string) (access accessio.BlobAccess, err error) {
-	return n.access.AddArtefact(artefact, nil)
+func (n *Namespace) AddTaggedArtefact(artefact cpi.Artefact, tags ...string) (accessio.BlobAccess, error) {
+	blob, err := n.access.AddArtefact(artefact, nil)
+	if err != nil {
+		return nil, err
+	}
+	return blob, n.AddTags(blob.Digest(), tags...)
 }
 
 func (n *Namespace) AddTags(digest digest.Digest, tags ...string) error {

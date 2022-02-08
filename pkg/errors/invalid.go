@@ -24,6 +24,18 @@ func ErrInvalid(spec ...string) error {
 	return &errInvalid{newErrInfo(formatInvalid, spec...)}
 }
 
+func ErrInvalidWrap(err error, spec ...string) error {
+	return &errInvalid{wrapErrInfo(err, formatInvalid, spec...)}
+}
+
 func IsErrInvalid(err error) bool {
 	return IsA(err, &errInvalid{})
+}
+
+func IsErrInvalidKind(err error, kind string) bool {
+	var uerr *errInvalid
+	if err == nil || !As(err, &uerr) {
+		return false
+	}
+	return uerr.kind == kind
 }

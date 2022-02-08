@@ -27,9 +27,9 @@ import (
 	"github.com/opencontainers/go-digest"
 )
 
-const TAGS_MAINARTEFACT = "ocm.gardener.cloud/main"
-const TAGS_ANNOTATION = "ocm.gardener.cloud/tags"
-const TYPE_ANNOTATION = "ocm.gardener.cloud/type"
+const TAGS_MAINARTEFACT = "cloud.gardener.ocm/main"
+const TAGS_ANNOTATION = "cloud.gardener.ocm/tags"
+const TYPE_ANNOTATION = "cloud.gardener.ocm/type"
 
 type ArtefactSet struct {
 	base *FileSystemBlobAccess

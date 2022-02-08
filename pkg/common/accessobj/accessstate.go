@@ -62,7 +62,7 @@ type StateAccess interface {
 	// It MUST return an errors.IsErrNotFound compatible error
 	// if the persistence not yet exists.
 	Get() (accessio.BlobAccess, error)
-	Digest() digest.Digest
+	//Digest() digest.Digest
 	Put(data []byte) error
 }
 

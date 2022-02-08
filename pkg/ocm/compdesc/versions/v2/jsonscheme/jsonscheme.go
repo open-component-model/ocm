@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:generate go-bindata -pkg jsonscheme ../../../../language-independent/component-descriptor-v2-schema.yaml
+//go:generate go-bindata -pkg jsonscheme ../../../../../../resources/component-descriptor-v2-schema.yaml
 
 package jsonscheme
 
@@ -27,7 +27,7 @@ import (
 var Schema *gojsonschema.Schema
 
 func init() {
-	dataBytes, err := LanguageIndependentComponentDescriptorV2SchemaYamlBytes()
+	dataBytes, err := ResourcesComponentDescriptorV2SchemaYamlBytes()
 	if err != nil {
 		panic(err)
 	}

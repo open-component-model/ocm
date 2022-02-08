@@ -58,6 +58,16 @@ func New() *Artefact {
 	return &Artefact{}
 }
 
+func (d *Artefact) MimeType() string {
+	if d.IsIndex() {
+		return MediaTypeImageManifest
+	}
+	if d.IsManifest() {
+		return MediaTypeImageIndex
+	}
+	return ""
+}
+
 func (d *Artefact) SetManifest(m *Manifest) error {
 	if d.IsIndex() || d.IsManifest() {
 		return errors.Newf("artefact descriptor already instantiated")
@@ -120,7 +130,7 @@ func (d Artefact) MarshalJSON() ([]byte, error) {
 		return json.Marshal(d.manifest)
 	}
 	if d.index != nil {
-		d.manifest.MediaType = ociv1.MediaTypeImageIndex
+		d.index.MediaType = ociv1.MediaTypeImageIndex
 		return json.Marshal(d.index)
 	}
 	return []byte("null"), nil

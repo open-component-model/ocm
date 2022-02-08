@@ -57,6 +57,10 @@ func (a *ComponentVersionAccess) GetVersion() string {
 	return a.base.GetDescriptor().GetVersion()
 }
 
+func (a *ComponentVersionAccess) AddBlob(blob cpi.BlobAccess, refName string) (cpi.AccessSpec, error) {
+	return a.base.AddBlob(blob, refName)
+}
+
 func (c *ComponentVersionAccess) AccessMethod(a cpi.AccessSpec) (cpi.AccessMethod, error) {
 	if !a.IsLocal(c.base.GetContext()) {
 		// fall back to original version
@@ -160,26 +164,18 @@ func (c *ComponentVersionAccess) AddSource(meta *cpi.SourceMeta, acc compdesc.Ac
 
 // AddResource adds a blob resource to the current archive.
 func (c *ComponentVersionAccess) AddResourceBlob(meta *cpi.ResourceMeta, blob cpi.BlobAccess, refName string) error {
-	if blob == nil {
-		return errors.New("a resource has to be defined")
-	}
-	name, err := c.base.AddBlob(blob)
+	acc, err := c.AddBlob(blob, refName)
 	if err != nil {
 		return err
 	}
-	acc := accessmethods.NewLocalBlobAccessSpecV1(name, refName, blob.MimeType())
 	return c.AddResource(meta, acc)
 }
 
 func (c *ComponentVersionAccess) AddSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string) error {
-	if blob == nil {
-		return errors.New("a resource has to be defined")
-	}
-	name, err := c.base.AddBlob(blob)
+	acc, err := c.AddBlob(blob, refName)
 	if err != nil {
 		return err
 	}
-	acc := accessmethods.NewLocalBlobAccessSpecV1(name, refName, blob.MimeType())
 	return c.AddSource(meta, acc)
 }
 

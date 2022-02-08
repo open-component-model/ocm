@@ -67,9 +67,7 @@ var _ = Describe("ctf management", func() {
 		Expect(err).To(Succeed())
 		tempfs = t
 
-		spec = ctf.NewRepositorySpec("test", accessobj.PathFileSystem(tempfs), accessobj.FormatDirectory)
-		spec.PathFileSystem = tempfs
-		spec.AccessMode = accessobj.ACC_CREATE
+		spec = ctf.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessobj.PathFileSystem(tempfs), accessobj.FormatDirectory)
 	})
 
 	AfterEach(func() {

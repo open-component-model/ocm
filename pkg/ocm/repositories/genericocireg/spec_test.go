@@ -33,7 +33,7 @@ var _ = Describe("access method", func() {
 	specData := "{\"baseUrl\":\"X\",\"componentNameMapping\":\"sha256-digest\",\"type\":\"OCIRegistry\"}"
 
 	It("marshal mapped spec", func() {
-		gen := genericocireg.NewGenericOCIBackendSpec(
+		gen := genericocireg.NewRepositorySpec(
 			ocireg.NewRepositorySpec("X"),
 			ocmreg.NewComponentRepositoryMeta(ocmreg.OCIRegistryDigestMapping))
 		data, err := json.Marshal(gen)
@@ -42,13 +42,13 @@ var _ = Describe("access method", func() {
 	})
 
 	It("decodes generic spec", func() {
-		typ := genericocireg.NewOCIRepositoryBackendType(DefaultOCIContext)
+		typ := genericocireg.NewRepositoryType(DefaultOCIContext)
 
 		spec, err := typ.Decode([]byte(specData), runtime.DefaultJSONEncoding)
 		Expect(err).To(Succeed())
-		Expect(reflect.TypeOf(spec).String()).To(Equal("*genericocireg.GenericOCIBackendSpec"))
+		Expect(reflect.TypeOf(spec).String()).To(Equal("*genericocireg.RepositorySpec"))
 
-		eff, ok := spec.(*genericocireg.GenericOCIBackendSpec)
+		eff, ok := spec.(*genericocireg.RepositorySpec)
 		Expect(ok).To(BeTrue())
 		Expect(reflect.TypeOf(eff.RepositorySpec).String()).To(Equal("*ocireg.RepositorySpec"))
 		Expect(eff.ComponentNameMapping).To(Equal(ocmreg.OCIRegistryDigestMapping))

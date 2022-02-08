@@ -90,18 +90,22 @@ type ComponentAccess struct {
 
 var _ cpi.ComponentAccess = (*ComponentAccess)(nil)
 
-func (c ComponentAccess) GetContext() cpi.Context {
+func (c *ComponentAccess) GetContext() cpi.Context {
 	return c.repo.GetContext()
 }
 
-func (c ComponentAccess) GetVersion(ref string) (cpi.ComponentVersionAccess, error) {
+func (c *ComponentAccess) GetName() string {
+	return c.repo.arch.GetName()
+}
+
+func (c *ComponentAccess) LookupVersion(ref string) (cpi.ComponentVersionAccess, error) {
 	return c.repo.LookupComponentVersion(c.repo.arch.GetName(), ref)
 }
 
-func (c ComponentAccess) AddVersion(access core.ComponentVersionAccess) error {
+func (c *ComponentAccess) AddVersion(access core.ComponentVersionAccess) error {
 	return errors.ErrNotSupported(errors.KIND_FUNCTION, "add version", CTFComponentArchiveType)
 }
 
-func (c ComponentAccess) NewVersion(version string) (core.ComponentVersionAccess, error) {
+func (c *ComponentAccess) NewVersion(version string) (core.ComponentVersionAccess, error) {
 	return nil, errors.ErrNotSupported(errors.KIND_FUNCTION, "new version", CTFComponentArchiveType)
 }

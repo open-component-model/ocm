@@ -36,8 +36,9 @@ type MimeType = accessio.MimeType
 
 type ComponentAccess interface {
 	GetContext() Context
+	GetName() string
 
-	GetVersion(version string) (ComponentVersionAccess, error)
+	LookupVersion(version string) (ComponentVersionAccess, error)
 	AddVersion(ComponentVersionAccess) error
 	NewVersion(version string) (ComponentVersionAccess, error)
 }
@@ -73,12 +74,15 @@ type ComponentVersionAccess interface {
 	// an access spec. This might be a repository local implementation
 	// or a global one. It might be called by the AccessSpec method
 	// to map itself to a local implementation or called directly.
-	// If callled it should forward the call to the AccessSpec
+	// If called it should forward the call to the AccessSpec
 	// if and only if this specs NOT states to be local IsLocal()==false
 	// If the spec states to be local, the repository is responsible for
 	// providing a local implementation or return nil if this is
 	// not supported by the actual repository type.
 	AccessMethod(AccessSpec) (AccessMethod, error)
+
+	// AddBlob adds a local blob and returns an appropriate local access spec
+	AddBlob(blob BlobAccess, refName string) (AccessSpec, error)
 
 	AddResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string) error
 	AddResource(*ResourceMeta, compdesc.AccessSpec) error

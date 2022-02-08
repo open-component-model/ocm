@@ -36,26 +36,36 @@ import (
 
 type Repository struct {
 	base *artefactset.FileSystemBlobAccess
+	spec *RepositorySpec
 	ctx  cpi.Context
 }
 
 var _ cpi.Repository = &Repository{}
 
 // New returns a new representation based repository
-func New(ctx cpi.Context, acc accessobj.AccessMode, fs vfs.FileSystem, closer accessobj.Closer, mode vfs.FileMode) (*Repository, error) {
-	base, err := accessobj.NewAccessObject(accessObjectInfo, acc, fs, closer, mode)
-	return _Wrap(ctx, base, err)
+func New(ctx cpi.Context, spec *RepositorySpec, acc accessobj.AccessMode, closer accessobj.Closer, mode vfs.FileMode) (*Repository, error) {
+	base, err := accessobj.NewAccessObject(accessObjectInfo, acc, spec.Options.Representation, closer, mode)
+	return _Wrap(ctx, spec, base, err)
 }
 
-func _Wrap(ctx cpi.Context, obj *accessobj.AccessObject, err error) (*Repository, error) {
+func _Wrap(ctx cpi.Context, spec *RepositorySpec, obj *accessobj.AccessObject, err error) (*Repository, error) {
 	if err != nil {
 		return nil, err
 	}
 	r := &Repository{
 		base: artefactset.NewFileSystemBlobAccess(obj),
 		ctx:  ctx,
+		spec: spec,
 	}
 	return r, nil
+}
+
+func (r *Repository) GetSpecification() cpi.RepositorySpec {
+	return r.spec
+}
+
+func (r *Repository) SupportsDistributionSpec() bool {
+	return false
 }
 
 ////////////////////////////////////////////////////////////////////////////////

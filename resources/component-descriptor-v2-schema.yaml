@@ -1,0 +1,386 @@
+$id: 'https://gardener.cloud/schemas/component-descriptor-v2'
+$schema: 'https://json-schema.org/draft/2020-12/schema'
+description: 'Gardener Component Descriptor v2 schema'
+definitions:
+  meta:
+    type: 'object'
+    description: 'component descriptor metadata'
+    required:
+      - 'schemaVersion'
+    properties:
+      schemaVersion:
+        type: 'string'
+
+  label:
+    type: 'object'
+    required:
+      - 'name'
+      - 'value'
+
+  componentName:
+    type: 'string'
+    maxLength: 255
+    pattern: '^[a-z0-9.\-]+[.][a-z]{2,4}/[-a-z0-9/_.]*$'
+
+  identityAttributeKey:
+    minLength: 2
+    pattern: '^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$'
+
+  relaxedSemver:
+    # taken from semver.org and adjusted to allow an optional leading 'v', major-only, and major.minor-only
+    # this means the following strings are all valid relaxedSemvers:
+    # 1.2.3
+    # 1.2.3-foo+bar
+    # v1.2.3
+    # v1.2.3-foo+bar
+    # 1.2
+    # 1
+    # v1
+    # v1.2
+    # v1-foo+bar
+    pattern: '^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
+    type: 'string'
+
+  identityAttribute:
+    type: 'object'
+    propertyNames: { $ref: '#/definitions/identityAttributeKey' }
+
+  repositoryContext:
+    type: 'object'
+    required:
+      - 'type'
+    properties:
+      type:
+        type: 'string'
+
+  ociRepositoryContext:
+    allOf:
+      - $ref: '#/definitions/repositoryContext'
+      - required:
+        - 'baseUrl'
+        properties:
+          baseUrl:
+            type: 'string'
+          componentNameMapping:
+            type: 'string'
+            enum: ['urlPath', 'sha256-digest']
+          type:
+            type: 'string'
+            enum: ['ociRegistry']
+
+  access:
+    type: 'object'
+    description: 'base type for accesses (for extensions)'
+    required:
+      - 'type'
+
+  githubAccess:
+    type: 'object'
+    required:
+      - 'type'
+      - 'repoUrl'
+      - 'ref'
+    properties:
+      type:
+        type: 'string'
+        enum: ['github']
+      repoUrl:
+        type: 'string'
+      ref:
+        type: 'string'
+      commit:
+        type: 'string'
+
+  noneAccess:
+    type: 'object'
+    required:
+      - 'type'
+    properties:
+      type:
+        type: 'string'
+        enum: ['None']
+
+  sourceDefinition:
+    type: 'object'
+    required:
+      - name
+      - version
+      - type
+      - access
+    properties:
+      name:
+        type: 'string'
+        $ref: '#/definitions/identityAttributeKey'
+      extraIdentity:
+        $ref: '#/definitions/identityAttribute'
+      version:
+        $ref: '#/definitions/relaxedSemver'
+      type:
+        type: 'string'
+        enum: ['git']
+      labels:
+        type: 'array'
+        items:
+          $ref: '#/definitions/label'
+      access:
+        anyOf:
+          - $ref: '#/definitions/access'
+          - $ref: '#/definitions/githubAccess'
+          - $ref: '#/definitions/httpAccess'
+
+  srcRef:
+    type: 'object'
+    description: 'a reference to a (component-local) source'
+    properties:
+      identitySelector:
+        $ref: '#/definitions/identityAttribute'
+      labels:
+        type: 'array'
+        items:
+          $ref: '#/definitions/label'
+
+  componentReference:
+    type: 'object'
+    description: 'a reference to a component'
+    required:
+      - 'name'
+      - 'componentName'
+      - 'version'
+    properties:
+      componentName:
+        $ref: '#/definitions/componentName'
+      name:
+        type: 'string' # actually: component-type w/ special restrictions
+        $ref: '#/definitions/identityAttributeKey'
+      extraIdentity:
+        $ref: '#/definitions/identityAttribute'
+      version:
+        $ref: '#/definitions/relaxedSemver'
+      labels:
+        type: 'array'
+        items:
+          $ref: '#/definitions/label'
+
+  resourceType:
+    type: 'object'
+    description: 'base type for resources'
+    required:
+      - 'name'
+      - 'version' # for local resources, this must match component's version
+      - 'type'
+      - 'relation'
+      - 'access'
+    properties:
+      name:
+        type: 'string'
+        $ref: '#/definitions/identityAttributeKey'
+      extraIdentity:
+        $ref: '#/definitions/identityAttribute'
+      version:
+        $ref: '#/definitions/relaxedSemver'
+      type:
+        type: 'string'
+      srcRefs:
+        type: 'array'
+        items:
+          $ref: '#/definitions/srcRef'
+      relation:
+        type: 'string'
+        enum: ['local', 'external']
+      labels:
+        type: 'array'
+        items:
+          $ref: '#/definitions/label'
+      access:
+        anyOf:
+        - $ref: '#/definitions/access'
+        - $ref: '#/definitions/ociBlobAccess'
+        - $ref: '#/definitions/localFilesystemBlobAccess'
+        - $ref: '#/definitions/localOciBlobAccess'
+
+  ociImageAccess:
+    type: 'object'
+    required:
+      - 'type'
+      - 'imageReference'
+    properties:
+      type:
+        type: 'string'
+        enum: ['ociRegistry']
+      imageReference:
+        type: 'string'
+
+  ociBlobAccess:
+    type: 'object'
+    required:
+    - 'type'
+    - 'layer'
+    properties:
+      type:
+        type: 'string'
+        enum: [ 'ociBlob' ]
+      ref:
+        description: 'A oci reference to the manifest'
+        type: 'string'
+      mediaType:
+        description: 'The media type of the object this access refers to'
+        type: 'string'
+      digest:
+        description: 'The digest of the targeted content'
+        type: 'string'
+      size:
+        description: 'The size in bytes of the blob'
+        type: 'number'
+
+  localFilesystemBlobAccess:
+    type: 'object'
+    required:
+      - 'type'
+      - 'filename'
+    properties:
+      type:
+        type: 'string'
+        enum: [ 'localFilesystemBlob' ]
+      filename:
+        description: 'filename of the blob that is located in the "blobs" directory'
+        type: 'string'
+
+  localOciBlobAccess:
+    type: 'object'
+    required:
+      - 'type'
+      - 'filename'
+    properties:
+      type:
+        type: 'string'
+        enum: [ 'localOciBlob' ]
+      digest:
+        description: 'digest of the layer within the current component descriptor'
+        type: 'string'
+
+  ociImageResource:
+    type: 'object'
+    required:
+      - 'name'
+      - 'version'
+      - 'type'
+      - 'access'
+    properties:
+      name:
+        type: 'string'
+        $ref: '#/definitions/identityAttributeKey'
+      extraIdentity:
+        $ref: '#/definitions/identityAttribute'
+      version:
+        $ref: '#/definitions/relaxedSemver'
+      type:
+        type: 'string'
+        enum: ['ociImage']
+      labels:
+        type: 'array'
+        items:
+          $ref: '#/definitions/label'
+      access:
+        $ref: '#/definitions/ociImageAccess'
+
+  httpAccess:
+    type: 'object'
+    required:
+      - 'type'
+      - 'url'
+    properties:
+      type:
+        type: 'string'
+        enum: ['http']
+      url:
+        type: 'string'
+
+  genericAccess:
+    type: 'object'
+    required:
+      - 'type'
+    properties:
+      type:
+        type: 'string'
+        enum: ['generic']
+
+  genericResource:
+    type: 'object'
+    required:
+      - 'name'
+      - 'version'
+      - 'type'
+      - 'access'
+    properties:
+      name:
+        type: 'string'
+        $ref: '#/definitions/identityAttributeKey'
+      extraIdentity:
+        $ref: '#/definitions/identityAttribute'
+      version:
+        $ref: '#/definitions/relaxedSemver'
+      type:
+        type: 'string'
+        enum: ['generic']
+      labels:
+        type: 'array'
+        items:
+          $ref: '#/definitions/label'
+      access:
+        $ref: '#/definitions/genericAccess'
+
+  component:
+    type: 'object'
+    description: 'a component'
+    required:
+      - 'name'
+      - 'version'
+      - 'repositoryContexts'
+      - 'provider'
+      - 'sources'
+      - 'componentReferences'
+      - 'resources'
+    properties:
+      name:
+        $ref: '#/definitions/componentName'
+      version:
+        $ref: '#/definitions/relaxedSemver'
+      repositoryContexts:
+        type: 'array'
+        items:
+          anyOf:
+            - $ref: '#/definitions/ociRepositoryContext' # currently, we only allow this one
+      provider:
+        type: 'string'
+      labels:
+        type: 'array'
+        items:
+          $ref: '#/definitions/label'
+      sources:
+        type: 'array'
+        items:
+          $ref: '#/definitions/sourceDefinition'
+      componentReferences:
+        type: 'array'
+        items:
+          $ref: '#/definitions/componentReference'
+      resources:
+        type: 'array'
+        items:
+          anyOf:
+            - $ref: '#/definitions/resourceType'
+            - $ref: '#/definitions/ociImageResource'
+            - $ref: '#/definitions/genericResource'
+
+    componentReferences: {}
+
+
+type: 'object'
+required:
+  - 'meta'
+  - 'component'
+properties:
+  meta:
+    $ref: '#/definitions/meta'
+  component:
+    $ref: '#/definitions/component'

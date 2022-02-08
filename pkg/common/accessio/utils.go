@@ -16,6 +16,8 @@ package accessio
 
 import (
 	"io"
+
+	"github.com/gardener/ocm/pkg/errors"
 )
 
 type closableReader struct {
@@ -29,4 +31,31 @@ func (r closableReader) Read(p []byte) (n int, err error) {
 }
 func (r closableReader) Close() error {
 	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type additionalCloser struct {
+	reader           io.ReadCloser
+	additionalCloser io.Closer
+}
+
+var _ io.ReadCloser = (*additionalCloser)(nil)
+
+func AddCloser(reader io.ReadCloser, closer io.Closer) io.ReadCloser {
+	return &additionalCloser{
+		reader:           reader,
+		additionalCloser: closer,
+	}
+}
+
+func (c *additionalCloser) Close() error {
+	list := errors.ErrListf("synthesized artefact blob")
+	list.Add(c.reader.Close())
+	list.Add(c.additionalCloser.Close())
+	return list.Result()
+}
+
+func (c *additionalCloser) Read(p []byte) (n int, err error) {
+	return c.reader.Read(p)
 }

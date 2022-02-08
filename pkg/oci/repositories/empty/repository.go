@@ -29,6 +29,14 @@ func newRepository(ctx datacontext.Context) interface{} {
 	return &Repository{}
 }
 
+func (r Repository) GetSpecification() cpi.RepositorySpec {
+	return NewRepositorySpec()
+}
+
+func (r Repository) SupportsDistributionSpec() bool {
+	return false
+}
+
 func (r Repository) ExistsArtefact(name string, version string) (bool, error) {
 	return false, nil
 }

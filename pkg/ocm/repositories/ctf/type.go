@@ -17,7 +17,6 @@ package ctf
 import (
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/credentials"
-	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/gardener/ocm/pkg/runtime"
 )
@@ -30,11 +29,6 @@ const (
 func init() {
 	cpi.RegisterRepositoryType(CTFComponentArchiveType, cpi.NewRepositoryType(CTFComponentArchiveType, &RepositorySpec{}, nil))
 	cpi.RegisterRepositoryType(CTFComponentArchiveTypeV1, cpi.NewRepositoryType(CTFComponentArchiveTypeV1, &RepositorySpec{}, nil))
-}
-
-type GenericOCIRepositoryBackendType struct {
-	runtime.ObjectVersionedType
-	ocictx oci.Context
 }
 
 type RepositorySpec struct {

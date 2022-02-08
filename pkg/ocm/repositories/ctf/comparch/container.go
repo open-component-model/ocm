@@ -22,7 +22,13 @@ import (
 // BlobContainer is the interface for an element capable to store blobs
 type BlobContainer interface {
 	GetBlobData(name string) (cpi.DataAccess, error)
-	AddBlob(ctx cpi.BlobAccess) (string, error)
+
+	// AddBlob stores a local blob together with the component and
+	// potentially provides a global reference according to the OCI distribution spec
+	// if the blob described an oci artefact.
+	// The resultimg access information (global and local) is provided as
+	// an access method specification usable in a component descriptor
+	AddBlob(blob cpi.BlobAccess, refName string) (cpi.AccessSpec, error)
 }
 
 // ComponentContainer is an interface for an element to store component versions

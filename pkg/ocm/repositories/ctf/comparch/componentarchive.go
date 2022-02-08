@@ -16,8 +16,9 @@ package comparch
 
 import (
 	"github.com/gardener/ocm/pkg/common"
-	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
+	"github.com/gardener/ocm/pkg/errors"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -70,12 +71,15 @@ func (c *ComponentArchive) GetBlobData(name string) (cpi.DataAccess, error) {
 	return c.base.GetBlobDataByName(name)
 }
 
-func (c *ComponentArchive) AddBlob(blob accessio.BlobAccess) (string, error) {
+func (c *ComponentArchive) AddBlob(blob cpi.BlobAccess, refName string) (cpi.AccessSpec, error) {
+	if blob == nil {
+		return nil, errors.New("a resource has to be defined")
+	}
 	err := c.base.AddBlob(blob)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return common.DigestToFileName(blob.Digest()), nil
+	return accessmethods.NewLocalBlobAccessSpecV1(common.DigestToFileName(blob.Digest()), refName, blob.MimeType()), nil
 }
 
 func (c *ComponentArchive) GetDescriptor() *compdesc.ComponentDescriptor {

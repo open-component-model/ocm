@@ -95,12 +95,12 @@ func Create(ctx cpi.Context, acc accessobj.AccessMode, path string, mode vfs.Fil
 
 func (h FormatHandler) Open(ctx cpi.Context, acc accessobj.AccessMode, path string, opts accessobj.Options) (*Object, error) {
 	obj, err := h.FormatHandler.Open(accessObjectInfo, acc, path, opts)
-	return _Wrap(ctx, obj, err)
+	return _Wrap(ctx, NewRepositorySpec(acc, path, opts), obj, err)
 }
 
 func (h *FormatHandler) Create(ctx cpi.Context, path string, opts accessobj.Options, mode vfs.FileMode) (*Object, error) {
 	obj, err := h.FormatHandler.Create(accessObjectInfo, path, opts, mode)
-	return _Wrap(ctx, obj, err)
+	return _Wrap(ctx, NewRepositorySpec(accessobj.ACC_CREATE, path, opts), obj, err)
 }
 
 // WriteToFilesystem writes the current object to a filesystem

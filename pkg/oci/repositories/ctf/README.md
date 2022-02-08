@@ -113,18 +113,18 @@ endpoint according to the [OCI Distribution Specification](https://github.com/op
 
 Additionally this specification described two special annotations:
 
-- **`ocm.gardener.cloud/tags`**
+- **`cloud.gardener.ocm/tags`**
   
   This annotation can be used to describe a comma-separated list of tags.
   that should be added for this index entry, when imported into an OCI registry.
 
-- **`ocm.gardener.cloud/type`**
+- **`cloud.gardener.ocm/type`**
 
   This annotation can be used some additional type information.
 
 For the annotations of the index itself the following keys are defined:
 
-- **`ocm.gardener.cloud/main`** *digest*
+- **`cloud.gardener.ocm/main`** *digest*
 
   This annotation describes the digest of the main artefact of the set, if used as blob
   format for an artefact

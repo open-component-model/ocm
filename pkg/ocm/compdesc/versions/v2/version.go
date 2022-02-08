@@ -233,6 +233,9 @@ func (v *DescriptorVersion) ConvertFrom(in *compdesc.ComponentDescriptor) (inter
 			ComponentReferences: convert_ComponentReferences_from(in.ComponentReferences),
 		},
 	}
+	if err := DefaultComponent(out); err != nil {
+		return nil, err
+	}
 	return out, nil
 }
 
