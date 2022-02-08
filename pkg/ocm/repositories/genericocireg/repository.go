@@ -97,11 +97,11 @@ func (r *Repository) LookupComponentVersion(name string, version string) (cpi.Co
 func (r *Repository) MapComponentNameToNamespace(name string) (string, error) {
 	switch r.meta.ComponentNameMapping {
 	case ocireg.OCIRegistryURLPathMapping, "":
-		return path.Join(ComponentDescriptorNamespace, name), nil
+		return path.Join(r.meta.SubPath, ComponentDescriptorNamespace, name), nil
 	case ocireg.OCIRegistryDigestMapping:
 		h := sha256.New()
 		_, _ = h.Write([]byte(name))
-		return path.Join(hex.EncodeToString(h.Sum(nil))), nil
+		return path.Join(r.meta.SubPath, hex.EncodeToString(h.Sum(nil))), nil
 	default:
 		return "", fmt.Errorf("unknown component name mapping method %s", r.meta.ComponentNameMapping)
 	}

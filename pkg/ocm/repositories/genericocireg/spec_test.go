@@ -35,7 +35,7 @@ var _ = Describe("access method", func() {
 	It("marshal mapped spec", func() {
 		gen := genericocireg.NewRepositorySpec(
 			ocireg.NewRepositorySpec("X"),
-			ocmreg.NewComponentRepositoryMeta(ocmreg.OCIRegistryDigestMapping))
+			ocmreg.NewComponentRepositoryMeta("", ocmreg.OCIRegistryDigestMapping))
 		data, err := json.Marshal(gen)
 		Expect(err).To(Succeed())
 		Expect(string(data)).To(Equal(specData))

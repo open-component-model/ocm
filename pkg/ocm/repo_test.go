@@ -32,7 +32,7 @@ var _ = Describe("access method", func() {
 	It("instantiate repo mapped to empty oci repo", func() {
 		backendSpec := genericocireg.NewRepositorySpec(
 			empty.NewRepositorySpec(),
-			ocmreg.NewComponentRepositoryMeta(ocmreg.OCIRegistryDigestMapping))
+			ocmreg.NewComponentRepositoryMeta("", ocmreg.OCIRegistryDigestMapping))
 		data, err := json.Marshal(backendSpec)
 		Expect(err).To(Succeed())
 		Expect(string(data)).To(Equal("{\"componentNameMapping\":\"sha256-digest\",\"type\":\"Empty\"}"))

@@ -108,19 +108,21 @@ func (c *ComponentVersionContainer) evalLayer(spec compdesc.AccessSpec) error {
 	if err != nil {
 		return err
 	}
-	if a, ok := spec.(*accessmethods.LocalBlobAccessSpec); ok {
-		if !artdesc.IsDigest(a.LocalReference) {
-			return errors.ErrInvalid("digest", a.LocalReference)
-		}
-		desc := c.access.GetDescriptor()
-		for _, l := range desc.Layers {
-			if l.Digest == digest.Digest(a.LocalReference) {
-				if artdesc.IsOCIMediaType(l.MediaType) && c.comp.repo.ocirepo.SupportsDistributionSpec() {
-					return c.assureGlobalRef(l.Digest, a.ReferenceName)
+	if c.comp.repo.ocirepo.SupportsDistributionSpec() {
+		if a, ok := spec.(*accessmethods.LocalBlobAccessSpec); ok {
+			if !artdesc.IsDigest(a.LocalReference) {
+				return errors.ErrInvalid("digest", a.LocalReference)
+			}
+			desc := c.access.GetDescriptor()
+			for _, l := range desc.Layers {
+				if l.Digest == digest.Digest(a.LocalReference) {
+					if artdesc.IsOCIMediaType(l.MediaType) {
+						return c.assureGlobalRef(l.Digest, a.ReferenceName)
+					}
 				}
 			}
+			return errors.ErrUnknown("localReference", a.LocalReference)
 		}
-		return errors.ErrUnknown("localReference", a.LocalReference)
 	}
 	return nil
 }
