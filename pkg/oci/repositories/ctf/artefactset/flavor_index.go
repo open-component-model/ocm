@@ -26,7 +26,6 @@ import (
 
 type Index struct {
 	artefactBase
-	*BlobHandler // Index offers all: blobs, artefacts, manifests and indices
 }
 
 var _ cpi.IndexAccess = (*Index)(nil)
@@ -51,7 +50,6 @@ func NewIndex(access ArtefactSetContainer, defs ...*artdesc.Index) core.IndexAcc
 			state:  state,
 		},
 	}
-	i.BlobHandler = NewBlobHandler(access, i)
 	return i
 }
 
@@ -75,7 +73,6 @@ func NewIndexForArtefact(a *Artefact) *Index {
 			state:  &indexMapper{a.state},
 		},
 	}
-	m.BlobHandler = NewBlobHandler(a.access, m)
 	return m
 }
 
@@ -118,11 +115,59 @@ func (i *Index) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 	if d != nil {
 		return d
 	}
-	return i.container.GetBlobDescriptor(digest)
+	return i.access.GetBlobDescriptor(digest)
+}
+
+func (i *Index) GetBlob(digest digest.Digest) (core.BlobAccess, error) {
+
+	d := i.GetBlobDescriptor(digest)
+	if d != nil {
+		data, err := i.access.GetBlobData(digest)
+		if err != nil {
+			return nil, err
+		}
+		return accessio.BlobAccessForDataAccess(d.Digest, d.Size, d.MediaType, data), nil
+	}
+	return nil, cpi.ErrBlobNotFound(digest)
+}
+
+func (i *Index) GetArtefact(digest digest.Digest) (core.ArtefactAccess, error) {
+	for _, d := range i.GetDescriptor().Manifests {
+		if d.Digest == digest {
+			return i.access.GetArtefact(digest.String())
+		}
+	}
+	return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, digest.String())
+}
+
+func (i *Index) GetIndex(digest digest.Digest) (core.IndexAccess, error) {
+	a, err := i.GetArtefact(digest)
+	if err != nil {
+		return nil, err
+	}
+	if idx, err := a.Index(); err == nil {
+		return NewIndex(i.access, idx), nil
+	}
+	return nil, errors.New("no index")
+}
+
+func (i *Index) GetManifest(digest digest.Digest) (core.ManifestAccess, error) {
+	a, err := i.GetArtefact(digest)
+	if err != nil {
+		return nil, err
+	}
+	if m, err := a.Manifest(); err == nil {
+		return NewManifest(i.access, m), nil
+	}
+	return nil, errors.New("no manifest")
+}
+
+func (i *Index) AddBlob(blob core.BlobAccess) error {
+	return i.access.AddBlob(blob)
 }
 
 func (a *Index) AddArtefact(art cpi.Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
-	blob, err := a.container.AddArtefact(art, platform)
+	blob, err := a.access.AddArtefact(art, platform)
 	if err != nil {
 		return nil, err
 	}
@@ -140,4 +185,11 @@ func (a *Index) AddArtefact(art cpi.Artefact, platform *artdesc.Platform) (acces
 		Platform:    platform,
 	})
 	return blob, nil
+}
+
+func (a *Index) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
+	if !a.IsIndex() {
+		return nil, ErrNoIndex
+	}
+	return NewArtefact(a.access, art...), nil
 }

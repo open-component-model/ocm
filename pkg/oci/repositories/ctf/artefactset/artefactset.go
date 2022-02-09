@@ -38,6 +38,7 @@ type ArtefactSet struct {
 
 var _ ArtefactSetContainer = (*ArtefactSet)(nil)
 var _ cpi.ArtefactSink = (*ArtefactSet)(nil)
+var _ cpi.NamespaceAccess = (*ArtefactSet)(nil)
 
 // New returns a new representation based element
 func New(acc accessobj.AccessMode, fs vfs.FileSystem, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode) (*ArtefactSet, error) {
@@ -153,23 +154,44 @@ func (a *ArtefactSet) AddBlob(blob cpi.BlobAccess) error {
 	return a.base.AddBlob(blob)
 }
 
-func (i *ArtefactSet) GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {
+func (i *ArtefactSet) GetArtefact(ref string) (cpi.ArtefactAccess, error) {
 	if i.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
 	i.base.Lock()
 	defer i.base.Unlock()
-	return i.getArtefact(digest)
+	return i.getArtefact(ref)
 }
 
-func (i *ArtefactSet) getArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {
+func (i *ArtefactSet) matcher(ref string) func(d *artdesc.Descriptor) bool {
+	if artdesc.IsDigest(ref) {
+		digest := digest.Digest(ref)
+		return func(d *artdesc.Descriptor) bool {
+			return d.Digest == digest
+		}
+	}
+	return func(d *artdesc.Descriptor) bool {
+		if d.Annotations == nil {
+			return false
+		}
+		for _, tag := range strings.Split(d.Annotations[TAGS_ANNOTATION], ",") {
+			if tag == ref {
+				return true
+			}
+		}
+		return false
+	}
+}
+
+func (i *ArtefactSet) getArtefact(ref string) (cpi.ArtefactAccess, error) {
 	idx := i.GetIndex()
+	match := i.matcher(ref)
 	for _, e := range idx.Manifests {
-		if e.Digest == digest {
+		if match(&e) {
 			return i.base.GetArtefact(i, e.Digest)
 		}
 	}
-	return nil, errors.ErrUnknown(cpi.KIND_OCIARTEFACT, digest.String())
+	return nil, errors.ErrUnknown(cpi.KIND_OCIARTEFACT, ref)
 }
 
 func (a *ArtefactSet) AnnotateArtefact(digest digest.Digest, name, value string) error {
@@ -220,4 +242,8 @@ func (a *ArtefactSet) AddArtefact(artefact cpi.Artefact, platform *artdesc.Platf
 		Platform:    platform,
 	})
 	return blob, nil
+}
+
+func (a *ArtefactSet) NewArtefact(artefact ...*artdesc.Artefact) (core.ArtefactAccess, error) {
+	return NewArtefact(a, artefact...), nil
 }

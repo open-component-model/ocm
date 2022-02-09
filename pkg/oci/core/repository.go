@@ -50,7 +50,6 @@ type ArtefactSource interface {
 }
 
 type NamespaceAccess interface {
-	RepositorySource
 	ArtefactSource
 	ArtefactSink
 
@@ -76,10 +75,10 @@ type ArtefactAccess interface {
 	GetDescriptor() *artdesc.Artefact
 	ManifestAccess() ManifestAccess
 	IndexAccess() IndexAccess
-	GetManifest(digest digest.Digest) (ManifestAccess, error)
 	GetBlob(digest digest.Digest) (BlobAccess, error)
 
 	AddBlob(BlobAccess) error
+
 	AddArtefact(Artefact, *artdesc.Platform) (BlobAccess, error)
 	AddLayer(BlobAccess, *artdesc.Descriptor) (int, error)
 }

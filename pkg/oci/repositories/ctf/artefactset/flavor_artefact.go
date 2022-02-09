@@ -40,7 +40,6 @@ func (a *artefactBase) Blob() (accessio.BlobAccess, error) {
 
 type Artefact struct {
 	artefactBase
-	handler *BlobHandler
 }
 
 var _ cpi.ArtefactAccess = (*Artefact)(nil)
@@ -60,7 +59,6 @@ func NewArtefactForBlob(access ArtefactSetContainer, blob accessio.BlobAccess) (
 			state:  state,
 		},
 	}
-	a.handler = NewBlobHandler(access, a)
 	return a, nil
 }
 
@@ -84,7 +82,6 @@ func NewArtefact(access ArtefactSetContainer, defs ...*artdesc.Artefact) *Artefa
 			state:  state,
 		},
 	}
-	a.handler = NewBlobHandler(access, a)
 	return a
 }
 
@@ -204,29 +201,40 @@ func (a *Artefact) GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error)
 	if !a.IsIndex() {
 		return nil, ErrNoIndex
 	}
-	return a.handler.GetArtefact(digest)
+	return a.access.GetArtefact(digest.String())
 }
 
 func (a *Artefact) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
-	return a.handler.GetBlob(digest)
+	d := a.GetBlobDescriptor(digest)
+	if d != nil {
+		data, err := a.access.GetBlobData(digest)
+		if err != nil {
+			return nil, err
+		}
+		return accessio.BlobAccessForDataAccess(d.Digest, d.Size, d.MediaType, data), nil
+	}
+	return nil, cpi.ErrBlobNotFound(digest)
 }
 
 func (a *Artefact) GetManifest(digest digest.Digest) (cpi.ManifestAccess, error) {
 	if !a.IsIndex() {
 		return nil, ErrNoIndex
 	}
-	return a.handler.GetManifest(digest)
+	return a.IndexAccess().GetManifest(digest)
 }
 
 func (a *Artefact) GetIndex(digest digest.Digest) (cpi.IndexAccess, error) {
 	if !a.IsIndex() {
 		return nil, ErrNoIndex
 	}
-	return a.handler.GetIndex(digest)
+	return a.IndexAccess().GetIndex(digest)
 }
 
 func (a *Artefact) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
-	return a.handler.NewArtefact(art...)
+	if !a.IsIndex() {
+		return nil, ErrNoIndex
+	}
+	return NewArtefact(a.access, art...), nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////

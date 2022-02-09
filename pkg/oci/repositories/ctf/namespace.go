@@ -75,13 +75,12 @@ func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
 	return n.repo.base.AddBlob(blob)
 }
 
-func (n *NamespaceContainer) GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {
-	for _, a := range n.repo.getIndex().GetArtefactInfos(digest) {
-		if a.Repository == n.namespace {
-			return n.repo.base.GetArtefact(n, digest)
-		}
+func (n *NamespaceContainer) GetArtefact(ref string) (cpi.ArtefactAccess, error) {
+	meta := n.repo.getIndex().GetArtefactInfo(n.namespace, ref)
+	if meta == nil {
+		return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, ref, n.namespace)
 	}
-	return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, digest.String(), n.namespace)
+	return n.repo.base.GetArtefact(n, meta.Digest)
 }
 
 func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {

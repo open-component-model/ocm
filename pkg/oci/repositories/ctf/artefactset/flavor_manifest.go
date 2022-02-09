@@ -27,7 +27,6 @@ import (
 
 type Manifest struct {
 	artefactBase
-	handler *BlobHandler // not inherited because only blob access should be offered
 }
 
 var _ cpi.ManifestAccess = (*Manifest)(nil)
@@ -52,7 +51,6 @@ func NewManifest(access ArtefactSetContainer, defs ...*artdesc.Manifest) *Manife
 			state:  state,
 		},
 	}
-	m.handler = NewBlobHandler(access, m)
 	return m
 }
 
@@ -76,7 +74,6 @@ func NewManifestForArtefact(a *Artefact) *Manifest {
 			state:  &manifestMapper{a.state},
 		},
 	}
-	m.handler = NewBlobHandler(a.access, m)
 	return m
 }
 
@@ -126,11 +123,19 @@ func (m *Manifest) GetConfigBlob() (cpi.BlobAccess, error) {
 	if m.GetDescriptor().Config.Digest == "" {
 		return nil, nil
 	}
-	return m.handler.GetBlob(m.GetDescriptor().Config.Digest)
+	return m.GetBlob(m.GetDescriptor().Config.Digest)
 }
 
 func (m *Manifest) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
-	return m.handler.GetBlob(digest)
+	d := m.GetBlobDescriptor(digest)
+	if d != nil {
+		data, err := m.access.GetBlobData(digest)
+		if err != nil {
+			return nil, err
+		}
+		return accessio.BlobAccessForDataAccess(d.Digest, d.Size, d.MediaType, data), nil
+	}
+	return nil, cpi.ErrBlobNotFound(digest)
 }
 
 func (m *Manifest) AddBlob(blob cpi.BlobAccess) error {

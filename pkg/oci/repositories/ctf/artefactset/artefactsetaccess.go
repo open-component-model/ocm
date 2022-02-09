@@ -30,8 +30,6 @@ type ArtefactSetAccess struct {
 
 	lock      sync.RWMutex
 	blobinfos map[digest.Digest]*cpi.Descriptor
-
-	*BlobHandler
 }
 
 func NewArtefactSetAccess(container ArtefactSetContainer) *ArtefactSetAccess {
@@ -39,7 +37,6 @@ func NewArtefactSetAccess(container ArtefactSetContainer) *ArtefactSetAccess {
 		base:      container,
 		blobinfos: map[digest.Digest]*cpi.Descriptor{},
 	}
-	s.BlobHandler = NewBlobHandler(s, s)
 	return s
 }
 

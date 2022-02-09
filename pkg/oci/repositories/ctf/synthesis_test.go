@@ -15,6 +15,7 @@
 package ctf_test
 
 import (
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
@@ -27,6 +28,49 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/opencontainers/go-digest"
 )
+
+func CheckBlob(blob accessio.BlobAccess) oci.NamespaceAccess {
+	set, err := artefactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
+	Expect(err).To(Succeed())
+	defer func() {
+		if set != nil {
+			set.Close()
+		}
+	}()
+
+	idx := set.GetIndex()
+	Expect(idx.Annotations).To(Equal(map[string]string{
+		"cloud.gardener.ocm/main": "sha256:" + DIGEST_MANIFEST,
+	}))
+	Expect(idx.Manifests).To(Equal([]artdesc.Descriptor{
+		{
+			MediaType: artdesc.MediaTypeImageManifest,
+			Digest:    "sha256:" + DIGEST_MANIFEST,
+			Size:      362,
+			Annotations: map[string]string{
+				"cloud.gardener.ocm/tags": "v1",
+			},
+		},
+	}))
+
+	art, err := set.GetArtefact("sha256:" + DIGEST_MANIFEST)
+	Expect(err).To(Succeed())
+	m, err := art.Manifest()
+	Expect(err).To(Succeed())
+	Expect(m.Config).To(Equal(artdesc.Descriptor{
+		MediaType: MimeTypeOctetStream,
+		Digest:    "sha256:" + DIGEST_CONFIG,
+		Size:      2,
+	}))
+
+	layer, err := art.GetBlob(digest.Digest("sha256:" + DIGEST_LAYER))
+	Expect(err).To(Succeed())
+	Expect(layer.Get()).To(Equal([]byte("testdata")))
+
+	result := set
+	set = nil
+	return result
+}
 
 var _ = Describe("syntheses", func() {
 	var tempfs vfs.FileSystem
@@ -63,39 +107,16 @@ var _ = Describe("syntheses", func() {
 		Expect(path).To(MatchRegexp(filepath.Join(blob.FileSystem().FSTempDir(), "artefactblob.*\\.tgz")))
 		Expect(vfs.Exists(blob.FileSystem(), path)).To(BeTrue())
 
-		set, err := artefactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
-		Expect(err).To(Succeed())
-		idx := set.GetIndex()
-		Expect(idx.Annotations).To(Equal(map[string]string{
-			"cloud.gardener.ocm/main": "sha256:" + DIGEST_MANIFEST,
-		}))
-		Expect(idx.Manifests).To(Equal([]artdesc.Descriptor{
-			{
-				MediaType: artdesc.MediaTypeImageManifest,
-				Digest:    "sha256:" + DIGEST_MANIFEST,
-				Size:      362,
-				Annotations: map[string]string{
-					"cloud.gardener.ocm/tags": "v1",
-				},
-			},
-		}))
-
-		art, err := set.GetArtefact("sha256:" + DIGEST_MANIFEST)
-		Expect(err).To(Succeed())
-		m, err := art.Manifest()
-		Expect(err).To(Succeed())
-		Expect(m.Config).To(Equal(artdesc.Descriptor{
-			MediaType: MimeTypeOctetStream,
-			Digest:    "sha256:" + DIGEST_CONFIG,
-			Size:      2,
-		}))
-
-		layer, err := art.GetBlob(digest.Digest("sha256:" + DIGEST_LAYER))
-		Expect(err).To(Succeed())
-		Expect(layer.Get()).To(Equal([]byte("testdata")))
+		set := CheckBlob(blob)
+		defer set.Close()
 
 		Expect(blob.Close()).To(Succeed())
-
 		Expect(vfs.Exists(blob.FileSystem(), path)).To(BeFalse())
+
+		// use syntesized blob to extract new blob, useless but should work
+		newblob, err := artefactset.SynthesizeArtefactBlob(set, TAG)
+		Expect(err).To(Succeed())
+		defer newblob.Close()
+		CheckBlob(newblob).Close()
 	})
 })
