@@ -19,6 +19,7 @@ import (
 
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
+	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/mandelsoft/vfs/pkg/osfs"
@@ -28,16 +29,33 @@ import (
 type ArtefactBlob interface {
 	accessio.BlobAccess
 	io.Closer
+	FileSystem() vfs.FileSystem
+	Path() string
 }
 
 type artefactBlob struct {
 	accessio.BlobAccess
-	path       string
+	temp       vfs.File
 	filesystem vfs.FileSystem
 }
 
 func (a *artefactBlob) Close() error {
-	return a.filesystem.Remove(a.path)
+	if a.temp != nil {
+		list := errors.ErrListf("synthesized blob")
+		list.Add(a.temp.Close())
+		list.Add(a.filesystem.Remove(a.temp.Name()))
+		a.temp = nil
+		return list.Result()
+	}
+	return nil
+}
+
+func (a *artefactBlob) FileSystem() vfs.FileSystem {
+	return a.filesystem
+}
+
+func (a *artefactBlob) Path() string {
+	return a.temp.Name()
 }
 
 // SynthesizeArtefactBlob synthesizes an artefact blob incorporation all side artefacts.
@@ -70,20 +88,24 @@ func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, e
 	}()
 
 	ab := &artefactBlob{
+		BlobAccess: accessio.BlobAccessForFile(blob.MimeType()+"+tar+gzip", temp.Name(), fs),
 		filesystem: fs,
-		path:       temp.Name(),
+		temp:       temp,
 	}
 	_ = art
 
-	set, err := Create(accessobj.ACC_CREATE, "", 0600, accessobj.File(temp))
-
+	set, err := Create(accessobj.ACC_CREATE, "", 0600, accessobj.File(temp), accessobj.FormatTGZ)
+	if err != nil {
+		return nil, err
+	}
+	defer set.Close()
 	err = TransferArtefactToSet(art, ns, set)
 	if err != nil {
 		return nil, err
 	}
 
 	if !artdesc.IsDigest(ref) {
-		err = set.AddTags(digest, TAGS_ANNOTATION, ref)
+		err = set.AddTags(digest, ref)
 		if err != nil {
 			return nil, err
 		}

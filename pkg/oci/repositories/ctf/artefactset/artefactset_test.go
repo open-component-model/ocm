@@ -195,6 +195,25 @@ var _ = Describe("artefact management", func() {
 			Expect(blob.Get()).To(Equal([]byte("testdata")))
 			Expect(blob.MimeType()).To(Equal(MimeTypeOctetStream))
 		})
+		It("read from tgz artefact", func() {
+			a, err := artefactset.FormatTGZ.Create("test.tgz", opts, 0700)
+			Expect(err).To(Succeed())
+			defaultManifestFill(a)
+			Expect(a.Close()).To(Succeed())
+
+			a, err = artefactset.Open(accessobj.ACC_READONLY, "test.tgz", 0, opts)
+			Expect(err).To(Succeed())
+			defer a.Close()
+			Expect(len(a.GetIndex().Manifests)).To(Equal(1))
+			art, err := a.GetArtefact(a.GetIndex().Manifests[0].Digest)
+			Expect(err).To(Succeed())
+			Expect(art.IsManifest()).To(BeTrue())
+			blob, err := art.GetBlob("sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50")
+			Expect(err).To(Succeed())
+			Expect(blob.Get()).To(Equal([]byte("testdata")))
+			Expect(blob.MimeType()).To(Equal(MimeTypeOctetStream))
+		})
+
 	})
 	Context("index", func() {
 

@@ -17,11 +17,13 @@ package accessobj
 import (
 	"archive/tar"
 	"compress/gzip"
+	"fmt"
 	"io"
 	"sync"
 
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/errors"
+	"github.com/gardener/ocm/pkg/oci/repositories/ctf/format"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
@@ -66,6 +68,18 @@ type CloserFunction func(*AccessObject) error
 
 func (f CloserFunction) Close(obj *AccessObject) error {
 	return f(obj)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type Setup interface {
+	Setup(vfs.FileSystem) error
+}
+
+type SetupFunction func(vfs.FileSystem) error
+
+func (f SetupFunction) Setup(fs vfs.FileSystem) error {
+	return f(fs)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -140,4 +154,61 @@ func DetectFormatForFile(file vfs.File) (*FileFormat, error) {
 		}
 	}
 	return &format, nil
+}
+
+type StandardReaderHandler interface {
+	Write(obj *AccessObject, path string, opts Options, mode vfs.FileMode) error
+	NewFromReader(info *AccessObjectInfo, acc AccessMode, in io.Reader, opts Options, closer Closer) (*AccessObject, error)
+}
+
+func DefaultOpenOptsFileHandling(kind string, info *AccessObjectInfo, acc AccessMode, path string, opts Options, handler StandardReaderHandler) (*AccessObject, error) {
+	if err := opts.ValidForPath(path); err != nil {
+		return nil, err
+	}
+	var reader io.ReadCloser
+	var file vfs.File
+	var err error
+	var closer Closer
+	if opts.Reader != nil {
+		reader = opts.Reader
+		defer opts.Reader.Close()
+	} else if opts.File == nil {
+		// we expect that the path point to a tar
+		file, err = opts.PathFileSystem.Open(path)
+		if err != nil {
+			return nil, fmt.Errorf("unable to open %s from %s: %w", kind, path, err)
+		}
+		defer file.Close()
+	} else {
+		file = opts.File
+	}
+	if file != nil {
+		reader = file
+		fi, err := file.Stat()
+		if err != nil {
+			return nil, err
+		}
+		closer = CloserFunction(func(obj *AccessObject) error { return handler.Write(obj, path, opts, fi.Mode()) })
+	}
+	return handler.NewFromReader(info, acc, reader, opts, closer)
+}
+
+func DefaultCreateOptsFileHandling(kind string, info *AccessObjectInfo, path string, opts Options, mode vfs.FileMode, handler StandardReaderHandler) (*AccessObject, error) {
+	if err := opts.ValidForPath(path); err != nil {
+		return nil, err
+	}
+	if opts.Reader != nil {
+		return nil, errors.ErrNotSupported("reader option not supported")
+	}
+	if opts.File == nil {
+		ok, err := vfs.Exists(opts.PathFileSystem, path)
+		if err != nil {
+			return nil, err
+		}
+		if ok {
+			return nil, vfs.ErrExist
+		}
+	}
+
+	return NewAccessObject(info, ACC_CREATE, opts.Representation, nil, CloserFunction(func(obj *AccessObject) error { return handler.Write(obj, path, opts, mode) }), format.DirMode)
 }

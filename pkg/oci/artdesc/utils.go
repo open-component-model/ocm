@@ -36,15 +36,21 @@ func IsDigest(ref string) bool {
 }
 
 func IsOCIMediaType(media string) bool {
-	last := strings.LastIndex(media, "+")
-	if last >= 0 {
+	for {
+		last := strings.LastIndex(media, "+")
+		if last < 0 {
+			break
+		}
 		switch media[last+1:] {
 		case "tar":
 			fallthrough
-		case "tgz":
+		case "gzip":
 			media = media[:last]
+		default:
+			break
 		}
 	}
+
 	switch media {
 	case MediaTypeImageIndex:
 		fallthrough

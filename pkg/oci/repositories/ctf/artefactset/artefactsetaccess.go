@@ -18,7 +18,6 @@ import (
 	"sync"
 
 	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/opencontainers/go-digest"
@@ -63,15 +62,15 @@ func (a *ArtefactSetAccess) GetBlob(digest digest.Digest) (cpi.BlobAccess, error
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
+	data, err := a.GetBlobData(digest)
+	if err != nil {
+		return nil, err
+	}
 	d := a.GetBlobDescriptor(digest)
 	if d != nil {
-		data, err := a.GetBlobData(digest)
-		if err != nil {
-			return nil, err
-		}
 		return accessio.BlobAccessForDataAccess(d.Digest, d.Size, d.MediaType, data), nil
 	}
-	return nil, errors.ErrNotFound("blob", string(digest))
+	return accessio.BlobAccessForDataAccess(digest, -1, "", data), nil
 }
 
 func (a *ArtefactSetAccess) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {

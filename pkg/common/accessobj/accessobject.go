@@ -47,11 +47,17 @@ type AccessObject struct {
 	closer Closer
 }
 
-func NewAccessObject(info *AccessObjectInfo, acc AccessMode, fs vfs.FileSystem, closer Closer, mode vfs.FileMode) (*AccessObject, error) {
+func NewAccessObject(info *AccessObjectInfo, acc AccessMode, fs vfs.FileSystem, setup Setup, closer Closer, mode vfs.FileMode) (*AccessObject, error) {
 	defaulted, fs, err := InternalRepresentationFilesystem(acc, fs, info.ElementDirectoryName, mode)
 
 	if err != nil {
 		return nil, err
+	}
+	if setup != nil {
+		err = setup.Setup(fs)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if defaulted {
 		closer = FSCloser(closer)

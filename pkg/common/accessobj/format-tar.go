@@ -34,6 +34,9 @@ func init() {
 
 type TarHandler struct{}
 
+var _ StandardReaderHandler = (*TarHandler)(nil)
+var _ FormatHandler = (*TarHandler)(nil)
+
 // ApplyOption applies the configured path filesystem.
 func (o TarHandler) ApplyOption(options *Options) {
 	f := o.Format()
@@ -45,43 +48,11 @@ func (_ TarHandler) Format() accessio.FileFormat {
 }
 
 func (c TarHandler) Open(info *AccessObjectInfo, acc AccessMode, path string, opts Options) (*AccessObject, error) {
-	if err := opts.ValidForPath(path); err != nil {
-		return nil, err
-	}
-	var file vfs.File
-	var err error
-	if opts.File == nil {
-		// we expect that the path point to a tar
-		file, err = opts.PathFileSystem.Open(path)
-		if err != nil {
-			return nil, fmt.Errorf("unable to open tar archive from %s: %w", path, err)
-		}
-		defer file.Close()
-	} else {
-		file = opts.File
-	}
-	fi, err := file.Stat()
-	if err != nil {
-		return nil, err
-	}
-	return newFromTarReader(info, acc, file, opts, CloserFunction(func(obj *AccessObject) error { return c.close(obj, path, opts, fi.Mode()) }))
+	return DefaultOpenOptsFileHandling("tgz archive", info, acc, path, opts, c)
 }
 
 func (c TarHandler) Create(info *AccessObjectInfo, path string, opts Options, mode vfs.FileMode) (*AccessObject, error) {
-	if err := opts.ValidForPath(path); err != nil {
-		return nil, err
-	}
-	if opts.File == nil {
-		ok, err := vfs.Exists(opts.PathFileSystem, path)
-		if err != nil {
-			return nil, err
-		}
-		if ok {
-			return nil, vfs.ErrExist
-		}
-	}
-
-	return NewAccessObject(info, ACC_CREATE, opts.Representation, CloserFunction(func(obj *AccessObject) error { return c.close(obj, path, opts, mode) }), format.DirMode)
+	return DefaultCreateOptsFileHandling("tgz archive", info, path, opts, mode, c)
 }
 
 // Write tars the current descriptor and its artifacts.
@@ -168,15 +139,12 @@ func (_ TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts Opti
 	return tw.Close()
 }
 
-func (c TarHandler) close(obj *AccessObject, path string, opts Options, mode vfs.FileMode) error {
-	return c.Write(obj, path, opts, mode)
-}
-
-// newFromTarReader creates a new builder from a input reader.
-func newFromTarReader(info *AccessObjectInfo, acc AccessMode, in io.Reader, opts Options, closer Closer) (*AccessObject, error) {
-	if err := utils.ExtractTarToFs(opts.Representation, in); err != nil {
-		return nil, fmt.Errorf("unable to extract tar: %w", err)
+func (t TarHandler) NewFromReader(info *AccessObjectInfo, acc AccessMode, in io.Reader, opts Options, closer Closer) (*AccessObject, error) {
+	setup := func(fs vfs.FileSystem) error {
+		if err := utils.ExtractTarToFs(fs, in); err != nil {
+			return fmt.Errorf("unable to extract tar: %w", err)
+		}
+		return nil
 	}
-
-	return NewAccessObject(info, acc, opts.Representation, closer, format.DirMode)
+	return NewAccessObject(info, acc, opts.Representation, SetupFunction(setup), closer, format.DirMode)
 }

@@ -22,6 +22,7 @@ import (
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
+	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf"
@@ -35,6 +36,11 @@ import (
 )
 
 const MimeTypeOctetStream = "application/octet-stream"
+
+const TAG = "v1"
+const DIGEST_MANIFEST = "3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a"
+const DIGEST_LAYER = "810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"
+const DIGEST_CONFIG = "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
 
 func defaultManifestFill(n cpi.NamespaceAccess) {
 	art, err := n.NewArtefact()
@@ -54,7 +60,7 @@ func defaultManifestFill(n cpi.NamespaceAccess) {
 
 	blob, err := n.AddTaggedArtefact(art)
 	Expect(err).To(Succeed())
-	n.AddTags(blob.Digest(), "v1")
+	n.AddTags(blob.Digest(), TAG)
 }
 
 var _ = Describe("ctf management", func() {
@@ -75,6 +81,29 @@ var _ = Describe("ctf management", func() {
 	})
 
 	It("instantiate filesystem ctf", func() {
+		r, err := ctf.FormatDirectory.Create(oci.DefaultContext, "test", spec.Options, 0700)
+		Expect(err).To(Succeed())
+		Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
+
+		n, err := r.LookupNamespace("mandelsoft/test")
+		defaultManifestFill(n)
+
+		Expect(r.Close()).To(Succeed())
+		Expect(vfs.FileExists(tempfs, "test/"+ctf.ArtefactIndexFileName)).To(BeTrue())
+
+		infos, err := vfs.ReadDir(tempfs, "test/"+artefactset.BlobsDirectoryName)
+		Expect(err).To(Succeed())
+		blobs := []string{}
+		for _, fi := range infos {
+			blobs = append(blobs, fi.Name())
+		}
+		Expect(blobs).To(ContainElements(
+			"sha256."+DIGEST_MANIFEST,
+			"sha256."+DIGEST_CONFIG,
+			"sha256."+DIGEST_LAYER))
+	})
+
+	It("instantiate filesystem ctf", func() {
 		r, err := spec.Repository(nil, nil)
 		Expect(err).To(Succeed())
 		Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
@@ -92,9 +121,9 @@ var _ = Describe("ctf management", func() {
 			blobs = append(blobs, fi.Name())
 		}
 		Expect(blobs).To(ContainElements(
-			"sha256.3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
-			"sha256.44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
-			"sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
+			"sha256."+DIGEST_MANIFEST,
+			"sha256."+DIGEST_CONFIG,
+			"sha256."+DIGEST_LAYER))
 	})
 
 	It("instantiate tgz artefact", func() {
@@ -137,9 +166,9 @@ var _ = Describe("ctf management", func() {
 		}
 		Expect(files).To(ContainElements(
 			ctf.ArtefactIndexFileName,
-			"blobs/sha256.3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
-			"blobs/sha256.44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
-			"blobs/sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
+			"blobs/sha256."+DIGEST_MANIFEST,
+			"blobs/sha256."+DIGEST_CONFIG,
+			"blobs/sha256."+DIGEST_LAYER))
 	})
 
 	Context("manifest", func() {
@@ -158,19 +187,23 @@ var _ = Describe("ctf management", func() {
 			n, err = r.LookupNamespace("mandelsoft/test")
 			Expect(err).To(Succeed())
 
-			art, err := n.GetArtefact("sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")
+			art, err := n.GetArtefact("sha256:" + DIGEST_MANIFEST)
 			Expect(err).To(Succeed())
 			Expect(art.IsManifest()).To(BeTrue())
-			blob, err := art.GetBlob("sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50")
+			blob, err := art.GetBlob("sha256:" + DIGEST_LAYER)
 			Expect(err).To(Succeed())
 			Expect(blob.Get()).To(Equal([]byte("testdata")))
 			Expect(blob.MimeType()).To(Equal(MimeTypeOctetStream))
+			blob, err = art.GetBlob("sha256:" + DIGEST_CONFIG)
+			Expect(err).To(Succeed())
+			Expect(blob.Get()).To(Equal([]byte("{}")))
+			Expect(blob.MimeType()).To(Equal(MimeTypeOctetStream))
 
-			art, err = n.GetArtefact("v1")
+			art, err = n.GetArtefact(TAG)
 			Expect(err).To(Succeed())
 			b, err := art.Artefact().ToBlobAccess()
 			Expect(err).To(Succeed())
-			Expect(b.Digest()).To(Equal(digest.Digest("sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")))
+			Expect(b.Digest()).To(Equal(digest.Digest("sha256:" + DIGEST_MANIFEST)))
 
 			_, err = n.GetArtefact("dummy")
 			Expect(err).To(Equal(errors.ErrNotFound(cpi.KIND_OCIARTEFACT, "dummy", "mandelsoft/test")))
@@ -179,8 +212,8 @@ var _ = Describe("ctf management", func() {
 
 			n, err = r.LookupNamespace("mandelsoft/other")
 			Expect(err).To(Succeed())
-			_, err = n.GetArtefact("sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")
-			Expect(err).To(Equal(errors.ErrNotFound(cpi.KIND_OCIARTEFACT, "sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", "mandelsoft/other")))
+			_, err = n.GetArtefact("sha256:" + DIGEST_MANIFEST)
+			Expect(err).To(Equal(errors.ErrNotFound(cpi.KIND_OCIARTEFACT, "sha256:"+DIGEST_MANIFEST, "mandelsoft/other")))
 		})
 	})
 })

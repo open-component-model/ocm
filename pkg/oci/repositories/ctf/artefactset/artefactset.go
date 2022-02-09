@@ -40,8 +40,8 @@ var _ ArtefactSetContainer = (*ArtefactSet)(nil)
 var _ cpi.ArtefactSink = (*ArtefactSet)(nil)
 
 // New returns a new representation based element
-func New(acc accessobj.AccessMode, fs vfs.FileSystem, closer accessobj.Closer, mode vfs.FileMode) (*ArtefactSet, error) {
-	return _Wrap(accessobj.NewAccessObject(accessObjectInfo, acc, fs, closer, mode))
+func New(acc accessobj.AccessMode, fs vfs.FileSystem, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode) (*ArtefactSet, error) {
+	return _Wrap(accessobj.NewAccessObject(accessObjectInfo, acc, fs, setup, closer, mode))
 }
 
 func _Wrap(obj *accessobj.AccessObject, err error) (*ArtefactSet, error) {
@@ -98,7 +98,7 @@ func (i *ArtefactSet) AddTags(digest digest.Digest, tags ...string) error {
 				cur = strings.Join(tags, ",")
 			}
 			if cur != "" {
-				e.Annotations[TYPE_ANNOTATION] = cur
+				e.Annotations[TAGS_ANNOTATION] = cur
 			}
 			return nil
 		}

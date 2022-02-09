@@ -45,6 +45,25 @@ type Artefact struct {
 
 var _ cpi.ArtefactAccess = (*Artefact)(nil)
 
+func NewArtefactForBlob(access ArtefactSetContainer, blob accessio.BlobAccess) (*Artefact, error) {
+	mode := accessobj.ACC_WRITABLE
+	if access.IsReadOnly() {
+		mode = accessobj.ACC_READONLY
+	}
+	state, err := accessobj.NewBlobStateForBlob(mode, blob, NewArtefactStateHandler())
+	if err != nil {
+		return nil, err
+	}
+	a := &Artefact{
+		artefactBase: artefactBase{
+			access: access,
+			state:  state,
+		},
+	}
+	a.handler = NewBlobHandler(access, a)
+	return a, nil
+}
+
 func NewArtefact(access ArtefactSetContainer, defs ...*artdesc.Artefact) *Artefact {
 	var def *artdesc.Artefact
 	if len(defs) != 0 && defs[0] != nil {
@@ -67,6 +86,18 @@ func NewArtefact(access ArtefactSetContainer, defs ...*artdesc.Artefact) *Artefa
 	}
 	a.handler = NewBlobHandler(access, a)
 	return a
+}
+
+func (a *Artefact) Blob() (accessio.BlobAccess, error) {
+	d := a.state.GetState().(*artdesc.Artefact)
+	if !d.IsValid() {
+		return nil, errors.ErrUnknown("artefact type")
+	}
+	blob, err := a.artefactBase.Blob()
+	if err != nil {
+		return nil, err
+	}
+	return accessio.BlobWithMimeType(d.MimeType(), blob), nil
 }
 
 func (a *Artefact) IsClosed() bool {

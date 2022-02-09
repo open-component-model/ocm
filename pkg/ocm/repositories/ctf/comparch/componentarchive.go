@@ -34,8 +34,8 @@ type ComponentArchive struct {
 }
 
 // New returns a new representation based element
-func New(ctx cpi.Context, acc accessobj.AccessMode, fs vfs.FileSystem, closer accessobj.Closer, mode vfs.FileMode) (*ComponentArchive, error) {
-	obj, err := accessobj.NewAccessObject(accessObjectInfo, acc, fs, closer, mode)
+func New(ctx cpi.Context, acc accessobj.AccessMode, fs vfs.FileSystem, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode) (*ComponentArchive, error) {
+	obj, err := accessobj.NewAccessObject(accessObjectInfo, acc, fs, setup, closer, mode)
 	return _Wrap(ctx, obj, err)
 }
 

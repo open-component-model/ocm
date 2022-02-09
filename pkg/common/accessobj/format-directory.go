@@ -20,6 +20,7 @@ import (
 	"os"
 
 	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/errors"
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -44,15 +45,27 @@ func (_ DirectoryHandler) Format() accessio.FileFormat {
 }
 
 func (_ DirectoryHandler) Open(info *AccessObjectInfo, acc AccessMode, path string, opts Options) (*AccessObject, error) {
+	if err := opts.ValidForPath(path); err != nil {
+		return nil, err
+	}
+	if opts.File != nil || opts.Reader != nil {
+		return nil, errors.ErrNotSupported("file or reader option")
+	}
 	fs, err := projectionfs.New(opts.PathFileSystem, path)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create projected filesystem from path %s: %w", path, err)
 	}
 	opts.Representation = fs // TODO: use of temporary copy
-	return NewAccessObject(info, acc, fs, nil, os.ModePerm)
+	return NewAccessObject(info, acc, fs, nil, nil, os.ModePerm)
 }
 
 func (_ DirectoryHandler) Create(info *AccessObjectInfo, path string, opts Options, mode vfs.FileMode) (*AccessObject, error) {
+	if err := opts.ValidForPath(path); err != nil {
+		return nil, err
+	}
+	if opts.File != nil || opts.Reader != nil {
+		return nil, errors.ErrNotSupported("file or reader option")
+	}
 	err := opts.PathFileSystem.Mkdir(path, mode)
 	if err != nil {
 		return nil, err
@@ -61,7 +74,7 @@ func (_ DirectoryHandler) Create(info *AccessObjectInfo, path string, opts Optio
 	if err != nil {
 		return nil, fmt.Errorf("unable to create projected filesystem from path %s: %w", path, err)
 	}
-	return NewAccessObject(info, ACC_CREATE, opts.Representation, nil, mode)
+	return NewAccessObject(info, ACC_CREATE, opts.Representation, nil, nil, mode)
 }
 
 // WriteToFilesystem writes the current object to a filesystem

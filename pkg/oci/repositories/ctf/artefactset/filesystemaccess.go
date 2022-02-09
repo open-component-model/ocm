@@ -17,7 +17,6 @@ package artefactset
 import (
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
-	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/opencontainers/go-digest"
 )
@@ -31,25 +30,14 @@ func NewFileSystemBlobAccess(access *accessobj.AccessObject) *FileSystemBlobAcce
 	return &FileSystemBlobAccess{accessobj.NewFileSystemBlobAccess(access)}
 }
 
-func (i *FileSystemBlobAccess) getArtefact(blob cpi.BlobAccess) (*artdesc.Artefact, error) {
-	data, err := blob.Get()
-	if err != nil {
-		return nil, err
-	}
-	return artdesc.Decode(data)
-}
-
 func (i *FileSystemBlobAccess) GetArtefact(access ArtefactSetContainer, digest digest.Digest) (cpi.ArtefactAccess, error) {
 	data, err := i.GetBlobData(digest)
 	if err != nil {
 		return nil, err
 	}
 
-	d, err := i.getArtefact(accessio.BlobAccessForDataAccess("", -1, "", data))
-	if err != nil {
-		return nil, err
-	}
-	return NewArtefact(access, d), nil
+	blob := accessio.BlobAccessForDataAccess("", -1, "", data)
+	return NewArtefactForBlob(access, blob)
 }
 
 func (i *FileSystemBlobAccess) AddArtefactBlob(artefact cpi.Artefact) (cpi.BlobAccess, error) {

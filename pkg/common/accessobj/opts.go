@@ -40,6 +40,10 @@ type Options struct {
 	// File is an opened file object to use instead of the path and path filesystem
 	// It should never be closed if given to support temporary files
 	File vfs.File `json:"-"`
+	// Reader provides a one time access to the content (archive xontent only)
+	// The resulting access is therefore temporarily and cannot be written back
+	// to its origin, but to other destinations.
+	Reader io.ReadCloser `json:"-"`
 }
 
 var _ Option = &Options{}
@@ -55,6 +59,12 @@ func (o Options) ApplyOption(options *Options) {
 	}
 	if o.FileFormat != nil {
 		options.FileFormat = o.FileFormat
+	}
+	if o.File != nil {
+		options.File = o.File
+	}
+	if o.Reader != nil {
+		options.Reader = o.Reader
 	}
 }
 
@@ -73,8 +83,18 @@ func (o Options) DefaultFormat(fmt accessio.FileFormat) Options {
 }
 
 func (o Options) ValidForPath(path string) error {
-	if path != "" && o.File != nil {
-		return errors.ErrInvalid("option", "path", "combination with file")
+	count := 0
+	if path != "" {
+		count++
+	}
+	if o.File != nil {
+		count++
+	}
+	if o.Reader != nil {
+		count++
+	}
+	if count > 1 {
+		return errors.ErrInvalid("only path,, file or reader can be set")
 	}
 	return nil
 }
@@ -170,6 +190,20 @@ type opt_F struct {
 // ApplyOption applies the configured open file
 func (o opt_F) ApplyOption(options *Options) {
 	options.File = o.File
+}
+
+// Reader set open reader to use
+func Reader(reader io.ReadCloser) Option {
+	return opt_R{reader}
+}
+
+type opt_R struct {
+	io.ReadCloser
+}
+
+// ApplyOption applies the configured open file
+func (o opt_R) ApplyOption(options *Options) {
+	options.Reader = o.ReadCloser
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -15,6 +15,7 @@
 package ctf
 
 import (
+	"strings"
 	"sync"
 
 	"github.com/gardener/ocm/pkg/common/accessio"
@@ -68,6 +69,26 @@ func GetFormat(name accessio.FileFormat) FormatHandler {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+func OpenFromBlob(ctx cpi.Context, acc accessobj.AccessMode, blob accessio.BlobAccess, opts ...accessobj.Option) (*Object, error) {
+	o := accessobj.AccessOptions(opts...)
+	if o.File != nil || o.Reader != nil {
+		return nil, errors.ErrInvalid("file or reader option nor possible for blob access")
+	}
+	reader, err := blob.Reader()
+	if err != nil {
+		return nil, err
+	}
+	defer reader.Close()
+	o.Reader = reader
+	fmt := accessio.FormatTar
+	mime := blob.MimeType()
+	if strings.HasSuffix(mime, "+gzip") {
+		fmt = accessio.FormatTGZ
+	}
+	o.FileFormat = &fmt
+	return Open(ctx, acc&accessobj.ACC_READONLY, "", 0, o)
+}
 
 func Open(ctx cpi.Context, acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessobj.Option) (*Object, error) {
 	o, create, err := accessobj.HandleAccessMode(acc, path, opts...)

@@ -16,6 +16,7 @@ package accessobj
 
 import (
 	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/errors"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
@@ -42,12 +43,19 @@ func InternalRepresentationFilesystem(acc AccessMode, fs vfs.FileSystem, dir str
 }
 
 func HandleAccessMode(acc AccessMode, path string, opts ...Option) (Options, bool, error) {
+	var err error
+	ok := true
 	o := AccessOptions(opts...)
-	ok, err := vfs.Exists(o.PathFileSystem, path)
-	if err != nil {
-		return o, false, err
+	if o.File == nil && o.Reader == nil {
+		ok, err = vfs.Exists(o.PathFileSystem, path)
+		if err != nil {
+			return o, false, err
+		}
 	}
 	if !ok {
+		if !acc.IsCreate() {
+			return o, false, errors.ErrNotFoundWrap(vfs.ErrNotExist, "file", path)
+		}
 		if o.FileFormat == nil {
 			fmt := accessio.FormatDirectory
 			o.FileFormat = &fmt

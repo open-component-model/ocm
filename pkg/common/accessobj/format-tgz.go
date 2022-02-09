@@ -16,11 +16,9 @@ package accessobj
 
 import (
 	"compress/gzip"
-	"fmt"
 	"io"
 
 	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/oci/repositories/ctf/format"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
@@ -43,43 +41,11 @@ func (_ TGZHandler) Format() accessio.FileFormat {
 }
 
 func (c TGZHandler) Open(info *AccessObjectInfo, acc AccessMode, path string, opts Options) (*AccessObject, error) {
-	if err := opts.ValidForPath(path); err != nil {
-		return nil, err
-	}
-	var file vfs.File
-	var err error
-	if opts.File == nil {
-		// we expect that the path point to a tar
-		file, err = opts.PathFileSystem.Open(path)
-		if err != nil {
-			return nil, fmt.Errorf("unable to open tgz archive from %s: %w", path, err)
-		}
-		defer file.Close()
-	} else {
-		file = opts.File
-	}
-	fi, err := file.Stat()
-	if err != nil {
-		return nil, err
-	}
-	return newFromTGZReader(info, acc, file, opts, CloserFunction(func(obj *AccessObject) error { return c.close(obj, path, opts, fi.Mode()) }))
+	return DefaultOpenOptsFileHandling("tgz archive", info, acc, path, opts, c)
 }
 
 func (c TGZHandler) Create(info *AccessObjectInfo, path string, opts Options, mode vfs.FileMode) (*AccessObject, error) {
-	if err := opts.ValidForPath(path); err != nil {
-		return nil, err
-	}
-	if opts.File == nil {
-		ok, err := vfs.Exists(opts.PathFileSystem, path)
-		if err != nil {
-			return nil, err
-		}
-		if ok {
-			return nil, vfs.ErrExist
-		}
-	}
-
-	return NewAccessObject(info, ACC_CREATE, opts.Representation, CloserFunction(func(obj *AccessObject) error { return c.close(obj, path, opts, mode) }), format.DirMode)
+	return DefaultCreateOptsFileHandling("tgz archive", info, path, opts, mode, c)
 }
 
 // Write tars the current object and its artifacts.
@@ -99,12 +65,8 @@ func (c TGZHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts Opti
 	return gw.Close()
 }
 
-func (c TGZHandler) close(obj *AccessObject, path string, opts Options, mode vfs.FileMode) error {
-	return c.Write(obj, path, opts, mode)
-}
-
-// newFromTarReader creates a new manifest builder from a input reader.
-func newFromTGZReader(info *AccessObjectInfo, acc AccessMode, in io.Reader, opts Options, closer Closer) (*AccessObject, error) {
+// NewFromReader creates a new manifest builder from a input reader.
+func (c TGZHandler) NewFromReader(info *AccessObjectInfo, acc AccessMode, in io.Reader, opts Options, closer Closer) (*AccessObject, error) {
 	// the archive is untared to a memory fs that the builder can work
 	// as it would be a default filesystem.
 
@@ -112,5 +74,5 @@ func newFromTGZReader(info *AccessObjectInfo, acc AccessMode, in io.Reader, opts
 	if err != nil {
 		return nil, err
 	}
-	return newFromTarReader(info, acc, in, opts, closer)
+	return TarHandler{}.NewFromReader(info, acc, in, opts, closer)
 }

@@ -79,6 +79,14 @@ func NewIndexForArtefact(a *Artefact) *Index {
 	return m
 }
 
+func (i *Index) Blob() (accessio.BlobAccess, error) {
+	blob, err := i.artefactBase.Blob()
+	if err != nil {
+		return nil, err
+	}
+	return accessio.BlobWithMimeType(artdesc.MediaTypeImageIndex, blob), nil
+}
+
 func (i *Index) IsManifest() bool {
 	return false
 }

@@ -59,7 +59,7 @@ var _ = Describe("access method", func() {
 			cd, err := compdesc.Decode(data)
 			Expect(err).To(Succeed())
 
-			ca, err := comparch.New(DefaultContext, accessobj.ACC_CREATE, nil, nil, 0600)
+			ca, err := comparch.New(DefaultContext, accessobj.ACC_CREATE, nil, nil, nil, 0600)
 
 			res, err := cd.GetResourceByIdentity(metav1.IdentityByName("local"))
 			Expect(err).To(Succeed())

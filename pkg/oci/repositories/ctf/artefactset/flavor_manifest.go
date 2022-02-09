@@ -17,6 +17,7 @@ package artefactset
 import (
 	"compress/gzip"
 
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
@@ -77,6 +78,14 @@ func NewManifestForArtefact(a *Artefact) *Manifest {
 	}
 	m.handler = NewBlobHandler(a.access, m)
 	return m
+}
+
+func (i *Manifest) Blob() (accessio.BlobAccess, error) {
+	blob, err := i.artefactBase.Blob()
+	if err != nil {
+		return nil, err
+	}
+	return accessio.BlobWithMimeType(artdesc.MediaTypeImageManifest, blob), nil
 }
 
 func (m *Manifest) IsManifest() bool {

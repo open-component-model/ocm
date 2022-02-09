@@ -85,16 +85,28 @@ func (c *ComponentVersionContainer) IsClosed() bool {
 }
 
 func (c *ComponentVersionContainer) Update() error {
+	desc := c.GetDescriptor()
+	for i, r := range desc.Resources {
+		s, err := c.evalLayer(r.Access)
+		if err != nil {
+			return err
+		}
+		if s != r.Access {
+			desc.Resources[i].Access = s
+		}
+	}
+	for i, r := range desc.Sources {
+		s, err := c.evalLayer(r.Access)
+		if err != nil {
+			return err
+		}
+		if s != r.Access {
+			desc.Sources[i].Access = s
+		}
+	}
 	_, err := c.state.Update()
 	if err != nil {
 		return err
-	}
-	desc := c.GetDescriptor()
-	for _, r := range desc.Resources {
-		c.evalLayer(r.Access)
-	}
-	for _, r := range desc.Sources {
-		c.evalLayer(r.Access)
 	}
 	_, err = c.comp.namespace.AddTaggedArtefact(c.access, c.version)
 	if err != nil {
@@ -103,28 +115,32 @@ func (c *ComponentVersionContainer) Update() error {
 	return nil
 }
 
-func (c *ComponentVersionContainer) evalLayer(spec compdesc.AccessSpec) error {
-	spec, err := c.GetContext().AccessSpecForSpec(spec)
+func (c *ComponentVersionContainer) evalLayer(s compdesc.AccessSpec) (compdesc.AccessSpec, error) {
+	spec, err := c.GetContext().AccessSpecForSpec(s)
 	if err != nil {
-		return err
+		return s, err
 	}
 	if c.comp.repo.ocirepo.SupportsDistributionSpec() {
 		if a, ok := spec.(*accessmethods.LocalBlobAccessSpec); ok {
 			if !artdesc.IsDigest(a.LocalReference) {
-				return errors.ErrInvalid("digest", a.LocalReference)
+				return s, errors.ErrInvalid("digest", a.LocalReference)
 			}
 			desc := c.access.GetDescriptor()
 			for _, l := range desc.Layers {
 				if l.Digest == digest.Digest(a.LocalReference) {
 					if artdesc.IsOCIMediaType(l.MediaType) {
-						return c.assureGlobalRef(l.Digest, a.ReferenceName)
+						ref, err := c.assureGlobalRef(l.Digest, a.ReferenceName)
+						if err == nil {
+							a.ImageReference = ref
+							return a, nil
+						}
 					}
 				}
 			}
-			return errors.ErrUnknown("localReference", a.LocalReference)
+			return s, errors.ErrUnknown("localReference", a.LocalReference)
 		}
 	}
-	return nil
+	return s, nil
 }
 
 func (c *ComponentVersionContainer) assureLayer(blob cpi.BlobAccess) error {
@@ -176,6 +192,14 @@ func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string)
 }
 
 // assureGlobalRef provides a global access for a local OCI Artefact
-func (c *ComponentVersionContainer) assureGlobalRef(d digest.Digest, name string) error {
-	return nil
+func (c *ComponentVersionContainer) assureGlobalRef(d digest.Digest, name string) (string, error) {
+
+	blob, err := c.access.GetBlob(d)
+	if err != nil {
+		return "", err
+	}
+
+	_ = blob
+	//artefactset.Open(accessobj.ACC_READONLY, "", accessobj.File())
+	return "", nil
 }

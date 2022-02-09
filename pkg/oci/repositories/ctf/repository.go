@@ -43,8 +43,8 @@ type Repository struct {
 var _ cpi.Repository = &Repository{}
 
 // New returns a new representation based repository
-func New(ctx cpi.Context, spec *RepositorySpec, acc accessobj.AccessMode, closer accessobj.Closer, mode vfs.FileMode) (*Repository, error) {
-	base, err := accessobj.NewAccessObject(accessObjectInfo, acc, spec.Options.Representation, closer, mode)
+func New(ctx cpi.Context, spec *RepositorySpec, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode) (*Repository, error) {
+	base, err := accessobj.NewAccessObject(accessObjectInfo, spec.AccessMode, spec.Options.Representation, setup, closer, mode)
 	return _Wrap(ctx, spec, base, err)
 }
 
