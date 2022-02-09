@@ -13,17 +13,21 @@ It is a directory containing
 
 - **`blobs`** *directory*
 
-  The *blobs* directory contains the blobs described artefacts described by the
-  artefact set descriptor as a flat file list. Every file has a filename according
+  The *blobs* directory contains the blobs described by the
+  artefact set descriptor as a flat file list. These are layer blobs or artefact
+  blobs for the aretfact descriptors. Every file has a filename according
   to its [digest](https://github.com/opencontainers/image-spec/blob/main/descriptor.md#digests).
   Hereby the algorithm separator character is replaced by a dot (".").
-  Every file SHOULD be referenced in the artefact descriptor by a
+  Every file SHOULD be referenced, directly or indirectly, in the artefact
+  descriptor by a
   [descriptor according the OCI Image Specification](https://github.com/opencontainers/image-spec/blob/main/descriptor.md).
 
+  The artefact index describes the OCI manifests (image manifests and index
+  manifests), which refer to further non-manifest blobs.
   Files not referenced by the artefacts described by the index are ignored.
   
 
-It might be used in various technical forms: as structure of an
+This format might be used in various technical forms: as structure of an
 operating system file system, a virtual file system or as content of
 an archive file. The descriptor SHOULD be the first file if stored in an archive.
 
@@ -54,13 +58,13 @@ The following fields contain the properties that constitute an *Artefact*:
 
 - **`repository`** *string*
 
-  This REQUIRED property is the repository name of the targeted artefact described by the
+  This REQUIRED property is the _repository_ name of the targeted artefact described by the
   *Common Transport Format*,  conforming to the requirements outlined in the
   [OCI Distribution Specification](https://github.com/opencontainers/distribution-spec/blob/main/spec.md).
 
 - **`digest`** *string*
 
-  This REQUIRED property is the _digest_ of the targeted artefact in the targeted
+  This REQUIRED property is the _digest_ of the targeted artefact blob in the targeted
   artefact set, conforming to the requirements outlined in
   [Digests](https://github.com/opencontainers/image-spec/blob/main/descriptor.md#digests).
   Retrieved content SHOULD be verified against this digest when consumed via
@@ -107,11 +111,13 @@ via the manifest endpoint according to the distribution spec.
 
 ### Extension Models
 
-Any artefacts described by this format is addressable only by digests.
+Any artefact described by this format is addressable only by digests.
 The entries in the index are intended to be registered via the manifest
 endpoint according to the [OCI Distribution Specification](https://github.com/opencontainers/distribution-spec).
 
-Additionally this specification described two special annotations:
+Additionally this specification describes two special annotations, that can be
+set for any described artefact in the annotations attribute of the manifest
+list entries:
 
 - **`cloud.gardener.ocm/tags`**
   
@@ -120,14 +126,14 @@ Additionally this specification described two special annotations:
 
 - **`cloud.gardener.ocm/type`**
 
-  This annotation can be used some additional type information.
+  This annotation can be used for some additional type information.
 
 For the annotations of the index itself the following keys are defined:
 
 - **`cloud.gardener.ocm/main`** *digest*
 
-  This annotation describes the digest of the main artefact of the set, if used as blob
-  format for an artefact
+  This annotation describes the digest of the main artefact of the set, if used
+  as blob format for an artefact
   
 This way the format can be used to attach elements according to various extension
 models for the OCI specification:
