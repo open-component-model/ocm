@@ -15,8 +15,6 @@
 package artefactset
 
 import (
-	"sync"
-
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
@@ -27,16 +25,6 @@ import (
 )
 
 var ErrNoIndex = errors.New("manifest does not support access to subsequent artefacts")
-
-type artefactBase struct {
-	lock   sync.RWMutex
-	access ArtefactSetContainer
-	state  accessobj.State
-}
-
-func (a *artefactBase) Blob() (accessio.BlobAccess, error) {
-	return a.state.GetBlob()
-}
 
 type Artefact struct {
 	artefactBase
@@ -85,25 +73,33 @@ func NewArtefact(access ArtefactSetContainer, defs ...*artdesc.Artefact) *Artefa
 	return a
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// forward
+
+func (a *Artefact) AddBlob(access cpi.BlobAccess) error {
+	return a.addBlob(access)
+}
+
 func (a *Artefact) Blob() (accessio.BlobAccess, error) {
 	d := a.state.GetState().(*artdesc.Artefact)
 	if !d.IsValid() {
 		return nil, errors.ErrUnknown("artefact type")
 	}
-	blob, err := a.artefactBase.Blob()
+	blob, err := a.blob()
 	if err != nil {
 		return nil, err
 	}
 	return accessio.BlobWithMimeType(d.MimeType(), blob), nil
 }
 
-func (a *Artefact) IsClosed() bool {
-	return a.access.IsClosed()
+func (a *Artefact) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
+	if !a.IsIndex() {
+		return nil, ErrNoIndex
+	}
+	return a.newArtefact(art...)
 }
 
-func (a *Artefact) IsReadOnly() bool {
-	return a.access.IsReadOnly()
-}
+////////////////////////////////////////////////////////////////////////////////
 
 func (a *Artefact) Artefact() *artdesc.Artefact {
 	return a.GetDescriptor()
@@ -126,16 +122,6 @@ func (a *Artefact) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 		return d
 	}
 	return a.access.GetBlobDescriptor(digest)
-}
-
-func (a *Artefact) IsIndex() bool {
-	d := a.state.GetState().(*artdesc.Artefact)
-	return d.IsIndex()
-}
-
-func (a *Artefact) IsManifest() bool {
-	d := a.state.GetState().(*artdesc.Artefact)
-	return d.IsManifest()
 }
 
 func (a *Artefact) Index() (*artdesc.Index, error) {
@@ -194,26 +180,11 @@ func (a *Artefact) IndexAccess() core.IndexAccess {
 	return NewIndexForArtefact(a)
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// from BlobHandler
-
 func (a *Artefact) GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {
 	if !a.IsIndex() {
 		return nil, ErrNoIndex
 	}
-	return a.access.GetArtefact(digest.String())
-}
-
-func (a *Artefact) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
-	d := a.GetBlobDescriptor(digest)
-	if d != nil {
-		data, err := a.access.GetBlobData(digest)
-		if err != nil {
-			return nil, err
-		}
-		return accessio.BlobAccessForDataAccess(d.Digest, d.Size, d.MediaType, data), nil
-	}
-	return nil, cpi.ErrBlobNotFound(digest)
+	return a.getArtefact(digest)
 }
 
 func (a *Artefact) GetManifest(digest digest.Digest) (cpi.ManifestAccess, error) {
@@ -230,17 +201,16 @@ func (a *Artefact) GetIndex(digest digest.Digest) (cpi.IndexAccess, error) {
 	return a.IndexAccess().GetIndex(digest)
 }
 
-func (a *Artefact) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
-	if !a.IsIndex() {
-		return nil, ErrNoIndex
+func (a *Artefact) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
+	d := a.GetBlobDescriptor(digest)
+	if d != nil {
+		data, err := a.access.GetBlobData(digest)
+		if err != nil {
+			return nil, err
+		}
+		return accessio.BlobAccessForDataAccess(d.Digest, d.Size, d.MediaType, data), nil
 	}
-	return NewArtefact(a.access, art...), nil
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-func (a *Artefact) AddBlob(access cpi.BlobAccess) error {
-	return a.access.AddBlob(access)
+	return nil, cpi.ErrBlobNotFound(digest)
 }
 
 func (a *Artefact) AddArtefact(art cpi.Artefact, platform *artdesc.Platform) (accessio.BlobAccess, error) {

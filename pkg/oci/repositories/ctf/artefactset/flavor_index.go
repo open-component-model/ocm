@@ -77,19 +77,19 @@ func NewIndexForArtefact(a *Artefact) *Index {
 }
 
 func (i *Index) Blob() (accessio.BlobAccess, error) {
-	blob, err := i.artefactBase.Blob()
+	blob, err := i.artefactBase.blob()
 	if err != nil {
 		return nil, err
 	}
 	return accessio.BlobWithMimeType(artdesc.MediaTypeImageIndex, blob), nil
 }
 
-func (i *Index) IsManifest() bool {
-	return false
+func (a *Index) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
+	return a.newArtefact(art...)
 }
 
-func (i *Index) IsIndex() bool {
-	return true
+func (i *Index) AddBlob(blob core.BlobAccess) error {
+	return i.access.AddBlob(blob)
 }
 
 func (i *Index) Manifest() (*artdesc.Manifest, error) {
@@ -119,7 +119,6 @@ func (i *Index) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 }
 
 func (i *Index) GetBlob(digest digest.Digest) (core.BlobAccess, error) {
-
 	d := i.GetBlobDescriptor(digest)
 	if d != nil {
 		data, err := i.access.GetBlobData(digest)
@@ -162,10 +161,6 @@ func (i *Index) GetManifest(digest digest.Digest) (core.ManifestAccess, error) {
 	return nil, errors.New("no manifest")
 }
 
-func (i *Index) AddBlob(blob core.BlobAccess) error {
-	return i.access.AddBlob(blob)
-}
-
 func (a *Index) AddArtefact(art cpi.Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
 	blob, err := a.access.AddArtefact(art, platform)
 	if err != nil {
@@ -185,11 +180,4 @@ func (a *Index) AddArtefact(art cpi.Artefact, platform *artdesc.Platform) (acces
 		Platform:    platform,
 	})
 	return blob, nil
-}
-
-func (a *Index) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
-	if !a.IsIndex() {
-		return nil, ErrNoIndex
-	}
-	return NewArtefact(a.access, art...), nil
 }

@@ -84,7 +84,7 @@ var _ = Describe("component repository mapping", func() {
 		Expect(err).To(Succeed())
 		Expect(vers.GetDescriptor()).To(Equal(compdesc.New(COMPONENT, "v1")))
 
-		Expect(repo.(*genericocireg.Repository).Close()).To(Succeed())
+		Expect(repo.Close()).To(Succeed())
 	})
 
 })

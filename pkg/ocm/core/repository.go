@@ -28,6 +28,8 @@ type Repository interface {
 	ExistsComponentVersion(name string, version string) (bool, error)
 	LookupComponentVersion(name string, version string) (ComponentVersionAccess, error)
 	LookupComponent(name string) (ComponentAccess, error)
+
+	Close() error
 }
 
 type DataAccess = accessio.DataAccess
@@ -41,6 +43,8 @@ type ComponentAccess interface {
 	LookupVersion(version string) (ComponentVersionAccess, error)
 	AddVersion(ComponentVersionAccess) error
 	NewVersion(version string) (ComponentVersionAccess, error)
+
+	Close() error
 }
 type ResourceMeta = compdesc.ResourceMeta
 

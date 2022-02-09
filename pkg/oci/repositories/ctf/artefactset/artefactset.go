@@ -146,6 +146,12 @@ func (a *ArtefactSet) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) 
 }
 
 func (a *ArtefactSet) AddBlob(blob cpi.BlobAccess) error {
+	if a.IsClosed() {
+		return accessio.ErrClosed
+	}
+	if a.IsReadOnly() {
+		return accessio.ErrReadOnly
+	}
 	if blob == nil {
 		return nil
 	}
@@ -245,5 +251,11 @@ func (a *ArtefactSet) AddArtefact(artefact cpi.Artefact, platform *artdesc.Platf
 }
 
 func (a *ArtefactSet) NewArtefact(artefact ...*artdesc.Artefact) (core.ArtefactAccess, error) {
+	if a.IsClosed() {
+		return nil, accessio.ErrClosed
+	}
+	if a.IsReadOnly() {
+		return nil, accessio.ErrReadOnly
+	}
 	return NewArtefact(a, artefact...), nil
 }

@@ -94,6 +94,10 @@ func (c *ComponentAccess) GetContext() cpi.Context {
 	return c.repo.GetContext()
 }
 
+func (c *ComponentAccess) Close() error {
+	return nil
+}
+
 func (c *ComponentAccess) GetName() string {
 	return c.repo.arch.GetName()
 }

@@ -77,20 +77,16 @@ func NewManifestForArtefact(a *Artefact) *Manifest {
 	return m
 }
 
-func (i *Manifest) Blob() (accessio.BlobAccess, error) {
-	blob, err := i.artefactBase.Blob()
+func (m *Manifest) Blob() (accessio.BlobAccess, error) {
+	blob, err := m.artefactBase.blob()
 	if err != nil {
 		return nil, err
 	}
 	return accessio.BlobWithMimeType(artdesc.MediaTypeImageManifest, blob), nil
 }
 
-func (m *Manifest) IsManifest() bool {
-	return true
-}
-
-func (m *Manifest) IsIndex() bool {
-	return false
+func (m *Manifest) AddBlob(access cpi.BlobAccess) error {
+	return m.addBlob(access)
 }
 
 func (m *Manifest) Manifest() (*artdesc.Manifest, error) {
@@ -136,10 +132,6 @@ func (m *Manifest) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
 		return accessio.BlobAccessForDataAccess(d.Digest, d.Size, d.MediaType, data), nil
 	}
 	return nil, cpi.ErrBlobNotFound(digest)
-}
-
-func (m *Manifest) AddBlob(blob cpi.BlobAccess) error {
-	return m.access.AddBlob(blob)
 }
 
 func (m *Manifest) AddLayer(blob cpi.BlobAccess, d *artdesc.Descriptor) (int, error) {
