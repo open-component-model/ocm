@@ -111,6 +111,21 @@ func (r *RepositoryIndex) HasArtefact(repo, tag string) bool {
 	return m != nil
 }
 
+func (r *RepositoryIndex) GetTags(repo string) []string {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+
+	repos := r.byRepository[repo]
+	if repos == nil {
+		return nil
+	}
+	result := []string{}
+	for t, _ := range repos {
+		result = append(result, t)
+	}
+	return result
+}
+
 func (r *RepositoryIndex) GetArtefactInfos(digest digest.Digest) []*ArtefactMeta {
 	r.lock.RLock()
 	defer r.lock.RUnlock()

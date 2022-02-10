@@ -52,6 +52,10 @@ func NewNamespace(repo *Repository, name string) *Namespace {
 	return n
 }
 
+func (n *NamespaceContainer) GetNamepace() string {
+	return n.namespace
+}
+
 func (n *NamespaceContainer) IsReadOnly() bool {
 	return n.repo.IsReadOnly()
 }
@@ -62,6 +66,10 @@ func (n *NamespaceContainer) IsClosed() bool {
 
 func (n *NamespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 	return nil
+}
+
+func (n *NamespaceContainer) ListTags() ([]string, error) {
+	return n.repo.getIndex().GetTags(n.namespace), nil
 }
 
 func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
@@ -107,6 +115,14 @@ func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 
 func (n *Namespace) GetRepository() cpi.Repository {
 	return n.access.repo
+}
+
+func (n *Namespace) GetNamespace() string {
+	return n.access.GetNamepace()
+}
+
+func (n *Namespace) ListTags() ([]string, error) {
+	return n.access.ListTags()
 }
 
 func (n *Namespace) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {

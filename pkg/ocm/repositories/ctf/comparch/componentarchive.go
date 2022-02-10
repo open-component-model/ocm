@@ -71,7 +71,7 @@ func (c *ComponentArchive) GetBlobData(name string) (cpi.DataAccess, error) {
 	return c.base.GetBlobDataByName(name)
 }
 
-func (c *ComponentArchive) AddBlob(blob cpi.BlobAccess, refName string) (cpi.AccessSpec, error) {
+func (c *ComponentArchive) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
@@ -79,7 +79,7 @@ func (c *ComponentArchive) AddBlob(blob cpi.BlobAccess, refName string) (cpi.Acc
 	if err != nil {
 		return nil, err
 	}
-	return accessmethods.NewLocalBlobAccessSpecV1(common.DigestToFileName(blob.Digest()), refName, blob.MimeType()), nil
+	return accessmethods.NewLocalBlobAccessSpec(common.DigestToFileName(blob.Digest()), refName, blob.MimeType(), global), nil
 }
 
 func (c *ComponentArchive) GetDescriptor() *compdesc.ComponentDescriptor {

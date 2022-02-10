@@ -5,6 +5,10 @@ The *Common Transport Format* describes a file system structure that can be
 used for the representation of [content](https://github.com/opencontainers/image-spec)
 of an OCI repository.
 
+It is used to describe an OCI repository structure. Therefore it can be used
+to describe a subset of repositories of an OCI registry with a subset of
+artefacts, that can then be imported again into any OCI registry.
+
 It is a directory containing
 
 - **`artefact-index.json`** *[Artefact Index](#artefact-index)*
@@ -14,7 +18,7 @@ It is a directory containing
 - **`blobs`** *directory*
 
   The *blobs* directory contains the blobs described by the
-  artefact set descriptor as a flat file list. These are layer blobs or artefact
+  _artefact index_ as a flat file list. These are layer blobs or artefact
   blobs for the aretfact descriptors. Every file has a filename according
   to its [digest](https://github.com/opencontainers/image-spec/blob/main/descriptor.md#digests).
   Hereby the algorithm separator character is replaced by a dot (".").
@@ -84,7 +88,11 @@ The following fields contain the properties that constitute an *Artefact*:
 
 The *Artefact Set Archive* Format describes a file system structure that can be
 used for the representation of a dedicated set of [artefact versions](https://github.com/opencontainers/image-spec)
-of an OCI repository for the same respository.
+of an OCI registry for the same OCI respository.
+
+An artefact set can be exported from an OCI repository and imported into another
+OCI repository, it only contains artefacts and tags from a single repository.
+
 In the archive form the artefact set descriptor SHOULD be the first file.
 
 The file structure is a directory containing

@@ -21,7 +21,7 @@ import (
 )
 
 type Repository interface {
-	SupportsDistributionSpec() bool
+	SupportsDistributionSpec() string
 
 	GetSpecification() RepositorySpec
 
@@ -52,6 +52,9 @@ type ArtefactSource interface {
 type NamespaceAccess interface {
 	ArtefactSource
 	ArtefactSink
+
+	GetNamespace() string
+	ListTags() ([]string, error)
 
 	NewArtefact(...*artdesc.Artefact) (ArtefactAccess, error)
 

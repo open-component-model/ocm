@@ -38,8 +38,8 @@ func (r *Repository) GetSpecification() cpi.RepositorySpec {
 	return r.spec
 }
 
-func (r *Repository) SupportsDistributionSpec() bool {
-	return true
+func (r *Repository) SupportsDistributionSpec() string {
+	return r.spec.BaseURL
 }
 
 func (r *Repository) ExistsArtefact(name string, version string) (bool, error) {

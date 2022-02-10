@@ -56,6 +56,10 @@ func _Wrap(obj *accessobj.AccessObject, err error) (*ArtefactSet, error) {
 	return s, nil
 }
 
+func (a *ArtefactSet) GetNamespace() string {
+	return ""
+}
+
 func (a *ArtefactSet) Annotate(name string, value string) {
 	a.lock.Lock()
 	defer a.lock.Unlock()
@@ -130,11 +134,27 @@ func (a *ArtefactSet) Close() error {
 	return a.base.Close()
 }
 
+// GetIndex returns the index of the included artefacts
+// (image manifests and image indices)
+// The manifst entries may describe dedicated tags
+// to use for the dedicated artefact as annotation
+// with the key TAGS_ANNOTATION.
 func (a *ArtefactSet) GetIndex() *artdesc.Index {
 	if a.IsReadOnly() {
 		return a.base.GetState().GetOriginalState().(*artdesc.Index)
 	}
 	return a.base.GetState().GetState().(*artdesc.Index)
+}
+
+// GetMain returns the digest of the main artefact
+// described by this artefact set.
+// There might be more, if the main artefact is an index.
+func (a *ArtefactSet) GetMain() digest.Digest {
+	idx := a.GetIndex()
+	if idx.Annotations == nil {
+		return ""
+	}
+	return digest.Digest(idx.Annotations[TAGS_MAINARTEFACT])
 }
 
 func (a *ArtefactSet) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
@@ -158,6 +178,30 @@ func (a *ArtefactSet) AddBlob(blob cpi.BlobAccess) error {
 	a.base.Lock()
 	defer a.base.Unlock()
 	return a.base.AddBlob(blob)
+}
+
+func (n *ArtefactSet) ListTags() ([]string, error) {
+	result := []string{}
+	for _, a := range n.GetIndex().Manifests {
+		if a.Annotations != nil {
+			if tags, ok := a.Annotations[TAGS_ANNOTATION]; ok {
+				result = append(result, strings.Split(tags, ",")...)
+			}
+		}
+	}
+	return result, nil
+}
+
+func (n *ArtefactSet) GetTags(digest digest.Digest) ([]string, error) {
+	result := []string{}
+	for _, a := range n.GetIndex().Manifests {
+		if a.Digest == digest && a.Annotations != nil {
+			if tags, ok := a.Annotations[TAGS_ANNOTATION]; ok {
+				result = append(result, strings.Split(tags, ",")...)
+			}
+		}
+	}
+	return result, nil
 }
 
 func (i *ArtefactSet) GetArtefact(ref string) (cpi.ArtefactAccess, error) {

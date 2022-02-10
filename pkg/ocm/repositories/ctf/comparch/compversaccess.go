@@ -57,8 +57,8 @@ func (a *ComponentVersionAccess) GetVersion() string {
 	return a.base.GetDescriptor().GetVersion()
 }
 
-func (a *ComponentVersionAccess) AddBlob(blob cpi.BlobAccess, refName string) (cpi.AccessSpec, error) {
-	return a.base.AddBlob(blob, refName)
+func (a *ComponentVersionAccess) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+	return a.base.AddBlob(blob, refName, global)
 }
 
 func (c *ComponentVersionAccess) AccessMethod(a cpi.AccessSpec) (cpi.AccessMethod, error) {
@@ -163,16 +163,16 @@ func (c *ComponentVersionAccess) AddSource(meta *cpi.SourceMeta, acc compdesc.Ac
 }
 
 // AddResource adds a blob resource to the current archive.
-func (c *ComponentVersionAccess) AddResourceBlob(meta *cpi.ResourceMeta, blob cpi.BlobAccess, refName string) error {
-	acc, err := c.AddBlob(blob, refName)
+func (c *ComponentVersionAccess) AddResourceBlob(meta *cpi.ResourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) error {
+	acc, err := c.AddBlob(blob, refName, global)
 	if err != nil {
 		return err
 	}
 	return c.AddResource(meta, acc)
 }
 
-func (c *ComponentVersionAccess) AddSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string) error {
-	acc, err := c.AddBlob(blob, refName)
+func (c *ComponentVersionAccess) AddSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) error {
+	acc, err := c.AddBlob(blob, refName, global)
 	if err != nil {
 		return err
 	}

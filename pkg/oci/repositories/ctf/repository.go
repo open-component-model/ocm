@@ -64,8 +64,8 @@ func (r *Repository) GetSpecification() cpi.RepositorySpec {
 	return r.spec
 }
 
-func (r *Repository) SupportsDistributionSpec() bool {
-	return false
+func (r *Repository) SupportsDistributionSpec() string {
+	return ""
 }
 
 ////////////////////////////////////////////////////////////////////////////////

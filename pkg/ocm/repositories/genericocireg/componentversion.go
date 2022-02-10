@@ -15,13 +15,16 @@
 package genericocireg
 
 import (
+	"path"
 	"reflect"
+	"strings"
 
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
+	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
@@ -120,7 +123,7 @@ func (c *ComponentVersionContainer) evalLayer(s compdesc.AccessSpec) (compdesc.A
 	if err != nil {
 		return s, err
 	}
-	if c.comp.repo.ocirepo.SupportsDistributionSpec() {
+	if url := c.comp.repo.ocirepo.SupportsDistributionSpec(); url != "" {
 		if a, ok := spec.(*accessmethods.LocalBlobAccessSpec); ok {
 			if !artdesc.IsDigest(a.LocalReference) {
 				return s, errors.ErrInvalid("digest", a.LocalReference)
@@ -129,9 +132,9 @@ func (c *ComponentVersionContainer) evalLayer(s compdesc.AccessSpec) (compdesc.A
 			for _, l := range desc.Layers {
 				if l.Digest == digest.Digest(a.LocalReference) {
 					if artdesc.IsOCIMediaType(l.MediaType) {
-						ref, err := c.assureGlobalRef(l.Digest, a.ReferenceName)
+						ref, err := c.assureGlobalRef(l.Digest, url, a.ReferenceName)
 						if err == nil {
-							a.ImageReference = ref
+							a.GlobalAccess = ref
 							return a, nil
 						}
 					}
@@ -176,7 +179,7 @@ func (c *ComponentVersionContainer) GetBlobData(name string) (cpi.DataAccess, er
 	return c.access.GetBlob(digest.Digest((name)))
 }
 
-func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string) (cpi.AccessSpec, error) {
+func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
@@ -188,18 +191,59 @@ func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string)
 	if err != nil {
 		return nil, err
 	}
-	return accessmethods.NewLocalBlobAccessSpecV1(common.DigestToFileName(blob.Digest()), refName, blob.MimeType()), nil
+	return accessmethods.NewLocalBlobAccessSpec(common.DigestToFileName(blob.Digest()), refName, blob.MimeType(), global), nil
 }
 
 // assureGlobalRef provides a global access for a local OCI Artefact
-func (c *ComponentVersionContainer) assureGlobalRef(d digest.Digest, name string) (string, error) {
+func (c *ComponentVersionContainer) assureGlobalRef(d digest.Digest, url, name string) (cpi.AccessSpec, error) {
 
 	blob, err := c.access.GetBlob(d)
 	if err != nil {
-		return "", err
+		return nil, err
+	}
+	var namespace oci.NamespaceAccess
+	var version string
+	var tag string
+	if name == "" {
+		namespace = c.comp.namespace
+	} else {
+		i := strings.LastIndex(name, ":")
+		if i > 0 {
+			version = name[i+1:]
+			name = name[:i]
+			tag = version
+		}
+		namespace, err = c.comp.repo.ocirepo.LookupNamespace(name)
+		if err != nil {
+			return nil, err
+		}
+	}
+	set, err := artefactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
+	if err != nil {
+		return nil, err
+	}
+	defer set.Close()
+	digest := set.GetMain()
+	if version == "" {
+		version = digest.String()
+	}
+	art, err := set.GetArtefact(digest.String())
+	if err != nil {
+		return nil, err
+	}
+	err = artefactset.TransferArtefact(art, set, namespace)
+	if err != nil {
+		return nil, err
+	}
+	if tag != "" {
+		err = namespace.AddTags(digest, tag)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	_ = blob
-	//artefactset.Open(accessobj.ACC_READONLY, "", accessobj.File())
-	return "", nil
+	ref := path.Join(url+namespace.GetNamespace()) + ":" + version
+
+	global := accessmethods.NewOCIRegistryAccessSpec(ref)
+	return global, nil
 }

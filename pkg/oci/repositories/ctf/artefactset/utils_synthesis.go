@@ -99,7 +99,7 @@ func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, e
 		return nil, err
 	}
 	defer set.Close()
-	err = TransferArtefactToSet(art, ns, set)
+	err = TransferArtefact(art, ns, set)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, e
 	return ab, nil
 }
 
-func TransferArtefactToSet(art cpi.ArtefactAccess, ns cpi.NamespaceAccess, set cpi.ArtefactSink) error {
+func TransferArtefact(art cpi.ArtefactAccess, ns cpi.NamespaceAccess, set cpi.ArtefactSink) error {
 	if art.GetDescriptor().IsIndex() {
 		return TransferIndexToSet(art.IndexAccess(), ns, set)
 	} else {
@@ -129,7 +129,7 @@ func TransferIndexToSet(art cpi.IndexAccess, ns cpi.NamespaceAccess, set cpi.Art
 		if err != nil {
 			return err
 		}
-		err = TransferArtefactToSet(art, ns, set)
+		err = TransferArtefact(art, ns, set)
 		if err != nil {
 			return err
 		}

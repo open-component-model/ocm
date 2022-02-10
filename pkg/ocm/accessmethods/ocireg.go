@@ -42,8 +42,8 @@ type OCIRegistryAccessSpec struct {
 	ImageReference string `json:"imageReference"`
 }
 
-// NewOCIRegistryAccessSpecV1 creates a new oci registry access spec version v1
-func NewOCIRegistryAccessSpecV1(ref string) *OCIRegistryAccessSpec {
+// NewOCIRegistryAccessSpec creates a new oci registry access spec version v1
+func NewOCIRegistryAccessSpec(ref string) *OCIRegistryAccessSpec {
 	return &OCIRegistryAccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(OCIRegistryType),
 		ImageReference:      ref,

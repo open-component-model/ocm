@@ -43,7 +43,7 @@ var _ = Describe("Validation", func() {
 	)
 
 	BeforeEach(func() {
-		ociRegistry1 = accessmethods.NewOCIRegistryAccessSpecV1("docker/image1:1.2.3")
+		ociRegistry1 = accessmethods.NewOCIRegistryAccessSpec("docker/image1:1.2.3")
 
 		unstrucOCIRegistry1, err := runtime.ToUnstructuredTypedObject(ociRegistry1)
 		Expect(err).ToNot(HaveOccurred())
@@ -56,7 +56,7 @@ var _ = Describe("Validation", func() {
 			Relation: metav1.ExternalRelation,
 			Access:   unstrucOCIRegistry1,
 		}
-		ociRegistry2 = accessmethods.NewOCIRegistryAccessSpecV1("docker/image1:1.2.3")
+		ociRegistry2 = accessmethods.NewOCIRegistryAccessSpec("docker/image1:1.2.3")
 		unstrucOCIRegistry2, err := runtime.ToUnstructuredTypedObject(ociRegistry2)
 		Expect(err).ToNot(HaveOccurred())
 		ociImage2 = &Resource{
