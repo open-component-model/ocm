@@ -38,8 +38,9 @@ type GenericConfig = core.GenericConfig
 type ConfigSelector = core.ConfigSelector
 type ConfigSelectorFunction = core.ConfigSelectorFunction
 
-var DefaultContext = core.DefaultContext
-
+func DefaultContext() core.Context {
+	return core.DefaultContext
+}
 func ForContext(ctx context.Context) Context {
 	return core.ForContext(ctx)
 }

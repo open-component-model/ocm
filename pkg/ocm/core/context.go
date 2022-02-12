@@ -22,6 +22,7 @@ import (
 	"github.com/gardener/ocm/pkg/datacontext"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
+	"github.com/gardener/ocm/pkg/ocm/digester"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
@@ -38,6 +39,7 @@ type Context interface {
 	AccessMethods() AccessTypeScheme
 
 	BlobHandlers() BlobHandlerRegistry
+	BlobDigesters() digester.BlobDigesterRegistry
 
 	RepositoryForSpec(spec RepositorySpec, creds ...credentials.CredentialsSource) (Repository, error)
 	RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...credentials.CredentialsSource) (Repository, error)
@@ -72,17 +74,19 @@ type _context struct {
 	knownRepositoryTypes RepositoryTypeScheme
 	knownAccessTypes     AccessTypeScheme
 
-	blobHandlers BlobHandlerRegistry
+	blobHandlers  BlobHandlerRegistry
+	blobDigesters digester.BlobDigesterRegistry
 }
 
 var _ Context = &_context{}
 
-func newContext(shared datacontext.AttributesContext, credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, blobHandlers BlobHandlerRegistry) Context {
+func newContext(shared datacontext.AttributesContext, credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, blobHandlers BlobHandlerRegistry, blobDigesters digester.BlobDigesterRegistry) Context {
 	c := &_context{
 		sharedattributes:     shared,
 		credctx:              credctx,
 		ocictx:               ocictx,
 		blobHandlers:         blobHandlers,
+		blobDigesters:        blobDigesters,
 		knownAccessTypes:     accessscheme,
 		knownRepositoryTypes: reposcheme,
 	}
@@ -108,6 +112,10 @@ func (c *_context) RepositoryTypes() RepositoryTypeScheme {
 
 func (c *_context) BlobHandlers() BlobHandlerRegistry {
 	return c.blobHandlers
+}
+
+func (c *_context) BlobDigesters() digester.BlobDigesterRegistry {
+	return c.blobDigesters
 }
 
 func (c *_context) RepositoryForSpec(spec RepositorySpec, creds ...credentials.CredentialsSource) (Repository, error) {

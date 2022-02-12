@@ -31,10 +31,10 @@ import (
 )
 
 func init() {
-	cpi.RegisterBlobHandler(&blobHandler{}, cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.OCIRegistryRepositoryType),
-		cpi.ForMimeType(artdesc.ToContentMediaType(artdesc.MediaTypeImageManifest)))
-	cpi.RegisterBlobHandler(&blobHandler{}, cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.OCIRegistryRepositoryType),
-		cpi.ForMimeType(artdesc.ToContentMediaType(artdesc.MediaTypeImageIndex)))
+	for _, mime := range artdesc.ContentTypes() {
+		cpi.RegisterBlobHandler(&blobHandler{}, cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.OCIRegistryRepositoryType),
+			cpi.ForMimeType(mime))
+	}
 	cpi.RegisterBlobHandler(&blobHandler{}, cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.OCIRegistryRepositoryType))
 }
 

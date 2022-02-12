@@ -21,6 +21,7 @@ import (
 	"github.com/gardener/ocm/pkg/datacontext"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/ocm/core"
+	"github.com/gardener/ocm/pkg/ocm/digester"
 )
 
 func WithContext(ctx context.Context) core.Builder {
@@ -45,6 +46,14 @@ func WithRepositoyTypeScheme(scheme RepositoryTypeScheme) core.Builder {
 
 func WithAccessypeScheme(scheme AccessTypeScheme) core.Builder {
 	return core.Builder{}.WithAccessTypeScheme(scheme)
+}
+
+func WithBlobHandlers(reg BlobHandlerRegistry) core.Builder {
+	return core.Builder{}.WithBlobHandlers(reg)
+}
+
+func WithBlobDigesters(reg digester.BlobDigesterRegistry) core.Builder {
+	return core.Builder{}.WithBlobDigesters(reg)
 }
 
 func New() Context {

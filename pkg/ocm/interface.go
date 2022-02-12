@@ -32,9 +32,12 @@ type RepositorySpec = core.RepositorySpec
 type RepositoryType = core.RepositoryType
 type RepositoryTypeScheme = core.RepositoryTypeScheme
 type AccessTypeScheme = core.AccessTypeScheme
+type BlobHandlerRegistry = core.BlobHandlerRegistry
 
 // DefaultContext is the default context initialized by init functions
-var DefaultContext = core.DefaultContext
+func DefaultContext() core.Context {
+	return core.DefaultContext
+}
 
 // ForContext returns the Context to use for context.Context.
 // This is eiter an explicit context or the default context.

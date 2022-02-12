@@ -81,7 +81,7 @@ var _ = Describe("ctf management", func() {
 	})
 
 	It("instantiate filesystem ctf", func() {
-		r, err := ctf.FormatDirectory.Create(oci.DefaultContext, "test", spec.Options, 0700)
+		r, err := ctf.FormatDirectory.Create(oci.DefaultContext(), "test", spec.Options, 0700)
 		Expect(err).To(Succeed())
 		Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
 

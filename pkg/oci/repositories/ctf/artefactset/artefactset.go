@@ -27,7 +27,7 @@ import (
 	"github.com/opencontainers/go-digest"
 )
 
-const TAGS_MAINARTEFACT = "cloud.gardener.ocm/main"
+const MAINARTEFACT_ANNOTATION = "cloud.gardener.ocm/main"
 const TAGS_ANNOTATION = "cloud.gardener.ocm/tags"
 const TYPE_ANNOTATION = "cloud.gardener.ocm/type"
 
@@ -154,7 +154,7 @@ func (a *ArtefactSet) GetMain() digest.Digest {
 	if idx.Annotations == nil {
 		return ""
 	}
-	return digest.Digest(idx.Annotations[TAGS_MAINARTEFACT])
+	return digest.Digest(idx.Annotations[MAINARTEFACT_ANNOTATION])
 }
 
 func (a *ArtefactSet) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {

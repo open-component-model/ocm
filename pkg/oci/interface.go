@@ -39,7 +39,9 @@ type IndexAccess = core.IndexAccess
 type BlobAccess = core.BlobAccess
 type DataAccess = core.DataAccess
 
-var DefaultContext = core.DefaultContext
+func DefaultContext() core.Context {
+	return core.DefaultContext
+}
 
 func ForContext(ctx context.Context) Context {
 	return core.ForContext(ctx)

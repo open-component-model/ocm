@@ -37,7 +37,7 @@ var _ = Describe("generic config handling", func() {
 
 	BeforeEach(func() {
 		scheme = config.NewConfigTypeScheme()
-		scheme.AddKnownTypes(config.DefaultContext.ConfigTypes())
+		scheme.AddKnownTypes(config.DefaultContext().ConfigTypes())
 		cfgctx = config.WithConfigTypeScheme(scheme).New()
 	})
 

@@ -69,3 +69,20 @@ func IsOCIMediaType(media string) bool {
 		return false
 	}
 }
+
+func ContentTypes() []string {
+	return []string{ToContentMediaType(MediaTypeImageManifest),
+		ToContentMediaType(MediaTypeImageIndex),
+	}
+}
+
+func ArchiveBlobTypes() []string {
+	manifest := ToContentMediaType(MediaTypeImageManifest)
+	index := ToContentMediaType(MediaTypeImageIndex)
+	return []string{
+		manifest + "+tar",
+		manifest + "+tar+gzip",
+		index + "+tar",
+		index + "+tar+gzip",
+	}
+}

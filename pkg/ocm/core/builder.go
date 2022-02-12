@@ -21,16 +21,18 @@ import (
 	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/datacontext"
 	"github.com/gardener/ocm/pkg/oci"
+	"github.com/gardener/ocm/pkg/ocm/digester"
 )
 
 type Builder struct {
-	ctx          context.Context
-	shared       datacontext.AttributesContext
-	credentials  credentials.Context
-	oci          oci.Context
-	reposcheme   RepositoryTypeScheme
-	accessscheme AccessTypeScheme
-	blobhandlers BlobHandlerRegistry
+	ctx           context.Context
+	shared        datacontext.AttributesContext
+	credentials   credentials.Context
+	oci           oci.Context
+	reposcheme    RepositoryTypeScheme
+	accessscheme  AccessTypeScheme
+	blobhandlers  BlobHandlerRegistry
+	blobdigesters digester.BlobDigesterRegistry
 }
 
 func (b *Builder) getContext() context.Context {
@@ -75,6 +77,11 @@ func (b Builder) WithBlobHandlers(reg BlobHandlerRegistry) Builder {
 	return b
 }
 
+func (b Builder) WithBlobDigesters(reg digester.BlobDigesterRegistry) Builder {
+	b.blobdigesters = reg
+	return b
+}
+
 func (b Builder) Bound() (Context, context.Context) {
 	c := b.New()
 	return c, context.WithValue(b.getContext(), key, c)
@@ -101,6 +108,9 @@ func (b Builder) New() Context {
 	if b.blobhandlers == nil {
 		b.blobhandlers = DefaultBlobHandlerRegistry
 	}
+	if b.blobdigesters == nil {
+		b.blobdigesters = digester.DefaultBlobDigesterRegistry()
+	}
 	if ociimpl != nil {
 		def, err := ociimpl(b.oci)
 		if err != nil {
@@ -110,6 +120,6 @@ func (b Builder) New() Context {
 		reposcheme.AddKnownTypes(b.reposcheme) // TODO: implement delegation
 		b.reposcheme = reposcheme
 	}
-	return newContext(b.shared, b.credentials, b.oci, b.reposcheme, b.accessscheme, b.blobhandlers)
+	return newContext(b.shared, b.credentials, b.oci, b.reposcheme, b.accessscheme, b.blobhandlers, b.blobdigesters)
 
 }

@@ -110,7 +110,7 @@ func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, e
 			return nil, err
 		}
 	}
-	set.Annotate(TAGS_MAINARTEFACT, digest.String())
+	set.Annotate(MAINARTEFACT_ANNOTATION, digest.String())
 	temp = nil
 	return ab, nil
 }

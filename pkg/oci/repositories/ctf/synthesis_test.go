@@ -21,6 +21,9 @@ import (
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
+	"github.com/gardener/ocm/pkg/ocm"
+	"github.com/gardener/ocm/pkg/ocm/digester"
+	"github.com/gardener/ocm/pkg/ocm/digester/digesters"
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -88,14 +91,14 @@ var _ = Describe("syntheses", func() {
 	})
 
 	It("synthesize", func() {
-		r, err := ctf.FormatDirectory.Create(oci.DefaultContext, "test", spec.Options, 0700)
+		r, err := ctf.FormatDirectory.Create(oci.DefaultContext(), "test", spec.Options, 0700)
 		Expect(err).To(Succeed())
 		n, err := r.LookupNamespace("mandelsoft/test")
 		Expect(err).To(Succeed())
 		defaultManifestFill(n)
 		Expect(r.Close()).To(Succeed())
 
-		r, err = ctf.Open(oci.DefaultContext, accessobj.ACC_READONLY, "test", 0, spec.Options)
+		r, err = ctf.Open(oci.DefaultContext(), accessobj.ACC_READONLY, "test", 0, spec.Options)
 		Expect(err).To(Succeed())
 		defer r.Close()
 		n, err = r.LookupNamespace("mandelsoft/test")
@@ -117,6 +120,21 @@ var _ = Describe("syntheses", func() {
 		newblob, err := artefactset.SynthesizeArtefactBlob(set, TAG)
 		Expect(err).To(Succeed())
 		defer newblob.Close()
+
 		CheckBlob(newblob).Close()
+
+		digest, err := digesters.ArtefactDigester{}.DetermineDigest(newblob)
+		Expect(err).To(Succeed())
+		Expect(digest.Digest.String()).To(Equal("sha256:" + DIGEST_MANIFEST))
+
+		digests, err := ocm.DefaultContext().BlobDigesters().DetermineDigests(newblob)
+		Expect(err).To(Succeed())
+		Expect(digests).To(Equal([]digester.DigestDescriptor{
+			{
+				Digest:   "sha256:" + DIGEST_MANIFEST,
+				Digester: &digesters.ARTEFACT_DIGESTER,
+			},
+		}))
+
 	})
 })

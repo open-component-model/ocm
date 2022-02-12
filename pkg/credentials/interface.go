@@ -48,7 +48,9 @@ type GenericRepositorySpec = core.GenericRepositorySpec
 type GenericCredentialsSpec = core.GenericCredentialsSpec
 type DirectCredentials = core.DirectCredentials
 
-var DefaultContext = core.DefaultContext
+func DefaultContext() core.Context {
+	return core.DefaultContext
+}
 
 func ForContext(ctx context.Context) Context {
 	return core.ForContext(ctx)
