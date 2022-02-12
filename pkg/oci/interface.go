@@ -25,6 +25,8 @@ const KIND_OCIARTEFACT = core.KIND_OCIARTEFACT
 const KIND_MEDIATYPE = core.KIND_MEDIATYPE
 const KIND_BLOB = core.KIND_BLOB
 
+const CONTEXT_TYPE = core.CONTEXT_TYPE
+
 type Context = core.Context
 type Repository = core.Repository
 type RepositoryTypeScheme = core.RepositoryTypeScheme

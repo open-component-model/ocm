@@ -25,6 +25,8 @@ import (
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
+const CONTEXT_TYPE = "ocm.context.gardener.cloud"
+
 type Context interface {
 	datacontext.Context
 
@@ -34,6 +36,8 @@ type Context interface {
 
 	RepositoryTypes() RepositoryTypeScheme
 	AccessMethods() AccessTypeScheme
+
+	BlobHandlers() BlobHandlerRegistry
 
 	RepositoryForSpec(spec RepositorySpec, creds ...credentials.CredentialsSource) (Repository, error)
 	RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...credentials.CredentialsSource) (Repository, error)
@@ -67,19 +71,22 @@ type _context struct {
 
 	knownRepositoryTypes RepositoryTypeScheme
 	knownAccessTypes     AccessTypeScheme
+
+	blobHandlers BlobHandlerRegistry
 }
 
 var _ Context = &_context{}
 
-func newContext(shared datacontext.AttributesContext, credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme) Context {
+func newContext(shared datacontext.AttributesContext, credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, blobHandlers BlobHandlerRegistry) Context {
 	c := &_context{
 		sharedattributes:     shared,
 		credctx:              credctx,
 		ocictx:               ocictx,
+		blobHandlers:         blobHandlers,
 		knownAccessTypes:     accessscheme,
 		knownRepositoryTypes: reposcheme,
 	}
-	c.Context = datacontext.NewContextBase(c, key, shared.GetAttributes())
+	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
 	return c
 }
 
@@ -97,6 +104,10 @@ func (c *_context) OCIContext() oci.Context {
 
 func (c *_context) RepositoryTypes() RepositoryTypeScheme {
 	return c.knownRepositoryTypes
+}
+
+func (c *_context) BlobHandlers() BlobHandlerRegistry {
+	return c.blobHandlers
 }
 
 func (c *_context) RepositoryForSpec(spec RepositorySpec, creds ...credentials.CredentialsSource) (Repository, error) {

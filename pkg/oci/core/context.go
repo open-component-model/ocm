@@ -23,6 +23,8 @@ import (
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
+const CONTEXT_TYPE = "oci.context.gardener.cloud"
+
 type Context interface {
 	datacontext.Context
 
@@ -63,7 +65,7 @@ func newContext(shared datacontext.AttributesContext, creds credentials.Context,
 		credentials:          creds,
 		knownRepositoryTypes: reposcheme,
 	}
-	c.Context = datacontext.NewContextBase(c, key, shared.GetAttributes())
+	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
 	return c
 }
 

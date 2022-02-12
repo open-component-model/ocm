@@ -5,6 +5,7 @@ import (
 
 	_ "github.com/gardener/ocm/pkg/oci/repositories"
 	_ "github.com/gardener/ocm/pkg/ocm/accessmethods"
+	_ "github.com/gardener/ocm/pkg/ocm/blobhandler"
 	_ "github.com/gardener/ocm/pkg/ocm/compdesc/versions"
 	_ "github.com/gardener/ocm/pkg/ocm/repositories"
 
@@ -12,6 +13,8 @@ import (
 )
 
 const KIND_COMPONENTVERSION = core.KIND_COMPONENTVERSION
+
+const CONTEXT_TYPE = core.CONTEXT_TYPE
 
 type Context = core.Context
 type Repository = core.Repository

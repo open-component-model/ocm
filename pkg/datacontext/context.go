@@ -25,11 +25,18 @@ import (
 // Such a context incorporates a context.Context and some context
 // specific attribute store
 type Context interface {
+	// GetType returns the context type
+	GetType() string
+	// BindTo binds the context to a context.Context and makes it
+	// retrievable by a ForContext method
 	BindTo(ctx context.Context) context.Context
 	GetAttributes() Attributes
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+// CONTEXT_TYPE is the global type for a attribute context
+const CONTEXT_TYPE = "attributes.context.gardener.cloud"
 
 type AttributesContext interface {
 	Context
@@ -66,6 +73,7 @@ func WithContext(ctx context.Context, parentAttrs Attributes) (Context, context.
 ////////////////////////////////////////////////////////////////////////////////
 
 type _context struct {
+	ctxtype    string
 	key        interface{}
 	effective  Context
 	attributes Attributes
@@ -74,7 +82,7 @@ type _context struct {
 // New provides a default base implementation for a data context.
 // It can also be used as root attribute context
 func New(parentAttrs Attributes) AttributesContext {
-	c := &_context{key: key}
+	c := &_context{ctxtype: CONTEXT_TYPE, key: key}
 	c.effective = c
 	c.attributes = newAttributes(c, parentAttrs)
 	return c
@@ -82,10 +90,14 @@ func New(parentAttrs Attributes) AttributesContext {
 
 // NewContextBase creates a context base implementation supporting
 // context attributes
-func NewContextBase(eff Context, key interface{}, parentAttrs Attributes) Context {
+func NewContextBase(eff Context, typ string, key interface{}, parentAttrs Attributes) Context {
 	c := &_context{key: key, effective: eff}
 	c.attributes = newAttributes(eff, parentAttrs)
 	return c
+}
+
+func (c *_context) GetType() string {
+	return c.ctxtype
 }
 
 // BindTo make the Context reachable via the resulting context.Context

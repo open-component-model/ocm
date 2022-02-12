@@ -29,6 +29,8 @@ const KIND_CREDENTIALS = core.KIND_CREDENTIALS
 const KIND_CONSUMER = core.KIND_CREDENTIALS
 const KIND_REPOSITORY = core.KIND_REPOSITORY
 
+const CONTEXT_TYPE = core.CONTEXT_TYPE
+
 const AliasRepositoryType = core.AliasRepositoryType
 
 type Context = core.Context

@@ -33,10 +33,6 @@ func (r Repository) GetSpecification() cpi.RepositorySpec {
 	return NewRepositorySpec()
 }
 
-func (r Repository) SupportsDistributionSpec() string {
-	return ""
-}
-
 func (r Repository) ExistsArtefact(name string, version string) (bool, error) {
 	return false, nil
 }

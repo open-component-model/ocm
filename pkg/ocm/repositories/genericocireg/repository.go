@@ -22,6 +22,7 @@ import (
 
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
+	"github.com/gardener/ocm/pkg/ocm/repositories/genericocireg/componentmapping"
 	"github.com/gardener/ocm/pkg/ocm/repositories/ocireg"
 )
 
@@ -76,7 +77,7 @@ func (r *Repository) ExistsComponentVersion(name string, version string) (bool, 
 		return false, err
 	}
 	switch desc.Config.MediaType {
-	case ComponentDescriptorConfigMimeType, ComponentDescriptorLegacyConfigMimeType:
+	case componentmapping.ComponentDescriptorConfigMimeType, componentmapping.ComponentDescriptorLegacyConfigMimeType:
 		return true, nil
 	}
 	return false, nil
@@ -97,7 +98,7 @@ func (r *Repository) LookupComponentVersion(name string, version string) (cpi.Co
 func (r *Repository) MapComponentNameToNamespace(name string) (string, error) {
 	switch r.meta.ComponentNameMapping {
 	case ocireg.OCIRegistryURLPathMapping, "":
-		return path.Join(r.meta.SubPath, ComponentDescriptorNamespace, name), nil
+		return path.Join(r.meta.SubPath, componentmapping.ComponentDescriptorNamespace, name), nil
 	case ocireg.OCIRegistryDigestMapping:
 		h := sha256.New()
 		_, _ = h.Write([]byte(name))

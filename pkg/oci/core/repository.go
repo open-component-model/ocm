@@ -21,8 +21,6 @@ import (
 )
 
 type Repository interface {
-	SupportsDistributionSpec() string
-
 	GetSpecification() RepositorySpec
 
 	ExistsArtefact(name string, ref string) (bool, error)

@@ -38,7 +38,7 @@ func (r *Repository) GetSpecification() cpi.RepositorySpec {
 	return r.spec
 }
 
-func (r *Repository) SupportsDistributionSpec() string {
+func (r *Repository) GetBaseURL() string {
 	return r.spec.BaseURL
 }
 

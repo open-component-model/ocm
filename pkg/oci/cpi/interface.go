@@ -22,6 +22,8 @@ import (
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
+const CONTEXT_TYPE = core.CONTEXT_TYPE
+
 type Context = core.Context
 type Repository = core.Repository
 type RepositoryType = core.RepositoryType

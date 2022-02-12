@@ -88,7 +88,7 @@ func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, e
 	}()
 
 	ab := &artefactBlob{
-		BlobAccess: accessio.BlobAccessForFile(blob.MimeType()+"+tar+gzip", temp.Name(), fs),
+		BlobAccess: accessio.BlobAccessForFile(artdesc.ToContentMediaType(blob.MimeType())+"+tar+gzip", temp.Name(), fs),
 		filesystem: fs,
 		temp:       temp,
 	}

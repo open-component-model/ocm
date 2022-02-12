@@ -25,6 +25,9 @@ import (
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
+// CONTEXT_TYPE is the global type for a credential context
+const CONTEXT_TYPE = "credentials.context.gardener.cloud"
+
 type Context interface {
 	datacontext.Context
 
@@ -80,8 +83,12 @@ func newContext(shared datacontext.AttributesContext, configctx config.Context, 
 		knownRepositoryTypes: reposcheme,
 		consumers:            newConsumers(),
 	}
-	c.Context = datacontext.NewContextBase(c, key, shared.GetAttributes())
+	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
 	return c
+}
+
+func (c *_context) xGetType() string {
+	return CONTEXT_TYPE
 }
 
 func (c *_context) Update() error {

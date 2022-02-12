@@ -34,6 +34,8 @@ var AllConfigs = AppliedConfigSelectorFunction(func(*AppliedConfig) bool { retur
 
 const AllGenerations int64 = 0
 
+const CONTEXT_TYPE = "config.context.gardener.cloud"
+
 type Context interface {
 	datacontext.Context
 
@@ -90,7 +92,7 @@ func newContext(shared datacontext.AttributesContext, reposcheme ConfigTypeSchem
 		knownConfigTypes: reposcheme,
 		configs:          NewConfigStore(),
 	}
-	c.Context = datacontext.NewContextBase(c, key, shared.GetAttributes())
+	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
 	return c
 }
 

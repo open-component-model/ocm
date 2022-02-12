@@ -28,6 +28,8 @@ var AllConfigs = core.AllConfigs
 
 const AllGenerations = core.AllGenerations
 
+const CONTEXT_TYPE = core.CONTEXT_TYPE
+
 type Context = core.Context
 type Config = core.Config
 type ConfigType = core.ConfigType

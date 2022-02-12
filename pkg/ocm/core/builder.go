@@ -30,6 +30,7 @@ type Builder struct {
 	oci          oci.Context
 	reposcheme   RepositoryTypeScheme
 	accessscheme AccessTypeScheme
+	blobhandlers BlobHandlerRegistry
 }
 
 func (b *Builder) getContext() context.Context {
@@ -69,6 +70,11 @@ func (b Builder) WithAccessTypeScheme(scheme AccessTypeScheme) Builder {
 	return b
 }
 
+func (b Builder) WithBlobHandlers(reg BlobHandlerRegistry) Builder {
+	b.blobhandlers = reg
+	return b
+}
+
 func (b Builder) Bound() (Context, context.Context) {
 	c := b.New()
 	return c, context.WithValue(b.getContext(), key, c)
@@ -92,6 +98,9 @@ func (b Builder) New() Context {
 	if b.accessscheme == nil {
 		b.accessscheme = DefaultAccessTypeScheme
 	}
+	if b.blobhandlers == nil {
+		b.blobhandlers = DefaultBlobHandlerRegistry
+	}
 	if ociimpl != nil {
 		def, err := ociimpl(b.oci)
 		if err != nil {
@@ -101,6 +110,6 @@ func (b Builder) New() Context {
 		reposcheme.AddKnownTypes(b.reposcheme) // TODO: implement delegation
 		b.reposcheme = reposcheme
 	}
-	return newContext(b.shared, b.credentials, b.oci, b.reposcheme, b.accessscheme)
+	return newContext(b.shared, b.credentials, b.oci, b.reposcheme, b.accessscheme, b.blobhandlers)
 
 }

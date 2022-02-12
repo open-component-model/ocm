@@ -20,6 +20,8 @@ import (
 	"github.com/gardener/ocm/pkg/ocm/core"
 )
 
+const CONTEXT_TYPE = core.CONTEXT_TYPE
+
 type Context = core.Context
 type Repository = core.Repository
 type ComponentAccess = core.ComponentAccess
@@ -36,6 +38,22 @@ type ResourceAccess = core.ResourceAccess
 type ResourceMeta = core.ResourceMeta
 type RepositorySpec = core.RepositorySpec
 type RepositoryType = core.RepositoryType
+
+type BlobHandler = core.BlobHandler
+type BlobHandlerKey = core.BlobHandlerKey
+type StorageContext = core.StorageContext
+
+func ForRepo(ctxtype, repostype string) BlobHandlerKey {
+	return core.ForRepo(ctxtype, repostype)
+}
+
+func ForMimeType(mimetype string) BlobHandlerKey {
+	return core.ForMimeType(mimetype)
+}
+
+func RegisterBlobHandler(handler BlobHandler, keys ...BlobHandlerKey) {
+	core.RegisterBlobHandler(handler, keys...)
+}
 
 func RegisterRepositoryType(name string, atype RepositoryType) {
 	core.DefaultRepositoryTypeScheme.Register(name, atype)

@@ -16,7 +16,6 @@ package genericocireg
 
 import (
 	"path"
-	"reflect"
 	"strings"
 
 	"github.com/gardener/ocm/pkg/common"
@@ -26,11 +25,11 @@ import (
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
+	ocihdlr "github.com/gardener/ocm/pkg/ocm/blobhandler/oci"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/gardener/ocm/pkg/ocm/repositories/ctf/comparch"
 	"github.com/opencontainers/go-digest"
-	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
 type ComponentVersion struct {
@@ -54,24 +53,24 @@ func NewComponentVersionAccess(mode accessobj.AccessMode, comp *ComponentAccess,
 ////////////////////////////////////////////////////////////////////////////////
 
 type ComponentVersionContainer struct {
-	comp    *ComponentAccess
-	version string
-	access  oci.ManifestAccess
-	state   accessobj.State
+	comp     *ComponentAccess
+	version  string
+	manifest oci.ManifestAccess
+	state    accessobj.State
 }
 
 var _ comparch.ComponentVersionContainer = (*ComponentVersionContainer)(nil)
 
-func NewComponentVersionContainer(mode accessobj.AccessMode, comp *ComponentAccess, version string, access oci.ManifestAccess) (*ComponentVersionContainer, error) {
-	state, err := NewState(mode, comp.name, version, access)
+func NewComponentVersionContainer(mode accessobj.AccessMode, comp *ComponentAccess, version string, manifest oci.ManifestAccess) (*ComponentVersionContainer, error) {
+	state, err := NewState(mode, comp.name, version, manifest)
 	if err != nil {
 		return nil, err
 	}
 	return &ComponentVersionContainer{
-		comp:    comp,
-		version: version,
-		access:  access,
-		state:   state,
+		comp:     comp,
+		version:  version,
+		manifest: manifest,
+		state:    state,
 	}, nil
 }
 
@@ -84,7 +83,7 @@ func (c *ComponentVersionContainer) IsReadOnly() bool {
 }
 
 func (c *ComponentVersionContainer) IsClosed() bool {
-	return c.access == nil
+	return c.manifest == nil
 }
 
 func (c *ComponentVersionContainer) Update() error {
@@ -111,7 +110,7 @@ func (c *ComponentVersionContainer) Update() error {
 	if err != nil {
 		return err
 	}
-	_, err = c.comp.namespace.AddTaggedArtefact(c.access, c.version)
+	_, err = c.comp.namespace.AddTaggedArtefact(c.manifest, c.version)
 	if err != nil {
 		return err
 	}
@@ -123,52 +122,12 @@ func (c *ComponentVersionContainer) evalLayer(s compdesc.AccessSpec) (compdesc.A
 	if err != nil {
 		return s, err
 	}
-	if url := c.comp.repo.ocirepo.SupportsDistributionSpec(); url != "" {
-		if a, ok := spec.(*accessmethods.LocalBlobAccessSpec); ok {
-			if !artdesc.IsDigest(a.LocalReference) {
-				return s, errors.ErrInvalid("digest", a.LocalReference)
-			}
-			desc := c.access.GetDescriptor()
-			for _, l := range desc.Layers {
-				if l.Digest == digest.Digest(a.LocalReference) {
-					if artdesc.IsOCIMediaType(l.MediaType) {
-						ref, err := c.assureGlobalRef(l.Digest, url, a.ReferenceName)
-						if err == nil {
-							a.GlobalAccess = ref
-							return a, nil
-						}
-					}
-				}
-			}
-			return s, errors.ErrUnknown("localReference", a.LocalReference)
+	if a, ok := spec.(*accessmethods.LocalBlobAccessSpec); ok {
+		if !artdesc.IsDigest(a.LocalReference) {
+			return s, errors.ErrInvalid("digest", a.LocalReference)
 		}
 	}
 	return s, nil
-}
-
-func (c *ComponentVersionContainer) assureLayer(blob cpi.BlobAccess) error {
-	d := artdesc.DefaultBlobDescriptor(blob)
-	desc := c.access.GetDescriptor()
-
-	found := -1
-	for i, l := range desc.Layers {
-		if reflect.DeepEqual(&l, *d) {
-			return nil
-		}
-		if l.Digest == blob.Digest() {
-			found = i
-		}
-	}
-	if found > 0 { // ignore layer 0 used for component descriptor
-		desc.Layers[found] = *d
-	} else {
-		if len(desc.Layers) == 0 {
-			// fake descriptor layer
-			desc.Layers = append(desc.Layers, ociv1.Descriptor{MediaType: ComponentDescriptorConfigMimeType})
-		}
-		desc.Layers = append(desc.Layers, *d)
-	}
-	return nil
 }
 
 func (c *ComponentVersionContainer) GetDescriptor() *compdesc.ComponentDescriptor {
@@ -176,28 +135,41 @@ func (c *ComponentVersionContainer) GetDescriptor() *compdesc.ComponentDescripto
 }
 
 func (c *ComponentVersionContainer) GetBlobData(name string) (cpi.DataAccess, error) {
-	return c.access.GetBlob(digest.Digest((name)))
+	return c.manifest.GetBlob(digest.Digest((name)))
 }
 
 func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
-	err := c.access.AddBlob(blob)
+
+	storagectx := ocihdlr.New(c.comp.repo.ocirepo, c.comp.namespace, c.manifest)
+	h := c.GetContext().BlobHandlers().GetHandler(oci.CONTEXT_TYPE, c.comp.repo.ocirepo.GetSpecification().GetKind(), blob.MimeType())
+	if h != nil {
+		acc, err := h.StoreBlob(c.comp.repo, blob, refName, storagectx)
+		if err != nil {
+			return nil, err
+		}
+		if acc != nil {
+			return acc, nil
+		}
+	}
+
+	err := c.manifest.AddBlob(blob)
 	if err != nil {
 		return nil, err
 	}
-	err = c.assureLayer(blob)
+	err = storagectx.AssureLayer(blob)
 	if err != nil {
 		return nil, err
 	}
 	return accessmethods.NewLocalBlobAccessSpec(common.DigestToFileName(blob.Digest()), refName, blob.MimeType(), global), nil
 }
 
-// assureGlobalRef provides a global access for a local OCI Artefact
+// assureGlobalRef provides a global manifest for a local OCI Artefact
 func (c *ComponentVersionContainer) assureGlobalRef(d digest.Digest, url, name string) (cpi.AccessSpec, error) {
 
-	blob, err := c.access.GetBlob(d)
+	blob, err := c.manifest.GetBlob(d)
 	if err != nil {
 		return nil, err
 	}
