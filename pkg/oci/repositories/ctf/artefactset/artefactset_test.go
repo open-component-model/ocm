@@ -19,37 +19,18 @@ import (
 	"compress/gzip"
 	"io"
 
-	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
-	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
+	. "github.com/gardener/ocm/pkg/oci/repositories/ctf/testhelper"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/opencontainers/go-digest"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-const MimeTypeOctetStream = "application/octet-stream"
-
 func defaultManifestFill(a *artefactset.ArtefactSet) {
-	art := artefactset.NewArtefact(a)
-	Expect(art.AddLayer(accessio.BlobAccessForData(MimeTypeOctetStream, []byte("testdata")), nil)).To(Equal(0))
-	desc, err := art.Manifest()
-	Expect(err).To(Succeed())
-	Expect(desc).NotTo(BeNil())
-
-	Expect(desc.Layers[0].Digest).To(Equal(digest.FromString("testdata")))
-	Expect(desc.Layers[0].MediaType).To(Equal(MimeTypeOctetStream))
-	Expect(desc.Layers[0].Size).To(Equal(int64(8)))
-
-	config := accessio.BlobAccessForData(MimeTypeOctetStream, []byte("{}"))
-	Expect(a.AddBlob(config)).To(Succeed())
-	desc.Config = *artdesc.DefaultBlobDescriptor(config)
-
+	art := NewArtefact(a)
 	a.AddArtefact(art, nil)
-
 }
 
 var _ = Describe("artefact management", func() {

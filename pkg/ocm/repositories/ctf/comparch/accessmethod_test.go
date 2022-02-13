@@ -60,6 +60,10 @@ var _ = Describe("access method", func() {
 			Expect(err).To(Succeed())
 
 			ca, err := comparch.New(DefaultContext, accessobj.ACC_CREATE, nil, nil, nil, 0600)
+			Expect(err).To(Succeed())
+
+			ca.GetDescriptor().Name = "acme.org/dummy"
+			ca.GetDescriptor().Version = "v1"
 
 			res, err := cd.GetResourceByIdentity(metav1.IdentityByName("local"))
 			Expect(err).To(Succeed())
@@ -83,6 +87,8 @@ var _ = Describe("access method", func() {
 			Expect(m).To(Not(BeNil()))
 			Expect(reflect.TypeOf(m).String()).To(Equal("*comparch.localFilesystemBlobAccessMethod"))
 			Expect(m.GetKind()).To(Equal("localBlob"))
+
+			Expect(ca.Close()).To(Succeed())
 		})
 	})
 })

@@ -104,16 +104,16 @@ func (m *OCIRegistryAccessMethod) Reader() (io.ReadCloser, error) {
 }
 
 func (m *OCIRegistryAccessMethod) MimeType() string {
-	ref, err := oci.ParseOCIReference(m.spec.ImageReference)
+	ref, err := oci.ParseRef(m.spec.ImageReference)
 	if err != nil {
 		return ""
 	}
-	spec := ocireg.NewRepositorySpec(ref.HostPort())
+	spec := ocireg.NewRepositorySpec(ref.Host)
 	ocirepo, err := m.comp.GetContext().OCIContext().RepositoryForSpec(spec)
 	if err != nil {
 		return ""
 	}
-	art, err := ocirepo.LookupArtefact(ref.Repository, ref.Reference)
+	art, err := ocirepo.LookupArtefact(ref.Repository, ref.Repository)
 	if err != nil {
 		return ""
 	}
@@ -122,11 +122,11 @@ func (m *OCIRegistryAccessMethod) MimeType() string {
 }
 
 func (m *OCIRegistryAccessMethod) getBlob() (artefactset.ArtefactBlob, error) {
-	ref, err := oci.ParseOCIReference(m.spec.ImageReference)
+	ref, err := oci.ParseRef(m.spec.ImageReference)
 	if err != nil {
 		return nil, err
 	}
-	spec := ocireg.NewRepositorySpec(ref.HostPort())
+	spec := ocireg.NewRepositorySpec(ref.Host)
 	ocirepo, err := m.comp.GetContext().OCIContext().RepositoryForSpec(spec)
 	if err != nil {
 		return nil, err
@@ -135,7 +135,7 @@ func (m *OCIRegistryAccessMethod) getBlob() (artefactset.ArtefactBlob, error) {
 	if err != nil {
 		return nil, err
 	}
-	blob, err := artefactset.SynthesizeArtefactBlob(ns, ref.Reference)
+	blob, err := artefactset.SynthesizeArtefactBlob(ns, ref.Reference())
 	if err != nil {
 		return nil, err
 	}

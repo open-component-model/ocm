@@ -68,14 +68,16 @@ func ForRepo(ctxtype, repotype string) BlobHandlerKey {
 	return BlobHandlerKey{ContextType: ctxtype, RepositoryType: repotype}
 }
 func ForMimeType(mimetype string) BlobHandlerKey {
-	return BlobHandlerKey{ContextType: mimetype}
+	return BlobHandlerKey{MimeType: mimetype}
 }
 
 // BlobHandlerRegistry registers blob handlers to use in a dedicated ocm context
 type BlobHandlerRegistry interface {
+	// Copy provides a new independend copy of the registry
+	Copy() BlobHandlerRegistry
 	// RegisterBlobHandler registers a blob handler. It must specify either a sole mime type,
 	// or a context and repository type, or all three keys
-	RegisterBlobHandler(handler BlobHandler, keys ...BlobHandlerKey)
+	RegisterBlobHandler(handler BlobHandler, keys ...BlobHandlerKey) BlobHandlerRegistry
 	// GetHandler returns handler trying all matches in the following order:
 	//
 	// - a handle matching all keys
@@ -100,7 +102,18 @@ func NewBlobHandlerRegistry() BlobHandlerRegistry {
 	return &blobHandlerRegistry{handlers: map[BlobHandlerKey]BlobHandler{}}
 }
 
-func (r *blobHandlerRegistry) RegisterBlobHandler(handler BlobHandler, keys ...BlobHandlerKey) {
+func (r *blobHandlerRegistry) Copy() BlobHandlerRegistry {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+	n := NewBlobHandlerRegistry().(*blobHandlerRegistry)
+	n.defhandler = append(n.defhandler, r.defhandler...)
+	for k, h := range r.handlers {
+		n.handlers[k] = h
+	}
+	return n
+}
+
+func (r *blobHandlerRegistry) RegisterBlobHandler(handler BlobHandler, keys ...BlobHandlerKey) BlobHandlerRegistry {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
@@ -124,6 +137,7 @@ func (r *blobHandlerRegistry) RegisterBlobHandler(handler BlobHandler, keys ...B
 	} else {
 		r.handlers[key] = handler
 	}
+	return r
 }
 
 func (r *blobHandlerRegistry) forMimeType(ctxtype, repotype, mimetype string) MultiBlobHandler {
@@ -149,10 +163,10 @@ func (r *blobHandlerRegistry) GetHandler(ctxtype, repotype, mimetype string) Blo
 
 	var multi MultiBlobHandler
 	if ctxtype != "" || repotype != "" {
-		multi = append(multi, r.forMimeType(ctxtype, repotype, mimetype))
+		multi = append(multi, r.forMimeType(ctxtype, repotype, mimetype)...)
 	}
-	multi = append(multi, r.forMimeType("", "", mimetype))
-	multi = append(multi, r.defhandler)
+	multi = append(multi, r.forMimeType("", "", mimetype)...)
+	multi = append(multi, r.defhandler...)
 	if len(multi) == 0 {
 		return nil
 	}

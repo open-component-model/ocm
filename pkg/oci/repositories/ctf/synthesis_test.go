@@ -27,9 +27,11 @@ import (
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/opencontainers/go-digest"
+
+	. "github.com/gardener/ocm/pkg/oci/repositories/ctf/testhelper"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/opencontainers/go-digest"
 )
 
 func CheckBlob(blob accessio.BlobAccess) oci.NamespaceAccess {
@@ -43,7 +45,7 @@ func CheckBlob(blob accessio.BlobAccess) oci.NamespaceAccess {
 
 	idx := set.GetIndex()
 	Expect(idx.Annotations).To(Equal(map[string]string{
-		"cloud.gardener.ocm/main": "sha256:" + DIGEST_MANIFEST,
+		artefactset.MAINARTEFACT_ANNOTATION: "sha256:" + DIGEST_MANIFEST,
 	}))
 	Expect(idx.Manifests).To(Equal([]artdesc.Descriptor{
 		{
@@ -95,7 +97,7 @@ var _ = Describe("syntheses", func() {
 		Expect(err).To(Succeed())
 		n, err := r.LookupNamespace("mandelsoft/test")
 		Expect(err).To(Succeed())
-		defaultManifestFill(n)
+		DefaultManifestFill(n)
 		Expect(r.Close()).To(Succeed())
 
 		r, err = ctf.Open(oci.DefaultContext(), accessobj.ACC_READONLY, "test", 0, spec.Options)

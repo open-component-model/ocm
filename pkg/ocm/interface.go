@@ -39,6 +39,10 @@ func DefaultContext() core.Context {
 	return core.DefaultContext
 }
 
+func DefaultBlobHandlers() core.BlobHandlerRegistry {
+	return core.DefaultBlobHandlerRegistry
+}
+
 // ForContext returns the Context to use for context.Context.
 // This is eiter an explicit context or the default context.
 func ForContext(ctx context.Context) Context {

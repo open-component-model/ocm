@@ -32,20 +32,36 @@ import (
 
 func init() {
 	for _, mime := range artdesc.ContentTypes() {
-		cpi.RegisterBlobHandler(&blobHandler{}, cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.OCIRegistryRepositoryType),
+		cpi.RegisterBlobHandler(NewArtefactHandler(nil), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.OCIRegistryRepositoryType),
 			cpi.ForMimeType(mime))
 	}
-	cpi.RegisterBlobHandler(&blobHandler{}, cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.OCIRegistryRepositoryType))
+	cpi.RegisterBlobHandler(NewBlobHandler(nil), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.OCIRegistryRepositoryType))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type BaseFunction func(ctx *storagecontext.StorageContext) string
+
+// blobHandler is the default handling to store local blobs as local blobs but with an additional
+// globally accessible OCIBlob access method
 type blobHandler struct {
+	base BaseFunction
 }
 
-func (b blobHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hint string, ctx cpi.StorageContext) (core.AccessSpec, error) {
+func (h *blobHandler) GetBaseURL(ctx *storagecontext.StorageContext) string {
+	if h.base != nil {
+		return h.base(ctx)
+	}
+	return ctx.Repository.(*ocireg.Repository).GetBaseURL()
+}
+
+func NewBlobHandler(base BaseFunction) cpi.BlobHandler {
+	return &blobHandler{base}
+}
+
+func (b *blobHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hint string, ctx cpi.StorageContext) (core.AccessSpec, error) {
 	ocictx := ctx.(*storagecontext.StorageContext)
-	base := ocictx.Repository.(*ocireg.Repository).GetBaseURL()
+	base := b.GetBaseURL(ocictx)
 	i := strings.LastIndex(hint, ":")
 	if i > 0 {
 		hint = hint[:i]
@@ -58,15 +74,21 @@ func (b blobHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hint st
 	if err != nil {
 		return nil, err
 	}
-	return accessmethods.NewOCIBlobAccessSpec(path.Join(base, ocictx.Namespace.GetNamespace()), blob.Digest(), blob.MimeType(), blob.Size()), nil
+	return accessmethods.NewLocalBlobAccessSpec(blob.Digest().String(), "", blob.MimeType(), accessmethods.NewOCIBlobAccessSpec(path.Join(base, ocictx.Namespace.GetNamespace()), blob.Digest(), blob.MimeType(), blob.Size())), nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// artefactHandler stores artefact blobs as OCIArtefacts
 type artefactHandler struct {
+	blobHandler
 }
 
-func (b artefactHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hint string, ctx cpi.StorageContext) (core.AccessSpec, error) {
+func NewArtefactHandler(base BaseFunction) cpi.BlobHandler {
+	return &artefactHandler{blobHandler{base}}
+}
+
+func (b *artefactHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hint string, ctx cpi.StorageContext) (core.AccessSpec, error) {
 	mediaType := blob.MimeType()
 
 	if !artdesc.IsOCIMediaType(mediaType) || (!strings.HasSuffix(mediaType, "+tar") && !strings.HasSuffix(mediaType, "+tar+gzip")) {
@@ -80,16 +102,18 @@ func (b artefactHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hin
 	var err error
 
 	ocictx := ctx.(*storagecontext.StorageContext)
-	base := ocictx.Repository.(*ocireg.Repository).GetBaseURL()
+	base := b.GetBaseURL(ocictx)
 	if hint == "" {
 		namespace = ocictx.Namespace
 	} else {
 		spec := repo.GetSpecification().(*genericocireg.RepositorySpec)
 		i := strings.LastIndex(hint, ":")
 		if i > 0 {
-			version = hint[i+1:]
+			version = hint[i:]
 			name = path.Join(spec.SubPath, hint[:i])
-			tag = version
+			tag = version[1:]
+		} else {
+			name = hint
 		}
 		namespace, err = ocictx.Repository.LookupNamespace(name)
 		if err != nil {
@@ -104,7 +128,7 @@ func (b artefactHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hin
 	defer set.Close()
 	digest := set.GetMain()
 	if version == "" {
-		version = digest.String()
+		version = "@" + digest.String()
 	}
 	art, err := set.GetArtefact(digest.String())
 	if err != nil {
@@ -121,7 +145,7 @@ func (b artefactHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hin
 		}
 	}
 
-	ref := path.Join(base, namespace.GetNamespace()) + ":" + version
+	ref := path.Join(base, namespace.GetNamespace()) + version
 
 	global := accessmethods.NewOCIRegistryAccessSpec(ref)
 	return global, nil

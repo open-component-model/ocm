@@ -49,7 +49,7 @@ func (r *Repository) Close() error {
 }
 
 func (r *Repository) GetContext() cpi.Context {
-	return r.GetContext()
+	return r.ctx
 }
 
 func (r *Repository) GetSpecification() cpi.RepositorySpec {
@@ -57,6 +57,10 @@ func (r *Repository) GetSpecification() cpi.RepositorySpec {
 		RepositorySpec:          r.ocirepo.GetSpecification(),
 		ComponentRepositoryMeta: r.meta,
 	}
+}
+
+func (r *Repository) GetOCIRepository() oci.Repository {
+	return r.ocirepo
 }
 
 func (r *Repository) ExistsComponentVersion(name string, version string) (bool, error) {

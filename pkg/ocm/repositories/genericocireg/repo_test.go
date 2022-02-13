@@ -17,12 +17,21 @@ package genericocireg_test
 import (
 	"reflect"
 
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/oci"
+	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf"
+	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
+	"github.com/gardener/ocm/pkg/oci/repositories/ctf/testhelper"
 	"github.com/gardener/ocm/pkg/ocm"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods"
+	storagecontext "github.com/gardener/ocm/pkg/ocm/blobhandler/oci"
+	"github.com/gardener/ocm/pkg/ocm/blobhandler/oci/ocirepo"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
+	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/gardener/ocm/pkg/ocm/repositories/genericocireg"
+	"github.com/gardener/ocm/pkg/ocm/repositories/genericocireg/componentmapping"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo"
@@ -32,6 +41,7 @@ import (
 var DefaultContext = ocm.New()
 
 const COMPONENT = "github.com/mandelsoft/ocm"
+const TESTBASE = "testbase.de"
 
 var _ = Describe("component repository mapping", func() {
 	var tempfs vfs.FileSystem
@@ -85,6 +95,98 @@ var _ = Describe("component repository mapping", func() {
 		Expect(vers.GetDescriptor()).To(Equal(compdesc.New(COMPONENT, "v1")))
 
 		Expect(repo.Close()).To(Succeed())
+	})
+
+	It("imports blobs", func() {
+
+		base := func(ctx *storagecontext.StorageContext) string {
+			return TESTBASE
+		}
+		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().RegisterBlobHandler(ocirepo.NewBlobHandler(base))).New()
+
+		blob := accessio.BlobAccessForString(testhelper.MimeTypeOctetStream, "anydata")
+
+		// create repository
+		repo, err := ctx.RepositoryForSpec(spec)
+		Expect(err).To(Succeed())
+		Expect(reflect.TypeOf(repo).String()).To(Equal("*genericocireg.Repository"))
+
+		comp, err := repo.LookupComponent(COMPONENT)
+		Expect(err).To(Succeed())
+
+		vers, err := comp.NewVersion("v1")
+		Expect(err).To(Succeed())
+
+		acc, err := vers.AddBlob(blob, "", nil)
+		Expect(err).To(Succeed())
+
+		// check provided actual access to be local blob
+		Expect(acc.GetKind()).To(Equal(accessmethods.LocalBlobType))
+		l, ok := acc.(*accessmethods.LocalBlobAccessSpec)
+		Expect(ok).To(BeTrue())
+		Expect(l.LocalReference).To(Equal(blob.Digest().String()))
+		Expect(l.GlobalAccess).NotTo(BeNil())
+
+		// check provided global access to be oci blob
+		o, ok := l.GlobalAccess.(*accessmethods.OCIBlobAccessSpec)
+		Expect(ok).To(BeTrue())
+		Expect(o.Digest).To(Equal(blob.Digest()))
+		Expect(o.Reference).To(Equal(TESTBASE + "/" + componentmapping.ComponentDescriptorNamespace + "/" + COMPONENT))
+		err = comp.AddVersion(vers)
+		Expect(err).To(Succeed())
+	})
+
+	It("imports artefact", func() {
+		mime := artdesc.ToContentMediaType(artdesc.MediaTypeImageManifest) + "+tar+gzip"
+		base := func(ctx *storagecontext.StorageContext) string {
+			return TESTBASE
+		}
+		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().RegisterBlobHandler(ocirepo.NewArtefactHandler(base), cpi.ForMimeType(mime))).New()
+
+		// create artefactset
+		r, err := artefactset.FormatTGZ.Create("test.tgz", accessobj.AccessOptions(accessobj.PathFileSystem(tempfs)), 0700)
+		Expect(err).To(Succeed())
+		testhelper.DefaultManifestFill(r)
+		r.Annotate(artefactset.MAINARTEFACT_ANNOTATION, "sha256:"+testhelper.DIGEST_MANIFEST)
+		Expect(r.Close()).To(Succeed())
+
+		// create repository
+		repo, err := ctx.RepositoryForSpec(spec)
+		Expect(err).To(Succeed())
+		Expect(reflect.TypeOf(repo).String()).To(Equal("*genericocireg.Repository"))
+
+		comp, err := repo.LookupComponent(COMPONENT)
+		Expect(err).To(Succeed())
+
+		vers, err := comp.NewVersion("v1")
+		Expect(err).To(Succeed())
+
+		blob := accessio.BlobAccessForFile(mime, "test.tgz", tempfs)
+
+		acc, err := vers.AddBlob(blob, "artefact1", nil)
+		Expect(err).To(Succeed())
+		Expect(acc.GetKind()).To(Equal(accessmethods.OCIRegistryType))
+		o := acc.(*accessmethods.OCIRegistryAccessSpec)
+		Expect(o.ImageReference).To(Equal(TESTBASE + "/artefact1@sha256:" + testhelper.DIGEST_MANIFEST))
+		err = comp.AddVersion(vers)
+		Expect(err).To(Succeed())
+
+		acc, err = vers.AddBlob(blob, "artefact2:v1", nil)
+		Expect(err).To(Succeed())
+		Expect(acc.GetKind()).To(Equal(accessmethods.OCIRegistryType))
+		o = acc.(*accessmethods.OCIRegistryAccessSpec)
+		Expect(o.ImageReference).To(Equal(TESTBASE + "/artefact2:v1"))
+		err = comp.AddVersion(vers)
+		Expect(err).To(Succeed())
+
+		ocirepo := repo.(*genericocireg.Repository).GetOCIRepository()
+
+		ns, err := ocirepo.LookupNamespace("artefact2")
+		Expect(err).To(Succeed())
+		art, err := ns.GetArtefact("v1")
+		Expect(err).To(Succeed())
+		testhelper.CheckArtefact(art)
+		Expect(repo.(*genericocireg.Repository).Close()).To(Succeed())
 	})
 
 })

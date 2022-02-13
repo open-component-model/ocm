@@ -23,7 +23,6 @@ import (
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
-	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
@@ -31,37 +30,10 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
+	. "github.com/gardener/ocm/pkg/oci/repositories/ctf/testhelper"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
-
-const MimeTypeOctetStream = "application/octet-stream"
-
-const TAG = "v1"
-const DIGEST_MANIFEST = "3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a"
-const DIGEST_LAYER = "810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"
-const DIGEST_CONFIG = "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
-
-func defaultManifestFill(n cpi.NamespaceAccess) {
-	art, err := n.NewArtefact()
-	Expect(err).To(Succeed())
-	Expect(art.AddLayer(accessio.BlobAccessForString(MimeTypeOctetStream, "testdata"), nil)).To(Equal(0))
-	desc, err := art.Manifest()
-	Expect(err).To(Succeed())
-	Expect(desc).NotTo(BeNil())
-
-	Expect(desc.Layers[0].Digest).To(Equal(digest.FromString("testdata")))
-	Expect(desc.Layers[0].MediaType).To(Equal(MimeTypeOctetStream))
-	Expect(desc.Layers[0].Size).To(Equal(int64(8)))
-
-	config := accessio.BlobAccessForString(MimeTypeOctetStream, "{}")
-	Expect(n.AddBlob(config)).To(Succeed())
-	desc.Config = *artdesc.DefaultBlobDescriptor(config)
-
-	blob, err := n.AddTaggedArtefact(art)
-	Expect(err).To(Succeed())
-	n.AddTags(blob.Digest(), TAG)
-}
 
 var _ = Describe("ctf management", func() {
 	var tempfs vfs.FileSystem
@@ -86,7 +58,7 @@ var _ = Describe("ctf management", func() {
 		Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
 
 		n, err := r.LookupNamespace("mandelsoft/test")
-		defaultManifestFill(n)
+		DefaultManifestFill(n)
 
 		Expect(r.Close()).To(Succeed())
 		Expect(vfs.FileExists(tempfs, "test/"+ctf.ArtefactIndexFileName)).To(BeTrue())
@@ -109,7 +81,7 @@ var _ = Describe("ctf management", func() {
 		Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
 
 		n, err := r.LookupNamespace("mandelsoft/test")
-		defaultManifestFill(n)
+		DefaultManifestFill(n)
 
 		Expect(r.Close()).To(Succeed())
 		Expect(vfs.FileExists(tempfs, "test/"+ctf.ArtefactIndexFileName)).To(BeTrue())
@@ -134,7 +106,7 @@ var _ = Describe("ctf management", func() {
 
 		n, err := r.LookupNamespace("mandelsoft/test")
 		Expect(err).To(Succeed())
-		defaultManifestFill(n)
+		DefaultManifestFill(n)
 
 		Expect(r.Close()).To(Succeed())
 		Expect(vfs.FileExists(tempfs, "test.tgz")).To(BeTrue())
@@ -177,7 +149,7 @@ var _ = Describe("ctf management", func() {
 			Expect(err).To(Succeed())
 			Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
 			n, err := r.LookupNamespace("mandelsoft/test")
-			defaultManifestFill(n)
+			DefaultManifestFill(n)
 			Expect(r.Close()).To(Succeed())
 
 			r, err = ctf.Open(nil, accessobj.ACC_READONLY, "test", 0, accessobj.PathFileSystem(tempfs))
@@ -189,16 +161,7 @@ var _ = Describe("ctf management", func() {
 
 			art, err := n.GetArtefact("sha256:" + DIGEST_MANIFEST)
 			Expect(err).To(Succeed())
-			Expect(art.IsManifest()).To(BeTrue())
-			blob, err := art.GetBlob("sha256:" + DIGEST_LAYER)
-			Expect(err).To(Succeed())
-			Expect(blob.Get()).To(Equal([]byte("testdata")))
-			Expect(blob.MimeType()).To(Equal(MimeTypeOctetStream))
-			blob, err = art.GetBlob("sha256:" + DIGEST_CONFIG)
-			Expect(err).To(Succeed())
-			Expect(blob.Get()).To(Equal([]byte("{}")))
-			Expect(blob.MimeType()).To(Equal(MimeTypeOctetStream))
-
+			CheckArtefact(art)
 			art, err = n.GetArtefact(TAG)
 			Expect(err).To(Succeed())
 			b, err := art.Artefact().ToBlobAccess()

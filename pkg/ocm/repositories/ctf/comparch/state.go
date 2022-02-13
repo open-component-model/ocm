@@ -18,7 +18,6 @@ import (
 	"reflect"
 
 	"github.com/gardener/ocm/pkg/common/accessobj"
-	"github.com/gardener/ocm/pkg/oci/repositories/ctf/index"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
@@ -34,7 +33,7 @@ func NewStateHandler(fs vfs.FileSystem) accessobj.StateHandler {
 }
 
 func (i StateHandler) Initial() interface{} {
-	return index.NewRepositoryIndex()
+	return compdesc.New("", "")
 }
 
 func (i StateHandler) Encode(d interface{}) ([]byte, error) {
