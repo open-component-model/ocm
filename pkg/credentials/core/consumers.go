@@ -44,6 +44,20 @@ func (c *_consumers) Set(id ConsumerIdentity, creds CredentialsSource) {
 	}
 }
 
+func (c *_consumers) Match(pattern ConsumerIdentity, m IdentityMatcher) *_consumer {
+	c.RLock()
+	defer c.RUnlock()
+	var found *_consumer
+	var cur ConsumerIdentity
+	for _, s := range c.data {
+		if m(pattern, cur, s.identity) {
+			found = s
+			cur = s.identity
+		}
+	}
+	return found
+}
+
 type _consumer struct {
 	identity    ConsumerIdentity
 	credentials CredentialsSource

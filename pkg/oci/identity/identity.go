@@ -14,6 +14,12 @@
 
 package identity
 
+import (
+	"strings"
+
+	"github.com/gardener/ocm/pkg/credentials/cpi"
+)
+
 // ID_HOSTNAME is the hostname of an OCT repository
 const ID_HOSTNAME = "hostname"
 
@@ -22,3 +28,55 @@ const ID_PORT = "port"
 
 // ID_PATHPREFIX is the artefact prefix
 const ID_PATHPREFIX = "pathprefix"
+
+func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
+	if pattern[ID_HOSTNAME] != id[ID_HOSTNAME] {
+		return false
+	}
+
+	if pattern[ID_PORT] != "" {
+		if id[ID_PORT] != "" && id[ID_PORT] != pattern[ID_PORT] {
+			return false
+		}
+	} else {
+		if id[ID_PORT] != "" {
+			// return false // try other port
+		}
+	}
+
+	if pattern[ID_PATHPREFIX] != "" {
+		if id[ID_PATHPREFIX] != "" {
+			if len(id[ID_PATHPREFIX]) > len(pattern[ID_PATHPREFIX]) {
+				return false
+			}
+			pcomps := strings.Split(pattern[ID_PATHPREFIX], "/")
+			icomps := strings.Split(id[ID_PATHPREFIX], "/")
+			if len(icomps) > len(pcomps) {
+				return false
+			}
+			for i := range icomps {
+				if pcomps[i] != icomps[i] {
+					return false
+				}
+			}
+		}
+	} else {
+		if id[ID_PATHPREFIX] != "" {
+			return false
+		}
+	}
+
+	// ok now it matches, check against current match
+	if len(cur) == 0 {
+		return true
+	}
+
+	if cur[ID_PORT] == "" && (id[ID_PORT] != "" && pattern[ID_PORT] != "") {
+		return true
+	}
+
+	if len(cur[ID_PATHPREFIX]) < len(id[ID_PATHPREFIX]) {
+		return true
+	}
+	return false
+}

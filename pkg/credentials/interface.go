@@ -43,6 +43,7 @@ type CredentialsSpec = core.CredentialsSpec
 type RepositorySpec = core.RepositorySpec
 
 type ConsumerIdentity = core.ConsumerIdentity
+type IdentityMatcher = core.IdentityMatcher
 
 type GenericRepositorySpec = core.GenericRepositorySpec
 type GenericCredentialsSpec = core.GenericCredentialsSpec

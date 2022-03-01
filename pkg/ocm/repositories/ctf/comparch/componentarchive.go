@@ -67,6 +67,14 @@ func (c *ComponentArchive) Close() error {
 	return c.base.Close()
 }
 
+func (c *ComponentArchive) SetName(n string) {
+	c.GetDescriptor().Name = n
+}
+
+func (c *ComponentArchive) SetVersion(v string) {
+	c.GetDescriptor().Version = v
+}
+
 func (c *ComponentArchive) GetBlobData(name string) (cpi.DataAccess, error) {
 	return c.base.GetBlobDataByName(name)
 }

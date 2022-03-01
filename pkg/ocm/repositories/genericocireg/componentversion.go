@@ -74,6 +74,16 @@ func NewComponentVersionContainer(mode accessobj.AccessMode, comp *ComponentAcce
 	}, nil
 }
 
+func (c *ComponentVersionContainer) Check() error {
+	if c.version != c.GetDescriptor().Version {
+		return errors.ErrInvalid("component version", c.GetDescriptor().Version)
+	}
+	if c.comp.name != c.GetDescriptor().Name {
+		return errors.ErrInvalid("component name", c.GetDescriptor().Name)
+	}
+	return nil
+}
+
 func (c *ComponentVersionContainer) GetContext() cpi.Context {
 	return c.comp.GetContext()
 }
@@ -87,6 +97,7 @@ func (c *ComponentVersionContainer) IsClosed() bool {
 }
 
 func (c *ComponentVersionContainer) Update() error {
+	err := c.Check()
 	desc := c.GetDescriptor()
 	for i, r := range desc.Resources {
 		s, err := c.evalLayer(r.Access)
@@ -106,7 +117,7 @@ func (c *ComponentVersionContainer) Update() error {
 			desc.Sources[i].Access = s
 		}
 	}
-	_, err := c.state.Update()
+	_, err = c.state.Update()
 	if err != nil {
 		return err
 	}

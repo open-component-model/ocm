@@ -34,7 +34,9 @@ type CredentialsSpec = core.CredentialsSpec
 type RepositorySpec = core.RepositorySpec
 type GenericRepositorySpec = core.GenericRepositorySpec
 type GenericCredentialsSpec = core.GenericCredentialsSpec
+
 type ConsumerIdentity = core.ConsumerIdentity
+type IdentityMatcher = core.IdentityMatcher
 
 var DefaultContext = core.DefaultContext
 

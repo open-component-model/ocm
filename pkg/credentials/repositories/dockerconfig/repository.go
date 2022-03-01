@@ -76,8 +76,6 @@ func (r Repository) LookupCredentials(name string) (cpi.Credentials, error) {
 		return nil, err
 	}
 	return newCredentials(auth), nil
-
-	return newCredentials(auth), cpi.ErrUnknownCredentials(name)
 }
 
 func (r Repository) WriteCredentials(name string, creds cpi.Credentials) (cpi.Credentials, error) {

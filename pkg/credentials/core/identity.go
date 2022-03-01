@@ -18,6 +18,73 @@ import (
 	"encoding/json"
 )
 
+// IdentityMatcher checks whether id matches against pattern and if this match
+// is better than the one for cur.
+type IdentityMatcher func(pattern, cur, id ConsumerIdentity) bool
+
+func CompleteMatch(pattern, cur, id ConsumerIdentity) bool {
+	return pattern.Equals(id)
+}
+
+func NoMatch(pattern, cur, id ConsumerIdentity) bool {
+	return false
+}
+
+func mergeMatcher(no IdentityMatcher, merge func([]IdentityMatcher) IdentityMatcher, matchers []IdentityMatcher) IdentityMatcher {
+	var list []IdentityMatcher
+	for _, m := range matchers {
+		if m != nil {
+			list = append(list, m)
+		}
+	}
+	switch len(list) {
+	case 0:
+		return no
+	case 1:
+		return list[0]
+	default:
+		return merge(list)
+	}
+}
+
+func defaultMatcher(matchers ...IdentityMatcher) IdentityMatcher {
+	return mergeMatcher(nil, andMatcher, matchers)
+}
+
+func AndMatcher(matchers ...IdentityMatcher) IdentityMatcher {
+	return mergeMatcher(NoMatch, andMatcher, matchers)
+}
+
+func OrMatcher(matchers ...IdentityMatcher) IdentityMatcher {
+	return mergeMatcher(NoMatch, orMatcher, matchers)
+}
+
+func andMatcher(list []IdentityMatcher) IdentityMatcher {
+	return func(pattern, cur, id ConsumerIdentity) bool {
+		result := false
+		for _, m := range list {
+			if m != nil && !m(pattern, cur, id) {
+				return false
+			}
+			result = true
+		}
+		return result
+	}
+}
+
+func orMatcher(list []IdentityMatcher) IdentityMatcher {
+	return func(pattern, cur, id ConsumerIdentity) bool {
+		for _, m := range list {
+			if m != nil && m(pattern, cur, id) {
+				return true
+			}
+		}
+		return false
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 // ConsumerIdentity describes the identity of a credential consumer.
 type ConsumerIdentity map[string]string
 
@@ -53,13 +120,13 @@ func (i ConsumerIdentity) Equals(o ConsumerIdentity) bool {
 }
 
 // Match implements the selector interface.
-func (i ConsumerIdentity) Match(obj map[string]string) (bool, error) {
+func (i ConsumerIdentity) Match(obj map[string]string) bool {
 	for k, v := range i {
 		if obj[k] != v {
-			return false, nil
+			return false
 		}
 	}
-	return true, nil
+	return true
 }
 
 // Copy copies identity
