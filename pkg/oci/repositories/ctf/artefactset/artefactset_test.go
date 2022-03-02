@@ -30,7 +30,7 @@ import (
 
 func defaultManifestFill(a *artefactset.ArtefactSet) {
 	art := NewArtefact(a)
-	a.AddArtefact(art, nil)
+	a.AddArtefact(art)
 }
 
 var _ = Describe("artefact management", func() {

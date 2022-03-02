@@ -121,7 +121,7 @@ func (c *ComponentVersionContainer) Update() error {
 	if err != nil {
 		return err
 	}
-	_, err = c.comp.namespace.AddTaggedArtefact(c.manifest, c.version)
+	_, err = c.comp.namespace.AddArtefact(c.manifest, c.version)
 	if err != nil {
 		return err
 	}

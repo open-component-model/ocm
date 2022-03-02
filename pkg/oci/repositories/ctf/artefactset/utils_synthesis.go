@@ -134,7 +134,7 @@ func TransferIndexToSet(art cpi.IndexAccess, ns cpi.NamespaceAccess, set cpi.Art
 			return err
 		}
 	}
-	_, err := set.AddTaggedArtefact(art)
+	_, err := set.AddArtefact(art)
 	return err
 }
 
@@ -157,6 +157,6 @@ func TransferManifestToSet(art cpi.ManifestAccess, ns cpi.NamespaceAccess, set c
 			return err
 		}
 	}
-	_, err = set.AddTaggedArtefact(art)
+	_, err = set.AddArtefact(art)
 	return err
 }

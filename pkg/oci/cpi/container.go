@@ -16,7 +16,6 @@ package cpi
 
 import (
 	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/opencontainers/go-digest"
 )
 
@@ -31,5 +30,5 @@ type ArtefactSetContainer interface {
 	AddBlob(blob BlobAccess) error
 
 	GetArtefact(ref string) (ArtefactAccess, error)
-	AddArtefact(artefact Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error)
+	AddArtefact(artefact Artefact, tags ...string) (access accessio.BlobAccess, err error)
 }

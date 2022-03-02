@@ -129,7 +129,7 @@ func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error
 	return cpi.NewArtefactForBlob(n, accessio.BlobAccessForDataAccess(desc.Digest, desc.Size, desc.MediaType, acc))
 }
 
-func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
+func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, tags ...string) (access accessio.BlobAccess, err error) {
 	blob, err := artefact.Blob()
 	if err != nil {
 		return nil, err
@@ -185,12 +185,8 @@ func (n *Namespace) GetArtefact(vers string) (cpi.ArtefactAccess, error) {
 	return n.access.GetArtefact(vers)
 }
 
-func (n *Namespace) AddTaggedArtefact(artefact cpi.Artefact, tags ...string) (accessio.BlobAccess, error) {
-	blob, err := n.access.AddArtefact(artefact, nil)
-	if err != nil {
-		return nil, err
-	}
-	return blob, n.AddTags(blob.Digest(), tags...)
+func (n *Namespace) AddArtefact(artefact cpi.Artefact, tags ...string) (accessio.BlobAccess, error) {
+	return n.access.AddArtefact(artefact, tags...)
 }
 
 func (n *Namespace) AddTags(digest digest.Digest, tags ...string) error {

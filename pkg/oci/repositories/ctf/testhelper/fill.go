@@ -33,7 +33,7 @@ const DIGEST_CONFIG = "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61
 
 func DefaultManifestFill(n cpi.NamespaceAccess) {
 	art := NewArtefact(n)
-	blob, err := n.AddTaggedArtefact(art)
+	blob, err := n.AddArtefact(art)
 	Expect(err).To(Succeed())
 	n.AddTags(blob.Digest(), TAG)
 }

@@ -161,7 +161,7 @@ func (i *IndexImpl) GetManifest(digest digest.Digest) (core.ManifestAccess, erro
 }
 
 func (a *IndexImpl) AddArtefact(art Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
-	blob, err := a.access.AddArtefact(art, platform)
+	blob, err := a.access.AddArtefact(art)
 	if err != nil {
 		return nil, err
 	}

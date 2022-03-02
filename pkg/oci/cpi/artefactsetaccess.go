@@ -80,8 +80,8 @@ func (a *ArtefactSetAccess) GetBlobDescriptor(digest digest.Digest) *Descriptor 
 	return d
 }
 
-func (a *ArtefactSetAccess) AddArtefact(artefact Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
-	return a.base.AddArtefact(artefact, platform)
+func (a *ArtefactSetAccess) AddArtefact(artefact Artefact, tags ...string) (access accessio.BlobAccess, err error) {
+	return a.base.AddArtefact(artefact, tags...)
 }
 
 func (a *ArtefactSetAccess) AddBlob(blob BlobAccess) error {

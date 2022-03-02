@@ -74,15 +74,6 @@ func (a *ArtefactSet) Annotate(name string, value string) {
 ////////////////////////////////////////////////////////////////////////////////
 // sink
 
-func (a *ArtefactSet) AddTaggedArtefact(art core.Artefact, tags ...string) (core.BlobAccess, error) {
-	blob, err := a.AddArtefact(art, nil)
-	if err != nil {
-		return nil, err
-	}
-	err = a.AnnotateArtefact(blob.Digest(), TAGS_ANNOTATION, strings.Join(tags, ","))
-	return blob, err
-}
-
 func (a *ArtefactSet) AddTags(digest digest.Digest, tags ...string) error {
 	if a.IsClosed() {
 		return accessio.ErrClosed
@@ -91,10 +82,11 @@ func (a *ArtefactSet) AddTags(digest digest.Digest, tags ...string) error {
 	defer a.base.Unlock()
 
 	idx := a.GetIndex()
-	for _, e := range idx.Manifests {
+	for i, e := range idx.Manifests {
 		if e.Digest == digest {
 			if e.Annotations == nil {
 				e.Annotations = map[string]string{}
+				idx.Manifests[i].Annotations = e.Annotations
 			}
 			cur := e.Annotations[TAGS_ANNOTATION]
 			if cur != "" {
@@ -267,7 +259,15 @@ func (a *ArtefactSet) AnnotateArtefact(digest digest.Digest, name, value string)
 	return errors.ErrUnknown(cpi.KIND_OCIARTEFACT, digest.String())
 }
 
-func (a *ArtefactSet) AddArtefact(artefact cpi.Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
+func (a *ArtefactSet) AddArtefact(artefact cpi.Artefact, tags ...string) (access accessio.BlobAccess, err error) {
+	blob, err := a.AddPlatformArtefact(artefact, nil)
+	if err != nil {
+		return nil, err
+	}
+	return blob, a.AddTags(blob.Digest(), tags...)
+}
+
+func (a *ArtefactSet) AddPlatformArtefact(artefact cpi.Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}

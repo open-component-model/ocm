@@ -38,7 +38,7 @@ type DataAccess = accessio.DataAccess
 
 type ArtefactSink interface {
 	AddBlob(BlobAccess) error
-	AddTaggedArtefact(art Artefact, tags ...string) (BlobAccess, error)
+	AddArtefact(a Artefact, tags ...string) (BlobAccess, error)
 	AddTags(digest digest.Digest, tags ...string) error
 }
 
