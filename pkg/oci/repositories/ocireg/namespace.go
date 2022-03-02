@@ -12,14 +12,17 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package ctf
+package ocireg
 
 import (
+	"context"
+
+	"github.com/containerd/containerd/errdefs"
+	"github.com/containerd/containerd/remotes"
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
-	"github.com/gardener/ocm/pkg/oci/repositories/ctf/index"
 	"github.com/opencontainers/go-digest"
 )
 
@@ -28,27 +31,58 @@ type Namespace struct {
 }
 
 func (n *Namespace) Close() error {
-	panic("implement me")
+	return nil
 }
 
 type NamespaceContainer struct {
-	repo              *Repository
-	namespace         string
-	ArtefactSetAccess *cpi.ArtefactSetAccess
+	repo      *Repository
+	namespace string
+	resolver  remotes.Resolver
+	fetcher   remotes.Fetcher
+	pusher    remotes.Pusher
 }
 
 var _ cpi.ArtefactSetContainer = (*NamespaceContainer)(nil)
 var _ cpi.NamespaceAccess = (*Namespace)(nil)
 
-func NewNamespace(repo *Repository, name string) *Namespace {
+func NewNamespace(repo *Repository, name string) (*Namespace, error) {
+	ref := repo.getRef(name, "")
+	resolver, err := repo.getResolver(ref)
+	if err != nil {
+		return nil, err
+	}
+	fetcher, err := resolver.Fetcher(context.Background(), ref)
+	if err != nil {
+		return nil, err
+	}
+	pusher, err := resolver.Pusher(context.Background(), ref)
+	if err != nil {
+		return nil, err
+	}
 	n := &Namespace{
 		access: &NamespaceContainer{
 			repo:      repo,
 			namespace: name,
+			resolver:  resolver,
+			fetcher:   fetcher,
+			pusher:    pusher,
 		},
 	}
-	n.access.ArtefactSetAccess = cpi.NewArtefactSetAccess(n.access)
-	return n
+	return n, nil
+}
+
+func (n *NamespaceContainer) getPusher(vers string) (remotes.Pusher, error) {
+	ref := n.repo.getRef(n.namespace, vers)
+	return n.resolver.Pusher(dummyContext, ref)
+}
+
+func (n *NamespaceContainer) push(vers string, blob cpi.BlobAccess) error {
+	ref := n.repo.getRef(n.namespace, vers)
+	p, err := n.resolver.Pusher(dummyContext, ref)
+	if err != nil {
+		return err
+	}
+	return push(dummyContext, p, blob)
 }
 
 func (n *NamespaceContainer) GetNamepace() string {
@@ -68,46 +102,58 @@ func (n *NamespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi.Descri
 }
 
 func (n *NamespaceContainer) ListTags() ([]string, error) {
-	return n.repo.getIndex().GetTags(n.namespace), nil
+	panic("implement me")
 }
 
 func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
-	return n.repo.base.GetBlobData(digest)
+	return NewDataAcess(n.fetcher, digest, "", false)
 }
 
 func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
-	n.repo.base.Lock()
-	defer n.repo.base.Unlock()
-
-	return n.repo.base.AddBlob(blob)
+	return push(dummyContext, n.pusher, blob)
 }
 
-func (n *NamespaceContainer) GetArtefact(ref string) (cpi.ArtefactAccess, error) {
-	meta := n.repo.getIndex().GetArtefactInfo(n.namespace, ref)
-	if meta == nil {
-		return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, ref, n.namespace)
+func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error) {
+	ref := n.repo.getRef(n.namespace, vers)
+	_, desc, err := n.resolver.Resolve(context.Background(), ref)
+	if err != nil {
+		if errdefs.IsNotFound(err) {
+			return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, ref, n.namespace)
+		}
+		return nil, err
 	}
-	return n.repo.base.GetArtefact(n, meta.Digest)
-}
-
-func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
-	n.repo.base.Lock()
-	defer n.repo.base.Unlock()
-
-	blob, err := n.repo.base.AddArtefactBlob(artefact)
+	acc, err := NewDataAcess(n.fetcher, desc.Digest, desc.MediaType, false)
 	if err != nil {
 		return nil, err
 	}
-	n.repo.getIndex().AddArtefactInfo(&index.ArtefactMeta{
-		Repository: n.namespace,
-		Tag:        "",
-		Digest:     blob.Digest(),
-	})
-	return blob, nil
+	return cpi.NewArtefactForBlob(n, accessio.BlobAccessForDataAccess(desc.Digest, desc.Size, desc.MediaType, acc))
+}
+
+func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
+	blob, err := artefact.Blob()
+	if err != nil {
+		return nil, err
+	}
+	return blob, n.push(blob.Digest().String(), blob)
 }
 
 func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error {
-	return n.repo.getIndex().AddTagsFor(n.namespace, digest, tags...)
+	_, desc, err := n.resolver.Resolve(context.Background(), n.repo.getRef(n.namespace, digest.String()))
+	if err != nil {
+		return err
+	}
+	acc, err := NewDataAcess(n.fetcher, desc.Digest, desc.MediaType, false)
+	if err != nil {
+		return err
+	}
+	blob := accessio.BlobAccessForDataAccess(desc.Digest, desc.Size, desc.MediaType, acc)
+	for _, tag := range tags {
+		err := n.push(tag, blob)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -135,12 +181,8 @@ func (n *Namespace) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
 	return n.access.GetBlobData(digest)
 }
 
-func (n *Namespace) GetArtefact(ref string) (cpi.ArtefactAccess, error) {
-	meta := n.access.repo.getIndex().GetArtefactInfo(n.access.namespace, ref)
-	if meta != nil {
-		return n.access.repo.base.GetArtefact(n.access, meta.Digest)
-	}
-	return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, ref, n.access.namespace)
+func (n *Namespace) GetArtefact(vers string) (cpi.ArtefactAccess, error) {
+	return n.access.GetArtefact(vers)
 }
 
 func (n *Namespace) AddTaggedArtefact(artefact cpi.Artefact, tags ...string) (accessio.BlobAccess, error) {

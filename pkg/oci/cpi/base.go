@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package artefactset
+package cpi
 
 import (
 	"sync"
@@ -20,7 +20,6 @@ import (
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
-	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/opencontainers/go-digest"
 )
 
@@ -52,15 +51,15 @@ func (a *artefactBase) blob() (accessio.BlobAccess, error) {
 	return a.state.GetBlob()
 }
 
-func (a *artefactBase) addBlob(access cpi.BlobAccess) error {
+func (a *artefactBase) addBlob(access BlobAccess) error {
 	return a.access.AddBlob(access)
 }
 
-func (a *artefactBase) getArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {
+func (a *artefactBase) getArtefact(digest digest.Digest) (ArtefactAccess, error) {
 	return a.access.GetArtefact(digest.String())
 }
 
-func (a *artefactBase) newArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
+func (a *artefactBase) newArtefact(art ...*artdesc.Artefact) (ArtefactAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}

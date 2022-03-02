@@ -134,7 +134,7 @@ func (c *ComponentVersionContainer) evalLayer(s compdesc.AccessSpec) (compdesc.A
 		return s, err
 	}
 	if a, ok := spec.(*accessmethods.LocalBlobAccessSpec); ok {
-		if !artdesc.IsDigest(a.LocalReference) {
+		if ok, _ := artdesc.IsDigest(a.LocalReference); !ok {
 			return s, errors.ErrInvalid("digest", a.LocalReference)
 		}
 	}

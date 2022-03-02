@@ -27,6 +27,19 @@ import (
 var ErrClosed = errors.ErrClosed()
 var ErrReadOnly = errors.ErrReadOnly()
 
+const KIND_BLOB = "blob"
+const KIND_MEDIATYPE = "media type"
+
+func ErrBlobNotFound(digest digest.Digest) error {
+	return errors.ErrNotFound(KIND_BLOB, digest.String())
+}
+
+func IsErrBlobNotFound(err error) bool {
+	return errors.IsErrNotFoundKind(err, KIND_BLOB)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 //  DataAccess describes the access to sequence of bytes
 type DataAccess interface {
 	// Get returns the content of the blob as byte array

@@ -26,20 +26,25 @@ require (
 	sigs.k8s.io/yaml v1.3.0
 )
 
-require (
-	github.com/containerd/containerd v1.5.9
-	github.com/containers/image v3.0.2+incompatible
-)
+require github.com/containerd/containerd v1.5.9
 
 require (
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
+	github.com/klauspost/compress v1.11.13 // indirect
+	github.com/moby/locker v1.0.1 // indirect
 	github.com/nxadm/tail v1.4.8 // indirect
+	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/text v0.3.7 // indirect
+	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
+	google.golang.org/grpc v1.42.0 // indirect
+	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

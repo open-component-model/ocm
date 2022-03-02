@@ -26,18 +26,17 @@ type FileSystemBlobAccess struct {
 }
 
 func NewFileSystemBlobAccess(access *accessobj.AccessObject) *FileSystemBlobAccess {
-	accessobj.NewFileSystemBlobAccess(access)
 	return &FileSystemBlobAccess{accessobj.NewFileSystemBlobAccess(access)}
 }
 
-func (i *FileSystemBlobAccess) GetArtefact(access ArtefactSetContainer, digest digest.Digest) (cpi.ArtefactAccess, error) {
+func (i *FileSystemBlobAccess) GetArtefact(access cpi.ArtefactSetContainer, digest digest.Digest) (cpi.ArtefactAccess, error) {
 	data, err := i.GetBlobData(digest)
 	if err != nil {
 		return nil, err
 	}
 
 	blob := accessio.BlobAccessForDataAccess("", -1, "", data)
-	return NewArtefactForBlob(access, blob)
+	return cpi.NewArtefactForBlob(access, blob)
 }
 
 func (i *FileSystemBlobAccess) AddArtefactBlob(artefact cpi.Artefact) (cpi.BlobAccess, error) {

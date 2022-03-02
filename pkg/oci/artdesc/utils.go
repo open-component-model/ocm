@@ -18,6 +18,7 @@ import (
 	"strings"
 
 	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/opencontainers/go-digest"
 )
 
 func DefaultBlobDescriptor(blob accessio.BlobAccess) *Descriptor {
@@ -31,8 +32,14 @@ func DefaultBlobDescriptor(blob accessio.BlobAccess) *Descriptor {
 	}
 }
 
-func IsDigest(ref string) bool {
-	return strings.Index(ref, ":") >= 0
+func IsDigest(ref string) (bool, digest.Digest) {
+	if strings.HasPrefix(ref, "@") {
+		return true, digest.Digest(ref[1:])
+	}
+	if strings.Index(ref, ":") >= 0 {
+		return true, digest.Digest(ref)
+	}
+	return false, ""
 }
 
 func ToContentMediaType(media string) string {

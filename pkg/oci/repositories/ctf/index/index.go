@@ -16,6 +16,7 @@ package index
 
 import (
 	"sort"
+	"strings"
 	"sync"
 
 	"github.com/gardener/ocm/pkg/oci/cpi"
@@ -142,6 +143,9 @@ func (r *RepositoryIndex) getArtefactInfo(repo, reference string) *ArtefactMeta 
 	repos := r.byRepository[repo]
 	if repos == nil {
 		return nil
+	}
+	if strings.HasPrefix(reference, "@") {
+		reference = reference[1:]
 	}
 	m := repos[reference]
 	if m == nil {

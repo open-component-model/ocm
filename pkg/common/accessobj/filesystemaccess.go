@@ -19,7 +19,6 @@ import (
 
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 )
@@ -73,7 +72,7 @@ func (a *FileSystemBlobAccess) BlobPath(name string) string {
 	return a.base.GetInfo().SubPath(name)
 }
 
-func (a *FileSystemBlobAccess) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
+func (a *FileSystemBlobAccess) GetBlobData(digest digest.Digest) (accessio.DataAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
@@ -84,11 +83,11 @@ func (a *FileSystemBlobAccess) GetBlobData(digest digest.Digest) (cpi.DataAccess
 		if err != nil {
 			return nil, err
 		}
-		return nil, cpi.ErrBlobNotFound(digest)
+		return nil, accessio.ErrBlobNotFound(digest)
 	}
 }
 
-func (a *FileSystemBlobAccess) GetBlobDataByName(name string) (cpi.DataAccess, error) {
+func (a *FileSystemBlobAccess) GetBlobDataByName(name string) (accessio.DataAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
@@ -99,11 +98,11 @@ func (a *FileSystemBlobAccess) GetBlobDataByName(name string) (cpi.DataAccess, e
 		if err != nil {
 			return nil, err
 		}
-		return nil, cpi.ErrBlobNotFound(digest.Digest(name))
+		return nil, accessio.ErrBlobNotFound(digest.Digest(name))
 	}
 }
 
-func (a *FileSystemBlobAccess) AddBlob(blob cpi.BlobAccess) error {
+func (a *FileSystemBlobAccess) AddBlob(blob accessio.BlobAccess) error {
 	if a.base.IsClosed() {
 		return accessio.ErrClosed
 	}

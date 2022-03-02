@@ -12,19 +12,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package core
+package credentials
 
-import (
-	"fmt"
-
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/errors"
+const (
+	ATTR_USERNAME       = "username"
+	ATTR_PASSWORD       = "password"
+	ATTR_SERVER_ADDRESS = "serverAddress"
+	ATTR_IDENTITY_TOKEN = "identityToken"
+	ATTR_REGISTRY_TOKEN = "registryToken"
 )
-
-const KIND_OCIARTEFACT = "oci artefact"
-const KIND_BLOB = accessio.KIND_BLOB
-const KIND_MEDIATYPE = accessio.KIND_MEDIATYPE
-
-func ErrUnknownArtefact(name, version string) error {
-	return errors.ErrUnknown(KIND_OCIARTEFACT, fmt.Sprintf("%s:%s", name, version))
-}

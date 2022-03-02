@@ -72,7 +72,6 @@ type Artefact interface {
 type ArtefactAccess interface {
 	Artefact
 
-	Blob() (BlobAccess, error)
 	GetDescriptor() *artdesc.Artefact
 	ManifestAccess() ManifestAccess
 	IndexAccess() IndexAccess

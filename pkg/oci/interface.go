@@ -17,13 +17,14 @@ package oci
 import (
 	"context"
 
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/oci/core"
 	_ "github.com/gardener/ocm/pkg/oci/repositories"
 )
 
 const KIND_OCIARTEFACT = core.KIND_OCIARTEFACT
-const KIND_MEDIATYPE = core.KIND_MEDIATYPE
-const KIND_BLOB = core.KIND_BLOB
+const KIND_MEDIATYPE = accessio.KIND_MEDIATYPE
+const KIND_BLOB = accessio.KIND_BLOB
 
 const CONTEXT_TYPE = core.CONTEXT_TYPE
 
@@ -48,5 +49,5 @@ func ForContext(ctx context.Context) Context {
 }
 
 func IsErrBlobNotFound(err error) bool {
-	return core.IsErrBlobNotFound(err)
+	return accessio.IsErrBlobNotFound(err)
 }

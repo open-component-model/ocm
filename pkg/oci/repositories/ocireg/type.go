@@ -15,8 +15,11 @@
 package ocireg
 
 import (
+	"fmt"
+	"net/url"
+
+	"github.com/containerd/containerd/reference"
 	"github.com/gardener/ocm/pkg/credentials"
-	"github.com/gardener/ocm/pkg/errors"
 	cpi "github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/gardener/ocm/pkg/runtime"
 )
@@ -50,5 +53,28 @@ func (a *RepositorySpec) GetType() string {
 	return OCIRegistryRepositoryType
 }
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
-	return nil, errors.ErrNotImplemented() // TODO
+	var u *url.URL
+	info := &RepositoryInfo{}
+
+	ref, err := reference.Parse(a.BaseURL)
+	if err == nil {
+		u, err = url.Parse("https://" + ref.Locator)
+		if err != nil {
+			return nil, err
+		}
+		info.Locator = ref.Locator
+		if ref.Object != "" {
+			return nil, fmt.Errorf("invalid repository locator %q", a.BaseURL)
+		}
+	} else {
+		u, err = url.Parse(a.BaseURL)
+		if err != nil {
+			return nil, err
+		}
+		info.Locator = u.Host
+	}
+	info.Scheme = u.Scheme
+	info.Creds = creds
+
+	return NewRepository(ctx, a, info)
 }

@@ -36,16 +36,16 @@ func newRepositories(context.Context) interface{} {
 }
 
 func (r *Repositories) GetRepository(ctx cpi.Context, spec *RepositorySpec, creds credentials.Credentials) (*Repository, error) {
-	var err error
 	name := spec.BaseURL // TODO: switch to ID
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	repo := r.repos[name]
 	if repo == nil {
-		repo, err = NewRepository(ctx, spec, creds)
+		new, err := spec.Repository(ctx, creds)
 		if err != nil {
 			return nil, err
 		}
+		repo = new.(*Repository)
 		r.repos[name] = repo
 	}
 	return repo, nil

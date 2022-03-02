@@ -36,6 +36,7 @@ func (g *GenericDescriptor) Validate() error {
 	switch g.MediaType {
 	case ociv1.MediaTypeImageIndex:
 	case ociv1.MediaTypeImageManifest:
+	case "":
 	default:
 		return errors.ErrUnknown("media type", g.MediaType)
 	}

@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package artefactset
+package cpi
 
 import (
 	"compress/gzip"
@@ -21,17 +21,16 @@ import (
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
-	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/opencontainers/go-digest"
 )
 
-type Manifest struct {
+type ManifestImpl struct {
 	artefactBase
 }
 
-var _ cpi.ManifestAccess = (*Manifest)(nil)
+var _ ManifestAccess = (*ManifestImpl)(nil)
 
-func NewManifest(access ArtefactSetContainer, defs ...*artdesc.Manifest) *Manifest {
+func NewManifest(access ArtefactSetContainer, defs ...*artdesc.Manifest) *ManifestImpl {
 	var def *artdesc.Manifest
 	if len(defs) != 0 && defs[0] != nil {
 		def = defs[0]
@@ -45,7 +44,7 @@ func NewManifest(access ArtefactSetContainer, defs ...*artdesc.Manifest) *Manife
 		panic("oops")
 	}
 
-	m := &Manifest{
+	m := &ManifestImpl{
 		artefactBase: artefactBase{
 			access: access,
 			state:  state,
@@ -67,8 +66,8 @@ func (m *manifestMapper) GetOriginalState() interface{} {
 	return m.State.GetOriginalState().(*artdesc.Artefact).Manifest()
 }
 
-func NewManifestForArtefact(a *Artefact) *Manifest {
-	m := &Manifest{
+func NewManifestForArtefact(a *ArtefactImpl) *ManifestImpl {
+	m := &ManifestImpl{
 		artefactBase: artefactBase{
 			access: a.access,
 			state:  &manifestMapper{a.state},
@@ -77,7 +76,7 @@ func NewManifestForArtefact(a *Artefact) *Manifest {
 	return m
 }
 
-func (m *Manifest) Blob() (accessio.BlobAccess, error) {
+func (m *ManifestImpl) Blob() (accessio.BlobAccess, error) {
 	blob, err := m.artefactBase.blob()
 	if err != nil {
 		return nil, err
@@ -85,29 +84,29 @@ func (m *Manifest) Blob() (accessio.BlobAccess, error) {
 	return accessio.BlobWithMimeType(artdesc.MediaTypeImageManifest, blob), nil
 }
 
-func (m *Manifest) AddBlob(access cpi.BlobAccess) error {
+func (m *ManifestImpl) AddBlob(access BlobAccess) error {
 	return m.addBlob(access)
 }
 
-func (m *Manifest) Manifest() (*artdesc.Manifest, error) {
+func (m *ManifestImpl) Manifest() (*artdesc.Manifest, error) {
 	return m.GetDescriptor(), nil
 }
 
-func (m *Manifest) Index() (*artdesc.Index, error) {
+func (m *ManifestImpl) Index() (*artdesc.Index, error) {
 	return nil, errors.ErrInvalid()
 }
 
-func (m *Manifest) Artefact() *artdesc.Artefact {
+func (m *ManifestImpl) Artefact() *artdesc.Artefact {
 	a := artdesc.New()
 	_ = a.SetManifest(m.GetDescriptor())
 	return a
 }
 
-func (m *Manifest) GetDescriptor() *artdesc.Manifest {
+func (m *ManifestImpl) GetDescriptor() *artdesc.Manifest {
 	return m.state.GetState().(*artdesc.Manifest)
 }
 
-func (m *Manifest) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
+func (m *ManifestImpl) GetBlobDescriptor(digest digest.Digest) *Descriptor {
 	d := m.GetDescriptor().GetBlobDescriptor(digest)
 	if d != nil {
 		return d
@@ -115,14 +114,14 @@ func (m *Manifest) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 	return m.access.GetBlobDescriptor(digest)
 }
 
-func (m *Manifest) GetConfigBlob() (cpi.BlobAccess, error) {
+func (m *ManifestImpl) GetConfigBlob() (BlobAccess, error) {
 	if m.GetDescriptor().Config.Digest == "" {
 		return nil, nil
 	}
 	return m.GetBlob(m.GetDescriptor().Config.Digest)
 }
 
-func (m *Manifest) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
+func (m *ManifestImpl) GetBlob(digest digest.Digest) (BlobAccess, error) {
 	d := m.GetBlobDescriptor(digest)
 	if d != nil {
 		data, err := m.access.GetBlobData(digest)
@@ -131,10 +130,10 @@ func (m *Manifest) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
 		}
 		return accessio.BlobAccessForDataAccess(d.Digest, d.Size, d.MediaType, data), nil
 	}
-	return nil, cpi.ErrBlobNotFound(digest)
+	return nil, ErrBlobNotFound(digest)
 }
 
-func (m *Manifest) AddLayer(blob cpi.BlobAccess, d *artdesc.Descriptor) (int, error) {
+func (m *ManifestImpl) AddLayer(blob BlobAccess, d *artdesc.Descriptor) (int, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	if d == nil {

@@ -12,12 +12,11 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package artefactset
+package cpi
 
 import (
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
-	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/opencontainers/go-digest"
 )
 
@@ -27,10 +26,10 @@ type ArtefactSetContainer interface {
 	IsReadOnly() bool
 	IsClosed() bool
 
-	GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor
-	GetBlobData(digest digest.Digest) (cpi.DataAccess, error)
-	AddBlob(blob cpi.BlobAccess) error
+	GetBlobDescriptor(digest digest.Digest) *Descriptor
+	GetBlobData(digest digest.Digest) (DataAccess, error)
+	AddBlob(blob BlobAccess) error
 
-	GetArtefact(ref string) (cpi.ArtefactAccess, error)
-	AddArtefact(artefact cpi.Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error)
+	GetArtefact(ref string) (ArtefactAccess, error)
+	AddArtefact(artefact Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error)
 }

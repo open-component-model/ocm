@@ -107,7 +107,7 @@ func (r *Repository) LookupArtefact(name string, tag string) (cpi.ArtefactAccess
 		return nil, cpi.ErrUnknownArtefact(name, tag)
 	}
 
-	panic("implement me")
+	return NewNamespace(r, name).GetArtefact(tag)
 }
 
 func (r *Repository) LookupNamespace(name string) (cpi.NamespaceAccess, error) {

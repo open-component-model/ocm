@@ -58,7 +58,7 @@ func (a *artefactBlob) Path() string {
 	return a.temp.Name()
 }
 
-// SynthesizeArtefactBlob synthesizes an artefact blob incorporation all side artefacts.
+// SynthesizeArtefactBlob synthesizes an artefact blob incorporating all side artefacts.
 // To support extensions like cosign, we need the namespace access her to find
 // additionally objects associated by tags.
 func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, error) {
@@ -104,7 +104,7 @@ func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, e
 		return nil, err
 	}
 
-	if !artdesc.IsDigest(ref) {
+	if ok, _ := artdesc.IsDigest(ref); !ok {
 		err = set.AddTags(digest, ref)
 		if err != nil {
 			return nil, err

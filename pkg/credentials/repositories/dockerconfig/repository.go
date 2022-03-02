@@ -25,6 +25,7 @@ import (
 	dockercred "github.com/docker/cli/cli/config/credentials"
 	"github.com/docker/cli/cli/config/types"
 	"github.com/gardener/ocm/pkg/common"
+	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/identity"
 
@@ -100,8 +101,12 @@ func (r *Repository) Read(force bool) error {
 	if r.propagate {
 		all := cfg.GetAuthConfigs()
 		for h, a := range all {
+			hostname := dockercred.ConvertToHostname(h)
+			if hostname == "index.docker.io" {
+				hostname = "docker.io"
+			}
 			id := cpi.ConsumerIdentity{
-				identity.ID_HOSTNAME: dockercred.ConvertToHostname(h),
+				identity.ID_HOSTNAME: hostname,
 			}
 			fmt.Printf("propgate id %s\n", id)
 			r.ctx.SetCredentialsForConsumer(id, newCredentials(a))
@@ -113,12 +118,12 @@ func (r *Repository) Read(force bool) error {
 
 func newCredentials(auth types.AuthConfig) cpi.Credentials {
 	props := common.Properties{
-		"username": auth.Username,
-		"password": auth.Password,
+		credentials.ATTR_USERNAME: auth.Username,
+		credentials.ATTR_PASSWORD: auth.Password,
 	}
 	props.SetNonEmptyValue("auth", auth.Auth)
-	props.SetNonEmptyValue("serverAddress", auth.ServerAddress)
-	props.SetNonEmptyValue("identityToken", auth.IdentityToken)
-	props.SetNonEmptyValue("registryToken", auth.RegistryToken)
+	props.SetNonEmptyValue(credentials.ATTR_SERVER_ADDRESS, auth.ServerAddress)
+	props.SetNonEmptyValue(credentials.ATTR_IDENTITY_TOKEN, auth.IdentityToken)
+	props.SetNonEmptyValue(credentials.ATTR_REGISTRY_TOKEN, auth.RegistryToken)
 	return cpi.NewCredentials(props)
 }

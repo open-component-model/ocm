@@ -12,14 +12,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package artefactset
+package cpi
 
 import (
 	"sync"
 
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
-	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/opencontainers/go-digest"
 )
 
@@ -29,13 +28,13 @@ type ArtefactSetAccess struct {
 	base ArtefactSetContainer
 
 	lock      sync.RWMutex
-	blobinfos map[digest.Digest]*cpi.Descriptor
+	blobinfos map[digest.Digest]*Descriptor
 }
 
 func NewArtefactSetAccess(container ArtefactSetContainer) *ArtefactSetAccess {
 	s := &ArtefactSetAccess{
 		base:      container,
-		blobinfos: map[digest.Digest]*cpi.Descriptor{},
+		blobinfos: map[digest.Digest]*Descriptor{},
 	}
 	return s
 }
@@ -51,11 +50,11 @@ func (a *ArtefactSetAccess) IsClosed() bool {
 ////////////////////////////////////////////////////////////////////////////////
 // methods for BlobHandler
 
-func (a *ArtefactSetAccess) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
+func (a *ArtefactSetAccess) GetBlobData(digest digest.Digest) (DataAccess, error) {
 	return a.base.GetBlobData(digest)
 }
 
-func (a *ArtefactSetAccess) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
+func (a *ArtefactSetAccess) GetBlob(digest digest.Digest) (BlobAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
@@ -70,7 +69,7 @@ func (a *ArtefactSetAccess) GetBlob(digest digest.Digest) (cpi.BlobAccess, error
 	return accessio.BlobAccessForDataAccess(digest, -1, "", data), nil
 }
 
-func (a *ArtefactSetAccess) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
+func (a *ArtefactSetAccess) GetBlobDescriptor(digest digest.Digest) *Descriptor {
 	a.lock.RLock()
 	defer a.lock.RUnlock()
 
@@ -81,11 +80,11 @@ func (a *ArtefactSetAccess) GetBlobDescriptor(digest digest.Digest) *cpi.Descrip
 	return d
 }
 
-func (a *ArtefactSetAccess) AddArtefact(artefact cpi.Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
+func (a *ArtefactSetAccess) AddArtefact(artefact Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
 	return a.base.AddArtefact(artefact, platform)
 }
 
-func (a *ArtefactSetAccess) AddBlob(blob cpi.BlobAccess) error {
+func (a *ArtefactSetAccess) AddBlob(blob BlobAccess) error {
 	a.lock.RLock()
 	defer a.lock.RUnlock()
 	err := a.base.AddBlob(blob)

@@ -33,10 +33,10 @@ const TYPE_ANNOTATION = "cloud.gardener.ocm/type"
 
 type ArtefactSet struct {
 	base *FileSystemBlobAccess
-	*ArtefactSetAccess
+	*cpi.ArtefactSetAccess
 }
 
-var _ ArtefactSetContainer = (*ArtefactSet)(nil)
+var _ cpi.ArtefactSetContainer = (*ArtefactSet)(nil)
 var _ cpi.ArtefactSink = (*ArtefactSet)(nil)
 var _ cpi.NamespaceAccess = (*ArtefactSet)(nil)
 
@@ -52,7 +52,7 @@ func _Wrap(obj *accessobj.AccessObject, err error) (*ArtefactSet, error) {
 	s := &ArtefactSet{
 		base: NewFileSystemBlobAccess(obj),
 	}
-	s.ArtefactSetAccess = NewArtefactSetAccess(s)
+	s.ArtefactSetAccess = cpi.NewArtefactSetAccess(s)
 	return s, nil
 }
 
@@ -61,8 +61,8 @@ func (a *ArtefactSet) GetNamespace() string {
 }
 
 func (a *ArtefactSet) Annotate(name string, value string) {
-	a.lock.Lock()
-	defer a.lock.Unlock()
+	a.base.Lock()
+	defer a.base.Unlock()
 
 	d := a.GetIndex()
 	if d.Annotations == nil {
@@ -83,14 +83,14 @@ func (a *ArtefactSet) AddTaggedArtefact(art core.Artefact, tags ...string) (core
 	return blob, err
 }
 
-func (i *ArtefactSet) AddTags(digest digest.Digest, tags ...string) error {
-	if i.IsClosed() {
+func (a *ArtefactSet) AddTags(digest digest.Digest, tags ...string) error {
+	if a.IsClosed() {
 		return accessio.ErrClosed
 	}
-	i.base.Lock()
-	defer i.base.Unlock()
+	a.base.Lock()
+	defer a.base.Unlock()
 
-	idx := i.GetIndex()
+	idx := a.GetIndex()
 	for _, e := range idx.Manifests {
 		if e.Digest == digest {
 			if e.Annotations == nil {
@@ -180,9 +180,9 @@ func (a *ArtefactSet) AddBlob(blob cpi.BlobAccess) error {
 	return a.base.AddBlob(blob)
 }
 
-func (n *ArtefactSet) ListTags() ([]string, error) {
+func (a *ArtefactSet) ListTags() ([]string, error) {
 	result := []string{}
-	for _, a := range n.GetIndex().Manifests {
+	for _, a := range a.GetIndex().Manifests {
 		if a.Annotations != nil {
 			if tags, ok := a.Annotations[TAGS_ANNOTATION]; ok {
 				result = append(result, strings.Split(tags, ",")...)
@@ -192,9 +192,9 @@ func (n *ArtefactSet) ListTags() ([]string, error) {
 	return result, nil
 }
 
-func (n *ArtefactSet) GetTags(digest digest.Digest) ([]string, error) {
+func (a *ArtefactSet) GetTags(digest digest.Digest) ([]string, error) {
 	result := []string{}
-	for _, a := range n.GetIndex().Manifests {
+	for _, a := range a.GetIndex().Manifests {
 		if a.Digest == digest && a.Annotations != nil {
 			if tags, ok := a.Annotations[TAGS_ANNOTATION]; ok {
 				result = append(result, strings.Split(tags, ",")...)
@@ -204,20 +204,19 @@ func (n *ArtefactSet) GetTags(digest digest.Digest) ([]string, error) {
 	return result, nil
 }
 
-func (i *ArtefactSet) GetArtefact(ref string) (cpi.ArtefactAccess, error) {
-	if i.IsClosed() {
+func (a *ArtefactSet) GetArtefact(ref string) (cpi.ArtefactAccess, error) {
+	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
-	i.base.Lock()
-	defer i.base.Unlock()
-	return i.getArtefact(ref)
+	a.base.Lock()
+	defer a.base.Unlock()
+	return a.getArtefact(ref)
 }
 
-func (i *ArtefactSet) matcher(ref string) func(d *artdesc.Descriptor) bool {
-	if artdesc.IsDigest(ref) {
-		digest := digest.Digest(ref)
-		return func(d *artdesc.Descriptor) bool {
-			return d.Digest == digest
+func (a *ArtefactSet) matcher(ref string) func(d *artdesc.Descriptor) bool {
+	if ok, digest := artdesc.IsDigest(ref); ok {
+		return func(desc *artdesc.Descriptor) bool {
+			return desc.Digest == digest
 		}
 	}
 	return func(d *artdesc.Descriptor) bool {
@@ -233,12 +232,12 @@ func (i *ArtefactSet) matcher(ref string) func(d *artdesc.Descriptor) bool {
 	}
 }
 
-func (i *ArtefactSet) getArtefact(ref string) (cpi.ArtefactAccess, error) {
-	idx := i.GetIndex()
-	match := i.matcher(ref)
+func (a *ArtefactSet) getArtefact(ref string) (cpi.ArtefactAccess, error) {
+	idx := a.GetIndex()
+	match := a.matcher(ref)
 	for _, e := range idx.Manifests {
 		if match(&e) {
-			return i.base.GetArtefact(i, e.Digest)
+			return a.base.GetArtefact(a, e.Digest)
 		}
 	}
 	return nil, errors.ErrUnknown(cpi.KIND_OCIARTEFACT, ref)
@@ -301,5 +300,5 @@ func (a *ArtefactSet) NewArtefact(artefact ...*artdesc.Artefact) (core.ArtefactA
 	if a.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	return NewArtefact(a, artefact...), nil
+	return cpi.NewArtefact(a, artefact...), nil
 }
