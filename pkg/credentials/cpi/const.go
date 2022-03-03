@@ -18,25 +18,10 @@ import (
 	"github.com/gardener/ocm/pkg/credentials/core"
 )
 
-const DirectCredentialsType = core.DirectCredentialsType
-const AliasRepositoryType = core.AliasRepositoryType
-
-type AliasRegistry = core.AliasRegistry
-
-type aliasRegistry struct {
-	RepositoryType
-	setter core.SetAliasFunction
-}
-
-var _ AliasRegistry = &aliasRegistry{}
-
-func NewAliasRegistry(t RepositoryType, setter core.SetAliasFunction) RepositoryType {
-	return &aliasRegistry{
-		RepositoryType: t,
-		setter:         setter,
-	}
-}
-
-func (a *aliasRegistry) SetAlias(ctx Context, name string, spec RepositorySpec, creds CredentialsSource) error {
-	return a.setter(ctx, name, spec, creds)
-}
+const (
+	ATTR_USERNAME       = core.ATTR_USERNAME
+	ATTR_PASSWORD       = core.ATTR_PASSWORD
+	ATTR_SERVER_ADDRESS = core.ATTR_SERVER_ADDRESS
+	ATTR_IDENTITY_TOKEN = core.ATTR_IDENTITY_TOKEN
+	ATTR_REGISTRY_TOKEN = core.ATTR_REGISTRY_TOKEN
+)

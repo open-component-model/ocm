@@ -16,11 +16,12 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/config"
 	"github.com/gardener/ocm/pkg/credentials"
-	"github.com/gardener/ocm/pkg/credentials/repositories/dockerconfig"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/ociutils"
 	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
@@ -41,13 +42,25 @@ func handleError(err error, msg string, args ...interface{}) {
 }
 
 func setupCredentials() {
+	data, err := ioutil.ReadFile("config.yaml")
+	handleError(err, "cannot read config")
+
+	cfg, err := config.DefaultContext().GetConfigForData(data, nil)
+	handleError(err, "invalid config")
+	err = config.DefaultContext().ApplyConfig(cfg, "config.yaml")
+	handleError(err, "invalid config")
 	ctx := credentials.DefaultContext()
 
-	spec := dockerconfig.NewRepositorySpec(os.Getenv("HOME") + "/.docker/config.json").WithConsumerPropagation(true)
-	repo, err := ctx.RepositoryForSpec(spec)
-	handleError(err, "setup credentials")
-	_ = repo
+	/*
+
+		spec := dockerconfig.NewRepositorySpec(os.Getenv("HOME") + "/.docker/config.json").WithConsumerPropagation(true)
+		repo, err := ctx.RepositoryForSpec(spec)
+		handleError(err, "setup credentials")
+		_ = repo
+	*/
+	_ = ctx
 }
+
 func main() {
 
 	setupCredentials()
@@ -60,7 +73,7 @@ func main() {
 	handleError(err, "get repo")
 
 	ns, err := repo.LookupNamespace("mandelsoft/cnudie/component-descriptors/github.com/mandelsoft/pause")
-	handleError(err, "lookup namepsace")
+	handleError(err, "lookup namespace")
 
 	art, err := ns.GetArtefact("0.1-dev")
 	handleError(err, "lookup artefact")

@@ -16,6 +16,7 @@ package ocireg
 
 import (
 	"context"
+	"fmt"
 	"path"
 	"strings"
 
@@ -93,9 +94,9 @@ func (r *Repository) getCreds(comp string) (credentials.Credentials, error) {
 		src, err := r.ctx.CredentialsContext().GetCredentialsForConsumer(id, identity.IdentityMatcher)
 		if err != nil {
 			if !errors.IsErrUnknown(err) {
-				return nil, nil
+				return nil, err
 			}
-			return nil, err
+			return nil, nil
 		}
 		if src != nil {
 			creds, err = src.Credentials(r.ctx.CredentialsContext())
@@ -110,18 +111,24 @@ func (r *Repository) getCreds(comp string) (credentials.Credentials, error) {
 func (r *Repository) getResolver(comp string) (remotes.Resolver, error) {
 	creds, err := r.getCreds(comp)
 	if err != nil {
-		return nil, err
+		if !errors.IsErrUnknownKind(err, credentials.KIND_CONSUMER) {
+			return nil, err
+		}
 	}
 
 	opts := docker.ResolverOptions{
 		Hosts: config.ConfigureHosts(context.Background(), config.HostOptions{
 			Credentials: func(host string) (string, string, error) {
-				p := creds.GetProperty(credentials.ATTR_IDENTITY_TOKEN)
-				if p == "" {
-					p = creds.GetProperty(credentials.ATTR_PASSWORD)
+				if creds != nil {
+					fmt.Printf("************** creds for %s: %s\n", host, creds)
+					p := creds.GetProperty(credentials.ATTR_IDENTITY_TOKEN)
+					if p == "" {
+						p = creds.GetProperty(credentials.ATTR_PASSWORD)
+					}
+					return creds.GetProperty(credentials.ATTR_USERNAME), p, err
 				}
-				return creds.GetProperty(credentials.ATTR_USERNAME), p, err
-				return "", "", err
+				fmt.Printf("************** no creds for %s\n", host)
+				return "", "", nil
 			},
 			DefaultScheme: r.info.Scheme,
 		}),

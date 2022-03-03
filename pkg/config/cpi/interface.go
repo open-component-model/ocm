@@ -41,6 +41,14 @@ func NewGenericConfig(data []byte, unmarshaler runtime.Unmarshaler) (Config, err
 	return core.NewGenericConfig(data, unmarshaler)
 }
 
+func ToGenericConfig(c Config) (*GenericConfig, error) {
+	return core.ToGenericConfig(c)
+}
+
+func NewConfigTypeScheme() ConfigTypeScheme {
+	return core.NewConfigTypeScheme(nil)
+}
+
 func IsGeneric(cfg Config) bool {
 	return core.IsGeneric(cfg)
 }

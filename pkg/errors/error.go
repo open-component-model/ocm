@@ -52,6 +52,9 @@ type wrappedError struct {
 }
 
 func Wrapf(err error, msg string, args ...interface{}) error {
+	if err == nil {
+		return nil
+	}
 	if len(args) > 0 {
 		msg = fmt.Sprintf(msg, args...)
 	}

@@ -16,8 +16,8 @@ package config
 
 import (
 	"github.com/gardener/ocm/pkg/common"
-	"github.com/gardener/ocm/pkg/config/cpi"
-	"github.com/gardener/ocm/pkg/credentials"
+	config "github.com/gardener/ocm/pkg/config/cpi"
+	"github.com/gardener/ocm/pkg/credentials/cpi"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/runtime"
 )
@@ -28,8 +28,8 @@ const (
 )
 
 func init() {
-	cpi.RegisterConfigType(CredentialsConfigType, cpi.NewConfigType(CredentialsConfigType, &ConfigSpec{}))
-	cpi.RegisterConfigType(CredentialsConfigTypeV1, cpi.NewConfigType(CredentialsConfigTypeV1, &ConfigSpec{}))
+	config.RegisterConfigType(CredentialsConfigType, config.NewConfigType(CredentialsConfigType, &ConfigSpec{}))
+	config.RegisterConfigType(CredentialsConfigTypeV1, config.NewConfigType(CredentialsConfigTypeV1, &ConfigSpec{}))
 }
 
 // ConfigSpec describes a memory based repository interface.
@@ -48,13 +48,13 @@ type ConfigSpec struct {
 }
 
 type ConsumerSpec struct {
-	Identity    credentials.ConsumerIdentity         `json:"identity"`
-	Credentials []credentials.GenericCredentialsSpec `json:"credentials"`
+	Identity    cpi.ConsumerIdentity         `json:"identity"`
+	Credentials []cpi.GenericCredentialsSpec `json:"credentials"`
 }
 
 type RepositorySpec struct {
-	Repository  credentials.GenericRepositorySpec    `json:"repository"`
-	Credentials []credentials.GenericCredentialsSpec `json:"credentials,omitempty"`
+	Repository  cpi.GenericRepositorySpec    `json:"repository"`
+	Credentials []cpi.GenericCredentialsSpec `json:"credentials,omitempty"`
 }
 
 // NewConfigSpec creates a new memory ConfigSpec
@@ -68,10 +68,10 @@ func (a *ConfigSpec) GetType() string {
 	return CredentialsConfigType
 }
 
-func (a *ConfigSpec) MapCredentialsChain(creds ...credentials.CredentialsSpec) ([]credentials.GenericCredentialsSpec, error) {
-	var cgens []credentials.GenericCredentialsSpec
+func (a *ConfigSpec) MapCredentialsChain(creds ...cpi.CredentialsSpec) ([]cpi.GenericCredentialsSpec, error) {
+	var cgens []cpi.GenericCredentialsSpec
 	for _, c := range creds {
-		cgen, err := credentials.ToGenericCredentialsSpec(c)
+		cgen, err := cpi.ToGenericCredentialsSpec(c)
 		if err != nil {
 			return nil, err
 		}
@@ -80,7 +80,7 @@ func (a *ConfigSpec) MapCredentialsChain(creds ...credentials.CredentialsSpec) (
 	return cgens, nil
 }
 
-func (a *ConfigSpec) AddConsumer(id credentials.ConsumerIdentity, creds ...credentials.CredentialsSpec) error {
+func (a *ConfigSpec) AddConsumer(id cpi.ConsumerIdentity, creds ...cpi.CredentialsSpec) error {
 	cgens, err := a.MapCredentialsChain(creds...)
 	if err != nil {
 		return err
@@ -94,8 +94,8 @@ func (a *ConfigSpec) AddConsumer(id credentials.ConsumerIdentity, creds ...crede
 	return nil
 }
 
-func (a *ConfigSpec) MapRepository(repo credentials.RepositorySpec, creds ...credentials.CredentialsSpec) (*RepositorySpec, error) {
-	rgen, err := credentials.ToGenericRepositorySpec(repo)
+func (a *ConfigSpec) MapRepository(repo cpi.RepositorySpec, creds ...cpi.CredentialsSpec) (*RepositorySpec, error) {
+	rgen, err := cpi.ToGenericRepositorySpec(repo)
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +111,7 @@ func (a *ConfigSpec) MapRepository(repo credentials.RepositorySpec, creds ...cre
 	}, nil
 }
 
-func (a *ConfigSpec) AddRepository(repo credentials.RepositorySpec, creds ...credentials.CredentialsSpec) error {
+func (a *ConfigSpec) AddRepository(repo cpi.RepositorySpec, creds ...cpi.CredentialsSpec) error {
 	spec, err := a.MapRepository(repo, creds...)
 	if err != nil {
 		return err
@@ -120,7 +120,7 @@ func (a *ConfigSpec) AddRepository(repo credentials.RepositorySpec, creds ...cre
 	return nil
 }
 
-func (a *ConfigSpec) AddAlias(name string, repo credentials.RepositorySpec, creds ...credentials.CredentialsSpec) error {
+func (a *ConfigSpec) AddAlias(name string, repo cpi.RepositorySpec, creds ...cpi.CredentialsSpec) error {
 	spec, err := a.MapRepository(repo, creds...)
 	if err != nil {
 		return err
@@ -133,11 +133,11 @@ func (a *ConfigSpec) AddAlias(name string, repo credentials.RepositorySpec, cred
 	return nil
 }
 
-func (a *ConfigSpec) ApplyTo(ctx cpi.Context, target interface{}) error {
+func (a *ConfigSpec) ApplyTo(ctx config.Context, target interface{}) error {
 	list := errors.ErrListf("applying config")
-	t, ok := target.(credentials.Context)
+	t, ok := target.(cpi.Context)
 	if !ok {
-		return cpi.ErrNoContext(CredentialsConfigType)
+		return config.ErrNoContext(CredentialsConfigType)
 	}
 	for _, e := range a.Consumers {
 		t.SetCredentialsForConsumer(e.Identity, CredentialsChain(e.Credentials...))
@@ -148,17 +148,17 @@ func (a *ConfigSpec) ApplyTo(ctx cpi.Context, target interface{}) error {
 	}
 	list.Add(sub.Result())
 	sub = errors.ErrListf("applying repositories")
-	for _, e := range a.Repositories {
+	for i, e := range a.Repositories {
 		_, err := t.RepositoryForSpec(&e.Repository, CredentialsChain(e.Credentials...))
-		sub.Add(err)
+		sub.Add(errors.Wrapf(err, "repository entry %d", i))
 	}
 	list.Add(sub.Result())
 
 	return list.Result()
 }
 
-func CredentialsChain(creds ...credentials.GenericCredentialsSpec) credentials.CredentialsChain {
-	r := make([]credentials.CredentialsSource, len(creds))
+func CredentialsChain(creds ...cpi.GenericCredentialsSpec) cpi.CredentialsChain {
+	r := make([]cpi.CredentialsSource, len(creds))
 	for i := range creds {
 		r[i] = &creds[i]
 	}

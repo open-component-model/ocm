@@ -64,7 +64,7 @@ var _ = Describe("config handling", func() {
 
 		cfg := NewConfig("a", "b")
 
-		err := cfgctx.ApplyConfig(cfg)
+		err := cfgctx.ApplyConfig(cfg, "test")
 
 		Expect(err).To(Succeed())
 
@@ -76,7 +76,7 @@ var _ = Describe("config handling", func() {
 
 		cfg := NewConfig("a", "b")
 
-		err := cfgctx.ApplyConfig(cfg)
+		err := cfgctx.ApplyConfig(cfg, "test")
 		Expect(err).To(Succeed())
 
 		d := newDummy(cfgctx)
@@ -89,7 +89,7 @@ var _ = Describe("config handling", func() {
 		data, err := json.Marshal(cfg)
 		Expect(err).To(Succeed())
 
-		gen, err := cfgctx.ApplyData(data, nil)
+		gen, err := cfgctx.ApplyData(data, nil, "test")
 		Expect(err).To(HaveOccurred())
 		Expect(errors.IsErrUnknownKind(err, config.KIND_CONFIGTYPE)).To(BeTrue())
 		Expect(config.IsGeneric(gen)).To(BeTrue())

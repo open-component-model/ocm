@@ -14,10 +14,14 @@
 
 package credentials
 
+import (
+	"github.com/gardener/ocm/pkg/credentials/core"
+)
+
 const (
-	ATTR_USERNAME       = "username"
-	ATTR_PASSWORD       = "password"
-	ATTR_SERVER_ADDRESS = "serverAddress"
-	ATTR_IDENTITY_TOKEN = "identityToken"
-	ATTR_REGISTRY_TOKEN = "registryToken"
+	ATTR_USERNAME       = core.ATTR_USERNAME
+	ATTR_PASSWORD       = core.ATTR_PASSWORD
+	ATTR_SERVER_ADDRESS = core.ATTR_SERVER_ADDRESS
+	ATTR_IDENTITY_TOKEN = core.ATTR_IDENTITY_TOKEN
+	ATTR_REGISTRY_TOKEN = core.ATTR_REGISTRY_TOKEN
 )

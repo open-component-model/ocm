@@ -151,7 +151,7 @@ var _ = Describe("generic credentials", func() {
 			cfg := localconfig.NewConfigSpec()
 			cfg.AddAlias("alias", repospec, direct)
 
-			ctx.ConfigContext().ApplyConfig(cfg)
+			ctx.ConfigContext().ApplyConfig(cfg, "testconfig")
 
 			spec := aliases.NewRepositorySpec("alias")
 

@@ -21,7 +21,7 @@ import (
 	"github.com/gardener/ocm/pkg/datacontext"
 )
 
-const ATTR_REPOS = "github.com/gardener/ocm/pkg/credentials/repositories/dockercofig"
+const ATTR_REPOS = "github.com/gardener/ocm/pkg/credentials/repositories/dockerconfig"
 
 type Repositories struct {
 	lock  sync.Mutex

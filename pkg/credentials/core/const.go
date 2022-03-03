@@ -12,31 +12,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package cpi
+package core
 
-import (
-	"github.com/gardener/ocm/pkg/credentials/core"
+const (
+	ATTR_USERNAME       = "username"
+	ATTR_PASSWORD       = "password"
+	ATTR_SERVER_ADDRESS = "serverAddress"
+	ATTR_IDENTITY_TOKEN = "identityToken"
+	ATTR_REGISTRY_TOKEN = "registryToken"
 )
-
-const DirectCredentialsType = core.DirectCredentialsType
-const AliasRepositoryType = core.AliasRepositoryType
-
-type AliasRegistry = core.AliasRegistry
-
-type aliasRegistry struct {
-	RepositoryType
-	setter core.SetAliasFunction
-}
-
-var _ AliasRegistry = &aliasRegistry{}
-
-func NewAliasRegistry(t RepositoryType, setter core.SetAliasFunction) RepositoryType {
-	return &aliasRegistry{
-		RepositoryType: t,
-		setter:         setter,
-	}
-}
-
-func (a *aliasRegistry) SetAlias(ctx Context, name string, spec RepositorySpec, creds CredentialsSource) error {
-	return a.setter(ctx, name, spec, creds)
-}

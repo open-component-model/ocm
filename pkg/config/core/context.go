@@ -41,6 +41,11 @@ type Context interface {
 
 	AttributesContext() datacontext.AttributesContext
 
+	// Info provides the context for nested configuration evaluation
+	Info() string
+	// WithInfo provides the same context withh additional nesting info
+	WithInfo(desc string) Context
+
 	ConfigTypes() ConfigTypeScheme
 
 	GetConfigForData(data []byte, unmarshaler runtime.Unmarshaler) (Config, error)
@@ -48,9 +53,9 @@ type Context interface {
 	// ApplyData applies the config given by a byte stream to the config store
 	// If the config type is not known, a generic config is stored and returned.
 	// In this case an unknown error for kind KIND_CONFIGTYPE is returned.
-	ApplyData(data []byte, unmarshaler runtime.Unmarshaler) (Config, error)
+	ApplyData(data []byte, unmarshaler runtime.Unmarshaler, desc string) (Config, error)
 	// ApplyConfig applies the config to the config store
-	ApplyConfig(spec Config) error
+	ApplyConfig(spec Config, desc string) error
 
 	GetConfigForType(generation int64, typ string) (int64, []Config)
 	GetConfigForName(generation int64, name string) (int64, []Config)
@@ -74,7 +79,7 @@ func ForContext(ctx context.Context) Context {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type _context struct {
+type __context struct {
 	datacontext.Context
 
 	sharedAttributes datacontext.AttributesContext
@@ -84,16 +89,34 @@ type _context struct {
 	configs *ConfigStore
 }
 
+type _context struct {
+	*__context
+	description string
+}
+
 var _ Context = &_context{}
 
 func newContext(shared datacontext.AttributesContext, reposcheme ConfigTypeScheme) Context {
 	c := &_context{
-		sharedAttributes: shared,
-		knownConfigTypes: reposcheme,
-		configs:          NewConfigStore(),
+		__context: &__context{
+			sharedAttributes: shared,
+			knownConfigTypes: reposcheme,
+			configs:          NewConfigStore(),
+		},
 	}
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
 	return c
+}
+
+func (c *_context) Info() string {
+	return c.description
+}
+
+func (c *_context) WithInfo(desc string) Context {
+	if c.description != "" {
+		desc = desc + "--" + c.description
+	}
+	return &_context{c.__context, desc}
 }
 
 func (c *_context) AttributesContext() datacontext.AttributesContext {
@@ -116,27 +139,36 @@ func (c *_context) GetConfigForData(data []byte, unmarshaler runtime.Unmarshaler
 	return spec, nil
 }
 
-func (c *_context) ApplyConfig(spec Config) error {
+func (c *_context) ApplyConfig(spec Config, desc string) error {
 	var unknown error
 	spec = (&AppliedConfig{config: spec}).eval(c)
 	if IsGeneric(spec) {
 		unknown = errors.ErrUnknown(KIND_CONFIGTYPE, spec.GetType())
 	}
 
-	err := spec.ApplyTo(c, c)
+	ctx := c.WithInfo(desc)
+	err := spec.ApplyTo(c, ctx)
 	if IsErrNoContext(err) {
 		err = unknown
 	}
-	c.configs.Apply(spec)
+	err = errors.Wrapf(err, ctx.Info())
+	c.configs.Apply(spec, ctx.Info())
 	return err
 }
 
-func (c *_context) ApplyData(data []byte, unmarshaler runtime.Unmarshaler) (Config, error) {
+func (c *_context) joinInfo(desc string) string {
+	if c.description == "" {
+		return desc
+	}
+	return desc + "--" + c.description
+}
+
+func (c *_context) ApplyData(data []byte, unmarshaler runtime.Unmarshaler, desc string) (Config, error) {
 	spec, err := c.knownConfigTypes.DecodeConfig(data, unmarshaler)
 	if err != nil {
 		return nil, err
 	}
-	return spec, c.ApplyConfig(spec)
+	return spec, c.ApplyConfig(spec, desc)
 }
 
 func (c *_context) selector(gen int64, selector ConfigSelector) AppliedConfigSelector {
@@ -160,9 +192,9 @@ func (c *_context) ApplyTo(gen int64, target interface{}) (int64, error) {
 	}
 	cur, cfgs := c.configs.GetConfigForSelector(c, AppliedGenerationSelector(gen))
 
-	list := errors.ErrListf("apply errors")
+	list := errors.ErrListf("config apply errors")
 	for _, cfg := range cfgs {
-		list.Add(cfg.config.ApplyTo(c, target))
+		list.Add(errors.Wrapf(cfg.config.ApplyTo(c, target), cfg.description))
 	}
 	return cur, list.Result()
 }

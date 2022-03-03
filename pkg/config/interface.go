@@ -20,6 +20,8 @@ import (
 	"github.com/gardener/ocm/pkg/config/core"
 	"github.com/gardener/ocm/pkg/config/cpi"
 	"github.com/gardener/ocm/pkg/runtime"
+
+	_ "github.com/gardener/ocm/pkg/config/config"
 )
 
 const KIND_CONFIGTYPE = core.KIND_CONFIGTYPE

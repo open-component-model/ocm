@@ -55,7 +55,7 @@ var _ = Describe("generic config handling", func() {
 		cfg, err := cfgctx.GetConfigForData(testdataconfig, nil)
 		Expect(err).To(Succeed())
 
-		err = cfgctx.ApplyConfig(cfg)
+		err = cfgctx.ApplyConfig(cfg, "testconfig")
 		Expect(err).To(Succeed())
 		gen, cfgs := cfgctx.GetConfig(config.AllGenerations, nil)
 		Expect(gen).To(Equal(int64(3)))
@@ -69,9 +69,9 @@ var _ = Describe("generic config handling", func() {
 		cfg, err := cfgctx.GetConfigForData(testdataconfig, nil)
 		Expect(err).To(Succeed())
 
-		err = cfgctx.ApplyConfig(cfg)
+		err = cfgctx.ApplyConfig(cfg, "testconfig")
 		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).To(Equal("{applying generic config list: config type \"Dummy\" is unknown, config type \"Dummy\" is unknown}"))
+		Expect(err.Error()).To(Equal("testconfig: {applying generic config list: config entry 0--testconfig: config type \"Dummy\" is unknown, config entry 1--testconfig: config type \"Dummy\" is unknown}"))
 		gen, cfgs := cfgctx.GetConfig(config.AllGenerations, nil)
 		Expect(gen).To(Equal(int64(3)))
 		Expect(len(cfgs)).To(Equal(3))

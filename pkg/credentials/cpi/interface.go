@@ -30,6 +30,8 @@ type Context = core.Context
 type Repository = core.Repository
 type RepositoryType = core.RepositoryType
 type Credentials = core.Credentials
+type CredentialsSource = core.CredentialsSource
+type CredentialsChain = core.CredentialsChain
 type CredentialsSpec = core.CredentialsSpec
 type RepositorySpec = core.RepositorySpec
 type GenericRepositorySpec = core.GenericRepositorySpec
@@ -46,6 +48,14 @@ func NewGenericCredentialsSpec(name string, repospec *GenericRepositorySpec) *Ge
 
 func NewCredentialsSpec(name string, repospec RepositorySpec) CredentialsSpec {
 	return core.NewCredentialsSpec(name, repospec)
+}
+
+func ToGenericCredentialsSpec(spec CredentialsSpec) (*GenericCredentialsSpec, error) {
+	return core.ToGenericCredentialsSpec(spec)
+}
+
+func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {
+	return core.ToGenericRepositorySpec(spec)
 }
 
 func RegisterRepositoryType(name string, atype RepositoryType) {

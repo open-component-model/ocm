@@ -16,7 +16,6 @@ package dockerconfig
 
 import (
 	"github.com/gardener/ocm/pkg/common"
-	"github.com/gardener/ocm/pkg/credentials/core"
 	"github.com/gardener/ocm/pkg/credentials/cpi"
 	"k8s.io/apimachinery/pkg/util/sets"
 )
@@ -36,7 +35,7 @@ func (c *Credentials) get() common.Properties {
 	return newCredentials(auth).Properties()
 }
 
-func (c *Credentials) Credentials(context core.Context, source ...core.CredentialsSource) (cpi.Credentials, error) {
+func (c *Credentials) Credentials(context cpi.Context, source ...cpi.CredentialsSource) (cpi.Credentials, error) {
 	auth, err := c.repo.config.GetAuthConfig(c.name)
 	if err != nil {
 		return nil, err

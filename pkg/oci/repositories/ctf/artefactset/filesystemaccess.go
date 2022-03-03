@@ -40,7 +40,7 @@ func (i *FileSystemBlobAccess) GetArtefact(access cpi.ArtefactSetContainer, dige
 }
 
 func (i *FileSystemBlobAccess) AddArtefactBlob(artefact cpi.Artefact) (cpi.BlobAccess, error) {
-	blob, err := artefact.Artefact().ToBlobAccess()
+	blob, err := artefact.Blob()
 	if err != nil {
 		return nil, err
 	}

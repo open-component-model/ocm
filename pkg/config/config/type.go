@@ -15,8 +15,9 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/gardener/ocm/pkg/common"
-	"github.com/gardener/ocm/pkg/config"
 	"github.com/gardener/ocm/pkg/config/cpi"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/runtime"
@@ -35,18 +36,18 @@ func init() {
 // Config describes a memory based repository interface.
 type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
-	Configurations              []*config.GenericConfig `json:"configurations"`
+	Configurations              []*cpi.GenericConfig `json:"configurations"`
 }
 
 // NewConfig creates a new memory Config
-func NewConfig() *Config {
+func NewConfig(info string) *Config {
 	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(GenericConfigType),
 	}
 }
 
-func (c *Config) AddConfig(cfg config.Config) error {
-	g, err := config.ToGenericConfig(cfg)
+func (c *Config) AddConfig(cfg cpi.Config) error {
+	g, err := cpi.ToGenericConfig(cfg)
 	if err != nil {
 		return err
 	}
@@ -59,10 +60,11 @@ func (c *Config) GetType() string {
 }
 
 func (c *Config) ApplyTo(ctx cpi.Context, target interface{}) error {
-	if cctx, ok := target.(config.Context); ok {
+	if cctx, ok := target.(cpi.Context); ok {
 		list := errors.ErrListf("applying generic config list")
-		for _, cfg := range c.Configurations {
-			list.Add(cctx.ApplyConfig(cfg))
+		for i, cfg := range c.Configurations {
+			sub := fmt.Sprintf("config entry %d", i)
+			list.Add(cctx.ApplyConfig(cfg, sub))
 		}
 		return list.Result()
 	}

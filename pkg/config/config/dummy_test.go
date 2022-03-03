@@ -52,6 +52,10 @@ func (a *Config) GetType() string {
 	return DummyType
 }
 
+func (a *Config) Info() string {
+	return "dummy config"
+}
+
 func (a *Config) ApplyTo(ctx config.Context, target interface{}) error {
 	d, ok := target.(*dummyContext)
 	if ok {

@@ -17,6 +17,7 @@ package credentials
 import (
 	"context"
 
+	_ "github.com/gardener/ocm/pkg/credentials/config"
 	_ "github.com/gardener/ocm/pkg/credentials/repositories"
 
 	"github.com/gardener/ocm/pkg/common"
@@ -26,7 +27,7 @@ import (
 )
 
 const KIND_CREDENTIALS = core.KIND_CREDENTIALS
-const KIND_CONSUMER = core.KIND_CREDENTIALS
+const KIND_CONSUMER = core.KIND_CONSUMER
 const KIND_REPOSITORY = core.KIND_REPOSITORY
 
 const CONTEXT_TYPE = core.CONTEXT_TYPE

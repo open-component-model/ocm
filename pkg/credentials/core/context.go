@@ -162,7 +162,10 @@ func (c *_context) CredentialsForConfig(data []byte, unmarshaler runtime.Unmarsh
 }
 
 func (c *_context) GetCredentialsForConsumer(identity ConsumerIdentity, matchers ...IdentityMatcher) (CredentialsSource, error) {
-	c.Update()
+	err := c.Update()
+	if err != nil {
+		return nil, err
+	}
 
 	m := defaultMatcher(matchers...)
 	var consumer *_consumer

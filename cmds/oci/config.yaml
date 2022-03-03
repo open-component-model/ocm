@@ -1,0 +1,8 @@
+type: generic.config.ocm.gardener.cloud/v1
+configurations:
+  - type: credentials.config.ocm.gardener.cloud
+    repositories:
+      - repository:
+          type: DockerConfig/v1
+          dockerConfigFile: "~/.docker/config.json"
+          propagateConsumerIdentity: true

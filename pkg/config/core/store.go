@@ -77,8 +77,9 @@ func (l AppliedConfigs) Configs() []Config {
 }
 
 type AppliedConfig struct {
-	generation int64
-	config     Config
+	generation  int64
+	config      Config
+	description string
 }
 
 func (c *AppliedConfig) eval(ctx Context) Config {
@@ -110,11 +111,11 @@ func (s *ConfigStore) Generation() int64 {
 	return s.generation
 }
 
-func (s *ConfigStore) Apply(c Config) {
+func (s *ConfigStore) Apply(c Config, desc string) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 	s.generation++
-	a := &AppliedConfig{s.generation, c}
+	a := &AppliedConfig{s.generation, c, desc}
 	configs := s.types[c.GetKind()]
 	s.types[c.GetKind()] = append(configs, a)
 	s.configs = append(s.configs, a)

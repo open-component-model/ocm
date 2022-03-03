@@ -18,6 +18,8 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"strings"
 	"sync"
 
 	"github.com/docker/cli/cli/config"
@@ -25,11 +27,9 @@ import (
 	dockercred "github.com/docker/cli/cli/config/credentials"
 	"github.com/docker/cli/cli/config/types"
 	"github.com/gardener/ocm/pkg/common"
-	"github.com/gardener/ocm/pkg/credentials"
+	"github.com/gardener/ocm/pkg/credentials/cpi"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/identity"
-
-	"github.com/gardener/ocm/pkg/credentials/cpi"
 )
 
 type Repository struct {
@@ -89,7 +89,12 @@ func (r *Repository) Read(force bool) error {
 	if !force && r.config != nil {
 		return nil
 	}
-	data, err := ioutil.ReadFile(r.path)
+	path := r.path
+	if strings.HasPrefix(path, "~/") {
+		home := os.Getenv("HOME")
+		path = home + path[1:]
+	}
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
 	}
@@ -118,12 +123,12 @@ func (r *Repository) Read(force bool) error {
 
 func newCredentials(auth types.AuthConfig) cpi.Credentials {
 	props := common.Properties{
-		credentials.ATTR_USERNAME: auth.Username,
-		credentials.ATTR_PASSWORD: auth.Password,
+		cpi.ATTR_USERNAME: auth.Username,
+		cpi.ATTR_PASSWORD: auth.Password,
 	}
 	props.SetNonEmptyValue("auth", auth.Auth)
-	props.SetNonEmptyValue(credentials.ATTR_SERVER_ADDRESS, auth.ServerAddress)
-	props.SetNonEmptyValue(credentials.ATTR_IDENTITY_TOKEN, auth.IdentityToken)
-	props.SetNonEmptyValue(credentials.ATTR_REGISTRY_TOKEN, auth.RegistryToken)
+	props.SetNonEmptyValue(cpi.ATTR_SERVER_ADDRESS, auth.ServerAddress)
+	props.SetNonEmptyValue(cpi.ATTR_IDENTITY_TOKEN, auth.IdentityToken)
+	props.SetNonEmptyValue(cpi.ATTR_REGISTRY_TOKEN, auth.RegistryToken)
 	return cpi.NewCredentials(props)
 }
