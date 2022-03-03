@@ -55,6 +55,14 @@ func IsGeneric(cfg Config) bool {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type Updater = core.Updater
+
+func NewUpdate(ctx Context) Updater {
+	return core.NewUpdater(ctx)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 func ErrNoContext(name string) error {
 	return core.ErrNoContext(name)
 }

@@ -17,9 +17,9 @@ package core
 import (
 	"context"
 	"reflect"
-	"sync"
 
 	"github.com/gardener/ocm/pkg/config"
+	cfgcpi "github.com/gardener/ocm/pkg/config/cpi"
 	"github.com/gardener/ocm/pkg/datacontext"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/runtime"
@@ -66,12 +66,9 @@ type _context struct {
 	datacontext.Context
 
 	sharedattributes     datacontext.AttributesContext
-	configctx            config.Context
-	lock                 sync.RWMutex
-	lastGeneration       int64
+	updater              cfgcpi.Updater
 	knownRepositoryTypes RepositoryTypeScheme
 	consumers            *_consumers
-	inupdate             bool
 }
 
 var _ Context = &_context{}
@@ -79,7 +76,7 @@ var _ Context = &_context{}
 func newContext(shared datacontext.AttributesContext, configctx config.Context, reposcheme RepositoryTypeScheme) Context {
 	c := &_context{
 		sharedattributes:     shared,
-		configctx:            configctx,
+		updater:              cfgcpi.NewUpdate(configctx),
 		knownRepositoryTypes: reposcheme,
 		consumers:            newConsumers(),
 	}
@@ -87,26 +84,8 @@ func newContext(shared datacontext.AttributesContext, configctx config.Context, 
 	return c
 }
 
-func (c *_context) xGetType() string {
+func (c *_context) GetType() string {
 	return CONTEXT_TYPE
-}
-
-func (c *_context) Update() error {
-	c.lock.Lock()
-	if c.inupdate {
-		c.lock.Unlock()
-		return nil
-	}
-	c.inupdate = true
-	c.lock.Unlock()
-
-	gen, err := c.configctx.ApplyTo(c.lastGeneration, c)
-
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	c.inupdate = false
-	c.lastGeneration = gen
-	return err
 }
 
 func (c *_context) AttributesContext() datacontext.AttributesContext {
@@ -114,7 +93,11 @@ func (c *_context) AttributesContext() datacontext.AttributesContext {
 }
 
 func (c *_context) ConfigContext() config.Context {
-	return c.configctx
+	return c.updater.GetContext()
+}
+
+func (c *_context) Update() error {
+	return c.updater.Update(c)
 }
 
 func (c *_context) RepositoryTypes() RepositoryTypeScheme {

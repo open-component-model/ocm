@@ -43,11 +43,13 @@ type Context interface {
 
 	// Info provides the context for nested configuration evaluation
 	Info() string
-	// WithInfo provides the same context withh additional nesting info
+	// WithInfo provides the same context with additional nesting info
 	WithInfo(desc string) Context
 
 	ConfigTypes() ConfigTypeScheme
 
+	// GetConfigForData deserialize configuration objects for known
+	// configuration types.
 	GetConfigForData(data []byte, unmarshaler runtime.Unmarshaler) (Config, error)
 
 	// ApplyData applies the config given by a byte stream to the config store
