@@ -20,6 +20,7 @@ import (
 	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/remotes"
 	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
@@ -106,7 +107,7 @@ func (n *NamespaceContainer) ListTags() ([]string, error) {
 }
 
 func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
-	return NewDataAcess(n.fetcher, digest, "", false)
+	return NewDataAccess(n.fetcher, digest, "", false)
 }
 
 func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
@@ -122,7 +123,7 @@ func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error
 		}
 		return nil, err
 	}
-	acc, err := NewDataAcess(n.fetcher, desc.Digest, desc.MediaType, false)
+	acc, err := NewDataAccess(n.fetcher, desc.Digest, desc.MediaType, false)
 	if err != nil {
 		return nil, err
 	}
@@ -142,7 +143,7 @@ func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	if err != nil {
 		return err
 	}
-	acc, err := NewDataAcess(n.fetcher, desc.Digest, desc.MediaType, false)
+	acc, err := NewDataAccess(n.fetcher, desc.Digest, desc.MediaType, false)
 	if err != nil {
 		return err
 	}
@@ -154,6 +155,10 @@ func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 		}
 	}
 	return nil
+}
+
+func (n *NamespaceContainer) NewArtefactProvider(state accessobj.State) (cpi.ArtefactProvider, error) {
+	return cpi.NewNopCloserArtefactProvider(n), nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -174,7 +179,7 @@ func (n *Namespace) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, e
 	if n.access.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	return cpi.NewArtefact(n.access, art...), nil
+	return cpi.NewArtefact(n.access, art...)
 }
 
 func (n *Namespace) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {

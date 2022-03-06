@@ -16,6 +16,7 @@ package ctf
 
 import (
 	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
@@ -28,7 +29,7 @@ type Namespace struct {
 }
 
 func (n *Namespace) Close() error {
-	panic("implement me")
+	return nil
 }
 
 type NamespaceContainer struct {
@@ -82,10 +83,10 @@ func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
 	return n.repo.base.AddBlob(blob)
 }
 
-func (n *NamespaceContainer) GetArtefact(ref string) (cpi.ArtefactAccess, error) {
-	meta := n.repo.getIndex().GetArtefactInfo(n.namespace, ref)
+func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error) {
+	meta := n.repo.getIndex().GetArtefactInfo(n.namespace, vers)
 	if meta == nil {
-		return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, ref, n.namespace)
+		return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, vers, n.namespace)
 	}
 	return n.repo.base.GetArtefact(n, meta.Digest)
 }
@@ -110,6 +111,10 @@ func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	return n.repo.getIndex().AddTagsFor(n.namespace, digest, tags...)
 }
 
+func (n *NamespaceContainer) NewArtefactProvider(state accessobj.State) (cpi.ArtefactProvider, error) {
+	return cpi.NewNopCloserArtefactProvider(n), nil
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 func (n *Namespace) GetRepository() cpi.Repository {
@@ -128,7 +133,7 @@ func (n *Namespace) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, e
 	if n.access.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	return cpi.NewArtefact(n.access, art...), nil
+	return cpi.NewArtefact(n.access, art...)
 }
 
 func (n *Namespace) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {

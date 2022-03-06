@@ -15,6 +15,7 @@
 package core
 
 const (
+	ATTR_TYPE           = "type"
 	ATTR_USERNAME       = "username"
 	ATTR_PASSWORD       = "password"
 	ATTR_SERVER_ADDRESS = "serverAddress"

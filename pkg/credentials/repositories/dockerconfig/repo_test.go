@@ -20,6 +20,7 @@ import (
 
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/credentials"
+	"github.com/gardener/ocm/pkg/credentials/cpi"
 	local "github.com/gardener/ocm/pkg/credentials/repositories/dockerconfig"
 	"github.com/gardener/ocm/pkg/oci/identity"
 
@@ -92,6 +93,7 @@ var _ = Describe("docker config", func() {
 		Expect(err).To(Succeed())
 
 		csrc, err := DefaultContext.GetCredentialsForConsumer(credentials.ConsumerIdentity{
+			cpi.ATTR_TYPE:        identity.VALUE_TYPE,
 			identity.ID_HOSTNAME: "ghcr.io",
 		})
 		Expect(err).To(Succeed())

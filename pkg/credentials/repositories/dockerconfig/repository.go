@@ -111,6 +111,7 @@ func (r *Repository) Read(force bool) error {
 				hostname = "docker.io"
 			}
 			id := cpi.ConsumerIdentity{
+				cpi.ATTR_TYPE:        identity.VALUE_TYPE,
 				identity.ID_HOSTNAME: hostname,
 			}
 			fmt.Printf("propgate id %s\n", id)

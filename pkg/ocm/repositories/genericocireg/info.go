@@ -29,39 +29,29 @@ func init() {
 
 type handler struct{}
 
-func (h handler) Info(m cpi.ManifestAccess) string {
-	d := m.GetDescriptor()
-	blob, err := m.GetBlob(d.Config.Digest)
+func (h handler) Info(m cpi.ManifestAccess, config []byte) string {
+	s := "component version:\n"
+	acc := NewStateAccess(m)
+	blob, err := acc.Get()
 	if err != nil {
-		return "error reading config: " + err.Error()
+		return s + "  cannot get component descriptor blob: " + err.Error()
 	}
 	data, err := blob.Get()
 	if err != nil {
-		return "error reading config: " + err.Error()
+		return s + "  cannot read component descriptor: " + err.Error()
 	}
-	s := "descriptor ref: " + string(data) + "\n"
-
-	acc := NewStateAccess(m)
-	blob, err = acc.Get()
-	if err != nil {
-		return s + "cannot get component descriptor blob: " + err.Error()
-	}
-	data, err = blob.Get()
-	if err != nil {
-		return s + "cannot read component descriptor: " + err.Error()
-	}
-	s += fmt.Sprintf("descriptor:\n")
+	s += fmt.Sprintf("  descriptor:\n")
 	var raw interface{}
 	err = json.Unmarshal(data, &raw)
 	if err != nil {
-		s += string(data)
-		return s + "cannot get unmarshal component descriptor: " + err.Error()
+		s += "    " + string(data)
+		return s + "  cannot get unmarshal component descriptor: " + err.Error()
 	}
 
-	form, err := json.MarshalIndent(raw, "  ", "  ")
+	form, err := json.MarshalIndent(raw, "  ", "    ")
 	if err != nil {
-		s += string(data)
-		return s + "cannot get marshal component descriptor: " + err.Error()
+		s += "    " + string(data)
+		return s + "  cannot get marshal component descriptor: " + err.Error()
 	}
 	return s + string(form)
 }

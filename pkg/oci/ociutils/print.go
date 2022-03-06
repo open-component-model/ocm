@@ -15,16 +15,21 @@
 package ociutils
 
 import (
+	"archive/tar"
 	"fmt"
+	"io"
+	"os"
 	"strings"
 	"sync"
 
+	"github.com/containers/image/v5/pkg/compression"
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 )
 
 type InfoHandler interface {
-	Info(m cpi.ManifestAccess) string
+	Info(m cpi.ManifestAccess, config []byte) string
 }
 
 var lock sync.Mutex
@@ -63,17 +68,84 @@ func indent(orig string, gap string) string {
 func PrintManifest(m cpi.ManifestAccess) string {
 	man := m.GetDescriptor()
 	s := "config:\n"
-	s += fmt.Sprintf("  type:   %s\n", man.Config.MediaType)
-	s += fmt.Sprintf("  digest: %s\n", man.Config.Digest)
+	s += fmt.Sprintf("  type:        %s\n", man.Config.MediaType)
+	s += fmt.Sprintf("  digest:      %s\n", man.Config.Digest)
+	s += fmt.Sprintf("  size:        %d\n", man.Config.Size)
 
+	var config []byte
+	blob, err := m.GetBlob(man.Config.Digest)
+	if err != nil {
+		s += "  error getting config blob: " + err.Error() + "\n"
+	} else {
+		config, err = blob.Get()
+		if err != nil {
+			s += "  error reading config: " + err.Error() + "\n"
+		} else {
+			s += fmt.Sprintf("  config json: %s\n", string(config))
+		}
+	}
 	h := getHandler(man.Config.MediaType)
+
 	if h != nil {
-		s += indent(h.Info(m), "  ")
+		s += indent(h.Info(m, config), "  ")
 	}
 	s += "layers:\n"
 	for _, l := range man.Layers {
 		s += fmt.Sprintf("- type:   %s\n", l.MediaType)
 		s += fmt.Sprintf("  digest: %s\n", l.Digest)
+		s += fmt.Sprintf("  size:   %d\n", l.Size)
+		blob, err := m.GetBlob(l.Digest)
+		if err != nil {
+			s += "  error getting blob: " + err.Error() + "\n"
+		}
+		s += indent(PrintLayer(blob), "  ")
+	}
+	return s
+}
+
+func PrintLayer(blob accessio.BlobAccess) string {
+	reader, err := blob.Reader()
+	if err != nil {
+		return "cannot read blob: " + err.Error()
+	}
+	file, err := os.Create("/tmp/blob")
+	if err == nil {
+		io.Copy(file, reader)
+		file.Close()
+		reader.Close()
+		reader, err = blob.Reader()
+		if err != nil {
+			return "cannot read blob: " + err.Error()
+		}
+	}
+	defer reader.Close()
+	reader, _, err = compression.AutoDecompress(reader)
+	if err != nil {
+		return "cannot decompress blob: " + err.Error()
+	}
+	tr := tar.NewReader(reader)
+	s := ""
+	for {
+		header, err := tr.Next()
+		if err != nil {
+			if err == io.EOF {
+				return s
+			}
+			if s == "" {
+				return "no tar"
+			}
+			return s + fmt.Sprintf("tar error: %s", err)
+		}
+		if s == "" {
+			s = "tar filesystem:\n"
+		}
+
+		switch header.Typeflag {
+		case tar.TypeDir:
+			s += fmt.Sprintf("  dir:  %s\n", header.Name)
+		case tar.TypeReg:
+			s += fmt.Sprintf("  file: %s\n", header.Name)
+		}
 	}
 	return s
 }

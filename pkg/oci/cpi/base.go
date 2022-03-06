@@ -24,17 +24,18 @@ import (
 )
 
 type artefactBase struct {
-	lock   sync.RWMutex
-	access ArtefactSetContainer
-	state  accessobj.State
+	lock      sync.RWMutex
+	container ArtefactSetContainer
+	provider  ArtefactProvider
+	state     accessobj.State
 }
 
 func (a *artefactBase) IsClosed() bool {
-	return a.access.IsClosed()
+	return a.provider.IsClosed()
 }
 
 func (a *artefactBase) IsReadOnly() bool {
-	return a.access.IsReadOnly()
+	return a.provider.IsReadOnly()
 }
 
 func (a *artefactBase) IsIndex() bool {
@@ -52,11 +53,15 @@ func (a *artefactBase) blob() (accessio.BlobAccess, error) {
 }
 
 func (a *artefactBase) addBlob(access BlobAccess) error {
-	return a.access.AddBlob(access)
+	return a.provider.AddBlob(access)
 }
 
 func (a *artefactBase) getArtefact(digest digest.Digest) (ArtefactAccess, error) {
-	return a.access.GetArtefact(digest.String())
+	return a.provider.GetArtefact(digest)
+}
+
+func (a *artefactBase) Close() error {
+	return a.provider.Close()
 }
 
 func (a *artefactBase) newArtefact(art ...*artdesc.Artefact) (ArtefactAccess, error) {
@@ -66,5 +71,5 @@ func (a *artefactBase) newArtefact(art ...*artdesc.Artefact) (ArtefactAccess, er
 	if a.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	return NewArtefact(a.access, art...), nil
+	return NewArtefact(a.container, art...)
 }

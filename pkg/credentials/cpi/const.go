@@ -19,6 +19,7 @@ import (
 )
 
 const (
+	ATTR_TYPE           = core.ATTR_TYPE
 	ATTR_USERNAME       = core.ATTR_USERNAME
 	ATTR_PASSWORD       = core.ATTR_PASSWORD
 	ATTR_SERVER_ADDRESS = core.ATTR_SERVER_ADDRESS

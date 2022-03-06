@@ -46,7 +46,7 @@ type ComponentRepositoryMeta struct {
 	// ComponentNameMapping describes the method that is used to map the "Component Name", "Component Version"-tuples
 	// to OCI Image References.
 	ComponentNameMapping ComponentNameMapping `json:"componentNameMapping,omitempty"`
-	SubPath              string               `json:"subPat,omitempty"`
+	SubPath              string               `json:"subPath,omitempty"`
 }
 
 // RepositorySpec describes a component repository backed by a oci registry.

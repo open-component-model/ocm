@@ -43,7 +43,7 @@ type ArtefactSink interface {
 }
 
 type ArtefactSource interface {
-	GetArtefact(ref string) (ArtefactAccess, error)
+	GetArtefact(version string) (ArtefactAccess, error)
 	GetBlobData(digest digest.Digest) (DataAccess, error)
 }
 
@@ -81,6 +81,8 @@ type ArtefactAccess interface {
 
 	AddArtefact(Artefact, *artdesc.Platform) (BlobAccess, error)
 	AddLayer(BlobAccess, *artdesc.Descriptor) (int, error)
+
+	Close() error
 }
 
 type ManifestAccess interface {

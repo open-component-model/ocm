@@ -30,7 +30,7 @@ type ManifestImpl struct {
 
 var _ ManifestAccess = (*ManifestImpl)(nil)
 
-func NewManifest(access ArtefactSetContainer, defs ...*artdesc.Manifest) *ManifestImpl {
+func NewManifest(access ArtefactSetContainer, defs ...*artdesc.Manifest) (*ManifestImpl, error) {
 	var def *artdesc.Manifest
 	if len(defs) != 0 && defs[0] != nil {
 		def = defs[0]
@@ -44,13 +44,19 @@ func NewManifest(access ArtefactSetContainer, defs ...*artdesc.Manifest) *Manife
 		panic("oops")
 	}
 
+	p, err := access.NewArtefactProvider(state)
+	if err != nil {
+		return nil, err
+	}
+
 	m := &ManifestImpl{
 		artefactBase: artefactBase{
-			access: access,
-			state:  state,
+			container: access,
+			state:     state,
+			provider:  p,
 		},
 	}
-	return m
+	return m, nil
 }
 
 type manifestMapper struct {
@@ -69,8 +75,9 @@ func (m *manifestMapper) GetOriginalState() interface{} {
 func NewManifestForArtefact(a *ArtefactImpl) *ManifestImpl {
 	m := &ManifestImpl{
 		artefactBase: artefactBase{
-			access: a.access,
-			state:  &manifestMapper{a.state},
+			container: a.container,
+			state:     &manifestMapper{a.state},
+			provider:  a.provider,
 		},
 	}
 	return m
@@ -111,7 +118,7 @@ func (m *ManifestImpl) GetBlobDescriptor(digest digest.Digest) *Descriptor {
 	if d != nil {
 		return d
 	}
-	return m.access.GetBlobDescriptor(digest)
+	return m.container.GetBlobDescriptor(digest)
 }
 
 func (m *ManifestImpl) GetConfigBlob() (BlobAccess, error) {
@@ -124,7 +131,7 @@ func (m *ManifestImpl) GetConfigBlob() (BlobAccess, error) {
 func (m *ManifestImpl) GetBlob(digest digest.Digest) (BlobAccess, error) {
 	d := m.GetBlobDescriptor(digest)
 	if d != nil {
-		data, err := m.access.GetBlobData(digest)
+		data, err := m.provider.GetBlobData(digest)
 		if err != nil {
 			return nil, err
 		}
@@ -160,7 +167,7 @@ func (m *ManifestImpl) AddLayer(blob BlobAccess, d *artdesc.Descriptor) (int, er
 		}
 	}
 
-	err := m.access.AddBlob(blob)
+	err := m.container.AddBlob(blob)
 	if err != nil {
 		return -1, err
 	}

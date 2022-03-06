@@ -15,16 +15,24 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"regexp"
 
+	"github.com/containerd/containerd/reference/docker"
+	"github.com/containers/image/v5/docker/archive"
+	"github.com/containers/image/v5/docker/daemon"
+	"github.com/containers/image/v5/image"
+	"github.com/containers/image/v5/types"
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/config"
 	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/oci"
+	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/ociutils"
-	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
+	docker2 "github.com/gardener/ocm/pkg/oci/repositories/docker"
 	_ "github.com/gardener/ocm/pkg/ocm"
 )
 
@@ -61,21 +69,149 @@ func setupCredentials() {
 	_ = ctx
 }
 
+func dockertest() {
+
+	ref, err := archive.ParseReference("ghcr.io/mandelsoft/pause:0.1-dev")
+	ref, err = daemon.ParseReference("ghcr.io/mandelsoft/pause:0.1-dev")
+	ref, err = daemon.NewReference("c4c442d0040d", nil)
+	ref, err = daemon.NewReference("ca617b241345", nil)
+	handleError(err, "ref")
+
+	src, err := ref.NewImageSource(context.Background(), nil)
+	handleError(err, "source")
+
+	defer src.Close()
+
+	data, mime, err := src.GetManifest(context.Background(), nil)
+	handleError(err, "manifest")
+
+	fmt.Printf("mime: %s\n", mime)
+	fmt.Printf("manifest:\n %s\n*********\n", string(data))
+
+	opts := types.ManifestUpdateOptions{
+		ManifestMIMEType: artdesc.MediaTypeImageManifest,
+	}
+	un := image.UnparsedInstance(src, nil)
+	img, err := image.FromUnparsedImage(context.Background(), nil, un)
+	handleError(err, "manifest")
+
+	img, err = img.UpdatedImage(context.Background(), opts)
+	handleError(err, "convert")
+
+	data, mime, err = img.Manifest(context.Background())
+	handleError(err, "manifest")
+
+	fmt.Printf("mime: %s\n", mime)
+	fmt.Printf("manifest:\n %s\n*********\n", string(data))
+
+	art, err := artdesc.Decode(data)
+	handleError(err, "decode")
+
+	for i, l := range art.Manifest().Layers {
+		fmt.Printf("  layer %d [%s]: %s\n", i, l.MediaType, l.Digest)
+	}
+	info := img.LayerInfos()
+	handleError(err, "layer info")
+	for i, l := range info {
+		fmt.Printf("  layer %d [%s]: %s\n", i, l.MediaType, l.Digest)
+	}
+	os.Exit(0)
+}
+
+func Print(resourceURl string) {
+	fmt.Printf("%s:\n", resourceURl)
+	/*
+		ref, err := docker.ParseDockerRef(resourceURl)
+		if err == nil {
+			fmt.Printf("  name:   %s\n", ref.Name())
+			fmt.Printf("  domain: %s\n", docker.Domain(ref) )
+			fmt.Printf("  path:   %s\n", docker.Path(ref) )
+
+			if t, ok := ref.(docker.Tagged); ok {
+				fmt.Printf("  tag:    %s\n", t.Tag() )
+			}
+			if t, ok := ref.(docker.Digested); ok {
+				fmt.Printf("  digest:  %s\n", t.Digest() )
+			}
+		} else {
+			fmt.Printf("  err:    %s\n", err)
+		}
+	*/
+	a, err := docker.ParseAnyReference(resourceURl)
+	if err == nil {
+		fmt.Printf("  any:   %s\n", a.String())
+		if t, ok := a.(docker.Named); ok {
+			fmt.Printf("  name:   %s\n", t.Name())
+			fmt.Printf("  domain: %s\n", docker.Domain(t))
+			fmt.Printf("  path:   %s\n", docker.Path(t))
+		}
+		if t, ok := a.(docker.Tagged); ok {
+			fmt.Printf("  tag:    %s\n", t.Tag())
+		}
+		if t, ok := a.(docker.Digested); ok {
+			fmt.Printf("  digest:  %s\n", t.Digest())
+		}
+	} else {
+		fmt.Printf("  err:    %s\n", err)
+	}
+	a, err = docker.Parse(resourceURl)
+	if err == nil {
+		fmt.Printf("  gen:   %s\n", a.String())
+		if t, ok := a.(docker.Tagged); ok {
+			fmt.Printf("  tag:    %s\n", t.Tag())
+		}
+		if t, ok := a.(docker.Digested); ok {
+			fmt.Printf("  digest:  %s\n", t.Digest())
+		}
+	} else {
+		fmt.Printf("  err:    %s\n", err)
+	}
+
+}
+
+var pattern = regexp.MustCompile("^[0-9a-f]{12}$")
+
 func main() {
 
+	fmt.Printf("%t\n", pattern.MatchString("c4c442d0040d"))
+	fmt.Printf("%t\n", !pattern.MatchString("c4c442d0040x"))
+	fmt.Printf("%t\n", !pattern.MatchString("c4c442d0040"))
+	fmt.Printf("%t\n", !pattern.MatchString("c4c442d0040dd"))
+
+	ref, err := daemon.ParseReference("c4c442d0040d")
+	ref, err = daemon.ParseReference("test/laber/blob:latest")
+	fmt.Printf("%s\n", ref.StringWithinTransport())
+	_ = ref
+	_ = err
+	Print("ubuntu")
+	Print("ubuntu:v1")
+	Print("test/ubuntu")
+	Print("test/ubuntu:v1")
+	Print("ghcr.io/test/ubuntu")
+	Print("ghcr.io:8080/test/ubuntu")
+	Print("ghcr.io/test/ubuntu:v1")
+	Print("ghcr.io/test/ubuntu@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")
+	Print("ghcr.io/test/ubuntu:v1@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")
+
+	//os.Exit(0)
+	//dockertest()
 	setupCredentials()
 
 	ctx := oci.DefaultContext()
 
-	spec := ocireg.NewRepositorySpec("ghcr.io")
+	//spec := ocireg.NewRepositorySpec("ghcr.io")
+	//name := "mandelsoft/cnudie/component-descriptors/github.com/mandelsoft/pause"
+	version := "0.1-dev"
+	spec := docker2.NewRepositorySpec()
+	name := "ghcr.io/mandelsoft/pause"
 
 	repo, err := ctx.RepositoryForSpec(spec)
 	handleError(err, "get repo")
 
-	ns, err := repo.LookupNamespace("mandelsoft/cnudie/component-descriptors/github.com/mandelsoft/pause")
+	ns, err := repo.LookupNamespace(name)
 	handleError(err, "lookup namespace")
 
-	art, err := ns.GetArtefact("0.1-dev")
+	art, err := ns.GetArtefact(version)
 	handleError(err, "lookup artefact")
 
 	fmt.Println(ociutils.PrintArtefact(art))

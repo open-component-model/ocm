@@ -16,8 +16,49 @@ package cpi
 
 import (
 	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/opencontainers/go-digest"
 )
+
+// ArtefactProvider manages the technical access to a dedicated artefact
+type ArtefactProvider interface {
+	IsClosed() bool
+	IsReadOnly() bool
+	GetBlobDescriptor(digest digest.Digest) *Descriptor
+	Close() error
+
+	GetBlobData(digest digest.Digest) (DataAccess, error)
+	// GetArtefact is used to access nested artefacts (only)
+	GetArtefact(digest digest.Digest) (ArtefactAccess, error)
+
+	AddBlob(access BlobAccess) error
+	// AddArtefact is used to add nested artefacts (only)
+	AddArtefact(art Artefact) (access accessio.BlobAccess, err error)
+}
+
+type NopCloserArtefactProvider struct {
+	ArtefactSetContainer
+}
+
+func (p *NopCloserArtefactProvider) Close() error {
+	return nil
+}
+
+func (p *NopCloserArtefactProvider) AddArtefact(art Artefact) (access accessio.BlobAccess, err error) {
+	return p.ArtefactSetContainer.AddArtefact(art)
+}
+
+func (p *NopCloserArtefactProvider) GetArtefact(digest digest.Digest) (ArtefactAccess, error) {
+	return p.ArtefactSetContainer.GetArtefact("@" + digest.String())
+}
+
+func NewNopCloserArtefactProvider(p ArtefactSetContainer) ArtefactProvider {
+	return &NopCloserArtefactProvider{
+		p,
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 // ArtefactSetContainer is the interface used by subsequent access objects
 // to access the base implementation
@@ -29,6 +70,8 @@ type ArtefactSetContainer interface {
 	GetBlobData(digest digest.Digest) (DataAccess, error)
 	AddBlob(blob BlobAccess) error
 
-	GetArtefact(ref string) (ArtefactAccess, error)
+	GetArtefact(vers string) (ArtefactAccess, error)
 	AddArtefact(artefact Artefact, tags ...string) (access accessio.BlobAccess, err error)
+
+	NewArtefactProvider(state accessobj.State) (ArtefactProvider, error)
 }

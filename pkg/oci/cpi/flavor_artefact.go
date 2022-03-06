@@ -31,7 +31,7 @@ type ArtefactImpl struct {
 
 var _ ArtefactAccess = (*ArtefactImpl)(nil)
 
-func NewArtefactForBlob(access ArtefactSetContainer, blob accessio.BlobAccess) (*ArtefactImpl, error) {
+func NewArtefactForProviderBlob(access ArtefactSetContainer, p ArtefactProvider, blob accessio.BlobAccess) (*ArtefactImpl, error) {
 	mode := accessobj.ACC_WRITABLE
 	if access.IsReadOnly() {
 		mode = accessobj.ACC_READONLY
@@ -42,14 +42,38 @@ func NewArtefactForBlob(access ArtefactSetContainer, blob accessio.BlobAccess) (
 	}
 	a := &ArtefactImpl{
 		artefactBase: artefactBase{
-			access: access,
-			state:  state,
+			container: access,
+			state:     state,
+			provider:  p,
 		},
 	}
 	return a, nil
 }
 
-func NewArtefact(access ArtefactSetContainer, defs ...*artdesc.Artefact) *ArtefactImpl {
+func NewArtefactForBlob(access ArtefactSetContainer, blob accessio.BlobAccess) (*ArtefactImpl, error) {
+	mode := accessobj.ACC_WRITABLE
+	if access.IsReadOnly() {
+		mode = accessobj.ACC_READONLY
+	}
+	state, err := accessobj.NewBlobStateForBlob(mode, blob, NewArtefactStateHandler())
+	if err != nil {
+		return nil, err
+	}
+	p, err := access.NewArtefactProvider(state)
+	if err != nil {
+		return nil, err
+	}
+	a := &ArtefactImpl{
+		artefactBase: artefactBase{
+			container: access,
+			state:     state,
+			provider:  p,
+		},
+	}
+	return a, nil
+}
+
+func NewArtefact(access ArtefactSetContainer, defs ...*artdesc.Artefact) (*ArtefactImpl, error) {
 	var def *artdesc.Artefact
 	if len(defs) != 0 && defs[0] != nil {
 		def = defs[0]
@@ -63,13 +87,18 @@ func NewArtefact(access ArtefactSetContainer, defs ...*artdesc.Artefact) *Artefa
 		panic("oops: " + err.Error())
 	}
 
+	p, err := access.NewArtefactProvider(state)
+	if err != nil {
+		return nil, err
+	}
 	a := &ArtefactImpl{
 		artefactBase: artefactBase{
-			access: access,
-			state:  state,
+			container: access,
+			provider:  p,
+			state:     state,
 		},
 	}
-	return a
+	return a, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -120,7 +149,7 @@ func (a *ArtefactImpl) GetBlobDescriptor(digest digest.Digest) *Descriptor {
 	if d != nil {
 		return d
 	}
-	return a.access.GetBlobDescriptor(digest)
+	return a.container.GetBlobDescriptor(digest)
 }
 
 func (a *ArtefactImpl) Index() (*artdesc.Index, error) {
@@ -203,7 +232,13 @@ func (a *ArtefactImpl) GetIndex(digest digest.Digest) (IndexAccess, error) {
 func (a *ArtefactImpl) GetBlob(digest digest.Digest) (BlobAccess, error) {
 	d := a.GetBlobDescriptor(digest)
 	if d != nil {
-		data, err := a.access.GetBlobData(digest)
+		var data DataAccess
+		var err error
+		if a.provider != nil {
+			data, err = a.provider.GetBlobData(digest)
+		} else {
+			data, err = a.provider.GetBlobData(digest)
+		}
 		if err != nil {
 			return nil, err
 		}

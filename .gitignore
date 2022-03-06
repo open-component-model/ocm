@@ -1,3 +1,4 @@
 .idea
 *.sw[pq]
 main
+/tmp

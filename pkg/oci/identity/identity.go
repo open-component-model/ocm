@@ -20,6 +20,9 @@ import (
 	"github.com/gardener/ocm/pkg/credentials/cpi"
 )
 
+// VALUE_TYPE is the OCT registry type
+const VALUE_TYPE = "OCIRegistry"
+
 // ID_HOSTNAME is the hostname of an OCT repository
 const ID_HOSTNAME = "hostname"
 
@@ -30,6 +33,9 @@ const ID_PORT = "port"
 const ID_PATHPREFIX = "pathprefix"
 
 func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
+	if pattern["type"] != "" && id["type"] != "" && pattern["type"] != id["type"] {
+		return false
+	}
 	if pattern[ID_HOSTNAME] != id[ID_HOSTNAME] {
 		return false
 	}

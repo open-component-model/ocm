@@ -40,7 +40,7 @@ type dataAccess struct {
 
 var _ cpi.DataAccess = (*dataAccess)(nil)
 
-func NewDataAcess(fetcher remotes.Fetcher, digest digest.Digest, mimeType string, delayed bool) (*dataAccess, error) {
+func NewDataAccess(fetcher remotes.Fetcher, digest digest.Digest, mimeType string, delayed bool) (*dataAccess, error) {
 	var reader io.ReadCloser
 	var err error
 	desc := artdesc.Descriptor{

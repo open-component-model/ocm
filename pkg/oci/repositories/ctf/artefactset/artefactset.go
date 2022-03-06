@@ -300,5 +300,9 @@ func (a *ArtefactSet) NewArtefact(artefact ...*artdesc.Artefact) (core.ArtefactA
 	if a.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	return cpi.NewArtefact(a, artefact...), nil
+	return cpi.NewArtefact(a, artefact...)
+}
+
+func (a *ArtefactSet) NewArtefactProvider(state accessobj.State) (cpi.ArtefactProvider, error) {
+	return cpi.NewNopCloserArtefactProvider(a), nil
 }
