@@ -60,10 +60,10 @@ func New() *Artefact {
 
 func (d *Artefact) MimeType() string {
 	if d.IsIndex() {
-		return MediaTypeImageManifest
+		return MediaTypeImageIndex
 	}
 	if d.IsManifest() {
-		return MediaTypeImageIndex
+		return MediaTypeImageManifest
 	}
 	return ""
 }

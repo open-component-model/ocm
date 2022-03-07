@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/docker/cli v20.10.12+incompatible
-	github.com/docker/docker v20.10.12+incompatible // indirect
+	github.com/docker/docker v20.10.12+incompatible
 	github.com/docker/docker-credential-helpers v0.6.4 // indirect
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.2.0
@@ -28,6 +28,8 @@ require (
 require (
 	github.com/containerd/containerd v1.5.9
 	github.com/containers/image/v5 v5.20.0
+	github.com/docker/go-connections v0.4.0
+	github.com/marstr/guid v1.1.0
 )
 
 require (
@@ -36,7 +38,6 @@ require (
 	github.com/containers/ocicrypt v1.1.2 // indirect
 	github.com/containers/storage v1.38.2 // indirect
 	github.com/docker/distribution v2.8.0+incompatible // indirect
-	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect

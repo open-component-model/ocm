@@ -229,6 +229,10 @@ func (a *ArtefactImpl) GetIndex(digest digest.Digest) (IndexAccess, error) {
 	return a.IndexAccess().GetIndex(digest)
 }
 
+func (a *ArtefactImpl) GetBlobData(digest digest.Digest) (DataAccess, error) {
+	return a.provider.GetBlobData(digest)
+}
+
 func (a *ArtefactImpl) GetBlob(digest digest.Digest) (BlobAccess, error) {
 	d := a.GetBlobDescriptor(digest)
 	if d != nil {

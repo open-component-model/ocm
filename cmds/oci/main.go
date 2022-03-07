@@ -24,6 +24,7 @@ import (
 	"github.com/containerd/containerd/reference/docker"
 	"github.com/containers/image/v5/docker/archive"
 	"github.com/containers/image/v5/docker/daemon"
+	"github.com/containers/image/v5/docker/reference"
 	"github.com/containers/image/v5/image"
 	"github.com/containers/image/v5/types"
 	"github.com/gardener/ocm/pkg/common/accessio"
@@ -69,6 +70,59 @@ func setupCredentials() {
 	_ = ctx
 }
 
+func dockerwritetest() {
+
+	os.Remove("/tmp/docker.tar")
+	w, err := archive.NewWriter(nil, "/tmp/docker.tar")
+	handleError(err, "writer")
+
+	defer w.Close()
+
+	any, err := docker.ParseAnyReference("ghcr.io/mandelsoft/pause:test")
+	handleError(err, "ref")
+
+	ref, err := w.NewReference(any.(reference.NamedTagged))
+	handleError(err, "attach writer")
+
+	dst, err := ref.NewImageDestination(context.Background(), nil)
+	handleError(err, "dest")
+
+	ctx := oci.DefaultContext()
+
+	version := "0.1-dev"
+	spec := docker2.NewRepositorySpec()
+	name := "ghcr.io/mandelsoft/pause"
+
+	repo, err := ctx.RepositoryForSpec(spec)
+	handleError(err, "get repo")
+
+	ns, err := repo.LookupNamespace(name)
+	handleError(err, "lookup namespace")
+
+	defer ns.Close()
+
+	art, err := ns.GetArtefact(version)
+	handleError(err, "lookup artefact")
+
+	defer art.Close()
+
+	err = docker2.Convert(art, nil, dst)
+	handleError(err, "convert")
+	err = dst.Commit(context.Background(), nil)
+	handleError(err, "commit")
+
+	/*
+		m, mime, err := img.Manifest(context.Background())
+		handleError(err, "manifest")
+		fmt.Printf("manifest [%s]: %s\n", mime, string(m))
+
+		cfg, err := img.ConfigBlob(context.Background())
+		handleError(err, "config")
+		fmt.Printf("config: %s\n", string(cfg))
+	*/
+
+}
+
 func dockertest() {
 
 	ref, err := archive.ParseReference("ghcr.io/mandelsoft/pause:0.1-dev")
@@ -77,6 +131,7 @@ func dockertest() {
 	ref, err = daemon.NewReference("ca617b241345", nil)
 	handleError(err, "ref")
 
+	//ref.NewImageDestination(context.Background(), nil)
 	src, err := ref.NewImageSource(context.Background(), nil)
 	handleError(err, "source")
 
@@ -169,6 +224,44 @@ func Print(resourceURl string) {
 
 }
 
+func repotest() {
+	setupCredentials()
+
+	ctx := oci.DefaultContext()
+
+	//spec := ocireg.NewRepositorySpec("ghcr.io")
+	//name := "mandelsoft/cnudie/component-descriptors/github.com/mandelsoft/pause"
+	version := "0.1-dev"
+	spec := docker2.NewRepositorySpec()
+	name := "ghcr.io/mandelsoft/pause"
+
+	repo, err := ctx.RepositoryForSpec(spec)
+	handleError(err, "get repo")
+
+	ns, err := repo.LookupNamespace(name)
+	handleError(err, "lookup namespace")
+
+	art, err := ns.GetArtefact(version)
+	handleError(err, "lookup artefact")
+
+	defer art.Close()
+	fmt.Println(ociutils.PrintArtefact(art))
+	_ = art
+
+	blob := accessio.BlobAccessForString(MIME_OCTET, "testdata")
+	err = ns.AddBlob(blob)
+	handleError(err, "add blob")
+
+	bd, err := ns.GetBlobData(blob.Digest())
+	data, err := bd.Get()
+	handleError(err, "read blob")
+	fmt.Println(string(data))
+
+	b, _ := art.Blob()
+	err = ns.AddTags(b.Digest(), "0.1.beta")
+	handleError(err, "add tag")
+}
+
 var pattern = regexp.MustCompile("^[0-9a-f]{12}$")
 
 func main() {
@@ -193,40 +286,8 @@ func main() {
 	Print("ghcr.io/test/ubuntu@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")
 	Print("ghcr.io/test/ubuntu:v1@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")
 
-	//os.Exit(0)
 	//dockertest()
-	setupCredentials()
+	dockerwritetest()
+	//repotest()
 
-	ctx := oci.DefaultContext()
-
-	//spec := ocireg.NewRepositorySpec("ghcr.io")
-	//name := "mandelsoft/cnudie/component-descriptors/github.com/mandelsoft/pause"
-	version := "0.1-dev"
-	spec := docker2.NewRepositorySpec()
-	name := "ghcr.io/mandelsoft/pause"
-
-	repo, err := ctx.RepositoryForSpec(spec)
-	handleError(err, "get repo")
-
-	ns, err := repo.LookupNamespace(name)
-	handleError(err, "lookup namespace")
-
-	art, err := ns.GetArtefact(version)
-	handleError(err, "lookup artefact")
-
-	fmt.Println(ociutils.PrintArtefact(art))
-	_ = art
-
-	blob := accessio.BlobAccessForString(MIME_OCTET, "testdata")
-	err = ns.AddBlob(blob)
-	handleError(err, "add blob")
-
-	bd, err := ns.GetBlobData(blob.Digest())
-	data, err := bd.Get()
-	handleError(err, "read blob")
-	fmt.Println(string(data))
-
-	b, _ := art.Blob()
-	err = ns.AddTags(b.Digest(), "0.1.beta")
-	handleError(err, "add tag")
 }

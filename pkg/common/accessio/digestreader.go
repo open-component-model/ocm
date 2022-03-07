@@ -43,10 +43,32 @@ func (r *DigestReader) Read(buf []byte) (int, error) {
 	return c, err
 }
 
+func NewDefaultDigestReader(r io.Reader) *DigestReader {
+	return &DigestReader{
+		reader:   r,
+		digester: digest.Canonical.Digester(),
+		count:    0,
+	}
+}
+
 func NewDigestReaderWith(algorithm digest.Algorithm, r io.Reader) *DigestReader {
 	return &DigestReader{
 		reader:   r,
 		digester: algorithm.Digester(),
 		count:    0,
 	}
+}
+
+func Digest(access DataAccess) (digest.Digest, error) {
+	reader, err := access.Reader()
+	if err != nil {
+		return "", err
+	}
+	defer reader.Close()
+
+	dig, err := digest.FromReader(reader)
+	if err != nil {
+		return "", err
+	}
+	return dig, nil
 }

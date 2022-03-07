@@ -58,6 +58,8 @@ type BlobAccess interface {
 	DataAccess
 	MimeType
 
+	// DigestKnown reports whether digest is already known
+	DigestKnown() bool
 	// Digest returns the blob digest
 	Digest() digest.Digest // TODO; add error
 	// Size returns the blob size
@@ -159,6 +161,12 @@ func (b *blobAccess) MimeType() string {
 	return b.mimeType
 }
 
+func (b *blobAccess) DigestKnown() bool {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+	return b.digest != ""
+}
+
 func (b *blobAccess) Digest() digest.Digest {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -233,6 +241,10 @@ func (f *fileBlobAccess) Size() int64 {
 
 func (f *fileBlobAccess) MimeType() string {
 	return f.mimeType
+}
+
+func (f *fileBlobAccess) DigestKnown() bool {
+	return false
 }
 
 func (f *fileBlobAccess) Digest() digest.Digest {

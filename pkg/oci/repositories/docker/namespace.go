@@ -41,16 +41,22 @@ func (n *Namespace) Close() error {
 type NamespaceContainer struct {
 	repo      *Repository
 	namespace string
+	cache     accessio.BlobCache
 }
 
 var _ cpi.ArtefactSetContainer = (*NamespaceContainer)(nil)
 var _ cpi.NamespaceAccess = (*Namespace)(nil)
 
 func NewNamespace(repo *Repository, name string) (*Namespace, error) {
+	cache, err := accessio.NewDefaultBlobCache()
+	if err != nil {
+		return nil, err
+	}
 	n := &Namespace{
 		access: &NamespaceContainer{
 			repo:      repo,
 			namespace: name,
+			cache:     cache,
 		},
 	}
 	return n, nil
@@ -97,11 +103,12 @@ func (n *NamespaceContainer) ListTags() ([]string, error) {
 }
 
 func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
-	return nil, errors.ErrNotImplemented()
+	return n.cache.GetBlob("", digest)
 }
 
 func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
-	return accessio.ErrReadOnly
+	_, _, err := n.cache.AddBlob(blob)
+	return err
 }
 
 func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error) {
@@ -154,6 +161,20 @@ func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error
 }
 
 func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, tags ...string) (access accessio.BlobAccess, err error) {
+	tag := "latest"
+	if len(tags) > 0 {
+		tag = tags[0]
+	}
+	ref, err := ParseRef(n.namespace, tag)
+	if err != nil {
+		return nil, err
+	}
+	dst, err := ref.NewImageDestination(dummyContext, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer dst.Close()
+
 	return nil, accessio.ErrReadOnly
 }
 
