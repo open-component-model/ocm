@@ -30,15 +30,8 @@ import (
 	"github.com/opencontainers/go-digest"
 )
 
-type Namespace struct {
-	access *NamespaceContainer
-}
-
-func (n *Namespace) Close() error {
-	return nil
-}
-
 type NamespaceContainer struct {
+	lock      sync.RWMutex
 	repo      *Repository
 	namespace string
 	cache     accessio.BlobCache
@@ -48,7 +41,7 @@ var _ cpi.ArtefactSetContainer = (*NamespaceContainer)(nil)
 var _ cpi.NamespaceAccess = (*Namespace)(nil)
 
 func NewNamespace(repo *Repository, name string) (*Namespace, error) {
-	cache, err := accessio.NewDefaultBlobCache()
+	cache, err := accessio.NewCascadedBlobCache(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +64,20 @@ func (n *NamespaceContainer) IsReadOnly() bool {
 }
 
 func (n *NamespaceContainer) IsClosed() bool {
-	return n.repo.IsClosed()
+	n.lock.RLock()
+	defer n.lock.RUnlock()
+	return n.cache == nil
+}
+
+func (n *NamespaceContainer) Close() error {
+	n.lock.Lock()
+	defer n.lock.Unlock()
+	if n.cache != nil {
+		err := n.cache.Unref()
+		n.cache = nil
+		return err
+	}
+	return nil
 }
 
 func (n *NamespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
@@ -103,7 +109,8 @@ func (n *NamespaceContainer) ListTags() ([]string, error) {
 }
 
 func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
-	return n.cache.GetBlob("", digest)
+	_, acc, err := n.cache.GetBlob(digest)
+	return acc, err
 }
 
 func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
@@ -152,10 +159,13 @@ func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error
 		return nil, err
 	}
 
+	cache, err := accessio.NewCascadedBlobCacheForSource(n.cache, newDockerSource(img, src))
+	if err != nil {
+		return nil, err
+	}
 	p := &daemonArtefactProvider{
 		namespace: n,
-		src:       src,
-		img:       img,
+		cache:     cache,
 	}
 	return cpi.NewArtefactForProviderBlob(n, p, accessio.BlobAccessForData(mime, data))
 }
@@ -175,83 +185,50 @@ func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, tags ...string) 
 	}
 	defer dst.Close()
 
-	return nil, accessio.ErrReadOnly
+	blob, err := Convert(artefact, n.cache, dst)
+	if err != nil {
+		return nil, err
+	}
+	err = dst.Commit(dummyContext, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return blob, nil
 }
 
 func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error {
-	return accessio.ErrReadOnly
+
+	if ok, _ := artdesc.IsDigest(digest.String()); ok {
+		return errors.ErrNotSupported("image access by digest")
+	}
+	src := n.namespace + ":" + digest.String()
+	if pattern.MatchString(digest.String()) {
+		// this definately no digest, but the library expects it this way
+		src = digest.String()
+	}
+	for _, tag := range tags {
+		err := n.repo.client.ImageTag(dummyContext, src, n.namespace+":"+tag)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (n *NamespaceContainer) NewArtefactProvider(state accessobj.State) (cpi.ArtefactProvider, error) {
 	return nil, nil
 }
 
-type daemonArtefactProvider struct {
-	lock      sync.Mutex
-	namespace *NamespaceContainer
-	src       types.ImageSource
-	img       types.Image
-}
-
-var _ cpi.ArtefactProvider = (*daemonArtefactProvider)(nil)
-
-func (d *daemonArtefactProvider) IsClosed() bool {
-	d.lock.Lock()
-	defer d.lock.Unlock()
-	return d.src == nil
-}
-
-func (d *daemonArtefactProvider) IsReadOnly() bool {
-	return true
-}
-
-func (d *daemonArtefactProvider) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
-	return nil
-}
-
-func (d *daemonArtefactProvider) Close() error {
-	d.lock.Lock()
-	defer d.lock.Unlock()
-	if d.src != nil {
-		err := d.src.Close()
-		d.src = nil
-		return err
-	}
-	return nil
-}
-
-func (d *daemonArtefactProvider) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
-	info := d.img.ConfigInfo()
-	if info.Digest == digest {
-		data, err := d.img.ConfigBlob(dummyContext)
-		if err != nil {
-			return nil, err
-		}
-		return accessio.DataAccessForBytes(data), nil
-	}
-	info.Digest = ""
-	for _, l := range d.img.LayerInfos() {
-		if l.Digest == digest {
-			info = l
-			return NewDataAccess(d.src, info, false)
-		}
-	}
-	return nil, cpi.ErrBlobNotFound(digest)
-}
-
-func (d *daemonArtefactProvider) GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {
-	return nil, errors.ErrInvalid()
-}
-
-func (d *daemonArtefactProvider) AddBlob(access cpi.BlobAccess) error {
-	return accessio.ErrReadOnly
-}
-
-func (d *daemonArtefactProvider) AddArtefact(art cpi.Artefact) (access accessio.BlobAccess, err error) {
-	return nil, accessio.ErrReadOnly
-}
-
 ////////////////////////////////////////////////////////////////////////////////
+
+type Namespace struct {
+	access *NamespaceContainer
+}
+
+func (n *Namespace) Close() error {
+	return n.access.Close()
+}
 
 func (n *Namespace) GetRepository() cpi.Repository {
 	return n.access.repo
@@ -269,7 +246,19 @@ func (n *Namespace) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, e
 	if n.access.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	return nil, errors.ErrNotImplemented()
+	var m *artdesc.Artefact
+	if len(art) == 0 {
+		m = artdesc.NewManifestArtefact()
+	} else {
+		if !art[0].IsManifest() {
+			err := m.SetManifest(artdesc.NewManifest())
+			if err != nil {
+				return nil, err
+			}
+		}
+		m = art[0]
+	}
+	return cpi.NewArtefact(n.access, m)
 }
 
 func (n *Namespace) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {

@@ -17,6 +17,7 @@ package helper
 import (
 	"fmt"
 
+	"github.com/containerd/containerd/images"
 	"github.com/gardener/ocm/pkg/errors"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
@@ -36,6 +37,8 @@ func (g *GenericDescriptor) Validate() error {
 	switch g.MediaType {
 	case ociv1.MediaTypeImageIndex:
 	case ociv1.MediaTypeImageManifest:
+	case images.MediaTypeDockerSchema2Manifest:
+	case images.MediaTypeDockerSchema2ManifestList:
 	case "":
 	default:
 		return errors.ErrUnknown("media type", g.MediaType)

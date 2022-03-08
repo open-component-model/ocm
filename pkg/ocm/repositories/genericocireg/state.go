@@ -67,15 +67,9 @@ func (s *StateAccess) Get() (accessio.BlobAccess, error) {
 }
 
 func (s *StateAccess) get() (accessio.BlobAccess, error) {
-	blob, err := s.access.GetConfigBlob()
-	if err != nil {
-		return nil, err
-	}
-	data, err := blob.Get()
-	if err != nil {
-		return nil, err
-	}
 	var config ComponentDescriptorConfig
+
+	data, err := accessio.BlobData(s.access.GetConfigBlob())
 
 	err = json.Unmarshal(data, &config)
 	if err != nil {

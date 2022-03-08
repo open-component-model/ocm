@@ -36,6 +36,7 @@ type RepositoryInfo struct {
 	Scheme  string
 	Locator string
 	Creds   credentials.Credentials
+	Legacy  bool
 }
 
 func (r *RepositoryInfo) HostInfo() (string, string, string) {
@@ -121,7 +122,7 @@ func (r *Repository) getResolver(comp string) (remotes.Resolver, error) {
 		Hosts: config.ConfigureHosts(context.Background(), config.HostOptions{
 			Credentials: func(host string) (string, string, error) {
 				if creds != nil {
-					fmt.Printf("************** creds for %s: %s\n", host, creds)
+					//fmt.Printf("************** creds for %s: %s\n", host, creds)
 					p := creds.GetProperty(credentials.ATTR_IDENTITY_TOKEN)
 					if p == "" {
 						p = creds.GetProperty(credentials.ATTR_PASSWORD)

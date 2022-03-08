@@ -134,15 +134,10 @@ func (b *artefactHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hi
 	if err != nil {
 		return nil, err
 	}
-	err = artefactset.TransferArtefact(art, set, namespace)
+
+	err = artefactset.TransferArtefact(art, namespace, oci.AsTags(tag)...)
 	if err != nil {
 		return nil, err
-	}
-	if tag != "" {
-		err = namespace.AddTags(digest, tag)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	ref := path.Join(base, namespace.GetNamespace()) + version

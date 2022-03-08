@@ -17,6 +17,7 @@ package comparch
 import (
 	"io"
 
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/gardener/ocm/pkg/runtime"
@@ -96,19 +97,11 @@ func (m *localFilesystemBlobAccessMethod) GetKind() string {
 }
 
 func (m *localFilesystemBlobAccessMethod) Reader() (io.ReadCloser, error) {
-	blob, err := m.comp.base.GetBlobData(m.spec.ReferenceName)
-	if err != nil {
-		return nil, err
-	}
-	return blob.Reader()
+	return accessio.BlobReader(m.comp.base.GetBlobData(m.spec.ReferenceName))
 }
 
 func (m *localFilesystemBlobAccessMethod) Get() ([]byte, error) {
-	blob, err := m.comp.base.GetBlobData(m.spec.ReferenceName)
-	if err != nil {
-		return nil, err
-	}
-	return blob.Get()
+	return accessio.BlobData(m.comp.base.GetBlobData(m.spec.ReferenceName))
 }
 
 func (m *localFilesystemBlobAccessMethod) MimeType() string {

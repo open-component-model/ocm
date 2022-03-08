@@ -17,6 +17,7 @@ package comparch
 import (
 	"io"
 
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
@@ -195,19 +196,11 @@ func (r BaseAccess) AccessMethod() (cpi.AccessMethod, error) {
 }
 
 func (r BaseAccess) Get() ([]byte, error) {
-	m, err := r.AccessMethod()
-	if err != nil {
-		return nil, err
-	}
-	return m.Get()
+	return accessio.BlobData(r.AccessMethod())
 }
 
 func (r BaseAccess) Reader() (io.ReadCloser, error) {
-	m, err := r.AccessMethod()
-	if err != nil {
-		return nil, err
-	}
-	return m.Reader()
+	return accessio.BlobReader(r.AccessMethod())
 }
 
 func (r BaseAccess) MimeType() string {

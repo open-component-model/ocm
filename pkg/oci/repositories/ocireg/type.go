@@ -17,6 +17,7 @@ package ocireg
 import (
 	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/containerd/containerd/reference"
 	"github.com/gardener/ocm/pkg/credentials"
@@ -38,7 +39,8 @@ func init() {
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	// BaseURL is the base url of the repository to resolve artefacts.
-	BaseURL string `json:"baseUrl"`
+	BaseURL     string `json:"baseUrl"`
+	LegacyTypes *bool  `json:"legacyTypes,omitempty"`
 }
 
 // NewRepositorySpec creates a new RepositorySpec
@@ -55,7 +57,7 @@ func (a *RepositorySpec) GetType() string {
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	var u *url.URL
 	info := &RepositoryInfo{}
-
+	legacy := false
 	ref, err := reference.Parse(a.BaseURL)
 	if err == nil {
 		u, err = url.Parse("https://" + ref.Locator)
@@ -73,8 +75,21 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 		}
 		info.Locator = u.Host
 	}
+	if a.LegacyTypes != nil {
+		legacy = *a.LegacyTypes
+	} else {
+		idx := strings.Index(info.Locator, "/")
+		host := info.Locator
+		if idx > 0 {
+			host = info.Locator[:idx]
+		}
+		if host == "docker.io" {
+			legacy = true
+		}
+	}
 	info.Scheme = u.Scheme
 	info.Creds = creds
+	info.Legacy = legacy
 
 	return NewRepository(ctx, a, info)
 }

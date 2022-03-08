@@ -16,6 +16,7 @@ package accessio
 
 import (
 	"io"
+	"os"
 	"sync"
 
 	"github.com/gardener/ocm/pkg/common"
@@ -26,16 +27,31 @@ import (
 	"github.com/opencontainers/go-digest"
 )
 
-type BlobCache interface {
-	GetBlob(mime string, digest digest.Digest) (BlobAccess, error)
+type Allocatable interface {
+	Ref() error
+	Unref() error
+}
+
+type BlobSource interface {
+	Allocatable
+	GetBlobData(digest digest.Digest) (DataAccess, error)
+	GetBlob(digest digest.Digest) (int64, DataAccess, error)
+}
+
+type BlobSink interface {
+	Allocatable
 	AddBlob(blob BlobAccess) (int64, digest.Digest, error)
-	Close() error
+}
+
+type BlobCache interface {
+	BlobSource
+	BlobSink
 }
 
 type blobCache struct {
 	lock     sync.RWMutex
-	refcount int
 	cache    vfs.FileSystem
+	refcount int
 }
 
 func NewDefaultBlobCache() (BlobCache, error) {
@@ -44,30 +60,57 @@ func NewDefaultBlobCache() (BlobCache, error) {
 		return nil, err
 	}
 	return &blobCache{
-		cache: fs,
+		cache:    fs,
+		refcount: 1,
 	}, nil
 }
 
-func (c *blobCache) Close() error {
+func (c *blobCache) Ref() error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
-	err := vfs.Cleanup(c.cache)
-	c.cache = nil
+	if c.cache == nil {
+		return ErrClosed
+	}
+	c.refcount++
+	return nil
+}
+
+func (c *blobCache) Unref() error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	if c.cache == nil {
+		return ErrClosed
+	}
+	c.refcount--
+	var err error
+	if c.refcount <= 0 {
+		err = vfs.Cleanup(c.cache)
+		c.cache = nil
+	}
 	return err
 }
 
-func (c *blobCache) GetBlob(mime string, digest digest.Digest) (BlobAccess, error) {
+func (c *blobCache) GetBlobData(digest digest.Digest) (DataAccess, error) {
+	_, acc, err := c.GetBlob(digest)
+	return acc, err
+}
+
+func (c *blobCache) GetBlob(digest digest.Digest) (int64, DataAccess, error) {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 	if c.cache == nil {
-		return nil, ErrClosed
+		return -1, nil, ErrClosed
 	}
 
 	path := common.DigestToFileName(digest)
-	if ok, err := vfs.Exists(c.cache, path); ok || err != nil {
-		return BlobAccessForFile(mime, path, c.cache), nil
+	fi, err := c.cache.Stat(path)
+	if err == nil {
+		return fi.Size(), DataAccessForFile(c.cache, path), nil
 	}
-	return nil, ErrBlobNotFound(digest)
+	if os.IsNotExist(err) {
+		return -1, nil, ErrBlobNotFound(digest)
+	}
+	return -1, nil, err
 }
 
 func (c *blobCache) AddBlob(blob BlobAccess) (int64, digest.Digest, error) {
@@ -121,4 +164,205 @@ func (c *blobCache) AddBlob(blob BlobAccess) (int64, digest.Digest, error) {
 		return size, digester.Digest(), err
 	}
 	return size, blob.Digest(), nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type cascadedCache struct {
+	lock     sync.RWMutex
+	parent   BlobSource
+	source   BlobSource
+	sink     BlobSink
+	refcount int
+}
+
+var _ BlobCache = (*cascadedCache)(nil)
+
+func NewCascadedBlobCache(parent BlobCache) (BlobCache, error) {
+	if parent != nil {
+		err := parent.Ref()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &cascadedCache{
+		parent:   parent,
+		refcount: 1,
+	}, nil
+}
+
+func NewCascadedBlobCacheForSource(parent BlobSource, src BlobSource) (BlobCache, error) {
+	if parent != nil {
+		err := parent.Ref()
+		if err != nil {
+			return nil, err
+		}
+	}
+	if src != nil {
+		err := src.Ref()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &cascadedCache{
+		parent:   parent,
+		source:   src,
+		refcount: 1,
+	}, nil
+}
+
+func NewCascadedBlobCacheForCache(parent BlobSource, src BlobCache) (BlobCache, error) {
+	if parent != nil {
+		err := parent.Ref()
+		if err != nil {
+			return nil, err
+		}
+	}
+	if src != nil {
+		err := src.Ref()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &cascadedCache{
+		parent: parent,
+		source: src,
+		sink:   src,
+	}, nil
+}
+
+func (c *cascadedCache) Ref() error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	if c.refcount == 0 {
+		return ErrClosed
+	}
+	c.refcount++
+	return nil
+}
+
+func (c *cascadedCache) Unref() error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	if c.refcount == 0 {
+		return ErrClosed
+	}
+	c.refcount--
+	list := errors.ErrListf("closing cascaded blob cache")
+	if c.refcount <= 0 {
+		if c.source != nil {
+			list.Add(c.source.Unref())
+		}
+		if c.parent != nil {
+			list.Add(c.parent.Unref())
+		}
+	}
+	return list.Result()
+}
+
+func (c *cascadedCache) GetBlobData(digest digest.Digest) (DataAccess, error) {
+	_, acc, err := c.GetBlob(digest)
+	return acc, err
+}
+
+func (c *cascadedCache) GetBlob(digest digest.Digest) (int64, DataAccess, error) {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+	if c.refcount == 0 {
+		return -1, nil, ErrClosed
+	}
+
+	if c.source != nil {
+		size, acc, err := c.source.GetBlob(digest)
+		if err == nil {
+			return size, acc, err
+		}
+		if !IsErrBlobNotFound(err) {
+			return -1, nil, err
+		}
+	}
+	if c.parent != nil {
+		return c.parent.GetBlob(digest)
+	}
+	return -1, nil, ErrBlobNotFound(digest)
+}
+
+func (c *cascadedCache) AddBlob(blob BlobAccess) (int64, digest.Digest, error) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	if c.refcount == 0 {
+		return -1, "", ErrClosed
+	}
+
+	if c.source == nil {
+		cache, err := NewDefaultBlobCache()
+		if err != nil {
+			return -1, "", err
+		}
+		c.source = cache
+		c.sink = cache
+	}
+	if c.sink != nil {
+		return c.sink.AddBlob(blob)
+	}
+	if c.parent != nil {
+		if sink, ok := c.parent.(BlobSink); ok {
+			return sink.AddBlob(blob)
+		}
+	}
+	return -1, "", ErrReadOnly
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type norefBlobSource struct {
+	BlobSource
+}
+
+var _ BlobSource = (*norefBlobSource)(nil)
+
+func NoRefBlobSource(s BlobSource) BlobSource { return &norefBlobSource{s} }
+
+func (norefBlobSource) Ref() error {
+	return nil
+}
+
+func (norefBlobSource) Unref() error {
+	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type norefBlobSink struct {
+	BlobSink
+}
+
+var _ BlobSink = (*norefBlobSink)(nil)
+
+func NoRefBlobSink(s BlobSink) BlobSink { return &norefBlobSink{s} }
+
+func (norefBlobSink) Ref() error {
+	return nil
+}
+
+func (norefBlobSink) Unref() error {
+	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type norefBlobCache struct {
+	BlobCache
+}
+
+var _ BlobCache = (*norefBlobCache)(nil)
+
+func NoRefBlobCache(s BlobCache) BlobCache { return &norefBlobCache{s} }
+
+func (norefBlobCache) Ref() error {
+	return nil
+}
+
+func (norefBlobCache) Unref() error {
+	return nil
 }

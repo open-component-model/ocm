@@ -27,11 +27,11 @@ type ArtefactProvider interface {
 	GetBlobDescriptor(digest digest.Digest) *Descriptor
 	Close() error
 
-	GetBlobData(digest digest.Digest) (DataAccess, error)
+	BlobSource
+	BlobSink
+
 	// GetArtefact is used to access nested artefacts (only)
 	GetArtefact(digest digest.Digest) (ArtefactAccess, error)
-
-	AddBlob(access BlobAccess) error
 	// AddArtefact is used to add nested artefacts (only)
 	AddArtefact(art Artefact) (access accessio.BlobAccess, err error)
 }

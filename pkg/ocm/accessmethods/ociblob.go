@@ -17,6 +17,10 @@ package accessmethods
 import (
 	"io"
 
+	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/errors"
+	"github.com/gardener/ocm/pkg/oci"
+	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
 	"github.com/gardener/ocm/pkg/ocm/core"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/gardener/ocm/pkg/runtime"
@@ -67,12 +71,13 @@ func (s OCIBlobAccessSpec) IsLocal(context core.Context) bool {
 }
 
 func (s *OCIBlobAccessSpec) AccessMethod(access core.ComponentVersionAccess) (core.AccessMethod, error) {
-	return &ociBlobAccessMethod{s}, nil
+	return &ociBlobAccessMethod{access, s}, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type ociBlobAccessMethod struct {
+	comp core.ComponentVersionAccess
 	spec *OCIBlobAccessSpec
 }
 
@@ -83,13 +88,40 @@ func (o *ociBlobAccessMethod) GetKind() string {
 }
 
 func (o *ociBlobAccessMethod) Get() ([]byte, error) {
-	panic("implement me")
+	return accessio.BlobData(o.getBlob())
 }
 
 func (o *ociBlobAccessMethod) Reader() (io.ReadCloser, error) {
-	panic("implement me")
+	return accessio.BlobReader(o.getBlob())
 }
 
 func (o *ociBlobAccessMethod) MimeType() string {
 	return o.MimeType()
+}
+
+func (m *ociBlobAccessMethod) getBlob() (cpi.BlobAccess, error) {
+	ref, err := oci.ParseRef(m.spec.Reference)
+	if err != nil {
+		return nil, err
+	}
+	if ref.Tag != nil || ref.Digest != nil {
+		return nil, errors.ErrInvalid("oci repository", m.spec.Reference)
+	}
+	spec := ocireg.NewRepositorySpec(ref.Host)
+	ocirepo, err := m.comp.GetContext().OCIContext().RepositoryForSpec(spec)
+	if err != nil {
+		return nil, err
+	}
+	ns, err := ocirepo.LookupNamespace(ref.Repository)
+	if err != nil {
+		return nil, err
+	}
+	acc, err := ns.GetBlobData(m.spec.Digest)
+	if err != nil {
+		return nil, err
+	}
+	if m.spec.Size <= 0 {
+		m.spec.Size = -1
+	}
+	return accessio.BlobAccessForDataAccess(m.spec.Digest, m.spec.Size, m.spec.MediaType, acc), nil
 }

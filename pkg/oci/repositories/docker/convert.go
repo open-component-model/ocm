@@ -23,6 +23,7 @@ import (
 	"github.com/containers/image/v5/image"
 	"github.com/containers/image/v5/manifest"
 	"github.com/containers/image/v5/types"
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/opencontainers/go-digest"
 )
@@ -30,7 +31,7 @@ import (
 // fakeSource implements required methods to call the manifest conversion
 type fakeSource struct {
 	types.ImageSource
-	art   cpi.Artefact
+	art   cpi.BlobAccess
 	blobs cpi.BlobSource
 	ref   types.ImageReference
 }
@@ -39,15 +40,11 @@ func (f *fakeSource) GetManifest(ctx context.Context, instanceDigest *digest.Dig
 	if instanceDigest != nil {
 		return nil, "", fmt.Errorf("manifest lists are not supported")
 	}
-	blob, err := f.art.Blob()
+	data, err := f.art.Get()
 	if err != nil {
 		return nil, "", err
 	}
-	data, err := blob.Get()
-	if err != nil {
-		return nil, "", err
-	}
-	return data, blob.MimeType(), nil
+	return data, f.art.MimeType(), nil
 }
 
 func (f *fakeSource) GetBlob(ctx context.Context, bi types.BlobInfo, bc types.BlobInfoCache) (io.ReadCloser, int64, error) {
@@ -65,35 +62,93 @@ func (f *fakeSource) Reference() types.ImageReference {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type artBlobCache struct {
+	access cpi.ArtefactAccess
+}
+
+var _ accessio.BlobCache = (*artBlobCache)(nil)
+
+func ArtefactAsBlobCache(access cpi.ArtefactAccess) accessio.BlobCache {
+	return &artBlobCache{access}
+}
+
+func (a *artBlobCache) Ref() error {
+	return nil
+}
+
+func (a *artBlobCache) Unref() error {
+	return nil
+}
+
+func (a *artBlobCache) GetBlobData(digest digest.Digest) (accessio.DataAccess, error) {
+	return a.access.GetBlob(digest)
+}
+
+func (a artBlobCache) GetBlob(digest digest.Digest) (int64, accessio.DataAccess, error) {
+	blob, err := a.access.GetBlob(digest)
+	if err != nil {
+		return -1, nil, err
+	}
+	return blob.Size(), blob, err
+}
+
+func (a artBlobCache) AddBlob(blob accessio.BlobAccess) (int64, digest.Digest, error) {
+	err := a.access.AddBlob(blob)
+	if err != nil {
+		return -1, "", err
+	}
+	return blob.Size(), blob.Digest(), err
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
-func Convert(art cpi.Artefact, blobs cpi.BlobSource, dst types.ImageDestination) error {
-
+func blobSource(art cpi.Artefact, blobs accessio.BlobSource) (accessio.BlobSource, error) {
+	var err error
 	if blobs == nil {
-		if t, ok := art.(cpi.BlobSource); !ok {
-			return fmt.Errorf("blob source required")
+		if t, ok := art.(cpi.ArtefactAccess); !ok {
+			return nil, fmt.Errorf("blob source required")
 		} else {
-			blobs = t
+			blobs = ArtefactAsBlobCache(t)
+		}
+	} else {
+		if t, ok := art.(cpi.ArtefactAccess); ok {
+			blobs, err = accessio.NewCascadedBlobCacheForSource(blobs, ArtefactAsBlobCache(t))
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
+	return blobs, nil
+}
+
+func Convert(art cpi.Artefact, blobs accessio.BlobSource, dst types.ImageDestination) (cpi.BlobAccess, error) {
+
+	blobs, err := blobSource(art, blobs)
+	if err != nil {
+		return nil, err
+	}
+	artblob, err := art.Blob()
+	if err != nil {
+		return nil, err
+	}
 	ociImage := &fakeSource{
-		art:   art,
+		art:   artblob,
 		blobs: blobs,
 		ref:   dst.Reference(),
 	}
 
 	m, err := art.Manifest()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	for i, l := range m.Layers {
 		blob, err := blobs.GetBlobData(l.Digest)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		r, err := blob.Reader()
 		if err != nil {
-			return err
+			return nil, err
 		}
 		defer r.Close()
 		info := types.BlobInfo{
@@ -106,14 +161,14 @@ func Convert(art cpi.Artefact, blobs cpi.BlobSource, dst types.ImageDestination)
 		fmt.Printf("put blob  for layer %d\n", i)
 		info, err = dst.PutBlob(dummyContext, r, info, nil, false)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	un := image.UnparsedInstance(ociImage, nil)
 	img, err := image.FromUnparsedImage(dummyContext, nil, un)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	opts := types.ManifestUpdateOptions{
@@ -125,23 +180,23 @@ func Convert(art cpi.Artefact, blobs cpi.BlobSource, dst types.ImageDestination)
 
 	img, err = img.UpdatedImage(dummyContext, opts)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	bi := img.ConfigInfo()
 	blob, err := img.ConfigBlob(dummyContext)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	var reader io.ReadCloser
 	if blob == nil {
 		orig, err := blobs.GetBlobData(bi.Digest)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		reader, err = orig.Reader()
 		if err != nil {
-			return err
+			return nil, err
 		}
 	} else {
 		reader = io.NopCloser(bytes.NewReader(blob))
@@ -150,8 +205,8 @@ func Convert(art cpi.Artefact, blobs cpi.BlobSource, dst types.ImageDestination)
 
 	man, _, err := img.Manifest(dummyContext)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return dst.PutManifest(dummyContext, man, nil)
+	return artblob, dst.PutManifest(dummyContext, man, nil)
 }

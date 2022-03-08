@@ -162,6 +162,7 @@ func newState(mode AccessMode, a StateAccess, p StateHandler) (*state, error) {
 		if err != nil {
 			return nil, err
 		}
+		blob = accessio.BlobAccessForData(blob.MimeType(), data) // cache orginal data
 		current, err = p.Decode(data)
 		if err != nil {
 			return nil, err

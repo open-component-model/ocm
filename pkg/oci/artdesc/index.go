@@ -45,12 +45,17 @@ func (i *Index) GetBlobDescriptor(digest digest.Digest) *Descriptor {
 	return nil
 }
 
+func (i *Index) MimeType() string {
+	return ArtefactMimeType(i.MediaType, MediaTypeImageIndex, legacy)
+}
+
 func (i *Index) ToBlobAccess() (accessio.BlobAccess, error) {
+	i.MediaType = i.MimeType()
 	data, err := json.Marshal(i)
 	if err != nil {
 		return nil, err
 	}
-	return accessio.BlobAccessForData(MediaTypeImageIndex, data), nil
+	return accessio.BlobAccessForData(i.MediaType, data), nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -17,6 +17,7 @@ package genericocireg
 import (
 	"io"
 
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
@@ -66,11 +67,7 @@ func (m *localFilesystemBlobAccessMethod) Reader() (io.ReadCloser, error) {
 }
 
 func (m *localFilesystemBlobAccessMethod) Get() ([]byte, error) {
-	blob, err := m.getBlob()
-	if err != nil {
-		return nil, err
-	}
-	return blob.Get()
+	return accessio.BlobData(m.getBlob())
 }
 
 func (m *localFilesystemBlobAccessMethod) MimeType() string {

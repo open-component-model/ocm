@@ -20,6 +20,7 @@ import (
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
+	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/mandelsoft/vfs/pkg/osfs"
@@ -99,7 +100,7 @@ func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, e
 		return nil, err
 	}
 	defer set.Close()
-	err = TransferArtefact(art, ns, set)
+	err = TransferArtefact(art, set)
 	if err != nil {
 		return nil, err
 	}
@@ -115,48 +116,6 @@ func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, e
 	return ab, nil
 }
 
-func TransferArtefact(art cpi.ArtefactAccess, ns cpi.NamespaceAccess, set cpi.ArtefactSink) error {
-	if art.GetDescriptor().IsIndex() {
-		return TransferIndexToSet(art.IndexAccess(), ns, set)
-	} else {
-		return TransferManifestToSet(art.ManifestAccess(), ns, set)
-	}
-}
-
-func TransferIndexToSet(art cpi.IndexAccess, ns cpi.NamespaceAccess, set cpi.ArtefactSink) error {
-	for _, l := range art.GetDescriptor().Manifests {
-		art, err := art.GetArtefact(l.Digest)
-		if err != nil {
-			return err
-		}
-		err = TransferArtefact(art, ns, set)
-		if err != nil {
-			return err
-		}
-	}
-	_, err := set.AddArtefact(art)
-	return err
-}
-
-func TransferManifestToSet(art cpi.ManifestAccess, ns cpi.NamespaceAccess, set cpi.ArtefactSink) error {
-	blob, err := art.GetConfigBlob()
-	if err != nil {
-		return err
-	}
-	err = set.AddBlob(blob)
-	if err != nil {
-		return err
-	}
-	for _, l := range art.GetDescriptor().Layers {
-		blob, err = art.GetBlob(l.Digest)
-		if err != nil {
-			return err
-		}
-		err = set.AddBlob(blob)
-		if err != nil {
-			return err
-		}
-	}
-	_, err = set.AddArtefact(art)
-	return err
+func TransferArtefact(art cpi.ArtefactAccess, set cpi.ArtefactSink, tags ...string) error {
+	return oci.TransferArtefact(art, set, tags...)
 }

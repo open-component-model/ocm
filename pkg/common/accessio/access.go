@@ -38,14 +38,22 @@ func IsErrBlobNotFound(err error) bool {
 	return errors.IsErrNotFoundKind(err, KIND_BLOB)
 }
 
+type DataGetter interface {
+	// Get returns the content as byte array
+	Get() ([]byte, error)
+}
+
+type DataReader interface {
+	// Reader returns a reader to incrementally access byte stream content
+	Reader() (io.ReadCloser, error)
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 //  DataAccess describes the access to sequence of bytes
 type DataAccess interface {
-	// Get returns the content of the blob as byte array
-	Get() ([]byte, error)
-	// Reader returns a reader to incrementally access the blob content
-	Reader() (io.ReadCloser, error)
+	DataGetter
+	DataReader
 }
 
 type MimeType interface {

@@ -59,3 +59,19 @@ func (c *additionalCloser) Close() error {
 func (c *additionalCloser) Read(p []byte) (n int, err error) {
 	return c.reader.Read(p)
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+func BlobData(blob DataGetter, err error) ([]byte, error) {
+	if err != nil {
+		return nil, err
+	}
+	return blob.Get()
+}
+
+func BlobReader(blob DataReader, err error) (io.ReadCloser, error) {
+	if err != nil {
+		return nil, err
+	}
+	return blob.Reader()
+}

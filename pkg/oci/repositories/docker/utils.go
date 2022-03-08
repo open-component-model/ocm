@@ -48,6 +48,14 @@ func ParseRef(name, version string) (types.ImageReference, error) {
 	return daemon.ParseReference(name + ":" + version)
 }
 
+func ImageId(art cpi.Artefact) digest.Digest {
+	m, err := art.Manifest()
+	if err != nil {
+		return ""
+	}
+	return digest.Digest(m.Config.Digest.Hex()[:12])
+}
+
 type dataAccess struct {
 	lock   sync.Mutex
 	info   types.BlobInfo

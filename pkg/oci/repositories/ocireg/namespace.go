@@ -135,7 +135,35 @@ func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, tags ...string) 
 	if err != nil {
 		return nil, err
 	}
-	return blob, n.push(blob.Digest().String(), blob)
+	// blob=artdesc.MapArtefactBlobMimeType(blob, true)
+	/*
+		mime:=artefact.Artefact().MimeType()
+		mapped:=artdesc.MapArtefactMimeType(mime, true)
+		if blob.MimeType()!=mapped {
+			blob, err = artefact.Artefact().ToBlobAccess()
+		}
+	*/
+	vers := blob.Digest().String()
+	if len(tags) > 0 && tags[0] != "" {
+		vers = tags[0]
+	}
+	if n.repo.info.Legacy {
+		blob = artdesc.MapArtefactBlobMimeType(blob, true)
+	}
+	err = n.push(vers, blob)
+	if err != nil {
+		return nil, err
+	}
+	if len(tags) > 1 {
+		for _, tag := range tags[1:] {
+			err := n.push(tag, blob)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return blob, err
 }
 
 func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error {

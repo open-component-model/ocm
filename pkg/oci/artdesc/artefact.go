@@ -17,6 +17,7 @@ package artdesc
 import (
 	"encoding/json"
 
+	"github.com/containerd/containerd/images"
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/artdesc/helper"
@@ -31,7 +32,12 @@ const (
 	MediaTypeImageIndex     = ociv1.MediaTypeImageIndex
 	MediaTypeImageLayer     = ociv1.MediaTypeImageLayer
 	MediaTypeImageLayerGzip = ociv1.MediaTypeImageLayerGzip
+
+	MediaTypeDockerSchema2Manifest     = images.MediaTypeDockerSchema2Manifest
+	MediaTypeDockerSchema2ManifestList = images.MediaTypeDockerSchema2ManifestList
 )
+
+var legacy = false
 
 type Descriptor = ociv1.Descriptor
 type Platform = ociv1.Platform
@@ -58,12 +64,24 @@ func New() *Artefact {
 	return &Artefact{}
 }
 
+func NewManifestArtefact() *Artefact {
+	a := New()
+	a.SetManifest(NewManifest())
+	return a
+}
+
+func NewIndexArtefact() *Artefact {
+	a := New()
+	a.SetIndex(NewIndex())
+	return a
+}
+
 func (d *Artefact) MimeType() string {
 	if d.IsIndex() {
-		return MediaTypeImageIndex
+		return d.index.MimeType()
 	}
 	if d.IsManifest() {
-		return MediaTypeImageManifest
+		return d.manifest.MimeType()
 	}
 	return ""
 }
@@ -126,11 +144,11 @@ func (d *Artefact) GetBlobDescriptor(digest digest.Digest) *Descriptor {
 
 func (d Artefact) MarshalJSON() ([]byte, error) {
 	if d.manifest != nil {
-		d.manifest.MediaType = ociv1.MediaTypeImageManifest
+		d.manifest.MediaType = ArtefactMimeType(d.manifest.MediaType, ociv1.MediaTypeImageManifest, legacy)
 		return json.Marshal(d.manifest)
 	}
 	if d.index != nil {
-		d.index.MediaType = ociv1.MediaTypeImageIndex
+		d.index.MediaType = ArtefactMimeType(d.index.MediaType, ociv1.MediaTypeImageIndex, legacy)
 		return json.Marshal(d.index)
 	}
 	return []byte("null"), nil

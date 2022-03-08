@@ -78,7 +78,8 @@ func IsOCIMediaType(media string) bool {
 }
 
 func ContentTypes() []string {
-	return []string{ToContentMediaType(MediaTypeImageManifest),
+	return []string{
+		ToContentMediaType(MediaTypeImageManifest),
 		ToContentMediaType(MediaTypeImageIndex),
 	}
 }
@@ -92,4 +93,39 @@ func ArchiveBlobTypes() []string {
 		index + "+tar",
 		index + "+tar+gzip",
 	}
+}
+
+func ArtefactMimeType(cur, def string, legacy bool) string {
+	if cur != "" {
+		return cur
+	}
+	return MapArtefactMimeType(def, legacy)
+}
+
+func MapArtefactMimeType(mime string, legacy bool) string {
+	if legacy {
+		switch mime {
+		case MediaTypeImageManifest:
+			return MediaTypeDockerSchema2Manifest
+		case MediaTypeImageIndex:
+			return MediaTypeDockerSchema2ManifestList
+		}
+	} else {
+		switch mime {
+		case MediaTypeDockerSchema2Manifest:
+			return MediaTypeImageManifest
+		case MediaTypeDockerSchema2ManifestList:
+			return MediaTypeImageIndex
+		}
+	}
+	return mime
+}
+
+func MapArtefactBlobMimeType(blob accessio.BlobAccess, legacy bool) accessio.BlobAccess {
+	mime := blob.MimeType()
+	mapped := MapArtefactMimeType(mime, legacy)
+	if mapped != mime {
+		return accessio.BlobWithMimeType(mapped, blob)
+	}
+	return blob
 }

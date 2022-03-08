@@ -57,7 +57,7 @@ func PrintArtefact(art cpi.ArtefactAccess) string {
 	return "unspecific"
 }
 
-func indent(orig string, gap string) string {
+func IndentLines(orig string, gap string) string {
 	s := ""
 	for _, l := range strings.Split(orig, "\n") {
 		s += gap + l + "\n"
@@ -66,28 +66,29 @@ func indent(orig string, gap string) string {
 }
 
 func PrintManifest(m cpi.ManifestAccess) string {
+	s := ""
+	data, err := accessio.BlobData(m.Blob())
+	if err != nil {
+		s += fmt.Sprintf("descriptor: invalid: %s\n", err)
+	} else {
+		s += fmt.Sprintf("descriptor: %s\n", string(data))
+	}
 	man := m.GetDescriptor()
-	s := "config:\n"
+	s += "config:\n"
 	s += fmt.Sprintf("  type:        %s\n", man.Config.MediaType)
 	s += fmt.Sprintf("  digest:      %s\n", man.Config.Digest)
 	s += fmt.Sprintf("  size:        %d\n", man.Config.Size)
 
-	var config []byte
-	blob, err := m.GetBlob(man.Config.Digest)
+	config, err := accessio.BlobData(m.GetBlob(man.Config.Digest))
 	if err != nil {
 		s += "  error getting config blob: " + err.Error() + "\n"
 	} else {
-		config, err = blob.Get()
-		if err != nil {
-			s += "  error reading config: " + err.Error() + "\n"
-		} else {
-			s += fmt.Sprintf("  config json: %s\n", string(config))
-		}
+		s += fmt.Sprintf("  config json: %s\n", string(config))
 	}
 	h := getHandler(man.Config.MediaType)
 
 	if h != nil {
-		s += indent(h.Info(m, config), "  ")
+		s += IndentLines(h.Info(m, config), "  ")
 	}
 	s += "layers:\n"
 	for _, l := range man.Layers {
@@ -98,7 +99,7 @@ func PrintManifest(m cpi.ManifestAccess) string {
 		if err != nil {
 			s += "  error getting blob: " + err.Error() + "\n"
 		}
-		s += indent(PrintLayer(blob), "  ")
+		s += IndentLines(PrintLayer(blob), "  ")
 	}
 	return s
 }
@@ -160,7 +161,7 @@ func PrintIndex(i cpi.IndexAccess) string {
 			s += fmt.Sprintf("  error: %s\n", err)
 		} else {
 			s += fmt.Sprintf("  resolved artefact:\n")
-			s += indent(PrintArtefact(a), "    ")
+			s += IndentLines(PrintArtefact(a), "    ")
 		}
 	}
 	return s

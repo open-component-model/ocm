@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/gardener/ocm/pkg/oci/ociutils"
 	"github.com/gardener/ocm/pkg/ocm/repositories/genericocireg/componentmapping"
@@ -32,11 +33,7 @@ type handler struct{}
 func (h handler) Info(m cpi.ManifestAccess, config []byte) string {
 	s := "component version:\n"
 	acc := NewStateAccess(m)
-	blob, err := acc.Get()
-	if err != nil {
-		return s + "  cannot get component descriptor blob: " + err.Error()
-	}
-	data, err := blob.Get()
+	data, err := accessio.BlobData(acc.Get())
 	if err != nil {
 		return s + "  cannot read component descriptor: " + err.Error()
 	}
