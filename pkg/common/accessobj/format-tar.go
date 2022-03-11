@@ -21,50 +21,75 @@ import (
 	"os"
 
 	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/common/compression"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/format"
 	"github.com/gardener/ocm/pkg/utils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
-var FormatTAR = TarHandler{}
+var FormatTAR = NewTarHandler()
 
 func init() {
 	RegisterFormat(FormatTAR)
 }
 
-type TarHandler struct{}
+type TarHandler struct {
+	format      FileFormat
+	compression compression.Algorithm
+}
 
 var _ StandardReaderHandler = (*TarHandler)(nil)
+
 var _ FormatHandler = (*TarHandler)(nil)
 
+func NewTarHandler() *TarHandler {
+	return NewTarHandlerWithCompression(accessio.FormatTar, nil)
+}
+
+func NewTarHandlerWithCompression(format FileFormat, algorithm compression.Algorithm) *TarHandler {
+	return &TarHandler{
+		format:      format,
+		compression: algorithm,
+	}
+}
+
 // ApplyOption applies the configured path filesystem.
-func (o TarHandler) ApplyOption(options *Options) {
-	f := o.Format()
+func (h *TarHandler) ApplyOption(options *Options) {
+	f := h.Format()
 	options.FileFormat = &f
 }
 
-func (_ TarHandler) Format() accessio.FileFormat {
-	return accessio.FormatTar
+func (h *TarHandler) Format() accessio.FileFormat {
+	return h.format
 }
 
-func (c TarHandler) Open(info *AccessObjectInfo, acc AccessMode, path string, opts Options) (*AccessObject, error) {
-	return DefaultOpenOptsFileHandling("tgz archive", info, acc, path, opts, c)
+func (h *TarHandler) Open(info *AccessObjectInfo, acc AccessMode, path string, opts Options) (*AccessObject, error) {
+	return DefaultOpenOptsFileHandling(fmt.Sprintf("%s archive", h.format), info, acc, path, opts, h)
 }
 
-func (c TarHandler) Create(info *AccessObjectInfo, path string, opts Options, mode vfs.FileMode) (*AccessObject, error) {
-	return DefaultCreateOptsFileHandling("tgz archive", info, path, opts, mode, c)
+func (h *TarHandler) Create(info *AccessObjectInfo, path string, opts Options, mode vfs.FileMode) (*AccessObject, error) {
+	return DefaultCreateOptsFileHandling(fmt.Sprintf("%s archive", h.format), info, path, opts, mode, h)
 }
 
 // Write tars the current descriptor and its artifacts.
-func (c TarHandler) Write(obj *AccessObject, path string, opts Options, mode vfs.FileMode) error {
+func (h *TarHandler) Write(obj *AccessObject, path string, opts Options, mode vfs.FileMode) error {
 	writer, err := opts.WriterFor(path, mode)
 	if err != nil {
 		return err
 	}
-	return c.WriteToStream(obj, writer, opts)
+	defer writer.Close()
+	return h.WriteToStream(obj, writer, opts)
 }
 
-func (_ TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts Options) error {
+func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts Options) error {
+	if h.compression != nil {
+		w, err := h.compression.Compressor(writer, nil, nil)
+		if err != nil {
+			return err
+		}
+		defer w.Close()
+		writer = w
+	}
 	// write descriptor
 	err := obj.Update()
 	if err != nil {
@@ -139,7 +164,15 @@ func (_ TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts Opti
 	return tw.Close()
 }
 
-func (t TarHandler) NewFromReader(info *AccessObjectInfo, acc AccessMode, in io.Reader, opts Options, closer Closer) (*AccessObject, error) {
+func (h *TarHandler) NewFromReader(info *AccessObjectInfo, acc AccessMode, in io.Reader, opts Options, closer Closer) (*AccessObject, error) {
+	if h.compression != nil {
+		reader, err := h.compression.Decompressor(in)
+		if err != nil {
+			return nil, err
+		}
+		defer reader.Close()
+		in = reader
+	}
 	setup := func(fs vfs.FileSystem) error {
 		if err := utils.ExtractTarToFs(fs, in); err != nil {
 			return fmt.Errorf("unable to extract tar: %w", err)

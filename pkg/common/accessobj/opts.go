@@ -119,16 +119,16 @@ func (o Options) DefaultForPath(path string) (Options, error) {
 	return o, nil
 }
 
-func (o Options) WriterFor(path string, mode vfs.FileMode) (io.Writer, error) {
+func (o Options) WriterFor(path string, mode vfs.FileMode) (io.WriteCloser, error) {
 	if err := o.ValidForPath(path); err != nil {
 		return nil, err
 	}
-	var writer io.Writer
+	var writer io.WriteCloser
 	var err error
 	if o.File == nil {
 		writer, err = o.PathFileSystem.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode&0666)
 	} else {
-		writer = o.File
+		writer = accessio.NopWriteCloser(o.File)
 		err = o.File.Truncate(0)
 	}
 	return writer, err

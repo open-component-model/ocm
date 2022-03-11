@@ -15,64 +15,12 @@
 package accessobj
 
 import (
-	"compress/gzip"
-	"io"
-
 	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/gardener/ocm/pkg/common/compression"
 )
 
-var FormatTGZ = TGZHandler{}
+var FormatTGZ = NewTarHandlerWithCompression(accessio.FormatTGZ, compression.Gzip)
 
 func init() {
 	RegisterFormat(FormatTGZ)
-}
-
-type TGZHandler struct{}
-
-// ApplyOption applies the configured path filesystem.
-func (o TGZHandler) ApplyOption(options *Options) {
-	f := o.Format()
-	options.FileFormat = &f
-}
-
-func (_ TGZHandler) Format() accessio.FileFormat {
-	return accessio.FormatTGZ
-}
-
-func (c TGZHandler) Open(info *AccessObjectInfo, acc AccessMode, path string, opts Options) (*AccessObject, error) {
-	return DefaultOpenOptsFileHandling("tgz archive", info, acc, path, opts, c)
-}
-
-func (c TGZHandler) Create(info *AccessObjectInfo, path string, opts Options, mode vfs.FileMode) (*AccessObject, error) {
-	return DefaultCreateOptsFileHandling("tgz archive", info, path, opts, mode, c)
-}
-
-// Write tars the current object and its artifacts.
-func (c TGZHandler) Write(obj *AccessObject, path string, opts Options, mode vfs.FileMode) error {
-	writer, err := opts.WriterFor(path, mode)
-	if err != nil {
-		return err
-	}
-	return c.WriteToStream(obj, writer, opts)
-}
-
-func (c TGZHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts Options) error {
-	gw := gzip.NewWriter(writer)
-	if err := FormatTAR.WriteToStream(obj, gw, opts); err != nil {
-		return err
-	}
-	return gw.Close()
-}
-
-// NewFromReader creates a new manifest builder from a input reader.
-func (c TGZHandler) NewFromReader(info *AccessObjectInfo, acc AccessMode, in io.Reader, opts Options, closer Closer) (*AccessObject, error) {
-	// the archive is untared to a memory fs that the builder can work
-	// as it would be a default filesystem.
-
-	in, err := gzip.NewReader(in)
-	if err != nil {
-		return nil, err
-	}
-	return TarHandler{}.NewFromReader(info, acc, in, opts, closer)
 }
