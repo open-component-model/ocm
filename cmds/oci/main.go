@@ -30,10 +30,11 @@ import (
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/config"
 	"github.com/gardener/ocm/pkg/credentials"
+	extdocker "github.com/gardener/ocm/pkg/docker"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/ociutils"
-	docker2 "github.com/gardener/ocm/pkg/oci/repositories/docker"
+	dockerreg "github.com/gardener/ocm/pkg/oci/repositories/docker"
 	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
 	_ "github.com/gardener/ocm/pkg/ocm"
 )
@@ -93,7 +94,7 @@ func daemonrwritetest() {
 	ctx := oci.DefaultContext()
 
 	version := "0.1-dev"
-	spec := docker2.NewRepositorySpec()
+	spec := dockerreg.NewRepositorySpec()
 	name := "ghcr.io/mandelsoft/pause"
 
 	repo, err := ctx.RepositoryForSpec(spec)
@@ -109,7 +110,7 @@ func daemonrwritetest() {
 
 	defer art.Close()
 
-	_, err = docker2.Convert(art, nil, dst)
+	_, err = dockerreg.Convert(art, nil, dst)
 	handleError(err, "convert")
 	err = dst.Commit(context.Background(), nil)
 	handleError(err, "commit")
@@ -119,7 +120,7 @@ func dockerwritetest() {
 	ctx := oci.DefaultContext()
 
 	version := "0.1-dev"
-	spec := docker2.NewRepositorySpec()
+	spec := dockerreg.NewRepositorySpec()
 	name := "ghcr.io/mandelsoft/pause"
 
 	tversion := "test"
@@ -153,7 +154,7 @@ func dockerwritetest() {
 	acc, err := art.GetDescriptor().ToBlobAccess()
 	handleError(err, "digest")
 
-	err = tns.AddTags(docker2.ImageId(art), tversion)
+	err = tns.AddTags(dockerreg.ImageId(art), tversion)
 	handleError(err, "tag")
 
 	_ = tversion
@@ -214,7 +215,7 @@ func dockerreadtest() {
 	ctx := oci.DefaultContext()
 
 	version := "0.1-dev"
-	spec := docker2.NewRepositorySpec()
+	spec := dockerreg.NewRepositorySpec()
 	name := "ghcr.io/mandelsoft/pause"
 
 	repo, err := ctx.RepositoryForSpec(spec)
@@ -307,6 +308,13 @@ func repotest() {
 	ns, err := repo.LookupNamespace(name)
 	handleError(err, "lookup namespace")
 
+	tags, err := ns.ListTags()
+	handleError(err, "list tags")
+	fmt.Printf("tags for %s:\n", name)
+	for _, t := range tags {
+		fmt.Printf("- %s\n", t)
+	}
+
 	art, err := ns.GetArtefact(version)
 	handleError(err, "lookup artefact")
 
@@ -367,8 +375,7 @@ func transfertest() {
 
 var pattern = regexp.MustCompile("^[0-9a-f]{12}$")
 
-func main() {
-
+func parsetest() {
 	fmt.Printf("%t\n", pattern.MatchString("c4c442d0040d"))
 	fmt.Printf("%t\n", !pattern.MatchString("c4c442d0040x"))
 	fmt.Printf("%t\n", !pattern.MatchString("c4c442d0040"))
@@ -388,12 +395,31 @@ func main() {
 	Print("ghcr.io/test/ubuntu:v1")
 	Print("ghcr.io/test/ubuntu@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")
 	Print("ghcr.io/test/ubuntu:v1@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")
+}
 
+func listtest() {
+	r := extdocker.NewResolver(extdocker.ResolverOptions{}).(extdocker.Resolver)
+
+	name, d, err := r.Resolve(context.Background(), "ghcr.io/mandelsoft/kubelink:latest")
+	handleError(err, "resolve")
+	fmt.Printf("%s: %v\n", name, d)
+
+	lister, err := r.Lister(context.Background(), "ghcr.io/mandelsoft/kubelink")
+	handleError(err, "lister")
+	list, err := lister.List(context.Background())
+	handleError(err, "list tags")
+	fmt.Printf("%v\n", list)
+}
+
+func main() {
+
+	//parsetest()
 	//daemonreadtest()
 	//daemonwritetest()
 	//dockerreadtest()
 	//dockerwritetest()
-	//repotest()
-	transfertest()
+	//listtest()
+	repotest()
+	//transfertest()
 
 }

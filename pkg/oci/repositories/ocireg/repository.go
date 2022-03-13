@@ -22,9 +22,9 @@ import (
 
 	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/remotes"
-	"github.com/containerd/containerd/remotes/docker"
 	"github.com/containerd/containerd/remotes/docker/config"
 	"github.com/gardener/ocm/pkg/credentials"
+	"github.com/gardener/ocm/pkg/docker"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/core"
@@ -119,7 +119,7 @@ func (r *Repository) getResolver(comp string) (remotes.Resolver, error) {
 	}
 
 	opts := docker.ResolverOptions{
-		Hosts: config.ConfigureHosts(context.Background(), config.HostOptions{
+		Hosts: docker.ConvertHosts(config.ConfigureHosts(context.Background(), config.HostOptions{
 			Credentials: func(host string) (string, string, error) {
 				if creds != nil {
 					//fmt.Printf("************** creds for %s: %s\n", host, creds)
@@ -133,7 +133,7 @@ func (r *Repository) getResolver(comp string) (remotes.Resolver, error) {
 				return "", "", nil
 			},
 			DefaultScheme: r.info.Scheme,
-		}),
+		})),
 	}
 
 	return docker.NewResolver(opts), nil

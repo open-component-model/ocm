@@ -21,6 +21,7 @@ import (
 	"github.com/containerd/containerd/remotes"
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
+	"github.com/gardener/ocm/pkg/docker"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
@@ -41,6 +42,7 @@ type NamespaceContainer struct {
 	resolver  remotes.Resolver
 	fetcher   remotes.Fetcher
 	pusher    remotes.Pusher
+	lister    docker.Lister
 }
 
 var _ cpi.ArtefactSetContainer = (*NamespaceContainer)(nil)
@@ -60,6 +62,10 @@ func NewNamespace(repo *Repository, name string) (*Namespace, error) {
 	if err != nil {
 		return nil, err
 	}
+	lister, err := resolver.(docker.Resolver).Lister(context.Background(), ref)
+	if err != nil {
+		return nil, err
+	}
 	n := &Namespace{
 		access: &NamespaceContainer{
 			repo:      repo,
@@ -67,6 +73,7 @@ func NewNamespace(repo *Repository, name string) (*Namespace, error) {
 			resolver:  resolver,
 			fetcher:   fetcher,
 			pusher:    pusher,
+			lister:    lister,
 		},
 	}
 	return n, nil
@@ -103,7 +110,7 @@ func (n *NamespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi.Descri
 }
 
 func (n *NamespaceContainer) ListTags() ([]string, error) {
-	panic("implement me")
+	return n.lister.List(dummyContext)
 }
 
 func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {

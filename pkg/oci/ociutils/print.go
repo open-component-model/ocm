@@ -22,8 +22,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/containers/image/v5/pkg/compression"
 	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/common/compression"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 )

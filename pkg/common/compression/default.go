@@ -16,7 +16,6 @@ package compression
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 )
 
@@ -74,7 +73,7 @@ func (c *algorithm) Match(r MatchReader) (bool, error) {
 	}
 	buf := make([]byte, len(c.prefix))
 	n, err := io.ReadAtLeast(r, buf, len(buf))
-	fmt.Printf("%s: found %v\n", c.Name(), buf[:n])
+	//fmt.Printf("%s: found %v\n", c.Name(), buf[:n])
 	if err != nil {
 		if err == io.ErrUnexpectedEOF || err == io.EOF {
 			err = nil
