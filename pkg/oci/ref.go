@@ -10,6 +10,8 @@ import (
 	"strings"
 
 	"github.com/containerd/containerd/reference/docker"
+	"github.com/gardener/ocm/pkg/errors"
+	"github.com/gardener/ocm/pkg/oci/grammar"
 	"github.com/opencontainers/go-digest"
 )
 
@@ -52,19 +54,26 @@ func ParseRef(resourceURL string) (RefSpec, error) {
 // RefSpec is a go internal representation of a oci reference.
 type RefSpec struct {
 	// Scheme
-	Scheme string
+	Scheme string `json:"scheme,omitempty"`
 	// Host is the hostname of a oci ref.
-	Host string
+	Host string `json:"host,omitempty"`
 	// Repository is the part of a reference without its hostname
-	Repository string
+	Repository string `json:"respository"`
 	// +optional
-	Tag *string
+	Tag *string `json:"tag,omitempty"`
 	// +optional
-	Digest *digest.Digest
+	Digest *digest.Digest `json:"digest,omitempty"`
 }
 
 func (r *RefSpec) Name() string {
 	return path.Join(r.Host, r.Repository)
+}
+
+func (r *RefSpec) Base() string {
+	if r.Scheme == "" {
+		return r.Host
+	}
+	return r.Scheme + "://" + r.Host
 }
 
 func (r *RefSpec) HostPort() (string, string) {
@@ -80,12 +89,16 @@ func (r *RefSpec) Reference() string {
 		return *r.Tag
 	}
 	if r.Digest != nil {
-		return string(*r.Digest)
+		return "@" + string(*r.Digest)
 	}
 	return "latest"
 }
 
-func (r RefSpec) String() string {
+func (r *RefSpec) IsVersion() bool {
+	return r.Tag != nil || r.Digest != nil
+}
+
+func (r *RefSpec) String() string {
 	if r.Tag != nil {
 		return fmt.Sprintf("%s:%s", r.Name(), *r.Tag)
 	}
@@ -119,4 +132,69 @@ func (r RefSpec) DeepCopy() RefSpec {
 		refspec.Digest = &d
 	}
 	return refspec
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func ParseArt(art string) (ArtSpec, error) {
+	match := grammar.AnchoredArtefactVersionRegexp.FindSubmatch([]byte(art))
+
+	if match == nil {
+		return ArtSpec{}, errors.ErrInvalid("artefact ref", art)
+	}
+	var tag *string
+	var dig *digest.Digest
+
+	if match[2] != nil {
+		t := string(match[2])
+		tag = &t
+	}
+	if match[3] != nil {
+		t := string(match[3])
+		d, err := digest.Parse(t)
+		if err != nil {
+			return ArtSpec{}, errors.ErrInvalidWrap(err, "artefact ref", art)
+		}
+		dig = &d
+	}
+	return ArtSpec{
+		Repository: string(match[1]),
+		Tag:        tag,
+		Digest:     dig,
+	}, nil
+}
+
+// ArtSpec is a go internal representation of a oci reference.
+type ArtSpec struct {
+	// Repository is the part of a reference without its hostname
+	Repository string
+	// +optional
+	Tag *string
+	// +optional
+	Digest *digest.Digest
+}
+
+func (r *ArtSpec) IsVersion() bool {
+	return r.Tag != nil || r.Digest != nil
+}
+
+func (r *ArtSpec) Reference() string {
+	if r.Tag != nil {
+		return *r.Tag
+	}
+	if r.Digest != nil {
+		return "@" + string(*r.Digest)
+	}
+	return "latest"
+}
+
+func (r *ArtSpec) String() string {
+	s := r.Repository
+	if r.Tag != nil {
+		s += fmt.Sprintf(":%s", *r.Tag)
+	}
+	if r.Digest != nil {
+		s += fmt.Sprintf("@%s", r.Digest.String())
+	}
+	return s
 }

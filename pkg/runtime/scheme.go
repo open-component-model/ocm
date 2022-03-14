@@ -15,6 +15,7 @@
 package runtime
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 	"sync"
@@ -169,6 +170,7 @@ type Scheme interface {
 
 	ValidateInterface(object TypedObject) error
 	CreateUnstructured() Unstructured
+	Convert(object TypedObject) (TypedObject, error)
 	GetDecoder(otype string) TypedObjectDecoder
 	Decode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
 	Encode(obj TypedObject, marshaler Marshaler) ([]byte, error)
@@ -356,6 +358,37 @@ func (d *defaultScheme) EnforceDecode(data []byte, unmarshal Unmarshaler) (Typed
 		return un.(TypedObject), err
 	}
 	return o, err
+}
+
+func (d *defaultScheme) Convert(o TypedObject) (TypedObject, error) {
+	if o.GetType() == "" {
+		return nil, errors.Newf("no type found")
+	}
+	data, err := json.Marshal(o)
+	if err != nil {
+		return nil, err
+	}
+	decoder := d.GetDecoder(o.GetType())
+	if decoder == nil {
+		if d.defaultdecoder != nil {
+			o, err := d.defaultdecoder.Decode(data, DefaultJSONEncoding)
+			if err == nil {
+				return o, nil
+			}
+			if !errors.IsErrUnknownKind(err, errors.KIND_OBJECTTYPE) {
+				return nil, err
+			}
+		}
+		return nil, errors.ErrUnknown(errors.KIND_OBJECTTYPE, o.GetType())
+	}
+	r, err := decoder.Decode(data, DefaultJSONEncoding)
+	if err != nil {
+		return nil, err
+	}
+	if reflect.TypeOf(r) == reflect.TypeOf(o) {
+		return o, nil
+	}
+	return r, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////

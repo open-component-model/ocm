@@ -15,10 +15,12 @@
 package oci
 
 import (
+	"encoding/json"
 	"io"
 	"sync"
 
 	"github.com/gardener/ocm/pkg/errors"
+	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
 )
 
 type NamespaceContainer interface {
@@ -31,9 +33,10 @@ type ArtefactContainer interface {
 type Session interface {
 	Closer(closer io.Closer, err error) (io.Closer, error)
 
+	LookupRepository(Context, RepositorySpec) (Repository, error)
 	LookupNamespace(NamespaceContainer, string) (NamespaceAccess, error)
 	GetArtefact(ArtefactContainer, string) (ArtefactAccess, error)
-
+	EvaluateRef(ctx Context, ref string) (*RefSpec, NamespaceAccess, error)
 	Close() error
 }
 
@@ -42,17 +45,19 @@ type objectkey struct {
 	Name   string
 }
 type session struct {
-	lock       sync.RWMutex
-	closed     bool
-	closer     []io.Closer
-	namespaces map[objectkey]NamespaceAccess
-	artefacts  map[objectkey]ArtefactAccess
+	lock         sync.RWMutex
+	closed       bool
+	closer       []io.Closer
+	repositories map[objectkey]Repository
+	namespaces   map[objectkey]NamespaceAccess
+	artefacts    map[objectkey]ArtefactAccess
 }
 
 func NewSession() Session {
 	return &session{
-		namespaces: map[objectkey]NamespaceAccess{},
-		artefacts:  map[objectkey]ArtefactAccess{},
+		repositories: map[objectkey]Repository{},
+		namespaces:   map[objectkey]NamespaceAccess{},
+		artefacts:    map[objectkey]ArtefactAccess{},
 	}
 }
 
@@ -89,6 +94,39 @@ func (s *session) add(closer io.Closer, err error) (io.Closer, error) {
 	return closer, err
 }
 
+func (s *session) LookupRepository(ctx Context, spec RepositorySpec) (Repository, error) {
+
+	spec, err := ctx.RepositoryTypes().CreateRepositorySpec(spec)
+	if err != nil {
+		return nil, err
+	}
+	data, err := json.Marshal(spec)
+	if err != nil {
+		return nil, err
+	}
+	key := objectkey{
+		Object: ctx,
+		Name:   string(data),
+	}
+
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	if s.closed {
+		return nil, errors.ErrClosed("session")
+	}
+
+	if r := s.repositories[key]; r != nil {
+		return r, nil
+	}
+	repo, err := ctx.RepositoryForSpec(spec)
+	if err != nil {
+		return nil, err
+	}
+	s.repositories[key] = repo
+	s.add(repo, err)
+	return repo, err
+}
+
 func (s *session) LookupNamespace(c NamespaceContainer, name string) (NamespaceAccess, error) {
 	key := objectkey{
 		Object: c,
@@ -99,7 +137,7 @@ func (s *session) LookupNamespace(c NamespaceContainer, name string) (NamespaceA
 	if s.closed {
 		return nil, errors.ErrClosed("session")
 	}
-	if ns := s.namespaces[key]; s != nil {
+	if ns := s.namespaces[key]; ns != nil {
 		return ns, nil
 	}
 	ns, err := c.LookupNamespace(name)
@@ -131,4 +169,18 @@ func (s *session) GetArtefact(c ArtefactContainer, version string) (ArtefactAcce
 	s.artefacts[key] = obj
 	s.add(obj, err)
 	return obj, err
+}
+
+func (s *session) EvaluateRef(ctx Context, ref string) (*RefSpec, NamespaceAccess, error) {
+	parsed, err := ParseRef(ref)
+	if err != nil {
+		return nil, nil, err
+	}
+	spec := ocireg.NewRepositorySpec(parsed.Base())
+	repo, err := s.LookupRepository(ctx, spec)
+	if err != nil {
+		return nil, nil, err
+	}
+	ns, err := s.LookupNamespace(repo, parsed.Repository)
+	return &parsed, ns, err
 }

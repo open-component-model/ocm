@@ -51,6 +51,10 @@ func RegisterRepositoryType(name string, atype RepositoryType) {
 	core.DefaultRepositoryTypeScheme.Register(name, atype)
 }
 
+func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {
+	return core.ToGenericRepositorySpec(spec)
+}
+
 const KIND_OCIARTEFACT = core.KIND_OCIARTEFACT
 const KIND_MEDIATYPE = accessio.KIND_MEDIATYPE
 const KIND_BLOB = accessio.KIND_BLOB

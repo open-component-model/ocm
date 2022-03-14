@@ -16,7 +16,6 @@ package ocireg
 
 import (
 	"context"
-	"fmt"
 	"path"
 	"strings"
 
@@ -129,7 +128,7 @@ func (r *Repository) getResolver(comp string) (remotes.Resolver, error) {
 					}
 					return creds.GetProperty(credentials.ATTR_USERNAME), p, err
 				}
-				fmt.Printf("************** no creds for %s\n", host)
+				//fmt.Printf("************** no creds for %s\n", host)
 				return "", "", nil
 			},
 			DefaultScheme: r.info.Scheme,

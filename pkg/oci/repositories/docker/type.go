@@ -47,6 +47,10 @@ func (a *RepositorySpec) GetType() string {
 	return DockerDeamonRepositoryType
 }
 
+func (a *RepositorySpec) Name() string {
+	return DockerDeamonRepositoryType
+}
+
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	return NewRepository(ctx, a)
 }

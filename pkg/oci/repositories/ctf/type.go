@@ -58,6 +58,10 @@ func NewRepositorySpec(mode accessobj.AccessMode, filePath string, opts ...acces
 func (a *RepositorySpec) GetType() string {
 	return CommonTransportFormatRepositoryType
 }
+
+func (s *RepositorySpec) Name() string {
+	return s.FilePath
+}
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	return Open(ctx, a.AccessMode, a.FilePath, 0700, a.Options)
 }

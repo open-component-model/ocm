@@ -15,12 +15,14 @@
 package core
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 
 	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/modern-go/reflect2"
 )
 
 type RepositoryType interface {
@@ -31,6 +33,7 @@ type RepositoryType interface {
 type RepositorySpec interface {
 	runtime.VersionedTypedObject
 
+	Name() string
 	Repository(Context, credentials.Credentials) (Repository, error)
 }
 
@@ -97,7 +100,11 @@ func (t *repositoryTypeScheme) DecodeRepositorySpec(data []byte, unmarshaler run
 
 func (t *repositoryTypeScheme) CreateRepositorySpec(obj runtime.TypedObject) (RepositorySpec, error) {
 	if s, ok := obj.(RepositorySpec); ok {
-		return s, nil
+		r, err := t.Scheme.Convert(s)
+		if err != nil {
+			return nil, err
+		}
+		return r.(RepositorySpec), nil
 	}
 	if u, ok := obj.(*runtime.UnstructuredTypedObject); ok {
 		raw, err := u.GetRaw()
@@ -126,6 +133,10 @@ type UnknownRepositorySpec struct {
 
 var _ RepositorySpec = &UnknownRepositorySpec{}
 
+func (r *UnknownRepositorySpec) Name() string {
+	return "unknown-" + r.GetKind()
+}
+
 func (r *UnknownRepositorySpec) Repository(Context, credentials.Credentials) (Repository, error) {
 	return nil, errors.ErrUnknown("respository type", r.GetType())
 }
@@ -134,6 +145,10 @@ func (r *UnknownRepositorySpec) Repository(Context, credentials.Credentials) (Re
 
 type GenericRepositorySpec struct {
 	runtime.UnstructuredVersionedTypedObject `json:",inline"`
+}
+
+func (s *GenericRepositorySpec) Name() string {
+	return "generic-" + s.GetKind()
 }
 
 func (s *GenericRepositorySpec) Evaluate(ctx Context) (RepositorySpec, error) {
@@ -153,5 +168,39 @@ func (s *GenericRepositorySpec) Repository(ctx Context, creds credentials.Creden
 }
 
 var _ RepositorySpec = &GenericRepositorySpec{}
+
+func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {
+	if reflect2.IsNil(spec) {
+		return nil, nil
+	}
+	if g, ok := spec.(*GenericRepositorySpec); ok {
+		return g, nil
+	}
+	data, err := json.Marshal(spec)
+	if err != nil {
+		return nil, err
+	}
+	return newGenericRepositorySpec(data, runtime.DefaultJSONEncoding)
+}
+
+func NewGenericRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
+	s, err := newGenericRepositorySpec(data, unmarshaler)
+	if err != nil {
+		return nil, err // GO is great
+	}
+	return s, nil
+}
+
+func newGenericRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (*GenericRepositorySpec, error) {
+	unstr := &runtime.UnstructuredVersionedTypedObject{}
+	if unmarshaler == nil {
+		unmarshaler = runtime.DefaultYAMLEncoding
+	}
+	err := unmarshaler.Unmarshal(data, unstr)
+	if err != nil {
+		return nil, err
+	}
+	return &GenericRepositorySpec{*unstr}, nil
+}
 
 ////////////////////////////////////////////////////////////////////////////////

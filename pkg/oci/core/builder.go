@@ -46,7 +46,7 @@ func (b Builder) WithSharedAttributes(ctx datacontext.AttributesContext) Builder
 }
 
 func (b Builder) WithCredentials(ctx credentials.Context) Builder {
-	b.shared = ctx
+	b.credentials = ctx
 	return b
 }
 

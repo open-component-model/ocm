@@ -17,6 +17,7 @@ package oci
 import (
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/cpi"
+	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
 )
 
 func AsTags(tag string) []string {
@@ -76,4 +77,18 @@ func TransferManifest(art cpi.ManifestAccess, set cpi.ArtefactSink, tags ...stri
 		return errors.Wrapf(err, "transferring image artefact")
 	}
 	return err
+}
+
+func EvaluateRefWithContext(ctx Context, ref string) (*RefSpec, NamespaceAccess, error) {
+	parsed, err := ParseRef(ref)
+	if err != nil {
+		return nil, nil, err
+	}
+	spec := ocireg.NewRepositorySpec(parsed.Base())
+	repo, err := ctx.RepositoryForSpec(spec)
+	if err != nil {
+		return nil, nil, err
+	}
+	ns, err := repo.LookupNamespace(parsed.Repository)
+	return &parsed, ns, err
 }

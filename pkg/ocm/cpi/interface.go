@@ -37,6 +37,7 @@ type SourceMeta = core.SourceMeta
 type ResourceAccess = core.ResourceAccess
 type ResourceMeta = core.ResourceMeta
 type RepositorySpec = core.RepositorySpec
+type GenericRepositorySpec = core.GenericRepositorySpec
 type RepositoryType = core.RepositoryType
 
 type BlobHandler = core.BlobHandler
@@ -61,6 +62,10 @@ func RegisterRepositoryType(name string, atype RepositoryType) {
 
 func RegisterAccessType(atype AccessType) {
 	core.DefaultAccessTypeScheme.Register(atype.GetKind(), atype)
+}
+
+func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {
+	return core.ToGenericRepositorySpec(spec)
 }
 
 const KIND_COMPONENTVERSION = core.KIND_COMPONENTVERSION

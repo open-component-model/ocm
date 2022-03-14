@@ -43,6 +43,8 @@ type RepositorySpec struct {
 	LegacyTypes *bool  `json:"legacyTypes,omitempty"`
 }
 
+var _ cpi.RepositorySpec = (*RepositorySpec)(nil)
+
 // NewRepositorySpec creates a new RepositorySpec
 func NewRepositorySpec(baseURL string) *RepositorySpec {
 	return &RepositorySpec{
@@ -54,6 +56,11 @@ func NewRepositorySpec(baseURL string) *RepositorySpec {
 func (a *RepositorySpec) GetType() string {
 	return OCIRegistryRepositoryType
 }
+
+func (a *RepositorySpec) Name() string {
+	return a.BaseURL
+}
+
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	var u *url.URL
 	info := &RepositoryInfo{}

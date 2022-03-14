@@ -45,6 +45,8 @@ type Unstructured interface {
 	GetRaw() ([]byte, error)
 }
 
+type Object interface{}
+
 type JSONMarhaler interface {
 	MarshalJSON() ([]byte, error)
 }
