@@ -13,6 +13,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gardener/ocm/cmds/ocm/commands/create"
 	"github.com/gardener/ocm/cmds/ocm/commands/get"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -51,6 +52,7 @@ func NewCliCommand(ctx context.Context) *cobra.Command {
 
 	cmd.AddCommand(NewVersionCommand())
 	cmd.AddCommand(get.NewCommand(opts.Context))
+	cmd.AddCommand(create.NewCommand(opts.Context))
 
 	opts.AddFlags(cmd.Flags())
 	return cmd

@@ -35,3 +35,12 @@ func CatchConversionError(errp *error) {
 		}
 	}
 }
+
+func Validate(desc *ComponentDescriptor) error {
+	data, err := Encode(desc)
+	if err != nil {
+		return err
+	}
+	_, err = Decode(data)
+	return err
+}

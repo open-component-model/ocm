@@ -54,7 +54,7 @@ var _ = Describe("component repository mapping", func() {
 		Expect(err).To(Succeed())
 		tempfs = t
 
-		ocispec = ctf.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessobj.PathFileSystem(tempfs), accessobj.FormatDirectory)
+		ocispec = ctf.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessio.PathFileSystem(tempfs), accessobj.FormatDirectory)
 		spec = genericocireg.NewRepositorySpec(ocispec, nil)
 
 	})
@@ -144,7 +144,7 @@ var _ = Describe("component repository mapping", func() {
 		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().RegisterBlobHandler(ocirepo.NewArtefactHandler(base), cpi.ForMimeType(mime))).New()
 
 		// create artefactset
-		r, err := artefactset.FormatTGZ.Create("test.tgz", accessobj.AccessOptions(accessobj.PathFileSystem(tempfs)), 0700)
+		r, err := artefactset.FormatTGZ.Create("test.tgz", accessio.AccessOptions(accessio.PathFileSystem(tempfs)), 0700)
 		Expect(err).To(Succeed())
 		testhelper.DefaultManifestFill(r)
 		r.Annotate(artefactset.MAINARTEFACT_ANNOTATION, "sha256:"+testhelper.DIGEST_MANIFEST)

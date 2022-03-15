@@ -38,7 +38,17 @@ var accessObjectInfo = &accessobj.AccessObjectInfo{
 
 type Object = ArtefactSet
 
-type FormatHandler struct {
+type FormatHandler interface {
+	accessio.Option
+
+	Format() accessio.FileFormat
+
+	Open(acc accessobj.AccessMode, path string, opts accessio.Options) (*Object, error)
+	Create(path string, opts accessio.Options, mode vfs.FileMode) (*Object, error)
+	Write(obj *Object, path string, opts accessio.Options, mode vfs.FileMode) error
+}
+
+type formatHandler struct {
 	accessobj.FormatHandler
 }
 
@@ -56,7 +66,7 @@ var lock sync.RWMutex
 func RegisterFormat(f accessobj.FormatHandler) FormatHandler {
 	lock.Lock()
 	defer lock.Unlock()
-	h := FormatHandler{f}
+	h := &formatHandler{f}
 	fileFormats[f.Format()] = h
 	return h
 }
@@ -69,8 +79,8 @@ func GetFormat(name accessio.FileFormat) FormatHandler {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func OpenFromBlob(acc accessobj.AccessMode, blob accessio.BlobAccess, opts ...accessobj.Option) (*Object, error) {
-	o := accessobj.AccessOptions(opts...)
+func OpenFromBlob(acc accessobj.AccessMode, blob accessio.BlobAccess, opts ...accessio.Option) (*Object, error) {
+	o := accessio.AccessOptions(opts...)
 	if o.File != nil || o.Reader != nil {
 		return nil, errors.ErrInvalid("file or reader option nor possible for blob access")
 	}
@@ -89,7 +99,7 @@ func OpenFromBlob(acc accessobj.AccessMode, blob accessio.BlobAccess, opts ...ac
 	return Open(acc&accessobj.ACC_READONLY, "", 0, o)
 }
 
-func Open(acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessobj.Option) (*Object, error) {
+func Open(acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessio.Option) (*Object, error) {
 	o, create, err := accessobj.HandleAccessMode(acc, path, opts...)
 	if err != nil {
 		return nil, err
@@ -104,8 +114,8 @@ func Open(acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...acce
 	return h.Open(acc, path, o)
 }
 
-func Create(acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessobj.Option) (*Object, error) {
-	o := accessobj.AccessOptions(opts...).DefaultFormat(accessio.FormatDirectory)
+func Create(acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessio.Option) (*Object, error) {
+	o := accessio.AccessOptions(opts...).DefaultFormat(accessio.FormatDirectory)
 	h, ok := fileFormats[*o.FileFormat]
 	if !ok {
 		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.FileFormat.String())
@@ -115,16 +125,16 @@ func Create(acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...ac
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (h FormatHandler) Open(acc accessobj.AccessMode, path string, opts accessobj.Options) (*Object, error) {
+func (h *formatHandler) Open(acc accessobj.AccessMode, path string, opts accessio.Options) (*Object, error) {
 
 	return _Wrap(h.FormatHandler.Open(accessObjectInfo, acc, path, opts))
 }
 
-func (h *FormatHandler) Create(path string, opts accessobj.Options, mode vfs.FileMode) (*Object, error) {
+func (h *formatHandler) Create(path string, opts accessio.Options, mode vfs.FileMode) (*Object, error) {
 	return _Wrap(h.FormatHandler.Create(accessObjectInfo, path, opts, mode))
 }
 
 // WriteToFilesystem writes the current object to a filesystem
-func (h *FormatHandler) Write(obj *Object, path string, opts accessobj.Options, mode vfs.FileMode) error {
+func (h *formatHandler) Write(obj *Object, path string, opts accessio.Options, mode vfs.FileMode) error {
 	return h.FormatHandler.Write(obj.base.Access(), path, opts, mode)
 }

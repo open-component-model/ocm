@@ -54,7 +54,7 @@ func NewTarHandlerWithCompression(format FileFormat, algorithm compression.Algor
 }
 
 // ApplyOption applies the configured path filesystem.
-func (h *TarHandler) ApplyOption(options *Options) {
+func (h *TarHandler) ApplyOption(options *accessio.Options) {
 	f := h.Format()
 	options.FileFormat = &f
 }
@@ -63,16 +63,16 @@ func (h *TarHandler) Format() accessio.FileFormat {
 	return h.format
 }
 
-func (h *TarHandler) Open(info *AccessObjectInfo, acc AccessMode, path string, opts Options) (*AccessObject, error) {
+func (h *TarHandler) Open(info *AccessObjectInfo, acc AccessMode, path string, opts accessio.Options) (*AccessObject, error) {
 	return DefaultOpenOptsFileHandling(fmt.Sprintf("%s archive", h.format), info, acc, path, opts, h)
 }
 
-func (h *TarHandler) Create(info *AccessObjectInfo, path string, opts Options, mode vfs.FileMode) (*AccessObject, error) {
+func (h *TarHandler) Create(info *AccessObjectInfo, path string, opts accessio.Options, mode vfs.FileMode) (*AccessObject, error) {
 	return DefaultCreateOptsFileHandling(fmt.Sprintf("%s archive", h.format), info, path, opts, mode, h)
 }
 
 // Write tars the current descriptor and its artifacts.
-func (h *TarHandler) Write(obj *AccessObject, path string, opts Options, mode vfs.FileMode) error {
+func (h *TarHandler) Write(obj *AccessObject, path string, opts accessio.Options, mode vfs.FileMode) error {
 	writer, err := opts.WriterFor(path, mode)
 	if err != nil {
 		return err
@@ -81,7 +81,7 @@ func (h *TarHandler) Write(obj *AccessObject, path string, opts Options, mode vf
 	return h.WriteToStream(obj, writer, opts)
 }
 
-func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts Options) error {
+func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts accessio.Options) error {
 	if h.compression != nil {
 		w, err := h.compression.Compressor(writer, nil, nil)
 		if err != nil {
@@ -164,7 +164,7 @@ func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts Opti
 	return tw.Close()
 }
 
-func (h *TarHandler) NewFromReader(info *AccessObjectInfo, acc AccessMode, in io.Reader, opts Options, closer Closer) (*AccessObject, error) {
+func (h *TarHandler) NewFromReader(info *AccessObjectInfo, acc AccessMode, in io.Reader, opts accessio.Options, closer Closer) (*AccessObject, error) {
 	if h.compression != nil {
 		reader, err := h.compression.Decompressor(in)
 		if err != nil {

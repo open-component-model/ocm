@@ -15,6 +15,7 @@
 package ctf
 
 import (
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
@@ -75,7 +76,7 @@ func (r *Repository) IsClosed() bool {
 	return r.base.IsClosed()
 }
 
-func (r *Repository) Write(path string, mode vfs.FileMode, opts ...accessobj.Option) error {
+func (r *Repository) Write(path string, mode vfs.FileMode, opts ...accessio.Option) error {
 	return r.base.Write(path, mode, opts...)
 }
 

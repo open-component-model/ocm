@@ -12,13 +12,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package get_artefact
+package get
 
 import (
 	"fmt"
 	"os"
 
 	"github.com/gardener/ocm/cmds/ocm/cmd"
+	"github.com/gardener/ocm/cmds/ocm/commands/oci/artefact"
 	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
@@ -71,7 +72,7 @@ all tagged artefacts are listed.
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Repository, "repo", "r", "", "repository name or spec")
-	o.Output.AddFlags(fs)
+	o.Output.AddFlags(fs, outputs)
 }
 
 func (o *Options) Complete(args []string) error {
@@ -84,7 +85,7 @@ func (o *Options) Complete(args []string) error {
 
 func (o *Options) Run() error {
 	var repobase oci.Repository
-	session := oci.NewSession()
+	session := oci.NewSession(nil)
 
 	if o.Repository != "" {
 		var parsed interface{}
@@ -102,11 +103,7 @@ func (o *Options) Run() error {
 		}
 	}
 
-	handler := &TypeHandler{
-		octx:     o.Context.OCIContext(),
-		session:  session,
-		repobase: repobase,
-	}
+	handler := artefact.NewTypeHandler(o.Context.OCIContext(), session, repobase)
 
 	return utils.HandleArgs(outputs, &o.Output, handler, o.Refs...)
 }
@@ -129,32 +126,32 @@ func get_wide(opts *output.Options) output.Output {
 
 func map_get_regular_output(e interface{}) interface{} {
 	digest := "unknown"
-	p := e.(*Object)
-	blob, err := p.artefact.Blob()
+	p := e.(*artefact.Object)
+	blob, err := p.Artefact.Blob()
 	if err == nil {
 		digest = blob.Digest().String()
 	}
 	tag := "-"
-	if p.spec.Tag != nil {
-		tag = *p.spec.Tag
+	if p.Spec.Tag != nil {
+		tag = *p.Spec.Tag
 	}
-	return []string{p.spec.Host, p.spec.Repository, tag, digest}
+	return []string{p.Spec.Host, p.Spec.Repository, tag, digest}
 }
 
 func map_get_wide_output(e interface{}) interface{} {
 	digest := "unknown"
-	p := e.(*Object)
-	blob, err := p.artefact.Blob()
+	p := e.(*artefact.Object)
+	blob, err := p.Artefact.Blob()
 	if err == nil {
 		digest = blob.Digest().String()
 	}
 	tag := "-"
-	if p.spec.Tag != nil {
-		tag = *p.spec.Tag
+	if p.Spec.Tag != nil {
+		tag = *p.Spec.Tag
 	}
 	config := "-"
-	if p.artefact.IsManifest() {
-		config = p.artefact.ManifestAccess().GetDescriptor().Config.MediaType
+	if p.Artefact.IsManifest() {
+		config = p.Artefact.ManifestAccess().GetDescriptor().Config.MediaType
 	}
-	return []string{p.spec.Host, p.spec.Repository, tag, digest, p.artefact.GetDescriptor().MimeType(), config}
+	return []string{p.Spec.Host, p.Spec.Repository, tag, digest, p.Artefact.GetDescriptor().MimeType(), config}
 }

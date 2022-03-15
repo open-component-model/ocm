@@ -12,17 +12,18 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package get_artefact
+package artefact
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
+	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 )
 
 type Object struct {
-	spec     oci.RefSpec
-	artefact oci.ArtefactAccess
+	Spec     oci.RefSpec
+	Artefact oci.ArtefactAccess
 }
 
 type Manifest struct {
@@ -32,8 +33,8 @@ type Manifest struct {
 
 func (o *Object) AsManifest() interface{} {
 	return &Manifest{
-		Spec:     o.spec,
-		Manifest: o.artefact.GetDescriptor(),
+		Spec:     o.Spec,
+		Manifest: o.Artefact.GetDescriptor(),
 	}
 }
 
@@ -43,6 +44,14 @@ type TypeHandler struct {
 	octx     oci.Context
 	session  oci.Session
 	repobase oci.Repository
+}
+
+func NewTypeHandler(octx oci.Context, session oci.Session, repobase oci.Repository) utils.TypeHandler {
+	return &TypeHandler{
+		octx:     octx,
+		session:  session,
+		repobase: repobase,
+	}
 }
 
 func (h *TypeHandler) Close() error {
@@ -83,8 +92,8 @@ func (h *TypeHandler) Get(name string) ([]output.Object, error) {
 			return nil, err
 		}
 		result = append(result, &Object{
-			spec:     spec,
-			artefact: a,
+			Spec:     spec,
+			Artefact: a,
 		})
 	} else {
 		tags, err := namespace.ListTags()
@@ -100,8 +109,8 @@ func (h *TypeHandler) Get(name string) ([]output.Object, error) {
 			s := spec
 			s.Tag = &t
 			result = append(result, &Object{
-				spec:     s,
-				artefact: a,
+				Spec:     s,
+				Artefact: a,
 			})
 		}
 	}

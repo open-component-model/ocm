@@ -42,10 +42,10 @@ func InternalRepresentationFilesystem(acc AccessMode, fs vfs.FileSystem, dir str
 	return tmp, fs, err
 }
 
-func HandleAccessMode(acc AccessMode, path string, opts ...Option) (Options, bool, error) {
+func HandleAccessMode(acc AccessMode, path string, opts ...accessio.Option) (accessio.Options, bool, error) {
 	var err error
 	ok := true
-	o := AccessOptions(opts...)
+	o := accessio.AccessOptions(opts...)
 	if o.File == nil && o.Reader == nil {
 		ok, err = vfs.Exists(o.PathFileSystem, path)
 		if err != nil {
@@ -63,6 +63,6 @@ func HandleAccessMode(acc AccessMode, path string, opts ...Option) (Options, boo
 		return o, true, nil
 	}
 
-	o, err = AccessOptions(opts...).DefaultForPath(path)
+	o, err = accessio.AccessOptions(opts...).DefaultForPath(path)
 	return o, false, err
 }

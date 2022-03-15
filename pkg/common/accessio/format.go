@@ -14,10 +14,24 @@
 
 package accessio
 
+import (
+	"archive/tar"
+	"compress/gzip"
+	"io"
+
+	"github.com/gardener/ocm/pkg/errors"
+	"github.com/mandelsoft/vfs/pkg/vfs"
+)
+
+const KIND_FILEFORMAT = "file format"
+
 type FileFormat string
 
 func (f FileFormat) String() string {
 	return string(f)
+}
+func (o FileFormat) ApplyOption(options *Options) {
+	options.FileFormat = &o
 }
 
 const (
@@ -25,3 +39,62 @@ const (
 	FormatTGZ       FileFormat = "tgz"
 	FormatDirectory FileFormat = "directory"
 )
+
+func ErrInvalidFileFormat(fmt string) error {
+	return errors.ErrInvalid(KIND_FILEFORMAT, fmt)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+func DetectFormat(path string, fs vfs.FileSystem) (*FileFormat, error) {
+	if fs == nil {
+		fs = _osfs
+	}
+
+	fi, err := fs.Stat(path)
+	if err != nil {
+		return nil, err
+	}
+
+	format := FormatDirectory
+	if !fi.IsDir() {
+		file, err := fs.Open(path)
+		if err != nil {
+			return nil, err
+		}
+		defer file.Close()
+		return DetectFormatForFile(file)
+	}
+	return &format, nil
+}
+
+func DetectFormatForFile(file vfs.File) (*FileFormat, error) {
+
+	fi, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
+	format := FormatDirectory
+	if !fi.IsDir() {
+		var r io.Reader
+
+		defer file.Seek(0, io.SeekStart)
+		zip, err := gzip.NewReader(file)
+		if err == nil {
+			format = FormatTGZ
+			defer zip.Close()
+			r = zip
+		} else {
+			file.Seek(0, io.SeekStart)
+			format = FormatTar
+			r = file
+		}
+		t := tar.NewReader(r)
+		_, err = t.Next()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &format, nil
+}

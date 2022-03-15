@@ -85,7 +85,7 @@ var _ = Describe("syntheses", func() {
 		t, err := osfs.NewTempFileSystem()
 		Expect(err).To(Succeed())
 		tempfs = t
-		spec = ctf.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessobj.PathFileSystem(tempfs), accessobj.FormatDirectory)
+		spec = ctf.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessio.PathFileSystem(tempfs), accessobj.FormatDirectory)
 	})
 
 	AfterEach(func() {

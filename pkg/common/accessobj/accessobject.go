@@ -112,11 +112,11 @@ func (a *AccessObject) updateDescriptor() (bool, error) {
 	return a.state.Update()
 }
 
-func (a *AccessObject) Write(path string, mode vfs.FileMode, opts ...Option) error {
+func (a *AccessObject) Write(path string, mode vfs.FileMode, opts ...accessio.Option) error {
 	if a.IsClosed() {
 		return accessio.ErrClosed
 	}
-	o := AccessOptions(opts...)
+	o := accessio.AccessOptions(opts...)
 	f := GetFormat(*o.FileFormat)
 	if f == nil {
 		return errors.ErrUnknown("file format", string(*o.FileFormat))

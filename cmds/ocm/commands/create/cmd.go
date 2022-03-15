@@ -12,48 +12,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package output
+package create
 
 import (
-	"fmt"
-	"strings"
-
-	"github.com/spf13/pflag"
+	"github.com/gardener/ocm/cmds/ocm/cmd"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocm/componentarchive/create"
+	"github.com/spf13/cobra"
 )
 
-type Options struct {
-	output string
-
-	Output *string
-	Sort   []string
-}
-
-func (o *Options) AddFlags(fs *pflag.FlagSet, outputs Outputs) {
-	s := ""
-	sep := ""
-	for o := range outputs {
-		s = fmt.Sprintf("%s%s%s", s, sep, o)
-		sep = ", "
+// NewCommand creates a new command.
+func NewCommand(ctx cmd.Context) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:              "create",
+		TraverseChildren: true,
 	}
-	fs.StringVarP(&o.output, "output", "o", "", fmt.Sprintf("output mode (%s)", s))
-	fs.StringArrayVarP(&o.Sort, "sort", "s", nil, "sort fields")
-}
-
-func (o *Options) Complete() error {
-	if o.output != "" {
-		o.Output = &o.output
-	}
-	var fields []string
-
-	for _, f := range o.Sort {
-		split := strings.Split(f, ",")
-		for _, s := range split {
-			s = strings.TrimSpace(s)
-			if s != "" {
-				fields = append(fields, s)
-			}
-		}
-	}
-	o.Sort = fields
-	return nil
+	cmd.AddCommand(create.NewCommand(ctx))
+	return cmd
 }

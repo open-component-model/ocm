@@ -16,9 +16,9 @@ package oci
 
 import (
 	"encoding/json"
-	"io"
-	"sync"
+	"reflect"
 
+	"github.com/gardener/ocm/pkg/datacontext"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
 )
@@ -31,7 +31,7 @@ type ArtefactContainer interface {
 }
 
 type Session interface {
-	Closer(closer io.Closer, err error) (io.Closer, error)
+	datacontext.Session
 
 	LookupRepository(Context, RepositorySpec) (Repository, error)
 	LookupNamespace(NamespaceContainer, string) (NamespaceAccess, error)
@@ -40,58 +40,28 @@ type Session interface {
 	Close() error
 }
 
-type objectkey struct {
-	Object interface{}
-	Name   string
-}
 type session struct {
-	lock         sync.RWMutex
-	closed       bool
-	closer       []io.Closer
-	repositories map[objectkey]Repository
-	namespaces   map[objectkey]NamespaceAccess
-	artefacts    map[objectkey]ArtefactAccess
+	datacontext.Session
+	base         datacontext.SessionBase
+	repositories map[datacontext.ObjectKey]Repository
+	namespaces   map[datacontext.ObjectKey]NamespaceAccess
+	artefacts    map[datacontext.ObjectKey]ArtefactAccess
 }
 
-func NewSession() Session {
+var key = reflect.TypeOf(session{})
+
+func NewSession(s datacontext.Session) Session {
+	return datacontext.GetOrCreateSubSession(s, key, newSession).(Session)
+}
+
+func newSession(s datacontext.SessionBase) datacontext.Session {
 	return &session{
-		repositories: map[objectkey]Repository{},
-		namespaces:   map[objectkey]NamespaceAccess{},
-		artefacts:    map[objectkey]ArtefactAccess{},
+		Session:      s.Session(),
+		base:         s,
+		repositories: map[datacontext.ObjectKey]Repository{},
+		namespaces:   map[datacontext.ObjectKey]NamespaceAccess{},
+		artefacts:    map[datacontext.ObjectKey]ArtefactAccess{},
 	}
-}
-
-func (s *session) Close() error {
-	s.lock.Lock()
-	defer s.lock.Unlock()
-	if s.closed {
-		return nil
-	}
-	s.closed = true
-	list := errors.ErrListf("closing session")
-	for i := len(s.closer) - 1; i >= 0; i-- {
-		list.Add(s.closer[i].Close())
-	}
-	s.namespaces = nil
-	return list.Result()
-}
-
-func (s *session) Closer(closer io.Closer, err error) (io.Closer, error) {
-	if err != nil {
-		return nil, err
-	}
-	s.lock.Lock()
-	defer s.lock.Unlock()
-	s.closer = append(s.closer, closer)
-	return closer, err
-}
-
-func (s *session) add(closer io.Closer, err error) (io.Closer, error) {
-	if err != nil {
-		return nil, err
-	}
-	s.closer = append(s.closer, closer)
-	return closer, err
 }
 
 func (s *session) LookupRepository(ctx Context, spec RepositorySpec) (Repository, error) {
@@ -104,14 +74,14 @@ func (s *session) LookupRepository(ctx Context, spec RepositorySpec) (Repository
 	if err != nil {
 		return nil, err
 	}
-	key := objectkey{
+	key := datacontext.ObjectKey{
 		Object: ctx,
 		Name:   string(data),
 	}
 
-	s.lock.Lock()
-	defer s.lock.Unlock()
-	if s.closed {
+	s.base.Lock()
+	defer s.base.Unlock()
+	if s.base.IsClosed() {
 		return nil, errors.ErrClosed("session")
 	}
 
@@ -123,18 +93,18 @@ func (s *session) LookupRepository(ctx Context, spec RepositorySpec) (Repository
 		return nil, err
 	}
 	s.repositories[key] = repo
-	s.add(repo, err)
+	s.base.AddCloser(repo)
 	return repo, err
 }
 
 func (s *session) LookupNamespace(c NamespaceContainer, name string) (NamespaceAccess, error) {
-	key := objectkey{
+	key := datacontext.ObjectKey{
 		Object: c,
 		Name:   name,
 	}
-	s.lock.Lock()
-	defer s.lock.Unlock()
-	if s.closed {
+	s.base.Lock()
+	defer s.base.Unlock()
+	if s.base.IsClosed() {
 		return nil, errors.ErrClosed("session")
 	}
 	if ns := s.namespaces[key]; ns != nil {
@@ -145,18 +115,18 @@ func (s *session) LookupNamespace(c NamespaceContainer, name string) (NamespaceA
 		return nil, err
 	}
 	s.namespaces[key] = ns
-	s.add(ns, err)
+	s.base.AddCloser(ns)
 	return ns, err
 }
 
 func (s *session) GetArtefact(c ArtefactContainer, version string) (ArtefactAccess, error) {
-	key := objectkey{
+	key := datacontext.ObjectKey{
 		Object: c,
 		Name:   version,
 	}
-	s.lock.Lock()
-	defer s.lock.Unlock()
-	if s.closed {
+	s.base.Lock()
+	defer s.base.Unlock()
+	if s.base.IsClosed() {
 		return nil, errors.ErrClosed("session")
 	}
 	if obj := s.artefacts[key]; s != nil {
@@ -167,7 +137,7 @@ func (s *session) GetArtefact(c ArtefactContainer, version string) (ArtefactAcce
 		return nil, err
 	}
 	s.artefacts[key] = obj
-	s.add(obj, err)
+	s.base.AddCloser(obj)
 	return obj, err
 }
 

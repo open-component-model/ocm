@@ -12,13 +12,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package accessobj
+package accessio
 
 import (
 	"io"
 	"os"
 
-	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 
@@ -27,7 +26,7 @@ import (
 
 type Options struct {
 	// FilePath is the path of the repository base in the filesystem
-	FileFormat *accessio.FileFormat `json:"fileFormat"`
+	FileFormat *FileFormat `json:"fileFormat"`
 	// FileSystem is the virtual filesystem to evaluate the file path. Default is the OS filesytem
 	// or the filesystem defined as base filesystem for the context
 	// This configuration option is not available for the textual representation of
@@ -75,7 +74,7 @@ func (o Options) Default() Options {
 	return o
 }
 
-func (o Options) DefaultFormat(fmt accessio.FileFormat) Options {
+func (o Options) DefaultFormat(fmt FileFormat) Options {
 	if o.FileFormat == nil {
 		o.FileFormat = &fmt
 	}
@@ -104,7 +103,7 @@ func (o Options) DefaultForPath(path string) (Options, error) {
 		return o, err
 	}
 	if o.FileFormat == nil {
-		var fmt *accessio.FileFormat
+		var fmt *FileFormat
 		var err error
 		if o.File != nil {
 			fmt, err = DetectFormatForFile(o.File)
@@ -128,7 +127,7 @@ func (o Options) WriterFor(path string, mode vfs.FileMode) (io.WriteCloser, erro
 	if o.File == nil {
 		writer, err = o.PathFileSystem.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode&0666)
 	} else {
-		writer = accessio.NopWriteCloser(o.File)
+		writer = NopWriteCloser(o.File)
 		err = o.File.Truncate(0)
 	}
 	return writer, err

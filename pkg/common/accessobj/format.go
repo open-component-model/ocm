@@ -15,8 +15,6 @@
 package accessobj
 
 import (
-	"archive/tar"
-	"compress/gzip"
 	"fmt"
 	"io"
 	"sync"
@@ -27,18 +25,18 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
-const KIND_FILEFORMAT = "file format"
+const KIND_FILEFORMAT = accessio.KIND_FILEFORMAT
 
 type FileFormat = accessio.FileFormat
 
 type FormatHandler interface {
-	Option
+	accessio.Option
 
 	Format() accessio.FileFormat
 
-	Open(info *AccessObjectInfo, acc AccessMode, path string, opts Options) (*AccessObject, error)
-	Create(info *AccessObjectInfo, path string, opts Options, mode vfs.FileMode) (*AccessObject, error)
-	Write(obj *AccessObject, path string, opts Options, mode vfs.FileMode) error
+	Open(info *AccessObjectInfo, acc AccessMode, path string, opts accessio.Options) (*AccessObject, error)
+	Create(info *AccessObjectInfo, path string, opts accessio.Options, mode vfs.FileMode) (*AccessObject, error)
+	Write(obj *AccessObject, path string, opts accessio.Options, mode vfs.FileMode) error
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -101,67 +99,12 @@ func (f fsCloser) Close(obj *AccessObject) error {
 	return err.Result()
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-func DetectFormat(path string, fs vfs.FileSystem) (*FileFormat, error) {
-	if fs == nil {
-		fs = _osfs
-	}
-
-	fi, err := fs.Stat(path)
-	if err != nil {
-		return nil, err
-	}
-
-	format := accessio.FormatDirectory
-	if !fi.IsDir() {
-		file, err := fs.Open(path)
-		if err != nil {
-			return nil, err
-		}
-		defer file.Close()
-		return DetectFormatForFile(file)
-	}
-	return &format, nil
-}
-
-func DetectFormatForFile(file vfs.File) (*FileFormat, error) {
-
-	fi, err := file.Stat()
-	if err != nil {
-		return nil, err
-	}
-
-	format := accessio.FormatDirectory
-	if !fi.IsDir() {
-		var r io.Reader
-
-		defer file.Seek(0, io.SeekStart)
-		zip, err := gzip.NewReader(file)
-		if err == nil {
-			format = accessio.FormatTGZ
-			defer zip.Close()
-			r = zip
-		} else {
-			file.Seek(0, io.SeekStart)
-			format = accessio.FormatTar
-			r = file
-		}
-		t := tar.NewReader(r)
-		_, err = t.Next()
-		if err != nil {
-			return nil, err
-		}
-	}
-	return &format, nil
-}
-
 type StandardReaderHandler interface {
-	Write(obj *AccessObject, path string, opts Options, mode vfs.FileMode) error
-	NewFromReader(info *AccessObjectInfo, acc AccessMode, in io.Reader, opts Options, closer Closer) (*AccessObject, error)
+	Write(obj *AccessObject, path string, opts accessio.Options, mode vfs.FileMode) error
+	NewFromReader(info *AccessObjectInfo, acc AccessMode, in io.Reader, opts accessio.Options, closer Closer) (*AccessObject, error)
 }
 
-func DefaultOpenOptsFileHandling(kind string, info *AccessObjectInfo, acc AccessMode, path string, opts Options, handler StandardReaderHandler) (*AccessObject, error) {
+func DefaultOpenOptsFileHandling(kind string, info *AccessObjectInfo, acc AccessMode, path string, opts accessio.Options, handler StandardReaderHandler) (*AccessObject, error) {
 	if err := opts.ValidForPath(path); err != nil {
 		return nil, err
 	}
@@ -193,7 +136,7 @@ func DefaultOpenOptsFileHandling(kind string, info *AccessObjectInfo, acc Access
 	return handler.NewFromReader(info, acc, reader, opts, closer)
 }
 
-func DefaultCreateOptsFileHandling(kind string, info *AccessObjectInfo, path string, opts Options, mode vfs.FileMode, handler StandardReaderHandler) (*AccessObject, error) {
+func DefaultCreateOptsFileHandling(kind string, info *AccessObjectInfo, path string, opts accessio.Options, mode vfs.FileMode, handler StandardReaderHandler) (*AccessObject, error) {
 	if err := opts.ValidForPath(path); err != nil {
 		return nil, err
 	}

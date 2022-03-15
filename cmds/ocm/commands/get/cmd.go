@@ -16,7 +16,7 @@ package get
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/cmd"
-	"github.com/gardener/ocm/cmds/ocm/commands/oci/get_artefact"
+	"github.com/gardener/ocm/cmds/ocm/commands/oci/artefact/get"
 	"github.com/spf13/cobra"
 )
 
@@ -26,6 +26,6 @@ func NewCommand(ctx cmd.Context) *cobra.Command {
 		Use:              "get",
 		TraverseChildren: true,
 	}
-	cmd.AddCommand(get_artefact.NewCommand(ctx))
+	cmd.AddCommand(get.NewCommand(ctx))
 	return cmd
 }

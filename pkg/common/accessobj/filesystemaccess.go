@@ -46,7 +46,7 @@ func (a *FileSystemBlobAccess) IsClosed() bool {
 	return a.base.IsClosed()
 }
 
-func (a *FileSystemBlobAccess) Write(path string, mode vfs.FileMode, opts ...Option) error {
+func (a *FileSystemBlobAccess) Write(path string, mode vfs.FileMode, opts ...accessio.Option) error {
 	return a.base.Write(path, mode, opts...)
 }
 

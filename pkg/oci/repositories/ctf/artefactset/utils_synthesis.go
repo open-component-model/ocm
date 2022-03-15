@@ -95,7 +95,7 @@ func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, e
 	}
 	_ = art
 
-	set, err := Create(accessobj.ACC_CREATE, "", 0600, accessobj.File(temp), accessobj.FormatTGZ)
+	set, err := Create(accessobj.ACC_CREATE, "", 0600, accessio.File(temp), accessobj.FormatTGZ)
 	if err != nil {
 		return nil, err
 	}

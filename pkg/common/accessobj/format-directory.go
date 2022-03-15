@@ -35,7 +35,7 @@ func init() {
 type DirectoryHandler struct{}
 
 // ApplyOption applies the configured path filesystem.
-func (o DirectoryHandler) ApplyOption(options *Options) {
+func (o DirectoryHandler) ApplyOption(options *accessio.Options) {
 	f := o.Format()
 	options.FileFormat = &f
 }
@@ -44,7 +44,7 @@ func (_ DirectoryHandler) Format() accessio.FileFormat {
 	return accessio.FormatDirectory
 }
 
-func (_ DirectoryHandler) Open(info *AccessObjectInfo, acc AccessMode, path string, opts Options) (*AccessObject, error) {
+func (_ DirectoryHandler) Open(info *AccessObjectInfo, acc AccessMode, path string, opts accessio.Options) (*AccessObject, error) {
 	if err := opts.ValidForPath(path); err != nil {
 		return nil, err
 	}
@@ -59,7 +59,7 @@ func (_ DirectoryHandler) Open(info *AccessObjectInfo, acc AccessMode, path stri
 	return NewAccessObject(info, acc, fs, nil, nil, os.ModePerm)
 }
 
-func (_ DirectoryHandler) Create(info *AccessObjectInfo, path string, opts Options, mode vfs.FileMode) (*AccessObject, error) {
+func (_ DirectoryHandler) Create(info *AccessObjectInfo, path string, opts accessio.Options, mode vfs.FileMode) (*AccessObject, error) {
 	if err := opts.ValidForPath(path); err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (_ DirectoryHandler) Create(info *AccessObjectInfo, path string, opts Optio
 }
 
 // WriteToFilesystem writes the current object to a filesystem
-func (_ DirectoryHandler) Write(obj *AccessObject, path string, opts Options, mode vfs.FileMode) error {
+func (_ DirectoryHandler) Write(obj *AccessObject, path string, opts accessio.Options, mode vfs.FileMode) error {
 	// create the directory structure with the content directory
 	if err := opts.PathFileSystem.MkdirAll(filepath.Join(path, obj.info.ElementDirectoryName), mode|0400); err != nil {
 		return fmt.Errorf("unable to create output directory %q: %s", path, err.Error())

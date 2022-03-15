@@ -45,7 +45,7 @@ var _ = Describe("ctf management", func() {
 		Expect(err).To(Succeed())
 		tempfs = t
 
-		spec = ctf.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessobj.PathFileSystem(tempfs), accessobj.FormatDirectory)
+		spec = ctf.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessio.PathFileSystem(tempfs), accessobj.FormatDirectory)
 	})
 
 	AfterEach(func() {
@@ -152,7 +152,7 @@ var _ = Describe("ctf management", func() {
 			DefaultManifestFill(n)
 			Expect(r.Close()).To(Succeed())
 
-			r, err = ctf.Open(nil, accessobj.ACC_READONLY, "test", 0, accessobj.PathFileSystem(tempfs))
+			r, err = ctf.Open(nil, accessobj.ACC_READONLY, "test", 0, accessio.PathFileSystem(tempfs))
 			Expect(err).To(Succeed())
 			defer r.Close()
 

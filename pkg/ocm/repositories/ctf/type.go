@@ -15,6 +15,7 @@
 package ctf
 
 import (
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
@@ -33,7 +34,7 @@ func init() {
 
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
-	accessobj.Options           `json:",inline"`
+	accessio.Options            `json:",inline"`
 
 	// FileFormat is the format of the repository file
 	FilePath string `json:"filePath"`
@@ -42,8 +43,8 @@ type RepositorySpec struct {
 }
 
 // NewRepositorySpec creates a new RepositorySpec
-func NewRepositorySpec(filePath string, opts ...accessobj.Option) *RepositorySpec {
-	o := accessobj.Options{}
+func NewRepositorySpec(filePath string, opts ...accessio.Option) *RepositorySpec {
+	o := accessio.Options{}
 	o.ApplyOptions(opts...)
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(CTFComponentArchiveType),

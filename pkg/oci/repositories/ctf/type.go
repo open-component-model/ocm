@@ -15,6 +15,7 @@
 package ctf
 
 import (
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/credentials"
 	cpi "github.com/gardener/ocm/pkg/oci/cpi"
@@ -34,7 +35,7 @@ func init() {
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
-	accessobj.Options           `json:",inline"`
+	accessio.Options            `json:",inline"`
 
 	// FileFormat is the format of the repository file
 	FilePath string `json:"filePath"`
@@ -45,8 +46,8 @@ type RepositorySpec struct {
 var _ cpi.RepositorySpec = (*RepositorySpec)(nil)
 
 // NewRepositorySpec creates a new RepositorySpec
-func NewRepositorySpec(mode accessobj.AccessMode, filePath string, opts ...accessobj.Option) *RepositorySpec {
-	o := accessobj.AccessOptions(opts...)
+func NewRepositorySpec(mode accessobj.AccessMode, filePath string, opts ...accessio.Option) *RepositorySpec {
+	o := accessio.AccessOptions(opts...)
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(CommonTransportFormatRepositoryType),
 		FilePath:            filePath,

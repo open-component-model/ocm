@@ -19,6 +19,7 @@ import (
 	"compress/gzip"
 	"io"
 
+	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
 	. "github.com/gardener/ocm/pkg/oci/repositories/ctf/testhelper"
@@ -35,13 +36,13 @@ func defaultManifestFill(a *artefactset.ArtefactSet) {
 
 var _ = Describe("artefact management", func() {
 	var tempfs vfs.FileSystem
-	var opts accessobj.Options
+	var opts accessio.Options
 
 	BeforeEach(func() {
 		t, err := osfs.NewTempFileSystem()
 		Expect(err).To(Succeed())
 		tempfs = t
-		opts = accessobj.AccessOptions(accessobj.PathFileSystem(tempfs))
+		opts = accessio.AccessOptions(accessio.PathFileSystem(tempfs))
 	})
 
 	AfterEach(func() {
@@ -116,7 +117,7 @@ var _ = Describe("artefact management", func() {
 		Expect(err).To(Succeed())
 		defer file.Close()
 
-		opts := accessobj.AccessOptions(opts, accessobj.File(file))
+		opts := accessio.AccessOptions(opts, accessio.File(file))
 
 		a, err := artefactset.FormatTGZ.Create("", opts, 0600)
 		Expect(err).To(Succeed())

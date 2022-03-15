@@ -114,7 +114,7 @@ func (a *ArtefactSet) IsClosed() bool {
 	return a.base.IsClosed()
 }
 
-func (a *ArtefactSet) Write(path string, mode vfs.FileMode, opts ...accessobj.Option) error {
+func (a *ArtefactSet) Write(path string, mode vfs.FileMode, opts ...accessio.Option) error {
 	return a.base.Write(path, mode, opts...)
 }
 
