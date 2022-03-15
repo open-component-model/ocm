@@ -7,12 +7,12 @@
 package app
 
 import (
-	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
 
+	"github.com/gardener/ocm/cmds/ocm/commands/add"
 	"github.com/gardener/ocm/cmds/ocm/commands/create"
 	"github.com/gardener/ocm/cmds/ocm/commands/get"
 	"github.com/mandelsoft/vfs/pkg/osfs"
@@ -28,31 +28,49 @@ import (
 	_ "github.com/gardener/ocm/cmds/ocm/cmd/config"
 )
 
+type CLI struct {
+	ctx cmd.Context
+}
+
+func NewCLI(ctx cmd.Context) *CLI {
+	if ctx == nil {
+		ctx = cmd.DefaultContext()
+	}
+	return &CLI{ctx}
+}
+
+func (c *CLI) Execute(args ...string) error {
+	cmd := NewCliCommand(c.ctx)
+	cmd.SetArgs(args)
+	return cmd.Execute()
+}
+
 type CLIOptions struct {
 	Config  string
 	Context cmd.Context
 }
 
-func NewCliCommand(ctx context.Context) *cobra.Command {
+func NewCliCommand(ctx cmd.Context) *cobra.Command {
+	if ctx == nil {
+		ctx = cmd.DefaultContext()
+	}
 	opts := &CLIOptions{
-		Context: cmd.DefaultContext(),
+		Context: ctx,
 	}
 	cmd := &cobra.Command{
 		Use:              "ocm",
 		Short:            "ocm",
 		TraverseChildren: true,
 		Version:          version.Get().String(),
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			if err := opts.Complete(); err != nil {
-				fmt.Fprintf(os.Stderr, "%s\n", err.Error())
-				os.Exit(1)
-			}
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			return opts.Complete()
 		},
 	}
 
 	cmd.AddCommand(NewVersionCommand())
 	cmd.AddCommand(get.NewCommand(opts.Context))
 	cmd.AddCommand(create.NewCommand(opts.Context))
+	cmd.AddCommand(add.NewCommand(opts.Context))
 
 	opts.AddFlags(cmd.Flags())
 	return cmd
@@ -64,8 +82,6 @@ func (o *CLIOptions) AddFlags(fs *pflag.FlagSet) {
 
 func (o *CLIOptions) Complete() error {
 	h := os.Getenv("HOME")
-	fmt.Printf("found config file %q\n", o.Config)
-
 	if o.Config == "" {
 		if h != "" {
 			cfg := h + "/.ocmconfig"

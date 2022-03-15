@@ -19,12 +19,14 @@ import (
 
 	"github.com/gardener/ocm/pkg/datacontext"
 	"github.com/gardener/ocm/pkg/ocm"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 type Builder struct {
-	ctx    context.Context
-	shared datacontext.AttributesContext
-	ocm    ocm.Context
+	ctx        context.Context
+	shared     datacontext.AttributesContext
+	ocm        ocm.Context
+	filesystem vfs.FileSystem
 }
 
 func (b *Builder) getContext() context.Context {
@@ -36,6 +38,11 @@ func (b *Builder) getContext() context.Context {
 
 func (b Builder) WithContext(ctx context.Context) Builder {
 	b.ctx = ctx
+	return b
+}
+
+func (b Builder) WithFileSystem(fs vfs.FileSystem) Builder {
+	b.filesystem = fs
 	return b
 }
 
@@ -63,5 +70,5 @@ func (b Builder) New() Context {
 		b.shared = b.ocm.AttributesContext()
 	}
 
-	return newContext(b.shared, b.ocm)
+	return newContext(b.shared, b.ocm, b.filesystem)
 }

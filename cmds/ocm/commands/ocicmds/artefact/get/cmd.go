@@ -16,10 +16,9 @@ package get
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/gardener/ocm/cmds/ocm/cmd"
-	"github.com/gardener/ocm/cmds/ocm/commands/oci/artefact"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefact"
 	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
@@ -30,52 +29,35 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-type Options struct {
+type Command struct {
 	Context cmd.Context
 
 	Output output.Options
 
-	// Ref is the oci artifact reference.
 	Repository string
-
-	Refs []string
+	Refs       []string
 }
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx cmd.Context) *cobra.Command {
-	opts := &Options{Context: ctx}
-	cmd := &cobra.Command{
-		Use:              "artefact",
-		TraverseChildren: true,
-		Aliases:          []string{"a", "art"},
-		Short:            "get artefact version",
-		Long: `
-get lists all artefact versions specified, if only a repository is specified
+	return utils.SetupCommand(&Command{Context: ctx},
+		&cobra.Command{
+			Use:     "artefact[<options>] {<artefact-reference>}",
+			Aliases: []string{"a", "art"},
+			Short:   "get artefact version",
+			Long: `
+Get lists all artefact versions specified, if only a repository is specified
 all tagged artefacts are listed.
 `,
-		Run: func(cmd *cobra.Command, args []string) {
-			if err := opts.Complete(args); err != nil {
-				fmt.Println(err.Error())
-				os.Exit(1)
-			}
-
-			if err := opts.Run(); err != nil {
-				fmt.Println(err.Error())
-				os.Exit(1)
-			}
-		},
-	}
-
-	opts.AddFlags(cmd.Flags())
-	return cmd
+		})
 }
 
-func (o *Options) AddFlags(fs *pflag.FlagSet) {
+func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Repository, "repo", "r", "", "repository name or spec")
 	o.Output.AddFlags(fs, outputs)
 }
 
-func (o *Options) Complete(args []string) error {
+func (o *Command) Complete(args []string) error {
 	if len(args) == 0 {
 		return fmt.Errorf("at least one argument that defines the reference is needed")
 	}
@@ -83,7 +65,7 @@ func (o *Options) Complete(args []string) error {
 	return nil
 }
 
-func (o *Options) Run() error {
+func (o *Command) Run() error {
 	var repobase oci.Repository
 	session := oci.NewSession(nil)
 

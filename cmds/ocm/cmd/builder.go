@@ -20,6 +20,7 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/cmd/core"
 	"github.com/gardener/ocm/pkg/datacontext"
 	"github.com/gardener/ocm/pkg/ocm"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 func WithContext(ctx context.Context) core.Builder {
@@ -32,6 +33,10 @@ func WithSharedAttributes(ctx datacontext.AttributesContext) core.Builder {
 
 func WithOCM(ctx ocm.Context) core.Builder {
 	return core.Builder{}.WithOCM(ctx)
+}
+
+func WithFileSystem(fs vfs.FileSystem) core.Builder {
+	return core.Builder{}.WithFileSystem(fs)
 }
 
 func New() core.Context {

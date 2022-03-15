@@ -168,7 +168,7 @@ func convert_Resource_to(in *Resource) *compdesc.Resource {
 			ElementMeta: *convert_ElementMeta_to(&in.ElementMeta),
 			Type:        in.Type,
 			Relation:    in.Relation,
-			SourceRef:   convert_SourceRefs_to(in.SourceRef),
+			SourceRef:   Convert_SourceRefs_to(in.SourceRef),
 		},
 		Access: compdesc.GenericAccessSpec(in.Access),
 	}
@@ -197,7 +197,7 @@ func convert_SourceRef_to(in *SourceRef) *compdesc.SourceRef {
 	return out
 }
 
-func convert_SourceRefs_to(in []SourceRef) []compdesc.SourceRef {
+func Convert_SourceRefs_to(in []SourceRef) []compdesc.SourceRef {
 	if in == nil {
 		return nil
 	}

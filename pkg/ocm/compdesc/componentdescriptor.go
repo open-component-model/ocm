@@ -185,6 +185,9 @@ func (o *ElementMeta) SetExtraIdentity(identity metav1.Identity) {
 // GetIdentity returns the identity of the object.
 func (o *ElementMeta) GetIdentity(accessor ElementMetaAccessor) metav1.Identity {
 	identity := o.ExtraIdentity.Copy()
+	if identity == nil {
+		identity = metav1.Identity{}
+	}
 	identity[SystemIdentityName] = o.Name
 	if accessor != nil {
 		found := false

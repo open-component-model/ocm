@@ -15,9 +15,6 @@
 package compdesc
 
 import (
-	"regexp"
-	"unicode"
-
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -78,26 +75,7 @@ func ValidateObjectMeta(fldPath *field.Path, om compdesc.ObjectMetaAccessor) fie
 		allErrs = append(allErrs, field.Required(fldPath.Child("version"), "must specify a version"))
 	}
 	if len(om.GetLabels()) != 0 {
-		allErrs = append(allErrs, ValidateLabels(fldPath.Child("labels"), om.GetLabels())...)
-	}
-	return allErrs
-}
-
-// ValidateIdentity validates the identity of object.
-func ValidateIdentity(fldPath *field.Path, id metav1.Identity) field.ErrorList {
-	allErrs := field.ErrorList{}
-
-	for key := range id {
-		if key == SystemIdentityName {
-			allErrs = append(allErrs, field.Forbidden(fldPath.Key(SystemIdentityName), "name is a reserved system identity label"))
-		}
-
-		if !IsASCII(key) {
-			allErrs = append(allErrs, field.Forbidden(fldPath.Key(key), "key contains non-ascii characters"))
-		}
-		if !identityKeyValidationRegexp.Match([]byte(key)) {
-			allErrs = append(allErrs, field.Invalid(fldPath.Key(key), key, identityKeyValidationErrMsg))
-		}
+		allErrs = append(allErrs, metav1.ValidateLabels(fldPath.Child("labels"), om.GetLabels())...)
 	}
 	return allErrs
 }
@@ -130,55 +108,40 @@ func ValidateSource(fldPath *field.Path, src Source) field.ErrorList {
 	if len(src.GetType()) == 0 {
 		allErrs = append(allErrs, field.Required(fldPath.Child("type"), "must specify a type"))
 	}
-	allErrs = append(allErrs, ValidateIdentity(fldPath.Child("extraIdentity"), src.ExtraIdentity)...)
+	allErrs = append(allErrs, metav1.ValidateIdentity(fldPath.Child("extraIdentity"), src.ExtraIdentity)...)
 	return allErrs
 }
 
 // ValidateResource validates a components resource
-func ValidateResource(fldPath *field.Path, res Resource) field.ErrorList {
+func ValidateResource(fldPath *field.Path, res Resource, access bool) field.ErrorList {
 	allErrs := field.ErrorList{}
 	allErrs = append(allErrs, ValidateObjectMeta(fldPath, &res)...)
 
-	if !identityKeyValidationRegexp.Match([]byte(res.Name)) {
-		allErrs = append(allErrs, field.Invalid(fldPath.Child("name"), res.Name, identityKeyValidationErrMsg))
+	if err := metav1.ValidateRelation(fldPath.Child("relation"), res.Relation); err != nil {
+		allErrs = append(allErrs, err)
+	}
+
+	if !metav1.IsIdentity(res.Name) {
+		allErrs = append(allErrs, field.Invalid(fldPath.Child("name"), res.Name, metav1.IdentityKeyValidationErrMsg))
 	}
 
 	if len(res.GetType()) == 0 {
 		allErrs = append(allErrs, field.Required(fldPath.Child("type"), "must specify a type"))
 	}
-	if res.Access == nil {
+
+	if res.Access == nil && access {
 		allErrs = append(allErrs, field.Required(fldPath.Child("access"), "must specify a access"))
 	}
-	allErrs = append(allErrs, ValidateIdentity(fldPath.Child("extraIdentity"), res.ExtraIdentity)...)
+	allErrs = append(allErrs, metav1.ValidateIdentity(fldPath.Child("extraIdentity"), res.ExtraIdentity)...)
 
 	return allErrs
 }
 
 func validateProvider(fldPath *field.Path, provider metav1.ProviderType) *field.Error {
 	if len(provider) == 0 {
-		return field.Required(fldPath, "provider must be set and one of (internal, external)")
+		return field.Required(fldPath, "provider must be set")
 	}
 	return nil
-}
-
-// ValidateLabels validates a list of labels.
-func ValidateLabels(fldPath *field.Path, labels metav1.Labels) field.ErrorList {
-	allErrs := field.ErrorList{}
-	labelNames := make(map[string]struct{})
-	for i, label := range labels {
-		labelPath := fldPath.Index(i)
-		if len(label.Name) == 0 {
-			allErrs = append(allErrs, field.Required(labelPath.Child("name"), "must specify a name"))
-			continue
-		}
-
-		if _, ok := labelNames[label.Name]; ok {
-			allErrs = append(allErrs, field.Duplicate(labelPath, "duplicate label name"))
-			continue
-		}
-		labelNames[label.Name] = struct{}{}
-	}
-	return allErrs
 }
 
 // ValidateComponentReference validates a component reference.
@@ -217,7 +180,7 @@ func ValidateResources(fldPath *field.Path, resources Resources, componentVersio
 	resourceIDs := make(map[string]struct{})
 	for i, res := range resources {
 		localPath := fldPath.Index(i)
-		allErrs = append(allErrs, ValidateResource(localPath, res)...)
+		allErrs = append(allErrs, ValidateResource(localPath, res, true)...)
 
 		// only validate the component version if it is defined
 		if res.Relation == metav1.LocalRelation && len(componentVersion) != 0 {
@@ -225,6 +188,10 @@ func ValidateResources(fldPath *field.Path, resources Resources, componentVersio
 				allErrs = append(allErrs, field.Invalid(localPath.Child("version"), "invalid version",
 					"version of local resources must match the component version"))
 			}
+		}
+
+		if err := ValidateSourceRefs(localPath.Child("sourceRef"), res.SourceRef); err != nil {
+			allErrs = append(allErrs, err...)
 		}
 
 		id := string(res.GetIdentityDigest(resources))
@@ -237,16 +204,13 @@ func ValidateResources(fldPath *field.Path, resources Resources, componentVersio
 	return allErrs
 }
 
-const identityKeyValidationErrMsg string = "a identity label or name must consist of lower case alphanumeric characters, '-', '_' or '+', and must start and end with an alphanumeric character"
-
-var identityKeyValidationRegexp = regexp.MustCompile("^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$")
-
-// IsAscii checks whether a string only contains ascii characters
-func IsASCII(s string) bool {
-	for i := 0; i < len(s); i++ {
-		if s[i] > unicode.MaxASCII {
-			return false
+func ValidateSourceRefs(fldPath *field.Path, srcs []SourceRef) field.ErrorList {
+	allErrs := field.ErrorList{}
+	for i, src := range srcs {
+		localPath := fldPath.Index(i)
+		if err := metav1.ValidateLabels(localPath.Child("labels"), src.Labels); err != nil {
+			allErrs = append(allErrs, err...)
 		}
 	}
-	return true
+	return allErrs
 }

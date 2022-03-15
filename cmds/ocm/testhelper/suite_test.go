@@ -12,20 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package create
+package testhelper
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/cmd"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
-	"github.com/spf13/cobra"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-// NewCommand creates a new command.
-func NewCommand(ctx cmd.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              "create",
-		TraverseChildren: true,
-	}
-	cmd.AddCommand(create.NewCommand(ctx))
-	return cmd
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "CLI Test Helper Suite")
 }

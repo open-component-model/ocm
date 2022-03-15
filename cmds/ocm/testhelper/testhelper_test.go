@@ -12,20 +12,21 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package create
+package testhelper
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/cmd"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
-	"github.com/spf13/cobra"
+	"github.com/mandelsoft/vfs/pkg/vfs"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-// NewCommand creates a new command.
-func NewCommand(ctx cmd.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              "create",
-		TraverseChildren: true,
-	}
-	cmd.AddCommand(create.NewCommand(ctx))
-	return cmd
-}
+var _ = Describe("Test Environment", func() {
+
+	It("loads test environment", func() {
+		h := NewTestEnv(TestData())
+		defer h.Cleanup()
+		data, err := vfs.ReadFile(h.FileSystem(), "/testdata/testfile.txt")
+		Expect(err).To(Succeed())
+		Expect(string(data)).To(Equal("this is some test data"))
+	})
+})

@@ -12,20 +12,35 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package create
+package utils
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/cmd"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
+	"fmt"
+	"os"
+
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
-// NewCommand creates a new command.
-func NewCommand(ctx cmd.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              "create",
-		TraverseChildren: true,
+type OCMCommand interface {
+	AddFlags(fs *pflag.FlagSet)
+	Complete(args []string) error
+	Run() error
+}
+
+func SetupCommand(ocmcmd OCMCommand, c *cobra.Command) *cobra.Command {
+	c.Run = func(cmd *cobra.Command, args []string) {
+		if err := ocmcmd.Complete(args); err != nil {
+			fmt.Println(err.Error())
+			os.Exit(1)
+		}
+
+		if err := ocmcmd.Run(); err != nil {
+			fmt.Println(err.Error())
+			os.Exit(1)
+		}
 	}
-	cmd.AddCommand(create.NewCommand(ctx))
-	return cmd
+	c.TraverseChildren = true
+	ocmcmd.AddFlags(c.Flags())
+	return c
 }

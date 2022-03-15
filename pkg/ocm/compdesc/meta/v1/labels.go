@@ -16,6 +16,8 @@ package v1
 
 import (
 	"encoding/json"
+
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 // Label is a label that can be set on objects.
@@ -53,4 +55,24 @@ func (l Labels) Copy() Labels {
 		n[k] = v
 	}
 	return n
+}
+
+// ValidateLabels validates a list of labels.
+func ValidateLabels(fldPath *field.Path, labels Labels) field.ErrorList {
+	allErrs := field.ErrorList{}
+	labelNames := make(map[string]struct{})
+	for i, label := range labels {
+		labelPath := fldPath.Index(i)
+		if len(label.Name) == 0 {
+			allErrs = append(allErrs, field.Required(labelPath.Child("name"), "must specify a name"))
+			continue
+		}
+
+		if _, ok := labelNames[label.Name]; ok {
+			allErrs = append(allErrs, field.Duplicate(labelPath, "duplicate label name"))
+			continue
+		}
+		labelNames[label.Name] = struct{}{}
+	}
+	return allErrs
 }

@@ -16,6 +16,8 @@ package v1
 
 import (
 	"encoding/json"
+
+	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 // Identity describes the identity of an object.
@@ -69,4 +71,23 @@ func (l Identity) Copy() Identity {
 		n[k] = v
 	}
 	return n
+}
+
+// ValidateIdentity validates the identity of object.
+func ValidateIdentity(fldPath *field.Path, id Identity) field.ErrorList {
+	allErrs := field.ErrorList{}
+
+	for key := range id {
+		if key == SystemIdentityName {
+			allErrs = append(allErrs, field.Forbidden(fldPath.Key(SystemIdentityName), "name is a reserved system identity label"))
+		}
+
+		if !IsASCII(key) {
+			allErrs = append(allErrs, field.Forbidden(fldPath.Key(key), "key contains non-ascii characters"))
+		}
+		if !IsIdentity(key) {
+			allErrs = append(allErrs, field.Invalid(fldPath.Key(key), key, IdentityKeyValidationErrMsg))
+		}
+	}
+	return allErrs
 }

@@ -16,7 +16,7 @@ package get
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/cmd"
-	"github.com/gardener/ocm/cmds/ocm/commands/oci/artefact/get"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefact/get"
 	"github.com/spf13/cobra"
 )
 

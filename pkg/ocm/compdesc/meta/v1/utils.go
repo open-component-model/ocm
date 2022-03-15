@@ -12,20 +12,27 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package create
+package v1
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/cmd"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
-	"github.com/spf13/cobra"
+	"regexp"
+	"unicode"
 )
 
-// NewCommand creates a new command.
-func NewCommand(ctx cmd.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              "create",
-		TraverseChildren: true,
+const IdentityKeyValidationErrMsg string = "a identity label or name must consist of lower case alphanumeric characters, '-', '_' or '+', and must start and end with an alphanumeric character"
+
+var identityKeyValidationRegexp = regexp.MustCompile("^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$")
+
+func IsIdentity(s string) bool {
+	return identityKeyValidationRegexp.Match([]byte(s))
+}
+
+// IsAscii checks whether a string only contains ascii characters
+func IsASCII(s string) bool {
+	for i := 0; i < len(s); i++ {
+		if s[i] > unicode.MaxASCII {
+			return false
+		}
 	}
-	cmd.AddCommand(create.NewCommand(ctx))
-	return cmd
+	return true
 }

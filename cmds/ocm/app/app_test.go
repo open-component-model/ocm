@@ -12,20 +12,15 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package create
+package app
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/cmd"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
-	"github.com/spf13/cobra"
+	"fmt"
+	"os"
+	"testing"
 )
 
-// NewCommand creates a new command.
-func NewCommand(ctx cmd.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              "create",
-		TraverseChildren: true,
-	}
-	cmd.AddCommand(create.NewCommand(ctx))
-	return cmd
+func TestEnv(t *testing.T) {
+	wd, err := os.Getwd()
+	fmt.Printf("%s (%s)\n", wd, err)
 }

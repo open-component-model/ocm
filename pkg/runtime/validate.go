@@ -12,20 +12,24 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package create
+package runtime
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/cmd"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
-	"github.com/spf13/cobra"
+	"github.com/gardener/ocm/pkg/errors"
 )
 
-// NewCommand creates a new command.
-func NewCommand(ctx cmd.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              "create",
-		TraverseChildren: true,
+type Validater interface {
+	Validate() error
+}
+
+func Validate(o interface{}) error {
+	if t, ok := o.(TypedObject); ok {
+		if t.GetType() == "" {
+			return errors.New("type missing")
+		}
 	}
-	cmd.AddCommand(create.NewCommand(ctx))
-	return cmd
+	if v, ok := o.(Validater); ok {
+		return v.Validate()
+	}
+	return nil
 }

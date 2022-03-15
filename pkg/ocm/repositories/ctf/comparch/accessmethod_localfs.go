@@ -97,11 +97,11 @@ func (m *localFilesystemBlobAccessMethod) GetKind() string {
 }
 
 func (m *localFilesystemBlobAccessMethod) Reader() (io.ReadCloser, error) {
-	return accessio.BlobReader(m.comp.base.GetBlobData(m.spec.ReferenceName))
+	return accessio.BlobReader(m.comp.base.GetBlobData(m.spec.LocalReference))
 }
 
 func (m *localFilesystemBlobAccessMethod) Get() ([]byte, error) {
-	return accessio.BlobData(m.comp.base.GetBlobData(m.spec.ReferenceName))
+	return accessio.BlobData(m.comp.base.GetBlobData(m.spec.LocalReference))
 }
 
 func (m *localFilesystemBlobAccessMethod) MimeType() string {

@@ -26,6 +26,8 @@ import (
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/ocm"
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 const CONTEXT_TYPE = "ocm.cmd.context.gardener.cloud"
@@ -39,6 +41,8 @@ type Context interface {
 	CredentialsContext() credentials.Context
 	OCIContext() oci.Context
 	OCMContext() ocm.Context
+
+	FileSystem() vfs.FileSystem
 
 	GetOCMRepository(name string) (ocm.Repository, error)
 	GetOCIRepository(name string) (oci.Repository, error)
@@ -73,13 +77,18 @@ type _context struct {
 	oci         oci.Context
 	ocm         ocm.Context
 
+	filesystem vfs.FileSystem
+
 	ocirepos map[string]oci.RepositorySpec
 	ocmrepos map[string]ocm.RepositorySpec
 }
 
 var _ Context = &_context{}
 
-func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context) Context {
+func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context, fs vfs.FileSystem) Context {
+	if fs == nil {
+		fs = osfs.New()
+	}
 	c := &_context{
 		sharedAttributes: shared,
 		ocm:              ocmctx,
@@ -88,8 +97,9 @@ func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context) Contex
 		config:           ocmctx.CredentialsContext().ConfigContext(),
 		updater:          cfgcpi.NewUpdate(ocmctx.CredentialsContext().ConfigContext()),
 
-		ocirepos: map[string]oci.RepositorySpec{},
-		ocmrepos: map[string]ocm.RepositorySpec{},
+		filesystem: fs,
+		ocirepos:   map[string]oci.RepositorySpec{},
+		ocmrepos:   map[string]ocm.RepositorySpec{},
 	}
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
 	return c
@@ -113,6 +123,10 @@ func (c *_context) OCIContext() oci.Context {
 
 func (c *_context) OCMContext() ocm.Context {
 	return c.ocm
+}
+
+func (c *_context) FileSystem() vfs.FileSystem {
+	return c.filesystem
 }
 
 func (c *_context) AddOCIRepository(name string, spec oci.RepositorySpec) error {

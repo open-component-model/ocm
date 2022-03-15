@@ -98,8 +98,8 @@ func (o *ObjectMeta) SetLabels(labels []metav1.Label) {
 }
 
 const (
-	SystemIdentityName    = "name"
-	SystemIdentityVersion = "version"
+	SystemIdentityName    = metav1.SystemIdentityName
+	SystemIdentityVersion = metav1.SystemIdentityVersion
 )
 
 // ElementMeta defines a object that is uniquely identified by its identity.

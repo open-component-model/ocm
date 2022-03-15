@@ -14,6 +14,15 @@
 
 package v1
 
+import (
+	"k8s.io/apimachinery/pkg/util/validation/field"
+)
+
+const (
+	SystemIdentityName    = "name"
+	SystemIdentityVersion = "version"
+)
+
 // Metadata defines the metadata of the component descriptor.
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
@@ -42,3 +51,13 @@ const (
 	// which describes a resource maintained by a third party vendor in the origin's context.
 	ExternalRelation ResourceRelation = "external"
 )
+
+func ValidateRelation(fldPath *field.Path, relation ResourceRelation) *field.Error {
+	if len(relation) == 0 {
+		return field.Required(fldPath, "relation must be set")
+	}
+	if relation != LocalRelation && relation != ExternalRelation {
+		return field.NotSupported(fldPath, relation, []string{string(LocalRelation), string(ExternalRelation)})
+	}
+	return nil
+}

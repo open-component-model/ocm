@@ -12,20 +12,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package create
+package add
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/cmd"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/add"
 	"github.com/spf13/cobra"
 )
 
 // NewCommand creates a new command.
 func NewCommand(ctx cmd.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              "create",
+		Use:              "add",
 		TraverseChildren: true,
 	}
-	cmd.AddCommand(create.NewCommand(ctx))
+	cmd.AddCommand(add.NewCommand(ctx))
 	return cmd
 }

@@ -420,7 +420,7 @@ var _ = Describe("Validation", func() {
 				"my-l1": "test",
 				"my-l2": "test",
 			}
-			errList := ValidateIdentity(field.NewPath("identity"), identity)
+			errList := metav1.ValidateIdentity(field.NewPath("identity"), identity)
 			Expect(errList).To(HaveLen(0))
 		})
 
@@ -428,7 +428,7 @@ var _ = Describe("Validation", func() {
 			identity := metav1.Identity{
 				"name": "test",
 			}
-			errList := ValidateIdentity(field.NewPath("identity"), identity)
+			errList := metav1.ValidateIdentity(field.NewPath("identity"), identity)
 			Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 				"Type":  Equal(field.ErrorTypeForbidden),
 				"Field": Equal("identity[name]"),
@@ -439,7 +439,7 @@ var _ = Describe("Validation", func() {
 			identity := metav1.Identity{
 				"my-l1!": "test",
 			}
-			errList := ValidateIdentity(field.NewPath("identity"), identity)
+			errList := metav1.ValidateIdentity(field.NewPath("identity"), identity)
 			Expect(errList).ToNot(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 				"Type":  Equal(field.ErrorTypeForbidden),
 				"Field": Equal("identity[my-l1!]"),

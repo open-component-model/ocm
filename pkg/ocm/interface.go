@@ -18,7 +18,8 @@ const CONTEXT_TYPE = core.CONTEXT_TYPE
 
 type Context = core.Context
 type Repository = core.Repository
-type ComponentAccess = core.ComponentVersionAccess
+type ComponentAccess = core.ComponentAccess
+type ComponentVersionAccess = core.ComponentVersionAccess
 type AccessSpec = core.AccessSpec
 type AccessMethod = core.AccessMethod
 type AccessType = core.AccessType

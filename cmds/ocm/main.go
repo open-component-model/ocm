@@ -5,19 +5,17 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"os"
 
 	"github.com/gardener/ocm/cmds/ocm/app"
+	cmd "github.com/gardener/ocm/cmds/ocm/cmd"
 )
 
 func main() {
-	ctx := context.Background()
-	defer ctx.Done()
-	cmd := app.NewCliCommand(ctx)
+	c := app.NewCliCommand(cmd.DefaultContext())
 
-	if err := cmd.Execute(); err != nil {
+	if err := c.Execute(); err != nil {
 		fmt.Print(err)
 		os.Exit(1)
 	}

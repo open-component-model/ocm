@@ -15,24 +15,21 @@
 package create
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/gardener/ocm/cmds/ocm/cmd"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocm"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds"
+	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/gardener/ocm/pkg/ocm/repositories/ctf/comparch"
-	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
 
-type Options struct {
+type Command struct {
 	Context cmd.Context
 
 	format string
@@ -49,40 +46,25 @@ type Options struct {
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx cmd.Context) *cobra.Command {
-	opts := &Options{Context: ctx}
-	cmd := &cobra.Command{
-		Use:              "componentarchive [<options>] <component> <version> <provider> <path> {<label>=<value>}",
-		TraverseChildren: true,
-		Args:             cobra.MinimumNArgs(4),
-		Aliases:          []string{"ca", "comparch"},
-		Short:            "create new component archive",
-		Long: `
-create a new component archive. This might be either a directory prepared
-to host component versuon content or a tar/tgz file.
+	return utils.SetupCommand(&Command{Context: ctx},
+		&cobra.Command{
+			Use:     "componentarchive [<options>] <component> <version> <provider> <path> {<label>=<value>}",
+			Args:    cobra.MinimumNArgs(4),
+			Aliases: []string{"ca", "comparch"},
+			Short:   "create new component archive",
+			Long: `
+Create a new component archive. This might be either a directory prepared
+to host component version content or a tar/tgz file.
 `,
-		Run: func(cmd *cobra.Command, args []string) {
-			if err := opts.Complete(args); err != nil {
-				fmt.Println(err.Error())
-				os.Exit(1)
-			}
-
-			if err := opts.Run(); err != nil {
-				fmt.Println(err.Error())
-				os.Exit(1)
-			}
-		},
-	}
-
-	opts.AddFlags(cmd.Flags())
-	return cmd
+		})
 }
 
-func (o *Options) AddFlags(fs *pflag.FlagSet) {
+func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.format, "type", "t", string(accessio.FormatDirectory), "archive format")
 	fs.BoolVarP(&o.Force, "force", "f", false, "remove existing content")
 }
 
-func (o *Options) Complete(args []string) error {
+func (o *Command) Complete(args []string) error {
 	var err error
 
 	o.Handler = comparch.GetFormat(accessio.FileFormat(o.format))
@@ -96,7 +78,7 @@ func (o *Options) Complete(args []string) error {
 	o.Path = args[3]
 
 	for _, a := range args[4:] {
-		o.Labels, err = ocm.AddParsedLabel(o.Labels, a)
+		o.Labels, err = ocmcmds.AddParsedLabel(o.Labels, a)
 		if err != nil {
 			return err
 		}
@@ -104,23 +86,24 @@ func (o *Options) Complete(args []string) error {
 	return nil
 }
 
-func (o *Options) Run() error {
+func (o *Command) Run() error {
 	mode := vfs.FileMode(0660)
 	if o.format == string(accessio.FormatDirectory) {
 		mode = 0770
 	}
-	if ok, err := vfs.Exists(osfs.New(), o.Path); ok || err != nil {
+	fs := o.Context.FileSystem()
+	if ok, err := vfs.Exists(fs, o.Path); ok || err != nil {
 		if err != nil {
 			return err
 		}
 		if o.Force {
-			err = os.RemoveAll(o.Path)
+			err = fs.RemoveAll(o.Path)
 			if err != nil {
 				return errors.Wrapf(err, "cannot remove old %q", o.Path)
 			}
 		}
 	}
-	obj, err := comparch.Create(o.Context.OCMContext(), accessobj.ACC_CREATE, o.Path, mode, o.Handler)
+	obj, err := comparch.Create(o.Context.OCMContext(), accessobj.ACC_CREATE, o.Path, mode, o.Handler, accessio.PathFileSystem(fs))
 	if err != nil {
 		return err
 	}

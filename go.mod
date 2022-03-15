@@ -9,7 +9,6 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.2.0
 	github.com/mandelsoft/filepath v0.0.0-20200909114706-3df73d378d55
-	github.com/mandelsoft/vfs v0.0.0-20220201135517-cf1272e4bfd9
 	github.com/modern-go/reflect2 v1.0.2
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.17.0
@@ -33,12 +32,14 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/klauspost/compress v1.14.4
 	github.com/klauspost/pgzip v1.2.5
+	github.com/mandelsoft/vfs v0.0.0-20220316154950-d15bc3474271
 	github.com/marstr/guid v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.0
 	github.com/ulikunitz/xz v0.5.10
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -74,6 +75,5 @@ require (
 	google.golang.org/grpc v1.42.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
