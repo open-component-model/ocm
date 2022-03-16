@@ -15,7 +15,7 @@
 package add
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/cmd"
+	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds"
 	"github.com/gardener/ocm/pkg/ocm"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
@@ -40,7 +40,7 @@ type ResourceOptionList struct {
 	Resources []*ResourceOptions `json:"resources"`
 }
 
-func Validate(r *ResourceOptions, ctx cmd.Context, inputFilePath string) error {
+func Validate(r *ResourceOptions, ctx clictx.Context, inputFilePath string) error {
 	allErrs := field.ErrorList{}
 	var fldPath *field.Path
 

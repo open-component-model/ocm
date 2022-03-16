@@ -15,13 +15,13 @@
 package add
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/cmd"
+	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/add"
 	"github.com/spf13/cobra"
 )
 
 // NewCommand creates a new command.
-func NewCommand(ctx cmd.Context) *cobra.Command {
+func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:              "add",
 		TraverseChildren: true,

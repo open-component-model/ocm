@@ -5,10 +5,10 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"os"
 
+	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/spf13/cobra/doc"
 
 	"github.com/gardener/ocm/cmds/ocm/app"
@@ -27,7 +27,7 @@ func main() {
 	check(os.RemoveAll(outputDir))
 	check(os.MkdirAll(outputDir, os.ModePerm))
 
-	cmd := app.NewCliCommand(context.TODO())
+	cmd := app.NewCliCommand(clictx.DefaultContext())
 	cmd.DisableAutoGenTag = true
 	check(doc.GenMarkdownTree(cmd, outputDir))
 	fmt.Printf("Successfully written docs to %s", outputDir)

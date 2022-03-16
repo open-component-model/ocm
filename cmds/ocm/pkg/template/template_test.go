@@ -7,6 +7,7 @@ package template_test
 import (
 	"testing"
 
+	"github.com/mandelsoft/vfs/pkg/osfs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -24,14 +25,14 @@ var _ = Describe("Template", func() {
 
 		It("should parse one argument after a '--'", func() {
 			opts := template.Options{}
-			Expect(opts.FilterSettings([]string{"MY_VAR=test"})).To(BeNil())
+			Expect(opts.FilterSettings("MY_VAR=test")).To(BeNil())
 			Expect(opts.Vars).To(HaveKeyWithValue("MY_VAR", "test"))
 		})
 
 		It("should return non variable arguments", func() {
 			opts := template.Options{}
 
-			args := opts.FilterSettings([]string{"--", "MY_VAR=test", "my-arg"})
+			args := opts.FilterSettings("--", "MY_VAR=test", "my-arg")
 			Expect(args).To(Equal([]string{
 				"--", "my-arg",
 			}))
@@ -40,11 +41,25 @@ var _ = Describe("Template", func() {
 
 		It("should parse multiple values", func() {
 			opts := template.Options{}
-			Expect(opts.FilterSettings([]string{"MY_VAR=test", "myOtherVar=true"})).To(BeNil())
+			Expect(opts.FilterSettings("MY_VAR=test", "myOtherVar=true")).To(BeNil())
 			Expect(opts.Vars).To(HaveKeyWithValue("MY_VAR", "test"))
 			Expect(opts.Vars).To(HaveKeyWithValue("myOtherVar", "true"))
 		})
 
+		It("should filter multiple values", func() {
+			opts := template.Options{}
+			Expect(opts.FilterSettings("MY_VAR=test", "other")).To(Equal([]string{"other"}))
+			Expect(opts.Vars).To(HaveKeyWithValue("MY_VAR", "test"))
+		})
+	})
+
+	Context("Settings", func() {
+		It("should filter multiple values", func() {
+			opts := template.Options{}
+			Expect(opts.ParseSettings(osfs.New(), "testdata/env.values")).To(Succeed())
+			Expect(opts.Vars).To(HaveKeyWithValue("NAME", "test.de/x"))
+			Expect(opts.Vars).To(HaveKeyWithValue("VERSION", "v1"))
+		})
 	})
 
 	Context("Template", func() {

@@ -16,7 +16,7 @@ package testhelper
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/app"
-	"github.com/gardener/ocm/cmds/ocm/cmd"
+	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/pkg/ocm"
 	"github.com/mandelsoft/vfs/pkg/composefs"
 	"github.com/mandelsoft/vfs/pkg/osfs"
@@ -102,7 +102,7 @@ func (o tdOpt) Mount(cfs *composefs.ComposedFileSystem) error {
 type TestEnv struct {
 	vfs.VFS
 	filesystem *composefs.ComposedFileSystem
-	cmd.Context
+	clictx.Context
 	*app.CLI
 }
 
@@ -125,7 +125,7 @@ func NewTestEnv(opts ...Option) *TestEnv {
 			panic(err)
 		}
 	}
-	ctx := cmd.WithOCM(ocm.DefaultContext()).WithFileSystem(fs).New()
+	ctx := clictx.WithOCM(ocm.DefaultContext()).WithFileSystem(fs).New()
 	tmpfs = nil
 	return &TestEnv{
 		VFS:        vfs.New(fs),

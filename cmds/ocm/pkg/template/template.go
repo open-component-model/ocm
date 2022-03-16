@@ -53,6 +53,9 @@ key:
 // it returns all non variable arguments
 func (o *Options) FilterSettings(args ...string) []string {
 	var addArgs []string
+	if o.Vars == nil {
+		o.Vars = map[string]string{}
+	}
 	for _, arg := range args {
 		if i := strings.Index(arg, "="); i > 0 {
 			value := arg[i+1:]
@@ -66,6 +69,9 @@ func (o *Options) FilterSettings(args ...string) []string {
 }
 
 func (o *Options) ParseSettings(fs vfs.FileSystem, paths ...string) error {
+	if o.Vars == nil {
+		o.Vars = map[string]string{}
+	}
 	for _, path := range paths {
 		vars, err := ReadSettings(fs, path)
 		if err != nil {

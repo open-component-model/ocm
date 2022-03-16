@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/gardener/ocm/cmds/ocm/cmd"
+	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/pkg/template"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/common/accessio"
@@ -37,7 +37,7 @@ import (
 )
 
 type Command struct {
-	Context cmd.Context
+	Context clictx.Context
 
 	Archive    string
 	Paths      []string
@@ -46,7 +46,7 @@ type Command struct {
 }
 
 // NewCommand creates a new ctf command.
-func NewCommand(ctx cmd.Context) *cobra.Command {
+func NewCommand(ctx clictx.Context) *cobra.Command {
 	return utils.SetupCommand(&Command{Context: ctx},
 		&cobra.Command{
 			Use:     "resources [<options>] <target> {<resourcefile> | <var>=<value>}",

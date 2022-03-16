@@ -17,7 +17,7 @@ package get
 import (
 	"fmt"
 
-	"github.com/gardener/ocm/cmds/ocm/cmd"
+	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefact"
 	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
@@ -30,7 +30,7 @@ import (
 )
 
 type Command struct {
-	Context cmd.Context
+	Context clictx.Context
 
 	Output output.Options
 
@@ -39,10 +39,10 @@ type Command struct {
 }
 
 // NewCommand creates a new ctf command.
-func NewCommand(ctx cmd.Context) *cobra.Command {
+func NewCommand(ctx clictx.Context) *cobra.Command {
 	return utils.SetupCommand(&Command{Context: ctx},
 		&cobra.Command{
-			Use:     "artefact[<options>] {<artefact-reference>}",
+			Use:     "artefact [<options>] {<artefact-reference>}",
 			Aliases: []string{"a", "art"},
 			Short:   "get artefact version",
 			Long: `

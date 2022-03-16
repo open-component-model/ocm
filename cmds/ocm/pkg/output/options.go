@@ -32,8 +32,10 @@ func (o *Options) AddFlags(fs *pflag.FlagSet, outputs Outputs) {
 	s := ""
 	sep := ""
 	for o := range outputs {
-		s = fmt.Sprintf("%s%s%s", s, sep, o)
-		sep = ", "
+		if o != "" {
+			s = fmt.Sprintf("%s%s%s", s, sep, o)
+			sep = ", "
+		}
 	}
 	fs.StringVarP(&o.output, "output", "o", "", fmt.Sprintf("output mode (%s)", s))
 	fs.StringArrayVarP(&o.Sort, "sort", "s", nil, "sort fields")

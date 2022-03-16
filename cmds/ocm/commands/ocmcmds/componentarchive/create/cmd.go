@@ -15,7 +15,7 @@
 package create
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/cmd"
+	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/common/accessio"
@@ -30,7 +30,7 @@ import (
 )
 
 type Command struct {
-	Context cmd.Context
+	Context clictx.Context
 
 	format string
 
@@ -45,7 +45,7 @@ type Command struct {
 }
 
 // NewCommand creates a new ctf command.
-func NewCommand(ctx cmd.Context) *cobra.Command {
+func NewCommand(ctx clictx.Context) *cobra.Command {
 	return utils.SetupCommand(&Command{Context: ctx},
 		&cobra.Command{
 			Use:     "componentarchive [<options>] <component> <version> <provider> <path> {<label>=<value>}",

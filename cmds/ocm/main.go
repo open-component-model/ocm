@@ -9,7 +9,7 @@ import (
 	"os"
 
 	"github.com/gardener/ocm/cmds/ocm/app"
-	cmd "github.com/gardener/ocm/cmds/ocm/cmd"
+	cmd "github.com/gardener/ocm/cmds/ocm/clictx"
 )
 
 func main() {

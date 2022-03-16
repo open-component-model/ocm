@@ -1,6 +1,0 @@
-input:
-  path: test
----
-type: anytype
-input:
-  path: other

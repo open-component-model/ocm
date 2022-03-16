@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-//go:generate go run -mod=vendor ../../../hack/generate-docs ../../../docs/reference
+//go:generate go run -mod=mod ../../../hack/generate-docs ../../../docs/reference
 
 package app
 
@@ -19,22 +19,22 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 
-	"github.com/gardener/ocm/cmds/ocm/cmd"
+	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/pkg/config"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/version"
 	"github.com/spf13/pflag"
 
-	_ "github.com/gardener/ocm/cmds/ocm/cmd/config"
+	_ "github.com/gardener/ocm/cmds/ocm/clictx/config"
 )
 
 type CLI struct {
-	ctx cmd.Context
+	ctx clictx.Context
 }
 
-func NewCLI(ctx cmd.Context) *CLI {
+func NewCLI(ctx clictx.Context) *CLI {
 	if ctx == nil {
-		ctx = cmd.DefaultContext()
+		ctx = clictx.DefaultContext()
 	}
 	return &CLI{ctx}
 }
@@ -47,12 +47,12 @@ func (c *CLI) Execute(args ...string) error {
 
 type CLIOptions struct {
 	Config  string
-	Context cmd.Context
+	Context clictx.Context
 }
 
-func NewCliCommand(ctx cmd.Context) *cobra.Command {
+func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	if ctx == nil {
-		ctx = cmd.DefaultContext()
+		ctx = clictx.DefaultContext()
 	}
 	opts := &CLIOptions{
 		Context: ctx,
@@ -107,7 +107,7 @@ func (o *CLIOptions) Complete() error {
 		if err != nil {
 			return errors.Wrapf(err, "invalid config file %q", o.Config)
 		}
-		o.Context = cmd.DefaultContext()
+		o.Context = clictx.DefaultContext()
 		err = config.DefaultContext().ApplyConfig(cfg, o.Config)
 		if err != nil {
 			return errors.Wrapf(err, "cannot apply config %q", o.Config)
