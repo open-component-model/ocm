@@ -100,6 +100,7 @@ func (o tdOpt) Mount(cfs *composefs.ComposedFileSystem) error {
 ////////////////////////////////////////////////////////////////////////////////
 
 type TestEnv struct {
+	vfs.VFS
 	filesystem *composefs.ComposedFileSystem
 	cmd.Context
 	*app.CLI
@@ -127,12 +128,9 @@ func NewTestEnv(opts ...Option) *TestEnv {
 	ctx := cmd.WithOCM(ocm.DefaultContext()).WithFileSystem(fs).New()
 	tmpfs = nil
 	return &TestEnv{
+		VFS:        vfs.New(fs),
 		filesystem: fs,
 		Context:    ctx,
 		CLI:        app.NewCLI(ctx),
 	}
-}
-
-func (t *TestEnv) Cleanup() {
-	t.filesystem.Cleanup()
 }

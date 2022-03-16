@@ -15,14 +15,13 @@
 package compdesc
 
 import (
-	"errors"
-
+	"github.com/gardener/ocm/pkg/errors"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
 var (
-	NotFound = errors.New("NotFound")
+	NotFound = errors.ErrNotFound()
 )
 
 // Metadata defines the configured metadata of the component descriptor.

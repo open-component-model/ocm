@@ -32,7 +32,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/klauspost/compress v1.14.4
 	github.com/klauspost/pgzip v1.2.5
-	github.com/mandelsoft/vfs v0.0.0-20220316154950-d15bc3474271
+	github.com/mandelsoft/vfs v0.0.0-20220316203817-110dbc400bcb
 	github.com/marstr/guid v1.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/pflag v1.0.5

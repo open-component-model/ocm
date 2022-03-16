@@ -26,9 +26,19 @@ import (
 // +k8s:openapi-gen=true
 type Identity map[string]string
 
-// IdentityByName return a simple name identity
-func IdentityByName(name string) Identity {
-	return Identity{"name": name}
+// NewIdentity return a simple name identity
+func NewIdentity(name string, extras ...string) Identity {
+	id := Identity{"name": name}
+	i := 0
+	for i < len(extras) {
+		if i+1 < len(extras) {
+			id[extras[i]] = extras[i+1]
+		} else {
+			id[extras[i]] = ""
+		}
+		i += 2
+	}
+	return id
 }
 
 // Digest returns the object digest of an identity

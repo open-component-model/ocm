@@ -18,9 +18,8 @@ import (
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
-	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
+	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/gardener/ocm/pkg/ocm/repositories/ctf/comparch"
 
 	. "github.com/gardener/ocm/cmds/ocm/testhelper"
@@ -30,6 +29,26 @@ import (
 
 const ARCH = "/tmp/ca"
 const VERSION = "v1"
+
+func CheckTextResource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string) {
+	rblob := accessio.BlobAccessForFile("text/plain", "/testdata/testcontent", env)
+	dig := rblob.Digest()
+	data, err := rblob.Get()
+	Expect(err).To(Succeed())
+	bpath := env.Join(ARCH, comparch.BlobsDirectoryName, common.DigestToFileName(dig))
+	Expect(env.FileExists(bpath)).To(BeTrue())
+	Expect(env.ReadFile(bpath)).To(Equal(data))
+
+	r, err := cd.GetResourceByIdentity(metav1.NewIdentity(name))
+	Expect(err).To(Succeed())
+	Expect(r.Version).To(Equal(VERSION))
+	Expect(r.Type).To(Equal("PlainText"))
+	spec, err := env.OCMContext().AccessSpecForSpec(cd.Resources[0].Access)
+	Expect(err).To(Succeed())
+	Expect(spec.GetType()).To(Equal(accessmethods.LocalBlobType))
+	Expect(spec.(*accessmethods.LocalBlobAccessSpec).LocalReference).To(Equal(common.DigestToFileName(dig)))
+	Expect(spec.(*accessmethods.LocalBlobAccessSpec).MediaType).To(Equal("text/plain"))
+}
 
 var _ = Describe("Test Environment", func() {
 	var env *TestEnv
@@ -45,23 +64,34 @@ var _ = Describe("Test Environment", func() {
 
 	It("adds simple text blob", func() {
 		Expect(env.Execute("add", "resources", ARCH, "/testdata/resources.yaml")).To(Succeed())
-		data, err := vfs.ReadFile(env.FileSystem(), vfs.Join(nil, ARCH, comparch.ComponentDescriptorFileName))
+		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
 		Expect(err).To(Succeed())
 		Expect(len(cd.Resources)).To(Equal(1))
 
-		rblob := accessio.BlobAccessForFile("text/plain", "/testdata/testcontent", env.FileSystem())
-		dig := rblob.Digest()
-		data, err = rblob.Get()
+		CheckTextResource(env, cd, "testdata")
+	})
+
+	It("adds simple text blob by cli env file", func() {
+		Expect(env.Execute("add", "resources", ARCH, "--env", "/testdata/settings", "/testdata/resources.tmpl")).To(Succeed())
+		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
-		bpath := vfs.Join(nil, ARCH, comparch.BlobsDirectoryName, common.DigestToFileName(dig))
-		Expect(vfs.FileExists(env.FileSystem(), bpath)).To(BeTrue())
-		Expect(vfs.ReadFile(env.FileSystem(), bpath)).To(Equal(data))
-		Expect(cd.Resources[0].Name).To(Equal("testdata"))
-		Expect(cd.Resources[0].Version).To(Equal(VERSION))
-		spec, err := env.Context.OCMContext().AccessSpecForSpec(cd.Resources[0].Access)
+		cd, err := compdesc.Decode(data)
 		Expect(err).To(Succeed())
-		Expect(spec.GetType()).To(Equal(accessmethods.LocalBlobType))
+		Expect(len(cd.Resources)).To(Equal(1))
+
+		CheckTextResource(env, cd, "testdata")
+	})
+
+	It("adds simple text blob by cli variable", func() {
+		Expect(env.Execute("add", "resources", ARCH, "CONTENT=testcontent", "/testdata/resources.tmpl")).To(Succeed())
+		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+		Expect(err).To(Succeed())
+		cd, err := compdesc.Decode(data)
+		Expect(err).To(Succeed())
+		Expect(len(cd.Resources)).To(Equal(1))
+
+		CheckTextResource(env, cd, "testdata")
 	})
 })

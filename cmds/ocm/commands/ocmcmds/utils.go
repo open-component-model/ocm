@@ -15,11 +15,7 @@
 package ocmcmds
 
 import (
-	"bufio"
-	"bytes"
 	"encoding/json"
-	"io"
-	"os"
 	"strings"
 
 	"github.com/gardener/ocm/pkg/errors"
@@ -74,40 +70,4 @@ func SetParsedLabel(labels metav1.Labels, a string) (metav1.Labels, error) {
 		}
 	}
 	return append(labels, *l), nil
-}
-
-func ReadEnv(path string) (map[string]string, error) {
-	var (
-		part   []byte
-		prefix bool
-	)
-
-	result := map[string]string{}
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	reader := bufio.NewReader(file)
-	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
-	for {
-		if part, prefix, err = reader.ReadLine(); err != nil {
-			break
-		}
-		buffer.Write(part)
-		if !prefix {
-			line := strings.TrimSpace(buffer.String())
-			if line != "" && !strings.HasPrefix(line, "#") {
-				i := strings.Index(line, "=")
-				if i <= 0 {
-					return nil, errors.Newf("invalid variable syntax %q", line)
-				}
-				result[strings.TrimSpace(line[:i])] = strings.TrimSpace(line[i+1:])
-			}
-			buffer.Reset()
-		}
-	}
-	if err == io.EOF {
-		err = nil
-	}
-	return result, err
 }

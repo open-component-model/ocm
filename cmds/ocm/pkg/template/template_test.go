@@ -24,14 +24,14 @@ var _ = Describe("Template", func() {
 
 		It("should parse one argument after a '--'", func() {
 			opts := template.Options{}
-			Expect(opts.Parse([]string{"MY_VAR=test"})).To(BeNil())
+			Expect(opts.FilterSettings([]string{"MY_VAR=test"})).To(BeNil())
 			Expect(opts.Vars).To(HaveKeyWithValue("MY_VAR", "test"))
 		})
 
 		It("should return non variable arguments", func() {
 			opts := template.Options{}
 
-			args := opts.Parse([]string{"--", "MY_VAR=test", "my-arg"})
+			args := opts.FilterSettings([]string{"--", "MY_VAR=test", "my-arg"})
 			Expect(args).To(Equal([]string{
 				"--", "my-arg",
 			}))
@@ -40,7 +40,7 @@ var _ = Describe("Template", func() {
 
 		It("should parse multiple values", func() {
 			opts := template.Options{}
-			Expect(opts.Parse([]string{"MY_VAR=test", "myOtherVar=true"})).To(BeNil())
+			Expect(opts.FilterSettings([]string{"MY_VAR=test", "myOtherVar=true"})).To(BeNil())
 			Expect(opts.Vars).To(HaveKeyWithValue("MY_VAR", "test"))
 			Expect(opts.Vars).To(HaveKeyWithValue("myOtherVar", "true"))
 		})

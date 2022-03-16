@@ -65,7 +65,7 @@ var _ = Describe("access method", func() {
 			ca.GetDescriptor().Name = "acme.org/dummy"
 			ca.GetDescriptor().Version = "v1"
 
-			res, err := cd.GetResourceByIdentity(metav1.IdentityByName("local"))
+			res, err := cd.GetResourceByIdentity(metav1.NewIdentity("local"))
 			Expect(err).To(Succeed())
 			Expect(res).To(Not(BeNil()))
 

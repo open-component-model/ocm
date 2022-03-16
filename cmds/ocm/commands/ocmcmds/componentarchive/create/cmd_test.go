@@ -15,8 +15,6 @@
 package create_test
 
 import (
-	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/gardener/ocm/pkg/ocm/repositories/ctf/comparch"
@@ -41,8 +39,8 @@ var _ = Describe("Test Environment", func() {
 
 		Expect(env.Execute("create", "ca", "-ft", "directory", "test.de/x", "v1", "mandelsoft", "/tmp/ca",
 			"l1=value", "l2={\"name\":\"value\"}")).To(Succeed())
-		Expect(vfs.DirExists(env.FileSystem(), "/tmp/ca")).To(BeTrue())
-		data, err := vfs.ReadFile(env.FileSystem(), "/tmp/ca/"+comparch.ComponentDescriptorFileName)
+		Expect(env.DirExists("/tmp/ca")).To(BeTrue())
+		data, err := env.ReadFile("/tmp/ca/" + comparch.ComponentDescriptorFileName)
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
 		Expect(err).To(Succeed())

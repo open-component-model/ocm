@@ -5,9 +5,14 @@
 package template
 
 import (
+	"bufio"
+	"bytes"
+	"io"
 	"strings"
 
 	"github.com/drone/envsubst"
+	"github.com/gardener/ocm/pkg/errors"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 // Options defines the options for component-cli templating
@@ -15,18 +20,23 @@ type Options struct {
 	Vars map[string]string
 }
 
+// NewTemplateOptions provides a new templating options object
+func NewTemplateOptions() *Options {
+	return &Options{map[string]string{}}
+}
+
 // Usage prints out the usage for templating
 func (o *Options) Usage() string {
 	return `
 Templating:
 All yaml/json defined resources can be templated using simple envsubst syntax.
-Variables are specified after a "--" and follow the syntax "<name>=<value>".
+Variables are specified as regular arguments following the syntax "<name>=<value>".
 
 Note: Variable names are case-sensitive.
 
 Example:
 <pre>
-<command> [args] [--flags] -- MY_VAL=test
+<command> <options> -- MY_VAL=test <args>
 </pre>
 
 <pre>
@@ -39,21 +49,33 @@ key:
 `
 }
 
-// Parse parses commandline argument variables.
+// FilterSettings parses commandline argument variables.
 // it returns all non variable arguments
-func (o *Options) Parse(args []string) []string {
-	o.Vars = make(map[string]string)
+func (o *Options) FilterSettings(args ...string) []string {
 	var addArgs []string
 	for _, arg := range args {
 		if i := strings.Index(arg, "="); i > 0 {
 			value := arg[i+1:]
-			name := arg[0:i]
+			name := strings.TrimSpace(arg[0:i])
 			o.Vars[name] = value
 			continue
 		}
 		addArgs = append(addArgs, arg)
 	}
 	return addArgs
+}
+
+func (o *Options) ParseSettings(fs vfs.FileSystem, paths ...string) error {
+	for _, path := range paths {
+		vars, err := ReadSettings(fs, path)
+		if err != nil {
+			return errors.Wrapf(err, "cannot read env file %q", path)
+		}
+		for k, v := range vars {
+			o.Vars[k] = v
+		}
+	}
+	return nil
 }
 
 // Template templates a string with the parsed vars.
@@ -69,4 +91,41 @@ func (o *Options) mapping(variable string) string {
 	}
 	// todo: maybe use os.getenv as backup.
 	return o.Vars[variable]
+}
+
+func ReadSettings(fs vfs.FileSystem, path string) (map[string]string, error) {
+	var (
+		part   []byte
+		prefix bool
+	)
+
+	result := map[string]string{}
+	file, err := fs.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	reader := bufio.NewReader(file)
+	buffer := bytes.NewBuffer(make([]byte, 0, 1024))
+	for {
+		if part, prefix, err = reader.ReadLine(); err != nil {
+			break
+		}
+		buffer.Write(part)
+		if !prefix {
+			line := strings.TrimSpace(buffer.String())
+			if line != "" && !strings.HasPrefix(line, "#") {
+				i := strings.Index(line, "=")
+				if i <= 0 {
+					return nil, errors.Newf("invalid variable syntax %q", line)
+				}
+				result[strings.TrimSpace(line[:i])] = strings.TrimSpace(line[i+1:])
+			}
+			buffer.Reset()
+		}
+	}
+	if err == io.EOF {
+		err = nil
+	}
+	return result, err
 }

@@ -15,12 +15,12 @@
 package add
 
 import (
+	"bytes"
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/gardener/ocm/cmds/ocm/cmd"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds"
+	"github.com/gardener/ocm/cmds/ocm/pkg/template"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
@@ -30,6 +30,7 @@ import (
 	compdescv2 "github.com/gardener/ocm/pkg/ocm/compdesc/versions/v2"
 	"github.com/gardener/ocm/pkg/ocm/repositories/ctf/comparch"
 	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v2"
@@ -38,10 +39,10 @@ import (
 type Command struct {
 	Context cmd.Context
 
-	Archive string
-	Paths   []string
-	Envs    []string
-	Vars    map[string]string
+	Archive    string
+	Paths      []string
+	Envs       []string
+	Templating *template.Options
 }
 
 // NewCommand creates a new ctf command.
@@ -65,26 +66,15 @@ func (o *Command) AddFlags(fs *pflag.FlagSet) {
 
 func (o *Command) Complete(args []string) error {
 	o.Archive = args[0]
-	o.Vars = map[string]string{}
+	o.Templating = template.NewTemplateOptions()
 
-	for _, env := range o.Envs {
-		vars, err := ocmcmds.ReadEnv(env)
-		if err != nil {
-			return errors.Wrapf(err, "cannot read env file %q", env)
-		}
-		for k, v := range vars {
-			o.Vars[k] = v
-		}
+	err := o.Templating.ParseSettings(o.Context.FileSystem(), o.Envs...)
+	if err != nil {
+		return err
 	}
 
-	for _, a := range args[1:] {
-		i := strings.Index(a, "=")
-		if i < 0 {
-			o.Paths = append(o.Paths, a)
-		} else {
-			o.Vars[strings.TrimSpace(a[:i])] = strings.TrimSpace(a[i+1:])
-		}
-	}
+	o.Paths = o.Templating.FilterSettings(args[1:]...)
+
 	return nil
 }
 
@@ -112,17 +102,21 @@ func (o *Command) Run() error {
 	resources := []*Resource{}
 
 	for _, filePath := range o.Paths {
-		file, err := fs.Open(filePath)
+		data, err := vfs.ReadFile(fs, filePath)
 		//data, err := ioutil.ReadFile(p)
 		if err != nil {
 			return errors.Wrapf(err, "cannot read resource file %q", filePath)
 		}
 
+		parsed, err := o.Templating.Template(string(data))
+		if err != nil {
+			return errors.Wrapf(err, "error during variable substitution for %q", filePath)
+		}
 		// sigs parser has no multi document stream parsing
 		// but yaml.v3 does not recognize json tagged fields.
 		// Therefore we first use the v3 parser to parse the multi doc,
 		// marshal it again and finally unmarshal it with the sigs parser.
-		decoder := yaml.NewDecoder(file)
+		decoder := yaml.NewDecoder(bytes.NewBuffer([]byte(parsed)))
 		i := 0
 		for {
 			var tmp interface{}
