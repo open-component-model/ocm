@@ -56,7 +56,7 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 			Long: `
 Add resources specified in a resource file to a component version.
 So far only component archives are supported as target.
-`,
+` + (&template.Options{}).Usage(),
 		})
 }
 
@@ -191,11 +191,12 @@ func (o *Command) Run() error {
 		}
 		if r.spec.Input != nil {
 			// Local Blob
-			blob, hint, err := r.spec.Input.GetBlob(fs, r.path)
+			blob, hint, err := r.spec.Input.GetBlob(o.Context, r.path)
 			if err != nil {
 				return errors.Wrapf(err, "cannot get resource blob for %q(%s)", r.spec.Name, r.source)
 			}
 			err = obj.AddResourceBlob(meta, blob, hint, nil)
+			blob.Close()
 		} else {
 			compdesc.GenericAccessSpec(r.spec.Access)
 			err = obj.AddResource(meta, compdesc.GenericAccessSpec(r.spec.Access))

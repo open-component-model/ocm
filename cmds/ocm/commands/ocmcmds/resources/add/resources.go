@@ -87,7 +87,7 @@ func Validate(r *ResourceOptions, ctx clictx.Context, inputFilePath string) erro
 			if r.Relation != metav1.LocalRelation {
 				allErrs = append(allErrs, field.Forbidden(fldPath.Child("relation"), "input requires local relation"))
 			}
-			if err := ocmcmds.ValidateBlobInput(fldPath.Child("input"), r.Input, ctx.FileSystem(), inputFilePath); err != nil {
+			if err := ocmcmds.ValidateBlobInput(fldPath.Child("input"), r.Input, ctx, inputFilePath); err != nil {
 				allErrs = append(allErrs, err...)
 			}
 		}

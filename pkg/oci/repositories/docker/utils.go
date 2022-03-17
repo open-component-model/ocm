@@ -20,6 +20,7 @@ import (
 	"io"
 	"io/ioutil"
 	"regexp"
+	"strings"
 	"sync"
 
 	"github.com/containers/image/v5/docker/daemon"
@@ -31,6 +32,27 @@ import (
 var dummyContext = context.Background()
 
 var pattern = regexp.MustCompile("^[0-9a-f]{12}$")
+
+func ParseGenericRef(ref string) (string, string, error) {
+	if strings.TrimSpace(ref) == "" {
+		return "", "", fmt.Errorf("invalid docker reference %q", ref)
+	}
+	parts := strings.Split(ref, ":")
+	if len(parts) > 2 {
+		return "", "", fmt.Errorf("invalid docker reference %q", ref)
+	}
+	if len(parts) == 1 {
+		// expect docker id
+		if pattern.MatchString(parts[0]) {
+			return "", parts[0], nil
+		}
+	}
+	_, err := daemon.ParseReference(ref)
+	if err != nil {
+		return "", "", err
+	}
+	return parts[0], parts[1], nil
+}
 
 func ParseRef(name, version string) (types.ImageReference, error) {
 	if version == "" || name == "" {

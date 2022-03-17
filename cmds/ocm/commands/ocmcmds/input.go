@@ -16,7 +16,6 @@ package ocmcmds
 
 import (
 	"archive/tar"
-	"bytes"
 	"compress/gzip"
 	"fmt"
 	"io"
@@ -25,7 +24,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
+	"github.com/gardener/ocm/pkg/oci/repositories/docker"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
@@ -42,8 +44,9 @@ const MediaTypeOctetStream = "application/octet-stream"
 type BlobInputType string
 
 const (
-	FileInputType = "file"
-	DirInputType  = "dir"
+	FileInputType   BlobInputType = "file"
+	DirInputType    BlobInputType = "dir"
+	DockerInputType BlobInputType = "docker"
 )
 
 // BlobInput defines a local resource input that should be added to the component descriptor and
@@ -92,7 +95,11 @@ func (input *BlobInput) SetMediaTypeIfNotDefined(mediaType string) {
 	input.MediaType = mediaType
 }
 
-func (input *BlobInput) GetPath(fs vfs.FileSystem, inputFilePath string) (string, error) {
+func (input *BlobInput) GetPath(ctx clictx.Context, inputFilePath string) (string, error) {
+	fs := ctx.FileSystem()
+	if input.Path == "" {
+		return "", fmt.Errorf("path attribute required")
+	}
 	if filepath.IsAbs(input.Path) {
 		return input.Path, nil
 	} else {
@@ -112,33 +119,67 @@ func (input *BlobInput) GetPath(fs vfs.FileSystem, inputFilePath string) (string
 }
 
 // GetBlob provides a BlobAccess for the actual input.
-func (input *BlobInput) GetBlob(fs vfs.FileSystem, inputFilePath string) (accessio.BlobAccess, string, error) {
-	inputPath, err := input.GetPath(fs, inputFilePath)
-	if err != nil {
-		return nil, "", err
+func (input *BlobInput) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+	var err error
+	var inputInfo os.FileInfo
+
+	fs := ctx.FileSystem()
+	inputPath := input.Path
+	if input.Type != DockerInputType {
+		inputPath, err = input.GetPath(ctx, inputFilePath)
+		if err != nil {
+			return nil, "", err
+		}
+		inputInfo, err = fs.Stat(inputPath)
+		if err != nil {
+			return nil, "", fmt.Errorf("unable to get info for input blob from %q, %w", inputPath, err)
+		}
 	}
 
-	inputInfo, err := fs.Stat(inputPath)
-	if err != nil {
-		return nil, "", fmt.Errorf("unable to get info for input blob from %q, %w", inputPath, err)
-	}
+	switch input.Type {
+	case DockerInputType:
+		locator, version, err := docker.ParseGenericRef(inputPath)
+		if err != nil {
+			return nil, "", err
+		}
+		spec := docker.NewRepositorySpec()
+		repo, err := ctx.OCIContext().RepositoryForSpec(spec)
+		if err != nil {
+			return nil, "", err
+		}
+		ns, err := repo.LookupNamespace(locator)
+		if err != nil {
+			return nil, "", err
+		}
+
+		blob, err := artefactset.SynthesizeArtefactBlob(ns, version)
+		if err != nil {
+			return nil, "", err
+		}
+		return blob, locator, nil
 
 	// automatically tar the input artifact if it is a directory
-	if input.Type == DirInputType {
+	case DirInputType:
 		if !inputInfo.IsDir() {
 			return nil, "", fmt.Errorf("resource type is dir but a file was provided")
 		}
 
-		var data bytes.Buffer
 		opts := TarFileSystemOptions{
 			IncludeFiles:   input.IncludeFiles,
 			ExcludeFiles:   input.ExcludeFiles,
 			PreserveDir:    input.PreserveDir != nil && *input.PreserveDir,
 			FollowSymlinks: input.FollowSymlinks != nil && *input.FollowSymlinks,
 		}
+
+		temp, err := accessio.NewTempFile(fs, "", "resourceblob*.tgz")
+		if err != nil {
+			return nil, "", err
+		}
+		defer temp.Close()
+
 		if input.Compress() {
 			input.SetMediaTypeIfNotDefined(MediaTypeGZip)
-			gw := gzip.NewWriter(&data)
+			gw := gzip.NewWriter(temp.Writer())
 			if err := TarFileSystem(fs, inputPath, gw, opts); err != nil {
 				return nil, "", fmt.Errorf("unable to tar input artifact: %w", err)
 			}
@@ -147,12 +188,13 @@ func (input *BlobInput) GetBlob(fs vfs.FileSystem, inputFilePath string) (access
 			}
 		} else {
 			input.SetMediaTypeIfNotDefined(MediaTypeTar)
-			if err := TarFileSystem(fs, inputPath, &data, opts); err != nil {
+			if err := TarFileSystem(fs, inputPath, temp.Writer(), opts); err != nil {
 				return nil, "", fmt.Errorf("unable to tar input artifact: %w", err)
 			}
 		}
-		return accessio.BlobAccessForData(input.MediaType, data.Bytes()), "", nil
-	} else if input.Type == FileInputType {
+		return temp.AsBlob(input.MediaType), "", nil
+
+	case FileInputType:
 		if inputInfo.IsDir() {
 			return nil, "", fmt.Errorf("resource type is file but a directory was provided")
 		}
@@ -162,22 +204,29 @@ func (input *BlobInput) GetBlob(fs vfs.FileSystem, inputFilePath string) (access
 			return nil, "", fmt.Errorf("unable to read input blob from %q: %w", inputPath, err)
 		}
 
-		if input.Compress() {
-			input.SetMediaTypeIfNotDefined(MediaTypeGZip)
-			var data bytes.Buffer
-			gw := gzip.NewWriter(&data)
-			if _, err := io.Copy(gw, inputBlob); err != nil {
-				return nil, "", fmt.Errorf("unable to compress input file %q: %w", inputPath, err)
-			}
-			if err := gw.Close(); err != nil {
-				return nil, "", fmt.Errorf("unable to close gzip writer: %w", err)
-			}
-
-			return accessio.BlobAccessForData(input.MediaType, data.Bytes()), "", nil
+		if !input.Compress() {
+			inputBlob.Close()
+			return accessio.BlobNopCloser(accessio.BlobAccessForFile(input.MediaType, inputPath, fs)), "", nil
 		}
-		inputBlob.Close()
-		return accessio.BlobAccessForFile(input.MediaType, inputPath, fs), "", nil
-	} else {
+
+		temp, err := accessio.NewTempFile(fs, "", "compressed*.gzip")
+		if err != nil {
+			return nil, "", err
+		}
+		defer temp.Close()
+
+		input.SetMediaTypeIfNotDefined(MediaTypeGZip)
+		gw := gzip.NewWriter(temp.Writer())
+		if _, err := io.Copy(gw, inputBlob); err != nil {
+			return nil, "", fmt.Errorf("unable to compress input file %q: %w", inputPath, err)
+		}
+		if err := gw.Close(); err != nil {
+			return nil, "", fmt.Errorf("unable to close gzip writer: %w", err)
+		}
+
+		return temp.AsBlob(input.MediaType), "", nil
+
+	default:
 		return nil, "", fmt.Errorf("unknown input type %q", inputPath)
 	}
 }
@@ -316,69 +365,82 @@ func addFileToTar(fs vfs.FileSystem, tw *tar.Writer, path string, realPath strin
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func ValidateBlobInput(fldPath *field.Path, input *BlobInput, fs vfs.FileSystem, inputFilePath string) field.ErrorList {
+func ValidateBlobInput(fldPath *field.Path, input *BlobInput, ctx clictx.Context, inputFilePath string) field.ErrorList {
 	if input == nil {
 		return nil
 	}
 	allErrs := field.ErrorList{}
-	if input.Type != DirInputType && input.Type != FileInputType {
+	if input.Type != DirInputType && input.Type != FileInputType && input.Type != DockerInputType {
 		path := fldPath.Child("type")
 		if input.Type == "" {
 			allErrs = append(allErrs, field.Required(path, "input type required"))
 		} else {
-			allErrs = append(allErrs, field.NotSupported(path, input.Type, []string{DirInputType, FileInputType}))
+			allErrs = append(allErrs, field.NotSupported(path, input.Type, []string{string(DirInputType), string(FileInputType)}))
 		}
 	} else {
 		pathField := fldPath.Child("path")
-		filePath, err := input.GetPath(fs, inputFilePath)
-		if err != nil {
-			allErrs = append(allErrs, field.Invalid(pathField, filePath, err.Error()))
+		if input.Path == "" {
+			allErrs = append(allErrs, field.Required(pathField, "path is required for input"))
 		} else {
-			ok, err := vfs.Exists(fs, filePath)
-			if err != nil {
-				allErrs = append(allErrs, field.Invalid(pathField, filePath, err.Error()))
-			} else {
-				if !ok {
-					allErrs = append(allErrs, field.NotFound(pathField, filePath))
-				}
-			}
+			if input.Type != DockerInputType {
+				fs := ctx.FileSystem()
+				filePath, err := input.GetPath(ctx, inputFilePath)
+				if err != nil {
+					allErrs = append(allErrs, field.Invalid(pathField, filePath, err.Error()))
+				} else {
+					ok, err := vfs.Exists(fs, filePath)
+					if err != nil {
+						allErrs = append(allErrs, field.Invalid(pathField, filePath, err.Error()))
+					} else {
+						if !ok {
+							allErrs = append(allErrs, field.NotFound(pathField, filePath))
+						}
+					}
 
-			if input.Type == DirInputType {
-				if ok {
-					ok, err := vfs.DirExists(fs, filePath)
-					if err != nil {
-						allErrs = append(allErrs, field.Invalid(pathField, filePath, err.Error()))
+					if input.Type == DirInputType {
+						if ok {
+							ok, err := vfs.DirExists(fs, filePath)
+							if err != nil {
+								allErrs = append(allErrs, field.Invalid(pathField, filePath, err.Error()))
+							} else {
+								if !ok {
+									allErrs = append(allErrs, field.Invalid(pathField, filePath, "no directory"))
+								}
+							}
+						}
 					} else {
-						if !ok {
-							allErrs = append(allErrs, field.Invalid(pathField, filePath, "no directory"))
+						if ok {
+							ok, err := vfs.FileExists(fs, filePath)
+							if err != nil {
+								allErrs = append(allErrs, field.Invalid(pathField, filePath, err.Error()))
+							} else {
+								if !ok {
+									allErrs = append(allErrs, field.Invalid(pathField, filePath, "no regular file"))
+								}
+							}
+						}
+						if input.PreserveDir != nil {
+							allErrs = append(allErrs, field.Forbidden(fldPath.Child("preserveDir"), "only supported for type "+string(DirInputType)))
+						}
+						if input.FollowSymlinks != nil {
+							allErrs = append(allErrs, field.Forbidden(fldPath.Child("followSymlinks"), "only supported for type "+string(DirInputType)))
+						}
+						if input.CompressWithGzip != nil {
+							allErrs = append(allErrs, field.Forbidden(fldPath.Child("compress"), "only supported for type "+string(DirInputType)))
+						}
+						if input.ExcludeFiles != nil {
+							allErrs = append(allErrs, field.Forbidden(fldPath.Child("excludeFiles"), "only supported for type "+string(DirInputType)))
+						}
+						if input.IncludeFiles != nil {
+							allErrs = append(allErrs, field.Forbidden(fldPath.Child("includeFiles"), "only supported for type "+string(DirInputType)))
 						}
 					}
 				}
 			} else {
-				if ok {
-					ok, err := vfs.FileExists(fs, filePath)
-					if err != nil {
-						allErrs = append(allErrs, field.Invalid(pathField, filePath, err.Error()))
-					} else {
-						if !ok {
-							allErrs = append(allErrs, field.Invalid(pathField, filePath, "no regular file"))
-						}
-					}
-				}
-				if input.PreserveDir != nil {
-					allErrs = append(allErrs, field.Forbidden(fldPath.Child("preserveDir"), "only supported for type "+DirInputType))
-				}
-				if input.FollowSymlinks != nil {
-					allErrs = append(allErrs, field.Forbidden(fldPath.Child("followSymlinks"), "only supported for type "+DirInputType))
-				}
-				if input.CompressWithGzip != nil {
-					allErrs = append(allErrs, field.Forbidden(fldPath.Child("compress"), "only supported for type "+DirInputType))
-				}
-				if input.ExcludeFiles != nil {
-					allErrs = append(allErrs, field.Forbidden(fldPath.Child("excludeFiles"), "only supported for type "+DirInputType))
-				}
-				if input.IncludeFiles != nil {
-					allErrs = append(allErrs, field.Forbidden(fldPath.Child("includeFiles"), "only supported for type "+DirInputType))
+				_, _, err := docker.ParseGenericRef(input.Path)
+				if err != nil {
+					allErrs = append(allErrs, field.Invalid(pathField, input.Path, err.Error()))
+
 				}
 			}
 		}

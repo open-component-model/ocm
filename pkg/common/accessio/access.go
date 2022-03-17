@@ -74,6 +74,13 @@ type BlobAccess interface {
 	Size() int64
 }
 
+// TemporaryBlobAccess describes a blob with temporary allocated external resources.
+// The will be releases, when the close method is called
+type TemporaryBlobAccess interface {
+	BlobAccess
+	Close() error
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type Access = interface{}
@@ -266,4 +273,135 @@ func (f *fileBlobAccess) Digest() digest.Digest {
 		return ""
 	}
 	return d
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type blobNopCloser struct {
+	BlobAccess
+}
+
+func BlobNopCloser(blob BlobAccess) TemporaryBlobAccess {
+	return &blobNopCloser{blob}
+}
+
+func (b *blobNopCloser) Close() error {
+	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type TemporaryFileSystemBlobAccess interface {
+	TemporaryBlobAccess
+	FileSystem() vfs.FileSystem
+	Path() string
+}
+
+type temporaryBlob struct {
+	BlobAccess
+	temp       vfs.File
+	filesystem vfs.FileSystem
+}
+
+func TempFileBlobAccess(mime string, fs vfs.FileSystem, temp vfs.File) TemporaryFileSystemBlobAccess {
+	return &temporaryBlob{
+		BlobAccess: BlobAccessForFile(mime, temp.Name(), fs),
+		filesystem: fs,
+		temp:       temp,
+	}
+}
+
+func (a *temporaryBlob) Close() error {
+	if a.temp != nil {
+		list := errors.ErrListf("temporary blob")
+		list.Add(a.temp.Close())
+		list.Add(a.filesystem.Remove(a.temp.Name()))
+		a.temp = nil
+		return list.Result()
+	}
+	return nil
+}
+
+func (a *temporaryBlob) FileSystem() vfs.FileSystem {
+	return a.filesystem
+}
+
+func (a *temporaryBlob) Path() string {
+	return a.temp.Name()
+}
+
+// TempFile holds a temporary file that should be kept open.
+// Close should neven be called directly.
+// It can be passed to another responsibility realm be Release
+// are transformed into a TemporaryBlobAccess.
+// Close will close and remove an unreleased file and does
+// nothing if it has been released.
+// If it has been releases the new realm is responsible.
+// to close and remove it.
+type TempFile struct {
+	lock       sync.Mutex
+	temp       vfs.File
+	filesystem vfs.FileSystem
+}
+
+func NewTempFile(fs vfs.FileSystem, dir string, pattern string) (*TempFile, error) {
+	temp, err := vfs.TempFile(fs, dir, pattern)
+	if err != nil {
+		return nil, err
+	}
+	return &TempFile{
+		temp:       temp,
+		filesystem: fs,
+	}, nil
+}
+
+func (t *TempFile) Name() string {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+	return t.temp.Name()
+}
+
+func (t *TempFile) FileSystem() vfs.FileSystem {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+	return t.filesystem
+}
+
+func (t *TempFile) Release() vfs.File {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+	if t.temp != nil {
+		t.temp.Sync()
+	}
+	tmp := t.temp
+	t.temp = nil
+	return tmp
+}
+
+func (t *TempFile) Writer() io.Writer {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+	return t.temp
+}
+
+func (t *TempFile) Sync() error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+	return t.temp.Sync()
+}
+
+func (t *TempFile) AsBlob(mime string) TemporaryFileSystemBlobAccess {
+	return TempFileBlobAccess(mime, t.filesystem, t.Release())
+}
+
+func (t *TempFile) Close() error {
+	t.lock.Lock()
+	defer t.lock.Unlock()
+	if t.temp != nil {
+		name := t.temp.Name()
+		t.temp.Close()
+		t.temp = nil
+		return t.filesystem.Remove(name)
+	}
+	return nil
 }

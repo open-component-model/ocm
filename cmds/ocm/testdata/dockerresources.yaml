@@ -1,0 +1,6 @@
+---
+name: kubelink
+type: Image
+input:
+  type: docker
+  path: ghcr.io/mandelsoft/kubelink:qual

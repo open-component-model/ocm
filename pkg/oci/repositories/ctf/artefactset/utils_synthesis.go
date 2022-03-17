@@ -15,11 +15,8 @@
 package artefactset
 
 import (
-	"io"
-
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
-	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
@@ -28,35 +25,7 @@ import (
 )
 
 type ArtefactBlob interface {
-	accessio.BlobAccess
-	io.Closer
-	FileSystem() vfs.FileSystem
-	Path() string
-}
-
-type artefactBlob struct {
-	accessio.BlobAccess
-	temp       vfs.File
-	filesystem vfs.FileSystem
-}
-
-func (a *artefactBlob) Close() error {
-	if a.temp != nil {
-		list := errors.ErrListf("synthesized blob")
-		list.Add(a.temp.Close())
-		list.Add(a.filesystem.Remove(a.temp.Name()))
-		a.temp = nil
-		return list.Result()
-	}
-	return nil
-}
-
-func (a *artefactBlob) FileSystem() vfs.FileSystem {
-	return a.filesystem
-}
-
-func (a *artefactBlob) Path() string {
-	return a.temp.Name()
+	accessio.TemporaryFileSystemBlobAccess
 }
 
 // SynthesizeArtefactBlob synthesizes an artefact blob incorporating all side artefacts.
@@ -75,27 +44,13 @@ func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, e
 	digest := blob.Digest()
 
 	fs := osfs.New()
-	temp, err := vfs.TempFile(fs, "", "artefactblob*.tgz")
+	temp, err := accessio.NewTempFile(fs, "", "artefactblob*.tgz")
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		// cleanup everything, if an error is returned (indicated by valid temp)
-		if temp != nil {
-			name := temp.Name()
-			temp.Close()
-			fs.Remove(name)
-		}
-	}()
+	defer temp.Close()
 
-	ab := &artefactBlob{
-		BlobAccess: accessio.BlobAccessForFile(artdesc.ToContentMediaType(blob.MimeType())+"+tar+gzip", temp.Name(), fs),
-		filesystem: fs,
-		temp:       temp,
-	}
-	_ = art
-
-	set, err := Create(accessobj.ACC_CREATE, "", 0600, accessio.File(temp), accessobj.FormatTGZ)
+	set, err := Create(accessobj.ACC_CREATE, "", 0600, accessio.File(temp.Writer().(vfs.File)), accessobj.FormatTGZ)
 	if err != nil {
 		return nil, err
 	}
@@ -112,8 +67,7 @@ func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, e
 		}
 	}
 	set.Annotate(MAINARTEFACT_ANNOTATION, digest.String())
-	temp = nil
-	return ab, nil
+	return temp.AsBlob(artdesc.ToContentMediaType(blob.MimeType()) + "+tar+gzip"), nil
 }
 
 func TransferArtefact(art cpi.ArtefactAccess, set cpi.ArtefactSink, tags ...string) error {
