@@ -16,8 +16,10 @@ ocm add resources [<options>] <target> {<resourcefile> | <var>=<value>} [flags]
 ### Options
 
 ```
-  -e, --env stringArray   environment file with variable settings
-  -h, --help              help for resources
+      --addenv                 access environment for templating
+  -h, --help                   help for resources
+  -s, --settings stringArray   settings file with variable settings (yaml)
+      --templater string       templater to use (subst, spiff, go) (default "subst")
 ```
 
 ### SEE ALSO

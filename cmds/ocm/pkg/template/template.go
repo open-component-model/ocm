@@ -8,21 +8,61 @@ import (
 	"bufio"
 	"bytes"
 	"io"
+	"os"
 	"strings"
 
-	"github.com/drone/envsubst"
 	"github.com/gardener/ocm/pkg/errors"
+	"github.com/gardener/ocm/pkg/runtime"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/spf13/pflag"
 )
 
-// Options defines the options for component-cli templating
-type Options struct {
-	Vars map[string]string
+type Values map[string]interface{}
+
+type Templater interface {
+	Process(data string, values Values) (string, error)
 }
 
-// NewTemplateOptions provides a new templating options object
-func NewTemplateOptions() *Options {
-	return &Options{map[string]string{}}
+// Options defines the options for cli templating
+type Options struct {
+	Mode      string
+	UseEnv    bool
+	Templater Templater
+	Vars      Values
+}
+
+func (o *Options) AddFlags(fs *pflag.FlagSet) {
+	fs.StringVarP(&o.Mode, "templater", "", "subst", "templater to use (subst, spiff, go)")
+	fs.BoolVarP(&o.UseEnv, "addenv", "", false, "access environment for templating")
+}
+
+func (o *Options) Complete(fs vfs.FileSystem) error {
+	if o.Vars == nil {
+		o.Vars = Values{}
+	}
+	if o.Mode == "" {
+		o.Mode = "subst"
+	}
+	if o.UseEnv {
+		for _, v := range os.Environ() {
+			if i := strings.Index(v, "="); i > 0 {
+				value := v[i+1:]
+				name := strings.TrimSpace(v[0:i])
+				o.Vars[name] = value
+			}
+		}
+	}
+	switch o.Mode {
+	case "subst":
+		o.Templater = NewSubst()
+	case "go":
+		o.Templater = NewGo()
+	case "spiff":
+		o.Templater = NewSpiff(fs)
+	default:
+		return errors.Newf("unsupported templater %q", o.Mode)
+	}
+	return nil
 }
 
 // Usage prints out the usage for templating
@@ -54,7 +94,7 @@ key:
 func (o *Options) FilterSettings(args ...string) []string {
 	var addArgs []string
 	if o.Vars == nil {
-		o.Vars = map[string]string{}
+		o.Vars = Values{}
 	}
 	for _, arg := range args {
 		if i := strings.Index(arg, "="); i > 0 {
@@ -70,10 +110,10 @@ func (o *Options) FilterSettings(args ...string) []string {
 
 func (o *Options) ParseSettings(fs vfs.FileSystem, paths ...string) error {
 	if o.Vars == nil {
-		o.Vars = map[string]string{}
+		o.Vars = Values{}
 	}
 	for _, path := range paths {
-		vars, err := ReadSettings(fs, path)
+		vars, err := ReadYAMLSettings(fs, path)
 		if err != nil {
 			return errors.Wrapf(err, "cannot read env file %q", path)
 		}
@@ -84,22 +124,25 @@ func (o *Options) ParseSettings(fs vfs.FileSystem, paths ...string) error {
 	return nil
 }
 
-// Template templates a string with the parsed vars.
-func (o *Options) Template(data string) (string, error) {
-	return envsubst.Eval(data, o.mapping)
+// Execute templates a string with the parsed vars.
+func (o *Options) Execute(data string) (string, error) {
+	return o.Templater.Process(data, o.Vars)
 }
 
-// mapping is a helper function for the envsubst to provide the value for a variable name.
-// It returns an emtpy string if the variable is not defined.
-func (o *Options) mapping(variable string) string {
-	if o.Vars == nil {
-		return ""
+func ReadYAMLSettings(fs vfs.FileSystem, path string) (Values, error) {
+	result := Values{}
+	data, err := vfs.ReadFile(fs, path)
+	if err != nil {
+		return nil, err
 	}
-	// todo: maybe use os.getenv as backup.
-	return o.Vars[variable]
+	err = runtime.DefaultYAMLEncoding.Unmarshal(data, &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
-func ReadSettings(fs vfs.FileSystem, path string) (map[string]string, error) {
+func ReadSimpleSettings(fs vfs.FileSystem, path string) (map[string]string, error) {
 	var (
 		part   []byte
 		prefix bool

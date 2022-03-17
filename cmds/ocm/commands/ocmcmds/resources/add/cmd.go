@@ -42,7 +42,7 @@ type Command struct {
 	Archive    string
 	Paths      []string
 	Envs       []string
-	Templating *template.Options
+	Templating template.Options
 }
 
 // NewCommand creates a new ctf command.
@@ -61,12 +61,13 @@ So far only component archives are supported as target.
 }
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
-	fs.StringArrayVarP(&o.Envs, "env", "e", nil, "environment file with variable settings")
+	fs.StringArrayVarP(&o.Envs, "settings", "s", nil, "settings file with variable settings (yaml)")
+	o.Templating.AddFlags(fs)
 }
 
 func (o *Command) Complete(args []string) error {
 	o.Archive = args[0]
-	o.Templating = template.NewTemplateOptions()
+	o.Templating.Complete(o.Context.FileSystem())
 
 	err := o.Templating.ParseSettings(o.Context.FileSystem(), o.Envs...)
 	if err != nil {
@@ -108,7 +109,7 @@ func (o *Command) Run() error {
 			return errors.Wrapf(err, "cannot read resource file %q", filePath)
 		}
 
-		parsed, err := o.Templating.Template(string(data))
+		parsed, err := o.Templating.Execute(string(data))
 		if err != nil {
 			return errors.Wrapf(err, "error during variable substitution for %q", filePath)
 		}

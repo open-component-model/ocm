@@ -74,7 +74,7 @@ var _ = Describe("Test Environment", func() {
 	})
 
 	It("adds simple text blob by cli env file", func() {
-		Expect(env.Execute("add", "resources", ARCH, "--env", "/testdata/settings", "/testdata/resources.tmpl")).To(Succeed())
+		Expect(env.Execute("add", "resources", ARCH, "--settings", "/testdata/settings", "/testdata/resources.tmpl")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)

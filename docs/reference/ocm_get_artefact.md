@@ -17,7 +17,7 @@ ocm get artefact [<options>] {<artefact-reference>} [flags]
 
 ```
   -h, --help               help for artefact
-  -o, --output string      output mode (JSON, wide, yaml, json)
+  -o, --output string      output mode (wide, yaml, json, JSON)
   -r, --repo string        repository name or spec
   -s, --sort stringArray   sort fields
 ```
