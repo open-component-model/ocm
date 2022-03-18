@@ -24,7 +24,7 @@ import (
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
-	"github.com/gardener/ocm/pkg/ocm/repositories/ctf/comparch"
+	comparch2 "github.com/gardener/ocm/pkg/ocm/repositories/comparch/comparch"
 	"github.com/gardener/ocm/pkg/runtime"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -45,7 +45,7 @@ var _ = Describe("access method", func() {
 		})
 
 		It("encodes legacy methood", func() {
-			spec := comparch.NewLocalFilesystemBlobAccessSpecV1("anydigest", "application/json")
+			spec := comparch2.NewLocalFilesystemBlobAccessSpecV1("anydigest", "application/json")
 			data, err := DefaultContext.Encode(spec, runtime.DefaultJSONEncoding)
 			Expect(err).To(Succeed())
 			Expect(data).To(Equal([]byte(legacy)))
@@ -59,7 +59,7 @@ var _ = Describe("access method", func() {
 			cd, err := compdesc.Decode(data)
 			Expect(err).To(Succeed())
 
-			ca, err := comparch.New(DefaultContext, accessobj.ACC_CREATE, nil, nil, nil, 0600)
+			ca, err := comparch2.New(DefaultContext, accessobj.ACC_CREATE, nil, nil, nil, 0600)
 			Expect(err).To(Succeed())
 
 			ca.GetDescriptor().Name = "acme.org/dummy"
@@ -73,8 +73,8 @@ var _ = Describe("access method", func() {
 			Expect(err).To(Succeed())
 			Expect(spec).To(Not(BeNil()))
 
-			Expect(spec.GetType()).To(Equal(comparch.LocalFilesystemBlobType))
-			Expect(spec.GetKind()).To(Equal(comparch.LocalFilesystemBlobType))
+			Expect(spec.GetType()).To(Equal(comparch2.LocalFilesystemBlobType))
+			Expect(spec.GetKind()).To(Equal(comparch2.LocalFilesystemBlobType))
 			Expect(spec.GetVersion()).To(Equal("v1"))
 			Expect(reflect.TypeOf(spec).String()).To(Equal("*accessmethods.LocalBlobAccessSpec"))
 

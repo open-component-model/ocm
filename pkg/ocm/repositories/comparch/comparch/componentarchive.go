@@ -47,7 +47,7 @@ func _Wrap(ctx cpi.Context, obj *accessobj.AccessObject, err error) (*ComponentA
 		base: accessobj.NewFileSystemBlobAccess(obj),
 		ctx:  ctx,
 	}
-	s.ComponentVersionAccess = NewComponentVersionAccess(s)
+	s.ComponentVersionAccess = NewComponentVersionAccess(s, false)
 	return s, nil
 }
 

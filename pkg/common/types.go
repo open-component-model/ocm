@@ -21,3 +21,26 @@ type VersionedElement interface {
 	// GetVersion gets the version of the element
 	GetVersion() string
 }
+
+type NameVersion struct {
+	name    string
+	version string
+}
+
+var _ VersionedElement = (*NameVersion)(nil)
+
+func NewNameVersion(name, version string) NameVersion {
+	return NameVersion{name, version}
+}
+
+func (n NameVersion) GetName() string {
+	return n.name
+}
+
+func (n NameVersion) GetVersion() string {
+	return n.version
+}
+
+func (n NameVersion) String() string {
+	return n.name + ":" + n.version
+}

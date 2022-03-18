@@ -31,7 +31,7 @@ import (
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/format"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
-	"github.com/gardener/ocm/pkg/ocm/repositories/ctf/comparch"
+	"github.com/gardener/ocm/pkg/ocm/repositories/comparch/comparch"
 	"github.com/gardener/ocm/pkg/ocm/repositories/genericocireg/componentmapping"
 	"github.com/opencontainers/go-digest"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"

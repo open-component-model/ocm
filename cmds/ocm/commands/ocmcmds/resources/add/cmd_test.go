@@ -15,14 +15,13 @@
 package add_test
 
 import (
+	. "github.com/gardener/ocm/cmds/ocm/testhelper"
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
-	"github.com/gardener/ocm/pkg/ocm/repositories/ctf/comparch"
-
-	. "github.com/gardener/ocm/cmds/ocm/testhelper"
+	"github.com/gardener/ocm/pkg/ocm/repositories/comparch/comparch"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

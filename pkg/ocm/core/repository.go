@@ -15,6 +15,8 @@
 package core
 
 import (
+	"io"
+
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
@@ -49,19 +51,20 @@ type ComponentAccess interface {
 type ResourceMeta = compdesc.ResourceMeta
 
 type BaseAccess interface {
+	Access() (AccessSpec, error)
 	AccessMethod() (AccessMethod, error)
 	DataAccess
 }
 
 type ResourceAccess interface {
-	Meta() ResourceMeta
+	Meta() *ResourceMeta
 	BaseAccess
 }
 
 type SourceMeta = compdesc.SourceMeta
 
 type SourceAccess interface {
-	Meta() SourceMeta
+	Meta() *SourceMeta
 	BaseAccess
 }
 
@@ -71,7 +74,11 @@ type ComponentVersionAccess interface {
 	GetContext() Context
 
 	GetDescriptor() *compdesc.ComponentDescriptor
+
+	GetResources() []ResourceAccess
 	GetResource(meta metav1.Identity) (ResourceAccess, error)
+
+	GetSources() []SourceAccess
 	GetSource(meta metav1.Identity) (SourceAccess, error)
 
 	// AccessMethod provides an access method implementation for
@@ -88,9 +95,11 @@ type ComponentVersionAccess interface {
 	// AddBlob adds a local blob and returns an appropriate local access spec
 	AddBlob(blob BlobAccess, refName string, global AccessSpec) (AccessSpec, error)
 
-	AddResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string, global AccessSpec) error
-	AddResource(*ResourceMeta, compdesc.AccessSpec) error
+	SetResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string, global AccessSpec) error
+	SetResource(*ResourceMeta, compdesc.AccessSpec) error
 
-	AddSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec) error
-	AddSource(*SourceMeta, compdesc.AccessSpec) error
+	SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec) error
+	SetSource(*SourceMeta, compdesc.AccessSpec) error
+
+	io.Closer
 }

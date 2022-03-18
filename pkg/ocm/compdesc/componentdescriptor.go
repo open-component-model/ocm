@@ -492,7 +492,7 @@ type ComponentReference struct {
 }
 
 // GetName returns the name of the object.
-func (o ComponentReference) GetKind() string {
+func (o ComponentReference) GetName() string {
 	return o.Name
 }
 

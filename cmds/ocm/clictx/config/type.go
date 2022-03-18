@@ -85,10 +85,10 @@ func (a *ConfigSpec) ApplyTo(ctx config.Context, target interface{}) error {
 		return config.ErrNoContext(OCMCmdConfigType)
 	}
 	for n, s := range a.OCIRepositories {
-		list.Add(t.AddOCIRepository(n, s))
+		list.Add(t.OCI().AddRepository(n, s))
 	}
 	for n, s := range a.OCMRepositories {
-		list.Add(t.AddOCMRepository(n, s))
+		list.Add(t.OCM().AddRepository(n, s))
 	}
 	return list.Result()
 }

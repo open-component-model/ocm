@@ -28,7 +28,7 @@ import (
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	compdescv2 "github.com/gardener/ocm/pkg/ocm/compdesc/versions/v2"
-	"github.com/gardener/ocm/pkg/ocm/repositories/ctf/comparch"
+	"github.com/gardener/ocm/pkg/ocm/repositories/comparch/comparch"
 	"github.com/gardener/ocm/pkg/runtime"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
@@ -195,11 +195,11 @@ func (o *Command) Run() error {
 			if err != nil {
 				return errors.Wrapf(err, "cannot get resource blob for %q(%s)", r.spec.Name, r.source)
 			}
-			err = obj.AddResourceBlob(meta, blob, hint, nil)
+			err = obj.SetResourceBlob(meta, blob, hint, nil)
 			blob.Close()
 		} else {
 			compdesc.GenericAccessSpec(r.spec.Access)
-			err = obj.AddResource(meta, compdesc.GenericAccessSpec(r.spec.Access))
+			err = obj.SetResource(meta, compdesc.GenericAccessSpec(r.spec.Access))
 		}
 		if err != nil {
 			return errors.Wrapf(err, "cannot add resource %q(%s)", r.spec.Name, r.source)

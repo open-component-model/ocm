@@ -18,7 +18,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
@@ -28,7 +27,7 @@ import (
 	ocihdlr "github.com/gardener/ocm/pkg/ocm/blobhandler/oci"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
-	"github.com/gardener/ocm/pkg/ocm/repositories/ctf/comparch"
+	"github.com/gardener/ocm/pkg/ocm/repositories/comparch/comparch"
 	"github.com/opencontainers/go-digest"
 )
 
@@ -46,7 +45,7 @@ func NewComponentVersionAccess(mode accessobj.AccessMode, comp *ComponentAccess,
 	}
 	return &ComponentVersion{
 		container:              c,
-		ComponentVersionAccess: comparch.NewComponentVersionAccess(c),
+		ComponentVersionAccess: comparch.NewComponentVersionAccess(c, true),
 	}, nil
 }
 
@@ -72,6 +71,10 @@ func NewComponentVersionContainer(mode accessobj.AccessMode, comp *ComponentAcce
 		manifest: manifest,
 		state:    state,
 	}, nil
+}
+
+func (c *ComponentVersionContainer) Close() error {
+	return nil
 }
 
 func (c *ComponentVersionContainer) Check() error {
@@ -174,7 +177,7 @@ func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string,
 	if err != nil {
 		return nil, err
 	}
-	return accessmethods.NewLocalBlobAccessSpec(common.DigestToFileName(blob.Digest()), refName, blob.MimeType(), global), nil
+	return accessmethods.NewLocalBlobAccessSpec(blob.Digest().String(), refName, blob.MimeType(), global), nil
 }
 
 // assureGlobalRef provides a global manifest for a local OCI Artefact

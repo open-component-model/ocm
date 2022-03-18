@@ -26,16 +26,22 @@ import (
 )
 
 type ComponentVersionAccess struct {
+	lazy bool
 	base ComponentVersionContainer
 }
 
 var _ cpi.ComponentVersionAccess = (*ComponentVersionAccess)(nil)
 
-func NewComponentVersionAccess(container ComponentVersionContainer) *ComponentVersionAccess {
+func NewComponentVersionAccess(container ComponentVersionContainer, lazy bool) *ComponentVersionAccess {
 	s := &ComponentVersionAccess{
+		lazy: lazy,
 		base: container,
 	}
 	return s
+}
+
+func (a *ComponentVersionAccess) Close() error {
+	return errors.ErrListf("closing archive").Add(a.base.Update(), a.base.Close()).Result()
 }
 
 func (a *ComponentVersionAccess) IsReadOnly() bool {
@@ -95,6 +101,20 @@ func (a *ComponentVersionAccess) GetResource(id metav1.Identity) (cpi.ResourceAc
 	}, nil
 }
 
+func (a *ComponentVersionAccess) GetResources() []cpi.ResourceAccess {
+	result := []cpi.ResourceAccess{}
+	for _, r := range a.GetDescriptor().Resources {
+		result = append(result, &ResourceAccess{
+			BaseAccess: &BaseAccess{
+				vers:   a,
+				access: r.Access,
+			},
+			meta: r.ResourceMeta,
+		})
+	}
+	return result
+}
+
 func (a *ComponentVersionAccess) GetSource(id metav1.Identity) (cpi.SourceAccess, error) {
 	r, err := a.base.GetDescriptor().GetSourceByIdentity(id)
 	if err != nil {
@@ -107,6 +127,20 @@ func (a *ComponentVersionAccess) GetSource(id metav1.Identity) (cpi.SourceAccess
 		},
 		meta: r.SourceMeta,
 	}, nil
+}
+
+func (a *ComponentVersionAccess) GetSources() []cpi.SourceAccess {
+	result := []cpi.SourceAccess{}
+	for _, r := range a.GetDescriptor().Sources {
+		result = append(result, &SourceAccess{
+			BaseAccess: &BaseAccess{
+				vers:   a,
+				access: r.Access,
+			},
+			meta: r.SourceMeta,
+		})
+	}
+	return result
 }
 
 func (c *ComponentVersionAccess) getAccessSpec(acc compdesc.AccessSpec) (cpi.AccessSpec, error) {
@@ -129,7 +163,7 @@ func (c *ComponentVersionAccess) checkAccessSpec(acc compdesc.AccessSpec) error 
 	return err
 }
 
-func (c *ComponentVersionAccess) AddResource(meta *cpi.ResourceMeta, acc compdesc.AccessSpec) error {
+func (c *ComponentVersionAccess) SetResource(meta *cpi.ResourceMeta, acc compdesc.AccessSpec) error {
 	if err := c.checkAccessSpec(acc); err != nil {
 		return err
 	}
@@ -143,10 +177,13 @@ func (c *ComponentVersionAccess) AddResource(meta *cpi.ResourceMeta, acc compdes
 	} else {
 		c.GetDescriptor().Resources[idx] = *res
 	}
+	if c.lazy {
+		return nil
+	}
 	return c.base.Update()
 }
 
-func (c *ComponentVersionAccess) AddSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec) error {
+func (c *ComponentVersionAccess) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec) error {
 	if err := c.checkAccessSpec(acc); err != nil {
 		return err
 	}
@@ -160,24 +197,27 @@ func (c *ComponentVersionAccess) AddSource(meta *cpi.SourceMeta, acc compdesc.Ac
 	} else {
 		c.GetDescriptor().Sources[idx] = *res
 	}
+	if c.lazy {
+		return nil
+	}
 	return c.base.Update()
 }
 
 // AddResource adds a blob resource to the current archive.
-func (c *ComponentVersionAccess) AddResourceBlob(meta *cpi.ResourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) error {
+func (c *ComponentVersionAccess) SetResourceBlob(meta *cpi.ResourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) error {
 	acc, err := c.AddBlob(blob, refName, global)
 	if err != nil {
 		return err
 	}
-	return c.AddResource(meta, acc)
+	return c.SetResource(meta, acc)
 }
 
-func (c *ComponentVersionAccess) AddSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) error {
+func (c *ComponentVersionAccess) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) error {
 	acc, err := c.AddBlob(blob, refName, global)
 	if err != nil {
 		return err
 	}
-	return c.AddSource(meta, acc)
+	return c.SetSource(meta, acc)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -220,8 +260,8 @@ type ResourceAccess struct {
 
 var _ cpi.ResourceAccess = (*ResourceAccess)(nil)
 
-func (r ResourceAccess) Meta() cpi.ResourceMeta {
-	return r.meta
+func (r ResourceAccess) Meta() *cpi.ResourceMeta {
+	return &r.meta
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -233,6 +273,6 @@ type SourceAccess struct {
 
 var _ cpi.SourceAccess = (*SourceAccess)(nil)
 
-func (r SourceAccess) Meta() cpi.SourceMeta {
-	return r.meta
+func (r SourceAccess) Meta() *cpi.SourceMeta {
+	return &r.meta
 }

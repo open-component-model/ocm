@@ -24,9 +24,14 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
+	. "github.com/gardener/ocm/pkg/regex"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"sigs.k8s.io/yaml"
+)
+
+var TypeRegexp = Anchored(
+	Optional(Sequence(Capture(Identifier), Literal("::"))),
+	Capture(Match(".*")),
 )
 
 type Command struct {
@@ -48,6 +53,26 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 			Long: `
 Get lists all artefact versions specified, if only a repository is specified
 all tagged artefacts are listed.
+
+If no <code>repo</code> option is specified the given names are interpreted 
+as located OCI artefact names. 
+
+The options follows the syntax [<repotype>::]<repospec>. The following
+repository types are supported yet:
+- <code>OCIRegistry</code>: The given repository spec is used as base url
+
+Without a specified type prefix any JSON representation of an OCI repository
+specification supported by the OCM library or the name of an OCI repository
+configured in the used config file can be used.
+
+If the repository option is specified, the given artefact names are interpreted
+relative to the specified repository.
+
+*Example:*
+<pre>
+$ ocm get artefact ghcr.io/mandelsoft/kubelink
+$ ocm get artefact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
+</pre>
 `,
 		})
 }
@@ -66,22 +91,19 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
+	var err error
 	var repobase oci.Repository
 	session := oci.NewSession(nil)
 
 	if o.Repository != "" {
-		var parsed interface{}
-		err := yaml.Unmarshal([]byte(o.Repository), &parsed)
-		if err != nil {
-			return errors.Wrapf(err, "cannot unmarshal repository spec")
+
+		m := TypeRegexp.FindStringSubmatch(o.Repository)
+		if m == nil {
+			return errors.ErrInvalid("repository spec", o.Repository)
 		}
-		if s, ok := parsed.(string); ok {
-			repobase, err = o.Context.GetOCIRepository(s)
-			if err != nil {
-				return err
-			}
-		} else {
-			fmt.Printf("spec: %s\n", o.Repository)
+		repobase, err = o.Context.OCI().DetermineRepository(m[1], m[2])
+		if err != nil {
+			return err
 		}
 	}
 

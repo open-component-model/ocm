@@ -38,9 +38,11 @@ func (l *ErrorList) Error() string {
 	return msg + "}"
 }
 
-func (l *ErrorList) Add(e error) *ErrorList {
-	if e != nil {
-		l.errors = append(l.errors, e)
+func (l *ErrorList) Add(errs ...error) *ErrorList {
+	for _, e := range errs {
+		if e != nil {
+			l.errors = append(l.errors, e)
+		}
 	}
 	return l
 }

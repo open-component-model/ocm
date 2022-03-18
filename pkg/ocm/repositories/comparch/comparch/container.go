@@ -15,6 +15,8 @@
 package comparch
 
 import (
+	"io"
+
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 )
@@ -52,4 +54,6 @@ type ComponentVersionContainer interface {
 	GetDescriptor() *compdesc.ComponentDescriptor
 
 	BlobContainer
+
+	io.Closer
 }

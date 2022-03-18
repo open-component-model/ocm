@@ -83,15 +83,9 @@ type RepositorySpec struct {
 }
 
 func NewRepositorySpec(spec oci.RepositorySpec, meta *compreg.ComponentRepositoryMeta) *RepositorySpec {
-	if meta == nil {
-		meta = &compreg.ComponentRepositoryMeta{}
-	}
-	if meta.ComponentNameMapping == "" {
-		meta.ComponentNameMapping = compreg.OCIRegistryURLPathMapping
-	}
 	return &RepositorySpec{
 		RepositorySpec:          spec,
-		ComponentRepositoryMeta: *meta,
+		ComponentRepositoryMeta: *DefaultComponentRepositoryMeta(meta),
 	}
 }
 
@@ -129,5 +123,15 @@ func (s *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 	if err != nil {
 		return nil, err
 	}
-	return NewRepository(ctx, s.ComponentRepositoryMeta, r)
+	return NewRepository(ctx, &s.ComponentRepositoryMeta, r)
+}
+
+func DefaultComponentRepositoryMeta(meta *compreg.ComponentRepositoryMeta) *compreg.ComponentRepositoryMeta {
+	if meta == nil {
+		meta = &compreg.ComponentRepositoryMeta{}
+	}
+	if meta.ComponentNameMapping == "" {
+		meta.ComponentNameMapping = compreg.OCIRegistryURLPathMapping
+	}
+	return meta
 }

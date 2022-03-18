@@ -34,10 +34,10 @@ type Repository struct {
 
 var _ cpi.Repository = (*Repository)(nil)
 
-func NewRepository(ctx cpi.Context, meta ocireg.ComponentRepositoryMeta, ocirepo oci.Repository) (cpi.Repository, error) {
+func NewRepository(ctx cpi.Context, meta *ocireg.ComponentRepositoryMeta, ocirepo oci.Repository) (cpi.Repository, error) {
 	repo := &Repository{
 		ctx:     ctx,
-		meta:    meta,
+		meta:    *DefaultComponentRepositoryMeta(meta),
 		ocirepo: ocirepo,
 	}
 	_ = repo
