@@ -15,6 +15,8 @@
 package comparch
 
 import (
+	"strings"
+
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm/core"
@@ -38,6 +40,40 @@ func NewRepository(ctx cpi.Context, s *RepositorySpec) (*Repository, error) {
 	}
 	r.arch = a
 	return r, err
+}
+
+func (r *Repository) ComponentLister() cpi.ComponentLister {
+	return r
+}
+
+func (r *Repository) NumComponents(prefix string) (int, error) {
+	if r.arch == nil {
+		return -1, accessio.ErrClosed
+	}
+	if r.arch.GetName() != prefix {
+		if !strings.HasSuffix(prefix, "/") {
+			prefix += "/"
+		}
+		if !strings.HasPrefix(r.arch.GetName(), prefix) {
+			return 0, nil
+		}
+	}
+	return 1, nil
+}
+
+func (r *Repository) GetComponents(prefix string, closure bool) ([]string, error) {
+	if r.arch == nil {
+		return nil, accessio.ErrClosed
+	}
+	if r.arch.GetName() != prefix {
+		if !strings.HasSuffix(prefix, "/") {
+			prefix += "/"
+		}
+		if !closure || !strings.HasPrefix(r.arch.GetName(), prefix) {
+			return []string{}, nil
+		}
+	}
+	return []string{r.arch.GetName()}, nil
 }
 
 func (r *Repository) Get() *impl.ComponentArchive {
@@ -114,6 +150,10 @@ func (c *ComponentAccess) Close() error {
 
 func (c *ComponentAccess) GetName() string {
 	return c.repo.arch.GetName()
+}
+
+func (c *ComponentAccess) ListVersions() ([]string, error) {
+	return []string{c.repo.arch.GetVersion()}, nil
 }
 
 func (c *ComponentAccess) LookupVersion(ref string) (cpi.ComponentVersionAccess, error) {

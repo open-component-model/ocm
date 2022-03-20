@@ -45,18 +45,20 @@ type Command struct {
 }
 
 // NewCommand creates a new ctf command.
-func NewCommand(ctx clictx.Context) *cobra.Command {
-	return utils.SetupCommand(&Command{Context: ctx},
-		&cobra.Command{
-			Use:     "componentarchive [<options>] <component> <version> <provider> <path> {<label>=<value>}",
-			Args:    cobra.MinimumNArgs(4),
-			Aliases: []string{"ca", "comparch"},
-			Short:   "create new component archive",
-			Long: `
+func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
+	return utils.SetupCommand(&Command{Context: ctx}, names...)
+}
+
+func (o *Command) ForName(name string) *cobra.Command {
+	return &cobra.Command{
+		Use:   "[<options>] <component> <version> <provider> <path> {<label>=<value>}",
+		Args:  cobra.MinimumNArgs(4),
+		Short: "create new component archive",
+		Long: `
 Create a new component archive. This might be either a directory prepared
 to host component version content or a tar/tgz file.
 `,
-		})
+	}
 }
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {

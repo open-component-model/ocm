@@ -16,7 +16,8 @@ package get
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefact/get"
+	artefacts "github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/get"
+	components "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/get"
 	"github.com/spf13/cobra"
 )
 
@@ -26,6 +27,7 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 		Use:              "get",
 		TraverseChildren: true,
 	}
-	cmd.AddCommand(get.NewCommand(ctx))
+	cmd.AddCommand(artefacts.NewCommand(ctx, "artefacts", "artefact", "art", "a"))
+	cmd.AddCommand(components.NewCommand(ctx, "components", "component", "comps", "comp", "c"))
 	return cmd
 }

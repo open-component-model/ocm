@@ -18,6 +18,8 @@ const CONTEXT_TYPE = core.CONTEXT_TYPE
 
 type Context = core.Context
 type Repository = core.Repository
+type UniformRepositorySpec = core.UniformRepositorySpec
+type ComponentLister = core.ComponentLister
 type ComponentAccess = core.ComponentAccess
 type ComponentVersionAccess = core.ComponentVersionAccess
 type AccessSpec = core.AccessSpec

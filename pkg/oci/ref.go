@@ -19,6 +19,9 @@ import (
 const (
 	dockerHubDomain       = "docker.io"
 	dockerHubLegacyDomain = "index.docker.io"
+
+	KIND_OCI_REFERENCE       = "oci reference"
+	KIND_ARETEFACT_REFERENCE = "artefact reference"
 )
 
 // ParseRef parses a oci reference into a internal representation.
@@ -48,7 +51,7 @@ func ParseRef(resourceURL string) (RefSpec, error) {
 		}
 		return spec, nil
 	}
-	return RefSpec{}, err
+	return RefSpec{}, errors.ErrInvalidWrap(err, KIND_OCI_REFERENCE, resourceURL)
 }
 
 // RefSpec is a go internal representation of a oci reference.
@@ -84,7 +87,7 @@ func (r *RefSpec) HostPort() (string, string) {
 	return r.Host[:i], r.Host[i+1:]
 }
 
-func (r *RefSpec) Reference() string {
+func (r *RefSpec) Version() string {
 	if r.Tag != nil {
 		return *r.Tag
 	}
@@ -140,7 +143,7 @@ func ParseArt(art string) (ArtSpec, error) {
 	match := grammar.AnchoredArtefactVersionRegexp.FindSubmatch([]byte(art))
 
 	if match == nil {
-		return ArtSpec{}, errors.ErrInvalid("artefact ref", art)
+		return ArtSpec{}, errors.ErrInvalid(KIND_ARETEFACT_REFERENCE, art)
 	}
 	var tag *string
 	var dig *digest.Digest
@@ -153,7 +156,7 @@ func ParseArt(art string) (ArtSpec, error) {
 		t := string(match[3])
 		d, err := digest.Parse(t)
 		if err != nil {
-			return ArtSpec{}, errors.ErrInvalidWrap(err, "artefact ref", art)
+			return ArtSpec{}, errors.ErrInvalidWrap(err, KIND_ARETEFACT_REFERENCE, art)
 		}
 		dig = &d
 	}

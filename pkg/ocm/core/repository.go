@@ -27,6 +27,8 @@ type Repository interface {
 	GetContext() Context
 
 	GetSpecification() RepositorySpec
+	ComponentLister() ComponentLister
+
 	ExistsComponentVersion(name string, version string) (bool, error)
 	LookupComponentVersion(name string, version string) (ComponentVersionAccess, error)
 	LookupComponent(name string) (ComponentAccess, error)
@@ -42,6 +44,7 @@ type ComponentAccess interface {
 	GetContext() Context
 	GetName() string
 
+	ListVersions() ([]string, error)
 	LookupVersion(version string) (ComponentVersionAccess, error)
 	AddVersion(ComponentVersionAccess) error
 	NewVersion(version string) (ComponentVersionAccess, error)
@@ -102,4 +105,18 @@ type ComponentVersionAccess interface {
 	SetSource(*SourceMeta, compdesc.AccessSpec) error
 
 	io.Closer
+}
+
+// ComponentLister provides the optional repository list functionality of
+// a repository
+type ComponentLister interface {
+	// NumComponents returns the number of components found for a prefix
+	// If the given prefix does not end with a /, a repository with the
+	// prefix name is included
+	NumComponents(prefix string) (int, error)
+
+	// GetNamespaces returns the name of namespaces found for a prefix
+	// If the given prefix does not end with a /, a repository with the
+	// prefix name is included
+	GetComponents(prefix string, closure bool) ([]string, error)
 }

@@ -15,6 +15,8 @@
 package genericocireg
 
 import (
+	"strings"
+
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
@@ -60,6 +62,21 @@ func (c *ComponentAccess) GetContext() core.Context {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+func (c *ComponentAccess) ListVersions() ([]string, error) {
+	tags, err := c.namespace.ListTags()
+	if err != nil {
+		return nil, err
+	}
+	result := make([]string, 0, len(tags))
+	for _, t := range tags {
+		// omit reported digests (typically for ctf)
+		if !strings.HasPrefix(t, "@") {
+			result = append(result, t)
+		}
+	}
+	return result, err
+}
 
 func (c *ComponentAccess) LookupVersion(version string) (cpi.ComponentVersionAccess, error) {
 

@@ -18,7 +18,21 @@ import (
 	. "github.com/gardener/ocm/pkg/regex"
 )
 
+const (
+	// RepositorySeparatorChar is the separator character used to separate
+	// repository name components.
+	RepositorySeparatorChar = '/'
+
+	// RepositorySeparator is the separator string used to separate
+	// repository name components.
+	RepositorySeparator = string(RepositorySeparatorChar)
+)
+
 var (
+	// RepositorySeparatorRegexp is the separator used to separate
+	// repository name components.
+	RepositorySeparatorRegexp = Literal(RepositorySeparator)
+
 	// alphaNumericRegexp defines the alpha numeric atom, typically a
 	// component of names. This only allows lower case characters and digits.
 	AlphaNumericRegexp = Match(`[a-z0-9]+`)
@@ -36,7 +50,7 @@ var (
 		Optional(Repeated(separatorRegexp, AlphaNumericRegexp)))
 
 	// DomainComponentRegexp restricts the registry domain component of a
-	// repository name to start with a component as defined by DomainRegexp
+	// repository name to start with a component as defined by DomainPortRegexp
 	// and followed by an optional port.
 	DomainComponentRegexp = Match(`(?:[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]*[a-zA-Z0-9])`)
 
@@ -45,8 +59,15 @@ var (
 	// allowed by DNS to ensure backwards compatibility with Docker image
 	// names.
 	DomainRegexp = Sequence(
-		DomainComponentRegexp,
-		Optional(Repeated(Literal(`.`), DomainComponentRegexp)),
+		DomainComponentRegexp, Literal(`.`), DomainComponentRegexp,
+		Optional(Repeated(Literal(`.`), DomainComponentRegexp)))
+
+	// DomainPortRegexp defines the structure of potential domain components
+	// that may be part of image names. This is purposely a subset of what is
+	// allowed by DNS to ensure backwards compatibility with Docker image
+	// names followed by an optional port part.
+	DomainPortRegexp = Sequence(
+		DomainRegexp,
 		Optional(Literal(`:`), Match(`[0-9]+`)))
 
 	// TagRegexp matches valid tag names. From docker/docker:graph/tags.go.
@@ -66,20 +87,19 @@ var (
 	// RepositoryRegexp is the format of a repository ppart of references.
 	RepositoryRegexp = Sequence(
 		NameComponentRegexp,
-		Optional(Repeated(Literal(`/`), NameComponentRegexp)))
+		Optional(Repeated(RepositorySeparatorRegexp, NameComponentRegexp)))
 
 	// NameRegexp is the format for the name component of references. The
 	// regexp has capturing groups for the domain and name part omitting
 	// the separating forward slash from either.
 	NameRegexp = Sequence(
-		Optional(DomainRegexp, Literal(`/`)), RepositoryRegexp)
+		Optional(DomainPortRegexp, RepositorySeparatorRegexp), RepositoryRegexp)
 
 	// AnchoredNameRegexp is used to parse a name value, capturing the
 	// domain and trailing components.
 	AnchoredNameRegexp = Anchored(
-		Optional(Capture(DomainRegexp), Literal(`/`)),
-		Capture(NameComponentRegexp,
-			Optional(Repeated(Literal(`/`), NameComponentRegexp))))
+		Optional(Capture(DomainPortRegexp), RepositorySeparatorRegexp),
+		Capture(RepositoryRegexp))
 
 	// ArtefactVersionRegexp is used to parse an artefact version sped
 	// consisting of a repository part and an optional version part

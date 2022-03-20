@@ -18,12 +18,12 @@ import (
 	"fmt"
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefact"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/common"
 	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/oci"
+	"github.com/gardener/ocm/pkg/ocm"
 	. "github.com/gardener/ocm/pkg/regex"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -44,37 +44,36 @@ type Command struct {
 }
 
 // NewCommand creates a new ctf command.
-func NewCommand(ctx clictx.Context) *cobra.Command {
-	return utils.SetupCommand(&Command{Context: ctx},
-		&cobra.Command{
-			Use:     "artefact [<options>] {<artefact-reference>}",
-			Aliases: []string{"a", "art"},
-			Short:   "get artefact version",
-			Long: `
-Get lists all artefact versions specified, if only a repository is specified
-all tagged artefacts are listed.
+func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
+	return utils.SetupCommand(&Command{Context: ctx}, names...)
+}
 
-If no <code>repo</code> option is specified the given names are interpreted 
-as located OCI artefact names. 
+func (o *Command) ForName(name string) *cobra.Command {
+	return &cobra.Command{
+		Use:   "[<options>] {<component-reference>}",
+		Short: "get component version",
+		Long: `
+Get lists all component versions specified, if only a component is specified
+all versions are listed.
+
+If a <code>repo</code> option is specified the given names are interpreted 
+as component names. 
 
 The options follows the syntax [<repotype>::]<repospec>. The following
 repository types are supported yet:
 - <code>OCIRegistry</code>: The given repository spec is used as base url
 
-Without a specified type prefix any JSON representation of an OCI repository
-specification supported by the OCM library or the name of an OCI repository
+Without a specified type prefix any JSON representation of an OCM repository
+specification supported by the OCM library or the name of an OCM repository
 configured in the used config file can be used.
-
-If the repository option is specified, the given artefact names are interpreted
-relative to the specified repository.
 
 *Example:*
 <pre>
-$ ocm get artefact ghcr.io/mandelsoft/kubelink
-$ ocm get artefact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
+$ ocm get componentversion ghcr.io/mandelsoft/kubelink
+$ ocm get componentversion --repo OCIRegistry:ghcr.io mandelsoft/kubelink
 </pre>
 `,
-		})
+	}
 }
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
@@ -83,8 +82,8 @@ func (o *Command) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *Command) Complete(args []string) error {
-	if len(args) == 0 {
-		return fmt.Errorf("at least one argument that defines the reference is needed")
+	if len(args) == 0 && o.Repository == "" {
+		return fmt.Errorf("a repository or at least one argument that defines the reference is needed")
 	}
 	o.Refs = args
 	return nil
@@ -92,8 +91,8 @@ func (o *Command) Complete(args []string) error {
 
 func (o *Command) Run() error {
 	var err error
-	var repobase oci.Repository
-	session := oci.NewSession(nil)
+	var repobase ocm.Repository
+	session := ocm.NewSession(nil)
 
 	if o.Repository != "" {
 
@@ -101,13 +100,13 @@ func (o *Command) Run() error {
 		if m == nil {
 			return errors.ErrInvalid("repository spec", o.Repository)
 		}
-		repobase, err = o.Context.OCI().DetermineRepository(m[1], m[2])
+		repobase, err = o.Context.OCM().DetermineRepository(m[1], m[2])
 		if err != nil {
 			return err
 		}
 	}
 
-	handler := artefact.NewTypeHandler(o.Context.OCIContext(), session, repobase)
+	handler := common.NewTypeHandler(o.Context.OCMContext(), session, repobase)
 
 	return utils.HandleArgs(outputs, &o.Output, handler, o.Refs...)
 }
@@ -115,47 +114,20 @@ func (o *Command) Run() error {
 /////////////////////////////////////////////////////////////////////////////
 
 var outputs = output.NewOutputs(get_regular, output.Outputs{
-	"wide": get_wide,
+	// "wide": get_wide,
 }).AddManifestOutputs()
 
 func get_regular(opts *output.Options) output.Output {
 	return output.NewProcessingTableOutput(opts, data.Chain().Map(map_get_regular_output),
-		"REGISTRY", "REPOSITORY", "TAG", "DIGEST")
-}
-
-func get_wide(opts *output.Options) output.Output {
-	return output.NewProcessingTableOutput(opts, data.Chain().Parallel(20).Map(map_get_wide_output),
-		"REGISTRY", "REPOSITORY", "TAG", "DIGEST", "MIMETYPE", "CONFIGTYPE")
+		"REPOSITORY", "COMPONENT", "VERSION", "PROVIDER")
 }
 
 func map_get_regular_output(e interface{}) interface{} {
-	digest := "unknown"
-	p := e.(*artefact.Object)
-	blob, err := p.Artefact.Blob()
-	if err == nil {
-		digest = blob.Digest().String()
-	}
-	tag := "-"
-	if p.Spec.Tag != nil {
-		tag = *p.Spec.Tag
-	}
-	return []string{p.Spec.Host, p.Spec.Repository, tag, digest}
-}
+	p := e.(*common.Object)
 
-func map_get_wide_output(e interface{}) interface{} {
-	digest := "unknown"
-	p := e.(*artefact.Object)
-	blob, err := p.Artefact.Blob()
-	if err == nil {
-		digest = blob.Digest().String()
-	}
 	tag := "-"
-	if p.Spec.Tag != nil {
-		tag = *p.Spec.Tag
+	if p.Spec.Version != nil {
+		tag = *p.Spec.Version
 	}
-	config := "-"
-	if p.Artefact.IsManifest() {
-		config = p.Artefact.ManifestAccess().GetDescriptor().Config.MediaType
-	}
-	return []string{p.Spec.Host, p.Spec.Repository, tag, digest, p.Artefact.GetDescriptor().MimeType(), config}
+	return []string{p.Spec.UniformRepositorySpec.String(), p.Spec.Component, tag, string(p.ComponentVersion.GetDescriptor().Provider)}
 }

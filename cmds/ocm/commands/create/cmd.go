@@ -16,7 +16,7 @@ package create
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
+	comparch "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
 	"github.com/spf13/cobra"
 )
 
@@ -26,6 +26,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 		Use:              "create",
 		TraverseChildren: true,
 	}
-	cmd.AddCommand(create.NewCommand(ctx))
+	cmd.AddCommand(comparch.NewCommand(ctx, "componentarchive", "comparch", "ca"))
 	return cmd
 }

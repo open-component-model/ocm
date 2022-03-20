@@ -12,11 +12,15 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package artefact
+package common
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
+	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 )
@@ -58,27 +62,61 @@ func (h *TypeHandler) Close() error {
 	return h.session.Close()
 }
 
+func (h *TypeHandler) All() ([]output.Object, error) {
+	if h.repobase == nil {
+		return nil, nil
+	}
+	lister := h.repobase.NamespaceLister()
+	if lister == nil {
+		return nil, nil
+	}
+	list, err := lister.GetNamespaces("", true)
+	if err != nil {
+		return nil, err
+	}
+	var result []output.Object
+	for _, l := range list {
+		part, err := h.Get(l)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Warning: %s\n", err)
+		}
+		result = append(result, part...)
+	}
+	return result, nil
+}
+
 func (h *TypeHandler) Get(name string) ([]output.Object, error) {
 	var namespace oci.NamespaceAccess
 	var result []output.Object
+	var err error
 
 	spec := oci.RefSpec{}
 	repo := h.repobase
 	if repo == nil {
-		parsed, ns, err := h.session.EvaluateRef(h.octx, name)
+		parsed, ns, art, err := h.session.EvaluateRef(h.octx, name)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "repository %q", name)
 		}
 		spec = *parsed
 		namespace = ns
+		if art != nil {
+			result = append(result, &Object{
+				Spec:     spec,
+				Artefact: art,
+			})
+			return result, nil
+		}
 	} else {
-		art, err := oci.ParseArt(name)
-		if err != nil {
-			return nil, err
+		art := oci.ArtSpec{Repository: ""}
+		if name != "" {
+			art, err = oci.ParseArt(name)
+			if err != nil {
+				return nil, errors.Wrapf(err, "artefact reference %q", name)
+			}
 		}
 		namespace, err = h.session.LookupNamespace(repo, art.Repository)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "reference %q", name)
 		}
 		spec.Host = repo.GetSpecification().Name()
 		spec.Repository = art.Repository
@@ -87,7 +125,7 @@ func (h *TypeHandler) Get(name string) ([]output.Object, error) {
 	}
 
 	if spec.IsVersion() {
-		a, err := namespace.GetArtefact(spec.Reference())
+		a, err := namespace.GetArtefact(spec.Version())
 		if err != nil {
 			return nil, err
 		}
@@ -101,7 +139,7 @@ func (h *TypeHandler) Get(name string) ([]output.Object, error) {
 			return nil, err
 		}
 		for _, tag := range tags {
-			a, err := namespace.GetArtefact(spec.Reference())
+			a, err := namespace.GetArtefact(tag)
 			if err != nil {
 				return nil, err
 			}

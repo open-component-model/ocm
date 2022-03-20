@@ -15,11 +15,15 @@
 package utils
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/pkg/errors"
 )
 
 type TypeHandler interface {
+	All() ([]output.Object, error)
 	Get(name string) ([]output.Object, error)
 	Close() error
 }
@@ -32,6 +36,19 @@ func HandleArgs(outputs output.Outputs, opts *output.Options, handler TypeHandle
 	output, err := outputs.Create(opts)
 	if err != nil {
 		return err
+	}
+	if len(args) == 0 {
+		result, err := handler.All()
+		if err != nil {
+			return err
+		}
+		if result == nil {
+			fmt.Fprintf(os.Stderr, "not supported by source")
+			return nil
+		}
+		for _, r := range result {
+			output.Add(nil, r)
+		}
 	}
 	for _, a := range args {
 		result, err := handler.Get(a)

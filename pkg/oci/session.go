@@ -36,7 +36,7 @@ type Session interface {
 	LookupRepository(Context, RepositorySpec) (Repository, error)
 	LookupNamespace(NamespaceContainer, string) (NamespaceAccess, error)
 	GetArtefact(ArtefactContainer, string) (ArtefactAccess, error)
-	EvaluateRef(ctx Context, ref string) (*RefSpec, NamespaceAccess, error)
+	EvaluateRef(ctx Context, ref string) (*RefSpec, NamespaceAccess, ArtefactAccess, error)
 	Close() error
 }
 
@@ -141,16 +141,21 @@ func (s *session) GetArtefact(c ArtefactContainer, version string) (ArtefactAcce
 	return obj, err
 }
 
-func (s *session) EvaluateRef(ctx Context, ref string) (*RefSpec, NamespaceAccess, error) {
+func (s *session) EvaluateRef(ctx Context, ref string) (*RefSpec, NamespaceAccess, ArtefactAccess, error) {
 	parsed, err := ParseRef(ref)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	spec := ocireg.NewRepositorySpec(parsed.Base())
 	repo, err := s.LookupRepository(ctx, spec)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	ns, err := s.LookupNamespace(repo, parsed.Repository)
-	return &parsed, ns, err
+
+	if !parsed.IsVersion() {
+		return &parsed, ns, nil, err
+	}
+	a, err := s.GetArtefact(ns, parsed.Version())
+	return &parsed, ns, a, err
 }

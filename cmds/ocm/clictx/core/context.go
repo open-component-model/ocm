@@ -28,6 +28,7 @@ import (
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
 	ctfoci "github.com/gardener/ocm/pkg/oci/repositories/ctf"
+	"github.com/gardener/ocm/pkg/oci/repositories/docker"
 	ociregoci "github.com/gardener/ocm/pkg/oci/repositories/ocireg"
 	"github.com/gardener/ocm/pkg/ocm"
 	ctfocm "github.com/gardener/ocm/pkg/ocm/repositories/ctf"
@@ -218,6 +219,8 @@ func (c *_oci) DetermineRepository(typ string, spec string) (oci.Repository, err
 		rspec = ctfoci.NewRepositorySpec(accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, spec, accessio.FileFormat(typ), accessio.PathFileSystem(c.FileSystem()))
 	} else {
 		switch typ {
+		case "Docker", "DockerDeamon":
+			rspec = docker.NewRepositorySpec(spec)
 		case "OCIRegistry":
 			rspec = ociregoci.NewRepositorySpec(spec)
 		case "":
@@ -307,7 +310,7 @@ func (c *_ocm) DetermineRepository(typ string, spec string) (ocm.Repository, err
 	} else {
 		switch typ {
 		case "OCIRegistry":
-			rspec = ocireg.NewRepositorySpec(spec, ocireg.OCIRegistryURLPathMapping)
+			rspec = ocireg.NewRepositorySpec(spec, nil)
 		case "":
 			err := yaml.Unmarshal([]byte(spec), &parsed)
 			if err != nil {

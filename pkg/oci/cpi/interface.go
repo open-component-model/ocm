@@ -36,6 +36,7 @@ type ArtefactSource = core.ArtefactSource
 type ArtefactSink = core.ArtefactSink
 type BlobSource = core.BlobSource
 type BlobSink = core.BlobSink
+type NamespaceLister = core.NamespaceLister
 type NamespaceAccess = core.NamespaceAccess
 type ManifestAccess = core.ManifestAccess
 type IndexAccess = core.IndexAccess

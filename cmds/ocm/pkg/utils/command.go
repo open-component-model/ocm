@@ -17,18 +17,27 @@ package utils
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
 
+// OCMCommand is a command pattern, thta can be instantiated for a dediated
+// sub command name.
 type OCMCommand interface {
+	ForName(name string) *cobra.Command
 	AddFlags(fs *pflag.FlagSet)
 	Complete(args []string) error
 	Run() error
 }
 
-func SetupCommand(ocmcmd OCMCommand, c *cobra.Command) *cobra.Command {
+func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
+	c := ocmcmd.ForName(names[0])
+	if !strings.HasSuffix(c.Use, names[0]+" ") {
+		c.Use = names[0] + " " + c.Use
+	}
+	c.Aliases = names[1:]
 	c.Run = func(cmd *cobra.Command, args []string) {
 		if err := ocmcmd.Complete(args); err != nil {
 			fmt.Println(err.Error())

@@ -22,6 +22,7 @@ import (
 
 type Repository interface {
 	GetSpecification() RepositorySpec
+	NamespaceLister() NamespaceLister
 
 	ExistsArtefact(name string, ref string) (bool, error)
 	LookupArtefact(name string, ref string) (ArtefactAccess, error)
@@ -120,4 +121,18 @@ type IndexAccess interface {
 
 	AddBlob(BlobAccess) error
 	AddArtefact(Artefact, *artdesc.Platform) (BlobAccess, error)
+}
+
+// NamespaceLister provides the optional repository list functionality of
+// a repository
+type NamespaceLister interface {
+	// NumNamespaces returns the number of namespaces found for a prefix
+	// If the given prefix does not end with a /, a repository with the
+	// prefix name is included
+	NumNamespaces(prefix string) (int, error)
+
+	// GetNamespaces returns the name of namespaces found for a prefix
+	// If the given prefix does not end with a /, a repository with the
+	// prefix name is included
+	GetNamespaces(prefix string, closure bool) ([]string, error)
 }

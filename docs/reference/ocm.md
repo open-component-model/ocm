@@ -12,7 +12,11 @@ ocm
 ### SEE ALSO
 
 * [ocm add](ocm_add.md)	 - 
+* [ocm componentarchive](ocm_componentarchive.md)	 - 
 * [ocm create](ocm_create.md)	 - 
 * [ocm get](ocm_get.md)	 - 
+* [ocm oci](ocm_oci.md)	 - 
+* [ocm resources](ocm_resources.md)	 - 
+* [ocm transfer](ocm_transfer.md)	 - 
 * [ocm version](ocm_version.md)	 - displays the version
 

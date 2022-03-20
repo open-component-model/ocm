@@ -135,7 +135,7 @@ func (m *OCIRegistryAccessMethod) getBlob() (artefactset.ArtefactBlob, error) {
 	if err != nil {
 		return nil, err
 	}
-	blob, err := artefactset.SynthesizeArtefactBlob(ns, ref.Reference())
+	blob, err := artefactset.SynthesizeArtefactBlob(ns, ref.Version())
 	if err != nil {
 		return nil, err
 	}

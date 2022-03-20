@@ -33,6 +33,18 @@ func (r Repository) GetSpecification() cpi.RepositorySpec {
 	return NewRepositorySpec()
 }
 
+func (r *Repository) NamespaceLister() cpi.NamespaceLister {
+	return r
+}
+
+func (r *Repository) NumNamespaces(prefix string) (int, error) {
+	return 0, nil
+}
+
+func (r *Repository) GetNamespaces(prefix string, closure bool) ([]string, error) {
+	return nil, nil
+}
+
 func (r Repository) ExistsArtefact(name string, version string) (bool, error) {
 	return false, nil
 }

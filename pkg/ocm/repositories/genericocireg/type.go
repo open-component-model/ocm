@@ -21,21 +21,45 @@ import (
 	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
+	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
-	compreg "github.com/gardener/ocm/pkg/ocm/repositories/ocireg"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
 // ComponentNameMapping describes the method that is used to map the "Component Name", "Component Version"-tuples
 // to OCI Image References.
-type ComponentNameMapping = compreg.ComponentNameMapping
+type ComponentNameMapping string
+
+const (
+	OCIRegistryRepositoryType   = ocireg.OCIRegistryRepositoryType
+	OCIRegistryRepositoryTypeV1 = ocireg.OCIRegistryRepositoryTypeV1
+
+	OCIRegistryURLPathMapping ComponentNameMapping = "urlPath"
+	OCIRegistryDigestMapping  ComponentNameMapping = "sha256-digest"
+)
 
 func init() {
 	cpi.RegisterOCIImplementation(func(ctx oci.Context) (cpi.RepositoryType, error) {
 		return NewRepositoryType(ctx), nil
 	})
+}
+
+// ComponentRepositoryMeta describes config special for a mapping of
+// a component repository to an oci registry
+type ComponentRepositoryMeta struct {
+	// ComponentNameMapping describes the method that is used to map the "Component Name", "Component Version"-tuples
+	// to OCI Image References.
+	ComponentNameMapping ComponentNameMapping `json:"componentNameMapping,omitempty"`
+	SubPath              string               `json:"subPath,omitempty"`
+}
+
+func NewComponentRepositoryMeta(subPath string, mapping ComponentNameMapping) *ComponentRepositoryMeta {
+	return &ComponentRepositoryMeta{
+		ComponentNameMapping: mapping,
+		SubPath:              subPath,
+	}
 }
 
 type RepositoryType struct {
@@ -59,7 +83,7 @@ func (t *RepositoryType) Decode(data []byte, unmarshal runtime.Unmarshaler) (run
 		return nil, err
 	}
 
-	meta := &compreg.ComponentRepositoryMeta{}
+	meta := &ComponentRepositoryMeta{}
 	if unmarshal == nil {
 		unmarshal = runtime.DefaultYAMLEncoding.Unmarshaler
 	}
@@ -79,14 +103,18 @@ func (t *RepositoryType) LocalSupportForAccessSpec(ctx cpi.Context, a compdesc.A
 
 type RepositorySpec struct {
 	oci.RepositorySpec
-	compreg.ComponentRepositoryMeta
+	ComponentRepositoryMeta
 }
 
-func NewRepositorySpec(spec oci.RepositorySpec, meta *compreg.ComponentRepositoryMeta) *RepositorySpec {
+func NewRepositorySpec(spec oci.RepositorySpec, meta *ComponentRepositoryMeta) *RepositorySpec {
 	return &RepositorySpec{
 		RepositorySpec:          spec,
 		ComponentRepositoryMeta: *DefaultComponentRepositoryMeta(meta),
 	}
+}
+
+func (a *RepositorySpec) AsUniformSpec(cpi.Context) cpi.UniformRepositorySpec {
+	return cpi.UniformRepositorySpec{Type: a.GetKind(), SubPath: a.SubPath}
 }
 
 func (u *RepositorySpec) UnmarshalJSON(data []byte) error {
@@ -95,7 +123,7 @@ func (u *RepositorySpec) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, ocispec); err != nil {
 		return err
 	}
-	compmeta := &compreg.ComponentRepositoryMeta{}
+	compmeta := &ComponentRepositoryMeta{}
 	if err := json.Unmarshal(data, ocispec); err != nil {
 		return err
 	}
@@ -126,12 +154,12 @@ func (s *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 	return NewRepository(ctx, &s.ComponentRepositoryMeta, r)
 }
 
-func DefaultComponentRepositoryMeta(meta *compreg.ComponentRepositoryMeta) *compreg.ComponentRepositoryMeta {
+func DefaultComponentRepositoryMeta(meta *ComponentRepositoryMeta) *ComponentRepositoryMeta {
 	if meta == nil {
-		meta = &compreg.ComponentRepositoryMeta{}
+		meta = &ComponentRepositoryMeta{}
 	}
 	if meta.ComponentNameMapping == "" {
-		meta.ComponentNameMapping = compreg.OCIRegistryURLPathMapping
+		meta.ComponentNameMapping = OCIRegistryURLPathMapping
 	}
 	return meta
 }

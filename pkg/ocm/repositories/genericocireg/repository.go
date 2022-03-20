@@ -19,22 +19,23 @@ import (
 	"encoding/hex"
 	"fmt"
 	"path"
+	"strings"
 
+	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/gardener/ocm/pkg/ocm/repositories/genericocireg/componentmapping"
-	"github.com/gardener/ocm/pkg/ocm/repositories/ocireg"
 )
 
 type Repository struct {
 	ctx     cpi.Context
-	meta    ocireg.ComponentRepositoryMeta
+	meta    ComponentRepositoryMeta
 	ocirepo oci.Repository
 }
 
 var _ cpi.Repository = (*Repository)(nil)
 
-func NewRepository(ctx cpi.Context, meta *ocireg.ComponentRepositoryMeta, ocirepo oci.Repository) (cpi.Repository, error) {
+func NewRepository(ctx cpi.Context, meta *ComponentRepositoryMeta, ocirepo oci.Repository) (cpi.Repository, error) {
 	repo := &Repository{
 		ctx:     ctx,
 		meta:    *DefaultComponentRepositoryMeta(meta),
@@ -57,6 +58,51 @@ func (r *Repository) GetSpecification() cpi.RepositorySpec {
 		RepositorySpec:          r.ocirepo.GetSpecification(),
 		ComponentRepositoryMeta: r.meta,
 	}
+}
+
+func (r *Repository) ComponentLister() cpi.ComponentLister {
+	if r.meta.ComponentNameMapping != OCIRegistryURLPathMapping {
+		return nil
+	}
+	lister := r.ocirepo.NamespaceLister()
+	if lister == nil {
+		return nil
+	}
+	return r
+}
+
+func (r *Repository) NumComponents(prefix string) (int, error) {
+	lister := r.ocirepo.NamespaceLister()
+	if lister == nil {
+		return -1, errors.ErrNotSupported("component lister")
+	}
+	p := path.Join(r.meta.SubPath, componentmapping.ComponentDescriptorNamespace, prefix)
+	if strings.HasSuffix(prefix, "/") && !strings.HasSuffix(p, "/") {
+		p = p + "/"
+	}
+	return lister.NumNamespaces(p)
+}
+
+func (r *Repository) GetComponents(prefix string, closure bool) ([]string, error) {
+	lister := r.ocirepo.NamespaceLister()
+	if lister == nil {
+		return nil, errors.ErrNotSupported("component lister")
+	}
+	p := path.Join(r.meta.SubPath, componentmapping.ComponentDescriptorNamespace)
+	compprefix := len(p) + 1
+	p = path.Join(p, prefix)
+	if strings.HasSuffix(prefix, "/") && !strings.HasSuffix(p, "/") {
+		p = p + "/"
+	}
+	tmp, err := lister.GetNamespaces(p, closure)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]string, len(tmp))
+	for i, r := range tmp {
+		result[i] = r[compprefix:]
+	}
+	return result, nil
 }
 
 func (r *Repository) GetOCIRepository() oci.Repository {
@@ -101,9 +147,9 @@ func (r *Repository) LookupComponentVersion(name string, version string) (cpi.Co
 
 func (r *Repository) MapComponentNameToNamespace(name string) (string, error) {
 	switch r.meta.ComponentNameMapping {
-	case ocireg.OCIRegistryURLPathMapping, "":
+	case OCIRegistryURLPathMapping, "":
 		return path.Join(r.meta.SubPath, componentmapping.ComponentDescriptorNamespace, name), nil
-	case ocireg.OCIRegistryDigestMapping:
+	case OCIRegistryDigestMapping:
 		h := sha256.New()
 		_, _ = h.Write([]byte(name))
 		return path.Join(r.meta.SubPath, hex.EncodeToString(h.Sum(nil))), nil

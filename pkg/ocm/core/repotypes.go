@@ -38,6 +38,7 @@ type RepositoryType interface {
 type RepositorySpec interface {
 	runtime.VersionedTypedObject
 
+	AsUniformSpec(Context) UniformRepositorySpec
 	Repository(Context, credentials.Credentials) (Repository, error)
 }
 
@@ -129,6 +130,10 @@ type UnknownRepositorySpec struct {
 
 var _ RepositorySpec = &UnknownRepositorySpec{}
 
+func (a *UnknownRepositorySpec) AsUniformSpec(Context) UniformRepositorySpec {
+	return UniformRepositorySpec{Type: a.GetKind()}
+}
+
 func (r *UnknownRepositorySpec) Repository(Context, credentials.Credentials) (Repository, error) {
 	return nil, errors.ErrUnknown("respository type", r.GetType())
 }
@@ -140,6 +145,14 @@ type GenericRepositorySpec struct {
 }
 
 var _ RepositorySpec = &GenericRepositorySpec{}
+
+func (s *GenericRepositorySpec) AsUniformSpec(ctx Context) UniformRepositorySpec {
+	eff, err := s.Evaluate(ctx)
+	if err != nil {
+		return UniformRepositorySpec{Type: s.GetKind()}
+	}
+	return eff.AsUniformSpec(ctx)
+}
 
 func (s *GenericRepositorySpec) Evaluate(ctx Context) (RepositorySpec, error) {
 	raw, err := s.GetRaw()

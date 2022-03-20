@@ -72,6 +72,10 @@ func NewRepository(ctx cpi.Context, spec *RepositorySpec, info *RepositoryInfo) 
 	}, nil
 }
 
+func (r *Repository) NamespaceLister() cpi.NamespaceLister {
+	return nil
+}
+
 func (r *Repository) IsReadOnly() bool {
 	return false
 }

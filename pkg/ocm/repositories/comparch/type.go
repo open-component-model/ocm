@@ -20,10 +20,11 @@ import (
 	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 const (
-	CTFComponentArchiveType   = "Component Archive"
+	CTFComponentArchiveType   = "ComponentArchive"
 	CTFComponentArchiveTypeV1 = CTFComponentArchiveType + runtime.VersionSeparator + "v1"
 )
 
@@ -58,4 +59,12 @@ func (a *RepositorySpec) GetType() string {
 }
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	return NewRepository(ctx, a)
+}
+func (a *RepositorySpec) AsUniformSpec(cpi.Context) cpi.UniformRepositorySpec {
+	opts := a.Options.Default()
+	p, err := vfs.Canonical(opts.PathFileSystem, a.FilePath, false)
+	if err != nil {
+		return cpi.UniformRepositorySpec{Type: a.GetKind(), SubPath: a.FilePath}
+	}
+	return cpi.UniformRepositorySpec{Type: a.GetKind(), SubPath: p}
 }

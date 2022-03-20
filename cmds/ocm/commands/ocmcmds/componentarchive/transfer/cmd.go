@@ -36,14 +36,16 @@ type Command struct {
 }
 
 // NewCommand creates a new transfer command.
-func NewCommand(ctx clictx.Context) *cobra.Command {
-	return utils.SetupCommand(&Command{Context: ctx},
-		&cobra.Command{
-			Use:     "componentarchive [<options>]  <source> <target>",
-			Args:    cobra.MinimumNArgs(2),
-			Aliases: []string{"ca", "comparch"},
-			Short:   "transfer component archive to some component repository",
-			Long: `
+func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
+	return utils.SetupCommand(&Command{Context: ctx}, names...)
+}
+
+func (o *Command) ForName(name string) *cobra.Command {
+	return &cobra.Command{
+		Use:   "[<options>]  <source> <target>",
+		Args:  cobra.MinimumNArgs(2),
+		Short: "transfer component archive to some component repository",
+		Long: `
 Transfer a component archive to some component repository. This might
 be a CTF Archive or a regular repository.
 Explicitly supported types, so far: OCIRegistry, CTF (directory, tar, tgz).
@@ -53,7 +55,7 @@ is specified it will be created if it does not exist.
 Besides those explicitly known types a complete repository spec might be configured,
 either via inline argument or command configuration file and name.
 `,
-		})
+	}
 }
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {

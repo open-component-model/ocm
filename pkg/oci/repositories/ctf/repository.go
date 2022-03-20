@@ -65,6 +65,18 @@ func (r *Repository) GetSpecification() cpi.RepositorySpec {
 	return r.spec
 }
 
+func (r *Repository) NamespaceLister() cpi.NamespaceLister {
+	return r
+}
+
+func (r *Repository) NumNamespaces(prefix string) (int, error) {
+	return len(cpi.FilterByNamespacePrefix(prefix, r.getIndex().RepositoryList())), nil
+}
+
+func (r *Repository) GetNamespaces(prefix string, closure bool) ([]string, error) {
+	return cpi.FilterChildren(closure, cpi.FilterByNamespacePrefix(prefix, r.getIndex().RepositoryList())), nil
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // forward
 

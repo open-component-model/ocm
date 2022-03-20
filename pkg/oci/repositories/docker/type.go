@@ -36,10 +36,15 @@ type RepositorySpec struct {
 	DockerHost                  string `json:dockerHost,omitempty`
 }
 
-// NewRepositorySpec creates a new RepositorySpec
-func NewRepositorySpec() *RepositorySpec {
+// NewRepositorySpec creates a new RepositorySpec for an optional host
+func NewRepositorySpec(host ...string) *RepositorySpec {
+	h := ""
+	if len(host) > 0 {
+		h = host[0]
+	}
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(DockerDeamonRepositoryType),
+		DockerHost:          h,
 	}
 }
 

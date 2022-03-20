@@ -92,7 +92,14 @@ func (n *NamespaceContainer) ListTags() ([]string, error) {
 	var result []string
 	if n.namespace == "" {
 		for _, e := range list {
-			result = append(result, e.ID)
+			// ID is always the config digest
+			// filter images without a repo tag for empty namespace
+			if len(e.RepoTags) == 0 {
+				d, err := digest.Parse(e.ID)
+				if err == nil {
+					result = append(result, d.String()[:12])
+				}
+			}
 		}
 	} else {
 		prefix := n.namespace + ":"

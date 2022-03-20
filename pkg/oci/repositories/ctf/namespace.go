@@ -69,7 +69,7 @@ func (n *NamespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi.Descri
 }
 
 func (n *NamespaceContainer) ListTags() ([]string, error) {
-	return n.repo.getIndex().GetTags(n.namespace), nil
+	return n.repo.getIndex().GetTags(n.namespace), nil // return digests as tags, also
 }
 
 func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
