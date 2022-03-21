@@ -13,7 +13,9 @@ ocm
 
 * [ocm add](ocm_add.md)	 - 
 * [ocm componentarchive](ocm_componentarchive.md)	 - 
+* [ocm components](ocm_components.md)	 - 
 * [ocm create](ocm_create.md)	 - 
+* [ocm describe](ocm_describe.md)	 - 
 * [ocm get](ocm_get.md)	 - 
 * [ocm oci](ocm_oci.md)	 - 
 * [ocm resources](ocm_resources.md)	 - 

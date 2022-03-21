@@ -24,19 +24,56 @@ const (
 	KIND_ARETEFACT_REFERENCE = "artefact reference"
 )
 
-// ParseRef parses a oci reference into a internal representation.
-func ParseRef(resourceURL string) (RefSpec, error) {
-	scheme := ""
-	if strings.Contains(resourceURL, "://") {
-		// remove protocol if exists
-		i := strings.Index(resourceURL, "://")
-		scheme = resourceURL[:i]
-		resourceURL = resourceURL[i+3:]
-	}
+// ParseRepo parses a standard ocm repository reference into a internal representation.
+func ParseRepo(ref string) (UniformRepositorySpec, error) {
+	match := grammar.AnchoredRepositoryRegexp.FindSubmatch([]byte(ref))
+	if match == nil {
+		match = grammar.AnchoredGenericRepositoryRegexp.FindSubmatch([]byte(ref))
+		if match == nil {
+			return UniformRepositorySpec{}, errors.ErrInvalid(KIND_OCI_REFERENCE, ref)
+		}
+		return UniformRepositorySpec{
+			Type: string(match[1]),
+			Info: string(match[2]),
+		}, nil
 
-	a, err := docker.ParseAnyReference(resourceURL)
+	}
+	return UniformRepositorySpec{
+		Type:   string(match[1]),
+		Scheme: string(match[2]),
+		Host:   string(match[3]),
+	}, nil
+}
+
+// RefSpec is a go internal representation of a oci reference.
+type RefSpec struct {
+	UniformRepositorySpec
+	// Repository is the part of a reference without its hostname
+	Repository string `json:"respository"`
+	// +optional
+	Tag *string `json:"tag,omitempty"`
+	// +optional
+	Digest *digest.Digest `json:"digest,omitempty"`
+}
+
+// ParseRef parses a oci reference into a internal representation.
+func ParseRef(ref string) (RefSpec, error) {
+	match := grammar.AnchoredGenericRepositoryRegexp.FindSubmatch([]byte(ref))
+	if match == nil {
+		return RefSpec{}, errors.ErrInvalid(KIND_OCI_REFERENCE)
+	}
+	typ := string(match[1])
+	ref = string(match[2])
+	match = grammar.AnchoredSchemedRegexp.FindSubmatch([]byte(ref))
+	if match == nil {
+		return RefSpec{}, errors.ErrInvalid(KIND_OCI_REFERENCE)
+	}
+	scheme := string(match[1])
+	ref = string(match[2])
+
+	a, err := docker.ParseAnyReference(ref)
 	if err == nil {
-		spec := RefSpec{Scheme: scheme}
+		spec := RefSpec{UniformRepositorySpec: UniformRepositorySpec{Type: typ, Scheme: scheme}}
 		if t, ok := a.(docker.Named); ok {
 			spec.Host = docker.Domain(t)
 			spec.Repository = docker.Path(t)
@@ -51,21 +88,7 @@ func ParseRef(resourceURL string) (RefSpec, error) {
 		}
 		return spec, nil
 	}
-	return RefSpec{}, errors.ErrInvalidWrap(err, KIND_OCI_REFERENCE, resourceURL)
-}
-
-// RefSpec is a go internal representation of a oci reference.
-type RefSpec struct {
-	// Scheme
-	Scheme string `json:"scheme,omitempty"`
-	// Host is the hostname of a oci ref.
-	Host string `json:"host,omitempty"`
-	// Repository is the part of a reference without its hostname
-	Repository string `json:"respository"`
-	// +optional
-	Tag *string `json:"tag,omitempty"`
-	// +optional
-	Digest *digest.Digest `json:"digest,omitempty"`
+	return RefSpec{}, errors.ErrInvalidWrap(err, KIND_OCI_REFERENCE, ref)
 }
 
 func (r *RefSpec) Name() string {
@@ -121,20 +144,15 @@ func (r *RefSpec) CredHost() string {
 }
 
 func (r RefSpec) DeepCopy() RefSpec {
-	refspec := RefSpec{
-		Host:       r.Host,
-		Repository: r.Repository,
-	}
 	if r.Tag != nil {
 		tag := *r.Tag
-		refspec.Tag = &tag
+		r.Tag = &tag
 	}
 	if r.Digest != nil {
-		dig := r.Digest.String()
-		d := digest.FromString(dig)
-		refspec.Digest = &d
+		dig := *r.Digest
+		r.Digest = &dig
 	}
-	return refspec
+	return r
 }
 
 ////////////////////////////////////////////////////////////////////////////////

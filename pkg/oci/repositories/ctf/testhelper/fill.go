@@ -16,6 +16,7 @@ package testhelper
 
 import (
 	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/mime"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
@@ -23,8 +24,6 @@ import (
 
 	. "github.com/onsi/gomega"
 )
-
-const MimeTypeOctetStream = "application/octet-stream"
 
 const TAG = "v1"
 const DIGEST_MANIFEST = "3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a"
@@ -41,16 +40,16 @@ func DefaultManifestFill(n cpi.NamespaceAccess) {
 func NewArtefact(n cpi.NamespaceAccess) cpi.ArtefactAccess {
 	art, err := n.NewArtefact()
 	Expect(err).To(Succeed())
-	Expect(art.AddLayer(accessio.BlobAccessForString(MimeTypeOctetStream, "testdata"), nil)).To(Equal(0))
+	Expect(art.AddLayer(accessio.BlobAccessForString(mime.MIME_OCTET, "testdata"), nil)).To(Equal(0))
 	desc, err := art.Manifest()
 	Expect(err).To(Succeed())
 	Expect(desc).NotTo(BeNil())
 
 	Expect(desc.Layers[0].Digest).To(Equal(digest.FromString("testdata")))
-	Expect(desc.Layers[0].MediaType).To(Equal(MimeTypeOctetStream))
+	Expect(desc.Layers[0].MediaType).To(Equal(mime.MIME_OCTET))
 	Expect(desc.Layers[0].Size).To(Equal(int64(8)))
 
-	config := accessio.BlobAccessForData(MimeTypeOctetStream, []byte("{}"))
+	config := accessio.BlobAccessForData(mime.MIME_OCTET, []byte("{}"))
 	Expect(n.AddBlob(config)).To(Succeed())
 	desc.Config = *artdesc.DefaultBlobDescriptor(config)
 	return art
@@ -61,9 +60,9 @@ func CheckArtefact(art oci.ArtefactAccess) {
 	blob, err := art.GetBlob("sha256:" + DIGEST_LAYER)
 	Expect(err).To(Succeed())
 	Expect(blob.Get()).To(Equal([]byte("testdata")))
-	Expect(blob.MimeType()).To(Equal(MimeTypeOctetStream))
+	Expect(blob.MimeType()).To(Equal(mime.MIME_OCTET))
 	blob, err = art.GetBlob("sha256:" + DIGEST_CONFIG)
 	Expect(err).To(Succeed())
 	Expect(blob.Get()).To(Equal([]byte("{}")))
-	Expect(blob.MimeType()).To(Equal(MimeTypeOctetStream))
+	Expect(blob.MimeType()).To(Equal(mime.MIME_OCTET))
 }

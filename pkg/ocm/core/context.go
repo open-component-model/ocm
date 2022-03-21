@@ -21,12 +21,15 @@ import (
 	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/datacontext"
 	"github.com/gardener/ocm/pkg/oci"
+	"github.com/gardener/ocm/pkg/oci/repositories/ctf"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/digester"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
 const CONTEXT_TYPE = "ocm.context.gardener.cloud"
+
+const CommonTransportFormat = ctf.CommonTransportFormatRepositoryType
 
 type Context interface {
 	datacontext.Context
@@ -37,6 +40,9 @@ type Context interface {
 
 	RepositoryTypes() RepositoryTypeScheme
 	AccessMethods() AccessTypeScheme
+
+	RepositorySpecHandlers() RepositorySpecHandlers
+	MapUniformRepositorySpec(u *UniformRepositorySpec, aliases map[string]RepositorySpec) (RepositorySpec, error)
 
 	BlobHandlers() BlobHandlerRegistry
 	BlobDigesters() digester.BlobDigesterRegistry
@@ -74,17 +80,19 @@ type _context struct {
 	knownRepositoryTypes RepositoryTypeScheme
 	knownAccessTypes     AccessTypeScheme
 
+	specHandlers  RepositorySpecHandlers
 	blobHandlers  BlobHandlerRegistry
 	blobDigesters digester.BlobDigesterRegistry
 }
 
 var _ Context = &_context{}
 
-func newContext(shared datacontext.AttributesContext, credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, blobHandlers BlobHandlerRegistry, blobDigesters digester.BlobDigesterRegistry) Context {
+func newContext(shared datacontext.AttributesContext, credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, specHandlers RepositorySpecHandlers, blobHandlers BlobHandlerRegistry, blobDigesters digester.BlobDigesterRegistry) Context {
 	c := &_context{
 		sharedattributes:     shared,
 		credctx:              credctx,
 		ocictx:               ocictx,
+		specHandlers:         specHandlers,
 		blobHandlers:         blobHandlers,
 		blobDigesters:        blobDigesters,
 		knownAccessTypes:     accessscheme,
@@ -108,6 +116,14 @@ func (c *_context) OCIContext() oci.Context {
 
 func (c *_context) RepositoryTypes() RepositoryTypeScheme {
 	return c.knownRepositoryTypes
+}
+
+func (c *_context) RepositorySpecHandlers() RepositorySpecHandlers {
+	return c.specHandlers
+}
+
+func (c *_context) MapUniformRepositorySpec(u *UniformRepositorySpec, aliases map[string]RepositorySpec) (RepositorySpec, error) {
+	return c.specHandlers.MapUniformRepositorySpec(c, u, aliases)
 }
 
 func (c *_context) BlobHandlers() BlobHandlerRegistry {

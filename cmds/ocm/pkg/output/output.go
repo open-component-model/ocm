@@ -15,11 +15,12 @@
 package output
 
 import (
-	"context"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
 
+	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	"sigs.k8s.io/yaml"
 )
 
@@ -29,35 +30,32 @@ type Manifest interface {
 	AsManifest() interface{}
 }
 
-type Output interface {
-	Add(ctx *context.Context, e interface{}) error
-	Close(ctx *context.Context) error
-	Out(*context.Context) error
-}
-
 type ManifestOutput struct {
 	data []Object
+}
+
+func (this *ManifestOutput) Add(processingContext interface{}, e interface{}) error {
+	this.data = append(this.data, e)
+	return nil
+}
+
+func (this *ManifestOutput) Close(processingContext interface{}) error {
+	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type Output interface {
+	Add(processingContext interface{}, e interface{}) error
+	Close(processingContext interface{}) error
+	Out(processingContext interface{}) error
 }
 
 type YAMLOutput struct {
 	ManifestOutput
 }
 
-type JSONOutput struct {
-	ManifestOutput
-	pretty bool
-}
-
-func (this *ManifestOutput) Add(ctx *context.Context, e interface{}) error {
-	this.data = append(this.data, e)
-	return nil
-}
-
-func (this *ManifestOutput) Close(ctx *context.Context) error {
-	return nil
-}
-
-func (this *YAMLOutput) Out(ctx *context.Context) error {
+func (this *YAMLOutput) Out(processingContext interface{}) error {
 	for _, m := range this.data {
 		fmt.Println("---")
 		d, err := yaml.Marshal(m.(Manifest).AsManifest())
@@ -69,23 +67,112 @@ func (this *YAMLOutput) Out(ctx *context.Context) error {
 	return nil
 }
 
+type YAMLProcessingOutput struct {
+	ElementOutput
+}
+
+var _ Output = &YAMLProcessingOutput{}
+
+func NewProcessingYAMLOutput(chain data.ProcessChain) *YAMLProcessingOutput {
+	return (&YAMLProcessingOutput{}).new(chain)
+}
+
+func (this *YAMLProcessingOutput) new(chain data.ProcessChain) *YAMLProcessingOutput {
+	this.ElementOutput.new(chain)
+	return this
+}
+
+func (this *YAMLProcessingOutput) Out(interface{}) error {
+	i := this.Elems.Iterator()
+	for i.HasNext() {
+		fmt.Printf("---\n")
+		elem := i.Next()
+		if m, ok := elem.(Manifest); ok {
+			elem = m.AsManifest()
+		}
+		d, err := yaml.Marshal(elem)
+		if err != nil {
+			return err
+		}
+		os.Stdout.Write(d)
+	}
+	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type JSONOutput struct {
+	ManifestOutput
+	pretty bool
+}
+
 type ItemList struct {
 	Items []interface{} `json:"items"`
 }
 
-func (this *JSONOutput) Out(*context.Context) error {
+func (this *JSONOutput) Out(interface{}) error {
 	items := &ItemList{}
 	for _, m := range this.data {
 		items.Items = append(items.Items, m.(Manifest).AsManifest())
 	}
-	d, err := json.MarshalIndent(items, "", "  ")
+	d, err := json.Marshal(items)
 	if err != nil {
 		return err
 	}
-	os.Stdout.Write(d)
 	if this.pretty {
-		fmt.Println()
+		var buf bytes.Buffer
+		err = json.Indent(&buf, d, "", "  ")
+		if err != nil {
+			return err
+		}
+		buf.WriteByte('\n')
+		d = buf.Bytes()
 	}
+	os.Stdout.Write(d)
+	return nil
+}
+
+type JSONProcessingOutput struct {
+	ElementOutput
+	pretty bool
+}
+
+var _ Output = &JSONProcessingOutput{}
+
+func NewProcessingJSONOutput(chain data.ProcessChain, pretty bool) *JSONProcessingOutput {
+	return (&JSONProcessingOutput{}).new(chain, pretty)
+}
+
+func (this *JSONProcessingOutput) new(chain data.ProcessChain, pretty bool) *JSONProcessingOutput {
+	this.ElementOutput.new(chain)
+	this.pretty = pretty
+	return this
+}
+
+func (this *JSONProcessingOutput) Out(interface{}) error {
+	items := &ItemList{}
+	i := this.Elems.Iterator()
+	for i.HasNext() {
+		elem := i.Next()
+		if m, ok := elem.(Manifest); ok {
+			elem = m.AsManifest()
+		}
+		items.Items = append(items.Items, elem)
+	}
+	d, err := json.Marshal(items)
+	if err != nil {
+		return err
+	}
+	if this.pretty {
+		var buf bytes.Buffer
+		err = json.Indent(&buf, d, "", "  ")
+		if err != nil {
+			return err
+		}
+		buf.WriteByte('\n')
+		d = buf.Bytes()
+	}
+	os.Stdout.Write(d)
 	return nil
 }
 
@@ -144,6 +231,19 @@ func (this Outputs) AddManifestOutputs() Outputs {
 	}
 	this["JSON"] = func(opts *Options) Output {
 		return &JSONOutput{ManifestOutput{data: []Object{}}, false}
+	}
+	return this
+}
+
+func (this Outputs) AddChainedManifestOutputs(chain func(opts *Options) data.ProcessChain) Outputs {
+	this["yaml"] = func(opts *Options) Output {
+		return NewProcessingYAMLOutput(chain(opts))
+	}
+	this["json"] = func(opts *Options) Output {
+		return NewProcessingJSONOutput(chain(opts), true)
+	}
+	this["JSON"] = func(opts *Options) Output {
+		return NewProcessingJSONOutput(chain(opts), false)
 	}
 	return this
 }

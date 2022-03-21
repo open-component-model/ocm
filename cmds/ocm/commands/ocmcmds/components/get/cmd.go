@@ -22,25 +22,18 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
-	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm"
-	. "github.com/gardener/ocm/pkg/regex"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-)
-
-var TypeRegexp = Anchored(
-	Optional(Sequence(Capture(Identifier), Literal("::"))),
-	Capture(Match(".*")),
 )
 
 type Command struct {
 	Context clictx.Context
 
-	Output output.Options
+	Output     output.Options
+	Repository common.RepositoryOptions
 
-	Repository string
-	Refs       []string
+	Refs []string
 }
 
 // NewCommand creates a new ctf command.
@@ -55,18 +48,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Long: `
 Get lists all component versions specified, if only a component is specified
 all versions are listed.
-
-If a <code>repo</code> option is specified the given names are interpreted 
-as component names. 
-
-The options follows the syntax [<repotype>::]<repospec>. The following
-repository types are supported yet:
-- <code>OCIRegistry</code>: The given repository spec is used as base url
-
-Without a specified type prefix any JSON representation of an OCM repository
-specification supported by the OCM library or the name of an OCM repository
-configured in the used config file can be used.
-
+` + o.Repository.Usage() + `
 *Example:*
 <pre>
 $ ocm get componentversion ghcr.io/mandelsoft/kubelink
@@ -77,37 +59,22 @@ $ ocm get componentversion --repo OCIRegistry:ghcr.io mandelsoft/kubelink
 }
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVarP(&o.Repository, "repo", "r", "", "repository name or spec")
+	o.Repository.AddFlags(fs)
 	o.Output.AddFlags(fs, outputs)
 }
 
 func (o *Command) Complete(args []string) error {
-	if len(args) == 0 && o.Repository == "" {
+	o.Refs = args
+	if len(args) == 0 && o.Repository.Spec == "" {
 		return fmt.Errorf("a repository or at least one argument that defines the reference is needed")
 	}
-	o.Refs = args
-	return nil
+	return o.Repository.Complete(o.Context)
 }
 
 func (o *Command) Run() error {
-	var err error
-	var repobase ocm.Repository
 	session := ocm.NewSession(nil)
-
-	if o.Repository != "" {
-
-		m := TypeRegexp.FindStringSubmatch(o.Repository)
-		if m == nil {
-			return errors.ErrInvalid("repository spec", o.Repository)
-		}
-		repobase, err = o.Context.OCM().DetermineRepository(m[1], m[2])
-		if err != nil {
-			return err
-		}
-	}
-
-	handler := common.NewTypeHandler(o.Context.OCMContext(), session, repobase)
-
+	defer session.Close()
+	handler := common.NewTypeHandler(o.Context.OCMContext(), session, o.Repository.Repository)
 	return utils.HandleArgs(outputs, &o.Output, handler, o.Refs...)
 }
 

@@ -16,6 +16,7 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
@@ -59,6 +60,20 @@ func (i Identity) Equals(o Identity) bool {
 		}
 	}
 	return true
+}
+
+func (l Identity) String() string {
+	if l == nil {
+		return ""
+	}
+
+	s := ""
+	sep := ""
+	for k, v := range l {
+		s = fmt.Sprintf("%s%s%q=%q", s, sep, k, v)
+		sep = ","
+	}
+	return s
 }
 
 // Match implements the selector interface.

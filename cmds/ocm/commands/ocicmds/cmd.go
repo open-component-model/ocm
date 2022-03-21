@@ -16,6 +16,7 @@ package ocicmds
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/describe"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/get"
 	"github.com/spf13/cobra"
 )
@@ -27,5 +28,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 		TraverseChildren: true,
 	}
 	cmd.AddCommand(get.NewCommand(ctx, "get"))
+	cmd.AddCommand(describe.NewCommand(ctx, "describe"))
 	return cmd
 }

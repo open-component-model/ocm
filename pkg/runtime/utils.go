@@ -16,6 +16,8 @@ package runtime
 
 import (
 	"reflect"
+	"sort"
+	"strings"
 
 	"github.com/gardener/ocm/pkg/errors"
 )
@@ -44,4 +46,24 @@ func ProtoType(proto interface{}) (reflect.Type, error) {
 
 func TypedObjectFactory(proto TypedObject) func() TypedObject {
 	return func() TypedObject { return reflect.New(MustProtoType(proto)).Interface().(TypedObject) }
+}
+
+func TypeNames(scheme Scheme) []string {
+	types := []string{}
+	for t := range scheme.KnownTypes() {
+		types = append(types, t)
+	}
+	sort.Strings(types)
+	return types
+}
+
+func KindNames(scheme Scheme) []string {
+	types := []string{}
+	for t := range scheme.KnownTypes() {
+		if strings.Index(t, VersionSeparator) < 0 {
+			types = append(types, t)
+		}
+	}
+	sort.Strings(types)
+	return types
 }

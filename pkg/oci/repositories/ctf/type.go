@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	CommonTransportFormatRepositoryType   = "CommonTransportFormat"
+	CommonTransportFormatRepositoryType   = cpi.CommonTransportFormat
 	CommonTransportFormatRepositoryTypeV1 = CommonTransportFormatRepositoryType + runtime.VersionSeparator + "v1"
 )
 

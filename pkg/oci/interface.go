@@ -28,8 +28,13 @@ const KIND_BLOB = accessio.KIND_BLOB
 
 const CONTEXT_TYPE = core.CONTEXT_TYPE
 
+const CommonTransportFormat = core.CommonTransportFormat
+
 type Context = core.Context
 type Repository = core.Repository
+type RepositorySpecHandlers = core.RepositorySpecHandlers
+type RepositorySpecHandler = core.RepositorySpecHandler
+type UniformRepositorySpec = core.UniformRepositorySpec
 type RepositoryTypeScheme = core.RepositoryTypeScheme
 type RepositorySpec = core.RepositorySpec
 type GenericRepositorySpec = core.GenericRepositorySpec

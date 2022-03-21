@@ -20,32 +20,12 @@ import (
 	"io"
 	"os"
 	"strings"
-	"sync"
 
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/compression"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 )
-
-type InfoHandler interface {
-	Info(m cpi.ManifestAccess, config []byte) string
-}
-
-var lock sync.Mutex
-var handlers = map[string]InfoHandler{}
-
-func RegisterInfoHandler(mime string, h InfoHandler) {
-	lock.Lock()
-	defer lock.Unlock()
-	handlers[mime] = h
-}
-
-func getHandler(mime string) InfoHandler {
-	lock.Lock()
-	defer lock.Unlock()
-	return handlers[mime]
-}
 
 func PrintArtefact(art cpi.ArtefactAccess) string {
 	if art.IsManifest() {
@@ -88,7 +68,7 @@ func PrintManifest(m cpi.ManifestAccess) string {
 	h := getHandler(man.Config.MediaType)
 
 	if h != nil {
-		s += IndentLines(h.Info(m, config), "  ")
+		s += IndentLines(h.Description(m, config), "  ")
 	}
 	s += "layers:\n"
 	for _, l := range man.Layers {

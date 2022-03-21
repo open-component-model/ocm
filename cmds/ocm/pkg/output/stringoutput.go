@@ -15,7 +15,6 @@
 package output
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
@@ -39,7 +38,7 @@ func (this *StringOutput) new(mapper data.MappingFunction, lineseperator string)
 	return this
 }
 
-func (this *StringOutput) Out(ctx *context.Context) error {
+func (this *StringOutput) Out(processingContext interface{}) error {
 	var err error = nil
 	i := this.Elems.Iterator()
 	for i.HasNext() {

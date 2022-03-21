@@ -15,7 +15,6 @@
 package output
 
 import (
-	"context"
 	"fmt"
 
 	. "github.com/gardener/ocm/cmds/ocm/pkg/data"
@@ -39,7 +38,7 @@ func (this *AttrProcessingOutput) new(opts *Options, chain ProcessChain, header 
 	return this
 }
 
-func (this *AttrProcessingOutput) Out(*context.Context) error {
+func (this *AttrProcessingOutput) Out(interface{}) error {
 	var ok bool
 	i := this.Elems.Iterator()
 	for i.HasNext() {

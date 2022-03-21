@@ -31,7 +31,9 @@ func (f FileFormat) String() string {
 	return string(f)
 }
 func (o FileFormat) ApplyOption(options *Options) {
-	options.FileFormat = &o
+	if o != "" {
+		options.FileFormat = &o
+	}
 }
 
 const (

@@ -25,18 +25,14 @@ import (
 	cfgcpi "github.com/gardener/ocm/pkg/config/cpi"
 	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/datacontext"
+	"github.com/gardener/ocm/pkg/datacontext/vfsattr"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
 	ctfoci "github.com/gardener/ocm/pkg/oci/repositories/ctf"
-	"github.com/gardener/ocm/pkg/oci/repositories/docker"
-	ociregoci "github.com/gardener/ocm/pkg/oci/repositories/ocireg"
 	"github.com/gardener/ocm/pkg/ocm"
 	ctfocm "github.com/gardener/ocm/pkg/ocm/repositories/ctf"
-	"github.com/gardener/ocm/pkg/ocm/repositories/ocireg"
-	"github.com/gardener/ocm/pkg/runtime"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"sigs.k8s.io/yaml"
 )
 
 const CONTEXT_TYPE = "ocm.cmd.context.gardener.cloud"
@@ -45,7 +41,7 @@ type OCI interface {
 	Context() oci.Context
 	AddRepository(name string, spec oci.RepositorySpec) error
 	GetRepository(name string) (oci.Repository, error)
-	DetermineRepository(typ string, spec string) (oci.Repository, error)
+	DetermineRepository(ref string) (oci.Repository, error)
 	OpenCTF(path string) (oci.Repository, error)
 }
 
@@ -53,7 +49,7 @@ type OCM interface {
 	Context() ocm.Context
 	AddRepository(name string, spec ocm.RepositorySpec) error
 	GetRepository(name string) (ocm.Repository, error)
-	DetermineRepository(typ string, spec string) (ocm.Repository, error)
+	DetermineRepository(ref string) (ocm.Repository, error)
 	OpenCTF(path string) (ocm.Repository, error)
 }
 
@@ -100,11 +96,6 @@ type _context struct {
 	credentials credentials.Context
 	oci         *_oci
 	ocm         *_ocm
-
-	filesystem vfs.FileSystem
-
-	ocirepos map[string]oci.RepositorySpec
-	ocmrepos map[string]ocm.RepositorySpec
 }
 
 var _ Context = &_context{}
@@ -118,14 +109,11 @@ func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context, fs vfs
 		credentials:      ocmctx.CredentialsContext(),
 		config:           ocmctx.CredentialsContext().ConfigContext(),
 		updater:          cfgcpi.NewUpdate(ocmctx.CredentialsContext().ConfigContext()),
-
-		filesystem: fs,
-		ocirepos:   map[string]oci.RepositorySpec{},
-		ocmrepos:   map[string]ocm.RepositorySpec{},
 	}
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
 	c.oci = newOCI(c, ocmctx)
 	c.ocm = newOCM(c, ocmctx)
+	vfsattr.Set(c.Context, fs)
 	return c
 }
 
@@ -150,7 +138,7 @@ func (c *_context) OCMContext() ocm.Context {
 }
 
 func (c *_context) FileSystem() vfs.FileSystem {
-	return c.filesystem
+	return vfsattr.Get(c)
 }
 
 func (c *_context) OCI() OCI {
@@ -202,7 +190,7 @@ func (c *_oci) GetRepository(name string) (oci.Repository, error) {
 	}
 	c.lock.RLock()
 	defer c.lock.RUnlock()
-	spec := c.ocirepos[name]
+	spec := c.repos[name]
 
 	if spec == nil {
 		return nil, errors.ErrUnknown("oci repository", name)
@@ -210,39 +198,14 @@ func (c *_oci) GetRepository(name string) (oci.Repository, error) {
 	return c.ctx.RepositoryForSpec(spec)
 }
 
-func (c *_oci) DetermineRepository(typ string, spec string) (oci.Repository, error) {
-	var rspec oci.RepositorySpec
-	var parsed interface{}
-	var repobase oci.Repository
-
-	if ctfoci.GetFormat(accessio.FileFormat(typ)) != nil {
-		rspec = ctfoci.NewRepositorySpec(accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, spec, accessio.FileFormat(typ), accessio.PathFileSystem(c.FileSystem()))
-	} else {
-		switch typ {
-		case "Docker", "DockerDeamon":
-			rspec = docker.NewRepositorySpec(spec)
-		case "OCIRegistry":
-			rspec = ociregoci.NewRepositorySpec(spec)
-		case "":
-			err := yaml.Unmarshal([]byte(spec), &parsed)
-			if err != nil {
-				return nil, errors.Wrapf(err, "cannot unmarshal repository spec")
-			}
-			if s, ok := parsed.(string); ok {
-				repobase, err = c.GetRepository(s)
-				if err == nil {
-					return repobase, err
-				}
-				return c.OpenCTF(spec)
-			} else {
-				rspec, err = c.ctx.RepositoryTypes().DecodeRepositorySpec([]byte(spec), runtime.DefaultJSONEncoding)
-				if err != nil {
-					return nil, err
-				}
-			}
-		default:
-			return nil, errors.ErrNotSupported("repository type", typ)
-		}
+func (c *_oci) DetermineRepository(ref string) (oci.Repository, error) {
+	spec, err := oci.ParseRepo(ref)
+	if err != nil {
+		return nil, err
+	}
+	rspec, err := c.ctx.MapUniformRepositorySpec(&spec, c.repos)
+	if err != nil {
+		return nil, err
 	}
 	return c.ctx.RepositoryForSpec(rspec)
 }
@@ -292,7 +255,7 @@ func (c *_ocm) GetRepository(name string) (ocm.Repository, error) {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 
-	spec := c.ocmrepos[name]
+	spec := c.repos[name]
 
 	if spec == nil {
 		return nil, errors.ErrUnknown("ocm repository", name)
@@ -300,37 +263,14 @@ func (c *_ocm) GetRepository(name string) (ocm.Repository, error) {
 	return c.ctx.RepositoryForSpec(spec)
 }
 
-func (c *_ocm) DetermineRepository(typ string, spec string) (ocm.Repository, error) {
-	var rspec ocm.RepositorySpec
-	var parsed interface{}
-	var repobase ocm.Repository
-
-	if ctfoci.GetFormat(accessio.FileFormat(typ)) != nil {
-		rspec = ctfocm.NewRepositorySpec(accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, spec, accessio.FileFormat(typ), c)
-	} else {
-		switch typ {
-		case "OCIRegistry":
-			rspec = ocireg.NewRepositorySpec(spec, nil)
-		case "":
-			err := yaml.Unmarshal([]byte(spec), &parsed)
-			if err != nil {
-				return nil, errors.Wrapf(err, "cannot unmarshal repository spec")
-			}
-			if s, ok := parsed.(string); ok {
-				repobase, err = c.GetRepository(s)
-				if err == nil {
-					return repobase, err
-				}
-				return c.OpenCTF(spec)
-			} else {
-				rspec, err = c.ctx.RepositoryTypes().DecodeRepositorySpec([]byte(spec), runtime.DefaultJSONEncoding)
-				if err != nil {
-					return nil, err
-				}
-			}
-		default:
-			return nil, errors.ErrNotSupported("repository type", typ)
-		}
+func (c *_ocm) DetermineRepository(ref string) (ocm.Repository, error) {
+	spec, err := ocm.ParseRepo(ref)
+	if err != nil {
+		return nil, err
+	}
+	rspec, err := c.ctx.MapUniformRepositorySpec(&spec, c.repos)
+	if err != nil {
+		return nil, err
 	}
 	return c.ctx.RepositoryForSpec(rspec)
 }

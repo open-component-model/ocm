@@ -16,8 +16,12 @@ const KIND_COMPONENTVERSION = core.KIND_COMPONENTVERSION
 
 const CONTEXT_TYPE = core.CONTEXT_TYPE
 
+const CommonTransportFormat = core.CommonTransportFormat
+
 type Context = core.Context
 type Repository = core.Repository
+type RepositorySpecHandlers = core.RepositorySpecHandlers
+type RepositorySpecHandler = core.RepositorySpecHandler
 type UniformRepositorySpec = core.UniformRepositorySpec
 type ComponentLister = core.ComponentLister
 type ComponentAccess = core.ComponentAccess

@@ -31,6 +31,7 @@ import (
 	"github.com/gardener/ocm/pkg/config"
 	"github.com/gardener/ocm/pkg/credentials"
 	extdocker "github.com/gardener/ocm/pkg/docker"
+	"github.com/gardener/ocm/pkg/mime"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/ociutils"
@@ -39,7 +40,7 @@ import (
 	_ "github.com/gardener/ocm/pkg/ocm"
 )
 
-const MIME_OCTET = "application/octet-stream"
+const MIME_OCTET = mime.MIME_OCTET
 
 func Error(msg string, args ...interface{}) {
 	fmt.Fprintf(os.Stderr, "ERROR: "+msg, args...)

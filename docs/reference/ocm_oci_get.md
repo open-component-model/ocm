@@ -8,19 +8,31 @@ get artefact version
 Get lists all artefact versions specified, if only a repository is specified
 all tagged artefacts are listed.
 
-If no <code>repo</code> option is specified the given names are interpreted 
-as located OCI artefact names. 
 
-The options follows the syntax [<repotype>::]<repospec>. The following
-repository types are supported yet:
-- <code>OCIRegistry</code>: The given repository spec is used as base url
+If the repository/registry option is specified, the given names are interpreted
+relative to the specified registry using the syntax
 
-Without a specified type prefix any JSON representation of an OCI repository
-specification supported by the OCM library or the name of an OCI repository
-configured in the used config file can be used.
+<center><code>&lt;OCI repository name>[:&lt;tag>][@&lt;digest>]</code></center>
 
-If the repository option is specified, the given artefact names are interpreted
-relative to the specified repository.
+If no <code>--repo</code> option is specified the given names are interpreted 
+as extended CI artefact references.
+
+<center><code>[&lt;repo type>::]&lt;host>[:&lt;port>]/&lt;OCI repository name>[:&lt;tag>][@&lt;digest>]</code></center>
+
+The <code>--repo</code> option takes a repository/OCI registry specification:
+
+<center><code>[&lt;repo type>::]&lt;configured name>|&lt;file path>|&lt;spec json></code></center>
+
+For the *Common Transport Format* the types <code>directory</code>,
+<code>tar</code> or <code>tgz</code> are possible.
+
+Using the JSON variant any repository type supported by the 
+linked library can be used:
+- `CommonTransportFormat`
+- `DockerDaemon`
+- `Empty`
+- `OCIRegistry`
+
 
 *Example:*
 <pre>
@@ -37,7 +49,7 @@ ocm oci get [<options>] {<artefact-reference>} [flags]
 
 ```
   -h, --help               help for get
-  -o, --output string      output mode (yaml, json, JSON, wide)
+  -o, --output string      output mode (wide, yaml, json, JSON)
   -r, --repo string        repository name or spec
   -s, --sort stringArray   sort fields
 ```

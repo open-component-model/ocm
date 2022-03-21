@@ -38,6 +38,10 @@ func WithRepositoyTypeScheme(scheme RepositoryTypeScheme) core.Builder {
 	return core.Builder{}.WithRepositoyTypeScheme(scheme)
 }
 
+func WithRepositorySpecHandlers(reg RepositorySpecHandlers) core.Builder {
+	return core.Builder{}.WithRepositorySpecHandlers(reg)
+}
+
 func New() Context {
 	return core.Builder{}.New()
 }

@@ -22,10 +22,11 @@ import (
 )
 
 type Builder struct {
-	ctx         context.Context
-	shared      datacontext.AttributesContext
-	credentials credentials.Context
-	reposcheme  RepositoryTypeScheme
+	ctx          context.Context
+	shared       datacontext.AttributesContext
+	credentials  credentials.Context
+	reposcheme   RepositoryTypeScheme
+	spechandlers RepositorySpecHandlers
 }
 
 func (b *Builder) getContext() context.Context {
@@ -55,6 +56,11 @@ func (b Builder) WithRepositoyTypeScheme(scheme RepositoryTypeScheme) Builder {
 	return b
 }
 
+func (b Builder) WithRepositorySpecHandlers(reg RepositorySpecHandlers) Builder {
+	b.spechandlers = reg
+	return b
+}
+
 func (b Builder) Bound() (Context, context.Context) {
 	c := b.New()
 	return c, context.WithValue(b.getContext(), key, c)
@@ -71,6 +77,9 @@ func (b Builder) New() Context {
 	if b.reposcheme == nil {
 		b.reposcheme = DefaultRepositoryTypeScheme
 	}
-	return newContext(b.shared, b.credentials, b.reposcheme)
+	if b.spechandlers == nil {
+		b.spechandlers = DefaultRepositorySpecHandlers
+	}
+	return newContext(b.shared, b.credentials, b.reposcheme, b.spechandlers)
 
 }

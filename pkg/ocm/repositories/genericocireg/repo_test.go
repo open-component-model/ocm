@@ -19,6 +19,7 @@ import (
 
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
+	"github.com/gardener/ocm/pkg/mime"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf"
@@ -104,7 +105,7 @@ var _ = Describe("component repository mapping", func() {
 		}
 		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().RegisterBlobHandler(ocirepo.NewBlobHandler(base))).New()
 
-		blob := accessio.BlobAccessForString(testhelper.MimeTypeOctetStream, "anydata")
+		blob := accessio.BlobAccessForString(mime.MIME_OCTET, "anydata")
 
 		// create repository
 		repo, err := ctx.RepositoryForSpec(spec)

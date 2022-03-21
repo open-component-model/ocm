@@ -19,7 +19,7 @@ import (
 )
 
 //
-// resolve cyclic package dependency between genocireg and core
+// resolve cyclic package dependency between genericocireg and core
 
 type OCISpecFunction func(ctx oci.Context) (RepositoryType, error)
 

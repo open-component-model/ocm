@@ -74,6 +74,17 @@ func Group(res ...*regexp.Regexp) *regexp.Regexp {
 	return Match(`(?:` + Sequence(res...).String() + `)`)
 }
 
+// Or wraps alternative regexps.
+func Or(res ...*regexp.Regexp) *regexp.Regexp {
+	var s string
+	sep := ""
+	for _, re := range res {
+		s += sep + Group(re).String()
+		sep = "|"
+	}
+	return Match(`(?:` + s + `)`)
+}
+
 // Capture wraps the expression in a capturing group.
 func Capture(res ...*regexp.Regexp) *regexp.Regexp {
 	return Match(`(` + Sequence(res...).String() + `)`)

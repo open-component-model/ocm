@@ -22,16 +22,9 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
-	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
-	. "github.com/gardener/ocm/pkg/regex"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-)
-
-var TypeRegexp = Anchored(
-	Optional(Sequence(Capture(Identifier), Literal("::"))),
-	Capture(Match(".*")),
 )
 
 type Command struct {
@@ -39,7 +32,7 @@ type Command struct {
 
 	Output output.Options
 
-	Repository string
+	Repository common.RepositoryOptions
 	Refs       []string
 }
 
@@ -56,20 +49,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 Get lists all artefact versions specified, if only a repository is specified
 all tagged artefacts are listed.
 
-If a <code>repo</code> option is specified the given names are interpreted 
-as located OCI artefact names. 
-
-The options follows the syntax [<repotype>::]<repospec>. The following
-repository types are supported yet:
-- <code>OCIRegistry</code>: The given repository spec is used as base url
-- <code>Docker</code>/<code>DockerDeamon</code>: The repository spec is option and used as daemon address
-
-Without a specified type prefix any JSON representation of an OCI repository
-specification supported by the OCM library or the name of an OCI repository
-configured in the used config file can be used.
-
-If the repository option is specified, the given artefact names are interpreted
-relative to the specified repository.
+` + o.Repository.Usage() + `
 
 *Example:*
 <pre>
@@ -81,36 +61,28 @@ $ ocm get artefact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
 }
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVarP(&o.Repository, "repo", "r", "", "repository name or spec")
+	o.Repository.AddFlags(fs)
 	o.Output.AddFlags(fs, outputs)
 }
 
 func (o *Command) Complete(args []string) error {
-	if len(args) == 0 && o.Repository == "" {
+	var err error
+	if len(args) == 0 && o.Repository.Spec == "" {
 		return fmt.Errorf("a repository or at least one argument that defines the reference is needed")
 	}
 	o.Refs = args
+	err = o.Repository.Complete(o.Context)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func (o *Command) Run() error {
-	var err error
-	var repobase oci.Repository
 	session := oci.NewSession(nil)
-
-	if o.Repository != "" {
-
-		m := TypeRegexp.FindStringSubmatch(o.Repository)
-		if m == nil {
-			return errors.ErrInvalid("repository spec", o.Repository)
-		}
-		repobase, err = o.Context.OCI().DetermineRepository(m[1], m[2])
-		if err != nil {
-			return err
-		}
-	}
-
-	handler := common.NewTypeHandler(o.Context.OCIContext(), session, repobase)
+	defer session.Close()
+	handler := common.NewTypeHandler(o.Context.OCIContext(), session, o.Repository.Repository)
 
 	return utils.HandleArgs(outputs, &o.Output, handler, o.Refs...)
 }

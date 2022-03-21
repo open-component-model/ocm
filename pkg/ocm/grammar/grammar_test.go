@@ -82,6 +82,40 @@ var _ = Describe("ref matching", func() {
 			CheckRef("ghcr/sub//comp.io/comp")
 			CheckRef("ghcr.io/sub/comp.io/comp")
 			CheckRef("T:ghcr.io/sub//comp.io/comp")
+
+			CheckRef("directory::./some/../path.dir")
+			CheckRef("directory::./some/../path.dir//github.com/mandelsoft/kubelink")
+		})
+	})
+
+	Context("generic", func() {
+		It("succeeds", func() {
+			Check("directory::./some/../path.dir", AnchoredGenericReferenceRegexp, "directory", "./some/../path.dir", "", "")
+			Check("directory::./some/../path.dir//github.com/mandelsoft/kubelink", AnchoredGenericReferenceRegexp, "directory", "./some/../path.dir", "github.com/mandelsoft/kubelink", "")
+			Check("directory::./some/../path.dir//github.com/mandelsoft/kubelink:v1", AnchoredGenericReferenceRegexp, "directory", "./some/../path.dir", "github.com/mandelsoft/kubelink", "v1")
+		})
+		It("fails", func() {
+		})
+	})
+
+	Context("repo", func() {
+		It("succeeds", func() {
+			Check("directory::ghcr.io/sub/path", AnchoredRepositoryRegexp, "directory", "ghcr.io", "sub/path")
+			Check("ghcr.io/sub/path", AnchoredRepositoryRegexp, "", "ghcr.io", "sub/path")
+			Check("ghcr.io", AnchoredRepositoryRegexp, "", "ghcr.io", "")
+			Check("ghcr.io/sub/path", AnchoredRepositoryRegexp, "", "ghcr.io", "sub/path")
+		})
+		It("fails", func() {
+			Check("/ghcr.io/sub/path", AnchoredRepositoryRegexp)
+		})
+	})
+
+	Context("generic repo", func() {
+		It("succeeds", func() {
+			Check("directory::./some/../path.dir", AnchoredGenericRepositoryRegexp, "directory", "./some/../path.dir")
+			Check("./some/../path.dir", AnchoredGenericRepositoryRegexp, "", "./some/../path.dir")
+		})
+		It("fails", func() {
 		})
 	})
 

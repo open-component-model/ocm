@@ -29,7 +29,6 @@ type Command struct {
 
 	Path       string
 	TargetName string
-	Type       string
 
 	Source ocm.ComponentVersionAccess
 	Target ocm.Repository
@@ -59,7 +58,6 @@ either via inline argument or command configuration file and name.
 }
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVarP(&o.Type, "type", "t", "", "target component repository type ")
 }
 
 func (o *Command) Complete(args []string) error {
@@ -73,7 +71,7 @@ func (o *Command) Complete(args []string) error {
 		return err
 	}
 
-	o.Target, err = o.Context.OCM().DetermineRepository(o.Type, o.TargetName)
+	o.Target, err = o.Context.OCM().DetermineRepository(o.TargetName)
 	if err != nil {
 		o.Source.Close()
 		return err

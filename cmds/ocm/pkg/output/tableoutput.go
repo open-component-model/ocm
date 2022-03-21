@@ -15,7 +15,6 @@
 package output
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
@@ -41,7 +40,7 @@ func (this *TableProcessingOutput) new(opts *Options, chain ProcessChain, header
 	return this
 }
 
-func (this *TableProcessingOutput) Out(*context.Context) error {
+func (this *TableProcessingOutput) Out(interface{}) error {
 	lines := [][]string{this.header}
 
 	sort := this.opts.Sort

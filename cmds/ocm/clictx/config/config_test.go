@@ -47,7 +47,7 @@ var _ = Describe("command config", func() {
 	ocidata, err := normalize(ocispec)
 	Expect(err).To(Succeed())
 
-	ocmspec := ocmocireg.NewRepositorySpec("gcr.io", "")
+	ocmspec := ocmocireg.NewRepositorySpec("gcr.io", nil)
 	ocmdata, err := normalize(ocmspec)
 	Expect(err).To(Succeed())
 

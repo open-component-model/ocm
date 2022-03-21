@@ -15,8 +15,6 @@
 package output
 
 import (
-	"context"
-
 	. "github.com/gardener/ocm/cmds/ocm/pkg/data"
 )
 
@@ -39,15 +37,15 @@ func (this *ElementOutput) new(chain ProcessChain) *ElementOutput {
 	return this
 }
 
-func (this *ElementOutput) Add(ctx *context.Context, e interface{}) error {
+func (this *ElementOutput) Add(processingContext interface{}, e interface{}) error {
 	this.source.Add(e)
 	return nil
 }
 
-func (this *ElementOutput) Close(ctx *context.Context) error {
+func (this *ElementOutput) Close(processingContext interface{}) error {
 	this.source.Close()
 	return nil
 }
 
-func (this *ElementOutput) Out(ctx *context.Context) {
+func (this *ElementOutput) Out(processingContext interface{}) {
 }

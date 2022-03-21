@@ -13,11 +13,29 @@ import (
 )
 
 const (
-	dockerHubDomain       = "docker.io"
-	dockerHubLegacyDomain = "index.docker.io"
-
 	KIND_OCM_REFERENCE = "ocm reference"
 )
+
+// ParseRepo parses a standard ocm repository reference into a internal representation.
+func ParseRepo(ref string) (UniformRepositorySpec, error) {
+	match := grammar.AnchoredRepositoryRegexp.FindSubmatch([]byte(ref))
+	if match == nil {
+		match = grammar.AnchoredGenericRepositoryRegexp.FindSubmatch([]byte(ref))
+		if match == nil {
+			return UniformRepositorySpec{}, errors.ErrInvalid(KIND_OCM_REFERENCE, ref)
+		}
+		return UniformRepositorySpec{
+			Type: string(match[1]),
+			Info: string(match[2]),
+		}, nil
+
+	}
+	return UniformRepositorySpec{
+		Type:    string(match[1]),
+		Host:    string(match[2]),
+		SubPath: string(match[3]),
+	}, nil
+}
 
 // RefSpec is a go internal representation of a oci reference.
 type RefSpec struct {
@@ -27,21 +45,39 @@ type RefSpec struct {
 
 // ParseRef parses a standard ocm reference into a internal representation.
 func ParseRef(ref string) (RefSpec, error) {
+	var r RefSpec
+	v := ""
+
 	match := grammar.AnchoredComponentVersionRegexp.FindSubmatch([]byte(ref))
 	if match == nil {
-		return RefSpec{}, errors.ErrInvalid(KIND_OCM_REFERENCE, ref)
-	}
-	v := string(match[5])
-	r := RefSpec{
-		UniformRepositorySpec{
-			Type:    string(match[1]),
-			Host:    string(match[2]),
-			SubPath: string(match[3]),
-		},
-		CompSpec{
-			Component: string(match[4]),
-			Version:   nil,
-		},
+		match = grammar.AnchoredGenericReferenceRegexp.FindSubmatch([]byte(ref))
+		if match == nil {
+			return RefSpec{}, errors.ErrInvalid(KIND_OCM_REFERENCE, ref)
+		}
+		v = string(match[4])
+		r = RefSpec{
+			UniformRepositorySpec{
+				Type: string(match[1]),
+				Info: string(match[2]),
+			},
+			CompSpec{
+				Component: string(match[3]),
+				Version:   nil,
+			},
+		}
+	} else {
+		v = string(match[5])
+		r = RefSpec{
+			UniformRepositorySpec{
+				Type:    string(match[1]),
+				Host:    string(match[2]),
+				SubPath: string(match[3]),
+			},
+			CompSpec{
+				Component: string(match[4]),
+				Version:   nil,
+			},
+		}
 	}
 	if v != "" {
 		r.Version = &v
@@ -88,22 +124,10 @@ func (r *RefSpec) String() string {
 	return r.Reference()
 }
 
-// CredHost fallback to legacy docker domain if applicable
-// this is how containerd translates the old domain for DockerHub to the new one, taken from containerd/reference/docker/reference.go:674
-func (r *RefSpec) CredHost() string {
-	if r.Host == dockerHubDomain {
-		return dockerHubLegacyDomain
-	}
-	return r.Host
-}
-
 func (r RefSpec) DeepCopy() RefSpec {
-	if r.Info != nil {
-		info := map[string]string{}
-		for k, v := range r.Info {
-			info[k] = v
-		}
-		r.Info = info
+	if r.Version != nil {
+		v := *r.Version
+		r.Version = &v
 	}
 	return r
 }

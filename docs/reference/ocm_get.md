@@ -11,5 +11,6 @@
 ### SEE ALSO
 
 * [ocm](ocm.md)	 - ocm
-* [ocm get artefact](ocm_get_artefact.md)	 - get artefact version
+* [ocm get artefacts](ocm_get_artefacts.md)	 - get artefact version
+* [ocm get components](ocm_get_components.md)	 - get component version
 

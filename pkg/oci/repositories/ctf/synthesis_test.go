@@ -17,6 +17,7 @@ package ctf_test
 import (
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
+	"github.com/gardener/ocm/pkg/mime"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf"
@@ -63,7 +64,7 @@ func CheckBlob(blob accessio.BlobAccess) oci.NamespaceAccess {
 	m, err := art.Manifest()
 	Expect(err).To(Succeed())
 	Expect(m.Config).To(Equal(artdesc.Descriptor{
-		MediaType: MimeTypeOctetStream,
+		MediaType: mime.MIME_OCTET,
 		Digest:    "sha256:" + DIGEST_CONFIG,
 		Size:      2,
 	}))

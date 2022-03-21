@@ -29,6 +29,28 @@ const (
 )
 
 var (
+	// TypeRegexp describes a type name for a repository
+	TypeRegexp = Identifier
+
+	// SchemeRegexp matches an optional scheme
+	SchemeRegexp = Optional(Capture(Match(`[a-z]+`)), Match("://"))
+
+	// AnchoredRepositoryRegexp parses a uniform respository spec
+	AnchoredRepositoryRegexp = Anchored(
+		Optional(Capture(TypeRegexp), Literal("::")),
+		SchemeRegexp,
+		Capture(DomainPortRegexp),
+	)
+
+	// AnchoredGenericRepositoryRegexp describes a CTF reference
+	AnchoredGenericRepositoryRegexp = Anchored(
+		Optional(Capture(TypeRegexp), Literal("::")),
+		Capture(Match(".*")),
+	)
+
+	// AnchoredSchemedRegexp matche an optionally schemed string
+	AnchoredSchemedRegexp = Sequence(SchemeRegexp, Capture(Match(".*")))
+
 	// RepositorySeparatorRegexp is the separator used to separate
 	// repository name components.
 	RepositorySeparatorRegexp = Literal(RepositorySeparator)

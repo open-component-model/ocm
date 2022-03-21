@@ -22,8 +22,7 @@ ocm transfer componentarchive [<options>]  <source> <target> [flags]
 ### Options
 
 ```
-  -h, --help          help for componentarchive
-  -t, --type string   target component repository type 
+  -h, --help   help for componentarchive
 ```
 
 ### SEE ALSO

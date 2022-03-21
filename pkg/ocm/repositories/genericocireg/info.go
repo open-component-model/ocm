@@ -30,7 +30,34 @@ func init() {
 
 type handler struct{}
 
-func (h handler) Info(m cpi.ManifestAccess, config []byte) string {
+type ComponentVersionInfo struct {
+	Error       string          `json:"error,omitempty`
+	Description string          `json:"description`
+	Unparsed    string          `json:"unparsed,omitempty`
+	Descriptor  json.RawMessage `json:"descriptor,omitempty`
+}
+
+func (h handler) Info(m cpi.ManifestAccess, config []byte) interface{} {
+	info := &ComponentVersionInfo{
+		Description: "component version",
+	}
+	acc := NewStateAccess(m)
+	data, err := accessio.BlobData(acc.Get())
+	if err != nil {
+		info.Error = "cannot read component descriptor: " + err.Error()
+		return info
+	}
+	var raw interface{}
+	err = json.Unmarshal(data, &raw)
+	if err != nil {
+		info.Unparsed = string(data)
+		return info
+	}
+	info.Descriptor = data
+	return info
+}
+
+func (h handler) Description(m cpi.ManifestAccess, config []byte) string {
 	s := "component version:\n"
 	acc := NewStateAccess(m)
 	data, err := accessio.BlobData(acc.Get())

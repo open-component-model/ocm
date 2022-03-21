@@ -21,6 +21,7 @@ import (
 
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
+	"github.com/gardener/ocm/pkg/mime"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
 	. "github.com/gardener/ocm/pkg/oci/repositories/ctf/testhelper"
 	"github.com/mandelsoft/vfs/pkg/osfs"
@@ -175,7 +176,7 @@ var _ = Describe("artefact management", func() {
 			blob, err := art.GetBlob("sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50")
 			Expect(err).To(Succeed())
 			Expect(blob.Get()).To(Equal([]byte("testdata")))
-			Expect(blob.MimeType()).To(Equal(MimeTypeOctetStream))
+			Expect(blob.MimeType()).To(Equal(mime.MIME_OCTET))
 		})
 		It("read from tgz artefact", func() {
 			a, err := artefactset.FormatTGZ.Create("test.tgz", opts, 0700)
@@ -193,7 +194,7 @@ var _ = Describe("artefact management", func() {
 			blob, err := art.GetBlob("sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50")
 			Expect(err).To(Succeed())
 			Expect(blob.Get()).To(Equal([]byte("testdata")))
-			Expect(blob.MimeType()).To(Equal(MimeTypeOctetStream))
+			Expect(blob.MimeType()).To(Equal(mime.MIME_OCTET))
 		})
 
 	})

@@ -25,8 +25,13 @@ import (
 
 const CONTEXT_TYPE = core.CONTEXT_TYPE
 
+const CommonTransportFormat = core.CommonTransportFormat
+
 type Context = core.Context
 type Repository = core.Repository
+type RepositorySpecHandlers = core.RepositorySpecHandlers
+type RepositorySpecHandler = core.RepositorySpecHandler
+type UniformRepositorySpec = core.UniformRepositorySpec
 type RepositoryType = core.RepositoryType
 type RepositorySpec = core.RepositorySpec
 type GenericRepositorySpec = core.GenericRepositorySpec
@@ -50,6 +55,10 @@ var DefaultContext = core.DefaultContext
 
 func RegisterRepositoryType(name string, atype RepositoryType) {
 	core.DefaultRepositoryTypeScheme.Register(name, atype)
+}
+
+func RegisterRepositorySpecHandler(handler RepositorySpecHandler, types ...string) {
+	core.RegisterRepositorySpecHandler(handler, types...)
 }
 
 func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {

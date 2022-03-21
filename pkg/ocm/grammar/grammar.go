@@ -21,7 +21,19 @@ import (
 
 var (
 	// TypeRegexp describes a type name for a repository
-	TypeRegexp = Identifier
+	TypeRegexp = grammar.TypeRegexp
+
+	// AnchoredRepositoryRegexp parses a uniform respository spec
+	AnchoredRepositoryRegexp = Anchored(
+		Optional(Capture(TypeRegexp), Literal("::")),
+		Capture(grammar.DomainPortRegexp), Optional(grammar.RepositorySeparatorRegexp, Capture(grammar.RepositoryRegexp)),
+	)
+
+	// AnchoredGenericRepositoryRegexp describes a CTF reference
+	AnchoredGenericRepositoryRegexp = Anchored(
+		Optional(Capture(TypeRegexp), Literal("::")),
+		Capture(Match(".*")),
+	)
 
 	// ComponentRegexp describes the component name. It cosnsists
 	// of a domain ame followed by OCI repository name components
@@ -33,7 +45,7 @@ var (
 		Optional(Literal(":"), Capture(grammar.TagRegexp)),
 	)
 
-	// AnchoredReferenceRegexp parsed a complete string representation for default component references inclusing
+	// AnchoredReferenceRegexp parses a complete string representation for default component references including
 	// the repository part.
 	// It provides 5 captures: type, repository host port, sub path, component and version
 	AnchoredReferenceRegexp = Anchored(
@@ -41,5 +53,13 @@ var (
 		Capture(grammar.DomainPortRegexp), Optional(grammar.RepositorySeparatorRegexp, Capture(grammar.RepositoryRegexp)),
 		Literal("//"), Capture(ComponentRegexp),
 		Optional(Literal(":"), Capture(grammar.TagRegexp)),
+	)
+
+	// AnchoredGenericReferenceRegexp parses a CTF file based string representation
+	AnchoredGenericReferenceRegexp = Anchored(
+		Optional(Capture(TypeRegexp), Literal("::")),
+		Capture(Match(".*?")),
+		Optional(Literal("//"), Capture(ComponentRegexp),
+			Optional(Literal(":"), Capture(grammar.TagRegexp))),
 	)
 )

@@ -25,11 +25,16 @@ import (
 
 const CONTEXT_TYPE = "oci.context.gardener.cloud"
 
+const CommonTransportFormat = "CommonTransportFormat"
+
 type Context interface {
 	datacontext.Context
 
 	AttributesContext() datacontext.AttributesContext
 	CredentialsContext() credentials.Context
+
+	RepositorySpecHandlers() RepositorySpecHandlers
+	MapUniformRepositorySpec(u *UniformRepositorySpec, aliases map[string]RepositorySpec) (RepositorySpec, error)
 
 	RepositoryTypes() RepositoryTypeScheme
 
@@ -57,13 +62,15 @@ type _context struct {
 	credentials      credentials.Context
 
 	knownRepositoryTypes RepositoryTypeScheme
+	specHandlers         RepositorySpecHandlers
 }
 
-func newContext(shared datacontext.AttributesContext, creds credentials.Context, reposcheme RepositoryTypeScheme) Context {
+func newContext(shared datacontext.AttributesContext, creds credentials.Context, reposcheme RepositoryTypeScheme, specHandlers RepositorySpecHandlers) Context {
 	c := &_context{
 		sharedattributes:     shared,
 		credentials:          creds,
 		knownRepositoryTypes: reposcheme,
+		specHandlers:         specHandlers,
 	}
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
 	return c
@@ -81,6 +88,14 @@ func (c *_context) CredentialsContext() credentials.Context {
 
 func (c *_context) RepositoryTypes() RepositoryTypeScheme {
 	return c.knownRepositoryTypes
+}
+
+func (c *_context) RepositorySpecHandlers() RepositorySpecHandlers {
+	return c.specHandlers
+}
+
+func (c *_context) MapUniformRepositorySpec(u *UniformRepositorySpec, aliases map[string]RepositorySpec) (RepositorySpec, error) {
+	return c.specHandlers.MapUniformRepositorySpec(c, u, aliases)
 }
 
 func (c *_context) RepositorySpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {

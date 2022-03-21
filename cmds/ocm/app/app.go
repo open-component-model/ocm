@@ -14,13 +14,13 @@ import (
 
 	"github.com/gardener/ocm/cmds/ocm/commands/add"
 	"github.com/gardener/ocm/cmds/ocm/commands/create"
+	"github.com/gardener/ocm/cmds/ocm/commands/describe"
 	"github.com/gardener/ocm/cmds/ocm/commands/get"
-	"github.com/gardener/ocm/cmds/ocm/commands/transfer"
-
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/componentarchive"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources"
+	"github.com/gardener/ocm/cmds/ocm/commands/transfer"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -79,6 +79,7 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(create.NewCommand(opts.Context))
 	cmd.AddCommand(add.NewCommand(opts.Context))
 	cmd.AddCommand(transfer.NewCommand(opts.Context))
+	cmd.AddCommand(describe.NewCommand(opts.Context))
 
 	cmd.AddCommand(componentarchive.NewCommand(opts.Context))
 	cmd.AddCommand(resources.NewCommand(opts.Context))

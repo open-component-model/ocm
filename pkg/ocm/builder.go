@@ -48,6 +48,10 @@ func WithAccessypeScheme(scheme AccessTypeScheme) core.Builder {
 	return core.Builder{}.WithAccessTypeScheme(scheme)
 }
 
+func WithRepositorySpecHandlers(reg RepositorySpecHandlers) core.Builder {
+	return core.Builder{}.WithRepositorySpecHandlers(reg)
+}
+
 func WithBlobHandlers(reg BlobHandlerRegistry) core.Builder {
 	return core.Builder{}.WithBlobHandlers(reg)
 }

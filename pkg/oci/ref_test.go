@@ -36,16 +36,18 @@ var _ = Describe("ref parsing", func() {
 	tag := "v1"
 
 	It("succeeds", func() {
-		CheckRef("https://ubuntu", &oci.RefSpec{Scheme: "https", Host: "docker.io", Repository: "library/ubuntu"})
-		CheckRef("ubuntu", &oci.RefSpec{Host: "docker.io", Repository: "library/ubuntu"})
-		CheckRef("ubuntu:v1", &oci.RefSpec{Host: "docker.io", Repository: "library/ubuntu", Tag: &tag})
-		CheckRef("test/ubuntu", &oci.RefSpec{Host: "docker.io", Repository: "test/ubuntu"})
-		CheckRef("test/ubuntu:v1", &oci.RefSpec{Host: "docker.io", Repository: "test/ubuntu", Tag: &tag})
-		CheckRef("ghcr.io/test/ubuntu", &oci.RefSpec{Host: "ghcr.io", Repository: "test/ubuntu"})
-		CheckRef("ghcr.io:8080/test/ubuntu", &oci.RefSpec{Host: "ghcr.io:8080", Repository: "test/ubuntu"})
-		CheckRef("ghcr.io/test/ubuntu:v1", &oci.RefSpec{Host: "ghcr.io", Repository: "test/ubuntu", Tag: &tag})
-		CheckRef("ghcr.io/test/ubuntu@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", &oci.RefSpec{Host: "ghcr.io", Repository: "test/ubuntu", Digest: &digest})
-		CheckRef("ghcr.io/test/ubuntu:v1@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", &oci.RefSpec{Host: "ghcr.io", Repository: "test/ubuntu", Tag: &tag, Digest: &digest})
+		ghcr := oci.UniformRepositorySpec{Host: "ghcr.io"}
+		docker := oci.UniformRepositorySpec{Host: "docker.io"}
+		CheckRef("https://ubuntu", &oci.RefSpec{UniformRepositorySpec: oci.UniformRepositorySpec{Scheme: "https", Host: "docker.io"}, Repository: "library/ubuntu"})
+		CheckRef("ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "library/ubuntu"})
+		CheckRef("ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "library/ubuntu", Tag: &tag})
+		CheckRef("test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "test/ubuntu"})
+		CheckRef("test/ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "test/ubuntu", Tag: &tag})
+		CheckRef("ghcr.io/test/ubuntu", &oci.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu"})
+		CheckRef("ghcr.io:8080/test/ubuntu", &oci.RefSpec{UniformRepositorySpec: oci.UniformRepositorySpec{Host: "ghcr.io:8080"}, Repository: "test/ubuntu"})
+		CheckRef("ghcr.io/test/ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu", Tag: &tag})
+		CheckRef("ghcr.io/test/ubuntu@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", &oci.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu", Digest: &digest})
+		CheckRef("ghcr.io/test/ubuntu:v1@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", &oci.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu", Tag: &tag, Digest: &digest})
 	})
 
 	It("fails", func() {

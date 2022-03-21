@@ -75,7 +75,6 @@ func (t *configTypeScheme) AddKnownTypes(scheme runtime.Scheme) {
 }
 
 func (t *configTypeScheme) Register(name string, rtype ConfigType) {
-	fmt.Printf("registering config type %q [%T]\n", name, rtype)
 	t.Scheme.RegisterByDecoder(name, rtype)
 }
 

@@ -21,11 +21,17 @@ import (
 	"github.com/spf13/pflag"
 )
 
+type OtherOptions interface {
+	AddFlags(fs *pflag.FlagSet)
+	Complete() error
+}
+
 type Options struct {
 	output string
 
 	Output *string
 	Sort   []string
+	Others OtherOptions
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet, outputs Outputs) {
@@ -39,6 +45,10 @@ func (o *Options) AddFlags(fs *pflag.FlagSet, outputs Outputs) {
 	}
 	fs.StringVarP(&o.output, "output", "o", "", fmt.Sprintf("output mode (%s)", s))
 	fs.StringArrayVarP(&o.Sort, "sort", "s", nil, "sort fields")
+
+	if o.Others != nil {
+		o.Others.AddFlags(fs)
+	}
 }
 
 func (o *Options) Complete() error {
@@ -57,5 +67,8 @@ func (o *Options) Complete() error {
 		}
 	}
 	o.Sort = fields
+	if o.Others != nil {
+		return o.Others.Complete()
+	}
 	return nil
 }

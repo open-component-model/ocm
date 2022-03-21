@@ -48,4 +48,13 @@ func (s *UnstructuredVersionedTypedObject) GetVersion() string {
 	return ObjectVersionedType(s.ObjectType).GetVersion()
 }
 
+func (u *UnstructuredVersionedTypedObject) DeepCopy() *UnstructuredVersionedTypedObject {
+	if u == nil {
+		return nil
+	}
+	return &UnstructuredVersionedTypedObject{
+		*u.UnstructuredTypedObject.DeepCopy(),
+	}
+}
+
 var _ VersionedTypedObject = &UnstructuredVersionedTypedObject{}

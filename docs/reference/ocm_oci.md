@@ -11,5 +11,6 @@
 ### SEE ALSO
 
 * [ocm](ocm.md)	 - ocm
+* [ocm oci describe](ocm_oci_describe.md)	 - describe artefact version
 * [ocm oci get](ocm_oci_get.md)	 - get artefact version
 
