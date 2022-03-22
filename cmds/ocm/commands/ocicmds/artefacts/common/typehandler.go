@@ -76,7 +76,7 @@ func (h *TypeHandler) All() ([]output.Object, error) {
 	}
 	var result []output.Object
 	for _, l := range list {
-		part, err := h.Get(l)
+		part, err := h.Get(utils.StringSpec(l))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Warning: %s\n", err)
 		}
@@ -85,24 +85,25 @@ func (h *TypeHandler) All() ([]output.Object, error) {
 	return result, nil
 }
 
-func (h *TypeHandler) Get(name string) ([]output.Object, error) {
+func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 	var namespace oci.NamespaceAccess
 	var result []output.Object
 	var err error
 
+	name := elemspec.String()
 	spec := oci.RefSpec{}
 	repo := h.repobase
 	if repo == nil {
-		parsed, ns, art, err := h.session.EvaluateRef(h.octx, name)
+		evaluated, err := h.session.EvaluateRef(h.octx, name)
 		if err != nil {
 			return nil, errors.Wrapf(err, "repository %q", name)
 		}
-		spec = *parsed
-		namespace = ns
-		if art != nil {
+		spec = evaluated.Ref
+		namespace = evaluated.Namespace
+		if evaluated.Artefact != nil {
 			result = append(result, &Object{
 				Spec:     spec,
-				Artefact: art,
+				Artefact: evaluated.Artefact,
 			})
 			return result, nil
 		}

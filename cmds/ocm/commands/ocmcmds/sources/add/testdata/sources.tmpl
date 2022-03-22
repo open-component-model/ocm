@@ -1,0 +1,16 @@
+---
+name: testdata
+type: git
+input:
+  type: file
+  path: ${CONTENT}
+  mediaType: text/plain
+---
+name: 'myothersrc'
+type: 'git'
+input:
+  type: "dir"
+  path: .
+  compress: true # defaults to false
+  exclude: "*.yaml"
+  preserveDir: false # optional, defaulted to false; if true, the top level folder "my/path" is included

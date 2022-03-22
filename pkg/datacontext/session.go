@@ -25,7 +25,7 @@ import (
 // after final use. When closing a session all subsequent objects
 // will be closed in the opposite order they are added.
 type Session interface {
-	Closer(closer io.Closer, err error) (io.Closer, error)
+	Closer(closer io.Closer, extra ...interface{}) (io.Closer, error)
 	GetOrCreate(key interface{}, creator func(SessionBase) Session) Session
 	Close() error
 	IsClosed() bool
@@ -88,9 +88,14 @@ func (s *session) Close() error {
 	return s.base.Close()
 }
 
-func (s *session) Closer(closer io.Closer, err error) (io.Closer, error) {
-	if err != nil {
-		return nil, err
+func (s *session) Closer(closer io.Closer, extra ...interface{}) (io.Closer, error) {
+	for _, e := range extra {
+		if err, ok := e.(error); ok && err != nil {
+			return nil, err
+		}
+	}
+	if closer == nil {
+		return nil, nil
 	}
 	s.base.Lock()
 	defer s.base.Unlock()

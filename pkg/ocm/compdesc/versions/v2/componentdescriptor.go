@@ -49,7 +49,7 @@ type ComponentSpec struct {
 	// Sources defines sources that produced the component
 	Sources Sources `json:"sources"`
 	// ComponentReferences references component dependencies that can be resolved in the current context.
-	ComponentReferences []ComponentReference `json:"componentReferences"`
+	ComponentReferences ComponentReferences `json:"componentReferences"`
 	// Resources defines all resources that are created by the component and by a third party.
 	Resources Resources `json:"resources"`
 }
@@ -101,6 +101,17 @@ const (
 	SystemIdentityName    = metav1.SystemIdentityName
 	SystemIdentityVersion = metav1.SystemIdentityVersion
 )
+
+// ElementMetaAccessor provides generic access an elements meta information
+type ElementMetaAccessor interface {
+	GetMeta() *ElementMeta
+}
+
+// ElementAccessor provides generic access to list of elements
+type ElementAccessor interface {
+	Len() int
+	Get(i int) ElementMetaAccessor
+}
 
 // ElementMeta defines a object that is uniquely identified by its identity.
 // +k8s:deepcopy-gen=true
@@ -155,7 +166,7 @@ func (o *ElementMeta) SetExtraIdentity(identity metav1.Identity) {
 }
 
 // GetIdentity returns the identity of the object.
-func (o *ElementMeta) GetIdentity(accessor ElementMetaAccessor) metav1.Identity {
+func (o *ElementMeta) GetIdentity(accessor ElementAccessor) metav1.Identity {
 	identity := map[string]string{}
 	for k, v := range o.ExtraIdentity {
 		identity[k] = v
@@ -163,7 +174,9 @@ func (o *ElementMeta) GetIdentity(accessor ElementMetaAccessor) metav1.Identity 
 	identity[SystemIdentityName] = o.Name
 	if accessor != nil {
 		found := false
-		for _, m := range accessor.GetMetas() {
+		l := accessor.Len()
+		for i := 0; i < l; i++ {
+			m := accessor.Get(i).GetMeta()
 			if m.Name == o.Name {
 				if found {
 					identity[SystemIdentityVersion] = o.Version
@@ -177,25 +190,19 @@ func (o *ElementMeta) GetIdentity(accessor ElementMetaAccessor) metav1.Identity 
 }
 
 // GetIdentityDigest returns the digest of the object's identity.
-func (o *ElementMeta) GetIdentityDigest(accessor ElementMetaAccessor) []byte {
+func (o *ElementMeta) GetIdentityDigest(accessor ElementAccessor) []byte {
 	return o.GetIdentity(accessor).Digest()
-}
-
-// ElementMetaAccessor describes an accessor for the set of meta information for a set of elements.
-type ElementMetaAccessor interface {
-	// Get all the meta information for a set of elements
-	GetMetas() []ElementMeta
 }
 
 // Sources describes a set of source specifications
 type Sources []Source
 
-func (s Sources) GetMetas() []ElementMeta {
-	metas := make([]ElementMeta, len(s), len(s))
-	for i, src := range s {
-		metas[i] = src.ElementMeta
-	}
-	return metas
+func (r Sources) Len() int {
+	return len(r)
+}
+
+func (r Sources) Get(i int) ElementMetaAccessor {
+	return &r[i]
 }
 
 // Source is the definition of a component's source.
@@ -205,6 +212,10 @@ type Source struct {
 	SourceMeta `json:",inline"`
 
 	Access *runtime.UnstructuredTypedObject `json:"access"`
+}
+
+func (s *Source) GetMeta() *ElementMeta {
+	return &s.ElementMeta
 }
 
 // SourceMeta is the definition of the meta data of a source.
@@ -241,12 +252,12 @@ type SourceRef struct {
 // Resources describes a set of resource specifications
 type Resources []Resource
 
-func (r Resources) GetMetas() []ElementMeta {
-	metas := make([]ElementMeta, len(r), len(r))
-	for i, rsc := range r {
-		metas[i] = rsc.ElementMeta
-	}
-	return metas
+func (r Resources) Len() int {
+	return len(r)
+}
+
+func (r Resources) Get(i int) ElementMetaAccessor {
+	return &r[i]
 }
 
 // Resource describes a resource dependency of a component.
@@ -271,6 +282,10 @@ type Resource struct {
 	Access *runtime.UnstructuredTypedObject `json:"access"`
 }
 
+func (r *Resource) GetMeta() *ElementMeta {
+	return &r.ElementMeta
+}
+
 // GetType returns the type of the object.
 func (o Resource) GetType() string {
 	return o.Type
@@ -281,66 +296,25 @@ func (o *Resource) SetType(ttype string) {
 	o.Type = ttype
 }
 
+type ComponentReferences []ComponentReference
+
+func (r ComponentReferences) Len() int {
+	return len(r)
+}
+
+func (r ComponentReferences) Get(i int) ElementMetaAccessor {
+	return &r[i]
+}
+
 // ComponentReference describes the reference to another component in the registry.
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
 type ComponentReference struct {
-	// Name is the context unique name of the object.
-	Name string `json:"name"`
+	ElementMeta `json:",inline"`
 	// ComponentName describes the remote name of the referenced object
 	ComponentName string `json:"componentName"`
-	// Version is the semver version of the object.
-	Version string `json:"version"`
-	// ExtraIdentity is the identity of an object.
-	// An additional label with key "name" ist not allowed
-	ExtraIdentity metav1.Identity `json:"extraIdentity,omitempty"`
-	// Labels defines an optional set of additional labels
-	// describing the object.
-	// +optional
-	Labels metav1.Labels `json:"labels,omitempty"`
 }
 
-// GetName returns the name of the object.
-func (o ComponentReference) GetName() string {
-	return o.Name
-}
-
-// SetName sets the name of the object.
-func (o *ComponentReference) SetName(name string) {
-	o.Name = name
-}
-
-// GetVersion returns the version of the object.
-func (o ComponentReference) GetVersion() string {
-	return o.Version
-}
-
-// SetVersion sets the version of the object.
-func (o *ComponentReference) SetVersion(version string) {
-	o.Version = version
-}
-
-// GetLabels returns the label of the object.
-func (o ComponentReference) GetLabels() metav1.Labels {
-	return o.Labels
-}
-
-// SetLabels sets the labels of the object.
-func (o *ComponentReference) SetLabels(labels []metav1.Label) {
-	o.Labels = labels
-}
-
-// GetIdentity returns the identity of the object.
-func (o *ComponentReference) GetIdentity() metav1.Identity {
-	identity := map[string]string{}
-	for k, v := range o.ExtraIdentity {
-		identity[k] = v
-	}
-	identity[SystemIdentityName] = o.Name
-	return identity
-}
-
-// GetIdentityDigest returns the digest of the object's identity.
-func (o *ComponentReference) GetIdentityDigest() []byte {
-	return o.GetIdentity().Digest()
+func (r *ComponentReference) GetMeta() *ElementMeta {
+	return &r.ElementMeta
 }

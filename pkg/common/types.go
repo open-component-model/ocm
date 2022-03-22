@@ -14,6 +14,12 @@
 
 package common
 
+import (
+	"fmt"
+
+	"github.com/gardener/ocm/pkg/errors"
+)
+
 // VersionedElement describes an element that has a name and a version
 type VersionedElement interface {
 	// GetName gets the name of the element
@@ -33,6 +39,13 @@ func NewNameVersion(name, version string) NameVersion {
 	return NameVersion{name, version}
 }
 
+func VersionedElementKey(v VersionedElement) NameVersion {
+	if k, ok := v.(NameVersion); ok {
+		return k
+	}
+	return NameVersion{v.GetName(), v.GetVersion()}
+}
+
 func (n NameVersion) GetName() string {
 	return n.name
 }
@@ -43,4 +56,35 @@ func (n NameVersion) GetVersion() string {
 
 func (n NameVersion) String() string {
 	return n.name + ":" + n.version
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type History []NameVersion
+
+func (h History) String() string {
+	s := ""
+	sep := ""
+	for _, e := range h {
+		s = fmt.Sprintf("%s%s%s", s, sep, e)
+		sep = "->"
+	}
+	return s
+}
+
+func (h History) Contains(nv NameVersion) bool {
+	for _, e := range h {
+		if e == nv {
+			return true
+		}
+	}
+	return false
+}
+
+func (h *History) Add(kind string, nv NameVersion) error {
+	if h.Contains(nv) {
+		return errors.ErrRecusion(kind, nv, *h)
+	}
+	*h = append(*h, nv)
+	return nil
 }

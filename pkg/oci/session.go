@@ -30,13 +30,20 @@ type ArtefactContainer interface {
 	GetArtefact(version string) (ArtefactAccess, error)
 }
 
+type EvaluationResult struct {
+	Ref        RefSpec
+	Repository Repository
+	Namespace  NamespaceAccess
+	Artefact   ArtefactAccess
+}
+
 type Session interface {
 	datacontext.Session
 
 	LookupRepository(Context, RepositorySpec) (Repository, error)
 	LookupNamespace(NamespaceContainer, string) (NamespaceAccess, error)
 	GetArtefact(ArtefactContainer, string) (ArtefactAccess, error)
-	EvaluateRef(ctx Context, ref string) (*RefSpec, NamespaceAccess, ArtefactAccess, error)
+	EvaluateRef(ctx Context, ref string) (*EvaluationResult, error)
 	Close() error
 }
 
@@ -141,21 +148,23 @@ func (s *session) GetArtefact(c ArtefactContainer, version string) (ArtefactAcce
 	return obj, err
 }
 
-func (s *session) EvaluateRef(ctx Context, ref string) (*RefSpec, NamespaceAccess, ArtefactAccess, error) {
-	parsed, err := ParseRef(ref)
+func (s *session) EvaluateRef(ctx Context, ref string) (*EvaluationResult, error) {
+	var err error
+	result := &EvaluationResult{}
+	result.Ref, err = ParseRef(ref)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
-	spec := ocireg.NewRepositorySpec(parsed.Base())
-	repo, err := s.LookupRepository(ctx, spec)
+	spec := ocireg.NewRepositorySpec(result.Ref.Base())
+	result.Repository, err = s.LookupRepository(ctx, spec)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
-	ns, err := s.LookupNamespace(repo, parsed.Repository)
+	result.Namespace, err = s.LookupNamespace(result.Repository, result.Ref.Repository)
 
-	if !parsed.IsVersion() {
-		return &parsed, ns, nil, err
+	if !result.Ref.IsVersion() {
+		return result, err
 	}
-	a, err := s.GetArtefact(ns, parsed.Version())
-	return &parsed, ns, a, err
+	result.Artefact, err = s.GetArtefact(result.Namespace, result.Ref.Version())
+	return result, err
 }

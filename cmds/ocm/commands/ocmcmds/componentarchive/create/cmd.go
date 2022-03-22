@@ -16,7 +16,7 @@ package create
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
@@ -80,7 +80,7 @@ func (o *Command) Complete(args []string) error {
 	o.Path = args[3]
 
 	for _, a := range args[4:] {
-		o.Labels, err = ocmcmds.AddParsedLabel(o.Labels, a)
+		o.Labels, err = common.AddParsedLabel(o.Labels, a)
 		if err != nil {
 			return err
 		}

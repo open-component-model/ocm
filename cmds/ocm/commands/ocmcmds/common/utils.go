@@ -12,22 +12,29 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package add
+package common
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	resources "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/add"
-	sources "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/sources/add"
-	"github.com/spf13/cobra"
+	"fmt"
+	"strings"
+
+	compdesc "github.com/gardener/ocm/pkg/ocm/compdesc"
+	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 )
 
-// NewCommand creates a new command.
-func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              "add",
-		TraverseChildren: true,
+func MapArgsToIdentities(args ...string) ([]metav1.Identity, error) {
+	result := []metav1.Identity{}
+
+	for _, a := range args {
+		i := strings.Index(a, "=")
+		if i < 0 {
+			result = append(result, metav1.Identity{compdesc.SystemIdentityName: a})
+		} else {
+			if len(result) == 0 {
+				return nil, fmt.Errorf("first resource identity argument must be a sole resource name")
+			}
+			result[len(a)-1][a[:i]] = a[i+1:]
+		}
 	}
-	cmd.AddCommand(resources.NewCommand(ctx, "resources", "resource", "res", "r"))
-	cmd.AddCommand(sources.NewCommand(ctx, "sources", "source", "src", "s"))
-	return cmd
+	return result, nil
 }

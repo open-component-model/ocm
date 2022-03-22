@@ -48,7 +48,7 @@ func ParseRef(ref string) (RefSpec, error) {
 	var r RefSpec
 	v := ""
 
-	match := grammar.AnchoredComponentVersionRegexp.FindSubmatch([]byte(ref))
+	match := grammar.AnchoredReferenceRegexp.FindSubmatch([]byte(ref))
 	if match == nil {
 		match = grammar.AnchoredGenericReferenceRegexp.FindSubmatch([]byte(ref))
 		if match == nil {

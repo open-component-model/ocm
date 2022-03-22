@@ -16,7 +16,7 @@ package add
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/gardener/ocm/pkg/ocm"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	compdescv2 "github.com/gardener/ocm/pkg/ocm/compdesc/versions/v2"
@@ -32,7 +32,7 @@ type Resources struct {
 // ResourceOptions contains options that are used to describe a resource
 type ResourceOptions struct {
 	compdescv2.Resource `json:",inline"`
-	Input               *ocmcmds.BlobInput `json:"input,omitempty"`
+	Input               *common.BlobInput `json:"input,omitempty"`
 }
 
 // ResourceOptionList contains a list of options that are used to describe a resource.
@@ -87,7 +87,7 @@ func Validate(r *ResourceOptions, ctx clictx.Context, inputFilePath string) erro
 			if r.Relation != metav1.LocalRelation {
 				allErrs = append(allErrs, field.Forbidden(fldPath.Child("relation"), "input requires local relation"))
 			}
-			if err := ocmcmds.ValidateBlobInput(fldPath.Child("input"), r.Input, ctx, inputFilePath); err != nil {
+			if err := common.ValidateBlobInput(fldPath.Child("input"), r.Input, ctx, inputFilePath); err != nil {
 				allErrs = append(allErrs, err...)
 			}
 		}

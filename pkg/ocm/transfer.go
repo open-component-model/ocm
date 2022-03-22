@@ -15,8 +15,6 @@
 package ocm
 
 import (
-	"fmt"
-
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/errors"
@@ -74,35 +72,14 @@ func (DefaultTransferHandler) TransferSource(r SourceAccess, t ComponentVersionA
 	return nil
 }
 
-type history []common.NameVersion
-
-func (h history) String() string {
-	s := ""
-	sep := ""
-	for _, e := range h {
-		s = fmt.Sprintf("%s%s%s", s, sep, e)
-		sep = "->"
-	}
-	return s
-}
-
-func (h history) Contains(nv common.NameVersion) bool {
-	for _, e := range h {
-		if e == nv {
-			return true
-		}
-	}
-	return false
-}
-
 func TransferVersion(repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
 	return transferVersion(nil, repo, src, tgt, handler)
 }
 
-func transferVersion(hist history, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
+func transferVersion(hist common.History, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
 	nv := common.NewNameVersion(src.GetName(), src.GetVersion())
 	if hist.Contains(nv) {
-		return errors.Newf("%s: reference recursion for %s", hist, nv)
+		return errors.ErrRecusion(KIND_COMPONENTVERSION, nv, hist)
 	}
 	hist = append(hist, nv)
 

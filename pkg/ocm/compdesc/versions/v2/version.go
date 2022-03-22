@@ -101,11 +101,8 @@ func convert_ComponentReference_to(in *ComponentReference) *compdesc.ComponentRe
 		return nil
 	}
 	out := &compdesc.ComponentReference{
-		Name:          in.Name,
+		ElementMeta:   *convert_ElementMeta_to(&in.ElementMeta),
 		ComponentName: in.ComponentName,
-		Version:       in.Version,
-		ExtraIdentity: in.ExtraIdentity.Copy(),
-		Labels:        in.Labels.Copy(),
 	}
 	return out
 }
@@ -244,11 +241,8 @@ func convert_ComponentReference_from(in *compdesc.ComponentReference) *Component
 		return nil
 	}
 	out := &ComponentReference{
-		Name:          in.Name,
+		ElementMeta:   *convert_ElementMeta_from(&in.ElementMeta),
 		ComponentName: in.ComponentName,
-		Version:       in.Version,
-		ExtraIdentity: in.ExtraIdentity.Copy(),
-		Labels:        in.Labels.Copy(),
 	}
 	return out
 }

@@ -15,25 +15,28 @@
 package get
 
 import (
-	"fmt"
-
 	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/common"
+	ocmcommon "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
+	compcommon "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/common"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/sources/common"
 	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
-	"github.com/gardener/ocm/pkg/oci"
+	"github.com/gardener/ocm/pkg/ocm"
+	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
 
 type Command struct {
 	Context clictx.Context
+	Closure bool
 
-	Output output.Options
+	Repository compcommon.RepositoryOptions
+	Output     output.Options
 
-	Repository common.RepositoryOptions
-	Refs       []string
+	Comp string
+	Ids  []metav1.Identity
 }
 
 // NewCommand creates a new ctf command.
@@ -43,51 +46,52 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
-		Use:   "[<options>] {<artefact-reference>}",
-		Short: "get artefact version",
+		Use:   "[<options>]  <component> {<name> { <key>=<value> }}",
+		Args:  cobra.MinimumNArgs(1),
+		Short: "get sources of a component version",
 		Long: `
-Get lists all artefact versions specified, if only a repository is specified
-all tagged artefacts are listed.
-
-` + o.Repository.Usage() + `
-
-*Example:*
-<pre>
-$ ocm get artefact ghcr.io/mandelsoft/kubelink
-$ ocm get artefact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
-</pre>
+Get sources of a component version. Sources are specified
+by identities. An identity consists of 
+a name argument followed by optional <code>&lt;key>=&lt;value></code>
+arguments.
 `,
 	}
 }
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
+	fs.BoolVarP(&o.Closure, "closure", "c", false, "follow component references")
 	o.Repository.AddFlags(fs)
 	o.Output.AddFlags(fs, outputs)
 }
 
 func (o *Command) Complete(args []string) error {
-	var err error
-	if len(args) == 0 && o.Repository.Spec == "" {
-		return fmt.Errorf("a repository or at least one argument that defines the reference is needed")
+	err := o.Output.Complete()
+	if err != nil {
+		return err
 	}
-	o.Refs = args
 	err = o.Repository.Complete(o.Context)
 	if err != nil {
 		return err
 	}
-
-	return nil
+	o.Comp = args[0]
+	o.Ids, err = ocmcommon.MapArgsToIdentities(args[1:]...)
+	return err
 }
 
 func (o *Command) Run() error {
-	session := oci.NewSession(nil)
+	session := ocm.NewSession(nil)
 	defer session.Close()
-	handler := common.NewTypeHandler(o.Context.OCIContext(), session, o.Repository.Repository)
-	session.Closer(handler, nil)
-	return utils.HandleArgs(outputs, &o.Output, handler, o.Refs...)
-}
+	vershdlr := compcommon.NewTypeHandler(o.Context.OCMContext(), session, o.Repository.Repository)
+	session.Closer(vershdlr)
+	out := &output.SingleElementOutput{}
+	err := utils.HandleOutput(out, vershdlr, utils.StringSpec(o.Comp))
+	if err != nil {
+		return err
+	}
+	hdlr := common.NewTypeHandler(o.Repository.Repository, session, out.Elem.(*compcommon.Object).ComponentVersion, o.Closure)
 
-/////////////////////////////////////////////////////////////////////////////
+	return utils.HandleOutputs(outputs, &o.Output, hdlr, utils.ElemSpecs(o.Ids)...)
+}
 
 var outputs = output.NewOutputs(get_regular, output.Outputs{
 	"wide": get_wide,
@@ -95,42 +99,19 @@ var outputs = output.NewOutputs(get_regular, output.Outputs{
 
 func get_regular(opts *output.Options) output.Output {
 	return output.NewProcessingTableOutput(opts, data.Chain().Map(map_get_regular_output),
-		"REGISTRY", "REPOSITORY", "TAG", "DIGEST")
+		append(ocmcommon.MetaOutput, "TYPE")...)
 }
 
 func get_wide(opts *output.Options) output.Output {
-	return output.NewProcessingTableOutput(opts, data.Chain().Parallel(20).Map(map_get_wide_output),
-		"REGISTRY", "REPOSITORY", "TAG", "DIGEST", "MIMETYPE", "CONFIGTYPE")
+	return output.NewProcessingTableOutput(opts, data.Chain().Map(map_get_wide_output),
+		append(append(ocmcommon.MetaOutput, "TYPE"), ocmcommon.AccessOutput...)...)
 }
 
 func map_get_regular_output(e interface{}) interface{} {
-	digest := "unknown"
-	p := e.(*common.Object)
-	blob, err := p.Artefact.Blob()
-	if err == nil {
-		digest = blob.Digest().String()
-	}
-	tag := "-"
-	if p.Spec.Tag != nil {
-		tag = *p.Spec.Tag
-	}
-	return []string{p.Spec.Host, p.Spec.Repository, tag, digest}
+	r := common.Elem(e)
+	return append(ocmcommon.MapMetaOutput(e), r.Type)
 }
 
 func map_get_wide_output(e interface{}) interface{} {
-	digest := "unknown"
-	p := e.(*common.Object)
-	blob, err := p.Artefact.Blob()
-	if err == nil {
-		digest = blob.Digest().String()
-	}
-	tag := "-"
-	if p.Spec.Tag != nil {
-		tag = *p.Spec.Tag
-	}
-	config := "-"
-	if p.Artefact.IsManifest() {
-		config = p.Artefact.ManifestAccess().GetDescriptor().Config.MediaType
-	}
-	return []string{p.Spec.Host, p.Spec.Repository, tag, digest, p.Artefact.GetDescriptor().MimeType(), config}
+	return append(map_get_regular_output(e).([]string), ocmcommon.MapAccessOutput(common.Elem(e).Access)...)
 }

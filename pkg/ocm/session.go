@@ -31,14 +31,20 @@ type ComponentVersionContainer interface {
 	LookupVersion(version string) (ComponentVersionAccess, error)
 }
 
+type EvaluationResult struct {
+	Ref        RefSpec
+	Repository Repository
+	Component  ComponentAccess
+	Version    ComponentVersionAccess
+}
+
 type Session interface {
 	datacontext.Session
 
 	LookupRepository(Context, RepositorySpec) (Repository, error)
 	LookupComponent(ComponentContainer, string) (ComponentAccess, error)
 	GetComponentVersion(ComponentVersionContainer, string) (ComponentVersionAccess, error)
-	EvaluateRef(ctx Context, ref string) (*RefSpec, ComponentAccess, ComponentVersionAccess, error)
-	Close() error
+	EvaluateRef(ctx Context, ref string) (*EvaluationResult, error)
 }
 
 type session struct {
@@ -144,21 +150,24 @@ func (s *session) GetComponentVersion(c ComponentVersionContainer, version strin
 	return obj, err
 }
 
-func (s *session) EvaluateRef(ctx Context, ref string) (*RefSpec, ComponentAccess, ComponentVersionAccess, error) {
-	parsed, err := ParseRef(ref)
+func (s *session) EvaluateRef(ctx Context, ref string) (*EvaluationResult, error) {
+	var err error
+	result := &EvaluationResult{}
+	result.Ref, err = ParseRef(ref)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
-	meta := genericocireg.NewComponentRepositoryMeta(parsed.SubPath, "")
-	spec := ocireg.NewRepositorySpec(parsed.Host, meta)
-	repo, err := s.LookupRepository(ctx, spec)
+
+	meta := genericocireg.NewComponentRepositoryMeta(result.Ref.SubPath, "")
+	spec := ocireg.NewRepositorySpec(result.Ref.Host, meta)
+	result.Repository, err = s.LookupRepository(ctx, spec)
 	if err != nil {
-		return nil, nil, nil, err
+		return result, err
 	}
-	ns, err := s.LookupComponent(repo, parsed.Component)
-	if !parsed.IsVersion() {
-		return &parsed, ns, nil, err
+	result.Component, err = s.LookupComponent(result.Repository, result.Ref.Component)
+	if !result.Ref.IsVersion() {
+		return result, err
 	}
-	v, err := s.GetComponentVersion(ns, *parsed.Version)
-	return &parsed, ns, v, err
+	result.Version, err = s.GetComponentVersion(result.Component, *result.Ref.Version)
+	return result, err
 }

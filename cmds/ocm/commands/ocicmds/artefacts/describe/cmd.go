@@ -98,7 +98,7 @@ func (o *Command) Run() error {
 	session := oci.NewSession(nil)
 	defer session.Close()
 	handler := common.NewTypeHandler(o.Context.OCIContext(), session, o.Repository.Repository)
-
+	session.Closer(handler, nil)
 	return utils.HandleArgs(outputs, &o.Output, handler, o.Refs...)
 }
 

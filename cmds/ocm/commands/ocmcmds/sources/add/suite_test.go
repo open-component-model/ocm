@@ -12,22 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package add
+package add_test
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	resources "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/add"
-	sources "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/sources/add"
-	"github.com/spf13/cobra"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-// NewCommand creates a new command.
-func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              "add",
-		TraverseChildren: true,
-	}
-	cmd.AddCommand(resources.NewCommand(ctx, "resources", "resource", "res", "r"))
-	cmd.AddCommand(sources.NewCommand(ctx, "sources", "source", "src", "s"))
-	return cmd
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "OCM add sources")
 }

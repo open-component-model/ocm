@@ -26,6 +26,7 @@ import (
 
 type Object struct {
 	Spec             ocm.RefSpec
+	Repository       ocm.Repository
 	ComponentVersion ocm.ComponentVersionAccess
 }
 
@@ -50,7 +51,7 @@ func NewTypeHandler(octx ocm.Context, session ocm.Session, repobase ocm.Reposito
 }
 
 func (h *TypeHandler) Close() error {
-	return h.session.Close()
+	return nil
 }
 
 func (h *TypeHandler) All() ([]output.Object, error) {
@@ -67,7 +68,7 @@ func (h *TypeHandler) All() ([]output.Object, error) {
 	}
 	var result []output.Object
 	for _, l := range list {
-		part, err := h.Get(l)
+		part, err := h.Get(utils.StringSpec(l))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Warning: %s\n", err)
 		}
@@ -76,24 +77,26 @@ func (h *TypeHandler) All() ([]output.Object, error) {
 	return result, nil
 }
 
-func (h *TypeHandler) Get(name string) ([]output.Object, error) {
+func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 	var component ocm.ComponentAccess
 	var result []output.Object
 	var err error
 
+	name := elemspec.String()
 	spec := ocm.RefSpec{}
 	repo := h.repobase
 	if repo == nil {
-		parsed, ns, v, err := h.session.EvaluateRef(h.octx, name)
+		evaluated, err := h.session.EvaluateRef(h.octx, name)
 		if err != nil {
 			return nil, errors.Wrapf(err, "component version reference %q", name)
 		}
-		spec = *parsed
-		component = ns
-		if v != nil {
+		spec = evaluated.Ref
+		component = evaluated.Component
+		if evaluated.Version != nil {
 			result = append(result, &Object{
 				Spec:             spec,
-				ComponentVersion: v,
+				Repository:       evaluated.Repository,
+				ComponentVersion: evaluated.Version,
 			})
 			return result, nil
 		}
@@ -120,6 +123,7 @@ func (h *TypeHandler) Get(name string) ([]output.Object, error) {
 			return nil, err
 		}
 		result = append(result, &Object{
+			Repository:       repo,
 			Spec:             spec,
 			ComponentVersion: v,
 		})

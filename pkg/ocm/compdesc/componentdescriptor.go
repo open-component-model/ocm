@@ -182,7 +182,7 @@ func (o *ElementMeta) SetExtraIdentity(identity metav1.Identity) {
 }
 
 // GetIdentity returns the identity of the object.
-func (o *ElementMeta) GetIdentity(accessor ElementMetaAccessor) metav1.Identity {
+func (o *ElementMeta) GetIdentity(accessor ElementAccessor) metav1.Identity {
 	identity := o.ExtraIdentity.Copy()
 	if identity == nil {
 		identity = metav1.Identity{}
@@ -190,7 +190,9 @@ func (o *ElementMeta) GetIdentity(accessor ElementMetaAccessor) metav1.Identity 
 	identity[SystemIdentityName] = o.Name
 	if accessor != nil {
 		found := false
-		for _, m := range accessor.GetMetas() {
+		l := accessor.Len()
+		for i := 0; i < l; i++ {
+			m := accessor.Get(i).GetMeta()
 			if m.Name == o.Name && m.ExtraIdentity.Equals(o.ExtraIdentity) {
 				if found {
 					identity[SystemIdentityVersion] = o.Version
@@ -203,8 +205,20 @@ func (o *ElementMeta) GetIdentity(accessor ElementMetaAccessor) metav1.Identity 
 	return identity
 }
 
+// GetMatchBaseIdentity returns all possible identity attributes for resource matching
+func (o *ElementMeta) GetMatchBaseIdentity() metav1.Identity {
+	identity := o.ExtraIdentity.Copy()
+	if identity == nil {
+		identity = metav1.Identity{}
+	}
+	identity[SystemIdentityName] = o.Name
+	identity[SystemIdentityVersion] = o.Version
+
+	return identity
+}
+
 // GetIdentityDigest returns the digest of the object's identity.
-func (o *ElementMeta) GetIdentityDigest(accessor ElementMetaAccessor) []byte {
+func (o *ElementMeta) GetIdentityDigest(accessor ElementAccessor) []byte {
 	return o.GetIdentity(accessor).Digest()
 }
 
@@ -251,10 +265,15 @@ type ObjectMetaAccessor interface {
 	LabelsAccessor
 }
 
-// ElementMetaAccessor describes an accessor for the set of meta information for a set of elements.
+// ElementMetaAccessor provides generic access an elements meta information
 type ElementMetaAccessor interface {
-	// GetMetas all the meta information for a set of elements
-	GetMetas() []ElementMeta
+	GetMeta() *ElementMeta
+}
+
+// ElementAccessor provides generic access to list of elements
+type ElementAccessor interface {
+	Len() int
+	Get(i int) ElementMetaAccessor
 }
 
 // AccessSpec is an abstract specification of an access method
@@ -276,12 +295,14 @@ func GenericAccessSpec(un *runtime.UnstructuredTypedObject) AccessSpec {
 // Sources describes a set of source specifications
 type Sources []Source
 
-func (s Sources) GetMetas() []ElementMeta {
-	metas := make([]ElementMeta, len(s), len(s))
-	for i, src := range s {
-		metas[i] = src.ElementMeta
-	}
-	return metas
+var _ ElementAccessor = Sources{}
+
+func (s Sources) Len() int {
+	return len(s)
+}
+
+func (s Sources) Get(i int) ElementMetaAccessor {
+	return &s[i]
 }
 
 func (s Sources) Copy() Sources {
@@ -301,6 +322,10 @@ func (s Sources) Copy() Sources {
 type Source struct {
 	SourceMeta `json:",inline"`
 	Access     AccessSpec `json:"access"`
+}
+
+func (s *Source) GetMeta() *ElementMeta {
+	return &s.ElementMeta
 }
 
 func (s *Source) Copy() *Source {
@@ -381,12 +406,14 @@ func (r SourceRefs) Copy() SourceRefs {
 // Resources describes a set of resource specifications
 type Resources []Resource
 
-func (r Resources) GetMetas() []ElementMeta {
-	metas := make([]ElementMeta, len(r), len(r))
-	for i, rsc := range r {
-		metas[i] = rsc.ElementMeta
-	}
-	return metas
+var _ ElementAccessor = Resources{}
+
+func (r Resources) Len() int {
+	return len(r)
+}
+
+func (r Resources) Get(i int) ElementMetaAccessor {
+	return &r[i]
 }
 
 func (r Resources) Copy() Resources {
@@ -408,6 +435,10 @@ type Resource struct {
 	// Access describes the type specific method to
 	// access the defined resource.
 	Access AccessSpec `json:"access"`
+}
+
+func (r *Resource) GetMeta() *ElementMeta {
+	return &r.ElementMeta
 }
 
 func (r *Resource) Copy() *Resource {
@@ -461,6 +492,14 @@ func (o *ResourceMeta) Copy() *ResourceMeta {
 
 type ComponentReferences []ComponentReference
 
+func (r ComponentReferences) Len() int {
+	return len(r)
+}
+
+func (r ComponentReferences) Get(i int) ElementMetaAccessor {
+	return &r[i]
+}
+
 func (r ComponentReferences) Copy() ComponentReferences {
 	if r == nil {
 		return nil
@@ -476,72 +515,18 @@ func (r ComponentReferences) Copy() ComponentReferences {
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
 type ComponentReference struct {
-	// Name is the context unique name of the object.
-	Name string `json:"name"`
+	ElementMeta `json:",inline"`
 	// ComponentName describes the remote name of the referenced object
 	ComponentName string `json:"componentName"`
-	// Version is the semver version of the object.
-	Version string `json:"version"`
-	// ExtraIdentity is the identity of an object.
-	// An additional label with key "name" ist not allowed
-	ExtraIdentity metav1.Identity `json:"extraIdentity,omitempty"`
-	// Labels defines an optional set of additional labels
-	// describing the object.
-	// +optional
-	Labels metav1.Labels `json:"labels,omitempty"`
 }
 
-// GetName returns the name of the object.
-func (o ComponentReference) GetName() string {
-	return o.Name
+func (r *ComponentReference) GetMeta() *ElementMeta {
+	return &r.ElementMeta
 }
 
-// SetName sets the name of the object.
-func (o *ComponentReference) SetName(name string) {
-	o.Name = name
-}
-
-// GetVersion returns the version of the object.
-func (o ComponentReference) GetVersion() string {
-	return o.Version
-}
-
-// SetVersion sets the version of the object.
-func (o *ComponentReference) SetVersion(version string) {
-	o.Version = version
-}
-
-// GetLabels returns the label of the object.
-func (o ComponentReference) GetLabels() metav1.Labels {
-	return o.Labels
-}
-
-// SetLabels sets the labels of the object.
-func (o *ComponentReference) SetLabels(labels []metav1.Label) {
-	o.Labels = labels
-}
-
-// GetIdentity returns the identity of the object.
-func (o *ComponentReference) GetIdentity() metav1.Identity {
-	identity := map[string]string{}
-	for k, v := range o.ExtraIdentity {
-		identity[k] = v
-	}
-	identity[SystemIdentityName] = o.Name
-	return identity
-}
-
-// GetIdentityDigest returns the digest of the object's identity.
-func (o *ComponentReference) GetIdentityDigest() []byte {
-	return o.GetIdentity().Digest()
-}
-
-func (o *ComponentReference) Copy() *ComponentReference {
+func (r *ComponentReference) Copy() *ComponentReference {
 	return &ComponentReference{
-		Name:          o.Name,
-		ComponentName: o.ComponentName,
-		Version:       o.Version,
-		ExtraIdentity: o.ExtraIdentity.Copy(),
-		Labels:        o.Labels.Copy(),
+		ElementMeta:   *r.ElementMeta.Copy(),
+		ComponentName: r.ComponentName,
 	}
 }

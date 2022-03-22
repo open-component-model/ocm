@@ -73,7 +73,7 @@ var _ = Describe("json", func() {
 		It("wrapping unstructured map", func() {
 			d := &WrappingUnstructured{
 				Unstructured: Unstructured{
-					"type": "test",
+					runtime.ATTR_TYPE: "test",
 				},
 				Field: "value",
 			}
@@ -85,7 +85,7 @@ var _ = Describe("json", func() {
 		It("wrapping unstructured map with inline tag", func() {
 			d := &WrappingUnstructuredInlined{
 				Unstructured: Unstructured{
-					"type": "test",
+					runtime.ATTR_TYPE: "test",
 				},
 				Field: "value",
 			}

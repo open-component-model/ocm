@@ -167,9 +167,11 @@ var _ = Describe("Validation", func() {
 		It("should pass if a reference is set", func() {
 			comp.ComponentReferences = []ComponentReference{
 				{
-					Name:          "test",
+					ElementMeta: ElementMeta{
+						Name:    "test",
+						Version: "1.2.3",
+					},
 					ComponentName: "test",
-					Version:       "1.2.3",
 				},
 			}
 			errList := validate(nil, comp)
@@ -186,8 +188,10 @@ var _ = Describe("Validation", func() {
 		It("should forbid if a reference's name is missing", func() {
 			comp.ComponentReferences = []ComponentReference{
 				{
+					ElementMeta: ElementMeta{
+						Version: "1.2.3",
+					},
 					ComponentName: "test",
-					Version:       "1.2.3",
 				},
 			}
 			errList := validate(nil, comp)
@@ -200,8 +204,10 @@ var _ = Describe("Validation", func() {
 		It("should forbid if a reference's component name is missing", func() {
 			comp.ComponentReferences = []ComponentReference{
 				{
-					Name:    "test",
-					Version: "1.2.3",
+					ElementMeta: ElementMeta{
+						Name:    "test",
+						Version: "1.2.3",
+					},
 				},
 			}
 			errList := validate(nil, comp)
@@ -214,8 +220,10 @@ var _ = Describe("Validation", func() {
 		It("should forbid if a reference's version is missing", func() {
 			comp.ComponentReferences = []ComponentReference{
 				{
+					ElementMeta: ElementMeta{
+						Name: "test",
+					},
 					ComponentName: "test",
-					Name:          "test",
 				},
 			}
 			errList := validate(nil, comp)
@@ -228,10 +236,14 @@ var _ = Describe("Validation", func() {
 		It("should forbid if a duplicated component reference is defined", func() {
 			comp.ComponentReferences = []ComponentReference{
 				{
-					Name: "test",
+					ElementMeta: ElementMeta{
+						Name: "test",
+					},
 				},
 				{
-					Name: "test",
+					ElementMeta: ElementMeta{
+						Name: "test",
+					},
 				},
 			}
 			errList := validate(nil, comp)
@@ -364,19 +376,21 @@ var _ = Describe("Validation", func() {
 		It("should forbid if labels are defined multiple times in the same context", func() {
 			comp.ComponentReferences = []ComponentReference{
 				{
-					ComponentName: "test",
-					Name:          "test",
-					Version:       "1.2.3",
-					Labels: []metav1.Label{
-						{
-							Name:  "l1",
-							Value: []byte{},
-						},
-						{
-							Name:  "l1",
-							Value: []byte{},
+					ElementMeta: ElementMeta{
+						Name:    "test",
+						Version: "1.2.3",
+						Labels: []metav1.Label{
+							{
+								Name:  "l1",
+								Value: []byte{},
+							},
+							{
+								Name:  "l1",
+								Value: []byte{},
+							},
 						},
 					},
+					ComponentName: "test",
 				},
 			}
 
@@ -390,19 +404,21 @@ var _ = Describe("Validation", func() {
 		It("should pass if labels are defined multiple times in the same context with differnet names", func() {
 			comp.ComponentReferences = []ComponentReference{
 				{
-					ComponentName: "test",
-					Name:          "test",
-					Version:       "1.2.3",
-					Labels: []metav1.Label{
-						{
-							Name:  "l1",
-							Value: []byte{},
-						},
-						{
-							Name:  "l2",
-							Value: []byte{},
+					ElementMeta: ElementMeta{
+						Name:    "test",
+						Version: "1.2.3",
+						Labels: []metav1.Label{
+							{
+								Name:  "l1",
+								Value: []byte{},
+							},
+							{
+								Name:  "l2",
+								Value: []byte{},
+							},
 						},
 					},
+					ComponentName: "test",
 				},
 			}
 

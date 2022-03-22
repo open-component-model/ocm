@@ -87,7 +87,7 @@ func ValidateSources(fldPath *field.Path, sources Sources) field.ErrorList {
 	sourceIDs := make(map[string]struct{})
 	for i, src := range sources {
 		srcPath := fldPath.Index(i)
-		allErrs = append(allErrs, ValidateSource(srcPath, src)...)
+		allErrs = append(allErrs, ValidateSource(srcPath, src, false)...)
 
 		id := string(src.GetIdentityDigest(sources))
 		if _, ok := sourceIDs[id]; ok {
@@ -100,13 +100,16 @@ func ValidateSources(fldPath *field.Path, sources Sources) field.ErrorList {
 }
 
 // ValidateSource validates the a component's source object.
-func ValidateSource(fldPath *field.Path, src Source) field.ErrorList {
+func ValidateSource(fldPath *field.Path, src Source, access bool) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if len(src.GetName()) == 0 {
 		allErrs = append(allErrs, field.Required(fldPath.Child("name"), "must specify a name"))
 	}
 	if len(src.GetType()) == 0 {
 		allErrs = append(allErrs, field.Required(fldPath.Child("type"), "must specify a type"))
+	}
+	if src.Access == nil && access {
+		allErrs = append(allErrs, field.Required(fldPath.Child("access"), "must specify a access"))
 	}
 	allErrs = append(allErrs, metav1.ValidateIdentity(fldPath.Child("extraIdentity"), src.ExtraIdentity)...)
 	return allErrs
@@ -133,7 +136,6 @@ func ValidateResource(fldPath *field.Path, res Resource, access bool) field.Erro
 		allErrs = append(allErrs, field.Required(fldPath.Child("access"), "must specify a access"))
 	}
 	allErrs = append(allErrs, metav1.ValidateIdentity(fldPath.Child("extraIdentity"), res.ExtraIdentity)...)
-
 	return allErrs
 }
 
@@ -156,14 +158,14 @@ func ValidateComponentReference(fldPath *field.Path, cr ComponentReference) fiel
 
 // ValidateComponentReferences validates a list of component references.
 // It makes sure that no duplicate sources are present.
-func ValidateComponentReferences(fldPath *field.Path, refs []ComponentReference) field.ErrorList {
+func ValidateComponentReferences(fldPath *field.Path, refs ComponentReferences) field.ErrorList {
 	allErrs := field.ErrorList{}
 	refIDs := make(map[string]struct{})
 	for i, ref := range refs {
 		refPath := fldPath.Index(i)
 		allErrs = append(allErrs, ValidateComponentReference(refPath, ref)...)
 
-		id := string(ref.GetIdentityDigest())
+		id := string(ref.GetIdentityDigest(refs))
 		if _, ok := refIDs[id]; ok {
 			allErrs = append(allErrs, field.Duplicate(refPath, "duplicate component reference name"))
 			continue

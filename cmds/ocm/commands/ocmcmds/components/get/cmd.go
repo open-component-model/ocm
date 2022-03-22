@@ -75,6 +75,7 @@ func (o *Command) Run() error {
 	session := ocm.NewSession(nil)
 	defer session.Close()
 	handler := common.NewTypeHandler(o.Context.OCMContext(), session, o.Repository.Repository)
+	session.Closer(handler, nil)
 	return utils.HandleArgs(outputs, &o.Output, handler, o.Refs...)
 }
 

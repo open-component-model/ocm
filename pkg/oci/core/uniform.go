@@ -102,6 +102,7 @@ func (s *specHandlers) MapUniformRepositorySpec(ctx Context, u *UniformRepositor
 	var err error
 	s.lock.RLock()
 	defer s.lock.RUnlock()
+	deferr := errors.ErrNotSupported("uniform repository ref", u.String())
 
 	if len(aliases) > 0 && u.Type == "" {
 		if u.Info != "" {
@@ -109,12 +110,14 @@ func (s *specHandlers) MapUniformRepositorySpec(ctx Context, u *UniformRepositor
 			if spec != nil {
 				return spec, nil
 			}
+			deferr = errors.ErrUnknown("repository", u.Info)
 		}
 		if u.Host != "" {
 			spec := aliases[u.Host]
 			if spec != nil {
 				return spec, nil
 			}
+			deferr = errors.ErrUnknown("repository", u.Host)
 		}
 	}
 	for _, h := range s.handlers[u.Type] {
@@ -157,5 +160,5 @@ func (s *specHandlers) MapUniformRepositorySpec(ctx Context, u *UniformRepositor
 		}
 	}
 
-	return nil, errors.ErrNotSupported("uniform repository ref %q", u.String())
+	return nil, deferr
 }

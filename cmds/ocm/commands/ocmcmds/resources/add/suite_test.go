@@ -23,5 +23,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "OCM create component archive")
+	RunSpecs(t, "OCM add resources")
 }

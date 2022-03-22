@@ -17,19 +17,56 @@ package utils
 import (
 	"fmt"
 	"os"
+	"reflect"
 
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/pkg/errors"
 )
 
+type ElemSpec interface {
+	String() string
+}
+
+type StringSpec string
+
+func (s StringSpec) String() string {
+	return string(s)
+}
+
 type TypeHandler interface {
 	All() ([]output.Object, error)
-	Get(name string) ([]output.Object, error)
+	Get(name ElemSpec) ([]output.Object, error)
 	Close() error
 }
 
+func StringElemSpecs(args ...string) []ElemSpec {
+	r := make([]ElemSpec, len(args))
+	for i, v := range args {
+		r[i] = StringSpec(v)
+	}
+	return r
+}
+
+func ElemSpecs(list interface{}) []ElemSpec {
+	if list == nil {
+		return nil
+	}
+	v := reflect.ValueOf(list)
+	if v.Kind() != reflect.Array && v.Kind() != reflect.Slice {
+		panic("no array")
+	}
+	r := make([]ElemSpec, v.Len())
+	for i := 0; i < v.Len(); i++ {
+		r[i] = v.Index(i).Interface().(ElemSpec)
+	}
+	return r
+}
+
 func HandleArgs(outputs output.Outputs, opts *output.Options, handler TypeHandler, args ...string) error {
-	defer handler.Close()
+	return HandleOutputs(outputs, opts, handler, StringElemSpecs(args...)...)
+}
+
+func HandleOutputs(outputs output.Outputs, opts *output.Options, handler TypeHandler, args ...ElemSpec) error {
 	if err := opts.Complete(); err != nil {
 		return err
 	}
@@ -37,7 +74,11 @@ func HandleArgs(outputs output.Outputs, opts *output.Options, handler TypeHandle
 	if err != nil {
 		return err
 	}
-	if len(args) == 0 {
+	return HandleOutput(output, handler, args...)
+}
+
+func HandleOutput(output output.Output, handler TypeHandler, specs ...ElemSpec) error {
+	if len(specs) == 0 {
 		result, err := handler.All()
 		if err != nil {
 			return err
@@ -50,16 +91,16 @@ func HandleArgs(outputs output.Outputs, opts *output.Options, handler TypeHandle
 			output.Add(nil, r)
 		}
 	}
-	for _, a := range args {
-		result, err := handler.Get(a)
+	for _, s := range specs {
+		result, err := handler.Get(s)
 		if err != nil {
-			return errors.Wrapf(err, "error processing %q", a)
+			return errors.Wrapf(err, "error processing %q", s.String())
 		}
 		for _, r := range result {
 			output.Add(nil, r)
 		}
 	}
-	err = output.Close(nil)
+	err := output.Close(nil)
 	if err != nil {
 		return err
 	}

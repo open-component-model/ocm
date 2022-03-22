@@ -103,7 +103,7 @@ func (c *ComponentDescriptor) AddRepositoryContext(repoCtx runtime.TypedObject) 
 func (c *ComponentDescriptor) GetComponentReferences(selectors ...IdentitySelector) ([]ComponentReference, error) {
 	refs := make([]ComponentReference, 0)
 	for _, ref := range c.ComponentReferences {
-		ok, err := selector.MatchSelectors(ref.GetIdentity(), selectors...)
+		ok, err := selector.MatchSelectors(ref.GetIdentity(c.ComponentReferences), selectors...)
 		if err != nil {
 			return nil, fmt.Errorf("unable to match selector for resource %s: %w", ref.Name, err)
 		}
@@ -278,9 +278,9 @@ func (c *ComponentDescriptor) GetResourceIndex(res *ResourceMeta) int {
 // GetComponentReferenceIndex returns the index of a given component reference.
 // If the index is not found -1 is returned.
 func (c *ComponentDescriptor) GetComponentReferenceIndex(ref ComponentReference) int {
-	id := ref.GetIdentityDigest()
+	id := ref.GetIdentityDigest(c.ComponentReferences)
 	for i, cur := range c.ComponentReferences {
-		if bytes.Equal(cur.GetIdentityDigest(), id) {
+		if bytes.Equal(cur.GetIdentityDigest(c.ComponentReferences), id) {
 			return i
 		}
 	}

@@ -22,6 +22,8 @@ import (
 	"github.com/modern-go/reflect2"
 )
 
+const ATTR_TYPE = "type"
+
 // ATTENTION: UnstructuredTypedObject CANNOT be be used as anonymous
 // field together with the default struct marshalling with the
 // great json marshallers.
@@ -138,7 +140,7 @@ func (u *UnstructuredTypedObject) SetType(ttype string) {
 	if u.Object == nil {
 		u.Object = UnstructuredMap{}
 	}
-	u.Object["type"] = ttype
+	u.Object[ATTR_TYPE] = ttype
 }
 
 // DeepCopyInto is deepcopy function, copying the receiver, writing into out. in must be non-nil.
@@ -194,7 +196,7 @@ func (u *UnstructuredTypedObject) Evaluate(types Scheme) (TypedObject, error) {
 
 // UnmarshalJSON implements a custom json unmarshal method for a unstructured typed object.
 func (u *UnstructuredTypedObject) UnmarshalJSON(data []byte) error {
-	fmt.Printf("unmarshal raw: %s\n", string(data))
+	//fmt.Printf("unmarshal raw: %s\n", string(data))
 	typedObj := ObjectType{}
 	if err := json.Unmarshal(data, &typedObj); err != nil {
 		return err

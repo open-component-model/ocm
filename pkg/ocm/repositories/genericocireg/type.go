@@ -16,7 +16,6 @@ package genericocireg
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/errors"
@@ -118,7 +117,7 @@ func (a *RepositorySpec) AsUniformSpec(cpi.Context) cpi.UniformRepositorySpec {
 }
 
 func (u *RepositorySpec) UnmarshalJSON(data []byte) error {
-	fmt.Printf("unmarshal generic ocireg spec %s\n", string(data))
+	//fmt.Printf("unmarshal generic ocireg spec %s\n", string(data))
 	ocispec := &oci.GenericRepositorySpec{}
 	if err := json.Unmarshal(data, ocispec); err != nil {
 		return err

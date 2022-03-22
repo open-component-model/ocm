@@ -12,22 +12,27 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package add
+package common
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	resources "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/add"
-	sources "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/sources/add"
-	"github.com/spf13/cobra"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
+	"github.com/gardener/ocm/pkg/ocm"
+	"github.com/gardener/ocm/pkg/ocm/compdesc"
 )
 
-// NewCommand creates a new command.
-func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              "add",
-		TraverseChildren: true,
-	}
-	cmd.AddCommand(resources.NewCommand(ctx, "resources", "resource", "res", "r"))
-	cmd.AddCommand(sources.NewCommand(ctx, "sources", "source", "src", "s"))
-	return cmd
+func Elem(e interface{}) *compdesc.Resource {
+	return e.(*common.Object).Element.(*compdesc.Resource)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type TypeHandler struct {
+	*common.TypeHandler
+}
+
+func NewTypeHandler(repo ocm.Repository, session ocm.Session, access ocm.ComponentVersionAccess, recursive bool) utils.TypeHandler {
+	return common.NewTypeHandler(repo, session, access, recursive, func(access ocm.ComponentVersionAccess) compdesc.ElementAccessor {
+		return access.GetDescriptor().Resources
+	})
 }

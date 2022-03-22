@@ -12,22 +12,22 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package add
+package ocmcmds
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
-	resources "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/add"
-	sources "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/sources/add"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/sources"
 	"github.com/spf13/cobra"
 )
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              "add",
+		Use:              "ocm",
 		TraverseChildren: true,
 	}
-	cmd.AddCommand(resources.NewCommand(ctx, "resources", "resource", "res", "r"))
-	cmd.AddCommand(sources.NewCommand(ctx, "sources", "source", "src", "s"))
+	cmd.AddCommand(resources.NewCommand(ctx))
+	cmd.AddCommand(sources.NewCommand(ctx))
 	return cmd
 }

@@ -200,7 +200,6 @@ func (o *Command) Run() error {
 			err = obj.SetResourceBlob(meta, blob, hint, nil)
 			blob.Close()
 		} else {
-			compdesc.GenericAccessSpec(r.spec.Access)
 			err = obj.SetResource(meta, compdesc.GenericAccessSpec(r.spec.Access))
 		}
 		if err != nil {

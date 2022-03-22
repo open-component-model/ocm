@@ -17,6 +17,7 @@ package resources
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/add"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/get"
 	"github.com/spf13/cobra"
 )
 
@@ -28,5 +29,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 		TraverseChildren: true,
 	}
 	cmd.AddCommand(add.NewCommand(ctx, "add"))
+	cmd.AddCommand(get.NewCommand(ctx, "get"))
 	return cmd
 }
