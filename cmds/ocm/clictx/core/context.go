@@ -41,7 +41,9 @@ type OCI interface {
 	Context() oci.Context
 	AddRepository(name string, spec oci.RepositorySpec) error
 	GetRepository(name string) (oci.Repository, error)
+	GetAliases(name string) (map[string]oci.RepositorySpec, error)
 	DetermineRepository(ref string) (oci.Repository, error)
+	MapUniformRepositorySpec(spec oci.UniformRepositorySpec) (oci.Repository, error)
 	OpenCTF(path string) (oci.Repository, error)
 }
 
@@ -49,7 +51,9 @@ type OCM interface {
 	Context() ocm.Context
 	AddRepository(name string, spec ocm.RepositorySpec) error
 	GetRepository(name string) (ocm.Repository, error)
+	GetAliases(name string) (map[string]ocm.RepositorySpec, error)
 	DetermineRepository(ref string) (ocm.Repository, error)
+	MapUniformRepositorySpec(spec ocm.UniformRepositorySpec) (ocm.Repository, error)
 	OpenCTF(path string) (ocm.Repository, error)
 }
 
@@ -198,11 +202,30 @@ func (c *_oci) GetRepository(name string) (oci.Repository, error) {
 	return c.ctx.RepositoryForSpec(spec)
 }
 
+func (c *_oci) GetAliases(name string) (map[string]oci.RepositorySpec, error) {
+	err := c.updater.Update(c)
+	if err != nil {
+		return nil, err
+	}
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+
+	r := map[string]oci.RepositorySpec{}
+	for k, v := range c.repos {
+		r[k] = v
+	}
+	return r, nil
+}
+
 func (c *_oci) DetermineRepository(ref string) (oci.Repository, error) {
 	spec, err := oci.ParseRepo(ref)
 	if err != nil {
 		return nil, err
 	}
+	return c.MapUniformRepositorySpec(spec)
+}
+
+func (c *_oci) MapUniformRepositorySpec(spec oci.UniformRepositorySpec) (oci.Repository, error) {
 	rspec, err := c.ctx.MapUniformRepositorySpec(&spec, c.repos)
 	if err != nil {
 		return nil, err
@@ -263,11 +286,30 @@ func (c *_ocm) GetRepository(name string) (ocm.Repository, error) {
 	return c.ctx.RepositoryForSpec(spec)
 }
 
+func (c *_ocm) GetAliases(name string) (map[string]ocm.RepositorySpec, error) {
+	err := c.updater.Update(c)
+	if err != nil {
+		return nil, err
+	}
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+
+	r := map[string]ocm.RepositorySpec{}
+	for k, v := range c.repos {
+		r[k] = v
+	}
+	return r, nil
+}
+
 func (c *_ocm) DetermineRepository(ref string) (ocm.Repository, error) {
 	spec, err := ocm.ParseRepo(ref)
 	if err != nil {
 		return nil, err
 	}
+	return c.MapUniformRepositorySpec(spec)
+}
+
+func (c *_ocm) MapUniformRepositorySpec(spec ocm.UniformRepositorySpec) (ocm.Repository, error) {
 	rspec, err := c.ctx.MapUniformRepositorySpec(&spec, c.repos)
 	if err != nil {
 		return nil, err

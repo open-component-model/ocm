@@ -26,6 +26,40 @@ import (
 
 type Object interface{}
 
+////////////////////////////////////////////////////////////////////////////////
+
+// Output handles the output of elements.
+// It consists of two phases:
+// First, elements are added to the output using the Add method,
+// This phase is finished calling the Close method. THis finalizes
+// any ongoing input processing.
+// Second, the final output is requested using the Out method.
+type Output interface {
+	Add(processingContext interface{}, e interface{}) error
+	Close(processingContext interface{}) error
+	Out(processingContext interface{}) error
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type NopOutput struct{}
+
+var _ Output = (*NopOutput)(nil)
+
+func (NopOutput) Add(processingContext interface{}, e interface{}) error {
+	return nil
+}
+
+func (NopOutput) Close(processingContext interface{}) error {
+	return nil
+}
+
+func (n NopOutput) Out(processingContext interface{}) error {
+	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type Manifest interface {
 	AsManifest() interface{}
 }
@@ -41,20 +75,6 @@ func (this *ManifestOutput) Add(processingContext interface{}, e interface{}) er
 
 func (this *ManifestOutput) Close(processingContext interface{}) error {
 	return nil
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-// Output handles the output of elements.
-// It consists of two phases:
-// First, elements are added to the output using the Add method,
-// This phase is finished calling the Close method. THis finalizes
-// any ongoing input processing.
-// Second, the final output is requested using the Out method.
-type Output interface {
-	Add(processingContext interface{}, e interface{}) error
-	Close(processingContext interface{}) error
-	Out(processingContext interface{}) error
 }
 
 type YAMLOutput struct {

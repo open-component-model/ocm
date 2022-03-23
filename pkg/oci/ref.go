@@ -9,7 +9,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/containerd/containerd/reference/docker"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/grammar"
 	"github.com/opencontainers/go-digest"
@@ -26,15 +25,15 @@ const (
 
 // ParseRepo parses a standard ocm repository reference into a internal representation.
 func ParseRepo(ref string) (UniformRepositorySpec, error) {
-	match := grammar.AnchoredRepositoryRegexp.FindSubmatch([]byte(ref))
+	match := grammar.AnchoredRegistryRegexp.FindSubmatch([]byte(ref))
 	if match == nil {
-		match = grammar.AnchoredGenericRepositoryRegexp.FindSubmatch([]byte(ref))
+		match = grammar.AnchoredGenericRegistryRegexp.FindSubmatch([]byte(ref))
 		if match == nil {
 			return UniformRepositorySpec{}, errors.ErrInvalid(KIND_OCI_REFERENCE, ref)
 		}
 		return UniformRepositorySpec{
 			Type: string(match[1]),
-			Info: string(match[2]),
+			Info: string(match[2]) + string(match[3]),
 		}, nil
 
 	}
@@ -56,39 +55,90 @@ type RefSpec struct {
 	Digest *digest.Digest `json:"digest,omitempty"`
 }
 
+func pointer(b []byte) *string {
+	if len(b) == 0 {
+		return nil
+	}
+	s := string(b)
+	return &s
+}
+
+func dig(b []byte) *digest.Digest {
+	if len(b) == 0 {
+		return nil
+	}
+	s := digest.Digest(b)
+	return &s
+}
+
 // ParseRef parses a oci reference into a internal representation.
 func ParseRef(ref string) (RefSpec, error) {
-	match := grammar.AnchoredGenericRepositoryRegexp.FindSubmatch([]byte(ref))
-	if match == nil {
-		return RefSpec{}, errors.ErrInvalid(KIND_OCI_REFERENCE)
-	}
-	typ := string(match[1])
-	ref = string(match[2])
-	match = grammar.AnchoredSchemedRegexp.FindSubmatch([]byte(ref))
-	if match == nil {
-		return RefSpec{}, errors.ErrInvalid(KIND_OCI_REFERENCE)
-	}
-	scheme := string(match[1])
-	ref = string(match[2])
+	spec := RefSpec{}
 
-	a, err := docker.ParseAnyReference(ref)
-	if err == nil {
-		spec := RefSpec{UniformRepositorySpec: UniformRepositorySpec{Type: typ, Scheme: scheme}}
-		if t, ok := a.(docker.Named); ok {
-			spec.Host = docker.Domain(t)
-			spec.Repository = docker.Path(t)
-		}
-		if t, ok := a.(docker.Tagged); ok {
-			tag := t.Tag()
-			spec.Tag = &tag
-		}
-		if t, ok := a.(docker.Digested); ok {
-			digest := t.Digest()
-			spec.Digest = &digest
+	match := grammar.DockerLibraryReferenceRegexp.FindSubmatch([]byte(ref))
+	if match != nil {
+		spec.Host = dockerHubDomain
+		spec.Repository = "library" + grammar.RepositorySeparator + string(match[1])
+		spec.Tag = pointer(match[2])
+		spec.Digest = dig(match[3])
+		return spec, nil
+	}
+	match = grammar.DockerReferenceRegexp.FindSubmatch([]byte(ref))
+	if match != nil {
+		spec.Host = dockerHubDomain
+		spec.Repository = string(match[1])
+		spec.Tag = pointer(match[2])
+		spec.Digest = dig(match[3])
+		return spec, nil
+	}
+	match = grammar.ReferenceRegexp.FindSubmatch([]byte(ref))
+	if match != nil {
+		spec.Scheme = string(match[1])
+		spec.Host = string(match[2])
+		spec.Repository = string(match[3])
+		spec.Tag = pointer(match[4])
+		spec.Digest = dig(match[5])
+		return spec, nil
+	}
+	match = grammar.TypedReferenceRegexp.FindSubmatch([]byte(ref))
+	if match != nil {
+		spec.Type = string(match[1])
+		spec.Scheme = string(match[2])
+		spec.Host = string(match[3])
+		spec.Repository = string(match[4])
+		spec.Tag = pointer(match[5])
+		spec.Digest = dig(match[6])
+		return spec, nil
+	}
+	match = grammar.TypedGenericReferenceRegexp.FindSubmatch([]byte(ref))
+	if match != nil {
+		spec.Type = string(match[1])
+		spec.Info = string(match[2])
+		spec.Repository = string(match[3])
+		spec.Tag = pointer(match[4])
+		spec.Digest = dig(match[5])
+		return spec, nil
+	}
+	match = grammar.AnchoredRegistryRegexp.FindSubmatch([]byte(ref))
+	if match != nil {
+		spec.Type = string(match[1])
+		spec.Info = string(match[2])
+		spec.Repository = string(match[3])
+		spec.Tag = pointer(match[4])
+		spec.Digest = dig(match[5])
+		return spec, nil
+	}
+	match = grammar.AnchoredGenericRegistryRegexp.FindSubmatch([]byte(ref))
+	if match != nil {
+		spec.Type = string(match[1])
+		spec.Info = string(match[2])
+		if len(match[0]) != 0 {
+			spec.Info = string(match[3])
 		}
 		return spec, nil
 	}
-	return RefSpec{}, errors.ErrInvalidWrap(err, KIND_OCI_REFERENCE, ref)
+
+	return RefSpec{}, errors.ErrInvalid(KIND_OCI_REFERENCE, ref)
 }
 
 func (r *RefSpec) Name() string {
@@ -118,6 +168,10 @@ func (r *RefSpec) Version() string {
 		return "@" + string(*r.Digest)
 	}
 	return "latest"
+}
+
+func (r *RefSpec) IsRegistry() bool {
+	return r.Repository == ""
 }
 
 func (r *RefSpec) IsVersion() bool {

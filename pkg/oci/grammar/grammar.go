@@ -30,26 +30,23 @@ const (
 
 var (
 	// TypeRegexp describes a type name for a repository
-	TypeRegexp = Identifier
+	TypeRegexp = Optional(Identifier)
 
-	// SchemeRegexp matches an optional scheme
-	SchemeRegexp = Optional(Capture(Match(`[a-z]+`)), Match("://"))
+	// CapturedSchemeRegexp matches an optional scheme
+	CapturedSchemeRegexp = Sequence(Capture(Match(`[a-z]+`)), Match("://"))
 
-	// AnchoredRepositoryRegexp parses a uniform respository spec
-	AnchoredRepositoryRegexp = Anchored(
+	// AnchoredRegistryRegexp parses a uniform respository spec
+	AnchoredRegistryRegexp = Anchored(
 		Optional(Capture(TypeRegexp), Literal("::")),
-		SchemeRegexp,
+		Optional(CapturedSchemeRegexp),
 		Capture(DomainPortRegexp),
 	)
 
-	// AnchoredGenericRepositoryRegexp describes a CTF reference
-	AnchoredGenericRepositoryRegexp = Anchored(
-		Optional(Capture(TypeRegexp), Literal("::")),
-		Capture(Match(".*")),
+	// AnchoredGenericRegistryRegexp describes a CTF reference
+	AnchoredGenericRegistryRegexp = Anchored(
+		Or(Sequence(Capture(TypeRegexp), Literal("::"), Capture(Match(".*"))),
+			Capture(Identifier)),
 	)
-
-	// AnchoredSchemedRegexp matche an optionally schemed string
-	AnchoredSchemedRegexp = Sequence(SchemeRegexp, Capture(Match(".*")))
 
 	// RepositorySeparatorRegexp is the separator used to separate
 	// repository name components.
@@ -111,34 +108,57 @@ var (
 		NameComponentRegexp,
 		Optional(Repeated(RepositorySeparatorRegexp, NameComponentRegexp)))
 
-	// NameRegexp is the format for the name component of references. The
-	// regexp has capturing groups for the domain and name part omitting
-	// the separating forward slash from either.
-	NameRegexp = Sequence(
-		Optional(DomainPortRegexp, RepositorySeparatorRegexp), RepositoryRegexp)
-
 	// AnchoredNameRegexp is used to parse a name value, capturing the
 	// domain and trailing components.
 	AnchoredNameRegexp = Anchored(
 		Optional(Capture(DomainPortRegexp), RepositorySeparatorRegexp),
 		Capture(RepositoryRegexp))
 
-	// ArtefactVersionRegexp is used to parse an artefact version sped
+	// CapturedArtefactVersionRegexp is used to parse an artefact version sped
 	// consisting of a repository part and an optional version part
-	ArtefactVersionRegexp = Sequence(
+	CapturedArtefactVersionRegexp = Sequence(
 		Capture(RepositoryRegexp),
+		CapturedVersionRegexp)
+
+	// AnchoredArtefactVersionRegexp is used to parse artefact versions.
+	AnchoredArtefactVersionRegexp = Anchored(CapturedArtefactVersionRegexp)
+
+	// CapturedVersionRegexp described the version part of a reference
+	CapturedVersionRegexp = Sequence(
 		Optional(Literal(":"), Capture(TagRegexp)),
 		Optional(Literal("@"), Capture(DigestRegexp)))
 
-	// AnchoredArtefactVersionRegexp is used to parse artefact versions.
-	AnchoredArtefactVersionRegexp = Anchored(ArtefactVersionRegexp)
+	////////////////////////////////////////////////////////////////////////////
+	// now the various full flegded artefact flavors
 
 	// ReferenceRegexp is the full supported format of a reference. The regexp
 	// is anchored and has capturing groups for name, tag, and digest
 	// components.
-	ReferenceRegexp = Anchored(Capture(NameRegexp),
-		Optional(Literal(":"), Capture(TagRegexp)),
-		Optional(Literal("@"), Capture(DigestRegexp)))
+	ReferenceRegexp = Anchored(
+		Optional(Optional(CapturedSchemeRegexp), Capture(DomainPortRegexp), RepositorySeparatorRegexp),
+		CapturedArtefactVersionRegexp)
+
+	// DockerLibraryReferenceRegexp is a shortend docker library reference
+	DockerLibraryReferenceRegexp = Anchored(
+		Capture(NameComponentRegexp),
+		CapturedVersionRegexp)
+
+	// DockerReferenceRegexp is a shortend docker reference
+	DockerReferenceRegexp = Anchored(
+		Capture(NameComponentRegexp, RepositorySeparatorRegexp, NameComponentRegexp),
+		CapturedVersionRegexp)
+
+	TypedReferenceRegexp = Anchored(
+		Capture(TypeRegexp), Literal("::"),
+		Optional(Optional(CapturedSchemeRegexp), Capture(DomainPortRegexp), RepositorySeparatorRegexp),
+		Optional(CapturedArtefactVersionRegexp))
+
+	TypedGenericReferenceRegexp = Anchored(
+		Capture(TypeRegexp), Literal("::"),
+		Capture(Match(".*?")), RepositorySeparatorRegexp,
+		CapturedArtefactVersionRegexp)
+
+	// Unused
 
 	// IdentifierRegexp is the format for string identifier used as a
 	// content addressable identifier using sha256. These identifiers
