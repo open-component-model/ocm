@@ -52,7 +52,7 @@ type Command struct {
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{Context: ctx, Output: output.Options{Others: &Options{}}}, names...)
+	return utils.SetupCommand(&Command{Context: ctx, Output: output.Options{OtherOptions: &Options{}}}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -111,7 +111,7 @@ func get_regular(opts *output.Options) output.Output {
 }
 
 func infoChain(options *output.Options) data.ProcessChain {
-	return data.Chain().Parallel(4).Map(mapInfo(options.Others.(*Options)))
+	return data.Chain().Parallel(4).Map(mapInfo(options.OtherOptions.(*Options)))
 }
 
 func outInfo(e interface{}) {

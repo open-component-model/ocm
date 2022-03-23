@@ -26,6 +26,7 @@ import (
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/mime"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
 	"github.com/gardener/ocm/pkg/oci/repositories/docker"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -33,10 +34,10 @@ import (
 )
 
 // MediaTypeTar defines the media type for a tarred file
-const MediaTypeTar = "application/x-tar"
+const MediaTypeTar = mime.MIME_TAR
 
 // MediaTypeGZip defines the media type for a gzipped file
-const MediaTypeGZip = "application/gzip"
+const MediaTypeGZip = mime.MIME_GZIP
 
 // MediaTypeOctetStream is the media type for any binary data.
 const MediaTypeOctetStream = "application/octet-stream"
@@ -365,7 +366,7 @@ func addFileToTar(fs vfs.FileSystem, tw *tar.Writer, path string, realPath strin
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func ValidateBlobInput(fldPath *field.Path, input *BlobInput, ctx clictx.Context, inputFilePath string) field.ErrorList {
+func (input *BlobInput) Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath string) field.ErrorList {
 	if input == nil {
 		return nil
 	}

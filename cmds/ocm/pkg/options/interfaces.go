@@ -12,17 +12,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package mime
+package options
 
-const (
-	MIME_TEXT  = "text/plain"
-	MIME_OCTET = "application/octet-stream"
-
-	MIME_JSON     = "application/x-json"
-	MIME_JSON_ALT = "text/json" // no utf8
-	MIME_YAML     = "application/x-jyaml"
-	MIME_YAML_ALT = "text/yaml" // no utf8
-
-	MIME_GZIP = "application/gzip"
-	MIME_TAR  = "application/x-tar"
+import (
+	"github.com/spf13/pflag"
 )
+
+type Complete interface {
+	Complete() error
+}
+
+type Usage interface {
+	Usage() string
+}
+
+type Options interface {
+	AddFlags(fs *pflag.FlagSet)
+}

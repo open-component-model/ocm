@@ -45,6 +45,12 @@ func (this *ManifestOutput) Close(processingContext interface{}) error {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// Output handles the output of elements.
+// It consists of two phases:
+// First, elements are added to the output using the Add method,
+// This phase is finished calling the Close method. THis finalizes
+// any ongoing input processing.
+// Second, the final output is requested using the Out method.
 type Output interface {
 	Add(processingContext interface{}, e interface{}) error
 	Close(processingContext interface{}) error

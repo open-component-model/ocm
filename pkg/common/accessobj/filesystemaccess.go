@@ -15,6 +15,8 @@
 package accessobj
 
 import (
+	"io"
+	"os"
 	"sync"
 
 	"github.com/gardener/ocm/pkg/common"
@@ -118,9 +120,19 @@ func (a *FileSystemBlobAccess) AddBlob(blob accessio.BlobAccess) error {
 			return err
 		}
 	}
-	data, err := blob.Get()
+	r, err := blob.Reader()
 	if err != nil {
 		return err
 	}
-	return vfs.WriteFile(a.base.GetFileSystem(), path, data, a.base.GetMode()&0666)
+	defer r.Close()
+	w, err := a.base.GetFileSystem().OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, a.base.GetMode()&0666)
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(w, r)
+	if err != nil {
+		w.Close()
+		return err
+	}
+	return w.Close()
 }

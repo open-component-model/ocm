@@ -18,6 +18,8 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	ocmcommon "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
 	compcommon "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/common"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/common/options/closureoption"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/common/options/repooption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/sources/common"
 	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
@@ -30,9 +32,8 @@ import (
 
 type Command struct {
 	Context clictx.Context
-	Closure bool
 
-	Repository compcommon.RepositoryOptions
+	Repository repooption.Option
 	Output     output.Options
 
 	Comp string
@@ -41,7 +42,9 @@ type Command struct {
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{Context: ctx}, names...)
+	return utils.SetupCommand(&Command{Context: ctx, Output: output.Options{
+		OtherOptions: &closureoption.Option{},
+	}}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -59,7 +62,6 @@ arguments.
 }
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
-	fs.BoolVarP(&o.Closure, "closure", "c", false, "follow component references")
 	o.Repository.AddFlags(fs)
 	o.Output.AddFlags(fs, outputs)
 }
@@ -82,13 +84,12 @@ func (o *Command) Run() error {
 	session := ocm.NewSession(nil)
 	defer session.Close()
 	vershdlr := compcommon.NewTypeHandler(o.Context.OCMContext(), session, o.Repository.Repository)
-	session.Closer(vershdlr)
 	out := &output.SingleElementOutput{}
 	err := utils.HandleOutput(out, vershdlr, utils.StringSpec(o.Comp))
 	if err != nil {
 		return err
 	}
-	hdlr := common.NewTypeHandler(o.Repository.Repository, session, out.Elem.(*compcommon.Object).ComponentVersion, o.Closure)
+	hdlr := common.NewTypeHandler(o.Repository.Repository, session, out.Elem.(*compcommon.Object).ComponentVersion, closureoption.From(&o.Output).Closure)
 
 	return utils.HandleOutputs(outputs, &o.Output, hdlr, utils.ElemSpecs(o.Ids)...)
 }
@@ -98,13 +99,17 @@ var outputs = output.NewOutputs(get_regular, output.Outputs{
 }).AddManifestOutputs()
 
 func get_regular(opts *output.Options) output.Output {
-	return output.NewProcessingTableOutput(opts, data.Chain().Map(map_get_regular_output),
-		append(ocmcommon.MetaOutput, "TYPE")...)
+	columns := opts.OtherOptions.(*closureoption.Option).Columns(ocmcommon.MetaOutput)
+	mapper := closureoption.From(opts).Mapper(ocmcommon.History, map_get_regular_output)
+	return output.NewProcessingTableOutput(opts, data.Chain().Map(mapper),
+		append(columns, "TYPE")...)
 }
 
 func get_wide(opts *output.Options) output.Output {
-	return output.NewProcessingTableOutput(opts, data.Chain().Map(map_get_wide_output),
-		append(append(ocmcommon.MetaOutput, "TYPE"), ocmcommon.AccessOutput...)...)
+	columns := opts.OtherOptions.(*closureoption.Option).Columns(ocmcommon.MetaOutput)
+	mapper := closureoption.From(opts).Mapper(ocmcommon.History, map_get_wide_output)
+	return output.NewProcessingTableOutput(opts, data.Chain().Map(mapper),
+		append(append(columns, "TYPE"), ocmcommon.AccessOutput...)...)
 }
 
 func map_get_regular_output(e interface{}) interface{} {

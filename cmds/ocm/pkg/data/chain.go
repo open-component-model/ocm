@@ -93,3 +93,7 @@ func chain_parallel(n int) chain_operation {
 	return func(p ProcessingResult) ProcessingResult { return p.Parallel(n) }
 }
 func chain_unordered(p ProcessingResult) ProcessingResult { return p.Unordered() }
+
+func IdentityMapper(e interface{}) interface{} {
+	return e
+}

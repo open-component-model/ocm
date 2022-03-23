@@ -17,35 +17,73 @@ package add
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm"
+	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	compdescv2 "github.com/gardener/ocm/pkg/ocm/compdesc/versions/v2"
 	"github.com/gardener/ocm/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-type Resources struct {
-	*ResourceOptionList `json:",inline"`
-	*ResourceOptions    `json:",inline"`
+type ResourceSpecHandler struct{}
+
+var _ common.ResourceSpecHandler = (*ResourceSpecHandler)(nil)
+
+func (ResourceSpecHandler) Decode(data []byte) (common.ResourceSpec, error) {
+	var desc ResourceDescription
+	err := runtime.DefaultYAMLEncoding.Unmarshal(data, &desc)
+	if err != nil {
+		return nil, err
+	}
+	return &desc, nil
 }
 
-// ResourceOptions contains options that are used to describe a resource
-type ResourceOptions struct {
+func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r common.Resource, acc compdesc.AccessSpec) error {
+	spec := r.Spec().(*ResourceDescription)
+	vers := spec.Version
+	if spec.Relation == metav1.LocalRelation {
+
+		if vers == "" || vers == "<componentversion>" {
+			vers = v.GetVersion()
+		} else {
+			if vers != v.GetVersion() {
+				return errors.Newf("local resource %q (%s) has non-matching version %q", spec.Name, r.Source(), vers)
+			}
+		}
+	}
+	if vers == "<componentversion>" {
+		vers = v.GetVersion()
+	}
+
+	meta := &compdesc.ResourceMeta{
+		ElementMeta: compdesc.ElementMeta{
+			Name:          spec.Name,
+			Version:       vers,
+			ExtraIdentity: spec.ExtraIdentity,
+			Labels:        spec.Labels,
+		},
+		Type:      spec.Type,
+		Relation:  spec.Relation,
+		SourceRef: compdescv2.Convert_SourceRefs_to(spec.SourceRef),
+	}
+	return v.SetResource(meta, acc)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type ResourceDescription struct {
 	compdescv2.Resource `json:",inline"`
-	Input               *common.BlobInput `json:"input,omitempty"`
 }
 
-// ResourceOptionList contains a list of options that are used to describe a resource.
-type ResourceOptionList struct {
-	Resources []*ResourceOptions `json:"resources"`
-}
+var _ common.ResourceSpec = (*ResourceDescription)(nil)
 
-func Validate(r *ResourceOptions, ctx clictx.Context, inputFilePath string) error {
+func (r *ResourceDescription) Validate(ctx clictx.Context, input *common.ResourceInput) error {
 	allErrs := field.ErrorList{}
 	var fldPath *field.Path
 
 	if r.Relation == "" {
-		if r.Input != nil {
+		if input.Input != nil {
 			r.Relation = metav1.LocalRelation
 		}
 		if r.Access != nil {
@@ -58,38 +96,15 @@ func Validate(r *ResourceOptions, ctx clictx.Context, inputFilePath string) erro
 	if err := compdescv2.ValidateResource(fldPath, r.Resource, false); err != nil {
 		allErrs = append(allErrs, err...)
 	}
-	if r.Input != nil && r.Access != nil {
-		allErrs = append(allErrs, field.Forbidden(fldPath, "only either input or access might be specified"))
-	} else {
-		if r.Input == nil && r.Access == nil {
-			allErrs = append(allErrs, field.Forbidden(fldPath, "either input or access must be specified"))
+
+	if input.Access != nil {
+		if r.Relation == metav1.LocalRelation {
+			allErrs = append(allErrs, field.Forbidden(fldPath.Child("relation"), "access requires external relation"))
 		}
-		if r.Access != nil {
-			if r.Relation == metav1.LocalRelation {
-				allErrs = append(allErrs, field.Forbidden(fldPath.Child("relation"), "access required external relation"))
-			}
-			if r.Access.GetType() == "" {
-				allErrs = append(allErrs, field.Required(fldPath.Child("access", "type"), "type of access required"))
-			} else {
-				acc, err := r.Access.Evaluate(ctx.OCMContext().AccessMethods())
-				if err != nil {
-					raw, _ := r.Access.GetRaw()
-					allErrs = append(allErrs, field.Invalid(fldPath.Child("access"), string(raw), err.Error()))
-				} else {
-					if acc.(ocm.AccessSpec).IsLocal(ctx.OCMContext()) {
-						kind := runtime.ObjectVersionedType(r.Access.ObjectType).GetKind()
-						allErrs = append(allErrs, field.Invalid(fldPath.Child("access", "type"), kind, "local access no possible"))
-					}
-				}
-			}
-		}
-		if r.Input != nil {
-			if r.Relation != metav1.LocalRelation {
-				allErrs = append(allErrs, field.Forbidden(fldPath.Child("relation"), "input requires local relation"))
-			}
-			if err := common.ValidateBlobInput(fldPath.Child("input"), r.Input, ctx, inputFilePath); err != nil {
-				allErrs = append(allErrs, err...)
-			}
+	}
+	if input.Input != nil {
+		if r.Relation != metav1.LocalRelation {
+			allErrs = append(allErrs, field.Forbidden(fldPath.Child("relation"), "input requires local relation"))
 		}
 	}
 	return allErrs.ToAggregate()

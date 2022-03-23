@@ -29,7 +29,7 @@ type Identity map[string]string
 
 // NewIdentity return a simple name identity
 func NewIdentity(name string, extras ...string) Identity {
-	id := Identity{"name": name}
+	id := Identity{SystemIdentityName: name}
 	i := 0
 	for i < len(extras) {
 		if i+1 < len(extras) {

@@ -44,5 +44,5 @@ So far only component archives are supported as target.
 }
 
 func (o *Command) Run() error {
-	return o.ProcessResourceDescriptions("sources", ResourceDescriptionHandler{})
+	return o.ProcessResourceDescriptions("sources", ResourceSpecHandler{})
 }

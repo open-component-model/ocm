@@ -22,19 +22,31 @@ import (
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 )
 
-func MapArgsToIdentities(args ...string) ([]metav1.Identity, error) {
+func ConsumeIdentities(args []string, stop ...string) ([]metav1.Identity, []string, error) {
 	result := []metav1.Identity{}
-
-	for _, a := range args {
+	for i, a := range args {
+		for _, s := range stop {
+			if s == a {
+				return result, args[i+1:], nil
+			}
+		}
 		i := strings.Index(a, "=")
 		if i < 0 {
 			result = append(result, metav1.Identity{compdesc.SystemIdentityName: a})
 		} else {
 			if len(result) == 0 {
-				return nil, fmt.Errorf("first resource identity argument must be a sole resource name")
+				return nil, nil, fmt.Errorf("first resource identity argument must be a sole resource name")
 			}
-			result[len(a)-1][a[:i]] = a[i+1:]
+			if i == 0 {
+				return nil, nil, fmt.Errorf("extra identity key might not be empty in %q", a)
+			}
+			result[len(result)-1][a[:i]] = a[i+1:]
 		}
 	}
-	return result, nil
+	return result, nil, nil
+}
+
+func MapArgsToIdentities(args ...string) ([]metav1.Identity, error) {
+	result, _, err := ConsumeIdentities(args)
+	return result, err
 }

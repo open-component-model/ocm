@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package common
+package repooption
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
@@ -23,16 +23,16 @@ import (
 	"github.com/spf13/pflag"
 )
 
-type RepositoryOptions struct {
+type Option struct {
 	Repository ocm.Repository
 	Spec       string
 }
 
-func (o *RepositoryOptions) AddFlags(fs *pflag.FlagSet) {
+func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Spec, "repo", "r", "", "repository name or spec")
 }
 
-func (o *RepositoryOptions) Complete(ctx clictx.Context) error {
+func (o *Option) Complete(ctx clictx.Context) error {
 	var err error
 	if o.Spec != "" {
 		o.Repository, err = ctx.OCM().DetermineRepository(o.Spec)
@@ -43,8 +43,7 @@ func (o *RepositoryOptions) Complete(ctx clictx.Context) error {
 	return nil
 }
 
-func (o *RepositoryOptions) Usage() string {
-
+func (o *Option) Usage() string {
 	s := `
 If the repository option is specified, the given names are interpreted
 relative to the specified repository using the syntax

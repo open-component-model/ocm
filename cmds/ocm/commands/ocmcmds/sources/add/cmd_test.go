@@ -15,9 +15,16 @@
 package add_test
 
 import (
+	"archive/tar"
+	"compress/gzip"
+	"fmt"
+	"io"
+	"sort"
+
 	. "github.com/gardener/ocm/cmds/ocm/testhelper"
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/mime"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
@@ -29,8 +36,50 @@ import (
 const ARCH = "/tmp/ca"
 const VERSION = "v1"
 
+func CheckArchiveSource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string) {
+
+	r, err := cd.GetSourceByIdentity(metav1.NewIdentity(name))
+	Expect(err).To(Succeed())
+	Expect(r.Version).To(Equal(VERSION))
+	Expect(r.Type).To(Equal("git"))
+	spec, err := env.OCMContext().AccessSpecForSpec(r.Access)
+	Expect(err).To(Succeed())
+	Expect(spec.GetType()).To(Equal(accessmethods.LocalBlobType))
+	Expect(spec.(*accessmethods.LocalBlobAccessSpec).MediaType).To(Equal(mime.MIME_GZIP))
+
+	local := spec.(*accessmethods.LocalBlobAccessSpec).LocalReference
+	fmt.Printf("local: %s\n", local)
+
+	bpath := env.Join(ARCH, comparch.BlobsDirectoryName, local)
+	Expect(env.FileExists(bpath)).To(BeTrue())
+	file, err := env.Open(bpath)
+	Expect(err).To(Succeed())
+	defer file.Close()
+
+	gz, err := gzip.NewReader(file)
+	Expect(err).To(Succeed())
+	tr := tar.NewReader(gz)
+	files := []string{}
+	for {
+		header, err := tr.Next()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			Expect(err).To(Succeed())
+		}
+
+		switch header.Typeflag {
+		case tar.TypeReg, tar.TypeDir:
+			files = append(files, header.Name)
+		}
+	}
+	sort.Strings(files)
+	Expect(files).To(Equal([]string{"settings", "testcontent"}))
+}
+
 func CheckTextSource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string) {
-	rblob := accessio.BlobAccessForFile("text/plain", "/testdata/testcontent", env)
+	rblob := accessio.BlobAccessForFile(mime.MIME_TEXT, "/testdata/testcontent", env)
 	dig := rblob.Digest()
 	data, err := rblob.Get()
 	Expect(err).To(Succeed())
@@ -42,11 +91,11 @@ func CheckTextSource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string
 	Expect(err).To(Succeed())
 	Expect(r.Version).To(Equal(VERSION))
 	Expect(r.Type).To(Equal("git"))
-	spec, err := env.OCMContext().AccessSpecForSpec(cd.Sources[0].Access)
+	spec, err := env.OCMContext().AccessSpecForSpec(r.Access)
 	Expect(err).To(Succeed())
 	Expect(spec.GetType()).To(Equal(accessmethods.LocalBlobType))
 	Expect(spec.(*accessmethods.LocalBlobAccessSpec).LocalReference).To(Equal(common.DigestToFileName(dig)))
-	Expect(spec.(*accessmethods.LocalBlobAccessSpec).MediaType).To(Equal("text/plain"))
+	Expect(spec.(*accessmethods.LocalBlobAccessSpec).MediaType).To(Equal(mime.MIME_TEXT))
 }
 
 var _ = Describe("Test Environment", func() {
@@ -70,6 +119,7 @@ var _ = Describe("Test Environment", func() {
 		Expect(len(cd.Sources)).To(Equal(2))
 
 		CheckTextSource(env, cd, "testdata")
+		CheckArchiveSource(env, cd, "myothersrc")
 	})
 
 	It("adds simple text blob by cli env file", func() {

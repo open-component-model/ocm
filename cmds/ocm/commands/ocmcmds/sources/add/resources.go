@@ -24,12 +24,12 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-type ResourceDescriptionHandler struct{}
+type ResourceSpecHandler struct{}
 
-var _ common.ResourceDescriptionHandler = (*ResourceDescriptionHandler)(nil)
+var _ common.ResourceSpecHandler = (*ResourceSpecHandler)(nil)
 
-func (ResourceDescriptionHandler) Decode(data []byte) (common.ResourceDescription, error) {
-	var desc ResourceDescription
+func (ResourceSpecHandler) Decode(data []byte) (common.ResourceSpec, error) {
+	var desc ResourceSpec
 	err := runtime.DefaultYAMLEncoding.Unmarshal(data, &desc)
 	if err != nil {
 		return nil, err
@@ -37,8 +37,8 @@ func (ResourceDescriptionHandler) Decode(data []byte) (common.ResourceDescriptio
 	return &desc, nil
 }
 
-func (ResourceDescriptionHandler) Set(v ocm.ComponentVersionAccess, r common.ResourceDescription, acc compdesc.AccessSpec) error {
-	spec := r.(*ResourceDescription)
+func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r common.Resource, acc compdesc.AccessSpec) error {
+	spec := r.Spec().(*ResourceSpec)
 	vers := spec.Version
 	if vers == "" {
 		vers = v.GetVersion()
@@ -57,13 +57,13 @@ func (ResourceDescriptionHandler) Set(v ocm.ComponentVersionAccess, r common.Res
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type ResourceDescription struct {
+type ResourceSpec struct {
 	compdescv2.Source `json:",inline"`
 }
 
-var _ common.ResourceDescription = (*ResourceDescription)(nil)
+var _ common.ResourceSpec = (*ResourceSpec)(nil)
 
-func (r ResourceDescription) Validate(ctx clictx.Context, input *common.ResourceInput) error {
+func (r *ResourceSpec) Validate(ctx clictx.Context, input *common.ResourceInput) error {
 	allErrs := field.ErrorList{}
 	var fldPath *field.Path
 

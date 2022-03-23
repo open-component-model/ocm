@@ -33,8 +33,15 @@ func (s StringSpec) String() string {
 	return string(s)
 }
 
+// TypeHandler provides base input to an output processing chain
+// using HandleArsg or HandleOutput(s).
+// It provides the exploding of intials specifications
+// to effective objects passed to the output processing chain.
 type TypeHandler interface {
+	// All returns all elements according to its context
 	All() ([]output.Object, error)
+	// Get returns the the elements for a dedicated specification
+	// according to the handlers context.
 	Get(name ElemSpec) ([]output.Object, error)
 	Close() error
 }
@@ -84,7 +91,7 @@ func HandleOutput(output output.Output, handler TypeHandler, specs ...ElemSpec) 
 			return err
 		}
 		if result == nil {
-			fmt.Fprintf(os.Stderr, "not supported by source")
+			fmt.Fprintf(os.Stderr, "all not supported")
 			return nil
 		}
 		for _, r := range result {

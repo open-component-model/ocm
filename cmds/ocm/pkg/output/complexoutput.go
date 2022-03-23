@@ -80,10 +80,10 @@ func (this *ComplexProcessingOutput) out(gap string, m map[string]interface{}) {
 		if v != nil {
 			switch e := v.(type) {
 			case map[string]interface{}:
-				fmt.Printf("%s%s:\n", k)
+				fmt.Printf("%s%s:\n", gap, k)
 				this.out(gap+"  ", e)
 			case []interface{}:
-				fmt.Printf("%s%s:\n", k)
+				fmt.Printf("%s%s:\n", gap, k)
 				s, err := yaml.Marshal(v)
 				if err == nil {
 					ociutils.IndentLines(string(s), gap)

@@ -40,6 +40,14 @@ func (o *Object) AsManifest() interface{} {
 	return o.Element
 }
 
+func History(e interface{}) string {
+	o := e.(*Object)
+	if o.History == nil {
+		return ""
+	}
+	return o.History.String()
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type TypeHandler struct {
@@ -69,7 +77,7 @@ func (h *TypeHandler) All() ([]output.Object, error) {
 }
 
 func (h *TypeHandler) all(access ocm.ComponentVersionAccess) ([]output.Object, error) {
-	var result []output.Object
+	result := []output.Object{}
 	elemaccess := h.elemaccess(access)
 	l := elemaccess.Len()
 	for i := 0; i < l; i++ {
@@ -97,10 +105,14 @@ func (h *TypeHandler) execute(hist common.History, access ocm.ComponentVersionAc
 		for _, ref := range h.access.GetDescriptor().ComponentReferences {
 			nested, err := h.repository.LookupComponentVersion(ref.ComponentName, ref.Version)
 			if err != nil {
-				fmt.Fprint(os.Stderr, "nested component %q: %s", ref.ComponentName, err)
+				fmt.Fprintf(os.Stderr, "Warning: lookup nested component %q [%s]: %s", ref.ComponentName, hist, err)
+				continue
 			}
 			out, err := h.execute(hist, nested, f)
-			fmt.Fprintf(os.Stderr, "Warning: cannot handle %s: %s", hist, err)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Warning: cannot handle %s: %s", hist, err)
+				continue
+			}
 			result = append(result, out...)
 		}
 	}

@@ -22,6 +22,7 @@ import (
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/pkg/template"
+	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
@@ -40,29 +41,47 @@ type ResourceInput struct {
 	Input  *BlobInput                       `json:"input,omitempty"`
 }
 
-type ResourceDescriptionHandler interface {
-	Decode(data []byte) (ResourceDescription, error)
-	Set(v ocm.ComponentVersionAccess, r ResourceDescription, acc compdesc.AccessSpec) error
+type ResourceSpecHandler interface {
+	Decode(data []byte) (ResourceSpec, error)
+	Set(v ocm.ComponentVersionAccess, r Resource, acc compdesc.AccessSpec) error
 }
 
-type ResourceDescription interface {
+type ResourceSpec interface {
 	GetName() string
 	Validate(ctx clictx.Context, input *ResourceInput) error
 }
 
-type Resource struct {
+type Resource interface {
+	Source() string
+	Spec() ResourceSpec
+	Input() *ResourceInput
+}
+
+type resource struct {
 	path   string
 	source string
-	spec   ResourceDescription
+	spec   ResourceSpec
 	input  *ResourceInput
 }
 
-func NewResource(spec ResourceDescription, input *ResourceInput, path string, indices ...int) *Resource {
+func (r *resource) Source() string {
+	return r.source
+}
+
+func (r *resource) Spec() ResourceSpec {
+	return r.spec
+}
+
+func (r *resource) Input() *ResourceInput {
+	return r.input
+}
+
+func NewResource(spec ResourceSpec, input *ResourceInput, path string, indices ...int) *resource {
 	id := path
 	for _, i := range indices {
 		id += fmt.Sprintf("[%d]", i)
 	}
-	return &Resource{
+	return &resource{
 		path:   path,
 		source: id,
 		spec:   spec,
@@ -98,9 +117,9 @@ func (o *ResourceAdderCommand) Complete(args []string) error {
 	return nil
 }
 
-func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h ResourceDescriptionHandler) error {
+func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h ResourceSpecHandler) error {
 	fs := o.Context.FileSystem()
-	resources := []*Resource{}
+	resources := []*resource{}
 	for _, filePath := range o.Paths {
 		data, err := vfs.ReadFile(fs, filePath)
 		if err != nil {
@@ -158,19 +177,22 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 			}
 
 			for j, d := range list {
-				var input ResourceInput
-				err := runtime.DefaultYAMLEncoding.Unmarshal(d, &input)
+				input, err := DecodeInput(d)
 				if err != nil {
 					return errors.Newf("invalid spec %d[%d] in %q: %s", i+1, j+1, filePath, err)
 				}
-				r, err := h.Decode(d)
-				if err = r.Validate(o.Context, &input); err != nil {
+
+				r, err := DecodeResource(d, h)
+				if err != nil {
+					return errors.Newf("invalid spec %d[%d] in %q: %s", i+1, j+1, filePath, err)
+				}
+				if err = r.Validate(o.Context, input); err != nil {
 					return errors.Wrapf(err, "invalid spec %d[%d] in %q", i+1, j+1, filePath)
 				}
-				if err = Validate(&input, o.Context, filePath); err != nil {
+				if err = Validate(input, o.Context, filePath); err != nil {
 					return errors.Wrapf(err, "invalid spec %d[%d] in %q", i+1, j+1, filePath)
 				}
-				resources = append(resources, NewResource(r, &input, filePath, i, j))
+				resources = append(resources, NewResource(r, input, filePath, i, j))
 			}
 		}
 	}
@@ -191,17 +213,66 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 			}
 			acc, err = obj.AddBlob(blob, hint, nil)
 			if err == nil {
-				err = h.Set(obj, r.spec, acc)
+				err = h.Set(obj, r, acc)
 			}
 			blob.Close()
 		} else {
-			err = h.Set(obj, r.spec, compdesc.GenericAccessSpec(r.input.Access))
+			err = h.Set(obj, r, compdesc.GenericAccessSpec(r.input.Access))
 		}
 		if err != nil {
 			return errors.Wrapf(err, "cannot add resource %q(%s)", r.spec.GetName(), r.source)
 		}
 	}
 	return nil
+}
+
+func DecodeResource(data []byte, h ResourceSpecHandler) (ResourceSpec, error) {
+	result, err := h.Decode(data)
+	if err != nil {
+		return nil, err
+	}
+	accepted, err := runtime.DefaultJSONEncoding.Marshal(result)
+	if err != nil {
+		return nil, err
+	}
+	var plainAccepted interface{}
+	err = runtime.DefaultJSONEncoding.Unmarshal(accepted, &plainAccepted)
+	if err != nil {
+		return nil, err
+	}
+	var plainOrig map[string]interface{}
+	err = runtime.DefaultYAMLEncoding.Unmarshal(data, &plainOrig)
+	if err != nil {
+		return nil, err
+	}
+	delete(plainOrig, "input")
+	err = utils.CheckForUnknown(nil, plainOrig, plainAccepted).ToAggregate()
+	return result, err
+}
+
+func DecodeInput(data []byte) (*ResourceInput, error) {
+	var input ResourceInput
+	err := runtime.DefaultYAMLEncoding.Unmarshal(data, &input)
+	if err != nil {
+		return nil, err
+	}
+	accepted, err := runtime.DefaultJSONEncoding.Marshal(input.Input)
+	if err != nil {
+		return nil, err
+	}
+	var plainAccepted interface{}
+	err = runtime.DefaultJSONEncoding.Unmarshal(accepted, &plainAccepted)
+	if err != nil {
+		return nil, err
+	}
+	var plainOrig map[string]interface{}
+	err = runtime.DefaultYAMLEncoding.Unmarshal(data, &plainOrig)
+	if err != nil {
+		return nil, err
+	}
+	var fldPath field.Path
+	err = utils.CheckForUnknown(fldPath.Child("input"), plainOrig["input"], plainAccepted).ToAggregate()
+	return &input, err
 }
 
 func Validate(r *ResourceInput, ctx clictx.Context, inputFilePath string) error {
@@ -231,7 +302,7 @@ func Validate(r *ResourceInput, ctx clictx.Context, inputFilePath string) error 
 			}
 		}
 		if r.Input != nil {
-			if err := ValidateBlobInput(fldPath.Child("input"), r.Input, ctx, inputFilePath); err != nil {
+			if err := r.Input.Validate(fldPath.Child("input"), ctx, inputFilePath); err != nil {
 				allErrs = append(allErrs, err...)
 			}
 		}

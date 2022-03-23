@@ -12,5 +12,7 @@ input:
   type: "dir"
   path: .
   compress: true # defaults to false
-  exclude: "*.yaml"
+  excludeFiles:
+   - "*.yaml"
+   - "*.tmpl"
   preserveDir: false # optional, defaulted to false; if true, the top level folder "my/path" is included

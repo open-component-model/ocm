@@ -19,6 +19,7 @@ import (
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/common"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/common/options/repooption"
 	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
@@ -31,7 +32,7 @@ type Command struct {
 	Context clictx.Context
 
 	Output     output.Options
-	Repository common.RepositoryOptions
+	Repository repooption.Option
 
 	Refs []string
 }
