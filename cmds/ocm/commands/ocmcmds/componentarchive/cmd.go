@@ -18,17 +18,20 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/componentarchive/transfer"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/spf13/cobra"
 )
+
+var Names = names.ComponentArchive
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              "componentarchive",
-		Aliases:          []string{"comparch", "ca"},
+		Use:              Names[0],
+		Aliases:          Names[1:],
 		TraverseChildren: true,
 	}
-	cmd.AddCommand(transfer.NewCommand(ctx, "transfer"))
-	cmd.AddCommand(create.NewCommand(ctx, "create"))
+	cmd.AddCommand(transfer.NewCommand(ctx, transfer.Verb))
+	cmd.AddCommand(create.NewCommand(ctx, create.Verb))
 	return cmd
 }

@@ -15,6 +15,9 @@
 package create
 
 import (
+	"github.com/gardener/ocm/cmds/ocm/commands"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
+
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
@@ -27,6 +30,11 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+)
+
+var (
+	Names = names.ComponentArchive
+	Verb  = commands.Create
 )
 
 type Command struct {

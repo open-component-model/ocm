@@ -17,6 +17,9 @@ package transfer
 import (
 	"fmt"
 
+	"github.com/gardener/ocm/cmds/ocm/commands"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/names"
+
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/common"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
@@ -24,6 +27,11 @@ import (
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+)
+
+var (
+	Names = names.Artefacts
+	Verb  = commands.Transfer
 )
 
 type Command struct {
@@ -130,7 +138,7 @@ func NewAction(ctx clictx.Context, target string) (*action, error) {
 
 func (a *action) Add(processingContext interface{}, e interface{}) error {
 	if a.count > 0 && !a.Ref.IsRegistry() {
-		return fmt.Errorf("cannot copy multiple source artefacts to the same artefact (%s)", a.Ref)
+		return fmt.Errorf("cannot copy multiple source artefacts to the same artefact (%s)", &a.Ref)
 	}
 	a.count++
 
@@ -147,7 +155,7 @@ func (a *action) Add(processingContext interface{}, e interface{}) error {
 	if tag != "" {
 		tgt.Tag = &tag
 	}
-	fmt.Printf("copying %s to %s...\n", src.Spec)
+	fmt.Printf("copying %s to %s...\n", &src.Spec, &tgt)
 	err = oci.TransferArtefact(src.Artefact, ns, tag)
 	if err == nil {
 		a.copied++

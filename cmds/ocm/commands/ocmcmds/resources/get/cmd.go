@@ -15,6 +15,9 @@
 package get
 
 import (
+	"github.com/gardener/ocm/cmds/ocm/commands"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
+
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	ocmcommon "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
 	compcommon "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/common"
@@ -27,6 +30,11 @@ import (
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+)
+
+var (
+	Names = names.Resources
+	Verb  = commands.Get
 )
 
 type Command struct {

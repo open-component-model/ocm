@@ -15,6 +15,9 @@
 package transfer
 
 import (
+	"github.com/gardener/ocm/cmds/ocm/commands"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
+
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/common/accessobj"
@@ -22,6 +25,11 @@ import (
 	"github.com/gardener/ocm/pkg/ocm/repositories/comparch/comparch"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+)
+
+var (
+	Names = names.ComponentArchive
+	Verb  = commands.Transfer
 )
 
 type Command struct {

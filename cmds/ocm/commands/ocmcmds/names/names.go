@@ -12,26 +12,11 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package resources
+package names
 
-import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/add"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/get"
-	"github.com/spf13/cobra"
+var (
+	ComponentArchive = []string{"componentarchive", "comparch", "ca"}
+	Components       = []string{"components", "component", "comps", "comp", "c"}
+	Resources        = []string{"resources", "resource", "res", "r"}
+	Sources          = []string{"sources", "source", "src", "s"}
 )
-
-var Names = names.Resources
-
-// NewCommand creates a new command.
-func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              Names[0],
-		Aliases:          Names[1:],
-		TraverseChildren: true,
-	}
-	cmd.AddCommand(add.NewCommand(ctx, add.Verb))
-	cmd.AddCommand(get.NewCommand(ctx, get.Verb))
-	return cmd
-}

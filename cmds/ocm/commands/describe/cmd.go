@@ -16,6 +16,8 @@ package describe
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
+	"github.com/gardener/ocm/cmds/ocm/commands"
+
 	resources "github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/describe"
 	"github.com/spf13/cobra"
 )
@@ -23,9 +25,9 @@ import (
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              "describe",
+		Use:              commands.Describe,
 		TraverseChildren: true,
 	}
-	cmd.AddCommand(resources.NewCommand(ctx, "artefacts", "artefact", "art", "a"))
+	cmd.AddCommand(resources.NewCommand(ctx, resources.Names...))
 	return cmd
 }

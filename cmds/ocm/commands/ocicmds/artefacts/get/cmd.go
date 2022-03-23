@@ -17,6 +17,9 @@ package get
 import (
 	"fmt"
 
+	"github.com/gardener/ocm/cmds/ocm/commands"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/names"
+
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/common"
 	"github.com/gardener/ocm/cmds/ocm/pkg/data"
@@ -25,6 +28,11 @@ import (
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+)
+
+var (
+	Names = names.Artefacts
+	Verb  = commands.Get
 )
 
 type Command struct {

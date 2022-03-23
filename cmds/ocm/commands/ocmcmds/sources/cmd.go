@@ -16,19 +16,22 @@ package sources
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/sources/add"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/sources/get"
 	"github.com/spf13/cobra"
 )
 
+var Names = names.Sources
+
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              "sources",
-		Aliases:          []string{"sources", "source", "src", "s"},
+		Use:              Names[0],
+		Aliases:          Names[1:],
 		TraverseChildren: true,
 	}
-	cmd.AddCommand(add.NewCommand(ctx, "add"))
-	cmd.AddCommand(get.NewCommand(ctx, "get"))
+	cmd.AddCommand(add.NewCommand(ctx, add.Verb))
+	cmd.AddCommand(get.NewCommand(ctx, get.Verb))
 	return cmd
 }

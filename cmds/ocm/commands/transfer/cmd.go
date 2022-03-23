@@ -16,6 +16,7 @@ package transfer
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
+	artefacts "github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/transfer"
 	comparch "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/componentarchive/transfer"
 	"github.com/spf13/cobra"
 )
@@ -26,6 +27,8 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 		Use:              "transfer",
 		TraverseChildren: true,
 	}
-	cmd.AddCommand(comparch.NewCommand(ctx, "componentarchive", "comparch", "ca"))
+	cmd.AddCommand(comparch.NewCommand(ctx, comparch.Names...))
+	cmd.AddCommand(artefacts.NewCommand(ctx, artefacts.Names...))
+
 	return cmd
 }

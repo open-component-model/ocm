@@ -17,16 +17,19 @@ package components
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/get"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/spf13/cobra"
 )
+
+var Names = names.Components
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              "components",
-		Aliases:          []string{"component", "comps", "comp", "c"},
+		Use:              Names[0],
+		Aliases:          Names[1:],
 		TraverseChildren: true,
 	}
-	cmd.AddCommand(get.NewCommand(ctx, "get"))
+	cmd.AddCommand(get.NewCommand(ctx, get.Verb))
 	return cmd
 }

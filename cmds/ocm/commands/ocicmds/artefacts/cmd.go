@@ -12,17 +12,18 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package resources
+package artefacts
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/add"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/get"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/describe"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/get"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/transfer"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/names"
 	"github.com/spf13/cobra"
 )
 
-var Names = names.Resources
+var Names = names.Artefacts
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
@@ -31,7 +32,8 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 		Aliases:          Names[1:],
 		TraverseChildren: true,
 	}
-	cmd.AddCommand(add.NewCommand(ctx, add.Verb))
-	cmd.AddCommand(get.NewCommand(ctx, get.Verb))
+	cmd.AddCommand(get.NewCommand(ctx, "get"))
+	cmd.AddCommand(describe.NewCommand(ctx, "describe"))
+	cmd.AddCommand(transfer.NewCommand(ctx, "transfer"))
 	return cmd
 }
