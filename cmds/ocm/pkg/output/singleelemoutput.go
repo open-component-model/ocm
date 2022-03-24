@@ -15,7 +15,7 @@
 package output
 
 import (
-	"fmt"
+	"github.com/gardener/ocm/pkg/errors"
 )
 
 type SingleElementOutput struct {
@@ -28,18 +28,18 @@ func NewSingleElementOutput() *SingleElementOutput {
 	return &SingleElementOutput{}
 }
 
-func (this *SingleElementOutput) Add(processingContext interface{}, e interface{}) error {
+func (this *SingleElementOutput) Add(e interface{}) error {
 	if this.Elem == nil {
 		this.Elem = e
 		return nil
 	}
-	return fmt.Errorf("only one element can be selected, but multiple elements selected/found")
+	return errors.Newf("only one element can be selected, but multiple elements selected/found")
 }
 
-func (this *SingleElementOutput) Close(processingContext interface{}) error {
+func (this *SingleElementOutput) Close() error {
 	return nil
 }
 
-func (this *SingleElementOutput) Out(processingContext interface{}) error {
+func (this *SingleElementOutput) Out() error {
 	return nil
 }

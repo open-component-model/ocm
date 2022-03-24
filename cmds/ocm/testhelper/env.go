@@ -15,6 +15,8 @@
 package testhelper
 
 import (
+	"io"
+
 	"github.com/gardener/ocm/cmds/ocm/app"
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/pkg/ocm"
@@ -133,4 +135,19 @@ func NewTestEnv(opts ...Option) *TestEnv {
 		Context:    ctx,
 		CLI:        app.NewCLI(ctx),
 	}
+}
+
+func (e TestEnv) WithOutput(w io.Writer) *TestEnv {
+	e.Context = e.Context.WithStdIO(nil, w, nil)
+	return &e
+}
+
+func (e TestEnv) WithErrorOutput(w io.Writer) *TestEnv {
+	e.Context = e.Context.WithStdIO(nil, nil, w)
+	return &e
+}
+
+func (e TestEnv) WithInput(r io.Reader) *TestEnv {
+	e.Context = e.Context.WithStdIO(r, nil, nil)
+	return &e
 }

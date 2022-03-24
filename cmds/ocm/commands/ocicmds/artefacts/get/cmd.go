@@ -90,8 +90,11 @@ func (o *Command) Complete(args []string) error {
 func (o *Command) Run() error {
 	session := oci.NewSession(nil)
 	defer session.Close()
-	session.Closer(o.Repository.Repository)
-	handler := common.NewTypeHandler(o.Context.OCIContext(), session, o.Repository.Repository)
+	repo, err := o.Repository.GetRepository(o.Context.OCI(), session)
+	if err != nil {
+		return err
+	}
+	handler := common.NewTypeHandler(o.Context.OCI(), session, repo)
 	return utils.HandleArgs(outputs, &o.Output, handler, o.Refs...)
 }
 

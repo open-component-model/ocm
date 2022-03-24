@@ -16,29 +16,32 @@ package output
 
 import (
 	. "github.com/gardener/ocm/cmds/ocm/pkg/data"
+	. "github.com/gardener/ocm/cmds/ocm/pkg/output/out"
 )
+
+type OutputFunction func(Context, interface{})
 
 type FunctionProcessingOutput struct {
 	ElementOutput
-	function func(interface{})
+	function OutputFunction
 }
 
 var _ Output = &FunctionProcessingOutput{}
 
-func NewProcessingFunctionOutput(chain ProcessChain, f func(interface{})) *FunctionProcessingOutput {
-	return (&FunctionProcessingOutput{}).new(chain, f)
+func NewProcessingFunctionOutput(ctx Context, chain ProcessChain, f OutputFunction) *FunctionProcessingOutput {
+	return (&FunctionProcessingOutput{}).new(ctx, chain, f)
 }
 
-func (this *FunctionProcessingOutput) new(chain ProcessChain, f func(interface{})) *FunctionProcessingOutput {
-	this.ElementOutput.new(chain)
+func (this *FunctionProcessingOutput) new(ctx Context, chain ProcessChain, f OutputFunction) *FunctionProcessingOutput {
+	this.ElementOutput.new(ctx, chain)
 	this.function = f
 	return this
 }
 
-func (this *FunctionProcessingOutput) Out(interface{}) error {
+func (this *FunctionProcessingOutput) Out() error {
 	i := this.Elems.Iterator()
 	for i.HasNext() {
-		this.function(i.Next())
+		this.function(this.Context, i.Next())
 	}
 	return nil
 }

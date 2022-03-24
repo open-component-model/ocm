@@ -142,15 +142,19 @@ func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, tags ...string) 
 	if err != nil {
 		return nil, err
 	}
-	// blob=artdesc.MapArtefactBlobMimeType(blob, true)
-	/*
-		mime:=artefact.Artefact().MimeType()
-		mapped:=artdesc.MapArtefactMimeType(mime, true)
-		if blob.MimeType()!=mapped {
-			blob, err = artefact.Artefact().ToBlobAccess()
-		}
-	*/
 	vers := blob.Digest().String()
+
+	/*
+		data, err:=blob.Get()
+		if err != nil {
+			return nil, err
+		}
+		digest:=digest.Canonical.FromBytes(data)
+
+		fmt.Printf("*** blob digest: %10d %s\n", blob.Size(), blob.Digest())
+		fmt.Printf("*** data digest: %10d %s\n", len(data), digest)
+	*/
+
 	if len(tags) > 0 && tags[0] != "" {
 		vers = tags[0]
 	}

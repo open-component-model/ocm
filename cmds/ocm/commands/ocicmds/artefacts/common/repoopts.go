@@ -23,8 +23,7 @@ import (
 )
 
 type RepositoryOptions struct {
-	Repository oci.Repository
-	Spec       string
+	Spec string
 }
 
 func (o *RepositoryOptions) AddFlags(fs *pflag.FlagSet) {
@@ -32,14 +31,14 @@ func (o *RepositoryOptions) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *RepositoryOptions) Complete(ctx clictx.Context) error {
-	var err error
-	if o.Spec != "" {
-		o.Repository, err = ctx.OCI().DetermineRepository(o.Spec)
-		if err != nil {
-			return err
-		}
-	}
 	return nil
+}
+
+func (o *RepositoryOptions) GetRepository(ctx clictx.OCI, session oci.Session) (oci.Repository, error) {
+	if o.Spec != "" {
+		return session.DetermineRepository(ctx.Context(), o.Spec, ctx.GetAlias)
+	}
+	return nil, nil
 }
 
 func (o *RepositoryOptions) Usage() string {

@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/errors"
@@ -32,12 +33,21 @@ type Object struct {
 
 type Manifest struct {
 	Spec     oci.RefSpec
+	Digest   string
 	Manifest *artdesc.Artefact
 }
 
 func (o *Object) AsManifest() interface{} {
+	var digest string
+	b, err := o.Artefact.Blob()
+	if err == nil {
+		digest = b.Digest().String()
+	} else {
+		digest = err.Error()
+	}
 	return &Manifest{
 		Spec:     o.Spec,
+		Digest:   digest,
 		Manifest: o.Artefact.GetDescriptor(),
 	}
 }
@@ -45,12 +55,12 @@ func (o *Object) AsManifest() interface{} {
 ////////////////////////////////////////////////////////////////////////////////
 
 type TypeHandler struct {
-	octx     oci.Context
+	octx     clictx.OCI
 	session  oci.Session
 	repobase oci.Repository
 }
 
-func NewTypeHandler(octx oci.Context, session oci.Session, repobase oci.Repository) utils.TypeHandler {
+func NewTypeHandler(octx clictx.OCI, session oci.Session, repobase oci.Repository) utils.TypeHandler {
 	return &TypeHandler{
 		octx:     octx,
 		session:  session,
@@ -94,7 +104,7 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 	spec := oci.RefSpec{}
 	repo := h.repobase
 	if repo == nil {
-		evaluated, err := h.session.EvaluateRef(h.octx, name)
+		evaluated, err := h.session.EvaluateRef(h.octx.Context(), name, h.octx.GetAlias)
 		if err != nil {
 			return nil, errors.Wrapf(err, "repository %q", name)
 		}

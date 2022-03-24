@@ -86,7 +86,7 @@ func (i *IndexImpl) Blob() (accessio.BlobAccess, error) {
 	if err != nil {
 		return nil, err
 	}
-	return accessio.BlobWithMimeType(artdesc.MediaTypeImageIndex, blob), nil
+	return accessio.BlobWithMimeType(i.GetDescriptor().MimeType(), blob), nil
 }
 
 func (a *IndexImpl) NewArtefact(art ...*artdesc.Artefact) (ArtefactAccess, error) {

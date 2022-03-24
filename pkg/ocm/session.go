@@ -20,9 +20,10 @@ import (
 
 	"github.com/gardener/ocm/pkg/datacontext"
 	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/ocm/repositories/genericocireg"
-	"github.com/gardener/ocm/pkg/ocm/repositories/ocireg"
+	"github.com/gardener/ocm/pkg/ocm/core"
 )
+
+type Aliases = core.Aliases
 
 type ComponentContainer interface {
 	LookupComponent(name string) (ComponentAccess, error)
@@ -44,7 +45,9 @@ type Session interface {
 	LookupRepository(Context, RepositorySpec) (Repository, error)
 	LookupComponent(ComponentContainer, string) (ComponentAccess, error)
 	GetComponentVersion(ComponentVersionContainer, string) (ComponentVersionAccess, error)
-	EvaluateRef(ctx Context, ref string) (*EvaluationResult, error)
+	EvaluateRef(ctx Context, ref string, aliases Aliases) (*EvaluationResult, error)
+	DetermineRepository(ctx Context, ref string, aliases Aliases) (Repository, error)
+	DetermineRepositoryBySpec(ctx Context, spec *UniformRepositorySpec, aliases Aliases) (Repository, error)
 }
 
 type session struct {
@@ -150,7 +153,7 @@ func (s *session) GetComponentVersion(c ComponentVersionContainer, version strin
 	return obj, err
 }
 
-func (s *session) EvaluateRef(ctx Context, ref string) (*EvaluationResult, error) {
+func (s *session) EvaluateRef(ctx Context, ref string, aliases Aliases) (*EvaluationResult, error) {
 	var err error
 	result := &EvaluationResult{}
 	result.Ref, err = ParseRef(ref)
@@ -158,9 +161,7 @@ func (s *session) EvaluateRef(ctx Context, ref string) (*EvaluationResult, error
 		return nil, err
 	}
 
-	meta := genericocireg.NewComponentRepositoryMeta(result.Ref.SubPath, "")
-	spec := ocireg.NewRepositorySpec(result.Ref.Host, meta)
-	result.Repository, err = s.LookupRepository(ctx, spec)
+	result.Repository, err = s.DetermineRepositoryBySpec(ctx, &result.Ref.UniformRepositorySpec, aliases)
 	if err != nil {
 		return result, err
 	}
@@ -170,4 +171,20 @@ func (s *session) EvaluateRef(ctx Context, ref string) (*EvaluationResult, error
 	}
 	result.Version, err = s.GetComponentVersion(result.Component, *result.Ref.Version)
 	return result, err
+}
+
+func (s *session) DetermineRepository(ctx Context, ref string, aliases Aliases) (Repository, error) {
+	spec, err := ParseRepo(ref)
+	if err != nil {
+		return nil, err
+	}
+	return s.DetermineRepositoryBySpec(ctx, &spec, aliases)
+}
+
+func (s *session) DetermineRepositoryBySpec(ctx Context, spec *UniformRepositorySpec, aliases Aliases) (Repository, error) {
+	rspec, err := ctx.MapUniformRepositorySpec(spec, aliases)
+	if err != nil {
+		return nil, err
+	}
+	return s.LookupRepository(ctx, rspec)
 }

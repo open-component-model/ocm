@@ -16,7 +16,7 @@ func main() {
 	c := app.NewCliCommand(cmd.DefaultContext())
 
 	if err := c.Execute(); err != nil {
-		fmt.Print(err)
+		fmt.Fprint(os.Stdout, err)
 		os.Exit(1)
 	}
 }

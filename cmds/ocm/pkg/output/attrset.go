@@ -16,6 +16,8 @@ package output
 
 import (
 	"fmt"
+
+	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
 )
 
 type AttributeSet struct {
@@ -40,6 +42,6 @@ func (this *AttributeSet) Attributef(name, f string, args ...interface{}) {
 	this.attrs = append(this.attrs, []string{name + ":", fmt.Sprintf(f, args...)})
 }
 
-func (this *AttributeSet) PrintAttributes() {
-	FormatTable("", this.attrs)
+func (this *AttributeSet) PrintAttributes(ctx out.Context) {
+	FormatTable(ctx, "", this.attrs)
 }

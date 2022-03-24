@@ -40,11 +40,12 @@ type BlobInfo struct {
 	Info     interface{}     `json:"info,omitempty"`
 }
 type ArtefactInfo struct {
-	Type       string      `json:"type"`
-	Descriptor interface{} `json:"descriptor"`
-	Config     *BlobInfo   `json:"config,omitempty"`
-	Layers     []*BlobInfo `json:"layers,omitempty"`
-	Manifests  []*BlobInfo `json:"manifests,omitempty"`
+	Digest     digest.Digest `json:"digest"`
+	Type       string        `json:"type"`
+	Descriptor interface{}   `json:"descriptor"`
+	Config     *BlobInfo     `json:"config,omitempty"`
+	Layers     []*BlobInfo   `json:"layers,omitempty"`
+	Manifests  []*BlobInfo   `json:"manifests,omitempty"`
 }
 
 func GetArtefactInfo(art cpi.ArtefactAccess, layerFiles bool) *ArtefactInfo {
@@ -62,11 +63,9 @@ func GetManifestInfo(m cpi.ManifestAccess, layerFiles bool) *ArtefactInfo {
 		Type:       artdesc.MediaTypeImageManifest,
 		Descriptor: m.GetDescriptor(),
 	}
-	_, err := accessio.BlobData(m.Blob())
-	if err != nil {
-		info.Descriptor = fmt.Sprintf("invalid: %s\n", err)
-	} else {
-		info.Descriptor = m.GetDescriptor()
+	b, err := m.Blob()
+	if err == nil {
+		info.Digest = b.Digest()
 	}
 	man := m.GetDescriptor()
 	cfg := &BlobInfo{
@@ -212,6 +211,10 @@ func GetIndexInfo(i cpi.IndexAccess, layerFiles bool) *ArtefactInfo {
 	info := &ArtefactInfo{
 		Type:       artdesc.MediaTypeImageIndex,
 		Descriptor: i.GetDescriptor(),
+	}
+	b, err := i.Blob()
+	if err == nil {
+		info.Digest = b.Digest()
 	}
 	for _, l := range i.GetDescriptor().Manifests {
 		blobinfo := &BlobInfo{

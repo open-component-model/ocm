@@ -19,6 +19,8 @@ import (
 )
 
 type Context = core.Context
+type OCI = core.OCI
+type OCM = core.OCM
 
 func DefaultContext() Context {
 	return core.DefaultContext

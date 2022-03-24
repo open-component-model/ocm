@@ -99,7 +99,7 @@ func (o *CLIOptions) Complete() error {
 	if o.Config == "" {
 		if h != "" {
 			cfg := h + "/.ocmconfig"
-			if ok, err := vfs.FileExists(osfs.New(), cfg); ok && err != nil {
+			if ok, err := vfs.FileExists(osfs.New(), cfg); ok && err == nil {
 				o.Config = cfg
 			}
 		}

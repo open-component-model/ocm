@@ -37,9 +37,6 @@ type Command struct {
 
 	Path       string
 	TargetName string
-
-	Source ocm.ComponentVersionAccess
-	Target ocm.Repository
 }
 
 // NewCommand creates a new transfer command.
@@ -69,27 +66,25 @@ func (o *Command) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *Command) Complete(args []string) error {
-	var err error
-
 	o.Path = args[0]
 	o.TargetName = args[1]
-
-	o.Source, err = comparch.Open(o.Context.OCMContext(), accessobj.ACC_READONLY, o.Path, 0, o.Context)
-	if err != nil {
-		return err
-	}
-
-	o.Target, err = o.Context.OCM().DetermineRepository(o.TargetName)
-	if err != nil {
-		o.Source.Close()
-		return err
-	}
 
 	return nil
 }
 
 func (o *Command) Run() error {
-	defer o.Source.Close()
-	defer o.Target.Close()
-	return ocm.TransferVersion(nil, o.Source, o.Target, nil)
+	session := ocm.NewSession(nil)
+	defer session.Close()
+	source, err := comparch.Open(o.Context.OCMContext(), accessobj.ACC_READONLY, o.Path, 0, o.Context)
+	if err != nil {
+		return err
+	}
+	session.Closer(source)
+
+	target, err := session.DetermineRepository(o.Context.OCMContext(), o.TargetName, o.Context.OCM().GetAlias)
+	if err != nil {
+		return err
+	}
+
+	return ocm.TransferVersion(nil, source, target, nil)
 }

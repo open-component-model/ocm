@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/errors"
@@ -37,12 +38,12 @@ func (o *Object) AsManifest() interface{} {
 ////////////////////////////////////////////////////////////////////////////////
 
 type TypeHandler struct {
-	octx     ocm.Context
+	octx     clictx.OCM
 	session  ocm.Session
 	repobase ocm.Repository
 }
 
-func NewTypeHandler(octx ocm.Context, session ocm.Session, repobase ocm.Repository) utils.TypeHandler {
+func NewTypeHandler(octx clictx.OCM, session ocm.Session, repobase ocm.Repository) utils.TypeHandler {
 	return &TypeHandler{
 		octx:     octx,
 		session:  session,
@@ -86,7 +87,7 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 	spec := ocm.RefSpec{}
 	repo := h.repobase
 	if repo == nil {
-		evaluated, err := h.session.EvaluateRef(h.octx, name)
+		evaluated, err := h.session.EvaluateRef(h.octx.Context(), name, h.octx.GetAlias)
 		if err != nil {
 			return nil, errors.Wrapf(err, "component version reference %q", name)
 		}
@@ -112,7 +113,7 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 		if err != nil {
 			return nil, errors.Wrapf(err, "reference %q", name)
 		}
-		spec.UniformRepositorySpec = repo.GetSpecification().AsUniformSpec(h.octx)
+		spec.UniformRepositorySpec = repo.GetSpecification().AsUniformSpec(h.octx.Context())
 		spec.Component = comp.Component
 		spec.Version = comp.Version
 	}

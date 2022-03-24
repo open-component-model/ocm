@@ -15,10 +15,10 @@
 package output
 
 import (
-	"fmt"
 	"strings"
 
 	. "github.com/gardener/ocm/cmds/ocm/pkg/data"
+	"github.com/gardener/ocm/pkg/errors"
 )
 
 type TableProcessingOutput struct {
@@ -35,12 +35,12 @@ func NewProcessingTableOutput(opts *Options, chain ProcessChain, header ...strin
 
 func (this *TableProcessingOutput) new(opts *Options, chain ProcessChain, header []string) *TableProcessingOutput {
 	this.header = header
-	this.ElementOutput.new(chain)
+	this.ElementOutput.new(opts.Context, chain)
 	this.opts = opts
 	return this
 }
 
-func (this *TableProcessingOutput) Out(interface{}) error {
+func (this *TableProcessingOutput) Out() error {
 	lines := [][]string{this.header}
 
 	sort := this.opts.Sort
@@ -58,13 +58,13 @@ func (this *TableProcessingOutput) Out(interface{}) error {
 		for _, k := range sort {
 			key := SelectBest(strings.ToLower(k), cols...)
 			if key == "" {
-				return fmt.Errorf("unknown field '%s'", k)
+				return errors.Newf("unknown field '%s'", k)
 			}
 			slice.Sort(compare_column(idxs[key]))
 		}
 	}
 
-	FormatTable("", append(lines, StringArraySlice(slice)...))
+	FormatTable(this.Context, "", append(lines, StringArraySlice(slice)...))
 	return nil
 }
 

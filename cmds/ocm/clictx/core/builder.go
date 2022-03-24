@@ -16,7 +16,9 @@ package core
 
 import (
 	"context"
+	"io"
 
+	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
 	"github.com/gardener/ocm/pkg/datacontext"
 	"github.com/gardener/ocm/pkg/ocm"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -26,6 +28,7 @@ type Builder struct {
 	ctx        context.Context
 	shared     datacontext.AttributesContext
 	ocm        ocm.Context
+	out        out.Context
 	filesystem vfs.FileSystem
 }
 
@@ -56,6 +59,21 @@ func (b Builder) WithOCM(ctx ocm.Context) Builder {
 	return b
 }
 
+func (b Builder) WithOutput(w io.Writer) Builder {
+	b.out = out.WithOutput(b.out, w)
+	return b
+}
+
+func (b Builder) WithErrorOutput(w io.Writer) Builder {
+	b.out = out.WithErrorOutput(b.out, w)
+	return b
+}
+
+func (b Builder) WithInput(r io.Reader) Builder {
+	b.out = out.WithInput(b.out, r)
+	return b
+}
+
 func (b Builder) Bound() (Context, context.Context) {
 	c := b.New()
 	return c, context.WithValue(b.getContext(), key, c)
@@ -70,5 +88,5 @@ func (b Builder) New() Context {
 		b.shared = b.ocm.AttributesContext()
 	}
 
-	return newContext(b.shared, b.ocm, b.filesystem)
+	return newContext(b.shared, b.ocm, out.NewFor(b.out), b.filesystem)
 }

@@ -91,11 +91,14 @@ func HandleOutput(output output.Output, handler TypeHandler, specs ...ElemSpec) 
 			return err
 		}
 		if result == nil {
-			fmt.Fprintf(os.Stderr, "all not supported")
+			fmt.Fprintf(os.Stderr, "all not supported\n")
 			return nil
 		}
 		for _, r := range result {
-			output.Add(nil, r)
+			err := output.Add(r)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+			}
 		}
 	}
 	for _, s := range specs {
@@ -104,12 +107,15 @@ func HandleOutput(output output.Output, handler TypeHandler, specs ...ElemSpec) 
 			return errors.Wrapf(err, "error processing %q", s.String())
 		}
 		for _, r := range result {
-			output.Add(nil, r)
+			err := output.Add(r)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+			}
 		}
 	}
-	err := output.Close(nil)
+	err := output.Close()
 	if err != nil {
 		return err
 	}
-	return output.Out(nil)
+	return output.Out()
 }

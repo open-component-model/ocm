@@ -15,9 +15,9 @@
 package output
 
 import (
-	"fmt"
-
 	. "github.com/gardener/ocm/cmds/ocm/pkg/data"
+	. "github.com/gardener/ocm/cmds/ocm/pkg/output/out"
+	"github.com/gardener/ocm/pkg/errors"
 )
 
 type AttrProcessingOutput struct {
@@ -33,28 +33,28 @@ func NewProcessingAttrOutput(opts *Options, chain ProcessChain, header ...string
 }
 
 func (this *AttrProcessingOutput) new(opts *Options, chain ProcessChain, header []string) *AttrProcessingOutput {
-	this.ElementOutput.new(chain)
+	this.ElementOutput.new(opts.Context, chain)
 	this.opts = opts
 	return this
 }
 
-func (this *AttrProcessingOutput) Out(interface{}) error {
+func (this *AttrProcessingOutput) Out() error {
 	var ok bool
 	i := this.Elems.Iterator()
 	for i.HasNext() {
-		fmt.Printf("---\n")
+		Outf(this.opts.Context, "---\n")
 		elem := i.Next()
-		var out *AttributeSet
+		var set *AttributeSet
 		if this.mapper != nil {
-			out = this.mapper(elem)
+			set = this.mapper(elem)
 
 		} else {
-			out, ok = i.Next().(*AttributeSet)
+			set, ok = i.Next().(*AttributeSet)
 			if !ok {
-				return fmt.Errorf("invalid attr type")
+				return errors.Newf("invalid attr type")
 			}
 		}
-		out.PrintAttributes()
+		set.PrintAttributes(this.opts.Context)
 	}
 	return nil
 }

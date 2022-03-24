@@ -37,7 +37,7 @@ type Context interface {
 ```
 
 It offers the possibility to register configuration objects of arbitrary types.
-This is implemented by types objects, like for the other kinds of data context.
+This is implemented by typed objects, like for the other kinds of data context.
 Using this feature it is possible to decode configuration objects from
 yaml documents or fragments.
 
@@ -108,7 +108,7 @@ to the configuration context used by this data context since the last update.
 ## Providing Configuration Objects
 
 There might be any kind of configuration objects that can apply
-themselfs to any kind of data context.
+themselves to any kind of data context.
 
 It must implement the interface:
 
@@ -120,8 +120,8 @@ type Config interface {
 }
 ```
 
-Typically such an object SHOULD provide a serialization format.
-If supported it must get an unique type name and it can be
+Typically, such an object SHOULD provide a serialization format.
+If supported it must get a unique type name, and it can be
 registered for the configuration context.
 
 The following snipped shows a typical pattern, how to implement this.
@@ -163,7 +163,7 @@ func (a *ConfigSpec) ApplyTo(ctx config.Context, target interface{}) error {
 	if !ok {
 		return config.ErrNoContext(MyConfigType)
 	}
-	// do the needfull
+	// do the needful
 	return false
 }
 ```
@@ -173,7 +173,8 @@ be implemented in sub package `config`.
 
 ## Generic Configuration
 
-The configuration context provides an own configuration object (in su package
+The configuration context provides an own configuration object for configuring
+the configuration context (in sub package
 `config`), that can be used to aggregate any kind of configuration object,
 that is serializable.
 
@@ -186,7 +187,7 @@ type Config struct {
 }
 ```
 
-This can be used to list any sequenece of configurations that will be applied
-in this order, if the object is apllied to a configuration context.
-The listes configuration requests will be stored, until they are replayed by a
+This can be used to list any sequence of configurations that will be applied
+in this order, if the object is applied to a configuration context.
+The listed configuration requests will be stored, until they are replayed by a
 dedicated data context.

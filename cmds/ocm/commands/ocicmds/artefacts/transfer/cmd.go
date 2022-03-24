@@ -19,12 +19,12 @@ import (
 
 	"github.com/gardener/ocm/cmds/ocm/commands"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/names"
+	"github.com/gardener/ocm/pkg/oci"
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/common"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
-	"github.com/gardener/ocm/pkg/oci"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -86,18 +86,18 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
-	var err error
-	if o.Repository.Repository != nil {
-		defer o.Repository.Repository.Close()
-	}
-
-	a, err := NewAction(o.Context, o.Target)
-	if err == nil {
+	session := oci.NewSession(nil)
+	defer session.Close()
+	repo, err := o.Repository.GetRepository(o.Context.OCI(), session)
+	if err != nil {
 		return err
 	}
-	defer a.Close(nil)
+	a, err := NewAction(o.Context, session, o.Target)
+	if err != nil {
+		return err
+	}
 
-	handler := common.NewTypeHandler(o.Context.OCIContext(), a.Session, o.Repository.Repository)
+	handler := common.NewTypeHandler(o.Context.OCI(), a.Session, repo)
 
 	return utils.HandleOutput(a, handler, utils.StringElemSpecs(o.Refs...)...)
 }
@@ -114,7 +114,7 @@ type action struct {
 	Ref      oci.RefSpec
 }
 
-func NewAction(ctx clictx.Context, target string) (*action, error) {
+func NewAction(ctx clictx.Context, session oci.Session, target string) (*action, error) {
 	ref, err := oci.ParseRef(target)
 	if err != nil {
 		return nil, err
@@ -122,21 +122,20 @@ func NewAction(ctx clictx.Context, target string) (*action, error) {
 	if ref.Digest != nil {
 		return nil, fmt.Errorf("copy to target digest not supported")
 	}
-	session := oci.NewSession(nil)
-	repo, err := ctx.OCI().MapUniformRepositorySpec(ref.UniformRepositorySpec)
+	repo, err := session.DetermineRepositoryBySpec(ctx.OCIContext(), &ref.UniformRepositorySpec, ctx.OCI().GetAlias)
 	if err != nil {
 		return nil, err
 	}
-	session.Closer(repo)
 
 	return &action{
 		Context:  ctx,
 		Session:  session,
+		Ref:      ref,
 		Registry: repo,
 	}, nil
 }
 
-func (a *action) Add(processingContext interface{}, e interface{}) error {
+func (a *action) Add(e interface{}) error {
 	if a.count > 0 && !a.Ref.IsRegistry() {
 		return fmt.Errorf("cannot copy multiple source artefacts to the same artefact (%s)", &a.Ref)
 	}
@@ -163,11 +162,7 @@ func (a *action) Add(processingContext interface{}, e interface{}) error {
 	return err
 }
 
-func (a *action) Close(interface{}) error {
-	return a.Session.Close()
-}
-
-func (a *action) Out(processingContext interface{}) error {
+func (a *action) Out() error {
 	fmt.Printf("copied %d from %d artefact(s)\n", a.copied, a.count)
 	return nil
 }

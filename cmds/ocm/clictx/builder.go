@@ -16,6 +16,7 @@ package clictx
 
 import (
 	"context"
+	"io"
 
 	"github.com/gardener/ocm/cmds/ocm/clictx/core"
 	"github.com/gardener/ocm/pkg/datacontext"
@@ -37,6 +38,18 @@ func WithOCM(ctx ocm.Context) core.Builder {
 
 func WithFileSystem(fs vfs.FileSystem) core.Builder {
 	return core.Builder{}.WithFileSystem(fs)
+}
+
+func WithOutput(w io.Writer) core.Builder {
+	return core.Builder{}.WithOutput(w)
+}
+
+func WithErrorOutput(w io.Writer) core.Builder {
+	return core.Builder{}.WithErrorOutput(w)
+}
+
+func WithInput(r io.Reader) core.Builder {
+	return core.Builder{}.WithInput(r)
 }
 
 func New() core.Context {

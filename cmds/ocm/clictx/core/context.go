@@ -16,9 +16,11 @@ package core
 
 import (
 	"context"
+	"io"
 	"reflect"
 	"sync"
 
+	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/config"
@@ -41,9 +43,7 @@ type OCI interface {
 	Context() oci.Context
 	AddRepository(name string, spec oci.RepositorySpec) error
 	GetRepository(name string) (oci.Repository, error)
-	GetAliases(name string) (map[string]oci.RepositorySpec, error)
-	DetermineRepository(ref string) (oci.Repository, error)
-	MapUniformRepositorySpec(spec oci.UniformRepositorySpec) (oci.Repository, error)
+	GetAlias(name string) oci.RepositorySpec
 	OpenCTF(path string) (oci.Repository, error)
 }
 
@@ -51,9 +51,7 @@ type OCM interface {
 	Context() ocm.Context
 	AddRepository(name string, spec ocm.RepositorySpec) error
 	GetRepository(name string) (ocm.Repository, error)
-	GetAliases(name string) (map[string]ocm.RepositorySpec, error)
-	DetermineRepository(ref string) (ocm.Repository, error)
-	MapUniformRepositorySpec(spec ocm.UniformRepositorySpec) (ocm.Repository, error)
+	GetAlias(name string) ocm.RepositorySpec
 	OpenCTF(path string) (ocm.Repository, error)
 }
 
@@ -73,6 +71,9 @@ type Context interface {
 	OCM() OCM
 
 	ApplyOption(options *accessio.Options)
+
+	out.Context
+	WithStdIO(r io.Reader, o io.Writer, e io.Writer) Context
 }
 
 var key = reflect.TypeOf(_context{})
@@ -100,19 +101,25 @@ type _context struct {
 	credentials credentials.Context
 	oci         *_oci
 	ocm         *_ocm
+
+	out out.Context
 }
 
 var _ Context = &_context{}
 
-func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context, fs vfs.FileSystem) Context {
+func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context, outctx out.Context, fs vfs.FileSystem) Context {
 	if fs == nil {
 		fs = osfs.New()
+	}
+	if outctx == nil {
+		outctx = out.New()
 	}
 	c := &_context{
 		sharedAttributes: shared,
 		credentials:      ocmctx.CredentialsContext(),
 		config:           ocmctx.CredentialsContext().ConfigContext(),
 		updater:          cfgcpi.NewUpdate(ocmctx.CredentialsContext().ConfigContext()),
+		out:              outctx,
 	}
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
 	c.oci = newOCI(c, ocmctx)
@@ -155,6 +162,51 @@ func (c *_context) OCM() OCM {
 
 func (c *_context) ApplyOption(options *accessio.Options) {
 	options.PathFileSystem = c.FileSystem()
+}
+
+func (c *_context) StdOut() io.Writer {
+	return c.StdOut()
+}
+
+func (c *_context) StdErr() io.Writer {
+	return c.StdErr()
+}
+
+func (c *_context) StdIn() io.Reader {
+	return c.StdIn()
+}
+
+func (c *_context) WithStdIO(r io.Reader, o io.Writer, e io.Writer) Context {
+	return &_view{
+		Context: c,
+		out:     out.NewFor(out.WithStdIO(c.out, r, o, e)),
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type _view struct {
+	Context
+	out out.Context
+}
+
+func (c *_view) StdOut() io.Writer {
+	return c.StdOut()
+}
+
+func (c *_view) StdErr() io.Writer {
+	return c.StdErr()
+}
+
+func (c *_view) StdIn() io.Reader {
+	return c.StdIn()
+}
+
+func (c *_view) WithStdIO(r io.Reader, o io.Writer, e io.Writer) Context {
+	return &_view{
+		Context: c.Context,
+		out:     out.NewFor(out.WithStdIO(c.out, r, o, e)),
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -202,35 +254,14 @@ func (c *_oci) GetRepository(name string) (oci.Repository, error) {
 	return c.ctx.RepositoryForSpec(spec)
 }
 
-func (c *_oci) GetAliases(name string) (map[string]oci.RepositorySpec, error) {
+func (c *_oci) GetAlias(name string) oci.RepositorySpec {
 	err := c.updater.Update(c)
 	if err != nil {
-		return nil, err
+		return nil
 	}
 	c.lock.RLock()
 	defer c.lock.RUnlock()
-
-	r := map[string]oci.RepositorySpec{}
-	for k, v := range c.repos {
-		r[k] = v
-	}
-	return r, nil
-}
-
-func (c *_oci) DetermineRepository(ref string) (oci.Repository, error) {
-	spec, err := oci.ParseRepo(ref)
-	if err != nil {
-		return nil, err
-	}
-	return c.MapUniformRepositorySpec(spec)
-}
-
-func (c *_oci) MapUniformRepositorySpec(spec oci.UniformRepositorySpec) (oci.Repository, error) {
-	rspec, err := c.ctx.MapUniformRepositorySpec(&spec, c.repos)
-	if err != nil {
-		return nil, err
-	}
-	return c.ctx.RepositoryForSpec(rspec)
+	return c.repos[name]
 }
 
 func (c *_oci) OpenCTF(path string) (oci.Repository, error) {
@@ -286,35 +317,14 @@ func (c *_ocm) GetRepository(name string) (ocm.Repository, error) {
 	return c.ctx.RepositoryForSpec(spec)
 }
 
-func (c *_ocm) GetAliases(name string) (map[string]ocm.RepositorySpec, error) {
+func (c *_ocm) GetAlias(name string) ocm.RepositorySpec {
 	err := c.updater.Update(c)
 	if err != nil {
-		return nil, err
+		return nil
 	}
 	c.lock.RLock()
 	defer c.lock.RUnlock()
-
-	r := map[string]ocm.RepositorySpec{}
-	for k, v := range c.repos {
-		r[k] = v
-	}
-	return r, nil
-}
-
-func (c *_ocm) DetermineRepository(ref string) (ocm.Repository, error) {
-	spec, err := ocm.ParseRepo(ref)
-	if err != nil {
-		return nil, err
-	}
-	return c.MapUniformRepositorySpec(spec)
-}
-
-func (c *_ocm) MapUniformRepositorySpec(spec ocm.UniformRepositorySpec) (ocm.Repository, error) {
-	rspec, err := c.ctx.MapUniformRepositorySpec(&spec, c.repos)
-	if err != nil {
-		return nil, err
-	}
-	return c.ctx.RepositoryForSpec(rspec)
+	return c.repos[name]
 }
 
 func (c *_ocm) OpenCTF(path string) (ocm.Repository, error) {

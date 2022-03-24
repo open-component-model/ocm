@@ -18,7 +18,9 @@ import (
 	"fmt"
 
 	. "github.com/gardener/ocm/cmds/ocm/pkg/data"
-	"github.com/gardener/ocm/pkg/oci/ociutils"
+	. "github.com/gardener/ocm/cmds/ocm/pkg/output/out"
+	"github.com/gardener/ocm/pkg/utils"
+
 	"github.com/gardener/ocm/pkg/runtime"
 	"sigs.k8s.io/yaml"
 )
@@ -31,20 +33,20 @@ type ComplexProcessingOutput struct {
 
 var _ Output = &ComplexProcessingOutput{}
 
-func NewProcessingComplexOutput(chain ProcessChain, fields ...string) *ComplexProcessingOutput {
-	return (&ComplexProcessingOutput{}).new(chain, fields)
+func NewProcessingComplexOutput(ctx Context, chain ProcessChain, fields ...string) *ComplexProcessingOutput {
+	return (&ComplexProcessingOutput{}).new(ctx, chain, fields)
 }
 
-func (this *ComplexProcessingOutput) new(chain ProcessChain, fields []string) *ComplexProcessingOutput {
-	this.ElementOutput.new(chain)
+func (this *ComplexProcessingOutput) new(ctx Context, chain ProcessChain, fields []string) *ComplexProcessingOutput {
+	this.ElementOutput.new(ctx, chain)
 	this.fields = fields
 	return this
 }
 
-func (this *ComplexProcessingOutput) Out(interface{}) error {
+func (this *ComplexProcessingOutput) Out() error {
 	i := this.Elems.Iterator()
 	for i.HasNext() {
-		fmt.Printf("---\n")
+		Outf(this.Context, "---\n")
 		elem := i.Next()
 		var out interface{}
 		if this.mapper != nil {
@@ -53,7 +55,7 @@ func (this *ComplexProcessingOutput) Out(interface{}) error {
 		}
 		data, err := runtime.DefaultYAMLEncoding.Marshal(out)
 		if err != nil {
-			fmt.Printf("Error: %s\n", err)
+			Error(this.Context, err.Error())
 		} else {
 			if len(this.fields) > 0 {
 				m := map[string]interface{}{}
@@ -61,7 +63,7 @@ func (this *ComplexProcessingOutput) Out(interface{}) error {
 				this.out("", m)
 
 			} else {
-				fmt.Printf("%s\n", string(data))
+				Outf(this.Context, "%s\n", string(data))
 			}
 		}
 	}
@@ -80,22 +82,22 @@ func (this *ComplexProcessingOutput) out(gap string, m map[string]interface{}) {
 		if v != nil {
 			switch e := v.(type) {
 			case map[string]interface{}:
-				fmt.Printf("%s%s:\n", gap, k)
+				Outf(this.Context, "%s%s:\n", gap, k)
 				this.out(gap+"  ", e)
 			case []interface{}:
-				fmt.Printf("%s%s:\n", gap, k)
+				Outf(this.Context, "%s%s:\n", gap, k)
 				s, err := yaml.Marshal(v)
 				if err == nil {
-					ociutils.IndentLines(string(s), gap)
+					utils.IndentLines(string(s), gap)
 				}
 			default:
-				eff := ociutils.IndentLines(fmt.Sprintf("%v", v), gap+"  ")
-				fmt.Printf("%s%s: %s", gap, k, eff[len(gap)+2:])
+				eff := utils.IndentLines(fmt.Sprintf("%v", v), gap+"  ")
+				Outf(this.Context, "%s%s: %s", gap, k, eff[len(gap)+2:])
 			}
 		}
 	}
 	s, err := yaml.Marshal(rest)
 	if err == nil {
-		fmt.Printf(ociutils.IndentLines(string(s), gap))
+		Outf(this.Context, utils.IndentLines(string(s), gap))
 	}
 }

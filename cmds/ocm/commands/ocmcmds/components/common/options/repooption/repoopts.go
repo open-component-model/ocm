@@ -24,8 +24,7 @@ import (
 )
 
 type Option struct {
-	Repository ocm.Repository
-	Spec       string
+	Spec string
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
@@ -33,14 +32,14 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *Option) Complete(ctx clictx.Context) error {
-	var err error
-	if o.Spec != "" {
-		o.Repository, err = ctx.OCM().DetermineRepository(o.Spec)
-		if err != nil {
-			return err
-		}
-	}
 	return nil
+}
+
+func (o *Option) GetRepository(ctx clictx.OCM, session ocm.Session) (ocm.Repository, error) {
+	if o.Spec != "" {
+		return session.DetermineRepository(ctx.Context(), o.Spec, ctx.GetAlias)
+	}
+	return nil, nil
 }
 
 func (o *Option) Usage() string {

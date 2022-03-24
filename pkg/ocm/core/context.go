@@ -42,7 +42,7 @@ type Context interface {
 	AccessMethods() AccessTypeScheme
 
 	RepositorySpecHandlers() RepositorySpecHandlers
-	MapUniformRepositorySpec(u *UniformRepositorySpec, aliases map[string]RepositorySpec) (RepositorySpec, error)
+	MapUniformRepositorySpec(u *UniformRepositorySpec, aliases Aliases) (RepositorySpec, error)
 
 	BlobHandlers() BlobHandlerRegistry
 	BlobDigesters() digester.BlobDigesterRegistry
@@ -122,7 +122,7 @@ func (c *_context) RepositorySpecHandlers() RepositorySpecHandlers {
 	return c.specHandlers
 }
 
-func (c *_context) MapUniformRepositorySpec(u *UniformRepositorySpec, aliases map[string]RepositorySpec) (RepositorySpec, error) {
+func (c *_context) MapUniformRepositorySpec(u *UniformRepositorySpec, aliases Aliases) (RepositorySpec, error) {
 	return c.specHandlers.MapUniformRepositorySpec(c, u, aliases)
 }
 

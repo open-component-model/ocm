@@ -19,12 +19,12 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/compression"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	"github.com/gardener/ocm/pkg/oci/cpi"
+	"github.com/gardener/ocm/pkg/utils"
 )
 
 func PrintArtefact(art cpi.ArtefactAccess) string {
@@ -35,14 +35,6 @@ func PrintArtefact(art cpi.ArtefactAccess) string {
 		return fmt.Sprintf("type: %s\n", artdesc.MediaTypeImageIndex+PrintIndex(art.IndexAccess()))
 	}
 	return "unspecific"
-}
-
-func IndentLines(orig string, gap string) string {
-	s := ""
-	for _, l := range strings.Split(orig, "\n") {
-		s += gap + l + "\n"
-	}
-	return s
 }
 
 func PrintManifest(m cpi.ManifestAccess) string {
@@ -68,7 +60,7 @@ func PrintManifest(m cpi.ManifestAccess) string {
 	h := getHandler(man.Config.MediaType)
 
 	if h != nil {
-		s += IndentLines(h.Description(m, config), "  ")
+		s += utils.IndentLines(h.Description(m, config), "  ")
 	}
 	s += "layers:\n"
 	for _, l := range man.Layers {
@@ -79,7 +71,7 @@ func PrintManifest(m cpi.ManifestAccess) string {
 		if err != nil {
 			s += "  error getting blob: " + err.Error() + "\n"
 		}
-		s += IndentLines(PrintLayer(blob), "  ")
+		s += utils.IndentLines(PrintLayer(blob), "  ")
 	}
 	return s
 }
@@ -141,7 +133,7 @@ func PrintIndex(i cpi.IndexAccess) string {
 			s += fmt.Sprintf("  error: %s\n", err)
 		} else {
 			s += fmt.Sprintf("  resolved artefact:\n")
-			s += IndentLines(PrintArtefact(a), "    ")
+			s += utils.IndentLines(PrintArtefact(a), "    ")
 		}
 	}
 	return s

@@ -16,18 +16,20 @@ package output
 
 import (
 	. "github.com/gardener/ocm/cmds/ocm/pkg/data"
+	. "github.com/gardener/ocm/cmds/ocm/pkg/output/out"
 )
 
 type ElementOutput struct {
-	source ProcessingSource
-	Elems  Iterable
+	source  ProcessingSource
+	Elems   Iterable
+	Context Context
 }
 
-func NewElementOutput(chain ProcessChain) *ElementOutput {
-	return (&ElementOutput{}).new(chain)
+func NewElementOutput(ctx Context, chain ProcessChain) *ElementOutput {
+	return (&ElementOutput{}).new(ctx, chain)
 }
 
-func (this *ElementOutput) new(chain ProcessChain) *ElementOutput {
+func (this *ElementOutput) new(ctx Context, chain ProcessChain) *ElementOutput {
 	this.source = NewIncrementalProcessingSource()
 	if chain == nil {
 		this.Elems = this.source
@@ -37,15 +39,15 @@ func (this *ElementOutput) new(chain ProcessChain) *ElementOutput {
 	return this
 }
 
-func (this *ElementOutput) Add(processingContext interface{}, e interface{}) error {
+func (this *ElementOutput) Add(e interface{}) error {
 	this.source.Add(e)
 	return nil
 }
 
-func (this *ElementOutput) Close(processingContext interface{}) error {
+func (this *ElementOutput) Close() error {
 	this.source.Close()
 	return nil
 }
 
-func (this *ElementOutput) Out(processingContext interface{}) {
+func (this *ElementOutput) Out() {
 }

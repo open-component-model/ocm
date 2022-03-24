@@ -17,9 +17,11 @@ package output
 import (
 	"fmt"
 	"strings"
+
+	. "github.com/gardener/ocm/cmds/ocm/pkg/output/out"
 )
 
-func FormatTable(gap string, data [][]string) {
+func FormatTable(ctx Context, gap string, data [][]string) {
 	columns := []int{}
 	max := 0
 
@@ -59,14 +61,14 @@ func FormatTable(gap string, data [][]string) {
 			} else {
 				for c, col := range row {
 					if c < len(first) {
-						fmt.Printf("%s%s: %s\n", gap, first[c], col)
+						Outf(ctx, "%s%s: %s\n", gap, first[c], col)
 					} else {
-						fmt.Printf("%s%d: %s\n", gap, c, col)
+						Outf(ctx, "%s%d: %s\n", gap, c, col)
 					}
 					setSep = true
 				}
 				if setSep == true {
-					fmt.Printf("---\n")
+					Outf(ctx, "---\n")
 					setSep = false
 				}
 			}
@@ -95,7 +97,7 @@ func FormatTable(gap string, data [][]string) {
 						r = append(r, "")
 					}
 				}
-				fmt.Printf(format, r...)
+				Outf(ctx, format, r...)
 			}
 		}
 	}

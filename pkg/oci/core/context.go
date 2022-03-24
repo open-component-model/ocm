@@ -34,7 +34,7 @@ type Context interface {
 	CredentialsContext() credentials.Context
 
 	RepositorySpecHandlers() RepositorySpecHandlers
-	MapUniformRepositorySpec(u *UniformRepositorySpec, aliases map[string]RepositorySpec) (RepositorySpec, error)
+	MapUniformRepositorySpec(u *UniformRepositorySpec, aliases Aliases) (RepositorySpec, error)
 
 	RepositoryTypes() RepositoryTypeScheme
 
@@ -94,7 +94,7 @@ func (c *_context) RepositorySpecHandlers() RepositorySpecHandlers {
 	return c.specHandlers
 }
 
-func (c *_context) MapUniformRepositorySpec(u *UniformRepositorySpec, aliases map[string]RepositorySpec) (RepositorySpec, error) {
+func (c *_context) MapUniformRepositorySpec(u *UniformRepositorySpec, aliases Aliases) (RepositorySpec, error) {
 	return c.specHandlers.MapUniformRepositorySpec(c, u, aliases)
 }
 

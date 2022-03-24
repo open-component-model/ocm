@@ -17,10 +17,11 @@ package output
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"os"
 
 	"github.com/gardener/ocm/cmds/ocm/pkg/data"
+	. "github.com/gardener/ocm/cmds/ocm/pkg/output/out"
+	"github.com/gardener/ocm/pkg/errors"
 	"sigs.k8s.io/yaml"
 )
 
@@ -35,9 +36,9 @@ type Object interface{}
 // any ongoing input processing.
 // Second, the final output is requested using the Out method.
 type Output interface {
-	Add(processingContext interface{}, e interface{}) error
-	Close(processingContext interface{}) error
-	Out(processingContext interface{}) error
+	Add(e interface{}) error
+	Close() error
+	Out() error
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -46,15 +47,15 @@ type NopOutput struct{}
 
 var _ Output = (*NopOutput)(nil)
 
-func (NopOutput) Add(processingContext interface{}, e interface{}) error {
+func (NopOutput) Add(e interface{}) error {
 	return nil
 }
 
-func (NopOutput) Close(processingContext interface{}) error {
+func (NopOutput) Close() error {
 	return nil
 }
 
-func (n NopOutput) Out(processingContext interface{}) error {
+func (n NopOutput) Out() error {
 	return nil
 }
 
@@ -65,15 +66,16 @@ type Manifest interface {
 }
 
 type ManifestOutput struct {
-	data []Object
+	data    []Object
+	Context Context
 }
 
-func (this *ManifestOutput) Add(processingContext interface{}, e interface{}) error {
+func (this *ManifestOutput) Add(e interface{}) error {
 	this.data = append(this.data, e)
 	return nil
 }
 
-func (this *ManifestOutput) Close(processingContext interface{}) error {
+func (this *ManifestOutput) Close() error {
 	return nil
 }
 
@@ -81,14 +83,14 @@ type YAMLOutput struct {
 	ManifestOutput
 }
 
-func (this *YAMLOutput) Out(processingContext interface{}) error {
+func (this *YAMLOutput) Out() error {
 	for _, m := range this.data {
-		fmt.Println("---")
+		Outf(this.Context, "---")
 		d, err := yaml.Marshal(m.(Manifest).AsManifest())
 		if err != nil {
 			return err
 		}
-		os.Stdout.Write(d)
+		this.Context.StdOut().Write(d)
 	}
 	return nil
 }
@@ -99,19 +101,19 @@ type YAMLProcessingOutput struct {
 
 var _ Output = &YAMLProcessingOutput{}
 
-func NewProcessingYAMLOutput(chain data.ProcessChain) *YAMLProcessingOutput {
-	return (&YAMLProcessingOutput{}).new(chain)
+func NewProcessingYAMLOutput(ctx Context, chain data.ProcessChain) *YAMLProcessingOutput {
+	return (&YAMLProcessingOutput{}).new(ctx, chain)
 }
 
-func (this *YAMLProcessingOutput) new(chain data.ProcessChain) *YAMLProcessingOutput {
-	this.ElementOutput.new(chain)
+func (this *YAMLProcessingOutput) new(ctx Context, chain data.ProcessChain) *YAMLProcessingOutput {
+	this.ElementOutput.new(ctx, chain)
 	return this
 }
 
-func (this *YAMLProcessingOutput) Out(interface{}) error {
+func (this *YAMLProcessingOutput) Out() error {
 	i := this.Elems.Iterator()
 	for i.HasNext() {
-		fmt.Printf("---\n")
+		Outf(this.Context, "---\n")
 		elem := i.Next()
 		if m, ok := elem.(Manifest); ok {
 			elem = m.AsManifest()
@@ -120,7 +122,7 @@ func (this *YAMLProcessingOutput) Out(interface{}) error {
 		if err != nil {
 			return err
 		}
-		os.Stdout.Write(d)
+		this.Context.StdOut().Write(d)
 	}
 	return nil
 }
@@ -136,7 +138,7 @@ type ItemList struct {
 	Items []interface{} `json:"items"`
 }
 
-func (this *JSONOutput) Out(interface{}) error {
+func (this *JSONOutput) Out() error {
 	items := &ItemList{}
 	for _, m := range this.data {
 		items.Items = append(items.Items, m.(Manifest).AsManifest())
@@ -165,17 +167,17 @@ type JSONProcessingOutput struct {
 
 var _ Output = &JSONProcessingOutput{}
 
-func NewProcessingJSONOutput(chain data.ProcessChain, pretty bool) *JSONProcessingOutput {
-	return (&JSONProcessingOutput{}).new(chain, pretty)
+func NewProcessingJSONOutput(ctx Context, chain data.ProcessChain, pretty bool) *JSONProcessingOutput {
+	return (&JSONProcessingOutput{}).new(ctx, chain, pretty)
 }
 
-func (this *JSONProcessingOutput) new(chain data.ProcessChain, pretty bool) *JSONProcessingOutput {
-	this.ElementOutput.new(chain)
+func (this *JSONProcessingOutput) new(ctx Context, chain data.ProcessChain, pretty bool) *JSONProcessingOutput {
+	this.ElementOutput.new(ctx, chain)
 	this.pretty = pretty
 	return this
 }
 
-func (this *JSONProcessingOutput) Out(interface{}) error {
+func (this *JSONProcessingOutput) Out() error {
 	items := &ItemList{}
 	i := this.Elems.Iterator()
 	for i.HasNext() {
@@ -198,7 +200,7 @@ func (this *JSONProcessingOutput) Out(interface{}) error {
 		buf.WriteByte('\n')
 		d = buf.Bytes()
 	}
-	os.Stdout.Write(d)
+	this.Context.StdOut().Write(d)
 	return nil
 }
 
@@ -245,31 +247,31 @@ func (this Outputs) Create(opts *Options) (Output, error) {
 			return o, nil
 		}
 	}
-	return nil, fmt.Errorf("invalid output format '%s'", *f)
+	return nil, errors.Newf("invalid output format '%s'", *f)
 }
 
 func (this Outputs) AddManifestOutputs() Outputs {
 	this["yaml"] = func(opts *Options) Output {
-		return &YAMLOutput{ManifestOutput{data: []Object{}}}
+		return &YAMLOutput{ManifestOutput{Context: opts.Context, data: []Object{}}}
 	}
 	this["json"] = func(opts *Options) Output {
-		return &JSONOutput{ManifestOutput{data: []Object{}}, true}
+		return &JSONOutput{ManifestOutput{Context: opts.Context, data: []Object{}}, true}
 	}
 	this["JSON"] = func(opts *Options) Output {
-		return &JSONOutput{ManifestOutput{data: []Object{}}, false}
+		return &JSONOutput{ManifestOutput{Context: opts.Context, data: []Object{}}, false}
 	}
 	return this
 }
 
 func (this Outputs) AddChainedManifestOutputs(chain func(opts *Options) data.ProcessChain) Outputs {
 	this["yaml"] = func(opts *Options) Output {
-		return NewProcessingYAMLOutput(chain(opts))
+		return NewProcessingYAMLOutput(opts.Context, chain(opts))
 	}
 	this["json"] = func(opts *Options) Output {
-		return NewProcessingJSONOutput(chain(opts), true)
+		return NewProcessingJSONOutput(opts.Context, chain(opts), true)
 	}
 	this["JSON"] = func(opts *Options) Output {
-		return NewProcessingJSONOutput(chain(opts), false)
+		return NewProcessingJSONOutput(opts.Context, chain(opts), false)
 	}
 	return this
 }
@@ -280,13 +282,13 @@ func GetOutput(opts *Options, def Output) (Output, error) {
 	if f != nil {
 		switch *f {
 		case "yaml":
-			o = &YAMLOutput{ManifestOutput{data: []Object{}}}
+			o = &YAMLOutput{ManifestOutput{Context: opts.Context, data: []Object{}}}
 		case "json":
-			o = &JSONOutput{ManifestOutput{data: []Object{}}, true}
+			o = &JSONOutput{ManifestOutput{Context: opts.Context, data: []Object{}}, true}
 		case "JSON":
-			o = &JSONOutput{ManifestOutput{data: []Object{}}, false}
+			o = &JSONOutput{ManifestOutput{Context: opts.Context, data: []Object{}}, false}
 		default:
-			return nil, fmt.Errorf("invalid output format '%s'", *f)
+			return nil, errors.Newf("invalid output format '%s'", *f)
 		}
 	}
 	return o, nil

@@ -113,9 +113,9 @@ func MapArtefactMimeType(mime string, legacy bool) string {
 	} else {
 		switch mime {
 		case MediaTypeDockerSchema2Manifest:
-			return MediaTypeImageManifest
+			//return MediaTypeImageManifest
 		case MediaTypeDockerSchema2ManifestList:
-			return MediaTypeImageIndex
+			//return MediaTypeImageIndex
 		}
 	}
 	return mime

@@ -15,10 +15,10 @@
 package output
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/gardener/ocm/cmds/ocm/pkg/data"
+	. "github.com/gardener/ocm/cmds/ocm/pkg/output/out"
 )
 
 type StringOutput struct {
@@ -28,17 +28,17 @@ type StringOutput struct {
 
 var _ Output = &StringOutput{}
 
-func NewStringOutput(mapper data.MappingFunction, linesep string) *StringOutput {
-	return (&StringOutput{}).new(mapper, linesep)
+func NewStringOutput(ctx Context, mapper data.MappingFunction, linesep string) *StringOutput {
+	return (&StringOutput{}).new(ctx, mapper, linesep)
 }
 
-func (this *StringOutput) new(mapper data.MappingFunction, lineseperator string) *StringOutput {
+func (this *StringOutput) new(ctx Context, mapper data.MappingFunction, lineseperator string) *StringOutput {
 	this.linesep = lineseperator
-	this.ElementOutput.new(data.Chain().Parallel(20).Map(mapper))
+	this.ElementOutput.new(ctx, data.Chain().Parallel(20).Map(mapper))
 	return this
 }
 
-func (this *StringOutput) Out(processingContext interface{}) error {
+func (this *StringOutput) Out() error {
 	var err error = nil
 	i := this.Elems.Iterator()
 	for i.HasNext() {
@@ -46,18 +46,18 @@ func (this *StringOutput) Out(processingContext interface{}) error {
 		case error:
 			err = cfg
 			if this.linesep == "" {
-				fmt.Printf("Error: %s\n", err)
+				Error(this.Context, err.Error())
 			} else {
-				fmt.Printf("%s\nError: %s\n", this.linesep, err)
+				Errf(this.Context, "%s\nError: %s\n", this.linesep, err)
 			}
 		case string:
 			if cfg != "" {
 				if this.linesep != "" {
 					if !strings.HasPrefix(cfg, this.linesep+"\n") {
-						fmt.Println(this.linesep)
+						Outln(this.Context, this.linesep)
 					}
 				}
-				fmt.Println(cfg)
+				Outln(this.Context, cfg)
 			}
 		}
 	}

@@ -20,8 +20,10 @@ import (
 
 	"github.com/gardener/ocm/pkg/datacontext"
 	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
+	"github.com/gardener/ocm/pkg/oci/core"
 )
+
+type Aliases = core.Aliases
 
 type NamespaceContainer interface {
 	LookupNamespace(name string) (NamespaceAccess, error)
@@ -43,8 +45,9 @@ type Session interface {
 	LookupRepository(Context, RepositorySpec) (Repository, error)
 	LookupNamespace(NamespaceContainer, string) (NamespaceAccess, error)
 	GetArtefact(ArtefactContainer, string) (ArtefactAccess, error)
-	EvaluateRef(ctx Context, ref string) (*EvaluationResult, error)
-	Close() error
+	EvaluateRef(ctx Context, ref string, aliases Aliases) (*EvaluationResult, error)
+	DetermineRepository(ctx Context, ref string, aliases Aliases) (Repository, error)
+	DetermineRepositoryBySpec(ctx Context, spec *UniformRepositorySpec, aliases Aliases) (Repository, error)
 }
 
 type session struct {
@@ -148,15 +151,14 @@ func (s *session) GetArtefact(c ArtefactContainer, version string) (ArtefactAcce
 	return obj, err
 }
 
-func (s *session) EvaluateRef(ctx Context, ref string) (*EvaluationResult, error) {
+func (s *session) EvaluateRef(ctx Context, ref string, aliases Aliases) (*EvaluationResult, error) {
 	var err error
 	result := &EvaluationResult{}
 	result.Ref, err = ParseRef(ref)
 	if err != nil {
 		return nil, err
 	}
-	spec := ocireg.NewRepositorySpec(result.Ref.Base())
-	result.Repository, err = s.LookupRepository(ctx, spec)
+	result.Repository, err = s.DetermineRepositoryBySpec(ctx, &result.Ref.UniformRepositorySpec, aliases)
 	if err != nil {
 		return nil, err
 	}
@@ -167,4 +169,20 @@ func (s *session) EvaluateRef(ctx Context, ref string) (*EvaluationResult, error
 	}
 	result.Artefact, err = s.GetArtefact(result.Namespace, result.Ref.Version())
 	return result, err
+}
+
+func (s *session) DetermineRepository(ctx Context, ref string, aliases Aliases) (Repository, error) {
+	spec, err := ParseRepo(ref)
+	if err != nil {
+		return nil, err
+	}
+	return s.DetermineRepositoryBySpec(ctx, &spec, aliases)
+}
+
+func (s *session) DetermineRepositoryBySpec(ctx Context, spec *UniformRepositorySpec, aliases Aliases) (Repository, error) {
+	rspec, err := ctx.MapUniformRepositorySpec(spec, aliases)
+	if err != nil {
+		return nil, err
+	}
+	return s.LookupRepository(ctx, rspec)
 }

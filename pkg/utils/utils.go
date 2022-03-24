@@ -196,3 +196,11 @@ func WriteFileToTARArchive(filename string, contentReader io.Reader, archiveWrit
 
 	return nil
 }
+
+func IndentLines(orig string, gap string) string {
+	s := ""
+	for _, l := range strings.Split(orig, "\n") {
+		s += gap + l + "\n"
+	}
+	return s
+}

@@ -91,13 +91,17 @@ func (o *Command) Complete(args []string) error {
 func (o *Command) Run() error {
 	session := ocm.NewSession(nil)
 	defer session.Close()
-	vershdlr := compcommon.NewTypeHandler(o.Context.OCMContext(), session, o.Repository.Repository)
-	out := &output.SingleElementOutput{}
-	err := utils.HandleOutput(out, vershdlr, utils.StringSpec(o.Comp))
+	repo, err := o.Repository.GetRepository(o.Context.OCM(), session)
 	if err != nil {
 		return err
 	}
-	hdlr := common.NewTypeHandler(o.Repository.Repository, session, out.Elem.(*compcommon.Object).ComponentVersion, closureoption.From(&o.Output).Closure)
+	vershdlr := compcommon.NewTypeHandler(o.Context.OCM(), session, repo)
+	out := &output.SingleElementOutput{}
+	err = utils.HandleOutput(out, vershdlr, utils.StringSpec(o.Comp))
+	if err != nil {
+		return err
+	}
+	hdlr := common.NewTypeHandler(repo, session, out.Elem.(*compcommon.Object).ComponentVersion, closureoption.From(&o.Output).Closure)
 
 	return utils.HandleOutputs(outputs, &o.Output, hdlr, utils.ElemSpecs(o.Ids)...)
 }

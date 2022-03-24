@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	"github.com/gardener/ocm/cmds/ocm/pkg/options"
+	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
 	"github.com/spf13/pflag"
 )
 
@@ -28,6 +29,7 @@ type Options struct {
 	Output       *string
 	Sort         []string
 	OtherOptions options.Options
+	Context      out.Context
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet, outputs Outputs) {
