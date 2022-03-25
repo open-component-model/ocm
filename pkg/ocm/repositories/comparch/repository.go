@@ -46,17 +46,24 @@ func (r *Repository) ComponentLister() cpi.ComponentLister {
 	return r
 }
 
+func (r *Repository) matchPrefix(prefix string, closure bool) bool {
+	if r.arch.GetName() != prefix {
+		if prefix != "" && !strings.HasSuffix(prefix, "/") {
+			prefix += "/"
+		}
+		if !closure || !strings.HasPrefix(r.arch.GetName(), prefix) {
+			return false
+		}
+	}
+	return true
+}
+
 func (r *Repository) NumComponents(prefix string) (int, error) {
 	if r.arch == nil {
 		return -1, accessio.ErrClosed
 	}
-	if r.arch.GetName() != prefix {
-		if !strings.HasSuffix(prefix, "/") {
-			prefix += "/"
-		}
-		if !strings.HasPrefix(r.arch.GetName(), prefix) {
-			return 0, nil
-		}
+	if !r.matchPrefix(prefix, true) {
+		return 0, nil
 	}
 	return 1, nil
 }
@@ -65,13 +72,8 @@ func (r *Repository) GetComponents(prefix string, closure bool) ([]string, error
 	if r.arch == nil {
 		return nil, accessio.ErrClosed
 	}
-	if r.arch.GetName() != prefix {
-		if !strings.HasSuffix(prefix, "/") {
-			prefix += "/"
-		}
-		if !closure || !strings.HasPrefix(r.arch.GetName(), prefix) {
-			return []string{}, nil
-		}
+	if !r.matchPrefix(prefix, closure) {
+		return []string{}, nil
 	}
 	return []string{r.arch.GetName()}, nil
 }

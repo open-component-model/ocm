@@ -142,7 +142,6 @@ func (s *specHandlers) MapUniformRepositorySpec(ctx Context, u *UniformRepositor
 			return ctx.RepositoryTypes().CreateRepositorySpec(spec)
 		}
 		// generic info set, no json, but existing file
-		// generic info set, no json, but existing file
 		if ok, err := vfs.Exists(vfsattr.Get(ctx), u.Info); ok && err == nil {
 			list := s.handlers[CommonTransportFormat]
 			for _, h := range list {

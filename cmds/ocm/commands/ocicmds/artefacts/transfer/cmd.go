@@ -35,7 +35,7 @@ var (
 )
 
 type Command struct {
-	Context clictx.Context
+	utils.BaseCommand
 
 	Output output.Options
 
@@ -45,7 +45,7 @@ type Command struct {
 }
 
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{Context: ctx}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx)}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -81,8 +81,8 @@ func (o *Command) Complete(args []string) error {
 	if err != nil {
 		return err
 	}
+	return o.Output.Complete(o.Context)
 
-	return nil
 }
 
 func (o *Command) Run() error {

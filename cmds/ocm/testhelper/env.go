@@ -104,8 +104,7 @@ func (o tdOpt) Mount(cfs *composefs.ComposedFileSystem) error {
 type TestEnv struct {
 	vfs.VFS
 	filesystem *composefs.ComposedFileSystem
-	clictx.Context
-	*app.CLI
+	app.CLI
 }
 
 func NewTestEnv(opts ...Option) *TestEnv {
@@ -132,17 +131,16 @@ func NewTestEnv(opts ...Option) *TestEnv {
 	return &TestEnv{
 		VFS:        vfs.New(fs),
 		filesystem: fs,
-		Context:    ctx,
-		CLI:        app.NewCLI(ctx),
+		CLI:        *app.NewCLI(ctx),
 	}
 }
 
-func (e TestEnv) WithOutput(w io.Writer) *TestEnv {
+func (e TestEnv) CatchOutput(w io.Writer) *TestEnv {
 	e.Context = e.Context.WithStdIO(nil, w, nil)
 	return &e
 }
 
-func (e TestEnv) WithErrorOutput(w io.Writer) *TestEnv {
+func (e TestEnv) CatchErrorOutput(w io.Writer) *TestEnv {
 	e.Context = e.Context.WithStdIO(nil, nil, w)
 	return &e
 }

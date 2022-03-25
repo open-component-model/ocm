@@ -74,9 +74,6 @@ func HandleArgs(outputs output.Outputs, opts *output.Options, handler TypeHandle
 }
 
 func HandleOutputs(outputs output.Outputs, opts *output.Options, handler TypeHandler, args ...ElemSpec) error {
-	if err := opts.Complete(); err != nil {
-		return err
-	}
 	output, err := outputs.Create(opts)
 	if err != nil {
 		return err

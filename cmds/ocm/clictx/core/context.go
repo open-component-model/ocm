@@ -165,15 +165,15 @@ func (c *_context) ApplyOption(options *accessio.Options) {
 }
 
 func (c *_context) StdOut() io.Writer {
-	return c.StdOut()
+	return c.out.StdOut()
 }
 
 func (c *_context) StdErr() io.Writer {
-	return c.StdErr()
+	return c.out.StdErr()
 }
 
 func (c *_context) StdIn() io.Reader {
-	return c.StdIn()
+	return c.out.StdIn()
 }
 
 func (c *_context) WithStdIO(r io.Reader, o io.Writer, e io.Writer) Context {
@@ -191,15 +191,15 @@ type _view struct {
 }
 
 func (c *_view) StdOut() io.Writer {
-	return c.StdOut()
+	return c.out.StdOut()
 }
 
 func (c *_view) StdErr() io.Writer {
-	return c.StdErr()
+	return c.out.StdErr()
 }
 
 func (c *_view) StdIn() io.Reader {
-	return c.StdIn()
+	return c.out.StdIn()
 }
 
 func (c *_view) WithStdIO(r io.Reader, o io.Writer, e io.Writer) Context {

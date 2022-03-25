@@ -90,7 +90,7 @@ func NewResource(spec ResourceSpec, input *ResourceInput, path string, indices .
 }
 
 type ResourceAdderCommand struct {
-	Context clictx.Context
+	utils.BaseCommand
 
 	Archive    string
 	Paths      []string

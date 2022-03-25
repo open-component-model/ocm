@@ -31,6 +31,7 @@ func NewElementOutput(ctx Context, chain ProcessChain) *ElementOutput {
 
 func (this *ElementOutput) new(ctx Context, chain ProcessChain) *ElementOutput {
 	this.source = NewIncrementalProcessingSource()
+	this.Context = ctx
 	if chain == nil {
 		this.Elems = this.source
 	} else {

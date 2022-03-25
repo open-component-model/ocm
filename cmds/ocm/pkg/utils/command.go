@@ -15,10 +15,11 @@
 package utils
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
+	"github.com/gardener/ocm/cmds/ocm/clictx"
+	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -26,11 +27,23 @@ import (
 // OCMCommand is a command pattern, thta can be instantiated for a dediated
 // sub command name.
 type OCMCommand interface {
+	clictx.Context
 	ForName(name string) *cobra.Command
 	AddFlags(fs *pflag.FlagSet)
 	Complete(args []string) error
 	Run() error
 }
+
+type BaseCommand struct {
+	clictx.Context
+}
+
+func NewBaseCommand(ctx clictx.Context) BaseCommand {
+	return BaseCommand{Context: ctx}
+}
+
+func (BaseCommand) AddFlags(fs *pflag.FlagSet)   {}
+func (BaseCommand) Complete(args []string) error { return nil }
 
 func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 	c := ocmcmd.ForName(names[0])
@@ -40,12 +53,12 @@ func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 	c.Aliases = names[1:]
 	c.Run = func(cmd *cobra.Command, args []string) {
 		if err := ocmcmd.Complete(args); err != nil {
-			fmt.Println(err.Error())
+			out.Error(ocmcmd, err.Error())
 			os.Exit(1)
 		}
 
 		if err := ocmcmd.Run(); err != nil {
-			fmt.Println(err.Error())
+			out.Error(ocmcmd, err.Error())
 			os.Exit(1)
 		}
 	}

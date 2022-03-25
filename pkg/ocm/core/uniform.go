@@ -18,11 +18,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/gardener/ocm/pkg/datacontext/vfsattr"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
 	"github.com/gardener/ocm/pkg/runtime"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 const (
@@ -130,12 +128,11 @@ func (s *specHandlers) MapUniformRepositorySpec(ctx Context, u *UniformRepositor
 		}
 	}
 
-	for _, h := range s.handlers[u.Type] {
-		spec, err := h.MapReference(ctx, u)
-		if err != nil || spec != nil {
-			return spec, err
-		}
+	spec, err := s.handle(ctx, u.Type, u)
+	if err != nil || spec != nil {
+		return spec, err
 	}
+
 	if u.Info != "" {
 		spec := &runtime.UnstructuredVersionedTypedObject{}
 		err = runtime.DefaultJSONEncoding.Unmarshal([]byte(u.Info), spec)
@@ -148,26 +145,21 @@ func (s *specHandlers) MapUniformRepositorySpec(ctx Context, u *UniformRepositor
 			}
 			return ctx.RepositoryTypes().CreateRepositorySpec(spec)
 		}
-		// generic info set, no json, but existing file
-		if ok, err := vfs.Exists(vfsattr.Get(ctx), u.Info); ok && err == nil {
-			list := s.handlers[CommonTransportFormat]
-			for _, h := range list {
-				spec, err := h.MapReference(ctx, u)
-				if err != nil {
-					return nil, err
-				}
-				if spec != nil {
-					return spec, nil
-				}
-			}
-		}
 	}
-	for _, h := range s.handlers["*"] {
+
+	spec, err = s.handle(ctx, "*", u)
+	if spec == nil && err == nil {
+		err = deferr
+	}
+	return spec, err
+}
+
+func (s *specHandlers) handle(ctx Context, typ string, u *UniformRepositorySpec) (RepositorySpec, error) {
+	for _, h := range s.handlers[typ] {
 		spec, err := h.MapReference(ctx, u)
 		if err != nil || spec != nil {
 			return spec, err
 		}
 	}
-
-	return nil, deferr
+	return nil, nil
 }

@@ -38,7 +38,8 @@ var (
 )
 
 type Command struct {
-	Context clictx.Context
+	utils.BaseCommand
+
 	Closure bool
 
 	Repository repooption.Option
@@ -50,7 +51,7 @@ type Command struct {
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{Context: ctx}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx)}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -74,17 +75,13 @@ func (o *Command) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *Command) Complete(args []string) error {
-	err := o.Output.Complete()
-	if err != nil {
-		return err
-	}
-	err = o.Repository.Complete(o.Context)
+	err := o.Repository.Complete(o.Context)
 	if err != nil {
 		return err
 	}
 	o.Comp = args[0]
 	o.Ids, err = ocmcommon.MapArgsToIdentities(args[1:]...)
-	return err
+	return o.Output.Complete(o.Context)
 }
 
 func (o *Command) Run() error {

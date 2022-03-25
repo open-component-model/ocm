@@ -36,7 +36,7 @@ type Command struct {
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{common.ResourceAdderCommand{Context: ctx}}, names...)
+	return utils.SetupCommand(&Command{common.ResourceAdderCommand{BaseCommand: utils.NewBaseCommand(ctx)}}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {

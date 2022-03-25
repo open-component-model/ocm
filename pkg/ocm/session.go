@@ -44,8 +44,11 @@ type Session interface {
 
 	LookupRepository(Context, RepositorySpec) (Repository, error)
 	LookupComponent(ComponentContainer, string) (ComponentAccess, error)
+	LookupComponentVersion(r Repository, comp, vers string) (ComponentVersionAccess, error)
 	GetComponentVersion(ComponentVersionContainer, string) (ComponentVersionAccess, error)
 	EvaluateRef(ctx Context, ref string, aliases Aliases) (*EvaluationResult, error)
+	EvaluateComponentRef(ctx Context, ref string, aliases Aliases) (*EvaluationResult, error)
+	EvaluateVersionRef(ctx Context, ref string, aliases Aliases) (*EvaluationResult, error)
 	DetermineRepository(ctx Context, ref string, aliases Aliases) (Repository, error)
 	DetermineRepositoryBySpec(ctx Context, spec *UniformRepositorySpec, aliases Aliases) (Repository, error)
 }
@@ -131,6 +134,14 @@ func (s *session) LookupComponent(c ComponentContainer, name string) (ComponentA
 	return ns, err
 }
 
+func (s *session) LookupComponentVersion(r Repository, comp, vers string) (ComponentVersionAccess, error) {
+	component, err := s.LookupComponent(r, comp)
+	if err != nil {
+		return nil, err
+	}
+	return s.GetComponentVersion(component, vers)
+}
+
 func (s *session) GetComponentVersion(c ComponentVersionContainer, version string) (ComponentVersionAccess, error) {
 	key := datacontext.ObjectKey{
 		Object: c,
@@ -153,6 +164,55 @@ func (s *session) GetComponentVersion(c ComponentVersionContainer, version strin
 	return obj, err
 }
 
+func (s *session) EvaluateVersionRef(ctx Context, ref string, aliases Aliases) (*EvaluationResult, error) {
+	evaluated, err := s.EvaluateComponentRef(ctx, ref, aliases)
+	if err != nil {
+		return nil, err
+	}
+	versions, err := evaluated.Component.ListVersions()
+	if err != nil {
+		return evaluated, errors.Wrapf(err, "%s[%s]: listing versions", ref, evaluated.Ref.Component)
+	}
+	if len(versions) != 1 {
+		return evaluated, errors.Wrapf(err, "%s {%s]: found %d components", ref, evaluated.Ref.Component, len(versions))
+	}
+	evaluated.Version, err = s.GetComponentVersion(evaluated.Component, versions[0])
+	if err != nil {
+		return evaluated, errors.Wrapf(err, "%s {%s:%s]: listing components", ref, evaluated.Ref.Component, versions[0])
+	}
+	evaluated.Ref.Version = &versions[0]
+	return evaluated, nil
+}
+
+func (s *session) EvaluateComponentRef(ctx Context, ref string, aliases Aliases) (*EvaluationResult, error) {
+	evaluated, err := s.EvaluateRef(ctx, ref, aliases)
+	if err != nil {
+		return nil, err
+	}
+	if evaluated.Component == nil {
+		lister := evaluated.Repository.ComponentLister()
+		if lister == nil {
+			return evaluated, errors.Newf("%s: no component specified", ref)
+		}
+		if n, err := lister.NumComponents(""); n != 1 {
+			if err != nil {
+				return evaluated, errors.Wrapf(err, "%s: listing components", ref)
+			}
+			return evaluated, errors.Newf("%s: found %d components", ref, n)
+		}
+		list, err := lister.GetComponents("", true)
+		if err != nil {
+			return evaluated, errors.Wrapf(err, "%s: listing components", ref)
+		}
+		evaluated.Ref.Component = list[0]
+		evaluated.Component, err = s.LookupComponent(evaluated.Repository, list[0])
+		if err != nil {
+			return evaluated, errors.Wrapf(err, "%s: listing components", ref)
+		}
+	}
+	return evaluated, nil
+}
+
 func (s *session) EvaluateRef(ctx Context, ref string, aliases Aliases) (*EvaluationResult, error) {
 	var err error
 	result := &EvaluationResult{}
@@ -165,11 +225,12 @@ func (s *session) EvaluateRef(ctx Context, ref string, aliases Aliases) (*Evalua
 	if err != nil {
 		return result, err
 	}
-	result.Component, err = s.LookupComponent(result.Repository, result.Ref.Component)
-	if !result.Ref.IsVersion() {
-		return result, err
+	if result.Ref.Component != "" {
+		result.Component, err = s.LookupComponent(result.Repository, result.Ref.Component)
+		if result.Ref.IsVersion() {
+			result.Version, err = s.GetComponentVersion(result.Component, *result.Ref.Version)
+		}
 	}
-	result.Version, err = s.GetComponentVersion(result.Component, *result.Ref.Version)
 	return result, err
 }
 

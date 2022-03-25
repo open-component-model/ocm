@@ -28,6 +28,7 @@ import (
 type Object struct {
 	Spec             ocm.RefSpec
 	Repository       ocm.Repository
+	Component        ocm.ComponentAccess
 	ComponentVersion ocm.ComponentVersionAccess
 }
 
@@ -87,20 +88,21 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 	spec := ocm.RefSpec{}
 	repo := h.repobase
 	if repo == nil {
-		evaluated, err := h.session.EvaluateRef(h.octx.Context(), name, h.octx.GetAlias)
+		evaluated, err := h.session.EvaluateComponentRef(h.octx.Context(), name, h.octx.GetAlias)
 		if err != nil {
-			return nil, errors.Wrapf(err, "component version reference %q", name)
+			return nil, errors.Wrapf(err, "%s: invalid component version reference", name)
 		}
-		spec = evaluated.Ref
-		component = evaluated.Component
 		if evaluated.Version != nil {
 			result = append(result, &Object{
-				Spec:             spec,
+				Spec:             evaluated.Ref,
 				Repository:       evaluated.Repository,
+				Component:        evaluated.Component,
 				ComponentVersion: evaluated.Version,
 			})
 			return result, nil
 		}
+		spec = evaluated.Ref
+		component = evaluated.Component
 	} else {
 		comp := ocm.CompSpec{Component: ""}
 		if name != "" {
@@ -126,6 +128,7 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 		result = append(result, &Object{
 			Repository:       repo,
 			Spec:             spec,
+			Component:        component,
 			ComponentVersion: v,
 		})
 	} else {

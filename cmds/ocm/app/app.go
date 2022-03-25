@@ -36,7 +36,7 @@ import (
 )
 
 type CLI struct {
-	ctx clictx.Context
+	clictx.Context
 }
 
 func NewCLI(ctx clictx.Context) *CLI {
@@ -47,7 +47,7 @@ func NewCLI(ctx clictx.Context) *CLI {
 }
 
 func (c *CLI) Execute(args ...string) error {
-	cmd := NewCliCommand(c.ctx)
+	cmd := NewCliCommand(c)
 	cmd.SetArgs(args)
 	return cmd.Execute()
 }

@@ -12,19 +12,21 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package ctf
+package comparch
 
 import (
-	"github.com/gardener/ocm/pkg/oci"
+	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/common/accessobj"
+	"github.com/gardener/ocm/pkg/datacontext/vfsattr"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
-	"github.com/gardener/ocm/pkg/ocm/repositories/genericocireg"
+	"github.com/gardener/ocm/pkg/ocm/repositories/comparch/comparch"
 )
 
 func init() {
 	h := &repospechandler{}
 	cpi.RegisterRepositorySpecHandler(h, "")
-	cpi.RegisterRepositorySpecHandler(h, ctf.CommonTransportFormatRepositoryType)
+	cpi.RegisterRepositorySpecHandler(h, CTFComponentArchiveType)
 	for _, f := range ctf.SupportedFormats() {
 		cpi.RegisterRepositorySpecHandler(h, string(f))
 	}
@@ -33,18 +35,22 @@ func init() {
 type repospechandler struct{}
 
 func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepositorySpec) (cpi.RepositorySpec, error) {
+	path := u.Info
 	if u.Info == "" {
 		if u.Host == "" || u.Type == "" {
 			return nil, nil
 		}
+		path = u.Host
 	}
-	spec, err := ctf.MapReference(ctx.OCIContext(), &oci.UniformRepositorySpec{
-		Type: u.Type,
-		Host: u.Host,
-		Info: u.Info,
-	})
-	if err != nil || spec == nil {
-		return nil, err
+	fs := vfsattr.Get(ctx)
+
+	if ok, err := ctf.CheckFile(u.Type == CTFComponentArchiveType, path, fs, comparch.ComponentDescriptorFileName); !ok || err != nil {
+		if err != nil {
+			return nil, err
+		}
+		if !ok {
+			return nil, nil
+		}
 	}
-	return genericocireg.NewRepositorySpec(spec, nil), nil
+	return NewRepositorySpec(accessobj.ACC_WRITABLE, path, accessio.FileFormat(u.Type), accessio.PathFileSystem(fs)), nil
 }

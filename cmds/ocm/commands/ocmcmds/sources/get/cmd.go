@@ -39,7 +39,7 @@ var (
 )
 
 type Command struct {
-	Context clictx.Context
+	utils.BaseCommand
 
 	Repository repooption.Option
 	Output     output.Options
@@ -50,7 +50,7 @@ type Command struct {
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{Context: ctx, Output: output.Options{
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx), Output: output.Options{
 		OtherOptions: &closureoption.Option{},
 	}}, names...)
 }
@@ -75,7 +75,7 @@ func (o *Command) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *Command) Complete(args []string) error {
-	err := o.Output.Complete()
+	err := o.Output.Complete(o.Context)
 	if err != nil {
 		return err
 	}

@@ -49,7 +49,8 @@ func (o *Options) AddFlags(fs *pflag.FlagSet, outputs Outputs) {
 	}
 }
 
-func (o *Options) Complete() error {
+func (o *Options) Complete(ctx out.Context) error {
+	o.Context = ctx
 	if o.output != "" {
 		o.Output = &o.output
 	}

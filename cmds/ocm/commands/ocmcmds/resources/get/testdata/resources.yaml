@@ -1,0 +1,7 @@
+---
+name: testdata
+type: PlainText
+input:
+  type: file
+  path: testcontent
+  mediaType: text/plain
