@@ -17,6 +17,7 @@ package v1
 import (
 	"encoding/json"
 
+	"github.com/gardener/ocm/pkg/errors"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
@@ -43,6 +44,46 @@ func (l Labels) Get(name string) ([]byte, bool) {
 		}
 	}
 	return nil, false
+}
+
+func (l *Labels) Set(name string, value interface{}) error {
+	var data []byte
+	var err error
+	var ok bool
+
+	if data, ok = value.([]byte); ok {
+		var v interface{}
+		err = json.Unmarshal(data, &v)
+		if err != nil {
+			return errors.ErrInvalid("label value", string(data), name)
+		}
+	} else {
+		data, err = json.Marshal(value)
+		if err != nil {
+			return errors.ErrInvalid("label value", "<object>", name)
+		}
+	}
+	for _, label := range *l {
+		if label.Name == name {
+			label.Value = data
+			return nil
+		}
+	}
+	*l = append(*l, Label{
+		Name:  name,
+		Value: data,
+	})
+	return nil
+}
+
+func (l *Labels) Remove(name string) bool {
+	for i, label := range *l {
+		if label.Name == name {
+			*l = append((*l)[:i], (*l)[i+1:]...)
+			return true
+		}
+	}
+	return false
 }
 
 // Copy copies labels

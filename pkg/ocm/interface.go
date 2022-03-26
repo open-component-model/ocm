@@ -40,6 +40,7 @@ type RepositoryType = core.RepositoryType
 type RepositoryTypeScheme = core.RepositoryTypeScheme
 type AccessTypeScheme = core.AccessTypeScheme
 type BlobHandlerRegistry = core.BlobHandlerRegistry
+type ComponentReference = core.ComponentReference
 
 // DefaultContext is the default context initialized by init functions
 func DefaultContext() core.Context {

@@ -45,6 +45,7 @@ type ResourceMeta = core.ResourceMeta
 type RepositorySpec = core.RepositorySpec
 type GenericRepositorySpec = core.GenericRepositorySpec
 type RepositoryType = core.RepositoryType
+type ComponentReference = core.ComponentReference
 
 type BlobHandler = core.BlobHandler
 type BlobHandlerKey = core.BlobHandlerKey

@@ -176,6 +176,17 @@ func (o *ElementMeta) SetLabels(labels []metav1.Label) {
 	o.Labels = labels
 }
 
+// SetLabel sets a single label to an effective value.
+// If the value is no byte slice, it is marshaled.
+func (o *ElementMeta) SetLabel(name string, value interface{}) error {
+	return o.Labels.Set(name, value)
+}
+
+// RemoveLabel removes a single label.
+func (o *ElementMeta) RemoveLabel(name string) bool {
+	return o.Labels.Remove(name)
+}
+
 // SetExtraIdentity sets the identity of the object.
 func (o *ElementMeta) SetExtraIdentity(identity metav1.Identity) {
 	o.ExtraIdentity = identity

@@ -119,8 +119,9 @@ func (c *ComponentDescriptor) GetComponentReferences(selectors ...IdentitySelect
 
 // GetResourceByIdentity returns resource that match the given identity.
 func (c *ComponentDescriptor) GetResourceByIdentity(id metav1.Identity) (Resource, error) {
+	dig := id.Digest()
 	for _, res := range c.Resources {
-		if bytes.Equal(res.GetIdentityDigest(c.Resources), id.Digest()) {
+		if bytes.Equal(res.GetIdentityDigest(c.Resources), dig) {
 			return res, nil
 		}
 	}
@@ -287,10 +288,22 @@ func (c *ComponentDescriptor) GetComponentReferenceIndex(ref ComponentReference)
 	return -1
 }
 
+// GetComponentReferenceByIdentity returns reference that match the given identity.
+func (c *ComponentDescriptor) GetComponentReferenceByIdentity(id metav1.Identity) (ComponentReference, error) {
+	dig := id.Digest()
+	for _, ref := range c.ComponentReferences {
+		if bytes.Equal(ref.GetIdentityDigest(c.ComponentReferences), dig) {
+			return ref, nil
+		}
+	}
+	return ComponentReference{}, NotFound
+}
+
 // GetSourceByIdentity returns source that match the given identity.
 func (c *ComponentDescriptor) GetSourceByIdentity(id metav1.Identity) (Source, error) {
+	dig := id.Digest()
 	for _, res := range c.Sources {
-		if bytes.Equal(res.GetIdentityDigest(c.Resources), id.Digest()) {
+		if bytes.Equal(res.GetIdentityDigest(c.Resources), dig) {
 			return res, nil
 		}
 	}

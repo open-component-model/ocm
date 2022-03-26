@@ -61,7 +61,7 @@ testdata v1      "name"="testdata" PlainText local
 	})
 
 	It("lists single resource in ctf file", func() {
-		env.CommonTransport(ARCH, accessio.FormatDirectory, func() {
+		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
 			env.Component(COMP, func() {
 				env.Version(VERSION, func() {
 					env.Provider(PROVIDER)

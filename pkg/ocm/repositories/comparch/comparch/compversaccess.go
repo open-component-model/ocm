@@ -222,6 +222,21 @@ func (c *ComponentVersionAccess) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.Bl
 
 ////////////////////////////////////////////////////////////////////////////////
 
+func (c *ComponentVersionAccess) SetReference(ref *cpi.ComponentReference) error {
+
+	if idx := c.GetDescriptor().GetComponentReferenceIndex(*ref); idx == -1 {
+		c.GetDescriptor().ComponentReferences = append(c.GetDescriptor().ComponentReferences, *ref)
+	} else {
+		c.GetDescriptor().ComponentReferences[idx] = *ref
+	}
+	if c.lazy {
+		return nil
+	}
+	return c.base.Update()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type BaseAccess struct {
 	vers   *ComponentVersionAccess
 	access compdesc.AccessSpec

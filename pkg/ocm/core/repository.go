@@ -52,6 +52,7 @@ type ComponentAccess interface {
 	Close() error
 }
 type ResourceMeta = compdesc.ResourceMeta
+type ComponentReference = compdesc.ComponentReference
 
 type BaseAccess interface {
 	Access() (AccessSpec, error)
@@ -103,6 +104,8 @@ type ComponentVersionAccess interface {
 
 	SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec) error
 	SetSource(*SourceMeta, compdesc.AccessSpec) error
+
+	SetReference(ref *ComponentReference) error
 
 	io.Closer
 }

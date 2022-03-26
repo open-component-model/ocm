@@ -62,6 +62,23 @@ func (i Identity) Equals(o Identity) bool {
 	return true
 }
 
+func (l *Identity) Set(name, value string) {
+	if *l == nil {
+		*l = Identity{name: value}
+	} else {
+		(*l)[name] = value
+	}
+}
+
+func (l *Identity) Remove(name string) bool {
+	if *l != nil {
+		if _, ok := (*l)[name]; ok {
+			delete(*l, name)
+		}
+	}
+	return false
+}
+
 func (l Identity) String() string {
 	if l == nil {
 		return ""
