@@ -18,20 +18,24 @@ import (
 	"bytes"
 
 	. "github.com/gardener/ocm/cmds/ocm/testhelper"
+	"github.com/gardener/ocm/cmds/ocm/testhelper/builder"
+	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/mime"
+	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
 const ARCH = "/tmp/ca"
 const VERSION = "v1"
+const COMP = "test.de/x"
+const PROVIDER = "mandelsoft"
 
 var _ = Describe("Test Environment", func() {
-	var env *TestEnv
+	var env *builder.Builder
 
 	BeforeEach(func() {
-		env = NewTestEnv(TestData())
-		Expect(env.Execute("create", "ca", "-ft", "directory", "test.de/x", VERSION, "mandelsoft", ARCH)).To(Succeed())
-		Expect(env.Execute("add", "resources", ARCH, "/testdata/resources.yaml")).To(Succeed())
+		env = builder.NewBuilder(NewTestEnv(TestData()))
 
 	})
 
@@ -39,7 +43,35 @@ var _ = Describe("Test Environment", func() {
 		env.Cleanup()
 	})
 
-	It("adds simple text blob", func() {
+	It("lists single resource in component archive", func() {
+		env.ComponentArchive(ARCH, accessio.FormatDirectory, COMP, VERSION, func() {
+			env.Provider(PROVIDER)
+			env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
+				env.BlobStringData(mime.MIME_TEXT, "testdata")
+			})
+		})
+
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH)).To(Succeed())
+		Expect("\n" + buf.String()).To(Equal(
+			`
+NAME     VERSION IDENTITY          TYPE      RELATION
+testdata v1      "name"="testdata" PlainText local
+`))
+	})
+
+	It("lists single resource in ctf file", func() {
+		env.CommonTransport(ARCH, accessio.FormatDirectory, func() {
+			env.Component(COMP, func() {
+				env.Version(VERSION, func() {
+					env.Provider(PROVIDER)
+					env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
+						env.BlobStringData(mime.MIME_TEXT, "testdata")
+					})
+				})
+			})
+		})
+
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH)).To(Succeed())
 		Expect("\n" + buf.String()).To(Equal(
