@@ -164,6 +164,8 @@ func process_sort(c CompareFunction) func(data data.Iterable) data.Iterable {
 	}
 }
 
+////////////////////////////////////////////////////////////////////////////
+
 func process(op operation) processing {
 	return func(it data.Iterable) data.Iterable {
 		slice := []interface{}{}

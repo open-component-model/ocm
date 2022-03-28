@@ -34,6 +34,7 @@ type FilterFunction func(interface{}) bool
 type MappingFunction data.MappingFunction
 type ExplodeFunction func(interface{}) []interface{}
 type CompareFunction = data.CompareFunction
+type AggregationFunction func(e, aggr interface{}) interface{}
 
 func Identity(e interface{}) interface{} {
 	return e

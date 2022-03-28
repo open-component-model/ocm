@@ -16,6 +16,7 @@ package processing
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	. "github.com/onsi/ginkgo"
@@ -90,6 +91,55 @@ var _ = Describe("simple data processing", func() {
 				2, 3, 5,
 				3, 5, 9,
 				4, 7, 13,
+			}))
+		})
+	})
+
+	Split := func(text interface{}) []interface{} {
+		var words []interface{}
+		t := text.(string)
+		for t != "" {
+			i := strings.IndexAny(t, " \t\n\r.,:!?")
+			w := t
+			t = ""
+			if i >= 0 {
+				t = w[i+1:]
+				w = w[:i]
+			}
+			if w != "" {
+				words = append(words, w)
+			}
+		}
+		return words
+	}
+
+	ignore := []string{"a", "an", "the"}
+
+	Filter := func(e interface{}) bool {
+		s := e.(string)
+		for _, w := range ignore {
+			if s == w {
+				return false
+			}
+		}
+		return true
+	}
+
+	Compare := func(a, b interface{}) int {
+		return strings.Compare(a.(string), b.(string))
+	}
+
+	Context("example", func() {
+		It("example 1", func() {
+			input := []interface{}{
+				"this is a multi-line",
+				"text with some words.",
+			}
+
+			_ = Compare
+			result := Chain().Explode(Split).Parallel(3).Filter(Filter).Sort(Compare).Process(data.IndexedSliceAccess(input)).AsSlice()
+			Expect([]interface{}(result)).To(Equal([]interface{}{
+				"is", "multi-line", "some", "text", "this", "with", "words",
 			}))
 		})
 	})
