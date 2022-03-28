@@ -19,8 +19,8 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	. "github.com/gardener/ocm/cmds/ocm/pkg/output/out"
+	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
 	"github.com/gardener/ocm/pkg/errors"
 	"sigs.k8s.io/yaml"
 )
@@ -101,11 +101,11 @@ type YAMLProcessingOutput struct {
 
 var _ Output = &YAMLProcessingOutput{}
 
-func NewProcessingYAMLOutput(ctx Context, chain data.ProcessChain) *YAMLProcessingOutput {
+func NewProcessingYAMLOutput(ctx Context, chain processing.ProcessChain) *YAMLProcessingOutput {
 	return (&YAMLProcessingOutput{}).new(ctx, chain)
 }
 
-func (this *YAMLProcessingOutput) new(ctx Context, chain data.ProcessChain) *YAMLProcessingOutput {
+func (this *YAMLProcessingOutput) new(ctx Context, chain processing.ProcessChain) *YAMLProcessingOutput {
 	this.ElementOutput.new(ctx, chain)
 	return this
 }
@@ -167,11 +167,11 @@ type JSONProcessingOutput struct {
 
 var _ Output = &JSONProcessingOutput{}
 
-func NewProcessingJSONOutput(ctx Context, chain data.ProcessChain, pretty bool) *JSONProcessingOutput {
+func NewProcessingJSONOutput(ctx Context, chain processing.ProcessChain, pretty bool) *JSONProcessingOutput {
 	return (&JSONProcessingOutput{}).new(ctx, chain, pretty)
 }
 
-func (this *JSONProcessingOutput) new(ctx Context, chain data.ProcessChain, pretty bool) *JSONProcessingOutput {
+func (this *JSONProcessingOutput) new(ctx Context, chain processing.ProcessChain, pretty bool) *JSONProcessingOutput {
 	this.ElementOutput.new(ctx, chain)
 	this.pretty = pretty
 	return this
@@ -263,7 +263,7 @@ func (this Outputs) AddManifestOutputs() Outputs {
 	return this
 }
 
-func (this Outputs) AddChainedManifestOutputs(chain func(opts *Options) data.ProcessChain) Outputs {
+func (this Outputs) AddChainedManifestOutputs(chain func(opts *Options) processing.ProcessChain) Outputs {
 	this["yaml"] = func(opts *Options) Output {
 		return NewProcessingYAMLOutput(opts.Context, chain(opts))
 	}

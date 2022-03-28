@@ -29,6 +29,8 @@ type ResettableIterator interface {
 	Reset()
 }
 
+type MappingFunction func(interface{}) interface{}
+
 type MappedIterator struct {
 	Iterator
 	mapping MappingFunction

@@ -12,10 +12,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package data
+package processing
+
+import (
+	"github.com/gardener/ocm/cmds/ocm/pkg/data"
+)
 
 type IncrementalProcessingSource interface {
-	Iterable
+	data.Iterable
 	Open()
 	Add(e ...interface{}) IncrementalProcessingSource
 	Close()
@@ -23,20 +27,22 @@ type IncrementalProcessingSource interface {
 
 type ProcessingSource interface {
 	IncrementalProcessingSource
-	IndexedAccess
+	//data.IndexedAccess
 }
 
 type FilterFunction func(interface{}) bool
-type MappingFunction func(interface{}) interface{}
-type CompareFunction func(interface{}, interface{}) int
+type MappingFunction data.MappingFunction
+type ExplodeFunction func(interface{}) []interface{}
+type CompareFunction = data.CompareFunction
 
 func Identity(e interface{}) interface{} {
 	return e
 }
 
 type ProcessingResult interface {
-	Iterable
+	data.Iterable
 
+	Explode(e ExplodeFunction) ProcessingResult
 	Map(m MappingFunction) ProcessingResult
 	Filter(f FilterFunction) ProcessingResult
 	Sort(c CompareFunction) ProcessingResult
@@ -48,48 +54,46 @@ type ProcessingResult interface {
 	Unordered() ProcessingResult
 	Parallel(n int) ProcessingResult
 
-	AsSlice() IndexedSliceAccess
+	AsSlice() data.IndexedSliceAccess
 }
 
+////////////////////////////////////////////////////////////////////////////
+
+// Process processies an initial empty chain by converting
+// an iterable into a ProcessingResult
+func Process(data data.Iterable) ProcessingResult {
+	return (&_SynchronousProcessing{}).new(data)
+}
 
 ////////////////////////////////////////////////////////////////////////////
 
 type _ProcessingSource struct {
-	_container
+	ProcessingBuffer
 }
 
 var _ ProcessingSource = &_ProcessingSource{}
 var _ IncrementalProcessingSource = &_ProcessingSource{}
-var _ IndexedAccess = &_ProcessingSource{}
+var _ data.IndexedAccess = &_ProcessingSource{}
 
 func NewIncrementalProcessingSource() ProcessingSource {
 	return (&_ProcessingSource{}).new()
 }
 
 func (this *_ProcessingSource) new() ProcessingSource {
-	this._container.new()
+	this.ProcessingBuffer = NewSimpleBuffer()
 	return this
 }
 
 func (this *_ProcessingSource) Add(entries ...interface{}) IncrementalProcessingSource {
 	for _, e := range entries {
-		this.add(entry{this.len(), true, e})
+		this.ProcessingBuffer.Add(NewEntry(Top(this.Len()), e))
 	}
 	return this
 }
 
-func (this *_ProcessingSource) Open()    { this.open() }
-func (this *_ProcessingSource) Close()   { this.close() }
-func (this *_ProcessingSource) Len() int { return this.len() }
-
-func (this *_ProcessingSource) Get(i int) interface{} {
-	e := this.get(i)
-	return e.value
-}
-
 /////////////////////////////////////////////////////////////////////////////
 
-func NewAsyncProcessingSource(f func() Iterable, pool ProcessorPool) ProcessingSource {
+func NewAsyncProcessingSource(f func() data.Iterable, pool ProcessorPool) ProcessingSource {
 	p := (&_ProcessingSource{}).new()
 	pool.Request()
 	pool.Exec(func() {
@@ -102,4 +106,3 @@ func NewAsyncProcessingSource(f func() Iterable, pool ProcessorPool) ProcessingS
 	})
 	return p
 }
-

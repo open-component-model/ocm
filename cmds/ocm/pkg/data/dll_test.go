@@ -12,24 +12,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package dll
+package data
 
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
-
-func AsSlice(set Iterable) []interface{} {
-	var result []interface{}
-	i := set.Iterator()
-	for i.HasNext() {
-		e := i.Next()
-		if e != nil {
-			result = append(result, e)
-		}
-	}
-	return result
-}
 
 var _ = Describe("simple data processing", func() {
 
@@ -47,7 +35,7 @@ var _ = Describe("simple data processing", func() {
 			Expect(d1.Next()).To(BeNil())
 			Expect(d1.Prev()).To(BeIdenticalTo(&root))
 
-			Expect(AsSlice(&DLLRoot{root: root})).To(Equal([]interface{}{d1}))
+			Expect(Slice(&DLLRoot{root: root})).To(Equal([]interface{}{d1}))
 		})
 		It("middle", func() {
 			root := DLL{}
@@ -67,7 +55,7 @@ var _ = Describe("simple data processing", func() {
 			Expect(d2.Next()).To(BeNil())
 			Expect(d2.Prev()).To(BeIdenticalTo(d1))
 
-			Expect(AsSlice(&DLLRoot{root: root})).To(Equal([]interface{}{d1, d2}))
+			Expect(Slice(&DLLRoot{root: root})).To(Equal([]interface{}{d1, d2}))
 		})
 	})
 	Context("remove", func() {

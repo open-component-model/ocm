@@ -12,28 +12,99 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package dll
+package processing
 
 import (
+	"fmt"
 	_ "fmt"
 	"sync"
 
 	"github.com/containerd/containerd/pkg/atomic"
+	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 )
 
-type Index int
+type Index = IndexArray
 
-type ProcessingEntry struct {
-	Index Index
-	Valid bool
-	Value interface{}
+func Top(i int) Index {
+	return IndexArray{i}
 }
 
-func NewEntry(i Index, v interface{}, valid ...bool) ProcessingEntry {
+type IndexArray []int
+
+func (i IndexArray) After(o IndexArray) bool {
+	for l, v := range i {
+		if l >= len(o) {
+			return true
+		}
+		if v != o[l] {
+			return v > o[l]
+		}
+	}
+	return len(i) > len(o)
+}
+
+func (i IndexArray) Next(max, sub int) IndexArray {
+	l := len(i)
+	n := i.Copy()
+
+	if sub > 0 || len(i) == 0 {
+		return append(n, 0)
+	}
+	n[l-1]++
+	if max > 0 && n[l-1] >= max {
+		n[l-2]++
+		return n[:l-1]
+	}
+	return n
+}
+
+func (i IndexArray) Copy() IndexArray {
+	n := make(IndexArray, len(i))
+	copy(n, i)
+	return n
+}
+
+func (i IndexArray) Validate(max int) {
+	if max >= 0 && i[len(i)-1] >= max {
+		panic(fmt.Sprintf("index %d >= max %d", i[len(i)-1], max))
+	}
+}
+
+type ProcessingEntry struct {
+	Index    Index
+	MaxIndex int
+	MaxSub   int
+	Valid    bool
+	Value    interface{}
+}
+
+type SubEntries int
+
+func NewEntry(i Index, v interface{}, opts ...interface{}) ProcessingEntry {
+	max := -1
+	sub := 0
+	valid := true
+	for _, o := range opts {
+		switch t := o.(type) {
+		case bool:
+			valid = valid && t
+		case SubEntries:
+			sub = int(t)
+		case int:
+			max = t
+		default:
+			panic(fmt.Errorf("invalid entry option %T", o))
+		}
+	}
+	if len(i) > 1 && max < 0 {
+		panic(fmt.Errorf("invalid max option %d", max))
+	}
 	return ProcessingEntry{
-		Index: i,
-		Valid: len(valid) == 0 || valid[0],
-		Value: v,
+		Index:    i,
+		Valid:    valid,
+		Value:    v,
+		MaxIndex: max,
+		MaxSub:   sub,
 	}
 }
 
@@ -41,7 +112,7 @@ type BufferCreator func() ProcessingBuffer
 
 type ProcessingIterable interface {
 	ProcessingIterator() ProcessingIterator
-	Iterator() Iterator
+	Iterator() data.Iterator
 }
 
 type ProcessingIterator interface {
@@ -51,6 +122,8 @@ type ProcessingIterator interface {
 
 type ProcessingBuffer interface {
 	Add(e ProcessingEntry) ProcessingBuffer
+	Len() int
+	Get(int) interface{}
 	Open()
 	Close()
 
@@ -72,6 +145,8 @@ type BufferImplementation interface {
 	Add(e ProcessingEntry) bool
 	Open()
 	Close()
+	Len() int
+	Get(i int) interface{}
 
 	ProcessingIterable
 
@@ -86,7 +161,7 @@ type _buffer struct {
 }
 
 var _ ProcessingBuffer = &_buffer{}
-var _ Iterable = &_buffer{}
+var _ data.Iterable = &_buffer{}
 
 func NewProcessingBuffer(i BufferImplementation) ProcessingBuffer {
 	return (&_buffer{}).new(i)
@@ -129,6 +204,18 @@ func (this *_buffer) IsClosed() bool {
 	return this.complete.IsSet()
 }
 
+func (this *_buffer) Len() int {
+	this.Lock()
+	defer this.Unlock()
+	return this.BufferImplementation.Len()
+}
+
+func (this *_buffer) Get(i int) interface{} {
+	this.Lock()
+	defer this.Unlock()
+	return this.BufferImplementation.Get(i)
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type simpleBuffer struct {
@@ -155,7 +242,7 @@ func (this *simpleBuffer) Open() {
 func (this *simpleBuffer) Close() {
 }
 
-func (this *simpleBuffer) Iterator() Iterator {
+func (this *simpleBuffer) Iterator() data.Iterator {
 	return (&simpleBufferIterator{}).new(this, true)
 }
 
@@ -168,6 +255,18 @@ func (this *simpleBuffer) Add(e ProcessingEntry) bool {
 	return true
 }
 
+func (this *simpleBuffer) Len() int {
+	return len(this.entries)
+}
+
+func (this *simpleBuffer) Get(i int) interface{} {
+	e := this.entries[i]
+	if e.Valid {
+		return e.Value
+	}
+	return nil
+}
+
 type simpleBufferIterator struct {
 	buffer  *simpleBuffer
 	valid   bool
@@ -175,7 +274,7 @@ type simpleBufferIterator struct {
 }
 
 var _ ProcessingIterator = &simpleBufferIterator{}
-var _ Iterator = &simpleBufferIterator{}
+var _ data.Iterator = &simpleBufferIterator{}
 
 func (this *simpleBufferIterator) new(buffer *simpleBuffer, valid bool) *simpleBufferIterator {
 	this.valid = valid
@@ -235,14 +334,19 @@ func (this *simpleBufferIterator) NextProcessingEntry() ProcessingEntry {
 // of the initially specified indices
 type orderedBuffer struct {
 	simple    simpleBuffer
-	root      DLLRoot
-	last      *DLL
-	valid     *DLL
+	root      data.DLLRoot
+	last      *data.DLL
+	valid     *data.DLL
 	nextIndex Index
+	size      int
+}
+
+type CheckNext interface {
+	CheckNext() bool
 }
 
 type orderedEntry struct {
-	dll   DLL
+	dll   data.DLL
 	entry ProcessingEntry
 }
 
@@ -255,6 +359,7 @@ func (this *orderedBuffer) new() *orderedBuffer {
 	this.root.New(this)
 	this.valid = this.root.DLL()
 	this.last = this.valid
+	this.nextIndex = this.nextIndex.Next(-1, 0)
 	return this
 }
 
@@ -263,30 +368,36 @@ func (this *orderedBuffer) SetFrame(frame BufferFrame) {
 }
 
 func (this *orderedBuffer) Add(e ProcessingEntry) bool {
+	e.Index.Validate(e.MaxIndex)
 	this.simple.Add(e)
-	n := NewDLL(&e)
+	n := data.NewDLL(&e)
 
 	c := this.root.DLL()
 	i := c.Next()
 	for i != nil {
 		v := i.Get().(*ProcessingEntry)
-		if v.Index > e.Index {
+		if v.Index.After(e.Index) {
 			break
 		}
 		c, i = i, i.Next()
 	}
 	c.Append(n)
+	this.size++
 	if n.Next() == nil {
 		this.last = n
 	}
 
 	increased := false
+	//fmt.Printf("add to %v{%v}  cur %v\n", e.Index, e.Value, this.nextIndex)
+
 	next := this.valid.Next()
-	for next != nil && next.Get().(*ProcessingEntry).Index <= this.nextIndex {
-		this.nextIndex = next.Get().(*ProcessingEntry).Index + 1
+	for next != nil && !next.Get().(*ProcessingEntry).Index.After(this.nextIndex) {
+		n := next.Get().(*ProcessingEntry)
+		this.nextIndex = n.Index.Next(n.MaxIndex, n.MaxSub)
 		this.valid = next
 		next = next.Next()
 		increased = true
+		//fmt.Printf("increase to %v{%v}\n", n.Index, n.Value)
 	}
 	return increased
 }
@@ -303,7 +414,7 @@ func (this *orderedBuffer) Open() {
 	this.simple.Open()
 }
 
-func (this *orderedBuffer) Iterator() Iterator {
+func (this *orderedBuffer) Iterator() data.Iterator {
 	// this this is another this than this in iter() in this.container
 	// still inherited to offer the unordered entries for processing
 	return (&orderedBufferIterator{}).new(this)
@@ -313,12 +424,32 @@ func (this *orderedBuffer) ProcessingIterator() ProcessingIterator {
 	return this.simple.ProcessingIterator()
 }
 
-type orderedBufferIterator struct {
-	buffer  *orderedBuffer
-	current *DLL
+func (this *orderedBuffer) Len() int {
+	return this.size
 }
 
-var _ Iterator = (*orderedBufferIterator)(nil)
+func (this *orderedBuffer) Get(i int) interface{} {
+	e := this.root.DLL()
+	for e != nil && i >= 0 {
+		e = e.Next()
+		i--
+	}
+	if e == nil {
+		return nil
+	}
+	pe := e.Get().(*ProcessingEntry)
+	if pe.Valid {
+		return pe.Value
+	}
+	return nil
+}
+
+type orderedBufferIterator struct {
+	buffer  *orderedBuffer
+	current *data.DLL
+}
+
+var _ data.Iterator = (*orderedBufferIterator)(nil)
 
 func (this *orderedBufferIterator) new(buffer *orderedBuffer) *orderedBufferIterator {
 	this.buffer = buffer
@@ -342,6 +473,22 @@ func (this *orderedBufferIterator) HasNext() bool {
 			return false
 		}
 		this.buffer.simple.frame.Wait()
+	}
+}
+
+func (this *orderedBufferIterator) CheckNext() bool {
+	this.buffer.simple.frame.Lock()
+	defer this.buffer.simple.frame.Unlock()
+	for {
+		n := this.current.Next()
+		if n != nil && this.current != this.buffer.valid {
+			if n.Get().(*ProcessingEntry).Valid {
+				return true
+			}
+			this.current = n // skip invalid entries
+			continue
+		}
+		return false
 	}
 }
 
@@ -375,7 +522,7 @@ func (i *valueIterator) Next() interface{} {
 	return i.NextProcessingEntry().Value
 }
 
-func ValueIterator(i ProcessingIterator) Iterator {
+func ValueIterator(i ProcessingIterator) data.Iterator {
 	return &valueIterator{i}
 }
 
@@ -383,7 +530,7 @@ type valueIterable struct {
 	ProcessingIterable
 }
 
-func (i *valueIterable) Iterator() Iterator {
+func (i *valueIterable) Iterator() data.Iterator {
 	return ValueIterator(i.ProcessingIterator())
 }
 
@@ -391,7 +538,7 @@ func ValueIterable(i ProcessingIterable) ProcessingIterable {
 	return &valueIterable{i}
 }
 
-func NewEntryIterableFromIterable(data Iterable) ProcessingIterable {
+func NewEntryIterableFromIterable(data data.Iterable) ProcessingIterable {
 	e, ok := data.(ProcessingIterable)
 	if ok {
 		return e
@@ -399,10 +546,9 @@ func NewEntryIterableFromIterable(data Iterable) ProcessingIterable {
 	c := NewOrderedBuffer()
 
 	go func() {
-
 		i := data.Iterator()
 		for idx := 0; i.HasNext(); idx++ {
-			c.Add(ProcessingEntry{Index(idx), true, i.Next()})
+			c.Add(ProcessingEntry{Top(idx), -1, 0, true, i.Next()})
 		}
 		c.Close()
 	}()

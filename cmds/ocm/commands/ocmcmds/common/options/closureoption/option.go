@@ -15,8 +15,8 @@
 package closureoption
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
+	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
 	"github.com/spf13/pflag"
 )
 
@@ -62,7 +62,7 @@ func (o *Option) RowEnricher(path func(interface{}) string, row func(interface{}
 	return row
 }
 
-func (o *Option) Mapper(path func(interface{}) string, mapper data.MappingFunction) data.MappingFunction {
+func (o *Option) Mapper(path func(interface{}) string, mapper processing.MappingFunction) processing.MappingFunction {
 	if o.Closure {
 		return func(e interface{}) interface{} {
 			cols := mapper(e).([]string)

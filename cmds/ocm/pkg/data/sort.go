@@ -18,6 +18,8 @@ import (
 	"sort"
 )
 
+type CompareFunction func(interface{}, interface{}) int
+
 type elements struct {
 	data    []interface{}
 	compare CompareFunction

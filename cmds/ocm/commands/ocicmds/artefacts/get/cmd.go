@@ -19,10 +19,10 @@ import (
 
 	"github.com/gardener/ocm/cmds/ocm/commands"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/names"
+	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/common"
-	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/oci"
@@ -104,12 +104,12 @@ var outputs = output.NewOutputs(get_regular, output.Outputs{
 }).AddManifestOutputs()
 
 func get_regular(opts *output.Options) output.Output {
-	return output.NewProcessingTableOutput(opts, data.Chain().Map(map_get_regular_output),
+	return output.NewProcessingTableOutput(opts, processing.Chain().Map(map_get_regular_output),
 		"REGISTRY", "REPOSITORY", "TAG", "DIGEST")
 }
 
 func get_wide(opts *output.Options) output.Output {
-	return output.NewProcessingTableOutput(opts, data.Chain().Parallel(20).Map(map_get_wide_output),
+	return output.NewProcessingTableOutput(opts, processing.Chain().Parallel(20).Map(map_get_wide_output),
 		"REGISTRY", "REPOSITORY", "TAG", "DIGEST", "MIMETYPE", "CONFIGTYPE")
 }
 

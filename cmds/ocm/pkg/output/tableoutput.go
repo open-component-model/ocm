@@ -17,7 +17,8 @@ package output
 import (
 	"strings"
 
-	. "github.com/gardener/ocm/cmds/ocm/pkg/data"
+	"github.com/gardener/ocm/cmds/ocm/pkg/data"
+	. "github.com/gardener/ocm/cmds/ocm/pkg/processing"
 	"github.com/gardener/ocm/pkg/errors"
 )
 
@@ -44,7 +45,7 @@ func (this *TableProcessingOutput) Out() error {
 	lines := [][]string{this.header}
 
 	sort := this.opts.Sort
-	slice := Slice(this.Elems)
+	slice := data.IndexedSliceAccess(data.Slice(this.Elems))
 	if sort != nil {
 		cols := make([]string, len(this.header))
 		idxs := map[string]int{}
@@ -64,7 +65,7 @@ func (this *TableProcessingOutput) Out() error {
 		}
 	}
 
-	FormatTable(this.Context, "", append(lines, StringArraySlice(slice)...))
+	FormatTable(this.Context, "", append(lines, data.StringArraySlice(slice)...))
 	return nil
 }
 

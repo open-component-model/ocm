@@ -17,8 +17,8 @@ package output
 import (
 	"strings"
 
-	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	. "github.com/gardener/ocm/cmds/ocm/pkg/output/out"
+	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
 )
 
 type StringOutput struct {
@@ -28,13 +28,13 @@ type StringOutput struct {
 
 var _ Output = &StringOutput{}
 
-func NewStringOutput(ctx Context, mapper data.MappingFunction, linesep string) *StringOutput {
+func NewStringOutput(ctx Context, mapper processing.MappingFunction, linesep string) *StringOutput {
 	return (&StringOutput{}).new(ctx, mapper, linesep)
 }
 
-func (this *StringOutput) new(ctx Context, mapper data.MappingFunction, lineseperator string) *StringOutput {
+func (this *StringOutput) new(ctx Context, mapper processing.MappingFunction, lineseperator string) *StringOutput {
 	this.linesep = lineseperator
-	this.ElementOutput.new(ctx, data.Chain().Parallel(20).Map(mapper))
+	this.ElementOutput.new(ctx, processing.Chain().Parallel(20).Map(mapper))
 	return this
 }
 

@@ -1,0 +1,271 @@
+// Copyright 2022 SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+
+package processing
+
+import (
+	"sync"
+
+	"github.com/gardener/ocm/cmds/ocm/pkg/data"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+)
+
+type Result struct {
+	result []interface{}
+	wg     sync.WaitGroup
+}
+
+func Gather(i data.Iterable) *Result {
+	r := &Result{}
+	r.wg.Add(1)
+	go func() {
+		//defer GinkgoRecover()
+		r.result = data.Slice(i)
+		r.wg.Done()
+	}()
+	return r
+}
+
+func (r *Result) Get() []interface{} {
+	r.wg.Wait()
+	return r.result
+}
+
+func ExpectNext(it data.Iterator, v int, next bool) {
+	if !it.(CheckNext).CheckNext() {
+		Fail("next element expected but not indicated", 1)
+	}
+	ExpectWithOffset(1, it.Next()).To(Equal(v))
+	ExpectWithOffset(1, it.(CheckNext).CheckNext()).To(Equal(next))
+}
+
+var _ = Describe("processing buffer", func() {
+
+	Context("index array", func() {
+		It("after empty", func() {
+			i := IndexArray{}
+			Expect(i.After(IndexArray{1, 2, 3})).To(BeFalse())
+		})
+		It("after same level", func() {
+			i := IndexArray{1, 2, 3}
+			Expect(i.After(IndexArray{1, 2, 3})).To(BeFalse())
+			Expect(i.After(IndexArray{1, 2, 4})).To(BeFalse())
+			Expect(i.After(IndexArray{1, 3, 3})).To(BeFalse())
+			Expect(i.After(IndexArray{2, 2, 3})).To(BeFalse())
+
+			Expect(i.After(IndexArray{1, 2, 2})).To(BeTrue())
+			Expect(i.After(IndexArray{1, 1, 3})).To(BeTrue())
+			Expect(i.After(IndexArray{0, 2, 3})).To(BeTrue())
+
+		})
+		It("after deeper level", func() {
+			i := IndexArray{1, 2, 3}
+			Expect(i.After(IndexArray{1, 2, 3, 1})).To(BeFalse())
+			Expect(i.After(IndexArray{1, 2, 2, 1})).To(BeTrue())
+		})
+		It("after shallower level", func() {
+			i := IndexArray{1, 2, 3}
+			Expect(i.After(IndexArray{1, 2})).To(BeTrue())
+			Expect(i.After(IndexArray{1, 3})).To(BeFalse())
+			Expect(i.After(IndexArray{1})).To(BeTrue())
+			Expect(i.After(IndexArray{2, 2})).To(BeFalse())
+			Expect(i.After(IndexArray{1, 1})).To(BeTrue())
+		})
+	})
+	Context("index array next", func() {
+		It("empty", func() {
+			i := IndexArray{}
+			Expect(i.Next(-1, 0)).To(Equal(IndexArray{0}))
+		})
+		It("down", func() {
+			i := IndexArray{1}
+			Expect(i.Next(-1, 0)).To(Equal(IndexArray{2}))
+			Expect(i.Next(-1, 2)).To(Equal(IndexArray{1, 0}))
+			Expect(i.Next(3, 0)).To(Equal(IndexArray{2}))
+			Expect(i.Next(3, 2)).To(Equal(IndexArray{1, 0}))
+		})
+		It("up", func() {
+			i := IndexArray{1, 2}
+			Expect(i.Next(3, 0)).To(Equal(IndexArray{2}))
+			Expect(i.Next(3, 2)).To(Equal(IndexArray{1, 2, 0}))
+		})
+	})
+
+	Context("simple", func() {
+		It("add", func() {
+			buf := NewSimpleBuffer()
+
+			promise := Gather(buf)
+
+			buf.Add(NewEntry(Top(0), 0))
+			buf.Add(NewEntry(Top(1), 1))
+			buf.Add(NewEntry(Top(2), 2))
+			buf.Add(NewEntry(Top(3), 3))
+			buf.Close()
+			Expect(promise.Get()).To(Equal([]interface{}{0, 1, 2, 3}))
+			Expect(data.Slice(ValueIterable(buf))).To(Equal([]interface{}{0, 1, 2, 3}))
+		})
+		It("add filtered", func() {
+			buf := NewSimpleBuffer()
+
+			promise := Gather(buf)
+
+			buf.Add(NewEntry(Top(0), 0))
+			buf.Add(NewEntry(Top(1), 1))
+			buf.Add(NewEntry(Top(2), 2, false))
+			buf.Add(NewEntry(Top(3), 3))
+			buf.Close()
+			Expect(promise.Get()).To(Equal([]interface{}{0, 1, 3}))
+			Expect(data.Slice(ValueIterable(buf))).To(Equal([]interface{}{0, 1, 2, 3}))
+		})
+	})
+
+	Context("add ordered", func() {
+		It("add in order", func() {
+			buf := NewOrderedBuffer()
+
+			promise := Gather(buf)
+			it := buf.Iterator()
+			Expect(it.(CheckNext).CheckNext()).To(BeFalse())
+
+			buf.Add(NewEntry(Top(0), 0))
+			ExpectNext(it, 0, false)
+
+			buf.Add(NewEntry(Top(1), 1))
+			ExpectNext(it, 1, false)
+
+			buf.Add(NewEntry(Top(2), 2))
+			ExpectNext(it, 2, false)
+
+			buf.Add(NewEntry(Top(3), 3))
+			ExpectNext(it, 3, false)
+
+			buf.Close()
+			Expect(promise.Get()).To(Equal([]interface{}{0, 1, 2, 3}))
+			Expect(data.Slice(ValueIterable(buf))).To(Equal([]interface{}{0, 1, 2, 3}))
+
+		})
+
+		It("add filtered", func() {
+			buf := NewOrderedBuffer()
+
+			promise := Gather(buf)
+			it := buf.Iterator()
+			Expect(it.(CheckNext).CheckNext()).To(BeFalse())
+
+			buf.Add(NewEntry(Top(0), 0))
+			ExpectNext(it, 0, false)
+
+			buf.Add(NewEntry(Top(1), 1))
+			ExpectNext(it, 1, false)
+
+			buf.Add(NewEntry(Top(2), 2, false))
+			Expect(it.(CheckNext).CheckNext()).To(BeFalse())
+
+			buf.Add(NewEntry(Top(3), 3))
+			ExpectNext(it, 3, false)
+
+			buf.Close()
+			Expect(promise.Get()).To(Equal([]interface{}{0, 1, 3}))
+			Expect(data.Slice(ValueIterable(buf))).To(Equal([]interface{}{0, 1, 2, 3}))
+		})
+		It("add mixed order", func() {
+			buf := NewOrderedBuffer()
+
+			promise := Gather(buf)
+			it := buf.Iterator()
+			Expect(it.(CheckNext).CheckNext()).To(BeFalse())
+
+			buf.Add(NewEntry(Top(3), 3))
+			Expect(it.(CheckNext).CheckNext()).To(BeFalse())
+
+			buf.Add(NewEntry(Top(0), 0))
+			ExpectNext(it, 0, false)
+
+			buf.Add(NewEntry(Top(1), 1))
+			ExpectNext(it, 1, false)
+
+			buf.Add(NewEntry(Top(2), 2))
+			ExpectNext(it, 2, true)
+			ExpectNext(it, 3, false)
+
+			buf.Close()
+			Expect(promise.Get()).To(Equal([]interface{}{0, 1, 2, 3}))
+			Expect(data.Slice(ValueIterable(buf))).To(Equal([]interface{}{3, 0, 1, 2}))
+		})
+
+		It("add mixed order filtered", func() {
+			buf := NewOrderedBuffer()
+
+			promise := Gather(buf)
+			it := buf.Iterator()
+			Expect(it.(CheckNext).CheckNext()).To(BeFalse())
+
+			buf.Add(NewEntry(Top(3), 3))
+			Expect(it.(CheckNext).CheckNext()).To(BeFalse())
+
+			buf.Add(NewEntry(Top(0), 0))
+			ExpectNext(it, 0, false)
+
+			buf.Add(NewEntry(Top(2), 2))
+			Expect(it.(CheckNext).CheckNext()).To(BeFalse())
+
+			buf.Add(NewEntry(Top(1), 1, false))
+			ExpectNext(it, 2, true)
+			ExpectNext(it, 3, false)
+
+			buf.Close()
+			Expect(promise.Get()).To(Equal([]interface{}{0, 2, 3}))
+			Expect(data.Slice(ValueIterable(buf))).To(Equal([]interface{}{3, 0, 2, 1}))
+		})
+
+		Context("exploded", func() {
+			buf := NewOrderedBuffer()
+			promise := Gather(buf)
+			it := buf.Iterator()
+			Expect(it.(CheckNext).CheckNext()).To(BeFalse())
+
+			buf.Add(NewEntry(Index{0, 1}, 11, 2))
+			Expect(it.(CheckNext).CheckNext()).To(BeFalse())
+
+			buf.Add(NewEntry(Index{0, 0}, 10, 2))
+			Expect(it.(CheckNext).CheckNext()).To(BeFalse())
+
+			buf.Add(NewEntry(Index{0}, 0, SubEntries(2)))
+			ExpectNext(it, 0, true)
+			ExpectNext(it, 10, true)
+			ExpectNext(it, 11, false)
+
+			buf.Add(NewEntry(Index{1}, 1, SubEntries(1)))
+			ExpectNext(it, 1, false)
+
+			buf.Add(NewEntry(Index{2}, 2, SubEntries(1)))
+			Expect(it.(CheckNext).CheckNext()).To(BeFalse())
+
+			buf.Add(NewEntry(Index{1, 0}, 20, 1))
+			ExpectNext(it, 20, true)
+			ExpectNext(it, 2, false)
+
+			buf.Add(NewEntry(Index{2, 0}, 30, 1))
+			ExpectNext(it, 30, false)
+
+			Expect(it.(CheckNext).CheckNext()).To(BeFalse())
+
+			buf.Close()
+			Expect(promise.Get()).To(Equal([]interface{}{0, 10, 11, 1, 20, 2, 30}))
+			Expect(data.Slice(ValueIterable(buf))).To(Equal([]interface{}{11, 10, 0, 1, 2, 20, 30}))
+		})
+	})
+})

@@ -12,9 +12,19 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package data
+package processing
 
+import (
+	"github.com/gardener/ocm/cmds/ocm/pkg/data"
+)
+
+// ProcessChain is a data structure holding a chain definition, which is
+// a chain of step creation functions used to instantiate the chain
+// for a dedicated input processing.
+// The instantiation is initiated by calling the Process
+// method on a chain.
 type ProcessChain interface {
+	Explode(m ExplodeFunction) ProcessChain
 	Map(m MappingFunction) ProcessChain
 	Filter(f FilterFunction) ProcessChain
 	Sort(c CompareFunction) ProcessChain
@@ -22,14 +32,14 @@ type ProcessChain interface {
 	Unordered() ProcessChain
 	Parallel(n int) ProcessChain
 
-	Process(data Iterable) ProcessingResult
+	Process(data data.Iterable) ProcessingResult
 }
 
-type chain_operation func(ProcessingResult) ProcessingResult
+type step_creator func(ProcessingResult) ProcessingResult
 
 type _ProcessChain struct {
-	parent    *_ProcessChain
-	operation chain_operation
+	parent  *_ProcessChain
+	creator step_creator
 }
 
 var _ ProcessChain = &_ProcessChain{}
@@ -38,12 +48,15 @@ func Chain() ProcessChain {
 	return (&_ProcessChain{}).new(nil, nil)
 }
 
-func (this *_ProcessChain) new(p *_ProcessChain, op chain_operation) *_ProcessChain {
+func (this *_ProcessChain) new(p *_ProcessChain, creator step_creator) *_ProcessChain {
 	this.parent = p
-	this.operation = op
+	this.creator = creator
 	return this
 }
 
+func (this *_ProcessChain) Explode(e ExplodeFunction) ProcessChain {
+	return (&_ProcessChain{}).new(this, chain_explode(e))
+}
 func (this *_ProcessChain) Map(m MappingFunction) ProcessChain {
 	return (&_ProcessChain{}).new(this, chain_map(m))
 }
@@ -63,33 +76,39 @@ func (this *_ProcessChain) Parallel(n int) ProcessChain {
 	return (&_ProcessChain{}).new(this, chain_parallel(n))
 }
 
-func (this *_ProcessChain) Process(data Iterable) ProcessingResult {
+// Process instantiates a processing chain for a dedicated input
+// It builds a dedicated execution structure
+// based on the chain functioned stored along the chain definition.
+func (this *_ProcessChain) Process(data data.Iterable) ProcessingResult {
 	p, ok := data.(ProcessingResult)
 	if ok {
 		if this.parent == nil {
 			return p
 		}
-		return this.operation(this.parent.Process(p))
+		return this.creator(this.parent.Process(p))
 	}
 	if this.parent == nil {
 		return Process(data)
 	}
-	return this.operation(this.parent.Process(data))
+	return this.creator(this.parent.Process(data))
 }
 
-func chain_map(m MappingFunction) chain_operation {
+func chain_explode(e ExplodeFunction) step_creator {
+	return func(p ProcessingResult) ProcessingResult { return p.Explode(e) }
+}
+func chain_map(m MappingFunction) step_creator {
 	return func(p ProcessingResult) ProcessingResult { return p.Map(m) }
 }
-func chain_filter(f FilterFunction) chain_operation {
+func chain_filter(f FilterFunction) step_creator {
 	return func(p ProcessingResult) ProcessingResult { return p.Filter(f) }
 }
-func chain_sort(c CompareFunction) chain_operation {
+func chain_sort(c CompareFunction) step_creator {
 	return func(p ProcessingResult) ProcessingResult { return p.Sort(c) }
 }
-func chain_with_pool(pool ProcessorPool) chain_operation {
+func chain_with_pool(pool ProcessorPool) step_creator {
 	return func(p ProcessingResult) ProcessingResult { return p.WithPool(pool) }
 }
-func chain_parallel(n int) chain_operation {
+func chain_parallel(n int) step_creator {
 	return func(p ProcessingResult) ProcessingResult { return p.Parallel(n) }
 }
 func chain_unordered(p ProcessingResult) ProcessingResult { return p.Unordered() }

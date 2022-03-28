@@ -76,24 +76,12 @@ func (this IndexedSliceAccess) Sort(cmp CompareFunction) IndexedSliceAccess {
 	return this
 }
 
+/*
 func (this IndexedSliceAccess) entry_iterator() entry_iterator {
 	return (&_slice_entry_iterator{}).new(this)
 }
+*/
 
 func NewSliceIterator(slice []interface{}) *IndexedIterator {
 	return NewIndexedIterator(IndexedSliceAccess(slice))
-}
-
-type _slice_entry_iterator struct {
-	IndexedIterator
-}
-
-func (this *_slice_entry_iterator) new(a IndexedSliceAccess) *_slice_entry_iterator {
-	this.IndexedIterator.new(a)
-	return this
-}
-
-func (this *_slice_entry_iterator) next() entry {
-	e := this.Next()
-	return entry{this.current, true, e}
 }

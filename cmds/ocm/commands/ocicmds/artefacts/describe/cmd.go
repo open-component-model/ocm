@@ -20,10 +20,10 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/commands"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/names"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
+	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/common"
-	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/oci"
@@ -118,11 +118,11 @@ func (o *Command) Run() error {
 var outputs = output.NewOutputs(get_regular, output.Outputs{}).AddChainedManifestOutputs(infoChain)
 
 func get_regular(opts *output.Options) output.Output {
-	return output.NewProcessingFunctionOutput(opts.Context, data.Chain(), outInfo)
+	return output.NewProcessingFunctionOutput(opts.Context, processing.Chain(), outInfo)
 }
 
-func infoChain(options *output.Options) data.ProcessChain {
-	return data.Chain().Parallel(4).Map(mapInfo(options.OtherOptions.(*Options)))
+func infoChain(options *output.Options) processing.ProcessChain {
+	return processing.Chain().Parallel(4).Map(mapInfo(options.OtherOptions.(*Options)))
 }
 
 func outInfo(ctx out.Context, e interface{}) {
@@ -135,7 +135,7 @@ type Info struct {
 	Info     interface{} `json:"info"`
 }
 
-func mapInfo(opts *Options) data.MappingFunction {
+func mapInfo(opts *Options) processing.MappingFunction {
 	return func(e interface{}) interface{} {
 		p := e.(*common.Object)
 		return &Info{

@@ -23,5 +23,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "data processing")
+	RunSpecs(t, "data structures")
 }

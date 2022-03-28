@@ -15,13 +15,14 @@
 package output
 
 import (
-	. "github.com/gardener/ocm/cmds/ocm/pkg/data"
+	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	. "github.com/gardener/ocm/cmds/ocm/pkg/output/out"
+	. "github.com/gardener/ocm/cmds/ocm/pkg/processing"
 )
 
 type ElementOutput struct {
 	source  ProcessingSource
-	Elems   Iterable
+	Elems   data.Iterable
 	Context Context
 }
 

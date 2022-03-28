@@ -15,8 +15,8 @@
 package output
 
 import (
-	. "github.com/gardener/ocm/cmds/ocm/pkg/data"
 	. "github.com/gardener/ocm/cmds/ocm/pkg/output/out"
+	. "github.com/gardener/ocm/cmds/ocm/pkg/processing"
 	"github.com/gardener/ocm/pkg/errors"
 )
 

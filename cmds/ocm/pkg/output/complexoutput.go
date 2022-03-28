@@ -17,8 +17,8 @@ package output
 import (
 	"fmt"
 
-	. "github.com/gardener/ocm/cmds/ocm/pkg/data"
 	. "github.com/gardener/ocm/cmds/ocm/pkg/output/out"
+	. "github.com/gardener/ocm/cmds/ocm/pkg/processing"
 	"github.com/gardener/ocm/pkg/utils"
 
 	"github.com/gardener/ocm/pkg/runtime"

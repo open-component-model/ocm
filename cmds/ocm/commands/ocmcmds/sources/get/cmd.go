@@ -19,12 +19,12 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/closureoption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	ocmcommon "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
 	compcommon "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/common"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/sources/common"
-	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/ocm"
@@ -113,14 +113,14 @@ var outputs = output.NewOutputs(get_regular, output.Outputs{
 func get_regular(opts *output.Options) output.Output {
 	columns := opts.OtherOptions.(*closureoption.Option).Columns(ocmcommon.MetaOutput)
 	mapper := closureoption.From(opts).Mapper(ocmcommon.History, map_get_regular_output)
-	return output.NewProcessingTableOutput(opts, data.Chain().Map(mapper),
+	return output.NewProcessingTableOutput(opts, processing.Chain().Map(mapper),
 		append(columns, "TYPE")...)
 }
 
 func get_wide(opts *output.Options) output.Output {
 	columns := opts.OtherOptions.(*closureoption.Option).Columns(ocmcommon.MetaOutput)
 	mapper := closureoption.From(opts).Mapper(ocmcommon.History, map_get_wide_output)
-	return output.NewProcessingTableOutput(opts, data.Chain().Map(mapper),
+	return output.NewProcessingTableOutput(opts, processing.Chain().Map(mapper),
 		append(append(columns, "TYPE"), ocmcommon.AccessOutput...)...)
 }
 

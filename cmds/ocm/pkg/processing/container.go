@@ -12,22 +12,25 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package data
+package processing
 
+/*
 import (
 	_ "fmt"
 	"sync"
+
+	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 )
 
 type container_creator func() container
 
 type entry_iterable interface {
 	entry_iterator() entry_iterator
-	Iterator() Iterator
+	Iterator() data.Iterator
 }
 
 type entry_iterator interface {
-	Iterator
+	data.Iterator
 	next() entry
 }
 
@@ -62,7 +65,7 @@ type _container struct {
 }
 
 var _ container = &_container{}
-var _ Iterable = &_container{}
+var _ data.Iterable = &_container{}
 
 func NewContainer() container {
 	return (&_container{}).new()
@@ -86,7 +89,7 @@ func (this *_container) _add(e entry) bool {
 	return true
 }
 
-func (this *_container) Iterator() Iterator {
+func (this *_container) Iterator() data.Iterator {
 	return this.entry_iterator()
 }
 
@@ -134,7 +137,7 @@ type _entry_iterator struct {
 }
 
 var _ entry_iterator = &_entry_iterator{}
-var _ Iterator = &_entry_iterator{}
+var _ data.Iterator = &_entry_iterator{}
 
 func (this *_entry_iterator) new(container container) entry_iterator {
 	this.current = -1
@@ -253,7 +256,7 @@ func (this *ordered_container) get(i int) entry {
 	return entry{i, false, nil}
 }
 
-func (this *ordered_container) Iterator() Iterator {
+func (this *ordered_container) Iterator() data.Iterator {
 	// this this is another this than this in iter() in this.container
 	// still inherited to offer the unordered entries for processing
 	return (&_entry_iterator{}).new(this)
@@ -269,7 +272,7 @@ type entry struct {
 
 ////////////////////////////////////////////////////////////////////////////
 
-func newEntryIterableFromIterable(data Iterable) entry_iterable {
+func newEntryIterableFromIterable(data data.Iterable) entry_iterable {
 	e, ok := data.(entry_iterable)
 	if ok {
 		return e
@@ -287,3 +290,6 @@ func newEntryIterableFromIterable(data Iterable) entry_iterable {
 	return c
 }
 
+
+
+*/
