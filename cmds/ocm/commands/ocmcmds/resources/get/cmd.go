@@ -16,12 +16,12 @@ package get
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/commands"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	ocmcommon "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
 	compcommon "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/common"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/common/options/repooption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/common"
 	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"

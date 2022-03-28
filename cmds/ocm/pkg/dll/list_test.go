@@ -12,16 +12,31 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package common_test
+package dll
 
 import (
-	"testing"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-func TestConfig(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Common OCM command utilities for components")
-}
+var _ = Describe("linked list", func() {
+
+	Context("add", func() {
+
+		It("end", func() {
+			list := NewLinkedList()
+
+			list.Append(1).Append(2)
+
+			Expect(AsSlice(list)).To(Equal([]interface{}{1, 2}))
+		})
+
+		It("start", func() {
+			list := NewLinkedList()
+
+			list.Append(1).Insert(2).Insert(3)
+
+			Expect(AsSlice(list)).To(Equal([]interface{}{3, 2, 1}))
+		})
+	})
+})

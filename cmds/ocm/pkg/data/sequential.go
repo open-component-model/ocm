@@ -18,39 +18,6 @@ import (
 	"sync"
 )
 
-type IncrementalProcessingSource interface {
-	Iterable
-	Open()
-	Add(e ...interface{}) IncrementalProcessingSource
-	Close()
-}
-
-type ProcessingSource interface {
-	IncrementalProcessingSource
-	IndexedAccess
-}
-
-type FilterFunction func(interface{}) bool
-type MappingFunction func(interface{}) interface{}
-type CompareFunction func(interface{}, interface{}) int
-
-type ProcessingResult interface {
-	Iterable
-
-	Map(m MappingFunction) ProcessingResult
-	Filter(f FilterFunction) ProcessingResult
-	Sort(c CompareFunction) ProcessingResult
-	Apply(c ProcessChain) ProcessingResult
-
-	Synchronously() ProcessingResult
-	Asynchronously() ProcessingResult
-	WithPool(ProcessorPool) ProcessingResult
-	Unordered() ProcessingResult
-	Parallel(n int) ProcessingResult
-
-	AsSlice() IndexedSliceAccess
-}
-
 func Process(data Iterable) ProcessingResult {
 	return (&_SynchronousProcessing{}).new(data)
 }

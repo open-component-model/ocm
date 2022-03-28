@@ -12,16 +12,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package common_test
+package dll
 
-import (
-	"testing"
+type Iterable interface {
+	Iterator() Iterator
+}
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-)
-
-func TestConfig(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Common OCM command utilities for components")
+type Iterator interface {
+	HasNext() bool
+	Next() interface{}
 }

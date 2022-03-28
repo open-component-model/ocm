@@ -17,7 +17,7 @@ package comppathopt_test
 import (
 	"testing"
 
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/common/options/comppathopt"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/comppathopt"
 	"github.com/gardener/ocm/pkg/errors"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	. "github.com/onsi/ginkgo"

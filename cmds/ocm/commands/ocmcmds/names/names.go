@@ -19,4 +19,5 @@ var (
 	Components       = []string{"components", "component", "comps", "comp", "c"}
 	Resources        = []string{"resources", "resource", "res", "r"}
 	Sources          = []string{"sources", "source", "src", "s"}
+	References       = []string{"references", "reference", "refs"}
 )

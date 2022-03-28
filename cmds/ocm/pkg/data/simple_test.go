@@ -12,16 +12,37 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package common_test
+package data
 
 import (
-	"testing"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-func TestConfig(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Common OCM command utilities for components")
+func AddOne(e interface{}) interface{} {
+	return e.(int) + 1
 }
+
+var _ = Describe("simple data processing", func() {
+
+	Context("sequential", func() {
+
+		It("map", func() {
+
+			data := IndexedSliceAccess([]interface{}{1, 2, 3})
+
+			result := Chain().Map(AddOne).Process(data).AsSlice()
+
+			Expect([]interface{}(result)).To(Equal([]interface{}{2, 3, 4}))
+		})
+
+		It("map", func() {
+
+			data := IndexedSliceAccess([]interface{}{1, 2, 3})
+
+			result := Chain().Parallel(1).Map(Identity).Process(data).AsSlice()
+
+			Expect([]interface{}(result)).To(Equal([]interface{}{1, 2, 3}))
+		})
+	})
+})
