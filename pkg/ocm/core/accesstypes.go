@@ -136,6 +136,15 @@ type GenericAccessSpec struct {
 	runtime.UnstructuredVersionedTypedObject `json:",inline"`
 }
 
+func NewGenericAccessSpec(spec string) (*GenericAccessSpec, error) {
+	var g GenericAccessSpec
+	err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(spec), &g)
+	if err != nil {
+		return nil, err
+	}
+	return &g, nil
+}
+
 func (s *GenericAccessSpec) Evaluate(ctx Context) (AccessSpec, error) {
 	raw, err := s.GetRaw()
 	if err != nil {

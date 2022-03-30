@@ -18,12 +18,14 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands"
 	ocmcommon "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/handlers/elemhdlr"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/closureoption"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
-	compcommon "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/common"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/sources/common"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
+	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/ocm"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
@@ -48,7 +50,7 @@ type Command struct {
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx), Output: *output.OutputOption(&closureoption.Option{})}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx), Output: *output.OutputOption(&closureoption.Option{}, &lookupoption.Option{})}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -87,19 +89,33 @@ func (o *Command) Complete(args []string) error {
 func (o *Command) Run() error {
 	session := ocm.NewSession(nil)
 	defer session.Close()
-	repo, err := o.Repository.GetRepository(o.Context.OCM(), session)
-	if err != nil {
-		return err
-	}
-	vershdlr := compcommon.NewTypeHandler(o.Context.OCM(), session, repo)
-	out := &output.SingleElementOutput{}
-	err = utils.HandleOutput(out, vershdlr, utils.StringSpec(o.Comp))
-	if err != nil {
-		return err
-	}
-	hdlr := common.NewTypeHandler(repo, session, out.Elem.(*compcommon.Object).ComponentVersion, closureoption.From(&o.Output).Closure)
 
+	err := o.Output.ProcessOnOptions(ocmcommon.CompleteOptionsWithContext(o.OCM(), session))
+	if err != nil {
+		return err
+	}
+	err = o.Repository.CompleteWithSession(o.OCM(), session)
+	if err != nil {
+		return err
+	}
+
+	hdlr, err := common.NewTypeHandler(o.Context.OCM(), &o.Output, o.Repository.Repository, session, []string{o.Comp})
+	if err != nil {
+		return err
+	}
 	return utils.HandleOutputs(outputs, &o.Output, hdlr, utils.ElemSpecs(o.Ids)...)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide ...string) output.Output {
+	def := &output.TableOutput{
+		Headers: output.Fields(elemhdlr.MetaOutput, "TYPE", wide),
+		Options: opts,
+		Chain:   elemhdlr.Sort,
+		Mapping: mapping,
+	}
+	return closureoption.TableOutput(def).New()
 }
 
 var outputs = output.NewOutputs(get_regular, output.Outputs{
@@ -107,28 +123,18 @@ var outputs = output.NewOutputs(get_regular, output.Outputs{
 }).AddManifestOutputs()
 
 func get_regular(opts *output.Options) output.Output {
-	def := &output.TableOutput{
-		Headers: append(ocmcommon.MetaOutput, "TYPE"),
-		Options: opts,
-		Mapping: map_get_regular_output,
-	}
-	return closureoption.TableOutput(def).New()
+	return TableOutput(opts, map_get_regular_output)
 }
 
 func get_wide(opts *output.Options) output.Output {
-	def := &output.TableOutput{
-		Headers: append(append(ocmcommon.MetaOutput, "TYPE"), ocmcommon.AccessOutput...),
-		Options: opts,
-		Mapping: map_get_wide_output,
-	}
-	return closureoption.TableOutput(def).New()
+	return TableOutput(opts, map_get_wide_output, elemhdlr.AccessOutput...)
 }
 
 func map_get_regular_output(e interface{}) interface{} {
 	r := common.Elem(e)
-	return append(ocmcommon.MapMetaOutput(e), r.Type)
+	return append(elemhdlr.MapMetaOutput(e), r.Type)
 }
 
 func map_get_wide_output(e interface{}) interface{} {
-	return append(map_get_regular_output(e).([]string), ocmcommon.MapAccessOutput(common.Elem(e).Access)...)
+	return append(map_get_regular_output(e).([]string), elemhdlr.MapAccessOutput(common.Elem(e).Access)...)
 }

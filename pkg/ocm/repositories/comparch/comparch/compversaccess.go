@@ -152,10 +152,11 @@ func (c *ComponentVersionAccess) getAccessMethod(acc compdesc.AccessSpec) (cpi.A
 	if err != nil {
 		return nil, err
 	}
-	if spec, err := c.AccessMethod(spec); err == nil {
+	if spec, err := c.AccessMethod(spec); err != nil {
+		return nil, err
+	} else {
 		return spec, nil
 	}
-	return nil, errors.ErrInvalid(errors.KIND_ACCESSMETHOD, acc.GetKind(), "component archive")
 }
 
 func (c *ComponentVersionAccess) checkAccessSpec(acc compdesc.AccessSpec) error {
@@ -185,7 +186,9 @@ func (c *ComponentVersionAccess) SetResource(meta *cpi.ResourceMeta, acc compdes
 
 func (c *ComponentVersionAccess) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec) error {
 	if err := c.checkAccessSpec(acc); err != nil {
-		return err
+		if !errors.IsErrUnknown(err) {
+			return err
+		}
 	}
 	res := &compdesc.Source{
 		SourceMeta: *meta.Copy(),

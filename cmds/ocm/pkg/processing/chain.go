@@ -159,10 +159,16 @@ func chain_apply(c ProcessChain) step_creator {
 
 var initial = Chain()
 
-func Explode(e ExplodeFunction) ProcessChain    { return initial.Explode(e) }
-func Map(m MappingFunction) ProcessChain        { return initial.Map(m) }
-func Filter(f FilterFunction) ProcessChain      { return initial.Filter(f) }
-func Sort(c CompareFunction) ProcessChain       { return initial.Sort(c) }
-func WithPool(pool ProcessorPool) ProcessChain  { return initial.WithPool(pool) }
-func Parallel(n int) ProcessChain               { return initial.Parallel(n) }
-func Unordered(p ProcessingResult) ProcessChain { return initial.Unordered() }
+func Explode(e ExplodeFunction) ProcessChain   { return initial.Explode(e) }
+func Map(m MappingFunction) ProcessChain       { return initial.Map(m) }
+func Filter(f FilterFunction) ProcessChain     { return initial.Filter(f) }
+func Sort(c CompareFunction) ProcessChain      { return initial.Sort(c) }
+func WithPool(pool ProcessorPool) ProcessChain { return initial.WithPool(pool) }
+func Parallel(n int) ProcessChain              { return initial.Parallel(n) }
+func Unordered() ProcessChain                  { return initial.Unordered() }
+func Append(p ProcessChain, a ProcessChain) ProcessChain {
+	if p == nil {
+		return a
+	}
+	return p.Append(a)
+}

@@ -20,6 +20,7 @@ import (
 
 	artefacts "github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/get"
 	components "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/get"
+	references "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/references/get"
 	resources "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/get"
 	sources "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/sources/get"
 	"github.com/spf13/cobra"
@@ -34,6 +35,7 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(artefacts.NewCommand(ctx, artefacts.Names...))
 	cmd.AddCommand(components.NewCommand(ctx, components.Names...))
 	cmd.AddCommand(resources.NewCommand(ctx, resources.Names...))
+	cmd.AddCommand(references.NewCommand(ctx, references.Names...))
 	cmd.AddCommand(sources.NewCommand(ctx, sources.Names...))
 	return cmd
 }

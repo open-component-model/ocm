@@ -15,6 +15,8 @@
 package compdesc
 
 import (
+	"strings"
+
 	"github.com/gardener/ocm/pkg/errors"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/gardener/ocm/pkg/runtime"
@@ -509,6 +511,18 @@ func (r ComponentReferences) Len() int {
 
 func (r ComponentReferences) Get(i int) ElementMetaAccessor {
 	return &r[i]
+}
+
+func (r ComponentReferences) Swap(i, j int) {
+	r[i], r[j] = r[j], r[i]
+}
+
+func (r ComponentReferences) Less(i, j int) bool {
+	c := strings.Compare(r[i].Name, r[j].Name)
+	if c != 0 {
+		return c < 0
+	}
+	return strings.Compare(r[i].Version, r[j].Version) < 0
 }
 
 func (r ComponentReferences) Copy() ComponentReferences {

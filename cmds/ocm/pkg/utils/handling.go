@@ -88,8 +88,7 @@ func HandleOutput(output output.Output, handler TypeHandler, specs ...ElemSpec) 
 			return err
 		}
 		if result == nil {
-			fmt.Fprintf(os.Stderr, "all not supported\n")
-			return nil
+			return fmt.Errorf("all mode not support")
 		}
 		for _, r := range result {
 			err := output.Add(r)

@@ -16,6 +16,7 @@ package ocmcmds
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/references"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/sources"
 	"github.com/spf13/cobra"
@@ -29,5 +30,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	}
 	cmd.AddCommand(resources.NewCommand(ctx))
 	cmd.AddCommand(sources.NewCommand(ctx))
+	cmd.AddCommand(references.NewCommand(ctx))
 	return cmd
 }

@@ -26,6 +26,8 @@ type ElementOutput struct {
 	Context Context
 }
 
+var _ Output = (*ElementOutput)(nil)
+
 func NewElementOutput(ctx Context, chain ProcessChain) *ElementOutput {
 	return (&ElementOutput{}).new(ctx, chain)
 }
@@ -51,5 +53,6 @@ func (this *ElementOutput) Close() error {
 	return nil
 }
 
-func (this *ElementOutput) Out() {
+func (this *ElementOutput) Out() error {
+	return nil
 }

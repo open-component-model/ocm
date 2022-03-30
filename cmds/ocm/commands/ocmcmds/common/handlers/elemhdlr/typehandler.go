@@ -12,16 +12,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package common
+package elemhdlr
 
 import (
 	"encoding/json"
-	"fmt"
-	"os"
+	"strings"
 
+	"github.com/gardener/ocm/cmds/ocm/clictx"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/closureoption"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
+	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/common"
+	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
@@ -48,39 +52,64 @@ func (o *Object) GetHistory() common.History {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type ComponentElementTypeHandler struct {
+type TypeHandler struct {
 	repository ocm.Repository
+	components []*comphdlr.Object
 	session    ocm.Session
 	access     ocm.ComponentVersionAccess
 	elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor
-	recursive  bool
 }
 
-func NewComponentElementTypeHandler(repository ocm.Repository, session ocm.Session, access ocm.ComponentVersionAccess, recursive bool, elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor) utils.TypeHandler {
-	return &ComponentElementTypeHandler{
-		repository: repository,
-		session:    session,
-		access:     access,
-		elemaccess: elemaccess,
-		recursive:  recursive,
+func NewTypeHandler(octx clictx.OCM, opts *output.Options, repobase ocm.Repository, session ocm.Session, compspecs []string, elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor) (utils.TypeHandler, error) {
+	h := comphdlr.NewTypeHandler(octx, session, repobase)
+
+	comps := output.NewElementOutput(nil, closureoption.Closure(opts, comphdlr.ClosureExplode, comphdlr.Sort))
+	err := utils.HandleOutput(comps, h, utils.StringElemSpecs(compspecs...)...)
+	if err != nil {
+		return nil, err
 	}
+	components := []*comphdlr.Object{}
+	i := comps.Elems.Iterator()
+	for i.HasNext() {
+		components = append(components, i.Next().(*comphdlr.Object))
+	}
+	if len(components) == 0 {
+		return nil, errors.Newf("no component specified")
+	}
+
+	t := &TypeHandler{
+		components: components,
+		repository: repobase,
+		session:    session,
+		elemaccess: elemaccess,
+	}
+	return t, nil
 }
 
-func (h *ComponentElementTypeHandler) Close() error {
+func (h *TypeHandler) Close() error {
 	return nil
 }
 
-func (h *ComponentElementTypeHandler) All() ([]output.Object, error) {
-	return h.execute(nil, h.access, func(access ocm.ComponentVersionAccess) ([]output.Object, error) { return h.all(access) })
+func (h *TypeHandler) All() ([]output.Object, error) {
+	result := []output.Object{}
+	for _, c := range h.components {
+		sub, err := h.all(c)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, sub...)
+	}
+	return result, nil
 }
 
-func (h *ComponentElementTypeHandler) all(access ocm.ComponentVersionAccess) ([]output.Object, error) {
+func (h *TypeHandler) all(c *comphdlr.Object) ([]output.Object, error) {
 	result := []output.Object{}
-	elemaccess := h.elemaccess(access)
+	elemaccess := h.elemaccess(c.ComponentVersion)
 	l := elemaccess.Len()
 	for i := 0; i < l; i++ {
 		e := elemaccess.Get(i)
 		result = append(result, &Object{
+			History: append(c.History, common.VersionedElementKey(c.ComponentVersion)),
 			Version: h.access,
 			Id:      e.GetMeta().GetIdentity(elemaccess),
 			Element: e,
@@ -89,39 +118,23 @@ func (h *ComponentElementTypeHandler) all(access ocm.ComponentVersionAccess) ([]
 	return result, nil
 }
 
-func (h *ComponentElementTypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
-	return h.execute(nil, h.access, func(access ocm.ComponentVersionAccess) ([]output.Object, error) { return h.get(access, elemspec) })
-}
-
-func (h *ComponentElementTypeHandler) execute(hist common.History, access ocm.ComponentVersionAccess, f func(access ocm.ComponentVersionAccess) ([]output.Object, error)) ([]output.Object, error) {
-	key := common.VersionedElementKey(access)
-	if err := hist.Add(ocm.KIND_COMPONENTVERSION, key); err != nil {
-		return nil, err
-	}
-	result, err := f(access)
-	if h.recursive {
-		for _, ref := range h.access.GetDescriptor().ComponentReferences {
-			nested, err := h.repository.LookupComponentVersion(ref.ComponentName, ref.Version)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Warning: lookup nested component %q [%s]: %s", ref.ComponentName, hist, err)
-				continue
-			}
-			out, err := h.execute(hist, nested, f)
-			if err != nil {
-				fmt.Fprintf(os.Stderr, "Warning: cannot handle %s: %s", hist, err)
-				continue
-			}
-			result = append(result, out...)
+func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
+	var result []output.Object
+	for _, c := range h.components {
+		sub, err := h.get(c, elemspec)
+		if err != nil {
+			return nil, err
 		}
+		result = append(result, sub...)
 	}
-	return result, err
+	return result, nil
 }
 
-func (h *ComponentElementTypeHandler) get(access ocm.ComponentVersionAccess, elemspec utils.ElemSpec) ([]output.Object, error) {
+func (h *TypeHandler) get(c *comphdlr.Object, elemspec utils.ElemSpec) ([]output.Object, error) {
 	var result []output.Object
 
 	selector := elemspec.(metav1.Identity)
-	elemaccess := h.elemaccess(access)
+	elemaccess := h.elemaccess(c.ComponentVersion)
 	l := elemaccess.Len()
 	for i := 0; i < l; i++ {
 		e := elemaccess.Get(i)
@@ -130,6 +143,7 @@ func (h *ComponentElementTypeHandler) get(access ocm.ComponentVersionAccess, ele
 		ok, _ := selector.Match(eid)
 		if ok {
 			result = append(result, &Object{
+				History: append(c.History, common.VersionedElementKey(c.ComponentVersion)),
 				Version: h.access,
 				Spec:    selector,
 				Id:      m.GetIdentity(elemaccess),
@@ -168,3 +182,17 @@ func MapAccessOutput(e compdesc.AccessSpec) []string {
 	}
 	return []string{e.GetKind(), a}
 }
+
+func Compare(a, b interface{}) int {
+	aa := a.(*Object)
+	ab := b.(*Object)
+
+	c := strings.Compare(aa.Element.GetMeta().GetName(), ab.Element.GetMeta().GetName())
+	if c != 0 {
+		return c
+	}
+	return strings.Compare(aa.Element.GetMeta().GetVersion(), ab.Element.GetMeta().GetVersion())
+}
+
+// Sort is a processing chain sorting original objects provided by type handler
+var Sort = processing.Sort(Compare)

@@ -96,27 +96,29 @@ func History(e interface{}) string {
 	return ""
 }
 
+func Closure(opts *output.Options, cf ClosureFunction, chain processing.ProcessChain) processing.ProcessChain {
+	return processing.Append(chain, processing.Explode(cf.Exploder(opts)))
+}
+
 type ClosureFunction func(*output.Options, interface{}) []interface{}
 
 func (c ClosureFunction) Exploder(opts *output.Options) processing.ExplodeFunction {
-	return func(e interface{}) []interface{} { return c(opts, e) }
+	if c != nil {
+		copts := From(opts)
+		if copts.Closure {
+			return func(e interface{}) []interface{} { return c(opts, e) }
+		}
+	}
+	return nil
 }
 
 func TableOutput(in *output.TableOutput, closure ...ClosureFunction) *output.TableOutput {
 	var cf ClosureFunction
-	copts := From(in.Options)
-	chain := in.Chain
 	if len(closure) > 0 {
 		cf = closure[0]
 	}
-	if cf != nil && copts.Closure {
-		explode := processing.Explode(cf.Exploder(in.Options))
-		if in.Chain == nil {
-			chain = explode
-		} else {
-			chain = chain.Append(explode)
-		}
-	}
+	chain := processing.Append(in.Chain, processing.Explode(cf.Exploder(in.Options)))
+	copts := From(in.Options)
 	return &output.TableOutput{
 		Headers: copts.Headers(in.Headers),
 		Options: in.Options,

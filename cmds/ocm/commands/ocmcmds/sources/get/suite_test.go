@@ -12,45 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package options
+package get_test
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
-	"github.com/spf13/pflag"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-type OptionsProcessor func(Options) error
-
-type Complete interface {
-	Complete() error
-}
-
-type CompleteWithContext interface {
-	Complete(ctx out.Context) error
-}
-
-type Usage interface {
-	Usage() string
-}
-
-type Options interface {
-	AddFlags(fs *pflag.FlagSet)
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-func CompleteOptions(opt Options) error {
-	if c, ok := opt.(Complete); ok {
-		return c.Complete()
-	}
-	return nil
-}
-
-func CompleteOptionsWithOutputContext(ctx out.Context) OptionsProcessor {
-	return func(opt Options) error {
-		if c, ok := opt.(CompleteWithContext); ok {
-			return c.Complete(ctx)
-		}
-		return nil
-	}
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "OCM get sources")
 }

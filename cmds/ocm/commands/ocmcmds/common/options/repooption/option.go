@@ -16,6 +16,7 @@ package repooption
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/runtime"
@@ -33,14 +34,28 @@ func From(o *output.Options) *Option {
 }
 
 type Option struct {
-	Spec string
+	Spec       string
+	Repository ocm.Repository
 }
+
+var _ common.OptionCompleter = (*Option)(nil)
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Spec, "repo", "r", "", "repository name or spec")
 }
 
 func (o *Option) Complete(ctx clictx.Context) error {
+	return nil
+}
+
+func (o *Option) CompleteWithSession(octx clictx.OCM, session ocm.Session) error {
+	if o.Repository == nil {
+		r, err := o.GetRepository(octx, session)
+		if err != nil {
+			return err
+		}
+		o.Repository = r
+	}
 	return nil
 }
 
@@ -53,12 +68,12 @@ func (o *Option) GetRepository(ctx clictx.OCM, session ocm.Session) (ocm.Reposit
 
 func (o *Option) Usage() string {
 	s := `
-If the repository option is specified, the given names are interpreted
+If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
 
 <center><code>&lt;component>[:&lt;version>]</code></center>
 
-If no <code>repo</code> option is specified the given names are interpreted 
+If no <code>--repo</code> option is specified the given names are interpreted 
 as located OCM component version references:
 
 <center><code>[&lt;repo type>::]&lt;host>[:&lt;port>][/&lt;base path>]//&lt;component>[:&lt;version>]</code></center>

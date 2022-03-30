@@ -23,7 +23,7 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/common"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/references/common"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
@@ -34,7 +34,7 @@ import (
 )
 
 var (
-	Names = names.Resources
+	Names = names.References
 	Verb  = commands.Get
 )
 
@@ -57,13 +57,15 @@ func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
 		Use:   "[<options>]  <component> {<name> { <key>=<value> }}",
 		Args:  cobra.MinimumNArgs(1),
-		Short: "get resources of a component version",
+		Short: "get references of a component version",
 		Long: `
-Get resources of a component version. Sources are specified
+Get references of a component version. References are specified
 by identities. An identity consists of 
 a name argument followed by optional <code>&lt;key>=&lt;value></code>
 arguments.
-`,
+` +
+			o.Repository.Usage() +
+			lookupoption.From(&o.Output).Usage(),
 	}
 }
 
@@ -110,7 +112,7 @@ func (o *Command) Run() error {
 
 func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide ...string) output.Output {
 	def := &output.TableOutput{
-		Headers: output.Fields(elemhdlr.MetaOutput, "TYPE", "RELATION", wide),
+		Headers: output.Fields("NAME", "COMPONENT", "VERSION", wide),
 		Options: opts,
 		Chain:   elemhdlr.Sort,
 		Mapping: mapping,
@@ -127,14 +129,15 @@ func get_regular(opts *output.Options) output.Output {
 }
 
 func get_wide(opts *output.Options) output.Output {
-	return TableOutput(opts, map_get_wide_output, elemhdlr.AccessOutput...)
+	return TableOutput(opts, map_get_wide_output, "IDENTITY")
 }
 
 func map_get_regular_output(e interface{}) interface{} {
 	r := common.Elem(e)
-	return append(elemhdlr.MapMetaOutput(e), r.Type, string(r.Relation))
+	return output.Fields(r.GetName(), r.GetVersion(), r.ComponentName)
 }
 
 func map_get_wide_output(e interface{}) interface{} {
-	return output.Fields(map_get_regular_output(e), elemhdlr.MapAccessOutput(common.Elem(e).Access))
+	o := e.(*elemhdlr.Object)
+	return output.Fields(map_get_regular_output(e), o.Id.String())
 }

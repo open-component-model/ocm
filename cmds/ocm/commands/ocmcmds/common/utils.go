@@ -18,6 +18,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/gardener/ocm/cmds/ocm/clictx"
+	"github.com/gardener/ocm/cmds/ocm/pkg/options"
+	"github.com/gardener/ocm/pkg/ocm"
 	compdesc "github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 )
@@ -49,4 +52,19 @@ func ConsumeIdentities(args []string, stop ...string) ([]metav1.Identity, []stri
 func MapArgsToIdentities(args ...string) ([]metav1.Identity, error) {
 	result, _, err := ConsumeIdentities(args)
 	return result, err
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type OptionCompleter interface {
+	CompleteWithSession(ctx clictx.OCM, session ocm.Session) error
+}
+
+func CompleteOptionsWithContext(ctx clictx.OCM, session ocm.Session) options.OptionsProcessor {
+	return func(opt options.Options) error {
+		if c, ok := opt.(OptionCompleter); ok {
+			return c.CompleteWithSession(ctx, session)
+		}
+		return nil
+	}
 }

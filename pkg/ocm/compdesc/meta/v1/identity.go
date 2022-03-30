@@ -17,6 +17,7 @@ package v1
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
@@ -84,10 +85,15 @@ func (l Identity) String() string {
 		return ""
 	}
 
+	var keys []string
+	for k := range l {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
 	s := ""
 	sep := ""
-	for k, v := range l {
-		s = fmt.Sprintf("%s%s%q=%q", s, sep, k, v)
+	for _, k := range keys {
+		s = fmt.Sprintf("%s%s%q=%q", s, sep, k, l[k])
 		sep = ","
 	}
 	return s

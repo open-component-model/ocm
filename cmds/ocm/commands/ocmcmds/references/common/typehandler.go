@@ -12,45 +12,29 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package options
+package common
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
-	"github.com/spf13/pflag"
+	"github.com/gardener/ocm/cmds/ocm/clictx"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/handlers/elemhdlr"
+	"github.com/gardener/ocm/cmds/ocm/pkg/output"
+	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
+	"github.com/gardener/ocm/pkg/ocm"
+	"github.com/gardener/ocm/pkg/ocm/compdesc"
 )
 
-type OptionsProcessor func(Options) error
-
-type Complete interface {
-	Complete() error
-}
-
-type CompleteWithContext interface {
-	Complete(ctx out.Context) error
-}
-
-type Usage interface {
-	Usage() string
-}
-
-type Options interface {
-	AddFlags(fs *pflag.FlagSet)
+func Elem(e interface{}) *compdesc.ComponentReference {
+	return e.(*elemhdlr.Object).Element.(*compdesc.ComponentReference)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func CompleteOptions(opt Options) error {
-	if c, ok := opt.(Complete); ok {
-		return c.Complete()
-	}
-	return nil
+type TypeHandler struct {
+	*elemhdlr.TypeHandler
 }
 
-func CompleteOptionsWithOutputContext(ctx out.Context) OptionsProcessor {
-	return func(opt Options) error {
-		if c, ok := opt.(CompleteWithContext); ok {
-			return c.Complete(ctx)
-		}
-		return nil
-	}
+func NewTypeHandler(octx clictx.OCM, opts *output.Options, repo ocm.Repository, session ocm.Session, compspecs []string) (utils.TypeHandler, error) {
+	return elemhdlr.NewTypeHandler(octx, opts, repo, session, compspecs, func(access ocm.ComponentVersionAccess) compdesc.ElementAccessor {
+		return access.GetDescriptor().ComponentReferences
+	})
 }

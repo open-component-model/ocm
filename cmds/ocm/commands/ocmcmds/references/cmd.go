@@ -12,45 +12,24 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package options
+package references
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
-	"github.com/spf13/pflag"
+	"github.com/gardener/ocm/cmds/ocm/clictx"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/references/get"
+	"github.com/spf13/cobra"
 )
 
-type OptionsProcessor func(Options) error
+var Names = names.References
 
-type Complete interface {
-	Complete() error
-}
-
-type CompleteWithContext interface {
-	Complete(ctx out.Context) error
-}
-
-type Usage interface {
-	Usage() string
-}
-
-type Options interface {
-	AddFlags(fs *pflag.FlagSet)
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-func CompleteOptions(opt Options) error {
-	if c, ok := opt.(Complete); ok {
-		return c.Complete()
+// NewCommand creates a new command.
+func NewCommand(ctx clictx.Context) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:              Names[0],
+		Aliases:          Names[1:],
+		TraverseChildren: true,
 	}
-	return nil
-}
-
-func CompleteOptionsWithOutputContext(ctx out.Context) OptionsProcessor {
-	return func(opt Options) error {
-		if c, ok := opt.(CompleteWithContext); ok {
-			return c.Complete(ctx)
-		}
-		return nil
-	}
+	cmd.AddCommand(get.NewCommand(ctx, get.Verb))
+	return cmd
 }

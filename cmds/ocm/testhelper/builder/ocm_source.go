@@ -43,7 +43,7 @@ func (r *ocm_source) Set() {
 
 func (r *ocm_source) Close() error {
 	switch {
-	case r.ocm_acc != nil:
+	case r.access != nil:
 		return r.Builder.ocm_vers.SetSource(&r.meta, r.access)
 	case r.blob != nil:
 		return r.Builder.ocm_vers.SetSourceBlob(&r.meta, r.blob, "", nil)

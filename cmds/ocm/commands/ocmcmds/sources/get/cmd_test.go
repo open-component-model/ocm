@@ -20,8 +20,7 @@ import (
 	. "github.com/gardener/ocm/cmds/ocm/testhelper"
 	"github.com/gardener/ocm/cmds/ocm/testhelper/builder"
 	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/mime"
-	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
+	"github.com/gardener/ocm/pkg/ocm"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -35,6 +34,9 @@ const PROVIDER = "mandelsoft"
 var _ = Describe("Test Environment", func() {
 	var env *builder.Builder
 
+	spec, err := ocm.NewGenericAccessSpec("{\"type\":\"git\"}")
+	Expect(err).To(Succeed())
+
 	BeforeEach(func() {
 		env = builder.NewBuilder(NewTestEnv())
 
@@ -47,17 +49,17 @@ var _ = Describe("Test Environment", func() {
 	It("lists single resource in component archive", func() {
 		env.ComponentArchive(ARCH, accessio.FormatDirectory, COMP, VERSION, func() {
 			env.Provider(PROVIDER)
-			env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
-				env.BlobStringData(mime.MIME_TEXT, "testdata")
+			env.Source("testdata", "v1", "git", func() {
+				env.Access(spec)
 			})
 		})
 
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH)).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("get", "sources", ARCH)).To(Succeed())
 		Expect("\n" + buf.String()).To(Equal(
 			`
-NAME     VERSION IDENTITY          TYPE      RELATION
-testdata v1      "name"="testdata" PlainText local
+NAME     VERSION IDENTITY          TYPE
+testdata v1      "name"="testdata" git
 `))
 	})
 
@@ -66,19 +68,19 @@ testdata v1      "name"="testdata" PlainText local
 			env.Component(COMP, func() {
 				env.Version(VERSION, func() {
 					env.Provider(PROVIDER)
-					env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
-						env.BlobStringData(mime.MIME_TEXT, "testdata")
+					env.Source("testdata", "v1", "git", func() {
+						env.Access(spec)
 					})
 				})
 			})
 		})
 
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH)).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("get", "sources", ARCH)).To(Succeed())
 		Expect("\n" + buf.String()).To(Equal(
 			`
-NAME     VERSION IDENTITY          TYPE      RELATION
-testdata v1      "name"="testdata" PlainText local
+NAME     VERSION IDENTITY          TYPE
+testdata v1      "name"="testdata" git
 `))
 	})
 
@@ -87,16 +89,16 @@ testdata v1      "name"="testdata" PlainText local
 			env.Component(COMP, func() {
 				env.Version(VERSION, func() {
 					env.Provider(PROVIDER)
-					env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
-						env.BlobStringData(mime.MIME_TEXT, "testdata")
+					env.Source("testdata", "v1", "git", func() {
+						env.Access(spec)
 					})
 				})
 			})
 			env.Component(COMP2, func() {
 				env.Version(VERSION, func() {
 					env.Provider(PROVIDER)
-					env.Resource("moredata", "", "PlainText", metav1.LocalRelation, func() {
-						env.BlobStringData(mime.MIME_TEXT, "moredata")
+					env.Source("source", "v1", "git", func() {
+						env.Access(spec)
 					})
 					env.Reference("base", COMP, VERSION)
 				})
@@ -104,12 +106,12 @@ testdata v1      "name"="testdata" PlainText local
 		})
 
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("get", "sources", "-c", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 		Expect("\n" + buf.String()).To(Equal(
 			`
-REFERENCEPATH              NAME     VERSION IDENTITY          TYPE      RELATION
-test.de/y:v1               moredata v1      "name"="moredata" PlainText local
-test.de/y:v1->test.de/x:v1 testdata v1      "name"="testdata" PlainText local
+REFERENCEPATH              NAME     VERSION IDENTITY          TYPE
+test.de/y:v1               source   v1      "name"="source"   git
+test.de/y:v1->test.de/x:v1 testdata v1      "name"="testdata" git
 `))
 	})
 })

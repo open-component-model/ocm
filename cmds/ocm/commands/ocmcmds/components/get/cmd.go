@@ -19,9 +19,9 @@ import (
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/closureoption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/common"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
@@ -95,14 +95,14 @@ func (o *Command) Run() error {
 	if err != nil {
 		return err
 	}
-	handler := common.NewTypeHandler(o.Context.OCM(), session, repo)
+	handler := comphdlr.NewTypeHandler(o.Context.OCM(), session, repo)
 	return utils.HandleArgs(outputs, &o.Output, handler, o.Refs...)
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
 func identity(e interface{}) []string {
-	p := e.(*common.Object)
+	p := e.(*comphdlr.Object)
 	return []string{p.Identity.String()}
 }
 
@@ -110,10 +110,10 @@ func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide 
 	def := &output.TableOutput{
 		Headers: output.Fields("COMPONENT", "VERSION", "PROVIDER", wide),
 		Options: opts,
-		Chain:   common.Sort,
+		Chain:   comphdlr.Sort,
 		Mapping: mapping,
 	}
-	return closureoption.TableOutput(def, common.ClosureExplode).New()
+	return closureoption.TableOutput(def, comphdlr.ClosureExplode).New()
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -131,7 +131,7 @@ func get_wide(opts *output.Options) output.Output {
 }
 
 func map_get_regular_output(e interface{}) interface{} {
-	p := e.(*common.Object)
+	p := e.(*comphdlr.Object)
 
 	tag := "-"
 	if p.Spec.Version != nil {
@@ -141,6 +141,6 @@ func map_get_regular_output(e interface{}) interface{} {
 }
 
 func map_get_wide_output(e interface{}) interface{} {
-	p := e.(*common.Object)
-	return append(map_get_regular_output(e).([]string), p.Spec.UniformRepositorySpec.String())
+	p := e.(*comphdlr.Object)
+	return output.Fields(map_get_regular_output(e), p.Spec.UniformRepositorySpec.String())
 }

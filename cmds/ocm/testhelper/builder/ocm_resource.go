@@ -44,7 +44,7 @@ func (r *ocm_resource) Set() {
 
 func (r *ocm_resource) Close() error {
 	switch {
-	case r.ocm_acc != nil:
+	case r.access != nil:
 		return r.Builder.ocm_vers.SetResource(&r.meta, r.access)
 	case r.blob != nil:
 		return r.Builder.ocm_vers.SetResourceBlob(&r.meta, r.blob, "", nil)

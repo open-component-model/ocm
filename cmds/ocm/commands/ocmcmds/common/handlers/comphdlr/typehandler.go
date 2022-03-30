@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package common
+package comphdlr
 
 import (
 	"fmt"
@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
 	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
@@ -51,27 +52,38 @@ func (o *Object) GetHistory() common.History {
 ////////////////////////////////////////////////////////////////////////////////
 
 func ClosureExplode(opts *output.Options, e interface{}) []interface{} {
-	return traverse(common.History{}, e.(*Object), opts.Context)
+	return traverse(common.History{}, e.(*Object), opts.Context, lookupoption.From(opts))
 }
 
-func traverse(hist common.History, o *Object, octx out.Context) []interface{} {
+func traverse(hist common.History, o *Object, octx out.Context, lookup *lookupoption.Option) []interface{} {
 	key := common.VersionedElementKey(o.ComponentVersion)
 	if err := hist.Add(ocm.KIND_COMPONENTVERSION, key); err != nil {
 		return nil
 	}
 	result := []interface{}{o}
 	refs := o.ComponentVersion.GetDescriptor().ComponentReferences
+	/*
+		refs=append(refs[:0:0], refs...)
+		sort.Sort(refs)
+	*/
 	for _, ref := range refs {
+		var nested ocm.ComponentVersionAccess
+		vers := ref.Version
 		comp, err := o.Repository.LookupComponent(ref.ComponentName)
 		if err != nil {
-			out.Errf(octx, "Warning: lookup nested component %q [%s]: %s", ref.ComponentName, hist, err)
-			continue
+			out.Errf(octx, "Warning: lookup nested component %q [%s]: %s\n", ref.ComponentName, hist, err)
+		} else {
+			nested, err = comp.LookupVersion(vers)
+			if err != nil {
+				out.Errf(octx, "Warning: lookup nested component %q [%s]: %s\n", ref.ComponentName, hist, err)
+			}
 		}
-		vers := ref.Version
-		nested, err := comp.LookupVersion(vers)
-		if err != nil {
-			out.Errf(octx, "Warning: lookup nested component %q [%s]: %s", ref.ComponentName, hist, err)
-			continue
+		if nested == nil {
+			comp, nested, err = lookup.LookupComponentVersion(ref.ComponentName, vers)
+			if err != nil {
+				out.Errf(octx, "Warning: fallback lookup nested component version \"%s:%s\" [%s]: %s\n", ref.ComponentName, vers, hist, err)
+				continue
+			}
 		}
 		var obj = &Object{
 			History:  hist,
@@ -87,7 +99,7 @@ func traverse(hist common.History, o *Object, octx out.Context) []interface{} {
 			Component:        comp,
 			ComponentVersion: nested,
 		}
-		result = append(result, traverse(hist, obj, octx)...)
+		result = append(result, traverse(hist, obj, octx, lookup)...)
 	}
 	return result
 }
@@ -178,7 +190,7 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 	}
 
 	if spec.IsVersion() {
-		v, err := component.LookupVersion(spec.Reference())
+		v, err := component.LookupVersion(*spec.Version)
 		if err != nil {
 			return nil, err
 		}

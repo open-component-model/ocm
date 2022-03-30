@@ -15,24 +15,26 @@
 package common
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/gardener/ocm/cmds/ocm/clictx"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/handlers/elemhdlr"
+	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/ocm"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 )
 
 func Elem(e interface{}) *compdesc.Source {
-	return e.(*common.Object).Element.(*compdesc.Source)
+	return e.(*elemhdlr.Object).Element.(*compdesc.Source)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type TypeHandler struct {
-	*common.ComponentElementTypeHandler
+	*elemhdlr.TypeHandler
 }
 
-func NewTypeHandler(repo ocm.Repository, session ocm.Session, access ocm.ComponentVersionAccess, recursive bool) utils.TypeHandler {
-	return common.NewComponentElementTypeHandler(repo, session, access, recursive, func(access ocm.ComponentVersionAccess) compdesc.ElementAccessor {
+func NewTypeHandler(octx clictx.OCM, opts *output.Options, repo ocm.Repository, session ocm.Session, compspecs []string) (utils.TypeHandler, error) {
+	return elemhdlr.NewTypeHandler(octx, opts, repo, session, compspecs, func(access ocm.ComponentVersionAccess) compdesc.ElementAccessor {
 		return access.GetDescriptor().Sources
 	})
 }

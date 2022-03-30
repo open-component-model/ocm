@@ -56,3 +56,7 @@ func DefaultBlobHandlers() core.BlobHandlerRegistry {
 func ForContext(ctx context.Context) Context {
 	return core.ForContext(ctx)
 }
+
+func NewGenericAccessSpec(spec string) (AccessSpec, error) {
+	return core.NewGenericAccessSpec(spec)
+}

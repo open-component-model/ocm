@@ -66,6 +66,16 @@ func (o *Options) AddFlags(fs *pflag.FlagSet, outputs Outputs) {
 	}
 }
 
+func (o *Options) ProcessOnOptions(f options.OptionsProcessor) error {
+	for _, n := range o.OtherOptions {
+		err := f(n)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (o *Options) Complete(ctx out.Context) error {
 	o.Context = ctx
 	if o.output != "" {
@@ -83,15 +93,15 @@ func (o *Options) Complete(ctx out.Context) error {
 		}
 	}
 	o.Sort = fields
-	for _, n := range o.OtherOptions {
-		if c, ok := n.(options.Complete); ok {
-			return c.Complete()
-		}
-		if c, ok := n.(options.CompleteWithContext); ok {
-			return c.Complete(ctx)
-		}
+	err := o.ProcessOnOptions(options.CompleteOptions)
+	if err != nil {
+		return err
 	}
-	return nil
+	err = o.ProcessOnOptions(options.CompleteOptionsWithOutputContext(ctx))
+	if err != nil {
+		return err
+	}
+	return err
 }
 
 func (o *Options) Usage() string {
@@ -102,3 +112,5 @@ func (o *Options) Usage() string {
 	}
 	return ""
 }
+
+////////////////////////////////////////////////////////////////////////////////
