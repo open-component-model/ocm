@@ -76,6 +76,17 @@ func (this IndexedSliceAccess) Sort(cmp CompareFunction) IndexedSliceAccess {
 	return this
 }
 
+func (this IndexedSliceAccess) SortIndexed(cmp CompareIndexedFunction) IndexedSliceAccess {
+	SortIndexed(this, cmp)
+	return this
+}
+
+func (this IndexedSliceAccess) Copy() IndexedSliceAccess {
+	n := make(IndexedSliceAccess, len(this))
+	copy(n, this)
+	return n
+}
+
 /*
 func (this IndexedSliceAccess) entry_iterator() entry_iterator {
 	return (&_slice_entry_iterator{}).new(this)

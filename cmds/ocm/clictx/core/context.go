@@ -114,6 +114,9 @@ func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context, outctx
 	if outctx == nil {
 		outctx = out.New()
 	}
+	if shared == nil {
+		shared = ocmctx.AttributesContext()
+	}
 	c := &_context{
 		sharedAttributes: shared,
 		credentials:      ocmctx.CredentialsContext(),
@@ -124,7 +127,7 @@ func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context, outctx
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
 	c.oci = newOCI(c, ocmctx)
 	c.ocm = newOCM(c, ocmctx)
-	vfsattr.Set(c.Context, fs)
+	vfsattr.Set(c.AttributesContext(), fs)
 	return c
 }
 

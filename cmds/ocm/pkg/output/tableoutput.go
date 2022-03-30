@@ -22,6 +22,23 @@ import (
 	"github.com/gardener/ocm/pkg/errors"
 )
 
+type TableOutput struct {
+	Headers []string
+	Options *Options
+	Chain   ProcessChain
+	Mapping MappingFunction
+}
+
+func (t *TableOutput) New() *TableProcessingOutput {
+	chain := t.Chain
+	if chain == nil {
+		chain = Map(t.Mapping)
+	} else {
+		chain = chain.Map(t.Mapping)
+	}
+	return NewProcessingTableOutput(t.Options, chain, t.Headers...)
+}
+
 type TableProcessingOutput struct {
 	ElementOutput
 	header []string
@@ -61,7 +78,12 @@ func (this *TableProcessingOutput) Out() error {
 			if key == "" {
 				return errors.Newf("unknown field '%s'", k)
 			}
-			slice.Sort(compare_column(idxs[key]))
+			cmp := compare_column(idxs[key])
+			if this.opts.FixedColums > 0 {
+				sortFixed(this.opts.FixedColums, slice, cmp)
+			} else {
+				slice.Sort(cmp)
+			}
 		}
 	}
 
@@ -78,5 +100,28 @@ func compare_column(c int) CompareFunction {
 		}
 		return len(aa) - len(ab)
 	}
+}
 
+func sortFixed(fixed int, slice data.IndexedSliceAccess, cmp CompareFunction) {
+	keys := [][]string{}
+	views := [][]int{}
+lineloop:
+	for l, e := range slice {
+		line := e.([]string)
+	keyloop:
+		for k, v := range keys {
+			for i := 0; i < fixed; i++ {
+				if v[i] != line[i] {
+					continue keyloop
+				}
+			}
+			views[k] = append(views[k], l)
+			continue lineloop
+		}
+		keys = append(keys, line[:fixed])
+		views = append(views, []int{l})
+	}
+	for _, v := range views {
+		data.SortView(slice, v, cmp)
+	}
 }

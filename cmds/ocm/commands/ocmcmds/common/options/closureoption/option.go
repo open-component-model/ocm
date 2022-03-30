@@ -17,15 +17,23 @@ package closureoption
 import (
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
+	"github.com/gardener/ocm/pkg/common"
 	"github.com/spf13/pflag"
 )
 
 func From(o *output.Options) *Option {
-	return o.OtherOptions.(*Option)
+	v := o.GetOptions((*Option)(nil))
+	if v == nil {
+		return nil
+	}
+	return v.(*Option)
 }
 
 type Option struct {
-	Closure bool
+	Closure          bool
+	ClosureField     string
+	AdditionalFields []string
+	FieldEnricher    func(interface{}) []string
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
@@ -38,36 +46,81 @@ With the option <code>--closure</code> the complete reference tree by a componen
 `
 }
 
-func (o *Option) Columns(cols []string) []string {
+func (o *Option) Explode(e processing.ExplodeFunction) processing.ProcessChain {
 	if o.Closure {
-		return append(append(cols[:0:len(cols)+1], "REFERENCEPATH"), cols...)
+		return processing.Explode(e)
+	}
+	return nil
+}
+
+func insert(a []string, v string) []string {
+	r := make([]string, len(a)+1)
+	copy(r[1:], a)
+	r[0] = v
+	return r
+}
+
+func (o *Option) Headers(cols []string) []string {
+	h := o.ClosureField
+	if h == "" {
+		h = "REFERENCEPATH"
+	}
+	if o.Closure {
+		return append(insert(cols, h), o.AdditionalFields...)
 	}
 	return cols
 }
 
-func (o *Option) Row(path string, cols []string) []string {
-	if o.Closure {
-		return append(append(cols[:0:len(cols)+1], path), cols...)
+func (o *Option) additionalFields(e interface{}) []string {
+	if o.FieldEnricher != nil {
+		return o.FieldEnricher(e)
 	}
-	return cols
-}
-
-func (o *Option) RowEnricher(path func(interface{}) string, row func(interface{}) []string) func(interface{}) []string {
-	if o.Closure {
-		return func(e interface{}) []string {
-			cols := row(e)
-			return append(append(cols[:0:len(cols)+1], path(e)), cols...)
-		}
-	}
-	return row
+	return nil
 }
 
 func (o *Option) Mapper(path func(interface{}) string, mapper processing.MappingFunction) processing.MappingFunction {
 	if o.Closure {
 		return func(e interface{}) interface{} {
-			cols := mapper(e).([]string)
-			return append(append(cols[:0:len(cols)+1], path(e)), cols...)
+			return append(insert(mapper(e).([]string), path(e)), o.additionalFields(e)...)
 		}
 	}
 	return mapper
+}
+
+func History(e interface{}) string {
+	if o, ok := e.(common.HistorySource); ok {
+		if h := o.GetHistory(); h != nil {
+			return h.String()
+		}
+	}
+	return ""
+}
+
+type ClosureFunction func(*output.Options, interface{}) []interface{}
+
+func (c ClosureFunction) Exploder(opts *output.Options) processing.ExplodeFunction {
+	return func(e interface{}) []interface{} { return c(opts, e) }
+}
+
+func TableOutput(in *output.TableOutput, closure ...ClosureFunction) *output.TableOutput {
+	var cf ClosureFunction
+	copts := From(in.Options)
+	chain := in.Chain
+	if len(closure) > 0 {
+		cf = closure[0]
+	}
+	if cf != nil && copts.Closure {
+		explode := processing.Explode(cf.Exploder(in.Options))
+		if in.Chain == nil {
+			chain = explode
+		} else {
+			chain = chain.Append(explode)
+		}
+	}
+	return &output.TableOutput{
+		Headers: copts.Headers(in.Headers),
+		Options: in.Options,
+		Chain:   chain,
+		Mapping: copts.Mapper(History, in.Mapping),
+	}
 }

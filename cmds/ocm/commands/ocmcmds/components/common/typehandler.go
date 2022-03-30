@@ -17,15 +17,23 @@ package common
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
+	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
+	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
+	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm"
+	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 )
 
 type Object struct {
+	History  common.History
+	Identity metav1.Identity
+
 	Spec             ocm.RefSpec
 	Repository       ocm.Repository
 	Component        ocm.ComponentAccess
@@ -34,6 +42,54 @@ type Object struct {
 
 func (o *Object) AsManifest() interface{} {
 	return o.ComponentVersion.GetDescriptor()
+}
+
+func (o *Object) GetHistory() common.History {
+	return o.History
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func ClosureExplode(opts *output.Options, e interface{}) []interface{} {
+	return traverse(common.History{}, e.(*Object), opts.Context)
+}
+
+func traverse(hist common.History, o *Object, octx out.Context) []interface{} {
+	key := common.VersionedElementKey(o.ComponentVersion)
+	if err := hist.Add(ocm.KIND_COMPONENTVERSION, key); err != nil {
+		return nil
+	}
+	result := []interface{}{o}
+	refs := o.ComponentVersion.GetDescriptor().ComponentReferences
+	for _, ref := range refs {
+		comp, err := o.Repository.LookupComponent(ref.ComponentName)
+		if err != nil {
+			out.Errf(octx, "Warning: lookup nested component %q [%s]: %s", ref.ComponentName, hist, err)
+			continue
+		}
+		vers := ref.Version
+		nested, err := comp.LookupVersion(vers)
+		if err != nil {
+			out.Errf(octx, "Warning: lookup nested component %q [%s]: %s", ref.ComponentName, hist, err)
+			continue
+		}
+		var obj = &Object{
+			History:  hist,
+			Identity: ref.GetIdentity(refs),
+			Spec: ocm.RefSpec{
+				UniformRepositorySpec: o.Spec.UniformRepositorySpec,
+				CompSpec: ocm.CompSpec{
+					Component: ref.ComponentName,
+					Version:   &vers,
+				},
+			},
+			Repository:       o.Repository,
+			Component:        comp,
+			ComponentVersion: nested,
+		}
+		result = append(result, traverse(hist, obj, octx)...)
+	}
+	return result
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -103,6 +159,7 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 		}
 		spec = evaluated.Ref
 		component = evaluated.Component
+		repo = evaluated.Repository
 	} else {
 		comp := ocm.CompSpec{Component: ""}
 		if name != "" {
@@ -145,10 +202,26 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 			s := spec
 			s.Version = &t
 			result = append(result, &Object{
+				Repository:       repo,
 				Spec:             s,
+				Component:        component,
 				ComponentVersion: v,
 			})
 		}
 	}
 	return result, nil
 }
+
+func Compare(a, b interface{}) int {
+	aa := a.(*Object)
+	ab := b.(*Object)
+
+	c := strings.Compare(aa.ComponentVersion.GetName(), ab.ComponentVersion.GetName())
+	if c != 0 {
+		return c
+	}
+	return strings.Compare(aa.ComponentVersion.GetVersion(), ab.ComponentVersion.GetVersion())
+}
+
+// Sort is a processing chain sorting original objects provided by type handler
+var Sort = processing.Sort(Compare)

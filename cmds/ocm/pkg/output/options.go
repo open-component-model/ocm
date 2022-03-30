@@ -16,6 +16,7 @@ package output
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/gardener/ocm/cmds/ocm/pkg/options"
@@ -28,8 +29,24 @@ type Options struct {
 
 	Output       *string
 	Sort         []string
-	OtherOptions options.Options
+	OtherOptions []options.Options
+	FixedColums  int
 	Context      out.Context
+}
+
+func OutputOption(opts ...options.Options) *Options {
+	return &Options{
+		OtherOptions: opts,
+	}
+}
+
+func (o *Options) GetOptions(proto options.Options) interface{} {
+	for _, o := range o.OtherOptions {
+		if reflect.TypeOf(o) == reflect.TypeOf(proto) {
+			return o
+		}
+	}
+	return nil
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet, outputs Outputs) {
@@ -44,8 +61,8 @@ func (o *Options) AddFlags(fs *pflag.FlagSet, outputs Outputs) {
 	fs.StringVarP(&o.output, "output", "o", "", fmt.Sprintf("output mode (%s)", s))
 	fs.StringArrayVarP(&o.Sort, "sort", "s", nil, "sort fields")
 
-	if o.OtherOptions != nil {
-		o.OtherOptions.AddFlags(fs)
+	for _, n := range o.OtherOptions {
+		n.AddFlags(fs)
 	}
 }
 
@@ -66,17 +83,20 @@ func (o *Options) Complete(ctx out.Context) error {
 		}
 	}
 	o.Sort = fields
-	if o.OtherOptions != nil {
-		if c, ok := o.OtherOptions.(options.Complete); ok {
+	for _, n := range o.OtherOptions {
+		if c, ok := n.(options.Complete); ok {
 			return c.Complete()
+		}
+		if c, ok := n.(options.CompleteWithContext); ok {
+			return c.Complete(ctx)
 		}
 	}
 	return nil
 }
 
 func (o *Options) Usage() string {
-	if o.OtherOptions != nil {
-		if c, ok := o.OtherOptions.(options.Usage); ok {
+	for _, n := range o.OtherOptions {
+		if c, ok := n.(options.Usage); ok {
 			return c.Usage()
 		}
 	}

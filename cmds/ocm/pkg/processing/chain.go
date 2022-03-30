@@ -31,6 +31,7 @@ type ProcessChain interface {
 	WithPool(p ProcessorPool) ProcessChain
 	Unordered() ProcessChain
 	Parallel(n int) ProcessChain
+	Append(p ProcessChain) ProcessChain
 
 	Process(data data.Iterable) ProcessingResult
 }
@@ -49,21 +50,44 @@ func Chain() ProcessChain {
 }
 
 func (this *_ProcessChain) new(p *_ProcessChain, creator step_creator) *_ProcessChain {
-	this.parent = p
+	if p != nil {
+		if p.creator != nil {
+			this.parent = p
+		} else {
+			if p.parent != nil {
+				this.parent = p.parent
+			}
+		}
+	}
+	if this.parent != nil && creator == nil {
+		return this.parent
+	}
 	this.creator = creator
 	return this
 }
 
 func (this *_ProcessChain) Explode(e ExplodeFunction) ProcessChain {
+	if e == nil {
+		return this
+	}
 	return (&_ProcessChain{}).new(this, chain_explode(e))
 }
 func (this *_ProcessChain) Map(m MappingFunction) ProcessChain {
+	if m == nil {
+		return this
+	}
 	return (&_ProcessChain{}).new(this, chain_map(m))
 }
 func (this *_ProcessChain) Filter(f FilterFunction) ProcessChain {
+	if f == nil {
+		return this
+	}
 	return (&_ProcessChain{}).new(this, chain_filter(f))
 }
 func (this *_ProcessChain) Sort(c CompareFunction) ProcessChain {
+	if c == nil {
+		return this
+	}
 	return (&_ProcessChain{}).new(this, chain_sort(c))
 }
 func (this *_ProcessChain) WithPool(p ProcessorPool) ProcessChain {
@@ -76,21 +100,33 @@ func (this *_ProcessChain) Parallel(n int) ProcessChain {
 	return (&_ProcessChain{}).new(this, chain_parallel(n))
 }
 
+func (this *_ProcessChain) Append(p ProcessChain) ProcessChain {
+	if p == nil {
+		return this
+	}
+	return (&_ProcessChain{}).new(this, chain_apply(p))
+}
+
 // Process instantiates a processing chain for a dedicated input
 // It builds a dedicated execution structure
 // based on the chain functioned stored along the chain definition.
 func (this *_ProcessChain) Process(data data.Iterable) ProcessingResult {
 	p, ok := data.(ProcessingResult)
-	if ok {
-		if this.parent == nil {
-			return p
+	if this.parent != nil {
+		p = this.parent.Process(data)
+	} else {
+		if !ok {
+			p = Process(data)
 		}
-		return this.creator(this.parent.Process(p))
 	}
-	if this.parent == nil {
-		return Process(data)
+	return this.step(p)
+}
+
+func (this *_ProcessChain) step(p ProcessingResult) ProcessingResult {
+	if this.creator == nil {
+		return p
 	}
-	return this.creator(this.parent.Process(data))
+	return this.creator(p)
 }
 
 func chain_explode(e ExplodeFunction) step_creator {
@@ -113,6 +149,20 @@ func chain_parallel(n int) step_creator {
 }
 func chain_unordered(p ProcessingResult) ProcessingResult { return p.Unordered() }
 
-func IdentityMapper(e interface{}) interface{} {
-	return e
+func chain_apply(c ProcessChain) step_creator {
+	return func(p ProcessingResult) ProcessingResult {
+		return p.Apply(c)
+	}
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+var initial = Chain()
+
+func Explode(e ExplodeFunction) ProcessChain    { return initial.Explode(e) }
+func Map(m MappingFunction) ProcessChain        { return initial.Map(m) }
+func Filter(f FilterFunction) ProcessChain      { return initial.Filter(f) }
+func Sort(c CompareFunction) ProcessChain       { return initial.Sort(c) }
+func WithPool(pool ProcessorPool) ProcessChain  { return initial.WithPool(pool) }
+func Parallel(n int) ProcessChain               { return initial.Parallel(n) }
+func Unordered(p ProcessingResult) ProcessChain { return initial.Unordered() }

@@ -12,25 +12,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package options
+package processing
 
-import (
-	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
-	"github.com/spf13/pflag"
-)
-
-type Complete interface {
-	Complete() error
-}
-
-type CompleteWithContext interface {
-	Complete(ctx out.Context) error
-}
-
-type Usage interface {
-	Usage() string
-}
-
-type Options interface {
-	AddFlags(fs *pflag.FlagSet)
+func IdentityMapper(e interface{}) interface{} {
+	return e
 }

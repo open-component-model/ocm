@@ -164,6 +164,27 @@ func process_sort(c CompareFunction) func(data data.Iterable) data.Iterable {
 	}
 }
 
+func process_aggregate(a AggregationFunction) func(data data.Iterable) data.Iterable {
+	return func(it data.Iterable) data.Iterable {
+		var result []interface{}
+		var state interface{}
+		i := it.Iterator()
+		for i.HasNext() {
+			s := a(i.Next(), state)
+			if s != nil {
+				if state != nil {
+					result = append(result, state)
+				}
+				state = s
+			}
+		}
+		if state != nil {
+			result = append(result, state)
+		}
+		return data.IndexedSliceAccess(result)
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////////
 
 func process(op operation) processing {

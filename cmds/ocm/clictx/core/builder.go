@@ -87,6 +87,5 @@ func (b Builder) New() Context {
 	if b.shared == nil {
 		b.shared = b.ocm.AttributesContext()
 	}
-
 	return newContext(b.shared, b.ocm, out.NewFor(b.out), b.filesystem)
 }

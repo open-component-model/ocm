@@ -17,6 +17,7 @@ package ctf
 import (
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
+	"github.com/gardener/ocm/pkg/datacontext/vfsattr"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/index"
@@ -45,6 +46,9 @@ var _ cpi.Repository = &Repository{}
 
 // New returns a new representation based repository
 func New(ctx cpi.Context, spec *RepositorySpec, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode) (*Repository, error) {
+	if spec.PathFileSystem == nil {
+		spec.PathFileSystem = vfsattr.Get(ctx)
+	}
 	base, err := accessobj.NewAccessObject(accessObjectInfo, spec.AccessMode, spec.Options.Representation, setup, closer, mode)
 	return _Wrap(ctx, spec, base, err)
 }

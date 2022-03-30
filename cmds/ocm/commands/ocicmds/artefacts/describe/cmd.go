@@ -37,6 +37,14 @@ var (
 	Verb  = commands.Describe
 )
 
+func From(o *output.Options) *Options {
+	v := o.GetOptions((*Options)(nil))
+	if v == nil {
+		return nil
+	}
+	return v.(*Options)
+}
+
 type Options struct {
 	BlobFiles bool
 }
@@ -61,7 +69,7 @@ type Command struct {
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx), Output: output.Options{OtherOptions: &Options{}}}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx), Output: *output.OutputOption(&Options{})}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -122,7 +130,7 @@ func get_regular(opts *output.Options) output.Output {
 }
 
 func infoChain(options *output.Options) processing.ProcessChain {
-	return processing.Chain().Parallel(4).Map(mapInfo(options.OtherOptions.(*Options)))
+	return processing.Chain().Parallel(4).Map(mapInfo(From(options)))
 }
 
 func outInfo(ctx out.Context, e interface{}) {

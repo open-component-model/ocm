@@ -36,21 +36,19 @@ type Object struct {
 	Element compdesc.ElementMetaAccessor
 }
 
+var _ common.HistorySource = (*Object)(nil)
+
 func (o *Object) AsManifest() interface{} {
 	return o.Element
 }
 
-func History(e interface{}) string {
-	o := e.(*Object)
-	if o.History == nil {
-		return ""
-	}
-	return o.History.String()
+func (o *Object) GetHistory() common.History {
+	return o.History
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type TypeHandler struct {
+type ComponentElementTypeHandler struct {
 	repository ocm.Repository
 	session    ocm.Session
 	access     ocm.ComponentVersionAccess
@@ -58,8 +56,8 @@ type TypeHandler struct {
 	recursive  bool
 }
 
-func NewTypeHandler(repository ocm.Repository, session ocm.Session, access ocm.ComponentVersionAccess, recursive bool, elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor) utils.TypeHandler {
-	return &TypeHandler{
+func NewComponentElementTypeHandler(repository ocm.Repository, session ocm.Session, access ocm.ComponentVersionAccess, recursive bool, elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor) utils.TypeHandler {
+	return &ComponentElementTypeHandler{
 		repository: repository,
 		session:    session,
 		access:     access,
@@ -68,15 +66,15 @@ func NewTypeHandler(repository ocm.Repository, session ocm.Session, access ocm.C
 	}
 }
 
-func (h *TypeHandler) Close() error {
+func (h *ComponentElementTypeHandler) Close() error {
 	return nil
 }
 
-func (h *TypeHandler) All() ([]output.Object, error) {
+func (h *ComponentElementTypeHandler) All() ([]output.Object, error) {
 	return h.execute(nil, h.access, func(access ocm.ComponentVersionAccess) ([]output.Object, error) { return h.all(access) })
 }
 
-func (h *TypeHandler) all(access ocm.ComponentVersionAccess) ([]output.Object, error) {
+func (h *ComponentElementTypeHandler) all(access ocm.ComponentVersionAccess) ([]output.Object, error) {
 	result := []output.Object{}
 	elemaccess := h.elemaccess(access)
 	l := elemaccess.Len()
@@ -91,11 +89,11 @@ func (h *TypeHandler) all(access ocm.ComponentVersionAccess) ([]output.Object, e
 	return result, nil
 }
 
-func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
+func (h *ComponentElementTypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 	return h.execute(nil, h.access, func(access ocm.ComponentVersionAccess) ([]output.Object, error) { return h.get(access, elemspec) })
 }
 
-func (h *TypeHandler) execute(hist common.History, access ocm.ComponentVersionAccess, f func(access ocm.ComponentVersionAccess) ([]output.Object, error)) ([]output.Object, error) {
+func (h *ComponentElementTypeHandler) execute(hist common.History, access ocm.ComponentVersionAccess, f func(access ocm.ComponentVersionAccess) ([]output.Object, error)) ([]output.Object, error) {
 	key := common.VersionedElementKey(access)
 	if err := hist.Add(ocm.KIND_COMPONENTVERSION, key); err != nil {
 		return nil, err
@@ -119,7 +117,7 @@ func (h *TypeHandler) execute(hist common.History, access ocm.ComponentVersionAc
 	return result, err
 }
 
-func (h *TypeHandler) get(access ocm.ComponentVersionAccess, elemspec utils.ElemSpec) ([]output.Object, error) {
+func (h *ComponentElementTypeHandler) get(access ocm.ComponentVersionAccess, elemspec utils.ElemSpec) ([]output.Object, error) {
 	var result []output.Object
 
 	selector := elemspec.(metav1.Identity)

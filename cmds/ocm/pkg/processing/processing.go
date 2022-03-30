@@ -34,6 +34,7 @@ type FilterFunction func(interface{}) bool
 type MappingFunction data.MappingFunction
 type ExplodeFunction func(interface{}) []interface{}
 type CompareFunction = data.CompareFunction
+type CompareIndexedFunction = data.CompareIndexedFunction
 type AggregationFunction func(e, aggr interface{}) interface{}
 
 func Identity(e interface{}) interface{} {
@@ -60,7 +61,7 @@ type ProcessingResult interface {
 
 ////////////////////////////////////////////////////////////////////////////
 
-// Process processies an initial empty chain by converting
+// Process processes an initial empty chain by converting
 // an iterable into a ProcessingResult
 func Process(data data.Iterable) ProcessingResult {
 	return (&_SynchronousProcessing{}).new(data)

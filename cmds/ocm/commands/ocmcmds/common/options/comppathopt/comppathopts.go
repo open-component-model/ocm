@@ -16,10 +16,19 @@ package comppathopt
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 
 	"github.com/spf13/pflag"
 )
+
+func From(o *output.Options) *Option {
+	v := o.GetOptions((*Option)(nil))
+	if v == nil {
+		return nil
+	}
+	return v.(*Option)
+}
 
 type Option struct {
 	Active bool

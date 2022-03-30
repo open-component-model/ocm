@@ -16,12 +16,21 @@ package repooption
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
+	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/runtime"
 
 	"github.com/gardener/ocm/pkg/ocm"
 	"github.com/spf13/pflag"
 )
+
+func From(o *output.Options) *Option {
+	v := o.GetOptions((*Option)(nil))
+	if v == nil {
+		return nil
+	}
+	return v.(*Option)
+}
 
 type Option struct {
 	Spec string

@@ -19,6 +19,7 @@ import (
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/closureoption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/common"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
@@ -46,7 +47,10 @@ type Command struct {
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx)}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx), Output: *output.OutputOption(&closureoption.Option{
+		AdditionalFields: output.Fields("IDENTITY"),
+		FieldEnricher:    identity,
+	})}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -97,13 +101,33 @@ func (o *Command) Run() error {
 
 /////////////////////////////////////////////////////////////////////////////
 
+func identity(e interface{}) []string {
+	p := e.(*common.Object)
+	return []string{p.Identity.String()}
+}
+
+func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide ...string) output.Output {
+	def := &output.TableOutput{
+		Headers: output.Fields("COMPONENT", "VERSION", "PROVIDER", wide),
+		Options: opts,
+		Chain:   common.Sort,
+		Mapping: mapping,
+	}
+	return closureoption.TableOutput(def, common.ClosureExplode).New()
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 var outputs = output.NewOutputs(get_regular, output.Outputs{
-	// "wide": get_wide,
+	"wide": get_wide,
 }).AddManifestOutputs()
 
 func get_regular(opts *output.Options) output.Output {
-	return output.NewProcessingTableOutput(opts, processing.Chain().Map(map_get_regular_output),
-		"REPOSITORY", "COMPONENT", "VERSION", "PROVIDER")
+	return TableOutput(opts, map_get_regular_output)
+}
+
+func get_wide(opts *output.Options) output.Output {
+	return TableOutput(opts, map_get_wide_output, "REPOSITORY")
 }
 
 func map_get_regular_output(e interface{}) interface{} {
@@ -113,5 +137,10 @@ func map_get_regular_output(e interface{}) interface{} {
 	if p.Spec.Version != nil {
 		tag = *p.Spec.Version
 	}
-	return []string{p.Spec.UniformRepositorySpec.String(), p.Spec.Component, tag, string(p.ComponentVersion.GetDescriptor().Provider)}
+	return []string{p.Spec.Component, tag, string(p.ComponentVersion.GetDescriptor().Provider)}
+}
+
+func map_get_wide_output(e interface{}) interface{} {
+	p := e.(*common.Object)
+	return append(map_get_regular_output(e).([]string), p.Spec.UniformRepositorySpec.String())
 }

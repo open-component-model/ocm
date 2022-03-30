@@ -66,6 +66,9 @@ type _context struct {
 }
 
 func newContext(shared datacontext.AttributesContext, creds credentials.Context, reposcheme RepositoryTypeScheme, specHandlers RepositorySpecHandlers) Context {
+	if shared == nil {
+		shared = creds.ConfigContext()
+	}
 	c := &_context{
 		sharedattributes:     shared,
 		credentials:          creds,

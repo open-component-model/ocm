@@ -45,12 +45,11 @@ type RepositorySpec struct {
 
 // NewRepositorySpec creates a new RepositorySpec
 func NewRepositorySpec(acc accessobj.AccessMode, filePath string, opts ...accessio.Option) *RepositorySpec {
-	o := accessio.Options{}
-	o.ApplyOptions(opts...)
+	o := accessio.AccessOptions(opts...)
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(CTFComponentArchiveType),
 		FilePath:            filePath,
-		Options:             o.Default(),
+		Options:             o,
 		AccessMode:          acc,
 	}
 }

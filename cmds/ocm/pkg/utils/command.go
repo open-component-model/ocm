@@ -15,7 +15,6 @@
 package utils
 
 import (
-	"os"
 	"strings"
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
@@ -51,16 +50,17 @@ func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 		c.Use = names[0] + " " + c.Use
 	}
 	c.Aliases = names[1:]
-	c.Run = func(cmd *cobra.Command, args []string) {
+	c.RunE = func(cmd *cobra.Command, args []string) error {
 		if err := ocmcmd.Complete(args); err != nil {
 			out.Error(ocmcmd, err.Error())
-			os.Exit(1)
+			return err
 		}
 
 		if err := ocmcmd.Run(); err != nil {
 			out.Error(ocmcmd, err.Error())
-			os.Exit(1)
+			return err
 		}
+		return nil
 	}
 	c.TraverseChildren = true
 	ocmcmd.AddFlags(c.Flags())

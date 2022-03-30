@@ -60,6 +60,10 @@ func (n NameVersion) String() string {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type HistorySource interface {
+	GetHistory() History
+}
+
 type History []NameVersion
 
 func (h History) String() string {

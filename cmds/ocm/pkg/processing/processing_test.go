@@ -95,6 +95,19 @@ var _ = Describe("simple data processing", func() {
 		})
 	})
 
+	Context("compose", func() {
+		chain := Chain().Map(AddOne)
+
+		It("appends a chain", func() {
+			slice := data.IndexedSliceAccess([]interface{}{1, 2, 3})
+			sub := Chain().Explode(Mul(2, 2))
+			r := chain.Append(sub).Process(slice).AsSlice()
+			Expect(r).To(Equal(data.IndexedSliceAccess([]interface{}{
+				2, 4, 3, 6, 4, 8,
+			})))
+
+		})
+	})
 	Split := func(text interface{}) []interface{} {
 		var words []interface{}
 		t := text.(string)

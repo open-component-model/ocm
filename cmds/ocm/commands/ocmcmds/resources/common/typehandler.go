@@ -28,11 +28,11 @@ func Elem(e interface{}) *compdesc.Resource {
 ////////////////////////////////////////////////////////////////////////////////
 
 type TypeHandler struct {
-	*common.TypeHandler
+	*common.ComponentElementTypeHandler
 }
 
 func NewTypeHandler(repo ocm.Repository, session ocm.Session, access ocm.ComponentVersionAccess, recursive bool) utils.TypeHandler {
-	return common.NewTypeHandler(repo, session, access, recursive, func(access ocm.ComponentVersionAccess) compdesc.ElementAccessor {
+	return common.NewComponentElementTypeHandler(repo, session, access, recursive, func(access ocm.ComponentVersionAccess) compdesc.ElementAccessor {
 		return access.GetDescriptor().Resources
 	})
 }

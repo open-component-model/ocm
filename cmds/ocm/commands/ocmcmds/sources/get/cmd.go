@@ -15,15 +15,13 @@
 package get
 
 import (
+	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands"
+	ocmcommon "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/closureoption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
-	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
-
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	ocmcommon "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
 	compcommon "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/common"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/sources/common"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
@@ -50,9 +48,7 @@ type Command struct {
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx), Output: output.Options{
-		OtherOptions: &closureoption.Option{},
-	}}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx), Output: *output.OutputOption(&closureoption.Option{})}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -111,17 +107,21 @@ var outputs = output.NewOutputs(get_regular, output.Outputs{
 }).AddManifestOutputs()
 
 func get_regular(opts *output.Options) output.Output {
-	columns := opts.OtherOptions.(*closureoption.Option).Columns(ocmcommon.MetaOutput)
-	mapper := closureoption.From(opts).Mapper(ocmcommon.History, map_get_regular_output)
-	return output.NewProcessingTableOutput(opts, processing.Chain().Map(mapper),
-		append(columns, "TYPE")...)
+	def := &output.TableOutput{
+		Headers: append(ocmcommon.MetaOutput, "TYPE"),
+		Options: opts,
+		Mapping: map_get_regular_output,
+	}
+	return closureoption.TableOutput(def).New()
 }
 
 func get_wide(opts *output.Options) output.Output {
-	columns := opts.OtherOptions.(*closureoption.Option).Columns(ocmcommon.MetaOutput)
-	mapper := closureoption.From(opts).Mapper(ocmcommon.History, map_get_wide_output)
-	return output.NewProcessingTableOutput(opts, processing.Chain().Map(mapper),
-		append(append(columns, "TYPE"), ocmcommon.AccessOutput...)...)
+	def := &output.TableOutput{
+		Headers: append(append(ocmcommon.MetaOutput, "TYPE"), ocmcommon.AccessOutput...),
+		Options: opts,
+		Mapping: map_get_wide_output,
+	}
+	return closureoption.TableOutput(def).New()
 }
 
 func map_get_regular_output(e interface{}) interface{} {

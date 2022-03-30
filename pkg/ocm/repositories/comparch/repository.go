@@ -18,6 +18,7 @@ import (
 	"strings"
 
 	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/datacontext/vfsattr"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/ocm/core"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
@@ -33,6 +34,9 @@ type Repository struct {
 var _ cpi.Repository = (*Repository)(nil)
 
 func NewRepository(ctx cpi.Context, s *RepositorySpec) (*Repository, error) {
+	if s.PathFileSystem == nil {
+		s.PathFileSystem = vfsattr.Get(ctx)
+	}
 	r := &Repository{ctx, s, nil}
 	a, err := r.Open()
 	if err != nil {
@@ -86,7 +90,7 @@ func (r *Repository) Get() *impl.ComponentArchive {
 }
 
 func (r *Repository) Open() (*impl.ComponentArchive, error) {
-	a, err := impl.Open(r.ctx, r.spec.AccessMode, r.spec.FilePath, 0700, r.spec.Options)
+	a, err := impl.Open(r.ctx, r.spec.AccessMode, r.spec.FilePath, 0700, r.spec.Options, accessio.PathFileSystem(r.spec.PathFileSystem))
 	if err != nil {
 		return nil, err
 	}
