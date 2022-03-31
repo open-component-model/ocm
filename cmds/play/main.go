@@ -15,65 +15,69 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
-	compdescv2 "github.com/gardener/ocm/pkg/ocm/compdesc/versions/v2"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/gardener/ocm/cmds/ocm/pkg/tree"
+	"github.com/gardener/ocm/pkg/common"
 )
 
-type Resources struct {
-	*ResourceOptionsList `json:",inline"`
-	*ResourceOptions     `json:",inline"`
+type Elem struct {
+	History common.History
+	Node    bool
+	Data    string
 }
 
-// ResourceOptions contains options that are used to describe a resource
-type ResourceOptions struct {
-	compdescv2.Resource `json:",inline"`
-	Input               *common.BlobInput `json:"input,omitempty"`
+var _ tree.Element = (*Elem)(nil)
+
+func (e *Elem) GetHierarchy() common.History {
+	return e.History
 }
 
-// ResourceOptionList contains a list of options that are used to describe a resource.
-type ResourceOptionsList struct {
-	Resources []json.RawMessage `json:"resources"`
+func (e *Elem) IsNode() *common.NameVersion {
+	if e.Node {
+		n := common.NewNameVersion(e.Data, "")
+		return &n
+	}
+	return nil
 }
 
-type Abstract interface {
+func (e *Elem) String() string {
+	return e.Data
 }
 
-type Other struct {
-	Other string `json:"other,omitempty"`
+func E(d string, hist ...string) *Elem {
+	h := common.History{}
+	for _, v := range hist {
+		h = append(h, common.NewNameVersion(v, ""))
+	}
+	return &Elem{h, false, d}
+}
+
+func N(d string, hist ...string) *Elem {
+	h := common.History{}
+	for _, v := range hist {
+		h = append(h, common.NewNameVersion(v, ""))
+	}
+	return &Elem{h, true, d}
+}
+
+func Create(h common.History, n common.NameVersion) tree.Element {
+	return &Elem{h, true, n.GetName()}
 }
 
 func main() {
-	var a Abstract
+	data := []tree.Element{
+		E("a"),
+		N("b"),
+		E("a", "b"),
+		E("a", "b", "c"),
+		E("a", "e", "f"),
+		E("c"),
+		E("d"),
+	}
 
-	data := `
-type: test
-resources:
-  - input:
-      type: test
-`
-
-	data1 := `
-type: test
-`
-	data2 := `
-resources:
-  - input:
-      type: test
-`
-	a = &Resources{}
-
-	err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(data2), a)
-	fmt.Printf("err %s\n", err)
-
-	var other map[string]interface{}
-	err = runtime.DefaultYAMLEncoding.Unmarshal([]byte(data2), &other)
-	fmt.Printf("err %s\n", err)
-
-	_ = data
-	_ = data1
-	_ = data2
+	t := tree.BuildTree(data, Create)
+	for _, l := range t {
+		fmt.Printf("%s %s\n", l.Header, l.Element)
+	}
 }

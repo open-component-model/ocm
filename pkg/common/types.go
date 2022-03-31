@@ -55,6 +55,9 @@ func (n NameVersion) GetVersion() string {
 }
 
 func (n NameVersion) String() string {
+	if n.version == "" {
+		return n.name
+	}
 	return n.name + ":" + n.version
 }
 
@@ -86,11 +89,11 @@ func (h History) Contains(nv NameVersion) bool {
 }
 
 func (h History) HasPrefix(o History) bool {
-	if len(h) > len(o) {
+	if len(o) > len(h) {
 		return false
 	}
-	for i, e := range h {
-		if e != o[i] {
+	for i, e := range o {
+		if e != h[i] {
 			return false
 		}
 	}
