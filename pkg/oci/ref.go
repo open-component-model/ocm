@@ -23,7 +23,7 @@ const (
 	KIND_ARETEFACT_REFERENCE = "artefact reference"
 )
 
-// ParseRepo parses a standard ocm repository reference into a internal representation.
+// ParseRepo parses a standard oci repository reference into a internal representation.
 func ParseRepo(ref string) (UniformRepositorySpec, error) {
 	match := grammar.AnchoredRegistryRegexp.FindSubmatch([]byte(ref))
 	if match == nil {
@@ -33,7 +33,7 @@ func ParseRepo(ref string) (UniformRepositorySpec, error) {
 		}
 		return UniformRepositorySpec{
 			Type: string(match[1]),
-			Info: string(match[2]) + string(match[3]),
+			Info: string(match[2]),
 		}, nil
 
 	}

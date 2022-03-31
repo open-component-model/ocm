@@ -36,7 +36,8 @@ func (o *RepositoryOptions) Complete(ctx clictx.Context) error {
 
 func (o *RepositoryOptions) GetRepository(ctx clictx.OCI, session oci.Session) (oci.Repository, error) {
 	if o.Spec != "" {
-		return session.DetermineRepository(ctx.Context(), o.Spec, ctx.GetAlias)
+		r, _, err := session.DetermineRepository(ctx.Context(), o.Spec, ctx.GetAlias)
+		return r, err
 	}
 	return nil, nil
 }

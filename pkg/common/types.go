@@ -85,6 +85,34 @@ func (h History) Contains(nv NameVersion) bool {
 	return false
 }
 
+func (h History) HasPrefix(o History) bool {
+	if len(h) > len(o) {
+		return false
+	}
+	for i, e := range h {
+		if e != o[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func (h History) Equals(o History) bool {
+	if len(h) != len(o) {
+		return false
+	}
+	if h == nil || o == nil {
+		return false
+	}
+
+	for i, e := range h {
+		if e != o[i] {
+			return false
+		}
+	}
+	return true
+}
+
 func (h *History) Add(kind string, nv NameVersion) error {
 	if h.Contains(nv) {
 		return errors.ErrRecusion(kind, nv, *h)

@@ -44,8 +44,8 @@ var (
 
 	// AnchoredGenericRegistryRegexp describes a CTF reference
 	AnchoredGenericRegistryRegexp = Anchored(
-		Or(Sequence(Capture(TypeRegexp), Literal("::"), Capture(Match(".*"))),
-			Capture(Identifier)),
+		Optional(Capture(TypeRegexp), Literal("::")),
+		Capture(Match(".*")),
 	)
 
 	// RepositorySeparatorRegexp is the separator used to separate

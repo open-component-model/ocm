@@ -61,7 +61,8 @@ func (o *Option) CompleteWithSession(octx clictx.OCM, session ocm.Session) error
 
 func (o *Option) GetRepository(ctx clictx.OCM, session ocm.Session) (ocm.Repository, error) {
 	if o.Spec != "" {
-		return session.DetermineRepository(ctx.Context(), o.Spec, ctx.GetAlias)
+		r, _, err := session.DetermineRepository(ctx.Context(), o.Spec, ctx.GetAlias)
+		return r, err
 	}
 	return nil, nil
 }

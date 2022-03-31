@@ -15,8 +15,13 @@
 package transfer
 
 import (
+	"fmt"
+
 	"github.com/gardener/ocm/cmds/ocm/commands"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/errors"
+	"github.com/gardener/ocm/pkg/ocm/repositories/ctf"
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
@@ -34,9 +39,10 @@ var (
 
 type Command struct {
 	utils.BaseCommand
-
+	typ        string
 	Path       string
 	TargetName string
+	FileFormat accessio.FileFormat
 }
 
 // NewCommand creates a new transfer command.
@@ -63,12 +69,19 @@ either via inline argument or command configuration file and name.
 }
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
+	fs.StringVarP(&o.typ, "type", "t", "", "archive type to create (directory,tar,tgz)")
 }
 
 func (o *Command) Complete(args []string) error {
 	o.Path = args[0]
 	o.TargetName = args[1]
 
+	if o.typ != "" {
+		if accessobj.GetFormat(accessio.FileFormat(o.typ)) == nil {
+			return errors.ErrInvalid(accessio.KIND_FILEFORMAT, o.typ)
+		}
+		o.FileFormat = accessio.FileFormat(o.typ)
+	}
 	return nil
 }
 
@@ -81,9 +94,22 @@ func (o *Command) Run() error {
 	}
 	session.Closer(source)
 
-	target, err := session.DetermineRepository(o.Context.OCMContext(), o.TargetName, o.Context.OCM().GetAlias)
+	target, ref, err := session.DetermineRepository(o.Context.OCMContext(), o.TargetName, o.Context.OCM().GetAlias)
 	if err != nil {
-		return err
+		if !errors.IsErrUnknown(err) || ref.Info == "" {
+			return err
+		}
+		if ref.Type == "" {
+			ref.Type = o.FileFormat.String()
+		}
+		if ref.Type == "" {
+			return fmt.Errorf("ctf format type required to create ctf")
+		}
+		target, err = ctf.Create(o.Context.OCMContext(), accessobj.ACC_CREATE, ref.Info, 0770, accessio.PathFileSystem(o.Context.FileSystem()))
+		if err != nil {
+			return err
+		}
+		session.Closer(target)
 	}
 
 	return ocm.TransferVersion(nil, source, target, nil)

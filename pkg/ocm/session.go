@@ -49,7 +49,7 @@ type Session interface {
 	EvaluateRef(ctx Context, ref string, aliases Aliases) (*EvaluationResult, error)
 	EvaluateComponentRef(ctx Context, ref string, aliases Aliases) (*EvaluationResult, error)
 	EvaluateVersionRef(ctx Context, ref string, aliases Aliases) (*EvaluationResult, error)
-	DetermineRepository(ctx Context, ref string, aliases Aliases) (Repository, error)
+	DetermineRepository(ctx Context, ref string, aliases Aliases) (Repository, UniformRepositorySpec, error)
 	DetermineRepositoryBySpec(ctx Context, spec *UniformRepositorySpec, aliases Aliases) (Repository, error)
 }
 
@@ -234,12 +234,13 @@ func (s *session) EvaluateRef(ctx Context, ref string, aliases Aliases) (*Evalua
 	return result, err
 }
 
-func (s *session) DetermineRepository(ctx Context, ref string, aliases Aliases) (Repository, error) {
+func (s *session) DetermineRepository(ctx Context, ref string, aliases Aliases) (Repository, UniformRepositorySpec, error) {
 	spec, err := ParseRepo(ref)
 	if err != nil {
-		return nil, err
+		return nil, spec, err
 	}
-	return s.DetermineRepositoryBySpec(ctx, &spec, aliases)
+	r, err := s.DetermineRepositoryBySpec(ctx, &spec, aliases)
+	return r, spec, err
 }
 
 func (s *session) DetermineRepositoryBySpec(ctx Context, spec *UniformRepositorySpec, aliases Aliases) (Repository, error) {

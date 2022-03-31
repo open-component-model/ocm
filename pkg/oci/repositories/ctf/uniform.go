@@ -30,6 +30,7 @@ import (
 
 func init() {
 	h := &repospechandler{}
+	cpi.RegisterRepositorySpecHandler(h, "")
 	cpi.RegisterRepositorySpecHandler(h, CommonTransportFormatRepositoryType)
 	for _, f := range SupportedFormats() {
 		cpi.RegisterRepositorySpecHandler(h, string(f))
@@ -42,7 +43,7 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 	return MapReference(ctx, u)
 }
 
-func MapReference(ctx cpi.Context, u *cpi.UniformRepositorySpec) (*RepositorySpec, error) {
+func MapReference(ctx cpi.Context, u *cpi.UniformRepositorySpec) (cpi.RepositorySpec, error) {
 	path := u.Info
 	if u.Info == "" {
 		if u.Host == "" || u.Type == "" {
