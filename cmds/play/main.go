@@ -27,7 +27,7 @@ type Elem struct {
 	Data    string
 }
 
-var _ tree.Element = (*Elem)(nil)
+var _ tree.Object = (*Elem)(nil)
 
 func (e *Elem) GetHierarchy() common.History {
 	return e.History
@@ -61,12 +61,12 @@ func N(d string, hist ...string) *Elem {
 	return &Elem{h, true, d}
 }
 
-func Create(h common.History, n common.NameVersion) tree.Element {
+func Create(h common.History, n common.NameVersion) tree.Object {
 	return &Elem{h, true, n.GetName()}
 }
 
 func main() {
-	data := []tree.Element{
+	data := []tree.Object{
 		E("a"),
 		N("b"),
 		E("a", "b"),
@@ -76,8 +76,8 @@ func main() {
 		E("d"),
 	}
 
-	t := tree.BuildTree(data, Create)
+	t := tree.MapToTree(data, Create)
 	for _, l := range t {
-		fmt.Printf("%s %s\n", l.Header, l.Element)
+		fmt.Printf("%s %s\n", l.Graph, l.Object)
 	}
 }

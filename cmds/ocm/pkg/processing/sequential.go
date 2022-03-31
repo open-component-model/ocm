@@ -33,6 +33,9 @@ func (this *_SynchronousProcessing) new(data data.Iterable) *_SynchronousProcess
 	return this
 }
 
+func (this *_SynchronousProcessing) Transform(t TransformFunction) ProcessingResult {
+	return (&_SynchronousStep{}).new(this, t)
+}
 func (this *_SynchronousProcessing) Explode(e ExplodeFunction) ProcessingResult {
 	return (&_SynchronousStep{}).new(this, process(explode(e)))
 }
@@ -98,6 +101,9 @@ func (this *_AsynchronousProcessing) new(data data.Iterable) *_AsynchronousProce
 	return this
 }
 
+func (this *_AsynchronousProcessing) Transform(t TransformFunction) ProcessingResult {
+	return (&_AsynchronousStep{}).new(this, t)
+}
 func (this *_AsynchronousProcessing) Explode(m ExplodeFunction) ProcessingResult {
 	return (&_AsynchronousStep{}).new(this, process(explode(m)))
 }

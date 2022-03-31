@@ -34,6 +34,7 @@ type FilterFunction func(interface{}) bool
 type MappingFunction data.MappingFunction
 type ExplodeFunction func(interface{}) []interface{}
 type CompareFunction = data.CompareFunction
+type TransformFunction = func(iterable data.Iterable) data.Iterable
 type CompareIndexedFunction = data.CompareIndexedFunction
 type AggregationFunction func(e, aggr interface{}) interface{}
 
@@ -44,6 +45,7 @@ func Identity(e interface{}) interface{} {
 type ProcessingResult interface {
 	data.Iterable
 
+	Transform(t TransformFunction) ProcessingResult
 	Explode(e ExplodeFunction) ProcessingResult
 	Map(m MappingFunction) ProcessingResult
 	Filter(f FilterFunction) ProcessingResult

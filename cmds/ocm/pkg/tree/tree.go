@@ -18,18 +18,20 @@ import (
 	"github.com/gardener/ocm/pkg/common"
 )
 
-type Element interface {
+type Object interface {
 	GetHierarchy() common.History
 	IsNode() *common.NameVersion
 }
 
-type NodeCreator func(common.History, common.NameVersion) Element
+type NodeCreator func(common.History, common.NameVersion) Object
 
-type Elements []Element
+type Objects []Object
 
-type TreeElement struct {
-	Header  string
-	Element Element
+// TreeObject is an element enriched by a textual
+// tree graph prefix line
+type TreeObject struct {
+	Graph  string
+	Object Object
 }
 
 var vertical = "│" + space[1:]
@@ -38,25 +40,27 @@ var corner = "└" + horizontal
 var fork = "├" + horizontal
 var space = "   "
 
-func BuildTree(elems Elements, creator NodeCreator) []TreeElement {
-	result := []TreeElement{}
-	handleLevel(elems, "", nil, 0, creator, &result)
+// MapToTree maps a list of elements featuring a resulution history
+// into a list of elements providing an ascii tree graph field
+func MapToTree(objs Objects, creator NodeCreator) []TreeObject {
+	result := []TreeObject{}
+	handleLevel(objs, "", nil, 0, creator, &result)
 	return result
 }
 
-func handleLevel(elems Elements, header string, prefix common.History, start int, creator NodeCreator, result *[]TreeElement) {
+func handleLevel(objs Objects, header string, prefix common.History, start int, creator NodeCreator, result *[]TreeObject) {
 	var node *common.NameVersion
 	lvl := len(prefix)
-	for i := start; i < len(elems); {
+	for i := start; i < len(objs); {
 		var next int
-		h := elems[i].GetHierarchy()
+		h := objs[i].GetHierarchy()
 		if !h.HasPrefix(prefix) {
 			return
 		}
 		ftag := corner
 		stag := space
-		for next = i + 1; next < len(elems); next++ {
-			if s := elems[next].GetHierarchy(); s.HasPrefix(prefix) {
+		for next = i + 1; next < len(objs); next++ {
+			if s := objs[next].GetHierarchy(); s.HasPrefix(prefix) {
 				if len(s) > lvl && len(h) > lvl && h[lvl] == s[lvl] { // skip same sub level
 					continue
 				}
@@ -66,21 +70,21 @@ func handleLevel(elems Elements, header string, prefix common.History, start int
 			break
 		}
 		if len(h) == lvl {
-			node = elems[i].IsNode() // Element acts as dedicate node
-			*result = append(*result, TreeElement{
-				Header:  header + ftag,
-				Element: elems[i],
+			node = objs[i].IsNode() // Element acts as dedicate node
+			*result = append(*result, TreeObject{
+				Graph:  header + ftag,
+				Object: objs[i],
 			})
 			i++
 		} else {
 			if node == nil || *node != h[lvl] {
 				// synthesize node if only leafs or non-matching node has been issued before
-				*result = append(*result, TreeElement{
-					Header:  header + ftag, // + " " + h[len(prefix)].String(),
-					Element: creator(prefix, h[len(prefix)]),
+				*result = append(*result, TreeObject{
+					Graph:  header + ftag, // + " " + h[len(prefix)].String(),
+					Object: creator(prefix, h[len(prefix)]),
 				})
 			}
-			handleLevel(elems, header+stag, h[:len(prefix)+1], i, creator, result)
+			handleLevel(objs, header+stag, h[:len(prefix)+1], i, creator, result)
 			i = next
 			node = nil
 		}

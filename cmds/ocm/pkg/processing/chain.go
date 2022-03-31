@@ -24,6 +24,7 @@ import (
 // The instantiation is initiated by calling the Process
 // method on a chain.
 type ProcessChain interface {
+	Transform(t TransformFunction) ProcessChain
 	Explode(m ExplodeFunction) ProcessChain
 	Map(m MappingFunction) ProcessChain
 	Filter(f FilterFunction) ProcessChain
@@ -64,6 +65,13 @@ func (this *_ProcessChain) new(p *_ProcessChain, creator step_creator) *_Process
 	}
 	this.creator = creator
 	return this
+}
+
+func (this *_ProcessChain) Transform(t TransformFunction) ProcessChain {
+	if t == nil {
+		return this
+	}
+	return (&_ProcessChain{}).new(this, chain_transform(t))
 }
 
 func (this *_ProcessChain) Explode(e ExplodeFunction) ProcessChain {
@@ -129,6 +137,9 @@ func (this *_ProcessChain) step(p ProcessingResult) ProcessingResult {
 	return this.creator(p)
 }
 
+func chain_transform(t TransformFunction) step_creator {
+	return func(p ProcessingResult) ProcessingResult { return p.Transform(t) }
+}
 func chain_explode(e ExplodeFunction) step_creator {
 	return func(p ProcessingResult) ProcessingResult { return p.Explode(e) }
 }
@@ -159,13 +170,14 @@ func chain_apply(c ProcessChain) step_creator {
 
 var initial = Chain()
 
-func Explode(e ExplodeFunction) ProcessChain   { return initial.Explode(e) }
-func Map(m MappingFunction) ProcessChain       { return initial.Map(m) }
-func Filter(f FilterFunction) ProcessChain     { return initial.Filter(f) }
-func Sort(c CompareFunction) ProcessChain      { return initial.Sort(c) }
-func WithPool(pool ProcessorPool) ProcessChain { return initial.WithPool(pool) }
-func Parallel(n int) ProcessChain              { return initial.Parallel(n) }
-func Unordered() ProcessChain                  { return initial.Unordered() }
+func Transform(t TransformFunction) ProcessChain { return initial.Transform(t) }
+func Explode(e ExplodeFunction) ProcessChain     { return initial.Explode(e) }
+func Map(m MappingFunction) ProcessChain         { return initial.Map(m) }
+func Filter(f FilterFunction) ProcessChain       { return initial.Filter(f) }
+func Sort(c CompareFunction) ProcessChain        { return initial.Sort(c) }
+func WithPool(pool ProcessorPool) ProcessChain   { return initial.WithPool(pool) }
+func Parallel(n int) ProcessChain                { return initial.Parallel(n) }
+func Unordered() ProcessChain                    { return initial.Unordered() }
 func Append(p ProcessChain, a ProcessChain) ProcessChain {
 	if p == nil {
 		return a

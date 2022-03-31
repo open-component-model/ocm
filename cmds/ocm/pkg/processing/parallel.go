@@ -52,6 +52,10 @@ func (this *_ParallelProcessing) Sort(c CompareFunction) ProcessingResult {
 	fmt.Printf("POOL %+v\n", this.pool)
 	return (&_ParallelProcessing{}).new(NewAsyncProcessingSource(setup, this.pool).(ProcessingIterable), this.pool, NewOrderedBuffer)
 }
+func (this *_ParallelProcessing) Transform(t TransformFunction) ProcessingResult {
+	transform := func() data.Iterable { return t(this.data) }
+	return (&_ParallelProcessing{}).new(NewAsyncProcessingSource(transform, this.pool).(ProcessingIterable), this.pool, NewOrderedBuffer)
+}
 
 func (this *_ParallelProcessing) WithPool(p ProcessorPool) ProcessingResult {
 	return (&_ParallelProcessing{}).new(this.data, p, this.creator)
