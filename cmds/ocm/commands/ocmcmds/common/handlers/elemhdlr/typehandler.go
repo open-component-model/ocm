@@ -23,6 +23,7 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/closureoption"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
+	"github.com/gardener/ocm/cmds/ocm/pkg/tree"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/errors"
@@ -41,6 +42,7 @@ type Object struct {
 }
 
 var _ common.HistorySource = (*Object)(nil)
+var _ tree.Object = (*Object)(nil)
 
 func (o *Object) AsManifest() interface{} {
 	return o.Element
@@ -48,6 +50,9 @@ func (o *Object) AsManifest() interface{} {
 
 func (o *Object) GetHistory() common.History {
 	return o.History
+}
+func (o *Object) IsNode() *common.NameVersion {
+	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////

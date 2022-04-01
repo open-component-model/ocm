@@ -22,14 +22,14 @@ import (
 )
 
 type Elem struct {
-	History common.History
-	Node    bool
-	Data    string
+	common.History
+	Node bool
+	Data string
 }
 
 var _ tree.Object = (*Elem)(nil)
 
-func (e *Elem) GetHierarchy() common.History {
+func (e *Elem) GetHistory() common.History {
 	return e.History
 }
 
@@ -76,8 +76,8 @@ func main() {
 		E("d"),
 	}
 
-	t := tree.MapToTree(data, Create)
+	t := tree.MapToTree(data, nil)
 	for _, l := range t {
-		fmt.Printf("%s %s\n", l.Graph, l.Object)
+		fmt.Printf("%s\n", l)
 	}
 }

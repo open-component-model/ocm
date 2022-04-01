@@ -84,34 +84,61 @@ testdata v1      "name"="testdata" git
 `))
 	})
 
-	It("lists resource closure in ctf file", func() {
-		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
-			env.Component(COMP, func() {
-				env.Version(VERSION, func() {
-					env.Provider(PROVIDER)
-					env.Source("testdata", "v1", "git", func() {
-						env.Access(spec)
+	Context("with closure", func() {
+		BeforeEach(func() {
+			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+				env.Component(COMP, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Source("testdata", "v1", "git", func() {
+							env.Access(spec)
+						})
 					})
 				})
-			})
-			env.Component(COMP2, func() {
-				env.Version(VERSION, func() {
-					env.Provider(PROVIDER)
-					env.Source("source", "v1", "git", func() {
-						env.Access(spec)
+				env.Component(COMP2, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Source("source", "v1", "git", func() {
+							env.Access(spec)
+						})
+						env.Reference("base", COMP, VERSION)
 					})
-					env.Reference("base", COMP, VERSION)
 				})
 			})
 		})
+		It("lists resource closure in ctf file", func() {
 
-		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("get", "sources", "-c", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(
-			`
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("get", "sources", "-c", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
+			Expect("\n" + buf.String()).To(Equal(
+				`
 REFERENCEPATH              NAME     VERSION IDENTITY          TYPE
 test.de/y:v1               source   v1      "name"="source"   git
 test.de/y:v1->test.de/x:v1 testdata v1      "name"="testdata" git
 `))
+		})
+		It("lists flat tree in ctf file", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("get", "sources", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
+			Expect("\n" + buf.String()).To(Equal(
+				`
+NESTING             NAME   VERSION IDENTITY        TYPE
+└─ test.de/y:v1                                    
+   └─               source v1      "name"="source" git
+`))
+		})
+
+		It("lists resource closure in ctf file", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("get", "sources", "-c", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
+			Expect("\n" + buf.String()).To(Equal(
+				`
+NESTING                NAME     VERSION IDENTITY          TYPE
+└─ test.de/y:v1                                           
+   ├─                  source   v1      "name"="source"   git
+   └─ test.de/x:v1                                        
+      └─               testdata v1      "name"="testdata" git
+`))
+		})
 	})
 })

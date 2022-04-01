@@ -110,31 +110,35 @@ func (o *Command) Run() error {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide ...string) output.Output {
-	def := &output.TableOutput{
+func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide ...string) *output.TableOutput {
+	return &output.TableOutput{
 		Headers: output.Fields("NAME", "COMPONENT", "VERSION", wide),
 		Options: opts,
 		Chain:   elemhdlr.Sort,
 		Mapping: mapping,
 	}
-	return closureoption.TableOutput(def).New()
 }
 
 var outputs = output.NewOutputs(get_regular, output.Outputs{
 	"wide": get_wide,
+	"tree": get_tree,
 }).AddManifestOutputs()
 
 func get_regular(opts *output.Options) output.Output {
-	return TableOutput(opts, map_get_regular_output)
+	return closureoption.TableOutput(TableOutput(opts, map_get_regular_output)).New()
 }
 
 func get_wide(opts *output.Options) output.Output {
-	return TableOutput(opts, map_get_wide_output, "IDENTITY")
+	return closureoption.TableOutput(TableOutput(opts, map_get_wide_output, "IDENTITY")).New()
+}
+
+func get_tree(opts *output.Options) output.Output {
+	return output.TreeOutput(TableOutput(opts, map_get_wide_output, "IDENTITY"), "NESTING").New()
 }
 
 func map_get_regular_output(e interface{}) interface{} {
 	r := common.Elem(e)
-	return output.Fields(r.GetName(), r.GetVersion(), r.ComponentName)
+	return output.Fields(r.GetName(), r.ComponentName, r.GetVersion())
 }
 
 func map_get_wide_output(e interface{}) interface{} {

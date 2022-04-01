@@ -82,34 +82,63 @@ testdata v1      "name"="testdata" PlainText local
 `))
 	})
 
-	It("lists resource closure in ctf file", func() {
-		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
-			env.Component(COMP, func() {
-				env.Version(VERSION, func() {
-					env.Provider(PROVIDER)
-					env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
-						env.BlobStringData(mime.MIME_TEXT, "testdata")
+	Context("with closure", func() {
+		BeforeEach(func() {
+
+			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+				env.Component(COMP, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
+							env.BlobStringData(mime.MIME_TEXT, "testdata")
+						})
 					})
 				})
-			})
-			env.Component(COMP2, func() {
-				env.Version(VERSION, func() {
-					env.Provider(PROVIDER)
-					env.Resource("moredata", "", "PlainText", metav1.LocalRelation, func() {
-						env.BlobStringData(mime.MIME_TEXT, "moredata")
+				env.Component(COMP2, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Resource("moredata", "", "PlainText", metav1.LocalRelation, func() {
+							env.BlobStringData(mime.MIME_TEXT, "moredata")
+						})
+						env.Reference("base", COMP, VERSION)
 					})
-					env.Reference("base", COMP, VERSION)
 				})
 			})
 		})
 
-		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(
-			`
+		It("lists resource closure in ctf file", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
+			Expect("\n" + buf.String()).To(Equal(
+				`
 REFERENCEPATH              NAME     VERSION IDENTITY          TYPE      RELATION
 test.de/y:v1               moredata v1      "name"="moredata" PlainText local
 test.de/y:v1->test.de/x:v1 testdata v1      "name"="testdata" PlainText local
 `))
+		})
+
+		It("lists flat tree in ctf file", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("get", "resources", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
+			Expect("\n" + buf.String()).To(Equal(
+				`
+NESTING             NAME     VERSION IDENTITY          TYPE      RELATION
+└─ test.de/y:v1                                                  
+   └─               moredata v1      "name"="moredata" PlainText local
+`))
+		})
+
+		It("lists resource closure in ctf file", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
+			Expect("\n" + buf.String()).To(Equal(
+				`
+NESTING                NAME     VERSION IDENTITY          TYPE      RELATION
+└─ test.de/y:v1                                                     
+   ├─                  moredata v1      "name"="moredata" PlainText local
+   └─ test.de/x:v1                                                  
+      └─               testdata v1      "name"="testdata" PlainText local
+`))
+		})
 	})
 })
