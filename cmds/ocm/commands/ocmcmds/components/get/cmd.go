@@ -106,28 +106,33 @@ func identity(e interface{}) []string {
 	return []string{p.Identity.String()}
 }
 
-func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide ...string) output.Output {
+func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide ...string) *output.TableOutput {
 	def := &output.TableOutput{
 		Headers: output.Fields("COMPONENT", "VERSION", "PROVIDER", wide),
 		Options: opts,
 		Chain:   comphdlr.Sort,
 		Mapping: mapping,
 	}
-	return closureoption.TableOutput(def, comphdlr.ClosureExplode).New()
+	return closureoption.TableOutput(def, comphdlr.ClosureExplode)
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
 var outputs = output.NewOutputs(get_regular, output.Outputs{
 	"wide": get_wide,
+	"tree": get_tree,
 }).AddManifestOutputs()
 
 func get_regular(opts *output.Options) output.Output {
-	return TableOutput(opts, map_get_regular_output)
+	return TableOutput(opts, map_get_regular_output).New()
 }
 
 func get_wide(opts *output.Options) output.Output {
-	return TableOutput(opts, map_get_wide_output, "REPOSITORY")
+	return TableOutput(opts, map_get_wide_output, "REPOSITORY").New()
+}
+
+func get_tree(opts *output.Options) output.Output {
+	return output.TreeOutput(TableOutput(opts, map_get_regular_output), "NESTING").New()
 }
 
 func map_get_regular_output(e interface{}) interface{} {

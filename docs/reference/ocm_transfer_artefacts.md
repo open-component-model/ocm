@@ -1,13 +1,11 @@
-## ocm oci describe
+## ocm transfer artefacts
 
-describe artefact version
+transfer OCI artefacts
 
 ### Synopsis
 
 
-Describe lists all artefact versions specified, if only a repository is specified
-all tagged artefacts are listed.
-Per version a detailed, potentially recursive description is printed.
+Transfer OCI artefacts from one registry to another one
 
 
 If the repository/registry option is specified, the given names are interpreted
@@ -37,26 +35,22 @@ linked library can be used:
 
 *Example:*
 <pre>
-$ ocm describe artefact ghcr.io/mandelsoft/kubelink
-$ ocm describe artefact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
+$ ocm oci transfer ghcr.io/mandelsoft/kubelink gcr.io
 </pre>
 
 
 ```
-ocm oci describe [<options>] {<artefact-reference>} [flags]
+ocm transfer artefacts [<options>] {<artefact-reference>} [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help               help for describe
-      --layerfiles         list layer files
-  -o, --output string      output mode (json, JSON, yaml)
-  -r, --repo string        repository name or spec
-  -s, --sort stringArray   sort fields
+  -h, --help          help for artefacts
+  -r, --repo string   repository name or spec
 ```
 
 ### SEE ALSO
 
-* [ocm oci](ocm_oci.md)	 - 
+* [ocm transfer](ocm_transfer.md)	 - 
 

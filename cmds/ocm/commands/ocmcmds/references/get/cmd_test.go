@@ -102,16 +102,15 @@ NESTING             NAME COMPONENT VERSION IDENTITY
 `))
 		})
 
-		It("lists reference closure in ctf file", func() {
+		It("lits reference closure in ctf file", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "references", "-c", "-o", "tree", "--lookup", CTF, CA)).To(Succeed())
 			Expect("\n" + buf.String()).To(Equal(
 				`
-NESTING                NAME   COMPONENT VERSION IDENTITY
-└─ test.de/x:v1                                 
-   ├─                  test   test.de/y v1      "name"="test"
-   └─ test.de/y:v1                              
-      └─               withid test.de/z v1      "id"="test","name"="withid"
+NESTING             NAME   COMPONENT VERSION IDENTITY
+└─ test.de/x:v1                              
+   └─ ⊗             test   test.de/y v1      "name"="test"
+      └─            withid test.de/z v1      "id"="test","name"="withid"
 `))
 		})
 	})

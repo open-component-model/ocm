@@ -24,9 +24,11 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/references/common"
+	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
+	common2 "github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/ocm"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/spf13/cobra"
@@ -110,11 +112,42 @@ func (o *Command) Run() error {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+func reorder(it data.Iterable) data.Iterable {
+	slice := elemhdlr.ObjectSlice(it)
+
+outer:
+	for i := 0; i < len(slice); i++ {
+		o := slice[i]
+		e := common.Elem(o)
+		key := common2.NewNameVersion(e.ComponentName, e.Version)
+		hist := o.GetHistory()
+		nested := append(hist, key)
+		var j int
+		for j = i + 1; j < len(slice); j++ {
+			n := slice[j]
+			if !n.GetHistory().HasPrefix(hist) {
+				continue outer
+			}
+			if n.GetHistory().Equals(nested) {
+				break
+			}
+		}
+		o.Node = &key
+		if j < len(slice) && j > i+1 {
+			copy(slice[i:j-1], slice[i+1:j])
+			slice[j-1] = o
+		}
+	}
+	return slice
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide ...string) *output.TableOutput {
 	return &output.TableOutput{
 		Headers: output.Fields("NAME", "COMPONENT", "VERSION", wide),
 		Options: opts,
-		Chain:   elemhdlr.Sort,
+		Chain:   elemhdlr.Sort.Transform(reorder),
 		Mapping: mapping,
 	}
 }

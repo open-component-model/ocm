@@ -38,6 +38,7 @@ type Object struct {
 	Version ocm.ComponentVersionAccess
 	Spec    metav1.Identity
 	Id      metav1.Identity
+	Node    *common.NameVersion
 	Element compdesc.ElementMetaAccessor
 }
 
@@ -52,7 +53,7 @@ func (o *Object) GetHistory() common.History {
 	return o.History
 }
 func (o *Object) IsNode() *common.NameVersion {
-	return nil
+	return o.Node
 }
 
 ////////////////////////////////////////////////////////////////////////////////

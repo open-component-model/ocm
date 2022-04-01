@@ -36,7 +36,6 @@ var _ = Describe("Test Environment", func() {
 
 	BeforeEach(func() {
 		env = builder.NewBuilder(NewTestEnv())
-
 	})
 
 	AfterEach(func() {
@@ -75,28 +74,53 @@ test.de/x v1      mandelsoft /tmp/ca
 `))
 	})
 
-	It("lists closure ctf file", func() {
-		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
-			env.Component(COMP, func() {
-				env.Version(VERSION, func() {
-					env.Provider(PROVIDER)
+	Context("with closure", func() {
+		BeforeEach(func() {
+			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+				env.Component(COMP, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+					})
 				})
-			})
-			env.Component(COMP2, func() {
-				env.Version(VERSION, func() {
-					env.Provider(PROVIDER)
-					env.Reference("xx", COMP, VERSION)
+				env.Component(COMP2, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Reference("xx", COMP, VERSION)
+					})
 				})
 			})
 		})
+		It("lists closure ctf file", func() {
 
-		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("get", "components", "-c", "--repo", ARCH, COMP2)).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(
-			`
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("get", "components", "-c", "--repo", ARCH, COMP2)).To(Succeed())
+			Expect("\n" + buf.String()).To(Equal(
+				`
 REFERENCEPATH COMPONENT VERSION PROVIDER   IDENTITY
               test.de/y v1      mandelsoft 
 test.de/y:v1  test.de/x v1      mandelsoft "name"="xx"
 `))
+		})
+		It("lists flat ctf file", func() {
+
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("get", "components", "-o", "tree", "--repo", ARCH, COMP2)).To(Succeed())
+			Expect("\n" + buf.String()).To(Equal(
+				`
+NESTING COMPONENT VERSION PROVIDER
+└─      test.de/y v1      mandelsoft
+`))
+		})
+		It("lists flat ctf file", func() {
+
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("get", "components", "-o", "tree", "-c", "--repo", ARCH, COMP2)).To(Succeed())
+			Expect("\n" + buf.String()).To(Equal(
+				`
+NESTING    REFERENCEPATH COMPONENT VERSION PROVIDER   IDENTITY
+└─ ⊗                     test.de/y v1      mandelsoft 
+   └─      test.de/y:v1  test.de/x v1      mandelsoft "name"="xx"
+`))
+		})
 	})
 })

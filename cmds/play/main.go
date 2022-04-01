@@ -80,4 +80,29 @@ func main() {
 	for _, l := range t {
 		fmt.Printf("%s\n", l)
 	}
+
+	fmt.Println("---------------")
+	data = []tree.Object{
+		N("b", "a"),
+		N("c", "a", "b"),
+		N("d", "a", "b"),
+	}
+
+	t = tree.MapToTree(data, nil)
+	for _, l := range t {
+		fmt.Printf("%s\n", l)
+	}
+
+	fmt.Println("---------------")
+	data = []tree.Object{
+		N("b", "a"),
+		N("c", "a", "b"),
+		N("d", "a", "b"),
+		N("e", "a"),
+	}
+
+	t = tree.MapToTree(data, nil)
+	for _, l := range t {
+		fmt.Printf("%s\n", l)
+	}
 }

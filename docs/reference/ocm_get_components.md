@@ -8,12 +8,12 @@ get component version
 Get lists all component versions specified, if only a component is specified
 all versions are listed.
 
-If the repository option is specified, the given names are interpreted
+If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
 
 <center><code>&lt;component>[:&lt;version>]</code></center>
 
-If no <code>repo</code> option is specified the given names are interpreted 
+If no <code>--repo</code> option is specified the given names are interpreted 
 as located OCM component version references:
 
 <center><code>[&lt;repo type>::]&lt;host>[:&lt;port>][/&lt;base path>]//&lt;component>[:&lt;version>]</code></center>
@@ -56,8 +56,9 @@ ocm get components [<options>] {<component-reference>} [flags]
 ### Options
 
 ```
+  -c, --closure            follow component references
   -h, --help               help for components
-  -o, --output string      output mode (json, JSON, yaml)
+  -o, --output string      output mode (wide, tree, yaml, json, JSON)
   -r, --repo string        repository name or spec
   -s, --sort stringArray   sort fields
 ```

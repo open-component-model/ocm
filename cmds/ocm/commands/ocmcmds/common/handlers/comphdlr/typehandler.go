@@ -24,6 +24,7 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
 	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
+	"github.com/gardener/ocm/cmds/ocm/pkg/tree"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/errors"
@@ -49,6 +50,14 @@ func (o *Object) GetHistory() common.History {
 	return o.History
 }
 
+func (o *Object) IsNode() *common.NameVersion {
+	nv := common.VersionedElementKey(o.ComponentVersion)
+	return &nv
+}
+
+var _ common.HistorySource = (*Object)(nil)
+var _ tree.Object = (*Object)(nil)
+
 ////////////////////////////////////////////////////////////////////////////////
 
 func ClosureExplode(opts *output.Options, e interface{}) []interface{} {
@@ -66,7 +75,13 @@ func traverse(hist common.History, o *Object, octx out.Context, lookup *lookupop
 		refs=append(refs[:0:0], refs...)
 		sort.Sort(refs)
 	*/
+	found := map[common.NameVersion]bool{}
 	for _, ref := range refs {
+		key := common.NewNameVersion(ref.ComponentName, ref.Version)
+		if found[key] {
+			continue // skip same ref wit different attributes for recursion
+		}
+		found[key] = true
 		var nested ocm.ComponentVersionAccess
 		vers := ref.Version
 		comp, err := o.Repository.LookupComponent(ref.ComponentName)

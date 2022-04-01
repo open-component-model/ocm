@@ -22,7 +22,8 @@ ocm transfer componentarchive [<options>]  <source> <target> [flags]
 ### Options
 
 ```
-  -h, --help   help for componentarchive
+  -h, --help          help for componentarchive
+  -t, --type string   archive type to create (directory,tar,tgz)
 ```
 
 ### SEE ALSO

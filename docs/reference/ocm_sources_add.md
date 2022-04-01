@@ -1,11 +1,11 @@
-## ocm resources add
+## ocm sources add
 
 add source information to a component version
 
 ### Synopsis
 
 
-Add resource information specified in a resource file to a component version.
+Add  source information specified in a resource file to a component version.
 So far only component archives are supported as target.
 
 Templating:
@@ -45,7 +45,7 @@ There are several templaters that can be selected by the <code>--templater</code
 
 
 ```
-ocm resources add [<options>] <target> {<resourcefile> | <var>=<value>} [flags]
+ocm sources add [<options>] <target> {<resourcefile> | <var>=<value>} [flags]
 ```
 
 ### Options
@@ -59,5 +59,5 @@ ocm resources add [<options>] <target> {<resourcefile> | <var>=<value>} [flags]
 
 ### SEE ALSO
 
-* [ocm resources](ocm_resources.md)	 - 
+* [ocm sources](ocm_sources.md)	 - 
 

@@ -1,12 +1,14 @@
-## ocm components get
+## ocm get references
 
-get component version
+get references of a component version
 
 ### Synopsis
 
 
-Get lists all component versions specified, if only a component is specified
-all versions are listed.
+Get references of a component version. References are specified
+by identities. An identity consists of 
+a name argument followed by optional <code>&lt;key>=&lt;value></code>
+arguments.
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
@@ -42,22 +44,27 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `Empty`
 - `OCIRegistry`
 
-*Example:*
-<pre>
-$ ocm get componentversion ghcr.io/mandelsoft/kubelink
-$ ocm get componentversion --repo OCIRegistry:ghcr.io mandelsoft/kubelink
-</pre>
+If a component lookup for building a reference closure is required
+the <code>--lookup</code>  option can be used to specify a fallback
+lookup repository. 
+By default the component versions are searched in the repository
+holding the component version for which the closure is determined.
+For *Component Archives* this is never possible, bcause it only
+contains a single component version. Therefore, in this scenario
+this option must always be specified to be able to follow component
+references.
 
 
 ```
-ocm components get [<options>] {<component-reference>} [flags]
+ocm get references [<options>]  <component> {<name> { <key>=<value> }} [flags]
 ```
 
 ### Options
 
 ```
   -c, --closure            follow component references
-  -h, --help               help for get
+  -h, --help               help for references
+      --lookup string      repository name or spec for closure lookup fallback
   -o, --output string      output mode (wide, tree, yaml, json, JSON)
   -r, --repo string        repository name or spec
   -s, --sort stringArray   sort fields
@@ -65,5 +72,5 @@ ocm components get [<options>] {<component-reference>} [flags]
 
 ### SEE ALSO
 
-* [ocm components](ocm_components.md)	 - 
+* [ocm get](ocm_get.md)	 - 
 

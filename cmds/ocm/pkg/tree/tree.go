@@ -72,10 +72,16 @@ func handleLevel(objs Objects, header string, prefix common.History, start int, 
 		}
 		ftag := corner
 		stag := space
+		key := objs[i].IsNode()
 		for next = i + 1; next < len(objs); next++ {
 			if s := objs[next].GetHistory(); s.HasPrefix(prefix) {
 				if len(s) > lvl && len(h) > lvl && h[lvl] == s[lvl] { // skip same sub level
 					continue
+				}
+				if key != nil {
+					if len(s) > lvl && *key == s[lvl] { // skip same sub level
+						continue
+					}
 				}
 				ftag = fork
 				stag = vertical
@@ -84,8 +90,17 @@ func handleLevel(objs Objects, header string, prefix common.History, start int, 
 		}
 		if len(h) == lvl {
 			node = objs[i].IsNode() // Element acts as dedicate node
+			sym := ""
+			if node != nil {
+				if i < len(objs)-1 {
+					sub := objs[i+1].GetHistory()
+					if len(sub) > len(h) && sub.HasPrefix(append(h, *node)) {
+						sym = " \u2297"
+					}
+				}
+			}
 			*result = append(*result, &TreeObject{
-				Graph:  header + ftag,
+				Graph:  header + ftag + sym,
 				Object: objs[i],
 			})
 			i++

@@ -1,11 +1,11 @@
-## ocm resources add
+## ocm add sources
 
 add source information to a component version
 
 ### Synopsis
 
 
-Add resource information specified in a resource file to a component version.
+Add  source information specified in a resource file to a component version.
 So far only component archives are supported as target.
 
 Templating:
@@ -45,19 +45,19 @@ There are several templaters that can be selected by the <code>--templater</code
 
 
 ```
-ocm resources add [<options>] <target> {<resourcefile> | <var>=<value>} [flags]
+ocm add sources [<options>] <target> {<resourcefile> | <var>=<value>} [flags]
 ```
 
 ### Options
 
 ```
       --addenv                 access environment for templating
-  -h, --help                   help for add
+  -h, --help                   help for sources
   -s, --settings stringArray   settings file with variable settings (yaml)
       --templater string       templater to use (subst, spiff, go) (default "subst")
 ```
 
 ### SEE ALSO
 
-* [ocm resources](ocm_resources.md)	 - 
+* [ocm add](ocm_add.md)	 - 
 

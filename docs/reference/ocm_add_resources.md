@@ -1,11 +1,11 @@
 ## ocm add resources
 
-add resources to a component version
+add source information to a component version
 
 ### Synopsis
 
 
-Add resources specified in a resource file to a component version.
+Add resource information specified in a resource file to a component version.
 So far only component archives are supported as target.
 
 Templating:
