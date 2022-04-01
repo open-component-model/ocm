@@ -60,10 +60,16 @@ type OptionCompleter interface {
 	CompleteWithSession(ctx clictx.OCM, session ocm.Session) error
 }
 
-func CompleteOptionsWithContext(ctx clictx.OCM, session ocm.Session) options.OptionsProcessor {
+func CompleteOptionsWithContext(ctx clictx.Context, session ocm.Session) options.OptionsProcessor {
 	return func(opt options.Options) error {
 		if c, ok := opt.(OptionCompleter); ok {
-			return c.CompleteWithSession(ctx, session)
+			return c.CompleteWithSession(ctx.OCM(), session)
+		}
+		if c, ok := opt.(options.CompleteWithCLIContext); ok {
+			return c.Complete(ctx)
+		}
+		if c, ok := opt.(options.Complete); ok {
+			return c.Complete()
 		}
 		return nil
 	}

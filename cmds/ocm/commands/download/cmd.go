@@ -12,13 +12,22 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package commands
+package download
 
-const (
-	Get      = "get"
-	Describe = "describe"
-	Add      = "add"
-	Create   = "create"
-	Transfer = "transfer"
-	Download = "download"
+import (
+	"github.com/gardener/ocm/cmds/ocm/clictx"
+	"github.com/gardener/ocm/cmds/ocm/commands"
+
+	resources "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/download"
+	"github.com/spf13/cobra"
 )
+
+// NewCommand creates a new command.
+func NewCommand(ctx clictx.Context) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:              commands.Download,
+		TraverseChildren: true,
+	}
+	cmd.AddCommand(resources.NewCommand(ctx, resources.Names...))
+	return cmd
+}

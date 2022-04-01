@@ -16,8 +16,10 @@ ocm
 * [ocm components](ocm_components.md)	 - 
 * [ocm create](ocm_create.md)	 - 
 * [ocm describe](ocm_describe.md)	 - 
+* [ocm download](ocm_download.md)	 - 
 * [ocm get](ocm_get.md)	 - 
 * [ocm oci](ocm_oci.md)	 - 
+* [ocm ocm](ocm_ocm.md)	 - 
 * [ocm references](ocm_references.md)	 - 
 * [ocm resources](ocm_resources.md)	 - 
 * [ocm sources](ocm_sources.md)	 - 

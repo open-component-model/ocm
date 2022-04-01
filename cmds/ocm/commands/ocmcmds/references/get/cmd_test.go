@@ -81,7 +81,6 @@ withid test.de/z v1      "id"="test","name"="withid"
 			})
 		})
 		It("lists single reference in component archive", func() {
-
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "references", "--lookup", CTF, "-c", "-o", "wide", CA)).To(Succeed())
 			Expect("\n" + buf.String()).To(Equal(
@@ -114,5 +113,4 @@ NESTING             NAME   COMPONENT VERSION IDENTITY
 `))
 		})
 	})
-
 })

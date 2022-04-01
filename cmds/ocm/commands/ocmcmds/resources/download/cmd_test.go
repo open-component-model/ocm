@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package get_test
+package download_test
 
 import (
 	"bytes"
@@ -22,6 +22,7 @@ import (
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/mime"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -31,6 +32,7 @@ const VERSION = "v1"
 const COMP = "test.de/x"
 const COMP2 = "test.de/y"
 const PROVIDER = "mandelsoft"
+const OUT = "/tmp/res"
 
 var _ = Describe("Test Environment", func() {
 	var env *builder.Builder
@@ -41,23 +43,6 @@ var _ = Describe("Test Environment", func() {
 
 	AfterEach(func() {
 		env.Cleanup()
-	})
-
-	It("lists single resource in component archive", func() {
-		env.ComponentArchive(ARCH, accessio.FormatDirectory, COMP, VERSION, func() {
-			env.Provider(PROVIDER)
-			env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
-				env.BlobStringData(mime.MIME_TEXT, "testdata")
-			})
-		})
-
-		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH)).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(
-			`
-NAME     VERSION IDENTITY          TYPE      RELATION
-testdata v1      "name"="testdata" PlainText local
-`))
 	})
 
 	It("lists single resource in ctf file", func() {
@@ -73,12 +58,13 @@ testdata v1      "name"="testdata" PlainText local
 		})
 
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH)).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("download", "resources", "-O", OUT, ARCH)).To(Succeed())
 		Expect("\n" + buf.String()).To(Equal(
 			`
-NAME     VERSION IDENTITY          TYPE      RELATION
-testdata v1      "name"="testdata" PlainText local
+/tmp/res: 8 byte(s) written
 `))
+		Expect(env.FileExists(OUT)).To(BeTrue())
+		Expect(env.ReadFile(OUT)).To(Equal([]byte("testdata")))
 	})
 
 	Context("with closure", func() {
@@ -98,45 +84,47 @@ testdata v1      "name"="testdata" PlainText local
 						env.Resource("moredata", "", "PlainText", metav1.LocalRelation, func() {
 							env.BlobStringData(mime.MIME_TEXT, "moredata")
 						})
+						env.Resource("otherdata", "", "PlainText", metav1.LocalRelation, func() {
+							env.ExtraIdentity("id", "test")
+							env.BlobStringData(mime.MIME_TEXT, "otherdata")
+						})
 						env.Reference("base", COMP, VERSION)
 					})
 				})
 			})
 		})
 
-		It("lists resource closure in ctf file", func() {
+		It("downloads multiple files", func() {
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("download", "resources", "-O", OUT, "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 			Expect("\n" + buf.String()).To(Equal(
 				`
-REFERENCEPATH              NAME     VERSION IDENTITY          TYPE      RELATION
-test.de/y:v1               moredata v1      "name"="moredata" PlainText local
-test.de/y:v1->test.de/x:v1 testdata v1      "name"="testdata" PlainText local
+/tmp/res/test.de/y/v1/moredata: 8 byte(s) written
+/tmp/res/test.de/y/v1/otherdata-id=test: 9 byte(s) written
 `))
+
+			Expect(env.FileExists(vfs.Join(env.FileSystem(), OUT, COMP2+"/"+VERSION+"/moredata"))).To(BeTrue())
+			Expect(env.ReadFile(vfs.Join(env.FileSystem(), OUT, COMP2+"/"+VERSION+"/moredata"))).To(Equal([]byte("moredata")))
+			Expect(env.FileExists(vfs.Join(env.FileSystem(), OUT, COMP2+"/"+VERSION+"/otherdata-id=test"))).To(BeTrue())
+			Expect(env.ReadFile(vfs.Join(env.FileSystem(), OUT, COMP2+"/"+VERSION+"/otherdata-id=test"))).To(Equal([]byte("otherdata")))
 		})
 
-		It("lists flat tree in ctf file", func() {
+		It("downloads closure", func() {
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("get", "resources", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("download", "resources", "-c", "-O", OUT, "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 			Expect("\n" + buf.String()).To(Equal(
 				`
-NESTING             NAME     VERSION IDENTITY          TYPE      RELATION
-└─ test.de/y:v1                                                  
-   └─               moredata v1      "name"="moredata" PlainText local
+/tmp/res/test.de/y/v1/moredata: 8 byte(s) written
+/tmp/res/test.de/y/v1/otherdata-id=test: 9 byte(s) written
+/tmp/res/test.de/y/v1/test.de/x/v1/testdata: 8 byte(s) written
 `))
-		})
 
-		It("lists resource closure in ctf file", func() {
-			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-			Expect("\n" + buf.String()).To(Equal(
-				`
-NESTING                NAME     VERSION IDENTITY          TYPE      RELATION
-└─ test.de/y:v1                                                     
-   ├─                  moredata v1      "name"="moredata" PlainText local
-   └─ test.de/x:v1                                                  
-      └─               testdata v1      "name"="testdata" PlainText local
-`))
+			Expect(env.FileExists(vfs.Join(env.FileSystem(), OUT, COMP2+"/"+VERSION+"/moredata"))).To(BeTrue())
+			Expect(env.ReadFile(vfs.Join(env.FileSystem(), OUT, COMP2+"/"+VERSION+"/moredata"))).To(Equal([]byte("moredata")))
+			Expect(env.FileExists(vfs.Join(env.FileSystem(), OUT, COMP2+"/"+VERSION+"/otherdata-id=test"))).To(BeTrue())
+			Expect(env.ReadFile(vfs.Join(env.FileSystem(), OUT, COMP2+"/"+VERSION+"/otherdata-id=test"))).To(Equal([]byte("otherdata")))
+			Expect(env.FileExists(vfs.Join(env.FileSystem(), OUT, COMP2+"/"+VERSION+"/"+COMP+"/"+VERSION+"/testdata"))).To(BeTrue())
+			Expect(env.ReadFile(vfs.Join(env.FileSystem(), OUT, COMP2+"/"+VERSION+"/"+COMP+"/"+VERSION+"/testdata"))).To(Equal([]byte("testdata")))
 		})
 	})
 })

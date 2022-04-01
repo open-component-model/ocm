@@ -62,7 +62,6 @@ type TypeHandler struct {
 	repository ocm.Repository
 	components []*comphdlr.Object
 	session    ocm.Session
-	access     ocm.ComponentVersionAccess
 	elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor
 }
 
@@ -116,7 +115,7 @@ func (h *TypeHandler) all(c *comphdlr.Object) ([]output.Object, error) {
 		e := elemaccess.Get(i)
 		result = append(result, &Object{
 			History: append(c.History, common.VersionedElementKey(c.ComponentVersion)),
-			Version: h.access,
+			Version: c.ComponentVersion,
 			Id:      e.GetMeta().GetIdentity(elemaccess),
 			Element: e,
 		})
@@ -150,7 +149,7 @@ func (h *TypeHandler) get(c *comphdlr.Object, elemspec utils.ElemSpec) ([]output
 		if ok {
 			result = append(result, &Object{
 				History: append(c.History, common.VersionedElementKey(c.ComponentVersion)),
-				Version: h.access,
+				Version: c.ComponentVersion,
 				Spec:    selector,
 				Id:      m.GetIdentity(elemaccess),
 				Element: e,

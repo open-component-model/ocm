@@ -12,28 +12,41 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package resources
+package destoption
 
 import (
+	"fmt"
+
 	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/add"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/download"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/get"
-	"github.com/spf13/cobra"
+	"github.com/gardener/ocm/cmds/ocm/pkg/options"
+	"github.com/gardener/ocm/cmds/ocm/pkg/output"
+	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/spf13/pflag"
 )
 
-var Names = names.Resources
-
-// NewCommand creates a new command.
-func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              Names[0],
-		Aliases:          Names[1:],
-		TraverseChildren: true,
+func From(o *output.Options) *Option {
+	v := o.GetOptions((*Option)(nil))
+	if v == nil {
+		return nil
 	}
-	cmd.AddCommand(add.NewCommand(ctx, add.Verb))
-	cmd.AddCommand(get.NewCommand(ctx, get.Verb))
-	cmd.AddCommand(download.NewCommand(ctx, download.Verb))
-	return cmd
+	return v.(*Option)
 }
+
+type Option struct {
+	Destination    string
+	PathFilesystem vfs.FileSystem
+}
+
+func (d *Option) AddFlags(fs *pflag.FlagSet) {
+	fs.StringVarP(&d.Destination, "outfile", "O", "", "output file or directory")
+}
+
+func (o *Option) Complete(ctx clictx.Context) error {
+	if o.Destination == "" {
+		return fmt.Errorf("output destination required")
+	}
+	o.PathFilesystem = ctx.FileSystem()
+	return nil
+}
+
+var _ options.Options = (*Option)(nil)

@@ -39,7 +39,6 @@ var _ = Describe("Test Environment", func() {
 
 	BeforeEach(func() {
 		env = builder.NewBuilder(NewTestEnv())
-
 	})
 
 	AfterEach(func() {
@@ -106,8 +105,8 @@ testdata v1      "name"="testdata" git
 				})
 			})
 		})
-		It("lists resource closure in ctf file", func() {
 
+		It("lists resource closure in ctf file", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "sources", "-c", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 			Expect("\n" + buf.String()).To(Equal(

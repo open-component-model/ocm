@@ -15,6 +15,7 @@
 package options
 
 import (
+	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
 	"github.com/spf13/pflag"
 )
@@ -25,8 +26,12 @@ type Complete interface {
 	Complete() error
 }
 
-type CompleteWithContext interface {
+type CompleteWithOutputContext interface {
 	Complete(ctx out.Context) error
+}
+
+type CompleteWithCLIContext interface {
+	Complete(ctx clictx.Context) error
 }
 
 type Usage interface {
@@ -48,8 +53,25 @@ func CompleteOptions(opt Options) error {
 
 func CompleteOptionsWithOutputContext(ctx out.Context) OptionsProcessor {
 	return func(opt Options) error {
-		if c, ok := opt.(CompleteWithContext); ok {
+		if c, ok := opt.(CompleteWithOutputContext); ok {
 			return c.Complete(ctx)
+		}
+		if c, ok := opt.(Complete); ok {
+			return c.Complete()
+		}
+		return nil
+	}
+}
+func CompleteOptionsWithCLIContext(ctx clictx.Context) OptionsProcessor {
+	return func(opt Options) error {
+		if c, ok := opt.(CompleteWithCLIContext); ok {
+			return c.Complete(ctx)
+		}
+		if c, ok := opt.(CompleteWithOutputContext); ok {
+			return c.Complete(ctx)
+		}
+		if c, ok := opt.(Complete); ok {
+			return c.Complete()
 		}
 		return nil
 	}

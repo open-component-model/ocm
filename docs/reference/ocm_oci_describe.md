@@ -51,7 +51,7 @@ ocm oci describe [<options>] {<artefact-reference>} [flags]
 ```
   -h, --help               help for describe
       --layerfiles         list layer files
-  -o, --output string      output mode (json, JSON, yaml)
+  -o, --output string      output mode (yaml, json, JSON)
   -r, --repo string        repository name or spec
   -s, --sort stringArray   sort fields
 ```

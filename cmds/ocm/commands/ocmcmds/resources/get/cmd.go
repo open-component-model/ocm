@@ -59,7 +59,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Args:  cobra.MinimumNArgs(1),
 		Short: "get resources of a component version",
 		Long: `
-Get resources of a component version. Sources are specified
+Get resources of a component version. Reources are specified
 by identities. An identity consists of 
 a name argument followed by optional <code>&lt;key>=&lt;value></code>
 arguments.
@@ -90,7 +90,7 @@ func (o *Command) Run() error {
 	session := ocm.NewSession(nil)
 	defer session.Close()
 
-	err := o.Output.ProcessOnOptions(ocmcommon.CompleteOptionsWithContext(o.OCM(), session))
+	err := o.Output.ProcessOnOptions(ocmcommon.CompleteOptionsWithContext(o, session))
 	if err != nil {
 		return err
 	}

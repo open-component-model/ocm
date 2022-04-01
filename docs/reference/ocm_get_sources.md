@@ -21,7 +21,7 @@ ocm get sources [<options>]  <component> {<name> { <key>=<value> }} [flags]
   -c, --closure            follow component references
   -h, --help               help for sources
       --lookup string      repository name or spec for closure lookup fallback
-  -o, --output string      output mode (json, JSON, wide, tree, yaml)
+  -o, --output string      output mode (wide, tree, yaml, json, JSON)
   -r, --repo string        repository name or spec
   -s, --sort stringArray   sort fields
 ```

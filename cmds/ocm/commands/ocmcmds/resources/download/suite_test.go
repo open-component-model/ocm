@@ -12,13 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package commands
+package download_test
 
-const (
-	Get      = "get"
-	Describe = "describe"
-	Add      = "add"
-	Create   = "create"
-	Transfer = "transfer"
-	Download = "download"
+import (
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
+
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "OCM download resources")
+}

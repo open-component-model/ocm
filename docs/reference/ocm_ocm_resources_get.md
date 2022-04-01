@@ -1,4 +1,4 @@
-## ocm resources get
+## ocm ocm resources get
 
 get resources of a component version
 
@@ -12,7 +12,7 @@ arguments.
 
 
 ```
-ocm resources get [<options>]  <component> {<name> { <key>=<value> }} [flags]
+ocm ocm resources get [<options>]  <component> {<name> { <key>=<value> }} [flags]
 ```
 
 ### Options
@@ -21,12 +21,12 @@ ocm resources get [<options>]  <component> {<name> { <key>=<value> }} [flags]
   -c, --closure            follow component references
   -h, --help               help for get
       --lookup string      repository name or spec for closure lookup fallback
-  -o, --output string      output mode (JSON, tree, wide, yaml, json)
+  -o, --output string      output mode (json, JSON, tree, wide, yaml)
   -r, --repo string        repository name or spec
   -s, --sort stringArray   sort fields
 ```
 
 ### SEE ALSO
 
-* [ocm resources](ocm_resources.md)	 - 
+* [ocm ocm resources](ocm_ocm_resources.md)	 - 
 

@@ -49,7 +49,7 @@ ocm get artefacts [<options>] {<artefact-reference>} [flags]
 
 ```
   -h, --help               help for artefacts
-  -o, --output string      output mode (wide, yaml, json, JSON)
+  -o, --output string      output mode (yaml, json, JSON, wide)
   -r, --repo string        repository name or spec
   -s, --sort stringArray   sort fields
 ```

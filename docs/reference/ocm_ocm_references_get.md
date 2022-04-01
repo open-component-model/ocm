@@ -1,4 +1,4 @@
-## ocm references get
+## ocm ocm references get
 
 get references of a component version
 
@@ -56,7 +56,7 @@ references.
 
 
 ```
-ocm references get [<options>]  <component> {<name> { <key>=<value> }} [flags]
+ocm ocm references get [<options>]  <component> {<name> { <key>=<value> }} [flags]
 ```
 
 ### Options
@@ -72,5 +72,5 @@ ocm references get [<options>]  <component> {<name> { <key>=<value> }} [flags]
 
 ### SEE ALSO
 
-* [ocm references](ocm_references.md)	 - 
+* [ocm ocm references](ocm_ocm_references.md)	 - 
 
