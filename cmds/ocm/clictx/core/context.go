@@ -33,7 +33,6 @@ import (
 	ctfoci "github.com/gardener/ocm/pkg/oci/repositories/ctf"
 	"github.com/gardener/ocm/pkg/ocm"
 	ctfocm "github.com/gardener/ocm/pkg/ocm/repositories/ctf"
-	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
@@ -108,9 +107,6 @@ type _context struct {
 var _ Context = &_context{}
 
 func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context, outctx out.Context, fs vfs.FileSystem) Context {
-	if fs == nil {
-		fs = osfs.New()
-	}
 	if outctx == nil {
 		outctx = out.New()
 	}
@@ -127,7 +123,9 @@ func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context, outctx
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
 	c.oci = newOCI(c, ocmctx)
 	c.ocm = newOCM(c, ocmctx)
-	vfsattr.Set(c.AttributesContext(), fs)
+	if fs != nil {
+		vfsattr.Set(c.AttributesContext(), fs)
+	}
 	return c
 }
 

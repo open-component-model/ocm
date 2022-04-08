@@ -15,8 +15,9 @@
 package builder
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/testhelper"
 	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/gardener/ocm/pkg/env"
+	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 	. "github.com/onsi/ginkgo"
@@ -41,7 +42,7 @@ func (e *base) SetBuilder(b *Builder) {
 }
 
 type Builder struct {
-	*testhelper.TestEnv
+	*env.Environment
 	stack []element
 
 	ocm_repo cpi.Repository
@@ -53,10 +54,15 @@ type Builder struct {
 	ocm_acc  *compdesc.AccessSpec
 
 	blob *accessio.BlobAccess
+
+	oci_repo   oci.Repository
+	oci_nsacc  oci.NamespaceAccess
+	oci_artacc oci.ArtefactAccess
+	oci_tags   *[]string
 }
 
-func NewBuilder(t *testhelper.TestEnv) *Builder {
-	return &Builder{TestEnv: t}
+func NewBuilder(t *env.Environment) *Builder {
+	return &Builder{Environment: t}
 }
 
 func (b *Builder) require(typ string) {
@@ -73,14 +79,26 @@ func (b *Builder) set() {
 	b.ocm_acc = nil
 
 	b.blob = nil
+
+	b.oci_repo = nil
+	b.oci_nsacc = nil
+	b.oci_artacc = nil
+	b.oci_tags = nil
+
 	if len(b.stack) > 0 {
 		b.peek().Set()
 	}
+
 }
 
-func (b *Builder) expect(p interface{}, msg string) {
+func (b *Builder) expect(p interface{}, msg string, tests ...func() bool) {
 	if p == nil {
 		Fail(msg+" required", 2)
+	}
+	for _, f := range tests {
+		if !f() {
+			Fail(msg+" required", 2)
+		}
 	}
 }
 

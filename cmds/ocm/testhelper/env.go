@@ -19,120 +19,27 @@ import (
 
 	"github.com/gardener/ocm/cmds/ocm/app"
 	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/pkg/ocm"
-	"github.com/mandelsoft/vfs/pkg/composefs"
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/projectionfs"
-	"github.com/mandelsoft/vfs/pkg/readonlyfs"
+	"github.com/gardener/ocm/pkg/env"
+	"github.com/gardener/ocm/pkg/env/builder"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
-////////////////////////////////////////////////////////////////////////////////
-
-type Option interface {
-	Mount(fs *composefs.ComposedFileSystem) error
-}
-
-type dummyOption struct{}
-
-func (dummyOption) Mount(*composefs.ComposedFileSystem) error {
-	return nil
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-type fsOpt struct {
-	dummyOption
-	path string
-	fs   vfs.FileSystem
-}
-
-func FileSystem(fs vfs.FileSystem, path string) fsOpt {
-	return fsOpt{
-		path: path,
-		fs:   fs,
-	}
-}
-
-func (o fsOpt) Mount(cfs *composefs.ComposedFileSystem) error {
-	return cfs.Mount(o.path, o.fs)
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-type tdOpt struct {
-	dummyOption
-	path   string
-	source string
-}
-
-func TestData(paths ...string) tdOpt {
-	path := "/testdata"
-	source := "testdata"
-
-	switch len(paths) {
-	case 0:
-	case 1:
-		source = paths[0]
-	case 2:
-		source = paths[0]
-		path = paths[1]
-	default:
-		panic("invalid number of arguments")
-	}
-	return tdOpt{
-		path:   path,
-		source: source,
-	}
-}
-
-func (o tdOpt) Mount(cfs *composefs.ComposedFileSystem) error {
-	fs, err := projectionfs.New(osfs.New(), o.source)
-	if err != nil {
-		return err
-	}
-	fs = readonlyfs.New(fs)
-	err = cfs.MkdirAll(o.path, vfs.ModePerm)
-	if err != nil {
-		return err
-	}
-	return cfs.Mount(o.path, fs)
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
 type TestEnv struct {
-	vfs.VFS
-	filesystem *composefs.ComposedFileSystem
+	*builder.Builder
 	app.CLI
 }
 
-func NewTestEnv(opts ...Option) *TestEnv {
-	tmpfs, err := osfs.NewTempFileSystem()
-	if err != nil {
-		panic(err)
-	}
-	defer func() {
-		vfs.Cleanup(tmpfs)
-	}()
-	err = tmpfs.Mkdir("/tmp", vfs.ModePerm)
-	if err != nil {
-		panic(err)
-	}
-	fs := composefs.New(tmpfs, "/tmp")
-	for _, o := range opts {
-		err := o.Mount(fs)
-		if err != nil {
-			panic(err)
-		}
-	}
-	ctx := clictx.WithOCM(ocm.DefaultContext()).WithFileSystem(fs).New()
-	tmpfs = nil
+func NewTestEnv(opts ...env.Option) *TestEnv {
+	b := builder.NewBuilder(env.NewEnvironment(opts...))
+	ctx := clictx.WithOCM(b.Context()).New()
 	return &TestEnv{
-		VFS:        vfs.New(fs),
-		filesystem: fs,
-		CLI:        *app.NewCLI(ctx),
+		Builder: b,
+		CLI:     *app.NewCLI(ctx),
 	}
+}
+
+func (e TestEnv) FileSystem() vfs.FileSystem {
+	return e.Builder.FileSystem()
 }
 
 func (e TestEnv) CatchOutput(w io.Writer) *TestEnv {

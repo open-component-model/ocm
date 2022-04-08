@@ -21,10 +21,10 @@ import (
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands"
+	"github.com/gardener/ocm/cmds/ocm/commands/common/options/destoption"
 	ocmcommon "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/handlers/elemhdlr"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/closureoption"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/destoption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"

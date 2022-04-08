@@ -19,7 +19,7 @@ import (
 
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/oci"
-	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
+	"github.com/gardener/ocm/pkg/oci/repositories/artefactset"
 	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/gardener/ocm/pkg/runtime"

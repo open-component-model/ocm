@@ -32,6 +32,12 @@ import (
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 )
 
+func Elem(e interface{}) ocm.ComponentVersionAccess {
+	return e.(*Object).ComponentVersion
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type Object struct {
 	History  common.History
 	Identity metav1.Identity

@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package common
+package artefacthdlr
 
 import (
 	"fmt"
@@ -25,6 +25,12 @@ import (
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 )
+
+func Elem(e interface{}) oci.ArtefactAccess {
+	return e.(*Object).Artefact
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 type Object struct {
 	Spec     oci.RefSpec

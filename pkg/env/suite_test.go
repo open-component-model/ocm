@@ -12,23 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package builder
+package env
 
 import (
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/common/accessobj"
-	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
-	"github.com/gardener/ocm/pkg/ocm/repositories/comparch/comparch"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-const T_COMPARCH = "component archive"
-
-func (b *Builder) ComponentArchive(path string, fmt accessio.FileFormat, name, vers string, f ...func()) {
-	r, err := comparch.Open(b.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, path, 0777, accessio.PathFileSystem(b.Context.FileSystem()))
-	b.failOn(err)
-	r.SetName(name)
-	r.SetVersion(vers)
-	r.GetDescriptor().Provider = metav1.ProviderType("ACME")
-
-	b.configure(&ocm_version{ComponentVersionAccess: r, kind: T_COMPARCH}, f)
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Env Test Suite")
 }

@@ -22,8 +22,8 @@ import (
 	"github.com/gardener/ocm/pkg/mime"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
+	artefactset2 "github.com/gardener/ocm/pkg/oci/repositories/artefactset"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf"
-	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/testhelper"
 	"github.com/gardener/ocm/pkg/ocm"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
@@ -145,10 +145,10 @@ var _ = Describe("component repository mapping", func() {
 		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().RegisterBlobHandler(ocirepo.NewArtefactHandler(base), cpi.ForMimeType(mime))).New()
 
 		// create artefactset
-		r, err := artefactset.FormatTGZ.Create("test.tgz", accessio.AccessOptions(accessio.PathFileSystem(tempfs)), 0700)
+		r, err := artefactset2.FormatTGZ.Create("test.tgz", accessio.AccessOptions(accessio.PathFileSystem(tempfs)), 0700)
 		Expect(err).To(Succeed())
 		testhelper.DefaultManifestFill(r)
-		r.Annotate(artefactset.MAINARTEFACT_ANNOTATION, "sha256:"+testhelper.DIGEST_MANIFEST)
+		r.Annotate(artefactset2.MAINARTEFACT_ANNOTATION, "sha256:"+testhelper.DIGEST_MANIFEST)
 		Expect(r.Close()).To(Succeed())
 
 		// create repository

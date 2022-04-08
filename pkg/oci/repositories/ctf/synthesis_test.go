@@ -20,8 +20,8 @@ import (
 	"github.com/gardener/ocm/pkg/mime"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
+	artefactset2 "github.com/gardener/ocm/pkg/oci/repositories/artefactset"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf"
-	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
 	"github.com/gardener/ocm/pkg/ocm"
 	"github.com/gardener/ocm/pkg/ocm/digester"
 	"github.com/gardener/ocm/pkg/ocm/digester/digesters"
@@ -36,7 +36,7 @@ import (
 )
 
 func CheckBlob(blob accessio.BlobAccess) oci.NamespaceAccess {
-	set, err := artefactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
+	set, err := artefactset2.OpenFromBlob(accessobj.ACC_READONLY, blob)
 	Expect(err).To(Succeed())
 	defer func() {
 		if set != nil {
@@ -46,7 +46,7 @@ func CheckBlob(blob accessio.BlobAccess) oci.NamespaceAccess {
 
 	idx := set.GetIndex()
 	Expect(idx.Annotations).To(Equal(map[string]string{
-		artefactset.MAINARTEFACT_ANNOTATION: "sha256:" + DIGEST_MANIFEST,
+		artefactset2.MAINARTEFACT_ANNOTATION: "sha256:" + DIGEST_MANIFEST,
 	}))
 	Expect(idx.Manifests).To(Equal([]artdesc.Descriptor{
 		{
@@ -106,7 +106,7 @@ var _ = Describe("syntheses", func() {
 		defer r.Close()
 		n, err = r.LookupNamespace("mandelsoft/test")
 		Expect(err).To(Succeed())
-		blob, err := artefactset.SynthesizeArtefactBlob(n, TAG)
+		blob, err := artefactset2.SynthesizeArtefactBlob(n, TAG)
 		Expect(err).To(Succeed())
 		defer blob.Close()
 		path := blob.Path()
@@ -120,7 +120,7 @@ var _ = Describe("syntheses", func() {
 		Expect(vfs.Exists(blob.FileSystem(), path)).To(BeFalse())
 
 		// use syntesized blob to extract new blob, useless but should work
-		newblob, err := artefactset.SynthesizeArtefactBlob(set, TAG)
+		newblob, err := artefactset2.SynthesizeArtefactBlob(set, TAG)
 		Expect(err).To(Succeed())
 		defer newblob.Close()
 

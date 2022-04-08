@@ -24,7 +24,7 @@ import (
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
-	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
+	artefactset2 "github.com/gardener/ocm/pkg/oci/repositories/artefactset"
 	"github.com/gardener/ocm/pkg/ocm/digester/core"
 	"github.com/opencontainers/go-digest"
 )
@@ -74,7 +74,7 @@ func (d ArtefactDigester) DetermineDigest(blob accessio.BlobAccess) (*core.Diges
 		switch header.Typeflag {
 		case tar.TypeDir:
 		case tar.TypeReg:
-			if header.Name == artefactset.ArtefactSetDescriptorFileName {
+			if header.Name == artefactset2.ArtefactSetDescriptorFileName {
 				data, err := io.ReadAll(tr)
 				if err != nil {
 					return nil, fmt.Errorf("unable to read descriptor from archive: %w", err)
@@ -86,7 +86,7 @@ func (d ArtefactDigester) DetermineDigest(blob accessio.BlobAccess) (*core.Diges
 				if index == nil {
 					return nil, fmt.Errorf("no main artefact found")
 				}
-				main := index.Annotations[artefactset.MAINARTEFACT_ANNOTATION]
+				main := index.Annotations[artefactset2.MAINARTEFACT_ANNOTATION]
 				if main == "" {
 					return nil, fmt.Errorf("no main artefact found")
 				}

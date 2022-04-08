@@ -18,7 +18,6 @@ import (
 	"bytes"
 
 	. "github.com/gardener/ocm/cmds/ocm/testhelper"
-	"github.com/gardener/ocm/cmds/ocm/testhelper/builder"
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/ocm"
 	. "github.com/onsi/ginkgo"
@@ -32,13 +31,13 @@ const COMP2 = "test.de/y"
 const PROVIDER = "mandelsoft"
 
 var _ = Describe("Test Environment", func() {
-	var env *builder.Builder
+	var env *TestEnv
 
 	spec, err := ocm.NewGenericAccessSpec("{\"type\":\"git\"}")
 	Expect(err).To(Succeed())
 
 	BeforeEach(func() {
-		env = builder.NewBuilder(NewTestEnv())
+		env = NewTestEnv()
 	})
 
 	AfterEach(func() {

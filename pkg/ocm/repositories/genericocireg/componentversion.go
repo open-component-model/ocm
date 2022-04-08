@@ -22,7 +22,7 @@ import (
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
-	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
+	artefactset2 "github.com/gardener/ocm/pkg/oci/repositories/artefactset"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	ocihdlr "github.com/gardener/ocm/pkg/ocm/blobhandler/oci"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
@@ -204,7 +204,7 @@ func (c *ComponentVersionContainer) assureGlobalRef(d digest.Digest, url, name s
 			return nil, err
 		}
 	}
-	set, err := artefactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
+	set, err := artefactset2.OpenFromBlob(accessobj.ACC_READONLY, blob)
 	if err != nil {
 		return nil, err
 	}
@@ -217,7 +217,7 @@ func (c *ComponentVersionContainer) assureGlobalRef(d digest.Digest, url, name s
 	if err != nil {
 		return nil, err
 	}
-	err = artefactset.TransferArtefact(art, namespace, oci.AsTags(tag)...)
+	err = artefactset2.TransferArtefact(art, namespace, oci.AsTags(tag)...)
 	if err != nil {
 		return nil, err
 	}

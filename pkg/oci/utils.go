@@ -15,8 +15,6 @@
 package oci
 
 import (
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
 )
 
@@ -25,58 +23,6 @@ func AsTags(tag string) []string {
 		return []string{tag}
 	}
 	return nil
-}
-
-func TransferArtefact(art cpi.ArtefactAccess, set cpi.ArtefactSink, tags ...string) error {
-	if art.GetDescriptor().IsIndex() {
-		return TransferIndex(art.IndexAccess(), set, tags...)
-	} else {
-		return TransferManifest(art.ManifestAccess(), set, tags...)
-	}
-}
-
-func TransferIndex(art cpi.IndexAccess, set cpi.ArtefactSink, tags ...string) error {
-	for _, l := range art.GetDescriptor().Manifests {
-		art, err := art.GetArtefact(l.Digest)
-		if err != nil {
-			return errors.Wrapf(err, "getting indexed artefact %s", l.Digest)
-		}
-		err = TransferArtefact(art, set)
-		if err != nil {
-			return errors.Wrapf(err, "transferring indexed artefact %s", l.Digest)
-		}
-	}
-	_, err := set.AddArtefact(art, tags...)
-	if err != nil {
-		return errors.Wrapf(err, "transferring index artefact")
-	}
-	return err
-}
-
-func TransferManifest(art cpi.ManifestAccess, set cpi.ArtefactSink, tags ...string) error {
-	blob, err := art.GetConfigBlob()
-	if err != nil {
-		return errors.Wrapf(err, "getting config blob")
-	}
-	err = set.AddBlob(blob)
-	if err != nil {
-		return errors.Wrapf(err, "transferring config blob")
-	}
-	for _, l := range art.GetDescriptor().Layers {
-		blob, err = art.GetBlob(l.Digest)
-		if err != nil {
-			return errors.Wrapf(err, "getting layer blob %s", l.Digest)
-		}
-		err = set.AddBlob(blob)
-		if err != nil {
-			return errors.Wrapf(err, "transferring layer blob %s", l.Digest)
-		}
-	}
-	_, err = set.AddArtefact(art, tags...)
-	if err != nil {
-		return errors.Wrapf(err, "transferring image artefact")
-	}
-	return err
 }
 
 func EvaluateRefWithContext(ctx Context, ref string) (*RefSpec, NamespaceAccess, error) {

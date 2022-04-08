@@ -37,6 +37,7 @@ import (
 	"github.com/gardener/ocm/pkg/oci/ociutils"
 	dockerreg "github.com/gardener/ocm/pkg/oci/repositories/docker"
 	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
+	"github.com/gardener/ocm/pkg/oci/transfer"
 	_ "github.com/gardener/ocm/pkg/ocm"
 )
 
@@ -148,7 +149,7 @@ func dockerwritetest() {
 	defer tns.Close()
 
 	//_, err = tns.AddArtefact(art,tversion)
-	err = oci.TransferArtefact(art, tns)
+	err = transfer.TransferArtefact(art, tns)
 
 	handleError(err, "add")
 
@@ -370,7 +371,7 @@ func transfertest() {
 
 	fmt.Println(ociutils.PrintArtefact(art))
 	fmt.Printf("transferring...\n")
-	err = oci.TransferArtefact(art, tns, tversion)
+	err = transfer.TransferArtefact(art, tns, tversion)
 	handleError(err, "transfer")
 }
 

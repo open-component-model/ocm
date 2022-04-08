@@ -20,7 +20,6 @@ import (
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/datacontext/vfsattr"
 	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/ocm/core"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 	impl "github.com/gardener/ocm/pkg/ocm/repositories/comparch/comparch"
 )
@@ -98,11 +97,11 @@ func (r *Repository) Open() (*impl.ComponentArchive, error) {
 	return a, nil
 }
 
-func (r *Repository) GetContext() core.Context {
+func (r *Repository) GetContext() cpi.Context {
 	return r.ctx
 }
 
-func (r *Repository) GetSpecification() core.RepositorySpec {
+func (r *Repository) GetSpecification() cpi.RepositorySpec {
 	return r.spec
 }
 
@@ -166,10 +165,10 @@ func (c *ComponentAccess) LookupVersion(ref string) (cpi.ComponentVersionAccess,
 	return c.repo.LookupComponentVersion(c.repo.arch.GetName(), ref)
 }
 
-func (c *ComponentAccess) AddVersion(access core.ComponentVersionAccess) error {
+func (c *ComponentAccess) AddVersion(access cpi.ComponentVersionAccess) error {
 	return errors.ErrNotSupported(errors.KIND_FUNCTION, "add version", CTFComponentArchiveType)
 }
 
-func (c *ComponentAccess) NewVersion(version string) (core.ComponentVersionAccess, error) {
+func (c *ComponentAccess) NewVersion(version string) (cpi.ComponentVersionAccess, error) {
 	return nil, errors.ErrNotSupported(errors.KIND_FUNCTION, "new version", CTFComponentArchiveType)
 }

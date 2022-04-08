@@ -18,7 +18,6 @@ import (
 	"bytes"
 
 	. "github.com/gardener/ocm/cmds/ocm/testhelper"
-	"github.com/gardener/ocm/cmds/ocm/testhelper/builder"
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/mime"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
@@ -33,10 +32,10 @@ const COMP2 = "test.de/y"
 const PROVIDER = "mandelsoft"
 
 var _ = Describe("Test Environment", func() {
-	var env *builder.Builder
+	var env *TestEnv
 
 	BeforeEach(func() {
-		env = builder.NewBuilder(NewTestEnv())
+		env = NewTestEnv()
 	})
 
 	AfterEach(func() {

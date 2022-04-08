@@ -19,6 +19,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/pkg/options"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
 	"github.com/spf13/pflag"
@@ -76,7 +77,7 @@ func (o *Options) ProcessOnOptions(f options.OptionsProcessor) error {
 	return nil
 }
 
-func (o *Options) Complete(ctx out.Context) error {
+func (o *Options) Complete(ctx clictx.Context) error {
 	o.Context = ctx
 	if o.output != "" {
 		o.Output = &o.output
@@ -97,7 +98,7 @@ func (o *Options) Complete(ctx out.Context) error {
 	if err != nil {
 		return err
 	}
-	err = o.ProcessOnOptions(options.CompleteOptionsWithOutputContext(ctx))
+	err = o.ProcessOnOptions(options.CompleteOptionsWithCLIContext(ctx))
 	if err != nil {
 		return err
 	}

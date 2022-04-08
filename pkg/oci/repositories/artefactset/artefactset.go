@@ -21,7 +21,6 @@ import (
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
-	"github.com/gardener/ocm/pkg/oci/core"
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
@@ -196,6 +195,15 @@ func (a *ArtefactSet) GetTags(digest digest.Digest) ([]string, error) {
 	return result, nil
 }
 
+func (a *ArtefactSet) HasArtefact(ref string) (bool, error) {
+	if a.IsClosed() {
+		return false, accessio.ErrClosed
+	}
+	a.base.Lock()
+	defer a.base.Unlock()
+	return a.hasArtefact(ref)
+}
+
 func (a *ArtefactSet) GetArtefact(ref string) (cpi.ArtefactAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
@@ -222,6 +230,17 @@ func (a *ArtefactSet) matcher(ref string) func(d *artdesc.Descriptor) bool {
 		}
 		return false
 	}
+}
+
+func (a *ArtefactSet) hasArtefact(ref string) (bool, error) {
+	idx := a.GetIndex()
+	match := a.matcher(ref)
+	for _, e := range idx.Manifests {
+		if match(&e) {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func (a *ArtefactSet) getArtefact(ref string) (cpi.ArtefactAccess, error) {
@@ -293,7 +312,7 @@ func (a *ArtefactSet) AddPlatformArtefact(artefact cpi.Artefact, platform *artde
 	return blob, nil
 }
 
-func (a *ArtefactSet) NewArtefact(artefact ...*artdesc.Artefact) (core.ArtefactAccess, error) {
+func (a *ArtefactSet) NewArtefact(artefact ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}

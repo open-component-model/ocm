@@ -21,7 +21,7 @@ import (
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
-	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
+	artefactset2 "github.com/gardener/ocm/pkg/oci/repositories/artefactset"
 	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
 	"github.com/gardener/ocm/pkg/ocm/accessmethods"
 	storagecontext "github.com/gardener/ocm/pkg/ocm/blobhandler/oci"
@@ -121,7 +121,7 @@ func (b *artefactHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hi
 		}
 	}
 
-	set, err := artefactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
+	set, err := artefactset2.OpenFromBlob(accessobj.ACC_READONLY, blob)
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +135,7 @@ func (b *artefactHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hi
 		return nil, err
 	}
 
-	err = artefactset.TransferArtefact(art, namespace, oci.AsTags(tag)...)
+	err = artefactset2.TransferArtefact(art, namespace, oci.AsTags(tag)...)
 	if err != nil {
 		return nil, err
 	}

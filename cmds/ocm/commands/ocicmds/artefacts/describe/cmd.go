@@ -18,12 +18,13 @@ import (
 	"fmt"
 
 	"github.com/gardener/ocm/cmds/ocm/commands"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/common/options/repooption"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/common/handlers/artefacthdlr"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/names"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
 	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/common"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/oci"
@@ -63,7 +64,7 @@ type Command struct {
 	Output output.Options
 
 	BlobFiles  bool
-	Repository common.RepositoryOptions
+	Repository repooption.Option
 	Refs       []string
 }
 
@@ -117,7 +118,7 @@ func (o *Command) Run() error {
 	if err != nil {
 		return err
 	}
-	handler := common.NewTypeHandler(o.Context.OCI(), session, repo)
+	handler := artefacthdlr.NewTypeHandler(o.Context.OCI(), session, repo)
 	return utils.HandleArgs(outputs, &o.Output, handler, o.Refs...)
 }
 
@@ -134,7 +135,7 @@ func infoChain(options *output.Options) processing.ProcessChain {
 }
 
 func outInfo(ctx out.Context, e interface{}) {
-	p := e.(*common.Object)
+	p := e.(*artefacthdlr.Object)
 	out.Outf(ctx, "%s", ociutils.PrintArtefact(p.Artefact))
 }
 
@@ -145,7 +146,7 @@ type Info struct {
 
 func mapInfo(opts *Options) processing.MappingFunction {
 	return func(e interface{}) interface{} {
-		p := e.(*common.Object)
+		p := e.(*artefacthdlr.Object)
 		return &Info{
 			Artefact: p.Spec.String(),
 			Info:     ociutils.GetArtefactInfo(p.Artefact, opts.BlobFiles),

@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package common
+package repooption
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
@@ -22,19 +22,31 @@ import (
 	"github.com/spf13/pflag"
 )
 
-type RepositoryOptions struct {
-	Spec string
+type Option struct {
+	Spec       string
+	Repository oci.Repository
 }
 
-func (o *RepositoryOptions) AddFlags(fs *pflag.FlagSet) {
+func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Spec, "repo", "r", "", "repository name or spec")
 }
 
-func (o *RepositoryOptions) Complete(ctx clictx.Context) error {
+func (o *Option) Complete(ctx clictx.Context) error {
 	return nil
 }
 
-func (o *RepositoryOptions) GetRepository(ctx clictx.OCI, session oci.Session) (oci.Repository, error) {
+func (o *Option) CompleteWithSession(octx clictx.OCI, session oci.Session) error {
+	if o.Repository == nil {
+		r, err := o.GetRepository(octx, session)
+		if err != nil {
+			return err
+		}
+		o.Repository = r
+	}
+	return nil
+}
+
+func (o *Option) GetRepository(ctx clictx.OCI, session oci.Session) (oci.Repository, error) {
 	if o.Spec != "" {
 		r, _, err := session.DetermineRepository(ctx.Context(), o.Spec, ctx.GetAlias)
 		return r, err
@@ -42,7 +54,7 @@ func (o *RepositoryOptions) GetRepository(ctx clictx.OCI, session oci.Session) (
 	return nil, nil
 }
 
-func (o *RepositoryOptions) Usage() string {
+func (o *Option) Usage() string {
 
 	s := `
 If the repository/registry option is specified, the given names are interpreted

@@ -12,18 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package builder
+package download_test
 
 import (
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/common/accessobj"
-	"github.com/gardener/ocm/pkg/ocm/repositories/ctf"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-const T_OCM_CTF = "ocm common transport format"
-
-func (b *Builder) OCMCommonTransport(path string, fmt accessio.FileFormat, f ...func()) {
-	r, err := ctf.Open(b.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, path, 0777, accessio.PathFileSystem(b.Context.FileSystem()))
-	b.failOn(err)
-	b.configure(&ocm_repository{Repository: r, kind: T_OCM_CTF}, f)
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "OCM download resources")
 }

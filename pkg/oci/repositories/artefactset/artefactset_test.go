@@ -22,7 +22,7 @@ import (
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/mime"
-	"github.com/gardener/ocm/pkg/oci/repositories/ctf/artefactset"
+	artefactset2 "github.com/gardener/ocm/pkg/oci/repositories/artefactset"
 	. "github.com/gardener/ocm/pkg/oci/repositories/ctf/testhelper"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -30,7 +30,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func defaultManifestFill(a *artefactset.ArtefactSet) {
+func defaultManifestFill(a *artefactset2.ArtefactSet) {
 	art := NewArtefact(a)
 	a.AddArtefact(art)
 }
@@ -51,16 +51,16 @@ var _ = Describe("artefact management", func() {
 	})
 
 	It("instantiate filesystem artefact", func() {
-		a, err := artefactset.FormatDirectory.Create("test", opts, 0700)
+		a, err := artefactset2.FormatDirectory.Create("test", opts, 0700)
 		Expect(err).To(Succeed())
-		Expect(vfs.DirExists(tempfs, "test/"+artefactset.BlobsDirectoryName)).To(BeTrue())
+		Expect(vfs.DirExists(tempfs, "test/"+artefactset2.BlobsDirectoryName)).To(BeTrue())
 
 		defaultManifestFill(a)
 
 		Expect(a.Close()).To(Succeed())
-		Expect(vfs.FileExists(tempfs, "test/"+artefactset.ArtefactSetDescriptorFileName)).To(BeTrue())
+		Expect(vfs.FileExists(tempfs, "test/"+artefactset2.ArtefactSetDescriptorFileName)).To(BeTrue())
 
-		infos, err := vfs.ReadDir(tempfs, "test/"+artefactset.BlobsDirectoryName)
+		infos, err := vfs.ReadDir(tempfs, "test/"+artefactset2.BlobsDirectoryName)
 		Expect(err).To(Succeed())
 		blobs := []string{}
 		for _, fi := range infos {
@@ -73,7 +73,7 @@ var _ = Describe("artefact management", func() {
 	})
 
 	It("instantiate tgz artefact", func() {
-		a, err := artefactset.FormatTGZ.Create("test.tgz", opts, 0600)
+		a, err := artefactset2.FormatTGZ.Create("test.tgz", opts, 0600)
 		Expect(err).To(Succeed())
 
 		defaultManifestFill(a)
@@ -101,13 +101,13 @@ var _ = Describe("artefact management", func() {
 
 			switch header.Typeflag {
 			case tar.TypeDir:
-				Expect(header.Name).To(Equal(artefactset.BlobsDirectoryName))
+				Expect(header.Name).To(Equal(artefactset2.BlobsDirectoryName))
 			case tar.TypeReg:
 				files = append(files, header.Name)
 			}
 		}
 		Expect(files).To(ContainElements(
-			artefactset.ArtefactSetDescriptorFileName,
+			artefactset2.ArtefactSetDescriptorFileName,
 			"blobs/sha256.3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
 			"blobs/sha256.44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
 			"blobs/sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
@@ -120,7 +120,7 @@ var _ = Describe("artefact management", func() {
 
 		opts := accessio.AccessOptions(opts, accessio.File(file))
 
-		a, err := artefactset.FormatTGZ.Create("", opts, 0600)
+		a, err := artefactset2.FormatTGZ.Create("", opts, 0600)
 		Expect(err).To(Succeed())
 
 		defaultManifestFill(a)
@@ -147,13 +147,13 @@ var _ = Describe("artefact management", func() {
 
 			switch header.Typeflag {
 			case tar.TypeDir:
-				Expect(header.Name).To(Equal(artefactset.BlobsDirectoryName))
+				Expect(header.Name).To(Equal(artefactset2.BlobsDirectoryName))
 			case tar.TypeReg:
 				files = append(files, header.Name)
 			}
 		}
 		Expect(files).To(ContainElements(
-			artefactset.ArtefactSetDescriptorFileName,
+			artefactset2.ArtefactSetDescriptorFileName,
 			"blobs/sha256.3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
 			"blobs/sha256.44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
 			"blobs/sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
@@ -161,13 +161,13 @@ var _ = Describe("artefact management", func() {
 
 	Context("manifest", func() {
 		It("read from filesystem artefact", func() {
-			a, err := artefactset.FormatDirectory.Create("test", opts, 0700)
+			a, err := artefactset2.FormatDirectory.Create("test", opts, 0700)
 			Expect(err).To(Succeed())
-			Expect(vfs.DirExists(tempfs, "test/"+artefactset.BlobsDirectoryName)).To(BeTrue())
+			Expect(vfs.DirExists(tempfs, "test/"+artefactset2.BlobsDirectoryName)).To(BeTrue())
 			defaultManifestFill(a)
 			Expect(a.Close()).To(Succeed())
 
-			a, err = artefactset.FormatDirectory.Open(accessobj.ACC_READONLY, "test", opts)
+			a, err = artefactset2.FormatDirectory.Open(accessobj.ACC_READONLY, "test", opts)
 			defer a.Close()
 			Expect(len(a.GetIndex().Manifests)).To(Equal(1))
 			art, err := a.GetArtefact(a.GetIndex().Manifests[0].Digest.String())
@@ -179,12 +179,12 @@ var _ = Describe("artefact management", func() {
 			Expect(blob.MimeType()).To(Equal(mime.MIME_OCTET))
 		})
 		It("read from tgz artefact", func() {
-			a, err := artefactset.FormatTGZ.Create("test.tgz", opts, 0700)
+			a, err := artefactset2.FormatTGZ.Create("test.tgz", opts, 0700)
 			Expect(err).To(Succeed())
 			defaultManifestFill(a)
 			Expect(a.Close()).To(Succeed())
 
-			a, err = artefactset.Open(accessobj.ACC_READONLY, "test.tgz", 0, opts)
+			a, err = artefactset2.Open(accessobj.ACC_READONLY, "test.tgz", 0, opts)
 			Expect(err).To(Succeed())
 			defer a.Close()
 			Expect(len(a.GetIndex().Manifests)).To(Equal(1))

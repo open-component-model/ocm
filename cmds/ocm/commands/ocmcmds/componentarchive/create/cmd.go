@@ -16,6 +16,7 @@ package create
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/commands"
+	"github.com/gardener/ocm/cmds/ocm/commands/common/options/formatoption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
@@ -40,8 +41,7 @@ var (
 type Command struct {
 	utils.BaseCommand
 
-	format string
-
+	Format  formatoption.Option
 	Handler comparch.FormatHandler
 	Force   bool
 	Path    string
@@ -70,16 +70,18 @@ to host component version content or a tar/tgz file.
 }
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVarP(&o.format, "type", "t", string(accessio.FormatDirectory), "archive format")
+	o.Format.AddFlags(fs)
 	fs.BoolVarP(&o.Force, "force", "f", false, "remove existing content")
 }
 
 func (o *Command) Complete(args []string) error {
-	var err error
-
-	o.Handler = comparch.GetFormat(accessio.FileFormat(o.format))
+	err := o.Format.Complete(o.Context)
+	if err != nil {
+		return err
+	}
+	o.Handler = comparch.GetFormat(o.Format.Format)
 	if o.Handler == nil {
-		return accessio.ErrInvalidFileFormat(o.format)
+		return accessio.ErrInvalidFileFormat(o.Format.Format.String())
 	}
 
 	o.Component = args[0]
@@ -97,10 +99,7 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
-	mode := vfs.FileMode(0660)
-	if o.format == string(accessio.FormatDirectory) {
-		mode = 0770
-	}
+	mode := o.Format.Mode()
 	fs := o.Context.FileSystem()
 	if ok, err := vfs.Exists(fs, o.Path); ok || err != nil {
 		if err != nil {

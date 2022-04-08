@@ -56,6 +56,17 @@ func GetFormat(name FileFormat) FormatHandler {
 	return fileFormats[name]
 }
 
+func GetFormats() map[accessio.FileFormat]FormatHandler {
+	lock.RLock()
+	defer lock.RUnlock()
+
+	m := map[accessio.FileFormat]FormatHandler{}
+	for k, v := range fileFormats {
+		m[k] = v
+	}
+	return m
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type Closer interface {

@@ -18,11 +18,12 @@ import (
 	"fmt"
 
 	"github.com/gardener/ocm/cmds/ocm/commands"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/common/options/repooption"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/common/handlers/artefacthdlr"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/names"
 	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/common"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/oci"
@@ -40,11 +41,11 @@ type Command struct {
 
 	Output output.Options
 
-	Repository common.RepositoryOptions
+	Repository repooption.Option
 	Refs       []string
 }
 
-// NewCommand creates a new ctf command.
+// NewCommand creates a new artefact command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx)}, names...)
 }
@@ -93,7 +94,7 @@ func (o *Command) Run() error {
 	if err != nil {
 		return err
 	}
-	handler := common.NewTypeHandler(o.Context.OCI(), session, repo)
+	handler := artefacthdlr.NewTypeHandler(o.Context.OCI(), session, repo)
 	return utils.HandleArgs(outputs, &o.Output, handler, o.Refs...)
 }
 
@@ -115,7 +116,7 @@ func get_wide(opts *output.Options) output.Output {
 
 func map_get_regular_output(e interface{}) interface{} {
 	digest := "unknown"
-	p := e.(*common.Object)
+	p := e.(*artefacthdlr.Object)
 	blob, err := p.Artefact.Blob()
 	if err == nil {
 		digest = blob.Digest().String()
@@ -129,7 +130,7 @@ func map_get_regular_output(e interface{}) interface{} {
 
 func map_get_wide_output(e interface{}) interface{} {
 	digest := "unknown"
-	p := e.(*common.Object)
+	p := e.(*artefacthdlr.Object)
 	blob, err := p.Artefact.Blob()
 	if err == nil {
 		digest = blob.Digest().String()

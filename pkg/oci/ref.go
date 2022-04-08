@@ -132,8 +132,12 @@ func ParseRef(ref string) (RefSpec, error) {
 	if match != nil {
 		spec.Type = string(match[1])
 		spec.Info = string(match[2])
-		if len(match[0]) != 0 {
-			spec.Info = string(match[3])
+
+		match = grammar.ErrorCheckRegexp.FindSubmatch([]byte(ref))
+		if match != nil {
+			if len(match[3]) != 0 || len(match[4]) != 0 {
+				return RefSpec{}, errors.ErrInvalid(KIND_OCI_REFERENCE, ref)
+			}
 		}
 		return spec, nil
 	}

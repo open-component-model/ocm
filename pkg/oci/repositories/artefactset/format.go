@@ -77,6 +77,16 @@ func GetFormat(name accessio.FileFormat) FormatHandler {
 	return fileFormats[name]
 }
 
+func SupportedFormats() []accessio.FileFormat {
+	lock.RLock()
+	defer lock.RUnlock()
+	result := make([]accessio.FileFormat, 0, len(fileFormats))
+	for f := range fileFormats {
+		result = append(result, f)
+	}
+	return result
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 func OpenFromBlob(acc accessobj.AccessMode, blob accessio.BlobAccess, opts ...accessio.Option) (*Object, error) {

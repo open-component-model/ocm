@@ -18,11 +18,13 @@ import (
 	"fmt"
 
 	"github.com/gardener/ocm/cmds/ocm/commands"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/common/options/repooption"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/common/handlers/artefacthdlr"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/names"
 	"github.com/gardener/ocm/pkg/oci"
+	"github.com/gardener/ocm/pkg/oci/transfer"
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/common"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/spf13/cobra"
@@ -39,7 +41,7 @@ type Command struct {
 
 	Output output.Options
 
-	Repository common.RepositoryOptions
+	Repository repooption.Option
 	Refs       []string
 	Target     string
 }
@@ -97,7 +99,7 @@ func (o *Command) Run() error {
 		return err
 	}
 
-	handler := common.NewTypeHandler(o.Context.OCI(), a.Session, repo)
+	handler := artefacthdlr.NewTypeHandler(o.Context.OCI(), a.Session, repo)
 
 	return utils.HandleOutput(a, handler, utils.StringElemSpecs(o.Refs...)...)
 }
@@ -141,7 +143,7 @@ func (a *action) Add(e interface{}) error {
 	}
 	a.count++
 
-	src := e.(*common.Object)
+	src := e.(*artefacthdlr.Object)
 
 	repository, tag := a.Target(src)
 
@@ -155,7 +157,7 @@ func (a *action) Add(e interface{}) error {
 		tgt.Tag = &tag
 	}
 	fmt.Printf("copying %s to %s...\n", &src.Spec, &tgt)
-	err = oci.TransferArtefact(src.Artefact, ns, tag)
+	err = transfer.TransferArtefact(src.Artefact, ns, tag)
 	if err == nil {
 		a.copied++
 	}
@@ -167,7 +169,7 @@ func (a *action) Out() error {
 	return nil
 }
 
-func (a *action) Target(obj *common.Object) (string, string) {
+func (a *action) Target(obj *artefacthdlr.Object) (string, string) {
 	if a.Ref.IsRegistry() {
 		if a.Ref.IsVersion() {
 			return a.Ref.Repository, *a.Ref.Tag

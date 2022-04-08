@@ -44,7 +44,7 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 	}
 	fs := vfsattr.Get(ctx)
 
-	if ok, err := ctf.CheckFile(u.Type == CTFComponentArchiveType, path, fs, comparch.ComponentDescriptorFileName); !ok || err != nil {
+	if ok, err := accessobj.CheckFile(CTFComponentArchiveType, u.Type == CTFComponentArchiveType, path, fs, comparch.ComponentDescriptorFileName); !ok || err != nil {
 		if err != nil {
 			return nil, err
 		}

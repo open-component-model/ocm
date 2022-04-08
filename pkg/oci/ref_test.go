@@ -24,20 +24,20 @@ import (
 func CheckRef(ref string, exp *oci.RefSpec) {
 	spec, err := oci.ParseRef(ref)
 	if exp == nil {
-		Expect(err).To(HaveOccurred())
+		ExpectWithOffset(1, err).To(HaveOccurred())
 	} else {
-		Expect(err).To(Succeed())
-		Expect(spec).To(Equal(*exp))
+		ExpectWithOffset(1, err).To(Succeed())
+		ExpectWithOffset(1, spec).To(Equal(*exp))
 	}
 }
 
 func CheckRepo(ref string, exp *oci.UniformRepositorySpec) {
 	spec, err := oci.ParseRepo(ref)
 	if exp == nil {
-		Expect(err).To(HaveOccurred())
+		ExpectWithOffset(1, err).To(HaveOccurred())
 	} else {
-		Expect(err).To(Succeed())
-		Expect(spec).To(Equal(*exp))
+		ExpectWithOffset(1, err).To(Succeed())
+		ExpectWithOffset(1, spec).To(Equal(*exp))
 	}
 }
 
@@ -73,6 +73,15 @@ var _ = Describe("ref parsing", func() {
 			Tag:        &tag,
 			Digest:     &digest,
 		})
+		CheckRef("directory::a/b", &oci.RefSpec{
+			UniformRepositorySpec: oci.UniformRepositorySpec{
+				Type:   "directory",
+				Scheme: "",
+				Host:   "",
+				Info:   "",
+			},
+			Repository: "a/b",
+		})
 	})
 
 	It("fails", func() {
@@ -94,7 +103,13 @@ var _ = Describe("ref parsing", func() {
 		CheckRepo("alias", &oci.UniformRepositorySpec{
 			Info: "alias",
 		})
-
+		CheckRepo("tar::a/b.tar", &oci.UniformRepositorySpec{
+			Type: "tar",
+			Info: "a/b.tar",
+		})
+		CheckRepo("a/b.tar", &oci.UniformRepositorySpec{
+			Info: "a/b.tar",
+		})
 	})
 
 })

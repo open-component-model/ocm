@@ -128,6 +128,13 @@ var (
 		Optional(Literal(":"), Capture(TagRegexp)),
 		Optional(Literal("@"), Capture(DigestRegexp)))
 
+	// ErrorCheckRegexp matches even wrong tags and/or digests
+	ErrorCheckRegexp = Anchored(
+		Optional(Capture(Match(".*?")), Literal("::")),
+		Capture(Match(".*?")),
+		Optional(Literal(":"), Capture(Match(".*?"))),
+		Optional(Literal("@"), Capture(Match(".*?"))))
+
 	////////////////////////////////////////////////////////////////////////////
 	// now the various full flegded artefact flavors
 

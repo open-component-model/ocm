@@ -51,17 +51,6 @@ func CompleteOptions(opt Options) error {
 	return nil
 }
 
-func CompleteOptionsWithOutputContext(ctx out.Context) OptionsProcessor {
-	return func(opt Options) error {
-		if c, ok := opt.(CompleteWithOutputContext); ok {
-			return c.Complete(ctx)
-		}
-		if c, ok := opt.(Complete); ok {
-			return c.Complete()
-		}
-		return nil
-	}
-}
 func CompleteOptionsWithCLIContext(ctx clictx.Context) OptionsProcessor {
 	return func(opt Options) error {
 		if c, ok := opt.(CompleteWithCLIContext); ok {
@@ -70,9 +59,6 @@ func CompleteOptionsWithCLIContext(ctx clictx.Context) OptionsProcessor {
 		if c, ok := opt.(CompleteWithOutputContext); ok {
 			return c.Complete(ctx)
 		}
-		if c, ok := opt.(Complete); ok {
-			return c.Complete()
-		}
-		return nil
+		return CompleteOptions(opt)
 	}
 }
