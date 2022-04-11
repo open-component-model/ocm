@@ -12,17 +12,29 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package output
+package common
 
 import (
-	"strings"
+	"github.com/gardener/ocm/cmds/ocm/clictx"
+	"github.com/gardener/ocm/cmds/ocm/pkg/options"
+	"github.com/gardener/ocm/pkg/oci"
 )
 
-func SelectBest(name string, candidates ...string) (string, int) {
-	for i, c := range candidates {
-		if strings.ToLower(name) == strings.ToLower(c) {
-			return c, i
+type OptionCompleter interface {
+	CompleteWithSession(ctx clictx.OCI, session oci.Session) error
+}
+
+func CompleteOptionsWithContext(ctx clictx.Context, session oci.Session) options.OptionsProcessor {
+	return func(opt options.Options) error {
+		if c, ok := opt.(OptionCompleter); ok {
+			return c.CompleteWithSession(ctx.OCI(), session)
 		}
+		if c, ok := opt.(options.CompleteWithCLIContext); ok {
+			return c.Complete(ctx)
+		}
+		if c, ok := opt.(options.Complete); ok {
+			return c.Complete()
+		}
+		return nil
 	}
-	return "", -1
 }

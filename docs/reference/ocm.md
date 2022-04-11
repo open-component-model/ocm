@@ -2,6 +2,12 @@
 
 ocm
 
+### Synopsis
+
+```
+ocm <sub command> [<options>]
+```
+
 ### Options
 
 ```
@@ -11,18 +17,18 @@ ocm
 
 ### SEE ALSO
 
-* [ocm add](ocm_add.md)	 - 
-* [ocm componentarchive](ocm_componentarchive.md)	 - 
-* [ocm components](ocm_components.md)	 - 
-* [ocm create](ocm_create.md)	 - 
-* [ocm describe](ocm_describe.md)	 - 
-* [ocm download](ocm_download.md)	 - 
-* [ocm get](ocm_get.md)	 - 
-* [ocm oci](ocm_oci.md)	 - 
-* [ocm ocm](ocm_ocm.md)	 - 
-* [ocm references](ocm_references.md)	 - 
-* [ocm resources](ocm_resources.md)	 - 
-* [ocm sources](ocm_sources.md)	 - 
-* [ocm transfer](ocm_transfer.md)	 - 
-* [ocm version](ocm_version.md)	 - displays the version
+* [ocm <b>add</b>](ocm_add.md)	 - 
+* [ocm <b>componentarchive</b>](ocm_componentarchive.md)	 - 
+* [ocm <b>components</b>](ocm_components.md)	 - 
+* [ocm <b>create</b>](ocm_create.md)	 - 
+* [ocm <b>describe</b>](ocm_describe.md)	 - 
+* [ocm <b>download</b>](ocm_download.md)	 - 
+* [ocm <b>get</b>](ocm_get.md)	 - 
+* [ocm <b>oci</b>](ocm_oci.md)	 - 
+* [ocm <b>ocm</b>](ocm_ocm.md)	 - 
+* [ocm <b>references</b>](ocm_references.md)	 - 
+* [ocm <b>resources</b>](ocm_resources.md)	 - 
+* [ocm <b>sources</b>](ocm_sources.md)	 - 
+* [ocm <b>transfer</b>](ocm_transfer.md)	 - 
+* [ocm <b>version</b>](ocm_version.md)	 - displays the version
 

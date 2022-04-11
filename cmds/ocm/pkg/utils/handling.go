@@ -69,12 +69,12 @@ func ElemSpecs(list interface{}) []ElemSpec {
 	return r
 }
 
-func HandleArgs(outputs output.Outputs, opts *output.Options, handler TypeHandler, args ...string) error {
-	return HandleOutputs(outputs, opts, handler, StringElemSpecs(args...)...)
+func HandleArgs(opts *output.Options, handler TypeHandler, args ...string) error {
+	return HandleOutputs(opts, handler, StringElemSpecs(args...)...)
 }
 
-func HandleOutputs(outputs output.Outputs, opts *output.Options, handler TypeHandler, args ...ElemSpec) error {
-	output, err := outputs.Create(opts)
+func HandleOutputs(opts *output.Options, handler TypeHandler, args ...ElemSpec) error {
+	output, err := opts.Create()
 	if err != nil {
 		return err
 	}

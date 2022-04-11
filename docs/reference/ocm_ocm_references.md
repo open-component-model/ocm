@@ -2,6 +2,12 @@
 
 
 
+### Synopsis
+
+```
+ocm ocm references <sub command> [<options>]
+```
+
 ### Options
 
 ```
@@ -10,6 +16,12 @@
 
 ### SEE ALSO
 
+##### Parent
+
 * [ocm ocm](ocm_ocm.md)	 - 
-* [ocm ocm references get](ocm_ocm_references_get.md)	 - get references of a component version
+
+
+##### Sub Commands
+
+* [ocm ocm references <b>get</b>](ocm_ocm_references_get.md)	 - get references of a component version
 

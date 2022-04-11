@@ -22,8 +22,9 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/commands"
 	"github.com/gardener/ocm/cmds/ocm/commands/common/options/destoption"
 	"github.com/gardener/ocm/cmds/ocm/commands/common/options/formatoption"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/common/options/repooption"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/common"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/common/handlers/artefacthdlr"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/common/options/repooption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/names"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
@@ -34,7 +35,6 @@ import (
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/repositories/artefactset"
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
 var (
@@ -45,14 +45,12 @@ var (
 type Command struct {
 	utils.BaseCommand
 
-	Repository repooption.Option
-	Output     output.Options
-	Refs       []string
+	Refs []string
 }
 
 // NewCommand creates a new resources command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx), Output: *output.OutputOption(&destoption.Option{}, &formatoption.Option{})}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, &repooption.Option{}, output.OutputOptions(outputs, &destoption.Option{}, &formatoption.Option{}))}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -69,20 +67,8 @@ The files are named according to the artefact repository name.
 	}
 }
 
-func (o *Command) AddFlags(fs *pflag.FlagSet) {
-	o.Repository.AddFlags(fs)
-	o.Output.AddFlags(fs, outputs)
-}
-
 func (o *Command) Complete(args []string) error {
-	err := o.Output.Complete(o.Context)
-	if err != nil {
-		return err
-	}
-	err = o.Repository.Complete(o.Context)
-	if err != nil {
-		return err
-	}
+	var err error
 	o.Refs = args[1:]
 	return err
 }
@@ -91,13 +77,13 @@ func (o *Command) Run() error {
 	session := oci.NewSession(nil)
 	defer session.Close()
 
-	err := o.Repository.CompleteWithSession(o.OCI(), session)
+	err := o.ProcessOnOptions(common.CompleteOptionsWithContext(o.Context, session))
 	if err != nil {
 		return err
 	}
 
-	hdlr := artefacthdlr.NewTypeHandler(o.Context.OCI(), session, o.Repository.Repository)
-	return utils.HandleOutputs(outputs, &o.Output, hdlr, utils.StringElemSpecs(o.Refs...)...)
+	hdlr := artefacthdlr.NewTypeHandler(o.Context.OCI(), session, repooption.From(o).Repository)
+	return utils.HandleArgs(output.From(o), hdlr, o.Refs...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

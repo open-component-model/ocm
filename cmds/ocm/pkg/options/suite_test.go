@@ -12,17 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package output
+package options
 
 import (
-	"strings"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-func SelectBest(name string, candidates ...string) (string, int) {
-	for i, c := range candidates {
-		if strings.ToLower(name) == strings.ToLower(c) {
-			return c, i
-		}
-	}
-	return "", -1
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Option handling")
 }

@@ -2,6 +2,12 @@
 
 
 
+### Synopsis
+
+```
+ocm download <sub command> [<options>]
+```
+
 ### Options
 
 ```
@@ -10,6 +16,13 @@
 
 ### SEE ALSO
 
+##### Parent
+
 * [ocm](ocm.md)	 - ocm
-* [ocm download resources](ocm_download_resources.md)	 - download resources of a component version
+
+
+##### Sub Commands
+
+* [ocm download <b>artefacts</b>](ocm_download_artefacts.md)	 - download oci artefacts
+* [ocm download <b>resources</b>](ocm_download_resources.md)	 - download resources of a component version
 

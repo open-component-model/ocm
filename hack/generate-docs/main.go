@@ -8,10 +8,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/spf13/cobra/doc"
-
 	"github.com/gardener/ocm/cmds/ocm/app"
+	"github.com/gardener/ocm/cmds/ocm/clictx"
 )
 
 func main() {
@@ -29,8 +27,8 @@ func main() {
 
 	cmd := app.NewCliCommand(clictx.DefaultContext())
 	cmd.DisableAutoGenTag = true
-	check(doc.GenMarkdownTree(cmd, outputDir))
-	fmt.Printf("Successfully written docs to %s", outputDir)
+	check(GenMarkdownTree(cmd, outputDir))
+	fmt.Printf("Successfully written docs to %s\n", outputDir)
 }
 
 func printHelp() {

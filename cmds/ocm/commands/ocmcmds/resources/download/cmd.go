@@ -37,7 +37,6 @@ import (
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
 var (
@@ -48,16 +47,13 @@ var (
 type Command struct {
 	utils.BaseCommand
 
-	Repository repooption.Option
-	Output     output.Options
-
 	Comp string
 	Ids  []metav1.Identity
 }
 
 // NewCommand creates a new resources command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx), Output: *output.OutputOption(&closureoption.Option{}, &lookupoption.Option{}, &destoption.Option{})}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, &repooption.Option{}, output.OutputOptions(outputs, &closureoption.Option{}, &lookupoption.Option{}, &destoption.Option{}))}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -96,20 +92,8 @@ order:
 	}
 }
 
-func (o *Command) AddFlags(fs *pflag.FlagSet) {
-	o.Repository.AddFlags(fs)
-	o.Output.AddFlags(fs, outputs)
-}
-
 func (o *Command) Complete(args []string) error {
-	err := o.Output.Complete(o.Context)
-	if err != nil {
-		return err
-	}
-	err = o.Repository.Complete(o.Context)
-	if err != nil {
-		return err
-	}
+	var err error
 	o.Comp = args[0]
 	o.Ids, err = ocmcommon.MapArgsToIdentities(args[1:]...)
 	return err
@@ -119,20 +103,17 @@ func (o *Command) Run() error {
 	session := ocm.NewSession(nil)
 	defer session.Close()
 
-	err := o.Output.ProcessOnOptions(ocmcommon.CompleteOptionsWithContext(o, session))
-	if err != nil {
-		return err
-	}
-	err = o.Repository.CompleteWithSession(o.OCM(), session)
+	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithContext(o, session))
 	if err != nil {
 		return err
 	}
 
-	hdlr, err := common.NewTypeHandler(o.Context.OCM(), &o.Output, o.Repository.Repository, session, []string{o.Comp})
+	opts := output.From(o)
+	hdlr, err := common.NewTypeHandler(o.Context.OCM(), opts, repooption.From(o).Repository, session, []string{o.Comp})
 	if err != nil {
 		return err
 	}
-	return utils.HandleOutputs(outputs, &o.Output, hdlr, utils.ElemSpecs(o.Ids)...)
+	return utils.HandleOutputs(opts, hdlr, utils.ElemSpecs(o.Ids)...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

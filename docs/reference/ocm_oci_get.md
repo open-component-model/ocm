@@ -4,11 +4,25 @@ get artefact version
 
 ### Synopsis
 
+```
+ocm oci get [<options>] {<artefact-reference>}
+```
 
-Get lists all artefact versions specified, if only a repository is specified
-all tagged artefacts are listed.
+### Options
+
+```
+  -h, --help               help for get
+  -o, --output string      output mode (JSON, json, wide, yaml)
+  -r, --repo string        repository name or spec
+  -s, --sort stringArray   sort fields
+```
+
+### Description
 
 
+		Get lists all artefact versions specified, if only a repository is specified
+		all tagged artefacts are listed.
+	
 If the repository/registry option is specified, the given names are interpreted
 relative to the specified registry using the syntax
 
@@ -28,33 +42,32 @@ For the *Common Transport Format* the types <code>directory</code>,
 
 Using the JSON variant any repository type supported by the 
 linked library can be used:
+- `ArtefactSet`
 - `CommonTransportFormat`
 - `DockerDaemon`
 - `Empty`
 - `OCIRegistry`
 
+With the option <code>--output</code> the out put mode can be selected.
+The following modes are supported:
+ - JSON
+ - json
+ - wide
+ - yaml
 
-*Example:*
-<pre>
+
+### Examples
+
+```
+
 $ ocm get artefact ghcr.io/mandelsoft/kubelink
 $ ocm get artefact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
-</pre>
 
-
-```
-ocm oci get [<options>] {<artefact-reference>} [flags]
-```
-
-### Options
-
-```
-  -h, --help               help for get
-  -o, --output string      output mode (wide, yaml, json, JSON)
-  -r, --repo string        repository name or spec
-  -s, --sort stringArray   sort fields
 ```
 
 ### SEE ALSO
+
+##### Parent
 
 * [ocm oci](ocm_oci.md)	 - 
 

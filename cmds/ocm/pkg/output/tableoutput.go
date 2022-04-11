@@ -74,9 +74,12 @@ func (this *TableProcessingOutput) Out() error {
 			idxs[cols[i]] = i
 		}
 		for _, k := range sort {
-			key := SelectBest(strings.ToLower(k), cols...)
+			key, n := SelectBest(strings.ToLower(k), cols...)
 			if key == "" {
 				return errors.Newf("unknown field '%s'", k)
+			}
+			if n < this.opts.FixedColums {
+				return errors.Newf("field '%s' not possible", k)
 			}
 			cmp := compare_column(idxs[key])
 			if this.opts.FixedColums > 0 {

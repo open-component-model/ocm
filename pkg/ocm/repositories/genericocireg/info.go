@@ -22,6 +22,7 @@ import (
 	"github.com/gardener/ocm/pkg/oci/cpi"
 	"github.com/gardener/ocm/pkg/oci/ociutils"
 	"github.com/gardener/ocm/pkg/ocm/repositories/genericocireg/componentmapping"
+	"github.com/gardener/ocm/pkg/runtime"
 )
 
 func init() {
@@ -66,7 +67,7 @@ func (h handler) Description(m cpi.ManifestAccess, config []byte) string {
 	}
 	s += fmt.Sprintf("  descriptor:\n")
 	var raw interface{}
-	err = json.Unmarshal(data, &raw)
+	err = runtime.DefaultYAMLEncoding.Unmarshal(data, &raw)
 	if err != nil {
 		s += "    " + string(data)
 		return s + "  cannot get unmarshal component descriptor: " + err.Error()

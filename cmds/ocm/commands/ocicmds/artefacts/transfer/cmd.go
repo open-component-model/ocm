@@ -18,17 +18,16 @@ import (
 	"fmt"
 
 	"github.com/gardener/ocm/cmds/ocm/commands"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/common/options/repooption"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/common"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/common/handlers/artefacthdlr"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/common/options/repooption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/names"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/transfer"
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
 var (
@@ -39,15 +38,12 @@ var (
 type Command struct {
 	utils.BaseCommand
 
-	Output output.Options
-
-	Repository repooption.Option
-	Refs       []string
-	Target     string
+	Refs   []string
+	Target string
 }
 
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx)}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, &repooption.Option{})}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -57,40 +53,26 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Short: "transfer OCI artefacts",
 		Long: `
 Transfer OCI artefacts from one registry to another one
-
-` + o.Repository.Usage() + `
-
-*Example:*
-<pre>
+`,
+		Example: `
 $ ocm oci transfer ghcr.io/mandelsoft/kubelink gcr.io
-</pre>
 `,
 	}
 }
 
-func (o *Command) AddFlags(fs *pflag.FlagSet) {
-	o.Repository.AddFlags(fs)
-}
-
 func (o *Command) Complete(args []string) error {
-	var err error
-	if len(args) == 0 && o.Repository.Spec == "" {
+	if len(args) == 0 && repooption.From(o).Spec == "" {
 		return fmt.Errorf("a repository or at least one argument that defines the reference is needed")
 	}
 	o.Target = args[len(args)-1]
 	o.Refs = args[:len(args)-1]
-	err = o.Repository.Complete(o.Context)
-	if err != nil {
-		return err
-	}
-	return o.Output.Complete(o.Context)
-
+	return nil
 }
 
 func (o *Command) Run() error {
 	session := oci.NewSession(nil)
 	defer session.Close()
-	repo, err := o.Repository.GetRepository(o.Context.OCI(), session)
+	err := o.ProcessOnOptions(common.CompleteOptionsWithContext(o.Context, session))
 	if err != nil {
 		return err
 	}
@@ -99,7 +81,7 @@ func (o *Command) Run() error {
 		return err
 	}
 
-	handler := artefacthdlr.NewTypeHandler(o.Context.OCI(), a.Session, repo)
+	handler := artefacthdlr.NewTypeHandler(o.Context.OCI(), a.Session, repooption.From(o).Repository)
 
 	return utils.HandleOutput(a, handler, utils.StringElemSpecs(o.Refs...)...)
 }

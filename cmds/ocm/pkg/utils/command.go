@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
+	"github.com/gardener/ocm/cmds/ocm/pkg/options"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -36,13 +37,13 @@ type OCMCommand interface {
 
 type BaseCommand struct {
 	clictx.Context
+	options.OptionSet
 }
 
-func NewBaseCommand(ctx clictx.Context) BaseCommand {
-	return BaseCommand{Context: ctx}
+func NewBaseCommand(ctx clictx.Context, opts ...options.Options) BaseCommand {
+	return BaseCommand{Context: ctx, OptionSet: opts}
 }
 
-func (BaseCommand) AddFlags(fs *pflag.FlagSet)   {}
 func (BaseCommand) Complete(args []string) error { return nil }
 
 func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
@@ -52,6 +53,9 @@ func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 	}
 	c.Aliases = names[1:]
 	c.RunE = func(cmd *cobra.Command, args []string) error {
+		if set, ok := ocmcmd.(options.OptionSetProvider); ok {
+			set.AsOptionSet().ProcessOnOptions(options.CompleteOptionsWithCLIContext(ocmcmd))
+		}
 		err := ocmcmd.Complete(args)
 		if err == nil {
 			err = ocmcmd.Run()
@@ -62,6 +66,9 @@ func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 		return err
 	}
 	c.TraverseChildren = true
+	if u, ok := ocmcmd.(options.Usage); ok {
+		c.Long = c.Long + u.Usage()
+	}
 	ocmcmd.AddFlags(c.Flags())
 	return c
 }

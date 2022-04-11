@@ -2,6 +2,12 @@
 
 
 
+### Synopsis
+
+```
+ocm create <sub command> [<options>]
+```
+
 ### Options
 
 ```
@@ -10,6 +16,12 @@
 
 ### SEE ALSO
 
+##### Parent
+
 * [ocm](ocm.md)	 - ocm
-* [ocm create componentarchive](ocm_create_componentarchive.md)	 - create new component archive
+
+
+##### Sub Commands
+
+* [ocm create <b>componentarchive</b>](ocm_create_componentarchive.md)	 - create new component archive
 

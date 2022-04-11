@@ -4,13 +4,8 @@ create new component archive
 
 ### Synopsis
 
-
-Create a new component archive. This might be either a directory prepared
-to host component version content or a tar/tgz file.
-
-
 ```
-ocm create componentarchive [<options>] <component> <version> <provider> <path> {<label>=<value>} [flags]
+ocm create componentarchive [<options>] <component> <version> <provider> <path> {<label>=<value>}
 ```
 
 ### Options
@@ -21,7 +16,16 @@ ocm create componentarchive [<options>] <component> <version> <provider> <path> 
   -t, --type string   archive format (default "directory")
 ```
 
+### Description
+
+
+Create a new component archive. This might be either a directory prepared
+to host component version content or a tar/tgz file.
+
+
 ### SEE ALSO
+
+##### Parent
 
 * [ocm create](ocm_create.md)	 - 
 

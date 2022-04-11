@@ -2,6 +2,12 @@
 
 
 
+### Synopsis
+
+```
+ocm describe <sub command> [<options>]
+```
+
 ### Options
 
 ```
@@ -10,6 +16,12 @@
 
 ### SEE ALSO
 
+##### Parent
+
 * [ocm](ocm.md)	 - ocm
-* [ocm describe artefacts](ocm_describe_artefacts.md)	 - describe artefact version
+
+
+##### Sub Commands
+
+* [ocm describe <b>artefacts</b>](ocm_describe_artefacts.md)	 - describe artefact version
 

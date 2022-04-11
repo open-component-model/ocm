@@ -4,9 +4,21 @@ transfer OCI artefacts
 
 ### Synopsis
 
+```
+ocm transfer artefacts [<options>] {<artefact-reference>}
+```
+
+### Options
+
+```
+  -h, --help          help for artefacts
+  -r, --repo string   repository name or spec
+```
+
+### Description
+
 
 Transfer OCI artefacts from one registry to another one
-
 
 If the repository/registry option is specified, the given names are interpreted
 relative to the specified registry using the syntax
@@ -27,30 +39,24 @@ For the *Common Transport Format* the types <code>directory</code>,
 
 Using the JSON variant any repository type supported by the 
 linked library can be used:
+- `ArtefactSet`
 - `CommonTransportFormat`
 - `DockerDaemon`
 - `Empty`
 - `OCIRegistry`
 
 
-*Example:*
-<pre>
+### Examples
+
+```
+
 $ ocm oci transfer ghcr.io/mandelsoft/kubelink gcr.io
-</pre>
 
-
-```
-ocm transfer artefacts [<options>] {<artefact-reference>} [flags]
-```
-
-### Options
-
-```
-  -h, --help          help for artefacts
-  -r, --repo string   repository name or spec
 ```
 
 ### SEE ALSO
+
+##### Parent
 
 * [ocm transfer](ocm_transfer.md)	 - 
 

@@ -2,6 +2,12 @@
 
 
 
+### Synopsis
+
+```
+ocm ocm sources <sub command> [<options>]
+```
+
 ### Options
 
 ```
@@ -10,7 +16,13 @@
 
 ### SEE ALSO
 
+##### Parent
+
 * [ocm ocm](ocm_ocm.md)	 - 
-* [ocm ocm sources add](ocm_ocm_sources_add.md)	 - add source information to a component version
-* [ocm ocm sources get](ocm_ocm_sources_get.md)	 - get sources of a component version
+
+
+##### Sub Commands
+
+* [ocm ocm sources <b>add</b>](ocm_ocm_sources_add.md)	 - add source information to a component version
+* [ocm ocm sources <b>get</b>](ocm_ocm_sources_get.md)	 - get sources of a component version
 

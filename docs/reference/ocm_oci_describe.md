@@ -4,6 +4,22 @@ describe artefact version
 
 ### Synopsis
 
+```
+ocm oci describe [<options>] {<artefact-reference>}
+```
+
+### Options
+
+```
+  -h, --help               help for describe
+      --layerfiles         list layer files
+  -o, --output string      output mode (JSON, json, yaml)
+  -r, --repo string        repository name or spec
+  -s, --sort stringArray   sort fields
+```
+
+### Description
+
 
 Describe lists all artefact versions specified, if only a repository is specified
 all tagged artefacts are listed.
@@ -29,34 +45,31 @@ For the *Common Transport Format* the types <code>directory</code>,
 
 Using the JSON variant any repository type supported by the 
 linked library can be used:
+- `ArtefactSet`
 - `CommonTransportFormat`
 - `DockerDaemon`
 - `Empty`
 - `OCIRegistry`
 
+With the option <code>--output</code> the out put mode can be selected.
+The following modes are supported:
+ - JSON
+ - json
+ - yaml
 
-*Example:*
-<pre>
+
+### Examples
+
+```
+
 $ ocm describe artefact ghcr.io/mandelsoft/kubelink
 $ ocm describe artefact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
-</pre>
 
-
-```
-ocm oci describe [<options>] {<artefact-reference>} [flags]
-```
-
-### Options
-
-```
-  -h, --help               help for describe
-      --layerfiles         list layer files
-  -o, --output string      output mode (yaml, json, JSON)
-  -r, --repo string        repository name or spec
-  -s, --sort stringArray   sort fields
 ```
 
 ### SEE ALSO
+
+##### Parent
 
 * [ocm oci](ocm_oci.md)	 - 
 

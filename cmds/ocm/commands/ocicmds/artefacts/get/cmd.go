@@ -18,8 +18,9 @@ import (
 	"fmt"
 
 	"github.com/gardener/ocm/cmds/ocm/commands"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/common/options/repooption"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/common"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/common/handlers/artefacthdlr"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/common/options/repooption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/names"
 	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
 
@@ -28,7 +29,6 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
 var (
@@ -39,15 +39,12 @@ var (
 type Command struct {
 	utils.BaseCommand
 
-	Output output.Options
-
-	Repository repooption.Option
-	Refs       []string
+	Refs []string
 }
 
 // NewCommand creates a new artefact command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx)}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, &repooption.Option{}, output.OutputOptions(outputs))}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -55,47 +52,33 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Use:   "[<options>] {<artefact-reference>}",
 		Short: "get artefact version",
 		Long: `
-Get lists all artefact versions specified, if only a repository is specified
-all tagged artefacts are listed.
-
-` + o.Repository.Usage() + `
-
-*Example:*
-<pre>
+		Get lists all artefact versions specified, if only a repository is specified
+		all tagged artefacts are listed.
+	`,
+		Example: `
 $ ocm get artefact ghcr.io/mandelsoft/kubelink
 $ ocm get artefact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
-</pre>
 `,
 	}
 }
 
-func (o *Command) AddFlags(fs *pflag.FlagSet) {
-	o.Repository.AddFlags(fs)
-	o.Output.AddFlags(fs, outputs)
-}
-
 func (o *Command) Complete(args []string) error {
-	var err error
-	if len(args) == 0 && o.Repository.Spec == "" {
+	if len(args) == 0 && repooption.From(o).Spec == "" {
 		return fmt.Errorf("a repository or at least one argument that defines the reference is needed")
 	}
 	o.Refs = args
-	err = o.Repository.Complete(o.Context)
-	if err != nil {
-		return err
-	}
-	return o.Output.Complete(o.Context)
+	return nil
 }
 
 func (o *Command) Run() error {
 	session := oci.NewSession(nil)
 	defer session.Close()
-	repo, err := o.Repository.GetRepository(o.Context.OCI(), session)
+	err := o.ProcessOnOptions(common.CompleteOptionsWithContext(o.Context, session))
 	if err != nil {
 		return err
 	}
-	handler := artefacthdlr.NewTypeHandler(o.Context.OCI(), session, repo)
-	return utils.HandleArgs(outputs, &o.Output, handler, o.Refs...)
+	handler := artefacthdlr.NewTypeHandler(o.Context.OCI(), session, repooption.From(o).Repository)
+	return utils.HandleArgs(output.From(o), handler, o.Refs...)
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -19,6 +19,7 @@ import (
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands"
+	ocmcommon "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/closureoption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
@@ -28,7 +29,6 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
 	"github.com/gardener/ocm/pkg/ocm"
 	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
 var (
@@ -39,18 +39,15 @@ var (
 type Command struct {
 	utils.BaseCommand
 
-	Output     output.Options
-	Repository repooption.Option
-
 	Refs []string
 }
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx), Output: *output.OutputOption(&closureoption.Option{
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, &repooption.Option{}, output.OutputOptions(outputs, &closureoption.Option{
 		AdditionalFields: output.Fields("IDENTITY"),
 		FieldEnricher:    identity,
-	})}, names...)
+	}))}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -60,43 +57,32 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Long: `
 Get lists all component versions specified, if only a component is specified
 all versions are listed.
-` + o.Repository.Usage() + `
-*Example:*
-<pre>
+`,
+		Example: `
 $ ocm get componentversion ghcr.io/mandelsoft/kubelink
 $ ocm get componentversion --repo OCIRegistry:ghcr.io mandelsoft/kubelink
-</pre>
 `,
 	}
 }
 
-func (o *Command) AddFlags(fs *pflag.FlagSet) {
-	o.Repository.AddFlags(fs)
-	o.Output.AddFlags(fs, outputs)
-}
-
 func (o *Command) Complete(args []string) error {
 	o.Refs = args
-	if len(args) == 0 && o.Repository.Spec == "" {
+	if len(args) == 0 && repooption.From(o).Spec == "" {
 		return fmt.Errorf("a repository or at least one argument that defines the reference is needed")
 	}
-	err := o.Repository.Complete(o.Context)
-	if err != nil {
-		return err
-	}
-	return o.Output.Complete(o.Context)
-
+	return nil
 }
 
 func (o *Command) Run() error {
 	session := ocm.NewSession(nil)
 	defer session.Close()
-	repo, err := o.Repository.GetRepository(o.Context.OCM(), session)
+
+	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithContext(o, session))
 	if err != nil {
 		return err
 	}
-	handler := comphdlr.NewTypeHandler(o.Context.OCM(), session, repo)
-	return utils.HandleArgs(outputs, &o.Output, handler, o.Refs...)
+	handler := comphdlr.NewTypeHandler(o.Context.OCM(), session, repooption.From(o).Repository)
+	return utils.HandleArgs(output.From(o), handler, o.Refs...)
 }
 
 /////////////////////////////////////////////////////////////////////////////

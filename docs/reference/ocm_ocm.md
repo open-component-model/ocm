@@ -2,6 +2,12 @@
 
 
 
+### Synopsis
+
+```
+ocm ocm <sub command> [<options>]
+```
+
 ### Options
 
 ```
@@ -10,8 +16,14 @@
 
 ### SEE ALSO
 
+##### Parent
+
 * [ocm](ocm.md)	 - ocm
-* [ocm ocm references](ocm_ocm_references.md)	 - 
-* [ocm ocm resources](ocm_ocm_resources.md)	 - 
-* [ocm ocm sources](ocm_ocm_sources.md)	 - 
+
+
+##### Sub Commands
+
+* [ocm ocm <b>references</b>](ocm_ocm_references.md)	 - 
+* [ocm ocm <b>resources</b>](ocm_ocm_resources.md)	 - 
+* [ocm ocm <b>sources</b>](ocm_ocm_sources.md)	 - 
 

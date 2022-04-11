@@ -22,11 +22,9 @@ import (
 )
 
 func From(o *output.Options) *Option {
-	v := o.GetOptions((*Option)(nil))
-	if v == nil {
-		return nil
-	}
-	return v.(*Option)
+	var opt *Option
+	o.Get(&opt)
+	return opt
 }
 
 type Option struct {

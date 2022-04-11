@@ -15,6 +15,8 @@
 package options
 
 import (
+	"reflect"
+
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
 	"github.com/spf13/pflag"
@@ -40,6 +42,97 @@ type Usage interface {
 
 type Options interface {
 	AddFlags(fs *pflag.FlagSet)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type OptionSet []Options
+
+type OptionSetProvider interface {
+	AsOptionSet() OptionSet
+}
+
+func (s OptionSet) AddFlags(fs *pflag.FlagSet) {
+	for _, o := range s {
+		o.AddFlags(fs)
+	}
+}
+
+func (s OptionSet) AsOptionSet() OptionSet {
+	return s
+}
+
+func (s OptionSet) Usage() string {
+	u := ""
+	for _, n := range s {
+		if c, ok := n.(Usage); ok {
+			u += c.Usage()
+		}
+	}
+	return u
+}
+
+func (s OptionSet) Options(proto Options) interface{} {
+	t := reflect.TypeOf(proto)
+	for _, o := range s {
+		if reflect.TypeOf(o) == t {
+			return o
+		}
+		if set, ok := o.(OptionSetProvider); ok {
+			r := set.AsOptionSet().Options(proto)
+			if r != nil {
+				return r
+			}
+		}
+	}
+	return nil
+}
+
+// Get extracts the option for a given target. This might be a
+// - pointer to a struct implementing the Options interface which
+//   will fill the struct with a copy of the options OR
+// - a pointer to such a pointer which will be filled with the
+//   pointer to the actual member of the OptionSet.
+func (s OptionSet) Get(proto interface{}) bool {
+	val := true
+	t := reflect.TypeOf(proto)
+	if t.Elem().Kind() == reflect.Ptr {
+		t = t.Elem()
+		val = false
+	}
+	for _, o := range s {
+		if reflect.TypeOf(o) == t {
+			if val {
+				reflect.ValueOf(proto).Elem().Set(reflect.ValueOf(o).Elem())
+			} else {
+				reflect.ValueOf(proto).Elem().Set(reflect.ValueOf(o))
+			}
+			return true
+		}
+		if set, ok := o.(OptionSetProvider); ok {
+			r := set.AsOptionSet().Get(proto)
+			if r {
+				return r
+			}
+		}
+	}
+	return false
+}
+
+func (s OptionSet) ProcessOnOptions(f OptionsProcessor) error {
+	for _, n := range s {
+		err := f(n)
+		if err != nil {
+			return err
+		}
+		if set, ok := n.(OptionSetProvider); ok {
+			err = set.AsOptionSet().ProcessOnOptions(f)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////

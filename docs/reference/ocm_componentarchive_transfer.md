@@ -4,6 +4,19 @@ transfer component archive to some component repository
 
 ### Synopsis
 
+```
+ocm componentarchive transfer [<options>]  <source> <target>
+```
+
+### Options
+
+```
+  -h, --help          help for transfer
+  -t, --type string   archive type to create (directory,tar,tgz)
+```
+
+### Description
+
 
 Transfer a component archive to some component repository. This might
 be a CTF Archive or a regular repository.
@@ -15,18 +28,9 @@ Besides those explicitly known types a complete repository spec might be configu
 either via inline argument or command configuration file and name.
 
 
-```
-ocm componentarchive transfer [<options>]  <source> <target> [flags]
-```
-
-### Options
-
-```
-  -h, --help          help for transfer
-  -t, --type string   archive type to create (directory,tar,tgz)
-```
-
 ### SEE ALSO
+
+##### Parent
 
 * [ocm componentarchive](ocm_componentarchive.md)	 - 
 

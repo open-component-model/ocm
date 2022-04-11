@@ -12,17 +12,42 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package output
+package main
 
 import (
 	"strings"
+
+	"github.com/spf13/cobra"
 )
 
-func SelectBest(name string, candidates ...string) (string, int) {
-	for i, c := range candidates {
-		if strings.ToLower(name) == strings.ToLower(c) {
-			return c, i
-		}
+// UseLine puts out the full usage for a given command (including parents).
+func UseLine(c *cobra.Command) string {
+	var useline string
+	if c.HasParent() {
+		useline = c.Parent().CommandPath() + " " + c.Use
+	} else {
+		useline = c.Use
 	}
-	return "", -1
+	if hasChildren(c) {
+		useline += " <sub command>"
+	}
+	if c.DisableFlagsInUseLine {
+		return useline
+	}
+	if c.HasAvailableFlags() && !strings.Contains(useline, "[<options>]") {
+		useline += " [<options>]"
+	}
+	return useline
+}
+
+func hasChildren(cmd *cobra.Command) bool {
+	children := cmd.Commands()
+
+	for _, child := range children {
+		if !child.IsAvailableCommand() || child.IsAdditionalHelpTopicCommand() {
+			continue
+		}
+		return true
+	}
+	return false
 }

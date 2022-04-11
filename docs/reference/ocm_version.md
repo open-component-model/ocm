@@ -2,8 +2,10 @@
 
 displays the version
 
+### Synopsis
+
 ```
-ocm version [flags]
+ocm version [<options>]
 ```
 
 ### Options
@@ -13,6 +15,8 @@ ocm version [flags]
 ```
 
 ### SEE ALSO
+
+##### Parent
 
 * [ocm](ocm.md)	 - ocm
 

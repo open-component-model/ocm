@@ -16,7 +16,7 @@ package output
 
 import (
 	"fmt"
-	"reflect"
+	"sort"
 	"strings"
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
@@ -25,56 +25,58 @@ import (
 	"github.com/spf13/pflag"
 )
 
+func From(o options.OptionSetProvider) *Options {
+	var opts *Options
+	o.AsOptionSet().Get(&opts)
+	return opts
+}
+
 type Options struct {
-	output string
+	options.OptionSet
 
-	Output       *string
-	Sort         []string
-	OtherOptions []options.Options
-	FixedColums  int
-	Context      out.Context
+	Outputs     Outputs
+	output      string
+	Output      *string
+	Sort        []string
+	FixedColums int
+	Context     out.Context
 }
 
-func OutputOption(opts ...options.Options) *Options {
+func OutputOptions(outputs Outputs, opts ...options.Options) *Options {
 	return &Options{
-		OtherOptions: opts,
+		Outputs:   outputs,
+		OptionSet: opts,
 	}
 }
 
-func (o *Options) GetOptions(proto options.Options) interface{} {
-	for _, o := range o.OtherOptions {
-		if reflect.TypeOf(o) == reflect.TypeOf(proto) {
-			return o
-		}
-	}
-	return nil
+func (o *Options) Options(proto options.Options) interface{} {
+	return o.OptionSet.Options(proto)
 }
 
-func (o *Options) AddFlags(fs *pflag.FlagSet, outputs Outputs) {
+func (o *Options) Get(proto interface{}) bool {
+	return o.OptionSet.Get(proto)
+}
+
+func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	s := ""
-	sep := ""
-	for o := range outputs {
-		if o != "" {
-			s = fmt.Sprintf("%s%s%s", s, sep, o)
-			sep = ", "
+	if len(o.Outputs) > 1 {
+		list := []string{}
+		for o := range o.Outputs {
+			list = append(list, o)
 		}
+		sort.Strings(list)
+		sep := ""
+		for _, o := range list {
+			if o != "" {
+				s = fmt.Sprintf("%s%s%s", s, sep, o)
+				sep = ", "
+			}
+		}
+		fs.StringVarP(&o.output, "output", "o", "", fmt.Sprintf("output mode (%s)", s))
 	}
-	fs.StringVarP(&o.output, "output", "o", "", fmt.Sprintf("output mode (%s)", s))
 	fs.StringArrayVarP(&o.Sort, "sort", "s", nil, "sort fields")
 
-	for _, n := range o.OtherOptions {
-		n.AddFlags(fs)
-	}
-}
-
-func (o *Options) ProcessOnOptions(f options.OptionsProcessor) error {
-	for _, n := range o.OtherOptions {
-		err := f(n)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	o.OptionSet.AddFlags(fs)
 }
 
 func (o *Options) Complete(ctx clictx.Context) error {
@@ -106,12 +108,29 @@ func (o *Options) Complete(ctx clictx.Context) error {
 }
 
 func (o *Options) Usage() string {
-	for _, n := range o.OtherOptions {
-		if c, ok := n.(options.Usage); ok {
-			return c.Usage()
+	s := o.OptionSet.Usage()
+
+	if len(o.Outputs) > 1 {
+		s += `
+With the option <code>--output</code> the out put mode can be selected.
+The following modes are supported:
+`
+		list := []string{}
+		for o := range o.Outputs {
+			list = append(list, o)
+		}
+		sort.Strings(list)
+		for _, m := range list {
+			if m != "" {
+				s += " - " + m + "\n"
+			}
 		}
 	}
-	return ""
+	return s
+}
+
+func (o *Options) Create() (Output, error) {
+	return o.Outputs.Create(o)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

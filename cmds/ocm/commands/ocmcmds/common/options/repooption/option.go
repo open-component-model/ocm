@@ -17,7 +17,7 @@ package repooption
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
-	"github.com/gardener/ocm/cmds/ocm/pkg/output"
+	"github.com/gardener/ocm/cmds/ocm/pkg/options"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/runtime"
 
@@ -25,12 +25,10 @@ import (
 	"github.com/spf13/pflag"
 )
 
-func From(o *output.Options) *Option {
-	v := o.GetOptions((*Option)(nil))
-	if v == nil {
-		return nil
-	}
-	return v.(*Option)
+func From(o options.OptionSetProvider) *Option {
+	var opt *Option
+	o.AsOptionSet().Get(&opt)
+	return opt
 }
 
 type Option struct {
@@ -42,10 +40,6 @@ var _ common.OptionCompleter = (*Option)(nil)
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Spec, "repo", "r", "", "repository name or spec")
-}
-
-func (o *Option) Complete(ctx clictx.Context) error {
-	return nil
 }
 
 func (o *Option) CompleteWithSession(octx clictx.OCM, session ocm.Session) error {

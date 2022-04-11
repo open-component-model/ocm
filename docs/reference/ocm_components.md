@@ -2,6 +2,12 @@
 
 
 
+### Synopsis
+
+```
+ocm components <sub command> [<options>]
+```
+
 ### Options
 
 ```
@@ -10,6 +16,12 @@
 
 ### SEE ALSO
 
+##### Parent
+
 * [ocm](ocm.md)	 - ocm
-* [ocm components get](ocm_components_get.md)	 - get component version
+
+
+##### Sub Commands
+
+* [ocm components <b>get</b>](ocm_components_get.md)	 - get component version
 

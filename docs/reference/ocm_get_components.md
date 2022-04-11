@@ -4,6 +4,22 @@ get component version
 
 ### Synopsis
 
+```
+ocm get components [<options>] {<component-reference>}
+```
+
+### Options
+
+```
+  -c, --closure            follow component references
+  -h, --help               help for components
+  -o, --output string      output mode (JSON, json, tree, wide, yaml)
+  -r, --repo string        repository name or spec
+  -s, --sort stringArray   sort fields
+```
+
+### Description
+
 
 Get lists all component versions specified, if only a component is specified
 all versions are listed.
@@ -37,33 +53,35 @@ Dedicated OCM repository types:
 - `ComponentArchive`
 
 OCI Repository types (using standard component repository to OCI mapping):
+- `ArtefactSet`
 - `CommonTransportFormat`
 - `DockerDaemon`
 - `Empty`
 - `OCIRegistry`
 
-*Example:*
-<pre>
+With the option <code>--closure</code> the complete reference tree by a component verserion is traversed.
+
+With the option <code>--output</code> the out put mode can be selected.
+The following modes are supported:
+ - JSON
+ - json
+ - tree
+ - wide
+ - yaml
+
+
+### Examples
+
+```
+
 $ ocm get componentversion ghcr.io/mandelsoft/kubelink
 $ ocm get componentversion --repo OCIRegistry:ghcr.io mandelsoft/kubelink
-</pre>
 
-
-```
-ocm get components [<options>] {<component-reference>} [flags]
-```
-
-### Options
-
-```
-  -c, --closure            follow component references
-  -h, --help               help for components
-  -o, --output string      output mode (wide, tree, yaml, json, JSON)
-  -r, --repo string        repository name or spec
-  -s, --sort stringArray   sort fields
 ```
 
 ### SEE ALSO
+
+##### Parent
 
 * [ocm get](ocm_get.md)	 - 
 
