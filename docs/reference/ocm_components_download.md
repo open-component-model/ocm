@@ -1,28 +1,29 @@
-## ocm get components
+## ocm components download
 
-get component version
+download ocm component versions
 
 ### Synopsis
 
 ```
-ocm get components [<options>] {<component-reference>}
+ocm components download [<options>] {<components>} 
 ```
 
 ### Options
 
 ```
-  -c, --closure            follow component references
-  -h, --help               help for components
-  -o, --output string      output mode (JSON, json, tree, wide, yaml)
-  -r, --repo string        repository name or spec
-  -s, --sort stringArray   sort fields
+  -h, --help             help for download
+  -O, --outfile string   output file or directory
+  -r, --repo string      repository name or spec
+  -t, --type string      archive format (default "directory")
 ```
 
 ### Description
 
 
-Get lists all component versions specified, if only a component is specified
-all versions are listed.
+Download component versions from an OCM repository. The result is stored in
+component archives.
+
+The files are named according to the component version name.
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
@@ -60,29 +61,16 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `OCIRegistry`
 - `oci`
 
-With the option <code>--closure</code> the complete reference tree by a component verserion is traversed.
-
-With the option <code>--output</code> the out put mode can be selected.
-The following modes are supported:
- - JSON
- - json
- - tree
- - wide
- - yaml
-
-
-### Examples
-
-```
-
-$ ocm get componentversion ghcr.io/mandelsoft/kubelink
-$ ocm get componentversion --repo OCIRegistry:ghcr.io mandelsoft/kubelink
-
-```
+The <code>--type</code> option accepts a file format for the
+target archive to use. The following formats are supported:
+- directory
+- tar
+- tgz
+The default format is <code>directory</code>.
 
 ### SEE ALSO
 
 ##### Parent
 
-* [ocm get](ocm_get.md)	 - 
+* [ocm components](ocm_components.md)	 - 
 

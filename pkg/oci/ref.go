@@ -128,6 +128,7 @@ func ParseRef(ref string) (RefSpec, error) {
 		spec.Digest = dig(match[5])
 		return spec, nil
 	}
+
 	match = grammar.AnchoredGenericRegistryRegexp.FindSubmatch([]byte(ref))
 	if match != nil {
 		spec.Type = string(match[1])
@@ -141,7 +142,6 @@ func ParseRef(ref string) (RefSpec, error) {
 		}
 		return spec, nil
 	}
-
 	return RefSpec{}, errors.ErrInvalid(KIND_OCI_REFERENCE, ref)
 }
 

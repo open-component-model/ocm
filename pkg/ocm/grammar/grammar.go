@@ -19,6 +19,14 @@ import (
 	. "github.com/gardener/ocm/pkg/regex"
 )
 
+const (
+	ComponentSeparatorChar = grammar.RepositorySeparatorChar
+	ComponentSeparator     = grammar.RepositorySeparator
+
+	VersionSeparatorChar = grammar.TagSeparatorChar
+	VersionSeparator     = grammar.TagSeparator
+)
+
 var (
 	// TypeRegexp describes a type name for a repository
 	TypeRegexp = grammar.TypeRegexp
@@ -42,7 +50,7 @@ var (
 	// AnchoredComponentVersionRegexp parses a component with an optional version
 	AnchoredComponentVersionRegexp = Anchored(
 		Capture(ComponentRegexp),
-		Optional(Literal(":"), Capture(grammar.TagRegexp)),
+		Optional(Literal(VersionSeparator), Capture(grammar.TagRegexp)),
 	)
 
 	// AnchoredReferenceRegexp parses a complete string representation for default component references including
@@ -52,7 +60,7 @@ var (
 		Optional(Capture(TypeRegexp), Literal("::")),
 		Capture(grammar.DomainPortRegexp), Optional(grammar.RepositorySeparatorRegexp, Capture(grammar.RepositoryRegexp)),
 		Literal("//"), Capture(ComponentRegexp),
-		Optional(Literal(":"), Capture(grammar.TagRegexp)),
+		Optional(Literal(VersionSeparator), Capture(grammar.TagRegexp)),
 	)
 
 	// AnchoredGenericReferenceRegexp parses a CTF file based string representation
@@ -60,6 +68,6 @@ var (
 		Optional(Capture(TypeRegexp), Literal("::")),
 		Capture(Match(".*?")),
 		Optional(Literal("//"), Capture(ComponentRegexp),
-			Optional(Literal(":"), Capture(grammar.TagRegexp))),
+			Optional(Literal(VersionSeparator), Capture(grammar.TagRegexp))),
 	)
 )

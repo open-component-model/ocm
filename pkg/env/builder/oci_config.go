@@ -42,7 +42,7 @@ func (r *oci_config) Close() error {
 	m := r.Builder.oci_artacc.ManifestAccess()
 	err := m.AddBlob(r.blob)
 	if err != nil {
-		return errors.Newf("cannot add config blob: %s", err.Error)
+		return errors.Newf("cannot add config blob: %s", err)
 	}
 	d := artdesc.DefaultBlobDescriptor(r.blob)
 	m.GetDescriptor().Config = *d

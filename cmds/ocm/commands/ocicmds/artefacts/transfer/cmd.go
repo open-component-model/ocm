@@ -22,6 +22,7 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/common/handlers/artefacthdlr"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/common/options/repooption"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/names"
+	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/transfer"
 
@@ -138,7 +139,7 @@ func (a *action) Add(e interface{}) error {
 	if tag != "" {
 		tgt.Tag = &tag
 	}
-	fmt.Printf("copying %s to %s...\n", &src.Spec, &tgt)
+	out.Outf(a.Context, "copying %s to %s...\n", &src.Spec, &tgt)
 	err = transfer.TransferArtefact(src.Artefact, ns, tag)
 	if err == nil {
 		a.copied++
@@ -147,16 +148,16 @@ func (a *action) Add(e interface{}) error {
 }
 
 func (a *action) Out() error {
-	fmt.Printf("copied %d from %d artefact(s)\n", a.copied, a.count)
+	out.Outf(a.Context, "copied %d from %d artefact(s)\n", a.copied, a.count)
 	return nil
 }
 
 func (a *action) Target(obj *artefacthdlr.Object) (string, string) {
 	if a.Ref.IsRegistry() {
-		if a.Ref.IsVersion() {
-			return a.Ref.Repository, *a.Ref.Tag
+		if obj.Spec.Tag != nil {
+			return obj.Spec.Repository, *obj.Spec.Tag
 		}
-		return a.Ref.Repository, ""
+		return obj.Spec.Repository, ""
 	}
 	if a.Ref.IsVersion() {
 		return a.Ref.Repository, *a.Ref.Tag

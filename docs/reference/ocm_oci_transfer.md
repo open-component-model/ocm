@@ -44,6 +44,7 @@ linked library can be used:
 - `DockerDaemon`
 - `Empty`
 - `OCIRegistry`
+- `oci`
 
 
 ### Examples

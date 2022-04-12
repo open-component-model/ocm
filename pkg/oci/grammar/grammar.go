@@ -26,6 +26,12 @@ const (
 	// RepositorySeparator is the separator string used to separate
 	// repository name components.
 	RepositorySeparator = string(RepositorySeparatorChar)
+
+	TagSeparatorChar = ":"
+	TagSeparator     = string(TagSeparatorChar)
+
+	DigestSeparatorChar = "@"
+	DigestSeparator     = string(DigestSeparatorChar)
 )
 
 var (
@@ -125,15 +131,15 @@ var (
 
 	// CapturedVersionRegexp described the version part of a reference
 	CapturedVersionRegexp = Sequence(
-		Optional(Literal(":"), Capture(TagRegexp)),
-		Optional(Literal("@"), Capture(DigestRegexp)))
+		Optional(Literal(TagSeparator), Capture(TagRegexp)),
+		Optional(Literal(DigestSeparator), Capture(DigestRegexp)))
 
 	// ErrorCheckRegexp matches even wrong tags and/or digests
 	ErrorCheckRegexp = Anchored(
 		Optional(Capture(Match(".*?")), Literal("::")),
 		Capture(Match(".*?")),
-		Optional(Literal(":"), Capture(Match(".*?"))),
-		Optional(Literal("@"), Capture(Match(".*?"))))
+		Optional(Literal(TagSeparator), Capture(Match(".*?"))),
+		Optional(Literal(DigestSeparator), Capture(Match(".*?"))))
 
 	////////////////////////////////////////////////////////////////////////////
 	// now the various full flegded artefact flavors
@@ -155,15 +161,19 @@ var (
 		Capture(NameComponentRegexp, RepositorySeparatorRegexp, NameComponentRegexp),
 		CapturedVersionRegexp)
 
+	TypedRepoRegexp = Anchored(
+		Capture(TypeRegexp), Literal("::"),
+		Optional(CapturedSchemeRegexp), Capture(DomainPortRegexp))
+
 	TypedReferenceRegexp = Anchored(
 		Capture(TypeRegexp), Literal("::"),
-		Optional(Optional(CapturedSchemeRegexp), Capture(DomainPortRegexp), RepositorySeparatorRegexp),
-		Optional(CapturedArtefactVersionRegexp))
+		Optional(CapturedSchemeRegexp), Capture(DomainPortRegexp),
+		Optional(RepositorySeparatorRegexp, Optional(CapturedArtefactVersionRegexp)))
 
 	TypedGenericReferenceRegexp = Anchored(
-		Capture(TypeRegexp), Literal("::"),
-		Capture(Match(".*?")), RepositorySeparatorRegexp,
-		CapturedArtefactVersionRegexp)
+		Optional(Capture(TypeRegexp), Literal("::")),
+		Capture(Match(".*?"), Match("[^:]")), Match(RepositorySeparator+RepositorySeparator),
+		Optional(CapturedArtefactVersionRegexp))
 
 	// Unused
 

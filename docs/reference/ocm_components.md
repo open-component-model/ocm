@@ -23,5 +23,6 @@ ocm components <sub command> [<options>]
 
 ##### Sub Commands
 
+* [ocm components <b>download</b>](ocm_components_download.md)	 - download ocm component versions
 * [ocm components <b>get</b>](ocm_components_get.md)	 - get component version
 

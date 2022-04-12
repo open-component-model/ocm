@@ -22,23 +22,23 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/commands"
 	"github.com/gardener/ocm/cmds/ocm/commands/common/options/destoption"
 	"github.com/gardener/ocm/cmds/ocm/commands/common/options/formatoption"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/common"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/common/handlers/artefacthdlr"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/common/options/repooption"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/names"
-	"github.com/gardener/ocm/cmds/ocm/pkg/output"
+	ocmcommon "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
 	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
+	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/oci"
-	"github.com/gardener/ocm/pkg/oci/repositories/artefactset"
+	"github.com/gardener/ocm/pkg/ocm"
+	"github.com/gardener/ocm/pkg/ocm/repositories/comparch/comparch"
 	"github.com/spf13/cobra"
 )
 
 var (
-	Names = names.Artefacts
+	Names = names.Components
 	Verb  = commands.Download
 )
 
@@ -50,57 +50,51 @@ type Command struct {
 
 // NewCommand creates a new download command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, &repooption.Option{}, output.OutputOptions(outputs, &destoption.Option{}, &formatoption.Option{}))}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, &repooption.Option{}, &destoption.Option{}, &formatoption.Option{})}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
-		Use:   "[<options>]  {<artefact>} ",
+		Use:   "[<options>] {<components>} ",
 		Args:  cobra.MinimumNArgs(1),
-		Short: "download oci artefacts",
+		Short: "download ocm component versions",
 		Long: `
-Download artefacts from an OCI registry. The result is stored in
-artefact set format, without the repository part
+Download component versions from an OCM repository. The result is stored in
+component archives.
 
-The files are named according to the artefact repository name.
+The files are named according to the component version name.
 `,
 	}
 }
 
 func (o *Command) Complete(args []string) error {
 	var err error
-	o.Refs = args
+	o.Refs = args[1:]
 	return err
 }
 
 func (o *Command) Run() error {
-	session := oci.NewSession(nil)
+	session := ocm.NewSession(nil)
 	defer session.Close()
 
-	err := o.ProcessOnOptions(common.CompleteOptionsWithContext(o.Context, session))
+	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithContext(o.Context, session))
 	if err != nil {
 		return err
 	}
 
-	hdlr := artefacthdlr.NewTypeHandler(o.Context.OCI(), session, repooption.From(o).Repository)
-	return utils.HandleArgs(output.From(o), hdlr, o.Refs...)
+	hdlr := comphdlr.NewTypeHandler(o.Context.OCM(), session, repooption.From(o).Repository)
+	return utils.HandleOutput(&download{cmd: o}, hdlr, utils.StringElemSpecs(o.Refs...)...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-var outputs = output.NewOutputs(get_download)
-
-func get_download(opts *output.Options) output.Output {
-	return &download{opts: opts}
-}
-
 type download struct {
-	data artefacthdlr.Objects
-	opts *output.Options
+	data comphdlr.Objects
+	cmd  *Command
 }
 
 func (d *download) Add(e interface{}) error {
-	d.data = append(d.data, e.(*artefacthdlr.Object))
+	d.data = append(d.data, e.(*comphdlr.Object))
 	return nil
 }
 
@@ -109,31 +103,28 @@ func (d *download) Close() error {
 }
 
 func (d *download) Out() error {
-	list := errors.ErrListf("downloading artefacts")
-	dest := destoption.From(d.opts)
-	if len(d.data) == 0 {
-		out.Outf(d.opts.Context, "no artefacts found\n")
-	}
+	list := errors.ErrListf("downloading component versions")
+	dest := destoption.From(d.cmd)
 	if len(d.data) == 1 {
 		return d.Save(d.data[0], dest.Destination)
 	} else {
 		for _, e := range d.data {
 			f := e.Spec.UniformRepositorySpec.String()
 			f = strings.ReplaceAll(f, "::", "-")
-			f = path.Join(f, e.Spec.Repository)
+			f = path.Join(f, e.Spec.Component, *e.Spec.Version)
 			err := d.Save(e, f)
 			if err != nil {
 				list.Add(err)
-				out.Outf(d.opts.Context, "%s failed: %s\n", f, err)
+				out.Outf(d.cmd.Context, "%s failed: %s\n", f, err)
 			}
 		}
 	}
 	return list.Result()
 }
 
-func (d *download) Save(o *artefacthdlr.Object, f string) error {
-	dest := destoption.From(d.opts)
-	art := o.Artefact
+func (d *download) Save(o *comphdlr.Object, f string) error {
+	dest := destoption.From(d.cmd)
+	src := o.ComponentVersion
 	dir := path.Dir(f)
 
 	err := dest.PathFilesystem.MkdirAll(dir, 0770)
@@ -141,33 +132,19 @@ func (d *download) Save(o *artefacthdlr.Object, f string) error {
 		return err
 	}
 
-	blob, err := art.Blob()
-	if err != nil {
-		return err
-	}
-	digest := blob.Digest()
-
-	format := formatoption.From(d.opts)
-	set, err := artefactset.Create(accessobj.ACC_CREATE, f, format.Mode(), format.Format, accessio.PathFileSystem(dest.PathFilesystem))
+	format := formatoption.From(d.cmd)
+	set, err := comparch.Create(d.cmd.OCMContext(), accessobj.ACC_CREATE, f, format.Mode(), format.Format, accessio.PathFileSystem(dest.PathFilesystem))
 	if err != nil {
 		return err
 	}
 	defer set.Close()
-	err = artefactset.TransferArtefact(art, set)
-	if err != nil {
-		return err
-	}
 
-	if o.Spec.Tag != nil {
-		err = set.AddTags(digest, *o.Spec.Tag)
-		if err != nil {
-			return err
-		}
-	}
-	set.Annotate(artefactset.MAINARTEFACT_ANNOTATION, digest.String())
+	nv := common.NewNameVersion(src.GetName(), src.GetVersion())
+	hist := common.History{nv}
 
+	err = ocm.CopyVersion(hist, src, set, nil)
 	if err == nil {
-		out.Outf(d.opts.Context, "%s: downloaded\n", f)
+		out.Outf(d.cmd.Context, "%s: downloaded\n", f)
 	}
 	return err
 }

@@ -114,7 +114,7 @@ func (o *CLIOptions) Complete() error {
 		}
 	}
 	if o.Config != "" {
-		fmt.Printf("********** config file is %s\n", o.Config)
+		//fmt.Printf("********** config file is %s\n", o.Config)
 		if strings.HasPrefix(o.Config, "~"+string(os.PathSeparator)) {
 			if len(h) == 0 {
 				return fmt.Errorf("no home directory found for resolving path of config file %q", o.Config)

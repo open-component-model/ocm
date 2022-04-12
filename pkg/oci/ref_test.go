@@ -78,9 +78,39 @@ var _ = Describe("ref parsing", func() {
 				Type:   "directory",
 				Scheme: "",
 				Host:   "",
+				Info:   "a/b",
+			},
+			Repository: "",
+		})
+
+		CheckRef("a/b//", &oci.RefSpec{
+			UniformRepositorySpec: oci.UniformRepositorySpec{
+				Type:   "",
+				Scheme: "",
+				Host:   "",
+				Info:   "a/b",
+			},
+			Repository: "",
+		})
+
+		CheckRef("directory::a/b//c/d", &oci.RefSpec{
+			UniformRepositorySpec: oci.UniformRepositorySpec{
+				Type:   "directory",
+				Scheme: "",
+				Host:   "",
+				Info:   "a/b",
+			},
+			Repository: "c/d",
+		})
+
+		CheckRef("oci::ghcr.io", &oci.RefSpec{
+			UniformRepositorySpec: oci.UniformRepositorySpec{
+				Type:   "oci",
+				Scheme: "",
+				Host:   "ghcr.io",
 				Info:   "",
 			},
-			Repository: "a/b",
+			Repository: "",
 		})
 	})
 

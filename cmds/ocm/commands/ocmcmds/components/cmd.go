@@ -16,6 +16,7 @@ package components
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/download"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/get"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/spf13/cobra"
@@ -31,5 +32,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 		TraverseChildren: true,
 	}
 	cmd.AddCommand(get.NewCommand(ctx, get.Verb))
+	cmd.AddCommand(download.NewCommand(ctx, download.Verb))
 	return cmd
 }

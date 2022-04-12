@@ -12,26 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package download
+package transfer_test
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands"
+	"testing"
 
-	artefacts "github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/download"
-	components "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/download"
-	resources "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/download"
-	"github.com/spf13/cobra"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-// NewCommand creates a new command.
-func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              commands.Download,
-		TraverseChildren: true,
-	}
-	cmd.AddCommand(resources.NewCommand(ctx, resources.Names...))
-	cmd.AddCommand(artefacts.NewCommand(ctx, artefacts.Names...))
-	cmd.AddCommand(components.NewCommand(ctx, components.Names...))
-	return cmd
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "OCM download resources")
 }

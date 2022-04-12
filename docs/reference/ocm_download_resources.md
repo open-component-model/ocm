@@ -83,6 +83,7 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `DockerDaemon`
 - `Empty`
 - `OCIRegistry`
+- `oci`
 
 With the option <code>--closure</code> the complete reference tree by a component verserion is traversed.
 

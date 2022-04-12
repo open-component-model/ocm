@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package download_test
+package transfer_test
 
 import (
 	"bytes"
@@ -20,8 +20,7 @@ import (
 	. "github.com/gardener/ocm/cmds/ocm/testhelper"
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/mime"
-	"github.com/gardener/ocm/pkg/oci/grammar"
-	"github.com/gardener/ocm/pkg/oci/repositories/artefactset"
+	"github.com/gardener/ocm/pkg/oci/repositories/ctf"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
@@ -36,13 +35,14 @@ var _ = Describe("Test Environment", func() {
 
 	BeforeEach(func() {
 		env = NewTestEnv()
+		env.OCICommonTransport(OUT, accessio.FormatDirectory)
 	})
 
 	AfterEach(func() {
 		env.Cleanup()
 	})
 
-	It("download single artefact from ctf file", func() {
+	It("transfers a named artefact", func() {
 		env.OCICommonTransport(ARCH, accessio.FormatDirectory, func() {
 			env.Namespace(NS, func() {
 				env.Manifest(VERSION, func() {
@@ -57,12 +57,34 @@ var _ = Describe("Test Environment", func() {
 		})
 
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("download", "artefact", "-O", OUT, "-r", ARCH, NS+grammar.TagSeparator+VERSION)).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("transfer", "artefact", ARCH+"//"+NS+":"+VERSION, "directory::"+OUT)).To(Succeed())
 		Expect("\n" + buf.String()).To(Equal(
 			`
-/tmp/res: downloaded
+copying mandelsoft/test:v1 to mandelsoft/test:v1...
+copied 1 from 1 artefact(s)
 `))
-		Expect(env.DirExists(OUT)).To(BeTrue())
-		Expect(env.ReadFile(OUT + "/" + artefactset.ArtefactSetDescriptorFileName)).To(Equal([]byte("{\"schemaVersion\":2,\"mediaType\":\"application/vnd.oci.image.index.v1+json\",\"manifests\":[{\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"digest\":\"sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9\",\"size\":342,\"annotations\":{\"cloud.gardener.ocm/tags\":\"v1\"}}],\"annotations\":{\"cloud.gardener.ocm/main\":\"sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9\"}}")))
+		Expect(env.ReadFile(OUT + "/" + ctf.ArtefactIndexFileName)).To(Equal([]byte("{\"schemaVersion\":1,\"artefacts\":[{\"repository\":\"mandelsoft/test\",\"tag\":\"v1\",\"digest\":\"sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9\"}]}")))
+	})
+
+	It("transfers an unnamed artefact set", func() {
+		env.ArtefactSet(ARCH, accessio.FormatDirectory, func() {
+			env.Manifest(VERSION, func() {
+				env.Config(func() {
+					env.BlobStringData(mime.MIME_JSON, "{}")
+				})
+				env.Layer(func() {
+					env.BlobStringData(mime.MIME_TEXT, "testdata")
+				})
+			})
+		})
+
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("transfer", "artefact", ARCH, "directory::"+OUT+"//"+NS)).To(Succeed())
+		Expect("\n" + buf.String()).To(Equal(
+			`
+copying :v1 to mandelsoft/test:v1...
+copied 1 from 1 artefact(s)
+`))
+		Expect(env.ReadFile(OUT + "/" + ctf.ArtefactIndexFileName)).To(Equal([]byte("{\"schemaVersion\":1,\"artefacts\":[{\"repository\":\"mandelsoft/test\",\"tag\":\"v1\",\"digest\":\"sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9\"}]}")))
 	})
 })

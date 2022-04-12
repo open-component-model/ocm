@@ -12,26 +12,34 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package download
+package comphdlr
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands"
-
-	artefacts "github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/download"
-	components "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/download"
-	resources "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/download"
-	"github.com/spf13/cobra"
+	"github.com/gardener/ocm/cmds/ocm/pkg/data"
 )
 
-// NewCommand creates a new command.
-func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              commands.Download,
-		TraverseChildren: true,
+type Objects []*Object
+
+func ObjectSlice(s data.Iterable) Objects {
+	var a Objects
+	i := s.Iterator()
+	for i.HasNext() {
+		a = append(a, i.Next().(*Object))
 	}
-	cmd.AddCommand(resources.NewCommand(ctx, resources.Names...))
-	cmd.AddCommand(artefacts.NewCommand(ctx, artefacts.Names...))
-	cmd.AddCommand(components.NewCommand(ctx, components.Names...))
-	return cmd
+	return a
+}
+
+var _ data.IndexedAccess = Objects{}
+var _ data.Iterable = Objects{}
+
+func (this Objects) Len() int {
+	return len(this)
+}
+
+func (this Objects) Get(i int) interface{} {
+	return this[i]
+}
+
+func (this Objects) Iterator() data.Iterator {
+	return data.NewIndexedIterator(this)
 }

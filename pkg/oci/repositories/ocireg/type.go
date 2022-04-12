@@ -28,11 +28,16 @@ import (
 const (
 	OCIRegistryRepositoryType   = "OCIRegistry"
 	OCIRegistryRepositoryTypeV1 = OCIRegistryRepositoryType + runtime.VersionSeparator + "v1"
+
+	ShortOCIRegistryRepositoryType   = "oci"
+	ShortOCIRegistryRepositoryTypeV1 = ShortOCIRegistryRepositoryType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
 	cpi.RegisterRepositoryType(OCIRegistryRepositoryType, cpi.NewRepositoryType(OCIRegistryRepositoryType, &RepositorySpec{}))
 	cpi.RegisterRepositoryType(OCIRegistryRepositoryTypeV1, cpi.NewRepositoryType(OCIRegistryRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(ShortOCIRegistryRepositoryType, cpi.NewRepositoryType(ShortOCIRegistryRepositoryType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(ShortOCIRegistryRepositoryTypeV1, cpi.NewRepositoryType(ShortOCIRegistryRepositoryTypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes an OCI registry interface backed by an oci registry.

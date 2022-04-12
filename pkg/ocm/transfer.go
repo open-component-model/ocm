@@ -98,19 +98,10 @@ func transferVersion(hist common.History, repo ocmcpi.Repository, src ocmcpi.Com
 	if err != nil {
 		return errors.Wrapf(err, "%s: creating target version", hist)
 	}
-	*t.GetDescriptor() = *d
 	defer t.Close()
-	for i, r := range src.GetResources() {
-		err = handler.TransferResource(r, t)
-		if err != nil {
-			return errors.Wrapf(err, "%s: transferring resource %d", hist, i)
-		}
-	}
-	for i, r := range src.GetSources() {
-		err = handler.TransferSource(r, t)
-		if err != nil {
-			return errors.Wrapf(err, "%s: transferring source %d", hist, i)
-		}
+	err = CopyVersion(hist, src, t, handler)
+	if err != nil {
+		return err
 	}
 	for _, r := range d.ComponentReferences {
 		if srepo, shdlr := handler.TransferVersion(repo, r.GetName(), r.GetVersion()); srepo != nil {
@@ -125,4 +116,27 @@ func transferVersion(hist common.History, repo ocmcpi.Repository, src ocmcpi.Com
 		}
 	}
 	return comp.AddVersion(t)
+}
+
+func CopyVersion(hist common.History, src ComponentVersionAccess, t ComponentVersionAccess, handler TransferHandler) error {
+	var err error
+
+	if handler == nil {
+		handler = DefaultTransferHandler{}
+	}
+
+	*t.GetDescriptor() = *src.GetDescriptor()
+	for i, r := range src.GetResources() {
+		err = handler.TransferResource(r, t)
+		if err != nil {
+			return errors.Wrapf(err, "%s: transferring resource %d", hist, i)
+		}
+	}
+	for i, r := range src.GetSources() {
+		err = handler.TransferSource(r, t)
+		if err != nil {
+			return errors.Wrapf(err, "%s: transferring source %d", hist, i)
+		}
+	}
+	return nil
 }

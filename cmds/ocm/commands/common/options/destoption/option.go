@@ -19,14 +19,13 @@ import (
 
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/pkg/options"
-	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 )
 
-func From(o *output.Options) *Option {
+func From(o options.OptionSetProvider) *Option {
 	var opt *Option
-	o.Get(&opt)
+	o.AsOptionSet().Get(&opt)
 	return opt
 }
 
