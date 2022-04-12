@@ -17,6 +17,7 @@ package artefacts
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/describe"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/download"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/get"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/transfer"
 	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/names"
@@ -32,8 +33,9 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 		Aliases:          Names[1:],
 		TraverseChildren: true,
 	}
-	cmd.AddCommand(get.NewCommand(ctx, "get"))
-	cmd.AddCommand(describe.NewCommand(ctx, "describe"))
-	cmd.AddCommand(transfer.NewCommand(ctx, "transfer"))
+	cmd.AddCommand(get.NewCommand(ctx, get.Verb))
+	cmd.AddCommand(describe.NewCommand(ctx, describe.Verb))
+	cmd.AddCommand(transfer.NewCommand(ctx, transfer.Verb))
+	cmd.AddCommand(download.NewCommand(ctx, download.Verb))
 	return cmd
 }

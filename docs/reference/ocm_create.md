@@ -24,4 +24,5 @@ ocm create <sub command> [<options>]
 ##### Sub Commands
 
 * [ocm create <b>componentarchive</b>](ocm_create_componentarchive.md)	 - create new component archive
+* [ocm create <b>transportarchive</b>](ocm_create_transportarchive.md)	 - create new OCI/OCM transport  archive
 

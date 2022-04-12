@@ -1,18 +1,19 @@
-## ocm oci get
+## ocm oci artefacts describe
 
-get artefact version
+describe artefact version
 
 ### Synopsis
 
 ```
-ocm oci get [<options>] {<artefact-reference>}
+ocm oci artefacts describe [<options>] {<artefact-reference>}
 ```
 
 ### Options
 
 ```
-  -h, --help               help for get
-  -o, --output string      output mode (JSON, json, wide, yaml)
+  -h, --help               help for describe
+      --layerfiles         list layer files
+  -o, --output string      output mode (JSON, json, yaml)
   -r, --repo string        repository name or spec
   -s, --sort stringArray   sort fields
 ```
@@ -20,9 +21,11 @@ ocm oci get [<options>] {<artefact-reference>}
 ### Description
 
 
-		Get lists all artefact versions specified, if only a repository is specified
-		all tagged artefacts are listed.
-	
+Describe lists all artefact versions specified, if only a repository is specified
+all tagged artefacts are listed.
+Per version a detailed, potentially recursive description is printed.
+
+
 If the repository/registry option is specified, the given names are interpreted
 relative to the specified registry using the syntax
 
@@ -53,7 +56,6 @@ With the option <code>--output</code> the out put mode can be selected.
 The following modes are supported:
  - JSON
  - json
- - wide
  - yaml
 
 
@@ -61,8 +63,8 @@ The following modes are supported:
 
 ```
 
-$ ocm get artefact ghcr.io/mandelsoft/kubelink
-$ ocm get artefact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
+$ ocm describe artefact ghcr.io/mandelsoft/kubelink
+$ ocm describe artefact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
 
 ```
 
@@ -70,5 +72,5 @@ $ ocm get artefact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
 
 ##### Parent
 
-* [ocm oci](ocm_oci.md)	 - 
+* [ocm oci artefacts](ocm_oci_artefacts.md)	 - 
 

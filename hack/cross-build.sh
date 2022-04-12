@@ -21,16 +21,16 @@ for i in "${build_matrix[@]}"; do
   IFS=',' read os arch <<< "${i}"
 
   echo "Build $os/$arch"
-  bin_path="dist/componentcli-$os-$arch"
+  bin_path="dist/ocm-$os-$arch"
 
   CGO_ENABLED=0 GOOS=$os GOARCH=$arch GO111MODULE=on \
-  go build -mod=vendor -o $bin_path \
+  go build -o $bin_path \
   -ldflags "-s -w \
             -X github.com/gardener/ocm/pkg/version.gitVersion=$EFFECTIVE_VERSION \
             -X github.com/gardener/ocm/pkg/version.gitTreeState=$([ -z git status --porcelain 2>/dev/null ] && echo clean || echo dirty) \
             -X github.com/gardener/ocm/pkg/version.gitCommit=$(git rev-parse --verify HEAD) \
             -X github.com/gardener/ocm/pkg/version.buildDate=$(date --rfc-3339=seconds | sed 's/ /T/')" \
-  ${PROJECT_ROOT}/cmd/component-cli
+  ${PROJECT_ROOT}/cmds/ocm
 
   # create zipped file
   gzip -f -k "$bin_path"

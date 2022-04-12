@@ -1,30 +1,30 @@
-## ocm oci describe
+## ocm oci artefacts download
 
-describe artefact version
+download oci artefacts
 
 ### Synopsis
 
 ```
-ocm oci describe [<options>] {<artefact-reference>}
+ocm oci artefacts download [<options>]  {<artefact>} 
 ```
 
 ### Options
 
 ```
-  -h, --help               help for describe
-      --layerfiles         list layer files
-  -o, --output string      output mode (JSON, json, yaml)
+  -h, --help               help for download
+  -O, --outfile string     output file or directory
   -r, --repo string        repository name or spec
   -s, --sort stringArray   sort fields
+  -t, --type string        archive format (default "directory")
 ```
 
 ### Description
 
 
-Describe lists all artefact versions specified, if only a repository is specified
-all tagged artefacts are listed.
-Per version a detailed, potentially recursive description is printed.
+Download artefacts from an OCI registry. The result is stored in
+artefact set format, without the repository part
 
+The files are named according to the artefact repository name.
 
 If the repository/registry option is specified, the given names are interpreted
 relative to the specified registry using the syntax
@@ -52,25 +52,16 @@ linked library can be used:
 - `OCIRegistry`
 - `oci`
 
-With the option <code>--output</code> the out put mode can be selected.
-The following modes are supported:
- - JSON
- - json
- - yaml
-
-
-### Examples
-
-```
-
-$ ocm describe artefact ghcr.io/mandelsoft/kubelink
-$ ocm describe artefact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
-
-```
+The <code>--type</code> option accepts a file format for the
+target archive to use. The following formats are supported:
+- tar
+- tgz
+- directory
+The default format is <code>directory</code>.
 
 ### SEE ALSO
 
 ##### Parent
 
-* [ocm oci](ocm_oci.md)	 - 
+* [ocm oci artefacts](ocm_oci_artefacts.md)	 - 
 

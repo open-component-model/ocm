@@ -12,22 +12,32 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package ocicmds
+package create_test
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/ctf"
-	"github.com/spf13/cobra"
+	. "github.com/gardener/ocm/cmds/ocm/testhelper"
+	"github.com/gardener/ocm/pkg/oci/repositories/ctf"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-// NewCommand creates a new command.
-func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              "oci",
-		TraverseChildren: true,
-	}
-	cmd.AddCommand(artefacts.NewCommand(ctx))
-	cmd.AddCommand(ctf.NewCommand(ctx))
-	return cmd
-}
+const ARCH = "/tmp/ctf"
+
+var _ = Describe("Test Environment", func() {
+	var env *TestEnv
+
+	BeforeEach(func() {
+		env = NewTestEnv()
+	})
+
+	AfterEach(func() {
+		env.Cleanup()
+	})
+
+	It("creates common transport archive", func() {
+
+		Expect(env.Execute("create", "ctf", "-ft", "directory", ARCH)).To(Succeed())
+		Expect(env.DirExists(ARCH)).To(BeTrue())
+		Expect(env.ReadTextFile(env.Join(ARCH, ctf.ArtefactIndexFileName))).To(Equal("{\"schemaVersion\":1,\"artefacts\":null}"))
+	})
+})

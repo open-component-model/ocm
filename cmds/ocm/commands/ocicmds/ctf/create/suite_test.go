@@ -12,22 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package ocicmds
+package create_test
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/ctf"
-	"github.com/spf13/cobra"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-// NewCommand creates a new command.
-func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              "oci",
-		TraverseChildren: true,
-	}
-	cmd.AddCommand(artefacts.NewCommand(ctx))
-	cmd.AddCommand(ctf.NewCommand(ctx))
-	return cmd
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "OCI create transport archive")
 }

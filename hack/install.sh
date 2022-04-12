@@ -14,10 +14,10 @@ if [[ $EFFECTIVE_VERSION == "" ]]; then
 fi
 
 CGO_ENABLED=0 GOOS=$(go env GOOS) GOARCH=$(go env GOARCH) GO111MODULE=on \
-  go install -mod=vendor \
+  go install \
   -ldflags "-s -w \
             -X github.com/gardener/ocm/pkg/version.gitVersion=$EFFECTIVE_VERSION \
             -X github.com/gardener/ocm/pkg/version.gitTreeState=$([ -z git status --porcelain 2>/dev/null ] && echo clean || echo dirty) \
             -X github.com/gardener/ocm/pkg/version.gitCommit=$(git rev-parse --verify HEAD) \
             -X github.com/gardener/ocm/pkg/version.buildDate=$(date --rfc-3339=seconds | sed 's/ /T/')" \
-  ${PROJECT_ROOT}/cmd/...
+  ${PROJECT_ROOT}/cmds/ocm

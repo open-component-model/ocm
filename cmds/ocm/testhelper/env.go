@@ -42,6 +42,14 @@ func (e TestEnv) FileSystem() vfs.FileSystem {
 	return e.Builder.FileSystem()
 }
 
+func (e TestEnv) ReadTextFile(path string) (string, error) {
+	data, err := e.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
 func (e TestEnv) CatchOutput(w io.Writer) *TestEnv {
 	e.Context = e.Context.WithStdIO(nil, w, nil)
 	return &e

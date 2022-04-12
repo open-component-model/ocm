@@ -23,14 +23,14 @@ echo "Executing golangci-lint"
 golangci-lint run $GOLANGCI_LINT_CONFIG_FILE --timeout 10m $@
 
 echo "Executing go vet"
-go vet -mod=vendor $@
+go vet $@
 
 echo "Executing gofmt"
 folders=()
 for f in $@; do
   folders+=( "$(echo $f | sed 's/\(.*\)\/\.\.\./\1/')" )
 done
-unformatted_files="$(goimports -l -local=github.com/gardener/component-cli ${folders[*]})"
+unformatted_files="$(goimports -l -local=github.com/gardener/ocm ${folders[*]})"
 if [[ "$unformatted_files" ]]; then
   echo "Unformatted files detected:"
   echo "$unformatted_files"

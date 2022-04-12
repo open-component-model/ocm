@@ -1,5 +1,6 @@
 .idea
-*.sw[pq]
+*.sw[pqo]
 main
+/dist
 /tmp
 /ocm

@@ -18,6 +18,7 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/commands"
 
+	ctf "github.com/gardener/ocm/cmds/ocm/commands/ocicmds/ctf/create"
 	comparch "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
 	"github.com/spf13/cobra"
 )
@@ -29,5 +30,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 		TraverseChildren: true,
 	}
 	cmd.AddCommand(comparch.NewCommand(ctx, comparch.Names...))
+	cmd.AddCommand(ctf.NewCommand(ctx, ctf.Names...))
 	return cmd
 }

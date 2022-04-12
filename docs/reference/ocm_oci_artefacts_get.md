@@ -1,25 +1,28 @@
-## ocm oci transfer
+## ocm oci artefacts get
 
-transfer OCI artefacts
+get artefact version
 
 ### Synopsis
 
 ```
-ocm oci transfer [<options>] {<artefact-reference>}
+ocm oci artefacts get [<options>] {<artefact-reference>}
 ```
 
 ### Options
 
 ```
-  -h, --help          help for transfer
-  -r, --repo string   repository name or spec
+  -h, --help               help for get
+  -o, --output string      output mode (JSON, json, wide, yaml)
+  -r, --repo string        repository name or spec
+  -s, --sort stringArray   sort fields
 ```
 
 ### Description
 
 
-Transfer OCI artefacts from one registry to another one
-
+		Get lists all artefact versions specified, if only a repository is specified
+		all tagged artefacts are listed.
+	
 If the repository/registry option is specified, the given names are interpreted
 relative to the specified registry using the syntax
 
@@ -46,12 +49,20 @@ linked library can be used:
 - `OCIRegistry`
 - `oci`
 
+With the option <code>--output</code> the out put mode can be selected.
+The following modes are supported:
+ - JSON
+ - json
+ - wide
+ - yaml
+
 
 ### Examples
 
 ```
 
-$ ocm oci transfer ghcr.io/mandelsoft/kubelink gcr.io
+$ ocm get artefact ghcr.io/mandelsoft/kubelink
+$ ocm get artefact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
 
 ```
 
@@ -59,5 +70,5 @@ $ ocm oci transfer ghcr.io/mandelsoft/kubelink gcr.io
 
 ##### Parent
 
-* [ocm oci](ocm_oci.md)	 - 
+* [ocm oci artefacts](ocm_oci_artefacts.md)	 - 
 

@@ -12,22 +12,24 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package ocicmds
+package ctf
 
 import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/ctf"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/ctf/create"
+	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/names"
 	"github.com/spf13/cobra"
 )
+
+var Names = names.TransportArchive
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              "oci",
+		Use:              Names[0],
+		Aliases:          Names[1:],
 		TraverseChildren: true,
 	}
-	cmd.AddCommand(artefacts.NewCommand(ctx))
-	cmd.AddCommand(ctf.NewCommand(ctx))
+	cmd.AddCommand(create.NewCommand(ctx, create.Verb))
 	return cmd
 }
