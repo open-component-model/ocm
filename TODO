@@ -1,6 +1,10 @@
 
 - Align OCI and OCM Repository Name with type structure and reference syntax
 - Aligned Denotation for OCM and OCI elements
+- Generalize Sort Field Detection and check
+- Rework Processing Chain/Iterable to work go-like with channels
+- Recursion + Tree mode for OCI Indices
+- Better separation between typehandler/chain and chain/output
 - Rework digest handling based on Resource Type and Access Method Spec
 - Complete handling of all  possible input variations for the various CLI commands.
 - Add signature handling

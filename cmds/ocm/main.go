@@ -5,7 +5,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/gardener/ocm/cmds/ocm/app"
@@ -16,7 +15,6 @@ func main() {
 	c := app.NewCliCommand(cmd.DefaultContext())
 
 	if err := c.Execute(); err != nil {
-		fmt.Fprint(os.Stdout, err)
 		os.Exit(1)
 	}
 }

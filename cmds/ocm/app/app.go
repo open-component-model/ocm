@@ -73,6 +73,7 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 		Short:            "ocm",
 		TraverseChildren: true,
 		Version:          version.Get().String(),
+		SilenceUsage:     true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return opts.Complete()
 		},
