@@ -11,11 +11,10 @@ ocm oci artefacts describe [<options>] {<artefact-reference>}
 ### Options
 
 ```
-  -h, --help               help for describe
-      --layerfiles         list layer files
-  -o, --output string      output mode (JSON, json, yaml)
-  -r, --repo string        repository name or spec
-  -s, --sort stringArray   sort fields
+  -h, --help            help for describe
+      --layerfiles      list layer files
+  -o, --output string   output mode (JSON, json, yaml)
+  -r, --repo string     repository name or spec
 ```
 
 ### Description

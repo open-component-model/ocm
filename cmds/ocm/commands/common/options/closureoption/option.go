@@ -15,6 +15,8 @@
 package closureoption
 
 import (
+	"fmt"
+
 	"github.com/gardener/ocm/cmds/ocm/pkg/output"
 	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
 	"github.com/gardener/ocm/pkg/common"
@@ -28,20 +30,39 @@ func From(o *output.Options) *Option {
 }
 
 type Option struct {
+	ElementName      string
 	Closure          bool
 	ClosureField     string
 	AdditionalFields []string
 	FieldEnricher    func(interface{}) []string
 }
 
+func New(elemname string, settings ...interface{}) *Option {
+	o := &Option{ElementName: elemname}
+	for _, s := range settings {
+		switch v := s.(type) {
+		case string:
+			o.ClosureField = v
+		case []string:
+			o.AdditionalFields = v
+		case func(interface{}) []string:
+			o.FieldEnricher = v
+		default:
+			panic(fmt.Errorf("invalid setting for closure option: %T", s))
+		}
+	}
+	if (len(o.AdditionalFields) > 0) != (o.FieldEnricher != nil) {
+		panic(fmt.Errorf("invalid setting for closure option: both, addituonal fields and enricher must be set"))
+	}
+	return o
+}
+
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	fs.BoolVarP(&o.Closure, "closure", "c", false, "follow component references")
+	fs.BoolVarP(&o.Closure, "closure", "c", false, fmt.Sprintf("follow %s nesting", o.ElementName))
 }
 
 func (o *Option) Usage() string {
-	return `
-With the option <code>--closure</code> the complete reference tree by a component verserion is traversed.
-`
+	return fmt.Sprintf("\nWith the option <code>--closure</code> the complete reference tree of a %s is traversed.\n", o.ElementName)
 }
 
 func (o *Option) Explode(e processing.ExplodeFunction) processing.ProcessChain {

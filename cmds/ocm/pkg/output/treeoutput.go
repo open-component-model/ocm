@@ -21,9 +21,11 @@ import (
 )
 
 func TreeOutput(t *TableOutput, header string) *TableOutput {
+	opts := *t.Options
+	opts.FixedColums = 1
 	return &TableOutput{
 		Headers: Fields(header, t.Headers),
-		Options: t.Options,
+		Options: &opts,
 		Chain:   processing.Append(t.Chain, processing.Transform(treeTransform)),
 		Mapping: treeMapping(len(t.Headers), t.Mapping),
 	}

@@ -11,7 +11,7 @@ ocm get components [<options>] {<component-reference>}
 ### Options
 
 ```
-  -c, --closure            follow component references
+  -c, --closure            follow component reference nesting
   -h, --help               help for components
   -o, --output string      output mode (JSON, json, tree, wide, yaml)
   -r, --repo string        repository name or spec
@@ -60,7 +60,7 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `OCIRegistry`
 - `oci`
 
-With the option <code>--closure</code> the complete reference tree by a component verserion is traversed.
+With the option <code>--closure</code> the complete reference tree of a component reference is traversed.
 
 With the option <code>--output</code> the out put mode can be selected.
 The following modes are supported:

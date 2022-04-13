@@ -236,18 +236,15 @@ func (this Outputs) Select(name string) OutputFactory {
 }
 
 func (this Outputs) Create(opts *Options) (Output, error) {
-	f := opts.Output
-	if f == nil {
-		return this[""](opts), nil
-	}
-	c := this.Select(*f)
+	f := opts.OutputMode
+	c := this.Select(f)
 	if c != nil {
 		o := c(opts)
 		if o != nil {
 			return o, nil
 		}
 	}
-	return nil, errors.Newf("invalid output format '%s'", *f)
+	return nil, errors.Newf("invalid output format '%s'", f)
 }
 
 func (this Outputs) AddManifestOutputs() Outputs {
@@ -274,22 +271,4 @@ func (this Outputs) AddChainedManifestOutputs(chain func(opts *Options) processi
 		return NewProcessingJSONOutput(opts.Context, chain(opts), false)
 	}
 	return this
-}
-
-func GetOutput(opts *Options, def Output) (Output, error) {
-	o := def
-	f := opts.Output
-	if f != nil {
-		switch *f {
-		case "yaml":
-			o = &YAMLOutput{ManifestOutput{Context: opts.Context, data: []Object{}}}
-		case "json":
-			o = &JSONOutput{ManifestOutput{Context: opts.Context, data: []Object{}}, true}
-		case "JSON":
-			o = &JSONOutput{ManifestOutput{Context: opts.Context, data: []Object{}}, false}
-		default:
-			return nil, errors.Newf("invalid output format '%s'", *f)
-		}
-	}
-	return o, nil
 }

@@ -22,6 +22,8 @@ import (
 	"github.com/gardener/ocm/cmds/ocm/clictx"
 	"github.com/gardener/ocm/cmds/ocm/pkg/options"
 	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
+	"github.com/gardener/ocm/pkg/errors"
+	"github.com/gardener/ocm/pkg/utils"
 	"github.com/spf13/pflag"
 )
 
@@ -35,8 +37,8 @@ type Options struct {
 	options.OptionSet
 
 	Outputs     Outputs
-	output      string
-	Output      *string
+	OutputMode  string
+	Output      Output
 	Sort        []string
 	FixedColums int
 	Context     out.Context
@@ -72,26 +74,44 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 				sep = ", "
 			}
 		}
-		fs.StringVarP(&o.output, "output", "o", "", fmt.Sprintf("output mode (%s)", s))
+		fs.StringVarP(&o.OutputMode, "output", "o", "", fmt.Sprintf("output mode (%s)", s))
 	}
-	fs.StringArrayVarP(&o.Sort, "sort", "s", nil, "sort fields")
+
+	// TODO: not the best solution to instantiate all possiblke outputs to figure out, whether sort fields
+	// are available or not
+	for _, out := range o.Outputs {
+		if _, ok := out(o).(SortFields); ok {
+			fs.StringArrayVarP(&o.Sort, "sort", "s", nil, "sort fields")
+			break
+		}
+	}
 
 	o.OptionSet.AddFlags(fs)
 }
 
 func (o *Options) Complete(ctx clictx.Context) error {
 	o.Context = ctx
-	if o.output != "" {
-		o.Output = &o.output
-	}
 	var fields []string
 
+	if f := o.Outputs[o.OutputMode]; f == nil {
+		return errors.ErrInvalid("output mode", o.OutputMode)
+	} else {
+		o.Output = f(o)
+	}
+	var avail utils.StringSlice
+	if s, ok := o.Output.(SortFields); ok {
+		avail = s.GetSortFields()
+	}
 	for _, f := range o.Sort {
 		split := strings.Split(f, ",")
 		for _, s := range split {
 			s = strings.TrimSpace(s)
 			if s != "" {
-				fields = append(fields, s)
+				if avail.Contains(s) {
+					fields = append(fields, s)
+				} else {
+					return errors.ErrInvalid("sort field", s)
+				}
 			}
 		}
 	}
@@ -127,10 +147,6 @@ The following modes are supported:
 		}
 	}
 	return s
-}
-
-func (o *Options) Create() (Output, error) {
-	return o.Outputs.Create(o)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

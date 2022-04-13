@@ -11,11 +11,10 @@ ocm oci artefacts download [<options>]  {<artefact>}
 ### Options
 
 ```
-  -h, --help               help for download
-  -O, --outfile string     output file or directory
-  -r, --repo string        repository name or spec
-  -s, --sort stringArray   sort fields
-  -t, --type string        archive format (default "directory")
+  -h, --help             help for download
+  -O, --outfile string   output file or directory
+  -r, --repo string      repository name or spec
+  -t, --type string      archive format (default "directory")
 ```
 
 ### Description

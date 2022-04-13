@@ -11,12 +11,11 @@ ocm resources download [<options>]  <component> {<name> { <key>=<value> }}
 ### Options
 
 ```
-  -c, --closure            follow component references
-  -h, --help               help for download
-      --lookup string      repository name or spec for closure lookup fallback
-  -O, --outfile string     output file or directory
-  -r, --repo string        repository name or spec
-  -s, --sort stringArray   sort fields
+  -c, --closure          follow component reference nesting
+  -h, --help             help for download
+      --lookup string    repository name or spec for closure lookup fallback
+  -O, --outfile string   output file or directory
+  -r, --repo string      repository name or spec
 ```
 
 ### Description
@@ -85,7 +84,7 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `OCIRegistry`
 - `oci`
 
-With the option <code>--closure</code> the complete reference tree by a component verserion is traversed.
+With the option <code>--closure</code> the complete reference tree of a component reference is traversed.
 
 If a component lookup for building a reference closure is required
 the <code>--lookup</code>  option can be used to specify a fallback

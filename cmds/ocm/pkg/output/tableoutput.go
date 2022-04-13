@@ -22,12 +22,18 @@ import (
 	"github.com/gardener/ocm/pkg/errors"
 )
 
+type SortFields interface {
+	GetSortFields() []string
+}
+
 type TableOutput struct {
 	Headers []string
 	Options *Options
 	Chain   ProcessChain
 	Mapping MappingFunction
 }
+
+var _ SortFields = (*TableOutput)(nil)
 
 func (t *TableOutput) New() *TableProcessingOutput {
 	chain := t.Chain
@@ -39,13 +45,18 @@ func (t *TableOutput) New() *TableProcessingOutput {
 	return NewProcessingTableOutput(t.Options, chain, t.Headers...)
 }
 
+func (this *TableOutput) GetSortFields() []string {
+	return this.Headers[this.Options.FixedColums:]
+}
+
 type TableProcessingOutput struct {
 	ElementOutput
 	header []string
 	opts   *Options
 }
 
-var _ Output = &TableProcessingOutput{}
+var _ Output = (*TableProcessingOutput)(nil)
+var _ SortFields = (*TableProcessingOutput)(nil)
 
 func NewProcessingTableOutput(opts *Options, chain ProcessChain, header ...string) *TableProcessingOutput {
 	return (&TableProcessingOutput{}).new(opts, chain, header)
@@ -56,6 +67,10 @@ func (this *TableProcessingOutput) new(opts *Options, chain ProcessChain, header
 	this.ElementOutput.new(opts.Context, chain)
 	this.opts = opts
 	return this
+}
+
+func (this *TableProcessingOutput) GetSortFields() []string {
+	return this.header[this.opts.FixedColums:]
 }
 
 func (this *TableProcessingOutput) Out() error {

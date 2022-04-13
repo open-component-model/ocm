@@ -33,8 +33,9 @@ func Elem(e interface{}) oci.ArtefactAccess {
 ////////////////////////////////////////////////////////////////////////////////
 
 type Object struct {
-	Spec     oci.RefSpec
-	Artefact oci.ArtefactAccess
+	Spec      oci.RefSpec
+	Namespace oci.NamespaceAccess
+	Artefact  oci.ArtefactAccess
 }
 
 type Manifest struct {
@@ -118,8 +119,9 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 		namespace = evaluated.Namespace
 		if evaluated.Artefact != nil {
 			result = append(result, &Object{
-				Spec:     spec,
-				Artefact: evaluated.Artefact,
+				Spec:      spec,
+				Namespace: namespace,
+				Artefact:  evaluated.Artefact,
 			})
 			return result, nil
 		}
@@ -164,8 +166,9 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 			s := spec
 			s.Tag = &t
 			result = append(result, &Object{
-				Spec:     s,
-				Artefact: a,
+				Spec:      s,
+				Namespace: namespace,
+				Artefact:  a,
 			})
 		}
 	}
