@@ -18,6 +18,7 @@ package cpi
 
 import (
 	"github.com/gardener/ocm/pkg/ocm/core"
+	"github.com/opencontainers/go-digest"
 )
 
 const CONTEXT_TYPE = core.CONTEXT_TYPE
@@ -50,6 +51,23 @@ type ComponentReference = core.ComponentReference
 type BlobHandler = core.BlobHandler
 type BlobHandlerKey = core.BlobHandlerKey
 type StorageContext = core.StorageContext
+
+type DigesterType = core.DigesterType
+type BlobDigester = core.BlobDigester
+type BlobDigesterRegistry = core.BlobDigesterRegistry
+type DigestDescriptor = core.DigestDescriptor
+
+func NewDigestDescriptor(digest digest.Digest, typ DigesterType) *DigestDescriptor {
+	return core.NewDigestDescriptor(digest, typ)
+}
+
+func DefaultBlobDigesterRegistry() BlobDigesterRegistry {
+	return core.DefaultBlobDigesterRegistry
+}
+
+func DefaultContext() core.Context {
+	return core.DefaultContext
+}
 
 func ForRepo(ctxtype, repostype string) BlobHandlerKey {
 	return core.ForRepo(ctxtype, repostype)

@@ -18,7 +18,7 @@ import (
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/ocm/accessmethods"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods/localblob"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -87,7 +87,7 @@ func (c *ComponentArchive) AddBlob(blob cpi.BlobAccess, refName string, global c
 	if err != nil {
 		return nil, err
 	}
-	return accessmethods.NewLocalBlobAccessSpec(common.DigestToFileName(blob.Digest()), refName, blob.MimeType(), global), nil
+	return localblob.New(common.DigestToFileName(blob.Digest()), refName, blob.MimeType(), global), nil
 }
 
 func (c *ComponentArchive) GetDescriptor() *compdesc.ComponentDescriptor {

@@ -18,7 +18,7 @@ import (
 	"io"
 
 	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/ocm/accessmethods"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods/localblob"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/gardener/ocm/pkg/runtime"
 )
@@ -35,8 +35,8 @@ func init() {
 }
 
 // NewLocalFilesystemBlobAccessSpecV1 creates a new localFilesystemBlob accessor.
-func NewLocalFilesystemBlobAccessSpecV1(path string, mediaType string) *accessmethods.LocalBlobAccessSpec {
-	return &accessmethods.LocalBlobAccessSpec{
+func NewLocalFilesystemBlobAccessSpecV1(path string, mediaType string) *localblob.AccessSpec {
+	return &localblob.AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(LocalFilesystemBlobType),
 		ReferenceName:       path,
 		MediaType:           mediaType,
@@ -59,7 +59,7 @@ type localfsblobConverterV1 struct{}
 var LocalFilesystemBlobV1 = cpi.NewAccessSpecVersion(&LocalFilesystemBlobAccessSpecV1{}, localfsblobConverterV1{})
 
 func (_ localfsblobConverterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, error) {
-	in := object.(*accessmethods.LocalBlobAccessSpec)
+	in := object.(*localblob.AccessSpec)
 	return &LocalFilesystemBlobAccessSpecV1{
 		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
 		Filename:            in.ReferenceName,
@@ -69,7 +69,7 @@ func (_ localfsblobConverterV1) ConvertFrom(object cpi.AccessSpec) (runtime.Type
 
 func (_ localfsblobConverterV1) ConvertTo(object interface{}) (cpi.AccessSpec, error) {
 	in := object.(*LocalFilesystemBlobAccessSpecV1)
-	return &accessmethods.LocalBlobAccessSpec{
+	return &localblob.AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
 		ReferenceName:       in.Filename,
 		MediaType:           in.MediaType,
@@ -79,13 +79,13 @@ func (_ localfsblobConverterV1) ConvertTo(object interface{}) (cpi.AccessSpec, e
 ////////////////////////////////////////////////////////////////////////////////
 
 type localFilesystemBlobAccessMethod struct {
-	spec *accessmethods.LocalBlobAccessSpec
+	spec *localblob.AccessSpec
 	comp *ComponentVersionAccess
 }
 
 var _ cpi.AccessMethod = (*localFilesystemBlobAccessMethod)(nil)
 
-func newLocalFilesystemBlobAccessMethod(a *accessmethods.LocalBlobAccessSpec, comp *ComponentVersionAccess) (cpi.AccessMethod, error) {
+func newLocalFilesystemBlobAccessMethod(a *localblob.AccessSpec, comp *ComponentVersionAccess) (cpi.AccessMethod, error) {
 	return &localFilesystemBlobAccessMethod{
 		spec: a,
 		comp: comp,
@@ -93,7 +93,7 @@ func newLocalFilesystemBlobAccessMethod(a *accessmethods.LocalBlobAccessSpec, co
 }
 
 func (m *localFilesystemBlobAccessMethod) GetKind() string {
-	return accessmethods.LocalBlobType
+	return localblob.Type
 }
 
 func (m *localFilesystemBlobAccessMethod) Reader() (io.ReadCloser, error) {

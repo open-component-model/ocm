@@ -21,7 +21,6 @@ import (
 	"github.com/gardener/ocm/pkg/datacontext"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/ocm/core"
-	"github.com/gardener/ocm/pkg/ocm/digester"
 )
 
 func WithContext(ctx context.Context) core.Builder {
@@ -56,7 +55,7 @@ func WithBlobHandlers(reg BlobHandlerRegistry) core.Builder {
 	return core.Builder{}.WithBlobHandlers(reg)
 }
 
-func WithBlobDigesters(reg digester.BlobDigesterRegistry) core.Builder {
+func WithBlobDigesters(reg BlobDigesterRegistry) core.Builder {
 	return core.Builder{}.WithBlobDigesters(reg)
 }
 

@@ -23,7 +23,8 @@ import (
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	artefactset2 "github.com/gardener/ocm/pkg/oci/repositories/artefactset"
-	"github.com/gardener/ocm/pkg/ocm/accessmethods"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods/localblob"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods/ociregistry"
 	ocihdlr "github.com/gardener/ocm/pkg/ocm/blobhandler/oci"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
@@ -136,7 +137,7 @@ func (c *ComponentVersionContainer) evalLayer(s compdesc.AccessSpec) (compdesc.A
 	if err != nil {
 		return s, err
 	}
-	if a, ok := spec.(*accessmethods.LocalBlobAccessSpec); ok {
+	if a, ok := spec.(*localblob.AccessSpec); ok {
 		if ok, _ := artdesc.IsDigest(a.LocalReference); !ok {
 			return s, errors.ErrInvalid("digest", a.LocalReference)
 		}
@@ -177,7 +178,7 @@ func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string,
 	if err != nil {
 		return nil, err
 	}
-	return accessmethods.NewLocalBlobAccessSpec(blob.Digest().String(), refName, blob.MimeType(), global), nil
+	return localblob.New(blob.Digest().String(), refName, blob.MimeType(), global), nil
 }
 
 // assureGlobalRef provides a global manifest for a local OCI Artefact
@@ -224,6 +225,6 @@ func (c *ComponentVersionContainer) assureGlobalRef(d digest.Digest, url, name s
 
 	ref := path.Join(url+namespace.GetNamespace()) + ":" + version
 
-	global := accessmethods.NewOCIRegistryAccessSpec(ref)
+	global := ociregistry.New(ref)
 	return global, nil
 }

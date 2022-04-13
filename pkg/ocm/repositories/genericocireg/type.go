@@ -21,7 +21,7 @@ import (
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
-	"github.com/gardener/ocm/pkg/ocm/accessmethods"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods/localblob"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/gardener/ocm/pkg/runtime"
@@ -95,7 +95,7 @@ func (t *RepositoryType) Decode(data []byte, unmarshal runtime.Unmarshaler) (run
 
 func (t *RepositoryType) LocalSupportForAccessSpec(ctx cpi.Context, a compdesc.AccessSpec) bool {
 	name := a.GetKind()
-	return name == accessmethods.LocalBlobType
+	return name == localblob.Type
 }
 
 ////////////////////////////////////////////////////////////////////////////////

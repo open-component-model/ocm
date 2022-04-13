@@ -12,31 +12,10 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package digester
+package accessmethods
 
 import (
-	_ "github.com/gardener/ocm/pkg/ocm/digester/digesters"
-
-	"github.com/gardener/ocm/pkg/ocm/digester/core"
-	"github.com/opencontainers/go-digest"
+	_ "github.com/gardener/ocm/pkg/ocm/accessmethods/localblob"
+	_ "github.com/gardener/ocm/pkg/ocm/accessmethods/ociblob"
+	_ "github.com/gardener/ocm/pkg/ocm/accessmethods/ociregistry"
 )
-
-type DigesterType = core.DigesterType
-type DigestDescriptor = core.DigestDescriptor
-type BlobDigester = core.BlobDigester
-type BlobDigesterRegistry = core.BlobDigesterRegistry
-
-func NewDigestDescriptor(digest digest.Digest, typ DigesterType) *DigestDescriptor {
-	return &DigestDescriptor{
-		Digest:   digest,
-		Digester: &typ,
-	}
-}
-
-func NewBlobDigesterRegistry() BlobDigesterRegistry {
-	return core.NewBlobDigesterRegistry()
-}
-
-func DefaultBlobDigesterRegistry() BlobDigesterRegistry {
-	return core.DefaultBlobDigesterRegistry
-}

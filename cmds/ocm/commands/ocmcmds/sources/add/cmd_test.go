@@ -25,7 +25,7 @@ import (
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/mime"
-	"github.com/gardener/ocm/pkg/ocm/accessmethods"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods/localblob"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/gardener/ocm/pkg/ocm/repositories/comparch/comparch"
@@ -44,10 +44,10 @@ func CheckArchiveSource(env *TestEnv, cd *compdesc.ComponentDescriptor, name str
 	Expect(r.Type).To(Equal("git"))
 	spec, err := env.OCMContext().AccessSpecForSpec(r.Access)
 	Expect(err).To(Succeed())
-	Expect(spec.GetType()).To(Equal(accessmethods.LocalBlobType))
-	Expect(spec.(*accessmethods.LocalBlobAccessSpec).MediaType).To(Equal(mime.MIME_GZIP))
+	Expect(spec.GetType()).To(Equal(localblob.Type))
+	Expect(spec.(*localblob.AccessSpec).MediaType).To(Equal(mime.MIME_GZIP))
 
-	local := spec.(*accessmethods.LocalBlobAccessSpec).LocalReference
+	local := spec.(*localblob.AccessSpec).LocalReference
 	fmt.Printf("local: %s\n", local)
 
 	bpath := env.Join(ARCH, comparch.BlobsDirectoryName, local)
@@ -93,9 +93,9 @@ func CheckTextSource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string
 	Expect(r.Type).To(Equal("git"))
 	spec, err := env.OCMContext().AccessSpecForSpec(r.Access)
 	Expect(err).To(Succeed())
-	Expect(spec.GetType()).To(Equal(accessmethods.LocalBlobType))
-	Expect(spec.(*accessmethods.LocalBlobAccessSpec).LocalReference).To(Equal(common.DigestToFileName(dig)))
-	Expect(spec.(*accessmethods.LocalBlobAccessSpec).MediaType).To(Equal(mime.MIME_TEXT))
+	Expect(spec.GetType()).To(Equal(localblob.Type))
+	Expect(spec.(*localblob.AccessSpec).LocalReference).To(Equal(common.DigestToFileName(dig)))
+	Expect(spec.(*localblob.AccessSpec).MediaType).To(Equal(mime.MIME_TEXT))
 }
 
 var _ = Describe("Test Environment", func() {

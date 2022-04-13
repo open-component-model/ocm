@@ -17,7 +17,7 @@ package compdesc
 import (
 	"testing"
 
-	"github.com/gardener/ocm/pkg/ocm/accessmethods"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods/ociregistry"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/gardener/ocm/pkg/runtime"
 	. "github.com/onsi/ginkgo"
@@ -37,13 +37,13 @@ var _ = Describe("Validation", func() {
 		comp *ComponentDescriptor
 
 		ociImage1    *Resource
-		ociRegistry1 *accessmethods.OCIRegistryAccessSpec
+		ociRegistry1 *ociregistry.AccessSpec
 		ociImage2    *Resource
-		ociRegistry2 *accessmethods.OCIRegistryAccessSpec
+		ociRegistry2 *ociregistry.AccessSpec
 	)
 
 	BeforeEach(func() {
-		ociRegistry1 = accessmethods.NewOCIRegistryAccessSpec("docker/image1:1.2.3")
+		ociRegistry1 = ociregistry.New("docker/image1:1.2.3")
 
 		unstrucOCIRegistry1, err := runtime.ToUnstructuredTypedObject(ociRegistry1)
 		Expect(err).ToNot(HaveOccurred())
@@ -56,7 +56,7 @@ var _ = Describe("Validation", func() {
 			Relation: metav1.ExternalRelation,
 			Access:   unstrucOCIRegistry1,
 		}
-		ociRegistry2 = accessmethods.NewOCIRegistryAccessSpec("docker/image1:1.2.3")
+		ociRegistry2 = ociregistry.New("docker/image1:1.2.3")
 		unstrucOCIRegistry2, err := runtime.ToUnstructuredTypedObject(ociRegistry2)
 		Expect(err).ToNot(HaveOccurred())
 		ociImage2 = &Resource{
@@ -263,7 +263,7 @@ var _ = Describe("Validation", func() {
 						Version: "0.0.1",
 					},
 					Relation: metav1.LocalRelation,
-					Access:   runtime.NewEmptyUnstructured(accessmethods.OCIRegistryType),
+					Access:   runtime.NewEmptyUnstructured(ociregistry.Type),
 				},
 			}
 			errList := validate(nil, comp)

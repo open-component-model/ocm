@@ -18,8 +18,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/errors"
 	"github.com/opencontainers/go-digest"
 )
 
@@ -51,32 +49,34 @@ func NewDigestDescriptor(digest digest.Digest, typ DigesterType) *DigestDescript
 // of the blob
 type BlobDigester interface {
 	GetType() DigesterType
-	DetermineDigest(blob accessio.BlobAccess) (*DigestDescriptor, error)
+	DetermineDigest(resType string, meth AccessMethod) (*DigestDescriptor, error)
 }
 
 // BlobDigesterRegistry registers blob handlers to use in a dedicated ocm context
 type BlobDigesterRegistry interface {
 	// RegisterDigester registers a blob digester for a dedicated exact mime type
 	//
-	RegisterDigester(handler BlobDigester, mimetypes ...string)
+	RegisterDigester(handler BlobDigester, restypes ...string)
 	// GetDigester returns the digester for a given type
 	GetDigester(typ DigesterType) BlobDigester
-	DetermineDigests(blob accessio.BlobAccess, typs ...DigesterType) ([]DigestDescriptor, error)
+	DetermineDigests(typ string, acc AccessMethod, typs ...DigesterType) ([]DigestDescriptor, error)
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 type blobDigesterRegistry struct {
 	lock         sync.RWMutex
-	mimehandlers map[string]BlobDigester
+	typehandlers map[string][]BlobDigester
 	digesters    map[DigesterType]BlobDigester
 }
 
 var DefaultBlobDigesterRegistry = NewBlobDigesterRegistry()
 
 func NewBlobDigesterRegistry() BlobDigesterRegistry {
-	return &blobDigesterRegistry{mimehandlers: map[string]BlobDigester{}, digesters: map[DigesterType]BlobDigester{}}
+	return &blobDigesterRegistry{typehandlers: map[string][]BlobDigester{}, digesters: map[DigesterType]BlobDigester{}}
 }
 
-func (r *blobDigesterRegistry) RegisterDigester(digester BlobDigester, mimetypes ...string) {
+func (r *blobDigesterRegistry) RegisterDigester(digester BlobDigester, restypes ...string) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
@@ -86,12 +86,16 @@ func (r *blobDigesterRegistry) RegisterDigester(digester BlobDigester, mimetypes
 	}
 	r.digesters[digester.GetType()] = digester
 
-	for _, mimetype := range mimetypes {
-		old = r.mimehandlers[mimetype]
-		if old != nil && old != digester {
-			panic(fmt.Errorf("duplicate digester for mime type %q: %s and %s", mimetype, old.GetType(), digester.GetType()))
+outer:
+	for _, t := range restypes {
+		old := r.typehandlers[t]
+		for _, o := range old {
+			if o == digester {
+				continue outer
+			}
 		}
-		r.mimehandlers[mimetype] = digester
+		old = append(old, digester)
+		r.typehandlers[t] = old
 	}
 }
 
@@ -101,19 +105,36 @@ func (r *blobDigesterRegistry) GetDigester(typ DigesterType) BlobDigester {
 	return r.digesters[typ]
 }
 
-func (r *blobDigesterRegistry) DetermineDigests(blob accessio.BlobAccess, typs ...DigesterType) ([]DigestDescriptor, error) {
+func (r *blobDigesterRegistry) handle(list []BlobDigester, typ string, acc AccessMethod) ([]DigestDescriptor, error) {
+	for _, h := range list {
+		d, err := h.DetermineDigest(typ, acc)
+		if err != nil {
+			return nil, err
+		}
+		if d != nil {
+			return []DigestDescriptor{
+				*d,
+			}, nil
+		}
+	}
+	return nil, nil
+}
+
+func (r *blobDigesterRegistry) DetermineDigests(typ string, acc AccessMethod, dtyps ...DigesterType) ([]DigestDescriptor, error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
-	if len(typs) == 0 {
-		var d *DigestDescriptor
+	if len(dtyps) == 0 {
 		var err error
-		h := r.mimehandlers[blob.MimeType()]
-		if h != nil {
-			d, err = h.DetermineDigest(blob)
-		} else {
-			d, err = defaultDigester{}.DetermineDigest(blob)
+		res, err := r.handle(r.typehandlers[typ], typ, acc)
+		if res != nil || err != nil {
+			return res, err
 		}
+		res, err = r.handle(r.typehandlers[""], typ, acc)
+		if res != nil || err != nil {
+			return res, err
+		}
+		d, err := defaultDigester{}.DetermineDigest(typ, acc)
 		if err != nil {
 			return nil, err
 		}
@@ -121,22 +142,25 @@ func (r *blobDigesterRegistry) DetermineDigests(blob accessio.BlobAccess, typs .
 			*d,
 		}, nil
 	}
+
 	var result []DigestDescriptor
-	for _, typ := range typs {
-		t := r.digesters[typ]
+	for _, dtyp := range dtyps {
+		t := r.digesters[dtyp]
 		if t != nil {
-			d, err := t.DetermineDigest(blob)
+			d, err := t.DetermineDigest(typ, acc)
 			if err != nil {
 				return nil, err
 			}
-			result = append(result, *d)
+			if d != nil {
+				result = append(result, *d)
+			}
 		}
 	}
 	return result, nil
 }
 
-func RegisterDigester(digester BlobDigester, mimetypes ...string) {
-	DefaultBlobDigesterRegistry.RegisterDigester(digester, mimetypes...)
+func RegisterDigester(digester BlobDigester, arttypes ...string) {
+	DefaultBlobDigesterRegistry.RegisterDigester(digester, arttypes...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -151,13 +175,17 @@ func (d defaultDigester) GetType() DigesterType {
 	}
 }
 
-func (d defaultDigester) DetermineDigest(blob accessio.BlobAccess) (*DigestDescriptor, error) {
-	digest := blob.Digest()
-	if digest == "" {
-		return nil, errors.New("no digest available")
+func (d defaultDigester) DetermineDigest(typ string, acc AccessMethod) (*DigestDescriptor, error) {
+	r, err := acc.Reader()
+	if err != nil {
+		return nil, err
+	}
+	dig, err := digest.FromReader(r)
+	if err != nil {
+		return nil, err
 	}
 	return &DigestDescriptor{
-		Digest:   digest,
+		Digest:   dig,
 		Digester: nil,
 	}, nil
 }

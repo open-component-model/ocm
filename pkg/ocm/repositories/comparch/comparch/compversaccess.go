@@ -19,7 +19,7 @@ import (
 
 	"github.com/gardener/ocm/pkg/common/accessio"
 	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/ocm/accessmethods"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods/localblob"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
@@ -73,12 +73,12 @@ func (c *ComponentVersionAccess) AccessMethod(a cpi.AccessSpec) (cpi.AccessMetho
 		// fall back to original version
 		return a.AccessMethod(c)
 	}
-	if a.GetKind() == accessmethods.LocalBlobType || a.GetKind() == LocalFilesystemBlobType {
+	if a.GetKind() == localblob.Type || a.GetKind() == LocalFilesystemBlobType {
 		a, err := c.base.GetContext().AccessSpecForSpec(a)
 		if err != nil {
 			return nil, err
 		}
-		return newLocalFilesystemBlobAccessMethod(a.(*accessmethods.LocalBlobAccessSpec), c)
+		return newLocalFilesystemBlobAccessMethod(a.(*localblob.AccessSpec), c)
 	}
 	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "component archive")
 }

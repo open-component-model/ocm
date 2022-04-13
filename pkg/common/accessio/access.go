@@ -64,12 +64,11 @@ type MimeType interface {
 //  BlobAccess describes the access to a blob
 type BlobAccess interface {
 	DataAccess
+	DigestSource
 	MimeType
 
 	// DigestKnown reports whether digest is already known
 	DigestKnown() bool
-	// Digest returns the blob digest
-	Digest() digest.Digest // TODO; add error
 	// Size returns the blob size
 	Size() int64
 }
@@ -79,6 +78,11 @@ type BlobAccess interface {
 type TemporaryBlobAccess interface {
 	BlobAccess
 	Close() error
+}
+
+type DigestSource interface {
+	// Digest returns the blob digest
+	Digest() digest.Digest
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -7,7 +7,9 @@ import (
 	_ "github.com/gardener/ocm/pkg/ocm/accessmethods"
 	_ "github.com/gardener/ocm/pkg/ocm/blobhandler"
 	_ "github.com/gardener/ocm/pkg/ocm/compdesc/versions"
+	_ "github.com/gardener/ocm/pkg/ocm/digester/digesters"
 	_ "github.com/gardener/ocm/pkg/ocm/repositories"
+	"github.com/opencontainers/go-digest"
 
 	"github.com/gardener/ocm/pkg/ocm/core"
 )
@@ -41,6 +43,15 @@ type RepositoryTypeScheme = core.RepositoryTypeScheme
 type AccessTypeScheme = core.AccessTypeScheme
 type BlobHandlerRegistry = core.BlobHandlerRegistry
 type ComponentReference = core.ComponentReference
+
+type DigesterType = core.DigesterType
+type BlobDigester = core.BlobDigester
+type BlobDigesterRegistry = core.BlobDigesterRegistry
+type DigestDescriptor = core.DigestDescriptor
+
+func NewDigestDescriptor(digest digest.Digest, typ DigesterType) *DigestDescriptor {
+	return core.NewDigestDescriptor(digest, typ)
+}
 
 // DefaultContext is the default context initialized by init functions
 func DefaultContext() core.Context {

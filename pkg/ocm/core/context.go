@@ -23,7 +23,6 @@ import (
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	"github.com/gardener/ocm/pkg/ocm/digester"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
@@ -45,7 +44,7 @@ type Context interface {
 	MapUniformRepositorySpec(u *UniformRepositorySpec, aliases Aliases) (RepositorySpec, error)
 
 	BlobHandlers() BlobHandlerRegistry
-	BlobDigesters() digester.BlobDigesterRegistry
+	BlobDigesters() BlobDigesterRegistry
 
 	RepositoryForSpec(spec RepositorySpec, creds ...credentials.CredentialsSource) (Repository, error)
 	RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...credentials.CredentialsSource) (Repository, error)
@@ -82,12 +81,12 @@ type _context struct {
 
 	specHandlers  RepositorySpecHandlers
 	blobHandlers  BlobHandlerRegistry
-	blobDigesters digester.BlobDigesterRegistry
+	blobDigesters BlobDigesterRegistry
 }
 
 var _ Context = &_context{}
 
-func newContext(shared datacontext.AttributesContext, credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, specHandlers RepositorySpecHandlers, blobHandlers BlobHandlerRegistry, blobDigesters digester.BlobDigesterRegistry) Context {
+func newContext(shared datacontext.AttributesContext, credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, specHandlers RepositorySpecHandlers, blobHandlers BlobHandlerRegistry, blobDigesters BlobDigesterRegistry) Context {
 	c := &_context{
 		sharedattributes:     shared,
 		credctx:              credctx,
@@ -130,7 +129,7 @@ func (c *_context) BlobHandlers() BlobHandlerRegistry {
 	return c.blobHandlers
 }
 
-func (c *_context) BlobDigesters() digester.BlobDigesterRegistry {
+func (c *_context) BlobDigesters() BlobDigesterRegistry {
 	return c.blobDigesters
 }
 

@@ -21,7 +21,6 @@ import (
 	"github.com/gardener/ocm/pkg/credentials"
 	"github.com/gardener/ocm/pkg/datacontext"
 	"github.com/gardener/ocm/pkg/oci"
-	"github.com/gardener/ocm/pkg/ocm/digester"
 )
 
 type Builder struct {
@@ -33,7 +32,7 @@ type Builder struct {
 	accessscheme  AccessTypeScheme
 	spechandlers  RepositorySpecHandlers
 	blobhandlers  BlobHandlerRegistry
-	blobdigesters digester.BlobDigesterRegistry
+	blobdigesters BlobDigesterRegistry
 }
 
 func (b *Builder) getContext() context.Context {
@@ -83,7 +82,7 @@ func (b Builder) WithBlobHandlers(reg BlobHandlerRegistry) Builder {
 	return b
 }
 
-func (b Builder) WithBlobDigesters(reg digester.BlobDigesterRegistry) Builder {
+func (b Builder) WithBlobDigesters(reg BlobDigesterRegistry) Builder {
 	b.blobdigesters = reg
 	return b
 }
@@ -118,7 +117,7 @@ func (b Builder) New() Context {
 		b.blobhandlers = DefaultBlobHandlerRegistry
 	}
 	if b.blobdigesters == nil {
-		b.blobdigesters = digester.DefaultBlobDigesterRegistry()
+		b.blobdigesters = DefaultBlobDigesterRegistry
 	}
 	if ociimpl != nil {
 		def, err := ociimpl(b.oci)

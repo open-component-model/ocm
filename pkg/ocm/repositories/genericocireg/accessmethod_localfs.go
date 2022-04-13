@@ -21,19 +21,19 @@ import (
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/artdesc"
-	"github.com/gardener/ocm/pkg/ocm/accessmethods"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods/localblob"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/opencontainers/go-digest"
 )
 
 type localFilesystemBlobAccessMethod struct {
-	spec   *accessmethods.LocalBlobAccessSpec
+	spec   *localblob.AccessSpec
 	access oci.NamespaceAccess
 }
 
 var _ cpi.AccessMethod = (*localFilesystemBlobAccessMethod)(nil)
 
-func newLocalFilesystemBlobAccessMethod(a *accessmethods.LocalBlobAccessSpec, access oci.NamespaceAccess) (cpi.AccessMethod, error) {
+func newLocalFilesystemBlobAccessMethod(a *localblob.AccessSpec, access oci.NamespaceAccess) (cpi.AccessMethod, error) {
 	return &localFilesystemBlobAccessMethod{
 		spec:   a,
 		access: access,
@@ -41,7 +41,7 @@ func newLocalFilesystemBlobAccessMethod(a *accessmethods.LocalBlobAccessSpec, ac
 }
 
 func (m *localFilesystemBlobAccessMethod) GetKind() string {
-	return accessmethods.LocalBlobType
+	return localblob.Type
 }
 
 func (m *localFilesystemBlobAccessMethod) getBlob() (cpi.DataAccess, error) {

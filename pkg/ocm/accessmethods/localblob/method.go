@@ -12,30 +12,29 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package accessmethods
+package localblob
 
 import (
 	"encoding/json"
 
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	"github.com/gardener/ocm/pkg/ocm/core"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/gardener/ocm/pkg/runtime"
 )
 
-// LocalBlobType is the access type of a blob local to a component.
-const LocalBlobType = "localBlob"
-const LocalBlobTypeV1 = LocalBlobType + runtime.VersionSeparator + "v1"
+// Type is the access type of a blob local to a component.
+const Type = "localBlob"
+const TypeV1 = Type + runtime.VersionSeparator + "v1"
 
 func init() {
-	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(LocalBlobType, LocalBlobV1))
-	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(LocalBlobTypeV1, LocalBlobV1))
+	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(Type, LocalBlobV1))
+	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(TypeV1, LocalBlobV1))
 }
 
-// NewLocalBlobAccessSpec creates a new localFilesystemBlob accessor.
-func NewLocalBlobAccessSpec(path, name string, mediaType string, global cpi.AccessSpec) *LocalBlobAccessSpec {
-	return &LocalBlobAccessSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(LocalBlobType),
+// New creates a new localFilesystemBlob accessor.
+func New(path, name string, mediaType string, global cpi.AccessSpec) *AccessSpec {
+	return &AccessSpec{
+		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		LocalReference:      path,
 		ReferenceName:       name,
 		MediaType:           mediaType,
@@ -43,8 +42,8 @@ func NewLocalBlobAccessSpec(path, name string, mediaType string, global cpi.Acce
 	}
 }
 
-// LocalBlobAccessSpec describes the access for a blob on the filesystem.
-type LocalBlobAccessSpec struct {
+// AccessSpec describes the access for a blob on the filesystem.
+type AccessSpec struct {
 	runtime.ObjectVersionedType
 	// LocalReference is the repository local identity of the blob.
 	// it is used by the repository implementation to get access
@@ -66,23 +65,23 @@ type LocalBlobAccessSpec struct {
 	ReferenceName string `json:"referenceName,omitempty"`
 }
 
-var _ json.Marshaler = &LocalBlobAccessSpec{}
+var _ json.Marshaler = &AccessSpec{}
 
-func (a LocalBlobAccessSpec) MarshalJSON() ([]byte, error) {
-	return cpi.MarshalConvertedAccessSpec(core.DefaultContext, &a)
+func (a AccessSpec) MarshalJSON() ([]byte, error) {
+	return cpi.MarshalConvertedAccessSpec(cpi.DefaultContext(), &a)
 }
 
-func (a *LocalBlobAccessSpec) IsLocal(cpi.Context) bool {
+func (a *AccessSpec) IsLocal(cpi.Context) bool {
 	return true
 }
 
-func (a *LocalBlobAccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
+func (a *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
 	return c.AccessMethod(a)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type LocalBlobAccessSpecV1 struct {
+type AccessSpecV1 struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	// LocalReference is the repository local identity of the blob.
 	// it is used by the repository implementation to get access
@@ -104,13 +103,13 @@ type LocalBlobAccessSpecV1 struct {
 	ReferenceName string `json:"referenceName,omitempty"`
 }
 
-type localblobConverterV1 struct{}
+type converterV1 struct{}
 
-var LocalBlobV1 = cpi.NewAccessSpecVersion(&LocalBlobAccessSpecV1{}, localblobConverterV1{})
+var LocalBlobV1 = cpi.NewAccessSpecVersion(&AccessSpecV1{}, converterV1{})
 
-func (_ localblobConverterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, error) {
-	in := object.(*LocalBlobAccessSpec)
-	return &LocalBlobAccessSpecV1{
+func (_ converterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, error) {
+	in := object.(*AccessSpec)
+	return &AccessSpecV1{
 		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
 		LocalReference:      in.LocalReference,
 		ReferenceName:       in.ReferenceName,
@@ -119,9 +118,9 @@ func (_ localblobConverterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedO
 	}, nil
 }
 
-func (_ localblobConverterV1) ConvertTo(object interface{}) (cpi.AccessSpec, error) {
-	in := object.(*LocalBlobAccessSpecV1)
-	return &LocalBlobAccessSpec{
+func (_ converterV1) ConvertTo(object interface{}) (cpi.AccessSpec, error) {
+	in := object.(*AccessSpecV1)
+	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
 		LocalReference:      in.LocalReference,
 		ReferenceName:       in.ReferenceName,

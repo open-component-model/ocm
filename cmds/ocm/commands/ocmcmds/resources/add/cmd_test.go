@@ -18,7 +18,7 @@ import (
 	. "github.com/gardener/ocm/cmds/ocm/testhelper"
 	"github.com/gardener/ocm/pkg/common"
 	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/ocm/accessmethods"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods/localblob"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/gardener/ocm/pkg/ocm/repositories/comparch/comparch"
@@ -44,9 +44,9 @@ func CheckTextResource(env *TestEnv, cd *compdesc.ComponentDescriptor, name stri
 	Expect(r.Type).To(Equal("PlainText"))
 	spec, err := env.OCMContext().AccessSpecForSpec(cd.Resources[0].Access)
 	Expect(err).To(Succeed())
-	Expect(spec.GetType()).To(Equal(accessmethods.LocalBlobType))
-	Expect(spec.(*accessmethods.LocalBlobAccessSpec).LocalReference).To(Equal(common.DigestToFileName(dig)))
-	Expect(spec.(*accessmethods.LocalBlobAccessSpec).MediaType).To(Equal("text/plain"))
+	Expect(spec.GetType()).To(Equal(localblob.Type))
+	Expect(spec.(*localblob.AccessSpec).LocalReference).To(Equal(common.DigestToFileName(dig)))
+	Expect(spec.(*localblob.AccessSpec).MediaType).To(Equal("text/plain"))
 }
 
 var _ = Describe("Test Environment", func() {

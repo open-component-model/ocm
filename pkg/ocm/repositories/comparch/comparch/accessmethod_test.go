@@ -21,7 +21,7 @@ import (
 
 	"github.com/gardener/ocm/pkg/common/accessobj"
 	"github.com/gardener/ocm/pkg/ocm"
-	"github.com/gardener/ocm/pkg/ocm/accessmethods"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods/localblob"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
 	comparch2 "github.com/gardener/ocm/pkg/ocm/repositories/comparch/comparch"
@@ -40,8 +40,8 @@ var _ = Describe("access method", func() {
 		It("decodes legacy methood", func() {
 			spec, err := DefaultContext.AccessSpecForConfig([]byte(legacy), nil)
 			Expect(err).To(Succeed())
-			Expect(reflect.TypeOf(spec).String()).To(Equal("*accessmethods.LocalBlobAccessSpec"))
-			Expect(spec.(*accessmethods.LocalBlobAccessSpec).ReferenceName).To(Equal("anydigest"))
+			Expect(reflect.TypeOf(spec)).To(Equal(reflect.TypeOf(&localblob.AccessSpec{})))
+			Expect(spec.(*localblob.AccessSpec).ReferenceName).To(Equal("anydigest"))
 		})
 
 		It("encodes legacy methood", func() {
@@ -76,7 +76,7 @@ var _ = Describe("access method", func() {
 			Expect(spec.GetType()).To(Equal(comparch2.LocalFilesystemBlobType))
 			Expect(spec.GetKind()).To(Equal(comparch2.LocalFilesystemBlobType))
 			Expect(spec.GetVersion()).To(Equal("v1"))
-			Expect(reflect.TypeOf(spec).String()).To(Equal("*accessmethods.LocalBlobAccessSpec"))
+			Expect(reflect.TypeOf(spec)).To(Equal(reflect.TypeOf(&localblob.AccessSpec{})))
 
 			data, err = json.Marshal(spec)
 			Expect(err).To(Succeed())

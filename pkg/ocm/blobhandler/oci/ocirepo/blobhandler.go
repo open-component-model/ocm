@@ -23,7 +23,9 @@ import (
 	"github.com/gardener/ocm/pkg/oci/artdesc"
 	artefactset2 "github.com/gardener/ocm/pkg/oci/repositories/artefactset"
 	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
-	"github.com/gardener/ocm/pkg/ocm/accessmethods"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods/localblob"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods/ociblob"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods/ociregistry"
 	storagecontext "github.com/gardener/ocm/pkg/ocm/blobhandler/oci"
 	"github.com/gardener/ocm/pkg/ocm/core"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
@@ -74,7 +76,7 @@ func (b *blobHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hint s
 	if err != nil {
 		return nil, err
 	}
-	return accessmethods.NewLocalBlobAccessSpec(blob.Digest().String(), "", blob.MimeType(), accessmethods.NewOCIBlobAccessSpec(path.Join(base, ocictx.Namespace.GetNamespace()), blob.Digest(), blob.MimeType(), blob.Size())), nil
+	return localblob.New(blob.Digest().String(), "", blob.MimeType(), ociblob.New(path.Join(base, ocictx.Namespace.GetNamespace()), blob.Digest(), blob.MimeType(), blob.Size())), nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -142,6 +144,6 @@ func (b *artefactHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hi
 
 	ref := path.Join(base, namespace.GetNamespace()) + version
 
-	global := accessmethods.NewOCIRegistryAccessSpec(ref)
+	global := ociregistry.New(ref)
 	return global, nil
 }

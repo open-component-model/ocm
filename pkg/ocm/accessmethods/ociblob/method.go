@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package accessmethods
+package ociblob
 
 import (
 	"io"
@@ -21,25 +21,24 @@ import (
 	"github.com/gardener/ocm/pkg/errors"
 	"github.com/gardener/ocm/pkg/oci"
 	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
-	"github.com/gardener/ocm/pkg/ocm/core"
 	"github.com/gardener/ocm/pkg/ocm/cpi"
 	"github.com/gardener/ocm/pkg/runtime"
 	"github.com/opencontainers/go-digest"
 )
 
-// OCIBlobType is the access type for a blob in an OCI repository.
-const OCIBlobType = "ociBlob"
-const OCIBlobTypeV1 = OCIBlobType + runtime.VersionSeparator + "v1"
+// Type is the access type for a blob in an OCI repository.
+const Type = "ociBlob"
+const TypeV1 = Type + runtime.VersionSeparator + "v1"
 
 func init() {
-	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(LocalBlobType, LocalBlobV1))
-	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(LocalBlobTypeV1, LocalBlobV1))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}))
 }
 
-// NewOCIBlobAccessSpec creates a new OCIBlob accessor.
-func NewOCIBlobAccessSpec(repository string, digest digest.Digest, mediaType string, size int64) *OCIBlobAccessSpec {
-	return &OCIBlobAccessSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(OCIBlobType),
+// New creates a new OCIBlob accessor.
+func New(repository string, digest digest.Digest, mediaType string, size int64) *AccessSpec {
+	return &AccessSpec{
+		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		Reference:           repository,
 		MediaType:           mediaType,
 		Digest:              digest,
@@ -47,8 +46,8 @@ func NewOCIBlobAccessSpec(repository string, digest digest.Digest, mediaType str
 	}
 }
 
-// OCIBlobAccessSpec describes the access for a oci registry.
-type OCIBlobAccessSpec struct {
+// AccessSpec describes the access for a oci registry.
+type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 
 	// Reference is the oci reference to the manifest
@@ -64,42 +63,42 @@ type OCIBlobAccessSpec struct {
 	Size int64 `json:"size"`
 }
 
-var _ cpi.AccessSpec = (*OCIBlobAccessSpec)(nil)
+var _ cpi.AccessSpec = (*AccessSpec)(nil)
 
-func (s OCIBlobAccessSpec) IsLocal(context core.Context) bool {
+func (s AccessSpec) IsLocal(context cpi.Context) bool {
 	return false
 }
 
-func (s *OCIBlobAccessSpec) AccessMethod(access core.ComponentVersionAccess) (core.AccessMethod, error) {
-	return &ociBlobAccessMethod{access, s}, nil
+func (s *AccessSpec) AccessMethod(access cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
+	return &accessMethod{access, s}, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type ociBlobAccessMethod struct {
-	comp core.ComponentVersionAccess
-	spec *OCIBlobAccessSpec
+type accessMethod struct {
+	comp cpi.ComponentVersionAccess
+	spec *AccessSpec
 }
 
-var _ cpi.AccessMethod = (*ociBlobAccessMethod)(nil)
+var _ cpi.AccessMethod = (*accessMethod)(nil)
 
-func (o *ociBlobAccessMethod) GetKind() string {
-	return OCIBlobType
+func (o *accessMethod) GetKind() string {
+	return Type
 }
 
-func (o *ociBlobAccessMethod) Get() ([]byte, error) {
+func (o *accessMethod) Get() ([]byte, error) {
 	return accessio.BlobData(o.getBlob())
 }
 
-func (o *ociBlobAccessMethod) Reader() (io.ReadCloser, error) {
+func (o *accessMethod) Reader() (io.ReadCloser, error) {
 	return accessio.BlobReader(o.getBlob())
 }
 
-func (o *ociBlobAccessMethod) MimeType() string {
+func (o *accessMethod) MimeType() string {
 	return o.MimeType()
 }
 
-func (m *ociBlobAccessMethod) getBlob() (cpi.BlobAccess, error) {
+func (m *accessMethod) getBlob() (cpi.BlobAccess, error) {
 	ref, err := oci.ParseRef(m.spec.Reference)
 	if err != nil {
 		return nil, err

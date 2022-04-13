@@ -23,8 +23,9 @@ import (
 	artefactset2 "github.com/gardener/ocm/pkg/oci/repositories/artefactset"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf"
 	"github.com/gardener/ocm/pkg/ocm"
-	"github.com/gardener/ocm/pkg/ocm/digester"
-	"github.com/gardener/ocm/pkg/ocm/digester/digesters"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods/localblob"
+	"github.com/gardener/ocm/pkg/ocm/cpi"
+	"github.com/gardener/ocm/pkg/ocm/digester/digesters/artefact"
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -34,6 +35,17 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
+
+type DummyMethod struct {
+	accessio.BlobAccess
+}
+
+var _ ocm.AccessMethod = (*DummyMethod)(nil)
+var _ accessio.DigestSource = (*DummyMethod)(nil)
+
+func (d *DummyMethod) GetKind() string {
+	return localblob.Type
+}
 
 func CheckBlob(blob accessio.BlobAccess) oci.NamespaceAccess {
 	set, err := artefactset2.OpenFromBlob(accessobj.ACC_READONLY, blob)
@@ -126,16 +138,17 @@ var _ = Describe("syntheses", func() {
 
 		CheckBlob(newblob).Close()
 
-		digest, err := digesters.ArtefactDigester{}.DetermineDigest(newblob)
+		meth := &DummyMethod{newblob}
+		digest, err := artefact.Digester{}.DetermineDigest("", meth)
 		Expect(err).To(Succeed())
 		Expect(digest.Digest.String()).To(Equal("sha256:" + DIGEST_MANIFEST))
 
-		digests, err := ocm.DefaultContext().BlobDigesters().DetermineDigests(newblob)
+		digests, err := ocm.DefaultContext().BlobDigesters().DetermineDigests("", meth)
 		Expect(err).To(Succeed())
-		Expect(digests).To(Equal([]digester.DigestDescriptor{
+		Expect(digests).To(Equal([]cpi.DigestDescriptor{
 			{
 				Digest:   "sha256:" + DIGEST_MANIFEST,
-				Digester: &digesters.ARTEFACT_DIGESTER,
+				Digester: &artefact.ARTEFACT_DIGESTER,
 			},
 		}))
 

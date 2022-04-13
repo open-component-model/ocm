@@ -26,7 +26,9 @@ import (
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf"
 	"github.com/gardener/ocm/pkg/oci/repositories/ctf/testhelper"
 	"github.com/gardener/ocm/pkg/ocm"
-	"github.com/gardener/ocm/pkg/ocm/accessmethods"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods/localblob"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods/ociblob"
+	"github.com/gardener/ocm/pkg/ocm/accessmethods/ociregistry"
 	storagecontext "github.com/gardener/ocm/pkg/ocm/blobhandler/oci"
 	"github.com/gardener/ocm/pkg/ocm/blobhandler/oci/ocirepo"
 	"github.com/gardener/ocm/pkg/ocm/compdesc"
@@ -122,14 +124,14 @@ var _ = Describe("component repository mapping", func() {
 		Expect(err).To(Succeed())
 
 		// check provided actual access to be local blob
-		Expect(acc.GetKind()).To(Equal(accessmethods.LocalBlobType))
-		l, ok := acc.(*accessmethods.LocalBlobAccessSpec)
+		Expect(acc.GetKind()).To(Equal(localblob.Type))
+		l, ok := acc.(*localblob.AccessSpec)
 		Expect(ok).To(BeTrue())
 		Expect(l.LocalReference).To(Equal(blob.Digest().String()))
 		Expect(l.GlobalAccess).NotTo(BeNil())
 
 		// check provided global access to be oci blob
-		o, ok := l.GlobalAccess.(*accessmethods.OCIBlobAccessSpec)
+		o, ok := l.GlobalAccess.(*ociblob.AccessSpec)
 		Expect(ok).To(BeTrue())
 		Expect(o.Digest).To(Equal(blob.Digest()))
 		Expect(o.Reference).To(Equal(TESTBASE + "/" + componentmapping.ComponentDescriptorNamespace + "/" + COMPONENT))
@@ -166,16 +168,16 @@ var _ = Describe("component repository mapping", func() {
 
 		acc, err := vers.AddBlob(blob, "artefact1", nil)
 		Expect(err).To(Succeed())
-		Expect(acc.GetKind()).To(Equal(accessmethods.OCIRegistryType))
-		o := acc.(*accessmethods.OCIRegistryAccessSpec)
+		Expect(acc.GetKind()).To(Equal(ociregistry.Type))
+		o := acc.(*ociregistry.AccessSpec)
 		Expect(o.ImageReference).To(Equal(TESTBASE + "/artefact1@sha256:" + testhelper.DIGEST_MANIFEST))
 		err = comp.AddVersion(vers)
 		Expect(err).To(Succeed())
 
 		acc, err = vers.AddBlob(blob, "artefact2:v1", nil)
 		Expect(err).To(Succeed())
-		Expect(acc.GetKind()).To(Equal(accessmethods.OCIRegistryType))
-		o = acc.(*accessmethods.OCIRegistryAccessSpec)
+		Expect(acc.GetKind()).To(Equal(ociregistry.Type))
+		o = acc.(*ociregistry.AccessSpec)
 		Expect(o.ImageReference).To(Equal(TESTBASE + "/artefact2:v1"))
 		err = comp.AddVersion(vers)
 		Expect(err).To(Succeed())

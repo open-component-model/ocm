@@ -83,6 +83,7 @@ type ArtefactAccess interface {
 	BlobSource
 	BlobSink
 
+	Blob() (accessio.BlobAccess, error)
 	GetDescriptor() *artdesc.Artefact
 	ManifestAccess() ManifestAccess
 	IndexAccess() IndexAccess
