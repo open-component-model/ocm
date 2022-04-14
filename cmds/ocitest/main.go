@@ -29,8 +29,8 @@ import (
 	"github.com/containerd/containerd/remotes/docker/config"
 	config2 "github.com/docker/cli/cli/config"
 	"github.com/docker/cli/cli/config/credentials"
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/oci/artdesc"
 	"github.com/sirupsen/logrus"
 )
 

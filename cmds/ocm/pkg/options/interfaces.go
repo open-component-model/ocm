@@ -17,8 +17,8 @@ package options
 import (
 	"reflect"
 
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
 	"github.com/spf13/pflag"
 )
 

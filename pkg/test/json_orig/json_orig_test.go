@@ -15,11 +15,11 @@
 package test_test
 
 import (
-	//"github.com/gardener/ocm/pkg/json"
+	//"github.com/open-component-model/ocm/pkg/json"
 	"encoding/json"
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/runtime"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

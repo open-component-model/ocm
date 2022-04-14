@@ -18,11 +18,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/pkg/options"
-	"github.com/gardener/ocm/pkg/ocm"
-	compdesc "github.com/gardener/ocm/pkg/ocm/compdesc"
-	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/pkg/ocm"
+	compdesc "github.com/open-component-model/ocm/pkg/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
 )
 
 func ConsumeIdentities(args []string, stop ...string) ([]metav1.Identity, []string, error) {

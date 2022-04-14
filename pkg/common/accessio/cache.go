@@ -19,8 +19,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/gardener/ocm/pkg/common"
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/marstr/guid"

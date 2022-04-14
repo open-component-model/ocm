@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/ocm/grammar"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/ocm/grammar"
 )
 
 const (

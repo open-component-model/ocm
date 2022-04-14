@@ -17,8 +17,8 @@ package core
 import (
 	"context"
 
-	"github.com/gardener/ocm/pkg/config"
-	"github.com/gardener/ocm/pkg/datacontext"
+	"github.com/open-component-model/ocm/pkg/config"
+	"github.com/open-component-model/ocm/pkg/datacontext"
 )
 
 type Builder struct {

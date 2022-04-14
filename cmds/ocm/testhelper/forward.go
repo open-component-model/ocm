@@ -15,7 +15,7 @@
 package testhelper
 
 import (
-	"github.com/gardener/ocm/pkg/env"
+	"github.com/open-component-model/ocm/pkg/env"
 )
 
 var TestData = env.TestData

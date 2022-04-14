@@ -17,7 +17,7 @@ package core
 import (
 	"fmt"
 
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 const KIND_COMPONENTVERSION = "component version"

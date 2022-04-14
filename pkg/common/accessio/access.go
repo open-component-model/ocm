@@ -19,7 +19,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 )

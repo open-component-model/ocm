@@ -18,8 +18,8 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/gardener/ocm/pkg/errors"
-	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/errors"
+	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
 	"sigs.k8s.io/yaml"
 )
 

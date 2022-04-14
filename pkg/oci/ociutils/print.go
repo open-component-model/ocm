@@ -20,11 +20,11 @@ import (
 	"io"
 	"os"
 
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/common/compression"
-	"github.com/gardener/ocm/pkg/oci/artdesc"
-	"github.com/gardener/ocm/pkg/oci/cpi"
-	"github.com/gardener/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/compression"
+	"github.com/open-component-model/ocm/pkg/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func PrintArtefact(art cpi.ArtefactAccess) string {

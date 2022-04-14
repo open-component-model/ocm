@@ -15,8 +15,8 @@
 package genericocireg
 
 import (
-	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
-	"github.com/gardener/ocm/pkg/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/oci/repositories/ocireg"
+	"github.com/open-component-model/ocm/pkg/ocm/cpi"
 )
 
 func init() {

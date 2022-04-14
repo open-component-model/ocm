@@ -17,10 +17,10 @@ package oci
 import (
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/oci"
-	"github.com/gardener/ocm/pkg/oci/artdesc"
-	"github.com/gardener/ocm/pkg/oci/cpi"
-	"github.com/gardener/ocm/pkg/ocm/repositories/genericocireg/componentmapping"
+	"github.com/open-component-model/ocm/pkg/oci"
+	"github.com/open-component-model/ocm/pkg/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/ocm/repositories/genericocireg/componentmapping"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
 

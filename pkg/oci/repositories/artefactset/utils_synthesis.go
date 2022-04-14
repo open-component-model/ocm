@@ -15,11 +15,11 @@
 package artefactset
 
 import (
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/common/accessobj"
-	"github.com/gardener/ocm/pkg/oci/artdesc"
-	"github.com/gardener/ocm/pkg/oci/cpi"
-	"github.com/gardener/ocm/pkg/oci/transfer"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/oci/transfer"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )

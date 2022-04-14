@@ -17,8 +17,8 @@ package comparch
 import (
 	"io"
 
-	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	"github.com/gardener/ocm/pkg/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
+	"github.com/open-component-model/ocm/pkg/ocm/cpi"
 )
 
 // BlobContainer is the interface for an element capable to store blobs

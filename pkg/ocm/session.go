@@ -18,9 +18,9 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/datacontext"
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/ocm/core"
+	"github.com/open-component-model/ocm/pkg/datacontext"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/ocm/core"
 )
 
 type Aliases = core.Aliases

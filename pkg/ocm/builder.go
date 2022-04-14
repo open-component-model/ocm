@@ -17,10 +17,10 @@ package ocm
 import (
 	"context"
 
-	"github.com/gardener/ocm/pkg/credentials"
-	"github.com/gardener/ocm/pkg/datacontext"
-	"github.com/gardener/ocm/pkg/oci"
-	"github.com/gardener/ocm/pkg/ocm/core"
+	"github.com/open-component-model/ocm/pkg/credentials"
+	"github.com/open-component-model/ocm/pkg/datacontext"
+	"github.com/open-component-model/ocm/pkg/oci"
+	"github.com/open-component-model/ocm/pkg/ocm/core"
 )
 
 func WithContext(ctx context.Context) core.Builder {

@@ -22,13 +22,13 @@ import (
 	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/remotes"
 	"github.com/containerd/containerd/remotes/docker/config"
-	"github.com/gardener/ocm/pkg/credentials"
-	"github.com/gardener/ocm/pkg/docker"
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/oci/artdesc"
-	"github.com/gardener/ocm/pkg/oci/core"
-	"github.com/gardener/ocm/pkg/oci/cpi"
-	"github.com/gardener/ocm/pkg/oci/identity"
+	"github.com/open-component-model/ocm/pkg/credentials"
+	"github.com/open-component-model/ocm/pkg/docker"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/oci/core"
+	"github.com/open-component-model/ocm/pkg/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/oci/identity"
 )
 
 type RepositoryInfo struct {

@@ -15,12 +15,12 @@
 package download
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands"
 
-	artefacts "github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/download"
-	components "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/download"
-	resources "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/download"
+	artefacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/download"
+	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/download"
+	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/download"
 	"github.com/spf13/cobra"
 )
 

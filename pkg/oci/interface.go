@@ -17,9 +17,9 @@ package oci
 import (
 	"context"
 
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/oci/core"
-	_ "github.com/gardener/ocm/pkg/oci/repositories"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/oci/core"
+	_ "github.com/open-component-model/ocm/pkg/oci/repositories"
 )
 
 const KIND_OCIARTEFACT = core.KIND_OCIARTEFACT

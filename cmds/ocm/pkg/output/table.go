@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"strings"
 
-	. "github.com/gardener/ocm/cmds/ocm/pkg/output/out"
+	. "github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
 )
 
 func FormatTable(ctx Context, gap string, data [][]string) {

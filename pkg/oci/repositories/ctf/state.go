@@ -18,8 +18,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/common/accessobj"
-	"github.com/gardener/ocm/pkg/oci/repositories/ctf/index"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/oci/repositories/ctf/index"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 

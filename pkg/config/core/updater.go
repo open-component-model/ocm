@@ -17,7 +17,7 @@ package core
 import (
 	"sync"
 
-	"github.com/gardener/ocm/pkg/datacontext"
+	"github.com/open-component-model/ocm/pkg/datacontext"
 )
 
 // Updater implements the generation based update protocol

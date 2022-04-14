@@ -8,4 +8,4 @@ set -e
 
 echo "> Format"
 
-goimports -l -w -local=github.com/gardener/ocm $@
+goimports -l -w -local=github.com/open-component-model/ocm $@

@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"sync"
 
-	data "github.com/gardener/ocm/cmds/ocm/pkg/data"
+	data "github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 )
 
 var log = false

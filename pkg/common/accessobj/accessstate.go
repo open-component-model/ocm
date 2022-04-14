@@ -18,8 +18,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/modern-go/reflect2"
 	"github.com/opencontainers/go-digest"

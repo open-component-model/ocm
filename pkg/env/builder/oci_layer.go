@@ -15,8 +15,8 @@
 package builder
 
 import (
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 const T_OCILAYER = "oci layer"

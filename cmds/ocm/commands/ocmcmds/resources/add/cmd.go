@@ -15,13 +15,13 @@
 package add
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/commands"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
-	"github.com/gardener/ocm/cmds/ocm/pkg/template"
-	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/spf13/cobra"
 )
 

@@ -18,11 +18,11 @@ import (
 	"context"
 	"sync"
 
-	"github.com/gardener/ocm/pkg/credentials"
-	"github.com/gardener/ocm/pkg/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/credentials"
+	"github.com/open-component-model/ocm/pkg/oci/cpi"
 )
 
-const ATTR_REPOS = "github.com/gardener/ocm/pkg/oci/repositories/ocireg"
+const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/oci/repositories/ocireg"
 
 type Repositories struct {
 	lock  sync.Mutex

@@ -17,11 +17,11 @@ package download_test
 import (
 	"bytes"
 
-	. "github.com/gardener/ocm/cmds/ocm/testhelper"
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/mime"
-	"github.com/gardener/ocm/pkg/oci/grammar"
-	"github.com/gardener/ocm/pkg/oci/repositories/artefactset"
+	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/oci/grammar"
+	"github.com/open-component-model/ocm/pkg/oci/repositories/artefactset"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

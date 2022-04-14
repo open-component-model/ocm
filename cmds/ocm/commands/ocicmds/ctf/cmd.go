@@ -15,9 +15,9 @@
 package ctf
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/ctf/create"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/ctf/create"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/names"
 	"github.com/spf13/cobra"
 )
 

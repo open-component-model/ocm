@@ -18,9 +18,9 @@ import (
 	"context"
 	"io"
 
-	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
-	"github.com/gardener/ocm/pkg/datacontext"
-	"github.com/gardener/ocm/pkg/ocm"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
+	"github.com/open-component-model/ocm/pkg/datacontext"
+	"github.com/open-component-model/ocm/pkg/ocm"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 

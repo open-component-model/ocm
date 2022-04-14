@@ -19,7 +19,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func MustProtoType(proto interface{}) reflect.Type {

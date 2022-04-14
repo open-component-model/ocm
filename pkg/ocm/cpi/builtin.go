@@ -15,7 +15,7 @@
 package cpi
 
 import (
-	"github.com/gardener/ocm/pkg/ocm/core"
+	"github.com/open-component-model/ocm/pkg/ocm/core"
 )
 
 type OCISpecFunction = core.OCISpecFunction

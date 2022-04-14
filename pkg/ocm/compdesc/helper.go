@@ -18,9 +18,9 @@ import (
 	"bytes"
 	"fmt"
 
-	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
-	"github.com/gardener/ocm/pkg/runtime"
-	"github.com/gardener/ocm/pkg/utils/selector"
+	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils/selector"
 )
 
 type IdentitySelector = selector.Interface

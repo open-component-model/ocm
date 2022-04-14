@@ -17,8 +17,8 @@ package config
 import (
 	"context"
 
-	"github.com/gardener/ocm/pkg/config/core"
-	"github.com/gardener/ocm/pkg/datacontext"
+	"github.com/open-component-model/ocm/pkg/config/core"
+	"github.com/open-component-model/ocm/pkg/datacontext"
 )
 
 func WithContext(ctx context.Context) core.Builder {

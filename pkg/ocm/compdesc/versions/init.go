@@ -1,5 +1,5 @@
 package versions
 
 import (
-	_ "github.com/gardener/ocm/pkg/ocm/compdesc/versions/v2"
+	_ "github.com/open-component-model/ocm/pkg/ocm/compdesc/versions/v2"
 )

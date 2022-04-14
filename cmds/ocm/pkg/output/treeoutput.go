@@ -15,9 +15,9 @@
 package output
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/pkg/data"
-	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
-	"github.com/gardener/ocm/cmds/ocm/pkg/tree"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
 )
 
 func TreeOutput(t *TableOutput, header string) *TableOutput {

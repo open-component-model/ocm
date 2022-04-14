@@ -18,9 +18,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/pkg/options"
-	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )

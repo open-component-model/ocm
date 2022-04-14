@@ -15,7 +15,7 @@
 package docker
 
 import (
-	"github.com/gardener/ocm/pkg/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/oci/cpi"
 )
 
 func init() {

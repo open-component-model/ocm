@@ -17,17 +17,17 @@ package transfer
 import (
 	"fmt"
 
-	"github.com/gardener/ocm/cmds/ocm/commands"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/ocm/repositories/ctf"
+	"github.com/open-component-model/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/ocm/repositories/ctf"
 
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
-	"github.com/gardener/ocm/pkg/common/accessobj"
-	"github.com/gardener/ocm/pkg/ocm"
-	"github.com/gardener/ocm/pkg/ocm/repositories/comparch/comparch"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/ocm"
+	"github.com/open-component-model/ocm/pkg/ocm/repositories/comparch/comparch"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )

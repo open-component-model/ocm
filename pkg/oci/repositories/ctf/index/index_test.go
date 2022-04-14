@@ -15,7 +15,7 @@
 package index_test
 
 import (
-	. "github.com/gardener/ocm/pkg/oci/repositories/ctf/index"
+	. "github.com/open-component-model/ocm/pkg/oci/repositories/ctf/index"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

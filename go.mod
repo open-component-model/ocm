@@ -1,4 +1,4 @@
-module github.com/gardener/ocm
+module github.com/open-component-model/ocm
 
 go 1.17
 

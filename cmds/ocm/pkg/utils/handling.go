@@ -19,8 +19,8 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/gardener/ocm/cmds/ocm/pkg/output"
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type ElemSpec interface {

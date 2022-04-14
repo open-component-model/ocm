@@ -17,11 +17,11 @@ package output
 import (
 	"fmt"
 
-	. "github.com/gardener/ocm/cmds/ocm/pkg/output/out"
-	. "github.com/gardener/ocm/cmds/ocm/pkg/processing"
-	"github.com/gardener/ocm/pkg/utils"
+	. "github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
+	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
+	"github.com/open-component-model/ocm/pkg/utils"
 
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/runtime"
 	"sigs.k8s.io/yaml"
 )
 

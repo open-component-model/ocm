@@ -15,11 +15,11 @@
 package config
 
 import (
-	"github.com/gardener/ocm/pkg/common"
-	config "github.com/gardener/ocm/pkg/config/cpi"
-	"github.com/gardener/ocm/pkg/credentials/cpi"
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/common"
+	config "github.com/open-component-model/ocm/pkg/config/cpi"
+	"github.com/open-component-model/ocm/pkg/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const (

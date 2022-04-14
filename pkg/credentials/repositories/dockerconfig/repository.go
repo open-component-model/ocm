@@ -26,10 +26,10 @@ import (
 	"github.com/docker/cli/cli/config/configfile"
 	dockercred "github.com/docker/cli/cli/config/credentials"
 	"github.com/docker/cli/cli/config/types"
-	"github.com/gardener/ocm/pkg/common"
-	"github.com/gardener/ocm/pkg/credentials/cpi"
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/oci/identity"
+	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/oci/identity"
 )
 
 type Repository struct {

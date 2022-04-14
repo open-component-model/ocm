@@ -9,8 +9,8 @@ import (
 	"path"
 	"strings"
 
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/oci/grammar"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/oci/grammar"
 	"github.com/opencontainers/go-digest"
 )
 

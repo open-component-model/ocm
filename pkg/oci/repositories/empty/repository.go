@@ -15,10 +15,10 @@
 package empty
 
 import (
-	"github.com/gardener/ocm/pkg/datacontext"
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/oci/core"
-	"github.com/gardener/ocm/pkg/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/datacontext"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/oci/core"
+	"github.com/open-component-model/ocm/pkg/oci/cpi"
 )
 
 type Repository struct{}

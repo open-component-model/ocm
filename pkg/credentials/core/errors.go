@@ -15,7 +15,7 @@
 package core
 
 import (
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 const KIND_CREDENTIALS = "credentials"

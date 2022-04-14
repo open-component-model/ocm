@@ -19,8 +19,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/gardener/ocm/pkg/common"
-	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 )

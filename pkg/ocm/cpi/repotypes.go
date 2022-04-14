@@ -17,9 +17,9 @@ package cpi
 import (
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	"github.com/gardener/ocm/pkg/ocm/core"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
+	"github.com/open-component-model/ocm/pkg/ocm/core"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 type DefaultRepositoryType struct {

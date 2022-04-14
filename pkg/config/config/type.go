@@ -17,10 +17,10 @@ package config
 import (
 	"fmt"
 
-	"github.com/gardener/ocm/pkg/common"
-	"github.com/gardener/ocm/pkg/config/cpi"
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/config/cpi"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const (

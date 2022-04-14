@@ -19,7 +19,7 @@ import (
 	"compress/gzip"
 	"io"
 
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 

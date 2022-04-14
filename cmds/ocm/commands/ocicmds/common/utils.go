@@ -15,9 +15,9 @@
 package common
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/pkg/options"
-	"github.com/gardener/ocm/pkg/oci"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/pkg/oci"
 )
 
 type OptionCompleter interface {

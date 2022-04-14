@@ -17,7 +17,7 @@ package accessio
 import (
 	"io"
 
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type closableReader struct {

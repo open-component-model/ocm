@@ -18,7 +18,7 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/credentials"
+	"github.com/open-component-model/ocm/pkg/credentials"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

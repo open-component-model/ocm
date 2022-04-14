@@ -15,14 +15,14 @@
 package config
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx/core"
-	"github.com/gardener/ocm/pkg/common"
-	"github.com/gardener/ocm/pkg/config"
-	cfgcpi "github.com/gardener/ocm/pkg/config/cpi"
-	"github.com/gardener/ocm/pkg/errors"
-	ocicpi "github.com/gardener/ocm/pkg/oci/cpi"
-	ocmcpi "github.com/gardener/ocm/pkg/ocm/cpi"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx/core"
+	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/config"
+	cfgcpi "github.com/open-component-model/ocm/pkg/config/cpi"
+	"github.com/open-component-model/ocm/pkg/errors"
+	ocicpi "github.com/open-component-model/ocm/pkg/oci/cpi"
+	ocmcpi "github.com/open-component-model/ocm/pkg/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const (

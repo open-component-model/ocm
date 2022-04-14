@@ -21,10 +21,10 @@ import (
 	"path"
 	"strings"
 
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/oci"
-	"github.com/gardener/ocm/pkg/ocm/cpi"
-	"github.com/gardener/ocm/pkg/ocm/repositories/genericocireg/componentmapping"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/oci"
+	"github.com/open-component-model/ocm/pkg/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/ocm/repositories/genericocireg/componentmapping"
 )
 
 type Repository struct {

@@ -17,9 +17,9 @@ package credentials
 import (
 	"context"
 
-	"github.com/gardener/ocm/pkg/config"
-	"github.com/gardener/ocm/pkg/credentials/core"
-	"github.com/gardener/ocm/pkg/datacontext"
+	"github.com/open-component-model/ocm/pkg/config"
+	"github.com/open-component-model/ocm/pkg/credentials/core"
+	"github.com/open-component-model/ocm/pkg/datacontext"
 )
 
 func WithContext(ctx context.Context) core.Builder {

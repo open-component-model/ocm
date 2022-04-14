@@ -15,7 +15,7 @@
 package builder
 
 import (
-	"github.com/gardener/ocm/pkg/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/ocm/cpi"
 )
 
 const T_OCMREPOSITORY = "ocm repository"

@@ -15,7 +15,7 @@
 package processing
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/pkg/data"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 )
 
 // ProcessChain is a data structure holding a chain definition, which is

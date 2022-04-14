@@ -3,15 +3,15 @@ package ocm
 import (
 	"context"
 
-	_ "github.com/gardener/ocm/pkg/oci/repositories"
-	_ "github.com/gardener/ocm/pkg/ocm/accessmethods"
-	_ "github.com/gardener/ocm/pkg/ocm/blobhandler"
-	_ "github.com/gardener/ocm/pkg/ocm/compdesc/versions"
-	_ "github.com/gardener/ocm/pkg/ocm/digester/digesters"
-	_ "github.com/gardener/ocm/pkg/ocm/repositories"
+	_ "github.com/open-component-model/ocm/pkg/oci/repositories"
+	_ "github.com/open-component-model/ocm/pkg/ocm/accessmethods"
+	_ "github.com/open-component-model/ocm/pkg/ocm/blobhandler"
+	_ "github.com/open-component-model/ocm/pkg/ocm/compdesc/versions"
+	_ "github.com/open-component-model/ocm/pkg/ocm/digester/digesters"
+	_ "github.com/open-component-model/ocm/pkg/ocm/repositories"
 	"github.com/opencontainers/go-digest"
 
-	"github.com/gardener/ocm/pkg/ocm/core"
+	"github.com/open-component-model/ocm/pkg/ocm/core"
 )
 
 const KIND_COMPONENTVERSION = core.KIND_COMPONENTVERSION

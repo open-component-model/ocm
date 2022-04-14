@@ -15,11 +15,11 @@
 package add
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands"
 
-	resources "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/add"
-	sources "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/sources/add"
+	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/add"
+	sources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources/add"
 	"github.com/spf13/cobra"
 )
 

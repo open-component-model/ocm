@@ -17,9 +17,9 @@ package config_test
 import (
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/config"
-	"github.com/gardener/ocm/pkg/config/cpi"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/config"
+	"github.com/open-component-model/ocm/pkg/config/cpi"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const (

@@ -19,9 +19,9 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/credentials"
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/credentials"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/modern-go/reflect2"
 )
 

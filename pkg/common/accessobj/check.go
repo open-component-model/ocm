@@ -18,8 +18,8 @@ import (
 	"archive/tar"
 	"io"
 
-	"github.com/gardener/ocm/pkg/common/compression"
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/common/compression"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )

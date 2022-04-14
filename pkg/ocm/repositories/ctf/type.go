@@ -15,11 +15,11 @@
 package ctf
 
 import (
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/common/accessobj"
-	"github.com/gardener/ocm/pkg/oci/repositories/ctf"
-	"github.com/gardener/ocm/pkg/ocm/cpi"
-	"github.com/gardener/ocm/pkg/ocm/repositories/genericocireg"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/oci/repositories/ctf"
+	"github.com/open-component-model/ocm/pkg/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/ocm/repositories/genericocireg"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 

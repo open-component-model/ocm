@@ -15,7 +15,7 @@
 package grammar
 
 import (
-	. "github.com/gardener/ocm/pkg/regex"
+	. "github.com/open-component-model/ocm/pkg/regex"
 )
 
 const (

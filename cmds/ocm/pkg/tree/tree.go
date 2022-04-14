@@ -17,7 +17,7 @@ package tree
 import (
 	"fmt"
 
-	"github.com/gardener/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/common"
 )
 
 type Object interface {

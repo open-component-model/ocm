@@ -17,7 +17,7 @@ package memory
 import (
 	"sync"
 
-	"github.com/gardener/ocm/pkg/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/credentials/cpi"
 )
 
 type Repository struct {

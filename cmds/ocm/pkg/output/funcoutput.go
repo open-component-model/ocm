@@ -15,8 +15,8 @@
 package output
 
 import (
-	. "github.com/gardener/ocm/cmds/ocm/pkg/output/out"
-	. "github.com/gardener/ocm/cmds/ocm/pkg/processing"
+	. "github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
+	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 )
 
 type OutputFunction func(Context, interface{})

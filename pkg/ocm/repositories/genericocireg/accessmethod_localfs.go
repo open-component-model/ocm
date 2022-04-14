@@ -17,12 +17,12 @@ package genericocireg
 import (
 	"io"
 
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/oci"
-	"github.com/gardener/ocm/pkg/oci/artdesc"
-	"github.com/gardener/ocm/pkg/ocm/accessmethods/localblob"
-	"github.com/gardener/ocm/pkg/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/oci"
+	"github.com/open-component-model/ocm/pkg/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/pkg/ocm/cpi"
 	"github.com/opencontainers/go-digest"
 )
 

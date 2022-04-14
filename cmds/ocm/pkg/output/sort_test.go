@@ -15,7 +15,7 @@
 package output
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/pkg/data"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

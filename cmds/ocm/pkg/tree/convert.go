@@ -15,7 +15,7 @@
 package tree
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/pkg/data"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 )
 
 type Objects []Object

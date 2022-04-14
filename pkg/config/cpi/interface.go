@@ -17,8 +17,8 @@ package cpi
 // This is the Context Provider Interface for credential providers
 
 import (
-	"github.com/gardener/ocm/pkg/config/core"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/config/core"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const KIND_CONFIGTYPE = core.KIND_CONFIGTYPE

@@ -18,7 +18,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"

@@ -15,7 +15,7 @@
 package accessmethods
 
 import (
-	_ "github.com/gardener/ocm/pkg/ocm/accessmethods/localblob"
-	_ "github.com/gardener/ocm/pkg/ocm/accessmethods/ociblob"
-	_ "github.com/gardener/ocm/pkg/ocm/accessmethods/ociregistry"
+	_ "github.com/open-component-model/ocm/pkg/ocm/accessmethods/localblob"
+	_ "github.com/open-component-model/ocm/pkg/ocm/accessmethods/ociblob"
+	_ "github.com/open-component-model/ocm/pkg/ocm/accessmethods/ociregistry"
 )

@@ -17,12 +17,12 @@ package ociblob
 import (
 	"io"
 
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/oci"
-	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
-	"github.com/gardener/ocm/pkg/ocm/cpi"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/oci"
+	"github.com/open-component-model/ocm/pkg/oci/repositories/ocireg"
+	"github.com/open-component-model/ocm/pkg/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/opencontainers/go-digest"
 )
 

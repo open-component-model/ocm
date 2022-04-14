@@ -15,8 +15,8 @@
 package memory
 
 import (
-	"github.com/gardener/ocm/pkg/credentials/cpi"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const (

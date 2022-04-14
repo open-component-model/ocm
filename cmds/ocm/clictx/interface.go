@@ -15,7 +15,7 @@
 package clictx
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx/core"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx/core"
 )
 
 type Context = core.Context

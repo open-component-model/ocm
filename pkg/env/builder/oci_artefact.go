@@ -15,10 +15,10 @@
 package builder
 
 import (
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/oci"
-	"github.com/gardener/ocm/pkg/oci/artdesc"
-	"github.com/gardener/ocm/pkg/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/oci"
+	"github.com/open-component-model/ocm/pkg/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/oci/cpi"
 )
 
 const T_OCIARTEFACT = "artefact"
@@ -28,6 +28,8 @@ const T_OCIMANIFEST = "manifest"
 type oci_artefact struct {
 	base
 	kind string
+	artfunc func(a oci.ArtefactAccess) error
+	ns cpi.NamespaceAccess
 	cpi.ArtefactAccess
 	tags []string
 }
@@ -37,8 +39,13 @@ func (r *oci_artefact) Type() string {
 }
 
 func (r *oci_artefact) Set() {
+	r.Builder.oci_nsacc = r.ns
 	r.Builder.oci_artacc = r.ArtefactAccess
 	r.Builder.oci_tags = &r.tags
+
+	if r.ns!=nil {
+		r.Builder.oci_artfunc=r.addArtefact
+	}
 }
 
 func (r *oci_artefact) Close() error {
@@ -47,12 +54,20 @@ func (r *oci_artefact) Close() error {
 		return err
 	}
 	_, err = r.Builder.oci_nsacc.AddArtefact(r.ArtefactAccess, r.tags...)
+	if err==nil && r.artfunc!=nil  {
+		err=r.artfunc(r.ArtefactAccess)
+	}
+	return err
+}
+
+func (r *oci_artefact) addArtefact(a oci.ArtefactAccess) error {
+	_, err := r.ArtefactAccess.AddArtefact(a, nil)
 	return err
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (b *Builder) artefact(version string, t func(access oci.ArtefactAccess) (string, error), f ...func()) {
+func (b *Builder) artefact(version string, ns cpi.NamespaceAccess, t func(access oci.ArtefactAccess) (string, error), f ...func()) {
 	var k string
 	b.expect(b.oci_nsacc, T_OCINAMESPACE)
 	v, err := b.oci_nsacc.GetArtefact(version)
@@ -74,11 +89,11 @@ func (b *Builder) artefact(version string, t func(access oci.ArtefactAccess) (st
 	if version != "" {
 		tags = append(tags, version)
 	}
-	b.configure(&oci_artefact{ArtefactAccess: v, kind: k, tags: tags}, f)
+	b.configure(&oci_artefact{ArtefactAccess: v, kind: k, tags: tags, ns: ns, artfunc: b.oci_artfunc}, f)
 }
 
 func (b *Builder) Index(version string, f ...func()) {
-	b.artefact(version, func(a oci.ArtefactAccess) (string, error) {
+	b.artefact(version, nil, func(a oci.ArtefactAccess) (string, error) {
 		if a.IndexAccess() == nil {
 			return "", errors.Newf("artefact is manifest")
 		}
@@ -87,7 +102,7 @@ func (b *Builder) Index(version string, f ...func()) {
 }
 
 func (b *Builder) Manifest(version string, f ...func()) {
-	b.artefact(version, func(a oci.ArtefactAccess) (string, error) {
+	b.artefact(version, nil, func(a oci.ArtefactAccess) (string, error) {
 		if a.ManifestAccess() == nil {
 			return "", errors.Newf("artefact is index")
 		}

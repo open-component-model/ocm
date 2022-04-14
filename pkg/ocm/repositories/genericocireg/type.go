@@ -17,14 +17,14 @@ package genericocireg
 import (
 	"encoding/json"
 
-	"github.com/gardener/ocm/pkg/credentials"
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/oci"
-	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
-	"github.com/gardener/ocm/pkg/ocm/accessmethods/localblob"
-	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	"github.com/gardener/ocm/pkg/ocm/cpi"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/credentials"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/oci"
+	"github.com/open-component-model/ocm/pkg/oci/repositories/ocireg"
+	"github.com/open-component-model/ocm/pkg/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
+	"github.com/open-component-model/ocm/pkg/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 // ComponentNameMapping describes the method that is used to map the "Component Name", "Component Version"-tuples

@@ -17,9 +17,9 @@ package compdesc
 import (
 	"testing"
 
-	"github.com/gardener/ocm/pkg/ocm/accessmethods/ociregistry"
-	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/ocm/accessmethods/ociregistry"
+	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/runtime"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"

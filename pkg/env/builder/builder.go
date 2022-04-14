@@ -15,13 +15,13 @@
 package builder
 
 import (
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/env"
-	"github.com/gardener/ocm/pkg/oci"
-	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	"github.com/gardener/ocm/pkg/ocm/cpi"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/env"
+	"github.com/open-component-model/ocm/pkg/oci"
+	"github.com/open-component-model/ocm/pkg/ocm"
+	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
 )
 
 type element interface {
@@ -45,9 +45,9 @@ type Builder struct {
 	*env.Environment
 	stack []element
 
-	ocm_repo cpi.Repository
-	ocm_comp cpi.ComponentAccess
-	ocm_vers cpi.ComponentVersionAccess
+	ocm_repo ocm.Repository
+	ocm_comp ocm.ComponentAccess
+	ocm_vers ocm.ComponentVersionAccess
 	ocm_rsc  *compdesc.ResourceMeta
 	ocm_src  *compdesc.SourceMeta
 	ocm_meta *compdesc.ElementMeta
@@ -59,6 +59,7 @@ type Builder struct {
 	oci_nsacc  oci.NamespaceAccess
 	oci_artacc oci.ArtefactAccess
 	oci_tags   *[]string
+	oci_artfunc  func(oci.ArtefactAccess) error
 }
 
 func NewBuilder(t *env.Environment) *Builder {
@@ -84,6 +85,7 @@ func (b *Builder) set() {
 	b.oci_nsacc = nil
 	b.oci_artacc = nil
 	b.oci_tags = nil
+	b.oci_artfunc = nil
 
 	if len(b.stack) > 0 {
 		b.peek().Set()

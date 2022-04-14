@@ -17,9 +17,9 @@ package oci
 import (
 	"context"
 
-	"github.com/gardener/ocm/pkg/credentials"
-	"github.com/gardener/ocm/pkg/datacontext"
-	"github.com/gardener/ocm/pkg/oci/core"
+	"github.com/open-component-model/ocm/pkg/credentials"
+	"github.com/open-component-model/ocm/pkg/datacontext"
+	"github.com/open-component-model/ocm/pkg/oci/core"
 )
 
 func WithContext(ctx context.Context) core.Builder {

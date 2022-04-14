@@ -15,8 +15,8 @@
 package dockerconfig
 
 import (
-	"github.com/gardener/ocm/pkg/common"
-	"github.com/gardener/ocm/pkg/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/credentials/cpi"
 	"k8s.io/apimachinery/pkg/util/sets"
 )
 

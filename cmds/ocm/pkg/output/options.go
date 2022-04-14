@@ -19,11 +19,11 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/pkg/options"
-	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/spf13/pflag"
 )
 

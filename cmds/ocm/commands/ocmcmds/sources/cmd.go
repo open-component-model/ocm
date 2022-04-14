@@ -15,10 +15,10 @@
 package sources
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/sources/add"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/sources/get"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources/add"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources/get"
 	"github.com/spf13/cobra"
 )
 

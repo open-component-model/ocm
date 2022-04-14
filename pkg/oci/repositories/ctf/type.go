@@ -15,11 +15,11 @@
 package ctf
 
 import (
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/common/accessobj"
-	"github.com/gardener/ocm/pkg/credentials"
-	cpi "github.com/gardener/ocm/pkg/oci/cpi"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/credentials"
+	cpi "github.com/open-component-model/ocm/pkg/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const (

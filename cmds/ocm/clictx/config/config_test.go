@@ -17,10 +17,10 @@ package config_test
 import (
 	"encoding/json"
 
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/clictx/config"
-	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
-	ocmocireg "github.com/gardener/ocm/pkg/ocm/repositories/ocireg"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx/config"
+	"github.com/open-component-model/ocm/pkg/oci/repositories/ocireg"
+	ocmocireg "github.com/open-component-model/ocm/pkg/ocm/repositories/ocireg"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

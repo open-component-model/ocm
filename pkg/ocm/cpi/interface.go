@@ -17,7 +17,7 @@ package cpi
 // This is the Context Provider Interface for credential providers
 
 import (
-	"github.com/gardener/ocm/pkg/ocm/core"
+	"github.com/open-component-model/ocm/pkg/ocm/core"
 	"github.com/opencontainers/go-digest"
 )
 

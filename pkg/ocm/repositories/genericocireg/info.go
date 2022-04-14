@@ -18,11 +18,11 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/oci/cpi"
-	"github.com/gardener/ocm/pkg/oci/ociutils"
-	"github.com/gardener/ocm/pkg/ocm/repositories/genericocireg/componentmapping"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/oci/ociutils"
+	"github.com/open-component-model/ocm/pkg/ocm/repositories/genericocireg/componentmapping"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 func init() {

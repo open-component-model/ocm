@@ -17,10 +17,10 @@ package comparch
 import (
 	"io"
 
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/ocm/accessmethods/localblob"
-	"github.com/gardener/ocm/pkg/ocm/cpi"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/pkg/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 // LocalFilesystemBlobType is the access type of a blob in a local filesystem.

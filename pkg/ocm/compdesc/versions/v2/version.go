@@ -15,11 +15,11 @@
 package compdesc
 
 import (
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
-	"github.com/gardener/ocm/pkg/ocm/compdesc/versions/v2/jsonscheme"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/ocm/compdesc/versions/v2/jsonscheme"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const SchemaVersion = "v2"

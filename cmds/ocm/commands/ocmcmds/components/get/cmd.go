@@ -17,17 +17,17 @@ package get
 import (
 	"fmt"
 
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands"
-	"github.com/gardener/ocm/cmds/ocm/commands/common/options/closureoption"
-	ocmcommon "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
-	"github.com/gardener/ocm/cmds/ocm/pkg/output"
-	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
-	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
-	"github.com/gardener/ocm/pkg/ocm"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
+	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/ocm"
 	"github.com/spf13/cobra"
 )
 

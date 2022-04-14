@@ -15,12 +15,12 @@
 package common
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/handlers/elemhdlr"
-	"github.com/gardener/ocm/cmds/ocm/pkg/output"
-	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
-	"github.com/gardener/ocm/pkg/ocm"
-	"github.com/gardener/ocm/pkg/ocm/compdesc"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/elemhdlr"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/ocm"
+	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
 )
 
 func Elem(e interface{}) *compdesc.Resource {

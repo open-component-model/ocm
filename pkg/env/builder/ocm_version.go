@@ -15,9 +15,9 @@
 package builder
 
 import (
-	"github.com/gardener/ocm/pkg/errors"
-	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
-	"github.com/gardener/ocm/pkg/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/errors"
+	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/ocm/cpi"
 )
 
 const T_OCMVERSION = "component version"

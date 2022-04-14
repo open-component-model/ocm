@@ -19,17 +19,17 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
-	"github.com/gardener/ocm/cmds/ocm/pkg/output"
-	"github.com/gardener/ocm/cmds/ocm/pkg/output/out"
-	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
-	"github.com/gardener/ocm/cmds/ocm/pkg/tree"
-	"github.com/gardener/ocm/cmds/ocm/pkg/utils"
-	"github.com/gardener/ocm/pkg/common"
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/ocm"
-	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/ocm"
+	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
 )
 
 func Elem(e interface{}) ocm.ComponentVersionAccess {

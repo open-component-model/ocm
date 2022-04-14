@@ -17,8 +17,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/gardener/ocm/cmds/ocm/pkg/tree"
-	"github.com/gardener/ocm/pkg/common"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
+	"github.com/open-component-model/ocm/pkg/common"
 )
 
 type Elem struct {

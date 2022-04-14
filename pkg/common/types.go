@@ -17,7 +17,7 @@ package common
 import (
 	"fmt"
 
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 // VersionedElement describes an element that has a name and a version

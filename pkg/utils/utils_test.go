@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/gardener/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 var _ = Describe("utils", func() {

@@ -15,5 +15,5 @@
 package digesters
 
 import (
-	_ "github.com/gardener/ocm/pkg/ocm/digester/digesters/artefact"
+	_ "github.com/open-component-model/ocm/pkg/ocm/digester/digesters/artefact"
 )

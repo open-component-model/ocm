@@ -20,10 +20,10 @@ import (
 	"io"
 	"os"
 
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/common/compression"
-	"github.com/gardener/ocm/pkg/oci/repositories/ctf/format"
-	"github.com/gardener/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/compression"
+	"github.com/open-component-model/ocm/pkg/oci/repositories/ctf/format"
+	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 

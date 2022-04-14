@@ -17,12 +17,12 @@ package download_test
 import (
 	"bytes"
 
-	. "github.com/gardener/ocm/cmds/ocm/testhelper"
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/mime"
-	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
-	"github.com/gardener/ocm/pkg/ocm/grammar"
-	"github.com/gardener/ocm/pkg/ocm/repositories/comparch/comparch"
+	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/mime"
+	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/ocm/grammar"
+	"github.com/open-component-model/ocm/pkg/ocm/repositories/comparch/comparch"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

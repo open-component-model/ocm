@@ -17,13 +17,13 @@ package credentials
 import (
 	"context"
 
-	_ "github.com/gardener/ocm/pkg/credentials/config"
-	_ "github.com/gardener/ocm/pkg/credentials/repositories"
+	_ "github.com/open-component-model/ocm/pkg/credentials/config"
+	_ "github.com/open-component-model/ocm/pkg/credentials/repositories"
 
-	"github.com/gardener/ocm/pkg/common"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/runtime"
 
-	"github.com/gardener/ocm/pkg/credentials/core"
+	"github.com/open-component-model/ocm/pkg/credentials/core"
 )
 
 const KIND_CREDENTIALS = core.KIND_CREDENTIALS

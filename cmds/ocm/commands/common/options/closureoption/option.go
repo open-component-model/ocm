@@ -17,9 +17,9 @@ package closureoption
 import (
 	"fmt"
 
-	"github.com/gardener/ocm/cmds/ocm/pkg/output"
-	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
-	"github.com/gardener/ocm/pkg/common"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/spf13/pflag"
 )
 

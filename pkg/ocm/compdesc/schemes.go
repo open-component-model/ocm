@@ -17,8 +17,8 @@ package compdesc
 import (
 	"encoding/json"
 
-	"github.com/gardener/ocm/pkg/errors"
-	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/errors"
+	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
 )
 
 const DefaultSchemeVersion = "v2"

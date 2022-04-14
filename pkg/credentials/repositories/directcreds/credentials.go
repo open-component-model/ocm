@@ -15,8 +15,8 @@
 package directcreds
 
 import (
-	"github.com/gardener/ocm/pkg/common"
-	"github.com/gardener/ocm/pkg/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/credentials/cpi"
 )
 
 func NewCredentials(props common.Properties) cpi.CredentialsSpec {

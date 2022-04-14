@@ -17,8 +17,8 @@ package core
 import (
 	"fmt"
 
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 const KIND_OCIARTEFACT = "oci artefact"

@@ -17,9 +17,9 @@ package get_test
 import (
 	"bytes"
 
-	. "github.com/gardener/ocm/cmds/ocm/testhelper"
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/ocm"
+	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/ocm"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

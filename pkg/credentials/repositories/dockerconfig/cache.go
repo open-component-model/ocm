@@ -17,11 +17,11 @@ package dockerconfig
 import (
 	"sync"
 
-	"github.com/gardener/ocm/pkg/credentials/cpi"
-	"github.com/gardener/ocm/pkg/datacontext"
+	"github.com/open-component-model/ocm/pkg/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/datacontext"
 )
 
-const ATTR_REPOS = "github.com/gardener/ocm/pkg/credentials/repositories/dockerconfig"
+const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/credentials/repositories/dockerconfig"
 
 type Repositories struct {
 	lock  sync.Mutex

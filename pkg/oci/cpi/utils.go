@@ -17,7 +17,7 @@ package cpi
 import (
 	"strings"
 
-	"github.com/gardener/ocm/pkg/oci/grammar"
+	"github.com/open-component-model/ocm/pkg/oci/grammar"
 )
 
 type StringList []string

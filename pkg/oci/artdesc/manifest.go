@@ -17,7 +17,7 @@ package artdesc
 import (
 	"encoding/json"
 
-	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/opencontainers/go-digest"
 	"github.com/opencontainers/image-spec/specs-go"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"

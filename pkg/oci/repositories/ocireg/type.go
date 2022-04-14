@@ -20,9 +20,9 @@ import (
 	"strings"
 
 	"github.com/containerd/containerd/reference"
-	"github.com/gardener/ocm/pkg/credentials"
-	cpi "github.com/gardener/ocm/pkg/oci/cpi"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/credentials"
+	cpi "github.com/open-component-model/ocm/pkg/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const (

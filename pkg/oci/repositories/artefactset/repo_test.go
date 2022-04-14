@@ -15,13 +15,13 @@
 package artefactset_test
 
 import (
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/common/accessobj"
-	testenv "github.com/gardener/ocm/pkg/env"
-	"github.com/gardener/ocm/pkg/env/builder"
-	"github.com/gardener/ocm/pkg/mime"
-	"github.com/gardener/ocm/pkg/oci/cpi"
-	"github.com/gardener/ocm/pkg/oci/repositories/artefactset"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	testenv "github.com/open-component-model/ocm/pkg/env"
+	"github.com/open-component-model/ocm/pkg/env/builder"
+	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/oci/repositories/artefactset"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

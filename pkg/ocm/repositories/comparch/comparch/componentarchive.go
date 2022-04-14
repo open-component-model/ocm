@@ -15,12 +15,12 @@
 package comparch
 
 import (
-	"github.com/gardener/ocm/pkg/common"
-	"github.com/gardener/ocm/pkg/common/accessobj"
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/ocm/accessmethods/localblob"
-	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	"github.com/gardener/ocm/pkg/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
+	"github.com/open-component-model/ocm/pkg/ocm/cpi"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 

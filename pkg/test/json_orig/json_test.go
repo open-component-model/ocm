@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 func InOut(in runtime.TypedObject, encoding runtime.Encoding) (runtime.TypedObject, string, error) {

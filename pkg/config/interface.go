@@ -17,11 +17,11 @@ package config
 import (
 	"context"
 
-	"github.com/gardener/ocm/pkg/config/core"
-	"github.com/gardener/ocm/pkg/config/cpi"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/config/core"
+	"github.com/open-component-model/ocm/pkg/config/cpi"
+	"github.com/open-component-model/ocm/pkg/runtime"
 
-	_ "github.com/gardener/ocm/pkg/config/config"
+	_ "github.com/open-component-model/ocm/pkg/config/config"
 )
 
 const KIND_CONFIGTYPE = core.KIND_CONFIGTYPE

@@ -15,9 +15,9 @@
 package empty
 
 import (
-	"github.com/gardener/ocm/pkg/credentials"
-	"github.com/gardener/ocm/pkg/oci/cpi"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/credentials"
+	"github.com/open-component-model/ocm/pkg/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const (
@@ -25,7 +25,7 @@ const (
 	EmptyRepositoryTypeV1 = EmptyRepositoryType + runtime.VersionSeparator + "v1"
 )
 
-const ATTR_REPOS = "github.com/gardener/ocm/pkg/oci/repositories/empty"
+const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/oci/repositories/empty"
 
 func init() {
 	cpi.RegisterRepositoryType(EmptyRepositoryType, cpi.NewRepositoryType(EmptyRepositoryType, &RepositorySpec{}))

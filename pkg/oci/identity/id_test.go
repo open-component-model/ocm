@@ -15,8 +15,8 @@
 package identity_test
 
 import (
-	"github.com/gardener/ocm/pkg/credentials"
-	"github.com/gardener/ocm/pkg/oci/identity"
+	"github.com/open-component-model/ocm/pkg/credentials"
+	"github.com/open-component-model/ocm/pkg/oci/identity"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

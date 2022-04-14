@@ -15,7 +15,7 @@
 package oci
 
 import (
-	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
+	"github.com/open-component-model/ocm/pkg/oci/repositories/ocireg"
 )
 
 func AsTags(tag string) []string {

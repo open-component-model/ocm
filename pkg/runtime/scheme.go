@@ -20,7 +20,7 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 // TypeGetter is the interface to be implemented for extracting a type

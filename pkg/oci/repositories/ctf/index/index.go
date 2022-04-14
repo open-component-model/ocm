@@ -19,7 +19,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/gardener/ocm/pkg/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/oci/cpi"
 	"github.com/opencontainers/go-digest"
 	"github.com/opencontainers/image-spec/specs-go"
 )

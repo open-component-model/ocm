@@ -15,9 +15,9 @@
 package transfer
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	artefacts "github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/transfer"
-	comparch "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/componentarchive/transfer"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	artefacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/transfer"
+	comparch "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive/transfer"
 	"github.com/spf13/cobra"
 )
 

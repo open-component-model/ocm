@@ -15,7 +15,7 @@
 package output
 
 import (
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type SingleElementOutput struct {

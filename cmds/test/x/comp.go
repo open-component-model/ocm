@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gardener/ocm/pkg/ocm/compdesc"
+	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
 )
 
 func CheckErr(err error, msg string, args ...interface{}) {

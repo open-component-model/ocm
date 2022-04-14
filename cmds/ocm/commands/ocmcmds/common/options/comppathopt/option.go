@@ -15,9 +15,9 @@
 package comppathopt
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
-	"github.com/gardener/ocm/cmds/ocm/pkg/output"
-	metav1 "github.com/gardener/ocm/pkg/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
+	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
 
 	"github.com/spf13/pflag"
 )

@@ -17,11 +17,11 @@ package comparch
 import (
 	"strings"
 
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/datacontext/vfsattr"
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/ocm/cpi"
-	impl "github.com/gardener/ocm/pkg/ocm/repositories/comparch/comparch"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/datacontext/vfsattr"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/ocm/cpi"
+	impl "github.com/open-component-model/ocm/pkg/ocm/repositories/comparch/comparch"
 )
 
 type Repository struct {

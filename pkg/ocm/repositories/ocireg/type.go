@@ -15,8 +15,8 @@
 package ocireg
 
 import (
-	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
-	"github.com/gardener/ocm/pkg/ocm/repositories/genericocireg"
+	"github.com/open-component-model/ocm/pkg/oci/repositories/ocireg"
+	"github.com/open-component-model/ocm/pkg/ocm/repositories/genericocireg"
 )
 
 // ComponentNameMapping describes the method that is used to map the "Component Name", "Component Version"-tuples

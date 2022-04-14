@@ -18,11 +18,11 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/common"
-	"github.com/gardener/ocm/pkg/credentials"
-	"github.com/gardener/ocm/pkg/credentials/cpi"
-	local "github.com/gardener/ocm/pkg/credentials/repositories/dockerconfig"
-	"github.com/gardener/ocm/pkg/oci/identity"
+	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/credentials"
+	"github.com/open-component-model/ocm/pkg/credentials/cpi"
+	local "github.com/open-component-model/ocm/pkg/credentials/repositories/dockerconfig"
+	"github.com/open-component-model/ocm/pkg/oci/identity"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

@@ -15,7 +15,7 @@
 package accessio_test
 
 import (
-	"github.com/gardener/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo"

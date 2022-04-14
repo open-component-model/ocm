@@ -7,8 +7,8 @@ package main
 import (
 	"os"
 
-	"github.com/gardener/ocm/cmds/ocm/app"
-	cmd "github.com/gardener/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/app"
+	cmd "github.com/open-component-model/ocm/cmds/ocm/clictx"
 )
 
 func main() {

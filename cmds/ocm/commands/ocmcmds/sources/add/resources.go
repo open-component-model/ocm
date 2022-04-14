@@ -15,12 +15,12 @@
 package add
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/common"
-	"github.com/gardener/ocm/pkg/ocm"
-	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	compdescv2 "github.com/gardener/ocm/pkg/ocm/compdesc/versions/v2"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/pkg/ocm"
+	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
+	compdescv2 "github.com/open-component-model/ocm/pkg/ocm/compdesc/versions/v2"
+	"github.com/open-component-model/ocm/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 

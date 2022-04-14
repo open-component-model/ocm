@@ -18,11 +18,11 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/config"
-	cfgcpi "github.com/gardener/ocm/pkg/config/cpi"
-	"github.com/gardener/ocm/pkg/datacontext"
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/config"
+	cfgcpi "github.com/open-component-model/ocm/pkg/config/cpi"
+	"github.com/open-component-model/ocm/pkg/datacontext"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 // CONTEXT_TYPE is the global type for a credential context

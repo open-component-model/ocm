@@ -17,8 +17,8 @@ package comparch
 import (
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/common/accessobj"
-	"github.com/gardener/ocm/pkg/ocm/compdesc"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 

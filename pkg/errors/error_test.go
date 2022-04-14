@@ -15,7 +15,7 @@
 package errors_test
 
 import (
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errors"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

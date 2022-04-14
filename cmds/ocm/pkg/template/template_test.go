@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/gardener/ocm/cmds/ocm/pkg/template"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
 )
 
 func TestConfig(t *testing.T) {

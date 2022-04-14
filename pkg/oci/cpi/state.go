@@ -17,8 +17,8 @@ package cpi
 import (
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/common/accessobj"
-	"github.com/gardener/ocm/pkg/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/oci/artdesc"
 )
 
 type ManifestStateHandler struct {

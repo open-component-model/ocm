@@ -15,5 +15,5 @@
 package blobhandler
 
 import (
-	_ "github.com/gardener/ocm/pkg/ocm/blobhandler/oci/ocirepo"
+	_ "github.com/open-component-model/ocm/pkg/ocm/blobhandler/oci/ocirepo"
 )

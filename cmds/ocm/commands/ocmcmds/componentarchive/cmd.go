@@ -15,10 +15,10 @@
 package componentarchive
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/componentarchive/transfer"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive/transfer"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/spf13/cobra"
 )
 

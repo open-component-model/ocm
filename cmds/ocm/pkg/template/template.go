@@ -11,8 +11,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 )

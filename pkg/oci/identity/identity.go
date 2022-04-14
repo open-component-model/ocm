@@ -17,7 +17,7 @@ package identity
 import (
 	"strings"
 
-	"github.com/gardener/ocm/pkg/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/credentials/cpi"
 )
 
 // VALUE_TYPE is the OCT registry type

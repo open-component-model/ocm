@@ -18,9 +18,9 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/common"
-	"github.com/gardener/ocm/pkg/credentials"
-	"github.com/gardener/ocm/pkg/credentials/repositories/directcreds"
+	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/credentials"
+	"github.com/open-component-model/ocm/pkg/credentials/repositories/directcreds"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

@@ -15,10 +15,10 @@
 package ocm
 
 import (
-	"github.com/gardener/ocm/pkg/common"
-	"github.com/gardener/ocm/pkg/common/accessio"
-	"github.com/gardener/ocm/pkg/errors"
-	ocmcpi "github.com/gardener/ocm/pkg/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/errors"
+	ocmcpi "github.com/open-component-model/ocm/pkg/ocm/cpi"
 )
 
 type TransferHandler interface {

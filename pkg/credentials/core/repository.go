@@ -15,7 +15,7 @@
 package core
 
 import (
-	"github.com/gardener/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/common"
 	"k8s.io/apimachinery/pkg/util/sets"
 )
 

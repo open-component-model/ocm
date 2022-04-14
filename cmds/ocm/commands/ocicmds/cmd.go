@@ -15,9 +15,9 @@
 package ocicmds
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts"
-	"github.com/gardener/ocm/cmds/ocm/commands/ocicmds/ctf"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/ctf"
 	"github.com/spf13/cobra"
 )
 

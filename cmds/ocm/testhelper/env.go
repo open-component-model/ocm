@@ -17,10 +17,10 @@ package testhelper
 import (
 	"io"
 
-	"github.com/gardener/ocm/cmds/ocm/app"
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/pkg/env"
-	"github.com/gardener/ocm/pkg/env/builder"
+	"github.com/open-component-model/ocm/cmds/ocm/app"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/pkg/env"
+	"github.com/open-component-model/ocm/pkg/env/builder"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 

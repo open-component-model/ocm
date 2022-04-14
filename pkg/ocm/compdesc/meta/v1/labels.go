@@ -17,7 +17,7 @@ package v1
 import (
 	"encoding/json"
 
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 

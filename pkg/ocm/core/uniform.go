@@ -18,9 +18,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/gardener/ocm/pkg/errors"
-	"github.com/gardener/ocm/pkg/oci/repositories/ocireg"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/oci/repositories/ocireg"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const (

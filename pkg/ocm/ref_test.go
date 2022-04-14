@@ -5,7 +5,7 @@
 package ocm_test
 
 import (
-	"github.com/gardener/ocm/pkg/ocm"
+	"github.com/open-component-model/ocm/pkg/ocm"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

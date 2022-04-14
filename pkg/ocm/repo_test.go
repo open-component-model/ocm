@@ -17,11 +17,11 @@ package ocm_test
 import (
 	"encoding/json"
 
-	"github.com/gardener/ocm/pkg/oci/repositories/empty"
-	"github.com/gardener/ocm/pkg/ocm"
-	"github.com/gardener/ocm/pkg/ocm/repositories/genericocireg"
-	ocmreg "github.com/gardener/ocm/pkg/ocm/repositories/ocireg"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/oci/repositories/empty"
+	"github.com/open-component-model/ocm/pkg/ocm"
+	"github.com/open-component-model/ocm/pkg/ocm/repositories/genericocireg"
+	ocmreg "github.com/open-component-model/ocm/pkg/ocm/repositories/ocireg"
+	"github.com/open-component-model/ocm/pkg/runtime"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

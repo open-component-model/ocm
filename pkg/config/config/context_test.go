@@ -21,7 +21,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/gardener/ocm/pkg/config"
+	"github.com/open-component-model/ocm/pkg/config"
 	"sigs.k8s.io/yaml"
 )
 

@@ -17,9 +17,9 @@ package localblob
 import (
 	"encoding/json"
 
-	"github.com/gardener/ocm/pkg/ocm/compdesc"
-	"github.com/gardener/ocm/pkg/ocm/cpi"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
+	"github.com/open-component-model/ocm/pkg/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 // Type is the access type of a blob local to a component.

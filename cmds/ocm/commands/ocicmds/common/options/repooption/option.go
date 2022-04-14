@@ -15,10 +15,10 @@
 package repooption
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/pkg/options"
-	"github.com/gardener/ocm/pkg/oci"
-	"github.com/gardener/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/pkg/oci"
+	"github.com/open-component-model/ocm/pkg/runtime"
 
 	"github.com/spf13/pflag"
 )

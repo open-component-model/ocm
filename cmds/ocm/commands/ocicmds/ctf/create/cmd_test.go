@@ -15,8 +15,8 @@
 package create_test
 
 import (
-	. "github.com/gardener/ocm/cmds/ocm/testhelper"
-	"github.com/gardener/ocm/pkg/oci/repositories/ctf"
+	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	"github.com/open-component-model/ocm/pkg/oci/repositories/ctf"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

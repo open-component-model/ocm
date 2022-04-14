@@ -18,8 +18,8 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/gardener/ocm/pkg/config"
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/config"
+	"github.com/open-component-model/ocm/pkg/errors"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

@@ -20,8 +20,8 @@ import (
 	"github.com/containers/image/v5/types"
 	dockertypes "github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
-	"github.com/gardener/ocm/pkg/oci/core"
-	"github.com/gardener/ocm/pkg/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/oci/core"
+	"github.com/open-component-model/ocm/pkg/oci/cpi"
 )
 
 type Repository struct {

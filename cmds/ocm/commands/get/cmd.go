@@ -15,14 +15,14 @@
 package get
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands"
 
-	artefacts "github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/get"
-	components "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/components/get"
-	references "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/references/get"
-	resources "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/resources/get"
-	sources "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/sources/get"
+	artefacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/get"
+	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/get"
+	references "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references/get"
+	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/get"
+	sources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources/get"
 	"github.com/spf13/cobra"
 )
 

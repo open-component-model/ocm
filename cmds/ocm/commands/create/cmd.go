@@ -15,11 +15,11 @@
 package create
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands"
 
-	ctf "github.com/gardener/ocm/cmds/ocm/commands/ocicmds/ctf/create"
-	comparch "github.com/gardener/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
+	ctf "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/ctf/create"
+	comparch "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
 	"github.com/spf13/cobra"
 )
 

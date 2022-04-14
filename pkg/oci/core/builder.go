@@ -17,8 +17,8 @@ package core
 import (
 	"context"
 
-	"github.com/gardener/ocm/pkg/credentials"
-	"github.com/gardener/ocm/pkg/datacontext"
+	"github.com/open-component-model/ocm/pkg/credentials"
+	"github.com/open-component-model/ocm/pkg/datacontext"
 )
 
 type Builder struct {

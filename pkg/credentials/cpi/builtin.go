@@ -15,7 +15,7 @@
 package cpi
 
 import (
-	"github.com/gardener/ocm/pkg/credentials/core"
+	"github.com/open-component-model/ocm/pkg/credentials/core"
 )
 
 const DirectCredentialsType = core.DirectCredentialsType

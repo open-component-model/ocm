@@ -15,7 +15,7 @@
 package core
 
 import (
-	"github.com/gardener/ocm/pkg/oci"
+	"github.com/open-component-model/ocm/pkg/oci"
 )
 
 //

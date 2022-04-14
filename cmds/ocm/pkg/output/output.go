@@ -19,9 +19,9 @@ import (
 	"encoding/json"
 	"os"
 
-	. "github.com/gardener/ocm/cmds/ocm/pkg/output/out"
-	"github.com/gardener/ocm/cmds/ocm/pkg/processing"
-	"github.com/gardener/ocm/pkg/errors"
+	. "github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"sigs.k8s.io/yaml"
 )
 

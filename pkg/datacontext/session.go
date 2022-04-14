@@ -18,7 +18,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/gardener/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 // Session is a context keeping track of objects requiring a close

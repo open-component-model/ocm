@@ -15,10 +15,10 @@
 package describe
 
 import (
-	"github.com/gardener/ocm/cmds/ocm/clictx"
-	"github.com/gardener/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands"
 
-	resources "github.com/gardener/ocm/cmds/ocm/commands/ocicmds/artefacts/describe"
+	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/describe"
 	"github.com/spf13/cobra"
 )
 
