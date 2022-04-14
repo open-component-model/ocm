@@ -18,11 +18,11 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/oci/repositories/ctf/format"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 const ArtefactSetDescriptorFileName = format.ArtefactSetDescriptorFileName

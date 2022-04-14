@@ -18,10 +18,10 @@ import (
 	"context"
 	"io"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/cmds/ocm/clictx/core"
 	"github.com/open-component-model/ocm/pkg/datacontext"
 	"github.com/open-component-model/ocm/pkg/ocm"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 func WithContext(ctx context.Context) core.Builder {

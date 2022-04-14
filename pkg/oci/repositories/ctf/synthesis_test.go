@@ -15,6 +15,9 @@
 package ctf_test
 
 import (
+	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -26,14 +29,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/ocm/digester/digesters/artefact"
-	"github.com/mandelsoft/filepath/pkg/filepath"
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
-	. "github.com/open-component-model/ocm/pkg/oci/repositories/ctf/testhelper"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/oci/repositories/ctf/testhelper"
 )
 
 type DummyMethod struct {

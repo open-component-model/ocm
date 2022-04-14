@@ -18,9 +18,9 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/modern-go/reflect2"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/modern-go/reflect2"
 )
 
 type ConfigType interface {

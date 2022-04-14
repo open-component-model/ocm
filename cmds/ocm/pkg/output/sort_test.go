@@ -15,9 +15,9 @@
 package output
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 )
 
 var _ = Describe("sort", func() {

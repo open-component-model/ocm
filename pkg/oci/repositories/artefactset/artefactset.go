@@ -17,12 +17,12 @@ package artefactset
 import (
 	"strings"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/oci/cpi"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 )
 

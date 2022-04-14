@@ -18,10 +18,10 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/open-component-model/ocm/pkg/config"
-	"github.com/open-component-model/ocm/pkg/errors"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/config"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 var _ = Describe("config handling", func() {

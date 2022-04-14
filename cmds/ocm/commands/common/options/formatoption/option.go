@@ -15,11 +15,11 @@
 package formatoption
 
 import (
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 )
 

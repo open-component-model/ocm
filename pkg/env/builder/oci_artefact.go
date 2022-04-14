@@ -27,9 +27,9 @@ const T_OCIMANIFEST = "manifest"
 
 type oci_artefact struct {
 	base
-	kind string
+	kind    string
 	artfunc func(a oci.ArtefactAccess) error
-	ns cpi.NamespaceAccess
+	ns      cpi.NamespaceAccess
 	cpi.ArtefactAccess
 	tags []string
 }
@@ -43,8 +43,8 @@ func (r *oci_artefact) Set() {
 	r.Builder.oci_artacc = r.ArtefactAccess
 	r.Builder.oci_tags = &r.tags
 
-	if r.ns!=nil {
-		r.Builder.oci_artfunc=r.addArtefact
+	if r.ns != nil {
+		r.Builder.oci_artfunc = r.addArtefact
 	}
 }
 
@@ -54,8 +54,8 @@ func (r *oci_artefact) Close() error {
 		return err
 	}
 	_, err = r.Builder.oci_nsacc.AddArtefact(r.ArtefactAccess, r.tags...)
-	if err==nil && r.artfunc!=nil  {
-		err=r.artfunc(r.ArtefactAccess)
+	if err == nil && r.artfunc != nil {
+		err = r.artfunc(r.ArtefactAccess)
 	}
 	return err
 }
@@ -84,16 +84,16 @@ func (b *Builder) artefact(version string, ns cpi.NamespaceAccess, t func(access
 	if v != nil {
 		k, err = t(v)
 	}
-	b.failOn(err)
+	b.failOn(err, 2)
 	tags := []string{}
 	if version != "" {
 		tags = append(tags, version)
 	}
-	b.configure(&oci_artefact{ArtefactAccess: v, kind: k, tags: tags, ns: ns, artfunc: b.oci_artfunc}, f)
+	b.configure(&oci_artefact{ArtefactAccess: v, kind: k, tags: tags, ns: ns, artfunc: b.oci_artfunc}, f, 1)
 }
 
 func (b *Builder) Index(version string, f ...func()) {
-	b.artefact(version, nil, func(a oci.ArtefactAccess) (string, error) {
+	b.artefact(version, b.oci_nsacc, func(a oci.ArtefactAccess) (string, error) {
 		if a.IndexAccess() == nil {
 			return "", errors.Newf("artefact is manifest")
 		}

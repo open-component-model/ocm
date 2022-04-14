@@ -17,11 +17,11 @@ package testhelper
 import (
 	"io"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/cmds/ocm/app"
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/pkg/env"
 	"github.com/open-component-model/ocm/pkg/env/builder"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 type TestEnv struct {

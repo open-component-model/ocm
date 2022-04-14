@@ -15,11 +15,11 @@
 package accessio_test
 
 import (
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 )
 
 var _ = Describe("artefact management", func() {

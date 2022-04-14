@@ -19,11 +19,11 @@ import (
 	"os"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/marstr/guid"
+	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/opencontainers/go-digest"
 )
 

@@ -53,9 +53,9 @@ linked library can be used:
 
 The <code>--type</code> option accepts a file format for the
 target archive to use. The following formats are supported:
+- tgz
 - directory
 - tar
-- tgz
 The default format is <code>directory</code>.
 
 ### SEE ALSO

@@ -15,9 +15,9 @@
 package compdesc_test
 
 import (
-	"github.com/open-component-model/ocm/pkg/ocm/repositories/ocireg"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/ocm/repositories/ocireg"
 
 	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
 )

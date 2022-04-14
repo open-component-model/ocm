@@ -17,6 +17,10 @@ package genericocireg_test
 import (
 	"reflect"
 
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -35,10 +39,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/ocm/repositories/genericocireg"
 	"github.com/open-component-model/ocm/pkg/ocm/repositories/genericocireg/componentmapping"
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 )
 
 var DefaultContext = ocm.New()

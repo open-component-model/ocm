@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -30,7 +31,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/ocm/repositories/comparch/comparch"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/util/validation/field"

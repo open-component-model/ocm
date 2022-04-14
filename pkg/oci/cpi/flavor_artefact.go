@@ -160,7 +160,7 @@ func (a *ArtefactImpl) Index() (*artdesc.Index, error) {
 	if idx == nil {
 		idx = artdesc.NewIndex()
 		if err := d.SetIndex(idx); err != nil {
-			return nil, err
+			return nil, errors.Newf("artefact is manifest")
 		}
 	}
 	return idx, nil
@@ -174,7 +174,7 @@ func (a *ArtefactImpl) Manifest() (*artdesc.Manifest, error) {
 	if m == nil {
 		m = artdesc.NewManifest()
 		if err := d.SetManifest(m); err != nil {
-			return nil, err
+			return nil, errors.Newf("artefact is index")
 		}
 	}
 	return m, nil
@@ -198,10 +198,10 @@ func (a *ArtefactImpl) IndexAccess() core.IndexAccess {
 	a.lock.Lock()
 	defer a.lock.Unlock()
 	d := a.state.GetState().(*artdesc.Artefact)
-	m := d.Manifest()
-	if m == nil {
-		m = artdesc.NewManifest()
-		if err := d.SetManifest(m); err != nil {
+	i := d.Index()
+	if i == nil {
+		i = artdesc.NewIndex()
+		if err := d.SetIndex(i); err != nil {
 			return nil
 		}
 	}

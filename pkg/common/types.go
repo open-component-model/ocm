@@ -58,6 +58,9 @@ func (n NameVersion) String() string {
 	if n.version == "" {
 		return n.name
 	}
+	if n.name == "" {
+		return n.version
+	}
 	return n.name + ":" + n.version
 }
 

@@ -15,13 +15,13 @@
 package env
 
 import (
-	"github.com/open-component-model/ocm/pkg/datacontext/vfsattr"
-	"github.com/open-component-model/ocm/pkg/ocm"
 	"github.com/mandelsoft/vfs/pkg/composefs"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/readonlyfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/datacontext/vfsattr"
+	"github.com/open-component-model/ocm/pkg/ocm"
 )
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -23,5 +23,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "OCM download resources")
+	RunSpecs(t, "OCI transfer artefacts")
 }

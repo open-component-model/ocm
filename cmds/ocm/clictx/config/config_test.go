@@ -17,12 +17,12 @@ package config_test
 import (
 	"encoding/json"
 
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/clictx/config"
 	"github.com/open-component-model/ocm/pkg/oci/repositories/ocireg"
 	ocmocireg "github.com/open-component-model/ocm/pkg/ocm/repositories/ocireg"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 )
 
 var DefaultContext = clictx.New()

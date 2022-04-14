@@ -18,6 +18,7 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/handlers/artefacthdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/options/repooption"
@@ -44,7 +45,7 @@ type Command struct {
 
 // NewCommand creates a new artefact command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, &repooption.Option{}, output.OutputOptions(outputs))}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, &repooption.Option{}, output.OutputOptions(outputs, closureoption.New("index")))}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -52,8 +53,8 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Use:   "[<options>] {<artefact-reference>}",
 		Short: "get artefact version",
 		Long: `
-		Get lists all artefact versions specified, if only a repository is specified
-		all tagged artefacts are listed.
+Get lists all artefact versions specified, if only a repository is specified
+all tagged artefacts are listed.
 	`,
 		Example: `
 $ ocm get artefact ghcr.io/mandelsoft/kubelink
@@ -83,18 +84,25 @@ func (o *Command) Run() error {
 
 /////////////////////////////////////////////////////////////////////////////
 
+func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide ...string) *output.TableOutput {
+	return &output.TableOutput{
+		Headers: output.Fields("REGISTRY", "REPOSITORY", "KIND", "TAG", "DIGEST", wide),
+		Chain:   artefacthdlr.Sort,
+		Options: opts,
+		Mapping: mapping,
+	}
+}
+
 var outputs = output.NewOutputs(get_regular, output.Outputs{
 	"wide": get_wide,
 }).AddManifestOutputs()
 
 func get_regular(opts *output.Options) output.Output {
-	return output.NewProcessingTableOutput(opts, processing.Chain().Map(map_get_regular_output),
-		"REGISTRY", "REPOSITORY", "TAG", "DIGEST")
+	return closureoption.TableOutput(TableOutput(opts, map_get_regular_output), artefacthdlr.ClosureExplode).New()
 }
 
 func get_wide(opts *output.Options) output.Output {
-	return output.NewProcessingTableOutput(opts, processing.Chain().Parallel(20).Map(map_get_wide_output),
-		"REGISTRY", "REPOSITORY", "TAG", "DIGEST", "MIMETYPE", "CONFIGTYPE")
+	return closureoption.TableOutput(TableOutput(opts, map_get_wide_output, "MIMETYPE", "CONFIGTYPE"), artefacthdlr.ClosureExplode).New()
 }
 
 func map_get_regular_output(e interface{}) interface{} {
@@ -108,23 +116,22 @@ func map_get_regular_output(e interface{}) interface{} {
 	if p.Spec.Tag != nil {
 		tag = *p.Spec.Tag
 	}
-	return []string{p.Spec.Host, p.Spec.Repository, tag, digest}
+	kind := "-"
+	if p.Artefact.IsManifest() {
+		kind = "manifest"
+	}
+	if p.Artefact.IsIndex() {
+		kind = "index"
+	}
+	return []string{p.Spec.Host, p.Spec.Repository, kind, tag, digest}
 }
 
 func map_get_wide_output(e interface{}) interface{} {
-	digest := "unknown"
 	p := e.(*artefacthdlr.Object)
-	blob, err := p.Artefact.Blob()
-	if err == nil {
-		digest = blob.Digest().String()
-	}
-	tag := "-"
-	if p.Spec.Tag != nil {
-		tag = *p.Spec.Tag
-	}
+
 	config := "-"
 	if p.Artefact.IsManifest() {
 		config = p.Artefact.ManifestAccess().GetDescriptor().Config.MediaType
 	}
-	return []string{p.Spec.Host, p.Spec.Repository, tag, digest, p.Artefact.GetDescriptor().MimeType(), config}
+	return output.Fields(map_get_regular_output(e), p.Artefact.GetDescriptor().MimeType(), config)
 }

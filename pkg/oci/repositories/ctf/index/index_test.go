@@ -15,9 +15,9 @@
 package index_test
 
 import (
-	. "github.com/open-component-model/ocm/pkg/oci/repositories/ctf/index"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/oci/repositories/ctf/index"
 )
 
 var _ = Describe("index", func() {

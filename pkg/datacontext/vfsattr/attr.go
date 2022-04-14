@@ -15,9 +15,9 @@
 package vfsattr
 
 import (
-	"github.com/open-component-model/ocm/pkg/datacontext"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/datacontext"
 )
 
 const ATTR_KEY = "github.com/mandelsoft/vfs"

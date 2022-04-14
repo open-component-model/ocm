@@ -19,6 +19,8 @@ import (
 	"os"
 	"reflect"
 
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/ocm"
 	"github.com/open-component-model/ocm/pkg/ocm/accessmethods/localblob"
@@ -26,8 +28,6 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
 	comparch2 "github.com/open-component-model/ocm/pkg/ocm/repositories/comparch/comparch"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 )
 
 var DefaultContext = ocm.New()

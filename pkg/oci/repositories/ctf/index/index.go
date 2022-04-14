@@ -140,11 +140,13 @@ func (r *RepositoryIndex) GetTags(repo string) []string {
 			}
 		}
 	}
+	/* TODO: how to query untagged entries at api level
 	for d, found := range digests {
 		if !found {
 			result = append(result, "@"+d.String())
 		}
 	}
+	*/
 	return result
 }
 

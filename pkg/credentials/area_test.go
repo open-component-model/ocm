@@ -18,9 +18,9 @@ import (
 	"context"
 	"reflect"
 
-	"github.com/open-component-model/ocm/pkg/credentials"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/credentials"
 )
 
 var DefaultContext = credentials.New()

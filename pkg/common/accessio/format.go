@@ -19,8 +19,8 @@ import (
 	"compress/gzip"
 	"io"
 
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 const KIND_FILEFORMAT = "file format"

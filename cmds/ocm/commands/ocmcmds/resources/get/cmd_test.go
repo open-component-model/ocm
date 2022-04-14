@@ -17,12 +17,12 @@ package get_test
 import (
 	"bytes"
 
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/mime"
 	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 )
 
 const ARCH = "/tmp/ca"

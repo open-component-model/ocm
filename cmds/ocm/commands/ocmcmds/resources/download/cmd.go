@@ -19,6 +19,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
@@ -35,7 +36,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 )
 

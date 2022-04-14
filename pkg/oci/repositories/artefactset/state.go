@@ -15,9 +15,9 @@
 package artefactset
 
 import (
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/oci/cpi"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 // NewStateHandler implements the factory interface for the artefact set

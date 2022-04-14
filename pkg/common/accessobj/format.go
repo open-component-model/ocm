@@ -19,10 +19,10 @@ import (
 	"io"
 	"sync"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/oci/repositories/ctf/format"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 const KIND_FILEFORMAT = accessio.KIND_FILEFORMAT

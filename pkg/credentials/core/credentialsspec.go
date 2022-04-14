@@ -17,8 +17,8 @@ package core
 import (
 	"encoding/json"
 
-	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/modern-go/reflect2"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 // CredentialsSpec describes a dedicated credential provided by some repository

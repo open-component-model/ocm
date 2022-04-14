@@ -15,12 +15,12 @@
 package ctf
 
 import (
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/ocm/repositories/genericocireg"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 func NewRepositorySpec(acc accessobj.AccessMode, path string, opts ...accessio.Option) *genericocireg.RepositorySpec {

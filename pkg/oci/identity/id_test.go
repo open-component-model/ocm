@@ -15,10 +15,10 @@
 package identity_test
 
 import (
-	"github.com/open-component-model/ocm/pkg/credentials"
-	"github.com/open-component-model/ocm/pkg/oci/identity"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/credentials"
+	"github.com/open-component-model/ocm/pkg/oci/identity"
 )
 
 var _ = Describe("ctf management", func() {

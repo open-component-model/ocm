@@ -55,11 +55,11 @@ type Builder struct {
 
 	blob *accessio.BlobAccess
 
-	oci_repo   oci.Repository
-	oci_nsacc  oci.NamespaceAccess
-	oci_artacc oci.ArtefactAccess
-	oci_tags   *[]string
-	oci_artfunc  func(oci.ArtefactAccess) error
+	oci_repo    oci.Repository
+	oci_nsacc   oci.NamespaceAccess
+	oci_artacc  oci.ArtefactAccess
+	oci_tags    *[]string
+	oci_artfunc func(oci.ArtefactAccess) error
 }
 
 func NewBuilder(t *env.Environment) *Builder {
@@ -132,7 +132,7 @@ func (b *Builder) push(e element) {
 	b.set()
 }
 
-func (b *Builder) configure(e element, funcs []func()) {
+func (b *Builder) configure(e element, funcs []func(), skip ...int) {
 	e.SetBuilder(b)
 	b.push(e)
 	for _, f := range funcs {
@@ -142,7 +142,11 @@ func (b *Builder) configure(e element, funcs []func()) {
 	}
 	err := b.pop().Close()
 	if err != nil {
-		Fail(err.Error(), 2)
+		cs := 2
+		if len(skip) > 0 {
+			cs += skip[0]
+		}
+		Fail(err.Error(), cs)
 	}
 }
 

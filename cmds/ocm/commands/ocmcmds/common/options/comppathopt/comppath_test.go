@@ -17,11 +17,11 @@ package comppathopt_test
 import (
 	"testing"
 
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/comppathopt"
 	"github.com/open-component-model/ocm/pkg/errors"
 	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 )
 
 func TestConfig(t *testing.T) {

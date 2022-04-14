@@ -18,10 +18,10 @@ import (
 	"context"
 	"io"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
 	"github.com/open-component-model/ocm/pkg/datacontext"
 	"github.com/open-component-model/ocm/pkg/ocm"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 type Builder struct {

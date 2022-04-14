@@ -15,8 +15,8 @@
 package builder
 
 import (
-	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
 	. "github.com/onsi/ginkgo"
+	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
 )
 
 const T_OCMACCESS = "access"

@@ -18,11 +18,11 @@ import (
 	"encoding/json"
 	"reflect"
 
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/credentials"
 	local "github.com/open-component-model/ocm/pkg/credentials/repositories/aliases"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 )
 
 var DefaultContext = credentials.New()

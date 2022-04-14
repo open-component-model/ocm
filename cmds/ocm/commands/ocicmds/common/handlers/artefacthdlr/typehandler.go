@@ -17,10 +17,14 @@ package artefacthdlr
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/oci"
 	"github.com/open-component-model/ocm/pkg/oci/artdesc"
@@ -33,15 +37,16 @@ func Elem(e interface{}) oci.ArtefactAccess {
 ////////////////////////////////////////////////////////////////////////////////
 
 type Object struct {
+	History   common.History
 	Spec      oci.RefSpec
 	Namespace oci.NamespaceAccess
 	Artefact  oci.ArtefactAccess
 }
 
-type Manifest struct {
-	Spec     oci.RefSpec
-	Digest   string
-	Manifest *artdesc.Artefact
+var _ common.HistorySource = (*Object)(nil)
+
+func (o *Object) GetHistory() common.History {
+	return o.History
 }
 
 func (o *Object) AsManifest() interface{} {
@@ -57,6 +62,55 @@ func (o *Object) AsManifest() interface{} {
 		Digest:   digest,
 		Manifest: o.Artefact.GetDescriptor(),
 	}
+}
+
+type Manifest struct {
+	Spec     oci.RefSpec
+	Digest   string
+	Manifest *artdesc.Artefact
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func ClosureExplode(opts *output.Options, e interface{}) []interface{} {
+	return traverse(common.History{}, e.(*Object), opts.Context)
+}
+
+func traverse(hist common.History, o *Object, octx out.Context) []interface{} {
+	blob, _ := o.Artefact.Blob()
+	key := common.NewNameVersion("", blob.Digest().String())
+	if err := hist.Add(oci.KIND_OCIARTEFACT, key); err != nil {
+		return nil
+	}
+	result := []interface{}{o}
+	if o.Artefact.IsIndex() {
+		refs := o.Artefact.IndexAccess().GetDescriptor().Manifests
+
+		found := map[common.NameVersion]bool{}
+		for _, ref := range refs {
+			key := common.NewNameVersion("", ref.Digest.String())
+			if found[key] {
+				continue // skip same ref wit different attributes for recursion
+			}
+			found[key] = true
+			nested, err := o.Namespace.GetArtefact(key.GetVersion())
+			if err != nil {
+				out.Errf(octx, "Warning: lookup nested artefact %q [%s]: %s\n", ref.Digest, hist, err)
+			}
+			var obj = &Object{
+				History: hist,
+				Spec: oci.RefSpec{
+					UniformRepositorySpec: o.Spec.UniformRepositorySpec,
+					Repository:            o.Spec.Repository,
+					Digest:                &ref.Digest,
+				},
+				Namespace: o.Namespace,
+				Artefact:  nested,
+			}
+			result = append(result, traverse(hist, obj, octx)...)
+		}
+	}
+	return result
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -174,3 +228,13 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 	}
 	return result, nil
 }
+
+func Compare(a, b interface{}) int {
+	aa := a.(*Object)
+	ab := b.(*Object)
+
+	return strings.Compare(aa.Spec.String(), ab.Spec.String())
+}
+
+// Sort is a processing chain sorting original objects provided by type handler
+var Sort = processing.Sort(Compare)

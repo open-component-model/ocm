@@ -20,11 +20,11 @@ import (
 	"io"
 	"os"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/oci/repositories/ctf/format"
 	"github.com/open-component-model/ocm/pkg/utils"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 var FormatTAR = NewTarHandler()

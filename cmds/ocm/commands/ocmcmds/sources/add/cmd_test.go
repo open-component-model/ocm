@@ -21,6 +21,8 @@ import (
 	"io"
 	"sort"
 
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -29,8 +31,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/ocm/repositories/comparch/comparch"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 )
 
 const ARCH = "/tmp/ca"

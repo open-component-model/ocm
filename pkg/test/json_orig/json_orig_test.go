@@ -19,9 +19,9 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/open-component-model/ocm/pkg/runtime"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 var _ = Describe("json", func() {

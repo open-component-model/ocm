@@ -19,15 +19,15 @@ import (
 	"compress/gzip"
 	"io"
 
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/mime"
 	artefactset2 "github.com/open-component-model/ocm/pkg/oci/repositories/artefactset"
 	. "github.com/open-component-model/ocm/pkg/oci/repositories/ctf/testhelper"
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 )
 
 func defaultManifestFill(a *artefactset2.ArtefactSet) {

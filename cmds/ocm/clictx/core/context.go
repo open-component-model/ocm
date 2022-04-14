@@ -20,6 +20,7 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -33,7 +34,6 @@ import (
 	ctfoci "github.com/open-component-model/ocm/pkg/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/ocm"
 	ctfocm "github.com/open-component-model/ocm/pkg/ocm/repositories/ctf"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 const CONTEXT_TYPE = "ocm.cmd.context.gardener.cloud"

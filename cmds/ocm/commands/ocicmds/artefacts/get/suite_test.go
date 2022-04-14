@@ -12,38 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package comparch
+package get_test
 
 import (
-	"reflect"
+	"testing"
 
-	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-type StateHandler struct {
-	fs vfs.FileSystem
-}
-
-var _ accessobj.StateHandler = &StateHandler{}
-
-func NewStateHandler(fs vfs.FileSystem) accessobj.StateHandler {
-	return &StateHandler{fs}
-}
-
-func (i StateHandler) Initial() interface{} {
-	return compdesc.New("", "")
-}
-
-func (i StateHandler) Encode(d interface{}) ([]byte, error) {
-	return compdesc.Encode(d.(*compdesc.ComponentDescriptor))
-}
-
-func (i StateHandler) Decode(data []byte) (interface{}, error) {
-	return compdesc.Decode(data)
-}
-
-func (i StateHandler) Equivalent(a, b interface{}) bool {
-	return reflect.DeepEqual(a, b)
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "OCI get artefacts")
 }

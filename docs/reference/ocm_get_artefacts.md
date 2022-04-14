@@ -11,6 +11,7 @@ ocm get artefacts [<options>] {<artefact-reference>}
 ### Options
 
 ```
+  -c, --closure            follow index nesting
   -h, --help               help for artefacts
   -o, --output string      output mode (JSON, json, wide, yaml)
   -r, --repo string        repository name or spec
@@ -20,8 +21,8 @@ ocm get artefacts [<options>] {<artefact-reference>}
 ### Description
 
 
-		Get lists all artefact versions specified, if only a repository is specified
-		all tagged artefacts are listed.
+Get lists all artefact versions specified, if only a repository is specified
+all tagged artefacts are listed.
 	
 If the repository/registry option is specified, the given names are interpreted
 relative to the specified registry using the syntax
@@ -48,6 +49,8 @@ linked library can be used:
 - `Empty`
 - `OCIRegistry`
 - `oci`
+
+With the option <code>--closure</code> the complete reference tree of a index is traversed.
 
 With the option <code>--output</code> the out put mode can be selected.
 The following modes are supported:

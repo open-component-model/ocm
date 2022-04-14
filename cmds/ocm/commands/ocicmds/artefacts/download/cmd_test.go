@@ -17,13 +17,13 @@ package download_test
 import (
 	"bytes"
 
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/oci/grammar"
 	"github.com/open-component-model/ocm/pkg/oci/repositories/artefactset"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 )
 
 const ARCH = "/tmp/ctf"

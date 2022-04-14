@@ -1,8 +1,10 @@
 
+- [ ] Clarify how to list digests in (oci) ctf and artefact set under common oci API abstraction
 - [ ] Align OCI and OCM Repository Name with type structure and reference syntax
 - [ ] Aligned Denotation for OCM and OCI elements
 - [X] Generalize Sort Field Detection and check
   - first ugly implementation done
+- [ ] Artefact download with side artefacts (based on dedicated option)
 - [ ] Rework Processing Chain/Iterable to work go-like with channels
 - [ ] Generic History based sort function to be used to transform object sequence for tree output
 - [ ] Recursion + Tree mode for OCI Indices
