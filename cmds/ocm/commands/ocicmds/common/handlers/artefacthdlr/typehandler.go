@@ -23,6 +23,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -44,9 +45,16 @@ type Object struct {
 }
 
 var _ common.HistorySource = (*Object)(nil)
+var _ tree.Object = (*Object)(nil)
 
 func (o *Object) GetHistory() common.History {
 	return o.History
+}
+
+func (o *Object) IsNode() *common.NameVersion {
+	blob, _ := o.Artefact.Blob()
+	nv := common.NewNameVersion("", blob.Digest().String())
+	return &nv
 }
 
 func (o *Object) AsManifest() interface{} {

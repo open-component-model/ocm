@@ -20,6 +20,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/spf13/pflag"
 )
 
@@ -61,8 +62,13 @@ func (o *Option) Usage() string {
 The <code>--type</code> option accepts a file format for the
 target archive to use. The following formats are supported:
 `
+	list := utils.StringSlice{}
 	for k := range accessobj.GetFormats() {
-		s = s + "- " + k.String() + "\n"
+		list.Add(k.String())
+	}
+	list.Sort()
+	for _, k := range list {
+		s = s + "- " + k + "\n"
 	}
 	return s + "The default format is <code>directory</code>."
 }

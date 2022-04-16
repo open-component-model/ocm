@@ -87,7 +87,7 @@ func (o *Command) Run() error {
 func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide ...string) *output.TableOutput {
 	return &output.TableOutput{
 		Headers: output.Fields("REGISTRY", "REPOSITORY", "KIND", "TAG", "DIGEST", wide),
-		Chain:   artefacthdlr.Sort,
+		Chain:   closureoption.Closure(opts, artefacthdlr.ClosureExplode, artefacthdlr.Sort),
 		Options: opts,
 		Mapping: mapping,
 	}
@@ -95,14 +95,19 @@ func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide 
 
 var outputs = output.NewOutputs(get_regular, output.Outputs{
 	"wide": get_wide,
+	"tree": get_tree,
 }).AddManifestOutputs()
 
 func get_regular(opts *output.Options) output.Output {
-	return closureoption.TableOutput(TableOutput(opts, map_get_regular_output), artefacthdlr.ClosureExplode).New()
+	return closureoption.TableOutput(TableOutput(opts, map_get_regular_output)).New()
 }
 
 func get_wide(opts *output.Options) output.Output {
-	return closureoption.TableOutput(TableOutput(opts, map_get_wide_output, "MIMETYPE", "CONFIGTYPE"), artefacthdlr.ClosureExplode).New()
+	return closureoption.TableOutput(TableOutput(opts, map_get_wide_output, "MIMETYPE", "CONFIGTYPE")).New()
+}
+
+func get_tree(opts *output.Options) output.Output {
+	return output.TreeOutput(TableOutput(opts, map_get_regular_output), "NESTING").New()
 }
 
 func map_get_regular_output(e interface{}) interface{} {

@@ -13,7 +13,7 @@ ocm oci artefacts get [<options>] {<artefact-reference>}
 ```
   -c, --closure            follow index nesting
   -h, --help               help for get
-  -o, --output string      output mode (JSON, json, wide, yaml)
+  -o, --output string      output mode (JSON, json, tree, wide, yaml)
   -r, --repo string        repository name or spec
   -s, --sort stringArray   sort fields
 ```
@@ -56,6 +56,7 @@ With the option <code>--output</code> the out put mode can be selected.
 The following modes are supported:
  - JSON
  - json
+ - tree
  - wide
  - yaml
 
