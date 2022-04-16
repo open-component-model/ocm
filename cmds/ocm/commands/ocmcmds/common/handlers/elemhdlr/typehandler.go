@@ -164,7 +164,9 @@ var MetaOutput = []string{"NAME", "VERSION", "IDENTITY"}
 func MapMetaOutput(e interface{}) []string {
 	p := e.(*Object)
 	m := p.Element.GetMeta()
-	return []string{m.Name, m.Version, p.Id.String()}
+	id := p.Id.Copy()
+	id.Remove(metav1.SystemIdentityName)
+	return []string{m.Name, m.Version, id.String()}
 }
 
 var AccessOutput = []string{"ACCESSTYPE", "ACCESSSPEC"}

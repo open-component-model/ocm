@@ -173,6 +173,16 @@ func (c *ComponentVersionAccess) SetResource(meta *cpi.ResourceMeta, acc compdes
 		Access:       acc,
 	}
 
+	if res.Relation == metav1.LocalRelation {
+		switch res.Version {
+		case "":
+			res.Version = c.GetVersion()
+		case c.GetVersion():
+		default:
+			return errors.ErrInvalid("resource version", res.Version)
+		}
+	}
+
 	if idx := c.GetDescriptor().GetResourceIndex(meta); idx == -1 {
 		c.GetDescriptor().Resources = append(c.GetDescriptor().Resources, *res)
 	} else {
@@ -193,6 +203,11 @@ func (c *ComponentVersionAccess) SetSource(meta *cpi.SourceMeta, acc compdesc.Ac
 	res := &compdesc.Source{
 		SourceMeta: *meta.Copy(),
 		Access:     acc,
+	}
+
+	switch res.Version {
+	case "":
+		res.Version = c.GetVersion()
 	}
 
 	if idx := c.GetDescriptor().GetSourceIndex(meta); idx == -1 {

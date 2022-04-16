@@ -71,10 +71,10 @@ func (l *Identity) Set(name, value string) {
 	}
 }
 
-func (l *Identity) Remove(name string) bool {
-	if *l != nil {
-		if _, ok := (*l)[name]; ok {
-			delete(*l, name)
+func (l Identity) Remove(name string) bool {
+	if l != nil {
+		if _, ok := (l)[name]; ok {
+			delete(l, name)
 		}
 	}
 	return false

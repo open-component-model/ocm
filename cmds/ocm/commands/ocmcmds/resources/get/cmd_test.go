@@ -54,8 +54,31 @@ var _ = Describe("Test Environment", func() {
 		Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH)).To(Succeed())
 		Expect("\n" + buf.String()).To(Equal(
 			`
-NAME     VERSION IDENTITY          TYPE      RELATION
-testdata v1      "name"="testdata" PlainText local
+NAME     VERSION IDENTITY TYPE      RELATION
+testdata v1               PlainText local
+`))
+	})
+
+	It("lists ambigious resource in component archive", func() {
+		env.ComponentArchive(ARCH, accessio.FormatDirectory, COMP, VERSION, func() {
+			env.Provider(PROVIDER)
+			env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
+				env.BlobStringData(mime.MIME_TEXT, "testdata")
+				env.ExtraIdentity("platform", "a")
+			})
+			env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
+				env.BlobStringData(mime.MIME_TEXT, "testdata")
+				env.ExtraIdentity("platform", "b")
+			})
+		})
+
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH)).To(Succeed())
+		Expect("\n" + buf.String()).To(Equal(
+			`
+NAME     VERSION IDENTITY       TYPE      RELATION
+testdata v1      "platform"="a" PlainText local
+testdata v1      "platform"="b" PlainText local
 `))
 	})
 
@@ -75,8 +98,8 @@ testdata v1      "name"="testdata" PlainText local
 		Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH)).To(Succeed())
 		Expect("\n" + buf.String()).To(Equal(
 			`
-NAME     VERSION IDENTITY          TYPE      RELATION
-testdata v1      "name"="testdata" PlainText local
+NAME     VERSION IDENTITY TYPE      RELATION
+testdata v1               PlainText local
 `))
 	})
 
@@ -108,9 +131,9 @@ testdata v1      "name"="testdata" PlainText local
 			Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 			Expect("\n" + buf.String()).To(Equal(
 				`
-REFERENCEPATH              NAME     VERSION IDENTITY          TYPE      RELATION
-test.de/y:v1               moredata v1      "name"="moredata" PlainText local
-test.de/y:v1->test.de/x:v1 testdata v1      "name"="testdata" PlainText local
+REFERENCEPATH              NAME     VERSION IDENTITY TYPE      RELATION
+test.de/y:v1               moredata v1               PlainText local
+test.de/y:v1->test.de/x:v1 testdata v1               PlainText local
 `))
 		})
 
@@ -119,9 +142,9 @@ test.de/y:v1->test.de/x:v1 testdata v1      "name"="testdata" PlainText local
 			Expect(env.CatchOutput(buf).Execute("get", "resources", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 			Expect("\n" + buf.String()).To(Equal(
 				`
-NESTING             NAME     VERSION IDENTITY          TYPE      RELATION
-└─ test.de/y:v1                                                  
-   └─               moredata v1      "name"="moredata" PlainText local
+NESTING             NAME     VERSION IDENTITY TYPE      RELATION
+└─ test.de/y:v1                                         
+   └─               moredata v1               PlainText local
 `))
 		})
 
@@ -130,11 +153,11 @@ NESTING             NAME     VERSION IDENTITY          TYPE      RELATION
 			Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 			Expect("\n" + buf.String()).To(Equal(
 				`
-NESTING                NAME     VERSION IDENTITY          TYPE      RELATION
-└─ test.de/y:v1                                                     
-   ├─                  moredata v1      "name"="moredata" PlainText local
-   └─ test.de/x:v1                                                  
-      └─               testdata v1      "name"="testdata" PlainText local
+NESTING                NAME     VERSION IDENTITY TYPE      RELATION
+└─ test.de/y:v1                                            
+   ├─                  moredata v1               PlainText local
+   └─ test.de/x:v1                                         
+      └─               testdata v1               PlainText local
 `))
 		})
 	})
