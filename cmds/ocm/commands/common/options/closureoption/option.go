@@ -17,15 +17,16 @@ package closureoption
 import (
 	"fmt"
 
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/spf13/pflag"
 )
 
-func From(o *output.Options) *Option {
+func From(o options.OptionSetProvider) *Option {
 	var opt *Option
-	o.Get(&opt)
+	o.AsOptionSet().Get(&opt)
 	return opt
 }
 
@@ -55,6 +56,10 @@ func New(elemname string, settings ...interface{}) *Option {
 		panic(fmt.Errorf("invalid setting for closure option: both, addituonal fields and enricher must be set"))
 	}
 	return o
+}
+
+func (o *Option) IsTrue() bool {
+	return o.Closure
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
@@ -129,6 +134,15 @@ func (c ClosureFunction) Exploder(opts *output.Options) processing.ExplodeFuncti
 		}
 	}
 	return nil
+}
+
+func AddChain(opts *output.Options, chain, add processing.ProcessChain) processing.ProcessChain {
+	copts := From(opts)
+
+	if !copts.Closure {
+		return chain
+	}
+	return processing.Append(chain, add)
 }
 
 func TableOutput(in *output.TableOutput, closure ...ClosureFunction) *output.TableOutput {

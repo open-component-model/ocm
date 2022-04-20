@@ -150,3 +150,7 @@ The following modes are supported:
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+func OutputModeCondition(opts *Options, mode string) options.Condition {
+	return options.Flag(opts.OutputMode == mode)
+}

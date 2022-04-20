@@ -11,6 +11,7 @@ ocm oci artefacts get [<options>] {<artefact-reference>}
 ### Options
 
 ```
+  -a, --attached           show attached artefacts
   -c, --closure            follow index nesting
   -h, --help               help for get
   -o, --output string      output mode (JSON, json, tree, wide, yaml)

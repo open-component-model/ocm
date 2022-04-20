@@ -17,13 +17,9 @@ package comphdlr
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common"
@@ -63,67 +59,6 @@ func (o *Object) IsNode() *common.NameVersion {
 
 var _ common.HistorySource = (*Object)(nil)
 var _ tree.Object = (*Object)(nil)
-
-////////////////////////////////////////////////////////////////////////////////
-
-func ClosureExplode(opts *output.Options, e interface{}) []interface{} {
-	return traverse(common.History{}, e.(*Object), opts.Context, lookupoption.From(opts))
-}
-
-func traverse(hist common.History, o *Object, octx out.Context, lookup *lookupoption.Option) []interface{} {
-	key := common.VersionedElementKey(o.ComponentVersion)
-	if err := hist.Add(ocm.KIND_COMPONENTVERSION, key); err != nil {
-		return nil
-	}
-	result := []interface{}{o}
-	refs := o.ComponentVersion.GetDescriptor().ComponentReferences
-	/*
-		refs=append(refs[:0:0], refs...)
-		sort.Sort(refs)
-	*/
-	found := map[common.NameVersion]bool{}
-	for _, ref := range refs {
-		key := common.NewNameVersion(ref.ComponentName, ref.Version)
-		if found[key] {
-			continue // skip same ref wit different attributes for recursion
-		}
-		found[key] = true
-		var nested ocm.ComponentVersionAccess
-		vers := ref.Version
-		comp, err := o.Repository.LookupComponent(ref.ComponentName)
-		if err != nil {
-			out.Errf(octx, "Warning: lookup nested component %q [%s]: %s\n", ref.ComponentName, hist, err)
-		} else {
-			nested, err = comp.LookupVersion(vers)
-			if err != nil {
-				out.Errf(octx, "Warning: lookup nested component %q [%s]: %s\n", ref.ComponentName, hist, err)
-			}
-		}
-		if nested == nil {
-			comp, nested, err = lookup.LookupComponentVersion(ref.ComponentName, vers)
-			if err != nil {
-				out.Errf(octx, "Warning: fallback lookup nested component version \"%s:%s\" [%s]: %s\n", ref.ComponentName, vers, hist, err)
-				continue
-			}
-		}
-		var obj = &Object{
-			History:  hist,
-			Identity: ref.GetIdentity(refs),
-			Spec: ocm.RefSpec{
-				UniformRepositorySpec: o.Spec.UniformRepositorySpec,
-				CompSpec: ocm.CompSpec{
-					Component: ref.ComponentName,
-					Version:   &vers,
-				},
-			},
-			Repository:       o.Repository,
-			Component:        comp,
-			ComponentVersion: nested,
-		}
-		result = append(result, traverse(hist, obj, octx, lookup)...)
-	}
-	return result
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -244,17 +179,3 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 	}
 	return result, nil
 }
-
-func Compare(a, b interface{}) int {
-	aa := a.(*Object)
-	ab := b.(*Object)
-
-	c := strings.Compare(aa.ComponentVersion.GetName(), ab.ComponentVersion.GetName())
-	if c != 0 {
-		return c
-	}
-	return strings.Compare(aa.ComponentVersion.GetVersion(), ab.ComponentVersion.GetVersion())
-}
-
-// Sort is a processing chain sorting original objects provided by type handler
-var Sort = processing.Sort(Compare)

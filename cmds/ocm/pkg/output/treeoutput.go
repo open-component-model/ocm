@@ -32,6 +32,7 @@ func TreeOutput(t *TableOutput, header string) *TableOutput {
 }
 
 func treeTransform(s data.Iterable) data.Iterable {
+	Print(data.Slice(s), "tree transform")
 	result := tree.MapToTree(tree.ObjectSlice(s), nil)
 	return result
 }

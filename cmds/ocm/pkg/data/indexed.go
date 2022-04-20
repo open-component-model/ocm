@@ -59,6 +59,36 @@ type IndexedSliceAccess []interface{}
 var _ IndexedAccess = IndexedSliceAccess{}
 var _ Iterable = IndexedSliceAccess{}
 
+func (this *IndexedSliceAccess) Add(elems ...interface{}) *IndexedSliceAccess {
+	*this = append(*this, elems...)
+	return this
+}
+
+func (this *IndexedSliceAccess) Remove(i int) *IndexedSliceAccess {
+	*this = append((*this)[:i], (*this)[i+1:]...)
+	return this
+}
+
+// Move [i:j] to [k:]
+func (this *IndexedSliceAccess) Move(i, j, k int) *IndexedSliceAccess {
+
+	if k < i || k > j {
+		l := j - i
+
+		n := make(IndexedSliceAccess, len(*this))
+		if i > k {
+			copy(n[k:], (*this)[i:j])
+			copy(n[k+l:], (*this)[k:i])
+			copy((*this)[k:], n[k:j])
+		} else {
+			copy(n[i:], (*this)[j:k])
+			copy(n[i+k-j:], (*this)[i:j])
+			copy((*this)[i:], n[i:k])
+		}
+	}
+	return this
+}
+
 func (this IndexedSliceAccess) Len() int {
 	return len(this)
 }

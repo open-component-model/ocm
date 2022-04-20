@@ -25,6 +25,10 @@ type Object interface {
 	IsNode() *common.NameVersion
 }
 
+type Typed interface {
+	GetKind() string
+}
+
 type NodeCreator func(common.History, common.NameVersion) Object
 
 // TreeObject is an element enriched by a textual
@@ -97,6 +101,12 @@ func handleLevel(objs Objects, header string, prefix common.History, start int, 
 					if len(sub) > len(h) && sub.HasPrefix(append(h, *node)) {
 						sym = " \u2297"
 					}
+				}
+			}
+			if t, ok := objs[i].(Typed); ok {
+				k := t.GetKind()
+				if k != "" {
+					sym += " " + k
 				}
 			}
 			*result = append(*result, &TreeObject{

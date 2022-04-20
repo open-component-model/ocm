@@ -12,11 +12,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package options
+package options_test
 
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/spf13/pflag"
 )
 
@@ -28,12 +29,12 @@ func (t *TestOption) AddFlags(fs *pflag.FlagSet) {
 	fs.BoolVarP(&t.Flag, "flag", "f", false, "test flag")
 }
 
-var _ Options = (*TestOption)(nil)
+var _ options.Options = (*TestOption)(nil)
 
 var _ = Describe("options", func() {
 
 	It("skips unknown option", func() {
-		set := OptionSet{}
+		set := options.OptionSet{}
 
 		var opt *TestOption
 		Expect(set.Get(&opt)).To(BeFalse())
@@ -41,7 +42,7 @@ var _ = Describe("options", func() {
 
 	It("assigns options pointer from set", func() {
 		inst := &TestOption{}
-		set := OptionSet{inst}
+		set := options.OptionSet{inst}
 		set.Options(inst).(*TestOption).Flag = true
 
 		var opt *TestOption
@@ -54,7 +55,7 @@ var _ = Describe("options", func() {
 
 	It("assigns options value from set", func() {
 		inst := &TestOption{}
-		set := OptionSet{inst}
+		set := options.OptionSet{inst}
 
 		set.Options(inst).(*TestOption).Flag = true
 

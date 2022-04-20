@@ -16,6 +16,7 @@ package processing
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 )
 
 // ProcessChain is a data structure holding a chain definition, which is
@@ -178,9 +179,14 @@ func Sort(c CompareFunction) ProcessChain        { return initial.Sort(c) }
 func WithPool(pool ProcessorPool) ProcessChain   { return initial.WithPool(pool) }
 func Parallel(n int) ProcessChain                { return initial.Parallel(n) }
 func Unordered() ProcessChain                    { return initial.Unordered() }
-func Append(p ProcessChain, a ProcessChain) ProcessChain {
-	if p == nil {
-		return a
+func Append(chain, add ProcessChain, conditions ...options.Condition) ProcessChain {
+	if add != nil {
+		if options.And(conditions...).IsTrue() {
+			if chain == nil {
+				return add
+			}
+			return chain.Append(add)
+		}
 	}
-	return p.Append(a)
+	return chain
 }

@@ -12,16 +12,30 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package options_test
+package get
 
 import (
-	"testing"
-
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/spf13/pflag"
 )
 
-func TestConfig(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Option handling")
+func AttachedFrom(o options.OptionSetProvider) *Attached {
+	var opt *Attached
+	o.AsOptionSet().Get(&opt)
+	return opt
+}
+
+type Attached struct {
+	Flag bool
+}
+
+var _ options.Condition = (*Attached)(nil)
+var _ options.Options = (*Attached)(nil)
+
+func (a *Attached) IsTrue() bool {
+	return a.Flag
+}
+
+func (a *Attached) AddFlags(fs *pflag.FlagSet) {
+	fs.BoolVarP(&a.Flag, "attached", "a", false, "show attached artefacts")
 }

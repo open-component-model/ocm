@@ -12,16 +12,24 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package options_test
+package elemhdlr
 
 import (
-	"testing"
+	"strings"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 )
 
-func TestConfig(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "Option handling")
+func Compare(a, b interface{}) int {
+	aa := a.(*Object)
+	ab := b.(*Object)
+
+	c := strings.Compare(aa.Element.GetMeta().GetName(), ab.Element.GetMeta().GetName())
+	if c != 0 {
+		return c
+	}
+	return strings.Compare(aa.Element.GetMeta().GetVersion(), ab.Element.GetMeta().GetVersion())
 }
+
+// Sort is a processing chain sorting original objects provided by type handler
+var Sort = processing.Sort(Compare)

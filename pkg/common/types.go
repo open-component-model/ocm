@@ -126,3 +126,16 @@ func (h *History) Add(kind string, nv NameVersion) error {
 	*h = append(*h, nv)
 	return nil
 }
+
+func (h History) Copy() History {
+	return append(h[:0:0], h...)
+}
+
+func (h History) RemovePrefix(prefix History) History {
+	for i, e := range prefix {
+		if len(h) <= i || e != h[i] {
+			return h[i:]
+		}
+	}
+	return h[len(prefix):]
+}

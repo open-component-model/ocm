@@ -29,16 +29,23 @@ type element interface {
 	Type() string
 	Close() error
 	Set()
+
+	Result() interface{}
 }
 
 type State struct {
 }
 type base struct {
 	*Builder
+	result interface{}
 }
 
 func (e *base) SetBuilder(b *Builder) {
 	e.Builder = b
+}
+
+func (e *base) Result() interface{} {
+	return e.result
 }
 
 type Builder struct {
@@ -132,7 +139,7 @@ func (b *Builder) push(e element) {
 	b.set()
 }
 
-func (b *Builder) configure(e element, funcs []func(), skip ...int) {
+func (b *Builder) configure(e element, funcs []func(), skip ...int) interface{} {
 	e.SetBuilder(b)
 	b.push(e)
 	for _, f := range funcs {
@@ -148,6 +155,7 @@ func (b *Builder) configure(e element, funcs []func(), skip ...int) {
 		}
 		Fail(err.Error(), cs)
 	}
+	return e.Result()
 }
 
 ////////////////////////////////////////////////////////////////////////////////

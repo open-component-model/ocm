@@ -15,14 +15,10 @@
 package elemhdlr
 
 import (
-	"encoding/json"
-	"strings"
-
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common"
@@ -30,7 +26,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/ocm"
 	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 type Object struct {
@@ -158,48 +153,3 @@ func (h *TypeHandler) get(c *comphdlr.Object, elemspec utils.ElemSpec) ([]output
 	}
 	return result, nil
 }
-
-var MetaOutput = []string{"NAME", "VERSION", "IDENTITY"}
-
-func MapMetaOutput(e interface{}) []string {
-	p := e.(*Object)
-	m := p.Element.GetMeta()
-	id := p.Id.Copy()
-	id.Remove(metav1.SystemIdentityName)
-	return []string{m.Name, m.Version, id.String()}
-}
-
-var AccessOutput = []string{"ACCESSTYPE", "ACCESSSPEC"}
-
-func MapAccessOutput(e compdesc.AccessSpec) []string {
-	a := ""
-	data, err := json.Marshal(e)
-	if err != nil {
-		a = "invalid: " + err.Error()
-	} else {
-		var un map[string]interface{}
-		err := json.Unmarshal(data, &un)
-		if err != nil {
-			a = "invalid: " + err.Error()
-		} else {
-			delete(un, runtime.ATTR_TYPE)
-			data, _ = json.Marshal(un)
-			a = string(data)
-		}
-	}
-	return []string{e.GetKind(), a}
-}
-
-func Compare(a, b interface{}) int {
-	aa := a.(*Object)
-	ab := b.(*Object)
-
-	c := strings.Compare(aa.Element.GetMeta().GetName(), ab.Element.GetMeta().GetName())
-	if c != 0 {
-		return c
-	}
-	return strings.Compare(aa.Element.GetMeta().GetVersion(), ab.Element.GetMeta().GetVersion())
-}
-
-// Sort is a processing chain sorting original objects provided by type handler
-var Sort = processing.Sort(Compare)

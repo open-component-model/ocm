@@ -155,3 +155,43 @@ func CompleteOptionsWithCLIContext(ctx clictx.Context) OptionsProcessor {
 		return CompleteOptions(opt)
 	}
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+type Condition interface {
+	IsTrue() bool
+}
+
+type ConditionFunction func() bool
+
+func (f ConditionFunction) IsTrue() bool {
+	return f()
+}
+
+type Flag bool
+
+func (f Flag) IsTrue() bool {
+	return bool(f)
+}
+
+func Or(conditions ...Condition) Condition {
+	return ConditionFunction(func() bool {
+		for _, c := range conditions {
+			if c.IsTrue() {
+				return true
+			}
+		}
+		return false
+	})
+}
+
+func And(conditions ...Condition) Condition {
+	return ConditionFunction(func() bool {
+		for _, c := range conditions {
+			if !c.IsTrue() {
+				return false
+			}
+		}
+		return true
+	})
+}

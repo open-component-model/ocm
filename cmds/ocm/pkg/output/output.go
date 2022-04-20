@@ -17,6 +17,7 @@ package output
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 
 	. "github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
@@ -25,7 +26,7 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-type Object interface{}
+type Object = interface{}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -271,4 +272,11 @@ func (this Outputs) AddChainedManifestOutputs(chain func(opts *Options) processi
 		return NewProcessingJSONOutput(opts.Context, chain(opts), false)
 	}
 	return this
+}
+
+func Print(list []Object, msg string, args ...interface{}) {
+	fmt.Printf(msg+":\n", args...)
+	for i, e := range list {
+		fmt.Printf("  %3d %s\n", i, e)
+	}
 }

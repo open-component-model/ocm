@@ -17,16 +17,16 @@ package get
 import (
 	"fmt"
 
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/handlers/artefacthdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
-
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/oci"
 	"github.com/spf13/cobra"
@@ -45,7 +45,7 @@ type Command struct {
 
 // NewCommand creates a new artefact command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, &repooption.Option{}, output.OutputOptions(outputs, closureoption.New("index")))}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, &repooption.Option{}, output.OutputOptions(outputs, &Attached{}, closureoption.New("index")))}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -85,9 +85,12 @@ func (o *Command) Run() error {
 /////////////////////////////////////////////////////////////////////////////
 
 func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide ...string) *output.TableOutput {
+	chain := closureoption.Closure(opts, artefacthdlr.ClosureExplode, artefacthdlr.Sort)
+	chain = processing.Append(chain, artefacthdlr.ExplodeAttached, AttachedFrom(opts))
+	chain = processing.Append(chain, artefacthdlr.Clean, options.Or(closureoption.From(opts), output.OutputModeCondition(opts, "tree")))
 	return &output.TableOutput{
 		Headers: output.Fields("REGISTRY", "REPOSITORY", "KIND", "TAG", "DIGEST", wide),
-		Chain:   closureoption.Closure(opts, artefacthdlr.ClosureExplode, artefacthdlr.Sort),
+		Chain:   chain,
 		Options: opts,
 		Mapping: mapping,
 	}
