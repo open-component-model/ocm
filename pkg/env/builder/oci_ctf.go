@@ -17,7 +17,7 @@ package builder
 import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/oci/repositories/ctf"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 )
 
 const T_OCI_CTF = "oci common transport format"

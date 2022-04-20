@@ -31,9 +31,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	ocm2 "github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch/comparch"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/ocm"
-	"github.com/open-component-model/ocm/pkg/ocm/repositories/comparch/comparch"
 	"github.com/spf13/cobra"
 )
 
@@ -74,7 +74,7 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
-	session := ocm.NewSession(nil)
+	session := ocm2.NewSession(nil)
 	defer session.Close()
 
 	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithContext(o.Context, session))
@@ -142,7 +142,7 @@ func (d *download) Save(o *comphdlr.Object, f string) error {
 	nv := common.NewNameVersion(src.GetName(), src.GetVersion())
 	hist := common.History{nv}
 
-	err = ocm.CopyVersion(hist, src, set, nil)
+	err = ocm2.CopyVersion(hist, src, set, nil)
 	if err == nil {
 		out.Outf(d.cmd.Context, "%s: downloaded\n", f)
 	}

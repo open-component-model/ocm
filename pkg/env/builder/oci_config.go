@@ -16,8 +16,8 @@ package builder
 
 import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/oci/artdesc"
 )
 
 const T_OCICONFIG = "oci config"

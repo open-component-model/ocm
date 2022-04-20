@@ -15,7 +15,7 @@
 package builder
 
 import (
-	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 )
 
 func (b *Builder) Provider(name string) {

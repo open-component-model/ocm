@@ -15,9 +15,7 @@
 package common
 
 import (
-	"fmt"
-
-	"github.com/open-component-model/ocm/pkg/errors"
+	"strings"
 )
 
 // VersionedElement describes an element that has a name and a version
@@ -54,6 +52,14 @@ func (n NameVersion) GetVersion() string {
 	return n.version
 }
 
+func (n NameVersion) Compare(o NameVersion) int {
+	c := strings.Compare(n.name, o.name)
+	if c == 0 {
+		return strings.Compare(n.version, o.version)
+	}
+	return c
+}
+
 func (n NameVersion) String() string {
 	if n.version == "" {
 		return n.name
@@ -62,80 +68,4 @@ func (n NameVersion) String() string {
 		return n.version
 	}
 	return n.name + ":" + n.version
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-type HistorySource interface {
-	GetHistory() History
-}
-
-type History []NameVersion
-
-func (h History) String() string {
-	s := ""
-	sep := ""
-	for _, e := range h {
-		s = fmt.Sprintf("%s%s%s", s, sep, e)
-		sep = "->"
-	}
-	return s
-}
-
-func (h History) Contains(nv NameVersion) bool {
-	for _, e := range h {
-		if e == nv {
-			return true
-		}
-	}
-	return false
-}
-
-func (h History) HasPrefix(o History) bool {
-	if len(o) > len(h) {
-		return false
-	}
-	for i, e := range o {
-		if e != h[i] {
-			return false
-		}
-	}
-	return true
-}
-
-func (h History) Equals(o History) bool {
-	if len(h) != len(o) {
-		return false
-	}
-	if h == nil || o == nil {
-		return false
-	}
-
-	for i, e := range h {
-		if e != o[i] {
-			return false
-		}
-	}
-	return true
-}
-
-func (h *History) Add(kind string, nv NameVersion) error {
-	if h.Contains(nv) {
-		return errors.ErrRecusion(kind, nv, *h)
-	}
-	*h = append(*h, nv)
-	return nil
-}
-
-func (h History) Copy() History {
-	return append(h[:0:0], h...)
-}
-
-func (h History) RemovePrefix(prefix History) History {
-	for i, e := range prefix {
-		if len(h) <= i || e != h[i] {
-			return h[i:]
-		}
-	}
-	return h[len(prefix):]
 }

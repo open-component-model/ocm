@@ -17,11 +17,11 @@ package add
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	compdesc2 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/ocm"
-	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
-	compdescv2 "github.com/open-component-model/ocm/pkg/ocm/compdesc/versions/v2"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
@@ -65,7 +65,7 @@ func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r common.Resource, 
 		},
 		Type:      spec.Type,
 		Relation:  spec.Relation,
-		SourceRef: compdescv2.Convert_SourceRefs_to(spec.SourceRef),
+		SourceRef: compdesc2.Convert_SourceRefs_to(spec.SourceRef),
 	}
 	return v.SetResource(meta, acc)
 }
@@ -73,7 +73,7 @@ func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r common.Resource, 
 ////////////////////////////////////////////////////////////////////////////////
 
 type ResourceDescription struct {
-	compdescv2.Resource `json:",inline"`
+	compdesc2.Resource `json:",inline"`
 }
 
 var _ common.ResourceSpec = (*ResourceDescription)(nil)
@@ -93,7 +93,7 @@ func (r *ResourceDescription) Validate(ctx clictx.Context, input *common.Resourc
 	if r.Version == "" && r.Relation == metav1.LocalRelation {
 		r.Version = "<componentversion>"
 	}
-	if err := compdescv2.ValidateResource(fldPath, r.Resource, false); err != nil {
+	if err := compdesc2.ValidateResource(fldPath, r.Resource, false); err != nil {
 		allErrs = append(allErrs, err...)
 	}
 

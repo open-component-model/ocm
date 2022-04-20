@@ -17,8 +17,7 @@ package comppathopt
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
-
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/spf13/pflag"
 )
 

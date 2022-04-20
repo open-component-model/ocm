@@ -20,8 +20,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/comppathopt"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
-	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
 )
 
 func TestConfig(t *testing.T) {
@@ -40,15 +40,15 @@ var _ = Describe("--path option", func() {
 		Expect(err).To(Succeed())
 		Expect(rest).To(BeNil())
 
-		Expect(opts.Ids).To(Equal([]metav1.Identity{
+		Expect(opts.Ids).To(Equal([]v1.Identity{
 			{
-				metav1.SystemIdentityName: "name1",
+				v1.SystemIdentityName: "name1",
 			},
 			{
-				metav1.SystemIdentityName: "name2",
+				v1.SystemIdentityName: "name2",
 			},
 			{
-				metav1.SystemIdentityName: "name3",
+				v1.SystemIdentityName: "name3",
 			},
 		}))
 	})
@@ -59,12 +59,12 @@ var _ = Describe("--path option", func() {
 		Expect(err).To(Succeed())
 		Expect(rest).To(Equal([]string{"name3"}))
 
-		Expect(opts.Ids).To(Equal([]metav1.Identity{
+		Expect(opts.Ids).To(Equal([]v1.Identity{
 			{
-				metav1.SystemIdentityName: "name1",
+				v1.SystemIdentityName: "name1",
 			},
 			{
-				metav1.SystemIdentityName: "name2",
+				v1.SystemIdentityName: "name2",
 			},
 		}))
 	})
@@ -75,11 +75,11 @@ var _ = Describe("--path option", func() {
 		Expect(err).To(Succeed())
 		Expect(rest).To(BeNil())
 
-		Expect(opts.Ids).To(Equal([]metav1.Identity{
+		Expect(opts.Ids).To(Equal([]v1.Identity{
 			{
-				metav1.SystemIdentityName: "name1",
-				"a":                       "v1",
-				"attr":                    "v2",
+				v1.SystemIdentityName: "name1",
+				"a":                   "v1",
+				"attr":                "v2",
 			},
 		}))
 	})
@@ -90,15 +90,15 @@ var _ = Describe("--path option", func() {
 		Expect(err).To(Succeed())
 		Expect(rest).To(BeNil())
 
-		Expect(opts.Ids).To(Equal([]metav1.Identity{
+		Expect(opts.Ids).To(Equal([]v1.Identity{
 			{
-				metav1.SystemIdentityName: "name1",
-				"a":                       "v1",
-				"attr":                    "v2",
+				v1.SystemIdentityName: "name1",
+				"a":                   "v1",
+				"attr":                "v2",
 			},
 			{
-				metav1.SystemIdentityName: "name2",
-				"attr":                    "v3",
+				v1.SystemIdentityName: "name2",
+				"attr":                "v3",
 			},
 		}))
 	})
@@ -109,15 +109,15 @@ var _ = Describe("--path option", func() {
 		Expect(err).To(Succeed())
 		Expect(rest).To(Equal([]string{"name3"}))
 
-		Expect(opts.Ids).To(Equal([]metav1.Identity{
+		Expect(opts.Ids).To(Equal([]v1.Identity{
 			{
-				metav1.SystemIdentityName: "name1",
-				"a":                       "v1",
-				"attr":                    "v2",
+				v1.SystemIdentityName: "name1",
+				"a":                   "v1",
+				"attr":                "v2",
 			},
 			{
-				metav1.SystemIdentityName: "name2",
-				"attr":                    "v3",
+				v1.SystemIdentityName: "name2",
+				"attr":                "v3",
 			},
 		}))
 	})
@@ -128,18 +128,18 @@ var _ = Describe("--path option", func() {
 		Expect(err).To(Succeed())
 		Expect(rest).To(BeNil())
 
-		Expect(opts.Ids).To(Equal([]metav1.Identity{
+		Expect(opts.Ids).To(Equal([]v1.Identity{
 			{
-				metav1.SystemIdentityName: "name1",
-				"a":                       "v1",
-				"attr":                    "v2",
+				v1.SystemIdentityName: "name1",
+				"a":                   "v1",
+				"attr":                "v2",
 			},
 			{
-				metav1.SystemIdentityName: "name2",
+				v1.SystemIdentityName: "name2",
 			},
 			{
-				metav1.SystemIdentityName: "name3",
-				"attr":                    "v3",
+				v1.SystemIdentityName: "name3",
+				"attr":                "v3",
 			},
 		}))
 	})

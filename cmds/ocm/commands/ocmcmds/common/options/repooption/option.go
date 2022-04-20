@@ -18,10 +18,10 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	ocm2 "github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/runtime"
 
-	"github.com/open-component-model/ocm/pkg/ocm"
 	"github.com/spf13/pflag"
 )
 
@@ -33,7 +33,7 @@ func From(o options.OptionSetProvider) *Option {
 
 type Option struct {
 	Spec       string
-	Repository ocm.Repository
+	Repository ocm2.Repository
 }
 
 var _ common.OptionCompleter = (*Option)(nil)
@@ -42,7 +42,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Spec, "repo", "r", "", "repository name or spec")
 }
 
-func (o *Option) CompleteWithSession(octx clictx.OCM, session ocm.Session) error {
+func (o *Option) CompleteWithSession(octx clictx.OCM, session ocm2.Session) error {
 	if o.Repository == nil {
 		r, err := o.GetRepository(octx, session)
 		if err != nil {
@@ -53,7 +53,7 @@ func (o *Option) CompleteWithSession(octx clictx.OCM, session ocm.Session) error
 	return nil
 }
 
-func (o *Option) GetRepository(ctx clictx.OCM, session ocm.Session) (ocm.Repository, error) {
+func (o *Option) GetRepository(ctx clictx.OCM, session ocm2.Session) (ocm2.Repository, error) {
 	if o.Spec != "" {
 		r, _, err := session.DetermineRepository(ctx.Context(), o.Spec, ctx.GetAlias)
 		return r, err
@@ -91,7 +91,7 @@ linked library can be used:
 Dedicated OCM repository types:
 `
 
-	types := runtime.KindNames(ocm.DefaultContext().RepositoryTypes())
+	types := runtime.KindNames(ocm2.DefaultContext().RepositoryTypes())
 	for _, t := range types {
 		s += "- `" + t + "`\n"
 	}

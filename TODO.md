@@ -17,3 +17,5 @@
 - [ ] Add type factories for generic spec
 - [ ] Provide size a and digest info for OCM blob access
 - [ ] CD validation for sources enforces git
+- [ ] decide on and introduce logging framework
+- [ ] add optional reference name to resource input

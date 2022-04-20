@@ -15,7 +15,7 @@
 package builder
 
 import (
-	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 )
 
 type ocm_reference struct {

@@ -17,17 +17,16 @@ package transfer
 import (
 	"fmt"
 
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/handlers/artefacthdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
-	"github.com/open-component-model/ocm/pkg/oci"
-	"github.com/open-component-model/ocm/pkg/oci/transfer"
-
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	oci2 "github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer"
 	"github.com/spf13/cobra"
 )
 
@@ -71,7 +70,7 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
-	session := oci.NewSession(nil)
+	session := oci2.NewSession(nil)
 	defer session.Close()
 	err := o.ProcessOnOptions(common.CompleteOptionsWithContext(o.Context, session))
 	if err != nil {
@@ -90,17 +89,17 @@ func (o *Command) Run() error {
 /////////////////////////////////////////////////////////////////////////////
 
 type action struct {
-	oci.Session
+	oci2.Session
 
 	count    int
 	copied   int
 	Context  clictx.Context
-	Registry oci.Repository
-	Ref      oci.RefSpec
+	Registry oci2.Repository
+	Ref      oci2.RefSpec
 }
 
-func NewAction(ctx clictx.Context, session oci.Session, target string) (*action, error) {
-	ref, err := oci.ParseRef(target)
+func NewAction(ctx clictx.Context, session oci2.Session, target string) (*action, error) {
+	ref, err := oci2.ParseRef(target)
 	if err != nil {
 		return nil, err
 	}

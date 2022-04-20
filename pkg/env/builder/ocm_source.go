@@ -16,8 +16,8 @@ package builder
 
 import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
 )
 
 type ocm_source struct {

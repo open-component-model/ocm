@@ -17,8 +17,8 @@ package builder
 import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/ocm/repositories/comparch/comparch"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch/comparch"
 )
 
 const T_COMPARCH = "component archive"

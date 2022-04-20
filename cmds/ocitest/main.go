@@ -30,13 +30,13 @@ import (
 	config2 "github.com/docker/cli/cli/config"
 	"github.com/docker/cli/cli/config/credentials"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/oci/artdesc"
+	artdesc2 "github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/sirupsen/logrus"
 )
 
 const MIME_OCTET = "application/octet-stream"
 
-func fetch(ctx context.Context, msg string, f remotes.Fetcher, desc artdesc.Descriptor) {
+func fetch(ctx context.Context, msg string, f remotes.Fetcher, desc artdesc2.Descriptor) {
 	fmt.Printf("*** fetch %s %s\n", desc.MediaType, desc.Digest)
 	read, err := f.Fetch(ctx, desc)
 	if err != nil {
@@ -54,7 +54,7 @@ func fetch(ctx context.Context, msg string, f remotes.Fetcher, desc artdesc.Desc
 }
 
 func push(ctx context.Context, msg string, p remotes.Pusher, blob accessio.BlobAccess) {
-	desc := *artdesc.DefaultBlobDescriptor(blob)
+	desc := *artdesc2.DefaultBlobDescriptor(blob)
 	key := remotes.MakeRefKey(ctx, desc)
 	fmt.Printf("*** push %s %s: %s\n", desc.MediaType, desc.Digest, key)
 	write, err := p.Push(ctx, desc)
@@ -154,7 +154,7 @@ func main() {
 
 	push(ctx, "blob", p, blob)
 
-	desc = *artdesc.DefaultBlobDescriptor(blob)
+	desc = *artdesc2.DefaultBlobDescriptor(blob)
 	desc.MediaType = ""
 	fetch(ctx, "blob", f, desc)
 

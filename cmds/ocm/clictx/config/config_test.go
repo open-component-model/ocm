@@ -21,8 +21,8 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/clictx/config"
-	"github.com/open-component-model/ocm/pkg/oci/repositories/ocireg"
-	ocmocireg "github.com/open-component-model/ocm/pkg/ocm/repositories/ocireg"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
+	ocmocireg "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
 )
 
 var DefaultContext = clictx.New()

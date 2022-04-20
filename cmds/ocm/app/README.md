@@ -6,7 +6,7 @@ The command line tool can be configured by a configuration file. If not
 specified on the command line, the file `~/.ocmconfig` is read.
 
 The configuration file is a yaml file following format by the
-[configuration context](../../../pkg/config/README.md).
+[configuration context](../../../pkg/contexts/config/README.md).
 
 It consists of list of configuration specifications according to
 the registered configurations types provided by the used library.

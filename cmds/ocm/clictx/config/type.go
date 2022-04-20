@@ -17,11 +17,11 @@ package config
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx/core"
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/config"
-	cfgcpi "github.com/open-component-model/ocm/pkg/config/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/config"
+	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
+	ocicpi "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	ocmcpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
-	ocicpi "github.com/open-component-model/ocm/pkg/oci/cpi"
-	ocmcpi "github.com/open-component-model/ocm/pkg/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -31,8 +31,8 @@ const (
 )
 
 func init() {
-	cfgcpi.RegisterConfigType(OCMCmdConfigType, cfgcpi.NewConfigType(OCMCmdConfigType, &ConfigSpec{}))
-	cfgcpi.RegisterConfigType(OCMCmdConfigTypeV1, cfgcpi.NewConfigType(OCMCmdConfigTypeV1, &ConfigSpec{}))
+	cpi.RegisterConfigType(OCMCmdConfigType, cpi.NewConfigType(OCMCmdConfigType, &ConfigSpec{}))
+	cpi.RegisterConfigType(OCMCmdConfigTypeV1, cpi.NewConfigType(OCMCmdConfigTypeV1, &ConfigSpec{}))
 }
 
 // ConfigSpec describes a memory based repository interface.

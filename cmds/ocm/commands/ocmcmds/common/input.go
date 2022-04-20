@@ -27,9 +27,9 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
+	docker2 "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/oci/repositories/artefactset"
-	"github.com/open-component-model/ocm/pkg/oci/repositories/docker"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
@@ -139,11 +139,11 @@ func (input *BlobInput) GetBlob(ctx clictx.Context, inputFilePath string) (acces
 
 	switch input.Type {
 	case DockerInputType:
-		locator, version, err := docker.ParseGenericRef(inputPath)
+		locator, version, err := docker2.ParseGenericRef(inputPath)
 		if err != nil {
 			return nil, "", err
 		}
-		spec := docker.NewRepositorySpec()
+		spec := docker2.NewRepositorySpec()
 		repo, err := ctx.OCIContext().RepositoryForSpec(spec)
 		if err != nil {
 			return nil, "", err
@@ -438,7 +438,7 @@ func (input *BlobInput) Validate(fldPath *field.Path, ctx clictx.Context, inputF
 					}
 				}
 			} else {
-				_, _, err := docker.ParseGenericRef(input.Path)
+				_, _, err := docker2.ParseGenericRef(input.Path)
 				if err != nil {
 					allErrs = append(allErrs, field.Invalid(pathField, input.Path, err.Error()))
 

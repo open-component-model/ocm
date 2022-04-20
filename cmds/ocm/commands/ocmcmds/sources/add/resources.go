@@ -17,9 +17,9 @@ package add
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
-	"github.com/open-component-model/ocm/pkg/ocm"
-	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
-	compdescv2 "github.com/open-component-model/ocm/pkg/ocm/compdesc/versions/v2"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	compdesc2 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
@@ -58,7 +58,7 @@ func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r common.Resource, 
 ////////////////////////////////////////////////////////////////////////////////
 
 type ResourceSpec struct {
-	compdescv2.Source `json:",inline"`
+	compdesc2.Source `json:",inline"`
 }
 
 var _ common.ResourceSpec = (*ResourceSpec)(nil)
@@ -67,7 +67,7 @@ func (r *ResourceSpec) Validate(ctx clictx.Context, input *common.ResourceInput)
 	allErrs := field.ErrorList{}
 	var fldPath *field.Path
 
-	if err := compdescv2.ValidateSource(fldPath, r.Source, false); err != nil {
+	if err := compdesc2.ValidateSource(fldPath, r.Source, false); err != nil {
 		allErrs = append(allErrs, err...)
 	}
 	if r.Access != nil {

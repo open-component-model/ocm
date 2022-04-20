@@ -18,10 +18,10 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/env"
-	"github.com/open-component-model/ocm/pkg/oci"
-	"github.com/open-component-model/ocm/pkg/ocm"
-	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
 )
 
 type element interface {

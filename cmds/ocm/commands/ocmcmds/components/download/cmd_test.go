@@ -22,10 +22,10 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/grammar"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch/comparch"
 	"github.com/open-component-model/ocm/pkg/mime"
-	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/ocm/grammar"
-	"github.com/open-component-model/ocm/pkg/ocm/repositories/comparch/comparch"
 )
 
 const ARCH = "/tmp/ctf"

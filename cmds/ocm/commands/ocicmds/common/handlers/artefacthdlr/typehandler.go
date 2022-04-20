@@ -23,12 +23,12 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common"
+	oci2 "github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/oci"
-	"github.com/open-component-model/ocm/pkg/oci/artdesc"
 )
 
-func Elem(e interface{}) oci.ArtefactAccess {
+func Elem(e interface{}) oci2.ArtefactAccess {
 	return e.(*Object).Artefact
 }
 
@@ -36,18 +36,23 @@ func Elem(e interface{}) oci.ArtefactAccess {
 
 type Object struct {
 	History    common.History
-	Spec       oci.RefSpec
+	Key        common.NameVersion
+	Spec       oci2.RefSpec
 	AttachKind string
-	Namespace  oci.NamespaceAccess
-	Artefact   oci.ArtefactAccess
+	Namespace  oci2.NamespaceAccess
+	Artefact   oci2.ArtefactAccess
 }
 
-var _ common.HistorySource = (*Object)(nil)
+var _ common.HistoryElement = (*Object)(nil)
 var _ tree.Object = (*Object)(nil)
 var _ tree.Typed = (*Object)(nil)
 
 func (o *Object) GetHistory() common.History {
 	return o.History
+}
+
+func (o *Object) GetKey() common.NameVersion {
+	return o.Key
 }
 
 func (o *Object) GetKind() string {
@@ -86,20 +91,25 @@ func (o *Object) String() string {
 }
 
 type Manifest struct {
-	Spec     oci.RefSpec
+	Spec     oci2.RefSpec
 	Digest   string
 	Manifest *artdesc.Artefact
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type TypeHandler struct {
-	octx     clictx.OCI
-	session  oci.Session
-	repobase oci.Repository
+func Key(a oci2.ArtefactAccess) common.NameVersion {
+	blob, _ := a.Blob()
+	return common.NewNameVersion("", blob.Digest().String())
 }
 
-func NewTypeHandler(octx clictx.OCI, session oci.Session, repobase oci.Repository) utils.TypeHandler {
+type TypeHandler struct {
+	octx     clictx.OCI
+	session  oci2.Session
+	repobase oci2.Repository
+}
+
+func NewTypeHandler(octx clictx.OCI, session oci2.Session, repobase oci2.Repository) utils.TypeHandler {
 	return &TypeHandler{
 		octx:     octx,
 		session:  session,
@@ -142,12 +152,12 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 }
 
 func (h *TypeHandler) get(elemspec utils.ElemSpec) ([]output.Object, error) {
-	var namespace oci.NamespaceAccess
+	var namespace oci2.NamespaceAccess
 	var result []output.Object
 	var err error
 
 	name := elemspec.String()
-	spec := oci.RefSpec{}
+	spec := oci2.RefSpec{}
 	repo := h.repobase
 	if repo == nil {
 		evaluated, err := h.session.EvaluateRef(h.octx.Context(), name, h.octx.GetAlias)
@@ -158,6 +168,7 @@ func (h *TypeHandler) get(elemspec utils.ElemSpec) ([]output.Object, error) {
 		namespace = evaluated.Namespace
 		if evaluated.Artefact != nil {
 			obj := &Object{
+				Key:       Key(evaluated.Artefact),
 				Spec:      spec,
 				Namespace: namespace,
 				Artefact:  evaluated.Artefact,
@@ -166,9 +177,9 @@ func (h *TypeHandler) get(elemspec utils.ElemSpec) ([]output.Object, error) {
 			return result, nil
 		}
 	} else {
-		art := oci.ArtSpec{Repository: ""}
+		art := oci2.ArtSpec{Repository: ""}
 		if name != "" {
-			art, err = oci.ParseArt(name)
+			art, err = oci2.ParseArt(name)
 			if err != nil {
 				return nil, errors.Wrapf(err, "artefact reference %q", name)
 			}
@@ -189,6 +200,7 @@ func (h *TypeHandler) get(elemspec utils.ElemSpec) ([]output.Object, error) {
 			return nil, err
 		}
 		obj := &Object{
+			Key:       Key(a),
 			Spec:      spec,
 			Namespace: namespace,
 			Artefact:  a,
@@ -208,6 +220,7 @@ func (h *TypeHandler) get(elemspec utils.ElemSpec) ([]output.Object, error) {
 			s := spec
 			s.Tag = &t
 			result = append(result, &Object{
+				Key:       Key(a),
 				Spec:      s,
 				Namespace: namespace,
 				Artefact:  a,

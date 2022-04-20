@@ -15,7 +15,7 @@
 package builder
 
 import (
-	"github.com/open-component-model/ocm/pkg/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
 )
 
 const T_OCINAMESPACE = "oci namespace"

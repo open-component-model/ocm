@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
+	compdesc2 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 )
 
 func CheckErr(err error, msg string, args ...interface{}) {
@@ -29,26 +29,26 @@ func CheckErr(err error, msg string, args ...interface{}) {
 }
 
 func C() (err error) {
-	defer compdesc.CatchConversionError(&err)
+	defer compdesc2.CatchConversionError(&err)
 	C1()
 	return
 }
 
 func C1() {
-	compdesc.ThrowConversionError(fmt.Errorf("occured"))
+	compdesc2.ThrowConversionError(fmt.Errorf("occured"))
 }
 
 func compTest() {
 	data, err := os.ReadFile("component-descriptor.yaml")
 	CheckErr(err, "read")
-	cd, err := compdesc.Decode(data)
+	cd, err := compdesc2.Decode(data)
 	CheckErr(err, "decode")
 
 	raw, err := cd.RepositoryContexts[0].GetRaw()
 	CheckErr(err, "raw ctx")
 	fmt.Printf("ctx: %s\n", string(raw))
 	_ = cd
-	data, err = compdesc.Encode(cd)
+	data, err = compdesc2.Encode(cd)
 	CheckErr(err, "marshal")
 	fmt.Printf("%s\n", string(data))
 

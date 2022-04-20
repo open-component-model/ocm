@@ -274,9 +274,13 @@ func (this Outputs) AddChainedManifestOutputs(chain func(opts *Options) processi
 	return this
 }
 
+var log bool
+
 func Print(list []Object, msg string, args ...interface{}) {
-	fmt.Printf(msg+":\n", args...)
-	for i, e := range list {
-		fmt.Printf("  %3d %s\n", i, e)
+	if log {
+		fmt.Printf(msg+":\n", args...)
+		for i, e := range list {
+			fmt.Printf("  %3d %s\n", i, e)
+		}
 	}
 }

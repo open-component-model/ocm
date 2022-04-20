@@ -33,9 +33,9 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/ocm"
-	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
 	"github.com/spf13/cobra"
 )
 
@@ -48,7 +48,7 @@ type Command struct {
 	utils.BaseCommand
 
 	Comp string
-	Ids  []metav1.Identity
+	Ids  []v1.Identity
 }
 
 // NewCommand creates a new resources command.
@@ -152,7 +152,7 @@ func (d *download) Out() error {
 			r := common.Elem(e)
 			f = path.Join(f, r.Name)
 			id := r.GetIdentity(e.Version.GetDescriptor().Resources)
-			delete(id, metav1.SystemIdentityName)
+			delete(id, v1.SystemIdentityName)
 			if len(id) > 0 {
 				f += "-" + strings.ReplaceAll(id.String(), "\"", "")
 			}

@@ -23,8 +23,8 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/handlers/artefacthdlr"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/oci/artdesc"
 )
 
 const ARCH = "/tmp/ctf"
@@ -249,7 +249,7 @@ NESTING     REGISTRY REPOSITORY       KIND     TAG DIGEST
 				`
 REGISTRY REPOSITORY       KIND     TAG                                                                          DIGEST
          mandelsoft/index index    v1                                                                           sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
-         mandelsoft/index manifest sha256.d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627.test sha256:439d433cd85eac706b86e39d3d9dbbd5f1ff19acd1bcb7aa3549f5d7b11777d9
+         mandelsoft/index manifest sha256-d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627.test sha256:439d433cd85eac706b86e39d3d9dbbd5f1ff19acd1bcb7aa3549f5d7b11777d9
 `))
 		})
 
@@ -261,7 +261,7 @@ REGISTRY REPOSITORY       KIND     TAG                                          
 				`
 NESTING        REGISTRY REPOSITORY       KIND     TAG                                                                          DIGEST
 └─ ⊗                    mandelsoft/index index    v1                                                                           sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
-   └─ test              mandelsoft/index manifest sha256.d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627.test sha256:439d433cd85eac706b86e39d3d9dbbd5f1ff19acd1bcb7aa3549f5d7b11777d9
+   └─ test              mandelsoft/index manifest sha256-d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627.test sha256:439d433cd85eac706b86e39d3d9dbbd5f1ff19acd1bcb7aa3549f5d7b11777d9
 `))
 		})
 
@@ -273,9 +273,9 @@ NESTING        REGISTRY REPOSITORY       KIND     TAG                           
 				`
 NESTING             REGISTRY REPOSITORY       KIND     TAG                                                                          DIGEST
 └─ ⊗                         mandelsoft/index index    v1                                                                           sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
-   ├─ test                   mandelsoft/index manifest sha256.d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627.test sha256:439d433cd85eac706b86e39d3d9dbbd5f1ff19acd1bcb7aa3549f5d7b11777d9
+   ├─ test                   mandelsoft/index manifest sha256-d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627.test sha256:439d433cd85eac706b86e39d3d9dbbd5f1ff19acd1bcb7aa3549f5d7b11777d9
    ├─ ⊗                      mandelsoft/index manifest -                                                                            sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9
-   │  └─ test                mandelsoft/index manifest sha256.2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9.test sha256:efbfe2c665fc93690911d74e8e7dcf7fb01524545c7b87cb14d5febf1613eaba
+   │  └─ test                mandelsoft/index manifest sha256-2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9.test sha256:efbfe2c665fc93690911d74e8e7dcf7fb01524545c7b87cb14d5febf1613eaba
    └─                        mandelsoft/index manifest -                                                                            sha256:60b245b3de64c43b18489e9c3cf177402f9bd18ab62f8cc6653e2fc2e3a5fc39
 `))
 		})

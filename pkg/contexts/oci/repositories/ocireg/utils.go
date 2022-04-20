@@ -1,0 +1,134 @@
+// Copyright 2022 SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+
+package ocireg
+
+import (
+	"context"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"sync"
+
+	"github.com/containerd/containerd/errdefs"
+	"github.com/containerd/containerd/log"
+	"github.com/containerd/containerd/remotes"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	artdesc2 "github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/opencontainers/go-digest"
+	"github.com/sirupsen/logrus"
+)
+
+type dataAccess struct {
+	lock    sync.Mutex
+	fetcher remotes.Fetcher
+	desc    artdesc2.Descriptor
+	reader  io.ReadCloser
+}
+
+var _ cpi.DataAccess = (*dataAccess)(nil)
+
+func NewDataAccess(fetcher remotes.Fetcher, digest digest.Digest, mimeType string, delayed bool) (*dataAccess, error) {
+	var reader io.ReadCloser
+	var err error
+	desc := artdesc2.Descriptor{
+		MediaType: mimeType,
+		Digest:    digest,
+		Size:      -1,
+	}
+	if !delayed {
+		reader, err = fetcher.Fetch(dummyContext, desc)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return &dataAccess{
+		fetcher: fetcher,
+		desc:    desc,
+		reader:  reader,
+	}, nil
+}
+
+func (d *dataAccess) Get() ([]byte, error) {
+	return readAll(d.Reader())
+}
+
+func (d *dataAccess) Reader() (io.ReadCloser, error) {
+	d.lock.Lock()
+	reader := d.reader
+	d.reader = nil
+	d.lock.Unlock()
+	if reader != nil {
+		return reader, nil
+	}
+	return d.fetcher.Fetch(dummyContext, d.desc)
+}
+
+func fetch(ctx context.Context, f remotes.Fetcher, desc *artdesc2.Descriptor) ([]byte, error) {
+	fmt.Printf("*** fetch %s %s\n", desc.MediaType, desc.Digest)
+	if desc.Size == 0 {
+		desc.Size = -1
+	}
+	return readAll(f.Fetch(ctx, *desc))
+}
+
+func readAll(reader io.ReadCloser, err error) ([]byte, error) {
+	if err != nil {
+		return nil, err
+	}
+	defer reader.Close()
+
+	data, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func push(ctx context.Context, p remotes.Pusher, blob accessio.BlobAccess) error {
+	desc := *artdesc2.DefaultBlobDescriptor(blob)
+	return pushData(ctx, p, desc, blob)
+}
+
+func pushData(ctx context.Context, p remotes.Pusher, desc artdesc2.Descriptor, data accessio.DataAccess) error {
+	key := remotes.MakeRefKey(ctx, desc)
+	if desc.Size == 0 {
+		desc.Size = -1
+	}
+	fmt.Printf("*** push %s %s: %s\n", desc.MediaType, desc.Digest, key)
+	write, err := p.Push(ctx, desc)
+	if err != nil {
+		if errdefs.IsAlreadyExists(err) {
+			return nil
+		}
+		return err
+	}
+	read, err := data.Reader()
+	defer read.Close()
+	_, err = io.Copy(write, read)
+	if err != nil {
+		return err
+	}
+	return write.Commit(ctx, desc.Size, desc.Digest)
+}
+
+var dummyContext = nologger()
+
+func nologger() context.Context {
+	ctx := context.Background()
+	logger := logrus.New()
+	logger.Level = logrus.ErrorLevel
+	return log.WithLogger(ctx, logrus.NewEntry(logger))
+}

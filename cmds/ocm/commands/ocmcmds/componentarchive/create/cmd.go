@@ -18,6 +18,9 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch/comparch"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
@@ -26,9 +29,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/ocm/repositories/comparch/comparch"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -49,7 +49,7 @@ type Command struct {
 	Component string
 	Version   string
 	Provider  string
-	Labels    metav1.Labels
+	Labels    v1.Labels
 }
 
 // NewCommand creates a new ctf command.
@@ -119,7 +119,7 @@ func (o *Command) Run() error {
 	desc := obj.GetDescriptor()
 	desc.Name = o.Component
 	desc.Version = o.Version
-	desc.Provider = metav1.ProviderType(o.Provider)
+	desc.Provider = v1.ProviderType(o.Provider)
 	desc.Labels = o.Labels
 
 	err = compdesc.Validate(desc)

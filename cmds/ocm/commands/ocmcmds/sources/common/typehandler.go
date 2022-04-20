@@ -19,8 +19,8 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/elemhdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/ocm"
-	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
+	ocm2 "github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 )
 
 func Elem(e interface{}) *compdesc.Source {
@@ -33,8 +33,8 @@ type TypeHandler struct {
 	*elemhdlr.TypeHandler
 }
 
-func NewTypeHandler(octx clictx.OCM, opts *output.Options, repo ocm.Repository, session ocm.Session, compspecs []string) (utils.TypeHandler, error) {
-	return elemhdlr.NewTypeHandler(octx, opts, repo, session, compspecs, func(access ocm.ComponentVersionAccess) compdesc.ElementAccessor {
+func NewTypeHandler(octx clictx.OCM, opts *output.Options, repo ocm2.Repository, session ocm2.Session, compspecs []string) (utils.TypeHandler, error) {
+	return elemhdlr.NewTypeHandler(octx, opts, repo, session, compspecs, func(access ocm2.ComponentVersionAccess) compdesc.ElementAccessor {
 		return access.GetDescriptor().Sources
 	})
 }

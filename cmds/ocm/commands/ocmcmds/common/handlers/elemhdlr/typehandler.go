@@ -22,15 +22,15 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common"
+	ocm2 "github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/ocm"
-	"github.com/open-component-model/ocm/pkg/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
 )
 
 type Object struct {
 	History common.History
-	Version ocm.ComponentVersionAccess
+	Version ocm2.ComponentVersionAccess
 	Spec    metav1.Identity
 	Id      metav1.Identity
 	Node    *common.NameVersion
@@ -54,13 +54,13 @@ func (o *Object) IsNode() *common.NameVersion {
 ////////////////////////////////////////////////////////////////////////////////
 
 type TypeHandler struct {
-	repository ocm.Repository
+	repository ocm2.Repository
 	components []*comphdlr.Object
-	session    ocm.Session
-	elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor
+	session    ocm2.Session
+	elemaccess func(ocm2.ComponentVersionAccess) compdesc.ElementAccessor
 }
 
-func NewTypeHandler(octx clictx.OCM, opts *output.Options, repobase ocm.Repository, session ocm.Session, compspecs []string, elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor) (utils.TypeHandler, error) {
+func NewTypeHandler(octx clictx.OCM, opts *output.Options, repobase ocm2.Repository, session ocm2.Session, compspecs []string, elemaccess func(ocm2.ComponentVersionAccess) compdesc.ElementAccessor) (utils.TypeHandler, error) {
 	h := comphdlr.NewTypeHandler(octx, session, repobase)
 
 	comps := output.NewElementOutput(nil, closureoption.Closure(opts, comphdlr.ClosureExplode, comphdlr.Sort))

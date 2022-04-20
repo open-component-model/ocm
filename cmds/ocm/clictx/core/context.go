@@ -24,16 +24,16 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/config"
-	cfgcpi "github.com/open-component-model/ocm/pkg/config/cpi"
-	"github.com/open-component-model/ocm/pkg/credentials"
-	"github.com/open-component-model/ocm/pkg/datacontext"
-	"github.com/open-component-model/ocm/pkg/datacontext/vfsattr"
+	"github.com/open-component-model/ocm/pkg/contexts/config"
+	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	datacontext2 "github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/vfsattr"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/oci"
-	ctfoci "github.com/open-component-model/ocm/pkg/oci/repositories/ctf"
-	"github.com/open-component-model/ocm/pkg/ocm"
-	ctfocm "github.com/open-component-model/ocm/pkg/ocm/repositories/ctf"
 )
 
 const CONTEXT_TYPE = "ocm.cmd.context.gardener.cloud"
@@ -55,9 +55,9 @@ type OCM interface {
 }
 
 type Context interface {
-	datacontext.Context
+	datacontext2.Context
 
-	AttributesContext() datacontext.AttributesContext
+	AttributesContext() datacontext2.AttributesContext
 
 	ConfigContext() config.Context
 	CredentialsContext() credentials.Context
@@ -84,17 +84,17 @@ var DefaultContext = Builder{}.New()
 // This is eiter an explicit context or the default context.
 // The returned context incorporates the given context.
 func ForContext(ctx context.Context) Context {
-	return datacontext.ForContextByKey(ctx, key, DefaultContext).(Context)
+	return datacontext2.ForContextByKey(ctx, key, DefaultContext).(Context)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type _context struct {
 	lock sync.RWMutex
-	datacontext.Context
+	datacontext2.Context
 	updater cfgcpi.Updater
 
-	sharedAttributes datacontext.AttributesContext
+	sharedAttributes datacontext2.AttributesContext
 
 	config      config.Context
 	credentials credentials.Context
@@ -106,7 +106,7 @@ type _context struct {
 
 var _ Context = &_context{}
 
-func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context, outctx out.Context, fs vfs.FileSystem) Context {
+func newContext(shared datacontext2.AttributesContext, ocmctx ocm.Context, outctx out.Context, fs vfs.FileSystem) Context {
 	if outctx == nil {
 		outctx = out.New()
 	}
@@ -120,7 +120,7 @@ func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context, outctx
 		updater:          cfgcpi.NewUpdate(ocmctx.CredentialsContext().ConfigContext()),
 		out:              outctx,
 	}
-	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
+	c.Context = datacontext2.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
 	c.oci = newOCI(c, ocmctx)
 	c.ocm = newOCM(c, ocmctx)
 	if fs != nil {
@@ -129,7 +129,7 @@ func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context, outctx
 	return c
 }
 
-func (c *_context) AttributesContext() datacontext.AttributesContext {
+func (c *_context) AttributesContext() datacontext2.AttributesContext {
 	return c.sharedAttributes
 }
 

@@ -28,16 +28,16 @@ import (
 	"github.com/containers/image/v5/image"
 	"github.com/containers/image/v5/types"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/config"
-	"github.com/open-component-model/ocm/pkg/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/config"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils"
+	docker2 "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer"
 	extdocker "github.com/open-component-model/ocm/pkg/docker"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/oci"
-	"github.com/open-component-model/ocm/pkg/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/oci/ociutils"
-	dockerreg "github.com/open-component-model/ocm/pkg/oci/repositories/docker"
-	"github.com/open-component-model/ocm/pkg/oci/repositories/ocireg"
-	"github.com/open-component-model/ocm/pkg/oci/transfer"
 	_ "github.com/open-component-model/ocm/pkg/ocm"
 )
 
@@ -96,7 +96,7 @@ func daemonrwritetest() {
 	ctx := oci.DefaultContext()
 
 	version := "0.1-dev"
-	spec := dockerreg.NewRepositorySpec()
+	spec := docker2.NewRepositorySpec()
 	name := "ghcr.io/mandelsoft/pause"
 
 	repo, err := ctx.RepositoryForSpec(spec)
@@ -112,7 +112,7 @@ func daemonrwritetest() {
 
 	defer art.Close()
 
-	_, err = dockerreg.Convert(art, nil, dst)
+	_, err = docker2.Convert(art, nil, dst)
 	handleError(err, "convert")
 	err = dst.Commit(context.Background(), nil)
 	handleError(err, "commit")
@@ -122,7 +122,7 @@ func dockerwritetest() {
 	ctx := oci.DefaultContext()
 
 	version := "0.1-dev"
-	spec := dockerreg.NewRepositorySpec()
+	spec := docker2.NewRepositorySpec()
 	name := "ghcr.io/mandelsoft/pause"
 
 	tversion := "test"
@@ -156,7 +156,7 @@ func dockerwritetest() {
 	acc, err := art.GetDescriptor().ToBlobAccess()
 	handleError(err, "digest")
 
-	err = tns.AddTags(dockerreg.ImageId(art), tversion)
+	err = tns.AddTags(docker2.ImageId(art), tversion)
 	handleError(err, "tag")
 
 	_ = tversion
@@ -217,7 +217,7 @@ func dockerreadtest() {
 	ctx := oci.DefaultContext()
 
 	version := "0.1-dev"
-	spec := dockerreg.NewRepositorySpec()
+	spec := docker2.NewRepositorySpec()
 	name := "ghcr.io/mandelsoft/pause"
 
 	repo, err := ctx.RepositoryForSpec(spec)

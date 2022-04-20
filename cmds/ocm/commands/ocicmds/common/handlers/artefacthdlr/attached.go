@@ -24,7 +24,7 @@ import (
 )
 
 func Attachment(d digest.Digest, suffix string) string {
-	return strings.Replace(d.String(), ":", ".", 1) + "." + suffix
+	return strings.Replace(d.String(), ":", "-", 1) + "." + suffix
 }
 
 var ExplodeAttached = processing.Explode(explodeAttached)
@@ -48,6 +48,7 @@ func explodeAttached(o interface{}) []interface{} {
 					s.Digest = nil
 					att := &Object{
 						History:    hist,
+						Key:        Key(a),
 						Spec:       s,
 						AttachKind: l[len(prefix):],
 						Namespace:  obj.Namespace,

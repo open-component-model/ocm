@@ -23,12 +23,12 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common"
+	ocm2 "github.com/open-component-model/ocm/pkg/contexts/ocm"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/ocm"
-	metav1 "github.com/open-component-model/ocm/pkg/ocm/compdesc/meta/v1"
 )
 
-func Elem(e interface{}) ocm.ComponentVersionAccess {
+func Elem(e interface{}) ocm2.ComponentVersionAccess {
 	return e.(*Object).ComponentVersion
 }
 
@@ -38,10 +38,10 @@ type Object struct {
 	History  common.History
 	Identity metav1.Identity
 
-	Spec             ocm.RefSpec
-	Repository       ocm.Repository
-	Component        ocm.ComponentAccess
-	ComponentVersion ocm.ComponentVersionAccess
+	Spec             ocm2.RefSpec
+	Repository       ocm2.Repository
+	Component        ocm2.ComponentAccess
+	ComponentVersion ocm2.ComponentVersionAccess
 }
 
 func (o *Object) AsManifest() interface{} {
@@ -64,11 +64,11 @@ var _ tree.Object = (*Object)(nil)
 
 type TypeHandler struct {
 	octx     clictx.OCM
-	session  ocm.Session
-	repobase ocm.Repository
+	session  ocm2.Session
+	repobase ocm2.Repository
 }
 
-func NewTypeHandler(octx clictx.OCM, session ocm.Session, repobase ocm.Repository) utils.TypeHandler {
+func NewTypeHandler(octx clictx.OCM, session ocm2.Session, repobase ocm2.Repository) utils.TypeHandler {
 	return &TypeHandler{
 		octx:     octx,
 		session:  session,
@@ -104,12 +104,12 @@ func (h *TypeHandler) All() ([]output.Object, error) {
 }
 
 func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
-	var component ocm.ComponentAccess
+	var component ocm2.ComponentAccess
 	var result []output.Object
 	var err error
 
 	name := elemspec.String()
-	spec := ocm.RefSpec{}
+	spec := ocm2.RefSpec{}
 	repo := h.repobase
 	if repo == nil {
 		evaluated, err := h.session.EvaluateComponentRef(h.octx.Context(), name, h.octx.GetAlias)
@@ -129,9 +129,9 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 		component = evaluated.Component
 		repo = evaluated.Repository
 	} else {
-		comp := ocm.CompSpec{Component: ""}
+		comp := ocm2.CompSpec{Component: ""}
 		if name != "" {
-			comp, err = ocm.ParseComp(name)
+			comp, err = ocm2.ParseComp(name)
 			if err != nil {
 				return nil, errors.Wrapf(err, "reference %q", name)
 			}
