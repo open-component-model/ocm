@@ -19,3 +19,4 @@
 - [ ] CD validation for sources enforces git
 - [ ] decide on and introduce logging framework
 - [ ] add optional reference name to resource input
+- [ ] remove registry from default output and show only with wide output option (get artefact)
