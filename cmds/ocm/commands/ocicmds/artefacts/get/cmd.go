@@ -131,7 +131,7 @@ func map_get_regular_output(e interface{}) interface{} {
 	if p.Artefact.IsIndex() {
 		kind = "index"
 	}
-	return []string{p.Spec.Host, p.Spec.Repository, kind, tag, digest}
+	return []string{p.Spec.UniformRepositorySpec.String(), p.Spec.Repository, kind, tag, digest}
 }
 
 func map_get_wide_output(e interface{}) interface{} {

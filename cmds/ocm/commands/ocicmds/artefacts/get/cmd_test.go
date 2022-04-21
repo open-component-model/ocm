@@ -101,7 +101,7 @@ var _ = Describe("Test Environment", func() {
 			Expect("\n" + buf.String()).To(Equal(
 				`
 REGISTRY REPOSITORY      KIND     TAG DIGEST
-         mandelsoft/test manifest v1  sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9
+/tmp/ctf mandelsoft/test manifest v1  sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9
 `))
 		})
 		It("get all artefacts in namespace", func() {
@@ -111,8 +111,8 @@ REGISTRY REPOSITORY      KIND     TAG DIGEST
 			Expect("\n" + buf.String()).To(Equal(
 				`
 REGISTRY REPOSITORY      KIND     TAG DIGEST
-         mandelsoft/test manifest v1  sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9
-         mandelsoft/test manifest v2  sha256:60b245b3de64c43b18489e9c3cf177402f9bd18ab62f8cc6653e2fc2e3a5fc39
+/tmp/ctf mandelsoft/test manifest v1  sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9
+/tmp/ctf mandelsoft/test manifest v2  sha256:60b245b3de64c43b18489e9c3cf177402f9bd18ab62f8cc6653e2fc2e3a5fc39
 `))
 		})
 
@@ -122,8 +122,8 @@ REGISTRY REPOSITORY      KIND     TAG DIGEST
 			Expect("\n" + buf.String()).To(Equal(
 				`
 REGISTRY REPOSITORY       KIND     TAG DIGEST
-         mandelsoft/index index    v1  sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
-         mandelsoft/index manifest v2  sha256:e51c2165e00ec22eba0b6d18fe7b136491edce1fa4d286549fb35bd5538c03df
+/tmp/ctf mandelsoft/index index    v1  sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
+/tmp/ctf mandelsoft/index manifest v2  sha256:e51c2165e00ec22eba0b6d18fe7b136491edce1fa4d286549fb35bd5538c03df
 `))
 		})
 
@@ -133,10 +133,10 @@ REGISTRY REPOSITORY       KIND     TAG DIGEST
 			Expect("\n" + buf.String()).To(Equal(
 				`
 REFERENCEPATH                                                           REGISTRY REPOSITORY       KIND     TAG DIGEST
-                                                                                 mandelsoft/index index    v1  sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
-sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627          mandelsoft/index manifest -   sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9
-sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627          mandelsoft/index manifest -   sha256:60b245b3de64c43b18489e9c3cf177402f9bd18ab62f8cc6653e2fc2e3a5fc39
-                                                                                 mandelsoft/index manifest v2  sha256:e51c2165e00ec22eba0b6d18fe7b136491edce1fa4d286549fb35bd5538c03df
+                                                                        /tmp/ctf mandelsoft/index index    v1  sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
+sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627 /tmp/ctf mandelsoft/index manifest -   sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9
+sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627 /tmp/ctf mandelsoft/index manifest -   sha256:60b245b3de64c43b18489e9c3cf177402f9bd18ab62f8cc6653e2fc2e3a5fc39
+                                                                        /tmp/ctf mandelsoft/index manifest v2  sha256:e51c2165e00ec22eba0b6d18fe7b136491edce1fa4d286549fb35bd5538c03df
 `))
 		})
 		It("get tree of all tagged artefacts in other namespace", func() {
@@ -145,8 +145,8 @@ sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627         
 			Expect("\n" + buf.String()).To(Equal(
 				`
 NESTING REGISTRY REPOSITORY       KIND     TAG DIGEST
-├─               mandelsoft/index index    v1  sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
-└─               mandelsoft/index manifest v2  sha256:e51c2165e00ec22eba0b6d18fe7b136491edce1fa4d286549fb35bd5538c03df
+├─      /tmp/ctf mandelsoft/index index    v1  sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
+└─      /tmp/ctf mandelsoft/index manifest v2  sha256:e51c2165e00ec22eba0b6d18fe7b136491edce1fa4d286549fb35bd5538c03df
 `))
 		})
 
@@ -156,10 +156,10 @@ NESTING REGISTRY REPOSITORY       KIND     TAG DIGEST
 			Expect("\n" + buf.String()).To(Equal(
 				`
 NESTING     REGISTRY REPOSITORY       KIND     TAG DIGEST
-├─ ⊗                 mandelsoft/index index    v1  sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
-│  ├─                mandelsoft/index manifest -   sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9
-│  └─                mandelsoft/index manifest -   sha256:60b245b3de64c43b18489e9c3cf177402f9bd18ab62f8cc6653e2fc2e3a5fc39
-└─                   mandelsoft/index manifest v2  sha256:e51c2165e00ec22eba0b6d18fe7b136491edce1fa4d286549fb35bd5538c03df
+├─ ⊗        /tmp/ctf mandelsoft/index index    v1  sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
+│  ├─       /tmp/ctf mandelsoft/index manifest -   sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9
+│  └─       /tmp/ctf mandelsoft/index manifest -   sha256:60b245b3de64c43b18489e9c3cf177402f9bd18ab62f8cc6653e2fc2e3a5fc39
+└─          /tmp/ctf mandelsoft/index manifest v2  sha256:e51c2165e00ec22eba0b6d18fe7b136491edce1fa4d286549fb35bd5538c03df
 `))
 		})
 	})
@@ -248,8 +248,8 @@ NESTING     REGISTRY REPOSITORY       KIND     TAG DIGEST
 			Expect("\n" + buf.String()).To(Equal(
 				`
 REGISTRY REPOSITORY       KIND     TAG                                                                          DIGEST
-         mandelsoft/index index    v1                                                                           sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
-         mandelsoft/index manifest sha256-d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627.test sha256:439d433cd85eac706b86e39d3d9dbbd5f1ff19acd1bcb7aa3549f5d7b11777d9
+/tmp/ctf mandelsoft/index index    v1                                                                           sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
+/tmp/ctf mandelsoft/index manifest sha256-d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627.test sha256:439d433cd85eac706b86e39d3d9dbbd5f1ff19acd1bcb7aa3549f5d7b11777d9
 `))
 		})
 
@@ -260,8 +260,8 @@ REGISTRY REPOSITORY       KIND     TAG                                          
 			Expect("\n" + buf.String()).To(Equal(
 				`
 NESTING        REGISTRY REPOSITORY       KIND     TAG                                                                          DIGEST
-└─ ⊗                    mandelsoft/index index    v1                                                                           sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
-   └─ test              mandelsoft/index manifest sha256-d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627.test sha256:439d433cd85eac706b86e39d3d9dbbd5f1ff19acd1bcb7aa3549f5d7b11777d9
+└─ ⊗           /tmp/ctf mandelsoft/index index    v1                                                                           sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
+   └─ test     /tmp/ctf mandelsoft/index manifest sha256-d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627.test sha256:439d433cd85eac706b86e39d3d9dbbd5f1ff19acd1bcb7aa3549f5d7b11777d9
 `))
 		})
 
@@ -272,11 +272,11 @@ NESTING        REGISTRY REPOSITORY       KIND     TAG                           
 			Expect("\n" + buf.String()).To(Equal(
 				`
 NESTING             REGISTRY REPOSITORY       KIND     TAG                                                                          DIGEST
-└─ ⊗                         mandelsoft/index index    v1                                                                           sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
-   ├─ test                   mandelsoft/index manifest sha256-d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627.test sha256:439d433cd85eac706b86e39d3d9dbbd5f1ff19acd1bcb7aa3549f5d7b11777d9
-   ├─ ⊗                      mandelsoft/index manifest -                                                                            sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9
-   │  └─ test                mandelsoft/index manifest sha256-2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9.test sha256:efbfe2c665fc93690911d74e8e7dcf7fb01524545c7b87cb14d5febf1613eaba
-   └─                        mandelsoft/index manifest -                                                                            sha256:60b245b3de64c43b18489e9c3cf177402f9bd18ab62f8cc6653e2fc2e3a5fc39
+└─ ⊗                /tmp/ctf mandelsoft/index index    v1                                                                           sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
+   ├─ test          /tmp/ctf mandelsoft/index manifest sha256-d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627.test sha256:439d433cd85eac706b86e39d3d9dbbd5f1ff19acd1bcb7aa3549f5d7b11777d9
+   ├─ ⊗             /tmp/ctf mandelsoft/index manifest -                                                                            sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9
+   │  └─ test       /tmp/ctf mandelsoft/index manifest sha256-2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9.test sha256:efbfe2c665fc93690911d74e8e7dcf7fb01524545c7b87cb14d5febf1613eaba
+   └─               /tmp/ctf mandelsoft/index manifest -                                                                            sha256:60b245b3de64c43b18489e9c3cf177402f9bd18ab62f8cc6653e2fc2e3a5fc39
 `))
 		})
 
