@@ -15,12 +15,12 @@
 package repooption
 
 import (
+	"github.com/spf13/pflag"
+
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	oci2 "github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/runtime"
-
-	"github.com/spf13/pflag"
 )
 
 func From(o options.OptionSetProvider) *Option {
@@ -31,7 +31,7 @@ func From(o options.OptionSetProvider) *Option {
 
 type Option struct {
 	Spec       string
-	Repository oci2.Repository
+	Repository oci.Repository
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
@@ -42,7 +42,7 @@ func (o *Option) Complete(ctx clictx.Context) error {
 	return nil
 }
 
-func (o *Option) CompleteWithSession(octx clictx.OCI, session oci2.Session) error {
+func (o *Option) CompleteWithSession(octx clictx.OCI, session oci.Session) error {
 	if o.Repository == nil {
 		r, err := o.GetRepository(octx, session)
 		if err != nil {
@@ -53,7 +53,7 @@ func (o *Option) CompleteWithSession(octx clictx.OCI, session oci2.Session) erro
 	return nil
 }
 
-func (o *Option) GetRepository(ctx clictx.OCI, session oci2.Session) (oci2.Repository, error) {
+func (o *Option) GetRepository(ctx clictx.OCI, session oci.Session) (oci.Repository, error) {
 	if o.Spec != "" {
 		r, _, err := session.DetermineRepository(ctx.Context(), o.Spec, ctx.GetAlias)
 		return r, err
@@ -84,7 +84,7 @@ For the *Common Transport Format* the types <code>directory</code>,
 Using the JSON variant any repository type supported by the 
 linked library can be used:
 `
-	types := runtime.KindNames(oci2.DefaultContext().RepositoryTypes())
+	types := runtime.KindNames(oci.DefaultContext().RepositoryTypes())
 	for _, t := range types {
 		s += "- `" + t + "`\n"
 	}

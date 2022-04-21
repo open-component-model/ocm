@@ -20,12 +20,13 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	"github.com/open-component-model/ocm/pkg/common"
-	credentials2 "github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	local "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/aliases"
 )
 
-var DefaultContext = credentials2.New()
+var DefaultContext = credentials.New()
 
 var _ = Describe("alias credentials", func() {
 
@@ -51,7 +52,7 @@ var _ = Describe("alias credentials", func() {
 	})
 
 	It("resolves repository", func() {
-		memoryspec, err := credentials2.NewGenericRepositorySpec([]byte(memorydata), nil)
+		memoryspec, err := credentials.NewGenericRepositorySpec([]byte(memorydata), nil)
 		Expect(err).To(Succeed())
 
 		err = DefaultContext.SetAlias("test", memoryspec)
@@ -63,7 +64,7 @@ var _ = Describe("alias credentials", func() {
 	})
 
 	It("sets and retrieves credentials", func() {
-		memoryspec, err := credentials2.NewGenericRepositorySpec([]byte(memorydata), nil)
+		memoryspec, err := credentials.NewGenericRepositorySpec([]byte(memorydata), nil)
 		Expect(err).To(Succeed())
 
 		err = DefaultContext.SetAlias("test", memoryspec)
@@ -72,10 +73,10 @@ var _ = Describe("alias credentials", func() {
 		repo, err := DefaultContext.RepositoryForConfig([]byte(memorydata), nil)
 		Expect(err).To(Succeed())
 
-		_, err = repo.WriteCredentials("bibo", credentials2.NewCredentials(props))
+		_, err = repo.WriteCredentials("bibo", credentials.NewCredentials(props))
 		Expect(err).To(Succeed())
 
-		credspec := credentials2.NewCredentialsSpec("bibo", local.NewRepositorySpec("test"))
+		credspec := credentials.NewCredentialsSpec("bibo", local.NewRepositorySpec("test"))
 
 		creds, err := DefaultContext.CredentialsForSpec(credspec)
 		Expect(err).To(Succeed())

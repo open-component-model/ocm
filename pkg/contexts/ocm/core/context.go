@@ -19,7 +19,7 @@ import (
 	"reflect"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	datacontext2 "github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -31,9 +31,9 @@ const CONTEXT_TYPE = "ocm.context.gardener.cloud"
 const CommonTransportFormat = ctf.CommonTransportFormatRepositoryType
 
 type Context interface {
-	datacontext2.Context
+	datacontext.Context
 
-	AttributesContext() datacontext2.AttributesContext
+	AttributesContext() datacontext.AttributesContext
 	CredentialsContext() credentials.Context
 	OCIContext() oci.Context
 
@@ -64,15 +64,15 @@ var DefaultContext = Builder{}.New()
 // ForContext returns the Context to use for context.Context.
 // This is eiter an explicit context or the default context.
 func ForContext(ctx context.Context) Context {
-	return datacontext2.ForContextByKey(ctx, key, DefaultContext).(Context)
+	return datacontext.ForContextByKey(ctx, key, DefaultContext).(Context)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type _context struct {
-	datacontext2.Context
+	datacontext.Context
 
-	sharedattributes datacontext2.AttributesContext
+	sharedattributes datacontext.AttributesContext
 	credctx          credentials.Context
 	ocictx           oci.Context
 
@@ -86,7 +86,7 @@ type _context struct {
 
 var _ Context = &_context{}
 
-func newContext(shared datacontext2.AttributesContext, credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, specHandlers RepositorySpecHandlers, blobHandlers BlobHandlerRegistry, blobDigesters BlobDigesterRegistry) Context {
+func newContext(shared datacontext.AttributesContext, credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, specHandlers RepositorySpecHandlers, blobHandlers BlobHandlerRegistry, blobDigesters BlobDigesterRegistry) Context {
 	c := &_context{
 		sharedattributes:     shared,
 		credctx:              credctx,
@@ -97,11 +97,11 @@ func newContext(shared datacontext2.AttributesContext, credctx credentials.Conte
 		knownAccessTypes:     accessscheme,
 		knownRepositoryTypes: reposcheme,
 	}
-	c.Context = datacontext2.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
+	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
 	return c
 }
 
-func (c *_context) AttributesContext() datacontext2.AttributesContext {
+func (c *_context) AttributesContext() datacontext.AttributesContext {
 	return c.sharedattributes
 }
 

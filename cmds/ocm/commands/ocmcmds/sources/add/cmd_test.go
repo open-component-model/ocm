@@ -23,11 +23,12 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	compdesc2 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch/comparch"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -36,7 +37,7 @@ import (
 const ARCH = "/tmp/ca"
 const VERSION = "v1"
 
-func CheckArchiveSource(env *TestEnv, cd *compdesc2.ComponentDescriptor, name string) {
+func CheckArchiveSource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string) {
 
 	r, err := cd.GetSourceByIdentity(metav1.NewIdentity(name))
 	Expect(err).To(Succeed())
@@ -78,7 +79,7 @@ func CheckArchiveSource(env *TestEnv, cd *compdesc2.ComponentDescriptor, name st
 	Expect(files).To(Equal([]string{"settings", "testcontent"}))
 }
 
-func CheckTextSource(env *TestEnv, cd *compdesc2.ComponentDescriptor, name string) {
+func CheckTextSource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string) {
 	rblob := accessio.BlobAccessForFile(mime.MIME_TEXT, "/testdata/testcontent", env)
 	dig := rblob.Digest()
 	data, err := rblob.Get()
@@ -114,7 +115,7 @@ var _ = Describe("Test Environment", func() {
 		Expect(env.Execute("add", "sources", ARCH, "/testdata/sources.yaml")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
-		cd, err := compdesc2.Decode(data)
+		cd, err := compdesc.Decode(data)
 		Expect(err).To(Succeed())
 		Expect(len(cd.Sources)).To(Equal(2))
 
@@ -126,7 +127,7 @@ var _ = Describe("Test Environment", func() {
 		Expect(env.Execute("add", "sources", ARCH, "--settings", "/testdata/settings", "/testdata/sources.tmpl")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
-		cd, err := compdesc2.Decode(data)
+		cd, err := compdesc.Decode(data)
 		Expect(err).To(Succeed())
 		Expect(len(cd.Sources)).To(Equal(2))
 
@@ -137,7 +138,7 @@ var _ = Describe("Test Environment", func() {
 		Expect(env.Execute("add", "sources", ARCH, "CONTENT=testcontent", "/testdata/sources.tmpl")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
-		cd, err := compdesc2.Decode(data)
+		cd, err := compdesc.Decode(data)
 		Expect(err).To(Succeed())
 		Expect(len(cd.Sources)).To(Equal(2))
 

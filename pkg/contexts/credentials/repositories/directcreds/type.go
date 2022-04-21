@@ -16,19 +16,18 @@ package directcreds
 
 import (
 	"github.com/open-component-model/ocm/pkg/common"
-	core2 "github.com/open-component-model/ocm/pkg/contexts/credentials/core"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const (
-	DirectCredentialsRepositoryType   = cpi2.DirectCredentialsType
+	DirectCredentialsRepositoryType   = cpi.DirectCredentialsType
 	DirectCredentialsRepositoryTypeV1 = DirectCredentialsRepositoryType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
-	cpi2.RegisterRepositoryType(DirectCredentialsRepositoryType, cpi2.NewRepositoryType(DirectCredentialsRepositoryType, &RepositorySpec{}))
-	cpi2.RegisterRepositoryType(DirectCredentialsRepositoryTypeV1, cpi2.NewRepositoryType(DirectCredentialsRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(DirectCredentialsRepositoryType, cpi.NewRepositoryType(DirectCredentialsRepositoryType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(DirectCredentialsRepositoryTypeV1, cpi.NewRepositoryType(DirectCredentialsRepositoryTypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes a repository interface for single direct credentials.
@@ -37,8 +36,8 @@ type RepositorySpec struct {
 	Properties                  common.Properties `json:"properties"`
 }
 
-var _ cpi2.RepositorySpec = &RepositorySpec{}
-var _ cpi2.CredentialsSpec = &RepositorySpec{}
+var _ cpi.RepositorySpec = &RepositorySpec{}
+var _ cpi.CredentialsSpec = &RepositorySpec{}
 
 // NewRepositorySpec creates a new RepositorySpec
 func NewRepositorySpec(credentials common.Properties) *RepositorySpec {
@@ -52,18 +51,18 @@ func (a *RepositorySpec) GetType() string {
 	return DirectCredentialsRepositoryType
 }
 
-func (a *RepositorySpec) Repository(ctx cpi2.Context, creds cpi2.Credentials) (cpi2.Repository, error) {
-	return NewRepository(cpi2.NewCredentials(a.Properties)), nil
+func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi.Repository, error) {
+	return NewRepository(cpi.NewCredentials(a.Properties)), nil
 }
 
-func (a *RepositorySpec) Credentials(context core2.Context, source ...core2.CredentialsSource) (core2.Credentials, error) {
-	return cpi2.NewCredentials(a.Properties), nil
+func (a *RepositorySpec) Credentials(context cpi.Context, source ...cpi.CredentialsSource) (cpi.Credentials, error) {
+	return cpi.NewCredentials(a.Properties), nil
 }
 
 func (a *RepositorySpec) GetCredentialsName() string {
 	return ""
 }
 
-func (a *RepositorySpec) GetRepositorySpec(context core2.Context) core2.RepositorySpec {
+func (a *RepositorySpec) GetRepositorySpec(context cpi.Context) cpi.RepositorySpec {
 	return a
 }

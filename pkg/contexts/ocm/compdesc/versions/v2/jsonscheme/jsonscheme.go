@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:generate go-bindata -pkg jsonscheme ../../../../../../resources/component-descriptor-v2-schema.yaml
+//go:generate go-bindata -pkg jsonscheme ../../../../../../../resources/component-descriptor-v2-schema.yaml
 
 package jsonscheme
 

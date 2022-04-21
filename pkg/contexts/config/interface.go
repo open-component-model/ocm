@@ -17,52 +17,52 @@ package config
 import (
 	"context"
 
-	core2 "github.com/open-component-model/ocm/pkg/contexts/config/core"
+	"github.com/open-component-model/ocm/pkg/contexts/config/core"
 	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const KIND_CONFIGTYPE = core2.KIND_CONFIGTYPE
+const KIND_CONFIGTYPE = core.KIND_CONFIGTYPE
 
-var AllConfigs = core2.AllConfigs
+var AllConfigs = core.AllConfigs
 
-const AllGenerations = core2.AllGenerations
+const AllGenerations = core.AllGenerations
 
-const CONTEXT_TYPE = core2.CONTEXT_TYPE
+const CONTEXT_TYPE = core.CONTEXT_TYPE
 
-type Context = core2.Context
-type Config = core2.Config
-type ConfigType = core2.ConfigType
-type ConfigTypeScheme = core2.ConfigTypeScheme
-type GenericConfig = core2.GenericConfig
-type ConfigSelector = core2.ConfigSelector
-type ConfigSelectorFunction = core2.ConfigSelectorFunction
+type Context = core.Context
+type Config = core.Config
+type ConfigType = core.ConfigType
+type ConfigTypeScheme = core.ConfigTypeScheme
+type GenericConfig = core.GenericConfig
+type ConfigSelector = core.ConfigSelector
+type ConfigSelectorFunction = core.ConfigSelectorFunction
 
-func DefaultContext() core2.Context {
-	return core2.DefaultContext
+func DefaultContext() core.Context {
+	return core.DefaultContext
 }
 func ForContext(ctx context.Context) Context {
-	return core2.ForContext(ctx)
+	return core.ForContext(ctx)
 }
 
 func NewGenericConfig(data []byte, unmarshaler runtime.Unmarshaler) (Config, error) {
-	return core2.NewGenericConfig(data, unmarshaler)
+	return core.NewGenericConfig(data, unmarshaler)
 }
 
 func ToGenericConfig(c Config) (*GenericConfig, error) {
-	return core2.ToGenericConfig(c)
+	return core.ToGenericConfig(c)
 }
 
 func NewConfigTypeScheme() ConfigTypeScheme {
-	return core2.NewConfigTypeScheme(nil)
+	return core.NewConfigTypeScheme(nil)
 }
 
 func IsGeneric(cfg Config) bool {
-	return core2.IsGeneric(cfg)
+	return core.IsGeneric(cfg)
 }
 
 func ErrNoContext(name string) error {
-	return core2.ErrNoContext(name)
+	return core.ErrNoContext(name)
 }
 
 func IsErrNoContext(err error) bool {

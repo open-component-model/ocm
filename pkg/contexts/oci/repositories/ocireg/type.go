@@ -20,8 +20,9 @@ import (
 	"strings"
 
 	"github.com/containerd/containerd/reference"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -34,10 +35,10 @@ const (
 )
 
 func init() {
-	cpi2.RegisterRepositoryType(OCIRegistryRepositoryType, cpi2.NewRepositoryType(OCIRegistryRepositoryType, &RepositorySpec{}))
-	cpi2.RegisterRepositoryType(OCIRegistryRepositoryTypeV1, cpi2.NewRepositoryType(OCIRegistryRepositoryTypeV1, &RepositorySpec{}))
-	cpi2.RegisterRepositoryType(ShortOCIRegistryRepositoryType, cpi2.NewRepositoryType(ShortOCIRegistryRepositoryType, &RepositorySpec{}))
-	cpi2.RegisterRepositoryType(ShortOCIRegistryRepositoryTypeV1, cpi2.NewRepositoryType(ShortOCIRegistryRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(OCIRegistryRepositoryType, cpi.NewRepositoryType(OCIRegistryRepositoryType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(OCIRegistryRepositoryTypeV1, cpi.NewRepositoryType(OCIRegistryRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(ShortOCIRegistryRepositoryType, cpi.NewRepositoryType(ShortOCIRegistryRepositoryType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(ShortOCIRegistryRepositoryTypeV1, cpi.NewRepositoryType(ShortOCIRegistryRepositoryTypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
@@ -48,7 +49,7 @@ type RepositorySpec struct {
 	LegacyTypes *bool  `json:"legacyTypes,omitempty"`
 }
 
-var _ cpi2.RepositorySpec = (*RepositorySpec)(nil)
+var _ cpi.RepositorySpec = (*RepositorySpec)(nil)
 
 // NewRepositorySpec creates a new RepositorySpec
 func NewRepositorySpec(baseURL string) *RepositorySpec {
@@ -66,7 +67,7 @@ func (a *RepositorySpec) Name() string {
 	return a.BaseURL
 }
 
-func (a *RepositorySpec) Repository(ctx cpi2.Context, creds credentials.Credentials) (cpi2.Repository, error) {
+func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	var u *url.URL
 	info := &RepositoryInfo{}
 	legacy := false

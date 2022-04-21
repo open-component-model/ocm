@@ -24,17 +24,18 @@ import (
 	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/log"
 	"github.com/containerd/containerd/remotes"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	artdesc2 "github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/opencontainers/go-digest"
 	"github.com/sirupsen/logrus"
+
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 )
 
 type dataAccess struct {
 	lock    sync.Mutex
 	fetcher remotes.Fetcher
-	desc    artdesc2.Descriptor
+	desc    artdesc.Descriptor
 	reader  io.ReadCloser
 }
 
@@ -43,7 +44,7 @@ var _ cpi.DataAccess = (*dataAccess)(nil)
 func NewDataAccess(fetcher remotes.Fetcher, digest digest.Digest, mimeType string, delayed bool) (*dataAccess, error) {
 	var reader io.ReadCloser
 	var err error
-	desc := artdesc2.Descriptor{
+	desc := artdesc.Descriptor{
 		MediaType: mimeType,
 		Digest:    digest,
 		Size:      -1,
@@ -76,7 +77,7 @@ func (d *dataAccess) Reader() (io.ReadCloser, error) {
 	return d.fetcher.Fetch(dummyContext, d.desc)
 }
 
-func fetch(ctx context.Context, f remotes.Fetcher, desc *artdesc2.Descriptor) ([]byte, error) {
+func fetch(ctx context.Context, f remotes.Fetcher, desc *artdesc.Descriptor) ([]byte, error) {
 	fmt.Printf("*** fetch %s %s\n", desc.MediaType, desc.Digest)
 	if desc.Size == 0 {
 		desc.Size = -1
@@ -98,11 +99,11 @@ func readAll(reader io.ReadCloser, err error) ([]byte, error) {
 }
 
 func push(ctx context.Context, p remotes.Pusher, blob accessio.BlobAccess) error {
-	desc := *artdesc2.DefaultBlobDescriptor(blob)
+	desc := *artdesc.DefaultBlobDescriptor(blob)
 	return pushData(ctx, p, desc, blob)
 }
 
-func pushData(ctx context.Context, p remotes.Pusher, desc artdesc2.Descriptor, data accessio.DataAccess) error {
+func pushData(ctx context.Context, p remotes.Pusher, desc artdesc.Descriptor, data accessio.DataAccess) error {
 	key := remotes.MakeRefKey(ctx, desc)
 	if desc.Size == 0 {
 		desc.Size = -1

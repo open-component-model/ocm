@@ -17,18 +17,19 @@ package transfer
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	ocm2 "github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch/comparch"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
 var (
@@ -85,7 +86,7 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
-	session := ocm2.NewSession(nil)
+	session := ocm.NewSession(nil)
 	defer session.Close()
 	source, err := comparch.Open(o.Context.OCMContext(), accessobj.ACC_READONLY, o.Path, 0, o.Context)
 	if err != nil {
@@ -111,5 +112,5 @@ func (o *Command) Run() error {
 		session.Closer(target)
 	}
 
-	return ocm2.TransferVersion(nil, source, target, nil)
+	return ocm.TransferVersion(nil, source, target, nil)
 }

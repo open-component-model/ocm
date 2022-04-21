@@ -18,10 +18,10 @@ import (
 	"io"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	oci2 "github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/opencontainers/go-digest"
 )
@@ -31,8 +31,8 @@ const Type = "ociRegistry"
 const TypeV1 = Type + runtime.VersionSeparator + "v1"
 
 func init() {
-	cpi2.RegisterAccessType(cpi2.NewAccessSpecType(Type, &AccessSpec{}))
-	cpi2.RegisterAccessType(cpi2.NewAccessSpecType(TypeV1, &AccessSpec{}))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}))
 }
 
 // AccessSpec describes the access for a oci registry.
@@ -51,7 +51,7 @@ func New(ref string) *AccessSpec {
 	}
 }
 
-func (_ *AccessSpec) IsLocal(cpi2.Context) bool {
+func (_ *AccessSpec) IsLocal(cpi.Context) bool {
 	return false
 }
 
@@ -59,21 +59,21 @@ func (_ *AccessSpec) GetType() string {
 	return Type
 }
 
-func (a *AccessSpec) AccessMethod(c cpi2.ComponentVersionAccess) (cpi2.AccessMethod, error) {
+func (a *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
 	return newMethod(c, a)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type accessMethod struct {
-	comp cpi2.ComponentVersionAccess
+	comp cpi.ComponentVersionAccess
 	spec *AccessSpec
 }
 
-var _ cpi2.AccessMethod = (*accessMethod)(nil)
+var _ cpi.AccessMethod = (*accessMethod)(nil)
 var _ accessio.DigestSource = (*accessMethod)(nil)
 
-func newMethod(c cpi2.ComponentVersionAccess, a *AccessSpec) (*accessMethod, error) {
+func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, error) {
 	return &accessMethod{
 		spec: a,
 		comp: c,
@@ -84,9 +84,9 @@ func (m *accessMethod) GetKind() string {
 	return Type
 }
 
-func (m *accessMethod) getArtefact() (oci2.ArtefactAccess, error) {
+func (m *accessMethod) getArtefact() (oci.ArtefactAccess, error) {
 
-	ref, err := oci2.ParseRef(m.spec.ImageReference)
+	ref, err := oci.ParseRef(m.spec.ImageReference)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +139,7 @@ func (m *accessMethod) MimeType() string {
 }
 
 func (m *accessMethod) getBlob() (artefactset.ArtefactBlob, error) {
-	ref, err := oci2.ParseRef(m.spec.ImageReference)
+	ref, err := oci.ParseRef(m.spec.ImageReference)
 	if err != nil {
 		return nil, err
 	}

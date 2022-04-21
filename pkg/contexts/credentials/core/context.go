@@ -20,7 +20,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
-	datacontext2 "github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -29,9 +29,9 @@ import (
 const CONTEXT_TYPE = "credentials.context.gardener.cloud"
 
 type Context interface {
-	datacontext2.Context
+	datacontext.Context
 
-	AttributesContext() datacontext2.AttributesContext
+	AttributesContext() datacontext.AttributesContext
 	ConfigContext() config.Context
 	RepositoryTypes() RepositoryTypeScheme
 
@@ -57,15 +57,15 @@ var DefaultContext = Builder{}.New()
 // ForContext returns the Context to use for context.Context.
 // This is eiter an explicit context or the default context.
 func ForContext(ctx context.Context) Context {
-	return datacontext2.ForContextByKey(ctx, key, DefaultContext).(Context)
+	return datacontext.ForContextByKey(ctx, key, DefaultContext).(Context)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type _context struct {
-	datacontext2.Context
+	datacontext.Context
 
-	sharedattributes     datacontext2.AttributesContext
+	sharedattributes     datacontext.AttributesContext
 	updater              cfgcpi.Updater
 	knownRepositoryTypes RepositoryTypeScheme
 	consumers            *_consumers
@@ -73,14 +73,14 @@ type _context struct {
 
 var _ Context = &_context{}
 
-func newContext(shared datacontext2.AttributesContext, configctx config.Context, reposcheme RepositoryTypeScheme) Context {
+func newContext(shared datacontext.AttributesContext, configctx config.Context, reposcheme RepositoryTypeScheme) Context {
 	c := &_context{
 		sharedattributes:     shared,
 		updater:              cfgcpi.NewUpdate(configctx),
 		knownRepositoryTypes: reposcheme,
 		consumers:            newConsumers(),
 	}
-	c.Context = datacontext2.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
+	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
 	return c
 }
 
@@ -88,7 +88,7 @@ func (c *_context) GetType() string {
 	return CONTEXT_TYPE
 }
 
-func (c *_context) AttributesContext() datacontext2.AttributesContext {
+func (c *_context) AttributesContext() datacontext.AttributesContext {
 	return c.sharedattributes
 }
 

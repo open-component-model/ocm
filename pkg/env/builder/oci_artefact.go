@@ -16,7 +16,7 @@ package builder
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	artdesc2 "github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -58,7 +58,7 @@ func (r *oci_artefact) Close() error {
 		err = r.artfunc(r.ArtefactAccess)
 	}
 	if err == nil {
-		r.result = artdesc2.DefaultBlobDescriptor(blob)
+		r.result = artdesc.DefaultBlobDescriptor(blob)
 	}
 	return err
 }
@@ -70,13 +70,13 @@ func (r *oci_artefact) addArtefact(a oci.ArtefactAccess) error {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (b *Builder) artefact(version string, ns cpi.NamespaceAccess, t func(access oci.ArtefactAccess) (string, error), f ...func()) *artdesc2.Descriptor {
+func (b *Builder) artefact(version string, ns cpi.NamespaceAccess, t func(access oci.ArtefactAccess) (string, error), f ...func()) *artdesc.Descriptor {
 	var k string
 	b.expect(b.oci_nsacc, T_OCINAMESPACE)
 	v, err := b.oci_nsacc.GetArtefact(version)
 	if err != nil {
 		if errors.IsErrNotFound(err) {
-			if b, _ := artdesc2.IsDigest(version); !b {
+			if b, _ := artdesc.IsDigest(version); !b {
 				err = nil
 			}
 		}
@@ -96,10 +96,10 @@ func (b *Builder) artefact(version string, ns cpi.NamespaceAccess, t func(access
 	if r == nil {
 		return nil
 	}
-	return r.(*artdesc2.Descriptor)
+	return r.(*artdesc.Descriptor)
 }
 
-func (b *Builder) Index(version string, f ...func()) *artdesc2.Descriptor {
+func (b *Builder) Index(version string, f ...func()) *artdesc.Descriptor {
 	return b.artefact(version, b.oci_nsacc, func(a oci.ArtefactAccess) (string, error) {
 		if a.IndexAccess() == nil {
 			return "", errors.Newf("artefact is manifest")
@@ -108,7 +108,7 @@ func (b *Builder) Index(version string, f ...func()) *artdesc2.Descriptor {
 	}, f...)
 }
 
-func (b *Builder) Manifest(version string, f ...func()) *artdesc2.Descriptor {
+func (b *Builder) Manifest(version string, f ...func()) *artdesc.Descriptor {
 	return b.artefact(version, nil, func(a oci.ArtefactAccess) (string, error) {
 		if a.ManifestAccess() == nil {
 			return "", errors.Newf("artefact is index")

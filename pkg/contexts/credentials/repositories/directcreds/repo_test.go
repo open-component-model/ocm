@@ -20,9 +20,10 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	directcreds2 "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
 )
 
 var DefaultContext = credentials.New()
@@ -35,7 +36,7 @@ var _ = Describe("direct credentials", func() {
 	propsdata := "{\"type\":\"Credentials\",\"properties\":{\"password\":\"PASSWORD\",\"user\":\"USER\"}}"
 
 	It("serializes credentials spec", func() {
-		spec := directcreds2.NewRepositorySpec(props)
+		spec := directcreds.NewRepositorySpec(props)
 		data, err := json.Marshal(spec)
 		Expect(err).To(Succeed())
 		Expect(data).To(Equal([]byte(propsdata)))
@@ -47,7 +48,7 @@ var _ = Describe("direct credentials", func() {
 	})
 
 	It("resolved direct credentials", func() {
-		spec := directcreds2.NewCredentials(props)
+		spec := directcreds.NewCredentials(props)
 
 		creds, err := DefaultContext.CredentialsForSpec(spec)
 		Expect(err).To(Succeed())

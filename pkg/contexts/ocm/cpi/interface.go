@@ -17,88 +17,88 @@ package cpi
 // This is the Context Provider Interface for credential providers
 
 import (
-	core2 "github.com/open-component-model/ocm/pkg/contexts/ocm/core"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 	"github.com/opencontainers/go-digest"
 )
 
-const CONTEXT_TYPE = core2.CONTEXT_TYPE
+const CONTEXT_TYPE = core.CONTEXT_TYPE
 
-const CommonTransportFormat = core2.CommonTransportFormat
+const CommonTransportFormat = core.CommonTransportFormat
 
-type Context = core2.Context
-type Repository = core2.Repository
-type RepositorySpecHandlers = core2.RepositorySpecHandlers
-type RepositorySpecHandler = core2.RepositorySpecHandler
-type UniformRepositorySpec = core2.UniformRepositorySpec
-type ComponentLister = core2.ComponentLister
-type ComponentAccess = core2.ComponentAccess
-type ComponentVersionAccess = core2.ComponentVersionAccess
-type AccessSpec = core2.AccessSpec
-type AccessMethod = core2.AccessMethod
-type AccessMethodSupport = core2.AccessMethodSupport
-type AccessType = core2.AccessType
-type DataAccess = core2.DataAccess
-type BlobAccess = core2.BlobAccess
-type SourceAccess = core2.SourceAccess
-type SourceMeta = core2.SourceMeta
-type ResourceAccess = core2.ResourceAccess
-type ResourceMeta = core2.ResourceMeta
-type RepositorySpec = core2.RepositorySpec
-type GenericRepositorySpec = core2.GenericRepositorySpec
-type RepositoryType = core2.RepositoryType
-type ComponentReference = core2.ComponentReference
+type Context = core.Context
+type Repository = core.Repository
+type RepositorySpecHandlers = core.RepositorySpecHandlers
+type RepositorySpecHandler = core.RepositorySpecHandler
+type UniformRepositorySpec = core.UniformRepositorySpec
+type ComponentLister = core.ComponentLister
+type ComponentAccess = core.ComponentAccess
+type ComponentVersionAccess = core.ComponentVersionAccess
+type AccessSpec = core.AccessSpec
+type AccessMethod = core.AccessMethod
+type AccessMethodSupport = core.AccessMethodSupport
+type AccessType = core.AccessType
+type DataAccess = core.DataAccess
+type BlobAccess = core.BlobAccess
+type SourceAccess = core.SourceAccess
+type SourceMeta = core.SourceMeta
+type ResourceAccess = core.ResourceAccess
+type ResourceMeta = core.ResourceMeta
+type RepositorySpec = core.RepositorySpec
+type GenericRepositorySpec = core.GenericRepositorySpec
+type RepositoryType = core.RepositoryType
+type ComponentReference = core.ComponentReference
 
-type BlobHandler = core2.BlobHandler
-type BlobHandlerKey = core2.BlobHandlerKey
-type StorageContext = core2.StorageContext
+type BlobHandler = core.BlobHandler
+type BlobHandlerKey = core.BlobHandlerKey
+type StorageContext = core.StorageContext
 
-type DigesterType = core2.DigesterType
-type BlobDigester = core2.BlobDigester
-type BlobDigesterRegistry = core2.BlobDigesterRegistry
-type DigestDescriptor = core2.DigestDescriptor
+type DigesterType = core.DigesterType
+type BlobDigester = core.BlobDigester
+type BlobDigesterRegistry = core.BlobDigesterRegistry
+type DigestDescriptor = core.DigestDescriptor
 
 func NewDigestDescriptor(digest digest.Digest, typ DigesterType) *DigestDescriptor {
-	return core2.NewDigestDescriptor(digest, typ)
+	return core.NewDigestDescriptor(digest, typ)
 }
 
 func DefaultBlobDigesterRegistry() BlobDigesterRegistry {
-	return core2.DefaultBlobDigesterRegistry
+	return core.DefaultBlobDigesterRegistry
 }
 
-func DefaultContext() core2.Context {
-	return core2.DefaultContext
+func DefaultContext() core.Context {
+	return core.DefaultContext
 }
 
 func ForRepo(ctxtype, repostype string) BlobHandlerKey {
-	return core2.ForRepo(ctxtype, repostype)
+	return core.ForRepo(ctxtype, repostype)
 }
 
 func ForMimeType(mimetype string) BlobHandlerKey {
-	return core2.ForMimeType(mimetype)
+	return core.ForMimeType(mimetype)
 }
 
 func RegisterRepositorySpecHandler(handler RepositorySpecHandler, types ...string) {
-	core2.RegisterRepositorySpecHandler(handler, types...)
+	core.RegisterRepositorySpecHandler(handler, types...)
 }
 
 func RegisterBlobHandler(handler BlobHandler, keys ...BlobHandlerKey) {
-	core2.RegisterBlobHandler(handler, keys...)
+	core.RegisterBlobHandler(handler, keys...)
 }
 
 func RegisterRepositoryType(name string, atype RepositoryType) {
-	core2.DefaultRepositoryTypeScheme.Register(name, atype)
+	core.DefaultRepositoryTypeScheme.Register(name, atype)
 }
 
 func RegisterAccessType(atype AccessType) {
-	core2.DefaultAccessTypeScheme.Register(atype.GetKind(), atype)
+	core.DefaultAccessTypeScheme.Register(atype.GetKind(), atype)
 }
 
 func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {
-	return core2.ToGenericRepositorySpec(spec)
+	return core.ToGenericRepositorySpec(spec)
 }
 
-const KIND_COMPONENTVERSION = core2.KIND_COMPONENTVERSION
+const KIND_COMPONENTVERSION = core.KIND_COMPONENTVERSION
 
 func ErrUnknownComponentVersion(name, version string) error {
-	return core2.ErrUnknownComponentVersion(name, version)
+	return core.ErrUnknownComponentVersion(name, version)
 }

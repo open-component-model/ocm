@@ -1,6 +1,6 @@
 // Code generated for package jsonscheme by go-bindata DO NOT EDIT. (@generated)
 // sources:
-// ../../../../../../resources/component-descriptor-v2-schema.yaml
+// ../../../../../../../resources/component-descriptor-v2-schema.yaml
 package jsonscheme
 
 import (
@@ -82,7 +82,7 @@ var _ResourcesComponentDescriptorV2SchemaYaml = []byte("\x1f\x8b\x08\x00\x00\x00
 func ResourcesComponentDescriptorV2SchemaYamlBytes() ([]byte, error) {
 	return bindataRead(
 		_ResourcesComponentDescriptorV2SchemaYaml,
-		"../../../../../../resources/component-descriptor-v2-schema.yaml",
+		"../../../../../../../resources/component-descriptor-v2-schema.yaml",
 	)
 }
 
@@ -92,7 +92,7 @@ func ResourcesComponentDescriptorV2SchemaYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "../../../../../../resources/component-descriptor-v2-schema.yaml", size: 8901, mode: os.FileMode(436), modTime: time.Unix(1644329280, 0)}
+	info := bindataFileInfo{name: "../../../../../../../resources/component-descriptor-v2-schema.yaml", size: 8901, mode: os.FileMode(436), modTime: time.Unix(1644329280, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -149,7 +149,7 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"../../../../../../resources/component-descriptor-v2-schema.yaml": ResourcesComponentDescriptorV2SchemaYaml,
+	"../../../../../../../resources/component-descriptor-v2-schema.yaml": ResourcesComponentDescriptorV2SchemaYaml,
 }
 
 // AssetDir returns the file names below a certain
@@ -199,8 +199,10 @@ var _bintree = &bintree{nil, map[string]*bintree{
 				"..": &bintree{nil, map[string]*bintree{
 					"..": &bintree{nil, map[string]*bintree{
 						"..": &bintree{nil, map[string]*bintree{
-							"resources": &bintree{nil, map[string]*bintree{
-								"component-descriptor-v2-schema.yaml": &bintree{ResourcesComponentDescriptorV2SchemaYaml, map[string]*bintree{}},
+							"..": &bintree{nil, map[string]*bintree{
+								"resources": &bintree{nil, map[string]*bintree{
+									"component-descriptor-v2-schema.yaml": &bintree{ResourcesComponentDescriptorV2SchemaYaml, map[string]*bintree{}},
+								}},
 							}},
 						}},
 					}},

@@ -19,8 +19,9 @@ import (
 	"reflect"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	index2 "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/index"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/index"
 )
 
 type StateHandler struct {
@@ -34,23 +35,23 @@ func NewStateHandler(fs vfs.FileSystem) accessobj.StateHandler {
 }
 
 func (i StateHandler) Initial() interface{} {
-	return index2.NewRepositoryIndex()
+	return index.NewRepositoryIndex()
 }
 
 func (i StateHandler) Encode(d interface{}) ([]byte, error) {
-	return index2.Encode(d.(*index2.RepositoryIndex).GetDescriptor())
+	return index.Encode(d.(*index.RepositoryIndex).GetDescriptor())
 }
 
 func (i StateHandler) Decode(data []byte) (interface{}, error) {
-	idx, err := index2.Decode(data)
+	idx, err := index.Decode(data)
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse artefact index read from %s: %w", ArtefactIndexFileName, err)
 	}
-	if idx.SchemaVersion != index2.SchemaVersion {
-		return nil, fmt.Errorf("unknown schema version %d for artefact index %s", index2.SchemaVersion, ArtefactIndexFileName)
+	if idx.SchemaVersion != index.SchemaVersion {
+		return nil, fmt.Errorf("unknown schema version %d for artefact index %s", index.SchemaVersion, ArtefactIndexFileName)
 	}
 
-	artefacts := index2.NewRepositoryIndex()
+	artefacts := index.NewRepositoryIndex()
 	for _, a := range idx.Index {
 		artefacts.AddArtefactInfo(&a)
 	}

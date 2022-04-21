@@ -20,8 +20,9 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	"github.com/open-component-model/ocm/pkg/common"
-	credentials2 "github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	local "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
@@ -44,10 +45,10 @@ var _ = Describe("docker config", func() {
 	specdata := "{\"type\":\"DockerConfig\",\"dockerConfigFile\":\"testdata/dockerconfig.json\"}"
 	specdata2 := "{\"type\":\"DockerConfig\",\"dockerConfigFile\":\"testdata/dockerconfig.json\",\"propagateConsumerIdentity\":true}"
 
-	var DefaultContext credentials2.Context
+	var DefaultContext credentials.Context
 
 	BeforeEach(func() {
-		DefaultContext = credentials2.New()
+		DefaultContext = credentials.New()
 	})
 
 	It("serializes repo spec", func() {
@@ -91,7 +92,7 @@ var _ = Describe("docker config", func() {
 		_, err := DefaultContext.RepositoryForConfig([]byte(specdata2), nil)
 		Expect(err).To(Succeed())
 
-		csrc, err := DefaultContext.GetCredentialsForConsumer(credentials2.ConsumerIdentity{
+		csrc, err := DefaultContext.GetCredentialsForConsumer(credentials.ConsumerIdentity{
 			cpi.ATTR_TYPE:        identity.VALUE_TYPE,
 			identity.ID_HOSTNAME: "ghcr.io",
 		})

@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	oci2 "github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
@@ -27,26 +27,26 @@ import (
 	ocihdlr "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	comparch2 "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch/comparch"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch/comparch"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/opencontainers/go-digest"
 )
 
 type ComponentVersion struct {
 	container *ComponentVersionContainer
-	*comparch2.ComponentVersionAccess
+	*comparch.ComponentVersionAccess
 }
 
 var _ cpi.ComponentVersionAccess = (*ComponentVersion)(nil)
 
-func NewComponentVersionAccess(mode accessobj.AccessMode, comp *ComponentAccess, version string, access oci2.ManifestAccess) (*ComponentVersion, error) {
+func NewComponentVersionAccess(mode accessobj.AccessMode, comp *ComponentAccess, version string, access oci.ManifestAccess) (*ComponentVersion, error) {
 	c, err := NewComponentVersionContainer(mode, comp, version, access)
 	if err != nil {
 		return nil, err
 	}
 	return &ComponentVersion{
 		container:              c,
-		ComponentVersionAccess: comparch2.NewComponentVersionAccess(c, true),
+		ComponentVersionAccess: comparch.NewComponentVersionAccess(c, true),
 	}, nil
 }
 
@@ -55,13 +55,13 @@ func NewComponentVersionAccess(mode accessobj.AccessMode, comp *ComponentAccess,
 type ComponentVersionContainer struct {
 	comp     *ComponentAccess
 	version  string
-	manifest oci2.ManifestAccess
+	manifest oci.ManifestAccess
 	state    accessobj.State
 }
 
-var _ comparch2.ComponentVersionContainer = (*ComponentVersionContainer)(nil)
+var _ comparch.ComponentVersionContainer = (*ComponentVersionContainer)(nil)
 
-func NewComponentVersionContainer(mode accessobj.AccessMode, comp *ComponentAccess, version string, manifest oci2.ManifestAccess) (*ComponentVersionContainer, error) {
+func NewComponentVersionContainer(mode accessobj.AccessMode, comp *ComponentAccess, version string, manifest oci.ManifestAccess) (*ComponentVersionContainer, error) {
 	state, err := NewState(mode, comp.name, version, manifest)
 	if err != nil {
 		return nil, err
@@ -170,7 +170,7 @@ func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string,
 	}
 
 	storagectx := ocihdlr.New(c.comp.repo.ocirepo, c.comp.namespace, c.manifest)
-	h := c.GetContext().BlobHandlers().GetHandler(oci2.CONTEXT_TYPE, c.comp.repo.ocirepo.GetSpecification().GetKind(), blob.MimeType())
+	h := c.GetContext().BlobHandlers().GetHandler(oci.CONTEXT_TYPE, c.comp.repo.ocirepo.GetSpecification().GetKind(), blob.MimeType())
 	if h != nil {
 		acc, err := h.StoreBlob(c.comp.repo, blob, refName, storagectx)
 		if err != nil {
@@ -199,7 +199,7 @@ func (c *ComponentVersionContainer) assureGlobalRef(d digest.Digest, url, name s
 	if err != nil {
 		return nil, err
 	}
-	var namespace oci2.NamespaceAccess
+	var namespace oci.NamespaceAccess
 	var version string
 	var tag string
 	if name == "" {
@@ -229,7 +229,7 @@ func (c *ComponentVersionContainer) assureGlobalRef(d digest.Digest, url, name s
 	if err != nil {
 		return nil, err
 	}
-	err = artefactset.TransferArtefact(art, namespace, oci2.AsTags(tag)...)
+	err = artefactset.TransferArtefact(art, namespace, oci.AsTags(tag)...)
 	if err != nil {
 		return nil, err
 	}

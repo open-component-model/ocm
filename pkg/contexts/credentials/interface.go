@@ -17,68 +17,67 @@ package credentials
 import (
 	"context"
 
-	core2 "github.com/open-component-model/ocm/pkg/contexts/credentials/core"
-
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const KIND_CREDENTIALS = core2.KIND_CREDENTIALS
-const KIND_CONSUMER = core2.KIND_CONSUMER
-const KIND_REPOSITORY = core2.KIND_REPOSITORY
+const KIND_CREDENTIALS = core.KIND_CREDENTIALS
+const KIND_CONSUMER = core.KIND_CONSUMER
+const KIND_REPOSITORY = core.KIND_REPOSITORY
 
-const CONTEXT_TYPE = core2.CONTEXT_TYPE
+const CONTEXT_TYPE = core.CONTEXT_TYPE
 
-const AliasRepositoryType = core2.AliasRepositoryType
+const AliasRepositoryType = core.AliasRepositoryType
 
-type Context = core2.Context
-type RepositoryTypeScheme = core2.RepositoryTypeScheme
-type Repository = core2.Repository
-type Credentials = core2.Credentials
-type CredentialsSource = core2.CredentialsSource
-type CredentialsChain = core2.CredentialsChain
-type CredentialsSpec = core2.CredentialsSpec
-type RepositorySpec = core2.RepositorySpec
+type Context = core.Context
+type RepositoryTypeScheme = core.RepositoryTypeScheme
+type Repository = core.Repository
+type Credentials = core.Credentials
+type CredentialsSource = core.CredentialsSource
+type CredentialsChain = core.CredentialsChain
+type CredentialsSpec = core.CredentialsSpec
+type RepositorySpec = core.RepositorySpec
 
-type ConsumerIdentity = core2.ConsumerIdentity
-type IdentityMatcher = core2.IdentityMatcher
+type ConsumerIdentity = core.ConsumerIdentity
+type IdentityMatcher = core.IdentityMatcher
 
-type GenericRepositorySpec = core2.GenericRepositorySpec
-type GenericCredentialsSpec = core2.GenericCredentialsSpec
-type DirectCredentials = core2.DirectCredentials
+type GenericRepositorySpec = core.GenericRepositorySpec
+type GenericCredentialsSpec = core.GenericCredentialsSpec
+type DirectCredentials = core.DirectCredentials
 
-func DefaultContext() core2.Context {
-	return core2.DefaultContext
+func DefaultContext() core.Context {
+	return core.DefaultContext
 }
 
 func ForContext(ctx context.Context) Context {
-	return core2.ForContext(ctx)
+	return core.ForContext(ctx)
 }
 
 func NewCredentialsSpec(name string, repospec RepositorySpec) CredentialsSpec {
-	return core2.NewCredentialsSpec(name, repospec)
+	return core.NewCredentialsSpec(name, repospec)
 }
 
 func NewGenericCredentialsSpec(name string, repospec *GenericRepositorySpec) CredentialsSpec {
-	return core2.NewGenericCredentialsSpec(name, repospec)
+	return core.NewGenericCredentialsSpec(name, repospec)
 }
 
 func NewGenericRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
-	return core2.NewGenericRepositorySpec(data, unmarshaler)
+	return core.NewGenericRepositorySpec(data, unmarshaler)
 }
 
 func NewCredentials(props common.Properties) Credentials {
-	return core2.NewCredentials(props)
+	return core.NewCredentials(props)
 }
 
 func ToGenericCredentialsSpec(spec CredentialsSpec) (*GenericCredentialsSpec, error) {
-	return core2.ToGenericCredentialsSpec(spec)
+	return core.ToGenericCredentialsSpec(spec)
 }
 
 func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {
-	return core2.ToGenericRepositorySpec(spec)
+	return core.ToGenericRepositorySpec(spec)
 }
 
 func ErrUnknownCredentials(name string) error {
-	return core2.ErrUnknownCredentials(name)
+	return core.ErrUnknownCredentials(name)
 }

@@ -15,9 +15,10 @@
 package dockerconfig
 
 import (
+	"k8s.io/apimachinery/pkg/util/sets"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"k8s.io/apimachinery/pkg/util/sets"
 )
 
 type Credentials struct {

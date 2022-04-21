@@ -18,7 +18,7 @@ import (
 	"context"
 	"reflect"
 
-	datacontext2 "github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -37,9 +37,9 @@ const AllGenerations int64 = 0
 const CONTEXT_TYPE = "config.context.gardener.cloud"
 
 type Context interface {
-	datacontext2.Context
+	datacontext.Context
 
-	AttributesContext() datacontext2.AttributesContext
+	AttributesContext() datacontext.AttributesContext
 
 	// Info provides the context for nested configuration evaluation
 	Info() string
@@ -76,15 +76,15 @@ var DefaultContext = Builder{}.New()
 // This is eiter an explicit context or the default context.
 // The returned context incorporates the given context.
 func ForContext(ctx context.Context) Context {
-	return datacontext2.ForContextByKey(ctx, key, DefaultContext).(Context)
+	return datacontext.ForContextByKey(ctx, key, DefaultContext).(Context)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type __context struct {
-	datacontext2.Context
+	datacontext.Context
 
-	sharedAttributes datacontext2.AttributesContext
+	sharedAttributes datacontext.AttributesContext
 
 	knownConfigTypes ConfigTypeScheme
 
@@ -98,7 +98,7 @@ type _context struct {
 
 var _ Context = &_context{}
 
-func newContext(shared datacontext2.AttributesContext, reposcheme ConfigTypeScheme) Context {
+func newContext(shared datacontext.AttributesContext, reposcheme ConfigTypeScheme) Context {
 	c := &_context{
 		__context: &__context{
 			sharedAttributes: shared,
@@ -106,7 +106,7 @@ func newContext(shared datacontext2.AttributesContext, reposcheme ConfigTypeSche
 			configs:          NewConfigStore(),
 		},
 	}
-	c.Context = datacontext2.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
+	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
 	return c
 }
 
@@ -121,7 +121,7 @@ func (c *_context) WithInfo(desc string) Context {
 	return &_context{c.__context, desc}
 }
 
-func (c *_context) AttributesContext() datacontext2.AttributesContext {
+func (c *_context) AttributesContext() datacontext.AttributesContext {
 	return c.sharedAttributes
 }
 

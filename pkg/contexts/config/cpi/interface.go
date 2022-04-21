@@ -17,60 +17,60 @@ package cpi
 // This is the Context Provider Interface for credential providers
 
 import (
-	core2 "github.com/open-component-model/ocm/pkg/contexts/config/core"
+	"github.com/open-component-model/ocm/pkg/contexts/config/core"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const KIND_CONFIGTYPE = core2.KIND_CONFIGTYPE
+const KIND_CONFIGTYPE = core.KIND_CONFIGTYPE
 
-const CONTEXT_TYPE = core2.CONTEXT_TYPE
+const CONTEXT_TYPE = core.CONTEXT_TYPE
 
-type Context = core2.Context
-type Config = core2.Config
-type ConfigType = core2.ConfigType
-type ConfigTypeScheme = core2.ConfigTypeScheme
-type GenericConfig = core2.GenericConfig
+type Context = core.Context
+type Config = core.Config
+type ConfigType = core.ConfigType
+type ConfigTypeScheme = core.ConfigTypeScheme
+type GenericConfig = core.GenericConfig
 
-var DefaultContext = core2.DefaultContext
+var DefaultContext = core.DefaultContext
 
 func RegisterConfigType(name string, atype ConfigType) {
-	core2.DefaultConfigTypeScheme.Register(name, atype)
+	core.DefaultConfigTypeScheme.Register(name, atype)
 }
 
 func NewGenericConfig(data []byte, unmarshaler runtime.Unmarshaler) (Config, error) {
-	return core2.NewGenericConfig(data, unmarshaler)
+	return core.NewGenericConfig(data, unmarshaler)
 }
 
 func ToGenericConfig(c Config) (*GenericConfig, error) {
-	return core2.ToGenericConfig(c)
+	return core.ToGenericConfig(c)
 }
 
 func NewConfigTypeScheme() ConfigTypeScheme {
-	return core2.NewConfigTypeScheme(nil)
+	return core.NewConfigTypeScheme(nil)
 }
 
 func IsGeneric(cfg Config) bool {
-	return core2.IsGeneric(cfg)
+	return core.IsGeneric(cfg)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type Updater = core2.Updater
+type Updater = core.Updater
 
 func NewUpdate(ctx Context) Updater {
-	return core2.NewUpdater(ctx)
+	return core.NewUpdater(ctx)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 func ErrNoContext(name string) error {
-	return core2.ErrNoContext(name)
+	return core.ErrNoContext(name)
 }
 
 func IsErrNoContext(err error) bool {
-	return core2.IsErrNoContext(err)
+	return core.IsErrNoContext(err)
 }
 
 func IsErrConfigNotApplicable(err error) bool {
-	return core2.IsErrConfigNotApplicable(err)
+	return core.IsErrConfigNotApplicable(err)
 }

@@ -18,18 +18,18 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const (
-	CommonTransportFormatRepositoryType   = cpi2.CommonTransportFormat
+	CommonTransportFormatRepositoryType   = cpi.CommonTransportFormat
 	CommonTransportFormatRepositoryTypeV1 = CommonTransportFormatRepositoryType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
-	cpi2.RegisterRepositoryType(CommonTransportFormatRepositoryType, cpi2.NewRepositoryType(CommonTransportFormatRepositoryType, &RepositorySpec{}))
-	cpi2.RegisterRepositoryType(CommonTransportFormatRepositoryTypeV1, cpi2.NewRepositoryType(CommonTransportFormatRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(CommonTransportFormatRepositoryType, cpi.NewRepositoryType(CommonTransportFormatRepositoryType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(CommonTransportFormatRepositoryTypeV1, cpi.NewRepositoryType(CommonTransportFormatRepositoryTypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
@@ -43,7 +43,7 @@ type RepositorySpec struct {
 	AccessMode accessobj.AccessMode `json:"accessMode,omitempty"`
 }
 
-var _ cpi2.RepositorySpec = (*RepositorySpec)(nil)
+var _ cpi.RepositorySpec = (*RepositorySpec)(nil)
 
 // NewRepositorySpec creates a new RepositorySpec
 func NewRepositorySpec(mode accessobj.AccessMode, filePath string, opts ...accessio.Option) *RepositorySpec {
@@ -63,6 +63,6 @@ func (a *RepositorySpec) GetType() string {
 func (s *RepositorySpec) Name() string {
 	return s.FilePath
 }
-func (a *RepositorySpec) Repository(ctx cpi2.Context, creds credentials.Credentials) (cpi2.Repository, error) {
+func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	return Open(ctx, a.AccessMode, a.FilePath, 0700, a.Options)
 }

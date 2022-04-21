@@ -19,7 +19,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
 	"github.com/open-component-model/ocm/pkg/common"
-	ocm2 "github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -30,7 +30,7 @@ func ClosureExplode(opts *output.Options, e interface{}) []interface{} {
 
 func traverse(hist common.History, o *Object, octx out.Context, lookup *lookupoption.Option) []interface{} {
 	key := common.VersionedElementKey(o.ComponentVersion)
-	if err := hist.Add(ocm2.KIND_COMPONENTVERSION, key); err != nil {
+	if err := hist.Add(ocm.KIND_COMPONENTVERSION, key); err != nil {
 		return nil
 	}
 	result := []interface{}{o}
@@ -46,7 +46,7 @@ func traverse(hist common.History, o *Object, octx out.Context, lookup *lookupop
 			continue // skip same ref wit different attributes for recursion
 		}
 		found[key] = true
-		var nested ocm2.ComponentVersionAccess
+		var nested ocm.ComponentVersionAccess
 		vers := ref.Version
 		comp, err := o.Repository.LookupComponent(ref.ComponentName)
 		if err != nil {
@@ -67,9 +67,9 @@ func traverse(hist common.History, o *Object, octx out.Context, lookup *lookupop
 		var obj = &Object{
 			History:  hist,
 			Identity: ref.GetIdentity(refs),
-			Spec: ocm2.RefSpec{
+			Spec: ocm.RefSpec{
 				UniformRepositorySpec: o.Spec.UniformRepositorySpec,
-				CompSpec: ocm2.CompSpec{
+				CompSpec: ocm.CompSpec{
 					Component: ref.ComponentName,
 					Version:   &vers,
 				},

@@ -18,7 +18,7 @@ import (
 	"reflect"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	core2 "github.com/open-component-model/ocm/pkg/contexts/ocm/core"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -28,9 +28,9 @@ type DefaultRepositoryType struct {
 	checker RepositoryAccessMethodChecker
 }
 
-type RepositoryAccessMethodChecker func(core2.Context, compdesc.AccessSpec) bool
+type RepositoryAccessMethodChecker func(core.Context, compdesc.AccessSpec) bool
 
-func NewRepositoryType(name string, proto core2.RepositorySpec, checker RepositoryAccessMethodChecker) core2.RepositoryType {
+func NewRepositoryType(name string, proto core.RepositorySpec, checker RepositoryAccessMethodChecker) core.RepositoryType {
 	t := reflect.TypeOf(proto)
 	for t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -42,7 +42,7 @@ func NewRepositoryType(name string, proto core2.RepositorySpec, checker Reposito
 	}
 }
 
-func (t *DefaultRepositoryType) LocalSupportForAccessSpec(ctx core2.Context, a compdesc.AccessSpec) bool {
+func (t *DefaultRepositoryType) LocalSupportForAccessSpec(ctx core.Context, a compdesc.AccessSpec) bool {
 	if t.checker != nil {
 		return t.checker(ctx, a)
 	}

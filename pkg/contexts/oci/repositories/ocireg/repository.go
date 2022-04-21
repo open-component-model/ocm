@@ -22,9 +22,8 @@ import (
 	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/remotes"
 	"github.com/containerd/containerd/remotes/docker/config"
-	credentials2 "github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/docker"
@@ -34,7 +33,7 @@ import (
 type RepositoryInfo struct {
 	Scheme  string
 	Locator string
-	Creds   credentials2.Credentials
+	Creds   credentials.Credentials
 	Legacy  bool
 }
 
@@ -84,9 +83,9 @@ func (r *Repository) IsClosed() bool {
 	return false
 }
 
-func (r *Repository) getCreds(comp string) (credentials2.Credentials, error) {
+func (r *Repository) getCreds(comp string) (credentials.Credentials, error) {
 	host, port, base := r.info.HostInfo()
-	id := credentials2.ConsumerIdentity{
+	id := credentials.ConsumerIdentity{
 		"type":               identity.VALUE_TYPE,
 		identity.ID_HOSTNAME: host,
 	}
@@ -116,7 +115,7 @@ func (r *Repository) getCreds(comp string) (credentials2.Credentials, error) {
 func (r *Repository) getResolver(comp string) (remotes.Resolver, error) {
 	creds, err := r.getCreds(comp)
 	if err != nil {
-		if !errors.IsErrUnknownKind(err, credentials2.KIND_CONSUMER) {
+		if !errors.IsErrUnknownKind(err, credentials.KIND_CONSUMER) {
 			return nil, err
 		}
 	}
@@ -126,11 +125,11 @@ func (r *Repository) getResolver(comp string) (remotes.Resolver, error) {
 			Credentials: func(host string) (string, string, error) {
 				if creds != nil {
 					//fmt.Printf("************** creds for %s: %s\n", host, creds)
-					p := creds.GetProperty(credentials2.ATTR_IDENTITY_TOKEN)
+					p := creds.GetProperty(credentials.ATTR_IDENTITY_TOKEN)
 					if p == "" {
-						p = creds.GetProperty(credentials2.ATTR_PASSWORD)
+						p = creds.GetProperty(credentials.ATTR_PASSWORD)
 					}
-					return creds.GetProperty(credentials2.ATTR_USERNAME), p, err
+					return creds.GetProperty(credentials.ATTR_USERNAME), p, err
 				}
 				//fmt.Printf("************** no creds for %s\n", host)
 				return "", "", nil
@@ -179,7 +178,7 @@ func (r *Repository) ExistsArtefact(name string, version string) (bool, error) {
 	return true, nil
 }
 
-func (r *Repository) LookupArtefact(name string, version string) (core.ArtefactAccess, error) {
+func (r *Repository) LookupArtefact(name string, version string) (cpi.ArtefactAccess, error) {
 	n, err := r.LookupNamespace(name)
 	if err != nil {
 		return nil, err

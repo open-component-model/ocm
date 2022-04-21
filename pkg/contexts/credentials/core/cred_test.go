@@ -21,12 +21,12 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/open-component-model/ocm/pkg/common"
-	credentials2 "github.com/open-component-model/ocm/pkg/contexts/credentials"
-	core2 "github.com/open-component-model/ocm/pkg/contexts/credentials/core"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/memory"
 )
 
-var DefaultContext = credentials2.New()
+var DefaultContext = credentials.New()
 
 var _ = Describe("generic credentials", func() {
 	props := common.Properties{
@@ -40,23 +40,23 @@ var _ = Describe("generic credentials", func() {
 
 	It("de/serializes credentials spec", func() {
 		repospec := memory.NewRepositorySpec("test")
-		credspec := credentials2.NewCredentialsSpec("cred", repospec)
+		credspec := credentials.NewCredentialsSpec("cred", repospec)
 
 		data, err := json.Marshal(credspec)
 		Expect(err).To(Succeed())
 		Expect(data).To(Equal([]byte(credmemdata)))
 
-		credspec = &core2.DefaultCredentialsSpec{}
+		credspec = &core.DefaultCredentialsSpec{}
 		err = json.Unmarshal(data, credspec)
 		Expect(err).To(Succeed())
-		s := credspec.(*core2.DefaultCredentialsSpec)
+		s := credspec.(*core.DefaultCredentialsSpec)
 		Expect(reflect.TypeOf(s.RepositorySpec).String()).To(Equal("*memory.RepositorySpec"))
 		Expect(s.CredentialsName).To(Equal("cred"))
 		Expect(s.RepositorySpec.(*memory.RepositorySpec).RepositoryName).To(Equal("test"))
 	})
 
 	It("de/serializes generic credentials spec", func() {
-		credspec := &core2.GenericCredentialsSpec{}
+		credspec := &core.GenericCredentialsSpec{}
 
 		err := json.Unmarshal([]byte(credmemdata), credspec)
 		Expect(err).To(Succeed())
@@ -67,7 +67,7 @@ var _ = Describe("generic credentials", func() {
 	})
 
 	It("de/serializes generic repository spec", func() {
-		credspec := &core2.GenericRepositorySpec{}
+		credspec := &core.GenericRepositorySpec{}
 
 		err := json.Unmarshal([]byte(memdata), credspec)
 		Expect(err).To(Succeed())
@@ -79,17 +79,17 @@ var _ = Describe("generic credentials", func() {
 
 	It("converts credentials spec to generic ones", func() {
 		repospec := memory.NewRepositorySpec("test")
-		credspec := credentials2.NewCredentialsSpec("cred", repospec)
+		credspec := credentials.NewCredentialsSpec("cred", repospec)
 		data, err := json.Marshal(credspec)
 		Expect(err).To(Succeed())
 
-		gen, err := credentials2.ToGenericCredentialsSpec(credspec)
+		gen, err := credentials.ToGenericCredentialsSpec(credspec)
 		Expect(err).To(Succeed())
 
 		Expect(reflect.TypeOf(gen).String()).To(Equal("*core.GenericCredentialsSpec"))
 		Expect(reflect.TypeOf(gen.RepositorySpec).String()).To(Equal("*core.GenericRepositorySpec"))
 
-		gen2, err := credentials2.ToGenericCredentialsSpec(gen)
+		gen2, err := credentials.ToGenericCredentialsSpec(gen)
 		Expect(err).To(Succeed())
 		Expect(gen2).To(BeIdenticalTo(gen))
 

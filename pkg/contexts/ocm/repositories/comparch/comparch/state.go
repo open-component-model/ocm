@@ -19,7 +19,7 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	compdesc2 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 )
 
 type StateHandler struct {
@@ -33,15 +33,15 @@ func NewStateHandler(fs vfs.FileSystem) accessobj.StateHandler {
 }
 
 func (i StateHandler) Initial() interface{} {
-	return compdesc2.New("", "")
+	return compdesc.New("", "")
 }
 
 func (i StateHandler) Encode(d interface{}) ([]byte, error) {
-	return compdesc2.Encode(d.(*compdesc2.ComponentDescriptor))
+	return compdesc.Encode(d.(*compdesc.ComponentDescriptor))
 }
 
 func (i StateHandler) Decode(data []byte) (interface{}, error) {
-	return compdesc2.Decode(data)
+	return compdesc.Decode(data)
 }
 
 func (i StateHandler) Equivalent(a, b interface{}) bool {

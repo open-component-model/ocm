@@ -20,20 +20,19 @@ import (
 	"github.com/containers/image/v5/types"
 	dockertypes "github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 )
 
 type Repository struct {
-	ctx    cpi2.Context
+	ctx    cpi.Context
 	spec   *RepositorySpec
 	sysctx *types.SystemContext
 	client *client.Client
 }
 
-var _ cpi2.Repository = &Repository{}
+var _ cpi.Repository = &Repository{}
 
-func NewRepository(ctx cpi2.Context, spec *RepositorySpec) (*Repository, error) {
+func NewRepository(ctx cpi.Context, spec *RepositorySpec) (*Repository, error) {
 	sysctx := &types.SystemContext{
 		DockerDaemonHost: spec.DockerHost,
 	}
@@ -50,7 +49,7 @@ func NewRepository(ctx cpi2.Context, spec *RepositorySpec) (*Repository, error) 
 	}, nil
 }
 
-func (r *Repository) NamespaceLister() cpi2.NamespaceLister {
+func (r *Repository) NamespaceLister() cpi.NamespaceLister {
 	return r
 }
 
@@ -59,7 +58,7 @@ func (r *Repository) NumNamespaces(prefix string) (int, error) {
 	if err != nil {
 		return -1, err
 	}
-	return len(cpi2.FilterByNamespacePrefix(prefix, repos)), nil
+	return len(cpi.FilterByNamespacePrefix(prefix, repos)), nil
 }
 
 func (r *Repository) GetNamespaces(prefix string, closure bool) ([]string, error) {
@@ -67,7 +66,7 @@ func (r *Repository) GetNamespaces(prefix string, closure bool) ([]string, error
 	if err != nil {
 		return nil, err
 	}
-	return cpi2.FilterChildren(closure, cpi2.FilterByNamespacePrefix(prefix, repos)), nil
+	return cpi.FilterChildren(closure, cpi.FilterByNamespacePrefix(prefix, repos)), nil
 }
 
 func (r *Repository) GetRepositories() ([]string, error) {
@@ -76,7 +75,7 @@ func (r *Repository) GetRepositories() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	var result cpi2.StringList
+	var result cpi.StringList
 	for _, e := range list {
 		if len(e.RepoTags) > 0 {
 			for _, t := range e.RepoTags {
@@ -102,7 +101,7 @@ func (r *Repository) IsClosed() bool {
 	return false
 }
 
-func (r *Repository) GetSpecification() cpi2.RepositorySpec {
+func (r *Repository) GetSpecification() cpi.RepositorySpec {
 	return r.spec
 }
 
@@ -120,7 +119,7 @@ func (r *Repository) ExistsArtefact(name string, version string) (bool, error) {
 	return len(list) > 0, nil
 }
 
-func (r *Repository) LookupArtefact(name string, version string) (core.ArtefactAccess, error) {
+func (r *Repository) LookupArtefact(name string, version string) (cpi.ArtefactAccess, error) {
 	n, err := r.LookupNamespace(name)
 	if err != nil {
 		return nil, err
@@ -128,7 +127,7 @@ func (r *Repository) LookupArtefact(name string, version string) (core.ArtefactA
 	return n.GetArtefact(version)
 }
 
-func (r *Repository) LookupNamespace(name string) (cpi2.NamespaceAccess, error) {
+func (r *Repository) LookupNamespace(name string) (cpi.NamespaceAccess, error) {
 	return NewNamespace(r, name)
 }
 

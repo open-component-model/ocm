@@ -16,7 +16,6 @@ package empty
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -53,7 +52,7 @@ func (r Repository) LookupArtefact(name string, version string) (cpi.ArtefactAcc
 	return nil, cpi.ErrUnknownArtefact(name, version)
 }
 
-func (r Repository) LookupNamespace(name string) (core.NamespaceAccess, error) {
+func (r Repository) LookupNamespace(name string) (cpi.NamespaceAccess, error) {
 	return nil, errors.ErrNotSupported("write access")
 }
 

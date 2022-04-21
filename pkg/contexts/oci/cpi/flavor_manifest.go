@@ -19,7 +19,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	artdesc2 "github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/opencontainers/go-digest"
 )
@@ -30,8 +30,8 @@ type ManifestImpl struct {
 
 var _ ManifestAccess = (*ManifestImpl)(nil)
 
-func NewManifest(access ArtefactSetContainer, defs ...*artdesc2.Manifest) (*ManifestImpl, error) {
-	var def *artdesc2.Manifest
+func NewManifest(access ArtefactSetContainer, defs ...*artdesc.Manifest) (*ManifestImpl, error) {
+	var def *artdesc.Manifest
 	if len(defs) != 0 && defs[0] != nil {
 		def = defs[0]
 	}
@@ -66,10 +66,10 @@ type manifestMapper struct {
 var _ accessobj.State = (*manifestMapper)(nil)
 
 func (m *manifestMapper) GetState() interface{} {
-	return m.State.GetState().(*artdesc2.Artefact).Manifest()
+	return m.State.GetState().(*artdesc.Artefact).Manifest()
 }
 func (m *manifestMapper) GetOriginalState() interface{} {
-	return m.State.GetOriginalState().(*artdesc2.Artefact).Manifest()
+	return m.State.GetOriginalState().(*artdesc.Artefact).Manifest()
 }
 
 func NewManifestForArtefact(a *ArtefactImpl) *ManifestImpl {
@@ -95,22 +95,22 @@ func (m *ManifestImpl) AddBlob(access BlobAccess) error {
 	return m.addBlob(access)
 }
 
-func (m *ManifestImpl) Manifest() (*artdesc2.Manifest, error) {
+func (m *ManifestImpl) Manifest() (*artdesc.Manifest, error) {
 	return m.GetDescriptor(), nil
 }
 
-func (m *ManifestImpl) Index() (*artdesc2.Index, error) {
+func (m *ManifestImpl) Index() (*artdesc.Index, error) {
 	return nil, errors.ErrInvalid()
 }
 
-func (m *ManifestImpl) Artefact() *artdesc2.Artefact {
-	a := artdesc2.New()
+func (m *ManifestImpl) Artefact() *artdesc.Artefact {
+	a := artdesc.New()
 	_ = a.SetManifest(m.GetDescriptor())
 	return a
 }
 
-func (m *ManifestImpl) GetDescriptor() *artdesc2.Manifest {
-	return m.state.GetState().(*artdesc2.Manifest)
+func (m *ManifestImpl) GetDescriptor() *artdesc.Manifest {
+	return m.state.GetState().(*artdesc.Manifest)
 }
 
 func (m *ManifestImpl) GetBlobDescriptor(digest digest.Digest) *Descriptor {
@@ -140,18 +140,18 @@ func (m *ManifestImpl) GetBlob(digest digest.Digest) (BlobAccess, error) {
 	return nil, ErrBlobNotFound(digest)
 }
 
-func (m *ManifestImpl) AddLayer(blob BlobAccess, d *artdesc2.Descriptor) (int, error) {
+func (m *ManifestImpl) AddLayer(blob BlobAccess, d *artdesc.Descriptor) (int, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	if d == nil {
-		d = &artdesc2.Descriptor{}
+		d = &artdesc.Descriptor{}
 	}
 	d.Digest = blob.Digest()
 	d.Size = blob.Size()
 	if d.MediaType == "" {
 		d.MediaType = blob.MimeType()
 		if d.MediaType == "" {
-			d.MediaType = artdesc2.MediaTypeImageLayer
+			d.MediaType = artdesc.MediaTypeImageLayer
 			r, err := blob.Reader()
 			if err != nil {
 				return -1, err
@@ -161,7 +161,7 @@ func (m *ManifestImpl) AddLayer(blob BlobAccess, d *artdesc2.Descriptor) (int, e
 			if err == nil {
 				err = zr.Close()
 				if err == nil {
-					d.MediaType = artdesc2.MediaTypeImageLayerGzip
+					d.MediaType = artdesc.MediaTypeImageLayerGzip
 				}
 			}
 		}

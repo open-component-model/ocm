@@ -16,10 +16,11 @@ package artefactset
 
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -29,8 +30,8 @@ const (
 )
 
 func init() {
-	cpi2.RegisterRepositoryType(ArtefactSetType, cpi2.NewRepositoryType(ArtefactSetType, &RepositorySpec{}))
-	cpi2.RegisterRepositoryType(ArtefactSetTypeV1, cpi2.NewRepositoryType(ArtefactSetTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(ArtefactSetType, cpi.NewRepositoryType(ArtefactSetType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(ArtefactSetTypeV1, cpi.NewRepositoryType(ArtefactSetTypeV1, &RepositorySpec{}))
 }
 
 type RepositorySpec struct {
@@ -60,14 +61,14 @@ func (s *RepositorySpec) Name() string {
 func (a *RepositorySpec) GetType() string {
 	return ArtefactSetType
 }
-func (a *RepositorySpec) Repository(ctx cpi2.Context, creds credentials.Credentials) (cpi2.Repository, error) {
+func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	return NewRepository(ctx, a)
 }
-func (a *RepositorySpec) AsUniformSpec(cpi2.Context) cpi2.UniformRepositorySpec {
+func (a *RepositorySpec) AsUniformSpec(cpi.Context) cpi.UniformRepositorySpec {
 	opts := a.Options.Default()
 	p, err := vfs.Canonical(opts.PathFileSystem, a.FilePath, false)
 	if err != nil {
-		return cpi2.UniformRepositorySpec{Type: a.GetKind(), Info: a.FilePath}
+		return cpi.UniformRepositorySpec{Type: a.GetKind(), Info: a.FilePath}
 	}
-	return cpi2.UniformRepositorySpec{Type: a.GetKind(), Info: p}
+	return cpi.UniformRepositorySpec{Type: a.GetKind(), Info: p}
 }

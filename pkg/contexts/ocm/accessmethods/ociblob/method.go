@@ -20,7 +20,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/opencontainers/go-digest"
@@ -31,8 +31,8 @@ const Type = "ociBlob"
 const TypeV1 = Type + runtime.VersionSeparator + "v1"
 
 func init() {
-	cpi2.RegisterAccessType(cpi2.NewAccessSpecType(Type, &AccessSpec{}))
-	cpi2.RegisterAccessType(cpi2.NewAccessSpecType(TypeV1, &AccessSpec{}))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}))
 }
 
 // New creates a new OCIBlob accessor.
@@ -63,24 +63,24 @@ type AccessSpec struct {
 	Size int64 `json:"size"`
 }
 
-var _ cpi2.AccessSpec = (*AccessSpec)(nil)
+var _ cpi.AccessSpec = (*AccessSpec)(nil)
 
-func (s AccessSpec) IsLocal(context cpi2.Context) bool {
+func (s AccessSpec) IsLocal(context cpi.Context) bool {
 	return false
 }
 
-func (s *AccessSpec) AccessMethod(access cpi2.ComponentVersionAccess) (cpi2.AccessMethod, error) {
+func (s *AccessSpec) AccessMethod(access cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
 	return &accessMethod{access, s}, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type accessMethod struct {
-	comp cpi2.ComponentVersionAccess
+	comp cpi.ComponentVersionAccess
 	spec *AccessSpec
 }
 
-var _ cpi2.AccessMethod = (*accessMethod)(nil)
+var _ cpi.AccessMethod = (*accessMethod)(nil)
 
 func (o *accessMethod) GetKind() string {
 	return Type
@@ -98,7 +98,7 @@ func (o *accessMethod) MimeType() string {
 	return o.MimeType()
 }
 
-func (m *accessMethod) getBlob() (cpi2.BlobAccess, error) {
+func (m *accessMethod) getBlob() (cpi.BlobAccess, error) {
 	ref, err := oci.ParseRef(m.spec.Reference)
 	if err != nil {
 		return nil, err

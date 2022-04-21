@@ -33,12 +33,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils"
-	docker2 "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
+	regdocker "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer"
+	_ "github.com/open-component-model/ocm/pkg/contexts/ocm"
 	extdocker "github.com/open-component-model/ocm/pkg/docker"
 	"github.com/open-component-model/ocm/pkg/mime"
-	_ "github.com/open-component-model/ocm/pkg/ocm"
 )
 
 const MIME_OCTET = mime.MIME_OCTET
@@ -96,7 +96,7 @@ func daemonrwritetest() {
 	ctx := oci.DefaultContext()
 
 	version := "0.1-dev"
-	spec := docker2.NewRepositorySpec()
+	spec := regdocker.NewRepositorySpec()
 	name := "ghcr.io/mandelsoft/pause"
 
 	repo, err := ctx.RepositoryForSpec(spec)
@@ -112,7 +112,7 @@ func daemonrwritetest() {
 
 	defer art.Close()
 
-	_, err = docker2.Convert(art, nil, dst)
+	_, err = regdocker.Convert(art, nil, dst)
 	handleError(err, "convert")
 	err = dst.Commit(context.Background(), nil)
 	handleError(err, "commit")
@@ -122,7 +122,7 @@ func dockerwritetest() {
 	ctx := oci.DefaultContext()
 
 	version := "0.1-dev"
-	spec := docker2.NewRepositorySpec()
+	spec := regdocker.NewRepositorySpec()
 	name := "ghcr.io/mandelsoft/pause"
 
 	tversion := "test"
@@ -156,7 +156,7 @@ func dockerwritetest() {
 	acc, err := art.GetDescriptor().ToBlobAccess()
 	handleError(err, "digest")
 
-	err = tns.AddTags(docker2.ImageId(art), tversion)
+	err = tns.AddTags(regdocker.ImageId(art), tversion)
 	handleError(err, "tag")
 
 	_ = tversion
@@ -217,7 +217,7 @@ func dockerreadtest() {
 	ctx := oci.DefaultContext()
 
 	version := "0.1-dev"
-	spec := docker2.NewRepositorySpec()
+	spec := regdocker.NewRepositorySpec()
 	name := "ghcr.io/mandelsoft/pause"
 
 	repo, err := ctx.RepositoryForSpec(spec)

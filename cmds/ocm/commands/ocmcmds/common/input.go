@@ -25,12 +25,13 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"k8s.io/apimachinery/pkg/util/validation/field"
+
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
-	docker2 "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 // MediaTypeTar defines the media type for a tarred file
@@ -139,11 +140,11 @@ func (input *BlobInput) GetBlob(ctx clictx.Context, inputFilePath string) (acces
 
 	switch input.Type {
 	case DockerInputType:
-		locator, version, err := docker2.ParseGenericRef(inputPath)
+		locator, version, err := docker.ParseGenericRef(inputPath)
 		if err != nil {
 			return nil, "", err
 		}
-		spec := docker2.NewRepositorySpec()
+		spec := docker.NewRepositorySpec()
 		repo, err := ctx.OCIContext().RepositoryForSpec(spec)
 		if err != nil {
 			return nil, "", err
@@ -438,7 +439,7 @@ func (input *BlobInput) Validate(fldPath *field.Path, ctx clictx.Context, inputF
 					}
 				}
 			} else {
-				_, _, err := docker2.ParseGenericRef(input.Path)
+				_, _, err := docker.ParseGenericRef(input.Path)
 				if err != nil {
 					allErrs = append(allErrs, field.Invalid(pathField, input.Path, err.Error()))
 

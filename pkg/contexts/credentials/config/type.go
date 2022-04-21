@@ -16,7 +16,7 @@ package config
 
 import (
 	"github.com/open-component-model/ocm/pkg/common"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
+	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -28,8 +28,8 @@ const (
 )
 
 func init() {
-	cpi2.RegisterConfigType(CredentialsConfigType, cpi2.NewConfigType(CredentialsConfigType, &ConfigSpec{}))
-	cpi2.RegisterConfigType(CredentialsConfigTypeV1, cpi2.NewConfigType(CredentialsConfigTypeV1, &ConfigSpec{}))
+	cfgcpi.RegisterConfigType(CredentialsConfigType, cfgcpi.NewConfigType(CredentialsConfigType, &ConfigSpec{}))
+	cfgcpi.RegisterConfigType(CredentialsConfigTypeV1, cfgcpi.NewConfigType(CredentialsConfigTypeV1, &ConfigSpec{}))
 }
 
 // ConfigSpec describes a memory based repository interface.
@@ -133,11 +133,11 @@ func (a *ConfigSpec) AddAlias(name string, repo cpi.RepositorySpec, creds ...cpi
 	return nil
 }
 
-func (a *ConfigSpec) ApplyTo(ctx cpi2.Context, target interface{}) error {
+func (a *ConfigSpec) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	list := errors.ErrListf("applying config")
 	t, ok := target.(cpi.Context)
 	if !ok {
-		return cpi2.ErrNoContext(CredentialsConfigType)
+		return cfgcpi.ErrNoContext(CredentialsConfigType)
 	}
 	for _, e := range a.Consumers {
 		t.SetCredentialsForConsumer(e.Identity, CredentialsChain(e.Credentials...))

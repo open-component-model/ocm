@@ -18,6 +18,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/spf13/cobra"
+
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/destoption"
@@ -32,9 +34,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	artefactset2 "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/spf13/cobra"
 )
 
 var (
@@ -148,12 +149,12 @@ func (d *download) Save(o *artefacthdlr.Object, f string) error {
 	digest := blob.Digest()
 
 	format := formatoption.From(d.opts)
-	set, err := artefactset2.Create(accessobj.ACC_CREATE, f, format.Mode(), format.Format, accessio.PathFileSystem(dest.PathFilesystem))
+	set, err := artefactset.Create(accessobj.ACC_CREATE, f, format.Mode(), format.Format, accessio.PathFileSystem(dest.PathFilesystem))
 	if err != nil {
 		return err
 	}
 	defer set.Close()
-	err = artefactset2.TransferArtefact(art, set)
+	err = artefactset.TransferArtefact(art, set)
 	if err != nil {
 		return err
 	}
@@ -164,7 +165,7 @@ func (d *download) Save(o *artefacthdlr.Object, f string) error {
 			return err
 		}
 	}
-	set.Annotate(artefactset2.MAINARTEFACT_ANNOTATION, digest.String())
+	set.Annotate(artefactset.MAINARTEFACT_ANNOTATION, digest.String())
 
 	if err == nil {
 		out.Outf(d.opts.Context, "%s: downloaded\n", f)

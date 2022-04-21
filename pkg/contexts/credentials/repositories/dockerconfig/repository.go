@@ -25,21 +25,22 @@ import (
 	"github.com/docker/cli/cli/config/configfile"
 	dockercred "github.com/docker/cli/cli/config/credentials"
 	"github.com/docker/cli/cli/config/types"
+
 	"github.com/open-component-model/ocm/pkg/common"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type Repository struct {
 	lock      sync.RWMutex
-	ctx       cpi2.Context
+	ctx       cpi.Context
 	propagate bool
 	path      string
 	config    *configfile.ConfigFile
 }
 
-func NewRepository(ctx cpi2.Context, path string, propagate bool) (*Repository, error) {
+func NewRepository(ctx cpi.Context, path string, propagate bool) (*Repository, error) {
 	r := &Repository{
 		ctx:       ctx,
 		propagate: propagate,
@@ -49,7 +50,7 @@ func NewRepository(ctx cpi2.Context, path string, propagate bool) (*Repository, 
 	return r, err
 }
 
-var _ cpi2.Repository = &Repository{}
+var _ cpi.Repository = &Repository{}
 
 func (r *Repository) ExistsCredentials(name string) (bool, error) {
 	err := r.Read(false)
@@ -63,7 +64,7 @@ func (r *Repository) ExistsCredentials(name string) (bool, error) {
 	return err != nil, err
 }
 
-func (r Repository) LookupCredentials(name string) (cpi2.Credentials, error) {
+func (r Repository) LookupCredentials(name string) (cpi.Credentials, error) {
 	err := r.Read(false)
 	if err != nil {
 		return nil, err
@@ -78,7 +79,7 @@ func (r Repository) LookupCredentials(name string) (cpi2.Credentials, error) {
 	return newCredentials(auth), nil
 }
 
-func (r Repository) WriteCredentials(name string, creds cpi2.Credentials) (cpi2.Credentials, error) {
+func (r Repository) WriteCredentials(name string, creds cpi.Credentials) (cpi.Credentials, error) {
 	return nil, errors.ErrNotSupported("write", "credentials", DockerConfigRepositoryType)
 }
 
@@ -109,8 +110,8 @@ func (r *Repository) Read(force bool) error {
 			if hostname == "index.docker.io" {
 				hostname = "docker.io"
 			}
-			id := cpi2.ConsumerIdentity{
-				cpi2.ATTR_TYPE:       identity.VALUE_TYPE,
+			id := cpi.ConsumerIdentity{
+				cpi.ATTR_TYPE:        identity.VALUE_TYPE,
 				identity.ID_HOSTNAME: hostname,
 			}
 			//fmt.Printf("propgate id %s\n", id)
@@ -121,14 +122,14 @@ func (r *Repository) Read(force bool) error {
 	return nil
 }
 
-func newCredentials(auth types.AuthConfig) cpi2.Credentials {
+func newCredentials(auth types.AuthConfig) cpi.Credentials {
 	props := common.Properties{
-		cpi2.ATTR_USERNAME: auth.Username,
-		cpi2.ATTR_PASSWORD: auth.Password,
+		cpi.ATTR_USERNAME: auth.Username,
+		cpi.ATTR_PASSWORD: auth.Password,
 	}
 	props.SetNonEmptyValue("auth", auth.Auth)
-	props.SetNonEmptyValue(cpi2.ATTR_SERVER_ADDRESS, auth.ServerAddress)
-	props.SetNonEmptyValue(cpi2.ATTR_IDENTITY_TOKEN, auth.IdentityToken)
-	props.SetNonEmptyValue(cpi2.ATTR_REGISTRY_TOKEN, auth.RegistryToken)
-	return cpi2.NewCredentials(props)
+	props.SetNonEmptyValue(cpi.ATTR_SERVER_ADDRESS, auth.ServerAddress)
+	props.SetNonEmptyValue(cpi.ATTR_IDENTITY_TOKEN, auth.IdentityToken)
+	props.SetNonEmptyValue(cpi.ATTR_REGISTRY_TOKEN, auth.RegistryToken)
+	return cpi.NewCredentials(props)
 }

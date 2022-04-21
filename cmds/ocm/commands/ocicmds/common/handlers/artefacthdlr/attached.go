@@ -17,10 +17,11 @@ package artefacthdlr
 import (
 	"strings"
 
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/opencontainers/go-digest"
 )
 
 func Attachment(d digest.Digest, suffix string) string {

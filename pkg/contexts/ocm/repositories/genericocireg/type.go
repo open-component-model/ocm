@@ -22,7 +22,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -40,7 +40,7 @@ const (
 )
 
 func init() {
-	cpi2.RegisterOCIImplementation(func(ctx oci.Context) (cpi2.RepositoryType, error) {
+	cpi.RegisterOCIImplementation(func(ctx oci.Context) (cpi.RepositoryType, error) {
 		return NewRepositoryType(ctx), nil
 	})
 }
@@ -66,7 +66,7 @@ type RepositoryType struct {
 	ocictx oci.Context
 }
 
-var _ cpi2.RepositoryType = &RepositoryType{}
+var _ cpi.RepositoryType = &RepositoryType{}
 
 // NewRepositoryType creates generic type for any OCI Repository Backend
 func NewRepositoryType(ocictx oci.Context) *RepositoryType {
@@ -93,7 +93,7 @@ func (t *RepositoryType) Decode(data []byte, unmarshal runtime.Unmarshaler) (run
 	return NewRepositorySpec(ospec, meta), nil
 }
 
-func (t *RepositoryType) LocalSupportForAccessSpec(ctx cpi2.Context, a compdesc.AccessSpec) bool {
+func (t *RepositoryType) LocalSupportForAccessSpec(ctx cpi.Context, a compdesc.AccessSpec) bool {
 	name := a.GetKind()
 	return name == localblob.Type
 }
@@ -112,8 +112,8 @@ func NewRepositorySpec(spec oci.RepositorySpec, meta *ComponentRepositoryMeta) *
 	}
 }
 
-func (a *RepositorySpec) AsUniformSpec(cpi2.Context) cpi2.UniformRepositorySpec {
-	return cpi2.UniformRepositorySpec{Type: a.GetKind(), SubPath: a.SubPath}
+func (a *RepositorySpec) AsUniformSpec(cpi.Context) cpi.UniformRepositorySpec {
+	return cpi.UniformRepositorySpec{Type: a.GetKind(), SubPath: a.SubPath}
 }
 
 func (u *RepositorySpec) UnmarshalJSON(data []byte) error {
@@ -145,7 +145,7 @@ func (u RepositorySpec) MarshalJSON() ([]byte, error) {
 	return json.Marshal(compmeta.FlatMerge(ocispec.Object))
 }
 
-func (s *RepositorySpec) Repository(ctx cpi2.Context, creds credentials.Credentials) (cpi2.Repository, error) {
+func (s *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	r, err := s.RepositorySpec.Repository(ctx.OCIContext(), creds)
 	if err != nil {
 		return nil, err

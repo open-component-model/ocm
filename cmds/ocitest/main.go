@@ -27,16 +27,16 @@ import (
 	"github.com/containerd/containerd/remotes"
 	"github.com/containerd/containerd/remotes/docker"
 	"github.com/containerd/containerd/remotes/docker/config"
-	config2 "github.com/docker/cli/cli/config"
+	dockercfg "github.com/docker/cli/cli/config"
 	"github.com/docker/cli/cli/config/credentials"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	artdesc2 "github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/sirupsen/logrus"
 )
 
 const MIME_OCTET = "application/octet-stream"
 
-func fetch(ctx context.Context, msg string, f remotes.Fetcher, desc artdesc2.Descriptor) {
+func fetch(ctx context.Context, msg string, f remotes.Fetcher, desc artdesc.Descriptor) {
 	fmt.Printf("*** fetch %s %s\n", desc.MediaType, desc.Digest)
 	read, err := f.Fetch(ctx, desc)
 	if err != nil {
@@ -54,7 +54,7 @@ func fetch(ctx context.Context, msg string, f remotes.Fetcher, desc artdesc2.Des
 }
 
 func push(ctx context.Context, msg string, p remotes.Pusher, blob accessio.BlobAccess) {
-	desc := *artdesc2.DefaultBlobDescriptor(blob)
+	desc := *artdesc.DefaultBlobDescriptor(blob)
 	key := remotes.MakeRefKey(ctx, desc)
 	fmt.Printf("*** push %s %s: %s\n", desc.MediaType, desc.Digest, key)
 	write, err := p.Push(ctx, desc)
@@ -86,7 +86,7 @@ func main() {
 	logger.Level = logrus.ErrorLevel
 	ctx = log.WithLogger(ctx, logrus.NewEntry(logger))
 
-	cfg := config2.LoadDefaultConfigFile(os.Stderr)
+	cfg := dockercfg.LoadDefaultConfigFile(os.Stderr)
 	if cfg == nil {
 		fmt.Printf("failed to load dockercfg\n")
 		os.Exit(1)
@@ -154,7 +154,7 @@ func main() {
 
 	push(ctx, "blob", p, blob)
 
-	desc = *artdesc2.DefaultBlobDescriptor(blob)
+	desc = *artdesc.DefaultBlobDescriptor(blob)
 	desc.MediaType = ""
 	fetch(ctx, "blob", f, desc)
 

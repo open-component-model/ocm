@@ -20,12 +20,13 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	"github.com/open-component-model/ocm/pkg/common"
-	credentials2 "github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	local "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/memory"
 )
 
-var DefaultContext = credentials2.New()
+var DefaultContext = credentials.New()
 
 var _ = Describe("direct credentials", func() {
 	props := common.Properties{
@@ -65,7 +66,7 @@ var _ = Describe("direct credentials", func() {
 		repo, err := DefaultContext.RepositoryForConfig([]byte(specdata), nil)
 		Expect(err).To(Succeed())
 
-		_, err = repo.WriteCredentials("bibo", credentials2.NewCredentials(props))
+		_, err = repo.WriteCredentials("bibo", credentials.NewCredentials(props))
 		Expect(err).To(Succeed())
 
 		creds, err := repo.LookupCredentials("bibo")
@@ -81,7 +82,7 @@ var _ = Describe("direct credentials", func() {
 		repo, err := DefaultContext.RepositoryForConfig([]byte(specdata), nil)
 		Expect(err).To(Succeed())
 
-		_, err = repo.WriteCredentials("bibo", credentials2.NewCredentials(props))
+		_, err = repo.WriteCredentials("bibo", credentials.NewCredentials(props))
 		Expect(err).To(Succeed())
 
 		// re-request repo by spec
@@ -99,13 +100,13 @@ var _ = Describe("direct credentials", func() {
 
 	It("caches repo in two contexts", func() {
 		ctx1 := DefaultContext
-		ctx2 := credentials2.New()
+		ctx2 := credentials.New()
 
 		// write to first context
 		repo1, err := ctx1.RepositoryForConfig([]byte(specdata), nil)
 		Expect(err).To(Succeed())
 
-		_, err = repo1.WriteCredentials("bibo", credentials2.NewCredentials(props))
+		_, err = repo1.WriteCredentials("bibo", credentials.NewCredentials(props))
 		Expect(err).To(Succeed())
 
 		// request repo in second context
@@ -117,7 +118,7 @@ var _ = Describe("direct credentials", func() {
 		Expect(creds).To(BeNil())
 
 		// write to second context
-		_, err = repo2.WriteCredentials("bibo", credentials2.NewCredentials(props2))
+		_, err = repo2.WriteCredentials("bibo", credentials.NewCredentials(props2))
 		Expect(err).To(Succeed())
 
 		creds, err = repo2.LookupCredentials("bibo")

@@ -24,11 +24,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	artdesc2 "github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/testhelper"
-	ocm2 "github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
@@ -36,12 +36,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci/ocirepo"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	genericocireg2 "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-var DefaultContext = ocm2.New()
+var DefaultContext = ocm.New()
 
 const COMPONENT = "github.com/mandelsoft/ocm"
 const TESTBASE = "testbase.de"
@@ -50,7 +50,7 @@ var _ = Describe("component repository mapping", func() {
 	var tempfs vfs.FileSystem
 
 	var ocispec oci.RepositorySpec
-	var spec *genericocireg2.RepositorySpec
+	var spec *genericocireg.RepositorySpec
 
 	BeforeEach(func() {
 		t, err := osfs.NewTempFileSystem()
@@ -58,7 +58,7 @@ var _ = Describe("component repository mapping", func() {
 		tempfs = t
 
 		ocispec = ctf.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessio.PathFileSystem(tempfs), accessobj.FormatDirectory)
-		spec = genericocireg2.NewRepositorySpec(ocispec, nil)
+		spec = genericocireg.NewRepositorySpec(ocispec, nil)
 
 	})
 
@@ -80,7 +80,7 @@ var _ = Describe("component repository mapping", func() {
 		err = comp.AddVersion(vers)
 		Expect(err).To(Succeed())
 
-		Expect(repo.(*genericocireg2.Repository).Close()).To(Succeed())
+		Expect(repo.(*genericocireg.Repository).Close()).To(Succeed())
 
 		// access it again
 		repo, err = DefaultContext.RepositoryForSpec(spec)
@@ -105,7 +105,7 @@ var _ = Describe("component repository mapping", func() {
 		base := func(ctx *storagecontext.StorageContext) string {
 			return TESTBASE
 		}
-		ctx := ocm2.WithBlobHandlers(ocm2.DefaultBlobHandlers().Copy().RegisterBlobHandler(ocirepo.NewBlobHandler(base))).New()
+		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().RegisterBlobHandler(ocirepo.NewBlobHandler(base))).New()
 
 		blob := accessio.BlobAccessForString(mime.MIME_OCTET, "anydata")
 
@@ -140,11 +140,11 @@ var _ = Describe("component repository mapping", func() {
 	})
 
 	It("imports artefact", func() {
-		mime := artdesc2.ToContentMediaType(artdesc2.MediaTypeImageManifest) + "+tar+gzip"
+		mime := artdesc.ToContentMediaType(artdesc.MediaTypeImageManifest) + "+tar+gzip"
 		base := func(ctx *storagecontext.StorageContext) string {
 			return TESTBASE
 		}
-		ctx := ocm2.WithBlobHandlers(ocm2.DefaultBlobHandlers().Copy().RegisterBlobHandler(ocirepo.NewArtefactHandler(base), cpi.ForMimeType(mime))).New()
+		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().RegisterBlobHandler(ocirepo.NewArtefactHandler(base), cpi.ForMimeType(mime))).New()
 
 		// create artefactset
 		r, err := artefactset.FormatTGZ.Create("test.tgz", accessio.AccessOptions(accessio.PathFileSystem(tempfs)), 0700)
@@ -182,14 +182,14 @@ var _ = Describe("component repository mapping", func() {
 		err = comp.AddVersion(vers)
 		Expect(err).To(Succeed())
 
-		ocirepo := repo.(*genericocireg2.Repository).GetOCIRepository()
+		ocirepo := repo.(*genericocireg.Repository).GetOCIRepository()
 
 		ns, err := ocirepo.LookupNamespace("artefact2")
 		Expect(err).To(Succeed())
 		art, err := ns.GetArtefact("v1")
 		Expect(err).To(Succeed())
 		testhelper.CheckArtefact(art)
-		Expect(repo.(*genericocireg2.Repository).Close()).To(Succeed())
+		Expect(repo.(*genericocireg.Repository).Close()).To(Succeed())
 	})
 
 })

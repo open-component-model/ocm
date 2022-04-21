@@ -21,12 +21,13 @@ import (
 	"github.com/containers/image/v5/image"
 	"github.com/containers/image/v5/types"
 	dockertypes "github.com/docker/docker/api/types"
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	artdesc2 "github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/opencontainers/go-digest"
 )
 
 type NamespaceContainer struct {
@@ -36,8 +37,8 @@ type NamespaceContainer struct {
 	cache     accessio.BlobCache
 }
 
-var _ cpi2.ArtefactSetContainer = (*NamespaceContainer)(nil)
-var _ cpi2.NamespaceAccess = (*Namespace)(nil)
+var _ cpi.ArtefactSetContainer = (*NamespaceContainer)(nil)
+var _ cpi.NamespaceAccess = (*Namespace)(nil)
 
 func NewNamespace(repo *Repository, name string) (*Namespace, error) {
 	cache, err := accessio.NewCascadedBlobCache(nil)
@@ -79,7 +80,7 @@ func (n *NamespaceContainer) Close() error {
 	return nil
 }
 
-func (n *NamespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi2.Descriptor {
+func (n *NamespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 	return nil
 }
 
@@ -114,17 +115,17 @@ func (n *NamespaceContainer) ListTags() ([]string, error) {
 	return result, nil
 }
 
-func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (cpi2.DataAccess, error) {
+func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
 	_, acc, err := n.cache.GetBlob(digest)
 	return acc, err
 }
 
-func (n *NamespaceContainer) AddBlob(blob cpi2.BlobAccess) error {
+func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
 	_, _, err := n.cache.AddBlob(blob)
 	return err
 }
 
-func (n *NamespaceContainer) GetArtefact(vers string) (cpi2.ArtefactAccess, error) {
+func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error) {
 	ref, err := ParseRef(n.namespace, vers)
 	if err != nil {
 		return nil, err
@@ -144,7 +145,7 @@ func (n *NamespaceContainer) GetArtefact(vers string) (cpi2.ArtefactAccess, erro
 	//fmt.Printf("manifest:\n %s\n*********\n", string(data))
 
 	opts := types.ManifestUpdateOptions{
-		ManifestMIMEType: artdesc2.MediaTypeImageManifest,
+		ManifestMIMEType: artdesc.MediaTypeImageManifest,
 	}
 	un := image.UnparsedInstance(src, nil)
 	img, err := image.FromUnparsedImage(dummyContext, nil, un)
@@ -173,10 +174,10 @@ func (n *NamespaceContainer) GetArtefact(vers string) (cpi2.ArtefactAccess, erro
 		namespace: n,
 		cache:     cache,
 	}
-	return cpi2.NewArtefactForProviderBlob(n, p, accessio.BlobAccessForData(mime, data))
+	return cpi.NewArtefactForProviderBlob(n, p, accessio.BlobAccessForData(mime, data))
 }
 
-func (n *NamespaceContainer) AddArtefact(artefact cpi2.Artefact, tags ...string) (access accessio.BlobAccess, err error) {
+func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, tags ...string) (access accessio.BlobAccess, err error) {
 	tag := "latest"
 	if len(tags) > 0 {
 		tag = tags[0]
@@ -205,7 +206,7 @@ func (n *NamespaceContainer) AddArtefact(artefact cpi2.Artefact, tags ...string)
 
 func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error {
 
-	if ok, _ := artdesc2.IsDigest(digest.String()); ok {
+	if ok, _ := artdesc.IsDigest(digest.String()); ok {
 		return errors.ErrNotSupported("image access by digest")
 	}
 	src := n.namespace + ":" + digest.String()
@@ -222,7 +223,7 @@ func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	return nil
 }
 
-func (n *NamespaceContainer) NewArtefactProvider(state accessobj.State) (cpi2.ArtefactProvider, error) {
+func (n *NamespaceContainer) NewArtefactProvider(state accessobj.State) (cpi.ArtefactProvider, error) {
 	return nil, nil
 }
 
@@ -236,7 +237,7 @@ func (n *Namespace) Close() error {
 	return n.access.Close()
 }
 
-func (n *Namespace) GetRepository() cpi2.Repository {
+func (n *Namespace) GetRepository() cpi.Repository {
 	return n.access.repo
 }
 
@@ -248,34 +249,34 @@ func (n *Namespace) ListTags() ([]string, error) {
 	return n.access.ListTags()
 }
 
-func (n *Namespace) NewArtefact(art ...*artdesc2.Artefact) (cpi2.ArtefactAccess, error) {
+func (n *Namespace) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
 	if n.access.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	var m *artdesc2.Artefact
+	var m *artdesc.Artefact
 	if len(art) == 0 {
-		m = artdesc2.NewManifestArtefact()
+		m = artdesc.NewManifestArtefact()
 	} else {
 		if !art[0].IsManifest() {
-			err := m.SetManifest(artdesc2.NewManifest())
+			err := m.SetManifest(artdesc.NewManifest())
 			if err != nil {
 				return nil, err
 			}
 		}
 		m = art[0]
 	}
-	return cpi2.NewArtefact(n.access, m)
+	return cpi.NewArtefact(n.access, m)
 }
 
-func (n *Namespace) GetBlobData(digest digest.Digest) (cpi2.DataAccess, error) {
+func (n *Namespace) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
 	return n.access.GetBlobData(digest)
 }
 
-func (n *Namespace) GetArtefact(vers string) (cpi2.ArtefactAccess, error) {
+func (n *Namespace) GetArtefact(vers string) (cpi.ArtefactAccess, error) {
 	return n.access.GetArtefact(vers)
 }
 
-func (n *Namespace) AddArtefact(artefact cpi2.Artefact, tags ...string) (accessio.BlobAccess, error) {
+func (n *Namespace) AddArtefact(artefact cpi.Artefact, tags ...string) (accessio.BlobAccess, error) {
 	return n.access.AddArtefact(artefact, tags...)
 }
 
@@ -283,6 +284,6 @@ func (n *Namespace) AddTags(digest digest.Digest, tags ...string) error {
 	return n.access.AddTags(digest, tags...)
 }
 
-func (n *Namespace) AddBlob(blob cpi2.BlobAccess) error {
+func (n *Namespace) AddBlob(blob cpi.BlobAccess) error {
 	return n.access.AddBlob(blob)
 }

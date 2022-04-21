@@ -16,7 +16,7 @@ package docker
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -26,8 +26,8 @@ const (
 )
 
 func init() {
-	cpi2.RegisterRepositoryType(DockerDeamonRepositoryType, cpi2.NewRepositoryType(DockerDeamonRepositoryType, &RepositorySpec{}))
-	cpi2.RegisterRepositoryType(DockerDaemonRepositoryTypeV1, cpi2.NewRepositoryType(DockerDaemonRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(DockerDeamonRepositoryType, cpi.NewRepositoryType(DockerDeamonRepositoryType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(DockerDaemonRepositoryTypeV1, cpi.NewRepositoryType(DockerDaemonRepositoryTypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
@@ -56,6 +56,6 @@ func (a *RepositorySpec) Name() string {
 	return DockerDeamonRepositoryType
 }
 
-func (a *RepositorySpec) Repository(ctx cpi2.Context, creds credentials.Credentials) (cpi2.Repository, error) {
+func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	return NewRepository(ctx, a)
 }

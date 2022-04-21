@@ -18,39 +18,39 @@ import (
 	"context"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	core2 "github.com/open-component-model/ocm/pkg/contexts/oci/core"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
 )
 
-const KIND_OCIARTEFACT = core2.KIND_OCIARTEFACT
+const KIND_OCIARTEFACT = core.KIND_OCIARTEFACT
 const KIND_MEDIATYPE = accessio.KIND_MEDIATYPE
 const KIND_BLOB = accessio.KIND_BLOB
 
-const CONTEXT_TYPE = core2.CONTEXT_TYPE
+const CONTEXT_TYPE = core.CONTEXT_TYPE
 
-const CommonTransportFormat = core2.CommonTransportFormat
+const CommonTransportFormat = core.CommonTransportFormat
 
-type Context = core2.Context
-type Repository = core2.Repository
-type RepositorySpecHandlers = core2.RepositorySpecHandlers
-type RepositorySpecHandler = core2.RepositorySpecHandler
-type UniformRepositorySpec = core2.UniformRepositorySpec
-type RepositoryTypeScheme = core2.RepositoryTypeScheme
-type RepositorySpec = core2.RepositorySpec
-type GenericRepositorySpec = core2.GenericRepositorySpec
-type ArtefactAccess = core2.ArtefactAccess
-type NamespaceLister = core2.NamespaceLister
-type NamespaceAccess = core2.NamespaceAccess
-type ManifestAccess = core2.ManifestAccess
-type IndexAccess = core2.IndexAccess
-type BlobAccess = core2.BlobAccess
-type DataAccess = core2.DataAccess
+type Context = core.Context
+type Repository = core.Repository
+type RepositorySpecHandlers = core.RepositorySpecHandlers
+type RepositorySpecHandler = core.RepositorySpecHandler
+type UniformRepositorySpec = core.UniformRepositorySpec
+type RepositoryTypeScheme = core.RepositoryTypeScheme
+type RepositorySpec = core.RepositorySpec
+type GenericRepositorySpec = core.GenericRepositorySpec
+type ArtefactAccess = core.ArtefactAccess
+type NamespaceLister = core.NamespaceLister
+type NamespaceAccess = core.NamespaceAccess
+type ManifestAccess = core.ManifestAccess
+type IndexAccess = core.IndexAccess
+type BlobAccess = core.BlobAccess
+type DataAccess = core.DataAccess
 
-func DefaultContext() core2.Context {
-	return core2.DefaultContext
+func DefaultContext() core.Context {
+	return core.DefaultContext
 }
 
 func ForContext(ctx context.Context) Context {
-	return core2.ForContext(ctx)
+	return core.ForContext(ctx)
 }
 
 func IsErrBlobNotFound(err error) bool {

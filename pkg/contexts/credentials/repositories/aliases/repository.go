@@ -17,7 +17,6 @@ package aliases
 import (
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 )
 
@@ -36,7 +35,7 @@ func (a *Repository) GetRepository(ctx cpi.Context, creds cpi.Credentials) (cpi.
 		return a.repo, nil
 	}
 
-	src := core.CredentialsChain{}
+	src := cpi.CredentialsChain{}
 	if a.creds != nil {
 		src = append(src, a.creds)
 	}

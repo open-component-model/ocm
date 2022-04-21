@@ -22,14 +22,14 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
-	credentials2 "github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	localconfig "github.com/open-component-model/ocm/pkg/contexts/credentials/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/aliases"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/memory"
 )
 
-var DefaultContext = credentials2.New()
+var DefaultContext = credentials.New()
 
 var _ = Describe("generic credentials", func() {
 	props := common.Properties{
@@ -38,7 +38,7 @@ var _ = Describe("generic credentials", func() {
 	}
 
 	repospec := memory.NewRepositorySpec("test")
-	credspec := credentials2.NewCredentialsSpec("cred", repospec)
+	credspec := credentials.NewCredentialsSpec("cred", repospec)
 	direct := directcreds.NewRepositorySpec(props)
 
 	cfgconsumerdata := "{\"type\":\"credentials.config.ocm.gardener.cloud\",\"consumers\":[{\"identity\":{\"type\":\"oci\",\"url\":\"https://acme.com\"},\"credentials\":[{\"credentialsName\":\"cred\",\"repoName\":\"test\",\"type\":\"Memory\"}]}]}"
@@ -54,7 +54,7 @@ var _ = Describe("generic credentials", func() {
 				Repositories localconfig.RepositorySpec `json:"repositories"`
 			}
 
-			rspec, err := credentials2.ToGenericRepositorySpec(repospec)
+			rspec, err := credentials.ToGenericRepositorySpec(repospec)
 			Expect(err).To(Succeed())
 			s := &S{
 				Repositories: localconfig.RepositorySpec{Repository: *rspec},
@@ -71,7 +71,7 @@ var _ = Describe("generic credentials", func() {
 				Repositories map[string]localconfig.RepositorySpec `json:"repositories"`
 			}
 
-			rspec, err := credentials2.ToGenericRepositorySpec(repospec)
+			rspec, err := credentials.ToGenericRepositorySpec(repospec)
 			Expect(err).To(Succeed())
 			s := &S{
 				Repositories: map[string]localconfig.RepositorySpec{
@@ -86,7 +86,7 @@ var _ = Describe("generic credentials", func() {
 
 	Context("composition", func() {
 		It("composes a config for consumers", func() {
-			consumerid := credentials2.ConsumerIdentity{
+			consumerid := credentials.ConsumerIdentity{
 				"type": "oci",
 				"url":  "https://acme.com",
 			}
@@ -139,12 +139,12 @@ var _ = Describe("generic credentials", func() {
 	})
 
 	Context("apply", func() {
-		var ctx credentials2.Context
+		var ctx credentials.Context
 
 		_ = ctx
 
 		BeforeEach(func() {
-			ctx = credentials2.WithConfigs(config.New()).New()
+			ctx = credentials.WithConfigs(config.New()).New()
 		})
 
 		It("applies a config for aliases", func() {

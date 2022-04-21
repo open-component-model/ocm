@@ -18,7 +18,7 @@ import (
 	"encoding/json"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -27,12 +27,12 @@ const Type = "localBlob"
 const TypeV1 = Type + runtime.VersionSeparator + "v1"
 
 func init() {
-	cpi2.RegisterAccessType(cpi2.NewConvertedAccessSpecType(Type, LocalBlobV1))
-	cpi2.RegisterAccessType(cpi2.NewConvertedAccessSpecType(TypeV1, LocalBlobV1))
+	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(Type, LocalBlobV1))
+	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(TypeV1, LocalBlobV1))
 }
 
 // New creates a new localFilesystemBlob accessor.
-func New(path, name string, mediaType string, global cpi2.AccessSpec) *AccessSpec {
+func New(path, name string, mediaType string, global cpi.AccessSpec) *AccessSpec {
 	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		LocalReference:      path,
@@ -68,14 +68,14 @@ type AccessSpec struct {
 var _ json.Marshaler = &AccessSpec{}
 
 func (a AccessSpec) MarshalJSON() ([]byte, error) {
-	return cpi2.MarshalConvertedAccessSpec(cpi2.DefaultContext(), &a)
+	return cpi.MarshalConvertedAccessSpec(cpi.DefaultContext(), &a)
 }
 
-func (a *AccessSpec) IsLocal(cpi2.Context) bool {
+func (a *AccessSpec) IsLocal(cpi.Context) bool {
 	return true
 }
 
-func (a *AccessSpec) AccessMethod(c cpi2.ComponentVersionAccess) (cpi2.AccessMethod, error) {
+func (a *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
 	return c.AccessMethod(a)
 }
 
@@ -105,9 +105,9 @@ type AccessSpecV1 struct {
 
 type converterV1 struct{}
 
-var LocalBlobV1 = cpi2.NewAccessSpecVersion(&AccessSpecV1{}, converterV1{})
+var LocalBlobV1 = cpi.NewAccessSpecVersion(&AccessSpecV1{}, converterV1{})
 
-func (_ converterV1) ConvertFrom(object cpi2.AccessSpec) (runtime.TypedObject, error) {
+func (_ converterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, error) {
 	in := object.(*AccessSpec)
 	return &AccessSpecV1{
 		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
@@ -118,7 +118,7 @@ func (_ converterV1) ConvertFrom(object cpi2.AccessSpec) (runtime.TypedObject, e
 	}, nil
 }
 
-func (_ converterV1) ConvertTo(object interface{}) (cpi2.AccessSpec, error) {
+func (_ converterV1) ConvertTo(object interface{}) (cpi.AccessSpec, error) {
 	in := object.(*AccessSpecV1)
 	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),

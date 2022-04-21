@@ -15,7 +15,7 @@
 package dockerconfig
 
 import (
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -25,8 +25,8 @@ const (
 )
 
 func init() {
-	cpi2.RegisterRepositoryType(DockerConfigRepositoryType, cpi2.NewRepositoryType(DockerConfigRepositoryType, &RepositorySpec{}))
-	cpi2.RegisterRepositoryType(DockerConfigRepositoryTypeV1, cpi2.NewRepositoryType(DockerConfigRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(DockerConfigRepositoryType, cpi.NewRepositoryType(DockerConfigRepositoryType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(DockerConfigRepositoryTypeV1, cpi.NewRepositoryType(DockerConfigRepositoryTypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes a cocker config based credential repository interface.
@@ -53,7 +53,7 @@ func (a *RepositorySpec) GetType() string {
 	return DockerConfigRepositoryType
 }
 
-func (a *RepositorySpec) Repository(ctx cpi2.Context, creds cpi2.Credentials) (cpi2.Repository, error) {
+func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi.Repository, error) {
 	repos := ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories).(*Repositories)
 	return repos.GetRepository(ctx, a.DockerConfigFile, a.PropgateConsumerIdentity)
 }

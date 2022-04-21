@@ -17,12 +17,14 @@ package oci_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	oci2 "github.com/open-component-model/ocm/pkg/contexts/oci"
+
 	"github.com/opencontainers/go-digest"
+
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
 )
 
-func CheckRef(ref string, exp *oci2.RefSpec) {
-	spec, err := oci2.ParseRef(ref)
+func CheckRef(ref string, exp *oci.RefSpec) {
+	spec, err := oci.ParseRef(ref)
 	if exp == nil {
 		ExpectWithOffset(1, err).To(HaveOccurred())
 	} else {
@@ -31,8 +33,8 @@ func CheckRef(ref string, exp *oci2.RefSpec) {
 	}
 }
 
-func CheckRepo(ref string, exp *oci2.UniformRepositorySpec) {
-	spec, err := oci2.ParseRepo(ref)
+func CheckRepo(ref string, exp *oci.UniformRepositorySpec) {
+	spec, err := oci.ParseRepo(ref)
 	if exp == nil {
 		ExpectWithOffset(1, err).To(HaveOccurred())
 	} else {
@@ -45,25 +47,25 @@ var _ = Describe("ref parsing", func() {
 	digest := digest.Digest("sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a")
 	tag := "v1"
 
-	ghcr := oci2.UniformRepositorySpec{Host: "ghcr.io"}
-	docker := oci2.UniformRepositorySpec{Host: "docker.io"}
+	ghcr := oci.UniformRepositorySpec{Host: "ghcr.io"}
+	docker := oci.UniformRepositorySpec{Host: "docker.io"}
 
 	It("succeeds for repository", func() {
-		CheckRef("::ghcr.io/", &oci2.RefSpec{UniformRepositorySpec: ghcr})
+		CheckRef("::ghcr.io/", &oci.RefSpec{UniformRepositorySpec: ghcr})
 	})
 	It("succeeds", func() {
 
-		CheckRef("ubuntu", &oci2.RefSpec{UniformRepositorySpec: docker, Repository: "library/ubuntu"})
-		CheckRef("ubuntu:v1", &oci2.RefSpec{UniformRepositorySpec: docker, Repository: "library/ubuntu", Tag: &tag})
-		CheckRef("test/ubuntu", &oci2.RefSpec{UniformRepositorySpec: docker, Repository: "test/ubuntu"})
-		CheckRef("test/ubuntu:v1", &oci2.RefSpec{UniformRepositorySpec: docker, Repository: "test/ubuntu", Tag: &tag})
-		CheckRef("ghcr.io/test/ubuntu", &oci2.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu"})
-		CheckRef("ghcr.io:8080/test/ubuntu", &oci2.RefSpec{UniformRepositorySpec: oci2.UniformRepositorySpec{Host: "ghcr.io:8080"}, Repository: "test/ubuntu"})
-		CheckRef("ghcr.io/test/ubuntu:v1", &oci2.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu", Tag: &tag})
-		CheckRef("ghcr.io/test/ubuntu@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", &oci2.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu", Digest: &digest})
-		CheckRef("ghcr.io/test/ubuntu:v1@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", &oci2.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu", Tag: &tag, Digest: &digest})
-		CheckRef("type::https://ghcr.io/repo/repo:v1@"+digest.String(), &oci2.RefSpec{
-			UniformRepositorySpec: oci2.UniformRepositorySpec{
+		CheckRef("ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "library/ubuntu"})
+		CheckRef("ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "library/ubuntu", Tag: &tag})
+		CheckRef("test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "test/ubuntu"})
+		CheckRef("test/ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "test/ubuntu", Tag: &tag})
+		CheckRef("ghcr.io/test/ubuntu", &oci.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu"})
+		CheckRef("ghcr.io:8080/test/ubuntu", &oci.RefSpec{UniformRepositorySpec: oci.UniformRepositorySpec{Host: "ghcr.io:8080"}, Repository: "test/ubuntu"})
+		CheckRef("ghcr.io/test/ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu", Tag: &tag})
+		CheckRef("ghcr.io/test/ubuntu@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", &oci.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu", Digest: &digest})
+		CheckRef("ghcr.io/test/ubuntu:v1@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", &oci.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu", Tag: &tag, Digest: &digest})
+		CheckRef("type::https://ghcr.io/repo/repo:v1@"+digest.String(), &oci.RefSpec{
+			UniformRepositorySpec: oci.UniformRepositorySpec{
 				Type:   "type",
 				Scheme: "https",
 				Host:   "ghcr.io",
@@ -73,8 +75,8 @@ var _ = Describe("ref parsing", func() {
 			Tag:        &tag,
 			Digest:     &digest,
 		})
-		CheckRef("directory::a/b", &oci2.RefSpec{
-			UniformRepositorySpec: oci2.UniformRepositorySpec{
+		CheckRef("directory::a/b", &oci.RefSpec{
+			UniformRepositorySpec: oci.UniformRepositorySpec{
 				Type:   "directory",
 				Scheme: "",
 				Host:   "",
@@ -83,8 +85,8 @@ var _ = Describe("ref parsing", func() {
 			Repository: "",
 		})
 
-		CheckRef("a/b//", &oci2.RefSpec{
-			UniformRepositorySpec: oci2.UniformRepositorySpec{
+		CheckRef("a/b//", &oci.RefSpec{
+			UniformRepositorySpec: oci.UniformRepositorySpec{
 				Type:   "",
 				Scheme: "",
 				Host:   "",
@@ -93,8 +95,8 @@ var _ = Describe("ref parsing", func() {
 			Repository: "",
 		})
 
-		CheckRef("directory::a/b//c/d", &oci2.RefSpec{
-			UniformRepositorySpec: oci2.UniformRepositorySpec{
+		CheckRef("directory::a/b//c/d", &oci.RefSpec{
+			UniformRepositorySpec: oci.UniformRepositorySpec{
 				Type:   "directory",
 				Scheme: "",
 				Host:   "",
@@ -103,8 +105,8 @@ var _ = Describe("ref parsing", func() {
 			Repository: "c/d",
 		})
 
-		CheckRef("oci::ghcr.io", &oci2.RefSpec{
-			UniformRepositorySpec: oci2.UniformRepositorySpec{
+		CheckRef("oci::ghcr.io", &oci.RefSpec{
+			UniformRepositorySpec: oci.UniformRepositorySpec{
 				Type:   "oci",
 				Scheme: "",
 				Host:   "ghcr.io",
@@ -123,21 +125,21 @@ var _ = Describe("ref parsing", func() {
 
 	})
 	It("repo", func() {
-		CheckRepo("ghcr.io", &oci2.UniformRepositorySpec{
+		CheckRepo("ghcr.io", &oci.UniformRepositorySpec{
 			Host: "ghcr.io",
 		})
-		CheckRepo("https://ghcr.io", &oci2.UniformRepositorySpec{
+		CheckRepo("https://ghcr.io", &oci.UniformRepositorySpec{
 			Scheme: "https",
 			Host:   "ghcr.io",
 		})
-		CheckRepo("alias", &oci2.UniformRepositorySpec{
+		CheckRepo("alias", &oci.UniformRepositorySpec{
 			Info: "alias",
 		})
-		CheckRepo("tar::a/b.tar", &oci2.UniformRepositorySpec{
+		CheckRepo("tar::a/b.tar", &oci.UniformRepositorySpec{
 			Type: "tar",
 			Info: "a/b.tar",
 		})
-		CheckRepo("a/b.tar", &oci2.UniformRepositorySpec{
+		CheckRepo("a/b.tar", &oci.UniformRepositorySpec{
 			Info: "a/b.tar",
 		})
 	})

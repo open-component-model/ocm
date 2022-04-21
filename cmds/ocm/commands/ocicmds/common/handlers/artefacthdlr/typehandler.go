@@ -23,12 +23,12 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common"
-	oci2 "github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-func Elem(e interface{}) oci2.ArtefactAccess {
+func Elem(e interface{}) oci.ArtefactAccess {
 	return e.(*Object).Artefact
 }
 
@@ -37,10 +37,10 @@ func Elem(e interface{}) oci2.ArtefactAccess {
 type Object struct {
 	History    common.History
 	Key        common.NameVersion
-	Spec       oci2.RefSpec
+	Spec       oci.RefSpec
 	AttachKind string
-	Namespace  oci2.NamespaceAccess
-	Artefact   oci2.ArtefactAccess
+	Namespace  oci.NamespaceAccess
+	Artefact   oci.ArtefactAccess
 }
 
 var _ common.HistoryElement = (*Object)(nil)
@@ -91,25 +91,25 @@ func (o *Object) String() string {
 }
 
 type Manifest struct {
-	Spec     oci2.RefSpec
+	Spec     oci.RefSpec
 	Digest   string
 	Manifest *artdesc.Artefact
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func Key(a oci2.ArtefactAccess) common.NameVersion {
+func Key(a oci.ArtefactAccess) common.NameVersion {
 	blob, _ := a.Blob()
 	return common.NewNameVersion("", blob.Digest().String())
 }
 
 type TypeHandler struct {
 	octx     clictx.OCI
-	session  oci2.Session
-	repobase oci2.Repository
+	session  oci.Session
+	repobase oci.Repository
 }
 
-func NewTypeHandler(octx clictx.OCI, session oci2.Session, repobase oci2.Repository) utils.TypeHandler {
+func NewTypeHandler(octx clictx.OCI, session oci.Session, repobase oci.Repository) utils.TypeHandler {
 	return &TypeHandler{
 		octx:     octx,
 		session:  session,
@@ -152,12 +152,12 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 }
 
 func (h *TypeHandler) get(elemspec utils.ElemSpec) ([]output.Object, error) {
-	var namespace oci2.NamespaceAccess
+	var namespace oci.NamespaceAccess
 	var result []output.Object
 	var err error
 
 	name := elemspec.String()
-	spec := oci2.RefSpec{}
+	spec := oci.RefSpec{}
 	repo := h.repobase
 	if repo == nil {
 		evaluated, err := h.session.EvaluateRef(h.octx.Context(), name, h.octx.GetAlias)
@@ -177,9 +177,9 @@ func (h *TypeHandler) get(elemspec utils.ElemSpec) ([]output.Object, error) {
 			return result, nil
 		}
 	} else {
-		art := oci2.ArtSpec{Repository: ""}
+		art := oci.ArtSpec{Repository: ""}
 		if name != "" {
-			art, err = oci2.ParseArt(name)
+			art, err = oci.ParseArt(name)
 			if err != nil {
 				return nil, errors.Wrapf(err, "artefact reference %q", name)
 			}

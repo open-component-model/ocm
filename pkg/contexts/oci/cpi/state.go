@@ -18,7 +18,7 @@ import (
 	"reflect"
 
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	artdesc2 "github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 )
 
 type ManifestStateHandler struct {
@@ -31,15 +31,15 @@ func NewManifestStateHandler() accessobj.StateHandler {
 }
 
 func (i ManifestStateHandler) Initial() interface{} {
-	return artdesc2.NewManifest()
+	return artdesc.NewManifest()
 }
 
 func (i ManifestStateHandler) Encode(d interface{}) ([]byte, error) {
-	return artdesc2.EncodeManifest(d.(*artdesc2.Manifest))
+	return artdesc.EncodeManifest(d.(*artdesc.Manifest))
 }
 
 func (i ManifestStateHandler) Decode(data []byte) (interface{}, error) {
-	return artdesc2.DecodeManifest(data)
+	return artdesc.DecodeManifest(data)
 }
 
 func (i ManifestStateHandler) Equivalent(a, b interface{}) bool {
@@ -58,15 +58,15 @@ func NewIndexStateHandler() accessobj.StateHandler {
 }
 
 func (i IndexStateHandler) Initial() interface{} {
-	return artdesc2.NewIndex()
+	return artdesc.NewIndex()
 }
 
 func (i IndexStateHandler) Encode(d interface{}) ([]byte, error) {
-	return artdesc2.EncodeIndex(d.(*artdesc2.Index))
+	return artdesc.EncodeIndex(d.(*artdesc.Index))
 }
 
 func (i IndexStateHandler) Decode(data []byte) (interface{}, error) {
-	return artdesc2.DecodeIndex(data)
+	return artdesc.DecodeIndex(data)
 }
 
 func (i IndexStateHandler) Equivalent(a, b interface{}) bool {
@@ -85,15 +85,15 @@ func NewArtefactStateHandler() accessobj.StateHandler {
 }
 
 func (i ArtefactStateHandler) Initial() interface{} {
-	return artdesc2.New()
+	return artdesc.New()
 }
 
 func (i ArtefactStateHandler) Encode(d interface{}) ([]byte, error) {
-	return artdesc2.Encode(d.(*artdesc2.Artefact))
+	return artdesc.Encode(d.(*artdesc.Artefact))
 }
 
 func (i ArtefactStateHandler) Decode(data []byte) (interface{}, error) {
-	return artdesc2.Decode(data)
+	return artdesc.Decode(data)
 }
 
 func (i ArtefactStateHandler) Equivalent(a, b interface{}) bool {

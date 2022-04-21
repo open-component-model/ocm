@@ -18,6 +18,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/spf13/cobra"
+
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/destoption"
@@ -31,10 +33,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	ocm2 "github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch/comparch"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/spf13/cobra"
 )
 
 var (
@@ -74,7 +75,7 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
-	session := ocm2.NewSession(nil)
+	session := ocm.NewSession(nil)
 	defer session.Close()
 
 	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithContext(o.Context, session))
@@ -142,7 +143,7 @@ func (d *download) Save(o *comphdlr.Object, f string) error {
 	nv := common.NewNameVersion(src.GetName(), src.GetVersion())
 	hist := common.History{nv}
 
-	err = ocm2.CopyVersion(hist, src, set, nil)
+	err = ocm.CopyVersion(hist, src, set, nil)
 	if err == nil {
 		out.Outf(d.cmd.Context, "%s: downloaded\n", f)
 	}

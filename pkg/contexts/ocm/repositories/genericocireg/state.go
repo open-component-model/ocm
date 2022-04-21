@@ -28,7 +28,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/format"
-	compdesc2 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch/comparch"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
@@ -220,20 +220,20 @@ func NewStateHandler(name, version string) accessobj.StateHandler {
 }
 
 func (i StateHandler) Initial() interface{} {
-	return compdesc2.New(i.name, i.version)
+	return compdesc.New(i.name, i.version)
 }
 
 // Encode always provides a yaml representation
 func (i StateHandler) Encode(d interface{}) ([]byte, error) {
-	desc := d.(*compdesc2.ComponentDescriptor)
+	desc := d.(*compdesc.ComponentDescriptor)
 	desc.Name = i.name
 	desc.Version = i.version
-	return compdesc2.Encode(desc)
+	return compdesc.Encode(desc)
 }
 
 // Decode always accepts a yaml representation, and therefore json, also
 func (i StateHandler) Decode(data []byte) (interface{}, error) {
-	return compdesc2.Decode(data)
+	return compdesc.Decode(data)
 }
 
 func (i StateHandler) Equivalent(a, b interface{}) bool {

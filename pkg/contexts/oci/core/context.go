@@ -19,7 +19,7 @@ import (
 	"reflect"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	datacontext2 "github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -28,9 +28,9 @@ const CONTEXT_TYPE = "oci.context.gardener.cloud"
 const CommonTransportFormat = "CommonTransportFormat"
 
 type Context interface {
-	datacontext2.Context
+	datacontext.Context
 
-	AttributesContext() datacontext2.AttributesContext
+	AttributesContext() datacontext.AttributesContext
 	CredentialsContext() credentials.Context
 
 	RepositorySpecHandlers() RepositorySpecHandlers
@@ -50,22 +50,22 @@ var DefaultContext = Builder{}.New()
 // ForContext returns the Context to use for context.Context.
 // This is either an explicit context or the default context.
 func ForContext(ctx context.Context) Context {
-	return datacontext2.ForContextByKey(ctx, key, DefaultContext).(Context)
+	return datacontext.ForContextByKey(ctx, key, DefaultContext).(Context)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type _context struct {
-	datacontext2.Context
+	datacontext.Context
 
-	sharedattributes datacontext2.AttributesContext
+	sharedattributes datacontext.AttributesContext
 	credentials      credentials.Context
 
 	knownRepositoryTypes RepositoryTypeScheme
 	specHandlers         RepositorySpecHandlers
 }
 
-func newContext(shared datacontext2.AttributesContext, creds credentials.Context, reposcheme RepositoryTypeScheme, specHandlers RepositorySpecHandlers) Context {
+func newContext(shared datacontext.AttributesContext, creds credentials.Context, reposcheme RepositoryTypeScheme, specHandlers RepositorySpecHandlers) Context {
 	if shared == nil {
 		shared = creds.ConfigContext()
 	}
@@ -75,13 +75,13 @@ func newContext(shared datacontext2.AttributesContext, creds credentials.Context
 		knownRepositoryTypes: reposcheme,
 		specHandlers:         specHandlers,
 	}
-	c.Context = datacontext2.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
+	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
 	return c
 }
 
 var _ Context = &_context{}
 
-func (c *_context) AttributesContext() datacontext2.AttributesContext {
+func (c *_context) AttributesContext() datacontext.AttributesContext {
 	return c.sharedattributes
 }
 

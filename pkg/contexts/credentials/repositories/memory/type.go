@@ -15,7 +15,7 @@
 package memory
 
 import (
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -25,8 +25,8 @@ const (
 )
 
 func init() {
-	cpi2.RegisterRepositoryType(MemoryRepositoryType, cpi2.NewRepositoryType(MemoryRepositoryType, &RepositorySpec{}))
-	cpi2.RegisterRepositoryType(MemoryRepositoryTypeV1, cpi2.NewRepositoryType(MemoryRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(MemoryRepositoryType, cpi.NewRepositoryType(MemoryRepositoryType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(MemoryRepositoryTypeV1, cpi.NewRepositoryType(MemoryRepositoryTypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes a memory based repository interface.
@@ -47,7 +47,7 @@ func (a *RepositorySpec) GetType() string {
 	return MemoryRepositoryType
 }
 
-func (a *RepositorySpec) Repository(ctx cpi2.Context, creds cpi2.Credentials) (cpi2.Repository, error) {
+func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi.Repository, error) {
 	repos := ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories).(*Repositories)
 	return repos.GetRepository(a.RepositoryName), nil
 }

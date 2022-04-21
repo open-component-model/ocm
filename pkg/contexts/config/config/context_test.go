@@ -20,15 +20,15 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	config2 "github.com/open-component-model/ocm/pkg/contexts/config"
+	"github.com/open-component-model/ocm/pkg/contexts/config"
 
 	"sigs.k8s.io/yaml"
 )
 
 var _ = Describe("generic config handling", func() {
 
-	var scheme config2.ConfigTypeScheme
-	var cfgctx config2.Context
+	var scheme config.ConfigTypeScheme
+	var cfgctx config.Context
 
 	testdataconfig, _ := ioutil.ReadFile("testdata/config.yaml")
 	testdatajson, _ := yaml.YAMLToJSON(testdataconfig)
@@ -36,15 +36,15 @@ var _ = Describe("generic config handling", func() {
 	_ = testdatajson
 
 	BeforeEach(func() {
-		scheme = config2.NewConfigTypeScheme()
-		scheme.AddKnownTypes(config2.DefaultContext().ConfigTypes())
-		cfgctx = config2.WithConfigTypeScheme(scheme).New()
+		scheme = config.NewConfigTypeScheme()
+		scheme.AddKnownTypes(config.DefaultContext().ConfigTypes())
+		cfgctx = config.WithConfigTypeScheme(scheme).New()
 	})
 
 	It("can deserialize config", func() {
 		result, err := cfgctx.GetConfigForData(testdataconfig, nil)
 		Expect(err).To(Succeed())
-		Expect(config2.IsGeneric(result)).To(BeFalse())
+		Expect(config.IsGeneric(result)).To(BeFalse())
 		Expect(reflect.TypeOf(result).String()).To(Equal("*config.Config"))
 	})
 
@@ -57,7 +57,7 @@ var _ = Describe("generic config handling", func() {
 
 		err = cfgctx.ApplyConfig(cfg, "testconfig")
 		Expect(err).To(Succeed())
-		gen, cfgs := cfgctx.GetConfig(config2.AllGenerations, nil)
+		gen, cfgs := cfgctx.GetConfig(config.AllGenerations, nil)
 		Expect(gen).To(Equal(int64(3)))
 		Expect(len(cfgs)).To(Equal(3))
 
@@ -72,7 +72,7 @@ var _ = Describe("generic config handling", func() {
 		err = cfgctx.ApplyConfig(cfg, "testconfig")
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(Equal("testconfig: {applying generic config list: config entry 0--testconfig: config type \"Dummy\" is unknown, config entry 1--testconfig: config type \"Dummy\" is unknown}"))
-		gen, cfgs := cfgctx.GetConfig(config2.AllGenerations, nil)
+		gen, cfgs := cfgctx.GetConfig(config.AllGenerations, nil)
 		Expect(gen).To(Equal(int64(3)))
 		Expect(len(cfgs)).To(Equal(3))
 

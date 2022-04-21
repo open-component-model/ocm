@@ -15,13 +15,14 @@
 package ctf
 
 import (
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/index"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/opencontainers/go-digest"
 )
 
 type Namespace struct {
@@ -35,11 +36,11 @@ func (n *Namespace) Close() error {
 type NamespaceContainer struct {
 	repo              *Repository
 	namespace         string
-	ArtefactSetAccess *cpi2.ArtefactSetAccess
+	ArtefactSetAccess *cpi.ArtefactSetAccess
 }
 
-var _ cpi2.ArtefactSetContainer = (*NamespaceContainer)(nil)
-var _ cpi2.NamespaceAccess = (*Namespace)(nil)
+var _ cpi.ArtefactSetContainer = (*NamespaceContainer)(nil)
+var _ cpi.NamespaceAccess = (*Namespace)(nil)
 
 func NewNamespace(repo *Repository, name string) *Namespace {
 	n := &Namespace{
@@ -48,7 +49,7 @@ func NewNamespace(repo *Repository, name string) *Namespace {
 			namespace: name,
 		},
 	}
-	n.access.ArtefactSetAccess = cpi2.NewArtefactSetAccess(n.access)
+	n.access.ArtefactSetAccess = cpi.NewArtefactSetAccess(n.access)
 	return n
 }
 
@@ -64,7 +65,7 @@ func (n *NamespaceContainer) IsClosed() bool {
 	return n.repo.IsClosed()
 }
 
-func (n *NamespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi2.Descriptor {
+func (n *NamespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 	return nil
 }
 
@@ -72,26 +73,26 @@ func (n *NamespaceContainer) ListTags() ([]string, error) {
 	return n.repo.getIndex().GetTags(n.namespace), nil // return digests as tags, also
 }
 
-func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (cpi2.DataAccess, error) {
+func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
 	return n.repo.base.GetBlobData(digest)
 }
 
-func (n *NamespaceContainer) AddBlob(blob cpi2.BlobAccess) error {
+func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
 	n.repo.base.Lock()
 	defer n.repo.base.Unlock()
 
 	return n.repo.base.AddBlob(blob)
 }
 
-func (n *NamespaceContainer) GetArtefact(vers string) (cpi2.ArtefactAccess, error) {
+func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error) {
 	meta := n.repo.getIndex().GetArtefactInfo(n.namespace, vers)
 	if meta == nil {
-		return nil, errors.ErrNotFound(cpi2.KIND_OCIARTEFACT, vers, n.namespace)
+		return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, vers, n.namespace)
 	}
 	return n.repo.base.GetArtefact(n, meta.Digest)
 }
 
-func (n *NamespaceContainer) AddArtefact(artefact cpi2.Artefact, tags ...string) (access accessio.BlobAccess, err error) {
+func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, tags ...string) (access accessio.BlobAccess, err error) {
 	n.repo.base.Lock()
 	defer n.repo.base.Unlock()
 
@@ -111,13 +112,13 @@ func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	return n.repo.getIndex().AddTagsFor(n.namespace, digest, tags...)
 }
 
-func (n *NamespaceContainer) NewArtefactProvider(state accessobj.State) (cpi2.ArtefactProvider, error) {
-	return cpi2.NewNopCloserArtefactProvider(n), nil
+func (n *NamespaceContainer) NewArtefactProvider(state accessobj.State) (cpi.ArtefactProvider, error) {
+	return cpi.NewNopCloserArtefactProvider(n), nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (n *Namespace) GetRepository() cpi2.Repository {
+func (n *Namespace) GetRepository() cpi.Repository {
 	return n.access.repo
 }
 
@@ -129,26 +130,26 @@ func (n *Namespace) ListTags() ([]string, error) {
 	return n.access.ListTags()
 }
 
-func (n *Namespace) NewArtefact(art ...*artdesc.Artefact) (cpi2.ArtefactAccess, error) {
+func (n *Namespace) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
 	if n.access.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	return cpi2.NewArtefact(n.access, art...)
+	return cpi.NewArtefact(n.access, art...)
 }
 
-func (n *Namespace) GetBlobData(digest digest.Digest) (cpi2.DataAccess, error) {
+func (n *Namespace) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
 	return n.access.GetBlobData(digest)
 }
 
-func (n *Namespace) GetArtefact(ref string) (cpi2.ArtefactAccess, error) {
+func (n *Namespace) GetArtefact(ref string) (cpi.ArtefactAccess, error) {
 	meta := n.access.repo.getIndex().GetArtefactInfo(n.access.namespace, ref)
 	if meta != nil {
 		return n.access.repo.base.GetArtefact(n.access, meta.Digest)
 	}
-	return nil, errors.ErrNotFound(cpi2.KIND_OCIARTEFACT, ref, n.access.namespace)
+	return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, ref, n.access.namespace)
 }
 
-func (n *Namespace) AddArtefact(a cpi2.Artefact, tags ...string) (cpi2.BlobAccess, error) {
+func (n *Namespace) AddArtefact(a cpi.Artefact, tags ...string) (cpi.BlobAccess, error) {
 	return n.access.AddArtefact(a, tags...)
 }
 
@@ -156,6 +157,6 @@ func (n *Namespace) AddTags(digest digest.Digest, tags ...string) error {
 	return n.access.AddTags(digest, tags...)
 }
 
-func (n *Namespace) AddBlob(blob cpi2.BlobAccess) error {
+func (n *Namespace) AddBlob(blob cpi.BlobAccess) error {
 	return n.access.AddBlob(blob)
 }

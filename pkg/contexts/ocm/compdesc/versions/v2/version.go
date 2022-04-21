@@ -15,7 +15,7 @@
 package compdesc
 
 import (
-	compdesc2 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2/jsonscheme"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -25,7 +25,7 @@ import (
 const SchemaVersion = "v2"
 
 func init() {
-	compdesc2.RegisterScheme(&DescriptorVersion{})
+	compdesc.RegisterScheme(&DescriptorVersion{})
 }
 
 type DescriptorVersion struct{}
@@ -34,7 +34,7 @@ func (v *DescriptorVersion) GetVersion() string {
 	return SchemaVersion
 }
 
-func (v *DescriptorVersion) Decode(data []byte, opts *compdesc2.DecodeOptions) (interface{}, error) {
+func (v *DescriptorVersion) Decode(data []byte, opts *compdesc.DecodeOptions) (interface{}, error) {
 	var cd ComponentDescriptor
 	if !opts.DisableValidation {
 		if err := jsonscheme.Validate(data); err != nil {
@@ -68,7 +68,7 @@ func (v *DescriptorVersion) Decode(data []byte, opts *compdesc2.DecodeOptions) (
 // convert to internal version
 ////////////////////////////////////////////////////////////////////////////////
 
-func (v *DescriptorVersion) ConvertTo(obj interface{}) (out *compdesc2.ComponentDescriptor, err error) {
+func (v *DescriptorVersion) ConvertTo(obj interface{}) (out *compdesc.ComponentDescriptor, err error) {
 	if obj == nil {
 		return nil, nil
 	}
@@ -77,11 +77,11 @@ func (v *DescriptorVersion) ConvertTo(obj interface{}) (out *compdesc2.Component
 		return nil, errors.Newf("%T is no version v2 descriptor", obj)
 	}
 
-	defer compdesc2.CatchConversionError(&err)
-	out = &compdesc2.ComponentDescriptor{
-		Metadata: compdesc2.Metadata{in.Metadata.Version},
-		ComponentSpec: compdesc2.ComponentSpec{
-			ObjectMeta: compdesc2.ObjectMeta{
+	defer compdesc.CatchConversionError(&err)
+	out = &compdesc.ComponentDescriptor{
+		Metadata: compdesc.Metadata{in.Metadata.Version},
+		ComponentSpec: compdesc.ComponentSpec{
+			ObjectMeta: compdesc.ObjectMeta{
 				Name:    in.Name,
 				Version: in.Version,
 				Labels:  in.Labels.Copy(),
@@ -96,58 +96,58 @@ func (v *DescriptorVersion) ConvertTo(obj interface{}) (out *compdesc2.Component
 	return out, nil
 }
 
-func convert_ComponentReference_to(in *ComponentReference) *compdesc2.ComponentReference {
+func convert_ComponentReference_to(in *ComponentReference) *compdesc.ComponentReference {
 	if in == nil {
 		return nil
 	}
-	out := &compdesc2.ComponentReference{
+	out := &compdesc.ComponentReference{
 		ElementMeta:   *convert_ElementMeta_to(&in.ElementMeta),
 		ComponentName: in.ComponentName,
 	}
 	return out
 }
 
-func convert_ComponentReferences_to(in []ComponentReference) compdesc2.ComponentReferences {
+func convert_ComponentReferences_to(in []ComponentReference) compdesc.ComponentReferences {
 	if in == nil {
 		return nil
 	}
-	out := make(compdesc2.ComponentReferences, len(in))
+	out := make(compdesc.ComponentReferences, len(in))
 	for i, v := range in {
 		out[i] = *convert_ComponentReference_to(&v)
 	}
 	return out
 }
 
-func convert_Source_to(in *Source) *compdesc2.Source {
+func convert_Source_to(in *Source) *compdesc.Source {
 	if in == nil {
 		return nil
 	}
-	out := &compdesc2.Source{
-		SourceMeta: compdesc2.SourceMeta{
+	out := &compdesc.Source{
+		SourceMeta: compdesc.SourceMeta{
 			ElementMeta: *convert_ElementMeta_to(&in.ElementMeta),
 			Type:        in.Type,
 		},
-		Access: compdesc2.GenericAccessSpec(in.Access.DeepCopy()),
+		Access: compdesc.GenericAccessSpec(in.Access.DeepCopy()),
 	}
 	return out
 }
 
-func convert_Sources_to(in Sources) compdesc2.Sources {
+func convert_Sources_to(in Sources) compdesc.Sources {
 	if in == nil {
 		return nil
 	}
-	out := make(compdesc2.Sources, len(in))
+	out := make(compdesc.Sources, len(in))
 	for i, v := range in {
 		out[i] = *convert_Source_to(&v)
 	}
 	return out
 }
 
-func convert_ElementMeta_to(in *ElementMeta) *compdesc2.ElementMeta {
+func convert_ElementMeta_to(in *ElementMeta) *compdesc.ElementMeta {
 	if in == nil {
 		return nil
 	}
-	out := &compdesc2.ElementMeta{
+	out := &compdesc.ElementMeta{
 		Name:          in.Name,
 		Version:       in.Version,
 		ExtraIdentity: in.ExtraIdentity.Copy(),
@@ -156,49 +156,49 @@ func convert_ElementMeta_to(in *ElementMeta) *compdesc2.ElementMeta {
 	return out
 }
 
-func convert_Resource_to(in *Resource) *compdesc2.Resource {
+func convert_Resource_to(in *Resource) *compdesc.Resource {
 	if in == nil {
 		return nil
 	}
-	out := &compdesc2.Resource{
-		ResourceMeta: compdesc2.ResourceMeta{
+	out := &compdesc.Resource{
+		ResourceMeta: compdesc.ResourceMeta{
 			ElementMeta: *convert_ElementMeta_to(&in.ElementMeta),
 			Type:        in.Type,
 			Relation:    in.Relation,
 			SourceRef:   Convert_SourceRefs_to(in.SourceRef),
 		},
-		Access: compdesc2.GenericAccessSpec(in.Access),
+		Access: compdesc.GenericAccessSpec(in.Access),
 	}
 	return out
 }
 
-func convert_Resources_to(in Resources) compdesc2.Resources {
+func convert_Resources_to(in Resources) compdesc.Resources {
 	if in == nil {
 		return nil
 	}
-	out := make(compdesc2.Resources, len(in))
+	out := make(compdesc.Resources, len(in))
 	for i, v := range in {
 		out[i] = *convert_Resource_to(&v)
 	}
 	return out
 }
 
-func convert_SourceRef_to(in *SourceRef) *compdesc2.SourceRef {
+func convert_SourceRef_to(in *SourceRef) *compdesc.SourceRef {
 	if in == nil {
 		return nil
 	}
-	out := &compdesc2.SourceRef{
+	out := &compdesc.SourceRef{
 		IdentitySelector: in.IdentitySelector.Copy(),
 		Labels:           in.Labels.Copy(),
 	}
 	return out
 }
 
-func Convert_SourceRefs_to(in []SourceRef) []compdesc2.SourceRef {
+func Convert_SourceRefs_to(in []SourceRef) []compdesc.SourceRef {
 	if in == nil {
 		return nil
 	}
-	out := make([]compdesc2.SourceRef, len(in))
+	out := make([]compdesc.SourceRef, len(in))
 	for i, v := range in {
 		out[i] = *convert_SourceRef_to(&v)
 	}
@@ -209,7 +209,7 @@ func Convert_SourceRefs_to(in []SourceRef) []compdesc2.SourceRef {
 // convert from internal version
 ////////////////////////////////////////////////////////////////////////////////
 
-func (v *DescriptorVersion) ConvertFrom(in *compdesc2.ComponentDescriptor) (interface{}, error) {
+func (v *DescriptorVersion) ConvertFrom(in *compdesc.ComponentDescriptor) (interface{}, error) {
 	if in == nil {
 		return nil, nil
 	}
@@ -236,7 +236,7 @@ func (v *DescriptorVersion) ConvertFrom(in *compdesc2.ComponentDescriptor) (inte
 	return out, nil
 }
 
-func convert_ComponentReference_from(in *compdesc2.ComponentReference) *ComponentReference {
+func convert_ComponentReference_from(in *compdesc.ComponentReference) *ComponentReference {
 	if in == nil {
 		return nil
 	}
@@ -247,7 +247,7 @@ func convert_ComponentReference_from(in *compdesc2.ComponentReference) *Componen
 	return out
 }
 
-func convert_ComponentReferences_from(in []compdesc2.ComponentReference) []ComponentReference {
+func convert_ComponentReferences_from(in []compdesc.ComponentReference) []ComponentReference {
 	if in == nil {
 		return nil
 	}
@@ -258,13 +258,13 @@ func convert_ComponentReferences_from(in []compdesc2.ComponentReference) []Compo
 	return out
 }
 
-func convert_Source_from(in *compdesc2.Source) *Source {
+func convert_Source_from(in *compdesc.Source) *Source {
 	if in == nil {
 		return nil
 	}
 	acc, err := runtime.ToUnstructuredTypedObject(in.Access)
 	if err != nil {
-		compdesc2.ThrowConversionError(err)
+		compdesc.ThrowConversionError(err)
 	}
 	out := &Source{
 		SourceMeta: SourceMeta{
@@ -276,7 +276,7 @@ func convert_Source_from(in *compdesc2.Source) *Source {
 	return out
 }
 
-func convert_Sources_from(in compdesc2.Sources) Sources {
+func convert_Sources_from(in compdesc.Sources) Sources {
 	if in == nil {
 		return nil
 	}
@@ -287,7 +287,7 @@ func convert_Sources_from(in compdesc2.Sources) Sources {
 	return out
 }
 
-func convert_ElementMeta_from(in *compdesc2.ElementMeta) *ElementMeta {
+func convert_ElementMeta_from(in *compdesc.ElementMeta) *ElementMeta {
 	if in == nil {
 		return nil
 	}
@@ -300,13 +300,13 @@ func convert_ElementMeta_from(in *compdesc2.ElementMeta) *ElementMeta {
 	return out
 }
 
-func convert_Resource_from(in *compdesc2.Resource) *Resource {
+func convert_Resource_from(in *compdesc.Resource) *Resource {
 	if in == nil {
 		return nil
 	}
 	acc, err := runtime.ToUnstructuredTypedObject(in.Access)
 	if err != nil {
-		compdesc2.ThrowConversionError(err)
+		compdesc.ThrowConversionError(err)
 	}
 	out := &Resource{
 		ElementMeta: *convert_ElementMeta_from(&in.ElementMeta),
@@ -318,7 +318,7 @@ func convert_Resource_from(in *compdesc2.Resource) *Resource {
 	return out
 }
 
-func convert_Resources_from(in compdesc2.Resources) Resources {
+func convert_Resources_from(in compdesc.Resources) Resources {
 	if in == nil {
 		return nil
 	}
@@ -329,7 +329,7 @@ func convert_Resources_from(in compdesc2.Resources) Resources {
 	return out
 }
 
-func convert_SourceRef_from(in *compdesc2.SourceRef) *SourceRef {
+func convert_SourceRef_from(in *compdesc.SourceRef) *SourceRef {
 	if in == nil {
 		return nil
 	}
@@ -340,7 +340,7 @@ func convert_SourceRef_from(in *compdesc2.SourceRef) *SourceRef {
 	return out
 }
 
-func convert_SourceRefs_from(in []compdesc2.SourceRef) []SourceRef {
+func convert_SourceRefs_from(in []compdesc.SourceRef) []SourceRef {
 	if in == nil {
 		return nil
 	}

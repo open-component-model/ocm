@@ -17,18 +17,19 @@ package artdesc_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	artdesc2 "github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 )
 
 var _ = Describe("utils", func() {
 
 	It("strips media type", func() {
-		Expect(artdesc2.ToContentMediaType(artdesc2.MediaTypeImageManifest)).To(Equal("application/vnd.oci.image.manifest.v1"))
-		Expect(artdesc2.ToContentMediaType(artdesc2.MediaTypeImageIndex)).To(Equal("application/vnd.oci.image.index.v1"))
+		Expect(artdesc.ToContentMediaType(artdesc.MediaTypeImageManifest)).To(Equal("application/vnd.oci.image.manifest.v1"))
+		Expect(artdesc.ToContentMediaType(artdesc.MediaTypeImageIndex)).To(Equal("application/vnd.oci.image.index.v1"))
 	})
 
 	It("maps to descriptor media typ", func() {
-		Expect(artdesc2.ToDescriptorMediaType(artdesc2.ToContentMediaType(artdesc2.MediaTypeImageManifest) + "+tar+gzip")).To(Equal(artdesc2.MediaTypeImageManifest))
-		Expect(artdesc2.ToDescriptorMediaType(artdesc2.ToContentMediaType(artdesc2.MediaTypeImageIndex) + "+tar+gzip")).To(Equal(artdesc2.MediaTypeImageIndex))
+		Expect(artdesc.ToDescriptorMediaType(artdesc.ToContentMediaType(artdesc.MediaTypeImageManifest) + "+tar+gzip")).To(Equal(artdesc.MediaTypeImageManifest))
+		Expect(artdesc.ToDescriptorMediaType(artdesc.ToContentMediaType(artdesc.MediaTypeImageIndex) + "+tar+gzip")).To(Equal(artdesc.MediaTypeImageIndex))
 	})
 })

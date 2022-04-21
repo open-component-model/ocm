@@ -18,7 +18,7 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/common"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -29,14 +29,14 @@ const (
 )
 
 func init() {
-	cpi2.RegisterConfigType(GenericConfigType, cpi2.NewConfigType(GenericConfigType, &Config{}))
-	cpi2.RegisterConfigType(GenericConfigTypeV1, cpi2.NewConfigType(GenericConfigTypeV1, &Config{}))
+	cpi.RegisterConfigType(GenericConfigType, cpi.NewConfigType(GenericConfigType, &Config{}))
+	cpi.RegisterConfigType(GenericConfigTypeV1, cpi.NewConfigType(GenericConfigTypeV1, &Config{}))
 }
 
 // Config describes a memory based repository interface.
 type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
-	Configurations              []*cpi2.GenericConfig `json:"configurations"`
+	Configurations              []*cpi.GenericConfig `json:"configurations"`
 }
 
 // NewConfig creates a new memory Config
@@ -46,8 +46,8 @@ func NewConfig(info string) *Config {
 	}
 }
 
-func (c *Config) AddConfig(cfg cpi2.Config) error {
-	g, err := cpi2.ToGenericConfig(cfg)
+func (c *Config) AddConfig(cfg cpi.Config) error {
+	g, err := cpi.ToGenericConfig(cfg)
 	if err != nil {
 		return err
 	}
@@ -59,8 +59,8 @@ func (c *Config) GetType() string {
 	return GenericConfigType
 }
 
-func (c *Config) ApplyTo(ctx cpi2.Context, target interface{}) error {
-	if cctx, ok := target.(cpi2.Context); ok {
+func (c *Config) ApplyTo(ctx cpi.Context, target interface{}) error {
+	if cctx, ok := target.(cpi.Context); ok {
 		list := errors.ErrListf("applying generic config list")
 		for i, cfg := range c.Configurations {
 			sub := fmt.Sprintf("config entry %d", i)

@@ -18,7 +18,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
 	"github.com/open-component-model/ocm/pkg/common"
-	oci2 "github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -30,7 +30,7 @@ func ClosureExplode(opts *output.Options, e interface{}) []interface{} {
 func traverse(hist common.History, o *Object, octx out.Context) []output.Object {
 	blob, _ := o.Artefact.Blob()
 	key := common.NewNameVersion("", blob.Digest().String())
-	if err := hist.Add(oci2.KIND_OCIARTEFACT, key); err != nil {
+	if err := hist.Add(oci.KIND_OCIARTEFACT, key); err != nil {
 		return nil
 	}
 	result := []output.Object{o}
@@ -51,7 +51,7 @@ func traverse(hist common.History, o *Object, octx out.Context) []output.Object 
 			var obj = &Object{
 				History: hist.Copy(),
 				Key:     Key(nested),
-				Spec: oci2.RefSpec{
+				Spec: oci.RefSpec{
 					UniformRepositorySpec: o.Spec.UniformRepositorySpec,
 					Repository:            o.Spec.Repository,
 					Digest:                &ref.Digest,

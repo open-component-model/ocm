@@ -18,58 +18,58 @@ package cpi
 
 import (
 	"github.com/open-component-model/ocm/pkg/common"
-	core2 "github.com/open-component-model/ocm/pkg/contexts/credentials/core"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
 )
 
-const KIND_CREDENTIALS = core2.KIND_CREDENTIALS
-const KIND_REPOSITORY = core2.KIND_REPOSITORY
+const KIND_CREDENTIALS = core.KIND_CREDENTIALS
+const KIND_REPOSITORY = core.KIND_REPOSITORY
 
-const CONTEXT_TYPE = core2.CONTEXT_TYPE
+const CONTEXT_TYPE = core.CONTEXT_TYPE
 
-type Context = core2.Context
-type Repository = core2.Repository
-type RepositoryType = core2.RepositoryType
-type Credentials = core2.Credentials
-type CredentialsSource = core2.CredentialsSource
-type CredentialsChain = core2.CredentialsChain
-type CredentialsSpec = core2.CredentialsSpec
-type RepositorySpec = core2.RepositorySpec
-type GenericRepositorySpec = core2.GenericRepositorySpec
-type GenericCredentialsSpec = core2.GenericCredentialsSpec
+type Context = core.Context
+type Repository = core.Repository
+type RepositoryType = core.RepositoryType
+type Credentials = core.Credentials
+type CredentialsSource = core.CredentialsSource
+type CredentialsChain = core.CredentialsChain
+type CredentialsSpec = core.CredentialsSpec
+type RepositorySpec = core.RepositorySpec
+type GenericRepositorySpec = core.GenericRepositorySpec
+type GenericCredentialsSpec = core.GenericCredentialsSpec
 
-type ConsumerIdentity = core2.ConsumerIdentity
-type IdentityMatcher = core2.IdentityMatcher
+type ConsumerIdentity = core.ConsumerIdentity
+type IdentityMatcher = core.IdentityMatcher
 
-var DefaultContext = core2.DefaultContext
+var DefaultContext = core.DefaultContext
 
 func NewGenericCredentialsSpec(name string, repospec *GenericRepositorySpec) *GenericCredentialsSpec {
-	return core2.NewGenericCredentialsSpec(name, repospec)
+	return core.NewGenericCredentialsSpec(name, repospec)
 }
 
 func NewCredentialsSpec(name string, repospec RepositorySpec) CredentialsSpec {
-	return core2.NewCredentialsSpec(name, repospec)
+	return core.NewCredentialsSpec(name, repospec)
 }
 
 func ToGenericCredentialsSpec(spec CredentialsSpec) (*GenericCredentialsSpec, error) {
-	return core2.ToGenericCredentialsSpec(spec)
+	return core.ToGenericCredentialsSpec(spec)
 }
 
 func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {
-	return core2.ToGenericRepositorySpec(spec)
+	return core.ToGenericRepositorySpec(spec)
 }
 
 func RegisterRepositoryType(name string, atype RepositoryType) {
-	core2.DefaultRepositoryTypeScheme.Register(name, atype)
+	core.DefaultRepositoryTypeScheme.Register(name, atype)
 }
 
 func NewCredentials(props common.Properties) Credentials {
-	return core2.NewCredentials(props)
+	return core.NewCredentials(props)
 }
 
 func ErrUnknownCredentials(name string) error {
-	return core2.ErrUnknownCredentials(name)
+	return core.ErrUnknownCredentials(name)
 }
 
 func ErrUnknownRepository(kind, name string) error {
-	return core2.ErrUnknownRepository(kind, name)
+	return core.ErrUnknownRepository(kind, name)
 }

@@ -7,7 +7,7 @@ package ocm_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	ocm2 "github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
 func Type(t string) string {
@@ -34,16 +34,16 @@ func CheckRef(ref, ut, h, us, c, uv, i string) {
 	if uv != "" {
 		v = &uv
 	}
-	spec, err := ocm2.ParseRef(ref)
+	spec, err := ocm.ParseRef(ref)
 	Expect(err).To(Succeed())
-	Expect(spec).To(Equal(ocm2.RefSpec{
-		UniformRepositorySpec: ocm2.UniformRepositorySpec{
+	Expect(spec).To(Equal(ocm.RefSpec{
+		UniformRepositorySpec: ocm.UniformRepositorySpec{
 			Type:    ut,
 			Host:    h,
 			SubPath: us,
 			Info:    i,
 		},
-		CompSpec: ocm2.CompSpec{
+		CompSpec: ocm.CompSpec{
 			Component: c,
 			Version:   v,
 		},

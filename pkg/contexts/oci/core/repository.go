@@ -15,9 +15,10 @@
 package core
 
 import (
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	artdesc2 "github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/opencontainers/go-digest"
+
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 )
 
 type Repository interface {
@@ -63,7 +64,7 @@ type NamespaceAccess interface {
 	GetNamespace() string
 	ListTags() ([]string, error)
 
-	NewArtefact(...*artdesc2.Artefact) (ArtefactAccess, error)
+	NewArtefact(...*artdesc.Artefact) (ArtefactAccess, error)
 
 	Close() error
 }
@@ -73,9 +74,9 @@ type Artefact interface {
 	IsIndex() bool
 
 	Blob() (BlobAccess, error)
-	Artefact() *artdesc2.Artefact
-	Manifest() (*artdesc2.Manifest, error)
-	Index() (*artdesc2.Index, error)
+	Artefact() *artdesc.Artefact
+	Manifest() (*artdesc.Manifest, error)
+	Index() (*artdesc.Index, error)
 }
 
 type ArtefactAccess interface {
@@ -84,15 +85,15 @@ type ArtefactAccess interface {
 	BlobSink
 
 	Blob() (accessio.BlobAccess, error)
-	GetDescriptor() *artdesc2.Artefact
+	GetDescriptor() *artdesc.Artefact
 	ManifestAccess() ManifestAccess
 	IndexAccess() IndexAccess
 	GetBlob(digest digest.Digest) (BlobAccess, error)
 
 	AddBlob(BlobAccess) error
 
-	AddArtefact(Artefact, *artdesc2.Platform) (BlobAccess, error)
-	AddLayer(BlobAccess, *artdesc2.Descriptor) (int, error)
+	AddArtefact(Artefact, *artdesc.Platform) (BlobAccess, error)
+	AddLayer(BlobAccess, *artdesc.Descriptor) (int, error)
 
 	Close() error
 }
@@ -100,20 +101,20 @@ type ArtefactAccess interface {
 type ManifestAccess interface {
 	Artefact
 
-	GetDescriptor() *artdesc2.Manifest
-	GetBlobDescriptor(digest digest.Digest) *artdesc2.Descriptor
+	GetDescriptor() *artdesc.Manifest
+	GetBlobDescriptor(digest digest.Digest) *artdesc.Descriptor
 	GetConfigBlob() (BlobAccess, error)
 	GetBlob(digest digest.Digest) (BlobAccess, error)
 
 	AddBlob(BlobAccess) error
-	AddLayer(BlobAccess, *artdesc2.Descriptor) (int, error)
+	AddLayer(BlobAccess, *artdesc.Descriptor) (int, error)
 }
 
 type IndexAccess interface {
 	Artefact
 
-	GetDescriptor() *artdesc2.Index
-	GetBlobDescriptor(digest digest.Digest) *artdesc2.Descriptor
+	GetDescriptor() *artdesc.Index
+	GetBlobDescriptor(digest digest.Digest) *artdesc.Descriptor
 	GetBlob(digest digest.Digest) (BlobAccess, error)
 
 	GetArtefact(digest digest.Digest) (ArtefactAccess, error)
@@ -121,7 +122,7 @@ type IndexAccess interface {
 	GetManifest(digest digest.Digest) (ManifestAccess, error)
 
 	AddBlob(BlobAccess) error
-	AddArtefact(Artefact, *artdesc2.Platform) (BlobAccess, error)
+	AddArtefact(Artefact, *artdesc.Platform) (BlobAccess, error)
 }
 
 // NamespaceLister provides the optional repository list functionality of

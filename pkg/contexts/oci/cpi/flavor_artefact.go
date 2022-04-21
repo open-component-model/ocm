@@ -17,7 +17,7 @@ package cpi
 import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	artdesc2 "github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/opencontainers/go-digest"
@@ -73,8 +73,8 @@ func NewArtefactForBlob(access ArtefactSetContainer, blob accessio.BlobAccess) (
 	return a, nil
 }
 
-func NewArtefact(access ArtefactSetContainer, defs ...*artdesc2.Artefact) (*ArtefactImpl, error) {
-	var def *artdesc2.Artefact
+func NewArtefact(access ArtefactSetContainer, defs ...*artdesc.Artefact) (*ArtefactImpl, error) {
+	var def *artdesc.Artefact
 	if len(defs) != 0 && defs[0] != nil {
 		def = defs[0]
 	}
@@ -109,7 +109,7 @@ func (a *ArtefactImpl) AddBlob(access BlobAccess) error {
 }
 
 func (a *ArtefactImpl) Blob() (accessio.BlobAccess, error) {
-	d := a.state.GetState().(*artdesc2.Artefact)
+	d := a.state.GetState().(*artdesc.Artefact)
 	if !d.IsValid() {
 		return nil, errors.ErrUnknown("artefact type")
 	}
@@ -120,7 +120,7 @@ func (a *ArtefactImpl) Blob() (accessio.BlobAccess, error) {
 	return accessio.BlobWithMimeType(d.MimeType(), blob), nil
 }
 
-func (a *ArtefactImpl) NewArtefact(art ...*artdesc2.Artefact) (ArtefactAccess, error) {
+func (a *ArtefactImpl) NewArtefact(art ...*artdesc.Artefact) (ArtefactAccess, error) {
 	if !a.IsIndex() {
 		return nil, ErrNoIndex
 	}
@@ -129,12 +129,12 @@ func (a *ArtefactImpl) NewArtefact(art ...*artdesc2.Artefact) (ArtefactAccess, e
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *ArtefactImpl) Artefact() *artdesc2.Artefact {
+func (a *ArtefactImpl) Artefact() *artdesc.Artefact {
 	return a.GetDescriptor()
 }
 
-func (a *ArtefactImpl) GetDescriptor() *artdesc2.Artefact {
-	d := a.state.GetState().(*artdesc2.Artefact)
+func (a *ArtefactImpl) GetDescriptor() *artdesc.Artefact {
+	d := a.state.GetState().(*artdesc.Artefact)
 	if d.IsValid() {
 		return d
 	}
@@ -152,13 +152,13 @@ func (a *ArtefactImpl) GetBlobDescriptor(digest digest.Digest) *Descriptor {
 	return a.container.GetBlobDescriptor(digest)
 }
 
-func (a *ArtefactImpl) Index() (*artdesc2.Index, error) {
+func (a *ArtefactImpl) Index() (*artdesc.Index, error) {
 	a.lock.Lock()
 	defer a.lock.Unlock()
-	d := a.state.GetState().(*artdesc2.Artefact)
+	d := a.state.GetState().(*artdesc.Artefact)
 	idx := d.Index()
 	if idx == nil {
-		idx = artdesc2.NewIndex()
+		idx = artdesc.NewIndex()
 		if err := d.SetIndex(idx); err != nil {
 			return nil, errors.Newf("artefact is manifest")
 		}
@@ -166,13 +166,13 @@ func (a *ArtefactImpl) Index() (*artdesc2.Index, error) {
 	return idx, nil
 }
 
-func (a *ArtefactImpl) Manifest() (*artdesc2.Manifest, error) {
+func (a *ArtefactImpl) Manifest() (*artdesc.Manifest, error) {
 	a.lock.Lock()
 	defer a.lock.Unlock()
-	d := a.state.GetState().(*artdesc2.Artefact)
+	d := a.state.GetState().(*artdesc.Artefact)
 	m := d.Manifest()
 	if m == nil {
-		m = artdesc2.NewManifest()
+		m = artdesc.NewManifest()
 		if err := d.SetManifest(m); err != nil {
 			return nil, errors.Newf("artefact is index")
 		}
@@ -183,10 +183,10 @@ func (a *ArtefactImpl) Manifest() (*artdesc2.Manifest, error) {
 func (a *ArtefactImpl) ManifestAccess() core.ManifestAccess {
 	a.lock.Lock()
 	defer a.lock.Unlock()
-	d := a.state.GetState().(*artdesc2.Artefact)
+	d := a.state.GetState().(*artdesc.Artefact)
 	m := d.Manifest()
 	if m == nil {
-		m = artdesc2.NewManifest()
+		m = artdesc.NewManifest()
 		if err := d.SetManifest(m); err != nil {
 			return nil
 		}
@@ -197,10 +197,10 @@ func (a *ArtefactImpl) ManifestAccess() core.ManifestAccess {
 func (a *ArtefactImpl) IndexAccess() core.IndexAccess {
 	a.lock.Lock()
 	defer a.lock.Unlock()
-	d := a.state.GetState().(*artdesc2.Artefact)
+	d := a.state.GetState().(*artdesc.Artefact)
 	i := d.Index()
 	if i == nil {
-		i = artdesc2.NewIndex()
+		i = artdesc.NewIndex()
 		if err := d.SetIndex(i); err != nil {
 			return nil
 		}
@@ -251,7 +251,7 @@ func (a *ArtefactImpl) GetBlob(digest digest.Digest) (BlobAccess, error) {
 	return nil, ErrBlobNotFound(digest)
 }
 
-func (a *ArtefactImpl) AddArtefact(art Artefact, platform *artdesc2.Platform) (accessio.BlobAccess, error) {
+func (a *ArtefactImpl) AddArtefact(art Artefact, platform *artdesc.Platform) (accessio.BlobAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}

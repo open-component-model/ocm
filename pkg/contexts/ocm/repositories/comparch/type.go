@@ -19,7 +19,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -29,8 +29,8 @@ const (
 )
 
 func init() {
-	cpi2.RegisterRepositoryType(CTFComponentArchiveType, cpi2.NewRepositoryType(CTFComponentArchiveType, &RepositorySpec{}, nil))
-	cpi2.RegisterRepositoryType(CTFComponentArchiveTypeV1, cpi2.NewRepositoryType(CTFComponentArchiveTypeV1, &RepositorySpec{}, nil))
+	cpi.RegisterRepositoryType(CTFComponentArchiveType, cpi.NewRepositoryType(CTFComponentArchiveType, &RepositorySpec{}, nil))
+	cpi.RegisterRepositoryType(CTFComponentArchiveTypeV1, cpi.NewRepositoryType(CTFComponentArchiveTypeV1, &RepositorySpec{}, nil))
 }
 
 type RepositorySpec struct {
@@ -57,14 +57,14 @@ func NewRepositorySpec(acc accessobj.AccessMode, filePath string, opts ...access
 func (a *RepositorySpec) GetType() string {
 	return CTFComponentArchiveType
 }
-func (a *RepositorySpec) Repository(ctx cpi2.Context, creds credentials.Credentials) (cpi2.Repository, error) {
+func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	return NewRepository(ctx, a)
 }
-func (a *RepositorySpec) AsUniformSpec(cpi2.Context) cpi2.UniformRepositorySpec {
+func (a *RepositorySpec) AsUniformSpec(cpi.Context) cpi.UniformRepositorySpec {
 	opts := a.Options.Default()
 	p, err := vfs.Canonical(opts.PathFileSystem, a.FilePath, false)
 	if err != nil {
-		return cpi2.UniformRepositorySpec{Type: a.GetKind(), SubPath: a.FilePath}
+		return cpi.UniformRepositorySpec{Type: a.GetKind(), SubPath: a.FilePath}
 	}
-	return cpi2.UniformRepositorySpec{Type: a.GetKind(), SubPath: p}
+	return cpi.UniformRepositorySpec{Type: a.GetKind(), SubPath: p}
 }

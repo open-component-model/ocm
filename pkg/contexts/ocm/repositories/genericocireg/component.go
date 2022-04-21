@@ -19,7 +19,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -57,7 +56,7 @@ func (c *ComponentAccess) Close() error {
 	return c.namespace.Close()
 }
 
-func (c *ComponentAccess) GetContext() core.Context {
+func (c *ComponentAccess) GetContext() cpi.Context {
 	return c.repo.GetContext()
 }
 

@@ -19,33 +19,34 @@ import (
 	"compress/gzip"
 	"io"
 
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
-	ctf2 "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/testhelper"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/opencontainers/go-digest"
-
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("ctf management", func() {
 	var tempfs vfs.FileSystem
 
-	var spec *ctf2.RepositorySpec
+	var spec *ctf.RepositorySpec
 
 	BeforeEach(func() {
 		t, err := osfs.NewTempFileSystem()
 		Expect(err).To(Succeed())
 		tempfs = t
 
-		spec = ctf2.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessio.PathFileSystem(tempfs), accessobj.FormatDirectory)
+		spec = ctf.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessio.PathFileSystem(tempfs), accessobj.FormatDirectory)
 	})
 
 	AfterEach(func() {
@@ -53,15 +54,15 @@ var _ = Describe("ctf management", func() {
 	})
 
 	It("instantiate filesystem ctf", func() {
-		r, err := ctf2.FormatDirectory.Create(oci.DefaultContext(), "test", spec.Options, 0700)
+		r, err := ctf.FormatDirectory.Create(oci.DefaultContext(), "test", spec.Options, 0700)
 		Expect(err).To(Succeed())
-		Expect(vfs.DirExists(tempfs, "test/"+ctf2.BlobsDirectoryName)).To(BeTrue())
+		Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
 
 		n, err := r.LookupNamespace("mandelsoft/test")
 		DefaultManifestFill(n)
 
 		Expect(r.Close()).To(Succeed())
-		Expect(vfs.FileExists(tempfs, "test/"+ctf2.ArtefactIndexFileName)).To(BeTrue())
+		Expect(vfs.FileExists(tempfs, "test/"+ctf.ArtefactIndexFileName)).To(BeTrue())
 
 		infos, err := vfs.ReadDir(tempfs, "test/"+artefactset.BlobsDirectoryName)
 		Expect(err).To(Succeed())
@@ -78,13 +79,13 @@ var _ = Describe("ctf management", func() {
 	It("instantiate filesystem ctf", func() {
 		r, err := spec.Repository(nil, nil)
 		Expect(err).To(Succeed())
-		Expect(vfs.DirExists(tempfs, "test/"+ctf2.BlobsDirectoryName)).To(BeTrue())
+		Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
 
 		n, err := r.LookupNamespace("mandelsoft/test")
 		DefaultManifestFill(n)
 
 		Expect(r.Close()).To(Succeed())
-		Expect(vfs.FileExists(tempfs, "test/"+ctf2.ArtefactIndexFileName)).To(BeTrue())
+		Expect(vfs.FileExists(tempfs, "test/"+ctf.ArtefactIndexFileName)).To(BeTrue())
 
 		infos, err := vfs.ReadDir(tempfs, "test/"+artefactset.BlobsDirectoryName)
 		Expect(err).To(Succeed())
@@ -99,7 +100,7 @@ var _ = Describe("ctf management", func() {
 	})
 
 	It("instantiate tgz artefact", func() {
-		ctf2.FormatTGZ.ApplyOption(&spec.Options)
+		ctf.FormatTGZ.ApplyOption(&spec.Options)
 		spec.FilePath = "test.tgz"
 		r, err := spec.Repository(nil, nil)
 		Expect(err).To(Succeed())
@@ -137,7 +138,7 @@ var _ = Describe("ctf management", func() {
 			}
 		}
 		Expect(files).To(ContainElements(
-			ctf2.ArtefactIndexFileName,
+			ctf.ArtefactIndexFileName,
 			"blobs/sha256."+DIGEST_MANIFEST,
 			"blobs/sha256."+DIGEST_CONFIG,
 			"blobs/sha256."+DIGEST_LAYER))
@@ -147,12 +148,12 @@ var _ = Describe("ctf management", func() {
 		It("read from filesystem ctf", func() {
 			r, err := spec.Repository(nil, nil)
 			Expect(err).To(Succeed())
-			Expect(vfs.DirExists(tempfs, "test/"+ctf2.BlobsDirectoryName)).To(BeTrue())
+			Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
 			n, err := r.LookupNamespace("mandelsoft/test")
 			DefaultManifestFill(n)
 			Expect(r.Close()).To(Succeed())
 
-			r, err = ctf2.Open(nil, accessobj.ACC_READONLY, "test", 0, accessio.PathFileSystem(tempfs))
+			r, err = ctf.Open(nil, accessobj.ACC_READONLY, "test", 0, accessio.PathFileSystem(tempfs))
 			Expect(err).To(Succeed())
 			defer r.Close()
 

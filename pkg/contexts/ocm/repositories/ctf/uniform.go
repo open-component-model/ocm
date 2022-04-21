@@ -16,7 +16,7 @@ package ctf
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	ctf2 "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
 )
@@ -24,8 +24,8 @@ import (
 func init() {
 	h := &repospechandler{}
 	cpi.RegisterRepositorySpecHandler(h, "")
-	cpi.RegisterRepositorySpecHandler(h, ctf2.CommonTransportFormatRepositoryType)
-	for _, f := range ctf2.SupportedFormats() {
+	cpi.RegisterRepositorySpecHandler(h, ctf.CommonTransportFormatRepositoryType)
+	for _, f := range ctf.SupportedFormats() {
 		cpi.RegisterRepositorySpecHandler(h, string(f))
 	}
 }
@@ -38,7 +38,7 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 			return nil, nil
 		}
 	}
-	spec, err := ctf2.MapReference(ctx.OCIContext(), &oci.UniformRepositorySpec{
+	spec, err := ctf.MapReference(ctx.OCIContext(), &oci.UniformRepositorySpec{
 		Type: u.Type,
 		Host: u.Host,
 		Info: u.Info,

@@ -20,8 +20,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	artdesc2 "github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/opencontainers/go-digest"
 )
@@ -32,12 +32,12 @@ const TYPE_ANNOTATION = "cloud.gardener.ocm/type"
 
 type ArtefactSet struct {
 	base *FileSystemBlobAccess
-	*cpi2.ArtefactSetAccess
+	*cpi.ArtefactSetAccess
 }
 
-var _ cpi2.ArtefactSetContainer = (*ArtefactSet)(nil)
-var _ cpi2.ArtefactSink = (*ArtefactSet)(nil)
-var _ cpi2.NamespaceAccess = (*ArtefactSet)(nil)
+var _ cpi.ArtefactSetContainer = (*ArtefactSet)(nil)
+var _ cpi.ArtefactSink = (*ArtefactSet)(nil)
+var _ cpi.NamespaceAccess = (*ArtefactSet)(nil)
 
 // New returns a new representation based element
 func New(acc accessobj.AccessMode, fs vfs.FileSystem, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode) (*ArtefactSet, error) {
@@ -51,7 +51,7 @@ func _Wrap(obj *accessobj.AccessObject, err error) (*ArtefactSet, error) {
 	s := &ArtefactSet{
 		base: NewFileSystemBlobAccess(obj),
 	}
-	s.ArtefactSetAccess = cpi2.NewArtefactSetAccess(s)
+	s.ArtefactSetAccess = cpi.NewArtefactSetAccess(s)
 	return s, nil
 }
 
@@ -99,7 +99,7 @@ func (a *ArtefactSet) AddTags(digest digest.Digest, tags ...string) error {
 			return nil
 		}
 	}
-	return errors.ErrUnknown(cpi2.KIND_OCIARTEFACT, digest.String())
+	return errors.ErrUnknown(cpi.KIND_OCIARTEFACT, digest.String())
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -130,11 +130,11 @@ func (a *ArtefactSet) Close() error {
 // The manifst entries may describe dedicated tags
 // to use for the dedicated artefact as annotation
 // with the key TAGS_ANNOTATION.
-func (a *ArtefactSet) GetIndex() *artdesc2.Index {
+func (a *ArtefactSet) GetIndex() *artdesc.Index {
 	if a.IsReadOnly() {
-		return a.base.GetState().GetOriginalState().(*artdesc2.Index)
+		return a.base.GetState().GetOriginalState().(*artdesc.Index)
 	}
-	return a.base.GetState().GetState().(*artdesc2.Index)
+	return a.base.GetState().GetState().(*artdesc.Index)
 }
 
 // GetMain returns the digest of the main artefact
@@ -148,15 +148,15 @@ func (a *ArtefactSet) GetMain() digest.Digest {
 	return digest.Digest(idx.Annotations[MAINARTEFACT_ANNOTATION])
 }
 
-func (a *ArtefactSet) GetBlobDescriptor(digest digest.Digest) *cpi2.Descriptor {
+func (a *ArtefactSet) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 	return a.GetIndex().GetBlobDescriptor(digest)
 }
 
-func (a *ArtefactSet) GetBlobData(digest digest.Digest) (cpi2.DataAccess, error) {
+func (a *ArtefactSet) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
 	return a.base.GetBlobData(digest)
 }
 
-func (a *ArtefactSet) AddBlob(blob cpi2.BlobAccess) error {
+func (a *ArtefactSet) AddBlob(blob cpi.BlobAccess) error {
 	if a.IsClosed() {
 		return accessio.ErrClosed
 	}
@@ -204,7 +204,7 @@ func (a *ArtefactSet) HasArtefact(ref string) (bool, error) {
 	return a.hasArtefact(ref)
 }
 
-func (a *ArtefactSet) GetArtefact(ref string) (cpi2.ArtefactAccess, error) {
+func (a *ArtefactSet) GetArtefact(ref string) (cpi.ArtefactAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
@@ -213,13 +213,13 @@ func (a *ArtefactSet) GetArtefact(ref string) (cpi2.ArtefactAccess, error) {
 	return a.getArtefact(ref)
 }
 
-func (a *ArtefactSet) matcher(ref string) func(d *artdesc2.Descriptor) bool {
-	if ok, digest := artdesc2.IsDigest(ref); ok {
-		return func(desc *artdesc2.Descriptor) bool {
+func (a *ArtefactSet) matcher(ref string) func(d *artdesc.Descriptor) bool {
+	if ok, digest := artdesc.IsDigest(ref); ok {
+		return func(desc *artdesc.Descriptor) bool {
 			return desc.Digest == digest
 		}
 	}
-	return func(d *artdesc2.Descriptor) bool {
+	return func(d *artdesc.Descriptor) bool {
 		if d.Annotations == nil {
 			return false
 		}
@@ -243,7 +243,7 @@ func (a *ArtefactSet) hasArtefact(ref string) (bool, error) {
 	return false, nil
 }
 
-func (a *ArtefactSet) getArtefact(ref string) (cpi2.ArtefactAccess, error) {
+func (a *ArtefactSet) getArtefact(ref string) (cpi.ArtefactAccess, error) {
 	idx := a.GetIndex()
 	match := a.matcher(ref)
 	for _, e := range idx.Manifests {
@@ -251,7 +251,7 @@ func (a *ArtefactSet) getArtefact(ref string) (cpi2.ArtefactAccess, error) {
 			return a.base.GetArtefact(a, e.Digest)
 		}
 	}
-	return nil, errors.ErrUnknown(cpi2.KIND_OCIARTEFACT, ref)
+	return nil, errors.ErrUnknown(cpi.KIND_OCIARTEFACT, ref)
 }
 
 func (a *ArtefactSet) AnnotateArtefact(digest digest.Digest, name, value string) error {
@@ -275,10 +275,10 @@ func (a *ArtefactSet) AnnotateArtefact(digest digest.Digest, name, value string)
 			return nil
 		}
 	}
-	return errors.ErrUnknown(cpi2.KIND_OCIARTEFACT, digest.String())
+	return errors.ErrUnknown(cpi.KIND_OCIARTEFACT, digest.String())
 }
 
-func (a *ArtefactSet) AddArtefact(artefact cpi2.Artefact, tags ...string) (access accessio.BlobAccess, err error) {
+func (a *ArtefactSet) AddArtefact(artefact cpi.Artefact, tags ...string) (access accessio.BlobAccess, err error) {
 	blob, err := a.AddPlatformArtefact(artefact, nil)
 	if err != nil {
 		return nil, err
@@ -286,7 +286,7 @@ func (a *ArtefactSet) AddArtefact(artefact cpi2.Artefact, tags ...string) (acces
 	return blob, a.AddTags(blob.Digest(), tags...)
 }
 
-func (a *ArtefactSet) AddPlatformArtefact(artefact cpi2.Artefact, platform *artdesc2.Platform) (access accessio.BlobAccess, err error) {
+func (a *ArtefactSet) AddPlatformArtefact(artefact cpi.Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
@@ -301,7 +301,7 @@ func (a *ArtefactSet) AddPlatformArtefact(artefact cpi2.Artefact, platform *artd
 		return nil, err
 	}
 
-	idx.Manifests = append(idx.Manifests, cpi2.Descriptor{
+	idx.Manifests = append(idx.Manifests, cpi.Descriptor{
 		MediaType:   blob.MimeType(),
 		Digest:      blob.Digest(),
 		Size:        blob.Size(),
@@ -312,16 +312,16 @@ func (a *ArtefactSet) AddPlatformArtefact(artefact cpi2.Artefact, platform *artd
 	return blob, nil
 }
 
-func (a *ArtefactSet) NewArtefact(artefact ...*artdesc2.Artefact) (cpi2.ArtefactAccess, error) {
+func (a *ArtefactSet) NewArtefact(artefact ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
 	if a.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	return cpi2.NewArtefact(a, artefact...)
+	return cpi.NewArtefact(a, artefact...)
 }
 
-func (a *ArtefactSet) NewArtefactProvider(state accessobj.State) (cpi2.ArtefactProvider, error) {
-	return cpi2.NewNopCloserArtefactProvider(a), nil
+func (a *ArtefactSet) NewArtefactProvider(state accessobj.State) (cpi.ArtefactProvider, error) {
+	return cpi.NewNopCloserArtefactProvider(a), nil
 }

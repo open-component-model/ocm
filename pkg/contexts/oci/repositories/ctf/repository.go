@@ -16,10 +16,11 @@ package ctf
 
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/vfsattr"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/index"
 )
@@ -39,13 +40,13 @@ import (
 type Repository struct {
 	base *artefactset.FileSystemBlobAccess
 	spec *RepositorySpec
-	ctx  cpi2.Context
+	ctx  cpi.Context
 }
 
-var _ cpi2.Repository = &Repository{}
+var _ cpi.Repository = &Repository{}
 
 // New returns a new representation based repository
-func New(ctx cpi2.Context, spec *RepositorySpec, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode) (*Repository, error) {
+func New(ctx cpi.Context, spec *RepositorySpec, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode) (*Repository, error) {
 	if spec.PathFileSystem == nil {
 		spec.PathFileSystem = vfsattr.Get(ctx)
 	}
@@ -53,7 +54,7 @@ func New(ctx cpi2.Context, spec *RepositorySpec, setup accessobj.Setup, closer a
 	return _Wrap(ctx, spec, base, err)
 }
 
-func _Wrap(ctx cpi2.Context, spec *RepositorySpec, obj *accessobj.AccessObject, err error) (*Repository, error) {
+func _Wrap(ctx cpi.Context, spec *RepositorySpec, obj *accessobj.AccessObject, err error) (*Repository, error) {
 	if err != nil {
 		return nil, err
 	}
@@ -65,20 +66,20 @@ func _Wrap(ctx cpi2.Context, spec *RepositorySpec, obj *accessobj.AccessObject, 
 	return r, nil
 }
 
-func (r *Repository) GetSpecification() cpi2.RepositorySpec {
+func (r *Repository) GetSpecification() cpi.RepositorySpec {
 	return r.spec
 }
 
-func (r *Repository) NamespaceLister() cpi2.NamespaceLister {
+func (r *Repository) NamespaceLister() cpi.NamespaceLister {
 	return r
 }
 
 func (r *Repository) NumNamespaces(prefix string) (int, error) {
-	return len(cpi2.FilterByNamespacePrefix(prefix, r.getIndex().RepositoryList())), nil
+	return len(cpi.FilterByNamespacePrefix(prefix, r.getIndex().RepositoryList())), nil
 }
 
 func (r *Repository) GetNamespaces(prefix string, closure bool) ([]string, error) {
-	return cpi2.FilterChildren(closure, cpi2.FilterByNamespacePrefix(prefix, r.getIndex().RepositoryList())), nil
+	return cpi.FilterChildren(closure, cpi.FilterByNamespacePrefix(prefix, r.getIndex().RepositoryList())), nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -118,15 +119,15 @@ func (r *Repository) ExistsArtefact(name string, tag string) (bool, error) {
 	return r.getIndex().HasArtefact(name, tag), nil
 }
 
-func (r *Repository) LookupArtefact(name string, tag string) (cpi2.ArtefactAccess, error) {
+func (r *Repository) LookupArtefact(name string, tag string) (cpi.ArtefactAccess, error) {
 	a := r.getIndex().GetArtefactInfo(name, tag)
 	if a == nil {
-		return nil, cpi2.ErrUnknownArtefact(name, tag)
+		return nil, cpi.ErrUnknownArtefact(name, tag)
 	}
 
 	return NewNamespace(r, name).GetArtefact(tag)
 }
 
-func (r *Repository) LookupNamespace(name string) (cpi2.NamespaceAccess, error) {
+func (r *Repository) LookupNamespace(name string) (cpi.NamespaceAccess, error) {
 	return NewNamespace(r, name), nil
 }

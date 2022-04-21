@@ -17,21 +17,21 @@ package describe
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/handlers/artefacthdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	ociutils2 "github.com/open-component-model/ocm/pkg/contexts/oci/ociutils"
-
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils"
 )
 
 var (
@@ -119,7 +119,7 @@ func infoChain(options *output.Options) processing.ProcessChain {
 
 func outInfo(ctx out.Context, e interface{}) {
 	p := e.(*artefacthdlr.Object)
-	out.Outf(ctx, "%s", ociutils2.PrintArtefact(p.Artefact))
+	out.Outf(ctx, "%s", ociutils.PrintArtefact(p.Artefact))
 }
 
 type Info struct {
@@ -132,7 +132,7 @@ func mapInfo(opts *Options) processing.MappingFunction {
 		p := e.(*artefacthdlr.Object)
 		return &Info{
 			Artefact: p.Spec.String(),
-			Info:     ociutils2.GetArtefactInfo(p.Artefact, opts.BlobFiles),
+			Info:     ociutils.GetArtefactInfo(p.Artefact, opts.BlobFiles),
 		}
 	}
 }

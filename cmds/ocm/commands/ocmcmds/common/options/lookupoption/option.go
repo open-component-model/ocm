@@ -15,11 +15,11 @@
 package lookupoption
 
 import (
+	"github.com/spf13/pflag"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
-	"github.com/spf13/pflag"
 )
 
 func From(o *output.Options) *Option {
@@ -51,7 +51,7 @@ references.
 	return s
 }
 
-func (o *Option) LookupComponentVersion(name string, vers string) (core.ComponentAccess, ocm.ComponentVersionAccess, error) {
+func (o *Option) LookupComponentVersion(name string, vers string) (ocm.ComponentAccess, ocm.ComponentVersionAccess, error) {
 	if o == nil {
 		return nil, nil, nil
 	}

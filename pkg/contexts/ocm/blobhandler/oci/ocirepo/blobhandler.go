@@ -19,25 +19,24 @@ import (
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	oci2 "github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
-	ocireg2 "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
 	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
 )
 
 func init() {
 	for _, mime := range artdesc.ContentTypes() {
-		cpi.RegisterBlobHandler(NewArtefactHandler(nil), cpi.ForRepo(oci2.CONTEXT_TYPE, ocireg2.OCIRegistryRepositoryType),
+		cpi.RegisterBlobHandler(NewArtefactHandler(nil), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.OCIRegistryRepositoryType),
 			cpi.ForMimeType(mime))
 	}
-	cpi.RegisterBlobHandler(NewBlobHandler(nil), cpi.ForRepo(oci2.CONTEXT_TYPE, ocireg2.OCIRegistryRepositoryType))
+	cpi.RegisterBlobHandler(NewBlobHandler(nil), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.OCIRegistryRepositoryType))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -54,7 +53,7 @@ func (h *blobHandler) GetBaseURL(ctx *storagecontext.StorageContext) string {
 	if h.base != nil {
 		return h.base(ctx)
 	}
-	return ctx.Repository.(*ocireg2.Repository).GetBaseURL()
+	return ctx.Repository.(*ocireg.Repository).GetBaseURL()
 }
 
 func NewBlobHandler(base BaseFunction) cpi.BlobHandler {
@@ -90,14 +89,14 @@ func NewArtefactHandler(base BaseFunction) cpi.BlobHandler {
 	return &artefactHandler{blobHandler{base}}
 }
 
-func (b *artefactHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hint string, ctx cpi.StorageContext) (core.AccessSpec, error) {
+func (b *artefactHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hint string, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	mediaType := blob.MimeType()
 
 	if !artdesc.IsOCIMediaType(mediaType) || (!strings.HasSuffix(mediaType, "+tar") && !strings.HasSuffix(mediaType, "+tar+gzip")) {
 		return nil, nil
 	}
 
-	var namespace oci2.NamespaceAccess
+	var namespace oci.NamespaceAccess
 	var version string
 	var name string
 	var tag string
@@ -137,7 +136,7 @@ func (b *artefactHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hi
 		return nil, err
 	}
 
-	err = artefactset.TransferArtefact(art, namespace, oci2.AsTags(tag)...)
+	err = artefactset.TransferArtefact(art, namespace, oci.AsTags(tag)...)
 	if err != nil {
 		return nil, err
 	}

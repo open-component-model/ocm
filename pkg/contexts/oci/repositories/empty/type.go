@@ -16,7 +16,7 @@ package empty
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -28,8 +28,8 @@ const (
 const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/oci/repositories/empty"
 
 func init() {
-	cpi2.RegisterRepositoryType(EmptyRepositoryType, cpi2.NewRepositoryType(EmptyRepositoryType, &RepositorySpec{}))
-	cpi2.RegisterRepositoryType(EmptyRepositoryTypeV1, cpi2.NewRepositoryType(EmptyRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(EmptyRepositoryType, cpi.NewRepositoryType(EmptyRepositoryType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(EmptyRepositoryTypeV1, cpi.NewRepositoryType(EmptyRepositoryTypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
@@ -52,6 +52,6 @@ func (a *RepositorySpec) Name() string {
 	return EmptyRepositoryType
 }
 
-func (a *RepositorySpec) Repository(ctx cpi2.Context, creds credentials.Credentials) (cpi2.Repository, error) {
+func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	return ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepository).(*Repository), nil
 }

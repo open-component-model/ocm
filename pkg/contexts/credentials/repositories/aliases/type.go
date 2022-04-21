@@ -15,21 +15,21 @@
 package aliases
 
 import (
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const (
-	AliasRepositoryType   = cpi2.AliasRepositoryType
+	AliasRepositoryType   = cpi.AliasRepositoryType
 	AliasRepositoryTypeV1 = AliasRepositoryType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
-	cpi2.RegisterRepositoryType(AliasRepositoryType, cpi2.NewAliasRegistry(cpi2.NewRepositoryType(AliasRepositoryType, &RepositorySpec{}), setAlias))
-	cpi2.RegisterRepositoryType(AliasRepositoryTypeV1, cpi2.NewRepositoryType(AliasRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(AliasRepositoryType, cpi.NewAliasRegistry(cpi.NewRepositoryType(AliasRepositoryType, &RepositorySpec{}), setAlias))
+	cpi.RegisterRepositoryType(AliasRepositoryTypeV1, cpi.NewRepositoryType(AliasRepositoryTypeV1, &RepositorySpec{}))
 }
 
-func setAlias(ctx cpi2.Context, name string, spec cpi2.RepositorySpec, creds cpi2.CredentialsSource) error {
+func setAlias(ctx cpi.Context, name string, spec cpi.RepositorySpec, creds cpi.CredentialsSource) error {
 	repos := ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories).(*Repositories)
 	repos.Set(name, spec, creds)
 	return nil
@@ -53,11 +53,11 @@ func (a *RepositorySpec) GetType() string {
 	return AliasRepositoryType
 }
 
-func (a *RepositorySpec) Repository(ctx cpi2.Context, creds cpi2.Credentials) (cpi2.Repository, error) {
+func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi.Repository, error) {
 	repos := ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories).(*Repositories)
 	alias := repos.GetRepository(a.Alias)
 	if alias == nil {
-		return nil, cpi2.ErrUnknownRepository(AliasRepositoryType, a.Alias)
+		return nil, cpi.ErrUnknownRepository(AliasRepositoryType, a.Alias)
 	}
 	return alias.GetRepository(ctx, creds)
 }

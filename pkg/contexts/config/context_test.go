@@ -20,18 +20,18 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	config2 "github.com/open-component-model/ocm/pkg/contexts/config"
+	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 var _ = Describe("config handling", func() {
 
-	var scheme config2.ConfigTypeScheme
-	var cfgctx config2.Context
+	var scheme config.ConfigTypeScheme
+	var cfgctx config.Context
 
 	BeforeEach(func() {
-		scheme = config2.NewConfigTypeScheme()
-		cfgctx = config2.WithConfigTypeScheme(scheme).New()
+		scheme = config.NewConfigTypeScheme()
+		cfgctx = config.WithConfigTypeScheme(scheme).New()
 	})
 
 	It("can deserialize unknown", func() {
@@ -41,7 +41,7 @@ var _ = Describe("config handling", func() {
 
 		result, err := cfgctx.GetConfigForData(data, nil)
 		Expect(err).To(Succeed())
-		Expect(config2.IsGeneric(result)).To(BeTrue())
+		Expect(config.IsGeneric(result)).To(BeTrue())
 	})
 
 	It("can deserialize known", func() {
@@ -53,7 +53,7 @@ var _ = Describe("config handling", func() {
 
 		result, err := cfgctx.GetConfigForData(data, nil)
 		Expect(err).To(Succeed())
-		Expect(config2.IsGeneric(result)).To(BeFalse())
+		Expect(config.IsGeneric(result)).To(BeFalse())
 		Expect(reflect.TypeOf(result).String()).To(Equal("*config_test.Config"))
 	})
 
@@ -91,8 +91,8 @@ var _ = Describe("config handling", func() {
 
 		gen, err := cfgctx.ApplyData(data, nil, "test")
 		Expect(err).To(HaveOccurred())
-		Expect(errors.IsErrUnknownKind(err, config2.KIND_CONFIGTYPE)).To(BeTrue())
-		Expect(config2.IsGeneric(gen)).To(BeTrue())
+		Expect(errors.IsErrUnknownKind(err, config.KIND_CONFIGTYPE)).To(BeTrue())
+		Expect(config.IsGeneric(gen)).To(BeTrue())
 
 		RegisterAt(scheme)
 		d := newDummy(cfgctx)

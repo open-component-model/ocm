@@ -15,25 +15,26 @@
 package ctf_test
 
 import (
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
-	ctf2 "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/testhelper"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/artefact"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/opencontainers/go-digest"
-
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
 )
 
 type DummyMethod struct {
@@ -92,13 +93,13 @@ func CheckBlob(blob accessio.BlobAccess) oci.NamespaceAccess {
 
 var _ = Describe("syntheses", func() {
 	var tempfs vfs.FileSystem
-	var spec *ctf2.RepositorySpec
+	var spec *ctf.RepositorySpec
 
 	BeforeEach(func() {
 		t, err := osfs.NewTempFileSystem()
 		Expect(err).To(Succeed())
 		tempfs = t
-		spec = ctf2.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessio.PathFileSystem(tempfs), accessobj.FormatDirectory)
+		spec = ctf.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessio.PathFileSystem(tempfs), accessobj.FormatDirectory)
 	})
 
 	AfterEach(func() {
@@ -106,14 +107,14 @@ var _ = Describe("syntheses", func() {
 	})
 
 	It("synthesize", func() {
-		r, err := ctf2.FormatDirectory.Create(oci.DefaultContext(), "test", spec.Options, 0700)
+		r, err := ctf.FormatDirectory.Create(oci.DefaultContext(), "test", spec.Options, 0700)
 		Expect(err).To(Succeed())
 		n, err := r.LookupNamespace("mandelsoft/test")
 		Expect(err).To(Succeed())
 		DefaultManifestFill(n)
 		Expect(r.Close()).To(Succeed())
 
-		r, err = ctf2.Open(oci.DefaultContext(), accessobj.ACC_READONLY, "test", 0, spec.Options)
+		r, err = ctf.Open(oci.DefaultContext(), accessobj.ACC_READONLY, "test", 0, spec.Options)
 		Expect(err).To(Succeed())
 		defer r.Close()
 		n, err = r.LookupNamespace("mandelsoft/test")

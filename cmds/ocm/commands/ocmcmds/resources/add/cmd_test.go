@@ -17,11 +17,12 @@ package add_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	compdesc2 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch/comparch"
 )
@@ -29,7 +30,7 @@ import (
 const ARCH = "/tmp/ca"
 const VERSION = "v1"
 
-func CheckTextResource(env *TestEnv, cd *compdesc2.ComponentDescriptor, name string) {
+func CheckTextResource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string) {
 	rblob := accessio.BlobAccessForFile("text/plain", "/testdata/testcontent", env)
 	dig := rblob.Digest()
 	data, err := rblob.Get()
@@ -65,7 +66,7 @@ var _ = Describe("Test Environment", func() {
 		Expect(env.Execute("add", "resources", ARCH, "/testdata/resources.yaml")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
-		cd, err := compdesc2.Decode(data)
+		cd, err := compdesc.Decode(data)
 		Expect(err).To(Succeed())
 		Expect(len(cd.Resources)).To(Equal(1))
 
@@ -76,7 +77,7 @@ var _ = Describe("Test Environment", func() {
 		Expect(env.Execute("add", "resources", ARCH, "--settings", "/testdata/settings", "/testdata/resources.tmpl")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
-		cd, err := compdesc2.Decode(data)
+		cd, err := compdesc.Decode(data)
 		Expect(err).To(Succeed())
 		Expect(len(cd.Resources)).To(Equal(1))
 
@@ -87,7 +88,7 @@ var _ = Describe("Test Environment", func() {
 		Expect(env.Execute("add", "resources", ARCH, "CONTENT=testcontent", "/testdata/resources.tmpl")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
-		cd, err := compdesc2.Decode(data)
+		cd, err := compdesc.Decode(data)
 		Expect(err).To(Succeed())
 		Expect(len(cd.Resources)).To(Equal(1))
 

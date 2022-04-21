@@ -9,9 +9,10 @@ import (
 	"path"
 	"strings"
 
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/opencontainers/go-digest"
 )
 
 // to find a suitable secret for images on Docker Hub, we need its two domains to do matching

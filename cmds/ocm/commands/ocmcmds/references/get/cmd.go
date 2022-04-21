@@ -15,6 +15,8 @@
 package get
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
@@ -28,10 +30,9 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	common2 "github.com/open-component-model/ocm/pkg/common"
+	gcommom "github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/spf13/cobra"
 )
 
 var (
@@ -98,7 +99,7 @@ outer:
 	for i := 0; i < len(slice); i++ {
 		o := slice[i]
 		e := common.Elem(o)
-		key := common2.NewNameVersion(e.ComponentName, e.Version)
+		key := gcommom.NewNameVersion(e.ComponentName, e.Version)
 		hist := o.GetHistory()
 		nested := append(hist, key)
 		var j int

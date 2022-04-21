@@ -18,7 +18,7 @@ import (
 	"reflect"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -27,9 +27,9 @@ const (
 	DummyTypeV1 = DummyType + "/v1"
 )
 
-func RegisterAt(reg cpi2.ConfigTypeScheme) {
-	reg.Register(DummyType, cpi2.NewConfigType(DummyType, &Config{}))
-	reg.Register(DummyType, cpi2.NewConfigType(DummyTypeV1, &Config{}))
+func RegisterAt(reg cpi.ConfigTypeScheme) {
+	reg.Register(DummyType, cpi.NewConfigType(DummyType, &Config{}))
+	reg.Register(DummyType, cpi.NewConfigType(DummyTypeV1, &Config{}))
 }
 
 // Config describes a a dummy config
@@ -62,7 +62,7 @@ func (a *Config) ApplyTo(ctx config.Context, target interface{}) error {
 		d.applied = append(d.applied, a)
 		return nil
 	}
-	return cpi2.ErrNoContext(DummyType)
+	return cpi.ErrNoContext(DummyType)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -19,7 +19,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -30,8 +30,8 @@ const LocalFilesystemBlobTypeV1 = LocalFilesystemBlobType + "/v1"
 // Keep old access method and map generic one to this implementation for component archives
 
 func init() {
-	cpi2.RegisterAccessType(cpi2.NewConvertedAccessSpecType(LocalFilesystemBlobType, LocalFilesystemBlobV1))
-	cpi2.RegisterAccessType(cpi2.NewConvertedAccessSpecType(LocalFilesystemBlobTypeV1, LocalFilesystemBlobV1))
+	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(LocalFilesystemBlobType, LocalFilesystemBlobV1))
+	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(LocalFilesystemBlobTypeV1, LocalFilesystemBlobV1))
 }
 
 // NewLocalFilesystemBlobAccessSpecV1 creates a new localFilesystemBlob accessor.
@@ -56,9 +56,9 @@ type LocalFilesystemBlobAccessSpecV1 struct {
 
 type localfsblobConverterV1 struct{}
 
-var LocalFilesystemBlobV1 = cpi2.NewAccessSpecVersion(&LocalFilesystemBlobAccessSpecV1{}, localfsblobConverterV1{})
+var LocalFilesystemBlobV1 = cpi.NewAccessSpecVersion(&LocalFilesystemBlobAccessSpecV1{}, localfsblobConverterV1{})
 
-func (_ localfsblobConverterV1) ConvertFrom(object cpi2.AccessSpec) (runtime.TypedObject, error) {
+func (_ localfsblobConverterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, error) {
 	in := object.(*localblob.AccessSpec)
 	return &LocalFilesystemBlobAccessSpecV1{
 		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
@@ -67,7 +67,7 @@ func (_ localfsblobConverterV1) ConvertFrom(object cpi2.AccessSpec) (runtime.Typ
 	}, nil
 }
 
-func (_ localfsblobConverterV1) ConvertTo(object interface{}) (cpi2.AccessSpec, error) {
+func (_ localfsblobConverterV1) ConvertTo(object interface{}) (cpi.AccessSpec, error) {
 	in := object.(*LocalFilesystemBlobAccessSpecV1)
 	return &localblob.AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
@@ -83,9 +83,9 @@ type localFilesystemBlobAccessMethod struct {
 	base ComponentVersionContainer
 }
 
-var _ cpi2.AccessMethod = (*localFilesystemBlobAccessMethod)(nil)
+var _ cpi.AccessMethod = (*localFilesystemBlobAccessMethod)(nil)
 
-func newLocalFilesystemBlobAccessMethod(a *localblob.AccessSpec, base ComponentVersionContainer) (cpi2.AccessMethod, error) {
+func newLocalFilesystemBlobAccessMethod(a *localblob.AccessSpec, base ComponentVersionContainer) (cpi.AccessMethod, error) {
 	return &localFilesystemBlobAccessMethod{
 		spec: a,
 		base: base,

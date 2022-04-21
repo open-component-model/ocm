@@ -16,6 +16,7 @@ package env
 
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )

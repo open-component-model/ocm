@@ -18,10 +18,11 @@ import (
 	"sync"
 
 	"github.com/containers/image/v5/types"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	cpi2 "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/opencontainers/go-digest"
+
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type dockerSource struct {
@@ -83,7 +84,7 @@ func (d *dockerSource) GetBlob(digest digest.Digest) (int64, accessio.DataAccess
 			return l.Size, acc, err
 		}
 	}
-	return -1, nil, cpi2.ErrBlobNotFound(digest)
+	return -1, nil, cpi.ErrBlobNotFound(digest)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -94,7 +95,7 @@ type daemonArtefactProvider struct {
 	cache     accessio.BlobCache
 }
 
-var _ cpi2.ArtefactProvider = (*daemonArtefactProvider)(nil)
+var _ cpi.ArtefactProvider = (*daemonArtefactProvider)(nil)
 
 func (d *daemonArtefactProvider) IsClosed() bool {
 	d.lock.Lock()
@@ -106,7 +107,7 @@ func (d *daemonArtefactProvider) IsReadOnly() bool {
 	return d.namespace.IsReadOnly()
 }
 
-func (d *daemonArtefactProvider) GetBlobDescriptor(digest digest.Digest) *cpi2.Descriptor {
+func (d *daemonArtefactProvider) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 	return nil
 }
 
@@ -122,20 +123,20 @@ func (d *daemonArtefactProvider) Close() error {
 	return nil
 }
 
-func (d *daemonArtefactProvider) GetBlobData(digest digest.Digest) (cpi2.DataAccess, error) {
+func (d *daemonArtefactProvider) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
 	_, acc, err := d.cache.GetBlob(digest)
 	return acc, err
 }
 
-func (d *daemonArtefactProvider) GetArtefact(digest digest.Digest) (cpi2.ArtefactAccess, error) {
+func (d *daemonArtefactProvider) GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {
 	return nil, errors.ErrInvalid()
 }
 
-func (d *daemonArtefactProvider) AddBlob(access cpi2.BlobAccess) error {
+func (d *daemonArtefactProvider) AddBlob(access cpi.BlobAccess) error {
 	_, _, err := d.cache.AddBlob(access)
 	return err
 }
 
-func (d *daemonArtefactProvider) AddArtefact(art cpi2.Artefact) (access accessio.BlobAccess, err error) {
+func (d *daemonArtefactProvider) AddArtefact(art cpi.Artefact) (access accessio.BlobAccess, err error) {
 	return nil, errors.ErrInvalid()
 }
