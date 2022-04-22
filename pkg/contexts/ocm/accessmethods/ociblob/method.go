@@ -106,7 +106,11 @@ func (m *accessMethod) getBlob() (cpi.BlobAccess, error) {
 	if ref.Tag != nil || ref.Digest != nil {
 		return nil, errors.ErrInvalid("oci repository", m.spec.Reference)
 	}
-	spec := ocireg.NewRepositorySpec(ref.Host)
+	ocictx := m.comp.GetContext().OCIContext()
+	spec := ocictx.GetAlias(ref.Host)
+	if spec == nil {
+		spec = ocireg.NewRepositorySpec(ref.Host)
+	}
 	ocirepo, err := m.comp.GetContext().OCIContext().RepositoryForSpec(spec)
 	if err != nil {
 		return nil, err

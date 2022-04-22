@@ -17,6 +17,7 @@ package core
 import (
 	"context"
 	"reflect"
+	"strings"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
@@ -205,7 +206,11 @@ func (c *_context) GetAlias(name string) RepositorySpec {
 	}
 	c.updater.RLock()
 	defer c.updater.RUnlock()
-	return c.aliases[name]
+	spec := c.aliases[name]
+	if spec == nil && strings.HasSuffix(name, ".alias") {
+		spec = c.aliases[name[:len(name)-6]]
+	}
+	return spec
 }
 
 func (c *_context) SetAlias(name string, spec RepositorySpec) {

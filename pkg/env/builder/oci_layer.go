@@ -16,6 +16,7 @@ package builder
 
 import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -39,13 +40,16 @@ func (r *oci_layer) Close() error {
 		return errors.Newf("config blob required")
 	}
 	m := r.Builder.oci_artacc.ManifestAccess()
-	m.AddLayer(r.blob, nil)
+	_, err := m.AddLayer(r.blob, nil)
+	if err == nil {
+		r.result = artdesc.DefaultBlobDescriptor(r.blob)
+	}
 	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (b *Builder) Layer(f ...func()) {
+func (b *Builder) Layer(f ...func()) *artdesc.Descriptor {
 	b.expect(b.oci_artacc, T_OCIMANIFEST, func() bool { return b.oci_artacc.IsManifest() })
-	b.configure(&oci_layer{}, f)
+	return b.configure(&oci_layer{}, f).(*artdesc.Descriptor)
 }

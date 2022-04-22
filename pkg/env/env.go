@@ -20,6 +20,9 @@ import (
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/readonlyfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/contexts/config"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -134,8 +137,20 @@ func NewEnvironment(opts ...Option) *Environment {
 	}
 }
 
-func (e *Environment) Context() ocm.Context {
+func (e *Environment) OCMContext() ocm.Context {
 	return e.ctx
+}
+
+func (e *Environment) OCIContext() oci.Context {
+	return e.ctx.OCIContext()
+}
+
+func (e *Environment) CredentialsContext() credentials.Context {
+	return e.ctx.CredentialsContext()
+}
+
+func (e *Environment) ConfigContext() config.Context {
+	return e.ctx.ConfigContext()
 }
 
 func (e *Environment) FileSystem() vfs.FileSystem {

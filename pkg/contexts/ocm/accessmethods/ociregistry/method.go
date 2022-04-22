@@ -90,12 +90,16 @@ func (m *accessMethod) getArtefact() (oci.ArtefactAccess, error) {
 	if err != nil {
 		return nil, err
 	}
-	spec := ocireg.NewRepositorySpec(ref.Host)
-	ocirepo, err := m.comp.GetContext().OCIContext().RepositoryForSpec(spec)
+	ocictx := m.comp.GetContext().OCIContext()
+	spec := ocictx.GetAlias(ref.Host)
+	if spec == nil {
+		spec = ocireg.NewRepositorySpec(ref.Host)
+	}
+	ocirepo, err := ocictx.RepositoryForSpec(spec)
 	if err != nil {
 		return nil, err
 	}
-	return ocirepo.LookupArtefact(ref.Repository, ref.Repository)
+	return ocirepo.LookupArtefact(ref.Repository, ref.Version())
 }
 
 func (m *accessMethod) Digest() digest.Digest {

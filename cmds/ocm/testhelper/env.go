@@ -20,6 +20,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/cmds/ocm/app"
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/env"
 	"github.com/open-component-model/ocm/pkg/env/builder"
 )
@@ -31,11 +33,19 @@ type TestEnv struct {
 
 func NewTestEnv(opts ...env.Option) *TestEnv {
 	b := builder.NewBuilder(env.NewEnvironment(opts...))
-	ctx := clictx.WithOCM(b.Context()).New()
+	ctx := clictx.WithOCM(b.OCMContext()).New()
 	return &TestEnv{
 		Builder: b,
 		CLI:     *app.NewCLI(ctx),
 	}
+}
+
+func (e *TestEnv) OCMContext() ocm.Context {
+	return e.Builder.OCMContext()
+}
+
+func (e *TestEnv) OCIContext() oci.Context {
+	return e.Builder.OCIContext()
 }
 
 func (e TestEnv) FileSystem() vfs.FileSystem {

@@ -12,18 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package builder
+package ociregistry_test
 
 import (
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-const T_OCI_CTF = "oci common transport format"
-
-func (b *Builder) OCICommonTransport(path string, fmt accessio.FileFormat, f ...func()) {
-	r, err := ctf.Open(b.OCMContext().OCIContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, path, 0777, accessio.PathFileSystem(b.FileSystem()))
-	b.failOn(err)
-	b.configure(&oci_repository{Repository: r, kind: T_OCI_CTF}, f)
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "OCIRegistry Test Suite")
 }
