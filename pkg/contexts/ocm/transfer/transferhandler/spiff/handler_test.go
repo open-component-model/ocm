@@ -202,7 +202,7 @@ process: (( (*(rules[mode] || rules.default)).process ))
 
 			handler, err := spiff.New(standard.ResourcesByValue())
 			Expect(err).To(Succeed())
-			err = transfer.TransferVersion(nil, src, cv, tgt, handler)
+			err = transfer.TransferVersion(nil, nil, src, cv, tgt, handler)
 			Expect(err).To(Succeed())
 			Expect(env.DirExists(OUT)).To(BeTrue())
 
@@ -248,7 +248,7 @@ process: (( (*(rules[mode] || rules.default)).process ))
 
 			handler, err := spiff.New(standard.ResourcesByValue(), spiff.Script([]byte(script2)))
 			Expect(err).To(Succeed())
-			err = transfer.TransferVersion(nil, src, cv, tgt, handler)
+			err = transfer.TransferVersion(nil, nil, src, cv, tgt, handler)
 			Expect(err).To(Succeed())
 			Expect(env.DirExists(OUT)).To(BeTrue())
 

@@ -38,14 +38,17 @@ func (c TransportClosure) Contains(nv common.NameVersion) bool {
 	return ok
 }
 
-func TransferVersion(closure TransportClosure, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
+func TransferVersion(printer Printer, closure TransportClosure, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
 	if closure == nil {
 		closure = TransportClosure{}
 	}
-	return transferVersion(nil, closure, repo, src, tgt, handler)
+	if printer == nil {
+		printer = NewPrinter(nil)
+	}
+	return transferVersion(printer, nil, closure, repo, src, tgt, handler)
 }
 
-func transferVersion(hist common.History, closure TransportClosure, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
+func transferVersion(printer Printer, hist common.History, closure TransportClosure, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
 	nv := common.NewNameVersion(src.GetName(), src.GetVersion())
 	if err := hist.Add(ocm.KIND_COMPONENTVERSION, nv); err != nil {
 		return err
@@ -53,7 +56,7 @@ func transferVersion(hist common.History, closure TransportClosure, repo ocmcpi.
 	if !closure.Add(nv) {
 		return nil
 	}
-
+	printer.Printf("transferring version %q...\n", common.VersionedElementKey(src))
 	if handler == nil {
 		handler = standard.NewDefaultHandler(nil)
 	}
@@ -74,6 +77,8 @@ func transferVersion(hist common.History, closure TransportClosure, repo ocmcpi.
 	if err != nil {
 		return err
 	}
+	subp := printer.AddGap("  ")
+	list := errors.ErrListf("component references for %s", nv)
 	for _, r := range d.ComponentReferences {
 		srepo, shdlr, err := handler.TransferVersion(repo, src, &r.ElementMeta)
 		if err != nil {
@@ -84,13 +89,13 @@ func transferVersion(hist common.History, closure TransportClosure, repo ocmcpi.
 			if err != nil {
 				return errors.Wrapf(err, "%s: nested component %s:%s", hist, r.GetName(), r.GetVersion())
 			}
-			err = transferVersion(hist, closure, srepo, c, tgt, shdlr)
-			if err != nil {
-				return err
+			list.Add(transferVersion(subp, hist, closure, srepo, c, tgt, shdlr))
+			if srepo != repo {
+				srepo.Close()
 			}
 		}
 	}
-	return comp.AddVersion(t)
+	return list.Add(comp.AddVersion(t)).Result()
 }
 
 func CopyVersion(hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler transferhandler.TransferHandler) error {

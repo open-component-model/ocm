@@ -43,6 +43,7 @@ func CheckTextResource(env *TestEnv, cd *compdesc.ComponentDescriptor, name stri
 	Expect(err).To(Succeed())
 	Expect(r.Version).To(Equal(VERSION))
 	Expect(r.Type).To(Equal("PlainText"))
+	env.OCMContext()
 	spec, err := env.OCMContext().AccessSpecForSpec(cd.Resources[0].Access)
 	Expect(err).To(Succeed())
 	Expect(spec.GetType()).To(Equal(localblob.Type))

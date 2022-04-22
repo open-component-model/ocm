@@ -84,7 +84,11 @@ func (h *TypeHandler) All() ([]output.Object, error) {
 	if h.repobase == nil {
 		return nil, nil
 	}
-	lister := h.repobase.ComponentLister()
+	return h.all(h.repobase)
+}
+
+func (h *TypeHandler) all(repo ocm.Repository) ([]output.Object, error) {
+	lister := repo.ComponentLister()
 	if lister == nil {
 		return nil, nil
 	}
@@ -94,7 +98,7 @@ func (h *TypeHandler) All() ([]output.Object, error) {
 	}
 	var result []output.Object
 	for _, l := range list {
-		part, err := h.Get(utils.StringSpec(l))
+		part, err := h.get(repo, utils.StringSpec(l))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Warning: %s\n", err)
 		}
@@ -104,13 +108,16 @@ func (h *TypeHandler) All() ([]output.Object, error) {
 }
 
 func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
+	return h.get(h.repobase, elemspec)
+}
+
+func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]output.Object, error) {
 	var component ocm.ComponentAccess
 	var result []output.Object
 	var err error
 
 	name := elemspec.String()
 	spec := ocm.RefSpec{}
-	repo := h.repobase
 	if repo == nil {
 		evaluated, err := h.session.EvaluateComponentRef(h.octx.Context(), name)
 		if err != nil {
@@ -157,24 +164,28 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 			ComponentVersion: v,
 		})
 	} else {
-		versions, err := component.ListVersions()
-		if err != nil {
-			return nil, err
-		}
-		for _, vers := range versions {
-			v, err := component.LookupVersion(vers)
+		if component == nil {
+			return h.all(repo)
+		} else {
+			versions, err := component.ListVersions()
 			if err != nil {
 				return nil, err
 			}
-			t := vers
-			s := spec
-			s.Version = &t
-			result = append(result, &Object{
-				Repository:       repo,
-				Spec:             s,
-				Component:        component,
-				ComponentVersion: v,
-			})
+			for _, vers := range versions {
+				v, err := component.LookupVersion(vers)
+				if err != nil {
+					return nil, err
+				}
+				t := vers
+				s := spec
+				s.Version = &t
+				result = append(result, &Object{
+					Repository:       repo,
+					Spec:             s,
+					Component:        component,
+					ComponentVersion: v,
+				})
+			}
 		}
 	}
 	return result, nil

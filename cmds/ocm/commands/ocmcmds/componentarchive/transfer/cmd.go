@@ -113,5 +113,5 @@ func (o *Command) Run() error {
 		session.Closer(target)
 	}
 
-	return transfer.TransferVersion(nil, nil, source, target, nil)
+	return transfer.TransferVersion(nil, nil, nil, source, target, nil)
 }

@@ -135,7 +135,7 @@ func (m *accessMethod) Reader() (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
-	return accessio.AddCloser(r, b), nil
+	return accessio.AddCloser(r, b, "synthesized artefact"), nil
 }
 
 func (m *accessMethod) MimeType() string {

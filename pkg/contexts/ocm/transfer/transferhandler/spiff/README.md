@@ -45,7 +45,7 @@ version. It gets the  following bindings:
 
 - `mode` **&lt;string>**: `componentversion`
 - `values` **&lt;map>**: (see [Resource Mode](#resource-mode))
-  - `component` **&lt;map>**:  the meta dats of the component version carrying the reference
+  - `component` **&lt;map>** *(optional)*:  the meta dats of the component version carrying the reference
     - `name` **&lt;string>**: component name
     - `version` **&lt;string>**: component version
     - `provider` **&lt;string>**: provider name
@@ -61,3 +61,6 @@ or a map with the following fields:
 
 If no new repository spec is given, the actual repository is used. If no new
 script is given, the actual one is used for sub sequent processing.
+
+the `component` field is optional, for top level requests during the transport
+of a set of component versions, there is no hosting component.

@@ -99,7 +99,7 @@ var _ = Describe("Transfer handler", func() {
 		defer tgt.Close()
 		handler, err := standard.New(standard.ResourcesByValue())
 		Expect(err).To(Succeed())
-		err = transfer.TransferVersion(nil, src, cv, tgt, handler)
+		err = transfer.TransferVersion(nil, nil, src, cv, tgt, handler)
 		Expect(err).To(Succeed())
 		Expect(env.DirExists(OUT)).To(BeTrue())
 

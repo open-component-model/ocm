@@ -105,7 +105,9 @@ func (h *Handler) TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpe
 
 func (h *Handler) getBinding(src ocm.ComponentVersionAccess, a ocm.AccessSpec, m *compdesc.ElementMeta, typ *string) map[string]interface{} {
 	binding := map[string]interface{}{}
-	binding["component"] = getCVAttrs(src)
+	if src != nil {
+		binding["component"] = getCVAttrs(src)
+	}
 
 	if a != nil {
 		binding["access"] = getData(a)

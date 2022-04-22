@@ -195,7 +195,8 @@ func (s *session) EvaluateComponentRef(ctx Context, ref string) (*EvaluationResu
 			if err != nil {
 				return evaluated, errors.Wrapf(err, "%s: listing components", ref)
 			}
-			return evaluated, errors.Newf("%s: found %d components", ref, n)
+			//return evaluated, errors.Newf("%s: found %d components", ref, n)
+			return evaluated, nil // return repo ref
 		}
 		list, err := lister.GetComponents("", true)
 		if err != nil {

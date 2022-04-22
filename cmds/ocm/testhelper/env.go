@@ -40,11 +40,11 @@ func NewTestEnv(opts ...env.Option) *TestEnv {
 	}
 }
 
-func (e *TestEnv) OCMContext() ocm.Context {
+func (e TestEnv) OCMContext() ocm.Context {
 	return e.Builder.OCMContext()
 }
 
-func (e *TestEnv) OCIContext() oci.Context {
+func (e TestEnv) OCIContext() oci.Context {
 	return e.Builder.OCIContext()
 }
 

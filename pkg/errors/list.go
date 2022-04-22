@@ -16,6 +16,7 @@ package errors
 
 import (
 	"fmt"
+	"io"
 )
 
 type ErrorList struct {
@@ -45,6 +46,19 @@ func (l *ErrorList) Add(errs ...error) *ErrorList {
 		}
 	}
 	return l
+}
+
+func (l *ErrorList) Addf(writer io.Writer, err error, msg string, args ...interface{}) error {
+	if err != nil {
+		if msg != "" {
+			err = Wrapf(err, msg, args...)
+		}
+		l.errors = append(l.errors, err)
+		if writer != nil {
+			fmt.Fprintf(writer, "Error: %s\n", err)
+		}
+	}
+	return err
 }
 
 func (l *ErrorList) Len() int {

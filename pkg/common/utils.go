@@ -15,9 +15,11 @@
 package common
 
 import (
+	"reflect"
 	"strings"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/modern-go/reflect2"
 	"github.com/opencontainers/go-digest"
 )
 
@@ -34,4 +36,18 @@ func PathToDigest(path string) digest.Digest {
 		return ""
 	}
 	return digest.Digest(n[:idx] + ":" + n[idx+1:])
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func IterfaceSlice(slice interface{}) []interface{} {
+	if reflect2.IsNil(slice) {
+		return nil
+	}
+	v := reflect.ValueOf(slice)
+	r := make([]interface{}, v.Len())
+	for i := 0; i < v.Len(); i++ {
+		r[i] = v.Index(i).Interface()
+	}
+	return r
 }
