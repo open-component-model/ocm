@@ -19,11 +19,8 @@ import (
 	"reflect"
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
-
-type Aliases = core.Aliases
 
 type ComponentContainer interface {
 	LookupComponent(name string) (ComponentAccess, error)
@@ -46,11 +43,11 @@ type Session interface {
 	LookupComponent(ComponentContainer, string) (ComponentAccess, error)
 	LookupComponentVersion(r Repository, comp, vers string) (ComponentVersionAccess, error)
 	GetComponentVersion(ComponentVersionContainer, string) (ComponentVersionAccess, error)
-	EvaluateRef(ctx Context, ref string, aliases Aliases) (*EvaluationResult, error)
-	EvaluateComponentRef(ctx Context, ref string, aliases Aliases) (*EvaluationResult, error)
-	EvaluateVersionRef(ctx Context, ref string, aliases Aliases) (*EvaluationResult, error)
-	DetermineRepository(ctx Context, ref string, aliases Aliases) (Repository, UniformRepositorySpec, error)
-	DetermineRepositoryBySpec(ctx Context, spec *UniformRepositorySpec, aliases Aliases) (Repository, error)
+	EvaluateRef(ctx Context, ref string) (*EvaluationResult, error)
+	EvaluateComponentRef(ctx Context, ref string) (*EvaluationResult, error)
+	EvaluateVersionRef(ctx Context, ref string) (*EvaluationResult, error)
+	DetermineRepository(ctx Context, ref string) (Repository, UniformRepositorySpec, error)
+	DetermineRepositoryBySpec(ctx Context, spec *UniformRepositorySpec) (Repository, error)
 }
 
 type session struct {
@@ -164,8 +161,8 @@ func (s *session) GetComponentVersion(c ComponentVersionContainer, version strin
 	return obj, err
 }
 
-func (s *session) EvaluateVersionRef(ctx Context, ref string, aliases Aliases) (*EvaluationResult, error) {
-	evaluated, err := s.EvaluateComponentRef(ctx, ref, aliases)
+func (s *session) EvaluateVersionRef(ctx Context, ref string) (*EvaluationResult, error) {
+	evaluated, err := s.EvaluateComponentRef(ctx, ref)
 	if err != nil {
 		return nil, err
 	}
@@ -184,8 +181,8 @@ func (s *session) EvaluateVersionRef(ctx Context, ref string, aliases Aliases) (
 	return evaluated, nil
 }
 
-func (s *session) EvaluateComponentRef(ctx Context, ref string, aliases Aliases) (*EvaluationResult, error) {
-	evaluated, err := s.EvaluateRef(ctx, ref, aliases)
+func (s *session) EvaluateComponentRef(ctx Context, ref string) (*EvaluationResult, error) {
+	evaluated, err := s.EvaluateRef(ctx, ref)
 	if err != nil {
 		return nil, err
 	}
@@ -213,7 +210,7 @@ func (s *session) EvaluateComponentRef(ctx Context, ref string, aliases Aliases)
 	return evaluated, nil
 }
 
-func (s *session) EvaluateRef(ctx Context, ref string, aliases Aliases) (*EvaluationResult, error) {
+func (s *session) EvaluateRef(ctx Context, ref string) (*EvaluationResult, error) {
 	var err error
 	result := &EvaluationResult{}
 	result.Ref, err = ParseRef(ref)
@@ -221,7 +218,7 @@ func (s *session) EvaluateRef(ctx Context, ref string, aliases Aliases) (*Evalua
 		return nil, err
 	}
 
-	result.Repository, err = s.DetermineRepositoryBySpec(ctx, &result.Ref.UniformRepositorySpec, aliases)
+	result.Repository, err = s.DetermineRepositoryBySpec(ctx, &result.Ref.UniformRepositorySpec)
 	if err != nil {
 		return result, err
 	}
@@ -234,17 +231,17 @@ func (s *session) EvaluateRef(ctx Context, ref string, aliases Aliases) (*Evalua
 	return result, err
 }
 
-func (s *session) DetermineRepository(ctx Context, ref string, aliases Aliases) (Repository, UniformRepositorySpec, error) {
+func (s *session) DetermineRepository(ctx Context, ref string) (Repository, UniformRepositorySpec, error) {
 	spec, err := ParseRepo(ref)
 	if err != nil {
 		return nil, spec, err
 	}
-	r, err := s.DetermineRepositoryBySpec(ctx, &spec, aliases)
+	r, err := s.DetermineRepositoryBySpec(ctx, &spec)
 	return r, spec, err
 }
 
-func (s *session) DetermineRepositoryBySpec(ctx Context, spec *UniformRepositorySpec, aliases Aliases) (Repository, error) {
-	rspec, err := ctx.MapUniformRepositorySpec(spec, aliases)
+func (s *session) DetermineRepositoryBySpec(ctx Context, spec *UniformRepositorySpec) (Repository, error) {
+	rspec, err := ctx.MapUniformRepositorySpec(spec)
 	if err != nil {
 		return nil, err
 	}

@@ -32,12 +32,12 @@ func DefaultBlobDescriptor(blob accessio.BlobAccess) *Descriptor {
 	}
 }
 
-func IsDigest(ref string) (bool, digest.Digest) {
-	if strings.HasPrefix(ref, "@") {
-		return true, digest.Digest(ref[1:])
+func IsDigest(version string) (bool, digest.Digest) {
+	if strings.HasPrefix(version, "@") {
+		return true, digest.Digest(version[1:])
 	}
-	if strings.Index(ref, ":") >= 0 {
-		return true, digest.Digest(ref)
+	if strings.Contains(version, ":") {
+		return true, digest.Digest(version)
 	}
 	return false, ""
 }

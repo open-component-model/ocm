@@ -112,7 +112,7 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 	spec := ocm.RefSpec{}
 	repo := h.repobase
 	if repo == nil {
-		evaluated, err := h.session.EvaluateComponentRef(h.octx.Context(), name, h.octx.GetAlias)
+		evaluated, err := h.session.EvaluateComponentRef(h.octx.Context(), name)
 		if err != nil {
 			return nil, errors.Wrapf(err, "%s: invalid component version reference", name)
 		}

@@ -21,7 +21,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	ocicpi "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	ocmcpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -79,16 +78,15 @@ func (a *ConfigSpec) AddOCMRepository(name string, spec ocmcpi.RepositorySpec) e
 }
 
 func (a *ConfigSpec) ApplyTo(ctx config.Context, target interface{}) error {
-	list := errors.ErrListf("applying config")
 	t, ok := target.(core.Context)
 	if !ok {
 		return config.ErrNoContext(OCMCmdConfigType)
 	}
 	for n, s := range a.OCIRepositories {
-		list.Add(t.OCI().AddRepository(n, s))
+		t.OCI().Context().SetAlias(n, s)
 	}
 	for n, s := range a.OCMRepositories {
-		list.Add(t.OCM().AddRepository(n, s))
+		t.OCM().Context().SetAlias(n, s)
 	}
-	return list.Result()
+	return nil
 }

@@ -27,9 +27,6 @@ const (
 	dockerHubLegacyDomain = "index.docker.io"
 )
 
-// Aliases is a fuction that can resolve alias names repositories
-type Aliases func(alias string) RepositorySpec
-
 // UniformRepositorySpec is a generic specification of the repository
 // for handling as part of standard references
 type UniformRepositorySpec struct {
@@ -70,7 +67,7 @@ type RepositorySpecHandler interface {
 
 type RepositorySpecHandlers interface {
 	Register(hdlr RepositorySpecHandler, types ...string)
-	MapUniformRepositorySpec(ctx Context, u *UniformRepositorySpec, aliases Aliases) (RepositorySpec, error)
+	MapUniformRepositorySpec(ctx Context, u *UniformRepositorySpec) (RepositorySpec, error)
 }
 
 var DefaultRepositorySpecHandlers = NewRepositorySpecHandlers()
@@ -99,22 +96,22 @@ func (s *specHandlers) Register(hdlr RepositorySpecHandler, types ...string) {
 	}
 }
 
-func (s *specHandlers) MapUniformRepositorySpec(ctx Context, u *UniformRepositorySpec, aliases Aliases) (RepositorySpec, error) {
+func (s *specHandlers) MapUniformRepositorySpec(ctx Context, u *UniformRepositorySpec) (RepositorySpec, error) {
 	var err error
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 	deferr := errors.ErrNotSupported("uniform repository ref", u.String())
 
-	if aliases != nil && u.Type == "" {
+	if u.Type == "" {
 		if u.Info != "" {
-			spec := aliases(u.Info)
+			spec := ctx.GetAlias(u.Info)
 			if spec != nil {
 				return spec, nil
 			}
 			deferr = errors.ErrUnknown("repository", u.Info)
 		}
 		if u.Host != "" {
-			spec := aliases(u.Host)
+			spec := ctx.GetAlias(u.Host)
 			if spec != nil {
 				return spec, nil
 			}

@@ -12,16 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package ocm_test
+package resourcetypes
 
-import (
-	"testing"
-
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-)
-
-func TestConfig(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "OCM Test Suite")
-}
+// OCI_IMAGE is the resource type of any kind of oci artefact
+const OCI_IMAGE = "ociImage"

@@ -16,61 +16,9 @@ package ocm
 
 import (
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	ocmcpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
-
-type TransferHandler interface {
-	TransferVersion(repo Repository, name, version string) (Repository, TransferHandler)
-	TransferResource(src ResourceAccess, tgt ComponentVersionAccess) error
-	TransferSource(src SourceAccess, tgt ComponentVersionAccess) error
-}
-
-type DefaultTransferHandler struct {
-	recursive bool
-}
-
-func NewDefaultTransferHandler(recursive bool) TransferHandler {
-	return DefaultTransferHandler{recursive}
-}
-
-func (h DefaultTransferHandler) TransferVersion(repo Repository, name, version string) (Repository, TransferHandler) {
-	if h.recursive {
-		return repo, h
-	}
-	return nil, nil
-}
-
-func (DefaultTransferHandler) TransferResource(r ResourceAccess, t ComponentVersionAccess) error {
-	a, err := r.Access()
-	if err != nil {
-		return err
-	}
-	if a.IsLocal(t.GetContext()) {
-		m, err := r.AccessMethod()
-		if err != nil {
-			return err
-		}
-		return t.SetResourceBlob(r.Meta(), accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m), "", nil)
-	}
-	return nil
-}
-
-func (DefaultTransferHandler) TransferSource(r SourceAccess, t ComponentVersionAccess) error {
-	a, err := r.Access()
-	if err != nil {
-		return err
-	}
-	if a.IsLocal(t.GetContext()) {
-		m, err := r.AccessMethod()
-		if err != nil {
-			return err
-		}
-		return t.SetSourceBlob(r.Meta(), accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m), "", nil)
-	}
-	return nil
-}
 
 func TransferVersion(repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
 	return transferVersion(nil, repo, src, tgt, handler)
@@ -83,7 +31,7 @@ func transferVersion(hist common.History, repo ocmcpi.Repository, src ocmcpi.Com
 	}
 
 	if handler == nil {
-		handler = DefaultTransferHandler{}
+		handler = NewDefaultTransferHandler(nil)
 	}
 
 	d := src.GetDescriptor()
@@ -121,7 +69,7 @@ func CopyVersion(hist common.History, src ComponentVersionAccess, t ComponentVer
 	var err error
 
 	if handler == nil {
-		handler = DefaultTransferHandler{}
+		handler = NewDefaultTransferHandler(nil)
 	}
 
 	*t.GetDescriptor() = *src.GetDescriptor()

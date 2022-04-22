@@ -33,7 +33,7 @@ check:
 
 .PHONY: test
 test:
-	@go test -mod=vendor $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/pkg/...
+	@go test $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/pkg/...
 
 .PHONY: generate
 generate:

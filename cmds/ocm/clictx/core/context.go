@@ -41,17 +41,11 @@ const CONTEXT_TYPE = "ocm.cmd.context.gardener.cloud"
 
 type OCI interface {
 	Context() oci.Context
-	AddRepository(name string, spec oci.RepositorySpec) error
-	GetRepository(name string) (oci.Repository, error)
-	GetAlias(name string) oci.RepositorySpec
 	OpenCTF(path string) (oci.Repository, error)
 }
 
 type OCM interface {
 	Context() ocm.Context
-	AddRepository(name string, spec ocm.RepositorySpec) error
-	GetRepository(name string) (ocm.Repository, error)
-	GetAlias(name string) ocm.RepositorySpec
 	OpenCTF(path string) (ocm.Repository, error)
 }
 
@@ -234,38 +228,6 @@ func (c *_oci) Context() oci.Context {
 	return c.ctx
 }
 
-func (c *_oci) AddRepository(name string, spec oci.RepositorySpec) error {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	c.repos[name] = spec
-	return nil
-}
-
-func (c *_oci) GetRepository(name string) (oci.Repository, error) {
-	err := c.updater.Update(c)
-	if err != nil {
-		return nil, err
-	}
-	c.lock.RLock()
-	defer c.lock.RUnlock()
-	spec := c.repos[name]
-
-	if spec == nil {
-		return nil, errors.ErrUnknown("oci repository", name)
-	}
-	return c.ctx.RepositoryForSpec(spec)
-}
-
-func (c *_oci) GetAlias(name string) oci.RepositorySpec {
-	err := c.updater.Update(c)
-	if err != nil {
-		return nil
-	}
-	c.lock.RLock()
-	defer c.lock.RUnlock()
-	return c.repos[name]
-}
-
 func (c *_oci) OpenCTF(path string) (oci.Repository, error) {
 	ok, err := vfs.Exists(c.FileSystem(), path)
 	if err != nil {
@@ -294,39 +256,6 @@ func newOCM(ctx *_context, ocmctx ocm.Context) *_ocm {
 }
 func (c *_ocm) Context() ocm.Context {
 	return c.ctx
-}
-
-func (c *_ocm) AddRepository(name string, spec ocm.RepositorySpec) error {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-	c.repos[name] = spec
-	return nil
-}
-
-func (c *_ocm) GetRepository(name string) (ocm.Repository, error) {
-	err := c.updater.Update(c)
-	if err != nil {
-		return nil, err
-	}
-	c.lock.RLock()
-	defer c.lock.RUnlock()
-
-	spec := c.repos[name]
-
-	if spec == nil {
-		return nil, errors.ErrUnknown("ocm repository", name)
-	}
-	return c.ctx.RepositoryForSpec(spec)
-}
-
-func (c *_ocm) GetAlias(name string) ocm.RepositorySpec {
-	err := c.updater.Update(c)
-	if err != nil {
-		return nil
-	}
-	c.lock.RLock()
-	defer c.lock.RUnlock()
-	return c.repos[name]
 }
 
 func (c *_ocm) OpenCTF(path string) (ocm.Repository, error) {

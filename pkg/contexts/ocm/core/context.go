@@ -18,6 +18,8 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/open-component-model/ocm/pkg/contexts/config"
+	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -34,6 +36,7 @@ type Context interface {
 	datacontext.Context
 
 	AttributesContext() datacontext.AttributesContext
+	ConfigContext() config.Context
 	CredentialsContext() credentials.Context
 	OCIContext() oci.Context
 
@@ -41,7 +44,7 @@ type Context interface {
 	AccessMethods() AccessTypeScheme
 
 	RepositorySpecHandlers() RepositorySpecHandlers
-	MapUniformRepositorySpec(u *UniformRepositorySpec, aliases Aliases) (RepositorySpec, error)
+	MapUniformRepositorySpec(u *UniformRepositorySpec) (RepositorySpec, error)
 
 	BlobHandlers() BlobHandlerRegistry
 	BlobDigesters() BlobDigesterRegistry
@@ -52,6 +55,9 @@ type Context interface {
 	AccessSpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error)
 
 	Encode(AccessSpec, runtime.Marshaler) ([]byte, error)
+
+	GetAlias(name string) RepositorySpec
+	SetAlias(name string, spec RepositorySpec)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -71,6 +77,7 @@ func ForContext(ctx context.Context) Context {
 
 type _context struct {
 	datacontext.Context
+	updater cfgcpi.Updater
 
 	sharedattributes datacontext.AttributesContext
 	credctx          credentials.Context
@@ -82,6 +89,7 @@ type _context struct {
 	specHandlers  RepositorySpecHandlers
 	blobHandlers  BlobHandlerRegistry
 	blobDigesters BlobDigesterRegistry
+	aliases       map[string]RepositorySpec
 }
 
 var _ Context = &_context{}
@@ -89,6 +97,7 @@ var _ Context = &_context{}
 func newContext(shared datacontext.AttributesContext, credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, specHandlers RepositorySpecHandlers, blobHandlers BlobHandlerRegistry, blobDigesters BlobDigesterRegistry) Context {
 	c := &_context{
 		sharedattributes:     shared,
+		updater:              cfgcpi.NewUpdate(ocictx.ConfigContext()),
 		credctx:              credctx,
 		ocictx:               ocictx,
 		specHandlers:         specHandlers,
@@ -96,6 +105,7 @@ func newContext(shared datacontext.AttributesContext, credctx credentials.Contex
 		blobDigesters:        blobDigesters,
 		knownAccessTypes:     accessscheme,
 		knownRepositoryTypes: reposcheme,
+		aliases:              map[string]RepositorySpec{},
 	}
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
 	return c
@@ -103,6 +113,10 @@ func newContext(shared datacontext.AttributesContext, credctx credentials.Contex
 
 func (c *_context) AttributesContext() datacontext.AttributesContext {
 	return c.sharedattributes
+}
+
+func (c *_context) ConfigContext() config.Context {
+	return c.updater.GetContext()
 }
 
 func (c *_context) CredentialsContext() credentials.Context {
@@ -121,8 +135,8 @@ func (c *_context) RepositorySpecHandlers() RepositorySpecHandlers {
 	return c.specHandlers
 }
 
-func (c *_context) MapUniformRepositorySpec(u *UniformRepositorySpec, aliases Aliases) (RepositorySpec, error) {
-	return c.specHandlers.MapUniformRepositorySpec(c, u, aliases)
+func (c *_context) MapUniformRepositorySpec(u *UniformRepositorySpec) (RepositorySpec, error) {
+	return c.specHandlers.MapUniformRepositorySpec(c, u)
 }
 
 func (c *_context) BlobHandlers() BlobHandlerRegistry {
@@ -182,4 +196,20 @@ func (c *_context) AccessSpecForSpec(spec compdesc.AccessSpec) (AccessSpec, erro
 
 func (c *_context) Encode(spec AccessSpec, marshaler runtime.Marshaler) ([]byte, error) {
 	return c.knownAccessTypes.Encode(spec, marshaler)
+}
+
+func (c *_context) GetAlias(name string) RepositorySpec {
+	err := c.updater.Update(c)
+	if err != nil {
+		return nil
+	}
+	c.updater.RLock()
+	defer c.updater.RUnlock()
+	return c.aliases[name]
+}
+
+func (c *_context) SetAlias(name string, spec RepositorySpec) {
+	c.updater.Lock()
+	defer c.updater.Unlock()
+	c.aliases[name] = spec
 }

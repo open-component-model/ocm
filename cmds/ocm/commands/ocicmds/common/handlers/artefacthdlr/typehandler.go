@@ -160,7 +160,7 @@ func (h *TypeHandler) get(elemspec utils.ElemSpec) ([]output.Object, error) {
 	spec := oci.RefSpec{}
 	repo := h.repobase
 	if repo == nil {
-		evaluated, err := h.session.EvaluateRef(h.octx.Context(), name, h.octx.GetAlias)
+		evaluated, err := h.session.EvaluateRef(h.octx.Context(), name)
 		if err != nil {
 			return nil, errors.Wrapf(err, "repository %q", name)
 		}

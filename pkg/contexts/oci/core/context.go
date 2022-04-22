@@ -18,6 +18,8 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/open-component-model/ocm/pkg/contexts/config"
+	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -31,15 +33,19 @@ type Context interface {
 	datacontext.Context
 
 	AttributesContext() datacontext.AttributesContext
+	ConfigContext() config.Context
 	CredentialsContext() credentials.Context
 
 	RepositorySpecHandlers() RepositorySpecHandlers
-	MapUniformRepositorySpec(u *UniformRepositorySpec, aliases Aliases) (RepositorySpec, error)
+	MapUniformRepositorySpec(u *UniformRepositorySpec) (RepositorySpec, error)
 
 	RepositoryTypes() RepositoryTypeScheme
 
 	RepositoryForSpec(spec RepositorySpec, creds ...credentials.CredentialsSource) (Repository, error)
 	RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...credentials.CredentialsSource) (Repository, error)
+
+	GetAlias(name string) RepositorySpec
+	SetAlias(name string, spec RepositorySpec)
 }
 
 var key = reflect.TypeOf(_context{})
@@ -57,12 +63,14 @@ func ForContext(ctx context.Context) Context {
 
 type _context struct {
 	datacontext.Context
+	updater cfgcpi.Updater
 
 	sharedattributes datacontext.AttributesContext
 	credentials      credentials.Context
 
 	knownRepositoryTypes RepositoryTypeScheme
 	specHandlers         RepositorySpecHandlers
+	aliases              map[string]RepositorySpec
 }
 
 func newContext(shared datacontext.AttributesContext, creds credentials.Context, reposcheme RepositoryTypeScheme, specHandlers RepositorySpecHandlers) Context {
@@ -71,9 +79,11 @@ func newContext(shared datacontext.AttributesContext, creds credentials.Context,
 	}
 	c := &_context{
 		sharedattributes:     shared,
+		updater:              cfgcpi.NewUpdate(creds.ConfigContext()),
 		credentials:          creds,
 		knownRepositoryTypes: reposcheme,
 		specHandlers:         specHandlers,
+		aliases:              map[string]RepositorySpec{},
 	}
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
 	return c
@@ -83,6 +93,10 @@ var _ Context = &_context{}
 
 func (c *_context) AttributesContext() datacontext.AttributesContext {
 	return c.sharedattributes
+}
+
+func (c *_context) ConfigContext() config.Context {
+	return c.updater.GetContext()
 }
 
 func (c *_context) CredentialsContext() credentials.Context {
@@ -97,8 +111,8 @@ func (c *_context) RepositorySpecHandlers() RepositorySpecHandlers {
 	return c.specHandlers
 }
 
-func (c *_context) MapUniformRepositorySpec(u *UniformRepositorySpec, aliases Aliases) (RepositorySpec, error) {
-	return c.specHandlers.MapUniformRepositorySpec(c, u, aliases)
+func (c *_context) MapUniformRepositorySpec(u *UniformRepositorySpec) (RepositorySpec, error) {
+	return c.specHandlers.MapUniformRepositorySpec(c, u)
 }
 
 func (c *_context) RepositorySpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
@@ -119,4 +133,20 @@ func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarsha
 		return nil, err
 	}
 	return c.RepositoryForSpec(spec, creds...)
+}
+
+func (c *_context) GetAlias(name string) RepositorySpec {
+	err := c.updater.Update(c)
+	if err != nil {
+		return nil
+	}
+	c.updater.RLock()
+	defer c.updater.RUnlock()
+	return c.aliases[name]
+}
+
+func (c *_context) SetAlias(name string, spec RepositorySpec) {
+	c.updater.Lock()
+	defer c.updater.Unlock()
+	c.aliases[name] = spec
 }

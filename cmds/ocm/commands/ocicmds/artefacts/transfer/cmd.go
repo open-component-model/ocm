@@ -107,7 +107,7 @@ func NewAction(ctx clictx.Context, session oci.Session, target string) (*action,
 	if ref.Digest != nil {
 		return nil, fmt.Errorf("copy to target digest not supported")
 	}
-	repo, err := session.DetermineRepositoryBySpec(ctx.OCIContext(), &ref.UniformRepositorySpec, ctx.OCI().GetAlias)
+	repo, err := session.DetermineRepositoryBySpec(ctx.OCIContext(), &ref.UniformRepositorySpec)
 	if err != nil {
 		return nil, err
 	}

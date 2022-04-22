@@ -94,7 +94,7 @@ func (o *Command) Run() error {
 	}
 	session.Closer(source)
 
-	target, ref, err := session.DetermineRepository(o.Context.OCMContext(), o.TargetName, o.Context.OCM().GetAlias)
+	target, ref, err := session.DetermineRepository(o.Context.OCMContext(), o.TargetName)
 	if err != nil {
 		if !errors.IsErrUnknown(err) || ref.Info == "" {
 			return err

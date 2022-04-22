@@ -15,6 +15,10 @@
 package oci
 
 import (
+	"fmt"
+
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 )
 
@@ -37,4 +41,12 @@ func EvaluateRefWithContext(ctx Context, ref string) (*RefSpec, NamespaceAccess,
 	}
 	ns, err := repo.LookupNamespace(parsed.Repository)
 	return &parsed, ns, err
+}
+
+func StandardOCIRef(host, repository, version string) string {
+	sep := grammar.TagSeparator
+	if ok, _ := artdesc.IsDigest(version); ok {
+		sep = grammar.DigestSeparator
+	}
+	return fmt.Sprintf("%s%s%s%s%s", host, grammar.RepositorySeparator, repository, sep, version)
 }
