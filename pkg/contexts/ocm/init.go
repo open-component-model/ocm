@@ -15,10 +15,11 @@
 package ocm
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/contexts/oci/repositories"
+	_ "github.com/open-component-model/ocm/pkg/contexts/oci"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions"
+	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories"
 )

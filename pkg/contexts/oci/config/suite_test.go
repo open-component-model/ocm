@@ -12,9 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package oci
+package config_test
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/contexts/oci/config"
-	_ "github.com/open-component-model/ocm/pkg/contexts/oci/repositories"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
+
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "OCI Config Test Suite")
+}

@@ -23,7 +23,7 @@ import (
 
 func CheckErr(err error, msg string, args ...interface{}) {
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %s: %s\n ", fmt.Sprintf(msg, args), err)
+		fmt.Fprintf(os.Stderr, "Error: %s: %s\n ", fmt.Sprintf(msg, args...), err)
 		os.Exit(1)
 	}
 }

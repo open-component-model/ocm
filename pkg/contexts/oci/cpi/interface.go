@@ -53,6 +53,10 @@ type Descriptor = ociv1.Descriptor
 
 var DefaultContext = core.DefaultContext
 
+func New() Context {
+	return core.Builder{}.New()
+}
+
 func RegisterRepositoryType(name string, atype RepositoryType) {
 	core.DefaultRepositoryTypeScheme.Register(name, atype)
 }

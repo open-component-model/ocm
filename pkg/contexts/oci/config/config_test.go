@@ -19,13 +19,11 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/clictx/config"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
-	ocmocireg "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
-)
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 
-var DefaultContext = clictx.New()
+	"github.com/open-component-model/ocm/pkg/contexts/oci/config"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
+)
 
 func normalize(i interface{}) ([]byte, error) {
 	data, err := json.Marshal(i)
@@ -40,27 +38,18 @@ func normalize(i interface{}) ([]byte, error) {
 	return json.Marshal(generic)
 }
 
-var _ = Describe("command config", func() {
+var _ = Describe("oci config", func() {
 
-	ocispec := ocireg.NewRepositorySpec("ghcr.io")
-
-	ocidata, err := normalize(ocispec)
+	spec := ocireg.NewRepositorySpec("ghcr.io")
+	data, err := normalize(spec)
 	Expect(err).To(Succeed())
 
-	ocmspec := ocmocireg.NewRepositorySpec("gcr.io", nil)
-	ocmdata, err := normalize(ocmspec)
-	Expect(err).To(Succeed())
-
-	specdata := "{\"ociRepositories\":{\"oci\":" + string(ocidata) + "},\"ocmRepositories\":{\"ocm\":" + string(ocmdata) + "},\"type\":\"" + config.OCMCmdConfigType + "\"}"
+	specdata := "{\"aliases\":{\"alias\":" + string(data) + "},\"type\":\"" + config.ConfigType + "\"}"
 
 	Context("serialize", func() {
-
 		It("serializes config", func() {
-
 			cfg := config.NewConfigSpec()
-			err := cfg.AddOCIRepository("oci", ocispec)
-			Expect(err).To(Succeed())
-			err = cfg.AddOCMRepository("ocm", ocmspec)
+			err := cfg.SetAlias("alias", spec)
 			Expect(err).To(Succeed())
 
 			data, err := normalize(cfg)
@@ -72,6 +61,34 @@ var _ = Describe("command config", func() {
 			err = json.Unmarshal(data, cfg2)
 			Expect(err).To(Succeed())
 			Expect(cfg2).To(Equal(cfg))
+		})
+	})
+
+	Context("apply", func() {
+		It("applies directly", func() {
+			ctx := cpi.New()
+
+			cfg := config.NewConfigSpec()
+			err := cfg.SetAlias("alias", spec)
+			Expect(err).To(Succeed())
+
+			Expect(cfg.ApplyTo(ctx.ConfigContext(), ctx)).To(Succeed())
+
+			found := ctx.GetAlias("alias")
+			Expect(found).To(Equal(cfg.Aliases["alias"]))
+		})
+
+		It("applies via config context", func() {
+			ctx := cpi.New()
+
+			cfg := config.NewConfigSpec()
+			err := cfg.SetAlias("alias", spec)
+			Expect(err).To(Succeed())
+
+			Expect(ctx.ConfigContext().ApplyConfig(cfg, "programmatic")).To(Succeed())
+
+			found := ctx.GetAlias("alias")
+			Expect(found).To(Equal(cfg.Aliases["alias"]))
 		})
 	})
 })

@@ -57,6 +57,10 @@ type BlobDigester = core.BlobDigester
 type BlobDigesterRegistry = core.BlobDigesterRegistry
 type DigestDescriptor = core.DigestDescriptor
 
+func New() Context {
+	return core.Builder{}.New()
+}
+
 func NewDigestDescriptor(digest digest.Digest, typ DigesterType) *DigestDescriptor {
 	return core.NewDigestDescriptor(digest, typ)
 }

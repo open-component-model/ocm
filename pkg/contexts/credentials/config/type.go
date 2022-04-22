@@ -23,13 +23,13 @@ import (
 )
 
 const (
-	CredentialsConfigType   = "credentials.config" + common.TypeGroupSuffix
-	CredentialsConfigTypeV1 = CredentialsConfigType + runtime.VersionSeparator + "v1"
+	ConfigType   = "credentials.config" + common.TypeGroupSuffix
+	ConfigTypeV1 = ConfigType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
-	cfgcpi.RegisterConfigType(CredentialsConfigType, cfgcpi.NewConfigType(CredentialsConfigType, &ConfigSpec{}))
-	cfgcpi.RegisterConfigType(CredentialsConfigTypeV1, cfgcpi.NewConfigType(CredentialsConfigTypeV1, &ConfigSpec{}))
+	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &ConfigSpec{}))
+	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &ConfigSpec{}))
 }
 
 // ConfigSpec describes a memory based repository interface.
@@ -60,12 +60,12 @@ type RepositorySpec struct {
 // NewConfigSpec creates a new memory ConfigSpec
 func NewConfigSpec() *ConfigSpec {
 	return &ConfigSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(CredentialsConfigType),
+		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
 	}
 }
 
 func (a *ConfigSpec) GetType() string {
-	return CredentialsConfigType
+	return ConfigType
 }
 
 func (a *ConfigSpec) MapCredentialsChain(creds ...cpi.CredentialsSpec) ([]cpi.GenericCredentialsSpec, error) {
@@ -137,7 +137,7 @@ func (a *ConfigSpec) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	list := errors.ErrListf("applying config")
 	t, ok := target.(cpi.Context)
 	if !ok {
-		return cfgcpi.ErrNoContext(CredentialsConfigType)
+		return cfgcpi.ErrNoContext(ConfigType)
 	}
 	for _, e := range a.Consumers {
 		t.SetCredentialsForConsumer(e.Identity, CredentialsChain(e.Credentials...))
