@@ -17,6 +17,7 @@ package transfer
 import (
 	"fmt"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -112,5 +113,5 @@ func (o *Command) Run() error {
 		session.Closer(target)
 	}
 
-	return ocm.TransferVersion(nil, nil, source, target, nil)
+	return transfer.TransferVersion(nil, nil, source, target, nil)
 }

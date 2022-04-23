@@ -12,47 +12,44 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package ocm
+package standard
 
-type TransferOptions interface {
-}
+import (
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
+)
 
-type DefaultTransferOptions struct {
+type Options struct {
 	recursive        bool
 	resourcesByValue bool
 	sourcesByValue   bool
 }
 
-var _ ResourcesByValueTransferOption = (*DefaultTransferOptions)(nil)
-var _ SourcesByValueTransferOption = (*DefaultTransferOptions)(nil)
-var _ RecursiveTransferOption = (*DefaultTransferOptions)(nil)
+var _ ResourcesByValueOption = (*Options)(nil)
+var _ SourcesByValueOption = (*Options)(nil)
+var _ RecursiveOption = (*Options)(nil)
 
-func (o *DefaultTransferOptions) SetRecursive(recursive bool) {
+func (o *Options) SetRecursive(recursive bool) {
 	o.recursive = recursive
 }
 
-func (o *DefaultTransferOptions) SetResourcesByValue(resourcesByValue bool) {
+func (o *Options) SetResourcesByValue(resourcesByValue bool) {
 	o.resourcesByValue = resourcesByValue
 }
 
-func (o *DefaultTransferOptions) SetSourcesByValue(sourcesByValue bool) {
+func (o *Options) SetSourcesByValue(sourcesByValue bool) {
 	o.sourcesByValue = sourcesByValue
 }
 
-func (o *DefaultTransferOptions) IsRecursive() bool {
+func (o *Options) IsRecursive() bool {
 	return o.recursive
 }
 
-func (o *DefaultTransferOptions) IsResourcesByValue() bool {
+func (o *Options) IsResourcesByValue() bool {
 	return o.resourcesByValue
 }
 
-func (o *DefaultTransferOptions) IsSourcesByValue() bool {
+func (o *Options) IsSourcesByValue() bool {
 	return o.sourcesByValue
-}
-
-type TransferOption interface {
-	Apply(TransferOptions)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -70,7 +67,7 @@ func GetFlag(args ...bool) bool {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-type RecursiveTransferOption interface {
+type RecursiveOption interface {
 	SetRecursive(bool)
 	IsRecursive() bool
 }
@@ -79,11 +76,12 @@ type recursiveOption struct {
 	recursive bool
 }
 
-func (o *recursiveOption) Apply(to TransferOptions) {
-	to.(RecursiveTransferOption).SetRecursive(o.recursive)
+func (o *recursiveOption) Apply(to transferhandler.TransferOptions) error {
+	to.(RecursiveOption).SetRecursive(o.recursive)
+	return nil
 }
 
-func RecursiveTransfer(args ...bool) TransferOption {
+func Recursive(args ...bool) transferhandler.TransferOption {
 	return &recursiveOption{
 		recursive: GetFlag(args...),
 	}
@@ -91,7 +89,7 @@ func RecursiveTransfer(args ...bool) TransferOption {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-type ResourcesByValueTransferOption interface {
+type ResourcesByValueOption interface {
 	SetResourcesByValue(bool)
 	IsResourcesByValue() bool
 }
@@ -100,11 +98,12 @@ type resourcesByValueOption struct {
 	flag bool
 }
 
-func (o *resourcesByValueOption) Apply(to TransferOptions) {
-	to.(ResourcesByValueTransferOption).SetResourcesByValue(o.flag)
+func (o *resourcesByValueOption) Apply(to transferhandler.TransferOptions) error {
+	to.(ResourcesByValueOption).SetResourcesByValue(o.flag)
+	return nil
 }
 
-func ResourcesByValueTransfer(args ...bool) TransferOption {
+func ResourcesByValue(args ...bool) transferhandler.TransferOption {
 	return &resourcesByValueOption{
 		flag: GetFlag(args...),
 	}
@@ -112,7 +111,7 @@ func ResourcesByValueTransfer(args ...bool) TransferOption {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-type SourcesByValueTransferOption interface {
+type SourcesByValueOption interface {
 	SetSourcesByValue(bool)
 	IsSourcesByValue() bool
 }
@@ -121,11 +120,12 @@ type sourcesByValueOption struct {
 	flag bool
 }
 
-func (o *sourcesByValueOption) Apply(to TransferOptions) {
-	to.(SourcesByValueTransferOption).SetSourcesByValue(o.flag)
+func (o *sourcesByValueOption) Apply(to transferhandler.TransferOptions) error {
+	to.(SourcesByValueOption).SetSourcesByValue(o.flag)
+	return nil
 }
 
-func SourcesByValueTransfer(args ...bool) TransferOption {
+func SourcesByValue(args ...bool) transferhandler.TransferOption {
 	return &sourcesByValueOption{
 		flag: GetFlag(args...),
 	}

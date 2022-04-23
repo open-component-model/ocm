@@ -18,6 +18,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
@@ -143,7 +144,7 @@ func (d *download) Save(o *comphdlr.Object, f string) error {
 	nv := common.NewNameVersion(src.GetName(), src.GetVersion())
 	hist := common.History{nv}
 
-	err = ocm.CopyVersion(hist, src, set, nil)
+	err = transfer.CopyVersion(hist, src, set, nil)
 	if err == nil {
 		out.Outf(d.cmd.Context, "%s: downloaded\n", f)
 	}

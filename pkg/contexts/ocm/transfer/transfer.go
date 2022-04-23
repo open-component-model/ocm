@@ -12,11 +12,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package ocm
+package transfer
 
 import (
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	ocmcpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -35,16 +38,16 @@ func (c TransportClosure) Contains(nv common.NameVersion) bool {
 	return ok
 }
 
-func TransferVersion(closure TransportClosure, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
+func TransferVersion(closure TransportClosure, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
 	if closure == nil {
 		closure = TransportClosure{}
 	}
 	return transferVersion(nil, closure, repo, src, tgt, handler)
 }
 
-func transferVersion(hist common.History, closure TransportClosure, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
+func transferVersion(hist common.History, closure TransportClosure, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
 	nv := common.NewNameVersion(src.GetName(), src.GetVersion())
-	if err := hist.Add(KIND_COMPONENTVERSION, nv); err != nil {
+	if err := hist.Add(ocm.KIND_COMPONENTVERSION, nv); err != nil {
 		return err
 	}
 	if !closure.Add(nv) {
@@ -52,7 +55,7 @@ func transferVersion(hist common.History, closure TransportClosure, repo ocmcpi.
 	}
 
 	if handler == nil {
-		handler = NewDefaultTransferHandler(nil)
+		handler = standard.NewDefaultHandler(nil)
 	}
 
 	d := src.GetDescriptor()
@@ -72,7 +75,11 @@ func transferVersion(hist common.History, closure TransportClosure, repo ocmcpi.
 		return err
 	}
 	for _, r := range d.ComponentReferences {
-		if srepo, shdlr := handler.TransferVersion(repo, r.GetName(), r.GetVersion()); srepo != nil {
+		srepo, shdlr, err := handler.TransferVersion(repo, src, &r.ElementMeta)
+		if err != nil {
+			return err
+		}
+		if srepo != nil {
 			c, err := srepo.LookupComponentVersion(r.GetName(), r.GetVersion())
 			if err != nil {
 				return errors.Wrapf(err, "%s: nested component %s:%s", hist, r.GetName(), r.GetVersion())
@@ -86,19 +93,25 @@ func transferVersion(hist common.History, closure TransportClosure, repo ocmcpi.
 	return comp.AddVersion(t)
 }
 
-func CopyVersion(hist common.History, src ComponentVersionAccess, t ComponentVersionAccess, handler TransferHandler) error {
+func CopyVersion(hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler transferhandler.TransferHandler) error {
 	if handler == nil {
-		handler = NewDefaultTransferHandler(nil)
+		handler = standard.NewDefaultHandler(nil)
 	}
 
 	*t.GetDescriptor() = *src.GetDescriptor()
 	for i, r := range src.GetResources() {
-		var m AccessMethod
+		var m ocm.AccessMethod
 		a, err := r.Access()
 		if err == nil {
 			m, err = r.AccessMethod()
-			if err == nil && (a.IsLocal(src.GetContext()) || handler.TransferResource(src, a, r, t)) {
-				err = handler.HandleTransferResource(r, m, t)
+			if err == nil {
+				ok := a.IsLocal(src.GetContext())
+				if !ok {
+					ok, err = handler.TransferResource(src, a, r)
+				}
+				if ok {
+					err = handler.HandleTransferResource(r, m, t)
+				}
 			}
 		}
 		if err != nil {
@@ -106,12 +119,18 @@ func CopyVersion(hist common.History, src ComponentVersionAccess, t ComponentVer
 		}
 	}
 	for i, r := range src.GetSources() {
-		var m AccessMethod
+		var m ocm.AccessMethod
 		a, err := r.Access()
 		if err == nil {
 			m, err = r.AccessMethod()
-			if err == nil && (a.IsLocal(src.GetContext()) || handler.TransferSource(src, a, r, t)) {
-				err = handler.HandleTransferSource(r, m, t)
+			if err == nil {
+				ok := a.IsLocal(src.GetContext())
+				if !ok {
+					ok, err = handler.TransferSource(src, a, r)
+				}
+				if ok {
+					err = handler.HandleTransferSource(r, m, t)
+				}
 			}
 		}
 		if err != nil {
