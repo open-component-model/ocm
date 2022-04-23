@@ -20,6 +20,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/readonlyfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -135,6 +136,12 @@ func NewEnvironment(opts ...Option) *Environment {
 		ctx:        ctx,
 		filesystem: fs,
 	}
+}
+
+var _ accessio.Option = (*Environment)(nil)
+
+func (e *Environment) ApplyOption(options *accessio.Options) {
+	options.PathFileSystem = e.FileSystem()
 }
 
 func (e *Environment) OCMContext() ocm.Context {

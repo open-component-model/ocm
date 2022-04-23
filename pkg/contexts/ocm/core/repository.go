@@ -81,9 +81,11 @@ type ComponentVersionAccess interface {
 
 	GetResources() []ResourceAccess
 	GetResource(meta metav1.Identity) (ResourceAccess, error)
+	GetResourceByIndex(i int) (ResourceAccess, error)
 
 	GetSources() []SourceAccess
 	GetSource(meta metav1.Identity) (SourceAccess, error)
+	GetSourceByIndex(i int) (SourceAccess, error)
 
 	// AccessMethod provides an access method implementation for
 	// an access spec. This might be a repository local implementation

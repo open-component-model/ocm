@@ -84,22 +84,26 @@ func (m *accessMethod) GetKind() string {
 	return Type
 }
 
-func (m *accessMethod) getArtefact() (oci.ArtefactAccess, error) {
-
+func (m *accessMethod) eval() (oci.Repository, *oci.RefSpec, error) {
 	ref, err := oci.ParseRef(m.spec.ImageReference)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	ocictx := m.comp.GetContext().OCIContext()
 	spec := ocictx.GetAlias(ref.Host)
 	if spec == nil {
 		spec = ocireg.NewRepositorySpec(ref.Host)
 	}
-	ocirepo, err := ocictx.RepositoryForSpec(spec)
+	repo, err := ocictx.RepositoryForSpec(spec)
+	return repo, &ref, err
+}
+
+func (m *accessMethod) getArtefact() (oci.ArtefactAccess, error) {
+	repo, ref, err := m.eval()
 	if err != nil {
 		return nil, err
 	}
-	return ocirepo.LookupArtefact(ref.Repository, ref.Version())
+	return repo.LookupArtefact(ref.Repository, ref.Version())
 }
 
 func (m *accessMethod) Digest() digest.Digest {
@@ -143,16 +147,11 @@ func (m *accessMethod) MimeType() string {
 }
 
 func (m *accessMethod) getBlob() (artefactset.ArtefactBlob, error) {
-	ref, err := oci.ParseRef(m.spec.ImageReference)
+	repo, ref, err := m.eval()
 	if err != nil {
 		return nil, err
 	}
-	spec := ocireg.NewRepositorySpec(ref.Host)
-	ocirepo, err := m.comp.GetContext().OCIContext().RepositoryForSpec(spec)
-	if err != nil {
-		return nil, err
-	}
-	ns, err := ocirepo.LookupNamespace(ref.Repository)
+	ns, err := repo.LookupNamespace(ref.Repository)
 	if err != nil {
 		return nil, err
 	}

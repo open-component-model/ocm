@@ -20,8 +20,11 @@ import (
 
 type TransferHandler interface {
 	TransferVersion(repo Repository, name, version string) (Repository, TransferHandler)
-	TransferResource(src ResourceAccess, tgt ComponentVersionAccess) error
-	TransferSource(src SourceAccess, tgt ComponentVersionAccess) error
+	TransferResource(src ComponentVersionAccess, a AccessSpec, r ResourceAccess, tgt ComponentVersionAccess) bool
+	TransferSource(src ComponentVersionAccess, a AccessSpec, r SourceAccess, tgt ComponentVersionAccess) bool
+
+	HandleTransferResource(r ResourceAccess, m AccessMethod, t ComponentVersionAccess) error
+	HandleTransferSource(r SourceAccess, m AccessMethod, t ComponentVersionAccess) error
 }
 
 type DefaultTransferHandler struct {
@@ -36,11 +39,11 @@ func NewDefaultTransferHandler(opts *DefaultTransferOptions) TransferHandler {
 }
 
 func NewTransferHandler(opts ...TransferOption) TransferHandler {
-	defaultOpts := DefaultTransferOptions{}
+	defaultOpts := &DefaultTransferOptions{}
 	for _, opt := range opts {
 		opt.Apply(defaultOpts)
 	}
-	return NewDefaultTransferHandler(&defaultOpts)
+	return NewDefaultTransferHandler(defaultOpts)
 }
 
 func (h *DefaultTransferHandler) TransferVersion(repo Repository, name, version string) (Repository, TransferHandler) {
@@ -50,32 +53,18 @@ func (h *DefaultTransferHandler) TransferVersion(repo Repository, name, version 
 	return nil, nil
 }
 
-func (h *DefaultTransferHandler) TransferResource(r ResourceAccess, t ComponentVersionAccess) error {
-	a, err := r.Access()
-	if err != nil {
-		return err
-	}
-	if a.IsLocal(t.GetContext()) || h.opts.IsResourcesByValue() {
-		m, err := r.AccessMethod()
-		if err != nil {
-			return err
-		}
-		return t.SetResourceBlob(r.Meta(), accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m), "", nil)
-	}
-	return nil
+func (h *DefaultTransferHandler) TransferResource(src ComponentVersionAccess, a AccessSpec, r ResourceAccess, t ComponentVersionAccess) bool {
+	return h.opts.IsResourcesByValue()
 }
 
-func (h *DefaultTransferHandler) TransferSource(r SourceAccess, t ComponentVersionAccess) error {
-	a, err := r.Access()
-	if err != nil {
-		return err
-	}
-	if a.IsLocal(t.GetContext()) || h.opts.IsSourcesByValue() {
-		m, err := r.AccessMethod()
-		if err != nil {
-			return err
-		}
-		return t.SetSourceBlob(r.Meta(), accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m), "", nil)
-	}
-	return nil
+func (h *DefaultTransferHandler) TransferSource(src ComponentVersionAccess, a AccessSpec, r SourceAccess, t ComponentVersionAccess) bool {
+	return h.opts.IsSourcesByValue()
+}
+
+func (h *DefaultTransferHandler) HandleTransferResource(r ResourceAccess, m AccessMethod, t ComponentVersionAccess) error {
+	return t.SetResourceBlob(r.Meta(), accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m), "", nil)
+}
+
+func (h *DefaultTransferHandler) HandleTransferSource(r SourceAccess, m AccessMethod, t ComponentVersionAccess) error {
+	return t.SetSourceBlob(r.Meta(), accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m), "", nil)
 }

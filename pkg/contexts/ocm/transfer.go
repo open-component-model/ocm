@@ -20,14 +20,35 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-func TransferVersion(repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
-	return transferVersion(nil, repo, src, tgt, handler)
+type TransportClosure map[common.NameVersion]struct{}
+
+func (c TransportClosure) Add(nv common.NameVersion) bool {
+	if _, ok := c[nv]; !ok {
+		c[nv] = struct{}{}
+		return true
+	}
+	return false
 }
 
-func transferVersion(hist common.History, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
+func (c TransportClosure) Contains(nv common.NameVersion) bool {
+	_, ok := c[nv]
+	return ok
+}
+
+func TransferVersion(closure TransportClosure, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
+	if closure == nil {
+		closure = TransportClosure{}
+	}
+	return transferVersion(nil, closure, repo, src, tgt, handler)
+}
+
+func transferVersion(hist common.History, closure TransportClosure, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler TransferHandler) error {
 	nv := common.NewNameVersion(src.GetName(), src.GetVersion())
 	if err := hist.Add(KIND_COMPONENTVERSION, nv); err != nil {
 		return err
+	}
+	if !closure.Add(nv) {
+		return nil
 	}
 
 	if handler == nil {
@@ -56,7 +77,7 @@ func transferVersion(hist common.History, repo ocmcpi.Repository, src ocmcpi.Com
 			if err != nil {
 				return errors.Wrapf(err, "%s: nested component %s:%s", hist, r.GetName(), r.GetVersion())
 			}
-			err = transferVersion(hist, srepo, c, tgt, shdlr)
+			err = transferVersion(hist, closure, srepo, c, tgt, shdlr)
 			if err != nil {
 				return err
 			}
@@ -66,21 +87,33 @@ func transferVersion(hist common.History, repo ocmcpi.Repository, src ocmcpi.Com
 }
 
 func CopyVersion(hist common.History, src ComponentVersionAccess, t ComponentVersionAccess, handler TransferHandler) error {
-	var err error
-
 	if handler == nil {
 		handler = NewDefaultTransferHandler(nil)
 	}
 
 	*t.GetDescriptor() = *src.GetDescriptor()
 	for i, r := range src.GetResources() {
-		err = handler.TransferResource(r, t)
+		var m AccessMethod
+		a, err := r.Access()
+		if err == nil {
+			m, err = r.AccessMethod()
+			if err == nil && (a.IsLocal(src.GetContext()) || handler.TransferResource(src, a, r, t)) {
+				err = handler.HandleTransferResource(r, m, t)
+			}
+		}
 		if err != nil {
 			return errors.Wrapf(err, "%s: transferring resource %d", hist, i)
 		}
 	}
 	for i, r := range src.GetSources() {
-		err = handler.TransferSource(r, t)
+		var m AccessMethod
+		a, err := r.Access()
+		if err == nil {
+			m, err = r.AccessMethod()
+			if err == nil && (a.IsLocal(src.GetContext()) || handler.TransferSource(src, a, r, t)) {
+				err = handler.HandleTransferSource(r, m, t)
+			}
+		}
 		if err != nil {
 			return errors.Wrapf(err, "%s: transferring source %d", hist, i)
 		}

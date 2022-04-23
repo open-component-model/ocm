@@ -19,6 +19,7 @@ import (
 	"os"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/errors"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -105,9 +106,17 @@ func (o Options) DefaultForPath(path string) (Options, error) {
 	if o.FileFormat == nil {
 		var fmt *FileFormat
 		var err error
-		if o.File != nil {
+		switch {
+		case o.Reader != nil:
+			r, _, err := compression.AutoDecompress(o.Reader)
+			if err == nil {
+				o.Reader = AddCloser(r, o.Reader)
+				f := FormatTar
+				fmt = &f
+			}
+		case o.File != nil:
 			fmt, err = DetectFormatForFile(o.File)
-		} else {
+		default:
 			fmt, err = DetectFormat(path, o.PathFileSystem)
 		}
 		if err == nil {

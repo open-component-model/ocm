@@ -23,9 +23,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
 	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
@@ -36,78 +33,6 @@ const OCIPATH = "/tmp/oci"
 const OCINAMESPACE = "ocm/test"
 const OCIVERSION = "v2.0"
 const OCIHOST = "alias"
-
-type DummyAccess struct {
-	ctx cpi.Context
-}
-
-var _ cpi.ComponentVersionAccess = (*DummyAccess)(nil)
-
-func (d *DummyAccess) GetContext() core.Context {
-	return d.ctx
-}
-
-func (d *DummyAccess) GetName() string {
-	panic("implement me")
-}
-
-func (d *DummyAccess) GetVersion() string {
-	panic("implement me")
-}
-
-func (d *DummyAccess) GetDescriptor() *compdesc.ComponentDescriptor {
-	panic("implement me")
-}
-
-func (d *DummyAccess) GetResources() []core.ResourceAccess {
-	panic("implement me")
-}
-
-func (d *DummyAccess) GetResource(meta metav1.Identity) (core.ResourceAccess, error) {
-	panic("implement me")
-}
-
-func (d *DummyAccess) GetSources() []core.SourceAccess {
-	panic("implement me")
-}
-
-func (d *DummyAccess) GetSource(meta metav1.Identity) (core.SourceAccess, error) {
-	panic("implement me")
-}
-
-func (d *DummyAccess) AccessMethod(spec core.AccessSpec) (core.AccessMethod, error) {
-	panic("implement me")
-}
-
-func (d *DummyAccess) AddBlob(blob core.BlobAccess, refName string, global core.AccessSpec) (core.AccessSpec, error) {
-	panic("implement me")
-}
-
-func (d *DummyAccess) SetResourceBlob(meta *core.ResourceMeta, blob core.BlobAccess, refname string, global core.AccessSpec) error {
-	panic("implement me")
-}
-
-func (d *DummyAccess) SetResource(meta *core.ResourceMeta, spec compdesc.AccessSpec) error {
-	panic("implement me")
-}
-
-func (d *DummyAccess) SetSourceBlob(meta *core.SourceMeta, blob core.BlobAccess, refname string, global core.AccessSpec) error {
-	panic("implement me")
-}
-
-func (d *DummyAccess) SetSource(meta *core.SourceMeta, spec compdesc.AccessSpec) error {
-	panic("implement me")
-}
-
-func (d *DummyAccess) SetReference(ref *core.ComponentReference) error {
-	panic("implement me")
-}
-
-func (d *DummyAccess) Close() error {
-	return nil
-}
-
-////////////////////////////////////////////////////////////////////////////////
 
 var _ = Describe("Method", func() {
 	var env *Builder
@@ -139,7 +64,7 @@ var _ = Describe("Method", func() {
 
 		spec := ociblob.New(OCIHOST+".alias"+grammar.RepositorySeparator+OCINAMESPACE, desc.Digest, "", -1)
 
-		m, err := spec.AccessMethod(&DummyAccess{env.OCMContext()})
+		m, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{env.OCMContext()})
 		Expect(err).To(Succeed())
 
 		blob, err := m.Get()

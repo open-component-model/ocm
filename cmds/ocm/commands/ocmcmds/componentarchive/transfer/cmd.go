@@ -112,5 +112,5 @@ func (o *Command) Run() error {
 		session.Closer(target)
 	}
 
-	return ocm.TransferVersion(nil, source, target, nil)
+	return ocm.TransferVersion(nil, nil, source, target, nil)
 }

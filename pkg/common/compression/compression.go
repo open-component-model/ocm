@@ -5,7 +5,6 @@ import (
 	"io"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/pkg/errors"
 )
 
@@ -25,7 +24,7 @@ func noneDecompressor(r io.Reader) (io.ReadCloser, error) {
 }
 
 func noneCompressor(w io.Writer, _ map[string]string, _ *int) (io.WriteCloser, error) {
-	return accessio.NopWriteCloser(w), nil
+	return NopWriteCloser(w), nil
 }
 
 var None = NewAlgorithm("none", "", nil, noneDecompressor, noneCompressor)

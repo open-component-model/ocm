@@ -23,6 +23,10 @@ type DefaultTransferOptions struct {
 	sourcesByValue   bool
 }
 
+var _ ResourcesByValueTransferOption = (*DefaultTransferOptions)(nil)
+var _ SourcesByValueTransferOption = (*DefaultTransferOptions)(nil)
+var _ RecursiveTransferOption = (*DefaultTransferOptions)(nil)
+
 func (o *DefaultTransferOptions) SetRecursive(recursive bool) {
 	o.recursive = recursive
 }
@@ -53,6 +57,19 @@ type TransferOption interface {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+func GetFlag(args ...bool) bool {
+	flag := len(args) == 0
+	for _, f := range args {
+		if f {
+			flag = true
+			break
+		}
+	}
+	return flag
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 type RecursiveTransferOption interface {
 	SetRecursive(bool)
 	IsRecursive() bool
@@ -66,9 +83,9 @@ func (o *recursiveOption) Apply(to TransferOptions) {
 	to.(RecursiveTransferOption).SetRecursive(o.recursive)
 }
 
-func RecursiveTransfer(recursive bool) TransferOption {
+func RecursiveTransfer(args ...bool) TransferOption {
 	return &recursiveOption{
-		recursive: recursive,
+		recursive: GetFlag(args...),
 	}
 }
 
@@ -87,9 +104,9 @@ func (o *resourcesByValueOption) Apply(to TransferOptions) {
 	to.(ResourcesByValueTransferOption).SetResourcesByValue(o.flag)
 }
 
-func ResourcesByValueTransfer(flag bool) TransferOption {
+func ResourcesByValueTransfer(args ...bool) TransferOption {
 	return &resourcesByValueOption{
-		flag: flag,
+		flag: GetFlag(args...),
 	}
 }
 
@@ -108,8 +125,8 @@ func (o *sourcesByValueOption) Apply(to TransferOptions) {
 	to.(SourcesByValueTransferOption).SetSourcesByValue(o.flag)
 }
 
-func SourcesByValueTransfer(flag bool) TransferOption {
+func SourcesByValueTransfer(args ...bool) TransferOption {
 	return &sourcesByValueOption{
-		flag: flag,
+		flag: GetFlag(args...),
 	}
 }

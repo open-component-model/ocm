@@ -17,6 +17,7 @@ package accessio
 import (
 	"io"
 
+	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -38,14 +39,8 @@ func (r closableReader) Close() error {
 // NopWriteCloser returns a ReadCloser with a no-op Close method wrapping
 // the provided Reader r.
 func NopWriteCloser(w io.Writer) io.WriteCloser {
-	return nopCloser{w}
+	return compression.NopWriteCloser(w)
 }
-
-type nopCloser struct {
-	io.Writer
-}
-
-func (nopCloser) Close() error { return nil }
 
 ////////////////////////////////////////////////////////////////////////////////
 

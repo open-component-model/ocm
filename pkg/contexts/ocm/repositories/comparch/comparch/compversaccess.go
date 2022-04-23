@@ -16,6 +16,7 @@ package comparch
 
 import (
 	"io"
+	"strconv"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -93,6 +94,20 @@ func (a *ComponentVersionAccess) GetResource(id v1.Identity) (cpi.ResourceAccess
 	}, nil
 }
 
+func (a *ComponentVersionAccess) GetResourceByIndex(i int) (cpi.ResourceAccess, error) {
+	if i < 0 || i > len(a.base.GetDescriptor().Resources) {
+		return nil, errors.ErrInvalid("resource index", strconv.Itoa(i))
+	}
+	r := a.base.GetDescriptor().Resources[i]
+	return &ResourceAccess{
+		BaseAccess: &BaseAccess{
+			vers:   a,
+			access: r.Access,
+		},
+		meta: r.ResourceMeta,
+	}, nil
+}
+
 func (a *ComponentVersionAccess) GetResources() []cpi.ResourceAccess {
 	result := []cpi.ResourceAccess{}
 	for _, r := range a.GetDescriptor().Resources {
@@ -112,6 +127,20 @@ func (a *ComponentVersionAccess) GetSource(id v1.Identity) (cpi.SourceAccess, er
 	if err != nil {
 		return nil, err
 	}
+	return &SourceAccess{
+		BaseAccess: &BaseAccess{
+			vers:   a,
+			access: r.Access,
+		},
+		meta: r.SourceMeta,
+	}, nil
+}
+
+func (a *ComponentVersionAccess) GetSourceByIndex(i int) (cpi.SourceAccess, error) {
+	if i < 0 || i > len(a.base.GetDescriptor().Sources) {
+		return nil, errors.ErrInvalid("source index", strconv.Itoa(i))
+	}
+	r := a.base.GetDescriptor().Sources[i]
 	return &SourceAccess{
 		BaseAccess: &BaseAccess{
 			vers:   a,

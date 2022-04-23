@@ -63,6 +63,6 @@ func HandleAccessMode(acc AccessMode, path string, opts ...accessio.Option) (acc
 		return o, true, nil
 	}
 
-	o, err = accessio.AccessOptions(opts...).DefaultForPath(path)
+	o, err = o.DefaultForPath(path)
 	return o, false, err
 }
