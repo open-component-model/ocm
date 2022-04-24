@@ -21,7 +21,7 @@ following bindings:
     - `version` *&lt;string>*: component version
     - `provider` *&lt;string>*: provider name
     - `labels` *&lt;map[string]>*: labels of the component version (deep)
-  - `element` *&lt;map>*:  the meta data of the resource
+  - `element` *&lt;map>*:  the meta data of the resource and the field `type` containing the element type.
   - `access` *&lt;map>*:  the access specification of the resource
 
 The result value (field `process`) must be a boolean describing whether the

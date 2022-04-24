@@ -55,7 +55,7 @@ func New(opts ...transferhandler.TransferOption) (transferhandler.TransferHandle
 
 func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ElementMeta) (ocm.Repository, transferhandler.TransferHandler, error) {
 	if h.opts.IsRecursive() {
-		binding := h.getBinding(src, nil, meta)
+		binding := h.getBinding(src, nil, meta, nil)
 		result, r, s, err := h.EvalRecursion("componentversion", binding, "process")
 		if err != nil {
 			return nil, nil, err
@@ -88,7 +88,7 @@ func (h *Handler) TransferResource(src ocm.ComponentVersionAccess, a ocm.AccessS
 	if h.opts.GetScript() == nil {
 		return true, nil
 	}
-	binding := h.getBinding(src, a, &r.Meta().ElementMeta)
+	binding := h.getBinding(src, a, &r.Meta().ElementMeta, &r.Meta().Type)
 	return h.EvalBool("resource", binding, "process")
 }
 
@@ -99,11 +99,11 @@ func (h *Handler) TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpe
 	if h.opts.GetScript() == nil {
 		return true, nil
 	}
-	binding := h.getBinding(src, a, &r.Meta().ElementMeta)
+	binding := h.getBinding(src, a, &r.Meta().ElementMeta, &r.Meta().Type)
 	return h.EvalBool("source", binding, "process")
 }
 
-func (h *Handler) getBinding(src ocm.ComponentVersionAccess, a ocm.AccessSpec, m *compdesc.ElementMeta) map[string]interface{} {
+func (h *Handler) getBinding(src ocm.ComponentVersionAccess, a ocm.AccessSpec, m *compdesc.ElementMeta, typ *string) map[string]interface{} {
 	binding := map[string]interface{}{}
 	binding["component"] = getCVAttrs(src)
 
@@ -111,6 +111,9 @@ func (h *Handler) getBinding(src ocm.ComponentVersionAccess, a ocm.AccessSpec, m
 		binding["access"] = getData(a)
 	}
 	binding["element"] = getData(m)
+	if typ != nil {
+		binding["element"].(map[string]interface{})["type"] = *typ
+	}
 	return binding
 }
 
