@@ -15,46 +15,41 @@
 package transfer
 
 import (
-	"fmt"
-
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
-	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/scriptoption"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/spiff"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/spf13/cobra"
+
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands"
+	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
 var (
-	Names = names.Components
+	Names = names.CommonTransportArchive
 	Verb  = commands.Transfer
 )
 
 type Command struct {
 	utils.BaseCommand
 
-	Refs       []string
+	SourceName string
 	TargetName string
 }
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx,
-		repooption.New(),
 		formatoption.New(),
-		closureoption.New("component reference"),
 		rscbyvalueoption.New(),
 		scriptoption.New(),
 	)}, names...)
@@ -62,27 +57,21 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
-		Use:   "[<options>] {<component-reference>} <target>",
-		Args:  cobra.MinimumNArgs(1),
-		Short: "transfer component version",
+		Use:   "[<options>] <ctf> <target>",
+		Args:  cobra.MinimumNArgs(2),
+		Short: "transfer transport archive",
 		Long: `
-Transfer all component versions specified to the given target repository.
-If only a component (instead of a component version) is specified all versions
-are transferred.
+Transfer content of a Common Transport Archive to the given target repository.
 `,
 		Example: `
-$ ocm transfer components -t tgz ghcr.io/mandelsoft/kubelink ctf.tgz
-$ ocm transfer components -t tgz --repo OCIRegistry:ghcr.io mandelsoft/kubelink ctf.tgz
+$ ocm transfer ctf ctf.tgz ghcr.io/mandelsoft/components
 `,
 	}
 }
 
 func (o *Command) Complete(args []string) error {
-	o.Refs = args[:len(args)-1]
-	if len(args) == 0 && repooption.From(o).Spec == "" {
-		return fmt.Errorf("a repository or at least one argument that defines the reference is required")
-	}
-	o.TargetName = args[len(args)-1]
+	o.SourceName = args[0]
+	o.TargetName = args[1]
 	return nil
 }
 
@@ -94,29 +83,32 @@ func (o *Command) Run() error {
 	if err != nil {
 		return err
 	}
+
+	src, err := ctf.Open(o.Context.OCMContext(), accessobj.ACC_READONLY, o.SourceName, 0, o.FileSystem())
+	if err != nil {
+		return errors.Wrapf(err, "cannot open source")
+	}
 	target, err := ocm.AssureTargetRepository(session, o.Context.OCMContext(), o.TargetName, formatoption.From(o).Format, o.Context.FileSystem())
 	if err != nil {
 		return err
 	}
 
 	thdlr, err := spiff.New(
-		closureoption.From(o),
-		rscbyvalueoption.From(o),
 		spiff.Script(scriptoption.From(o).ScriptData),
+		rscbyvalueoption.From(o),
 		spiff.ScriptFilesystem(o.FileSystem()),
 	)
 	if err != nil {
 		return err
 	}
-	hdlr := comphdlr.NewTypeHandler(o.Context.OCM(), session, repooption.From(o).Repository)
-	return utils.HandleOutput(&action{
-		cmd:     o,
+	a := &action{
 		printer: transfer.NewPrinter(o.Context.StdOut()),
 		target:  target,
 		handler: thdlr,
 		closure: transfer.TransportClosure{},
 		errors:  errors.ErrListf("transfer errors"),
-	}, hdlr, utils.StringElemSpecs(o.Refs...)...)
+	}
+	return a.Execute(src)
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -130,23 +122,6 @@ type action struct {
 	errors  *errors.ErrorList
 }
 
-var _ output.Output = (*action)(nil)
-
-func (a *action) Add(e interface{}) error {
-	o := e.(*comphdlr.Object)
-	err := transfer.TransferVersion(a.printer, a.closure, o.Repository, o.ComponentVersion, a.target, a.handler)
-	a.errors.Add(err)
-	if err != nil {
-		a.printer.Printf("Error: %s\n", err)
-	}
-	return nil
-}
-
-func (a *action) Close() error {
-	return nil
-}
-
-func (a *action) Out() error {
-	a.printer.Printf("%d versions transferred\n", len(a.closure))
-	return a.errors.Result()
+func (a *action) Execute(src ocm.Repository) error {
+	return transfer.TransferComponents(a.printer, a.closure, src, "", true, a.target, a.handler)
 }

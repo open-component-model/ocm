@@ -21,6 +21,8 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	"github.com/spf13/pflag"
 )
 
@@ -60,6 +62,10 @@ func New(elemname string, settings ...interface{}) *Option {
 
 func (o *Option) IsTrue() bool {
 	return o.Closure
+}
+
+func (o *Option) ApplyTransferOption(opts transferhandler.TransferOptions) error {
+	return standard.Recursive(o.Closure).ApplyTransferOption(opts)
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {

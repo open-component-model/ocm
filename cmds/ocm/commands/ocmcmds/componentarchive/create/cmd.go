@@ -112,7 +112,7 @@ func (o *Command) Run() error {
 			}
 		}
 	}
-	obj, err := comparch.Create(o.Context.OCMContext(), accessobj.ACC_CREATE, o.Path, mode, o.Handler, accessio.PathFileSystem(fs))
+	obj, err := comparch.Create(o.Context.OCMContext(), accessobj.ACC_CREATE, o.Path, mode, o.Handler, fs)
 	if err != nil {
 		return err
 	}

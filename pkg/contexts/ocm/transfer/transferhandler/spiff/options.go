@@ -59,7 +59,7 @@ type scriptOption struct {
 	script func() ([]byte, error)
 }
 
-func (o *scriptOption) Apply(to transferhandler.TransferOptions) error {
+func (o *scriptOption) ApplyTransferOption(to transferhandler.TransferOptions) error {
 	if o.script == nil {
 		return nil
 	}
@@ -105,7 +105,7 @@ type filesystemOption struct {
 	fs vfs.FileSystem
 }
 
-func (o *filesystemOption) Apply(to transferhandler.TransferOptions) error {
+func (o *filesystemOption) ApplyTransferOption(to transferhandler.TransferOptions) error {
 	to.(ScriptFilesystemOption).SetScriptFilesystem(o.fs)
 	return nil
 }

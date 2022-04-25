@@ -12,13 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package names
+package transfer_test
 
-var (
-	ComponentArchive       = []string{"componentarchive", "comparch", "ca"}
-	CommonTransportArchive = []string{"commontransportarchive", "ctf"}
-	Components             = []string{"components", "component", "comps", "comp", "c"}
-	Resources              = []string{"resources", "resource", "res", "r"}
-	Sources                = []string{"sources", "source", "src", "s"}
-	References             = []string{"references", "reference", "refs"}
+import (
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
+
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "OCM transfer ctf")
+}

@@ -54,7 +54,7 @@ func New(opts ...transferhandler.TransferOption) (transferhandler.TransferHandle
 }
 
 func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ElementMeta) (ocm.Repository, transferhandler.TransferHandler, error) {
-	if h.opts.IsRecursive() {
+	if src == nil || h.opts.IsRecursive() {
 		binding := h.getBinding(src, nil, meta, nil)
 		result, r, s, err := h.EvalRecursion("componentversion", binding, "process")
 		if err != nil {

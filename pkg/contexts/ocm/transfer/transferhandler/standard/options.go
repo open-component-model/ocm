@@ -76,7 +76,7 @@ type recursiveOption struct {
 	recursive bool
 }
 
-func (o *recursiveOption) Apply(to transferhandler.TransferOptions) error {
+func (o *recursiveOption) ApplyTransferOption(to transferhandler.TransferOptions) error {
 	to.(RecursiveOption).SetRecursive(o.recursive)
 	return nil
 }
@@ -98,7 +98,7 @@ type resourcesByValueOption struct {
 	flag bool
 }
 
-func (o *resourcesByValueOption) Apply(to transferhandler.TransferOptions) error {
+func (o *resourcesByValueOption) ApplyTransferOption(to transferhandler.TransferOptions) error {
 	to.(ResourcesByValueOption).SetResourcesByValue(o.flag)
 	return nil
 }
@@ -120,7 +120,7 @@ type sourcesByValueOption struct {
 	flag bool
 }
 
-func (o *sourcesByValueOption) Apply(to transferhandler.TransferOptions) error {
+func (o *sourcesByValueOption) ApplyTransferOption(to transferhandler.TransferOptions) error {
 	to.(SourcesByValueOption).SetSourcesByValue(o.flag)
 	return nil
 }

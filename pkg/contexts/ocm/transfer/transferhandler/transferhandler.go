@@ -24,7 +24,7 @@ type TransferOptions interface {
 }
 
 type TransferOption interface {
-	Apply(TransferOptions) error
+	ApplyTransferOption(TransferOptions) error
 }
 
 type TransferHandler interface {
@@ -39,7 +39,7 @@ type TransferHandler interface {
 func ApplyOptions(set TransferOptions, opts ...TransferOption) error {
 	list := errors.ErrListf("transfer options")
 	for _, o := range opts {
-		list.Add(o.Apply(set))
+		list.Add(o.ApplyTransferOption(set))
 	}
 	return list.Result()
 }

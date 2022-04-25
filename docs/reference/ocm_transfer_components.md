@@ -71,6 +71,12 @@ target archive to use. The following formats are supported:
 The default format is <code>directory</code>.
 With the option <code>--closure</code> the complete reference tree of a component reference is traversed.
 
+It the option <code>--resourcesByValue</code> is given, all referential 
+resources will potentially be localized, mapped to component version local
+resources in the target repository.
+This behaviour can be further influenced by specifying a transfer script
+with the <code>script</code> option family.
+
 It is possible to use a dedicated transfer script based on spiff.
 The option <code>--scriptFile</code> can be used to specify this script
 by a file name. With <code>--script</code> it can be taken from the 

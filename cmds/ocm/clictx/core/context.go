@@ -49,6 +49,14 @@ type OCM interface {
 	OpenCTF(path string) (ocm.Repository, error)
 }
 
+type FileSystem struct {
+	vfs.FileSystem
+}
+
+func (f *FileSystem) ApplyOption(options *accessio.Options) {
+	options.PathFileSystem = f.FileSystem
+}
+
 type Context interface {
 	datacontext.Context
 
@@ -59,7 +67,7 @@ type Context interface {
 	OCIContext() oci.Context
 	OCMContext() ocm.Context
 
-	FileSystem() vfs.FileSystem
+	FileSystem() *FileSystem
 
 	OCI() OCI
 	OCM() OCM
@@ -144,8 +152,8 @@ func (c *_context) OCMContext() ocm.Context {
 	return c.ocm.Context()
 }
 
-func (c *_context) FileSystem() vfs.FileSystem {
-	return vfsattr.Get(c)
+func (c *_context) FileSystem() *FileSystem {
+	return &FileSystem{vfsattr.Get(c)}
 }
 
 func (c *_context) OCI() OCI {

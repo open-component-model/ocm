@@ -93,7 +93,7 @@ func (o *Command) Run() error {
 			}
 		}
 	}
-	obj, err := ctf.Create(o.Context.OCIContext(), accessobj.ACC_CREATE, o.Path, mode, o.Handler, accessio.PathFileSystem(fs))
+	obj, err := ctf.Create(o.Context.OCIContext(), accessobj.ACC_CREATE, o.Path, mode, o.Handler, fs)
 	if err != nil {
 		return err
 	}
