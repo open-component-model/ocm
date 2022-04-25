@@ -1,11 +1,11 @@
 ## ocm ocm references
 
-
+Commands related to component references in component versions
 
 ### Synopsis
 
 ```
-ocm ocm references <sub command> [<options>]
+ocm ocm references <sub-command> ... <sub command> [<options>]
 ```
 
 ### Options
@@ -18,7 +18,7 @@ ocm ocm references <sub command> [<options>]
 
 ##### Parent
 
-* [ocm ocm](ocm_ocm.md)	 - 
+* [ocm ocm](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
 
 
 ##### Sub Commands

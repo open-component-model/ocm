@@ -84,5 +84,5 @@ $ ocm get componentversion --repo OCIRegistry:ghcr.io mandelsoft/kubelink
 
 ##### Parent
 
-* [ocm components](ocm_components.md)	 - 
+* [ocm components](ocm_components.md)	 - Commands acting on components
 

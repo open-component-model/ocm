@@ -1,11 +1,11 @@
 ## ocm resources
 
-
+Commands acting on component resources
 
 ### Synopsis
 
 ```
-ocm resources <sub command> [<options>]
+ocm resources <sub-command> ... <sub command> [<options>]
 ```
 
 ### Options

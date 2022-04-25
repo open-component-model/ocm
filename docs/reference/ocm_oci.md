@@ -1,11 +1,11 @@
 ## ocm oci
 
-
+Dedicated command flavors for the OCI layer
 
 ### Synopsis
 
 ```
-ocm oci <sub command> [<options>]
+ocm oci <sub-command> ... <sub command> [<options>]
 ```
 
 ### Options
@@ -23,6 +23,6 @@ ocm oci <sub command> [<options>]
 
 ##### Sub Commands
 
-* [ocm oci <b>artefacts</b>](ocm_oci_artefacts.md)	 - 
-* [ocm oci <b>transportarchive</b>](ocm_oci_transportarchive.md)	 - 
+* [ocm oci <b>artefacts</b>](ocm_oci_artefacts.md)	 - Commands acting on OCI artefacts
+* [ocm oci <b>transportarchive</b>](ocm_oci_transportarchive.md)	 - Commands acting on OCI view of a Common Transport Archive
 

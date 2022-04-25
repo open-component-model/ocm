@@ -19,6 +19,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive/transfer"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -27,8 +28,9 @@ var Names = names.ComponentArchive
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              Names[0],
+		Use:              utils.SubCmdUse(Names[0]),
 		Aliases:          Names[1:],
+		Short:            "Commands acting on component archives",
 		TraverseChildren: true,
 	}
 	cmd.AddCommand(transfer.NewCommand(ctx, transfer.Verb))

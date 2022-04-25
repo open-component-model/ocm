@@ -71,5 +71,5 @@ $ ocm describe artefact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
 
 ##### Parent
 
-* [ocm oci artefacts](ocm_oci_artefacts.md)	 - 
+* [ocm oci artefacts](ocm_oci_artefacts.md)	 - Commands acting on OCI artefacts
 

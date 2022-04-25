@@ -1,11 +1,11 @@
 ## ocm oci artefacts
 
-
+Commands acting on OCI artefacts
 
 ### Synopsis
 
 ```
-ocm oci artefacts <sub command> [<options>]
+ocm oci artefacts <sub-command> ... <sub command> [<options>]
 ```
 
 ### Options
@@ -18,7 +18,7 @@ ocm oci artefacts <sub command> [<options>]
 
 ##### Parent
 
-* [ocm oci](ocm_oci.md)	 - 
+* [ocm oci](ocm_oci.md)	 - Dedicated command flavors for the OCI layer
 
 
 ##### Sub Commands

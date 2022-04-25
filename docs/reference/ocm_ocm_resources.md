@@ -1,11 +1,11 @@
 ## ocm ocm resources
 
-
+Commands acting on component resources
 
 ### Synopsis
 
 ```
-ocm ocm resources <sub command> [<options>]
+ocm ocm resources <sub-command> ... <sub command> [<options>]
 ```
 
 ### Options
@@ -18,7 +18,7 @@ ocm ocm resources <sub command> [<options>]
 
 ##### Parent
 
-* [ocm ocm](ocm_ocm.md)	 - 
+* [ocm ocm](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
 
 
 ##### Sub Commands

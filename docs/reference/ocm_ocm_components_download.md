@@ -1,11 +1,11 @@
-## ocm components download
+## ocm ocm components download
 
 download ocm component versions
 
 ### Synopsis
 
 ```
-ocm components download [<options>] {<components>} 
+ocm ocm components download [<options>] {<components>} 
 ```
 
 ### Options
@@ -72,5 +72,5 @@ The default format is <code>directory</code>.
 
 ##### Parent
 
-* [ocm components](ocm_components.md)	 - Commands acting on components
+* [ocm ocm components](ocm_ocm_components.md)	 - Commands acting on components
 

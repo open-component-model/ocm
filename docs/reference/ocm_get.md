@@ -1,11 +1,11 @@
 ## ocm get
 
-
+Get information about artefacts and components
 
 ### Synopsis
 
 ```
-ocm get <sub command> [<options>]
+ocm get <sub-command> ... <sub command> [<options>]
 ```
 
 ### Options

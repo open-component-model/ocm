@@ -16,17 +16,20 @@ package transfer
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	artefacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/transfer"
 	comparch "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive/transfer"
 	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/transfer"
 	ctf "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/ctf/transfer"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              "transfer",
+		Use:              utils.SubCmdUse(commands.Transfer),
+		Short:            "Transfer artefacts or components",
 		TraverseChildren: true,
 	}
 	cmd.AddCommand(comparch.NewCommand(ctx, comparch.Names...))

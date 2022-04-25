@@ -27,5 +27,5 @@ to host artefact content or a tar/tgz file.
 
 ##### Parent
 
-* [ocm create](ocm_create.md)	 - 
+* [ocm create](ocm_create.md)	 - Create transport or component archive
 

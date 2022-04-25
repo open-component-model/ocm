@@ -1,11 +1,11 @@
 ## ocm oci transportarchive
 
-
+Commands acting on OCI view of a Common Transport Archive
 
 ### Synopsis
 
 ```
-ocm oci transportarchive <sub command> [<options>]
+ocm oci transportarchive <sub-command> ... <sub command> [<options>]
 ```
 
 ### Options
@@ -18,7 +18,7 @@ ocm oci transportarchive <sub command> [<options>]
 
 ##### Parent
 
-* [ocm oci](ocm_oci.md)	 - 
+* [ocm oci](ocm_oci.md)	 - Dedicated command flavors for the OCI layer
 
 
 ##### Sub Commands

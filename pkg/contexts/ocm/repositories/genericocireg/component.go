@@ -100,15 +100,24 @@ func (c *ComponentAccess) AddVersion(access cpi.ComponentVersionAccess) error {
 	return errors.ErrInvalid("component version")
 }
 
-func (c *ComponentAccess) NewVersion(version string) (cpi.ComponentVersionAccess, error) {
-	_, err := c.namespace.GetArtefact(version)
+func (c *ComponentAccess) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {
+	override := false
+	for _, o := range overrides {
+		if o {
+			override = o
+		}
+	}
+	acc, err := c.namespace.GetArtefact(version)
 	if err == nil {
+		if override {
+			return NewComponentVersionAccess(accessobj.ACC_CREATE, c, version, acc.ManifestAccess())
+		}
 		return nil, errors.ErrAlreadyExists(cpi.KIND_COMPONENTVERSION, c.name+"/"+version)
 	}
 	if !errors.IsErrNotFoundKind(err, oci.KIND_OCIARTEFACT) {
 		return nil, err
 	}
-	acc, err := c.namespace.NewArtefact()
+	acc, err = c.namespace.NewArtefact()
 	if err != nil {
 		return nil, err
 	}

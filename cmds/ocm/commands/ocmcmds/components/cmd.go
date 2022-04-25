@@ -19,6 +19,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/download"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/get"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -27,8 +28,9 @@ var Names = names.Components
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              Names[0],
+		Use:              utils.SubCmdUse(Names[0]),
 		Aliases:          Names[1:],
+		Short:            "Commands acting on components",
 		TraverseChildren: true,
 	}
 	cmd.AddCommand(get.NewCommand(ctx, get.Verb))

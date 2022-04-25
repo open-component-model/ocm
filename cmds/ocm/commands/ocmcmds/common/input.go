@@ -84,7 +84,7 @@ type BlobInput struct {
 // Compress returns if the blob should be compressed using gzip.
 func (input BlobInput) Compress() bool {
 	if input.CompressWithGzip == nil {
-		return false
+		return mime.IsGZip(input.MediaType)
 	}
 	return *input.CompressWithGzip
 }
@@ -377,7 +377,7 @@ func (input *BlobInput) Validate(fldPath *field.Path, ctx clictx.Context, inputF
 		if input.Type == "" {
 			allErrs = append(allErrs, field.Required(path, "input type required"))
 		} else {
-			allErrs = append(allErrs, field.NotSupported(path, input.Type, []string{string(DirInputType), string(FileInputType)}))
+			allErrs = append(allErrs, field.NotSupported(path, input.Type, []string{string(DirInputType), string(FileInputType), string(DockerInputType)}))
 		}
 	} else {
 		pathField := fldPath.Child("path")

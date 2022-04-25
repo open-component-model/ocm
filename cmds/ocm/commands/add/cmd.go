@@ -17,6 +17,7 @@ package add
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 
 	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/add"
 	sources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources/add"
@@ -26,7 +27,8 @@ import (
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              commands.Add,
+		Use:              utils.SubCmdUse(commands.Add),
+		Short:            "Add resources or sources to a component archive",
 		TraverseChildren: true,
 	}
 	cmd.AddCommand(resources.NewCommand(ctx, resources.Names...))

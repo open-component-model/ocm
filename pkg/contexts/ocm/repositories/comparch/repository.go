@@ -169,6 +169,6 @@ func (c *ComponentAccess) AddVersion(access cpi.ComponentVersionAccess) error {
 	return errors.ErrNotSupported(errors.KIND_FUNCTION, "add version", CTFComponentArchiveType)
 }
 
-func (c *ComponentAccess) NewVersion(version string) (cpi.ComponentVersionAccess, error) {
+func (c *ComponentAccess) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {
 	return nil, errors.ErrNotSupported(errors.KIND_FUNCTION, "new version", CTFComponentArchiveType)
 }

@@ -1,11 +1,11 @@
 ## ocm references
 
-
+Commands related to component references in component versions
 
 ### Synopsis
 
 ```
-ocm references <sub command> [<options>]
+ocm references <sub-command> ... <sub command> [<options>]
 ```
 
 ### Options

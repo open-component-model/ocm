@@ -17,6 +17,7 @@ package get
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 
 	artefacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/get"
 	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/get"
@@ -29,7 +30,8 @@ import (
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              commands.Get,
+		Use:              utils.SubCmdUse(commands.Get),
+		Short:            "Get information about artefacts and components",
 		TraverseChildren: true,
 	}
 	cmd.AddCommand(artefacts.NewCommand(ctx, artefacts.Names...))

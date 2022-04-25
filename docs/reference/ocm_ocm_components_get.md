@@ -1,29 +1,28 @@
-## ocm components download
+## ocm ocm components get
 
-download ocm component versions
+get component version
 
 ### Synopsis
 
 ```
-ocm components download [<options>] {<components>} 
+ocm ocm components get [<options>] {<component-reference>}
 ```
 
 ### Options
 
 ```
-  -h, --help             help for download
-  -O, --outfile string   output file or directory
-  -r, --repo string      repository name or spec
-  -t, --type string      archive format (default "directory")
+  -c, --closure            follow component reference nesting
+  -h, --help               help for get
+  -o, --output string      output mode (JSON, json, tree, wide, yaml)
+  -r, --repo string        repository name or spec
+  -s, --sort stringArray   sort fields
 ```
 
 ### Description
 
 
-Download component versions from an OCM repository. The result is stored in
-component archives.
-
-The files are named according to the component version name.
+Get lists all component versions specified, if only a component is specified
+all versions are listed.
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
@@ -61,16 +60,29 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `OCIRegistry`
 - `oci`
 
-The <code>--type</code> option accepts a file format for the
-target archive to use. The following formats are supported:
-- directory
-- tar
-- tgz
-The default format is <code>directory</code>.
+With the option <code>--closure</code> the complete reference tree of a component reference is traversed.
+
+With the option <code>--output</code> the out put mode can be selected.
+The following modes are supported:
+ - JSON
+ - json
+ - tree
+ - wide
+ - yaml
+
+
+### Examples
+
+```
+
+$ ocm get componentversion ghcr.io/mandelsoft/kubelink
+$ ocm get componentversion --repo OCIRegistry:ghcr.io mandelsoft/kubelink
+
+```
 
 ### SEE ALSO
 
 ##### Parent
 
-* [ocm components](ocm_components.md)	 - Commands acting on components
+* [ocm ocm components](ocm_ocm_components.md)	 - Commands acting on components
 

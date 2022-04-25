@@ -62,5 +62,5 @@ The default format is <code>directory</code>.
 
 ##### Parent
 
-* [ocm oci artefacts](ocm_oci_artefacts.md)	 - 
+* [ocm oci artefacts](ocm_oci_artefacts.md)	 - Commands acting on OCI artefacts
 

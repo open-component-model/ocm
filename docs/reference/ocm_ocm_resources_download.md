@@ -101,5 +101,5 @@ references.
 
 ##### Parent
 
-* [ocm ocm resources](ocm_ocm_resources.md)	 - 
+* [ocm ocm resources](ocm_ocm_resources.md)	 - Commands acting on component resources
 

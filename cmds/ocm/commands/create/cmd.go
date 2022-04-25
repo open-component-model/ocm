@@ -17,6 +17,7 @@ package create
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 
 	ctf "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/ctf/create"
 	comparch "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
@@ -26,7 +27,8 @@ import (
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              commands.Create,
+		Use:              utils.SubCmdUse(commands.Create),
+		Short:            "Create transport or component archive",
 		TraverseChildren: true,
 	}
 	cmd.AddCommand(comparch.NewCommand(ctx, comparch.Names...))

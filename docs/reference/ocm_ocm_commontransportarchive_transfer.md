@@ -1,17 +1,17 @@
-## ocm transfer componentarchive
+## ocm ocm commontransportarchive transfer
 
 transfer component archive to some component repository
 
 ### Synopsis
 
 ```
-ocm transfer componentarchive [<options>]  <source> <target>
+ocm ocm commontransportarchive transfer [<options>]  <source> <target>
 ```
 
 ### Options
 
 ```
-  -h, --help          help for componentarchive
+  -h, --help          help for transfer
   -t, --type string   archive format (default "directory")
 ```
 
@@ -37,5 +37,5 @@ The default format is <code>directory</code>.
 
 ##### Parent
 
-* [ocm transfer](ocm_transfer.md)	 - Transfer artefacts or components
+* [ocm ocm commontransportarchive](ocm_ocm_commontransportarchive.md)	 - Commands acting on common transport archives
 

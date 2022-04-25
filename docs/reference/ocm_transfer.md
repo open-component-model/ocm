@@ -1,11 +1,11 @@
 ## ocm transfer
 
-
+Transfer artefacts or components
 
 ### Synopsis
 
 ```
-ocm transfer <sub command> [<options>]
+ocm transfer <sub-command> ... <sub command> [<options>]
 ```
 
 ### Options

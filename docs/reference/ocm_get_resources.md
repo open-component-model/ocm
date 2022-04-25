@@ -88,5 +88,5 @@ The following modes are supported:
 
 ##### Parent
 
-* [ocm get](ocm_get.md)	 - 
+* [ocm get](ocm_get.md)	 - Get information about artefacts and components
 

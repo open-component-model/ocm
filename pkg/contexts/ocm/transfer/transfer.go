@@ -68,7 +68,12 @@ func transferVersion(printer Printer, hist common.History, closure TransportClos
 		return errors.Wrapf(err, "%s: lookup target component", hist)
 	}
 
-	t, err := comp.NewVersion(src.GetVersion())
+	t, err := comp.LookupVersion(src.GetVersion())
+	if err != nil {
+		if errors.IsErrNotFound(err) {
+			t, err = comp.NewVersion(src.GetVersion())
+		}
+	}
 	if err != nil {
 		return errors.Wrapf(err, "%s: creating target version", hist)
 	}

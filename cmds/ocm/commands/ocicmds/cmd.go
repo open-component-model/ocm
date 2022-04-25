@@ -15,6 +15,7 @@
 package ocicmds
 
 import (
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
@@ -25,7 +26,8 @@ import (
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              "oci",
+		Use:              utils.SubCmdUse("oci"),
+		Short:            "Dedicated command flavors for the OCI layer",
 		TraverseChildren: true,
 	}
 	cmd.AddCommand(artefacts.NewCommand(ctx))

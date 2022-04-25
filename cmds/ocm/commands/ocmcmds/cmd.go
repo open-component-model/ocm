@@ -16,20 +16,28 @@ package ocmcmds
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/ctf"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              "ocm",
+		Use:              utils.SubCmdUse("ocm"),
+		Short:            "Dedicated command flavors for the Open Component Model",
 		TraverseChildren: true,
 	}
 	cmd.AddCommand(resources.NewCommand(ctx))
 	cmd.AddCommand(sources.NewCommand(ctx))
 	cmd.AddCommand(references.NewCommand(ctx))
+	cmd.AddCommand(components.NewCommand(ctx))
+	cmd.AddCommand(ctf.NewCommand(ctx))
+	cmd.AddCommand(componentarchive.NewCommand(ctx))
 	return cmd
 }

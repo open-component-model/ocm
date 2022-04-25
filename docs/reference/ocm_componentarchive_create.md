@@ -27,5 +27,5 @@ to host component version content or a tar/tgz file.
 
 ##### Parent
 
-* [ocm componentarchive](ocm_componentarchive.md)	 - 
+* [ocm componentarchive](ocm_componentarchive.md)	 - Commands acting on component archives
 

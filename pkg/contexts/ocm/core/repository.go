@@ -47,7 +47,7 @@ type ComponentAccess interface {
 	ListVersions() ([]string, error)
 	LookupVersion(version string) (ComponentVersionAccess, error)
 	AddVersion(ComponentVersionAccess) error
-	NewVersion(version string) (ComponentVersionAccess, error)
+	NewVersion(version string, overrides ...bool) (ComponentVersionAccess, error)
 
 	Close() error
 }

@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/ctf/create"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -26,8 +27,9 @@ var Names = names.TransportArchive
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              Names[0],
+		Use:              utils.SubCmdUse(Names[0]),
 		Aliases:          Names[1:],
+		Short:            "Commands acting on OCI view of a Common Transport Archive",
 		TraverseChildren: true,
 	}
 	cmd.AddCommand(create.NewCommand(ctx, create.Verb))

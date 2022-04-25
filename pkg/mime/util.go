@@ -37,3 +37,7 @@ func IsYAML(mime string) bool {
 	}
 	return false
 }
+
+func IsGZip(mime string) bool {
+	return strings.HasSuffix(mime, "/gzip") || strings.HasSuffix(mime, "+gzip")
+}

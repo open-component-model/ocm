@@ -12,24 +12,28 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package describe
+package ctf
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive/transfer"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-
-	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/describe"
 	"github.com/spf13/cobra"
 )
+
+var Names = names.CommonTransportArchive
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              utils.SubCmdUse(commands.Describe),
-		Short:            "Describe artefacts",
+		Use:              utils.SubCmdUse(Names[0]),
+		Aliases:          Names[1:],
+		Short:            "Commands acting on common transport archives",
 		TraverseChildren: true,
 	}
-	cmd.AddCommand(resources.NewCommand(ctx, resources.Names...))
+	cmd.AddCommand(transfer.NewCommand(ctx, transfer.Verb))
+	cmd.AddCommand(create.NewCommand(ctx, create.Verb))
 	return cmd
 }

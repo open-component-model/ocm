@@ -63,5 +63,5 @@ There are several templaters that can be selected by the <code>--templater</code
 
 ##### Parent
 
-* [ocm ocm resources](ocm_ocm_resources.md)	 - 
+* [ocm ocm resources](ocm_ocm_resources.md)	 - Commands acting on component resources
 

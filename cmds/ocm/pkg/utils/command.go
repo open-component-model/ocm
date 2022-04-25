@@ -72,3 +72,7 @@ func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 	ocmcmd.AddFlags(c.Flags())
 	return c
 }
+
+func SubCmdUse(cmd string) string {
+	return cmd + " <sub-command> ..."
+}

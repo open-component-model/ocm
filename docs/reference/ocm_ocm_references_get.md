@@ -88,5 +88,5 @@ The following modes are supported:
 
 ##### Parent
 
-* [ocm ocm references](ocm_ocm_references.md)	 - 
+* [ocm ocm references](ocm_ocm_references.md)	 - Commands related to component references in component versions
 

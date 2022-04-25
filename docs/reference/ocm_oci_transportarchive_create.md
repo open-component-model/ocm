@@ -27,5 +27,5 @@ to host artefact content or a tar/tgz file.
 
 ##### Parent
 
-* [ocm oci transportarchive](ocm_oci_transportarchive.md)	 - 
+* [ocm oci transportarchive](ocm_oci_transportarchive.md)	 - Commands acting on OCI view of a Common Transport Archive
 

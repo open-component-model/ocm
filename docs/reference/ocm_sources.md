@@ -1,11 +1,11 @@
 ## ocm sources
 
-
+Commands acting on component sources
 
 ### Synopsis
 
 ```
-ocm sources <sub command> [<options>]
+ocm sources <sub-command> ... <sub command> [<options>]
 ```
 
 ### Options

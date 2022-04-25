@@ -1,18 +1,18 @@
-## ocm create componentarchive
+## ocm ocm componentarchive create
 
 create new component archive
 
 ### Synopsis
 
 ```
-ocm create componentarchive [<options>] <component> <version> <provider> <path> {<label>=<value>}
+ocm ocm componentarchive create [<options>] <component> <version> <provider> <path> {<label>=<value>}
 ```
 
 ### Options
 
 ```
   -f, --force         remove existing content
-  -h, --help          help for componentarchive
+  -h, --help          help for create
   -t, --type string   archive format (default "directory")
 ```
 
@@ -27,5 +27,5 @@ to host component version content or a tar/tgz file.
 
 ##### Parent
 
-* [ocm create](ocm_create.md)	 - Create transport or component archive
+* [ocm ocm componentarchive](ocm_ocm_componentarchive.md)	 - Commands acting on component archives
 

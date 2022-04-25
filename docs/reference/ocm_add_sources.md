@@ -63,5 +63,5 @@ There are several templaters that can be selected by the <code>--templater</code
 
 ##### Parent
 
-* [ocm add](ocm_add.md)	 - 
+* [ocm add](ocm_add.md)	 - Add resources or sources to a component archive
 

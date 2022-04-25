@@ -17,6 +17,7 @@ package download
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 
 	artefacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/download"
 	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/download"
@@ -27,7 +28,8 @@ import (
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              commands.Download,
+		Use:              utils.SubCmdUse(commands.Download),
+		Short:            "Download oci artefacts, resources or complete components",
 		TraverseChildren: true,
 	}
 	cmd.AddCommand(resources.NewCommand(ctx, resources.Names...))

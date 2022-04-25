@@ -67,5 +67,5 @@ $ ocm transfer ctf ctf.tgz ghcr.io/mandelsoft/components
 
 ##### Parent
 
-* [ocm transfer](ocm_transfer.md)	 - 
+* [ocm transfer](ocm_transfer.md)	 - Transfer artefacts or components
 

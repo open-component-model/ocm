@@ -88,5 +88,5 @@ The following modes are supported:
 
 ##### Parent
 
-* [ocm ocm sources](ocm_ocm_sources.md)	 - 
+* [ocm ocm sources](ocm_ocm_sources.md)	 - Commands acting on component sources
 

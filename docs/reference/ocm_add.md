@@ -1,11 +1,11 @@
 ## ocm add
 
-
+Add resources or sources to a component archive
 
 ### Synopsis
 
 ```
-ocm add <sub command> [<options>]
+ocm add <sub-command> ... <sub command> [<options>]
 ```
 
 ### Options

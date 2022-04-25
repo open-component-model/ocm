@@ -59,5 +59,5 @@ $ ocm oci transfer ghcr.io/mandelsoft/kubelink gcr.io
 
 ##### Parent
 
-* [ocm oci artefacts](ocm_oci_artefacts.md)	 - 
+* [ocm oci artefacts](ocm_oci_artefacts.md)	 - Commands acting on OCI artefacts
 
