@@ -16,8 +16,6 @@ package core
 
 import (
 	"sync"
-
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 )
 
 // Updater implements the generation based update protocol
@@ -25,11 +23,11 @@ import (
 // made to a configuration context.
 type Updater interface {
 	// Update replays missing configuration requests
-	// applicable for a dedicated type of data context
+	// applicable for a dedicated type of context
 	// stored in a configuration context.
-	// It should be called from with such a context with
+	// It should be called from within such a context with
 	// the actual context as argument.
-	Update(target datacontext.Context) error
+	Update(target interface{}) error
 	GetContext() Context
 
 	Lock()
@@ -55,7 +53,7 @@ func (u *updater) GetContext() Context {
 	return u.ctx
 }
 
-func (u *updater) Update(target datacontext.Context) error {
+func (u *updater) Update(target interface{}) error {
 	u.Lock()
 	if u.inupdate {
 		u.Unlock()

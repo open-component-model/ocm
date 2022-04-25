@@ -12,29 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package common
+package transfer_test
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-type OptionCompleter interface {
-	CompleteWithSession(ctx clictx.OCI, session oci.Session) error
-}
-
-func CompleteOptionsWithContext(ctx clictx.Context, session oci.Session) options.OptionsProcessor {
-	return func(opt options.Options) error {
-		if c, ok := opt.(OptionCompleter); ok {
-			return c.CompleteWithSession(ctx.OCI(), session)
-		}
-		if c, ok := opt.(options.OptionWithCLIContextCompleter); ok {
-			return c.Complete(ctx)
-		}
-		if c, ok := opt.(options.SimpleOptionCompleter); ok {
-			return c.Complete()
-		}
-		return nil
-	}
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "OCM get components")
 }

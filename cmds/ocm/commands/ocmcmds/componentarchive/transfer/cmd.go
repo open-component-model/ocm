@@ -15,22 +15,16 @@
 package transfer
 
 import (
-	"fmt"
-
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
-
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch/comparch"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -40,15 +34,13 @@ var (
 
 type Command struct {
 	utils.BaseCommand
-	typ        string
 	Path       string
 	TargetName string
-	FileFormat accessio.FileFormat
 }
 
 // NewCommand creates a new transfer command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx)}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, formatoption.New())}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -59,7 +51,6 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Long: `
 Transfer a component archive to some component repository. This might
 be a CTF Archive or a regular repository.
-Explicitly supported types, so far: OCIRegistry, CTF (directory, tar, tgz).
 If the type CTF is specified the target must already exist, if CTF flavor
 is specified it will be created if it does not exist.
 
@@ -69,20 +60,10 @@ either via inline argument or command configuration file and name.
 	}
 }
 
-func (o *Command) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVarP(&o.typ, "type", "t", "", "archive type to create (directory,tar,tgz)")
-}
-
 func (o *Command) Complete(args []string) error {
 	o.Path = args[0]
 	o.TargetName = args[1]
 
-	if o.typ != "" {
-		if accessobj.GetFormat(accessio.FileFormat(o.typ)) == nil {
-			return errors.ErrInvalid(accessio.KIND_FILEFORMAT, o.typ)
-		}
-		o.FileFormat = accessio.FileFormat(o.typ)
-	}
 	return nil
 }
 
@@ -95,22 +76,10 @@ func (o *Command) Run() error {
 	}
 	session.Closer(source)
 
-	target, ref, err := session.DetermineRepository(o.Context.OCMContext(), o.TargetName)
+	format := formatoption.From(o)
+	target, err := ocm.AssureTargetRepository(session, o.Context.OCMContext(), o.TargetName, format.Format, o.Context.FileSystem())
 	if err != nil {
-		if !errors.IsErrUnknown(err) || ref.Info == "" {
-			return err
-		}
-		if ref.Type == "" {
-			ref.Type = o.FileFormat.String()
-		}
-		if ref.Type == "" {
-			return fmt.Errorf("ctf format type required to create ctf")
-		}
-		target, err = ctf.Create(o.Context.OCMContext(), accessobj.ACC_CREATE, ref.Info, 0770, accessio.PathFileSystem(o.Context.FileSystem()))
-		if err != nil {
-			return err
-		}
-		session.Closer(target)
+		return err
 	}
 
 	return transfer.TransferVersion(nil, nil, nil, source, target, nil)

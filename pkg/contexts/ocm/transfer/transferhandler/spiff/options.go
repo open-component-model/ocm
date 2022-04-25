@@ -16,8 +16,8 @@ package spiff
 
 import (
 	"github.com/mandelsoft/spiff/spiffing"
-	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 )
@@ -60,6 +60,9 @@ type scriptOption struct {
 }
 
 func (o *scriptOption) Apply(to transferhandler.TransferOptions) error {
+	if o.script == nil {
+		return nil
+	}
 	script, err := o.script()
 	if err != nil {
 		return err
@@ -73,20 +76,21 @@ func (o *scriptOption) Apply(to transferhandler.TransferOptions) error {
 }
 
 func Script(data []byte) transferhandler.TransferOption {
+	if data == nil {
+		return &scriptOption{
+			source: "script",
+		}
+	}
 	return &scriptOption{
 		source: "script",
 		script: func() ([]byte, error) { return data, nil },
 	}
 }
 
-func ScriptByFile(path string, fss ...vfs.VFS) transferhandler.TransferOption {
-	fs := osfs.New()
-	if len(fss) > 0 {
-		fs = fss[0]
-	}
+func ScriptByFile(path string, fss ...vfs.FileSystem) transferhandler.TransferOption {
 	return &scriptOption{
 		source: path,
-		script: func() ([]byte, error) { return vfs.ReadFile(fs, path) },
+		script: func() ([]byte, error) { return vfs.ReadFile(accessio.FileSystem(fss...), path) },
 	}
 }
 

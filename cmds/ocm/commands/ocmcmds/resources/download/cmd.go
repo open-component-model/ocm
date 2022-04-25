@@ -54,7 +54,7 @@ type Command struct {
 
 // NewCommand creates a new resources command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, &repooption.Option{}, output.OutputOptions(outputs, closureoption.New("component reference"), &lookupoption.Option{}, &destoption.Option{}))}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), output.OutputOptions(outputs, closureoption.New("component reference"), lookupoption.New(), destoption.New()))}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {

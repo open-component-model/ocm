@@ -196,7 +196,10 @@ func (c *_context) ApplyTo(gen int64, target interface{}) (int64, error) {
 
 	list := errors.ErrListf("config apply errors")
 	for _, cfg := range cfgs {
-		list.Add(errors.Wrapf(cfg.config.ApplyTo(c, target), cfg.description))
+		err := errors.Wrapf(cfg.config.ApplyTo(c, target), cfg.description)
+		if !IsErrNoContext(err) {
+			list.Add(err)
+		}
 	}
 	return cur, list.Result()
 }

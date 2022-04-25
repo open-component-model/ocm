@@ -24,15 +24,15 @@ import (
 
 type OptionsProcessor func(Options) error
 
-type Complete interface {
+type SimpleOptionCompleter interface {
 	Complete() error
 }
 
-type CompleteWithOutputContext interface {
+type OptionWithOutputContextCompleter interface {
 	Complete(ctx out.Context) error
 }
 
-type CompleteWithCLIContext interface {
+type OptionWithCLIContextCompleter interface {
 	Complete(ctx clictx.Context) error
 }
 
@@ -138,7 +138,7 @@ func (s OptionSet) ProcessOnOptions(f OptionsProcessor) error {
 ////////////////////////////////////////////////////////////////////////////////
 
 func CompleteOptions(opt Options) error {
-	if c, ok := opt.(Complete); ok {
+	if c, ok := opt.(SimpleOptionCompleter); ok {
 		return c.Complete()
 	}
 	return nil
@@ -146,10 +146,10 @@ func CompleteOptions(opt Options) error {
 
 func CompleteOptionsWithCLIContext(ctx clictx.Context) OptionsProcessor {
 	return func(opt Options) error {
-		if c, ok := opt.(CompleteWithCLIContext); ok {
+		if c, ok := opt.(OptionWithCLIContextCompleter); ok {
 			return c.Complete(ctx)
 		}
-		if c, ok := opt.(CompleteWithOutputContext); ok {
+		if c, ok := opt.(OptionWithOutputContextCompleter); ok {
 			return c.Complete(ctx)
 		}
 		return CompleteOptions(opt)

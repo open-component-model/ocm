@@ -18,6 +18,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 	"github.com/spf13/cobra"
 
@@ -52,7 +53,11 @@ type Command struct {
 
 // NewCommand creates a new download command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, &repooption.Option{}, &destoption.Option{}, &formatoption.Option{})}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx,
+		repooption.New(),
+		destoption.New(),
+		formatoption.New(),
+	)}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -85,26 +90,28 @@ func (o *Command) Run() error {
 	}
 
 	hdlr := comphdlr.NewTypeHandler(o.Context.OCM(), session, repooption.From(o).Repository)
-	return utils.HandleOutput(&download{cmd: o}, hdlr, utils.StringElemSpecs(o.Refs...)...)
+	return utils.HandleOutput(&action{cmd: o}, hdlr, utils.StringElemSpecs(o.Refs...)...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type download struct {
+type action struct {
 	data comphdlr.Objects
 	cmd  *Command
 }
 
-func (d *download) Add(e interface{}) error {
+var _ output.Output = (*action)(nil)
+
+func (d *action) Add(e interface{}) error {
 	d.data = append(d.data, e.(*comphdlr.Object))
 	return nil
 }
 
-func (d *download) Close() error {
+func (d *action) Close() error {
 	return nil
 }
 
-func (d *download) Out() error {
+func (d *action) Out() error {
 	list := errors.ErrListf("downloading component versions")
 	dest := destoption.From(d.cmd)
 	if len(d.data) == 1 {
@@ -124,7 +131,7 @@ func (d *download) Out() error {
 	return list.Result()
 }
 
-func (d *download) Save(o *comphdlr.Object, f string) error {
+func (d *action) Save(o *comphdlr.Object, f string) error {
 	dest := destoption.From(d.cmd)
 	src := o.ComponentVersion
 	dir := path.Dir(f)

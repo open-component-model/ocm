@@ -1,5 +1,4 @@
 
-- [ ] Transfer MUST use a session to keep track of elements requiring a close
 - [ ] Add Close method to access method to support external resource management
 - [ ] Clarify how to list digests in (oci) ctf and artefact set under common oci API abstraction
 - [ ] Align OCI and OCM Repository Name with type structure and reference syntax
@@ -22,3 +21,4 @@
 - [ ] decide on and introduce logging framework
 - [ ] add optional reference name to resource input
 - [ ] remove registry from default output and show only with wide output option (get artefact)
+- [ ] error handling for applying config (especially usage of ErrNoContext)

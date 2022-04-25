@@ -30,6 +30,13 @@ func From(o options.OptionSetProvider) *Option {
 	return opt
 }
 
+func New(f ...accessio.FileFormat) *Option {
+	if len(f) > 0 {
+		return &Option{Default: f[0]}
+	}
+	return &Option{Default: accessio.FormatDirectory}
+}
+
 type Option struct {
 	format  string
 	Default accessio.FileFormat

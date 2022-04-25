@@ -31,12 +31,16 @@ func From(o options.OptionSetProvider) *Option {
 	return opt
 }
 
+func New() *Option {
+	return &Option{}
+}
+
 type Option struct {
 	Spec       string
 	Repository ocm.Repository
 }
 
-var _ common.OptionCompleter = (*Option)(nil)
+var _ common.OptionWithSessionCompleter = (*Option)(nil)
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Spec, "repo", "r", "", "repository name or spec")

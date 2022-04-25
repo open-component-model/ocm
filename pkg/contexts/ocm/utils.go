@@ -13,3 +13,36 @@
 //  limitations under the License.
 
 package ocm
+
+import (
+	"fmt"
+
+	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
+	"github.com/open-component-model/ocm/pkg/errors"
+)
+
+////////////////////////////////////////////////////////////////////////////////
+
+func AssureTargetRepository(session Session, ctx Context, targetref string, format accessio.FileFormat, fss ...vfs.FileSystem) (Repository, error) {
+	target, ref, err := session.DetermineRepository(ctx, targetref)
+	if err != nil {
+		if !errors.IsErrUnknown(err) || ref.Info == "" {
+			return nil, err
+		}
+		if ref.Type == "" {
+			ref.Type = format.String()
+		}
+		if ref.Type == "" {
+			return nil, fmt.Errorf("ctf format type required to create ctf")
+		}
+		target, err = ctf.Create(ctx, accessobj.ACC_CREATE, ref.Info, 0770, accessio.PathFileSystem(accessio.FileSystem(fss...)))
+		if err != nil {
+			return nil, err
+		}
+		session.Closer(target)
+	}
+	return target, nil
+}

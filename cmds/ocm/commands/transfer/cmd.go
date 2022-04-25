@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	artefacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/transfer"
 	comparch "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive/transfer"
+	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/transfer"
 	"github.com/spf13/cobra"
 )
 
@@ -29,6 +30,7 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	}
 	cmd.AddCommand(comparch.NewCommand(ctx, comparch.Names...))
 	cmd.AddCommand(artefacts.NewCommand(ctx, artefacts.Names...))
+	cmd.AddCommand(components.NewCommand(ctx, components.Names...))
 
 	return cmd
 }

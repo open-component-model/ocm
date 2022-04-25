@@ -29,6 +29,10 @@ func From(o options.OptionSetProvider) *Option {
 	return opt
 }
 
+func New() *Option {
+	return &Option{}
+}
+
 type Option struct {
 	Spec       string
 	Repository oci.Repository

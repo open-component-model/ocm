@@ -17,6 +17,7 @@ package accessio
 import (
 	"io"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -91,4 +92,13 @@ func BlobReader(blob DataReader, err error) (io.ReadCloser, error) {
 		return nil, err
 	}
 	return blob.Reader()
+}
+
+func FileSystem(fss ...vfs.FileSystem) vfs.FileSystem {
+	for _, fs := range fss {
+		if fs != nil {
+			return fs
+		}
+	}
+	return _osfs
 }

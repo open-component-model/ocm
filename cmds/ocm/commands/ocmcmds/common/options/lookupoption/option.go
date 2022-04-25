@@ -28,6 +28,10 @@ func From(o *output.Options) *Option {
 	return opt
 }
 
+func New() *Option {
+	return &Option{}
+}
+
 type Option struct {
 	repooption.Option
 }
