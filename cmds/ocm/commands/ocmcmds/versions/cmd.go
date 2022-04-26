@@ -12,14 +12,26 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package commands
+package versions
 
-const (
-	Get      = "get"
-	Describe = "describe"
-	Add      = "add"
-	Create   = "create"
-	Transfer = "transfer"
-	Download = "download"
-	Show     = "show"
+import (
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/versions/show"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/spf13/cobra"
 )
+
+var Names = names.Versions
+
+// NewCommand creates a new command.
+func NewCommand(ctx clictx.Context) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:              utils.SubCmdUse(Names[0]),
+		Aliases:          Names[1:],
+		Short:            "Commands acting on component version names",
+		TraverseChildren: true,
+	}
+	cmd.AddCommand(show.NewCommand(ctx, show.Verb))
+	return cmd
+}

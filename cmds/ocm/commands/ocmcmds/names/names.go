@@ -21,4 +21,5 @@ var (
 	Resources              = []string{"resources", "resource", "res", "r"}
 	Sources                = []string{"sources", "source", "src", "s"}
 	References             = []string{"references", "reference", "refs"}
+	Versions               = []string{"versions", "vers", "v"}
 )

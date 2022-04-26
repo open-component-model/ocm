@@ -29,4 +29,5 @@ ocm ocm <sub-command> ... <sub command> [<options>]
 * [ocm ocm <b>references</b>](ocm_ocm_references.md)	 - Commands related to component references in component versions
 * [ocm ocm <b>resources</b>](ocm_ocm_resources.md)	 - Commands acting on component resources
 * [ocm ocm <b>sources</b>](ocm_ocm_sources.md)	 - Commands acting on component sources
+* [ocm ocm <b>versions</b>](ocm_ocm_versions.md)	 - Commands acting on component version names
 

@@ -26,6 +26,7 @@ require (
 )
 
 require (
+	github.com/Masterminds/semver/v3 v3.1.1
 	github.com/containerd/containerd v1.5.9
 	github.com/containers/image/v5 v5.20.0
 	github.com/docker/go-connections v0.4.0
@@ -44,7 +45,6 @@ require (
 )
 
 require (
-	github.com/Masterminds/semver/v3 v3.1.1 // indirect
 	github.com/Microsoft/go-winio v0.5.1 // indirect
 	github.com/containers/libtrust v0.0.0-20200511145503-9c3a6c22cd9a // indirect
 	github.com/containers/ocicrypt v1.1.2 // indirect

@@ -17,6 +17,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/Masterminds/semver/v3"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
 	"github.com/open-component-model/ocm/pkg/common"
 )
@@ -119,4 +120,14 @@ func main() {
 	for _, l := range t {
 		fmt.Printf("%s\n", l)
 	}
+
+	c, _ := semver.NewConstraint("1.3")
+	fmt.Printf("%s\n", c)
+
+	v := semver.MustParse("1.3")
+	fmt.Printf("%s (%t)\n", v, c.Check(v))
+	v = semver.MustParse("1.3.1")
+	fmt.Printf("%s (%t)\n", v, c.Check(v))
+	v, _ = semver.NewVersion("1.4.0")
+	fmt.Printf("%s (%t)\n", v, c.Check(v))
 }
