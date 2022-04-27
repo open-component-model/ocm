@@ -5,3 +5,4 @@ main
 /tmp
 /ocm
 .vscode
+/cmds/test/generics

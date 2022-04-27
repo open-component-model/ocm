@@ -79,7 +79,7 @@ Every credential setting is related to a dedicated consumer and provides a set o
 credential attributes. All this can be specified by a sequence of <code>--cred</code>
 options. 
 
-Ever option value has the the
+Every option value has the format
 <center>
 <code>--cred [:]&lt;attr>=&lt;value></code>
 </center>
