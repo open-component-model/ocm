@@ -15,6 +15,7 @@
 package core
 
 const (
+	CONSUMER_ATTR_TYPE  = ATTR_TYPE
 	ATTR_TYPE           = "type"
 	ATTR_USERNAME       = "username"
 	ATTR_PASSWORD       = "password"

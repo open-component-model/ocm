@@ -69,7 +69,8 @@ $ ocm describe artefact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
 
 ### SEE ALSO
 
-##### Parent
+##### Parents
 
 * [ocm describe](ocm_describe.md)	 - Describe artefacts
+* [ocm](ocm.md)	 - ocm command line client
 

@@ -25,7 +25,8 @@ to host component version content or a tar/tgz file.
 
 ### SEE ALSO
 
-##### Parent
+##### Parents
 
 * [ocm create](ocm_create.md)	 - Create transport or component archive
+* [ocm](ocm.md)	 - ocm command line client
 

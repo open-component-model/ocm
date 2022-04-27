@@ -16,9 +16,9 @@ ocm references <sub-command> ... <sub command> [<options>]
 
 ### SEE ALSO
 
-##### Parent
+##### Parents
 
-* [ocm](ocm.md)	 - ocm
+* [ocm](ocm.md)	 - ocm command line client
 
 
 ##### Sub Commands

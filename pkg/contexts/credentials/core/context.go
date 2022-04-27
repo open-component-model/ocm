@@ -144,6 +144,8 @@ func (c *_context) CredentialsForConfig(data []byte, unmarshaler runtime.Unmarsh
 	return c.CredentialsForSpec(spec, creds...)
 }
 
+var emptyIdentity = ConsumerIdentity{}
+
 func (c *_context) GetCredentialsForConsumer(identity ConsumerIdentity, matchers ...IdentityMatcher) (CredentialsSource, error) {
 	err := c.Update()
 	if err != nil {
@@ -156,6 +158,9 @@ func (c *_context) GetCredentialsForConsumer(identity ConsumerIdentity, matchers
 		consumer = c.consumers.Get(identity)
 	} else {
 		consumer = c.consumers.Match(identity, m)
+	}
+	if consumer == nil {
+		consumer = c.consumers.Get(emptyIdentity)
 	}
 	if consumer == nil {
 		return nil, ErrUnknownConsumer(identity.String())

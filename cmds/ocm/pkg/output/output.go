@@ -86,7 +86,7 @@ type YAMLOutput struct {
 
 func (this *YAMLOutput) Out() error {
 	for _, m := range this.data {
-		Outf(this.Context, "---")
+		Outf(this.Context, "---\n")
 		d, err := yaml.Marshal(m.(Manifest).AsManifest())
 		if err != nil {
 			return err

@@ -86,7 +86,9 @@ The following modes are supported:
 
 ### SEE ALSO
 
-##### Parent
+##### Parents
 
 * [ocm ocm sources](ocm_ocm_sources.md)	 - Commands acting on component sources
+* [ocm ocm](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
+* [ocm](ocm.md)	 - ocm command line client
 

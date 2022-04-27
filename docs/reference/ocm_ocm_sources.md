@@ -16,9 +16,10 @@ ocm ocm sources <sub-command> ... <sub command> [<options>]
 
 ### SEE ALSO
 
-##### Parent
+##### Parents
 
 * [ocm ocm](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
+* [ocm](ocm.md)	 - ocm command line client
 
 
 ##### Sub Commands

@@ -69,7 +69,9 @@ $ ocm transfer ctf ctf.tgz ghcr.io/mandelsoft/components
 
 ### SEE ALSO
 
-##### Parent
+##### Parents
 
 * [ocm ocm versions](ocm_ocm_versions.md)	 - Commands acting on component version names
+* [ocm ocm](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
+* [ocm](ocm.md)	 - ocm command line client
 

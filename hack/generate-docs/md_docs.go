@@ -65,6 +65,7 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 		buf.WriteString("### Synopsis\n\n")
 		buf.WriteString(fmt.Sprintf("```\n%s\n```\n\n", UseLine(cmd)))
 	}
+
 	if err := printOptions(buf, cmd, name); err != nil {
 		return err
 	}
@@ -84,12 +85,15 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 		buf.WriteString("### SEE ALSO\n\n")
 		if cmd.HasParent() {
 			header = true
-			buf.WriteString("##### Parent\n\n")
-			parent := cmd.Parent()
-			pname := parent.CommandPath()
-			link := pname + ".md"
-			link = strings.Replace(link, " ", "_", -1)
-			buf.WriteString(fmt.Sprintf("* [%s](%s)\t - %s\n", pname, linkHandler(link), parent.Short))
+			buf.WriteString("##### Parents\n\n")
+			parent := cmd
+			for parent.HasParent() {
+				parent = parent.Parent()
+				pname := parent.CommandPath()
+				link := pname + ".md"
+				link = strings.Replace(link, " ", "_", -1)
+				buf.WriteString(fmt.Sprintf("* [%s](%s)\t - %s\n", pname, linkHandler(link), parent.Short))
+			}
 			cmd.VisitParents(func(c *cobra.Command) {
 				if c.DisableAutoGenTag {
 					cmd.DisableAutoGenTag = c.DisableAutoGenTag

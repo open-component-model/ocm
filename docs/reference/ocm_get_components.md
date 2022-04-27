@@ -82,7 +82,8 @@ $ ocm get componentversion --repo OCIRegistry:ghcr.io mandelsoft/kubelink
 
 ### SEE ALSO
 
-##### Parent
+##### Parents
 
 * [ocm get](ocm_get.md)	 - Get information about artefacts and components
+* [ocm](ocm.md)	 - ocm command line client
 

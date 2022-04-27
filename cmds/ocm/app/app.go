@@ -25,7 +25,9 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/transfer"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -57,9 +59,45 @@ func (c *CLI) Execute(args ...string) error {
 }
 
 type CLIOptions struct {
-	Config  string
-	Context clictx.Context
+	Config      string
+	Credentials []string
+	Context     clictx.Context
 }
+
+var desc = `
+The Open Component Model command line client support the work with OCM
+artefacts, like Component Archives, Common Transport Archive,  
+Component Repositories, and component versions.
+
+Additionally it provides some limited support for the docker daemon, OCI artefacts and
+registries.
+
+With the open <code>--cred</code> it is possible to specify arbitrary credentials
+for various environments on the command line. Nevertheless it is always preferrable
+to use the cli config file.
+Every credential setting is related to a dedicated consumer and provides a set of
+credential attributes. All this can be specified by a sequence of <code>--cred</code>
+options. 
+
+Ever option value has the the
+<center>
+<code>--cred [:]&lt;attr>=&lt;value></code>
+</center>
+
+Consumer identity attribues are prefixed with the colon (:). A credential settings
+always start with a sequence of at least one identity attributes, followed by a
+sequence of credential attributes.
+If a credential attribute is followed by an identity attribute a new credential setting
+is started.
+
+The first credential setting may omit identity attributes. In this case it is used as
+default credential, always used if no dedicated match is found.
+
+For example:
+<center>
+<code>--cred :type=ociRegistry --cred hostname:ghcr.io --cred usename=mandelsoft --cred password=xyz </code>
+</center>
+`
 
 func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	if ctx == nil {
@@ -70,7 +108,8 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	}
 	cmd := &cobra.Command{
 		Use:              "ocm",
-		Short:            "ocm",
+		Short:            "ocm command line client",
+		Long:             desc,
 		TraverseChildren: true,
 		Version:          version.Get().String(),
 		SilenceUsage:     true,
@@ -102,6 +141,7 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 
 func (o *CLIOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Config, "config", "", "", "configuration file")
+	fs.StringArrayVarP(&o.Credentials, "cred", "C", nil, "credential setting")
 }
 
 func (o *CLIOptions) Complete() error {
@@ -135,6 +175,40 @@ func (o *CLIOptions) Complete() error {
 		err = config.DefaultContext().ApplyConfig(cfg, o.Config)
 		if err != nil {
 			return errors.Wrapf(err, "cannot apply config %q", o.Config)
+		}
+	}
+
+	id := credentials.ConsumerIdentity{}
+	attrs := common.Properties{}
+	for _, s := range o.Credentials {
+		i := strings.Index(s, "=")
+		if i < 0 {
+			return errors.ErrInvalid("credential setting", s)
+		}
+		name := s[:i]
+		value := s[i+1:]
+		if strings.HasPrefix(name, ":") {
+			if len(attrs) != 0 {
+				o.Context.CredentialsContext().SetCredentialsForConsumer(id, credentials.NewCredentials(attrs))
+				id = credentials.ConsumerIdentity{}
+				attrs = common.Properties{}
+			}
+			name = name[1:]
+			id[name] = value
+		} else {
+			attrs[name] = value
+		}
+		if len(name) == 0 {
+			return errors.ErrInvalid("credential setting", s)
+		}
+	}
+	if len(attrs) != 0 {
+		o.Context.CredentialsContext().SetCredentialsForConsumer(id, credentials.NewCredentials(attrs))
+		id = credentials.ConsumerIdentity{}
+		attrs = common.Properties{}
+	} else {
+		if len(id) != 0 {
+			return errors.Newf("empty credential attribute set for %s", id.String())
 		}
 	}
 	return nil

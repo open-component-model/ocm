@@ -57,7 +57,8 @@ $ ocm oci transfer ghcr.io/mandelsoft/kubelink gcr.io
 
 ### SEE ALSO
 
-##### Parent
+##### Parents
 
 * [ocm transfer](ocm_transfer.md)	 - Transfer artefacts or components
+* [ocm](ocm.md)	 - ocm command line client
 

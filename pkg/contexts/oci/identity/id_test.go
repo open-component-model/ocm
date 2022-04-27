@@ -105,6 +105,15 @@ var _ = Describe("ctf management", func() {
 			Expect(identity.IdentityMatcher(pat, nil, id)).To(BeFalse())
 			Expect(identity.IdentityMatcher(pat, pat, id)).To(BeFalse())
 		})
+		It("no host", func() {
+			id := credentials.ConsumerIdentity{
+				identity.ID_PATHPREFIX: "a/b",
+				identity.ID_PORT:       "4711",
+			}
+			Expect(identity.IdentityMatcher(id, nil, pat)).To(BeTrue())
+			Expect(identity.IdentityMatcher(pat, id, id)).To(BeFalse())
+			Expect(identity.IdentityMatcher(pat, id, pat)).To(BeTrue())
+		})
 	})
 
 	Context("without path", func() {

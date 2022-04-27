@@ -16,9 +16,10 @@ ocm oci transportarchive <sub-command> ... <sub command> [<options>]
 
 ### SEE ALSO
 
-##### Parent
+##### Parents
 
 * [ocm oci](ocm_oci.md)	 - Dedicated command flavors for the OCI layer
+* [ocm](ocm.md)	 - ocm command line client
 
 
 ##### Sub Commands

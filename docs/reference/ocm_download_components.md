@@ -70,7 +70,8 @@ The default format is <code>directory</code>.
 
 ### SEE ALSO
 
-##### Parent
+##### Parents
 
 * [ocm download](ocm_download.md)	 - Download oci artefacts, resources or complete components
+* [ocm](ocm.md)	 - ocm command line client
 

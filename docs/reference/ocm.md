@@ -1,6 +1,6 @@
 ## ocm
 
-ocm
+ocm command line client
 
 ### Synopsis
 
@@ -11,9 +11,47 @@ ocm <sub command> [<options>]
 ### Options
 
 ```
-      --config string   configuration file
-  -h, --help            help for ocm
+      --config string      configuration file
+  -C, --cred stringArray   credential setting
+  -h, --help               help for ocm
 ```
+
+### Description
+
+
+The Open Component Model command line client support the work with OCM
+artefacts, like Component Archives, Common Transport Archive,  
+Component Repositories, and component versions.
+
+Additionally it provides some limited support for the docker daemon, OCI artefacts and
+registries.
+
+With the open <code>--cred</code> it is possible to specify arbitrary credentials
+for various environments on the command line. Nevertheless it is always preferrable
+to use the cli config file.
+Every credential setting is related to a dedicated consumer and provides a set of
+credential attributes. All this can be specified by a sequence of <code>--cred</code>
+options. 
+
+Ever option value has the the
+<center>
+<code>--cred [:]&lt;attr>=&lt;value></code>
+</center>
+
+Consumer identity attribues are prefixed with the colon (:). A credential settings
+always start with a sequence of at least one identity attributes, followed by a
+sequence of credential attributes.
+If a credential attribute is followed by an identity attribute a new credential setting
+is started.
+
+The first credential setting may omit identity attributes. In this case it is used as
+default credential, always used if no dedicated match is found.
+
+For example:
+<center>
+<code>--cred :type=ociRegistry --cred hostname:ghcr.io --cred usename=mandelsoft --cred password=xyz </code>
+</center>
+
 
 ### SEE ALSO
 

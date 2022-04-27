@@ -20,8 +20,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 )
 
-// VALUE_TYPE is the OCT registry type
-const VALUE_TYPE = "OCIRegistry"
+// CONSUMER_TYPE is the OCT registry type
+const CONSUMER_TYPE = "OCIRegistry"
 
 // ID_HOSTNAME is the hostname of an OCT repository
 const ID_HOSTNAME = "hostname"
@@ -33,10 +33,10 @@ const ID_PORT = "port"
 const ID_PATHPREFIX = "pathprefix"
 
 func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
-	if pattern["type"] != "" && id["type"] != "" && pattern["type"] != id["type"] {
+	if pattern[cpi.CONSUMER_ATTR_TYPE] != "" && id[cpi.CONSUMER_ATTR_TYPE] != "" && pattern[cpi.CONSUMER_ATTR_TYPE] != id[cpi.CONSUMER_ATTR_TYPE] {
 		return false
 	}
-	if pattern[ID_HOSTNAME] != id[ID_HOSTNAME] {
+	if pattern[ID_HOSTNAME] != "" && pattern[ID_HOSTNAME] != id[ID_HOSTNAME] {
 		return false
 	}
 
@@ -72,11 +72,14 @@ func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
 		}
 	}
 
-	// ok now it matches, check against current match
+	// ok now it basically matches, check against current match
 	if len(cur) == 0 {
 		return true
 	}
 
+	if cur[ID_HOSTNAME] == "" && id[ID_HOSTNAME] != "" {
+		return true
+	}
 	if cur[ID_PORT] == "" && (id[ID_PORT] != "" && pattern[ID_PORT] != "") {
 		return true
 	}

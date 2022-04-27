@@ -70,7 +70,9 @@ The default format is <code>directory</code>.
 
 ### SEE ALSO
 
-##### Parent
+##### Parents
 
 * [ocm ocm components](ocm_ocm_components.md)	 - Commands acting on components
+* [ocm ocm](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
+* [ocm](ocm.md)	 - ocm command line client
 

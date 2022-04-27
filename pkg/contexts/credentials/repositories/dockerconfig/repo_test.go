@@ -93,7 +93,7 @@ var _ = Describe("docker config", func() {
 		Expect(err).To(Succeed())
 
 		csrc, err := DefaultContext.GetCredentialsForConsumer(credentials.ConsumerIdentity{
-			cpi.ATTR_TYPE:        identity.VALUE_TYPE,
+			cpi.ATTR_TYPE:        identity.CONSUMER_TYPE,
 			identity.ID_HOSTNAME: "ghcr.io",
 		})
 		Expect(err).To(Succeed())

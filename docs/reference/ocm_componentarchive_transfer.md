@@ -35,7 +35,8 @@ The default format is <code>directory</code>.
 
 ### SEE ALSO
 
-##### Parent
+##### Parents
 
 * [ocm componentarchive](ocm_componentarchive.md)	 - Commands acting on component archives
+* [ocm](ocm.md)	 - ocm command line client
 
