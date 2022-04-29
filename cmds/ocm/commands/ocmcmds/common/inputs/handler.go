@@ -15,23 +15,24 @@
 package inputs
 
 import (
+	"sort"
 	"sync"
 
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 type InputHandler interface {
-	RequireFilePath() bool
-	Validate(fldPath *field.Path, ctx clictx.Context, input *BlobInput) field.ErrorList
-	CreateBlob(fs vfs.FileSystem, inputPath string, input *BlobInput) (accessio.TemporaryBlobAccess, string, error)
+	Validate(fldPath *field.Path, ctx clictx.Context, input *BlobInput, inputFilePath string) field.ErrorList
+	GetBlob(ctx clictx.Context, input *BlobInput, inputFilePath string) (accessio.TemporaryBlobAccess, string, error)
+	Usage() string
 }
 
 type Registry interface {
 	Register(name string, handler InputHandler)
 	Get(name string) InputHandler
+	KnownTypes() []string
 }
 
 type registry struct {
@@ -57,6 +58,17 @@ func (r *registry) Get(name string) InputHandler {
 	return r.handlers[name]
 }
 
+func (r *registry) KnownTypes() []string {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+	types:=make([]string, 0, len(r.handlers))
+	for t := range r.handlers {
+		types=append(types, t)
+	}
+	sort.Strings(types)
+	return types
+}
+
 var Default = NewRegistry()
 
 func Register(name string, handler InputHandler) {
@@ -65,4 +77,12 @@ func Register(name string, handler InputHandler) {
 
 func Get(name string) InputHandler {
 	return Default.Get(name)
+}
+
+func Usage(r Registry) string {
+	usage:="The following input types are supported:"
+	for _, t := range r.KnownTypes() {
+		usage+=r.Get(t).Usage()
+	}
+	return usage
 }

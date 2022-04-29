@@ -55,7 +55,7 @@ func TransferAsArtefact(path string, ns oci.NamespaceAccess, fss ...vfs.FileSyst
 	if err != nil {
 		return nil, nil, err
 	}
-	chart, err := loader.Load(fs, path)
+	chart, err := loader.Load(path, fs)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "cannot load helm chart from %q", path)
 	}

@@ -12,16 +12,18 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package helm
+package file
 
 import (
+	"compress/gzip"
+	"fmt"
+	"io"
 	"os"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm/loader"
+	"github.com/open-component-model/ocm/pkg/mime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
@@ -29,56 +31,65 @@ type Handler struct{}
 
 var _ inputs.InputHandler = (*Handler)(nil)
 
-func (h *Handler) RequireFilePath() bool {
-	return true
-}
-
 func (h *Handler) Validate(fldPath *field.Path, ctx clictx.Context, input *inputs.BlobInput, inputFilePath string) field.ErrorList {
-	allErrs := inputs.ForbidFileInfo(fldPath, input)
+	allErrs := inputs.ForbidFilePattern(fldPath, input)
 	path := fldPath.Child("path")
 	if input.Path == "" {
 		allErrs = append(allErrs, field.Required(path, "path is required for input"))
 	} else {
-		inputInfo, filePath, err := input.FileInfo(ctx, inputFilePath)
-		if err != nil {
+		fileInfo, filePath, err := input.FileInfo(ctx, inputFilePath)
+		if err!=nil {
 			allErrs = append(allErrs, field.Invalid(path, filePath, err.Error()))
-		}
-		if !inputInfo.IsDir() && inputInfo.Mode()&os.ModeType != 0 {
-			allErrs = append(allErrs, field.Invalid(path, filePath, "no regular file or directory"))
+		} else {
+			if fileInfo.Mode()&os.ModeType != 0 {
+				allErrs = append(allErrs, field.Invalid(path, filePath, "no regular file"))
+			}
 		}
 	}
 	return allErrs
 }
 
 func (h *Handler) GetBlob(ctx clictx.Context, input *inputs.BlobInput, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
-	_, inputPath, err := input.FileInfo(ctx, inputFilePath)
+	fs := ctx.FileSystem()
+	inputInfo, inputPath, err := input.FileInfo(ctx, inputFilePath)
+	if inputInfo.IsDir() {
+		return nil, "", fmt.Errorf("resource type is file but a directory was provided")
+	}
+	// otherwise just open the file
+	inputBlob, err := fs.Open(inputPath)
+	if err != nil {
+		return nil, "", fmt.Errorf("unable to read input blob from %q: %w", inputPath, err)
+	}
+
+	if !input.Compress() {
+		inputBlob.Close()
+		return accessio.BlobNopCloser(accessio.BlobAccessForFile(input.MediaType, inputPath, fs)), "", nil
+	}
+
+	temp, err := accessio.NewTempFile(fs, "", "compressed*.gzip")
 	if err != nil {
 		return nil, "", err
 	}
-	chart, err := loader.Load(inputPath, ctx.FileSystem())
-	if err != nil {
-		return nil, "", err
+	defer temp.Close()
+
+	input.SetMediaTypeIfNotDefined(mime.MIME_GZIP)
+	gw := gzip.NewWriter(temp.Writer())
+	if _, err := io.Copy(gw, inputBlob); err != nil {
+		return nil, "", fmt.Errorf("unable to compress input file %q: %w", inputPath, err)
 	}
-	blob, err := helm.SynthesizeArtefactBlob(inputPath, ctx.FileSystem())
-	if err != nil {
-		return nil, "", err
+	if err := gw.Close(); err != nil {
+		return nil, "", fmt.Errorf("unable to close gzip writer: %w", err)
 	}
-	return blob, chart.Metadata.Name, err
+
+	return temp.AsBlob(input.MediaType), "", nil
 }
-
-
 
 func (h *Handler) Usage() string {
 	return `
-- <code>helm</code>
+- <code>file</code>
 
-  The path must denote an helm chart archive or directory
-  relative to the resources file.
-  The denoted chart is packed as an OCI artefact set.
-  Additional provider info is taken from a file with the same name
-  and the suffix <code>.prov</code>.
-
-  If the chart should just be stored as archive, please use the 
-  type <code>file</code> or <code>dir</code>.
+  The path must denote a file relative the the resources file.
+  The content is compressed if the <code>compress</code> field
+  is set to <code>true</code>.
 `
 }

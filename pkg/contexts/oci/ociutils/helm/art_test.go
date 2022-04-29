@@ -57,7 +57,7 @@ func norm(chart *chart.Chart) *chart.Chart {
 
 	path, err := chartutil.Save(chart, dir)
 	Expect(err).To(Succeed())
-	chart, err = loader.Load(osfs.New(), path)
+	chart, err = loader.Load(path, osfs.New())
 	Expect(err).To(Succeed())
 	//	sort.Sort(Files(chart.Raw))
 	//	sort.Sort(Files(chart.Files))
@@ -81,7 +81,7 @@ var _ = Describe("art parsing", func() {
 
 		prov, err := env.ReadFile("/testdata/testchart.prov")
 		Expect(err).To(Succeed())
-		chart, err := loader.Load(env, "/testdata/testchart")
+		chart, err := loader.Load("/testdata/testchart", env)
 		Expect(err).To(Succeed())
 		meta, err := json.Marshal(chart.Metadata)
 		Expect(err).To(Succeed())

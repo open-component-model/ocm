@@ -12,26 +12,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package loader
+package directory
 
 import (
-	"github.com/mandelsoft/vfs/pkg/vfs"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chart/loader"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 )
 
-func Load(name string, fs vfs.FileSystem) (*chart.Chart, error) {
-	fi, err := fs.Stat(name)
-	if err != nil {
-		return nil, err
-	}
-	if fi.IsDir() {
-		return LoadDir(fs, name)
-	}
-	file, err := fs.Open(name)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	return loader.LoadArchive(file)
+const TYPE = "dir"
+
+func init() {
+	inputs.Register(TYPE, &Handler{})
 }

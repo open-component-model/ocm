@@ -12,16 +12,14 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package helm
+package docker
 
 import (
-	"os"
-
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm/loader"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
@@ -29,56 +27,49 @@ type Handler struct{}
 
 var _ inputs.InputHandler = (*Handler)(nil)
 
-func (h *Handler) RequireFilePath() bool {
-	return true
-}
-
 func (h *Handler) Validate(fldPath *field.Path, ctx clictx.Context, input *inputs.BlobInput, inputFilePath string) field.ErrorList {
 	allErrs := inputs.ForbidFileInfo(fldPath, input)
-	path := fldPath.Child("path")
+	pathField := fldPath.Child("path")
 	if input.Path == "" {
-		allErrs = append(allErrs, field.Required(path, "path is required for input"))
+		allErrs = append(allErrs, field.Required(pathField, "path is required for input"))
 	} else {
-		inputInfo, filePath, err := input.FileInfo(ctx, inputFilePath)
+		_, _, err := docker.ParseGenericRef(input.Path)
 		if err != nil {
-			allErrs = append(allErrs, field.Invalid(path, filePath, err.Error()))
-		}
-		if !inputInfo.IsDir() && inputInfo.Mode()&os.ModeType != 0 {
-			allErrs = append(allErrs, field.Invalid(path, filePath, "no regular file or directory"))
+			allErrs = append(allErrs, field.Invalid(pathField, input.Path, err.Error()))
+
 		}
 	}
 	return allErrs
 }
 
 func (h *Handler) GetBlob(ctx clictx.Context, input *inputs.BlobInput, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
-	_, inputPath, err := input.FileInfo(ctx, inputFilePath)
+	locator, version, err := docker.ParseGenericRef(input.Path)
 	if err != nil {
 		return nil, "", err
 	}
-	chart, err := loader.Load(inputPath, ctx.FileSystem())
+	spec := docker.NewRepositorySpec()
+	repo, err := ctx.OCIContext().RepositoryForSpec(spec)
 	if err != nil {
 		return nil, "", err
 	}
-	blob, err := helm.SynthesizeArtefactBlob(inputPath, ctx.FileSystem())
+	ns, err := repo.LookupNamespace(locator)
 	if err != nil {
 		return nil, "", err
 	}
-	return blob, chart.Metadata.Name, err
-}
 
+	blob, err := artefactset.SynthesizeArtefactBlob(ns, version)
+	if err != nil {
+		return nil, "", err
+	}
+	return blob, locator, nil
+}
 
 
 func (h *Handler) Usage() string {
 	return `
-- <code>helm</code>
+- <code>docker</code>
 
-  The path must denote an helm chart archive or directory
-  relative to the resources file.
-  The denoted chart is packed as an OCI artefact set.
-  Additional provider info is taken from a file with the same name
-  and the suffix <code>.prov</code>.
-
-  If the chart should just be stored as archive, please use the 
-  type <code>file</code> or <code>dir</code>.
+  The path must denote an image tag that can be found in the local
+  docker daemon. The denoted image is packed an OCI artefact set.
 `
 }

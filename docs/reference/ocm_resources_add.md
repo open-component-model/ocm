@@ -58,6 +58,44 @@ There are several templaters that can be selected by the <code>--templater</code
     subkey: "abc (( values.MY_VAL ))"
   </pre>
 
+This command accepts  resource specification files describing the resources
+to add to a component version.
+The following input types are supported:
+- <code>dir</code>
+
+  The path must denote a directory relative to the resources file, which is packed
+  with tar and optionally compressed
+  if the <code>compress</code> field is set to <code>true</code>. If the field
+  <code>preserveDir</code> is set to true the directory itself is added to the tar.
+  If the field <code>followSymLinks</code> is set to <code>true</code>, symbolic
+  links are not packed but their targets files or folders.
+  With the list fields <code>includeFiles</code> and <code>excludeFiles</code> it is 
+  possible to specify which files should be included or excluded. The values are
+  regular expression used to match relative file paths. If no inlcudes are specified
+  all file not explicitly excluded are used.
+
+- <code>docker</code>
+
+  The path must denote an image tag that can be found in the local
+  docker daemon. The denoted image is packed an OCI artefact set.
+
+- <code>file</code>
+
+  The path must denote a file relative the the resources file.
+  The content is compressed if the <code>compress</code> field
+  is set to <code>true</code>.
+
+- <code>helm</code>
+
+  The path must denote an helm chart archive or directory
+  relative to the resources file.
+  The denoted chart is packed as an OCI artefact set.
+  Additional provider info is taken from a file with the same name
+  and the suffix <code>.prov</code>.
+
+  If the chart should just be stored as archive, please use the 
+  type <code>file</code> or <code>dir</code>.
+
 
 ### SEE ALSO
 
