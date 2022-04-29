@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package common
+package inputs
 
 import (
 	"archive/tar"
@@ -25,6 +25,8 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm/loader"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
@@ -49,6 +51,7 @@ const (
 	FileInputType   BlobInputType = "file"
 	DirInputType    BlobInputType = "dir"
 	DockerInputType BlobInputType = "docker"
+	HelmInputType   BlobInputType = "helm"
 )
 
 // BlobInput defines a local resource input that should be added to the component descriptor and
@@ -159,6 +162,17 @@ func (input *BlobInput) GetBlob(ctx clictx.Context, inputFilePath string) (acces
 			return nil, "", err
 		}
 		return blob, locator, nil
+
+	case HelmInputType:
+		chart, err := loader.Load(fs, inputPath)
+		if err != nil {
+			return nil, "", err
+		}
+		blob, err := helm.SynthesizeArtefactBlob(inputPath, fs)
+		if err != nil {
+			return nil, "", err
+		}
+		return blob, chart.Metadata.Name, err
 
 	// automatically tar the input artifact if it is a directory
 	case DirInputType:
@@ -372,12 +386,12 @@ func (input *BlobInput) Validate(fldPath *field.Path, ctx clictx.Context, inputF
 		return nil
 	}
 	allErrs := field.ErrorList{}
-	if input.Type != DirInputType && input.Type != FileInputType && input.Type != DockerInputType {
+	if input.Type != DirInputType && input.Type != FileInputType && input.Type != DockerInputType && input.Type != HelmInputType {
 		path := fldPath.Child("type")
 		if input.Type == "" {
 			allErrs = append(allErrs, field.Required(path, "input type required"))
 		} else {
-			allErrs = append(allErrs, field.NotSupported(path, input.Type, []string{string(DirInputType), string(FileInputType), string(DockerInputType)}))
+			allErrs = append(allErrs, field.NotSupported(path, input.Type, []string{string(DirInputType), string(FileInputType), string(DockerInputType), string(HelmInputType)}))
 		}
 	} else {
 		pathField := fldPath.Child("path")
@@ -399,7 +413,8 @@ func (input *BlobInput) Validate(fldPath *field.Path, ctx clictx.Context, inputF
 						}
 					}
 
-					if input.Type == DirInputType {
+					switch input.Type {
+					case HelmInputType, DirInputType:
 						if ok {
 							ok, err := vfs.DirExists(fs, filePath)
 							if err != nil {
@@ -410,7 +425,7 @@ func (input *BlobInput) Validate(fldPath *field.Path, ctx clictx.Context, inputF
 								}
 							}
 						}
-					} else {
+					case FileInputType:
 						if ok {
 							ok, err := vfs.FileExists(fs, filePath)
 							if err != nil {

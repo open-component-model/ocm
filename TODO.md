@@ -1,4 +1,5 @@
 
+- [ ] migrate resource add input spec to typed spec
 - [ ] Transfer should support force option for override
 - [ ] Add Close method to access method to support external resource management
 - [ ] Clarify how to list digests in (oci) ctf and artefact set under common oci API abstraction

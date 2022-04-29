@@ -17,7 +17,6 @@ package artefactset
 import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -27,6 +26,33 @@ import (
 
 type ArtefactBlob interface {
 	accessio.TemporaryFileSystemBlobAccess
+}
+
+type Producer func(set *ArtefactSet) error
+
+func SythesizeArtefactSet(mime string, producer Producer) (ArtefactBlob, error) {
+	fs := osfs.New()
+	temp, err := accessio.NewTempFile(fs, "", "artefactblob*.tgz")
+	if err != nil {
+		return nil, err
+	}
+	defer temp.Close()
+
+	set, err := Create(accessobj.ACC_CREATE, "", 0600, accessio.File(temp.Writer().(vfs.File)), accessobj.FormatTGZ)
+	if err != nil {
+		return nil, err
+	}
+	defer set.Close()
+	err = producer(set)
+	if err != nil {
+		return nil, err
+	}
+
+	return temp.AsBlob(artdesc.ToContentMediaType(mime) + "+tar+gzip"), nil
+}
+
+func TransferArtefact(art cpi.ArtefactAccess, set cpi.ArtefactSink, tags ...string) error {
+	return transfer.TransferArtefact(art, set, tags...)
 }
 
 // SynthesizeArtefactBlob synthesizes an artefact blob incorporating all side artefacts.
@@ -44,33 +70,19 @@ func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, e
 	}
 	digest := blob.Digest()
 
-	fs := osfs.New()
-	temp, err := accessio.NewTempFile(fs, "", "artefactblob*.tgz")
-	if err != nil {
-		return nil, err
-	}
-	defer temp.Close()
-
-	set, err := Create(accessobj.ACC_CREATE, "", 0600, accessio.File(temp.Writer().(vfs.File)), accessobj.FormatTGZ)
-	if err != nil {
-		return nil, err
-	}
-	defer set.Close()
-	err = TransferArtefact(art, set)
-	if err != nil {
-		return nil, err
-	}
-
-	if ok, _ := artdesc.IsDigest(ref); !ok {
-		err = set.AddTags(digest, ref)
+	return SythesizeArtefactSet(blob.MimeType(), func(set *ArtefactSet) error {
+		err = TransferArtefact(art, set)
 		if err != nil {
-			return nil, err
+			return err
 		}
-	}
-	set.Annotate(MAINARTEFACT_ANNOTATION, digest.String())
-	return temp.AsBlob(artdesc.ToContentMediaType(blob.MimeType()) + "+tar+gzip"), nil
-}
 
-func TransferArtefact(art cpi.ArtefactAccess, set cpi.ArtefactSink, tags ...string) error {
-	return transfer.TransferArtefact(art, set, tags...)
+		if ok, _ := artdesc.IsDigest(ref); !ok {
+			err = set.AddTags(digest, ref)
+			if err != nil {
+				return err
+			}
+		}
+		set.Annotate(MAINARTEFACT_ANNOTATION, digest.String())
+		return nil
+	})
 }

@@ -164,7 +164,7 @@ func (o *Command) Run() error {
 	}
 
 	sort.Sort(versions)
-	if o.Latest {
+	if len(versions) > 1 && o.Latest {
 		versions = versions[len(versions)-1:]
 	}
 

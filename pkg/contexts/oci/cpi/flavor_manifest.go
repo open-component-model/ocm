@@ -140,6 +140,18 @@ func (m *ManifestImpl) GetBlob(digest digest.Digest) (BlobAccess, error) {
 	return nil, ErrBlobNotFound(digest)
 }
 
+func (m *ManifestImpl) SetConfigBlob(blob BlobAccess, d *artdesc.Descriptor) error {
+	if d == nil {
+		d = artdesc.DefaultBlobDescriptor(blob)
+	}
+	err := m.AddBlob(blob)
+	if err != nil {
+		return err
+	}
+	m.GetDescriptor().Config = *d
+	return nil
+}
+
 func (m *ManifestImpl) AddLayer(blob BlobAccess, d *artdesc.Descriptor) (int, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()

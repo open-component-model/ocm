@@ -15,10 +15,10 @@
 package artefactset
 
 import (
-	"strings"
 	"sync"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	mime2 "github.com/open-component-model/ocm/pkg/mime"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -103,7 +103,8 @@ func OpenFromBlob(acc accessobj.AccessMode, blob accessio.BlobAccess, opts ...ac
 	o.Reader = reader
 	fmt := accessio.FormatTar
 	mime := blob.MimeType()
-	if strings.HasSuffix(mime, "+gzip") {
+
+	if mime2.IsGZip(mime) {
 		fmt = accessio.FormatTGZ
 	}
 	o.FileFormat = &fmt

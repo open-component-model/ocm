@@ -108,6 +108,7 @@ type ManifestAccess interface {
 
 	AddBlob(BlobAccess) error
 	AddLayer(BlobAccess, *artdesc.Descriptor) (int, error)
+	SetConfigBlob(blob BlobAccess, d *artdesc.Descriptor) error
 }
 
 type IndexAccess interface {

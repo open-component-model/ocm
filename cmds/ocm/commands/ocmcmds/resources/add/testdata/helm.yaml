@@ -1,0 +1,6 @@
+---
+name: chart
+type: HelmChart
+input:
+  type: helm
+  path: testchart
