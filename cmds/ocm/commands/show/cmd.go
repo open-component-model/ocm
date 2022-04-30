@@ -12,14 +12,24 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package helm
+package show
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands"
+	versions "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/versions/show"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/spf13/cobra"
 )
 
-const TYPE = "helm"
+// NewCommand creates a new command.
+func NewCommand(ctx clictx.Context) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:              utils.SubCmdUse(commands.Show),
+		Short:            "Show tags or versions",
+		TraverseChildren: true,
+	}
+	cmd.AddCommand(versions.NewCommand(ctx, versions.Names...))
 
-func init() {
-	inputs.Register(TYPE, &Handler{})
+	return cmd
 }

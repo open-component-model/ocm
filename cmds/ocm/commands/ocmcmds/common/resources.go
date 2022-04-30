@@ -41,8 +41,8 @@ import (
 
 type ResourceInput struct {
 	Access *runtime.UnstructuredTypedObject `json:"access"`
-	Input  *inputs.BlobInput                `json:"input,omitempty"`
-	//Input  *inputs.GenericInputSpec         `json:"input,omitempty"`
+	//Input  *inputs.BlobInput                `json:"input,omitempty"`
+	Input *inputs.GenericInputSpec `json:"input,omitempty"`
 }
 
 type ResourceSpecHandler interface {

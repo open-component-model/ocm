@@ -309,3 +309,14 @@ func newGenericInputSpec(data []byte, unmarshaler runtime.Unmarshaler) (*Generic
 	}
 	return &gen, nil
 }
+
+func Usage(scheme InputTypeScheme) string {
+	s := `
+The resource specification supports the following blob input types, specified
+with the field <code>type</code> in the <code>input</code> field:
+`
+	for t := range scheme.KnownTypes() {
+		s += scheme.GetInputType(t).Usage()
+	}
+	return s
+}

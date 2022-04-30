@@ -63,23 +63,19 @@ input:
 		Expect(err).To(Succeed())
 	})
 
-	/*
-		It("complains about additional dir field for file", func() {
-			in := `
-	access:
-	  type: localBlob
-	input:
-	  mediaType: text/plain
-	  path: test
-	  type: file
-	  excludeFiles:
-	     - xyz
-	`
-			_, err := common.DecodeInput([]byte(in), nil)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("input.excludeFiles: Forbidden: unknown field"))
-		})
-
-	*/
-
+	It("complains about additional dir field for file", func() {
+		in := `
+access:
+  type: localBlob
+input:
+  mediaType: text/plain
+  path: test
+  type: file
+  excludeFiles:
+  - xyz
+`
+		_, err := common.DecodeInput([]byte(in), nil)
+		Expect(err).To(HaveOccurred())
+		Expect(err.Error()).To(Equal("input.excludeFiles: Forbidden: unknown field"))
+	})
 })

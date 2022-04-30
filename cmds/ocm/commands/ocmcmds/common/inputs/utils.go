@@ -21,38 +21,7 @@ import (
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"k8s.io/apimachinery/pkg/util/validation/field"
 )
-
-func ForbidFileInfo(fldPath *field.Path, input *BlobInput) field.ErrorList {
-	allErrs := ForbidFilePattern(fldPath, input)
-	path := fldPath.Child("compress")
-	if input.CompressWithGzip != nil {
-		allErrs = append(allErrs, field.Required(path, fmt.Sprintf("compress option not possible for type %s", input.Type)))
-	}
-	return allErrs
-}
-
-func ForbidFilePattern(fldPath *field.Path, input *BlobInput) field.ErrorList {
-	allErrs := field.ErrorList{}
-	path := fldPath.Child("includeFiles")
-	if input.IncludeFiles != nil {
-		allErrs = append(allErrs, field.Required(path, fmt.Sprintf("includeFiles option not possble for type %s", input.Type)))
-	}
-	path = fldPath.Child("excludeFiles")
-	if input.ExcludeFiles != nil {
-		allErrs = append(allErrs, field.Required(path, fmt.Sprintf("excludeFiles option not possble for type %s", input.Type)))
-	}
-	path = fldPath.Child("preserveDir")
-	if input.PreserveDir != nil {
-		allErrs = append(allErrs, field.Required(path, fmt.Sprintf("preserveDir option not possble for type %s", input.Type)))
-	}
-	path = fldPath.Child("followSymlinks")
-	if input.FollowSymlinks != nil {
-		allErrs = append(allErrs, field.Required(path, fmt.Sprintf("followSymlinks option not possble for type %s", input.Type)))
-	}
-	return allErrs
-}
 
 func FileInfo(ctx clictx.Context, path string, inputFilePath string) (os.FileInfo, string, error) {
 	var err error

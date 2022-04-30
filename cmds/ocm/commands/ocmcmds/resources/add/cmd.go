@@ -51,7 +51,7 @@ So far only component archives are supported as target.
 ` + (&template.Options{}).Usage() + `
 This command accepts  resource specification files describing the resources
 to add to a component version.
-` + inputs.Usage(inputs.Default),
+` + inputs.Usage(inputs.DefaultInputTypeScheme),
 	}
 }
 

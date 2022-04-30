@@ -66,6 +66,7 @@ For example:
 * [ocm <b>ocm</b>](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
 * [ocm <b>references</b>](ocm_references.md)	 - Commands related to component references in component versions
 * [ocm <b>resources</b>](ocm_resources.md)	 - Commands acting on component resources
+* [ocm <b>show</b>](ocm_show.md)	 - Show tags or versions
 * [ocm <b>sources</b>](ocm_sources.md)	 - Commands acting on component sources
 * [ocm <b>transfer</b>](ocm_transfer.md)	 - Transfer artefacts or components
 * [ocm <b>version</b>](ocm_version.md)	 - displays the version

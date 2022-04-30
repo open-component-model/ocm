@@ -58,6 +58,113 @@ There are several templaters that can be selected by the <code>--templater</code
     subkey: "abc (( values.MY_VAL ))"
   </pre>
 
+This command accepts (re)source specification files describing the sources
+to add to a component version.
+
+The resource specification supports the following blob input types, specified
+with the field <code>type</code> in the <code>input</code> field:
+
+- <code>file</code>
+
+  The path must denote a file relative the the resources file.
+  The content is compressed if the <code>compress</code> field
+  is set to <code>true</code>.
+
+  This blob type specification supports the following fields: 
+  - **<code>path</code>** *string*
+
+    This REQUIRED property describes the file path to the helm chart relative to the
+    resource file location.
+
+  - **<code>mediaType</code>** *sting*
+
+    This OPTIONAL property describes the media type to store with the local blob.
+    The default media type is application/octet-stream and
+    application/gzip if compression is enabled.
+
+  - **<code>compress</code>** *bool*
+
+    This OPTIONAL property describes whether the file content should be stored
+    compressed or not.
+- <code>helm</code>
+
+  The path must denote an helm chart archive or directory
+  relative to the resources file.
+  The denoted chart is packed as an OCI artefact set.
+  Additional provider info is taken from a file with the same name
+  and the suffix <code>.prov</code>.
+
+  If the chart should just be stored as archive, please use the 
+  type <code>file</code> or <code>dir</code>.
+
+  This blob type specification supports the following fields: 
+  - **<code>path</code>** *string*
+
+    This REQUIRED property describes the file path to the helm chart relative to the
+    resource file location.
+- <code>dir</code>
+
+  The path must denote a directory relative to the resources file, which is packed
+  with tar and optionally compressed
+  if the <code>compress</code> field is set to <code>true</code>. If the field
+  <code>preserveDir</code> is set to true the directory itself is added to the tar.
+  If the field <code>followSymLinks</code> is set to <code>true</code>, symbolic
+  links are not packed but their targets files or folders.
+  With the list fields <code>includeFiles</code> and <code>excludeFiles</code> it is 
+  possible to specify which files should be included or excluded. The values are
+  regular expression used to match relative file paths. If no inlcudes are specified
+  all file not explicitly excluded are used.
+
+  This blob type specification supports the following fields: 
+  - **<code>path</code>** *string*
+
+    This REQUIRED property describes the file path to directory relative to the
+    resource file location.
+
+  - **<code>mediaType</code>** *sting*
+
+    This OPTIONAL property describes the media type to store with the local blob.
+    The default media type is application/x-tar and
+    application/gzip if compression is enabled.
+
+  - **<code>compress</code>** *bool*
+
+    This OPTIONAL property describes whether the file content should be stored
+    compressed or not.
+
+  - **<code>preserveDir</code>** *bool*
+
+    This OPTIONAL property describes whether the specified directory with its
+    basename should be included as top level folder.
+
+  - **<code>followSymlinks</code>** *bool*
+
+    This OPTIONAL property describes whether symbolic links should be followed or
+    included as links.
+
+  - **<code>excludeFiles</code>** *list of regex*
+
+    This OPTIONAL property describes regular expressions used to match files 
+    that should NOT be included in the tar file. It takes precedence over
+    the include match.
+
+  - **<code>includeFiles</code>** *list of regex*
+
+    This OPTIONAL property describes regular expressions used to match files 
+    that should be included in the tar file. If this option is not given
+    all files not explicitly excluded are used.
+
+
+- <code>docker</code>
+
+  The path must denote an image tag that can be found in the local
+  docker daemon. The denoted image is packed an OCI artefact set.
+
+  This blob type specification supports the following fields: 
+  - **<code>path</code>** *string*
+
+    This REQUIRED property describes the image name to import from the
+    local docker daemon.
 
 ### SEE ALSO
 

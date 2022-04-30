@@ -66,6 +66,9 @@ func (s *Spec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.Tempo
 	}
 
 	if !s.Compress() {
+		if s.MediaType == "" {
+			s.MediaType = mime.MIME_OCTET
+		}
 		inputBlob.Close()
 		return accessio.BlobNopCloser(accessio.BlobAccessForFile(s.MediaType, inputPath, fs)), "", nil
 	}

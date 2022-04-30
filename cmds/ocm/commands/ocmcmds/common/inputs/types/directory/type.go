@@ -16,6 +16,7 @@ package directory
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	"github.com/open-component-model/ocm/pkg/mime"
 )
 
 const TYPE = "dir"
@@ -36,4 +37,45 @@ const usage = `
   With the list fields <code>includeFiles</code> and <code>excludeFiles</code> it is 
   possible to specify which files should be included or excluded. The values are
   regular expression used to match relative file paths. If no inlcudes are specified
-  all file not explicitly excluded are used.`
+  all file not explicitly excluded are used.
+
+  This blob type specification supports the following fields: 
+  - **<code>path</code>** *string*
+
+    This REQUIRED property describes the file path to directory relative to the
+    resource file location.
+
+  - **<code>mediaType</code>** *sting*
+
+    This OPTIONAL property describes the media type to store with the local blob.
+    The default media type is ` + mime.MIME_TAR + ` and
+    ` + mime.MIME_GZIP + ` if compression is enabled.
+
+  - **<code>compress</code>** *bool*
+
+    This OPTIONAL property describes whether the file content should be stored
+    compressed or not.
+
+  - **<code>preserveDir</code>** *bool*
+
+    This OPTIONAL property describes whether the specified directory with its
+    basename should be included as top level folder.
+
+  - **<code>followSymlinks</code>** *bool*
+
+    This OPTIONAL property describes whether symbolic links should be followed or
+    included as links.
+
+  - **<code>excludeFiles</code>** *list of regex*
+
+    This OPTIONAL property describes regular expressions used to match files 
+    that should NOT be included in the tar file. It takes precedence over
+    the include match.
+
+  - **<code>includeFiles</code>** *list of regex*
+
+    This OPTIONAL property describes regular expressions used to match files 
+    that should be included in the tar file. If this option is not given
+    all files not explicitly excluded are used.
+
+`

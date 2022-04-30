@@ -34,4 +34,10 @@ const usage = `
   and the suffix <code>.prov</code>.
 
   If the chart should just be stored as archive, please use the 
-  type <code>file</code> or <code>dir</code>.`
+  type <code>file</code> or <code>dir</code>.
+
+  This blob type specification supports the following fields: 
+  - **<code>path</code>** *string*
+
+    This REQUIRED property describes the file path to the helm chart relative to the
+    resource file location.`
