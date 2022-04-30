@@ -17,33 +17,41 @@ package docker
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-type Handler struct{}
+type Spec struct {
+	// PathSpec holds the repository path and tag of the image in the docker daemon
+	cpi.PathSpec
+}
 
-var _ inputs.InputHandler = (*Handler)(nil)
+var _ inputs.InputSpec = (*Spec)(nil)
 
-func (h *Handler) Validate(fldPath *field.Path, ctx clictx.Context, input *inputs.BlobInput, inputFilePath string) field.ErrorList {
-	allErrs := inputs.ForbidFileInfo(fldPath, input)
-	pathField := fldPath.Child("path")
-	if input.Path == "" {
-		allErrs = append(allErrs, field.Required(pathField, "path is required for input"))
-	} else {
-		_, _, err := docker.ParseGenericRef(input.Path)
+func New(pathtag string) *Spec {
+	return &Spec{
+		PathSpec: cpi.NewPathSpec(TYPE, pathtag),
+	}
+}
+
+func (s *Spec) Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath string) field.ErrorList {
+	allErrs := s.Validate(fldPath, ctx, inputFilePath)
+	if s.Path != "" {
+		pathField := fldPath.Child("path")
+		_, _, err := docker.ParseGenericRef(s.Path)
 		if err != nil {
-			allErrs = append(allErrs, field.Invalid(pathField, input.Path, err.Error()))
+			allErrs = append(allErrs, field.Invalid(pathField, s.Path, err.Error()))
 
 		}
 	}
 	return allErrs
 }
 
-func (h *Handler) GetBlob(ctx clictx.Context, input *inputs.BlobInput, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
-	locator, version, err := docker.ParseGenericRef(input.Path)
+func (s *Spec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+	locator, version, err := docker.ParseGenericRef(s.Path)
 	if err != nil {
 		return nil, "", err
 	}
@@ -62,13 +70,4 @@ func (h *Handler) GetBlob(ctx clictx.Context, input *inputs.BlobInput, inputFile
 		return nil, "", err
 	}
 	return blob, locator, nil
-}
-
-func (h *Handler) Usage() string {
-	return `
-- <code>docker</code>
-
-  The path must denote an image tag that can be found in the local
-  docker daemon. The denoted image is packed an OCI artefact set.
-`
 }

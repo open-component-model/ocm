@@ -12,34 +12,11 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package memory
+package handlers
 
 import (
-	"sync"
-
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/directory"
+	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/docker"
+	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/file"
+	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/helm"
 )
-
-const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/memory"
-
-type Repositories struct {
-	lock  sync.Mutex
-	repos map[string]*Repository
-}
-
-func newRepositories(datacontext.Context) interface{} {
-	return &Repositories{
-		repos: map[string]*Repository{},
-	}
-}
-
-func (r *Repositories) GetRepository(name string) *Repository {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-	repo := r.repos[name]
-	if repo == nil {
-		repo = NewRepository(name)
-		r.repos[name] = repo
-	}
-	return repo
-}

@@ -21,7 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 )
 
-const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/credentials/repositories/aliases"
+const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/aliases"
 
 type Repositories struct {
 	sync.RWMutex

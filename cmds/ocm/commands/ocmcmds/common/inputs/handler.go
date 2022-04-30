@@ -61,9 +61,9 @@ func (r *registry) Get(name string) InputHandler {
 func (r *registry) KnownTypes() []string {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
-	types:=make([]string, 0, len(r.handlers))
+	types := make([]string, 0, len(r.handlers))
 	for t := range r.handlers {
-		types=append(types, t)
+		types = append(types, t)
 	}
 	sort.Strings(types)
 	return types
@@ -80,9 +80,9 @@ func Get(name string) InputHandler {
 }
 
 func Usage(r Registry) string {
-	usage:="The following input types are supported:"
+	usage := "The following input types are supported:"
 	for _, t := range r.KnownTypes() {
-		usage+=r.Get(t).Usage()
+		usage += r.Get(t).Usage()
 	}
 	return usage
 }

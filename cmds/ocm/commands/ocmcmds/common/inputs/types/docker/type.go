@@ -12,36 +12,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package dockerconfig
+package docker
 
 import (
-	"sync"
-
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 )
 
-const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
+const TYPE = "docker"
 
-type Repositories struct {
-	lock  sync.Mutex
-	repos map[string]*Repository
+func init() {
+	inputs.DefaultInputTypeScheme.Register(TYPE, inputs.NewInputType(TYPE, &Spec{}, usage))
 }
 
-func newRepositories(datacontext.Context) interface{} {
-	return &Repositories{
-		repos: map[string]*Repository{},
-	}
-}
+const usage = `
+- <code>docker</code>
 
-func (r *Repositories) GetRepository(ctx cpi.Context, name string, propagate bool) (*Repository, error) {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-	var err error = nil
-	repo := r.repos[name]
-	if repo == nil {
-		repo, err = NewRepository(ctx, name, propagate)
-		r.repos[name] = repo
-	}
-	return repo, err
-}
+  The path must denote an image tag that can be found in the local
+  docker daemon. The denoted image is packed an OCI artefact set.`

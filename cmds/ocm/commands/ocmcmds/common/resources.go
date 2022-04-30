@@ -35,11 +35,14 @@ import (
 	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
+	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
 )
 
 type ResourceInput struct {
 	Access *runtime.UnstructuredTypedObject `json:"access"`
 	Input  *inputs.BlobInput                `json:"input,omitempty"`
+	//Input  *inputs.GenericInputSpec         `json:"input,omitempty"`
 }
 
 type ResourceSpecHandler interface {
@@ -178,7 +181,7 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 			}
 
 			for j, d := range list {
-				input, err := DecodeInput(d)
+				input, err := DecodeInput(d, o.Context)
 				if err != nil {
 					return errors.Newf("invalid spec %d[%d] in %q: %s", i+1, j+1, filePath, err)
 				}
@@ -251,9 +254,13 @@ func DecodeResource(data []byte, h ResourceSpecHandler) (ResourceSpec, error) {
 	return result, err
 }
 
-func DecodeInput(data []byte) (*ResourceInput, error) {
+func DecodeInput(data []byte, ctx clictx.Context) (*ResourceInput, error) {
 	var input ResourceInput
 	err := runtime.DefaultYAMLEncoding.Unmarshal(data, &input)
+	if err != nil {
+		return nil, err
+	}
+	_, err = input.Input.Evaluate(inputs.For(ctx))
 	if err != nil {
 		return nil, err
 	}
@@ -271,7 +278,7 @@ func DecodeInput(data []byte) (*ResourceInput, error) {
 	if err != nil {
 		return nil, err
 	}
-	var fldPath field.Path
+	var fldPath *field.Path
 	err = utils.CheckForUnknown(fldPath.Child("input"), plainOrig["input"], plainAccepted).ToAggregate()
 	return &input, err
 }

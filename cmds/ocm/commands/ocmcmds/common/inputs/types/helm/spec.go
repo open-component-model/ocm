@@ -15,39 +15,45 @@
 package helm
 
 import (
-	"os"
-
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm/loader"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
-type Handler struct{}
+type Spec struct {
+	// PathSpec hold the path that points to the helm chart file
+	cpi.PathSpec `json:",inline"`
+}
 
-var _ inputs.InputHandler = (*Handler)(nil)
+var _ inputs.InputSpec = (*Spec)(nil)
 
-func (h *Handler) Validate(fldPath *field.Path, ctx clictx.Context, input *inputs.BlobInput, inputFilePath string) field.ErrorList {
-	allErrs := inputs.ForbidFileInfo(fldPath, input)
-	path := fldPath.Child("path")
-	if input.Path == "" {
-		allErrs = append(allErrs, field.Required(path, "path is required for input"))
-	} else {
-		inputInfo, filePath, err := inputs.FileInfo(ctx, input.Path, inputFilePath)
+func New(path string) *Spec {
+	return &Spec{
+		PathSpec: cpi.NewPathSpec(TYPE, path),
+	}
+}
+
+func (s *Spec) Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath string) field.ErrorList {
+	allErrs := s.PathSpec.Validate(fldPath, ctx, inputFilePath)
+	if s.Path != "" {
+		path := fldPath.Child("path")
+		inputInfo, filePath, err := inputs.FileInfo(ctx, s.Path, inputFilePath)
 		if err != nil {
 			allErrs = append(allErrs, field.Invalid(path, filePath, err.Error()))
 		}
-		if !inputInfo.IsDir() && inputInfo.Mode()&os.ModeType != 0 {
+		if !inputInfo.Mode().IsDir() && !inputInfo.Mode().IsRegular() {
 			allErrs = append(allErrs, field.Invalid(path, filePath, "no regular file or directory"))
 		}
 	}
 	return allErrs
 }
 
-func (h *Handler) GetBlob(ctx clictx.Context, input *inputs.BlobInput, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
-	_, inputPath, err := inputs.FileInfo(ctx, input.Path, inputFilePath)
+func (s *Spec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+	_, inputPath, err := inputs.FileInfo(ctx, s.Path, inputFilePath)
 	if err != nil {
 		return nil, "", err
 	}
@@ -60,19 +66,4 @@ func (h *Handler) GetBlob(ctx clictx.Context, input *inputs.BlobInput, inputFile
 		return nil, "", err
 	}
 	return blob, chart.Metadata.Name, err
-}
-
-func (h *Handler) Usage() string {
-	return `
-- <code>helm</code>
-
-  The path must denote an helm chart archive or directory
-  relative to the resources file.
-  The denoted chart is packed as an OCI artefact set.
-  Additional provider info is taken from a file with the same name
-  and the suffix <code>.prov</code>.
-
-  If the chart should just be stored as archive, please use the 
-  type <code>file</code> or <code>dir</code>.
-`
 }

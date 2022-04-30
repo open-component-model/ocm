@@ -48,7 +48,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Long: `
 Add resource information specified in a resource file to a component version.
 So far only component archives are supported as target.
-` + (&template.Options{}).Usage()+`
+` + (&template.Options{}).Usage() + `
 This command accepts  resource specification files describing the resources
 to add to a component version.
 ` + inputs.Usage(inputs.Default),

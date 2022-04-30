@@ -12,36 +12,21 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package dockerconfig
+package file
 
 import (
-	"sync"
-
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 )
 
-const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
+const TYPE = "file"
 
-type Repositories struct {
-	lock  sync.Mutex
-	repos map[string]*Repository
+func init() {
+	inputs.DefaultInputTypeScheme.Register(TYPE, inputs.NewInputType(TYPE, &Spec{}, usage))
 }
 
-func newRepositories(datacontext.Context) interface{} {
-	return &Repositories{
-		repos: map[string]*Repository{},
-	}
-}
+const usage = `
+- <code>file</code>
 
-func (r *Repositories) GetRepository(ctx cpi.Context, name string, propagate bool) (*Repository, error) {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-	var err error = nil
-	repo := r.repos[name]
-	if repo == nil {
-		repo, err = NewRepository(ctx, name, propagate)
-		r.repos[name] = repo
-	}
-	return repo, err
-}
+  The path must denote a file relative the the resources file.
+  The content is compressed if the <code>compress</code> field
+  is set to <code>true</code>.`

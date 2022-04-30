@@ -27,6 +27,9 @@ import (
 type Context interface {
 	// GetType returns the context type
 	GetType() string
+
+	// AttributesContext returns the shared attributes
+	AttributesContext() AttributesContext
 	// BindTo binds the context to a context.Context and makes it
 	// retrievable by a ForContext method
 	BindTo(ctx context.Context) context.Context
@@ -48,7 +51,7 @@ type AttributesContext interface {
 type AttributeFactory func(Context) interface{}
 
 type Attributes interface {
-	GetAttribute(name string) interface{}
+	GetAttribute(name string, def ...interface{}) interface{}
 	SetAttribute(name string, value interface{})
 	GetOrCreateAttribute(name string, creator AttributeFactory) interface{}
 }
@@ -105,6 +108,10 @@ func (c *_context) BindTo(ctx context.Context) context.Context {
 	return context.WithValue(ctx, c.key, c.effective)
 }
 
+func (c *_context) AttributesContext() AttributesContext {
+	return c
+}
+
 func (c *_context) GetAttributes() Attributes {
 	return c.attributes
 }
@@ -132,15 +139,21 @@ func newAttributes(ctx Context, parent Attributes) *_attributes {
 	}
 }
 
-func (c *_attributes) GetAttribute(name string) interface{} {
+func (c *_attributes) GetAttribute(name string, def ...interface{}) interface{} {
 	c.RLock()
 	defer c.RUnlock()
-	a := c.attributes[name]
-	if a != nil {
+	if a := c.attributes[name]; a != nil {
 		return a
 	}
 	if c.parent != nil {
-		return c.parent.GetAttribute(name)
+		if a := c.parent.GetAttribute(name); a != nil {
+			return a
+		}
+	}
+	for _, d := range def {
+		if d != nil {
+			return d
+		}
 	}
 	return nil
 }
@@ -154,8 +167,13 @@ func (c *_attributes) SetAttribute(name string, value interface{}) {
 func (c *_attributes) GetOrCreateAttribute(name string, creator AttributeFactory) interface{} {
 	c.Lock()
 	defer c.Unlock()
-	if v, ok := c.attributes[name]; ok {
+	if v := c.attributes[name]; v != nil {
 		return v
+	}
+	if c.parent != nil {
+		if v := c.parent.GetAttribute(name); v != nil {
+			return v
+		}
 	}
 	v := creator(c.ctx)
 	c.attributes[name] = v

@@ -25,7 +25,7 @@ const (
 	EmptyRepositoryTypeV1 = EmptyRepositoryType + runtime.VersionSeparator + "v1"
 )
 
-const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/oci/repositories/empty"
+const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/empty"
 
 func init() {
 	cpi.RegisterRepositoryType(EmptyRepositoryType, cpi.NewRepositoryType(EmptyRepositoryType, &RepositorySpec{}))

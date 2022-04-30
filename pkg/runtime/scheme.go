@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"sort"
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -158,6 +159,16 @@ func (t KnownTypes) Copy() KnownTypes {
 	return n
 }
 
+// TypeNames return a sorted list of known type names
+func (t KnownTypes) TypeNames() []string {
+	types := make([]string, 0, len(t))
+	for t := range t {
+		types = append(types, t)
+	}
+	sort.Strings(types)
+	return types
+}
+
 // Scheme is the interface to describe a set of object types
 // that implement a dedicated interface.
 // As such it knows about the desired interface of the instances
@@ -177,6 +188,7 @@ type Scheme interface {
 	EnforceDecode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
 	AddKnownTypes(scheme Scheme)
 	KnownTypes() KnownTypes
+	KnownTypeNames() []string
 }
 
 type defaultScheme struct {
@@ -239,6 +251,16 @@ func (d *defaultScheme) AddKnownTypes(s Scheme) {
 
 func (d *defaultScheme) KnownTypes() KnownTypes {
 	return d.types.Copy()
+}
+
+// KnownTypeNames return a sorted list of known type names
+func (d *defaultScheme) KnownTypeNames() []string {
+	types := make([]string, 0, len(d.types))
+	for t := range d.types {
+		types = append(types, t)
+	}
+	sort.Strings(types)
+	return types
 }
 
 func RegisterByType(s Scheme, typ string, proto TypedObject) error {

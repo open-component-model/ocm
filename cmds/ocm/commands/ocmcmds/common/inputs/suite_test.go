@@ -12,36 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package dockerconfig
+package inputs_test
 
 import (
-	"sync"
+	"testing"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
-
-type Repositories struct {
-	lock  sync.Mutex
-	repos map[string]*Repository
-}
-
-func newRepositories(datacontext.Context) interface{} {
-	return &Repositories{
-		repos: map[string]*Repository{},
-	}
-}
-
-func (r *Repositories) GetRepository(ctx cpi.Context, name string, propagate bool) (*Repository, error) {
-	r.lock.Lock()
-	defer r.lock.Unlock()
-	var err error = nil
-	repo := r.repos[name]
-	if repo == nil {
-		repo, err = NewRepository(ctx, name, propagate)
-		r.repos[name] = repo
-	}
-	return repo, err
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Resource Blob Inputs")
 }

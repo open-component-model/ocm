@@ -16,10 +16,7 @@ package inputs
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 
-	"github.com/open-component-model/ocm/pkg/errors"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
@@ -27,30 +24,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-// MediaTypeTar defines the media type for a tarred file
-const MediaTypeTar = mime.MIME_TAR
-
-// MediaTypeGZip defines the media type for a gzipped file
-const MediaTypeGZip = mime.MIME_GZIP
-
-// MediaTypeOctetStream is the media type for any binary data.
-const MediaTypeOctetStream = "application/octet-stream"
-
-type BlobInputType string
-
-const (
-	FileInputType   BlobInputType = "file"
-	DirInputType    BlobInputType = "dir"
-	DockerInputType BlobInputType = "docker"
-	HelmInputType   BlobInputType = "helm"
-)
-
 // BlobInput defines a local resource input that should be added to the component descriptor and
 // to the resource's access.
 type BlobInput struct {
 	// Type defines the input type of the blob to be added.
 	// Note that a input blob of type "dir" is automatically tarred.
-	Type BlobInputType `json:"type"`
+	Type string `json:"type"`
 	// MediaType is the mediatype of the defined file that is also added to the oci layer.
 	// Should be a custom media type in the form of "application/vnd.<mydomain>.<my description>"
 	MediaType string `json:"mediaType,omitempty"`
@@ -91,49 +70,10 @@ func (input *BlobInput) SetMediaTypeIfNotDefined(mediaType string) {
 	input.MediaType = mediaType
 }
 
-func (input *BlobInput) GetPath(ctx clictx.Context, inputFilePath string) (string, error) {
-	fs := ctx.FileSystem()
-	if input.Path == "" {
-		return "", fmt.Errorf("path attribute required")
-	}
-	if filepath.IsAbs(input.Path) {
-		return input.Path, nil
-	} else {
-		var wd string
-		if len(inputFilePath) == 0 {
-			// default to working directory if no input filepath is given
-			var err error
-			wd, err = fs.Getwd()
-			if err != nil {
-				return "", fmt.Errorf("unable to read current working directory: %w", err)
-			}
-		} else {
-			wd = filepath.Dir(inputFilePath)
-		}
-		return filepath.Join(wd, input.Path), nil
-	}
-}
-
-func (input *BlobInput) FileInfo(ctx clictx.Context, inputFilePath string) (os.FileInfo, string, error) {
-	var err error
-	var inputInfo os.FileInfo
-
-	fs := ctx.FileSystem()
-	inputPath, err := input.GetPath(ctx, inputFilePath)
-	if err != nil {
-		return nil, "", err
-	}
-	inputInfo, err = fs.Stat(inputPath)
-	if err != nil {
-		return nil, "", errors.Wrapf(err, "input path %q", inputPath)
-	}
-	return inputInfo, inputPath, nil
-}
-
 // GetBlob provides a BlobAccess for the actual input.
 func (input *BlobInput) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
-	hdlr:=Default.Get(string(input.Type))
-	if hdlr==nil {
+	hdlr := Default.Get(input.Type)
+	if hdlr == nil {
 		return nil, "", fmt.Errorf("unknown input type %q", input.Type)
 	}
 	return hdlr.GetBlob(ctx, input, inputFilePath)
@@ -145,15 +85,19 @@ func (input *BlobInput) Validate(fldPath *field.Path, ctx clictx.Context, inputF
 	}
 	allErrs := field.ErrorList{}
 	path := fldPath.Child("type")
-	if input.Type=="" {
+	if input.Type == "" {
 		allErrs = append(allErrs, field.Required(path, "input type required"))
 	} else {
-		hdlr:=Default.Get(string(input.Type))
-		if hdlr==nil {
+		hdlr := Default.Get(input.Type)
+		if hdlr == nil {
 			allErrs = append(allErrs, field.NotSupported(path, input.Type, Default.KnownTypes()))
 		} else {
 			allErrs = append(allErrs, hdlr.Validate(fldPath, ctx, input, inputFilePath)...)
 		}
 	}
 	return allErrs
+}
+
+func (input *BlobInput) Evaluate(scheme InputTypeScheme) (InputSpec, error) {
+	return nil, nil
 }

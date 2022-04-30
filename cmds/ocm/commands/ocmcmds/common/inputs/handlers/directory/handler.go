@@ -30,12 +30,12 @@ type Handler struct{}
 var _ inputs.InputHandler = (*Handler)(nil)
 
 func (h *Handler) Validate(fldPath *field.Path, ctx clictx.Context, input *inputs.BlobInput, inputFilePath string) field.ErrorList {
-	allErrs := inputs.ForbidFilePattern(fldPath, input)
+	allErrs := field.ErrorList{}
 	path := fldPath.Child("path")
 	if input.Path == "" {
 		allErrs = append(allErrs, field.Required(path, "path is required for input"))
 	} else {
-		inputInfo, filePath, err := input.FileInfo(ctx, inputFilePath)
+		inputInfo, filePath, err := inputs.FileInfo(ctx, input.Path, inputFilePath)
 		if err != nil {
 			allErrs = append(allErrs, field.Invalid(path, filePath, err.Error()))
 		}
@@ -48,7 +48,7 @@ func (h *Handler) Validate(fldPath *field.Path, ctx clictx.Context, input *input
 
 func (h *Handler) GetBlob(ctx clictx.Context, input *inputs.BlobInput, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
 	fs := ctx.FileSystem()
-	inputInfo, inputPath, err := input.FileInfo(ctx, inputFilePath)
+	inputInfo, inputPath, err := inputs.FileInfo(ctx, input.Path, inputFilePath)
 	if !inputInfo.IsDir() {
 		return nil, "", fmt.Errorf("resource type is dir but a file was provided")
 	}
