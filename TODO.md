@@ -1,7 +1,5 @@
 
-- [X] migrate resource add input spec to typed spec
 - [ ] Transfer should support force option for override
-- [ ] Add Close method to access method to support external resource management
 - [ ] Clarify how to list digests in (oci) ctf and artefact set under common oci API abstraction
 - [ ] Align OCI and OCM Repository Name with type structure and reference syntax
 - [ ] Aligned Denotation for OCM and OCI elements
@@ -24,3 +22,5 @@
 - [ ] add optional reference name to resource input
 - [ ] remove registry from default output and show only with wide output option (get artefact)
 - [ ] error handling for applying config (especially usage of ErrNoContext)
+- [X] migrate resource add input spec to typed spec
+- [X] Add Close method to access method to support external resource management

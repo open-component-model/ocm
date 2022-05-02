@@ -115,6 +115,7 @@ func CopyVersion(hist common.History, src ocm.ComponentVersionAccess, t ocm.Comp
 		if err == nil {
 			m, err = r.AccessMethod()
 			if err == nil {
+				defer m.Close()
 				ok := a.IsLocal(src.GetContext())
 				if !ok {
 					ok, err = handler.TransferResource(src, a, r)
@@ -134,6 +135,7 @@ func CopyVersion(hist common.History, src ocm.ComponentVersionAccess, t ocm.Comp
 		if err == nil {
 			m, err = r.AccessMethod()
 			if err == nil {
+				defer m.Close()
 				ok := a.IsLocal(src.GetContext())
 				if !ok {
 					ok, err = handler.TransferSource(src, a, r)

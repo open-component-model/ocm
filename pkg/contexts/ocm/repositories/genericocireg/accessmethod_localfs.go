@@ -16,6 +16,7 @@ package genericocireg
 
 import (
 	"io"
+	"sync"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -27,6 +28,8 @@ import (
 )
 
 type localFilesystemBlobAccessMethod struct {
+	lock   sync.Mutex
+	data   accessio.DataAccess
 	ctx    cpi.Context
 	spec   *localblob.AccessSpec
 	access oci.NamespaceAccess
@@ -46,7 +49,25 @@ func (m *localFilesystemBlobAccessMethod) GetKind() string {
 	return localblob.Type
 }
 
+func (m *localFilesystemBlobAccessMethod) Close() error {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	if m.data != nil {
+		tmp := m.data
+		m.data = nil
+		return tmp.Close()
+	}
+	return nil
+}
+
 func (m *localFilesystemBlobAccessMethod) getBlob() (cpi.DataAccess, error) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	if m.data != nil {
+		return m.data, nil
+	}
 	if artdesc.IsOCIMediaType(m.spec.MediaType) {
 
 		// may be we should always store the blob, additionally to the
@@ -57,7 +78,12 @@ func (m *localFilesystemBlobAccessMethod) getBlob() (cpi.DataAccess, error) {
 			return nil, errors.ErrNotImplemented("artefact blob synthesis")
 		}
 	}
-	return m.access.GetBlobData(digest.Digest(m.spec.LocalReference))
+	data, err := m.access.GetBlobData(digest.Digest(m.spec.LocalReference))
+	if err != nil {
+		return nil, err
+	}
+	m.data = data
+	return m.data, err
 }
 
 func (m *localFilesystemBlobAccessMethod) Reader() (io.ReadCloser, error) {

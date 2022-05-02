@@ -16,6 +16,7 @@ package ociblob
 
 import (
 	"io"
+	"sync"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -70,35 +71,55 @@ func (s AccessSpec) IsLocal(context cpi.Context) bool {
 }
 
 func (s *AccessSpec) AccessMethod(access cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
-	return &accessMethod{access, s}, nil
+	return &accessMethod{comp: access, spec: s}, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// TODO add cache
+
 type accessMethod struct {
+	lock sync.Mutex
+	blob accessio.BlobAccess
 	comp cpi.ComponentVersionAccess
 	spec *AccessSpec
 }
 
 var _ cpi.AccessMethod = (*accessMethod)(nil)
 
-func (o *accessMethod) GetKind() string {
+func (m *accessMethod) GetKind() string {
 	return Type
 }
 
-func (o *accessMethod) Get() ([]byte, error) {
-	return accessio.BlobData(o.getBlob())
+func (m *accessMethod) Close() error {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	if m.blob != nil {
+		m.blob.Close()
+		m.blob = nil
+	}
+	return nil
 }
 
-func (o *accessMethod) Reader() (io.ReadCloser, error) {
-	return accessio.BlobReader(o.getBlob())
+func (m *accessMethod) Get() ([]byte, error) {
+	return accessio.BlobData(m.getBlob())
 }
 
-func (o *accessMethod) MimeType() string {
-	return o.MimeType()
+func (m *accessMethod) Reader() (io.ReadCloser, error) {
+	return accessio.BlobReader(m.getBlob())
+}
+
+func (m *accessMethod) MimeType() string {
+	return m.MimeType()
 }
 
 func (m *accessMethod) getBlob() (cpi.BlobAccess, error) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	if m.blob != nil {
+		return m.blob, nil
+	}
 	ref, err := oci.ParseRef(m.spec.Reference)
 	if err != nil {
 		return nil, err
@@ -126,5 +147,6 @@ func (m *accessMethod) getBlob() (cpi.BlobAccess, error) {
 	if m.spec.Size <= 0 {
 		m.spec.Size = -1
 	}
-	return accessio.BlobAccessForDataAccess(m.spec.Digest, m.spec.Size, m.spec.MediaType, acc), nil
+	m.blob = accessio.BlobAccessForDataAccess(m.spec.Digest, m.spec.Size, m.spec.MediaType, acc)
+	return m.blob, nil
 }

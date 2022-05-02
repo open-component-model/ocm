@@ -115,7 +115,10 @@ var _ = Describe("Transfer handler", func() {
 
 		r, err := comp.GetResourceByIndex(1)
 		Expect(err).To(Succeed())
-		reader, err := r.Reader()
+		meth, err := r.AccessMethod()
+		Expect(err).To(Succeed())
+		defer meth.Close()
+		reader, err := meth.Reader()
 		Expect(err).To(Succeed())
 		defer reader.Close()
 		set, err := artefactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(reader))

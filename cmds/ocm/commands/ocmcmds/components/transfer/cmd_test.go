@@ -25,6 +25,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
@@ -134,9 +135,9 @@ transferring version "github.com/mandelsoft/test:v1"...
 		Expect(err).To(Succeed())
 		Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"type\":\"localBlob\"}"))
 
-		r, err := comp.GetResourceByIndex(1)
+		racc, err := comp.GetResourceByIndex(1)
 		Expect(err).To(Succeed())
-		reader, err := r.Reader()
+		reader, err := ocm.ResourceReader(racc)
 		Expect(err).To(Succeed())
 		defer reader.Close()
 		set, err := artefactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(reader))

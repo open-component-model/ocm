@@ -54,6 +54,7 @@ type DataReader interface {
 type DataAccess interface {
 	DataGetter
 	DataReader
+	io.Closer
 }
 
 type MimeType interface {
@@ -74,10 +75,10 @@ type BlobAccess interface {
 }
 
 // TemporaryBlobAccess describes a blob with temporary allocated external resources.
-// The will be releases, when the close method is called
+// They will be releases, when the close method is called
 type TemporaryBlobAccess interface {
 	BlobAccess
-	Close() error
+	IsValid() bool
 }
 
 type DigestSource interface {
@@ -87,24 +88,22 @@ type DigestSource interface {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type Access = interface{}
+type NopCloser struct{}
 
-func CloseAccess(a Access) error {
-	if c, ok := a.(io.Closer); ok {
-		return c.Close()
-	}
+func (NopCloser) Close() error {
 	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type dataAccess struct {
+	NopCloser
 	fs   vfs.FileSystem
 	path string
 }
 
 func DataAccessForFile(fs vfs.FileSystem, path string) DataAccess {
-	return &dataAccess{fs, path}
+	return &dataAccess{fs: fs, path: path}
 }
 
 func (a *dataAccess) Get() ([]byte, error) {
@@ -118,11 +117,12 @@ func (a *dataAccess) Reader() (io.ReadCloser, error) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type bytesAccess struct {
+	NopCloser
 	data []byte
 }
 
 func DataAccessForBytes(data []byte) DataAccess {
-	return &bytesAccess{data}
+	return &bytesAccess{data: data}
 }
 
 func (a *bytesAccess) Get() ([]byte, error) {
@@ -166,6 +166,17 @@ func BlobAccessForData(mimeType string, data []byte) BlobAccess {
 		mimeType: mimeType,
 		access:   DataAccessForBytes(data),
 	}
+}
+
+func (b *blobAccess) Close() error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	if b.access != nil {
+		tmp := b.access
+		b.access = nil
+		return tmp.Close()
+	}
+	return ErrClosed
 }
 
 func (b *blobAccess) Get() ([]byte, error) {
@@ -245,7 +256,7 @@ var _ BlobAccess = (*fileBlobAccess)(nil)
 func BlobAccessForFile(mimeType string, path string, fs vfs.FileSystem) BlobAccess {
 	return &fileBlobAccess{
 		mimeType:   mimeType,
-		dataAccess: dataAccess{fs, path},
+		dataAccess: dataAccess{fs: fs, path: path},
 	}
 }
 
@@ -285,12 +296,29 @@ type blobNopCloser struct {
 	BlobAccess
 }
 
-func BlobNopCloser(blob BlobAccess) TemporaryBlobAccess {
+func BlobNopCloser(blob BlobAccess) BlobAccess {
 	return &blobNopCloser{blob}
 }
 
 func (b *blobNopCloser) Close() error {
 	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type temporaryBlobAccess struct {
+	BlobAccess
+}
+
+func TemporaryBlobAccessFor(blob BlobAccess) TemporaryBlobAccess {
+	if t, ok := blob.(TemporaryBlobAccess); ok {
+		return t
+	}
+	return &temporaryBlobAccess{blob}
+}
+
+func (b *temporaryBlobAccess) IsValid() bool {
+	return true
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -303,6 +331,7 @@ type TemporaryFileSystemBlobAccess interface {
 
 type temporaryBlob struct {
 	BlobAccess
+	lock       sync.Mutex
 	temp       vfs.File
 	filesystem vfs.FileSystem
 }
@@ -315,29 +344,38 @@ func TempFileBlobAccess(mime string, fs vfs.FileSystem, temp vfs.File) Temporary
 	}
 }
 
-func (a *temporaryBlob) Close() error {
-	if a.temp != nil {
+func (b *temporaryBlob) IsValid() bool {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	return b.temp != nil
+}
+
+func (b *temporaryBlob) Close() error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	if b.temp != nil {
 		list := errors.ErrListf("temporary blob")
-		list.Add(a.temp.Close())
-		list.Add(a.filesystem.Remove(a.temp.Name()))
-		a.temp = nil
+		list.Add(b.temp.Close())
+		list.Add(b.filesystem.Remove(b.temp.Name()))
+		b.temp = nil
+		b.BlobAccess = nil
 		return list.Result()
 	}
 	return nil
 }
 
-func (a *temporaryBlob) FileSystem() vfs.FileSystem {
-	return a.filesystem
+func (b *temporaryBlob) FileSystem() vfs.FileSystem {
+	return b.filesystem
 }
 
-func (a *temporaryBlob) Path() string {
-	return a.temp.Name()
+func (b *temporaryBlob) Path() string {
+	return b.temp.Name()
 }
 
 // TempFile holds a temporary file that should be kept open.
-// Close should neven be called directly.
-// It can be passed to another responsibility realm be Release
-// are transformed into a TemporaryBlobAccess.
+// Close should never be called directly.
+// It can be passed to another responsibility realm by calling Release
+// For example to be transformed into a TemporaryBlobAccess.
 // Close will close and remove an unreleased file and does
 // nothing if it has been released.
 // If it has been releases the new realm is responsible.

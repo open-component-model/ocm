@@ -15,10 +15,8 @@
 package comparch
 
 import (
-	"io"
 	"strconv"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -281,28 +279,12 @@ type BaseAccess struct {
 	access compdesc.AccessSpec
 }
 
-func (r BaseAccess) Access() (cpi.AccessSpec, error) {
+func (r *BaseAccess) Access() (cpi.AccessSpec, error) {
 	return r.vers.getAccessSpec(r.access)
 }
 
-func (r BaseAccess) AccessMethod() (cpi.AccessMethod, error) {
+func (r *BaseAccess) AccessMethod() (cpi.AccessMethod, error) {
 	return r.vers.getAccessMethod(r.access)
-}
-
-func (r BaseAccess) Get() ([]byte, error) {
-	return accessio.BlobData(r.AccessMethod())
-}
-
-func (r BaseAccess) Reader() (io.ReadCloser, error) {
-	return accessio.BlobReader(r.AccessMethod())
-}
-
-func (r BaseAccess) MimeType() string {
-	m, err := r.AccessMethod()
-	if err != nil {
-		return ""
-	}
-	return m.MimeType()
 }
 
 ////////////////////////////////////////////////////////////////////////////////

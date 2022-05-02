@@ -16,6 +16,7 @@ package ociregistry
 
 import (
 	"io"
+	"sync"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -66,6 +67,8 @@ func (a *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMetho
 ////////////////////////////////////////////////////////////////////////////////
 
 type accessMethod struct {
+	lock sync.Mutex
+	blob artefactset.ArtefactBlob
 	comp cpi.ComponentVersionAccess
 	spec *AccessSpec
 }
@@ -82,6 +85,17 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, erro
 
 func (m *accessMethod) GetKind() string {
 	return Type
+}
+
+func (m *accessMethod) Close() error {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	if m.blob != nil {
+		tmp := m.blob
+		m.blob = nil
+		return tmp.Close()
+	}
+	return nil
 }
 
 func (m *accessMethod) eval() (oci.Repository, *oci.RefSpec, error) {
@@ -122,8 +136,7 @@ func (m *accessMethod) Get() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer blob.Close()
-	return m.Get()
+	return blob.Get()
 }
 
 func (m *accessMethod) Reader() (io.ReadCloser, error) {
@@ -135,7 +148,8 @@ func (m *accessMethod) Reader() (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
-	return accessio.AddCloser(r, b, "synthesized artefact"), nil
+	//return accessio.AddCloser(r, b, "synthesized artefact"), nil
+	return r, nil
 }
 
 func (m *accessMethod) MimeType() string {
@@ -147,6 +161,11 @@ func (m *accessMethod) MimeType() string {
 }
 
 func (m *accessMethod) getBlob() (artefactset.ArtefactBlob, error) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	if m.blob != nil {
+		return m.blob, nil
+	}
 	repo, ref, err := m.eval()
 	if err != nil {
 		return nil, err
@@ -155,9 +174,9 @@ func (m *accessMethod) getBlob() (artefactset.ArtefactBlob, error) {
 	if err != nil {
 		return nil, err
 	}
-	blob, err := artefactset.SynthesizeArtefactBlob(ns, ref.Version())
+	m.blob, err = artefactset.SynthesizeArtefactBlob(ns, ref.Version())
 	if err != nil {
 		return nil, err
 	}
-	return blob, nil
+	return m.blob, nil
 }

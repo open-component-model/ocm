@@ -32,7 +32,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 )
 
+// TODO: add cache
+
 type dataAccess struct {
+	accessio.NopCloser
 	lock    sync.Mutex
 	fetcher remotes.Fetcher
 	desc    artdesc.Descriptor

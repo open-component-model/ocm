@@ -57,7 +57,6 @@ type ComponentReference = compdesc.ComponentReference
 type BaseAccess interface {
 	Access() (AccessSpec, error)
 	AccessMethod() (AccessMethod, error)
-	DataAccess
 }
 
 type ResourceAccess interface {

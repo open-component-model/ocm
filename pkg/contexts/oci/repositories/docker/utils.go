@@ -25,6 +25,7 @@ import (
 
 	"github.com/containers/image/v5/docker/daemon"
 	"github.com/containers/image/v5/types"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/opencontainers/go-digest"
 )
@@ -78,7 +79,10 @@ func ImageId(art cpi.Artefact) digest.Digest {
 	return digest.Digest(m.Config.Digest.Hex()[:12])
 }
 
+// TODO add cache
+
 type dataAccess struct {
+	accessio.NopCloser
 	lock   sync.Mutex
 	info   types.BlobInfo
 	src    types.ImageSource

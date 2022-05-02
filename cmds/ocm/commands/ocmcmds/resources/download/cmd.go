@@ -171,7 +171,7 @@ func (d *download) Save(o *elemhdlr.Object, f string) error {
 	dest := destoption.From(d.opts)
 	r := common.Elem(o)
 	id := r.GetIdentity(o.Version.GetDescriptor().Resources)
-	acc, err := o.Version.GetResource(id)
+	racc, err := o.Version.GetResource(id)
 	if err != nil {
 		return err
 	}
@@ -180,7 +180,7 @@ func (d *download) Save(o *elemhdlr.Object, f string) error {
 	if err != nil {
 		return err
 	}
-	rd, err := acc.Reader()
+	rd, err := ocm.ResourceReader(racc)
 	if err != nil {
 		return err
 	}

@@ -79,6 +79,7 @@ func (_ localfsblobConverterV1) ConvertTo(object interface{}) (cpi.AccessSpec, e
 ////////////////////////////////////////////////////////////////////////////////
 
 type localFilesystemBlobAccessMethod struct {
+	accessio.NopCloser
 	spec *localblob.AccessSpec
 	base ComponentVersionContainer
 }
