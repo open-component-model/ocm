@@ -25,7 +25,7 @@ import (
 
 type Index ociv1.Index
 
-var _ BlobDescriptorSource = (*Manifest)(nil)
+var _ BlobDescriptorSource = (*Index)(nil)
 
 func NewIndex() *Index {
 	return &Index{
@@ -34,6 +34,10 @@ func NewIndex() *Index {
 		Manifests:   nil,
 		Annotations: nil,
 	}
+}
+
+func (i *Index) IsValid() bool {
+	return true
 }
 
 func (i *Index) GetBlobDescriptor(digest digest.Digest) *Descriptor {

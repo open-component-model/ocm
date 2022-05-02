@@ -64,22 +64,6 @@ to add to a component version.
 The resource specification supports the following blob input types, specified
 with the field <code>type</code> in the <code>input</code> field:
 
-- <code>helm</code>
-
-  The path must denote an helm chart archive or directory
-  relative to the resources file.
-  The denoted chart is packed as an OCI artefact set.
-  Additional provider info is taken from a file with the same name
-  and the suffix <code>.prov</code>.
-
-  If the chart should just be stored as archive, please use the 
-  type <code>file</code> or <code>dir</code>.
-
-  This blob type specification supports the following fields: 
-  - **<code>path</code>** *string*
-
-    This REQUIRED property describes the file path to the helm chart relative to the
-    resource file location.
 - <code>dir</code>
 
   The path must denote a directory relative to the resources file, which is packed
@@ -165,6 +149,22 @@ with the field <code>type</code> in the <code>input</code> field:
 
     This OPTIONAL property describes whether the file content should be stored
     compressed or not.
+- <code>helm</code>
+
+  The path must denote an helm chart archive or directory
+  relative to the resources file.
+  The denoted chart is packed as an OCI artefact set.
+  Additional provider info is taken from a file with the same name
+  and the suffix <code>.prov</code>.
+
+  If the chart should just be stored as archive, please use the 
+  type <code>file</code> or <code>dir</code>.
+
+  This blob type specification supports the following fields: 
+  - **<code>path</code>** *string*
+
+    This REQUIRED property describes the file path to the helm chart relative to the
+    resource file location.
 
 ### SEE ALSO
 

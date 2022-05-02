@@ -12,27 +12,26 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package ocicmds
+package tags
 
 import (
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/tags/show"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/spf13/cobra"
-
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/ctf"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/tags"
 )
+
+var Names = names.Tags
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:              utils.SubCmdUse("oci"),
-		Short:            "Dedicated command flavors for the OCI layer",
+		Use:              utils.SubCmdUse(Names[0]),
+		Aliases:          Names[1:],
+		Short:            "Commands acting on OCI tag names",
 		TraverseChildren: true,
 	}
-	cmd.AddCommand(artefacts.NewCommand(ctx))
-	cmd.AddCommand(ctf.NewCommand(ctx))
-	cmd.AddCommand(tags.NewCommand(ctx))
+	cmd.AddCommand(show.NewCommand(ctx, show.Verb))
 	return cmd
 }

@@ -12,10 +12,9 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package names
+package builder
 
-var (
-	Artefacts        = []string{"artefacts", "artefact", "art", "a"}
-	Tags             = []string{"tags"}
-	TransportArchive = []string{"transportarchive", "ctf"}
-)
+func (b *Builder) Tags(tags ...string) {
+	b.expect(b.oci_tags, T_OCIARTEFACT)
+	*b.oci_tags = append(*b.oci_tags, tags...)
+}

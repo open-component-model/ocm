@@ -136,7 +136,7 @@ func (s *session) GetArtefact(c ArtefactContainer, version string) (ArtefactAcce
 	if s.base.IsClosed() {
 		return nil, errors.ErrClosed("session")
 	}
-	if obj := s.artefacts[key]; s != nil {
+	if obj := s.artefacts[key]; obj != nil {
 		return obj, nil
 	}
 	obj, err := c.GetArtefact(version)

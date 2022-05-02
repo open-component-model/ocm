@@ -63,7 +63,7 @@ OCI Repository types (using standard component repository to OCI mapping):
 
 ```
 
-$ ocm transfer ctf ctf.tgz ghcr.io/mandelsoft/components
+$ ocm show versions ghcr.io/mandelsoft/cnudie//github.com/mandelsoft/playground
 
 ```
 

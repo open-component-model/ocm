@@ -70,13 +70,13 @@ func (r *oci_artefact) addArtefact(a oci.ArtefactAccess) error {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (b *Builder) artefact(version string, ns cpi.NamespaceAccess, t func(access oci.ArtefactAccess) (string, error), f ...func()) *artdesc.Descriptor {
+func (b *Builder) artefact(tag string, ns cpi.NamespaceAccess, t func(access oci.ArtefactAccess) (string, error), f ...func()) *artdesc.Descriptor {
 	var k string
 	b.expect(b.oci_nsacc, T_OCINAMESPACE)
-	v, err := b.oci_nsacc.GetArtefact(version)
+	v, err := b.oci_nsacc.GetArtefact(tag)
 	if err != nil {
 		if errors.IsErrNotFound(err) {
-			if b, _ := artdesc.IsDigest(version); !b {
+			if b, _ := artdesc.IsDigest(tag); !b {
 				err = nil
 			}
 		}
@@ -89,8 +89,8 @@ func (b *Builder) artefact(version string, ns cpi.NamespaceAccess, t func(access
 	}
 	b.failOn(err, 2)
 	tags := []string{}
-	if version != "" {
-		tags = append(tags, version)
+	if tag != "" {
+		tags = append(tags, tag)
 	}
 	r := b.configure(&oci_artefact{ArtefactAccess: v, kind: k, tags: tags, ns: ns, artfunc: b.oci_artfunc}, f, 1)
 	if r == nil {
@@ -99,8 +99,8 @@ func (b *Builder) artefact(version string, ns cpi.NamespaceAccess, t func(access
 	return r.(*artdesc.Descriptor)
 }
 
-func (b *Builder) Index(version string, f ...func()) *artdesc.Descriptor {
-	return b.artefact(version, b.oci_nsacc, func(a oci.ArtefactAccess) (string, error) {
+func (b *Builder) Index(tag string, f ...func()) *artdesc.Descriptor {
+	return b.artefact(tag, b.oci_nsacc, func(a oci.ArtefactAccess) (string, error) {
 		if a.IndexAccess() == nil {
 			return "", errors.Newf("artefact is manifest")
 		}
@@ -108,8 +108,8 @@ func (b *Builder) Index(version string, f ...func()) *artdesc.Descriptor {
 	}, f...)
 }
 
-func (b *Builder) Manifest(version string, f ...func()) *artdesc.Descriptor {
-	return b.artefact(version, nil, func(a oci.ArtefactAccess) (string, error) {
+func (b *Builder) Manifest(tag string, f ...func()) *artdesc.Descriptor {
+	return b.artefact(tag, nil, func(a oci.ArtefactAccess) (string, error) {
 		if a.ManifestAccess() == nil {
 			return "", errors.Newf("artefact is index")
 		}

@@ -18,22 +18,23 @@ import (
 	"sort"
 
 	"github.com/Masterminds/semver/v3"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/errors"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands"
-	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
+	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
 var (
-	Names = names.Versions
+	Names = names.Tags
 	Verb  = commands.Show
 )
 
@@ -41,6 +42,7 @@ type Command struct {
 	utils.BaseCommand
 	Latest   bool
 	Semantic bool
+	Semver   bool
 
 	Ref         string
 	Constraints []*semver.Constraints
@@ -57,20 +59,21 @@ func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
 		Use:   "[<options>] <component> {<version pattern>}",
 		Args:  cobra.MinimumNArgs(1),
-		Short: "show dedicated versions (semver compliant)",
+		Short: "show dedicated tags of OCI artefacts",
 		Long: `
-Match versions of a component against some patterns.
+Match tags of an artefact against some patterns.
 `,
 		Example: `
-$ ocm show versions ghcr.io/mandelsoft/cnudie//github.com/mandelsoft/playground
+$ oci show tags ghcr.io/mandelsoft/kubelink
 `,
 	}
 }
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	o.BaseCommand.AddFlags(fs)
-	fs.BoolVarP(&o.Latest, "latest", "l", false, "show only latest version")
-	fs.BoolVarP(&o.Semantic, "semantic", "s", false, "show semantic version")
+	fs.BoolVarP(&o.Latest, "latest", "l", false, "show only latest tags")
+	fs.BoolVarP(&o.Semver, "semver", "s", false, "show only semver compliant tags")
+	fs.BoolVarP(&o.Semantic, "semantic", "o", false, "show semantic tags")
 }
 
 func (o *Command) Complete(args []string) error {
@@ -83,11 +86,15 @@ func (o *Command) Complete(args []string) error {
 		}
 		o.Constraints = append(o.Constraints, c)
 	}
+
+	if o.Semantic {
+		o.Semver = true
+	}
 	return nil
 }
 
 func (o *Command) Run() error {
-	session := ocm.NewSession(nil)
+	session := oci.NewSession(nil)
 	defer session.Close()
 
 	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithContext(o, session))
@@ -96,52 +103,69 @@ func (o *Command) Run() error {
 	}
 
 	versions := Versions{}
+	tags := utils2.StringSlice{}
 	repo := repooption.From(o)
 
-	var cv ocm.ComponentVersionAccess
-	var comp ocm.ComponentAccess
+	var art oci.ArtefactAccess
+	var ns oci.NamespaceAccess
 
 	// determine version source
 	if repo.Repository != nil {
-		cr, err := ocm.ParseComp(o.Ref)
+		cr, err := oci.ParseArt(o.Ref)
 		if err != nil {
 			return err
 		}
-		comp, err = session.LookupComponent(repo.Repository, cr.Component)
+		ns, err = session.LookupNamespace(repo.Repository, cr.Repository)
 		if err != nil {
 			return err
 		}
 		if cr.IsVersion() {
-			cv, err = session.GetComponentVersion(comp, *cr.Version)
+			art, err = session.GetArtefact(ns, cr.Reference())
 			if err != nil {
 				return err
 			}
 		}
 	} else {
-		r, err := session.EvaluateVersionRef(o.Context.OCMContext(), o.Ref)
+		r, err := session.EvaluateRef(o.Context.OCIContext(), o.Ref)
 		if err != nil {
 			return err
 		}
-		if r.Component == nil {
-			return errors.Newf("no component specified")
+		if r.Namespace == nil {
+			return errors.Newf("no namespace specified")
 		}
-		comp = r.Component
-		cv = r.Version
+		ns = r.Namespace
+		art = r.Artefact
 	}
 
+	list, err := ns.ListTags()
+	if err != nil {
+		return err
+	}
+	tags = utils2.StringSlice(list)
 	// determine version base set
-	if cv != nil {
-		v, err := semver.NewVersion(cv.GetVersion())
-		if err != nil {
-			return err
+	if art != nil {
+		dig := art.Digest()
+		for i := 0; i < len(tags); i++ {
+			a, err := ns.GetArtefact(tags[i])
+			if err != nil {
+				return err
+			}
+			if a.Digest() != dig {
+				tags.Delete(i)
+				i--
+			} else {
+				v, err := semver.NewVersion(tags[i])
+				if err == nil {
+					versions = append(versions, v)
+				}
+			}
 		}
-		versions = append(versions, v)
 	} else {
-		vers, err := comp.ListVersions()
+		tags, err = ns.ListTags()
 		if err != nil {
 			return err
 		}
-		for _, vn := range vers {
+		for _, vn := range tags {
 			v, err := semver.NewVersion(vn)
 			if err == nil {
 				versions = append(versions, v)
@@ -164,15 +188,22 @@ func (o *Command) Run() error {
 	}
 
 	sort.Sort(versions)
+	tags.Sort()
 	if len(versions) > 1 && o.Latest {
 		versions = versions[len(versions)-1:]
 	}
 
-	for _, r := range versions {
-		if o.Semantic {
+	if o.Semver {
+		for _, r := range versions {
+			if o.Semantic {
+				out.Outf(o, "%s\n", r)
+			} else {
+				out.Outf(o, "%s\n", r.Original())
+			}
+		}
+	} else {
+		for _, r := range tags {
 			out.Outf(o, "%s\n", r)
-		} else {
-			out.Outf(o, "%s\n", r.Original())
 		}
 	}
 	return nil

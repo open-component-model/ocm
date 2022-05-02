@@ -108,18 +108,6 @@ func (a *ArtefactImpl) AddBlob(access BlobAccess) error {
 	return a.addBlob(access)
 }
 
-func (a *ArtefactImpl) Blob() (accessio.BlobAccess, error) {
-	d := a.state.GetState().(*artdesc.Artefact)
-	if !d.IsValid() {
-		return nil, errors.ErrUnknown("artefact type")
-	}
-	blob, err := a.blob()
-	if err != nil {
-		return nil, err
-	}
-	return accessio.BlobWithMimeType(d.MimeType(), blob), nil
-}
-
 func (a *ArtefactImpl) NewArtefact(art ...*artdesc.Artefact) (ArtefactAccess, error) {
 	if !a.IsIndex() {
 		return nil, ErrNoIndex

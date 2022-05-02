@@ -83,14 +83,6 @@ func NewManifestForArtefact(a *ArtefactImpl) *ManifestImpl {
 	return m
 }
 
-func (m *ManifestImpl) Blob() (accessio.BlobAccess, error) {
-	blob, err := m.artefactBase.blob()
-	if err != nil {
-		return nil, err
-	}
-	return accessio.BlobWithMimeType(m.GetDescriptor().MimeType(), blob), nil
-}
-
 func (m *ManifestImpl) AddBlob(access BlobAccess) error {
 	return m.addBlob(access)
 }

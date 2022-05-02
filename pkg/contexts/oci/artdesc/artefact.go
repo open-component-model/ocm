@@ -44,6 +44,8 @@ type Platform = ociv1.Platform
 
 type BlobDescriptorSource interface {
 	GetBlobDescriptor(digest.Digest) *Descriptor
+	MimeType() string
+	IsValid() bool
 }
 
 // Artefact is the unified representation of an OCI artefact

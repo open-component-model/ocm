@@ -20,6 +20,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/opencontainers/go-digest"
 )
 
@@ -72,4 +73,28 @@ func (a *artefactBase) newArtefact(art ...*artdesc.Artefact) (ArtefactAccess, er
 		return nil, accessio.ErrReadOnly
 	}
 	return NewArtefact(a.container, art...)
+}
+
+func (a *artefactBase) Blob() (accessio.BlobAccess, error) {
+	d := a.state.GetState().(artdesc.BlobDescriptorSource)
+	if !d.IsValid() {
+		return nil, errors.ErrUnknown("artefact type")
+	}
+	blob, err := a.blob()
+	if err != nil {
+		return nil, err
+	}
+	return accessio.BlobWithMimeType(d.MimeType(), blob), nil
+}
+
+func (a *artefactBase) Digest() digest.Digest {
+	d := a.state.GetState().(artdesc.BlobDescriptorSource)
+	if !d.IsValid() {
+		return ""
+	}
+	blob, err := a.blob()
+	if err != nil {
+		return ""
+	}
+	return blob.Digest()
 }

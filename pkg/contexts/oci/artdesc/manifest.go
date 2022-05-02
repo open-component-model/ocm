@@ -36,6 +36,10 @@ func NewManifest() *Manifest {
 	}
 }
 
+func (i *Manifest) IsValid() bool {
+	return true
+}
+
 func (m *Manifest) GetBlobDescriptor(digest digest.Digest) *Descriptor {
 	if m.Config.Digest == digest {
 		d := m.Config

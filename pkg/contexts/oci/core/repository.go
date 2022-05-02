@@ -73,6 +73,7 @@ type Artefact interface {
 	IsManifest() bool
 	IsIndex() bool
 
+	Digest() digest.Digest
 	Blob() (BlobAccess, error)
 	Artefact() *artdesc.Artefact
 	Manifest() (*artdesc.Manifest, error)
@@ -84,7 +85,6 @@ type ArtefactAccess interface {
 	BlobSource
 	BlobSink
 
-	Blob() (accessio.BlobAccess, error)
 	GetDescriptor() *artdesc.Artefact
 	ManifestAccess() ManifestAccess
 	IndexAccess() IndexAccess

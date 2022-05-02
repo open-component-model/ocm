@@ -81,14 +81,6 @@ func NewIndexForArtefact(a *ArtefactImpl) *IndexImpl {
 	return m
 }
 
-func (i *IndexImpl) Blob() (accessio.BlobAccess, error) {
-	blob, err := i.artefactBase.blob()
-	if err != nil {
-		return nil, err
-	}
-	return accessio.BlobWithMimeType(i.GetDescriptor().MimeType(), blob), nil
-}
-
 func (a *IndexImpl) NewArtefact(art ...*artdesc.Artefact) (ArtefactAccess, error) {
 	return a.newArtefact(art...)
 }

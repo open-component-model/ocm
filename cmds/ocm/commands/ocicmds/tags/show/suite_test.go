@@ -12,27 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package ocicmds
+package show_test
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/spf13/cobra"
+	"testing"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/ctf"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/tags"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-// NewCommand creates a new command.
-func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              utils.SubCmdUse("oci"),
-		Short:            "Dedicated command flavors for the OCI layer",
-		TraverseChildren: true,
-	}
-	cmd.AddCommand(artefacts.NewCommand(ctx))
-	cmd.AddCommand(ctf.NewCommand(ctx))
-	cmd.AddCommand(tags.NewCommand(ctx))
-	return cmd
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "OCM show versions")
 }
