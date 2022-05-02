@@ -20,6 +20,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -81,12 +82,12 @@ func (_ localfsblobConverterV1) ConvertTo(object interface{}) (cpi.AccessSpec, e
 type localFilesystemBlobAccessMethod struct {
 	accessio.NopCloser
 	spec *localblob.AccessSpec
-	base ComponentVersionContainer
+	base support.ComponentVersionContainer
 }
 
 var _ cpi.AccessMethod = (*localFilesystemBlobAccessMethod)(nil)
 
-func newLocalFilesystemBlobAccessMethod(a *localblob.AccessSpec, base ComponentVersionContainer) (cpi.AccessMethod, error) {
+func newLocalFilesystemBlobAccessMethod(a *localblob.AccessSpec, base support.ComponentVersionContainer) (cpi.AccessMethod, error) {
 	return &localFilesystemBlobAccessMethod{
 		spec: a,
 		base: base,

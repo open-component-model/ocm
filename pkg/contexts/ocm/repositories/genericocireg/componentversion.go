@@ -27,14 +27,14 @@ import (
 	ocihdlr "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch/comparch"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/opencontainers/go-digest"
 )
 
 type ComponentVersion struct {
 	container *ComponentVersionContainer
-	*comparch.ComponentVersionAccess
+	*support.ComponentVersionAccess
 }
 
 var _ cpi.ComponentVersionAccess = (*ComponentVersion)(nil)
@@ -46,7 +46,7 @@ func NewComponentVersionAccess(mode accessobj.AccessMode, comp *ComponentAccess,
 	}
 	return &ComponentVersion{
 		container:              c,
-		ComponentVersionAccess: comparch.NewComponentVersionAccess(c, true),
+		ComponentVersionAccess: support.NewComponentVersionAccess(c, true),
 	}, nil
 }
 
@@ -59,7 +59,7 @@ type ComponentVersionContainer struct {
 	state    accessobj.State
 }
 
-var _ comparch.ComponentVersionContainer = (*ComponentVersionContainer)(nil)
+var _ support.ComponentVersionContainer = (*ComponentVersionContainer)(nil)
 
 func NewComponentVersionContainer(mode accessobj.AccessMode, comp *ComponentAccess, version string, manifest oci.ManifestAccess) (*ComponentVersionContainer, error) {
 	state, err := NewState(mode, comp.name, version, manifest)

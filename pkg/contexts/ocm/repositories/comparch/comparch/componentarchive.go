@@ -21,6 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -30,10 +31,10 @@ import (
 type ComponentArchive struct {
 	base *accessobj.FileSystemBlobAccess
 	ctx  cpi.Context
-	*ComponentVersionAccess
+	*support.ComponentVersionAccess
 }
 
-var _ ComponentVersionContainer = (*ComponentArchive)(nil)
+var _ support.ComponentVersionContainer = (*ComponentArchive)(nil)
 
 // New returns a new representation based element
 func New(ctx cpi.Context, acc accessobj.AccessMode, fs vfs.FileSystem, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode) (*ComponentArchive, error) {
@@ -49,7 +50,7 @@ func _Wrap(ctx cpi.Context, obj *accessobj.AccessObject, err error) (*ComponentA
 		base: accessobj.NewFileSystemBlobAccess(obj),
 		ctx:  ctx,
 	}
-	s.ComponentVersionAccess = NewComponentVersionAccess(s, false)
+	s.ComponentVersionAccess = support.NewComponentVersionAccess(s, false)
 	return s, nil
 }
 

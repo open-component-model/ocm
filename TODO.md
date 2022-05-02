@@ -16,7 +16,7 @@
 - [ ] Add signature handling
 - [ ] Identify required scenarios for OCM transport handling and improve transport handler accordingly
 - [ ] Add type factories for generic spec
-- [ ] Provide size a and digest info for OCM blob access
+- [ ] Provide size and digest info for OCM blob access
 - [ ] CD validation for sources enforces git
 - [ ] decide on and introduce logging framework
 - [ ] add optional reference name to resource input

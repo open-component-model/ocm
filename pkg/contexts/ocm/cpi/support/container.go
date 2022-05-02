@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package comparch
+package support
 
 import (
 	"io"
@@ -31,17 +31,6 @@ type BlobContainer interface {
 	// The resultimg access information (global and local) is provided as
 	// an access method specification usable in a component descriptor
 	AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error)
-}
-
-// ComponentContainer is an interface for an element to store component versions
-type ComponentContainer interface {
-	GetContext() cpi.Context
-	IsReadOnly() bool
-	IsClosed() bool
-
-	AddComponentVersion(ComponentVersionAccess) error
-	GetComponentVersion(version string) (cpi.ComponentVersionAccess, error)
-	BlobContainer
 }
 
 // ComponentVersionContainer is the interface of an element hosting a component version
