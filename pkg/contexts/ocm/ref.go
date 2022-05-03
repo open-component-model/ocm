@@ -18,6 +18,11 @@ const (
 
 // ParseRepo parses a standard ocm repository reference into a internal representation.
 func ParseRepo(ref string) (UniformRepositorySpec, error) {
+	if strings.HasPrefix(ref, ".") || strings.HasPrefix(ref, "/") {
+		return UniformRepositorySpec{
+			Info: ref,
+		}, nil
+	}
 	match := grammar.AnchoredRepositoryRegexp.FindSubmatch([]byte(ref))
 	if match == nil {
 		match = grammar.AnchoredGenericRepositoryRegexp.FindSubmatch([]byte(ref))
@@ -45,9 +50,8 @@ type RefSpec struct {
 
 // ParseRef parses a standard ocm reference into a internal representation.
 func ParseRef(ref string) (RefSpec, error) {
-	var r RefSpec
+	var spec RefSpec
 	v := ""
-
 	match := grammar.AnchoredReferenceRegexp.FindSubmatch([]byte(ref))
 	if match == nil {
 		match = grammar.AnchoredGenericReferenceRegexp.FindSubmatch([]byte(ref))
@@ -55,7 +59,7 @@ func ParseRef(ref string) (RefSpec, error) {
 			return RefSpec{}, errors.ErrInvalid(KIND_OCM_REFERENCE, ref)
 		}
 		v = string(match[4])
-		r = RefSpec{
+		spec = RefSpec{
 			UniformRepositorySpec{
 				Type: string(match[1]),
 				Info: string(match[2]),
@@ -67,7 +71,7 @@ func ParseRef(ref string) (RefSpec, error) {
 		}
 	} else {
 		v = string(match[5])
-		r = RefSpec{
+		spec = RefSpec{
 			UniformRepositorySpec{
 				Type:    string(match[1]),
 				Host:    string(match[2]),
@@ -80,9 +84,9 @@ func ParseRef(ref string) (RefSpec, error) {
 		}
 	}
 	if v != "" {
-		r.Version = &v
+		spec.Version = &v
 	}
-	return r, nil
+	return spec, nil
 }
 
 func (r *RefSpec) Name() string {

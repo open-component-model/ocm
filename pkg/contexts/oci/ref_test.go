@@ -114,6 +114,25 @@ var _ = Describe("ref parsing", func() {
 			},
 			Repository: "",
 		})
+		CheckRef("/tmp/ctf//mandelsoft/test:v1", &oci.RefSpec{
+			UniformRepositorySpec: oci.UniformRepositorySpec{
+				Type:   "",
+				Scheme: "",
+				Host:   "",
+				Info:   "/tmp/ctf",
+			},
+			Repository: "mandelsoft/test",
+			Tag:        &tag,
+		})
+		CheckRef("/tmp/ctf", &oci.RefSpec{
+			UniformRepositorySpec: oci.UniformRepositorySpec{
+				Type:   "",
+				Scheme: "",
+				Host:   "",
+				Info:   "/tmp/ctf",
+			},
+		})
+
 	})
 
 	It("fails", func() {

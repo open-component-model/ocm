@@ -175,6 +175,11 @@ var (
 		Capture(Match(".*?"), Match("[^:]")), Match(RepositorySeparator+RepositorySeparator),
 		Optional(CapturedArtefactVersionRegexp))
 
+	FileReferenceRegexp = Anchored(
+		Optional(Capture(TypeRegexp), Literal("::")),
+		Capture(Match("[./].*?"), Match("[^:]")), Match(RepositorySeparator+RepositorySeparator),
+		Optional(CapturedArtefactVersionRegexp))
+
 	// Unused
 
 	// IdentifierRegexp is the format for string identifier used as a

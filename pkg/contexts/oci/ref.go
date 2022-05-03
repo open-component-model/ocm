@@ -76,7 +76,16 @@ func dig(b []byte) *digest.Digest {
 func ParseRef(ref string) (RefSpec, error) {
 	spec := RefSpec{}
 
-	match := grammar.DockerLibraryReferenceRegexp.FindSubmatch([]byte(ref))
+	match := grammar.FileReferenceRegexp.FindSubmatch([]byte(ref))
+	if match != nil {
+		spec.Type = string(match[1])
+		spec.Info = string(match[2])
+		spec.Repository = string(match[3])
+		spec.Tag = pointer(match[4])
+		spec.Digest = dig(match[5])
+		return spec, nil
+	}
+	match = grammar.DockerLibraryReferenceRegexp.FindSubmatch([]byte(ref))
 	if match != nil {
 		spec.Host = dockerHubDomain
 		spec.Repository = "library" + grammar.RepositorySeparator + string(match[1])
