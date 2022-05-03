@@ -39,7 +39,7 @@ func init() {
 func NewLocalFilesystemBlobAccessSpecV1(path string, mediaType string) *localblob.AccessSpec {
 	return &localblob.AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(LocalFilesystemBlobType),
-		ReferenceName:       path,
+		LocalReference:      path,
 		MediaType:           mediaType,
 	}
 }
@@ -63,7 +63,7 @@ func (_ localfsblobConverterV1) ConvertFrom(object cpi.AccessSpec) (runtime.Type
 	in := object.(*localblob.AccessSpec)
 	return &LocalFilesystemBlobAccessSpecV1{
 		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
-		Filename:            in.ReferenceName,
+		Filename:            in.LocalReference,
 		MediaType:           in.MediaType,
 	}, nil
 }
@@ -72,7 +72,7 @@ func (_ localfsblobConverterV1) ConvertTo(object interface{}) (cpi.AccessSpec, e
 	in := object.(*LocalFilesystemBlobAccessSpecV1)
 	return &localblob.AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
-		ReferenceName:       in.Filename,
+		LocalReference:      in.Filename,
 		MediaType:           in.MediaType,
 	}, nil
 }

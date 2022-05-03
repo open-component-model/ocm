@@ -27,6 +27,7 @@ import (
 type Spec struct {
 	// PathSpec hold the path that points to the helm chart file
 	cpi.PathSpec `json:",inline"`
+	Version      string `json:"version,omitempty"`
 }
 
 var _ inputs.InputSpec = (*Spec)(nil)
@@ -61,9 +62,13 @@ func (s *Spec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.Tempo
 	if err != nil {
 		return nil, "", err
 	}
+	vers := chart.Metadata.Version
+	if s.Version != "" {
+		vers = s.Version
+	}
 	blob, err := helm.SynthesizeArtefactBlob(inputPath, ctx.FileSystem())
 	if err != nil {
 		return nil, "", err
 	}
-	return blob, chart.Metadata.Name, err
+	return blob, chart.Metadata.Name + ":" + vers, err
 }

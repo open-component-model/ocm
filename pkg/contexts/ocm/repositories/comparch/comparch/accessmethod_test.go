@@ -41,7 +41,7 @@ var _ = Describe("access method", func() {
 			spec, err := DefaultContext.AccessSpecForConfig([]byte(legacy), nil)
 			Expect(err).To(Succeed())
 			Expect(reflect.TypeOf(spec)).To(Equal(reflect.TypeOf(&localblob.AccessSpec{})))
-			Expect(spec.(*localblob.AccessSpec).ReferenceName).To(Equal("anydigest"))
+			Expect(spec.(*localblob.AccessSpec).LocalReference).To(Equal("anydigest"))
 		})
 
 		It("encodes legacy methood", func() {

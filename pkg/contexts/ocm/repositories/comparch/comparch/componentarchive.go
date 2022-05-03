@@ -94,6 +94,10 @@ func (c *ComponentArchive) GetBlobData(name string) (cpi.DataAccess, error) {
 }
 
 func (c *ComponentArchive) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+	return c.AddBlobFor(c, blob, refName, global)
+}
+
+func (c *ComponentArchive) AddBlobFor(cv cpi.ComponentVersionAccess, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}

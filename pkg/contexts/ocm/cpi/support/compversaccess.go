@@ -63,7 +63,7 @@ func (a *ComponentVersionAccess) GetVersion() string {
 }
 
 func (a *ComponentVersionAccess) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
-	return a.base.AddBlob(blob, refName, global)
+	return a.base.AddBlobFor(a, blob, refName, global)
 }
 
 func (c *ComponentVersionAccess) AccessMethod(a cpi.AccessSpec) (cpi.AccessMethod, error) {

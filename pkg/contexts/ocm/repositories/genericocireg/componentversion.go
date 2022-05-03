@@ -113,32 +113,34 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMe
 
 func (c *ComponentVersionContainer) Update() error {
 	err := c.Check()
-	desc := c.GetDescriptor()
-	for i, r := range desc.Resources {
-		s, err := c.evalLayer(r.Access)
+	if c.state.HasChanged() {
+		desc := c.GetDescriptor()
+		for i, r := range desc.Resources {
+			s, err := c.evalLayer(r.Access)
+			if err != nil {
+				return err
+			}
+			if s != r.Access {
+				desc.Resources[i].Access = s
+			}
+		}
+		for i, r := range desc.Sources {
+			s, err := c.evalLayer(r.Access)
+			if err != nil {
+				return err
+			}
+			if s != r.Access {
+				desc.Sources[i].Access = s
+			}
+		}
+		_, err = c.state.Update()
 		if err != nil {
 			return err
 		}
-		if s != r.Access {
-			desc.Resources[i].Access = s
-		}
-	}
-	for i, r := range desc.Sources {
-		s, err := c.evalLayer(r.Access)
+		_, err = c.comp.namespace.AddArtefact(c.manifest, c.version)
 		if err != nil {
 			return err
 		}
-		if s != r.Access {
-			desc.Sources[i].Access = s
-		}
-	}
-	_, err = c.state.Update()
-	if err != nil {
-		return err
-	}
-	_, err = c.comp.namespace.AddArtefact(c.manifest, c.version)
-	if err != nil {
-		return err
 	}
 	return nil
 }
@@ -164,12 +166,12 @@ func (c *ComponentVersionContainer) GetBlobData(name string) (cpi.DataAccess, er
 	return c.manifest.GetBlob(digest.Digest((name)))
 }
 
-func (c *ComponentVersionContainer) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (c *ComponentVersionContainer) AddBlobFor(cv cpi.ComponentVersionAccess, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
 
-	storagectx := ocihdlr.New(c.comp.repo.ocirepo, c.comp.namespace, c.manifest)
+	storagectx := ocihdlr.New(cv, c.comp.repo.ocirepo, c.comp.namespace, c.manifest)
 	h := c.GetContext().BlobHandlers().GetHandler(oci.CONTEXT_TYPE, c.comp.repo.ocirepo.GetSpecification().GetKind(), blob.MimeType())
 	if h != nil {
 		acc, err := h.StoreBlob(c.comp.repo, blob, refName, storagectx)

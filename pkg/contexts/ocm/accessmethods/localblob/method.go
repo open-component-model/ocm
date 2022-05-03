@@ -65,7 +65,9 @@ type AccessSpec struct {
 	ReferenceName string `json:"referenceName,omitempty"`
 }
 
-var _ json.Marshaler = &AccessSpec{}
+var _ json.Marshaler = (*AccessSpec)(nil)
+var _ cpi.HintProvider = (*AccessSpec)(nil)
+var _ cpi.AccessSpec = (*AccessSpec)(nil)
 
 func (a AccessSpec) MarshalJSON() ([]byte, error) {
 	return cpi.MarshalConvertedAccessSpec(cpi.DefaultContext(), &a)
@@ -73,6 +75,10 @@ func (a AccessSpec) MarshalJSON() ([]byte, error) {
 
 func (a *AccessSpec) IsLocal(cpi.Context) bool {
 	return true
+}
+
+func (a *AccessSpec) GetReferenceName() string {
+	return a.ReferenceName
 }
 
 func (a *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {

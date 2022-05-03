@@ -20,6 +20,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -44,6 +45,9 @@ type AccessSpec struct {
 	ImageReference string `json:"imageReference"`
 }
 
+var _ cpi.AccessSpec = (*AccessSpec)(nil)
+var _ cpi.HintProvider = (*AccessSpec)(nil)
+
 // New creates a new oci registry access spec version v1
 func New(ref string) *AccessSpec {
 	return &AccessSpec{
@@ -54,6 +58,18 @@ func New(ref string) *AccessSpec {
 
 func (_ *AccessSpec) IsLocal(cpi.Context) bool {
 	return false
+}
+
+func (a *AccessSpec) GetReferenceName() string {
+	ref, err := oci.ParseRef(a.ImageReference)
+	if err != nil {
+		return ""
+	}
+	hint := ref.Repository
+	if ref.Tag != nil {
+		hint += grammar.TagSeparator + *ref.Tag
+	}
+	return hint
 }
 
 func (_ *AccessSpec) GetType() string {

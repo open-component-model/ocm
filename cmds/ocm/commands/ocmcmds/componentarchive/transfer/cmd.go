@@ -82,5 +82,5 @@ func (o *Command) Run() error {
 		return err
 	}
 
-	return transfer.TransferVersion(nil, nil, nil, source, target, nil)
+	return transfer.TransferVersion(transfer.NewPrinter(o.Context.StdOut()), nil, nil, source, target, nil)
 }

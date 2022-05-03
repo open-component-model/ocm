@@ -78,7 +78,7 @@ func transferVersion(printer Printer, hist common.History, closure TransportClos
 		return errors.Wrapf(err, "%s: creating target version", hist)
 	}
 	defer t.Close()
-	err = CopyVersion(hist, src, t, handler)
+	err = CopyVersion(printer, hist, src, t, handler)
 	if err != nil {
 		return err
 	}
@@ -100,10 +100,11 @@ func transferVersion(printer Printer, hist common.History, closure TransportClos
 			}
 		}
 	}
+	printer.Printf("...adding component version...\n")
 	return list.Add(comp.AddVersion(t)).Result()
 }
 
-func CopyVersion(hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler transferhandler.TransferHandler) error {
+func CopyVersion(printer Printer, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler transferhandler.TransferHandler) error {
 	if handler == nil {
 		handler = standard.NewDefaultHandler(nil)
 	}
@@ -121,7 +122,14 @@ func CopyVersion(hist common.History, src ocm.ComponentVersionAccess, t ocm.Comp
 					ok, err = handler.TransferResource(src, a, r)
 				}
 				if ok {
-					err = handler.HandleTransferResource(r, m, t)
+					hint := ""
+					if h, ok := a.(ocm.HintProvider); ok {
+						hint = h.GetReferenceName()
+					}
+					if printer != nil {
+						printer.Printf("...resource %d...\n", i)
+					}
+					err = handler.HandleTransferResource(r, m, hint, t)
 				}
 			}
 		}
@@ -141,7 +149,14 @@ func CopyVersion(hist common.History, src ocm.ComponentVersionAccess, t ocm.Comp
 					ok, err = handler.TransferSource(src, a, r)
 				}
 				if ok {
-					err = handler.HandleTransferSource(r, m, t)
+					hint := ""
+					if h, ok := a.(ocm.HintProvider); ok {
+						hint = h.GetReferenceName()
+					}
+					if printer != nil {
+						printer.Printf("...source %d...\n", i)
+					}
+					err = handler.HandleTransferSource(r, m, hint, t)
 				}
 			}
 		}

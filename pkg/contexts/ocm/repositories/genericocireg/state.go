@@ -237,5 +237,12 @@ func (i StateHandler) Decode(data []byte) (interface{}, error) {
 }
 
 func (i StateHandler) Equivalent(a, b interface{}) bool {
+	ea, err := i.Encode(a)
+	if err == nil {
+		eb, err := i.Encode(b)
+		if err == nil {
+			return bytes.Equal(ea, eb)
+		}
+	}
 	return reflect.DeepEqual(a, b)
 }

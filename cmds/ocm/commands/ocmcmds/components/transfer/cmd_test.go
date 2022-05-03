@@ -111,6 +111,10 @@ var _ = Describe("Test Environment", func() {
 		Expect(env.CatchOutput(buf).Execute("transfer", "components", "--resourcesByValue", ARCH, ARCH, OUT)).To(Succeed())
 		Expect("\n" + buf.String()).To(Equal(`
 transferring version "github.com/mandelsoft/test:v1"...
+...resource 0...
+...resource 1...
+...resource 2...
+...adding component version...
 1 versions transferred
 `))
 
@@ -129,11 +133,11 @@ transferring version "github.com/mandelsoft/test:v1"...
 
 		data, err := json.Marshal(comp.GetDescriptor().Resources[2].Access)
 		Expect(err).To(Succeed())
-		Expect(string(data)).To(Equal("{\"localReference\":\"sha256:f6a519fb1d0c8cef5e8d7811911fc7cb170462bbce19d6df067dae041250de7f\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"type\":\"localBlob\"}"))
+		Expect(string(data)).To(Equal("{\"localReference\":\"sha256:f6a519fb1d0c8cef5e8d7811911fc7cb170462bbce19d6df067dae041250de7f\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"referenceName\":\"ocm/ref:v2.0\",\"type\":\"localBlob\"}"))
 
 		data, err = json.Marshal(comp.GetDescriptor().Resources[1].Access)
 		Expect(err).To(Succeed())
-		Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"type\":\"localBlob\"}"))
+		Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"referenceName\":\"ocm/value:v2.0\",\"type\":\"localBlob\"}"))
 
 		racc, err := comp.GetResourceByIndex(1)
 		Expect(err).To(Succeed())

@@ -40,4 +40,11 @@ const usage = `
   - **<code>path</code>** *string*
 
     This REQUIRED property describes the file path to the helm chart relative to the
-    resource file location.`
+    resource file location.
+
+  - **<code>version</code>** *string*
+
+    This OPTIONAL property can be set to configure an explicit version hint.
+    If not specified the versio from the chart will be used.
+    Basically, it is a good practice to use the component version for local resources
+    This can be achieved by using templating for this attribute in the resource file.`

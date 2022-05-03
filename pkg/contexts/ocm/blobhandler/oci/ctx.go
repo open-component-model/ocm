@@ -20,6 +20,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	ocmcpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
@@ -27,17 +28,25 @@ import (
 // StorageContext is the context information passed for Blobhandler
 // registered for context type oci.CONTEXT_TYPE.
 type StorageContext struct {
+	Component  ocmcpi.ComponentVersionAccess
 	Repository cpi.Repository
 	Namespace  cpi.NamespaceAccess
 	Manifest   cpi.ManifestAccess
 }
 
-func New(repo oci.Repository, namespace oci.NamespaceAccess, manifest oci.ManifestAccess) *StorageContext {
+var _ ocmcpi.StorageContext = (*StorageContext)(nil)
+
+func New(comp ocmcpi.ComponentVersionAccess, repo oci.Repository, namespace oci.NamespaceAccess, manifest oci.ManifestAccess) *StorageContext {
 	return &StorageContext{
+		Component:  comp,
 		Repository: repo,
 		Namespace:  namespace,
 		Manifest:   manifest,
 	}
+}
+
+func (s *StorageContext) TargetComponentVersion() ocmcpi.ComponentVersionAccess {
+	return s.Component
 }
 
 func (s *StorageContext) AssureLayer(blob cpi.BlobAccess) error {

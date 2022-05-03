@@ -32,8 +32,8 @@ type TransferHandler interface {
 	TransferResource(src ocm.ComponentVersionAccess, a ocm.AccessSpec, r ocm.ResourceAccess) (bool, error)
 	TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpec, r ocm.SourceAccess) (bool, error)
 
-	HandleTransferResource(r ocm.ResourceAccess, m ocm.AccessMethod, t ocm.ComponentVersionAccess) error
-	HandleTransferSource(r ocm.SourceAccess, m ocm.AccessMethod, t ocm.ComponentVersionAccess) error
+	HandleTransferResource(r ocm.ResourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error
+	HandleTransferSource(r ocm.SourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error
 }
 
 func ApplyOptions(set TransferOptions, opts ...TransferOption) error {

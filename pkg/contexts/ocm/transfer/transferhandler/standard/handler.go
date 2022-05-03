@@ -56,10 +56,10 @@ func (h *Handler) TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpe
 	return h.opts.IsSourcesByValue(), nil
 }
 
-func (h *Handler) HandleTransferResource(r ocm.ResourceAccess, m ocm.AccessMethod, t ocm.ComponentVersionAccess) error {
-	return t.SetResourceBlob(r.Meta(), accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m), "", nil)
+func (h *Handler) HandleTransferResource(r ocm.ResourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error {
+	return t.SetResourceBlob(r.Meta(), accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m), hint, nil)
 }
 
-func (h *Handler) HandleTransferSource(r ocm.SourceAccess, m ocm.AccessMethod, t ocm.ComponentVersionAccess) error {
-	return t.SetSourceBlob(r.Meta(), accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m), "", nil)
+func (h *Handler) HandleTransferSource(r ocm.SourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error {
+	return t.SetSourceBlob(r.Meta(), accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m), hint, nil)
 }

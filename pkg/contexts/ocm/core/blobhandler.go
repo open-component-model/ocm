@@ -22,7 +22,9 @@ import (
 // StorageContext is an object describing the storage context used for the
 // mapping of a component repository to a base repository (e.g. oci api)
 // It depends on the Context type of the used base repository
-type StorageContext interface{}
+type StorageContext interface {
+	TargetComponentVersion() ComponentVersionAccess
+}
 
 // BlobHandler s the interface for a dedicated handling of storing blobs
 // for the LocalBlob access method in a dedicated kind of repository.
@@ -33,8 +35,8 @@ type StorageContext interface{}
 // The task of the handler is to store the local blob on its own
 // responsibility and to return an appropriate global access method.
 type BlobHandler interface {
-	// StoreBlob has the change to decide to store a local blob
-	// in a repository specific fashion provide external access.
+	// StoreBlob has the chance to decide to store a local blob
+	// in a repository specific fashion providing external access.
 	// If this is possible and done an appropriate access spec
 	// must be returned, if this is not done, nil has to be returned
 	// without error

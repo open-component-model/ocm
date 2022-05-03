@@ -52,7 +52,7 @@ func FormatTable(ctx Context, gap string, data [][]string) {
 		}
 	}
 
-	if len(columns) > 2 && max > 100 {
+	if len(columns) > 2 && max > 200 {
 		first := []string{}
 		setSep := false
 		for i, row := range data {

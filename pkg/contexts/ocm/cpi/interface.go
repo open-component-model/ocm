@@ -34,6 +34,7 @@ type ComponentLister = core.ComponentLister
 type ComponentAccess = core.ComponentAccess
 type ComponentVersionAccess = core.ComponentVersionAccess
 type AccessSpec = core.AccessSpec
+type HintProvider = core.HintProvider
 type AccessMethod = core.AccessMethod
 type AccessMethodSupport = core.AccessMethodSupport
 type AccessType = core.AccessType

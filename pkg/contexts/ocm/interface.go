@@ -23,6 +23,7 @@ type ComponentLister = core.ComponentLister
 type ComponentAccess = core.ComponentAccess
 type ComponentVersionAccess = core.ComponentVersionAccess
 type AccessSpec = core.AccessSpec
+type HintProvider = core.HintProvider
 type AccessMethod = core.AccessMethod
 type AccessType = core.AccessType
 type DataAccess = core.DataAccess
@@ -35,13 +36,15 @@ type RepositorySpec = core.RepositorySpec
 type RepositoryType = core.RepositoryType
 type RepositoryTypeScheme = core.RepositoryTypeScheme
 type AccessTypeScheme = core.AccessTypeScheme
-type BlobHandlerRegistry = core.BlobHandlerRegistry
 type ComponentReference = core.ComponentReference
 
 type DigesterType = core.DigesterType
 type BlobDigester = core.BlobDigester
 type BlobDigesterRegistry = core.BlobDigesterRegistry
 type DigestDescriptor = core.DigestDescriptor
+
+type BlobHandlerRegistry = core.BlobHandlerRegistry
+type BlobHandler = core.BlobHandler
 
 func NewDigestDescriptor(digest digest.Digest, typ DigesterType) *DigestDescriptor {
 	return core.NewDigestDescriptor(digest, typ)

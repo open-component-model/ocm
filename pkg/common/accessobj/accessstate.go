@@ -250,11 +250,14 @@ func (s *state) GetOriginalBlob() accessio.BlobAccess {
 }
 
 func (s *state) HasChanged() bool {
-	return s.handler.Equivalent(s.original, s.current)
+	if s.original == nil {
+		return true
+	}
+	return !s.handler.Equivalent(s.original, s.current)
 }
 
 func (s *state) GetBlob() (accessio.BlobAccess, error) {
-	if s.handler.Equivalent(s.original, s.current) {
+	if !s.HasChanged() {
 		return s.originalBlob, nil
 	}
 	data, err := s.handler.Encode(s.current)
@@ -268,7 +271,7 @@ func (s *state) GetBlob() (accessio.BlobAccess, error) {
 }
 
 func (s *state) Update() (bool, error) {
-	if s.handler.Equivalent(s.original, s.current) {
+	if !s.HasChanged() {
 		return false, nil
 	}
 

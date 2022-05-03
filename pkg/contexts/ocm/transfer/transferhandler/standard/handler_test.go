@@ -42,7 +42,7 @@ const VERSION = "v1"
 const COMPONENT = "github.com/mandelsoft/test"
 const OUT = "/tmp/res"
 const OCIPATH = "/tmp/oci"
-const OCINAMESPACE = "ocm/test"
+const OCINAMESPACE = "oci/test"
 const OCIVERSION = "v2.0"
 const OCIHOST = "alias"
 
@@ -111,7 +111,7 @@ var _ = Describe("Transfer handler", func() {
 		Expect(len(comp.GetDescriptor().Resources)).To(Equal(2))
 		data, err := json.Marshal(comp.GetDescriptor().Resources[1].Access)
 		Expect(err).To(Succeed())
-		Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"type\":\"localBlob\"}"))
+		Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"referenceName\":\"" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 
 		r, err := comp.GetResourceByIndex(1)
 		Expect(err).To(Succeed())

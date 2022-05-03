@@ -8,7 +8,7 @@ require (
 	github.com/docker/docker-credential-helpers v0.6.4 // indirect
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.2.2
-	github.com/mandelsoft/filepath v0.0.0-20200909114706-3df73d378d55
+	github.com/mandelsoft/filepath v0.0.0-20220503095057-4432a2285b68
 	github.com/mandelsoft/spiff v1.7.0-beta-3
 	github.com/modern-go/reflect2 v1.0.2
 	github.com/onsi/ginkgo v1.16.5

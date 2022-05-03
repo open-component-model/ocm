@@ -3,6 +3,7 @@
 main
 /dist
 /tmp
+/local
 /ocm
 .vscode
 /cmds/test/generics

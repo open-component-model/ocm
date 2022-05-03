@@ -38,6 +38,12 @@ type AccessSpec interface {
 	AccessMethod(access ComponentVersionAccess) (AccessMethod, error)
 }
 
+// HintProvider is used to provide a reference hint for local access method specs
+// optionally povided by an access spec.
+type HintProvider interface {
+	GetReferenceName() string
+}
+
 type AccessMethod interface {
 	GetKind() string
 	DataAccess
