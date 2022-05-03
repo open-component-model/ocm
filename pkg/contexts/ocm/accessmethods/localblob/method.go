@@ -77,6 +77,10 @@ func (a *AccessSpec) IsLocal(cpi.Context) bool {
 	return true
 }
 
+func (a *AccessSpec) GetMimeType() string {
+	return a.MediaType
+}
+
 func (a *AccessSpec) GetReferenceName() string {
 	return a.ReferenceName
 }

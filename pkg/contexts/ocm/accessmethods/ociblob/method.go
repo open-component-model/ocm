@@ -70,6 +70,10 @@ func (s AccessSpec) IsLocal(context cpi.Context) bool {
 	return false
 }
 
+func (s *AccessSpec) GetMimeType() string {
+	return s.MediaType
+}
+
 func (s *AccessSpec) AccessMethod(access cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
 	return &accessMethod{comp: access, spec: s}, nil
 }

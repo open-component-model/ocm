@@ -12,54 +12,45 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package ocm
+package cpi
 
 import (
-	"fmt"
 	"io"
 
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-////////////////////////////////////////////////////////////////////////////////
-
-func AssureTargetRepository(session Session, ctx Context, targetref string, format accessio.FileFormat, fss ...vfs.FileSystem) (Repository, error) {
-	target, ref, err := session.DetermineRepository(ctx, targetref)
-	if err != nil {
-		if !errors.IsErrUnknown(err) || ref.Info == "" {
-			return nil, err
-		}
-		if ref.Type == "" {
-			ref.Type = format.String()
-		}
-		if ref.Type == "" {
-			return nil, fmt.Errorf("ctf format type required to create ctf")
-		}
-		target, err = ctf.Create(ctx, accessobj.ACC_CREATE, ref.Info, 0770, accessio.PathFileSystem(accessio.FileSystem(fss...)))
-		if err != nil {
-			return nil, err
-		}
-		session.Closer(target)
-	}
-	return target, nil
+type AccessMethodSource interface {
+	AccessMethod() (AccessMethod, error)
 }
-
-type AccessMethodSource = cpi.AccessMethodSource
 
 // ResourceReader gets a Reader for a given resource/source access.
 // It provides a Reader handling the Close contract for the access method
 // by connecting the access method's Close method to the Readers Close method .
 func ResourceReader(s AccessMethodSource) (io.ReadCloser, error) {
-	return cpi.ResourceReader(s)
+	meth, err := s.AccessMethod()
+	if err != nil {
+		return nil, err
+	}
+	return ResourceReaderForMethod(meth)
+}
+
+func ResourceReaderForMethod(meth AccessMethod) (io.ReadCloser, error) {
+	r, err := meth.Reader()
+	if err != nil {
+		meth.Close()
+		return nil, err
+	}
+	return accessio.AddCloser(r, meth, "access method"), nil
 }
 
 // ResourceData extracts the data for a given resource/source access.
 // It handles the Close contract for the access method for a singular use.
 func ResourceData(s AccessMethodSource) ([]byte, error) {
-	return cpi.ResourceData(s)
+	meth, err := s.AccessMethod()
+	if err != nil {
+		return nil, err
+	}
+	defer meth.Close()
+	return meth.Get()
 }

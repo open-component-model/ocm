@@ -15,12 +15,8 @@
 package download
 
 import (
-	"io"
 	"path"
 	"strings"
-
-	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands"
@@ -37,7 +33,9 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -54,7 +52,10 @@ type Command struct {
 
 // NewCommand creates a new resources command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), output.OutputOptions(outputs, closureoption.New("component reference"), lookupoption.New(), destoption.New()))}, names...)
+	f := func(opts *output.Options) output.Output {
+		return &action{downloaders: download.For(ctx), opts: opts}
+	}
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), output.OutputOptions(output.NewOutputs(f), NewOptions(), closureoption.New("component reference"), lookupoption.New(), destoption.New()))}, names...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -119,27 +120,22 @@ func (o *Command) Run() error {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-var outputs = output.NewOutputs(get_download)
-
-func get_download(opts *output.Options) output.Output {
-	return &download{opts: opts}
+type action struct {
+	downloaders download.Registry
+	data        elemhdlr.Objects
+	opts        *output.Options
 }
 
-type download struct {
-	data elemhdlr.Objects
-	opts *output.Options
-}
-
-func (d *download) Add(e interface{}) error {
+func (d *action) Add(e interface{}) error {
 	d.data = append(d.data, e.(*elemhdlr.Object))
 	return nil
 }
 
-func (d *download) Close() error {
+func (d *action) Close() error {
 	return nil
 }
 
-func (d *download) Out() error {
+func (d *action) Out() error {
 	list := errors.ErrListf("downloading resources")
 	dest := destoption.From(d.opts)
 	if len(d.data) == 1 {
@@ -167,8 +163,9 @@ func (d *download) Out() error {
 	return list.Result()
 }
 
-func (d *download) Save(o *elemhdlr.Object, f string) error {
+func (d *action) Save(o *elemhdlr.Object, f string) error {
 	dest := destoption.From(d.opts)
+	local := From(d.opts)
 	r := common.Elem(o)
 	id := r.GetIdentity(o.Version.GetDescriptor().Resources)
 	racc, err := o.Version.GetResource(id)
@@ -180,19 +177,17 @@ func (d *download) Save(o *elemhdlr.Object, f string) error {
 	if err != nil {
 		return err
 	}
-	rd, err := ocm.ResourceReader(racc)
+	var ok bool
+	if local.UseHandlers {
+		ok, err = d.downloaders.Download(d.opts.Context, racc, f, dest.PathFilesystem)
+	} else {
+		ok, err = d.downloaders.DownloadAsBlob(d.opts.Context, racc, f, dest.PathFilesystem)
+	}
 	if err != nil {
 		return err
 	}
-	defer rd.Close()
-	file, err := dest.PathFilesystem.OpenFile(f, vfs.O_TRUNC|vfs.O_CREATE|vfs.O_WRONLY, 0660)
-	if err != nil {
-		return err
+	if !ok {
+		return errors.Newf("no downloader configured  type %q", racc.Meta().GetType())
 	}
-	defer file.Close()
-	n, err := io.Copy(file, rd)
-	if err == nil {
-		out.Outf(d.opts.Context, "%s: %d byte(s) written\n", f, n)
-	}
-	return err
+	return nil
 }

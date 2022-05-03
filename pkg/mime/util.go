@@ -38,6 +38,14 @@ func IsYAML(mime string) bool {
 	return false
 }
 
+func BaseType(mime string) string {
+	i := strings.Index(mime, "+")
+	if i > 0 {
+		return mime[:i]
+	}
+	return mime
+}
+
 func IsGZip(mime string) bool {
 	return strings.HasSuffix(mime, "/gzip") || strings.HasSuffix(mime, "+gzip")
 }

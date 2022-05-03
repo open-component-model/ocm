@@ -44,6 +44,12 @@ type HintProvider interface {
 	GetReferenceName() string
 }
 
+// AccessMethod described the access to a dedicate resource
+// It can allocate external resources, which should be released
+// with the Close() call.
+// Resources SHOULD onyl be allocated, if the content is accessed
+// via the DataAccess interface to avoid unnecessary effort
+// if the method object is just used to access meta data.
 type AccessMethod interface {
 	GetKind() string
 	DataAccess
