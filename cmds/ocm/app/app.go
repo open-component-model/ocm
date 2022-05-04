@@ -26,6 +26,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/show"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/transfer"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -108,16 +109,18 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 		Context: ctx,
 	}
 	cmd := &cobra.Command{
-		Use:              "ocm",
-		Short:            "ocm command line client",
-		Long:             desc,
-		TraverseChildren: true,
-		Version:          version.Get().String(),
-		SilenceUsage:     true,
+		Use:                   "ocm",
+		Short:                 "ocm command line client",
+		Long:                  desc,
+		TraverseChildren:      true,
+		Version:               version.Get().String(),
+		SilenceUsage:          true,
+		DisableFlagsInUseLine: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return opts.Complete()
 		},
 	}
+	cobrautils.TweakCommand(cmd, ctx)
 
 	cmd.AddCommand(NewVersionCommand())
 	cmd.AddCommand(get.NewCommand(opts.Context))

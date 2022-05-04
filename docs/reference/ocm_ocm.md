@@ -5,7 +5,7 @@ Dedicated command flavors for the Open Component Model
 ### Synopsis
 
 ```
-ocm ocm <sub-command> ... <sub command> [<options>]
+ocm ocm [<options>] <sub command> ...
 ```
 
 ### Options

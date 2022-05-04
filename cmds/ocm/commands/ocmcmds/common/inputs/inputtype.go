@@ -316,7 +316,7 @@ The resource specification supports the following blob input types, specified
 with the field <code>type</code> in the <code>input</code> field:
 `
 	for t := range scheme.KnownTypes() {
-		s += scheme.GetInputType(t).Usage()
+		s += scheme.GetInputType(t).Usage() + "\n"
 	}
 	return s
 }

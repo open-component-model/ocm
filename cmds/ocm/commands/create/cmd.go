@@ -26,11 +26,9 @@ import (
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              utils.SubCmdUse(commands.Create),
-		Short:            "Create transport or component archive",
-		TraverseChildren: true,
-	}
+	cmd := utils.MassageCommand(&cobra.Command{
+		Short: "Create transport or component archive",
+	}, commands.Create)
 	cmd.AddCommand(comparch.NewCommand(ctx, comparch.Names...))
 	cmd.AddCommand(ctf.NewCommand(ctx, ctf.Names...))
 	return cmd

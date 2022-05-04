@@ -5,7 +5,7 @@ Commands acting on components
 ### Synopsis
 
 ```
-ocm components <sub-command> ... <sub command> [<options>]
+ocm components [<options>] <sub command> ...
 ```
 
 ### Options

@@ -5,7 +5,7 @@ Add resources or sources to a component archive
 ### Synopsis
 
 ```
-ocm add <sub-command> ... <sub command> [<options>]
+ocm add [<options>] <sub command> ...
 ```
 
 ### Options

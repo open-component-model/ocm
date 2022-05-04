@@ -5,7 +5,7 @@ Commands acting on OCI tag names
 ### Synopsis
 
 ```
-ocm oci tags <sub-command> ... <sub command> [<options>]
+ocm oci tags [<options>] <sub command> ...
 ```
 
 ### Options

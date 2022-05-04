@@ -11,11 +11,12 @@ ocm download resources [<options>]  <component> {<name> { <key>=<value> }}
 ### Options
 
 ```
-  -c, --closure          follow component reference nesting
-  -h, --help             help for resources
-      --lookup string    repository name or spec for closure lookup fallback
-  -O, --outfile string   output file or directory
-  -r, --repo string      repository name or spec
+  -c, --closure             follow component reference nesting
+  -d, --download-handlers   use download handler if possible
+  -h, --help                help for resources
+      --lookup string       repository name or spec for closure lookup fallback
+  -O, --outfile string      output file or directory
+  -r, --repo string         repository name or spec
 ```
 
 ### Description
@@ -83,6 +84,11 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `Empty`
 - `OCIRegistry`
 - `oci`
+
+The library supports some downloads with semantics based on resource types. For example a helm chart
+can be download directly as helm chart archive, even if stored as OCI artefact.
+This is handled by download handler. Their usage can be enabled with the <code>--download-handlers</code>
+option. Otherwise the resource as returned by the access method is stored.
 
 With the option <code>--closure</code> the complete reference tree of a component reference is traversed.
 

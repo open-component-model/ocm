@@ -5,7 +5,7 @@ Commands acting on component resources
 ### Synopsis
 
 ```
-ocm resources <sub-command> ... <sub command> [<options>]
+ocm resources [<options>] <sub command> ...
 ```
 
 ### Options

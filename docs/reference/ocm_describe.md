@@ -5,7 +5,7 @@ Describe artefacts
 ### Synopsis
 
 ```
-ocm describe <sub-command> ... <sub command> [<options>]
+ocm describe [<options>] <sub command> ...
 ```
 
 ### Options

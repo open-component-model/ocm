@@ -5,7 +5,7 @@ Show tags or versions
 ### Synopsis
 
 ```
-ocm show <sub-command> ... <sub command> [<options>]
+ocm show [<options>] <sub command> ...
 ```
 
 ### Options

@@ -20,7 +20,7 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
+	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -46,12 +46,25 @@ func NewBaseCommand(ctx clictx.Context, opts ...options.Options) BaseCommand {
 
 func (BaseCommand) Complete(args []string) error { return nil }
 
+func MassageCommand(cmd *cobra.Command, names ...string) *cobra.Command {
+	if cmd.Use == "" {
+		cmd.Use = names[0] // SubCmdUse(name)
+	} else {
+		if !strings.HasSuffix(cmd.Use, names[0]+" ") {
+			cmd.Use = names[0] + " " + cmd.Use
+		}
+	}
+	if len(names) > 1 {
+		cmd.Aliases = names[1:]
+	}
+	cmd.DisableFlagsInUseLine = true
+	cmd.TraverseChildren = true
+	return cmd
+}
+
 func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 	c := ocmcmd.ForName(names[0])
-	if !strings.HasSuffix(c.Use, names[0]+" ") {
-		c.Use = names[0] + " " + c.Use
-	}
-	c.Aliases = names[1:]
+	MassageCommand(c, names...)
 	c.RunE = func(cmd *cobra.Command, args []string) error {
 		if set, ok := ocmcmd.(options.OptionSetProvider); ok {
 			set.AsOptionSet().ProcessOnOptions(options.CompleteOptionsWithCLIContext(ocmcmd))
@@ -65,14 +78,9 @@ func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 		}
 		return err
 	}
-	c.TraverseChildren = true
 	if u, ok := ocmcmd.(options.Usage); ok {
 		c.Long = c.Long + u.Usage()
 	}
 	ocmcmd.AddFlags(c.Flags())
 	return c
-}
-
-func SubCmdUse(cmd string) string {
-	return cmd + " <sub-command> ..."
 }

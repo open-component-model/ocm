@@ -5,7 +5,7 @@ Download oci artefacts, resources or complete components
 ### Synopsis
 
 ```
-ocm download <sub-command> ... <sub command> [<options>]
+ocm download [<options>] <sub command> ...
 ```
 
 ### Options

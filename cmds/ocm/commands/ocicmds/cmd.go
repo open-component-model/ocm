@@ -26,11 +26,9 @@ import (
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              utils.SubCmdUse("oci"),
-		Short:            "Dedicated command flavors for the OCI layer",
-		TraverseChildren: true,
-	}
+	cmd := utils.MassageCommand(&cobra.Command{
+		Short: "Dedicated command flavors for the OCI layer",
+	}, "oci")
 	cmd.AddCommand(artefacts.NewCommand(ctx))
 	cmd.AddCommand(ctf.NewCommand(ctx))
 	cmd.AddCommand(tags.NewCommand(ctx))

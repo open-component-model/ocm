@@ -5,7 +5,7 @@ Commands acting on component archives
 ### Synopsis
 
 ```
-ocm ocm componentarchive <sub-command> ... <sub command> [<options>]
+ocm ocm componentarchive [<options>] <sub command> ...
 ```
 
 ### Options

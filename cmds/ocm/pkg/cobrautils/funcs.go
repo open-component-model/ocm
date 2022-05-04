@@ -12,24 +12,45 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package add
+package cobrautils
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-
-	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/add"
-	sources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources/add"
-	"github.com/spf13/cobra"
+	"strings"
 )
 
-// NewCommand creates a new command.
-func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "Add resources or sources to a component archive",
-	}, commands.Add)
-	cmd.AddCommand(resources.NewCommand(ctx, resources.Names...))
-	cmd.AddCommand(sources.NewCommand(ctx, sources.Names...))
-	return cmd
+var templatefuncs = map[string]interface{}{
+	"indent":      indent,
+	"skipCommand": skipCommand,
+	"soleCommand": soleCommand,
+}
+
+func soleCommand(s string) bool {
+	return strings.Index(s, " ") < 0
+}
+
+func skipCommand(s string) string {
+	i := strings.Index(s, " ")
+	if i < 0 {
+		return ""
+	}
+	for ; i < len(s); i++ {
+		if s[i] != ' ' {
+			return s[i:]
+		}
+	}
+	return ""
+}
+
+func indent(n int, s string) string {
+	gap := ""
+	for ; n > 0; n-- {
+		gap += " "
+	}
+	lines := strings.Split(s, "\n")
+	for i, l := range lines {
+		if len(l) > 0 {
+			lines[i] = gap + lines[i]
+		}
+	}
+	return strings.Join(lines, "\n")
 }

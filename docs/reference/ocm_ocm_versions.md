@@ -5,7 +5,7 @@ Commands acting on component version names
 ### Synopsis
 
 ```
-ocm ocm versions <sub-command> ... <sub command> [<options>]
+ocm ocm versions [<options>] <sub command> ...
 ```
 
 ### Options

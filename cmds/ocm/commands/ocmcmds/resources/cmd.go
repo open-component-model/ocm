@@ -28,12 +28,9 @@ var Names = names.Resources
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              utils.SubCmdUse(Names[0]),
-		Aliases:          Names[1:],
-		Short:            "Commands acting on component resources",
-		TraverseChildren: true,
-	}
+	cmd := utils.MassageCommand(&cobra.Command{
+		Short: "Commands acting on component resources",
+	}, Names...)
 	cmd.AddCommand(add.NewCommand(ctx, add.Verb))
 	cmd.AddCommand(get.NewCommand(ctx, get.Verb))
 	cmd.AddCommand(download.NewCommand(ctx, download.Verb))

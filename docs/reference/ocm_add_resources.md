@@ -64,7 +64,7 @@ to add to a component version.
 The resource specification supports the following blob input types, specified
 with the field <code>type</code> in the <code>input</code> field:
 
-- <code>dir</code>
+- Input type <code>dir</code>
 
   The path must denote a directory relative to the resources file, which is packed
   with tar and optionally compressed
@@ -83,7 +83,7 @@ with the field <code>type</code> in the <code>input</code> field:
     This REQUIRED property describes the file path to directory relative to the
     resource file location.
 
-  - **<code>mediaType</code>** *sting*
+  - **<code>mediaType</code>** *string*
 
     This OPTIONAL property describes the media type to store with the local blob.
     The default media type is application/x-tar and
@@ -117,7 +117,8 @@ with the field <code>type</code> in the <code>input</code> field:
     all files not explicitly excluded are used.
 
 
-- <code>docker</code>
+
+- Input type <code>docker</code>
 
   The path must denote an image tag that can be found in the local
   docker daemon. The denoted image is packed an OCI artefact set.
@@ -127,7 +128,8 @@ with the field <code>type</code> in the <code>input</code> field:
 
     This REQUIRED property describes the image name to import from the
     local docker daemon.
-- <code>file</code>
+
+- Input type <code>file</code>
 
   The path must denote a file relative the the resources file.
   The content is compressed if the <code>compress</code> field
@@ -139,7 +141,7 @@ with the field <code>type</code> in the <code>input</code> field:
     This REQUIRED property describes the file path to the helm chart relative to the
     resource file location.
 
-  - **<code>mediaType</code>** *sting*
+  - **<code>mediaType</code>** *string*
 
     This OPTIONAL property describes the media type to store with the local blob.
     The default media type is application/octet-stream and
@@ -149,7 +151,8 @@ with the field <code>type</code> in the <code>input</code> field:
 
     This OPTIONAL property describes whether the file content should be stored
     compressed or not.
-- <code>helm</code>
+
+- Input type <code>helm</code>
 
   The path must denote an helm chart archive or directory
   relative to the resources file.
@@ -165,6 +168,14 @@ with the field <code>type</code> in the <code>input</code> field:
 
     This REQUIRED property describes the file path to the helm chart relative to the
     resource file location.
+
+  - **<code>version</code>** *string*
+
+    This OPTIONAL property can be set to configure an explicit version hint.
+    If not specified the versio from the chart will be used.
+    Basically, it is a good practice to use the component version for local resources
+    This can be achieved by using templating for this attribute in the resource file.
+
 
 ### SEE ALSO
 

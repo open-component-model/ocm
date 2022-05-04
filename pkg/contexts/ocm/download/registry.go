@@ -18,9 +18,9 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/out"
 )
 
 const ALL = "*"

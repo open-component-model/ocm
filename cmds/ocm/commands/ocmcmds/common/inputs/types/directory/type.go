@@ -26,7 +26,7 @@ func init() {
 }
 
 const usage = `
-- <code>dir</code>
+- Input type <code>dir</code>
 
   The path must denote a directory relative to the resources file, which is packed
   with tar and optionally compressed
@@ -45,7 +45,7 @@ const usage = `
     This REQUIRED property describes the file path to directory relative to the
     resource file location.
 
-  - **<code>mediaType</code>** *sting*
+  - **<code>mediaType</code>** *string*
 
     This OPTIONAL property describes the media type to store with the local blob.
     The default media type is ` + mime.MIME_TAR + ` and

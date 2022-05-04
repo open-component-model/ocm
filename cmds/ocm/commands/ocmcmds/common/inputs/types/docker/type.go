@@ -25,7 +25,7 @@ func init() {
 }
 
 const usage = `
-- <code>docker</code>
+- Input type <code>docker</code>
 
   The path must denote an image tag that can be found in the local
   docker daemon. The denoted image is packed an OCI artefact set.

@@ -18,6 +18,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
@@ -29,7 +30,6 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"

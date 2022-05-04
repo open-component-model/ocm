@@ -26,12 +26,9 @@ var Names = names.Tags
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              utils.SubCmdUse(Names[0]),
-		Aliases:          Names[1:],
-		Short:            "Commands acting on OCI tag names",
-		TraverseChildren: true,
-	}
+	cmd := utils.MassageCommand(&cobra.Command{
+		Short: "Commands acting on OCI tag names",
+	}, Names...)
 	cmd.AddCommand(show.NewCommand(ctx, show.Verb))
 	return cmd
 }

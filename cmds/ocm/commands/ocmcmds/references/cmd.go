@@ -26,12 +26,9 @@ var Names = names.References
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              utils.SubCmdUse(Names[0]),
-		Aliases:          Names[1:],
-		Short:            "Commands related to component references in component versions",
-		TraverseChildren: true,
-	}
+	cmd := utils.MassageCommand(&cobra.Command{
+		Short: "Commands related to component references in component versions",
+	}, Names...)
 	cmd.AddCommand(get.NewCommand(ctx, get.Verb))
 	return cmd
 }

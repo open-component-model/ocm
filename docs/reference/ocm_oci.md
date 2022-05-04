@@ -5,7 +5,7 @@ Dedicated command flavors for the OCI layer
 ### Synopsis
 
 ```
-ocm oci <sub-command> ... <sub command> [<options>]
+ocm oci [<options>] <sub command> ...
 ```
 
 ### Options

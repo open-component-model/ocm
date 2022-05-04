@@ -5,7 +5,7 @@ Transfer artefacts or components
 ### Synopsis
 
 ```
-ocm transfer <sub-command> ... <sub command> [<options>]
+ocm transfer [<options>] <sub command> ...
 ```
 
 ### Options

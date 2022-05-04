@@ -17,7 +17,7 @@ package output
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
+	"github.com/open-component-model/ocm/pkg/out"
 )
 
 type AttributeSet struct {

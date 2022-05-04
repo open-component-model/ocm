@@ -18,7 +18,7 @@ import (
 	"reflect"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
+	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/spf13/pflag"
 )
 

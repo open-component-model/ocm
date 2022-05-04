@@ -15,8 +15,6 @@
 package destoption
 
 import (
-	"fmt"
-
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
@@ -43,9 +41,6 @@ func (d *Option) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *Option) Complete(ctx clictx.Context) error {
-	if o.Destination == "" {
-		return fmt.Errorf("output destination required")
-	}
 	o.PathFilesystem = ctx.FileSystem()
 	return nil
 }

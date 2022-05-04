@@ -19,8 +19,8 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 

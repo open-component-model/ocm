@@ -5,7 +5,7 @@ ocm command line client
 ### Synopsis
 
 ```
-ocm <sub command> [<options>]
+ocm [<options>] <sub command> ...
 ```
 
 ### Options

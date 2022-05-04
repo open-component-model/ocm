@@ -25,7 +25,7 @@ func init() {
 }
 
 const usage = `
-- <code>helm</code>
+- Input type <code>helm</code>
 
   The path must denote an helm chart archive or directory
   relative to the resources file.

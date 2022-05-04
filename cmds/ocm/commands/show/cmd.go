@@ -25,11 +25,9 @@ import (
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              utils.SubCmdUse(commands.Show),
-		Short:            "Show tags or versions",
-		TraverseChildren: true,
-	}
+	cmd := utils.MassageCommand(&cobra.Command{
+		Short: "Show tags or versions",
+	}, commands.Show)
 	cmd.AddCommand(versions.NewCommand(ctx, versions.Names...))
 	cmd.AddCommand(tags.NewCommand(ctx, tags.Names...))
 

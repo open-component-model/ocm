@@ -29,12 +29,12 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/common"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/spf13/cobra"
 )
 
@@ -143,6 +143,9 @@ func (d *action) Out() error {
 	} else {
 		for _, e := range d.data {
 			f := dest.Destination
+			if f == "" {
+				f = "."
+			}
 			for _, p := range e.History {
 				f = path.Join(f, p.GetName(), p.GetVersion())
 			}
@@ -167,6 +170,9 @@ func (d *action) Save(o *elemhdlr.Object, f string) error {
 	dest := destoption.From(d.opts)
 	local := From(d.opts)
 	r := common.Elem(o)
+	if f == "" {
+		f = r.GetName()
+	}
 	id := r.GetIdentity(o.Version.GetDescriptor().Resources)
 	racc, err := o.Version.GetResource(id)
 	if err != nil {

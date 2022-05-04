@@ -5,7 +5,7 @@ Create transport or component archive
 ### Synopsis
 
 ```
-ocm create <sub-command> ... <sub command> [<options>]
+ocm create [<options>] <sub command> ...
 ```
 
 ### Options

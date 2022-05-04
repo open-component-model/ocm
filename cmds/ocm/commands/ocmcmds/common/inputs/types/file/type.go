@@ -26,7 +26,7 @@ func init() {
 }
 
 const usage = `
-- <code>file</code>
+- Input type <code>file</code>
 
   The path must denote a file relative the the resources file.
   The content is compressed if the <code>compress</code> field
@@ -38,7 +38,7 @@ const usage = `
     This REQUIRED property describes the file path to the helm chart relative to the
     resource file location.
 
-  - **<code>mediaType</code>** *sting*
+  - **<code>mediaType</code>** *string*
 
     This OPTIONAL property describes the media type to store with the local blob.
     The default media type is ` + mime.MIME_OCTET + ` and

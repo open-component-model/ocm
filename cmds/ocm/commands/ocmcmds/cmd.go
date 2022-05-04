@@ -29,11 +29,9 @@ import (
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              utils.SubCmdUse("ocm"),
-		Short:            "Dedicated command flavors for the Open Component Model",
-		TraverseChildren: true,
-	}
+	cmd := utils.MassageCommand(&cobra.Command{
+		Short: "Dedicated command flavors for the Open Component Model",
+	}, "ocm")
 	cmd.AddCommand(resources.NewCommand(ctx))
 	cmd.AddCommand(sources.NewCommand(ctx))
 	cmd.AddCommand(references.NewCommand(ctx))

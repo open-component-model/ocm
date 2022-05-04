@@ -5,7 +5,7 @@ Commands acting on OCI artefacts
 ### Synopsis
 
 ```
-ocm oci artefacts <sub-command> ... <sub command> [<options>]
+ocm oci artefacts [<options>] <sub command> ...
 ```
 
 ### Options

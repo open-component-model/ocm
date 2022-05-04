@@ -5,7 +5,7 @@ Commands acting on component sources
 ### Synopsis
 
 ```
-ocm sources <sub-command> ... <sub command> [<options>]
+ocm sources [<options>] <sub command> ...
 ```
 
 ### Options

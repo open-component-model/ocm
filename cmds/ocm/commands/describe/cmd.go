@@ -25,11 +25,9 @@ import (
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              utils.SubCmdUse(commands.Describe),
-		Short:            "Describe artefacts",
-		TraverseChildren: true,
-	}
+	cmd := utils.MassageCommand(&cobra.Command{
+		Short: "Describe artefacts",
+	}, commands.Describe)
 	cmd.AddCommand(resources.NewCommand(ctx, resources.Names...))
 	return cmd
 }

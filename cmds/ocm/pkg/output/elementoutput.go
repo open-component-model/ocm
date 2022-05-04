@@ -16,8 +16,8 @@ package output
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
-	. "github.com/open-component-model/ocm/cmds/ocm/pkg/output/out"
 	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
+	. "github.com/open-component-model/ocm/pkg/out"
 )
 
 type ElementOutput struct {

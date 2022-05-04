@@ -5,7 +5,7 @@ Commands related to component references in component versions
 ### Synopsis
 
 ```
-ocm ocm references <sub-command> ... <sub command> [<options>]
+ocm ocm references [<options>] <sub command> ...
 ```
 
 ### Options

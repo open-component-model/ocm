@@ -26,12 +26,9 @@ var Names = names.TransportArchive
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := &cobra.Command{
-		Use:              utils.SubCmdUse(Names[0]),
-		Aliases:          Names[1:],
-		Short:            "Commands acting on OCI view of a Common Transport Archive",
-		TraverseChildren: true,
-	}
+	cmd := utils.MassageCommand(&cobra.Command{
+		Short: "Commands acting on OCI view of a Common Transport Archive",
+	}, Names...)
 	cmd.AddCommand(create.NewCommand(ctx, create.Verb))
 	return cmd
 }

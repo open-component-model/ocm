@@ -22,14 +22,18 @@ import (
 
 // UseLine puts out the full usage for a given command (including parents).
 func UseLine(c *cobra.Command) string {
-	var useline string
-	if c.HasParent() {
-		useline = c.Parent().CommandPath() + " " + c.Use
-	} else {
-		useline = c.Use
+	useline := c.Use
+	if strings.Index(useline, " ") < 0 {
+		// no syntax given
+		if c.HasAvailableLocalFlags() {
+			useline += " [<options>]"
+		}
+		if hasChildren(c) {
+			useline += " <sub command> ..."
+		}
 	}
-	if hasChildren(c) {
-		useline += " <sub command>"
+	if c.HasParent() {
+		useline = c.Parent().CommandPath() + " " + useline
 	}
 	if c.DisableFlagsInUseLine {
 		return useline

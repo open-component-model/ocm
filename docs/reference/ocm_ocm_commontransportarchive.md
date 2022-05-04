@@ -5,7 +5,7 @@ Commands acting on common transport archives
 ### Synopsis
 
 ```
-ocm ocm commontransportarchive <sub-command> ... <sub command> [<options>]
+ocm ocm commontransportarchive [<options>] <sub command> ...
 ```
 
 ### Options

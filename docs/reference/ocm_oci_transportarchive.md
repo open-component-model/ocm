@@ -5,7 +5,7 @@ Commands acting on OCI view of a Common Transport Archive
 ### Synopsis
 
 ```
-ocm oci transportarchive <sub-command> ... <sub command> [<options>]
+ocm oci transportarchive [<options>] <sub command> ...
 ```
 
 ### Options
