@@ -4,7 +4,7 @@
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 VERSION                                        := $(shell cat $(REPO_ROOT)/VERSION)
-EFFECTIVE_VERSION                              := $(VERSION)-$(shell git rev-parse HEAD)
+EFFECTIVE_VERSION                              := $(VERSION)+$(shell git rev-parse HEAD)
 
 REGISTRY                                       := ghcr.io/mandelsoft/ocm
 COMPONENT_CLI_IMAGE_REPOSITORY                 := $(REGISTRY)/cli

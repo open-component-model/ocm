@@ -7,9 +7,10 @@ package version
 import (
 	"fmt"
 	"runtime"
+	"strconv"
 	"strings"
 
-	apimachineryversion "k8s.io/apimachinery/pkg/version"
+	"github.com/Masterminds/semver/v3"
 )
 
 var (
@@ -19,25 +20,76 @@ var (
 	buildDate    = "1970-01-01T00:00:00Z"
 )
 
+type Info struct {
+	Major        string `json:"major"`
+	Minor        string `json:"minor"`
+	Patch        string `json:"patch"`
+	PreRelease   string `json:"prerelease"`
+	Meta         string `json:"meta"`
+	GitVersion   string `json:"gitVersion"`
+	GitCommit    string `json:"gitCommit"`
+	GitTreeState string `json:"gitTreeState"`
+	BuildDate    string `json:"buildDate"`
+	GoVersion    string `json:"goVersion"`
+	Compiler     string `json:"compiler"`
+	Platform     string `json:"platform"`
+}
+
+// String returns info as a human-friendly version string.
+func (info Info) String() string {
+	return info.GitVersion
+}
+
 // GetInterface returns the overall codebase version. It's for detecting
 // what code a binary was built from.
 // These variables typically come from -ldflags settings and in
 // their absence fallback to the settings in pkg/version/base.go
-func Get() apimachineryversion.Info {
+func Get() Info {
 	var (
-		version  = strings.Split(gitVersion, ".")
 		gitMajor string
 		gitMinor string
+		gitPatch string = "0"
+		gitPre   string
+		gitMeta  string
 	)
 
-	if len(version) >= 2 {
-		gitMajor = version[0]
-		gitMinor = version[1]
+	v, err := semver.NewVersion(gitVersion)
+	if err == nil {
+		gitMajor = strconv.Itoa(int(v.Major()))
+		gitMinor = strconv.Itoa(int(v.Minor()))
+		gitPatch = strconv.Itoa(int(v.Patch()))
+		gitPre = v.Prerelease()
+		gitMeta = v.Metadata()
+	} else {
+		version := gitVersion
+		if i := strings.Index(version, "-"); i >= 0 {
+			gitPre = version[i+1:]
+			version = version[:i]
+		}
+		if i := strings.Index(version, "+"); i >= 0 {
+			gitMeta = version[i+1:]
+			version = version[:i]
+		}
+		if i := strings.Index(gitPre, "+"); i >= 0 {
+			gitMeta = gitPre[i+1:]
+			gitPre = gitPre[:i]
+		}
+		v := strings.Split(gitVersion, ".")
+		if len(v) >= 2 {
+			gitMajor = v[0]
+			gitMinor = v[1]
+			if len(v) >= 3 {
+				gitPatch = v[2]
+			}
+		}
 	}
 
-	return apimachineryversion.Info{
+	return Info{
 		Major:        gitMajor,
 		Minor:        gitMinor,
+		Patch:        gitPatch,
+		PreRelease:   gitPre,
+		Meta:         gitMeta,
 		GitVersion:   gitVersion,
 		GitCommit:    gitCommit,
 		GitTreeState: gitTreeState,

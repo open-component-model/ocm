@@ -110,10 +110,10 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	}
 	cmd := &cobra.Command{
 		Use:                   "ocm",
-		Short:                 "ocm command line client",
+		Short:                 "Open Component Model command line client",
 		Long:                  desc,
-		TraverseChildren:      true,
 		Version:               version.Get().String(),
+		TraverseChildren:      true,
 		SilenceUsage:          true,
 		DisableFlagsInUseLine: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
