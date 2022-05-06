@@ -46,6 +46,7 @@ type ResourceInput struct {
 }
 
 type ResourceSpecHandler interface {
+	RequireInputs() bool
 	Decode(data []byte) (ResourceSpec, error)
 	Set(v ocm.ComponentVersionAccess, r Resource, acc compdesc.AccessSpec) error
 }
@@ -151,6 +152,9 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 				}
 				break
 			}
+			if (tmp["input"] != nil || tmp["access"] != nil) && !h.RequireInputs() {
+				return errors.Newf("invalid spec %d in %q: no input or access possible for %s", i+1, filePath, listkey)
+			}
 
 			var list []json.RawMessage
 			if reslist, ok := tmp[listkey]; ok {
@@ -181,21 +185,28 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 			}
 
 			for j, d := range list {
-				input, err := DecodeInput(d, o.Context)
-				if err != nil {
-					return errors.Newf("invalid spec %d[%d] in %q: %s", i+1, j+1, filePath, err)
-				}
-
+				var input *ResourceInput
 				r, err := DecodeResource(d, h)
 				if err != nil {
 					return errors.Newf("invalid spec %d[%d] in %q: %s", i+1, j+1, filePath, err)
 				}
+
+				if h.RequireInputs() {
+					input, err = DecodeInput(d, o.Context)
+					if err != nil {
+						return errors.Newf("invalid spec %d[%d] in %q: %s", i+1, j+1, filePath, err)
+					}
+					if err = Validate(input, o.Context, filePath); err != nil {
+						return errors.Wrapf(err, "invalid spec %d[%d] in %q", i+1, j+1, filePath)
+					}
+				} else {
+
+				}
+
 				if err = r.Validate(o.Context, input); err != nil {
 					return errors.Wrapf(err, "invalid spec %d[%d] in %q", i+1, j+1, filePath)
 				}
-				if err = Validate(input, o.Context, filePath); err != nil {
-					return errors.Wrapf(err, "invalid spec %d[%d] in %q", i+1, j+1, filePath)
-				}
+
 				resources = append(resources, NewResource(r, input, filePath, i, j))
 			}
 		}
@@ -208,20 +219,24 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 	defer obj.Close()
 
 	for _, r := range resources {
-		if r.input.Input != nil {
-			var acc ocm.AccessSpec
-			// Local Blob
-			blob, hint, berr := r.input.Input.GetBlob(o.Context, r.path)
-			if berr != nil {
-				return errors.Wrapf(err, "cannot get resource blob for %q(%s)", r.spec.GetName(), r.source)
+		if h.RequireInputs() {
+			if r.input.Input != nil {
+				var acc ocm.AccessSpec
+				// Local Blob
+				blob, hint, berr := r.input.Input.GetBlob(o.Context, r.path)
+				if berr != nil {
+					return errors.Wrapf(err, "cannot get resource blob for %q(%s)", r.spec.GetName(), r.source)
+				}
+				acc, err = obj.AddBlob(blob, hint, nil)
+				if err == nil {
+					err = h.Set(obj, r, acc)
+				}
+				blob.Close()
+			} else {
+				err = h.Set(obj, r, compdesc.GenericAccessSpec(r.input.Access))
 			}
-			acc, err = obj.AddBlob(blob, hint, nil)
-			if err == nil {
-				err = h.Set(obj, r, acc)
-			}
-			blob.Close()
 		} else {
-			err = h.Set(obj, r, compdesc.GenericAccessSpec(r.input.Access))
+			err = h.Set(obj, r, nil)
 		}
 		if err != nil {
 			return errors.Wrapf(err, "cannot add resource %q(%s)", r.spec.GetName(), r.source)

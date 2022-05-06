@@ -29,6 +29,10 @@ type ResourceSpecHandler struct{}
 
 var _ common.ResourceSpecHandler = (*ResourceSpecHandler)(nil)
 
+func (ResourceSpecHandler) RequireInputs() bool {
+	return true
+}
+
 func (ResourceSpecHandler) Decode(data []byte) (common.ResourceSpec, error) {
 	var desc ResourceSpec
 	err := runtime.DefaultYAMLEncoding.Unmarshal(data, &desc)

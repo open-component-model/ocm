@@ -1,0 +1,5 @@
+---
+references:
+- name: testdata
+  componentName: github.com/mandelsoft/ref
+  version: v1.1.1

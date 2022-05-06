@@ -21,9 +21,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	compdescv2 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -32,11 +30,11 @@ type ResourceSpecHandler struct{}
 var _ common.ResourceSpecHandler = (*ResourceSpecHandler)(nil)
 
 func (ResourceSpecHandler) RequireInputs() bool {
-	return true
+	return false
 }
 
 func (ResourceSpecHandler) Decode(data []byte) (common.ResourceSpec, error) {
-	var desc ResourceDescription
+	var desc ResourceSpec
 	err := runtime.DefaultYAMLEncoding.Unmarshal(data, &desc)
 	if err != nil {
 		return nil, err
@@ -45,72 +43,37 @@ func (ResourceSpecHandler) Decode(data []byte) (common.ResourceSpec, error) {
 }
 
 func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r common.Resource, acc compdesc.AccessSpec) error {
-	spec := r.Spec().(*ResourceDescription)
+	spec := r.Spec().(*ResourceSpec)
 	vers := spec.Version
-	if spec.Relation == metav1.LocalRelation {
-
-		if vers == "" || vers == "<componentversion>" {
-			vers = v.GetVersion()
-		} else {
-			if vers != v.GetVersion() {
-				return errors.Newf("local resource %q (%s) has non-matching version %q", spec.Name, r.Source(), vers)
-			}
-		}
-	}
-	if vers == "<componentversion>" {
+	if vers == "" {
 		vers = v.GetVersion()
 	}
-
-	meta := &compdesc.ResourceMeta{
+	meta := &compdesc.ComponentReference{
 		ElementMeta: compdesc.ElementMeta{
 			Name:          spec.Name,
 			Version:       vers,
 			ExtraIdentity: spec.ExtraIdentity,
 			Labels:        spec.Labels,
 		},
-		Type:      spec.Type,
-		Relation:  spec.Relation,
-		SourceRef: compdescv2.Convert_SourceRefs_to(spec.SourceRef),
+		ComponentName: spec.ComponentName,
 	}
-	return v.SetResource(meta, acc)
+	return v.SetReference(meta)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type ResourceDescription struct {
-	compdescv2.Resource `json:",inline"`
+type ResourceSpec struct {
+	compdescv2.ComponentReference `json:",inline"`
 }
 
-var _ common.ResourceSpec = (*ResourceDescription)(nil)
+var _ common.ResourceSpec = (*ResourceSpec)(nil)
 
-func (r *ResourceDescription) Validate(ctx clictx.Context, input *common.ResourceInput) error {
+func (r *ResourceSpec) Validate(ctx clictx.Context, input *common.ResourceInput) error {
 	allErrs := field.ErrorList{}
 	var fldPath *field.Path
 
-	if r.Relation == "" {
-		if input.Input != nil {
-			r.Relation = metav1.LocalRelation
-		}
-		if r.Access != nil {
-			r.Relation = metav1.ExternalRelation
-		}
-	}
-	if r.Version == "" && r.Relation == metav1.LocalRelation {
-		r.Version = "<componentversion>"
-	}
-	if err := compdescv2.ValidateResource(fldPath, r.Resource, false); err != nil {
+	if err := compdescv2.ValidateComponentReference(fldPath, r.ComponentReference); err != nil {
 		allErrs = append(allErrs, err...)
-	}
-
-	if input.Access != nil {
-		if r.Relation == metav1.LocalRelation {
-			allErrs = append(allErrs, field.Forbidden(fldPath.Child("relation"), "access requires external relation"))
-		}
-	}
-	if input.Input != nil {
-		if r.Relation != metav1.LocalRelation {
-			allErrs = append(allErrs, field.Forbidden(fldPath.Child("relation"), "input requires local relation"))
-		}
 	}
 	return allErrs.ToAggregate()
 }

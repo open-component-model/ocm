@@ -99,7 +99,7 @@ func CheckTextSource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string
 	Expect(spec.(*localblob.AccessSpec).MediaType).To(Equal(mime.MIME_TEXT))
 }
 
-var _ = Describe("Test Environment", func() {
+var _ = Describe("Add sources", func() {
 	var env *TestEnv
 
 	BeforeEach(func() {

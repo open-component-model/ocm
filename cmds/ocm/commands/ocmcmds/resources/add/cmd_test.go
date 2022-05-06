@@ -65,7 +65,7 @@ func get(blob accessio.BlobAccess, expected []byte) []byte {
 	return data
 }
 
-var _ = Describe("Test Environment", func() {
+var _ = Describe("Add resources", func() {
 	var env *TestEnv
 
 	BeforeEach(func() {
