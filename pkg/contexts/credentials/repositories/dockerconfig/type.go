@@ -42,10 +42,15 @@ func (s RepositorySpec) WithConsumerPropagation(propagate bool) *RepositorySpec 
 }
 
 // NewRepositorySpec creates a new memory RepositorySpec
-func NewRepositorySpec(path string) *RepositorySpec {
+func NewRepositorySpec(path string, prop ...bool) *RepositorySpec {
+	p := false
+	for _, e := range prop {
+		p = p || e
+	}
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(DockerConfigRepositoryType),
-		DockerConfigFile:    path,
+		ObjectVersionedType:      runtime.NewVersionedObjectType(DockerConfigRepositoryType),
+		DockerConfigFile:         path,
+		PropgateConsumerIdentity: p,
 	}
 }
 

@@ -16,6 +16,7 @@ package dockerconfig
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -25,12 +26,13 @@ import (
 	"github.com/docker/cli/cli/config/configfile"
 	dockercred "github.com/docker/cli/cli/config/credentials"
 	"github.com/docker/cli/cli/config/types"
-
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
+
+var log = false
 
 type Repository struct {
 	lock      sync.RWMutex
@@ -103,6 +105,9 @@ func (r *Repository) Read(force bool) error {
 	if err != nil {
 		return err
 	}
+	defaultStore := dockercred.DetectDefaultStore(cfg.CredentialsStore)
+	store := dockercred.NewNativeStore(cfg, defaultStore)
+	// get default native credential store
 	if r.propagate {
 		all := cfg.GetAuthConfigs()
 		for h, a := range all {
@@ -114,8 +119,34 @@ func (r *Repository) Read(force bool) error {
 				cpi.ATTR_TYPE:        identity.CONSUMER_TYPE,
 				identity.ID_HOSTNAME: hostname,
 			}
-			//fmt.Printf("propgate id %s\n", id)
-			r.ctx.SetCredentialsForConsumer(id, newCredentials(a))
+
+			var creds cpi.Credentials
+			if IsEmptyAuthConfig(a) {
+				if log {
+					fmt.Printf("propagate id %s with default store\n", id, defaultStore)
+				}
+				creds = NewCredentials(r, h, store)
+			} else {
+				if log {
+					fmt.Printf("propagate id %s\n", id)
+				}
+				creds = newCredentials(a)
+			}
+			r.ctx.SetCredentialsForConsumer(id, creds)
+		}
+		for h, helper := range cfg.CredentialHelpers {
+			hostname := dockercred.ConvertToHostname(h)
+			if hostname == "index.docker.io" {
+				hostname = "docker.io"
+			}
+			id := cpi.ConsumerIdentity{
+				cpi.ATTR_TYPE:        identity.CONSUMER_TYPE,
+				identity.ID_HOSTNAME: hostname,
+			}
+			if log {
+				fmt.Printf("propagate id %s with helper %s\n", id, helper)
+			}
+			r.ctx.SetCredentialsForConsumer(id, NewCredentials(r, h, dockercred.NewNativeStore(cfg, helper)))
 		}
 	}
 	r.config = cfg
@@ -132,4 +163,15 @@ func newCredentials(auth types.AuthConfig) cpi.Credentials {
 	props.SetNonEmptyValue(cpi.ATTR_IDENTITY_TOKEN, auth.IdentityToken)
 	props.SetNonEmptyValue(cpi.ATTR_REGISTRY_TOKEN, auth.RegistryToken)
 	return cpi.NewCredentials(props)
+}
+
+// IsEmptyAuthConfig validates if the resulting auth config contains credentails
+func IsEmptyAuthConfig(auth types.AuthConfig) bool {
+	if len(auth.Auth) != 0 {
+		return false
+	}
+	if len(auth.Username) != 0 {
+		return false
+	}
+	return true
 }

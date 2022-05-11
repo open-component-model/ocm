@@ -50,8 +50,11 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 
 func (o *Option) Complete(ctx clictx.Context) error {
 	o.FileSystem = ctx.FileSystem()
-	if o.ScriptFile != "" && o.Script == "" {
+	if o.ScriptFile != "" && o.Script != "" {
 		return errors.Newf("only one of --script or --scriptFile may be set")
+	}
+	if o.ScriptData != nil {
+		return nil
 	}
 	if o.Script != "" {
 		err := cfgcpi.NewUpdate(ctx.ConfigContext()).Update(o)
@@ -59,7 +62,7 @@ func (o *Option) Complete(ctx clictx.Context) error {
 			return err
 		}
 		if o.ScriptData == nil {
-			return errors.ErrUnknown("script", o.ScriptFile)
+			return errors.ErrUnknown("script", o.Script)
 		}
 	}
 	if o.ScriptFile != "" {
@@ -72,6 +75,9 @@ func (o *Option) Complete(ctx clictx.Context) error {
 	if o.ScriptData == nil {
 		o.Script = "default"
 		err := cfgcpi.NewUpdate(ctx.ConfigContext()).Update(o)
+		if o.ScriptData == nil {
+			o.Script = ""
+		}
 		if err != nil {
 			return err
 		}

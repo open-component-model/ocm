@@ -55,6 +55,9 @@ func New(opts ...transferhandler.TransferOption) (transferhandler.TransferHandle
 
 func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ElementMeta) (ocm.Repository, transferhandler.TransferHandler, error) {
 	if src == nil || h.opts.IsRecursive() {
+		if h.opts.GetScript() == nil {
+			return repo, h, nil
+		}
 		binding := h.getBinding(src, nil, meta, nil)
 		result, r, s, err := h.EvalRecursion("componentversion", binding, "process")
 		if err != nil {
@@ -177,11 +180,11 @@ func (h *Handler) EvalRecursion(mode string, binding map[string]interface{}, key
 
 	m, ok := r.Value().(map[string]spiffing.Node)
 	if !ok {
-		return false, nil, nil, errors.ErrUnknown("field", key)
+		return false, nil, nil, errors.ErrUnknown("transfer script field", key)
 	}
 	r = m[key]
 	if r == nil {
-		return false, nil, nil, errors.ErrUnknown("field", key)
+		return false, nil, nil, errors.ErrUnknown("transfer script field", key)
 	}
 
 	b, err := h.evalBoolValue(r)
@@ -191,7 +194,7 @@ func (h *Handler) EvalRecursion(mode string, binding map[string]interface{}, key
 	}
 	m, ok = r.Value().(map[string]spiffing.Node)
 	if !ok {
-		return false, nil, nil, errors.ErrInvalid("result field type", dynaml.ExpressionType(r))
+		return false, nil, nil, errors.ErrInvalid("transfer script result field type", dynaml.ExpressionType(r))
 	}
 	// now we expect a result structure
 	// process: bool

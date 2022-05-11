@@ -10,8 +10,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 
+	dockercli "github.com/docker/cli/cli/config"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/add"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/create"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/describe"
@@ -30,6 +32,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	credcfg "github.com/open-component-model/ocm/pkg/contexts/credentials/config"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -180,6 +184,17 @@ func (o *CLIOptions) Complete() error {
 		err = config.DefaultContext().ApplyConfig(cfg, o.Config)
 		if err != nil {
 			return errors.Wrapf(err, "cannot apply config %q", o.Config)
+		}
+	} else {
+		// use docker config as default config for ocm cli
+		d := filepath.Join(dockercli.Dir(), dockercli.ConfigFileName)
+		if ok, err := vfs.FileExists(osfs.New(), d); ok && err == nil {
+			cfg := credcfg.NewConfigSpec()
+			cfg.AddRepository(dockerconfig.NewRepositorySpec(d, true))
+			err = config.DefaultContext().ApplyConfig(cfg, d)
+			if err != nil {
+				return errors.Wrapf(err, "cannot apply docker config %q", d)
+			}
 		}
 	}
 
