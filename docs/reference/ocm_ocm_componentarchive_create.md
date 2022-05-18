@@ -29,5 +29,5 @@ to host component version content or a tar/tgz file.
 
 * [ocm ocm componentarchive](ocm_ocm_componentarchive.md)	 - Commands acting on component archives
 * [ocm ocm](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
-* [ocm](ocm.md)	 - ocm command line client
+* [ocm](ocm.md)	 - Open Component Model command line client
 

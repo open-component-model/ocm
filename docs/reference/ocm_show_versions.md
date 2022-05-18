@@ -72,5 +72,5 @@ $ ocm show versions ghcr.io/mandelsoft/cnudie//github.com/mandelsoft/playground
 ##### Parents
 
 * [ocm show](ocm_show.md)	 - Show tags or versions
-* [ocm](ocm.md)	 - ocm command line client
+* [ocm](ocm.md)	 - Open Component Model command line client
 

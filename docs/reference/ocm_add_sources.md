@@ -182,5 +182,5 @@ with the field <code>type</code> in the <code>input</code> field:
 ##### Parents
 
 * [ocm add](ocm_add.md)	 - Add resources or sources to a component archive
-* [ocm](ocm.md)	 - ocm command line client
+* [ocm](ocm.md)	 - Open Component Model command line client
 

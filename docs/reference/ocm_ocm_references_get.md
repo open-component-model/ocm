@@ -90,5 +90,5 @@ The following modes are supported:
 
 * [ocm ocm references](ocm_ocm_references.md)	 - Commands related to component references in component versions
 * [ocm ocm](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
-* [ocm](ocm.md)	 - ocm command line client
+* [ocm](ocm.md)	 - Open Component Model command line client
 

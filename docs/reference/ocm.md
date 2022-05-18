@@ -1,6 +1,6 @@
 ## ocm
 
-ocm command line client
+Open Component Model command line client
 
 ### Synopsis
 

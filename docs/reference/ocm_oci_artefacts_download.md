@@ -64,5 +64,5 @@ The default format is <code>directory</code>.
 
 * [ocm oci artefacts](ocm_oci_artefacts.md)	 - Commands acting on OCI artefacts
 * [ocm oci](ocm_oci.md)	 - Dedicated command flavors for the OCI layer
-* [ocm](ocm.md)	 - ocm command line client
+* [ocm](ocm.md)	 - Open Component Model command line client
 

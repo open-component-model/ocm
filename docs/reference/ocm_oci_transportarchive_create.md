@@ -29,5 +29,5 @@ to host artefact content or a tar/tgz file.
 
 * [ocm oci transportarchive](ocm_oci_transportarchive.md)	 - Commands acting on OCI view of a Common Transport Archive
 * [ocm oci](ocm_oci.md)	 - Dedicated command flavors for the OCI layer
-* [ocm](ocm.md)	 - ocm command line client
+* [ocm](ocm.md)	 - Open Component Model command line client
 

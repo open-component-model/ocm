@@ -73,5 +73,5 @@ The default format is <code>directory</code>.
 ##### Parents
 
 * [ocm components](ocm_components.md)	 - Commands acting on components
-* [ocm](ocm.md)	 - ocm command line client
+* [ocm](ocm.md)	 - Open Component Model command line client
 

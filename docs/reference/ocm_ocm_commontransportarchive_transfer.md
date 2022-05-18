@@ -39,5 +39,5 @@ The default format is <code>directory</code>.
 
 * [ocm ocm commontransportarchive](ocm_ocm_commontransportarchive.md)	 - Commands acting on common transport archives
 * [ocm ocm](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
-* [ocm](ocm.md)	 - ocm command line client
+* [ocm](ocm.md)	 - Open Component Model command line client
 

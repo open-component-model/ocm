@@ -18,5 +18,5 @@ ocm version [<options>]
 
 ##### Parents
 
-* [ocm](ocm.md)	 - ocm command line client
+* [ocm](ocm.md)	 - Open Component Model command line client
 

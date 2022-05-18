@@ -64,17 +64,6 @@ to add to a component version.
 The resource specification supports the following blob input types, specified
 with the field <code>type</code> in the <code>input</code> field:
 
-- Input type <code>docker</code>
-
-  The path must denote an image tag that can be found in the local
-  docker daemon. The denoted image is packed an OCI artefact set.
-
-  This blob type specification supports the following fields: 
-  - **<code>path</code>** *string*
-
-    This REQUIRED property describes the image name to import from the
-    local docker daemon.
-
 - Input type <code>file</code>
 
   The path must denote a file relative the the resources file.
@@ -176,6 +165,17 @@ with the field <code>type</code> in the <code>input</code> field:
 
 
 
+- Input type <code>docker</code>
+
+  The path must denote an image tag that can be found in the local
+  docker daemon. The denoted image is packed an OCI artefact set.
+
+  This blob type specification supports the following fields: 
+  - **<code>path</code>** *string*
+
+    This REQUIRED property describes the image name to import from the
+    local docker daemon.
+
 
 ### SEE ALSO
 
@@ -183,5 +183,5 @@ with the field <code>type</code> in the <code>input</code> field:
 
 * [ocm ocm sources](ocm_ocm_sources.md)	 - Commands acting on component sources
 * [ocm ocm](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
-* [ocm](ocm.md)	 - ocm command line client
+* [ocm](ocm.md)	 - Open Component Model command line client
 

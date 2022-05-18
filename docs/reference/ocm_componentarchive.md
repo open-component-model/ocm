@@ -18,7 +18,7 @@ ocm componentarchive [<options>] <sub command> ...
 
 ##### Parents
 
-* [ocm](ocm.md)	 - ocm command line client
+* [ocm](ocm.md)	 - Open Component Model command line client
 
 
 ##### Sub Commands

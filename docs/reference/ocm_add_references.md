@@ -1,18 +1,18 @@
-## ocm sources add
+## ocm add references
 
-add source information to a component version
+add aggregation information to a component version
 
 ### Synopsis
 
 ```
-ocm sources add [<options>] <target> {<resourcefile> | <var>=<value>}
+ocm add references [<options>] <target> {<resourcefile> | <var>=<value>}
 ```
 
 ### Options
 
 ```
       --addenv                 access environment for templating
-  -h, --help                   help for add
+  -h, --help                   help for references
   -s, --settings stringArray   settings file with variable settings (yaml)
       --templater string       templater to use (subst, spiff, go) (default "subst")
 ```
@@ -20,7 +20,7 @@ ocm sources add [<options>] <target> {<resourcefile> | <var>=<value>}
 ### Description
 
 
-Add  source information specified in a resource file to a component version.
+Add  aggregation information specified in a resource file to a component version.
 So far only component archives are supported as target.
 
 Templating:
@@ -58,7 +58,7 @@ There are several templaters that can be selected by the <code>--templater</code
     subkey: "abc (( values.MY_VAL ))"
   </pre>
 
-This command accepts (re)source specification files describing the sources
+This command accepts reference specification files describing the references
 to add to a component version.
 
 The resource specification supports the following blob input types, specified
@@ -181,6 +181,6 @@ with the field <code>type</code> in the <code>input</code> field:
 
 ##### Parents
 
-* [ocm sources](ocm_sources.md)	 - Commands acting on component sources
+* [ocm add](ocm_add.md)	 - Add resources or sources to a component archive
 * [ocm](ocm.md)	 - Open Component Model command line client
 

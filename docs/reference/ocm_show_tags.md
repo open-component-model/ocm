@@ -63,5 +63,5 @@ $ oci show tags ghcr.io/mandelsoft/kubelink
 ##### Parents
 
 * [ocm show](ocm_show.md)	 - Show tags or versions
-* [ocm](ocm.md)	 - ocm command line client
+* [ocm](ocm.md)	 - Open Component Model command line client
 

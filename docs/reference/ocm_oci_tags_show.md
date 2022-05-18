@@ -64,5 +64,5 @@ $ oci show tags ghcr.io/mandelsoft/kubelink
 
 * [ocm oci tags](ocm_oci_tags.md)	 - Commands acting on OCI tag names
 * [ocm oci](ocm_oci.md)	 - Dedicated command flavors for the OCI layer
-* [ocm](ocm.md)	 - ocm command line client
+* [ocm](ocm.md)	 - Open Component Model command line client
 

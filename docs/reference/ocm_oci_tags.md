@@ -19,7 +19,7 @@ ocm oci tags [<options>] <sub command> ...
 ##### Parents
 
 * [ocm oci](ocm_oci.md)	 - Dedicated command flavors for the OCI layer
-* [ocm](ocm.md)	 - ocm command line client
+* [ocm](ocm.md)	 - Open Component Model command line client
 
 
 ##### Sub Commands

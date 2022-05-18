@@ -64,6 +64,40 @@ to add to a component version.
 The resource specification supports the following blob input types, specified
 with the field <code>type</code> in the <code>input</code> field:
 
+- Input type <code>docker</code>
+
+  The path must denote an image tag that can be found in the local
+  docker daemon. The denoted image is packed an OCI artefact set.
+
+  This blob type specification supports the following fields: 
+  - **<code>path</code>** *string*
+
+    This REQUIRED property describes the image name to import from the
+    local docker daemon.
+
+- Input type <code>file</code>
+
+  The path must denote a file relative the the resources file.
+  The content is compressed if the <code>compress</code> field
+  is set to <code>true</code>.
+
+  This blob type specification supports the following fields: 
+  - **<code>path</code>** *string*
+
+    This REQUIRED property describes the file path to the helm chart relative to the
+    resource file location.
+
+  - **<code>mediaType</code>** *string*
+
+    This OPTIONAL property describes the media type to store with the local blob.
+    The default media type is application/octet-stream and
+    application/gzip if compression is enabled.
+
+  - **<code>compress</code>** *bool*
+
+    This OPTIONAL property describes whether the file content should be stored
+    compressed or not.
+
 - Input type <code>helm</code>
 
   The path must denote an helm chart archive or directory
@@ -142,45 +176,11 @@ with the field <code>type</code> in the <code>input</code> field:
 
 
 
-- Input type <code>docker</code>
-
-  The path must denote an image tag that can be found in the local
-  docker daemon. The denoted image is packed an OCI artefact set.
-
-  This blob type specification supports the following fields: 
-  - **<code>path</code>** *string*
-
-    This REQUIRED property describes the image name to import from the
-    local docker daemon.
-
-- Input type <code>file</code>
-
-  The path must denote a file relative the the resources file.
-  The content is compressed if the <code>compress</code> field
-  is set to <code>true</code>.
-
-  This blob type specification supports the following fields: 
-  - **<code>path</code>** *string*
-
-    This REQUIRED property describes the file path to the helm chart relative to the
-    resource file location.
-
-  - **<code>mediaType</code>** *string*
-
-    This OPTIONAL property describes the media type to store with the local blob.
-    The default media type is application/octet-stream and
-    application/gzip if compression is enabled.
-
-  - **<code>compress</code>** *bool*
-
-    This OPTIONAL property describes whether the file content should be stored
-    compressed or not.
-
 
 ### SEE ALSO
 
 ##### Parents
 
 * [ocm resources](ocm_resources.md)	 - Commands acting on component resources
-* [ocm](ocm.md)	 - ocm command line client
+* [ocm](ocm.md)	 - Open Component Model command line client
 

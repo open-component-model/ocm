@@ -89,5 +89,5 @@ The following modes are supported:
 ##### Parents
 
 * [ocm references](ocm_references.md)	 - Commands related to component references in component versions
-* [ocm](ocm.md)	 - ocm command line client
+* [ocm](ocm.md)	 - Open Component Model command line client
 
