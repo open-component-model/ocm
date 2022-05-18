@@ -23,6 +23,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localociblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
 	ocihdlr "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -106,7 +107,14 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMe
 		if err != nil {
 			return nil, err
 		}
-		return newLocalFilesystemBlobAccessMethod(a.(*localblob.AccessSpec), c.comp.namespace, c.comp.GetContext())
+		return newLocalBlobAccessMethod(a.(*localblob.AccessSpec), c.comp.namespace, c.comp.GetContext())
+	}
+	if a.GetKind() == localociblob.Type {
+		a, err := c.comp.GetContext().AccessSpecForSpec(a)
+		if err != nil {
+			return nil, err
+		}
+		return newLocalOCIBlobAccessMethod(a.(*localociblob.AccessSpec), c.comp.namespace)
 	}
 	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "oci registry")
 }

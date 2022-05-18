@@ -20,36 +20,31 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localociblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/opencontainers/go-digest"
 )
 
-type localBlobAccessMethod struct {
+type localOCIBlobAccessMethod struct {
 	lock   sync.Mutex
 	data   accessio.DataAccess
-	ctx    cpi.Context
-	spec   *localblob.AccessSpec
+	spec   *localociblob.AccessSpec
 	access oci.NamespaceAccess
 }
 
-var _ cpi.AccessMethod = (*localBlobAccessMethod)(nil)
+var _ cpi.AccessMethod = (*localOCIBlobAccessMethod)(nil)
 
-func newLocalBlobAccessMethod(a *localblob.AccessSpec, access oci.NamespaceAccess, ctx cpi.Context) (cpi.AccessMethod, error) {
-	return &localBlobAccessMethod{
-		ctx:    ctx,
+func newLocalOCIBlobAccessMethod(a *localociblob.AccessSpec, access oci.NamespaceAccess) (cpi.AccessMethod, error) {
+	return &localOCIBlobAccessMethod{
 		spec:   a,
 		access: access,
 	}, nil
 }
 
-func (m *localBlobAccessMethod) GetKind() string {
-	return localblob.Type
+func (m *localOCIBlobAccessMethod) GetKind() string {
+	return localociblob.Type
 }
 
-func (m *localBlobAccessMethod) Close() error {
+func (m *localOCIBlobAccessMethod) Close() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -61,24 +56,14 @@ func (m *localBlobAccessMethod) Close() error {
 	return nil
 }
 
-func (m *localBlobAccessMethod) getBlob() (cpi.DataAccess, error) {
+func (m *localOCIBlobAccessMethod) getBlob() (cpi.DataAccess, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
 	if m.data != nil {
 		return m.data, nil
 	}
-	if artdesc.IsOCIMediaType(m.spec.MediaType) {
-
-		// may be we should always store the blob, additionally to the
-		// exploded form to make things easier.
-
-		if m.spec.LocalReference == "" {
-			// TODO: synthesize the artefact blob
-			return nil, errors.ErrNotImplemented("artefact blob synthesis")
-		}
-	}
-	data, err := m.access.GetBlobData(digest.Digest(m.spec.LocalReference))
+	data, err := m.access.GetBlobData(m.spec.Digest)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +71,7 @@ func (m *localBlobAccessMethod) getBlob() (cpi.DataAccess, error) {
 	return m.data, err
 }
 
-func (m *localBlobAccessMethod) Reader() (io.ReadCloser, error) {
+func (m *localOCIBlobAccessMethod) Reader() (io.ReadCloser, error) {
 	blob, err := m.getBlob()
 	if err != nil {
 		return nil, err
@@ -94,10 +79,10 @@ func (m *localBlobAccessMethod) Reader() (io.ReadCloser, error) {
 	return blob.Reader()
 }
 
-func (m *localBlobAccessMethod) Get() ([]byte, error) {
+func (m *localOCIBlobAccessMethod) Get() ([]byte, error) {
 	return accessio.BlobData(m.getBlob())
 }
 
-func (m *localBlobAccessMethod) MimeType() string {
-	return m.spec.MediaType
+func (m *localOCIBlobAccessMethod) MimeType() string {
+	return m.spec.GetMimeType()
 }

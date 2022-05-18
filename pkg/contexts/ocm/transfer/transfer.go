@@ -90,9 +90,9 @@ func transferVersion(printer Printer, hist common.History, closure TransportClos
 			return err
 		}
 		if srepo != nil {
-			c, err := srepo.LookupComponentVersion(r.GetName(), r.GetVersion())
+			c, err := srepo.LookupComponentVersion(r.ComponentName, r.GetVersion())
 			if err != nil {
-				return errors.Wrapf(err, "%s: nested component %s:%s", hist, r.GetName(), r.GetVersion())
+				return errors.Wrapf(err, "%s: nested component %s[%s:%s]", hist, r.GetName(), r.ComponentName, r.GetVersion())
 			}
 			list.Add(transferVersion(subp, hist, closure, srepo, c, tgt, shdlr))
 			if srepo != repo {
@@ -134,7 +134,10 @@ func CopyVersion(printer Printer, hist common.History, src ocm.ComponentVersionA
 			}
 		}
 		if err != nil {
-			return errors.Wrapf(err, "%s: transferring resource %d", hist, i)
+			if !errors.IsErrUnknownKind(err, errors.KIND_ACCESSMETHOD) {
+				return errors.Wrapf(err, "%s: transferring resource %d", hist, i)
+			}
+			printer.Printf("WARN: %s: transferring resource %d: %s (enforce transport by reference)", hist, i, err)
 		}
 	}
 	for i, r := range src.GetSources() {
@@ -161,7 +164,10 @@ func CopyVersion(printer Printer, hist common.History, src ocm.ComponentVersionA
 			}
 		}
 		if err != nil {
-			return errors.Wrapf(err, "%s: transferring source %d", hist, i)
+			if !errors.IsErrUnknownKind(err, errors.KIND_ACCESSMETHOD) {
+				return errors.Wrapf(err, "%s: transferring source %d", hist, i)
+			}
+			printer.Printf("WARN: %s: transferring resource %d: %s (enforce transport by reference)", hist, i, err)
 		}
 	}
 	return nil

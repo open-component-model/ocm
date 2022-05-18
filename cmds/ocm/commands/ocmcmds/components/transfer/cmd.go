@@ -148,5 +148,8 @@ func (a *action) Close() error {
 
 func (a *action) Out() error {
 	a.printer.Printf("%d versions transferred\n", len(a.closure))
-	return a.errors.Result()
+	if a.errors.Result() != nil {
+		return fmt.Errorf("transfer finished with %d error(s)", a.errors.Len())
+	}
+	return nil
 }

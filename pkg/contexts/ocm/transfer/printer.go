@@ -61,7 +61,7 @@ func (p *printer) Write(data []byte) (int, error) {
 	return p.writer.Write([]byte(s))
 }
 
-func (p *printer) Printf(msg string, args ...interface{}) (int, error) {
+func (p *printer) printf(msg string, args ...interface{}) (int, error) {
 	if p.writer == nil {
 		return 0, nil
 	}
@@ -74,4 +74,8 @@ func (p *printer) Printf(msg string, args ...interface{}) (int, error) {
 	data := fmt.Sprintf(msg, args...)
 	p.state.pending = false
 	return p.Write([]byte(data))
+}
+
+func (p *printer) Printf(msg string, args ...interface{}) (int, error) {
+	return p.printf(msg, args...)
 }

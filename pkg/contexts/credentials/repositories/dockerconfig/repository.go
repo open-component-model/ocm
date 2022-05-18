@@ -123,12 +123,12 @@ func (r *Repository) Read(force bool) error {
 			var creds cpi.Credentials
 			if IsEmptyAuthConfig(a) {
 				if log {
-					fmt.Printf("propagate id %s with default store\n", id, defaultStore)
+					fmt.Printf("propagate id %q with default store %q\n", id, defaultStore)
 				}
 				creds = NewCredentials(r, h, store)
 			} else {
 				if log {
-					fmt.Printf("propagate id %s\n", id)
+					fmt.Printf("propagate id %q\n", id)
 				}
 				creds = newCredentials(a)
 			}
