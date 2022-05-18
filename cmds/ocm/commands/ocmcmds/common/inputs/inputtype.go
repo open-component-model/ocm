@@ -246,6 +246,9 @@ func (s *GenericInputSpec) GetBlob(ctx clictx.Context, inputFilePath string) (ac
 
 func (s *GenericInputSpec) Evaluate(scheme InputTypeScheme) (InputSpec, error) {
 	var err error
+	if s == nil {
+		return nil, nil
+	}
 	if s.effective == nil {
 		var raw []byte
 		raw, err = s.unstructured.GetRaw()

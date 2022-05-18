@@ -22,6 +22,15 @@ import (
 
 var _ = Describe("Blob Inputs", func() {
 
+	It("missing input", func() {
+		in := `
+access:
+  type: localBlob
+`
+		_, err := common.DecodeInput([]byte(in), nil)
+		Expect(err).To(Succeed())
+	})
+
 	It("simple decode", func() {
 		in := `
 access:

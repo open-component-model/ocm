@@ -15,10 +15,13 @@
 package add_test
 
 import (
+	"reflect"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/opencontainers/go-digest"
 	"helm.sh/helm/v3/pkg/chart/loader"
@@ -149,4 +152,25 @@ var _ = Describe("Add resources", func() {
 		Expect(err).To(Succeed())
 	})
 
+	It("adds external image", func() {
+		Expect(env.Execute("add", "resources", ARCH, "/testdata/image.yaml")).To(Succeed())
+		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+		Expect(err).To(Succeed())
+		cd, err := compdesc.Decode(data)
+		Expect(err).To(Succeed())
+		Expect(len(cd.Resources)).To(Equal(1))
+
+		r, err := cd.GetResourceByIdentity(metav1.NewIdentity("image"))
+		Expect(err).To(Succeed())
+		Expect(r.Type).To(Equal("ociImage"))
+		Expect(r.Version).To(Equal("v0.1.0"))
+		Expect(r.Relation).To(Equal(metav1.ResourceRelation("external")))
+
+		Expect(r.Access.GetType()).To(Equal(ociregistry.Type))
+
+		acc, err := env.OCMContext().AccessSpecForSpec(r.Access)
+		Expect(err).To(Succeed())
+		Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*ociregistry.AccessSpec)(nil))))
+		Expect(acc.(*ociregistry.AccessSpec).ImageReference).To(Equal("ghcr.io/mandelsoft/pause:v0.1.0"))
+	})
 })
