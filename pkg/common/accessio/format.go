@@ -18,6 +18,7 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"io"
+	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -47,6 +48,23 @@ func ErrInvalidFileFormat(fmt string) error {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+func FileFormatForType(t string) FileFormat {
+	i := strings.Index(t, "+")
+	if i < 0 {
+		return FileFormat(t)
+	}
+	return FileFormat(t[i+1:])
+}
+
+func TypeForType(t string) string {
+	i := strings.Index(t, "+")
+	if i < 0 {
+		return ""
+	}
+	return t[:i]
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 func DetectFormat(path string, fs vfs.FileSystem) (*FileFormat, error) {

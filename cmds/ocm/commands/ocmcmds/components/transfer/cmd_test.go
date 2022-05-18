@@ -47,6 +47,42 @@ const OCINAMESPACE2 = "ocm/ref"
 const OCIVERSION = "v2.0"
 const OCIHOST = "alias"
 
+func Check(env *TestEnv, ldesc *artdesc.Descriptor, out string) {
+	tgt, err := ctfocm.Open(env.OCMContext(), accessobj.ACC_READONLY, out, 0, accessio.PathFileSystem(env.FileSystem()))
+	Expect(err).To(Succeed())
+	defer tgt.Close()
+
+	list, err := tgt.ComponentLister().GetComponents("", true)
+	Expect(err).To(Succeed())
+	Expect(list).To(Equal([]string{COMPONENT}))
+	comp, err := tgt.LookupComponentVersion(COMPONENT, VERSION)
+	Expect(err).To(Succeed())
+	Expect(len(comp.GetDescriptor().Resources)).To(Equal(3))
+
+	data, err := json.Marshal(comp.GetDescriptor().Resources[2].Access)
+	Expect(err).To(Succeed())
+	Expect(string(data)).To(Equal("{\"localReference\":\"sha256:f6a519fb1d0c8cef5e8d7811911fc7cb170462bbce19d6df067dae041250de7f\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"referenceName\":\"ocm/ref:v2.0\",\"type\":\"localBlob\"}"))
+
+	data, err = json.Marshal(comp.GetDescriptor().Resources[1].Access)
+	Expect(err).To(Succeed())
+	Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"referenceName\":\"ocm/value:v2.0\",\"type\":\"localBlob\"}"))
+
+	racc, err := comp.GetResourceByIndex(1)
+	Expect(err).To(Succeed())
+	reader, err := ocm.ResourceReader(racc)
+	Expect(err).To(Succeed())
+	defer reader.Close()
+	set, err := artefactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(reader))
+	Expect(err).To(Succeed())
+	defer set.Close()
+
+	blob, err := set.GetBlob(ldesc.Digest)
+	Expect(err).To(Succeed())
+	data, err = blob.Get()
+	Expect(err).To(Succeed())
+	Expect(string(data)).To(Equal("manifestlayer"))
+}
+
 var _ = Describe("Test Environment", func() {
 	var env *TestEnv
 	var ldesc *artdesc.Descriptor
@@ -119,39 +155,38 @@ transferring version "github.com/mandelsoft/test:v1"...
 `))
 
 		Expect(env.DirExists(OUT)).To(BeTrue())
+		Check(env, ldesc, OUT)
+	})
 
-		tgt, err := ctfocm.Open(env.OCMContext(), accessobj.ACC_READONLY, OUT, 0, accessio.PathFileSystem(env.FileSystem()))
-		Expect(err).To(Succeed())
-		defer tgt.Close()
+	It("transfers ctf to tgz", func() {
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("transfer", "components", "--resourcesByValue", ARCH, ARCH, accessio.FormatTGZ.String()+"::"+OUT)).To(Succeed())
+		Expect("\n" + buf.String()).To(Equal(`
+transferring version "github.com/mandelsoft/test:v1"...
+...resource 0...
+...resource 1...
+...resource 2...
+...adding component version...
+1 versions transferred
+`))
 
-		list, err := tgt.ComponentLister().GetComponents("", true)
-		Expect(err).To(Succeed())
-		Expect(list).To(Equal([]string{COMPONENT}))
-		comp, err := tgt.LookupComponentVersion(COMPONENT, VERSION)
-		Expect(err).To(Succeed())
-		Expect(len(comp.GetDescriptor().Resources)).To(Equal(3))
+		Expect(env.FileExists(OUT)).To(BeTrue())
+		Check(env, ldesc, OUT)
+	})
 
-		data, err := json.Marshal(comp.GetDescriptor().Resources[2].Access)
-		Expect(err).To(Succeed())
-		Expect(string(data)).To(Equal("{\"localReference\":\"sha256:f6a519fb1d0c8cef5e8d7811911fc7cb170462bbce19d6df067dae041250de7f\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"referenceName\":\"ocm/ref:v2.0\",\"type\":\"localBlob\"}"))
+	It("transfers ctf to ctf+tgz", func() {
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("transfer", "components", "--resourcesByValue", ARCH, ARCH, "ctf+"+accessio.FormatTGZ.String()+"::"+OUT)).To(Succeed())
+		Expect("\n" + buf.String()).To(Equal(`
+transferring version "github.com/mandelsoft/test:v1"...
+...resource 0...
+...resource 1...
+...resource 2...
+...adding component version...
+1 versions transferred
+`))
 
-		data, err = json.Marshal(comp.GetDescriptor().Resources[1].Access)
-		Expect(err).To(Succeed())
-		Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"referenceName\":\"ocm/value:v2.0\",\"type\":\"localBlob\"}"))
-
-		racc, err := comp.GetResourceByIndex(1)
-		Expect(err).To(Succeed())
-		reader, err := ocm.ResourceReader(racc)
-		Expect(err).To(Succeed())
-		defer reader.Close()
-		set, err := artefactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(reader))
-		Expect(err).To(Succeed())
-		defer set.Close()
-
-		blob, err := set.GetBlob(ldesc.Digest)
-		Expect(err).To(Succeed())
-		data, err = blob.Get()
-		Expect(err).To(Succeed())
-		Expect(string(data)).To(Equal("manifestlayer"))
+		Expect(env.FileExists(OUT)).To(BeTrue())
+		Check(env, ldesc, OUT)
 	})
 })

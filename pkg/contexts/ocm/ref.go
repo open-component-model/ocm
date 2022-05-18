@@ -18,9 +18,15 @@ const (
 
 // ParseRepo parses a standard ocm repository reference into a internal representation.
 func ParseRepo(ref string) (UniformRepositorySpec, error) {
+	create := false
+	if strings.HasPrefix(ref, "+") {
+		create = true
+		ref = ref[1:]
+	}
 	if strings.HasPrefix(ref, ".") || strings.HasPrefix(ref, "/") {
 		return UniformRepositorySpec{
-			Info: ref,
+			Info:            ref,
+			CreateIfMissing: create,
 		}, nil
 	}
 	match := grammar.AnchoredRepositoryRegexp.FindSubmatch([]byte(ref))
@@ -30,15 +36,17 @@ func ParseRepo(ref string) (UniformRepositorySpec, error) {
 			return UniformRepositorySpec{}, errors.ErrInvalid(KIND_OCM_REFERENCE, ref)
 		}
 		return UniformRepositorySpec{
-			Type: string(match[1]),
-			Info: string(match[2]),
+			Type:            string(match[1]),
+			Info:            string(match[2]),
+			CreateIfMissing: create,
 		}, nil
 
 	}
 	return UniformRepositorySpec{
-		Type:    string(match[1]),
-		Host:    string(match[2]),
-		SubPath: string(match[3]),
+		Type:            string(match[1]),
+		Host:            string(match[2]),
+		SubPath:         string(match[3]),
+		CreateIfMissing: create,
 	}, nil
 }
 
@@ -50,6 +58,12 @@ type RefSpec struct {
 
 // ParseRef parses a standard ocm reference into a internal representation.
 func ParseRef(ref string) (RefSpec, error) {
+	create := false
+	if strings.HasPrefix(ref, "+") {
+		create = true
+		ref = ref[1:]
+	}
+
 	var spec RefSpec
 	v := ""
 	match := grammar.AnchoredReferenceRegexp.FindSubmatch([]byte(ref))
@@ -61,8 +75,9 @@ func ParseRef(ref string) (RefSpec, error) {
 		v = string(match[4])
 		spec = RefSpec{
 			UniformRepositorySpec{
-				Type: string(match[1]),
-				Info: string(match[2]),
+				Type:            string(match[1]),
+				Info:            string(match[2]),
+				CreateIfMissing: create,
 			},
 			CompSpec{
 				Component: string(match[3]),
@@ -73,9 +88,10 @@ func ParseRef(ref string) (RefSpec, error) {
 		v = string(match[5])
 		spec = RefSpec{
 			UniformRepositorySpec{
-				Type:    string(match[1]),
-				Host:    string(match[2]),
-				SubPath: string(match[3]),
+				Type:            string(match[1]),
+				Host:            string(match[2]),
+				SubPath:         string(match[3]),
+				CreateIfMissing: create,
 			},
 			CompSpec{
 				Component: string(match[4]),

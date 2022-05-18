@@ -39,6 +39,11 @@ type UniformRepositorySpec struct {
 	SubPath string `json:"subPath,omitempty"`
 	// Info is the file path used to host ctf component versions
 	Info string `json:"filePath,omitempty"`
+
+	// CreateIfMissing indicates whether a file based or dynamic repo should be created if it does not exist
+	CreateIfMissing bool `json:"createIfMissing,omitempty"`
+	// TypeHintshould be set if CreateIfMissing is true to help to decide what kind of repo to create
+	TypeHint string `json:"typeHint, omitempty"`
 }
 
 // CredHost fallback to legacy docker domain if applicable

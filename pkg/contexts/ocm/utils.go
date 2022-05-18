@@ -28,10 +28,42 @@ import (
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func AssureTargetRepository(session Session, ctx Context, targetref string, format accessio.FileFormat, fss ...vfs.FileSystem) (Repository, error) {
-	target, ref, err := session.DetermineRepository(ctx, targetref)
+func AssureTargetRepository(session Session, ctx Context, targetref string, opts ...interface{}) (Repository, error) {
+	var format accessio.FileFormat
+	var archive string
+	var fs vfs.FileSystem
+
+	for _, o := range opts {
+		switch v := o.(type) {
+		case vfs.FileSystem:
+			if fs == nil && v != nil {
+				fs = v
+			}
+		case accessio.FileFormat:
+			format = v
+		case string:
+			archive = v
+		default:
+			panic(fmt.Sprintf("invalid option type %T", o))
+		}
+	}
+
+	ref, err := ParseRepo(targetref)
 	if err != nil {
-		if !errors.IsErrUnknown(err) || ref.Info == "" {
+		return nil, err
+	}
+	if archive != "" && ref.Type != "" {
+		for _, f := range ctf.SupportedFormats() {
+			if f.String() == ref.Type {
+				ref.Type = archive + "+" + ref.Type
+			}
+		}
+	}
+	ref.TypeHint = archive
+	ref.CreateIfMissing = true
+	target, err := session.DetermineRepositoryBySpec(ctx, &ref)
+	if err != nil {
+		if !errors.IsErrUnknown(err) || vfs.IsErrNotExist(err) || ref.Info == "" {
 			return nil, err
 		}
 		if ref.Type == "" {
@@ -40,7 +72,7 @@ func AssureTargetRepository(session Session, ctx Context, targetref string, form
 		if ref.Type == "" {
 			return nil, fmt.Errorf("ctf format type required to create ctf")
 		}
-		target, err = ctf.Create(ctx, accessobj.ACC_CREATE, ref.Info, 0770, accessio.PathFileSystem(accessio.FileSystem(fss...)))
+		target, err = ctf.Create(ctx, accessobj.ACC_CREATE, ref.Info, 0770, accessio.PathFileSystem(accessio.FileSystem(fs)))
 		if err != nil {
 			return nil, err
 		}

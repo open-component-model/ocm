@@ -24,28 +24,34 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-func mapErr(forced bool, err error) (bool, error) {
+func mapErr(forced bool, err error) (bool, bool, error) {
 	if !forced {
-		return false, nil
+		return false, false, nil
 	}
-	return true, err
+	return false, true, err
 }
 
-func CheckFile(kind string, forced bool, path string, fs vfs.FileSystem, descriptorname string) (bool, error) {
+// CheckFile returns create, acceptable, error
+func CheckFile(kind string, createHint string, forcedType bool, path string, fs vfs.FileSystem, descriptorname string) (bool, bool, error) {
 	info, err := fs.Stat(path)
 	if err != nil {
-		return mapErr(forced, err)
+		if createHint == kind {
+			if vfs.IsErrNotExist(err) {
+				return true, true, nil
+			}
+		}
+		return mapErr(forcedType, err)
 	}
 	accepted := false
 	if !info.IsDir() {
 		file, err := fs.Open(path)
 		if err != nil {
-			return mapErr(forced, err)
+			return mapErr(forcedType, err)
 		}
 		defer file.Close()
 		r, _, err := compression.AutoDecompress(file)
 		if err != nil {
-			return mapErr(forced, err)
+			return mapErr(forcedType, err)
 		}
 		tr := tar.NewReader(r)
 		for {
@@ -54,7 +60,7 @@ func CheckFile(kind string, forced bool, path string, fs vfs.FileSystem, descrip
 				if err == io.EOF {
 					break
 				}
-				return mapErr(forced, err)
+				return mapErr(forcedType, err)
 			}
 
 			switch header.Typeflag {
@@ -68,14 +74,14 @@ func CheckFile(kind string, forced bool, path string, fs vfs.FileSystem, descrip
 	} else {
 		if ok, err := vfs.FileExists(fs, filepath.Join(path, descriptorname)); !ok || err != nil {
 			if err != nil {
-				return mapErr(forced, err)
+				return mapErr(forcedType, err)
 			}
 		} else {
 			accepted = ok
 		}
 	}
 	if !accepted {
-		return mapErr(forced, errors.Newf("%s: no %s", path, kind))
+		return mapErr(forcedType, errors.Newf("%s: no %s", path, kind))
 	}
-	return true, nil
+	return false, true, nil
 }

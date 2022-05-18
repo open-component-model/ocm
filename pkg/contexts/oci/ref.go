@@ -26,6 +26,11 @@ const (
 
 // ParseRepo parses a standard oci repository reference into a internal representation.
 func ParseRepo(ref string) (UniformRepositorySpec, error) {
+	create := false
+	if strings.HasPrefix(ref, "+") {
+		create = true
+		ref = ref[1:]
+	}
 	match := grammar.AnchoredRegistryRegexp.FindSubmatch([]byte(ref))
 	if match == nil {
 		match = grammar.AnchoredGenericRegistryRegexp.FindSubmatch([]byte(ref))
@@ -33,15 +38,17 @@ func ParseRepo(ref string) (UniformRepositorySpec, error) {
 			return UniformRepositorySpec{}, errors.ErrInvalid(KIND_OCI_REFERENCE, ref)
 		}
 		return UniformRepositorySpec{
-			Type: string(match[1]),
-			Info: string(match[2]),
+			Type:            string(match[1]),
+			Info:            string(match[2]),
+			CreateIfMissing: create,
 		}, nil
 
 	}
 	return UniformRepositorySpec{
-		Type:   string(match[1]),
-		Scheme: string(match[2]),
-		Host:   string(match[3]),
+		Type:            string(match[1]),
+		Scheme:          string(match[2]),
+		Host:            string(match[3]),
+		CreateIfMissing: create,
 	}, nil
 }
 
@@ -74,7 +81,13 @@ func dig(b []byte) *digest.Digest {
 
 // ParseRef parses a oci reference into a internal representation.
 func ParseRef(ref string) (RefSpec, error) {
-	spec := RefSpec{}
+	create := false
+	if strings.HasPrefix(ref, "+") {
+		create = true
+		ref = ref[1:]
+	}
+
+	spec := RefSpec{UniformRepositorySpec: UniformRepositorySpec{CreateIfMissing: create}}
 
 	match := grammar.FileReferenceRegexp.FindSubmatch([]byte(ref))
 	if match != nil {

@@ -28,7 +28,7 @@ var (
 	AlphaNumeric = Match(`[A-Za-z0-9]+`)
 
 	// Identifier is an AlphaNumeric regexp starting with an Alpha regexp
-	Identifier = Sequence(Alpha, Match(`[A-Za-z0-9]*`))
+	Identifier = Sequence(Alpha, Match(`[A-Za-z0-9]`), Optional(Literal("+"), Alpha))
 )
 
 // Match compiles the string to a regular expression.

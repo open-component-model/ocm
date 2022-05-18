@@ -84,6 +84,25 @@ var _ = Describe("ref parsing", func() {
 			},
 			Repository: "",
 		})
+		CheckRef("ctf+directory::a/b", &oci.RefSpec{
+			UniformRepositorySpec: oci.UniformRepositorySpec{
+				Type:   "ctf+directory",
+				Scheme: "",
+				Host:   "",
+				Info:   "a/b",
+			},
+			Repository: "",
+		})
+		CheckRef("+ctf+directory::a/b", &oci.RefSpec{
+			UniformRepositorySpec: oci.UniformRepositorySpec{
+				Type:            "ctf+directory",
+				Scheme:          "",
+				Host:            "",
+				Info:            "a/b",
+				CreateIfMissing: true,
+			},
+			Repository: "",
+		})
 
 		CheckRef("a/b//", &oci.RefSpec{
 			UniformRepositorySpec: oci.UniformRepositorySpec{

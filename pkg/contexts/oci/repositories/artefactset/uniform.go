@@ -42,7 +42,12 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 	}
 	fs := vfsattr.Get(ctx)
 
-	if ok, err := accessobj.CheckFile(ArtefactSetType, u.Type == ArtefactSetType, path, fs, ArtefactSetDescriptorFileName); !ok || err != nil {
+	hint := u.TypeHint
+	if !u.CreateIfMissing {
+		hint = ""
+	}
+	create, ok, err := accessobj.CheckFile(ArtefactSetType, hint, accessio.TypeForType(u.Type) == ArtefactSetType, path, fs, ArtefactSetDescriptorFileName)
+	if !ok || err != nil {
 		if err != nil {
 			return nil, err
 		}
@@ -50,5 +55,9 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 			return nil, nil
 		}
 	}
-	return NewRepositorySpec(accessobj.ACC_WRITABLE, path, accessio.FileFormat(u.Type), accessio.PathFileSystem(fs)), nil
+	mode := accessobj.ACC_WRITABLE
+	if create {
+		mode |= accessobj.ACC_CREATE
+	}
+	return NewRepositorySpec(mode, path, accessio.FileFormatForType(u.Type), accessio.PathFileSystem(fs)), nil
 }

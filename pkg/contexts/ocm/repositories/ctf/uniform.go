@@ -15,18 +15,26 @@
 package ctf
 
 import (
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
 )
 
+func SupportedFormats() []accessio.FileFormat {
+	return ctf.SupportedFormats()
+}
+
 func init() {
 	h := &repospechandler{}
 	cpi.RegisterRepositorySpecHandler(h, "")
 	cpi.RegisterRepositorySpecHandler(h, ctf.CommonTransportFormatRepositoryType)
-	for _, f := range ctf.SupportedFormats() {
+	cpi.RegisterRepositorySpecHandler(h, "ctf")
+	for _, f := range SupportedFormats() {
 		cpi.RegisterRepositorySpecHandler(h, string(f))
+		cpi.RegisterRepositorySpecHandler(h, "ctf+"+string(f))
+		cpi.RegisterRepositorySpecHandler(h, ctf.CommonTransportFormatRepositoryType+"+"+string(f))
 	}
 }
 
@@ -39,9 +47,11 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 		}
 	}
 	spec, err := ctf.MapReference(ctx.OCIContext(), &oci.UniformRepositorySpec{
-		Type: u.Type,
-		Host: u.Host,
-		Info: u.Info,
+		Type:            u.Type,
+		Host:            u.Host,
+		Info:            u.Info,
+		CreateIfMissing: u.CreateIfMissing,
+		TypeHint:        u.TypeHint,
 	})
 	if err != nil || spec == nil {
 		return nil, err

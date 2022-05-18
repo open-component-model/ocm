@@ -27,8 +27,11 @@ func init() {
 	h := &repospechandler{}
 	cpi.RegisterRepositorySpecHandler(h, "")
 	cpi.RegisterRepositorySpecHandler(h, CTFComponentArchiveType)
+	cpi.RegisterRepositorySpecHandler(h, "ca")
 	for _, f := range ctf.SupportedFormats() {
 		cpi.RegisterRepositorySpecHandler(h, string(f))
+		cpi.RegisterRepositorySpecHandler(h, "ca+"+string(f))
+		cpi.RegisterRepositorySpecHandler(h, CTFComponentArchiveType+"+"+string(f))
 	}
 }
 
@@ -43,8 +46,12 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 		path = u.Host
 	}
 	fs := vfsattr.Get(ctx)
-
-	if ok, err := accessobj.CheckFile(CTFComponentArchiveType, u.Type == CTFComponentArchiveType, path, fs, comparch.ComponentDescriptorFileName); !ok || err != nil {
+	hint := u.TypeHint
+	if !u.CreateIfMissing {
+		hint = ""
+	}
+	create, ok, err := accessobj.CheckFile(CTFComponentArchiveType, hint, accessio.TypeForType(u.Type) == CTFComponentArchiveType, path, fs, comparch.ComponentDescriptorFileName)
+	if !ok || err != nil {
 		if err != nil {
 			return nil, err
 		}
@@ -52,5 +59,9 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 			return nil, nil
 		}
 	}
-	return NewRepositorySpec(accessobj.ACC_WRITABLE, path, accessio.FileFormat(u.Type), accessio.PathFileSystem(fs)), nil
+	mode := accessobj.ACC_WRITABLE
+	if create {
+		mode |= accessobj.ACC_CREATE
+	}
+	return NewRepositorySpec(mode, path, accessio.FileFormatForType(u.Type), accessio.PathFileSystem(fs)), nil
 }

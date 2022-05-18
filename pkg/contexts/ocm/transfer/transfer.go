@@ -137,7 +137,7 @@ func CopyVersion(printer Printer, hist common.History, src ocm.ComponentVersionA
 			if !errors.IsErrUnknownKind(err, errors.KIND_ACCESSMETHOD) {
 				return errors.Wrapf(err, "%s: transferring resource %d", hist, i)
 			}
-			printer.Printf("WARN: %s: transferring resource %d: %s (enforce transport by reference)", hist, i, err)
+			printer.Printf("WARN: %s: transferring resource %d: %s (enforce transport by reference)\n", hist, i, err)
 		}
 	}
 	for i, r := range src.GetSources() {
@@ -167,7 +167,7 @@ func CopyVersion(printer Printer, hist common.History, src ocm.ComponentVersionA
 			if !errors.IsErrUnknownKind(err, errors.KIND_ACCESSMETHOD) {
 				return errors.Wrapf(err, "%s: transferring source %d", hist, i)
 			}
-			printer.Printf("WARN: %s: transferring resource %d: %s (enforce transport by reference)", hist, i, err)
+			printer.Printf("WARN: %s: transferring resource %d: %s (enforce transport by reference)\n", hist, i, err)
 		}
 	}
 	return nil

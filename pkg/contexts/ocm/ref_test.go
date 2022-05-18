@@ -35,13 +35,14 @@ func CheckRef(ref, ut, h, us, c, uv, i string) {
 		v = &uv
 	}
 	spec, err := ocm.ParseRef(ref)
-	Expect(err).To(Succeed())
-	Expect(spec).To(Equal(ocm.RefSpec{
+	Expect(err).WithOffset(1).To(Succeed())
+	Expect(spec).WithOffset(1).To(Equal(ocm.RefSpec{
 		UniformRepositorySpec: ocm.UniformRepositorySpec{
-			Type:    ut,
-			Host:    h,
-			SubPath: us,
-			Info:    i,
+			Type:            ut,
+			Host:            h,
+			SubPath:         us,
+			Info:            i,
+			CreateIfMissing: ref[0] == '+',
 		},
 		CompSpec: ocm.CompSpec{
 			Component: c,
@@ -85,6 +86,8 @@ var _ = Describe("ref parsing", func() {
 		})
 
 		It("dir ref", func() {
+			CheckRef("+ctf+directory::./file//bla.blob/comp", "ctf+directory", "", "", "bla.blob/comp", "", "./file")
+			CheckRef("ctf+directory::./file//bla.blob/comp", "ctf+directory", "", "", "bla.blob/comp", "", "./file")
 			CheckRef("directory::./file//bla.blob/comp", "directory", "", "", "bla.blob/comp", "", "./file")
 			CheckRef("directory::file//bla.blob/comp", "directory", "", "", "bla.blob/comp", "", "file")
 			CheckRef("directory::./file.io//bla.blob/comp", "directory", "", "", "bla.blob/comp", "", "./file.io")
