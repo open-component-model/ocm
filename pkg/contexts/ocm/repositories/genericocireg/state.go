@@ -30,7 +30,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/format"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch/comparch"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/opencontainers/go-digest"
@@ -114,7 +113,7 @@ func (s *StateAccess) readComponentDescriptorFromTar(r io.Reader) ([]byte, error
 			return nil, fmt.Errorf("unable to read tar: %w", err)
 		}
 
-		if strings.TrimLeft(header.Name, "/") != comparch.ComponentDescriptorFileName {
+		if strings.TrimLeft(header.Name, "/") != compdesc.ComponentDescriptorFileName {
 			continue
 		}
 
@@ -180,7 +179,7 @@ func (s *StateAccess) writeComponentDescriptorFromTar(data []byte) (cpi.BlobAcce
 	tw := tar.NewWriter(&buf)
 	err := tw.WriteHeader(&tar.Header{
 		Typeflag: tar.TypeReg,
-		Name:     comparch.ComponentDescriptorFileName,
+		Name:     compdesc.ComponentDescriptorFileName,
 		Size:     int64(len(data)),
 		ModTime:  format.ModTime,
 	})

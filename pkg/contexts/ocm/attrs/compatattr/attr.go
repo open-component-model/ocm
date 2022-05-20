@@ -12,20 +12,17 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package vfsattr
+package compatattr
 
 import (
 	"fmt"
 
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const ATTR_KEY = "github.com/mandelsoft/vfs"
-const ATTR_SHORT = "vfs"
+const ATTR_KEY = "github.com/mandelsoft/ocm/compat"
+const ATTR_SHORT = "compat"
 
 func init() {
 	datacontext.RegisterAttributeType(ATTR_KEY, AttributeType{})
@@ -40,35 +37,33 @@ func (a AttributeType) Name() string {
 
 func (a AttributeType) Description() string {
 	return `
-Virtual filesystem to use for command line context.
+Avoid generic local access methods and prefer type specific ones.
 `
 }
 
 func (a AttributeType) Encode(v interface{}, marshaller runtime.Marshaler) ([]byte, error) {
-	if _, ok := v.(vfs.FileSystem); !ok {
-		return nil, fmt.Errorf("vfs.FileSystem required")
+	if _, ok := v.(bool); !ok {
+		return nil, fmt.Errorf("boolean required")
 	}
-	return nil, nil
+	return marshaller.Marshal(v)
 }
 
 func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (interface{}, error) {
-	return nil, errors.ErrNotSupported("decode attribute", ATTR_KEY)
+	var value bool
+	err := unmarshaller.Unmarshal(data, &value)
+	return value, err
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-var _osfs = osfs.New()
-
-func Get(ctx datacontext.Context) vfs.FileSystem {
-	v := ctx.GetAttributes().GetAttribute(ATTR_KEY)
-	if v == nil {
-		return _osfs
+func Get(ctx datacontext.Context) bool {
+	a := ctx.GetAttributes().GetAttribute(ATTR_KEY)
+	if a == nil {
+		return false
 	}
-	fs, _ := v.(vfs.FileSystem)
-	return fs
-
+	return a.(bool)
 }
 
-func Set(ctx datacontext.Context, fs vfs.FileSystem) {
-	ctx.GetAttributes().SetAttribute(ATTR_KEY, fs)
+func Set(ctx datacontext.Context, flag bool) error {
+	return ctx.GetAttributes().SetAttribute(ATTR_KEY, flag)
 }

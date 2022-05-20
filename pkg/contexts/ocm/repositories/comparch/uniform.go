@@ -20,7 +20,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch/comparch"
 )
 
 func init() {
@@ -50,7 +49,7 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 	if !u.CreateIfMissing {
 		hint = ""
 	}
-	create, ok, err := accessobj.CheckFile(CTFComponentArchiveType, hint, accessio.TypeForType(u.Type) == CTFComponentArchiveType, path, fs, comparch.ComponentDescriptorFileName)
+	create, ok, err := accessobj.CheckFile(CTFComponentArchiveType, hint, accessio.TypeForType(u.Type) == CTFComponentArchiveType, path, fs, ComponentDescriptorFileName)
 	if !ok || err != nil {
 		if err != nil {
 			return nil, err

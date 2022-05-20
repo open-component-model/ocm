@@ -12,23 +12,40 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package builder
+package ocm
 
 import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 )
 
-const T_COMPARCH = "component archive"
+type BlobSink interface {
+	AddBlob(blob accessio.BlobAccess) error
+}
 
-func (b *Builder) ComponentArchive(path string, fmt accessio.FileFormat, name, vers string, f ...func()) {
-	r, err := comparch.Open(b.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, path, 0777, accessio.PathFileSystem(b.FileSystem()))
-	b.failOn(err)
-	r.SetName(name)
-	r.SetVersion(vers)
-	r.GetDescriptor().Provider = metav1.ProviderType("ACME")
+// StorageContext is the context information passed for Blobhandler
+// registered for context type oci.CONTEXT_TYPE.
+type StorageContext interface {
+	cpi.StorageContext
+	BlobSink
+}
 
-	b.configure(&ocm_version{ComponentVersionAccess: r, kind: T_COMPARCH}, f)
+type DefaultStorageContext struct {
+	Version cpi.ComponentVersionAccess
+	Sink    BlobSink
+}
+
+func New(vers cpi.ComponentVersionAccess, access BlobSink) StorageContext {
+	return &DefaultStorageContext{
+		Version: vers,
+		Sink:    access,
+	}
+}
+
+func (c *DefaultStorageContext) TargetComponentVersion() cpi.ComponentVersionAccess {
+	return c.Version
+}
+
+func (c *DefaultStorageContext) AddBlob(blob accessio.BlobAccess) error {
+	return c.Sink.AddBlob(blob)
 }

@@ -244,17 +244,23 @@ func NewDefaultScheme(proto_ifce interface{}, proto_unstr Unstructured, acceptUn
 }
 
 func (d *defaultScheme) AddKnownTypes(s Scheme) {
+	d.lock.Lock()
+	defer d.lock.Unlock()
 	for k, v := range s.KnownTypes() {
 		d.types[k] = v
 	}
 }
 
 func (d *defaultScheme) KnownTypes() KnownTypes {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
 	return d.types.Copy()
 }
 
 // KnownTypeNames return a sorted list of known type names
 func (d *defaultScheme) KnownTypeNames() []string {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
 	types := make([]string, 0, len(d.types))
 	for t := range d.types {
 		types = append(types, t)

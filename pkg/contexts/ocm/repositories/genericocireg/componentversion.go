@@ -182,7 +182,7 @@ func (c *ComponentVersionContainer) AddBlobFor(cv cpi.ComponentVersionAccess, bl
 	storagectx := ocihdlr.New(cv, c.comp.repo.ocirepo, c.comp.namespace, c.manifest)
 	h := c.GetContext().BlobHandlers().GetHandler(oci.CONTEXT_TYPE, c.comp.repo.ocirepo.GetSpecification().GetKind(), blob.MimeType())
 	if h != nil {
-		acc, err := h.StoreBlob(c.comp.repo, blob, refName, storagectx)
+		acc, err := h.StoreBlob(c.comp.repo, blob, refName, nil, storagectx)
 		if err != nil {
 			return nil, err
 		}

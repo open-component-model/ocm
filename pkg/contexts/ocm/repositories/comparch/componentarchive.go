@@ -19,6 +19,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localfsblob"
+	ocmhdlr "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
@@ -30,7 +32,7 @@ import (
 // ComponentArchive is the go representation for a component artefact
 type ComponentArchive struct {
 	base *accessobj.FileSystemBlobAccess
-	ctx  cpi.Context
+	repo *Repository
 	*support.ComponentVersionAccess
 }
 
@@ -39,16 +41,20 @@ var _ support.ComponentVersionContainer = (*ComponentArchive)(nil)
 // New returns a new representation based element
 func New(ctx cpi.Context, acc accessobj.AccessMode, fs vfs.FileSystem, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode) (*ComponentArchive, error) {
 	obj, err := accessobj.NewAccessObject(accessObjectInfo, acc, fs, setup, closer, mode)
-	return _Wrap(ctx, obj, err)
+	return _Wrap(ctx, obj, NewRepositorySpec(acc, ""), err)
 }
 
-func _Wrap(ctx cpi.Context, obj *accessobj.AccessObject, err error) (*ComponentArchive, error) {
+func _Wrap(ctx cpi.Context, obj *accessobj.AccessObject, spec *RepositorySpec, err error) (*ComponentArchive, error) {
 	if err != nil {
 		return nil, err
 	}
 	s := &ComponentArchive{
 		base: accessobj.NewFileSystemBlobAccess(obj),
+	}
+	s.repo = &Repository{
 		ctx:  ctx,
+		spec: spec,
+		arch: s,
 	}
 	s.ComponentVersionAccess = support.NewComponentVersionAccess(s, false)
 	return s, nil
@@ -59,7 +65,11 @@ func _Wrap(ctx cpi.Context, obj *accessobj.AccessObject, err error) (*ComponentA
 var _ cpi.ComponentVersionAccess = &ComponentArchive{}
 
 func (c *ComponentArchive) GetContext() cpi.Context {
-	return c.ctx
+	return c.repo.GetContext()
+}
+
+func (c *ComponentArchive) AsRepository() cpi.Repository {
+	return c.repo
 }
 
 func (c *ComponentArchive) Update() error {
@@ -79,8 +89,8 @@ func (c *ComponentArchive) SetVersion(v string) {
 }
 
 func (c *ComponentArchive) AccessMethod(a cpi.AccessSpec) (cpi.AccessMethod, error) {
-	if a.GetKind() == localblob.Type || a.GetKind() == LocalFilesystemBlobType {
-		a, err := c.ctx.AccessSpecForSpec(a)
+	if a.GetKind() == localblob.Type || a.GetKind() == localfsblob.Type {
+		a, err := c.GetContext().AccessSpecForSpec(a)
 		if err != nil {
 			return nil, err
 		}
@@ -100,6 +110,17 @@ func (c *ComponentArchive) AddBlob(blob cpi.BlobAccess, refName string, global c
 func (c *ComponentArchive) AddBlobFor(cv cpi.ComponentVersionAccess, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
+	}
+	storagectx := ocmhdlr.New(cv, c.base)
+	h := c.GetContext().BlobHandlers().GetHandler(cpi.CONTEXT_TYPE, CTFComponentArchiveType, blob.MimeType())
+	if h != nil {
+		acc, err := h.StoreBlob(c.repo, blob, refName, nil, storagectx)
+		if err != nil {
+			return nil, err
+		}
+		if acc != nil {
+			return acc, nil
+		}
 	}
 	err := c.base.AddBlob(blob)
 	if err != nil {

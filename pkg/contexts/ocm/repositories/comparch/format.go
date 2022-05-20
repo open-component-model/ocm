@@ -20,12 +20,13 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 // ComponentDescriptorFileName is the name of the component-descriptor file.
-const ComponentDescriptorFileName = "component-descriptor.yaml"
+const ComponentDescriptorFileName = compdesc.ComponentDescriptorFileName
 
 // BlobsDirectoryName is the name of the blob directory in the tar.
 const BlobsDirectoryName = "blobs"
@@ -113,12 +114,12 @@ func Create(ctx cpi.Context, acc accessobj.AccessMode, path string, mode vfs.Fil
 
 func (h *formatHandler) Open(ctx cpi.Context, acc accessobj.AccessMode, path string, opts accessio.Options) (*Object, error) {
 	obj, err := h.FormatHandler.Open(accessObjectInfo, acc, path, opts)
-	return _Wrap(ctx, obj, err)
+	return _Wrap(ctx, obj, NewRepositorySpec(acc, path, opts), err)
 }
 
 func (h *formatHandler) Create(ctx cpi.Context, path string, opts accessio.Options, mode vfs.FileMode) (*Object, error) {
 	obj, err := h.FormatHandler.Create(accessObjectInfo, path, opts, mode)
-	return _Wrap(ctx, obj, err)
+	return _Wrap(ctx, obj, NewRepositorySpec(accessobj.ACC_CREATE, path, opts), err)
 }
 
 // WriteToFilesystem writes the current object to a filesystem

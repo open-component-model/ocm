@@ -21,6 +21,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/get"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds"
+	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references"
@@ -34,6 +35,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	credcfg "github.com/open-component-model/ocm/pkg/contexts/credentials/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
+	config2 "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -68,6 +70,7 @@ type CLIOptions struct {
 	Config      string
 	Credentials []string
 	Context     clictx.Context
+	Settings    []string
 }
 
 var desc = `
@@ -151,6 +154,7 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 func (o *CLIOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Config, "config", "", "", "configuration file")
 	fs.StringArrayVarP(&o.Credentials, "cred", "C", nil, "credential setting")
+	fs.StringArrayVarP(&o.Settings, "", "X", nil, "attribute setting")
 }
 
 func (o *CLIOptions) Complete() error {
@@ -229,6 +233,18 @@ func (o *CLIOptions) Complete() error {
 	} else {
 		if len(id) != 0 {
 			return errors.Newf("empty credential attribute set for %s", id.String())
+		}
+	}
+
+	set, err := common2.ParseLabels(o.Settings, "attribute setting")
+	if err != nil {
+		return err
+	}
+	spec := config2.NewConfigSpec()
+	for _, s := range set {
+		err = spec.AddRawAttribute(s.Name, s.Value)
+		if err != nil {
+			return errors.Wrapf(err, "attribute %s", s.Name)
 		}
 	}
 	return nil

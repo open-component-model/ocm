@@ -19,13 +19,11 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 )
 
 type Builder struct {
 	ctx           context.Context
-	shared        datacontext.AttributesContext
 	credentials   credentials.Context
 	oci           oci.Context
 	reposcheme    RepositoryTypeScheme
@@ -47,13 +45,8 @@ func (b Builder) WithContext(ctx context.Context) Builder {
 	return b
 }
 
-func (b Builder) WithSharedAttributes(ctx datacontext.AttributesContext) Builder {
-	b.shared = ctx
-	return b
-}
-
 func (b Builder) WithCredentials(ctx credentials.Context) Builder {
-	b.shared = ctx
+	b.credentials = ctx
 	return b
 }
 
@@ -96,13 +89,14 @@ func (b Builder) New() Context {
 	ctx := b.getContext()
 
 	if b.oci == nil {
-		b.oci = oci.ForContext(ctx)
+		if b.credentials != nil {
+			b.oci = oci.WithCredentials(b.credentials).New()
+		} else {
+			b.oci = oci.ForContext(ctx)
+		}
 	}
 	if b.credentials == nil {
 		b.credentials = b.oci.CredentialsContext()
-	}
-	if b.shared == nil {
-		b.shared = b.credentials.AttributesContext()
 	}
 	if b.reposcheme == nil {
 		b.reposcheme = DefaultRepositoryTypeScheme
@@ -128,6 +122,6 @@ func (b Builder) New() Context {
 		reposcheme.AddKnownTypes(b.reposcheme) // TODO: implement delegation
 		b.reposcheme = reposcheme
 	}
-	return newContext(b.shared, b.credentials, b.oci, b.reposcheme, b.accessscheme, b.spechandlers, b.blobhandlers, b.blobdigesters)
+	return newContext(b.credentials, b.oci, b.reposcheme, b.accessscheme, b.spechandlers, b.blobhandlers, b.blobdigesters)
 
 }

@@ -19,15 +19,10 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 )
 
 func WithContext(ctx context.Context) core.Builder {
 	return core.Builder{}.WithContext(ctx)
-}
-
-func WithSharedAttributes(ctx datacontext.AttributesContext) core.Builder {
-	return core.Builder{}.WithSharedAttributes(ctx)
 }
 
 func WithConfigs(ctx config.Context) core.Builder {

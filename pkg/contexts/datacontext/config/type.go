@@ -1,0 +1,86 @@
+// Copyright 2020 Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package config
+
+import (
+	"encoding/json"
+
+	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/config"
+	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/runtime"
+)
+
+const (
+	ConfigType   = "attributes.config" + common.TypeGroupSuffix
+	ConfigTypeV1 = ConfigType + runtime.VersionSeparator + "v1"
+)
+
+func init() {
+	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &ConfigSpec{}))
+	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &ConfigSpec{}))
+}
+
+// ConfigSpec describes a memory based repository interface.
+type ConfigSpec struct {
+	runtime.ObjectVersionedType `json:",inline"`
+	// Attributes descibe a set of geeric attribute settings
+	Attributes map[string]json.RawMessage `json:"attributes,omitempty"`
+}
+
+// NewConfigSpec creates a new memory ConfigSpec
+func NewConfigSpec() *ConfigSpec {
+	return &ConfigSpec{
+		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
+		Attributes:          map[string]json.RawMessage{},
+	}
+}
+
+func (a *ConfigSpec) GetType() string {
+	return ConfigType
+}
+
+func (a *ConfigSpec) AddAttribute(attr string, value interface{}) error {
+	data, err := datacontext.DefaultAttributeScheme.Encode(attr, value, runtime.DefaultJSONEncoding)
+	if err == nil {
+		a.Attributes[attr] = data
+	}
+	return err
+}
+
+func (a *ConfigSpec) AddRawAttribute(attr string, data []byte) error {
+	_, err := datacontext.DefaultAttributeScheme.Decode(attr, data, runtime.DefaultJSONEncoding)
+	if err == nil {
+		a.Attributes[attr] = data
+	}
+	return err
+}
+
+func (a *ConfigSpec) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
+	list := errors.ErrListf("applying config")
+	t, ok := target.(config.Context)
+	if !ok {
+		return cfgcpi.ErrNoContext(ConfigType)
+	}
+	if a.Attributes == nil {
+		return nil
+	}
+	for a, e := range a.Attributes {
+		list.Add(errors.Wrapf(t.GetAttributes().SetEncodedAttribute(a, e, runtime.DefaultJSONEncoding), "attribute %q", a))
+	}
+	return list.Result()
+}

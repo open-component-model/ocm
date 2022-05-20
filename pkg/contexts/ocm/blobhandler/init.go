@@ -16,4 +16,5 @@ package blobhandler
 
 import (
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci/ocirepo"
+	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/ocm/comparch"
 )

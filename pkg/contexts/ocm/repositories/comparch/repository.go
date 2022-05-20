@@ -16,18 +16,19 @@ package comparch
 
 import (
 	"strings"
+	"sync"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch/comparch"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type Repository struct {
+	lock sync.RWMutex
 	ctx  cpi.Context
 	spec *RepositorySpec
-	arch *comparch.ComponentArchive
+	arch *ComponentArchive
 }
 
 var _ cpi.Repository = (*Repository)(nil)
@@ -36,13 +37,11 @@ func NewRepository(ctx cpi.Context, s *RepositorySpec) (*Repository, error) {
 	if s.PathFileSystem == nil {
 		s.PathFileSystem = vfsattr.Get(ctx)
 	}
-	r := &Repository{ctx, s, nil}
-	a, err := r.Open()
+	a, err := Open(ctx, s.AccessMode, s.FilePath, 0700, s)
 	if err != nil {
 		return nil, err
 	}
-	r.arch = a
-	return r, err
+	return a.repo, nil
 }
 
 func (r *Repository) ComponentLister() cpi.ComponentLister {
@@ -62,6 +61,8 @@ func (r *Repository) matchPrefix(prefix string, closure bool) bool {
 }
 
 func (r *Repository) NumComponents(prefix string) (int, error) {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
 	if r.arch == nil {
 		return -1, accessio.ErrClosed
 	}
@@ -72,6 +73,8 @@ func (r *Repository) NumComponents(prefix string) (int, error) {
 }
 
 func (r *Repository) GetComponents(prefix string, closure bool) ([]string, error) {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
 	if r.arch == nil {
 		return nil, accessio.ErrClosed
 	}
@@ -81,15 +84,22 @@ func (r *Repository) GetComponents(prefix string, closure bool) ([]string, error
 	return []string{r.arch.GetName()}, nil
 }
 
-func (r *Repository) Get() *comparch.ComponentArchive {
+func (r *Repository) Get() *ComponentArchive {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
 	if r.arch != nil {
 		return r.arch
 	}
 	return nil
 }
 
-func (r *Repository) Open() (*comparch.ComponentArchive, error) {
-	a, err := comparch.Open(r.ctx, r.spec.AccessMode, r.spec.FilePath, 0700, r.spec.Options, accessio.PathFileSystem(r.spec.PathFileSystem))
+func (r *Repository) Open() (*ComponentArchive, error) {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	if r.arch != nil {
+		return r.arch, nil
+	}
+	a, err := Open(r.ctx, r.spec.AccessMode, r.spec.FilePath, 0700, r.spec)
 	if err != nil {
 		return nil, err
 	}
@@ -106,6 +116,8 @@ func (r *Repository) GetSpecification() cpi.RepositorySpec {
 }
 
 func (r *Repository) ExistsComponentVersion(name string, ref string) (bool, error) {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
 	if r.arch == nil {
 		return false, accessio.ErrClosed
 	}
@@ -113,6 +125,8 @@ func (r *Repository) ExistsComponentVersion(name string, ref string) (bool, erro
 }
 
 func (r *Repository) LookupComponentVersion(name string, version string) (cpi.ComponentVersionAccess, error) {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
 	ok, err := r.ExistsComponentVersion(name, version)
 	if ok {
 		return r.arch, nil
@@ -121,6 +135,8 @@ func (r *Repository) LookupComponentVersion(name string, version string) (cpi.Co
 }
 
 func (r *Repository) LookupComponent(name string) (cpi.ComponentAccess, error) {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
 	if r.arch == nil {
 		return nil, accessio.ErrClosed
 	}
@@ -131,6 +147,8 @@ func (r *Repository) LookupComponent(name string) (cpi.ComponentAccess, error) {
 }
 
 func (r Repository) Close() error {
+	r.lock.Lock()
+	defer r.lock.Unlock()
 	if r.arch != nil {
 		r.arch.Close()
 	}

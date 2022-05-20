@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-// Package blobhandler contains blobhandlers for handling local bloba
+// Package blobhandler contains blobhandlers for handling local blobs
 // for dedicated repository types. It is structured into sub packaged
 // for all context types, for example the context type oci for
 // implementations of the oci go binding interface

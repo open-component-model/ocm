@@ -12,31 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package oci
+package config_test
 
 import (
-	"context"
+	"testing"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-func WithContext(ctx context.Context) core.Builder {
-	return core.Builder{}.WithContext(ctx)
-}
-
-func WithCredentials(ctx credentials.Context) core.Builder {
-	return core.Builder{}.WithCredentials(ctx)
-}
-
-func WithRepositoyTypeScheme(scheme RepositoryTypeScheme) core.Builder {
-	return core.Builder{}.WithRepositoyTypeScheme(scheme)
-}
-
-func WithRepositorySpecHandlers(reg RepositorySpecHandlers) core.Builder {
-	return core.Builder{}.WithRepositorySpecHandlers(reg)
-}
-
-func New() Context {
-	return core.Builder{}.New()
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Attributes Config Test Suite")
 }

@@ -57,7 +57,7 @@ func (r *UniformRepositorySpec) CredHost() string {
 
 func (u *UniformRepositorySpec) String() string {
 	t := u.Type
-	if t != "" && t != ocireg.OCIRegistryRepositoryType {
+	if t != "" && t != ocireg.RepositoryType {
 		t = t + "::"
 	}
 	if u.Info != "" {

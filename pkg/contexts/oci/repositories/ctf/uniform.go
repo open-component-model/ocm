@@ -24,7 +24,7 @@ import (
 func init() {
 	h := &repospechandler{}
 	cpi.RegisterRepositorySpecHandler(h, "")
-	cpi.RegisterRepositorySpecHandler(h, CommonTransportFormatRepositoryType)
+	cpi.RegisterRepositorySpecHandler(h, RepositoryType)
 	for _, f := range SupportedFormats() {
 		cpi.RegisterRepositorySpecHandler(h, string(f))
 	}
@@ -50,7 +50,7 @@ func MapReference(ctx cpi.Context, u *cpi.UniformRepositorySpec) (cpi.Repository
 	if !u.CreateIfMissing {
 		hint = ""
 	}
-	create, ok, err := accessobj.CheckFile(CommonTransportFormatRepositoryType, hint, accessio.TypeForType(u.Type) != "", path, fs, ArtefactIndexFileName)
+	create, ok, err := accessobj.CheckFile(RepositoryType, hint, accessio.TypeForType(u.Type) != "", path, fs, ArtefactIndexFileName)
 	if !ok || err != nil {
 		if err != nil {
 			return nil, err

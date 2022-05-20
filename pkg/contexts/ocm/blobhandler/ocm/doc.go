@@ -12,31 +12,6 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package oci
-
-import (
-	"context"
-
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
-)
-
-func WithContext(ctx context.Context) core.Builder {
-	return core.Builder{}.WithContext(ctx)
-}
-
-func WithCredentials(ctx credentials.Context) core.Builder {
-	return core.Builder{}.WithCredentials(ctx)
-}
-
-func WithRepositoyTypeScheme(scheme RepositoryTypeScheme) core.Builder {
-	return core.Builder{}.WithRepositoyTypeScheme(scheme)
-}
-
-func WithRepositorySpecHandlers(reg RepositorySpecHandlers) core.Builder {
-	return core.Builder{}.WithRepositorySpecHandlers(reg)
-}
-
-func New() Context {
-	return core.Builder{}.New()
-}
+// Package ocm contains sub packages for blob handler implementations
+// for dedicated implementations of the default ocm go binding interface.
+package ocm

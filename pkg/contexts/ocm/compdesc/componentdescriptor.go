@@ -26,6 +26,8 @@ var (
 	NotFound = errors.ErrNotFound()
 )
 
+const ComponentDescriptorFileName = "component-descriptor.yaml"
+
 // Metadata defines the configured metadata of the component descriptor.
 // It is taken from the original serialization format. It can be set
 // to define a default serialization version.

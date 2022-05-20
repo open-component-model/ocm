@@ -18,12 +18,10 @@ import (
 	"context"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 )
 
 type Builder struct {
 	ctx          context.Context
-	shared       datacontext.AttributesContext
 	credentials  credentials.Context
 	reposcheme   RepositoryTypeScheme
 	spechandlers RepositorySpecHandlers
@@ -38,11 +36,6 @@ func (b *Builder) getContext() context.Context {
 
 func (b Builder) WithContext(ctx context.Context) Builder {
 	b.ctx = ctx
-	return b
-}
-
-func (b Builder) WithSharedAttributes(ctx datacontext.AttributesContext) Builder {
-	b.shared = ctx
 	return b
 }
 
@@ -71,15 +64,12 @@ func (b Builder) New() Context {
 	if b.credentials == nil {
 		b.credentials = credentials.ForContext(ctx)
 	}
-	if b.shared == nil {
-		b.shared = b.credentials.AttributesContext()
-	}
 	if b.reposcheme == nil {
 		b.reposcheme = DefaultRepositoryTypeScheme
 	}
 	if b.spechandlers == nil {
 		b.spechandlers = DefaultRepositorySpecHandlers
 	}
-	return newContext(b.shared, b.credentials, b.reposcheme, b.spechandlers)
+	return newContext(b.credentials, b.reposcheme, b.spechandlers)
 
 }

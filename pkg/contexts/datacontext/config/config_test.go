@@ -12,20 +12,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package vfsattr
+package config
 
 import (
 	"fmt"
 
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/contexts/config"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const ATTR_KEY = "github.com/mandelsoft/vfs"
-const ATTR_SHORT = "vfs"
+const ATTR_KEY = "test"
 
 func init() {
 	datacontext.RegisterAttributeType(ATTR_KEY, AttributeType{})
@@ -40,35 +40,57 @@ func (a AttributeType) Name() string {
 
 func (a AttributeType) Description() string {
 	return `
-Virtual filesystem to use for command line context.
+A Test attribute.
 `
 }
 
+type Attribute struct {
+	Value string `json:"value"`
+}
+
 func (a AttributeType) Encode(v interface{}, marshaller runtime.Marshaler) ([]byte, error) {
-	if _, ok := v.(vfs.FileSystem); !ok {
-		return nil, fmt.Errorf("vfs.FileSystem required")
+	if _, ok := v.(*Attribute); !ok {
+		return nil, fmt.Errorf("boolean required")
 	}
-	return nil, nil
+	return marshaller.Marshal(v)
 }
 
 func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (interface{}, error) {
-	return nil, errors.ErrNotSupported("decode attribute", ATTR_KEY)
+	var value Attribute
+	err := unmarshaller.Unmarshal(data, &value)
+	return &value, err
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-var _osfs = osfs.New()
+var _ = Describe("generic attributes", func() {
+	attribute := &Attribute{"TEST"}
+	var ctx config.Context
 
-func Get(ctx datacontext.Context) vfs.FileSystem {
-	v := ctx.GetAttributes().GetAttribute(ATTR_KEY)
-	if v == nil {
-		return _osfs
-	}
-	fs, _ := v.(vfs.FileSystem)
-	return fs
+	BeforeEach(func() {
+		ctx = config.WithSharedAttributes(datacontext.New(nil)).New()
+	})
 
-}
+	Context("applies", func() {
 
-func Set(ctx datacontext.Context, fs vfs.FileSystem) {
-	ctx.GetAttributes().SetAttribute(ATTR_KEY, fs)
-}
+		It("applies later attribute config", func() {
+
+			sub := credentials.WithConfigs(ctx).New()
+			spec := NewConfigSpec()
+			Expect(spec.AddAttribute(ATTR_KEY, attribute)).To(Succeed())
+			Expect(ctx.ApplyConfig(spec, "test")).To(Succeed())
+
+			Expect(sub.GetAttributes().GetAttribute(ATTR_KEY, nil)).To(Equal(attribute))
+		})
+
+		It("applies earlier attribute config", func() {
+
+			spec := NewConfigSpec()
+			Expect(spec.AddAttribute(ATTR_KEY, attribute)).To(Succeed())
+			Expect(ctx.ApplyConfig(spec, "test")).To(Succeed())
+
+			sub := credentials.WithConfigs(ctx).New()
+			Expect(sub.GetAttributes().GetAttribute(ATTR_KEY, nil)).To(Equal(attribute))
+		})
+	})
+})

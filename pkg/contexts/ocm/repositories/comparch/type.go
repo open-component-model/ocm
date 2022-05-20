@@ -43,6 +43,8 @@ type RepositorySpec struct {
 	AccessMode accessobj.AccessMode `json:"accessMode,omitempty"`
 }
 
+var _ accessio.Option = (*RepositorySpec)(nil)
+
 // NewRepositorySpec creates a new RepositorySpec
 func NewRepositorySpec(acc accessobj.AccessMode, filePath string, opts ...accessio.Option) *RepositorySpec {
 	o := accessio.AccessOptions(opts...)

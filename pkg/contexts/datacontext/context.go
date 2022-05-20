@@ -18,6 +18,9 @@ import (
 	"context"
 	"reflect"
 	"sync"
+
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 // Context describes a common interface for a data context used for a dedicated
@@ -52,7 +55,8 @@ type AttributeFactory func(Context) interface{}
 
 type Attributes interface {
 	GetAttribute(name string, def ...interface{}) interface{}
-	SetAttribute(name string, value interface{})
+	SetAttribute(name string, value interface{}) error
+	SetEncodedAttribute(name string, data []byte, unmarshaller runtime.Unmarshaler) error
 	GetOrCreateAttribute(name string, creator AttributeFactory) interface{}
 }
 
@@ -75,6 +79,16 @@ func WithContext(ctx context.Context, parentAttrs Attributes) (Context, context.
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type Updater interface {
+	Update() error
+}
+
+type UpdateFunc func() error
+
+func (u UpdateFunc) Update() error {
+	return u()
+}
+
 type _context struct {
 	ctxtype    string
 	key        interface{}
@@ -87,15 +101,16 @@ type _context struct {
 func New(parentAttrs Attributes) AttributesContext {
 	c := &_context{ctxtype: CONTEXT_TYPE, key: key}
 	c.effective = c
-	c.attributes = newAttributes(c, parentAttrs)
+	c.attributes = newAttributes(c, parentAttrs, nil)
 	return c
 }
 
 // NewContextBase creates a context base implementation supporting
 // context attributes and the binding to a context.Context
 func NewContextBase(eff Context, typ string, key interface{}, parentAttrs Attributes) Context {
+	updater, _ := eff.(Updater)
 	c := &_context{ctxtype: typ, key: key, effective: eff}
-	c.attributes = newAttributes(eff, parentAttrs)
+	c.attributes = newAttributes(eff, parentAttrs, updater)
 	return c
 }
 
@@ -122,24 +137,29 @@ type _attributes struct {
 	sync.RWMutex
 	ctx        Context
 	parent     Attributes
+	updater    Updater
 	attributes map[string]interface{}
 }
 
 var _ Attributes = &_attributes{}
 
-func NewAttributes(ctx Context, parent Attributes) Attributes {
-	return newAttributes(ctx, parent)
+func NewAttributes(ctx Context, parent Attributes, updater Updater) Attributes {
+	return newAttributes(ctx, parent, updater)
 }
 
-func newAttributes(ctx Context, parent Attributes) *_attributes {
+func newAttributes(ctx Context, parent Attributes, updater Updater) *_attributes {
 	return &_attributes{
 		ctx:        ctx,
 		parent:     parent,
+		updater:    updater,
 		attributes: map[string]interface{}{},
 	}
 }
 
 func (c *_attributes) GetAttribute(name string, def ...interface{}) interface{} {
+	if c.updater != nil {
+		c.updater.Update()
+	}
 	c.RLock()
 	defer c.RUnlock()
 	if a := c.attributes[name]; a != nil {
@@ -158,10 +178,27 @@ func (c *_attributes) GetAttribute(name string, def ...interface{}) interface{} 
 	return nil
 }
 
-func (c *_attributes) SetAttribute(name string, value interface{}) {
+func (c *_attributes) SetEncodedAttribute(name string, data []byte, unmarshaller runtime.Unmarshaler) error {
 	c.Lock()
 	defer c.Unlock()
+	v, err := DefaultAttributeScheme.Decode(name, data, unmarshaller)
+	if err != nil {
+		return err
+	}
+	c.attributes[name] = v
+	return nil
+}
+
+func (c *_attributes) SetAttribute(name string, value interface{}) error {
+	c.Lock()
+	defer c.Unlock()
+
+	_, err := DefaultAttributeScheme.Encode(name, value, nil)
+	if err != nil && !errors.IsErrUnknownKind(err, "attribute") {
+		return err
+	}
 	c.attributes[name] = value
+	return nil
 }
 
 func (c *_attributes) GetOrCreateAttribute(name string, creator AttributeFactory) interface{} {

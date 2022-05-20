@@ -27,18 +27,18 @@ import (
 )
 
 const (
-	OCIRegistryRepositoryType   = "OCIRegistry"
-	OCIRegistryRepositoryTypeV1 = OCIRegistryRepositoryType + runtime.VersionSeparator + "v1"
+	RepositoryType   = "OCIRegistry"
+	RepositoryTypeV1 = RepositoryType + runtime.VersionSeparator + "v1"
 
-	ShortOCIRegistryRepositoryType   = "oci"
-	ShortOCIRegistryRepositoryTypeV1 = ShortOCIRegistryRepositoryType + runtime.VersionSeparator + "v1"
+	ShortRepositoryType   = "oci"
+	ShortRepositoryTypeV1 = ShortRepositoryType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
-	cpi.RegisterRepositoryType(OCIRegistryRepositoryType, cpi.NewRepositoryType(OCIRegistryRepositoryType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(OCIRegistryRepositoryTypeV1, cpi.NewRepositoryType(OCIRegistryRepositoryTypeV1, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(ShortOCIRegistryRepositoryType, cpi.NewRepositoryType(ShortOCIRegistryRepositoryType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(ShortOCIRegistryRepositoryTypeV1, cpi.NewRepositoryType(ShortOCIRegistryRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(RepositoryType, cpi.NewRepositoryType(RepositoryType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(RepositoryTypeV1, cpi.NewRepositoryType(RepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(ShortRepositoryType, cpi.NewRepositoryType(ShortRepositoryType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(ShortRepositoryTypeV1, cpi.NewRepositoryType(ShortRepositoryTypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
@@ -54,13 +54,13 @@ var _ cpi.RepositorySpec = (*RepositorySpec)(nil)
 // NewRepositorySpec creates a new RepositorySpec
 func NewRepositorySpec(baseURL string) *RepositorySpec {
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(OCIRegistryRepositoryType),
+		ObjectVersionedType: runtime.NewVersionedObjectType(RepositoryType),
 		BaseURL:             baseURL,
 	}
 }
 
 func (a *RepositorySpec) GetType() string {
-	return OCIRegistryRepositoryType
+	return RepositoryType
 }
 
 func (a *RepositorySpec) Name() string {

@@ -128,7 +128,7 @@ func NewEnvironment(opts ...Option) *Environment {
 			panic(err)
 		}
 	}
-	ctx := ocm.DefaultContext()
+	ctx := ocm.WithCredentials(credentials.WithConfigs(config.New()).New()).New()
 	vfsattr.Set(ctx.AttributesContext(), fs)
 	tmpfs = nil
 	return &Environment{

@@ -31,7 +31,7 @@ import (
 
 const CONTEXT_TYPE = "ocm.context.gardener.cloud"
 
-const CommonTransportFormat = ctf.CommonTransportFormatRepositoryType
+const CommonTransportFormat = ctf.RepositoryType
 
 type Context interface {
 	datacontext.Context
@@ -95,10 +95,10 @@ type _context struct {
 
 var _ Context = &_context{}
 
-func newContext(shared datacontext.AttributesContext, credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, specHandlers RepositorySpecHandlers, blobHandlers BlobHandlerRegistry, blobDigesters BlobDigesterRegistry) Context {
+func newContext(credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, specHandlers RepositorySpecHandlers, blobHandlers BlobHandlerRegistry, blobDigesters BlobDigesterRegistry) Context {
 	c := &_context{
-		sharedattributes:     shared,
-		updater:              cfgcpi.NewUpdate(ocictx.ConfigContext()),
+		sharedattributes:     credctx.AttributesContext(),
+		updater:              cfgcpi.NewUpdate(credctx.ConfigContext()),
 		credctx:              credctx,
 		ocictx:               ocictx,
 		specHandlers:         specHandlers,
@@ -108,7 +108,7 @@ func newContext(shared datacontext.AttributesContext, credctx credentials.Contex
 		knownRepositoryTypes: reposcheme,
 		aliases:              map[string]RepositorySpec{},
 	}
-	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
+	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, credctx.GetAttributes())
 	return c
 }
 

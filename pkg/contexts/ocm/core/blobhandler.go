@@ -40,15 +40,15 @@ type BlobHandler interface {
 	// If this is possible and done an appropriate access spec
 	// must be returned, if this is not done, nil has to be returned
 	// without error
-	StoreBlob(repo Repository, blob BlobAccess, hint string, ctx StorageContext) (AccessSpec, error)
+	StoreBlob(repo Repository, blob BlobAccess, hint string, global AccessSpec, ctx StorageContext) (AccessSpec, error)
 }
 
 // MultiBlobHandler is a BlobHandler consisting of a sequence of handlers
 type MultiBlobHandler []BlobHandler
 
-func (m MultiBlobHandler) StoreBlob(repo Repository, blob BlobAccess, hint string, ctx StorageContext) (AccessSpec, error) {
+func (m MultiBlobHandler) StoreBlob(repo Repository, blob BlobAccess, hint string, global AccessSpec, ctx StorageContext) (AccessSpec, error) {
 	for _, h := range m {
-		a, err := h.StoreBlob(repo, blob, hint, ctx)
+		a, err := h.StoreBlob(repo, blob, hint, global, ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -166,6 +166,7 @@ func (r *blobHandlerRegistry) GetHandler(ctxtype, repotype, mimetype string) Blo
 	var multi MultiBlobHandler
 	if ctxtype != "" || repotype != "" {
 		multi = append(multi, r.forMimeType(ctxtype, repotype, mimetype)...)
+		multi = append(multi, r.forMimeType(ctxtype, repotype, "")...)
 	}
 	multi = append(multi, r.forMimeType("", "", mimetype)...)
 	multi = append(multi, r.defhandler...)

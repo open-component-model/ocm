@@ -20,7 +20,7 @@ import (
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch/comparch"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 )
 
 var _ = Describe("Test Environment", func() {

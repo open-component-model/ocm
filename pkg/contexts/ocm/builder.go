@@ -18,17 +18,12 @@ import (
 	"context"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 )
 
 func WithContext(ctx context.Context) core.Builder {
 	return core.Builder{}.WithContext(ctx)
-}
-
-func WithSharedAttributes(ctx datacontext.AttributesContext) core.Builder {
-	return core.Builder{}.WithSharedAttributes(ctx)
 }
 
 func WithCredentials(ctx credentials.Context) core.Builder {

@@ -73,14 +73,14 @@ type _context struct {
 
 var _ Context = &_context{}
 
-func newContext(shared datacontext.AttributesContext, configctx config.Context, reposcheme RepositoryTypeScheme) Context {
+func newContext(configctx config.Context, reposcheme RepositoryTypeScheme) Context {
 	c := &_context{
-		sharedattributes:     shared,
+		sharedattributes:     configctx.AttributesContext(),
 		updater:              cfgcpi.NewUpdate(configctx),
 		knownRepositoryTypes: reposcheme,
 		consumers:            newConsumers(),
 	}
-	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
+	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, configctx.GetAttributes())
 	return c
 }
 

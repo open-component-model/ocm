@@ -23,21 +23,30 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-func ParseLabel(a string) (*metav1.Label, error) {
+func gkind(kind ...string) string {
+	for _, k := range kind {
+		if k != "" {
+			return k
+		}
+	}
+	return "label"
+}
+
+func ParseLabel(a string, kind ...string) (*metav1.Label, error) {
 	i := strings.Index(a, "=")
 	if i < 0 {
-		return nil, errors.ErrInvalid("label", a)
+		return nil, errors.ErrInvalid(gkind(kind...), a)
 	}
 	label := a[:i]
 
 	var value interface{}
 	err := yaml.Unmarshal([]byte(a[i+1:]), &value)
 	if err != nil {
-		return nil, errors.Wrapf(errors.ErrInvalid("label", a), "no yaml or json")
+		return nil, errors.Wrapf(errors.ErrInvalid(gkind(kind...), a), "no yaml or json")
 	}
 	data, err := json.Marshal(value)
 	if err != nil {
-		return nil, errors.Wrapf(errors.ErrInvalid("label", a), err.Error())
+		return nil, errors.Wrapf(errors.ErrInvalid(gkind(kind...), a), err.Error())
 	}
 	return &metav1.Label{
 		Name:  strings.TrimSpace(label),
@@ -45,21 +54,33 @@ func ParseLabel(a string) (*metav1.Label, error) {
 	}, nil
 }
 
-func AddParsedLabel(labels metav1.Labels, a string) (metav1.Labels, error) {
-	l, err := ParseLabel(a)
+func AddParsedLabel(labels metav1.Labels, a string, kind ...string) (metav1.Labels, error) {
+	l, err := ParseLabel(a, kind...)
 	if err != nil {
 		return nil, err
 	}
 	for _, c := range labels {
 		if c.Name == l.Name {
-			return nil, errors.Newf("duplicate label %q", l.Name)
+			return nil, errors.Newf("duplicate %s %q", gkind(kind...), l.Name)
 		}
 	}
 	return append(labels, *l), nil
 }
 
-func SetParsedLabel(labels metav1.Labels, a string) (metav1.Labels, error) {
-	l, err := ParseLabel(a)
+func ParseLabels(labels []string, kind ...string) (metav1.Labels, error) {
+	var err error
+	result := metav1.Labels{}
+	for _, l := range labels {
+		result, err = AddParsedLabel(result, l, kind...)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return result, err
+}
+
+func SetParsedLabel(labels metav1.Labels, a string, kind ...string) (metav1.Labels, error) {
+	l, err := ParseLabel(a, kind...)
 	if err != nil {
 		return nil, err
 	}

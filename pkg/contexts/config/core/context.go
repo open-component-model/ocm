@@ -83,6 +83,7 @@ func ForContext(ctx context.Context) Context {
 
 type __context struct {
 	datacontext.Context
+	updater Updater
 
 	sharedAttributes datacontext.AttributesContext
 
@@ -106,9 +107,16 @@ func newContext(shared datacontext.AttributesContext, reposcheme ConfigTypeSchem
 			configs:          NewConfigStore(),
 		},
 	}
+	c.updater = NewUpdater(c)
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
 	return c
 }
+
+func (c *_context) Update() error {
+	return c.updater.Update(c)
+}
+
+var _ datacontext.Updater = (*_context)(nil)
 
 func (c *_context) Info() string {
 	return c.description
@@ -122,6 +130,7 @@ func (c *_context) WithInfo(desc string) Context {
 }
 
 func (c *_context) AttributesContext() datacontext.AttributesContext {
+	c.updater.Update(c)
 	return c.sharedAttributes
 }
 

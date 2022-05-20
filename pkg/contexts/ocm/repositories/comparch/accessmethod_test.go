@@ -24,9 +24,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localfsblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch/comparch"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -45,7 +46,7 @@ var _ = Describe("access method", func() {
 		})
 
 		It("encodes legacy methood", func() {
-			spec := comparch.NewLocalFilesystemBlobAccessSpecV1("anydigest", "application/json")
+			spec := localfsblob.New("anydigest", "application/json")
 			data, err := DefaultContext.Encode(spec, runtime.DefaultJSONEncoding)
 			Expect(err).To(Succeed())
 			Expect(data).To(Equal([]byte(legacy)))
@@ -73,8 +74,8 @@ var _ = Describe("access method", func() {
 			Expect(err).To(Succeed())
 			Expect(spec).To(Not(BeNil()))
 
-			Expect(spec.GetType()).To(Equal(comparch.LocalFilesystemBlobType))
-			Expect(spec.GetKind()).To(Equal(comparch.LocalFilesystemBlobType))
+			Expect(spec.GetType()).To(Equal(localfsblob.Type))
+			Expect(spec.GetKind()).To(Equal(localfsblob.Type))
 			Expect(spec.GetVersion()).To(Equal("v1"))
 			Expect(reflect.TypeOf(spec)).To(Equal(reflect.TypeOf(&localblob.AccessSpec{})))
 

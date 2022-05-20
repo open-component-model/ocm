@@ -74,19 +74,16 @@ type _context struct {
 	aliases              map[string]RepositorySpec
 }
 
-func newContext(shared datacontext.AttributesContext, creds credentials.Context, reposcheme RepositoryTypeScheme, specHandlers RepositorySpecHandlers) Context {
-	if shared == nil {
-		shared = creds.ConfigContext()
-	}
+func newContext(creds credentials.Context, reposcheme RepositoryTypeScheme, specHandlers RepositorySpecHandlers) Context {
 	c := &_context{
-		sharedattributes:     shared,
+		sharedattributes:     creds.AttributesContext(),
 		updater:              cfgcpi.NewUpdate(creds.ConfigContext()),
 		credentials:          creds,
 		knownRepositoryTypes: reposcheme,
 		specHandlers:         specHandlers,
 		aliases:              map[string]RepositorySpec{},
 	}
-	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
+	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, creds.ConfigContext().GetAttributes())
 	return c
 }
 
