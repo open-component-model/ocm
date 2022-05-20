@@ -15,8 +15,6 @@
 package elemhdlr
 
 import (
-	"strings"
-
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 )
 
@@ -24,11 +22,7 @@ func Compare(a, b interface{}) int {
 	aa := a.(*Object)
 	ab := b.(*Object)
 
-	c := strings.Compare(aa.Element.GetMeta().GetName(), ab.Element.GetMeta().GetName())
-	if c != 0 {
-		return c
-	}
-	return strings.Compare(aa.Element.GetMeta().GetVersion(), ab.Element.GetMeta().GetVersion())
+	return aa.Compare(ab)
 }
 
 // Sort is a processing chain sorting original objects provided by type handler

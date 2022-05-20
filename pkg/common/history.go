@@ -98,6 +98,24 @@ func (h History) RemovePrefix(prefix History) History {
 	return h[len(prefix):]
 }
 
+func (h History) Compare(o History) int {
+	c, _ := h.Compare2(o)
+	return c
+}
+
+func (h History) Compare2(o History) (int, bool) {
+	for i, h := range h {
+		if len(o) <= i {
+			break
+		}
+		c := h.Compare(o[i])
+		if c != 0 {
+			return c, true
+		}
+	}
+	return len(h) - len(o), false
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type HistoryElement interface {
@@ -112,6 +130,13 @@ func SortHistoryElements(s interface{}) {
 	})
 }
 
+func CompareHistorySource(a, b interface{}) int {
+	aa := a.(HistorySource)
+	ab := b.(HistorySource)
+
+	return aa.GetHistory().Compare(ab.GetHistory())
+}
+
 func CompareHistoryElement(a, b interface{}) int {
 	aa := a.(HistoryElement)
 	ab := b.(HistoryElement)
@@ -119,16 +144,10 @@ func CompareHistoryElement(a, b interface{}) int {
 	ha := aa.GetHistory()
 	hb := ab.GetHistory()
 
-	for i, h := range ha {
-		if len(hb) <= i {
-			break
-		}
-		c := h.Compare(hb[i])
-		if c != 0 {
-			return c
-		}
+	c, ok := ha.Compare2(hb)
+	if ok {
+		return c
 	}
-	c := len(ha) - len(hb)
 	k := 0
 	switch {
 	case c < 0:

@@ -15,6 +15,8 @@
 package elemhdlr
 
 import (
+	"strings"
+
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
@@ -49,6 +51,17 @@ func (o *Object) GetHistory() common.History {
 }
 func (o *Object) IsNode() *common.NameVersion {
 	return o.Node
+}
+
+func (o *Object) Compare(b *Object) int {
+	c := o.History.Compare(b.History)
+	if c == 0 {
+		c = strings.Compare(o.Element.GetMeta().GetName(), b.Element.GetMeta().GetName())
+		if c == 0 {
+			c = strings.Compare(o.Id.String(), b.Id.String())
+		}
+	}
+	return c
 }
 
 ////////////////////////////////////////////////////////////////////////////////
