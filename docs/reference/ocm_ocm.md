@@ -1,6 +1,4 @@
-## ocm ocm
-
-Dedicated command flavors for the Open Component Model
+## ocm ocm &mdash; Dedicated Command Flavors For The Open Component Model
 
 ### Synopsis
 
@@ -30,4 +28,10 @@ ocm ocm [<options>] <sub command> ...
 * [ocm ocm <b>resources</b>](ocm_ocm_resources.md)	 - Commands acting on component resources
 * [ocm ocm <b>sources</b>](ocm_ocm_sources.md)	 - Commands acting on component sources
 * [ocm ocm <b>versions</b>](ocm_ocm_versions.md)	 - Commands acting on component version names
+
+
+
+##### Additional Help Topics
+
+* [ocm ocm <b>ocm-references</b>](ocm_ocm_ocm-references.md)	 - notation for OCM references
 

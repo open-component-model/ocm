@@ -1,6 +1,4 @@
-## ocm ocm versions
-
-Commands acting on component version names
+## ocm ocm versions &mdash; Commands Acting On Component Version Names
 
 ### Synopsis
 

@@ -26,8 +26,12 @@ func hasSeeAlso(cmd *cobra.Command) bool {
 	if cmd.HasParent() {
 		return true
 	}
+	return cmd.HasAvailableSubCommands()
+}
+
+func hasAdditionalHelpTopics(cmd *cobra.Command) bool {
 	for _, c := range cmd.Commands() {
-		if !c.IsAvailableCommand() || c.IsAdditionalHelpTopicCommand() {
+		if !c.IsAvailableCommand() || !c.IsAdditionalHelpTopicCommand() {
 			continue
 		}
 		return true

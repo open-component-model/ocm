@@ -1,6 +1,4 @@
-## ocm create
-
-Create transport or component archive
+## ocm create &mdash; Create Transport Or Component Archive
 
 ### Synopsis
 

@@ -1,6 +1,4 @@
-## ocm ocm componentarchive transfer
-
-transfer component archive to some component repository
+## ocm ocm componentarchive transfer &mdash; Transfer Component Archive To Some Component Repository
 
 ### Synopsis
 

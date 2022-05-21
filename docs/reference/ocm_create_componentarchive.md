@@ -1,6 +1,4 @@
-## ocm create componentarchive
-
-create new component archive
+## ocm create componentarchive &mdash; Create New Component Archive
 
 ### Synopsis
 

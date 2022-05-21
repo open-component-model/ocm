@@ -1,6 +1,4 @@
-## ocm show
-
-Show tags or versions
+## ocm show &mdash; Show Tags Or Versions
 
 ### Synopsis
 

@@ -1,6 +1,4 @@
-## ocm transfer
-
-Transfer artefacts or components
+## ocm transfer &mdash; Transfer Artefacts Or Components
 
 ### Synopsis
 

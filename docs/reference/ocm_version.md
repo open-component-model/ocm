@@ -1,6 +1,4 @@
-## ocm version
-
-displays the version
+## ocm version &mdash; Displays The Version
 
 ### Synopsis
 

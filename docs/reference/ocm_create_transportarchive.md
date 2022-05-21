@@ -1,6 +1,4 @@
-## ocm create transportarchive
-
-create new OCI/OCM transport  archive
+## ocm create transportarchive &mdash; Create New OCI/OCM Transport  Archive
 
 ### Synopsis
 

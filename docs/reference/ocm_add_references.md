@@ -1,6 +1,4 @@
-## ocm add references
-
-add aggregation information to a component version
+## ocm add references &mdash; Add Aggregation Information To A Component Version
 
 ### Synopsis
 

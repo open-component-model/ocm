@@ -1,6 +1,4 @@
-## ocm add
-
-Add resources or sources to a component archive
+## ocm add &mdash; Add Resources Or Sources To A Component Archive
 
 ### Synopsis
 
@@ -24,6 +22,6 @@ ocm add [<options>] <sub command> ...
 ##### Sub Commands
 
 * [ocm add <b>references</b>](ocm_add_references.md)	 - add aggregation information to a component version
-* [ocm add <b>resources</b>](ocm_add_resources.md)	 - add source information to a component version
+* [ocm add <b>resources</b>](ocm_add_resources.md)	 - add resources to a component version
 * [ocm add <b>sources</b>](ocm_add_sources.md)	 - add source information to a component version
 

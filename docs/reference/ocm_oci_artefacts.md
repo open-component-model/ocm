@@ -1,6 +1,4 @@
-## ocm oci artefacts
-
-Commands acting on OCI artefacts
+## ocm oci artefacts &mdash; Commands Acting On OCI Artefacts
 
 ### Synopsis
 

@@ -1,6 +1,4 @@
-## ocm sources
-
-Commands acting on component sources
+## ocm sources &mdash; Commands Acting On Component Sources
 
 ### Synopsis
 

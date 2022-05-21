@@ -40,6 +40,7 @@ func (a AttributeType) Name() string {
 
 func (a AttributeType) Description() string {
 	return `
+*intern* (not via command line)
 Virtual filesystem to use for command line context.
 `
 }

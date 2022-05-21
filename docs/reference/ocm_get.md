@@ -1,6 +1,4 @@
-## ocm get
-
-Get information about artefacts and components
+## ocm get &mdash; Get Information About Artefacts And Components
 
 ### Synopsis
 

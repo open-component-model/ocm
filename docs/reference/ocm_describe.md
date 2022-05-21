@@ -1,6 +1,4 @@
-## ocm describe
-
-Describe artefacts
+## ocm describe &mdash; Describe Artefacts
 
 ### Synopsis
 

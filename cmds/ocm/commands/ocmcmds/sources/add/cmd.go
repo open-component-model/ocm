@@ -46,7 +46,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Args:  cobra.MinimumNArgs(2),
 		Short: "add source information to a component version",
 		Long: `
-Add  source information specified in a resource file to a component version.
+Add source information specified in a resource file to a component version.
 So far only component archives are supported as target.
 ` + (&template.Options{}).Usage() + `
 This command accepts (re)source specification files describing the sources

@@ -1,6 +1,4 @@
-## ocm componentarchive
-
-Commands acting on component archives
+## ocm componentarchive &mdash; Commands Acting On Component Archives
 
 ### Synopsis
 

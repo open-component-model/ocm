@@ -1,6 +1,4 @@
-## ocm oci artefacts transfer
-
-transfer OCI artefacts
+## ocm oci artefacts transfer &mdash; Transfer OCI Artefacts
 
 ### Synopsis
 
@@ -23,16 +21,22 @@ Transfer OCI artefacts from one registry to another one
 If the repository/registry option is specified, the given names are interpreted
 relative to the specified registry using the syntax
 
-<center><code>&lt;OCI repository name>[:&lt;tag>][@&lt;digest>]</code></center>
+<center>
+    <pre>&lt;OCI repository name>[:&lt;tag>][@&lt;digest>]</pre>
+</center>
 
 If no <code>--repo</code> option is specified the given names are interpreted 
 as extended CI artefact references.
 
-<center><code>[&lt;repo type>::]&lt;host>[:&lt;port>]/&lt;OCI repository name>[:&lt;tag>][@&lt;digest>]</code></center>
+<center>
+    <pre>[&lt;repo type>::]&lt;host>[:&lt;port>]/&lt;OCI repository name>[:&lt;tag>][@&lt;digest>]</pre>
+</center>
 
 The <code>--repo</code> option takes a repository/OCI registry specification:
 
-<center><code>[&lt;repo type>::]&lt;configured name>|&lt;file path>|&lt;spec json></code></center>
+<center>
+    <pre>[&lt;repo type>::]&lt;configured name>|&lt;file path>|&lt;spec json></pre>
+</center>
 
 For the *Common Transport Format* the types <code>directory</code>,
 <code>tar</code> or <code>tgz</code> are possible.

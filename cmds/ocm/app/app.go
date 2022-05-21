@@ -30,12 +30,17 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/show"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/transfer"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/cobrautils"
+	"github.com/open-component-model/ocm/cmds/ocm/topics/common/config"
+	"github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
+	"github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	credcfg "github.com/open-component-model/ocm/pkg/contexts/credentials/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
-	config2 "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	datactg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -51,6 +56,10 @@ import (
 
 type CLI struct {
 	clictx.Context
+}
+
+var ShortCuts = map[string]string{
+	compatattr.ATTR_SHORT: compatattr.ATTR_KEY,
 }
 
 func NewCLI(ctx clictx.Context) *CLI {
@@ -81,7 +90,7 @@ Component Repositories, and component versions.
 Additionally it provides some limited support for the docker daemon, OCI artefacts and
 registries.
 
-With the open <code>--cred</code> it is possible to specify arbitrary credentials
+With the option <code>--cred</code> it is possible to specify arbitrary credentials
 for various environments on the command line. Nevertheless it is always preferrable
 to use the cli config file.
 Every credential setting is related to a dedicated consumer and provides a set of
@@ -89,11 +98,12 @@ credential attributes. All this can be specified by a sequence of <code>--cred</
 options. 
 
 Every option value has the format
+
 <center>
-<code>--cred [:]&lt;attr>=&lt;value></code>
+    <pre>--cred [:]&lt;attr>=&lt;value></pre>
 </center>
 
-Consumer identity attribues are prefixed with the colon (:). A credential settings
+Consumer identity attributes are prefixed with the colon (:). A credential settings
 always start with a sequence of at least one identity attributes, followed by a
 sequence of credential attributes.
 If a credential attribute is followed by an identity attribute a new credential setting
@@ -103,10 +113,21 @@ The first credential setting may omit identity attributes. In this case it is us
 default credential, always used if no dedicated match is found.
 
 For example:
+
 <center>
-<code>--cred :type=ociRegistry --cred hostname:ghcr.io --cred usename=mandelsoft --cred password=xyz </code>
+    <pre>--cred :type=ociRegistry --cred hostname=ghcr.io --cred usename=mandelsoft --cred password=xyz</pre>
 </center>
-`
+
+With the option <code>-X</code> it is possible to pass global settings of the 
+form 
+
+<center>
+    <pre>-X &lt;attribute>=&lt;value></pre>
+</center>
+
+The value can be a simple type or a json string for complex values. The following
+attributes are supported:
+` + Attributes()
 
 func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	if ctx == nil {
@@ -148,13 +169,31 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(ocmcmds.NewCommand(opts.Context))
 
 	opts.AddFlags(cmd.Flags())
+	cmd.InitDefaultHelpCmd()
+	var help *cobra.Command
+	for _, c := range cmd.Commands() {
+		if c.Name() == "help" {
+			help = c
+			break
+		}
+	}
+	//help.Use="help <topic>"
+	help.DisableFlagsInUseLine = true
+	cmd.AddCommand(topicconfig.New(ctx))
+	cmd.AddCommand(topicocirefs.New(ctx))
+	cmd.AddCommand(topicocmrefs.New(ctx))
+
+	help.AddCommand(topicconfig.New(ctx))
+	help.AddCommand(topicocirefs.New(ctx))
+	help.AddCommand(topicocmrefs.New(ctx))
+
 	return cmd
 }
 
 func (o *CLIOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Config, "config", "", "", "configuration file")
 	fs.StringArrayVarP(&o.Credentials, "cred", "C", nil, "credential setting")
-	fs.StringArrayVarP(&o.Settings, "", "X", nil, "attribute setting")
+	fs.StringArrayVarP(&o.Settings, "attribute", "X", nil, "attribute setting")
 }
 
 func (o *CLIOptions) Complete() error {
@@ -237,17 +276,21 @@ func (o *CLIOptions) Complete() error {
 	}
 
 	set, err := common2.ParseLabels(o.Settings, "attribute setting")
-	if err != nil {
-		return err
-	}
-	spec := config2.NewConfigSpec()
-	for _, s := range set {
-		err = spec.AddRawAttribute(s.Name, s.Value)
-		if err != nil {
-			return errors.Wrapf(err, "attribute %s", s.Name)
+	if err == nil && len(set) > 0 {
+		spec := datactg.NewConfigSpec()
+		for _, s := range set {
+			attr := s.Name
+			if ShortCuts[attr] != "" {
+				attr = ShortCuts[attr]
+			}
+			err = spec.AddRawAttribute(attr, s.Value)
+			if err != nil {
+				return errors.Wrapf(err, "attribute %s", s.Name)
+			}
 		}
+		err = o.Context.ConfigContext().ApplyConfig(spec, "cli")
 	}
-	return nil
+	return err
 }
 
 func NewVersionCommand() *cobra.Command {
@@ -260,4 +303,32 @@ func NewVersionCommand() *cobra.Command {
 			fmt.Printf("%#v", v)
 		},
 	}
+}
+
+func Attributes() string {
+	s := ""
+	sep := ""
+	for a, t := range datacontext.DefaultAttributeScheme.KnownTypes() {
+		desc := t.Description()
+		if !strings.Contains(desc, "not via command line") {
+			for strings.HasPrefix(desc, "\n") {
+				desc = desc[1:]
+			}
+			for strings.HasSuffix(desc, "\n") {
+				desc = desc[:len(desc)-1]
+			}
+			desc = strings.Replace(desc, "\n", "\n  ", -1)
+			short := ""
+			for k, v := range ShortCuts {
+				if v == a {
+					short = short + "," + k
+				}
+			}
+			if len(short) > 0 {
+				short = " [" + short[1:] + "]"
+			}
+			s = fmt.Sprintf("%s%s- %s%s: %s", s, sep, a, short, desc)
+		}
+	}
+	return s
 }

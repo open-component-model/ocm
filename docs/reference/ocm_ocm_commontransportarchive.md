@@ -1,6 +1,4 @@
-## ocm ocm commontransportarchive
-
-Commands acting on common transport archives
+## ocm ocm commontransportarchive &mdash; Commands Acting On Common Transport Archives
 
 ### Synopsis
 

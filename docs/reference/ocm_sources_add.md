@@ -1,6 +1,4 @@
-## ocm sources add
-
-add source information to a component version
+## ocm sources add &mdash; Add Source Information To A Component Version
 
 ### Synopsis
 
@@ -20,7 +18,7 @@ ocm sources add [<options>] <target> {<resourcefile> | <var>=<value>}
 ### Description
 
 
-Add  source information specified in a resource file to a component version.
+Add source information specified in a resource file to a component version.
 So far only component archives are supported as target.
 
 Templating:

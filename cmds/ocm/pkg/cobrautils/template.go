@@ -14,18 +14,20 @@
 
 package cobrautils
 
-const HelpTemplate = `Synopsis:{{if .Runnable}}
+const HelpTemplate = "{{.CommandPath}} \u2014 {{title .Short}}" + `{{if .IsAvailableCommand}}
+
+Synopsis:{{if .Runnable}}
   {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
-  {{if soleCommand .Use}}{{if .HasAvailableLocalFlags}}{{.CommandPath}} [<options>] <sub-command> ...{{else}}{{.CommandPath}} <sub-command> ...{{end}}{{else}}{{.UseLine}}{{end}}{{end}}{{if gt (len .Aliases) 0}}
+  {{if or .Runnable (soleCommand .Use)}}{{if .HasAvailableLocalFlags}}{{.CommandPath}} [<options>] <sub-command> ...{{else}}{{.CommandPath}} <sub-command> ...{{end}}{{else}}{{.UseLine}}{{end}}{{end}}{{if gt (len .Aliases) 0}}
 
 Aliases:
-  {{.NameAndAliases}}{{end}}{{if .HasAvailableSubCommands}}
+  {{.NameAndAliases}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
 
 Available Commands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
-  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if and .HasAvailableLocalFlags .IsAvailableCommand}}
 
 Flags:
-{{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
+{{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if and .HasAvailableInheritedFlags .IsAvailableCommand}}
 
 Global Flags:
 {{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}

@@ -1,6 +1,4 @@
-## ocm ocm commontransportarchive create
-
-create new component archive
+## ocm ocm commontransportarchive create &mdash; Create New Component Archive
 
 ### Synopsis
 

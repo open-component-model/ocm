@@ -1,6 +1,4 @@
-## ocm ocm sources add
-
-add source information to a component version
+## ocm ocm sources add &mdash; Add Source Information To A Component Version
 
 ### Synopsis
 
@@ -20,7 +18,7 @@ ocm ocm sources add [<options>] <target> {<resourcefile> | <var>=<value>}
 ### Description
 
 
-Add  source information specified in a resource file to a component version.
+Add source information specified in a resource file to a component version.
 So far only component archives are supported as target.
 
 Templating:
@@ -63,53 +61,6 @@ to add to a component version.
 
 The resource specification supports the following blob input types, specified
 with the field <code>type</code> in the <code>input</code> field:
-
-- Input type <code>file</code>
-
-  The path must denote a file relative the the resources file.
-  The content is compressed if the <code>compress</code> field
-  is set to <code>true</code>.
-
-  This blob type specification supports the following fields: 
-  - **<code>path</code>** *string*
-
-    This REQUIRED property describes the file path to the helm chart relative to the
-    resource file location.
-
-  - **<code>mediaType</code>** *string*
-
-    This OPTIONAL property describes the media type to store with the local blob.
-    The default media type is application/octet-stream and
-    application/gzip if compression is enabled.
-
-  - **<code>compress</code>** *bool*
-
-    This OPTIONAL property describes whether the file content should be stored
-    compressed or not.
-
-- Input type <code>helm</code>
-
-  The path must denote an helm chart archive or directory
-  relative to the resources file.
-  The denoted chart is packed as an OCI artefact set.
-  Additional provider info is taken from a file with the same name
-  and the suffix <code>.prov</code>.
-
-  If the chart should just be stored as archive, please use the 
-  type <code>file</code> or <code>dir</code>.
-
-  This blob type specification supports the following fields: 
-  - **<code>path</code>** *string*
-
-    This REQUIRED property describes the file path to the helm chart relative to the
-    resource file location.
-
-  - **<code>version</code>** *string*
-
-    This OPTIONAL property can be set to configure an explicit version hint.
-    If not specified the versio from the chart will be used.
-    Basically, it is a good practice to use the component version for local resources
-    This can be achieved by using templating for this attribute in the resource file.
 
 - Input type <code>dir</code>
 
@@ -175,6 +126,53 @@ with the field <code>type</code> in the <code>input</code> field:
 
     This REQUIRED property describes the image name to import from the
     local docker daemon.
+
+- Input type <code>file</code>
+
+  The path must denote a file relative the the resources file.
+  The content is compressed if the <code>compress</code> field
+  is set to <code>true</code>.
+
+  This blob type specification supports the following fields: 
+  - **<code>path</code>** *string*
+
+    This REQUIRED property describes the file path to the helm chart relative to the
+    resource file location.
+
+  - **<code>mediaType</code>** *string*
+
+    This OPTIONAL property describes the media type to store with the local blob.
+    The default media type is application/octet-stream and
+    application/gzip if compression is enabled.
+
+  - **<code>compress</code>** *bool*
+
+    This OPTIONAL property describes whether the file content should be stored
+    compressed or not.
+
+- Input type <code>helm</code>
+
+  The path must denote an helm chart archive or directory
+  relative to the resources file.
+  The denoted chart is packed as an OCI artefact set.
+  Additional provider info is taken from a file with the same name
+  and the suffix <code>.prov</code>.
+
+  If the chart should just be stored as archive, please use the 
+  type <code>file</code> or <code>dir</code>.
+
+  This blob type specification supports the following fields: 
+  - **<code>path</code>** *string*
+
+    This REQUIRED property describes the file path to the helm chart relative to the
+    resource file location.
+
+  - **<code>version</code>** *string*
+
+    This OPTIONAL property can be set to configure an explicit version hint.
+    If not specified the versio from the chart will be used.
+    Basically, it is a good practice to use the component version for local resources
+    This can be achieved by using templating for this attribute in the resource file.
 
 
 ### SEE ALSO

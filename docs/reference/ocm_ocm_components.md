@@ -1,6 +1,4 @@
-## ocm ocm components
-
-Commands acting on components
+## ocm ocm components &mdash; Commands Acting On Components
 
 ### Synopsis
 

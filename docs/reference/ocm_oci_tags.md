@@ -1,6 +1,4 @@
-## ocm oci tags
-
-Commands acting on OCI tag names
+## ocm oci tags &mdash; Commands Acting On OCI Tag Names
 
 ### Synopsis
 

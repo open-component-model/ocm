@@ -28,8 +28,12 @@ func UseLine(c *cobra.Command) string {
 		if c.HasAvailableLocalFlags() {
 			useline += " [<options>]"
 		}
-		if hasChildren(c) {
-			useline += " <sub command> ..."
+		if c.HasAvailableSubCommands() {
+			if c.Runnable() {
+				useline += " [<sub command> ...]"
+			} else {
+				useline += " <sub command> ..."
+			}
 		}
 	}
 	if c.HasParent() {
@@ -42,16 +46,4 @@ func UseLine(c *cobra.Command) string {
 		useline += " [<options>]"
 	}
 	return useline
-}
-
-func hasChildren(cmd *cobra.Command) bool {
-	children := cmd.Commands()
-
-	for _, child := range children {
-		if !child.IsAvailableCommand() || child.IsAdditionalHelpTopicCommand() {
-			continue
-		}
-		return true
-	}
-	return false
 }

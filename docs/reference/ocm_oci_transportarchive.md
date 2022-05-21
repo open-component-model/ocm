@@ -1,6 +1,4 @@
-## ocm oci transportarchive
-
-Commands acting on OCI view of a Common Transport Archive
+## ocm oci transportarchive &mdash; Commands Acting On OCI View Of A Common Transport Archive
 
 ### Synopsis
 

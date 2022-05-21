@@ -1,6 +1,4 @@
-## ocm
-
-Open Component Model command line client
+## ocm &mdash; Open Component Model Command Line Client
 
 ### Synopsis
 
@@ -11,9 +9,10 @@ ocm [<options>] <sub command> ...
 ### Options
 
 ```
-      --config string      configuration file
-  -C, --cred stringArray   credential setting
-  -h, --help               help for ocm
+  -X, --attribute stringArray   attribute setting
+      --config string           configuration file
+  -C, --cred stringArray        credential setting
+  -h, --help                    help for ocm
 ```
 
 ### Description
@@ -26,7 +25,7 @@ Component Repositories, and component versions.
 Additionally it provides some limited support for the docker daemon, OCI artefacts and
 registries.
 
-With the open <code>--cred</code> it is possible to specify arbitrary credentials
+With the option <code>--cred</code> it is possible to specify arbitrary credentials
 for various environments on the command line. Nevertheless it is always preferrable
 to use the cli config file.
 Every credential setting is related to a dedicated consumer and provides a set of
@@ -34,11 +33,12 @@ credential attributes. All this can be specified by a sequence of <code>--cred</
 options. 
 
 Every option value has the format
+
 <center>
-<code>--cred [:]&lt;attr>=&lt;value></code>
+    <pre>--cred [:]&lt;attr>=&lt;value></pre>
 </center>
 
-Consumer identity attribues are prefixed with the colon (:). A credential settings
+Consumer identity attributes are prefixed with the colon (:). A credential settings
 always start with a sequence of at least one identity attributes, followed by a
 sequence of credential attributes.
 If a credential attribute is followed by an identity attribute a new credential setting
@@ -48,12 +48,28 @@ The first credential setting may omit identity attributes. In this case it is us
 default credential, always used if no dedicated match is found.
 
 For example:
+
 <center>
-<code>--cred :type=ociRegistry --cred hostname:ghcr.io --cred usename=mandelsoft --cred password=xyz </code>
+    <pre>--cred :type=ociRegistry --cred hostname=ghcr.io --cred usename=mandelsoft --cred password=xyz</pre>
 </center>
 
+With the option <code>-X</code> it is possible to pass global settings of the 
+form 
+
+<center>
+    <pre>-X &lt;attribute>=&lt;value></pre>
+</center>
+
+The value can be a simple type or a json string for complex values. The following
+attributes are supported:
+- github.com/mandelsoft/ocm/compat [compat]: *bool*
+  Avoid generic local access methods and prefer type specific ones.
 
 ### SEE ALSO
+
+
+
+##### Sub Commands
 
 * [ocm <b>add</b>](ocm_add.md)	 - Add resources or sources to a component archive
 * [ocm <b>componentarchive</b>](ocm_componentarchive.md)	 - Commands acting on component archives
@@ -70,4 +86,12 @@ For example:
 * [ocm <b>sources</b>](ocm_sources.md)	 - Commands acting on component sources
 * [ocm <b>transfer</b>](ocm_transfer.md)	 - Transfer artefacts or components
 * [ocm <b>version</b>](ocm_version.md)	 - displays the version
+
+
+
+##### Additional Help Topics
+
+* [ocm <b>configfile</b>](ocm_configfile.md)	 - configuration file
+* [ocm <b>oci-references</b>](ocm_oci-references.md)	 - notation for OCI references
+* [ocm <b>ocm-references</b>](ocm_ocm-references.md)	 - notation for OCM references
 

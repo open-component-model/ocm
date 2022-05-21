@@ -22,6 +22,7 @@ var templatefuncs = map[string]interface{}{
 	"indent":      indent,
 	"skipCommand": skipCommand,
 	"soleCommand": soleCommand,
+	"title":       strings.Title,
 }
 
 func soleCommand(s string) bool {

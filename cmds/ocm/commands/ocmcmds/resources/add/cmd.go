@@ -44,9 +44,9 @@ func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
 		Use:   "[<options>] <target> {<resourcefile> | <var>=<value>}",
 		Args:  cobra.MinimumNArgs(2),
-		Short: "add source information to a component version",
+		Short: "add resources to a component version",
 		Long: `
-Add resource information specified in a resource file to a component version.
+Add resources specified in a resource file to a component version.
 So far only component archives are supported as target.
 ` + (&template.Options{}).Usage() + `
 This command accepts  resource specification files describing the resources

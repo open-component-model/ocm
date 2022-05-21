@@ -1,6 +1,4 @@
-## ocm download
-
-Download oci artefacts, resources or complete components
+## ocm download &mdash; Download Oci Artefacts, Resources Or Complete Components
 
 ### Synopsis
 

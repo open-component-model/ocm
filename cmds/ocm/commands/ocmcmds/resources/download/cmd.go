@@ -76,7 +76,7 @@ is written into the given directory for every involved component version
 as follows:
 
 <center>
-<code>&lt;component>/&lt;version>{/&lt;nested component>/&lt;version>}</code>
+    <pre>&lt;component>/&lt;version>{/&lt;nested component>/&lt;version>}</pre>
 </center>
 
 The resource files are named according to the resource identity in the
@@ -87,7 +87,7 @@ separated by a "-" from the plain name. This attribute list is alphabetical
 order:
 
 <center>
-<code>&lt;resource name>[-[&lt;name>=&lt>value>]{,&lt;name>=&lt>value>}]</code>
+    <pre>&lt;resource name>[-[&lt;name>=&lt>value>]{,&lt;name>=&lt>value>}]</pre>
 </center>
 
 `,

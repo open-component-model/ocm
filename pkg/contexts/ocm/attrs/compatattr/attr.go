@@ -37,6 +37,7 @@ func (a AttributeType) Name() string {
 
 func (a AttributeType) Description() string {
 	return `
+*bool*
 Avoid generic local access methods and prefer type specific ones.
 `
 }

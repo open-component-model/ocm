@@ -1,6 +1,4 @@
-## ocm references
-
-Commands related to component references in component versions
+## ocm references &mdash; Commands Related To Component References In Component Versions
 
 ### Synopsis
 

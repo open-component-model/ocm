@@ -16,6 +16,7 @@ package ocicmds
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
@@ -32,5 +33,7 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(artefacts.NewCommand(ctx))
 	cmd.AddCommand(ctf.NewCommand(ctx))
 	cmd.AddCommand(tags.NewCommand(ctx))
+
+	cmd.AddCommand(topicocirefs.New(ctx))
 	return cmd
 }
