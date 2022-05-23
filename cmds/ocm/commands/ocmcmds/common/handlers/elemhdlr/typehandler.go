@@ -70,10 +70,11 @@ type TypeHandler struct {
 	repository ocm.Repository
 	components []*comphdlr.Object
 	session    ocm.Session
+	kind       string
 	elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor
 }
 
-func NewTypeHandler(octx clictx.OCM, opts *output.Options, repobase ocm.Repository, session ocm.Session, compspecs []string, elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor) (utils.TypeHandler, error) {
+func NewTypeHandler(octx clictx.OCM, opts *output.Options, repobase ocm.Repository, session ocm.Session, kind string, compspecs []string, elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor) (utils.TypeHandler, error) {
 	h := comphdlr.NewTypeHandler(octx, session, repobase)
 
 	comps := output.NewElementOutput(nil, closureoption.Closure(opts, comphdlr.ClosureExplode, comphdlr.Sort))
@@ -95,6 +96,7 @@ func NewTypeHandler(octx clictx.OCM, opts *output.Options, repobase ocm.Reposito
 		repository: repobase,
 		session:    session,
 		elemaccess: elemaccess,
+		kind:       kind,
 	}
 	return t, nil
 }
@@ -163,6 +165,9 @@ func (h *TypeHandler) get(c *comphdlr.Object, elemspec utils.ElemSpec) ([]output
 				Element: e,
 			})
 		}
+	}
+	if len(result) == 0 {
+		return nil, errors.ErrNotFound(h.kind, selector.String())
 	}
 	return result, nil
 }

@@ -34,7 +34,7 @@ type TypeHandler struct {
 }
 
 func NewTypeHandler(octx clictx.OCM, opts *output.Options, repo ocm.Repository, session ocm.Session, compspecs []string) (utils.TypeHandler, error) {
-	return elemhdlr.NewTypeHandler(octx, opts, repo, session, compspecs, func(access ocm.ComponentVersionAccess) compdesc.ElementAccessor {
+	return elemhdlr.NewTypeHandler(octx, opts, repo, session, ocm.KIND_REFERENCE, compspecs, func(access ocm.ComponentVersionAccess) compdesc.ElementAccessor {
 		return access.GetDescriptor().ComponentReferences
 	})
 }

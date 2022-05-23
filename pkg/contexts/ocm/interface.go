@@ -9,6 +9,9 @@ import (
 )
 
 const KIND_COMPONENTVERSION = core.KIND_COMPONENTVERSION
+const KIND_RESOURCE = "component resource"
+const KIND_SOURCE = "component source"
+const KIND_REFERENCE = "component reference"
 
 const CONTEXT_TYPE = core.CONTEXT_TYPE
 

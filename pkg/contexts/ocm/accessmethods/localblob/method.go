@@ -17,7 +17,6 @@ package localblob
 import (
 	"encoding/json"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -32,13 +31,13 @@ func init() {
 }
 
 // New creates a new localFilesystemBlob accessor.
-func New(path, name string, mediaType string, global cpi.AccessSpec) *AccessSpec {
+func New(local, hint string, mediaType string, global cpi.AccessSpec) *AccessSpec {
 	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
-		LocalReference:      path,
-		ReferenceName:       name,
+		LocalReference:      local,
+		ReferenceName:       hint,
 		MediaType:           mediaType,
-		GlobalAccess:        global,
+		GlobalAccess:        cpi.NewAccessSpecRef(global),
 	}
 }
 
@@ -54,7 +53,7 @@ type AccessSpec struct {
 
 	// GlobalAccess is an optional field describing a possibility
 	// for a global access. If given, it MUST describe a global access method.
-	GlobalAccess compdesc.AccessSpec `json:"globalAccess,omitempty"`
+	GlobalAccess *cpi.AccessSpecRef `json:"globalAccess,omitempty"`
 	// ReferenceName is an optional static name the object should be
 	// use in a local repository context. It is use by a repository
 	// to optionally determine a globally referencable access according
@@ -102,7 +101,7 @@ type AccessSpecV1 struct {
 
 	// GlobalAccess is an optional field describing a possibility
 	// for a global access. If given, it MUST describe a global access method.
-	GlobalAccess compdesc.AccessSpec `json:"globalAccess,omitempty"`
+	GlobalAccess *cpi.AccessSpecRef `json:"globalAccess,omitempty"`
 	// ReferenceName is an optional static name the object should be
 	// use in a local repository context. It is use by a repository
 	// to optionally determine a globally referencable access according
@@ -123,7 +122,7 @@ func (_ converterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, er
 		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
 		LocalReference:      in.LocalReference,
 		ReferenceName:       in.ReferenceName,
-		GlobalAccess:        in.GlobalAccess,
+		GlobalAccess:        cpi.NewAccessSpecRef(in.GlobalAccess),
 		MediaType:           in.MediaType,
 	}, nil
 }

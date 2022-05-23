@@ -131,7 +131,9 @@ var _ = Describe("component repository mapping", func() {
 		Expect(l.GlobalAccess).NotTo(BeNil())
 
 		// check provided global access to be oci blob
-		o, ok := l.GlobalAccess.(*ociblob.AccessSpec)
+		g, err := l.GlobalAccess.Evaluate(DefaultContext)
+		Expect(err).To(Succeed())
+		o, ok := g.(*ociblob.AccessSpec)
 		Expect(ok).To(BeTrue())
 		Expect(o.Digest).To(Equal(blob.Digest()))
 		Expect(o.Reference).To(Equal(TESTBASE + "/" + componentmapping.ComponentDescriptorNamespace + "/" + COMPONENT))
