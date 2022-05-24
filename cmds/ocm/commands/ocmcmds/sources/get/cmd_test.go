@@ -144,7 +144,7 @@ test.de/y:v1->test.de/x:v1 testdata v1               git
 			Expect(env.CatchOutput(buf).Execute("get", "sources", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 			Expect("\n" + buf.String()).To(Equal(
 				`
-NESTING             NAME   VERSION IDENTITY TYPE
+COMPONENTVERSION    NAME   VERSION IDENTITY TYPE
 └─ test.de/y:v1                             
    └─               source v1               git
 `))
@@ -155,7 +155,7 @@ NESTING             NAME   VERSION IDENTITY TYPE
 			Expect(env.CatchOutput(buf).Execute("get", "sources", "-c", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 			Expect("\n" + buf.String()).To(Equal(
 				`
-NESTING                NAME     VERSION IDENTITY TYPE
+COMPONENTVERSION       NAME     VERSION IDENTITY TYPE
 └─ test.de/y:v1                                  
    ├─                  source   v1               git
    └─ test.de/x:v1                               

@@ -56,7 +56,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Args:  cobra.MinimumNArgs(1),
 		Short: "get resources of a component version",
 		Long: `
-Get resources of a component version. Reources are specified
+Get resources of a component version. Resources are specified
 by identities. An identity consists of 
 a name argument followed by optional <code>&lt;key>=&lt;value></code>
 arguments.
@@ -100,8 +100,9 @@ func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide 
 }
 
 var outputs = output.NewOutputs(get_regular, output.Outputs{
-	"wide": get_wide,
-	"tree": get_tree,
+	"wide":     get_wide,
+	"tree":     get_tree,
+	"treewide": get_treewide,
 }).AddManifestOutputs()
 
 func get_regular(opts *output.Options) output.Output {
@@ -113,7 +114,11 @@ func get_wide(opts *output.Options) output.Output {
 }
 
 func get_tree(opts *output.Options) output.Output {
-	return output.TreeOutput(TableOutput(opts, map_get_regular_output), "NESTING").New()
+	return output.TreeOutput(TableOutput(opts, map_get_regular_output), "COMPONENTVERSION").New()
+}
+
+func get_treewide(opts *output.Options) output.Output {
+	return output.TreeOutput(TableOutput(opts, map_get_treewide_output, "ACCESS"), "COMPONENTVERSION").New()
 }
 
 func map_get_regular_output(e interface{}) interface{} {
@@ -123,4 +128,8 @@ func map_get_regular_output(e interface{}) interface{} {
 
 func map_get_wide_output(e interface{}) interface{} {
 	return output.Fields(map_get_regular_output(e), elemhdlr.MapAccessOutput(common.Elem(e).Access))
+}
+
+func map_get_treewide_output(e interface{}) interface{} {
+	return output.Fields(map_get_regular_output(e), common.Elem(e).Access.GetKind())
 }

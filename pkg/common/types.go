@@ -15,6 +15,8 @@
 package common
 
 import (
+	"encoding/json"
+	"fmt"
 	"strings"
 )
 
@@ -50,6 +52,10 @@ func (n NameVersion) GetName() string {
 
 func (n NameVersion) GetVersion() string {
 	return n.version
+}
+
+func (n NameVersion) MarshalJSON() ([]byte, error) {
+	return json.Marshal(fmt.Sprintf("%s:%s", n.GetName(), n.GetVersion()))
 }
 
 func (n NameVersion) Compare(o NameVersion) int {

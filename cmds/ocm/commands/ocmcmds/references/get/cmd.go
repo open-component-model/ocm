@@ -146,7 +146,7 @@ func get_wide(opts *output.Options) output.Output {
 }
 
 func get_tree(opts *output.Options) output.Output {
-	return output.TreeOutput(TableOutput(opts, map_get_wide_output, "IDENTITY"), "NESTING").New()
+	return output.TreeOutput(TableOutput(opts, map_get_wide_output, "IDENTITY"), "COMPONENTVERSION").New()
 }
 
 func map_get_regular_output(e interface{}) interface{} {

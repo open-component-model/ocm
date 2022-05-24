@@ -127,7 +127,19 @@ func History(e interface{}) string {
 }
 
 func Closure(opts *output.Options, cf ClosureFunction, chain processing.ProcessChain) processing.ProcessChain {
-	return processing.Append(chain, processing.Explode(cf.Exploder(opts)))
+	return processing.Append(chain, Chain(opts, cf))
+}
+
+func Chain(opts *output.Options, cf ClosureFunction) processing.ProcessChain {
+	return processing.Explode(cf.Exploder(opts))
+}
+
+// OutputChainFunction provides an chain function that can be used to add an option
+// based closure processing and an optional additional chain to an output chain.
+func OutputChainFunction(cf ClosureFunction, chain processing.ProcessChain) output.ChainFunction {
+	return func(opts *output.Options) processing.ProcessChain {
+		return Closure(opts, cf, chain)
+	}
 }
 
 type ClosureFunction func(*output.Options, interface{}) []interface{}

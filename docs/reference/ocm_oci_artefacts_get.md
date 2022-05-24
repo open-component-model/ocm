@@ -57,7 +57,7 @@ linked library can be used:
 
 With the option <code>--closure</code> the complete reference tree of a index is traversed.
 
-With the option <code>--output</code> the out put mode can be selected.
+With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:
  - JSON
  - json

@@ -42,8 +42,16 @@ type Object struct {
 var _ common.HistorySource = (*Object)(nil)
 var _ tree.Object = (*Object)(nil)
 
+type Manifest struct {
+	History common.History               `json:"context"`
+	Element compdesc.ElementMetaAccessor `json:"element"`
+}
+
 func (o *Object) AsManifest() interface{} {
-	return o.Element
+	return &Manifest{
+		History: o.History,
+		Element: o.Element,
+	}
 }
 
 func (o *Object) GetHistory() common.History {

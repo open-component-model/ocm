@@ -143,7 +143,7 @@ test.de/y:v1->test.de/x:v1 testdata v1               PlainText local
 			Expect(env.CatchOutput(buf).Execute("get", "resources", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 			Expect("\n" + buf.String()).To(Equal(
 				`
-NESTING             NAME     VERSION IDENTITY TYPE      RELATION
+COMPONENTVERSION    NAME     VERSION IDENTITY TYPE      RELATION
 └─ test.de/y:v1                                         
    └─               moredata v1               PlainText local
 `))
@@ -154,7 +154,7 @@ NESTING             NAME     VERSION IDENTITY TYPE      RELATION
 			Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 			Expect("\n" + buf.String()).To(Equal(
 				`
-NESTING                NAME     VERSION IDENTITY TYPE      RELATION
+COMPONENTVERSION       NAME     VERSION IDENTITY TYPE      RELATION
 └─ test.de/y:v1                                            
    ├─                  moredata v1               PlainText local
    └─ test.de/x:v1                                         

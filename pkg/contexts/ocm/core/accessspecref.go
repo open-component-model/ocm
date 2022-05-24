@@ -12,13 +12,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package cpi
+package core
 
 import (
 	"encoding/json"
 
 	"github.com/modern-go/reflect2"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -85,7 +84,7 @@ func (a *AccessSpecRef) GetVersion() string {
 	return a.generic.GetVersion()
 }
 
-func (a *AccessSpecRef) IsLocal(ctx core.Context) bool {
+func (a *AccessSpecRef) IsLocal(ctx Context) bool {
 	a.assure(ctx)
 	if a.evaluated != nil {
 		return a.evaluated.IsLocal(ctx)
@@ -93,7 +92,7 @@ func (a *AccessSpecRef) IsLocal(ctx core.Context) bool {
 	return false
 }
 
-func (a *AccessSpecRef) AccessMethod(access core.ComponentVersionAccess) (core.AccessMethod, error) {
+func (a *AccessSpecRef) AccessMethod(access ComponentVersionAccess) (AccessMethod, error) {
 	if err := a.assure(access.GetContext()); err != nil {
 		return nil, err
 	}
@@ -108,7 +107,7 @@ func (a *AccessSpecRef) Evaluate(ctx Context) (AccessSpec, error) {
 	return a.evaluated, nil
 }
 
-func (a *AccessSpecRef) assure(ctx core.Context) error {
+func (a *AccessSpecRef) assure(ctx Context) error {
 	var err error
 	if a.evaluated == nil {
 		a.evaluated, err = a.generic.Evaluate(ctx)

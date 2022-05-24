@@ -24,6 +24,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -44,8 +45,23 @@ type Object struct {
 	ComponentVersion ocm.ComponentVersionAccess
 }
 
+var _ common.HistorySource = (*Object)(nil)
+var _ tree.Object = (*Object)(nil)
+
+type Manifest struct {
+	History common.History                `json:"context"`
+	Element *compdesc.ComponentDescriptor `json:"element"`
+}
+
 func (o *Object) AsManifest() interface{} {
-	return o.ComponentVersion.GetDescriptor()
+	h := o.History
+	if h == nil {
+		h = common.History{}
+	}
+	return &Manifest{
+		h,
+		o.ComponentVersion.GetDescriptor(),
+	}
 }
 
 func (o *Object) GetHistory() common.History {
@@ -56,9 +72,6 @@ func (o *Object) IsNode() *common.NameVersion {
 	nv := common.VersionedElementKey(o.ComponentVersion)
 	return &nv
 }
-
-var _ common.HistorySource = (*Object)(nil)
-var _ tree.Object = (*Object)(nil)
 
 ////////////////////////////////////////////////////////////////////////////////
 

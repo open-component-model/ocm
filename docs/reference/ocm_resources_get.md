@@ -12,7 +12,7 @@ ocm resources get [<options>]  <component> {<name> { <key>=<value> }}
   -c, --closure            follow component reference nesting
   -h, --help               help for get
       --lookup string      repository name or spec for closure lookup fallback
-  -o, --output string      output mode (JSON, json, tree, wide, yaml)
+  -o, --output string      output mode (JSON, json, tree, treewide, wide, yaml)
   -r, --repo string        repository name or spec
   -s, --sort stringArray   sort fields
 ```
@@ -20,7 +20,7 @@ ocm resources get [<options>]  <component> {<name> { <key>=<value> }}
 ### Description
 
 
-Get resources of a component version. Reources are specified
+Get resources of a component version. Resources are specified
 by identities. An identity consists of 
 a name argument followed by optional <code>&lt;key>=&lt;value></code>
 arguments.
@@ -81,11 +81,12 @@ contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
 
-With the option <code>--output</code> the out put mode can be selected.
+With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:
  - JSON
  - json
  - tree
+ - treewide
  - wide
  - yaml
 

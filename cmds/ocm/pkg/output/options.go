@@ -132,7 +132,7 @@ func (o *Options) Usage() string {
 
 	if len(o.Outputs) > 1 {
 		s += `
-With the option <code>--output</code> the out put mode can be selected.
+With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:
 `
 		list := []string{}

@@ -107,7 +107,7 @@ func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide 
 var outputs = output.NewOutputs(get_regular, output.Outputs{
 	"wide": get_wide,
 	"tree": get_tree,
-}).AddManifestOutputs()
+}).AddChainedManifestOutputs(closureoption.OutputChainFunction(comphdlr.ClosureExplode, comphdlr.Sort))
 
 func get_regular(opts *output.Options) output.Output {
 	return TableOutput(opts, map_get_regular_output).New()

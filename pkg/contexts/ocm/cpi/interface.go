@@ -18,6 +18,7 @@ package cpi
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
+	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/opencontainers/go-digest"
 )
 
@@ -101,6 +102,16 @@ func RegisterAccessType(atype AccessType) {
 
 func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {
 	return core.ToGenericRepositorySpec(spec)
+}
+
+type AccessSpecRef = core.AccessSpecRef
+
+func NewAccessSpecRef(spec AccessSpec) *AccessSpecRef {
+	return core.NewAccessSpecRef(spec)
+}
+
+func NewRawAccessSpecRef(data []byte, unmarshaler runtime.Unmarshaler) (*AccessSpecRef, error) {
+	return core.NewRawAccessSpecRef(data, unmarshaler)
 }
 
 const KIND_COMPONENTVERSION = core.KIND_COMPONENTVERSION

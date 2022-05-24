@@ -32,6 +32,10 @@ type AccessMethodSupport interface {
 	LocalSupportForAccessSpec(spec AccessSpec) bool
 }
 
+// AccessSpec is the interface access method specifications
+// must fulfill. The main task is to map the specification
+// to a concrete implementation of the access method for a dedicated
+// component version.
 type AccessSpec interface {
 	compdesc.AccessSpec
 	IsLocal(Context) bool

@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/runtime"
 
 	"github.com/opencontainers/go-digest"
 )
@@ -70,4 +72,14 @@ func ForContext(ctx context.Context) Context {
 
 func NewGenericAccessSpec(spec string) (AccessSpec, error) {
 	return core.NewGenericAccessSpec(spec)
+}
+
+type AccessSpecRef = core.AccessSpecRef
+
+func NewAccessSpecRef(spec cpi.AccessSpec) *AccessSpecRef {
+	return core.NewAccessSpecRef(spec)
+}
+
+func NewRawAccessSpecRef(data []byte, unmarshaler runtime.Unmarshaler) (*AccessSpecRef, error) {
+	return core.NewRawAccessSpecRef(data, unmarshaler)
 }

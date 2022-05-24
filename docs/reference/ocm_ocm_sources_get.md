@@ -81,7 +81,7 @@ contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
 
-With the option <code>--output</code> the out put mode can be selected.
+With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:
  - JSON
  - json

@@ -55,7 +55,7 @@ linked library can be used:
 - `OCIRegistry`
 - `oci`
 
-With the option <code>--output</code> the out put mode can be selected.
+With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:
  - JSON
  - json

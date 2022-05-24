@@ -95,7 +95,7 @@ test.de/x:v1->test.de/y:v1 withid test.de/z v1      "id"="test","name"="withid"
 			Expect(env.CatchOutput(buf).Execute("get", "references", "-o", "tree", "--lookup", CTF, CA)).To(Succeed())
 			Expect("\n" + buf.String()).To(Equal(
 				`
-NESTING             NAME COMPONENT VERSION IDENTITY
+COMPONENTVERSION    NAME COMPONENT VERSION IDENTITY
 └─ test.de/x:v1                            
    └─               test test.de/y v1      "name"="test"
 `))
@@ -106,7 +106,7 @@ NESTING             NAME COMPONENT VERSION IDENTITY
 			Expect(env.CatchOutput(buf).Execute("get", "references", "-c", "-o", "tree", "--lookup", CTF, CA)).To(Succeed())
 			Expect("\n" + buf.String()).To(Equal(
 				`
-NESTING             NAME   COMPONENT VERSION IDENTITY
+COMPONENTVERSION    NAME   COMPONENT VERSION IDENTITY
 └─ test.de/x:v1                              
    └─ ⊗             test   test.de/y v1      "name"="test"
       └─            withid test.de/z v1      "id"="test","name"="withid"

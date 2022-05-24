@@ -85,13 +85,18 @@ func (o *Command) Run() error {
 
 /////////////////////////////////////////////////////////////////////////////
 
+func OutputChainFunction() output.ChainFunction {
+	return func(opts *output.Options) processing.ProcessChain {
+		chain := closureoption.Closure(opts, artefacthdlr.ClosureExplode, artefacthdlr.Sort)
+		chain = processing.Append(chain, artefacthdlr.ExplodeAttached, AttachedFrom(opts))
+		return processing.Append(chain, artefacthdlr.Clean, options.Or(closureoption.From(opts), output.OutputModeCondition(opts, "tree")))
+	}
+}
+
 func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide ...string) *output.TableOutput {
-	chain := closureoption.Closure(opts, artefacthdlr.ClosureExplode, artefacthdlr.Sort)
-	chain = processing.Append(chain, artefacthdlr.ExplodeAttached, AttachedFrom(opts))
-	chain = processing.Append(chain, artefacthdlr.Clean, options.Or(closureoption.From(opts), output.OutputModeCondition(opts, "tree")))
 	return &output.TableOutput{
 		Headers: output.Fields("REGISTRY", "REPOSITORY", "KIND", "TAG", "DIGEST", wide),
-		Chain:   chain,
+		Chain:   OutputChainFunction()(opts),
 		Options: opts,
 		Mapping: mapping,
 	}
@@ -100,7 +105,7 @@ func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide 
 var outputs = output.NewOutputs(get_regular, output.Outputs{
 	"wide": get_wide,
 	"tree": get_tree,
-}).AddManifestOutputs()
+}).AddChainedManifestOutputs(OutputChainFunction())
 
 func get_regular(opts *output.Options) output.Output {
 	return closureoption.TableOutput(TableOutput(opts, map_get_regular_output)).New()
