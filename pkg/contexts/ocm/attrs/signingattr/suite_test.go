@@ -12,9 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package compdesc
+package signingattr_test
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/signing/handlers"
-	_ "github.com/open-component-model/ocm/pkg/signing/hasher"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
+
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "OCM Signing Attribute")
+}

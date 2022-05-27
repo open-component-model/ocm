@@ -12,9 +12,28 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package compdesc
+package sha256
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/signing/handlers"
-	_ "github.com/open-component-model/ocm/pkg/signing/hasher"
+	"crypto/sha256"
+	"hash"
+
+	"github.com/open-component-model/ocm/pkg/signing"
 )
+
+const Algorithm = "sha256"
+
+func init() {
+	signing.DefaultHandlerRegistry().RegisterHasher(Algorithm, Handler{})
+}
+
+// Handler is a signatures.Hasher compatible struct to hash with sha256
+type Handler struct {
+}
+
+var _ signing.Hasher = Handler{}
+
+// Create creates a Hasher instance for sha256
+func (_ Handler) Create() hash.Hash {
+	return sha256.New()
+}

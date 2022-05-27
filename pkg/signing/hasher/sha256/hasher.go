@@ -12,9 +12,28 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package compdesc
+package sha256
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/signing/handlers"
-	_ "github.com/open-component-model/ocm/pkg/signing/hasher"
+	"hash"
+
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/signing"
 )
+
+const Algorithm = metav1.NoDigest
+
+func init() {
+	signing.DefaultHandlerRegistry().RegisterHasher(Algorithm, Handler{})
+}
+
+// Handler is a signatures.Hasher compatible struct to hash with sha256
+type Handler struct {
+}
+
+var _ signing.Hasher = Handler{}
+
+// Create creates a Hasher instance for no digest
+func (_ Handler) Create() hash.Hash {
+	return nil
+}

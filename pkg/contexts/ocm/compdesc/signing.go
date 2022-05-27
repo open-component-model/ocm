@@ -65,6 +65,9 @@ func (cd *ComponentDescriptor) isNormalizeable() error {
 // Hash return the hash for the component-descriptor, if it is normalizeable
 // (= componentReferences and resources contain digest field)
 func Hash(cd *ComponentDescriptor, hash hash.Hash) (string, error) {
+	if hash == nil {
+		return metav1.NoDigest, nil
+	}
 	cv := DefaultSchemes[cd.SchemaVersion()]
 	if cv == nil {
 		if cv == nil {

@@ -12,9 +12,9 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package compdesc
+package handlers
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/signing/handlers"
-	_ "github.com/open-component-model/ocm/pkg/signing/hasher"
+	_ "github.com/open-component-model/ocm/pkg/signing/hasher/nodigest"
+	_ "github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 )

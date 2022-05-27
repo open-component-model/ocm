@@ -85,9 +85,9 @@ func (h Handler) Sign(digest string, key interface{}) (signature string, mediaty
 		return "", "", fmt.Errorf("failed decoding hash to bytes")
 	}
 	// ensure length of hash is correct
-	if len(decodedHash) != 32 {
-		return "", "", fmt.Errorf("hash to sign has invalid length")
-	}
+	//if len(decodedHash) != 32 {
+	//	return "", "", fmt.Errorf("hash to sign has invalid length")
+	//}
 	sig, err := rsa.SignPKCS1v15(rand.Reader, privateKey, 0, decodedHash)
 	if err != nil {
 		return "", "", fmt.Errorf("failed signing hash, %w", err)
@@ -150,9 +150,9 @@ func (h Handler) Verify(digest string, signature string, mediatype string, key i
 		return fmt.Errorf("failed decoding hash %s: %w", digest, err)
 	}
 	// ensure length of hash is correct
-	if len(decodedHash) != 32 {
-		return fmt.Errorf("hash to verify has invalid length")
-	}
+	//if len(decodedHash) != 32 {
+	//	return fmt.Errorf("hash to verify has invalid length")
+	//}
 	if err := rsa.VerifyPKCS1v15(publicKey, 0, decodedHash, signatureBytes); err != nil {
 		return fmt.Errorf("signature verification failed, %w", err)
 	}
@@ -183,4 +183,12 @@ func GetSignaturePEMBlocks(pemData []byte) ([]*pem.Block, error) {
 	}
 
 	return signatureBlocks, nil
+}
+
+func (_ Handler) CreateKeyPair() (priv interface{}, pub interface{}, err error) {
+	key, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return nil, nil, err
+	}
+	return key, &key.PublicKey, nil
 }
