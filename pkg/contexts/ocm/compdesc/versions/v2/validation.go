@@ -21,10 +21,11 @@ import (
 )
 
 // Validate validates a parsed v2 component descriptor
-func Validate(component *ComponentDescriptor) error {
-	if err := validate(nil, component); err != nil {
+func (cd *ComponentDescriptor) Validate() error {
+	if err := validate(nil, cd); err != nil {
 		return err.ToAggregate()
 	}
+	cd.GetVersion()
 	return nil
 }
 

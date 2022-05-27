@@ -17,7 +17,8 @@ package compdesc
 import (
 	"errors"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -30,9 +31,22 @@ var (
 // +k8s:openapi-gen=true
 type ComponentDescriptor struct {
 	// Metadata specifies the schema version of the component.
-	Metadata v1.Metadata `json:"meta"`
+	Metadata metav1.Metadata `json:"meta"`
 	// Spec contains the specification of the component.
 	ComponentSpec `json:"component"`
+	// Signatures contains a list of signatures for the ComponentDescriptor
+	Signatures metav1.Signatures `json:"signatures,omitempty"`
+}
+
+var _ compdesc.ComponentDescriptorVersion = (*ComponentDescriptor)(nil)
+
+// SchemeVersion returns the actual scheme version of this component descriptor
+// representation.
+func (cd *ComponentDescriptor) SchemaVersion() string {
+	if cd.Metadata.Version == "" {
+		return SchemaVersion
+	}
+	return cd.Metadata.Version
 }
 
 // ComponentSpec defines a virtual component with
@@ -45,7 +59,7 @@ type ComponentSpec struct {
 	RepositoryContexts runtime.UnstructuredTypedObjectList `json:"repositoryContexts"`
 	// Provider defines the provider type of a component.
 	// It can be external or internal.
-	Provider v1.ProviderType `json:"provider"`
+	Provider metav1.ProviderType `json:"provider"`
 	// Sources defines sources that produced the component
 	Sources Sources `json:"sources"`
 	// ComponentReferences references component dependencies that can be resolved in the current context.
@@ -64,7 +78,7 @@ type ObjectMeta struct {
 	// Labels defines an optional set of additional labels
 	// describing the object.
 	// +optional
-	Labels v1.Labels `json:"labels,omitempty"`
+	Labels metav1.Labels `json:"labels,omitempty"`
 }
 
 // GetName returns the name of the object.
@@ -88,18 +102,18 @@ func (o *ObjectMeta) SetVersion(version string) {
 }
 
 // GetLabels returns the label of the object.
-func (o ObjectMeta) GetLabels() v1.Labels {
+func (o ObjectMeta) GetLabels() metav1.Labels {
 	return o.Labels
 }
 
 // SetLabels sets the labels of the object.
-func (o *ObjectMeta) SetLabels(labels []v1.Label) {
+func (o *ObjectMeta) SetLabels(labels []metav1.Label) {
 	o.Labels = labels
 }
 
 const (
-	SystemIdentityName    = v1.SystemIdentityName
-	SystemIdentityVersion = v1.SystemIdentityVersion
+	SystemIdentityName    = metav1.SystemIdentityName
+	SystemIdentityVersion = metav1.SystemIdentityVersion
 )
 
 // ElementMetaAccessor provides generic access an elements meta information
@@ -123,11 +137,11 @@ type ElementMeta struct {
 	Version string `json:"version"`
 	// ExtraIdentity is the identity of an object.
 	// An additional label with key "name" ist not allowed
-	ExtraIdentity v1.Identity `json:"extraIdentity,omitempty"`
+	ExtraIdentity metav1.Identity `json:"extraIdentity,omitempty"`
 	// Labels defines an optional set of additional labels
 	// describing the object.
 	// +optional
-	Labels v1.Labels `json:"labels,omitempty"`
+	Labels metav1.Labels `json:"labels,omitempty"`
 }
 
 // GetName returns the name of the object.
@@ -151,25 +165,25 @@ func (o *ElementMeta) SetVersion(version string) {
 }
 
 // GetLabels returns the label of the object.
-func (o ElementMeta) GetLabels() v1.Labels {
+func (o ElementMeta) GetLabels() metav1.Labels {
 	return o.Labels
 }
 
 // SetLabels sets the labels of the object.
-func (o *ElementMeta) SetLabels(labels []v1.Label) {
+func (o *ElementMeta) SetLabels(labels []metav1.Label) {
 	o.Labels = labels
 }
 
 // SetExtraIdentity sets the identity of the object.
-func (o *ElementMeta) SetExtraIdentity(identity v1.Identity) {
+func (o *ElementMeta) SetExtraIdentity(identity metav1.Identity) {
 	o.ExtraIdentity = identity
 }
 
 // GetIdentity returns the identity of the object.
-func (o *ElementMeta) GetIdentity(accessor ElementAccessor) v1.Identity {
+func (o *ElementMeta) GetIdentity(accessor ElementAccessor) metav1.Identity {
 	identity := o.ExtraIdentity.Copy()
 	if identity == nil {
-		identity = v1.Identity{}
+		identity = metav1.Identity{}
 	}
 	identity[SystemIdentityName] = o.Name
 	if accessor != nil {
@@ -242,11 +256,11 @@ func (o *SourceMeta) SetType(ttype string) {
 // +k8s:openapi-gen=true
 type SourceRef struct {
 	// IdentitySelector defines the identity that is used to match a source.
-	IdentitySelector v1.StringMap `json:"identitySelector,omitempty"`
+	IdentitySelector metav1.StringMap `json:"identitySelector,omitempty"`
 	// Labels defines an optional set of additional labels
 	// describing the object.
 	// +optional
-	Labels v1.Labels `json:"labels,omitempty"`
+	Labels metav1.Labels `json:"labels,omitempty"`
 }
 
 // Resources describes a set of resource specifications
@@ -271,7 +285,7 @@ type Resource struct {
 
 	// Relation describes the relation of the resource to the component.
 	// Can be a local or external resource
-	Relation v1.ResourceRelation `json:"relation,omitempty"`
+	Relation metav1.ResourceRelation `json:"relation,omitempty"`
 
 	// SourceRef defines a list of source names.
 	// These names reference the sources defines in `component.sources`.
@@ -280,6 +294,10 @@ type Resource struct {
 	// Access describes the type specific method to
 	// access the defined resource.
 	Access *runtime.UnstructuredTypedObject `json:"access"`
+
+	// Digest is the optional digest of the referenced resource.
+	// +optional
+	Digest *metav1.DigestSpec `json:"digest,omitempty"`
 }
 
 func (r *Resource) GetMeta() *ElementMeta {
@@ -313,6 +331,9 @@ type ComponentReference struct {
 	ElementMeta `json:",inline"`
 	// ComponentName describes the remote name of the referenced object
 	ComponentName string `json:"componentName"`
+	// Digest is the optional digest of the referenced component.
+	// +optional
+	Digest *metav1.DigestSpec `json:"digest,omitempty"`
 }
 
 func (r *ComponentReference) GetMeta() *ElementMeta {

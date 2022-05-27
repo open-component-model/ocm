@@ -19,22 +19,22 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-// DefaultComponent applies defaults to a component
-func DefaultComponent(component *ComponentDescriptor) error {
-	if component.RepositoryContexts == nil {
-		component.RepositoryContexts = make([]*runtime.UnstructuredTypedObject, 0)
+// Default applies defaults to a component
+func (cd *ComponentDescriptor) Default() error {
+	if cd.RepositoryContexts == nil {
+		cd.RepositoryContexts = make([]*runtime.UnstructuredTypedObject, 0)
 	}
-	if component.Sources == nil {
-		component.Sources = make([]Source, 0)
+	if cd.Sources == nil {
+		cd.Sources = make([]Source, 0)
 	}
-	if component.ComponentReferences == nil {
-		component.ComponentReferences = make([]ComponentReference, 0)
+	if cd.ComponentReferences == nil {
+		cd.ComponentReferences = make([]ComponentReference, 0)
 	}
-	if component.Resources == nil {
-		component.Resources = make([]Resource, 0)
+	if cd.Resources == nil {
+		cd.Resources = make([]Resource, 0)
 	}
 
-	DefaultResources(component)
+	DefaultResources(cd)
 	return nil
 }
 

@@ -57,7 +57,7 @@ definitions:
     allOf:
       - $ref: '#/definitions/repositoryContext'
       - required:
-        - 'baseUrl'
+          - 'baseUrl'
         properties:
           baseUrl:
             type: 'string'
@@ -128,6 +128,49 @@ definitions:
           - $ref: '#/definitions/githubAccess'
           - $ref: '#/definitions/httpAccess'
 
+  digestSpec:
+    type: 'object'
+    required:
+      - hashAlgorithm
+      - normalisationAlgorithm
+      - value
+    properties:
+      hashAlgorithm:
+        type: string
+      normalisationAlgorithm:
+        type: string
+      value:
+        type: string
+
+  signatureSpec:
+    type: 'object'
+    required:
+      - algorithm
+      - value
+      - mediaType
+    properties:
+      algorithm:
+        type: string
+      value:
+        type: string
+      mediaType:
+        description: 'The media type of the signature value'
+        type: string
+
+  signature:
+    type: 'object'
+    required:
+      - name
+      - digest
+      - signature
+    properties:
+      name:
+        type: string
+      digest:
+        $ref: '#/definitions/digestSpec'
+      signature:
+        $ref: '#/definitions/signatureSpec'
+
   srcRef:
     type: 'object'
     description: 'a reference to a (component-local) source'
@@ -160,6 +203,10 @@ definitions:
         type: 'array'
         items:
           $ref: '#/definitions/label'
+      digest:
+        oneOf:
+          - type: 'null'
+          - $ref: '#/definitions/digestSpec'
 
   resourceType:
     type: 'object'
@@ -193,10 +240,14 @@ definitions:
           $ref: '#/definitions/label'
       access:
         anyOf:
-        - $ref: '#/definitions/access'
-        - $ref: '#/definitions/ociBlobAccess'
-        - $ref: '#/definitions/localFilesystemBlobAccess'
-        - $ref: '#/definitions/localOciBlobAccess'
+          - $ref: '#/definitions/access'
+          - $ref: '#/definitions/ociBlobAccess'
+          - $ref: '#/definitions/localFilesystemBlobAccess'
+          - $ref: '#/definitions/localOciBlobAccess'
+      digest:
+        oneOf:
+          - type: 'null'
+          - $ref: '#/definitions/digestSpec'
 
   ociImageAccess:
     type: 'object'
@@ -213,8 +264,8 @@ definitions:
   ociBlobAccess:
     type: 'object'
     required:
-    - 'type'
-    - 'layer'
+      - 'type'
+      - 'layer'
     properties:
       type:
         type: 'string'
@@ -282,6 +333,11 @@ definitions:
           $ref: '#/definitions/label'
       access:
         $ref: '#/definitions/ociImageAccess'
+      digest:
+        oneOf:
+          - type: 'null'
+          - $ref: '#/definitions/digestSpec'
+
 
   httpAccess:
     type: 'object'
@@ -328,6 +384,10 @@ definitions:
           $ref: '#/definitions/label'
       access:
         $ref: '#/definitions/genericAccess'
+      digest:
+        oneOf:
+          - type: 'null'
+          - $ref: '#/definitions/digestSpec'
 
   component:
     type: 'object'
@@ -384,3 +444,7 @@ properties:
     $ref: '#/definitions/meta'
   component:
     $ref: '#/definitions/component'
+  signatures:
+    type: 'array'
+    items:
+      $ref: '#/definitions/signature'

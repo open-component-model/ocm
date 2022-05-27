@@ -24,21 +24,29 @@ import (
 const DefaultSchemeVersion = "v2"
 
 type ComponentDescriptorVersion interface {
+	SchemaVersion() string
+	GetName() string
 	GetVersion() string
-	Decode(data []byte, opts *DecodeOptions) (interface{}, error)
-	ConvertFrom(desc *ComponentDescriptor) (interface{}, error)
-	ConvertTo(interface{}) (*ComponentDescriptor, error)
+	Normalize() ([]byte, error)
 }
 
-type ComponentDescriptorVersions map[string]ComponentDescriptorVersion
+type Scheme interface {
+	GetVersion() string
 
-func (v ComponentDescriptorVersions) Register(scheme ComponentDescriptorVersion) {
+	Decode(data []byte, opts *DecodeOptions) (ComponentDescriptorVersion, error)
+	ConvertFrom(desc *ComponentDescriptor) (ComponentDescriptorVersion, error)
+	ConvertTo(ComponentDescriptorVersion) (*ComponentDescriptor, error)
+}
+
+type Schemes map[string]Scheme
+
+func (v Schemes) Register(scheme Scheme) {
 	v[scheme.GetVersion()] = scheme
 }
 
-var DefaultSchemes = ComponentDescriptorVersions{}
+var DefaultSchemes = Schemes{}
 
-func RegisterScheme(scheme ComponentDescriptorVersion) {
+func RegisterScheme(scheme Scheme) {
 	DefaultSchemes.Register(scheme)
 }
 

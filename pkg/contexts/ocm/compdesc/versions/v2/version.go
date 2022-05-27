@@ -30,11 +30,13 @@ func init() {
 
 type DescriptorVersion struct{}
 
+var _ compdesc.Scheme = (*DescriptorVersion)(nil)
+
 func (v *DescriptorVersion) GetVersion() string {
 	return SchemaVersion
 }
 
-func (v *DescriptorVersion) Decode(data []byte, opts *compdesc.DecodeOptions) (interface{}, error) {
+func (v *DescriptorVersion) Decode(data []byte, opts *compdesc.DecodeOptions) (compdesc.ComponentDescriptorVersion, error) {
 	var cd ComponentDescriptor
 	if !opts.DisableValidation {
 		if err := jsonscheme.Validate(data); err != nil {
@@ -51,12 +53,12 @@ func (v *DescriptorVersion) Decode(data []byte, opts *compdesc.DecodeOptions) (i
 		return nil, err
 	}
 
-	if err := DefaultComponent(&cd); err != nil {
+	if err := cd.Default(); err != nil {
 		return nil, err
 	}
 
 	if !opts.DisableValidation {
-		err = Validate(&cd)
+		err = cd.Validate()
 		if err != nil {
 			return nil, err
 		}
@@ -68,7 +70,7 @@ func (v *DescriptorVersion) Decode(data []byte, opts *compdesc.DecodeOptions) (i
 // convert to internal version
 ////////////////////////////////////////////////////////////////////////////////
 
-func (v *DescriptorVersion) ConvertTo(obj interface{}) (out *compdesc.ComponentDescriptor, err error) {
+func (v *DescriptorVersion) ConvertTo(obj compdesc.ComponentDescriptorVersion) (out *compdesc.ComponentDescriptor, err error) {
 	if obj == nil {
 		return nil, nil
 	}
@@ -92,6 +94,7 @@ func (v *DescriptorVersion) ConvertTo(obj interface{}) (out *compdesc.ComponentD
 			Resources:           convert_Resources_to(in.Resources),
 			ComponentReferences: convert_ComponentReferences_to(in.ComponentReferences),
 		},
+		Signatures: in.Signatures.Copy(),
 	}
 	return out, nil
 }
@@ -103,6 +106,7 @@ func convert_ComponentReference_to(in *ComponentReference) *compdesc.ComponentRe
 	out := &compdesc.ComponentReference{
 		ElementMeta:   *convert_ElementMeta_to(&in.ElementMeta),
 		ComponentName: in.ComponentName,
+		Digest:        in.Digest.Copy(),
 	}
 	return out
 }
@@ -166,6 +170,7 @@ func convert_Resource_to(in *Resource) *compdesc.Resource {
 			Type:        in.Type,
 			Relation:    in.Relation,
 			SourceRef:   Convert_SourceRefs_to(in.SourceRef),
+			Digest:      in.Digest.Copy(),
 		},
 		Access: compdesc.GenericAccessSpec(in.Access),
 	}
@@ -209,7 +214,7 @@ func Convert_SourceRefs_to(in []SourceRef) []compdesc.SourceRef {
 // convert from internal version
 ////////////////////////////////////////////////////////////////////////////////
 
-func (v *DescriptorVersion) ConvertFrom(in *compdesc.ComponentDescriptor) (interface{}, error) {
+func (v *DescriptorVersion) ConvertFrom(in *compdesc.ComponentDescriptor) (compdesc.ComponentDescriptorVersion, error) {
 	if in == nil {
 		return nil, nil
 	}
@@ -229,8 +234,9 @@ func (v *DescriptorVersion) ConvertFrom(in *compdesc.ComponentDescriptor) (inter
 			Resources:           convert_Resources_from(in.Resources),
 			ComponentReferences: convert_ComponentReferences_from(in.ComponentReferences),
 		},
+		Signatures: in.Signatures.Copy(),
 	}
-	if err := DefaultComponent(out); err != nil {
+	if err := out.Default(); err != nil {
 		return nil, err
 	}
 	return out, nil
@@ -243,6 +249,7 @@ func convert_ComponentReference_from(in *compdesc.ComponentReference) *Component
 	out := &ComponentReference{
 		ElementMeta:   *convert_ElementMeta_from(&in.ElementMeta),
 		ComponentName: in.ComponentName,
+		Digest:        in.Digest.Copy(),
 	}
 	return out
 }
@@ -314,6 +321,7 @@ func convert_Resource_from(in *compdesc.Resource) *Resource {
 		Relation:    in.Relation,
 		SourceRef:   convert_SourceRefs_from(in.SourceRef),
 		Access:      acc,
+		Digest:      in.Digest.Copy(),
 	}
 	return out
 }
