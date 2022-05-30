@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/scriptoption"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
@@ -102,7 +103,7 @@ func (o *Command) Run() error {
 		return err
 	}
 	a := &action{
-		printer: transfer.NewPrinter(o.Context.StdOut()),
+		printer: common.NewPrinter(o.Context.StdOut()),
 		target:  target,
 		handler: thdlr,
 		closure: transfer.TransportClosure{},
@@ -115,7 +116,7 @@ func (o *Command) Run() error {
 
 type action struct {
 	cmd     *Command
-	printer transfer.Printer
+	printer common.Printer
 	target  ocm.Repository
 	handler transferhandler.TransferHandler
 	closure transfer.TransportClosure

@@ -12,16 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package sha256
+package sha512
 
 import (
-	"crypto/sha256"
+	"crypto/sha512"
 	"hash"
 
 	"github.com/open-component-model/ocm/pkg/signing"
 )
 
-const Algorithm = "sha256"
+const Algorithm = "sha512"
 
 func init() {
 	signing.DefaultHandlerRegistry().RegisterHasher(Handler{})
@@ -39,5 +39,6 @@ func (_ Handler) Algorithm() string {
 
 // Create creates a Hasher instance for no digest
 func (_ Handler) Create() hash.Hash {
-	return sha256.New()
+	return sha512.New()
+
 }

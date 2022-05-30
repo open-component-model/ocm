@@ -23,6 +23,10 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 )
 
+type ComponentVersionResolver interface {
+	LookupComponentVersion(name string, version string) (ComponentVersionAccess, error)
+}
+
 type Repository interface {
 	GetContext() Context
 

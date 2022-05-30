@@ -27,6 +27,7 @@ import (
 type Session interface {
 	Closer(closer io.Closer, extra ...interface{}) (io.Closer, error)
 	GetOrCreate(key interface{}, creator func(SessionBase) Session) Session
+	AddCloser(io.Closer) io.Closer
 	Close() error
 	IsClosed() bool
 }
@@ -39,7 +40,7 @@ type SessionBase interface {
 
 	Session() Session
 	IsClosed() bool
-	AddCloser(closer io.Closer)
+	AddCloser(closer io.Closer) io.Closer
 }
 
 type ObjectKey struct {
@@ -104,6 +105,15 @@ func (s *session) Closer(closer io.Closer, extra ...interface{}) (io.Closer, err
 	return closer, nil
 }
 
+func (s *session) AddCloser(closer io.Closer) io.Closer {
+	if closer == nil {
+		return nil
+	}
+	s.base.Lock()
+	defer s.base.Unlock()
+	return s.base.AddCloser(closer)
+}
+
 func (s *session) GetOrCreate(key interface{}, creator func(SessionBase) Session) Session {
 	s.base.Lock()
 	defer s.base.Unlock()
@@ -130,8 +140,9 @@ func (s *sessionBase) Close() error {
 	return list.Result()
 }
 
-func (s *sessionBase) AddCloser(closer io.Closer) {
+func (s *sessionBase) AddCloser(closer io.Closer) io.Closer {
 	s.closer = append(s.closer, closer)
+	return closer
 }
 
 func (s *sessionBase) GetOrCreate(key interface{}, creator func(SessionBase) Session) Session {

@@ -20,6 +20,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
@@ -82,5 +83,5 @@ func (o *Command) Run() error {
 		return err
 	}
 
-	return transfer.TransferVersion(transfer.NewPrinter(o.Context.StdOut()), nil, nil, source, target, nil)
+	return transfer.TransferVersion(common.NewPrinter(o.Context.StdOut()), nil, nil, source, target, nil)
 }

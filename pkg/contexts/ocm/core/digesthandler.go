@@ -16,29 +16,25 @@ package core
 
 import (
 	"fmt"
+	"io"
 	"sync"
 
-	"github.com/opencontainers/go-digest"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/signing"
 )
 
 type DigesterType struct {
-	Kind    string `json:"kind"`
-	Version string `json:"version"`
+	HashAlgorithm          string
+	NormalizationAlgorithm string
 }
 
-func (t DigesterType) String() string {
-	return fmt.Sprintf("%s/%s", t.Kind, t.Version)
-}
+type DigestDescriptor = metav1.DigestSpec
 
-type DigestDescriptor struct {
-	Digest   digest.Digest `json:"digest"`
-	Digester *DigesterType `json:"digester,omitempty"`
-}
-
-func NewDigestDescriptor(digest digest.Digest, typ DigesterType) *DigestDescriptor {
+func NewDigestDescriptor(digest, hashAlgo, normAlgo string) *DigestDescriptor {
 	return &DigestDescriptor{
-		Digest:   digest,
-		Digester: &typ,
+		HashAlgorithm:          hashAlgo,
+		NormalisationAlgorithm: normAlgo,
+		Value:                  digest,
 	}
 }
 
@@ -49,7 +45,7 @@ func NewDigestDescriptor(digest digest.Digest, typ DigesterType) *DigestDescript
 // of the blob
 type BlobDigester interface {
 	GetType() DigesterType
-	DetermineDigest(resType string, meth AccessMethod) (*DigestDescriptor, error)
+	DetermineDigest(resType string, meth AccessMethod, preferred signing.Hasher) (*DigestDescriptor, error)
 }
 
 // BlobDigesterRegistry registers blob handlers to use in a dedicated ocm context
@@ -59,7 +55,7 @@ type BlobDigesterRegistry interface {
 	RegisterDigester(handler BlobDigester, restypes ...string)
 	// GetDigester returns the digester for a given type
 	GetDigester(typ DigesterType) BlobDigester
-	DetermineDigests(typ string, acc AccessMethod, typs ...DigesterType) ([]DigestDescriptor, error)
+	DetermineDigests(typ string, preferred signing.Hasher, registry signing.Registry, acc AccessMethod, typs ...DigesterType) ([]DigestDescriptor, error)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -67,24 +63,39 @@ type BlobDigesterRegistry interface {
 type blobDigesterRegistry struct {
 	lock         sync.RWMutex
 	typehandlers map[string][]BlobDigester
+	normhandlers map[string][]BlobDigester
 	digesters    map[DigesterType]BlobDigester
 }
 
 var DefaultBlobDigesterRegistry = NewBlobDigesterRegistry()
 
 func NewBlobDigesterRegistry() BlobDigesterRegistry {
-	return &blobDigesterRegistry{typehandlers: map[string][]BlobDigester{}, digesters: map[DigesterType]BlobDigester{}}
+	return &blobDigesterRegistry{
+		typehandlers: map[string][]BlobDigester{},
+		normhandlers: map[string][]BlobDigester{},
+		digesters:    map[DigesterType]BlobDigester{}}
 }
 
 func (r *blobDigesterRegistry) RegisterDigester(digester BlobDigester, restypes ...string) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	old := r.digesters[digester.GetType()]
+	t := digester.GetType()
+	old := r.digesters[t]
 	if old != nil && old != digester {
-		panic(fmt.Errorf("duplicate digester type %q: %T and %T", old.GetType(), old, digester))
+		panic(fmt.Errorf("duplicate digester type %q: %T and %T", t, old, digester))
 	}
-	r.digesters[digester.GetType()] = digester
+	r.digesters[t] = digester
+
+	oldn := r.normhandlers[t.NormalizationAlgorithm]
+outer_norm:
+	for _, o := range oldn {
+		if o == digester {
+			continue outer_norm
+		}
+	}
+	oldn = append(oldn, digester)
+	r.normhandlers[t.NormalizationAlgorithm] = oldn
 
 outer:
 	for _, t := range restypes {
@@ -105,9 +116,9 @@ func (r *blobDigesterRegistry) GetDigester(typ DigesterType) BlobDigester {
 	return r.digesters[typ]
 }
 
-func (r *blobDigesterRegistry) handle(list []BlobDigester, typ string, acc AccessMethod) ([]DigestDescriptor, error) {
+func (r *blobDigesterRegistry) handle(list []BlobDigester, typ string, acc AccessMethod, preferred signing.Hasher) ([]DigestDescriptor, error) {
 	for _, h := range list {
-		d, err := h.DetermineDigest(typ, acc)
+		d, err := h.DetermineDigest(typ, acc, preferred)
 		if err != nil {
 			return nil, err
 		}
@@ -120,21 +131,28 @@ func (r *blobDigesterRegistry) handle(list []BlobDigester, typ string, acc Acces
 	return nil, nil
 }
 
-func (r *blobDigesterRegistry) DetermineDigests(typ string, acc AccessMethod, dtyps ...DigesterType) ([]DigestDescriptor, error) {
+func (r *blobDigesterRegistry) DetermineDigests(restype string, preferred signing.Hasher, registry signing.Registry, acc AccessMethod, dtyps ...DigesterType) ([]DigestDescriptor, error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
+	none := DigesterType{}
+	for i := 0; i < len(dtyps); i++ {
+		if dtyps[i] == none {
+			dtyps = append(dtyps[:i], dtyps[i+1:]...)
+			i--
+		}
+	}
 	if len(dtyps) == 0 {
 		var err error
-		res, err := r.handle(r.typehandlers[typ], typ, acc)
+		res, err := r.handle(r.typehandlers[restype], restype, acc, preferred)
 		if res != nil || err != nil {
 			return res, err
 		}
-		res, err = r.handle(r.typehandlers[""], typ, acc)
+		res, err = r.handle(r.typehandlers[""], restype, acc, preferred)
 		if res != nil || err != nil {
 			return res, err
 		}
-		d, err := defaultDigester{}.DetermineDigest(typ, acc)
+		d, err := defaultDigester{}.DetermineDigest(restype, acc, preferred)
 		if err != nil {
 			return nil, err
 		}
@@ -147,12 +165,35 @@ func (r *blobDigesterRegistry) DetermineDigests(typ string, acc AccessMethod, dt
 	for _, dtyp := range dtyps {
 		t := r.digesters[dtyp]
 		if t != nil {
-			d, err := t.DetermineDigest(typ, acc)
+			d, err := t.DetermineDigest(restype, acc, preferred)
 			if err != nil {
 				return nil, err
 			}
 			if d != nil {
 				result = append(result, *d)
+			}
+		}
+	}
+	if len(result) == 0 {
+		for _, dtyp := range dtyps {
+			if dtyp.NormalizationAlgorithm != "" {
+				hasher := preferred
+				if dtyp.HashAlgorithm != "" {
+					hasher = registry.GetHasher(dtyp.HashAlgorithm)
+				}
+				if hasher == nil {
+					continue
+				}
+				for _, t := range r.normhandlers[dtyp.NormalizationAlgorithm] {
+					d, err := t.DetermineDigest(restype, acc, hasher)
+					if err != nil {
+						return nil, err
+					}
+					if d != nil {
+						result = append(result, *d)
+						continue
+					}
+				}
 			}
 		}
 	}
@@ -165,27 +206,33 @@ func RegisterDigester(digester BlobDigester, arttypes ...string) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+const GenericBlobDigestV1 = "genericBlobDigest/v1"
+
 type defaultDigester struct{}
 
 var _ BlobDigester = (*defaultDigester)(nil)
 
 func (d defaultDigester) GetType() DigesterType {
 	return DigesterType{
-		Kind: "bytes",
+		HashAlgorithm:          "",
+		NormalizationAlgorithm: GenericBlobDigestV1,
 	}
 }
 
-func (d defaultDigester) DetermineDigest(typ string, acc AccessMethod) (*DigestDescriptor, error) {
+func (d defaultDigester) DetermineDigest(typ string, acc AccessMethod, preferred signing.Hasher) (*DigestDescriptor, error) {
 	r, err := acc.Reader()
 	if err != nil {
 		return nil, err
 	}
-	dig, err := digest.FromReader(r)
-	if err != nil {
+	hash := preferred.Create()
+
+	if _, err := io.Copy(hash, r); err != nil {
 		return nil, err
 	}
+
 	return &DigestDescriptor{
-		Digest:   dig,
-		Digester: nil,
+		Value:                  fmt.Sprintf("%x", hash.Sum(nil)),
+		HashAlgorithm:          preferred.Algorithm(),
+		NormalisationAlgorithm: GenericBlobDigestV1,
 	}, nil
 }

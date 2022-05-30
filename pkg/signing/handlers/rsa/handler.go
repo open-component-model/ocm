@@ -39,7 +39,7 @@ const MediaTypePEM = "application/x-pem-file"
 const SignaturePEMBlockType = "SIGNATURE"
 
 func init() {
-	signing.DefaultHandlerRegistry().RegisterSigner(Algorithm, Handler{})
+	signing.DefaultHandlerRegistry().RegisterSigner(Handler{})
 }
 
 // Handler is a signatures.Signer compatible struct to sign with RSASSA-PKCS1-V1_5.
@@ -48,6 +48,10 @@ type Handler struct {
 }
 
 var _ Handler = Handler{}
+
+func (h Handler) Algorithm() string {
+	return Algorithm
+}
 
 // PrivateKey parses a private key
 func PrivateKey(data []byte) (*rsa.PrivateKey, error) {

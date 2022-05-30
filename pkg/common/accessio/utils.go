@@ -102,3 +102,20 @@ func FileSystem(fss ...vfs.FileSystem) vfs.FileSystem {
 	}
 	return _osfs
 }
+
+type once struct {
+	closer io.Closer
+}
+
+func OnceCloser(c io.Closer) io.Closer {
+	return &once{c}
+}
+
+func (c *once) Close() error {
+	if c.closer == nil {
+		return nil
+	}
+	t := c.closer
+	c.closer = nil
+	return t.Close()
+}

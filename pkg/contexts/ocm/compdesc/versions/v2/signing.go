@@ -15,6 +15,9 @@
 package compdesc
 
 import (
+	"fmt"
+
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/signing"
 )
 
@@ -45,6 +48,9 @@ var CDExcludes = signing.MapExcludes{
 	},
 }
 
-func (cd *ComponentDescriptor) Normalize() ([]byte, error) {
+func (cd *ComponentDescriptor) Normalize(normAlgo string) ([]byte, error) {
+	if normAlgo != compdesc.JsonNormalisationV1 {
+		return nil, fmt.Errorf("unsupported cd normalization %q", normAlgo)
+	}
 	return signing.Normalize(cd, CDExcludes)
 }

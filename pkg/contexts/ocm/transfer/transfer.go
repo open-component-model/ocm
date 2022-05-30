@@ -23,40 +23,25 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-type TransportClosure map[common.NameVersion]struct{}
+type TransportClosure = common.NameVersionInfo
 
-func (c TransportClosure) Add(nv common.NameVersion) bool {
-	if _, ok := c[nv]; !ok {
-		c[nv] = struct{}{}
-		return true
-	}
-	return false
-}
-
-func (c TransportClosure) Contains(nv common.NameVersion) bool {
-	_, ok := c[nv]
-	return ok
-}
-
-func TransferVersion(printer Printer, closure TransportClosure, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
+func TransferVersion(printer common.Printer, closure TransportClosure, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
 	if closure == nil {
 		closure = TransportClosure{}
 	}
 	if printer == nil {
-		printer = NewPrinter(nil)
+		printer = common.NewPrinter(nil)
 	}
-	return transferVersion(printer, nil, closure, repo, src, tgt, handler)
+	state := common.WalkingState{Closure: closure}
+	return transferVersion(printer, state, repo, src, tgt, handler)
 }
 
-func transferVersion(printer Printer, hist common.History, closure TransportClosure, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
-	nv := common.NewNameVersion(src.GetName(), src.GetVersion())
-	if err := hist.Add(ocm.KIND_COMPONENTVERSION, nv); err != nil {
+func transferVersion(printer common.Printer, state common.WalkingState, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
+	nv := common.VersionedElementKey(src)
+	if ok, err := state.Add(ocm.KIND_COMPONENTVERSION, nv); !ok {
 		return err
 	}
-	if !closure.Add(nv) {
-		return nil
-	}
-	printer.Printf("transferring version %q...\n", common.VersionedElementKey(src))
+	printer.Printf("transferring version %q...\n", nv)
 	if handler == nil {
 		handler = standard.NewDefaultHandler(nil)
 	}
@@ -65,7 +50,7 @@ func transferVersion(printer Printer, hist common.History, closure TransportClos
 
 	comp, err := tgt.LookupComponent(src.GetName())
 	if err != nil {
-		return errors.Wrapf(err, "%s: lookup target component", hist)
+		return errors.Wrapf(err, "%s: lookup target component", state.History)
 	}
 
 	t, err := comp.LookupVersion(src.GetVersion())
@@ -75,10 +60,10 @@ func transferVersion(printer Printer, hist common.History, closure TransportClos
 		}
 	}
 	if err != nil {
-		return errors.Wrapf(err, "%s: creating target version", hist)
+		return errors.Wrapf(err, "%s: creating target version", state.History)
 	}
 	defer t.Close()
-	err = CopyVersion(printer, hist, src, t, handler)
+	err = CopyVersion(printer, state.History, src, t, handler)
 	if err != nil {
 		return err
 	}
@@ -92,9 +77,9 @@ func transferVersion(printer Printer, hist common.History, closure TransportClos
 		if srepo != nil {
 			c, err := srepo.LookupComponentVersion(r.ComponentName, r.GetVersion())
 			if err != nil {
-				return errors.Wrapf(err, "%s: nested component %s[%s:%s]", hist, r.GetName(), r.ComponentName, r.GetVersion())
+				return errors.Wrapf(err, "%s: nested component %s[%s:%s]", state.History, r.GetName(), r.ComponentName, r.GetVersion())
 			}
-			list.Add(transferVersion(subp, hist, closure, srepo, c, tgt, shdlr))
+			list.Add(transferVersion(subp, state, srepo, c, tgt, shdlr))
 			if srepo != repo {
 				srepo.Close()
 			}
@@ -104,7 +89,7 @@ func transferVersion(printer Printer, hist common.History, closure TransportClos
 	return list.Add(comp.AddVersion(t)).Result()
 }
 
-func CopyVersion(printer Printer, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler transferhandler.TransferHandler) error {
+func CopyVersion(printer common.Printer, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler transferhandler.TransferHandler) error {
 	if handler == nil {
 		handler = standard.NewDefaultHandler(nil)
 	}

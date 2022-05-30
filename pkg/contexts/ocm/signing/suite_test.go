@@ -12,32 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package sha256
+package signing_test
 
 import (
-	"crypto/sha256"
-	"hash"
+	"testing"
 
-	"github.com/open-component-model/ocm/pkg/signing"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-const Algorithm = "sha256"
-
-func init() {
-	signing.DefaultHandlerRegistry().RegisterHasher(Handler{})
-}
-
-// Handler is a signatures.Hasher compatible struct to hash with sha256
-type Handler struct {
-}
-
-var _ signing.Hasher = Handler{}
-
-func (_ Handler) Algorithm() string {
-	return Algorithm
-}
-
-// Create creates a Hasher instance for no digest
-func (_ Handler) Create() hash.Hash {
-	return sha256.New()
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "OCM Signing Test Suite")
 }

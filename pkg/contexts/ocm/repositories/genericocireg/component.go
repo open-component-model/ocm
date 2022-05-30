@@ -81,6 +81,9 @@ func (c *ComponentAccess) LookupVersion(version string) (cpi.ComponentVersionAcc
 
 	acc, err := c.namespace.GetArtefact(version)
 	if err != nil {
+		if errors.IsErrNotFound(err) {
+			return nil, cpi.ErrComponentVersionNotFoundWrap(err, c.name, version)
+		}
 		return nil, err
 	}
 	m := acc.ManifestAccess()

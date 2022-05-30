@@ -6,8 +6,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
-
-	"github.com/opencontainers/go-digest"
 )
 
 const KIND_COMPONENTVERSION = core.KIND_COMPONENTVERSION
@@ -20,6 +18,7 @@ const CONTEXT_TYPE = core.CONTEXT_TYPE
 const CommonTransportFormat = core.CommonTransportFormat
 
 type Context = core.Context
+type ComponentVersionResolver = core.ComponentVersionResolver
 type Repository = core.Repository
 type RepositorySpecHandlers = core.RepositorySpecHandlers
 type RepositorySpecHandler = core.RepositorySpecHandler
@@ -51,8 +50,8 @@ type DigestDescriptor = core.DigestDescriptor
 type BlobHandlerRegistry = core.BlobHandlerRegistry
 type BlobHandler = core.BlobHandler
 
-func NewDigestDescriptor(digest digest.Digest, typ DigesterType) *DigestDescriptor {
-	return core.NewDigestDescriptor(digest, typ)
+func NewDigestDescriptor(digest, hashAlgo, normAlgo string) *DigestDescriptor {
+	return core.NewDigestDescriptor(digest, hashAlgo, normAlgo)
 }
 
 // DefaultContext is the default context initialized by init functions

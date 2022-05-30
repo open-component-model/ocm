@@ -19,7 +19,6 @@ package cpi
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/opencontainers/go-digest"
 )
 
 const CONTEXT_TYPE = core.CONTEXT_TYPE
@@ -27,6 +26,7 @@ const CONTEXT_TYPE = core.CONTEXT_TYPE
 const CommonTransportFormat = core.CommonTransportFormat
 
 type Context = core.Context
+type ComponentVersionResolver = core.ComponentVersionResolver
 type Repository = core.Repository
 type RepositorySpecHandlers = core.RepositorySpecHandlers
 type RepositorySpecHandler = core.RepositorySpecHandler
@@ -64,8 +64,8 @@ func New() Context {
 	return core.Builder{}.New()
 }
 
-func NewDigestDescriptor(digest digest.Digest, typ DigesterType) *DigestDescriptor {
-	return core.NewDigestDescriptor(digest, typ)
+func NewDigestDescriptor(digest string, typ DigesterType) *DigestDescriptor {
+	return core.NewDigestDescriptor(digest, typ.HashAlgorithm, typ.NormalizationAlgorithm)
 }
 
 func DefaultBlobDigesterRegistry() BlobDigesterRegistry {
@@ -116,6 +116,10 @@ func NewRawAccessSpecRef(data []byte, unmarshaler runtime.Unmarshaler) (*AccessS
 
 const KIND_COMPONENTVERSION = core.KIND_COMPONENTVERSION
 
-func ErrUnknownComponentVersion(name, version string) error {
-	return core.ErrUnknownComponentVersion(name, version)
+func ErrComponentVersionNotFound(name, version string) error {
+	return core.ErrComponentVersionNotFound(name, version)
+}
+
+func ErrComponentVersionNotFoundWrap(err error, name, version string) error {
+	return core.ErrComponentVersionNotFoundWrap(err, name, version)
 }

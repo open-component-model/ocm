@@ -28,30 +28,42 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/opencontainers/go-digest"
 )
 
+const OciArtifactDigestV1 string = "ociArtifactDigest/v1"
+
 func init() {
-	d := &Digester{}
-	cpi.DefaultBlobDigesterRegistry().RegisterDigester(d, "")
+	cpi.DefaultBlobDigesterRegistry().RegisterDigester(New(digest.SHA256), "")
+	cpi.DefaultBlobDigesterRegistry().RegisterDigester(New(digest.SHA512), "")
 }
 
-var ARTEFACT_DIGESTER = cpi.DigesterType{
-	Kind:    "artefact",
-	Version: "v1",
+func New(algo digest.Algorithm) cpi.BlobDigester {
+	return &Digester{
+		cpi.DigesterType{
+			HashAlgorithm:          algo.String(),
+			NormalizationAlgorithm: OciArtifactDigestV1,
+		},
+	}
 }
 
-type Digester struct{}
+type Digester struct {
+	typ cpi.DigesterType
+}
 
 var _ cpi.BlobDigester = (*Digester)(nil)
 
-func (d Digester) GetType() cpi.DigesterType {
-	return ARTEFACT_DIGESTER
+func (d *Digester) GetType() cpi.DigesterType {
+	return d.typ
 }
 
-func (d Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod) (*cpi.DigestDescriptor, error) {
+func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferred signing.Hasher) (*cpi.DigestDescriptor, error) {
 	if acc.GetKind() == localblob.Type {
 		mime := acc.MimeType()
+		if !artdesc.IsOCIMediaType(mime) {
+			return nil, nil
+		}
 		r, err := acc.Reader()
 		if err != nil {
 			return nil, err
@@ -93,7 +105,10 @@ func (d Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod) (*cpi.Dig
 					if main == "" {
 						return nil, fmt.Errorf("no main artefact found")
 					}
-					return cpi.NewDigestDescriptor(digest.Digest(main), d.GetType()), nil
+					if digest.Digest(main).Algorithm() != digest.Algorithm(d.GetType().HashAlgorithm) {
+						return nil, nil
+					}
+					return cpi.NewDigestDescriptor(digest.Digest(main).Hex(), d.GetType()), nil
 				}
 			}
 		}
@@ -102,7 +117,10 @@ func (d Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod) (*cpi.Dig
 	if acc.GetKind() == ociregistry.Type {
 		dig := acc.(accessio.DigestSource).Digest()
 		if dig != "" {
-			return cpi.NewDigestDescriptor(dig, d.GetType()), nil
+			if dig.Algorithm() != digest.Algorithm(d.GetType().HashAlgorithm) {
+				return nil, nil
+			}
+			return cpi.NewDigestDescriptor(dig.Hex(), d.GetType()), nil
 		}
 		return nil, errors.Newf("cannot determine digest")
 	}

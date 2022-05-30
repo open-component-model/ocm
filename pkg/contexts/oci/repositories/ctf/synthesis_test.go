@@ -17,6 +17,8 @@ package ctf_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/osfs"
@@ -140,16 +142,19 @@ var _ = Describe("syntheses", func() {
 		CheckBlob(newblob).Close()
 
 		meth := &DummyMethod{newblob}
-		digest, err := artefact.Digester{}.DetermineDigest("", meth)
+		digest, err := artefact.New(digest.SHA256).DetermineDigest("", meth, nil)
 		Expect(err).To(Succeed())
-		Expect(digest.Digest.String()).To(Equal("sha256:" + DIGEST_MANIFEST))
+		Expect(digest.Value).To(Equal(DIGEST_MANIFEST))
+		Expect(digest.NormalisationAlgorithm).To(Equal(artefact.OciArtifactDigestV1))
+		Expect(digest.HashAlgorithm).To(Equal(sha256.Algorithm))
 
-		digests, err := ocm.DefaultContext().BlobDigesters().DetermineDigests("", meth)
+		digests, err := ocm.DefaultContext().BlobDigesters().DetermineDigests("", nil, signing.DefaultRegistry(), meth)
 		Expect(err).To(Succeed())
 		Expect(digests).To(Equal([]cpi.DigestDescriptor{
 			{
-				Digest:   "sha256:" + DIGEST_MANIFEST,
-				Digester: &artefact.ARTEFACT_DIGESTER,
+				Value:                  DIGEST_MANIFEST,
+				HashAlgorithm:          sha256.Algorithm,
+				NormalisationAlgorithm: artefact.OciArtifactDigestV1,
 			},
 		}))
 

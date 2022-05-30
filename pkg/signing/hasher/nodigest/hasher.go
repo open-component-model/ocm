@@ -12,19 +12,19 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package sha256
+package nodigest
 
 import (
-	"crypto/sha256"
 	"hash"
 
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/signing"
 )
 
-const Algorithm = "sha256"
+const Algorithm = metav1.NoDigest
 
 func init() {
-	signing.DefaultHandlerRegistry().RegisterHasher(Algorithm, Handler{})
+	signing.DefaultHandlerRegistry().RegisterHasher(Handler{})
 }
 
 // Handler is a signatures.Hasher compatible struct to hash with sha256
@@ -33,7 +33,11 @@ type Handler struct {
 
 var _ signing.Hasher = Handler{}
 
+func (h Handler) Algorithm() string {
+	return Algorithm
+}
+
 // Create creates a Hasher instance for sha256
 func (_ Handler) Create() hash.Hash {
-	return sha256.New()
+	return nil
 }

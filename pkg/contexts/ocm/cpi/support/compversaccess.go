@@ -18,7 +18,7 @@ import (
 	"strconv"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -39,7 +39,7 @@ func NewComponentVersionAccess(container ComponentVersionContainer, lazy bool) *
 }
 
 func (a *ComponentVersionAccess) Close() error {
-	return errors.ErrListf("closing archive").Add(a.base.Update(), a.base.Close()).Result()
+	return errors.ErrListf("closing access").Add(a.base.Update(), a.base.Close()).Result()
 }
 
 func (a *ComponentVersionAccess) IsReadOnly() bool {
@@ -78,7 +78,7 @@ func (a *ComponentVersionAccess) GetDescriptor() *compdesc.ComponentDescriptor {
 	return a.base.GetDescriptor()
 }
 
-func (a *ComponentVersionAccess) GetResource(id v1.Identity) (cpi.ResourceAccess, error) {
+func (a *ComponentVersionAccess) GetResource(id metav1.Identity) (cpi.ResourceAccess, error) {
 	r, err := a.base.GetDescriptor().GetResourceByIdentity(id)
 	if err != nil {
 		return nil, err
@@ -120,7 +120,7 @@ func (a *ComponentVersionAccess) GetResources() []cpi.ResourceAccess {
 	return result
 }
 
-func (a *ComponentVersionAccess) GetSource(id v1.Identity) (cpi.SourceAccess, error) {
+func (a *ComponentVersionAccess) GetSource(id metav1.Identity) (cpi.SourceAccess, error) {
 	r, err := a.base.GetDescriptor().GetSourceByIdentity(id)
 	if err != nil {
 		return nil, err
@@ -192,7 +192,7 @@ func (c *ComponentVersionAccess) SetResource(meta *cpi.ResourceMeta, acc compdes
 		Access:       acc,
 	}
 
-	if res.Relation == v1.LocalRelation {
+	if res.Relation == metav1.LocalRelation {
 		switch res.Version {
 		case "":
 			res.Version = c.GetVersion()

@@ -29,8 +29,6 @@ type NormalisationAlgorithm = string
 
 const (
 	JsonNormalisationV1 NormalisationAlgorithm = "jsonNormalisation/v1"
-	OciArtifactDigestV1 NormalisationAlgorithm = "ociArtifactDigest/v1"
-	GenericBlobDigestV1 NormalisationAlgorithm = "genericBlobDigest/v1"
 )
 
 const (
@@ -64,7 +62,7 @@ func (cd *ComponentDescriptor) isNormalizeable() error {
 
 // Hash return the hash for the component-descriptor, if it is normalizeable
 // (= componentReferences and resources contain digest field)
-func Hash(cd *ComponentDescriptor, hash hash.Hash) (string, error) {
+func Hash(cd *ComponentDescriptor, normAlgo string, hash hash.Hash) (string, error) {
 	if hash == nil {
 		return metav1.NoDigest, nil
 	}
@@ -78,7 +76,7 @@ func Hash(cd *ComponentDescriptor, hash hash.Hash) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	normalized, err := v.Normalize()
+	normalized, err := v.Normalize(normAlgo)
 	if err != nil {
 		return "", fmt.Errorf("failed normalising component descriptor %w", err)
 	}
@@ -105,7 +103,7 @@ func Sign(cd *ComponentDescriptor, registry signing.Registry, signAlgo, hashAlgo
 	if privateKey == nil {
 		return errors.ErrNotFound(KIND_PRIVATE_KEY, signatureName)
 	}
-	digest, err := Hash(cd, hasher.Create())
+	digest, err := Hash(cd, JsonNormalisationV1, hasher.Create())
 	if err != nil {
 		return fmt.Errorf("failed getting hash for cd: %w", err)
 	}
@@ -162,7 +160,7 @@ func Verify(cd *ComponentDescriptor, registry signing.Registry, signatureName st
 
 	hash := hasher.Create()
 	//Verify normalised cd to given (and verified) hash
-	calculatedDigest, err := Hash(cd, hash)
+	calculatedDigest, err := Hash(cd, matchingSignature.Digest.NormalisationAlgorithm, hash)
 	if err != nil {
 		return fmt.Errorf("failed hashing cd %s:%s: %w", cd.Name, cd.Version, err)
 	}

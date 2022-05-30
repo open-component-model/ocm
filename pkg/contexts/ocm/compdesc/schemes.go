@@ -27,7 +27,7 @@ type ComponentDescriptorVersion interface {
 	SchemaVersion() string
 	GetName() string
 	GetVersion() string
-	Normalize() ([]byte, error)
+	Normalize(normAlgo string) ([]byte, error)
 }
 
 type Scheme interface {

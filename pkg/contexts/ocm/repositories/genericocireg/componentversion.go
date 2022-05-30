@@ -121,6 +121,9 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMe
 
 func (c *ComponentVersionContainer) Update() error {
 	err := c.Check()
+	if err != nil {
+		return err
+	}
 	if c.state.HasChanged() {
 		desc := c.GetDescriptor()
 		for i, r := range desc.Resources {

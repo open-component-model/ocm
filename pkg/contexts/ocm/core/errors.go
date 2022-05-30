@@ -22,6 +22,10 @@ import (
 
 const KIND_COMPONENTVERSION = "component version"
 
-func ErrUnknownComponentVersion(name, version string) error {
-	return errors.ErrUnknown(KIND_COMPONENTVERSION, fmt.Sprintf("%s:%s", name, version))
+func ErrComponentVersionNotFound(name, version string) error {
+	return errors.ErrNotFound(KIND_COMPONENTVERSION, fmt.Sprintf("%s:%s", name, version))
+}
+
+func ErrComponentVersionNotFoundWrap(err error, name, version string) error {
+	return errors.ErrNotFoundWrap(err, KIND_COMPONENTVERSION, fmt.Sprintf("%s:%s", name, version))
 }

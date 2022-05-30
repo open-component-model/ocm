@@ -24,13 +24,13 @@ type Registry interface {
 }
 
 type HandlerRegistry interface {
-	RegisterSignatureHandler(name string, handler SignatureHandler)
-	RegisterSigner(name string, signer Signer)
-	RegisterVerifier(name string, verifier Verifier)
+	RegisterSignatureHandler(handler SignatureHandler)
+	RegisterSigner(signer Signer)
+	RegisterVerifier(verifier Verifier)
 	GetSigner(name string) Signer
 	GetVerifier(name string) Verifier
 
-	RegisterHasher(name string, hasher Hasher)
+	RegisterHasher(hasher Hasher)
 	GetHasher(name string) Hasher
 }
 
@@ -60,35 +60,35 @@ func NewHandlerRegistry() HandlerRegistry {
 	}
 }
 
-func (r *handlerRegistry) RegisterSignatureHandler(name string, handler SignatureHandler) {
+func (r *handlerRegistry) RegisterSignatureHandler(handler SignatureHandler) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	r.signers[name] = handler
-	r.verifier[name] = handler
+	r.signers[handler.Algorithm()] = handler
+	r.verifier[handler.Algorithm()] = handler
 }
 
-func (r *handlerRegistry) RegisterSigner(name string, signer Signer) {
+func (r *handlerRegistry) RegisterSigner(signer Signer) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	r.signers[name] = signer
-	if v, ok := signer.(Verifier); ok && r.verifier[name] == nil {
-		r.verifier[name] = v
+	r.signers[signer.Algorithm()] = signer
+	if v, ok := signer.(Verifier); ok && r.verifier[signer.Algorithm()] == nil {
+		r.verifier[signer.Algorithm()] = v
 	}
 }
 
-func (r *handlerRegistry) RegisterVerifier(name string, verifier Verifier) {
+func (r *handlerRegistry) RegisterVerifier(verifier Verifier) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	r.verifier[name] = verifier
-	if v, ok := verifier.(Signer); ok && r.signers[name] == nil {
-		r.signers[name] = v
+	r.verifier[verifier.Algorithm()] = verifier
+	if v, ok := verifier.(Signer); ok && r.signers[verifier.Algorithm()] == nil {
+		r.signers[verifier.Algorithm()] = v
 	}
 }
 
-func (r *handlerRegistry) RegisterHasher(name string, hasher Hasher) {
+func (r *handlerRegistry) RegisterHasher(hasher Hasher) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	r.hasher[name] = hasher
+	r.hasher[hasher.Algorithm()] = hasher
 }
 
 func (r *handlerRegistry) GetSigner(name string) Signer {
@@ -184,16 +184,16 @@ func NewRegistry(h HandlerRegistry, k KeyRegistry) Registry {
 	}
 }
 
-func (r *registry) RegisterSignatureHandler(name string, handler SignatureHandler) {
-	r.handlers.RegisterSignatureHandler(name, handler)
+func (r *registry) RegisterSignatureHandler(handler SignatureHandler) {
+	r.handlers.RegisterSignatureHandler(handler)
 }
 
-func (r *registry) RegisterSigner(name string, signer Signer) {
-	r.handlers.RegisterSigner(name, signer)
+func (r *registry) RegisterSigner(signer Signer) {
+	r.handlers.RegisterSigner(signer)
 }
 
-func (r *registry) RegisterVerifier(name string, verifier Verifier) {
-	r.handlers.RegisterVerifier(name, verifier)
+func (r *registry) RegisterVerifier(verifier Verifier) {
+	r.handlers.RegisterVerifier(verifier)
 }
 
 func (r *registry) GetSigner(name string) Signer {
@@ -212,8 +212,8 @@ func (r *registry) GetVerifier(name string) Verifier {
 	return s
 }
 
-func (r *registry) RegisterHasher(name string, hasher Hasher) {
-	r.handlers.RegisterHasher(name, hasher)
+func (r *registry) RegisterHasher(hasher Hasher) {
+	r.handlers.RegisterHasher(hasher)
 }
 
 func (r *registry) GetHasher(name string) Hasher {

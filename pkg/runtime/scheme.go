@@ -500,12 +500,12 @@ func (c *codec) Decode(data []byte) (TypedObject, error) {
 	}
 
 	if c.validationFunc != nil {
-		if err := c.validationFunc(accessType.GetType()); err != nil {
+		if err := c.validationFunc(accessType.Algorithm()); err != nil {
 			return nil, err
 		}
 	}
 
-	codec := c.knownTypes.GetDecoder(accessType.GetType())
+	codec := c.knownTypes.GetDecoder(accessType.Algorithm())
 	if codec == nil {
 		codec = c.defaultCodec
 	}

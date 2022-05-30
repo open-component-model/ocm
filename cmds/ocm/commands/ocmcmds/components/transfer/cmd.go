@@ -29,6 +29,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
@@ -111,7 +112,7 @@ func (o *Command) Run() error {
 	hdlr := comphdlr.NewTypeHandler(o.Context.OCM(), session, repooption.From(o).Repository)
 	return utils.HandleOutput(&action{
 		cmd:     o,
-		printer: transfer.NewPrinter(o.Context.StdOut()),
+		printer: common.NewPrinter(o.Context.StdOut()),
 		target:  target,
 		handler: thdlr,
 		closure: transfer.TransportClosure{},
@@ -123,7 +124,7 @@ func (o *Command) Run() error {
 
 type action struct {
 	cmd     *Command
-	printer transfer.Printer
+	printer common.Printer
 	target  ocm.Repository
 	handler transferhandler.TransferHandler
 	closure transfer.TransportClosure
