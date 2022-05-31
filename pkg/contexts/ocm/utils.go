@@ -104,7 +104,16 @@ type CompoundResolver struct {
 
 var _ ComponentVersionResolver = (*CompoundResolver)(nil)
 
-func NewCompoundResolver(res ...ComponentVersionResolver) *CompoundResolver {
+func NewCompoundResolver(res ...ComponentVersionResolver) ComponentVersionResolver {
+	for i := 0; i < len(res); i++ {
+		if res[i] == nil {
+			res = append(res[:i], res[i+1:]...)
+			i--
+		}
+	}
+	if len(res) == 1 {
+		return res[0]
+	}
 	return &CompoundResolver{res}
 }
 

@@ -25,8 +25,8 @@ type Registry interface {
 
 type HandlerRegistry interface {
 	RegisterSignatureHandler(handler SignatureHandler)
-	RegisterSigner(signer Signer)
-	RegisterVerifier(verifier Verifier)
+	RegisterSigner(algo string, signer Signer)
+	RegisterVerifier(algo string, verifier Verifier)
 	GetSigner(name string) Signer
 	GetVerifier(name string) Verifier
 
@@ -67,21 +67,21 @@ func (r *handlerRegistry) RegisterSignatureHandler(handler SignatureHandler) {
 	r.verifier[handler.Algorithm()] = handler
 }
 
-func (r *handlerRegistry) RegisterSigner(signer Signer) {
+func (r *handlerRegistry) RegisterSigner(algo string, signer Signer) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	r.signers[signer.Algorithm()] = signer
-	if v, ok := signer.(Verifier); ok && r.verifier[signer.Algorithm()] == nil {
-		r.verifier[signer.Algorithm()] = v
+	r.signers[algo] = signer
+	if v, ok := signer.(Verifier); ok && r.verifier[algo] == nil {
+		r.verifier[algo] = v
 	}
 }
 
-func (r *handlerRegistry) RegisterVerifier(verifier Verifier) {
+func (r *handlerRegistry) RegisterVerifier(algo string, verifier Verifier) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	r.verifier[verifier.Algorithm()] = verifier
-	if v, ok := verifier.(Signer); ok && r.signers[verifier.Algorithm()] == nil {
-		r.signers[verifier.Algorithm()] = v
+	r.verifier[algo] = verifier
+	if v, ok := verifier.(Signer); ok && r.signers[algo] == nil {
+		r.signers[algo] = v
 	}
 }
 
@@ -188,12 +188,12 @@ func (r *registry) RegisterSignatureHandler(handler SignatureHandler) {
 	r.handlers.RegisterSignatureHandler(handler)
 }
 
-func (r *registry) RegisterSigner(signer Signer) {
-	r.handlers.RegisterSigner(signer)
+func (r *registry) RegisterSigner(algo string, signer Signer) {
+	r.handlers.RegisterSigner(algo, signer)
 }
 
-func (r *registry) RegisterVerifier(verifier Verifier) {
-	r.handlers.RegisterVerifier(verifier)
+func (r *registry) RegisterVerifier(algo string, verifier Verifier) {
+	r.handlers.RegisterVerifier(algo, verifier)
 }
 
 func (r *registry) GetSigner(name string) Signer {

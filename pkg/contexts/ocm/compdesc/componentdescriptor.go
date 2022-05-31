@@ -67,6 +67,22 @@ func (cd *ComponentDescriptor) SchemaVersion() string {
 	return cd.Metadata.ConfiguredVersion
 }
 
+func (c *ComponentDescriptor) Copy() *ComponentDescriptor {
+	out := &ComponentDescriptor{
+		Metadata: c.Metadata,
+		ComponentSpec: ComponentSpec{
+			ObjectMeta:          c.ObjectMeta.Copy(),
+			RepositoryContexts:  c.RepositoryContexts.Copy(),
+			Provider:            c.Provider,
+			Sources:             c.Sources.Copy(),
+			ComponentReferences: c.ComponentReferences.Copy(),
+			Resources:           c.Resources.Copy(),
+		},
+		Signatures: c.Signatures.Copy(),
+	}
+	return out
+}
+
 // ComponentSpec defines a virtual component with
 // a repository context, source and dependencies.
 // +k8s:deepcopy-gen=true
@@ -512,6 +528,7 @@ func (o *ResourceMeta) Copy() *ResourceMeta {
 		Type:        o.Type,
 		Relation:    o.Relation,
 		SourceRef:   o.SourceRef.Copy(),
+		Digest:      o.Digest.Copy(),
 	}
 	return r
 }
@@ -563,6 +580,10 @@ type ComponentReference struct {
 
 func (r *ComponentReference) GetMeta() *ElementMeta {
 	return &r.ElementMeta
+}
+
+func (r *ComponentReference) GetComponentName() string {
+	return r.ComponentName
 }
 
 func (r *ComponentReference) Copy() *ComponentReference {

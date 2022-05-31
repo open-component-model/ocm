@@ -39,12 +39,12 @@ var _ = Describe("normalization", func() {
 		registry.RegisterPublicKey(NAME, pub)
 		registry.RegisterPrivateKey(NAME, priv)
 
-		sig, media, err := registry.GetSigner(rsa.Algorithm).Sign(data, registry.GetPrivateKey(NAME))
+		sig, err := registry.GetSigner(rsa.Algorithm).Sign(data, registry.GetPrivateKey(NAME))
 
 		Expect(err).To(Succeed())
-		Expect(media).To(Equal(rsa.MediaType))
+		Expect(sig.MediaType).To(Equal(rsa.MediaType))
 
-		Expect(registry.GetVerifier(rsa.Algorithm).Verify(data, sig, media, registry.GetPublicKey(NAME))).To(Succeed())
-		Expect(registry.GetVerifier(rsa.Algorithm).Verify(hex.EncodeToString([]byte("Test")), sig, media, registry.GetPublicKey(NAME))).To(HaveOccurred())
+		Expect(registry.GetVerifier(rsa.Algorithm).Verify(data, sig.Value, sig.MediaType, registry.GetPublicKey(NAME))).To(Succeed())
+		Expect(registry.GetVerifier(rsa.Algorithm).Verify(hex.EncodeToString([]byte("Test")), sig.Value, sig.MediaType, registry.GetPublicKey(NAME))).To(HaveOccurred())
 	})
 })

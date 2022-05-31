@@ -20,12 +20,19 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
-	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 )
 
 type Option interface {
 	ApplySigningOption(o *Options)
+}
+
+func evalFlag(flags ...bool) bool {
+	flag := len(flags) == 0
+	for _, f := range flags {
+		flag = flag || f
+	}
+	return flag
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -34,8 +41,8 @@ type recursive struct {
 	flag bool
 }
 
-func Recursive(flag bool) Option {
-	return &recursive{flag}
+func Recursive(flags ...bool) Option {
+	return &recursive{evalFlag(flags...)}
 }
 
 func (o *recursive) ApplySigningOption(opts *Options) {
@@ -48,8 +55,8 @@ type update struct {
 	flag bool
 }
 
-func Update(flag bool) Option {
-	return &update{flag}
+func Update(flags ...bool) Option {
+	return &update{evalFlag(flags...)}
 }
 
 func (o *update) ApplySigningOption(opts *Options) {
@@ -58,15 +65,31 @@ func (o *update) ApplySigningOption(opts *Options) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type signer struct {
-	signer signing.Signer
+type verify struct {
+	flag bool
 }
 
-func Signer(h signing.Signer) Option {
-	return &signer{h}
+func VerifyDigests(flags ...bool) Option {
+	return &verify{evalFlag(flags...)}
+}
+
+func (o *verify) ApplySigningOption(opts *Options) {
+	opts.Verify = o.flag
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type signer struct {
+	signer signing.Signer
+	name   string
+}
+
+func Sign(h signing.Signer, name string) Option {
+	return &signer{h, name}
 }
 
 func (o *signer) ApplySigningOption(opts *Options) {
+	opts.SignatureName = o.name
 	opts.Signer = o.signer
 	if o.signer != nil {
 		if v, ok := o.signer.(signing.Verifier); ok {
@@ -79,33 +102,64 @@ func (o *signer) ApplySigningOption(opts *Options) {
 
 type verifier struct {
 	verifier signing.Verifier
+	name     string
 }
 
-func Verifier(h signing.Verifier) Option {
-	return &verifier{h}
+func VerifySignature(h signing.Verifier, names ...string) Option {
+	name := ""
+	for _, n := range names {
+		if n != "" {
+			name = n
+			break
+		}
+	}
+	return &verifier{h, name}
 }
 
 func (o *verifier) ApplySigningOption(opts *Options) {
 	opts.Verifier = o.verifier
-	if o.verifier != nil {
-		if s, ok := o.verifier.(signing.Signer); ok {
-			opts.Signer = s
-		}
+	if o.name != "" {
+		opts.SignatureName = o.name
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type resolver struct {
-	resolver ocm.ComponentVersionResolver
+	resolver []ocm.ComponentVersionResolver
 }
 
-func Resolver(h ocm.ComponentVersionResolver) Option {
+func Resolver(h ...ocm.ComponentVersionResolver) Option {
 	return &resolver{h}
 }
 
 func (o *resolver) ApplySigningOption(opts *Options) {
-	opts.Resolver = o.resolver
+	opts.Resolver = ocm.NewCompoundResolver(append(append([]ocm.ComponentVersionResolver{}, opts.Resolver), o.resolver...)...)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type skip struct {
+	skip map[string]bool
+}
+
+func SkipAccessTypes(names ...string) Option {
+	m := map[string]bool{}
+	for _, n := range names {
+		m[n] = true
+	}
+	return &skip{m}
+}
+
+func (o *skip) ApplySigningOption(opts *Options) {
+	if len(o.skip) > 0 {
+		if opts.SkipAccessTypes == nil {
+			opts.SkipAccessTypes = map[string]bool{}
+		}
+		for k, v := range o.skip {
+			opts.SkipAccessTypes[k] = v
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -127,6 +181,7 @@ func (o *registry) ApplySigningOption(opts *Options) {
 type Options struct {
 	Update          bool
 	Recursively     bool
+	Verify          bool
 	Signer          signing.Signer
 	Verifier        signing.Verifier
 	Hasher          signing.Hasher
@@ -138,6 +193,17 @@ type Options struct {
 
 var _ Option = (*Options)(nil)
 
+func NewOptions(list ...Option) *Options {
+	return (&Options{}).Eval(list...)
+}
+
+func (opts *Options) Eval(list ...Option) *Options {
+	for _, o := range list {
+		o.ApplySigningOption(opts)
+	}
+	return opts
+}
+
 func (o *Options) ApplySigningOption(opts *Options) {
 	if o.Signer != nil {
 		opts.Signer = o.Signer
@@ -148,48 +214,99 @@ func (o *Options) ApplySigningOption(opts *Options) {
 	if o.Hasher != nil {
 		opts.Hasher = o.Hasher
 	}
+	if o.Registry != nil {
+		opts.Registry = o.Registry
+	}
+	if o.Resolver != nil {
+		opts.Resolver = o.Resolver
+	}
+	if o.SignatureName != "" {
+		opts.SignatureName = o.SignatureName
+	}
+	if o.SkipAccessTypes != nil {
+		if opts.SkipAccessTypes == nil {
+			opts.SkipAccessTypes = map[string]bool{}
+		}
+		for k, v := range o.SkipAccessTypes {
+			opts.SkipAccessTypes[k] = v
+		}
+	}
 	opts.Recursively = o.Recursively
 	opts.Update = o.Update
+	opts.Verify = o.Verify
 }
 
-func (o *Options) Default(registry signing.Registry) {
+func (o *Options) Complete(registry signing.Registry) error {
 	if o.Registry == nil {
+		if registry == nil {
+			registry = signing.DefaultRegistry()
+		}
 		o.Registry = registry
-	} else {
-		registry = o.Registry
 	}
 	if o.SkipAccessTypes == nil {
 		o.SkipAccessTypes = map[string]bool{}
 	}
-	if o.Signer == nil {
-		o.Signer = registry.GetSigner(rsa.Algorithm)
+	if o.Signer != nil {
+		if o.SignatureName == "" {
+			return errors.Newf("signature name required for signing")
+		}
+		if o.PrivateKey() == nil {
+			return errors.ErrNotFound(compdesc.KIND_PRIVATE_KEY, o.SignatureName)
+		}
 	}
-	if o.Verifier == nil {
+	if o.Verifier != nil {
+		if o.SignatureName == "" {
+			return errors.Newf("signature name required for verifying signature")
+		}
+		if o.PublicKey() == nil {
+			return errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, o.SignatureName)
+		}
+	} else {
 		if o.Signer != nil {
 			if v, ok := o.Signer.(signing.Verifier); ok {
-				o.Verifier = v
+				if o.PublicKey() != nil {
+					o.Verifier = v
+				}
 			}
-		}
-		if o.Verifier == nil {
-			o.Verifier = registry.GetVerifier(rsa.Algorithm)
 		}
 	}
 	if o.Hasher == nil {
-		o.Hasher = registry.GetHasher(sha256.Algorithm)
+		o.Hasher = o.Registry.GetHasher(sha256.Algorithm)
 	}
-	if o.Registry == nil {
-		o.Registry = signing.DefaultRegistry()
-	}
+	return nil
+}
+
+func (o *Options) DoUpdate() bool {
+	return o.Update || o.Signer != nil
+}
+
+func (o *Options) DoSign() bool {
+	return o.Signer != nil && o.SignatureName != ""
+}
+
+func (o *Options) DoVerify() bool {
+	return o.Verifier != nil && o.SignatureName != ""
+}
+
+func (o *Options) PublicKey() interface{} {
+	return o.Registry.GetPublicKey(o.SignatureName)
+}
+
+func (o *Options) PrivateKey() interface{} {
+	return o.Registry.GetPrivateKey(o.SignatureName)
 }
 
 func (o *Options) For(digest *metav1.DigestSpec) (*Options, error) {
-	if digest == nil {
-		return o, nil
-	}
 	opts := *o
-	opts.Hasher = o.Registry.GetHasher(digest.HashAlgorithm)
-	if o.Hasher == nil {
-		return nil, errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, digest.HashAlgorithm)
+	if !opts.Recursively {
+		opts.Signer = nil
+		opts.Verifier = nil
+	}
+	if digest != nil {
+		opts.Hasher = opts.Registry.GetHasher(digest.HashAlgorithm)
+		if opts.Hasher == nil {
+			return nil, errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, digest.HashAlgorithm)
+		}
 	}
 	return &opts, nil
 }

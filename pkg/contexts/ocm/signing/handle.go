@@ -34,14 +34,14 @@ func ToDigestSpec(v interface{}) *metav1.DigestSpec {
 	return v.(*metav1.DigestSpec)
 }
 
-func Apply(printer common.Printer, cv ocm.ComponentVersionAccess, sign bool, opts *Options) (*metav1.DigestSpec, error) {
+func Apply(printer common.Printer, cv ocm.ComponentVersionAccess, opts *Options) (*metav1.DigestSpec, error) {
 	if printer == nil {
 		printer = common.NewPrinter(nil)
 	}
-	return apply(printer, common.NewWalkingState(), cv, sign, opts)
+	return apply(printer, common.NewWalkingState(), cv, opts)
 }
 
-func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVersionAccess, sign bool, opts *Options) (*metav1.DigestSpec, error) {
+func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVersionAccess, opts *Options) (*metav1.DigestSpec, error) {
 	nv := common.VersionedElementKey(cv)
 	if ok, err := state.Add(ocm.KIND_COMPONENTVERSION, nv); !ok {
 		return ToDigestSpec(state.Closure[nv]), err
@@ -50,26 +50,35 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 	cd := cv.GetDescriptor().Copy()
 	printer.Printf("applying to version %q...\n", nv)
 	for i, reference := range cd.ComponentReferences {
-		nested, err := opts.Resolver.LookupComponentVersion(cd.GetName(), cd.GetVersion())
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed resolving componentReference for %s:%s in %s", reference.Name, reference.Version, state.History)
+		var calculatedDigest *metav1.DigestSpec
+		if reference.Digest == nil && !opts.DoUpdate() {
+			return nil, errors.Newf(refMsg(reference, state, "no digest for component reference"))
 		}
-		closer := accessio.OnceCloser(nested)
-		defer closer.Close()
+		if reference.Digest == nil || opts.Verify {
+			nested, err := opts.Resolver.LookupComponentVersion(reference.GetComponentName(), reference.GetVersion())
+			if err != nil {
+				return nil, errors.Wrapf(err, refMsg(reference, state, "failed resolving component reference"))
+			}
+			closer := accessio.OnceCloser(nested)
+			defer closer.Close()
+			opts, err := opts.For(reference.Digest)
+			if err != nil {
+				return nil, errors.Wrapf(err, refMsg(reference, state, "failed resolving hasher for existing digest for component reference"))
+			}
+			calculatedDigest, err = apply(printer, state, nested, opts)
+			if err != nil {
+				return nil, errors.Wrapf(err, refMsg(reference, state, "failed applying to component reference"))
+			}
+			closer.Close()
+		}
 
-		opts, err := opts.For(reference.Digest)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed resolving hasher for existing digest for %s:%s in %s", reference.Name, reference.Version, state.History)
+		if reference.Digest == nil {
+			cd.ComponentReferences[i].Digest = calculatedDigest
+		} else {
+			if calculatedDigest != nil && !reflect.DeepEqual(reference.Digest, calculatedDigest) {
+				return nil, errors.Newf(refMsg(reference, state, "calculated reference digest (%+v) mismatches existing digest (%+v) for", calculatedDigest, reference.Digest))
+			}
 		}
-		digest, err := apply(printer, state, nested, sign && opts.Recursively, opts)
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed applying to component version %s:%s: in", reference.Name, reference.Version, state.History)
-		}
-		if reference.Digest != nil && !reflect.DeepEqual(reference.Digest, digest) {
-			return nil, fmt.Errorf("calculated cd reference digest mismatches existing digest %s:%s", reference.ComponentName, reference.Version)
-		}
-		closer.Close()
-		cd.ComponentReferences[i].Digest = digest
 	}
 
 	blobdigesters := cv.GetContext().BlobDigesters()
@@ -89,7 +98,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 		raw := &cd.Resources[i]
 		meth, err := acc.AccessMethod(cv)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed creating access for resource for %s:%s in ", raw.Name, raw.Version, state.History)
+			return nil, errors.Wrapf(err, resMsg(raw, state, "failed creating access for resource"))
 		}
 		var req []cpi.DigesterType
 		if raw.Digest != nil {
@@ -102,13 +111,13 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 		}
 		digest, err := blobdigesters.DetermineDigests(res.Meta().GetType(), opts.Hasher, opts.Registry, meth, req...)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed determining digest for resource %s:%s in ", raw.Name, raw.Version, state.History)
+			return nil, errors.Wrapf(err, resMsg(raw, state, "failed determining digest for resource"))
 		}
 		if len(digest) == 0 {
-			return nil, errors.Newf("no digester accepts resource %s:%s in %s", raw.Name, raw.Version, state.History)
+			return nil, errors.Newf(resMsg(raw, state, "no digester accepts resource"))
 		}
-		if raw.Digest != nil && !reflect.DeepEqual(raw.Digest, digest) {
-			return nil, fmt.Errorf("calculated resource digest mismatches existing digest %s:%s in %s", raw.Name, raw.Version, state.History)
+		if raw.Digest != nil && !reflect.DeepEqual(*raw.Digest, digest[0]) {
+			return nil, errors.Newf(resMsg(raw, state, "calculated resource digest (%+v) mismatches existing digest (%+v) for", digest, raw.Digest))
 		}
 		cd.Resources[i].Digest = &digest[0]
 	}
@@ -121,8 +130,24 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 		NormalisationAlgorithm: compdesc.JsonNormalisationV1,
 		Value:                  digest,
 	}
-	if sign {
-		sig, media, err := opts.Signer.Sign(digest, opts.Registry.GetPrivateKey(opts.SignatureName))
+
+	found := cd.GetSignatureIndex(opts.SignatureName)
+	if opts.DoVerify() {
+		if found >= 0 {
+			pub := opts.PublicKey()
+			sig := &cd.Signatures[found]
+			err = opts.Verifier.Verify(sig.Digest.Value, sig.Signature.Value, sig.Signature.MediaType, pub)
+			if err != nil {
+				return nil, errors.ErrInvalidWrap(err, compdesc.KIND_SIGNATURE, opts.SignatureName, state.History.String())
+			}
+		} else {
+			if !opts.DoSign() {
+				return nil, errors.Newf("signature %q not found in %s", opts.SignatureName, state.History)
+			}
+		}
+	}
+	if opts.DoSign() && (!opts.DoVerify() || found == -1) {
+		sig, err := opts.Signer.Sign(digest, opts.Registry.GetPrivateKey(opts.SignatureName))
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed signing component descriptor %s ", state.History)
 		}
@@ -130,31 +155,34 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 			Name:   opts.SignatureName,
 			Digest: *spec,
 			Signature: metav1.SignatureSpec{
-				Algorithm: opts.Signer.Algorithm(),
-				Value:     sig,
-				MediaType: media,
+				Algorithm: sig.Algorithm,
+				Value:     sig.Value,
+				MediaType: sig.MediaType,
 			},
 		}
-		found := false
-		for i, s := range cd.Signatures {
-			if s.Name == opts.SignatureName {
-				cd.Signatures[i] = signature
-				found = true
-				break
-			}
-		}
-		if !found {
+		if found >= 0 {
+			cd.Signatures[found] = signature
+		} else {
 			cd.Signatures = append(cd.Signatures, signature)
 		}
 	}
-	if opts.Update {
+	if opts.DoUpdate() {
 		orig := cv.GetDescriptor()
 		for i, res := range cd.Resources {
 			orig.Resources[i].Digest = res.Digest
 		}
-		if sign {
+		if opts.DoSign() {
 			orig.Signatures = cd.Signatures
 		}
 	}
+	state.Closure[nv] = spec
 	return spec, nil
+}
+
+func refMsg(ref compdesc.ComponentReference, state common.WalkingState, msg string, args ...interface{}) string {
+	return fmt.Sprintf("%s %q [%s:%s] in %s", fmt.Sprintf(msg, args...), ref.Name, ref.ComponentName, ref.Version, state.History)
+}
+
+func resMsg(ref *compdesc.Resource, state common.WalkingState, msg string, args ...interface{}) string {
+	return fmt.Sprintf("%s %s:%s in %s", fmt.Sprintf(msg, args...), ref.Name, ref.Version, state.History)
 }

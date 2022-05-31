@@ -208,6 +208,10 @@ func RegisterDigester(digester BlobDigester, arttypes ...string) {
 
 const GenericBlobDigestV1 = "genericBlobDigest/v1"
 
+func init() {
+	RegisterDigester(&defaultDigester{})
+}
+
 type defaultDigester struct{}
 
 var _ BlobDigester = (*defaultDigester)(nil)

@@ -104,11 +104,14 @@ func FileSystem(fss ...vfs.FileSystem) vfs.FileSystem {
 }
 
 type once struct {
-	closer io.Closer
+	callbacks []CloserCallback
+	closer    io.Closer
 }
 
-func OnceCloser(c io.Closer) io.Closer {
-	return &once{c}
+type CloserCallback func()
+
+func OnceCloser(c io.Closer, callbacks ...CloserCallback) io.Closer {
+	return &once{callbacks, c}
 }
 
 func (c *once) Close() error {
@@ -117,5 +120,9 @@ func (c *once) Close() error {
 	}
 	t := c.closer
 	c.closer = nil
-	return t.Close()
+	err := t.Close()
+	for _, cb := range c.callbacks {
+		cb()
+	}
+	return err
 }

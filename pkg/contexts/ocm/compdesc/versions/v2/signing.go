@@ -44,13 +44,15 @@ var CDExcludes = signing.MapExcludes{
 				"labels": nil,
 			},
 		},
-		"signatures": nil,
 	},
+	"signatures": nil,
 }
 
 func (cd *ComponentDescriptor) Normalize(normAlgo string) ([]byte, error) {
 	if normAlgo != compdesc.JsonNormalisationV1 {
 		return nil, fmt.Errorf("unsupported cd normalization %q", normAlgo)
 	}
-	return signing.Normalize(cd, CDExcludes)
+	data, err := signing.Normalize(cd, CDExcludes)
+	//fmt.Printf("**** normalized:\n %s\n", string(data))
+	return data, err
 }

@@ -18,16 +18,19 @@ import (
 	"io"
 	"sync"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 // Session is a context keeping track of objects requiring a close
 // after final use. When closing a session all subsequent objects
 // will be closed in the opposite order they are added.
+// Added closers may be closed prio to the session without causing
+// errors.
 type Session interface {
 	Closer(closer io.Closer, extra ...interface{}) (io.Closer, error)
 	GetOrCreate(key interface{}, creator func(SessionBase) Session) Session
-	AddCloser(io.Closer) io.Closer
+	AddCloser(closer io.Closer, callbacks ...accessio.CloserCallback) io.Closer
 	Close() error
 	IsClosed() bool
 }
@@ -40,7 +43,7 @@ type SessionBase interface {
 
 	Session() Session
 	IsClosed() bool
-	AddCloser(closer io.Closer) io.Closer
+	AddCloser(closer io.Closer, callbacks ...accessio.CloserCallback) io.Closer
 }
 
 type ObjectKey struct {
@@ -105,13 +108,13 @@ func (s *session) Closer(closer io.Closer, extra ...interface{}) (io.Closer, err
 	return closer, nil
 }
 
-func (s *session) AddCloser(closer io.Closer) io.Closer {
+func (s *session) AddCloser(closer io.Closer, callbacks ...accessio.CloserCallback) io.Closer {
 	if closer == nil {
 		return nil
 	}
 	s.base.Lock()
 	defer s.base.Unlock()
-	return s.base.AddCloser(closer)
+	return s.base.AddCloser(closer, callbacks...)
 }
 
 func (s *session) GetOrCreate(key interface{}, creator func(SessionBase) Session) Session {
@@ -140,8 +143,8 @@ func (s *sessionBase) Close() error {
 	return list.Result()
 }
 
-func (s *sessionBase) AddCloser(closer io.Closer) io.Closer {
-	s.closer = append(s.closer, closer)
+func (s *sessionBase) AddCloser(closer io.Closer, callbacks ...accessio.CloserCallback) io.Closer {
+	s.closer = append(s.closer, accessio.OnceCloser(closer, callbacks...))
 	return closer
 }
 

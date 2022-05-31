@@ -18,24 +18,29 @@ import (
 	"hash"
 )
 
+type Signature struct {
+	Value     string
+	MediaType string
+	Algorithm string
+}
+
 // Signer interface is used to implement different signing algorithms.
 // Each Signer should have a matching Verifier.
 type Signer interface {
-	Algorithm() string
 	// Sign returns the signature for the given digest
-	Sign(digest string, privatekey interface{}) (signature string, mediatype string, err error)
+	Sign(digest string, privatekey interface{}) (*Signature, error)
 }
 
 // Verifier interface is used to implement different verification algorithms.
 // Each Verifier should have a matching Signer.
 type Verifier interface {
-	Algorithm() string
 	// Verify checks the signature, returns an error on verification failure
 	Verify(digest string, signature string, mediatype string, publickey interface{}) error
 }
 
 // SignatureHandler can create and verify signature of a dedicated type
 type SignatureHandler interface {
+	Algorithm() string
 	Signer
 	Verifier
 }

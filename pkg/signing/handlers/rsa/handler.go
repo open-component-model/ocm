@@ -38,8 +38,11 @@ const MediaTypePEM = "application/x-pem-file"
 // SignaturePEMBlockType defines the type of a signature pem block.
 const SignaturePEMBlockType = "SIGNATURE"
 
+// SignaturePEMBlockAlgorithmHeader defines the header in a signature pem block where the signature algorithm is defined.
+const SignaturePEMBlockAlgorithmHeader = "Algorithm"
+
 func init() {
-	signing.DefaultHandlerRegistry().RegisterSigner(Handler{})
+	signing.DefaultHandlerRegistry().RegisterSigner(Algorithm, Handler{})
 }
 
 // Handler is a signatures.Signer compatible struct to sign with RSASSA-PKCS1-V1_5.
@@ -70,7 +73,7 @@ func PrivateKey(data []byte) (*rsa.PrivateKey, error) {
 	return key, nil
 }
 
-func (h Handler) Sign(digest string, key interface{}) (signature string, mediatype string, err error) {
+func (h Handler) Sign(digest string, key interface{}) (signature *signing.Signature, err error) {
 	var privateKey *rsa.PrivateKey
 	switch k := key.(type) {
 	case *rsa.PrivateKey:
@@ -82,11 +85,11 @@ func (h Handler) Sign(digest string, key interface{}) (signature string, mediaty
 	}
 
 	if err != nil {
-		return "", "", errors.Wrapf(err, "invalid rsa private key")
+		return nil, errors.Wrapf(err, "invalid rsa private key")
 	}
 	decodedHash, err := hex.DecodeString(digest)
 	if err != nil {
-		return "", "", fmt.Errorf("failed decoding hash to bytes")
+		return nil, fmt.Errorf("failed decoding hash to bytes")
 	}
 	// ensure length of hash is correct
 	//if len(decodedHash) != 32 {
@@ -94,9 +97,13 @@ func (h Handler) Sign(digest string, key interface{}) (signature string, mediaty
 	//}
 	sig, err := rsa.SignPKCS1v15(rand.Reader, privateKey, 0, decodedHash)
 	if err != nil {
-		return "", "", fmt.Errorf("failed signing hash, %w", err)
+		return nil, fmt.Errorf("failed signing hash, %w", err)
 	}
-	return hex.EncodeToString(sig), MediaType, nil
+	return &signing.Signature{
+		Value:     hex.EncodeToString(sig),
+		MediaType: MediaType,
+		Algorithm: Algorithm,
+	}, nil
 }
 
 // PublicKey creates an instance of RsaVerifier from a rsa public key file.

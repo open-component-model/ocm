@@ -321,17 +321,14 @@ func (c *ComponentDescriptor) GetSourceIndex(src *SourceMeta) int {
 	}
 	return -1
 }
-func (c *ComponentDescriptor) Copy() *ComponentDescriptor {
-	out := &ComponentDescriptor{
-		Metadata: c.Metadata,
-		ComponentSpec: ComponentSpec{
-			ObjectMeta:          c.ObjectMeta.Copy(),
-			RepositoryContexts:  c.RepositoryContexts.Copy(),
-			Provider:            c.Provider,
-			Sources:             c.Sources.Copy(),
-			ComponentReferences: c.ComponentReferences.Copy(),
-			Resources:           c.Resources.Copy(),
-		},
+
+// GetSignatureIndex returns the index of the signature with the given name
+// If the index is not found -1 is returned.
+func (c *ComponentDescriptor) GetSignatureIndex(name string) int {
+	for i, cur := range c.Signatures {
+		if cur.Name == name {
+			return i
+		}
 	}
-	return out
+	return -1
 }

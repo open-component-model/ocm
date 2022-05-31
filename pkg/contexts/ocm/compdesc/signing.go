@@ -90,39 +90,27 @@ func Hash(cd *ComponentDescriptor, normAlgo string, hash hash.Hash) (string, err
 
 // Sign signs the given component-descriptor with the signer.
 // The component-descriptor has to contain digests for componentReferences and resources.
-func Sign(cd *ComponentDescriptor, registry signing.Registry, signAlgo, hashAlgo, signatureName string) error {
-	hasher := registry.GetHasher(hashAlgo)
-	if hasher == nil {
-		return errors.ErrUnknown(KIND_HASH_ALGORITHM, hashAlgo)
-	}
-	signer := registry.GetSigner(signAlgo)
-	if signer == nil {
-		return errors.ErrUnknown(KIND_SIGN_ALGORITHM, hashAlgo)
-	}
-	privateKey := registry.GetPrivateKey(signatureName)
-	if privateKey == nil {
-		return errors.ErrNotFound(KIND_PRIVATE_KEY, signatureName)
-	}
+func Sign(cd *ComponentDescriptor, privateKey interface{}, signer signing.Signer, hasher signing.Hasher, signatureName string) error {
 	digest, err := Hash(cd, JsonNormalisationV1, hasher.Create())
 	if err != nil {
 		return fmt.Errorf("failed getting hash for cd: %w", err)
 	}
 
-	signature, mediaType, err := signer.Sign(digest, privateKey)
+	signature, err := signer.Sign(digest, privateKey)
 	if err != nil {
 		return fmt.Errorf("failed signing hash of normalised component descriptor, %w", err)
 	}
 	cd.Signatures = append(cd.Signatures, metav1.Signature{
 		Name: signatureName,
 		Digest: metav1.DigestSpec{
-			HashAlgorithm:          hashAlgo,
+			HashAlgorithm:          hasher.Algorithm(),
 			NormalisationAlgorithm: JsonNormalisationV1,
 			Value:                  digest,
 		},
 		Signature: metav1.SignatureSpec{
-			Algorithm: signAlgo,
-			Value:     signature,
-			MediaType: mediaType,
+			Algorithm: signature.Algorithm,
+			Value:     signature.Value,
+			MediaType: signature.MediaType,
 		},
 	})
 	return nil
