@@ -17,7 +17,7 @@ package names
 var (
 	ComponentArchive       = []string{"componentarchive", "comparch", "ca"}
 	CommonTransportArchive = []string{"commontransportarchive", "ctf"}
-	Components             = []string{"components", "component", "comps", "comp", "c"}
+	Components             = []string{"componentversions", "componentversion", "cv", "components", "component", "comps", "comp", "c"}
 	Resources              = []string{"resources", "resource", "res", "r"}
 	Sources                = []string{"sources", "source", "src", "s"}
 	References             = []string{"references", "reference", "refs"}

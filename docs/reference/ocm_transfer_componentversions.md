@@ -1,16 +1,16 @@
-## ocm transfer components &mdash; Transfer Component Version
+## ocm transfer componentversions &mdash; Transfer Component Version
 
 ### Synopsis
 
 ```
-ocm transfer components [<options>] {<component-reference>} <target>
+ocm transfer componentversions [<options>] {<component-reference>} <target>
 ```
 
 ### Options
 
 ```
   -c, --closure             follow component reference nesting
-  -h, --help                help for components
+  -h, --help                help for componentversions
   -r, --repo string         repository name or spec
       --resourcesByValue    transfer resources by-value
       --script string       config name of transfer handler script

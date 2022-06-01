@@ -91,21 +91,15 @@ func Sign(h signing.Signer, name string) Option {
 func (o *signer) ApplySigningOption(opts *Options) {
 	opts.SignatureName = o.name
 	opts.Signer = o.signer
-	if o.signer != nil {
-		if v, ok := o.signer.(signing.Verifier); ok {
-			opts.Verifier = v
-		}
-	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type verifier struct {
-	verifier signing.Verifier
-	name     string
+	name string
 }
 
-func VerifySignature(h signing.Verifier, names ...string) Option {
+func VerifySignature(names ...string) Option {
 	name := ""
 	for _, n := range names {
 		if n != "" {
@@ -113,11 +107,11 @@ func VerifySignature(h signing.Verifier, names ...string) Option {
 			break
 		}
 	}
-	return &verifier{h, name}
+	return &verifier{name}
 }
 
 func (o *verifier) ApplySigningOption(opts *Options) {
-	opts.Verifier = o.verifier
+	opts.Verifier = true
 	if o.name != "" {
 		opts.SignatureName = o.name
 	}
@@ -178,13 +172,50 @@ func (o *registry) ApplySigningOption(opts *Options) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type privkey struct {
+	name string
+	key  interface{}
+}
+
+func PrivateKey(name string, key interface{}) Option {
+	return &privkey{name, key}
+}
+
+func (o *privkey) ApplySigningOption(opts *Options) {
+	if opts.Keys == nil {
+		opts.Keys = signing.NewKeyRegistry()
+	}
+	opts.Keys.RegisterPrivateKey(o.name, o.key)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type pubkey struct {
+	name string
+	key  interface{}
+}
+
+func PublicKey(name string, key interface{}) Option {
+	return &pubkey{name, key}
+}
+
+func (o *pubkey) ApplySigningOption(opts *Options) {
+	if opts.Keys == nil {
+		opts.Keys = signing.NewKeyRegistry()
+	}
+	opts.Keys.RegisterPublicKey(o.name, o.key)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type Options struct {
 	Update          bool
 	Recursively     bool
 	Verify          bool
 	Signer          signing.Signer
-	Verifier        signing.Verifier
+	Verifier        bool
 	Hasher          signing.Hasher
+	Keys            signing.KeyRegistry
 	Registry        signing.Registry
 	Resolver        ocm.ComponentVersionResolver
 	SkipAccessTypes map[string]bool
@@ -208,7 +239,7 @@ func (o *Options) ApplySigningOption(opts *Options) {
 	if o.Signer != nil {
 		opts.Signer = o.Signer
 	}
-	if o.Verifier != nil {
+	if o.Verifier {
 		opts.Verifier = o.Verifier
 	}
 	if o.Hasher != nil {
@@ -254,7 +285,7 @@ func (o *Options) Complete(registry signing.Registry) error {
 			return errors.ErrNotFound(compdesc.KIND_PRIVATE_KEY, o.SignatureName)
 		}
 	}
-	if o.Verifier != nil {
+	if o.Verifier {
 		if o.SignatureName == "" {
 			return errors.Newf("signature name required for verifying signature")
 		}
@@ -263,10 +294,8 @@ func (o *Options) Complete(registry signing.Registry) error {
 		}
 	} else {
 		if o.Signer != nil {
-			if v, ok := o.Signer.(signing.Verifier); ok {
-				if o.PublicKey() != nil {
-					o.Verifier = v
-				}
+			if o.PublicKey() != nil {
+				o.Verifier = true
 			}
 		}
 	}
@@ -285,14 +314,26 @@ func (o *Options) DoSign() bool {
 }
 
 func (o *Options) DoVerify() bool {
-	return o.Verifier != nil && o.SignatureName != ""
+	return o.Verifier && o.SignatureName != ""
 }
 
 func (o *Options) PublicKey() interface{} {
+	if o.Keys != nil {
+		k := o.Keys.GetPublicKey(o.SignatureName)
+		if k != nil {
+			return k
+		}
+	}
 	return o.Registry.GetPublicKey(o.SignatureName)
 }
 
 func (o *Options) PrivateKey() interface{} {
+	if o.Keys != nil {
+		k := o.Keys.GetPrivateKey(o.SignatureName)
+		if k != nil {
+			return k
+		}
+	}
 	return o.Registry.GetPrivateKey(o.SignatureName)
 }
 
@@ -300,7 +341,7 @@ func (o *Options) For(digest *metav1.DigestSpec) (*Options, error) {
 	opts := *o
 	if !opts.Recursively {
 		opts.Signer = nil
-		opts.Verifier = nil
+		opts.Verifier = false
 	}
 	if digest != nil {
 		opts.Hasher = opts.Registry.GetHasher(digest.HashAlgorithm)

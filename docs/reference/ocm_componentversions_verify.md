@@ -1,27 +1,28 @@
-## ocm components download &mdash; Download Ocm Component Versions
+## ocm componentversions verify &mdash; Verify Signature Of Component Version
 
 ### Synopsis
 
 ```
-ocm components download [<options>] {<components>} 
+ocm componentversions verify [<options>] {<component-reference>}
 ```
 
 ### Options
 
 ```
-  -h, --help             help for download
-  -O, --outfile string   output file or directory
-  -r, --repo string      repository name or spec
-  -t, --type string      archive format (default "directory")
+      --algorithm string          signature handler
+  -h, --help                      help for verify
+  -K, --private-key stringArray   private key setting
+  -k, --public-key stringArray    public key setting
+  -r, --repo string               repository name or spec
+  -s, --signature string          signature name
+      --update                    update digest in component versions
+  -V, --verify                    verify existing digests (default true)
 ```
 
 ### Description
 
 
-Download component versions from an OCM repository. The result is stored in
-component archives.
-
-The files are named according to the component version name.
+Verify signature of specified component versions. 
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
@@ -67,17 +68,23 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `OCIRegistry`
 - `oci`
 
-The <code>--type</code> option accepts a file format for the
-target archive to use. The following formats are supported:
-- directory
-- tar
-- tgz
-The default format is <code>directory</code>.
+The <code>--public-key</code> and <code>--private-key</code> optiond can be
+used to define public and provate keys on the command line. The options have an
+argument of the form <code>[&lt;name>=]&lt;filepath></code>. The optional name
+specified the signature name the key should be used for. By default this is the
+signature name specified with the option <code>--signature</code>.
+
+
+### Examples
+
+```
+$ ocm verify componentversion --signature mandelsoft --public-key=mandelsoft.key ghcr.io/mandelsoft/kubelink
+```
 
 ### SEE ALSO
 
 ##### Parents
 
-* [ocm components](ocm_components.md)	 - Commands acting on components
+* [ocm componentversions](ocm_componentversions.md)	 - Commands acting on components
 * [ocm](ocm.md)	 - Open Component Model command line client
 

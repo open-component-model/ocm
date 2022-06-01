@@ -23,7 +23,7 @@ ocm ocm [<options>] <sub command> ...
 
 * [ocm ocm <b>commontransportarchive</b>](ocm_ocm_commontransportarchive.md)	 - Commands acting on common transport archives
 * [ocm ocm <b>componentarchive</b>](ocm_ocm_componentarchive.md)	 - Commands acting on component archives
-* [ocm ocm <b>components</b>](ocm_ocm_components.md)	 - Commands acting on components
+* [ocm ocm <b>componentversions</b>](ocm_ocm_componentversions.md)	 - Commands acting on components
 * [ocm ocm <b>references</b>](ocm_ocm_references.md)	 - Commands related to component references in component versions
 * [ocm ocm <b>resources</b>](ocm_ocm_resources.md)	 - Commands acting on component resources
 * [ocm ocm <b>sources</b>](ocm_ocm_sources.md)	 - Commands acting on component sources

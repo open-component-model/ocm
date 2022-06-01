@@ -12,35 +12,29 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package signing_test
+package sign_test
 
 import (
-	"fmt"
+	"bytes"
+	"os"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
-
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 
-	tenv "github.com/open-component-model/ocm/pkg/env"
-	. "github.com/open-component-model/ocm/pkg/env/builder"
+	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 )
-
-var DefaultContext = ocm.New()
 
 const ARCH = "/tmp/ctf"
 const PROVIDER = "mandelsoft"
@@ -57,17 +51,24 @@ const OCIHOST = "alias"
 const SIGNATURE = "test"
 const SIGN_ALGO = rsa.Algorithm
 
+const PUBKEY = "/tmp/pub"
+const PRIVKEY = "/tmp/priv"
+
 var _ = Describe("access method", func() {
-	var env *Builder
+	var env *TestEnv
 
 	priv, pub, err := rsa.Handler{}.CreateKeyPair()
 	Expect(err).To(Succeed())
 
-	signing.DefaultKeyRegistry().RegisterPublicKey(SIGNATURE, pub)
-	signing.DefaultKeyRegistry().RegisterPrivateKey(SIGNATURE, priv)
-
 	BeforeEach(func() {
-		env = NewBuilder(tenv.NewEnvironment())
+		env = NewTestEnv()
+		data, err := rsa.KeyData(pub)
+		Expect(err).To(Succeed())
+		Expect(vfs.WriteFile(env.FileSystem(), PUBKEY, data, os.ModePerm)).To(Succeed())
+		data, err = rsa.KeyData(priv)
+		Expect(err).To(Succeed())
+		Expect(vfs.WriteFile(env.FileSystem(), PRIVKEY, data, os.ModePerm)).To(Succeed())
+
 		env.OCIContext().SetAlias(OCIHOST, ctfoci.NewRepositorySpec(accessobj.ACC_READONLY, OCIPATH, accessio.PathFileSystem(env.FileSystem())))
 
 		env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
@@ -129,102 +130,27 @@ var _ = Describe("access method", func() {
 		env.Cleanup()
 	})
 
-	It("sign flat version", func() {
-		session := datacontext.NewSession()
-		defer session.Close()
-
-		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
-		Expect(err).To(Succeed())
-		archcloser := session.AddCloser(src)
-		resolver := ocm.NewCompoundResolver(src)
-
-		cv, err := resolver.LookupComponentVersion(COMPONENTA, VERSION)
-		Expect(err).To(Succeed())
-		closer := session.AddCloser(cv)
-
-		opts := NewOptions(
-			Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
-			Resolver(resolver),
-			Update(), VerifyDigests(),
-		)
-		Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
-		digest := "bf25a4c8cdb6df8e0eabf421fcc0e945de9458dc2b9f97fdfa7c986a7979ad8e"
-		dig, err := Apply(nil, nil, cv, opts)
-		Expect(err).To(Succeed())
-		closer.Close()
-		archcloser.Close()
-		fmt.Printf("%+v\n", dig)
-		Expect(dig.Value).To(Equal(digest))
-
-		src, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
-		Expect(err).To(Succeed())
-		session.AddCloser(src)
-		cv, err = src.LookupComponentVersion(COMPONENTA, VERSION)
-		Expect(err).To(Succeed())
-		session.AddCloser(cv)
-		Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(digest))
-
-		////////
-
-		opts = NewOptions(
-			VerifySignature(SIGNATURE),
-			Resolver(resolver),
-			Update(), VerifyDigests(),
-		)
-		Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
-
-		dig, err = Apply(nil, nil, cv, opts)
-		Expect(err).To(Succeed())
-		Expect(dig.Value).To(Equal(digest))
-
-	})
-
-	It("sign deep version", func() {
-		session := datacontext.NewSession()
-		defer session.Close()
-
-		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
-		Expect(err).To(Succeed())
-		archcloser := session.AddCloser(src)
-		resolver := ocm.NewCompoundResolver(src)
-
-		cv, err := resolver.LookupComponentVersion(COMPONENTB, VERSION)
-		Expect(err).To(Succeed())
-		closer := session.AddCloser(cv)
-
-		opts := NewOptions(
-			Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
-			Resolver(resolver),
-			Update(), VerifyDigests(),
-		)
+	It("sign component archive", func() {
+		buf := bytes.NewBuffer(nil)
 		digest := "43e779654ba6d4f4f2c18fade183a7a7e00defe170b8b8869c2adb50aac544aa"
-		Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
-		dig, err := Apply(nil, nil, cv, opts)
-		Expect(err).To(Succeed())
-		closer.Close()
-		archcloser.Close()
-		fmt.Printf("%+v\n", dig)
-		Expect(dig.Value).To(Equal(digest))
+		Expect(env.CatchOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(Succeed())
 
-		src, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
+		Expect("\n" + buf.String()).To(Equal(`
+applying to version "github.com/mandelsoft/ref:v1"...
+  applying to version "github.com/mandelsoft/test:v1"...
+successfully signed github.com/mandelsoft/ref:v1 (digest sha256:` + digest + `)
+`))
+		session := datacontext.NewSession()
+		defer session.Close()
+
+		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
 		Expect(err).To(Succeed())
 		session.AddCloser(src)
-		cv, err = src.LookupComponentVersion(COMPONENTB, VERSION)
+		cv, err := src.LookupComponentVersion(COMPONENTB, VERSION)
 		Expect(err).To(Succeed())
 		session.AddCloser(cv)
 		Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(digest))
 
-		////////
-
-		opts = NewOptions(
-			VerifySignature(SIGNATURE),
-			Resolver(src),
-			VerifyDigests(),
-		)
-		Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
-
-		dig, err = Apply(nil, nil, cv, opts)
-		Expect(err).To(Succeed())
-		Expect(dig.Value).To(Equal(digest))
 	})
+
 })

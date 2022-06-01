@@ -34,11 +34,15 @@ func ToDigestSpec(v interface{}) *metav1.DigestSpec {
 	return v.(*metav1.DigestSpec)
 }
 
-func Apply(printer common.Printer, cv ocm.ComponentVersionAccess, opts *Options) (*metav1.DigestSpec, error) {
+func Apply(printer common.Printer, state *common.WalkingState, cv ocm.ComponentVersionAccess, opts *Options) (*metav1.DigestSpec, error) {
 	if printer == nil {
 		printer = common.NewPrinter(nil)
 	}
-	return apply(printer, common.NewWalkingState(), cv, opts)
+	if state == nil {
+		s := common.NewWalkingState()
+		state = &s
+	}
+	return apply(printer, *state, cv, opts)
 }
 
 func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVersionAccess, opts *Options) (*metav1.DigestSpec, error) {
@@ -65,7 +69,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 			if err != nil {
 				return nil, errors.Wrapf(err, refMsg(reference, state, "failed resolving hasher for existing digest for component reference"))
 			}
-			calculatedDigest, err = apply(printer, state, nested, opts)
+			calculatedDigest, err = apply(printer.AddGap("  "), state, nested, opts)
 			if err != nil {
 				return nil, errors.Wrapf(err, refMsg(reference, state, "failed applying to component reference"))
 			}
@@ -136,7 +140,11 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 		if found >= 0 {
 			pub := opts.PublicKey()
 			sig := &cd.Signatures[found]
-			err = opts.Verifier.Verify(sig.Digest.Value, sig.Signature.Value, sig.Signature.MediaType, pub)
+			verifier := opts.Registry.GetVerifier(sig.Signature.Algorithm)
+			if verifier == nil {
+				return nil, errors.ErrUnknown(compdesc.KIND_VERIFY_ALGORITHM, sig.Signature.Algorithm, state.History.String())
+			}
+			err = verifier.Verify(sig.Digest.Value, sig.Signature.Value, sig.Signature.MediaType, pub)
 			if err != nil {
 				return nil, errors.ErrInvalidWrap(err, compdesc.KIND_SIGNATURE, opts.SignatureName, state.History.String())
 			}
@@ -147,7 +155,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 		}
 	}
 	if opts.DoSign() && (!opts.DoVerify() || found == -1) {
-		sig, err := opts.Signer.Sign(digest, opts.Registry.GetPrivateKey(opts.SignatureName))
+		sig, err := opts.Signer.Sign(digest, opts.PrivateKey())
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed signing component descriptor %s ", state.History)
 		}
@@ -170,6 +178,9 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 		orig := cv.GetDescriptor()
 		for i, res := range cd.Resources {
 			orig.Resources[i].Digest = res.Digest
+		}
+		for i, res := range cd.ComponentReferences {
+			orig.ComponentReferences[i].Digest = res.Digest
 		}
 		if opts.DoSign() {
 			orig.Signatures = cd.Signatures

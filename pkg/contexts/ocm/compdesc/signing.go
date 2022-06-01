@@ -32,11 +32,12 @@ const (
 )
 
 const (
-	KIND_HASH_ALGORITHM = "hash algorithm"
-	KIND_SIGN_ALGORITHM = "signing algorithm"
-	KIND_PUBLIC_KEY     = "public key"
-	KIND_PRIVATE_KEY    = "private key"
-	KIND_SIGNATURE      = "signature"
+	KIND_HASH_ALGORITHM   = "hash algorithm"
+	KIND_SIGN_ALGORITHM   = "signing algorithm"
+	KIND_VERIFY_ALGORITHM = "signature verification algorithm"
+	KIND_PUBLIC_KEY       = "public key"
+	KIND_PRIVATE_KEY      = "private key"
+	KIND_SIGNATURE        = "signature"
 )
 
 // isNormalizeable checks if componentReferences and resources contain digest.

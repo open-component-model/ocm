@@ -1,26 +1,27 @@
-## ocm components get &mdash; Get Component Version
+## ocm componentversions download &mdash; Download Ocm Component Versions
 
 ### Synopsis
 
 ```
-ocm components get [<options>] {<component-reference>}
+ocm componentversions download [<options>] {<components>} 
 ```
 
 ### Options
 
 ```
-  -c, --closure            follow component reference nesting
-  -h, --help               help for get
-  -o, --output string      output mode (JSON, json, tree, wide, yaml)
-  -r, --repo string        repository name or spec
-  -s, --sort stringArray   sort fields
+  -h, --help             help for download
+  -O, --outfile string   output file or directory
+  -r, --repo string      repository name or spec
+  -t, --type string      archive format (default "directory")
 ```
 
 ### Description
 
 
-Get lists all component versions specified, if only a component is specified
-all versions are listed.
+Download component versions from an OCM repository. The result is stored in
+component archives.
+
+The files are named according to the component version name.
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
@@ -66,30 +67,17 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `OCIRegistry`
 - `oci`
 
-With the option <code>--closure</code> the complete reference tree of a component reference is traversed.
-
-With the option <code>--output</code> the output mode can be selected.
-The following modes are supported:
- - JSON
- - json
- - tree
- - wide
- - yaml
-
-
-### Examples
-
-```
-
-$ ocm get componentversion ghcr.io/mandelsoft/kubelink
-$ ocm get componentversion --repo OCIRegistry:ghcr.io mandelsoft/kubelink
-
-```
+The <code>--type</code> option accepts a file format for the
+target archive to use. The following formats are supported:
+- directory
+- tar
+- tgz
+The default format is <code>directory</code>.
 
 ### SEE ALSO
 
 ##### Parents
 
-* [ocm components](ocm_components.md)	 - Commands acting on components
+* [ocm componentversions](ocm_componentversions.md)	 - Commands acting on components
 * [ocm](ocm.md)	 - Open Component Model command line client
 

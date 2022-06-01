@@ -20,6 +20,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/cmds/ocm/app"
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/env"
@@ -40,19 +41,23 @@ func NewTestEnv(opts ...env.Option) *TestEnv {
 	}
 }
 
-func (e TestEnv) OCMContext() ocm.Context {
+func (e *TestEnv) ApplyOption(opts *accessio.Options) {
+	e.Builder.ApplyOption(opts)
+}
+
+func (e *TestEnv) OCMContext() ocm.Context {
 	return e.Builder.OCMContext()
 }
 
-func (e TestEnv) OCIContext() oci.Context {
+func (e *TestEnv) OCIContext() oci.Context {
 	return e.Builder.OCIContext()
 }
 
-func (e TestEnv) FileSystem() vfs.FileSystem {
+func (e *TestEnv) FileSystem() vfs.FileSystem {
 	return e.Builder.FileSystem()
 }
 
-func (e TestEnv) ReadTextFile(path string) (string, error) {
+func (e *TestEnv) ReadTextFile(path string) (string, error) {
 	data, err := e.ReadFile(path)
 	if err != nil {
 		return "", err

@@ -18,6 +18,8 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/download"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/get"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/sign"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/verify"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/spf13/cobra"
@@ -31,6 +33,8 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 		Short: "Commands acting on components",
 	}, Names...)
 	cmd.AddCommand(get.NewCommand(ctx, get.Verb))
+	cmd.AddCommand(sign.NewCommand(ctx, sign.Verb))
+	cmd.AddCommand(verify.NewCommand(ctx, verify.Verb))
 	cmd.AddCommand(download.NewCommand(ctx, download.Verb))
 	return cmd
 }

@@ -28,7 +28,9 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/show"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/sign"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/transfer"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verify"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/cmds/ocm/topics/common/config"
 	"github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
@@ -154,6 +156,8 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(get.NewCommand(opts.Context))
 	cmd.AddCommand(create.NewCommand(opts.Context))
 	cmd.AddCommand(add.NewCommand(opts.Context))
+	cmd.AddCommand(sign.NewCommand(opts.Context))
+	cmd.AddCommand(verify.NewCommand(opts.Context))
 	cmd.AddCommand(show.NewCommand(opts.Context))
 	cmd.AddCommand(transfer.NewCommand(opts.Context))
 	cmd.AddCommand(describe.NewCommand(opts.Context))

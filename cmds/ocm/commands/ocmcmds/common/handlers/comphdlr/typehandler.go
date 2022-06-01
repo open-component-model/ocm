@@ -166,7 +166,7 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 	}
 
 	if spec.IsVersion() {
-		v, err := component.LookupVersion(*spec.Version)
+		v, err := h.session.GetComponentVersion(component, *spec.Version)
 		if err != nil {
 			return nil, err
 		}
@@ -185,7 +185,7 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 				return nil, err
 			}
 			for _, vers := range versions {
-				v, err := component.LookupVersion(vers)
+				v, err := h.session.GetComponentVersion(component, vers)
 				if err != nil {
 					return nil, err
 				}

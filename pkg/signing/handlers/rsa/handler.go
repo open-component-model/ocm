@@ -17,7 +17,6 @@ package rsa
 import (
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/x509"
 	"encoding/hex"
 	"encoding/pem"
 	"fmt"
@@ -56,34 +55,8 @@ func (h Handler) Algorithm() string {
 	return Algorithm
 }
 
-// PrivateKey parses a private key
-func PrivateKey(data []byte) (*rsa.PrivateKey, error) {
-	block, _ := pem.Decode([]byte(data))
-	if block == nil {
-		return nil, fmt.Errorf("failed decoding PEM formatted block in key")
-	}
-	untypedPrivateKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, fmt.Errorf("failed parsing key %w", err)
-	}
-	key, ok := untypedPrivateKey.(*rsa.PrivateKey)
-	if !ok {
-		return nil, fmt.Errorf("parsed key is not of type *rsa.PrivateKey: %T", untypedPrivateKey)
-	}
-	return key, nil
-}
-
 func (h Handler) Sign(digest string, key interface{}) (signature *signing.Signature, err error) {
-	var privateKey *rsa.PrivateKey
-	switch k := key.(type) {
-	case *rsa.PrivateKey:
-		privateKey = k
-	case []byte:
-		privateKey, err = PrivateKey(k)
-	default:
-		err = errors.ErrNotSupported("private key type", fmt.Sprintf("%T", key))
-	}
-
+	privateKey, err := PrivateKey(key)
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid rsa private key")
 	}
@@ -106,36 +79,12 @@ func (h Handler) Sign(digest string, key interface{}) (signature *signing.Signat
 	}, nil
 }
 
-// PublicKey creates an instance of RsaVerifier from a rsa public key file.
-// The private key has to be in the PKIX, ASN.1 DER form, see x509.ParsePKIXPublicKey.
-func PublicKey(data []byte) (*rsa.PublicKey, error) {
-	block, _ := pem.Decode([]byte(data))
-	if block == nil {
-		return nil, fmt.Errorf("failed decoding PEM formatted block in key")
-	}
-	untypedKey, err := x509.ParsePKIXPublicKey(block.Bytes)
-	if err != nil {
-		return nil, fmt.Errorf("failed parsing key %w", err)
-	}
-	switch key := untypedKey.(type) {
-	case *rsa.PublicKey:
-		return key, nil
-	default:
-		return nil, fmt.Errorf("public key format is not supported. Only rsa.PublicKey is supported")
-	}
-}
-
 // Verify checks the signature, returns an error on verification failure
 func (h Handler) Verify(digest string, signature string, mediatype string, key interface{}) (err error) {
 	var signatureBytes []byte
-	var publicKey *rsa.PublicKey
-	switch k := key.(type) {
-	case *rsa.PublicKey:
-		publicKey = k
-	case []byte:
-		publicKey, err = PublicKey(k)
-	default:
-		err = errors.ErrNotSupported("public key type", fmt.Sprintf("%T", key))
+	publicKey, err := PublicKey(key)
+	if err != nil {
+		return err
 	}
 	switch mediatype {
 	case MediaType:

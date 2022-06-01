@@ -63,7 +63,21 @@ form
 The value can be a simple type or a json string for complex values. The following
 attributes are supported:
 - github.com/mandelsoft/ocm/compat [compat]: *bool*
-  Avoid generic local access methods and prefer type specific ones.
+  Avoid generic local access methods and prefer type specific ones.- github.com/mandelsoft/ocm/signing: *bool*
+  Public and private Key settings.
+  <pre>
+  {
+    "publicKeys"": [
+       "<provider>": {
+         "data": "<base64>"
+       }
+    ],
+    "privateKeys"": [
+       "<provider>": {
+         "path": "<file path>"
+       }
+    ]
+  </pre>
 
 ### SEE ALSO
 
@@ -73,7 +87,7 @@ attributes are supported:
 
 * [ocm <b>add</b>](ocm_add.md)	 - Add resources or sources to a component archive
 * [ocm <b>componentarchive</b>](ocm_componentarchive.md)	 - Commands acting on component archives
-* [ocm <b>components</b>](ocm_components.md)	 - Commands acting on components
+* [ocm <b>componentversions</b>](ocm_componentversions.md)	 - Commands acting on components
 * [ocm <b>create</b>](ocm_create.md)	 - Create transport or component archive
 * [ocm <b>describe</b>](ocm_describe.md)	 - Describe artefacts
 * [ocm <b>download</b>](ocm_download.md)	 - Download oci artefacts, resources or complete components
@@ -83,8 +97,10 @@ attributes are supported:
 * [ocm <b>references</b>](ocm_references.md)	 - Commands related to component references in component versions
 * [ocm <b>resources</b>](ocm_resources.md)	 - Commands acting on component resources
 * [ocm <b>show</b>](ocm_show.md)	 - Show tags or versions
+* [ocm <b>sign</b>](ocm_sign.md)	 - Sign components
 * [ocm <b>sources</b>](ocm_sources.md)	 - Commands acting on component sources
 * [ocm <b>transfer</b>](ocm_transfer.md)	 - Transfer artefacts or components
+* [ocm <b>verify</b>](ocm_verify.md)	 - Verify component version signatures
 * [ocm <b>version</b>](ocm_version.md)	 - displays the version
 
 

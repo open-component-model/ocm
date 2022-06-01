@@ -12,16 +12,23 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package commands
+package sign
 
-const (
-	Get      = "get"
-	Describe = "describe"
-	Add      = "add"
-	Create   = "create"
-	Transfer = "transfer"
-	Download = "download"
-	Show     = "show"
-	Sign     = "sign"
-	Verify   = "verify"
+import (
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/common/sign"
+	"github.com/spf13/cobra"
+
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 )
+
+var (
+	Names = names.Components
+	Verb  = commands.Sign
+)
+
+// NewCommand creates a new ctf command.
+func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
+	return sign.NewSigningCommand(ctx, sign.NewOperation("Sign", true, []string{"signed", "signing"}, "$ ocm sign componentversion --signature mandelsoft --private-key=mandelsoft.key ghcr.io/mandelsoft/kubelink"), names...)
+}

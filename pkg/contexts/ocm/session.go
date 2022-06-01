@@ -16,6 +16,7 @@ package ocm
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
@@ -140,6 +141,9 @@ func (s *session) LookupComponentVersion(r Repository, comp, vers string) (Compo
 }
 
 func (s *session) GetComponentVersion(c ComponentVersionContainer, version string) (ComponentVersionAccess, error) {
+	if c == nil {
+		return nil, fmt.Errorf("no container given")
+	}
 	key := datacontext.ObjectKey{
 		Object: c,
 		Name:   version,
@@ -149,7 +153,7 @@ func (s *session) GetComponentVersion(c ComponentVersionContainer, version strin
 	if s.base.IsClosed() {
 		return nil, errors.ErrClosed("session")
 	}
-	if obj := s.versions[key]; s != nil {
+	if obj := s.versions[key]; obj != nil {
 		return obj, nil
 	}
 	obj, err := c.LookupVersion(version)

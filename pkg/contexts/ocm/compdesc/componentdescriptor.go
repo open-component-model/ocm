@@ -590,5 +590,6 @@ func (r *ComponentReference) Copy() *ComponentReference {
 	return &ComponentReference{
 		ElementMeta:   *r.ElementMeta.Copy(),
 		ComponentName: r.ComponentName,
+		Digest:        r.Digest.Copy(),
 	}
 }
