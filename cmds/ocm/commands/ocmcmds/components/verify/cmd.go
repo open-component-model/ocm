@@ -15,7 +15,7 @@
 package verify
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/common/sign"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/cmds/sign"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
@@ -30,5 +30,8 @@ var (
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return sign.NewSigningCommand(ctx, sign.NewOperation("Verify signature of", false, []string{"verified", "verifying signature of"}, "$ ocm verify componentversion --signature mandelsoft --public-key=mandelsoft.key ghcr.io/mandelsoft/kubelink"), names...)
+	return sign.NewCommand(ctx, "Verify signature of", false,
+		[]string{"verified", "verifying signature of"},
+		"$ ocm verify componentversion --signature mandelsoft --public-key=mandelsoft.key ghcr.io/mandelsoft/kubelink",
+		names...)
 }

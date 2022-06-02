@@ -15,6 +15,8 @@
 package signing
 
 import (
+	"strings"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -89,7 +91,10 @@ func Sign(h signing.Signer, name string) Option {
 }
 
 func (o *signer) ApplySigningOption(opts *Options) {
-	opts.SignatureName = o.name
+	n := strings.TrimSpace(o.name)
+	if n != "" {
+		opts.SignatureNames = append(append([]string{}, n), opts.SignatureNames...)
+	}
 	opts.Signer = o.signer
 }
 
@@ -102,6 +107,7 @@ type verifier struct {
 func VerifySignature(names ...string) Option {
 	name := ""
 	for _, n := range names {
+		n = strings.TrimSpace(n)
 		if n != "" {
 			name = n
 			break
@@ -111,9 +117,9 @@ func VerifySignature(names ...string) Option {
 }
 
 func (o *verifier) ApplySigningOption(opts *Options) {
-	opts.Verifier = true
+	opts.VerifySignature = true
 	if o.name != "" {
-		opts.SignatureName = o.name
+		opts.SignatureNames = append(opts.SignatureNames, o.name)
 	}
 }
 
@@ -213,13 +219,13 @@ type Options struct {
 	Recursively     bool
 	Verify          bool
 	Signer          signing.Signer
-	Verifier        bool
+	VerifySignature bool
 	Hasher          signing.Hasher
 	Keys            signing.KeyRegistry
 	Registry        signing.Registry
 	Resolver        ocm.ComponentVersionResolver
 	SkipAccessTypes map[string]bool
-	SignatureName   string
+	SignatureNames  []string
 }
 
 var _ Option = (*Options)(nil)
@@ -239,8 +245,8 @@ func (o *Options) ApplySigningOption(opts *Options) {
 	if o.Signer != nil {
 		opts.Signer = o.Signer
 	}
-	if o.Verifier {
-		opts.Verifier = o.Verifier
+	if o.VerifySignature {
+		opts.VerifySignature = o.VerifySignature
 	}
 	if o.Hasher != nil {
 		opts.Hasher = o.Hasher
@@ -251,8 +257,8 @@ func (o *Options) ApplySigningOption(opts *Options) {
 	if o.Resolver != nil {
 		opts.Resolver = o.Resolver
 	}
-	if o.SignatureName != "" {
-		opts.SignatureName = o.SignatureName
+	if len(o.SignatureNames) != 0 {
+		opts.SignatureNames = o.SignatureNames
 	}
 	if o.SkipAccessTypes != nil {
 		if opts.SkipAccessTypes == nil {
@@ -278,24 +284,25 @@ func (o *Options) Complete(registry signing.Registry) error {
 		o.SkipAccessTypes = map[string]bool{}
 	}
 	if o.Signer != nil {
-		if o.SignatureName == "" {
+		if len(o.SignatureNames) == 0 {
 			return errors.Newf("signature name required for signing")
 		}
 		if o.PrivateKey() == nil {
-			return errors.ErrNotFound(compdesc.KIND_PRIVATE_KEY, o.SignatureName)
+			return errors.ErrNotFound(compdesc.KIND_PRIVATE_KEY, o.SignatureNames[0])
 		}
 	}
-	if o.Verifier {
-		if o.SignatureName == "" {
-			return errors.Newf("signature name required for verifying signature")
-		}
-		if o.PublicKey() == nil {
-			return errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, o.SignatureName)
+	if o.VerifySignature {
+		if len(o.SignatureNames) > 0 {
+			for _, n := range o.SignatureNames {
+				if o.PublicKey(n) == nil {
+					return errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, n)
+				}
+			}
 		}
 	} else {
 		if o.Signer != nil {
-			if o.PublicKey() != nil {
-				o.Verifier = true
+			if o.PublicKey(o.SignatureName()) != nil {
+				o.VerifySignature = true
 			}
 		}
 	}
@@ -310,38 +317,54 @@ func (o *Options) DoUpdate() bool {
 }
 
 func (o *Options) DoSign() bool {
-	return o.Signer != nil && o.SignatureName != ""
+	return o.Signer != nil && len(o.SignatureNames) > 0
 }
 
 func (o *Options) DoVerify() bool {
-	return o.Verifier && o.SignatureName != ""
+	return o.VerifySignature
 }
 
-func (o *Options) PublicKey() interface{} {
+func (o *Options) SignatureName() string {
+	if len(o.SignatureNames) > 0 {
+		return o.SignatureNames[0]
+	}
+	return ""
+}
+
+func (o *Options) SignatureConfigured(name string) bool {
+	for _, n := range o.SignatureNames {
+		if n == name {
+			return true
+		}
+	}
+	return false
+}
+
+func (o *Options) PublicKey(sig string) interface{} {
 	if o.Keys != nil {
-		k := o.Keys.GetPublicKey(o.SignatureName)
+		k := o.Keys.GetPublicKey(sig)
 		if k != nil {
 			return k
 		}
 	}
-	return o.Registry.GetPublicKey(o.SignatureName)
+	return o.Registry.GetPublicKey(sig)
 }
 
 func (o *Options) PrivateKey() interface{} {
 	if o.Keys != nil {
-		k := o.Keys.GetPrivateKey(o.SignatureName)
+		k := o.Keys.GetPrivateKey(o.SignatureName())
 		if k != nil {
 			return k
 		}
 	}
-	return o.Registry.GetPrivateKey(o.SignatureName)
+	return o.Registry.GetPrivateKey(o.SignatureName())
 }
 
 func (o *Options) For(digest *metav1.DigestSpec) (*Options, error) {
 	opts := *o
 	if !opts.Recursively {
 		opts.Signer = nil
-		opts.Verifier = false
+		opts.VerifySignature = false
 	}
 	if digest != nil {
 		opts.Hasher = opts.Registry.GetHasher(digest.HashAlgorithm)

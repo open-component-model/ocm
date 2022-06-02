@@ -135,32 +135,59 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 		Value:                  digest,
 	}
 
-	found := cd.GetSignatureIndex(opts.SignatureName)
 	if opts.DoVerify() {
-		if found >= 0 {
-			pub := opts.PublicKey()
-			sig := &cd.Signatures[found]
+		list := opts.SignatureNames
+		if len(opts.SignatureNames) == 0 {
+			for _, s := range cd.Signatures {
+				list = append(list, s.Name)
+			}
+			if len(list) == 0 {
+				return nil, errors.Newf("no signature found in %s", state.History)
+			}
+		}
+		found := []string{}
+		for _, n := range list {
+			f := cd.GetSignatureIndex(n)
+			if f < 0 {
+				continue
+			}
+			pub := opts.PublicKey(n)
+			if pub == nil {
+				if opts.SignatureConfigured(n) {
+					return nil, errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, n, state.History.String())
+				}
+				printer.Printf("Warning: no public key for signature %q in %s\n", n, state.History)
+				continue
+			}
+			sig := &cd.Signatures[f]
 			verifier := opts.Registry.GetVerifier(sig.Signature.Algorithm)
 			if verifier == nil {
-				return nil, errors.ErrUnknown(compdesc.KIND_VERIFY_ALGORITHM, sig.Signature.Algorithm, state.History.String())
+				if opts.SignatureConfigured(n) {
+					return nil, errors.ErrUnknown(compdesc.KIND_VERIFY_ALGORITHM, n, state.History.String())
+				}
+				printer.Printf("Warning: no verifier (%s) found for signature %q in %s\n", sig.Signature.Algorithm, n, state.History)
+				continue
 			}
 			err = verifier.Verify(sig.Digest.Value, sig.Signature.Value, sig.Signature.MediaType, pub)
 			if err != nil {
-				return nil, errors.ErrInvalidWrap(err, compdesc.KIND_SIGNATURE, opts.SignatureName, state.History.String())
+				return nil, errors.ErrInvalidWrap(err, compdesc.KIND_SIGNATURE, sig.Signature.Algorithm, state.History.String())
 			}
-		} else {
+			found = append(found, n)
+		}
+		if len(found) == 0 {
 			if !opts.DoSign() {
-				return nil, errors.Newf("signature %q not found in %s", opts.SignatureName, state.History)
+				return nil, errors.Newf("no verifiable signature found in %s", state.History)
 			}
 		}
 	}
+	found := cd.GetSignatureIndex(opts.SignatureName())
 	if opts.DoSign() && (!opts.DoVerify() || found == -1) {
 		sig, err := opts.Signer.Sign(digest, opts.PrivateKey())
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed signing component descriptor %s ", state.History)
 		}
 		signature := metav1.Signature{
-			Name:   opts.SignatureName,
+			Name:   opts.SignatureName(),
 			Digest: *spec,
 			Signature: metav1.SignatureSpec{
 				Algorithm: sig.Algorithm,

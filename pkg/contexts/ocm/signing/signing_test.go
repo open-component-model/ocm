@@ -179,6 +179,56 @@ var _ = Describe("access method", func() {
 
 	})
 
+	It("sign flat version with generic verification", func() {
+		session := datacontext.NewSession()
+		defer session.Close()
+
+		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
+		Expect(err).To(Succeed())
+		archcloser := session.AddCloser(src)
+		resolver := ocm.NewCompoundResolver(src)
+
+		cv, err := resolver.LookupComponentVersion(COMPONENTA, VERSION)
+		Expect(err).To(Succeed())
+		closer := session.AddCloser(cv)
+
+		opts := NewOptions(
+			Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+			Resolver(resolver),
+			Update(), VerifyDigests(),
+		)
+		Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+		digest := "bf25a4c8cdb6df8e0eabf421fcc0e945de9458dc2b9f97fdfa7c986a7979ad8e"
+		dig, err := Apply(nil, nil, cv, opts)
+		Expect(err).To(Succeed())
+		closer.Close()
+		archcloser.Close()
+		fmt.Printf("%+v\n", dig)
+		Expect(dig.Value).To(Equal(digest))
+
+		src, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
+		Expect(err).To(Succeed())
+		session.AddCloser(src)
+		cv, err = src.LookupComponentVersion(COMPONENTA, VERSION)
+		Expect(err).To(Succeed())
+		session.AddCloser(cv)
+		Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(digest))
+
+		////////
+
+		opts = NewOptions(
+			VerifySignature(),
+			Resolver(resolver),
+			Update(), VerifyDigests(),
+		)
+		Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+
+		dig, err = Apply(nil, nil, cv, opts)
+		Expect(err).To(Succeed())
+		Expect(dig.Value).To(Equal(digest))
+
+	})
+
 	It("sign deep version", func() {
 		session := datacontext.NewSession()
 		defer session.Close()
@@ -226,5 +276,30 @@ var _ = Describe("access method", func() {
 		dig, err = Apply(nil, nil, cv, opts)
 		Expect(err).To(Succeed())
 		Expect(dig.Value).To(Equal(digest))
+	})
+
+	It("fails generic verification", func() {
+		session := datacontext.NewSession()
+		defer session.Close()
+
+		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
+		Expect(err).To(Succeed())
+		session.AddCloser(src)
+		resolver := ocm.NewCompoundResolver(src)
+
+		cv, err := resolver.LookupComponentVersion(COMPONENTA, VERSION)
+		Expect(err).To(Succeed())
+		session.AddCloser(cv)
+
+		opts := NewOptions(
+			VerifySignature(),
+			Resolver(resolver),
+			Update(), VerifyDigests(),
+		)
+		Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+
+		_, err = Apply(nil, nil, cv, opts)
+		Expect(err).To(HaveOccurred())
+		Expect(err.Error()).To(Equal("no signature found in github.com/mandelsoft/test:v1"))
 	})
 })

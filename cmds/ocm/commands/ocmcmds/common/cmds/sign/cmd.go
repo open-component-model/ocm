@@ -17,7 +17,7 @@ package sign
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/signoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/signoption"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
@@ -35,18 +35,18 @@ import (
 type SignatureCommand struct {
 	utils.BaseCommand
 	Refs []string
-	op   *Operation
+	spec *spec
 }
 
-type Operation struct {
+type spec struct {
 	op      string
 	sign    bool
 	example string
 	terms   []string
 }
 
-func NewOperation(op string, sign bool, terms []string, example string) *Operation {
-	return &Operation{
+func newOperation(op string, sign bool, terms []string, example string) *spec {
+	return &spec{
 		op:      op,
 		sign:    sign,
 		example: example,
@@ -54,19 +54,20 @@ func NewOperation(op string, sign bool, terms []string, example string) *Operati
 	}
 }
 
-// NewSigningCommand creates a new ctf command.
-func NewSigningCommand(ctx clictx.Context, op *Operation, names ...string) *cobra.Command {
-	return utils.SetupCommand(&SignatureCommand{op: op, BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), signoption.New(op.sign))}, names...)
+// NewCommand creates a new ctf command.
+func NewCommand(ctx clictx.Context, op string, sign bool, terms []string, example string, names ...string) *cobra.Command {
+	spec := newOperation(op, sign, terms, example)
+	return utils.SetupCommand(&SignatureCommand{spec: spec, BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), signoption.New(sign))}, names...)
 }
 
 func (o *SignatureCommand) ForName(name string) *cobra.Command {
 	return &cobra.Command{
 		Use:   "[<options>] {<component-reference>}",
-		Short: o.op.op + " component version",
+		Short: o.spec.op + " component version",
 		Long: `
-` + o.op.op + ` specified component versions. 
+` + o.spec.op + ` specified component versions. 
 `,
-		Example: o.op.example,
+		Example: o.spec.example,
 	}
 }
 
@@ -94,7 +95,7 @@ func (o *SignatureCommand) Run() error {
 	if err != nil {
 		return err
 	}
-	return utils.HandleOutput(NewAction(o.op.terms, o, sopts), handler, utils.StringElemSpecs(o.Refs...)...)
+	return utils.HandleOutput(NewAction(o.spec.terms, o, sopts), handler, utils.StringElemSpecs(o.Refs...)...)
 }
 
 /////////////////////////////////////////////////////////////////////////////

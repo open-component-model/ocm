@@ -49,23 +49,35 @@ type Option struct {
 
 	// Verify the digestes
 	Verify bool
-	// Signature name
-	Signature string
-	Update    bool
-	Signer    signing.Signer
-	Keys      signing.KeyRegistry
+	// SignatureNames is a list of signatures to handle (only the first one
+	// will be used for signing
+	SignatureNames []string
+	Update         bool
+	Signer         signing.Signer
+	Keys           signing.KeyRegistry
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringArrayVarP(&o.publicKeys, "public-key", "k", nil, "public key setting")
 	fs.StringArrayVarP(&o.privateKeys, "private-key", "K", nil, "private key setting")
-	fs.StringVarP(&o.Signature, "signature", "s", "", "signature name")
+	fs.StringArrayVarP(&o.SignatureNames, "signature", "s", nil, "signature name")
 	fs.StringVarP(&o.algorithm, "algorithm", "", "", "signature handler")
 	fs.BoolVarP(&o.Verify, "verify", "V", true, "verify existing digests")
 	fs.BoolVarP(&o.Update, "update", "", o.SignMode, "update digest in component versions")
 }
 
 func (o *Option) Complete(ctx clictx.Context) error {
+	if len(o.SignatureNames) > 0 {
+		for i, n := range o.SignatureNames {
+			n = strings.TrimSpace(n)
+			o.SignatureNames[i] = n
+			if n == "" {
+				return errors.Newf("empty signature name (name %d) not possible", i)
+			}
+		}
+	} else {
+		o.SignatureNames = nil
+	}
 	if o.Keys == nil {
 		o.Keys = signing.NewKeyRegistry()
 	}
@@ -91,7 +103,10 @@ func (o *Option) Complete(ctx clictx.Context) error {
 
 func (o *Option) handleKeys(ctx clictx.Context, desc string, keys []string, add func(string, interface{})) error {
 	for i, k := range keys {
-		name := o.Signature
+		name := ""
+		if len(o.SignatureNames) > 0 {
+			name = o.SignatureNames[0]
+		}
 		file := k
 		sep := strings.Index(k, "=")
 		if sep >= 0 {
@@ -127,7 +142,7 @@ func (o *Option) ApplySigningOption(opts *ocmsign.Options) {
 	if o.Signer != nil {
 		opts.Signer = o.Signer
 	}
-	opts.SignatureName = o.Signature
+	opts.SignatureNames = o.SignatureNames
 	opts.Verify = o.Verify
 	opts.Keys = o.Keys
 	opts.Update = o.Update
