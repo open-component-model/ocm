@@ -51,6 +51,6 @@ kinds of typed specification in the ocm area. The file must have the type of
 a configuration specification. Instead, the command line client supports
 a generic configuration specification able to host a list of arbitrary configuration
 specifications. The type for this spec is <code>generic.config.ocm.gardener.cloud/v1</code>.
-`,
+` + ctx.ConfigContext().ConfigTypes().Usage(),
 	}
 }

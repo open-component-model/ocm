@@ -34,8 +34,8 @@ const (
 )
 
 func init() {
-	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &ConfigSpec{}))
-	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &ConfigSpec{}))
+	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &ConfigSpec{}, usage))
+	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &ConfigSpec{}, usage))
 }
 
 // ConfigSpec describes a memory based repository interface.
@@ -170,3 +170,20 @@ func (a *ConfigSpec) ApplyToRegistry(registry signing.KeyRegistry) error {
 	}
 	return nil
 }
+
+const usage = `
+The config type <code>` + ConfigType + `</code> can be used to define
+public and private keys:
+
+<pre>
+    type: ` + ConfigType + `
+    privateKeys:
+       &lt;name>:
+         path: &lt;file path>
+       ...
+    publicKeys:
+       &lt;name>:
+         data: &lt;base64 encoded key representation>
+       ...
+</pre>
+`

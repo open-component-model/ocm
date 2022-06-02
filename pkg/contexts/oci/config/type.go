@@ -28,8 +28,8 @@ const (
 )
 
 func init() {
-	cfg.RegisterConfigType(ConfigType, cfg.NewConfigType(ConfigType, &ConfigSpec{}))
-	cfg.RegisterConfigType(ConfigTypeV1, cfg.NewConfigType(ConfigTypeV1, &ConfigSpec{}))
+	cfg.RegisterConfigType(ConfigType, cfg.NewConfigType(ConfigType, &ConfigSpec{}, usage))
+	cfg.RegisterConfigType(ConfigTypeV1, cfg.NewConfigType(ConfigTypeV1, &ConfigSpec{}, usage))
 }
 
 // ConfigSpec describes a memory based config interface.
@@ -71,3 +71,15 @@ func (a *ConfigSpec) ApplyTo(ctx config.Context, target interface{}) error {
 	}
 	return nil
 }
+
+const usage = `
+The config type <code>` + ConfigType + `</code> can be used to define
+OCI registry aliases:
+
+<pre>
+    type: ` + ConfigType + `
+    aliases:
+       &lt;name>: &lt;OCI registry specification>
+       ...
+</pre>
+`

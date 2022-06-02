@@ -14,7 +14,7 @@ ocm componentversions sign [<options>] {<component-reference>}
   -K, --private-key stringArray   private key setting
   -k, --public-key stringArray    public key setting
   -r, --repo string               repository name or spec
-  -s, --signature string          signature name
+  -s, --signature stringArray     signature name
       --update                    update digest in component versions (default true)
   -V, --verify                    verify existing digests (default true)
 ```
@@ -68,10 +68,10 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `OCIRegistry`
 - `oci`
 
-The <code>--public-key</code> and <code>--private-key</code> optiond can be
-used to define public and provate keys on the command line. The options have an
+The <code>--public-key</code> and <code>--private-key</code> options can be
+used to define public and private keys on the command line. The options have an
 argument of the form <code>[&lt;name>=]&lt;filepath></code>. The optional name
-specified the signature name the key should be used for. By default this is the
+specifies the signature name the key should be used for. By default this is the
 signature name specified with the option <code>--signature</code>.
 
 

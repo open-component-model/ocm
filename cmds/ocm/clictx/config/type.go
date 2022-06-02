@@ -30,8 +30,8 @@ const (
 )
 
 func init() {
-	cpi.RegisterConfigType(OCMCmdConfigType, cpi.NewConfigType(OCMCmdConfigType, &ConfigSpec{}))
-	cpi.RegisterConfigType(OCMCmdConfigTypeV1, cpi.NewConfigType(OCMCmdConfigTypeV1, &ConfigSpec{}))
+	cpi.RegisterConfigType(OCMCmdConfigType, cpi.NewConfigType(OCMCmdConfigType, &ConfigSpec{}, usage))
+	cpi.RegisterConfigType(OCMCmdConfigTypeV1, cpi.NewConfigType(OCMCmdConfigTypeV1, &ConfigSpec{}, usage))
 }
 
 // ConfigSpec describes a memory based repository interface.
@@ -90,3 +90,19 @@ func (a *ConfigSpec) ApplyTo(ctx config.Context, target interface{}) error {
 	}
 	return nil
 }
+
+const usage = `
+The config type <code>` + OCMCmdConfigType + `</code> can be used to 
+configure predefined aliases for dedicated OCM repositories and 
+OCI registries.
+
+<pre>
+   type: ` + OCMCmdConfigType + `
+   ocmRepositories:
+   &lt;name>: &lt;specification of OCM repository>
+   ...
+   ociRepositories:
+   &lt;name>: &lt;specification of OCI registry>
+   ...
+</pre>
+`

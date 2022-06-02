@@ -24,13 +24,13 @@ import (
 )
 
 const (
-	GenericConfigType   = "generic.config" + common.TypeGroupSuffix
-	GenericConfigTypeV1 = GenericConfigType + runtime.VersionSeparator + "v1"
+	ConfigType   = "generic.config" + common.TypeGroupSuffix
+	ConfigTypeV1 = ConfigType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
-	cpi.RegisterConfigType(GenericConfigType, cpi.NewConfigType(GenericConfigType, &Config{}))
-	cpi.RegisterConfigType(GenericConfigTypeV1, cpi.NewConfigType(GenericConfigTypeV1, &Config{}))
+	cpi.RegisterConfigType(ConfigType, cpi.NewConfigType(ConfigType, &Config{}, usage))
+	cpi.RegisterConfigType(ConfigTypeV1, cpi.NewConfigType(ConfigTypeV1, &Config{}, usage))
 }
 
 // Config describes a memory based repository interface.
@@ -42,7 +42,7 @@ type Config struct {
 // NewConfig creates a new memory Config
 func NewConfig(info string) *Config {
 	return &Config{
-		ObjectVersionedType: runtime.NewVersionedObjectType(GenericConfigType),
+		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
 	}
 }
 
@@ -56,7 +56,7 @@ func (c *Config) AddConfig(cfg cpi.Config) error {
 }
 
 func (c *Config) GetType() string {
-	return GenericConfigType
+	return ConfigType
 }
 
 func (c *Config) ApplyTo(ctx cpi.Context, target interface{}) error {
@@ -70,3 +70,16 @@ func (c *Config) ApplyTo(ctx cpi.Context, target interface{}) error {
 	}
 	return nil
 }
+
+const usage = `
+The config type <code>` + ConfigType + `</code> can be used to define a list
+of arbitrary configuration specifications:
+
+<pre>
+    type: ` + ConfigType + `
+    configurations:
+      - type: &lt;any config type>
+        ...
+      ...
+</pre>
+`

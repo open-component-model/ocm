@@ -17,15 +17,18 @@ package core
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/modern-go/reflect2"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type ConfigType interface {
 	runtime.TypedObjectDecoder
 	runtime.VersionedTypedObject
+	Usage() string
 }
 
 type ConfigTypeScheme interface {
@@ -36,6 +39,8 @@ type ConfigTypeScheme interface {
 
 	DecodeConfig(data []byte, unmarshaler runtime.Unmarshaler) (Config, error)
 	CreateConfig(obj runtime.TypedObject) (Config, error)
+
+	Usage() string
 }
 
 type configTypeScheme struct {
@@ -101,6 +106,25 @@ func (t *configTypeScheme) CreateConfig(obj runtime.TypedObject) (Config, error)
 		return t.DecodeConfig(raw, runtime.DefaultJSONEncoding)
 	}
 	return nil, fmt.Errorf("invalid object type %T for repository specs", obj)
+}
+
+func (t *configTypeScheme) Usage() string {
+	found := map[string]bool{}
+
+	s := "\nThe following configuration types are supported:\n"
+	for _, n := range t.KnownTypeNames() {
+		ct := t.GetConfigType(n)
+		u := ct.Usage()
+		if strings.TrimSpace(u) == "" || found[u] {
+			continue
+		}
+		found[u] = true
+		for strings.HasSuffix(u, "\n") {
+			u = u[:len(u)-1]
+		}
+		s = fmt.Sprintf("%s\n- <code>%s</code>\n%s", s, ct.GetKind(), utils.IndentLines(u, "  "))
+	}
+	return s + "\n"
 }
 
 // DefaultConfigTypeScheme contains all globally known access serializer

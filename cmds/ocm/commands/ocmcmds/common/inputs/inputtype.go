@@ -25,6 +25,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
@@ -319,7 +320,7 @@ The resource specification supports the following blob input types, specified
 with the field <code>type</code> in the <code>input</code> field:
 `
 	for _, t := range scheme.KnownTypeNames() {
-		s += scheme.GetInputType(t).Usage() + "\n"
+		s = fmt.Sprintf("%s\n- Input type <code>%s</code>\n%s", s, t, utils.IndentLines(scheme.GetInputType(t).Usage(), "  "))
 	}
-	return s
+	return s + "\n"
 }

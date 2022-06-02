@@ -28,8 +28,8 @@ const (
 )
 
 func init() {
-	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &ConfigSpec{}))
-	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &ConfigSpec{}))
+	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &ConfigSpec{}, usage))
+	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &ConfigSpec{}, usage))
 }
 
 // ConfigSpec describes a memory based repository interface.
@@ -164,3 +164,30 @@ func CredentialsChain(creds ...cpi.GenericCredentialsSpec) cpi.CredentialsChain 
 	}
 	return r
 }
+
+const usage = `
+The config type <code>` + ConfigType + `</code> can be used to define a list
+of arbitrary configuration specifications:
+
+<pre>
+    type: ` + ConfigType + `
+    consumers:
+      - identity:
+          &lt;name>: &lt;value>
+          ...
+        credentials:
+          - &lt;credential specification>
+          ... credential chain
+    repositories:
+       - repository: &lt;repository specification>
+         credentials:
+          - &lt;credential specification>
+          ... credential chain
+    aliases:
+       &lt;name>: 
+         repository: &lt;repository specification>
+         credentials:
+          - &lt;credential specification>
+          ... credential chain
+</pre>
+`

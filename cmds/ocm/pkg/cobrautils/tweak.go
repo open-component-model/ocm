@@ -5,6 +5,7 @@
 package cobrautils
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/out"
@@ -61,17 +62,14 @@ func CleanMarkdownUsageFunc(cmd *cobra.Command) {
 	})
 }
 
+var center = regexp.MustCompile(" *</?(pre|center)> *\n?")
+
 func cleanMarkdown(s string) string {
-	s = strings.ReplaceAll(s, "<pre>", "")
-	s = strings.ReplaceAll(s, "</pre>", "")
 	s = strings.ReplaceAll(s, "<code>", "\u00ab")
 	s = strings.ReplaceAll(s, "</code>", "\u00bb")
-	s = strings.ReplaceAll(s, "<center>\n", "")
-	s = strings.ReplaceAll(s, "<center>", "")
-	s = strings.ReplaceAll(s, "\n</center>", "")
-	s = strings.ReplaceAll(s, "</center>", "")
 	s = strings.ReplaceAll(s, "&lt;", "<")
 	s = strings.ReplaceAll(s, "&gt;", ">")
 	s = strings.ReplaceAll(s, "**", "")
+	s = string(center.ReplaceAll([]byte(s), nil))
 	return s
 }

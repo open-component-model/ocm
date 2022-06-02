@@ -26,25 +26,24 @@ func init() {
 }
 
 const usage = `
-- Input type <code>file</code>
+The path must denote a file relative the the resources file.
+The content is compressed if the <code>compress</code> field
+is set to <code>true</code>.
 
-  The path must denote a file relative the the resources file.
-  The content is compressed if the <code>compress</code> field
-  is set to <code>true</code>.
+This blob type specification supports the following fields: 
+- **<code>path</code>** *string*
 
-  This blob type specification supports the following fields: 
-  - **<code>path</code>** *string*
+  This REQUIRED property describes the file path to the helm chart relative to the
+  resource file location.
 
-    This REQUIRED property describes the file path to the helm chart relative to the
-    resource file location.
+- **<code>mediaType</code>** *string*
 
-  - **<code>mediaType</code>** *string*
+  This OPTIONAL property describes the media type to store with the local blob.
+  The default media type is ` + mime.MIME_OCTET + ` and
+  ` + mime.MIME_GZIP + ` if compression is enabled.
 
-    This OPTIONAL property describes the media type to store with the local blob.
-    The default media type is ` + mime.MIME_OCTET + ` and
-    ` + mime.MIME_GZIP + ` if compression is enabled.
+- **<code>compress</code>** *bool*
 
-  - **<code>compress</code>** *bool*
-
-    This OPTIONAL property describes whether the file content should be stored
-    compressed or not.`
+  This OPTIONAL property describes whether the file content should be stored
+  compressed or not.
+`

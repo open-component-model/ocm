@@ -31,8 +31,8 @@ const (
 )
 
 func init() {
-	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &ConfigSpec{}))
-	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &ConfigSpec{}))
+	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &ConfigSpec{}, usage))
+	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &ConfigSpec{}, usage))
 }
 
 // ConfigSpec describes a memory based repository interface.
@@ -102,3 +102,16 @@ func (a *ConfigSpec) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	}
 	return nil
 }
+
+const usage = `
+The config type <code>` + ConfigType + `</code> can be used to define transfer scripts:
+
+<pre>
+    type: ` + ConfigType + `
+    scripts:
+      &lt;name>:
+        path: &lt;>file path>
+      &lt;other name>:
+        script: &lt;>nested script as yaml>
+</pre>
+`

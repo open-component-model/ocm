@@ -31,8 +31,8 @@ const (
 )
 
 func init() {
-	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &ConfigSpec{}))
-	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &ConfigSpec{}))
+	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &ConfigSpec{}, usage))
+	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &ConfigSpec{}, usage))
 }
 
 // ConfigSpec describes a memory based repository interface.
@@ -84,3 +84,15 @@ func (a *ConfigSpec) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	}
 	return list.Result()
 }
+
+const usage = `
+The config type <code>` + ConfigType + `</code> can be used to define a list
+of arbitrary attribute specifications:
+
+<pre>
+    type: ` + ConfigType + `
+    attributes:
+       &lt;name>: &lt;yaml defining the attribute>
+       ...
+</pre>
+`
