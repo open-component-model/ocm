@@ -15,6 +15,7 @@
 package signoption
 
 import (
+	"encoding/base64"
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -47,7 +48,7 @@ type Option struct {
 	publicKeys  []string
 	privateKeys []string
 
-	// Verify the digestes
+	// Verify the digests
 	Verify bool
 	// SignatureNames is a list of signatures to handle (only the first one
 	// will be used for signing
@@ -113,7 +114,19 @@ func (o *Option) handleKeys(ctx clictx.Context, desc string, keys []string, add 
 			name = k[:sep]
 			file = k[i+1:]
 		}
-		data, err := vfs.ReadFile(ctx.FileSystem(), file)
+		if len(file) == 0 {
+			return errors.Newf("empty file name")
+		}
+		var data []byte
+		var err error
+		switch file[0] {
+		case '=':
+			data = []byte(file[1:])
+		case '!':
+			data, err = base64.StdEncoding.DecodeString(file[1:])
+		default:
+			data, err = vfs.ReadFile(ctx.FileSystem(), file)
+		}
 		if err != nil {
 			return errors.Wrapf(err, "cannot read %s file %q", desc, file)
 		}
@@ -132,6 +145,13 @@ used to define public and private keys on the command line. The options have an
 argument of the form <code>[&lt;name>=]&lt;filepath></code>. The optional name
 specifies the signature name the key should be used for. By default this is the
 signature name specified with the option <code>--signature</code>.
+
+Alternatively a key can be specified as base64 encoded string if the argument
+start with the prefix <code>!</code> or as direct string with the prefix
+<code>=</code>.
+
+If in signing mode a public key is specified, existing signatures for the
+given signature name will be verified, instead of recreated.
 `
 	return s
 }
@@ -145,5 +165,8 @@ func (o *Option) ApplySigningOption(opts *ocmsign.Options) {
 	opts.SignatureNames = o.SignatureNames
 	opts.Verify = o.Verify
 	opts.Keys = o.Keys
+	if len(o.SignatureNames) > 0 {
+		opts.VerifySignature = o.Keys.GetPublicKey(o.SignatureNames[0]) != nil
+	}
 	opts.Update = o.Update
 }

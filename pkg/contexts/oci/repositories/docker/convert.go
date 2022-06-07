@@ -85,7 +85,7 @@ func (a *artBlobCache) GetBlobData(digest digest.Digest) (accessio.DataAccess, e
 	return a.access.GetBlob(digest)
 }
 
-func (a artBlobCache) GetBlob(digest digest.Digest) (int64, accessio.DataAccess, error) {
+func (a *artBlobCache) GetBlob(digest digest.Digest) (int64, accessio.DataAccess, error) {
 	blob, err := a.access.GetBlob(digest)
 	if err != nil {
 		return -1, nil, err
@@ -93,12 +93,16 @@ func (a artBlobCache) GetBlob(digest digest.Digest) (int64, accessio.DataAccess,
 	return blob.Size(), blob, err
 }
 
-func (a artBlobCache) AddBlob(blob accessio.BlobAccess) (int64, digest.Digest, error) {
+func (a *artBlobCache) AddBlob(blob accessio.BlobAccess) (int64, digest.Digest, error) {
 	err := a.access.AddBlob(blob)
 	if err != nil {
 		return -1, "", err
 	}
 	return blob.Size(), blob.Digest(), err
+}
+
+func (c *artBlobCache) AddData(data accessio.DataAccess) (int64, digest.Digest, error) {
+	return c.AddBlob(accessio.BlobAccessForDataAccess(accessio.BLOB_UNKNOWN_DIGEST, accessio.BLOB_UNKNOWN_SIZE, "", data))
 }
 
 ////////////////////////////////////////////////////////////////////////////////

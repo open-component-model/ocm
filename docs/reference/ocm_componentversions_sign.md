@@ -74,6 +74,13 @@ argument of the form <code>[&lt;name>=]&lt;filepath></code>. The optional name
 specifies the signature name the key should be used for. By default this is the
 signature name specified with the option <code>--signature</code>.
 
+Alternatively a key can be specified as base64 encoded string if the argument
+start with the prefix <code>!</code> or as direct string with the prefix
+<code>=</code>.
+
+If in signing mode a public key is specified, existing signatures for the
+given signature name will be verified, instead of recreated.
+
 
 ### Examples
 

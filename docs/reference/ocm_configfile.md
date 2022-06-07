@@ -70,7 +70,10 @@ The following configuration types are supported:
 - <code>keys.config.ocm.gardener.cloud</code>
   
   The config type <code>keys.config.ocm.gardener.cloud</code> can be used to define
-  public and private keys:
+  public and private keys. A key value might be given by one of the fields:
+  - <code>path</code>: path of file with key data
+  - <code>data</code>: base64 encoded binary data
+  - <code>stringdata</code>: data a string parsed by key handler
   
   <pre>
       type: keys.config.ocm.gardener.cloud

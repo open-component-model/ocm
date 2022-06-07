@@ -29,6 +29,10 @@ type Signature struct {
 type Signer interface {
 	// Sign returns the signature for the given digest
 	Sign(digest string, privatekey interface{}) (*Signature, error)
+	// Algirith is the name of the finally used signature algorithm.
+	// A signer might be registered using a logical name, so there might
+	// be multiple signer registration providing the same signature algorithm
+	Algorithm() string
 }
 
 // Verifier interface is used to implement different verification algorithms.
@@ -36,6 +40,7 @@ type Signer interface {
 type Verifier interface {
 	// Verify checks the signature, returns an error on verification failure
 	Verify(digest string, signature string, mediatype string, publickey interface{}) error
+	Algorithm() string
 }
 
 // SignatureHandler can create and verify signature of a dedicated type

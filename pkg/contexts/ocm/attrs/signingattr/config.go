@@ -64,6 +64,7 @@ func (r *RawData) UnmarshalJSON(data []byte) error {
 
 type KeySpec struct {
 	Data       RawData        `json:"data,omitempty"`
+	StringData string         `json:"stringdata,omitempty"`
 	Path       string         `json:"path,omitempty"`
 	Parsed     interface{}    `json:"-"`
 	FileSystem vfs.FileSystem `json:"-"`
@@ -74,7 +75,16 @@ func (k *KeySpec) Get() (interface{}, error) {
 		return k.Parsed, nil
 	}
 	if k.Data != nil {
+		if k.StringData != "" || k.Path != "" {
+			return nil, errors.Newf("only one of data, stringdata or path may be set")
+		}
 		return []byte(k.Data), nil
+	}
+	if k.StringData != "" {
+		if k.Path != "" {
+			return nil, errors.Newf("only one of data, stringdata or path may be set")
+		}
+		return []byte(k.StringData), nil
 	}
 	fs := k.FileSystem
 	if fs == nil {
@@ -173,7 +183,10 @@ func (a *ConfigSpec) ApplyToRegistry(registry signing.KeyRegistry) error {
 
 const usage = `
 The config type <code>` + ConfigType + `</code> can be used to define
-public and private keys:
+public and private keys. A key value might be given by one of the fields:
+- <code>path</code>: path of file with key data
+- <code>data</code>: base64 encoded binary data
+- <code>stringdata</code>: data a string parsed by key handler
 
 <pre>
     type: ` + ConfigType + `

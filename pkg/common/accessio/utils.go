@@ -95,12 +95,16 @@ func BlobReader(blob DataReader, err error) (io.ReadCloser, error) {
 }
 
 func FileSystem(fss ...vfs.FileSystem) vfs.FileSystem {
+	return DefaultedFileSystem(_osfs, fss...)
+}
+
+func DefaultedFileSystem(def vfs.FileSystem, fss ...vfs.FileSystem) vfs.FileSystem {
 	for _, fs := range fss {
 		if fs != nil {
 			return fs
 		}
 	}
-	return _osfs
+	return def
 }
 
 type once struct {
