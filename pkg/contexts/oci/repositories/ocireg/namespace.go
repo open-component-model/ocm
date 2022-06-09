@@ -41,9 +41,10 @@ type NamespaceContainer struct {
 	repo      *Repository
 	namespace string
 	resolver  remotes.Resolver
+	lister    docker.Lister
 	fetcher   remotes.Fetcher
 	pusher    remotes.Pusher
-	lister    docker.Lister
+	blobs     BlobContainer
 }
 
 var _ cpi.ArtefactSetContainer = (*NamespaceContainer)(nil)
@@ -72,9 +73,10 @@ func NewNamespace(repo *Repository, name string) (*Namespace, error) {
 			repo:      repo,
 			namespace: name,
 			resolver:  resolver,
+			lister:    lister,
 			fetcher:   fetcher,
 			pusher:    pusher,
-			lister:    lister,
+			blobs:     NewBlobContainer(repo.ctx, fetcher, pusher),
 		},
 	}
 	return n, nil
@@ -110,16 +112,17 @@ func (n *NamespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi.Descri
 	return nil
 }
 
-func (n *NamespaceContainer) ListTags() ([]string, error) {
-	return n.lister.List(dummyContext)
-}
-
-func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
-	return NewDataAccess(n.fetcher, digest, "", false)
+func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
+	return n.blobs.GetBlobData(digest)
 }
 
 func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
-	return push(dummyContext, n.pusher, blob)
+	_, _, err := n.blobs.AddBlob(blob)
+	return err
+}
+
+func (n *NamespaceContainer) ListTags() ([]string, error) {
+	return n.lister.List(dummyContext)
 }
 
 func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error) {
@@ -222,7 +225,7 @@ func (n *Namespace) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, e
 	return cpi.NewArtefact(n.access, art...)
 }
 
-func (n *Namespace) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
+func (n *Namespace) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
 	return n.access.GetBlobData(digest)
 }
 

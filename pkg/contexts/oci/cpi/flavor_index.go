@@ -118,7 +118,11 @@ func (i *IndexImpl) GetBlobDescriptor(digest digest.Digest) *Descriptor {
 func (i *IndexImpl) GetBlob(digest digest.Digest) (core.BlobAccess, error) {
 	d := i.GetBlobDescriptor(digest)
 	if d != nil {
-		data, err := i.provider.GetBlobData(digest)
+		size, data, err := i.provider.GetBlobData(digest)
+		if err != nil {
+			return nil, err
+		}
+		err = AdjustSize(d, size)
 		if err != nil {
 			return nil, err
 		}

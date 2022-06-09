@@ -78,7 +78,7 @@ func (m *localBlobAccessMethod) getBlob() (cpi.DataAccess, error) {
 			return nil, errors.ErrNotImplemented("artefact blob synthesis")
 		}
 	}
-	data, err := m.access.GetBlobData(digest.Digest(m.spec.LocalReference))
+	_, data, err := m.access.GetBlobData(digest.Digest(m.spec.LocalReference))
 	if err != nil {
 		return nil, err
 	}

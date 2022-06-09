@@ -12,17 +12,21 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package compatattr
+package cacheattr
 
 import (
 	"fmt"
+	"os"
+	"strings"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const ATTR_KEY = "github.com/mandelsoft/ocm/compat"
-const ATTR_SHORT = "compat"
+const ATTR_KEY = "github.com/mandelsoft/oci/cache"
+const ATTR_SHORT = "cache"
 
 func init() {
 	datacontext.RegisterAttributeType(ATTR_KEY, AttributeType{}, ATTR_SHORT)
@@ -37,34 +41,51 @@ func (a AttributeType) Name() string {
 
 func (a AttributeType) Description() string {
 	return `
-*bool*
-Avoid generic local access methods and prefer type specific ones.
+*string*
+Filesystem folder to use for caching OCI blobs
 `
 }
 
 func (a AttributeType) Encode(v interface{}, marshaller runtime.Marshaler) ([]byte, error) {
-	if _, ok := v.(bool); !ok {
-		return nil, fmt.Errorf("boolean required")
+	if _, ok := v.(accessio.BlobCache); !ok {
+		return nil, fmt.Errorf("accessio.BlobCache required")
 	}
-	return marshaller.Marshal(v)
+	return nil, nil
 }
 
 func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (interface{}, error) {
-	var value bool
+	var value string
 	err := unmarshaller.Unmarshal(data, &value)
+	if value != "" {
+		if strings.HasPrefix(value, "~"+string(os.PathSeparator)) {
+			home := os.Getenv("HOME")
+			if home == "" {
+				panic("HOME not set")
+			}
+			value = home + value[1:]
+		}
+		err = os.MkdirAll(value, 0700)
+		if err == nil {
+			return accessio.NewStaticBlobCache(value)
+		}
+	} else {
+		if err == nil {
+			err = errors.Newf("file path missing")
+		}
+	}
 	return value, err
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func Get(ctx datacontext.Context) bool {
+func Get(ctx datacontext.Context) accessio.BlobCache {
 	a := ctx.GetAttributes().GetAttribute(ATTR_KEY)
 	if a == nil {
-		return false
+		return nil
 	}
-	return a.(bool)
+	return a.(accessio.BlobCache)
 }
 
-func Set(ctx datacontext.Context, flag bool) error {
-	return ctx.GetAttributes().SetAttribute(ATTR_KEY, flag)
+func Set(ctx datacontext.Context, cache accessio.BlobCache) error {
+	return ctx.GetAttributes().SetAttribute(ATTR_KEY, cache)
 }

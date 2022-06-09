@@ -73,7 +73,7 @@ func NewArtefactForBlob(access ArtefactSetContainer, blob accessio.BlobAccess) (
 	return a, nil
 }
 
-func NewArtefact(access ArtefactSetContainer, defs ...*artdesc.Artefact) (*ArtefactImpl, error) {
+func NewArtefact(access ArtefactSetContainer, defs ...*artdesc.Artefact) (ArtefactAccess, error) {
 	var def *artdesc.Artefact
 	if len(defs) != 0 && defs[0] != nil {
 		def = defs[0]
@@ -217,20 +217,18 @@ func (a *ArtefactImpl) GetIndex(digest digest.Digest) (IndexAccess, error) {
 	return a.IndexAccess().GetIndex(digest)
 }
 
-func (a *ArtefactImpl) GetBlobData(digest digest.Digest) (DataAccess, error) {
+func (a *ArtefactImpl) GetBlobData(digest digest.Digest) (int64, DataAccess, error) {
 	return a.provider.GetBlobData(digest)
 }
 
 func (a *ArtefactImpl) GetBlob(digest digest.Digest) (BlobAccess, error) {
 	d := a.GetBlobDescriptor(digest)
 	if d != nil {
-		var data DataAccess
-		var err error
-		if a.provider != nil {
-			data, err = a.provider.GetBlobData(digest)
-		} else {
-			data, err = a.provider.GetBlobData(digest)
+		size, data, err := a.provider.GetBlobData(digest)
+		if err != nil {
+			return nil, err
 		}
+		err = AdjustSize(d, size)
 		if err != nil {
 			return nil, err
 		}
@@ -265,4 +263,17 @@ func (a *ArtefactImpl) AddLayer(blob BlobAccess, d *Descriptor) (int, error) {
 		return -1, err
 	}
 	return NewManifestForArtefact(a).AddLayer(blob, d)
+}
+
+func AdjustSize(d *artdesc.Descriptor, size int64) error {
+	if size != accessio.BLOB_UNKNOWN_SIZE {
+		if d.Size == accessio.BLOB_UNKNOWN_SIZE {
+			d.Size = size
+		} else {
+			if d.Size != size {
+				return errors.Newf("blob size mismatch %d != %d", size, d.Size)
+			}
+		}
+	}
+	return nil
 }

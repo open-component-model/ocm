@@ -62,12 +62,7 @@ func (c *dockerSource) Unref() error {
 	return c.src.Close()
 }
 
-func (d *dockerSource) GetBlobData(digest digest.Digest) (accessio.DataAccess, error) {
-	_, acc, err := d.GetBlob(digest)
-	return acc, err
-}
-
-func (d *dockerSource) GetBlob(digest digest.Digest) (int64, accessio.DataAccess, error) {
+func (d *dockerSource) GetBlobData(digest digest.Digest) (int64, accessio.DataAccess, error) {
 	info := d.img.ConfigInfo()
 	if info.Digest == digest {
 		data, err := d.img.ConfigBlob(dummyContext)
@@ -123,9 +118,8 @@ func (d *daemonArtefactProvider) Close() error {
 	return nil
 }
 
-func (d *daemonArtefactProvider) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
-	_, acc, err := d.cache.GetBlob(digest)
-	return acc, err
+func (d *daemonArtefactProvider) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
+	return d.cache.GetBlobData(digest)
 }
 
 func (d *daemonArtefactProvider) GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {

@@ -73,7 +73,7 @@ func (n *NamespaceContainer) ListTags() ([]string, error) {
 	return n.repo.getIndex().GetTags(n.namespace), nil // return digests as tags, also
 }
 
-func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
+func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
 	return n.repo.base.GetBlobData(digest)
 }
 
@@ -137,7 +137,7 @@ func (n *Namespace) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, e
 	return cpi.NewArtefact(n.access, art...)
 }
 
-func (n *Namespace) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
+func (n *Namespace) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
 	return n.access.GetBlobData(digest)
 }
 

@@ -123,7 +123,11 @@ func (m *ManifestImpl) GetConfigBlob() (BlobAccess, error) {
 func (m *ManifestImpl) GetBlob(digest digest.Digest) (BlobAccess, error) {
 	d := m.GetBlobDescriptor(digest)
 	if d != nil {
-		data, err := m.provider.GetBlobData(digest)
+		size, data, err := m.provider.GetBlobData(digest)
+		if err != nil {
+			return nil, err
+		}
+		err = AdjustSize(d, size)
 		if err != nil {
 			return nil, err
 		}

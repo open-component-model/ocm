@@ -12,18 +12,22 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package commands
+package cachecmds
 
-const (
-	Get      = "get"
-	Describe = "describe"
-	Add      = "add"
-	Create   = "create"
-	Transfer = "transfer"
-	Download = "download"
-	Show     = "show"
-	Sign     = "sign"
-	Verify   = "verify"
-	Clean    = "clean"
-	Info     = "info"
+import (
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds/clean"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds/info"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/spf13/cobra"
 )
+
+// NewCommand creates a new command.
+func NewCommand(ctx clictx.Context) *cobra.Command {
+	cmd := utils.MassageCommand(&cobra.Command{
+		Short: "Cache related commands",
+	}, "cache")
+	cmd.AddCommand(clean.NewCommand(ctx, clean.Verb))
+	cmd.AddCommand(info.NewCommand(ctx, info.Verb))
+	return cmd
+}

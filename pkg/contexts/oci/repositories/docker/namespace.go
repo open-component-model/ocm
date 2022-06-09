@@ -115,9 +115,8 @@ func (n *NamespaceContainer) ListTags() ([]string, error) {
 	return result, nil
 }
 
-func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
-	_, acc, err := n.cache.GetBlob(digest)
-	return acc, err
+func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
+	return n.cache.GetBlobData(digest)
 }
 
 func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
@@ -268,7 +267,7 @@ func (n *Namespace) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, e
 	return cpi.NewArtefact(n.access, m)
 }
 
-func (n *Namespace) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
+func (n *Namespace) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
 	return n.access.GetBlobData(digest)
 }
 

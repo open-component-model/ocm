@@ -18,6 +18,7 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -30,13 +31,14 @@ type AttributeType interface {
 }
 
 type AttributeScheme interface {
-	Register(name string, typ AttributeType) error
+	Register(name string, typ AttributeType, short ...string) error
 
 	Decode(attr string, data []byte, unmarshaler runtime.Unmarshaler) (interface{}, error)
 	Encode(attr string, v interface{}, marshaller runtime.Marshaler) ([]byte, error)
 	GetType(attr string) (AttributeType, error)
 
 	AddKnownTypes(scheme AttributeScheme)
+	Shortcuts() common.Properties
 	KnownTypes() KnownTypes
 	KnownTypeNames() []string
 }
@@ -68,11 +70,13 @@ func (t KnownTypes) TypeNames() []string {
 type defaultScheme struct {
 	lock  sync.RWMutex
 	types KnownTypes
+	short common.Properties
 }
 
 func NewDefaulAttritutetScheme() AttributeScheme {
 	return &defaultScheme{
 		types: KnownTypes{},
+		short: common.Properties{},
 	}
 }
 
@@ -82,12 +86,21 @@ func (d *defaultScheme) AddKnownTypes(s AttributeScheme) {
 	for k, v := range s.KnownTypes() {
 		d.types[k] = v
 	}
+	for k, v := range s.Shortcuts() {
+		d.short[k] = v
+	}
 }
 
 func (d *defaultScheme) KnownTypes() KnownTypes {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
 	return d.types.Copy()
+}
+
+func (d *defaultScheme) Shortcuts() common.Properties {
+	d.lock.RLock()
+	defer d.lock.RUnlock()
+	return d.short.Copy()
 }
 
 // KnownTypeNames return a sorted list of known type names
@@ -102,11 +115,11 @@ func (d *defaultScheme) KnownTypeNames() []string {
 	return types
 }
 
-func RegisterAttributeType(name string, typ AttributeType) error {
-	return DefaultAttributeScheme.Register(name, typ)
+func RegisterAttributeType(name string, typ AttributeType, short ...string) error {
+	return DefaultAttributeScheme.Register(name, typ, short...)
 }
 
-func (d *defaultScheme) Register(name string, typ AttributeType) error {
+func (d *defaultScheme) Register(name string, typ AttributeType, short ...string) error {
 	if typ == nil {
 		return errors.Newf("type object must be given")
 	}
@@ -116,13 +129,24 @@ func (d *defaultScheme) Register(name string, typ AttributeType) error {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	d.types[name] = typ
+	for _, s := range short {
+		d.short[s] = name
+	}
 	return nil
+}
+
+func (d *defaultScheme) getType(attr string) AttributeType {
+	if s, ok := d.short[attr]; ok {
+		attr = s
+	}
+	return d.types[attr]
 }
 
 func (d *defaultScheme) GetType(attr string) (AttributeType, error) {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
-	t := d.types[attr]
+
+	t := d.getType(attr)
 	if t == nil {
 		return nil, errors.ErrUnknown("attribute", attr)
 	}
@@ -135,7 +159,7 @@ func (d *defaultScheme) Encode(attr string, value interface{}, marshaler runtime
 	}
 	d.lock.RLock()
 	defer d.lock.RUnlock()
-	t := d.types[attr]
+	t := d.getType(attr)
 	if t == nil {
 		return nil, errors.ErrUnknown("attribute", attr)
 	}
@@ -148,7 +172,7 @@ func (d *defaultScheme) Decode(attr string, data []byte, unmarshaler runtime.Unm
 	}
 	d.lock.RLock()
 	defer d.lock.RUnlock()
-	t := d.types[attr]
+	t := d.getType(attr)
 	if t == nil {
 		return nil, errors.ErrUnknown("attribute", attr)
 	}

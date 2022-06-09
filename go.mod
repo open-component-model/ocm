@@ -1,6 +1,6 @@
 module github.com/open-component-model/ocm
 
-go 1.17
+go 1.18
 
 replace github.com/spf13/cobra => github.com/mandelsoft/cobra v1.4.1-0.20220602090819-209e4a9a442d
 

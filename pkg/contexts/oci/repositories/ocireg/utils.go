@@ -50,7 +50,7 @@ func NewDataAccess(fetcher remotes.Fetcher, digest digest.Digest, mimeType strin
 	desc := artdesc.Descriptor{
 		MediaType: mimeType,
 		Digest:    digest,
-		Size:      -1,
+		Size:      accessio.BLOB_UNKNOWN_SIZE,
 	}
 	if !delayed {
 		reader, err = fetcher.Fetch(dummyContext, desc)

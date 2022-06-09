@@ -14,7 +14,11 @@ import (
 	"strings"
 
 	dockercli "github.com/docker/cli/cli/config"
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/add"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/clean"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/create"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/describe"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/download"
@@ -42,10 +46,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	datactg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
-
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
@@ -58,10 +58,6 @@ import (
 
 type CLI struct {
 	clictx.Context
-}
-
-var ShortCuts = map[string]string{
-	compatattr.ATTR_SHORT: compatattr.ATTR_KEY,
 }
 
 func NewCLI(ctx clictx.Context) *CLI {
@@ -162,6 +158,7 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(transfer.NewCommand(opts.Context))
 	cmd.AddCommand(describe.NewCommand(opts.Context))
 	cmd.AddCommand(download.NewCommand(opts.Context))
+	cmd.AddCommand(clean.NewCommand(opts.Context))
 
 	cmd.AddCommand(componentarchive.NewCommand(opts.Context))
 	cmd.AddCommand(resources.NewCommand(opts.Context))
@@ -169,6 +166,7 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(sources.NewCommand(opts.Context))
 	cmd.AddCommand(components.NewCommand(opts.Context))
 
+	cmd.AddCommand(cachecmds.NewCommand(opts.Context))
 	cmd.AddCommand(ocicmds.NewCommand(opts.Context))
 	cmd.AddCommand(ocmcmds.NewCommand(opts.Context))
 
@@ -281,18 +279,20 @@ func (o *CLIOptions) Complete() error {
 
 	set, err := common2.ParseLabels(o.Settings, "attribute setting")
 	if err == nil && len(set) > 0 {
+		ctx := o.Context.ConfigContext()
 		spec := datactg.NewConfigSpec()
 		for _, s := range set {
 			attr := s.Name
-			if ShortCuts[attr] != "" {
-				attr = ShortCuts[attr]
+			eff := datacontext.DefaultAttributeScheme.Shortcuts()[attr]
+			if eff != "" {
+				attr = eff
 			}
 			err = spec.AddRawAttribute(attr, s.Value)
 			if err != nil {
 				return errors.Wrapf(err, "attribute %s", s.Name)
 			}
 		}
-		err = o.Context.ConfigContext().ApplyConfig(spec, "cli")
+		err = ctx.ApplyConfig(spec, "cli")
 	}
 	return err
 }
@@ -323,15 +323,16 @@ func Attributes() string {
 			}
 			desc = strings.Replace(desc, "\n", "\n  ", -1)
 			short := ""
-			for k, v := range ShortCuts {
+			for k, v := range datacontext.DefaultAttributeScheme.Shortcuts() {
 				if v == a {
-					short = short + "," + k
+					short = short + ",<code>" + k + "</code>"
 				}
 			}
 			if len(short) > 0 {
 				short = " [" + short[1:] + "]"
 			}
-			s = fmt.Sprintf("%s%s- %s%s: %s", s, sep, a, short, desc)
+			s = fmt.Sprintf("%s%s- <code>%s</code>%s: %s", s, sep, a, short, desc)
+			sep = "\n"
 		}
 	}
 	return s

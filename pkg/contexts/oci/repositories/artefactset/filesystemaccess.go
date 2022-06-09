@@ -30,7 +30,7 @@ func NewFileSystemBlobAccess(access *accessobj.AccessObject) *FileSystemBlobAcce
 }
 
 func (i *FileSystemBlobAccess) GetArtefact(access cpi.ArtefactSetContainer, digest digest.Digest) (cpi.ArtefactAccess, error) {
-	data, err := i.GetBlobData(digest)
+	_, data, err := i.GetBlobData(digest)
 	if err != nil {
 		return nil, err
 	}

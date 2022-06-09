@@ -152,7 +152,7 @@ func (a *ArtefactSet) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 	return a.GetIndex().GetBlobDescriptor(digest)
 }
 
-func (a *ArtefactSet) GetBlobData(digest digest.Digest) (cpi.DataAccess, error) {
+func (a *ArtefactSet) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
 	return a.base.GetBlobData(digest)
 }
 

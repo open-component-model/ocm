@@ -74,18 +74,18 @@ func (a *FileSystemBlobAccess) BlobPath(name string) string {
 	return a.base.GetInfo().SubPath(name)
 }
 
-func (a *FileSystemBlobAccess) GetBlobData(digest digest.Digest) (accessio.DataAccess, error) {
+func (a *FileSystemBlobAccess) GetBlobData(digest digest.Digest) (int64, accessio.DataAccess, error) {
 	if a.IsClosed() {
-		return nil, accessio.ErrClosed
+		return accessio.BLOB_UNKNOWN_SIZE, nil, accessio.ErrClosed
 	}
 	path := a.DigestPath(digest)
 	if ok, err := vfs.FileExists(a.base.GetFileSystem(), path); ok {
-		return accessio.DataAccessForFile(a.base.GetFileSystem(), path), nil
+		return accessio.BLOB_UNKNOWN_SIZE, accessio.DataAccessForFile(a.base.GetFileSystem(), path), nil
 	} else {
 		if err != nil {
-			return nil, err
+			return accessio.BLOB_UNKNOWN_SIZE, nil, err
 		}
-		return nil, accessio.ErrBlobNotFound(digest)
+		return accessio.BLOB_UNKNOWN_SIZE, nil, accessio.ErrBlobNotFound(digest)
 	}
 }
 

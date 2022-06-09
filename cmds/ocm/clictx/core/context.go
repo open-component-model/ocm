@@ -123,7 +123,7 @@ func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context, outctx
 		updater:          cfgcpi.NewUpdate(ocmctx.CredentialsContext().ConfigContext()),
 		out:              outctx,
 	}
-	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
+	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, ocmctx.GetAttributes())
 	c.oci = newOCI(c, ocmctx)
 	c.ocm = newOCM(c, ocmctx)
 	if fs != nil {

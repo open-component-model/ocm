@@ -179,13 +179,15 @@ func (c *_attributes) GetAttribute(name string, def ...interface{}) interface{} 
 }
 
 func (c *_attributes) SetEncodedAttribute(name string, data []byte, unmarshaller runtime.Unmarshaler) error {
-	c.Lock()
-	defer c.Unlock()
+	s := DefaultAttributeScheme.Shortcuts()[name]
+	if s != "" {
+		name = s
+	}
 	v, err := DefaultAttributeScheme.Decode(name, data, unmarshaller)
 	if err != nil {
 		return err
 	}
-	c.attributes[name] = v
+	c.SetAttribute(name, v)
 	return nil
 }
 

@@ -67,7 +67,7 @@ type ArtefactSetContainer interface {
 	IsClosed() bool
 
 	GetBlobDescriptor(digest digest.Digest) *Descriptor
-	GetBlobData(digest digest.Digest) (DataAccess, error)
+	GetBlobData(digest digest.Digest) (int64, DataAccess, error)
 	AddBlob(blob BlobAccess) error
 
 	GetArtefact(vers string) (ArtefactAccess, error)

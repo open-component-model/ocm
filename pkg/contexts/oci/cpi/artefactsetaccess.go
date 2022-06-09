@@ -50,7 +50,7 @@ func (a *ArtefactSetAccess) IsClosed() bool {
 ////////////////////////////////////////////////////////////////////////////////
 // methods for BlobHandler
 
-func (a *ArtefactSetAccess) GetBlobData(digest digest.Digest) (DataAccess, error) {
+func (a *ArtefactSetAccess) GetBlobData(digest digest.Digest) (int64, DataAccess, error) {
 	return a.base.GetBlobData(digest)
 }
 
@@ -58,15 +58,19 @@ func (a *ArtefactSetAccess) GetBlob(digest digest.Digest) (BlobAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
-	data, err := a.GetBlobData(digest)
+	size, data, err := a.GetBlobData(digest)
 	if err != nil {
 		return nil, err
 	}
 	d := a.GetBlobDescriptor(digest)
 	if d != nil {
+		err = AdjustSize(d, size)
+		if err != nil {
+			return nil, err
+		}
 		return accessio.BlobAccessForDataAccess(d.Digest, d.Size, d.MediaType, data), nil
 	}
-	return accessio.BlobAccessForDataAccess(digest, -1, "", data), nil
+	return accessio.BlobAccessForDataAccess(digest, size, "", data), nil
 }
 
 func (a *ArtefactSetAccess) GetBlobDescriptor(digest digest.Digest) *Descriptor {

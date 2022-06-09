@@ -12,18 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package commands
+package cacheattr_test
 
-const (
-	Get      = "get"
-	Describe = "describe"
-	Add      = "add"
-	Create   = "create"
-	Transfer = "transfer"
-	Download = "download"
-	Show     = "show"
-	Sign     = "sign"
-	Verify   = "verify"
-	Clean    = "clean"
-	Info     = "info"
+import (
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
+
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "OCI blob cache attribute")
+}

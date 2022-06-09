@@ -12,18 +12,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package commands
+package names
 
-const (
-	Get      = "get"
-	Describe = "describe"
-	Add      = "add"
-	Create   = "create"
-	Transfer = "transfer"
-	Download = "download"
-	Show     = "show"
-	Sign     = "sign"
-	Verify   = "verify"
-	Clean    = "clean"
-	Info     = "info"
+var (
+	Cache = []string{"cache"}
 )

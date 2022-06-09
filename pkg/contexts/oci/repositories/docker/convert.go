@@ -49,10 +49,11 @@ func (f *fakeSource) GetManifest(ctx context.Context, instanceDigest *digest.Dig
 }
 
 func (f *fakeSource) GetBlob(ctx context.Context, bi types.BlobInfo, bc types.BlobInfoCache) (io.ReadCloser, int64, error) {
-	blob, err := f.blobs.GetBlobData(bi.Digest)
+	_, blob, err := f.blobs.GetBlobData(bi.Digest)
 	if err != nil {
-		return nil, -1, err
+		return nil, accessio.BLOB_UNKNOWN_SIZE, err
 	}
+
 	r, err := blob.Reader()
 	return r, bi.Size, err
 }
@@ -81,11 +82,7 @@ func (a *artBlobCache) Unref() error {
 	return nil
 }
 
-func (a *artBlobCache) GetBlobData(digest digest.Digest) (accessio.DataAccess, error) {
-	return a.access.GetBlob(digest)
-}
-
-func (a *artBlobCache) GetBlob(digest digest.Digest) (int64, accessio.DataAccess, error) {
+func (a *artBlobCache) GetBlobData(digest digest.Digest) (int64, accessio.DataAccess, error) {
 	blob, err := a.access.GetBlob(digest)
 	if err != nil {
 		return -1, nil, err
@@ -147,7 +144,7 @@ func Convert(art cpi.Artefact, blobs accessio.BlobSource, dst types.ImageDestina
 		return nil, err
 	}
 	for i, l := range m.Layers {
-		blob, err := blobs.GetBlobData(l.Digest)
+		size, blob, err := blobs.GetBlobData(l.Digest)
 		if err != nil {
 			return nil, err
 		}
@@ -158,7 +155,7 @@ func Convert(art cpi.Artefact, blobs accessio.BlobSource, dst types.ImageDestina
 		defer r.Close()
 		info := types.BlobInfo{
 			Digest:      l.Digest,
-			Size:        -1,
+			Size:        size,
 			URLs:        l.URLs,
 			Annotations: l.Annotations,
 			MediaType:   l.MediaType,
@@ -195,7 +192,7 @@ func Convert(art cpi.Artefact, blobs accessio.BlobSource, dst types.ImageDestina
 	}
 	var reader io.ReadCloser
 	if blob == nil {
-		orig, err := blobs.GetBlobData(bi.Digest)
+		_, orig, err := blobs.GetBlobData(bi.Digest)
 		if err != nil {
 			return nil, err
 		}

@@ -59,11 +59,10 @@ var _ = Describe("cache management", func() {
 
 	It("blob copied to cache", func() {
 		Expect(vfs.FileExists(tempfs, common.DigestToFileName(td1_digest))).To(BeFalse())
-		data, err := cache.GetBlobData(td1_digest)
+		_, data, err := cache.GetBlobData(td1_digest)
 		Expect(err).To(Succeed())
 		Expect(vfs.FileExists(tempfs, common.DigestToFileName(td1_digest))).To(BeFalse())
 		Expect(data.Get()).To(Equal([]byte("testdata")))
 		Expect(vfs.FileExists(tempfs, common.DigestToFileName(td1_digest))).To(BeTrue())
 	})
-
 })

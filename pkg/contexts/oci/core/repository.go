@@ -39,7 +39,7 @@ type BlobAccess = accessio.BlobAccess
 type DataAccess = accessio.DataAccess
 
 type BlobSource interface {
-	GetBlobData(digest digest.Digest) (DataAccess, error)
+	GetBlobData(digest digest.Digest) (int64, DataAccess, error)
 }
 
 type BlobSink interface {
@@ -54,7 +54,7 @@ type ArtefactSink interface {
 
 type ArtefactSource interface {
 	GetArtefact(version string) (ArtefactAccess, error)
-	GetBlobData(digest digest.Digest) (DataAccess, error)
+	GetBlobData(digest digest.Digest) (int64, DataAccess, error)
 }
 
 type NamespaceAccess interface {

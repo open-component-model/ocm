@@ -63,7 +63,7 @@ func (m *localOCIBlobAccessMethod) getBlob() (cpi.DataAccess, error) {
 	if m.data != nil {
 		return m.data, nil
 	}
-	data, err := m.access.GetBlobData(m.spec.Digest)
+	_, data, err := m.access.GetBlobData(m.spec.Digest)
 	if err != nil {
 		return nil, err
 	}
