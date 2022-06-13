@@ -18,7 +18,6 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -27,6 +26,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/scriptoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common"
@@ -40,7 +40,7 @@ import (
 
 var (
 	Names = names.Components
-	Verb  = commands.Transfer
+	Verb  = verbs.Transfer
 )
 
 type Command struct {
@@ -58,7 +58,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		closureoption.New("component reference"),
 		rscbyvalueoption.New(),
 		scriptoption.New(),
-	)}, names...)
+	)}, utils.Names(Names, names...)...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -110,7 +110,7 @@ func (o *Command) Run() error {
 		return err
 	}
 	hdlr := comphdlr.NewTypeHandler(o.Context.OCM(), session, repooption.From(o).Repository)
-	return utils.HandleOutput(&action{
+	err = utils.HandleOutput(&action{
 		cmd:     o,
 		printer: common.NewPrinter(o.Context.StdOut()),
 		target:  target,
@@ -118,6 +118,10 @@ func (o *Command) Run() error {
 		closure: transfer.TransportClosure{},
 		errors:  errors.ErrListf("transfer errors"),
 	}, hdlr, utils.StringElemSpecs(o.Refs...)...)
+	if err != nil {
+		return err
+	}
+	return session.Close()
 }
 
 /////////////////////////////////////////////////////////////////////////////

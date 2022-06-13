@@ -45,7 +45,7 @@ const (
 // Does NOT verify if the digests are correct
 func (cd *ComponentDescriptor) isNormalizeable() error {
 	// check for digests on component references
-	for _, reference := range cd.ComponentReferences {
+	for _, reference := range cd.References {
 		if reference.Digest == nil || reference.Digest.HashAlgorithm == "" || reference.Digest.NormalisationAlgorithm == "" || reference.Digest.Value == "" {
 			return fmt.Errorf("missing digest in componentReference for %s:%s", reference.Name, reference.Version)
 		}

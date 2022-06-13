@@ -54,6 +54,7 @@ linked library can be used:
 - `Empty`
 - `OCIRegistry`
 - `oci`
+- `ociRegistry`
 
 With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:

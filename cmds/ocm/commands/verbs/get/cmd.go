@@ -12,22 +12,30 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package clean
+package get
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 
-	cache "github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds/clean"
+	artefacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/get"
+	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/get"
+	references "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references/get"
+	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/get"
+	sources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources/get"
 	"github.com/spf13/cobra"
 )
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "Cleanup/re-organize elements",
-	}, commands.Clean)
-	cmd.AddCommand(cache.NewCommand(ctx, cache.Names...))
+		Short: "Get information about artefacts and components",
+	}, verbs.Get)
+	cmd.AddCommand(artefacts.NewCommand(ctx))
+	cmd.AddCommand(components.NewCommand(ctx))
+	cmd.AddCommand(resources.NewCommand(ctx))
+	cmd.AddCommand(references.NewCommand(ctx))
+	cmd.AddCommand(sources.NewCommand(ctx))
 	return cmd
 }

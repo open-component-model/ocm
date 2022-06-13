@@ -65,6 +65,7 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `Empty`
 - `OCIRegistry`
 - `oci`
+- `ociRegistry`
 
 With the option <code>--closure</code> the complete reference tree of a component reference is traversed.
 

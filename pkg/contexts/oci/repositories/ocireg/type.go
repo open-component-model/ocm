@@ -27,14 +27,16 @@ import (
 )
 
 const (
-	RepositoryType   = "OCIRegistry"
-	RepositoryTypeV1 = RepositoryType + runtime.VersionSeparator + "v1"
+	LegacyRepositoryType = "ociRegistry"
+	RepositoryType       = "OCIRegistry"
+	RepositoryTypeV1     = RepositoryType + runtime.VersionSeparator + "v1"
 
 	ShortRepositoryType   = "oci"
 	ShortRepositoryTypeV1 = ShortRepositoryType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
+	cpi.RegisterRepositoryType(LegacyRepositoryType, cpi.NewRepositoryType(LegacyRepositoryType, &RepositorySpec{}))
 	cpi.RegisterRepositoryType(RepositoryType, cpi.NewRepositoryType(RepositoryType, &RepositorySpec{}))
 	cpi.RegisterRepositoryType(RepositoryTypeV1, cpi.NewRepositoryType(RepositoryTypeV1, &RepositorySpec{}))
 	cpi.RegisterRepositoryType(ShortRepositoryType, cpi.NewRepositoryType(ShortRepositoryType, &RepositorySpec{}))

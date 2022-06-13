@@ -50,3 +50,10 @@ func StandardOCIRef(host, repository, version string) string {
 	}
 	return fmt.Sprintf("%s%s%s%s%s", host, grammar.RepositorySeparator, repository, sep, version)
 }
+
+func IsIntermediate(spec RepositorySpec) bool {
+	if s, ok := spec.(IntermediateRepositorySpecAspect); ok {
+		return s.IsIntermediate()
+	}
+	return false
+}

@@ -25,15 +25,20 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	ocmsign "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
 const ARCH = "/tmp/ctf"
@@ -45,20 +50,18 @@ const OCIPATH = "/tmp/oci"
 const OCINAMESPACE = "oci/test"
 const OCIVERSION = "v2.0"
 const OCIHOST = "alias"
+const SIGNATURE = "test"
+const SIGN_ALGO = rsa.Algorithm
 
 var _ = Describe("Transfer handler", func() {
 	var env *Builder
+	var ldesc *artdesc.Descriptor
 
 	BeforeEach(func() {
 		env = NewBuilder(NewEnvironment())
-	})
 
-	AfterEach(func() {
-		env.Cleanup()
-	})
+		env.RSAKeyPair(SIGNATURE)
 
-	It("it should copy a resource by value to a ctf file", func() {
-		var ldesc *artdesc.Descriptor
 		env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
 			env.Namespace(OCINAMESPACE, func() {
 				env.Manifest(OCIVERSION, func() {
@@ -89,7 +92,13 @@ var _ = Describe("Transfer handler", func() {
 		})
 
 		env.OCIContext().SetAlias(OCIHOST, ctfoci.NewRepositorySpec(accessobj.ACC_READONLY, OCIPATH, accessio.PathFileSystem(env.FileSystem())))
+	})
 
+	AfterEach(func() {
+		env.Cleanup()
+	})
+
+	It("it should copy a resource by value to a ctf file", func() {
 		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
 		Expect(err).To(Succeed())
 		cv, err := src.LookupComponentVersion(COMPONENT, VERSION)
@@ -111,7 +120,7 @@ var _ = Describe("Transfer handler", func() {
 		Expect(len(comp.GetDescriptor().Resources)).To(Equal(2))
 		data, err := json.Marshal(comp.GetDescriptor().Resources[1].Access)
 		Expect(err).To(Succeed())
-		Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"referenceName\":\"" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
+		Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 
 		r, err := comp.GetResourceByIndex(1)
 		Expect(err).To(Succeed())
@@ -130,5 +139,49 @@ var _ = Describe("Transfer handler", func() {
 		data, err = blob.Get()
 		Expect(err).To(Succeed())
 		Expect(string(data)).To(Equal("manifestlayer"))
+	})
+
+	It("it should copy signatures", func() {
+
+		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
+		Expect(err).To(Succeed())
+		cv, err := src.LookupComponentVersion(COMPONENT, VERSION)
+		Expect(err).To(Succeed())
+
+		resolver := ocm.NewCompoundResolver(src)
+
+		opts := ocmsign.NewOptions(
+			ocmsign.Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+			ocmsign.Resolver(resolver),
+			ocmsign.Update(), ocmsign.VerifyDigests(),
+		)
+		Expect(opts.Complete(signingattr.Get(env.OCMContext()))).To(Succeed())
+		digest := "1cd96e197202fad18ae76e239e08224be5bbe900bc4e4f50ac32119509cc18af"
+		dig, err := ocmsign.Apply(nil, nil, cv, opts)
+		Expect(err).To(Succeed())
+		Expect(dig.Value).To(Equal(digest))
+
+		Expect(len(cv.GetDescriptor().Signatures)).To(Equal(1))
+
+		tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env)
+		Expect(err).To(Succeed())
+		defer tgt.Close()
+		handler, err := standard.New(standard.ResourcesByValue())
+		Expect(err).To(Succeed())
+		err = transfer.TransferVersion(nil, nil, src, cv, tgt, handler)
+		Expect(err).To(Succeed())
+		Expect(env.DirExists(OUT)).To(BeTrue())
+
+		resolver = ocm.NewCompoundResolver(tgt)
+
+		opts = ocmsign.NewOptions(
+			ocmsign.Resolver(resolver),
+			ocmsign.VerifySignature(SIGNATURE),
+			ocmsign.Update(), ocmsign.VerifyDigests(),
+		)
+		Expect(opts.Complete(signingattr.Get(env.OCMContext()))).To(Succeed())
+		dig, err = ocmsign.Apply(nil, nil, cv, opts)
+		Expect(err).To(Succeed())
+		Expect(dig.Value).To(Equal(digest))
 	})
 })

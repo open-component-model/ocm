@@ -52,6 +52,7 @@ linked library can be used:
 - `Empty`
 - `OCIRegistry`
 - `oci`
+- `ociRegistry`
 
 
 ### Examples

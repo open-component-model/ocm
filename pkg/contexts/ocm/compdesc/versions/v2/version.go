@@ -88,11 +88,11 @@ func (v *DescriptorVersion) ConvertTo(obj compdesc.ComponentDescriptorVersion) (
 				Version: in.Version,
 				Labels:  in.Labels.Copy(),
 			},
-			RepositoryContexts:  in.RepositoryContexts.Copy(),
-			Provider:            in.Provider,
-			Sources:             convert_Sources_to(in.Sources),
-			Resources:           convert_Resources_to(in.Resources),
-			ComponentReferences: convert_ComponentReferences_to(in.ComponentReferences),
+			RepositoryContexts: in.RepositoryContexts.Copy(),
+			Provider:           in.Provider,
+			Sources:            convert_Sources_to(in.Sources),
+			Resources:          convert_Resources_to(in.Resources),
+			References:         convert_ComponentReferences_to(in.ComponentReferences),
 		},
 		Signatures: in.Signatures.Copy(),
 	}
@@ -111,11 +111,11 @@ func convert_ComponentReference_to(in *ComponentReference) *compdesc.ComponentRe
 	return out
 }
 
-func convert_ComponentReferences_to(in []ComponentReference) compdesc.ComponentReferences {
+func convert_ComponentReferences_to(in []ComponentReference) compdesc.References {
 	if in == nil {
 		return nil
 	}
-	out := make(compdesc.ComponentReferences, len(in))
+	out := make(compdesc.References, len(in))
 	for i, v := range in {
 		out[i] = *convert_ComponentReference_to(&v)
 	}
@@ -232,7 +232,7 @@ func (v *DescriptorVersion) ConvertFrom(in *compdesc.ComponentDescriptor) (compd
 			Provider:            in.Provider,
 			Sources:             convert_Sources_from(in.Sources),
 			Resources:           convert_Resources_from(in.Resources),
-			ComponentReferences: convert_ComponentReferences_from(in.ComponentReferences),
+			ComponentReferences: convert_ComponentReferences_from(in.References),
 		},
 		Signatures: in.Signatures.Copy(),
 	}

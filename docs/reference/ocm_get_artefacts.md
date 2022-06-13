@@ -54,6 +54,7 @@ linked library can be used:
 - `Empty`
 - `OCIRegistry`
 - `oci`
+- `ociRegistry`
 
 With the option <code>--closure</code> the complete reference tree of a index is traversed.
 

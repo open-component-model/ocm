@@ -16,6 +16,7 @@ package ocireg
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/remotes"
@@ -44,7 +45,7 @@ type NamespaceContainer struct {
 	lister    docker.Lister
 	fetcher   remotes.Fetcher
 	pusher    remotes.Pusher
-	blobs     BlobContainer
+	blobs     *BlobContainers
 }
 
 var _ cpi.ArtefactSetContainer = (*NamespaceContainer)(nil)
@@ -76,7 +77,7 @@ func NewNamespace(repo *Repository, name string) (*Namespace, error) {
 			lister:    lister,
 			fetcher:   fetcher,
 			pusher:    pusher,
-			blobs:     NewBlobContainer(repo.ctx, fetcher, pusher),
+			blobs:     NewBlobContainers(repo.ctx, fetcher, pusher),
 		},
 	}
 	return n, nil
@@ -84,15 +85,24 @@ func NewNamespace(repo *Repository, name string) (*Namespace, error) {
 
 func (n *NamespaceContainer) getPusher(vers string) (remotes.Pusher, error) {
 	ref := n.repo.getRef(n.namespace, vers)
-	return n.resolver.Pusher(dummyContext, ref)
+	fmt.Printf("pusher for %s\n", ref)
+	resolver := n.resolver
+	if ok, _ := artdesc.IsDigest(vers); !ok {
+		var err error
+		resolver, err = n.repo.getResolver(ref)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return resolver.Pusher(dummyContext, ref)
 }
 
 func (n *NamespaceContainer) push(vers string, blob cpi.BlobAccess) error {
-	ref := n.repo.getRef(n.namespace, vers)
-	p, err := n.resolver.Pusher(dummyContext, ref)
+	p, err := n.getPusher(vers)
 	if err != nil {
 		return err
 	}
+	fmt.Printf("pushing %s\n", vers)
 	return push(dummyContext, p, blob)
 }
 
@@ -113,11 +123,11 @@ func (n *NamespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi.Descri
 }
 
 func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
-	return n.blobs.GetBlobData(digest)
+	return n.blobs.Get("").GetBlobData(digest)
 }
 
 func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
-	_, _, err := n.blobs.AddBlob(blob)
+	_, _, err := n.blobs.Get("").AddBlob(blob)
 	return err
 }
 
@@ -127,14 +137,16 @@ func (n *NamespaceContainer) ListTags() ([]string, error) {
 
 func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error) {
 	ref := n.repo.getRef(n.namespace, vers)
+	// fmt.Printf("resolve %s\n", ref)
 	_, desc, err := n.resolver.Resolve(context.Background(), ref)
+	// fmt.Printf("done\n")
 	if err != nil {
 		if errdefs.IsNotFound(err) {
 			return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, ref, n.namespace)
 		}
 		return nil, err
 	}
-	acc, err := NewDataAccess(n.fetcher, desc.Digest, desc.MediaType, false)
+	_, acc, err := n.blobs.Get(desc.MediaType).GetBlobData(desc.Digest)
 	if err != nil {
 		return nil, err
 	}
@@ -146,31 +158,15 @@ func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, tags ...string) 
 	if err != nil {
 		return nil, err
 	}
-	vers := blob.Digest().String()
-
-	/*
-		data, err:=blob.Get()
-		if err != nil {
-			return nil, err
-		}
-		digest:=digest.Canonical.FromBytes(data)
-
-		fmt.Printf("*** blob digest: %10d %s\n", blob.Size(), blob.Digest())
-		fmt.Printf("*** data digest: %10d %s\n", len(data), digest)
-	*/
-
-	if len(tags) > 0 && tags[0] != "" {
-		vers = tags[0]
-	}
 	if n.repo.info.Legacy {
 		blob = artdesc.MapArtefactBlobMimeType(blob, true)
 	}
-	err = n.push(vers, blob)
+	_, _, err = n.blobs.Get(blob.MimeType()).AddBlob(blob)
 	if err != nil {
 		return nil, err
 	}
-	if len(tags) > 1 {
-		for _, tag := range tags[1:] {
+	if len(tags) > 0 {
+		for _, tag := range tags {
 			err := n.push(tag, blob)
 			if err != nil {
 				return nil, err

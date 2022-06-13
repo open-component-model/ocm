@@ -63,6 +63,7 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `Empty`
 - `OCIRegistry`
 - `oci`
+- `ociRegistry`
 
 
 ### Examples

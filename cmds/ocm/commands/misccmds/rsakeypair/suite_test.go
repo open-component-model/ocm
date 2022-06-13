@@ -12,22 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package describe
+package rsakeypair_test
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"testing"
 
-	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/describe"
-	"github.com/spf13/cobra"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-// NewCommand creates a new command.
-func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "Describe artefacts",
-	}, commands.Describe)
-	cmd.AddCommand(resources.NewCommand(ctx, resources.Names...))
-	return cmd
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "RSA Key Pair")
 }

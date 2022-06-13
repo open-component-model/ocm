@@ -9,9 +9,9 @@ import (
 )
 
 const KIND_COMPONENTVERSION = core.KIND_COMPONENTVERSION
-const KIND_RESOURCE = "component resource"
-const KIND_SOURCE = "component source"
-const KIND_REFERENCE = "component reference"
+const KIND_RESOURCE = core.KIND_RESOURCE
+const KIND_SOURCE = core.KIND_SOURCE
+const KIND_REFERENCE = core.KIND_REFERENCE
 
 const CONTEXT_TYPE = core.CONTEXT_TYPE
 
@@ -37,6 +37,7 @@ type SourceMeta = core.SourceMeta
 type ResourceAccess = core.ResourceAccess
 type ResourceMeta = core.ResourceMeta
 type RepositorySpec = core.RepositorySpec
+type IntermediateRepositorySpecAspect = core.IntermediateRepositorySpecAspect
 type RepositoryType = core.RepositoryType
 type RepositoryTypeScheme = core.RepositoryTypeScheme
 type AccessTypeScheme = core.AccessTypeScheme

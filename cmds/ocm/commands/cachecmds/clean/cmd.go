@@ -19,6 +19,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/spf13/cobra"
 
@@ -28,13 +29,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds/names"
 )
 
 var (
 	Names = names.Cache
-	Verb  = commands.Clean
+	Verb  = verbs.Clean
 )
 
 type Cache interface {
@@ -49,7 +49,7 @@ type Command struct {
 
 // NewCommand creates a new artefact command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx)}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx)}, utils.Names(Names, names...)...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {

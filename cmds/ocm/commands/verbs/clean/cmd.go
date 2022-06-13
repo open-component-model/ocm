@@ -12,18 +12,22 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package commands
+package clean
 
-const (
-	Get      = "get"
-	Describe = "describe"
-	Add      = "add"
-	Create   = "create"
-	Transfer = "transfer"
-	Download = "download"
-	Show     = "show"
-	Sign     = "sign"
-	Verify   = "verify"
-	Clean    = "clean"
-	Info     = "info"
+import (
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+
+	cache "github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds/clean"
+	"github.com/spf13/cobra"
 )
+
+// NewCommand creates a new command.
+func NewCommand(ctx clictx.Context) *cobra.Command {
+	cmd := utils.MassageCommand(&cobra.Command{
+		Short: "Cleanup/re-organize elements",
+	}, verbs.Clean)
+	cmd.AddCommand(cache.NewCommand(ctx))
+	return cmd
+}

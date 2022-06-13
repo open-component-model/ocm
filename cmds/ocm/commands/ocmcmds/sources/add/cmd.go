@@ -16,10 +16,10 @@ package add
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
@@ -28,7 +28,7 @@ import (
 
 var (
 	Names = names.Sources
-	Verb  = commands.Add
+	Verb  = verbs.Add
 )
 
 type Command struct {
@@ -37,7 +37,7 @@ type Command struct {
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{common.ResourceAdderCommand{BaseCommand: utils.NewBaseCommand(ctx)}}, names...)
+	return utils.SetupCommand(&Command{common.ResourceAdderCommand{BaseCommand: utils.NewBaseCommand(ctx)}}, utils.Names(Names, names...)...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {

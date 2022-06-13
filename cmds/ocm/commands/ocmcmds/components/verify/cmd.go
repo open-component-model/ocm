@@ -16,16 +16,17 @@ package verify
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/cmds/sign"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 )
 
 var (
 	Names = names.Components
-	Verb  = commands.Verify
+	Verb  = verbs.Verify
 )
 
 // NewCommand creates a new ctf command.
@@ -33,5 +34,5 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return sign.NewCommand(ctx, "Verify signature of", false,
 		[]string{"verified", "verifying signature of"},
 		"$ ocm verify componentversion --signature mandelsoft --public-key=mandelsoft.key ghcr.io/mandelsoft/kubelink",
-		names...)
+		utils.Names(Names, names...)...)
 }

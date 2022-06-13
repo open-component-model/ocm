@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/scriptoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
@@ -28,7 +29,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -37,7 +37,7 @@ import (
 
 var (
 	Names = names.CommonTransportArchive
-	Verb  = commands.Transfer
+	Verb  = verbs.Transfer
 )
 
 type Command struct {
@@ -53,7 +53,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		formatoption.New(),
 		rscbyvalueoption.New(),
 		scriptoption.New(),
-	)}, names...)
+	)}, utils.Names(Names, names...)...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {

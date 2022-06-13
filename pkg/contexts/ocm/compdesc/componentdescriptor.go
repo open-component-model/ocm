@@ -15,6 +15,7 @@
 package compdesc
 
 import (
+	"reflect"
 	"strings"
 
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -71,16 +72,27 @@ func (c *ComponentDescriptor) Copy() *ComponentDescriptor {
 	out := &ComponentDescriptor{
 		Metadata: c.Metadata,
 		ComponentSpec: ComponentSpec{
-			ObjectMeta:          c.ObjectMeta.Copy(),
-			RepositoryContexts:  c.RepositoryContexts.Copy(),
-			Provider:            c.Provider,
-			Sources:             c.Sources.Copy(),
-			ComponentReferences: c.ComponentReferences.Copy(),
-			Resources:           c.Resources.Copy(),
+			ObjectMeta:         c.ObjectMeta.Copy(),
+			RepositoryContexts: c.RepositoryContexts.Copy(),
+			Provider:           c.Provider,
+			Sources:            c.Sources.Copy(),
+			References:         c.References.Copy(),
+			Resources:          c.Resources.Copy(),
 		},
 		Signatures: c.Signatures.Copy(),
 	}
 	return out
+}
+
+func (c *ComponentDescriptor) Reset() {
+	c.Provider = ""
+	c.Resources = nil
+	c.Sources = nil
+	c.References = nil
+	c.RepositoryContexts = nil
+	c.Signatures = nil
+	c.Labels = nil
+	DefaultComponent(c)
 }
 
 // ComponentSpec defines a virtual component with
@@ -96,8 +108,8 @@ type ComponentSpec struct {
 	Provider metav1.ProviderType `json:"provider"`
 	// Sources defines sources that produced the component
 	Sources Sources `json:"sources"`
-	// ComponentReferences references component dependencies that can be resolved in the current context.
-	ComponentReferences ComponentReferences `json:"componentReferences"`
+	// References references component dependencies that can be resolved in the current context.
+	References References `json:"componentReferences"`
 	// Resources defines all resources that are created by the component and by a third party.
 	Resources Resources `json:"resources"`
 }
@@ -508,6 +520,31 @@ type ResourceMeta struct {
 	Digest *metav1.DigestSpec `json:"digest,omitempty"`
 }
 
+// HashEqual indicates whether the digest hash would be equal.
+// Excluded: Labels
+// Adapt together with version specific hash excludes.
+func (o *ResourceMeta) HashEqual(r *ResourceMeta) bool {
+	if o.Type != r.Type {
+		return false
+	}
+	if o.Relation != r.Relation {
+		return false
+	}
+	if o.ElementMeta.Name != r.ElementMeta.Name {
+		return false
+	}
+	if o.ElementMeta.Version != r.ElementMeta.Version {
+		return false
+	}
+	if o.Digest != nil && !reflect.DeepEqual(o.Digest, r.Digest) {
+		return false
+	}
+	if !reflect.DeepEqual(o.ElementMeta.ExtraIdentity, r.ElementMeta.ExtraIdentity) {
+		return false
+	}
+	return true
+}
+
 // GetType returns the type of the object.
 func (o ResourceMeta) GetType() string {
 	return o.Type
@@ -533,21 +570,21 @@ func (o *ResourceMeta) Copy() *ResourceMeta {
 	return r
 }
 
-type ComponentReferences []ComponentReference
+type References []ComponentReference
 
-func (r ComponentReferences) Len() int {
+func (r References) Len() int {
 	return len(r)
 }
 
-func (r ComponentReferences) Get(i int) ElementMetaAccessor {
+func (r References) Get(i int) ElementMetaAccessor {
 	return &r[i]
 }
 
-func (r ComponentReferences) Swap(i, j int) {
+func (r References) Swap(i, j int) {
 	r[i], r[j] = r[j], r[i]
 }
 
-func (r ComponentReferences) Less(i, j int) bool {
+func (r References) Less(i, j int) bool {
 	c := strings.Compare(r[i].Name, r[j].Name)
 	if c != 0 {
 		return c < 0
@@ -555,11 +592,11 @@ func (r ComponentReferences) Less(i, j int) bool {
 	return strings.Compare(r[i].Version, r[j].Version) < 0
 }
 
-func (r ComponentReferences) Copy() ComponentReferences {
+func (r References) Copy() References {
 	if r == nil {
 		return nil
 	}
-	out := make(ComponentReferences, len(r))
+	out := make(References, len(r))
 	for i, v := range r {
 		out[i] = *v.Copy()
 	}

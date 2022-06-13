@@ -17,10 +17,10 @@ package get
 import (
 	"fmt"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
@@ -34,7 +34,7 @@ import (
 
 var (
 	Names = names.Components
-	Verb  = commands.Get
+	Verb  = verbs.Get
 )
 
 type Command struct {
@@ -47,7 +47,7 @@ type Command struct {
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), output.OutputOptions(outputs, closureoption.New(
 		"component reference", output.Fields("IDENTITY"), identity),
-	))}, names...)
+	))}, utils.Names(Names, names...)...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {

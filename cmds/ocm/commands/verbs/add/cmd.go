@@ -16,7 +16,7 @@ package add
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 
 	references "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references/add"
@@ -29,9 +29,9 @@ import (
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
 		Short: "Add resources or sources to a component archive",
-	}, commands.Add)
-	cmd.AddCommand(resources.NewCommand(ctx, resources.Names...))
-	cmd.AddCommand(sources.NewCommand(ctx, sources.Names...))
-	cmd.AddCommand(references.NewCommand(ctx, references.Names...))
+	}, verbs.Add)
+	cmd.AddCommand(resources.NewCommand(ctx))
+	cmd.AddCommand(sources.NewCommand(ctx))
+	cmd.AddCommand(references.NewCommand(ctx))
 	return cmd
 }

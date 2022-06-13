@@ -129,3 +129,10 @@ func (c *CompoundResolver) LookupComponentVersion(name string, version string) (
 	}
 	return nil, errors.ErrNotFound(KIND_OCM_REFERENCE, common.NewNameVersion(name, version).String())
 }
+
+func IsIntermediate(spec RepositorySpec) bool {
+	if s, ok := spec.(IntermediateRepositorySpecAspect); ok {
+		return s.IsIntermediate()
+	}
+	return false
+}

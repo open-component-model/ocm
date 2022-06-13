@@ -21,6 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 type TransportClosure = common.NameVersionInfo
@@ -63,13 +64,14 @@ func transferVersion(printer common.Printer, state common.WalkingState, repo ocm
 		return errors.Wrapf(err, "%s: creating target version", state.History)
 	}
 	defer t.Close()
+
 	err = CopyVersion(printer, state.History, src, t, handler)
 	if err != nil {
 		return err
 	}
 	subp := printer.AddGap("  ")
 	list := errors.ErrListf("component references for %s", nv)
-	for _, r := range d.ComponentReferences {
+	for _, r := range d.References {
 		srepo, shdlr, err := handler.TransferVersion(repo, src, &r.ElementMeta)
 		if err != nil {
 			return err
@@ -85,6 +87,19 @@ func transferVersion(printer common.Printer, state common.WalkingState, repo ocm
 			}
 		}
 	}
+
+	var unstr *runtime.UnstructuredTypedObject
+	if !ocm.IsIntermediate(tgt.GetSpecification()) {
+		unstr, err = runtime.ToUnstructuredTypedObject(tgt.GetSpecification())
+		if err != nil {
+			unstr = nil
+		}
+	}
+	cd := t.GetDescriptor()
+	if unstr != nil {
+		cd.RepositoryContexts = append(cd.RepositoryContexts, unstr)
+	}
+	cd.Signatures = src.GetDescriptor().Signatures.Copy()
 	printer.Printf("...adding component version...\n")
 	return list.Add(comp.AddVersion(t)).Result()
 }
@@ -94,7 +109,7 @@ func CopyVersion(printer common.Printer, hist common.History, src ocm.ComponentV
 		handler = standard.NewDefaultHandler(nil)
 	}
 
-	*t.GetDescriptor() = *src.GetDescriptor()
+	*t.GetDescriptor() = *src.GetDescriptor().Copy()
 	for i, r := range src.GetResources() {
 		var m ocm.AccessMethod
 		a, err := r.Access()
@@ -152,7 +167,7 @@ func CopyVersion(printer common.Printer, hist common.History, src ocm.ComponentV
 			if !errors.IsErrUnknownKind(err, errors.KIND_ACCESSMETHOD) {
 				return errors.Wrapf(err, "%s: transferring source %d", hist, i)
 			}
-			printer.Printf("WARN: %s: transferring resource %d: %s (enforce transport by reference)\n", hist, i, err)
+			printer.Printf("WARN: %s: transferring source %d: %s (enforce transport by reference)\n", hist, i, err)
 		}
 	}
 	return nil

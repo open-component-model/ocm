@@ -15,6 +15,8 @@
 package ocireg
 
 import (
+	"sync"
+
 	"github.com/containerd/containerd/remotes"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/attrs/cacheattr"
@@ -31,18 +33,49 @@ type blobContainer struct {
 	accessio.StaticAllocatable
 	fetcher remotes.Fetcher
 	pusher  remotes.Pusher
+	mime    string
 }
 
-func newBlobContainer(fetcher remotes.Fetcher, pusher remotes.Pusher) *blobContainer {
+type BlobContainers struct {
+	lock    sync.Mutex
+	ctx     cpi.Context
+	cache   accessio.BlobCache
+	fetcher remotes.Fetcher
+	pusher  remotes.Pusher
+	mimes   map[string]BlobContainer
+}
+
+func NewBlobContainers(ctx cpi.Context, fetcher remotes.Fetcher, pusher remotes.Pusher) *BlobContainers {
+	return &BlobContainers{
+		cache:   cacheattr.Get(ctx),
+		fetcher: fetcher,
+		pusher:  pusher,
+		mimes:   map[string]BlobContainer{},
+	}
+}
+
+func (c *BlobContainers) Get(mime string) BlobContainer {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	found := c.mimes[mime]
+	if found == nil {
+		found = NewBlobContainer(c.cache, mime, c.fetcher, c.pusher)
+		c.mimes[mime] = found
+	}
+	return found
+}
+
+func newBlobContainer(mime string, fetcher remotes.Fetcher, pusher remotes.Pusher) *blobContainer {
 	return &blobContainer{
+		mime:    mime,
 		fetcher: fetcher,
 		pusher:  pusher,
 	}
 }
 
-func NewBlobContainer(ctx cpi.Context, fetcher remotes.Fetcher, pusher remotes.Pusher) BlobContainer {
-	c := newBlobContainer(fetcher, pusher)
-	cache := cacheattr.Get(ctx)
+func NewBlobContainer(cache accessio.BlobCache, mime string, fetcher remotes.Fetcher, pusher remotes.Pusher) BlobContainer {
+	c := newBlobContainer(mime, fetcher, pusher)
 
 	if cache == nil {
 		return c
@@ -55,7 +88,8 @@ func NewBlobContainer(ctx cpi.Context, fetcher remotes.Fetcher, pusher remotes.P
 }
 
 func (n *blobContainer) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
-	acc, err := NewDataAccess(n.fetcher, digest, "", false)
+	//fmt.Printf("orig get %s %s\n",n.mime, digest)
+	acc, err := NewDataAccess(n.fetcher, digest, n.mime, false)
 	return accessio.BLOB_UNKNOWN_SIZE, acc, err
 }
 

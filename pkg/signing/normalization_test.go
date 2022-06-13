@@ -89,9 +89,9 @@ var _ = Describe("normalization", func() {
 			RepositoryContexts: []*runtime.UnstructuredTypedObject{
 				unstr,
 			},
-			Provider:            "provider",
-			Sources:             nil,
-			ComponentReferences: nil,
+			Provider:   "provider",
+			Sources:    nil,
+			References: nil,
 			Resources: compdesc.Resources{
 				compdesc.Resource{
 					ResourceMeta: compdesc.ResourceMeta{

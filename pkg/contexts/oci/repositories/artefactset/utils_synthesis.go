@@ -24,6 +24,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer"
 )
 
+const SynthesizedBlobFormat = "+tar+gzip"
+
 type ArtefactBlob interface {
 	accessio.TemporaryFileSystemBlobAccess
 }
@@ -48,7 +50,7 @@ func SythesizeArtefactSet(mime string, producer Producer) (ArtefactBlob, error) 
 		return nil, err
 	}
 
-	return temp.AsBlob(artdesc.ToContentMediaType(mime) + "+tar+gzip"), nil
+	return temp.AsBlob(artdesc.ToContentMediaType(mime) + SynthesizedBlobFormat), nil
 }
 
 func TransferArtefact(art cpi.ArtefactAccess, set cpi.ArtefactSink, tags ...string) error {

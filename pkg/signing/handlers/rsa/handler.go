@@ -44,6 +44,9 @@ func init() {
 	signing.DefaultHandlerRegistry().RegisterSigner(Algorithm, Handler{})
 }
 
+type PrivateKey = rsa.PrivateKey
+type PublicKey = rsa.PublicKey
+
 // Handler is a signatures.Signer compatible struct to sign with RSASSA-PKCS1-V1_5.
 // and a signatures.Verifier compatible struct to verify RSASSA-PKCS1-V1_5 signatures.
 type Handler struct {
@@ -56,7 +59,7 @@ func (h Handler) Algorithm() string {
 }
 
 func (h Handler) Sign(digest string, key interface{}) (signature *signing.Signature, err error) {
-	privateKey, err := PrivateKey(key)
+	privateKey, err := GetPrivateKey(key)
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid rsa private key")
 	}
@@ -82,7 +85,7 @@ func (h Handler) Sign(digest string, key interface{}) (signature *signing.Signat
 // Verify checks the signature, returns an error on verification failure
 func (h Handler) Verify(digest string, signature string, mediatype string, key interface{}) (err error) {
 	var signatureBytes []byte
-	publicKey, err := PublicKey(key)
+	publicKey, err := GetPublicKey(key)
 	if err != nil {
 		return err
 	}

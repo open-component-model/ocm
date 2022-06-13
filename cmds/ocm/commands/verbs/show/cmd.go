@@ -12,15 +12,13 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package transfer
+package show
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
-	artefacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/transfer"
-	comparch "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive/transfer"
-	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/transfer"
-	ctf "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/ctf/transfer"
+	tags "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/tags/show"
+	versions "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/versions/show"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -28,12 +26,10 @@ import (
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "Transfer artefacts or components",
-	}, commands.Transfer)
-	cmd.AddCommand(comparch.NewCommand(ctx, comparch.Names...))
-	cmd.AddCommand(artefacts.NewCommand(ctx, artefacts.Names...))
-	cmd.AddCommand(components.NewCommand(ctx, components.Names...))
-	cmd.AddCommand(ctf.NewCommand(ctx, ctf.Names...))
+		Short: "Show tags or versions",
+	}, verbs.Show)
+	cmd.AddCommand(versions.NewCommand(ctx))
+	cmd.AddCommand(tags.NewCommand(ctx))
 
 	return cmd
 }

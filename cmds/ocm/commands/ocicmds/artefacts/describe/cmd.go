@@ -17,12 +17,12 @@ package describe
 import (
 	"fmt"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/handlers/artefacthdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/options/repooption"
@@ -36,7 +36,7 @@ import (
 
 var (
 	Names = names.Artefacts
-	Verb  = commands.Describe
+	Verb  = verbs.Describe
 )
 
 func From(o *output.Options) *Options {
@@ -66,7 +66,7 @@ type Command struct {
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), output.OutputOptions(outputs, &Options{}))}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), output.OutputOptions(outputs, &Options{}))}, utils.Names(Names, names...)...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {

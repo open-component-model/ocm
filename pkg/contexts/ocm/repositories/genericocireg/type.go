@@ -105,11 +105,21 @@ type RepositorySpec struct {
 	ComponentRepositoryMeta
 }
 
+var _ cpi.RepositorySpec = (*RepositorySpec)(nil)
+var _ cpi.IntermediateRepositorySpecAspect = (*RepositorySpec)(nil)
+
 func NewRepositorySpec(spec oci.RepositorySpec, meta *ComponentRepositoryMeta) *RepositorySpec {
 	return &RepositorySpec{
 		RepositorySpec:          spec,
 		ComponentRepositoryMeta: *DefaultComponentRepositoryMeta(meta),
 	}
+}
+
+func (a *RepositorySpec) IsIntermediate() bool {
+	if s, ok := a.RepositorySpec.(oci.IntermediateRepositorySpecAspect); ok {
+		return s.IsIntermediate()
+	}
+	return false
 }
 
 func (a *RepositorySpec) AsUniformSpec(cpi.Context) cpi.UniformRepositorySpec {

@@ -12,30 +12,26 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package get
+package create
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 
-	artefacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/get"
-	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/get"
-	references "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references/get"
-	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/get"
-	sources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources/get"
+	rsakeypair "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/rsakeypair"
+	ctf "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/ctf/create"
+	comparch "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
 	"github.com/spf13/cobra"
 )
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "Get information about artefacts and components",
-	}, commands.Get)
-	cmd.AddCommand(artefacts.NewCommand(ctx, artefacts.Names...))
-	cmd.AddCommand(components.NewCommand(ctx, components.Names...))
-	cmd.AddCommand(resources.NewCommand(ctx, resources.Names...))
-	cmd.AddCommand(references.NewCommand(ctx, references.Names...))
-	cmd.AddCommand(sources.NewCommand(ctx, sources.Names...))
+		Short: "Create transport or component archive",
+	}, verbs.Create)
+	cmd.AddCommand(comparch.NewCommand(ctx))
+	cmd.AddCommand(ctf.NewCommand(ctx))
+	cmd.AddCommand(rsakeypair.NewCommand(ctx))
 	return cmd
 }

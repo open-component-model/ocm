@@ -12,7 +12,7 @@ ocm transfer componentversions [<options>] {<component-reference>} <target>
   -c, --closure             follow component reference nesting
   -h, --help                help for componentversions
   -r, --repo string         repository name or spec
-      --resourcesByValue    transfer resources by-value
+  -V, --resourcesByValue    transfer resources by-value
       --script string       config name of transfer handler script
   -s, --scriptFile string   filename of transfer handler script
   -t, --type string         archive format (default "directory")
@@ -68,6 +68,7 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `Empty`
 - `OCIRegistry`
 - `oci`
+- `ociRegistry`
 
 The <code>--type</code> option accepts a file format for the
 target archive to use. The following formats are supported:

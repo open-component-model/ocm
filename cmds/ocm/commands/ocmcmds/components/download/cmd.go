@@ -18,6 +18,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
@@ -25,7 +26,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/destoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -42,7 +42,7 @@ import (
 
 var (
 	Names = names.Components
-	Verb  = commands.Download
+	Verb  = verbs.Download
 )
 
 type Command struct {
@@ -57,7 +57,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		repooption.New(),
 		destoption.New(),
 		formatoption.New(),
-	)}, names...)
+	)}, utils.Names(Names, names...)...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {

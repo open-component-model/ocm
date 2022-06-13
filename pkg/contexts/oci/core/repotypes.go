@@ -31,6 +31,10 @@ type RepositoryType interface {
 	runtime.VersionedTypedObject
 }
 
+type IntermediateRepositorySpecAspect interface {
+	IsIntermediate() bool
+}
+
 type RepositorySpec interface {
 	runtime.VersionedTypedObject
 

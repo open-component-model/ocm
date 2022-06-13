@@ -178,6 +178,23 @@ func (c *ComponentVersionAccess) getAccessMethod(acc compdesc.AccessSpec) (cpi.A
 	}
 }
 
+func (c *ComponentVersionAccess) AdjustResourceAccess(meta *cpi.ResourceMeta, acc compdesc.AccessSpec) error {
+	if err := c.checkAccessSpec(acc); err != nil {
+		return err
+	}
+
+	cd := c.GetDescriptor()
+	if idx := cd.GetResourceIndex(meta); idx == -1 {
+		return errors.ErrUnknown(cpi.KIND_RESOURCE, meta.GetIdentity(cd.Resources).String())
+	} else {
+		cd.Resources[idx].Access = acc
+	}
+	if c.lazy {
+		return nil
+	}
+	return c.base.Update()
+}
+
 func (c *ComponentVersionAccess) checkAccessSpec(acc compdesc.AccessSpec) error {
 	_, err := c.getAccessMethod(acc)
 	return err
@@ -202,10 +219,15 @@ func (c *ComponentVersionAccess) SetResource(meta *cpi.ResourceMeta, acc compdes
 		}
 	}
 
-	if idx := c.GetDescriptor().GetResourceIndex(meta); idx == -1 {
-		c.GetDescriptor().Resources = append(c.GetDescriptor().Resources, *res)
+	cd := c.GetDescriptor()
+	if idx := cd.GetResourceIndex(meta); idx == -1 {
+		cd.Resources = append(c.GetDescriptor().Resources, *res)
+		cd.Signatures = nil
 	} else {
-		c.GetDescriptor().Resources[idx] = *res
+		if !cd.Resources[idx].ResourceMeta.HashEqual(&res.ResourceMeta) {
+			cd.Signatures = nil
+		}
+		cd.Resources[idx] = *res
 	}
 	if c.lazy {
 		return nil
@@ -262,9 +284,9 @@ func (c *ComponentVersionAccess) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.Bl
 func (c *ComponentVersionAccess) SetReference(ref *cpi.ComponentReference) error {
 
 	if idx := c.GetDescriptor().GetComponentReferenceIndex(*ref); idx == -1 {
-		c.GetDescriptor().ComponentReferences = append(c.GetDescriptor().ComponentReferences, *ref)
+		c.GetDescriptor().References = append(c.GetDescriptor().References, *ref)
 	} else {
-		c.GetDescriptor().ComponentReferences[idx] = *ref
+		c.GetDescriptor().References[idx] = *ref
 	}
 	if c.lazy {
 		return nil

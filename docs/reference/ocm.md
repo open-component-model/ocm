@@ -89,6 +89,8 @@ attributes are supported:
 ##### Sub Commands
 
 * [ocm <b>add</b>](ocm_add.md)	 - Add resources or sources to a component archive
+* [ocm <b>cache</b>](ocm_cache.md)	 - Cache related commands
+* [ocm <b>clean</b>](ocm_clean.md)	 - Cleanup/re-organize elements
 * [ocm <b>componentarchive</b>](ocm_componentarchive.md)	 - Commands acting on component archives
 * [ocm <b>componentversions</b>](ocm_componentversions.md)	 - Commands acting on components
 * [ocm <b>create</b>](ocm_create.md)	 - Create transport or component archive

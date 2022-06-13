@@ -15,6 +15,8 @@
 package ctf
 
 import (
+	"strings"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -45,15 +47,29 @@ type RepositorySpec struct {
 
 var _ cpi.RepositorySpec = (*RepositorySpec)(nil)
 
+var _ cpi.IntermediateRepositorySpecAspect = (*RepositorySpec)(nil)
+
 // NewRepositorySpec creates a new RepositorySpec
 func NewRepositorySpec(mode accessobj.AccessMode, filePath string, opts ...accessio.Option) *RepositorySpec {
 	o := accessio.AccessOptions(opts...)
+	if o.FileFormat == nil {
+		for _, v := range SupportedFormats() {
+			if strings.HasSuffix(filePath, "."+v.String()) {
+				o.FileFormat = &v
+				break
+			}
+		}
+	}
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(RepositoryType),
 		FilePath:            filePath,
 		Options:             o.Default(),
 		AccessMode:          mode,
 	}
+}
+
+func (a *RepositorySpec) IsIntermediate() bool {
+	return true
 }
 
 func (a *RepositorySpec) GetType() string {

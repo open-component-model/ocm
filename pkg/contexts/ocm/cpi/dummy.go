@@ -19,6 +19,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -77,6 +78,10 @@ func (d *DummyComponentVersionAccess) AddBlob(blob BlobAccess, refName string, g
 }
 
 func (d *DummyComponentVersionAccess) SetResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string, global AccessSpec) error {
+	panic("implement me")
+}
+
+func (d *DummyComponentVersionAccess) AdjustResourceAccess(meta *core.ResourceMeta, acc compdesc.AccessSpec) error {
 	panic("implement me")
 }
 

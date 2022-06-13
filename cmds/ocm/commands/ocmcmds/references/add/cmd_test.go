@@ -53,7 +53,7 @@ var _ = Describe("Add references", func() {
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
 		Expect(err).To(Succeed())
-		Expect(len(cd.ComponentReferences)).To(Equal(1))
+		Expect(len(cd.References)).To(Equal(1))
 
 		CheckReference(env, cd, "testdata")
 	})
@@ -64,7 +64,7 @@ var _ = Describe("Add references", func() {
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
 		Expect(err).To(Succeed())
-		Expect(len(cd.ComponentReferences)).To(Equal(1))
+		Expect(len(cd.References)).To(Equal(1))
 
 		CheckReference(env, cd, "testdata")
 	})
@@ -75,7 +75,7 @@ var _ = Describe("Add references", func() {
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
 		Expect(err).To(Succeed())
-		Expect(len(cd.ComponentReferences)).To(Equal(1))
+		Expect(len(cd.References)).To(Equal(1))
 
 		CheckReference(env, cd, "testdata")
 	})

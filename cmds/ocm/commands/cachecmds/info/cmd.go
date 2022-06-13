@@ -18,6 +18,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/spf13/cobra"
 
@@ -27,13 +28,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds/names"
 )
 
 var (
 	Names = names.Cache
-	Verb  = commands.Info
+	Verb  = verbs.Info
 )
 
 type Cache interface {

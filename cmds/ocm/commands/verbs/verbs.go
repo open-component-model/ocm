@@ -12,22 +12,18 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package verify
+package verbs
 
-import (
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-
-	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/verify"
-	"github.com/spf13/cobra"
+const (
+	Get      = "get"
+	Describe = "describe"
+	Add      = "add"
+	Create   = "create"
+	Transfer = "transfer"
+	Download = "download"
+	Show     = "show"
+	Sign     = "sign"
+	Verify   = "verify"
+	Clean    = "clean"
+	Info     = "info"
 )
-
-// NewCommand creates a new command.
-func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "Verify component version signatures",
-	}, commands.Verify)
-	cmd.AddCommand(components.NewCommand(ctx, components.Names...))
-	return cmd
-}

@@ -33,7 +33,7 @@ The optional <code>+</code> is used for file based implementations
 file.
 
 The **type** may contain a file format qualifier separated by a <code>+</code>
-character. The following formats are supported: <code>directory</code>, <code>tar</code>, <code>tgz</code>
+character. The following formats are supported: <code>tar</code>, <code>tgz</code>, <code>directory</code>
 
 ### Examples
 

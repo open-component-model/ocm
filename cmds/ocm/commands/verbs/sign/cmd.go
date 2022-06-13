@@ -12,24 +12,22 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package create
+package sign
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 
-	ctf "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/ctf/create"
-	comparch "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
+	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/sign"
 	"github.com/spf13/cobra"
 )
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "Create transport or component archive",
-	}, commands.Create)
-	cmd.AddCommand(comparch.NewCommand(ctx, comparch.Names...))
-	cmd.AddCommand(ctf.NewCommand(ctx, ctf.Names...))
+		Short: "Sign components",
+	}, verbs.Sign)
+	cmd.AddCommand(components.NewCommand(ctx))
 	return cmd
 }

@@ -53,7 +53,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 
 	cd := cv.GetDescriptor().Copy()
 	printer.Printf("applying to version %q...\n", nv)
-	for i, reference := range cd.ComponentReferences {
+	for i, reference := range cd.References {
 		var calculatedDigest *metav1.DigestSpec
 		if reference.Digest == nil && !opts.DoUpdate() {
 			return nil, errors.Newf(refMsg(reference, state, "no digest for component reference"))
@@ -77,7 +77,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 		}
 
 		if reference.Digest == nil {
-			cd.ComponentReferences[i].Digest = calculatedDigest
+			cd.References[i].Digest = calculatedDigest
 		} else {
 			if calculatedDigest != nil && !reflect.DeepEqual(reference.Digest, calculatedDigest) {
 				return nil, errors.Newf(refMsg(reference, state, "calculated reference digest (%+v) mismatches existing digest (%+v) for", calculatedDigest, reference.Digest))
@@ -206,8 +206,8 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 		for i, res := range cd.Resources {
 			orig.Resources[i].Digest = res.Digest
 		}
-		for i, res := range cd.ComponentReferences {
-			orig.ComponentReferences[i].Digest = res.Digest
+		for i, res := range cd.References {
+			orig.References[i].Digest = res.Digest
 		}
 		if opts.DoSign() {
 			orig.Signatures = cd.Signatures

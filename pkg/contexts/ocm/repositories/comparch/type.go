@@ -44,6 +44,8 @@ type RepositorySpec struct {
 }
 
 var _ accessio.Option = (*RepositorySpec)(nil)
+var _ cpi.RepositorySpec = (*RepositorySpec)(nil)
+var _ cpi.IntermediateRepositorySpecAspect = (*RepositorySpec)(nil)
 
 // NewRepositorySpec creates a new RepositorySpec
 func NewRepositorySpec(acc accessobj.AccessMode, filePath string, opts ...accessio.Option) *RepositorySpec {
@@ -54,6 +56,10 @@ func NewRepositorySpec(acc accessobj.AccessMode, filePath string, opts ...access
 		Options:             o,
 		AccessMode:          acc,
 	}
+}
+
+func (a *RepositorySpec) IsIntermediate() bool {
+	return true
 }
 
 func (a *RepositorySpec) GetType() string {

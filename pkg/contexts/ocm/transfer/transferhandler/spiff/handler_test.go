@@ -216,11 +216,11 @@ process: (( (*(rules[mode] || rules.default)).process ))
 
 			data, err := json.Marshal(comp.GetDescriptor().Resources[2].Access)
 			Expect(err).To(Succeed())
-			Expect(string(data)).To(Equal("{\"localReference\":\"sha256:f6a519fb1d0c8cef5e8d7811911fc7cb170462bbce19d6df067dae041250de7f\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"referenceName\":\"" + OCINAMESPACE2 + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
+			Expect(string(data)).To(Equal("{\"localReference\":\"sha256:f6a519fb1d0c8cef5e8d7811911fc7cb170462bbce19d6df067dae041250de7f\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE2 + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 
 			data, err = json.Marshal(comp.GetDescriptor().Resources[1].Access)
 			Expect(err).To(Succeed())
-			Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"referenceName\":\"" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
+			Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 
 			racc, err := comp.GetResourceByIndex(1)
 			Expect(err).To(Succeed())
@@ -268,7 +268,7 @@ process: (( (*(rules[mode] || rules.default)).process ))
 			// index 1: by value
 			data, err = json.Marshal(comp.GetDescriptor().Resources[1].Access)
 			Expect(err).To(Succeed())
-			Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"referenceName\":\"" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
+			Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 
 			racc, err := comp.GetResourceByIndex(1)
 			Expect(err).To(Succeed())

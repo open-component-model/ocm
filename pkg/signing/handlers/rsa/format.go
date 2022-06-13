@@ -23,7 +23,7 @@ import (
 	"io"
 )
 
-func PublicKey(key interface{}) (*rsa.PublicKey, error) {
+func GetPublicKey(key interface{}) (*rsa.PublicKey, error) {
 	var err error
 	if data, ok := key.([]byte); ok {
 		key, err = ParseKey(data)
@@ -47,7 +47,7 @@ func PublicKey(key interface{}) (*rsa.PublicKey, error) {
 	}
 }
 
-func PrivateKey(key interface{}) (*rsa.PrivateKey, error) {
+func GetPrivateKey(key interface{}) (*rsa.PrivateKey, error) {
 	if data, ok := key.([]byte); ok {
 		return ParsePrivateKey(data)
 	}
@@ -139,7 +139,7 @@ func ParsePrivateKey(data []byte) (*rsa.PrivateKey, error) {
 		}
 		key, ok := untypedPrivateKey.(*rsa.PrivateKey)
 		if !ok {
-			return nil, fmt.Errorf("parsed key is not of type *rsa.PrivateKey: %T", untypedPrivateKey)
+			return nil, fmt.Errorf("parsed key is not of type *rsa.GetPrivateKey: %T", untypedPrivateKey)
 		}
 		return key, nil
 	}

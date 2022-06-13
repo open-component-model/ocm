@@ -84,3 +84,10 @@ func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 	ocmcmd.AddFlags(c.Flags())
 	return c
 }
+
+func Names(def []string, names ...string) []string {
+	if len(names) == 0 {
+		return def
+	}
+	return names
+}

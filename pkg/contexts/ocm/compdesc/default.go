@@ -27,8 +27,8 @@ func DefaultComponent(component *ComponentDescriptor) *ComponentDescriptor {
 	if component.Sources == nil {
 		component.Sources = make([]Source, 0)
 	}
-	if component.ComponentReferences == nil {
-		component.ComponentReferences = make([]ComponentReference, 0)
+	if component.References == nil {
+		component.References = make([]ComponentReference, 0)
 	}
 	if component.Resources == nil {
 		component.Resources = make([]Resource, 0)

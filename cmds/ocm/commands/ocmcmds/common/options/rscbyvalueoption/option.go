@@ -39,7 +39,7 @@ type Option struct {
 var _ transferhandler.TransferOption = (*Option)(nil)
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	fs.BoolVarP(&o.ResourcesByValue, "resourcesByValue", "", false, "transfer resources by-value")
+	fs.BoolVarP(&o.ResourcesByValue, "resourcesByValue", "V", false, "transfer resources by-value")
 }
 
 func (o *Option) Usage() string {

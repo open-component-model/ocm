@@ -102,8 +102,8 @@ func (c *ComponentDescriptor) AddRepositoryContext(repoCtx runtime.TypedObject) 
 // GetComponentReferences returns all component references that matches the given selectors.
 func (c *ComponentDescriptor) GetComponentReferences(selectors ...IdentitySelector) ([]ComponentReference, error) {
 	refs := make([]ComponentReference, 0)
-	for _, ref := range c.ComponentReferences {
-		ok, err := selector.MatchSelectors(ref.GetIdentity(c.ComponentReferences), selectors...)
+	for _, ref := range c.References {
+		ok, err := selector.MatchSelectors(ref.GetIdentity(c.References), selectors...)
 		if err != nil {
 			return nil, fmt.Errorf("unable to match selector for resource %s: %w", ref.Name, err)
 		}
@@ -279,9 +279,9 @@ func (c *ComponentDescriptor) GetResourceIndex(res *ResourceMeta) int {
 // GetComponentReferenceIndex returns the index of a given component reference.
 // If the index is not found -1 is returned.
 func (c *ComponentDescriptor) GetComponentReferenceIndex(ref ComponentReference) int {
-	id := ref.GetIdentityDigest(c.ComponentReferences)
-	for i, cur := range c.ComponentReferences {
-		if bytes.Equal(cur.GetIdentityDigest(c.ComponentReferences), id) {
+	id := ref.GetIdentityDigest(c.References)
+	for i, cur := range c.References {
+		if bytes.Equal(cur.GetIdentityDigest(c.References), id) {
 			return i
 		}
 	}
@@ -291,8 +291,8 @@ func (c *ComponentDescriptor) GetComponentReferenceIndex(ref ComponentReference)
 // GetComponentReferenceByIdentity returns reference that match the given identity.
 func (c *ComponentDescriptor) GetComponentReferenceByIdentity(id v1.Identity) (ComponentReference, error) {
 	dig := id.Digest()
-	for _, ref := range c.ComponentReferences {
-		if bytes.Equal(ref.GetIdentityDigest(c.ComponentReferences), dig) {
+	for _, ref := range c.References {
+		if bytes.Equal(ref.GetIdentityDigest(c.References), dig) {
 			return ref, nil
 		}
 	}

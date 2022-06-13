@@ -34,7 +34,7 @@ func traverse(hist common.History, o *Object, octx out.Context, lookup *lookupop
 		return nil
 	}
 	result := []interface{}{o}
-	refs := o.ComponentVersion.GetDescriptor().ComponentReferences
+	refs := o.ComponentVersion.GetDescriptor().References
 	/*
 		refs=append(refs[:0:0], refs...)
 		sort.Sort(refs)

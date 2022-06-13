@@ -12,8 +12,22 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package cachecmds
+package describe
 
 import (
-	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+
+	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/describe"
+	"github.com/spf13/cobra"
 )
+
+// NewCommand creates a new command.
+func NewCommand(ctx clictx.Context) *cobra.Command {
+	cmd := utils.MassageCommand(&cobra.Command{
+		Short: "Describe artefacts",
+	}, verbs.Describe)
+	cmd.AddCommand(resources.NewCommand(ctx))
+	return cmd
+}

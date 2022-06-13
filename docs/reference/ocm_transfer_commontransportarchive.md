@@ -10,7 +10,7 @@ ocm transfer commontransportarchive [<options>] <ctf> <target>
 
 ```
   -h, --help                help for commontransportarchive
-      --resourcesByValue    transfer resources by-value
+  -V, --resourcesByValue    transfer resources by-value
       --script string       config name of transfer handler script
   -s, --scriptFile string   filename of transfer handler script
   -t, --type string         archive format (default "directory")

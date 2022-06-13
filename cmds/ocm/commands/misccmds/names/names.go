@@ -12,22 +12,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package sign
+package names
 
-import (
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-
-	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/sign"
-	"github.com/spf13/cobra"
+var (
+	RSAKeyPair = []string{"rsakeypair", "rsa"}
 )
-
-// NewCommand creates a new command.
-func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "Sign components",
-	}, commands.Sign)
-	cmd.AddCommand(components.NewCommand(ctx, components.Names...))
-	return cmd
-}

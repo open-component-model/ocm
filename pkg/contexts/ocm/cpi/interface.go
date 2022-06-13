@@ -47,6 +47,7 @@ type SourceMeta = core.SourceMeta
 type ResourceAccess = core.ResourceAccess
 type ResourceMeta = core.ResourceMeta
 type RepositorySpec = core.RepositorySpec
+type IntermediateRepositorySpecAspect = core.IntermediateRepositorySpecAspect
 type GenericRepositorySpec = core.GenericRepositorySpec
 type RepositoryType = core.RepositoryType
 type ComponentReference = core.ComponentReference
@@ -115,6 +116,9 @@ func NewRawAccessSpecRef(data []byte, unmarshaler runtime.Unmarshaler) (*AccessS
 }
 
 const KIND_COMPONENTVERSION = core.KIND_COMPONENTVERSION
+const KIND_RESOURCE = core.KIND_RESOURCE
+const KIND_SOURCE = core.KIND_SOURCE
+const KIND_REFERENCE = core.KIND_REFERENCE
 
 func ErrComponentVersionNotFound(name, version string) error {
 	return core.ErrComponentVersionNotFound(name, version)

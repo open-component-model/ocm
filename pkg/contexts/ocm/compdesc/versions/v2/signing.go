@@ -21,6 +21,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing"
 )
 
+// CDExcludes describes the fields relevant for Signing
+// ATTENTION: if changed, please adapt the HashEqual Functions
+// in the generic part, accordingly
 var CDExcludes = signing.MapExcludes{
 	"component": signing.MapExcludes{
 		"repositoryContexts": nil,

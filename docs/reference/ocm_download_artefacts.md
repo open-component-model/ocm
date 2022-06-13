@@ -54,6 +54,7 @@ linked library can be used:
 - `Empty`
 - `OCIRegistry`
 - `oci`
+- `ociRegistry`
 
 The <code>--type</code> option accepts a file format for the
 target archive to use. The following formats are supported:

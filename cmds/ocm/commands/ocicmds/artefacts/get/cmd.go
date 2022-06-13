@@ -17,10 +17,10 @@ package get
 import (
 	"fmt"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/handlers/artefacthdlr"
@@ -35,7 +35,7 @@ import (
 
 var (
 	Names = names.Artefacts
-	Verb  = commands.Get
+	Verb  = verbs.Get
 )
 
 type Command struct {
@@ -46,7 +46,7 @@ type Command struct {
 
 // NewCommand creates a new artefact command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), output.OutputOptions(outputs, &Attached{}, closureoption.New("index")))}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), output.OutputOptions(outputs, &Attached{}, closureoption.New("index")))}, utils.Names(Names, names...)...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {

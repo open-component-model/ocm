@@ -36,6 +36,7 @@ type RepositorySpecHandler = core.RepositorySpecHandler
 type UniformRepositorySpec = core.UniformRepositorySpec
 type RepositoryTypeScheme = core.RepositoryTypeScheme
 type RepositorySpec = core.RepositorySpec
+type IntermediateRepositorySpecAspect = core.IntermediateRepositorySpecAspect
 type GenericRepositorySpec = core.GenericRepositorySpec
 type ArtefactAccess = core.ArtefactAccess
 type NamespaceLister = core.NamespaceLister

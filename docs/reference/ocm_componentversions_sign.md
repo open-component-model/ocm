@@ -67,6 +67,7 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `Empty`
 - `OCIRegistry`
 - `oci`
+- `ociRegistry`
 
 The <code>--public-key</code> and <code>--private-key</code> options can be
 used to define public and private keys on the command line. The options have an

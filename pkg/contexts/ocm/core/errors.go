@@ -21,6 +21,9 @@ import (
 )
 
 const KIND_COMPONENTVERSION = "component version"
+const KIND_RESOURCE = "component resource"
+const KIND_SOURCE = "component source"
+const KIND_REFERENCE = "component reference"
 
 func ErrComponentVersionNotFound(name, version string) error {
 	return errors.ErrNotFound(KIND_COMPONENTVERSION, fmt.Sprintf("%s:%s", name, version))

@@ -12,24 +12,26 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package show
+package download
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands"
-	tags "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/tags/show"
-	versions "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/versions/show"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+
+	artefacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/download"
+	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/download"
+	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/download"
 	"github.com/spf13/cobra"
 )
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "Show tags or versions",
-	}, commands.Show)
-	cmd.AddCommand(versions.NewCommand(ctx, versions.Names...))
-	cmd.AddCommand(tags.NewCommand(ctx, tags.Names...))
-
+		Short: "Download oci artefacts, resources or complete components",
+	}, verbs.Download)
+	cmd.AddCommand(resources.NewCommand(ctx))
+	cmd.AddCommand(artefacts.NewCommand(ctx))
+	cmd.AddCommand(components.NewCommand(ctx))
 	return cmd
 }

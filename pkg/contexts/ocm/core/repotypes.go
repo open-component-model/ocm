@@ -21,6 +21,7 @@ import (
 
 	"github.com/modern-go/reflect2"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -34,6 +35,8 @@ type RepositoryType interface {
 	// provides a local version for the access spec.
 	LocalSupportForAccessSpec(ctx Context, a compdesc.AccessSpec) bool
 }
+
+type IntermediateRepositorySpecAspect = oci.IntermediateRepositorySpecAspect
 
 type RepositorySpec interface {
 	runtime.VersionedTypedObject

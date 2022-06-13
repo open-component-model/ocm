@@ -35,10 +35,15 @@ import (
 
 func init() {
 	for _, mime := range artdesc.ContentTypes() {
-		cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.RepositoryType),
-			cpi.ForMimeType(mime))
-		cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.ShortRepositoryType),
-			cpi.ForMimeType(mime))
+		for _, suf := range []string{".tar", artefactset.SynthesizedBlobFormat} {
+			m := mime + suf
+			cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.RepositoryType),
+				cpi.ForMimeType(m))
+			cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.LegacyRepositoryType),
+				cpi.ForMimeType(m))
+			cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.ShortRepositoryType),
+				cpi.ForMimeType(m))
+		}
 	}
 	cpi.RegisterBlobHandler(NewBlobHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.RepositoryType))
 	cpi.RegisterBlobHandler(NewBlobHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.ShortRepositoryType))

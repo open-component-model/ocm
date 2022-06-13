@@ -60,16 +60,11 @@ const SIGN_ALGO = rsa.Algorithm
 var _ = Describe("access method", func() {
 	var env *Builder
 
-	priv, pub, err := rsa.Handler{}.CreateKeyPair()
-	Expect(err).To(Succeed())
-
-	signing.DefaultKeyRegistry().RegisterPublicKey(SIGNATURE, pub)
-	signing.DefaultKeyRegistry().RegisterPrivateKey(SIGNATURE, priv)
-
 	BeforeEach(func() {
 		env = NewBuilder(tenv.NewEnvironment())
 		env.OCIContext().SetAlias(OCIHOST, ctfoci.NewRepositorySpec(accessobj.ACC_READONLY, OCIPATH, accessio.PathFileSystem(env.FileSystem())))
 
+		env.RSAKeyPair(SIGNATURE)
 		env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
 			env.Namespace(OCINAMESPACE, func() {
 				env.Manifest(OCIVERSION, func() {

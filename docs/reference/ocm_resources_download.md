@@ -90,6 +90,7 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `Empty`
 - `OCIRegistry`
 - `oci`
+- `ociRegistry`
 
 The library supports some downloads with semantics based on resource types. For example a helm chart
 can be download directly as helm chart archive, even if stored as OCI artefact.

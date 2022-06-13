@@ -20,6 +20,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
@@ -173,7 +174,7 @@ func (m *accessMethod) MimeType() string {
 	if err != nil {
 		return ""
 	}
-	return art.GetDescriptor().MimeType()
+	return artdesc.ToContentMediaType(art.GetDescriptor().MimeType()) + artefactset.SynthesizedBlobFormat
 }
 
 func (m *accessMethod) getBlob() (artefactset.ArtefactBlob, error) {

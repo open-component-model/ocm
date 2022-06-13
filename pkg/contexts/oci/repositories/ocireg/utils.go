@@ -115,6 +115,7 @@ func pushData(ctx context.Context, p remotes.Pusher, desc artdesc.Descriptor, da
 	write, err := p.Push(ctx, desc)
 	if err != nil {
 		if errdefs.IsAlreadyExists(err) {
+			fmt.Printf("*** %s %s: already exists\n", desc.MediaType, desc.Digest)
 			return nil
 		}
 		return err
