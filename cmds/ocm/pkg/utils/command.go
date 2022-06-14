@@ -46,14 +46,27 @@ func NewBaseCommand(ctx clictx.Context, opts ...options.Options) BaseCommand {
 
 func (BaseCommand) Complete(args []string) error { return nil }
 
-func MassageCommand(cmd *cobra.Command, names ...string) *cobra.Command {
-	if cmd.Use == "" {
-		cmd.Use = names[0] // SubCmdUse(name)
-	} else {
-		if !strings.HasSuffix(cmd.Use, names[0]+" ") {
-			cmd.Use = names[0] + " " + cmd.Use
-		}
+func addCommand(names []string, use string) string {
+	if use == "" {
+		return names[0]
 	}
+	lines := strings.Split(use, "\n")
+	for i, l := range lines {
+		if strings.HasPrefix(l, " ") || strings.HasPrefix(l, "\t") {
+			continue
+		}
+		for _, n := range names {
+			if strings.HasPrefix(l, n+" ") {
+				continue
+			}
+		}
+		lines[i] = names[0] + " " + l
+	}
+	return strings.Join(lines, "\n")
+}
+
+func MassageCommand(cmd *cobra.Command, names ...string) *cobra.Command {
+	cmd.Use = addCommand(names, cmd.Use)
 	if len(names) > 1 {
 		cmd.Aliases = names[1:]
 	}

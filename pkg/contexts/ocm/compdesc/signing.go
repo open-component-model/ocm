@@ -61,23 +61,28 @@ func (cd *ComponentDescriptor) isNormalizeable() error {
 	return nil
 }
 
+func Normalize(cd *ComponentDescriptor, normAlgo string) ([]byte, error) {
+	cv := DefaultSchemes[cd.SchemaVersion()]
+	if cv == nil {
+		if cv == nil {
+			return nil, errors.ErrNotSupported(errors.KIND_SCHEMAVERSION, cd.SchemaVersion())
+		}
+	}
+	v, err := cv.ConvertFrom(cd)
+	if err != nil {
+		return nil, err
+	}
+	return v.Normalize(normAlgo)
+}
+
 // Hash return the hash for the component-descriptor, if it is normalizeable
 // (= componentReferences and resources contain digest field)
 func Hash(cd *ComponentDescriptor, normAlgo string, hash hash.Hash) (string, error) {
 	if hash == nil {
 		return metav1.NoDigest, nil
 	}
-	cv := DefaultSchemes[cd.SchemaVersion()]
-	if cv == nil {
-		if cv == nil {
-			return "", errors.ErrNotSupported(errors.KIND_SCHEMAVERSION, cd.SchemaVersion())
-		}
-	}
-	v, err := cv.ConvertFrom(cd)
-	if err != nil {
-		return "", err
-	}
-	normalized, err := v.Normalize(normAlgo)
+
+	normalized, err := Normalize(cd, normAlgo)
 	if err != nil {
 		return "", fmt.Errorf("failed normalising component descriptor %w", err)
 	}

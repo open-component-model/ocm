@@ -10,6 +10,7 @@ ocm transfer commontransportarchive [<options>] <ctf> <target>
 
 ```
   -h, --help                help for commontransportarchive
+  -f, --overwrite           overwrire existing component versions
   -V, --resourcesByValue    transfer resources by-value
       --script string       config name of transfer handler script
   -s, --scriptFile string   filename of transfer handler script
@@ -27,6 +28,9 @@ target archive to use. The following formats are supported:
 - tar
 - tgz
 The default format is <code>directory</code>.
+It the option <code>--overwrite</code> is given, component version in the
+target repository will be overwritten, if they already exist.
+
 It the option <code>--resourcesByValue</code> is given, all referential 
 resources will potentially be localized, mapped to component version local
 resources in the target repository.

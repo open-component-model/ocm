@@ -16,6 +16,7 @@ package transfer
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/overwriteoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/scriptoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
@@ -51,6 +52,7 @@ type Command struct {
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx,
 		formatoption.New(),
+		overwriteoption.New(),
 		rscbyvalueoption.New(),
 		scriptoption.New(),
 	)}, utils.Names(Names, names...)...)
@@ -97,6 +99,7 @@ func (o *Command) Run() error {
 	thdlr, err := spiff.New(
 		spiff.Script(scriptoption.From(o).ScriptData),
 		rscbyvalueoption.From(o),
+		overwriteoption.From(o),
 		spiff.ScriptFilesystem(o.FileSystem()),
 	)
 	if err != nil {

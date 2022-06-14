@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package sign
+package signing
 
 import (
 	"fmt"
@@ -20,6 +20,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/signoption"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/spf13/cobra"
@@ -91,7 +92,7 @@ func (o *SignatureCommand) Run() error {
 	repo := repooption.From(o).Repository
 	handler := comphdlr.NewTypeHandler(o.Context.OCM(), session, repo)
 	sopts := signing.NewOptions(sign, signing.Resolver(repo))
-	err = sopts.Complete(nil)
+	err = sopts.Complete(signingattr.Get(o.Context.OCMContext()))
 	if err != nil {
 		return err
 	}
@@ -101,30 +102,35 @@ func (o *SignatureCommand) Run() error {
 /////////////////////////////////////////////////////////////////////////////
 
 type action struct {
-	desc    []string
-	cmd     *SignatureCommand
-	printer common.Printer
-	state   common.WalkingState
-	sopts   *signing.Options
-	errlist *errors.ErrorList
+	desc         []string
+	cmd          *SignatureCommand
+	printer      common.Printer
+	state        common.WalkingState
+	baseresolver ocm.ComponentVersionResolver
+	sopts        *signing.Options
+	errlist      *errors.ErrorList
 }
 
 var _ output.Output = (*action)(nil)
 
 func NewAction(desc []string, cmd *SignatureCommand, sopts *signing.Options) output.Output {
 	return &action{
-		desc:    desc,
-		cmd:     cmd,
-		printer: common.NewPrinter(cmd.Context.StdOut()),
-		state:   common.NewWalkingState(),
-		sopts:   sopts,
-		errlist: errors.ErrListf(desc[1]),
+		desc:         desc,
+		cmd:          cmd,
+		printer:      common.NewPrinter(cmd.Context.StdOut()),
+		state:        common.NewWalkingState(),
+		baseresolver: sopts.Resolver,
+		sopts:        sopts,
+		errlist:      errors.ErrListf(desc[1]),
 	}
 }
 
 func (a *action) Add(e interface{}) error {
-	cv := comphdlr.Elem(e)
-	d, err := signing.Apply(a.printer, &a.state, cv, a.sopts)
+	o := e.(*comphdlr.Object)
+	cv := o.ComponentVersion
+	sopts := *a.sopts
+	sopts.Resolver = ocm.NewCompoundResolver(o.Repository, a.sopts.Resolver)
+	d, err := signing.Apply(a.printer, &a.state, cv, &sopts)
 	a.errlist.Add(err)
 	if err == nil {
 		a.printer.Printf("successfully %s %s:%s (digest %s:%s)\n", a.desc[0], cv.GetName(), cv.GetVersion(), d.HashAlgorithm, d.Value)

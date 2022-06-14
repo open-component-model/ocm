@@ -53,6 +53,10 @@ func New(opts ...transferhandler.TransferOption) (transferhandler.TransferHandle
 	}, nil
 }
 
+func (h *Handler) OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error) {
+	return h.Handler.OverwriteVersion(src, tgt)
+}
+
 func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ElementMeta) (ocm.Repository, transferhandler.TransferHandler, error) {
 	if src == nil || h.opts.IsRecursive() {
 		if h.opts.GetScript() == nil {

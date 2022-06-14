@@ -41,6 +41,10 @@ func New(opts ...transferhandler.TransferOption) (transferhandler.TransferHandle
 	return NewDefaultHandler(defaultOpts), nil
 }
 
+func (h *Handler) OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error) {
+	return h.opts.IsOverwrite(), nil
+}
+
 func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ElementMeta) (ocm.Repository, transferhandler.TransferHandler, error) {
 	if src == nil || h.opts.IsRecursive() {
 		return repo, h, nil

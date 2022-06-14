@@ -14,6 +14,10 @@
 
 package v1
 
+import (
+	"fmt"
+)
+
 const (
 	// ExcludeFromSignature used in digest field for normalisationAlgorithm (in combination with NoDigest for hashAlgorithm and value)
 	// to indicate the resource content should not be part of the signature
@@ -56,6 +60,10 @@ type DigestSpec struct {
 	HashAlgorithm          string `json:"hashAlgorithm"`
 	NormalisationAlgorithm string `json:"normalisationAlgorithm"`
 	Value                  string `json:"value"`
+}
+
+func (d *DigestSpec) String() string {
+	return fmt.Sprintf("%s:%s[%s]", d.HashAlgorithm, d.Value, d.NormalisationAlgorithm)
 }
 
 // Copy provides a copy of the digest spec

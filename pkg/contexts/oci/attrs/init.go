@@ -12,10 +12,8 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package oci
+package attrs
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/contexts/oci/attrs"
-	_ "github.com/open-component-model/ocm/pkg/contexts/oci/config"
-	_ "github.com/open-component-model/ocm/pkg/contexts/oci/repositories"
+	_ "github.com/open-component-model/ocm/pkg/contexts/oci/attrs/cacheattr"
 )

@@ -21,12 +21,14 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/attrs/cacheattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/opencontainers/go-digest"
 )
 
 type BlobContainer interface {
 	GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error)
 	AddBlob(blob cpi.BlobAccess) (int64, digest.Digest, error)
+	Unref() error
 }
 
 type blobContainer struct {
@@ -64,6 +66,16 @@ func (c *BlobContainers) Get(mime string) BlobContainer {
 		c.mimes[mime] = found
 	}
 	return found
+}
+
+func (c *BlobContainers) Release() error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	list := errors.ErrListf("releasing mime block caches")
+	for _, b := range c.mimes {
+		list.Add(b.Unref())
+	}
+	return list.Result()
 }
 
 func newBlobContainer(mime string, fetcher remotes.Fetcher, pusher remotes.Pusher) *blobContainer {

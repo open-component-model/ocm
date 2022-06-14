@@ -15,6 +15,7 @@
 package ctf
 
 import (
+	"sort"
 	"strings"
 	"sync"
 
@@ -86,6 +87,7 @@ func SupportedFormats() []accessio.FileFormat {
 	for f := range fileFormats {
 		result = append(result, f)
 	}
+	sort.Slice(result, func(i, j int) bool { return strings.Compare(string(result[i]), string(result[i])) < 0 })
 	return result
 }
 

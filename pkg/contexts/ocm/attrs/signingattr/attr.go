@@ -42,13 +42,13 @@ Public and private Key settings.
 <pre>
 {
   "publicKeys"": [
-     "<provider>": {
-       "data": "<base64>"
+     "&lt;provider>": {
+       "data": ""&lt;base64>"
      }
   ],
   "privateKeys"": [
-     "<provider>": {
-       "path": "<file path>"
+     "&lt;provider>": {
+       "path": ""&lt;file path>"
      }
   ]
 </pre>

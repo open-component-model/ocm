@@ -135,10 +135,20 @@ func (r ArrayExcludes) Element(v interface{}) (bool, ExcludeRules) {
 ////////////////////////////////////////////////////////////////////////////////
 
 func IgnoreResourcesWithNoneAccess(v interface{}) bool {
+	return CheckIgnoreResourcesWithAccessType("none", v)
+}
+
+func IgnoreResourcesWithAccessType(t string) func(v interface{}) bool {
+	return func(v interface{}) bool {
+		return CheckIgnoreResourcesWithAccessType(t, v)
+	}
+}
+
+func CheckIgnoreResourcesWithAccessType(t string, v interface{}) bool {
 	access := v.(map[string]interface{})["access"]
 	if access == nil {
 		return true
 	}
 	typ := access.(map[string]interface{})["type"]
-	return typ == "localBlob" // cycle localblob.Type
+	return typ == t
 }

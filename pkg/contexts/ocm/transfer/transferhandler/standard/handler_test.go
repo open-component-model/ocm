@@ -156,7 +156,7 @@ var _ = Describe("Transfer handler", func() {
 			ocmsign.Update(), ocmsign.VerifyDigests(),
 		)
 		Expect(opts.Complete(signingattr.Get(env.OCMContext()))).To(Succeed())
-		digest := "1cd96e197202fad18ae76e239e08224be5bbe900bc4e4f50ac32119509cc18af"
+		digest := "b65a1ae56a380d34a87aa5e52704d238a3cfbc6e6cc9a3cdb686db9ba084bc15"
 		dig, err := ocmsign.Apply(nil, nil, cv, opts)
 		Expect(err).To(Succeed())
 		Expect(dig.Value).To(Equal(digest))

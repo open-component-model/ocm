@@ -83,6 +83,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 				return nil, errors.Newf(refMsg(reference, state, "calculated reference digest (%+v) mismatches existing digest (%+v) for", calculatedDigest, reference.Digest))
 			}
 		}
+		printer.Printf("  reference %d:  %s:%s: digest %s\n", i, reference.ComponentName, reference.Version, calculatedDigest)
 	}
 
 	blobdigesters := cv.GetContext().BlobDigesters()
@@ -124,6 +125,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 			return nil, errors.Newf(resMsg(raw, state, "calculated resource digest (%+v) mismatches existing digest (%+v) for", digest, raw.Digest))
 		}
 		cd.Resources[i].Digest = &digest[0]
+		printer.Printf("  resource %d:  %s: digest %s\n", i, res.Meta().GetIdentity(cv.GetDescriptor().Resources), &digest[0])
 	}
 	digest, err := compdesc.Hash(cd, compdesc.JsonNormalisationV1, opts.Hasher.Create())
 	if err != nil {

@@ -65,19 +65,19 @@ attributes are supported:
 - <code>github.com/mandelsoft/oci/cache</code> [<code>cache</code>]: *string*
   Filesystem folder to use for caching OCI blobs
 - <code>github.com/mandelsoft/ocm/compat</code> [<code>compat</code>]: *bool*
-  Avoid generic local access methods and prefer type specific ones.
+  Compatibility mode: Avoid generic local access methods and prefer type specific ones.
 - <code>github.com/mandelsoft/ocm/signing</code>: *bool*
   Public and private Key settings.
   <pre>
   {
     "publicKeys"": [
-       "<provider>": {
-         "data": "<base64>"
+       "&lt;provider>": {
+         "data": ""&lt;base64>"
        }
     ],
     "privateKeys"": [
-       "<provider>": {
-         "path": "<file path>"
+       "&lt;provider>": {
+         "path": ""&lt;file path>"
        }
     ]
   </pre>

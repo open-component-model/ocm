@@ -34,10 +34,6 @@ type Namespace struct {
 	access *NamespaceContainer
 }
 
-func (n *Namespace) Close() error {
-	return nil
-}
-
 type NamespaceContainer struct {
 	repo      *Repository
 	namespace string
@@ -81,6 +77,10 @@ func NewNamespace(repo *Repository, name string) (*Namespace, error) {
 		},
 	}
 	return n, nil
+}
+
+func (n *NamespaceContainer) Close() error {
+	return n.blobs.Release()
 }
 
 func (n *NamespaceContainer) getPusher(vers string) (remotes.Pusher, error) {
@@ -201,6 +201,10 @@ func (n *NamespaceContainer) NewArtefactProvider(state accessobj.State) (cpi.Art
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+func (n *Namespace) Close() error {
+	return n.access.Close()
+}
 
 func (n *Namespace) GetRepository() cpi.Repository {
 	return n.access.repo

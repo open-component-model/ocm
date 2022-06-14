@@ -33,7 +33,7 @@ var CDExcludes = signing.MapExcludes{
 	"component": signing.MapExcludes{
 		"repositoryContexts": nil,
 		"resources": signing.DynamicArrayExcludes{
-			signing.IgnoreResourcesWithNoneAccess,
+			signing.IgnoreResourcesWithAccessType("localBlob"),
 			signing.MapExcludes{
 				"access": nil,
 				"labels": nil,
@@ -395,7 +395,7 @@ var _ = Describe("normalization", func() {
 		entries, err := signing.PrepareNormalization(cd, signing.MapExcludes{
 			"component": signing.MapExcludes{
 				"resources": signing.DynamicArrayExcludes{
-					signing.IgnoreResourcesWithNoneAccess,
+					signing.IgnoreResourcesWithAccessType("localBlob"),
 					signing.MapExcludes{
 						"access": nil,
 					},

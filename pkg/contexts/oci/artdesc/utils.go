@@ -68,9 +68,9 @@ func ToDescriptorMediaType(media string) string {
 
 func IsOCIMediaType(media string) bool {
 	switch ToDescriptorMediaType(media) {
-	case MediaTypeImageIndex:
+	case MediaTypeImageIndex, MediaTypeDockerSchema2ManifestList:
 		fallthrough
-	case MediaTypeImageManifest:
+	case MediaTypeImageManifest, MediaTypeDockerSchema2Manifest:
 		return true
 	default:
 		return false

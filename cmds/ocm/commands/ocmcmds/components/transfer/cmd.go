@@ -22,6 +22,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/overwriteoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/scriptoption"
@@ -56,6 +57,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		repooption.New(),
 		formatoption.New(),
 		closureoption.New("component reference"),
+		overwriteoption.New(),
 		rscbyvalueoption.New(),
 		scriptoption.New(),
 	)}, utils.Names(Names, names...)...)
@@ -102,6 +104,7 @@ func (o *Command) Run() error {
 
 	thdlr, err := spiff.New(
 		closureoption.From(o),
+		overwriteoption.From(o),
 		rscbyvalueoption.From(o),
 		spiff.Script(scriptoption.From(o).ScriptData),
 		spiff.ScriptFilesystem(o.FileSystem()),

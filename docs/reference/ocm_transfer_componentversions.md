@@ -11,6 +11,7 @@ ocm transfer componentversions [<options>] {<component-reference>} <target>
 ```
   -c, --closure             follow component reference nesting
   -h, --help                help for componentversions
+  -f, --overwrite           overwrire existing component versions
   -r, --repo string         repository name or spec
   -V, --resourcesByValue    transfer resources by-value
       --script string       config name of transfer handler script
@@ -77,6 +78,9 @@ target archive to use. The following formats are supported:
 - tgz
 The default format is <code>directory</code>.
 With the option <code>--closure</code> the complete reference tree of a component reference is traversed.
+
+It the option <code>--overwrite</code> is given, component version in the
+target repository will be overwritten, if they already exist.
 
 It the option <code>--resourcesByValue</code> is given, all referential 
 resources will potentially be localized, mapped to component version local

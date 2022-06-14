@@ -22,11 +22,16 @@ type Options struct {
 	recursive        bool
 	resourcesByValue bool
 	sourcesByValue   bool
+	overwrite        bool
 }
 
 var _ ResourcesByValueOption = (*Options)(nil)
 var _ SourcesByValueOption = (*Options)(nil)
 var _ RecursiveOption = (*Options)(nil)
+
+func (o *Options) SetOverwrite(overwrite bool) {
+	o.overwrite = overwrite
+}
 
 func (o *Options) SetRecursive(recursive bool) {
 	o.recursive = recursive
@@ -38,6 +43,10 @@ func (o *Options) SetResourcesByValue(resourcesByValue bool) {
 
 func (o *Options) SetSourcesByValue(sourcesByValue bool) {
 	o.sourcesByValue = sourcesByValue
+}
+
+func (o *Options) IsOverwrite() bool {
+	return o.overwrite
 }
 
 func (o *Options) IsRecursive() bool {
@@ -63,6 +72,28 @@ func GetFlag(args ...bool) bool {
 		}
 	}
 	return flag
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+type OverwriteOption interface {
+	SetOverwrite(bool)
+	IsOverwrite() bool
+}
+
+type overwriteOption struct {
+	overwrite bool
+}
+
+func (o *overwriteOption) ApplyTransferOption(to transferhandler.TransferOptions) error {
+	to.(OverwriteOption).SetOverwrite(o.overwrite)
+	return nil
+}
+
+func Overwrite(args ...bool) transferhandler.TransferOption {
+	return &overwriteOption{
+		overwrite: GetFlag(args...),
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////

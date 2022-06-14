@@ -44,7 +44,11 @@ func transferVersion(printer common.Printer, state common.WalkingState, repo ocm
 	}
 	printer.Printf("transferring version %q...\n", nv)
 	if handler == nil {
-		handler = standard.NewDefaultHandler(nil)
+		var err error
+		handler, err = standard.New(standard.Overwrite())
+		if err != nil {
+			return err
+		}
 	}
 
 	d := src.GetDescriptor()
@@ -58,6 +62,13 @@ func transferVersion(printer common.Printer, state common.WalkingState, repo ocm
 	if err != nil {
 		if errors.IsErrNotFound(err) {
 			t, err = comp.NewVersion(src.GetVersion())
+		}
+	} else {
+		var ok bool
+		ok, err = handler.OverwriteVersion(src, t)
+		if !ok {
+			printer.Printf("  version %q already present -> skip transport\n", nv)
+			return nil
 		}
 	}
 	if err != nil {
