@@ -17,6 +17,7 @@ package transfer
 import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
 	ocmcpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
@@ -130,7 +131,9 @@ func CopyVersion(printer common.Printer, hist common.History, src ocm.ComponentV
 				defer m.Close()
 				ok := a.IsLocal(src.GetContext())
 				if !ok {
-					ok, err = handler.TransferResource(src, a, r)
+					if a.GetKind() != none.Type {
+						ok, err = handler.TransferResource(src, a, r)
+					}
 				}
 				if ok {
 					hint := ""
@@ -160,7 +163,9 @@ func CopyVersion(printer common.Printer, hist common.History, src ocm.ComponentV
 				defer m.Close()
 				ok := a.IsLocal(src.GetContext())
 				if !ok {
-					ok, err = handler.TransferSource(src, a, r)
+					if a.GetKind() != none.Type {
+						ok, err = handler.TransferSource(src, a, r)
+					}
 				}
 				if ok {
 					hint := ""

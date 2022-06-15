@@ -62,8 +62,6 @@ form
 
 The value can be a simple type or a json string for complex values. The following
 attributes are supported:
-- <code>github.com/mandelsoft/oci/cache</code> [<code>cache</code>]: *string*
-  Filesystem folder to use for caching OCI blobs
 - <code>github.com/mandelsoft/ocm/compat</code> [<code>compat</code>]: *bool*
   Compatibility mode: Avoid generic local access methods and prefer type specific ones.
 - <code>github.com/mandelsoft/ocm/signing</code>: *bool*
@@ -81,6 +79,8 @@ attributes are supported:
        }
     ]
   </pre>
+- <code>github.com/mandelsoft/oci/cache</code> [<code>cache</code>]: *string*
+  Filesystem folder to use for caching OCI blobs
 
 ### SEE ALSO
 
