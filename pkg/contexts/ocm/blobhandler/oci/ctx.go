@@ -28,7 +28,7 @@ import (
 // StorageContext is the context information passed for Blobhandler
 // registered for context type oci.CONTEXT_TYPE.
 type StorageContext struct {
-	Component  ocmcpi.ComponentVersionAccess
+	ocmcpi.DefaultStorageContext
 	Repository cpi.Repository
 	Namespace  cpi.NamespaceAccess
 	Manifest   cpi.ManifestAccess
@@ -36,17 +36,21 @@ type StorageContext struct {
 
 var _ ocmcpi.StorageContext = (*StorageContext)(nil)
 
-func New(comp ocmcpi.ComponentVersionAccess, repo oci.Repository, namespace oci.NamespaceAccess, manifest oci.ManifestAccess) *StorageContext {
+func New(comprepo ocmcpi.Repository, vers ocmcpi.ComponentVersionAccess, impltyp string, ocirepo oci.Repository, namespace oci.NamespaceAccess, manifest oci.ManifestAccess) *StorageContext {
 	return &StorageContext{
-		Component:  comp,
-		Repository: repo,
-		Namespace:  namespace,
-		Manifest:   manifest,
+		DefaultStorageContext: *ocmcpi.NewDefaultStorageContext(comprepo, vers, ocmcpi.ImplementationRepositoryType{cpi.CONTEXT_TYPE, impltyp}),
+		Repository:            ocirepo,
+		Namespace:             namespace,
+		Manifest:              manifest,
 	}
 }
 
+func (s *StorageContext) TargetComponentRepository() ocmcpi.Repository {
+	return s.ComponentRepository
+}
+
 func (s *StorageContext) TargetComponentVersion() ocmcpi.ComponentVersionAccess {
-	return s.Component
+	return s.ComponentVersion
 }
 
 func (s *StorageContext) AssureLayer(blob cpi.BlobAccess) error {

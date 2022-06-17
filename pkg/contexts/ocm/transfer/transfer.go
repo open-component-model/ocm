@@ -138,7 +138,7 @@ func CopyVersion(printer common.Printer, hist common.History, src ocm.ComponentV
 				if ok {
 					hint := ""
 					if h, ok := a.(ocm.HintProvider); ok {
-						hint = h.GetReferenceName()
+						hint = h.GetReferenceHint()
 					}
 					if printer != nil {
 						printer.Printf("...resource %d...\n", i)
@@ -170,7 +170,7 @@ func CopyVersion(printer common.Printer, hist common.History, src ocm.ComponentV
 				if ok {
 					hint := ""
 					if h, ok := a.(ocm.HintProvider); ok {
-						hint = h.GetReferenceName()
+						hint = h.GetReferenceHint()
 					}
 					if printer != nil {
 						printer.Printf("...source %d...\n", i)

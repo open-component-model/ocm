@@ -67,32 +67,39 @@ func ToDescriptorMediaType(media string) string {
 }
 
 func IsOCIMediaType(media string) bool {
-	switch ToDescriptorMediaType(media) {
-	case MediaTypeImageIndex, MediaTypeDockerSchema2ManifestList:
-		fallthrough
-	case MediaTypeImageManifest, MediaTypeDockerSchema2Manifest:
-		return true
-	default:
-		return false
+	c := ToContentMediaType(media)
+	for _, t := range ContentTypes() {
+		if t == c {
+			return true
+		}
 	}
+	return false
 }
 
 func ContentTypes() []string {
+	r := []string{}
+	for _, t := range DescriptorTypes() {
+		r = append(r, ToContentMediaType(t))
+	}
+	return r
+}
+
+func DescriptorTypes() []string {
 	return []string{
-		ToContentMediaType(MediaTypeImageManifest),
-		ToContentMediaType(MediaTypeImageIndex),
+		MediaTypeImageManifest,
+		MediaTypeImageIndex,
+		MediaTypeDockerSchema2Manifest,
+		MediaTypeDockerSchema2ManifestList,
 	}
 }
 
 func ArchiveBlobTypes() []string {
-	manifest := ToContentMediaType(MediaTypeImageManifest)
-	index := ToContentMediaType(MediaTypeImageIndex)
-	return []string{
-		manifest + "+tar",
-		manifest + "+tar+gzip",
-		index + "+tar",
-		index + "+tar+gzip",
+	r := []string{}
+	for _, t := range ContentTypes() {
+		t = ToContentMediaType(t)
+		r = append(r, t+"+tar", t+"+tar+gzip")
 	}
+	return r
 }
 
 func ArtefactMimeType(cur, def string, legacy bool) string {

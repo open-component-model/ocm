@@ -53,8 +53,9 @@ type RepositoryType = core.RepositoryType
 type ComponentReference = core.ComponentReference
 
 type BlobHandler = core.BlobHandler
-type BlobHandlerKey = core.BlobHandlerKey
+type BlobHandlerOption = core.BlobHandlerOption
 type StorageContext = core.StorageContext
+type ImplementationRepositoryType = core.ImplementationRepositoryType
 
 type DigesterType = core.DigesterType
 type BlobDigester = core.BlobDigester
@@ -77,11 +78,15 @@ func DefaultContext() core.Context {
 	return core.DefaultContext
 }
 
-func ForRepo(ctxtype, repostype string) BlobHandlerKey {
+func WithPrio(p int) BlobHandlerOption {
+	return core.WithPrio(p)
+}
+
+func ForRepo(ctxtype, repostype string) BlobHandlerOption {
 	return core.ForRepo(ctxtype, repostype)
 }
 
-func ForMimeType(mimetype string) BlobHandlerKey {
+func ForMimeType(mimetype string) BlobHandlerOption {
 	return core.ForMimeType(mimetype)
 }
 
@@ -89,8 +94,8 @@ func RegisterRepositorySpecHandler(handler RepositorySpecHandler, types ...strin
 	core.RegisterRepositorySpecHandler(handler, types...)
 }
 
-func RegisterBlobHandler(handler BlobHandler, keys ...BlobHandlerKey) {
-	core.RegisterBlobHandler(handler, keys...)
+func RegisterBlobHandler(handler BlobHandler, opts ...BlobHandlerOption) {
+	core.RegisterBlobHandler(handler, opts...)
 }
 
 func RegisterRepositoryType(name string, atype RepositoryType) {

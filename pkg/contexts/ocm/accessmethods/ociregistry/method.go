@@ -61,7 +61,7 @@ func (_ *AccessSpec) IsLocal(cpi.Context) bool {
 	return false
 }
 
-func (a *AccessSpec) GetReferenceName() string {
+func (a *AccessSpec) GetReferenceHint() string {
 	ref, err := oci.ParseRef(a.ImageReference)
 	if err != nil {
 		return ""

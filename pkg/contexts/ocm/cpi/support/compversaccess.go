@@ -63,7 +63,21 @@ func (a *ComponentVersionAccess) GetVersion() string {
 }
 
 func (a *ComponentVersionAccess) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
-	return a.base.AddBlobFor(a, blob, refName, global)
+	if blob == nil {
+		return nil, errors.New("a resource has to be defined")
+	}
+	storagectx := a.base.GetStorageContext(a)
+	h := a.GetContext().BlobHandlers().GetHandler(storagectx.GetImplementationRepositoryType(), blob.MimeType())
+	if h != nil {
+		acc, err := h.StoreBlob(blob, refName, nil, storagectx)
+		if err != nil {
+			return nil, err
+		}
+		if acc != nil {
+			return acc, nil
+		}
+	}
+	return a.base.AddBlobFor(storagectx, blob, refName, global)
 }
 
 func (c *ComponentVersionAccess) AccessMethod(a cpi.AccessSpec) (cpi.AccessMethod, error) {

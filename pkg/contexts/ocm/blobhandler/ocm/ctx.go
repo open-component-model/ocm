@@ -31,19 +31,15 @@ type StorageContext interface {
 }
 
 type DefaultStorageContext struct {
-	Version cpi.ComponentVersionAccess
-	Sink    BlobSink
+	cpi.DefaultStorageContext
+	Sink BlobSink
 }
 
-func New(vers cpi.ComponentVersionAccess, access BlobSink) StorageContext {
+func New(repo cpi.Repository, vers cpi.ComponentVersionAccess, access BlobSink, impltyp string) StorageContext {
 	return &DefaultStorageContext{
-		Version: vers,
-		Sink:    access,
+		DefaultStorageContext: *cpi.NewDefaultStorageContext(repo, vers, cpi.ImplementationRepositoryType{cpi.CONTEXT_TYPE, impltyp}),
+		Sink:                  access,
 	}
-}
-
-func (c *DefaultStorageContext) TargetComponentVersion() cpi.ComponentVersionAccess {
-	return c.Version
 }
 
 func (c *DefaultStorageContext) AddBlob(blob accessio.BlobAccess) error {

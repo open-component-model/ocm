@@ -103,24 +103,13 @@ func (c *ComponentArchive) GetBlobData(name string) (cpi.DataAccess, error) {
 	return c.base.GetBlobDataByName(name)
 }
 
-func (c *ComponentArchive) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
-	return c.AddBlobFor(c, blob, refName, global)
+func (c *ComponentArchive) GetStorageContext(cv cpi.ComponentVersionAccess) cpi.StorageContext {
+	return ocmhdlr.New(c.AsRepository(), cv, c.base, CTFComponentArchiveType)
 }
 
-func (c *ComponentArchive) AddBlobFor(cv cpi.ComponentVersionAccess, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (c *ComponentArchive) AddBlobFor(storagectx cpi.StorageContext, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
-	}
-	storagectx := ocmhdlr.New(cv, c.base)
-	h := c.GetContext().BlobHandlers().GetHandler(cpi.CONTEXT_TYPE, CTFComponentArchiveType, blob.MimeType())
-	if h != nil {
-		acc, err := h.StoreBlob(c.repo, blob, refName, nil, storagectx)
-		if err != nil {
-			return nil, err
-		}
-		if acc != nil {
-			return acc, nil
-		}
 	}
 	err := c.base.AddBlob(blob)
 	if err != nil {

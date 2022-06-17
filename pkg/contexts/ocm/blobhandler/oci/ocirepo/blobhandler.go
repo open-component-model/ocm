@@ -28,22 +28,20 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
 	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
 )
 
 func init() {
-	for _, mime := range artdesc.ContentTypes() {
-		for _, suf := range []string{".tar", artefactset.SynthesizedBlobFormat} {
-			m := mime + suf
-			cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.RepositoryType),
-				cpi.ForMimeType(m))
-			cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.LegacyRepositoryType),
-				cpi.ForMimeType(m))
-			cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.ShortRepositoryType),
-				cpi.ForMimeType(m))
-		}
+	for _, mime := range artdesc.ArchiveBlobTypes() {
+		cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.RepositoryType),
+			cpi.ForMimeType(mime))
+		cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.LegacyRepositoryType),
+			cpi.ForMimeType(mime))
+		cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.ShortRepositoryType),
+			cpi.ForMimeType(mime))
 	}
 	cpi.RegisterBlobHandler(NewBlobHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.RepositoryType))
 	cpi.RegisterBlobHandler(NewBlobHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.ShortRepositoryType))
@@ -74,7 +72,7 @@ func NewBlobHandler(base BaseFunction) cpi.BlobHandler {
 	return &blobHandler{base}
 }
 
-func (b *blobHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	ocictx := ctx.(*storagecontext.StorageContext)
 
 	err := ocictx.Manifest.AddBlob(blob)
@@ -85,7 +83,7 @@ func (b *blobHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hint s
 	if err != nil {
 		return nil, err
 	}
-	if compatattr.Get(repo.GetContext()) {
+	if compatattr.Get(ctx.GetContext()) {
 		return localociblob.New(blob.Digest()), nil
 	} else {
 		if global == nil {
@@ -109,7 +107,7 @@ func NewArtefactHandler(base BaseFunction) cpi.BlobHandler {
 	return &artefactHandler{blobHandler{base}}
 }
 
-func (b *artefactHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	mediaType := blob.MimeType()
 
 	if !artdesc.IsOCIMediaType(mediaType) || (!strings.HasSuffix(mediaType, "+tar") && !strings.HasSuffix(mediaType, "+tar+gzip")) {
@@ -122,12 +120,14 @@ func (b *artefactHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hi
 	var tag string
 	var err error
 
+	keep := keepblobattr.Get(ctx.GetContext())
+
 	ocictx := ctx.(*storagecontext.StorageContext)
 	base := b.GetBaseURL(ocictx)
 	if hint == "" {
 		namespace = ocictx.Namespace
 	} else {
-		spec := repo.GetSpecification().(*genericocireg.RepositorySpec)
+		spec := ctx.TargetComponentRepository().GetSpecification().(*genericocireg.RepositorySpec)
 		i := strings.LastIndex(hint, ":")
 		if i > 0 {
 			version = hint[i:]
@@ -162,7 +162,18 @@ func (b *artefactHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hi
 	}
 
 	ref := path.Join(base, namespace.GetNamespace()) + version
+	var acc cpi.AccessSpec = ociregistry.New(ref)
 
-	global = ociregistry.New(ref)
-	return global, nil
+	if keep {
+		err := ocictx.Manifest.AddBlob(blob)
+		if err != nil {
+			return nil, err
+		}
+		err = ocictx.AssureLayer(blob)
+		if err != nil {
+			return nil, err
+		}
+		acc = localblob.New(blob.Digest().String(), hint, blob.MimeType(), acc)
+	}
+	return acc, nil
 }

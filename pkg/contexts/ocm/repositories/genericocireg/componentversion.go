@@ -177,28 +177,20 @@ func (c *ComponentVersionContainer) GetBlobData(name string) (cpi.DataAccess, er
 	return c.manifest.GetBlob(digest.Digest((name)))
 }
 
-func (c *ComponentVersionContainer) AddBlobFor(cv cpi.ComponentVersionAccess, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (c *ComponentVersionContainer) GetStorageContext(cv cpi.ComponentVersionAccess) cpi.StorageContext {
+	return ocihdlr.New(c.comp.repo, cv, c.comp.repo.ocirepo.GetSpecification().GetKind(), c.comp.repo.ocirepo, c.comp.namespace, c.manifest)
+}
+
+func (c *ComponentVersionContainer) AddBlobFor(storagectx cpi.StorageContext, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
-	}
-
-	storagectx := ocihdlr.New(cv, c.comp.repo.ocirepo, c.comp.namespace, c.manifest)
-	h := c.GetContext().BlobHandlers().GetHandler(oci.CONTEXT_TYPE, c.comp.repo.ocirepo.GetSpecification().GetKind(), blob.MimeType())
-	if h != nil {
-		acc, err := h.StoreBlob(c.comp.repo, blob, refName, nil, storagectx)
-		if err != nil {
-			return nil, err
-		}
-		if acc != nil {
-			return acc, nil
-		}
 	}
 
 	err := c.manifest.AddBlob(blob)
 	if err != nil {
 		return nil, err
 	}
-	err = storagectx.AssureLayer(blob)
+	err = storagectx.(*ocihdlr.StorageContext).AssureLayer(blob)
 	if err != nil {
 		return nil, err
 	}

@@ -39,7 +39,7 @@ func NewBlobHandler() cpi.BlobHandler {
 	return &blobHandler{}
 }
 
-func (b *blobHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	ocmctx := ctx.(storagecontext.StorageContext)
 
 	if blob == nil {
@@ -50,7 +50,7 @@ func (b *blobHandler) StoreBlob(repo cpi.Repository, blob cpi.BlobAccess, hint s
 		return nil, err
 	}
 	path := common.DigestToFileName(blob.Digest())
-	if compatattr.Get(repo.GetContext()) {
+	if compatattr.Get(ctx.GetContext()) {
 		return localfsblob.New(path, blob.MimeType()), nil
 	} else {
 		return localblob.New(path, hint, blob.MimeType(), global), nil

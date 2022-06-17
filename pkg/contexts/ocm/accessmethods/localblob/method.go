@@ -81,7 +81,7 @@ func (a *AccessSpec) GetMimeType() string {
 	return a.MediaType
 }
 
-func (a *AccessSpec) GetReferenceName() string {
+func (a *AccessSpec) GetReferenceHint() string {
 	return a.ReferenceName
 }
 

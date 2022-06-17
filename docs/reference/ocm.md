@@ -62,8 +62,16 @@ form
 
 The value can be a simple type or a json string for complex values. The following
 attributes are supported:
+- <code>github.com/mandelsoft/oci/cache</code> [<code>cache</code>]: *string*
+  Filesystem folder to use for caching OCI blobs
 - <code>github.com/mandelsoft/ocm/compat</code> [<code>compat</code>]: *bool*
   Compatibility mode: Avoid generic local access methods and prefer type specific ones.
+- <code>github.com/mandelsoft/ocm/keeplocalblob</code> [<code>keeplocalblob</code>]: *bool*
+  Keep local blobs when importing OCI artefacts to oci registries from localBlob
+  access methods. By default they will be expanded to OCT artefacts with the
+  access method ociRegistry. If this option is set to true, they will be stored
+  as local blobs, also. The access methid will be localBlob with a nested
+  ociRegistry access method for describing the global access.
 - <code>github.com/mandelsoft/ocm/signing</code>: *bool*
   Public and private Key settings.
   <pre>
@@ -79,8 +87,6 @@ attributes are supported:
        }
     ]
   </pre>
-- <code>github.com/mandelsoft/oci/cache</code> [<code>cache</code>]: *string*
-  Filesystem folder to use for caching OCI blobs
 
 ### SEE ALSO
 

@@ -25,12 +25,18 @@ import (
 type BlobContainer interface {
 	GetBlobData(name string) (cpi.DataAccess, error)
 
+	// GetStorageContext creates a storage context for blobs
+	// that is used to feed blob handlers for specific blob starage methods.
+	// If no handler accepts the blob, the AddBlobFor method will
+	// be ued toi store the blob
+	GetStorageContext(cv cpi.ComponentVersionAccess) cpi.StorageContext
+
 	// AddBlobFor stores a local blob together with the component and
 	// potentially provides a global reference according to the OCI distribution spec
 	// if the blob described an oci artefact.
-	// The resultimg access information (global and local) is provided as
+	// The resulting access information (global and local) is provided as
 	// an access method specification usable in a component descriptor
-	AddBlobFor(cv cpi.ComponentVersionAccess, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error)
+	AddBlobFor(storagectx cpi.StorageContext, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error)
 }
 
 // ComponentVersionContainer is the interface of an element hosting a component version

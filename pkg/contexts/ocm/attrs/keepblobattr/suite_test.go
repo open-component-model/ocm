@@ -12,10 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package attrs
+package keepblobattr_test
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
+
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "OCM KeepBlob Attribute")
+}

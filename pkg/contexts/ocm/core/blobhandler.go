@@ -15,15 +15,33 @@
 package core
 
 import (
+	"fmt"
+	"sort"
 	"strings"
 	"sync"
 )
+
+type ImplementationRepositoryType struct {
+	ContextType    string
+	RepositoryType string
+}
+
+func (t ImplementationRepositoryType) String() string {
+	return fmt.Sprintf("%s[%s]", t.RepositoryType, t.ContextType)
+}
+
+func (t ImplementationRepositoryType) IsInitial() bool {
+	return t.RepositoryType == "" && t.ContextType == ""
+}
 
 // StorageContext is an object describing the storage context used for the
 // mapping of a component repository to a base repository (e.g. oci api)
 // It depends on the Context type of the used base repository
 type StorageContext interface {
+	GetContext() Context
 	TargetComponentVersion() ComponentVersionAccess
+	TargetComponentRepository() Repository
+	GetImplementationRepositoryType() ImplementationRepositoryType
 }
 
 // BlobHandler s the interface for a dedicated handling of storing blobs
@@ -40,15 +58,17 @@ type BlobHandler interface {
 	// If this is possible and done an appropriate access spec
 	// must be returned, if this is not done, nil has to be returned
 	// without error
-	StoreBlob(repo Repository, blob BlobAccess, hint string, global AccessSpec, ctx StorageContext) (AccessSpec, error)
+	StoreBlob(blob BlobAccess, hint string, global AccessSpec, ctx StorageContext) (AccessSpec, error)
 }
 
 // MultiBlobHandler is a BlobHandler consisting of a sequence of handlers
 type MultiBlobHandler []BlobHandler
 
-func (m MultiBlobHandler) StoreBlob(repo Repository, blob BlobAccess, hint string, global AccessSpec, ctx StorageContext) (AccessSpec, error) {
+var _ sort.Interface = MultiBlobHandler(nil)
+
+func (m MultiBlobHandler) StoreBlob(blob BlobAccess, hint string, global AccessSpec, ctx StorageContext) (AccessSpec, error) {
 	for _, h := range m {
-		a, err := h.StoreBlob(repo, blob, hint, global, ctx)
+		a, err := h.StoreBlob(blob, hint, global, ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -59,6 +79,52 @@ func (m MultiBlobHandler) StoreBlob(repo Repository, blob BlobAccess, hint strin
 	return nil, nil
 }
 
+func (m MultiBlobHandler) Len() int {
+	return len(m)
+}
+
+func (m MultiBlobHandler) Less(i, j int) bool {
+	pi := DEFAULT_BLOBHANDLER_PRIO
+	pj := DEFAULT_BLOBHANDLER_PRIO
+
+	if p, ok := m[i].(*PrioBlobHandler); ok {
+		pi = p.Prio
+	}
+	if p, ok := m[j].(*PrioBlobHandler); ok {
+		pj = p.Prio
+	}
+	return pi > pj
+}
+
+func (m MultiBlobHandler) Swap(i, j int) {
+	m[i], m[j] = m[j], m[i]
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type BlobHandlerOptions struct {
+	BlobHandlerKey
+	Priority int
+}
+
+type BlobHandlerOption interface {
+	ApplyBlobHandlerOptionTo(*BlobHandlerOptions)
+}
+
+type prio struct {
+	prio int
+}
+
+func WithPrio(p int) BlobHandlerOption {
+	return prio{p}
+}
+
+func (o prio) ApplyBlobHandlerOptionTo(opts *BlobHandlerOptions) {
+	opts.Priority = o.prio
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 // BlobHandlerKey is the registration key for BlobHandlers
 type BlobHandlerKey struct {
 	ContextType    string
@@ -66,12 +132,28 @@ type BlobHandlerKey struct {
 	MimeType       string
 }
 
-func ForRepo(ctxtype, repotype string) BlobHandlerKey {
+var _ BlobHandlerOption = BlobHandlerKey{}
+
+func (k BlobHandlerKey) ApplyBlobHandlerOptionTo(opts *BlobHandlerOptions) {
+	if k.ContextType != "" {
+		opts.ContextType = k.ContextType
+	}
+	if k.RepositoryType != "" {
+		opts.RepositoryType = k.RepositoryType
+	}
+	if k.MimeType != "" {
+		opts.MimeType = k.MimeType
+	}
+}
+
+func ForRepo(ctxtype, repotype string) BlobHandlerOption {
 	return BlobHandlerKey{ContextType: ctxtype, RepositoryType: repotype}
 }
-func ForMimeType(mimetype string) BlobHandlerKey {
+func ForMimeType(mimetype string) BlobHandlerOption {
 	return BlobHandlerKey{MimeType: mimetype}
 }
+
+////////////////////////////////////////////////////////////////////////////////
 
 // BlobHandlerRegistry registers blob handlers to use in a dedicated ocm context
 type BlobHandlerRegistry interface {
@@ -79,7 +161,7 @@ type BlobHandlerRegistry interface {
 	Copy() BlobHandlerRegistry
 	// RegisterBlobHandler registers a blob handler. It must specify either a sole mime type,
 	// or a context and repository type, or all three keys
-	RegisterBlobHandler(handler BlobHandler, keys ...BlobHandlerKey) BlobHandlerRegistry
+	RegisterBlobHandler(handler BlobHandler, opts ...BlobHandlerOption) BlobHandlerRegistry
 	// GetHandler returns handler trying all matches in the following order:
 	//
 	// - a handle matching all keys
@@ -89,7 +171,14 @@ type BlobHandlerRegistry interface {
 	// - a handler matching the repo
 	//
 	// - handlers matching everything
-	GetHandler(ctxtype, repotype string, mimeType string) BlobHandler
+	GetHandler(repotype ImplementationRepositoryType, mimeType string) BlobHandler
+}
+
+const DEFAULT_BLOBHANDLER_PRIO = 100
+
+type PrioBlobHandler struct {
+	BlobHandler
+	Prio int
 }
 
 type blobHandlerRegistry struct {
@@ -115,29 +204,23 @@ func (r *blobHandlerRegistry) Copy() BlobHandlerRegistry {
 	return n
 }
 
-func (r *blobHandlerRegistry) RegisterBlobHandler(handler BlobHandler, keys ...BlobHandlerKey) BlobHandlerRegistry {
+func (r *blobHandlerRegistry) RegisterBlobHandler(handler BlobHandler, olist ...BlobHandlerOption) BlobHandlerRegistry {
+	opts := &BlobHandlerOptions{}
+	for _, o := range olist {
+		o.ApplyBlobHandlerOptionTo(opts)
+	}
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	key := BlobHandlerKey{}
-	for _, k := range keys {
-		if k.ContextType != "" {
-			key.ContextType = k.ContextType
-		}
-		if k.RepositoryType != "" {
-			key.RepositoryType = k.RepositoryType
-		}
-		if k.MimeType != "" {
-			key.MimeType = k.MimeType
-		}
-	}
-
 	def := BlobHandlerKey{}
 
-	if key == def {
+	if opts.Priority != 0 {
+		handler = &PrioBlobHandler{handler, opts.Priority}
+	}
+	if opts.BlobHandlerKey == def {
 		r.defhandler = append(r.defhandler, handler)
 	} else {
-		r.handlers[key] = handler
+		r.handlers[opts.BlobHandlerKey] = handler
 	}
 	return r
 }
@@ -159,23 +242,24 @@ func (r *blobHandlerRegistry) forMimeType(ctxtype, repotype, mimetype string) Mu
 	return multi
 }
 
-func (r *blobHandlerRegistry) GetHandler(ctxtype, repotype, mimetype string) BlobHandler {
+func (r *blobHandlerRegistry) GetHandler(repotype ImplementationRepositoryType, mimetype string) BlobHandler {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
 	var multi MultiBlobHandler
-	if ctxtype != "" || repotype != "" {
-		multi = append(multi, r.forMimeType(ctxtype, repotype, mimetype)...)
-		multi = append(multi, r.forMimeType(ctxtype, repotype, "")...)
+	if !repotype.IsInitial() {
+		multi = append(multi, r.forMimeType(repotype.ContextType, repotype.RepositoryType, mimetype)...)
+		multi = append(multi, r.forMimeType(repotype.ContextType, repotype.RepositoryType, "")...)
 	}
 	multi = append(multi, r.forMimeType("", "", mimetype)...)
 	multi = append(multi, r.defhandler...)
 	if len(multi) == 0 {
 		return nil
 	}
+	sort.Sort(multi)
 	return multi
 }
 
-func RegisterBlobHandler(handler BlobHandler, keys ...BlobHandlerKey) {
-	DefaultBlobHandlerRegistry.RegisterBlobHandler(handler, keys...)
+func RegisterBlobHandler(handler BlobHandler, opts ...BlobHandlerOption) {
+	DefaultBlobHandlerRegistry.RegisterBlobHandler(handler, opts...)
 }

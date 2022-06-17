@@ -42,10 +42,13 @@ type AccessSpec interface {
 	AccessMethod(access ComponentVersionAccess) (AccessMethod, error)
 }
 
-// HintProvider is used to provide a reference hint for local access method specs
-// optionally povided by an access spec.
+// HintProvider is used to provide a reference hint for local access method specs.
+// It may optionally be provided by an access spec.
+// When adding blobs to a repository the hint is used by blobhandlers for
+// expanding a blob to a repository specific representation to determine a
+// useful name.
 type HintProvider interface {
-	GetReferenceName() string
+	GetReferenceHint() string
 }
 
 // AccessMethod described the access to a dedicate resource

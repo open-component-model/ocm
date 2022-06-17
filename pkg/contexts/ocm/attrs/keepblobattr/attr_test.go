@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package compatattr_test
+package keepblobattr_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -22,7 +22,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	me "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
+	me "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
