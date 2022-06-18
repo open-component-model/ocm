@@ -67,11 +67,11 @@ attributes are supported:
 - <code>github.com/mandelsoft/ocm/compat</code> [<code>compat</code>]: *bool*
   Compatibility mode: Avoid generic local access methods and prefer type specific ones.
 - <code>github.com/mandelsoft/ocm/keeplocalblob</code> [<code>keeplocalblob</code>]: *bool*
-  Keep local blobs when importing OCI artefacts to oci registries from localBlob
-  access methods. By default they will be expanded to OCT artefacts with the
-  access method ociRegistry. If this option is set to true, they will be stored
-  as local blobs, also. The access methid will be localBlob with a nested
-  ociRegistry access method for describing the global access.
+  Keep local blobs when importing OCI artefacts to OCI registries from <code>localBlob</code>
+  access methods. By default they will be expanded to OCI artefacts with the
+  access method <code>ociRegistry</code>. If this option is set to true, they will be stored
+  as local blobs, also. The access method will still be <code>localBlob</code> but with a nested
+  <code>ociRegistry</code> access method for describing the global access.
 - <code>github.com/mandelsoft/ocm/signing</code>: *bool*
   Public and private Key settings.
   <pre>

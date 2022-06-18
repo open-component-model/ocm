@@ -127,12 +127,21 @@ func (o prio) ApplyBlobHandlerOptionTo(opts *BlobHandlerOptions) {
 
 // BlobHandlerKey is the registration key for BlobHandlers
 type BlobHandlerKey struct {
-	ContextType    string
-	RepositoryType string
-	MimeType       string
+	ImplementationRepositoryType
+	MimeType string
 }
 
 var _ BlobHandlerOption = BlobHandlerKey{}
+
+func NewBlobHandlerKey(ctxtype, repotype, mimetype string) BlobHandlerKey {
+	return BlobHandlerKey{
+		ImplementationRepositoryType: ImplementationRepositoryType{
+			ContextType:    ctxtype,
+			RepositoryType: repotype,
+		},
+		MimeType: mimetype,
+	}
+}
 
 func (k BlobHandlerKey) ApplyBlobHandlerOptionTo(opts *BlobHandlerOptions) {
 	if k.ContextType != "" {
@@ -147,7 +156,7 @@ func (k BlobHandlerKey) ApplyBlobHandlerOptionTo(opts *BlobHandlerOptions) {
 }
 
 func ForRepo(ctxtype, repotype string) BlobHandlerOption {
-	return BlobHandlerKey{ContextType: ctxtype, RepositoryType: repotype}
+	return BlobHandlerKey{ImplementationRepositoryType: ImplementationRepositoryType{ContextType: ctxtype, RepositoryType: repotype}}
 }
 func ForMimeType(mimetype string) BlobHandlerOption {
 	return BlobHandlerKey{MimeType: mimetype}
@@ -181,16 +190,38 @@ type PrioBlobHandler struct {
 	Prio int
 }
 
+type handlerCache struct {
+	cache map[BlobHandlerKey]BlobHandler
+}
+
+func newHandlerCache() *handlerCache {
+	return &handlerCache{map[BlobHandlerKey]BlobHandler{}}
+}
+
+func (c *handlerCache) len() int {
+	return len(c.cache)
+}
+
+func (c *handlerCache) get(key BlobHandlerKey) (BlobHandler, bool) {
+	h, ok := c.cache[key]
+	return h, ok
+}
+
+func (c *handlerCache) set(key BlobHandlerKey, h BlobHandler) {
+	c.cache[key] = h
+}
+
 type blobHandlerRegistry struct {
 	lock       sync.RWMutex
 	handlers   map[BlobHandlerKey]BlobHandler
 	defhandler MultiBlobHandler
+	cache      *handlerCache
 }
 
 var DefaultBlobHandlerRegistry = NewBlobHandlerRegistry()
 
 func NewBlobHandlerRegistry() BlobHandlerRegistry {
-	return &blobHandlerRegistry{handlers: map[BlobHandlerKey]BlobHandler{}}
+	return &blobHandlerRegistry{handlers: map[BlobHandlerKey]BlobHandler{}, cache: newHandlerCache()}
 }
 
 func (r *blobHandlerRegistry) Copy() BlobHandlerRegistry {
@@ -222,6 +253,9 @@ func (r *blobHandlerRegistry) RegisterBlobHandler(handler BlobHandler, olist ...
 	} else {
 		r.handlers[opts.BlobHandlerKey] = handler
 	}
+	if r.cache.len() > 0 {
+		r.cache = newHandlerCache()
+	}
 	return r
 }
 
@@ -230,7 +264,7 @@ func (r *blobHandlerRegistry) forMimeType(ctxtype, repotype, mimetype string) Mu
 
 	mime := mimetype
 	for {
-		if h := r.handlers[BlobHandlerKey{ctxtype, repotype, mime}]; h != nil {
+		if h := r.handlers[NewBlobHandlerKey(ctxtype, repotype, mime)]; h != nil {
 			multi = append(multi, h)
 		}
 		idx := strings.LastIndex(mime, "+")
@@ -243,21 +277,44 @@ func (r *blobHandlerRegistry) forMimeType(ctxtype, repotype, mimetype string) Mu
 }
 
 func (r *blobHandlerRegistry) GetHandler(repotype ImplementationRepositoryType, mimetype string) BlobHandler {
+	key := BlobHandlerKey{
+		ImplementationRepositoryType: repotype,
+		MimeType:                     mimetype,
+	}
+	h, cache := r.getHandler(key)
+	if cache != nil {
+		r.lock.Lock()
+		defer r.lock.Unlock()
+		// fill cache, if unchanged during pseudo lock upgrade (no support in go sync package for that).
+		// if cache has been renewed in the meantime, just use the old outdated result, but don't update.
+		if r.cache == cache {
+			r.cache.set(key, h)
+		}
+	}
+	return h
+}
+
+func (r *blobHandlerRegistry) getHandler(key BlobHandlerKey) (BlobHandler, *handlerCache) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
-	var multi MultiBlobHandler
-	if !repotype.IsInitial() {
-		multi = append(multi, r.forMimeType(repotype.ContextType, repotype.RepositoryType, mimetype)...)
-		multi = append(multi, r.forMimeType(repotype.ContextType, repotype.RepositoryType, "")...)
+	if h, ok := r.cache.get(key); ok {
+		return h, nil
 	}
-	multi = append(multi, r.forMimeType("", "", mimetype)...)
+	var multi MultiBlobHandler
+	if !key.ImplementationRepositoryType.IsInitial() {
+		multi = append(multi, r.forMimeType(key.ContextType, key.RepositoryType, key.MimeType)...)
+		if key.MimeType != "" {
+			multi = append(multi, r.forMimeType(key.ContextType, key.RepositoryType, "")...)
+		}
+	}
+	multi = append(multi, r.forMimeType("", "", key.MimeType)...)
 	multi = append(multi, r.defhandler...)
 	if len(multi) == 0 {
-		return nil
+		return nil, r.cache
 	}
 	sort.Sort(multi)
-	return multi
+	return multi, r.cache
 }
 
 func RegisterBlobHandler(handler BlobHandler, opts ...BlobHandlerOption) {

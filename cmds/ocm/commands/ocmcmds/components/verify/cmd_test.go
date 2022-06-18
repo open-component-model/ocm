@@ -169,7 +169,7 @@ var _ = Describe("access method", func() {
 		fmt.Printf("%+v\n", dig)
 		Expect(dig.Value).To(Equal(digest))
 
-		Expect(env.CatchOutput(buf).Execute("verify", "components", "-s", SIGNATURE, "-k", PUBKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("verify", "components", "-V", "-s", SIGNATURE, "-k", PUBKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(Succeed())
 
 		Expect("\n" + buf.String()).To(Equal(`
 applying to version "github.com/mandelsoft/ref:v1"...

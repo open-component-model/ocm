@@ -9,14 +9,11 @@ ocm componentversions verify [<options>] {<component-reference>}
 ### Options
 
 ```
-      --algorithm string          signature handler
-  -h, --help                      help for verify
-  -K, --private-key stringArray   private key setting
-  -k, --public-key stringArray    public key setting
-  -r, --repo string               repository name or spec
-  -s, --signature stringArray     signature name
-      --update                    update digest in component versions
-  -V, --verify                    verify existing digests (default true)
+  -h, --help                     help for verify
+  -k, --public-key stringArray   public key setting
+  -r, --repo string              repository name or spec
+  -s, --signature stringArray    signature name
+  -V, --verify                   verify existing digests
 ```
 
 ### Description

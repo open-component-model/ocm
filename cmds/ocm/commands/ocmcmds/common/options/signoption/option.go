@@ -50,6 +50,8 @@ type Option struct {
 
 	// Verify the digests
 	Verify bool
+	// Recursively sign component versions
+	Recursively bool
 	// SignatureNames is a list of signatures to handle (only the first one
 	// will be used for signing
 	SignatureNames []string
@@ -59,12 +61,15 @@ type Option struct {
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	fs.StringArrayVarP(&o.publicKeys, "public-key", "k", nil, "public key setting")
-	fs.StringArrayVarP(&o.privateKeys, "private-key", "K", nil, "private key setting")
 	fs.StringArrayVarP(&o.SignatureNames, "signature", "s", nil, "signature name")
-	fs.StringVarP(&o.algorithm, "algorithm", "", "", "signature handler")
-	fs.BoolVarP(&o.Verify, "verify", "V", true, "verify existing digests")
-	fs.BoolVarP(&o.Update, "update", "", o.SignMode, "update digest in component versions")
+	fs.StringArrayVarP(&o.publicKeys, "public-key", "k", nil, "public key setting")
+	if o.SignMode {
+		fs.StringArrayVarP(&o.privateKeys, "private-key", "K", nil, "private key setting")
+		fs.StringVarP(&o.algorithm, "algorithm", "", "", "signature handler")
+		fs.BoolVarP(&o.Update, "update", "", o.SignMode, "update digest in component versions")
+		fs.BoolVarP(&o.Recursively, "recursive", "R", o.SignMode, "recursivly sign component versions")
+	}
+	fs.BoolVarP(&o.Verify, "verify", "V", o.SignMode, "verify existing digests")
 }
 
 func (o *Option) Complete(ctx clictx.Context) error {
@@ -164,6 +169,7 @@ func (o *Option) ApplySigningOption(opts *ocmsign.Options) {
 	}
 	opts.SignatureNames = o.SignatureNames
 	opts.Verify = o.Verify
+	opts.Recursively = o.Recursively
 	opts.Keys = o.Keys
 	if len(o.SignatureNames) > 0 {
 		opts.VerifySignature = o.Keys.GetPublicKey(o.SignatureNames[0]) != nil
