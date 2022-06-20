@@ -61,3 +61,16 @@ func ValidateRelation(fldPath *field.Path, relation ResourceRelation) *field.Err
 	}
 	return nil
 }
+
+// ObjectMeta defines a object that is uniquely identified by its name and version.
+// +k8s:deepcopy-gen=true
+type ObjectMeta struct {
+	// Name is the context unique name of the object.
+	Name string `json:"name"`
+	// Version is the semver version of the object.
+	Version string `json:"version"`
+	// Labels defines an optional set of additional labels
+	// describing the object.
+	// +optional
+	Labels Labels `json:"labels,omitempty"`
+}

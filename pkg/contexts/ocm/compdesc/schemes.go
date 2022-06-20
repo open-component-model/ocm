@@ -15,8 +15,6 @@
 package compdesc
 
 import (
-	"encoding/json"
-
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -57,19 +55,24 @@ func Decode(data []byte, opts ...DecodeOption) (*ComponentDescriptor, error) {
 	o := &DecodeOptions{Codec: DefaultYAMLCodec}
 	o.ApplyOptions(opts)
 
-	raw := make(map[string]json.RawMessage)
-	if err := o.Codec.Decode(data, &raw); err != nil {
+	var schemedef struct {
+		Meta       metav1.Metadata `json:"meta"`
+		APIVersion string          `json:"apiVersion"`
+	}
+	if err := o.Codec.Decode(data, &schemedef); err != nil {
 		return nil, err
 	}
 
-	var metadata metav1.Metadata
-	if err := o.Codec.Decode(raw["meta"], &metadata); err != nil {
-		return nil, err
+	scheme := schemedef.Meta.Version
+	if schemedef.APIVersion != "" {
+		if scheme != "" {
+			return nil, errors.Newf("apiVersion and meta.schemeVersion defined")
+		}
+		scheme = schemedef.APIVersion
 	}
-
-	version := DefaultSchemes[metadata.Version]
+	version := DefaultSchemes[scheme]
 	if version == nil {
-		return nil, errors.ErrNotSupported(errors.KIND_SCHEMAVERSION, metadata.Version)
+		return nil, errors.ErrNotSupported(errors.KIND_SCHEMAVERSION, scheme)
 	}
 
 	versioned, err := version.Decode(data, o)

@@ -492,4 +492,45 @@ var _ = Describe("normalization", func() {
   }
 }`))
 	})
+
+	It("Normalizes with recursive includes", func() {
+
+		rules := signing.MapIncludes{
+			"component": signing.MapIncludes{
+				"name": nil,
+			},
+		}
+		entries, err := signing.PrepareNormalization(cd, rules)
+		Expect(err).To(Succeed())
+		fmt.Printf("%s\n", entries.ToString(""))
+
+		Expect("\n" + entries.ToString("")).To(Equal(`
+{
+  component: {
+    name: test
+  }
+}`))
+	})
+
+	It("Normalizes with recursive modifying includes", func() {
+
+		rules := signing.DynamicMapIncludes{
+			"component": &signing.DynamicInclude{
+				Continue: signing.DynamicMapIncludes{
+					"name": nil,
+				},
+				Name: "modified",
+			},
+		}
+		entries, err := signing.PrepareNormalization(cd, rules)
+		Expect(err).To(Succeed())
+		fmt.Printf("%s\n", entries.ToString(""))
+
+		Expect("\n" + entries.ToString("")).To(Equal(`
+{
+  modified: {
+    name: test
+  }
+}`))
+	})
 })

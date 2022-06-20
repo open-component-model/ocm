@@ -36,23 +36,81 @@ func (r NoExcludes) Element(v interface{}) (bool, ExcludeRules) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type MapIncludes map[string]ExcludeRules
+
+var _ ExcludeRules = MapIncludes{}
+
+func (r MapIncludes) Field(name string, value interface{}) (string, ExcludeRules) {
+	c, ok := r[name]
+	if ok {
+		if c == nil {
+			c = NoExcludes{}
+		}
+		return name, c
+	}
+	return "", nil
+}
+
+func (r MapIncludes) Element(v interface{}) (bool, ExcludeRules) {
+	panic("invalid exclude structure, require arry but found struct rules")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type MapExcludes map[string]ExcludeRules
 
 var _ ExcludeRules = MapExcludes{}
 
 func (r MapExcludes) Field(name string, value interface{}) (string, ExcludeRules) {
-	e, ok := r[name]
+	c, ok := r[name]
 	if ok {
-		if e == nil {
+		if c == nil {
 			return "", nil
 		}
 	} else {
-		e = NoExcludes{}
+		c = NoExcludes{}
 	}
-	return name, e
+	return name, c
 }
 
 func (r MapExcludes) Element(v interface{}) (bool, ExcludeRules) {
+	panic("invalid exclude structure, require arry but found struct rules")
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type DynamicInclude struct {
+	ValueChecker ValueChecker
+	Continue     ExcludeRules
+	Name         string
+}
+
+func (r *DynamicInclude) Check(value interface{}) bool {
+	return r == nil || r.ValueChecker == nil || r.ValueChecker(value)
+}
+
+type DynamicMapIncludes map[string]*DynamicInclude
+
+var _ ExcludeRules = DynamicMapIncludes{}
+
+func (r DynamicMapIncludes) Field(name string, value interface{}) (string, ExcludeRules) {
+	e, ok := r[name]
+	if ok && e.Check(value) {
+		var c ExcludeRules = NoExcludes{}
+		if e != nil {
+			if e.Name != "" {
+				name = e.Name
+			}
+			if e.Continue != nil {
+				c = e.Continue
+			}
+		}
+		return name, c
+	}
+	return "", nil
+}
+
+func (r DynamicMapIncludes) Element(v interface{}) (bool, ExcludeRules) {
 	panic("invalid exclude structure, require arry but found struct rules")
 }
 
@@ -64,17 +122,18 @@ type DynamicExclude struct {
 	Name         string
 }
 
-func (r DynamicExclude) Check(value interface{}) bool {
-	return r.Continue == nil || (r.ValueChecker != nil && r.ValueChecker(value))
+func (r *DynamicExclude) Check(value interface{}) bool {
+	return r == nil || (r.ValueChecker != nil && r.ValueChecker(value)) || (r.ValueChecker == nil && r.Continue == nil)
 }
 
-type DynamicMapExcludes map[string]DynamicExclude
+type DynamicMapExcludes map[string]*DynamicExclude
 
 type ValueChecker func(value interface{}) bool
 
 var _ ExcludeRules = DynamicMapExcludes{}
 
 func (r DynamicMapExcludes) Field(name string, value interface{}) (string, ExcludeRules) {
+	var c ExcludeRules
 	e, ok := r[name]
 	if ok {
 		if e.Check(value) {
@@ -83,8 +142,11 @@ func (r DynamicMapExcludes) Field(name string, value interface{}) (string, Exclu
 		if e.Name != "" {
 			name = e.Name
 		}
+		c = e.Continue
+	} else {
+		c = NoExcludes{}
 	}
-	return name, NoExcludes{}
+	return name, c
 }
 
 func (r DynamicMapExcludes) Element(v interface{}) (bool, ExcludeRules) {
