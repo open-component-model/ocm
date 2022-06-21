@@ -1,0 +1,24 @@
+name: Upgrade Landscape 
+"on": [workflow_dispatch]
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.TOOL || secrets.GITHUB_TOKEN }}
+      uses: actions/checkout@v2
+    - name: setup git config
+      run: |
+        git config user.name "Upgrade Bot"
+        git config user.email "<>"
+    - name: Upgrade
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOOL || secrets.GITHUB_TOKEN }}
+      run: |
+        echo "${{ github.event }}"
+        bin/upgrade -o -r "${{github.repository}}" ${{github.ref_name}}
+
+
+

@@ -1,0 +1,10 @@
+---
+name: gitopstemplate
+type: GitOpsTemplate
+labels:
+- name: commit
+  value: ${COMMIT}
+input:
+  type: dir
+  path: content
+  mediaType: application/tar+gzip

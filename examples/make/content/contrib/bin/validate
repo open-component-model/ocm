@@ -1,0 +1,3 @@
+#!/bin/bash -e
+
+echo this is an additional validation step

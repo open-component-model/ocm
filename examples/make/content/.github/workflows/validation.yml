@@ -1,0 +1,34 @@
+name: Configuration Validation
+"on":
+  push:
+    branches:
+      - '**'
+      - '!master'
+      - '!main'
+      - '!releases'
+      - '!**/releases'
+      - '!delivery'
+      - '!**/delivery'
+
+jobs:
+  validator:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Check
+      id: check
+      run: |
+        echo "${{ github.event }}"
+        bin/validate -o
+#    - name: Status
+#      uses: Sibz/github-status-action@v1
+#      with: 
+#        authToken: ${{secrets.GITHUB_TOKEN}}
+#        context: 'Configuration Validation'
+#        description: '${{steps.check.outputs.description}}'
+#        state: '${{steps.check.outputs.state}}'
+#        sha: ${{github.event.pull_request.head.sha || github.sha}}
+
+
+

@@ -1,0 +1,70 @@
+#!/bin/bash -e
+
+conflictmarker="(^<<<""<<<<)|(^===""====)|(^>>"">>>>>)"
+requiredmarker="<<<""required>>>" 
+
+A=
+if [ "$1" == "-o" ]; then
+  A=X
+fi
+
+fileerror()
+{
+  local line
+  local msg
+  if [ -n "$A" ]; then
+    msg="${3#*:}"
+    line="${3%:$msg}"
+    echo "::error file=${2#./},line="${line#"${line%%[![:space:]]*}"}",title=$1::$msg"
+  else
+    echo "  $3"
+  fi
+}
+
+report()
+{
+  local line
+  while IFS= read -r line; do
+    fileerror "$1" "$2" "  $line"
+  done
+}
+
+checkFiles()
+{
+  find . -type f | while IFS= read -r file; do
+    if grep "$requiredmarker" "$file" >/dev/null; then
+       echo "required attribute missing in $file:"
+      grep -n "$requiredmarker" "$file" | report "required attribute" "$file"
+    fi
+    if grep -E "$conflictmarker" "$file" >/dev/null; then
+       echo "unresolved conflicts in $file:"
+       grep -n -E "$conflictmarker" "$file" | report "pending conflict" "$file"
+    fi
+     
+  done
+}
+
+echo "validating configuration...."
+
+problems=$(checkFiles)
+escaped="$(echo -n "$problems" | sed ':a;N;$!ba;s/\n/%0A/g;s/:/%25/g')"
+
+if [ "$1" == "-o" ]; then
+  if [ -n "$problems" ]; then
+    echo "::set-output name=state::error"
+    echo "::set-output name=description::There are still unresolved required configuration changes"
+  else
+    echo "::set-output name=state::success"
+    echo "::set-output name=description::no configuration problem detected"
+  fi
+fi
+if [ -n "$problems" ]; then
+  echo "$problems"
+    exit 1
+else
+  echo "no configuration problem detected"
+fi
+
+if [ -x contrib/bin/validate ]; then
+  contrib/bin/validate $A
+fi

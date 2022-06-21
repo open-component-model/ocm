@@ -98,6 +98,13 @@ Component Repositories, and component versions.
 Additionally it provides some limited support for the docker daemon, OCI artefacts and
 registries.
 
+It can be used in two ways:
+- *verb/operation first*: here the sub commands follow the pattern *&lt;verb> &lt;object kind> &lt;arguments>*
+- *area/kind first*: here the area and/or object kind is given first followed by the operation according to the pattern
+  *[&lt;area>] &lt;object kind> &lt;verb/operation> &lt;arguments>*
+
+The command accepts some top level options, they can only be given before the sub commands.
+
 With the option <code>--cred</code> it is possible to specify arbitrary credentials
 for various environments on the command line. Nevertheless it is always preferrable
 to use the cli config file.

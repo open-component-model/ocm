@@ -1,0 +1,128 @@
+#!/bin/bash -e
+
+DIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
+source "$DIR/lib/github"
+
+D=
+repo=( )
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -d)
+      D=-d
+      shift;;
+    -o)
+      A=-o
+      shift;;
+    -r|--repo)
+      if [ $# -lt 2 ]; then
+        Error repository name missing
+      fi
+      repo=( --repo "$2" )
+      shift 2;;
+    -*)
+      Error invalid option $1;;
+    *) break;;
+  esac
+done
+
+current="$(git branch --show-current)"
+default="$current"
+if [ -n "$GITHUB_REF_NAME" ]; then
+  echo upgrade running as github action
+  default=$GITHUB_REF_NAME
+  if [ -n "$GITHUB_REF_TYPE" -a "$GITHUB_REF_TYPE" != branch ]; then
+    Error "only possible on branches: found $GITHUB_REF_TYPE $GITHUB_REF_NAME"
+  fi
+else
+  echo upgrade running locally
+fi
+
+Group Detecting settings
+echo "current branch is $current"
+
+tgt="${1:-$default}"
+tname="${tgt#*/}"
+tprefix=
+if [ "$tname" != "$tgt" ]; then
+  tprefix="${tgt%%$tname}"
+fi
+
+src="${2:-${tprefix}delivery}"
+sname="${src#*/}"
+sprefix=
+if [ "$sname" != "$src" ]; then
+  sprefix="${src%%$sname}"
+fi
+
+echo target is $tprefix $tname
+echo source is $sprefix $sname
+
+
+if [ -f "$(git rev-parse --git-dir)"/MERGE_HEAD ]; then
+  Error merge is still pending, no further upgrade possible
+fi
+
+if [ -n "$(git status --short)" ]; then
+  Error workspace not clean: upgrade not possible
+fi
+EndGroup
+
+Group Preparing upgrade
+echo "fetching source branch $src"
+git fetch origin "$src"
+echo "fetching target branch $tgt"
+git fetch origin "$tgt"
+
+
+if [ "$tgt" != "$current" ]; then
+  echo "switching to target branch"
+fi
+git reset --hard "origin/$tgt"
+
+commit="$(git rev-parse HEAD)"
+msg="$(git log -1 --pretty=%B origin/$src)"
+merge="$(git rev-parse --short origin/$src)"
+prbranch="${tprefix}$tname-upgrade-$merge"
+
+echo target branch is $prbranch
+
+echo "source commit is $merge ($msg)"
+EndGroup
+
+Group Merging
+draft=
+echo "git merge origin/$src"
+
+if ! git merge -m "Upgrading $tname from $sname: $msg" origin/$src; then
+  if [ -n "$(git status --short)" ]; then
+    echo "found conflicting files > checkin conflickt markers" 
+    git add .
+    git commit -m "Conflict: Upgrading $tname from $sname: $msg"
+    draft=$D
+  else 
+    Error "oops, something went wrong, please do the upgrade manually"
+  fi
+else
+  new="$(git rev-parse HEAD)"
+  if [ "$new" == "$commit" ]; then
+    EndGroup
+    echo "nothing to do -> skip upgrade"
+    exit 0
+  else
+    echo "merge completely successfull" 
+  fi
+fi
+EndGroup
+
+if [ -x contrib/bin/upgrade ]; then
+  contrib/bin/upgrade $A
+fi
+
+Group Creating pull request branch $prbranch
+SetOutput pull_request_branch $prbranch
+git push origin HEAD:$prbranch
+echo "creating pull request $prbranch -> $tgt"
+CreatePullRequest $draft "${repo[@]}" "$tgt" "$prbranch" "$msg"
+EndGroup
+

@@ -1,0 +1,142 @@
+#!/bin/bash -e
+
+insttemp=gitopstemplate
+
+cleanup()
+{
+  if [ -n "$clone" ]; then
+    echo cleaning up $clone
+    rm -rf "$clone"
+  fi
+}
+
+
+DIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
+source "$DIR/lib/github"
+
+P=
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -o)
+      A=-o
+      shift;;
+    -p)
+      P=X
+      shift;;
+    -*)
+      Error invalid option $1;;
+    *) break;;
+  esac
+done
+
+if [ ! -f ".product" ]; then
+  Error "no landscape or delivery folder"
+fi
+if [ -f ".landscape" ]; then
+  error "landscape folders cannot be upgraded directly from product"
+  error "please use a delivery branch instead"
+  exit 1
+fi
+source .product
+
+if [ -z "$productrepo" ]; then
+  Error "no product repo set"
+fi
+if [ -z "$productcomp" ]; then
+  Error "no product component set"
+fi
+if [ -z "$productvers" ]; then
+  Error "no product version set"
+fi
+
+U=
+if [ -n "$GITHUB_TOKEN" ]; then
+  U="$GITHUB_TOKEN@"
+fi
+
+OCMARGS=( )
+if [ -n "$REPO_AUTH" ]; then
+  Redact "$REPO_AUTH"
+  auth="$(base64 -d <<<"$REPO_AUTH")"
+  pass="${auth#*:}"
+  Redact "$pass"
+  user="${auth%:*}"
+  OCMARGS=( "-Cusername=$user" "-Cpassword=$pass" )
+fi
+
+echo "checking latest version for $productrepo//$productcomp"
+echo ocm "${OCMARGS[@]}" ocm versions show --latest --repo "$productrepo" "$productcomp"
+actual="$(ocm "${OCMARGS[@]}" ocm versions show --latest --repo "$productrepo" "$productcomp")"
+commit="$(ocm "${OCMARGS[@]}" get resource --repo "$productrepo" "$productcomp:$actual" "$insttemp" -o json | jq -r '.items[0].labels[] | select(.name=="commit").value')"
+
+echo "latest version is $actual [$commit]"
+SetOutput productversion "$actual"
+SetOutput commit "$commit"
+
+if [ "$actual" == "$productvers" ]; then
+  echo "no new version found"
+  exit 0
+fi
+
+
+
+clone=/tmp/clone$$
+trap cleanup exit err 2
+mkdir "$clone"
+
+Group "Fetching latest product release from $productrepo//$productcomp:$actual..."
+echo ocm "${OCMARGS[@]}" download resource --repo "$productrepo" "$productcomp:$actual" "$insttemp" -O "$clone/template.tgz"
+ocm "${OCMARGS[@]}" download resource --repo "$productrepo" "$productcomp:$actual" "$insttemp" -O "$clone/template.tgz"
+
+mkdir "$clone/content"
+( cd "$clone/content"; tar xvf ../template.tgz )
+EndGroup
+
+
+Group Updating files
+( cd "$clone/content"; tar c --exclude=.git .) | tar xv 2>&1
+EndGroup
+
+
+Group Preparing cleanup of obsolete files
+excludes=( .github/ .git .git/ .gitignore local local/ .product .fetches installation/ README.md)
+regexp=
+sep="("
+for i in "${excludes[@]}"; do
+  suf=
+  if [ "${i%/}" != "$i" ]; then
+    suf='.*'
+  fi
+  regexp="$regexp$sep(\\./$(sed 's/\./\\\./g' <<<"$i")$suf)"
+  sep="|"
+done
+regexp="$regexp)"
+echo "regexp=$regexp"
+EndGroup
+
+Group "Cleanup of obsolete files"
+find . | while IFS= read line; do
+  if [[ ! "$line" =~ $regexp ]]; then
+    if [ ! -e "$clone/content"/$line ]; then
+      echo cleaning "$line"
+      rm -rf "$line"
+    fi
+  fi
+done
+EndGroup
+
+echo "snapshot updated"
+echo "[$(date)] $actual" >>.fetches
+cat >.product <<EOF
+productrepo=$productrepo
+productcomp=$productcomp
+productvers=$actual
+EOF
+
+if [ -n "$P" ]; then
+  Group "Pushing to upstream"
+  git add .
+  git commit -m "updating to version $actual"
+  git push
+  EndGroup
+fi

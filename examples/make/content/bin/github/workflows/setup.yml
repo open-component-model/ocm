@@ -1,0 +1,58 @@
+name: Landscape Setup
+"on": 
+  workflow_dispatch:
+    inputs:
+      prefix:
+        description: branch prefix for landscape/delivery branches
+        required: true
+        default: landscape
+        type: string
+      name:
+        description: landscape branch name to create
+        required: true
+        type: string
+      delivery:
+        description: branch name for the delivery branch
+        required: true
+        default: delivery
+        type: string
+      product:
+        description: product source (host[/path/]/component) [defaulted by existing delivery branch"
+        required: false
+        type: string
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.TOOL }}
+    - name: setup git config
+      run: |
+        git config user.name "Upgrade Bot"
+        git config user.email "<>"
+    - name: Setup ocm
+      id: ocm
+      uses: mandelsoft/ocm-setup@master
+      with:
+        version: demo
+        repo: mandelsoft/ocm
+    - name: Setup
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOOL }}
+        REPO_AUTH: ${{ secrets.OCM }}
+      run: |
+        echo "${{ github.event }}"
+        echo "!$GITHUB_TOKEN!"
+        echo "OCM: ${{ steps.ocm.outputs.ocm-path }}"
+        product=( )
+        if [ -n "${{github.event.inputs.product}}" ]; then
+          product=( -p "${{github.event.inputs.product}}" )
+        fi
+        bin/setup -o -r "${{github.repository}}" "${product[@]}" "${{github.event.inputs.name}}" "${{github.event.inputs.delivery}}" "${{github.event.inputs.prefix}}"
+
+
+

@@ -1,0 +1,7 @@
+
+landscape:
+  version: 1.0.0
+  name: "<<<required>>>"
+  domain: newdefault
+  iaas:
+    type: "<<<required>>>"

@@ -1,0 +1,94 @@
+
+#
+# some github specific implementations
+#
+
+A=
+if [ -n "$GITHUB_REF_NAME" ]; then
+  A=-o
+fi
+
+error()
+{
+  if [ -n "$A" ]; then
+    echo "::error::$@"
+  else
+    echo "$@"
+  fi
+}
+
+Error()
+{
+  if [ -n "$A" ]; then
+    echo "::error::$@"
+  else
+    echo "Error: $@"
+  fi
+  exit 1
+}
+
+Redact()
+{
+  if [ -n "$A" ]; then
+    echo "::add-mask::$1"
+  fi
+}
+
+SetOutput()
+{
+  if [ -n "$A" ]; then
+    echo "::set-output name=$1::${@:2}"
+  fi
+}
+
+
+Group()
+{
+  if [ -n "$A" ]; then
+    echo "::group::${@}"
+  else
+    echo "*** $@"
+  fi
+}
+
+EndGroup()
+{
+  if [ -n "$A" ]; then
+    echo "::endgroup::"
+  fi
+}
+
+
+CreatePullRequest()
+{
+  local draft
+  local current
+  local repo=( )
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      -d)
+        D=-d
+        shift;;
+      -r|--repo)
+        if [ $# -lt 2 ]; then
+          Error repository name missing
+        fi
+        repo=( --repo "$2" )
+        shift 2;;
+      -*)
+        Error invalid option "$1";;
+      *) break;;
+    esac
+  done
+  current="$(git branch --show-current)"
+
+  echo "creating pull request $2 -> $1"
+  echo "gh pr create ${repo[@]} -B \"$1\" $draft --fill -t \"upgrade $(basename "$1"): ${@:3}\" -H $$2"
+
+  # problem with gh
+  # local copy of remote branch must exist
+  git checkout -b "$2"
+  gh pr create "${repo[@]}" -B "$1" $draft --fill -t "upgrade $(basename "$1"): ${@:3}" -H "$2"
+  git checkout "$current"
+  git branch -d "$2"
+}

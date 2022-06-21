@@ -1,0 +1,158 @@
+#!/bin/bash -e
+
+DIR=$(dirname $(readlink -f ${BASH_SOURCE[0]}))
+echo bindir: "$DIR"
+source "$DIR/lib/github"
+
+echo "commandline: $@"
+
+product=
+repo=( )
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -o)
+      A=-o
+      shift;;
+    -p)
+      if [ $# -lt 2 ]; then
+        Error product source missing
+      fi
+      product="$2"
+      shift 2;;
+    -r|--repo)
+      if [ $# -lt 2 ]; then
+        Error repository name missing
+      fi
+      repo=( --repo "$2" )
+      shift 2;;
+    -*)
+      Error invalid option $1;;
+    *) break;;
+  esac
+done
+
+
+split()
+{
+  if [ "${1#*/}" == "$1" ]; then
+    return 1
+  fi
+  if [ "${1#*//}" == "$1" ]; then
+    productrepo="${1%%/*}"
+    productcomp="${1#*/}"
+  else
+    productrepo="${1%//*}"
+    productcomp="${1#*//}"
+  fi
+}
+
+createDelivery()
+{
+  if [ -z "$product" ]; then
+    Error "product repo required to create delivery branch"
+  fi
+  Group "Creating delivery branch"
+
+  split "$product"
+  echo repo=$productrepo
+  echo comp=$productcomp
+
+  echo "preparing local branch"
+  git checkout --orphan "$src"
+  git rm -r --cached .
+  cat >.gitignore <<EOF
+*.sw[pq]
+/local
+EOF
+  git clean -fd
+  cat >.gitignore <<EOF
+*.sw[pq]
+/local
+EOF
+  cat >README.md <<EOF
+This is the delivery branch to import new deliveries from the provider.
+It can then be used to trigger upgrades for any connected landscapes.
+EOF
+  rm -rf .github
+  cat >.product <<EOF
+productrepo=$productrepo
+productcomp=$productcomp
+productvers=none
+EOF
+  echo "preparing initial version of toolset"
+  cp -r "$DIR/github/" .github
+  mkdir -p bin/lib
+  cp "$DIR/validate" "$DIR/upgrade" "$DIR/setup" "$DIR/fetch" bin
+  cp "$DIR/lib/github" bin/lib
+  ls -Rx bin
+  echo "pushing common initial commit"
+  git add .
+  git commit -m "Setup delivery branch for imported releases"
+  git push --set-upstream origin "$src" 
+  EndGroup
+
+  "$DIR/fetch" -p $A
+}
+
+
+
+
+name="${1:-prod}"
+delivery="${2:-delivery}"
+prefix="$3"
+if [ -n "$prefix" ]; then
+  prefix="${prefix%/}/"
+fi
+
+echo "setup landscape"
+echo "branch is   $prefix $name"
+echo "delivery is $prefix $delivery"
+
+tgt="${prefix}$name"
+src="${prefix}$delivery"
+
+if [ "$(basename "$DIR")" != "local" ]; then
+  if [ ! -e local ]; then
+    echo saving toolset
+    cp -r "$DIR" local
+    DIR=local
+  fi
+fi
+
+echo checking target branch $src
+git fetch origin "$tgt" || true
+if git show-ref -q "origin/$tgt"; then
+  Error "branch origin/$tgt already exists"
+fi
+
+echo checking delivery branch $src
+git fetch origin "$src" || true
+if ! git show-ref -q "origin/$src"; then
+   createDelivery
+else
+   echo "delivery branch already exists"
+fi
+
+cat >.gitignore <<EOF
+/local
+EOF
+
+Group "Setup initial delivery snapshot $init"
+init="$(git log "origin/$src" --pretty=format:"%h" | tail -1)"
+
+echo "checking out initial delivery snapshot $init"
+git checkout -b "$tgt" "$init"
+
+
+echo "preparing new landscape"
+touch .landscape
+cat >README.md <<EOF
+This is the new landscape $name
+EOF
+git add .
+git commit -m "landscape creation $name"
+git push origin "HEAD:$tgt"
+EndGroup
+
+echo "preparing initial configuration pull request"
+"$DIR/upgrade" $A "${repo[@]}"  "$tgt" "$src"

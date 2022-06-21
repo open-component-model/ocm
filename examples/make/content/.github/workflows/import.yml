@@ -1,0 +1,32 @@
+name: Import Product Version
+"on": [workflow_dispatch]
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.TOOL || secrets.GITHUB_TOKEN }}
+      uses: actions/checkout@v2
+    - name: setup git config
+      run: |
+        git config user.name "Upgrade Bot"
+        git config user.email "<>"
+    - name: Setup ocm
+      id: ocm
+      uses: mandelsoft/ocm-setup@master
+      with:
+        version: demo
+        repo: mandelsoft/ocm
+    - name: Fetch
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOOL || secrets.GITHUB_TOKEN }}
+        REPO_AUTH: ${{ secrets.OCM }}
+      run: |
+        echo "${{ github.event }}"
+        echo "OCM: ${{ steps.ocm.outputs.ocm-path }}"
+        bin/fetch -o -p
+
+
+
