@@ -132,13 +132,13 @@ func prepare(v interface{}, ex ExcludeRules) (interface{}, error) {
 func prepareStruct(v map[string]interface{}, ex ExcludeRules) ([]Entry, error) {
 	entries := Entries{}
 	for key, value := range v {
-		mapped, prop := ex.Field(key, value)
-		if mapped != "" {
-			nested, err := prepare(value, prop)
+		name, mapped, prop := ex.Field(key, value)
+		if name != "" {
+			nested, err := prepare(mapped, prop)
 			if err != nil {
 				return nil, errors.Wrapf(err, "field %q", key)
 			}
-			entries.Add(mapped, nested)
+			entries.Add(name, nested)
 		}
 	}
 	// sort the entries based on the key
@@ -151,9 +151,9 @@ func prepareStruct(v map[string]interface{}, ex ExcludeRules) ([]Entry, error) {
 func prepareArray(v []interface{}, ex ExcludeRules) ([]interface{}, error) {
 	entries := []interface{}{}
 	for index, value := range v {
-		exclude, prop := ex.Element(value)
+		exclude, mapped, prop := ex.Element(value)
 		if !exclude {
-			nested, err := prepare(value, prop)
+			nested, err := prepare(mapped, prop)
 			if err != nil {
 				return nil, errors.Wrapf(err, "entry %d", index)
 			}

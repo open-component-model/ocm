@@ -15,19 +15,16 @@
 package compdescv3
 
 import (
-	"encoding/json"
-
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	meta "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud/v3/jsonscheme"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const SchemaVersion = "v3"
-const GroupVersion = meta.GROUP + "/" + SchemaVersion
-const Kind = meta.KIND
+const GroupVersion = metav1.GROUP + "/" + SchemaVersion
+const Kind = metav1.KIND
 
 func init() {
 	compdesc.RegisterScheme(&DescriptorVersion{})
@@ -87,28 +84,12 @@ func (v *DescriptorVersion) ConvertTo(obj compdesc.ComponentDescriptorVersion) (
 		return nil, errors.ErrInvalid("kind", in.Kind)
 	}
 
-	var provider metav1.ProviderType
-	if len(in.Provider.Labels) == 0 {
-		provider = metav1.ProviderType(in.Provider.Name)
-	} else {
-		d, err := json.Marshal(in.Provider)
-		if err != nil {
-			return nil, errors.Wrapf(err, "cannot marshal provider")
-		}
-		provider = metav1.ProviderType(d)
-	}
-
 	defer compdesc.CatchConversionError(&err)
 	out = &compdesc.ComponentDescriptor{
 		Metadata: compdesc.Metadata{in.APIVersion},
 		ComponentSpec: compdesc.ComponentSpec{
-			ObjectMeta: compdesc.ObjectMeta{
-				Name:    in.Name,
-				Version: in.Version,
-				Labels:  in.Labels.Copy(),
-			},
+			ObjectMeta:         *in.ObjectMeta.Copy(),
 			RepositoryContexts: in.RepositoryContexts.Copy(),
-			Provider:           provider,
 			Sources:            convert_Sources_to(in.Spec.Sources),
 			Resources:          convert_Resources_to(in.Spec.Resources),
 			References:         convert_References_to(in.Spec.References),
@@ -237,25 +218,12 @@ func (v *DescriptorVersion) ConvertFrom(in *compdesc.ComponentDescriptor) (compd
 	if in == nil {
 		return nil, nil
 	}
-	var provider meta.Provider
-
-	err := json.Unmarshal([]byte(in.Provider), &provider)
-	if err != nil {
-		provider.Labels = metav1.Labels{}
-		provider.Name = string(in.Provider)
-	}
-
 	out := &ComponentDescriptor{
-		TypeMeta: meta.TypeMeta{
+		TypeMeta: metav1.TypeMeta{
 			APIVersion: GroupVersion,
 			Kind:       Kind,
 		},
-		ObjectMeta: meta.ObjectMeta{
-			Name:     in.Name,
-			Version:  in.Version,
-			Labels:   in.Labels.Copy(),
-			Provider: provider,
-		},
+		ObjectMeta:         *in.ObjectMeta.Copy(),
 		RepositoryContexts: in.RepositoryContexts.Copy(),
 		Spec: ComponentVersionSpec{
 			Sources:    convert_Sources_from(in.Sources),

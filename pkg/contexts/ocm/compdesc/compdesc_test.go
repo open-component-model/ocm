@@ -15,6 +15,8 @@
 package compdesc_test
 
 import (
+	"fmt"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	compdescv3 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud/v3"
@@ -172,7 +174,7 @@ spec:
 		data, err := compdesc.Encode(cd)
 		Expect(err).To(Succeed())
 
-		//fmt.Printf("%s\n", string(data))
+		fmt.Printf("%s\n", string(data))
 
 		Expect(string(data)).To(Equal(CDv3))
 
@@ -181,6 +183,5 @@ spec:
 		cd2, err := compdesc.Decode(data)
 		Expect(err).To(Succeed())
 		Expect(cd2).To(Equal(cd))
-
 	})
 })

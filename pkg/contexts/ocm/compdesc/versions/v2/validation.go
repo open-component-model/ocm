@@ -140,7 +140,7 @@ func ValidateResource(fldPath *field.Path, res Resource, access bool) field.Erro
 	return allErrs
 }
 
-func validateProvider(fldPath *field.Path, provider v1.ProviderType) *field.Error {
+func validateProvider(fldPath *field.Path, provider v1.ProviderName) *field.Error {
 	if len(provider) == 0 {
 		return field.Required(fldPath, "provider must be set")
 	}

@@ -16,8 +16,8 @@ package signing
 
 // ExcludeRules defines the rules for normalization excludes
 type ExcludeRules interface {
-	Field(name string, value interface{}) (string, ExcludeRules)
-	Element(v interface{}) (bool, ExcludeRules)
+	Field(name string, value interface{}) (string, interface{}, ExcludeRules)
+	Element(v interface{}) (bool, interface{}, ExcludeRules)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -26,12 +26,12 @@ type NoExcludes struct{}
 
 var _ ExcludeRules = NoExcludes{}
 
-func (r NoExcludes) Field(name string, value interface{}) (string, ExcludeRules) {
-	return name, r
+func (r NoExcludes) Field(name string, value interface{}) (string, interface{}, ExcludeRules) {
+	return name, value, r
 }
 
-func (r NoExcludes) Element(v interface{}) (bool, ExcludeRules) {
-	return false, r
+func (r NoExcludes) Element(value interface{}) (bool, interface{}, ExcludeRules) {
+	return false, value, r
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -40,18 +40,18 @@ type MapIncludes map[string]ExcludeRules
 
 var _ ExcludeRules = MapIncludes{}
 
-func (r MapIncludes) Field(name string, value interface{}) (string, ExcludeRules) {
+func (r MapIncludes) Field(name string, value interface{}) (string, interface{}, ExcludeRules) {
 	c, ok := r[name]
 	if ok {
 		if c == nil {
 			c = NoExcludes{}
 		}
-		return name, c
+		return name, value, c
 	}
-	return "", nil
+	return "", nil, nil
 }
 
-func (r MapIncludes) Element(v interface{}) (bool, ExcludeRules) {
+func (r MapIncludes) Element(v interface{}) (bool, interface{}, ExcludeRules) {
 	panic("invalid exclude structure, require arry but found struct rules")
 }
 
@@ -61,26 +61,30 @@ type MapExcludes map[string]ExcludeRules
 
 var _ ExcludeRules = MapExcludes{}
 
-func (r MapExcludes) Field(name string, value interface{}) (string, ExcludeRules) {
+func (r MapExcludes) Field(name string, value interface{}) (string, interface{}, ExcludeRules) {
 	c, ok := r[name]
 	if ok {
 		if c == nil {
-			return "", nil
+			return "", nil, nil
 		}
 	} else {
 		c = NoExcludes{}
 	}
-	return name, c
+	return name, value, c
 }
 
-func (r MapExcludes) Element(v interface{}) (bool, ExcludeRules) {
+func (r MapExcludes) Element(value interface{}) (bool, interface{}, ExcludeRules) {
 	panic("invalid exclude structure, require arry but found struct rules")
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type ValueMapper func(v interface{}) interface{}
+type ValueChecker func(value interface{}) bool
+
 type DynamicInclude struct {
 	ValueChecker ValueChecker
+	ValueMapper  ValueMapper
 	Continue     ExcludeRules
 	Name         string
 }
@@ -93,7 +97,7 @@ type DynamicMapIncludes map[string]*DynamicInclude
 
 var _ ExcludeRules = DynamicMapIncludes{}
 
-func (r DynamicMapIncludes) Field(name string, value interface{}) (string, ExcludeRules) {
+func (r DynamicMapIncludes) Field(name string, value interface{}) (string, interface{}, ExcludeRules) {
 	e, ok := r[name]
 	if ok && e.Check(value) {
 		var c ExcludeRules = NoExcludes{}
@@ -104,13 +108,16 @@ func (r DynamicMapIncludes) Field(name string, value interface{}) (string, Exclu
 			if e.Continue != nil {
 				c = e.Continue
 			}
+			if e.ValueMapper != nil {
+				value = e.ValueMapper(value)
+			}
 		}
-		return name, c
+		return name, value, c
 	}
-	return "", nil
+	return "", nil, nil
 }
 
-func (r DynamicMapIncludes) Element(v interface{}) (bool, ExcludeRules) {
+func (r DynamicMapIncludes) Element(value interface{}) (bool, interface{}, ExcludeRules) {
 	panic("invalid exclude structure, require arry but found struct rules")
 }
 
@@ -118,6 +125,7 @@ func (r DynamicMapIncludes) Element(v interface{}) (bool, ExcludeRules) {
 
 type DynamicExclude struct {
 	ValueChecker ValueChecker
+	ValueMapper  ValueMapper
 	Continue     ExcludeRules
 	Name         string
 }
@@ -128,16 +136,14 @@ func (r *DynamicExclude) Check(value interface{}) bool {
 
 type DynamicMapExcludes map[string]*DynamicExclude
 
-type ValueChecker func(value interface{}) bool
-
 var _ ExcludeRules = DynamicMapExcludes{}
 
-func (r DynamicMapExcludes) Field(name string, value interface{}) (string, ExcludeRules) {
+func (r DynamicMapExcludes) Field(name string, value interface{}) (string, interface{}, ExcludeRules) {
 	var c ExcludeRules
 	e, ok := r[name]
 	if ok {
 		if e.Check(value) {
-			return "", nil
+			return "", nil, nil
 		}
 		if e.Name != "" {
 			name = e.Name
@@ -146,10 +152,13 @@ func (r DynamicMapExcludes) Field(name string, value interface{}) (string, Exclu
 	} else {
 		c = NoExcludes{}
 	}
-	return name, c
+	if e != nil && e.ValueMapper != nil {
+		value = e.ValueMapper(value)
+	}
+	return name, value, c
 }
 
-func (r DynamicMapExcludes) Element(v interface{}) (bool, ExcludeRules) {
+func (r DynamicMapExcludes) Element(value interface{}) (bool, interface{}, ExcludeRules) {
 	panic("invalid exclude structure, require arry but found struct rules")
 }
 
@@ -157,21 +166,25 @@ func (r DynamicMapExcludes) Element(v interface{}) (bool, ExcludeRules) {
 
 type DynamicArrayExcludes struct {
 	ValueChecker ValueChecker
+	ValueMapper  ValueMapper
 	Continue     ExcludeRules
 }
 
 var _ ExcludeRules = DynamicArrayExcludes{}
 
-func (r DynamicArrayExcludes) Field(name string, value interface{}) (string, ExcludeRules) {
+func (r DynamicArrayExcludes) Field(name string, value interface{}) (string, interface{}, ExcludeRules) {
 	panic("invalid exclude structure, require struct but found array rules")
 }
 
-func (r DynamicArrayExcludes) Element(v interface{}) (bool, ExcludeRules) {
-	excl := r.Check(v)
-	if excl || r.Continue != nil {
-		return excl, r.Continue
+func (r DynamicArrayExcludes) Element(value interface{}) (bool, interface{}, ExcludeRules) {
+	excl := r.Check(value)
+	if !excl && r.ValueMapper != nil {
+		value = r.ValueMapper(value)
 	}
-	return false, NoExcludes{}
+	if excl || r.Continue != nil {
+		return excl, value, r.Continue
+	}
+	return false, value, NoExcludes{}
 }
 
 func (r DynamicArrayExcludes) Check(value interface{}) bool {
@@ -181,17 +194,17 @@ func (r DynamicArrayExcludes) Check(value interface{}) bool {
 ////////////////////////////////////////////////////////////////////////////////
 
 type ArrayExcludes struct {
-	Elements ExcludeRules
+	Continue ExcludeRules
 }
 
 var _ ExcludeRules = ArrayExcludes{}
 
-func (r ArrayExcludes) Field(name string, value interface{}) (string, ExcludeRules) {
+func (r ArrayExcludes) Field(name string, value interface{}) (string, interface{}, ExcludeRules) {
 	panic("invalid exclude structure, require struct but found array rules")
 }
 
-func (r ArrayExcludes) Element(v interface{}) (bool, ExcludeRules) {
-	return false, r.Elements
+func (r ArrayExcludes) Element(value interface{}) (bool, interface{}, ExcludeRules) {
+	return false, value, r.Continue
 }
 
 ////////////////////////////////////////////////////////////////////////////////

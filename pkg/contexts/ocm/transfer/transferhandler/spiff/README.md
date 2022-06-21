@@ -19,7 +19,9 @@ following bindings:
   - `component` *&lt;map>*:  the meta dats of the component version carrying the resource
     - `name` *&lt;string>*: component name
     - `version` *&lt;string>*: component version
-    - `provider` *&lt;string>*: provider name
+    - `provider` *&lt;provider>*: provider info, a struct with the field s
+      - `name` *&lt;string>*: provider name
+      - `labels` *&lt;map[string]any>*: provider attributes
     - `labels` *&lt;map[string]>*: labels of the component version (deep)
   - `element` *&lt;map>*:  the meta data of the resource and the field `type` containing the element type.
   - `access` *&lt;map>*:  the access specification of the resource

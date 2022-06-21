@@ -12,24 +12,41 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package compdescv3
+// Package jsonv2 provides a normalization which is completely based on the
+// abstract (internal) version of the component descriptor and is therefore
+// agnostic of the final serialization format. Signatures using this algorithm
+// can be transferred among different schema versions, as long as is able to
+// handle the complete information using for the normalization.
+// Older format might omit some info, therefore the signatures cannot be
+// validated for such representations, if the original component descriptor
+// has used such parts.
+package jsonv2
 
 import (
-	"fmt"
-
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/signing"
 )
+
+const Algorithm = compdesc.JsonNormalisationV2
+
+func init() {
+	compdesc.Normalizations.Register(Algorithm, normalization{})
+}
+
+type normalization struct{}
+
+func (m normalization) Normalize(cd *compdesc.ComponentDescriptor) ([]byte, error) {
+	data, err := signing.Normalize(cd, CDExcludes)
+	return data, err
+}
 
 // CDExcludes describes the fields relevant for Signing
 // ATTENTION: if changed, please adapt the HashEqual Functions
 // in the generic part, accordingly
 var CDExcludes = signing.MapExcludes{
-	"repositoryContexts": nil,
-	"metadata": signing.MapExcludes{
-		"labels": nil,
-	},
-	"spec": signing.MapExcludes{
+	"meta": nil,
+	"component": signing.MapExcludes{
+		"repositoryContexts": nil,
 		"resources": signing.DynamicArrayExcludes{
 			ValueChecker: signing.IgnoreResourcesWithNoneAccess,
 			Continue: signing.MapExcludes{
@@ -52,13 +69,4 @@ var CDExcludes = signing.MapExcludes{
 		},
 	},
 	"signatures": nil,
-}
-
-func (cd *ComponentDescriptor) Normalize(normAlgo string) ([]byte, error) {
-	if normAlgo != compdesc.JsonNormalisationV1 {
-		return nil, fmt.Errorf("unsupported cd normalization %q", normAlgo)
-	}
-	data, err := signing.Normalize(cd, CDExcludes)
-	//fmt.Printf("**** normalized:\n %s\n", string(data))
-	return data, err
 }

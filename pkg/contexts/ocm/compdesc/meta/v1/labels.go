@@ -31,6 +31,26 @@ type Label struct {
 	Value json.RawMessage `json:"value"`
 }
 
+func NewLabel(name string, value interface{}) (*Label, error) {
+	var data []byte
+	var err error
+	var ok bool
+
+	if data, ok = value.([]byte); ok {
+		var v interface{}
+		err = json.Unmarshal(data, &v)
+		if err != nil {
+			return nil, errors.ErrInvalid("label value", string(data), name)
+		}
+	} else {
+		data, err = json.Marshal(value)
+		if err != nil {
+			return nil, errors.ErrInvalid("label value", "<object>", name)
+		}
+	}
+	return &Label{name, data}, nil
+}
+
 // Labels describe a list of labels
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
@@ -47,32 +67,17 @@ func (l Labels) Get(name string) ([]byte, bool) {
 }
 
 func (l *Labels) Set(name string, value interface{}) error {
-	var data []byte
-	var err error
-	var ok bool
-
-	if data, ok = value.([]byte); ok {
-		var v interface{}
-		err = json.Unmarshal(data, &v)
-		if err != nil {
-			return errors.ErrInvalid("label value", string(data), name)
-		}
-	} else {
-		data, err = json.Marshal(value)
-		if err != nil {
-			return errors.ErrInvalid("label value", "<object>", name)
-		}
+	new, err := NewLabel(name, value)
+	if err != nil {
+		return err
 	}
 	for _, label := range *l {
 		if label.Name == name {
-			label.Value = data
+			label.Value = new.Value
 			return nil
 		}
 	}
-	*l = append(*l, Label{
-		Name:  name,
-		Value: data,
-	})
+	*l = append(*l, *new)
 	return nil
 }
 
@@ -84,6 +89,19 @@ func (l *Labels) Remove(name string) bool {
 		}
 	}
 	return false
+}
+
+// AsMap return an unmarshalled map representation
+func (l *Labels) AsMap() map[string]interface{} {
+	labels := map[string]interface{}{}
+	if l != nil {
+		for _, label := range *l {
+			var m interface{}
+			json.Unmarshal(label.Value, &m)
+			labels[label.Name] = m
+		}
+	}
+	return labels
 }
 
 // Copy copies labels

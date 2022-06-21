@@ -19,7 +19,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	meta "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -31,9 +30,9 @@ var (
 type ComponentDescriptor struct {
 
 	// TypeMeta specifies the schema version of the component.
-	meta.TypeMeta `json:",inline"`
+	metav1.TypeMeta `json:",inline"`
 	// Spec contains the specification of the component.
-	meta.ObjectMeta `json:"metadata"`
+	metav1.ObjectMeta `json:"metadata"`
 
 	// RepositoryContexts defines the previous repositories of the component
 	RepositoryContexts runtime.UnstructuredTypedObjectList `json:"repositoryContexts"`

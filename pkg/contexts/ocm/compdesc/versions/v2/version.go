@@ -15,6 +15,8 @@
 package compdesc
 
 import (
+	"encoding/json"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2/jsonscheme"
@@ -80,16 +82,23 @@ func (v *DescriptorVersion) ConvertTo(obj compdesc.ComponentDescriptorVersion) (
 	}
 
 	defer compdesc.CatchConversionError(&err)
+	var provider metav1.Provider
+	err = json.Unmarshal([]byte(in.Provider), &provider)
+	if err != nil {
+		provider.Name = in.Provider
+		provider.Labels = nil
+	}
+
 	out = &compdesc.ComponentDescriptor{
 		Metadata: compdesc.Metadata{in.Metadata.Version},
 		ComponentSpec: compdesc.ComponentSpec{
-			ObjectMeta: compdesc.ObjectMeta{
-				Name:    in.Name,
-				Version: in.Version,
-				Labels:  in.Labels.Copy(),
+			ObjectMeta: metav1.ObjectMeta{
+				Name:     in.Name,
+				Version:  in.Version,
+				Labels:   in.Labels.Copy(),
+				Provider: provider,
 			},
 			RepositoryContexts: in.RepositoryContexts.Copy(),
-			Provider:           in.Provider,
 			Sources:            convert_Sources_to(in.Sources),
 			Resources:          convert_Resources_to(in.Resources),
 			References:         convert_ComponentReferences_to(in.ComponentReferences),
@@ -218,6 +227,14 @@ func (v *DescriptorVersion) ConvertFrom(in *compdesc.ComponentDescriptor) (compd
 	if in == nil {
 		return nil, nil
 	}
+	provider := in.Provider.Name
+	if len(in.Provider.Labels) != 0 {
+		data, err := json.Marshal(in.Provider)
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot marshal provider")
+		}
+		provider = metav1.ProviderName(data)
+	}
 	out := &ComponentDescriptor{
 		Metadata: metav1.Metadata{
 			SchemaVersion,
@@ -229,7 +246,7 @@ func (v *DescriptorVersion) ConvertFrom(in *compdesc.ComponentDescriptor) (compd
 				Labels:  in.Labels.Copy(),
 			},
 			RepositoryContexts:  in.RepositoryContexts.Copy(),
-			Provider:            in.Provider,
+			Provider:            provider,
 			Sources:             convert_Sources_from(in.Sources),
 			Resources:           convert_Resources_from(in.Resources),
 			ComponentReferences: convert_ComponentReferences_from(in.References),

@@ -128,7 +128,7 @@ func map_get_regular_output(e interface{}) interface{} {
 	if p.Spec.Version != nil {
 		tag = *p.Spec.Version
 	}
-	return []string{p.Spec.Component, tag, string(p.ComponentVersion.GetDescriptor().Provider)}
+	return []string{p.Spec.Component, tag, string(p.ComponentVersion.GetDescriptor().Provider.Name)}
 }
 
 func map_get_wide_output(e interface{}) interface{} {

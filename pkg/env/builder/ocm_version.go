@@ -50,7 +50,7 @@ func (b *Builder) Version(name string, f ...func()) {
 		}
 	}
 	b.failOn(err)
-	v.GetDescriptor().Provider = metav1.ProviderType("ACME")
+	v.GetDescriptor().Provider.Name = metav1.ProviderName("ACME")
 	b.configure(&ocm_version{ComponentVersionAccess: v}, f)
 }
 

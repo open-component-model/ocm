@@ -33,16 +33,16 @@ var CDExcludes = signing.MapExcludes{
 	"component": signing.MapExcludes{
 		"repositoryContexts": nil,
 		"resources": signing.DynamicArrayExcludes{
-			signing.IgnoreResourcesWithAccessType("localBlob"),
-			signing.MapExcludes{
+			ValueChecker: signing.IgnoreResourcesWithAccessType("localBlob"),
+			Continue: signing.MapExcludes{
 				"access": nil,
 				"labels": nil,
 				"srcRef": nil,
 			},
 		},
 		"sources": signing.DynamicArrayExcludes{
-			signing.IgnoreResourcesWithNoneAccess,
-			signing.MapExcludes{
+			ValueChecker: signing.IgnoreResourcesWithNoneAccess,
+			Continue: signing.MapExcludes{
 				"access": nil,
 				"labels": nil,
 			},
@@ -82,14 +82,14 @@ var _ = Describe("normalization", func() {
 		},
 		ComponentSpec: compdesc.ComponentSpec{
 			ObjectMeta: compdesc.ObjectMeta{
-				Name:    "test",
-				Version: "1",
-				Labels:  labels,
+				Name:     "test",
+				Version:  "1",
+				Labels:   labels,
+				Provider: compdesc.Provider{Name: "provider"},
 			},
 			RepositoryContexts: []*runtime.UnstructuredTypedObject{
 				unstr,
 			},
-			Provider:   "provider",
 			Sources:    nil,
 			References: nil,
 			Resources: compdesc.Resources{
@@ -162,7 +162,9 @@ var _ = Describe("normalization", func() {
       }
     ]
     name: test
-    provider: provider
+    provider: {
+      name: provider
+    }
     repositoryContexts: [
       {
         attr: value
@@ -252,7 +254,9 @@ var _ = Describe("normalization", func() {
       }
     ]
     name: test
-    provider: provider
+    provider: {
+      name: provider
+    }
     resources: [
       {
         access: {
@@ -340,7 +344,9 @@ var _ = Describe("normalization", func() {
       }
     ]
     name: test
-    provider: provider
+    provider: {
+      name: provider
+    }
     repositoryContexts: [
       {
         attr: value
@@ -395,8 +401,8 @@ var _ = Describe("normalization", func() {
 		entries, err := signing.PrepareNormalization(cd, signing.MapExcludes{
 			"component": signing.MapExcludes{
 				"resources": signing.DynamicArrayExcludes{
-					signing.IgnoreResourcesWithAccessType("localBlob"),
-					signing.MapExcludes{
+					ValueChecker: signing.IgnoreResourcesWithAccessType("localBlob"),
+					Continue: signing.MapExcludes{
 						"access": nil,
 					},
 				},
@@ -424,7 +430,9 @@ var _ = Describe("normalization", func() {
       }
     ]
     name: test
-    provider: provider
+    provider: {
+      name: provider
+    }
     repositoryContexts: [
       {
         attr: value
@@ -475,7 +483,9 @@ var _ = Describe("normalization", func() {
       }
     ]
     name: test
-    provider: provider
+    provider: {
+      name: provider
+    }
     resources: [
       {
         name: elem1

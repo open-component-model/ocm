@@ -16,8 +16,7 @@ package compdescv3
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	meta "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
@@ -76,7 +75,7 @@ func ValidateObjectMeta(fldPath *field.Path, om compdesc.ObjectMetaAccessor) fie
 		allErrs = append(allErrs, field.Required(fldPath.Child("version"), "must specify a version"))
 	}
 	if len(om.GetLabels()) != 0 {
-		allErrs = append(allErrs, v1.ValidateLabels(fldPath.Child("labels"), om.GetLabels())...)
+		allErrs = append(allErrs, metav1.ValidateLabels(fldPath.Child("labels"), om.GetLabels())...)
 	}
 	return allErrs
 }
@@ -112,7 +111,7 @@ func ValidateSource(fldPath *field.Path, src Source, access bool) field.ErrorLis
 	if src.Access == nil && access {
 		allErrs = append(allErrs, field.Required(fldPath.Child("access"), "must specify a access"))
 	}
-	allErrs = append(allErrs, v1.ValidateIdentity(fldPath.Child("extraIdentity"), src.ExtraIdentity)...)
+	allErrs = append(allErrs, metav1.ValidateIdentity(fldPath.Child("extraIdentity"), src.ExtraIdentity)...)
 	return allErrs
 }
 
@@ -121,12 +120,12 @@ func ValidateResource(fldPath *field.Path, res Resource, access bool) field.Erro
 	allErrs := field.ErrorList{}
 	allErrs = append(allErrs, ValidateObjectMeta(fldPath, &res)...)
 
-	if err := v1.ValidateRelation(fldPath.Child("relation"), res.Relation); err != nil {
+	if err := metav1.ValidateRelation(fldPath.Child("relation"), res.Relation); err != nil {
 		allErrs = append(allErrs, err)
 	}
 
-	if !v1.IsIdentity(res.Name) {
-		allErrs = append(allErrs, field.Invalid(fldPath.Child("name"), res.Name, v1.IdentityKeyValidationErrMsg))
+	if !metav1.IsIdentity(res.Name) {
+		allErrs = append(allErrs, field.Invalid(fldPath.Child("name"), res.Name, metav1.IdentityKeyValidationErrMsg))
 	}
 
 	if len(res.GetType()) == 0 {
@@ -136,11 +135,11 @@ func ValidateResource(fldPath *field.Path, res Resource, access bool) field.Erro
 	if res.Access == nil && access {
 		allErrs = append(allErrs, field.Required(fldPath.Child("access"), "must specify a access"))
 	}
-	allErrs = append(allErrs, v1.ValidateIdentity(fldPath.Child("extraIdentity"), res.ExtraIdentity)...)
+	allErrs = append(allErrs, metav1.ValidateIdentity(fldPath.Child("extraIdentity"), res.ExtraIdentity)...)
 	return allErrs
 }
 
-func validateProvider(fldPath *field.Path, provider meta.Provider) *field.Error {
+func validateProvider(fldPath *field.Path, provider metav1.Provider) *field.Error {
 	if len(provider.Name) == 0 {
 		return field.Required(fldPath.Child("name"), "provider name must be set")
 	}
@@ -186,7 +185,7 @@ func ValidateResources(fldPath *field.Path, resources Resources, componentVersio
 		allErrs = append(allErrs, ValidateResource(localPath, res, true)...)
 
 		// only validate the component version if it is defined
-		if res.Relation == v1.LocalRelation && len(componentVersion) != 0 {
+		if res.Relation == metav1.LocalRelation && len(componentVersion) != 0 {
 			if res.GetVersion() != componentVersion {
 				allErrs = append(allErrs, field.Invalid(localPath.Child("version"), "invalid version",
 					"version of local resources must match the component version"))
@@ -211,7 +210,7 @@ func ValidateSourceRefs(fldPath *field.Path, srcs []SourceRef) field.ErrorList {
 	allErrs := field.ErrorList{}
 	for i, src := range srcs {
 		localPath := fldPath.Index(i)
-		if err := v1.ValidateLabels(localPath.Child("labels"), src.Labels); err != nil {
+		if err := metav1.ValidateLabels(localPath.Child("labels"), src.Labels); err != nil {
 			allErrs = append(allErrs, err...)
 		}
 	}

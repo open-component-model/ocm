@@ -24,13 +24,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing"
 )
 
-// NormalisationAlgorithm types and versions the algorithm used for digest generation.
-type NormalisationAlgorithm = string
-
-const (
-	JsonNormalisationV1 NormalisationAlgorithm = "jsonNormalisation/v1"
-)
-
 const (
 	KIND_HASH_ALGORITHM   = "hash algorithm"
 	KIND_SIGN_ALGORITHM   = "signing algorithm"
@@ -59,20 +52,6 @@ func (cd *ComponentDescriptor) isNormalizeable() error {
 		}
 	}
 	return nil
-}
-
-func Normalize(cd *ComponentDescriptor, normAlgo string) ([]byte, error) {
-	cv := DefaultSchemes[cd.SchemaVersion()]
-	if cv == nil {
-		if cv == nil {
-			return nil, errors.ErrNotSupported(errors.KIND_SCHEMAVERSION, cd.SchemaVersion())
-		}
-	}
-	v, err := cv.ConvertFrom(cd)
-	if err != nil {
-		return nil, err
-	}
-	return v.Normalize(normAlgo)
 }
 
 // Hash return the hash for the component-descriptor, if it is normalizeable

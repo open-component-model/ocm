@@ -27,6 +27,9 @@ var (
 	NotFound = errors.ErrNotFound()
 )
 
+type ObjectMeta = metav1.ObjectMeta
+type Provider = metav1.Provider
+
 const ComponentDescriptorFileName = "component-descriptor.yaml"
 
 // Metadata defines the configured metadata of the component descriptor.
@@ -54,11 +57,13 @@ func New(name, version string) *ComponentDescriptor {
 			ConfiguredVersion: "v2",
 		},
 		ComponentSpec: ComponentSpec{
-			ObjectMeta: ObjectMeta{
+			ObjectMeta: metav1.ObjectMeta{
 				Name:    name,
 				Version: version,
+				Provider: metav1.Provider{
+					Name: "acme",
+				},
 			},
-			Provider: "acme",
 		},
 	})
 }
@@ -72,9 +77,8 @@ func (c *ComponentDescriptor) Copy() *ComponentDescriptor {
 	out := &ComponentDescriptor{
 		Metadata: c.Metadata,
 		ComponentSpec: ComponentSpec{
-			ObjectMeta:         c.ObjectMeta.Copy(),
+			ObjectMeta:         *c.ObjectMeta.Copy(),
 			RepositoryContexts: c.RepositoryContexts.Copy(),
-			Provider:           c.Provider,
 			Sources:            c.Sources.Copy(),
 			References:         c.References.Copy(),
 			Resources:          c.Resources.Copy(),
@@ -85,7 +89,8 @@ func (c *ComponentDescriptor) Copy() *ComponentDescriptor {
 }
 
 func (c *ComponentDescriptor) Reset() {
-	c.Provider = ""
+	c.Provider.Name = ""
+	c.Provider.Labels = nil
 	c.Resources = nil
 	c.Sources = nil
 	c.References = nil
@@ -100,67 +105,15 @@ func (c *ComponentDescriptor) Reset() {
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
 type ComponentSpec struct {
-	ObjectMeta `json:",inline"`
+	metav1.ObjectMeta `json:",inline"`
 	// RepositoryContexts defines the previous repositories of the component
 	RepositoryContexts runtime.UnstructuredTypedObjectList `json:"repositoryContexts"`
-	// Provider defines the provider type of a component.
-	// It can be external or internal.
-	Provider metav1.ProviderType `json:"provider"`
 	// Sources defines sources that produced the component
 	Sources Sources `json:"sources"`
 	// References references component dependencies that can be resolved in the current context.
 	References References `json:"componentReferences"`
 	// Resources defines all resources that are created by the component and by a third party.
 	Resources Resources `json:"resources"`
-}
-
-// ObjectMeta defines a object that is uniquely identified by its name and version.
-// +k8s:deepcopy-gen=true
-type ObjectMeta struct {
-	// Name is the context unique name of the object.
-	Name string `json:"name"`
-	// Version is the semver version of the object.
-	Version string `json:"version"`
-	// Labels defines an optional set of additional labels
-	// describing the object.
-	// +optional
-	Labels metav1.Labels `json:"labels,omitempty"`
-}
-
-// GetName returns the name of the object.
-func (o ObjectMeta) GetName() string {
-	return o.Name
-}
-
-// SetName sets the name of the object.
-func (o *ObjectMeta) SetName(name string) {
-	o.Name = name
-}
-
-// GetVersion returns the version of the object.
-func (o ObjectMeta) GetVersion() string {
-	return o.Version
-}
-
-// SetVersion sets the version of the object.
-func (o *ObjectMeta) SetVersion(version string) {
-	o.Version = version
-}
-
-// GetLabels returns the label of the object.
-func (o ObjectMeta) GetLabels() metav1.Labels {
-	return o.Labels
-}
-
-// SetLabels sets the labels of the object.
-func (o *ObjectMeta) SetLabels(labels []metav1.Label) {
-	o.Labels = labels
-}
-
-// Copy copies the ObjectMeta value
-func (o ObjectMeta) Copy() ObjectMeta {
-	o.Labels = o.Labels.Copy()
-	return o
 }
 
 const (

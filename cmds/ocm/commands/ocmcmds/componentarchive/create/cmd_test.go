@@ -36,8 +36,10 @@ var _ = Describe("Test Environment", func() {
 
 	It("creates comp arch", func() {
 
+		plabels := metav1.Labels{}
+		plabels.Set("email", "info@mandelsoft.de")
 		Expect(env.Execute("create", "ca", "-ft", "directory", "test.de/x", "v1", "mandelsoft", "/tmp/ca",
-			"l1=value", "l2={\"name\":\"value\"}")).To(Succeed())
+			"l1=value", "l2={\"name\":\"value\"}", "-p", "email=info@mandelsoft.de")).To(Succeed())
 		Expect(env.DirExists("/tmp/ca")).To(BeTrue())
 		data, err := env.ReadFile("/tmp/ca/" + comparch.ComponentDescriptorFileName)
 		Expect(err).To(Succeed())
@@ -45,7 +47,8 @@ var _ = Describe("Test Environment", func() {
 		Expect(err).To(Succeed())
 		Expect(cd.Name).To(Equal("test.de/x"))
 		Expect(cd.Version).To(Equal("v1"))
-		Expect(string(cd.Provider)).To(Equal("mandelsoft"))
+		Expect(string(cd.Provider.Name)).To(Equal("mandelsoft"))
+		Expect(cd.Provider.Labels).To(Equal(plabels))
 		Expect(cd.Labels).To(Equal(metav1.Labels{
 			{
 				Name:  "l1",

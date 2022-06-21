@@ -59,7 +59,7 @@ type ComponentSpec struct {
 	RepositoryContexts runtime.UnstructuredTypedObjectList `json:"repositoryContexts"`
 	// Provider defines the provider type of a component.
 	// It can be external or internal.
-	Provider metav1.ProviderType `json:"provider"`
+	Provider metav1.ProviderName `json:"provider"`
 	// Sources defines sources that produced the component
 	Sources Sources `json:"sources"`
 	// ComponentReferences references component dependencies that can be resolved in the current context.

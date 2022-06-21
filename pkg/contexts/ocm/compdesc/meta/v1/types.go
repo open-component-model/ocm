@@ -31,11 +31,11 @@ type Metadata struct {
 	Version string `json:"schemaVersion"`
 }
 
-// ProviderType describes the provider type of component in the origin's context.
+// ProviderName describes the provider type of component in the origin's context.
 // Defines whether the component is created by a third party or internally.
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
-type ProviderType string
+type ProviderName string
 
 // ResourceRelation describes the type of a resource.
 // Defines whether the component is created by a third party or internally.
@@ -62,15 +62,100 @@ func ValidateRelation(fldPath *field.Path, relation ResourceRelation) *field.Err
 	return nil
 }
 
-// ObjectMeta defines a object that is uniquely identified by its name and version.
-// +k8s:deepcopy-gen=true
+const GROUP = "ocm.gardener.cloud"
+const KIND = "ComponentVersion"
+
+// TypeMeta describes the schema of a descriptor
+type TypeMeta struct {
+	APIVersion string `json:"apiVersion"`
+	Kind       string `json:"kind"`
+}
+
+// ObjectMeta defines the metadata of the component descriptor.
 type ObjectMeta struct {
-	// Name is the context unique name of the object.
+	// Name is the name of the component.
 	Name string `json:"name"`
-	// Version is the semver version of the object.
+	// Version is the version of the component.
 	Version string `json:"version"`
-	// Labels defines an optional set of additional labels
-	// describing the object.
-	// +optional
+	// Labels describe additional properties of the component version
 	Labels Labels `json:"labels,omitempty"`
+	// Provider described the component provider
+	Provider Provider `json:"provider"`
+}
+
+// GetName returns the name of the object.
+func (o ObjectMeta) GetName() string {
+	return o.Name
+}
+
+// SetName sets the name of the object.
+func (o *ObjectMeta) SetName(name string) {
+	o.Name = name
+}
+
+// GetVersion returns the version of the object.
+func (o ObjectMeta) GetVersion() string {
+	return o.Version
+}
+
+// SetVersion sets the version of the object.
+func (o *ObjectMeta) SetVersion(version string) {
+	o.Version = version
+}
+
+// GetLabels returns the label of the object.
+func (o ObjectMeta) GetLabels() Labels {
+	return o.Labels
+}
+
+// SetLabels sets the labels of the object.
+func (o *ObjectMeta) SetLabels(labels []Label) {
+	o.Labels = labels
+}
+
+// GetName returns the name of the object.
+func (o *ObjectMeta) Copy() *ObjectMeta {
+	return &ObjectMeta{
+		Name:     o.Name,
+		Version:  o.Version,
+		Labels:   o.Labels.Copy(),
+		Provider: *o.Provider.Copy(),
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+// Provider describes the provider information of a component version
+type Provider struct {
+	Name ProviderName `json:"name"`
+	// Labels describe additional properties of provider
+	Labels Labels `json:"labels,omitempty"`
+}
+
+// GetName returns the name of the provider.
+func (o Provider) GetName() ProviderName {
+	return o.Name
+}
+
+// SetName sets the name of the provider.
+func (o *Provider) SetName(name ProviderName) {
+	o.Name = name
+}
+
+// GetLabels returns the label of the provider.
+func (o Provider) GetLabels() Labels {
+	return o.Labels
+}
+
+// SetLabels sets the labels of the provider.
+func (o *Provider) SetLabels(labels []Label) {
+	o.Labels = labels
+}
+
+// Copy copies the provider info
+func (o *Provider) Copy() *Provider {
+	return &Provider{
+		Name:   o.Name,
+		Labels: o.Labels.Copy(),
+	}
 }

@@ -28,16 +28,16 @@ var CDExcludes = signing.MapExcludes{
 	"component": signing.MapExcludes{
 		"repositoryContexts": nil,
 		"resources": signing.DynamicArrayExcludes{
-			signing.IgnoreResourcesWithNoneAccess,
-			signing.MapExcludes{
+			ValueChecker: signing.IgnoreResourcesWithNoneAccess,
+			Continue: signing.MapExcludes{
 				"access": nil,
 				"labels": nil,
 				"srcRef": nil,
 			},
 		},
 		"sources": signing.DynamicArrayExcludes{
-			signing.IgnoreResourcesWithNoneAccess,
-			signing.MapExcludes{
+			ValueChecker: signing.IgnoreResourcesWithNoneAccess,
+			Continue: signing.MapExcludes{
 				"access": nil,
 				"labels": nil,
 			},

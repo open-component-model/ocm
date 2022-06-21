@@ -25,7 +25,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/spf13/cobra"
@@ -40,15 +40,18 @@ var (
 type Command struct {
 	utils.BaseCommand
 
+	providerattrs []string
+
 	Format  formatoption.Option
 	Handler comparch.FormatHandler
 	Force   bool
 	Path    string
 
-	Component string
-	Version   string
-	Provider  string
-	Labels    v1.Labels
+	Component      string
+	Version        string
+	Provider       string
+	ProviderLabels metav1.Labels
+	Labels         metav1.Labels
 }
 
 // NewCommand creates a new ctf command.
@@ -58,7 +61,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
-		Use:   "[<options>] <component> <version> <provider> <path> {<label>=<value>}",
+		Use:   "[<options>] <component> <version> <provider> <path> {--provider <label>=<value>} {<label>=<value>}",
 		Args:  cobra.MinimumNArgs(4),
 		Short: "create new component archive",
 		Long: `
@@ -71,6 +74,7 @@ to host component version content or a tar/tgz file.
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	o.Format.AddFlags(fs)
 	fs.BoolVarP(&o.Force, "force", "f", false, "remove existing content")
+	fs.StringArrayVarP(&o.providerattrs, "provider", "p", nil, "provider attribute")
 }
 
 func (o *Command) Complete(args []string) error {
@@ -90,6 +94,12 @@ func (o *Command) Complete(args []string) error {
 
 	for _, a := range args[4:] {
 		o.Labels, err = common.AddParsedLabel(o.Labels, a)
+		if err != nil {
+			return err
+		}
+	}
+	for _, a := range o.providerattrs {
+		o.ProviderLabels, err = common.AddParsedLabel(o.ProviderLabels, a)
 		if err != nil {
 			return err
 		}
@@ -118,7 +128,8 @@ func (o *Command) Run() error {
 	desc := obj.GetDescriptor()
 	desc.Name = o.Component
 	desc.Version = o.Version
-	desc.Provider = v1.ProviderType(o.Provider)
+	desc.Provider.Name = metav1.ProviderName(o.Provider)
+	desc.Provider.Labels = o.ProviderLabels
 	desc.Labels = o.Labels
 
 	err = compdesc.Validate(desc)
