@@ -52,6 +52,7 @@ type Command struct {
 	Provider       string
 	ProviderLabels metav1.Labels
 	Labels         metav1.Labels
+	Schema         string
 }
 
 // NewCommand creates a new ctf command.
@@ -60,6 +61,14 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
+	names := ""
+	for _, n := range compdesc.DefaultSchemes.Names() {
+		names += "\n  - <code>" + n + "</code>"
+		if n == compdesc.DefaultSchemeVersion {
+			names += " (default)"
+		}
+	}
+
 	return &cobra.Command{
 		Use:   "[<options>] <component> <version> <provider> <path> {--provider <label>=<value>} {<label>=<value>}",
 		Args:  cobra.MinimumNArgs(4),
@@ -67,7 +76,9 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Long: `
 Create a new component archive. This might be either a directory prepared
 to host component version content or a tar/tgz file.
-`,
+With option <code>-S</code> it is possible to specify the intended scheme version.
+The following versions are currently supported:
+` + names + "\n",
 	}
 }
 
@@ -75,6 +86,7 @@ func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	o.Format.AddFlags(fs)
 	fs.BoolVarP(&o.Force, "force", "f", false, "remove existing content")
 	fs.StringArrayVarP(&o.providerattrs, "provider", "p", nil, "provider attribute")
+	fs.StringVarP(&o.Schema, "scheme", "S", compdesc.DefaultSchemeVersion, "schema version")
 }
 
 func (o *Command) Complete(args []string) error {
@@ -104,6 +116,14 @@ func (o *Command) Complete(args []string) error {
 			return err
 		}
 	}
+	s := compdesc.DefaultSchemes[o.Schema]
+	if s == nil {
+		s = compdesc.DefaultSchemes[metav1.GROUP+"/"+o.Schema]
+		o.Schema = metav1.GROUP + "/" + o.Schema
+	}
+	if s == nil {
+		return errors.ErrUnknown(errors.KIND_SCHEMAVERSION, o.Schema)
+	}
 	return nil
 }
 
@@ -126,6 +146,7 @@ func (o *Command) Run() error {
 		return err
 	}
 	desc := obj.GetDescriptor()
+	desc.Metadata.ConfiguredVersion = o.Schema
 	desc.Name = o.Component
 	desc.Version = o.Version
 	desc.Provider.Name = metav1.ProviderName(o.Provider)

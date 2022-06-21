@@ -15,6 +15,8 @@
 package compdesc
 
 import (
+	"sort"
+
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -40,6 +42,15 @@ type Schemes map[string]Scheme
 
 func (v Schemes) Register(scheme Scheme) {
 	v[scheme.GetVersion()] = scheme
+}
+
+func (v Schemes) Names() []string {
+	names := []string{}
+	for n := range v {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	return names
 }
 
 var DefaultSchemes = Schemes{}

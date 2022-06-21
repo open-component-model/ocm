@@ -20,6 +20,7 @@ import (
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	compdescv3 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud/v3"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 )
 
@@ -45,6 +46,34 @@ var _ = Describe("Test Environment", func() {
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
 		Expect(err).To(Succeed())
+		Expect(cd.Name).To(Equal("test.de/x"))
+		Expect(cd.Version).To(Equal("v1"))
+		Expect(string(cd.Provider.Name)).To(Equal("mandelsoft"))
+		Expect(cd.Provider.Labels).To(Equal(plabels))
+		Expect(cd.Labels).To(Equal(metav1.Labels{
+			{
+				Name:  "l1",
+				Value: []byte("\"value\""),
+			},
+			{
+				Name:  "l2",
+				Value: []byte("{\"name\":\"value\"}"),
+			},
+		}))
+	})
+
+	It("creates comp arch with v3", func() {
+
+		plabels := metav1.Labels{}
+		plabels.Set("email", "info@mandelsoft.de")
+		Expect(env.Execute("create", "ca", "-ft", "directory", "test.de/x", "v1", "mandelsoft", "/tmp/ca",
+			"l1=value", "l2={\"name\":\"value\"}", "-p", "email=info@mandelsoft.de", "-s", "v3")).To(Succeed())
+		Expect(env.DirExists("/tmp/ca")).To(BeTrue())
+		data, err := env.ReadFile("/tmp/ca/" + comparch.ComponentDescriptorFileName)
+		Expect(err).To(Succeed())
+		cd, err := compdesc.Decode(data)
+		Expect(err).To(Succeed())
+		Expect(cd.Metadata.ConfiguredVersion).To(Equal(compdescv3.GroupVersion))
 		Expect(cd.Name).To(Equal("test.de/x"))
 		Expect(cd.Version).To(Equal("v1"))
 		Expect(string(cd.Provider.Name)).To(Equal("mandelsoft"))

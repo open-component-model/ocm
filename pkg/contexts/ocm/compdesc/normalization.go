@@ -15,6 +15,7 @@
 package compdesc
 
 import (
+	"sort"
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -41,6 +42,23 @@ func (n *NormalizationAlgorithms) Register(name string, norm Normalization) {
 	n.Lock()
 	defer n.Unlock()
 	n.algos[name] = norm
+}
+
+func (n *NormalizationAlgorithms) Get(algo string) Normalization {
+	n.RLock()
+	defer n.RUnlock()
+	return n.algos[algo]
+}
+
+func (n *NormalizationAlgorithms) Names() []string {
+	n.RLock()
+	defer n.RUnlock()
+	names := []string{}
+	for n, _ := range n.algos {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	return names
 }
 
 func (n *NormalizationAlgorithms) Normalize(cd *ComponentDescriptor, algo string) ([]byte, error) {
