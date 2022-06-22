@@ -18,9 +18,10 @@ import (
 	"encoding/json"
 	"strings"
 
+	"sigs.k8s.io/yaml"
+
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"sigs.k8s.io/yaml"
 )
 
 func gkind(kind ...string) string {

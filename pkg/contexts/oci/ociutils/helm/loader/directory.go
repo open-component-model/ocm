@@ -24,11 +24,12 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm/ignore"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm/sympath"
 	"github.com/pkg/errors"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
+
+	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm/ignore"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm/sympath"
 )
 
 var utf8bom = []byte{0xEF, 0xBB, 0xBF}

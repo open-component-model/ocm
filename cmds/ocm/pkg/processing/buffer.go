@@ -20,6 +20,7 @@ import (
 	"sync"
 
 	"github.com/containerd/containerd/pkg/atomic"
+
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 )
 

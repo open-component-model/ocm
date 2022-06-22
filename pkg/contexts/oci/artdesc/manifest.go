@@ -17,10 +17,11 @@ package artdesc
 import (
 	"encoding/json"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/opencontainers/go-digest"
 	"github.com/opencontainers/image-spec/specs-go"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 )
 
 type Manifest ociv1.Manifest

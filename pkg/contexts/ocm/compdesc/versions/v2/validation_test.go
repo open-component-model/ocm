@@ -20,10 +20,11 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
+	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 func TestConfig(t *testing.T) {

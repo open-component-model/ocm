@@ -18,14 +18,15 @@ import (
 	"sort"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common"

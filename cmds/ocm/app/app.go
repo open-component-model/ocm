@@ -26,6 +26,8 @@ import (
 	dockercli "github.com/docker/cli/cli/config"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/spf13/cobra"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds"
@@ -46,9 +48,9 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/transfer"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/verify"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/cobrautils"
-	"github.com/open-component-model/ocm/cmds/ocm/topics/common/config"
-	"github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
-	"github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
+	topicconfig "github.com/open-component-model/ocm/cmds/ocm/topics/common/config"
+	topicocirefs "github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
+	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -56,12 +58,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	datactg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
-	"github.com/spf13/cobra"
+
+	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/version"
-	"github.com/spf13/pflag"
 
 	_ "github.com/open-component-model/ocm/cmds/ocm/clictx/config"
 )
@@ -329,7 +331,8 @@ func NewVersionCommand() *cobra.Command {
 func Attributes() string {
 	s := ""
 	sep := ""
-	for a, t := range datacontext.DefaultAttributeScheme.KnownTypes() {
+	for _, a := range datacontext.DefaultAttributeScheme.KnownTypeNames() {
+		t, _ :=datacontext.DefaultAttributeScheme.GetType(a)
 		desc := t.Description()
 		if !strings.Contains(desc, "not via command line") {
 			for strings.HasPrefix(desc, "\n") {

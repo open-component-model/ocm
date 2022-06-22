@@ -18,6 +18,8 @@ import (
 	"path"
 	"strings"
 
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -30,7 +32,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/opencontainers/go-digest"
 )
 
 type ComponentVersion struct {

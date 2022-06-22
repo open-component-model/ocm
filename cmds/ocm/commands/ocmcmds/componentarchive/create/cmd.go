@@ -16,6 +16,9 @@ package create
 
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -28,8 +31,6 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
 var (
@@ -61,14 +62,6 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
-	names := ""
-	for _, n := range compdesc.DefaultSchemes.Names() {
-		names += "\n  - <code>" + n + "</code>"
-		if n == compdesc.DefaultSchemeVersion {
-			names += " (default)"
-		}
-	}
-
 	return &cobra.Command{
 		Use:   "[<options>] <component> <version> <provider> <path> {--provider <label>=<value>} {<label>=<value>}",
 		Args:  cobra.MinimumNArgs(4),
@@ -78,7 +71,7 @@ Create a new component archive. This might be either a directory prepared
 to host component version content or a tar/tgz file.
 With option <code>-S</code> it is possible to specify the intended scheme version.
 The following versions are currently supported:
-` + names + "\n",
+` + utils.FormatList(compdesc.DefaultSchemeVersion, compdesc.DefaultSchemes.Names()...) + "\n",
 	}
 }
 

@@ -15,12 +15,13 @@
 package cpi
 
 import (
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/opencontainers/go-digest"
 )
 
 var ErrNoIndex = errors.New("manifest does not support access to subsequent artefacts")

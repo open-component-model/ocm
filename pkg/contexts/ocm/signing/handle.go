@@ -127,7 +127,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 		cd.Resources[i].Digest = &digest[0]
 		printer.Printf("  resource %d:  %s: digest %s\n", i, res.Meta().GetIdentity(cv.GetDescriptor().Resources), &digest[0])
 	}
-	digest, err := compdesc.Hash(cd, compdesc.JsonNormalisationV1, opts.Hasher.Create())
+	digest, err := compdesc.Hash(cd, opts.NormalizationAlgo, opts.Hasher.Create())
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed hashing component descriptor %s ", state.History)
 	}

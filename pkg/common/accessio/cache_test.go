@@ -19,9 +19,10 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/opencontainers/go-digest"
 )
 
 var _ = Describe("cache management", func() {

@@ -22,9 +22,10 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/spf13/pflag"
+
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/spf13/pflag"
 )
 
 type Values map[string]interface{}

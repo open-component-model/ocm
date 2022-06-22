@@ -15,6 +15,8 @@
 package transfer
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/overwriteoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
@@ -27,7 +29,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/spiff"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"

@@ -15,12 +15,13 @@
 package testhelper
 
 import (
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/opencontainers/go-digest"
 
 	. "github.com/onsi/gomega"
 )

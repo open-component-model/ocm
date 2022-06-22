@@ -18,6 +18,7 @@ import (
 	"io"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/cmds/ocm/app"
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/pkg/common/accessio"

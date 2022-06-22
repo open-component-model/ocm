@@ -23,6 +23,9 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/opencontainers/go-digest"
+	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -32,8 +35,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/opencontainers/go-digest"
-	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
 func NewState(mode accessobj.AccessMode, name, version string, access oci.ManifestAccess) (accessobj.State, error) {

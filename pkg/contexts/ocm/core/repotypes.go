@@ -20,6 +20,7 @@ import (
 	"reflect"
 
 	"github.com/modern-go/reflect2"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"

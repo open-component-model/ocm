@@ -19,8 +19,9 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 
-	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/sign"
 	"github.com/spf13/cobra"
+
+	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/sign"
 )
 
 // NewCommand creates a new command.

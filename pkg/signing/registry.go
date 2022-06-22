@@ -15,6 +15,7 @@
 package signing
 
 import (
+	"sort"
 	"sync"
 )
 
@@ -29,9 +30,11 @@ type HandlerRegistry interface {
 	RegisterVerifier(algo string, verifier Verifier)
 	GetSigner(name string) Signer
 	GetVerifier(name string) Verifier
+	SignerNames() []string
 
 	RegisterHasher(hasher Hasher)
 	GetHasher(name string) Hasher
+	HasherNames() []string
 }
 
 type KeyRegistry interface {
@@ -76,6 +79,17 @@ func (r *handlerRegistry) RegisterSigner(algo string, signer Signer) {
 	}
 }
 
+func (r *handlerRegistry) SignerNames() []string {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	names := []string{}
+	for n := range r.signers {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	return names
+}
+
 func (r *handlerRegistry) RegisterVerifier(algo string, verifier Verifier) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
@@ -89,6 +103,17 @@ func (r *handlerRegistry) RegisterHasher(hasher Hasher) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	r.hasher[hasher.Algorithm()] = hasher
+}
+
+func (r *handlerRegistry) HasherNames() []string {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	names := []string{}
+	for n := range r.hasher {
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	return names
 }
 
 func (r *handlerRegistry) GetSigner(name string) Signer {
@@ -196,6 +221,21 @@ func (r *registry) RegisterVerifier(algo string, verifier Verifier) {
 	r.handlers.RegisterVerifier(algo, verifier)
 }
 
+func (r *registry) SignerNames() []string {
+	names := r.baseHandlers.SignerNames()
+outer:
+	for _, n := range r.handlers.SignerNames() {
+		for _, e := range names {
+			if e == n {
+				continue outer
+			}
+		}
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	return names
+}
+
 func (r *registry) GetSigner(name string) Signer {
 	s := r.handlers.GetSigner(name)
 	if s == nil && r.baseHandlers != nil {
@@ -222,6 +262,21 @@ func (r *registry) GetHasher(name string) Hasher {
 		s = r.baseHandlers.GetHasher(name)
 	}
 	return s
+}
+
+func (r *registry) HasherNames() []string {
+	names := r.baseHandlers.HasherNames()
+outer:
+	for _, n := range r.handlers.HasherNames() {
+		for _, e := range names {
+			if e == n {
+				continue outer
+			}
+		}
+		names = append(names, n)
+	}
+	sort.Strings(names)
+	return names
 }
 
 func (r *registry) RegisterPublicKey(name string, key interface{}) {

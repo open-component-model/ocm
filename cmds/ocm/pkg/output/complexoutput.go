@@ -21,8 +21,9 @@ import (
 	. "github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/utils"
 
-	"github.com/open-component-model/ocm/pkg/runtime"
 	"sigs.k8s.io/yaml"
+
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 type ComplexProcessingOutput struct {

@@ -17,10 +17,11 @@ package describe
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
+	"github.com/open-component-model/ocm/pkg/out"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common"

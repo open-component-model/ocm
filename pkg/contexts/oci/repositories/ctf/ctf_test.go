@@ -25,6 +25,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -33,7 +35,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/testhelper"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/opencontainers/go-digest"
 )
 
 var _ = Describe("ctf management", func() {

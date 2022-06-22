@@ -15,9 +15,10 @@
 package add
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"

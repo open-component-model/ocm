@@ -18,6 +18,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	mime2 "github.com/open-component-model/ocm/pkg/mime"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"

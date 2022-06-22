@@ -15,8 +15,9 @@
 package core
 
 import (
-	"github.com/open-component-model/ocm/pkg/common"
 	"k8s.io/apimachinery/pkg/util/sets"
+
+	"github.com/open-component-model/ocm/pkg/common"
 )
 
 const DirectCredentialsType = "Credentials"

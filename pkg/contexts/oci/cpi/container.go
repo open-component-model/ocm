@@ -15,9 +15,10 @@
 package cpi
 
 import (
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/opencontainers/go-digest"
 )
 
 // ArtefactProvider manages the technical access to a dedicated artefact

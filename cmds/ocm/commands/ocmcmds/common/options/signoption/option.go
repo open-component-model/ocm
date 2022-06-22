@@ -19,15 +19,19 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/spf13/pflag"
+
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/normalizations/jsonv1"
 	ocmsign "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
-	"github.com/spf13/pflag"
+	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 )
 
 func From(o options.OptionSetProvider) *Option {
@@ -43,13 +47,14 @@ func New(sign bool) *Option {
 }
 
 type Option struct {
-	SignMode    bool
-	algorithm   string
-	publicKeys  []string
-	privateKeys []string
-
+	SignMode      bool
+	signAlgorithm string
+	hashAlgorithm string
+	publicKeys    []string
+	privateKeys   []string
 	// Verify the digests
 	Verify bool
+
 	// Recursively sign component versions
 	Recursively bool
 	// SignatureNames is a list of signatures to handle (only the first one
@@ -57,7 +62,9 @@ type Option struct {
 	SignatureNames []string
 	Update         bool
 	Signer         signing.Signer
+	Hasher         signing.Hasher
 	Keys           signing.KeyRegistry
+	NormAlgorithm  string
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
@@ -65,7 +72,9 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringArrayVarP(&o.publicKeys, "public-key", "k", nil, "public key setting")
 	if o.SignMode {
 		fs.StringArrayVarP(&o.privateKeys, "private-key", "K", nil, "private key setting")
-		fs.StringVarP(&o.algorithm, "algorithm", "", "", "signature handler")
+		fs.StringVarP(&o.signAlgorithm, "algorithm", "S", rsa.Algorithm, "signature handler")
+		fs.StringVarP(&o.NormAlgorithm, "normalization", "N", jsonv1.Algorithm, "normalization algorithm")
+		fs.StringVarP(&o.hashAlgorithm, "hash", "H", sha256.Algorithm, "hash algorithm")
 		fs.BoolVarP(&o.Update, "update", "", o.SignMode, "update digest in component versions")
 		fs.BoolVarP(&o.Recursively, "recursive", "R", o.SignMode, "recursivly sign component versions")
 	}
@@ -88,12 +97,26 @@ func (o *Option) Complete(ctx clictx.Context) error {
 		o.Keys = signing.NewKeyRegistry()
 	}
 	if o.SignMode {
-		if o.algorithm == "" {
-			o.algorithm = rsa.Algorithm
+		if o.NormAlgorithm == "" {
+			o.NormAlgorithm = jsonv1.Algorithm
 		}
-		o.Signer = signingattr.Get(ctx).GetSigner(o.algorithm)
+		if o.signAlgorithm == "" {
+			o.signAlgorithm = rsa.Algorithm
+		}
+		if o.hashAlgorithm == "" {
+			o.hashAlgorithm = sha256.Algorithm
+		}
+		x := compdesc.Normalizations.Get(o.NormAlgorithm)
+		if x == nil {
+			return errors.ErrUnknown(compdesc.KIND_NORM_ALGORITHM, o.NormAlgorithm)
+		}
+		o.Signer = signingattr.Get(ctx).GetSigner(o.signAlgorithm)
 		if o.Signer == nil {
-			return errors.ErrUnknown(compdesc.KIND_SIGN_ALGORITHM, o.algorithm)
+			return errors.ErrUnknown(compdesc.KIND_SIGN_ALGORITHM, o.signAlgorithm)
+		}
+		o.Hasher = signingattr.Get(ctx).GetHasher(o.hashAlgorithm)
+		if o.Hasher == nil {
+			return errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, o.hashAlgorithm)
 		}
 	}
 	err := o.handleKeys(ctx, "public key", o.publicKeys, o.Keys.RegisterPublicKey)
@@ -154,10 +177,30 @@ signature name specified with the option <code>--signature</code>.
 Alternatively a key can be specified as base64 encoded string if the argument
 start with the prefix <code>!</code> or as direct string with the prefix
 <code>=</code>.
-
+`
+	if o.SignMode {
+		s += `
 If in signing mode a public key is specified, existing signatures for the
 given signature name will be verified, instead of recreated.
 `
+		s += `
+
+The following signing types are supported with option <code>--algorithm</code>:
+` + utils.FormatList(rsa.Algorithm, signing.DefaultRegistry().SignerNames()...)
+
+		s += `
+
+The following normalization modes are supported with option <code>--normalization</code>:
+` + utils.FormatList(jsonv1.Algorithm, compdesc.Normalizations.Names()...)
+
+		s += `
+
+The following hash modes are supported with option <code>--hash</code>:
+` + utils.FormatList(sha256.Algorithm, signing.DefaultRegistry().HasherNames()...)
+
+		signing.DefaultRegistry().HasherNames()
+
+	}
 	return s
 }
 
@@ -171,6 +214,8 @@ func (o *Option) ApplySigningOption(opts *ocmsign.Options) {
 	opts.Verify = o.Verify
 	opts.Recursively = o.Recursively
 	opts.Keys = o.Keys
+	opts.NormalizationAlgo = o.NormAlgorithm
+	opts.Hasher = o.Hasher
 	if len(o.SignatureNames) > 0 {
 		opts.VerifySignature = o.Keys.GetPublicKey(o.SignatureNames[0]) != nil
 	}

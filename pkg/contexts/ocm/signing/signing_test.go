@@ -19,6 +19,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"

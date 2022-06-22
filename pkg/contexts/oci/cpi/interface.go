@@ -17,10 +17,11 @@ package cpi
 // This is the Context Provider Interface for credential providers
 
 import (
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
 	"github.com/opencontainers/go-digest"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
 )
 
 const CONTEXT_TYPE = core.CONTEXT_TYPE

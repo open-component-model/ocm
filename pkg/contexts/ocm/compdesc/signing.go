@@ -27,6 +27,7 @@ import (
 const (
 	KIND_HASH_ALGORITHM   = "hash algorithm"
 	KIND_SIGN_ALGORITHM   = "signing algorithm"
+	KIND_NORM_ALGORITHM   = "normalization algorithm"
 	KIND_VERIFY_ALGORITHM = "signature verification algorithm"
 	KIND_PUBLIC_KEY       = "public key"
 	KIND_PRIVATE_KEY      = "private key"

@@ -19,8 +19,9 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 	"github.com/opencontainers/go-digest"
+
+	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 )

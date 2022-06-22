@@ -23,6 +23,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"

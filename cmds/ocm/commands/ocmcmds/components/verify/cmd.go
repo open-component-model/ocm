@@ -15,10 +15,11 @@
 package verify
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/cmds/signing"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"

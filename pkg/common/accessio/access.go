@@ -20,8 +20,9 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/opencontainers/go-digest"
+
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 var ErrClosed = errors.ErrClosed()

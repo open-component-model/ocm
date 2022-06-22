@@ -26,6 +26,7 @@ import (
 	"github.com/docker/cli/cli/config/configfile"
 	dockercred "github.com/docker/cli/cli/config/credentials"
 	"github.com/docker/cli/cli/config/types"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"

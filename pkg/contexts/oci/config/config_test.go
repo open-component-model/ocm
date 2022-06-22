@@ -19,6 +19,7 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci/config"

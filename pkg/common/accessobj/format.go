@@ -20,6 +20,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/format"
 	"github.com/open-component-model/ocm/pkg/errors"

@@ -19,9 +19,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/opencontainers/go-digest"
 	"github.com/opencontainers/image-spec/specs-go"
+
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 )
 
 type RepositoryIndex struct {

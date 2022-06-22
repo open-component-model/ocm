@@ -17,12 +17,13 @@ package oci
 import (
 	"reflect"
 
+	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	ocmcpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
-	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 )
 
 // StorageContext is the context information passed for Blobhandler

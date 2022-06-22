@@ -19,6 +19,7 @@ import (
 	"os"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
+
 	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/errors"
 

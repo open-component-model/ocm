@@ -15,11 +15,12 @@
 package cachecmds
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds/clean"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds/info"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/spf13/cobra"
 )
 
 // NewCommand creates a new command.

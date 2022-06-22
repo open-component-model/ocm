@@ -18,8 +18,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/spf13/cobra"
+
+	"github.com/open-component-model/ocm/pkg/out"
 
 	_ "github.com/open-component-model/ocm/cmds/ocm/clictx/config"
 )

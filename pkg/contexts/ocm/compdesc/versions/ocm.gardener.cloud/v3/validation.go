@@ -15,9 +15,10 @@
 package compdescv3
 
 import (
+	"k8s.io/apimachinery/pkg/util/validation/field"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 // Validate validates a parsed v2 component descriptor

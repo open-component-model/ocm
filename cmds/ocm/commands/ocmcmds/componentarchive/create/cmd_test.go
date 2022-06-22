@@ -17,6 +17,7 @@ package create_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -67,7 +68,7 @@ var _ = Describe("Test Environment", func() {
 		plabels := metav1.Labels{}
 		plabels.Set("email", "info@mandelsoft.de")
 		Expect(env.Execute("create", "ca", "-ft", "directory", "test.de/x", "v1", "mandelsoft", "/tmp/ca",
-			"l1=value", "l2={\"name\":\"value\"}", "-p", "email=info@mandelsoft.de", "-s", "v3")).To(Succeed())
+			"l1=value", "l2={\"name\":\"value\"}", "-p", "email=info@mandelsoft.de", "-S", "v3")).To(Succeed())
 		Expect(env.DirExists("/tmp/ca")).To(BeTrue())
 		data, err := env.ReadFile("/tmp/ca/" + comparch.ComponentDescriptorFileName)
 		Expect(err).To(Succeed())

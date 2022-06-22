@@ -215,17 +215,18 @@ func (o *pubkey) ApplySigningOption(opts *Options) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type Options struct {
-	Update          bool
-	Recursively     bool
-	Verify          bool
-	Signer          signing.Signer
-	VerifySignature bool
-	Hasher          signing.Hasher
-	Keys            signing.KeyRegistry
-	Registry        signing.Registry
-	Resolver        ocm.ComponentVersionResolver
-	SkipAccessTypes map[string]bool
-	SignatureNames  []string
+	Update            bool
+	Recursively       bool
+	Verify            bool
+	Signer            signing.Signer
+	VerifySignature   bool
+	Hasher            signing.Hasher
+	Keys              signing.KeyRegistry
+	Registry          signing.Registry
+	Resolver          ocm.ComponentVersionResolver
+	SkipAccessTypes   map[string]bool
+	SignatureNames    []string
+	NormalizationAlgo string
 }
 
 var _ Option = (*Options)(nil)
@@ -271,6 +272,9 @@ func (o *Options) ApplySigningOption(opts *Options) {
 	opts.Recursively = o.Recursively
 	opts.Update = o.Update
 	opts.Verify = o.Verify
+	if o.NormalizationAlgo != "" {
+		opts.NormalizationAlgo = o.NormalizationAlgo
+	}
 }
 
 func (o *Options) Complete(registry signing.Registry) error {
@@ -304,6 +308,11 @@ func (o *Options) Complete(registry signing.Registry) error {
 			if o.PublicKey(o.SignatureName()) != nil {
 				o.VerifySignature = true
 			}
+		}
+	}
+	if o.VerifySignature || o.Signer != nil {
+		if o.NormalizationAlgo == "" {
+			o.NormalizationAlgo = compdesc.JsonNormalisationV1
 		}
 	}
 	if o.Hasher == nil {

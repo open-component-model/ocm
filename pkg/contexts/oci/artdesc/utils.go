@@ -17,8 +17,9 @@ package artdesc
 import (
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/opencontainers/go-digest"
+
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 )
 
 func DefaultBlobDescriptor(blob accessio.BlobAccess) *Descriptor {

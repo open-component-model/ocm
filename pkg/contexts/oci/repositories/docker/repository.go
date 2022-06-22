@@ -20,6 +20,7 @@ import (
 	"github.com/containers/image/v5/types"
 	dockertypes "github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
+
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 )
 

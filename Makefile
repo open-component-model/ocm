@@ -23,9 +23,12 @@ install-requirements:
 	@go install -mod=vendor $(REPO_ROOT)/vendor/github.com/golang/mock/mockgen
 	@$(REPO_ROOT)/hack/install-requirements.sh
 
+.PHONY:
+prepare: generate format test
+
 .PHONY: format
 format:
-	@$(REPO_ROOT)/hack/format.sh $(REPO_ROOT)/pkg $(REPO_ROOT)/cmd $(REPO_ROOT)/ociclient
+	@$(REPO_ROOT)/hack/format.sh $(REPO_ROOT)/pkg $(REPO_ROOT)/cmds/ocm
 
 .PHONY: check
 check:

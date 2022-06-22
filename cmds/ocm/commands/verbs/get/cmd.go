@@ -19,12 +19,13 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 
+	"github.com/spf13/cobra"
+
 	artefacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/get"
 	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/get"
 	references "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references/get"
 	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/get"
 	sources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources/get"
-	"github.com/spf13/cobra"
 )
 
 // NewCommand creates a new command.

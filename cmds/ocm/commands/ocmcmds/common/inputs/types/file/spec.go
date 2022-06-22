@@ -19,12 +19,13 @@ import (
 	"fmt"
 	"io"
 
+	"k8s.io/apimachinery/pkg/util/validation/field"
+
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 type Spec struct {

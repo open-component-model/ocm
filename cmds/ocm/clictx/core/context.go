@@ -21,6 +21,7 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/pkg/out"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"

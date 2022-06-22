@@ -21,13 +21,14 @@ import (
 	"io"
 	"os"
 
+	"github.com/opencontainers/go-digest"
+	"sigs.k8s.io/yaml"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/opencontainers/go-digest"
-	"sigs.k8s.io/yaml"
 )
 
 type BlobInfo struct {

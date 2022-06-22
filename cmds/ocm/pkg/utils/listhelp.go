@@ -12,26 +12,19 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package sources
+package utils
 
 import (
-	"github.com/spf13/cobra"
-
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources/add"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources/get"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"fmt"
 )
 
-var Names = names.Sources
-
-// NewCommand creates a new command.
-func NewCommand(ctx clictx.Context) *cobra.Command {
-	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "Commands acting on component sources",
-	}, Names...)
-	cmd.AddCommand(add.NewCommand(ctx, add.Verb))
-	cmd.AddCommand(get.NewCommand(ctx, get.Verb))
-	return cmd
+func FormatList(def string, elems ...string) string {
+	names := ""
+	for _, n := range elems {
+		names = fmt.Sprintf("%s\n  - <code>%s</code>", names, n)
+		if n == def {
+			names += " (default)"
+		}
+	}
+	return names
 }

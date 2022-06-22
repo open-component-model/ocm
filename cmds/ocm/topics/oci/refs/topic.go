@@ -17,9 +17,10 @@ package topicocirefs
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
-	"github.com/spf13/cobra"
 )
 
 func New(ctx clictx.Context) *cobra.Command {

@@ -18,8 +18,9 @@ import (
 	"fmt"
 
 	"github.com/containerd/containerd/images"
-	"github.com/open-component-model/ocm/pkg/errors"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 const SchemeVersion = 2

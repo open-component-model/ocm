@@ -23,6 +23,9 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"helm.sh/helm/v3/pkg/chart"
+	"helm.sh/helm/v3/pkg/chartutil"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
@@ -30,8 +33,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/env"
 	"github.com/open-component-model/ocm/pkg/env/builder"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chartutil"
 )
 
 type Files []*chart.File

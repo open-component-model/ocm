@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 
 	"github.com/modern-go/reflect2"
+
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 

@@ -19,8 +19,9 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 
-	cache "github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds/clean"
 	"github.com/spf13/cobra"
+
+	cache "github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds/clean"
 )
 
 // NewCommand creates a new command.

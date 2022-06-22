@@ -17,11 +17,12 @@ package cpi
 import (
 	"sync"
 
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/opencontainers/go-digest"
 )
 
 type artefactBase struct {

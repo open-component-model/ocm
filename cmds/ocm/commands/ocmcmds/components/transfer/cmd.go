@@ -17,6 +17,8 @@ package transfer
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
@@ -36,7 +38,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/spiff"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/spf13/cobra"
 )
 
 var (

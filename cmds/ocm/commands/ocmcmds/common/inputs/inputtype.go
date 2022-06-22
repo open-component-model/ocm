@@ -20,13 +20,14 @@ import (
 	"reflect"
 
 	"github.com/modern-go/reflect2"
+	"k8s.io/apimachinery/pkg/util/validation/field"
+
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
-	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 ////////////////////////////////////////////////////////////////////////////////

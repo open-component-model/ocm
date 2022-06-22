@@ -15,10 +15,11 @@
 package artefactset
 
 import (
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/opencontainers/go-digest"
 )
 
 type FileSystemBlobAccess struct {

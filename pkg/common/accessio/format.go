@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 

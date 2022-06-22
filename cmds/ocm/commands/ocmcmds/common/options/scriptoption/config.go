@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"

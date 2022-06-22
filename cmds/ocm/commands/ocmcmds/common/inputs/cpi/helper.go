@@ -18,11 +18,12 @@ import (
 	"fmt"
 	"os"
 
+	"k8s.io/apimachinery/pkg/util/validation/field"
+
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
 type PathSpec struct {

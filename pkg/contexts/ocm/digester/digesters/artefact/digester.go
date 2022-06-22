@@ -21,6 +21,8 @@ import (
 	"io"
 	"strings"
 
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
@@ -29,7 +31,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
-	"github.com/opencontainers/go-digest"
 )
 
 const OciArtifactDigestV1 string = "ociArtifactDigest/v1"

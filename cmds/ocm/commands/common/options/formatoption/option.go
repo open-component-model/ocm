@@ -16,12 +16,13 @@ package formatoption
 
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/spf13/pflag"
+
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/utils"
-	"github.com/spf13/pflag"
 )
 
 func From(o options.OptionSetProvider) *Option {

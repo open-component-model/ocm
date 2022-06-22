@@ -28,6 +28,10 @@ definitions:
     required:
       - 'name'
       - 'value'
+    properties:
+      name:
+        type: string
+      value: {}
     additionalProperties: false
 
   componentName:

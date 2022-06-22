@@ -18,12 +18,13 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/opencontainers/go-digest"
 )
 
 const MAINARTEFACT_ANNOTATION = "cloud.gardener.ocm/main"
