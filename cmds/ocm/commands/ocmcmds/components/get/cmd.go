@@ -19,6 +19,9 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/schemaoption"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
@@ -47,7 +50,7 @@ type Command struct {
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), output.OutputOptions(outputs, closureoption.New(
-		"component reference", output.Fields("IDENTITY"), identity),
+		"component reference", output.Fields("IDENTITY"), identity), schemaoption.New(""),
 	))}, utils.Names(Names, names...)...)
 }
 
@@ -105,10 +108,38 @@ func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide 
 
 /////////////////////////////////////////////////////////////////////////////
 
+func Format(opts *output.Options) processing.ProcessChain {
+	o := schemaoption.From(opts)
+	if o.Schema == "" {
+		return nil
+	}
+	return processing.Map(func(in interface{}) interface{} {
+		desc := comphdlr.Elem(in).GetDescriptor()
+		out, err := compdesc.Convert(desc, compdesc.SchemaVersion(o.Schema))
+		if err != nil {
+			return struct {
+				Scheme  string `json:"scheme"`
+				Name    string `json:"name"`
+				Version string `json:"version"`
+				Error   string `json:"error"`
+			}{
+				Scheme:  desc.SchemaVersion(),
+				Name:    desc.GetName(),
+				Version: desc.GetVersion(),
+				Error:   err.Error(),
+			}
+		} else {
+			return out
+		}
+	})
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 var outputs = output.NewOutputs(get_regular, output.Outputs{
 	"wide": get_wide,
 	"tree": get_tree,
-}).AddChainedManifestOutputs(closureoption.OutputChainFunction(comphdlr.ClosureExplode, comphdlr.Sort))
+}).AddChainedManifestOutputs(output.ComposeChain(closureoption.OutputChainFunction(comphdlr.ClosureExplode, comphdlr.Sort), Format))
 
 func get_regular(opts *output.Options) output.Output {
 	return TableOutput(opts, map_get_regular_output).New()

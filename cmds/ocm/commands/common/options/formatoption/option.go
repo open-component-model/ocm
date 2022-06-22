@@ -78,7 +78,7 @@ target archive to use. The following formats are supported:
 	for _, k := range list {
 		s = s + "- " + k + "\n"
 	}
-	return s + "The default format is <code>directory</code>."
+	return s + "The default format is <code>directory</code>.\n"
 }
 
 func (o *Option) Mode() vfs.FileMode {

@@ -76,7 +76,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 		fs.StringVarP(&o.NormAlgorithm, "normalization", "N", jsonv1.Algorithm, "normalization algorithm")
 		fs.StringVarP(&o.hashAlgorithm, "hash", "H", sha256.Algorithm, "hash algorithm")
 		fs.BoolVarP(&o.Update, "update", "", o.SignMode, "update digest in component versions")
-		fs.BoolVarP(&o.Recursively, "recursive", "R", o.SignMode, "recursivly sign component versions")
+		fs.BoolVarP(&o.Recursively, "recursive", "R", o.SignMode, "recursively sign component versions")
 	}
 	fs.BoolVarP(&o.Verify, "verify", "V", o.SignMode, "verify existing digests")
 }

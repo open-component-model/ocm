@@ -21,8 +21,16 @@ ocm ocm componentarchive create [<options>] <component> <version> <provider> <pa
 
 Create a new component archive. This might be either a directory prepared
 to host component version content or a tar/tgz file.
-With option <code>-S</code> it is possible to specify the intended scheme version.
-The following versions are currently supported:
+
+The <code>--type</code> option accepts a file format for the
+target archive to use. The following formats are supported:
+- directory
+- tar
+- tgz
+The default format is <code>directory</code>.
+
+It the option <code>--scheme</code> is given, the given component descriptor format is used/generated.
+The following schema versions are supported:
 
   - <code>ocm.gardener.cloud/v3</code>
   - <code>v2</code> (default)

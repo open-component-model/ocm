@@ -122,5 +122,28 @@ NESTING    REFERENCEPATH COMPONENT VERSION PROVIDER   IDENTITY
    └─      test.de/y:v1  test.de/x v1      mandelsoft "name"="xx"
 `))
 		})
+
+		It("lists converted yaml", func() {
+
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("get", "components", "-S", "v3", "-o", "yaml", "--repo", ARCH, COMP2)).To(Succeed())
+			Expect("\n" + buf.String()).To(Equal(
+				`
+---
+apiVersion: ocm.gardener.cloud/v3
+kind: ComponentVersion
+metadata:
+  name: test.de/y
+  provider:
+    name: mandelsoft
+  version: v1
+repositoryContexts: []
+spec:
+  references:
+  - componentName: test.de/x
+    name: xx
+    version: v1
+`))
+		})
 	})
 })

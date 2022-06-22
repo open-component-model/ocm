@@ -18,13 +18,19 @@ import (
 	"fmt"
 )
 
-func FormatList(def string, elems ...string) string {
+type KeyInfo interface {
+	GetKey() string
+	GetDescription() string
+}
+
+func FormatList(def string, elems ...KeyInfo) string {
 	names := ""
 	for _, n := range elems {
-		names = fmt.Sprintf("%s\n  - <code>%s</code>", names, n)
-		if n == def {
-			names += " (default)"
+		add := ""
+		if n.GetKey() == def {
+			add = " (default)"
 		}
+		names = fmt.Sprintf("%s\n  - <code>%s</code>:%s %s", names, n.GetKey(), add, n.GetDescription())
 	}
-	return names+"\n"
+	return names
 }

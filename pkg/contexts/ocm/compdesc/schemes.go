@@ -154,17 +154,25 @@ func (v DisableValidation) ApplyDecodeOption(options *DecodeOptions) {
 // component descriptor will be used.
 func Encode(obj *ComponentDescriptor, opts ...EncodeOption) ([]byte, error) {
 	o := (&EncodeOptions{}).ApplyOptions(opts).DefaultFor(obj)
+	v, err := Convert(obj, o)
+	if err != nil {
+		return nil, err
+	}
+	return o.Codec.Encode(v)
+}
+
+// Convert concerts a component descriptor into ta dedicated schem version.
+// If the serialization version is left blank, the schema version configured in the
+// component descriptor will be used.
+func Convert(obj *ComponentDescriptor, opts ...EncodeOption) (ComponentDescriptorVersion, error) {
+	o := (&EncodeOptions{}).ApplyOptions(opts).DefaultFor(obj)
 	cv := DefaultSchemes[o.SchemaVersion]
 	if cv == nil {
 		if cv == nil {
 			return nil, errors.ErrNotSupported(errors.KIND_SCHEMAVERSION, o.SchemaVersion)
 		}
 	}
-	v, err := cv.ConvertFrom(obj)
-	if err != nil {
-		return nil, err
-	}
-	return o.Codec.Encode(v)
+	return cv.ConvertFrom(obj)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

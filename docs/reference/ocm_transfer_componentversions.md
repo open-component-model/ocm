@@ -77,6 +77,7 @@ target archive to use. The following formats are supported:
 - tar
 - tgz
 The default format is <code>directory</code>.
+
 With the option <code>--closure</code> the complete reference tree of a component reference is traversed.
 
 It the option <code>--overwrite</code> is given, component version in the

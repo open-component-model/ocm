@@ -28,6 +28,7 @@ target archive to use. The following formats are supported:
 - tar
 - tgz
 The default format is <code>directory</code>.
+
 It the option <code>--overwrite</code> is given, component version in the
 target repository will be overwritten, if they already exist.
 

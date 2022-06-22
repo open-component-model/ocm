@@ -262,8 +262,6 @@ func (this Outputs) AddManifestOutputs() Outputs {
 	return this
 }
 
-type ChainFunction func(opts *Options) processing.ProcessChain
-
 func (this Outputs) AddChainedManifestOutputs(chain ChainFunction) Outputs {
 	this["yaml"] = func(opts *Options) Output {
 		return NewProcessingYAMLOutput(opts.Context, chain(opts))

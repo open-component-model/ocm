@@ -13,6 +13,7 @@ ocm get componentversions [<options>] {<component-reference>}
   -h, --help               help for componentversions
   -o, --output string      output mode (JSON, json, tree, wide, yaml)
   -r, --repo string        repository name or spec
+  -S, --scheme string      schema version
   -s, --sort stringArray   sort fields
 ```
 
@@ -68,6 +69,12 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `ociRegistry`
 
 With the option <code>--closure</code> the complete reference tree of a component reference is traversed.
+
+It the option <code>--scheme</code> is given, the given component descriptor is converted to given format for output.
+The following schema versions are supported:
+
+  - <code>ocm.gardener.cloud/v3</code>
+  - <code>v2</code>
 
 With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:

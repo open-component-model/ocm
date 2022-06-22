@@ -12,19 +12,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package utils
+package output
 
 import (
-	"fmt"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 )
 
-func FormatList(def string, elems ...string) string {
-	names := ""
-	for _, n := range elems {
-		names = fmt.Sprintf("%s\n  - <code>%s</code>", names, n)
-		if n == def {
-			names += " (default)"
+type ChainFunction func(opts *Options) processing.ProcessChain
+
+func ComposeChain(funcs ...ChainFunction) ChainFunction {
+	return func(opts *Options) processing.ProcessChain {
+		var chain processing.ProcessChain
+		for _, f := range funcs {
+			chain = processing.Append(chain, f(opts))
 		}
+		return chain
 	}
-	return names+"\n"
 }

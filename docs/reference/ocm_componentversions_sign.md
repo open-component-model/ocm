@@ -15,7 +15,7 @@ ocm componentversions sign [<options>] {<component-reference>}
   -N, --normalization string      normalization algorithm (default "jsonNormalisation/v1")
   -K, --private-key stringArray   private key setting
   -k, --public-key stringArray    public key setting
-  -R, --recursive                 recursivly sign component versions (default true)
+  -R, --recursive                 recursively sign component versions (default true)
   -r, --repo string               repository name or spec
   -s, --signature stringArray     signature name
       --update                    update digest in component versions (default true)
@@ -91,16 +91,19 @@ The following signing types are supported with option <code>--algorithm</code>:
   - <code>RSASSA-PKCS1-V1_5</code> (default)
   - <code>rsa-signingsservice</code>
 
+
 The following normalization modes are supported with option <code>--normalization</code>:
 
   - <code>jsonNormalisation/v1</code> (default)
   - <code>jsonNormalisation/v2</code>
+
 
 The following hash modes are supported with option <code>--hash</code>:
 
   - <code>NO-DIGEST</code>
   - <code>sha256</code> (default)
   - <code>sha512</code>
+
 
 ### Examples
 

@@ -19,6 +19,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/schemaoption"
+
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -43,7 +45,6 @@ type Command struct {
 
 	providerattrs []string
 
-	Format  formatoption.Option
 	Handler comparch.FormatHandler
 	Force   bool
 	Path    string
@@ -53,12 +54,11 @@ type Command struct {
 	Provider       string
 	ProviderLabels metav1.Labels
 	Labels         metav1.Labels
-	Schema         string
 }
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx)}, utils.Names(Names, names...)...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, formatoption.New(), schemaoption.New(compdesc.DefaultSchemeVersion))}, utils.Names(Names, names...)...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -69,27 +69,23 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Long: `
 Create a new component archive. This might be either a directory prepared
 to host component version content or a tar/tgz file.
-With option <code>-S</code> it is possible to specify the intended scheme version.
-The following versions are currently supported:
-` + utils.FormatList(compdesc.DefaultSchemeVersion, compdesc.DefaultSchemes.Names()...) + "\n",
+`,
 	}
 }
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
-	o.Format.AddFlags(fs)
+	o.BaseCommand.AddFlags(fs)
 	fs.BoolVarP(&o.Force, "force", "f", false, "remove existing content")
 	fs.StringArrayVarP(&o.providerattrs, "provider", "p", nil, "provider attribute")
-	fs.StringVarP(&o.Schema, "scheme", "S", compdesc.DefaultSchemeVersion, "schema version")
 }
 
 func (o *Command) Complete(args []string) error {
-	err := o.Format.Complete(o.Context)
-	if err != nil {
-		return err
-	}
-	o.Handler = comparch.GetFormat(o.Format.Format)
+	var err error
+
+	format := formatoption.From(o).Format
+	o.Handler = comparch.GetFormat(format)
 	if o.Handler == nil {
-		return accessio.ErrInvalidFileFormat(o.Format.Format.String())
+		return accessio.ErrInvalidFileFormat(format.String())
 	}
 
 	o.Component = args[0]
@@ -109,19 +105,11 @@ func (o *Command) Complete(args []string) error {
 			return err
 		}
 	}
-	s := compdesc.DefaultSchemes[o.Schema]
-	if s == nil {
-		s = compdesc.DefaultSchemes[metav1.GROUP+"/"+o.Schema]
-		o.Schema = metav1.GROUP + "/" + o.Schema
-	}
-	if s == nil {
-		return errors.ErrUnknown(errors.KIND_SCHEMAVERSION, o.Schema)
-	}
 	return nil
 }
 
 func (o *Command) Run() error {
-	mode := o.Format.Mode()
+	mode := formatoption.From(o).Mode()
 	fs := o.Context.FileSystem()
 	if ok, err := vfs.Exists(fs, o.Path); ok || err != nil {
 		if err != nil {
@@ -139,7 +127,7 @@ func (o *Command) Run() error {
 		return err
 	}
 	desc := obj.GetDescriptor()
-	desc.Metadata.ConfiguredVersion = o.Schema
+	desc.Metadata.ConfiguredVersion = schemaoption.From(o).Schema
 	desc.Name = o.Component
 	desc.Version = o.Version
 	desc.Provider.Name = metav1.ProviderName(o.Provider)
