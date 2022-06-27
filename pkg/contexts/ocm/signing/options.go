@@ -15,6 +15,7 @@
 package signing
 
 import (
+	"crypto/x509"
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -178,6 +179,34 @@ func (o *registry) ApplySigningOption(opts *Options) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type issuer struct {
+	name string
+}
+
+func Issuer(name string) Option {
+	return &issuer{name}
+}
+
+func (o *issuer) ApplySigningOption(opts *Options) {
+	opts.Issuer = o.name
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type rootverts struct {
+	pool *x509.CertPool
+}
+
+func RootCertificates(pool *x509.CertPool) Option {
+	return &rootverts{pool}
+}
+
+func (o *rootverts) ApplySigningOption(opts *Options) {
+	opts.RootCerts = o.pool
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type privkey struct {
 	name string
 	key  interface{}
@@ -219,7 +248,9 @@ type Options struct {
 	Recursively       bool
 	Verify            bool
 	Signer            signing.Signer
+	Issuer            string
 	VerifySignature   bool
+	RootCerts         *x509.CertPool
 	Hasher            signing.Hasher
 	Keys              signing.KeyRegistry
 	Registry          signing.Registry
@@ -269,6 +300,9 @@ func (o *Options) ApplySigningOption(opts *Options) {
 			opts.SkipAccessTypes[k] = v
 		}
 	}
+	if o.Issuer != "" {
+		opts.Issuer = o.Issuer
+	}
 	opts.Recursively = o.Recursively
 	opts.Update = o.Update
 	opts.Verify = o.Verify
@@ -298,15 +332,24 @@ func (o *Options) Complete(registry signing.Registry) error {
 	if o.VerifySignature {
 		if len(o.SignatureNames) > 0 {
 			for _, n := range o.SignatureNames {
-				if o.PublicKey(n) == nil {
+				if pub := o.PublicKey(n); pub == nil {
 					return errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, n)
+				} else {
+					err := o.checkCert(pub, n)
+					if err != nil {
+						return err
+					}
 				}
 			}
 		}
 	} else {
 		if o.Signer != nil {
-			if o.PublicKey(o.SignatureName()) != nil {
+			if pub := o.PublicKey(o.SignatureName()); pub != nil {
 				o.VerifySignature = true
+				err := o.checkCert(pub, o.SignatureName())
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -317,6 +360,18 @@ func (o *Options) Complete(registry signing.Registry) error {
 	}
 	if o.Hasher == nil {
 		o.Hasher = o.Registry.GetHasher(sha256.Algorithm)
+	}
+	return nil
+}
+
+func (o *Options) checkCert(data interface{}, name string) error {
+	cert, err := signing.GetCertificate(data)
+	if err != nil {
+		return nil
+	}
+	err = signing.VerifyCert(nil, o.RootCerts, "", cert)
+	if err != nil {
+		return errors.Wrapf(err, "public key %q", name)
 	}
 	return nil
 }

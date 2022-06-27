@@ -23,27 +23,27 @@ import (
 	"io"
 )
 
-func GetPublicKey(key interface{}) (*rsa.PublicKey, error) {
+func GetPublicKey(key interface{}) (*rsa.PublicKey, []string, error) {
 	var err error
 	if data, ok := key.([]byte); ok {
 		key, err = ParseKey(data)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 	switch k := key.(type) {
 	case *rsa.PublicKey:
-		return k, nil
+		return k, nil, nil
 	case *rsa.PrivateKey:
-		return &k.PublicKey, nil
+		return &k.PublicKey, nil, nil
 	case *x509.Certificate:
 		switch p := k.PublicKey.(type) {
 		case *rsa.PublicKey:
-			return p, nil
+			return p, k.DNSNames, nil
 		}
-		return nil, fmt.Errorf("unknown key public key %T in certificate", k)
+		return nil, nil, fmt.Errorf("unknown key public key %T in certificate", k)
 	default:
-		return nil, fmt.Errorf("unknown key specification %T", k)
+		return nil, nil, fmt.Errorf("unknown key specification %T", k)
 	}
 }
 
@@ -98,6 +98,8 @@ func ParseKey(data []byte) (interface{}, error) {
 	switch block.Type {
 	case "RSA PRIVATE KEY":
 		return x509.ParsePKCS1PrivateKey(block.Bytes)
+	case "CERTIFICATE":
+		return x509.ParseCertificate(block.Bytes)
 	}
 	return ParsePublicKey(data)
 }
@@ -113,7 +115,6 @@ func ParsePublicKey(data []byte) (interface{}, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse DER encoded public key: %s", err)
 		}
-		return pub, nil
 	}
 	switch pub := pub.(type) {
 	case *rsa.PublicKey:

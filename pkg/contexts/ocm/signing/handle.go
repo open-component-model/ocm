@@ -170,7 +170,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 				printer.Printf("Warning: no verifier (%s) found for signature %q in %s\n", sig.Signature.Algorithm, n, state.History)
 				continue
 			}
-			err = verifier.Verify(sig.Digest.Value, sig.Signature.Value, sig.Signature.MediaType, pub)
+			err = verifier.Verify(sig.Digest.Value, sig.ConvertToSigning(), pub)
 			if err != nil {
 				return nil, errors.ErrInvalidWrap(err, compdesc.KIND_SIGNATURE, sig.Signature.Algorithm, state.History.String())
 			}
@@ -188,6 +188,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed signing component descriptor %s ", state.History)
 		}
+		sig.Issuer = opts.Issuer
 		signature := metav1.Signature{
 			Name:   opts.SignatureName(),
 			Digest: *spec,
@@ -195,6 +196,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 				Algorithm: sig.Algorithm,
 				Value:     sig.Value,
 				MediaType: sig.MediaType,
+				Issuer:    sig.Issuer,
 			},
 		}
 		if found >= 0 {

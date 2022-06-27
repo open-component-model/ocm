@@ -83,20 +83,20 @@ func (h Handler) Sign(digest string, key interface{}) (signature *signing.Signat
 }
 
 // Verify checks the signature, returns an error on verification failure
-func (h Handler) Verify(digest string, signature string, mediatype string, key interface{}) (err error) {
+func (h Handler) Verify(digest string, signature *signing.Signature, key interface{}) (err error) {
 	var signatureBytes []byte
-	publicKey, err := GetPublicKey(key)
+	publicKey, names, err := GetPublicKey(key)
 	if err != nil {
 		return err
 	}
-	switch mediatype {
+	switch signature.MediaType {
 	case MediaType:
-		signatureBytes, err = hex.DecodeString(signature)
+		signatureBytes, err = hex.DecodeString(signature.Value)
 		if err != nil {
 			return fmt.Errorf("unable to get signature value: failed decoding hash %s: %w", digest, err)
 		}
 	case MediaTypePEM:
-		signaturePemBlocks, err := GetSignaturePEMBlocks([]byte(signature))
+		signaturePemBlocks, err := GetSignaturePEMBlocks([]byte(signature.Value))
 		if err != nil {
 			return fmt.Errorf("unable to get signature pem blocks: %w", err)
 		}
@@ -105,12 +105,27 @@ func (h Handler) Verify(digest string, signature string, mediatype string, key i
 		}
 		signatureBytes = signaturePemBlocks[0].Bytes
 	default:
-		return fmt.Errorf("invalid signature mediaType %s", mediatype)
+		return fmt.Errorf("invalid signature mediaType %s", signature.MediaType)
 	}
 
 	decodedHash, err := hex.DecodeString(digest)
 	if err != nil {
 		return fmt.Errorf("failed decoding hash %s: %w", digest, err)
+	}
+
+	if names != nil {
+		if signature.Issuer != "" {
+			found := false
+			for _, n := range names {
+				if n == signature.Issuer {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return fmt.Errorf("issuer %q does not match %v", signature.Issuer, names)
+			}
+		}
 	}
 	// ensure length of hash is correct
 	//if len(decodedHash) != 32 {

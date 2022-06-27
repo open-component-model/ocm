@@ -26,5 +26,5 @@ func FormatList(def string, elems ...string) string {
 			names += " (default)"
 		}
 	}
-	return names+"\n"
+	return names + "\n"
 }

@@ -10,8 +10,10 @@ ocm ocm componentversions sign [<options>] {<component-reference>}
 
 ```
   -S, --algorithm string          signature handler (default "RSASSA-PKCS1-V1_5")
+      --ca-cert stringArray       Additional root certificates
   -H, --hash string               hash algorithm (default "sha256")
   -h, --help                      help for sign
+  -I, --issuer string             issuer name
   -N, --normalization string      normalization algorithm (default "jsonNormalisation/v1")
   -K, --private-key stringArray   private key setting
   -k, --public-key stringArray    public key setting

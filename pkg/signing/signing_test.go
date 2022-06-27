@@ -45,7 +45,7 @@ var _ = Describe("normalization", func() {
 		Expect(err).To(Succeed())
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))
 
-		Expect(registry.GetVerifier(rsa.Algorithm).Verify(data, sig.Value, sig.MediaType, registry.GetPublicKey(NAME))).To(Succeed())
-		Expect(registry.GetVerifier(rsa.Algorithm).Verify(hex.EncodeToString([]byte("Test")), sig.Value, sig.MediaType, registry.GetPublicKey(NAME))).To(HaveOccurred())
+		Expect(registry.GetVerifier(rsa.Algorithm).Verify(data, sig, registry.GetPublicKey(NAME))).To(Succeed())
+		Expect(registry.GetVerifier(rsa.Algorithm).Verify(hex.EncodeToString([]byte("Test")), sig, registry.GetPublicKey(NAME))).To(HaveOccurred())
 	})
 })

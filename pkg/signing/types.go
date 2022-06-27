@@ -15,6 +15,7 @@
 package signing
 
 import (
+	"encoding/json"
 	"hash"
 )
 
@@ -22,6 +23,12 @@ type Signature struct {
 	Value     string
 	MediaType string
 	Algorithm string
+	Issuer    string
+}
+
+func (s *Signature) String() string {
+	data, _ := json.Marshal(s)
+	return string(data)
 }
 
 // Signer interface is used to implement different signing algorithms.
@@ -39,7 +46,7 @@ type Signer interface {
 // Each Verifier should have a matching Signer.
 type Verifier interface {
 	// Verify checks the signature, returns an error on verification failure
-	Verify(digest string, signature string, mediatype string, publickey interface{}) error
+	Verify(digest string, sig *Signature, publickey interface{}) error
 	Algorithm() string
 }
 

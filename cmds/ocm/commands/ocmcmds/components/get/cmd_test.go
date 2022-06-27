@@ -16,9 +16,12 @@ package get_test
 
 import (
 	"bytes"
+	"fmt"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	compdescv3 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud/v3alpha1"
 
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -126,11 +129,11 @@ NESTING    REFERENCEPATH COMPONENT VERSION PROVIDER   IDENTITY
 		It("lists converted yaml", func() {
 
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("get", "components", "-S", "v3", "-o", "yaml", "--repo", ARCH, COMP2)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("get", "components", "-S", compdescv3.SchemaVersion, "-o", "yaml", "--repo", ARCH, COMP2)).To(Succeed())
 			Expect("\n" + buf.String()).To(Equal(
-				`
+				fmt.Sprintf(`
 ---
-apiVersion: ocm.gardener.cloud/v3
+apiVersion: ocm.gardener.cloud/%s
 kind: ComponentVersion
 metadata:
   name: test.de/y
@@ -143,7 +146,7 @@ spec:
   - componentName: test.de/x
     name: xx
     version: v1
-`))
+`, compdescv3.SchemaVersion)))
 		})
 	})
 })

@@ -73,7 +73,7 @@ With the option <code>--closure</code> the complete reference tree of a componen
 It the option <code>--scheme</code> is given, the given component descriptor is converted to given format for output.
 The following schema versions are supported:
 
-  - <code>ocm.gardener.cloud/v3</code>
+  - <code>ocm.gardener.cloud/v3alpha1</code>
   - <code>v2</code>
 
 With the option <code>--output</code> the output mode can be selected.

@@ -20,7 +20,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	compdescv3 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud/v3"
+	compdescv3 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud/v3alpha1"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 )
@@ -95,8 +95,8 @@ var _ = Describe("serialization", func() {
     schemaVersion: v2 
 `)
 
-	var CDv3 = NormalizeYAML(`
-apiVersion: ocm.gardener.cloud/v3
+	var CDv3 = NormalizeYAML(fmt.Sprintf(`
+apiVersion: ocm.gardener.cloud/%s
 kind: ComponentVersion
 metadata:
   name: github.com/vasu1124/introspect
@@ -154,7 +154,8 @@ spec:
     name: introspect
     type: git
     version: 1.0.0
-`)
+`, compdescv3.SchemaVersion))
+
 	It("deserializes v2", func() {
 
 		cd, err := compdesc.Decode([]byte(CDv2))
@@ -166,7 +167,7 @@ spec:
 		Expect(string(data)).To(Equal(CDv2))
 	})
 
-	It("deserializes v3", func() {
+	It("deserializes "+compdescv3.SchemaVersion, func() {
 
 		cd, err := compdesc.Decode([]byte(CDv2))
 		Expect(err).To(Succeed())

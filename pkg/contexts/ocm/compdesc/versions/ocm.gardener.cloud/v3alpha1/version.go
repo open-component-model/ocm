@@ -12,17 +12,17 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package compdescv3
+package v3alpha1
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud/v3/jsonscheme"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud/v3alpha1/jsonscheme"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const SchemaVersion = "v3"
+const SchemaVersion = "v3alpha1"
 const GroupVersion = metav1.GROUP + "/" + SchemaVersion
 const Kind = metav1.KIND
 

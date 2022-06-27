@@ -12,66 +12,59 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package main
+package signing_test
 
 import (
-	"crypto/sha256"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"encoding/hex"
-	"fmt"
 	"time"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
-func CheckErr(err error, msg string, args ...interface{}) {
-	if err != nil {
-		panic(errors.Wrapf(err, msg, args...))
-	}
-}
-
-func main() {
+var _ = Describe("normalization", func() {
 
 	capriv, capub, err := rsa.Handler{}.CreateKeyPair()
-
-	CheckErr(err, "ca keypair")
+	Expect(err).To(Succeed())
 
 	subject := pkix.Name{
 		CommonName: "ca-authority",
 	}
 	caData, err := signing.CreateCertificate(subject, nil, 10*time.Hour, capub, nil, capriv, true)
-	CheckErr(err, "ca cert")
-
+	Expect(err).To(Succeed())
 	ca, err := x509.ParseCertificate(caData)
-	CheckErr(err, "ca")
+	Expect(err).To(Succeed())
 
-	priv, pub, err := rsa.Handler{}.CreateKeyPair()
-	CheckErr(err, "keypair")
+	_, pub, err := rsa.Handler{}.CreateKeyPair()
+	Expect(err).To(Succeed())
 
 	subject = pkix.Name{
 		CommonName:    "mandelsoft",
-		StreetAddress: []string{"some street 24"},
+		StreetAddress: []string{"some street 21"},
 	}
 	certData, err := signing.CreateCertificate(subject, nil, 10*time.Hour, pub, ca, capriv, false)
-	CheckErr(err, "ca cert")
+	Expect(err).To(Succeed())
 
 	cert, err := x509.ParseCertificate(certData)
-	CheckErr(err, "ca cert")
+	Expect(err).To(Succeed())
 
 	pool := x509.NewCertPool()
 	pool.AddCert(ca)
-	err = signing.VerifyCert(nil, pool, "mandelsoft", cert)
-	CheckErr(err, "verify cert")
 
-	err = signing.VerifyCert(nil, pool, "", cert)
-	CheckErr(err, "verify anon cert")
-
-	digest := sha256.New().Sum([]byte("test"))
-	sig, err := rsa.Handler{}.Sign(hex.EncodeToString(digest), priv)
-	CheckErr(err, "sign")
-
-	fmt.Printf("sig: %s\n", sig)
-}
+	It("verifies for issuer", func() {
+		err = signing.VerifyCert(nil, pool, "mandelsoft", cert)
+		Expect(err).To(Succeed())
+	})
+	It("verifies for anonymous", func() {
+		err = signing.VerifyCert(nil, pool, "", cert)
+		Expect(err).To(Succeed())
+	})
+	It("fails for wrong issuer", func() {
+		err = signing.VerifyCert(nil, pool, "x", cert)
+		Expect(err).To(HaveOccurred())
+	})
+})

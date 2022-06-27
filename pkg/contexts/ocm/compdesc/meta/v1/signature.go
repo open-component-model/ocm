@@ -16,6 +16,8 @@ package v1
 
 import (
 	"fmt"
+
+	"github.com/open-component-model/ocm/pkg/signing"
 )
 
 const (
@@ -82,6 +84,7 @@ type SignatureSpec struct {
 	Algorithm string `json:"algorithm"`
 	Value     string `json:"value"`
 	MediaType string `json:"mediaType"`
+	Issuer    string `json:"issuer,omitempty"`
 }
 
 // Signature defines a digest and corresponding signature, identifyable by name.
@@ -100,6 +103,16 @@ func (s *Signature) Copy() *Signature {
 	}
 	r := *s
 	return &r
+}
+
+// ConvertToSigning converts a cd signature to a signing signature
+func (s *Signature) ConvertToSigning() *signing.Signature {
+	return &signing.Signature{
+		Value:     s.Signature.Value,
+		MediaType: s.Signature.MediaType,
+		Algorithm: s.Signature.Algorithm,
+		Issuer:    s.Signature.Issuer,
+	}
 }
 
 //NewExcludeFromSignatureDigest returns the special digest notation to indicate the resource content should not be part of the signature

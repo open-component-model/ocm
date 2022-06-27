@@ -1,4 +1,4 @@
-$id: 'https://gardener.cloud/schemas/component-descriptor-ocm-v3'
+$id: 'https://gardener.cloud/schemas/component-descriptor-ocm-v3alpha1'
 $schema: 'https://json-schema.org/draft/2020-12/schema'
 description: 'OCM Component Descriptor v3 schema'
 definitions:
@@ -440,7 +440,7 @@ required:
 properties:
   apiVersion:
     type: 'string'
-    enum: [ 'ocm.gardener.cloud/v3' ]
+    enum: [ 'ocm.gardener.cloud/v3alpha1' ]
   kind:
     type: 'string'
     const: 'ComponentVersion'

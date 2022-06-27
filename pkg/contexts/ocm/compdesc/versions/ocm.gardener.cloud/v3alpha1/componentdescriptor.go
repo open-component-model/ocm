@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package compdescv3
+package v3alpha1
 
 import (
 	"errors"

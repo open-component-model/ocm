@@ -9,6 +9,7 @@ ocm ocm componentversions verify [<options>] {<component-reference>}
 ### Options
 
 ```
+      --ca-cert stringArray      Additional root certificates
   -h, --help                     help for verify
   -k, --public-key stringArray   public key setting
   -r, --repo string              repository name or spec

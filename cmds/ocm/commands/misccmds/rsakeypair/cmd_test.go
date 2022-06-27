@@ -55,7 +55,7 @@ created rsa key pair key.priv[key.pub]
 		Expect(sig.Algorithm).To(Equal(rsa.Algorithm))
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))
 
-		err = rsa.Handler{}.Verify(d.Hex(), sig.Value, sig.MediaType, pub)
+		err = rsa.Handler{}.Verify(d.Hex(), sig, pub)
 		Expect(err).To(Succeed())
 	})
 })

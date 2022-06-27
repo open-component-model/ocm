@@ -15,6 +15,7 @@
 package signoption
 
 import (
+	"crypto/x509"
 	"encoding/base64"
 	"strings"
 
@@ -47,11 +48,15 @@ func New(sign bool) *Option {
 }
 
 type Option struct {
+	rootca []string
+
 	SignMode      bool
 	signAlgorithm string
 	hashAlgorithm string
 	publicKeys    []string
 	privateKeys   []string
+	Issuer        string
+	RootCerts     *x509.CertPool
 	// Verify the digests
 	Verify bool
 
@@ -75,10 +80,12 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 		fs.StringVarP(&o.signAlgorithm, "algorithm", "S", rsa.Algorithm, "signature handler")
 		fs.StringVarP(&o.NormAlgorithm, "normalization", "N", jsonv1.Algorithm, "normalization algorithm")
 		fs.StringVarP(&o.hashAlgorithm, "hash", "H", sha256.Algorithm, "hash algorithm")
+		fs.StringVarP(&o.Issuer, "issuer", "I", "", "issuer name")
 		fs.BoolVarP(&o.Update, "update", "", o.SignMode, "update digest in component versions")
 		fs.BoolVarP(&o.Recursively, "recursive", "R", o.SignMode, "recursively sign component versions")
 	}
 	fs.BoolVarP(&o.Verify, "verify", "V", o.SignMode, "verify existing digests")
+	fs.StringArrayVarP(&o.rootca, "ca-cert", "", o.rootca, "Additional root certificates")
 }
 
 func (o *Option) Complete(ctx clictx.Context) error {
@@ -126,6 +133,24 @@ func (o *Option) Complete(ctx clictx.Context) error {
 	err = o.handleKeys(ctx, "private key", o.privateKeys, o.Keys.RegisterPrivateKey)
 	if err != nil {
 		return err
+	}
+
+	if len(o.rootca) > 0 {
+		pool, err := signing.BaseRootPool()
+		if err != nil {
+			return err
+		}
+		for _, r := range o.rootca {
+			data, err := vfs.ReadFile(ctx.FileSystem(), r)
+			if err != nil {
+				return errors.Wrapf(err, "cannot read ca file %q", r)
+			}
+			ok := pool.AppendCertsFromPEM(data)
+			if !ok {
+				return errors.Newf("cannot add rot certs from %q", r)
+			}
+		}
+		o.RootCerts = pool
 	}
 	return nil
 }
@@ -216,6 +241,12 @@ func (o *Option) ApplySigningOption(opts *ocmsign.Options) {
 	opts.Keys = o.Keys
 	opts.NormalizationAlgo = o.NormAlgorithm
 	opts.Hasher = o.Hasher
+	if o.Issuer != "" {
+		opts.Issuer = o.Issuer
+	}
+	if o.RootCerts != nil {
+		opts.RootCerts = o.RootCerts
+	}
 	if len(o.SignatureNames) > 0 {
 		opts.VerifySignature = o.Keys.GetPublicKey(o.SignatureNames[0]) != nil
 	}
