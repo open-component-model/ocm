@@ -188,11 +188,17 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 	}
 	found := cd.GetSignatureIndex(opts.SignatureName())
 	if opts.DoSign() && (!opts.DoVerify() || found == -1) {
-		sig, err := opts.Signer.Sign(digest, opts.Hasher.Crypto(), opts.PrivateKey())
+		sig, err := opts.Signer.Sign(digest, opts.Hasher.Crypto(), opts.Issuer, opts.PrivateKey())
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed signing component descriptor %s ", state.History)
 		}
-		sig.Issuer = opts.Issuer
+		if sig.Issuer != "" {
+			if opts.Issuer != "" && opts.Issuer != sig.Issuer {
+				return nil, errors.Newf("signature issuer %q does not match intended issuer %q in %s", sig.Issuer, opts.Issuer, state.History)
+			}
+		} else {
+			sig.Issuer = opts.Issuer
+		}
 		signature := metav1.Signature{
 			Name:   opts.SignatureName(),
 			Digest: *spec,

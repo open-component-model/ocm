@@ -36,7 +36,7 @@ func (s *Signature) String() string {
 // Each Signer should have a matching Verifier.
 type Signer interface {
 	// Sign returns the signature for the given digest
-	Sign(digest string, hash crypto.Hash, privatekey interface{}) (*Signature, error)
+	Sign(digest string, hash crypto.Hash, issuer string, privatekey interface{}) (*Signature, error)
 	// Algorithm is the name of the finally used signature algorithm.
 	// A signer might be registered using a logical name, so there might
 	// be multiple signer registration providing the same signature algorithm

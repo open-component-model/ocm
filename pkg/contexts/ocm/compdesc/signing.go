@@ -82,7 +82,7 @@ func Sign(cd *ComponentDescriptor, privateKey interface{}, signer signing.Signer
 		return fmt.Errorf("failed getting hash for cd: %w", err)
 	}
 
-	signature, err := signer.Sign(digest, hasher.Crypto(), privateKey)
+	signature, err := signer.Sign(digest, hasher.Crypto(), issuer, privateKey)
 	if err != nil {
 		return fmt.Errorf("failed signing hash of normalised component descriptor, %w", err)
 	}

@@ -26,6 +26,8 @@ import (
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 )
 
+const ISSUER = "mandelsoft"
+
 var _ = Describe("Test Environment", func() {
 	var env *TestEnv
 
@@ -50,10 +52,11 @@ created rsa key pair key.priv[key.pub]
 		Expect(err).To(Succeed())
 
 		d := digest.FromBytes([]byte("digest"))
-		sig, err := rsa.Handler{}.Sign(d.Hex(), 0, priv)
+		sig, err := rsa.Handler{}.Sign(d.Hex(), 0, ISSUER, priv)
 		Expect(err).To(Succeed())
 		Expect(sig.Algorithm).To(Equal(rsa.Algorithm))
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))
+		Expect(sig.Issuer).To(Equal(ISSUER))
 
 		err = rsa.Handler{}.Verify(d.Hex(), 0, sig, pub)
 		Expect(err).To(Succeed())
@@ -72,10 +75,11 @@ created rsa key pair key.priv[key.cert]
 		Expect(err).To(Succeed())
 
 		d := digest.FromBytes([]byte("digest"))
-		sig, err := rsa.Handler{}.Sign(d.Hex(), 0, priv)
+		sig, err := rsa.Handler{}.Sign(d.Hex(), 0, "mandelsoft", priv)
 		Expect(err).To(Succeed())
 		Expect(sig.Algorithm).To(Equal(rsa.Algorithm))
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))
+		Expect(sig.Issuer).To(Equal(ISSUER))
 
 		err = rsa.Handler{}.Verify(d.Hex(), 0, sig, pub)
 		Expect(err).To(Succeed())

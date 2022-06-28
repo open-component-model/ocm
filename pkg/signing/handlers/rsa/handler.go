@@ -59,7 +59,7 @@ func (h Handler) Algorithm() string {
 	return Algorithm
 }
 
-func (h Handler) Sign(digest string, hash crypto.Hash, key interface{}) (signature *signing.Signature, err error) {
+func (h Handler) Sign(digest string, hash crypto.Hash, issuer string, key interface{}) (signature *signing.Signature, err error) {
 	privateKey, err := GetPrivateKey(key)
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid rsa private key")
@@ -80,6 +80,7 @@ func (h Handler) Sign(digest string, hash crypto.Hash, key interface{}) (signatu
 		Value:     hex.EncodeToString(sig),
 		MediaType: MediaType,
 		Algorithm: Algorithm,
+		Issuer:    issuer,
 	}, nil
 }
 

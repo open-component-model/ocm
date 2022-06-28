@@ -47,7 +47,7 @@ func NewSigningClient(url string, username, password string) (*SigningServerSign
 	}, nil
 }
 
-func (signer *SigningServerSigner) Sign(algo string, digest string, key interface{}) (*signing.Signature, error) {
+func (signer *SigningServerSigner) Sign(algo string, digest string, issuer string, key interface{}) (*signing.Signature, error) {
 	decodedHash, err := hex.DecodeString(digest)
 	if err != nil {
 		return nil, fmt.Errorf("failed decoding hash: %w", err)
@@ -103,5 +103,6 @@ func (signer *SigningServerSigner) Sign(algo string, digest string, key interfac
 		Value:     string(encodedSignature),
 		MediaType: MediaTypePEM,
 		Algorithm: algorithm,
+		Issuer:    issuer,
 	}, nil
 }
