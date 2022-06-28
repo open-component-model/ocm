@@ -58,4 +58,26 @@ created rsa key pair key.priv[key.pub]
 		err = rsa.Handler{}.Verify(d.Hex(), sig, pub)
 		Expect(err).To(Succeed())
 	})
+
+	It("create self-signed key pair", func() {
+
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "key.priv", "CN=mandelsoft")).To(Succeed())
+		Expect("\n" + buf.String()).To(Equal(`
+created rsa key pair key.priv[key.cert]
+`))
+		priv, err := env.ReadFile("key.priv")
+		Expect(err).To(Succeed())
+		pub, err := env.ReadFile("key.cert")
+		Expect(err).To(Succeed())
+
+		d := digest.FromBytes([]byte("digest"))
+		sig, err := rsa.Handler{}.Sign(d.Hex(), priv)
+		Expect(err).To(Succeed())
+		Expect(sig.Algorithm).To(Equal(rsa.Algorithm))
+		Expect(sig.MediaType).To(Equal(rsa.MediaType))
+
+		err = rsa.Handler{}.Verify(d.Hex(), sig, pub)
+		Expect(err).To(Succeed())
+	})
 })

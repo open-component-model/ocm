@@ -18,13 +18,13 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"encoding/pem"
 	"fmt"
 	"math/big"
 	"net"
 	"runtime"
 	"time"
 
+	parse "github.com/mandelsoft/spiff/dynaml/x509"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -42,15 +42,16 @@ func GetCertificate(data interface{}) (*x509.Certificate, error) {
 	}
 }
 
+func ParsePublicKey(data []byte) (interface{}, error) {
+	return parse.ParsePublicKey(string(data))
+}
+
+func ParsePrivateKey(data string) (interface{}, error) {
+	return parse.ParsePrivateKey(string(data))
+}
+
 func ParseCertificate(data []byte) (*x509.Certificate, error) {
-	block, _ := pem.Decode(data)
-	if block == nil {
-		return nil, fmt.Errorf("invalid certificate format (expected pem block)")
-	}
-	if block.Type != "CERTIFICATE" {
-		return nil, fmt.Errorf("unexpected pem block type for certificate: %q", block.Type)
-	}
-	return x509.ParseCertificate(block.Bytes)
+	return parse.ParseCertificate(string(data))
 }
 
 func IntermediatePool(pemfile string, fss ...vfs.FileSystem) (*x509.CertPool, error) {
@@ -125,6 +126,13 @@ func VerifyCert(intermediate, root *x509.CertPool, cn string, cert *x509.Certifi
 	}
 	_, err := cert.Verify(opts)
 	if err != nil {
+		if cn != "" {
+			opts.DNSName = ""
+			_, err2 := cert.Verify(opts)
+			if err2 == nil && cert.Subject.CommonName == cn {
+				return nil
+			}
+		}
 		return err
 	}
 	if cert.KeyUsage&x509.KeyUsageDigitalSignature != 0 {

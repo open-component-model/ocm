@@ -1,5 +1,5 @@
 
-- [ ] Transfer should support force option for override
+- [X] Transfer should support force option for override
 - [ ] Clarify how to list digests in (oci) ctf and artefact set under common oci API abstraction
 - [ ] Align OCI and OCM Repository Name with type structure and reference syntax
 - [ ] Aligned Denotation for OCM and OCI elements
@@ -12,8 +12,8 @@
 - [ ] Better separation between typehandler/chain and chain/output
 - [X] Rework digest handling based on Resource Type and Access Method Spec
   - first cut and reorg done
-- [ ] Complete handling of all possible input variations for the various CLI commands.
-- [ ] Add signature handling
+- [X] Complete handling of all possible input variations for the various CLI commands.
+- [X] Add signature handling
 - [ ] Identify required scenarios for OCM transport handling and improve transport handler accordingly
 - [ ] Add type factories for generic spec
 - [ ] Provide size and digest info for OCM blob access

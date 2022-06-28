@@ -39,32 +39,58 @@ var _ = Describe("normalization", func() {
 	ca, err := x509.ParseCertificate(caData)
 	Expect(err).To(Succeed())
 
-	_, pub, err := rsa.Handler{}.CreateKeyPair()
+	priv, pub, err := rsa.Handler{}.CreateKeyPair()
 	Expect(err).To(Succeed())
 
 	subject = pkix.Name{
 		CommonName:    "mandelsoft",
 		StreetAddress: []string{"some street 21"},
 	}
-	certData, err := signing.CreateCertificate(subject, nil, 10*time.Hour, pub, ca, capriv, false)
-	Expect(err).To(Succeed())
 
-	cert, err := x509.ParseCertificate(certData)
-	Expect(err).To(Succeed())
-
-	pool := x509.NewCertPool()
-	pool.AddCert(ca)
-
-	It("verifies for issuer", func() {
-		err = signing.VerifyCert(nil, pool, "mandelsoft", cert)
+	Context("foreignly signed", func() {
+		certData, err := signing.CreateCertificate(subject, nil, 10*time.Hour, pub, ca, capriv, false)
 		Expect(err).To(Succeed())
-	})
-	It("verifies for anonymous", func() {
-		err = signing.VerifyCert(nil, pool, "", cert)
+
+		cert, err := x509.ParseCertificate(certData)
 		Expect(err).To(Succeed())
+
+		pool := x509.NewCertPool()
+		pool.AddCert(ca)
+
+		It("verifies for issuer", func() {
+			err = signing.VerifyCert(nil, pool, "mandelsoft", cert)
+			Expect(err).To(Succeed())
+		})
+		It("verifies for anonymous", func() {
+			err = signing.VerifyCert(nil, pool, "", cert)
+			Expect(err).To(Succeed())
+		})
+		It("fails for wrong issuer", func() {
+			err = signing.VerifyCert(nil, pool, "x", cert)
+			Expect(err).To(HaveOccurred())
+		})
 	})
-	It("fails for wrong issuer", func() {
-		err = signing.VerifyCert(nil, pool, "x", cert)
-		Expect(err).To(HaveOccurred())
+	Context("self signed", func() {
+		certData, err := signing.CreateCertificate(subject, nil, 10*time.Hour, pub, nil, priv, false)
+		Expect(err).To(Succeed())
+
+		cert, err := x509.ParseCertificate(certData)
+		Expect(err).To(Succeed())
+
+		pool := x509.NewCertPool()
+		pool.AddCert(cert)
+
+		It("verifies for issuer", func() {
+			err = signing.VerifyCert(nil, pool, "mandelsoft", cert)
+			Expect(err).To(Succeed())
+		})
+		It("verifies for anonymous", func() {
+			err = signing.VerifyCert(nil, pool, "", cert)
+			Expect(err).To(Succeed())
+		})
+		It("fails for wrong issuer", func() {
+			err = signing.VerifyCert(nil, pool, "x", cert)
+			Expect(err).To(HaveOccurred())
+		})
 	})
 })
