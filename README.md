@@ -1,6 +1,6 @@
 # Open Component Model
 
-This projects provides a go library binding for working with the
+This project provides a go library binding for working with the
 Open Component Model (OCM)
 
 It supports an extensible set of repository bindings for OCM repositories:
@@ -12,13 +12,17 @@ It supports an extensible set of repository bindings for OCM repositories:
   filesystem
 
 Additionally it provides a generic solution
-- sign component version in any support OCM repository implementation and verify
-  signatures
+- to sign component version in any supported OCM repository implementation and
+  verify signatures based on public keys or verified certificates.
 - to transport component versions, per reference or as value among any of those 
   repository implementations.
 
-This functionally is additionally put into a command line interface, the 
-[`ocm` tool](docs/reference/ocm.md), which supports makes it easy to use the
-complete functionality on the command line. This makes is easy to embed the
-creation of component versions in build processes, for example in a 
+This functionally is additionally put into a command line tool
+([package `cmds/ocm`](cmds/ocm)), the 
+[`ocm` tool](docs/reference/ocm.md), which provides the
+most of the functionality of the library on the command line. This makes is easy
+to embed the creation of component versions in build processes, for example in a 
 [*makefile*](examples/make/Makefile).
+
+The OCI and OCM support can be found in packages
+[`pkg/contexts/oci`](pkg/contexts/oci) and [`pkg/contexts/ocm`](pkg/contexts/ocm).
