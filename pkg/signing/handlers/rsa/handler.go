@@ -15,6 +15,7 @@
 package rsa
 
 import (
+	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/hex"
@@ -58,7 +59,7 @@ func (h Handler) Algorithm() string {
 	return Algorithm
 }
 
-func (h Handler) Sign(digest string, key interface{}) (signature *signing.Signature, err error) {
+func (h Handler) Sign(digest string, hash crypto.Hash, key interface{}) (signature *signing.Signature, err error) {
 	privateKey, err := GetPrivateKey(key)
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid rsa private key")
@@ -71,7 +72,7 @@ func (h Handler) Sign(digest string, key interface{}) (signature *signing.Signat
 	//if len(decodedHash) != 32 {
 	//	return "", "", fmt.Errorf("hash to sign has invalid length")
 	//}
-	sig, err := rsa.SignPKCS1v15(rand.Reader, privateKey, 0, decodedHash)
+	sig, err := rsa.SignPKCS1v15(rand.Reader, privateKey, hash, decodedHash)
 	if err != nil {
 		return nil, fmt.Errorf("failed signing hash, %w", err)
 	}
@@ -83,7 +84,7 @@ func (h Handler) Sign(digest string, key interface{}) (signature *signing.Signat
 }
 
 // Verify checks the signature, returns an error on verification failure
-func (h Handler) Verify(digest string, signature *signing.Signature, key interface{}) (err error) {
+func (h Handler) Verify(digest string, hash crypto.Hash, signature *signing.Signature, key interface{}) (err error) {
 	var signatureBytes []byte
 	publicKey, names, err := GetPublicKey(key)
 	if err != nil {
@@ -131,7 +132,7 @@ func (h Handler) Verify(digest string, signature *signing.Signature, key interfa
 	//if len(decodedHash) != 32 {
 	//	return fmt.Errorf("hash to verify has invalid length")
 	//}
-	if err := rsa.VerifyPKCS1v15(publicKey, 0, decodedHash, signatureBytes); err != nil {
+	if err := rsa.VerifyPKCS1v15(publicKey, hash, decodedHash, signatureBytes); err != nil {
 		return fmt.Errorf("signature verification failed, %w", err)
 	}
 	return nil

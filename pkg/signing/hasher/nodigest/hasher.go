@@ -15,6 +15,7 @@
 package nodigest
 
 import (
+	"crypto"
 	"hash"
 
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -40,4 +41,8 @@ func (h Handler) Algorithm() string {
 // Create creates a Hasher instance for sha256
 func (_ Handler) Create() hash.Hash {
 	return nil
+}
+
+func (_ Handler) Crypto() crypto.Hash {
+	return 0
 }

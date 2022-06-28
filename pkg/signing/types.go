@@ -15,6 +15,7 @@
 package signing
 
 import (
+	"crypto"
 	"encoding/json"
 	"hash"
 )
@@ -35,8 +36,8 @@ func (s *Signature) String() string {
 // Each Signer should have a matching Verifier.
 type Signer interface {
 	// Sign returns the signature for the given digest
-	Sign(digest string, privatekey interface{}) (*Signature, error)
-	// Algirith is the name of the finally used signature algorithm.
+	Sign(digest string, hash crypto.Hash, privatekey interface{}) (*Signature, error)
+	// Algorithm is the name of the finally used signature algorithm.
 	// A signer might be registered using a logical name, so there might
 	// be multiple signer registration providing the same signature algorithm
 	Algorithm() string
@@ -46,7 +47,7 @@ type Signer interface {
 // Each Verifier should have a matching Signer.
 type Verifier interface {
 	// Verify checks the signature, returns an error on verification failure
-	Verify(digest string, sig *Signature, publickey interface{}) error
+	Verify(digest string, hash crypto.Hash, sig *Signature, publickey interface{}) error
 	Algorithm() string
 }
 
@@ -61,4 +62,5 @@ type SignatureHandler interface {
 type Hasher interface {
 	Algorithm() string
 	Create() hash.Hash
+	Crypto() crypto.Hash
 }

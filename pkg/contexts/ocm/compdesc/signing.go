@@ -82,7 +82,7 @@ func Sign(cd *ComponentDescriptor, privateKey interface{}, signer signing.Signer
 		return fmt.Errorf("failed getting hash for cd: %w", err)
 	}
 
-	signature, err := signer.Sign(digest, privateKey)
+	signature, err := signer.Sign(digest, hasher.Crypto(), privateKey)
 	if err != nil {
 		return fmt.Errorf("failed signing hash of normalised component descriptor, %w", err)
 	}
@@ -122,16 +122,14 @@ func Verify(cd *ComponentDescriptor, registry signing.Registry, signatureName st
 		return errors.ErrNotFound(KIND_PUBLIC_KEY, signatureName)
 	}
 
-	//Verify author of signature
-	err := verifier.Verify(matchingSignature.Digest.Value, matchingSignature.ConvertToSigning(), publicKey)
-	if err != nil {
-		return fmt.Errorf("failed verifying: %w", err)
-	}
-
-	//get hasher by algorithm name
 	hasher := registry.GetHasher(matchingSignature.Digest.HashAlgorithm)
 	if hasher == nil {
 		return errors.ErrUnknown(KIND_HASH_ALGORITHM, matchingSignature.Digest.HashAlgorithm)
+	}
+	//Verify author of signature
+	err := verifier.Verify(matchingSignature.Digest.Value, hasher.Crypto(), matchingSignature.ConvertToSigning(), publicKey)
+	if err != nil {
+		return fmt.Errorf("failed verifying: %w", err)
 	}
 
 	hash := hasher.Create()

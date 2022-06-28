@@ -170,7 +170,11 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 				printer.Printf("Warning: no verifier (%s) found for signature %q in %s\n", sig.Signature.Algorithm, n, state.History)
 				continue
 			}
-			err = verifier.Verify(sig.Digest.Value, sig.ConvertToSigning(), pub)
+			hasher := opts.Registry.GetHasher(sig.Digest.HashAlgorithm)
+			if hasher == nil {
+				return nil, errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, sig.Digest.HashAlgorithm, state.History.String())
+			}
+			err = verifier.Verify(sig.Digest.Value, hasher.Crypto(), sig.ConvertToSigning(), pub)
 			if err != nil {
 				return nil, errors.ErrInvalidWrap(err, compdesc.KIND_SIGNATURE, sig.Signature.Algorithm, state.History.String())
 			}
@@ -184,7 +188,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 	}
 	found := cd.GetSignatureIndex(opts.SignatureName())
 	if opts.DoSign() && (!opts.DoVerify() || found == -1) {
-		sig, err := opts.Signer.Sign(digest, opts.PrivateKey())
+		sig, err := opts.Signer.Sign(digest, opts.Hasher.Crypto(), opts.PrivateKey())
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed signing component descriptor %s ", state.History)
 		}

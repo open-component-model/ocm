@@ -15,6 +15,7 @@
 package rsa_signingservice
 
 import (
+	"crypto"
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -51,7 +52,7 @@ func (h Handler) Algorithm() string {
 	return Algorithm
 }
 
-func (h Handler) Sign(digest string, key interface{}) (signature *signing.Signature, err error) {
+func (h Handler) Sign(digest string, hash crypto.Hash, key interface{}) (signature *signing.Signature, err error) {
 	privateKey, err := PrivateKey(key)
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid rsa private key")

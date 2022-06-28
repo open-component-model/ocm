@@ -15,10 +15,10 @@
 package signing_test
 
 import (
-	"encoding/hex"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
@@ -32,7 +32,8 @@ var _ = Describe("normalization", func() {
 
 	It("Normalizes struct without excludes", func() {
 
-		data := hex.EncodeToString([]byte("test"))
+		hasher := registry.GetHasher(sha256.Algorithm)
+		hash, _ := signing.Hash(hasher.Create(), []byte("test"))
 
 		priv, pub, err := rsa.Handler{}.CreateKeyPair()
 		Expect(err).To(Succeed())
@@ -40,12 +41,13 @@ var _ = Describe("normalization", func() {
 		registry.RegisterPublicKey(NAME, pub)
 		registry.RegisterPrivateKey(NAME, priv)
 
-		sig, err := registry.GetSigner(rsa.Algorithm).Sign(data, registry.GetPrivateKey(NAME))
+		sig, err := registry.GetSigner(rsa.Algorithm).Sign(hash, hasher.Crypto(), registry.GetPrivateKey(NAME))
 
 		Expect(err).To(Succeed())
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))
 
-		Expect(registry.GetVerifier(rsa.Algorithm).Verify(data, sig, registry.GetPublicKey(NAME))).To(Succeed())
-		Expect(registry.GetVerifier(rsa.Algorithm).Verify(hex.EncodeToString([]byte("Test")), sig, registry.GetPublicKey(NAME))).To(HaveOccurred())
+		Expect(registry.GetVerifier(rsa.Algorithm).Verify(hash, hasher.Crypto(), sig, registry.GetPublicKey(NAME))).To(Succeed())
+		hash = "A" + hash[1:]
+		Expect(registry.GetVerifier(rsa.Algorithm).Verify(hash, hasher.Crypto(), sig, registry.GetPublicKey(NAME))).To(HaveOccurred())
 	})
 })

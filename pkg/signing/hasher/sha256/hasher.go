@@ -15,6 +15,7 @@
 package sha256
 
 import (
+	"crypto"
 	"crypto/sha256"
 	"hash"
 
@@ -40,4 +41,8 @@ func (_ Handler) Algorithm() string {
 // Create creates a Hasher instance for no digest
 func (_ Handler) Create() hash.Hash {
 	return sha256.New()
+}
+
+func (_ Handler) Crypto() crypto.Hash {
+	return crypto.SHA256
 }

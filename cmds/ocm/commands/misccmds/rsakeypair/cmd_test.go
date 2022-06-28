@@ -50,12 +50,12 @@ created rsa key pair key.priv[key.pub]
 		Expect(err).To(Succeed())
 
 		d := digest.FromBytes([]byte("digest"))
-		sig, err := rsa.Handler{}.Sign(d.Hex(), priv)
+		sig, err := rsa.Handler{}.Sign(d.Hex(), 0, priv)
 		Expect(err).To(Succeed())
 		Expect(sig.Algorithm).To(Equal(rsa.Algorithm))
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))
 
-		err = rsa.Handler{}.Verify(d.Hex(), sig, pub)
+		err = rsa.Handler{}.Verify(d.Hex(), 0, sig, pub)
 		Expect(err).To(Succeed())
 	})
 
@@ -72,12 +72,12 @@ created rsa key pair key.priv[key.cert]
 		Expect(err).To(Succeed())
 
 		d := digest.FromBytes([]byte("digest"))
-		sig, err := rsa.Handler{}.Sign(d.Hex(), priv)
+		sig, err := rsa.Handler{}.Sign(d.Hex(), 0, priv)
 		Expect(err).To(Succeed())
 		Expect(sig.Algorithm).To(Equal(rsa.Algorithm))
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))
 
-		err = rsa.Handler{}.Verify(d.Hex(), sig, pub)
+		err = rsa.Handler{}.Verify(d.Hex(), 0, sig, pub)
 		Expect(err).To(Succeed())
 	})
 })
