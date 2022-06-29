@@ -111,6 +111,14 @@ func (s *ConfigStore) Generation() int64 {
 	return s.generation
 }
 
+func (s *ConfigStore) Reset() int64 {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+	s.configs = nil
+	s.types = map[string]AppliedConfigs{}
+	return s.generation
+}
+
 func (s *ConfigStore) Apply(c Config, desc string) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
