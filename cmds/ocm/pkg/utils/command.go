@@ -26,16 +26,27 @@ import (
 	"github.com/open-component-model/ocm/pkg/out"
 )
 
-// OCMCommand is a command pattern, thta can be instantiated for a dediated
-// sub command name.
+// OCMCommand is a command pattern, that can be instantiated for a dediated
+// sub command name to create a cobra command
 type OCMCommand interface {
 	clictx.Context
+
+	// ForName create a new cobra command for the given command name.
+	// The Use attribute should omit the command name and just provide
+	// a ost argument synopsis.
+	// the complete attribute set is tweaked with the SetupCommand function
+	// which calls this method.
+	// Basically this should be an inherited function by the base implementation
+	// but GO does not support virtual methods, therefore it is a global
+	// function instead of a method.
 	ForName(name string) *cobra.Command
 	AddFlags(fs *pflag.FlagSet)
 	Complete(args []string) error
 	Run() error
 }
 
+// BaseCommand provides the basic functionality of an OCM command
+// to carry a context and a set of reusable option specs.
 type BaseCommand struct {
 	clictx.Context
 	options.OptionSet
@@ -76,6 +87,10 @@ func MassageCommand(cmd *cobra.Command, names ...string) *cobra.Command {
 	return cmd
 }
 
+// SetupCommand uses the OCMCommand to create and tweaks a cobra command
+// to incorporate the additional reusable option specs and their usage documentation.
+// Before the command executions the various Complete method flavors are
+// executed on the additional options ond the OCMCommand.
 func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 	c := ocmcmd.ForName(names[0])
 	MassageCommand(c, names...)

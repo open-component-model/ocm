@@ -23,7 +23,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 )
 
-// NewCommand creates a new command.
+// NewCommand creates a new cache command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
 		Short: "Cache related commands",

@@ -11,7 +11,7 @@ ocm transfer componentversions [<options>] {<component-reference>} <target>
 ```
   -c, --closure             follow component reference nesting
   -h, --help                help for componentversions
-  -f, --overwrite           overwrire existing component versions
+  -f, --overwrite           overwrite existing component versions
   -r, --repo string         repository name or spec
   -V, --resourcesByValue    transfer resources by-value
       --script string       config name of transfer handler script

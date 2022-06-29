@@ -10,7 +10,7 @@ ocm transfer commontransportarchive [<options>] <ctf> <target>
 
 ```
   -h, --help                help for commontransportarchive
-  -f, --overwrite           overwrire existing component versions
+  -f, --overwrite           overwrite existing component versions
   -V, --resourcesByValue    transfer resources by-value
       --script string       config name of transfer handler script
   -s, --scriptFile string   filename of transfer handler script

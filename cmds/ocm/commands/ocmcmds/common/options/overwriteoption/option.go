@@ -40,7 +40,7 @@ type Option struct {
 var _ transferhandler.TransferOption = (*Option)(nil)
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	fs.BoolVarP(&o.Overwrite, "overwrite", "f", false, "overwrire existing component versions")
+	fs.BoolVarP(&o.Overwrite, "overwrite", "f", false, "overwrite existing component versions")
 }
 
 func (o *Option) Usage() string {
