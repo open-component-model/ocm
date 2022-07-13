@@ -29,7 +29,7 @@ func init() {
 	cpi.RegisterRepositoryType(DockerConfigRepositoryTypeV1, cpi.NewRepositoryType(DockerConfigRepositoryTypeV1, &RepositorySpec{}))
 }
 
-// RepositorySpec describes a cocker config based credential repository interface.
+// RepositorySpec describes a docker config based credential repository interface.
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	DockerConfigFile            string `json:"dockerConfigFile"`
