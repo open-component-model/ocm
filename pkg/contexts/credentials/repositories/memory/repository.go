@@ -42,7 +42,7 @@ func (r *Repository) ExistsCredentials(name string) (bool, error) {
 	return ok, nil
 }
 
-func (r Repository) LookupCredentials(name string) (cpi.Credentials, error) {
+func (r *Repository) LookupCredentials(name string) (cpi.Credentials, error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 	c, ok := r.credentials[name]
@@ -52,7 +52,7 @@ func (r Repository) LookupCredentials(name string) (cpi.Credentials, error) {
 	return nil, cpi.ErrUnknownCredentials(name)
 }
 
-func (r Repository) WriteCredentials(name string, creds cpi.Credentials) (cpi.Credentials, error) {
+func (r *Repository) WriteCredentials(name string, creds cpi.Credentials) (cpi.Credentials, error) {
 	c := cpi.NewCredentials(creds.Properties())
 	r.lock.Lock()
 	defer r.lock.Unlock()
