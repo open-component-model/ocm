@@ -20,6 +20,8 @@ import (
 	"fmt"
 
 	"github.com/modern-go/reflect2"
+
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 const ATTR_TYPE = "type"
@@ -184,7 +186,7 @@ func (u *UnstructuredTypedObject) Evaluate(types Scheme) (TypedObject, error) {
 		decoder = types.GetDecoder(u.GetType())
 	}
 	if decoder == nil {
-		return u, nil
+		return nil, errors.ErrUnknown(errors.KIND_OBJECTTYPE)
 	}
 
 	if obj, err := decoder.Decode(data, DefaultJSONEncoding); err != nil {

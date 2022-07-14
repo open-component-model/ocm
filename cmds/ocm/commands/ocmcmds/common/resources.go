@@ -315,6 +315,9 @@ func Validate(r *ResourceInput, ctx clictx.Context, inputFilePath string) error 
 			} else {
 				acc, err := r.Access.Evaluate(ctx.OCMContext().AccessMethods())
 				if err != nil {
+					if errors.IsErrUnknown(err) {
+						err.(errors.Kinded).SetKind(errors.KIND_ACCESSMETHOD)
+					}
 					raw, _ := r.Access.GetRaw()
 					allErrs = append(allErrs, field.Invalid(fldPath.Child("access"), string(raw), err.Error()))
 				} else {

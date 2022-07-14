@@ -135,3 +135,12 @@ func (e *errinfo) Kind() string {
 func (e *errinfo) Ctx() string {
 	return e.ctx
 }
+
+type Kinded interface {
+	Kind() string
+	SetKind(string)
+}
+
+func (e *errinfo) SetKind(kind string) {
+	e.kind = kind
+}
