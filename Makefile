@@ -5,6 +5,8 @@
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 VERSION                                        := $(shell cat $(REPO_ROOT)/VERSION)
 EFFECTIVE_VERSION                              := $(VERSION)+$(shell git rev-parse HEAD)
+OS                                             := $(shell go env GOOS)
+DATE                                           := $(if $(if $(OS),darwin),$(shell date -Iseconds),$(shell date --rfc-3339=seconds | sed 's/ /T/'))
 
 REGISTRY                                       := ghcr.io/mandelsoft/ocm
 COMPONENT_CLI_IMAGE_REPOSITORY                 := $(REGISTRY)/cli
@@ -15,7 +17,7 @@ build:
 		-X github.com/open-component-model/ocm/pkg/version.gitVersion=$(EFFECTIVE_VERSION) \
 		-X github.com/open-component-model/ocm/pkg/version.gitTreeState=$(shell [ -z git status --porcelain 2>/dev/null ] && echo clean || echo dirty) \
 		-X github.com/open-component-model/ocm/pkg/version.gitCommit=$(shell git rev-parse --verify HEAD) \
-		-X github.com/open-component-model/ocm/pkg/version.buildDate=$(shell date --rfc-3339=seconds | sed 's/ /T/')" \
+		-X github.com/open-component-model/ocm/pkg/version.buildDate=$(DATE)"\
 		./cmds/ocm
 
 .PHONY: install-requirements
