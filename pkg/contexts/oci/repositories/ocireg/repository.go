@@ -87,8 +87,8 @@ func (r *Repository) IsClosed() bool {
 func (r *Repository) getCreds(comp string) (credentials.Credentials, error) {
 	host, port, base := r.info.HostInfo()
 	id := credentials.ConsumerIdentity{
-		"type":               identity.CONSUMER_TYPE,
-		identity.ID_HOSTNAME: host,
+		credentials.CONSUMER_ATTR_TYPE: identity.CONSUMER_TYPE,
+		identity.ID_HOSTNAME:           host,
 	}
 	if port != "" {
 		id[identity.ID_PORT] = port

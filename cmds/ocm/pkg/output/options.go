@@ -117,11 +117,18 @@ func (o *Options) Complete(ctx clictx.Context) error {
 		}
 	}
 	o.Sort = fields
-	err := o.ProcessOnOptions(options.CompleteOptions)
+	err := o.OptionSet.ProcessOnOptions(options.CompleteOptionsWithCLIContext(ctx))
 	if err != nil {
 		return err
 	}
-	err = o.ProcessOnOptions(options.CompleteOptionsWithCLIContext(ctx))
+	return err
+}
+
+func (o *Options) CompleteAll(ctx clictx.Context) error {
+	err := o.Complete(ctx)
+	if err == nil {
+		err = o.OptionSet.ProcessOnOptions(options.CompleteOptionsWithCLIContext(ctx))
+	}
 	if err != nil {
 		return err
 	}

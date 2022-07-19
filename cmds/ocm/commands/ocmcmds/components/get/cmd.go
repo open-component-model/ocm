@@ -81,7 +81,7 @@ func (o *Command) Run() error {
 	session := ocm.NewSession(nil)
 	defer session.Close()
 
-	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithContext(o, session))
+	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithSession(o, session))
 	if err != nil {
 		return err
 	}

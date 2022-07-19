@@ -122,15 +122,16 @@ func (s OptionSet) Get(proto interface{}) bool {
 
 func (s OptionSet) ProcessOnOptions(f OptionsProcessor) error {
 	for _, n := range s {
-		err := f(n)
-		if err != nil {
-			return err
-		}
+		var err error
 		if set, ok := n.(OptionSetProvider); ok {
 			err = set.AsOptionSet().ProcessOnOptions(f)
 			if err != nil {
 				return err
 			}
+		}
+		err = f(n)
+		if err != nil {
+			return err
 		}
 	}
 	return nil

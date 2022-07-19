@@ -150,11 +150,8 @@ func (c *ComponentVersionContainer) Update() error {
 			return err
 		}
 		_, err = c.comp.namespace.AddArtefact(c.manifest, c.version)
-		if err != nil {
-			return err
-		}
 	}
-	return nil
+	return err
 }
 
 func (c *ComponentVersionContainer) evalLayer(s compdesc.AccessSpec) (compdesc.AccessSpec, error) {
