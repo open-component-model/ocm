@@ -107,6 +107,7 @@ attributes are supported:
 * [ocm <b>componentarchive</b>](ocm_componentarchive.md)	 - Commands acting on component archives
 * [ocm <b>componentversions</b>](ocm_componentversions.md)	 - Commands acting on components
 * [ocm <b>create</b>](ocm_create.md)	 - Create transport or component archive
+* [ocm <b>credentials</b>](ocm_credentials.md)	 - Commands acting on credentials
 * [ocm <b>describe</b>](ocm_describe.md)	 - Describe artefacts
 * [ocm <b>download</b>](ocm_download.md)	 - Download oci artefacts, resources or complete components
 * [ocm <b>get</b>](ocm_get.md)	 - Get information about artefacts and components

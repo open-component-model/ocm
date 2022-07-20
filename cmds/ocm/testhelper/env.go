@@ -19,6 +19,9 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/contexts/config"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+
 	"github.com/open-component-model/ocm/cmds/ocm/app"
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -44,6 +47,14 @@ func NewTestEnv(opts ...env.Option) *TestEnv {
 
 func (e *TestEnv) ApplyOption(opts *accessio.Options) {
 	e.Builder.ApplyOption(opts)
+}
+
+func (e *TestEnv) ConfigContext() config.Context {
+	return e.Builder.ConfigContext()
+}
+
+func (e *TestEnv) CredentialsContext() credentials.Context {
+	return e.Builder.CredentialsContext()
 }
 
 func (e *TestEnv) OCMContext() ocm.Context {

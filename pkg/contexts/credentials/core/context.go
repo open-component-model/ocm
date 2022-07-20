@@ -47,6 +47,8 @@ type Context interface {
 	SetCredentialsForConsumer(identity ConsumerIdentity, creds CredentialsSource)
 
 	SetAlias(name string, spec RepositorySpec, creds ...CredentialsSource) error
+
+	ConsumerIdentityMatchers() IdentityMatcherRegistry
 }
 
 var key = reflect.TypeOf(_context{})
@@ -65,20 +67,22 @@ func ForContext(ctx context.Context) Context {
 type _context struct {
 	datacontext.Context
 
-	sharedattributes     datacontext.AttributesContext
-	updater              cfgcpi.Updater
-	knownRepositoryTypes RepositoryTypeScheme
-	consumers            *_consumers
+	sharedattributes         datacontext.AttributesContext
+	updater                  cfgcpi.Updater
+	knownRepositoryTypes     RepositoryTypeScheme
+	consumerIdentityMatchers IdentityMatcherRegistry
+	consumers                *_consumers
 }
 
 var _ Context = &_context{}
 
-func newContext(configctx config.Context, reposcheme RepositoryTypeScheme) Context {
+func newContext(configctx config.Context, reposcheme RepositoryTypeScheme, consumerMatchers IdentityMatcherRegistry) Context {
 	c := &_context{
-		sharedattributes:     configctx.AttributesContext(),
-		updater:              cfgcpi.NewUpdate(configctx),
-		knownRepositoryTypes: reposcheme,
-		consumers:            newConsumers(),
+		sharedattributes:         configctx.AttributesContext(),
+		updater:                  cfgcpi.NewUpdate(configctx),
+		knownRepositoryTypes:     reposcheme,
+		consumerIdentityMatchers: consumerMatchers,
+		consumers:                newConsumers(),
 	}
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, configctx.GetAttributes())
 	return c
@@ -171,6 +175,10 @@ func (c *_context) GetCredentialsForConsumer(identity ConsumerIdentity, matchers
 func (c *_context) SetCredentialsForConsumer(identity ConsumerIdentity, creds CredentialsSource) {
 	c.Update()
 	c.consumers.Set(identity, creds)
+}
+
+func (c *_context) ConsumerIdentityMatchers() IdentityMatcherRegistry {
+	return c.consumerIdentityMatchers
 }
 
 func (c *_context) SetAlias(name string, spec RepositorySpec, creds ...CredentialsSource) error {

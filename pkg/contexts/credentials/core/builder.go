@@ -24,6 +24,7 @@ type Builder struct {
 	ctx        context.Context
 	config     config.Context
 	reposcheme RepositoryTypeScheme
+	matchers   IdentityMatcherRegistry
 }
 
 func (b *Builder) getContext() context.Context {
@@ -48,6 +49,11 @@ func (b Builder) WithRepositoyTypeScheme(scheme RepositoryTypeScheme) Builder {
 	return b
 }
 
+func (b Builder) WithStandardConumerMatchers(matchers IdentityMatcherRegistry) Builder {
+	b.matchers = matchers
+	return b
+}
+
 func (b Builder) Bound() (Context, context.Context) {
 	c := b.New()
 	return c, context.WithValue(b.getContext(), key, c)
@@ -61,6 +67,9 @@ func (b Builder) New() Context {
 	if b.reposcheme == nil {
 		b.reposcheme = DefaultRepositoryTypeScheme
 	}
-	return newContext(b.config, b.reposcheme)
+	if b.matchers == nil {
+		b.matchers = StandardIdentityMatchers
+	}
+	return newContext(b.config, b.reposcheme, b.matchers)
 
 }

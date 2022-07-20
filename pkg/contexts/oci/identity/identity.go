@@ -32,6 +32,10 @@ const ID_PORT = "port"
 // ID_PATHPREFIX is the artefact prefix
 const ID_PATHPREFIX = "pathprefix"
 
+func init() {
+	cpi.RegisterIdentityMatcher(CONSUMER_TYPE, IdentityMatcher, "OCI registry credential matcher")
+}
+
 func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
 	if pattern[cpi.CONSUMER_ATTR_TYPE] != "" && id[cpi.CONSUMER_ATTR_TYPE] != "" && pattern[cpi.CONSUMER_ATTR_TYPE] != id[cpi.CONSUMER_ATTR_TYPE] {
 		return false

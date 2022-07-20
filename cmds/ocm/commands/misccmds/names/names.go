@@ -15,5 +15,6 @@
 package names
 
 var (
-	RSAKeyPair = []string{"rsakeypair", "rsa"}
+	RSAKeyPair  = []string{"rsakeypair", "rsa"}
+	Credentials = []string{"credentials", "creds", "cred"}
 )

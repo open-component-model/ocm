@@ -12,31 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package credentials
+package get_test
 
 import (
-	"context"
+	"testing"
 
-	"github.com/open-component-model/ocm/pkg/contexts/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-func WithContext(ctx context.Context) core.Builder {
-	return core.Builder{}.WithContext(ctx)
-}
-
-func WithConfigs(ctx config.Context) core.Builder {
-	return core.Builder{}.WithConfig(ctx)
-}
-
-func WithRepositoyTypeScheme(scheme RepositoryTypeScheme) core.Builder {
-	return core.Builder{}.WithRepositoyTypeScheme(scheme)
-}
-
-func WithStandardConumerMatchers(matchers core.IdentityMatcherRegistry) core.Builder {
-	return core.Builder{}.WithStandardConumerMatchers(matchers)
-}
-
-func New() Context {
-	return core.Builder{}.New()
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Get Credentials")
 }

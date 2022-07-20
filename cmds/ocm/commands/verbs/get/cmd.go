@@ -21,6 +21,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	credentials "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/credentials/get"
 	artefacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/get"
 	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/get"
 	references "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references/get"
@@ -38,5 +39,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(resources.NewCommand(ctx))
 	cmd.AddCommand(references.NewCommand(ctx))
 	cmd.AddCommand(sources.NewCommand(ctx))
+	cmd.AddCommand(credentials.NewCommand(ctx))
 	return cmd
 }

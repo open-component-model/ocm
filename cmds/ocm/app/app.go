@@ -29,6 +29,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds"
+	creds "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/credentials"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds"
 	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -168,6 +169,7 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	cobrautils.TweakCommand(cmd, ctx)
 
 	cmd.AddCommand(NewVersionCommand())
+
 	cmd.AddCommand(get.NewCommand(opts.Context))
 	cmd.AddCommand(create.NewCommand(opts.Context))
 	cmd.AddCommand(add.NewCommand(opts.Context))
@@ -188,6 +190,8 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(cachecmds.NewCommand(opts.Context))
 	cmd.AddCommand(ocicmds.NewCommand(opts.Context))
 	cmd.AddCommand(ocmcmds.NewCommand(opts.Context))
+
+	cmd.AddCommand(creds.NewCommand(opts.Context))
 
 	opts.AddFlags(cmd.Flags())
 	cmd.InitDefaultHelpCmd()

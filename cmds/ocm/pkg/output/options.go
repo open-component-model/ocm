@@ -78,7 +78,7 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 		fs.StringVarP(&o.OutputMode, "output", "o", "", fmt.Sprintf("output mode (%s)", s))
 	}
 
-	// TODO: not the best solution to instantiate all possiblke outputs to figure out, whether sort fields
+	// TODO: not the best solution to instantiate all possible outputs to figure out, whether sort fields
 	// are available or not
 	for _, out := range o.Outputs {
 		if _, ok := out(o).(SortFields); ok {

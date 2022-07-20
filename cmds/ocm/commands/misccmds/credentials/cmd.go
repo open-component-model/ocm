@@ -15,28 +15,22 @@
 package credentials
 
 import (
-	"context"
+	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/pkg/contexts/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	credentials "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/credentials/get"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/names"
 )
 
-func WithContext(ctx context.Context) core.Builder {
-	return core.Builder{}.WithContext(ctx)
-}
+var Names = names.Credentials
 
-func WithConfigs(ctx config.Context) core.Builder {
-	return core.Builder{}.WithConfig(ctx)
-}
-
-func WithRepositoyTypeScheme(scheme RepositoryTypeScheme) core.Builder {
-	return core.Builder{}.WithRepositoyTypeScheme(scheme)
-}
-
-func WithStandardConumerMatchers(matchers core.IdentityMatcherRegistry) core.Builder {
-	return core.Builder{}.WithStandardConumerMatchers(matchers)
-}
-
-func New() Context {
-	return core.Builder{}.New()
+// NewCommand creates a new command.
+func NewCommand(ctx clictx.Context) *cobra.Command {
+	cmd := utils.MassageCommand(&cobra.Command{
+		Short: "Commands acting on credentials",
+	}, Names...)
+	cmd.AddCommand(credentials.NewCommand(ctx, credentials.Verb))
+	return cmd
 }
