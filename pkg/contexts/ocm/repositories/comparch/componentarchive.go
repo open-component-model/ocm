@@ -33,7 +33,7 @@ import (
 // ComponentArchive is the go representation for a component artefact
 type ComponentArchive struct {
 	base *accessobj.FileSystemBlobAccess
-	repo *Repository
+	comp *ComponentAccess
 	*support.ComponentVersionAccess
 }
 
@@ -52,11 +52,11 @@ func _Wrap(ctx cpi.Context, obj *accessobj.AccessObject, spec *RepositorySpec, e
 	s := &ComponentArchive{
 		base: accessobj.NewFileSystemBlobAccess(obj),
 	}
-	s.repo = &Repository{
+	s.comp = &ComponentAccess{&Repository{
 		ctx:  ctx,
 		spec: spec,
 		arch: s,
-	}
+	}}
 	s.ComponentVersionAccess = support.NewComponentVersionAccess(s, false)
 	return s, nil
 }
@@ -66,11 +66,15 @@ func _Wrap(ctx cpi.Context, obj *accessobj.AccessObject, spec *RepositorySpec, e
 var _ cpi.ComponentVersionAccess = &ComponentArchive{}
 
 func (c *ComponentArchive) GetContext() cpi.Context {
-	return c.repo.GetContext()
+	return c.comp.repo.GetContext()
 }
 
 func (c *ComponentArchive) AsRepository() cpi.Repository {
-	return c.repo
+	return c.comp.repo
+}
+
+func (c *ComponentArchive) ComponentAccess() cpi.ComponentAccess {
+	return c.comp
 }
 
 func (c *ComponentArchive) Update() error {

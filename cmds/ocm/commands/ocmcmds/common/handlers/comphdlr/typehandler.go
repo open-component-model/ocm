@@ -39,9 +39,9 @@ type Object struct {
 	History  common.History
 	Identity metav1.Identity
 
-	Spec             ocm.RefSpec
-	Repository       ocm.Repository
-	Component        ocm.ComponentAccess
+	Spec       ocm.RefSpec
+	Repository ocm.Repository
+	//Component        ocm.ComponentAccess
 	ComponentVersion ocm.ComponentVersionAccess
 }
 
@@ -138,9 +138,9 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 		}
 		if evaluated.Version != nil {
 			result = append(result, &Object{
-				Spec:             evaluated.Ref,
-				Repository:       evaluated.Repository,
-				Component:        evaluated.Component,
+				Spec:       evaluated.Ref,
+				Repository: evaluated.Repository,
+				//Component:        evaluated.Component,
 				ComponentVersion: evaluated.Version,
 			})
 			return result, nil
@@ -171,9 +171,9 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 			return nil, err
 		}
 		result = append(result, &Object{
-			Repository:       repo,
-			Spec:             spec,
-			Component:        component,
+			Repository: repo,
+			Spec:       spec,
+			//Component:        component,
 			ComponentVersion: v,
 		})
 	} else {
@@ -193,9 +193,9 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 				s := spec
 				s.Version = &t
 				result = append(result, &Object{
-					Repository:       repo,
-					Spec:             s,
-					Component:        component,
+					Repository: repo,
+					Spec:       s,
+					//Component:        component,
 					ComponentVersion: v,
 				})
 			}

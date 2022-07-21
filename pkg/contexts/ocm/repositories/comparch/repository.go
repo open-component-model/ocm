@@ -41,7 +41,7 @@ func NewRepository(ctx cpi.Context, s *RepositorySpec) (*Repository, error) {
 	if err != nil {
 		return nil, err
 	}
-	return a.repo, nil
+	return a.comp.repo, nil
 }
 
 func (r *Repository) ComponentLister() cpi.ComponentLister {
@@ -143,7 +143,7 @@ func (r *Repository) LookupComponent(name string) (cpi.ComponentAccess, error) {
 	if r.arch.GetName() != name {
 		return nil, errors.ErrNotFound(errors.KIND_COMPONENT, name, CTFComponentArchiveType)
 	}
-	return &ComponentAccess{r}, nil
+	return r.arch.comp, nil
 }
 
 func (r Repository) Close() error {

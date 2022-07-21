@@ -9,12 +9,12 @@ ocm ocm sources get [<options>]  <component> {<name> { <key>=<value> }}
 ### Options
 
 ```
-  -c, --closure            follow component reference nesting
-  -h, --help               help for get
-      --lookup string      repository name or spec for closure lookup fallback
-  -o, --output string      output mode (JSON, json, tree, wide, yaml)
-  -r, --repo string        repository name or spec
-  -s, --sort stringArray   sort fields
+  -c, --closure              follow component reference nesting
+  -h, --help                 help for get
+      --lookup stringArray   repository name or spec for closure lookup fallback
+  -o, --output string        output mode (JSON, json, tree, wide, yaml)
+  -r, --repo string          repository name or spec
+  -s, --sort stringArray     sort fields
 ```
 
 ### Description

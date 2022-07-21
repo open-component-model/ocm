@@ -9,12 +9,12 @@ ocm resources download [<options>]  <component> {<name> { <key>=<value> }}
 ### Options
 
 ```
-  -c, --closure             follow component reference nesting
-  -d, --download-handlers   use download handler if possible
-  -h, --help                help for download
-      --lookup string       repository name or spec for closure lookup fallback
-  -O, --outfile string      output file or directory
-  -r, --repo string         repository name or spec
+  -c, --closure              follow component reference nesting
+  -d, --download-handlers    use download handler if possible
+  -h, --help                 help for download
+      --lookup stringArray   repository name or spec for closure lookup fallback
+  -O, --outfile string       output file or directory
+  -r, --repo string          repository name or spec
 ```
 
 ### Description

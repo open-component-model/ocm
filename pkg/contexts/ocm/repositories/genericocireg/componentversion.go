@@ -94,6 +94,10 @@ func (c *ComponentVersionContainer) GetContext() cpi.Context {
 	return c.comp.GetContext()
 }
 
+func (c *ComponentVersionContainer) ComponentAccess() cpi.ComponentAccess {
+	return c.comp
+}
+
 func (c *ComponentVersionContainer) IsReadOnly() bool {
 	return c.state.IsReadOnly()
 }

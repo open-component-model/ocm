@@ -17,7 +17,8 @@ package lookupoption
 import (
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
@@ -33,11 +34,38 @@ func New() *Option {
 }
 
 type Option struct {
-	repooption.Option
+	RepoSpecs []string
+	Resolver  ocm.ComponentVersionResolver
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVarP(&o.Spec, "lookup", "", "", "repository name or spec for closure lookup fallback")
+	fs.StringArrayVarP(&o.RepoSpecs, "lookup", "", nil, "repository name or spec for closure lookup fallback")
+}
+
+func (o *Option) CompleteWithSession(octx clictx.OCM, session ocm.Session) error {
+	if len(o.RepoSpecs) != 0 && o.Resolver == nil {
+		r, err := o.getResolver(octx, session)
+		if err != nil {
+			return err
+		}
+		o.Resolver = r
+	}
+	return nil
+}
+
+func (o *Option) getResolver(ctx clictx.OCM, session ocm.Session) (ocm.ComponentVersionResolver, error) {
+	if len(o.RepoSpecs) != 0 {
+		resolvers := []ocm.ComponentVersionResolver{}
+		for _, s := range o.RepoSpecs {
+			r, _, err := session.DetermineRepository(ctx.Context(), s)
+			if err != nil {
+				return nil, err
+			}
+			resolvers = append(resolvers, ocm.NewSessionBasedResolver(session, r))
+		}
+		return ocm.NewCompoundResolver(resolvers...), nil
+	}
+	return nil, nil
 }
 
 func (o *Option) Usage() string {
@@ -55,14 +83,13 @@ references.
 	return s
 }
 
-func (o *Option) LookupComponentVersion(name string, vers string) (ocm.ComponentAccess, ocm.ComponentVersionAccess, error) {
-	if o == nil {
-		return nil, nil, nil
+func (o *Option) LookupComponentVersion(name string, vers string) (ocm.ComponentVersionAccess, error) {
+	if o == nil || o.Resolver == nil {
+		return nil, nil
 	}
-	comp, err := o.Repository.LookupComponent(name)
+	cv, err := o.Resolver.LookupComponentVersion(name, vers)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	v, err := comp.LookupVersion(vers)
-	return comp, v, err
+	return cv, err
 }
