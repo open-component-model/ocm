@@ -37,7 +37,7 @@ definitions:
   componentName:
     type: 'string'
     maxLength: 255
-    pattern: '^[a-z0-9.\-]+[.][a-z]{2,4}/[-a-z0-9/_.]*$'
+    pattern: '^[a-z0-9.\-]+[.][a-z]{2,4}([-a-z0-9_.]+/?)+[a-zA-Z0-9]+$'
 
   identityAttributeKey:
     minLength: 2
