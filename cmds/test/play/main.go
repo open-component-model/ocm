@@ -15,7 +15,7 @@
 package main
 
 import (
-	"crypto/sha256"
+	"crypto"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/hex"
@@ -69,8 +69,11 @@ func main() {
 	err = signing.VerifyCert(nil, pool, "", cert)
 	CheckErr(err, "verify anon cert")
 
-	digest := sha256.New().Sum([]byte("test"))
-	sig, err := rsa.Handler{}.Sign(hex.EncodeToString(digest), priv)
+	hasher := crypto.SHA256
+	hash := hasher.New()
+	hash.Write([]byte("test"))
+	digest := hash.Sum(nil)
+	sig, err := rsa.Handler{}.Sign(hex.EncodeToString(digest), hasher, "", priv)
 	CheckErr(err, "sign")
 
 	fmt.Printf("sig: %s\n", sig)
