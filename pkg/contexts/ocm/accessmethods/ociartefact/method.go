@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package ociregistry
+package ociartefact
 
 import (
 	"io"
@@ -31,12 +31,19 @@ import (
 )
 
 // Type is the access type of a oci registry.
-const Type = "ociRegistry"
+const Type = "ociArtefact"
 const TypeV1 = Type + runtime.VersionSeparator + "v1"
+
+const LegacyType = "ociRegistry"
+const LegacyTypeV1 = LegacyType + runtime.VersionSeparator + "v1"
 
 func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}))
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}))
+
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyType, &AccessSpec{}))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyTypeV1, &AccessSpec{}))
+
 }
 
 // AccessSpec describes the access for a oci registry.

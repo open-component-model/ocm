@@ -47,24 +47,37 @@ var CDExcludes = signing.MapExcludes{
 	"meta": nil,
 	"component": signing.MapExcludes{
 		"repositoryContexts": nil,
+		"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
+			ValueChecker: signing.IgnoreLabelsWithoutSignature,
+			Continue:     signing.NoExcludes{},
+		}},
 		"resources": signing.DynamicArrayExcludes{
 			ValueChecker: signing.IgnoreResourcesWithNoneAccess,
 			Continue: signing.MapExcludes{
 				"access": nil,
-				"labels": nil,
 				"srcRef": nil,
+				"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
+					ValueChecker: signing.IgnoreLabelsWithoutSignature,
+					Continue:     signing.NoExcludes{},
+				}},
 			},
 		},
 		"sources": signing.DynamicArrayExcludes{
 			ValueChecker: signing.IgnoreResourcesWithNoneAccess,
 			Continue: signing.MapExcludes{
 				"access": nil,
-				"labels": nil,
+				"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
+					ValueChecker: signing.IgnoreLabelsWithoutSignature,
+					Continue:     signing.NoExcludes{},
+				}},
 			},
 		},
 		"references": signing.ArrayExcludes{
 			signing.MapExcludes{
-				"labels": nil,
+				"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
+					ValueChecker: signing.IgnoreLabelsWithoutSignature,
+					Continue:     signing.NoExcludes{},
+				}},
 			},
 		},
 	},

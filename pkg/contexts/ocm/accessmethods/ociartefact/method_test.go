@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package ociregistry_test
+package ociartefact_test
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -22,7 +22,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
@@ -61,7 +61,7 @@ var _ = Describe("Method", func() {
 
 		env.OCIContext().SetAlias(OCIHOST, ctfoci.NewRepositorySpec(accessobj.ACC_READONLY, OCIPATH, accessio.PathFileSystem(env.FileSystem())))
 
-		spec := ociregistry.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION))
+		spec := ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION))
 
 		m, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{env.OCMContext()})
 		Expect(err).To(Succeed())

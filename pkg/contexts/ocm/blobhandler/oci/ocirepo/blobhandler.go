@@ -25,8 +25,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localociblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
 	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci"
@@ -162,7 +162,7 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi
 	}
 
 	ref := path.Join(base, namespace.GetNamespace()) + version
-	var acc cpi.AccessSpec = ociregistry.New(ref)
+	var acc cpi.AccessSpec = ociartefact.New(ref)
 
 	if keep {
 		err := ocictx.Manifest.AddBlob(blob)

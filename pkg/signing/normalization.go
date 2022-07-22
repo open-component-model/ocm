@@ -19,6 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strconv"
 
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -52,7 +53,7 @@ func toString(v interface{}, gap string) string {
 		return Entries(castIn).ToString(gap)
 	case Entry:
 		return castIn.ToString(gap)
-	case []interface{}:
+	case []Normalized:
 		ngap := gap + "  "
 		s := "["
 		sep := ""
@@ -64,6 +65,8 @@ func toString(v interface{}, gap string) string {
 		return s
 	case string:
 		return castIn
+	case bool:
+		return strconv.FormatBool(castIn)
 	default:
 		panic(fmt.Sprintf("unknown type %T in sorting. This should not happen", v))
 	}
@@ -116,15 +119,23 @@ func PrepareNormalization(v interface{}, excludes ExcludeRules) (Entries, error)
 	return prepareStruct(raw, excludes)
 }
 
-func prepare(v interface{}, ex ExcludeRules) (interface{}, error) {
+func prepare(v interface{}, ex ExcludeRules) (r Normalized, err error) {
+
 	switch e := v.(type) {
 	case map[string]interface{}:
-		return prepareStruct(e, ex)
+		r, err = prepareStruct(e, ex)
 	case []interface{}:
-		return prepareArray(e, ex)
+		r, err = prepareArray(e, ex)
 	default:
 		return v, nil
 	}
+	if err != nil {
+		return r, err
+	}
+	if f, ok := ex.(NormalizationFilter); ok {
+		return f.Filter(r)
+	}
+	return r, err
 }
 
 func prepareStruct(v map[string]interface{}, ex ExcludeRules) ([]Entry, error) {
@@ -136,7 +147,9 @@ func prepareStruct(v map[string]interface{}, ex ExcludeRules) ([]Entry, error) {
 			if err != nil {
 				return nil, errors.Wrapf(err, "field %q", key)
 			}
-			entries.Add(name, nested)
+			if nested != nil {
+				entries.Add(name, nested)
+			}
 		}
 	}
 	// sort the entries based on the key
@@ -146,8 +159,8 @@ func prepareStruct(v map[string]interface{}, ex ExcludeRules) ([]Entry, error) {
 	return entries, nil
 }
 
-func prepareArray(v []interface{}, ex ExcludeRules) ([]interface{}, error) {
-	entries := []interface{}{}
+func prepareArray(v []interface{}, ex ExcludeRules) ([]Normalized, error) {
+	entries := []Normalized{}
 	for index, value := range v {
 		exclude, mapped, prop := ex.Element(value)
 		if !exclude {
@@ -155,7 +168,9 @@ func prepareArray(v []interface{}, ex ExcludeRules) ([]interface{}, error) {
 			if err != nil {
 				return nil, errors.Wrapf(err, "entry %d", index)
 			}
-			entries = append(entries, nested)
+			if nested != nil {
+				entries = append(entries, nested)
+			}
 		}
 	}
 	return entries, nil

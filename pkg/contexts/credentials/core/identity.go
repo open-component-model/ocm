@@ -23,7 +23,7 @@ import (
 
 func init() {
 	StandardIdentityMatchers.Register("partial", PartialMatch, "complete match of given pattern ignoring additional attributes")
-	StandardIdentityMatchers.Register("complete", CompleteMatch, "complete match of given pattern set")
+	StandardIdentityMatchers.Register("exact", CompleteMatch, "exact match of given pattern set")
 }
 
 // IdentityMatcher checks whether id matches against pattern and if this match

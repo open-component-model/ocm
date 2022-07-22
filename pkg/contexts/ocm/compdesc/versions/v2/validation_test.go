@@ -22,7 +22,7 @@ import (
 	. "github.com/onsi/gomega/gstruct"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -38,13 +38,13 @@ var _ = Describe("Validation", func() {
 		comp *ComponentDescriptor
 
 		ociImage1    *Resource
-		ociRegistry1 *ociregistry.AccessSpec
+		ociRegistry1 *ociartefact.AccessSpec
 		ociImage2    *Resource
-		ociRegistry2 *ociregistry.AccessSpec
+		ociRegistry2 *ociartefact.AccessSpec
 	)
 
 	BeforeEach(func() {
-		ociRegistry1 = ociregistry.New("docker/image1:1.2.3")
+		ociRegistry1 = ociartefact.New("docker/image1:1.2.3")
 
 		unstrucOCIRegistry1, err := runtime.ToUnstructuredTypedObject(ociRegistry1)
 		Expect(err).ToNot(HaveOccurred())
@@ -57,7 +57,7 @@ var _ = Describe("Validation", func() {
 			Relation: v1.ExternalRelation,
 			Access:   unstrucOCIRegistry1,
 		}
-		ociRegistry2 = ociregistry.New("docker/image1:1.2.3")
+		ociRegistry2 = ociartefact.New("docker/image1:1.2.3")
 		unstrucOCIRegistry2, err := runtime.ToUnstructuredTypedObject(ociRegistry2)
 		Expect(err).ToNot(HaveOccurred())
 		ociImage2 = &Resource{
@@ -264,7 +264,7 @@ var _ = Describe("Validation", func() {
 						Version: "0.0.1",
 					},
 					Relation: v1.LocalRelation,
-					Access:   runtime.NewEmptyUnstructured(ociregistry.Type),
+					Access:   runtime.NewEmptyUnstructured(ociartefact.Type),
 				},
 			}
 			errList := validate(nil, comp)

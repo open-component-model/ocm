@@ -20,6 +20,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -28,7 +29,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
@@ -64,6 +64,7 @@ var _ = Describe("access method", func() {
 	BeforeEach(func() {
 		env = NewBuilder(tenv.NewEnvironment())
 		env.RSAKeyPair(SIGNATURE)
+
 	})
 
 	AfterEach(func() {
@@ -106,13 +107,13 @@ var _ = Describe("access method", func() {
 						})
 						env.Resource("value", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
 							env.Access(
-								ociregistry.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
+								ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
 							)
 							env.Label("transportByValue", true)
 						})
 						env.Resource("ref", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
 							env.Access(
-								ociregistry.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION)),
+								ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION)),
 							)
 						})
 					})
