@@ -92,7 +92,7 @@ func ResourcesComponentDescriptorV2SchemaYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "../../../../../../../resources/component-descriptor-v2-schema.yaml", size: 10211, mode: os.FileMode(436), modTime: time.Unix(1655122518, 0)}
+	info := bindataFileInfo{name: "../../../../../../../resources/component-descriptor-v2-schema.yaml", size: 10211, mode: os.FileMode(436), modTime: time.Unix(1658604998, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

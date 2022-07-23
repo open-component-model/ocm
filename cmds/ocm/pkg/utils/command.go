@@ -15,7 +15,6 @@
 package utils
 
 import (
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -23,7 +22,6 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/out"
 )
 
 // OCMCommand is a command pattern, that can be instantiated for a dediated
@@ -102,9 +100,11 @@ func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 		if err == nil {
 			err = ocmcmd.Run()
 		}
-		if err != nil && ocmcmd.StdErr() != os.Stderr {
-			out.Error(ocmcmd, err.Error())
-		}
+		/*
+			if err != nil && ocmcmd.StdErr() != os.Stderr {
+				out.Error(ocmcmd, err.Error())
+			}
+		*/
 		return err
 	}
 	if u, ok := ocmcmd.(options.Usage); ok {

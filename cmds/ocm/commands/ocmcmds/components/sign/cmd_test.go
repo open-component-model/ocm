@@ -69,74 +69,77 @@ var _ = Describe("access method", func() {
 		data, err = rsa.KeyData(priv)
 		Expect(err).To(Succeed())
 		Expect(vfs.WriteFile(env.FileSystem(), PRIVKEY, data, os.ModePerm)).To(Succeed())
-
-		env.OCIContext().SetAlias(OCIHOST, ctfoci.NewRepositorySpec(accessobj.ACC_READONLY, OCIPATH, accessio.PathFileSystem(env.FileSystem())))
-
-		env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
-			env.Namespace(OCINAMESPACE, func() {
-				env.Manifest(OCIVERSION, func() {
-					env.Config(func() {
-						env.BlobStringData(mime.MIME_JSON, "{}")
-					})
-					env.Layer(func() {
-						env.BlobStringData(mime.MIME_TEXT, "manifestlayer")
-					})
-				})
-			})
-			env.Namespace(OCINAMESPACE2, func() {
-				env.Manifest(OCIVERSION, func() {
-					env.Config(func() {
-						env.BlobStringData(mime.MIME_JSON, "{}")
-					})
-					env.Layer(func() {
-						env.BlobStringData(mime.MIME_TEXT, "otherlayer")
-					})
-				})
-			})
-		})
-
-		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
-			env.Component(COMPONENTA, func() {
-				env.Version(VERSION, func() {
-					env.Provider(PROVIDER)
-					env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
-						env.BlobStringData(mime.MIME_TEXT, "testdata")
-					})
-					env.Resource("value", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
-						env.Access(
-							ociregistry.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
-						)
-						env.Label("transportByValue", true)
-					})
-					env.Resource("ref", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
-						env.Access(
-							ociregistry.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION)),
-						)
-					})
-				})
-			})
-			env.Component(COMPONENTB, func() {
-				env.Version(VERSION, func() {
-					env.Provider(PROVIDER)
-					env.Resource("otherdata", "", "PlainText", metav1.LocalRelation, func() {
-						env.BlobStringData(mime.MIME_TEXT, "otherdata")
-					})
-					env.Reference("ref", COMPONENTA, VERSION)
-				})
-			})
-		})
 	})
 
 	AfterEach(func() {
 		env.Cleanup()
 	})
 
-	It("sign component archive", func() {
-		buf := bytes.NewBuffer(nil)
-		digest := "05c4edd25661703e0c5caec8b0680c93738d8a8126d825adb755431fec29b7cb"
-		Expect(env.CatchOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(Succeed())
+	Context("valid", func() {
+		BeforeEach(func() {
+			env.OCIContext().SetAlias(OCIHOST, ctfoci.NewRepositorySpec(accessobj.ACC_READONLY, OCIPATH, accessio.PathFileSystem(env.FileSystem())))
 
-		Expect("\n" + buf.String()).To(Equal(`
+			env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
+				env.Namespace(OCINAMESPACE, func() {
+					env.Manifest(OCIVERSION, func() {
+						env.Config(func() {
+							env.BlobStringData(mime.MIME_JSON, "{}")
+						})
+						env.Layer(func() {
+							env.BlobStringData(mime.MIME_TEXT, "manifestlayer")
+						})
+					})
+				})
+				env.Namespace(OCINAMESPACE2, func() {
+					env.Manifest(OCIVERSION, func() {
+						env.Config(func() {
+							env.BlobStringData(mime.MIME_JSON, "{}")
+						})
+						env.Layer(func() {
+							env.BlobStringData(mime.MIME_TEXT, "otherlayer")
+						})
+					})
+				})
+			})
+
+			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+				env.Component(COMPONENTA, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
+							env.BlobStringData(mime.MIME_TEXT, "testdata")
+						})
+						env.Resource("value", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
+							env.Access(
+								ociregistry.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
+							)
+							env.Label("transportByValue", true)
+						})
+						env.Resource("ref", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
+							env.Access(
+								ociregistry.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION)),
+							)
+						})
+					})
+				})
+				env.Component(COMPONENTB, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Resource("otherdata", "", "PlainText", metav1.LocalRelation, func() {
+							env.BlobStringData(mime.MIME_TEXT, "otherdata")
+						})
+						env.Reference("ref", COMPONENTA, VERSION)
+					})
+				})
+			})
+		})
+
+		It("sign component archive", func() {
+			buf := bytes.NewBuffer(nil)
+			digest := "05c4edd25661703e0c5caec8b0680c93738d8a8126d825adb755431fec29b7cb"
+			Expect(env.CatchOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(Succeed())
+
+			Expect("\n" + buf.String()).To(Equal(`
 applying to version "github.com/mandelsoft/ref:v1"...
   applying to version "github.com/mandelsoft/test:v1"...
     resource 0:  "name"="testdata": digest sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50[genericBlobDigest/v1]
@@ -147,17 +150,76 @@ applying to version "github.com/mandelsoft/ref:v1"...
 successfully signed github.com/mandelsoft/ref:v1 (digest sha256:` + digest + `)
 `))
 
-		session := datacontext.NewSession()
-		defer session.Close()
+			session := datacontext.NewSession()
+			defer session.Close()
 
-		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
-		Expect(err).To(Succeed())
-		session.AddCloser(src)
-		cv, err := src.LookupComponentVersion(COMPONENTB, VERSION)
-		Expect(err).To(Succeed())
-		session.AddCloser(cv)
-		Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(digest))
+			src, err := ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
+			Expect(err).To(Succeed())
+			session.AddCloser(src)
+			cv, err := src.LookupComponentVersion(COMPONENTB, VERSION)
+			Expect(err).To(Succeed())
+			session.AddCloser(cv)
+			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(digest))
 
+		})
+	})
+	Context("incomplete ctf", func() {
+		BeforeEach(func() {
+			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+				env.Component(COMPONENTB, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Resource("otherdata", "", "PlainText", metav1.LocalRelation, func() {
+							env.BlobStringData(mime.MIME_TEXT, "otherdata")
+						})
+						env.Reference("ref", COMPONENTA, VERSION)
+					})
+				})
+			})
+		})
+
+		It("sign version", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchErrorOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(HaveOccurred())
+			Expect("\n" + buf.String()).To(Equal(`
+Error: {signing: failed resolving component reference "ref" [github.com/mandelsoft/test:v1] in github.com/mandelsoft/ref:v1: ocm reference "github.com/mandelsoft/test:v1" not found}
+`))
+		})
+
+		It("sign archive", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchErrorOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, ARCH)).To(HaveOccurred())
+			Expect("\n" + buf.String()).To(Equal(`
+Error: {signing: failed resolving component reference "ref" [github.com/mandelsoft/test:v1] in github.com/mandelsoft/ref:v1: ocm reference "github.com/mandelsoft/test:v1" not found}
+`))
+		})
 	})
 
+	Context("incomplete component archive", func() {
+		BeforeEach(func() {
+			env.ComponentArchive(ARCH, accessio.FormatDirectory, COMPONENTB, VERSION, func() {
+				env.Provider(PROVIDER)
+				env.Resource("otherdata", "", "PlainText", metav1.LocalRelation, func() {
+					env.BlobStringData(mime.MIME_TEXT, "otherdata")
+				})
+				env.Reference("ref", COMPONENTA, VERSION)
+			})
+		})
+
+		It("sign version", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchErrorOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(HaveOccurred())
+			Expect("\n" + buf.String()).To(Equal(`
+Error: {signing: failed resolving component reference "ref" [github.com/mandelsoft/test:v1] in github.com/mandelsoft/ref:v1: ocm reference "github.com/mandelsoft/test:v1" not found}
+`))
+		})
+
+		It("sign archive", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchErrorOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, ARCH)).To(HaveOccurred())
+			Expect("\n" + buf.String()).To(Equal(`
+Error: {signing: failed resolving component reference "ref" [github.com/mandelsoft/test:v1] in github.com/mandelsoft/ref:v1: ocm reference "github.com/mandelsoft/test:v1" not found}
+`))
+		})
+	})
 })

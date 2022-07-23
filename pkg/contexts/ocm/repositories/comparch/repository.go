@@ -18,6 +18,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -130,6 +131,9 @@ func (r *Repository) LookupComponentVersion(name string, version string) (cpi.Co
 	ok, err := r.ExistsComponentVersion(name, version)
 	if ok {
 		return r.arch, nil
+	}
+	if err == nil {
+		err = errors.ErrNotFound(cpi.KIND_COMPONENTVERSION, common.NewNameVersion(name, version).String(), CTFComponentArchiveType)
 	}
 	return nil, err
 }

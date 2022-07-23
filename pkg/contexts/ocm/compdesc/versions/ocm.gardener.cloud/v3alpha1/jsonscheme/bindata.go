@@ -92,7 +92,7 @@ func ResourcesComponentDescriptorOcmV3SchemaYaml() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "../../../../../../../../resources/component-descriptor-ocm-v3-schema.yaml", size: 10468, mode: os.FileMode(436), modTime: time.Unix(1656420902, 0)}
+	info := bindataFileInfo{name: "../../../../../../../../resources/component-descriptor-ocm-v3-schema.yaml", size: 10468, mode: os.FileMode(436), modTime: time.Unix(1658604998, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

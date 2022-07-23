@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	"helm.sh/helm/v3/pkg/chart"
@@ -76,9 +77,9 @@ func get(blob accessio.BlobAccess, expected []byte) []byte {
 }
 
 var _ = Describe("art parsing", func() {
-
 	It("succeeds", func() {
 		env := builder.NewBuilder(env.NewEnvironment(env.TestData()))
+		defer vfs.Cleanup(env)
 
 		prov, err := env.ReadFile("/testdata/testchart.prov")
 		Expect(err).To(Succeed())
