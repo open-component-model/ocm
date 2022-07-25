@@ -58,6 +58,7 @@ func transferVersion(printer common.Printer, state common.WalkingState, repo ocm
 	if err != nil {
 		return errors.Wrapf(err, "%s: lookup target component", state.History)
 	}
+	defer comp.Close()
 
 	t, err := comp.LookupVersion(src.GetVersion())
 	if err != nil {

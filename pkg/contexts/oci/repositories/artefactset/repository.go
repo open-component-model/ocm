@@ -34,11 +34,10 @@ func NewRepository(ctx cpi.Context, s *RepositorySpec) (*Repository, error) {
 		s.PathFileSystem = vfsattr.Get(ctx)
 	}
 	r := &Repository{ctx, s, nil}
-	a, err := r.Open()
+	_, err := r.Open()
 	if err != nil {
 		return nil, err
 	}
-	r.arch = a
 	return r, err
 }
 

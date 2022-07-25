@@ -135,6 +135,7 @@ func (a *action) Add(e interface{}) error {
 	if err != nil {
 		return err
 	}
+	defer ns.Close()
 	tgt := a.Ref
 	tgt.Repository = ns.GetNamespace()
 	if tag != "" {

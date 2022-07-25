@@ -30,7 +30,7 @@ type Namespace struct {
 }
 
 func (n *Namespace) Close() error {
-	return nil
+	return n.access.Close()
 }
 
 type NamespaceContainer struct {
@@ -42,7 +42,7 @@ type NamespaceContainer struct {
 var _ cpi.ArtefactSetContainer = (*NamespaceContainer)(nil)
 var _ cpi.NamespaceAccess = (*Namespace)(nil)
 
-func NewNamespace(repo *Repository, name string) *Namespace {
+func newNamespace(repo *Repository, name string) (*Namespace, error) {
 	n := &Namespace{
 		access: &NamespaceContainer{
 			repo:      repo,
@@ -50,7 +50,7 @@ func NewNamespace(repo *Repository, name string) *Namespace {
 		},
 	}
 	n.access.ArtefactSetAccess = cpi.NewArtefactSetAccess(n.access)
-	return n
+	return n, nil
 }
 
 func (n *NamespaceContainer) GetNamepace() string {
@@ -63,6 +63,10 @@ func (n *NamespaceContainer) IsReadOnly() bool {
 
 func (n *NamespaceContainer) IsClosed() bool {
 	return n.repo.IsClosed()
+}
+
+func (n *NamespaceContainer) Close() error {
+	return n.repo.Close()
 }
 
 func (n *NamespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {

@@ -81,7 +81,8 @@ var _ = Describe("component repository mapping", func() {
 		err = comp.AddVersion(vers)
 		Expect(err).To(Succeed())
 
-		Expect(repo.(*genericocireg.Repository).Close()).To(Succeed())
+		Expect(comp.Close()).To(Succeed())
+		Expect(repo.Close()).To(Succeed())
 
 		// access it again
 		repo, err = DefaultContext.RepositoryForSpec(spec)

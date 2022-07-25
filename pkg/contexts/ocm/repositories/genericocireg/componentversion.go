@@ -42,7 +42,7 @@ type ComponentVersion struct {
 var _ cpi.ComponentVersionAccess = (*ComponentVersion)(nil)
 
 func NewComponentVersionAccess(mode accessobj.AccessMode, comp *ComponentAccess, version string, access oci.ManifestAccess) (*ComponentVersion, error) {
-	c, err := NewComponentVersionContainer(mode, comp, version, access)
+	c, err := newComponentVersionContainer(mode, comp, version, access)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ type ComponentVersionContainer struct {
 
 var _ support.ComponentVersionContainer = (*ComponentVersionContainer)(nil)
 
-func NewComponentVersionContainer(mode accessobj.AccessMode, comp *ComponentAccess, version string, manifest oci.ManifestAccess) (*ComponentVersionContainer, error) {
+func newComponentVersionContainer(mode accessobj.AccessMode, comp *ComponentAccess, version string, manifest oci.ManifestAccess) (*ComponentVersionContainer, error) {
 	state, err := NewState(mode, comp.name, version, manifest)
 	if err != nil {
 		return nil, err
@@ -77,6 +77,9 @@ func NewComponentVersionContainer(mode accessobj.AccessMode, comp *ComponentAcce
 }
 
 func (c *ComponentVersionContainer) Close() error {
+	if c.comp.priv {
+		return c.comp.Close() // release private component access
+	}
 	return nil
 }
 

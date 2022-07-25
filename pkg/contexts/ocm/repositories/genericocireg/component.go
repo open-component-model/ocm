@@ -27,11 +27,12 @@ type ComponentAccess struct {
 	repo      *Repository
 	name      string
 	namespace oci.NamespaceAccess
+	priv      bool // private access for dedicated component version
 }
 
 var _ cpi.ComponentAccess = (*ComponentAccess)(nil)
 
-func NewComponentAccess(repo *Repository, name string) (*ComponentAccess, error) {
+func newComponentAccess(repo *Repository, name string, priv bool) (*ComponentAccess, error) {
 	mapped, err := repo.MapComponentNameToNamespace(name)
 	if err != nil {
 		return nil, err
@@ -44,6 +45,7 @@ func NewComponentAccess(repo *Repository, name string) (*ComponentAccess, error)
 		repo:      repo,
 		name:      name,
 		namespace: namespace,
+		priv:      priv,
 	}
 	return n, err
 }
@@ -53,6 +55,9 @@ func (c *ComponentAccess) GetName() string {
 }
 
 func (c *ComponentAccess) Close() error {
+	if !c.priv {
+		c.repo.Close()
+	}
 	return c.namespace.Close()
 }
 
@@ -88,6 +93,7 @@ func (c *ComponentAccess) LookupVersion(version string) (cpi.ComponentVersionAcc
 	}
 	m := acc.ManifestAccess()
 	if m == nil {
+		acc.Close()
 		return nil, errors.ErrInvalid("artefact type")
 	}
 	return NewComponentVersionAccess(accessobj.ACC_WRITABLE, c, version, m)

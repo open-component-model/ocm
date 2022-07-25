@@ -62,6 +62,7 @@ var _ = Describe("ctf management", func() {
 		n, err := r.LookupNamespace("mandelsoft/test")
 		Expect(err).To(Succeed())
 		DefaultManifestFill(n)
+		Expect(n.Close()).To(Succeed())
 
 		Expect(r.Close()).To(Succeed())
 		Expect(vfs.FileExists(tempfs, "test/"+ctf.ArtefactIndexFileName)).To(BeTrue())
@@ -87,6 +88,7 @@ var _ = Describe("ctf management", func() {
 		Expect(err).To(Succeed())
 		DefaultManifestFill(n)
 
+		Expect(n.Close()).To(Succeed())
 		Expect(r.Close()).To(Succeed())
 		Expect(vfs.FileExists(tempfs, "test/"+ctf.ArtefactIndexFileName)).To(BeTrue())
 
@@ -112,6 +114,7 @@ var _ = Describe("ctf management", func() {
 		Expect(err).To(Succeed())
 		DefaultManifestFill(n)
 
+		Expect(n.Close()).To(Succeed())
 		Expect(r.Close()).To(Succeed())
 		Expect(vfs.FileExists(tempfs, "test.tgz")).To(BeTrue())
 
@@ -155,6 +158,7 @@ var _ = Describe("ctf management", func() {
 			n, err := r.LookupNamespace("mandelsoft/test")
 			Expect(err).To(Succeed())
 			DefaultManifestFill(n)
+			Expect(n.Close()).To(Succeed())
 			Expect(r.Close()).To(Succeed())
 
 			r, err = ctf.Open(nil, accessobj.ACC_READONLY, "test", 0, accessio.PathFileSystem(tempfs))

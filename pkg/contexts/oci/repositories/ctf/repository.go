@@ -37,13 +37,36 @@ import (
    Digests used as filename will replace the ":" by a "."
 */
 
+// Repository is a closable view on a repository implementation
 type Repository struct {
-	base *artefactset.FileSystemBlobAccess
-	spec *RepositorySpec
-	ctx  cpi.Context
+	view accessio.CloserView
+	*RepositoryImpl
 }
 
-var _ cpi.Repository = &Repository{}
+func (r *Repository) IsClosed() bool {
+	return r.view.IsClosed()
+}
+
+func (r *Repository) Close() error {
+	return r.view.Close()
+}
+
+func (r *Repository) LookupArtefact(name string, ref string) (cpi.ArtefactAccess, error) {
+	return r.RepositoryImpl.LookupArtefact(r, name, ref)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+// RepositoryImpl is closed, if all views are released
+type RepositoryImpl struct {
+	refs accessio.ReferencableCloser
+
+	ctx  cpi.Context
+	spec *RepositorySpec
+	base *artefactset.FileSystemBlobAccess
+}
+
+var _ cpi.Repository = (*Repository)(nil)
 
 // New returns a new representation based repository
 func New(ctx cpi.Context, spec *RepositorySpec, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode) (*Repository, error) {
@@ -58,54 +81,63 @@ func _Wrap(ctx cpi.Context, spec *RepositorySpec, obj *accessobj.AccessObject, e
 	if err != nil {
 		return nil, err
 	}
-	r := &Repository{
-		base: artefactset.NewFileSystemBlobAccess(obj),
+	r := &RepositoryImpl{
 		ctx:  ctx,
 		spec: spec,
+		base: artefactset.NewFileSystemBlobAccess(obj),
 	}
-	return r, nil
+	r.refs = accessio.NewRefCloser(r, true)
+	return r.View(true)
 }
 
-func (r *Repository) GetSpecification() cpi.RepositorySpec {
+func (r *RepositoryImpl) View(main ...bool) (*Repository, error) {
+	v, err := r.refs.View(main...)
+	if err != nil {
+		return nil, err
+	}
+	return &Repository{view: v, RepositoryImpl: r}, nil
+}
+
+func (r *RepositoryImpl) GetSpecification() cpi.RepositorySpec {
 	return r.spec
 }
 
-func (r *Repository) NamespaceLister() cpi.NamespaceLister {
+func (r *RepositoryImpl) NamespaceLister() cpi.NamespaceLister {
 	return r
 }
 
-func (r *Repository) NumNamespaces(prefix string) (int, error) {
+func (r *RepositoryImpl) NumNamespaces(prefix string) (int, error) {
 	return len(cpi.FilterByNamespacePrefix(prefix, r.getIndex().RepositoryList())), nil
 }
 
-func (r *Repository) GetNamespaces(prefix string, closure bool) ([]string, error) {
+func (r *RepositoryImpl) GetNamespaces(prefix string, closure bool) ([]string, error) {
 	return cpi.FilterChildren(closure, cpi.FilterByNamespacePrefix(prefix, r.getIndex().RepositoryList())), nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // forward
 
-func (r *Repository) IsReadOnly() bool {
+func (r *RepositoryImpl) IsReadOnly() bool {
 	return r.base.IsReadOnly()
 }
 
-func (r *Repository) IsClosed() bool {
+func (r *RepositoryImpl) IsClosed() bool {
 	return r.base.IsClosed()
 }
 
-func (r *Repository) Write(path string, mode vfs.FileMode, opts ...accessio.Option) error {
+func (r *RepositoryImpl) Write(path string, mode vfs.FileMode, opts ...accessio.Option) error {
 	return r.base.Write(path, mode, opts...)
 }
 
-func (r *Repository) Update() error {
+func (r *RepositoryImpl) Update() error {
 	return r.base.Update()
 }
 
-func (r *Repository) Close() error {
+func (r *RepositoryImpl) Close() error {
 	return r.base.Close()
 }
 
-func (a *Repository) getIndex() *index.RepositoryIndex {
+func (a *RepositoryImpl) getIndex() *index.RepositoryIndex {
 	if a.IsReadOnly() {
 		return a.base.GetState().GetOriginalState().(*index.RepositoryIndex)
 	}
@@ -115,19 +147,27 @@ func (a *Repository) getIndex() *index.RepositoryIndex {
 ////////////////////////////////////////////////////////////////////////////////
 // cpi.Repository methods
 
-func (r *Repository) ExistsArtefact(name string, tag string) (bool, error) {
+func (r *RepositoryImpl) ExistsArtefact(name string, tag string) (bool, error) {
 	return r.getIndex().HasArtefact(name, tag), nil
 }
 
-func (r *Repository) LookupArtefact(name string, tag string) (cpi.ArtefactAccess, error) {
-	a := r.getIndex().GetArtefactInfo(name, tag)
+func (r *RepositoryImpl) LookupArtefact(repo *Repository, name string, ref string) (cpi.ArtefactAccess, error) {
+	a := r.getIndex().GetArtefactInfo(name, ref)
 	if a == nil {
-		return nil, cpi.ErrUnknownArtefact(name, tag)
+		return nil, cpi.ErrUnknownArtefact(name, ref)
 	}
 
-	return NewNamespace(r, name).GetArtefact(tag)
+	ns, err := newNamespace(repo, name) // share repo view.namespace not exposed
+	if err != nil {
+		return nil, err
+	}
+	return ns.GetArtefact(ref)
 }
 
-func (r *Repository) LookupNamespace(name string) (cpi.NamespaceAccess, error) {
-	return NewNamespace(r, name), nil
+func (r *RepositoryImpl) LookupNamespace(name string) (cpi.NamespaceAccess, error) {
+	repo, err := r.View() // create new closable view
+	if err != nil {
+		return nil, err
+	}
+	return newNamespace(repo, name)
 }

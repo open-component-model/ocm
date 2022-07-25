@@ -115,6 +115,7 @@ var _ = Describe("syntheses", func() {
 		n, err := r.LookupNamespace("mandelsoft/test")
 		Expect(err).To(Succeed())
 		DefaultManifestFill(n)
+		Expect(n.Close()).To(Succeed())
 		Expect(r.Close()).To(Succeed())
 
 		r, err = ctf.Open(oci.DefaultContext(), accessobj.ACC_READONLY, "test", 0, spec.Options)
