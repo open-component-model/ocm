@@ -9,7 +9,7 @@ EFFECTIVE_VERSION                              := $(VERSION)+$(shell git rev-par
 REGISTRY                                       := ghcr.io/mandelsoft/ocm
 COMPONENT_CLI_IMAGE_REPOSITORY                 := $(REGISTRY)/cli
 
-.PHONY: install-requirements
+.PHONY: build
 build:
 	go build -ldflags "-s -w \
 		-X github.com/open-component-model/ocm/pkg/version.gitVersion=$(EFFECTIVE_VERSION) \
