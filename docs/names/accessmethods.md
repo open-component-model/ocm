@@ -1,13 +1,14 @@
 # Naming Scheme for Access Methods
 
 Access methods describe (and finally implement) dedicated technical ways how to
-access the blob  content of a (re)source described by an
-[OCM component descriptor](../formats/compdesc/README.md) in the storage
-context of the component descriptor containing the access method description.
+access the blob content of a (re)source described by an
+[OCM component descriptor](../formats/compdesc/README.md).
 
-They are an integral part of the Open Component Model, because their implementation
-must be known to provide basic functionality of the model, like transporting
-content by value.
+They are an integral part of the Open Component Model. They always
+provide the link between a component version stored in some repository context,
+and the technical access of the described resources applicable for this
+context. Therefore, the access method of a resource may change when
+component versions are transported among repository contexts.
 
 In a dedicated context all used access methods must be known by the used tool
 set. Nevertheless, the set of access methods is not fixed. The actual
@@ -15,9 +16,9 @@ library/tool version provides a simple way to locally add new methods with
 their implementations to support own local environments.
 
 Because of this extensibility, the names of access methods must be globally
-unique, also.
+unique.
 
-Like for [resource types](resourcetypes.md) there are two flavors
+Like for [resource types](resourcetypes.md), there are two flavors
 of method names:
 
 - centrally provided access methods
@@ -42,6 +43,14 @@ of method names:
   Basically there may be multiple such types provided by different organizations
   with the same meaning. But we strongly encourage organizations to share
   such types instead of introducing new type names.
+
+  Extending the toolset by own access methods always means to locally
+  provide a new tool version with the additionally registered access method
+  implementations. Because the purpose of the Open Component Model is the
+  exchange of software, the involved parties must agree on the used toolset.
+  This might involve methods provided by several potentially non-central 
+  providers. Therefore, use used access method names must be globally unique
+  with a globally unique meaning.
 
   To support a unique namespace for those type names vendor specific types
   have to follow a hierarchical naming scheme based on DNS domain names.

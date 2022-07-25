@@ -13,9 +13,9 @@ are intended to express additional semantics for an element.
 To do so the meaning of labels must be clearly defied. Therefore,
 a label and its bound semantic must be uniquely identified by its name.
 
-The usage of labels is left the creator of a component version, therefore
+The usage of labels is left to the creator of a component version, therefore
 the set of labels must be extensible.
-Because of this extensibility, the names of access methods must be globally
+Because of this extensibility, the names of labels must be globally
 unique, also.
 
 Like for [resource types](resourcetypes.md) there are two flavors
@@ -38,7 +38,7 @@ of label names:
 - vendor specific labels
 
   any organization using the open component model may define dedicated labels
-  on their own. Nevertheless, their name must be globally unique.
+  on their own. Nevertheless, their names must be globally unique.
   Basically there may be multiple such labels provided by different organizations
   with the same meaning. But we strongly encourage organizations to share
   such types instead of introducing new type names.
@@ -64,8 +64,10 @@ The version must match the following regexp
 v[0-9]+([a-z][a-z0-9]*)?
 ```
 
-A label entry consists of a dedicated set of attributes with a predefined
-meaning. Additional (vendor/user specific) attributes are not allowed.
+A label entry in the component descriptor consists of a dedicated set of
+attributes with a predefined meaning. While arbitrary values are allowed for the 
+label `value`, additional (vendor/user specific) attributes are not
+allowed at the label entry level.
 
 - `name` (required) *string*
 

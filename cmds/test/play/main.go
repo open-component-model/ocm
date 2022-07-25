@@ -34,7 +34,7 @@ func CheckErr(err error, msg string, args ...interface{}) {
 	}
 }
 
-var expr = regexp.MustCompile("^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,4}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$")
+var expr = regexp.MustCompile("^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$")
 
 func Check(s string, exp bool) {
 	if expr.MatchString(s) != exp {
@@ -45,6 +45,8 @@ func Check(s string, exp bool) {
 func main() {
 
 	Check("github.wdf.sap.corp/kubernetes/landscape-setup", true)
+	Check("weave.works/registry/app", true)
+	Check("internal.github.org/registry/app", true)
 	Check("a.de/c", true)
 	Check("a.de/c/d/e-f", true)
 	Check("a.de/c/d/e_f", true)

@@ -40,7 +40,7 @@ type Label struct {
 	Signing bool `json:"signing,omitempty"`
 }
 
-var version_regex = regexp.MustCompile("^v[0-9]+$")
+var versionRegex = regexp.MustCompile("^v[0-9]+$")
 
 func NewLabel(name string, value interface{}, opts ...interface{}) (*Label, error) {
 	var data []byte
@@ -65,7 +65,7 @@ func NewLabel(name string, value interface{}, opts ...interface{}) (*Label, erro
 		case bool:
 			l.Signing = v
 		case string:
-			if version_regex.MatchString(v) {
+			if versionRegex.MatchString(v) {
 				l.Version = v
 			} else {
 				b, err := strconv.ParseBool(v)
@@ -74,6 +74,8 @@ func NewLabel(name string, value interface{}, opts ...interface{}) (*Label, erro
 				}
 				l.Signing = b
 			}
+		default:
+			return nil, fmt.Errorf("invalid label option '%v'[%T]", v, v)
 		}
 	}
 	return l, nil

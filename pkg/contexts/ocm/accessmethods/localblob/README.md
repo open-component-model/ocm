@@ -17,14 +17,12 @@ on behalf of the hosting OCM repository.
 Its implementation is specific to the implementation of OCM
 repository used to read the component descriptor. Every repository
 implementation may decide how and where local blobs are stored,
-but is MUST provide an implementation for this method.
+but it MUST provide an implementation for this method.
 
 Regardless of the chosen implementation the attribute specification is
 defined globally the same.
 
 Supported specification version is `v1`
-
-
 
 ### Specification Versions
 
@@ -37,7 +35,7 @@ The type specific specification fields are:
   Repository type specific location information as string. The value
   may encode any deep structure, but typically just an access path is sufficient.
 
-- **`mediaTyoe`** *string*
+- **`mediaType`** *string*
 
   The media type of the blob used to store the resource. It may add 
   format information like `+tar` or `+gzip`.

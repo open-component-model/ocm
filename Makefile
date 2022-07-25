@@ -41,6 +41,7 @@ force-test:
 
 .PHONY: test
 test:
+	@echo "> Test"
 	@go test $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/pkg/...
 
 .PHONY: generate

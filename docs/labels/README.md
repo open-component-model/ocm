@@ -1,8 +1,10 @@
 ## Predefined Labels
 
-The Open Component Model (OCM) uses some labels with a predefined meaning
-relevant for the interpretation of a component descriptor.
+Resources, sources, references and component versions feature [labels](../names/labels.md)
+with arbitrarily structured values.
 
-Such labels lack a namespace and are just flat names.
+The Open Component Model (OCM) allows defining labels with a predefined meaning
+relevant for the interpretation of a component descriptor. Such label names
+lack a namespace and are just flat names.
 
-So far, no predefined labels are in use.
+So far, no predefined labels are defined centrally.

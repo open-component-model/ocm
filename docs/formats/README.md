@@ -12,7 +12,7 @@ to represent content:
     which can be used to transport content without direct internet access.
 
     There are three different technical flavors:
-    - `directory`: the content is store directly as a directory tree
+    - `directory`: the content is stored directly as a directory tree
     - `tar`: the directory tree is stored in a tar archive
     - `tgz`: the directory tree is stored in a zipped tar archive
 
