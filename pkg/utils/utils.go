@@ -208,9 +208,7 @@ func WriteFileToTARArchive(filename string, contentReader io.Reader, archiveWrit
 }
 
 func IndentLines(orig string, gap string) string {
-	if strings.HasSuffix(orig, "\n") {
-		orig = orig[:len(orig)-1]
-	}
+	orig = strings.TrimPrefix(orig, "\n")
 	s := ""
 	for _, l := range strings.Split(orig, "\n") {
 		s += gap + l + "\n"

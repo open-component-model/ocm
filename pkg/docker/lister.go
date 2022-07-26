@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"strings"
 
 	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/log"
@@ -115,15 +114,8 @@ func (r *dockerLister) List(ctx context.Context) ([]string, error) {
 				return nil, errors.Errorf("taglist from host %s failed with unexpected status code %v: %v", host.Host, u, resp.Status)
 			}
 
-			defer resp.Body.Close()
-
-			// Strip encoding data (manifests should always be ascii JSON)
-			contentType := resp.Header.Get("Content-Type")
-			if sp := strings.IndexByte(contentType, ';'); sp != -1 {
-				contentType = contentType[0:sp]
-			}
-
 			data, err := io.ReadAll(resp.Body)
+			resp.Body.Close()
 			if err != nil {
 				return nil, err
 			}

@@ -80,6 +80,7 @@ func (d *dataAccess) Reader() (io.ReadCloser, error) {
 	return d.fetcher.Fetch(dummyContext, d.desc)
 }
 
+/*
 func fetch(ctx context.Context, f remotes.Fetcher, desc *artdesc.Descriptor) ([]byte, error) {
 	fmt.Printf("*** fetch %s %s\n", desc.MediaType, desc.Digest)
 	if desc.Size == 0 {
@@ -87,6 +88,7 @@ func fetch(ctx context.Context, f remotes.Fetcher, desc *artdesc.Descriptor) ([]
 	}
 	return readAll(f.Fetch(ctx, *desc))
 }
+*/
 
 func readAll(reader io.ReadCloser, err error) ([]byte, error) {
 	if err != nil {
@@ -121,6 +123,9 @@ func pushData(ctx context.Context, p remotes.Pusher, desc artdesc.Descriptor, da
 		return err
 	}
 	read, err := data.Reader()
+	if err != nil {
+		return err
+	}
 	defer read.Close()
 	_, err = io.Copy(write, read)
 	if err != nil {

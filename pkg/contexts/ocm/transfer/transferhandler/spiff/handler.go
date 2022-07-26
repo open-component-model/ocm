@@ -137,7 +137,7 @@ func getData(in interface{}) interface{} {
 func getCVAttrs(cv ocm.ComponentVersionAccess) map[string]interface{} {
 	provider := map[string]interface{}{}
 	data, _ := json.Marshal(cv.GetDescriptor().Provider)
-	json.Unmarshal(data, provider)
+	json.Unmarshal(data, &provider)
 
 	labels := cv.GetDescriptor().Labels.AsMap()
 

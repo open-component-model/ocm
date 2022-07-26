@@ -16,7 +16,6 @@ specifications. The type for this spec is <code>generic.config.ocm.gardener.clou
 The following configuration types are supported:
 
 - <code>attributes.config.ocm.gardener.cloud</code>
-  
   The config type <code>attributes.config.ocm.gardener.cloud</code> can be used to define a list
   of arbitrary attribute specifications:
   
@@ -28,7 +27,6 @@ The following configuration types are supported:
   </pre>
 
 - <code>credentials.config.ocm.gardener.cloud</code>
-  
   The config type <code>credentials.config.ocm.gardener.cloud</code> can be used to define a list
   of arbitrary configuration specifications:
   
@@ -55,7 +53,6 @@ The following configuration types are supported:
   </pre>
 
 - <code>generic.config.ocm.gardener.cloud</code>
-  
   The config type <code>generic.config.ocm.gardener.cloud</code> can be used to define a list
   of arbitrary configuration specifications:
   
@@ -68,7 +65,6 @@ The following configuration types are supported:
   </pre>
 
 - <code>keys.config.ocm.gardener.cloud</code>
-  
   The config type <code>keys.config.ocm.gardener.cloud</code> can be used to define
   public and private keys. A key value might be given by one of the fields:
   - <code>path</code>: path of file with key data
@@ -88,7 +84,6 @@ The following configuration types are supported:
   </pre>
 
 - <code>oci.config.ocm.gardener.cloud</code>
-  
   The config type <code>oci.config.ocm.gardener.cloud</code> can be used to define
   OCI registry aliases:
   
@@ -100,7 +95,6 @@ The following configuration types are supported:
   </pre>
 
 - <code>ocm.cmd.config.ocm.gardener.cloud</code>
-  
   The config type <code>ocm.cmd.config.ocm.gardener.cloud</code> can be used to 
   configure predefined aliases for dedicated OCM repositories and 
   OCI registries.
@@ -116,7 +110,6 @@ The following configuration types are supported:
   </pre>
 
 - <code>scripts.ocm.config.ocm.gardener.cloud</code>
-  
   The config type <code>scripts.ocm.config.ocm.gardener.cloud</code> can be used to define transfer scripts:
   
   <pre>

@@ -60,7 +60,7 @@ func CheckTextResource(env *TestEnv, cd *compdesc.ComponentDescriptor, name stri
 	Expect(spec.(*localblob.AccessSpec).MediaType).To(Equal("text/plain"))
 }
 
-func get(blob accessio.BlobAccess, expected []byte) []byte {
+func Get(blob accessio.BlobAccess, expected []byte) []byte {
 	data, err := blob.Get()
 	ExpectWithOffset(1, err).To(Succeed())
 	if expected != nil {

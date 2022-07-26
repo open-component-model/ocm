@@ -179,13 +179,6 @@ func (c *_context) ApplyConfig(spec Config, desc string) error {
 	return err
 }
 
-func (c *_context) joinInfo(desc string) string {
-	if c.description == "" {
-		return desc
-	}
-	return desc + "--" + c.description
-}
-
 func (c *_context) ApplyData(data []byte, unmarshaler runtime.Unmarshaler, desc string) (Config, error) {
 	spec, err := c.knownConfigTypes.DecodeConfig(data, unmarshaler)
 	if err != nil {

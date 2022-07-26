@@ -287,7 +287,7 @@ func (this *simpleBufferIterator) new(buffer *simpleBuffer, valid bool) *simpleB
 func (this *simpleBufferIterator) HasNext() bool {
 	this.buffer.frame.Lock()
 	defer this.buffer.frame.Unlock()
-	for true {
+	for {
 		//fmt.Printf("HasNext: %d(%d) %t\n", this.current, this.container.len(), this.container.closed())
 		if len(this.buffer.entries) > this.current+1 {
 			if !this.valid || this.buffer.entries[this.current+1].Valid {
@@ -301,7 +301,6 @@ func (this *simpleBufferIterator) HasNext() bool {
 		}
 		this.buffer.frame.Wait()
 	}
-	return false
 }
 
 func (this *simpleBufferIterator) Next() interface{} {
@@ -344,11 +343,6 @@ type orderedBuffer struct {
 
 type CheckNext interface {
 	CheckNext() bool
-}
-
-type orderedEntry struct {
-	dll   data.DLL
-	entry ProcessingEntry
 }
 
 func NewOrderedBuffer() ProcessingBuffer {

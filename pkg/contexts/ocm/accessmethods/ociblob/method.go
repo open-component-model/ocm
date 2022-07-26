@@ -115,7 +115,7 @@ func (m *accessMethod) Reader() (io.ReadCloser, error) {
 }
 
 func (m *accessMethod) MimeType() string {
-	return m.MimeType()
+	return m.spec.MediaType
 }
 
 func (m *accessMethod) getBlob() (cpi.BlobAccess, error) {

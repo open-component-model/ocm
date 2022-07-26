@@ -41,7 +41,6 @@ type blobContainer struct {
 
 type BlobContainers struct {
 	lock    sync.Mutex
-	ctx     cpi.Context
 	cache   accessio.BlobCache
 	fetcher remotes.Fetcher
 	pusher  remotes.Pusher

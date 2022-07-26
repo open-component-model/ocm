@@ -199,8 +199,8 @@ func (c *ComponentVersionContainer) AddBlobFor(storagectx cpi.StorageContext, bl
 	return localblob.New(blob.Digest().String(), refName, blob.MimeType(), global), nil
 }
 
-// assureGlobalRef provides a global manifest for a local OCI Artefact
-func (c *ComponentVersionContainer) assureGlobalRef(d digest.Digest, url, name string) (cpi.AccessSpec, error) {
+// AssureGlobalRef provides a global manifest for a local OCI Artefact
+func (c *ComponentVersionContainer) AssureGlobalRef(d digest.Digest, url, name string) (cpi.AccessSpec, error) {
 
 	blob, err := c.manifest.GetBlob(d)
 	if err != nil {

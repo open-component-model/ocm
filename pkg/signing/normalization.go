@@ -64,11 +64,9 @@ func toString(v interface{}, gap string) string {
 		return s
 	case string:
 		return castIn
-		break
 	default:
 		panic(fmt.Sprintf("unknown type %T in sorting. This should not happen", v))
 	}
-	return ""
 }
 
 // Entry is used to keep exactly one key/value pair

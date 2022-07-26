@@ -39,7 +39,7 @@ func New(pathtag string) *Spec {
 }
 
 func (s *Spec) Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath string) field.ErrorList {
-	allErrs := s.Validate(fldPath, ctx, inputFilePath)
+	allErrs := s.PathSpec.Validate(fldPath, ctx, inputFilePath)
 	if s.Path != "" {
 		pathField := fldPath.Child("path")
 		_, _, err := docker.ParseGenericRef(s.Path)

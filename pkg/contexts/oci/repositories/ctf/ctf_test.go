@@ -60,6 +60,7 @@ var _ = Describe("ctf management", func() {
 		Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
 
 		n, err := r.LookupNamespace("mandelsoft/test")
+		Expect(err).To(Succeed())
 		DefaultManifestFill(n)
 
 		Expect(r.Close()).To(Succeed())
@@ -83,6 +84,7 @@ var _ = Describe("ctf management", func() {
 		Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
 
 		n, err := r.LookupNamespace("mandelsoft/test")
+		Expect(err).To(Succeed())
 		DefaultManifestFill(n)
 
 		Expect(r.Close()).To(Succeed())
@@ -151,6 +153,7 @@ var _ = Describe("ctf management", func() {
 			Expect(err).To(Succeed())
 			Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
 			n, err := r.LookupNamespace("mandelsoft/test")
+			Expect(err).To(Succeed())
 			DefaultManifestFill(n)
 			Expect(r.Close()).To(Succeed())
 

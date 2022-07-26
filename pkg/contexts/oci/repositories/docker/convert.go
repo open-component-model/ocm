@@ -153,7 +153,7 @@ func Convert(art cpi.Artefact, blobs accessio.BlobSource, dst types.ImageDestina
 			return nil, err
 		}
 		defer r.Close()
-		info := types.BlobInfo{
+		bi := types.BlobInfo{
 			Digest:      l.Digest,
 			Size:        size,
 			URLs:        l.URLs,
@@ -161,7 +161,7 @@ func Convert(art cpi.Artefact, blobs accessio.BlobSource, dst types.ImageDestina
 			MediaType:   l.MediaType,
 		}
 		fmt.Printf("put blob  for layer %d\n", i)
-		info, err = dst.PutBlob(dummyContext, r, info, nil, false)
+		_, err = dst.PutBlob(dummyContext, r, bi, nil, false)
 		if err != nil {
 			return nil, err
 		}
@@ -203,8 +203,10 @@ func Convert(art cpi.Artefact, blobs accessio.BlobSource, dst types.ImageDestina
 	} else {
 		reader = io.NopCloser(bytes.NewReader(blob))
 	}
-	bi, err = dst.PutBlob(dummyContext, reader, bi, nil, true)
-
+	_, err = dst.PutBlob(dummyContext, reader, bi, nil, true)
+	if err != nil {
+		return nil, err
+	}
 	man, _, err := img.Manifest(dummyContext)
 	if err != nil {
 		return nil, err

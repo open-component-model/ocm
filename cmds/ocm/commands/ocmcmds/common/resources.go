@@ -200,8 +200,6 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 					if err = Validate(input, o.Context, filePath); err != nil {
 						return errors.Wrapf(err, "invalid spec %d[%d] in %q", i+1, j+1, filePath)
 					}
-				} else {
-
 				}
 
 				if err = r.Validate(o.Context, input); err != nil {

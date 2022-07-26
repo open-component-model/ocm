@@ -37,7 +37,7 @@ type Credentials interface {
 }
 
 type DirectCredentials struct {
-	Values common.Properties `json: "properties"`
+	Values common.Properties `json:"properties"`
 }
 
 var _ Credentials = &DirectCredentials{}

@@ -82,7 +82,8 @@ func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferre
 			header, err := tr.Next()
 			if err != nil {
 				if err == io.EOF {
-					return nil, errors.ErrInvalid("artefact archive")
+					err = fmt.Errorf("descriptor not found in archive")
+					return nil, errors.ErrInvalidWrap(err, "artefact archive")
 				}
 				return nil, err
 			}
@@ -113,7 +114,7 @@ func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferre
 				}
 			}
 		}
-		return nil, fmt.Errorf("unable to read descriptor from archive: %w", err)
+		// not reached (endless for)
 	}
 	if acc.GetKind() == ociregistry.Type {
 		dig := acc.(accessio.DigestSource).Digest()

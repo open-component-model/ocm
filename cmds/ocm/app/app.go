@@ -292,8 +292,6 @@ func (o *CLIOptions) Complete() error {
 	}
 	if len(attrs) != 0 {
 		o.Context.CredentialsContext().SetCredentialsForConsumer(id, credentials.NewCredentials(attrs))
-		id = credentials.ConsumerIdentity{}
-		attrs = common.Properties{}
 	} else {
 		if len(id) != 0 {
 			return errors.Newf("empty credential attribute set for %s", id.String())

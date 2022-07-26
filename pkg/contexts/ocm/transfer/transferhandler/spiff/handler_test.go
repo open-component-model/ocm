@@ -75,6 +75,7 @@ var _ = Describe("Transfer handler", func() {
 	It("handles bool", func() {
 
 		handler, err := spiff.New(spiff.Script([]byte(script1)))
+		Expect(err).To(Succeed())
 
 		binding := map[string]interface{}{
 			"component": map[string]interface{}{
@@ -90,6 +91,7 @@ var _ = Describe("Transfer handler", func() {
 	It("handles componentversion", func() {
 
 		handler, err := spiff.New(spiff.Script([]byte(script1)))
+		Expect(err).To(Succeed())
 
 		binding := map[string]interface{}{
 			"component": map[string]interface{}{
@@ -107,7 +109,7 @@ var _ = Describe("Transfer handler", func() {
 	It("handles simple componentversion", func() {
 
 		handler, err := spiff.New(spiff.Script([]byte(script1)))
-
+		Expect(err).To(Succeed())
 		binding := map[string]interface{}{
 			"component": map[string]interface{}{
 				"name":    COMPONENT,

@@ -48,10 +48,6 @@ func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
 		if id[ID_PORT] != "" && id[ID_PORT] != pattern[ID_PORT] {
 			return false
 		}
-	} else {
-		if id[ID_PORT] != "" {
-			// return false // try other port
-		}
 	}
 
 	if pattern[ID_PATHPREFIX] != "" {

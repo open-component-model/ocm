@@ -111,9 +111,7 @@ func (l Labels) Copy() Labels {
 		return nil
 	}
 	n := make(Labels, len(l))
-	for k, v := range l {
-		n[k] = v
-	}
+	copy(n, l)
 	return n
 }
 

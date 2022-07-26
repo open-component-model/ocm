@@ -130,7 +130,7 @@ func (this *_Cache) Iterator() Iterator {
 	return newMapEntryIterator(this.entries)
 }
 
-func (this _Cache) Entries() Iterator {
+func (this *_Cache) Entries() Iterator {
 	return NewMappedIterator(this.Iterator(), func(e interface{}) interface{} {
 		return e.(MapEntry).Value
 	})

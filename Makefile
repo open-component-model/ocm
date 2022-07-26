@@ -25,7 +25,7 @@ install-requirements:
 	@make -C hack $@
 
 .PHONY: prepare
-prepare: generate format test
+prepare: generate format test check
 
 .PHONY: format
 format:
@@ -33,7 +33,7 @@ format:
 
 .PHONY: check
 check:
-	@$(REPO_ROOT)/hack/check.sh --golangci-lint-config=./.golangci.yaml $(REPO_ROOT)/cmd/... $(REPO_ROOT)/pkg/... $(REPO_ROOT)/ociclient/...
+	@$(REPO_ROOT)/hack/check.sh --golangci-lint-config=./.golangci.yaml $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/pkg/...
 
 .PHONY: test
 test:

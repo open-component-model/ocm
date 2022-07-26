@@ -33,7 +33,7 @@ func init() {
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
-	DockerHost                  string `json:dockerHost,omitempty`
+	DockerHost                  string `json:"dockerHost,omitempty"`
 }
 
 // NewRepositorySpec creates a new RepositorySpec for an optional host

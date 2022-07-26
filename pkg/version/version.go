@@ -84,7 +84,7 @@ func Get() Info {
 			gitMeta = gitPre[i+1:]
 			gitPre = gitPre[:i]
 		}
-		v := strings.Split(gitVersion, ".")
+		v := strings.Split(version, ".")
 		if len(v) >= 2 {
 			gitMajor = v[0]
 			gitMinor = v[1]

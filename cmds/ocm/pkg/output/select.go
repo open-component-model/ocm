@@ -20,7 +20,7 @@ import (
 
 func SelectBest(name string, candidates ...string) (string, int) {
 	for i, c := range candidates {
-		if strings.ToLower(name) == strings.ToLower(c) {
+		if strings.EqualFold(name, c) {
 			return c, i
 		}
 	}

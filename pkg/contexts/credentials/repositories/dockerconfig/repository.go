@@ -67,7 +67,7 @@ func (r *Repository) ExistsCredentials(name string) (bool, error) {
 	return err != nil, err
 }
 
-func (r Repository) LookupCredentials(name string) (cpi.Credentials, error) {
+func (r *Repository) LookupCredentials(name string) (cpi.Credentials, error) {
 	err := r.Read(false)
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (r Repository) LookupCredentials(name string) (cpi.Credentials, error) {
 	return newCredentials(auth), nil
 }
 
-func (r Repository) WriteCredentials(name string, creds cpi.Credentials) (cpi.Credentials, error) {
+func (r *Repository) WriteCredentials(name string, creds cpi.Credentials) (cpi.Credentials, error) {
 	return nil, errors.ErrNotSupported("write", "credentials", DockerConfigRepositoryType)
 }
 

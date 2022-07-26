@@ -73,6 +73,7 @@ var _ = Describe("normalization", func() {
 		"type": "t1",
 		"attr": "value",
 	})
+	Expect(err).To(Succeed())
 	unstr := &runtime.UnstructuredTypedObject{}
 	err = json.Unmarshal(data, unstr)
 	Expect(err).To(Succeed())

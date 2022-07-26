@@ -54,7 +54,7 @@ func (n *NormalizationAlgorithms) Names() []string {
 	n.RLock()
 	defer n.RUnlock()
 	names := []string{}
-	for n, _ := range n.algos {
+	for n := range n.algos {
 		names = append(names, n)
 	}
 	sort.Strings(names)

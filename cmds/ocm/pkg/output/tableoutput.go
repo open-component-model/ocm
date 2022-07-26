@@ -82,10 +82,7 @@ func (this *TableProcessingOutput) Out() error {
 		cols := make([]string, len(this.header))
 		idxs := map[string]int{}
 		for i, n := range this.header {
-			cols[i] = strings.ToLower(n)
-			if strings.HasPrefix(cols[i], "-") {
-				cols[i] = cols[i][1:]
-			}
+			cols[i] = strings.TrimPrefix(strings.ToLower(n), "-")
 			idxs[cols[i]] = i
 		}
 		for _, k := range sort {

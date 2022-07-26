@@ -74,10 +74,6 @@ func NewBuilder(t *env.Environment) *Builder {
 	return &Builder{Environment: t}
 }
 
-func (b *Builder) require(typ string) {
-	Expect(b.peek().Type()).To(Equal(typ))
-}
-
 func (b *Builder) set() {
 	b.ocm_repo = nil
 	b.ocm_comp = nil

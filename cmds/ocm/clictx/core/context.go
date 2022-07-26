@@ -18,7 +18,6 @@ import (
 	"context"
 	"io"
 	"reflect"
-	"sync"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -94,7 +93,6 @@ func ForContext(ctx context.Context) Context {
 ////////////////////////////////////////////////////////////////////////////////
 
 type _context struct {
-	lock sync.RWMutex
 	datacontext.Context
 	updater cfgcpi.Updater
 

@@ -47,10 +47,8 @@ func (r *ocm_source) Close() error {
 		return r.Builder.ocm_vers.SetSource(&r.meta, r.access)
 	case r.blob != nil:
 		return r.Builder.ocm_vers.SetSourceBlob(&r.meta, r.blob, "", nil)
-	default:
-		return errors.New("access or blob required")
 	}
-	return nil
+	return errors.New("access or blob required")
 }
 
 ////////////////////////////////////////////////////////////////////////////////

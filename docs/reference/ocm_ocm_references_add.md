@@ -63,7 +63,6 @@ The resource specification supports the following blob input types, specified
 with the field <code>type</code> in the <code>input</code> field:
 
 - Input type <code>dir</code>
-  
   The path must denote a directory relative to the resources file, which is packed
   with tar and optionally compressed
   if the <code>compress</code> field is set to <code>true</code>. If the field
@@ -113,9 +112,9 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property describes regular expressions used to match files 
     that should be included in the tar file. If this option is not given
     all files not explicitly excluded are used.
+  
 
 - Input type <code>docker</code>
-  
   The path must denote an image tag that can be found in the local
   docker daemon. The denoted image is packed an OCI artefact set.
   
@@ -126,7 +125,6 @@ with the field <code>type</code> in the <code>input</code> field:
     local docker daemon.
 
 - Input type <code>file</code>
-  
   The path must denote a file relative the the resources file.
   The content is compressed if the <code>compress</code> field
   is set to <code>true</code>.
@@ -147,9 +145,9 @@ with the field <code>type</code> in the <code>input</code> field:
   
     This OPTIONAL property describes whether the file content should be stored
     compressed or not.
+  
 
 - Input type <code>helm</code>
-  
   The path must denote an helm chart archive or directory
   relative to the resources file.
   The denoted chart is packed as an OCI artefact set.

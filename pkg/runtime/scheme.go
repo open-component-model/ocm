@@ -93,7 +93,7 @@ func (d *DirectDecoder) Decode(data []byte, unmarshaler Unmarshaler) (TypedObjec
 		return nil, err
 	}
 
-	return inst.(TypedObject), nil
+	return inst, nil
 }
 
 func (d *DirectDecoder) Encode(obj TypedObject, marshaler Marshaler) ([]byte, error) {

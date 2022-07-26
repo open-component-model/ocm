@@ -72,6 +72,9 @@ func (s *Spec) Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath s
 func (s *Spec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
 	fs := ctx.FileSystem()
 	inputInfo, inputPath, err := inputs.FileInfo(ctx, s.Path, inputFilePath)
+	if err != nil {
+		return nil, "", fmt.Errorf("resource dir %s: %s", inputFilePath, err)
+	}
 	if !inputInfo.IsDir() {
 		return nil, "", fmt.Errorf("resource type is dir but a file was provided")
 	}

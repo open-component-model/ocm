@@ -20,10 +20,8 @@ done
 echo "> Check"
 
 echo "Executing golangci-lint"
+echo "  golangci-lint run $GOLANGCI_LINT_CONFIG_FILE --timeout 10m $@"
 golangci-lint run $GOLANGCI_LINT_CONFIG_FILE --timeout 10m $@
-
-echo "Executing go vet"
-go vet $@
 
 echo "Executing gofmt"
 folders=()

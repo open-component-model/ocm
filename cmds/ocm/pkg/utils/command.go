@@ -61,13 +61,14 @@ func addCommand(names []string, use string) string {
 		return names[0]
 	}
 	lines := strings.Split(use, "\n")
+outer:
 	for i, l := range lines {
 		if strings.HasPrefix(l, " ") || strings.HasPrefix(l, "\t") {
 			continue
 		}
 		for _, n := range names {
 			if strings.HasPrefix(l, n+" ") {
-				continue
+				continue outer
 			}
 		}
 		lines[i] = names[0] + " " + l

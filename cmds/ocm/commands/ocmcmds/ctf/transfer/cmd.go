@@ -119,7 +119,6 @@ func (o *Command) Run() error {
 /////////////////////////////////////////////////////////////////////////////
 
 type action struct {
-	cmd     *Command
 	printer common.Printer
 	target  ocm.Repository
 	handler transferhandler.TransferHandler

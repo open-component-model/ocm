@@ -16,17 +16,19 @@ package cobrautils
 
 import (
 	"strings"
+
+	"golang.org/x/text/cases"
 )
 
 var templatefuncs = map[string]interface{}{
 	"indent":      indent,
 	"skipCommand": skipCommand,
 	"soleCommand": soleCommand,
-	"title":       strings.Title,
+	"title":       cases.Title,
 }
 
 func soleCommand(s string) bool {
-	return strings.Index(s, " ") < 0
+	return !strings.Contains(s, " ")
 }
 
 func skipCommand(s string) string {

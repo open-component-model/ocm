@@ -67,7 +67,7 @@ func FormatTable(ctx Context, gap string, data [][]string) {
 					}
 					setSep = true
 				}
-				if setSep == true {
+				if setSep {
 					Outf(ctx, "---\n")
 					setSep = false
 				}

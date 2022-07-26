@@ -184,6 +184,7 @@ func GetLayerInfo(blob accessio.BlobAccess, layerFiles bool) *LayerInfo {
 		header, err := tr.Next()
 		if err != nil {
 			if err == io.EOF {
+				info.Content = files
 				return info
 			}
 			if len(files) == 0 {
@@ -204,8 +205,6 @@ func GetLayerInfo(blob accessio.BlobAccess, layerFiles bool) *LayerInfo {
 			files = append(files, fmt.Sprintf("file: %s\n", header.Name))
 		}
 	}
-	info.Content = files
-	return info
 }
 
 func GetIndexInfo(i cpi.IndexAccess, layerFiles bool) *ArtefactInfo {

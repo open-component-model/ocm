@@ -150,7 +150,7 @@ func (r *Repository) LookupComponent(name string) (cpi.ComponentAccess, error) {
 	return r.arch.comp, nil
 }
 
-func (r Repository) Close() error {
+func (r *Repository) Close() error {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	if r.arch != nil {

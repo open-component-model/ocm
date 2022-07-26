@@ -81,6 +81,9 @@ func TransferAsArtefact(path string, ns oci.NamespaceAccess, fss ...vfs.FileSyst
 		}
 		defer os.RemoveAll(dir)
 		path, err = chartutil.Save(chart, dir)
+		if err != nil {
+			return chart, nil, err
+		}
 		fs = osfs.New()
 	}
 	meta := chart.Metadata

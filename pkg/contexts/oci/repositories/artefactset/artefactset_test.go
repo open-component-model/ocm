@@ -170,6 +170,7 @@ var _ = Describe("artefact management", func() {
 			Expect(a.Close()).To(Succeed())
 
 			a, err = artefactset.FormatDirectory.Open(accessobj.ACC_READONLY, "test", opts)
+			Expect(err).To(Succeed())
 			defer a.Close()
 			Expect(len(a.GetIndex().Manifests)).To(Equal(1))
 			art, err := a.GetArtefact(a.GetIndex().Manifests[0].Digest.String())
