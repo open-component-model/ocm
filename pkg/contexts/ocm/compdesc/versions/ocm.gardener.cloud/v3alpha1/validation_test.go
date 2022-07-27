@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package compdesc_test
+package v3alpha1_test
 
 import (
 	"testing"
@@ -20,11 +20,12 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
-	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/testutils"
-	. "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2/jsonscheme"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud/v3alpha1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud/v3alpha1/jsonscheme"
+
+	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	meta "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -37,7 +38,7 @@ func TestConfig(t *testing.T) {
 }
 
 var _ = Describe("Validation", func() {
-	testutils.TestCompName(jsonscheme.ResourcesComponentDescriptorV2SchemaYamlBytes())
+	testutils.TestCompName(jsonscheme.ResourcesComponentDescriptorOcmV3SchemaYamlBytes())
 
 	Context("validator", func() {
 		var (
@@ -76,19 +77,22 @@ var _ = Describe("Validation", func() {
 			}
 
 			comp = &ComponentDescriptor{
-				Metadata: meta.Metadata{
-					Version: SchemaVersion,
+				TypeMeta: meta.TypeMeta{
+					APIVersion: GroupVersion,
+					Kind:       Kind,
 				},
-				ComponentSpec: ComponentSpec{
-					ObjectMeta: ObjectMeta{
-						Name:    "my-comp",
-						Version: "1.2.3",
+				ObjectMeta: meta.ObjectMeta{
+					Name:    "my-comp",
+					Version: "1.2.3",
+					Provider: meta.Provider{
+						Name: "external",
 					},
-					Provider:            "external",
-					RepositoryContexts:  nil,
-					Sources:             nil,
-					ComponentReferences: nil,
-					Resources:           []Resource{*ociImage1, *ociImage2},
+				},
+				RepositoryContexts: nil,
+				Spec: ComponentVersionSpec{
+					Sources:    nil,
+					References: nil,
+					Resources:  []Resource{*ociImage1, *ociImage2},
 				},
 			}
 		})
@@ -96,14 +100,12 @@ var _ = Describe("Validation", func() {
 		Context("#Metadata", func() {
 
 			It("should forbid if the component schemaVersion is missing", func() {
-				comp := ComponentDescriptor{
-					Metadata: meta.Metadata{},
-				}
+				comp := ComponentDescriptor{}
 
 				errList := Validate(nil, &comp)
 				Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeRequired),
-					"Field": Equal("meta.schemaVersion"),
+					"Field": Equal("apiVersion"),
 				}))))
 			})
 
@@ -111,7 +113,7 @@ var _ = Describe("Validation", func() {
 				errList := Validate(nil, comp)
 				Expect(errList).ToNot(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeRequired),
-					"Field": Equal("meta.schemaVersion"),
+					"Field": Equal("apiVersion"),
 				}))))
 			})
 
@@ -123,11 +125,11 @@ var _ = Describe("Validation", func() {
 				errList := Validate(nil, &comp)
 				Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeRequired),
-					"Field": Equal("component.name"),
+					"Field": Equal("metadata.name"),
 				}))))
 				Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeRequired),
-					"Field": Equal("component.version"),
+					"Field": Equal("metadata.version"),
 				}))))
 			})
 
@@ -136,7 +138,7 @@ var _ = Describe("Validation", func() {
 				errList := Validate(nil, &comp)
 				Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeRequired),
-					"Field": Equal("component.name"),
+					"Field": Equal("metadata.name"),
 				}))))
 			})
 
@@ -144,7 +146,7 @@ var _ = Describe("Validation", func() {
 
 		Context("#Sources", func() {
 			It("should forbid if a duplicated component's source is defined", func() {
-				comp.Sources = []Source{
+				comp.Spec.Sources = []Source{
 					{
 						SourceMeta: SourceMeta{
 							ElementMeta: ElementMeta{
@@ -165,14 +167,14 @@ var _ = Describe("Validation", func() {
 				errList := Validate(nil, comp)
 				Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeDuplicate),
-					"Field": Equal("component.sources[1]"),
+					"Field": Equal("spec.sources[1]"),
 				}))))
 			})
 		})
 
 		Context("#ComponentReferences", func() {
 			It("should pass if a reference is set", func() {
-				comp.ComponentReferences = []ComponentReference{
+				comp.Spec.References = []Reference{
 					{
 						ElementMeta: ElementMeta{
 							Name:    "test",
@@ -184,16 +186,16 @@ var _ = Describe("Validation", func() {
 				errList := Validate(nil, comp)
 				Expect(errList).ToNot(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeRequired),
-					"Field": Equal("component.componentReferences[0].name"),
+					"Field": Equal("spec.references[0].name"),
 				}))))
 				Expect(errList).ToNot(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeRequired),
-					"Field": Equal("component.componentReferences[0].version"),
+					"Field": Equal("spec.references[0].version"),
 				}))))
 			})
 
 			It("should forbid if a reference's name is missing", func() {
-				comp.ComponentReferences = []ComponentReference{
+				comp.Spec.References = []Reference{
 					{
 						ElementMeta: ElementMeta{
 							Version: "1.2.3",
@@ -204,12 +206,12 @@ var _ = Describe("Validation", func() {
 				errList := Validate(nil, comp)
 				Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeRequired),
-					"Field": Equal("component.componentReferences[0].name"),
+					"Field": Equal("spec.references[0].name"),
 				}))))
 			})
 
 			It("should forbid if a reference's component name is missing", func() {
-				comp.ComponentReferences = []ComponentReference{
+				comp.Spec.References = []Reference{
 					{
 						ElementMeta: ElementMeta{
 							Name:    "test",
@@ -220,12 +222,12 @@ var _ = Describe("Validation", func() {
 				errList := Validate(nil, comp)
 				Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeRequired),
-					"Field": Equal("component.componentReferences[0].componentName"),
+					"Field": Equal("spec.references[0].componentName"),
 				}))))
 			})
 
 			It("should forbid if a reference's version is missing", func() {
-				comp.ComponentReferences = []ComponentReference{
+				comp.Spec.References = []Reference{
 					{
 						ElementMeta: ElementMeta{
 							Name: "test",
@@ -236,12 +238,12 @@ var _ = Describe("Validation", func() {
 				errList := Validate(nil, comp)
 				Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeRequired),
-					"Field": Equal("component.componentReferences[0].version"),
+					"Field": Equal("spec.references[0].version"),
 				}))))
 			})
 
 			It("should forbid if a duplicated component reference is defined", func() {
-				comp.ComponentReferences = []ComponentReference{
+				comp.Spec.References = []Reference{
 					{
 						ElementMeta: ElementMeta{
 							Name: "test",
@@ -256,14 +258,14 @@ var _ = Describe("Validation", func() {
 				errList := Validate(nil, comp)
 				Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeDuplicate),
-					"Field": Equal("component.componentReferences[1]"),
+					"Field": Equal("spec.references[1]"),
 				}))))
 			})
 		})
 
 		Context("#Resources", func() {
 			It("should forbid if a local resource's version differs from the version of the parent", func() {
-				comp.Resources = []Resource{
+				comp.Spec.Resources = []Resource{
 					{
 						ElementMeta: ElementMeta{
 							Name:    "locRes",
@@ -276,12 +278,12 @@ var _ = Describe("Validation", func() {
 				errList := Validate(nil, comp)
 				Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeInvalid),
-					"Field": Equal("component.resources[0].version"),
+					"Field": Equal("spec.resources[0].version"),
 				}))))
 			})
 
 			It("should forbid if a resource name contains invalid characters", func() {
-				comp.Resources = []Resource{
+				comp.Spec.Resources = []Resource{
 					{
 						ElementMeta: ElementMeta{
 							Name: "test$",
@@ -296,16 +298,16 @@ var _ = Describe("Validation", func() {
 				errList := Validate(nil, comp)
 				Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeInvalid),
-					"Field": Equal("component.resources[0].name"),
+					"Field": Equal("spec.resources[0].name"),
 				}))))
 				Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeInvalid),
-					"Field": Equal("component.resources[1].name"),
+					"Field": Equal("spec.resources[1].name"),
 				}))))
 			})
 
 			It("should forbid if a duplicated local resource is defined", func() {
-				comp.Resources = []Resource{
+				comp.Spec.Resources = []Resource{
 					{
 						ElementMeta: ElementMeta{
 							Name: "test",
@@ -320,12 +322,12 @@ var _ = Describe("Validation", func() {
 				errList := Validate(nil, comp)
 				Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeDuplicate),
-					"Field": Equal("component.resources[1]"),
+					"Field": Equal("spec.resources[1]"),
 				}))))
 			})
 
 			It("should forbid if a duplicated resource with additional identity labels is defined", func() {
-				comp.Resources = []Resource{
+				comp.Spec.Resources = []Resource{
 					{
 						ElementMeta: ElementMeta{
 							Name: "test",
@@ -346,12 +348,12 @@ var _ = Describe("Validation", func() {
 				errList := Validate(nil, comp)
 				Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeDuplicate),
-					"Field": Equal("component.resources[1]"),
+					"Field": Equal("spec.resources[1]"),
 				}))))
 			})
 
 			It("should pass if a duplicated resource has the same name but with different additional identity labels", func() {
-				comp.Resources = []Resource{
+				comp.Spec.Resources = []Resource{
 					{
 						ElementMeta: ElementMeta{
 							Name: "test",
@@ -369,19 +371,18 @@ var _ = Describe("Validation", func() {
 				errList := Validate(nil, comp)
 				Expect(errList).ToNot(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeDuplicate),
-					"Field": Equal("component.resources[1]"),
+					"Field": Equal("spec.resources[1]"),
 				}))))
 				Expect(errList).ToNot(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeDuplicate),
-					"Field": Equal("component.resources[0]"),
+					"Field": Equal("spec.resources[0]"),
 				}))))
 			})
 		})
 
 		Context("#labels", func() {
-
 			It("should forbid if labels are defined multiple times in the same context", func() {
-				comp.ComponentReferences = []ComponentReference{
+				comp.Spec.References = []Reference{
 					{
 						ElementMeta: ElementMeta{
 							Name:    "test",
@@ -404,12 +405,12 @@ var _ = Describe("Validation", func() {
 				errList := Validate(nil, comp)
 				Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeDuplicate),
-					"Field": Equal("component.componentReferences[0].labels[1]"),
+					"Field": Equal("spec.references[0].labels[1]"),
 				}))))
 			})
 
 			It("should pass if labels are defined multiple times in the same context with differnet names", func() {
-				comp.ComponentReferences = []ComponentReference{
+				comp.Spec.References = []Reference{
 					{
 						ElementMeta: ElementMeta{
 							Name:    "test",
@@ -432,7 +433,7 @@ var _ = Describe("Validation", func() {
 				errList := Validate(nil, comp)
 				Expect(errList).ToNot(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
 					"Type":  Equal(field.ErrorTypeDuplicate),
-					"Field": Equal("component.componentReferences[0].labels[1]"),
+					"Field": Equal("spec.references[0].labels[1]"),
 				}))))
 			})
 		})
