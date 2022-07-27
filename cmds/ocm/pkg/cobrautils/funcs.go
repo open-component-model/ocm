@@ -18,13 +18,14 @@ import (
 	"strings"
 
 	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 var templatefuncs = map[string]interface{}{
 	"indent":      indent,
 	"skipCommand": skipCommand,
 	"soleCommand": soleCommand,
-	"title":       cases.Title,
+	"title":       cases.Title(language.English).String,
 }
 
 func soleCommand(s string) bool {
