@@ -76,6 +76,10 @@ func (c *ComponentArchive) AsRepository() cpi.Repository {
 	return c.comp.repo
 }
 
+func (c *ComponentArchive) Repository() cpi.Repository {
+	return c.comp.repo
+}
+
 func (c *ComponentArchive) ComponentAccess() cpi.ComponentAccess {
 	return c.comp
 }

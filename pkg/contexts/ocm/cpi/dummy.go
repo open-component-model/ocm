@@ -33,6 +33,10 @@ func (d *DummyComponentVersionAccess) GetContext() Context {
 	return d.Context
 }
 
+func (c *DummyComponentVersionAccess) Repository() Repository {
+	panic("implement me")
+}
+
 func (d *DummyComponentVersionAccess) GetName() string {
 	panic("implement me")
 }
@@ -67,6 +71,14 @@ func (d *DummyComponentVersionAccess) GetSource(meta metav1.Identity) (SourceAcc
 
 func (d *DummyComponentVersionAccess) GetSourceByIndex(i int) (SourceAccess, error) {
 	return nil, errors.ErrInvalid("source index", strconv.Itoa(i))
+}
+
+func (d *DummyComponentVersionAccess) GetReference(meta metav1.Identity) (ComponentReference, error) {
+	return ComponentReference{}, errors.ErrNotFound("reference", meta.String())
+}
+
+func (d *DummyComponentVersionAccess) GetReferenceByIndex(i int) (ComponentReference, error) {
+	return ComponentReference{}, errors.ErrInvalid("reference index", strconv.Itoa(i))
 }
 
 func (d *DummyComponentVersionAccess) AccessMethod(spec AccessSpec) (AccessMethod, error) {

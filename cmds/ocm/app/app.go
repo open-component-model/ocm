@@ -39,6 +39,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/add"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/bootstrap"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/clean"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/create"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/describe"
@@ -51,6 +52,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/cobrautils"
 	topicconfig "github.com/open-component-model/ocm/cmds/ocm/topics/common/config"
 	topicocirefs "github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
+	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/bootstrapping"
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
@@ -179,6 +181,7 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(transfer.NewCommand(opts.Context))
 	cmd.AddCommand(describe.NewCommand(opts.Context))
 	cmd.AddCommand(download.NewCommand(opts.Context))
+	cmd.AddCommand(bootstrap.NewCommand(opts.Context))
 	cmd.AddCommand(clean.NewCommand(opts.Context))
 
 	cmd.AddCommand(componentarchive.NewCommand(opts.Context))
@@ -207,10 +210,12 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(topicconfig.New(ctx))
 	cmd.AddCommand(topicocirefs.New(ctx))
 	cmd.AddCommand(topicocmrefs.New(ctx))
+	cmd.AddCommand(topicbootstrap.New(ctx))
 
 	help.AddCommand(topicconfig.New(ctx))
 	help.AddCommand(topicocirefs.New(ctx))
 	help.AddCommand(topicocmrefs.New(ctx))
+	help.AddCommand(topicbootstrap.New(ctx))
 
 	return cmd
 }

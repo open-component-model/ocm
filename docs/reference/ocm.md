@@ -102,6 +102,7 @@ attributes are supported:
 ##### Sub Commands
 
 * [ocm <b>add</b>](ocm_add.md)	 - Add resources or sources to a component archive
+* [ocm <b>bootstrap</b>](ocm_bootstrap.md)	 - bootstrap components
 * [ocm <b>cache</b>](ocm_cache.md)	 - Cache related commands
 * [ocm <b>clean</b>](ocm_clean.md)	 - Cleanup/re-organize elements
 * [ocm <b>componentarchive</b>](ocm_componentarchive.md)	 - Commands acting on component archives
@@ -128,5 +129,6 @@ attributes are supported:
 
 * [ocm <b>configfile</b>](ocm_configfile.md)	 - configuration file
 * [ocm <b>oci-references</b>](ocm_oci-references.md)	 - notation for OCI references
+* [ocm <b>ocm-bootstrapping</b>](ocm_ocm-bootstrapping.md)	 - installation bootstrapping based on component versions
 * [ocm <b>ocm-references</b>](ocm_ocm-references.md)	 - notation for OCM references
 

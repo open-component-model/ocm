@@ -126,6 +126,10 @@ func DataAccessForBytes(data []byte) DataAccess {
 	return &bytesAccess{data: data}
 }
 
+func DataAccessForString(data string) DataAccess {
+	return &bytesAccess{data: []byte(data)}
+}
+
 func (a *bytesAccess) Get() ([]byte, error) {
 	return a.data, nil
 }

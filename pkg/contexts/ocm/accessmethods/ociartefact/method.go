@@ -46,6 +46,10 @@ func init() {
 
 }
 
+func Is(spec cpi.AccessSpec) bool {
+	return spec != nil && spec.GetKind() == Type || spec.GetKind() == LegacyType
+}
+
 // AccessSpec describes the access for a oci registry.
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`

@@ -33,5 +33,6 @@ ocm ocm [<options>] <sub command> ...
 
 ##### Additional Help Topics
 
+* [ocm ocm <b>ocm-bootstrapping</b>](ocm_ocm_ocm-bootstrapping.md)	 - installation bootstrapping based on component versions
 * [ocm ocm <b>ocm-references</b>](ocm_ocm_ocm-references.md)	 - notation for OCM references
 

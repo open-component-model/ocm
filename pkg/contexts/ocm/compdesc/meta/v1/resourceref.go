@@ -12,19 +12,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package verbs
+package v1
 
-const (
-	Get       = "get"
-	Describe  = "describe"
-	Add       = "add"
-	Create    = "create"
-	Transfer  = "transfer"
-	Download  = "download"
-	Bootstrap = "bootstrap"
-	Show      = "show"
-	Sign      = "sign"
-	Verify    = "verify"
-	Clean     = "clean"
-	Info      = "info"
-)
+// ResourceReference describes re resource identity relative to an (aggregation)
+// component version
+type ResourceReference struct {
+	Resource      Identity   `json:"resource"`
+	ReferencePath []Identity `json:"referencePath,omitempty"`
+}
+
+func (r *ResourceReference) String() string {
+	s := r.Resource.String()
+
+	for i := 1; i <= len(r.ReferencePath); i++ {
+		s += "@" + r.ReferencePath[len(r.ReferencePath)-i].String()
+	}
+	return s
+}

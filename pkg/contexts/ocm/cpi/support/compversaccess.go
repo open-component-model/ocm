@@ -76,6 +76,10 @@ func (a *componentVersionAccessImpl) Close() error {
 	return errors.ErrListf("closing access").Add(a.base.Update(), a.base.Close()).Result()
 }
 
+func (c *componentVersionAccessImpl) Repository() cpi.Repository {
+	return c.base.Repository()
+}
+
 func (a *componentVersionAccessImpl) IsReadOnly() bool {
 	return a.base.IsReadOnly()
 }
@@ -208,6 +212,10 @@ func (a *componentVersionAccessImpl) GetSources() []cpi.SourceAccess {
 		})
 	}
 	return result
+}
+
+func (a *componentVersionAccessImpl) GetReference(id metav1.Identity) (cpi.ComponentReference, error) {
+	return a.base.GetDescriptor().GetReferenceByIdentity(id)
 }
 
 func (a *componentVersionAccessImpl) GetReferenceByIndex(i int) (cpi.ComponentReference, error) {

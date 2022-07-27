@@ -12,32 +12,23 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package components
+package bootstrap
 
 import (
+	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/bootstrap"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/download"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/get"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/sign"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/verify"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/bootstrap"
 )
-
-var Names = names.Components
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "Commands acting on components",
-	}, Names...)
-	cmd.AddCommand(get.NewCommand(ctx, get.Verb))
-	cmd.AddCommand(sign.NewCommand(ctx, sign.Verb))
-	cmd.AddCommand(verify.NewCommand(ctx, verify.Verb))
-	cmd.AddCommand(download.NewCommand(ctx, download.Verb))
-	cmd.AddCommand(bootstrap.NewCommand(ctx, bootstrap.Verb))
+		Short: "bootstrap components",
+	}, verbs.Bootstrap)
+	cmd.AddCommand(components.NewCommand(ctx))
 	return cmd
 }

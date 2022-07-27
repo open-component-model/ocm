@@ -17,15 +17,16 @@ package lookupoption
 import (
 	"github.com/spf13/pflag"
 
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+
 	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
-func From(o *output.Options) *Option {
+func From(o options.OptionSetProvider) *Option {
 	var opt *Option
-	o.Get(&opt)
+	o.AsOptionSet().Get(&opt)
 	return opt
 }
 

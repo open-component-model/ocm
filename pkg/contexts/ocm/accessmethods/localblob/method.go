@@ -31,6 +31,10 @@ func init() {
 	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(TypeV1, LocalBlobV1))
 }
 
+func Is(spec cpi.AccessSpec) bool {
+	return spec != nil && spec.GetKind() == Type
+}
+
 // New creates a new localFilesystemBlob accessor.
 func New(local, hint string, mediaType string, global cpi.AccessSpec) *AccessSpec {
 	return &AccessSpec{

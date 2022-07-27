@@ -96,6 +96,10 @@ func newComponentVersionContainer(mode accessobj.AccessMode, comp *componentAcce
 	}, nil
 }
 
+func (c *ComponentVersionContainer) Repository() cpi.Repository {
+	return c.comp.repo
+}
+
 func (c *ComponentVersionContainer) Close() error {
 	if c.manifest == nil {
 		return accessio.ErrClosed

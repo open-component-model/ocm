@@ -322,6 +322,29 @@ func (c *ComponentDescriptor) GetSourceIndex(src *SourceMeta) int {
 	return -1
 }
 
+// GetReferenceByIdentity returns reference that match the given identity.
+func (c *ComponentDescriptor) GetReferenceByIdentity(id v1.Identity) (ComponentReference, error) {
+	dig := id.Digest()
+	for _, ref := range c.References {
+		if bytes.Equal(ref.GetIdentityDigest(c.Resources), dig) {
+			return ref, nil
+		}
+	}
+	return ComponentReference{}, NotFound
+}
+
+// GetReferenceIndex returns the index of a given source.
+// If the index is not found -1 is returned.
+func (c *ComponentDescriptor) GetReferenceIndex(src *ElementMeta) int {
+	id := src.GetIdentityDigest(c.References)
+	for i, cur := range c.References {
+		if bytes.Equal(cur.GetIdentityDigest(c.References), id) {
+			return i
+		}
+	}
+	return -1
+}
+
 // GetSignatureIndex returns the index of the signature with the given name
 // If the index is not found -1 is returned.
 func (c *ComponentDescriptor) GetSignatureIndex(name string) int {

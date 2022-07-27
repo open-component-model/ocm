@@ -78,6 +78,8 @@ type SourceAccess interface {
 type ComponentVersionAccess interface {
 	common.VersionedElement
 
+	Repository() Repository
+
 	GetContext() Context
 
 	GetDescriptor() *compdesc.ComponentDescriptor
@@ -89,6 +91,9 @@ type ComponentVersionAccess interface {
 	GetSources() []SourceAccess
 	GetSource(meta metav1.Identity) (SourceAccess, error)
 	GetSourceByIndex(i int) (SourceAccess, error)
+
+	GetReference(meta metav1.Identity) (ComponentReference, error)
+	GetReferenceByIndex(i int) (ComponentReference, error)
 
 	// AccessMethod provides an access method implementation for
 	// an access spec. This might be a repository local implementation

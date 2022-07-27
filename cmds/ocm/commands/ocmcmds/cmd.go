@@ -26,6 +26,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/versions"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/bootstrapping"
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
 )
 
@@ -43,5 +44,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(versions.NewCommand(ctx))
 
 	cmd.AddCommand(topicocmrefs.New(ctx))
+	cmd.AddCommand(topicbootstrap.New(ctx))
 	return cmd
 }

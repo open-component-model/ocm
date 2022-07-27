@@ -12,18 +12,32 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package main
+package utils
 
 import (
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-func CheckErr(err error, msg string, args ...interface{}) {
+func GetOCIArtefactRef(ctx ocm.Context, r ocm.ResourceAccess) (string, error) {
+	acc, err := r.Access()
 	if err != nil {
-		panic(errors.Wrapf(err, msg, args...))
+		return "", err
 	}
-}
 
-func main() {
-	exec()
+	if localblob.Is(acc) {
+		g := acc.(*localblob.AccessSpec).GlobalAccess
+		if g != nil {
+			acc, err = ctx.AccessSpecForSpec(g)
+			if err != nil {
+				return "", errors.Wrapf(err, "global access spec")
+			}
+		}
+	}
+	if ociartefact.Is(acc) {
+		return acc.(*ociartefact.AccessSpec).ImageReference, nil
+	}
+	return "", errors.Newf("cannot map access to external image reference")
 }
