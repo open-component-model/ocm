@@ -28,8 +28,8 @@ import (
 
 func MustParseYaml(data string) json.RawMessage {
 	var m map[string]interface{}
-	err:=runtime.DefaultYAMLEncoding.Unmarshal([]byte(data), &m)
-	if err!=nil {
+	err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(data), &m)
+	if err != nil {
 		panic(err)
 	}
 	return json.RawMessage(data)
@@ -37,15 +37,15 @@ func MustParseYaml(data string) json.RawMessage {
 
 func exec() {
 
-	cfg:=MustParseYaml(`
+	cfg := MustParseYaml(`
 special: config
 `)
-	templ:=MustParseYaml(`
+	templ := MustParseYaml(`
 parameters:
    username: admin
    password: (( &merge ))
 `)
-	scheme:=MustParseYaml(`
+	scheme := MustParseYaml(`
 type: object
 required:
   - parameters
@@ -63,18 +63,18 @@ properties:
         type: string
 `)
 
-	params:=MustParseYaml(`
+	params := MustParseYaml(`
 parameters:
    password: supersecret
 `)
 
-	spec:=&install.Specification{
+	spec := &install.Specification{
 		Template: templ,
-		Scheme: scheme,
+		Scheme:   scheme,
 		Executors: []install.Executor{
 			{
-				Image: &install.Image{Ref: "inst"},
-				Config:   cfg,
+				Image:  &install.Image{Ref: "inst"},
+				Config: cfg,
 				Outputs: map[string]string{
 					"test": "bla",
 				},
@@ -86,7 +86,7 @@ parameters:
 
 	config.Configure("")
 
-	octx:=ocm.DefaultContext()
+	octx := ocm.DefaultContext()
 
 	sess := ocm.NewSession(nil)
 	ref, err := sess.EvaluateRef(octx, "ghcr.io/mandelsoft/cnudie//github.com/mandelsoft/ocmdemoinstaller:0.0.1-dev")

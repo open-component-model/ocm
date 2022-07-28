@@ -62,7 +62,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
-		Use:   "[<options>] <action> {<component-reference>}",
+		Use:   "[<options>] <action> {<component-reference>} {<resource id field>}",
 		Args:  cobra.MinimumNArgs(2),
 		Short: "bootstrap component version",
 		Long: `
@@ -70,6 +70,10 @@ Use the simple OCM bootstrap mechanism to execute a bootstrap resource.
 
 The bootstrap resource must have the type <code>` + install.TypeOCMInstaller + `</code>. This is a simple
 YAML file resource describing the bootstrapping. See also the topic bootstrapping.
+
+The first matching resource of this type is selected. Optionally a set of identity attribute can
+be specified used to refine the match. This can be the resource name and/or other key/value pairs
+(<code>&lt;attr>=&lt;value></code>).
 
 If no output file is provided, the yaml representation of the outputs are printed to 
 standard out. If the output file is a directory, for every output a dedicated file is created,
@@ -89,20 +93,15 @@ func (o *Command) AddFlags(set *pflag.FlagSet) {
 func (o *Command) Complete(args []string) error {
 	o.Action = args[0]
 	o.Ref = args[1]
-	ids, err := ocmcommon.MapArgsToIdentities(args[2:]...)
+	id, err := ocmcommon.MapArgsToIdentityPattern(args[2:]...)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "bootstrap resource identity pattern")
 	}
-	if len(ids) > 1 {
-		return errors.Newf("only one identity of the bootstrap resource is required")
-	}
-	if len(ids) > 0 {
-		o.Id = ids[0]
-	}
+	o.Id = id
 	if len(o.ParameterFile) > 0 {
 		o.Parameters, err = vfs.ReadFile(o.Context.FileSystem(), o.ParameterFile)
 		if err != nil {
-			return errors.Wrapf(err, "failed readinf parameter file %q", o.ParameterFile)
+			return errors.Wrapf(err, "failed reading parameter file %q", o.ParameterFile)
 		}
 	}
 	return nil

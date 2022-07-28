@@ -46,7 +46,7 @@ func (o *Option) Complete(args []string) ([]string, error) {
 	var err error
 	rest := args
 	if o.Active {
-		o.Ids, rest, err = common.ConsumeIdentities(args, ";")
+		o.Ids, rest, err = common.ConsumeIdentities(false, args, ";")
 	}
 	return rest, err
 }

@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -25,27 +26,9 @@ import (
 const TypeOCMInstaller = "ocmInstaller"
 
 func Install(d Driver, name string, rid metav1.Identity, params []byte, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
-	var ires ocm.ResourceAccess
-	var err error
-
-	if len(rid) == 0 {
-		for i, r := range cv.GetDescriptor().Resources {
-			if r.Type == TypeOCMInstaller {
-				ires, err = cv.GetResourceByIndex(i)
-				if err != nil {
-					return nil, errors.Wrapf(err, "cannot access installer resource %d", i)
-				}
-				break
-			}
-		}
-		if ires == nil {
-			return nil, errors.ErrNotFound("installer resource", common.VersionedElementKey(cv).String())
-		}
-	} else {
-		ires, err = cv.GetResource(rid)
-		if err != nil {
-			return nil, errors.Wrapf(err, "installer resource %s", rid)
-		}
+	ires, _, err := utils.MatchResourceReference(cv, TypeOCMInstaller, metav1.NewResourceRef(rid), nil)
+	if err != nil {
+		return nil, errors.Wrapf(err, "installer resource in %s", common.VersionedElementKey(cv).String())
 	}
 
 	m, err := ires.AccessMethod()

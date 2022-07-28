@@ -3,7 +3,7 @@
 ### Synopsis
 
 ```
-ocm ocm componentversions bootstrap [<options>] <action> {<component-reference>}
+ocm ocm componentversions bootstrap [<options>] <action> {<component-reference>} {<resource id field>}
 ```
 
 ### Options
@@ -21,6 +21,10 @@ Use the simple OCM bootstrap mechanism to execute a bootstrap resource.
 
 The bootstrap resource must have the type <code>ocmInstaller</code>. This is a simple
 YAML file resource describing the bootstrapping. See also the topic bootstrapping.
+
+The first matching resource of this type is selected. Optionally a set of identity attribute can
+be specified used to refine the match. This can be the resource name and/or other key/value pairs
+(<code>&lt;attr>=&lt;value></code>).
 
 If no output file is provided, the yaml representation of the outputs are printed to 
 standard out. If the output file is a directory, for every output a dedicated file is created,

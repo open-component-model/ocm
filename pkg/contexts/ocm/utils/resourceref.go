@@ -20,29 +20,81 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-func ResolveResourceReference(cv ocm.ComponentVersionAccess, ref metav1.ResourceReference, resolver ocm.ComponentVersionResolver) (ocm.ResourceAccess, ocm.ComponentVersionAccess, error) {
+func ResolveReferencePath(cv ocm.ComponentVersionAccess, path []metav1.Identity, resolver ocm.ComponentVersionResolver) (ocm.ComponentVersionAccess, error) {
 	eff := cv
-
-	if len(ref.Resource) == 0 || len(ref.Resource["name"]) == 0 {
-		return nil, nil, errors.Newf("at least resource name must be specified for resource reference")
-	}
-
-	for _, cr := range ref.ReferencePath {
+	for _, cr := range path {
 		if eff != cv {
 			defer eff.Close()
 		}
 		resolver := ocm.NewCompoundResolver(eff.Repository(), resolver)
 		cref, err := cv.GetReference(cr)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 
 		eff, err = resolver.LookupComponentVersion(cref.GetComponentName(), cref.GetVersion())
 		if err != nil {
-			return nil, nil, errors.Wrapf(err, "cannot resolve resource reference")
+			return nil, errors.Wrapf(err, "cannot resolve component reference")
 		}
 	}
+	return eff, nil
+}
 
+func MatchResourceReference(cv ocm.ComponentVersionAccess, typ string, ref metav1.ResourceReference, resolver ocm.ComponentVersionResolver) (ocm.ResourceAccess, ocm.ComponentVersionAccess, error) {
+	eff, err := ResolveReferencePath(cv, ref.ReferencePath, resolver)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if len(eff.GetDescriptor().Resources) == 0 && len(ref.Resource) == 0 {
+		return nil, nil, errors.ErrNotFound(ocm.KIND_RESOURCE)
+	}
+outer:
+	for i, r := range eff.GetDescriptor().Resources {
+		if r.Type != typ && typ != "" {
+			continue
+		}
+		for k, v := range ref.Resource {
+			switch k {
+			case metav1.SystemIdentityName:
+				if v != r.Name {
+					continue outer
+				}
+			case metav1.SystemIdentityVersion:
+				if v != r.Version {
+					continue outer
+				}
+			default:
+				if r.ExtraIdentity == nil || r.ExtraIdentity[k] != v {
+					continue outer
+				}
+			}
+		}
+		res, err := eff.GetResourceByIndex(i)
+		if err != nil {
+			if eff != cv {
+				eff.Close()
+			}
+			return nil, nil, err
+		}
+		return res, eff, nil
+	}
+	if eff != cv {
+		eff.Close()
+	}
+	return nil, nil, errors.ErrNotFound(ocm.KIND_RESOURCE, ref.Resource.String())
+}
+
+func ResolveResourceReference(cv ocm.ComponentVersionAccess, ref metav1.ResourceReference, resolver ocm.ComponentVersionResolver) (ocm.ResourceAccess, ocm.ComponentVersionAccess, error) {
+
+	if len(ref.Resource) == 0 || len(ref.Resource["name"]) == 0 {
+		return nil, nil, errors.Newf("at least resource name must be specified for resource reference")
+	}
+
+	eff, err := ResolveReferencePath(cv, ref.ReferencePath, resolver)
+	if err != nil {
+		return nil, nil, err
+	}
 	r, err := eff.GetResource(ref.Resource)
 	if err != nil {
 		if eff != cv {

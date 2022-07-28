@@ -20,7 +20,7 @@ const (
 
 	MIME_JSON     = "application/x-json"
 	MIME_JSON_ALT = "text/json" // no utf8
-	MIME_YAML     = "application/x-jyaml"
+	MIME_YAML     = "application/x-yaml"
 	MIME_YAML_ALT = "text/yaml" // no utf8
 
 	MIME_GZIP = "application/gzip"

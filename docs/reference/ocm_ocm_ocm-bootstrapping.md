@@ -7,7 +7,14 @@ The OCM command line tool and library provides some basic bootstrapping mechanis
 execute simple installation steps based on content described by the Open Component Model.
 
 Therefore a dedicated resource type <code>ocmInstaller</code> is defined.
-It describes a yaml file containing information about the bootstrapping mechanism:
+It is selected by an identity pattern. The first resource matching the pattern is used.
+A possible use case could be to provide different bootstrapper for different environments.
+The resource can the feature an identity attribute <code>platform=&lt;value></code>.
+By specifying just the platform attribute, the appropriate bootstrapper will be chosen.
+
+The bootstrapper resource describes a yaml file (media type <code>application/x-yaml</code>, <code>text/yaml</code>
+or <code>application/vnd.ocm.gardener.cloud.installer.v1+yaml</code>)
+containing information about the bootstrapping mechanism:
 
 The most important section is the <code>executors</code> sections. It describes a list of
 executor definitions and the actions the executor should be used for.
@@ -16,27 +23,27 @@ If the <code>actions</code> list omitted the executor will be used for all actio
 not already accepted by an earlier entry in the list.
 
 Every executor describes an executor image, which is taken from the component version
-the vootstrapping specification is taken from. Such a ref always describes a resource
+the bootstrapping specification is taken from. Such a ref always describes a resource
 identity (minimal attribute set consists of the resource's <code>name</code> attribute). Additional
-attributes are possible, to achive a unique identification of the resource.
+attributes are possible, to archive a unique identification of the resource.
 Optionally a <code>referencePath</code> can be given, if the resource is located in some 
 aggregated component version. This is just a list af identity sets uniquely identifying a nested
 component version reference.
 
 Every executor may define some config that is passed to the image execution.
 After processing it is possible to return named outputs. The name of an output must be a filename.
-The bootstrapp specification maps those file to logical outputs in the <code>outputs</code> section.
+The bootstrap specification maps those file to logical outputs in the <code>outputs</code> section.
 
 <center>
   &lt;provide file name by executor> -> &lt;logical output name for the bootstrap command>
 </center>
 
 Common to all executors a parameter file can be provided by the caller. The specification may 
-provide a [spiff template}(https://github.com/mandelsoft/spiff) for this parameter file.
+provide a [spiff template](https://github.com/mandelsoft/spiff) for this parameter file.
 The actually provided content is merged with this template.
 
-To validate user configuration a JSON scheme can be provided. The user input is valided first
-against this scheme before the actual merhe is done.
+To validate user configuration a JSON scheme can be provided. The user input is validated first
+against this scheme before the actual merge is done.
 
 ### Image Binding
 

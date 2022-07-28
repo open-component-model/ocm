@@ -21,6 +21,14 @@ type ResourceReference struct {
 	ReferencePath []Identity `json:"referencePath,omitempty"`
 }
 
+func NewResourceRef(id Identity) ResourceReference {
+	return ResourceReference{Resource: id}
+}
+
+func NewNestedResourceRef(id Identity, path []Identity) ResourceReference {
+	return ResourceReference{Resource: id, ReferencePath: path}
+}
+
 func (r *ResourceReference) String() string {
 	s := r.Resource.String()
 

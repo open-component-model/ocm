@@ -32,6 +32,8 @@ const (
 	InputOCMRepo    = "ocmrepo"
 )
 
+const InstallerSpecificationMimeType = "application/vnd.ocm.gardener.cloud.installer.v1+yaml"
+
 type Driver interface {
 	SetConfig(props map[string]string) error
 	Exec(op *Operation) (*OperationResult, error)
