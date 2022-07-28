@@ -50,6 +50,8 @@ func (s *ArtefactSet) IsClosed() bool {
 	return s.view.IsClosed()
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 type artefactSetImpl struct {
 	refs accessio.ReferencableCloser
 	base *FileSystemBlobAccess

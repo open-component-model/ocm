@@ -152,8 +152,8 @@ var _ = Describe("access method", func() {
 			digest := "39ea26ac4391052a638319f64b8da2628acb51d304c3a1ac8f920a46f2d6dce7"
 			dig, err := Apply(nil, nil, cv, opts)
 			Expect(err).To(Succeed())
-			closer.Close()
-			archcloser.Close()
+			Expect(closer.Close()).To(Succeed())
+			Expect(archcloser.Close()).To(Succeed())
 			fmt.Printf("%+v\n", dig)
 			Expect(dig.Value).To(Equal(digest))
 

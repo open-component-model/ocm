@@ -57,7 +57,10 @@ func _Wrap(ctx cpi.Context, obj *accessobj.AccessObject, spec *RepositorySpec, e
 		spec: spec,
 		arch: s,
 	}}
-	s.ComponentVersionAccess = support.NewComponentVersionAccess(s, false)
+	s.ComponentVersionAccess, err = support.NewComponentVersionAccess(s, false)
+	if err != nil {
+		return nil, err
+	}
 	return s, nil
 }
 

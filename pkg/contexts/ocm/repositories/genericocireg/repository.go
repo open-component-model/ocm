@@ -41,10 +41,6 @@ func (r *Repository) Close() error {
 	return r.view.Close()
 }
 
-func (r *Repository) LookupComponentVersion(name string, version string) (cpi.ComponentVersionAccess, error) {
-	return r.RepositoryImpl.LookupComponentVersion(r, name, version)
-}
-
 type RepositoryImpl struct {
 	refs accessio.ReferencableCloser
 
@@ -159,18 +155,15 @@ func (r *RepositoryImpl) ExistsComponentVersion(name string, version string) (bo
 }
 
 func (r *RepositoryImpl) LookupComponent(name string) (cpi.ComponentAccess, error) {
-	repo, err := r.View()
-	if err != nil {
-		return nil, err
-	}
-	return newComponentAccess(repo, name, false)
+	return newComponentAccess(r, name, true)
 }
 
-func (r *RepositoryImpl) LookupComponentVersion(repo *Repository, name string, version string) (cpi.ComponentVersionAccess, error) {
-	c, err := newComponentAccess(repo, name, true)
+func (r *RepositoryImpl) LookupComponentVersion(name string, version string) (cpi.ComponentVersionAccess, error) {
+	c, err := newComponentAccess(r, name, false)
 	if err != nil {
 		return nil, err
 	}
+	defer c.Close()
 	return c.LookupVersion(version)
 }
 

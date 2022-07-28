@@ -140,6 +140,7 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi
 		if err != nil {
 			return nil, err
 		}
+		defer namespace.Close()
 	}
 
 	set, err := artefactset.OpenFromBlob(accessobj.ACC_READONLY, blob)

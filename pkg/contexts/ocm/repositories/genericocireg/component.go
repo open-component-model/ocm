@@ -17,6 +17,7 @@ package genericocireg
 import (
 	"strings"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -24,50 +25,83 @@ import (
 )
 
 type ComponentAccess struct {
+	view accessio.CloserView // handle close and refs
+	*componentAccessImpl
+}
+
+// implemented by view
+// the rest is directly taken from the artefact set implementation
+
+func (s *ComponentAccess) Close() error {
+	return s.view.Close()
+}
+
+func (s *ComponentAccess) IsClosed() bool {
+	return s.view.IsClosed()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type componentAccessImpl struct {
+	refs      accessio.ReferencableCloser
 	repo      *Repository
 	name      string
 	namespace oci.NamespaceAccess
-	priv      bool // private access for dedicated component version
 }
 
 var _ cpi.ComponentAccess = (*ComponentAccess)(nil)
 
-func newComponentAccess(repo *Repository, name string, priv bool) (*ComponentAccess, error) {
+func newComponentAccess(repo *RepositoryImpl, name string, main bool) (*ComponentAccess, error) {
 	mapped, err := repo.MapComponentNameToNamespace(name)
+	if err != nil {
+		return nil, err
+	}
+	v, err := repo.View(false)
 	if err != nil {
 		return nil, err
 	}
 	namespace, err := repo.ocirepo.LookupNamespace(mapped)
 	if err != nil {
+		v.Close()
 		return nil, err
 	}
-	n := &ComponentAccess{
-		repo:      repo,
+	n := &componentAccessImpl{
+		repo:      v,
 		name:      name,
 		namespace: namespace,
-		priv:      priv,
 	}
-	return n, err
+	n.refs = accessio.NewRefCloser(n, true)
+	return n.View(main)
 }
 
-func (c *ComponentAccess) GetName() string {
+func (a *componentAccessImpl) View(main ...bool) (*ComponentAccess, error) {
+	v, err := a.refs.View(main...)
+	if err != nil {
+		return nil, err
+	}
+	return &ComponentAccess{view: v, componentAccessImpl: a}, nil
+}
+
+func (c *componentAccessImpl) GetName() string {
 	return c.name
 }
 
-func (c *ComponentAccess) Close() error {
-	if !c.priv {
+func (c *componentAccessImpl) Close() error {
+	err := c.namespace.Close()
+	if err != nil {
 		c.repo.Close()
+		return err
 	}
-	return c.namespace.Close()
+	return c.repo.Close()
 }
 
-func (c *ComponentAccess) GetContext() cpi.Context {
+func (c *componentAccessImpl) GetContext() cpi.Context {
 	return c.repo.GetContext()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (c *ComponentAccess) ListVersions() ([]string, error) {
+func (c *componentAccessImpl) ListVersions() ([]string, error) {
 	tags, err := c.namespace.ListTags()
 	if err != nil {
 		return nil, err
@@ -82,8 +116,12 @@ func (c *ComponentAccess) ListVersions() ([]string, error) {
 	return result, err
 }
 
-func (c *ComponentAccess) LookupVersion(version string) (cpi.ComponentVersionAccess, error) {
-
+func (c *componentAccessImpl) LookupVersion(version string) (cpi.ComponentVersionAccess, error) {
+	v, err := c.View(false)
+	if err != nil {
+		return nil, err
+	}
+	defer v.Close()
 	acc, err := c.namespace.GetArtefact(version)
 	if err != nil {
 		if errors.IsErrNotFound(err) {
@@ -91,15 +129,10 @@ func (c *ComponentAccess) LookupVersion(version string) (cpi.ComponentVersionAcc
 		}
 		return nil, err
 	}
-	m := acc.ManifestAccess()
-	if m == nil {
-		acc.Close()
-		return nil, errors.ErrInvalid("artefact type")
-	}
-	return NewComponentVersionAccess(accessobj.ACC_WRITABLE, c, version, m)
+	return newComponentVersionAccess(accessobj.ACC_WRITABLE, c, version, acc)
 }
 
-func (c *ComponentAccess) AddVersion(access cpi.ComponentVersionAccess) error {
+func (c *componentAccessImpl) AddVersion(access cpi.ComponentVersionAccess) error {
 	if a, ok := access.(*ComponentVersion); ok {
 		if a.GetName() != c.GetName() {
 			return errors.ErrInvalid("component name", a.GetName())
@@ -109,7 +142,12 @@ func (c *ComponentAccess) AddVersion(access cpi.ComponentVersionAccess) error {
 	return errors.ErrInvalid("component version")
 }
 
-func (c *ComponentAccess) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {
+func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {
+	v, err := c.View(false)
+	if err != nil {
+		return nil, err
+	}
+	defer v.Close()
 	override := false
 	for _, o := range overrides {
 		if o {
@@ -119,7 +157,7 @@ func (c *ComponentAccess) NewVersion(version string, overrides ...bool) (cpi.Com
 	acc, err := c.namespace.GetArtefact(version)
 	if err == nil {
 		if override {
-			return NewComponentVersionAccess(accessobj.ACC_CREATE, c, version, acc.ManifestAccess())
+			return newComponentVersionAccess(accessobj.ACC_CREATE, c, version, acc)
 		}
 		return nil, errors.ErrAlreadyExists(cpi.KIND_COMPONENTVERSION, c.name+"/"+version)
 	}
@@ -130,5 +168,5 @@ func (c *ComponentAccess) NewVersion(version string, overrides ...bool) (cpi.Com
 	if err != nil {
 		return nil, err
 	}
-	return NewComponentVersionAccess(accessobj.ACC_CREATE, c, version, acc.ManifestAccess())
+	return newComponentVersionAccess(accessobj.ACC_CREATE, c, version, acc)
 }

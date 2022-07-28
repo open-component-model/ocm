@@ -105,9 +105,9 @@ func (v *view) Finalize() error {
 
 func (v *view) Close() error {
 	if v.main {
-		return v.Release()
+		return v.Finalize()
 	}
-	return v.Finalize()
+	return v.Release()
 }
 
 func (v *view) IsClosed() bool {

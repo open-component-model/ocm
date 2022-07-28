@@ -91,7 +91,7 @@ func (c *refMgmt) UnrefLast() error {
 		return ErrClosed
 	}
 	if c.refcount > 1 {
-		errors.Newf("object still in use: %d reference(s) pending", c.refcount)
+		return errors.Newf("object still in use: %d reference(s) pending", c.refcount)
 	}
 	c.refcount--
 	var err error

@@ -36,6 +36,7 @@ func DefaultManifestFill(n cpi.NamespaceAccess) {
 	blob, err := n.AddArtefact(art)
 	Expect(err).To(Succeed())
 	n.AddTags(blob.Digest(), TAG)
+	art.Close()
 }
 
 func NewArtefact(n cpi.NamespaceAccess) cpi.ArtefactAccess {

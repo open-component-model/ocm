@@ -20,6 +20,8 @@ import (
 
 	"github.com/opencontainers/go-digest"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -41,14 +43,20 @@ type ComponentVersion struct {
 
 var _ cpi.ComponentVersionAccess = (*ComponentVersion)(nil)
 
-func NewComponentVersionAccess(mode accessobj.AccessMode, comp *ComponentAccess, version string, access oci.ManifestAccess) (*ComponentVersion, error) {
+// newComponentVersionAccess creates an component access for the artefact access, if this fails the artefact acess is closed.
+func newComponentVersionAccess(mode accessobj.AccessMode, comp *componentAccessImpl, version string, access oci.ArtefactAccess) (*ComponentVersion, error) {
 	c, err := newComponentVersionContainer(mode, comp, version, access)
 	if err != nil {
 		return nil, err
 	}
+	acc, err := support.NewComponentVersionAccess(c, true)
+	if err != nil {
+		c.Close()
+		return nil, err
+	}
 	return &ComponentVersion{
 		container:              c,
-		ComponentVersionAccess: support.NewComponentVersionAccess(c, true),
+		ComponentVersionAccess: acc,
 	}, nil
 }
 
@@ -57,30 +65,48 @@ func NewComponentVersionAccess(mode accessobj.AccessMode, comp *ComponentAccess,
 type ComponentVersionContainer struct {
 	comp     *ComponentAccess
 	version  string
+	access   oci.ArtefactAccess
 	manifest oci.ManifestAccess
 	state    accessobj.State
 }
 
 var _ support.ComponentVersionContainer = (*ComponentVersionContainer)(nil)
 
-func newComponentVersionContainer(mode accessobj.AccessMode, comp *ComponentAccess, version string, manifest oci.ManifestAccess) (*ComponentVersionContainer, error) {
-	state, err := NewState(mode, comp.name, version, manifest)
+func newComponentVersionContainer(mode accessobj.AccessMode, comp *componentAccessImpl, version string, access oci.ArtefactAccess) (*ComponentVersionContainer, error) {
+	m := access.ManifestAccess()
+	if m == nil {
+		return nil, errors.ErrInvalid("artefact type")
+	}
+	state, err := NewState(mode, comp.name, version, m)
 	if err != nil {
+		access.Close()
+		return nil, err
+	}
+	v, err := comp.View(false)
+	if err != nil {
+		access.Close()
 		return nil, err
 	}
 	return &ComponentVersionContainer{
-		comp:     comp,
+		comp:     v,
 		version:  version,
-		manifest: manifest,
+		access:   access,
+		manifest: m,
 		state:    state,
 	}, nil
 }
 
 func (c *ComponentVersionContainer) Close() error {
-	if c.comp.priv {
-		return c.comp.Close() // release private component access
+	if c.manifest == nil {
+		return accessio.ErrClosed
 	}
-	return nil
+	c.manifest = nil
+	err := c.access.Close()
+	if err != nil {
+		c.comp.Close()
+		return err
+	}
+	return c.comp.Close()
 }
 
 func (c *ComponentVersionContainer) Check() error {

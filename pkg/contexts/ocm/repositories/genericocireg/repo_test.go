@@ -81,6 +81,7 @@ var _ = Describe("component repository mapping", func() {
 		err = comp.AddVersion(vers)
 		Expect(err).To(Succeed())
 
+		Expect(vers.Close()).To(Succeed())
 		Expect(comp.Close()).To(Succeed())
 		Expect(repo.Close()).To(Succeed())
 
@@ -99,6 +100,8 @@ var _ = Describe("component repository mapping", func() {
 		Expect(err).To(Succeed())
 		Expect(vers.GetDescriptor()).To(Equal(compdesc.New(COMPONENT, "v1")))
 
+		Expect(vers.Close()).To(Succeed())
+		Expect(comp.Close()).To(Succeed())
 		Expect(repo.Close()).To(Succeed())
 	})
 
@@ -160,14 +163,18 @@ var _ = Describe("component repository mapping", func() {
 		// create repository
 		repo, err := ctx.RepositoryForSpec(spec)
 		Expect(err).To(Succeed())
+		defer repo.Close()
+
+		ocirepo := repo.(*genericocireg.Repository).GetOCIRepository()
+
 		Expect(reflect.TypeOf(repo).String()).To(Equal("*genericocireg.Repository"))
 
 		comp, err := repo.LookupComponent(COMPONENT)
 		Expect(err).To(Succeed())
-
+		defer comp.Close()
 		vers, err := comp.NewVersion("v1")
 		Expect(err).To(Succeed())
-
+		defer vers.Close()
 		blob := accessio.BlobAccessForFile(mime, "test.tgz", tempfs)
 
 		acc, err := vers.AddBlob(blob, "artefact1", nil)
@@ -186,13 +193,18 @@ var _ = Describe("component repository mapping", func() {
 		err = comp.AddVersion(vers)
 		Expect(err).To(Succeed())
 
-		ocirepo := repo.(*genericocireg.Repository).GetOCIRepository()
+		Expect(vers.Close()).To(Succeed())
+		Expect(comp.Close()).To(Succeed())
 
 		ns, err := ocirepo.LookupNamespace("artefact2")
 		Expect(err).To(Succeed())
+		defer ns.Close()
 		art, err := ns.GetArtefact("v1")
 		Expect(err).To(Succeed())
+		defer art.Close()
 		testhelper.CheckArtefact(art)
+		Expect(art.Close()).To(Succeed())
+		Expect(ns.Close()).To(Succeed())
 		Expect(repo.(*genericocireg.Repository).Close()).To(Succeed())
 	})
 
