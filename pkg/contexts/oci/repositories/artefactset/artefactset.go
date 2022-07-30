@@ -20,6 +20,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi/support"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -35,8 +37,7 @@ const TYPE_ANNOTATION = "cloud.gardener.ocm/type"
 // Every ArtefactSet is separated closable. If the last view is closed
 // the implementation is released.
 type ArtefactSet struct {
-	view             accessio.CloserView // handle close and refs
-	*artefactSetImpl                     // provide the artefact set interface
+	*artefactSetImpl // provide the artefact set interface
 }
 
 // implemented by view
@@ -53,12 +54,12 @@ func (s *ArtefactSet) IsClosed() bool {
 ////////////////////////////////////////////////////////////////////////////////
 
 type artefactSetImpl struct {
-	refs accessio.ReferencableCloser
+	view support.ArtefactSetContainer
+	impl support.ArtefactSetContainerImpl
 	base *FileSystemBlobAccess
-	*cpi.ArtefactSetAccess
+	*support.ArtefactSetAccess
 }
 
-var _ cpi.ArtefactSetContainer = (*ArtefactSet)(nil)
 var _ cpi.ArtefactSink = (*ArtefactSet)(nil)
 var _ cpi.NamespaceAccess = (*ArtefactSet)(nil)
 
@@ -74,17 +75,9 @@ func _Wrap(obj *accessobj.AccessObject, err error) (*ArtefactSet, error) {
 	s := &artefactSetImpl{
 		base: NewFileSystemBlobAccess(obj),
 	}
-	s.refs = accessio.NewRefCloser(s, true)
-	s.ArtefactSetAccess = cpi.NewArtefactSetAccess(s)
-	return s.View(true)
-}
-
-func (a *artefactSetImpl) View(main ...bool) (*ArtefactSet, error) {
-	v, err := a.refs.View(main...)
-	if err != nil {
-		return nil, err
-	}
-	return &ArtefactSet{view: v, artefactSetImpl: a}, nil
+	s.ArtefactSetAccess = support.NewArtefactSetAccess(s)
+	s.view, s.impl = support.NewArtefactSetContainer(s)
+	return &ArtefactSet{s}, nil
 }
 
 func (a *artefactSetImpl) GetNamespace() string {
@@ -280,7 +273,7 @@ func (a *artefactSetImpl) getArtefact(ref string) (cpi.ArtefactAccess, error) {
 	match := a.matcher(ref)
 	for _, e := range idx.Manifests {
 		if match(&e) {
-			return a.base.GetArtefact(a, e.Digest)
+			return a.base.GetArtefact(a.impl, e.Digest)
 		}
 	}
 	return nil, errors.ErrUnknown(cpi.KIND_OCIARTEFACT, ref)
@@ -351,9 +344,5 @@ func (a *artefactSetImpl) NewArtefact(artefact ...*artdesc.Artefact) (cpi.Artefa
 	if a.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	return cpi.NewArtefact(a, artefact...)
-}
-
-func (a *artefactSetImpl) NewArtefactProvider(state accessobj.State) (cpi.ArtefactProvider, error) {
-	return cpi.NewNopCloserArtefactProvider(a), nil
+	return support.NewArtefact(a.impl, artefact...)
 }

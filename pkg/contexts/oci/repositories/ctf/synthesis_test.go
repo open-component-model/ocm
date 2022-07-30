@@ -18,6 +18,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	. "github.com/open-component-model/ocm/pkg/testutils"
+
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 
@@ -77,6 +79,7 @@ func CheckBlob(blob accessio.BlobAccess) oci.NamespaceAccess {
 
 	art, err := set.GetArtefact("sha256:" + DIGEST_MANIFEST)
 	Expect(err).To(Succeed())
+	defer Close(art)
 	m, err := art.Manifest()
 	Expect(err).To(Succeed())
 	Expect(m.Config).To(Equal(artdesc.Descriptor{
@@ -120,18 +123,19 @@ var _ = Describe("syntheses", func() {
 
 		r, err = ctf.Open(oci.DefaultContext(), accessobj.ACC_READONLY, "test", 0, spec.Options)
 		Expect(err).To(Succeed())
-		defer r.Close()
+		defer Close(r, "ctf")
 		n, err = r.LookupNamespace("mandelsoft/test")
 		Expect(err).To(Succeed())
+		defer Close(n, "namespace")
 		blob, err := artefactset.SynthesizeArtefactBlob(n, TAG)
 		Expect(err).To(Succeed())
-		defer blob.Close()
+		defer Close(blob, "blob")
 		path := blob.Path()
 		Expect(path).To(MatchRegexp(filepath.Join(blob.FileSystem().FSTempDir(), "artefactblob.*\\.tgz")))
 		Expect(vfs.Exists(blob.FileSystem(), path)).To(BeTrue())
 
 		set := CheckBlob(blob)
-		defer set.Close()
+		defer Close(set, "set")
 
 		Expect(blob.Close()).To(Succeed())
 		Expect(vfs.Exists(blob.FileSystem(), path)).To(BeFalse())
@@ -139,9 +143,9 @@ var _ = Describe("syntheses", func() {
 		// use syntesized blob to extract new blob, useless but should work
 		newblob, err := artefactset.SynthesizeArtefactBlob(set, TAG)
 		Expect(err).To(Succeed())
-		defer newblob.Close()
+		defer Close(newblob, "newblob")
 
-		CheckBlob(newblob).Close()
+		Expect(CheckBlob(newblob).Close()).To(Succeed())
 
 		meth := &DummyMethod{newblob}
 		digest, err := artefact.New(digest.SHA256).DetermineDigest("", meth, nil)

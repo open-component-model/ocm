@@ -20,10 +20,14 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	. "github.com/open-component-model/ocm/pkg/testutils"
+
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chartutil"
 
@@ -90,12 +94,13 @@ var _ = Describe("art parsing", func() {
 
 		artblob, err := helm.SynthesizeArtefactBlob("/testdata/testchart", env)
 		Expect(err).To(Succeed())
-		defer artblob.Close()
+		defer Close(artblob)
 		set, err := artefactset.OpenFromBlob(accessobj.ACC_READONLY, artblob)
 		Expect(err).To(Succeed())
-		defer set.Close()
+		defer Close(set)
 		art, err := set.GetArtefact(set.GetMain().String())
 		Expect(err).To(Succeed())
+		defer Close(art)
 		m := art.ManifestAccess().GetDescriptor()
 		Expect(len(m.Layers)).To(Equal(2))
 

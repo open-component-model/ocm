@@ -52,7 +52,7 @@ func (r *Repository) Close() error {
 }
 
 func (r *Repository) LookupArtefact(name string, ref string) (cpi.ArtefactAccess, error) {
-	return r.RepositoryImpl.LookupArtefact(r, name, ref)
+	return r.RepositoryImpl.LookupArtefact(name, ref)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -151,23 +151,25 @@ func (r *RepositoryImpl) ExistsArtefact(name string, tag string) (bool, error) {
 	return r.getIndex().HasArtefact(name, tag), nil
 }
 
-func (r *RepositoryImpl) LookupArtefact(repo *Repository, name string, ref string) (cpi.ArtefactAccess, error) {
+func (r *RepositoryImpl) LookupArtefact(name string, ref string) (cpi.ArtefactAccess, error) {
+	v, err := r.View()
+	if err != nil {
+		return nil, err
+	}
+	defer v.Close()
 	a := r.getIndex().GetArtefactInfo(name, ref)
 	if a == nil {
 		return nil, cpi.ErrUnknownArtefact(name, ref)
 	}
 
-	ns, err := newNamespace(repo, name) // share repo view.namespace not exposed
+	ns, err := newNamespace(r, name, false) // share repo view.namespace not exposed
 	if err != nil {
 		return nil, err
 	}
+	defer ns.Close()
 	return ns.GetArtefact(ref)
 }
 
 func (r *RepositoryImpl) LookupNamespace(name string) (cpi.NamespaceAccess, error) {
-	repo, err := r.View() // create new closable view
-	if err != nil {
-		return nil, err
-	}
-	return newNamespace(repo, name)
+	return newNamespace(r, name, true)
 }

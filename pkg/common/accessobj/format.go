@@ -18,15 +18,24 @@ import (
 	"fmt"
 	"io"
 	"sync"
+	"time"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/format"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 const KIND_FILEFORMAT = accessio.KIND_FILEFORMAT
+
+const (
+	DirMode  = 0755
+	FileMode = 0644
+)
+
+var (
+	ModTime = time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC)
+)
 
 type FileFormat = accessio.FileFormat
 
@@ -165,5 +174,5 @@ func DefaultCreateOptsFileHandling(kind string, info *AccessObjectInfo, path str
 		}
 	}
 
-	return NewAccessObject(info, ACC_CREATE, opts.Representation, nil, CloserFunction(func(obj *AccessObject) error { return handler.Write(obj, path, opts, mode) }), format.DirMode)
+	return NewAccessObject(info, ACC_CREATE, opts.Representation, nil, CloserFunction(func(obj *AccessObject) error { return handler.Write(obj, path, opts, mode) }), DirMode)
 }

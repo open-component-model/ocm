@@ -22,6 +22,8 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
+	. "github.com/open-component-model/ocm/pkg/testutils"
+
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -63,6 +65,12 @@ var _ = Describe("ctf management", func() {
 		Expect(err).To(Succeed())
 		DefaultManifestFill(n)
 		Expect(n.Close()).To(Succeed())
+
+		Expect(r.ExistsArtefact("mandelsoft/test", TAG)).To(BeTrue())
+
+		art, err := r.LookupArtefact("mandelsoft/test", TAG)
+		Expect(err).To(Succeed())
+		Close(art, "art")
 
 		Expect(r.Close()).To(Succeed())
 		Expect(vfs.FileExists(tempfs, "test/"+ctf.ArtefactIndexFileName)).To(BeTrue())

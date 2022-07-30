@@ -12,10 +12,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package cpi
+package support
 
 import (
 	"github.com/opencontainers/go-digest"
+
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -27,89 +29,64 @@ import (
 var ErrNoIndex = errors.New("manifest does not support access to subsequent artefacts")
 
 type ArtefactImpl struct {
-	artefactBase
+	*artefactBase
 }
 
-var _ ArtefactAccess = (*ArtefactImpl)(nil)
+var _ cpi.ArtefactAccess = (*ArtefactImpl)(nil)
 
-func NewArtefactForProviderBlob(access ArtefactSetContainer, p ArtefactProvider, blob accessio.BlobAccess) (*ArtefactImpl, error) {
+func NewArtefactForBlob(container ArtefactSetContainerImpl, blob accessio.BlobAccess) (cpi.ArtefactAccess, error) {
 	mode := accessobj.ACC_WRITABLE
-	if access.IsReadOnly() {
+	if container.IsReadOnly() {
 		mode = accessobj.ACC_READONLY
 	}
-	state, err := accessobj.NewBlobStateForBlob(mode, blob, NewArtefactStateHandler())
+	state, err := accessobj.NewBlobStateForBlob(mode, blob, cpi.NewArtefactStateHandler())
 	if err != nil {
 		return nil, err
 	}
-	a := &ArtefactImpl{
-		artefactBase: artefactBase{
-			container: access,
-			state:     state,
-			provider:  p,
-		},
-	}
-	return a, nil
+
+	return newArtefactImpl(container, state)
 }
 
-func NewArtefactForBlob(access ArtefactSetContainer, blob accessio.BlobAccess) (*ArtefactImpl, error) {
-	mode := accessobj.ACC_WRITABLE
-	if access.IsReadOnly() {
-		mode = accessobj.ACC_READONLY
-	}
-	state, err := accessobj.NewBlobStateForBlob(mode, blob, NewArtefactStateHandler())
-	if err != nil {
-		return nil, err
-	}
-	p, err := access.NewArtefactProvider(state)
-	if err != nil {
-		return nil, err
-	}
-	a := &ArtefactImpl{
-		artefactBase: artefactBase{
-			container: access,
-			state:     state,
-			provider:  p,
-		},
-	}
-	return a, nil
-}
-
-func NewArtefact(access ArtefactSetContainer, defs ...*artdesc.Artefact) (ArtefactAccess, error) {
+func NewArtefact(container ArtefactSetContainerImpl, defs ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
 	var def *artdesc.Artefact
 	if len(defs) != 0 && defs[0] != nil {
 		def = defs[0]
 	}
 	mode := accessobj.ACC_WRITABLE
-	if access.IsReadOnly() {
+	if container.IsReadOnly() {
 		mode = accessobj.ACC_READONLY
 	}
-	state, err := accessobj.NewBlobStateForObject(mode, def, NewArtefactStateHandler())
+	state, err := accessobj.NewBlobStateForObject(mode, def, cpi.NewArtefactStateHandler())
 	if err != nil {
 		panic("oops: " + err.Error())
 	}
 
-	p, err := access.NewArtefactProvider(state)
+	return newArtefactImpl(container, state)
+}
+
+func newArtefactImpl(container ArtefactSetContainerImpl, state accessobj.State) (cpi.ArtefactAccess, error) {
+	v, err := container.View()
 	if err != nil {
 		return nil, err
 	}
 	a := &ArtefactImpl{
-		artefactBase: artefactBase{
-			container: access,
-			provider:  p,
-			state:     state,
-		},
+		artefactBase: newArtefactBase(v, container, state),
 	}
 	return a, nil
+}
+
+func (a *ArtefactImpl) Close() error {
+	return a.view.Close()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // forward
 
-func (a *ArtefactImpl) AddBlob(access BlobAccess) error {
+func (a *ArtefactImpl) AddBlob(access cpi.BlobAccess) error {
 	return a.addBlob(access)
 }
 
-func (a *ArtefactImpl) NewArtefact(art ...*artdesc.Artefact) (ArtefactAccess, error) {
+func (a *ArtefactImpl) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
 	if !a.IsIndex() {
 		return nil, ErrNoIndex
 	}
@@ -133,13 +110,12 @@ func (a *ArtefactImpl) GetDescriptor() *artdesc.Artefact {
 ////////////////////////////////////////////////////////////////////////////////
 // from artdesc.Artefact
 
-func (a *ArtefactImpl) GetBlobDescriptor(digest digest.Digest) *Descriptor {
+func (a *ArtefactImpl) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 	d := a.GetDescriptor().GetBlobDescriptor(digest)
 	if d != nil {
 		return d
 	}
-	return a.provider.GetBlobDescriptor(digest)
-	//return a.container.GetBlobDescriptor(digest)
+	return a.container.GetBlobDescriptor(digest)
 }
 
 func (a *ArtefactImpl) Index() (*artdesc.Index, error) {
@@ -198,21 +174,21 @@ func (a *ArtefactImpl) IndexAccess() core.IndexAccess {
 	return NewIndexForArtefact(a)
 }
 
-func (a *ArtefactImpl) GetArtefact(digest digest.Digest) (ArtefactAccess, error) {
+func (a *ArtefactImpl) GetArtefact(digest digest.Digest) (cpi.ArtefactAccess, error) {
 	if !a.IsIndex() {
 		return nil, ErrNoIndex
 	}
-	return a.getArtefact(digest)
+	return a.container.GetArtefact("@" + digest.String())
 }
 
-func (a *ArtefactImpl) GetBlobData(digest digest.Digest) (int64, DataAccess, error) {
-	return a.provider.GetBlobData(digest)
+func (a *ArtefactImpl) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
+	return a.container.GetBlobData(digest)
 }
 
-func (a *ArtefactImpl) GetBlob(digest digest.Digest) (BlobAccess, error) {
+func (a *ArtefactImpl) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
 	d := a.GetBlobDescriptor(digest)
 	if d != nil {
-		size, data, err := a.provider.GetBlobData(digest)
+		size, data, err := a.container.GetBlobData(digest)
 		if err != nil {
 			return nil, err
 		}
@@ -222,10 +198,10 @@ func (a *ArtefactImpl) GetBlob(digest digest.Digest) (BlobAccess, error) {
 		}
 		return accessio.BlobAccessForDataAccess(d.Digest, d.Size, d.MediaType, data), nil
 	}
-	return nil, ErrBlobNotFound(digest)
+	return nil, cpi.ErrBlobNotFound(digest)
 }
 
-func (a *ArtefactImpl) AddArtefact(art Artefact, platform *artdesc.Platform) (accessio.BlobAccess, error) {
+func (a *ArtefactImpl) AddArtefact(art cpi.Artefact, platform *artdesc.Platform) (cpi.BlobAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
@@ -239,7 +215,7 @@ func (a *ArtefactImpl) AddArtefact(art Artefact, platform *artdesc.Platform) (ac
 	return NewIndexForArtefact(a).AddArtefact(art, platform)
 }
 
-func (a *ArtefactImpl) AddLayer(blob BlobAccess, d *Descriptor) (int, error) {
+func (a *ArtefactImpl) AddLayer(blob cpi.BlobAccess, d *cpi.Descriptor) (int, error) {
 	if a.IsClosed() {
 		return -1, accessio.ErrClosed
 	}

@@ -123,3 +123,21 @@ func (v *view) View() (CloserView, error) {
 func (v *view) Closer() io.Closer {
 	return v.ref.Closer()
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+type ClosableViewProvider[T io.Closer] interface {
+	View(main...bool)(T,error)
+}
+
+func ExecuteViewed[T io.Closer](c ClosableViewProvider[T], f func() error) error {
+	v, err:=c.View()
+	if err != nil {
+		return err
+	}
+	err=f()
+	v.Close()
+	return nil
+}
+*/

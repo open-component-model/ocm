@@ -34,7 +34,9 @@ import (
 
 func defaultManifestFill(a *artefactset.ArtefactSet) {
 	art := NewArtefact(a)
-	a.AddArtefact(art)
+	_, err := a.AddArtefact(art)
+	ExpectWithOffset(1, err).To(Succeed())
+	art.Close()
 }
 
 var _ = Describe("artefact management", func() {

@@ -97,6 +97,7 @@ func TransferAsArtefact(path string, ns oci.NamespaceAccess, fss ...vfs.FileSyst
 	if err != nil {
 		return chart, nil, err
 	}
+	defer art.Close()
 	m := art.ManifestAccess()
 
 	err = m.SetConfigBlob(accessio.BlobAccessForData(registry.ConfigMediaType, configData), nil)

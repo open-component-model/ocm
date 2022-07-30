@@ -12,26 +12,26 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package format
+package testutils
 
 import (
-	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"fmt"
+	"io"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-const (
-	DirMode  = accessobj.DirMode
-	FileMode = accessobj.FileMode
-)
-
-var (
-	ModTime = accessobj.ModTime
-)
-
-const (
-	// The artefact descriptor name for artefact format
-	ArtefactSetDescriptorFileName = "artefact-descriptor.json"
-	// BlobsDirectoryName is the name of the directory holding the artefact archives
-	BlobsDirectoryName = "blobs"
-	// ArtefactIndexFileName is the artefact index descriptor name for CommanTransportFormat
-	ArtefactIndexFileName = "artefact-index.json"
-)
+func Close(c io.Closer, msg ...interface{}) {
+	err := c.Close()
+	if err != nil {
+		switch len(msg) {
+		case 0:
+			Expect(err).To(Succeed())
+		case 1:
+			Fail(fmt.Sprintf("%s: %s", msg[0], err), 1)
+		default:
+			Fail(fmt.Sprintf("%s: %s", fmt.Sprintf(msg[0].(string), msg[1:]...), err), 1)
+		}
+	}
+}

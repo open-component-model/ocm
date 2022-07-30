@@ -199,6 +199,7 @@ func (h *TypeHandler) get(elemspec utils.ElemSpec) ([]output.Object, error) {
 		if err != nil {
 			return nil, err
 		}
+		h.session.AddCloser(a)
 		obj := &Object{
 			Key:       Key(a),
 			Spec:      spec,
@@ -216,6 +217,7 @@ func (h *TypeHandler) get(elemspec utils.ElemSpec) ([]output.Object, error) {
 			if err != nil {
 				return nil, err
 			}
+			h.session.AddCloser(a)
 			t := tag
 			s := spec
 			s.Tag = &t
