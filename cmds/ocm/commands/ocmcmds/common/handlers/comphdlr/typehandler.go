@@ -69,7 +69,12 @@ func (o *Object) GetHistory() common.History {
 }
 
 func (o *Object) IsNode() *common.NameVersion {
-	nv := common.VersionedElementKey(o.ComponentVersion)
+	var nv common.NameVersion
+	if o.ComponentVersion == nil {
+		nv = o.Spec.NameVersion()
+	} else {
+		nv = common.VersionedElementKey(o.ComponentVersion)
+	}
 	return &nv
 }
 

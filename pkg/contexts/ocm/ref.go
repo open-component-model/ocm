@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/grammar"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -192,6 +193,13 @@ type CompSpec struct {
 
 func (r *CompSpec) IsVersion() bool {
 	return r.Version != nil
+}
+
+func (r *CompSpec) NameVersion() common.NameVersion {
+	if r.Version != nil {
+		return common.NewNameVersion(r.Component, *r.Version)
+	}
+	return common.NewNameVersion(r.Component, "-")
 }
 
 func (r *CompSpec) Reference() string {

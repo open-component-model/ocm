@@ -127,16 +127,18 @@ func (h *TypeHandler) All() ([]output.Object, error) {
 
 func (h *TypeHandler) all(c *comphdlr.Object) ([]output.Object, error) {
 	result := []output.Object{}
-	elemaccess := h.elemaccess(c.ComponentVersion)
-	l := elemaccess.Len()
-	for i := 0; i < l; i++ {
-		e := elemaccess.Get(i)
-		result = append(result, &Object{
-			History: append(c.History, common.VersionedElementKey(c.ComponentVersion)),
-			Version: c.ComponentVersion,
-			Id:      e.GetMeta().GetIdentity(elemaccess),
-			Element: e,
-		})
+	if c.ComponentVersion != nil {
+		elemaccess := h.elemaccess(c.ComponentVersion)
+		l := elemaccess.Len()
+		for i := 0; i < l; i++ {
+			e := elemaccess.Get(i)
+			result = append(result, &Object{
+				History: append(c.History, common.VersionedElementKey(c.ComponentVersion)),
+				Version: c.ComponentVersion,
+				Id:      e.GetMeta().GetIdentity(elemaccess),
+				Element: e,
+			})
+		}
 	}
 	return result, nil
 }

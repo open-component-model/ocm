@@ -19,6 +19,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/schemaoption"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 
@@ -50,7 +52,7 @@ type Command struct {
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), output.OutputOptions(outputs, closureoption.New(
-		"component reference", output.Fields("IDENTITY"), identity), schemaoption.New(""),
+		"component reference", output.Fields("IDENTITY"), options.Not(output.Selected("tree")), addIdentityField), schemaoption.New(""),
 	))}, utils.Names(Names, names...)...)
 }
 
@@ -91,7 +93,7 @@ func (o *Command) Run() error {
 
 /////////////////////////////////////////////////////////////////////////////
 
-func identity(e interface{}) []string {
+func addIdentityField(e interface{}) []string {
 	p := e.(*comphdlr.Object)
 	return []string{p.Identity.String()}
 }
@@ -159,6 +161,9 @@ func map_get_regular_output(e interface{}) interface{} {
 	tag := "-"
 	if p.Spec.Version != nil {
 		tag = *p.Spec.Version
+	}
+	if p.ComponentVersion == nil {
+		return []string{p.Spec.Component, tag, "<unknown component version>"}
 	}
 	return []string{p.Spec.Component, tag, string(p.ComponentVersion.GetDescriptor().Provider.Name)}
 }

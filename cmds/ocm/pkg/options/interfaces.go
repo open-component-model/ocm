@@ -47,6 +47,28 @@ type Options interface {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type OptionSelector func(provider OptionSetProvider) bool
+
+func Not(s OptionSelector) OptionSelector {
+	return func(provider OptionSetProvider) bool {
+		return !s(provider)
+	}
+}
+
+func Always() OptionSelector {
+	return func(provider OptionSetProvider) bool {
+		return true
+	}
+}
+
+func Never() OptionSelector {
+	return func(provider OptionSetProvider) bool {
+		return false
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type OptionSet []Options
 
 type OptionSetProvider interface {

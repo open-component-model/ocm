@@ -30,8 +30,17 @@ import (
 
 func From(o options.OptionSetProvider) *Options {
 	var opts *Options
+	if me, ok := o.(*Options); ok {
+		return me
+	}
 	o.AsOptionSet().Get(&opts)
 	return opts
+}
+
+func Selected(mode string) func(o options.OptionSetProvider) bool {
+	return func(o options.OptionSetProvider) bool {
+		return From(o).OutputMode == mode
+	}
 }
 
 type Options struct {

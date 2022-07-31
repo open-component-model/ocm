@@ -74,7 +74,11 @@ func traverse(hist common.History, o *Object, octx out.Context, lookup ocm.Compo
 			//Component:        comp,
 			ComponentVersion: nested,
 		}
-		result = append(result, traverse(hist, obj, octx, lookup)...)
+		if nested == nil {
+			result = append(result, obj)
+		} else {
+			result = append(result, traverse(hist, obj, octx, lookup)...)
+		}
 	}
 	return result
 }
