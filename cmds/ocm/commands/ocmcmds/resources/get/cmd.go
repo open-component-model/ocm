@@ -82,7 +82,7 @@ func (o *Command) Run() error {
 	}
 
 	opts := output.From(o)
-	hdlr, err := common.NewTypeHandler(o.Context.OCM(), opts, repooption.From(o).Repository, session, []string{o.Comp})
+	hdlr, err := common.NewTypeHandler(o.Context.OCM(), opts, repooption.From(o).Repository, session, []string{o.Comp}, elemhdlr.ForceEmpty(output.Selected("tree")(opts)))
 	if err != nil {
 		return err
 	}

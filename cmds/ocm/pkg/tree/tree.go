@@ -16,6 +16,7 @@ package tree
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/open-component-model/ocm/pkg/common"
 )
@@ -27,6 +28,10 @@ type Object interface {
 
 type Typed interface {
 	GetKind() string
+}
+
+type ValidTreeElement interface {
+	IsValid() bool
 }
 
 type NodeCreator func(common.History, common.NameVersion) Object
@@ -56,16 +61,28 @@ var horizontal = "─"
 var corner = "└" + horizontal
 var fork = "├" + horizontal
 var space = "   "
+var node = "⊗" // \u2297
 
-// MapToTree maps a list of elements featuring a resulution history
+// MapToTree maps a list of elements featuring a resolution history
 // into a list of elements providing an ascii tree graph field
-func MapToTree(objs Objects, creator NodeCreator) TreeObjects {
+// Intermediate nodes are synthesized, so only leaf elements are required.
+// If an element should act as explicit node, it must stat to be a node,
+// in this case the node will be tagged with the nodeSymbol. If this
+// is not desired, pass an empty symbol string.
+func MapToTree(objs Objects, creator NodeCreator, symbols ...string) TreeObjects {
 	result := TreeObjects{}
-	handleLevel(objs, "", nil, 0, creator, &result)
+	nodeSym := " " + node
+	if len(symbols) > 0 {
+		nodeSym = symbols[0]
+		if nodeSym != "" && !strings.HasPrefix(nodeSym, " ") {
+			nodeSym = " " + nodeSym
+		}
+	}
+	handleLevel(objs, "", nil, 0, creator, &result, nodeSym)
 	return result
 }
 
-func handleLevel(objs Objects, header string, prefix common.History, start int, creator NodeCreator, result *TreeObjects) {
+func handleLevel(objs Objects, header string, prefix common.History, start int, creator NodeCreator, result *TreeObjects, nodeSym string) {
 	var node *common.NameVersion
 	lvl := len(prefix)
 	for i := start; i < len(objs); {
@@ -99,7 +116,7 @@ func handleLevel(objs Objects, header string, prefix common.History, start int, 
 				if i < len(objs)-1 {
 					sub := objs[i+1].GetHistory()
 					if len(sub) > len(h) && sub.HasPrefix(append(h, *node)) {
-						sym = " \u2297"
+						sym = nodeSym
 					}
 				}
 			}
@@ -109,10 +126,12 @@ func handleLevel(objs Objects, header string, prefix common.History, start int, 
 					sym += " " + k
 				}
 			}
-			*result = append(*result, &TreeObject{
-				Graph:  header + ftag + sym,
-				Object: objs[i],
-			})
+			if valid, ok := objs[i].(ValidTreeElement); !ok || valid.IsValid() {
+				*result = append(*result, &TreeObject{
+					Graph:  header + ftag + sym,
+					Object: objs[i],
+				})
+			}
 			i++
 		} else {
 			if node == nil || *node != h[lvl] {
@@ -131,7 +150,7 @@ func handleLevel(objs Objects, header string, prefix common.History, start int, 
 					Node:   n,
 				})
 			}
-			handleLevel(objs, header+stag, h[:len(prefix)+1], i, creator, result)
+			handleLevel(objs, header+stag, h[:len(prefix)+1], i, creator, result, nodeSym)
 			i = next
 			node = nil
 		}

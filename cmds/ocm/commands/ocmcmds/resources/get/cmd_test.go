@@ -247,12 +247,22 @@ test.de/y:v1->test.de/x:v1 testdata v1               PlainText local
 `))
 			})
 
+			It("lists flat in ctf file", func() {
+				buf := bytes.NewBuffer(nil)
+				Expect(env.CatchOutput(buf).Execute("get", "resources", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
+				Expect("\n" + buf.String()).To(Equal(
+					`
+no elements found
+`))
+			})
+
 			It("lists flat tree in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
 				Expect(env.CatchOutput(buf).Execute("get", "resources", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 				Expect("\n" + buf.String()).To(Equal(
 					`
-no elements found
+COMPONENTVERSION    NAME VERSION IDENTITY TYPE RELATION
+└─ test.de/y:v1                                
 `))
 			})
 
@@ -286,7 +296,7 @@ COMPONENTVERSION          NAME     VERSION IDENTITY TYPE      RELATION
 							env.Resource("moredata", "", "PlainText", metav1.LocalRelation, func() {
 								env.BlobStringData(mime.MIME_TEXT, "moredata")
 							})
-							env.Reference("base", COMP2, VERSION)
+							env.Reference("base", COMP, VERSION)
 						})
 					})
 				})
@@ -309,9 +319,10 @@ test.de/y:v1  moredata v1               PlainText local
 				fmt.Printf("%s", buf)
 				Expect("\n" + buf.String()).To(Equal(
 					`
-COMPONENTVERSION    NAME     VERSION IDENTITY TYPE      RELATION
-└─ test.de/y:v1                                         
-   └─               moredata v1               PlainText local
+COMPONENTVERSION       NAME     VERSION IDENTITY TYPE      RELATION
+└─ test.de/y:v1                                            
+   ├─                  moredata v1               PlainText local
+   └─ test.de/x:v1                                         
 `))
 			})
 		})
