@@ -22,6 +22,7 @@ settings and show the found credential attributes.
 For the following usage contexts a standard identity matcher exists:
   - <code>OCIRegistry</code>: OCI registry credential matcher
   - <code>complete</code>: complete match of given pattern set
+  - <code>hostpath</code>: Host and path based credential matcher
   - <code>partial</code>: complete match of given pattern ignoring additional attributes
 
 The used matcher is derived from the consumer attribute <code>type</code>.
