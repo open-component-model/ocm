@@ -12,12 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package repositories
+package config_test
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/aliases"
-	_ "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
-	_ "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
-	_ "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/memory"
-	_ "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/memory/config"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
+
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Credential Config Test Suite")
+}

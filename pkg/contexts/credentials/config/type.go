@@ -32,7 +32,7 @@ func init() {
 	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &ConfigSpec{}, usage))
 }
 
-// ConfigSpec describes a memory based repository interface.
+// ConfigSpec describes a configuration for the config context
 type ConfigSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	// Consumers describe predefine logical cosumer specs mapped to credentials

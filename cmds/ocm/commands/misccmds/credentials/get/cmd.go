@@ -78,6 +78,13 @@ func (o *Command) AddFlags(set *pflag.FlagSet) {
 }
 
 func (o *Command) Complete(args []string) error {
+	if o.Type != "" {
+		m, _ := o.CredentialsContext().ConsumerIdentityMatchers().Get(o.Type)
+		if m == nil {
+			return errors.ErrUnknown("identity matcher", o.Type)
+		}
+		o.Matcher = m
+	}
 	o.Consumer = credentials.ConsumerIdentity{}
 	for _, s := range args {
 		i := strings.Index(s, "=")

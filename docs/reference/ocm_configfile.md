@@ -83,6 +83,26 @@ The following configuration types are supported:
          ...
   </pre>
 
+- <code>memory.credentials.config.ocm.gardener.cloud</code>
+  The config type <code>memory.credentials.config.ocm.gardener.cloud</code> can be used to define a list
+  of arbitrary credentials stored in a memory based credentials repository:
+  
+  <pre>
+      type: memory.credentials.config.ocm.gardener.cloud
+      repoName: default
+      credentials:
+        - credentialsName: ref
+          reference:  # refer to a credential set stored in some other credential repository
+            type: Credentials # this is a repo providing just one explicit credential set
+            properties:
+              username: mandelsoft
+              password: specialsecret
+        - credentialsName: direct
+          credentials: # direct credential specification
+              username: mandelsoft2
+              password: specialsecret2
+  </pre>
+
 - <code>oci.config.ocm.gardener.cloud</code>
   The config type <code>oci.config.ocm.gardener.cloud</code> can be used to define
   OCI registry aliases:

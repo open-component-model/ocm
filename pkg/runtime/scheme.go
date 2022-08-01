@@ -326,9 +326,11 @@ func (d *defaultScheme) Decode(data []byte, unmarshal Unmarshaler) (TypedObject,
 		return nil, errors.Wrapf(err, "cannot unmarshal unstructured")
 	}
 	if un.GetType() == "" {
-		if d.acceptUnknown {
-			return un.(TypedObject), nil
-		}
+		/*
+			if d.acceptUnknown {
+				return un.(TypedObject), nil
+			}
+		*/
 		return nil, errors.Newf("no type found")
 	}
 	decoder := d.GetDecoder(un.GetType())
