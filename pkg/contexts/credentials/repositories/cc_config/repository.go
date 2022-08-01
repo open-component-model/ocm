@@ -1,4 +1,4 @@
-package secretserver
+package cc_config
 
 import (
 	"bytes"
@@ -10,11 +10,11 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"sync"
 
 	dockercred "github.com/docker/cli/cli/config/credentials"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
@@ -31,15 +31,16 @@ const (
 )
 
 type Repository struct {
+	ctx          cpi.Context
 	lock         sync.RWMutex
 	url          string
 	consumerType string
 	cipher       Cipher
 	key          []byte
-	ctx          cpi.Context
 	propagate    bool
 	index        *IndexNode
 	creds        map[string]cpi.Credentials
+	fs           vfs.FileSystem
 }
 
 // Config is the struct that describes the cc-config data structure
@@ -56,11 +57,15 @@ type ContainerRegistryCredentials struct {
 	ImageReferencePrefixes []string `json:"image_reference_prefixes,omitempty"`
 }
 
-func NewRepository(url string, configName string, cipher Cipher, key []byte) *Repository {
+func NewRepository(ctx cpi.Context, url string, consumerType string, cipher Cipher, key []byte, propagate bool, fs vfs.FileSystem) *Repository {
 	return &Repository{
-		url:    url,
-		cipher: cipher,
-		key:    key,
+		ctx:          ctx,
+		url:          url,
+		consumerType: consumerType,
+		cipher:       cipher,
+		key:          key,
+		propagate:    propagate,
+		fs:           fs,
 	}
 }
 
@@ -91,7 +96,7 @@ func (r *Repository) LookupCredentials(name string) (cpi.Credentials, error) {
 }
 
 func (r *Repository) WriteCredentials(name string, creds cpi.Credentials) (cpi.Credentials, error) {
-	return nil, errors.ErrNotSupported("write", "credentials", SecretServerRepositoryType)
+	return nil, errors.ErrNotSupported("write", "credentials", CCConfigRepositoryType)
 }
 
 func (r *Repository) Read(force bool) error {
@@ -112,43 +117,41 @@ func (r *Repository) Read(force bool) error {
 		return fmt.Errorf("unable to unmarshal config: %w", err)
 	}
 
-	r.index = &IndexNode{}
+	r.index = NewIndexNode()
 	r.creds = map[string]cpi.Credentials{}
 
-	if r.propagate {
-		for _, credential := range config.ContainerRegistry {
-			for _, imgPrefix := range credential.ImageReferencePrefixes {
-				if _, ok := r.creds[imgPrefix]; ok {
-					return errors.Newf("credentials for image prefix %s already exist", imgPrefix)
-				}
-
-				// TODO: remember weird behavior if protocol prefix is missing, maybe use/implement util function?
-				// TODO: use image_reference_prefixes from the secret server config to get correct set of credentials for an image ref
-				url, err := url.Parse(imgPrefix)
-				if err != nil {
-					return err
-				}
-				hostname := dockercred.ConvertToHostname(url.Host)
-				if hostname == "index.docker.io" {
-					hostname = "docker.io"
-				}
-
-				id := cpi.ConsumerIdentity{
-					cpi.ATTR_TYPE:          r.consumerType,
-					identity.ID_HOSTNAME:   hostname,
-					identity.ID_PATHPREFIX: url.Path,
-				}
-
-				var creds cpi.Credentials
-				if log {
-					fmt.Printf("propagate id %q\n", id)
-				}
-				creds = newCredentialsFromContainerRegistryCredentials(credential)
-				r.ctx.SetCredentialsForConsumer(id, creds)
-
-				r.index.Insert(imgPrefix)
-				r.creds[imgPrefix] = creds
+	// TODO: what is the propagate flag for? must it be used here?
+	for _, credential := range config.ContainerRegistry {
+		for _, imgPrefix := range credential.ImageReferencePrefixes {
+			if _, ok := r.creds[imgPrefix]; ok {
+				return errors.Newf("credentials for image prefix %s already exist", imgPrefix)
 			}
+
+			// TODO: remember weird behavior if protocol prefix is missing, maybe use/implement util function?
+			url, err := url.Parse(imgPrefix)
+			if err != nil {
+				return err
+			}
+			hostname := dockercred.ConvertToHostname(url.Host)
+			if hostname == "index.docker.io" {
+				hostname = "docker.io"
+			}
+
+			id := cpi.ConsumerIdentity{
+				cpi.ATTR_TYPE:          r.consumerType,
+				identity.ID_HOSTNAME:   hostname,
+				identity.ID_PATHPREFIX: url.Path,
+			}
+
+			var creds cpi.Credentials
+			if log {
+				fmt.Printf("propagate id %q\n", id)
+			}
+			creds = newCredentialsFromContainerRegistryCredentials(credential)
+			r.ctx.SetCredentialsForConsumer(id, creds)
+
+			r.index.Insert(imgPrefix)
+			r.creds[imgPrefix] = creds
 		}
 	}
 
@@ -162,7 +165,7 @@ func (r *Repository) getConfig() (io.ReadCloser, error) {
 	}
 
 	if u.Scheme == "file" {
-		f, err := os.Open(u.Host)
+		f, err := r.fs.Open(u.Path)
 		if err != nil {
 			return nil, fmt.Errorf("unable to open file: %w", err)
 		}
@@ -196,7 +199,7 @@ func (r *Repository) getConfig() (io.ReadCloser, error) {
 		case Plaintext:
 			return reader, nil
 		default:
-			return nil, errors.ErrNotImplemented(string(r.cipher), SecretServerRepositoryType)
+			return nil, errors.ErrNotImplemented(string(r.cipher), CCConfigRepositoryType)
 		}
 	}
 }
@@ -232,6 +235,13 @@ type IndexNode struct {
 	children []*IndexNode
 }
 
+func NewIndexNode() *IndexNode {
+	return &IndexNode{
+		segment:  "",
+		children: []*IndexNode{},
+	}
+}
+
 func (n *IndexNode) Insert(path string) {
 	splitPath := strings.Split(path, "/")
 	child := n.findSegment(splitPath[0])
@@ -263,5 +273,9 @@ func (n *IndexNode) Find(path string) string {
 		return n.segment
 	}
 	childSegment := child.Find(strings.Join(splitPath[1:], "/"))
-	return strings.Join([]string{n.segment, childSegment}, "/")
+	if n.segment == "" {
+		return childSegment
+	} else {
+		return strings.Join([]string{n.segment, childSegment}, "/")
+	}
 }

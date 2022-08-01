@@ -1,4 +1,4 @@
-package secretserver_test
+package cc_config_test
 
 import (
 	"testing"

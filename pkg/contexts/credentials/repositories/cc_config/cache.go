@@ -1,18 +1,19 @@
-package secretserver
+package cc_config
 
 import (
-	"fmt"
 	"sync"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 )
 
-const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/secretserver"
+const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/cc_config"
 
 type Repositories struct {
 	lock  sync.Mutex
 	repos map[string]*Repository
+	fs    vfs.FileSystem
 }
 
 func newRepositories(datacontext.Context) interface{} {
@@ -21,14 +22,13 @@ func newRepositories(datacontext.Context) interface{} {
 	}
 }
 
-func (r *Repositories) GetRepository(ctx cpi.Context, url string, configName string, cipher Cipher, key []byte) *Repository {
+func (r *Repositories) GetRepository(ctx cpi.Context, url string, consumerType string, cipher Cipher, key []byte, propagate bool) *Repository {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	id := fmt.Sprintf("%s:%s", url, configName)
-	repo := r.repos[id]
+	repo := r.repos[url]
 	if repo == nil {
-		repo = NewRepository(url, configName, cipher, key)
-		r.repos[id] = repo
+		repo = NewRepository(ctx, url, consumerType, cipher, key, propagate, r.fs)
+		r.repos[url] = repo
 	}
 	return repo
 }

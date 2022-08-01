@@ -1,4 +1,4 @@
-package secretserver
+package cc_config
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
@@ -6,40 +6,42 @@ import (
 )
 
 const (
-	SecretServerRepositoryType   = "SecretServer"
-	SecretServerRepositoryTypeV1 = SecretServerRepositoryType + runtime.VersionSeparator + "v1"
+	CCConfigRepositoryType   = "CCConfig"
+	CCConfigRepositoryTypeV1 = CCConfigRepositoryType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
-	cpi.RegisterRepositoryType(SecretServerRepositoryType, cpi.NewRepositoryType(SecretServerRepositoryType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(SecretServerRepositoryTypeV1, cpi.NewRepositoryType(SecretServerRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(CCConfigRepositoryType, cpi.NewRepositoryType(CCConfigRepositoryType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(CCConfigRepositoryTypeV1, cpi.NewRepositoryType(CCConfigRepositoryTypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes a secret server based credential repository interface.
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	URL                         string `json:"url"`
-	ConfigName                  string `json:"configName"`
+	ConsumerType                string `json:"consumerType"`
 	Cipher                      Cipher `json:"cipher"`
 	Key                         []byte `json:"key"`
+	Propagate                   bool   `json:"propagate"`
 }
 
 // NewRepositorySpec creates a new memory RepositorySpec
-func NewRepositorySpec(url string, configName string, cipher Cipher, key []byte) *RepositorySpec {
+func NewRepositorySpec(url string, consumerType string, cipher Cipher, key []byte, propagate bool) *RepositorySpec {
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(SecretServerRepositoryType),
+		ObjectVersionedType: runtime.NewVersionedObjectType(CCConfigRepositoryType),
 		URL:                 url,
-		ConfigName:          configName,
+		ConsumerType:        consumerType,
 		Cipher:              cipher,
 		Key:                 key,
+		Propagate:           propagate,
 	}
 }
 
 func (a *RepositorySpec) GetType() string {
-	return SecretServerRepositoryType
+	return CCConfigRepositoryType
 }
 
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi.Repository, error) {
 	repos := ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories).(*Repositories)
-	return repos.GetRepository(ctx, a.URL, a.ConfigName, a.Cipher, a.Key), nil
+	return repos.GetRepository(ctx, a.URL, a.ConsumerType, a.Cipher, a.Key, a.Propagate), nil
 }
