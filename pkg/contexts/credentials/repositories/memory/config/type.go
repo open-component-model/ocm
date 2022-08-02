@@ -31,12 +31,12 @@ const (
 )
 
 func init() {
-	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &ConfigSpec{}, usage))
-	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &ConfigSpec{}, usage))
+	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &Config{}, usage))
+	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &Config{}, usage))
 }
 
-// ConfigSpec describes a configuration for the config context
-type ConfigSpec struct {
+// Config describes a configuration for the config context
+type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	RepoName                    string            `json:"repoName"`
 	Credentials                 []CredentialsSpec `json:"credentials,omitempty"`
@@ -50,25 +50,25 @@ type CredentialsSpec struct {
 	Credentails common.Properties `json:"credentials"`
 }
 
-// NewConfigSpec creates a new memory ConfigSpec
-func NewConfigSpec(repo string, credentials ...CredentialsSpec) *ConfigSpec {
-	return &ConfigSpec{
+// New creates a new memory ConfigSpec
+func New(repo string, credentials ...CredentialsSpec) *Config {
+	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
 		RepoName:            repo,
 		Credentials:         credentials,
 	}
 }
 
-func (a *ConfigSpec) GetType() string {
+func (a *Config) GetType() string {
 	return ConfigType
 }
 
-func (a *ConfigSpec) AddCredentials(name string, props common.Properties) error {
+func (a *Config) AddCredentials(name string, props common.Properties) error {
 	a.Credentials = append(a.Credentials, CredentialsSpec{CredentialsName: name, Credentails: props})
 	return nil
 }
 
-func (a *ConfigSpec) AddCredentialsRef(name string, refname string, spec cpi.RepositorySpec) error {
+func (a *Config) AddCredentialsRef(name string, refname string, spec cpi.RepositorySpec) error {
 	repo, err := cpi.ToGenericRepositorySpec(spec)
 	if err != nil {
 		return err
@@ -78,7 +78,7 @@ func (a *ConfigSpec) AddCredentialsRef(name string, refname string, spec cpi.Rep
 	return nil
 }
 
-func (a *ConfigSpec) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
+func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	list := errors.ErrListf("applying config")
 	t, ok := target.(cpi.Context)
 	if !ok {

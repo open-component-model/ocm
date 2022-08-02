@@ -29,6 +29,7 @@ const (
 	PathInputs      = PathOCM + "/inputs"
 	InputParameters = "parameters"
 	InputConfig     = "config"
+	InputOCMConfig  = "ocmconfig"
 	InputOCMRepo    = "ocmrepo"
 )
 
@@ -48,10 +49,11 @@ type Executor struct {
 }
 
 type Specification struct {
-	Template  json.RawMessage            `json:"configTemplate"`
-	Libraries []metav1.ResourceReference `json:"templateLibraries"`
-	Scheme    json.RawMessage            `json:"configScheme"`
-	Executors []Executor                 `json:"executors"`
+	CredentialsRequest `json:",inline"`
+	Template           json.RawMessage            `json:"configTemplate"`
+	Libraries          []metav1.ResourceReference `json:"templateLibraries"`
+	Scheme             json.RawMessage            `json:"configScheme"`
+	Executors          []Executor                 `json:"executors"`
 }
 
 type Image struct {

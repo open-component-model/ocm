@@ -37,7 +37,7 @@ type Config struct {
 	Bob                         string `json:"bob,omitempty"`
 }
 
-// NewConfig creates a new memory Config
+// NewConfig creates a new memory ConfigSpec
 func NewConfig(a, b string) *Config {
 	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(DummyType),

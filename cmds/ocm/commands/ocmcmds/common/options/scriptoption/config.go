@@ -32,12 +32,12 @@ const (
 )
 
 func init() {
-	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &ConfigSpec{}, usage))
-	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &ConfigSpec{}, usage))
+	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &Config{}, usage))
+	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &Config{}, usage))
 }
 
-// ConfigSpec describes a memory based repository interface.
-type ConfigSpec struct {
+// Config describes a memory based repository interface.
+type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	Scripts                     map[string]ScriptSpec `json:"scripts"`
 }
@@ -48,18 +48,18 @@ type ScriptSpec struct {
 	FileSystem vfs.FileSystem  `json:"-"`
 }
 
-// NewConfigSpec creates a new memory ConfigSpec
-func NewConfigSpec() *ConfigSpec {
-	return &ConfigSpec{
+// NewConfig creates a new memory ConfigSpec
+func NewConfig() *Config {
+	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
 	}
 }
 
-func (a *ConfigSpec) GetType() string {
+func (a *Config) GetType() string {
 	return ConfigType
 }
 
-func (a *ConfigSpec) AddScriptFile(name, path string, fss ...vfs.FileSystem) {
+func (a *Config) AddScriptFile(name, path string, fss ...vfs.FileSystem) {
 	var fs vfs.FileSystem
 	for _, fs = range fss {
 		if fs != nil {
@@ -72,14 +72,14 @@ func (a *ConfigSpec) AddScriptFile(name, path string, fss ...vfs.FileSystem) {
 	a.Scripts[name] = ScriptSpec{Path: path, FileSystem: fs}
 }
 
-func (a *ConfigSpec) AddScript(name string, data []byte) {
+func (a *Config) AddScript(name string, data []byte) {
 	if a.Scripts == nil {
 		a.Scripts = map[string]ScriptSpec{}
 	}
 	a.Scripts[name] = ScriptSpec{Script: data}
 }
 
-func (a *ConfigSpec) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
+func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	t, ok := target.(*Option)
 	if !ok {
 		return cfgcpi.ErrNoContext(ConfigType)

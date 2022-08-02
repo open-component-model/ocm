@@ -9,9 +9,10 @@ ocm componentversions bootstrap [<options>] <action> {<component-reference>} {<r
 ### Options
 
 ```
-  -h, --help                help for bootstrap
-  -o, --outputs string      output file/directory
-  -p, --parameters string   parameter file
+  -c, --credentials string   credentials file
+  -h, --help                 help for bootstrap
+  -o, --outputs string       output file/directory
+  -p, --parameters string    parameter file
 ```
 
 ### Description

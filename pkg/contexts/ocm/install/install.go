@@ -16,6 +16,7 @@ package install
 
 import (
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
@@ -25,7 +26,28 @@ import (
 
 const TypeOCMInstaller = "ocmInstaller"
 
-func Install(d Driver, name string, rid metav1.Identity, params []byte, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
+func Install(d Driver, name string, rid metav1.Identity, credsrc accessio.DataSource, paramsrc accessio.DataSource, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
+	var creds *Credentials
+	var params []byte
+	var err error
+
+	if paramsrc != nil {
+		params, err = paramsrc.Get()
+		if err != nil {
+			return nil, errors.Wrapf(err, "settings")
+		}
+	}
+
+	if credsrc != nil {
+		data, err := credsrc.Get()
+		if err == nil {
+			creds, err = ParseCredentialSpecification(data, credsrc.Origin())
+		}
+		if err != nil {
+			return nil, errors.Wrapf(err, "credentials")
+		}
+	}
+
 	ires, _, err := utils.MatchResourceReference(cv, TypeOCMInstaller, metav1.NewResourceRef(rid), nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "installer resource in %s", common.VersionedElementKey(cv).String())
@@ -36,6 +58,7 @@ func Install(d Driver, name string, rid metav1.Identity, params []byte, octx ocm
 		return nil, errors.Wrapf(err, "failed to instantiate access")
 	}
 	data, err := m.Get()
+	m.Close()
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot get resource content")
 	}
@@ -44,5 +67,5 @@ func Install(d Driver, name string, rid metav1.Identity, params []byte, octx ocm
 	if err != nil {
 		return nil, errors.ErrInvalidWrap(err, "installer spec")
 	}
-	return ExecuteAction(d, name, &spec, params, octx, cv, resolver)
+	return ExecuteAction(d, name, &spec, creds, params, octx, cv, resolver)
 }

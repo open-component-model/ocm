@@ -30,29 +30,29 @@ const (
 )
 
 func init() {
-	cpi.RegisterConfigType(OCMCmdConfigType, cpi.NewConfigType(OCMCmdConfigType, &ConfigSpec{}, usage))
-	cpi.RegisterConfigType(OCMCmdConfigTypeV1, cpi.NewConfigType(OCMCmdConfigTypeV1, &ConfigSpec{}, usage))
+	cpi.RegisterConfigType(OCMCmdConfigType, cpi.NewConfigType(OCMCmdConfigType, &Config{}, usage))
+	cpi.RegisterConfigType(OCMCmdConfigTypeV1, cpi.NewConfigType(OCMCmdConfigTypeV1, &Config{}, usage))
 }
 
-// ConfigSpec describes a memory based repository interface.
-type ConfigSpec struct {
+// Config describes a memory based repository interface.
+type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	OCMRepositories             map[string]*ocmcpi.GenericRepositorySpec `json:"ocmRepositories,omitempty"`
 	OCIRepositories             map[string]*ocicpi.GenericRepositorySpec `json:"ociRepositories,omitempty"`
 }
 
-// NewConfigSpec creates a new memory ConfigSpec
-func NewConfigSpec() *ConfigSpec {
-	return &ConfigSpec{
+// New creates a new memory ConfigSpec
+func New() *Config {
+	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(OCMCmdConfigType),
 	}
 }
 
-func (a *ConfigSpec) GetType() string {
+func (a *Config) GetType() string {
 	return OCMCmdConfigType
 }
 
-func (a *ConfigSpec) AddOCIRepository(name string, spec ocicpi.RepositorySpec) error {
+func (a *Config) AddOCIRepository(name string, spec ocicpi.RepositorySpec) error {
 	g, err := ocicpi.ToGenericRepositorySpec(spec)
 	if err != nil {
 		return err
@@ -64,7 +64,7 @@ func (a *ConfigSpec) AddOCIRepository(name string, spec ocicpi.RepositorySpec) e
 	return nil
 }
 
-func (a *ConfigSpec) AddOCMRepository(name string, spec ocmcpi.RepositorySpec) error {
+func (a *Config) AddOCMRepository(name string, spec ocmcpi.RepositorySpec) error {
 	g, err := ocmcpi.ToGenericRepositorySpec(spec)
 	if err != nil {
 		return err
@@ -77,7 +77,7 @@ func (a *ConfigSpec) AddOCMRepository(name string, spec ocmcpi.RepositorySpec) e
 	return nil
 }
 
-func (a *ConfigSpec) ApplyTo(ctx config.Context, target interface{}) error {
+func (a *Config) ApplyTo(ctx config.Context, target interface{}) error {
 	t, ok := target.(core.Context)
 	if !ok {
 		return config.ErrNoContext(OCMCmdConfigType)

@@ -262,7 +262,7 @@ func (o *CLIOptions) Complete() error {
 		// use docker config as default config for ocm cli
 		d := filepath.Join(dockercli.Dir(), dockercli.ConfigFileName)
 		if ok, err := vfs.FileExists(osfs.New(), d); ok && err == nil {
-			cfg := credcfg.NewConfigSpec()
+			cfg := credcfg.New()
 			cfg.AddRepository(dockerconfig.NewRepositorySpec(d, true))
 			err = config.DefaultContext().ApplyConfig(cfg, d)
 			if err != nil {
@@ -306,7 +306,7 @@ func (o *CLIOptions) Complete() error {
 	set, err := common2.ParseLabels(o.Settings, "attribute setting")
 	if err == nil && len(set) > 0 {
 		ctx := o.Context.ConfigContext()
-		spec := datactg.NewConfigSpec()
+		spec := datactg.New()
 		for _, s := range set {
 			attr := s.Name
 			eff := datacontext.DefaultAttributeScheme.Shortcuts()[attr]

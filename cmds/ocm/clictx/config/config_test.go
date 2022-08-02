@@ -58,7 +58,7 @@ var _ = Describe("command config", func() {
 
 		It("serializes config", func() {
 
-			cfg := config.NewConfigSpec()
+			cfg := config.New()
 			err := cfg.AddOCIRepository("oci", ocispec)
 			Expect(err).To(Succeed())
 			err = cfg.AddOCMRepository("ocm", ocmspec)
@@ -69,7 +69,7 @@ var _ = Describe("command config", func() {
 			Expect(err).To(Succeed())
 			Expect(data).To(Equal([]byte(specdata)))
 
-			cfg2 := config.NewConfigSpec()
+			cfg2 := config.New()
 			err = json.Unmarshal(data, cfg2)
 			Expect(err).To(Succeed())
 			Expect(cfg2).To(Equal(cfg))

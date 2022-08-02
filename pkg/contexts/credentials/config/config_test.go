@@ -92,7 +92,7 @@ var _ = Describe("generic credentials", func() {
 				"url":  "https://acme.com",
 			}
 
-			cfg := localconfig.NewConfigSpec()
+			cfg := localconfig.New()
 
 			cfg.AddConsumer(consumerid, credspec)
 
@@ -100,7 +100,7 @@ var _ = Describe("generic credentials", func() {
 			Expect(err).To(Succeed())
 			Expect(data).To(Equal([]byte(cfgconsumerdata)))
 
-			cfg2 := &localconfig.ConfigSpec{}
+			cfg2 := &localconfig.Config{}
 			err = json.Unmarshal(data, cfg2)
 			Expect(err).To(Succeed())
 			Expect(cfg2).To(Equal(cfg))
@@ -108,7 +108,7 @@ var _ = Describe("generic credentials", func() {
 
 		It("composes a config for repositories", func() {
 
-			cfg := localconfig.NewConfigSpec()
+			cfg := localconfig.New()
 
 			cfg.AddRepository(repospec, direct)
 
@@ -116,7 +116,7 @@ var _ = Describe("generic credentials", func() {
 			Expect(err).To(Succeed())
 			Expect(data).To(Equal([]byte(cfgrepodata)))
 
-			cfg2 := &localconfig.ConfigSpec{}
+			cfg2 := &localconfig.Config{}
 			err = json.Unmarshal(data, cfg2)
 			Expect(err).To(Succeed())
 			Expect(cfg2).To(Equal(cfg))
@@ -124,7 +124,7 @@ var _ = Describe("generic credentials", func() {
 
 		It("composes a config for aliases", func() {
 
-			cfg := localconfig.NewConfigSpec()
+			cfg := localconfig.New()
 
 			cfg.AddAlias("alias", repospec, direct)
 
@@ -132,7 +132,7 @@ var _ = Describe("generic credentials", func() {
 			Expect(err).To(Succeed())
 			Expect(data).To(Equal([]byte(cfgaliasdata)))
 
-			cfg2 := &localconfig.ConfigSpec{}
+			cfg2 := &localconfig.Config{}
 			err = json.Unmarshal(data, cfg2)
 			Expect(err).To(Succeed())
 			Expect(cfg2).To(Equal(cfg))
@@ -149,7 +149,7 @@ var _ = Describe("generic credentials", func() {
 		})
 
 		It("applies a config for aliases", func() {
-			cfg := localconfig.NewConfigSpec()
+			cfg := localconfig.New()
 			cfg.AddAlias("alias", repospec, direct)
 
 			ctx.ConfigContext().ApplyConfig(cfg, "testconfig")

@@ -60,7 +60,7 @@ func (a AttributeType) Encode(v interface{}, marshaller runtime.Marshaler) ([]by
 }
 
 func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (interface{}, error) {
-	var value ConfigSpec
+	var value Config
 	err := unmarshaller.Unmarshal(data, &value)
 	if err != nil {
 		return nil, err

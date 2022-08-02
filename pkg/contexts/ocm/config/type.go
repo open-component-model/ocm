@@ -28,28 +28,28 @@ const (
 )
 
 func init() {
-	cfg.RegisterConfigType(ConfigType, cfg.NewConfigType(ConfigType, &ConfigSpec{}))
-	cfg.RegisterConfigType(ConfigTypeV1, cfg.NewConfigType(ConfigTypeV1, &ConfigSpec{}))
+	cfg.RegisterConfigType(ConfigType, cfg.NewConfigType(ConfigType, &Config{}))
+	cfg.RegisterConfigType(ConfigTypeV1, cfg.NewConfigType(ConfigTypeV1, &Config{}))
 }
 
-// ConfigSpec describes a memory based config interface.
-type ConfigSpec struct {
+// Config describes a memory based config interface.
+type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	Aliases                     map[string]*cpi.GenericRepositorySpec `json:"aliases,omitempty"`
 }
 
-// NewConfigSpec creates a new memory ConfigSpec
-func NewConfigSpec() *ConfigSpec {
-	return &ConfigSpec{
+// New creates a new memory ConfigSpec
+func New() *Config {
+	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
 	}
 }
 
-func (a *ConfigSpec) GetType() string {
+func (a *Config) GetType() string {
 	return ConfigType
 }
 
-func (a *ConfigSpec) SetAlias(name string, spec cpi.RepositorySpec) error {
+func (a *Config) SetAlias(name string, spec cpi.RepositorySpec) error {
 	g, err := cpi.ToGenericRepositorySpec(spec)
 	if err != nil {
 		return err
@@ -61,7 +61,7 @@ func (a *ConfigSpec) SetAlias(name string, spec cpi.RepositorySpec) error {
 	return nil
 }
 
-func (a *ConfigSpec) ApplyTo(ctx config.Context, target interface{}) error {
+func (a *Config) ApplyTo(ctx config.Context, target interface{}) error {
 	t, ok := target.(cpi.Context)
 	if !ok {
 		return config.ErrNoContext(ConfigType)

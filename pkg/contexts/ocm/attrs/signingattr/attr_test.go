@@ -35,19 +35,19 @@ var _ = Describe("attribute", func() {
 		_ = cfgctx
 	})
 	It("marshal/unmarshal", func() {
-		cfg := signingattr.NewConfigSpec()
+		cfg := signingattr.New()
 		cfg.AddPublicKeyData(NAME, []byte("keydata"))
 
 		data, err := json.Marshal(cfg)
 		Expect(err).To(Succeed())
 
-		r := &signingattr.ConfigSpec{}
+		r := &signingattr.Config{}
 		Expect(json.Unmarshal(data, r)).To(Succeed())
 		Expect(r).To(Equal(cfg))
 	})
 
 	It("applies", func() {
-		cfg := signingattr.NewConfigSpec()
+		cfg := signingattr.New()
 		cfg.AddPublicKeyData(NAME, []byte("keydata"))
 
 		Expect(cfgctx.ApplyConfig(cfg, "from test")).To(Succeed())

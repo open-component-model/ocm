@@ -19,6 +19,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/install"
@@ -52,9 +54,11 @@ type Command struct {
 	Ref    string
 	Id     v1.Identity
 
-	ParameterFile string
-	OutputFile    string
-	Parameters    []byte
+	CredentialsFile string
+	ParameterFile   string
+	OutputFile      string
+	Credentials     accessio.DataSource
+	Parameters      accessio.DataSource
 }
 
 // NewCommand creates a new ctf command.
@@ -92,6 +96,7 @@ $ ocm bootstrap componentversion ghcr.io/mandelsoft/ocmdemoinstaller:0.0.1-dev
 }
 
 func (o *Command) AddFlags(set *pflag.FlagSet) {
+	set.StringVarP(&o.CredentialsFile, "credentials", "c", "", "credentials file")
 	set.StringVarP(&o.ParameterFile, "parameters", "p", "", "parameter file")
 	set.StringVarP(&o.OutputFile, "outputs", "o", "", "output file/directory")
 }
@@ -104,11 +109,19 @@ func (o *Command) Complete(args []string) error {
 		return errors.Wrapf(err, "bootstrap resource identity pattern")
 	}
 	o.Id = id
+	if len(o.CredentialsFile) > 0 {
+		data, err := vfs.ReadFile(o.Context.FileSystem(), o.CredentialsFile)
+		if err != nil {
+			return errors.Wrapf(err, "failed reading credentials file %q", o.CredentialsFile)
+		}
+		o.Credentials = accessio.DataAccessForBytes(data, o.CredentialsFile)
+	}
 	if len(o.ParameterFile) > 0 {
-		o.Parameters, err = vfs.ReadFile(o.Context.FileSystem(), o.ParameterFile)
+		data, err := vfs.ReadFile(o.Context.FileSystem(), o.ParameterFile)
 		if err != nil {
 			return errors.Wrapf(err, "failed reading parameter file %q", o.ParameterFile)
 		}
+		o.Parameters = accessio.DataAccessForBytes(data, o.ParameterFile)
 	}
 	return nil
 }
@@ -151,7 +164,7 @@ type Binary struct {
 }
 
 func (a *action) Out() error {
-	result, err := install.Install(&docker.Driver{}, a.cmd.Action, a.cmd.Id, a.cmd.Parameters, a.cmd.OCMContext(), a.data[0].ComponentVersion, lookupoption.From(a.cmd))
+	result, err := install.Install(&docker.Driver{}, a.cmd.Action, a.cmd.Id, a.cmd.Credentials, a.cmd.Parameters, a.cmd.OCMContext(), a.data[0].ComponentVersion, lookupoption.From(a.cmd))
 	if err != nil {
 		return err
 	}

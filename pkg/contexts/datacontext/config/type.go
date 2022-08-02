@@ -31,30 +31,30 @@ const (
 )
 
 func init() {
-	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &ConfigSpec{}, usage))
-	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &ConfigSpec{}, usage))
+	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &Config{}, usage))
+	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &Config{}, usage))
 }
 
-// ConfigSpec describes a memory based repository interface.
-type ConfigSpec struct {
+// Config describes a memory based repository interface.
+type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	// Attributes descibe a set of geeric attribute settings
 	Attributes map[string]json.RawMessage `json:"attributes,omitempty"`
 }
 
-// NewConfigSpec creates a new memory ConfigSpec
-func NewConfigSpec() *ConfigSpec {
-	return &ConfigSpec{
+// New creates a new memory ConfigSpec
+func New() *Config {
+	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
 		Attributes:          map[string]json.RawMessage{},
 	}
 }
 
-func (a *ConfigSpec) GetType() string {
+func (a *Config) GetType() string {
 	return ConfigType
 }
 
-func (a *ConfigSpec) AddAttribute(attr string, value interface{}) error {
+func (a *Config) AddAttribute(attr string, value interface{}) error {
 	data, err := datacontext.DefaultAttributeScheme.Encode(attr, value, runtime.DefaultJSONEncoding)
 	if err == nil {
 		a.Attributes[attr] = data
@@ -62,7 +62,7 @@ func (a *ConfigSpec) AddAttribute(attr string, value interface{}) error {
 	return err
 }
 
-func (a *ConfigSpec) AddRawAttribute(attr string, data []byte) error {
+func (a *Config) AddRawAttribute(attr string, data []byte) error {
 	_, err := datacontext.DefaultAttributeScheme.Decode(attr, data, runtime.DefaultJSONEncoding)
 	if err == nil {
 		a.Attributes[attr] = data
@@ -70,7 +70,7 @@ func (a *ConfigSpec) AddRawAttribute(attr string, data []byte) error {
 	return err
 }
 
-func (a *ConfigSpec) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
+func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	list := errors.ErrListf("applying config")
 	t, ok := target.(config.Context)
 	if !ok {

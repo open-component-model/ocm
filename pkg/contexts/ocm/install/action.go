@@ -26,12 +26,15 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/config/config"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
+	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/runtime"
+
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/mime"
 )
 
 func ValidateByScheme(src []byte, schemedata []byte) error {
@@ -66,8 +69,8 @@ func ValidateByScheme(src []byte, schemedata []byte) error {
 	return nil
 }
 
-func ExecuteAction(d Driver, name string, spec *Specification, params []byte, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
-	var parameters []byte
+func ExecuteAction(d Driver, name string, spec *Specification, creds *Credentials, params []byte, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
+	var err error
 
 	var executor *Executor
 	for _, e := range spec.Executors {
@@ -85,26 +88,50 @@ func ExecuteAction(d Driver, name string, spec *Specification, params []byte, oc
 	if executor == nil {
 		return nil, errors.Newf("no executor found for action %s", name)
 	}
+
+	ccfg := config.New()
+	if len(spec.CredentialsRequest.Credentials) > 0 {
+		if creds == nil {
+			return nil, errors.Newf("credential settings required")
+		}
+		ccfg, err = GetCredentials(octx.CredentialsContext(), creds, &spec.CredentialsRequest)
+		if err != nil {
+			return nil, errors.Wrapf(err, "credential evaluation failed")
+		}
+	}
+	stubs := []spiffing.Node{}
+	spiff := spiffing.New().WithFeatures(features.CONTROL, features.INTERPOLATION)
+
 	if len(spec.Template) > 0 {
-		spiff := spiffing.New().WithFeatures(features.CONTROL, features.INTERPOLATION)
 
 		templ, err := spiff.Unmarshal("template", spec.Template)
 		if err != nil {
 			return nil, errors.Newf("invalid parameter template: %s", err)
 		}
+		stubs = append(stubs, templ)
+	}
 
-		if len(spec.Scheme) > 0 {
-			err := ValidateByScheme(params, spec.Scheme)
-			if err != nil {
-				return nil, errors.Wrapf(err, "parameter file validation failed")
-			}
+	if len(spec.Scheme) > 0 {
+		if params == nil {
+			err = ValidateByScheme([]byte("{}"), spec.Scheme)
+		} else {
+			err = ValidateByScheme(params, spec.Scheme)
 		}
+		if err != nil {
+			return nil, errors.Wrapf(err, "parameter file validation failed")
+		}
+	}
+	if params != nil {
 		stub, err := spiff.Unmarshal("parameters", params)
 		if err != nil {
-			return nil, errors.Wrapf(err, "invalid parameters")
+			return nil, errors.Wrapf(err, "invalid settings")
 		}
+		stubs = append(stubs, stub)
+	}
 
-		stubs := []spiffing.Node{stub}
+	if len(stubs) == 0 {
+		params = []byte("{}")
+	} else {
 		for i, lib := range spec.Libraries {
 			res, eff, err := utils.ResolveResourceReference(cv, lib, resolver)
 			if err != nil {
@@ -118,6 +145,7 @@ func ExecuteAction(d Driver, name string, spec *Specification, params []byte, oc
 				return nil, errors.ErrNotFound("cannot access library resource", lib.String())
 			}
 			data, err := m.Get()
+			m.Close()
 			if err != nil {
 				return nil, errors.ErrNotFound("cannot access library resource", lib.String())
 			}
@@ -127,11 +155,11 @@ func ExecuteAction(d Driver, name string, spec *Specification, params []byte, oc
 			}
 			stubs = append(stubs, lib)
 		}
-		cfg, err := spiff.Cascade(templ, stubs)
+		cfg, err := spiff.Cascade(stubs[0], stubs[1:])
 		if err != nil {
 			return nil, errors.Wrapf(err, "error processing parameters")
 		}
-		parameters, err = spiff.Marshal(cfg)
+		params, err = spiff.Marshal(cfg)
 		if err != nil {
 			return nil, errors.Wrapf(err, "parameter marshalling")
 		}
@@ -172,8 +200,15 @@ func ExecuteAction(d Driver, name string, spec *Specification, params []byte, oc
 	}
 
 	op.Files = map[string]accessio.BlobAccess{}
-	if parameters != nil {
-		op.Files[InputParameters] = accessio.BlobAccessForData(mime.MIME_OCTET, parameters)
+	if ccfg != nil {
+		data, err := runtime.DefaultYAMLEncoding.Marshal(ccfg)
+		if err != nil {
+			return nil, errors.Wrapf(err, "marshalling ocm config failed")
+		}
+		op.Files[InputOCMConfig] = accessio.BlobAccessForData(mime.MIME_OCTET, data)
+	}
+	if params != nil {
+		op.Files[InputParameters] = accessio.BlobAccessForData(mime.MIME_OCTET, params)
 	}
 	if executor.Config != nil {
 		op.Files[InputConfig] = accessio.BlobAccessForData(mime.MIME_OCTET, executor.Config)
@@ -197,7 +232,7 @@ func ExecuteAction(d Driver, name string, spec *Specification, params []byte, oc
 	}
 	op.Outputs = executor.Outputs
 
-	err := d.SetConfig(map[string]string{})
+	err = d.SetConfig(map[string]string{})
 	if err != nil {
 		return nil, err
 	}
