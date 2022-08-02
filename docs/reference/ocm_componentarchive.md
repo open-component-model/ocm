@@ -16,11 +16,11 @@ ocm componentarchive [<options>] <sub command> ...
 
 ##### Parents
 
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
 
 ##### Sub Commands
 
-* [ocm componentarchive <b>create</b>](ocm_componentarchive_create.md)	 - create new component archive
-* [ocm componentarchive <b>transfer</b>](ocm_componentarchive_transfer.md)	 - transfer component archive to some component repository
+* [ocm componentarchive <b>create</b>](ocm_componentarchive_create.md)	 &mdash; create new component archive
+* [ocm componentarchive <b>transfer</b>](ocm_componentarchive_transfer.md)	 &mdash; transfer component archive to some component repository
 

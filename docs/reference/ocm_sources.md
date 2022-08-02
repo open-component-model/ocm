@@ -16,11 +16,11 @@ ocm sources [<options>] <sub command> ...
 
 ##### Parents
 
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
 
 ##### Sub Commands
 
-* [ocm sources <b>add</b>](ocm_sources_add.md)	 - add source information to a component version
-* [ocm sources <b>get</b>](ocm_sources_get.md)	 - get sources of a component version
+* [ocm sources <b>add</b>](ocm_sources_add.md)	 &mdash; add source information to a component version
+* [ocm sources <b>get</b>](ocm_sources_get.md)	 &mdash; get sources of a component version
 

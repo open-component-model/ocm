@@ -16,10 +16,10 @@ ocm credentials [<options>] <sub command> ...
 
 ##### Parents
 
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
 
 ##### Sub Commands
 
-* [ocm credentials <b>get</b>](ocm_credentials_get.md)	 - Get credentials for a dedicated consumer spec
+* [ocm credentials <b>get</b>](ocm_credentials_get.md)	 &mdash; Get credentials for a dedicated consumer spec
 

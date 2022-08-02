@@ -207,11 +207,22 @@ func WriteFileToTARArchive(filename string, contentReader io.Reader, archiveWrit
 	return nil
 }
 
-func IndentLines(orig string, gap string) string {
-	orig = strings.TrimPrefix(orig, "\n")
+func IndentLines(orig string, gap string, skipfirst ...bool) string {
+	return JoinIndentLines(strings.Split(strings.TrimPrefix(orig, "\n"), "\n"), gap, skipfirst...)
+}
+
+func JoinIndentLines(orig []string, gap string, skipfirst ...bool) string {
+	skip := false
+	for _, b := range skipfirst {
+		skip = skip || b
+	}
+
 	s := ""
-	for _, l := range strings.Split(orig, "\n") {
-		s += gap + l + "\n"
+	for _, l := range orig {
+		if !skip {
+			s += gap
+		}
+		s += l + "\n"
 	}
 	return s
 }

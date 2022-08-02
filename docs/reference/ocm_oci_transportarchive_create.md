@@ -25,7 +25,7 @@ to host artefact content or a tar/tgz file.
 
 ##### Parents
 
-* [ocm oci transportarchive](ocm_oci_transportarchive.md)	 - Commands acting on OCI view of a Common Transport Archive
-* [ocm oci](ocm_oci.md)	 - Dedicated command flavors for the OCI layer
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm oci transportarchive](ocm_oci_transportarchive.md)	 &mdash; Commands acting on OCI view of a Common Transport Archive
+* [ocm oci](ocm_oci.md)	 &mdash; Dedicated command flavors for the OCI layer
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

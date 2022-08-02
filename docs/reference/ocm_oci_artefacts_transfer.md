@@ -64,7 +64,7 @@ $ ocm oci transfer ghcr.io/mandelsoft/kubelink gcr.io
 
 ##### Parents
 
-* [ocm oci artefacts](ocm_oci_artefacts.md)	 - Commands acting on OCI artefacts
-* [ocm oci](ocm_oci.md)	 - Dedicated command flavors for the OCI layer
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm oci artefacts](ocm_oci_artefacts.md)	 &mdash; Commands acting on OCI artefacts
+* [ocm oci](ocm_oci.md)	 &mdash; Dedicated command flavors for the OCI layer
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

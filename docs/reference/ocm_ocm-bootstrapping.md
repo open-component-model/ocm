@@ -3,52 +3,60 @@
 ### Description
 
 
-The OCM command line tool and library provides some basic bootstrapping mechanism, which can be used to
-execute simple installation steps based on content described by the Open Component Model.
+The OCM command line tool and library provides some basic bootstrapping
+mechanism, which can be used to execute simple installation steps based on
+content described by the Open Component Model
+(see [ocm bootstrap componentversions](ocm_bootstrap_componentversions.md)).
 
 Therefore a dedicated resource type <code>ocmInstaller</code> is defined.
-It is selected by an identity pattern. The first resource matching the pattern is used.
-A possible use case could be to provide different bootstrapper for different environments.
-The resource can the feature an identity attribute <code>platform=&lt;value></code>.
-By specifying just the platform attribute, the appropriate bootstrapper will be chosen.
+It is selected by an identity pattern. The first resource matching the pattern
+is used. A possible use case could be to provide different bootstrapper for
+different environments. The resource can the feature an identity attribute
+<code>platform=&lt;value></code>. By specifying just the platform attribute,
+the appropriate bootstrapper will be chosen.
 
-The bootstrapper resource describes a yaml file (media type <code>application/x-yaml</code>, <code>text/yaml</code>
-or <code>application/vnd.ocm.gardener.cloud.installer.v1+yaml</code>)
-containing information about the bootstrapping mechanism:
+The bootstrapper resource describes a yaml or json file
+(media type <code>application/x-yaml</code>, <code>text/yaml</code> or
+<code>application/vnd.ocm.gardener.cloud.installer.v1+yaml</code>) containing
+information about the bootstrapping mechanism:
 
-The most important section is the <code>executors</code> sections. It describes a list of
-executor definitions and the actions the executor should be used for.
-The actions are arbitrary string that can be defined by the provider of the bootstrapping.
-If the <code>actions</code> list omitted the executor will be used for all actions
-not already accepted by an earlier entry in the list.
+The most important section is the <code>executors</code> sections. It describes
+a list of executor definitions and the actions the executor should be used for.
+The actions are arbitrary string that can be defined by the provider of the
+bootstrapping. If the <code>actions</code> list omitted the executor will be
+used for all actions not already accepted by an earlier entry in the list.
 
-Every executor describes an executor image, which is taken from the component version
-the bootstrapping specification is taken from. Such a ref always describes a resource
-identity (minimal attribute set consists of the resource's <code>name</code> attribute). Additional
-attributes are possible, to archive a unique identification of the resource.
-Optionally a <code>referencePath</code> can be given, if the resource is located in some 
-aggregated component version. This is just a list af identity sets uniquely identifying a nested
-component version reference.
+Every executor describes an executor image, which is taken from the component
+version the bootstrapping specification is taken from. Such a ref always
+describes a resource identity (minimal attribute set consists of the resource's
+<code>name</code> attribute). Additional attributes are possible, to archive a
+unique identification of the resource. Optionally a <code>referencePath</code>
+can be given, if the resource is located in some aggregated component version.
+This is just a list af identity sets uniquely identifying a nested component
+version reference.
 
 Every executor may define some config that is passed to the image execution.
-After processing it is possible to return named outputs. The name of an output must be a filename.
-The bootstrap specification maps those file to logical outputs in the <code>outputs</code> section.
+After processing it is possible to return named outputs. The name of an output
+must be a filename. The bootstrap specification maps those file to logical
+outputs in the <code>outputs</code> section.
 
 <center>
-  &lt;provide file name by executor> -> &lt;logical output name for the bootstrap command>
+  &lt;file name by executor> -> &lt;logical output name>
 </center>
 
-Common to all executors a parameter file can be provided by the caller. The specification may 
-provide a [spiff template](https://github.com/mandelsoft/spiff) for this parameter file.
-The actually provided content is merged with this template.
+Common to all executors a parameter file can be provided by the caller. The
+specification may provide a [spiff template](https://github.com/mandelsoft/spiff)
+for this parameter file. The actually provided content is merged with this
+template.
 
-To validate user configuration a JSON scheme can be provided. The user input is validated first
-against this scheme before the actual merge is done.
+To validate user configuration a JSON scheme can be provided. The user input is
+validated first against this scheme before the actual merge is done.
 
 ### Image Binding
 
-The executor image is called with the action as additional argument. It is expected 
-that is defines a default entry point and a potentially empty list of standard arguments.
+The executor image is called with the action as additional argument. It is
+expected that is defines a default entry point and a potentially empty list of
+standard arguments.
 
 The other inputs and outputs are provided by a filesystem structure:
 <pre>
@@ -56,10 +64,12 @@ The other inputs and outputs are provided by a filesystem structure:
 └── ocm
     ├── inputs
     │   ├── config      config info from bootstrap specification
-    │   ├── ocmrepo     OCM filesystem repository containing the complement component version
+    │   ├── ocmrepo     OCM filesystem repository containing the complete
+    │   │               component version
     │   └── parameters  merged complete parameter file
     ├── outputs
-    │   ├── &lt;out>       any number of arbitrary output data provided by executor
+    │   ├── &lt;out>       any number of arbitrary output data provided
+    │   │               by executor
     │   └── ...         
     └── run             typical location for the executed command
 </pre>
@@ -108,5 +118,5 @@ configScheme:
 
 ##### Parents
 
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

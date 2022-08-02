@@ -95,6 +95,6 @@ The following modes are supported:
 
 ##### Parents
 
-* [ocm sources](ocm_sources.md)	 - Commands acting on component sources
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm sources](ocm_sources.md)	 &mdash; Commands acting on component sources
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

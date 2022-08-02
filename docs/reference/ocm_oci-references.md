@@ -51,5 +51,5 @@ ghcr.io/mandelsoft/cnudie:1.0.0
 
 ##### Parents
 
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

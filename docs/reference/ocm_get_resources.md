@@ -96,6 +96,6 @@ The following modes are supported:
 
 ##### Parents
 
-* [ocm get](ocm_get.md)	 - Get information about artefacts and components
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm get](ocm_get.md)	 &mdash; Get information about artefacts and components
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

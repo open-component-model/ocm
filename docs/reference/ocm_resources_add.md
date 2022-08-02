@@ -176,6 +176,6 @@ with the field <code>type</code> in the <code>input</code> field:
 
 ##### Parents
 
-* [ocm resources](ocm_resources.md)	 - Commands acting on component resources
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm resources](ocm_resources.md)	 &mdash; Commands acting on component resources
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

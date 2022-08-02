@@ -16,11 +16,11 @@ ocm oci tags [<options>] <sub command> ...
 
 ##### Parents
 
-* [ocm oci](ocm_oci.md)	 - Dedicated command flavors for the OCI layer
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm oci](ocm_oci.md)	 &mdash; Dedicated command flavors for the OCI layer
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
 
 ##### Sub Commands
 
-* [ocm oci tags <b>show</b>](ocm_oci_tags_show.md)	 - show dedicated tags of OCI artefacts
+* [ocm oci tags <b>show</b>](ocm_oci_tags_show.md)	 &mdash; show dedicated tags of OCI artefacts
 

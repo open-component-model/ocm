@@ -32,15 +32,17 @@ The default format is <code>directory</code>.
 It the option <code>--scheme</code> is given, the given component descriptor format is used/generated.
 The following schema versions are supported:
 
-  - <code>ocm.gardener.cloud/v3alpha1</code>
-  - <code>v2</code> (default)
+  - <code>ocm.gardener.cloud/v3alpha1</code>: 
+
+  - <code>v2</code> (default): 
+
 
 
 ### SEE ALSO
 
 ##### Parents
 
-* [ocm ocm commontransportarchive](ocm_ocm_commontransportarchive.md)	 - Commands acting on common transport archives
-* [ocm ocm](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm ocm commontransportarchive](ocm_ocm_commontransportarchive.md)	 &mdash; Commands acting on common transport archives
+* [ocm ocm](ocm_ocm.md)	 &mdash; Dedicated command flavors for the Open Component Model
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

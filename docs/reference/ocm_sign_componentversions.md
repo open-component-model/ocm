@@ -90,21 +90,28 @@ given signature name will be verified, instead of recreated.
 
 The following signing types are supported with option <code>--algorithm</code>:
 
-  - <code>RSASSA-PKCS1-V1_5</code> (default)
-  - <code>rsa-signingsservice</code>
+  - <code>RSASSA-PKCS1-V1_5</code> (default): 
+
+  - <code>rsa-signingsservice</code>: 
+
 
 
 The following normalization modes are supported with option <code>--normalization</code>:
 
-  - <code>jsonNormalisation/v1</code> (default)
-  - <code>jsonNormalisation/v2</code>
+  - <code>jsonNormalisation/v1</code> (default): 
+
+  - <code>jsonNormalisation/v2</code>: 
+
 
 
 The following hash modes are supported with option <code>--hash</code>:
 
-  - <code>NO-DIGEST</code>
-  - <code>sha256</code> (default)
-  - <code>sha512</code>
+  - <code>NO-DIGEST</code>: 
+
+  - <code>sha256</code> (default): 
+
+  - <code>sha512</code>: 
+
 
 
 ### Examples
@@ -117,6 +124,6 @@ $ ocm sign componentversion --signature mandelsoft --private-key=mandelsoft.key 
 
 ##### Parents
 
-* [ocm sign](ocm_sign.md)	 - Sign components
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm sign](ocm_sign.md)	 &mdash; Sign components
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

@@ -19,16 +19,18 @@ ocm ocm componentversions bootstrap [<options>] <action> {<component-reference>}
 
 Use the simple OCM bootstrap mechanism to execute a bootstrap resource.
 
-The bootstrap resource must have the type <code>ocmInstaller</code>. This is a simple
-YAML file resource describing the bootstrapping. See also the topic bootstrapping.
+The bootstrap resource must have the type <code>ocmInstaller</code>.
+This is a simple YAML file resource describing the bootstrapping. See also the
+topic [ocm ocm-bootstrapping](ocm_ocm-bootstrapping.md).
 
-The first matching resource of this type is selected. Optionally a set of identity attribute can
-be specified used to refine the match. This can be the resource name and/or other key/value pairs
-(<code>&lt;attr>=&lt;value></code>).
+The first matching resource of this type is selected. Optionally a set of
+identity attribute can be specified used to refine the match. This can be the
+resource name and/or other key/value pairs (<code>&lt;attr>=&lt;value></code>).
 
-If no output file is provided, the yaml representation of the outputs are printed to 
-standard out. If the output file is a directory, for every output a dedicated file is created,
-otherwise the yaml representation is stored to the file.
+If no output file is provided, the yaml representation of the outputs are
+printed to standard out. If the output file is a directory, for every output a
+dedicated file is created, otherwise the yaml representation is stored to the
+file.
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
@@ -98,7 +100,13 @@ $ ocm bootstrap componentversion ghcr.io/mandelsoft/ocmdemoinstaller:0.0.1-dev
 
 ##### Parents
 
-* [ocm ocm componentversions](ocm_ocm_componentversions.md)	 - Commands acting on components
-* [ocm ocm](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm ocm componentversions](ocm_ocm_componentversions.md)	 &mdash; Commands acting on components
+* [ocm ocm](ocm_ocm.md)	 &mdash; Dedicated command flavors for the Open Component Model
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
+
+
+
+##### Additional Help Topics
+
+* [ocm ocm componentversions bootstrap <b>ocm-bootstrapping</b>](ocm_ocm_componentversions_bootstrap_ocm-bootstrapping.md)	 &mdash; installation bootstrapping based on component versions
 

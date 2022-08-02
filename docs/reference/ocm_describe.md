@@ -16,10 +16,10 @@ ocm describe [<options>] <sub command> ...
 
 ##### Parents
 
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
 
 ##### Sub Commands
 
-* [ocm describe <b>artefacts</b>](ocm_describe_artefacts.md)	 - describe artefact version
+* [ocm describe <b>artefacts</b>](ocm_describe_artefacts.md)	 &mdash; describe artefact version
 

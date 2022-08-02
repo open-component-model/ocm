@@ -37,6 +37,8 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+
+	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/bootstrapping"
 )
 
 var (
@@ -61,28 +63,32 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
-	return &cobra.Command{
+	cmd := &cobra.Command{
 		Use:   "[<options>] <action> {<component-reference>} {<resource id field>}",
 		Args:  cobra.MinimumNArgs(2),
 		Short: "bootstrap component version",
 		Long: `
 Use the simple OCM bootstrap mechanism to execute a bootstrap resource.
 
-The bootstrap resource must have the type <code>` + install.TypeOCMInstaller + `</code>. This is a simple
-YAML file resource describing the bootstrapping. See also the topic bootstrapping.
+The bootstrap resource must have the type <code>` + install.TypeOCMInstaller + `</code>.
+This is a simple YAML file resource describing the bootstrapping. See also the
+topic <CMD>ocm ocm-bootstrapping</CMD>.
 
-The first matching resource of this type is selected. Optionally a set of identity attribute can
-be specified used to refine the match. This can be the resource name and/or other key/value pairs
-(<code>&lt;attr>=&lt;value></code>).
+The first matching resource of this type is selected. Optionally a set of
+identity attribute can be specified used to refine the match. This can be the
+resource name and/or other key/value pairs (<code>&lt;attr>=&lt;value></code>).
 
-If no output file is provided, the yaml representation of the outputs are printed to 
-standard out. If the output file is a directory, for every output a dedicated file is created,
-otherwise the yaml representation is stored to the file.
+If no output file is provided, the yaml representation of the outputs are
+printed to standard out. If the output file is a directory, for every output a
+dedicated file is created, otherwise the yaml representation is stored to the
+file.
 `,
 		Example: `
 $ ocm bootstrap componentversion ghcr.io/mandelsoft/ocmdemoinstaller:0.0.1-dev
 `,
 	}
+	cmd.AddCommand(topicbootstrap.New(o.Context))
+	return cmd
 }
 
 func (o *Command) AddFlags(set *pflag.FlagSet) {

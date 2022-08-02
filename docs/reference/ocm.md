@@ -101,34 +101,34 @@ attributes are supported:
 
 ##### Sub Commands
 
-* [ocm <b>add</b>](ocm_add.md)	 - Add resources or sources to a component archive
-* [ocm <b>bootstrap</b>](ocm_bootstrap.md)	 - bootstrap components
-* [ocm <b>cache</b>](ocm_cache.md)	 - Cache related commands
-* [ocm <b>clean</b>](ocm_clean.md)	 - Cleanup/re-organize elements
-* [ocm <b>componentarchive</b>](ocm_componentarchive.md)	 - Commands acting on component archives
-* [ocm <b>componentversions</b>](ocm_componentversions.md)	 - Commands acting on components
-* [ocm <b>create</b>](ocm_create.md)	 - Create transport or component archive
-* [ocm <b>credentials</b>](ocm_credentials.md)	 - Commands acting on credentials
-* [ocm <b>describe</b>](ocm_describe.md)	 - Describe artefacts
-* [ocm <b>download</b>](ocm_download.md)	 - Download oci artefacts, resources or complete components
-* [ocm <b>get</b>](ocm_get.md)	 - Get information about artefacts and components
-* [ocm <b>oci</b>](ocm_oci.md)	 - Dedicated command flavors for the OCI layer
-* [ocm <b>ocm</b>](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
-* [ocm <b>references</b>](ocm_references.md)	 - Commands related to component references in component versions
-* [ocm <b>resources</b>](ocm_resources.md)	 - Commands acting on component resources
-* [ocm <b>show</b>](ocm_show.md)	 - Show tags or versions
-* [ocm <b>sign</b>](ocm_sign.md)	 - Sign components
-* [ocm <b>sources</b>](ocm_sources.md)	 - Commands acting on component sources
-* [ocm <b>transfer</b>](ocm_transfer.md)	 - Transfer artefacts or components
-* [ocm <b>verify</b>](ocm_verify.md)	 - Verify component version signatures
-* [ocm <b>version</b>](ocm_version.md)	 - displays the version
+* [ocm <b>add</b>](ocm_add.md)	 &mdash; Add resources or sources to a component archive
+* [ocm <b>bootstrap</b>](ocm_bootstrap.md)	 &mdash; bootstrap components
+* [ocm <b>cache</b>](ocm_cache.md)	 &mdash; Cache related commands
+* [ocm <b>clean</b>](ocm_clean.md)	 &mdash; Cleanup/re-organize elements
+* [ocm <b>componentarchive</b>](ocm_componentarchive.md)	 &mdash; Commands acting on component archives
+* [ocm <b>componentversions</b>](ocm_componentversions.md)	 &mdash; Commands acting on components
+* [ocm <b>create</b>](ocm_create.md)	 &mdash; Create transport or component archive
+* [ocm <b>credentials</b>](ocm_credentials.md)	 &mdash; Commands acting on credentials
+* [ocm <b>describe</b>](ocm_describe.md)	 &mdash; Describe artefacts
+* [ocm <b>download</b>](ocm_download.md)	 &mdash; Download oci artefacts, resources or complete components
+* [ocm <b>get</b>](ocm_get.md)	 &mdash; Get information about artefacts and components
+* [ocm <b>oci</b>](ocm_oci.md)	 &mdash; Dedicated command flavors for the OCI layer
+* [ocm <b>ocm</b>](ocm_ocm.md)	 &mdash; Dedicated command flavors for the Open Component Model
+* [ocm <b>references</b>](ocm_references.md)	 &mdash; Commands related to component references in component versions
+* [ocm <b>resources</b>](ocm_resources.md)	 &mdash; Commands acting on component resources
+* [ocm <b>show</b>](ocm_show.md)	 &mdash; Show tags or versions
+* [ocm <b>sign</b>](ocm_sign.md)	 &mdash; Sign components
+* [ocm <b>sources</b>](ocm_sources.md)	 &mdash; Commands acting on component sources
+* [ocm <b>transfer</b>](ocm_transfer.md)	 &mdash; Transfer artefacts or components
+* [ocm <b>verify</b>](ocm_verify.md)	 &mdash; Verify component version signatures
+* [ocm <b>version</b>](ocm_version.md)	 &mdash; displays the version
 
 
 
 ##### Additional Help Topics
 
-* [ocm <b>configfile</b>](ocm_configfile.md)	 - configuration file
-* [ocm <b>oci-references</b>](ocm_oci-references.md)	 - notation for OCI references
-* [ocm <b>ocm-bootstrapping</b>](ocm_ocm-bootstrapping.md)	 - installation bootstrapping based on component versions
-* [ocm <b>ocm-references</b>](ocm_ocm-references.md)	 - notation for OCM references
+* [ocm <b>configfile</b>](ocm_configfile.md)	 &mdash; configuration file
+* [ocm <b>oci-references</b>](ocm_oci-references.md)	 &mdash; notation for OCI references
+* [ocm <b>ocm-bootstrapping</b>](ocm_ocm-bootstrapping.md)	 &mdash; installation bootstrapping based on component versions
+* [ocm <b>ocm-references</b>](ocm_ocm-references.md)	 &mdash; notation for OCM references
 

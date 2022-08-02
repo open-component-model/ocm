@@ -114,6 +114,6 @@ references.
 
 ##### Parents
 
-* [ocm download](ocm_download.md)	 - Download oci artefacts, resources or complete components
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm download](ocm_download.md)	 &mdash; Download oci artefacts, resources or complete components
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

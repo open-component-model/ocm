@@ -88,6 +88,6 @@ $ ocm verify componentversion --signature mandelsoft --public-key=mandelsoft.key
 
 ##### Parents
 
-* [ocm verify](ocm_verify.md)	 - Verify component version signatures
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm verify](ocm_verify.md)	 &mdash; Verify component version signatures
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

@@ -51,6 +51,6 @@ $ ocm create rsakeypair mandelsoft.priv mandelsoft.cert issuer=mandelsoft
 
 ##### Parents
 
-* [ocm create](ocm_create.md)	 - Create transport or component archive
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm create](ocm_create.md)	 &mdash; Create transport or component archive
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

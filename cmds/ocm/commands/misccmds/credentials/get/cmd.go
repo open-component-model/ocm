@@ -64,7 +64,7 @@ Try to resolve a given consumer specification against the configured credential
 settings and show the found credential attributes.
 
 For the following usage contexts with matchers and standard identity matchers exist:
-` + utils.FormatListElements("", utils.IdentityMatcherList(o.CredentialsContext().ConsumerIdentityMatchers().List())) +
+` + utils.FormatListElements("", o.CredentialsContext().ConsumerIdentityMatchers().List()) +
 			`
 The used matcher is derived from the consumer attribute <code>type</code>.
 For all other consumer types a matcher matching all attributes will be used.

@@ -16,11 +16,11 @@ ocm cache [<options>] <sub command> ...
 
 ##### Parents
 
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
 
 ##### Sub Commands
 
-* [ocm cache <b>clean</b>](ocm_cache_clean.md)	 - cleanup oci blob cache
-* [ocm cache <b>info</b>](ocm_cache_info.md)	 - show OCI blob cache information
+* [ocm cache <b>clean</b>](ocm_cache_clean.md)	 &mdash; cleanup oci blob cache
+* [ocm cache <b>info</b>](ocm_cache_info.md)	 &mdash; show OCI blob cache information
 

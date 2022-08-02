@@ -16,10 +16,10 @@ ocm verify [<options>] <sub command> ...
 
 ##### Parents
 
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
 
 ##### Sub Commands
 
-* [ocm verify <b>componentversions</b>](ocm_verify_componentversions.md)	 - Verify signature of component version
+* [ocm verify <b>componentversions</b>](ocm_verify_componentversions.md)	 &mdash; Verify signature of component version
 

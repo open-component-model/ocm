@@ -166,10 +166,16 @@ type IdentityMatcherInfo struct {
 	Description string
 }
 
+type IdentityMatcherInfos []IdentityMatcherInfo
+
+func (l IdentityMatcherInfos) Size() int                { return len(l) }
+func (l IdentityMatcherInfos) Key(i int) string         { return l[i].Type }
+func (l IdentityMatcherInfos) Description(i int) string { return l[i].Description }
+
 type IdentityMatcherRegistry interface {
 	Register(typ string, matcher IdentityMatcher, desc string)
 	Get(typ string) (IdentityMatcher, string)
-	List() []IdentityMatcherInfo
+	List() IdentityMatcherInfos
 }
 
 type defaultMatchers struct {
@@ -197,10 +203,10 @@ func (r *defaultMatchers) Get(typ string) (IdentityMatcher, string) {
 	return i.Matcher, i.Description
 }
 
-func (r *defaultMatchers) List() []IdentityMatcherInfo {
+func (r *defaultMatchers) List() IdentityMatcherInfos {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	var list []IdentityMatcherInfo
+	var list IdentityMatcherInfos
 
 	for _, i := range r.types {
 		list = append(list, i)

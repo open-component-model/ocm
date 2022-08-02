@@ -73,8 +73,10 @@ With the option <code>--closure</code> the complete reference tree of a componen
 It the option <code>--scheme</code> is given, the given component descriptor is converted to given format for output.
 The following schema versions are supported:
 
-  - <code>ocm.gardener.cloud/v3alpha1</code>
-  - <code>v2</code>
+  - <code>ocm.gardener.cloud/v3alpha1</code>: 
+
+  - <code>v2</code>: 
+
 
 With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:
@@ -98,7 +100,7 @@ $ ocm get componentversion --repo OCIRegistry:ghcr.io mandelsoft/kubelink
 
 ##### Parents
 
-* [ocm ocm componentversions](ocm_ocm_componentversions.md)	 - Commands acting on components
-* [ocm ocm](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm ocm componentversions](ocm_ocm_componentversions.md)	 &mdash; Commands acting on components
+* [ocm ocm](ocm_ocm.md)	 &mdash; Dedicated command flavors for the Open Component Model
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

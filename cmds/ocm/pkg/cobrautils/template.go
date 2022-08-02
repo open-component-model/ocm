@@ -33,7 +33,7 @@ Global Flags:
 {{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}
 
 Description:
-{{with (or .Long .Short)}}{{. | trimTrailingWhitespaces | indent 2}}{{end}}{{if .HasExample}}
+{{with (or .Long .Short)}}{{. | substituteCommandLinks | trimTrailingWhitespaces | indent 2}}{{end}}{{if .HasExample}}
 
 Examples:
 {{.Example | indent 2}}{{end}}{{if .HasHelpSubCommands}}

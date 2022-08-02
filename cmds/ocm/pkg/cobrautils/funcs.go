@@ -22,10 +22,17 @@ import (
 )
 
 var templatefuncs = map[string]interface{}{
-	"indent":      indent,
-	"skipCommand": skipCommand,
-	"soleCommand": soleCommand,
-	"title":       cases.Title(language.English).String,
+	"indent":                 indent,
+	"skipCommand":            skipCommand,
+	"soleCommand":            soleCommand,
+	"title":                  cases.Title(language.English).String,
+	"substituteCommandLinks": substituteCommandLinks,
+}
+
+func substituteCommandLinks(desc string) string {
+	return SubstituteCommandLinks(desc, func(pname string) string {
+		return "\u00ab" + pname + "\u00bb"
+	})
 }
 
 func soleCommand(s string) bool {

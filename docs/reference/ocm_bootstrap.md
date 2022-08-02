@@ -16,10 +16,10 @@ ocm bootstrap [<options>] <sub command> ...
 
 ##### Parents
 
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
 
 ##### Sub Commands
 
-* [ocm bootstrap <b>componentversions</b>](ocm_bootstrap_componentversions.md)	 - bootstrap component version
+* [ocm bootstrap <b>componentversions</b>](ocm_bootstrap_componentversions.md)	 &mdash; bootstrap component version
 

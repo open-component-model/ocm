@@ -16,18 +16,18 @@ ocm oci [<options>] <sub command> ...
 
 ##### Parents
 
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
 
 ##### Sub Commands
 
-* [ocm oci <b>artefacts</b>](ocm_oci_artefacts.md)	 - Commands acting on OCI artefacts
-* [ocm oci <b>tags</b>](ocm_oci_tags.md)	 - Commands acting on OCI tag names
-* [ocm oci <b>transportarchive</b>](ocm_oci_transportarchive.md)	 - Commands acting on OCI view of a Common Transport Archive
+* [ocm oci <b>artefacts</b>](ocm_oci_artefacts.md)	 &mdash; Commands acting on OCI artefacts
+* [ocm oci <b>tags</b>](ocm_oci_tags.md)	 &mdash; Commands acting on OCI tag names
+* [ocm oci <b>transportarchive</b>](ocm_oci_transportarchive.md)	 &mdash; Commands acting on OCI view of a Common Transport Archive
 
 
 
 ##### Additional Help Topics
 
-* [ocm oci <b>oci-references</b>](ocm_oci_oci-references.md)	 - notation for OCI references
+* [ocm oci <b>oci-references</b>](ocm_oci_oci-references.md)	 &mdash; notation for OCI references
 

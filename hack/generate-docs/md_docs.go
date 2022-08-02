@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/cobrautils"
 	"github.com/spf13/cobra"
 )
 
@@ -47,7 +48,7 @@ func printOptions(buf *bytes.Buffer, cmd *cobra.Command, name string) error {
 
 // GenMarkdown creates markdown output.
 func GenMarkdown(cmd *cobra.Command, w io.Writer) error {
-	return GenMarkdownCustom(cmd, w, func(s string) string { return s })
+	return GenMarkdownCustom(cmd, w, cobrautils.LinkForPath)
 }
 
 // GenMarkdownCustom creates custom markdown output.
@@ -73,7 +74,7 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 
 	if len(cmd.Long) > 0 {
 		buf.WriteString("### Description\n\n")
-		buf.WriteString(cmd.Long + "\n\n")
+		buf.WriteString(cobrautils.SubstituteCommandLinks(cmd.Long, cobrautils.FormatLinkWithHandler(linkHandler)) + "\n\n")
 	}
 
 	if len(cmd.Example) > 0 {
@@ -91,9 +92,7 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 			for parent.HasParent() {
 				parent = parent.Parent()
 				pname := parent.CommandPath()
-				link := pname + ".md"
-				link = strings.Replace(link, " ", "_", -1)
-				buf.WriteString(fmt.Sprintf("* [%s](%s)\t - %s\n", pname, linkHandler(link), parent.Short))
+				buf.WriteString(fmt.Sprintf("* [%s](%s)\t &mdash; %s\n", pname, linkHandler(parent.CommandPath()), parent.Short))
 			}
 			cmd.VisitParents(func(c *cobra.Command) {
 				if c.DisableAutoGenTag {
@@ -115,9 +114,7 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 				subheader = true
 			}
 			cname := name + " " + "<b>" + child.Name() + "</b>"
-			link := name + "_" + child.Name() + ".md"
-			link = strings.Replace(link, " ", "_", -1)
-			buf.WriteString(fmt.Sprintf("* [%s](%s)\t - %s\n", cname, linkHandler(link), child.Short))
+			buf.WriteString(fmt.Sprintf("* [%s](%s)\t &mdash; %s\n", cname, linkHandler(child.CommandPath()), child.Short))
 		}
 		buf.WriteString("\n")
 
@@ -131,9 +128,7 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 				subheader = true
 			}
 			cname := name + " " + "<b>" + child.Name() + "</b>"
-			link := name + "_" + child.Name() + ".md"
-			link = strings.Replace(link, " ", "_", -1)
-			buf.WriteString(fmt.Sprintf("* [%s](%s)\t - %s\n", cname, linkHandler(link), child.Short))
+			buf.WriteString(fmt.Sprintf("* [%s](%s)\t &mdash; %s\n", cname, linkHandler(child.CommandPath()), child.Short))
 		}
 		if subheader {
 			buf.WriteString("\n")
@@ -154,7 +149,7 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 // and `sub` has a subcommand called `third`, it is undefined which
 // help output will be in the file `cmd-sub-third.1`.
 func GenMarkdownTree(cmd *cobra.Command, dir string) error {
-	identity := func(s string) string { return s }
+	identity := cobrautils.LinkForPath
 	emptyStr := func(s string) string { return "" }
 	return GenMarkdownTreeCustom(cmd, dir, emptyStr, identity)
 }

@@ -1,4 +1,4 @@
-## ocm ocm ocm-bootstrapping &mdash; Installation Bootstrapping Based On Component Versions
+## ocm bootstrap componentversions ocm-bootstrapping &mdash; Installation Bootstrapping Based On Component Versions
 
 ### Description
 
@@ -118,6 +118,7 @@ configScheme:
 
 ##### Parents
 
-* [ocm ocm](ocm_ocm.md)	 &mdash; Dedicated command flavors for the Open Component Model
+* [ocm bootstrap componentversions](ocm_bootstrap_componentversions.md)	 &mdash; bootstrap component version
+* [ocm bootstrap](ocm_bootstrap.md)	 &mdash; bootstrap components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

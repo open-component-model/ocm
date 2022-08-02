@@ -51,6 +51,6 @@ ghcr.io/mandelsoft/cnudie:1.0.0
 
 ##### Parents
 
-* [ocm oci](ocm_oci.md)	 - Dedicated command flavors for the OCI layer
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm oci](ocm_oci.md)	 &mdash; Dedicated command flavors for the OCI layer
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
