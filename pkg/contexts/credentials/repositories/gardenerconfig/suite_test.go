@@ -1,4 +1,4 @@
-package cc_config_test
+package gardenerconfig_test
 
 import (
 	"testing"
@@ -9,5 +9,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Secret Server Credentials Test Suite")
+	RunSpecs(t, "Gardener Config Credentials Test Suite")
 }

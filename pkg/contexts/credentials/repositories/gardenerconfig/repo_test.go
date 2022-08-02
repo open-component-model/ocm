@@ -1,4 +1,4 @@
-package cc_config_test
+package gardenerconfig_test
 
 import (
 	"encoding/base64"
@@ -13,12 +13,12 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	local "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/cc_config"
+	local "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
-	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-var _ = Describe("secret server", func() {
+var _ = Describe("gardener config", func() {
 	props := common.Properties{
 		"username": "abc",
 		"password": "123",
@@ -38,37 +38,37 @@ var _ = Describe("secret server", func() {
 	encryptionKey := "abcdefghijklmnop"
 	encryptedCredentials := "Uz4mfePXFOUbjUEZnRrnG8zP2T7lRH6bR2rFHYgWDwZUXfW7D5wArwY4dsBACPVFNapF7kcM9z79+LvJXd2kNoIfvUyMOhrSDAyv4LtUqYSKBOoRH/aJMnXjmN9GQBCXSRSJs/Fu21AoDNo8fA9zYvvc7WxTldkYC/vHxLVNJu5j176e1QiaS9hwDjgNhgyUT3XUjHUyQ19PcRgwDglRLfiL4Cs/fYPPxdg4YZQdCnc="
 
-	specdata := `{"type":"CCConfig","url":"localhost:8080/container_registry","consumerType":"OCIRegistry","cipher":"PLAINTEXT","key":null,"propagate":true}`
+	specdata := `{"type":"GardenerConfig","url":"localhost:8080/container_registry","configType":"container_registry","cipher":"PLAINTEXT","key":null,"propagate":true}`
 
-	var DefaultContext credentials.Context
+	var defaultContext credentials.Context
 
 	BeforeEach(func() {
-		DefaultContext = credentials.New()
+		defaultContext = credentials.New()
 	})
 
 	It("serializes repo spec", func() {
-		spec := local.NewRepositorySpec("localhost:8080/container_registry", identity.CONSUMER_TYPE, local.Plaintext, nil, true)
+		spec := local.NewRepositorySpec("localhost:8080/container_registry", local.ContainerRegistry, local.Plaintext, nil, true)
 		data, err := json.Marshal(spec)
 		Expect(err).To(Succeed())
 		Expect(data).To(Equal([]byte(specdata)))
 	})
 
 	It("deserializes repo spec", func() {
-		spec, err := DefaultContext.RepositorySpecForConfig([]byte(specdata), nil)
+		spec, err := defaultContext.RepositorySpecForConfig([]byte(specdata), nil)
 		Expect(err).To(Succeed())
-		Expect(reflect.TypeOf(spec).String()).To(Equal("*cc_config.RepositorySpec"))
+		Expect(reflect.TypeOf(spec).String()).To(Equal("*gardenerconfig.RepositorySpec"))
 
 		parsedSpec := spec.(*local.RepositorySpec)
 		Expect(parsedSpec.URL).To(Equal("localhost:8080/container_registry"))
-		Expect(parsedSpec.ConsumerType).To(Equal(identity.CONSUMER_TYPE))
+		Expect(parsedSpec.ConfigType).To(Equal(local.ContainerRegistry))
 		Expect(parsedSpec.Cipher).To(Equal(local.Plaintext))
 		Expect(parsedSpec.Key).To(BeNil())
 	})
 
 	It("resolves repository", func() {
-		repo, err := DefaultContext.RepositoryForConfig([]byte(specdata), nil)
+		repo, err := defaultContext.RepositoryForConfig([]byte(specdata), nil)
 		Expect(err).To(Succeed())
-		Expect(reflect.TypeOf(repo).String()).To(Equal("*cc_config.Repository"))
+		Expect(reflect.TypeOf(repo).String()).To(Equal("*gardenerconfig.Repository"))
 	})
 
 	It("retrieves credentials from unencrypted server", func() {
@@ -80,27 +80,17 @@ var _ = Describe("secret server", func() {
 		defer svr.Close()
 
 		repo := local.NewRepository(
-			DefaultContext,
+			defaultContext,
 			svr.URL+"/container_registry",
 			identity.CONSUMER_TYPE,
 			local.Plaintext,
 			nil,
 			true,
-			nil,
 		)
 
-		credentials, err := repo.LookupCredentials("eu.gcr.io/test-project")
+		credentials, err := repo.LookupCredentials("test-credentials")
 		Expect(err).ToNot(HaveOccurred())
 		Expect(credentials.Properties()).To(Equal(props))
-
-		credentials, err = repo.LookupCredentials("eu.gcr.io/test-project/my-image:1.0.0")
-		Expect(err).ToNot(HaveOccurred())
-		Expect(credentials.Properties()).To(Equal(props))
-
-		credentials, err = repo.LookupCredentials("eu.gcr.io")
-		Expect(err).To(HaveOccurred())
-		Expect(errors.IsErrUnknown(err)).To(BeTrue())
-		Expect(credentials).To(BeNil())
 	})
 
 	It("retrieves credentials from encrypted server", func() {
@@ -114,16 +104,15 @@ var _ = Describe("secret server", func() {
 		defer svr.Close()
 
 		repo := local.NewRepository(
-			DefaultContext,
+			defaultContext,
 			svr.URL+"/container_registry",
 			identity.CONSUMER_TYPE,
 			local.AESECB,
 			[]byte(encryptionKey),
 			true,
-			nil,
 		)
 
-		credentials, err := repo.LookupCredentials("eu.gcr.io/test-project")
+		credentials, err := repo.LookupCredentials("test-credentials")
 		Expect(err).ToNot(HaveOccurred())
 
 		Expect(credentials.Properties()).To(Equal(props))
@@ -132,6 +121,8 @@ var _ = Describe("secret server", func() {
 	It("retrieves credentials from file", func() {
 		filename := "/container_registry"
 		fs := memoryfs.New()
+		vfsattr.Set(defaultContext, fs)
+
 		file, err := fs.Create(filename)
 		Expect(err).ToNot(HaveOccurred())
 
@@ -142,16 +133,15 @@ var _ = Describe("secret server", func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		repo := local.NewRepository(
-			DefaultContext,
+			defaultContext,
 			"file://"+filename,
 			identity.CONSUMER_TYPE,
 			local.Plaintext,
 			nil,
 			true,
-			fs,
 		)
 
-		credentials, err := repo.LookupCredentials("eu.gcr.io/test-project")
+		credentials, err := repo.LookupCredentials("test-credentials")
 		Expect(err).ToNot(HaveOccurred())
 
 		Expect(credentials.Properties()).To(Equal(props))

@@ -32,6 +32,9 @@ const ID_PORT = "port"
 // ID_PATHPREFIX is the artefact prefix
 const ID_PATHPREFIX = "pathprefix"
 
+// ID_SCHEME is the scheme prefix
+const ID_SCHEME = "scheme"
+
 func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
 	if pattern[cpi.CONSUMER_ATTR_TYPE] != "" && id[cpi.CONSUMER_ATTR_TYPE] != "" && pattern[cpi.CONSUMER_ATTR_TYPE] != id[cpi.CONSUMER_ATTR_TYPE] {
 		return false
@@ -46,6 +49,16 @@ func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
 		}
 	} else {
 		if id[ID_PORT] != "" {
+			// return false // try other port
+		}
+	}
+
+	if pattern[ID_SCHEME] != "" {
+		if id[ID_SCHEME] != "" && id[ID_SCHEME] != pattern[ID_SCHEME] {
+			return false
+		}
+	} else {
+		if id[ID_SCHEME] != "" {
 			// return false // try other port
 		}
 	}
