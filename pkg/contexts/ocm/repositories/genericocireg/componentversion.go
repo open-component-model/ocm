@@ -26,7 +26,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localociblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	ocihdlr "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -243,6 +243,6 @@ func (c *ComponentVersionContainer) AssureGlobalRef(d digest.Digest, url, name s
 
 	ref := path.Join(url+namespace.GetNamespace()) + ":" + version
 
-	global := ociregistry.New(ref)
+	global := ociartefact.New(ref)
 	return global, nil
 }

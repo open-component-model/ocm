@@ -32,12 +32,16 @@ definitions:
       name:
         type: string
       value: {}
+      version:
+        pattern: '^v[0-9]+$'
+      signature:
+        type: 'boolean'
     additionalProperties: false
 
   componentName:
     type: 'string'
     maxLength: 255
-    pattern: '^[a-z0-9.\-]+[.][a-z]{2,4}/[-a-z0-9/_.]*$'
+    pattern: '^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$'
 
   identityAttributeKey:
     minLength: 2

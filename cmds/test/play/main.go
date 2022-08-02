@@ -20,6 +20,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/hex"
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -33,8 +34,28 @@ func CheckErr(err error, msg string, args ...interface{}) {
 	}
 }
 
+var expr = regexp.MustCompile("^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$")
+
+func Check(s string, exp bool) {
+	if expr.MatchString(s) != exp {
+		fmt.Printf("%s[%t] failed\n", s, exp)
+	}
+}
+
 func main() {
 
+	Check("github.wdf.sap.corp/kubernetes/landscape-setup", true)
+	Check("weave.works/registry/app", true)
+	Check("internal.github.org/registry/app", true)
+	Check("a.de/c", true)
+	Check("a.de/c/d/e-f", true)
+	Check("a.de/c/d/e_f", true)
+	Check("a.de/c/d/e", true)
+	Check("a.de/c/d/e.f", true)
+	Check("a.de/", false)
+	Check("a.de/a/", false)
+	Check("a.de//a", false)
+	Check("a.de/a.", false)
 	capriv, capub, err := rsa.Handler{}.CreateKeyPair()
 
 	CheckErr(err, "ca keypair")

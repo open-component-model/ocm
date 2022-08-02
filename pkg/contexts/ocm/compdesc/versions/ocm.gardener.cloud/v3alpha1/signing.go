@@ -27,27 +27,39 @@ import (
 var CDExcludes = signing.MapExcludes{
 	"repositoryContexts": nil,
 	"metadata": signing.MapExcludes{
-		"labels": nil,
+		"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
+			ValueChecker: signing.IgnoreLabelsWithoutSignature,
+			Continue:     signing.NoExcludes{},
+		}},
 	},
 	"spec": signing.MapExcludes{
 		"resources": signing.DynamicArrayExcludes{
 			ValueChecker: signing.IgnoreResourcesWithNoneAccess,
 			Continue: signing.MapExcludes{
 				"access": nil,
-				"labels": nil,
 				"srcRef": nil,
+				"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
+					ValueChecker: signing.IgnoreLabelsWithoutSignature,
+					Continue:     signing.NoExcludes{},
+				}},
 			},
 		},
 		"sources": signing.DynamicArrayExcludes{
 			ValueChecker: signing.IgnoreResourcesWithNoneAccess,
 			Continue: signing.MapExcludes{
 				"access": nil,
-				"labels": nil,
+				"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
+					ValueChecker: signing.IgnoreLabelsWithoutSignature,
+					Continue:     signing.NoExcludes{},
+				}},
 			},
 		},
 		"references": signing.ArrayExcludes{
 			signing.MapExcludes{
-				"labels": nil,
+				"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
+					ValueChecker: signing.IgnoreLabelsWithoutSignature,
+					Continue:     signing.NoExcludes{},
+				}},
 			},
 		},
 	},

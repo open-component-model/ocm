@@ -22,7 +22,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -37,8 +37,11 @@ var CDExcludes = signing.MapExcludes{
 			ValueChecker: signing.IgnoreResourcesWithAccessType("localBlob"),
 			Continue: signing.MapExcludes{
 				"access": nil,
-				"labels": nil,
 				"srcRef": nil,
+				"labels": signing.DynamicArrayExcludes{
+					ValueChecker: signing.IgnoreLabelsWithoutSignature,
+					Continue:     signing.NoExcludes{},
+				},
 			},
 		},
 		"sources": signing.DynamicArrayExcludes{
@@ -59,17 +62,19 @@ var CDExcludes = signing.MapExcludes{
 
 var _ = Describe("normalization", func() {
 
-	data, err := json.Marshal(map[string]interface{}{
+	labeldata, err := json.Marshal(map[string]interface{}{
 		"a1": "v1",
 		"a2": "v2",
 	})
 	Expect(err).To(Succeed())
+	signed, err := json.Marshal("signed")
+	Expect(err).To(Succeed())
 	labels := metav1.Labels{
-		metav1.Label{"b", data},
-		metav1.Label{"a", data},
+		metav1.Label{Name: "b", Value: labeldata},
+		metav1.Label{Name: "a", Value: labeldata},
 	}
 
-	data, err = json.Marshal(map[string]interface{}{
+	data, err := json.Marshal(map[string]interface{}{
 		"type": "t1",
 		"attr": "value",
 	})
@@ -115,16 +120,26 @@ var _ = Describe("normalization", func() {
 				compdesc.Resource{
 					ResourceMeta: compdesc.ResourceMeta{
 						ElementMeta: compdesc.ElementMeta{
-							Name:          "elem1",
+							Name:          "elem2",
 							Version:       "1",
 							ExtraIdentity: nil,
-							Labels:        nil,
+							Labels: metav1.Labels{
+								metav1.Label{
+									Name:  "a",
+									Value: labeldata,
+								},
+								metav1.Label{
+									Name:    "b",
+									Value:   signed,
+									Signing: true,
+								},
+							},
 						},
 						Type:      "elemtype",
 						Relation:  "local",
 						SourceRef: nil,
 					},
-					Access: ociregistry.New("blob"),
+					Access: ociartefact.New("blob"),
 				},
 			},
 		},
@@ -141,9 +156,10 @@ var _ = Describe("normalization", func() {
 		Expect(err).To(Succeed())
 		fmt.Printf("%s\n", string(data))
 
-		fmt.Printf("******\n%s\n", entries.ToString(""))
+		r := entries.ToString("")
+		fmt.Printf("******\n%s\n", r)
 
-		Expect("\n" + entries.ToString("")).To(Equal(`
+		Expect("\n" + r).To(Equal(`
 {
   component: {
     componentReferences: []
@@ -209,9 +225,23 @@ var _ = Describe("normalization", func() {
       {
         access: {
           imageReference: blob
-          type: ociRegistry
+          type: ` + ociartefact.Type + `
         }
-        name: elem1
+        labels: [
+          {
+            name: a
+            value: {
+              a1: v1
+              a2: v2
+            }
+          }
+          {
+            name: b
+            signing: true
+            value: signed
+          }
+        ]
+        name: elem2
         relation: local
         type: elemtype
         version: 1
@@ -295,9 +325,23 @@ var _ = Describe("normalization", func() {
       {
         access: {
           imageReference: blob
-          type: ociRegistry
+          type: ` + ociartefact.Type + `
         }
-        name: elem1
+        labels: [
+          {
+            name: a
+            value: {
+              a1: v1
+              a2: v2
+            }
+          }
+          {
+            name: b
+            signing: true
+            value: signed
+          }
+        ]
+        name: elem2
         relation: local
         type: elemtype
         version: 1
@@ -383,7 +427,21 @@ var _ = Describe("normalization", func() {
         version: 1
       }
       {
-        name: elem1
+        labels: [
+          {
+            name: a
+            value: {
+              a1: v1
+              a2: v2
+            }
+          }
+          {
+            name: b
+            signing: true
+            value: signed
+          }
+        ]
+        name: elem2
         relation: local
         type: elemtype
         version: 1
@@ -443,7 +501,111 @@ var _ = Describe("normalization", func() {
     ]
     resources: [
       {
+        labels: [
+          {
+            name: a
+            value: {
+              a1: v1
+              a2: v2
+            }
+          }
+          {
+            name: b
+            signing: true
+            value: signed
+          }
+        ]
+        name: elem2
+        relation: local
+        type: elemtype
+        version: 1
+      }
+    ]
+    sources: []
+    version: 1
+  }
+  meta: {
+    configuredSchemaVersion: v2
+  }
+}`))
+	})
+
+	It("Normalizes struct without no-signing resource labels", func() {
+
+		entries, err := signing.PrepareNormalization(cd, signing.MapExcludes{
+			"component": signing.MapExcludes{
+				"resources": signing.ArrayExcludes{
+					Continue: signing.MapExcludes{
+						"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
+							ValueChecker: signing.IgnoreLabelsWithoutSignature,
+							Continue:     signing.NoExcludes{},
+						}},
+					},
+				},
+			},
+		})
+		Expect(err).To(Succeed())
+		r := entries.ToString("")
+		Expect("\n" + r).To(Equal(`
+{
+  component: {
+    componentReferences: []
+    labels: [
+      {
+        name: b
+        value: {
+          a1: v1
+          a2: v2
+        }
+      }
+      {
+        name: a
+        value: {
+          a1: v1
+          a2: v2
+        }
+      }
+    ]
+    name: test
+    provider: {
+      name: provider
+    }
+    repositoryContexts: [
+      {
+        attr: value
+        type: t1
+      }
+    ]
+    resources: [
+      {
+        access: {
+          localReference: blob
+          mediaType: text/plain
+          referenceName: ref
+          type: localBlob
+        }
+        extraIdentity: {
+          additional: value
+          other: othervalue
+        }
         name: elem1
+        relation: local
+        type: elemtype
+        version: 1
+      }
+      {
+        access: {
+          imageReference: blob
+          type: ociArtefact
+        }
+        labels: [
+          {
+            name: b
+            signing: true
+            value: signed
+          }
+        ]
+        name: elem2
         relation: local
         type: elemtype
         version: 1
@@ -462,9 +624,10 @@ var _ = Describe("normalization", func() {
 
 		entries, err := signing.PrepareNormalization(cd, CDExcludes)
 		Expect(err).To(Succeed())
-		fmt.Printf("%s\n", entries.ToString(""))
+		r := entries.ToString("")
+		fmt.Printf("%s\n", r)
 
-		Expect("\n" + entries.ToString("")).To(Equal(`
+		Expect("\n" + r).To(Equal(`
 {
   component: {
     componentReferences: []
@@ -490,7 +653,14 @@ var _ = Describe("normalization", func() {
     }
     resources: [
       {
-        name: elem1
+        labels: [
+          {
+            name: b
+            signing: true
+            value: signed
+          }
+        ]
+        name: elem2
         relation: local
         type: elemtype
         version: 1
