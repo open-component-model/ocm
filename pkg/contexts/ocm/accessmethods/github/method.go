@@ -15,15 +15,14 @@
 package github
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io"
-	"net/http"
 	"net/url"
 	"path"
 	"strconv"
 	"sync"
+	"unicode"
 
 	"github.com/google/go-github/v45/github"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -61,16 +60,16 @@ type AccessSpec struct {
 	// Owner represents the organization/owner of the repository.
 	Owner string `json:"owner"`
 	// Commit defines the hash of the commit.
-	// TODO: Define this better and add example
-	// TODO: Add validation that this is really a SHA and not a ref
 	Commit string `json:"commit"`
+
+	repositoryService RepositoryService
+	downloader        Downloader
 }
 
 var _ cpi.AccessSpec = (*AccessSpec)(nil)
-var _ cpi.HintProvider = (*AccessSpec)(nil)
 
 // New creates a new GitHub registry access spec version v1
-func New(hostname string, port int, repo, owner, commit string) *AccessSpec {
+func New(hostname string, port int, repo, owner, commit string, repoClient RepositoryService, downloader Downloader) *AccessSpec {
 	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		Repository:          repo,
@@ -78,15 +77,13 @@ func New(hostname string, port int, repo, owner, commit string) *AccessSpec {
 		Commit:              commit,
 		Hostname:            hostname,
 		Port:                port,
+		repositoryService:   repoClient,
+		downloader:          downloader,
 	}
 }
 
 func (_ *AccessSpec) IsLocal(cpi.Context) bool {
 	return false
-}
-
-func (a *AccessSpec) GetReferenceHint() string {
-	return ""
 }
 
 func (_ *AccessSpec) GetType() string {
@@ -99,23 +96,23 @@ func (a *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMetho
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// Repository defines capabilities of a GitHub repository.
-type Repository interface {
+// RepositoryService defines capabilities of a GitHub repository.
+type RepositoryService interface {
 	GetArchiveLink(ctx context.Context, owner, repo string, archiveformat github.ArchiveFormat, opts *github.RepositoryContentGetOptions, followRedirects bool) (*url.URL, *github.Response, error)
 }
 
 type accessMethod struct {
-	lock             sync.Mutex
-	blob             artefactset.ArtefactBlob
-	comp             cpi.ComponentVersionAccess
-	spec             *AccessSpec
-	repositoryClient Repository
+	lock              sync.Mutex
+	blob              artefactset.ArtefactBlob
+	comp              cpi.ComponentVersionAccess
+	spec              *AccessSpec
+	repositoryService RepositoryService
+	downloader        Downloader
 }
 
 var _ cpi.AccessMethod = (*accessMethod)(nil)
 
 func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, error) {
-
 	token, err := getCreds(a, c.GetContext().CredentialsContext())
 	if err != nil {
 		return nil, fmt.Errorf("failed to get creds: %w", err)
@@ -131,10 +128,21 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, erro
 
 		client = github.NewClient(tc)
 	}
+
+	var repoService RepositoryService = client.Repositories
+	if a.repositoryService != nil {
+		repoService = a.repositoryService
+	}
+
+	var downloader Downloader = &HTTPDownloader{}
+	if a.downloader != nil {
+		downloader = a.downloader
+	}
 	return &accessMethod{
-		spec:             a,
-		comp:             c,
-		repositoryClient: client.Repositories,
+		spec:              a,
+		comp:              c,
+		repositoryService: repoService,
+		downloader:        downloader,
 	}, nil
 }
 
@@ -226,18 +234,18 @@ func (m *accessMethod) getBlob() (accessio.BlobAccess, error) {
 }
 
 func (m *accessMethod) downloadArchive() ([]byte, error) {
-	link, resp, err := m.repositoryClient.GetArchiveLink(context.Background(), m.spec.Owner, m.spec.Repository, github.Tarball, &github.RepositoryContentGetOptions{
+	if len(m.spec.Commit) != 40 {
+		return nil, fmt.Errorf("commit is not a SHA")
+	}
+	for _, c := range m.spec.Commit {
+		if !unicode.IsOneOf([]*unicode.RangeTable{unicode.Letter, unicode.Digit}, c) {
+			return nil, fmt.Errorf("commit contains invalid characters for a SHA")
+		}
+	}
+	link, resp, err := m.repositoryService.GetArchiveLink(context.Background(), m.spec.Owner, m.spec.Repository, github.Tarball, &github.RepositoryContentGetOptions{
 		Ref: m.spec.Commit,
 	}, true)
 	if err != nil {
-		fmt.Println("err from github: ", err)
-		fmt.Println("trying to read body for more information...")
-		content, err := io.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Println("failed to read body")
-			return nil, err
-		}
-		fmt.Println("body: ", string(content))
 		return nil, err
 	}
 	defer func() {
@@ -245,20 +253,5 @@ func (m *accessMethod) downloadArchive() ([]byte, error) {
 			fmt.Println("failed to close body: ", err)
 		}
 	}()
-	httpResp, err := http.Get(link.String())
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if err := httpResp.Body.Close(); err != nil {
-			fmt.Println("failed to close body: ", err)
-		}
-	}()
-
-	var blob []byte
-	buf := bytes.NewBuffer(blob)
-	if _, err := io.Copy(buf, httpResp.Body); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
+	return m.downloader.Download(link.String())
 }
