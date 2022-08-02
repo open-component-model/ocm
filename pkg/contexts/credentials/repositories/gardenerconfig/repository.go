@@ -161,22 +161,19 @@ func (r *Repository) read(force bool) error {
 				identity.ID_PATHPREFIX: parsedImgPrefix.Path,
 			}
 
-			var creds cpi.Credentials
-			if log {
-				fmt.Printf("propagate id %q\n", id)
-			}
-			creds = newCredentialsFromContainerRegistryCredentials(credential)
-			r.creds[credentialName] = creds
+			r.creds[credentialName] = newCredentialsFromContainerRegistryCredentials(credential)
 
 			if r.propagate {
+				if log {
+					fmt.Printf("propagate id %q\n", id)
+				}
+
 				getCredentials := func() (credentials.Credentials, error) {
 					return r.LookupCredentials(credentialName)
 				}
-
 				cg := CredentialGetter{
 					getCredentials: getCredentials,
 				}
-
 				r.ctx.SetCredentialsForConsumer(id, cg)
 			}
 		}
