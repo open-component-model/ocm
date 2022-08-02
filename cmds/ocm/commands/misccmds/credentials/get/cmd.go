@@ -55,10 +55,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
-	list := ""
-	for _, i := range o.CredentialsContext().ConsumerIdentityMatchers().List() {
-		list += "  - <code>" + i.Type + "</code>: " + i.Description + "\n"
-	}
+
 	return &cobra.Command{
 		Use:   "{<consumer property>=<value>}",
 		Short: "Get credentials for a dedicated consumer spec",
@@ -66,8 +63,8 @@ func (o *Command) ForName(name string) *cobra.Command {
 Try to resolve a given consumer specification against the configured credential
 settings and show the found credential attributes.
 
-For the following usage contexts a standard identity matcher exists:
-` + list +
+For the following usage contexts with matchers and standard identity matchers exist:
+` + utils.FormatListElements("", utils.IdentityMatcherList(o.CredentialsContext().ConsumerIdentityMatchers().List())) +
 			`
 The used matcher is derived from the consumer attribute <code>type</code>.
 For all other consumer types a matcher matching all attributes will be used.

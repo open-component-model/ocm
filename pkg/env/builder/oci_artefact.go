@@ -41,6 +41,7 @@ func (r *oci_artefact) Type() string {
 func (r *oci_artefact) Set() {
 	r.Builder.oci_nsacc = r.ns
 	r.Builder.oci_artacc = r.ArtefactAccess
+	r.Builder.oci_cleanuplayers = true
 	r.Builder.oci_tags = &r.tags
 
 	if r.ns != nil {

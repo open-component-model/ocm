@@ -24,7 +24,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/mime"
 
@@ -32,6 +31,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 )
@@ -167,11 +167,11 @@ var _ = Describe("Add resources", func() {
 		Expect(r.Version).To(Equal("v0.1.0"))
 		Expect(r.Relation).To(Equal(metav1.ResourceRelation("external")))
 
-		Expect(r.Access.GetType()).To(Equal(ociregistry.Type))
+		Expect(r.Access.GetType()).To(Equal(ociartefact.Type))
 
 		acc, err := env.OCMContext().AccessSpecForSpec(r.Access)
 		Expect(err).To(Succeed())
-		Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*ociregistry.AccessSpec)(nil))))
-		Expect(acc.(*ociregistry.AccessSpec).ImageReference).To(Equal("ghcr.io/mandelsoft/pause:v0.1.0"))
+		Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*ociartefact.AccessSpec)(nil))))
+		Expect(acc.(*ociartefact.AccessSpec).ImageReference).To(Equal("ghcr.io/mandelsoft/pause:v0.1.0"))
 	})
 })

@@ -26,25 +26,38 @@ import (
 // in the generic part, accordingly
 var CDExcludes = signing.MapExcludes{
 	"component": signing.MapExcludes{
+		"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
+			ValueChecker: signing.IgnoreLabelsWithoutSignature,
+			Continue:     signing.NoExcludes{},
+		}},
 		"repositoryContexts": nil,
 		"resources": signing.DynamicArrayExcludes{
 			ValueChecker: signing.IgnoreResourcesWithNoneAccess,
 			Continue: signing.MapExcludes{
 				"access": nil,
-				"labels": nil,
 				"srcRef": nil,
+				"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
+					ValueChecker: signing.IgnoreLabelsWithoutSignature,
+					Continue:     signing.NoExcludes{},
+				}},
 			},
 		},
 		"sources": signing.DynamicArrayExcludes{
 			ValueChecker: signing.IgnoreResourcesWithNoneAccess,
 			Continue: signing.MapExcludes{
 				"access": nil,
-				"labels": nil,
+				"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
+					ValueChecker: signing.IgnoreLabelsWithoutSignature,
+					Continue:     signing.NoExcludes{},
+				}},
 			},
 		},
 		"references": signing.ArrayExcludes{
 			signing.MapExcludes{
-				"labels": nil,
+				"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
+					ValueChecker: signing.IgnoreLabelsWithoutSignature,
+					Continue:     signing.NoExcludes{},
+				}},
 			},
 		},
 	},

@@ -41,6 +41,7 @@ type RepositorySpec = core.RepositorySpec
 
 type ConsumerIdentity = core.ConsumerIdentity
 type IdentityMatcher = core.IdentityMatcher
+type IdentityMatcherInfo = core.IdentityMatcherInfo
 type IdentityMatcherRegistry = core.IdentityMatcherRegistry
 
 type GenericRepositorySpec = core.GenericRepositorySpec

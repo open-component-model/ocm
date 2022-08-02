@@ -19,9 +19,10 @@ ocm credentials get {<consumer property>=<value>}
 Try to resolve a given consumer specification against the configured credential
 settings and show the found credential attributes.
 
-For the following usage contexts a standard identity matcher exists:
+For the following usage contexts with matchers and standard identity matchers exist:
+
   - <code>OCIRegistry</code>: OCI registry credential matcher
-  - <code>complete</code>: complete match of given pattern set
+  - <code>exact</code>: exact match of given pattern set
   - <code>hostpath</code>: Host and path based credential matcher
   - <code>partial</code>: complete match of given pattern ignoring additional attributes
 

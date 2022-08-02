@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package ociregistry_test
+package ociartefact_test
 
 import (
 	"testing"

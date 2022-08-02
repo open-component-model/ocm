@@ -23,14 +23,14 @@ import (
 
 // Validate validates a parsed v2 component descriptor
 func (cd *ComponentDescriptor) Validate() error {
-	if err := validate(nil, cd); err != nil {
+	if err := Validate(nil, cd); err != nil {
 		return err.ToAggregate()
 	}
 	cd.GetVersion()
 	return nil
 }
 
-func validate(fldPath *field.Path, component *ComponentDescriptor) field.ErrorList {
+func Validate(fldPath *field.Path, component *ComponentDescriptor) field.ErrorList {
 	if component == nil {
 		return nil
 	}
@@ -67,7 +67,7 @@ func validate(fldPath *field.Path, component *ComponentDescriptor) field.ErrorLi
 	return allErrs
 }
 
-// ValidateObjectMeta validate the metadata of an object.
+// ValidateObjectMeta Validate the metadata of an object.
 func ValidateObjectMeta(fldPath *field.Path, om compdesc.ObjectMetaAccessor) field.ErrorList {
 	allErrs := field.ErrorList{}
 	if len(om.GetName()) == 0 {
@@ -186,7 +186,7 @@ func ValidateResources(fldPath *field.Path, resources Resources, componentVersio
 		localPath := fldPath.Index(i)
 		allErrs = append(allErrs, ValidateResource(localPath, res, true)...)
 
-		// only validate the component version if it is defined
+		// only Validate the component version if it is defined
 		if res.Relation == v1.LocalRelation && len(componentVersion) != 0 {
 			if res.GetVersion() != componentVersion {
 				allErrs = append(allErrs, field.Invalid(localPath.Child("version"), "invalid version",

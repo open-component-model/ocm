@@ -14,10 +14,16 @@
 
 package signing
 
+type Normalized interface{}
+
 // ExcludeRules defines the rules for normalization excludes
 type ExcludeRules interface {
 	Field(name string, value interface{}) (string, interface{}, ExcludeRules)
 	Element(v interface{}) (bool, interface{}, ExcludeRules)
+}
+
+type NormalizationFilter interface {
+	Filter(Normalized) (Normalized, error)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -32,6 +38,32 @@ func (r NoExcludes) Field(name string, value interface{}) (string, interface{}, 
 
 func (r NoExcludes) Element(value interface{}) (bool, interface{}, ExcludeRules) {
 	return false, value, r
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type ExcludeEmpty struct {
+	ExcludeRules
+}
+
+var _ ExcludeRules = ExcludeEmpty{}
+var _ NormalizationFilter = ExcludeEmpty{}
+
+func (ExcludeEmpty) Filter(v Normalized) (Normalized, error) {
+	if v == nil {
+		return nil, nil
+	}
+	switch r := v.(type) {
+	case []Normalized:
+		if len(r) == 0 {
+			return nil, nil
+		}
+	case []Entry:
+		if len(r) == 0 {
+			return nil, nil
+		}
+	}
+	return v, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -205,6 +237,19 @@ func (r ArrayExcludes) Field(name string, value interface{}) (string, interface{
 
 func (r ArrayExcludes) Element(value interface{}) (bool, interface{}, ExcludeRules) {
 	return false, value, r.Continue
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func IgnoreLabelsWithoutSignature(v interface{}) bool {
+	if m, ok := v.(map[string]interface{}); ok {
+		if sig, ok := m["signing"]; ok {
+			if sig != nil {
+				return sig != "true" && sig != true
+			}
+		}
+	}
+	return true
 }
 
 ////////////////////////////////////////////////////////////////////////////////
