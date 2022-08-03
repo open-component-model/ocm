@@ -12,17 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package core
+package s3_test
 
-const (
-	CONSUMER_ATTR_TYPE         = ATTR_TYPE
-	ATTR_TYPE                  = "type"
-	ATTR_USERNAME              = "username"
-	ATTR_PASSWORD              = "password"
-	ATTR_SERVER_ADDRESS        = "serverAddress"
-	ATTR_IDENTITY_TOKEN        = "identityToken"
-	ATTR_REGISTRY_TOKEN        = "registryToken"
-	ATTR_TOKEN                 = "token"
-	ATTR_AWS_ACCESS_KEY_ID     = "awsAccessKeyID"
-	ATTR_AWS_SECRET_ACCESS_KEY = "awsSecretAccessKey"
+import (
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
+
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "S3 Test Suite")
+}
