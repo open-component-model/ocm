@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"net/url"
 	"path"
 	"strconv"
@@ -38,9 +39,10 @@ import (
 )
 
 // Type is the access type of GitHub registry.
-const Type = "github"
+const Type = "GitHub"
 const TypeV1 = Type + runtime.VersionSeparator + "v1"
 const CONSUMER_TYPE = "github"
+const ShaLength = 40
 
 func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}))
@@ -62,24 +64,45 @@ type AccessSpec struct {
 	// Commit defines the hash of the commit.
 	Commit string `json:"commit"`
 
-	repositoryService RepositoryService
-	downloader        Downloader
+	client     *http.Client
+	downloader Downloader
 }
 
 var _ cpi.AccessSpec = (*AccessSpec)(nil)
 
+// AccessSpecOptions defines a set of options which can be applied to the access spec.
+type AccessSpecOptions func(s *AccessSpec) *AccessSpec
+
+// WithClient creates an access spec with a custom http client.
+func WithClient(client *http.Client) func(s *AccessSpec) *AccessSpec {
+	return func(s *AccessSpec) *AccessSpec {
+		s.client = client
+		return s
+	}
+}
+
+// WithDownloader defines a client with a custom downloader.
+func WithDownloader(downloader Downloader) func(s *AccessSpec) *AccessSpec {
+	return func(s *AccessSpec) *AccessSpec {
+		s.downloader = downloader
+		return s
+	}
+}
+
 // New creates a new GitHub registry access spec version v1
-func New(hostname string, port int, repo, owner, commit string, repoClient RepositoryService, downloader Downloader) *AccessSpec {
-	return &AccessSpec{
+func New(hostname string, port int, repo, owner, commit string, opts ...AccessSpecOptions) *AccessSpec {
+	s := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		Repository:          repo,
 		Owner:               owner,
 		Commit:              commit,
 		Hostname:            hostname,
 		Port:                port,
-		repositoryService:   repoClient,
-		downloader:          downloader,
 	}
+	for _, o := range opts {
+		s = o(s)
+	}
+	return s
 }
 
 func (_ *AccessSpec) IsLocal(cpi.Context) bool {
@@ -118,8 +141,8 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, erro
 		return nil, fmt.Errorf("failed to get creds: %w", err)
 	}
 
-	client := github.NewClient(nil)
-	if token != "" {
+	client := github.NewClient(a.client)
+	if token != "" && a.client == nil {
 		ctx := context.Background()
 		ts := oauth2.StaticTokenSource(
 			&oauth2.Token{AccessToken: token},
@@ -129,11 +152,6 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, erro
 		client = github.NewClient(tc)
 	}
 
-	var repoService RepositoryService = client.Repositories
-	if a.repositoryService != nil {
-		repoService = a.repositoryService
-	}
-
 	var downloader Downloader = &HTTPDownloader{}
 	if a.downloader != nil {
 		downloader = a.downloader
@@ -141,7 +159,7 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, erro
 	return &accessMethod{
 		spec:              a,
 		comp:              c,
-		repositoryService: repoService,
+		repositoryService: client.Repositories,
 		downloader:        downloader,
 	}, nil
 }
@@ -234,7 +252,7 @@ func (m *accessMethod) getBlob() (accessio.BlobAccess, error) {
 }
 
 func (m *accessMethod) downloadArchive() ([]byte, error) {
-	if len(m.spec.Commit) != 40 {
+	if len(m.spec.Commit) != ShaLength {
 		return nil, fmt.Errorf("commit is not a SHA")
 	}
 	for _, c := range m.spec.Commit {
