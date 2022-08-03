@@ -15,8 +15,8 @@
 package config
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/clictx/core"
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx/core"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	ocicpi "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"

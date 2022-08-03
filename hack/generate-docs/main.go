@@ -9,7 +9,7 @@ import (
 	"os"
 
 	"github.com/open-component-model/ocm/cmds/ocm/app"
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 )
 
 func main() {

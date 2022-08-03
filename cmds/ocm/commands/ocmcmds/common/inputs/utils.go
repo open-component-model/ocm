@@ -20,7 +20,8 @@ import (
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 

@@ -24,6 +24,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/xeipuuv/gojsonschema"
 
+	"github.com/open-component-model/ocm/pkg/common"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/config/config"
@@ -236,5 +238,6 @@ func ExecuteAction(d Driver, name string, spec *Specification, creds *Credential
 	if err != nil {
 		return nil, err
 	}
+	op.ComponentVersion = common.VersionedElementKey(cv).String()
 	return d.Exec(op)
 }

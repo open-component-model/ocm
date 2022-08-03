@@ -323,10 +323,9 @@ func (d *Driver) setConfigurationOptions(op *install.Operation) error {
 	}
 
 	d.containerCfg = container.Config{
-		Image: op.Image.Ref,
-		Env:   env,
-		//Entrypoint:   strslice.StrSlice{PathExec},
-		Cmd:          []string{op.Action},
+		Image:        op.Image.Ref,
+		Env:          env,
+		Cmd:          []string{op.Action, op.ComponentVersion},
 		AttachStderr: true,
 		AttachStdout: true,
 	}

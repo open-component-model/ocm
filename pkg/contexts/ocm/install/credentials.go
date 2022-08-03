@@ -38,6 +38,9 @@ type CredentialsRequestSpec struct {
 	ConsumerId credentials.ConsumerIdentity `json:"consumerId,omitempty"`
 	// Description described the usecase the credentials will be used for
 	Description string `json:"description"`
+	// Properties describes the meaning of the used properties for this
+	// credential set.
+	Properties common.Properties `json:"properties"`
 }
 
 type Credentials struct {

@@ -20,7 +20,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/destoption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -170,9 +171,11 @@ func (d *action) Out() error {
 func (d *action) Save(o *elemhdlr.Object, f string) error {
 	dest := destoption.From(d.opts)
 	local := From(d.opts)
+	pathIn := true
 	r := common.Elem(o)
 	if f == "" {
 		f = r.GetName()
+		pathIn = false
 	}
 	id := r.GetIdentity(o.Version.GetDescriptor().Resources)
 	racc, err := o.Version.GetResource(id)
@@ -185,16 +188,20 @@ func (d *action) Save(o *elemhdlr.Object, f string) error {
 		return err
 	}
 	var ok bool
+	var eff string
 	if local.UseHandlers {
-		ok, err = d.downloaders.Download(d.opts.Context, racc, f, dest.PathFilesystem)
+		ok, eff, err = d.downloaders.Download(d.opts.Context, racc, f, dest.PathFilesystem)
 	} else {
-		ok, err = d.downloaders.DownloadAsBlob(d.opts.Context, racc, f, dest.PathFilesystem)
+		ok, eff, err = d.downloaders.DownloadAsBlob(d.opts.Context, racc, f, dest.PathFilesystem)
 	}
 	if err != nil {
 		return err
 	}
 	if !ok {
-		return errors.Newf("no downloader configured  type %q", racc.Meta().GetType())
+		return errors.Newf("no downloader configured for type %q", racc.Meta().GetType())
+	}
+	if eff != f && pathIn {
+		out.Outf(d.opts.Context, "output path %q changed to %q by downloader", f, eff)
 	}
 	return nil
 }

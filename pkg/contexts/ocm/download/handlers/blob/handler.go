@@ -39,20 +39,20 @@ func wrapErr(err error, racc cpi.ResourceAccess) error {
 	return errors.Wrapf(err, "resource %s/%s%s", m.GetName(), m.GetVersion(), m.ExtraIdentity.String())
 }
 
-func (_ Handler) Download(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, error) {
+func (_ Handler) Download(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
 	rd, err := cpi.ResourceReader(racc)
 	if err != nil {
-		return true, wrapErr(err, racc)
+		return true, "", wrapErr(err, racc)
 	}
 	defer rd.Close()
 	file, err := fs.OpenFile(path, vfs.O_TRUNC|vfs.O_CREATE|vfs.O_WRONLY, 0660)
 	if err != nil {
-		return true, wrapErr(errors.Wrapf(err, "creating target file %q", path), racc)
+		return true, "", wrapErr(errors.Wrapf(err, "creating target file %q", path), racc)
 	}
 	defer file.Close()
 	n, err := io.Copy(file, rd)
 	if err == nil {
 		out.Outf(ctx, "%s: %d byte(s) written\n", path, n)
 	}
-	return true, wrapErr(err, racc)
+	return true, path, wrapErr(err, racc)
 }

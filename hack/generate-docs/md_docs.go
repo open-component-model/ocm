@@ -23,7 +23,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/cobrautils"
+	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/spf13/cobra"
 )
 

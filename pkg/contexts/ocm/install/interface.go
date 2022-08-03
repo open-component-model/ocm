@@ -24,9 +24,11 @@ import (
 
 const (
 	PathOCM         = "/ocm"
+	Inputs          = "inputs"
+	Outputs         = "outputs"
 	PathExec        = PathOCM + "/run"
-	PathOutputs     = PathOCM + "/outputs"
-	PathInputs      = PathOCM + "/inputs"
+	PathOutputs     = PathOCM + "/" + Outputs
+	PathInputs      = PathOCM + "/" + Inputs
 	InputParameters = "parameters"
 	InputConfig     = "config"
 	InputOCMConfig  = "ocmconfig"
@@ -65,6 +67,8 @@ type Image struct {
 type Operation struct {
 	// Action is the action to be performed. It is passed a srgument to the executable
 	Action string
+	// ComponentVersion is the name of the root component/version to install
+	ComponentVersion string
 	// Image is the image to invoke
 	Image Image
 	// Environment contains environment variables that should be injected into the container execution

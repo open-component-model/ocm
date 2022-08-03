@@ -18,6 +18,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 // VersionedElement describes an element that has a name and a version
@@ -74,4 +76,12 @@ func (n NameVersion) String() string {
 		return n.version
 	}
 	return n.name + ":" + n.version
+}
+
+func ParseNameVersion(s string) (NameVersion, error) {
+	a := strings.Split(s, ":")
+	if len(a) != 2 {
+		return NameVersion{}, errors.ErrInvalid("name:version", s)
+	}
+	return NewNameVersion(strings.TrimSpace(a[0]), strings.TrimSpace(a[1])), nil
 }

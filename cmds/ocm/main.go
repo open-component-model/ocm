@@ -18,11 +18,11 @@ import (
 	"os"
 
 	"github.com/open-component-model/ocm/cmds/ocm/app"
-	cmd "github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 )
 
 func main() {
-	c := app.NewCliCommand(cmd.DefaultContext())
+	c := app.NewCliCommand(clictx.DefaultContext())
 
 	if err := c.Execute(); err != nil {
 		os.Exit(1)

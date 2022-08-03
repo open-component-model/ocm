@@ -17,9 +17,10 @@ package artefacts
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/describe"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/download"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/get"

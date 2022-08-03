@@ -17,10 +17,11 @@ package ocicmds
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	topicocirefs "github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/ctf"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/tags"

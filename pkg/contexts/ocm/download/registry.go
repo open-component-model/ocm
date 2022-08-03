@@ -19,6 +19,8 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/errors"
+
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/out"
@@ -27,13 +29,13 @@ import (
 const ALL = "*"
 
 type Handler interface {
-	Download(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, error)
+	Download(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error)
 }
 
 type Registry interface {
 	Register(typ string, hdlr Handler)
 	Handler
-	DownloadAsBlob(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, error)
+	DownloadAsBlob(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error)
 }
 
 type registry struct {
@@ -62,25 +64,27 @@ func (r *registry) getHandlers(typ string) []Handler {
 	return r.handlers[typ]
 }
 
-func (r *registry) Download(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, error) {
-	if ok, err := r.download(r.getHandlers(racc.Meta().GetType()), ctx, racc, path, fs); ok {
-		return ok, err
+func (r *registry) Download(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
+	if ok, p, err := r.download(r.getHandlers(racc.Meta().GetType()), ctx, racc, path, fs); ok {
+		return ok, p, err
 	}
 	return r.download(r.getHandlers(ALL), ctx, racc, path, fs)
 }
 
-func (r *registry) DownloadAsBlob(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, error) {
+func (r *registry) DownloadAsBlob(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
 	return r.download(r.getHandlers(ALL), ctx, racc, path, fs)
 }
 
-func (r *registry) download(list []Handler, ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, error) {
+func (r *registry) download(list []Handler, ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
+	errs := errors.ErrListf("download")
 	for _, h := range list {
-		ok, err := h.Download(ctx, racc, path, fs)
+		ok, p, err := h.Download(ctx, racc, path, fs)
 		if ok {
-			return ok, err
+			return ok, p, err
 		}
+		errs.Add(err)
 	}
-	return false, nil
+	return false, "", errs.Result()
 }
 
 var DefaultRegistry = NewRegistry()

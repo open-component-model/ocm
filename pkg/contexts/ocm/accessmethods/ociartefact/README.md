@@ -38,6 +38,9 @@ The type specific specification fields are:
   - `<repo>/<artefact>:<digest>@<tag>`
   - `<host>[<port>]/repo path>/<artefact>:<version>@<tag>`
 
+
+- **`imageReference`** *string* (deprecated)
+
 ### Go Bindings
 
 The go binding can be found [here](method.go)

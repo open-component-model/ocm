@@ -22,6 +22,8 @@ import (
 	"github.com/opencontainers/go-digest"
 	"helm.sh/helm/v3/pkg/chart/loader"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
+
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
@@ -119,11 +121,11 @@ var _ = Describe("Add resources", func() {
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
 		Expect(err).To(Succeed())
-		Expect(len(cd.Resources)).To(Equal(1))
+		Expect(len(cd.Resources)).To(Equal(2))
 
 		r, err := cd.GetResourceByIdentity(metav1.NewIdentity("chart"))
 		Expect(err).To(Succeed())
-		Expect(r.Type).To(Equal("HelmChart"))
+		Expect(r.Type).To(Equal(consts.HelmChart))
 		Expect(r.Version).To(Equal(VERSION))
 
 		Expect(r.Access.GetType()).To(Equal(localblob.Type))

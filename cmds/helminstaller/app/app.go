@@ -12,16 +12,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package clictx
+package app
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/clictx/core"
+	"github.com/spf13/cobra"
+
+	"github.com/open-component-model/ocm/cmds/helminstaller/app/driver"
+	"github.com/open-component-model/ocm/cmds/helminstaller/app/driver/helm"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/install/support"
 )
 
-type Context = core.Context
-type OCI = core.OCI
-type OCM = core.OCM
-
-func DefaultContext() Context {
-	return core.DefaultContext
+func NewCliCommand(ctx clictx.Context, d driver.Driver) *cobra.Command {
+	if d == nil {
+		d = helm.New()
+	}
+	return support.NewCLICommand(ctx.OCMContext(), "helmbootstrapper", New(d))
 }

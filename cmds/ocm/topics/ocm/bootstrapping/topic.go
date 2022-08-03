@@ -17,11 +17,11 @@ package bootstapping
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+
 	"github.com/open-component-model/ocm/pkg/mime"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/install"
-
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 )
 
 func New(ctx clictx.Context) *cobra.Command {
@@ -39,6 +39,12 @@ executors:
       level: info
     outputs:
        test: bla
+credentials:
+  target:
+    description: kubeconfig for target kubernetes cluster
+    consumerId:
+      type: Kubernetes
+      purpose: target
 configTemplate:
   parameters:
     username: admin
@@ -102,6 +108,8 @@ outputs in the <code>outputs</code> section.
   &lt;file name by executor> -> &lt;logical output name>
 </center>
 
+### Client Parameters
+
 Common to all executors a parameter file can be provided by the caller. The
 specification may provide a [spiff template](https://github.com/mandelsoft/spiff)
 for this parameter file. The actually provided content is merged with this
@@ -109,6 +117,33 @@ template.
 
 To validate user configuration a JSON scheme can be provided. The user input is
 validated first against this scheme before the actual merge is done.
+
+### Credentials
+
+Additionally crednetials can be requested to be provided by a client.
+This is done with the <code>credentials</code> field. It is a map
+of credentials names and their menaing and/or handling.
+
+It uses the following fields:
+
+- **<code>description</code>** *string*
+
+  This field should describe the purpose of the credential.
+
+- **<code>properties</code>** *map[string]string*
+
+  This field should describe the used credential fields
+
+- **<code>consumerId</code>** *map[string]*
+
+  This field can be used to optionally define a conumer id that should be set
+  in the OCM support library, if used by the executor. At least the field
+  <code>type</code> and one additonal field must be set.
+
+Credentials are provided in an ocm config file (see <CMD>ocm configfile</CMD>).
+It uses a memory credential repository with the name <code>default</code>
+to store the credentials under the given name. Additionally appropriate
+consumer ids will be propagated, if requested in the credentials request config.
 
 ### Image Binding
 

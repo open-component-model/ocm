@@ -18,15 +18,15 @@ package app
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"strings"
 
-	dockercli "github.com/docker/cli/cli/config"
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
+
+	"github.com/open-component-model/ocm/pkg/cobrautils"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/vfsattr"
+
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds"
 	creds "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/credentials"
@@ -49,44 +49,22 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/sign"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/transfer"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/verify"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/cobrautils"
 	topicconfig "github.com/open-component-model/ocm/cmds/ocm/topics/common/config"
 	topicocirefs "github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
 	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/bootstrapping"
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	credcfg "github.com/open-component-model/ocm/pkg/contexts/credentials/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	datactg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
 
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/version"
 
-	_ "github.com/open-component-model/ocm/cmds/ocm/clictx/config"
+	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 )
-
-type CLI struct {
-	clictx.Context
-}
-
-func NewCLI(ctx clictx.Context) *CLI {
-	if ctx == nil {
-		ctx = clictx.DefaultContext()
-	}
-	return &CLI{ctx}
-}
-
-func (c *CLI) Execute(args ...string) error {
-	cmd := NewCliCommand(c)
-	cmd.SetArgs(args)
-	return cmd.Execute()
-}
 
 type CLIOptions struct {
 	Config      string
@@ -227,48 +205,9 @@ func (o *CLIOptions) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *CLIOptions) Complete() error {
-	h := os.Getenv("HOME")
-	if o.Config == "" {
-		if h != "" {
-			cfg := h + "/.ocmconfig"
-			if ok, err := vfs.FileExists(osfs.New(), cfg); ok && err == nil {
-				o.Config = cfg
-			}
-		}
-	}
-	if o.Config != "" {
-		//fmt.Printf("********** config file is %s\n", o.Config)
-		if strings.HasPrefix(o.Config, "~"+string(os.PathSeparator)) {
-			if len(h) == 0 {
-				return fmt.Errorf("no home directory found for resolving path of config file %q", o.Config)
-			}
-			o.Config = h + o.Config[1:]
-		}
-		data, err := ioutil.ReadFile(o.Config)
-		if err != nil {
-			return errors.Wrapf(err, "cannot read config file %q", o.Config)
-		}
-
-		cfg, err := config.DefaultContext().GetConfigForData(data, nil)
-		if err != nil {
-			return errors.Wrapf(err, "invalid config file %q", o.Config)
-		}
-		o.Context = clictx.DefaultContext()
-		err = config.DefaultContext().ApplyConfig(cfg, o.Config)
-		if err != nil {
-			return errors.Wrapf(err, "cannot apply config %q", o.Config)
-		}
-	} else {
-		// use docker config as default config for ocm cli
-		d := filepath.Join(dockercli.Dir(), dockercli.ConfigFileName)
-		if ok, err := vfs.FileExists(osfs.New(), d); ok && err == nil {
-			cfg := credcfg.New()
-			cfg.AddRepository(dockerconfig.NewRepositorySpec(d, true))
-			err = config.DefaultContext().ApplyConfig(cfg, d)
-			if err != nil {
-				return errors.Wrapf(err, "cannot apply docker config %q", d)
-			}
-		}
+	_, err := utils.Configure(o.Context.OCMContext(), o.Config, vfsattr.Get(o.Context))
+	if err != nil {
+		return err
 	}
 
 	id := credentials.ConsumerIdentity{}

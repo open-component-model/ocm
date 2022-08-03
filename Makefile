@@ -18,7 +18,7 @@ build: ${SOURCES}
 		-X github.com/open-component-model/ocm/pkg/version.gitTreeState=$(shell [ -z git status --porcelain 2>/dev/null ] && echo clean || echo dirty) \
 		-X github.com/open-component-model/ocm/pkg/version.gitCommit=$(shell git rev-parse --verify HEAD) \
 		-X github.com/open-component-model/ocm/pkg/version.buildDate=$(shell date --rfc-3339=seconds | sed 's/ /T/')" \
-		./cmds/ocm
+		./cmds/ocm ./cmds/helminst
 
 .PHONY: install-requirements
 install-requirements:
@@ -29,15 +29,15 @@ prepare: generate format test check
 
 .PHONY: format
 format:
-	@$(REPO_ROOT)/hack/format.sh $(REPO_ROOT)/pkg $(REPO_ROOT)/cmds/ocm
+	@$(REPO_ROOT)/hack/format.sh $(REPO_ROOT)/pkg $(REPO_ROOT)/cmds/ocm $(REPO_ROOT)/cmds/helminstaller
 
 .PHONY: check
 check:
-	@$(REPO_ROOT)/hack/check.sh --golangci-lint-config=./.golangci.yaml $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/pkg/...
+	@$(REPO_ROOT)/hack/check.sh --golangci-lint-config=./.golangci.yaml $(REPO_ROOT)/cmds/ocm $(REPO_ROOT)/cmds/helminstaller/... $(REPO_ROOT)/pkg/...
 
 .PHONY: force-test
 force-test:
-	@go test --count=1 $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/pkg/...
+	@go test --count=1 $(REPO_ROOT)/cmds/ocm $(REPO_ROOT)/cmds/helminstaller $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/pkg/...
 
 .PHONY: test
 test:
@@ -46,7 +46,7 @@ test:
 
 .PHONY: generate
 generate:
-	@$(REPO_ROOT)/hack/generate.sh $(REPO_ROOT)/pkg... $(REPO_ROOT)/cmds/ocm/...
+	@$(REPO_ROOT)/hack/generate.sh $(REPO_ROOT)/pkg... $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/helminst/...
 
 .PHONY: verify
 verify: check

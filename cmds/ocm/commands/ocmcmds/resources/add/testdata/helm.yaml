@@ -1,6 +1,13 @@
 ---
 name: chart
-type: HelmChart
+type: helmChart
 input:
   type: helm
   path: testchart
+---
+name: echoserver
+type: ociImage
+version: "1.0"
+access:
+  type: ociArtefact
+  imageReference: gcr.io/google_containers/echoserver:1.0
