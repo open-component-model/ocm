@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	DirectCredentialsRepositoryType   = cpi.DirectCredentialsType
+	DirectCredentialsRepositoryType   = "Credentials"
 	DirectCredentialsRepositoryTypeV1 = DirectCredentialsRepositoryType + runtime.VersionSeparator + "v1"
 )
 
