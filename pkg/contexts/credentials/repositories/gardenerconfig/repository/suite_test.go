@@ -1,4 +1,4 @@
-package gardenerconfig_test
+package repository_test
 
 import (
 	"testing"

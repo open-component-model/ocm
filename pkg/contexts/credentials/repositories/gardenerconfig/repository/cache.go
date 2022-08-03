@@ -1,9 +1,10 @@
-package gardenerconfig
+package repository
 
 import (
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	gardenercfg_cpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 )
 
@@ -20,7 +21,7 @@ func newRepositories(datacontext.Context) interface{} {
 	}
 }
 
-func (r *Repositories) GetRepository(ctx cpi.Context, url string, configType ConfigType, cipher Cipher, key []byte, propagate bool) *Repository {
+func (r *Repositories) GetRepository(ctx cpi.Context, url string, configType gardenercfg_cpi.ConfigType, cipher Cipher, key []byte, propagate bool) *Repository {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	repo := r.repos[url]
