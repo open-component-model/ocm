@@ -15,17 +15,11 @@
 package s3
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"path"
 	"sync"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
-	awscreds "github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
@@ -61,18 +55,21 @@ type AccessSpec struct {
 	// Version of the object.
 	// +optional
 	Version string `json:"version,omitempty"`
+
+	downloader Downloader
 }
 
 var _ cpi.AccessSpec = (*AccessSpec)(nil)
 
 // New creates a new GitHub registry access spec version v1
-func New(region, bucket, key, version string) *AccessSpec {
+func New(region, bucket, key, version string, downloader Downloader) *AccessSpec {
 	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		Region:              region,
 		Bucket:              bucket,
 		Key:                 key,
 		Version:             version,
+		downloader:          downloader,
 	}
 }
 
@@ -97,6 +94,7 @@ type accessMethod struct {
 	spec         *AccessSpec
 	accessKeyID  string
 	accessSecret string
+	downloader   Downloader
 }
 
 var _ cpi.AccessMethod = (*accessMethod)(nil)
@@ -111,11 +109,17 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, erro
 		return nil, fmt.Errorf("failed to return any credentials; they MUST be provided for s3 access")
 	}
 
+	var d Downloader = &S3Downloader{}
+	if a.downloader != nil {
+		d = a.downloader
+	}
+
 	return &accessMethod{
 		spec:         a,
 		comp:         c,
 		accessKeyID:  creds.GetProperty(credentials.ATTR_AWS_ACCESS_KEY_ID),
 		accessSecret: creds.GetProperty(credentials.ATTR_AWS_SECRET_ACCESS_KEY),
+		downloader:   d,
 	}, nil
 }
 
@@ -194,42 +198,17 @@ func (m *accessMethod) getBlob() (accessio.BlobAccess, error) {
 	if m.blob != nil {
 		return m.blob, nil
 	}
-	blob, err := m.downloadArchive()
+	blob, err := m.downloader.Download(
+		m.spec.Region,
+		m.spec.Bucket,
+		m.spec.Key,
+		m.spec.Version,
+		m.accessKeyID,
+		m.accessSecret,
+	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to download object: %w", err)
 	}
 
 	return accessio.BlobAccessForData(mime.MIME_TGZ, blob), nil
-}
-
-func (m *accessMethod) downloadArchive() ([]byte, error) {
-	// initialise creds from the creds managed...
-	cfg, err := config.LoadDefaultConfig(context.Background(), config.WithRegion(m.spec.Region), config.WithCredentialsProvider(awscreds.StaticCredentialsProvider{
-		Value: aws.Credentials{
-			AccessKeyID:     m.accessKeyID,
-			SecretAccessKey: m.accessSecret,
-			//SessionToken:    "", // TODO: come back to this
-		},
-	}))
-	if err != nil {
-		return nil, err
-	}
-	client := s3.NewFromConfig(cfg)
-	downloader := manager.NewDownloader(client)
-	ctx := context.Background()
-
-	var blob []byte
-	buf := manager.NewWriteAtBuffer(blob)
-
-	input := &s3.GetObjectInput{
-		Bucket: aws.String(m.spec.Bucket),
-		Key:    aws.String(m.spec.Key),
-	}
-	if m.spec.Version != "" {
-		input.VersionId = aws.String(m.spec.Version)
-	}
-	if _, err := downloader.Download(ctx, buf, input); err != nil {
-		return nil, fmt.Errorf("failed to download object: %w", err)
-	}
-	return buf.Bytes(), nil
 }
