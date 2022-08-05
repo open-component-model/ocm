@@ -1,0 +1,3 @@
+
+alice: 24
+bob: (( read("include.yaml").bob ))

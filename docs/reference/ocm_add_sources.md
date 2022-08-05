@@ -63,6 +63,7 @@ The resource specification supports the following blob input types, specified
 with the field <code>type</code> in the <code>input</code> field:
 
 - Input type <code>dir</code>
+
   The path must denote a directory relative to the resources file, which is packed
   with tar and optionally compressed
   if the <code>compress</code> field is set to <code>true</code>. If the field
@@ -115,6 +116,7 @@ with the field <code>type</code> in the <code>input</code> field:
   
 
 - Input type <code>docker</code>
+
   The path must denote an image tag that can be found in the local
   docker daemon. The denoted image is packed an OCI artefact set.
   
@@ -125,6 +127,7 @@ with the field <code>type</code> in the <code>input</code> field:
     local docker daemon.
 
 - Input type <code>file</code>
+
   The path must denote a file relative the the resources file.
   The content is compressed if the <code>compress</code> field
   is set to <code>true</code>.
@@ -148,6 +151,7 @@ with the field <code>type</code> in the <code>input</code> field:
   
 
 - Input type <code>helm</code>
+
   The path must denote an helm chart archive or directory
   relative to the resources file.
   The denoted chart is packed as an OCI artefact set.
@@ -169,6 +173,40 @@ with the field <code>type</code> in the <code>input</code> field:
     If not specified the versio from the chart will be used.
     Basically, it is a good practice to use the component version for local resources
     This can be achieved by using templating for this attribute in the resource file.
+
+- Input type <code>spiff</code>
+
+  The path must denote a [spiff](https://github.com/mandelsoft/spiff) template relative the the resources file.
+  The content is compressed if the <code>compress</code> field
+  is set to <code>true</code>.
+  
+  This blob type specification supports the following fields: 
+  - **<code>path</code>** *string*
+  
+    This REQUIRED property describes the file path to the helm chart relative to the
+    resource file location.
+  
+  - **<code>mediaType</code>** *string*
+  
+    This OPTIONAL property describes the media type to store with the local blob.
+    The default media type is application/octet-stream and
+    application/gzip if compression is enabled.
+  
+  - **<code>compress</code>** *bool*
+  
+    This OPTIONAL property describes whether the file content should be stored
+    compressed or not.
+  
+  - **<code>values</code>** *map[string]any*
+  
+    This OPTIONAL property describes an additioanl value binding for the template processing. It will be available
+    under the node <code>values</code>.
+  
+  - **<code>libraries</code>** *[]string*
+  
+    This OPTIONAL property describes a list of spiff libraries to include in template
+    processing.
+  
 
 
 

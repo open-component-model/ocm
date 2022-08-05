@@ -95,12 +95,15 @@ func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 	c := ocmcmd.ForName(names[0])
 	MassageCommand(c, names...)
 	c.RunE = func(cmd *cobra.Command, args []string) error {
+		var err error
 		if set, ok := ocmcmd.(options.OptionSetProvider); ok {
-			set.AsOptionSet().ProcessOnOptions(options.CompleteOptionsWithCLIContext(ocmcmd))
+			err = set.AsOptionSet().ProcessOnOptions(options.CompleteOptionsWithCLIContext(ocmcmd))
 		}
-		err := ocmcmd.Complete(args)
 		if err == nil {
-			err = ocmcmd.Run()
+			err = ocmcmd.Complete(args)
+			if err == nil {
+				err = ocmcmd.Run()
+			}
 		}
 		/*
 			if err != nil && ocmcmd.StdErr() != os.Stderr {

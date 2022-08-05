@@ -33,6 +33,10 @@ printed to standard out. If the output file is a directory, for every output a
 dedicated file is created, otherwise the yaml representation is stored to the
 file.
 
+If no credentials file name is provided (option -c) the file 
+<code>SOICredentialsFile</code> is used, if present. If no parameter file name is
+provided (option -p) the file <code>SOIParameterFile</code> is used, if present.
+
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
 

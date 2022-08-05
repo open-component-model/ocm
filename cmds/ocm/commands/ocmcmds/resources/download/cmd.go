@@ -15,9 +15,12 @@
 package download
 
 import (
+	"fmt"
+	"io"
 	"path"
 	"strings"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -143,6 +146,9 @@ func (d *action) Out() error {
 	if len(d.data) == 1 {
 		return d.Save(d.data[0], dest.Destination)
 	} else {
+		if dest.Destination == "-" {
+			return fmt.Errorf("standard output suported for singlle resource only.")
+		}
 		for _, e := range d.data {
 			f := dest.Destination
 			if f == "" {
@@ -177,6 +183,17 @@ func (d *action) Save(o *elemhdlr.Object, f string) error {
 		f = r.GetName()
 		pathIn = false
 	}
+	var tmp vfs.File
+	var err error
+	if f == "-" {
+		tmp, err = vfs.TempFile(dest.PathFilesystem, "", "download-*")
+		if err != nil {
+			return err
+		}
+		f = tmp.Name()
+		tmp.Close()
+		defer dest.PathFilesystem.Remove(f)
+	}
 	id := r.GetIdentity(o.Version.GetDescriptor().Resources)
 	racc, err := o.Version.GetResource(id)
 	if err != nil {
@@ -200,8 +217,23 @@ func (d *action) Save(o *elemhdlr.Object, f string) error {
 	if !ok {
 		return errors.Newf("no downloader configured for type %q", racc.Meta().GetType())
 	}
-	if eff != f && pathIn {
-		out.Outf(d.opts.Context, "output path %q changed to %q by downloader", f, eff)
+	if tmp != nil {
+		if eff != f {
+			defer dest.PathFilesystem.Remove(eff)
+		}
+		file, err := dest.PathFilesystem.Open(eff)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		_, err = io.Copy(d.opts.Context.StdOut(), file)
+		if err != nil {
+			return err
+		}
+	} else {
+		if eff != f && pathIn {
+			out.Outf(d.opts.Context, "output path %q changed to %q by downloader", f, eff)
+		}
 	}
 	return nil
 }
