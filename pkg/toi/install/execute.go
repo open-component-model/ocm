@@ -24,9 +24,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const TypeOCMInstaller = "ocmInstaller"
-
-func Install(d Driver, name string, rid metav1.Identity, credsrc accessio.DataSource, paramsrc accessio.DataSource, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
+func Execute(d Driver, name string, rid metav1.Identity, credsrc accessio.DataSource, paramsrc accessio.DataSource, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
 	var creds *Credentials
 	var params []byte
 	var err error
@@ -34,7 +32,7 @@ func Install(d Driver, name string, rid metav1.Identity, credsrc accessio.DataSo
 	if paramsrc != nil {
 		params, err = paramsrc.Get()
 		if err != nil {
-			return nil, errors.Wrapf(err, "settings")
+			return nil, errors.Wrapf(err, "parameters")
 		}
 	}
 
@@ -48,7 +46,7 @@ func Install(d Driver, name string, rid metav1.Identity, credsrc accessio.DataSo
 		}
 	}
 
-	ires, _, err := utils.MatchResourceReference(cv, TypeOCMInstaller, metav1.NewResourceRef(rid), nil)
+	ires, _, err := utils.MatchResourceReference(cv, TypeTOIPackage, metav1.NewResourceRef(rid), nil)
 	if err != nil {
 		return nil, errors.Wrapf(err, "installer resource in %s", common.VersionedElementKey(cv).String())
 	}
@@ -62,7 +60,7 @@ func Install(d Driver, name string, rid metav1.Identity, credsrc accessio.DataSo
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot get resource content")
 	}
-	var spec Specification
+	var spec PackageSpecification
 	err = runtime.DefaultYAMLEncoding.Unmarshal(data, &spec)
 	if err != nil {
 		return nil, errors.ErrInvalidWrap(err, "installer spec")

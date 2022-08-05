@@ -18,11 +18,11 @@ import (
 	"fmt"
 
 	"github.com/ghodss/yaml"
-	"github.com/mandelsoft/spiff/features"
-	"github.com/mandelsoft/spiff/spiffing"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/xeipuuv/gojsonschema"
+
+	"github.com/open-component-model/ocm/pkg/spiff"
 
 	"github.com/open-component-model/ocm/pkg/common"
 
@@ -71,7 +71,7 @@ func ValidateByScheme(src []byte, schemedata []byte) error {
 	return nil
 }
 
-func ExecuteAction(d Driver, name string, spec *Specification, creds *Credentials, params []byte, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
+func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Credentials, params []byte, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
 	var err error
 
 	var executor *Executor
@@ -101,86 +101,79 @@ func ExecuteAction(d Driver, name string, spec *Specification, creds *Credential
 			return nil, errors.Wrapf(err, "credential evaluation failed")
 		}
 	}
-	stubs := []spiffing.Node{}
-	spiff := spiffing.New().WithFeatures(features.CONTROL, features.INTERPOLATION)
+
+	opts := spiff.Options{spiff.Context(octx)}
 
 	if len(spec.Template) > 0 {
-
-		templ, err := spiff.Unmarshal("template", spec.Template)
-		if err != nil {
-			return nil, errors.Newf("invalid parameter template: %s", err)
-		}
-		stubs = append(stubs, templ)
+		opts.Add(spiff.TemplateData("parameter template", spec.Template))
 	}
 
-	if len(spec.Scheme) > 0 {
-		if params == nil {
+	if params == nil {
+		if len(spec.Scheme) > 0 {
 			err = ValidateByScheme([]byte("{}"), spec.Scheme)
+			if err != nil {
+				return nil, errors.Wrapf(err, "parameter file validation failed")
+			}
+		}
+	} else {
+		var src spiff.Option
+		if len(spec.Template) > 0 {
+			src = spiff.StubData("parameter file", params)
 		} else {
-			err = ValidateByScheme(params, spec.Scheme)
+			src = spiff.TemplateData("parameter file", params)
 		}
-		if err != nil {
-			return nil, errors.Wrapf(err, "parameter file validation failed")
-		}
-	}
-	if params != nil {
-		stub, err := spiff.Unmarshal("parameters", params)
-		if err != nil {
-			return nil, errors.Wrapf(err, "invalid settings")
-		}
-		stubs = append(stubs, stub)
+		opts.Add(spiff.Validated(spec.Scheme, src))
 	}
 
-	if len(stubs) == 0 {
-		params = []byte("{}")
-	} else {
-		for i, lib := range spec.Libraries {
-			res, eff, err := utils.ResolveResourceReference(cv, lib, resolver)
-			if err != nil {
-				return nil, errors.ErrNotFound("library resource %s not found", executor.ImageResourceRef.String())
-			}
-			if eff != cv {
-				defer eff.Close()
-			}
-			m, err := res.AccessMethod()
-			if err != nil {
-				return nil, errors.ErrNotFound("cannot access library resource", lib.String())
-			}
-			data, err := m.Get()
-			m.Close()
-			if err != nil {
-				return nil, errors.ErrNotFound("cannot access library resource", lib.String())
-			}
-			lib, err := spiff.Unmarshal(fmt.Sprintf("lib%d", i), data)
-			if err != nil {
-				return nil, errors.Wrapf(err, "invalid spiff lib")
-			}
-			stubs = append(stubs, lib)
-		}
-		cfg, err := spiff.Cascade(stubs[0], stubs[1:])
+	for i, lib := range spec.Libraries {
+		res, eff, err := utils.ResolveResourceReference(cv, lib, resolver)
 		if err != nil {
-			return nil, errors.Wrapf(err, "error processing parameters")
+			return nil, errors.ErrNotFound("library resource %s not found", executor.ResourceRef.String())
 		}
-		params, err = spiff.Marshal(cfg)
+		if eff != cv {
+			defer eff.Close()
+		}
+		m, err := res.AccessMethod()
 		if err != nil {
-			return nil, errors.Wrapf(err, "parameter marshalling")
+			return nil, errors.ErrNotFound("cannot access library resource", lib.String())
 		}
+		data, err := m.Get()
+		m.Close()
+		if err != nil {
+			return nil, errors.ErrNotFound("cannot access library resource", lib.String())
+		}
+		opts.Add(spiff.StubData(fmt.Sprintf("spiff lib%d", i), data))
 	}
+
+	params, err = spiff.CascadeWith(opts...)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error processing parameters")
+	}
+
+	if executor.ParameterMapping != nil {
+		params, err = spiff.CascadeWith(
+			spiff.TemplateData("executor parameter mapping", executor.ParameterMapping),
+			spiff.StubData("package config", params))
+	}
+	if err != nil {
+		return nil, errors.Wrapf(err, "error mapping parameters to executor")
+	}
+
 	image := executor.Image
 	if image == nil {
 		if cv == nil {
 			return nil, errors.Newf("resource access not possible without component version")
 		}
-		res, eff, err := utils.ResolveResourceReference(cv, executor.ImageResourceRef, resolver)
+		res, eff, err := utils.ResolveResourceReference(cv, executor.ResourceRef, resolver)
 		if err != nil {
-			return nil, errors.ErrNotFound("executor resource", executor.ImageResourceRef.String())
+			return nil, errors.ErrNotFoundWrap(err, "executor resource", executor.ResourceRef.String())
 		}
 		if res.Meta().Type != "ociImage" {
-			return nil, errors.ErrInvalid("executor resource type", res.Meta().Type, executor.ImageResourceRef.String())
+			return nil, errors.ErrInvalid("executor resource type", res.Meta().Type, executor.ResourceRef.String())
 		}
 		ref, err := utils.GetOCIArtefactRef(octx, res)
 		if err != nil {
-			return nil, errors.Wrapf(err, "image for executor resource %s not found", executor.ImageResourceRef.String())
+			return nil, errors.Wrapf(err, "image for executor resource %s not found", executor.ResourceRef.String())
 		}
 		if eff != cv {
 			eff.Close()

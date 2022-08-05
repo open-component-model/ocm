@@ -19,14 +19,15 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"github.com/open-component-model/ocm/pkg/toi/drivers/docker"
+	"github.com/open-component-model/ocm/pkg/toi/install"
+
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/install"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/install/drivers/docker"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -45,8 +46,8 @@ import (
 )
 
 const (
-	DEFAULT_CREDENTIALS_FILE = "SOICredentialsFile"
-	DEFAULT_PARAMETER_FILE   = "SOIParameterFile"
+	DEFAULT_CREDENTIALS_FILE = "TOICredentials"
+	DEFAULT_PARAMETER_FILE   = "TOIParameters"
 )
 
 var (
@@ -80,7 +81,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Long: `
 Use the simple OCM bootstrap mechanism to execute a bootstrap resource.
 
-The bootstrap resource must have the type <code>` + install.TypeOCMInstaller + `</code>.
+The bootstrap resource must have the type <code>` + install.TypeTOIPackage + `</code>.
 This is a simple YAML file resource describing the bootstrapping. See also the
 topic <CMD>ocm ocm-bootstrapping</CMD>.
 
@@ -184,7 +185,7 @@ type Binary struct {
 }
 
 func (a *action) Out() error {
-	result, err := install.Install(&docker.Driver{}, a.cmd.Action, a.cmd.Id, a.cmd.Credentials, a.cmd.Parameters, a.cmd.OCMContext(), a.data[0].ComponentVersion, lookupoption.From(a.cmd))
+	result, err := install.Execute(&docker.Driver{}, a.cmd.Action, a.cmd.Id, a.cmd.Credentials, a.cmd.Parameters, a.cmd.OCMContext(), a.data[0].ComponentVersion, lookupoption.From(a.cmd))
 	if err != nil {
 		return err
 	}

@@ -8,7 +8,7 @@ mechanism, which can be used to execute simple installation steps based on
 content described by the Open Component Model
 (see [ocm bootstrap componentversions](ocm_bootstrap_componentversions.md)).
 
-Therefore a dedicated resource type <code>ocmInstaller</code> is defined.
+Therefore a dedicated resource type <code>toiPackage</code> is defined.
 It is selected by an identity pattern. The first resource matching the pattern
 is used. A possible use case could be to provide different bootstrapper for
 different environments. The resource can the feature an identity attribute
@@ -17,7 +17,7 @@ the appropriate bootstrapper will be chosen.
 
 The bootstrapper resource describes a yaml or json file
 (media type <code>application/x-yaml</code>, <code>text/yaml</code> or
-<code>application/vnd.ocm.gardener.cloud.installer.v1+yaml</code>) containing
+<code>application/vnd.toi.gardener.cloud.package.v1+yaml</code>) containing
 information about the bootstrapping mechanism:
 
 The most important section is the <code>executors</code> sections. It describes

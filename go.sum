@@ -760,6 +760,8 @@ github.com/mandelsoft/spiff v1.7.0-beta-3/go.mod h1:3Kg6qrggWO4oc1k++acd6xhcWisJ
 github.com/mandelsoft/vfs v0.0.0-20201002080026-d03d33d5889a/go.mod h1:74aV7kulg9C434HiI3zNALN79QHc9IZMN+SI4UdLn14=
 github.com/mandelsoft/vfs v0.0.0-20220401225935-42c25028b498 h1:pmzVBN7r2t3xOlE+iDbZ16H3F63tZojzaYci+g1ZMtE=
 github.com/mandelsoft/vfs v0.0.0-20220401225935-42c25028b498/go.mod h1:74aV7kulg9C434HiI3zNALN79QHc9IZMN+SI4UdLn14=
+github.com/mandelsoft/vfs v0.0.0-20220805210647-bf14a11bfe31 h1:5gmUtnP0NYOODvS/gTeQOJKSu4W8bOUImDiKdAb/j1A=
+github.com/mandelsoft/vfs v0.0.0-20220805210647-bf14a11bfe31/go.mod h1:74aV7kulg9C434HiI3zNALN79QHc9IZMN+SI4UdLn14=
 github.com/manifoldco/promptui v0.9.0/go.mod h1:ka04sppxSGFAtxX0qhlYQjISsg9mR4GWtQEhdbn6Pgg=
 github.com/markbates/errx v1.1.0 h1:QDFeR+UP95dO12JgW+tgi2UVfo0V8YBHiUIOaeBPiEI=
 github.com/markbates/errx v1.1.0/go.mod h1:PLa46Oex9KNbVDZhKel8v1OT7hD5JZ2eI7AHhA0wswc=

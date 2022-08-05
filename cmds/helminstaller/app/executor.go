@@ -16,9 +16,9 @@ package app
 
 import (
 	"github.com/open-component-model/ocm/cmds/helminstaller/app/driver"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/install/support"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/toi/support"
 )
 
 func New(d driver.Driver) func(o *support.ExecutorOptions) error {

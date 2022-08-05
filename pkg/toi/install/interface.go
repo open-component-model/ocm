@@ -15,11 +15,9 @@
 package install
 
 import (
-	"encoding/json"
 	"io"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 )
 
 const (
@@ -35,32 +33,9 @@ const (
 	InputOCMRepo    = "ocmrepo"
 )
 
-const InstallerSpecificationMimeType = "application/vnd.ocm.gardener.cloud.installer.v1+yaml"
-
 type Driver interface {
 	SetConfig(props map[string]string) error
 	Exec(op *Operation) (*OperationResult, error)
-}
-
-type Executor struct {
-	Actions          []string                 `json:"actions,omitempty"`
-	ImageResourceRef metav1.ResourceReference `json:"imageResourceRef"`
-	Image            *Image                   `json:"image,omitempty"`
-	Config           json.RawMessage          `json:"config,omitempty"`
-	Outputs          map[string]string        `json:"outputs,omitempty"`
-}
-
-type Specification struct {
-	CredentialsRequest `json:",inline"`
-	Template           json.RawMessage            `json:"configTemplate"`
-	Libraries          []metav1.ResourceReference `json:"templateLibraries"`
-	Scheme             json.RawMessage            `json:"configScheme"`
-	Executors          []Executor                 `json:"executors"`
-}
-
-type Image struct {
-	Ref    string `json:"image"`
-	Digest string `json:"digest"`
 }
 
 // Operation describes the data passed into the driver to run an operation

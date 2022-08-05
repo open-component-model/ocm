@@ -20,7 +20,7 @@ ocm componentversions bootstrap [<options>] <action> {<component-reference>} {<r
 
 Use the simple OCM bootstrap mechanism to execute a bootstrap resource.
 
-The bootstrap resource must have the type <code>ocmInstaller</code>.
+The bootstrap resource must have the type <code>toiPackage</code>.
 This is a simple YAML file resource describing the bootstrapping. See also the
 topic [ocm ocm-bootstrapping](ocm_ocm-bootstrapping.md).
 
@@ -34,8 +34,8 @@ dedicated file is created, otherwise the yaml representation is stored to the
 file.
 
 If no credentials file name is provided (option -c) the file 
-<code>SOICredentialsFile</code> is used, if present. If no parameter file name is
-provided (option -p) the file <code>SOIParameterFile</code> is used, if present.
+<code>TOICredentials</code> is used, if present. If no parameter file name is
+provided (option -p) the file <code>TOIParameters</code> is used, if present.
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax

@@ -18,14 +18,14 @@ build: ${SOURCES}
 		-X github.com/open-component-model/ocm/pkg/version.gitTreeState=$(shell [ -z git status --porcelain 2>/dev/null ] && echo clean || echo dirty) \
 		-X github.com/open-component-model/ocm/pkg/version.gitCommit=$(shell git rev-parse --verify HEAD) \
 		-X github.com/open-component-model/ocm/pkg/version.buildDate=$(shell date --rfc-3339=seconds | sed 's/ /T/')" \
-		./cmds/ocm ./cmds/helminst
+		./cmds/ocm ./cmds/helminstaller
 
 .PHONY: install-requirements
 install-requirements:
 	@make -C hack $@
 
 .PHONY: prepare
-prepare: generate format test check
+prepare: generate format build test check
 
 .PHONY: format
 format:

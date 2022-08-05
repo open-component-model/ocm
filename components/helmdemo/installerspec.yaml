@@ -1,5 +1,5 @@
 executors:
-  - imageResourceRef:
+  - resourceRef:
       resource:
         name: ocminstaller
       referencePath:

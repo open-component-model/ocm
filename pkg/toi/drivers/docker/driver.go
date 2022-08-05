@@ -36,8 +36,9 @@ import (
 	"github.com/mitchellh/copystructure"
 	"github.com/pkg/errors"
 
+	"github.com/open-component-model/ocm/pkg/toi/install"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/install"
 )
 
 const OptionQuiet = "DOCKER_DRIVER_QUIET"

@@ -1,6 +1,6 @@
 ---
 name: installer
-type: ocmInstaller
+type: toiPackage
 labels:
   - name: commit
     value: ${COMMIT}

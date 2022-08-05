@@ -21,9 +21,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/config"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/install"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/install/drivers/docker"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/toi/drivers/docker"
+	"github.com/open-component-model/ocm/pkg/toi/install"
 )
 
 func MustParseYaml(data string) json.RawMessage {
@@ -68,7 +68,7 @@ parameters:
    password: supersecret
 `)
 
-	spec := &install.Specification{
+	spec := &install.PackageSpecification{
 		Template: templ,
 		Scheme:   scheme,
 		Executors: []install.Executor{
@@ -91,7 +91,7 @@ parameters:
 	sess := ocm.NewSession(nil)
 	ref, err := sess.EvaluateRef(octx, "ghcr.io/mandelsoft/cnudie//github.com/mandelsoft/ocmdemoinstaller:0.0.1-dev")
 	CheckErr(err, "inst component")
-	r, err := install.Install(&docker.Driver{}, "install", metav1.NewIdentity("demoinstaller"), params, octx, ref.Version, nil)
+	r, err := install.Execute(&docker.Driver{}, "install", metav1.NewIdentity("demoinstaller"), params, octx, ref.Version, nil)
 	//r, err := install.ExecuteAction(&docker.Driver{}, "install", spec, params, nil, nil)
 
 	CheckErr(err, "execute")

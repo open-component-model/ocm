@@ -17,26 +17,28 @@ package bootstapping
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/pkg/toi/install"
+
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 
 	"github.com/open-component-model/ocm/pkg/mime"
-
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/install"
 )
 
 func New(ctx clictx.Context) *cobra.Command {
 	return &cobra.Command{
-		Use:   "ocm-bootstrapping",
-		Short: "installation bootstrapping based on component versions",
+		Use:   "toi-bootstrapping",
+		Short: "Tiny OCM Installer based on component versions",
 		Example: `
 executors:
   - actions:
     - install
-    imageResourceRef:
+    resourceRef:
       resource:
         name: installerimage
     config:
       level: info
+#   parameterMapping:  # optional spiff mapping of Package configuration to 
+#      ....            # executor parameters
     outputs:
        test: bla
 credentials:
@@ -72,7 +74,7 @@ mechanism, which can be used to execute simple installation steps based on
 content described by the Open Component Model
 (see <CMD>ocm bootstrap componentversions</CMD>).
 
-Therefore a dedicated resource type <code>` + install.TypeOCMInstaller + `</code> is defined.
+Therefore a dedicated resource type <code>` + install.TypeTOIPackage + `</code> is defined.
 It is selected by an identity pattern. The first resource matching the pattern
 is used. A possible use case could be to provide different bootstrapper for
 different environments. The resource can the feature an identity attribute
@@ -81,7 +83,7 @@ the appropriate bootstrapper will be chosen.
 
 The bootstrapper resource describes a yaml or json file
 (media type <code>` + mime.MIME_YAML + `</code>, <code>` + mime.MIME_YAML_ALT + `</code> or
-<code>` + install.InstallerSpecificationMimeType + `</code>) containing
+<code>` + install.PackageSpecificationMimeType + `</code>) containing
 information about the bootstrapping mechanism:
 
 The most important section is the <code>executors</code> sections. It describes
