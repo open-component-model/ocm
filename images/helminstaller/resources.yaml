@@ -1,0 +1,7 @@
+---
+name: installerimage
+type: ociImage
+version: ${VERSION}
+input:
+  type: docker
+  path: ${IMAGE}
