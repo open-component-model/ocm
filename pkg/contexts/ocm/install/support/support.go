@@ -185,7 +185,7 @@ func (e *Executor) Execute() error {
 			return err
 		}
 	}
-	list := errors.ErrListf("executor")
+	list := errors.ErrListf("executor:")
 	list.Add(e.Run(e.Options))
 	if e.Options.Closer != nil {
 		list.Add(e.Options.Closer())

@@ -1,0 +1,23 @@
+---
+name: installer
+type: ocmInstaller
+labels:
+  - name: commit
+    value: ${COMMIT}
+input:
+  type: spiff
+  mediaType: application/x-yaml
+  path: installerspec.yaml
+---
+name: chart
+type: helmChart
+input:
+  type: helm
+  path: echoserver
+---
+name: image
+type: ociImage
+version: "1.0"
+access:
+  type: ociArtefact
+  imageReference: gcr.io/google_containers/echoserver:1.0

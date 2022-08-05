@@ -1,5 +1,5 @@
 ---
-name: installerimage
+name: ocminstaller
 type: ociImage
 version: ${VERSION}
 input:

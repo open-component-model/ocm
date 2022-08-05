@@ -173,10 +173,10 @@ func ExecuteAction(d Driver, name string, spec *Specification, creds *Credential
 		}
 		res, eff, err := utils.ResolveResourceReference(cv, executor.ImageResourceRef, resolver)
 		if err != nil {
-			return nil, errors.ErrNotFound("executor resource %s not found", executor.ImageResourceRef.String())
+			return nil, errors.ErrNotFound("executor resource", executor.ImageResourceRef.String())
 		}
 		if res.Meta().Type != "ociImage" {
-			return nil, errors.ErrNotFound("invalid executor resource type", res.Meta().Type, executor.ImageResourceRef.String())
+			return nil, errors.ErrInvalid("executor resource type", res.Meta().Type, executor.ImageResourceRef.String())
 		}
 		ref, err := utils.GetOCIArtefactRef(octx, res)
 		if err != nil {
@@ -190,7 +190,7 @@ func ExecuteAction(d Driver, name string, spec *Specification, creds *Credential
 			Ref: ref,
 		}
 	}
-	fmt.Printf("using exector image %s\n", image.Ref)
+	fmt.Printf("using executor image %s\n", image.Ref)
 	op := &Operation{
 		Action:      name,
 		Image:       *image,

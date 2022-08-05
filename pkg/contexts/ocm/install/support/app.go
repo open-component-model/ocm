@@ -72,6 +72,7 @@ func NewCLICommand(ctx ocm.Context, name string, exec func(options *ExecutorOpti
 			return opts.Complete()
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Printf("This is %s (%s)\n", name, version.Get().String())
 			e := &Executor{Completed: true, Options: &opts.ExecutorOptions, Run: exec}
 			return e.Execute()
 		},

@@ -1,4 +1,4 @@
-NAME      = helminstaller
+NAME      = helmdemo
 IMAGE     = mandelsoft/ocm$(NAME)
 COMPONENT = github.com/$(IMAGE)
 
@@ -8,11 +8,10 @@ VERSION                                        = $(shell git describe --tags --e
 COMMIT                                         = $(shell git rev-parse HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
 
-GEN = $(REPO_ROOT)/gen/helminstaller
+GEN = $(REPO_ROOT)/gen/$(NAME)
 OCM = go run $(REPO_ROOT)/cmds/ocm
 
-CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(NAME) -type f)
-OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
+CHARTSRCS=$(shell find echoserver -type f)
 
 .PHONY: ctf
 ctf: $(GEN)/ctf
@@ -26,20 +25,13 @@ version:
 	@echo $(VERSION)
 
 .PHONY: ca
-ca: build $(GEN)/ca
+ca: $(GEN)/ca
 
-$(GEN)/ca: $(GEN) resources.yaml
+$(GEN)/ca: $(GEN) resources.yaml references.yaml $(CHARTSRCS) installerspec.yaml helmconfig.yaml
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" mandelsoft $(GEN)/ca
 	$(OCM) add resources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" resources.yaml
+	$(OCM) add references $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" references.yaml
 	touch $(GEN)/ca
-
-
-.PHONY: build
-build: $(GEN)/image.$(NAME)
-
-$(GEN)/image.$(NAME): Dockerfile $(CMDSRCS) $(OCMSRCS)
-	docker build -t $(IMAGE):$(VERSION) --file Dockerfile $(REPO_ROOT)
-	touch $(GEN)/image.$(NAME)
 
 .PHONY: push
 push: $(GEN)/ctf $(GEN)/push.$(NAME)

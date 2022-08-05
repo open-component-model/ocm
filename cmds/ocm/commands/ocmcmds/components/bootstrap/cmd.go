@@ -44,6 +44,11 @@ import (
 	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/bootstrapping"
 )
 
+const (
+	DEFAULT_CREDENTIALS_FILE = "SOICredentialsFile"
+	DEFAULT_PARAMETER_FILE   = "SOIParameterFile"
+)
+
 var (
 	Names = names.Components
 	Verb  = verbs.Bootstrap
@@ -87,6 +92,10 @@ If no output file is provided, the yaml representation of the outputs are
 printed to standard out. If the output file is a directory, for every output a
 dedicated file is created, otherwise the yaml representation is stored to the
 file.
+
+If no credentials file name is provided (option -c) the file 
+<code>` + DEFAULT_CREDENTIALS_FILE + `</code> is used, if present. If no parameter file name is
+provided (option -p) the file <code>` + DEFAULT_PARAMETER_FILE + `</code> is used, if present.
 `,
 		Example: `
 $ ocm bootstrap componentversion ghcr.io/mandelsoft/ocmdemoinstaller:0.0.1-dev
@@ -109,6 +118,11 @@ func (o *Command) Complete(args []string) error {
 	if err != nil {
 		return errors.Wrapf(err, "bootstrap resource identity pattern")
 	}
+	if len(o.CredentialsFile) == 0 {
+		if ok, _ := vfs.FileExists(o.FileSystem(), DEFAULT_CREDENTIALS_FILE); ok {
+			o.CredentialsFile = DEFAULT_CREDENTIALS_FILE
+		}
+	}
 	o.Id = id
 	if len(o.CredentialsFile) > 0 {
 		data, err := vfs.ReadFile(o.Context.FileSystem(), o.CredentialsFile)
@@ -116,6 +130,11 @@ func (o *Command) Complete(args []string) error {
 			return errors.Wrapf(err, "failed reading credentials file %q", o.CredentialsFile)
 		}
 		o.Credentials = accessio.DataAccessForBytes(data, o.CredentialsFile)
+	}
+	if len(o.ParameterFile) == 0 {
+		if ok, _ := vfs.FileExists(o.FileSystem(), DEFAULT_PARAMETER_FILE); ok {
+			o.ParameterFile = DEFAULT_PARAMETER_FILE
+		}
 	}
 	if len(o.ParameterFile) > 0 {
 		data, err := vfs.ReadFile(o.Context.FileSystem(), o.ParameterFile)

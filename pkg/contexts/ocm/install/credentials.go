@@ -41,6 +41,8 @@ type CredentialsRequestSpec struct {
 	// Properties describes the meaning of the used properties for this
 	// credential set.
 	Properties common.Properties `json:"properties"`
+	// Optional set to true make the request optional
+	Optional bool `json:"optional,omitempty"`
 }
 
 type Credentials struct {
@@ -105,7 +107,9 @@ func GetCredentials(ctx credentials.Context, spec *Credentials, req *Credentials
 		sub = errors.ErrListf("credential request %q", n)
 		found, ok := spec.Credentials[n]
 		if !ok {
-			sub.Add(errors.ErrNotFound("credential", n))
+			if !r.Optional {
+				sub.Add(errors.ErrNotFound("credential", n))
+			}
 			continue
 		}
 		creds, consumer, err := evaluate(ctx, &found)
