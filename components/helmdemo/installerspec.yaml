@@ -1,7 +1,8 @@
 executors:
   - resourceRef:
       resource:
-        name: toiimage
+        #name: toiimage
+        name: toiexecutor
       referencePath:
         - name: installer
     config: (( read("helmconfig.yaml") ))

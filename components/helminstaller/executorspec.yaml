@@ -10,15 +10,18 @@ configScheme:
   required:
     - chart
     - kubeConfigName
+    - imageMapping
   properties:
     chart:
+      additionalProperties: false
       type: object
       required:
       - resource
-      additionalProperties: false
       properties:
         resource:
-          type: string
+          type: object
+          additionalProperties:
+            type: string
         referencePath:
           type: array
           items:
@@ -32,6 +35,31 @@ configScheme:
       type: string
     createNamespace:
       type: boolean
+    imageMapping:
+      additionalProperties: false
+      anyOf:
+        - required: [ "tag" ]
+        - required: [ "repository" ]
+        - required: [ "image" ]
+      required:
+      - resource
+      properties:
+        tag:
+          type: string
+        repository:
+          type: string
+        image:
+          type: string
+        resource:
+          type: object
+          additionalProperties:
+            type: string
+        referencePath:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
     values:
       type: object
     kubeConfigName:

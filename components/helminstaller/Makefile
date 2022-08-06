@@ -4,9 +4,10 @@ COMPONENT = github.com/$(IMAGE)
 
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
-VERSION                                        = $(shell git describe --tags --exact-match 2>/dev/null|| echo "$$(cat $(REPO_ROOT)/VERSION)-dev")
-COMMIT                                         = $(shell git rev-parse HEAD)
-EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
+VERSION                                        := $(shell git describe --tags --exact-match 2>/dev/null|| echo "$$(cat $(REPO_ROOT)/VERSION)-dev")
+COMMIT                                         := $(shell git rev-parse --verify HEAD)
+EFFECTIVE_VERSION                              := $(VERSION)-$(COMMIT)
+GIT_TREE_STATE                                 := $(shell [ -z git status --porcelain 2>/dev/null ] && echo clean || echo dirty)
 
 GEN = $(REPO_ROOT)/gen/$(NAME)
 OCM = go run $(REPO_ROOT)/cmds/ocm
@@ -38,7 +39,10 @@ $(GEN)/ca: $(GEN)/image.$(NAME) $(GEN) resources.yaml
 build: $(GEN)/image.$(NAME)
 
 $(GEN)/image.$(NAME): Dockerfile $(CMDSRCS) $(OCMSRCS)
-	docker build -t $(IMAGE):$(VERSION) --file Dockerfile $(REPO_ROOT)
+	docker build -t $(IMAGE):$(VERSION) --file Dockerfile $(REPO_ROOT) \
+          --build-arg COMMIT=$(COMMIT) \
+          --build-arg EFFECTIVE_VERSION=$(EFFECTIVE_VERSION) \
+          --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE)
 	touch $(GEN)/image.$(NAME)
 
 .PHONY: push

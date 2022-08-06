@@ -15,6 +15,8 @@
 package spiff
 
 import (
+	"fmt"
+
 	"github.com/mandelsoft/spiff/spiffing"
 	"github.com/mandelsoft/vfs/pkg/cwdfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -32,15 +34,19 @@ type Option interface {
 type Options []Option
 
 func (o *Options) Add(opt Option) *Options {
-	*o = append(*o, opt)
+	if opt != nil {
+		*o = append(*o, opt)
+	}
 	return o
 }
 
 func (o Options) ApplyToRequest(r *Request) error {
 	for _, o := range o {
-		err := o.ApplyToRequest(r)
-		if err != nil {
-			return err
+		if o != nil {
+			err := o.ApplyToRequest(r)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -48,7 +54,10 @@ func (o Options) ApplyToRequest(r *Request) error {
 
 func GetRequest(opts ...Option) (*Request, error) {
 	req := &Request{}
-	Options(opts).ApplyToRequest(req)
+	err := Options(opts).ApplyToRequest(req)
+	if err != nil {
+		return nil, err
+	}
 	return req, nil
 }
 
@@ -81,12 +90,17 @@ func ValuesNode(values string) OptionFunction {
 }
 func StubData(name string, data []byte) OptionFunction {
 	return func(r *Request) error {
-		r.Stubs = append(r.Stubs, spiffing.NewSourceData(name, data))
+		if len(data) > 0 {
+			r.Stubs = append(r.Stubs, spiffing.NewSourceData(name, data))
+		}
 		return nil
 	}
 }
 func TemplateData(name string, data []byte) OptionFunction {
 	return func(r *Request) error {
+		if len(data) == 0 {
+			return fmt.Errorf("no template data for " + name)
+		}
 		r.Template = spiffing.NewSourceData(name, data)
 		return nil
 	}

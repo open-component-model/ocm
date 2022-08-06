@@ -58,7 +58,7 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 
 	acc, rcv, err := utils.ResolveResourceReference(cv, cfg.Chart, nil)
 	if err != nil {
-		return err
+		return errors.ErrNotFoundWrap(err, "chart reference", cfg.Chart.String())
 	}
 	defer rcv.Close()
 
@@ -86,7 +86,7 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 	for i, v := range cfg.ImageMapping {
 		acc, rcv, err := utils.ResolveResourceReference(cv, v.ResourceReference, nil)
 		if err != nil {
-			return errors.Wrapf(err, "mapping %d (%s)", i+1, &v.ResourceReference)
+			return errors.ErrNotFoundWrap(err, "mapping", fmt.Sprintf("%d (%s)", i+1, &v.ResourceReference))
 		}
 		rcv.Close()
 		ref, err := utils.GetOCIArtefactRef(ctx, acc)

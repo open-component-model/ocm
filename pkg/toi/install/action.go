@@ -246,21 +246,7 @@ func ProcessConfig(name string, octx ocm.Context, cv ocm.ComponentVersionAccess,
 		}
 	}
 
-	opts := spiff.Options{spiff.Context(octx)}
-	if len(template) > 0 {
-		opts.Add(spiff.TemplateData(name+" template", template))
-	}
-
-	if config != nil {
-		var src spiff.Option
-		if len(template) > 0 {
-			src = spiff.StubData(name, config)
-		} else {
-			src = spiff.TemplateData(name, config)
-		}
-		opts.Add(spiff.Validated(schemedata, src))
-	}
-
+	stubs := spiff.Options{}
 	for i, lib := range libraries {
 		res, eff, err := utils.ResolveResourceReference(cv, lib, resolver)
 		if err != nil {
@@ -276,12 +262,31 @@ func ProcessConfig(name string, octx ocm.Context, cv ocm.ComponentVersionAccess,
 		if err != nil {
 			return nil, errors.ErrNotFound("cannot access library resource", lib.String())
 		}
-		opts.Add(spiff.StubData(fmt.Sprintf("spiff lib%d", i), data))
+		stubs.Add(spiff.StubData(fmt.Sprintf("spiff lib%d", i), data))
 	}
 
-	config, err = spiff.CascadeWith(opts...)
-	if err != nil {
-		return nil, errors.Wrapf(err, "error processing "+name)
+	if len(schemedata) > 0 || len(template) == 0 {
+		// process input without template first to have final version without bfore using template
+		// to be verified by json scheme
+		if config != nil {
+			config, err = spiff.CascadeWith(spiff.Context(octx), spiff.TemplateData(name, config), stubs)
+			if err != nil {
+				return nil, errors.Wrapf(err, "error processing "+name)
+			}
+		}
+	}
+	if len(schemedata) > 0 {
+		fmt.Printf("validating config by scheme...\n")
+		err = ValidateByScheme(config, schemedata)
+		if err != nil {
+			return nil, errors.Wrapf(err, name+" validation failed")
+		}
+	}
+	if len(template) > 0 {
+		config, err = spiff.CascadeWith(spiff.Context(octx), spiff.TemplateData(name+" template", template), spiff.StubData(name, config), stubs)
+		if err != nil {
+			return nil, errors.Wrapf(err, "error processing "+name+" template")
+		}
 	}
 	return config, err
 }
@@ -325,12 +330,28 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 		}
 	}
 
+	if espec.Spec.Outputs != nil {
+		list := errors.ErrListf("invalid outputs")
+		for o := range executor.Outputs {
+			if _, ok := espec.Spec.Outputs[o]; !ok {
+				list.Add(fmt.Errorf("output %s not available from executor", o))
+			}
+		}
+		if list.Len() > 0 {
+			return nil, list.Result()
+		}
+	}
 	// prepare executor config
 	econfig, err := ProcessConfig("executor config", octx, espec.CV, resolver, espec.Spec.Template, executor.Config, espec.Spec.Libraries, espec.Spec.Scheme)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error executor config")
 	}
 
+	if econfig == nil {
+		fmt.Printf("no executor config found\n")
+	} else {
+		fmt.Printf("using executor config:\n%s\n", string(econfig))
+	}
 	// handle credentials
 	credentials, credmapping, err := CheckCredentialRequests(executor, spec, &espec.Spec)
 	if err != nil {

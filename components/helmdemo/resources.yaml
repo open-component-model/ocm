@@ -6,7 +6,7 @@ labels:
     value: ${COMMIT}
 input:
   type: spiff
-  mediaType: application/x-yaml
+  mediaType: application/vnd.toi.gardener.cloud.package.v1+yaml
   path: installerspec.yaml
 ---
 name: chart

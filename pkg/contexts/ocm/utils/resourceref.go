@@ -111,10 +111,12 @@ func Dup(orig ocm.ComponentVersionAccess, new ocm.ComponentVersionAccess) ocm.Co
 	return &nopCloserAccess{orig}
 }
 
+// TODO: provide a Dup method on cv to get another separately closable view
+
 type nopCloserAccess struct {
 	ocm.ComponentVersionAccess
 }
 
-func (n *nopCloserAccess) CLose() error {
+func (n *nopCloserAccess) Close() error {
 	return nil
 }

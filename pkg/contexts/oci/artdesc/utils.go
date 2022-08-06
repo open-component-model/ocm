@@ -44,6 +44,7 @@ func IsDigest(version string) (bool, digest.Digest) {
 }
 
 func ToContentMediaType(media string) string {
+loop:
 	for {
 		last := strings.LastIndex(media, "+")
 		if last < 0 {
@@ -54,10 +55,12 @@ func ToContentMediaType(media string) string {
 			fallthrough
 		case "gzip":
 			fallthrough
+		case "yaml":
+			fallthrough
 		case "json":
 			media = media[:last]
 		default:
-			break
+			break loop
 		}
 	}
 	return media

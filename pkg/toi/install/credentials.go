@@ -92,7 +92,7 @@ func ParseCredentialSpecification(data []byte, desc string) (*Credentials, error
 	}
 	final, err := spiff.Marshal(cfg)
 	if err != nil {
-		return nil, errors.Wrapf(err, "crednetial marshalling")
+		return nil, errors.Wrapf(err, "credential marshalling")
 	}
 	var spec Credentials
 

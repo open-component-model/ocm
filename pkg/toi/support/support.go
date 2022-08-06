@@ -148,13 +148,13 @@ func (o *ExecutorOptions) Complete() error {
 	o.Closer = func() error {
 		list := errors.ErrListf("closing")
 		if versCloser != nil {
-			list.Add(versCloser.Close())
+			list.Add(errors.Wrapf(versCloser.Close(), "component version"))
 		}
 		if repoCloser != nil {
-			list.Add(repoCloser.Close())
+			list.Add(errors.Wrapf(repoCloser.Close(), "repository"))
 		}
 		if old != nil {
-			list.Add(old())
+			list.Add(errors.Wrapf(old(), "external closer"))
 		}
 		return list.Result()
 	}
