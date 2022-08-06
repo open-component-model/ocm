@@ -63,6 +63,10 @@ type Driver struct {
 
 var _ install.Driver = (*Driver)(nil)
 
+func New() install.Driver {
+	return &Driver{}
+}
+
 // GetContainerConfig returns a copy of the container configuration
 // used by the driver during container exec
 func (d *Driver) GetContainerConfig() (container.Config, error) {

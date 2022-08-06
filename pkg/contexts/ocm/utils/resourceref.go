@@ -95,12 +95,26 @@ func ResolveResourceReference(cv ocm.ComponentVersionAccess, ref metav1.Resource
 	if err != nil {
 		return nil, nil, err
 	}
+	eff = Dup(cv, eff)
 	r, err := eff.GetResource(ref.Resource)
 	if err != nil {
-		if eff != cv {
-			eff.Close()
-		}
+		eff.Close()
 		return nil, nil, err
 	}
 	return r, eff, nil
+}
+
+func Dup(orig ocm.ComponentVersionAccess, new ocm.ComponentVersionAccess) ocm.ComponentVersionAccess {
+	if orig != new {
+		return new
+	}
+	return &nopCloserAccess{orig}
+}
+
+type nopCloserAccess struct {
+	ocm.ComponentVersionAccess
+}
+
+func (n *nopCloserAccess) CLose() error {
+	return nil
 }

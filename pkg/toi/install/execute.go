@@ -21,7 +21,6 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 func Execute(d Driver, name string, rid metav1.Identity, credsrc accessio.DataSource, paramsrc accessio.DataSource, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
@@ -51,17 +50,9 @@ func Execute(d Driver, name string, rid metav1.Identity, credsrc accessio.DataSo
 		return nil, errors.Wrapf(err, "installer resource in %s", common.VersionedElementKey(cv).String())
 	}
 
-	m, err := ires.AccessMethod()
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to instantiate access")
-	}
-	data, err := m.Get()
-	m.Close()
-	if err != nil {
-		return nil, errors.Wrapf(err, "cannot get resource content")
-	}
 	var spec PackageSpecification
-	err = runtime.DefaultYAMLEncoding.Unmarshal(data, &spec)
+
+	err = GetResource(ires, &spec)
 	if err != nil {
 		return nil, errors.ErrInvalidWrap(err, "installer spec")
 	}

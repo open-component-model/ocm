@@ -1,7 +1,18 @@
 ---
-name: ocminstaller
+name: toiimage
 type: ociImage
 version: ${VERSION}
 input:
   type: docker
   path: ${IMAGE}
+---
+name: toiexecutor
+type: toiExecutor
+labels:
+  - name: commit
+    value: ${COMMIT}
+input:
+  type: file
+  mediaType: application/x-yaml
+  path: executorspec.yaml
+

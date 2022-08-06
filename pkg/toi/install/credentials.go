@@ -15,6 +15,8 @@
 package install
 
 import (
+	"fmt"
+
 	"github.com/mandelsoft/spiff/features"
 	"github.com/mandelsoft/spiff/spiffing"
 
@@ -43,6 +45,21 @@ type CredentialsRequestSpec struct {
 	Properties common.Properties `json:"properties"`
 	// Optional set to true make the request optional
 	Optional bool `json:"optional,omitempty"`
+}
+
+func (s *CredentialsRequestSpec) Match(o *CredentialsRequestSpec) error {
+	if !s.ConsumerId.Equals(o.ConsumerId) {
+		return fmt.Errorf("consumer id mismatch")
+	}
+	for k := range o.Properties {
+		if _, ok := s.Properties[k]; !ok {
+			return fmt.Errorf("property %q not declared", k)
+		}
+	}
+	if s.Optional && !o.Optional {
+		return fmt.Errorf("cannot be optional")
+	}
+	return nil
 }
 
 type Credentials struct {
@@ -96,13 +113,13 @@ func ParseCredentialRequest(data []byte) (*CredentialsRequest, error) {
 	return &req, err
 }
 
-func GetCredentials(ctx credentials.Context, spec *Credentials, req *CredentialsRequest) (*globalconfig.Config, error) {
+func GetCredentials(ctx credentials.Context, spec *Credentials, req map[string]CredentialsRequestSpec, mapping map[string]string) (*globalconfig.Config, error) {
 	cfg := config.New()
 	mem := memorycfg.New("default")
 	memrepo := memory.NewRepositorySpec("default")
 	list := errors.ErrListf("providing requested credentials")
 	var sub *errors.ErrorList
-	for n, r := range req.Credentials {
+	for n, r := range req {
 		list.Add(sub.Result())
 		sub = errors.ErrListf("credential request %q", n)
 		found, ok := spec.Credentials[n]
@@ -117,20 +134,27 @@ func GetCredentials(ctx credentials.Context, spec *Credentials, req *Credentials
 			sub.Add(errors.Wrapf(err, "failed to evaluate"))
 			continue
 		}
-		err = mem.AddCredentials(n, creds)
+		mapped := n
+		if mapping != nil {
+			mapped = mapping[n]
+		}
+		if mapped == "" {
+			return nil, errors.Newf("mapping missing crednetial %q", n)
+		}
+		err = mem.AddCredentials(mapped, creds)
 		if err != nil {
 			sub.Add(errors.Wrapf(err, "failed to add credentials"))
 			continue
 		}
 		if len(consumer) != 0 {
-			err = cfg.AddConsumer(consumer, credentials.NewCredentialsSpec(n, memrepo))
+			err = cfg.AddConsumer(consumer, credentials.NewCredentialsSpec(mapped, memrepo))
 			if err != nil {
 				sub.Add(errors.Newf("failed to add consumer %s from config", consumer))
 				continue
 			}
 		}
 		if len(r.ConsumerId) != 0 {
-			err = cfg.AddConsumer(r.ConsumerId, credentials.NewCredentialsSpec(n, memrepo))
+			err = cfg.AddConsumer(r.ConsumerId, credentials.NewCredentialsSpec(mapped, memrepo))
 			if err != nil {
 				sub.Add(errors.Newf("failed to add consumer %s from request", consumer))
 				continue

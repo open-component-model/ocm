@@ -39,7 +39,9 @@ func (o *Options) Add(opt Option) *Options {
 func (o Options) ApplyToRequest(r *Request) error {
 	for _, o := range o {
 		err := o.ApplyToRequest(r)
-		return err
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

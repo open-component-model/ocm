@@ -1,4 +1,4 @@
-## ocm componentversions bootstrap ocm-bootstrapping &mdash; Installation Bootstrapping Based On Component Versions
+## ocm bootstrap componentversions toi-bootstrapping &mdash; Tiny OCM Installer Based On Component Versions
 
 ### Description
 
@@ -113,11 +113,13 @@ The output names are mapped according the bootstrap specification resource.
 executors:
   - actions:
     - install
-    imageResourceRef:
+    resourceRef:
       resource:
         name: installerimage
     config:
       level: info
+#   parameterMapping:  # optional spiff mapping of Package configuration to 
+#      ....            # executor parameters
     outputs:
        test: bla
 credentials:
@@ -153,7 +155,7 @@ configScheme:
 
 ##### Parents
 
-* [ocm componentversions bootstrap](ocm_componentversions_bootstrap.md)	 &mdash; bootstrap component version
-* [ocm componentversions](ocm_componentversions.md)	 &mdash; Commands acting on components
+* [ocm bootstrap componentversions](ocm_bootstrap_componentversions.md)	 &mdash; bootstrap component version
+* [ocm bootstrap](ocm_bootstrap.md)	 &mdash; bootstrap components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

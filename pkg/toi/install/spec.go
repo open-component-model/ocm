@@ -28,23 +28,24 @@ const ExecutorSpecificationMimeType = "application/vnd.toi.gardener.cloud.execut
 
 type PackageSpecification struct {
 	CredentialsRequest `json:",inline"`
-	Template           json.RawMessage            `json:"configTemplate"`
-	Libraries          []metav1.ResourceReference `json:"templateLibraries"`
-	Scheme             json.RawMessage            `json:"configScheme"`
+	Template           json.RawMessage            `json:"configTemplate,omitempty"`
+	Libraries          []metav1.ResourceReference `json:"templateLibraries,omitempty"`
+	Scheme             json.RawMessage            `json:"configScheme,omitempty"`
 	Executors          []Executor                 `json:"executors"`
 }
 
 type Executor struct {
-	Actions          []string                 `json:"actions,omitempty"`
-	ResourceRef      metav1.ResourceReference `json:"resourceRef"`
-	Image            *Image                   `json:"image,omitempty"`
-	ParameterMapping json.RawMessage          `json:"parameterMapping,omitempty"`
-	Config           json.RawMessage          `json:"config,omitempty"`
-	Outputs          map[string]string        `json:"outputs,omitempty"`
+	Actions           []string                  `json:"actions,omitempty"`
+	ResourceRef       *metav1.ResourceReference `json:"resourceRef,omitempty"`
+	Image             *Image                    `json:"image,omitempty"`
+	CredentialMapping map[string]string         `json:"credentialMapping,omitempty"`
+	ParameterMapping  json.RawMessage           `json:"parameterMapping,omitempty"`
+	Config            json.RawMessage           `json:"config,omitempty"`
+	Outputs           map[string]string         `json:"outputs,omitempty"`
 }
 
 type Image struct {
-	Ref    string `json:"image"`
+	Ref    string `json:"ref"`
 	Digest string `json:"digest"`
 }
 
@@ -53,9 +54,10 @@ type Image struct {
 type ExecutorSpecification struct {
 	CredentialsRequest `json:",inline"`
 	Actions            []string                   `json:"actions,omitempty"`
-	ResourceRef        metav1.ResourceReference   `json:"resourceRef"`
-	ConfigTemplate     json.RawMessage            `json:"configTemplate"`
-	Libraries          []metav1.ResourceReference `json:"templateLibraries"`
+	Image              *Image                     `json:"image,omitempty"`
+	ImageRef           *metav1.ResourceReference  `json:"imageRef,omitempty"`
+	Template           json.RawMessage            `json:"configTemplate,omitempty"`
+	Libraries          []metav1.ResourceReference `json:"templateLibraries,omitempty"`
 	Scheme             json.RawMessage            `json:"configScheme,omitempty"`
 	Outputs            map[string]OutputSpec      `json:"outputs,omitempty"`
 }

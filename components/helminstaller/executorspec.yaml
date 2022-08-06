@@ -1,0 +1,39 @@
+actions:
+  - install
+  - uninstall
+imageRef:
+  resource:
+    name: toiimage
+configScheme:
+  type: object
+  additionalProperties: false
+  required:
+    - chart
+    - kubeConfigName
+  properties:
+    chart:
+      type: object
+      required:
+      - resource
+      additionalProperties: false
+      properties:
+        resource:
+          type: string
+        referencePath:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
+
+    release:
+      type: string
+    namespace:
+      type: string
+    createNamespace:
+      type: boolean
+    values:
+      type: object
+    kubeConfigName:
+      type: string
+

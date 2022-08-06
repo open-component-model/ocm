@@ -112,5 +112,5 @@ $ ocm bootstrap componentversion ghcr.io/mandelsoft/ocmdemoinstaller:0.0.1-dev
 
 ##### Additional Help Topics
 
-* [ocm componentversions bootstrap <b>ocm-bootstrapping</b>](ocm_componentversions_bootstrap_ocm-bootstrapping.md)	 &mdash; installation bootstrapping based on component versions
+* [ocm componentversions bootstrap <b>toi-bootstrapping</b>](ocm_componentversions_bootstrap_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions
 

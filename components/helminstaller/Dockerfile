@@ -10,5 +10,5 @@ RUN CGO_ENABLED=0 go build -o /main ./cmds/helminstaller
 
 FROM alpine
 
-COPY --from=builder /main /ocm/run
-ENTRYPOINT [ "/ocm/run" ]
+COPY --from=builder /main /toi/run
+ENTRYPOINT [ "/toi/run" ]

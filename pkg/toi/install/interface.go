@@ -21,12 +21,12 @@ import (
 )
 
 const (
-	PathOCM         = "/ocm"
+	PathTOI         = "/toi"
 	Inputs          = "inputs"
 	Outputs         = "outputs"
-	PathExec        = PathOCM + "/run"
-	PathOutputs     = PathOCM + "/" + Outputs
-	PathInputs      = PathOCM + "/" + Inputs
+	PathExec        = PathTOI + "/run"
+	PathOutputs     = PathTOI + "/" + Outputs
+	PathInputs      = PathTOI + "/" + Inputs
 	InputParameters = "parameters"
 	InputConfig     = "config"
 	InputOCMConfig  = "ocmconfig"

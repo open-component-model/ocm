@@ -60,10 +60,7 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 	if err != nil {
 		return err
 	}
-
-	if cv != rcv {
-		defer rcv.Close()
-	}
+	defer rcv.Close()
 
 	fmt.Printf("Installing helm chart from resource %s@%s\n", cfg.Chart, common.VersionedElementKey(cv))
 	if acc.Meta().Type != consts.HelmChart {
@@ -91,9 +88,7 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 		if err != nil {
 			return errors.Wrapf(err, "mapping %d (%s)", i+1, &v.ResourceReference)
 		}
-		if rcv != cv {
-			rcv.Close()
-		}
+		rcv.Close()
 		ref, err := utils.GetOCIArtefactRef(ctx, acc)
 		if err != nil {
 			return errors.Wrapf(err, "mapping %d: cannot resolve resource %s to an OCI Reference", i+1, v)

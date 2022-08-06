@@ -19,7 +19,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/toi/drivers/docker"
+	defaultd "github.com/open-component-model/ocm/pkg/toi/drivers/default"
 	"github.com/open-component-model/ocm/pkg/toi/install"
 
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -185,7 +185,7 @@ type Binary struct {
 }
 
 func (a *action) Out() error {
-	result, err := install.Execute(&docker.Driver{}, a.cmd.Action, a.cmd.Id, a.cmd.Credentials, a.cmd.Parameters, a.cmd.OCMContext(), a.data[0].ComponentVersion, lookupoption.From(a.cmd))
+	result, err := install.Execute(defaultd.New(), a.cmd.Action, a.cmd.Id, a.cmd.Credentials, a.cmd.Parameters, a.cmd.OCMContext(), a.data[0].ComponentVersion, lookupoption.From(a.cmd))
 	if err != nil {
 		return err
 	}

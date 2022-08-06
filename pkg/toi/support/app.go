@@ -20,6 +20,8 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/pkg/toi/install"
+
 	"github.com/open-component-model/ocm/pkg/cobrautils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -93,7 +95,7 @@ func (o *BootstrapperCLIOptions) AddFlags(fs *pflag.FlagSet) {
 
 	fs.StringVarP(&o.Inputs, "inputs", "", "", "input path")
 	fs.StringVarP(&o.Outputs, "outputs", "", "", "output path")
-	fs.StringVarP(&o.Parameters, "bootstraproot", "", "/ocm", "bootstrapper contract root folder")
+	fs.StringVarP(&o.Root, "bootstraproot", "", install.PathTOI, "bootstrapper contract root folder")
 	fs.StringVarP(&o.OCMConfig, "config", "", "", "bootstrapper configuration input file")
 	fs.StringVarP(&o.Parameters, "parameters", "", "", "bootstrapper parameter input file")
 	fs.StringVarP(&o.RepoPath, "ctf", "", "", "bootstrapper transport archive")

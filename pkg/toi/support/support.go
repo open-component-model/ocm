@@ -75,7 +75,7 @@ func (o *ExecutorOptions) Complete() error {
 		o.Action = "install"
 	}
 	if o.Root == "" {
-		o.Root = install.PathOCM
+		o.Root = install.PathTOI
 	}
 	if o.Inputs == "" {
 		o.Inputs = o.Root + "/" + install.Inputs
