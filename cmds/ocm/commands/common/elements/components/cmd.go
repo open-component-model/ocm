@@ -12,11 +12,28 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package attrs
+package components
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/ociuploadattr"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
+	ocmcomp "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
+	toicomp "github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/components"
+
+	"github.com/spf13/cobra"
+
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 )
+
+var Names = names.Components
+
+// NewCommand creates a new command.
+func NewCommand(ctx clictx.Context) *cobra.Command {
+	cmd := utils.MassageCommand(&cobra.Command{
+		Short: "Commands acting on components",
+	}, Names...)
+	ocmcomp.AddCommands(ctx, cmd)
+	toicomp.AddCommands(ctx, cmd)
+	return cmd
+}

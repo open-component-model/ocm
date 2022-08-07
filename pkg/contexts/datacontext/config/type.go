@@ -80,6 +80,10 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 		return nil
 	}
 	for a, e := range a.Attributes {
+		eff := datacontext.DefaultAttributeScheme.Shortcuts()[a]
+		if eff != "" {
+			a = eff
+		}
 		list.Add(errors.Wrapf(t.GetAttributes().SetEncodedAttribute(a, e, runtime.DefaultJSONEncoding), "attribute %q", a))
 	}
 	return list.Result()

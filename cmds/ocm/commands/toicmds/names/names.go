@@ -12,11 +12,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package attrs
+package names
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/ociuploadattr"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
+)
+
+var (
+	Components = names.Components
 )

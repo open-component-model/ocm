@@ -12,20 +12,22 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package signingattr
+package ociuploadattr
 
 import (
+	"fmt"
+	"sync"
+
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/signing"
 )
 
-const ATTR_KEY = "github.com/mandelsoft/ocm/signing"
-const ATTR_SHORT = "signing"
+const ATTR_KEY = "github.com/mandelsoft/ocm/ociuploadrepo"
+const ATTR_SHORT = "ociuploadrepo"
 
 func init() {
-	datacontext.RegisterAttributeType(ATTR_KEY, AttributeType{})
+	datacontext.RegisterAttributeType(ATTR_KEY, AttributeType{}, ATTR_SHORT)
 }
 
 type AttributeType struct {
@@ -37,60 +39,58 @@ func (a AttributeType) Name() string {
 
 func (a AttributeType) Description() string {
 	return `
-*JSON*
-Public and private Key settings given as JSON document with the following
-format:
-
-<pre>
-{
-  "publicKeys"": [
-     "&lt;provider>": {
-       "data": ""&lt;base64>"
-     }
-  ],
-  "privateKeys"": [
-     "&lt;provider>": {
-       "path": ""&lt;file path>"
-     }
-  ]
-</pre>
-
-One of following data fields are possible:
-- <code>data</code>:       base64 encoded binary data
-- <code>stringdata</code>: plain text data
-- <code>path</code>:       a file path to read the data from
+*oci base repository ref*
+Upload local OCI artefact blobs to a dedicated repository.
 `
 }
 
 func (a AttributeType) Encode(v interface{}, marshaller runtime.Marshaler) ([]byte, error) {
-	return nil, errors.ErrNotSupported("encoding of key registry")
+	if _, ok := v.(*Attribute); !ok {
+		return nil, fmt.Errorf("OCI Upload Attribute structure required")
+	}
+	return marshaller.Marshal(v)
 }
 
 func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (interface{}, error) {
-	var value Config
+	var value Attribute
 	err := unmarshaller.Unmarshal(data, &value)
-	if err != nil {
-		return nil, err
+	if err == nil {
+		return &value, nil
 	}
-	value.SetType(ConfigType)
-	registry := signing.NewRegistry(signing.DefaultHandlerRegistry(), signing.DefaultKeyRegistry())
-	value.ApplyToRegistry(registry)
-	return registry, err
+	return &Attribute{Ref: string(data)}, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func Get(ctx datacontext.Context) signing.Registry {
-	a := ctx.GetAttributes().GetAttribute(ATTR_KEY)
-	if a == nil {
-		return signing.DefaultRegistry()
-	}
-	return a.(signing.Registry)
+type Attribute struct {
+	Ref string `json:"ociRef"`
+
+	lock     sync.Mutex
+	repo     oci.Repository
+	baserepo string
 }
 
-func Set(ctx datacontext.Context, registry signing.KeyRegistry) error {
-	if _, ok := registry.(signing.Registry); !ok {
-		registry = signing.NewRegistry(signing.DefaultHandlerRegistry(), registry)
+func (a *Attribute) Close() error {
+	a.lock.Lock()
+	defer a.lock.Unlock()
+	if a.repo != nil {
+		defer func() {
+			a.repo = nil
+			a.baserepo = ""
+		}()
+		return a.Close()
 	}
-	return ctx.GetAttributes().SetAttribute(ATTR_KEY, registry)
+	return nil
+}
+
+func Get(ctx datacontext.Context) *Attribute {
+	a := ctx.GetAttributes().GetAttribute(ATTR_KEY)
+	if a == nil {
+		return nil
+	}
+	return a.(*Attribute)
+}
+
+func Set(ctx datacontext.Context, attr *Attribute) error {
+	return ctx.GetAttributes().SetAttribute(ATTR_KEY, attr)
 }

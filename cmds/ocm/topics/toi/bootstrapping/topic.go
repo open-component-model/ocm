@@ -26,9 +26,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-func New(ctx clictx.Context) *cobra.Command {
+func New(ctx clictx.Context, name string) *cobra.Command {
 	return &cobra.Command{
-		Use:   "toi-bootstrapping",
+		Use:   name,
 		Short: "Tiny OCM Installer based on component versions",
 		Example: `
 executors:

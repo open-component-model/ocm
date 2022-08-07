@@ -22,22 +22,30 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/cmds/ocm/topics/common/attributes"
+	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
+
 	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/vfsattr"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 
+	// dedicated command sub areas
 	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds"
-	creds "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/credentials"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds"
-	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds"
+
+	// element commands
+	creds "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/credentials"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
+
+	// verbs
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/add"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/bootstrap"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/clean"
@@ -49,14 +57,18 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/sign"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/transfer"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/verify"
+
+	// topics
 	topicconfig "github.com/open-component-model/ocm/cmds/ocm/topics/common/config"
 	topicocirefs "github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
-	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/bootstrapping"
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
+
+	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	datactg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
+	datacfg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
 
 	"github.com/spf13/pflag"
 
@@ -64,6 +76,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/version"
 
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
+	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 )
 
 type CLIOptions struct {
@@ -125,7 +138,7 @@ form
 
 The value can be a simple type or a json string for complex values. The following
 attributes are supported:
-` + Attributes()
+` + attributes.Attributes()
 
 func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	if ctx == nil {
@@ -171,6 +184,7 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(cachecmds.NewCommand(opts.Context))
 	cmd.AddCommand(ocicmds.NewCommand(opts.Context))
 	cmd.AddCommand(ocmcmds.NewCommand(opts.Context))
+	cmd.AddCommand(toicmds.NewCommand(opts.Context))
 
 	cmd.AddCommand(creds.NewCommand(opts.Context))
 
@@ -188,12 +202,13 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(topicconfig.New(ctx))
 	cmd.AddCommand(topicocirefs.New(ctx))
 	cmd.AddCommand(topicocmrefs.New(ctx))
-	cmd.AddCommand(topicbootstrap.New(ctx))
+	cmd.AddCommand(attributes.New(ctx))
+	cmd.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 
 	help.AddCommand(topicconfig.New(ctx))
 	help.AddCommand(topicocirefs.New(ctx))
 	help.AddCommand(topicocmrefs.New(ctx))
-	help.AddCommand(topicbootstrap.New(ctx))
+	help.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 
 	return cmd
 }
@@ -245,7 +260,7 @@ func (o *CLIOptions) Complete() error {
 	set, err := common2.ParseLabels(o.Settings, "attribute setting")
 	if err == nil && len(set) > 0 {
 		ctx := o.Context.ConfigContext()
-		spec := datactg.New()
+		spec := datacfg.New()
 		for _, s := range set {
 			attr := s.Name
 			eff := datacontext.DefaultAttributeScheme.Shortcuts()[attr]
@@ -272,34 +287,4 @@ func NewVersionCommand() *cobra.Command {
 			fmt.Printf("%#v", v)
 		},
 	}
-}
-
-func Attributes() string {
-	s := ""
-	sep := ""
-	for _, a := range datacontext.DefaultAttributeScheme.KnownTypeNames() {
-		t, _ := datacontext.DefaultAttributeScheme.GetType(a)
-		desc := t.Description()
-		if !strings.Contains(desc, "not via command line") {
-			for strings.HasPrefix(desc, "\n") {
-				desc = desc[1:]
-			}
-			for strings.HasSuffix(desc, "\n") {
-				desc = desc[:len(desc)-1]
-			}
-			desc = strings.Replace(desc, "\n", "\n  ", -1)
-			short := ""
-			for k, v := range datacontext.DefaultAttributeScheme.Shortcuts() {
-				if v == a {
-					short = short + ",<code>" + k + "</code>"
-				}
-			}
-			if len(short) > 0 {
-				short = " [" + short[1:] + "]"
-			}
-			s = fmt.Sprintf("%s%s- <code>%s</code>%s: %s", s, sep, a, short, desc)
-			sep = "\n"
-		}
-	}
-	return s
 }

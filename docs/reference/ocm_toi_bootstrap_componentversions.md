@@ -1,16 +1,16 @@
-## ocm ocm componentversions bootstrap &mdash; Bootstrap Component Version
+## ocm toi bootstrap componentversions &mdash; Bootstrap Component Version
 
 ### Synopsis
 
 ```
-ocm ocm componentversions bootstrap [<options>] <action> {<component-reference>} {<resource id field>}
+ocm toi bootstrap componentversions [<options>] <action> {<component-reference>} {<resource id field>}
 ```
 
 ### Options
 
 ```
   -c, --credentials string   credentials file
-  -h, --help                 help for bootstrap
+  -h, --help                 help for componentversions
   -o, --outputs string       output file/directory
   -p, --parameters string    parameter file
 ```
@@ -18,11 +18,19 @@ ocm ocm componentversions bootstrap [<options>] <action> {<component-reference>}
 ### Description
 
 
-Use the simple OCM bootstrap mechanism to execute a bootstrap resource.
+Use the simple TOI bootstrap mechanism to execute actions for a TOI package resource
+based on the content of an OCM component version and some command input describing
+the dedicated installation target.
 
-The bootstrap resource must have the type <code>toiPackage</code>.
-This is a simple YAML file resource describing the bootstrapping. See also the
-topic [ocm ocm-bootstrapping](ocm_ocm-bootstrapping.md).
+The package resource must have the type <code>toiPackage</code>.
+This is a simple YAML file resource describing the bootstrapping of a dedicated kind
+of software. See also the topic [ocm toi toi-bootstrapping](ocm_toi_toi-bootstrapping.md).
+
+THis resource finally describes an executor image, which will be executed in a
+container with the installation source and (instance specific) user settings.
+The container is just executed, the framework make no assumption about the
+meaning/outcome of the execution. Therefore, any kind of actions can be described and
+issued this way, not on installation handling.
 
 The first matching resource of this type is selected. Optionally a set of
 identity attribute can be specified used to refine the match. This can be the
@@ -97,7 +105,7 @@ references.
 
 ```
 
-$ ocm bootstrap componentversion ghcr.io/mandelsoft/ocmdemoinstaller:0.0.1-dev
+$ ocm toi bootstrap componentversion ghcr.io/mandelsoft/ocmdemoinstaller:0.0.1-dev
 
 ```
 
@@ -105,13 +113,13 @@ $ ocm bootstrap componentversion ghcr.io/mandelsoft/ocmdemoinstaller:0.0.1-dev
 
 ##### Parents
 
-* [ocm ocm componentversions](ocm_ocm_componentversions.md)	 &mdash; Commands acting on components
-* [ocm ocm](ocm_ocm.md)	 &mdash; Dedicated command flavors for the Open Component Model
+* [ocm toi bootstrap](ocm_toi_bootstrap.md)	 &mdash; bootstrap components
+* [ocm toi](ocm_toi.md)	 &mdash; Dedicated command flavors for the TOI layer
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
 
 
 ##### Additional Help Topics
 
-* [ocm ocm componentversions bootstrap <b>toi-bootstrapping</b>](ocm_ocm_componentversions_bootstrap_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions
+* [ocm toi bootstrap componentversions <b>toi-bootstrapping</b>](ocm_toi_bootstrap_componentversions_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions
 

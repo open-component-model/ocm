@@ -15,6 +15,7 @@
 package install
 
 import (
+	"bytes"
 	"fmt"
 	"sort"
 
@@ -22,6 +23,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/xeipuuv/gojsonschema"
+
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config/config"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -276,7 +279,7 @@ func ProcessConfig(name string, octx ocm.Context, cv ocm.ComponentVersionAccess,
 		}
 	}
 	if len(schemedata) > 0 {
-		fmt.Printf("validating config by scheme...\n")
+		fmt.Printf("validating %s by scheme...\n", name)
 		err = ValidateByScheme(config, schemedata)
 		if err != nil {
 			return nil, errors.Wrapf(err, name+" validation failed")
@@ -350,7 +353,7 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 	if econfig == nil {
 		fmt.Printf("no executor config found\n")
 	} else {
-		fmt.Printf("using executor config:\n%s\n", string(econfig))
+		fmt.Printf("using executor config:\n%s\n", utils2.IndentLines(string(econfig), "  "))
 	}
 	// handle credentials
 	credentials, credmapping, err := CheckCredentialRequests(executor, spec, &espec.Spec)
@@ -375,11 +378,23 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 	if err != nil {
 		return nil, errors.Wrapf(err, "error processing parameters")
 	}
+	if params == nil {
+		fmt.Printf("no parameter config found\n")
+	} else {
+		fmt.Printf("using package parameters:\n%s\n", utils2.IndentLines(string(params), "  "))
+	}
 
 	if executor.ParameterMapping != nil {
+		orig := params
 		params, err = spiff.CascadeWith(
 			spiff.TemplateData("executor parameter mapping", executor.ParameterMapping),
 			spiff.StubData("package config", params))
+
+		if err == nil {
+			if !bytes.Equal(orig, params) {
+				fmt.Printf("using executor parameters:\n%s\n", utils2.IndentLines(string(params), "  "))
+			}
+		}
 	}
 	if err != nil {
 		return nil, errors.Wrapf(err, "error mapping parameters to executor")

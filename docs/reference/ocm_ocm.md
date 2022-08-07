@@ -34,5 +34,4 @@ ocm ocm [<options>] <sub command> ...
 ##### Additional Help Topics
 
 * [ocm ocm <b>ocm-references</b>](ocm_ocm_ocm-references.md)	 &mdash; notation for OCM references
-* [ocm ocm <b>toi-bootstrapping</b>](ocm_ocm_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions
 

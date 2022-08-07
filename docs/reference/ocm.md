@@ -70,17 +70,30 @@ form
 The value can be a simple type or a json string for complex values. The following
 attributes are supported:
 - <code>github.com/mandelsoft/oci/cache</code> [<code>cache</code>]: *string*
+
   Filesystem folder to use for caching OCI blobs
+
 - <code>github.com/mandelsoft/ocm/compat</code> [<code>compat</code>]: *bool*
+
   Compatibility mode: Avoid generic local access methods and prefer type specific ones.
+
 - <code>github.com/mandelsoft/ocm/keeplocalblob</code> [<code>keeplocalblob</code>]: *bool*
+
   Keep local blobs when importing OCI artefacts to OCI registries from <code>localBlob</code>
   access methods. By default they will be expanded to OCI artefacts with the
   access method <code>ociRegistry</code>. If this option is set to true, they will be stored
   as local blobs, also. The access method will still be <code>localBlob</code> but with a nested
   <code>ociRegistry</code> access method for describing the global access.
-- <code>github.com/mandelsoft/ocm/signing</code>: *bool*
-  Public and private Key settings.
+
+- <code>github.com/mandelsoft/ocm/ociuploadrepo</code> [<code>ociuploadrepo</code>]: *oci base repository ref*
+
+  Upload local OCI artefact blobs to a dedicated repository.
+
+- <code>github.com/mandelsoft/ocm/signing</code>: *JSON*
+
+  Public and private Key settings given as JSON document with the following
+  format:
+  
   <pre>
   {
     "publicKeys"": [
@@ -94,6 +107,11 @@ attributes are supported:
        }
     ]
   </pre>
+  
+  One of following data fields are possible:
+  - <code>data</code>:       base64 encoded binary data
+  - <code>stringdata</code>: plain text data
+  - <code>path</code>:       a file path to read the data from
 
 ### SEE ALSO
 
@@ -119,6 +137,7 @@ attributes are supported:
 * [ocm <b>show</b>](ocm_show.md)	 &mdash; Show tags or versions
 * [ocm <b>sign</b>](ocm_sign.md)	 &mdash; Sign components
 * [ocm <b>sources</b>](ocm_sources.md)	 &mdash; Commands acting on component sources
+* [ocm <b>toi</b>](ocm_toi.md)	 &mdash; Dedicated command flavors for the TOI layer
 * [ocm <b>transfer</b>](ocm_transfer.md)	 &mdash; Transfer artefacts or components
 * [ocm <b>verify</b>](ocm_verify.md)	 &mdash; Verify component version signatures
 * [ocm <b>version</b>](ocm_version.md)	 &mdash; displays the version
@@ -127,6 +146,7 @@ attributes are supported:
 
 ##### Additional Help Topics
 
+* [ocm <b>attributes</b>](ocm_attributes.md)	 &mdash; configuration attributes used to control the behaviour
 * [ocm <b>configfile</b>](ocm_configfile.md)	 &mdash; configuration file
 * [ocm <b>oci-references</b>](ocm_oci-references.md)	 &mdash; notation for OCI references
 * [ocm <b>ocm-references</b>](ocm_ocm-references.md)	 &mdash; notation for OCM references

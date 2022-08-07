@@ -37,12 +37,12 @@ import (
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 
-	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/bootstrapping"
+	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
 )
 
 const (
@@ -79,11 +79,19 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Args:  cobra.MinimumNArgs(2),
 		Short: "bootstrap component version",
 		Long: `
-Use the simple OCM bootstrap mechanism to execute a bootstrap resource.
+Use the simple TOI bootstrap mechanism to execute actions for a TOI package resource
+based on the content of an OCM component version and some command input describing
+the dedicated installation target.
 
-The bootstrap resource must have the type <code>` + install.TypeTOIPackage + `</code>.
-This is a simple YAML file resource describing the bootstrapping. See also the
-topic <CMD>ocm ocm-bootstrapping</CMD>.
+The package resource must have the type <code>` + install.TypeTOIPackage + `</code>.
+This is a simple YAML file resource describing the bootstrapping of a dedicated kind
+of software. See also the topic <CMD>ocm toi toi-bootstrapping</CMD>.
+
+THis resource finally describes an executor image, which will be executed in a
+container with the installation source and (instance specific) user settings.
+The container is just executed, the framework make no assumption about the
+meaning/outcome of the execution. Therefore, any kind of actions can be described and
+issued this way, not on installation handling.
 
 The first matching resource of this type is selected. Optionally a set of
 identity attribute can be specified used to refine the match. This can be the
@@ -99,10 +107,10 @@ If no credentials file name is provided (option -c) the file
 provided (option -p) the file <code>` + DEFAULT_PARAMETER_FILE + `</code> is used, if present.
 `,
 		Example: `
-$ ocm bootstrap componentversion ghcr.io/mandelsoft/ocmdemoinstaller:0.0.1-dev
+$ ocm toi bootstrap componentversion ghcr.io/mandelsoft/ocmdemoinstaller:0.0.1-dev
 `,
 	}
-	cmd.AddCommand(topicbootstrap.New(o.Context))
+	cmd.AddCommand(topicbootstrap.New(o.Context, "toi-bootstrapping"))
 	return cmd
 }
 

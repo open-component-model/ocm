@@ -2,7 +2,7 @@ module github.com/open-component-model/ocm
 
 go 1.18
 
-replace github.com/spf13/cobra => github.com/mandelsoft/cobra v1.4.1-0.20220602090819-209e4a9a442d
+replace github.com/spf13/cobra => github.com/mandelsoft/cobra v1.4.1-0.20220807114430-d47656a53e96
 
 require (
 	github.com/docker/cli v20.10.17+incompatible
@@ -18,7 +18,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.0.3-0.20211202193544-a5463b7f9c84
 	github.com/sirupsen/logrus v1.8.1
-	github.com/spf13/cobra v1.4.1-0.20220518005708-5b11656e45a6
+	github.com/spf13/cobra v1.5.1-0.20220628211933-69083f81b225
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect

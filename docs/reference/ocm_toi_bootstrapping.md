@@ -1,4 +1,4 @@
-## ocm componentversions bootstrap toi-bootstrapping &mdash; Tiny OCM Installer Based On Component Versions
+## ocm toi bootstrapping &mdash; Tiny OCM Installer Based On Component Versions
 
 ### Description
 
@@ -350,7 +350,6 @@ configScheme:
 
 ##### Parents
 
-* [ocm componentversions bootstrap](ocm_componentversions_bootstrap.md)	 &mdash; bootstrap component version
-* [ocm componentversions](ocm_componentversions.md)	 &mdash; Commands acting on components
+* [ocm toi](ocm_toi.md)	 &mdash; Dedicated command flavors for the TOI layer
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

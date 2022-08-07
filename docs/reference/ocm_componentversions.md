@@ -21,7 +21,6 @@ ocm componentversions [<options>] <sub command> ...
 
 ##### Sub Commands
 
-* [ocm componentversions <b>bootstrap</b>](ocm_componentversions_bootstrap.md)	 &mdash; bootstrap component version
 * [ocm componentversions <b>download</b>](ocm_componentversions_download.md)	 &mdash; download ocm component versions
 * [ocm componentversions <b>get</b>](ocm_componentversions_get.md)	 &mdash; get component version
 * [ocm componentversions <b>sign</b>](ocm_componentversions_sign.md)	 &mdash; Sign component version
