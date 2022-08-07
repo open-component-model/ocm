@@ -25,12 +25,12 @@ import (
 func init() {
 	h := &repospechandler{}
 	cpi.RegisterRepositorySpecHandler(h, "")
-	cpi.RegisterRepositorySpecHandler(h, CTFComponentArchiveType)
+	cpi.RegisterRepositorySpecHandler(h, Type)
 	cpi.RegisterRepositorySpecHandler(h, "ca")
 	for _, f := range ctf.SupportedFormats() {
 		cpi.RegisterRepositorySpecHandler(h, string(f))
 		cpi.RegisterRepositorySpecHandler(h, "ca+"+string(f))
-		cpi.RegisterRepositorySpecHandler(h, CTFComponentArchiveType+"+"+string(f))
+		cpi.RegisterRepositorySpecHandler(h, Type+"+"+string(f))
 	}
 }
 
@@ -49,7 +49,7 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 	if !u.CreateIfMissing {
 		hint = ""
 	}
-	create, ok, err := accessobj.CheckFile(CTFComponentArchiveType, hint, accessio.TypeForType(u.Type) == CTFComponentArchiveType, path, fs, ComponentDescriptorFileName)
+	create, ok, err := accessobj.CheckFile(Type, hint, accessio.TypeForType(u.Type) == Type, path, fs, ComponentDescriptorFileName)
 	if !ok || err != nil {
 		if err != nil {
 			return nil, err

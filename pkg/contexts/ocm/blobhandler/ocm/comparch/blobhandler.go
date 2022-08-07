@@ -26,7 +26,7 @@ import (
 )
 
 func init() {
-	cpi.RegisterBlobHandler(NewBlobHandler(), cpi.ForRepo(cpi.CONTEXT_TYPE, comparch.CTFComponentArchiveType))
+	cpi.RegisterBlobHandler(NewBlobHandler(), cpi.ForRepo(cpi.CONTEXT_TYPE, comparch.Type))
 }
 
 ////////////////////////////////////////////////////////////////////////////////

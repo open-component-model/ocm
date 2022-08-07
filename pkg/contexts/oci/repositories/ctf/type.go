@@ -25,13 +25,13 @@ import (
 )
 
 const (
-	RepositoryType   = cpi.CommonTransportFormat
-	RepositoryTypeV1 = RepositoryType + runtime.VersionSeparator + "v1"
+	Type   = cpi.CommonTransportFormat
+	TypeV1 = Type + runtime.VersionSeparator + "v1"
 )
 
 func init() {
-	cpi.RegisterRepositoryType(RepositoryType, cpi.NewRepositoryType(RepositoryType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(RepositoryTypeV1, cpi.NewRepositoryType(RepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(Type, cpi.NewRepositoryType(Type, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(TypeV1, cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
@@ -61,7 +61,7 @@ func NewRepositorySpec(mode accessobj.AccessMode, filePath string, opts ...acces
 		}
 	}
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(RepositoryType),
+		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		FilePath:            filePath,
 		Options:             o.Default(),
 		AccessMode:          mode,
@@ -73,7 +73,7 @@ func (a *RepositorySpec) IsIntermediate() bool {
 }
 
 func (a *RepositorySpec) GetType() string {
-	return RepositoryType
+	return Type
 }
 
 func (s *RepositorySpec) Name() string {

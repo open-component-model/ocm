@@ -30,11 +30,11 @@ func NewRepository(creds cpi.Credentials) cpi.Repository {
 }
 
 func (r *Repository) ExistsCredentials(name string) (bool, error) {
-	return name == DirectCredentialsRepositoryType, nil
+	return name == Type, nil
 }
 
 func (r *Repository) LookupCredentials(name string) (cpi.Credentials, error) {
-	if name != DirectCredentialsRepositoryType && name != "" {
+	if name != Type && name != "" {
 		return nil, cpi.ErrUnknownCredentials(name)
 	}
 	return r.Credentials, nil

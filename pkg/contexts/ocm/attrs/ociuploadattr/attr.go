@@ -20,6 +20,8 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -57,6 +59,13 @@ func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (in
 	if err == nil {
 		return &value, nil
 	}
+	ref, err := oci.ParseRef(string(data))
+	if err != nil {
+		return nil, errors.ErrInvalidWrap(err, oci.KIND_OCI_REFERENCE, string(data))
+	}
+	if ref.Tag != nil || ref.Digest != nil {
+		return nil, errors.ErrInvalidWrap(err, oci.KIND_OCI_REFERENCE, string(data))
+	}
 	return &Attribute{Ref: string(data)}, nil
 }
 
@@ -66,8 +75,13 @@ type Attribute struct {
 	Ref string `json:"ociRef"`
 
 	lock     sync.Mutex
+	ref      *oci.RefSpec
 	repo     oci.Repository
 	baserepo string
+}
+
+func New(ref string) *Attribute {
+	return &Attribute{Ref: ref}
 }
 
 func (a *Attribute) Close() error {
@@ -78,10 +92,44 @@ func (a *Attribute) Close() error {
 			a.repo = nil
 			a.baserepo = ""
 		}()
-		return a.Close()
+		return a.repo.Close()
 	}
 	return nil
 }
+
+func (a *Attribute) GetInfo(ctx cpi.Context) (oci.Repository, string, string, error) {
+
+	ref, err := oci.ParseRef(a.Ref)
+	if err != nil {
+		return nil, "", "", errors.ErrInvalidWrap(err, oci.KIND_OCI_REFERENCE, a.Ref)
+	}
+	if ref.Tag != nil || ref.Digest != nil {
+		return nil, "", "", errors.ErrInvalidWrap(err, oci.KIND_OCI_REFERENCE, a.Ref)
+	}
+
+	a.lock.Lock()
+	defer a.lock.Unlock()
+	if a.ref == nil || ref != *a.ref {
+		if a.repo != nil {
+			a.repo.Close()
+			a.repo = nil
+		}
+
+		spec, err := ctx.OCIContext().MapUniformRepositorySpec(&ref.UniformRepositorySpec)
+		if err != nil {
+			return nil, "", "", err
+		}
+		a.repo, err = ctx.OCIContext().RepositoryForSpec(spec)
+		if err != nil {
+			return nil, "", "", err
+		}
+		a.baserepo = ref.Repository
+		a.ref = &ref
+	}
+	return a.repo, a.ref.UniformRepositorySpec.String(), a.baserepo, nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 func Get(ctx datacontext.Context) *Attribute {
 	a := ctx.GetAttributes().GetAttribute(ATTR_KEY)

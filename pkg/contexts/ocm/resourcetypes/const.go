@@ -14,5 +14,16 @@
 
 package resourcetypes
 
-// OCI_IMAGE is the resource type of any kind of oci artefact
-const OCI_IMAGE = "ociImage"
+const (
+	// OCI_ARTEFACT describes a generic OCI artefact follwoing the
+	//   [open containers image specification](https://github.com/opencontainers/image-spec/blob/main/spec.md)
+	OCI_ARTEFACT = "ociArtefact"
+	// OCI_IMAGE describes an OCIArtefact containing an image
+	OCI_IMAGE = "ociImage"
+	// HELM_CHART describes a helm chart, either stored as OCI artefact or as tar blob (tar media type)
+	HELM_CHART = "helmChart"
+	// BLOB describes any anonymous untyped blob data
+	BLOB = "blob"
+	// FILESYSTEM_CONTENT describes a directory structure stored as archive (tar, tgz)
+	FILESYSTEM_CONTENT = "`filesytemContent"
+)

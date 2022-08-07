@@ -54,7 +54,7 @@ var _ = Describe("access method", func() {
 		Expect(reflect.TypeOf(eff.RepositorySpec).String()).To(Equal("*ocireg.RepositorySpec"))
 		Expect(eff.ComponentNameMapping).To(Equal(ocmreg.OCIRegistryDigestMapping))
 
-		Expect(spec.GetType()).To(Equal(ocireg.RepositoryType))
+		Expect(spec.GetType()).To(Equal(ocireg.Type))
 		effoci, ok := eff.RepositorySpec.(*ocireg.RepositorySpec)
 		Expect(ok).To(BeTrue())
 		Expect(effoci.BaseURL).To(Equal("X"))

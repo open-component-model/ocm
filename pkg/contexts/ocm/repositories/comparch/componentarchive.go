@@ -116,7 +116,7 @@ func (c *ComponentArchive) GetBlobData(name string) (cpi.DataAccess, error) {
 }
 
 func (c *ComponentArchive) GetStorageContext(cv cpi.ComponentVersionAccess) cpi.StorageContext {
-	return ocmhdlr.New(c.AsRepository(), cv, c.base, CTFComponentArchiveType)
+	return ocmhdlr.New(c.AsRepository(), cv, c.base, Type)
 }
 
 func (c *ComponentArchive) AddBlobFor(storagectx cpi.StorageContext, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {

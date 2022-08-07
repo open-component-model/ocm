@@ -31,7 +31,7 @@ import (
 
 const CONTEXT_TYPE = "ocm.context.gardener.cloud"
 
-const CommonTransportFormat = ctf.RepositoryType
+const CommonTransportFormat = ctf.Type
 
 type Context interface {
 	datacontext.Context

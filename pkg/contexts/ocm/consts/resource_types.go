@@ -14,16 +14,20 @@
 
 package consts
 
+import (
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+)
+
 const (
 	// OCIArtefact describes a generic OCI artefact follwoing the
 	//   [open containers image specification](https://github.com/opencontainers/image-spec/blob/main/spec.md)
-	OCIArtefact = "ociArtefact"
+	OCIArtefact = resourcetypes.OCI_ARTEFACT
 	// OCIImage describes an OCIArtefact containing an image
-	OCIImage = "ociImage"
+	OCIImage = resourcetypes.OCI_IMAGE
 	// HelmChart describes a helm chart, either stored as OCI artefact or as tar blob (tar media type)
-	HelmChart = "helmChart"
+	HelmChart = resourcetypes.HELM_CHART
 	// blob describes any anonymous untyped blob data
-	Blob = "blob"
+	Blob = resourcetypes.BLOB
 	// FileSystemContent describes a directory structure stored as archive (tar, tgz)
-	FileSystemContent = "`filesytemContent"
+	FileSystemContent = resourcetypes.FILESYSTEM_CONTENT
 )

@@ -133,7 +133,7 @@ func (r *Repository) LookupComponentVersion(name string, version string) (cpi.Co
 		return r.arch, nil
 	}
 	if err == nil {
-		err = errors.ErrNotFound(cpi.KIND_COMPONENTVERSION, common.NewNameVersion(name, version).String(), CTFComponentArchiveType)
+		err = errors.ErrNotFound(cpi.KIND_COMPONENTVERSION, common.NewNameVersion(name, version).String(), Type)
 	}
 	return nil, err
 }
@@ -145,7 +145,7 @@ func (r *Repository) LookupComponent(name string) (cpi.ComponentAccess, error) {
 		return nil, accessio.ErrClosed
 	}
 	if r.arch.GetName() != name {
-		return nil, errors.ErrNotFound(errors.KIND_COMPONENT, name, CTFComponentArchiveType)
+		return nil, errors.ErrNotFound(errors.KIND_COMPONENT, name, Type)
 	}
 	return r.arch.comp, nil
 }
@@ -188,9 +188,9 @@ func (c *ComponentAccess) LookupVersion(ref string) (cpi.ComponentVersionAccess,
 }
 
 func (c *ComponentAccess) AddVersion(access cpi.ComponentVersionAccess) error {
-	return errors.ErrNotSupported(errors.KIND_FUNCTION, "add version", CTFComponentArchiveType)
+	return errors.ErrNotSupported(errors.KIND_FUNCTION, "add version", Type)
 }
 
 func (c *ComponentAccess) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {
-	return nil, errors.ErrNotSupported(errors.KIND_FUNCTION, "new version", CTFComponentArchiveType)
+	return nil, errors.ErrNotSupported(errors.KIND_FUNCTION, "new version", Type)
 }

@@ -12,23 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package docker
+package ocirepo_test
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
-func init() {
-	cpi.RegisterRepositorySpecHandler(&repospechandler{}, Type)
-}
-
-type repospechandler struct{}
-
-func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepositorySpec) (cpi.RepositorySpec, error) {
-	host := u.Info
-	if u.Host != "" && host == "" {
-		host = u.Host
-	}
-
-	return NewRepositorySpec(host), nil
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "OCI Upload Repository Attribute")
 }

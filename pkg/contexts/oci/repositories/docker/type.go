@@ -21,13 +21,13 @@ import (
 )
 
 const (
-	DockerDeamonRepositoryType   = "DockerDaemon"
-	DockerDaemonRepositoryTypeV1 = DockerDeamonRepositoryType + runtime.VersionSeparator + "v1"
+	Type   = "DockerDaemon"
+	TypeV1 = Type + runtime.VersionSeparator + "v1"
 )
 
 func init() {
-	cpi.RegisterRepositoryType(DockerDeamonRepositoryType, cpi.NewRepositoryType(DockerDeamonRepositoryType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(DockerDaemonRepositoryTypeV1, cpi.NewRepositoryType(DockerDaemonRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(Type, cpi.NewRepositoryType(Type, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(TypeV1, cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
@@ -43,17 +43,17 @@ func NewRepositorySpec(host ...string) *RepositorySpec {
 		h = host[0]
 	}
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(DockerDeamonRepositoryType),
+		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		DockerHost:          h,
 	}
 }
 
 func (a *RepositorySpec) GetType() string {
-	return DockerDeamonRepositoryType
+	return Type
 }
 
 func (a *RepositorySpec) Name() string {
-	return DockerDeamonRepositoryType
+	return Type
 }
 
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {

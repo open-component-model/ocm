@@ -83,7 +83,7 @@ func (r *Repository) LookupCredentials(name string) (cpi.Credentials, error) {
 }
 
 func (r *Repository) WriteCredentials(name string, creds cpi.Credentials) (cpi.Credentials, error) {
-	return nil, errors.ErrNotSupported("write", "credentials", DockerConfigRepositoryType)
+	return nil, errors.ErrNotSupported("write", "credentials", Type)
 }
 
 func (r *Repository) Read(force bool) error {

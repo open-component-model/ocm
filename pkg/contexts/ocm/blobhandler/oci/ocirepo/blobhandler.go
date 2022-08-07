@@ -36,15 +36,16 @@ import (
 
 func init() {
 	for _, mime := range artdesc.ArchiveBlobTypes() {
-		cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.RepositoryType),
+		cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.Type),
 			cpi.ForMimeType(mime))
-		cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.LegacyRepositoryType),
+		cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.LegacyType),
 			cpi.ForMimeType(mime))
-		cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.ShortRepositoryType),
+		cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.ShortType),
 			cpi.ForMimeType(mime))
 	}
-	cpi.RegisterBlobHandler(NewBlobHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.RepositoryType))
-	cpi.RegisterBlobHandler(NewBlobHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.ShortRepositoryType))
+	cpi.RegisterBlobHandler(NewBlobHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.Type))
+	cpi.RegisterBlobHandler(NewBlobHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.LegacyType))
+	cpi.RegisterBlobHandler(NewBlobHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.ShortType))
 }
 
 ////////////////////////////////////////////////////////////////////////////////

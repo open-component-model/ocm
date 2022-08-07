@@ -21,13 +21,13 @@ import (
 )
 
 const (
-	DirectCredentialsRepositoryType   = "Credentials"
-	DirectCredentialsRepositoryTypeV1 = DirectCredentialsRepositoryType + runtime.VersionSeparator + "v1"
+	Type   = "Credentials"
+	TypeV1 = Type + runtime.VersionSeparator + "v1"
 )
 
 func init() {
-	cpi.RegisterRepositoryType(DirectCredentialsRepositoryType, cpi.NewRepositoryType(DirectCredentialsRepositoryType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(DirectCredentialsRepositoryTypeV1, cpi.NewRepositoryType(DirectCredentialsRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(Type, cpi.NewRepositoryType(Type, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(TypeV1, cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes a repository interface for single direct credentials.
@@ -42,13 +42,13 @@ var _ cpi.CredentialsSpec = &RepositorySpec{}
 // NewRepositorySpec creates a new RepositorySpec
 func NewRepositorySpec(credentials common.Properties) *RepositorySpec {
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(DirectCredentialsRepositoryType),
+		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		Properties:          credentials,
 	}
 }
 
 func (a *RepositorySpec) GetType() string {
-	return DirectCredentialsRepositoryType
+	return Type
 }
 
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi.Repository, error) {

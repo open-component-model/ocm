@@ -24,8 +24,8 @@ import (
 type ComponentNameMapping = genericocireg.ComponentNameMapping
 
 const (
-	OCIRegistryRepositoryType   = genericocireg.OCIRegistryRepositoryType
-	OCIRegistryRepositoryTypeV1 = genericocireg.OCIRegistryRepositoryTypeV1
+	Type   = genericocireg.Type
+	TypeV1 = genericocireg.TypeV1
 
 	OCIRegistryURLPathMapping ComponentNameMapping = "urlPath"
 	OCIRegistryDigestMapping  ComponentNameMapping = "sha256-digest"

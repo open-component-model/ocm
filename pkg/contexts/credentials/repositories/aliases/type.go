@@ -20,13 +20,13 @@ import (
 )
 
 const (
-	AliasRepositoryType   = cpi.AliasRepositoryType
-	AliasRepositoryTypeV1 = AliasRepositoryType + runtime.VersionSeparator + "v1"
+	Type   = cpi.AliasRepositoryType
+	TypeV1 = Type + runtime.VersionSeparator + "v1"
 )
 
 func init() {
-	cpi.RegisterRepositoryType(AliasRepositoryType, cpi.NewAliasRegistry(cpi.NewRepositoryType(AliasRepositoryType, &RepositorySpec{}), setAlias))
-	cpi.RegisterRepositoryType(AliasRepositoryTypeV1, cpi.NewRepositoryType(AliasRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(Type, cpi.NewAliasRegistry(cpi.NewRepositoryType(Type, &RepositorySpec{}), setAlias))
+	cpi.RegisterRepositoryType(TypeV1, cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
 }
 
 func setAlias(ctx cpi.Context, name string, spec cpi.RepositorySpec, creds cpi.CredentialsSource) error {
@@ -44,20 +44,20 @@ type RepositorySpec struct {
 // NewRepositorySpec creates a new memory RepositorySpec
 func NewRepositorySpec(name string) *RepositorySpec {
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(AliasRepositoryType),
+		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		Alias:               name,
 	}
 }
 
 func (a *RepositorySpec) GetType() string {
-	return AliasRepositoryType
+	return Type
 }
 
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi.Repository, error) {
 	repos := ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories).(*Repositories)
 	alias := repos.GetRepository(a.Alias)
 	if alias == nil {
-		return nil, cpi.ErrUnknownRepository(AliasRepositoryType, a.Alias)
+		return nil, cpi.ErrUnknownRepository(Type, a.Alias)
 	}
 	return alias.GetRepository(ctx, creds)
 }
