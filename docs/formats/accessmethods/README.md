@@ -65,13 +65,13 @@ The following method types are centrally defined and available in the OCM toolse
   
   Access of an OCI artefact stored in any OCI registry.
 
-- [`ociRegistry`](../../../pkg/contexts/ocm/accessmethods/ociartefact/README.md) *external* (deprecated)
-
-  It is a legacy name on the new official access method `ociArtefact`
-
 - [`ociBlob`](../../../pkg/contexts/ocm/accessmethods/ociblob/README.md) *external*
 
   Access of an OCI artefact stored in any OCI registry.
+
+- [`gitHub`](../../../pkg/contexts/ocm/accessmethods/github/README.md) *external*
+
+  Access of a git commit in a [github](https://github.com) repository.
 
 - [`localBlob`](../../../pkg/contexts/ocm/accessmethods/localblob/README.md) *local*
 
@@ -82,3 +82,13 @@ The following method types are centrally defined and available in the OCM toolse
 
   For example, in an OCI based OCM repository the implementation stores
   local blobs as additional artefact layers according to the OCI model.
+
+### Legacy Types
+
+- [`ociRegistry`](../../../pkg/contexts/ocm/accessmethods/ociartefact/README.md) *external* (deprecated)
+
+  It is a legacy name on the new official access method `ociArtefact`
+
+- [`github`](../../../pkg/contexts/ocm/accessmethods/github/README.md) *external*
+
+  It is a legacy name on the new official access method `gitHub`

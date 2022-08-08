@@ -223,6 +223,7 @@ func JoinIndentLines(orig []string, gap string, skipfirst ...bool) string {
 			s += gap
 		}
 		s += l + "\n"
+		skip = false
 	}
 	return s
 }

@@ -35,6 +35,7 @@ require (
 	github.com/docker/go-connections v0.4.0
 	github.com/drone/envsubst v1.0.3
 	github.com/golang/mock v1.6.0
+	github.com/google/go-github/v45 v45.2.0
 	github.com/klauspost/compress v1.14.4
 	github.com/klauspost/pgzip v1.2.5
 	github.com/mandelsoft/vfs v0.0.0-20220805210647-bf14a11bfe31
@@ -46,6 +47,7 @@ require (
 	github.com/stretchr/testify v1.7.2
 	github.com/ulikunitz/xz v0.5.10
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
+	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/text v0.3.7
 	gopkg.in/yaml.v3 v3.0.1
 	helm.sh/helm/v3 v3.9.1
@@ -91,7 +93,8 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/btree v1.0.1 // indirect
 	github.com/google/gnostic v0.6.9 // indirect
-	github.com/google/go-cmp v0.5.6 // indirect
+	github.com/google/go-cmp v0.5.8 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/google/uuid v1.3.0 // indirect
@@ -146,7 +149,6 @@ require (
 	go.starlark.net v0.0.0-20200306205701-8dd3e2ee1dd5 // indirect
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
-	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect

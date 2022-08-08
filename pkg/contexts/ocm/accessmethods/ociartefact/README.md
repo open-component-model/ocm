@@ -32,14 +32,11 @@ Supported specification version is `v1`
 
 The type specific specification fields are:
 
-- **`reference`** *string*
+- **`imageReference`** *string*
 
   OCI image/artefact reference following the possible docker schemes:
   - `<repo>/<artefact>:<digest>@<tag>`
   - `<host>[<port>]/repo path>/<artefact>:<version>@<tag>`
-
-
-- **`imageReference`** *string* (deprecated)
 
 ### Go Bindings
 

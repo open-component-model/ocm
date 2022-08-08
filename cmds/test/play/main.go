@@ -24,6 +24,7 @@ func CheckErr(err error, msg string, args ...interface{}) {
 	}
 }
 
+
 func main() {
 	exec()
 }

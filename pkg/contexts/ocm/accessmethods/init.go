@@ -15,6 +15,7 @@
 package accessmethods
 
 import (
+	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/github"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localfsblob"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localociblob"

@@ -62,7 +62,7 @@ func RegisterRepositoryType(name string, atype RepositoryType) {
 	core.DefaultRepositoryTypeScheme.Register(name, atype)
 }
 
-func RegisterIdentityMatcher(typ string, matcher IdentityMatcher, desc string) {
+func RegisterStandardIdentityMatcher(typ string, matcher IdentityMatcher, desc string) {
 	core.StandardIdentityMatchers.Register(typ, matcher, desc)
 }
 

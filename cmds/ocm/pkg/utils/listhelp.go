@@ -17,6 +17,7 @@ package utils
 import (
 	"fmt"
 
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -47,7 +48,13 @@ func FormatListElements(def string, elems ListElements) string {
 			names += " (default)"
 		}
 		desc := elems.Description(i)
-		names += ": " + utils.IndentLines(desc, "   ", true)
+		names += ": " + utils.IndentLines(desc, "    ", true)
 	}
 	return names + "\n"
 }
+
+type IdentityMatcherList []credentials.IdentityMatcherInfo
+
+func (l IdentityMatcherList) Size() int                { return len(l) }
+func (l IdentityMatcherList) Key(i int) string         { return l[i].Type }
+func (l IdentityMatcherList) Description(i int) string { return l[i].Description }

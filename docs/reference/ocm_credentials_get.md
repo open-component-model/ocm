@@ -22,8 +22,21 @@ settings and show the found credential attributes.
 For the following usage contexts with matchers and standard identity matchers exist:
 
   - <code>OCIRegistry</code>: OCI registry credential matcher
+    
+    It matches the <code>OCIRegistry</code> consumer type and additionally acts like 
+    the <code>hostpath</code> type.
 
   - <code>exact</code>: exact match of given pattern set
+
+  - <code>hostpath</code>: Host and path based credential matcher
+    
+    This matcher works on the following properties:
+    
+    - *<code>hostname</code>* (required): the hostname of a server
+    - *<code>port</code>* (optional): the port of a server
+    - *<code>pathprefix</code>* (optional): a path prefix to match. The 
+      element with the most matching path components is selected (separator is <code>/</code>).
+    
 
   - <code>partial</code>: complete match of given pattern ignoring additional attributes
 

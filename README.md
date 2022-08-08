@@ -1,9 +1,9 @@
 # Open Component Model
 
 This project provides a go library binding for working with the
-Open Component Model (OCM)
+Open Component Model (OCM) and an [OCM command line client](docs/reference/ocm.md).
 
-It supports an extensible set of repository bindings for OCM repositories:
+The library supports an extensible set of repository bindings for OCM repositories:
 - OCI: use a repository prefix path of an OCI repository to implement an OCM
   repository
 - CTF (Common Transport Format): a file based binding to represent any set of

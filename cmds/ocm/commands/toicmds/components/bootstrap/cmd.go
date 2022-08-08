@@ -183,7 +183,7 @@ func (a *action) Add(e interface{}) error {
 		return errors.New("found multiple component versions")
 	}
 	o := e.(*comphdlr.Object)
-	if o.ComponentVersion != nil && !ocireg.Is(o.Repository.GetSpecification().GetKind()) {
+	if o.ComponentVersion != nil && !ocireg.IsKind(o.Repository.GetSpecification().GetKind()) {
 		out.Outf(a.cmd, "Warning: repository is no OCI registry, consider importing it or use upload repository with option ' -X ociuploadrepo=...'")
 	}
 	a.data = append(a.data, o)

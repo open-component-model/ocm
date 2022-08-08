@@ -44,8 +44,12 @@ func init() {
 }
 
 // Is checks the kind
-func Is(t string) bool {
-	return t == Type || t == LegacyType
+func Is(spec cpi.RepositorySpec) bool {
+	return spec != nil && spec.GetKind() == Type || spec.GetKind() == LegacyType
+}
+
+func IsKind(k string) bool {
+	return k == Type || k == LegacyType
 }
 
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
