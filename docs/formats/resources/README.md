@@ -7,7 +7,7 @@ The following resource types are centrally defined:
 - `ociImage`: an OCI image or image list
 - `helmChart`: a helm chart, either stored as OCI artefact or as tar blob (tar media type)
 - `blob`: any anonymous untyped blob data
-- `filesytemContent`: a directory structures stored as archive (tar, tgz).
+- `filesytem`: a directory structures stored as archive (tar, tgz).
 
 For centrally defined resource types, there might be special support in the
 OCM library and tool set. For example, there is a dedicated downloader

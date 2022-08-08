@@ -43,6 +43,11 @@ func init() {
 	cpi.RegisterRepositoryType(ShortTypeV1, cpi.NewRepositoryType(ShortTypeV1, &RepositorySpec{}))
 }
 
+// Is checks the kind
+func Is(t string) bool {
+	return t == Type || t == LegacyType
+}
+
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`

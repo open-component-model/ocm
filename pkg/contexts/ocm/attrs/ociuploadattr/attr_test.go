@@ -15,8 +15,12 @@
 package ociuploadattr_test
 
 import (
+	"encoding/json"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -53,5 +57,17 @@ var _ = Describe("attribute", func() {
 
 	It("parses string", func() {
 		Expect(me.AttributeType{}.Decode([]byte("ref"), runtime.DefaultJSONEncoding)).To(Equal(&me.Attribute{Ref: "ref"}))
+	})
+
+	It("parses spec", func() {
+		spec, err := oci.ToGenericRepositorySpec(ocireg.NewRepositorySpec("ghcr.io"))
+		Expect(err).To(Succeed())
+		attr := &me.Attribute{
+			Repository:      spec,
+			NamespacePrefix: "ref",
+		}
+		data, err := json.Marshal(attr)
+		Expect(err).To(Succeed())
+		Expect(me.AttributeType{}.Decode(data, runtime.DefaultJSONEncoding)).To(Equal(attr))
 	})
 })

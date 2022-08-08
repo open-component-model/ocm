@@ -24,6 +24,6 @@ const (
 	HELM_CHART = "helmChart"
 	// BLOB describes any anonymous untyped blob data
 	BLOB = "blob"
-	// FILESYSTEM_CONTENT describes a directory structure stored as archive (tar, tgz)
-	FILESYSTEM_CONTENT = "`filesytemContent"
+	// FILESYSTEM describes a directory structure stored as archive (tar, tgz)
+	FILESYSTEM = "`filesytem"
 )

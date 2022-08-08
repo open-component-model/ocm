@@ -28,6 +28,6 @@ const (
 	HelmChart = resourcetypes.HELM_CHART
 	// blob describes any anonymous untyped blob data
 	Blob = resourcetypes.BLOB
-	// FileSystemContent describes a directory structure stored as archive (tar, tgz)
-	FileSystemContent = resourcetypes.FILESYSTEM_CONTENT
+	// FileSystem describes a directory structure stored as archive (tar, tgz)
+	FileSystem = resourcetypes.FILESYSTEM
 )

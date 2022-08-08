@@ -19,6 +19,8 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
+
 	defaultd "github.com/open-component-model/ocm/pkg/toi/drivers/default"
 	"github.com/open-component-model/ocm/pkg/toi/install"
 
@@ -180,7 +182,11 @@ func (a *action) Add(e interface{}) error {
 	if len(a.data) > 0 {
 		return errors.New("found multiple component versions")
 	}
-	a.data = append(a.data, e.(*comphdlr.Object))
+	o := e.(*comphdlr.Object)
+	if o.ComponentVersion != nil && !ocireg.Is(o.Repository.GetSpecification().GetKind()) {
+		out.Outf(a.cmd, "Warning: repository is no OCI registry, consider importing it or use upload repository with option ' -X ociuploadrepo=...'")
+	}
+	a.data = append(a.data, o)
 	return nil
 }
 

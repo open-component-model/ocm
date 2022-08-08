@@ -407,7 +407,7 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 	}
 	sort.Strings(names)
 	fmt.Printf("using executor image %s (%s)\n", espec.Image.Ref, executor.ResourceRef.String())
-	fmt.Printf("with crednetials: %v\n", names)
+	fmt.Printf("with credentials: %v\n", names)
 	op := &Operation{
 		Action:      name,
 		Image:       *espec.Image,
