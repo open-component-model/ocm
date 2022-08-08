@@ -34,6 +34,7 @@ require (
 	github.com/docker/go-connections v0.4.0
 	github.com/drone/envsubst v1.0.3
 	github.com/golang/mock v1.6.0
+	github.com/google/go-github/v45 v45.2.0
 	github.com/klauspost/compress v1.14.4
 	github.com/klauspost/pgzip v1.2.5
 	github.com/mandelsoft/vfs v0.0.0-20220401225935-42c25028b498
@@ -43,6 +44,7 @@ require (
 	github.com/stretchr/testify v1.7.0
 	github.com/ulikunitz/xz v0.5.10
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
+	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f
 	golang.org/x/text v0.3.7
 	gopkg.in/yaml.v3 v3.0.1
 	helm.sh/helm/v3 v3.8.2
@@ -65,7 +67,8 @@ require (
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/go-cmp v0.5.6 // indirect
+	github.com/google/go-cmp v0.5.8 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
@@ -92,6 +95,7 @@ require (
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/tools v0.1.6-0.20210820212750-d4cc65f0b2ff // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220107163113-42d7afdf6368 // indirect
 	google.golang.org/grpc v1.43.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect

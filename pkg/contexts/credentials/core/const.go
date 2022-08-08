@@ -22,4 +22,5 @@ const (
 	ATTR_SERVER_ADDRESS = "serverAddress"
 	ATTR_IDENTITY_TOKEN = "identityToken"
 	ATTR_REGISTRY_TOKEN = "registryToken"
+	ATTR_TOKEN          = "token"
 )

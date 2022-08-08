@@ -23,6 +23,7 @@ For the following usage contexts with matchers and standard identity matchers ex
 
   - <code>OCIRegistry</code>: OCI registry credential matcher
   - <code>exact</code>: exact match of given pattern set
+  - <code>hostpath</code>: Host and path based credential matcher
   - <code>partial</code>: complete match of given pattern ignoring additional attributes
 
 The used matcher is derived from the consumer attribute <code>type</code>.

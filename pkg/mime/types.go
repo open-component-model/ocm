@@ -25,4 +25,5 @@ const (
 
 	MIME_GZIP = "application/gzip"
 	MIME_TAR  = "application/x-tar"
+	MIME_TGZ  = "application/x-tgz"
 )

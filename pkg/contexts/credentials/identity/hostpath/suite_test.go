@@ -12,14 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package accessmethods
+package hostpath_test
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/github"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localfsblob"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localociblob"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociblob"
+	"testing"
+
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
+
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Hostpath Identity Test Suite")
+}
