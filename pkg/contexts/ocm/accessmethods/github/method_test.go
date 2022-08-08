@@ -180,9 +180,10 @@ var _ = Describe("Method", func() {
 				}),
 			)
 			m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
-			Expect(err).ToNot(HaveOccurred())
-			_, err = m.Get()
 			Expect(err).To(MatchError(ContainSubstring("commit is not a SHA")))
+			if m != nil {
+				m.Close()
+			}
 		})
 	})
 
@@ -201,9 +202,10 @@ var _ = Describe("Method", func() {
 				}),
 			)
 			m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
-			Expect(err).ToNot(HaveOccurred())
-			_, err = m.Get()
 			Expect(err).To(MatchError(ContainSubstring("commit contains invalid characters for a SHA")))
+			if m != nil {
+				m.Close()
+			}
 		})
 	})
 

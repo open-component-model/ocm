@@ -159,9 +159,17 @@ type accessMethod struct {
 
 var _ cpi.AccessMethod = (*accessMethod)(nil)
 
-func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, error) {
-	unparsed := a.RepoURL
+func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (cpi.AccessMethod, error) {
+	if len(a.Commit) != ShaLength {
+		return nil, fmt.Errorf("commit is not a SHA")
+	}
+	for _, c := range a.Commit {
+		if !unicode.IsOneOf([]*unicode.RangeTable{unicode.Letter, unicode.Digit}, c) {
+			return nil, fmt.Errorf("commit contains invalid characters for a SHA")
+		}
+	}
 
+	unparsed := a.RepoURL
 	if !strings.HasPrefix(unparsed, "https://") && !strings.HasPrefix(unparsed, "http://") {
 		unparsed = "https://" + unparsed
 	}

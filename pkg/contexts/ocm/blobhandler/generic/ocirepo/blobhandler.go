@@ -61,7 +61,7 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi
 		return nil, err
 	}
 	sep := ""
-	if repo.GetSpecification().GetKind() != ocireg.Type {
+	if !ocireg.Is(repo.GetSpecification()) {
 		// may be we should reject this, for non test scenario
 		sep = "//"
 	}
