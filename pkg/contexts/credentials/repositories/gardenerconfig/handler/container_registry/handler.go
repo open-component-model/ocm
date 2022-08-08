@@ -66,11 +66,11 @@ func (h Handler) ParseConfig(rawConfig []byte) ([]gardenercfg_cpi.Credential, er
 
 			consumerIdentity := cpi.ConsumerIdentity{
 				cpi.ATTR_TYPE:          identity.CONSUMER_TYPE,
-				identity.ID_SCHEME:     scheme,
 				identity.ID_HOSTNAME:   parsedImgPrefix.Host,
-				identity.ID_PORT:       port,
 				identity.ID_PATHPREFIX: parsedImgPrefix.Path,
 			}
+			consumerIdentity.SetNonEmptyValue(identity.ID_SCHEME, scheme)
+			consumerIdentity.SetNonEmptyValue(identity.ID_PORT, port)
 
 			c := credentials{
 				name:             credentialName,
