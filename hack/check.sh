@@ -23,12 +23,14 @@ echo "Executing golangci-lint"
 echo "  golangci-lint run $GOLANGCI_LINT_CONFIG_FILE --timeout 10m $@"
 golangci-lint run $GOLANGCI_LINT_CONFIG_FILE --timeout 10m $@
 
-echo "Executing gofmt"
+echo "Executing goimports"
 folders=()
 for f in $@; do
-  folders+=( "$(echo $f | sed 's/\(.*\)\/\.\.\./\1/')" )
+  folders+=( "$(echo "$f" | sed 's/\(.*\)\/\.\.\./\1/')" )
 done
-unformatted_files="$(goimports -l -local=github.com/open-component-model/ocm ${folders[*]})"
+
+GOBIN=$(go env GOPATH)
+unformatted_files="$("${GOBIN}/bin"/goimports -l -local=github.com/open-component-model/ocm ${folders[*]})"
 if [[ "$unformatted_files" ]]; then
   echo "Unformatted files detected:"
   echo "$unformatted_files"
