@@ -15,9 +15,10 @@
 package hostpath
 
 import (
+	"strings"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"strings"
 )
 
 // IDENTITY_TYPE is the identity of this matcher.

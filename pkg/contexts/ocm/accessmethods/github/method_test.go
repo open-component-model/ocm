@@ -18,22 +18,26 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"k8s.io/apimachinery/pkg/util/sets"
 	"net/http"
 	"os"
 	"path/filepath"
 
+	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
+
+	"k8s.io/apimachinery/pkg/util/sets"
+
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	ocmgithub "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/github"
+	me "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/github"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	. "github.com/open-component-model/ocm/pkg/env"
-	. "github.com/open-component-model/ocm/pkg/env/builder"
 )
+
+const doPrivate = false
 
 type mockDownloader struct {
 	expected        []byte
@@ -53,27 +57,39 @@ func NewTestClient(fn RoundTripFunc) *http.Client {
 	return &http.Client{
 		Transport: fn,
 	}
+
 }
 
 func (m *mockDownloader) Download(link string) ([]byte, error) {
 	if link != m.shouldMatchLink {
 		return nil, fmt.Errorf("link mismatch; got: %s want: %s", link, m.shouldMatchLink)
 	}
+
 	return m.expected, nil
+}
+
+func Configure(ctx ocm.Context) {
+	data, err := ioutil.ReadFile(filepath.Join(os.Getenv("HOME"), ".ocmconfig"))
+	if err != nil {
+		return
+	}
+	_, err = ctx.ConfigContext().ApplyData(data, nil, ".ocmconfig")
+	ExpectWithOffset(1, err).ToNot(HaveOccurred())
+
 }
 
 var _ = Describe("Method", func() {
 	var (
-		env                 *Builder
+		ctx                 ocm.Context
 		expectedBlobContent []byte
 		err                 error
 		testClient          *http.Client
 		defaultLink         string
-		accessSpec          *ocmgithub.AccessSpec
+		accessSpec          *me.AccessSpec
 	)
 
 	BeforeEach(func() {
-		env = NewBuilder(NewEnvironment())
+		ctx = ocm.New()
 		expectedBlobContent, err = os.ReadFile(filepath.Join("testdata", "repo.tar.gz"))
 		Expect(err).ToNot(HaveOccurred())
 		defaultLink = "https://github.com/test/test/sha?token=token"
@@ -89,26 +105,60 @@ var _ = Describe("Method", func() {
 				},
 			}
 		})
-		accessSpec = ocmgithub.New(
+		accessSpec = me.New(
 			"hostname",
 			1234,
 			"repo",
 			"owner",
 			"7b1445755ee2527f0bf80ef9eeb59a5d2e6e3e1f",
-			ocmgithub.WithClient(testClient),
-			ocmgithub.WithDownloader(&mockDownloader{
+			me.WithClient(testClient),
+			me.WithDownloader(&mockDownloader{
 				expected:        expectedBlobContent,
 				shouldMatchLink: defaultLink,
 			}),
 		)
 	})
 
-	AfterEach(func() {
-		env.Cleanup()
+	It("downloads public spiff commit", func() {
+		spec := me.New("github.com", 0, "spiff", "mandelsoft", "25d9a3f0031c0b42e9ef7ab0117c35378040ef82")
+
+		m, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
+		Expect(err).ToNot(HaveOccurred())
+		content, err := m.Get()
+		Expect(err).ToNot(HaveOccurred())
+		Expect(len(content)).To(Equal(281655))
 	})
 
+	if doPrivate {
+		Context("private access", func() {
+			It("downloads private commit", func() {
+				Configure(ctx)
+
+				spec := me.New("github.com", 0, "cnudie-pause", "mandelsoft", "76eaae596ba24e401240654c4ad19ae66ba1e1a2")
+
+				m, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
+				Expect(err).ToNot(HaveOccurred())
+				content, err := m.Get()
+				Expect(err).ToNot(HaveOccurred())
+				Expect(len(content)).To(Equal(3764))
+			})
+
+			It("downloads enterprise commit", func() {
+				Configure(ctx)
+
+				spec := me.New("github.tools.sap", 0, "dummy", "D021770", "d17e2c594f0ab71f2c0f050b9d7fb485af4d6850")
+
+				m, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
+				Expect(err).ToNot(HaveOccurred())
+				content, err := m.Get()
+				Expect(err).ToNot(HaveOccurred())
+				Expect(len(content)).To(Equal(284))
+			})
+		})
+	}
+
 	It("downloads artifacts", func() {
-		m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: env.OCMContext()})
+		m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
 		Expect(err).ToNot(HaveOccurred())
 		content, err := m.Get()
 		Expect(err).ToNot(HaveOccurred())
@@ -117,19 +167,19 @@ var _ = Describe("Method", func() {
 
 	When("the commit sha is of an invalid length", func() {
 		It("errors", func() {
-			accessSpec := ocmgithub.New(
+			accessSpec := me.New(
 				"hostname",
 				1234,
 				"repo",
 				"owner",
 				"not-a-sha",
-				ocmgithub.WithClient(testClient),
-				ocmgithub.WithDownloader(&mockDownloader{
+				me.WithClient(testClient),
+				me.WithDownloader(&mockDownloader{
 					expected:        expectedBlobContent,
 					shouldMatchLink: defaultLink,
 				}),
 			)
-			m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: env.OCMContext()})
+			m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
 			Expect(err).ToNot(HaveOccurred())
 			_, err = m.Get()
 			Expect(err).To(MatchError(ContainSubstring("commit is not a SHA")))
@@ -138,19 +188,19 @@ var _ = Describe("Method", func() {
 
 	When("the commit sha is of the right length but contains invalid characters", func() {
 		It("errors", func() {
-			accessSpec := ocmgithub.New(
+			accessSpec := me.New(
 				"hostname",
 				1234,
 				"repo",
 				"owner",
 				"refs/heads/veryinteresting_branch_namess",
-				ocmgithub.WithClient(testClient),
-				ocmgithub.WithDownloader(&mockDownloader{
+				me.WithClient(testClient),
+				me.WithDownloader(&mockDownloader{
 					expected:        expectedBlobContent,
 					shouldMatchLink: defaultLink,
 				}),
 			)
-			m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: env.OCMContext()})
+			m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
 			Expect(err).ToNot(HaveOccurred())
 			_, err = m.Get()
 			Expect(err).To(MatchError(ContainSubstring("commit contains invalid characters for a SHA")))

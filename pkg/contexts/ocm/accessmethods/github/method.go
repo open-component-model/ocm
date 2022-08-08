@@ -20,12 +20,13 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"path"
-	"strconv"
+	"strings"
 	"sync"
 	"unicode"
 
 	"github.com/google/go-github/v45/github"
+	"golang.org/x/oauth2"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
@@ -35,32 +36,39 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"golang.org/x/oauth2"
 )
 
 // Type is the access type of GitHub registry.
-const Type = "GitHub"
+const Type = "gitHub"
 const TypeV1 = Type + runtime.VersionSeparator + "v1"
-const CONSUMER_TYPE = "github"
+
+const LegacyType = "github"
+const LegacyTypeV1 = LegacyType + runtime.VersionSeparator + "v1"
+
+const CONSUMER_TYPE = "Github"
+
 const ShaLength = 40
 
 func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}))
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyType, &AccessSpec{}))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyTypeV1, &AccessSpec{}))
 }
 
 // AccessSpec describes the access for a GitHub registry.
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 
-	// Hostname of the GitHub installation.
-	Hostname string `json:"hostname,omitempty"`
-	// Port of the GitHub installation.
-	Port int `json:"port,omitempty"`
-	// Repository represents the name of the organization/user under which this repo can be located.
-	Repository string `json:"repository"`
-	// Owner represents the organization/owner of the repository.
-	Owner string `json:"owner"`
+	// RepoUrl is the repository URL, with host, owner and repository
+	RepoURL string `json:"repoUrl"`
+
+	// APIHostname is an optional different hostname for accessing the github REST API
+	// for enterprise installations
+	APIHostname string `json:"apiHostname,omitempty"`
+
+	// Ref
+	Ref string `json:"ref,omitempty"`
 	// Commit defines the hash of the commit.
 	Commit string `json:"commit"`
 
@@ -71,36 +79,46 @@ type AccessSpec struct {
 var _ cpi.AccessSpec = (*AccessSpec)(nil)
 
 // AccessSpecOptions defines a set of options which can be applied to the access spec.
-type AccessSpecOptions func(s *AccessSpec) *AccessSpec
+type AccessSpecOptions func(s *AccessSpec)
+
+// WithRef creates an access spec with a specified reference field
+func WithRef(ref string) AccessSpecOptions {
+	return func(s *AccessSpec) {
+		s.Ref = ref
+	}
+}
 
 // WithClient creates an access spec with a custom http client.
-func WithClient(client *http.Client) func(s *AccessSpec) *AccessSpec {
-	return func(s *AccessSpec) *AccessSpec {
+func WithClient(client *http.Client) AccessSpecOptions {
+	return func(s *AccessSpec) {
 		s.client = client
-		return s
 	}
 }
 
 // WithDownloader defines a client with a custom downloader.
-func WithDownloader(downloader Downloader) func(s *AccessSpec) *AccessSpec {
-	return func(s *AccessSpec) *AccessSpec {
+func WithDownloader(downloader Downloader) AccessSpecOptions {
+	return func(s *AccessSpec) {
 		s.downloader = downloader
-		return s
 	}
 }
 
 // New creates a new GitHub registry access spec version v1
 func New(hostname string, port int, repo, owner, commit string, opts ...AccessSpecOptions) *AccessSpec {
+	if hostname == "" {
+		hostname = "github.com"
+	}
+	p := ""
+	if port != 0 {
+		p = fmt.Sprintf(":%d", port)
+	}
+	url := fmt.Sprintf("%s%s/%s/%s", hostname, p, owner, repo)
 	s := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
-		Repository:          repo,
-		Owner:               owner,
+		RepoURL:             url,
 		Commit:              commit,
-		Hostname:            hostname,
-		Port:                port,
 	}
 	for _, o := range opts {
-		s = o(s)
+		o(s)
 	}
 	return s
 }
@@ -127,29 +145,61 @@ type RepositoryService interface {
 type accessMethod struct {
 	lock              sync.Mutex
 	blob              artefactset.ArtefactBlob
-	comp              cpi.ComponentVersionAccess
+	compvers          cpi.ComponentVersionAccess
 	spec              *AccessSpec
 	repositoryService RepositoryService
+	owner             string
+	repo              string
 	downloader        Downloader
 }
 
 var _ cpi.AccessMethod = (*accessMethod)(nil)
 
 func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, error) {
-	token, err := getCreds(a, c.GetContext().CredentialsContext())
+	unparsed := a.RepoURL
+
+	if !strings.HasPrefix(unparsed, "https://") && !strings.HasPrefix(unparsed, "http://") {
+		unparsed = "https://" + unparsed
+	}
+	u, err := url.Parse(unparsed)
+	if err != nil {
+		return nil, errors.ErrInvalidWrap(err, "repository url", a.RepoURL)
+	}
+
+	path := strings.Trim(u.Path, "/")
+	pathcomps := strings.Split(path, "/")
+	if len(pathcomps) != 2 {
+		return nil, errors.ErrInvalid("repository path", path, a.RepoURL)
+	}
+
+	token, err := getCreds(u.Hostname(), u.Port(), path, c.GetContext().CredentialsContext())
 	if err != nil {
 		return nil, fmt.Errorf("failed to get creds: %w", err)
 	}
 
-	client := github.NewClient(a.client)
-	if token != "" && a.client == nil {
-		ctx := context.Background()
+	var client *github.Client
+
+	httpclient := a.client
+
+	if token != "" && httpclient == nil {
 		ts := oauth2.StaticTokenSource(
 			&oauth2.Token{AccessToken: token},
 		)
-		tc := oauth2.NewClient(ctx, ts)
+		httpclient = oauth2.NewClient(context.Background(), ts)
+	}
+	if u.Hostname() == "github.com" {
+		client = github.NewClient(httpclient)
+	} else {
+		t := *u
+		t.Path = ""
+		if a.APIHostname != "" {
+			t.Host = a.APIHostname
+		}
 
-		client = github.NewClient(tc)
+		client, err = github.NewEnterpriseClient(t.String(), t.String(), httpclient)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var downloader Downloader = &HTTPDownloader{}
@@ -158,25 +208,23 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, erro
 	}
 	return &accessMethod{
 		spec:              a,
-		comp:              c,
+		compvers:          c,
+		owner:             pathcomps[0],
+		repo:              pathcomps[1],
 		repositoryService: client.Repositories,
 		downloader:        downloader,
 	}, nil
 }
 
-func getCreds(a *AccessSpec, cctx credentials.Context) (string, error) {
-	hostname := "github.com"
-	if a.Hostname != "" {
-		hostname = a.Hostname
-	}
+func getCreds(hostname, port, path string, cctx credentials.Context) (string, error) {
 	id := credentials.ConsumerIdentity{
 		credentials.CONSUMER_ATTR_TYPE: CONSUMER_TYPE,
 		identity.ID_HOSTNAME:           hostname,
 	}
-	if a.Port != 0 {
-		id[identity.ID_PORT] = strconv.Itoa(a.Port)
+	if port != "" {
+		id[identity.ID_PORT] = port
 	}
-	id[identity.ID_PATHPREFIX] = path.Join(a.Owner, a.Repository)
+	id[identity.ID_PATHPREFIX] = path
 	var creds credentials.Credentials
 	src, err := cctx.GetCredentialsForConsumer(id, hostpath.IdentityMatcher(CONSUMER_TYPE))
 	if err != nil {
@@ -260,7 +308,8 @@ func (m *accessMethod) downloadArchive() ([]byte, error) {
 			return nil, fmt.Errorf("commit contains invalid characters for a SHA")
 		}
 	}
-	link, resp, err := m.repositoryService.GetArchiveLink(context.Background(), m.spec.Owner, m.spec.Repository, github.Tarball, &github.RepositoryContentGetOptions{
+
+	link, resp, err := m.repositoryService.GetArchiveLink(context.Background(), m.owner, m.repo, github.Tarball, &github.RepositoryContentGetOptions{
 		Ref: m.spec.Commit,
 	}, true)
 	if err != nil {
