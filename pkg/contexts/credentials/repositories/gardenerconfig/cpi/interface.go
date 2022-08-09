@@ -1,6 +1,7 @@
 package cpi
 
 import (
+	"io"
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
@@ -15,12 +16,12 @@ const (
 type Credential interface {
 	Name() string
 	ConsumerIdentity() cpi.ConsumerIdentity
-	Data() cpi.Credentials
+	Properties() cpi.Credentials
 }
 
 type Handler interface {
 	ConfigType() ConfigType
-	ParseConfig([]byte) ([]Credential, error)
+	ParseConfig(io.Reader) ([]Credential, error)
 }
 
 var handlers = map[ConfigType]Handler{}

@@ -3,6 +3,7 @@ package container_registry
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/url"
 	"strings"
 
@@ -36,9 +37,9 @@ func (h Handler) ConfigType() gardenercfg_cpi.ConfigType {
 	return gardenercfg_cpi.ContainerRegistry
 }
 
-func (h Handler) ParseConfig(rawConfig []byte) ([]gardenercfg_cpi.Credential, error) {
+func (h Handler) ParseConfig(configReader io.Reader) ([]gardenercfg_cpi.Credential, error) {
 	config := &config{}
-	if err := json.Unmarshal(rawConfig, &config); err != nil {
+	if err := json.NewDecoder(configReader).Decode(&config); err != nil {
 		return nil, fmt.Errorf("unable to unmarshal config: %w", err)
 	}
 
@@ -75,8 +76,7 @@ func (h Handler) ParseConfig(rawConfig []byte) ([]gardenercfg_cpi.Credential, er
 			c := credentials{
 				name:             credentialName,
 				consumerIdentity: consumerIdentity,
-				// TODO: use img prefix as host
-				data:             newCredentialsFromContainerRegistryCredentials(credential),
+				properties:       newCredentialsFromContainerRegistryCredentials(credential),
 			}
 
 			creds = append(creds, c)

@@ -9,5 +9,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Gardener Config Credentials Test Suite")
+	RunSpecs(t, "Gardener Config Suite")
 }

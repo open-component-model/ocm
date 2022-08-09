@@ -8,7 +8,7 @@ import (
 type credentials struct {
 	name             string
 	consumerIdentity cpi.ConsumerIdentity
-	data             cpi.Credentials
+	properties       cpi.Credentials
 }
 
 func (c credentials) Name() string {
@@ -18,8 +18,9 @@ func (c credentials) Name() string {
 func (c credentials) ConsumerIdentity() cpi.ConsumerIdentity {
 	return c.consumerIdentity
 }
-func (c credentials) Data() cpi.Credentials {
-	return c.data
+
+func (c credentials) Properties() cpi.Credentials {
+	return c.properties
 }
 
 var _ gardenercfg_cpi.Credential = credentials{}

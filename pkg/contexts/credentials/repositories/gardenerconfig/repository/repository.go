@@ -6,12 +6,12 @@ import (
 	"crypto/cipher"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"sync"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
@@ -91,10 +91,11 @@ func (r *Repository) read(force bool) error {
 		return nil
 	}
 
-	rawConfig, err := r.getRawConfig()
+	configReader, err := r.getRawConfig()
 	if err != nil {
 		return err
 	}
+	defer configReader.Close()
 
 	r.creds = map[string]core.Credentials{}
 	handler := gardenercfg_cpi.GetHandler(r.configType)
@@ -102,7 +103,7 @@ func (r *Repository) read(force bool) error {
 		return errors.Newf("unable to find handler for config type %s", string(r.configType))
 	}
 
-	creds, err := handler.ParseConfig(rawConfig)
+	creds, err := handler.ParseConfig(configReader)
 	if err != nil {
 		return fmt.Errorf("unable to parse config: %w", err)
 	}
@@ -112,7 +113,7 @@ func (r *Repository) read(force bool) error {
 		if _, ok := r.creds[cred.Name()]; ok {
 			return errors.Newf("credential with name %s already exist", cred.Name())
 		}
-		r.creds[cred.Name()] = cred.Data()
+		r.creds[cred.Name()] = cred.Properties()
 		if r.propagate {
 			if log {
 				fmt.Printf("propagate id %q\n", cred.ConsumerIdentity())
@@ -131,7 +132,7 @@ func (r *Repository) read(force bool) error {
 	return nil
 }
 
-func (r *Repository) getRawConfig() ([]byte, error) {
+func (r *Repository) getRawConfig() (io.ReadCloser, error) {
 	u, err := url.Parse(r.url)
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse url %q: %w", r.url, err)
@@ -151,7 +152,6 @@ func (r *Repository) getRawConfig() ([]byte, error) {
 		}
 		reader = res.Body
 	}
-	defer reader.Close()
 
 	switch r.cipher {
 	case AESECB:
@@ -171,15 +171,16 @@ func (r *Repository) getRawConfig() ([]byte, error) {
 			return nil, err
 		}
 
-		return dst, nil
+		fmt.Println(string(dst))
+
+		return io.NopCloser(bytes.NewBuffer(dst)), nil
 	case Plaintext:
-		return ioutil.ReadAll(reader)
+		return reader, nil
 	default:
 		return nil, errors.ErrNotImplemented(string(r.cipher), RepositoryType)
 	}
 }
 
-// ecbDecrypt decrypts ecb data
 func ecbDecrypt(block cipher.Block, dst, src []byte) error {
 	blockSize := block.BlockSize()
 	if len(src)%blockSize != 0 {
