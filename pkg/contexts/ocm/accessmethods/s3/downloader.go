@@ -4,38 +4,41 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
-	awscreds "github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
 // Downloader defines a downloader for AWS S3 objects.
 type Downloader interface {
-	Download(region, bucket, key, version, accessKeyID, accessSecret string) ([]byte, error)
+	Download(region, bucket, key, version string, creds *credentials.Credentials) ([]byte, error)
 }
 
 type S3Downloader struct {
 }
 
-func (s *S3Downloader) Download(region, bucket, key, version, accessKeyID, accessSecret string) ([]byte, error) {
-	cfg, err := config.LoadDefaultConfig(context.Background(), config.WithRegion(region), config.WithCredentialsProvider(awscreds.StaticCredentialsProvider{
-		Value: aws.Credentials{
-			AccessKeyID:     accessKeyID,
-			SecretAccessKey: accessSecret,
-			//SessionToken:    "", // TODO: come back to this
-		},
-	}))
-	if err != nil {
-		return nil, err
-	}
-	client := s3.NewFromConfig(cfg)
-	downloader := manager.NewDownloader(client)
-	ctx := context.Background()
+func (s *S3Downloader) Download(region, bucket, key, version string, creds *credentials.Credentials) ([]byte, error) {
 
-	var blob []byte
-	buf := manager.NewWriteAtBuffer(blob)
+	cfg := &aws.Config{
+		Credentials: creds,
+		Region:      aws.String(region),
+	}
+	ctx := context.Background()
+	sess, _ := session.NewSession(cfg)
+
+	if region == "" {
+		cfg.Region = aws.String("us-east-1")
+		reg, err := s3manager.GetBucketRegion(ctx, sess, bucket, *cfg.Region)
+		if err != nil {
+			return nil, err
+		}
+		cfg.Region = aws.String(reg)
+	}
+
+	sess, _ = session.NewSession(cfg)
+	downloader := s3manager.NewDownloader(sess)
 
 	input := &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
@@ -44,7 +47,11 @@ func (s *S3Downloader) Download(region, bucket, key, version, accessKeyID, acces
 	if version != "" {
 		input.VersionId = aws.String(version)
 	}
-	if _, err := downloader.Download(ctx, buf, input); err != nil {
+
+	var blob []byte
+	buf := aws.NewWriteAtBuffer(blob)
+
+	if _, err := downloader.DownloadWithContext(ctx, buf, input); err != nil {
 		return nil, fmt.Errorf("failed to download object: %w", err)
 	}
 	return buf.Bytes(), nil

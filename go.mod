@@ -29,6 +29,7 @@ require (
 require (
 	github.com/Masterminds/semver/v3 v3.1.1
 <<<<<<< HEAD
+<<<<<<< HEAD
 	github.com/aws/aws-sdk-go-v2 v1.16.10
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.27.4
 =======
@@ -38,6 +39,10 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.21
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.27.2
 >>>>>>> b603080 (Adding s3 access method)
+=======
+	github.com/aws/aws-sdk-go v1.15.11
+	github.com/aws/aws-sdk-go-v2 v1.16.8
+>>>>>>> 3bf09e2 (S3: switch to sdk v1 to make things work)
 	github.com/containerd/containerd v1.6.6
 	github.com/containers/image/v5 v5.20.0
 	github.com/docker/distribution v2.8.1+incompatible
@@ -76,6 +81,7 @@ require (
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535 // indirect
 <<<<<<< HEAD
+<<<<<<< HEAD
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.4 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.17 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.11 // indirect
@@ -98,6 +104,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.13.9 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.11.13 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.16.10 // indirect
+=======
+>>>>>>> 3bf09e2 (S3: switch to sdk v1 to make things work)
 	github.com/aws/smithy-go v1.12.0 // indirect
 >>>>>>> b603080 (Adding s3 access method)
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -119,6 +127,7 @@ require (
 	github.com/fvbommel/sortorder v1.0.1 // indirect
 	github.com/go-errors/errors v1.0.1 // indirect
 	github.com/go-gorp/gorp/v3 v3.0.2 // indirect
+	github.com/go-ini/ini v1.25.4 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.19.5 // indirect
 	github.com/go-openapi/swag v0.19.14 // indirect

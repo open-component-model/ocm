@@ -20,6 +20,8 @@ import (
 	"path"
 	"sync"
 
+	awscreds "github.com/aws/aws-sdk-go/aws/credentials"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
@@ -32,9 +34,9 @@ import (
 )
 
 // Type is the access type of S3 registry.
-const Type = "S3"
+const Type = "s3"
 const TypeV1 = Type + runtime.VersionSeparator + "v1"
-const CONSUMER_TYPE = "s3"
+const CONSUMER_TYPE = "S3"
 
 func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}))
@@ -49,9 +51,9 @@ type AccessSpec struct {
 	// We can't assume that there is a default region setting sitting somewhere.
 	Region string `json:"region"`
 	// Bucket where the s3 object is located.
-	Bucket string `json:"bucket"`
+	Bucket string `json:"bucketName"`
 	// Key of the object to look for. This value will be used together with Bucket and Version to form an identity.
-	Key string `json:"key"`
+	Key string `json:"objectKey"`
 	// Version of the object.
 	// +optional
 	Version string `json:"version,omitempty"`
@@ -198,13 +200,21 @@ func (m *accessMethod) getBlob() (accessio.BlobAccess, error) {
 	if m.blob != nil {
 		return m.blob, nil
 	}
+
+	var creds *awscreds.Credentials
+
+	if m.accessKeyID != "" {
+		creds = awscreds.NewStaticCredentials(m.accessKeyID, m.accessSecret, "")
+	} else {
+		creds = awscreds.AnonymousCredentials
+	}
+
 	blob, err := m.downloader.Download(
 		m.spec.Region,
 		m.spec.Bucket,
 		m.spec.Key,
 		m.spec.Version,
-		m.accessKeyID,
-		m.accessSecret,
+		creds,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to download object: %w", err)
