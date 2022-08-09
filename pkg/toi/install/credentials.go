@@ -16,6 +16,7 @@ package install
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/mandelsoft/spiff/features"
 	"github.com/mandelsoft/spiff/spiffing"
@@ -119,7 +120,22 @@ func GetCredentials(ctx credentials.Context, spec *Credentials, req map[string]C
 	memrepo := memory.NewRepositorySpec("default")
 	list := errors.ErrListf("providing requested credentials")
 	var sub *errors.ErrorList
-	for n, r := range req {
+
+	// Get all keys from the map, so we can sort them and generate
+	// a deterministic array from credentials.
+	keys := make([]string, 0, len(req))
+	for k := range req {
+		keys = append(keys, k)
+	}
+
+	// 3. The iteration order over maps is not specified and is not guaranteed to be
+	// the same from one iteration to the next.
+	//
+	// Source: https://go.dev/ref/spec#For_range
+	sort.Strings(keys)
+
+	for _, n := range keys {
+		r := req[n]
 		list.Add(sub.Result())
 		sub = errors.ErrListf("credential request %q", n)
 		found, ok := spec.Credentials[n]
@@ -162,9 +178,11 @@ func GetCredentials(ctx credentials.Context, spec *Credentials, req map[string]C
 		}
 	}
 	list.Add(sub.Result())
+
 	main := globalconfig.New()
 	main.AddConfig(mem)
 	main.AddConfig(cfg)
+
 	return main, list.Result()
 }
 

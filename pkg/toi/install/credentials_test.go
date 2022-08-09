@@ -15,8 +15,6 @@
 package install_test
 
 import (
-	"fmt"
-
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -91,11 +89,13 @@ credentials:
 `
 		spec, err := install.ParseCredentialSpecification([]byte(input), "settings")
 		Expect(err).To(Succeed())
+
 		c, err := install.GetCredentials(ctx, spec, req.Credentials, nil)
 		Expect(err).To(Succeed())
+
 		output, err := runtime.DefaultYAMLEncoding.Marshal(c)
 		Expect(err).To(Succeed())
-		fmt.Printf("%s", output)
+
 		Expect("\n" + string(output)).To(Equal(cfgdata))
 	})
 
