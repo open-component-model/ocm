@@ -15,12 +15,22 @@ SOURCES := $(shell go list -f '{{$$I:=.Dir}}{{range .GoFiles }}{{$$I}}/{{.}} {{e
 GOPATH                                         := $(shell go env GOPATH)
 
 build: ${SOURCES}
+	mkdir -p bin
 	go build -ldflags "-s -w \
 		-X github.com/open-component-model/ocm/pkg/version.gitVersion=$(EFFECTIVE_VERSION) \
 		-X github.com/open-component-model/ocm/pkg/version.gitTreeState=$(GIT_TREE_STATE) \
 		-X github.com/open-component-model/ocm/pkg/version.gitCommit=$(COMMIT) \
 		-X github.com/open-component-model/ocm/pkg/version.buildDate=$(shell date --rfc-3339=seconds | sed 's/ /T/')" \
-		./cmds/ocm ./cmds/helminstaller
+		-o bin/ocm \
+		./cmds/ocm
+
+	go build -ldflags "-s -w \
+		-X github.com/open-component-model/ocm/pkg/version.gitVersion=$(EFFECTIVE_VERSION) \
+		-X github.com/open-component-model/ocm/pkg/version.gitTreeState=$(GIT_TREE_STATE) \
+		-X github.com/open-component-model/ocm/pkg/version.gitCommit=$(COMMIT) \
+		-X github.com/open-component-model/ocm/pkg/version.buildDate=$(shell date --rfc-3339=seconds | sed 's/ /T/')" \
+		-o bin/helminstaller \
+		./cmds/helminstaller
 
 .PHONY: install-requirements
 install-requirements:
