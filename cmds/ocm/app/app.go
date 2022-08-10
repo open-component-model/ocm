@@ -22,13 +22,13 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
+
 	"github.com/open-component-model/ocm/cmds/ocm/topics/common/attributes"
 	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/vfsattr"
-
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 
 	// dedicated command sub areas

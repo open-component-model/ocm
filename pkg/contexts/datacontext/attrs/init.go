@@ -12,17 +12,9 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package ocm
+package attrs
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs"
-	_ "github.com/open-component-model/ocm/pkg/contexts/oci"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/normalizations"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/config"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories"
+	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/tmpcache"
+	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 )

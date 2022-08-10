@@ -16,7 +16,7 @@ package artefactset
 
 import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/vfsattr"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 )

@@ -21,12 +21,13 @@ import (
 	"github.com/mandelsoft/vfs/pkg/readonlyfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 

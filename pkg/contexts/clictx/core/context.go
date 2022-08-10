@@ -21,6 +21,8 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
+
 	"github.com/open-component-model/ocm/pkg/out"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -29,7 +31,6 @@ import (
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"

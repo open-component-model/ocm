@@ -54,6 +54,12 @@ OCM library:
   - <code>stringdata</code>: plain text data
   - <code>path</code>:       a file path to read the data from
 
+- <code>github.com/mandelsoft/tempblobcache</code> [<code>blobcache</code>]: *string* Foldername for temporary blob cache
+
+  The temporary blob cache is used to accessing large blobs from remote sytems.
+  The are temporarily stored in the filesystem, instead of the memory, to avoid
+  blowing up the memory consumption.
+
 ### SEE ALSO
 
 ##### Parents

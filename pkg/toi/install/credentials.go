@@ -19,6 +19,7 @@ import (
 
 	"github.com/mandelsoft/spiff/features"
 	"github.com/mandelsoft/spiff/spiffing"
+
 	"github.com/open-component-model/ocm/pkg/utils"
 
 	"github.com/open-component-model/ocm/pkg/common"
