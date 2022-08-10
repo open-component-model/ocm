@@ -21,13 +21,16 @@ func newRepositories(datacontext.Context) interface{} {
 	}
 }
 
-func (r *Repositories) GetRepository(ctx cpi.Context, url string, configType gardenercfg_cpi.ConfigType, cipher Cipher, key []byte, propagate bool) *Repository {
+func (r *Repositories) GetRepository(ctx cpi.Context, url string, configType gardenercfg_cpi.ConfigType, cipher Cipher, key []byte, propagateConsumerIdentity bool) (*Repository, error) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	repo := r.repos[url]
 	if repo == nil {
-		repo = NewRepository(ctx, url, configType, cipher, key, propagate)
+		repo, err := NewRepository(ctx, url, configType, cipher, key, propagateConsumerIdentity)
+		if err != nil {
+			return nil, err
+		}
 		r.repos[url] = repo
 	}
-	return repo
+	return repo, nil
 }

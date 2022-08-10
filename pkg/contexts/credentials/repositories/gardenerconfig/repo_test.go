@@ -3,6 +3,7 @@ package gardenerconfig_test
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -38,7 +39,7 @@ var _ = Describe("gardener config", func() {
 	encryptionKey := "abcdefghijklmnop"
 	encryptedCredentials := "Uz4mfePXFOUbjUEZnRrnG8zP2T7lRH6bR2rFHYgWDwZUXfW7D5wArwY4dsBACPVFNapF7kcM9z79+LvJXd2kNoIfvUyMOhrSDAyv4LtUqYSKBOoRH/aJMnXjmN9GQBCXSRSJs/Fu21AoDNo8fA9zYvvc7WxTldkYC/vHxLVNJu5j176e1QiaS9hwDjgNhgyUT3XUjHUyQ19PcRgwDglRLfiL4Cs/fYPPxdg4YZQdCnc="
 
-	specdata := `{"type":"GardenerConfig","url":"localhost:8080/container_registry","configType":"container_registry","cipher":"PLAINTEXT","key":null,"propagate":true}`
+	specdata := `{"type":"GardenerConfig","url":"http://localhost:8080/container_registry","configType":"container_registry","cipher":"PLAINTEXT","key":null,"propagateConsumerIdentity":true}`
 
 	var defaultContext credentials.Context
 
@@ -47,7 +48,7 @@ var _ = Describe("gardener config", func() {
 	})
 
 	It("serializes repo spec", func() {
-		spec := local.NewRepositorySpec("localhost:8080/container_registry", "container_registry", local.Plaintext, nil, true)
+		spec := local.NewRepositorySpec("http://localhost:8080/container_registry", "container_registry", local.Plaintext, nil, true)
 		data, err := json.Marshal(spec)
 		Expect(err).To(Succeed())
 		Expect(data).To(Equal([]byte(specdata)))
@@ -56,19 +57,28 @@ var _ = Describe("gardener config", func() {
 	It("deserializes repo spec", func() {
 		spec, err := defaultContext.RepositorySpecForConfig([]byte(specdata), nil)
 		Expect(err).To(Succeed())
-		Expect(reflect.TypeOf(spec).String()).To(Equal("*repository.RepositorySpec"))
+		Expect(reflect.TypeOf(spec).String()).To(Equal("*gardenerconfig.RepositorySpec"))
 
 		parsedSpec := spec.(*local.RepositorySpec)
-		Expect(parsedSpec.URL).To(Equal("localhost:8080/container_registry"))
+		Expect(parsedSpec.URL).To(Equal("http://localhost:8080/container_registry"))
 		Expect(parsedSpec.ConfigType).To(Equal(gardenercfg_cpi.ContainerRegistry))
 		Expect(parsedSpec.Cipher).To(Equal(local.Plaintext))
 		Expect(parsedSpec.Key).To(BeNil())
 	})
 
 	It("resolves repository", func() {
+		svr := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			writer.WriteHeader(200)
+			_, err := writer.Write([]byte(creds))
+			Expect(err).ToNot(HaveOccurred())
+		}))
+		defer svr.Close()
+
+		specdata := fmt.Sprintf(`{"type":"GardenerConfig","url":"%s/container_registry","configType":"container_registry","cipher":"PLAINTEXT","key":null,"propagateConsumerIdentity":true}`, svr.URL)
+
 		repo, err := defaultContext.RepositoryForConfig([]byte(specdata), nil)
 		Expect(err).To(Succeed())
-		Expect(reflect.TypeOf(repo).String()).To(Equal("*repository.Repository"))
+		Expect(reflect.TypeOf(repo).String()).To(Equal("*gardenerconfig.Repository"))
 	})
 
 	It("retrieves credentials from unencrypted server", func() {
@@ -79,7 +89,7 @@ var _ = Describe("gardener config", func() {
 		}))
 		defer svr.Close()
 
-		repo := local.NewRepository(
+		repo, err := local.NewRepository(
 			defaultContext,
 			svr.URL+"/container_registry",
 			gardenercfg_cpi.ContainerRegistry,
@@ -87,6 +97,7 @@ var _ = Describe("gardener config", func() {
 			nil,
 			true,
 		)
+		Expect(err).ToNot(HaveOccurred())
 
 		credentials, err := repo.LookupCredentials("test-credentials")
 		Expect(err).ToNot(HaveOccurred())
@@ -103,7 +114,7 @@ var _ = Describe("gardener config", func() {
 		}))
 		defer svr.Close()
 
-		repo := local.NewRepository(
+		repo, err := local.NewRepository(
 			defaultContext,
 			svr.URL+"/container_registry",
 			gardenercfg_cpi.ContainerRegistry,
@@ -111,6 +122,7 @@ var _ = Describe("gardener config", func() {
 			[]byte(encryptionKey),
 			true,
 		)
+		Expect(err).ToNot(HaveOccurred())
 
 		credentials, err := repo.LookupCredentials("test-credentials")
 		Expect(err).ToNot(HaveOccurred())
@@ -132,7 +144,7 @@ var _ = Describe("gardener config", func() {
 		err = file.Close()
 		Expect(err).ToNot(HaveOccurred())
 
-		repo := local.NewRepository(
+		repo, err := local.NewRepository(
 			defaultContext,
 			"file://"+filename,
 			gardenercfg_cpi.ContainerRegistry,
@@ -140,6 +152,7 @@ var _ = Describe("gardener config", func() {
 			nil,
 			true,
 		)
+		Expect(err).ToNot(HaveOccurred())
 
 		credentials, err := repo.LookupCredentials("test-credentials")
 		Expect(err).ToNot(HaveOccurred())

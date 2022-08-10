@@ -29,27 +29,31 @@ const (
 )
 
 type Repository struct {
-	ctx        cpi.Context
-	lock       sync.RWMutex
-	url        string
-	configType gardenercfg_cpi.ConfigType
-	cipher     Cipher
-	key        []byte
-	propagate  bool
-	creds      map[string]cpi.Credentials
-	fs         vfs.FileSystem
+	ctx                       cpi.Context
+	lock                      sync.RWMutex
+	url                       string
+	configType                gardenercfg_cpi.ConfigType
+	cipher                    Cipher
+	key                       []byte
+	propagateConsumerIdentity bool
+	creds                     map[string]cpi.Credentials
+	fs                        vfs.FileSystem
 }
 
-func NewRepository(ctx cpi.Context, url string, configType gardenercfg_cpi.ConfigType, cipher Cipher, key []byte, propagate bool) *Repository {
-	return &Repository{
-		ctx:        ctx,
-		url:        url,
-		configType: configType,
-		cipher:     cipher,
-		key:        key,
-		propagate:  propagate,
-		fs:         vfsattr.Get(ctx),
+func NewRepository(ctx cpi.Context, url string, configType gardenercfg_cpi.ConfigType, cipher Cipher, key []byte, propagateConsumerIdentity bool) (*Repository, error) {
+	r := &Repository{
+		ctx:                       ctx,
+		url:                       url,
+		configType:                configType,
+		cipher:                    cipher,
+		key:                       key,
+		propagateConsumerIdentity: propagateConsumerIdentity,
+		fs:                        vfsattr.Get(ctx),
 	}
+	if err := r.read(true); err != nil {
+		return nil, err
+	}
+	return r, nil
 }
 
 var _ cpi.Repository = &Repository{}
@@ -113,7 +117,7 @@ func (r *Repository) read(force bool) error {
 			return errors.Newf("credential with name %s already exist", cred.Name())
 		}
 		r.creds[cred.Name()] = cred.Properties()
-		if r.propagate {
+		if r.propagateConsumerIdentity {
 			if log {
 				fmt.Printf("propagate id %q\n", cred.ConsumerIdentity())
 			}
