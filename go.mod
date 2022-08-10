@@ -30,6 +30,7 @@ require (
 	github.com/Masterminds/semver/v3 v3.1.1
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 	github.com/aws/aws-sdk-go-v2 v1.16.10
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.27.4
 =======
@@ -43,6 +44,13 @@ require (
 	github.com/aws/aws-sdk-go v1.15.11
 	github.com/aws/aws-sdk-go-v2 v1.16.8
 >>>>>>> 3bf09e2 (S3: switch to sdk v1 to make things work)
+=======
+	github.com/aws/aws-sdk-go-v2 v1.16.10
+	github.com/aws/aws-sdk-go-v2/config v1.15.17
+	github.com/aws/aws-sdk-go-v2/credentials v1.12.12
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.23
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.27.4
+>>>>>>> b2e2cb9 (Fixed working with v2 and doing a get region call for unspecified region)
 	github.com/containerd/containerd v1.6.6
 	github.com/containers/image/v5 v5.20.0
 	github.com/docker/distribution v2.8.1+incompatible
@@ -82,14 +90,23 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535 // indirect
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.4 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.17 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.11 // indirect
+=======
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.4 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.12.11 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.17 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.11 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.3.18 // indirect
+>>>>>>> b2e2cb9 (Fixed working with v2 and doing a get region call for unspecified region)
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.0.8 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.9.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.1.12 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.11 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.13.11 // indirect
+<<<<<<< HEAD
 	github.com/aws/smithy-go v1.12.1 // indirect
 =======
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.3 // indirect
@@ -108,6 +125,11 @@ require (
 >>>>>>> 3bf09e2 (S3: switch to sdk v1 to make things work)
 	github.com/aws/smithy-go v1.12.0 // indirect
 >>>>>>> b603080 (Adding s3 access method)
+=======
+	github.com/aws/aws-sdk-go-v2/service/sso v1.11.15 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.16.12 // indirect
+	github.com/aws/smithy-go v1.12.1 // indirect
+>>>>>>> b2e2cb9 (Fixed working with v2 and doing a get region call for unspecified region)
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/chai2010/gettext-go v0.0.0-20160711120539-c6fed771bfd5 // indirect
@@ -127,7 +149,6 @@ require (
 	github.com/fvbommel/sortorder v1.0.1 // indirect
 	github.com/go-errors/errors v1.0.1 // indirect
 	github.com/go-gorp/gorp/v3 v3.0.2 // indirect
-	github.com/go-ini/ini v1.25.4 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.19.5 // indirect
 	github.com/go-openapi/swag v0.19.14 // indirect

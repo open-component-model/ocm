@@ -4,42 +4,75 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	awscreds "github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
+
+const defaultRegion = "us-west-1"
 
 // Downloader defines a downloader for AWS S3 objects.
 type Downloader interface {
-	Download(region, bucket, key, version string, creds *credentials.Credentials) ([]byte, error)
+	Download(region, bucket, key, version string, creds *AWSCreds) ([]byte, error)
 }
 
+// S3Downloader is a downloader capable of downloading S3 Objects.
 type S3Downloader struct {
 }
 
-func (s *S3Downloader) Download(region, bucket, key, version string, creds *credentials.Credentials) ([]byte, error) {
+// AWSCreds groups AWS related credential values together.
+type AWSCreds struct {
+	AccessKeyID  string
+	AccessSecret string
+	SessionToken string
+}
 
-	cfg := &aws.Config{
-		Credentials: creds,
-		Region:      aws.String(region),
-	}
+func (s *S3Downloader) Download(region, bucket, key, version string, creds *AWSCreds) ([]byte, error) {
 	ctx := context.Background()
-	sess, _ := session.NewSession(cfg)
+	opts := []func(*config.LoadOptions) error{
+		config.WithRegion(region),
+	}
+	var awsCred aws.CredentialsProvider = aws.AnonymousCredentials{}
+	if creds != nil {
+		awsCred = awscreds.StaticCredentialsProvider{
+			Value: aws.Credentials{
+				AccessKeyID:     creds.AccessKeyID,
+				SecretAccessKey: creds.AccessSecret,
+			},
+		}
+	}
+	opts = append(opts, config.WithCredentialsProvider(awsCred))
+	cfg, err := config.LoadDefaultConfig(ctx, opts...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load configuration for AWS: %w", err)
+	}
 
 	if region == "" {
-		cfg.Region = aws.String("us-east-1")
-		reg, err := s3manager.GetBucketRegion(ctx, sess, bucket, *cfg.Region)
+		var err error
+		// deliberately use a different client so the real one will use the right region.
+		// Region has to be provided to get the region of the specified bucket. We use the
+		// global "default" of us-west-1 here. This will be updated to the right region
+		// once we retrieve it or die trying.
+		cfg.Region = defaultRegion
+		region, err = manager.GetBucketRegion(context.Background(), s3.NewFromConfig(cfg), bucket, func(o *s3.Options) {
+			o.Region = defaultRegion
+		})
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to find bucket region: %w", err)
 		}
-		cfg.Region = aws.String(reg)
+		cfg.Region = region
 	}
 
-	sess, _ = session.NewSession(cfg)
-	downloader := s3manager.NewDownloader(sess)
+	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
+		o.Credentials = awsCred
+		o.Region = region
+	})
+	downloader := manager.NewDownloader(client)
 
+	var blob []byte
+	buf := manager.NewWriteAtBuffer(blob)
 	input := &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
@@ -47,11 +80,7 @@ func (s *S3Downloader) Download(region, bucket, key, version string, creds *cred
 	if version != "" {
 		input.VersionId = aws.String(version)
 	}
-
-	var blob []byte
-	buf := aws.NewWriteAtBuffer(blob)
-
-	if _, err := downloader.DownloadWithContext(ctx, buf, input); err != nil {
+	if _, err := downloader.Download(context.Background(), buf, input); err != nil {
 		return nil, fmt.Errorf("failed to download object: %w", err)
 	}
 	return buf.Bytes(), nil

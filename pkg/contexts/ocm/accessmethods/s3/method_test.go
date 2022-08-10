@@ -19,19 +19,16 @@ import (
 	"os"
 	"path/filepath"
 
-	awscreds "github.com/aws/aws-sdk-go/aws/credentials"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-
-	"k8s.io/apimachinery/pkg/util/sets"
-
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	. "github.com/open-component-model/ocm/pkg/env"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
+	"k8s.io/apimachinery/pkg/util/sets"
 )
 
 type mockDownloader struct {
@@ -39,12 +36,13 @@ type mockDownloader struct {
 	err      error
 }
 
-func (m *mockDownloader) Download(region, bucket, key, version string, creds *awscreds.Credentials) ([]byte, error) {
+func (m *mockDownloader) Download(region, bucket, key, version string, creds *s3.AWSCreds) ([]byte, error) {
 	return m.expected, m.err
 }
 
 var _ = Describe("Method", func() {
 	var (
+		env             *Builder
 		accessSpec      *s3.AccessSpec
 		downloader      s3.Downloader
 		expectedContent []byte
@@ -54,6 +52,7 @@ var _ = Describe("Method", func() {
 	BeforeEach(func() {
 		expectedContent, err = os.ReadFile(filepath.Join("testdata", "repo.tar.gz"))
 		Expect(err).ToNot(HaveOccurred())
+		env = NewBuilder(NewEnvironment())
 		downloader = &mockDownloader{
 			expected: expectedContent,
 		}
@@ -65,7 +64,6 @@ var _ = Describe("Method", func() {
 			downloader,
 		)
 		mcc = &mockCredContext{
-			Context: ocm.New(),
 			creds: &mockCredSource{
 				cred: &mockCredentials{
 					value: map[string]string{
@@ -77,32 +75,9 @@ var _ = Describe("Method", func() {
 		}
 	})
 
-	/*
-		FIt("downloads s3 objects", func() {
-			accessSpec := s3.New("", "gardenlinux", "objects/fb65cf72b53dccb24ce387becfbc5aed48755a6d", "", nil)
-			m, err := accessSpec.AccessMethod(&mockComponentVersionAccess{credContext: mcc})
-			Expect(err).ToNot(HaveOccurred())
-			r, err := m.Reader()
-			Expect(err).ToNot(HaveOccurred())
-			defer r.Close()
-			dr:=accessio.NewDefaultDigestReader(r)
-			var buf [8096]byte
-			size:=0
-			for {
-				s, err := dr.Read(buf[:])
-				if s >=0 {
-					size+=s
-				}
-				if err == io.EOF {
-					break
-				}
-				Expect(err).ToNot(HaveOccurred())
-			}
-
-			Expect(size).To(Equal(dr.Size()))
-		})
-	*/
-
+	AfterEach(func() {
+		env.Cleanup()
+	})
 	It("downloads s3 objects", func() {
 		m, err := accessSpec.AccessMethod(&mockComponentVersionAccess{credContext: mcc})
 		Expect(err).ToNot(HaveOccurred())
@@ -110,7 +85,6 @@ var _ = Describe("Method", func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(blob).To(Equal(expectedContent))
 	})
-
 	When("the downloader fails to download the bucket object", func() {
 		BeforeEach(func() {
 			downloader = &mockDownloader{
@@ -129,12 +103,6 @@ var _ = Describe("Method", func() {
 			Expect(err).ToNot(HaveOccurred())
 			_, err = m.Get()
 			Expect(err).To(MatchError(ContainSubstring("object not found")))
-		})
-	})
-	When("no credentials are provided", func() {
-		It("returns an error stating that credentials have to be provided", func() {
-			_, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ocm.New()})
-			Expect(err).To(MatchError(ContainSubstring("failed to return any credentials; they MUST be provided for s3 access")))
 		})
 	})
 })

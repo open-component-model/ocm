@@ -20,8 +20,6 @@ import (
 	"path"
 	"sync"
 
-	awscreds "github.com/aws/aws-sdk-go/aws/credentials"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
@@ -34,9 +32,9 @@ import (
 )
 
 // Type is the access type of S3 registry.
-const Type = "s3"
+const Type = "S3"
 const TypeV1 = Type + runtime.VersionSeparator + "v1"
-const CONSUMER_TYPE = "S3"
+const CONSUMER_TYPE = "s3"
 
 func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}))
@@ -49,11 +47,12 @@ type AccessSpec struct {
 
 	// Region needs to be set even though buckets are global.
 	// We can't assume that there is a default region setting sitting somewhere.
-	Region string `json:"region"`
+	// +optional
+	Region string `json:"region,omitempty"`
 	// Bucket where the s3 object is located.
-	Bucket string `json:"bucketName"`
+	Bucket string `json:"bucket"`
 	// Key of the object to look for. This value will be used together with Bucket and Version to form an identity.
-	Key string `json:"objectKey"`
+	Key string `json:"key"`
 	// Version of the object.
 	// +optional
 	Version string `json:"version,omitempty"`
@@ -106,21 +105,25 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, erro
 	if err != nil {
 		return nil, fmt.Errorf("failed to get creds: %w", err)
 	}
-
-	if creds == nil {
-		return nil, fmt.Errorf("failed to return any credentials; they MUST be provided for s3 access")
-	}
-
 	var d Downloader = &S3Downloader{}
 	if a.downloader != nil {
 		d = a.downloader
 	}
 
+	var (
+		accessKeyID  string
+		accessSecret string
+	)
+	if creds != nil {
+		accessKeyID = creds.GetProperty(credentials.ATTR_AWS_ACCESS_KEY_ID)
+		accessSecret = creds.GetProperty(credentials.ATTR_AWS_SECRET_ACCESS_KEY)
+	}
+
 	return &accessMethod{
 		spec:         a,
 		comp:         c,
-		accessKeyID:  creds.GetProperty(credentials.ATTR_AWS_ACCESS_KEY_ID),
-		accessSecret: creds.GetProperty(credentials.ATTR_AWS_SECRET_ACCESS_KEY),
+		accessKeyID:  accessKeyID,
+		accessSecret: accessSecret,
 		downloader:   d,
 	}, nil
 }
@@ -200,15 +203,14 @@ func (m *accessMethod) getBlob() (accessio.BlobAccess, error) {
 	if m.blob != nil {
 		return m.blob, nil
 	}
-
-	var creds *awscreds.Credentials
-
+	var creds *AWSCreds
 	if m.accessKeyID != "" {
-		creds = awscreds.NewStaticCredentials(m.accessKeyID, m.accessSecret, "")
-	} else {
-		creds = awscreds.AnonymousCredentials
+		fmt.Println("setting up key: ", m.accessKeyID)
+		creds = &AWSCreds{
+			AccessKeyID:  m.accessKeyID,
+			AccessSecret: m.accessSecret,
+		}
 	}
-
 	blob, err := m.downloader.Download(
 		m.spec.Region,
 		m.spec.Bucket,
