@@ -19,8 +19,10 @@ import (
 	"os"
 	"path/filepath"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"k8s.io/apimachinery/pkg/util/sets"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
@@ -28,7 +30,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3"
 	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
-	"k8s.io/apimachinery/pkg/util/sets"
 )
 
 type mockDownloader struct {

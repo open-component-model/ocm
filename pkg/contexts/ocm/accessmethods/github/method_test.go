@@ -28,14 +28,13 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
-	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	me "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/github"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"k8s.io/apimachinery/pkg/util/sets"
 )
 
 const doPrivate = false
