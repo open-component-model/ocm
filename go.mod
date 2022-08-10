@@ -13,14 +13,13 @@ require (
 	github.com/mandelsoft/filepath v0.0.0-20220503095057-4432a2285b68
 	github.com/mandelsoft/spiff v1.7.0-beta-3
 	github.com/modern-go/reflect2 v1.0.2
-	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.17.0
+	github.com/onsi/gomega v1.19.0
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.0.3-0.20211202193544-a5463b7f9c84
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.5.1-0.20220628211933-69083f81b225
 	github.com/xeipuuv/gojsonschema v1.2.0
-	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd
+	golang.org/x/net v0.0.0-20220225172249-27dd8689420f
 	golang.org/x/sys v0.0.0-20220520151302-bc2c85ada10a // indirect
 	gotest.tools/v3 v3.1.0 // indirect
 	k8s.io/apimachinery v0.24.3
@@ -29,6 +28,8 @@ require (
 
 require (
 	github.com/Masterminds/semver/v3 v3.1.1
+	github.com/aws/aws-sdk-go-v2 v1.16.10
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.27.4
 	github.com/containerd/containerd v1.6.6
 	github.com/containers/image/v5 v5.20.0
 	github.com/docker/distribution v2.8.1+incompatible
@@ -42,6 +43,7 @@ require (
 	github.com/marstr/guid v1.1.0
 	github.com/mitchellh/copystructure v1.2.0
 	github.com/mittwald/go-helm-client v0.11.3
+	github.com/onsi/ginkgo/v2 v2.1.4
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.2
@@ -65,6 +67,15 @@ require (
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20200428143746-21a406dcc535 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.4.4 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.1.17 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.4.11 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/v4a v1.0.8 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.9.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.1.12 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.9.11 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.13.11 // indirect
+	github.com/aws/smithy-go v1.12.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/chai2010/gettext-go v0.0.0-20160711120539-c6fed771bfd5 // indirect
@@ -96,6 +107,7 @@ require (
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
+	github.com/google/pprof v0.0.0-20210407192527-94a9f03dee38 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
@@ -152,14 +164,13 @@ require (
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
-	golang.org/x/tools v0.1.10-0.20220218145154-897bd77cd717 // indirect
+	golang.org/x/tools v0.1.10 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220107163113-42d7afdf6368 // indirect
 	google.golang.org/grpc v1.43.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
-	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	k8s.io/api v0.24.3 // indirect
 	k8s.io/apiextensions-apiserver v0.24.2 // indirect

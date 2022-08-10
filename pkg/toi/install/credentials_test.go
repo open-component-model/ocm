@@ -17,9 +17,8 @@ package install_test
 import (
 	"fmt"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	"github.com/open-component-model/ocm/pkg/toi/install"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
@@ -58,7 +57,7 @@ configurations:
   type: credentials.config.ocm.gardener.cloud
 type: generic.config.ocm.gardener.cloud
 `
-	It("creates config data", func() {
+	It("creates config data", FlakeAttempts(50), func() {
 		ctx := credentials.New()
 		mem, err := ctx.RepositoryForSpec(memory.NewRepositorySpec("memory"))
 		Expect(err).To(Succeed())
