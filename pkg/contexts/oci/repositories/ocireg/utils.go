@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"sync"
 
 	"github.com/containerd/containerd/errdefs"
@@ -96,7 +95,7 @@ func readAll(reader io.ReadCloser, err error) ([]byte, error) {
 	}
 	defer reader.Close()
 
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, err
 	}

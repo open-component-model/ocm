@@ -16,7 +16,6 @@ package compression
 
 import (
 	"io"
-	"io/ioutil"
 
 	"github.com/ulikunitz/xz"
 )
@@ -41,7 +40,7 @@ func xzDecompressor(r io.Reader) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ioutil.NopCloser(r), nil
+	return io.NopCloser(r), nil
 }
 
 // xzCompressor is a CompressorFunc for the xz compression algorithm.

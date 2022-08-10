@@ -17,7 +17,7 @@ package github_test
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -69,7 +69,7 @@ func (m *mockDownloader) Download(link string) ([]byte, error) {
 }
 
 func Configure(ctx ocm.Context) {
-	data, err := ioutil.ReadFile(filepath.Join(os.Getenv("HOME"), ".ocmconfig"))
+	data, err := os.ReadFile(filepath.Join(os.Getenv("HOME"), ".ocmconfig"))
 	if err != nil {
 		return
 	}
@@ -98,7 +98,7 @@ var _ = Describe("Method", func() {
 			return &http.Response{
 				StatusCode: 302,
 				Status:     http.StatusText(http.StatusFound),
-				Body:       ioutil.NopCloser(bytes.NewBufferString(`{}`)),
+				Body:       io.NopCloser(bytes.NewBufferString(`{}`)),
 				// Must be set to non-nil value or it panics
 				Header: http.Header{
 					"Location": []string{defaultLink},

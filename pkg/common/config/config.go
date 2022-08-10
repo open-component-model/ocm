@@ -16,7 +16,6 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -47,7 +46,7 @@ func Configure(file string) error {
 			}
 			file = h + file[1:]
 		}
-		data, err := ioutil.ReadFile(file)
+		data, err := os.ReadFile(file)
 		if err != nil {
 			return errors.Wrapf(err, "cannot read config file %q", file)
 		}
