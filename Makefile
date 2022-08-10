@@ -51,10 +51,6 @@ check:
 force-test:
 	@go test --count=1 $(REPO_ROOT)/cmds/ocm $(REPO_ROOT)/cmds/helminstaller $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/pkg/...
 
-.PHONY: force-test
-force-test:
-	@go test --count=1 $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/pkg/...
-
 .PHONY: test
 test:
 	@echo "> Test"
