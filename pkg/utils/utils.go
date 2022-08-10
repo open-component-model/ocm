@@ -25,6 +25,8 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -226,4 +228,25 @@ func JoinIndentLines(orig []string, gap string, skipfirst ...bool) string {
 		skip = false
 	}
 	return s
+}
+
+
+func StringMapKeys(m interface{}) []string {
+	if m==nil {
+		return nil
+	}
+	v := reflect.ValueOf(m)
+	if v.Kind() != reflect.Map {
+		panic(fmt.Sprintf("%T is no map", m))
+	}
+	if v.Type().Key().Kind() != reflect.String {
+		panic(fmt.Sprintf("map key of %T is no string", m))
+	}
+
+	keys:=[]string{}
+	for _, k := range v.MapKeys() {
+		keys=append(keys,k.Interface().(string))
+	}
+	sort.Strings(keys)
+	return keys
 }

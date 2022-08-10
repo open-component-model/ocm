@@ -19,6 +19,7 @@ import (
 
 	"github.com/mandelsoft/spiff/features"
 	"github.com/mandelsoft/spiff/spiffing"
+	"github.com/open-component-model/ocm/pkg/utils"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	globalconfig "github.com/open-component-model/ocm/pkg/contexts/config/config"
@@ -119,7 +120,8 @@ func GetCredentials(ctx credentials.Context, spec *Credentials, req map[string]C
 	memrepo := memory.NewRepositorySpec("default")
 	list := errors.ErrListf("providing requested credentials")
 	var sub *errors.ErrorList
-	for n, r := range req {
+	for _, n := range utils.StringMapKeys(req) {
+		r := req[n]
 		list.Add(sub.Result())
 		sub = errors.ErrListf("credential request %q", n)
 		found, ok := spec.Credentials[n]
