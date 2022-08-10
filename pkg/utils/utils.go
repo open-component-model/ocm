@@ -22,9 +22,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"os"
 	"reflect"
 	"sort"
 	"strings"
@@ -176,7 +176,7 @@ func WriteFileToTARArchive(filename string, contentReader io.Reader, archiveWrit
 		return errors.New("archiveWriter must not be nil")
 	}
 
-	tempfile, err := ioutil.TempFile("", "")
+	tempfile, err := os.CreateTemp("", "")
 	if err != nil {
 		return fmt.Errorf("unable to create tempfile: %w", err)
 	}
@@ -230,9 +230,8 @@ func JoinIndentLines(orig []string, gap string, skipfirst ...bool) string {
 	return s
 }
 
-
 func StringMapKeys(m interface{}) []string {
-	if m==nil {
+	if m == nil {
 		return nil
 	}
 	v := reflect.ValueOf(m)
@@ -243,10 +242,11 @@ func StringMapKeys(m interface{}) []string {
 		panic(fmt.Sprintf("map key of %T is no string", m))
 	}
 
-	keys:=[]string{}
+	keys := []string{}
 	for _, k := range v.MapKeys() {
-		keys=append(keys,k.Interface().(string))
+		keys = append(keys, k.Interface().(string))
 	}
 	sort.Strings(keys)
 	return keys
 }
+

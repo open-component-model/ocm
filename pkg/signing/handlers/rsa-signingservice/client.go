@@ -20,7 +20,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/open-component-model/ocm/pkg/signing"
@@ -68,7 +68,7 @@ func (signer *SigningServerSigner) Sign(algo string, digest string, issuer strin
 	}
 	defer res.Body.Close()
 
-	responseBodyBytes, err := ioutil.ReadAll(res.Body)
+	responseBodyBytes, err := io.ReadAll(res.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed reading response body: %w", err)
 	}

@@ -19,7 +19,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	unix_path "path"
 	"strconv"
@@ -174,7 +173,7 @@ func (d *Driver) initializeDockerCli() (command.Cli, error) {
 	}
 
 	if d.config[OptionQuiet] == "1" {
-		cli.Apply(command.WithCombinedStreams(ioutil.Discard))
+		cli.Apply(command.WithCombinedStreams(io.Discard))
 	}
 
 	d.dockerCli = cli
@@ -383,7 +382,7 @@ func (d *Driver) fetchOutputs(ctx context.Context, container string, op *install
 		name := strings.TrimPrefix(header.Name, "outputs/")
 		outputName, shouldCapture := op.Outputs[name]
 		if shouldCapture {
-			contents, err = ioutil.ReadAll(tarReader)
+			contents, err = io.ReadAll(tarReader)
 			if err != nil {
 				return opResult, fmt.Errorf("error while reading %q from outputs tar: %s", header.Name, err)
 			}

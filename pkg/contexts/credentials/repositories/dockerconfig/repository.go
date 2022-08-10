@@ -17,7 +17,6 @@ package dockerconfig
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"sync"
@@ -97,7 +96,8 @@ func (r *Repository) Read(force bool) error {
 		home := os.Getenv("HOME")
 		path = home + path[1:]
 	}
-	data, err := ioutil.ReadFile(path)
+
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}

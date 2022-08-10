@@ -15,7 +15,7 @@
 package config_test
 
 import (
-	"io/ioutil"
+	"os"
 	"reflect"
 
 	. "github.com/onsi/ginkgo"
@@ -31,7 +31,7 @@ var _ = Describe("generic config handling", func() {
 	var scheme config.ConfigTypeScheme
 	var cfgctx config.Context
 
-	testdataconfig, _ := ioutil.ReadFile("testdata/config.yaml")
+	testdataconfig, _ := os.ReadFile("testdata/config.yaml")
 	testdatajson, _ := yaml.YAMLToJSON(testdataconfig)
 
 	_ = testdatajson

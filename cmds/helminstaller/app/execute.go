@@ -16,7 +16,6 @@ package app
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -68,7 +67,7 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 	}
 
 	// have to use the OS filesystem here for using the helm library
-	file, err := ioutil.TempFile("", "helm-*")
+	file, err := os.CreateTemp("", "helm-*")
 	if err != nil {
 		return err
 	}
