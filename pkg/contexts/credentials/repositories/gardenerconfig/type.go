@@ -1,4 +1,4 @@
-package repository
+package gardenerconfig
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"

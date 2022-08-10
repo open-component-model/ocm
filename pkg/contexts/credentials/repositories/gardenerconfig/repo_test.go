@@ -1,4 +1,4 @@
-package repository_test
+package gardenerconfig_test
 
 import (
 	"encoding/base64"
@@ -13,8 +13,8 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	local "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig"
 	gardenercfg_cpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
-	local "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/repository"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/vfsattr"
 )
 

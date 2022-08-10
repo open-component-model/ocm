@@ -1,4 +1,4 @@
-package repository
+package gardenerconfig
 
 import (
 	"bytes"
@@ -12,7 +12,6 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	gardenercfg_cpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
@@ -119,7 +118,7 @@ func (r *Repository) read(force bool) error {
 				fmt.Printf("propagate id %q\n", cred.ConsumerIdentity())
 			}
 
-			getCredentials := func() (credentials.Credentials, error) {
+			getCredentials := func() (cpi.Credentials, error) {
 				return r.LookupCredentials(cred.Name())
 			}
 			cg := CredentialGetter{
