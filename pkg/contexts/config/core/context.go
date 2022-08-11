@@ -63,7 +63,19 @@ type Context interface {
 	GetConfigForName(generation int64, name string) (int64, []Config)
 	GetConfig(generation int64, selector ConfigSelector) (int64, []Config)
 
+	// Reset all configs applied so far, subsequent calls to ApplyTo will
+	// ony see configs allpied after the last reset.
+	Reset() int64
+	// Generation return the actual config generation.
+	// this is a strictly increasing number, regardless of the number
+	// of Reset calls.
 	Generation() int64
+	// ApplyTo applies all configurations applied after the last reset with
+	// a generation larger than the given watermark to the specified target.
+	// A target may be any object. The applied configuration objects decide
+	// on their own whether they are applicable for the given target.
+	// The generation of the last applied object is returned to be used as
+	// new watermark.
 	ApplyTo(gen int64, target interface{}) (int64, error)
 }
 
@@ -167,13 +179,6 @@ func (c *_context) ApplyConfig(spec Config, desc string) error {
 	return err
 }
 
-func (c *_context) joinInfo(desc string) string {
-	if c.description == "" {
-		return desc
-	}
-	return desc + "--" + c.description
-}
-
 func (c *_context) ApplyData(data []byte, unmarshaler runtime.Unmarshaler, desc string) (Config, error) {
 	spec, err := c.knownConfigTypes.DecodeConfig(data, unmarshaler)
 	if err != nil {
@@ -194,6 +199,10 @@ func (c *_context) selector(gen int64, selector ConfigSelector) AppliedConfigSel
 
 func (c *_context) Generation() int64 {
 	return c.configs.Generation()
+}
+
+func (c *_context) Reset() int64 {
+	return c.configs.Reset()
 }
 
 func (c *_context) ApplyTo(gen int64, target interface{}) (int64, error) {

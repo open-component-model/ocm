@@ -60,7 +60,7 @@ func TypeNames(scheme Scheme) []string {
 func KindNames(scheme Scheme) []string {
 	types := []string{}
 	for t := range scheme.KnownTypes() {
-		if strings.Index(t, VersionSeparator) < 0 {
+		if !strings.Contains(t, VersionSeparator) {
 			types = append(types, t)
 		}
 	}

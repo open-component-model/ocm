@@ -16,10 +16,10 @@ ocm sign [<options>] <sub command> ...
 
 ##### Parents
 
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
 
 ##### Sub Commands
 
-* [ocm sign <b>componentversions</b>](ocm_sign_componentversions.md)	 - Sign component version
+* [ocm sign <b>componentversions</b>](ocm_sign_componentversions.md)	 &mdash; Sign component version
 

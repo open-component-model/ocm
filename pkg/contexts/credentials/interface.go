@@ -41,6 +41,8 @@ type RepositorySpec = core.RepositorySpec
 
 type ConsumerIdentity = core.ConsumerIdentity
 type IdentityMatcher = core.IdentityMatcher
+type IdentityMatcherInfo = core.IdentityMatcherInfo
+type IdentityMatcherRegistry = core.IdentityMatcherRegistry
 
 type GenericRepositorySpec = core.GenericRepositorySpec
 type GenericCredentialsSpec = core.GenericCredentialsSpec
@@ -81,3 +83,7 @@ func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error
 func ErrUnknownCredentials(name string) error {
 	return core.ErrUnknownCredentials(name)
 }
+
+var CompleteMatch = core.CompleteMatch
+var NoMatch = core.NoMatch
+var PartialMatch = core.PartialMatch

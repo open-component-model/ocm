@@ -15,6 +15,7 @@
 package ocm
 
 import (
+	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs"
 	_ "github.com/open-component-model/ocm/pkg/contexts/oci"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler"

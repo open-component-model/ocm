@@ -17,7 +17,7 @@ package processing
 import (
 	"sync"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"

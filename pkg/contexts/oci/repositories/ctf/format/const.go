@@ -15,16 +15,16 @@
 package format
 
 import (
-	"time"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
 )
 
 const (
-	DirMode  = 0755
-	FileMode = 0644
+	DirMode  = accessobj.DirMode
+	FileMode = accessobj.FileMode
 )
 
 var (
-	ModTime = time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC)
+	ModTime = accessobj.ModTime
 )
 
 const (

@@ -20,8 +20,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 )
 
-const DirectCredentialsType = "Credentials"
-
 type Repository interface {
 	ExistsCredentials(name string) (bool, error)
 	LookupCredentials(name string) (Credentials, error)
@@ -36,50 +34,40 @@ type Credentials interface {
 	Properties() common.Properties
 }
 
-type DirectCredentials struct {
-	Values common.Properties `json: "properties"`
-}
+type DirectCredentials common.Properties
 
-var _ Credentials = &DirectCredentials{}
+var _ Credentials = (*DirectCredentials)(nil)
 
-func NewCredentials(props common.Properties) *DirectCredentials {
+func NewCredentials(props common.Properties) DirectCredentials {
 	if props == nil {
 		props = common.Properties{}
 	} else {
 		props = props.Copy()
 	}
-	return &DirectCredentials{
-		Values: props,
-	}
+	return DirectCredentials(props)
 }
 
-func (c *DirectCredentials) GetType() string {
-	return DirectCredentialsType
-}
-
-func (c *DirectCredentials) ExistsProperty(name string) bool {
-	_, ok := c.Values[name]
+func (c DirectCredentials) ExistsProperty(name string) bool {
+	_, ok := c[name]
 	return ok
 }
 
-func (c *DirectCredentials) GetProperty(name string) string {
-	return c.Values[name]
+func (c DirectCredentials) GetProperty(name string) string {
+	return c[name]
 }
 
-func (c *DirectCredentials) PropertyNames() sets.String {
-	return c.Values.Names()
+func (c DirectCredentials) PropertyNames() sets.String {
+	return common.Properties(c).Names()
 }
 
-func (c *DirectCredentials) Properties() common.Properties {
-	return c.Values.Copy()
+func (c DirectCredentials) Properties() common.Properties {
+	return common.Properties(c).Copy()
 }
 
-func (c *DirectCredentials) Credentials(Context, ...CredentialsSource) (Credentials, error) {
+func (c DirectCredentials) Credentials(Context, ...CredentialsSource) (Credentials, error) {
 	return c, nil
 }
 
-func (c *DirectCredentials) Copy() *DirectCredentials {
-	return &DirectCredentials{
-		Values: c.Values.Copy(),
-	}
+func (c DirectCredentials) Copy() DirectCredentials {
+	return DirectCredentials(common.Properties(c).Copy())
 }

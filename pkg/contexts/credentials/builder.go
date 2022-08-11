@@ -33,6 +33,10 @@ func WithRepositoyTypeScheme(scheme RepositoryTypeScheme) core.Builder {
 	return core.Builder{}.WithRepositoyTypeScheme(scheme)
 }
 
+func WithStandardConumerMatchers(matchers core.IdentityMatcherRegistry) core.Builder {
+	return core.Builder{}.WithStandardConumerMatchers(matchers)
+}
+
 func New() Context {
 	return core.Builder{}.New()
 }

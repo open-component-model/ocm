@@ -64,6 +64,7 @@ func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (in
 			}
 			value = home + value[1:]
 		}
+		// TODO: This should use the virtual filesystem.
 		err = os.MkdirAll(value, 0700)
 		if err == nil {
 			return accessio.NewStaticBlobCache(value)

@@ -24,7 +24,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/compression"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/format"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -104,8 +103,8 @@ func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts acce
 	cdHeader := &tar.Header{
 		Name:    obj.info.DescriptorFileName,
 		Size:    data.Size(),
-		Mode:    format.FileMode,
-		ModTime: format.ModTime,
+		Mode:    FileMode,
+		ModTime: ModTime,
 	}
 
 	if err := tw.WriteHeader(cdHeader); err != nil {
@@ -124,8 +123,8 @@ func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts acce
 	err = tw.WriteHeader(&tar.Header{
 		Typeflag: tar.TypeDir,
 		Name:     obj.info.ElementDirectoryName,
-		Mode:     format.DirMode,
-		ModTime:  format.ModTime,
+		Mode:     DirMode,
+		ModTime:  ModTime,
 	})
 	if err != nil {
 		return fmt.Errorf("unable to write %s directory: %w", obj.info.ElementTypeName, err)
@@ -143,8 +142,8 @@ func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts acce
 		header := &tar.Header{
 			Name:    path,
 			Size:    fileInfo.Size(),
-			Mode:    format.FileMode,
-			ModTime: format.ModTime,
+			Mode:    FileMode,
+			ModTime: ModTime,
 		}
 		if err := tw.WriteHeader(header); err != nil {
 			return fmt.Errorf("unable to write %s header: %w", obj.info.ElementTypeName, err)
@@ -180,5 +179,5 @@ func (h *TarHandler) NewFromReader(info *AccessObjectInfo, acc AccessMode, in io
 		}
 		return nil
 	}
-	return NewAccessObject(info, acc, opts.Representation, SetupFunction(setup), closer, format.DirMode)
+	return NewAccessObject(info, acc, opts.Representation, SetupFunction(setup), closer, DirMode)
 }

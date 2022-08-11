@@ -20,10 +20,8 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -97,38 +95,6 @@ func ResourceReader(s AccessMethodSource) (io.ReadCloser, error) {
 // It handles the Close contract for the access method for a singular use.
 func ResourceData(s AccessMethodSource) ([]byte, error) {
 	return cpi.ResourceData(s)
-}
-
-type CompoundResolver struct {
-	resolvers []ComponentVersionResolver
-}
-
-var _ ComponentVersionResolver = (*CompoundResolver)(nil)
-
-func NewCompoundResolver(res ...ComponentVersionResolver) ComponentVersionResolver {
-	for i := 0; i < len(res); i++ {
-		if res[i] == nil {
-			res = append(res[:i], res[i+1:]...)
-			i--
-		}
-	}
-	if len(res) == 1 {
-		return res[0]
-	}
-	return &CompoundResolver{res}
-}
-
-func (c *CompoundResolver) LookupComponentVersion(name string, version string) (core.ComponentVersionAccess, error) {
-	for _, r := range c.resolvers {
-		cv, err := r.LookupComponentVersion(name, version)
-		if err == nil {
-			return cv, nil
-		}
-		if !errors.IsErrNotFoundKind(err, KIND_COMPONENTVERSION) {
-			return nil, err
-		}
-	}
-	return nil, errors.ErrNotFound(KIND_OCM_REFERENCE, common.NewNameVersion(name, version).String())
 }
 
 func IsIntermediate(spec RepositorySpec) bool {

@@ -70,6 +70,6 @@ $ ocm transfer ctf ctf.tgz ghcr.io/mandelsoft/components
 
 ##### Parents
 
-* [ocm transfer](ocm_transfer.md)	 - Transfer artefacts or components
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm transfer](ocm_transfer.md)	 &mdash; Transfer artefacts or components
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

@@ -62,6 +62,10 @@ func RegisterRepositoryType(name string, atype RepositoryType) {
 	core.DefaultRepositoryTypeScheme.Register(name, atype)
 }
 
+func RegisterStandardIdentityMatcher(typ string, matcher IdentityMatcher, desc string) {
+	core.StandardIdentityMatchers.Register(typ, matcher, desc)
+}
+
 func NewCredentials(props common.Properties) Credentials {
 	return core.NewCredentials(props)
 }
@@ -73,3 +77,7 @@ func ErrUnknownCredentials(name string) error {
 func ErrUnknownRepository(kind, name string) error {
 	return core.ErrUnknownRepository(kind, name)
 }
+
+var CompleteMatch = core.CompleteMatch
+var NoMatch = core.NoMatch
+var PartialMatch = core.PartialMatch

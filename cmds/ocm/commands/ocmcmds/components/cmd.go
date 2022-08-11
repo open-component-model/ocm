@@ -17,7 +17,8 @@ package components
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/download"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/get"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/sign"
@@ -33,9 +34,13 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
 		Short: "Commands acting on components",
 	}, Names...)
+	AddCommands(ctx, cmd)
+	return cmd
+}
+
+func AddCommands(ctx clictx.Context, cmd *cobra.Command) {
 	cmd.AddCommand(get.NewCommand(ctx, get.Verb))
 	cmd.AddCommand(sign.NewCommand(ctx, sign.Verb))
 	cmd.AddCommand(verify.NewCommand(ctx, verify.Verb))
 	cmd.AddCommand(download.NewCommand(ctx, download.Verb))
-	return cmd
 }

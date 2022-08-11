@@ -18,7 +18,6 @@ import (
 	"compress/bzip2"
 	"fmt"
 	"io"
-	"io/ioutil"
 )
 
 // Bzip2AlgorithmName is the name used by pkg/compression.Bzip2.
@@ -37,7 +36,7 @@ func init() {
 
 // bzip2Decompressor is a DecompressorFunc for the bzip2 compression algorithm.
 func bzip2Decompressor(r io.Reader) (io.ReadCloser, error) {
-	return ioutil.NopCloser(bzip2.NewReader(r)), nil
+	return io.NopCloser(bzip2.NewReader(r)), nil
 }
 
 // bzip2Compressor is a CompressorFunc for the bzip2 compression algorithm.

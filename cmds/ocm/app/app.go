@@ -18,26 +18,36 @@ package app
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"strings"
 
-	dockercli "github.com/docker/cli/cli/config"
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
+
+	"github.com/open-component-model/ocm/cmds/ocm/topics/common/attributes"
+	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
+
+	"github.com/open-component-model/ocm/pkg/cobrautils"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
+
+	// dedicated command sub areas
 	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds"
-	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds"
+
+	// element commands
+	creds "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/credentials"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
+
+	// verbs
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/add"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/bootstrap"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/clean"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/create"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/describe"
@@ -47,43 +57,27 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/sign"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/transfer"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/verify"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/cobrautils"
+
+	// topics
 	topicconfig "github.com/open-component-model/ocm/cmds/ocm/topics/common/config"
 	topicocirefs "github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
+
+	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	credcfg "github.com/open-component-model/ocm/pkg/contexts/credentials/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	datactg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
+	datacfg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
 
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/version"
 
-	_ "github.com/open-component-model/ocm/cmds/ocm/clictx/config"
+	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
+	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 )
-
-type CLI struct {
-	clictx.Context
-}
-
-func NewCLI(ctx clictx.Context) *CLI {
-	if ctx == nil {
-		ctx = clictx.DefaultContext()
-	}
-	return &CLI{ctx}
-}
-
-func (c *CLI) Execute(args ...string) error {
-	cmd := NewCliCommand(c)
-	cmd.SetArgs(args)
-	return cmd.Execute()
-}
 
 type CLIOptions struct {
 	Config      string
@@ -144,7 +138,7 @@ form
 
 The value can be a simple type or a json string for complex values. The following
 attributes are supported:
-` + Attributes()
+` + attributes.Attributes()
 
 func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	if ctx == nil {
@@ -168,6 +162,7 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	cobrautils.TweakCommand(cmd, ctx)
 
 	cmd.AddCommand(NewVersionCommand())
+
 	cmd.AddCommand(get.NewCommand(opts.Context))
 	cmd.AddCommand(create.NewCommand(opts.Context))
 	cmd.AddCommand(add.NewCommand(opts.Context))
@@ -177,6 +172,7 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(transfer.NewCommand(opts.Context))
 	cmd.AddCommand(describe.NewCommand(opts.Context))
 	cmd.AddCommand(download.NewCommand(opts.Context))
+	cmd.AddCommand(bootstrap.NewCommand(opts.Context))
 	cmd.AddCommand(clean.NewCommand(opts.Context))
 
 	cmd.AddCommand(componentarchive.NewCommand(opts.Context))
@@ -188,6 +184,9 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(cachecmds.NewCommand(opts.Context))
 	cmd.AddCommand(ocicmds.NewCommand(opts.Context))
 	cmd.AddCommand(ocmcmds.NewCommand(opts.Context))
+	cmd.AddCommand(toicmds.NewCommand(opts.Context))
+
+	cmd.AddCommand(creds.NewCommand(opts.Context))
 
 	opts.AddFlags(cmd.Flags())
 	cmd.InitDefaultHelpCmd()
@@ -203,10 +202,13 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(topicconfig.New(ctx))
 	cmd.AddCommand(topicocirefs.New(ctx))
 	cmd.AddCommand(topicocmrefs.New(ctx))
+	cmd.AddCommand(attributes.New(ctx))
+	cmd.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 
 	help.AddCommand(topicconfig.New(ctx))
 	help.AddCommand(topicocirefs.New(ctx))
 	help.AddCommand(topicocmrefs.New(ctx))
+	help.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 
 	return cmd
 }
@@ -218,48 +220,9 @@ func (o *CLIOptions) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *CLIOptions) Complete() error {
-	h := os.Getenv("HOME")
-	if o.Config == "" {
-		if h != "" {
-			cfg := h + "/.ocmconfig"
-			if ok, err := vfs.FileExists(osfs.New(), cfg); ok && err == nil {
-				o.Config = cfg
-			}
-		}
-	}
-	if o.Config != "" {
-		//fmt.Printf("********** config file is %s\n", o.Config)
-		if strings.HasPrefix(o.Config, "~"+string(os.PathSeparator)) {
-			if len(h) == 0 {
-				return fmt.Errorf("no home directory found for resolving path of config file %q", o.Config)
-			}
-			o.Config = h + o.Config[1:]
-		}
-		data, err := ioutil.ReadFile(o.Config)
-		if err != nil {
-			return errors.Wrapf(err, "cannot read config file %q", o.Config)
-		}
-
-		cfg, err := config.DefaultContext().GetConfigForData(data, nil)
-		if err != nil {
-			return errors.Wrapf(err, "invalid config file %q", o.Config)
-		}
-		o.Context = clictx.DefaultContext()
-		err = config.DefaultContext().ApplyConfig(cfg, o.Config)
-		if err != nil {
-			return errors.Wrapf(err, "cannot apply config %q", o.Config)
-		}
-	} else {
-		// use docker config as default config for ocm cli
-		d := filepath.Join(dockercli.Dir(), dockercli.ConfigFileName)
-		if ok, err := vfs.FileExists(osfs.New(), d); ok && err == nil {
-			cfg := credcfg.NewConfigSpec()
-			cfg.AddRepository(dockerconfig.NewRepositorySpec(d, true))
-			err = config.DefaultContext().ApplyConfig(cfg, d)
-			if err != nil {
-				return errors.Wrapf(err, "cannot apply docker config %q", d)
-			}
-		}
+	_, err := utils.Configure(o.Context.OCMContext(), o.Config, vfsattr.Get(o.Context))
+	if err != nil {
+		return err
 	}
 
 	id := credentials.ConsumerIdentity{}
@@ -288,8 +251,6 @@ func (o *CLIOptions) Complete() error {
 	}
 	if len(attrs) != 0 {
 		o.Context.CredentialsContext().SetCredentialsForConsumer(id, credentials.NewCredentials(attrs))
-		id = credentials.ConsumerIdentity{}
-		attrs = common.Properties{}
 	} else {
 		if len(id) != 0 {
 			return errors.Newf("empty credential attribute set for %s", id.String())
@@ -299,7 +260,7 @@ func (o *CLIOptions) Complete() error {
 	set, err := common2.ParseLabels(o.Settings, "attribute setting")
 	if err == nil && len(set) > 0 {
 		ctx := o.Context.ConfigContext()
-		spec := datactg.NewConfigSpec()
+		spec := datacfg.New()
 		for _, s := range set {
 			attr := s.Name
 			eff := datacontext.DefaultAttributeScheme.Shortcuts()[attr]
@@ -326,34 +287,4 @@ func NewVersionCommand() *cobra.Command {
 			fmt.Printf("%#v", v)
 		},
 	}
-}
-
-func Attributes() string {
-	s := ""
-	sep := ""
-	for _, a := range datacontext.DefaultAttributeScheme.KnownTypeNames() {
-		t, _ := datacontext.DefaultAttributeScheme.GetType(a)
-		desc := t.Description()
-		if !strings.Contains(desc, "not via command line") {
-			for strings.HasPrefix(desc, "\n") {
-				desc = desc[1:]
-			}
-			for strings.HasSuffix(desc, "\n") {
-				desc = desc[:len(desc)-1]
-			}
-			desc = strings.Replace(desc, "\n", "\n  ", -1)
-			short := ""
-			for k, v := range datacontext.DefaultAttributeScheme.Shortcuts() {
-				if v == a {
-					short = short + ",<code>" + k + "</code>"
-				}
-			}
-			if len(short) > 0 {
-				short = " [" + short[1:] + "]"
-			}
-			s = fmt.Sprintf("%s%s- <code>%s</code>%s: %s", s, sep, a, short, desc)
-			sep = "\n"
-		}
-	}
-	return s
 }

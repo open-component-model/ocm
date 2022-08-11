@@ -15,8 +15,6 @@
 package config_test
 
 import (
-	"reflect"
-
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -39,7 +37,7 @@ type Config struct {
 	Bob                         string `json:"bob,omitempty"`
 }
 
-// NewConfig creates a new memory Config
+// NewConfig creates a new memory ConfigSpec
 func NewConfig(a, b string) *Config {
 	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(DummyType),
@@ -66,8 +64,6 @@ func (a *Config) ApplyTo(ctx config.Context, target interface{}) error {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-var key = reflect.TypeOf(&dummyContext{})
 
 func newDummy(ctx config.Context) *dummyContext {
 	d := &dummyContext{

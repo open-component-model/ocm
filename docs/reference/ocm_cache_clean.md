@@ -30,6 +30,6 @@ $ ocm clean cache
 
 ##### Parents
 
-* [ocm cache](ocm_cache.md)	 - Cache related commands
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm cache](ocm_cache.md)	 &mdash; Cache related commands
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

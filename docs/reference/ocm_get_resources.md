@@ -9,12 +9,12 @@ ocm get resources [<options>]  <component> {<name> { <key>=<value> }}
 ### Options
 
 ```
-  -c, --closure            follow component reference nesting
-  -h, --help               help for resources
-      --lookup string      repository name or spec for closure lookup fallback
-  -o, --output string      output mode (JSON, json, tree, treewide, wide, yaml)
-  -r, --repo string        repository name or spec
-  -s, --sort stringArray   sort fields
+  -c, --closure              follow component reference nesting
+  -h, --help                 help for resources
+      --lookup stringArray   repository name or spec for closure lookup fallback
+  -o, --output string        output mode (JSON, json, tree, treewide, wide, yaml)
+  -r, --repo string          repository name or spec
+  -s, --sort stringArray     sort fields
 ```
 
 ### Description
@@ -96,6 +96,6 @@ The following modes are supported:
 
 ##### Parents
 
-* [ocm get](ocm_get.md)	 - Get information about artefacts and components
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm get](ocm_get.md)	 &mdash; Get information about artefacts and components
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

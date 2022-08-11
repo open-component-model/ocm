@@ -19,8 +19,12 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+
+	"github.com/open-component-model/ocm/pkg/contexts/config"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+
 	"github.com/open-component-model/ocm/cmds/ocm/app"
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -28,9 +32,26 @@ import (
 	"github.com/open-component-model/ocm/pkg/env/builder"
 )
 
+type CLI struct {
+	clictx.Context
+}
+
+func NewCLI(ctx clictx.Context) *CLI {
+	if ctx == nil {
+		ctx = clictx.DefaultContext()
+	}
+	return &CLI{ctx}
+}
+
+func (c *CLI) Execute(args ...string) error {
+	cmd := app.NewCliCommand(c)
+	cmd.SetArgs(args)
+	return cmd.Execute()
+}
+
 type TestEnv struct {
 	*builder.Builder
-	app.CLI
+	CLI
 }
 
 func NewTestEnv(opts ...env.Option) *TestEnv {
@@ -38,12 +59,20 @@ func NewTestEnv(opts ...env.Option) *TestEnv {
 	ctx := clictx.WithOCM(b.OCMContext()).New()
 	return &TestEnv{
 		Builder: b,
-		CLI:     *app.NewCLI(ctx),
+		CLI:     *NewCLI(ctx),
 	}
 }
 
 func (e *TestEnv) ApplyOption(opts *accessio.Options) {
 	e.Builder.ApplyOption(opts)
+}
+
+func (e *TestEnv) ConfigContext() config.Context {
+	return e.Builder.ConfigContext()
+}
+
+func (e *TestEnv) CredentialsContext() credentials.Context {
+	return e.Builder.CredentialsContext()
 }
 
 func (e *TestEnv) OCMContext() ocm.Context {

@@ -1,0 +1,67 @@
+actions:
+  - install
+  - uninstall
+imageRef:
+  resource:
+    name: toiimage
+configScheme:
+  type: object
+  additionalProperties: false
+  required:
+    - chart
+    - kubeConfigName
+    - imageMapping
+  properties:
+    chart:
+      additionalProperties: false
+      type: object
+      required:
+      - resource
+      properties:
+        resource:
+          type: object
+          additionalProperties:
+            type: string
+        referencePath:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
+
+    release:
+      type: string
+    namespace:
+      type: string
+    createNamespace:
+      type: boolean
+    imageMapping:
+      additionalProperties: false
+      anyOf:
+        - required: [ "tag" ]
+        - required: [ "repository" ]
+        - required: [ "image" ]
+      required:
+      - resource
+      properties:
+        tag:
+          type: string
+        repository:
+          type: string
+        image:
+          type: string
+        resource:
+          type: object
+          additionalProperties:
+            type: string
+        referencePath:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
+    values:
+      type: object
+    kubeConfigName:
+      type: string
+

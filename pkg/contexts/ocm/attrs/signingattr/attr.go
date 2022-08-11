@@ -37,8 +37,10 @@ func (a AttributeType) Name() string {
 
 func (a AttributeType) Description() string {
 	return `
-*bool*
-Public and private Key settings.
+*JSON*
+Public and private Key settings given as JSON document with the following
+format:
+
 <pre>
 {
   "publicKeys"": [
@@ -52,6 +54,11 @@ Public and private Key settings.
      }
   ]
 </pre>
+
+One of following data fields are possible:
+- <code>data</code>:       base64 encoded binary data
+- <code>stringdata</code>: plain text data
+- <code>path</code>:       a file path to read the data from
 `
 }
 
@@ -60,7 +67,7 @@ func (a AttributeType) Encode(v interface{}, marshaller runtime.Marshaler) ([]by
 }
 
 func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (interface{}, error) {
-	var value ConfigSpec
+	var value Config
 	err := unmarshaller.Unmarshal(data, &value)
 	if err != nil {
 		return nil, err

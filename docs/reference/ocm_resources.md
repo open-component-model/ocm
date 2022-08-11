@@ -16,12 +16,12 @@ ocm resources [<options>] <sub command> ...
 
 ##### Parents
 
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
 
 ##### Sub Commands
 
-* [ocm resources <b>add</b>](ocm_resources_add.md)	 - add resources to a component version
-* [ocm resources <b>download</b>](ocm_resources_download.md)	 - download resources of a component version
-* [ocm resources <b>get</b>](ocm_resources_get.md)	 - get resources of a component version
+* [ocm resources <b>add</b>](ocm_resources_add.md)	 &mdash; add resources to a component version
+* [ocm resources <b>download</b>](ocm_resources_download.md)	 &mdash; download resources of a component version
+* [ocm resources <b>get</b>](ocm_resources_get.md)	 &mdash; get resources of a component version
 

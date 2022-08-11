@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"reflect"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -50,7 +50,7 @@ func InOut(in runtime.TypedObject, encoding runtime.Encoding) (runtime.TypedObje
 		return nil, "", err
 	}
 	err = encoding.Unmarshal(data, out)
-	return out.(runtime.TypedObject), string(data), err
+	return out, string(data), err
 }
 
 var _ = Describe("*** unstructured", func() {

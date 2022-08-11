@@ -21,6 +21,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
@@ -28,6 +29,21 @@ import (
 )
 
 type Repository struct {
+	view accessio.CloserView
+	*RepositoryImpl
+}
+
+func (r *Repository) IsClosed() bool {
+	return r.view.IsClosed()
+}
+
+func (r *Repository) Close() error {
+	return r.view.Close()
+}
+
+type RepositoryImpl struct {
+	refs accessio.ReferencableCloser
+
 	ctx     cpi.Context
 	meta    ComponentRepositoryMeta
 	ocirepo oci.Repository
@@ -36,31 +52,39 @@ type Repository struct {
 var _ cpi.Repository = (*Repository)(nil)
 
 func NewRepository(ctx cpi.Context, meta *ComponentRepositoryMeta, ocirepo oci.Repository) (cpi.Repository, error) {
-	repo := &Repository{
+	repo := &RepositoryImpl{
 		ctx:     ctx,
 		meta:    *DefaultComponentRepositoryMeta(meta),
 		ocirepo: ocirepo,
 	}
-	_ = repo
-	return repo, nil
+	repo.refs = accessio.NewRefCloser(repo, true)
+	return repo.View(true)
 }
 
-func (r *Repository) Close() error {
+func (r *RepositoryImpl) View(main ...bool) (*Repository, error) {
+	v, err := r.refs.View(main...)
+	if err != nil {
+		return nil, err
+	}
+	return &Repository{view: v, RepositoryImpl: r}, nil
+}
+
+func (r *RepositoryImpl) Close() error {
 	return r.ocirepo.Close()
 }
 
-func (r *Repository) GetContext() cpi.Context {
+func (r *RepositoryImpl) GetContext() cpi.Context {
 	return r.ctx
 }
 
-func (r *Repository) GetSpecification() cpi.RepositorySpec {
+func (r *RepositoryImpl) GetSpecification() cpi.RepositorySpec {
 	return &RepositorySpec{
 		RepositorySpec:          r.ocirepo.GetSpecification(),
 		ComponentRepositoryMeta: r.meta,
 	}
 }
 
-func (r *Repository) ComponentLister() cpi.ComponentLister {
+func (r *RepositoryImpl) ComponentLister() cpi.ComponentLister {
 	if r.meta.ComponentNameMapping != OCIRegistryURLPathMapping {
 		return nil
 	}
@@ -71,7 +95,7 @@ func (r *Repository) ComponentLister() cpi.ComponentLister {
 	return r
 }
 
-func (r *Repository) NumComponents(prefix string) (int, error) {
+func (r *RepositoryImpl) NumComponents(prefix string) (int, error) {
 	lister := r.ocirepo.NamespaceLister()
 	if lister == nil {
 		return -1, errors.ErrNotSupported("component lister")
@@ -83,7 +107,7 @@ func (r *Repository) NumComponents(prefix string) (int, error) {
 	return lister.NumNamespaces(p)
 }
 
-func (r *Repository) GetComponents(prefix string, closure bool) ([]string, error) {
+func (r *RepositoryImpl) GetComponents(prefix string, closure bool) ([]string, error) {
 	lister := r.ocirepo.NamespaceLister()
 	if lister == nil {
 		return nil, errors.ErrNotSupported("component lister")
@@ -105,23 +129,20 @@ func (r *Repository) GetComponents(prefix string, closure bool) ([]string, error
 	return result, nil
 }
 
-func (r *Repository) GetOCIRepository() oci.Repository {
+func (r *RepositoryImpl) GetOCIRepository() oci.Repository {
 	return r.ocirepo
 }
 
-func (r *Repository) ExistsComponentVersion(name string, version string) (bool, error) {
+func (r *RepositoryImpl) ExistsComponentVersion(name string, version string) (bool, error) {
 	namespace, err := r.MapComponentNameToNamespace(name)
 	if err != nil {
 		return false, err
 	}
-	ns, err := r.ocirepo.LookupNamespace(namespace)
+	a, err := r.ocirepo.LookupArtefact(namespace, version)
 	if err != nil {
 		return false, err
 	}
-	a, err := ns.GetArtefact(version)
-	if err != nil {
-		return false, err
-	}
+	defer a.Close()
 	desc, err := a.Manifest()
 	if err != nil {
 		return false, err
@@ -133,19 +154,20 @@ func (r *Repository) ExistsComponentVersion(name string, version string) (bool, 
 	return false, nil
 }
 
-func (r *Repository) LookupComponent(name string) (cpi.ComponentAccess, error) {
-	return NewComponentAccess(r, name)
+func (r *RepositoryImpl) LookupComponent(name string) (cpi.ComponentAccess, error) {
+	return newComponentAccess(r, name, true)
 }
 
-func (r *Repository) LookupComponentVersion(name string, version string) (cpi.ComponentVersionAccess, error) {
-	c, err := r.LookupComponent(name)
+func (r *RepositoryImpl) LookupComponentVersion(name string, version string) (cpi.ComponentVersionAccess, error) {
+	c, err := newComponentAccess(r, name, false)
 	if err != nil {
 		return nil, err
 	}
+	defer c.Close()
 	return c.LookupVersion(version)
 }
 
-func (r *Repository) MapComponentNameToNamespace(name string) (string, error) {
+func (r *RepositoryImpl) MapComponentNameToNamespace(name string) (string, error) {
 	switch r.meta.ComponentNameMapping {
 	case OCIRegistryURLPathMapping, "":
 		return path.Join(r.meta.SubPath, componentmapping.ComponentDescriptorNamespace, name), nil

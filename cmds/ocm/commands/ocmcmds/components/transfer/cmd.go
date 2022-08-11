@@ -19,7 +19,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -94,7 +95,7 @@ func (o *Command) Run() error {
 	session := ocm.NewSession(nil)
 	defer session.Close()
 
-	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithContext(o, session))
+	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithSession(o, session))
 	if err != nil {
 		return err
 	}

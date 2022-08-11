@@ -39,10 +39,11 @@ type Config struct {
 	Configurations              []*cpi.GenericConfig `json:"configurations"`
 }
 
-// NewConfig creates a new memory Config
-func NewConfig(info string) *Config {
+// NewConfigSpec creates a new memory ConfigSpec
+func New() *Config {
 	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
+		Configurations:      []*cpi.GenericConfig{},
 	}
 }
 

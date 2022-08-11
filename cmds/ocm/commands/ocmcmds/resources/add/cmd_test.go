@@ -17,14 +17,15 @@ package add_test
 import (
 	"reflect"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/opencontainers/go-digest"
 	"helm.sh/helm/v3/pkg/chart/loader"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
+
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/mime"
 
@@ -32,6 +33,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 )
@@ -60,7 +62,7 @@ func CheckTextResource(env *TestEnv, cd *compdesc.ComponentDescriptor, name stri
 	Expect(spec.(*localblob.AccessSpec).MediaType).To(Equal("text/plain"))
 }
 
-func get(blob accessio.BlobAccess, expected []byte) []byte {
+func Get(blob accessio.BlobAccess, expected []byte) []byte {
 	data, err := blob.Get()
 	ExpectWithOffset(1, err).To(Succeed())
 	if expected != nil {
@@ -119,11 +121,11 @@ var _ = Describe("Add resources", func() {
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
 		Expect(err).To(Succeed())
-		Expect(len(cd.Resources)).To(Equal(1))
+		Expect(len(cd.Resources)).To(Equal(2))
 
 		r, err := cd.GetResourceByIdentity(metav1.NewIdentity("chart"))
 		Expect(err).To(Succeed())
-		Expect(r.Type).To(Equal("HelmChart"))
+		Expect(r.Type).To(Equal(consts.HelmChart))
 		Expect(r.Version).To(Equal(VERSION))
 
 		Expect(r.Access.GetType()).To(Equal(localblob.Type))
@@ -167,11 +169,11 @@ var _ = Describe("Add resources", func() {
 		Expect(r.Version).To(Equal("v0.1.0"))
 		Expect(r.Relation).To(Equal(metav1.ResourceRelation("external")))
 
-		Expect(r.Access.GetType()).To(Equal(ociregistry.Type))
+		Expect(r.Access.GetType()).To(Equal(ociartefact.Type))
 
 		acc, err := env.OCMContext().AccessSpecForSpec(r.Access)
 		Expect(err).To(Succeed())
-		Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*ociregistry.AccessSpec)(nil))))
-		Expect(acc.(*ociregistry.AccessSpec).ImageReference).To(Equal("ghcr.io/mandelsoft/pause:v0.1.0"))
+		Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*ociartefact.AccessSpec)(nil))))
+		Expect(acc.(*ociartefact.AccessSpec).ImageReference).To(Equal("ghcr.io/mandelsoft/pause:v0.1.0"))
 	})
 })

@@ -66,7 +66,7 @@ func (l *ErrorList) Len() int {
 }
 
 func (l *ErrorList) Result() error {
-	if len(l.errors) == 0 {
+	if l == nil || len(l.errors) == 0 {
 		return nil
 	}
 	return l

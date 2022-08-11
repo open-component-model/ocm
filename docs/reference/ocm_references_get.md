@@ -9,12 +9,12 @@ ocm references get [<options>]  <component> {<name> { <key>=<value> }}
 ### Options
 
 ```
-  -c, --closure            follow component reference nesting
-  -h, --help               help for get
-      --lookup string      repository name or spec for closure lookup fallback
-  -o, --output string      output mode (JSON, json, tree, wide, yaml)
-  -r, --repo string        repository name or spec
-  -s, --sort stringArray   sort fields
+  -c, --closure              follow component reference nesting
+  -h, --help                 help for get
+      --lookup stringArray   repository name or spec for closure lookup fallback
+  -o, --output string        output mode (JSON, json, tree, wide, yaml)
+  -r, --repo string          repository name or spec
+  -s, --sort stringArray     sort fields
 ```
 
 ### Description
@@ -95,6 +95,6 @@ The following modes are supported:
 
 ##### Parents
 
-* [ocm references](ocm_references.md)	 - Commands related to component references in component versions
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm references](ocm_references.md)	 &mdash; Commands related to component references in component versions
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

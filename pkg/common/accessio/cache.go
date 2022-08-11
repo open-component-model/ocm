@@ -35,6 +35,11 @@ type Allocatable interface {
 	Unref() error
 }
 
+type RefMgmt interface {
+	Allocatable
+	UnrefLast() error
+}
+
 type refMgmt struct {
 	lock     sync.Mutex
 	refcount int
@@ -42,8 +47,14 @@ type refMgmt struct {
 	cleanup  func() error
 }
 
-func NewAllocatable(cleanup func() error) Allocatable {
-	return &refMgmt{refcount: 1, cleanup: cleanup}
+func NewAllocatable(cleanup func() error, unused ...bool) RefMgmt {
+	n := 1
+	for _, b := range unused {
+		if b {
+			n = 0
+		}
+	}
+	return &refMgmt{refcount: n, cleanup: cleanup}
 }
 
 func (c *refMgmt) Ref() error {
@@ -61,6 +72,26 @@ func (c *refMgmt) Unref() error {
 	defer c.lock.Unlock()
 	if c.closed {
 		return ErrClosed
+	}
+	c.refcount--
+	var err error
+	if c.refcount <= 0 {
+		if c.cleanup != nil {
+			err = c.cleanup()
+		}
+		c.closed = true
+	}
+	return err
+}
+
+func (c *refMgmt) UnrefLast() error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	if c.closed {
+		return ErrClosed
+	}
+	if c.refcount > 1 {
+		return errors.Newf("object still in use: %d reference(s) pending", c.refcount)
 	}
 	c.refcount--
 	var err error
@@ -218,6 +249,7 @@ func (c *blobCache) AddBlob(blob BlobAccess) (int64, digest.Digest, error) {
 	}
 
 	var digest digest.Digest
+	var ok bool
 	if digester != nil {
 		digest = digester.Digest()
 	} else {
@@ -227,7 +259,7 @@ func (c *blobCache) AddBlob(blob BlobAccess) (int64, digest.Digest, error) {
 
 	c.lock.Lock()
 	defer c.lock.Unlock()
-	if ok, err := vfs.Exists(c.cache, target); err != nil || !ok {
+	if ok, err = vfs.Exists(c.cache, target); err != nil || !ok {
 		err = c.cache.Rename(tmp, target)
 	}
 	c.cache.Remove(tmp)
@@ -533,7 +565,7 @@ func (c *cachedAccess) Get() ([]byte, error) {
 	return c.access.Get()
 }
 
-func (c cachedAccess) Reader() (io.ReadCloser, error) {
+func (c *cachedAccess) Reader() (io.ReadCloser, error) {
 	var err error
 
 	c.lock.Lock()

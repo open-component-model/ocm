@@ -17,13 +17,13 @@ package elemhdlr
 import (
 	"strings"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -61,12 +61,20 @@ func (o *Object) IsNode() *common.NameVersion {
 	return o.Node
 }
 
+func (o *Object) IsValid() bool {
+	return o.Element != nil
+}
+
 func (o *Object) Compare(b *Object) int {
 	c := o.History.Compare(b.History)
 	if c == 0 {
-		c = strings.Compare(o.Element.GetMeta().GetName(), b.Element.GetMeta().GetName())
-		if c == 0 {
-			c = strings.Compare(o.Id.String(), b.Id.String())
+		if o.IsValid() {
+			c = strings.Compare(o.Element.GetMeta().GetName(), b.Element.GetMeta().GetName())
+			if c == 0 {
+				c = strings.Compare(o.Id.String(), b.Id.String())
+			}
+		} else {
+			c = 0
 		}
 	}
 	return c
@@ -79,13 +87,14 @@ type TypeHandler struct {
 	components []*comphdlr.Object
 	session    ocm.Session
 	kind       string
+	forceEmpty bool
 	elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor
 }
 
-func NewTypeHandler(octx clictx.OCM, opts *output.Options, repobase ocm.Repository, session ocm.Session, kind string, compspecs []string, elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor) (utils.TypeHandler, error) {
+func NewTypeHandler(octx clictx.OCM, oopts *output.Options, repobase ocm.Repository, session ocm.Session, kind string, compspecs []string, elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor, hopts ...Option) (utils.TypeHandler, error) {
 	h := comphdlr.NewTypeHandler(octx, session, repobase)
 
-	comps := output.NewElementOutput(nil, closureoption.Closure(opts, comphdlr.ClosureExplode, comphdlr.Sort))
+	comps := output.NewElementOutput(nil, closureoption.Closure(oopts, comphdlr.ClosureExplode, comphdlr.Sort))
 	err := utils.HandleOutput(comps, h, utils.StringElemSpecs(compspecs...)...)
 	if err != nil {
 		return nil, err
@@ -105,6 +114,9 @@ func NewTypeHandler(octx clictx.OCM, opts *output.Options, repobase ocm.Reposito
 		session:    session,
 		elemaccess: elemaccess,
 		kind:       kind,
+	}
+	for _, o := range hopts {
+		o.Apply(t)
 	}
 	return t, nil
 }
@@ -127,16 +139,27 @@ func (h *TypeHandler) All() ([]output.Object, error) {
 
 func (h *TypeHandler) all(c *comphdlr.Object) ([]output.Object, error) {
 	result := []output.Object{}
-	elemaccess := h.elemaccess(c.ComponentVersion)
-	l := elemaccess.Len()
-	for i := 0; i < l; i++ {
-		e := elemaccess.Get(i)
-		result = append(result, &Object{
-			History: append(c.History, common.VersionedElementKey(c.ComponentVersion)),
-			Version: c.ComponentVersion,
-			Id:      e.GetMeta().GetIdentity(elemaccess),
-			Element: e,
-		})
+	if c.ComponentVersion != nil {
+		elemaccess := h.elemaccess(c.ComponentVersion)
+		l := elemaccess.Len()
+		if l == 0 && h.forceEmpty {
+			result = append(result, &Object{
+				History: append(c.History, common.VersionedElementKey(c.ComponentVersion)),
+				Version: c.ComponentVersion,
+				Id:      metav1.Identity{},
+				Element: nil,
+			})
+		} else {
+			for i := 0; i < l; i++ {
+				e := elemaccess.Get(i)
+				result = append(result, &Object{
+					History: append(c.History, common.VersionedElementKey(c.ComponentVersion)),
+					Version: c.ComponentVersion,
+					Id:      e.GetMeta().GetIdentity(elemaccess),
+					Element: e,
+				})
+			}
+		}
 	}
 	return result, nil
 }
@@ -174,8 +197,13 @@ func (h *TypeHandler) get(c *comphdlr.Object, elemspec utils.ElemSpec) ([]output
 			})
 		}
 	}
-	if len(result) == 0 {
-		return nil, errors.ErrNotFound(h.kind, selector.String())
+	if len(result) == 0 && h.forceEmpty {
+		result = append(result, &Object{
+			History: append(c.History, common.VersionedElementKey(c.ComponentVersion)),
+			Version: c.ComponentVersion,
+			Id:      metav1.Identity{},
+			Element: nil,
+		})
 	}
 	return result, nil
 }

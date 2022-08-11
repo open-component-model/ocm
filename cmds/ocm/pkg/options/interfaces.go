@@ -19,7 +19,8 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+
 	"github.com/open-component-model/ocm/pkg/out"
 )
 
@@ -43,6 +44,28 @@ type Usage interface {
 
 type Options interface {
 	AddFlags(fs *pflag.FlagSet)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type OptionSelector func(provider OptionSetProvider) bool
+
+func Not(s OptionSelector) OptionSelector {
+	return func(provider OptionSetProvider) bool {
+		return !s(provider)
+	}
+}
+
+func Always() OptionSelector {
+	return func(provider OptionSetProvider) bool {
+		return true
+	}
+}
+
+func Never() OptionSelector {
+	return func(provider OptionSetProvider) bool {
+		return false
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -122,15 +145,16 @@ func (s OptionSet) Get(proto interface{}) bool {
 
 func (s OptionSet) ProcessOnOptions(f OptionsProcessor) error {
 	for _, n := range s {
-		err := f(n)
-		if err != nil {
-			return err
-		}
+		var err error
 		if set, ok := n.(OptionSetProvider); ok {
 			err = set.AsOptionSet().ProcessOnOptions(f)
 			if err != nil {
 				return err
 			}
+		}
+		err = f(n)
+		if err != nil {
+			return err
 		}
 	}
 	return nil

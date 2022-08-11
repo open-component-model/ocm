@@ -57,3 +57,7 @@ func ForContext(ctx context.Context) Context {
 func IsErrBlobNotFound(err error) bool {
 	return accessio.IsErrBlobNotFound(err)
 }
+
+func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {
+	return core.ToGenericRepositorySpec(spec)
+}

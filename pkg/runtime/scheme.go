@@ -93,7 +93,7 @@ func (d *DirectDecoder) Decode(data []byte, unmarshaler Unmarshaler) (TypedObjec
 		return nil, err
 	}
 
-	return inst.(TypedObject), nil
+	return inst, nil
 }
 
 func (d *DirectDecoder) Encode(obj TypedObject, marshaler Marshaler) ([]byte, error) {
@@ -326,9 +326,11 @@ func (d *defaultScheme) Decode(data []byte, unmarshal Unmarshaler) (TypedObject,
 		return nil, errors.Wrapf(err, "cannot unmarshal unstructured")
 	}
 	if un.GetType() == "" {
-		if d.acceptUnknown {
-			return un.(TypedObject), nil
-		}
+		/*
+			if d.acceptUnknown {
+				return un.(TypedObject), nil
+			}
+		*/
 		return nil, errors.Newf("no type found")
 	}
 	decoder := d.GetDecoder(un.GetType())

@@ -17,7 +17,7 @@ package runtime_test
 import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
 

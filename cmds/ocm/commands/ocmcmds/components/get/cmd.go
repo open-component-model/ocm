@@ -19,12 +19,15 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/schemaoption"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
@@ -50,7 +53,7 @@ type Command struct {
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), output.OutputOptions(outputs, closureoption.New(
-		"component reference", output.Fields("IDENTITY"), identity), schemaoption.New(""),
+		"component reference", output.Fields("IDENTITY"), options.Not(output.Selected("tree")), addIdentityField), schemaoption.New(""),
 	))}, utils.Names(Names, names...)...)
 }
 
@@ -81,7 +84,7 @@ func (o *Command) Run() error {
 	session := ocm.NewSession(nil)
 	defer session.Close()
 
-	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithContext(o, session))
+	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithSession(o, session))
 	if err != nil {
 		return err
 	}
@@ -91,7 +94,7 @@ func (o *Command) Run() error {
 
 /////////////////////////////////////////////////////////////////////////////
 
-func identity(e interface{}) []string {
+func addIdentityField(e interface{}) []string {
 	p := e.(*comphdlr.Object)
 	return []string{p.Identity.String()}
 }
@@ -159,6 +162,9 @@ func map_get_regular_output(e interface{}) interface{} {
 	tag := "-"
 	if p.Spec.Version != nil {
 		tag = *p.Spec.Version
+	}
+	if p.ComponentVersion == nil {
+		return []string{p.Spec.Component, tag, "<unknown component version>"}
 	}
 	return []string{p.Spec.Component, tag, string(p.ComponentVersion.GetDescriptor().Provider.Name)}
 }

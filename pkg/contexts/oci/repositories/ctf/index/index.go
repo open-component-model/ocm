@@ -160,7 +160,7 @@ func (r *RepositoryIndex) GetArtefacts(repo string) []string {
 		return nil
 	}
 	result := []string{}
-	for t, _ := range repos {
+	for t := range repos {
 		result = append(result, t)
 	}
 	return result

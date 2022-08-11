@@ -28,7 +28,7 @@ func ClosureExplode(opts *output.Options, e interface{}) []interface{} {
 	return traverse(common.History{}, e.(*Object), opts.Context, lookupoption.From(opts))
 }
 
-func traverse(hist common.History, o *Object, octx out.Context, lookup *lookupoption.Option) []interface{} {
+func traverse(hist common.History, o *Object, octx out.Context, lookup ocm.ComponentVersionResolver) []interface{} {
 	key := common.VersionedElementKey(o.ComponentVersion)
 	if err := hist.Add(ocm.KIND_COMPONENTVERSION, key); err != nil {
 		return nil
@@ -46,23 +46,19 @@ func traverse(hist common.History, o *Object, octx out.Context, lookup *lookupop
 			continue // skip same ref wit different attributes for recursion
 		}
 		found[key] = true
-		var nested ocm.ComponentVersionAccess
 		vers := ref.Version
-		comp, err := o.Repository.LookupComponent(ref.ComponentName)
+		nested, err := o.Repository.LookupComponentVersion(ref.ComponentName, vers)
 		if err != nil {
-			out.Errf(octx, "Warning: lookup nested component %q [%s]: %s\n", ref.ComponentName, hist, err)
-		} else {
-			nested, err = comp.LookupVersion(vers)
-			if err != nil {
-				out.Errf(octx, "Warning: lookup nested component %q [%s]: %s\n", ref.ComponentName, hist, err)
-			}
+			out.Errf(octx, "Warning: lookup nested component version %q:%s [%s]: %s\n", ref.ComponentName, vers, hist, err)
 		}
-		if nested == nil {
-			comp, nested, err = lookup.LookupComponentVersion(ref.ComponentName, vers)
+		if nested == nil && lookup != nil {
+			nested, err = lookup.LookupComponentVersion(ref.ComponentName, vers)
 			if err != nil {
 				out.Errf(octx, "Warning: fallback lookup nested component version \"%s:%s\" [%s]: %s\n", ref.ComponentName, vers, hist, err)
-				continue
 			}
+		}
+		if err != nil {
+			continue
 		}
 		var obj = &Object{
 			History:  hist,
@@ -74,11 +70,15 @@ func traverse(hist common.History, o *Object, octx out.Context, lookup *lookupop
 					Version:   &vers,
 				},
 			},
-			Repository:       o.Repository,
-			Component:        comp,
+			Repository: o.Repository,
+			//Component:        comp,
 			ComponentVersion: nested,
 		}
-		result = append(result, traverse(hist, obj, octx, lookup)...)
+		if nested == nil {
+			result = append(result, obj)
+		} else {
+			result = append(result, traverse(hist, obj, octx, lookup)...)
+		}
 	}
 	return result
 }

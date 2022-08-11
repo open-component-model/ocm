@@ -17,6 +17,8 @@ package artefactset
 import (
 	"github.com/opencontainers/go-digest"
 
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi/support"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
@@ -30,14 +32,19 @@ func NewFileSystemBlobAccess(access *accessobj.AccessObject) *FileSystemBlobAcce
 	return &FileSystemBlobAccess{accessobj.NewFileSystemBlobAccess(access)}
 }
 
-func (i *FileSystemBlobAccess) GetArtefact(access cpi.ArtefactSetContainer, digest digest.Digest) (cpi.ArtefactAccess, error) {
-	_, data, err := i.GetBlobData(digest)
+func (i *FileSystemBlobAccess) GetArtefact(access support.ArtefactSetContainerImpl, digest digest.Digest) (acc cpi.ArtefactAccess, err error) {
+
+	v, err := access.View()
 	if err != nil {
 		return nil, err
 	}
-
-	blob := accessio.BlobAccessForDataAccess("", -1, "", data)
-	return cpi.NewArtefactForBlob(access, blob)
+	defer v.Close()
+	_, data, err := i.GetBlobData(digest)
+	if err == nil {
+		blob := accessio.BlobAccessForDataAccess("", -1, "", data)
+		acc, err = support.NewArtefactForBlob(access, blob)
+	}
+	return
 }
 
 func (i *FileSystemBlobAccess) AddArtefactBlob(artefact cpi.Artefact) (cpi.BlobAccess, error) {

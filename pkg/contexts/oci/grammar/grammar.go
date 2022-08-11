@@ -105,10 +105,6 @@ var (
 	// DigestRegexp matches valid digests.
 	DigestRegexp = Match(`[A-Za-z][A-Za-z0-9]*(?:[-_+.][A-Za-z][A-Za-z0-9]*)*[:][[:xdigit:]]{32,}`)
 
-	// anchoredDigestRegexp matches valid digests, anchored at the start and
-	// end of the matched string.
-	anchoredDigestRegexp = Anchored(DigestRegexp)
-
 	// RepositoryRegexp is the format of a repository ppart of references.
 	RepositoryRegexp = Sequence(
 		NameComponentRegexp,

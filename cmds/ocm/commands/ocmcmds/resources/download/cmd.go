@@ -15,12 +15,16 @@
 package download
 
 import (
+	"fmt"
+	"io"
 	"path"
 	"strings"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/destoption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -106,7 +110,7 @@ func (o *Command) Run() error {
 	session := ocm.NewSession(nil)
 	defer session.Close()
 
-	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithContext(o, session))
+	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithSession(o, session))
 	if err != nil {
 		return err
 	}
@@ -142,6 +146,9 @@ func (d *action) Out() error {
 	if len(d.data) == 1 {
 		return d.Save(d.data[0], dest.Destination)
 	} else {
+		if dest.Destination == "-" {
+			return fmt.Errorf("standard output suported for singlle resource only.")
+		}
 		for _, e := range d.data {
 			f := dest.Destination
 			if f == "" {
@@ -170,9 +177,22 @@ func (d *action) Out() error {
 func (d *action) Save(o *elemhdlr.Object, f string) error {
 	dest := destoption.From(d.opts)
 	local := From(d.opts)
+	pathIn := true
 	r := common.Elem(o)
 	if f == "" {
 		f = r.GetName()
+		pathIn = false
+	}
+	var tmp vfs.File
+	var err error
+	if f == "-" {
+		tmp, err = vfs.TempFile(dest.PathFilesystem, "", "download-*")
+		if err != nil {
+			return err
+		}
+		f = tmp.Name()
+		tmp.Close()
+		defer dest.PathFilesystem.Remove(f)
 	}
 	id := r.GetIdentity(o.Version.GetDescriptor().Resources)
 	racc, err := o.Version.GetResource(id)
@@ -185,16 +205,35 @@ func (d *action) Save(o *elemhdlr.Object, f string) error {
 		return err
 	}
 	var ok bool
+	var eff string
 	if local.UseHandlers {
-		ok, err = d.downloaders.Download(d.opts.Context, racc, f, dest.PathFilesystem)
+		ok, eff, err = d.downloaders.Download(d.opts.Context, racc, f, dest.PathFilesystem)
 	} else {
-		ok, err = d.downloaders.DownloadAsBlob(d.opts.Context, racc, f, dest.PathFilesystem)
+		ok, eff, err = d.downloaders.DownloadAsBlob(d.opts.Context, racc, f, dest.PathFilesystem)
 	}
 	if err != nil {
 		return err
 	}
 	if !ok {
-		return errors.Newf("no downloader configured  type %q", racc.Meta().GetType())
+		return errors.Newf("no downloader configured for type %q", racc.Meta().GetType())
+	}
+	if tmp != nil {
+		if eff != f {
+			defer dest.PathFilesystem.Remove(eff)
+		}
+		file, err := dest.PathFilesystem.Open(eff)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		_, err = io.Copy(d.opts.Context.StdOut(), file)
+		if err != nil {
+			return err
+		}
+	} else {
+		if eff != f && pathIn {
+			out.Outf(d.opts.Context, "output path %q changed to %q by downloader", f, eff)
+		}
 	}
 	return nil
 }

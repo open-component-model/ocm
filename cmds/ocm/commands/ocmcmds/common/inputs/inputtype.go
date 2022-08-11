@@ -22,7 +22,8 @@ import (
 	"github.com/modern-go/reflect2"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -321,7 +322,7 @@ The resource specification supports the following blob input types, specified
 with the field <code>type</code> in the <code>input</code> field:
 `
 	for _, t := range scheme.KnownTypeNames() {
-		s = fmt.Sprintf("%s\n- Input type <code>%s</code>\n%s", s, t, utils.IndentLines(scheme.GetInputType(t).Usage(), "  "))
+		s = fmt.Sprintf("%s\n- Input type <code>%s</code>\n\n%s", s, t, utils.IndentLines(scheme.GetInputType(t).Usage(), "  "))
 	}
 	return s + "\n"
 }

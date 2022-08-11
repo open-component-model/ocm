@@ -49,5 +49,5 @@ ctf+tgz::./ctf
 
 ##### Parents
 
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

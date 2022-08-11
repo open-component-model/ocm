@@ -120,7 +120,6 @@ func PrintLayer(blob accessio.BlobAccess) string {
 			s += fmt.Sprintf("  file: %s\n", header.Name)
 		}
 	}
-	return s
 }
 
 func PrintIndex(i cpi.IndexAccess) string {
@@ -132,7 +131,7 @@ func PrintIndex(i cpi.IndexAccess) string {
 		if err != nil {
 			s += fmt.Sprintf("  error: %s\n", err)
 		} else {
-			s += fmt.Sprintf("  resolved artefact:\n")
+			s += "  resolved artefact:\n"
 			s += utils.IndentLines(PrintArtefact(a), "    ")
 		}
 	}

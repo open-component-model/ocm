@@ -178,6 +178,9 @@ func (s *GenericConfig) Evaluate(ctx Context) (Config, error) {
 		return nil, err
 	}
 	cfg, err := ctx.ConfigTypes().DecodeConfig(raw, runtime.DefaultJSONEncoding)
+	if err != nil {
+		return nil, err
+	}
 	if IsGeneric(cfg) {
 		return nil, errors.ErrUnknown(KIND_CONFIGTYPE, s.GetType())
 	}

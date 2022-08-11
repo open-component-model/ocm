@@ -18,8 +18,9 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/vfsattr"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -41,7 +42,7 @@ func NewRepository(ctx cpi.Context, s *RepositorySpec) (*Repository, error) {
 	if err != nil {
 		return nil, err
 	}
-	return a.repo, nil
+	return a.comp.repo, nil
 }
 
 func (r *Repository) ComponentLister() cpi.ComponentLister {
@@ -131,6 +132,9 @@ func (r *Repository) LookupComponentVersion(name string, version string) (cpi.Co
 	if ok {
 		return r.arch, nil
 	}
+	if err == nil {
+		err = errors.ErrNotFound(cpi.KIND_COMPONENTVERSION, common.NewNameVersion(name, version).String(), Type)
+	}
 	return nil, err
 }
 
@@ -141,12 +145,12 @@ func (r *Repository) LookupComponent(name string) (cpi.ComponentAccess, error) {
 		return nil, accessio.ErrClosed
 	}
 	if r.arch.GetName() != name {
-		return nil, errors.ErrNotFound(errors.KIND_COMPONENT, name, CTFComponentArchiveType)
+		return nil, errors.ErrNotFound(errors.KIND_COMPONENT, name, Type)
 	}
-	return &ComponentAccess{r}, nil
+	return r.arch.comp, nil
 }
 
-func (r Repository) Close() error {
+func (r *Repository) Close() error {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	if r.arch != nil {
@@ -184,9 +188,9 @@ func (c *ComponentAccess) LookupVersion(ref string) (cpi.ComponentVersionAccess,
 }
 
 func (c *ComponentAccess) AddVersion(access cpi.ComponentVersionAccess) error {
-	return errors.ErrNotSupported(errors.KIND_FUNCTION, "add version", CTFComponentArchiveType)
+	return errors.ErrNotSupported(errors.KIND_FUNCTION, "add version", Type)
 }
 
 func (c *ComponentAccess) NewVersion(version string, overrides ...bool) (cpi.ComponentVersionAccess, error) {
-	return nil, errors.ErrNotSupported(errors.KIND_FUNCTION, "new version", CTFComponentArchiveType)
+	return nil, errors.ErrNotSupported(errors.KIND_FUNCTION, "new version", Type)
 }

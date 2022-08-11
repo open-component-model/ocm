@@ -25,7 +25,10 @@ import (
 	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/pkg/out"
+
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -127,6 +130,7 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 	fs := o.Context.FileSystem()
 	resources := []*resource{}
 	for _, filePath := range o.Paths {
+		out.Outf(o.Context, "processing %s...\n", filePath)
 		data, err := vfs.ReadFile(fs, filePath)
 		if err != nil {
 			return errors.Wrapf(err, "cannot read resource file %q", filePath)
@@ -153,6 +157,7 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 				}
 				break
 			}
+			out.Outf(o.Context, "  processing document %d...\n", i)
 			if (tmp["input"] != nil || tmp["access"] != nil) && !h.RequireInputs() {
 				return errors.Newf("invalid spec %d in %q: no input or access possible for %s", i+1, filePath, listkey)
 			}
@@ -186,6 +191,7 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 			}
 
 			for j, d := range list {
+				out.Outf(o.Context, "    processing index %d\n", j)
 				var input *ResourceInput
 				r, err := DecodeResource(d, h)
 				if err != nil {
@@ -200,8 +206,6 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 					if err = Validate(input, o.Context, filePath); err != nil {
 						return errors.Wrapf(err, "invalid spec %d[%d] in %q", i+1, j+1, filePath)
 					}
-				} else {
-
 				}
 
 				if err = r.Validate(o.Context, input); err != nil {
@@ -212,6 +216,8 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 			}
 		}
 	}
+
+	out.Outf(o.Context, "found %d %s\n", len(resources), listkey)
 
 	obj, err := comparch.Open(o.Context.OCMContext(), accessobj.ACC_WRITABLE, o.Archive, 0, accessio.PathFileSystem(fs))
 	if err != nil {
@@ -226,7 +232,7 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 				// Local Blob
 				blob, hint, berr := r.input.Input.GetBlob(o.Context, r.path)
 				if berr != nil {
-					return errors.Wrapf(err, "cannot get resource blob for %q(%s)", r.spec.GetName(), r.source)
+					return errors.Wrapf(berr, "cannot get resource blob for %q(%s)", r.spec.GetName(), r.source)
 				}
 				acc, err = obj.AddBlob(blob, hint, nil)
 				if err == nil {
@@ -315,6 +321,9 @@ func Validate(r *ResourceInput, ctx clictx.Context, inputFilePath string) error 
 			} else {
 				acc, err := r.Access.Evaluate(ctx.OCMContext().AccessMethods())
 				if err != nil {
+					if errors.IsErrUnknown(err) {
+						err.(errors.Kinded).SetKind(errors.KIND_ACCESSMETHOD)
+					}
 					raw, _ := r.Access.GetRaw()
 					allErrs = append(allErrs, field.Invalid(fldPath.Child("access"), string(raw), err.Error()))
 				} else {

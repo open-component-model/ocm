@@ -16,7 +16,15 @@ package core
 
 import (
 	"encoding/json"
+	"sort"
+	"strings"
+	"sync"
 )
+
+func init() {
+	StandardIdentityMatchers.Register("partial", PartialMatch, "complete match of given pattern ignoring additional attributes")
+	StandardIdentityMatchers.Register("exact", CompleteMatch, "exact match of given pattern set")
+}
 
 // IdentityMatcher checks whether id matches against pattern and if this match
 // is better than the one for cur.
@@ -28,6 +36,15 @@ func CompleteMatch(pattern, cur, id ConsumerIdentity) bool {
 
 func NoMatch(pattern, cur, id ConsumerIdentity) bool {
 	return false
+}
+
+func PartialMatch(pattern, cur, id ConsumerIdentity) bool {
+	for k, v := range pattern {
+		if c, ok := id[k]; !ok || c != v {
+			return false
+		}
+	}
+	return len(cur) == 0 || len(id) < len(cur)
 }
 
 func mergeMatcher(no IdentityMatcher, merge func([]IdentityMatcher) IdentityMatcher, matchers []IdentityMatcher) IdentityMatcher {
@@ -146,4 +163,68 @@ func (i ConsumerIdentity) SetNonEmptyValue(name, value string) {
 	if value != "" {
 		i[name] = value
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type IdentityMatcherInfo struct {
+	Type        string
+	Matcher     IdentityMatcher
+	Description string
+}
+
+type IdentityMatcherInfos []IdentityMatcherInfo
+
+func (l IdentityMatcherInfos) Size() int                { return len(l) }
+func (l IdentityMatcherInfos) Key(i int) string         { return l[i].Type }
+func (l IdentityMatcherInfos) Description(i int) string { return l[i].Description }
+
+type IdentityMatcherRegistry interface {
+	Register(typ string, matcher IdentityMatcher, desc string)
+	Get(typ string) (IdentityMatcher, string)
+	List() IdentityMatcherInfos
+}
+
+type defaultMatchers struct {
+	lock  sync.Mutex
+	types map[string]IdentityMatcherInfo
+}
+
+func NewMatcherRegistry() IdentityMatcherRegistry {
+	return &defaultMatchers{types: map[string]IdentityMatcherInfo{}}
+}
+
+func (r *defaultMatchers) Register(typ string, matcher IdentityMatcher, desc string) {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	r.types[typ] = IdentityMatcherInfo{typ, matcher, desc}
+}
+
+func (r *defaultMatchers) Get(typ string) (IdentityMatcher, string) {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	i, ok := r.types[typ]
+	if !ok {
+		return nil, ""
+	}
+	return i.Matcher, i.Description
+}
+
+func (r *defaultMatchers) List() IdentityMatcherInfos {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	var list IdentityMatcherInfos
+
+	for _, i := range r.types {
+		list = append(list, i)
+	}
+
+	sort.Slice(list, func(i, j int) bool { return strings.Compare(list[i].Type, list[j].Type) < 0 })
+	return list
+}
+
+var StandardIdentityMatchers = NewMatcherRegistry()
+
+func RegisterIdentityMatcher(typ string, matcher IdentityMatcher, desc string) {
+	StandardIdentityMatchers.Register(typ, matcher, desc)
 }

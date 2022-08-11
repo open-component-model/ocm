@@ -16,7 +16,6 @@ package genericocireg
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
@@ -32,10 +31,10 @@ func init() {
 type handler struct{}
 
 type ComponentVersionInfo struct {
-	Error       string          `json:"error,omitempty`
-	Description string          `json:"description`
-	Unparsed    string          `json:"unparsed,omitempty`
-	Descriptor  json.RawMessage `json:"descriptor,omitempty`
+	Error       string          `json:"error,omitempty"`
+	Description string          `json:"description"`
+	Unparsed    string          `json:"unparsed,omitempty"`
+	Descriptor  json.RawMessage `json:"descriptor,omitempty"`
 }
 
 func (h handler) Info(m cpi.ManifestAccess, config []byte) interface{} {
@@ -65,7 +64,7 @@ func (h handler) Description(m cpi.ManifestAccess, config []byte) string {
 	if err != nil {
 		return s + "  cannot read component descriptor: " + err.Error()
 	}
-	s += fmt.Sprintf("  descriptor:\n")
+	s += "  descriptor:\n"
 	var raw interface{}
 	err = runtime.DefaultYAMLEncoding.Unmarshal(data, &raw)
 	if err != nil {

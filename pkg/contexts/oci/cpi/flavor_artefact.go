@@ -138,7 +138,8 @@ func (a *ArtefactImpl) GetBlobDescriptor(digest digest.Digest) *Descriptor {
 	if d != nil {
 		return d
 	}
-	return a.container.GetBlobDescriptor(digest)
+	return a.provider.GetBlobDescriptor(digest)
+	//return a.container.GetBlobDescriptor(digest)
 }
 
 func (a *ArtefactImpl) Index() (*artdesc.Index, error) {
@@ -202,20 +203,6 @@ func (a *ArtefactImpl) GetArtefact(digest digest.Digest) (ArtefactAccess, error)
 		return nil, ErrNoIndex
 	}
 	return a.getArtefact(digest)
-}
-
-func (a *ArtefactImpl) GetManifest(digest digest.Digest) (ManifestAccess, error) {
-	if !a.IsIndex() {
-		return nil, ErrNoIndex
-	}
-	return a.IndexAccess().GetManifest(digest)
-}
-
-func (a *ArtefactImpl) GetIndex(digest digest.Digest) (IndexAccess, error) {
-	if !a.IsIndex() {
-		return nil, ErrNoIndex
-	}
-	return a.IndexAccess().GetIndex(digest)
 }
 
 func (a *ArtefactImpl) GetBlobData(digest digest.Digest) (int64, DataAccess, error) {

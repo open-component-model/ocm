@@ -28,12 +28,12 @@ const (
 )
 
 func init() {
-	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &ConfigSpec{}, usage))
-	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &ConfigSpec{}, usage))
+	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &Config{}, usage))
+	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &Config{}, usage))
 }
 
-// ConfigSpec describes a memory based repository interface.
-type ConfigSpec struct {
+// Config describes a configuration for the config context
+type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	// Consumers describe predefine logical cosumer specs mapped to credentials
 	// These will (potentially) be evaluated if access objects requiring crednetials
@@ -58,17 +58,17 @@ type RepositorySpec struct {
 }
 
 // NewConfigSpec creates a new memory ConfigSpec
-func NewConfigSpec() *ConfigSpec {
-	return &ConfigSpec{
+func New() *Config {
+	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
 	}
 }
 
-func (a *ConfigSpec) GetType() string {
+func (a *Config) GetType() string {
 	return ConfigType
 }
 
-func (a *ConfigSpec) MapCredentialsChain(creds ...cpi.CredentialsSpec) ([]cpi.GenericCredentialsSpec, error) {
+func (a *Config) MapCredentialsChain(creds ...cpi.CredentialsSpec) ([]cpi.GenericCredentialsSpec, error) {
 	var cgens []cpi.GenericCredentialsSpec
 	for _, c := range creds {
 		cgen, err := cpi.ToGenericCredentialsSpec(c)
@@ -80,7 +80,7 @@ func (a *ConfigSpec) MapCredentialsChain(creds ...cpi.CredentialsSpec) ([]cpi.Ge
 	return cgens, nil
 }
 
-func (a *ConfigSpec) AddConsumer(id cpi.ConsumerIdentity, creds ...cpi.CredentialsSpec) error {
+func (a *Config) AddConsumer(id cpi.ConsumerIdentity, creds ...cpi.CredentialsSpec) error {
 	cgens, err := a.MapCredentialsChain(creds...)
 	if err != nil {
 		return err
@@ -94,7 +94,7 @@ func (a *ConfigSpec) AddConsumer(id cpi.ConsumerIdentity, creds ...cpi.Credentia
 	return nil
 }
 
-func (a *ConfigSpec) MapRepository(repo cpi.RepositorySpec, creds ...cpi.CredentialsSpec) (*RepositorySpec, error) {
+func (a *Config) MapRepository(repo cpi.RepositorySpec, creds ...cpi.CredentialsSpec) (*RepositorySpec, error) {
 	rgen, err := cpi.ToGenericRepositorySpec(repo)
 	if err != nil {
 		return nil, err
@@ -111,7 +111,7 @@ func (a *ConfigSpec) MapRepository(repo cpi.RepositorySpec, creds ...cpi.Credent
 	}, nil
 }
 
-func (a *ConfigSpec) AddRepository(repo cpi.RepositorySpec, creds ...cpi.CredentialsSpec) error {
+func (a *Config) AddRepository(repo cpi.RepositorySpec, creds ...cpi.CredentialsSpec) error {
 	spec, err := a.MapRepository(repo, creds...)
 	if err != nil {
 		return err
@@ -120,7 +120,7 @@ func (a *ConfigSpec) AddRepository(repo cpi.RepositorySpec, creds ...cpi.Credent
 	return nil
 }
 
-func (a *ConfigSpec) AddAlias(name string, repo cpi.RepositorySpec, creds ...cpi.CredentialsSpec) error {
+func (a *Config) AddAlias(name string, repo cpi.RepositorySpec, creds ...cpi.CredentialsSpec) error {
 	spec, err := a.MapRepository(repo, creds...)
 	if err != nil {
 		return err
@@ -133,7 +133,7 @@ func (a *ConfigSpec) AddAlias(name string, repo cpi.RepositorySpec, creds ...cpi
 	return nil
 }
 
-func (a *ConfigSpec) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
+func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	list := errors.ErrListf("applying config")
 	t, ok := target.(cpi.Context)
 	if !ok {

@@ -25,13 +25,13 @@ import (
 )
 
 const (
-	ArtefactSetType   = "ArtefactSet"
-	ArtefactSetTypeV1 = ArtefactSetType + runtime.VersionSeparator + "v1"
+	Type   = "ArtefactSet"
+	TypeV1 = Type + runtime.VersionSeparator + "v1"
 )
 
 func init() {
-	cpi.RegisterRepositoryType(ArtefactSetType, cpi.NewRepositoryType(ArtefactSetType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(ArtefactSetTypeV1, cpi.NewRepositoryType(ArtefactSetTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(Type, cpi.NewRepositoryType(Type, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(TypeV1, cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
 }
 
 type RepositorySpec struct {
@@ -48,7 +48,7 @@ type RepositorySpec struct {
 func NewRepositorySpec(acc accessobj.AccessMode, filePath string, opts ...accessio.Option) *RepositorySpec {
 	o := accessio.AccessOptions(opts...)
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(ArtefactSetType),
+		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		FilePath:            filePath,
 		Options:             o,
 		AccessMode:          acc,
@@ -59,7 +59,7 @@ func (s *RepositorySpec) Name() string {
 	return s.FilePath
 }
 func (a *RepositorySpec) GetType() string {
-	return ArtefactSetType
+	return Type
 }
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	return NewRepository(ctx, a)

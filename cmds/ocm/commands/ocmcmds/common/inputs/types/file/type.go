@@ -16,34 +16,11 @@ package file
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
-	"github.com/open-component-model/ocm/pkg/mime"
 )
 
 const TYPE = "file"
 
 func init() {
-	inputs.DefaultInputTypeScheme.Register(TYPE, inputs.NewInputType(TYPE, &Spec{}, usage))
+	inputs.DefaultInputTypeScheme.Register(TYPE, inputs.NewInputType(TYPE, &Spec{},
+		Usage("The path must denote a file relative the the resources file.")))
 }
-
-const usage = `
-The path must denote a file relative the the resources file.
-The content is compressed if the <code>compress</code> field
-is set to <code>true</code>.
-
-This blob type specification supports the following fields: 
-- **<code>path</code>** *string*
-
-  This REQUIRED property describes the file path to the helm chart relative to the
-  resource file location.
-
-- **<code>mediaType</code>** *string*
-
-  This OPTIONAL property describes the media type to store with the local blob.
-  The default media type is ` + mime.MIME_OCTET + ` and
-  ` + mime.MIME_GZIP + ` if compression is enabled.
-
-- **<code>compress</code>** *bool*
-
-  This OPTIONAL property describes whether the file content should be stored
-  compressed or not.
-`

@@ -19,7 +19,7 @@ import (
 	"compress/gzip"
 	"io"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
@@ -34,7 +34,9 @@ import (
 
 func defaultManifestFill(a *artefactset.ArtefactSet) {
 	art := NewArtefact(a)
-	a.AddArtefact(art)
+	_, err := a.AddArtefact(art)
+	ExpectWithOffset(1, err).To(Succeed())
+	art.Close()
 }
 
 var _ = Describe("artefact management", func() {
@@ -170,6 +172,7 @@ var _ = Describe("artefact management", func() {
 			Expect(a.Close()).To(Succeed())
 
 			a, err = artefactset.FormatDirectory.Open(accessobj.ACC_READONLY, "test", opts)
+			Expect(err).To(Succeed())
 			defer a.Close()
 			Expect(len(a.GetIndex().Manifests)).To(Equal(1))
 			art, err := a.GetArtefact(a.GetIndex().Manifests[0].Digest.String())

@@ -229,6 +229,9 @@ func (s *session) EvaluateRef(ctx Context, ref string) (*EvaluationResult, error
 	}
 	if result.Ref.Component != "" {
 		result.Component, err = s.LookupComponent(result.Repository, result.Ref.Component)
+		if err != nil {
+			return nil, err
+		}
 		if result.Ref.IsVersion() {
 			result.Version, err = s.GetComponentVersion(result.Component, *result.Ref.Version)
 		}

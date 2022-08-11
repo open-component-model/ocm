@@ -19,7 +19,7 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -31,8 +31,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/testhelper"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
 	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci/ocirepo"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -81,7 +81,9 @@ var _ = Describe("component repository mapping", func() {
 		err = comp.AddVersion(vers)
 		Expect(err).To(Succeed())
 
-		Expect(repo.(*genericocireg.Repository).Close()).To(Succeed())
+		Expect(vers.Close()).To(Succeed())
+		Expect(comp.Close()).To(Succeed())
+		Expect(repo.Close()).To(Succeed())
 
 		// access it again
 		repo, err = DefaultContext.RepositoryForSpec(spec)
@@ -98,6 +100,8 @@ var _ = Describe("component repository mapping", func() {
 		Expect(err).To(Succeed())
 		Expect(vers.GetDescriptor()).To(Equal(compdesc.New(COMPONENT, "v1")))
 
+		Expect(vers.Close()).To(Succeed())
+		Expect(comp.Close()).To(Succeed())
 		Expect(repo.Close()).To(Succeed())
 	})
 
@@ -159,39 +163,48 @@ var _ = Describe("component repository mapping", func() {
 		// create repository
 		repo, err := ctx.RepositoryForSpec(spec)
 		Expect(err).To(Succeed())
+		defer repo.Close()
+
+		ocirepo := repo.(*genericocireg.Repository).GetOCIRepository()
+
 		Expect(reflect.TypeOf(repo).String()).To(Equal("*genericocireg.Repository"))
 
 		comp, err := repo.LookupComponent(COMPONENT)
 		Expect(err).To(Succeed())
-
+		defer comp.Close()
 		vers, err := comp.NewVersion("v1")
 		Expect(err).To(Succeed())
-
+		defer vers.Close()
 		blob := accessio.BlobAccessForFile(mime, "test.tgz", tempfs)
 
 		acc, err := vers.AddBlob(blob, "artefact1", nil)
 		Expect(err).To(Succeed())
-		Expect(acc.GetKind()).To(Equal(ociregistry.Type))
-		o := acc.(*ociregistry.AccessSpec)
+		Expect(acc.GetKind()).To(Equal(ociartefact.Type))
+		o := acc.(*ociartefact.AccessSpec)
 		Expect(o.ImageReference).To(Equal(TESTBASE + "/artefact1@sha256:" + testhelper.DIGEST_MANIFEST))
 		err = comp.AddVersion(vers)
 		Expect(err).To(Succeed())
 
 		acc, err = vers.AddBlob(blob, "artefact2:v1", nil)
 		Expect(err).To(Succeed())
-		Expect(acc.GetKind()).To(Equal(ociregistry.Type))
-		o = acc.(*ociregistry.AccessSpec)
+		Expect(acc.GetKind()).To(Equal(ociartefact.Type))
+		o = acc.(*ociartefact.AccessSpec)
 		Expect(o.ImageReference).To(Equal(TESTBASE + "/artefact2:v1"))
 		err = comp.AddVersion(vers)
 		Expect(err).To(Succeed())
 
-		ocirepo := repo.(*genericocireg.Repository).GetOCIRepository()
+		Expect(vers.Close()).To(Succeed())
+		Expect(comp.Close()).To(Succeed())
 
 		ns, err := ocirepo.LookupNamespace("artefact2")
 		Expect(err).To(Succeed())
+		defer ns.Close()
 		art, err := ns.GetArtefact("v1")
 		Expect(err).To(Succeed())
+		defer art.Close()
 		testhelper.CheckArtefact(art)
+		Expect(art.Close()).To(Succeed())
+		Expect(ns.Close()).To(Succeed())
 		Expect(repo.(*genericocireg.Repository).Close()).To(Succeed())
 	})
 

@@ -32,8 +32,8 @@ import (
 type ComponentNameMapping string
 
 const (
-	OCIRegistryRepositoryType   = ocireg.RepositoryType
-	OCIRegistryRepositoryTypeV1 = ocireg.RepositoryTypeV1
+	Type   = ocireg.Type
+	TypeV1 = ocireg.TypeV1
 
 	OCIRegistryURLPathMapping ComponentNameMapping = "urlPath"
 	OCIRegistryDigestMapping  ComponentNameMapping = "sha256-digest"
@@ -121,6 +121,8 @@ func (a *RepositorySpec) IsIntermediate() bool {
 	}
 	return false
 }
+
+// TODO: host etc is missing
 
 func (a *RepositorySpec) AsUniformSpec(cpi.Context) cpi.UniformRepositorySpec {
 	return cpi.UniformRepositorySpec{Type: a.GetKind(), SubPath: a.SubPath}

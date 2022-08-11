@@ -16,11 +16,11 @@ ocm references [<options>] <sub command> ...
 
 ##### Parents
 
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
 
 ##### Sub Commands
 
-* [ocm references <b>add</b>](ocm_references_add.md)	 - add aggregation information to a component version
-* [ocm references <b>get</b>](ocm_references_get.md)	 - get references of a component version
+* [ocm references <b>add</b>](ocm_references_add.md)	 &mdash; add aggregation information to a component version
+* [ocm references <b>get</b>](ocm_references_get.md)	 &mdash; get references of a component version
 

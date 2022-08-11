@@ -30,6 +30,6 @@ $ ocm clean cache
 
 ##### Parents
 
-* [ocm clean](ocm_clean.md)	 - Cleanup/re-organize elements
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm clean](ocm_clean.md)	 &mdash; Cleanup/re-organize elements
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

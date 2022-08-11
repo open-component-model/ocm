@@ -26,7 +26,7 @@ var Is = errors.Is
 var As = errors.As
 
 func Newf(msg string, args ...interface{}) error {
-	return errors.New(fmt.Sprintf(msg, args...))
+	return New(fmt.Sprintf(msg, args...))
 }
 
 func IsA(err error, target error) bool {
@@ -72,7 +72,7 @@ func (e *wrappedError) Unwrap() error {
 	return e.wrapped
 }
 
-var errorType = reflect.TypeOf((*error)(nil)).Elem()
+//var errorType = reflect.TypeOf((*error)(nil)).Elem()
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -134,4 +134,13 @@ func (e *errinfo) Kind() string {
 
 func (e *errinfo) Ctx() string {
 	return e.ctx
+}
+
+type Kinded interface {
+	Kind() string
+	SetKind(string)
+}
+
+func (e *errinfo) SetKind(kind string) {
+	e.kind = kind
 }

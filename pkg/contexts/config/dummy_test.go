@@ -15,8 +15,6 @@
 package config_test
 
 import (
-	"reflect"
-
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -62,8 +60,6 @@ func (a *Config) ApplyTo(ctx config.Context, target interface{}) error {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-var key = reflect.TypeOf(&dummyContext{})
 
 func newDummy(ctx config.Context) *dummyContext {
 	d := &dummyContext{

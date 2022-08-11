@@ -90,6 +90,7 @@ type ArtefactAccess interface {
 	IndexAccess() IndexAccess
 	GetBlob(digest digest.Digest) (BlobAccess, error)
 
+	GetArtefact(digest digest.Digest) (ArtefactAccess, error)
 	AddBlob(BlobAccess) error
 
 	AddArtefact(Artefact, *artdesc.Platform) (BlobAccess, error)
@@ -119,8 +120,10 @@ type IndexAccess interface {
 	GetBlob(digest digest.Digest) (BlobAccess, error)
 
 	GetArtefact(digest digest.Digest) (ArtefactAccess, error)
-	GetIndex(digest digest.Digest) (IndexAccess, error)
-	GetManifest(digest digest.Digest) (ManifestAccess, error)
+	/*
+		GetIndex(digest digest.Digest) (IndexAccess, error)
+		GetManifest(digest digest.Digest) (ManifestAccess, error)
+	*/
 
 	AddBlob(BlobAccess) error
 	AddArtefact(Artefact, *artdesc.Platform) (BlobAccess, error)

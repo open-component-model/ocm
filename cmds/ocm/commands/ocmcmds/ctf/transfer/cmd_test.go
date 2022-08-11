@@ -18,14 +18,14 @@ import (
 	"bytes"
 	"encoding/json"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
@@ -87,13 +87,13 @@ var _ = Describe("Test Environment", func() {
 					})
 					env.Resource("value", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
 						env.Access(
-							ociregistry.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
+							ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
 						)
 						env.Label("transportByValue", true)
 					})
 					env.Resource("ref", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
 						env.Access(
-							ociregistry.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION)),
+							ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION)),
 						)
 					})
 				})
@@ -130,10 +130,10 @@ transferring component "github.com/mandelsoft/test"...
 
 		data, err := json.Marshal(comp.GetDescriptor().Resources[2].Access)
 		Expect(err).To(Succeed())
-		Expect(string(data)).To(Equal("{\"imageReference\":\"alias.alias/ocm/ref:v2.0\",\"type\":\"ociRegistry\"}"))
+		Expect(string(data)).To(Equal("{\"imageReference\":\"alias.alias/ocm/ref:v2.0\",\"type\":\"" + ociartefact.Type + "\"}"))
 
 		data, err = json.Marshal(comp.GetDescriptor().Resources[1].Access)
 		Expect(err).To(Succeed())
-		Expect(string(data)).To(Equal("{\"imageReference\":\"alias.alias/ocm/value:v2.0\",\"type\":\"ociRegistry\"}"))
+		Expect(string(data)).To(Equal("{\"imageReference\":\"alias.alias/ocm/value:v2.0\",\"type\":\"" + ociartefact.Type + "\"}"))
 	})
 })

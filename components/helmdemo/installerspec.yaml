@@ -1,0 +1,22 @@
+executors:
+  - resourceRef:
+      resource:
+        #name: toiimage
+        name: toiexecutor
+      referencePath:
+        - name: installer
+    config: (( read("helmconfig.yaml") ))
+credentials:
+  target:
+    description: Kubeconfig for installation
+configTemplate:
+  namespace: default
+  release: echoserver
+configScheme:
+  type: object
+  additionalProperties: false
+  properties:
+    release:
+      type: string
+    namespace:
+      type: string

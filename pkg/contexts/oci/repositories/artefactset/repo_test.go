@@ -15,8 +15,10 @@
 package artefactset_test
 
 import (
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -54,7 +56,7 @@ var _ = Describe("", func() {
 
 		r, err := cpi.DefaultContext.RepositoryForSpec(spec)
 		Expect(err).To(Succeed())
-		defer r.Close()
+		defer Close(r)
 		ns, err := r.LookupNamespace("")
 		Expect(err).To(Succeed())
 

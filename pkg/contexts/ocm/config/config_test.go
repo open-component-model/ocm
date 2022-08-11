@@ -17,7 +17,7 @@ package config_test
 import (
 	"encoding/json"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/config"
@@ -48,7 +48,7 @@ var _ = Describe("oci config", func() {
 
 	Context("serialize", func() {
 		It("serializes config", func() {
-			cfg := config.NewConfigSpec()
+			cfg := config.New()
 			err := cfg.SetAlias("alias", spec)
 			Expect(err).To(Succeed())
 
@@ -57,7 +57,7 @@ var _ = Describe("oci config", func() {
 			Expect(err).To(Succeed())
 			Expect(data).To(Equal([]byte(specdata)))
 
-			cfg2 := config.NewConfigSpec()
+			cfg2 := config.New()
 			err = json.Unmarshal(data, cfg2)
 			Expect(err).To(Succeed())
 			Expect(cfg2).To(Equal(cfg))
@@ -68,7 +68,7 @@ var _ = Describe("oci config", func() {
 		It("applies directly", func() {
 			ctx := cpi.New()
 
-			cfg := config.NewConfigSpec()
+			cfg := config.New()
 			err := cfg.SetAlias("alias", spec)
 			Expect(err).To(Succeed())
 
@@ -81,7 +81,7 @@ var _ = Describe("oci config", func() {
 		It("applies via config context", func() {
 			ctx := cpi.New()
 
-			cfg := config.NewConfigSpec()
+			cfg := config.New()
 			err := cfg.SetAlias("alias", spec)
 			Expect(err).To(Succeed())
 

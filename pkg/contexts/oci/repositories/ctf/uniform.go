@@ -17,14 +17,14 @@ package ctf
 import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/vfsattr"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 )
 
 func init() {
 	h := &repospechandler{}
 	cpi.RegisterRepositorySpecHandler(h, "")
-	cpi.RegisterRepositorySpecHandler(h, RepositoryType)
+	cpi.RegisterRepositorySpecHandler(h, Type)
 	for _, f := range SupportedFormats() {
 		cpi.RegisterRepositorySpecHandler(h, string(f))
 	}
@@ -50,7 +50,7 @@ func MapReference(ctx cpi.Context, u *cpi.UniformRepositorySpec) (cpi.Repository
 	if !u.CreateIfMissing {
 		hint = ""
 	}
-	create, ok, err := accessobj.CheckFile(RepositoryType, hint, accessio.TypeForType(u.Type) != "", path, fs, ArtefactIndexFileName)
+	create, ok, err := accessobj.CheckFile(Type, hint, accessio.TypeForType(u.Type) != "", path, fs, ArtefactIndexFileName)
 	if !ok || err != nil {
 		if err != nil {
 			return nil, err

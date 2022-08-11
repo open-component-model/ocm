@@ -34,10 +34,10 @@ const (
 	KIND_SIGNATURE        = "signature"
 )
 
-// isNormalizeable checks if componentReferences and resources contain digest.
+// IsNormalizeable checks if componentReferences and resources contain digest.
 // Resources are allowed to omit the digest, if res.access.type == None or res.access == nil.
 // Does NOT verify if the digests are correct
-func (cd *ComponentDescriptor) isNormalizeable() error {
+func (cd *ComponentDescriptor) IsNormalizeable() error {
 	// check for digests on component references
 	for _, reference := range cd.References {
 		if reference.Digest == nil || reference.Digest.HashAlgorithm == "" || reference.Digest.NormalisationAlgorithm == "" || reference.Digest.Value == "" {

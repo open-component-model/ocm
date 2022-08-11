@@ -78,7 +78,7 @@ type _MapIterator struct {
 func newMapKeyIterator(m _Map) ResettableIterator {
 	keys := make([]interface{}, m.Size())
 	i := 0
-	for k, _ := range m {
+	for k := range m {
 		keys[i] = k
 		i++
 	}
@@ -94,7 +94,7 @@ type _EntryIterator _MapIterator
 func (this *_EntryIterator) Next() interface{} {
 	if this.HasNext() {
 		k := this.Iterator.Next()
-		v, _ := this.data[k]
+		v := this.data[k]
 		return MapEntry{k, v}
 	}
 	return nil

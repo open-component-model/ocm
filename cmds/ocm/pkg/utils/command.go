@@ -15,15 +15,14 @@
 package utils
 
 import (
-	"os"
 	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/out"
 )
 
 // OCMCommand is a command pattern, that can be instantiated for a dediated
@@ -63,13 +62,14 @@ func addCommand(names []string, use string) string {
 		return names[0]
 	}
 	lines := strings.Split(use, "\n")
+outer:
 	for i, l := range lines {
 		if strings.HasPrefix(l, " ") || strings.HasPrefix(l, "\t") {
 			continue
 		}
 		for _, n := range names {
 			if strings.HasPrefix(l, n+" ") {
-				continue
+				continue outer
 			}
 		}
 		lines[i] = names[0] + " " + l
@@ -95,16 +95,21 @@ func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 	c := ocmcmd.ForName(names[0])
 	MassageCommand(c, names...)
 	c.RunE = func(cmd *cobra.Command, args []string) error {
+		var err error
 		if set, ok := ocmcmd.(options.OptionSetProvider); ok {
-			set.AsOptionSet().ProcessOnOptions(options.CompleteOptionsWithCLIContext(ocmcmd))
+			err = set.AsOptionSet().ProcessOnOptions(options.CompleteOptionsWithCLIContext(ocmcmd))
 		}
-		err := ocmcmd.Complete(args)
 		if err == nil {
-			err = ocmcmd.Run()
+			err = ocmcmd.Complete(args)
+			if err == nil {
+				err = ocmcmd.Run()
+			}
 		}
-		if err != nil && ocmcmd.StdErr() != os.Stderr {
-			out.Error(ocmcmd, err.Error())
-		}
+		/*
+			if err != nil && ocmcmd.StdErr() != os.Stderr {
+				out.Error(ocmcmd, err.Error())
+			}
+		*/
 		return err
 	}
 	if u, ok := ocmcmd.(options.Usage); ok {

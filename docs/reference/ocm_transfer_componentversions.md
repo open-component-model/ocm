@@ -122,6 +122,6 @@ $ ocm transfer components -t tgz --repo OCIRegistry:ghcr.io mandelsoft/kubelink 
 
 ##### Parents
 
-* [ocm transfer](ocm_transfer.md)	 - Transfer artefacts or components
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm transfer](ocm_transfer.md)	 &mdash; Transfer artefacts or components
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

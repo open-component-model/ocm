@@ -18,7 +18,7 @@ import (
 	"bytes"
 	"fmt"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	compdescv3 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud/v3alpha1"
@@ -59,6 +59,40 @@ test.de/x v1      mandelsoft /tmp/ca
 `))
 	})
 
+	It("get component archive with refs", func() {
+		env.ComponentArchive(ARCH, accessio.FormatDirectory, COMP, VERSION, func() {
+			env.Provider(PROVIDER)
+			env.Reference("ref", COMP2, VERSION)
+		})
+
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("get", "components", ARCH, "-c")).To(Succeed())
+		fmt.Printf("%s", buf)
+		Expect("\n" + buf.String()).To(Equal(
+			`
+REFERENCEPATH COMPONENT VERSION PROVIDER                    IDENTITY
+              test.de/x v1      mandelsoft                  
+test.de/x:v1  test.de/y v1      <unknown component version> "name"="ref"
+`))
+	})
+
+	It("get component archive with refs as tree", func() {
+		env.ComponentArchive(ARCH, accessio.FormatDirectory, COMP, VERSION, func() {
+			env.Provider(PROVIDER)
+			env.Reference("ref", COMP2, VERSION)
+		})
+
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("get", "components", ARCH, "-c", "-o", "tree")).To(Succeed())
+		fmt.Printf("%s", buf)
+		Expect("\n" + buf.String()).To(Equal(
+			`
+NESTING    COMPONENT VERSION PROVIDER                    IDENTITY
+└─ ⊗       test.de/x v1      mandelsoft                  
+   └─      test.de/y v1      <unknown component version> "name"="ref"
+`))
+	})
+
 	It("lists ctf file", func() {
 		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
 			env.Component(COMP, func() {
@@ -77,7 +111,7 @@ test.de/x v1      mandelsoft /tmp/ca
 `))
 	})
 
-	Context("with closure", func() {
+	Context("ctf", func() {
 		BeforeEach(func() {
 			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
 				env.Component(COMP, func() {
@@ -114,15 +148,15 @@ NESTING COMPONENT VERSION PROVIDER
 └─      test.de/y v1      mandelsoft
 `))
 		})
-		It("lists flat ctf file", func() {
+		It("lists flat ctf file with closure", func() {
 
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "components", "-o", "tree", "-c", "--repo", ARCH, COMP2)).To(Succeed())
 			Expect("\n" + buf.String()).To(Equal(
 				`
-NESTING    REFERENCEPATH COMPONENT VERSION PROVIDER   IDENTITY
-└─ ⊗                     test.de/y v1      mandelsoft 
-   └─      test.de/y:v1  test.de/x v1      mandelsoft "name"="xx"
+NESTING    COMPONENT VERSION PROVIDER   IDENTITY
+└─ ⊗       test.de/y v1      mandelsoft 
+   └─      test.de/x v1      mandelsoft "name"="xx"
 `))
 		})
 

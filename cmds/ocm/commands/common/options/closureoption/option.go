@@ -37,14 +37,17 @@ type Option struct {
 	ElementName      string
 	Closure          bool
 	ClosureField     string
+	AddReferencePath options.OptionSelector
 	AdditionalFields []string
 	FieldEnricher    func(interface{}) []string
 }
 
 func New(elemname string, settings ...interface{}) *Option {
-	o := &Option{ElementName: elemname}
+	o := &Option{ElementName: elemname, AddReferencePath: options.Always()}
 	for _, s := range settings {
 		switch v := s.(type) {
+		case options.OptionSelector:
+			o.AddReferencePath = v
 		case string:
 			o.ClosureField = v
 		case []string:
@@ -91,13 +94,16 @@ func insert(a []string, v string) []string {
 	return r
 }
 
-func (o *Option) Headers(cols []string) []string {
-	h := o.ClosureField
-	if h == "" {
-		h = "REFERENCEPATH"
-	}
+func (o *Option) Headers(opts options.OptionSetProvider, cols []string) []string {
 	if o.Closure {
-		return append(insert(cols, h), o.AdditionalFields...)
+		if o.AddReferencePath(opts) {
+			h := o.ClosureField
+			if h == "" {
+				h = "REFERENCEPATH"
+			}
+			cols = insert(cols, h)
+		}
+		return append(cols, o.AdditionalFields...)
 	}
 	return cols
 }
@@ -109,10 +115,15 @@ func (o *Option) additionalFields(e interface{}) []string {
 	return nil
 }
 
-func (o *Option) Mapper(path func(interface{}) string, mapper processing.MappingFunction) processing.MappingFunction {
+func (o *Option) Mapper(opts options.OptionSetProvider, path func(interface{}) string, mapper processing.MappingFunction) processing.MappingFunction {
 	if o.Closure {
+		use := o.AddReferencePath(opts)
 		return func(e interface{}) interface{} {
-			return append(insert(mapper(e).([]string), path(e)), o.additionalFields(e)...)
+			fields := mapper(e).([]string)
+			if use {
+				fields = insert(fields, path(e))
+			}
+			return append(fields, o.additionalFields(e)...)
 		}
 	}
 	return mapper
@@ -172,9 +183,9 @@ func TableOutput(in *output.TableOutput, closure ...ClosureFunction) *output.Tab
 	chain := processing.Append(in.Chain, processing.Explode(cf.Exploder(in.Options)))
 	copts := From(in.Options)
 	return &output.TableOutput{
-		Headers: copts.Headers(in.Headers),
+		Headers: copts.Headers(in.Options, in.Headers),
 		Options: in.Options,
 		Chain:   chain,
-		Mapping: copts.Mapper(History, in.Mapping),
+		Mapping: copts.Mapper(in.Options, History, in.Mapping),
 	}
 }

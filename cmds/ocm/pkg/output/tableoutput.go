@@ -20,6 +20,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/out"
 )
 
 type SortFields interface {
@@ -78,14 +79,15 @@ func (this *TableProcessingOutput) Out() error {
 
 	sort := this.opts.Sort
 	slice := data.IndexedSliceAccess(data.Slice(this.Elems))
+	if len(slice) == 0 {
+		out.Out(this.Context, "no elements found\n")
+		return nil
+	}
 	if sort != nil {
 		cols := make([]string, len(this.header))
 		idxs := map[string]int{}
 		for i, n := range this.header {
-			cols[i] = strings.ToLower(n)
-			if strings.HasPrefix(cols[i], "-") {
-				cols[i] = cols[i][1:]
-			}
+			cols[i] = strings.TrimPrefix(strings.ToLower(n), "-")
 			idxs[cols[i]] = i
 		}
 		for _, k := range sort {

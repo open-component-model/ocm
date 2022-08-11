@@ -19,7 +19,7 @@ import (
 )
 
 func init() {
-	cpi.RegisterRepositorySpecHandler(&repospechandler{}, DockerDeamonRepositoryType)
+	cpi.RegisterRepositorySpecHandler(&repospechandler{}, Type)
 }
 
 type repospechandler struct{}

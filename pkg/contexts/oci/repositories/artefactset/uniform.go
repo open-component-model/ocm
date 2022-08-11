@@ -17,14 +17,14 @@ package artefactset
 import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/vfsattr"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 )
 
 func init() {
 	h := &repospechandler{}
 	cpi.RegisterRepositorySpecHandler(h, "")
-	cpi.RegisterRepositorySpecHandler(h, ArtefactSetType)
+	cpi.RegisterRepositorySpecHandler(h, Type)
 	for _, f := range SupportedFormats() {
 		cpi.RegisterRepositorySpecHandler(h, string(f))
 	}
@@ -46,7 +46,7 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 	if !u.CreateIfMissing {
 		hint = ""
 	}
-	create, ok, err := accessobj.CheckFile(ArtefactSetType, hint, accessio.TypeForType(u.Type) == ArtefactSetType, path, fs, ArtefactSetDescriptorFileName)
+	create, ok, err := accessobj.CheckFile(Type, hint, accessio.TypeForType(u.Type) == Type, path, fs, ArtefactSetDescriptorFileName)
 	if !ok || err != nil {
 		if err != nil {
 			return nil, err

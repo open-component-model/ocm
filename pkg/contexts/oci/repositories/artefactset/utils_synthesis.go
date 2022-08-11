@@ -45,10 +45,13 @@ func SythesizeArtefactSet(mime string, producer Producer) (ArtefactBlob, error) 
 	if err != nil {
 		return nil, err
 	}
-	defer set.Close()
 	err = producer(set)
+	err2 := set.Close()
 	if err != nil {
 		return nil, err
+	}
+	if err2 != nil {
+		return nil, err2
 	}
 
 	return temp.AsBlob(artdesc.ToContentMediaType(mime) + SynthesizedBlobFormat), nil
@@ -66,6 +69,7 @@ func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, e
 	if err != nil {
 		return nil, err
 	}
+	defer art.Close()
 
 	blob, err := art.Blob()
 	if err != nil {

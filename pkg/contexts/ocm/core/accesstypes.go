@@ -61,6 +61,7 @@ type AccessMethod interface {
 	GetKind() string
 	DataAccess
 	MimeType
+	Close() error
 }
 
 type AccessTypeScheme interface {

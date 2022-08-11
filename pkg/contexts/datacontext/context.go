@@ -16,6 +16,7 @@ package datacontext
 
 import (
 	"context"
+	"io"
 	"reflect"
 	"sync"
 
@@ -198,6 +199,12 @@ func (c *_attributes) SetAttribute(name string, value interface{}) error {
 	_, err := DefaultAttributeScheme.Encode(name, value, nil)
 	if err != nil && !errors.IsErrUnknownKind(err, "attribute") {
 		return err
+	}
+	old := c.attributes[name]
+	if old != nil && old != value {
+		if c, ok := old.(io.Closer); ok {
+			c.Close()
+		}
 	}
 	c.attributes[name] = value
 	return nil

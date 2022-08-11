@@ -70,17 +70,30 @@ form
 The value can be a simple type or a json string for complex values. The following
 attributes are supported:
 - <code>github.com/mandelsoft/oci/cache</code> [<code>cache</code>]: *string*
+
   Filesystem folder to use for caching OCI blobs
+
 - <code>github.com/mandelsoft/ocm/compat</code> [<code>compat</code>]: *bool*
+
   Compatibility mode: Avoid generic local access methods and prefer type specific ones.
+
 - <code>github.com/mandelsoft/ocm/keeplocalblob</code> [<code>keeplocalblob</code>]: *bool*
+
   Keep local blobs when importing OCI artefacts to OCI registries from <code>localBlob</code>
   access methods. By default they will be expanded to OCI artefacts with the
   access method <code>ociRegistry</code>. If this option is set to true, they will be stored
   as local blobs, also. The access method will still be <code>localBlob</code> but with a nested
   <code>ociRegistry</code> access method for describing the global access.
-- <code>github.com/mandelsoft/ocm/signing</code>: *bool*
-  Public and private Key settings.
+
+- <code>github.com/mandelsoft/ocm/ociuploadrepo</code> [<code>ociuploadrepo</code>]: *oci base repository ref*
+
+  Upload local OCI artefact blobs to a dedicated repository.
+
+- <code>github.com/mandelsoft/ocm/signing</code>: *JSON*
+
+  Public and private Key settings given as JSON document with the following
+  format:
+  
   <pre>
   {
     "publicKeys"": [
@@ -94,6 +107,17 @@ attributes are supported:
        }
     ]
   </pre>
+  
+  One of following data fields are possible:
+  - <code>data</code>:       base64 encoded binary data
+  - <code>stringdata</code>: plain text data
+  - <code>path</code>:       a file path to read the data from
+
+- <code>github.com/mandelsoft/tempblobcache</code> [<code>blobcache</code>]: *string* Foldername for temporary blob cache
+
+  The temporary blob cache is used to accessing large blobs from remote sytems.
+  The are temporarily stored in the filesystem, instead of the memory, to avoid
+  blowing up the memory consumption.
 
 ### SEE ALSO
 
@@ -101,31 +125,36 @@ attributes are supported:
 
 ##### Sub Commands
 
-* [ocm <b>add</b>](ocm_add.md)	 - Add resources or sources to a component archive
-* [ocm <b>cache</b>](ocm_cache.md)	 - Cache related commands
-* [ocm <b>clean</b>](ocm_clean.md)	 - Cleanup/re-organize elements
-* [ocm <b>componentarchive</b>](ocm_componentarchive.md)	 - Commands acting on component archives
-* [ocm <b>componentversions</b>](ocm_componentversions.md)	 - Commands acting on components
-* [ocm <b>create</b>](ocm_create.md)	 - Create transport or component archive
-* [ocm <b>describe</b>](ocm_describe.md)	 - Describe artefacts
-* [ocm <b>download</b>](ocm_download.md)	 - Download oci artefacts, resources or complete components
-* [ocm <b>get</b>](ocm_get.md)	 - Get information about artefacts and components
-* [ocm <b>oci</b>](ocm_oci.md)	 - Dedicated command flavors for the OCI layer
-* [ocm <b>ocm</b>](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
-* [ocm <b>references</b>](ocm_references.md)	 - Commands related to component references in component versions
-* [ocm <b>resources</b>](ocm_resources.md)	 - Commands acting on component resources
-* [ocm <b>show</b>](ocm_show.md)	 - Show tags or versions
-* [ocm <b>sign</b>](ocm_sign.md)	 - Sign components
-* [ocm <b>sources</b>](ocm_sources.md)	 - Commands acting on component sources
-* [ocm <b>transfer</b>](ocm_transfer.md)	 - Transfer artefacts or components
-* [ocm <b>verify</b>](ocm_verify.md)	 - Verify component version signatures
-* [ocm <b>version</b>](ocm_version.md)	 - displays the version
+* [ocm <b>add</b>](ocm_add.md)	 &mdash; Add resources or sources to a component archive
+* [ocm <b>bootstrap</b>](ocm_bootstrap.md)	 &mdash; bootstrap components
+* [ocm <b>cache</b>](ocm_cache.md)	 &mdash; Cache related commands
+* [ocm <b>clean</b>](ocm_clean.md)	 &mdash; Cleanup/re-organize elements
+* [ocm <b>componentarchive</b>](ocm_componentarchive.md)	 &mdash; Commands acting on component archives
+* [ocm <b>componentversions</b>](ocm_componentversions.md)	 &mdash; Commands acting on components
+* [ocm <b>create</b>](ocm_create.md)	 &mdash; Create transport or component archive
+* [ocm <b>credentials</b>](ocm_credentials.md)	 &mdash; Commands acting on credentials
+* [ocm <b>describe</b>](ocm_describe.md)	 &mdash; Describe artefacts
+* [ocm <b>download</b>](ocm_download.md)	 &mdash; Download oci artefacts, resources or complete components
+* [ocm <b>get</b>](ocm_get.md)	 &mdash; Get information about artefacts and components
+* [ocm <b>oci</b>](ocm_oci.md)	 &mdash; Dedicated command flavors for the OCI layer
+* [ocm <b>ocm</b>](ocm_ocm.md)	 &mdash; Dedicated command flavors for the Open Component Model
+* [ocm <b>references</b>](ocm_references.md)	 &mdash; Commands related to component references in component versions
+* [ocm <b>resources</b>](ocm_resources.md)	 &mdash; Commands acting on component resources
+* [ocm <b>show</b>](ocm_show.md)	 &mdash; Show tags or versions
+* [ocm <b>sign</b>](ocm_sign.md)	 &mdash; Sign components
+* [ocm <b>sources</b>](ocm_sources.md)	 &mdash; Commands acting on component sources
+* [ocm <b>toi</b>](ocm_toi.md)	 &mdash; Dedicated command flavors for the TOI layer
+* [ocm <b>transfer</b>](ocm_transfer.md)	 &mdash; Transfer artefacts or components
+* [ocm <b>verify</b>](ocm_verify.md)	 &mdash; Verify component version signatures
+* [ocm <b>version</b>](ocm_version.md)	 &mdash; displays the version
 
 
 
 ##### Additional Help Topics
 
-* [ocm <b>configfile</b>](ocm_configfile.md)	 - configuration file
-* [ocm <b>oci-references</b>](ocm_oci-references.md)	 - notation for OCI references
-* [ocm <b>ocm-references</b>](ocm_ocm-references.md)	 - notation for OCM references
+* [ocm <b>attributes</b>](ocm_attributes.md)	 &mdash; configuration attributes used to control the behaviour
+* [ocm <b>configfile</b>](ocm_configfile.md)	 &mdash; configuration file
+* [ocm <b>oci-references</b>](ocm_oci-references.md)	 &mdash; notation for OCI references
+* [ocm <b>ocm-references</b>](ocm_ocm-references.md)	 &mdash; notation for OCM references
+* [ocm <b>toi-bootstrapping</b>](ocm_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions
 

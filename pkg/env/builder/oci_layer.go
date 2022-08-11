@@ -40,6 +40,11 @@ func (r *oci_layer) Close() error {
 		return errors.Newf("config blob required")
 	}
 	m := r.Builder.oci_artacc.ManifestAccess()
+
+	if r.oci_cleanuplayers {
+		m.GetDescriptor().Layers = nil
+		r.oci_cleanuplayers = false
+	}
 	_, err := m.AddLayer(r.blob, nil)
 	if err == nil {
 		r.result = artdesc.DefaultBlobDescriptor(r.blob)

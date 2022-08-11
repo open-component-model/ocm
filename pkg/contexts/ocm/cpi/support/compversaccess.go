@@ -17,6 +17,7 @@ package support
 import (
 	"strconv"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -24,45 +25,82 @@ import (
 )
 
 type ComponentVersionAccess struct {
+	view accessio.CloserView // handle close and refs
+	*componentVersionAccessImpl
+}
+
+// implemented by view
+// the rest is directly taken from the artefact set implementation
+
+func (s *ComponentVersionAccess) Close() error {
+	err := s.base.Update()
+	if err != nil {
+		s.view.Close()
+		return err
+	}
+	return s.view.Close()
+}
+
+func (s *ComponentVersionAccess) IsClosed() bool {
+	return s.view.IsClosed()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type componentVersionAccessImpl struct {
+	refs accessio.ReferencableCloser
 	lazy bool
 	base ComponentVersionContainer
 }
 
 var _ cpi.ComponentVersionAccess = (*ComponentVersionAccess)(nil)
 
-func NewComponentVersionAccess(container ComponentVersionContainer, lazy bool) *ComponentVersionAccess {
-	s := &ComponentVersionAccess{
+func NewComponentVersionAccess(container ComponentVersionContainer, lazy bool) (*ComponentVersionAccess, error) {
+	s := &componentVersionAccessImpl{
 		lazy: lazy,
 		base: container,
 	}
-	return s
+	s.refs = accessio.NewRefCloser(s, true)
+	return s.View(true)
 }
 
-func (a *ComponentVersionAccess) Close() error {
+func (a *componentVersionAccessImpl) View(main ...bool) (*ComponentVersionAccess, error) {
+	v, err := a.refs.View(main...)
+	if err != nil {
+		return nil, err
+	}
+	return &ComponentVersionAccess{view: v, componentVersionAccessImpl: a}, nil
+}
+
+func (a *componentVersionAccessImpl) Close() error {
 	return errors.ErrListf("closing access").Add(a.base.Update(), a.base.Close()).Result()
 }
 
-func (a *ComponentVersionAccess) IsReadOnly() bool {
+func (c *componentVersionAccessImpl) Repository() cpi.Repository {
+	return c.base.Repository()
+}
+
+func (a *componentVersionAccessImpl) IsReadOnly() bool {
 	return a.base.IsReadOnly()
 }
 
-func (a *ComponentVersionAccess) IsClosed() bool {
+func (a *componentVersionAccessImpl) IsClosed() bool {
 	return a.base.IsClosed()
 }
 
-func (a *ComponentVersionAccess) GetContext() cpi.Context {
+func (a *componentVersionAccessImpl) GetContext() cpi.Context {
 	return a.base.GetContext()
 }
 
-func (a *ComponentVersionAccess) GetName() string {
+func (a *componentVersionAccessImpl) GetName() string {
 	return a.base.GetDescriptor().GetName()
 }
 
-func (a *ComponentVersionAccess) GetVersion() string {
+func (a *componentVersionAccessImpl) GetVersion() string {
 	return a.base.GetDescriptor().GetVersion()
 }
 
-func (a *ComponentVersionAccess) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (a *componentVersionAccessImpl) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
@@ -80,7 +118,7 @@ func (a *ComponentVersionAccess) AddBlob(blob cpi.BlobAccess, refName string, gl
 	return a.base.AddBlobFor(storagectx, blob, refName, global)
 }
 
-func (c *ComponentVersionAccess) AccessMethod(a cpi.AccessSpec) (cpi.AccessMethod, error) {
+func (c *componentVersionAccessImpl) AccessMethod(a cpi.AccessSpec) (cpi.AccessMethod, error) {
 	if !a.IsLocal(c.base.GetContext()) {
 		// fall back to original version
 		return a.AccessMethod(c)
@@ -88,11 +126,11 @@ func (c *ComponentVersionAccess) AccessMethod(a cpi.AccessSpec) (cpi.AccessMetho
 	return c.base.AccessMethod(a)
 }
 
-func (a *ComponentVersionAccess) GetDescriptor() *compdesc.ComponentDescriptor {
+func (a *componentVersionAccessImpl) GetDescriptor() *compdesc.ComponentDescriptor {
 	return a.base.GetDescriptor()
 }
 
-func (a *ComponentVersionAccess) GetResource(id metav1.Identity) (cpi.ResourceAccess, error) {
+func (a *componentVersionAccessImpl) GetResource(id metav1.Identity) (cpi.ResourceAccess, error) {
 	r, err := a.base.GetDescriptor().GetResourceByIdentity(id)
 	if err != nil {
 		return nil, err
@@ -106,7 +144,7 @@ func (a *ComponentVersionAccess) GetResource(id metav1.Identity) (cpi.ResourceAc
 	}, nil
 }
 
-func (a *ComponentVersionAccess) GetResourceByIndex(i int) (cpi.ResourceAccess, error) {
+func (a *componentVersionAccessImpl) GetResourceByIndex(i int) (cpi.ResourceAccess, error) {
 	if i < 0 || i > len(a.base.GetDescriptor().Resources) {
 		return nil, errors.ErrInvalid("resource index", strconv.Itoa(i))
 	}
@@ -120,7 +158,7 @@ func (a *ComponentVersionAccess) GetResourceByIndex(i int) (cpi.ResourceAccess, 
 	}, nil
 }
 
-func (a *ComponentVersionAccess) GetResources() []cpi.ResourceAccess {
+func (a *componentVersionAccessImpl) GetResources() []cpi.ResourceAccess {
 	result := []cpi.ResourceAccess{}
 	for _, r := range a.GetDescriptor().Resources {
 		result = append(result, &ResourceAccess{
@@ -134,7 +172,7 @@ func (a *ComponentVersionAccess) GetResources() []cpi.ResourceAccess {
 	return result
 }
 
-func (a *ComponentVersionAccess) GetSource(id metav1.Identity) (cpi.SourceAccess, error) {
+func (a *componentVersionAccessImpl) GetSource(id metav1.Identity) (cpi.SourceAccess, error) {
 	r, err := a.base.GetDescriptor().GetSourceByIdentity(id)
 	if err != nil {
 		return nil, err
@@ -148,7 +186,7 @@ func (a *ComponentVersionAccess) GetSource(id metav1.Identity) (cpi.SourceAccess
 	}, nil
 }
 
-func (a *ComponentVersionAccess) GetSourceByIndex(i int) (cpi.SourceAccess, error) {
+func (a *componentVersionAccessImpl) GetSourceByIndex(i int) (cpi.SourceAccess, error) {
 	if i < 0 || i > len(a.base.GetDescriptor().Sources) {
 		return nil, errors.ErrInvalid("source index", strconv.Itoa(i))
 	}
@@ -162,7 +200,7 @@ func (a *ComponentVersionAccess) GetSourceByIndex(i int) (cpi.SourceAccess, erro
 	}, nil
 }
 
-func (a *ComponentVersionAccess) GetSources() []cpi.SourceAccess {
+func (a *componentVersionAccessImpl) GetSources() []cpi.SourceAccess {
 	result := []cpi.SourceAccess{}
 	for _, r := range a.GetDescriptor().Sources {
 		result = append(result, &SourceAccess{
@@ -176,11 +214,22 @@ func (a *ComponentVersionAccess) GetSources() []cpi.SourceAccess {
 	return result
 }
 
-func (c *ComponentVersionAccess) getAccessSpec(acc compdesc.AccessSpec) (cpi.AccessSpec, error) {
+func (a *componentVersionAccessImpl) GetReference(id metav1.Identity) (cpi.ComponentReference, error) {
+	return a.base.GetDescriptor().GetReferenceByIdentity(id)
+}
+
+func (a *componentVersionAccessImpl) GetReferenceByIndex(i int) (cpi.ComponentReference, error) {
+	if i < 0 || i > len(a.base.GetDescriptor().References) {
+		return cpi.ComponentReference{}, errors.ErrInvalid("reference index", strconv.Itoa(i))
+	}
+	return a.base.GetDescriptor().References[i], nil
+}
+
+func (c *componentVersionAccessImpl) getAccessSpec(acc compdesc.AccessSpec) (cpi.AccessSpec, error) {
 	return c.GetContext().AccessSpecForSpec(acc)
 }
 
-func (c *ComponentVersionAccess) getAccessMethod(acc compdesc.AccessSpec) (cpi.AccessMethod, error) {
+func (c *componentVersionAccessImpl) getAccessMethod(acc compdesc.AccessSpec) (cpi.AccessMethod, error) {
 	spec, err := c.getAccessSpec(acc)
 	if err != nil {
 		return nil, err
@@ -192,7 +241,7 @@ func (c *ComponentVersionAccess) getAccessMethod(acc compdesc.AccessSpec) (cpi.A
 	}
 }
 
-func (c *ComponentVersionAccess) AdjustResourceAccess(meta *cpi.ResourceMeta, acc compdesc.AccessSpec) error {
+func (c *componentVersionAccessImpl) AdjustResourceAccess(meta *cpi.ResourceMeta, acc compdesc.AccessSpec) error {
 	if err := c.checkAccessSpec(acc); err != nil {
 		return err
 	}
@@ -209,12 +258,12 @@ func (c *ComponentVersionAccess) AdjustResourceAccess(meta *cpi.ResourceMeta, ac
 	return c.base.Update()
 }
 
-func (c *ComponentVersionAccess) checkAccessSpec(acc compdesc.AccessSpec) error {
+func (c *componentVersionAccessImpl) checkAccessSpec(acc compdesc.AccessSpec) error {
 	_, err := c.getAccessMethod(acc)
 	return err
 }
 
-func (c *ComponentVersionAccess) SetResource(meta *cpi.ResourceMeta, acc compdesc.AccessSpec) error {
+func (c *componentVersionAccessImpl) SetResource(meta *cpi.ResourceMeta, acc compdesc.AccessSpec) error {
 	if err := c.checkAccessSpec(acc); err != nil {
 		return err
 	}
@@ -249,7 +298,7 @@ func (c *ComponentVersionAccess) SetResource(meta *cpi.ResourceMeta, acc compdes
 	return c.base.Update()
 }
 
-func (c *ComponentVersionAccess) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec) error {
+func (c *componentVersionAccessImpl) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec) error {
 	if err := c.checkAccessSpec(acc); err != nil {
 		if !errors.IsErrUnknown(err) {
 			return err
@@ -277,7 +326,7 @@ func (c *ComponentVersionAccess) SetSource(meta *cpi.SourceMeta, acc compdesc.Ac
 }
 
 // AddResource adds a blob resource to the current archive.
-func (c *ComponentVersionAccess) SetResourceBlob(meta *cpi.ResourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) error {
+func (c *componentVersionAccessImpl) SetResourceBlob(meta *cpi.ResourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) error {
 	acc, err := c.AddBlob(blob, refName, global)
 	if err != nil {
 		return err
@@ -285,7 +334,7 @@ func (c *ComponentVersionAccess) SetResourceBlob(meta *cpi.ResourceMeta, blob cp
 	return c.SetResource(meta, acc)
 }
 
-func (c *ComponentVersionAccess) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) error {
+func (c *componentVersionAccessImpl) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) error {
 	acc, err := c.AddBlob(blob, refName, global)
 	if err != nil {
 		return err
@@ -295,7 +344,7 @@ func (c *ComponentVersionAccess) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.Bl
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (c *ComponentVersionAccess) SetReference(ref *cpi.ComponentReference) error {
+func (c *componentVersionAccessImpl) SetReference(ref *cpi.ComponentReference) error {
 
 	if idx := c.GetDescriptor().GetComponentReferenceIndex(*ref); idx == -1 {
 		c.GetDescriptor().References = append(c.GetDescriptor().References, *ref)
@@ -311,7 +360,7 @@ func (c *ComponentVersionAccess) SetReference(ref *cpi.ComponentReference) error
 ////////////////////////////////////////////////////////////////////////////////
 
 type BaseAccess struct {
-	vers   *ComponentVersionAccess
+	vers   *componentVersionAccessImpl
 	access compdesc.AccessSpec
 }
 

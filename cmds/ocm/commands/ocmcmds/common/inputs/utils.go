@@ -19,8 +19,10 @@ import (
 	"os"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -40,6 +42,21 @@ func FileInfo(ctx clictx.Context, path string, inputFilePath string) (os.FileInf
 	return inputInfo, inputPath, nil
 }
 
+func GetBaseDir(fs vfs.FileSystem, filePath string) (string, error) {
+	var wd string
+	if len(filePath) == 0 {
+		// default to working directory if no input filePath is given
+		var err error
+		wd, err = fs.Getwd()
+		if err != nil {
+			return "", fmt.Errorf("unable to read current working directory: %w", err)
+		}
+	} else {
+		wd = filepath.Dir(filePath)
+	}
+	return wd, nil
+}
+
 func GetPath(ctx clictx.Context, path string, inputFilePath string) (string, error) {
 	fs := ctx.FileSystem()
 	if path == "" {
@@ -48,17 +65,11 @@ func GetPath(ctx clictx.Context, path string, inputFilePath string) (string, err
 	if filepath.IsAbs(path) {
 		return path, nil
 	} else {
-		var wd string
-		if len(inputFilePath) == 0 {
-			// default to working directory if no input filepath is given
-			var err error
-			wd, err = fs.Getwd()
-			if err != nil {
-				return "", fmt.Errorf("unable to read current working directory: %w", err)
-			}
-		} else {
-			wd = filepath.Dir(inputFilePath)
+		wd, err := GetBaseDir(fs, inputFilePath)
+		if err != nil {
+			return "", err
 		}
+
 		return filepath.Join(wd, path), nil
 	}
 }

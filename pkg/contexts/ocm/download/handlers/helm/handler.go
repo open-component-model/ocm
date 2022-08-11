@@ -20,6 +20,8 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -31,7 +33,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/out"
 )
 
-const TYPE = "HelmChart"
+const TYPE = consts.HelmChart
 
 type Handler struct{}
 
@@ -39,58 +41,58 @@ func init() {
 	download.Register(TYPE, &Handler{})
 }
 
-func (h Handler) Download(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, error) {
+func (h Handler) Download(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
 	meth, err := racc.AccessMethod()
 	if err != nil {
-		return false, err
+		return false, "", err
 	}
 	defer meth.Close()
 	if mime.BaseType(meth.MimeType()) != mime.BaseType(artdesc.MediaTypeImageManifest) {
-		return false, nil
+		return false, "", nil
 	}
 	rd, err := meth.Reader()
 	if err != nil {
-		return true, err
+		return true, "", err
 	}
 	defer rd.Close()
 	set, err := artefactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(rd))
 	if err != nil {
-		return true, err
+		return true, "", err
 	}
 	art, err := set.GetArtefact(set.GetMain().String())
 	if err != nil {
-		return true, err
+		return true, "", err
 	}
 	m := art.ManifestAccess()
 	if m == nil {
-		return true, errors.Newf("artefact is no image manifest")
+		return true, "", errors.Newf("artefact is no image manifest")
 	}
 	if len(m.GetDescriptor().Layers) < 1 {
-		return true, errors.Newf("no layers found")
+		return true, "", errors.Newf("no layers found")
 	}
 	if !strings.HasSuffix(path, ".tgz") {
 		path = path + ".tgz"
 	}
 	blob, err := m.GetBlob(m.GetDescriptor().Layers[0].Digest)
 	if err != nil {
-		return true, err
+		return true, "", err
 	}
 	err = h.write(ctx, blob, path, fs)
 	if err != nil {
-		return true, err
+		return true, "", err
 	}
 	if len(m.GetDescriptor().Layers) > 1 {
 		path = path[:len(path)-3] + "prov"
 		blob, err := m.GetBlob(m.GetDescriptor().Layers[1].Digest)
 		if err != nil {
-			return true, err
+			return true, "", err
 		}
 		err = h.write(ctx, blob, path, fs)
 		if err != nil {
-			return true, err
+			return true, "", err
 		}
 	}
-	return true, nil
+	return true, path, nil
 }
 
 func (_ Handler) write(ctx out.Context, blob accessio.BlobAccess, path string, fs vfs.FileSystem) error {

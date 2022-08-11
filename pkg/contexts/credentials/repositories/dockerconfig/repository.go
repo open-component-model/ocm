@@ -17,7 +17,6 @@ package dockerconfig
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"sync"
@@ -83,7 +82,7 @@ func (r *Repository) LookupCredentials(name string) (cpi.Credentials, error) {
 }
 
 func (r *Repository) WriteCredentials(name string, creds cpi.Credentials) (cpi.Credentials, error) {
-	return nil, errors.ErrNotSupported("write", "credentials", DockerConfigRepositoryType)
+	return nil, errors.ErrNotSupported("write", "credentials", Type)
 }
 
 func (r *Repository) Read(force bool) error {
@@ -97,7 +96,8 @@ func (r *Repository) Read(force bool) error {
 		home := os.Getenv("HOME")
 		path = home + path[1:]
 	}
-	data, err := ioutil.ReadFile(path)
+
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return err
 	}
@@ -156,14 +156,21 @@ func (r *Repository) Read(force bool) error {
 
 func newCredentials(auth types.AuthConfig) cpi.Credentials {
 	props := common.Properties{
-		cpi.ATTR_USERNAME: auth.Username,
-		cpi.ATTR_PASSWORD: auth.Password,
+		cpi.ATTR_USERNAME: norm(auth.Username),
+		cpi.ATTR_PASSWORD: norm(auth.Password),
 	}
 	props.SetNonEmptyValue("auth", auth.Auth)
-	props.SetNonEmptyValue(cpi.ATTR_SERVER_ADDRESS, auth.ServerAddress)
-	props.SetNonEmptyValue(cpi.ATTR_IDENTITY_TOKEN, auth.IdentityToken)
-	props.SetNonEmptyValue(cpi.ATTR_REGISTRY_TOKEN, auth.RegistryToken)
+	props.SetNonEmptyValue(cpi.ATTR_SERVER_ADDRESS, norm(auth.ServerAddress))
+	props.SetNonEmptyValue(cpi.ATTR_IDENTITY_TOKEN, norm(auth.IdentityToken))
+	props.SetNonEmptyValue(cpi.ATTR_REGISTRY_TOKEN, norm(auth.RegistryToken))
 	return cpi.NewCredentials(props)
+}
+
+func norm(s string) string {
+	for strings.HasSuffix(s, "\n") {
+		s = s[:len(s)-1]
+	}
+	return s
 }
 
 // IsEmptyAuthConfig validates if the resulting auth config contains credentails

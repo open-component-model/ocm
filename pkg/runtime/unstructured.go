@@ -20,6 +20,8 @@ import (
 	"fmt"
 
 	"github.com/modern-go/reflect2"
+
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 const ATTR_TYPE = "type"
@@ -184,7 +186,7 @@ func (u *UnstructuredTypedObject) Evaluate(types Scheme) (TypedObject, error) {
 		decoder = types.GetDecoder(u.GetType())
 	}
 	if decoder == nil {
-		return u, nil
+		return nil, errors.ErrUnknown(errors.KIND_OBJECTTYPE)
 	}
 
 	if obj, err := decoder.Decode(data, DefaultJSONEncoding); err != nil {
@@ -273,7 +275,7 @@ func ToUnstructuredObject(obj interface{}) (UnstructuredMap, error) {
 type UnstructuredTypedObjectList []*UnstructuredTypedObject
 
 func (l UnstructuredTypedObjectList) Copy() UnstructuredTypedObjectList {
-	n := make(UnstructuredTypedObjectList, len(l), len(l))
+	n := make(UnstructuredTypedObjectList, len(l))
 	for i, u := range l {
 		copy := *u
 		n[i] = &copy

@@ -22,9 +22,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"os"
+	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -174,7 +176,7 @@ func WriteFileToTARArchive(filename string, contentReader io.Reader, archiveWrit
 		return errors.New("archiveWriter must not be nil")
 	}
 
-	tempfile, err := ioutil.TempFile("", "")
+	tempfile, err := os.CreateTemp("", "")
 	if err != nil {
 		return fmt.Errorf("unable to create tempfile: %w", err)
 	}
@@ -207,13 +209,43 @@ func WriteFileToTARArchive(filename string, contentReader io.Reader, archiveWrit
 	return nil
 }
 
-func IndentLines(orig string, gap string) string {
-	if strings.HasSuffix(orig, "\n") {
-		orig = orig[:len(orig)-1]
+func IndentLines(orig string, gap string, skipfirst ...bool) string {
+	return JoinIndentLines(strings.Split(strings.TrimPrefix(orig, "\n"), "\n"), gap, skipfirst...)
+}
+
+func JoinIndentLines(orig []string, gap string, skipfirst ...bool) string {
+	skip := false
+	for _, b := range skipfirst {
+		skip = skip || b
 	}
+
 	s := ""
-	for _, l := range strings.Split(orig, "\n") {
-		s += gap + l + "\n"
+	for _, l := range orig {
+		if !skip {
+			s += gap
+		}
+		s += l + "\n"
+		skip = false
 	}
 	return s
+}
+
+func StringMapKeys(m interface{}) []string {
+	if m == nil {
+		return nil
+	}
+	v := reflect.ValueOf(m)
+	if v.Kind() != reflect.Map {
+		panic(fmt.Sprintf("%T is no map", m))
+	}
+	if v.Type().Key().Kind() != reflect.String {
+		panic(fmt.Sprintf("map key of %T is no string", m))
+	}
+
+	keys := []string{}
+	for _, k := range v.MapKeys() {
+		keys = append(keys, k.Interface().(string))
+	}
+	sort.Strings(keys)
+	return keys
 }

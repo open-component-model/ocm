@@ -134,14 +134,16 @@ func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error
 		return nil, err
 	}
 
-	data, mime, err := src.GetManifest(dummyContext, nil)
-	if err != nil {
-		src.Close()
-		return nil, err
-	}
+	/*
+		data, mime, err := src.GetManifest(dummyContext, nil)
+		if err != nil {
+			src.Close()
+			return nil, err
+		}
 
-	//fmt.Printf("mime: %s\n", mime)
-	//fmt.Printf("manifest:\n %s\n*********\n", string(data))
+		//fmt.Printf("mime: %s\n", mime)
+		//fmt.Printf("manifest:\n %s\n*********\n", string(data))
+	*/
 
 	opts := types.ManifestUpdateOptions{
 		ManifestMIMEType: artdesc.MediaTypeImageManifest,
@@ -159,7 +161,7 @@ func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error
 		return nil, err
 	}
 
-	data, mime, err = img.Manifest(dummyContext)
+	data, mime, err := img.Manifest(dummyContext)
 	if err != nil {
 		src.Close()
 		return nil, err

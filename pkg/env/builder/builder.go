@@ -15,7 +15,7 @@
 package builder
 
 import (
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -63,19 +63,16 @@ type Builder struct {
 
 	blob *accessio.BlobAccess
 
-	oci_repo    oci.Repository
-	oci_nsacc   oci.NamespaceAccess
-	oci_artacc  oci.ArtefactAccess
-	oci_tags    *[]string
-	oci_artfunc func(oci.ArtefactAccess) error
+	oci_repo          oci.Repository
+	oci_nsacc         oci.NamespaceAccess
+	oci_artacc        oci.ArtefactAccess
+	oci_cleanuplayers bool
+	oci_tags          *[]string
+	oci_artfunc       func(oci.ArtefactAccess) error
 }
 
 func NewBuilder(t *env.Environment) *Builder {
 	return &Builder{Environment: t}
-}
-
-func (b *Builder) require(typ string) {
-	Expect(b.peek().Type()).To(Equal(typ))
 }
 
 func (b *Builder) set() {
@@ -92,6 +89,7 @@ func (b *Builder) set() {
 	b.oci_repo = nil
 	b.oci_nsacc = nil
 	b.oci_artacc = nil
+	b.oci_cleanuplayers = false
 	b.oci_tags = nil
 	b.oci_artfunc = nil
 

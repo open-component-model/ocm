@@ -16,12 +16,12 @@ ocm ocm commontransportarchive [<options>] <sub command> ...
 
 ##### Parents
 
-* [ocm ocm](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm ocm](ocm_ocm.md)	 &mdash; Dedicated command flavors for the Open Component Model
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
 
 ##### Sub Commands
 
-* [ocm ocm commontransportarchive <b>create</b>](ocm_ocm_commontransportarchive_create.md)	 - create new component archive
-* [ocm ocm commontransportarchive <b>transfer</b>](ocm_ocm_commontransportarchive_transfer.md)	 - transfer component archive to some component repository
+* [ocm ocm commontransportarchive <b>create</b>](ocm_ocm_commontransportarchive_create.md)	 &mdash; create new component archive
+* [ocm ocm commontransportarchive <b>transfer</b>](ocm_ocm_commontransportarchive_transfer.md)	 &mdash; transfer component archive to some component repository
 

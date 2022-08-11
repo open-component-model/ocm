@@ -42,6 +42,7 @@ func Apply(printer common.Printer, state *common.WalkingState, cv ocm.ComponentV
 		s := common.NewWalkingState()
 		state = &s
 	}
+
 	return apply(printer, *state, cv, opts)
 }
 
@@ -88,8 +89,11 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 
 	blobdigesters := cv.GetContext().BlobDigesters()
 	for i, res := range cv.GetResources() {
+		raw := &cd.Resources[i]
 		acc, err := res.Access()
-
+		if err != nil {
+			return nil, errors.Wrapf(err, resMsg(raw, state, "failed getting access for resource"))
+		}
 		if _, ok := opts.SkipAccessTypes[acc.GetKind()]; ok {
 			// set the do not sign digest notation on skip-access-type resources
 			cd.Resources[i].Digest = metav1.NewExcludeFromSignatureDigest()
@@ -100,7 +104,6 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 			continue
 		}
 
-		raw := &cd.Resources[i]
 		meth, err := acc.AccessMethod(cv)
 		if err != nil {
 			return nil, errors.Wrapf(err, resMsg(raw, state, "failed creating access for resource"))

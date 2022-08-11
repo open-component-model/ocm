@@ -17,7 +17,7 @@ package config
 import (
 	"fmt"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
@@ -77,7 +77,7 @@ var _ = Describe("generic attributes", func() {
 		It("applies later attribute config", func() {
 
 			sub := credentials.WithConfigs(ctx).New()
-			spec := NewConfigSpec()
+			spec := New()
 			Expect(spec.AddAttribute(ATTR_KEY, attribute)).To(Succeed())
 			Expect(ctx.ApplyConfig(spec, "test")).To(Succeed())
 
@@ -86,7 +86,7 @@ var _ = Describe("generic attributes", func() {
 
 		It("applies earlier attribute config", func() {
 
-			spec := NewConfigSpec()
+			spec := New()
 			Expect(spec.AddAttribute(ATTR_KEY, attribute)).To(Succeed())
 			Expect(ctx.ApplyConfig(spec, "test")).To(Succeed())
 

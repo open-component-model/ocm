@@ -42,6 +42,9 @@ type BlobContainer interface {
 // ComponentVersionContainer is the interface of an element hosting a component version
 type ComponentVersionContainer interface {
 	GetContext() cpi.Context
+
+	Repository() cpi.Repository
+
 	IsReadOnly() bool
 	IsClosed() bool
 	Update() error

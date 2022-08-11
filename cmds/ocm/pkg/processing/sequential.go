@@ -170,6 +170,7 @@ func process_sort(c CompareFunction) func(data data.Iterable) data.Iterable {
 	}
 }
 
+/*
 func process_aggregate(a AggregationFunction) func(data data.Iterable) data.Iterable {
 	return func(it data.Iterable) data.Iterable {
 		var result []interface{}
@@ -190,6 +191,7 @@ func process_aggregate(a AggregationFunction) func(data data.Iterable) data.Iter
 		return data.IndexedSliceAccess(result)
 	}
 }
+*/
 
 ////////////////////////////////////////////////////////////////////////////
 

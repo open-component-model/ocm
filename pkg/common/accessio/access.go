@@ -19,6 +19,7 @@ import (
 	"io"
 	"sync"
 
+	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
@@ -51,7 +52,15 @@ type DataReader interface {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-//  DataAccess describes the access to sequence of bytes
+// DataSource describes some data plus its origin
+type DataSource interface {
+	DataAccess
+	Origin() string
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+// DataAccess describes the access to sequence of bytes
 type DataAccess interface {
 	DataGetter
 	DataReader
@@ -103,27 +112,50 @@ type dataAccess struct {
 	path string
 }
 
+var _ DataSource = (*dataAccess)(nil)
+
 func DataAccessForFile(fs vfs.FileSystem, path string) DataAccess {
 	return &dataAccess{fs: fs, path: path}
 }
 
 func (a *dataAccess) Get() ([]byte, error) {
-	return vfs.ReadFile(a.fs, a.path)
+	data, err := vfs.ReadFile(a.fs, a.path)
+	if err != nil {
+		return nil, errors.Wrapf(err, "file %q", a.path)
+	}
+	return data, nil
 }
 
 func (a *dataAccess) Reader() (io.ReadCloser, error) {
-	return a.fs.Open(a.path)
+	file, err := a.fs.Open(a.path)
+	if err != nil {
+		return nil, errors.Wrapf(err, "file %q", a.path)
+	}
+	return file, nil
+}
+
+func (a *dataAccess) Origin() string {
+	return a.path
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type bytesAccess struct {
 	NopCloser
-	data []byte
+	data   []byte
+	origin string
 }
 
-func DataAccessForBytes(data []byte) DataAccess {
-	return &bytesAccess{data: data}
+func DataAccessForBytes(data []byte, origin ...string) DataSource {
+	path := ""
+	if len(origin) > 0 {
+		path = filepath.Join(origin...)
+	}
+	return &bytesAccess{data: data, origin: path}
+}
+
+func DataAccessForString(data string, origin ...string) DataSource {
+	return DataAccessForBytes([]byte(data), origin...)
 }
 
 func (a *bytesAccess) Get() ([]byte, error) {
@@ -132,6 +164,10 @@ func (a *bytesAccess) Get() ([]byte, error) {
 
 func (a *bytesAccess) Reader() (io.ReadCloser, error) {
 	return ReadCloser(bytes.NewReader(a.data)), nil
+}
+
+func (a *bytesAccess) Origin() string {
+	return a.origin
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -303,6 +339,85 @@ func BlobNopCloser(blob BlobAccess) BlobAccess {
 
 func (b *blobNopCloser) Close() error {
 	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type MultiViewBlobAccess struct {
+	refs   ReferencableCloser
+	access BlobAccess
+}
+
+func NewMultiViewBlobAccess(acc BlobAccess) *MultiViewBlobAccess {
+	return &MultiViewBlobAccess{
+		refs:   NewRefCloser(acc, true),
+		access: acc,
+	}
+}
+
+func (m *MultiViewBlobAccess) View() (BlobAccess, error) {
+	v, err := m.refs.View(false)
+	if err != nil {
+		return nil, err
+	}
+	return &blobAccessView{v, m.access}, nil
+}
+
+type blobAccessView struct {
+	view   CloserView
+	access BlobAccess
+}
+
+func (b *blobAccessView) Close() error {
+	return b.view.Close()
+}
+
+func (b *blobAccessView) IsClosed() bool {
+	return b.view.IsClosed()
+}
+
+func (b *blobAccessView) Get() (result []byte, err error) {
+	return result, b.view.Execute(func() error {
+		result, err = b.access.Get()
+		return err
+	})
+}
+
+func (b *blobAccessView) Reader() (result io.ReadCloser, err error) {
+	return result, b.view.Execute(func() error {
+		result, err = b.access.Reader()
+		return err
+	})
+}
+
+func (b *blobAccessView) Digest() (result digest.Digest) {
+	err := b.view.Execute(func() error {
+		result = b.access.Digest()
+		return nil
+	})
+	if err != nil {
+		return BLOB_UNKNOWN_DIGEST
+	}
+	return
+}
+
+func (b *blobAccessView) MimeType() string {
+	return b.access.MimeType()
+}
+
+func (b *blobAccessView) DigestKnown() bool {
+	return b.access.DigestKnown()
+}
+
+func (b *blobAccessView) Size() (result int64) {
+	err := b.view.Execute(func() error {
+		result = b.access.Size()
+		return nil
+	})
+	if err != nil {
+		return BLOB_UNKNOWN_SIZE
+	}
+	return
 }
 
 ////////////////////////////////////////////////////////////////////////////////

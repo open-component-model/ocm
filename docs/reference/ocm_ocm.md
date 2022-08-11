@@ -16,22 +16,22 @@ ocm ocm [<options>] <sub command> ...
 
 ##### Parents
 
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
 
 ##### Sub Commands
 
-* [ocm ocm <b>commontransportarchive</b>](ocm_ocm_commontransportarchive.md)	 - Commands acting on common transport archives
-* [ocm ocm <b>componentarchive</b>](ocm_ocm_componentarchive.md)	 - Commands acting on component archives
-* [ocm ocm <b>componentversions</b>](ocm_ocm_componentversions.md)	 - Commands acting on components
-* [ocm ocm <b>references</b>](ocm_ocm_references.md)	 - Commands related to component references in component versions
-* [ocm ocm <b>resources</b>](ocm_ocm_resources.md)	 - Commands acting on component resources
-* [ocm ocm <b>sources</b>](ocm_ocm_sources.md)	 - Commands acting on component sources
-* [ocm ocm <b>versions</b>](ocm_ocm_versions.md)	 - Commands acting on component version names
+* [ocm ocm <b>commontransportarchive</b>](ocm_ocm_commontransportarchive.md)	 &mdash; Commands acting on common transport archives
+* [ocm ocm <b>componentarchive</b>](ocm_ocm_componentarchive.md)	 &mdash; Commands acting on component archives
+* [ocm ocm <b>componentversions</b>](ocm_ocm_componentversions.md)	 &mdash; Commands acting on components
+* [ocm ocm <b>references</b>](ocm_ocm_references.md)	 &mdash; Commands related to component references in component versions
+* [ocm ocm <b>resources</b>](ocm_ocm_resources.md)	 &mdash; Commands acting on component resources
+* [ocm ocm <b>sources</b>](ocm_ocm_sources.md)	 &mdash; Commands acting on component sources
+* [ocm ocm <b>versions</b>](ocm_ocm_versions.md)	 &mdash; Commands acting on component version names
 
 
 
 ##### Additional Help Topics
 
-* [ocm ocm <b>ocm-references</b>](ocm_ocm_ocm-references.md)	 - notation for OCM references
+* [ocm ocm <b>ocm-references</b>](ocm_ocm_ocm-references.md)	 &mdash; notation for OCM references
 

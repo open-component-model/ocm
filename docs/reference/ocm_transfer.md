@@ -16,13 +16,13 @@ ocm transfer [<options>] <sub command> ...
 
 ##### Parents
 
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
 
 ##### Sub Commands
 
-* [ocm transfer <b>artefacts</b>](ocm_transfer_artefacts.md)	 - transfer OCI artefacts
-* [ocm transfer <b>commontransportarchive</b>](ocm_transfer_commontransportarchive.md)	 - transfer transport archive
-* [ocm transfer <b>componentarchive</b>](ocm_transfer_componentarchive.md)	 - transfer component archive to some component repository
-* [ocm transfer <b>componentversions</b>](ocm_transfer_componentversions.md)	 - transfer component version
+* [ocm transfer <b>artefacts</b>](ocm_transfer_artefacts.md)	 &mdash; transfer OCI artefacts
+* [ocm transfer <b>commontransportarchive</b>](ocm_transfer_commontransportarchive.md)	 &mdash; transfer transport archive
+* [ocm transfer <b>componentarchive</b>](ocm_transfer_componentarchive.md)	 &mdash; transfer component archive to some component repository
+* [ocm transfer <b>componentversions</b>](ocm_transfer_componentversions.md)	 &mdash; transfer component version
 

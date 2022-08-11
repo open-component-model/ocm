@@ -1,0 +1,13 @@
+chart:
+  resource:
+    name: chart
+
+imageMapping:
+  - tag: image.tag
+    repository: image.repository
+    resource:
+      name: image
+
+kubeConfigName: target
+release: echoserver
+createNamespace: true

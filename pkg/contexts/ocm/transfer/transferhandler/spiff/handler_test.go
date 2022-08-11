@@ -17,7 +17,7 @@ package spiff_test
 import (
 	"encoding/json"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -27,7 +27,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
@@ -75,6 +75,7 @@ var _ = Describe("Transfer handler", func() {
 	It("handles bool", func() {
 
 		handler, err := spiff.New(spiff.Script([]byte(script1)))
+		Expect(err).To(Succeed())
 
 		binding := map[string]interface{}{
 			"component": map[string]interface{}{
@@ -90,6 +91,7 @@ var _ = Describe("Transfer handler", func() {
 	It("handles componentversion", func() {
 
 		handler, err := spiff.New(spiff.Script([]byte(script1)))
+		Expect(err).To(Succeed())
 
 		binding := map[string]interface{}{
 			"component": map[string]interface{}{
@@ -107,7 +109,7 @@ var _ = Describe("Transfer handler", func() {
 	It("handles simple componentversion", func() {
 
 		handler, err := spiff.New(spiff.Script([]byte(script1)))
-
+		Expect(err).To(Succeed())
 		binding := map[string]interface{}{
 			"component": map[string]interface{}{
 				"name":    COMPONENT,
@@ -161,13 +163,13 @@ var _ = Describe("Transfer handler", func() {
 						})
 						env.Resource("value", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
 							env.Access(
-								ociregistry.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
+								ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
 							)
 							env.Label("transportByValue", true)
 						})
 						env.Resource("ref", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
 							env.Access(
-								ociregistry.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION)),
+								ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION)),
 							)
 						})
 					})
@@ -264,7 +266,7 @@ process: (( (*(rules[mode] || rules.default)).process ))
 			// index 2: by ref
 			data, err := json.Marshal(comp.GetDescriptor().Resources[2].Access)
 			Expect(err).To(Succeed())
-			Expect(string(data)).To(Equal("{\"imageReference\":\"" + oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION) + "\",\"type\":\"ociRegistry\"}"))
+			Expect(string(data)).To(Equal("{\"imageReference\":\"" + oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION) + "\",\"type\":\"" + ociartefact.Type + "\"}"))
 
 			// index 1: by value
 			data, err = json.Marshal(comp.GetDescriptor().Resources[1].Access)

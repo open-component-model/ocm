@@ -35,12 +35,12 @@ const (
 )
 
 func init() {
-	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &ConfigSpec{}, usage))
-	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &ConfigSpec{}, usage))
+	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &Config{}, usage))
+	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &Config{}, usage))
 }
 
-// ConfigSpec describes a memory based repository interface.
-type ConfigSpec struct {
+// Config describes a memory based repository interface.
+type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	PublicKeys                  map[string]KeySpec `json:"publicKeys"`
 	PrivateKeys                 map[string]KeySpec `json:"privateKeys"`
@@ -94,33 +94,33 @@ func (k *KeySpec) Get() (interface{}, error) {
 	return vfs.ReadFile(fs, k.Path)
 }
 
-// NewConfigSpec creates a new memory ConfigSpec
-func NewConfigSpec() *ConfigSpec {
-	return &ConfigSpec{
+// New creates a new memory ConfigSpec
+func New() *Config {
+	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
 	}
 }
 
-func (a *ConfigSpec) GetType() string {
+func (a *Config) GetType() string {
 	return ConfigType
 }
 
-func (a *ConfigSpec) addKey(set *map[string]KeySpec, name string, key interface{}) {
+func (a *Config) addKey(set *map[string]KeySpec, name string, key interface{}) {
 	if *set == nil {
 		*set = map[string]KeySpec{}
 	}
 	(*set)[name] = KeySpec{Parsed: key}
 }
 
-func (a *ConfigSpec) AddPublicKey(name string, key interface{}) {
+func (a *Config) AddPublicKey(name string, key interface{}) {
 	a.addKey(&a.PublicKeys, name, key)
 }
 
-func (a *ConfigSpec) AddPrivateKey(name string, key interface{}) {
+func (a *Config) AddPrivateKey(name string, key interface{}) {
 	a.addKey(&a.PrivateKeys, name, key)
 }
 
-func (a *ConfigSpec) addKeyFile(set *map[string]KeySpec, name, path string, fss ...vfs.FileSystem) {
+func (a *Config) addKeyFile(set *map[string]KeySpec, name, path string, fss ...vfs.FileSystem) {
 	var fs vfs.FileSystem
 	for _, fs = range fss {
 		if fs != nil {
@@ -133,30 +133,30 @@ func (a *ConfigSpec) addKeyFile(set *map[string]KeySpec, name, path string, fss 
 	(*set)[name] = KeySpec{Path: path, FileSystem: fs}
 }
 
-func (a *ConfigSpec) AddPublicKeyFile(name, path string, fss ...vfs.FileSystem) {
+func (a *Config) AddPublicKeyFile(name, path string, fss ...vfs.FileSystem) {
 	a.addKeyFile(&a.PublicKeys, name, path, fss...)
 }
 
-func (a *ConfigSpec) AddPrivateKeyFile(name, path string, fss ...vfs.FileSystem) {
+func (a *Config) AddPrivateKeyFile(name, path string, fss ...vfs.FileSystem) {
 	a.addKeyFile(&a.PrivateKeys, name, path, fss...)
 }
 
-func (a *ConfigSpec) addKeyData(set *map[string]KeySpec, name string, data []byte) {
+func (a *Config) addKeyData(set *map[string]KeySpec, name string, data []byte) {
 	if *set == nil {
 		*set = map[string]KeySpec{}
 	}
 	(*set)[name] = KeySpec{Data: data}
 }
 
-func (a *ConfigSpec) AddPublicKeyData(name string, data []byte) {
+func (a *Config) AddPublicKeyData(name string, data []byte) {
 	a.addKeyData(&a.PublicKeys, name, data)
 }
 
-func (a *ConfigSpec) AddPrivateKeyData(name string, data []byte) {
+func (a *Config) AddPrivateKeyData(name string, data []byte) {
 	a.addKeyData(&a.PrivateKeys, name, data)
 }
 
-func (a *ConfigSpec) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
+func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	t, ok := target.(config.Context)
 	if !ok {
 		return cfgcpi.ErrNoContext(ConfigType)
@@ -164,7 +164,7 @@ func (a *ConfigSpec) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	return errors.Wrapf(a.ApplyToRegistry(Get(t)), "applying config failed")
 }
 
-func (a *ConfigSpec) ApplyToRegistry(registry signing.KeyRegistry) error {
+func (a *Config) ApplyToRegistry(registry signing.KeyRegistry) error {
 	for n, k := range a.PublicKeys {
 		key, err := k.Get()
 		if err != nil {

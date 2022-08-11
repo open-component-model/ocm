@@ -3,7 +3,10 @@
 main
 /dist
 /tmp
-/local
+local
 /ocm
 .vscode
+/gen
 /cmds/test/generics
+/gen
+bin/

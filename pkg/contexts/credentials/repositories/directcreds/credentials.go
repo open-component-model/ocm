@@ -20,5 +20,5 @@ import (
 )
 
 func NewCredentials(props common.Properties) cpi.CredentialsSpec {
-	return cpi.NewCredentialsSpec(DirectCredentialsRepositoryType, NewRepositorySpec(props))
+	return cpi.NewCredentialsSpec(Type, NewRepositorySpec(props))
 }

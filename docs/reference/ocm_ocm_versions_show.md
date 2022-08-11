@@ -78,7 +78,7 @@ $ ocm show versions ghcr.io/mandelsoft/cnudie//github.com/mandelsoft/playground
 
 ##### Parents
 
-* [ocm ocm versions](ocm_ocm_versions.md)	 - Commands acting on component version names
-* [ocm ocm](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm ocm versions](ocm_ocm_versions.md)	 &mdash; Commands acting on component version names
+* [ocm ocm](ocm_ocm.md)	 &mdash; Dedicated command flavors for the Open Component Model
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

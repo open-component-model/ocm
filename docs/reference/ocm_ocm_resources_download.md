@@ -9,12 +9,12 @@ ocm ocm resources download [<options>]  <component> {<name> { <key>=<value> }}
 ### Options
 
 ```
-  -c, --closure             follow component reference nesting
-  -d, --download-handlers   use download handler if possible
-  -h, --help                help for download
-      --lookup string       repository name or spec for closure lookup fallback
-  -O, --outfile string      output file or directory
-  -r, --repo string         repository name or spec
+  -c, --closure              follow component reference nesting
+  -d, --download-handlers    use download handler if possible
+  -h, --help                 help for download
+      --lookup stringArray   repository name or spec for closure lookup fallback
+  -O, --outfile string       output file or directory
+  -r, --repo string          repository name or spec
 ```
 
 ### Description
@@ -114,7 +114,7 @@ references.
 
 ##### Parents
 
-* [ocm ocm resources](ocm_ocm_resources.md)	 - Commands acting on component resources
-* [ocm ocm](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm ocm resources](ocm_ocm_resources.md)	 &mdash; Commands acting on component resources
+* [ocm ocm](ocm_ocm.md)	 &mdash; Dedicated command flavors for the Open Component Model
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

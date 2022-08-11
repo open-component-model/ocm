@@ -20,13 +20,13 @@ import (
 )
 
 const (
-	MemoryRepositoryType   = "Memory"
-	MemoryRepositoryTypeV1 = MemoryRepositoryType + "/v1" + runtime.VersionSeparator + "v1"
+	Type   = "Memory"
+	TypeV1 = Type + runtime.VersionSeparator + "v1"
 )
 
 func init() {
-	cpi.RegisterRepositoryType(MemoryRepositoryType, cpi.NewRepositoryType(MemoryRepositoryType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(MemoryRepositoryTypeV1, cpi.NewRepositoryType(MemoryRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(Type, cpi.NewRepositoryType(Type, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(TypeV1, cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes a memory based repository interface.
@@ -38,13 +38,13 @@ type RepositorySpec struct {
 // NewRepositorySpec creates a new memory RepositorySpec
 func NewRepositorySpec(name string) *RepositorySpec {
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(MemoryRepositoryType),
+		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		RepositoryName:      name,
 	}
 }
 
 func (a *RepositorySpec) GetType() string {
-	return MemoryRepositoryType
+	return Type
 }
 
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi.Repository, error) {

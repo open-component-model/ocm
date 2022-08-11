@@ -16,6 +16,9 @@ package v1
 
 import (
 	"encoding/json"
+	"fmt"
+	"regexp"
+	"strconv"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
@@ -30,9 +33,16 @@ type Label struct {
 	Name string `json:"name"`
 	// Value is the json/yaml data of the label
 	Value json.RawMessage `json:"value"`
+
+	// Version is the optional specification version of the attribute value
+	Version string `json:"version,omitempty"`
+	// Signing describes whether the label should be included into the signature
+	Signing bool `json:"signing,omitempty"`
 }
 
-func NewLabel(name string, value interface{}) (*Label, error) {
+var versionRegex = regexp.MustCompile("^v[0-9]+$")
+
+func NewLabel(name string, value interface{}, opts ...interface{}) (*Label, error) {
 	var data []byte
 	var err error
 	var ok bool
@@ -49,7 +59,26 @@ func NewLabel(name string, value interface{}) (*Label, error) {
 			return nil, errors.ErrInvalid("label value", "<object>", name)
 		}
 	}
-	return &Label{name, data}, nil
+	l := &Label{Name: name, Value: data}
+	for _, o := range opts {
+		switch v := o.(type) {
+		case bool:
+			l.Signing = v
+		case string:
+			if versionRegex.MatchString(v) {
+				l.Version = v
+			} else {
+				b, err := strconv.ParseBool(v)
+				if err != nil {
+					return nil, fmt.Errorf("invalid label option '%v'[%T]", v, v)
+				}
+				l.Signing = b
+			}
+		default:
+			return nil, fmt.Errorf("invalid label option '%v'[%T]", v, v)
+		}
+	}
+	return l, nil
 }
 
 // Labels describe a list of labels
@@ -57,7 +86,7 @@ func NewLabel(name string, value interface{}) (*Label, error) {
 // +k8s:openapi-gen=true
 type Labels []Label
 
-// Get returns the label witht the given name
+// Get returns the label with the given name
 func (l Labels) Get(name string) ([]byte, bool) {
 	for _, label := range l {
 		if label.Name == name {
@@ -111,9 +140,7 @@ func (l Labels) Copy() Labels {
 		return nil
 	}
 	n := make(Labels, len(l))
-	for k, v := range l {
-		n[k] = v
-	}
+	copy(n, l)
 	return n
 }
 

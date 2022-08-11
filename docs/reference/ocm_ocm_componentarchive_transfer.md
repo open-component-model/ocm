@@ -36,7 +36,7 @@ The default format is <code>directory</code>.
 
 ##### Parents
 
-* [ocm ocm componentarchive](ocm_ocm_componentarchive.md)	 - Commands acting on component archives
-* [ocm ocm](ocm_ocm.md)	 - Dedicated command flavors for the Open Component Model
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm ocm componentarchive](ocm_ocm_componentarchive.md)	 &mdash; Commands acting on component archives
+* [ocm ocm](ocm_ocm.md)	 &mdash; Dedicated command flavors for the Open Component Model
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

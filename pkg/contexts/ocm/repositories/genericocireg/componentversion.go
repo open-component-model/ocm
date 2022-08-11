@@ -20,13 +20,15 @@ import (
 
 	"github.com/opencontainers/go-digest"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localociblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	ocihdlr "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -41,14 +43,20 @@ type ComponentVersion struct {
 
 var _ cpi.ComponentVersionAccess = (*ComponentVersion)(nil)
 
-func NewComponentVersionAccess(mode accessobj.AccessMode, comp *ComponentAccess, version string, access oci.ManifestAccess) (*ComponentVersion, error) {
-	c, err := NewComponentVersionContainer(mode, comp, version, access)
+// newComponentVersionAccess creates an component access for the artefact access, if this fails the artefact acess is closed.
+func newComponentVersionAccess(mode accessobj.AccessMode, comp *componentAccessImpl, version string, access oci.ArtefactAccess) (*ComponentVersion, error) {
+	c, err := newComponentVersionContainer(mode, comp, version, access)
 	if err != nil {
+		return nil, err
+	}
+	acc, err := support.NewComponentVersionAccess(c, true)
+	if err != nil {
+		c.Close()
 		return nil, err
 	}
 	return &ComponentVersion{
 		container:              c,
-		ComponentVersionAccess: support.NewComponentVersionAccess(c, true),
+		ComponentVersionAccess: acc,
 	}, nil
 }
 
@@ -57,27 +65,52 @@ func NewComponentVersionAccess(mode accessobj.AccessMode, comp *ComponentAccess,
 type ComponentVersionContainer struct {
 	comp     *ComponentAccess
 	version  string
+	access   oci.ArtefactAccess
 	manifest oci.ManifestAccess
 	state    accessobj.State
 }
 
 var _ support.ComponentVersionContainer = (*ComponentVersionContainer)(nil)
 
-func NewComponentVersionContainer(mode accessobj.AccessMode, comp *ComponentAccess, version string, manifest oci.ManifestAccess) (*ComponentVersionContainer, error) {
-	state, err := NewState(mode, comp.name, version, manifest)
+func newComponentVersionContainer(mode accessobj.AccessMode, comp *componentAccessImpl, version string, access oci.ArtefactAccess) (*ComponentVersionContainer, error) {
+	m := access.ManifestAccess()
+	if m == nil {
+		return nil, errors.ErrInvalid("artefact type")
+	}
+	state, err := NewState(mode, comp.name, version, m)
 	if err != nil {
+		access.Close()
+		return nil, err
+	}
+	v, err := comp.View(false)
+	if err != nil {
+		access.Close()
 		return nil, err
 	}
 	return &ComponentVersionContainer{
-		comp:     comp,
+		comp:     v,
 		version:  version,
-		manifest: manifest,
+		access:   access,
+		manifest: m,
 		state:    state,
 	}, nil
 }
 
+func (c *ComponentVersionContainer) Repository() cpi.Repository {
+	return c.comp.repo
+}
+
 func (c *ComponentVersionContainer) Close() error {
-	return nil
+	if c.manifest == nil {
+		return accessio.ErrClosed
+	}
+	c.manifest = nil
+	err := c.access.Close()
+	if err != nil {
+		c.comp.Close()
+		return err
+	}
+	return c.comp.Close()
 }
 
 func (c *ComponentVersionContainer) Check() error {
@@ -92,6 +125,10 @@ func (c *ComponentVersionContainer) Check() error {
 
 func (c *ComponentVersionContainer) GetContext() cpi.Context {
 	return c.comp.GetContext()
+}
+
+func (c *ComponentVersionContainer) ComponentAccess() cpi.ComponentAccess {
+	return c.comp
 }
 
 func (c *ComponentVersionContainer) IsReadOnly() bool {
@@ -150,11 +187,8 @@ func (c *ComponentVersionContainer) Update() error {
 			return err
 		}
 		_, err = c.comp.namespace.AddArtefact(c.manifest, c.version)
-		if err != nil {
-			return err
-		}
 	}
-	return nil
+	return err
 }
 
 func (c *ComponentVersionContainer) evalLayer(s compdesc.AccessSpec) (compdesc.AccessSpec, error) {
@@ -198,8 +232,8 @@ func (c *ComponentVersionContainer) AddBlobFor(storagectx cpi.StorageContext, bl
 	return localblob.New(blob.Digest().String(), refName, blob.MimeType(), global), nil
 }
 
-// assureGlobalRef provides a global manifest for a local OCI Artefact
-func (c *ComponentVersionContainer) assureGlobalRef(d digest.Digest, url, name string) (cpi.AccessSpec, error) {
+// AssureGlobalRef provides a global manifest for a local OCI Artefact
+func (c *ComponentVersionContainer) AssureGlobalRef(d digest.Digest, url, name string) (cpi.AccessSpec, error) {
 
 	blob, err := c.manifest.GetBlob(d)
 	if err != nil {
@@ -242,6 +276,6 @@ func (c *ComponentVersionContainer) assureGlobalRef(d digest.Digest, url, name s
 
 	ref := path.Join(url+namespace.GetNamespace()) + ":" + version
 
-	global := ociregistry.New(ref)
+	global := ociartefact.New(ref)
 	return global, nil
 }

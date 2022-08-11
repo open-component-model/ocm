@@ -25,13 +25,13 @@ import (
 )
 
 const (
-	CTFComponentArchiveType   = "ComponentArchive"
-	CTFComponentArchiveTypeV1 = CTFComponentArchiveType + runtime.VersionSeparator + "v1"
+	Type   = "ComponentArchive"
+	TypeV1 = Type + runtime.VersionSeparator + "v1"
 )
 
 func init() {
-	cpi.RegisterRepositoryType(CTFComponentArchiveType, cpi.NewRepositoryType(CTFComponentArchiveType, &RepositorySpec{}, nil))
-	cpi.RegisterRepositoryType(CTFComponentArchiveTypeV1, cpi.NewRepositoryType(CTFComponentArchiveTypeV1, &RepositorySpec{}, nil))
+	cpi.RegisterRepositoryType(Type, cpi.NewRepositoryType(Type, &RepositorySpec{}, nil))
+	cpi.RegisterRepositoryType(TypeV1, cpi.NewRepositoryType(TypeV1, &RepositorySpec{}, nil))
 }
 
 type RepositorySpec struct {
@@ -52,7 +52,7 @@ var _ cpi.IntermediateRepositorySpecAspect = (*RepositorySpec)(nil)
 func NewRepositorySpec(acc accessobj.AccessMode, filePath string, opts ...accessio.Option) *RepositorySpec {
 	o := accessio.AccessOptions(opts...)
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(CTFComponentArchiveType),
+		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		FilePath:            filePath,
 		Options:             o,
 		AccessMode:          acc,
@@ -64,7 +64,7 @@ func (a *RepositorySpec) IsIntermediate() bool {
 }
 
 func (a *RepositorySpec) GetType() string {
-	return CTFComponentArchiveType
+	return Type
 }
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	return NewRepository(ctx, a)

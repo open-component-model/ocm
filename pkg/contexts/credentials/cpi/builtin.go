@@ -18,7 +18,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
 )
 
-const DirectCredentialsType = core.DirectCredentialsType
 const AliasRepositoryType = core.AliasRepositoryType
 
 type AliasRegistry = core.AliasRegistry

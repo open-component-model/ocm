@@ -80,6 +80,6 @@ The default format is <code>directory</code>.
 
 ##### Parents
 
-* [ocm componentversions](ocm_componentversions.md)	 - Commands acting on components
-* [ocm](ocm.md)	 - Open Component Model command line client
+* [ocm componentversions](ocm_componentversions.md)	 &mdash; Commands acting on components
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

@@ -21,7 +21,8 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
@@ -30,8 +31,17 @@ import (
 
 func From(o options.OptionSetProvider) *Options {
 	var opts *Options
+	if me, ok := o.(*Options); ok {
+		return me
+	}
 	o.AsOptionSet().Get(&opts)
 	return opts
+}
+
+func Selected(mode string) func(o options.OptionSetProvider) bool {
+	return func(o options.OptionSetProvider) bool {
+		return From(o).OutputMode == mode
+	}
 }
 
 type Options struct {
@@ -78,7 +88,7 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 		fs.StringVarP(&o.OutputMode, "output", "o", "", fmt.Sprintf("output mode (%s)", s))
 	}
 
-	// TODO: not the best solution to instantiate all possiblke outputs to figure out, whether sort fields
+	// TODO: not the best solution to instantiate all possible outputs to figure out, whether sort fields
 	// are available or not
 	for _, out := range o.Outputs {
 		if _, ok := out(o).(SortFields); ok {
@@ -117,11 +127,18 @@ func (o *Options) Complete(ctx clictx.Context) error {
 		}
 	}
 	o.Sort = fields
-	err := o.ProcessOnOptions(options.CompleteOptions)
+	err := o.OptionSet.ProcessOnOptions(options.CompleteOptionsWithCLIContext(ctx))
 	if err != nil {
 		return err
 	}
-	err = o.ProcessOnOptions(options.CompleteOptionsWithCLIContext(ctx))
+	return err
+}
+
+func (o *Options) CompleteAll(ctx clictx.Context) error {
+	err := o.Complete(ctx)
+	if err == nil {
+		err = o.OptionSet.ProcessOnOptions(options.CompleteOptionsWithCLIContext(ctx))
+	}
 	if err != nil {
 		return err
 	}

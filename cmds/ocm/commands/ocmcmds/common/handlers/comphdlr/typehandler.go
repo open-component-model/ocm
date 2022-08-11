@@ -18,11 +18,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -39,9 +39,9 @@ type Object struct {
 	History  common.History
 	Identity metav1.Identity
 
-	Spec             ocm.RefSpec
-	Repository       ocm.Repository
-	Component        ocm.ComponentAccess
+	Spec       ocm.RefSpec
+	Repository ocm.Repository
+	//Component        ocm.ComponentAccess
 	ComponentVersion ocm.ComponentVersionAccess
 }
 
@@ -69,7 +69,12 @@ func (o *Object) GetHistory() common.History {
 }
 
 func (o *Object) IsNode() *common.NameVersion {
-	nv := common.VersionedElementKey(o.ComponentVersion)
+	var nv common.NameVersion
+	if o.ComponentVersion == nil {
+		nv = o.Spec.NameVersion()
+	} else {
+		nv = common.VersionedElementKey(o.ComponentVersion)
+	}
 	return &nv
 }
 
@@ -138,9 +143,9 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 		}
 		if evaluated.Version != nil {
 			result = append(result, &Object{
-				Spec:             evaluated.Ref,
-				Repository:       evaluated.Repository,
-				Component:        evaluated.Component,
+				Spec:       evaluated.Ref,
+				Repository: evaluated.Repository,
+				//Component:        evaluated.Component,
 				ComponentVersion: evaluated.Version,
 			})
 			return result, nil
@@ -171,9 +176,9 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 			return nil, err
 		}
 		result = append(result, &Object{
-			Repository:       repo,
-			Spec:             spec,
-			Component:        component,
+			Repository: repo,
+			Spec:       spec,
+			//Component:        component,
 			ComponentVersion: v,
 		})
 	} else {
@@ -193,9 +198,9 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 				s := spec
 				s.Version = &t
 				result = append(result, &Object{
-					Repository:       repo,
-					Spec:             s,
-					Component:        component,
+					Repository: repo,
+					Spec:       s,
+					//Component:        component,
 					ComponentVersion: v,
 				})
 			}

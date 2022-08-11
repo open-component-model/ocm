@@ -86,7 +86,6 @@ func PemBlockForKey(priv interface{}, gen ...bool) *pem.Block {
 		return &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(k)}
 	default:
 		panic("invalid key")
-		return nil
 	}
 }
 

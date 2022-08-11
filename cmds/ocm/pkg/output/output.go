@@ -226,7 +226,7 @@ func (this Outputs) Select(name string) OutputFactory {
 	c, ok := this[name]
 	if !ok {
 		keys := []string{}
-		for k, _ := range this {
+		for k := range this {
 			keys = append(keys, k)
 		}
 		k, _ := SelectBest(name, keys...)

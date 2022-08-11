@@ -17,9 +17,10 @@ package signing_test
 import (
 	"fmt"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -28,7 +29,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociregistry"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
@@ -63,239 +63,285 @@ var _ = Describe("access method", func() {
 
 	BeforeEach(func() {
 		env = NewBuilder(tenv.NewEnvironment())
-		env.OCIContext().SetAlias(OCIHOST, ctfoci.NewRepositorySpec(accessobj.ACC_READONLY, OCIPATH, accessio.PathFileSystem(env.FileSystem())))
-
 		env.RSAKeyPair(SIGNATURE)
-		env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
-			env.Namespace(OCINAMESPACE, func() {
-				env.Manifest(OCIVERSION, func() {
-					env.Config(func() {
-						env.BlobStringData(mime.MIME_JSON, "{}")
-					})
-					env.Layer(func() {
-						env.BlobStringData(mime.MIME_TEXT, "manifestlayer")
-					})
-				})
-			})
-			env.Namespace(OCINAMESPACE2, func() {
-				env.Manifest(OCIVERSION, func() {
-					env.Config(func() {
-						env.BlobStringData(mime.MIME_JSON, "{}")
-					})
-					env.Layer(func() {
-						env.BlobStringData(mime.MIME_TEXT, "otherlayer")
-					})
-				})
-			})
-		})
 
-		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
-			env.Component(COMPONENTA, func() {
-				env.Version(VERSION, func() {
-					env.Provider(PROVIDER)
-					env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
-						env.BlobStringData(mime.MIME_TEXT, "testdata")
-					})
-					env.Resource("value", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
-						env.Access(
-							ociregistry.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
-						)
-						env.Label("transportByValue", true)
-					})
-					env.Resource("ref", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
-						env.Access(
-							ociregistry.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION)),
-						)
-					})
-				})
-			})
-			env.Component(COMPONENTB, func() {
-				env.Version(VERSION, func() {
-					env.Provider(PROVIDER)
-					env.Resource("otherdata", "", "PlainText", metav1.LocalRelation, func() {
-						env.BlobStringData(mime.MIME_TEXT, "otherdata")
-					})
-					env.Reference("ref", COMPONENTA, VERSION)
-				})
-			})
-		})
 	})
 
 	AfterEach(func() {
 		env.Cleanup()
 	})
 
-	It("sign flat version", func() {
-		session := datacontext.NewSession()
-		defer session.Close()
+	Context("valid", func() {
+		BeforeEach(func() {
+			env.OCIContext().SetAlias(OCIHOST, ctfoci.NewRepositorySpec(accessobj.ACC_READONLY, OCIPATH, accessio.PathFileSystem(env.FileSystem())))
 
-		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
-		Expect(err).To(Succeed())
-		archcloser := session.AddCloser(src)
-		resolver := ocm.NewCompoundResolver(src)
+			env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
+				env.Namespace(OCINAMESPACE, func() {
+					env.Manifest(OCIVERSION, func() {
+						env.Config(func() {
+							env.BlobStringData(mime.MIME_JSON, "{}")
+						})
+						env.Layer(func() {
+							env.BlobStringData(mime.MIME_TEXT, "manifestlayer")
+						})
+					})
+				})
+				env.Namespace(OCINAMESPACE2, func() {
+					env.Manifest(OCIVERSION, func() {
+						env.Config(func() {
+							env.BlobStringData(mime.MIME_JSON, "{}")
+						})
+						env.Layer(func() {
+							env.BlobStringData(mime.MIME_TEXT, "otherlayer")
+						})
+					})
+				})
+			})
 
-		cv, err := resolver.LookupComponentVersion(COMPONENTA, VERSION)
-		Expect(err).To(Succeed())
-		closer := session.AddCloser(cv)
+			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+				env.Component(COMPONENTA, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
+							env.BlobStringData(mime.MIME_TEXT, "testdata")
+						})
+						env.Resource("value", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
+							env.Access(
+								ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
+							)
+							env.Label("transportByValue", true)
+						})
+						env.Resource("ref", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
+							env.Access(
+								ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION)),
+							)
+						})
+					})
+				})
+				env.Component(COMPONENTB, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Resource("otherdata", "", "PlainText", metav1.LocalRelation, func() {
+							env.BlobStringData(mime.MIME_TEXT, "otherdata")
+						})
+						env.Reference("ref", COMPONENTA, VERSION)
+					})
+				})
+			})
+		})
 
-		opts := NewOptions(
-			Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
-			Resolver(resolver),
-			Update(), VerifyDigests(),
-		)
-		Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
-		digest := "39ea26ac4391052a638319f64b8da2628acb51d304c3a1ac8f920a46f2d6dce7"
-		dig, err := Apply(nil, nil, cv, opts)
-		Expect(err).To(Succeed())
-		closer.Close()
-		archcloser.Close()
-		fmt.Printf("%+v\n", dig)
-		Expect(dig.Value).To(Equal(digest))
+		It("sign flat version", func() {
+			session := datacontext.NewSession()
+			defer session.Close()
 
-		src, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
-		Expect(err).To(Succeed())
-		session.AddCloser(src)
-		cv, err = src.LookupComponentVersion(COMPONENTA, VERSION)
-		Expect(err).To(Succeed())
-		session.AddCloser(cv)
-		Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(digest))
+			src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
+			Expect(err).To(Succeed())
+			archcloser := session.AddCloser(src)
+			resolver := ocm.NewCompoundResolver(src)
 
-		////////
+			cv, err := resolver.LookupComponentVersion(COMPONENTA, VERSION)
+			Expect(err).To(Succeed())
+			closer := session.AddCloser(cv)
 
-		opts = NewOptions(
-			VerifySignature(SIGNATURE),
-			Resolver(resolver),
-			Update(), VerifyDigests(),
-		)
-		Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+			opts := NewOptions(
+				Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+				Resolver(resolver),
+				Update(), VerifyDigests(),
+			)
+			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+			digest := "39ea26ac4391052a638319f64b8da2628acb51d304c3a1ac8f920a46f2d6dce7"
+			dig, err := Apply(nil, nil, cv, opts)
+			Expect(err).To(Succeed())
+			Expect(closer.Close()).To(Succeed())
+			Expect(archcloser.Close()).To(Succeed())
+			fmt.Printf("%+v\n", dig)
+			Expect(dig.Value).To(Equal(digest))
 
-		dig, err = Apply(nil, nil, cv, opts)
-		Expect(err).To(Succeed())
-		Expect(dig.Value).To(Equal(digest))
+			src, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
+			Expect(err).To(Succeed())
+			session.AddCloser(src)
+			cv, err = src.LookupComponentVersion(COMPONENTA, VERSION)
+			Expect(err).To(Succeed())
+			session.AddCloser(cv)
+			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(digest))
 
+			////////
+
+			opts = NewOptions(
+				VerifySignature(SIGNATURE),
+				Resolver(resolver),
+				Update(), VerifyDigests(),
+			)
+			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+
+			dig, err = Apply(nil, nil, cv, opts)
+			Expect(err).To(Succeed())
+			Expect(dig.Value).To(Equal(digest))
+
+		})
+
+		It("sign flat version with generic verification", func() {
+			session := datacontext.NewSession()
+			defer session.Close()
+
+			src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
+			Expect(err).To(Succeed())
+			archcloser := session.AddCloser(src)
+			resolver := ocm.NewCompoundResolver(src)
+
+			cv, err := resolver.LookupComponentVersion(COMPONENTA, VERSION)
+			Expect(err).To(Succeed())
+			closer := session.AddCloser(cv)
+
+			opts := NewOptions(
+				Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+				Resolver(resolver),
+				Update(), VerifyDigests(),
+			)
+			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+			digest := "39ea26ac4391052a638319f64b8da2628acb51d304c3a1ac8f920a46f2d6dce7"
+			dig, err := Apply(nil, nil, cv, opts)
+			Expect(err).To(Succeed())
+			closer.Close()
+			archcloser.Close()
+			fmt.Printf("%+v\n", dig)
+			Expect(dig.Value).To(Equal(digest))
+
+			src, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
+			Expect(err).To(Succeed())
+			session.AddCloser(src)
+			cv, err = src.LookupComponentVersion(COMPONENTA, VERSION)
+			Expect(err).To(Succeed())
+			session.AddCloser(cv)
+			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(digest))
+
+			////////
+
+			opts = NewOptions(
+				VerifySignature(),
+				Resolver(resolver),
+				Update(), VerifyDigests(),
+			)
+			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+
+			dig, err = Apply(nil, nil, cv, opts)
+			Expect(err).To(Succeed())
+			Expect(dig.Value).To(Equal(digest))
+
+		})
+
+		It("sign deep version", func() {
+			session := datacontext.NewSession()
+			defer session.Close()
+
+			src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
+			Expect(err).To(Succeed())
+			archcloser := session.AddCloser(src)
+			resolver := ocm.NewCompoundResolver(src)
+
+			cv, err := resolver.LookupComponentVersion(COMPONENTB, VERSION)
+			Expect(err).To(Succeed())
+			closer := session.AddCloser(cv)
+
+			opts := NewOptions(
+				Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+				Resolver(resolver),
+				Update(), VerifyDigests(),
+			)
+			digest := "05c4edd25661703e0c5caec8b0680c93738d8a8126d825adb755431fec29b7cb"
+			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+			dig, err := Apply(nil, nil, cv, opts)
+			Expect(err).To(Succeed())
+			closer.Close()
+			archcloser.Close()
+			fmt.Printf("%+v\n", dig)
+			Expect(dig.Value).To(Equal(digest))
+
+			src, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
+			Expect(err).To(Succeed())
+			session.AddCloser(src)
+			cv, err = src.LookupComponentVersion(COMPONENTB, VERSION)
+			Expect(err).To(Succeed())
+			session.AddCloser(cv)
+			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(digest))
+
+			////////
+
+			opts = NewOptions(
+				VerifySignature(SIGNATURE),
+				Resolver(src),
+				VerifyDigests(),
+			)
+			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+
+			dig, err = Apply(nil, nil, cv, opts)
+			Expect(err).To(Succeed())
+			Expect(dig.Value).To(Equal(digest))
+		})
+
+		It("fails generic verification", func() {
+			session := datacontext.NewSession()
+			defer session.Close()
+
+			src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
+			Expect(err).To(Succeed())
+			session.AddCloser(src)
+			resolver := ocm.NewCompoundResolver(src)
+
+			cv, err := resolver.LookupComponentVersion(COMPONENTA, VERSION)
+			Expect(err).To(Succeed())
+			session.AddCloser(cv)
+
+			opts := NewOptions(
+				VerifySignature(),
+				Resolver(resolver),
+				Update(), VerifyDigests(),
+			)
+			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+
+			_, err = Apply(nil, nil, cv, opts)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("no signature found in github.com/mandelsoft/test:v1"))
+		})
 	})
 
-	It("sign flat version with generic verification", func() {
-		session := datacontext.NewSession()
-		defer session.Close()
+	Context("invalid", func() {
+		BeforeEach(func() {
+			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+				env.Component(COMPONENTB, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Resource("otherdata", "", "PlainText", metav1.LocalRelation, func() {
+							env.BlobStringData(mime.MIME_TEXT, "otherdata")
+						})
+						env.Reference("ref", COMPONENTA, VERSION)
+					})
+				})
+			})
+		})
 
-		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
-		Expect(err).To(Succeed())
-		archcloser := session.AddCloser(src)
-		resolver := ocm.NewCompoundResolver(src)
+		It("fails signing version with unknow ref", func() {
+			session := datacontext.NewSession()
+			defer session.Close()
 
-		cv, err := resolver.LookupComponentVersion(COMPONENTA, VERSION)
-		Expect(err).To(Succeed())
-		closer := session.AddCloser(cv)
+			src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
+			Expect(err).To(Succeed())
+			session.AddCloser(src)
 
-		opts := NewOptions(
-			Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
-			Resolver(resolver),
-			Update(), VerifyDigests(),
-		)
-		Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
-		digest := "39ea26ac4391052a638319f64b8da2628acb51d304c3a1ac8f920a46f2d6dce7"
-		dig, err := Apply(nil, nil, cv, opts)
-		Expect(err).To(Succeed())
-		closer.Close()
-		archcloser.Close()
-		fmt.Printf("%+v\n", dig)
-		Expect(dig.Value).To(Equal(digest))
+			opts := NewOptions(
+				Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+				Resolver(src),
+				Update(), VerifyDigests(),
+			)
+			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
 
-		src, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
-		Expect(err).To(Succeed())
-		session.AddCloser(src)
-		cv, err = src.LookupComponentVersion(COMPONENTA, VERSION)
-		Expect(err).To(Succeed())
-		session.AddCloser(cv)
-		Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(digest))
+			cv, err := src.LookupComponentVersion(COMPONENTB, VERSION)
+			Expect(err).To(Succeed())
+			session.AddCloser(cv)
 
-		////////
-
-		opts = NewOptions(
-			VerifySignature(),
-			Resolver(resolver),
-			Update(), VerifyDigests(),
-		)
-		Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
-
-		dig, err = Apply(nil, nil, cv, opts)
-		Expect(err).To(Succeed())
-		Expect(dig.Value).To(Equal(digest))
-
-	})
-
-	It("sign deep version", func() {
-		session := datacontext.NewSession()
-		defer session.Close()
-
-		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
-		Expect(err).To(Succeed())
-		archcloser := session.AddCloser(src)
-		resolver := ocm.NewCompoundResolver(src)
-
-		cv, err := resolver.LookupComponentVersion(COMPONENTB, VERSION)
-		Expect(err).To(Succeed())
-		closer := session.AddCloser(cv)
-
-		opts := NewOptions(
-			Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
-			Resolver(resolver),
-			Update(), VerifyDigests(),
-		)
-		digest := "05c4edd25661703e0c5caec8b0680c93738d8a8126d825adb755431fec29b7cb"
-		Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
-		dig, err := Apply(nil, nil, cv, opts)
-		Expect(err).To(Succeed())
-		closer.Close()
-		archcloser.Close()
-		fmt.Printf("%+v\n", dig)
-		Expect(dig.Value).To(Equal(digest))
-
-		src, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
-		Expect(err).To(Succeed())
-		session.AddCloser(src)
-		cv, err = src.LookupComponentVersion(COMPONENTB, VERSION)
-		Expect(err).To(Succeed())
-		session.AddCloser(cv)
-		Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(digest))
-
-		////////
-
-		opts = NewOptions(
-			VerifySignature(SIGNATURE),
-			Resolver(src),
-			VerifyDigests(),
-		)
-		Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
-
-		dig, err = Apply(nil, nil, cv, opts)
-		Expect(err).To(Succeed())
-		Expect(dig.Value).To(Equal(digest))
-	})
-
-	It("fails generic verification", func() {
-		session := datacontext.NewSession()
-		defer session.Close()
-
-		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
-		Expect(err).To(Succeed())
-		session.AddCloser(src)
-		resolver := ocm.NewCompoundResolver(src)
-
-		cv, err := resolver.LookupComponentVersion(COMPONENTA, VERSION)
-		Expect(err).To(Succeed())
-		session.AddCloser(cv)
-
-		opts := NewOptions(
-			VerifySignature(),
-			Resolver(resolver),
-			Update(), VerifyDigests(),
-		)
-		Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
-
-		_, err = Apply(nil, nil, cv, opts)
-		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).To(Equal("no signature found in github.com/mandelsoft/test:v1"))
+			_, err = Apply(nil, nil, cv, opts)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("failed resolving component reference \"ref\" [github.com/mandelsoft/test:v1] in github.com/mandelsoft/ref:v1: component version \"github.com/mandelsoft/test:v1\" not found: oci artefact \"v1\" not found in component-descriptors/github.com/mandelsoft/test"))
+		})
 	})
 })

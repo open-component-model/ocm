@@ -15,90 +15,31 @@
 package identity
 
 import (
-	"strings"
-
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 )
 
 // CONSUMER_TYPE is the OCT registry type
 const CONSUMER_TYPE = "OCIRegistry"
 
 // ID_HOSTNAME is the hostname of an OCT repository
-const ID_HOSTNAME = "hostname"
+const ID_HOSTNAME = hostpath.ID_HOSTNAME
 
 // ID_PORT is the port number of an OCT repository
-const ID_PORT = "port"
+const ID_PORT = hostpath.ID_PORT
 
 // ID_PATHPREFIX is the artefact prefix
-const ID_PATHPREFIX = "pathprefix"
+const ID_PATHPREFIX = hostpath.ID_PATHPREFIX
 
-// ID_SCHEME is the scheme prefix
-const ID_SCHEME = "scheme"
+func init() {
+	cpi.RegisterStandardIdentityMatcher(CONSUMER_TYPE, IdentityMatcher, `OCI registry credential matcher
+
+It matches the <code>`+CONSUMER_TYPE+`</code> consumer type and additionally acts like 
+the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`)
+}
+
+var identityMatcher = hostpath.IdentityMatcher(CONSUMER_TYPE)
 
 func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
-	if pattern[cpi.CONSUMER_ATTR_TYPE] != "" && id[cpi.CONSUMER_ATTR_TYPE] != "" && pattern[cpi.CONSUMER_ATTR_TYPE] != id[cpi.CONSUMER_ATTR_TYPE] {
-		return false
-	}
-	if pattern[ID_HOSTNAME] != "" && pattern[ID_HOSTNAME] != id[ID_HOSTNAME] {
-		return false
-	}
-
-	if pattern[ID_PORT] != "" {
-		if id[ID_PORT] != "" && id[ID_PORT] != pattern[ID_PORT] {
-			return false
-		}
-	} else {
-		if id[ID_PORT] != "" {
-			// return false // try other port
-		}
-	}
-
-	if pattern[ID_SCHEME] != "" {
-		if id[ID_SCHEME] != "" && id[ID_SCHEME] != pattern[ID_SCHEME] {
-			return false
-		}
-	} else {
-		if id[ID_SCHEME] != "" {
-			// return false // try other port
-		}
-	}
-
-	if pattern[ID_PATHPREFIX] != "" {
-		if id[ID_PATHPREFIX] != "" {
-			if len(id[ID_PATHPREFIX]) > len(pattern[ID_PATHPREFIX]) {
-				return false
-			}
-			pcomps := strings.Split(pattern[ID_PATHPREFIX], "/")
-			icomps := strings.Split(id[ID_PATHPREFIX], "/")
-			if len(icomps) > len(pcomps) {
-				return false
-			}
-			for i := range icomps {
-				if pcomps[i] != icomps[i] {
-					return false
-				}
-			}
-		}
-	} else {
-		if id[ID_PATHPREFIX] != "" {
-			return false
-		}
-	}
-
-	// ok now it basically matches, check against current match
-	if len(cur) == 0 {
-		return true
-	}
-
-	if cur[ID_HOSTNAME] == "" && id[ID_HOSTNAME] != "" {
-		return true
-	}
-	if cur[ID_PORT] == "" && (id[ID_PORT] != "" && pattern[ID_PORT] != "") {
-		return true
-	}
-
-	if len(cur[ID_PATHPREFIX]) < len(id[ID_PATHPREFIX]) {
-		return true
-	}
-	return false
+	return identityMatcher(pattern, cur, id)
 }

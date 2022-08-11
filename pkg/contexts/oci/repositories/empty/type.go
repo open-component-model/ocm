@@ -21,15 +21,15 @@ import (
 )
 
 const (
-	EmptyRepositoryType   = "Empty"
-	EmptyRepositoryTypeV1 = EmptyRepositoryType + runtime.VersionSeparator + "v1"
+	Type   = "Empty"
+	TypeV1 = Type + runtime.VersionSeparator + "v1"
 )
 
 const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/empty"
 
 func init() {
-	cpi.RegisterRepositoryType(EmptyRepositoryType, cpi.NewRepositoryType(EmptyRepositoryType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(EmptyRepositoryTypeV1, cpi.NewRepositoryType(EmptyRepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(Type, cpi.NewRepositoryType(Type, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(TypeV1, cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
@@ -40,16 +40,16 @@ type RepositorySpec struct {
 // NewRepositorySpec creates a new RepositorySpec
 func NewRepositorySpec() *RepositorySpec {
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(EmptyRepositoryType),
+		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 	}
 }
 
 func (a *RepositorySpec) GetType() string {
-	return EmptyRepositoryType
+	return Type
 }
 
 func (a *RepositorySpec) Name() string {
-	return EmptyRepositoryType
+	return Type
 }
 
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {

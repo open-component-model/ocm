@@ -17,6 +17,8 @@ package transfer
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/overwriteoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
@@ -30,7 +32,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/spiff"
 	"github.com/open-component-model/ocm/pkg/errors"
 
-	"github.com/open-component-model/ocm/cmds/ocm/clictx"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -83,7 +84,7 @@ func (o *Command) Run() error {
 	session := ocm.NewSession(nil)
 	defer session.Close()
 
-	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithContext(o, session))
+	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithSession(o, session))
 	if err != nil {
 		return err
 	}
@@ -119,7 +120,6 @@ func (o *Command) Run() error {
 /////////////////////////////////////////////////////////////////////////////
 
 type action struct {
-	cmd     *Command
 	printer common.Printer
 	target  ocm.Repository
 	handler transferhandler.TransferHandler

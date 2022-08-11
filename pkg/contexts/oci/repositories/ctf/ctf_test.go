@@ -19,8 +19,10 @@ import (
 	"compress/gzip"
 	"io"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -60,7 +62,15 @@ var _ = Describe("ctf management", func() {
 		Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
 
 		n, err := r.LookupNamespace("mandelsoft/test")
+		Expect(err).To(Succeed())
 		DefaultManifestFill(n)
+		Expect(n.Close()).To(Succeed())
+
+		Expect(r.ExistsArtefact("mandelsoft/test", TAG)).To(BeTrue())
+
+		art, err := r.LookupArtefact("mandelsoft/test", TAG)
+		Expect(err).To(Succeed())
+		Close(art, "art")
 
 		Expect(r.Close()).To(Succeed())
 		Expect(vfs.FileExists(tempfs, "test/"+ctf.ArtefactIndexFileName)).To(BeTrue())
@@ -83,8 +93,10 @@ var _ = Describe("ctf management", func() {
 		Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
 
 		n, err := r.LookupNamespace("mandelsoft/test")
+		Expect(err).To(Succeed())
 		DefaultManifestFill(n)
 
+		Expect(n.Close()).To(Succeed())
 		Expect(r.Close()).To(Succeed())
 		Expect(vfs.FileExists(tempfs, "test/"+ctf.ArtefactIndexFileName)).To(BeTrue())
 
@@ -110,6 +122,7 @@ var _ = Describe("ctf management", func() {
 		Expect(err).To(Succeed())
 		DefaultManifestFill(n)
 
+		Expect(n.Close()).To(Succeed())
 		Expect(r.Close()).To(Succeed())
 		Expect(vfs.FileExists(tempfs, "test.tgz")).To(BeTrue())
 
@@ -151,7 +164,9 @@ var _ = Describe("ctf management", func() {
 			Expect(err).To(Succeed())
 			Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
 			n, err := r.LookupNamespace("mandelsoft/test")
+			Expect(err).To(Succeed())
 			DefaultManifestFill(n)
+			Expect(n.Close()).To(Succeed())
 			Expect(r.Close()).To(Succeed())
 
 			r, err = ctf.Open(nil, accessobj.ACC_READONLY, "test", 0, accessio.PathFileSystem(tempfs))
