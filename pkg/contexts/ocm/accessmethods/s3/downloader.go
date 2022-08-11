@@ -9,6 +9,7 @@ import (
 	awscreds "github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 )
 
 const defaultRegion = "us-west-1"
@@ -20,6 +21,13 @@ type Downloader interface {
 
 // S3Downloader is a downloader capable of downloading S3 Objects.
 type S3Downloader struct {
+	cache accessio.BlobAccess
+}
+
+func NewS3Downloader(cache accessio.BlobAccess) *S3Downloader {
+	return &S3Downloader{
+		cache: cache,
+	}
 }
 
 // AWSCreds groups AWS related credential values together.
@@ -72,6 +80,7 @@ func (s *S3Downloader) Download(region, bucket, key, version string, creds *AWSC
 	downloader := manager.NewDownloader(client)
 
 	var blob []byte
+	// instead of this, use the cache from Uwe.
 	buf := manager.NewWriteAtBuffer(blob)
 	input := &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
