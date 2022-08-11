@@ -16,11 +16,17 @@ package s3_test
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/tmpcache"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"k8s.io/apimachinery/pkg/util/sets"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -37,8 +43,11 @@ type mockDownloader struct {
 	err      error
 }
 
-func (m *mockDownloader) Download(region, bucket, key, version string, creds *s3.AWSCreds) ([]byte, error) {
-	return m.expected, m.err
+func (m *mockDownloader) Download(w io.WriterAt) error {
+	if _, err := w.WriteAt(m.expected, 0); err != nil {
+		return fmt.Errorf("failed to write to mock writer: %w", err)
+	}
+	return m.err
 }
 
 var _ = Describe("Method", func() {
@@ -49,6 +58,8 @@ var _ = Describe("Method", func() {
 		expectedContent []byte
 		err             error
 		mcc             ocm.Context
+		fs              vfs.FileSystem
+		ctx             datacontext.Context
 	)
 	BeforeEach(func() {
 		expectedContent, err = os.ReadFile(filepath.Join("testdata", "repo.tar.gz"))
@@ -62,9 +73,16 @@ var _ = Describe("Method", func() {
 			"bucket",
 			"key",
 			"version",
+			"tar/gz",
 			downloader,
 		)
-		mcc = &mockCredContext{
+		fs, err = osfs.NewTempFileSystem()
+		Expect(err).To(Succeed())
+		ctx = datacontext.New(nil)
+		vfsattr.Set(ctx, fs)
+		tmpcache.Set(ctx, &tmpcache.Attribute{Path: "/tmp"})
+		mcc = &mockContext{
+			dataContext: ctx,
 			creds: &mockCredSource{
 				cred: &mockCredentials{
 					value: map[string]string{
@@ -78,9 +96,10 @@ var _ = Describe("Method", func() {
 
 	AfterEach(func() {
 		env.Cleanup()
+		vfs.Cleanup(fs)
 	})
 	It("downloads s3 objects", func() {
-		m, err := accessSpec.AccessMethod(&mockComponentVersionAccess{credContext: mcc})
+		m, err := accessSpec.AccessMethod(&mockComponentVersionAccess{context: mcc})
 		Expect(err).ToNot(HaveOccurred())
 		blob, err := m.Get()
 		Expect(err).ToNot(HaveOccurred())
@@ -96,11 +115,12 @@ var _ = Describe("Method", func() {
 				"bucket",
 				"key",
 				"version",
+				"tar/gz",
 				downloader,
 			)
 		})
 		It("errors", func() {
-			m, err := accessSpec.AccessMethod(&mockComponentVersionAccess{credContext: mcc})
+			m, err := accessSpec.AccessMethod(&mockComponentVersionAccess{context: mcc})
 			Expect(err).ToNot(HaveOccurred())
 			_, err = m.Get()
 			Expect(err).To(MatchError(ContainSubstring("object not found")))
@@ -110,20 +130,25 @@ var _ = Describe("Method", func() {
 
 type mockComponentVersionAccess struct {
 	ocm.ComponentVersionAccess
-	credContext ocm.Context
+	context ocm.Context
 }
 
 func (m *mockComponentVersionAccess) GetContext() ocm.Context {
-	return m.credContext
+	return m.context
 }
 
-type mockCredContext struct {
+type mockContext struct {
 	ocm.Context
-	creds credentials.Context
+	creds       credentials.Context
+	dataContext datacontext.Context
 }
 
-func (m *mockCredContext) CredentialsContext() credentials.Context {
+func (m *mockContext) CredentialsContext() credentials.Context {
 	return m.creds
+}
+
+func (m *mockContext) GetAttributes() datacontext.Attributes {
+	return m.dataContext.GetAttributes()
 }
 
 type mockCredSource struct {

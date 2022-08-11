@@ -21,10 +21,10 @@ import (
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -56,20 +56,23 @@ type AccessSpec struct {
 	// Version of the object.
 	// +optional
 	Version string `json:"version,omitempty"`
-
+	// MediaType defines the mime type of the object to download.
+	// +optional
+	MediaType  string `json:"mediaType,omitempty"`
 	downloader Downloader
 }
 
 var _ cpi.AccessSpec = (*AccessSpec)(nil)
 
 // New creates a new GitHub registry access spec version v1
-func New(region, bucket, key, version string, downloader Downloader) *AccessSpec {
+func New(region, bucket, key, version, mediaType string, downloader Downloader) *AccessSpec {
 	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		Region:              region,
 		Bucket:              bucket,
 		Key:                 key,
 		Version:             version,
+		MediaType:           mediaType,
 		downloader:          downloader,
 	}
 }
@@ -89,13 +92,10 @@ func (a *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMetho
 ////////////////////////////////////////////////////////////////////////////////
 
 type accessMethod struct {
-	lock         sync.Mutex
-	blob         artefactset.ArtefactBlob
-	comp         cpi.ComponentVersionAccess
-	spec         *AccessSpec
-	accessKeyID  string
-	accessSecret string
-	downloader   Downloader
+	lock            sync.Mutex
+	comp            cpi.ComponentVersionAccess
+	spec            *AccessSpec
+	cacheBlobAccess accessio.BlobAccess
 }
 
 var _ cpi.AccessMethod = (*accessMethod)(nil)
@@ -104,10 +104,6 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, erro
 	creds, err := getCreds(a, c.GetContext().CredentialsContext())
 	if err != nil {
 		return nil, fmt.Errorf("failed to get creds: %w", err)
-	}
-	var d Downloader = &S3Downloader{}
-	if a.downloader != nil {
-		d = a.downloader
 	}
 
 	var (
@@ -118,13 +114,28 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, erro
 		accessKeyID = creds.GetProperty(credentials.ATTR_AWS_ACCESS_KEY_ID)
 		accessSecret = creds.GetProperty(credentials.ATTR_AWS_SECRET_ACCESS_KEY)
 	}
-
+	var awsCreds *AWSCreds
+	if accessKeyID != "" {
+		awsCreds = &AWSCreds{
+			AccessKeyID:  accessKeyID,
+			AccessSecret: accessSecret,
+		}
+	}
+	var d Downloader = NewS3Downloader(a.Region, a.Bucket, a.Key, a.Version, awsCreds)
+	if a.downloader != nil {
+		d = a.downloader
+	}
+	w := accessio.NewWriteAtWriter(d.Download)
+	// don't change the spec, leave it empty.
+	mediaType := a.MediaType
+	if mediaType == "" {
+		mediaType = mime.MIME_OCTET
+	}
+	cacheBlobAccess := accessobj.CachedBlobAccessForWriter(c.GetContext(), mediaType, w)
 	return &accessMethod{
-		spec:         a,
-		comp:         c,
-		accessKeyID:  accessKeyID,
-		accessSecret: accessSecret,
-		downloader:   d,
+		spec:            a,
+		comp:            c,
+		cacheBlobAccess: cacheBlobAccess,
 	}, nil
 }
 
@@ -158,69 +169,21 @@ func (m *accessMethod) GetKind() string {
 	return Type
 }
 
-// Close should clean up all cached data if present.
-// Exp.: Cache the blob data.
 func (m *accessMethod) Close() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	if m.blob != nil {
-		tmp := m.blob
-		m.blob = nil
-		return tmp.Close()
-	}
-	return nil
+
+	return m.cacheBlobAccess.Close()
 }
 
 func (m *accessMethod) Get() ([]byte, error) {
-	blob, err := m.getBlob()
-	if err != nil {
-		return nil, err
-	}
-	return blob.Get()
+	return m.cacheBlobAccess.Get()
 }
 
 func (m *accessMethod) Reader() (io.ReadCloser, error) {
-	b, err := m.getBlob()
-	if err != nil {
-		return nil, err
-	}
-	r, err := b.Reader()
-	if err != nil {
-		return nil, err
-	}
-	return r, nil
+	return m.cacheBlobAccess.Reader()
 }
 
 func (m *accessMethod) MimeType() string {
-	return mime.MIME_TGZ
-}
-
-// TODO: Implement caching based on the SHA of the blob. If it is detected that that SHA already exists
-// return it. ( Use the virtual filesystem implementation so it can be in memory or via file system ).
-func (m *accessMethod) getBlob() (accessio.BlobAccess, error) {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-	if m.blob != nil {
-		return m.blob, nil
-	}
-	var creds *AWSCreds
-	if m.accessKeyID != "" {
-		fmt.Println("setting up key: ", m.accessKeyID)
-		creds = &AWSCreds{
-			AccessKeyID:  m.accessKeyID,
-			AccessSecret: m.accessSecret,
-		}
-	}
-	blob, err := m.downloader.Download(
-		m.spec.Region,
-		m.spec.Bucket,
-		m.spec.Key,
-		m.spec.Version,
-		creds,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to download object: %w", err)
-	}
-
-	return accessio.BlobAccessForData(mime.MIME_TGZ, blob), nil
+	return m.cacheBlobAccess.MimeType()
 }
