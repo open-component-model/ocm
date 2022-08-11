@@ -16,7 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	local "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig"
 	gardenercfg_cpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/vfsattr"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 )
 
 var _ = Describe("gardener config", func() {

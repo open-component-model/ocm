@@ -33,7 +33,7 @@ const ID_PORT = "port"
 // ID_PATHPREFIX is the path prefix below the host.
 const ID_PATHPREFIX = "pathprefix"
 
-// ID_SCHEME is the scheme prefix
+// ID_SCHEME is the scheme prefix.
 const ID_SCHEME = "scheme"
 
 func init() {

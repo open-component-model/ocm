@@ -15,7 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	gardenercfg_cpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/vfsattr"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
