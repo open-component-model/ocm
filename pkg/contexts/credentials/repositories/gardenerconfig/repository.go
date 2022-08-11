@@ -113,10 +113,9 @@ func (r *Repository) read(force bool) error {
 
 	for _, cred := range creds {
 		cred := cred
-		if _, ok := r.creds[cred.Name()]; ok {
-			return errors.Newf("credential with name %s already exist", cred.Name())
+		if _, ok := r.creds[cred.Name()]; !ok {
+			r.creds[cred.Name()] = cred.Properties()
 		}
-		r.creds[cred.Name()] = cred.Properties()
 		if r.propagateConsumerIdentity {
 			if log {
 				fmt.Printf("propagate id %q\n", cred.ConsumerIdentity())
@@ -173,8 +172,6 @@ func (r *Repository) getRawConfig() (io.ReadCloser, error) {
 		if err := ecbDecrypt(block, dst, srcBuf.Bytes()); err != nil {
 			return nil, err
 		}
-
-		fmt.Println(string(dst))
 
 		return io.NopCloser(bytes.NewBuffer(dst)), nil
 	case Plaintext:
