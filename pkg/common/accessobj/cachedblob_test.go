@@ -49,6 +49,28 @@ func (s *Source) Count() int {
 	return s.count
 }
 
+type WriteAtSource struct {
+	accessio.DataWriter
+	data  []byte
+	count int
+}
+
+func NewWriteAtSource(data string) *WriteAtSource {
+	w := &WriteAtSource{data: []byte(data), count: 0}
+	w.DataWriter = accessio.NewWriteAtWriter(w.write)
+	return w
+}
+
+func (s *WriteAtSource) write(writer io.WriterAt) error {
+	s.count++
+	_, err := writer.WriteAt(s.data, 0)
+	return err
+}
+
+func (s *WriteAtSource) Count() int {
+	return s.count
+}
+
 var _ = Describe("cached blob", func() {
 	var fs vfs.FileSystem
 	var ctx datacontext.Context
@@ -66,9 +88,9 @@ var _ = Describe("cached blob", func() {
 		vfs.Cleanup(fs)
 	})
 
-	It("reads source only once", func() {
+	It("reads data source only once", func() {
 		src := NewData("testdata")
-		blob := accessobj.NewCachedBlob(ctx, mime.MIME_TEXT, src)
+		blob := accessobj.CachedBlobAccessForDataAccess(ctx, mime.MIME_TEXT, src)
 
 		Expect(blob.Size()).To(Equal(int64(8)))
 		Expect(blob.Digest().String()).To(Equal("sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
@@ -84,4 +106,24 @@ var _ = Describe("cached blob", func() {
 		Expect(err).To(Succeed())
 		Expect(len(dir)).To(Equal(0))
 	})
+
+	It("reads write at source only once", func() {
+		src := NewWriteAtSource("testdata")
+		blob := accessobj.CachedBlobAccessForWriter(ctx, mime.MIME_TEXT, src)
+
+		Expect(blob.Size()).To(Equal(int64(8)))
+		Expect(blob.Digest().String()).To(Equal("sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
+		Expect(blob.Get()).To(Equal([]byte("testdata")))
+		Expect(blob.Get()).To(Equal([]byte("testdata")))
+		Expect(src.Count()).To(Equal(1))
+		dir, err := vfs.ReadDir(fs, "/tmp")
+		Expect(err).To(Succeed())
+		Expect(len(dir)).To(Equal(1))
+		Expect(blob.Close()).To(Succeed())
+
+		dir, err = vfs.ReadDir(fs, "/tmp")
+		Expect(err).To(Succeed())
+		Expect(len(dir)).To(Equal(0))
+	})
+
 })

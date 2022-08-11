@@ -343,6 +343,85 @@ func (b *blobNopCloser) Close() error {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type MultiViewBlobAccess struct {
+	refs   ReferencableCloser
+	access BlobAccess
+}
+
+func NewMultiViewBlobAccess(acc BlobAccess) *MultiViewBlobAccess {
+	return &MultiViewBlobAccess{
+		refs:   NewRefCloser(acc, true),
+		access: acc,
+	}
+}
+
+func (m *MultiViewBlobAccess) View() (BlobAccess, error) {
+	v, err := m.refs.View(false)
+	if err != nil {
+		return nil, err
+	}
+	return &blobAccessView{v, m.access}, nil
+}
+
+type blobAccessView struct {
+	view   CloserView
+	access BlobAccess
+}
+
+func (b *blobAccessView) Close() error {
+	return b.view.Close()
+}
+
+func (b *blobAccessView) IsClosed() bool {
+	return b.view.IsClosed()
+}
+
+func (b *blobAccessView) Get() (result []byte, err error) {
+	return result, b.view.Execute(func() error {
+		result, err = b.access.Get()
+		return err
+	})
+}
+
+func (b *blobAccessView) Reader() (result io.ReadCloser, err error) {
+	return result, b.view.Execute(func() error {
+		result, err = b.access.Reader()
+		return err
+	})
+}
+
+func (b *blobAccessView) Digest() (result digest.Digest) {
+	err := b.view.Execute(func() error {
+		result = b.access.Digest()
+		return nil
+	})
+	if err != nil {
+		return BLOB_UNKNOWN_DIGEST
+	}
+	return
+}
+
+func (b *blobAccessView) MimeType() string {
+	return b.access.MimeType()
+}
+
+func (b *blobAccessView) DigestKnown() bool {
+	return b.access.DigestKnown()
+}
+
+func (b *blobAccessView) Size() (result int64) {
+	err := b.view.Execute(func() error {
+		result = b.access.Size()
+		return nil
+	})
+	if err != nil {
+		return BLOB_UNKNOWN_SIZE
+	}
+	return
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type temporaryBlobAccess struct {
 	BlobAccess
 }

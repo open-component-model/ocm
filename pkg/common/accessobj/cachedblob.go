@@ -25,7 +25,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/tmpcache"
 )
 
-type CachedBlob struct {
+type CachedBlobAccess struct {
 	lock sync.Mutex
 	mime string
 
@@ -33,21 +33,25 @@ type CachedBlob struct {
 	path      string
 	digest    digest.Digest
 	size      int64
-	source    accessio.DataAccess
+	source    accessio.DataWriter
 	effective accessio.BlobAccess
 }
 
-var _ accessio.BlobAccess = (*CachedBlob)(nil)
+var _ accessio.BlobAccess = (*CachedBlobAccess)(nil)
 
-func NewCachedBlob(ctx datacontext.Context, mime string, src accessio.DataAccess) accessio.BlobAccess {
-	return &CachedBlob{
+func CachedBlobAccessForWriter(ctx datacontext.Context, mime string, src accessio.DataWriter) accessio.BlobAccess {
+	return &CachedBlobAccess{
 		source: src,
 		mime:   mime,
 		cache:  tmpcache.Get(ctx),
 	}
 }
 
-func (c *CachedBlob) setup() error {
+func CachedBlobAccessForDataAccess(ctx datacontext.Context, mime string, src accessio.DataAccess) accessio.BlobAccess {
+	return CachedBlobAccessForWriter(ctx, mime, accessio.NewDataAccessWriter(src))
+}
+
+func (c *CachedBlobAccess) setup() error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -58,26 +62,18 @@ func (c *CachedBlob) setup() error {
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 	c.path = file.Name()
 
-	r, err := c.source.Reader()
-	dr := accessio.NewDefaultDigestReader(r)
-	if err != nil {
-		return err
-	}
-	defer r.Close()
-	defer file.Close()
-	_, err = io.Copy(file, dr)
+	c.size, c.digest, err = c.source.WriteTo(file)
 	if err != nil {
 		return err
 	}
 	c.effective = accessio.BlobAccessForFile(c.mime, c.path, c.cache.Filesystem)
-	c.digest = dr.Digest()
-	c.size = dr.Size()
 	return err
 }
 
-func (c *CachedBlob) Get() ([]byte, error) {
+func (c *CachedBlobAccess) Get() ([]byte, error) {
 	err := c.setup()
 	if err != nil {
 		return nil, err
@@ -85,7 +81,7 @@ func (c *CachedBlob) Get() ([]byte, error) {
 	return c.effective.Get()
 }
 
-func (c *CachedBlob) Reader() (io.ReadCloser, error) {
+func (c *CachedBlobAccess) Reader() (io.ReadCloser, error) {
 	err := c.setup()
 	if err != nil {
 		return nil, err
@@ -93,7 +89,7 @@ func (c *CachedBlob) Reader() (io.ReadCloser, error) {
 	return c.effective.Reader()
 }
 
-func (c *CachedBlob) Close() error {
+func (c *CachedBlobAccess) Close() error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -106,26 +102,32 @@ func (c *CachedBlob) Close() error {
 	return err
 }
 
-func (c *CachedBlob) Digest() digest.Digest {
+func (c *CachedBlobAccess) Digest() digest.Digest {
 	err := c.setup()
 	if err != nil {
-		return ""
+		return accessio.BLOB_UNKNOWN_DIGEST
+	}
+	if c.digest == accessio.BLOB_UNKNOWN_DIGEST {
+		return c.effective.Digest()
 	}
 	return c.digest
 }
 
-func (c *CachedBlob) MimeType() string {
-	panic("implement me")
+func (c *CachedBlobAccess) MimeType() string {
+	return c.mime
 }
 
-func (c *CachedBlob) DigestKnown() bool {
+func (c *CachedBlobAccess) DigestKnown() bool {
 	return c.effective != nil
 }
 
-func (c *CachedBlob) Size() int64 {
+func (c *CachedBlobAccess) Size() int64 {
 	err := c.setup()
 	if err != nil {
-		return -1
+		return accessio.BLOB_UNKNOWN_SIZE
+	}
+	if c.size == accessio.BLOB_UNKNOWN_SIZE {
+		return c.effective.Size()
 	}
 	return c.size
 }

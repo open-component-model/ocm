@@ -69,6 +69,8 @@ type CloserView interface {
 	Finalize() error
 
 	Closer() io.Closer
+
+	Execute(f func() error) error
 }
 
 type view struct {
@@ -79,6 +81,15 @@ type view struct {
 }
 
 var _ CloserView = (*view)(nil)
+
+func (v *view) Execute(f func() error) error {
+	v.lock.Lock()
+	defer v.lock.Unlock()
+	if v.closed {
+		return ErrClosed
+	}
+	return f()
+}
 
 func (v *view) Release() error {
 	v.lock.Lock()
