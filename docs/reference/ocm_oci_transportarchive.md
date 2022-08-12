@@ -1,3 +1,15 @@
+
+---
+title: ocm_oci_transportarchive
+url: /docs/cli-reference/ocm_oci_transportarchive/
+date: 2022-08-12T11:14:49+01:00
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
 ## ocm oci transportarchive &mdash; Commands Acting On OCI View Of A Common Transport Archive
 
 ### Synopsis

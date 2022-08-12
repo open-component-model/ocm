@@ -1,3 +1,15 @@
+
+---
+title: ocm_componentarchive
+url: /docs/cli-reference/ocm_componentarchive/
+date: 2022-08-12T11:14:49+01:00
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
 ## ocm componentarchive &mdash; Commands Acting On Component Archives
 
 ### Synopsis

@@ -1,3 +1,15 @@
+
+---
+title: ocm_create_rsakeypair
+url: /docs/cli-reference/ocm_create_rsakeypair/
+date: 2022-08-12T11:14:49+01:00
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
 ## ocm create rsakeypair &mdash; Create RSA Public Key Pair
 
 ### Synopsis

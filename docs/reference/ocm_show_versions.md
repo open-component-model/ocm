@@ -1,3 +1,15 @@
+
+---
+title: ocm_show_versions
+url: /docs/cli-reference/ocm_show_versions/
+date: 2022-08-12T11:14:49+01:00
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
 ## ocm show versions &mdash; Show Dedicated Versions (Semver Compliant)
 
 ### Synopsis

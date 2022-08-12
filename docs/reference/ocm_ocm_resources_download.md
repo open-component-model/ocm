@@ -1,3 +1,15 @@
+
+---
+title: ocm_ocm_resources_download
+url: /docs/cli-reference/ocm_ocm_resources_download/
+date: 2022-08-12T11:14:49+01:00
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
 ## ocm ocm resources download &mdash; Download Resources Of A Component Version
 
 ### Synopsis

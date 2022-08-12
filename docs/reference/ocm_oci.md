@@ -1,3 +1,15 @@
+
+---
+title: ocm_oci
+url: /docs/cli-reference/ocm_oci/
+date: 2022-08-12T11:14:49+01:00
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
 ## ocm oci &mdash; Dedicated Command Flavors For The OCI Layer
 
 ### Synopsis

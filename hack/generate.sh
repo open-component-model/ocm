@@ -10,3 +10,5 @@ set -e
 echo "> Generate"
 
 GO111MODULE=on go generate -mod=mod $@
+
+cp -R ./docs/reference/* ./site/content/en/docs/cli-reference

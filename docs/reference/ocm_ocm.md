@@ -1,3 +1,15 @@
+
+---
+title: ocm_ocm
+url: /docs/cli-reference/ocm_ocm/
+date: 2022-08-12T11:14:49+01:00
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
 ## ocm ocm &mdash; Dedicated Command Flavors For The Open Component Model
 
 ### Synopsis

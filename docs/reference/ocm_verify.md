@@ -1,3 +1,15 @@
+
+---
+title: ocm_verify
+url: /docs/cli-reference/ocm_verify/
+date: 2022-08-12T11:14:49+01:00
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
 ## ocm verify &mdash; Verify Component Version Signatures
 
 ### Synopsis

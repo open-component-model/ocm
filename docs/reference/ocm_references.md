@@ -1,3 +1,15 @@
+
+---
+title: ocm_references
+url: /docs/cli-reference/ocm_references/
+date: 2022-08-12T11:14:49+01:00
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
 ## ocm references &mdash; Commands Related To Component References In Component Versions
 
 ### Synopsis

@@ -1,3 +1,15 @@
+
+---
+title: ocm_sources
+url: /docs/cli-reference/ocm_sources/
+date: 2022-08-12T11:14:49+01:00
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
 ## ocm sources &mdash; Commands Acting On Component Sources
 
 ### Synopsis

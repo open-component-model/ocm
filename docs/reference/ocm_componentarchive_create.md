@@ -1,3 +1,15 @@
+
+---
+title: ocm_componentarchive_create
+url: /docs/cli-reference/ocm_componentarchive_create/
+date: 2022-08-12T11:14:49+01:00
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
 ## ocm componentarchive create &mdash; Create New Component Archive
 
 ### Synopsis

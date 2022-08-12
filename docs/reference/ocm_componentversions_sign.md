@@ -1,3 +1,15 @@
+
+---
+title: ocm_componentversions_sign
+url: /docs/cli-reference/ocm_componentversions_sign/
+date: 2022-08-12T11:14:49+01:00
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
 ## ocm componentversions sign &mdash; Sign Component Version
 
 ### Synopsis

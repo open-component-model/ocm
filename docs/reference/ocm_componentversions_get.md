@@ -1,3 +1,15 @@
+
+---
+title: ocm_componentversions_get
+url: /docs/cli-reference/ocm_componentversions_get/
+date: 2022-08-12T11:14:49+01:00
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
 ## ocm componentversions get &mdash; Get Component Version
 
 ### Synopsis

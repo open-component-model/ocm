@@ -1,3 +1,15 @@
+
+---
+title: ocm_get_resources
+url: /docs/cli-reference/ocm_get_resources/
+date: 2022-08-12T11:14:49+01:00
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
 ## ocm get resources &mdash; Get Resources Of A Component Version
 
 ### Synopsis

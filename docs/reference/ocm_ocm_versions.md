@@ -1,3 +1,15 @@
+
+---
+title: ocm_ocm_versions
+url: /docs/cli-reference/ocm_ocm_versions/
+date: 2022-08-12T11:14:49+01:00
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
 ## ocm ocm versions &mdash; Commands Acting On Component Version Names
 
 ### Synopsis

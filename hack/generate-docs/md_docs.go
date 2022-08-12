@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -26,6 +27,20 @@ import (
 	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/spf13/cobra"
 )
+
+const fmTmpl = `
+---
+title: %s
+url: %s
+date: %s
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
+`
 
 func printOptions(buf *bytes.Buffer, cmd *cobra.Command, name string) error {
 	flags := cmd.NonInheritedFlags()
@@ -150,8 +165,15 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 // help output will be in the file `cmd-sub-third.1`.
 func GenMarkdownTree(cmd *cobra.Command, dir string) error {
 	identity := cobrautils.LinkForPath
-	emptyStr := func(s string) string { return "" }
-	return GenMarkdownTreeCustom(cmd, dir, emptyStr, identity)
+	frontmatter := func(filename string) string {
+		now := time.Now().Format(time.RFC3339)
+		name := filepath.Base(filename)
+		base := strings.TrimSuffix(name, path.Ext(name))
+		url := "/docs/cli-reference/" + strings.ToLower(base) + "/"
+		return fmt.Sprintf(fmTmpl, base, url, now)
+	}
+
+	return GenMarkdownTreeCustom(cmd, dir, frontmatter, identity)
 }
 
 // GenMarkdownTreeCustom is the the same as GenMarkdownTree, but

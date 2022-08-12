@@ -1,3 +1,15 @@
+
+---
+title: ocm
+url: /docs/cli-reference/ocm/
+date: 2022-08-12T11:14:49+01:00
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
 ## ocm &mdash; Open Component Model Command Line Client
 
 ### Synopsis

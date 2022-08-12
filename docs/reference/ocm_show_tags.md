@@ -1,3 +1,15 @@
+
+---
+title: ocm_show_tags
+url: /docs/cli-reference/ocm_show_tags/
+date: 2022-08-12T11:14:49+01:00
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
 ## ocm show tags &mdash; Show Dedicated Tags Of OCI Artefacts
 
 ### Synopsis

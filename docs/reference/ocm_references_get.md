@@ -1,3 +1,15 @@
+
+---
+title: ocm_references_get
+url: /docs/cli-reference/ocm_references_get/
+date: 2022-08-12T11:14:49+01:00
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
 ## ocm references get &mdash; Get References Of A Component Version
 
 ### Synopsis
