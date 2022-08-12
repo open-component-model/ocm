@@ -58,6 +58,10 @@ func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyTypeV1, &AccessSpec{}))
 }
 
+func Is(spec cpi.AccessSpec) bool {
+	return spec != nil && spec.GetKind() == Type || spec.GetKind() == LegacyType
+}
+
 // AccessSpec describes the access for a GitHub registry.
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
@@ -65,11 +69,11 @@ type AccessSpec struct {
 	// RepoUrl is the repository URL, with host, owner and repository
 	RepoURL string `json:"repoUrl"`
 
-	// APIHostname is an optional different hostname for accessing the github REST API
+	// APIHostname is an optional different hostname for accessing the GitHub REST API
 	// for enterprise installations
 	APIHostname string `json:"apiHostname,omitempty"`
 
-	// Commit defines the hash of the commit.
+	// Commit defines the hash of the commit
 	Commit string `json:"commit"`
 
 	client     *http.Client
@@ -95,19 +99,12 @@ func WithDownloader(downloader downloader.Downloader) AccessSpecOptions {
 	}
 }
 
-// New creates a new GitHub registry access spec version v1
-func New(hostname string, port int, repo, owner, commit string, opts ...AccessSpecOptions) *AccessSpec {
-	if hostname == "" {
-		hostname = "github.com"
-	}
-	p := ""
-	if port != 0 {
-		p = fmt.Sprintf(":%d", port)
-	}
-	url := fmt.Sprintf("%s%s/%s/%s", hostname, p, owner, repo)
+// New creates a new GitHub registry access spec version v1.
+func New(repoURL, apiHostname, commit string, opts ...AccessSpecOptions) *AccessSpec {
 	s := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
-		RepoURL:             url,
+		RepoURL:             repoURL,
+		APIHostname:         apiHostname,
 		Commit:              commit,
 	}
 	for _, o := range opts {
@@ -128,7 +125,20 @@ func (a *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMetho
 	return newMethod(c, a)
 }
 
-////////////////////////////////////////////////////////////////////////////////
+func (a *AccessSpec) createHTTPClient(token string) *http.Client {
+	if token != "" {
+		ts := oauth2.StaticTokenSource(
+			&oauth2.Token{AccessToken: token},
+		)
+		ctx := context.Background()
+		// set up the test client if we have one
+		if a.client != nil {
+			ctx = context.WithValue(ctx, oauth2.HTTPClient, a.client)
+		}
+		return oauth2.NewClient(ctx, ts)
+	}
+	return a.client
+}
 
 // RepositoryService defines capabilities of a GitHub repository.
 type RepositoryService interface {
@@ -148,13 +158,8 @@ type accessMethod struct {
 var _ cpi.AccessMethod = (*accessMethod)(nil)
 
 func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (cpi.AccessMethod, error) {
-	if len(a.Commit) != ShaLength {
-		return nil, fmt.Errorf("commit is not a SHA")
-	}
-	for _, c := range a.Commit {
-		if !unicode.IsOneOf([]*unicode.RangeTable{unicode.Letter, unicode.Digit}, c) {
-			return nil, fmt.Errorf("commit contains invalid characters for a SHA")
-		}
+	if err := validateCommit(a.Commit); err != nil {
+		return nil, fmt.Errorf("failed to validate commit: %w", err)
 	}
 
 	unparsed := a.RepoURL
@@ -178,15 +183,8 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (cpi.AccessMethod, e
 	}
 
 	var client *github.Client
+	httpclient := a.createHTTPClient(token)
 
-	httpclient := a.client
-
-	if token != "" && httpclient == nil {
-		ts := oauth2.StaticTokenSource(
-			&oauth2.Token{AccessToken: token},
-		)
-		httpclient = oauth2.NewClient(context.Background(), ts)
-	}
 	if u.Hostname() == "github.com" {
 		client = github.NewClient(httpclient)
 	} else {
@@ -224,6 +222,18 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (cpi.AccessMethod, e
 	cacheBlobAccess := accessobj.CachedBlobAccessForWriter(c.GetContext(), method.MimeType(), w)
 	method.cacheBlobAccess = cacheBlobAccess
 	return method, nil
+}
+
+func validateCommit(commit string) error {
+	if len(commit) != ShaLength {
+		return fmt.Errorf("commit is not a SHA")
+	}
+	for _, c := range commit {
+		if !unicode.IsOneOf([]*unicode.RangeTable{unicode.Letter, unicode.Digit}, c) {
+			return fmt.Errorf("commit contains invalid characters for a SHA")
+		}
+	}
+	return nil
 }
 
 func getCreds(hostname, port, path string, cctx credentials.Context) (string, error) {
@@ -278,15 +288,6 @@ func (m *accessMethod) MimeType() string {
 }
 
 func (m *accessMethod) getDownloadLink() (string, error) {
-	if len(m.spec.Commit) != ShaLength {
-		return "", fmt.Errorf("commit is not a SHA")
-	}
-	for _, c := range m.spec.Commit {
-		if !unicode.IsOneOf([]*unicode.RangeTable{unicode.Letter, unicode.Digit}, c) {
-			return "", fmt.Errorf("commit contains invalid characters for a SHA")
-		}
-	}
-
 	link, resp, err := m.repositoryService.GetArchiveLink(context.Background(), m.owner, m.repo, github.Tarball, &github.RepositoryContentGetOptions{
 		Ref: m.spec.Commit,
 	}, true)

@@ -74,6 +74,7 @@ func (s *Downloader) Download(w io.WriterAt) error {
 	}
 
 	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
+		// Pass in creds because of https://github.com/aws/aws-sdk-go-v2/issues/1797
 		o.Credentials = awsCred
 		o.Region = s.region
 	})
