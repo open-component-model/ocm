@@ -22,16 +22,20 @@ import (
 	"os"
 	"path/filepath"
 
-	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
-
 	"k8s.io/apimachinery/pkg/util/sets"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/tmpcache"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
+	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	me "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/github"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -40,8 +44,15 @@ import (
 const doPrivate = false
 
 type mockDownloader struct {
-	expected        []byte
-	shouldMatchLink string
+	expected []byte
+	err      error
+}
+
+func (m *mockDownloader) Download(w io.WriterAt) error {
+	if _, err := w.WriteAt(m.expected, 0); err != nil {
+		return fmt.Errorf("failed to write to mock writer: %w", err)
+	}
+	return m.err
 }
 
 // RoundTripFunc .
@@ -58,14 +69,6 @@ func NewTestClient(fn RoundTripFunc) *http.Client {
 		Transport: fn,
 	}
 
-}
-
-func (m *mockDownloader) Download(link string) ([]byte, error) {
-	if link != m.shouldMatchLink {
-		return nil, fmt.Errorf("link mismatch; got: %s want: %s", link, m.shouldMatchLink)
-	}
-
-	return m.expected, nil
 }
 
 func Configure(ctx ocm.Context) {
@@ -86,6 +89,8 @@ var _ = Describe("Method", func() {
 		testClient          *http.Client
 		defaultLink         string
 		accessSpec          *me.AccessSpec
+		dctx                datacontext.Context
+		fs                  vfs.FileSystem
 	)
 
 	BeforeEach(func() {
@@ -113,10 +118,18 @@ var _ = Describe("Method", func() {
 			"7b1445755ee2527f0bf80ef9eeb59a5d2e6e3e1f",
 			me.WithClient(testClient),
 			me.WithDownloader(&mockDownloader{
-				expected:        expectedBlobContent,
-				shouldMatchLink: defaultLink,
+				expected: expectedBlobContent,
 			}),
 		)
+		fs, err = osfs.NewTempFileSystem()
+		Expect(err).To(Succeed())
+		dctx = datacontext.New(nil)
+		vfsattr.Set(ctx, fs)
+		tmpcache.Set(ctx, &tmpcache.Attribute{Path: "/tmp"})
+	})
+
+	AfterEach(func() {
+		vfs.Cleanup(fs)
 	})
 
 	It("downloads public spiff commit", func() {
@@ -175,8 +188,7 @@ var _ = Describe("Method", func() {
 				"not-a-sha",
 				me.WithClient(testClient),
 				me.WithDownloader(&mockDownloader{
-					expected:        expectedBlobContent,
-					shouldMatchLink: defaultLink,
+					expected: expectedBlobContent,
 				}),
 			)
 			m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
@@ -197,8 +209,7 @@ var _ = Describe("Method", func() {
 				"refs/heads/veryinteresting_branch_namess",
 				me.WithClient(testClient),
 				me.WithDownloader(&mockDownloader{
-					expected:        expectedBlobContent,
-					shouldMatchLink: defaultLink,
+					expected: expectedBlobContent,
 				}),
 			)
 			m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
@@ -212,7 +223,8 @@ var _ = Describe("Method", func() {
 	When("credentials are provided", func() {
 		It("can use those to access private repos", func() {
 			called := false
-			mcc := &mockCredContext{
+			mcc := &mockContext{
+				dataContext: dctx,
 				creds: &mockCredSource{
 					cred: &mockCredentials{
 						value: func() string {
@@ -235,7 +247,7 @@ var _ = Describe("Method", func() {
 	When("GetCredentialsForConsumer returns an error", func() {
 		It("errors", func() {
 			called := false
-			mcc := &mockCredContext{
+			mcc := &mockContext{
 				creds: &mockCredSource{
 					cred: &mockCredentials{
 						value: func() string {
@@ -264,13 +276,18 @@ func (m *mockComponentVersionAccess) GetContext() ocm.Context {
 	return m.credContext
 }
 
-type mockCredContext struct {
+type mockContext struct {
 	ocm.Context
-	creds credentials.Context
+	creds       credentials.Context
+	dataContext datacontext.Context
 }
 
-func (m *mockCredContext) CredentialsContext() credentials.Context {
+func (m *mockContext) CredentialsContext() credentials.Context {
 	return m.creds
+}
+
+func (m *mockContext) GetAttributes() datacontext.Attributes {
+	return m.dataContext.GetAttributes()
 }
 
 type mockCredSource struct {

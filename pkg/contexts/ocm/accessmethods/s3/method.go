@@ -25,6 +25,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/downloader"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/downloader/s3"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -59,13 +61,13 @@ type AccessSpec struct {
 	// MediaType defines the mime type of the object to download.
 	// +optional
 	MediaType  string `json:"mediaType,omitempty"`
-	downloader Downloader
+	downloader downloader.Downloader
 }
 
 var _ cpi.AccessSpec = (*AccessSpec)(nil)
 
 // New creates a new GitHub registry access spec version v1
-func New(region, bucket, key, version, mediaType string, downloader Downloader) *AccessSpec {
+func New(region, bucket, key, version, mediaType string, downloader downloader.Downloader) *AccessSpec {
 	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		Region:              region,
@@ -114,14 +116,14 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, erro
 		accessKeyID = creds.GetProperty(credentials.ATTR_AWS_ACCESS_KEY_ID)
 		accessSecret = creds.GetProperty(credentials.ATTR_AWS_SECRET_ACCESS_KEY)
 	}
-	var awsCreds *AWSCreds
+	var awsCreds *s3.AWSCreds
 	if accessKeyID != "" {
-		awsCreds = &AWSCreds{
+		awsCreds = &s3.AWSCreds{
 			AccessKeyID:  accessKeyID,
 			AccessSecret: accessSecret,
 		}
 	}
-	var d Downloader = NewS3Downloader(a.Region, a.Bucket, a.Key, a.Version, awsCreds)
+	var d downloader.Downloader = s3.NewDownloader(a.Region, a.Bucket, a.Key, a.Version, awsCreds)
 	if a.downloader != nil {
 		d = a.downloader
 	}

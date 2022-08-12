@@ -25,13 +25,15 @@ import (
 	"unicode"
 
 	"github.com/google/go-github/v45/github"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/downloader"
+	hd "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/downloader/http"
 	"golang.org/x/oauth2"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -56,10 +58,6 @@ func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyTypeV1, &AccessSpec{}))
 }
 
-func Is(spec cpi.AccessSpec) bool {
-	return spec != nil && spec.GetKind() == Type || spec.GetKind() == LegacyType
-}
-
 // AccessSpec describes the access for a GitHub registry.
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
@@ -71,26 +69,17 @@ type AccessSpec struct {
 	// for enterprise installations
 	APIHostname string `json:"apiHostname,omitempty"`
 
-	// Ref
-	Ref string `json:"ref,omitempty"`
 	// Commit defines the hash of the commit.
 	Commit string `json:"commit"`
 
 	client     *http.Client
-	downloader Downloader
+	downloader downloader.Downloader
 }
 
 var _ cpi.AccessSpec = (*AccessSpec)(nil)
 
 // AccessSpecOptions defines a set of options which can be applied to the access spec.
 type AccessSpecOptions func(s *AccessSpec)
-
-// WithRef creates an access spec with a specified reference field
-func WithRef(ref string) AccessSpecOptions {
-	return func(s *AccessSpec) {
-		s.Ref = ref
-	}
-}
 
 // WithClient creates an access spec with a custom http client.
 func WithClient(client *http.Client) AccessSpecOptions {
@@ -100,7 +89,7 @@ func WithClient(client *http.Client) AccessSpecOptions {
 }
 
 // WithDownloader defines a client with a custom downloader.
-func WithDownloader(downloader Downloader) AccessSpecOptions {
+func WithDownloader(downloader downloader.Downloader) AccessSpecOptions {
 	return func(s *AccessSpec) {
 		s.downloader = downloader
 	}
@@ -148,13 +137,12 @@ type RepositoryService interface {
 
 type accessMethod struct {
 	lock              sync.Mutex
-	blob              artefactset.ArtefactBlob
 	compvers          cpi.ComponentVersionAccess
 	spec              *AccessSpec
 	repositoryService RepositoryService
 	owner             string
 	repo              string
-	downloader        Downloader
+	cacheBlobAccess   accessio.BlobAccess
 }
 
 var _ cpi.AccessMethod = (*accessMethod)(nil)
@@ -214,18 +202,28 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (cpi.AccessMethod, e
 		}
 	}
 
-	var downloader Downloader = &HTTPDownloader{}
-	if a.downloader != nil {
-		downloader = a.downloader
-	}
-	return &accessMethod{
+	method := &accessMethod{
 		spec:              a,
 		compvers:          c,
 		owner:             pathcomps[0],
 		repo:              pathcomps[1],
 		repositoryService: client.Repositories,
-		downloader:        downloader,
-	}, nil
+	}
+
+	link, err := method.getDownloadLink()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get download link: %w", err)
+	}
+
+	var d downloader.Downloader = hd.NewDownloader(link)
+	if a.downloader != nil {
+		d = a.downloader
+	}
+
+	w := accessio.NewWriteAtWriter(d.Download)
+	cacheBlobAccess := accessobj.CachedBlobAccessForWriter(c.GetContext(), method.MimeType(), w)
+	method.cacheBlobAccess = cacheBlobAccess
+	return method, nil
 }
 
 func getCreds(hostname, port, path string, cctx credentials.Context) (string, error) {
@@ -263,61 +261,29 @@ func (m *accessMethod) GetKind() string {
 func (m *accessMethod) Close() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	if m.blob != nil {
-		tmp := m.blob
-		m.blob = nil
-		return tmp.Close()
-	}
-	return nil
+
+	return m.cacheBlobAccess.Close()
 }
 
 func (m *accessMethod) Get() ([]byte, error) {
-	blob, err := m.getBlob()
-	if err != nil {
-		return nil, err
-	}
-	return blob.Get()
+	return m.cacheBlobAccess.Get()
 }
 
 func (m *accessMethod) Reader() (io.ReadCloser, error) {
-	b, err := m.getBlob()
-	if err != nil {
-		return nil, err
-	}
-	r, err := b.Reader()
-	if err != nil {
-		return nil, err
-	}
-	return r, nil
+	return m.cacheBlobAccess.Reader()
 }
 
 func (m *accessMethod) MimeType() string {
 	return mime.MIME_TGZ
 }
 
-// TODO: Implement caching based on the SHA of the blob. If it is detected that that SHA already exists
-// return it. ( Use the virtual filesystem implementation so it can be in memory or via file system ).
-func (m *accessMethod) getBlob() (accessio.BlobAccess, error) {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-	if m.blob != nil {
-		return m.blob, nil
-	}
-	blob, err := m.downloadArchive()
-	if err != nil {
-		return nil, err
-	}
-
-	return accessio.BlobAccessForData(mime.MIME_TGZ, blob), nil
-}
-
-func (m *accessMethod) downloadArchive() ([]byte, error) {
+func (m *accessMethod) getDownloadLink() (string, error) {
 	if len(m.spec.Commit) != ShaLength {
-		return nil, fmt.Errorf("commit is not a SHA")
+		return "", fmt.Errorf("commit is not a SHA")
 	}
 	for _, c := range m.spec.Commit {
 		if !unicode.IsOneOf([]*unicode.RangeTable{unicode.Letter, unicode.Digit}, c) {
-			return nil, fmt.Errorf("commit contains invalid characters for a SHA")
+			return "", fmt.Errorf("commit contains invalid characters for a SHA")
 		}
 	}
 
@@ -325,12 +291,9 @@ func (m *accessMethod) downloadArchive() ([]byte, error) {
 		Ref: m.spec.Commit,
 	}, true)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			fmt.Println("failed to close body: ", err)
-		}
-	}()
-	return m.downloader.Download(link.String())
+	defer resp.Body.Close()
+
+	return link.String(), nil
 }

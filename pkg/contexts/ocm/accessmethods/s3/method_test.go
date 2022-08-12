@@ -27,6 +27,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/tmpcache"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/downloader"
 	"k8s.io/apimachinery/pkg/util/sets"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -54,7 +55,7 @@ var _ = Describe("Method", func() {
 	var (
 		env             *Builder
 		accessSpec      *s3.AccessSpec
-		downloader      s3.Downloader
+		downloader      downloader.Downloader
 		expectedContent []byte
 		err             error
 		mcc             ocm.Context
