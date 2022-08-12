@@ -1,0 +1,42 @@
+
+---
+title: ocm_create_transportarchive
+url: /docs/cli-reference/ocm_create_transportarchive/
+date: 2022-08-12T11:14:49+01:00
+draft: false
+images: []
+menu:
+  docs:
+    parent: cli-reference
+toc: true
+---
+## ocm create transportarchive &mdash; Create New OCI/OCM Transport  Archive
+
+### Synopsis
+
+```
+ocm create transportarchive [<options>] <path>
+```
+
+### Options
+
+```
+  -f, --force         remove existing content
+  -h, --help          help for transportarchive
+  -t, --type string   archive format (default "directory")
+```
+
+### Description
+
+
+Create a new empty OCM/OCI transport archive. This might be either a directory prepared
+to host artefact content or a tar/tgz file.
+
+
+### SEE ALSO
+
+##### Parents
+
+* [ocm create](ocm_create.md)	 - Create transport or component archive
+* [ocm](ocm.md)	 - Open Component Model command line client
+

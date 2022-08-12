@@ -1,0 +1,20 @@
+[en]
+  languageName = "English"
+  contentDir = "content/en"
+  weight = 10
+  [en.params]
+    languageISO = "EN"
+    languageTag = "en-US"
+
+[de]
+  languageName = "German"
+  contentDir = "content/de"
+  weight = 15
+  [de.params]
+    languageISO = "DE"
+    languageTag = "de-DE"
+    # titleAddition =
+    # description =
+    # titleHome =
+    # footer =
+    # alertText =
