@@ -59,8 +59,8 @@ func (h Handler) ParseConfig(configReader io.Reader) ([]gardenercfg_cpi.Credenti
 			port = parsedHost.Port()
 		}
 
-		for _, imgPrefix := range credential.ImageReferencePrefixes {
-			parsedImgPrefix, err := parseImageRef(imgPrefix)
+		for _, imgRef := range credential.ImageReferencePrefixes {
+			parsedImgPrefix, err := parseImageRef(imgRef)
 			if err != nil {
 				return nil, fmt.Errorf("unable to parse image prefix: %w", err)
 			}
