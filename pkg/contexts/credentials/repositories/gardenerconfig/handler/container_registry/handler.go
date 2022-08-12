@@ -45,10 +45,10 @@ func (h Handler) ParseConfig(configReader io.Reader) ([]gardenercfg_cpi.Credenti
 
 	creds := []gardenercfg_cpi.Credential{}
 	for credentialName, credential := range config.ContainerRegistry {
-                 var (
-                 		scheme string
-                 		port string
-                 )
+		var (
+			scheme string
+			port   string
+		)
 		if credential.Host != "" {
 			if !strings.Contains(credential.Host, "://") {
 				credential.Host = "dummy://" + credential.Host
