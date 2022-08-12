@@ -15,7 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	local "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig"
-	gardenercfg_cpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
+	gardenercfgcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 )
 
@@ -61,7 +61,7 @@ var _ = Describe("gardener config", func() {
 
 		parsedSpec := spec.(*local.RepositorySpec)
 		Expect(parsedSpec.URL).To(Equal("http://localhost:8080/container_registry"))
-		Expect(parsedSpec.ConfigType).To(Equal(gardenercfg_cpi.ContainerRegistry))
+		Expect(parsedSpec.ConfigType).To(Equal(gardenercfgcpi.ContainerRegistry))
 		Expect(parsedSpec.Cipher).To(Equal(local.Plaintext))
 		Expect(parsedSpec.Key).To(BeNil())
 	})
@@ -92,7 +92,7 @@ var _ = Describe("gardener config", func() {
 		repo, err := local.NewRepository(
 			defaultContext,
 			svr.URL+"/container_registry",
-			gardenercfg_cpi.ContainerRegistry,
+			gardenercfgcpi.ContainerRegistry,
 			local.Plaintext,
 			nil,
 			true,
@@ -117,7 +117,7 @@ var _ = Describe("gardener config", func() {
 		repo, err := local.NewRepository(
 			defaultContext,
 			svr.URL+"/container_registry",
-			gardenercfg_cpi.ContainerRegistry,
+			gardenercfgcpi.ContainerRegistry,
 			local.AESECB,
 			[]byte(encryptionKey),
 			true,
@@ -147,7 +147,7 @@ var _ = Describe("gardener config", func() {
 		repo, err := local.NewRepository(
 			defaultContext,
 			"file://"+filename,
-			gardenercfg_cpi.ContainerRegistry,
+			gardenercfgcpi.ContainerRegistry,
 			local.Plaintext,
 			nil,
 			true,

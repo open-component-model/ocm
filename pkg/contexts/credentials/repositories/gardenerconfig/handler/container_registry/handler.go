@@ -9,12 +9,12 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	gardenercfg_cpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
+	gardenercfgcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 )
 
 func init() {
-	gardenercfg_cpi.RegisterHandler(Handler{})
+	gardenercfgcpi.RegisterHandler(Handler{})
 }
 
 // config is the struct that describes the gardener config data structure
@@ -33,17 +33,17 @@ type containerRegistryCredentials struct {
 
 type Handler struct{}
 
-func (h Handler) ConfigType() gardenercfg_cpi.ConfigType {
-	return gardenercfg_cpi.ContainerRegistry
+func (h Handler) ConfigType() gardenercfgcpi.ConfigType {
+	return gardenercfgcpi.ContainerRegistry
 }
 
-func (h Handler) ParseConfig(configReader io.Reader) ([]gardenercfg_cpi.Credential, error) {
+func (h Handler) ParseConfig(configReader io.Reader) ([]gardenercfgcpi.Credential, error) {
 	config := &config{}
 	if err := json.NewDecoder(configReader).Decode(&config); err != nil {
 		return nil, fmt.Errorf("unable to unmarshal config: %w", err)
 	}
 
-	creds := []gardenercfg_cpi.Credential{}
+	creds := []gardenercfgcpi.Credential{}
 	for credentialName, credential := range config.ContainerRegistry {
 		var (
 			scheme string

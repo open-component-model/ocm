@@ -2,7 +2,7 @@ package gardenerconfig
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	gardenercfg_cpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
+	gardenercfgcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -19,15 +19,15 @@ func init() {
 // RepositorySpec describes a secret server based credential repository interface.
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
-	URL                         string                     `json:"url"`
-	ConfigType                  gardenercfg_cpi.ConfigType `json:"configType"`
-	Cipher                      Cipher                     `json:"cipher"`
-	Key                         []byte                     `json:"key"`
-	PropagateConsumerIdentity   bool                       `json:"propagateConsumerIdentity"`
+	URL                         string                    `json:"url"`
+	ConfigType                  gardenercfgcpi.ConfigType `json:"configType"`
+	Cipher                      Cipher                    `json:"cipher"`
+	Key                         []byte                    `json:"key"`
+	PropagateConsumerIdentity   bool                      `json:"propagateConsumerIdentity"`
 }
 
 // NewRepositorySpec creates a new memory RepositorySpec
-func NewRepositorySpec(url string, configType gardenercfg_cpi.ConfigType, cipher Cipher, key []byte, propagateConsumerIdentity bool) *RepositorySpec {
+func NewRepositorySpec(url string, configType gardenercfgcpi.ConfigType, cipher Cipher, key []byte, propagateConsumerIdentity bool) *RepositorySpec {
 	return &RepositorySpec{
 		ObjectVersionedType:       runtime.NewVersionedObjectType(RepositoryType),
 		URL:                       url,

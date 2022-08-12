@@ -14,12 +14,10 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	gardenercfg_cpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
+	gardenercfgcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
-
-var log = false
 
 type Cipher string
 
@@ -32,7 +30,7 @@ type Repository struct {
 	ctx                       cpi.Context
 	lock                      sync.RWMutex
 	url                       string
-	configType                gardenercfg_cpi.ConfigType
+	configType                gardenercfgcpi.ConfigType
 	cipher                    Cipher
 	key                       []byte
 	propagateConsumerIdentity bool
@@ -40,7 +38,7 @@ type Repository struct {
 	fs                        vfs.FileSystem
 }
 
-func NewRepository(ctx cpi.Context, url string, configType gardenercfg_cpi.ConfigType, cipher Cipher, key []byte, propagateConsumerIdentity bool) (*Repository, error) {
+func NewRepository(ctx cpi.Context, url string, configType gardenercfgcpi.ConfigType, cipher Cipher, key []byte, propagateConsumerIdentity bool) (*Repository, error) {
 	r := &Repository{
 		ctx:                       ctx,
 		url:                       url,
@@ -51,7 +49,7 @@ func NewRepository(ctx cpi.Context, url string, configType gardenercfg_cpi.Confi
 		fs:                        vfsattr.Get(ctx),
 	}
 	if err := r.read(true); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to read repository content: %w", err)
 	}
 	return r, nil
 }
@@ -63,7 +61,7 @@ func (r *Repository) ExistsCredentials(name string) (bool, error) {
 	defer r.lock.RUnlock()
 
 	if err := r.read(false); err != nil {
-		return false, err
+		return false, fmt.Errorf("unable to read repository content: %w", err)
 	}
 
 	return r.creds[name] != nil, nil
@@ -74,7 +72,7 @@ func (r *Repository) LookupCredentials(name string) (cpi.Credentials, error) {
 	defer r.lock.RUnlock()
 
 	if err := r.read(false); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to read repository content: %w", err)
 	}
 
 	auth, ok := r.creds[name]
@@ -96,14 +94,13 @@ func (r *Repository) read(force bool) error {
 
 	configReader, err := r.getRawConfig()
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to get config: %w", err)
 	}
 	defer configReader.Close()
 
-	r.creds = map[string]core.Credentials{}
-	handler := gardenercfg_cpi.GetHandler(r.configType)
+	handler := gardenercfgcpi.GetHandler(r.configType)
 	if handler == nil {
-		return errors.Newf("unable to find handler for config type %s", string(r.configType))
+		return errors.Newf("unable to get handler for config type %s", string(r.configType))
 	}
 
 	creds, err := handler.ParseConfig(configReader)
@@ -111,16 +108,13 @@ func (r *Repository) read(force bool) error {
 		return fmt.Errorf("unable to parse config: %w", err)
 	}
 
+	r.creds = map[string]core.Credentials{}
 	for _, cred := range creds {
 		cred := cred
 		if _, ok := r.creds[cred.Name()]; !ok {
 			r.creds[cred.Name()] = cred.Properties()
 		}
 		if r.propagateConsumerIdentity {
-			if log {
-				fmt.Printf("propagate id %q\n", cred.ConsumerIdentity())
-			}
-
 			getCredentials := func() (cpi.Credentials, error) {
 				return r.LookupCredentials(cred.Name())
 			}
@@ -137,7 +131,7 @@ func (r *Repository) read(force bool) error {
 func (r *Repository) getRawConfig() (io.ReadCloser, error) {
 	u, err := url.Parse(r.url)
 	if err != nil {
-		return nil, fmt.Errorf("unable to parse url %q: %w", r.url, err)
+		return nil, fmt.Errorf("unable to parse url: %w", err)
 	}
 
 	var reader io.ReadCloser
@@ -150,7 +144,7 @@ func (r *Repository) getRawConfig() (io.ReadCloser, error) {
 	} else {
 		res, err := http.Get(u.String())
 		if err != nil {
-			return nil, fmt.Errorf("unable to get config from secret server: %w", err)
+			return nil, fmt.Errorf("request to secret server failed: %w", err)
 		}
 		reader = res.Body
 	}
@@ -159,10 +153,10 @@ func (r *Repository) getRawConfig() (io.ReadCloser, error) {
 	case AESECB:
 		var srcBuf bytes.Buffer
 		if _, err := io.Copy(&srcBuf, reader); err != nil {
-			return nil, fmt.Errorf("unable to read body: %w", err)
+			return nil, fmt.Errorf("unable to read: %w", err)
 		}
 		if err := reader.Close(); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("unable to close reader: %w", err)
 		}
 		block, err := aes.NewCipher(r.key)
 		if err != nil {
@@ -170,14 +164,14 @@ func (r *Repository) getRawConfig() (io.ReadCloser, error) {
 		}
 		dst := make([]byte, srcBuf.Len())
 		if err := ecbDecrypt(block, dst, srcBuf.Bytes()); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("unable to decrypt: %w", err)
 		}
 
 		return io.NopCloser(bytes.NewBuffer(dst)), nil
 	case Plaintext:
 		return reader, nil
 	default:
-		return nil, errors.ErrNotImplemented(string(r.cipher), RepositoryType)
+		return nil, errors.ErrNotImplemented("cipher algorithm", string(r.cipher), RepositoryType)
 	}
 }
 

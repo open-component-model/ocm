@@ -2,7 +2,7 @@ package container_registry
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	gardenercfg_cpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
+	gardenercfgcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
 )
 
 type credentials struct {
@@ -23,4 +23,4 @@ func (c credentials) Properties() cpi.Credentials {
 	return c.properties
 }
 
-var _ gardenercfg_cpi.Credential = credentials{}
+var _ gardenercfgcpi.Credential = credentials{}
