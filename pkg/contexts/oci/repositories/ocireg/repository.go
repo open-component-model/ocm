@@ -93,7 +93,7 @@ func (r *Repository) getCreds(comp string) (credentials.Credentials, error) {
 	if port != "" {
 		id[identity.ID_PORT] = port
 	}
-	id[identity.ID_PATHPREFIX] = path.Join("/", base, comp)
+	id[identity.ID_PATHPREFIX] = path.Join(base, comp)
 	creds := r.info.Creds
 	if creds == nil {
 		src, err := r.ctx.CredentialsContext().GetCredentialsForConsumer(id, identity.IdentityMatcher)
