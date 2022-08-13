@@ -5,7 +5,7 @@ The *Common Transport Format* describes a file system structure that can be
 used for the representation of [content](https://github.com/opencontainers/image-spec)
 of an OCI repository.
 
-It is used to describe an OCI repository structure. Therefore it can be used
+It is used to describe an OCI repository structure. Therefore, it can be used
 to describe a subset of repositories of an OCI registry with a subset of
 artefacts, that can then be imported again into any OCI registry.
 
@@ -19,7 +19,7 @@ It is a directory containing
 
   The *blobs* directory contains the blobs described by the
   _artefact index_ as a flat file list. These are layer blobs or artefact
-  blobs for the aretfact descriptors. Every file has a filename according
+  blobs for the artefact descriptors. Every file has a filename according
   to its [digest](https://github.com/opencontainers/image-spec/blob/main/descriptor.md#digests).
   Hereby the algorithm separator character is replaced by a dot (".").
   Every file SHOULD be referenced, directly or indirectly, in the artefact
@@ -80,7 +80,7 @@ The following fields contain the properties that constitute an *Artefact*:
   the requirements outlined in the
   [OCI Distribution Specification](https://github.com/opencontainers/distribution-spec/blob/main/spec.md).
 
-  There might be multiple entries in the artefact list refering to the same artefact
+  There might be multiple entries in the artefact list referring to the same artefact
   with different tags. But all used tags for a repository must be unique.
   
 
@@ -88,7 +88,7 @@ The following fields contain the properties that constitute an *Artefact*:
 
 The *Artefact Set Archive* Format describes a file system structure that can be
 used for the representation of a dedicated set of [artefact versions](https://github.com/opencontainers/image-spec)
-of an OCI registry for the same OCI respository.
+of an OCI registry for the same OCI repository.
 
 An artefact set can be exported from an OCI repository and imported into another
 OCI repository, it only contains artefacts and tags from a single repository.
@@ -148,7 +148,7 @@ models for the OCI specification:
 
  - *[cosign](https://github.com/sigstore/cosign)*
 
-   For *cosign* addtional signatures are represented as dedicated artefacts
+   For *cosign* additional signatures are represented as dedicated artefacts
    with special tags establishing the relation to the original artefact they
    refer to by deriving the tag from the digest of the related object.
 
@@ -158,7 +158,7 @@ models for the OCI specification:
  - [*ORAS*](https://github.com/oras-project/artifacts-spec)
 
    Here a new third top-level manifest type is introduced, that can be 
-   stored via the manifest endpoint of the distribution spec. No addtional
+   stored via the manifest endpoint of the distribution spec. No additional
    tags are required, the relation to the annotated object is established
    by a dedicated digest based field. Those artefacts can directly be 
    described by this format. But language bindings basically have to support

@@ -25,7 +25,7 @@ The type specific specification fields are:
 
 - **`baseUrl`** *string*
 
-  OCI repository refernce
+  OCI repository reference
 
 - **`legacyTypes`** (optional) *bool*
 

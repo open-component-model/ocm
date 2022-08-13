@@ -74,7 +74,7 @@ by the Gardener team developing the component `external-dns-management`.
 A *Component Version* is a concrete instance of a [Component](#components).
 As such it describes a concrete set of [Artefacts](#Artefacts)
 adhering to the semantic assigned to the containing Component. It has a unique
-identity composed of the component identity and a version name following 
+identity composed of the [component identity](#components) and a version name following 
 the [semantic versioning](https://semver.org) specification.
 
 So, all versions provided for a component should provide software artefacts
@@ -150,7 +150,7 @@ attribute always contribute to the identity of the element.
 
 The element identity is composed by the following formal fields:
 
-- `name` (required) *string*
+- **`name`** (required) *string*
 
   The name of an element. In most of the cases the name should be chosen
   to be unique in the context of the list of elements. 
@@ -163,13 +163,13 @@ The element identity is composed by the following formal fields:
   elements. In such a case the name is not sufficient for uniquely identity
   a dedicated element.
 
-- `version` (optional) *string*
+- **`version`** (optional) *string*
 
   This optional attribute version describes the version of the element.
   If given, and the name of the element is not unique in its context, the
   version is added to the identity attribute set.
 
-- `extraIdentity` (optional) *map[string]string*
+- **`extraIdentity`** (optional) *map[string]string*
 
   If name and version are not sufficient to provide a unique selection 
   scheme, any arbitrary identity dimension can be added  by this field.
@@ -187,7 +187,7 @@ naming scheme and use a common [structure](../names/labels.md).
 
 Labels are described by the element field 
 
-- `labels` *[]label*
+- **`labels`** *[]label*
 
   A list of arbitrary labels described by a formal name with a globally
   unique meaning (see [label structure](../names/labels.md)
@@ -212,7 +212,7 @@ in the component descriptor:
 
 - the [identity](#identity) fields are directly embedded
 
-- `type` (required) *string*
+- **`type`** (required) *string*
 
   The [type of an artefact](../names/resourcetypes.md) uniquely specifies the
   technical interpretation of an artefact, its kind, independent of its 
@@ -229,12 +229,12 @@ in the component descriptor:
   logical interpretation and use case is completely different. This is expressed
   by the chosen type of the artefact.
 
-- `labels` (optional) *[]label*
+- **`labels`** (optional) *[]label*
 
   A list of arbitrary labels described by a formal name with a globally
   unique meaning (see [label structure](../names/labels.md)
 
-- `access` (required) *access specification*
+- **`access`** (required) *access specification*
 
   The [access specification](../names/accessmethods.md) for the actual artefact.
   The specification is typed. The type determines an access method to use
@@ -277,24 +277,24 @@ its artefact identity.
 
 A resource uses the following additional formal field:
 
-- `digest` (optional) [*digest*](#digest-info)
+- **`digest`** (optional) [*digest*](#digest-info)
 
   If the component descriptor is signed (directly or indirectly by one of its
   referencing component versions) a digest of a resource is stored along with
   the resource description. THis is required because there might be different
   digest and resource normalization algorithms.
 
-- `srcRef` (optional) *struct*
+- **`srcRef`** (optional) *struct*
 
   This field is used to describe the sources used to generate the resource.
   This is done by a field
 
-  - `identitySelector` *map[string]string*
+  - **`identitySelector`** *map[string]string*
 
     [Identity attributes](#identity) determining an appropriate [source](#sources)
     element.
 
-  - `labels` (optional) *[]label
+  - **`labels`** (optional) *[]label
 
     A list of arbitrary labels described by a formal name with a globally
     unique meaning (see [label structure](../names/labels.md)) can be used
@@ -328,7 +328,7 @@ There are basically two ways an artefact blob can be stored:
 
 The specification must contain at least the field
 
-- `type` (required) *string*
+- **`type`** (required) *string*
 
   The type of the access method. It determines the possible and required 
   additional fields of the access specification.
@@ -347,7 +347,7 @@ references have an [identity](#identity).
 
 A reference element has the following additional formal fields:
 
-- `componentName` (required) *string*
+- **`componentName`** (required) *string*
 
   The identity of the component whose version is referenced.
   The elements common version field is required in this usage context.
@@ -429,12 +429,12 @@ their component descriptors (see [Digest Info](#digest-info)).
 
 Every signature entry has the following formal fields:
 
-- `name` (required) *string*
+- **`name`** (required) *string*
 
   The name if the signature. It must be unique in the context of a component
   version.
 
-- `digest` (required) [*digest*](#digest-info)
+- **`digest`** (required) [*digest*](#digest-info)
 
   The digest of the component version used to generate the signature.
   Different signatures may use different digest algorithms.
@@ -442,7 +442,7 @@ Every signature entry has the following formal fields:
   The digest of a component version does not include volatile fields, like
   the access specification, which can change along a transportation chain.
 
-- `signature` (required) [*signature*](#signature-info)
+- **`signature`** (required) [*signature*](#signature-info)
 
   The signature for the given digest
 
@@ -451,11 +451,11 @@ Every signature entry has the following formal fields:
 
 A digest is specified by the following fields:
 
-- `hashAlgorithm` (required) *string*
+- **`hashAlgorithm`** (required) *string*
 
   The used digest algorithm
 
-- `normalisationAlgorithm` (required) *string*
+- **`normalisationAlgorithm`** (required) *string*
 
   The used normalization algorithm for the signed element.
 
@@ -476,7 +476,7 @@ A digest is specified by the following fields:
   artefact type and media type combinations. All implementations must provide
   appropriate handlers for the used resources types to be interoperable.
 
-- `value` (required) *string*
+- **`value`** (required) *string*
 
   The digest itself.
 
@@ -484,19 +484,19 @@ A digest is specified by the following fields:
 
 A signature is specified by the following fields:
 
-- `algorithm` (required) *string*
+- **`algorithm`** (required) *string*
 
   The used signing algorithm
 
-- `mediaType` (required) *string*
+- **`mediaType`** (required) *string*
 
   The media type of the technical representation of the signature value.
 
-- `value` (required) *string*
+- **`value`** (required) *string*
 
   The signature itself.
 
-- `issuer` *string*
+- **`issuer`** *string*
 
   The description of the issuer.
 
