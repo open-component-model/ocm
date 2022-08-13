@@ -1,7 +1,7 @@
 # Resource Types in the Open Component Model
 
-The OCM component descriptor described a set of resources, their type and
-meaning with attached meta and access information.
+The OCM component descriptor described a set of artefacts, their type and
+meaning with attached meta, and access information.
 
 The meaning is basically encoded into a dedicated *resource type*.
 Therefore, the resource type must be globally unique.
