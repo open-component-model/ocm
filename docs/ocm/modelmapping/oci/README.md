@@ -10,11 +10,11 @@ Such an OCM repository is [identified by an OCI repository reference](../../../.
 An OCM *component identifier* is mapped to a sub *repository name* prefixed
 with `component-descriptors/`. The complete repository name is
 
-<center>
+<div align="center">
 
 *&lt;oci base repository>* `/component-descriptors/` *&lt;component id>*
 
-</center>
+</div>
 
 An OCM *version name* of a component version is mapped to an OCI *tag*.
 
@@ -41,9 +41,11 @@ identifier stored in the `localBlob` access specification is the OCI *blob diges
 of the blob. The media type of the blob is the one specified in the
 access specification.
 
-<center>
+<div align="center">
+
 <img src="ocm2oci-mapping.png" alt="drawing" width="800"/>
-</center>
+
+</div>
 
 ## Blob Mappings
 
@@ -51,11 +53,11 @@ Local blobs with an OCI artefact media type will implicitly be mapped to a regul
 artefact. The *reference hint* provided by the specification of the local access
 is used to compose a repository name of the form:
 
-<center>
+<div align="center">
 
 *&lt;oci base repository>* `/` *&lt;reference hint>*
 
-</center>
+</div>
 
 Without a given tag, the provided external access specification (of type `ociArtefact`)
 uses a digest based reference

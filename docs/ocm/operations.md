@@ -20,6 +20,8 @@ and mapping specification for S3 and OCI.
 Every such binding must support at least a dedicated set of abstract operations
 working with {elements of the component model}(model.md).
 
+## Mandatory Model Operations
+
 The following operations are mandatory:
 
 - **`UploadComponentDescriptor(ComponentDescriptor-YAML) error`**
@@ -45,7 +47,7 @@ The following operations are mandatory:
   to its media type. For example, an OCI based implementation can represent 
   blobs containing an OCI artefact as regular, globally addressable object.
 
-  An type-specific optional *ReferenceHint* can be passed to guide the
+  A type-specific optional *ReferenceHint* can be passed to guide the
   operation for generating an identity, if it decided to make the object
   externally visible.
 
@@ -61,6 +63,8 @@ The following operations are mandatory:
 - **`ListComponentVersions(ComponentId) ([]VersionName, error)`**
 
   List all the known versions of a component specified by its component identity.
+
+## Optional Model Operations
 
 Optional operations might be:
 
@@ -85,3 +89,18 @@ Optional operations might be:
   List all components in the given identifier namespace, recursively.
   It should not only return component identities, that are direct children,
   traverse the complete subtree.
+
+## Access Methods
+
+There must be an implementation for all supported external access methods
+according to their [specifications](../formats/accessmethods/README.md).
+The local access method is mapped to the local blob access provided by
+the repository.
+
+They have to support read access, only. At least a stream access for the
+denoted blob is required.
+
+- **`<method>.GetStream(AccessSpecification) (Byte Stream, error)`**
+
+  Provide access to the blob content described by a dedicated access
+  specification.

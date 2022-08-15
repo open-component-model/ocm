@@ -47,11 +47,11 @@ unique identifier
 
 A component identifier uses the following naming scheme:
 
-<center>
+<div align="center">
 
 *&lt;DNS domain>* `/` *&lt;name component> {* `/` *&lt;name component> }*
 
-</center>
+</div>
 
 Hereby the DNS domain plus optional some leading name components MUST 
 be owned by the provider of a component.
@@ -175,6 +175,15 @@ The element identity is composed by the following formal fields:
   scheme, any arbitrary identity dimension can be added  by this field.
   If given, all those attributes contribute to the identity of the element
   and must be given to uniquely identify an element.
+
+
+<div align="center"> 
+<img src="ocmidentity.png" alt="Identities" width="800"/>
+</div>
+
+Every resource described by the Open Component Model can therefore be identified
+by the triple  *(Component Identity, Version Name, Local Resource Identity)*.
+
 
 ###### Labels
 
@@ -332,6 +341,22 @@ The specification must contain at least the field
 
   The type of the access method. It determines the possible and required 
   additional fields of the access specification.
+
+
+The content of a described artefact is accessible by applying its
+global identity triple to the following procedure:
+
+- [lookup](operations.md#mandatory-model-operations) of a [component version](#component-versions)) and its 
+  [component descriptor](#component-descriptor) by using its
+  component identity and version name in
+  the desired [repository context](#repository-contexts)
+- identify the artefact by is local identity (distinguish between [source](#sources)
+  and [resource](#resources))
+- [apply](operations.md#access-methods) the described [access method](#artefact-access)
+
+<div align="center"> 
+<img src="ocmresourceaccess.png" alt="Structure of OCM Specification" width="800"/>
+</div>
 
 #### References
 

@@ -8,3 +8,43 @@ This specification is divided into three parts:
 - Layer 3: The [interoperability specifications](interoperability.md) describing how the model elements
   are mapped to elements of an underlying persistence layer
   (for example and OCI registry)
+
+<div align="center"> 
+<img src="ocmspecstruct.png" alt="Structure of OCM Specification" width="800"/>
+</div>
+
+Layer 1 describes the elements and data formats the Open Component Model deals
+with. All client APIs MUST provide a binding for those kinds of elements.
+
+Layer 2 describes the abstract operations, which handle the persistence
+of the described to-level elements. All client APIs MUST provide a binding
+for those operations for the client code.
+
+
+The OCM specification does not explicitly describe a dedicated remote API for
+interacting with a repository conforming to the OCM specification.
+Instead, it focuses on the mapping of the OCM functionality to an already
+existing, common storage backend, like the OCI Registries.
+
+Layer 3 defines how the elements of layer 1 are mapped to various
+storage technologies. The border between a client tool and a storage backend
+, and therefore the interoperability layer, is typically the API of
+the storage backend.
+
+This avoids the need for a dedicated OCM server infrastructure. Client code
+includes a dedicated binding for the supported storage technology and
+an implementation of the specified mapping of the OBM elements to the
+storage elements. This will then be encapsulated behind a common binding
+of an interpretation of the layer 1 and 2 specification for the dedicated client
+environment.
+
+This way, all appropriate clients can interoperate with all instances of the
+supported storage backend types.
+
+The binding provided by this project offers a general client API conforming
+to layer 1 and 2 (package [github.com/open-component-model/pkg/contexts/ocm](../../pkg/contexts/ocm))
+and a provider API for embedding different storage backend mappings
+(package [github.com/open-component-model/pkg/contexts/ocm/cpi](../../pkg/contexts/ocm/cpi)),
+which will then be available for the generalized client API.
+Mappings are provided for the filesystem persistence and for OCI registries.
+
