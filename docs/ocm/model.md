@@ -1,11 +1,11 @@
 # Elements used by the Open Component Model
 
-The Open Component Model provides are formal description of 
+The Open Component Model provides a formal description of 
 delivery artefacts for dedicated semantics that are accessible
 in some kind of repository.
 
-This leased to the following major elements that must be specified
-the element specification of the Open Component Model
+This leads to the following major elements that must be specified
+as part of the Open Component Model specification
 
 - [Repositories](#repositories)
 - [Components](#components)
@@ -15,8 +15,10 @@ the element specification of the Open Component Model
       - [Resources](#resources)
       - [Artefact Access](#artefact-access)
     - [Labels](#labels)
-    - [Repository Contexts](#repository-contexts)
-    
+- [Repository Contexts](#repository-contexts)
+
+Those elements partly use further sub-level elements that are
+defined in the context of their usage.
 
 ## Repositories
 
@@ -24,11 +26,11 @@ A *Component Repository* is a dedicated entity that provides technical access
 to the other elements of the Open Component Model.
 
 So far, we don't define a dedicated repository API for a dedicated technical
-instance of an OCM  repository, because we want to use existing storage
+instance of an OCM repository, because we want to use existing storage
 subsystems, without the need of running OCM specific servers.
 
 Therefore, a component repository is typically given by a well-known storage
-subsystem  hosting a content structure adhering to an [element mapping specification](interoperability.md) 
+subsystem hosting a content structure adhering to an [element mapping specification](interoperability.md) 
 for this dedicated kind of storage backend (e.g. OCI).
 
 So, any tool or language binding can map an existing storage technology into an
@@ -42,8 +44,9 @@ can be added.
 ## Components
 
 A *Component* is an abstract entity describing a dedicated usage context or
-meaning for provided software. It is technically defined by a globally
-unique identifier
+meaning for provided software. This semantic is defined by the owner of a
+component and subsumed by the component identity. It is technically defined
+by a globally unique identifier
 
 A component identifier uses the following naming scheme:
 
@@ -53,8 +56,11 @@ A component identifier uses the following naming scheme:
 
 </div>
 
-Hereby the DNS domain plus optional some leading name components MUST 
-be owned by the provider of a component.
+Hereby the DNS domain plus optionally any number  of leading name components MUST 
+be owned by the provider of a component. For example, `github.com`, as DNS domain
+is shared by lots of organizations. Therefore, all component identities, provided
+based on this DNS name, must include the owner prefix of the providing
+organization, e.g. `github.com/gardener`.
 
 The component acts as a namespace to host multiple [*Component Versions*](#component-versions),
 which finally describe dedicated technical artefact sets, which describe the
@@ -73,12 +79,15 @@ by the Gardener team developing the component `external-dns-management`.
 
 A *Component Version* is a concrete instance of a [Component](#components).
 As such it describes a concrete set of [Artefacts](#Artefacts)
-adhering to the semantic assigned to the containing Component. It has a unique
-identity composed of the [component identity](#components) and a version name following 
-the [semantic versioning](https://semver.org) specification.
+adhering to the semantic assigned to the containing [Component](#components) (by its owner).
+It has a unique identity composed of the [component identity](#components) and
+a version name following the [semantic versioning](https://semver.org) 
+specification.
 
 So, all versions provided for a component should provide software artefacts
-with the same purpose.
+with the semantic defined by the component. For example, for a component
+pretending to be a Kubernetes DNS Controller, all provided versions should
+provide versions of a DNS Controller, and not an ingress controller.
 
 A component version is formally described by a [Component Descriptor](#component-descriptor).
 
@@ -172,7 +181,7 @@ The element identity is composed by the following formal fields:
 - **`extraIdentity`** (optional) *map[string]string*
 
   If name and version are not sufficient to provide a unique selection 
-  scheme, any arbitrary identity dimension can be added  by this field.
+  scheme, any arbitrary identity dimension can be added by this field.
   If given, all those attributes contribute to the identity of the element
   and must be given to uniquely identify an element.
 
@@ -182,7 +191,7 @@ The element identity is composed by the following formal fields:
 </div>
 
 Every resource described by the Open Component Model can therefore be identified
-by the triple  *(Component Identity, Version Name, Local Resource Identity)*.
+by the triple *(Component Identity, Version Name, Local Resource Identity)*.
 
 
 ###### Labels
@@ -308,7 +317,7 @@ A resource uses the following additional formal field:
     A list of arbitrary labels described by a formal name with a globally
     unique meaning (see [label structure](../names/labels.md)) can be used
     to attach more information about the part or kind of usage of the sources.
-  
+
 
 ##### Artefact Access
 
@@ -379,10 +388,12 @@ A reference element has the following additional formal fields:
 
 ##### Resource Reference
 
-Any local or non-local artefact can then be addressed relative to a component
-version by a possibly empty sequence of reference identities followed by
-the artefact identity in the context of the finally addressed component
-version.
+Following the chain of [references](#references), starting from an initial
+[component version](#component-versions)
+any local or non-local artefact can be addressed relative to a component
+version by a possibly empty sequence (for a local artefact) of reference
+identities followed by the artefact identity in the context of the finally
+reached component version.
 
 The composite is called *Source Reference* or *Resource Reference*.
 It can be used in artefacts to refer to other artefacts described by the 
@@ -424,24 +435,20 @@ This description contains a resource reference indicating to
 use the resource `IMAGE` in component version `B:1.0.0` when evaluated
 in the context of component version `A:1.0.0`.
 
-This way any content related tool can interact with the Open Component Model,
+This way any content-related tool can interact with the Open Component Model,
 by identifying resources and finally access resources described by the component
-model which is agnostic of the evaluation context of the component version.
+model.
+
+This kind of relative access description is location-agnostic, meaning, independent
+of the [repository context](#repository-contexts) used to access
+the initial component version and resource. The stored description, only
+includes identities provided by the model. They can then be evaluated in a
+dedicated repository context to finally achieve the artefact content
+(or location) in the actually used environment (for example, after
+transportation into a fenced repository environment).
 
 Depending on the transport history of the component version, always the
 correct resource location valid for the actual environment is used.
-
-
-##### Repository Contexts
-
-A *Repository Context* describes the access to an [OCM Repository](#repositories).
-
-This access is described by a [formal and typed specification](../names/repositorytypes.md)
-
-A [component descriptor](#component-descriptor) may contain information
-about the transport history by keeping a list of repository contexts.
-It should at least describe the last repository context for a remotely accessible
-OCM repository it was transported into.
 
 #### Signatures
 
@@ -469,7 +476,7 @@ Every signature entry has the following formal fields:
 
 - **`signature`** (required) [*signature*](#signature-info)
 
-  The signature for the given digest
+  The signature for the specified digest
 
 
 ##### Digest Info
@@ -526,3 +533,13 @@ A signature is specified by the following fields:
   The description of the issuer.
 
 
+## Repository Contexts
+
+A *Repository Context* describes the access to an [OCM Repository](#repositories).
+
+This access is described by a [formal and typed specification](../names/repositorytypes.md)
+
+A [component descriptor](#component-descriptor) may contain information
+about the transport history by keeping a list of repository contexts.
+It should at least describe the last repository context for a remotely accessible
+OCM repository it was transported into.

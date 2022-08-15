@@ -4,12 +4,16 @@ Any repository that can be used to store content according to the
 Open Component Model must be describable by a formal repository
 specification.
 
-Such a specification is usable by language binding supporting
+Such a specification is usable by a language binding supporting
 this kind of specification to gain access to this repository.
+In a concrete environment, all repositories are usable, for which an
+implementation of [abstract model operations](../ocm/interoperability.md)
+exists.
 
 Therefore, a repository specification has a type, the *Repository Type*.
 Additionally, it defines dedicated attributes, which are
-used to determine the access to a dedicated instance of this repository type.
+used to determine the identity of and the access to a dedicated instance
+of this repository type (for example a URL of the repository instance).
 
 There are two kinds of types:
 - centrally defined type names managed by the OCM organization
@@ -20,14 +24,14 @@ There are two kinds of types:
   [A-Z][a-zA-Z0-9]*
   ```
 
-  The actually defined types with their meaning and format can be
+  The defined types with their meaning and format can be
   found [here](../formats/repositories/README.md)
-- 
+
 - vendor specific types
 
   any organization using the open component model may define dedicated types on
   their own. Nevertheless, the meaning of those types must be defined.
-  Basically there may be multiple such types provided by different organizations
+  Basically, there may be multiple such types provided by different organizations
   with the same meaning. But we strongly encourage organizations to share
   such types instead of introducing new type names.
 

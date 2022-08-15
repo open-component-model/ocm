@@ -87,8 +87,8 @@ in the component descriptor. The access method type may define
 additional specification attributes required to finally identify the 
 concrete access path to the artefact blob.
 
-For example, te access method `ociBlob` requires the OCI repository reference
-and the blob digests to be able to access the blob.
+For example, the access method `ociBlob` requires the OCI repository reference
+and the blob digest to be able to access the blob.
 
 Centrally defined access methods with their specification versions
 can be found [here](../formats/accessmethods/README.md).
