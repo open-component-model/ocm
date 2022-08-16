@@ -48,3 +48,7 @@ and a provider API for embedding different storage backend mappings
 which will then be available for the generalized client API.
 Mappings are provided for the filesystem persistence and for OCI registries.
 
+Layer 4, as shown in the picture, is finally out-of-scope for this
+specification. It describes the storage-technology-specific APIs, which 
+will be used as basis for the OCM mapping specification dedicated to
+this storage technology.

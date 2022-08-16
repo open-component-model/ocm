@@ -104,10 +104,13 @@ mechanisms:
     the local artefact set by describing a [reference](#references) to this
     component version.
 
-Those artefact composing elements all feature a common [set of attributes](#composing-the-artefact-set), which
-are used to uniquely identify the elements in the context of their component
-descriptor and provide a possibility to formally enrich the information attached
-to an element.
+Those artefact composing elements all feature a common [set of attributes](#composing-the-artefact-set),
+which are used to uniquely identify the elements in the context of their component
+descriptor. Additionally, they provide a possibility to formally enrich the
+information attached to an element by using an arbitrary number of 
+appropriately named labels without the need for explicit dedicated model
+attributes (for example, attaching hints for the triage of identified
+vulnerabilities for this artefact).
 
 It describes:
 - a history of [Repository Contexts](#repository-contexts) describing
@@ -135,10 +138,10 @@ versions.
 
 All those descriptive elements share a common basic attribute set.
 First, such an element mut be uniquely identifiable in the context
-of a component version. Therefore, it required an [*Identity*](#identity).
+of a component version. Therefore, it requires an [*Identity*](#identity).
 To be able to attach additional formal meta to such an element, which
 is not directly described by existing model elements, it is possible to
-define arbitrary [*Labels*](#labels). This enabled the use of application specific
+define arbitrary [*Labels*](#labels). This enables the use of application specific
 attributes, without the need of extending the basic component model for every
 new arising use case.
 
@@ -150,18 +153,20 @@ have a unique identity in the context of a [Component Version](#component-versio
 All those element types share the same notion of an identity, which is a set
 of key/value string pairs.
 This includes at least the value of the `name` attribute of those elements.
-Optionally a `version` attribute can be given. If the element name is not
-unique in the context of the component version for the actual element type,
-the version attribute is added to the element identity.
-
-Optionally explicit identity attributes can be defined. If given, all those
-attribute always contribute to the identity of the element.
+If the element name cannot be chosen uniquely an optional `version` attribute
+can be provided to assure uniqueness in the context of the [component version](#component-versions).
+In such a case this attribute will be added to the effective identity
+attribute set.
+If even this is not sufficient to meet the requirements to identify 
+artefacts in the context of the component version, explicit identity attributes
+can be defined. If given, all those
+attributes always contribute to the identity of the element.
 
 The element identity is composed by the following formal fields:
 
 - **`name`** (required) *string*
 
-  The name of an element. In most of the cases the name should be chosen
+  The name of the element. In most of the cases the name should be chosen
   to be unique in the context of the list of elements. 
   It basically also expresses the meaning or purpose of the element in the
   context of the component version. But it might be the
@@ -181,10 +186,32 @@ The element identity is composed by the following formal fields:
 - **`extraIdentity`** (optional) *map[string]string*
 
   If name and version are not sufficient to provide a unique selection 
-  scheme, any arbitrary identity dimension can be added by this field.
+  scheme, any arbitrary identity dimension can be added by using this field.
   If given, all those attributes contribute to the identity of the element
   and must be given to uniquely identify an element.
 
+Using attributes of an artefact for its identity makes it easier to formally
+describe the identity and to select a dedicated artefact from the set of
+described artefacts. It avoids the need to
+marshal a dedicated identity scheme for an intended usage scenario into a
+single attribute value. Instead, different attributes can be used to represent
+the dedicated selection dimensions. Selecting all artefacts for partial set
+of constraints is then just a partial match of the set of identity attributes.
+
+For example:
+
+You want to describe different image versions to use
+for different Kubernetes versions for multiple purposes. With the identity
+attributes this can easily be modeled by using
+- the `name` attribute for the purpose (e.g. DNS controller)
+- the `version` attribute for the image version
+- and an extra identity attribute for the intended Kubernetes Version.
+
+Then you don't need to derive artificially unique artefact names, instead
+the identity of the artefact can naturally be composed by using appropriate
+attributes. Selecting all artefacts for a dedicated purpose is possible
+by selecting all artefacts with the appropriate `name` attribute, without the
+need of parsing an artificial structure imprinted on the name attribute.
 
 <div align="center"> 
 <img src="ocmidentity.png" alt="Identities" width="800"/>
@@ -197,10 +224,18 @@ by the triple *(Component Identity, Version Name, Local Resource Identity)*.
 ###### Labels
 
 *Labels* can be used to add additional formal information to a component
-model elements which do not have static formal fields in the
+model element, which do not have static formal fields in the
 [component descriptor](#component-descriptor). Its usage is
-free to users of the component model. To assure, that this information
-has a globally unique interpretation or meaning, labels must comply to some
+left to users of the component model, or better to the used toolsets
+looking at component versions (for example: a scanning environment,
+used to scan artefacts for vulnerabilities, uses a dedicated label 
+to control its behavior).
+
+To be able to evaluate labels used by dedicated tool environments for any
+[component version](#component-versions), the same
+label name must have the same meaning, regardless by which component provider
+they are generated. To assure, that this information
+has a globally unique interpretation or meaning, labels must comply with some
 naming scheme and use a common [structure](../names/labels.md).
 
 Labels are described by the element field 
@@ -221,8 +256,9 @@ Every artefact described by the component version has
   component version, which is not formally defined by the Open Component Model.
 - a formal description of the [Access Specification](#artefact-access) ,
   which can be used to technically access the content of the artefact in form of
-  a blob with a format defined by the artefact type and an optional media type 
-  assigned to the access specification.
+  a blob with a format defined by the artefact type. If there are multiple variants
+  possible for the blob format the access specification must be able to
+  describe an optional media type.
 - a (optional) digest of the artefact that is immutable during transport steps.
 
 Those attributes are described by formal fields of the element description
@@ -244,8 +280,8 @@ in the component descriptor:
   to be a helm chart, even if represented as OCI image. The type `ociImage`
   describes an object that can be used as container image. So, although the
   technical representation might in both cases be an OCI image manifest, its
-  logical interpretation and use case is completely different. This is expressed
-  by the chosen type of the artefact.
+  semantics and use case is completely different. This is expressed
+  by the chosen type of the artefact, which focuses on the semantics.
 
 - **`labels`** (optional) *[]label*
 
@@ -257,8 +293,9 @@ in the component descriptor:
   The [access specification](../names/accessmethods.md) for the actual artefact.
   The specification is typed. The type determines an access method to use
   to access the artefact blob. This type determines the technical procedure
-  to use to access the artefact blob and the specification of the attribute that
-  are required by this procedure to be able to identity a dedicated target blob.
+  to use to access the artefact blob as well as the specification of the
+  attributes that are required by this procedure to be able to identify a
+  dedicated target blob.
 
 The Open Component Model distinguishes two kinds of artefacts:
 - [*Sources*](#sources) are optional artefacts that contain the sources, which
@@ -279,13 +316,13 @@ Source elements do not have specific additional formal attributes.
 
 A *Resource* is an [Artefact](#artefacts), which is a delivery artefact,
 intended for deployment into a runtime environment, or describing additional
-content relevant for a deployment mechanism, for example installation procedures
+content relevant for a deployment mechanism. For example, installation procedures
 or meta-model descriptions controlling orchestration and/or deployment mechanisms.
 (A simple example how such elements could be used to construct a deployment
 mechanism on top of the Open Component Model can be found [here](../reference/ocm_toi.md).)
 
 The Open Component Model makes absolutely no assumptions, how content described
-by the model is finally deployed or used. All this is eft to external tools and tool
+by the model is finally deployed or used. All this is left to external tools and tool
 specific deployment information is formally represented as other artefacts with
 an appropriate dedicated own type.
 
@@ -299,13 +336,13 @@ A resource uses the following additional formal field:
 
   If the component descriptor is signed (directly or indirectly by one of its
   referencing component versions) a digest of a resource is stored along with
-  the resource description. THis is required because there might be different
+  the resource description. This is required because there might be different
   digest and resource normalization algorithms.
 
 - **`srcRef`** (optional) *struct*
 
   This field is used to describe the sources used to generate the resource.
-  This is done by a field
+  The selection is done by the following two fields:
 
   - **`identitySelector`** *map[string]string*
 
@@ -339,7 +376,7 @@ There are basically two ways an artefact blob can be stored:
 - `external` access methods allow referring to artefacts in any other
   technical repository as long as the access type is supported by the
   used tool set.
-- `internal` access methods (basically, there is finally only one: [`localBlob`](../../pkg/contexts/ocm/accessmethods/localblob/README.md)).
+- `internal` access methods ([`localBlob`](../../pkg/contexts/ocm/accessmethods/localblob/README.md)).
   are used to store an artefact together with the component descriptor in an
   OCM repository. These methods must be supported by all OCM repository
   implementations.
