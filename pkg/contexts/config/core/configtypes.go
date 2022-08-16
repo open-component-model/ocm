@@ -54,10 +54,6 @@ func NewConfigTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) ConfigTy
 	return &configTypeScheme{scheme}
 }
 
-func (t *configTypeScheme) AddKnowntypes(s ConfigTypeScheme) {
-	t.Scheme.AddKnownTypes(s)
-}
-
 func (t *configTypeScheme) GetConfigType(name string) ConfigType {
 	d := t.GetDecoder(name)
 	if d == nil {
@@ -68,16 +64,17 @@ func (t *configTypeScheme) GetConfigType(name string) ConfigType {
 
 func (t *configTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedObjectDecoder) error {
 	if _, ok := decoder.(ConfigType); !ok {
-		errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
+		return errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
 	}
 	return t.Scheme.RegisterByDecoder(name, decoder)
 }
 
-func (t *configTypeScheme) AddKnownTypes(scheme runtime.Scheme) {
+func (t *configTypeScheme) AddKnownTypes(scheme runtime.Scheme) error {
 	if _, ok := scheme.(ConfigTypeScheme); !ok {
-		panic("can only add RepositoryTypeSchemes")
+		return errors.ErrInvalid("type", reflect.TypeOf(scheme).String())
 	}
-	t.Scheme.AddKnownTypes(scheme)
+
+	return t.Scheme.AddKnownTypes(scheme)
 }
 
 func (t *configTypeScheme) Register(name string, rtype ConfigType) {
