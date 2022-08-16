@@ -63,10 +63,6 @@ func NewRepositoryTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) Repo
 	return &repositoryTypeScheme{scheme}
 }
 
-func (t *repositoryTypeScheme) AddKnowntypes(s RepositoryTypeScheme) {
-	t.Scheme.AddKnownTypes(s)
-}
-
 func (t *repositoryTypeScheme) GetRepositoryType(name string) RepositoryType {
 	d := t.GetDecoder(name)
 	if d == nil {
@@ -77,16 +73,17 @@ func (t *repositoryTypeScheme) GetRepositoryType(name string) RepositoryType {
 
 func (t *repositoryTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedObjectDecoder) error {
 	if _, ok := decoder.(RepositoryType); !ok {
-		errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
+		return errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
 	}
 	return t.Scheme.RegisterByDecoder(name, decoder)
 }
 
-func (t *repositoryTypeScheme) AddKnownTypes(scheme runtime.Scheme) {
+func (t *repositoryTypeScheme) AddKnownTypes(scheme runtime.Scheme) error {
 	if _, ok := scheme.(RepositoryTypeScheme); !ok {
-		panic("can only add RepositoryTypeSchemes")
+		return errors.ErrInvalid("type", reflect.TypeOf(scheme).String())
 	}
-	t.Scheme.AddKnownTypes(scheme)
+
+	return t.Scheme.AddKnownTypes(scheme)
 }
 
 func (t *repositoryTypeScheme) Register(name string, rtype RepositoryType) {

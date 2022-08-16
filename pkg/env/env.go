@@ -23,13 +23,11 @@ import (
 	"github.com/mandelsoft/vfs/pkg/readonlyfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
-
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
@@ -43,25 +41,6 @@ type dummyOption struct{}
 
 func (dummyOption) Mount(*composefs.ComposedFileSystem) error {
 	return nil
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-type fsOpt struct {
-	dummyOption
-	path string
-	fs   vfs.FileSystem
-}
-
-func FileSystem(fs vfs.FileSystem, path string) fsOpt {
-	return fsOpt{
-		path: path,
-		fs:   fs,
-	}
-}
-
-func (o fsOpt) Mount(cfs *composefs.ComposedFileSystem) error {
-	return cfs.Mount(o.path, o.fs)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

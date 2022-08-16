@@ -172,7 +172,7 @@ func (t KnownTypes) TypeNames() []string {
 // Scheme is the interface to describe a set of object types
 // that implement a dedicated interface.
 // As such it knows about the desired interface of the instances
-// and can validate it. Additionally it provides an implementation
+// and can validate it. Additionally, it provides an implementation
 // for generic unstructured objects that can be used to decode
 // any serialized from of object candidates and provide the
 // effective type.
@@ -186,7 +186,7 @@ type Scheme interface {
 	Decode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
 	Encode(obj TypedObject, marshaler Marshaler) ([]byte, error)
 	EnforceDecode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
-	AddKnownTypes(scheme Scheme)
+	AddKnownTypes(scheme Scheme) error
 	KnownTypes() KnownTypes
 	KnownTypeNames() []string
 }
@@ -243,12 +243,13 @@ func NewDefaultScheme(proto_ifce interface{}, proto_unstr Unstructured, acceptUn
 	}, nil
 }
 
-func (d *defaultScheme) AddKnownTypes(s Scheme) {
+func (d *defaultScheme) AddKnownTypes(s Scheme) error {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	for k, v := range s.KnownTypes() {
 		d.types[k] = v
 	}
+	return nil
 }
 
 func (d *defaultScheme) KnownTypes() KnownTypes {
