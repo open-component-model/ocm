@@ -16,17 +16,15 @@ package s3
 
 import (
 	"fmt"
-	"io"
 	"path"
-	"sync"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/downloader"
+	"github.com/open-component-model/ocm/pkg/common/accessio/downloader/s3"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/downloader"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/downloader/s3"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -94,10 +92,10 @@ func (a *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMetho
 ////////////////////////////////////////////////////////////////////////////////
 
 type accessMethod struct {
-	lock            sync.Mutex
-	comp            cpi.ComponentVersionAccess
-	spec            *AccessSpec
-	cacheBlobAccess accessio.BlobAccess
+	accessio.BlobAccess
+
+	comp cpi.ComponentVersionAccess
+	spec *AccessSpec
 }
 
 var _ cpi.AccessMethod = (*accessMethod)(nil)
@@ -135,9 +133,9 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, erro
 	}
 	cacheBlobAccess := accessobj.CachedBlobAccessForWriter(c.GetContext(), mediaType, w)
 	return &accessMethod{
-		spec:            a,
-		comp:            c,
-		cacheBlobAccess: cacheBlobAccess,
+		spec:       a,
+		comp:       c,
+		BlobAccess: cacheBlobAccess,
 	}, nil
 }
 
@@ -169,23 +167,4 @@ func getCreds(a *AccessSpec, cctx credentials.Context) (credentials.Credentials,
 
 func (m *accessMethod) GetKind() string {
 	return Type
-}
-
-func (m *accessMethod) Close() error {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-
-	return m.cacheBlobAccess.Close()
-}
-
-func (m *accessMethod) Get() ([]byte, error) {
-	return m.cacheBlobAccess.Get()
-}
-
-func (m *accessMethod) Reader() (io.ReadCloser, error) {
-	return m.cacheBlobAccess.Reader()
-}
-
-func (m *accessMethod) MimeType() string {
-	return m.cacheBlobAccess.MimeType()
 }
