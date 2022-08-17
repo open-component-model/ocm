@@ -32,7 +32,7 @@ concrete implementation of the repository type. All implementations of a
 dedicated type have to conform to the attribute structure definition of this type.
 
 For example, the type `OCIRegistry` defines two additional flat
-[attributes](../../../pkg/contexts/ocm/repositories/ocireg/README.md): `baeURL`
+[attributes](../../../pkg/contexts/ocm/repositories/ocireg/README.md): `baseURL`
 and `legacyTypes`.
 
 ## Centrally defined Repository Types

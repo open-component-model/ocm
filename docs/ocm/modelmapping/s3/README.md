@@ -5,7 +5,7 @@ blob store.
 
 An *OCM repository* is mapped to an *S3 bucket*.
 
-The component id is mapped to an object path below this bucked, followed
+The component id is mapped to an object path below this bucket, followed
 by a namespace component `__versions__`.
 
 The OCM *component version* is stored below an additional folder with the
@@ -15,7 +15,7 @@ All artefacts belonging to a component version are stored as blobs below
 this folder.
 
 The OCM *component descriptor* of a component version is stored with the
-name `component-descriptor.yaml` in yaml format.
+name `component-descriptor.yaml` in [YAML](https://yaml.org/spec/) format.
 
 Local blobs are stored as additional blobs in the same folder. The
 blob identity is the name of the blob object in this folder.

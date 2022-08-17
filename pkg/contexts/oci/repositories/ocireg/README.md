@@ -10,10 +10,10 @@ type: OCIRegistry/v1
 
 ### Description
 
-The content of an OCI-like repository will be stored in an OCI repository
-according to the [OCI distribution specification](https://github.com/opencontainers/distribution-spec/blob/main/spec.md).
+Artefact namespaces/repositories of the API layer will be mapped to an OCI
+registry according to the [OCI distribution specification](https://github.com/opencontainers/distribution-spec/blob/main/spec.md).
 
-Supported specification version is `v1`
+Supported specification version is `v1`.
 
 
 

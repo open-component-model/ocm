@@ -22,9 +22,9 @@ The type specific specification fields are:
 
 - **`filePath`** *string*
 
-  Path in filesystem used to host the repository.
+  Path in the filesystem used to host the repository.
 
-- **`fileFormat`** (optional) *bool*
+- **`fileFormat`** (optional) *string*
 
   The format to use to store content:
   - `directory`: stored as directory structure

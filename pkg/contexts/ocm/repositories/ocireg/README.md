@@ -13,7 +13,7 @@ type: OCIRegistry/v1
 The content of an OCM repository will be stored as OCI content using
 a dedicated OCI repository prefix.
 
-Supported specification version is `v1`
+Supported specification version is `v1`.
 
 
 

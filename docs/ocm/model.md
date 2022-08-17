@@ -25,13 +25,15 @@ defined in the context of their usage.
 A *Component Repository* is a dedicated entity that provides technical access
 to the other elements of the Open Component Model.
 
-So far, we don't define a dedicated repository API for a dedicated technical
+So far, we don't define a repository API for a dedicated technical native
 instance of an OCM repository, because we want to use existing storage
-subsystems, without the need of running OCM specific servers.
+subsystems, without the need of running OCM specific servers (Nevertheless,
+such an API is still compatible with this specification and could be defined in
+the future).
 
 Therefore, a component repository is typically given by a well-known storage
 subsystem hosting a content structure adhering to an [element mapping specification](interoperability.md) 
-for this dedicated kind of storage backend (e.g. OCI).
+for this kind of storage backend (e.g. OCI).
 
 So, any tool or language binding can map an existing storage technology into an
 OCM repository view by implementing the [abstract operations](operations.md)
@@ -46,7 +48,7 @@ can be added.
 A *Component* is an abstract entity describing a dedicated usage context or
 meaning for provided software. This semantic is defined by the owner of a
 component and subsumed by the component identity. It is technically defined
-by a globally unique identifier
+by a globally unique identifier.
 
 A component identifier uses the following naming scheme:
 
@@ -58,7 +60,7 @@ A component identifier uses the following naming scheme:
 
 Hereby the DNS domain plus optionally any number  of leading name components MUST 
 be owned by the provider of a component. For example, `github.com`, as DNS domain
-is shared by lots of organizations. Therefore, all component identities, provided
+is shared by lots of organizations. Therefore, all component identities provided
 based on this DNS name, must include the owner prefix of the providing
 organization, e.g. `github.com/gardener`.
 
@@ -70,7 +72,7 @@ software artefacts required to run this tool.
 
 The component with the identity `github.com/gardener/external-dns-management` 
 contains software versions of a tool maintaining DNS entries in DNS providers 
-based om on Kubernetes resource manifests.
+based on Kubernetes resource manifests.
 
 Hereby, the prefix `github.com/gardener` describes a *GitHub* organization owned
 by the Gardener team developing the component `external-dns-management`.
@@ -112,12 +114,12 @@ appropriately named labels without the need for explicit dedicated model
 attributes (for example, attaching hints for the triage of identified
 vulnerabilities for this artefact).
 
-It describes:
+A component descriptor describes:
 - a history of [Repository Contexts](#repository-contexts) describing
   former repository locations of the component version along a transportation
   chain
 - a set of [Labels](#labels) to assign arbitrary kinds of information to the
-  component version, which is not formally defined by the Open Component Model.
+  component version, which is not formally defined by the Open Component Model
 - an optional set of [Sources](#sources), that were used to generate the 
   [Resources](#resources) provided by the component version
 - a set of [Resources](#resources) provided with this component version
@@ -129,15 +131,15 @@ It describes:
 
 There are several elements in a [component descriptor](#component-descriptor),
 which can be used to compose the artefact set finally described by a component
-versions.
+version.
 
-- elements to directly describe an [artefact](#artefacts) as part of the 
+- elements, which directly describe an [artefact](#artefacts) as part of the 
   component descriptor.
 - [references](#references), which can be used to include artefact sets described
   by other components.
 
 All those descriptive elements share a common basic attribute set.
-First, such an element mut be uniquely identifiable in the context
+First, such an element must be uniquely identifiable in the context
 of a component version. Therefore, it requires an [*Identity*](#identity).
 To be able to attach additional formal meta to such an element, which
 is not directly described by existing model elements, it is possible to
@@ -170,11 +172,11 @@ The element identity is composed by the following formal fields:
   to be unique in the context of the list of elements. 
   It basically also expresses the meaning or purpose of the element in the
   context of the component version. But it might be the
-  case, that multiple elements should be used for the same purpose. For example,
+  case that multiple elements should be used for the same purpose. For example,
   a component version is used to describe multiple versions of an artefact,
   which should be selected for different environment versions for deployment.
   Then, they could share the same name, to be able to easily find all those
-  elements. In such a case the name is not sufficient for uniquely identity
+  elements. In such a case the name is not sufficient to uniquely identify
   a dedicated element.
 
 - **`version`** (optional) *string*
@@ -200,8 +202,8 @@ of constraints is then just a partial match of the set of identity attributes.
 
 For example:
 
-You want to describe different image versions to use
-for different Kubernetes versions for multiple purposes. With the identity
+You want to describe different image versions to be used
+for different Kubernetes versions and for multiple purposes. With the identity
 attributes this can easily be modeled by using
 - the `name` attribute for the purpose (e.g. DNS controller)
 - the `version` attribute for the image version
@@ -234,7 +236,7 @@ to control its behavior).
 To be able to evaluate labels used by dedicated tool environments for any
 [component version](#component-versions), the same
 label name must have the same meaning, regardless by which component provider
-they are generated. To assure, that this information
+they are generated. To assure that this information
 has a globally unique interpretation or meaning, labels must comply with some
 naming scheme and use a common [structure](../names/labels.md).
 
@@ -257,8 +259,11 @@ Every artefact described by the component version has
 - a formal description of the [Access Specification](#artefact-access) ,
   which can be used to technically access the content of the artefact in form of
   a blob with a format defined by the artefact type. If there are multiple variants
-  possible for the blob format the access specification must be able to
-  describe an optional media type.
+  possible for the blob format, the access specification must be able to
+  describe an optional media type. Applying an access specification always
+  yields a media type. It might be implicitly provided the [implementation of
+  an access method](operations.md#access-methods) or explicitly provided by the
+  access specification.
 - a (optional) digest of the artefact that is immutable during transport steps.
 
 Those attributes are described by formal fields of the element description
@@ -314,28 +319,28 @@ Source elements do not have specific additional formal attributes.
 
 ##### Resources
 
-A *Resource* is an [Artefact](#artefacts), which is a delivery artefact,
+A *Resource* is a delivery [Artefact](#artefacts),
 intended for deployment into a runtime environment, or describing additional
-content relevant for a deployment mechanism. For example, installation procedures
+content, relevant for a deployment mechanism. For example, installation procedures
 or meta-model descriptions controlling orchestration and/or deployment mechanisms.
 (A simple example how such elements could be used to construct a deployment
 mechanism on top of the Open Component Model can be found [here](../reference/ocm_toi.md).)
 
-The Open Component Model makes absolutely no assumptions, how content described
+The Open Component Model makes absolutely no assumptions, about how content described
 by the model is finally deployed or used. All this is left to external tools and tool
 specific deployment information is formally represented as other artefacts with
 an appropriate dedicated own type.
 
-In addition to the common [artefact](#artefacts) information a resource
+In addition to the common [artefact](#artefacts) information, a resource
 may optionally describe a reference to the [source](#sources) by specifying
 its artefact identity.
 
-A resource uses the following additional formal field:
+A resource uses the following additional formal fields:
 
 - **`digest`** (optional) [*digest*](#digest-info)
 
   If the component descriptor is signed (directly or indirectly by one of its
-  referencing component versions) a digest of a resource is stored along with
+  referencing component versions), a digest of a resource is stored along with
   the resource description. This is required because there might be different
   digest and resource normalization algorithms.
 
@@ -370,7 +375,7 @@ Every access specification has a formal type and type specific attributes.
 The type uniquely specifies the technical procedure how to use the
 attributes and the [repository context](#repository-contexts) of
 the component descriptor containing the [access method specification](../formats/accessmethods/README.md)
-to retrieve the context of the artefact.
+to retrieve the content of the artefact.
 
 There are basically two ways an artefact blob can be stored:
 - `external` access methods allow referring to artefacts in any other
@@ -426,7 +431,7 @@ A reference element has the following additional formal fields:
 ##### Resource Reference
 
 Following the chain of [references](#references), starting from an initial
-[component version](#component-versions)
+[component version](#component-versions),
 any local or non-local artefact can be addressed relative to a component
 version by a possibly empty sequence (for a local artefact) of reference
 identities followed by the artefact identity in the context of the finally
@@ -449,7 +454,7 @@ CompVers: `A:1.0.0`
     component: B:1.0.0
 ```
 
-ComVers: `B:1.0.0`
+CompVers: `B:1.0.0`
 ```
 - Resources:
   - name IMAGE
@@ -478,19 +483,19 @@ model.
 
 This kind of relative access description is location-agnostic, meaning, independent
 of the [repository context](#repository-contexts) used to access
-the initial component version and resource. The stored description, only
+the initial component version and resource. The stored description only
 includes identities provided by the model. They can then be evaluated in a
-dedicated repository context to finally achieve the artefact content
+dedicated repository context to finally obtain the artefact content
 (or location) in the actually used environment (for example, after
-transportation into a fenced repository environment).
+transportation into a fenced environment).
 
-Depending on the transport history of the component version, always the
-correct resource location valid for the actual environment is used.
+Depending on the transport history of the component version, the
+correct artefact location valid for the actual environment is used.
 
 #### Signatures
 
-A [component version](#component-versions) may be singed by some authority.
-It is possible to multiple signatures in the component descriptor.
+A [component version](#component-versions) may be signed by some authority.
+It is possible to have multiple signatures in the component descriptor.
 
 When signing a component version, all included component versions are
 digested by digesting their [resources](#resources) and normalizing
@@ -513,7 +518,7 @@ Every signature entry has the following formal fields:
 
 - **`signature`** (required) [*signature*](#signature-info)
 
-  The signature for the specified digest
+  The signature for the specified digest.
 
 
 ##### Digest Info
@@ -522,7 +527,7 @@ A digest is specified by the following fields:
 
 - **`hashAlgorithm`** (required) *string*
 
-  The used digest algorithm
+  The used digest algorithm.
 
 - **`normalisationAlgorithm`** (required) *string*
 
@@ -541,7 +546,7 @@ A digest is specified by the following fields:
   but for OCI images the digest of the image manifest is used, regardless of the
   technical representation.
 
-  This is handled by dedicated *Digest Handlers*, which can be defined for dedicated
+  This is handled by *Digest Handlers*, which can be defined for dedicated
   artefact type and media type combinations. All implementations must provide
   appropriate handlers for the used resources types to be interoperable.
 
@@ -555,7 +560,7 @@ A signature is specified by the following fields:
 
 - **`algorithm`** (required) *string*
 
-  The used signing algorithm
+  The used signing algorithm.
 
 - **`mediaType`** (required) *string*
 

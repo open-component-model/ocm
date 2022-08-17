@@ -17,7 +17,7 @@ Layer 1 describes the elements and data formats the Open Component Model deals
 with. All client APIs MUST provide a binding for those kinds of elements.
 
 Layer 2 describes the abstract operations, which handle the persistence
-of the described to-level elements. All client APIs MUST provide a binding
+of the described top-level elements. All client APIs MUST provide a binding
 for those operations for the client code.
 
 
@@ -33,7 +33,7 @@ the storage backend.
 
 This avoids the need for a dedicated OCM server infrastructure. Client code
 includes a dedicated binding for the supported storage technology and
-an implementation of the specified mapping of the OBM elements to the
+an implementation of the specified mapping of the OCM elements to the
 storage elements. This will then be encapsulated behind a common binding
 of an interpretation of the layer 1 and 2 specification for the dedicated client
 environment.

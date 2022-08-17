@@ -42,7 +42,7 @@ environments without losing the validity of the access information. In any
 environment the actual description of the component version carries valid
 environment-specific information for the artefact location.
 
-A transport tool, can use the bill of material to determine the set of
+A transport tool can use the bill of material to determine the set of
 artefacts that have to be transferred and use the access information to access
 the technical content of the artefacts in the source environment. They will then
 be copied into a repository landscape on the target side. In the target
@@ -63,7 +63,8 @@ be able to verify the authenticity of the described content even after any
 number of transportation steps.
 
 This is achieved by signing a normalized form of a component version description,
-including the digests of the described artefacts, but not the technical access
+which is independent of a concrete serialization format of a [component descriptor](ocm/model.md#component-descriptor)
+It includes the digests of the described artefacts, but not the technical access
 specifications used to access the artefact in the environment, where the
 signature is created.
 

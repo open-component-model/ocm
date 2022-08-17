@@ -1,6 +1,6 @@
 # OCM Mapping to an OCI Registry
 
-OCM component version can be stored in OCI registries which 
+OCM component versions can be stored in OCI registries which 
 are conforming to the [OCI distribution specification](https://github.com/opencontainers/distribution-spec/blob/main/spec.md).
 Additionally, a registry must support a deep repository structure.
 
@@ -26,15 +26,16 @@ This json file has one defined formal field:
 
 - **`componentDescriptorLayer`** (required) [*OCI Content Descriptor*](https://github.com/opencontainers/image-spec/blob/main/descriptor.md)
 
-  It references the layer blob containing the component descriptor. The layer always should
-  be layer 0. The layer uses the media type `application/vnd.gardener.cloud.cnudie.component-descriptor.v2+yaml+tar`
+  It references the layer blob containing the component descriptor. The layer
+  always must be layer 0 of the manifest. It uses the media type
+  `application/vnd.gardener.cloud.cnudie.component-descriptor.v2+yaml+tar`
 
 
 TODO: decide which media type to use for v3 descriptors.
 
-The descriptor layer contains a tar archive with at least a first file
+The descriptor layer contains a tar archive with at least a single file
 with the name `component-descriptor.yaml` containing the component descriptor of the
-component version.
+component version. This file should always be the first file in the tar archive.
 
 OCM *Local Blobs* are stored in additional OCI *Image Layers*. The local blob
 identifier stored in the `localBlob` access specification is the OCI *blob digest*
@@ -60,7 +61,7 @@ is used to compose a repository name of the form:
 </div>
 
 Without a given tag, the provided external access specification (of type `ociArtefact`)
-uses a digest based reference
+uses a digest based reference.
 
 Additional blob transformations can be added by registering appropriate blob handlers.
 

@@ -11,14 +11,14 @@ addressing scheme, supporting arbitrary names.
 For example, an OCI repository with a deep repository structure, is suitable
 to host OCM components (see [OCI mapping Scheme](modelmapping/oci/README.md)).
 
-On the client side a suitable implementation or language binding must available
+On the client side, a suitable implementation or language binding must available
 to work with component information stored in such a storage backend.
 
 The OCM project provides a complete implementation for common OCI registries,
 and mapping specification for S3 and OCI.
 
-Every such binding must support at least a dedicated set of abstract operations
-working with {elements of the component model}(model.md).
+Every such binding must support at least the mandatory set of abstract operations
+working with [elements of the component model](model.md) (see below).
 
 ## Mandatory Model Operations
 
@@ -27,7 +27,7 @@ The following operations are mandatory:
 - **`UploadComponentDescriptor(ComponentDescriptor-YAML) error`**
 
   Persist a serialized form of the descriptor of a [component version](model.md#component-versions)  with its
-  component identity and version name in way so that is retrievable again using
+  component identity and version name in way so that it is retrievable again using
   this identity.
 
 - **`GetComponentDescriptor(ComponentId, VersionName) (ComponentDescriptor-YAML, error)`**
@@ -38,12 +38,12 @@ The following operations are mandatory:
 
   Store a byte stream or blob under a namespace given by the component version
   identity and return a local blob identity (as string) that can be used to retrieve
-  the blob, again (together with the component version identity)
+  the blob, again (together with the component version identity).
 
   Additionally, a dedicated media type can be used to decide how to internally
   represent the artefact content.
 
-  Optionally the operation may decide to store the blob in dedicated ways according
+  Optionally, the operation may decide to store the blob in dedicated ways according
   to its media type. For example, an OCI based implementation can represent 
   blobs containing an OCI artefact as regular, globally addressable object.
 
@@ -70,7 +70,7 @@ Optional operations might be:
 
 - **`DeleteComponentVersion(ComponentId, VersionName) error`**
 
-  To be able to clean up old information an operation to delete the information
+  To be able to clean up old information, an operation to delete the information
   stored for a component version should be available.
 
 - **`DeleteBlob(ComponentId, VersionName, BlobIndentity) error`**
@@ -82,13 +82,13 @@ Optional operations might be:
 - **`ListComponents(ComponentId-Prefix) ([]ComponentId, error)`**
 
   List all components in the given identifier namespace. (The structure of a 
-  component id based on hierarchical namespace)
+  component id based on hierarchical namespace).
 
-- **`ListComponents(ComponentId-Prefix) ([]ComponentId, error)`**
+- **`ListComponentClosure(ComponentId-Prefix) ([]ComponentId, error)`**
 
   List all components in the given identifier namespace, recursively.
   It should not only return component identities, that are direct children,
-  traverse the complete subtree.
+  but traverse the complete subtree.
 
 ## Access Methods
 
