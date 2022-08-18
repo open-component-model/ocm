@@ -14,7 +14,9 @@ This specification is divided into three parts:
 </div>
 
 Layer 1 describes the elements and data formats the Open Component Model deals
-with. All client APIs MUST provide a binding for those kinds of elements.
+with. All client APIs MUST provide a binding
+for the mandatory operations for the client code and SHOULD provide a
+binding for the optional ones.
 
 Layer 2 describes the abstract operations, which handle the persistence
 of the described top-level elements. All client APIs MUST provide a binding
@@ -27,8 +29,8 @@ Instead, it focuses on the mapping of the OCM functionality to an already
 existing, common storage backend, like the OCI Registries.
 
 Layer 3 defines how the elements of layer 1 are mapped to various
-storage technologies. The border between a client tool and a storage backend
-, and therefore the interoperability layer, is typically the API of
+storage technologies. The border between a client tool and a storage backend,
+and therefore the interoperability layer, is typically the API of
 the storage backend.
 
 This avoids the need for a dedicated OCM server infrastructure. Client code
@@ -37,6 +39,30 @@ an implementation of the specified mapping of the OCM elements to the
 storage elements. This will then be encapsulated behind a common binding
 of an interpretation of the layer 1 and 2 specification for the dedicated client
 environment.
+
+An implementation of this layer for a dedicated storage technology MUST
+implement this mapping by supporting the mandatory abstract model operations
+defined in layer 2. It SHOULD implement the optional operations, also.
+
+<div align="center"> 
+<img src="ocmaltbind.png" alt="Alternatives for Language Bindings" width="800"/>
+</div>
+
+There are two basic ways how layer 1/2 and layer 3 can interact in a given
+language binding.
+
+1) The left diagram in the above picture shows two independent implementations
+   for two storage technologies. Here, the consumer code has to deal
+   with different variants of an OCM conform API to deal with different storage
+   technologies. This is a valid implementation, but it makes it extremely
+   difficult for tools on top of these APIs to work with different technologies.
+   All tools have to implement this technology fork on their own.
+2) The right diagram shows the preferred solution. A *generic language binding*
+   for layer 1 and 2 of the specification maps the operations to an internal
+   *Provider API* that has to be implemented by a dedicated mapping
+   implementation. According to information provided by a repository specification,
+   which is already part of the OCM specification, the fork can be implemented
+   transparently for the consumer code.
 
 This way, all appropriate clients can interoperate with all instances of the
 supported storage backend types.
