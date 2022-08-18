@@ -1,14 +1,21 @@
 package gardenerconfig
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	gardenercfgcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
 	RepositoryType   = "GardenerConfig"
 	RepositoryTypeV1 = RepositoryType + runtime.VersionSeparator + "v1"
+	CONSUMER_TYPE    = "gardenerConfig"
 )
 
 func init() {
@@ -22,18 +29,16 @@ type RepositorySpec struct {
 	URL                         string                    `json:"url"`
 	ConfigType                  gardenercfgcpi.ConfigType `json:"configType"`
 	Cipher                      Cipher                    `json:"cipher"`
-	Key                         []byte                    `json:"key"`
 	PropagateConsumerIdentity   bool                      `json:"propagateConsumerIdentity"`
 }
 
 // NewRepositorySpec creates a new memory RepositorySpec
-func NewRepositorySpec(url string, configType gardenercfgcpi.ConfigType, cipher Cipher, key []byte, propagateConsumerIdentity bool) *RepositorySpec {
+func NewRepositorySpec(url string, configType gardenercfgcpi.ConfigType, cipher Cipher, propagateConsumerIdentity bool) *RepositorySpec {
 	return &RepositorySpec{
 		ObjectVersionedType:       runtime.NewVersionedObjectType(RepositoryType),
 		URL:                       url,
 		ConfigType:                configType,
 		Cipher:                    cipher,
-		Key:                       key,
 		PropagateConsumerIdentity: propagateConsumerIdentity,
 	}
 }
@@ -44,5 +49,48 @@ func (a *RepositorySpec) GetType() string {
 
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi.Repository, error) {
 	repos := ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories).(*Repositories)
-	return repos.GetRepository(ctx, a.URL, a.ConfigType, a.Cipher, a.Key, a.PropagateConsumerIdentity)
+
+	key, err := getKey(ctx, a.URL)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get key from context: %w", err)
+	}
+
+	return repos.GetRepository(ctx, a.URL, a.ConfigType, a.Cipher, key, a.PropagateConsumerIdentity)
+}
+
+func getKey(cctx cpi.Context, configURL string) ([]byte, error) {
+	parsedURL, err := utils.ParseURL(configURL)
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse url: %w", err)
+	}
+
+	id := cpi.ConsumerIdentity{
+		cpi.CONSUMER_ATTR_TYPE: CONSUMER_TYPE,
+	}
+	id.SetNonEmptyValue(hostpath.ID_HOSTNAME, parsedURL.Host)
+	id.SetNonEmptyValue(hostpath.ID_SCHEME, parsedURL.Scheme)
+	id.SetNonEmptyValue(hostpath.ID_PATHPREFIX, strings.Trim(parsedURL.Path, "/"))
+	id.SetNonEmptyValue(hostpath.ID_PORT, parsedURL.Port())
+
+	var creds cpi.Credentials
+	src, err := cctx.GetCredentialsForConsumer(id, hostpath.IdentityMatcher(CONSUMER_TYPE))
+	if err != nil {
+		if !errors.IsErrUnknown(err) {
+			return nil, fmt.Errorf("unable to get credentials source: %w", err)
+		}
+		return nil, nil
+	}
+	if src != nil {
+		creds, err = src.Credentials(cctx)
+		if err != nil {
+			return nil, fmt.Errorf("unable to get credentials from credentials source: %w", err)
+		}
+	}
+
+	var key string
+	if creds != nil {
+		key = creds.GetProperty(cpi.ATTR_KEY)
+	}
+
+	return []byte(key), nil
 }

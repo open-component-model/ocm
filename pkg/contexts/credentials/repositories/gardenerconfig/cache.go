@@ -25,13 +25,12 @@ func newRepositories(datacontext.Context) interface{} {
 func (r *Repositories) GetRepository(ctx cpi.Context, url string, configType gardenercfgcpi.ConfigType, cipher Cipher, key []byte, propagateConsumerIdentity bool) (*Repository, error) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	repo := r.repos[url]
-	if repo == nil {
+	if _, ok := r.repos[url]; !ok {
 		repo, err := NewRepository(ctx, url, configType, cipher, key, propagateConsumerIdentity)
 		if err != nil {
 			return nil, fmt.Errorf("unable to create repository: %w", err)
 		}
 		r.repos[url] = repo
 	}
-	return repo, nil
+	return r.repos[url], nil
 }

@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/url"
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	gardenercfgcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func init() {
@@ -50,11 +51,7 @@ func (h Handler) ParseConfig(configReader io.Reader) ([]gardenercfgcpi.Credentia
 			port   string
 		)
 		if credential.Host != "" {
-			if !strings.Contains(credential.Host, "://") {
-				credential.Host = "dummy://" + credential.Host
-			}
-
-			parsedHost, err := url.Parse(credential.Host)
+			parsedHost, err := utils.ParseURL(credential.Host)
 			if err != nil {
 				return nil, fmt.Errorf("unable to parse host: %w", err)
 			}
@@ -63,18 +60,21 @@ func (h Handler) ParseConfig(configReader io.Reader) ([]gardenercfgcpi.Credentia
 		}
 
 		for _, imgRef := range credential.ImageReferencePrefixes {
-			parsedImgPrefix, err := parseImageRef(imgRef)
+			parsedImgPrefix, err := utils.ParseURL(imgRef)
 			if err != nil {
 				return nil, fmt.Errorf("unable to parse image prefix: %w", err)
 			}
+			if parsedImgPrefix.Host == "index.docker.io" {
+				parsedImgPrefix.Host = "docker.io"
+			}
 
 			consumerIdentity := cpi.ConsumerIdentity{
-				cpi.ATTR_TYPE:          identity.CONSUMER_TYPE,
-				identity.ID_HOSTNAME:   parsedImgPrefix.Host,
-				identity.ID_PATHPREFIX: strings.Trim(parsedImgPrefix.Path, "/"),
+				cpi.CONSUMER_ATTR_TYPE: identity.CONSUMER_TYPE,
+				hostpath.ID_HOSTNAME:   parsedImgPrefix.Host,
+				hostpath.ID_PATHPREFIX: strings.Trim(parsedImgPrefix.Path, "/"),
 			}
-			consumerIdentity.SetNonEmptyValue(identity.ID_SCHEME, scheme)
-			consumerIdentity.SetNonEmptyValue(identity.ID_PORT, port)
+			consumerIdentity.SetNonEmptyValue(hostpath.ID_SCHEME, scheme)
+			consumerIdentity.SetNonEmptyValue(hostpath.ID_PORT, port)
 
 			c := credentials{
 				name:             credentialName,
@@ -87,23 +87,6 @@ func (h Handler) ParseConfig(configReader io.Reader) ([]gardenercfgcpi.Credentia
 	}
 
 	return creds, nil
-}
-
-func parseImageRef(imgRef string) (*url.URL, error) {
-	if !strings.Contains(imgRef, "://") {
-		imgRef = "dummy://" + imgRef
-	}
-
-	parsedImgRef, err := url.Parse(imgRef)
-	if err != nil {
-		return nil, err
-	}
-
-	if parsedImgRef.Host == "index.docker.io" {
-		parsedImgRef.Host = "docker.io"
-	}
-
-	return parsedImgRef, nil
 }
 
 func newCredentialsFromContainerRegistryCredentials(auth *containerRegistryCredentials) cpi.Credentials {
