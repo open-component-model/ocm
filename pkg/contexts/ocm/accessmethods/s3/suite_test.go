@@ -12,10 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package compilererror
+package s3_test
 
-type A struct {
-	c C
+import (
+	"testing"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+)
+
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "S3 Test Suite")
 }
-
-type O = A
