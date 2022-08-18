@@ -23,4 +23,5 @@ const (
 	ATTR_IDENTITY_TOKEN = "identityToken"
 	ATTR_REGISTRY_TOKEN = "registryToken"
 	ATTR_TOKEN          = "token"
+	ATTR_KEY            = "key"
 )
