@@ -26,6 +26,7 @@ import (
 
 var Schema *gojsonschema.Schema
 
+// TODO: Remove these panics from the init function.
 func init() {
 	dataBytes, err := ResourcesComponentDescriptorV2SchemaYamlBytes()
 	if err != nil {

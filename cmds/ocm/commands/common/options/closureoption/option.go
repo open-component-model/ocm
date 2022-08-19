@@ -16,6 +16,7 @@ package closureoption
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/pflag"
 
@@ -42,8 +43,8 @@ type Option struct {
 	FieldEnricher    func(interface{}) []string
 }
 
-func New(elemname string, settings ...interface{}) *Option {
-	o := &Option{ElementName: elemname, AddReferencePath: options.Always()}
+func New(elemName string, settings ...interface{}) *Option {
+	o := &Option{ElementName: elemName, AddReferencePath: options.Always()}
 	for _, s := range settings {
 		switch v := s.(type) {
 		case options.OptionSelector:
@@ -55,11 +56,13 @@ func New(elemname string, settings ...interface{}) *Option {
 		case func(interface{}) []string:
 			o.FieldEnricher = v
 		default:
-			panic(fmt.Errorf("invalid setting for closure option: %T", s))
+			fmt.Printf("invalid setting for closure option: %T\n", s)
+			os.Exit(1)
 		}
 	}
 	if (len(o.AdditionalFields) > 0) != (o.FieldEnricher != nil) {
-		panic(fmt.Errorf("invalid setting for closure option: both, addituonal fields and enricher must be set"))
+		fmt.Println("invalid setting for closure option: both, additional fields and enricher must be set")
+		os.Exit(1)
 	}
 	return o
 }

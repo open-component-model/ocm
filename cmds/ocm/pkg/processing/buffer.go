@@ -122,7 +122,7 @@ type ProcessingIterator interface {
 }
 
 type ProcessingBuffer interface {
-	Add(e ProcessingEntry) ProcessingBuffer
+	Add(e ProcessingEntry) (ProcessingBuffer, error)
 	Len() int
 	Get(int) interface{}
 	Open()
@@ -143,7 +143,7 @@ type BufferFrame interface {
 }
 
 type BufferImplementation interface {
-	Add(e ProcessingEntry) bool
+	Add(e ProcessingEntry) (bool, error)
 	Open()
 	Close()
 	Len() int
@@ -176,14 +176,17 @@ func (this *_buffer) new(i BufferImplementation) *_buffer {
 	return this
 }
 
-func (this *_buffer) Add(e ProcessingEntry) ProcessingBuffer {
+func (this *_buffer) Add(e ProcessingEntry) (ProcessingBuffer, error) {
 	this.Lock()
-	notify := this.BufferImplementation.Add(e)
+	notify, err := this.BufferImplementation.Add(e)
+	if err != nil {
+		return nil, fmt.Errorf("buffer add failed: %w", err)
+	}
 	this.Unlock()
 	if notify {
 		this.Broadcast()
 	}
-	return this
+	return this, nil
 }
 
 func (this *_buffer) Open() {
@@ -251,9 +254,9 @@ func (this *simpleBuffer) ProcessingIterator() ProcessingIterator {
 	return (&simpleBufferIterator{}).new(this, false)
 }
 
-func (this *simpleBuffer) Add(e ProcessingEntry) bool {
+func (this *simpleBuffer) Add(e ProcessingEntry) (bool, error) {
 	this.entries = append(this.entries, e)
-	return true
+	return true, nil
 }
 
 func (this *simpleBuffer) Len() int {
@@ -362,9 +365,11 @@ func (this *orderedBuffer) SetFrame(frame BufferFrame) {
 	this.simple.SetFrame(frame)
 }
 
-func (this *orderedBuffer) Add(e ProcessingEntry) bool {
+func (this *orderedBuffer) Add(e ProcessingEntry) (bool, error) {
 	e.Index.Validate(e.MaxIndex)
-	this.simple.Add(e)
+	if _, err := this.simple.Add(e); err != nil {
+		return false, fmt.Errorf("ordered buffer add failed: %w", err)
+	}
 	n := data.NewDLL(&e)
 
 	c := this.root.DLL()
@@ -376,15 +381,15 @@ func (this *orderedBuffer) Add(e ProcessingEntry) bool {
 		}
 		c, i = i, i.Next()
 	}
-	c.Append(n)
+	if err := c.Append(n); err != nil {
+		return false, fmt.Errorf("ordered buffer add failed: %w", err)
+	}
 	this.size++
 	if n.Next() == nil {
 		this.last = n
 	}
 
 	increased := false
-	//fmt.Printf("add to %v{%v}  cur %v\n", e.Index, e.Value, this.nextIndex)
-
 	next := this.valid.Next()
 	for next != nil && !next.Get().(*ProcessingEntry).Index.After(this.nextIndex) {
 		n := next.Get().(*ProcessingEntry)
@@ -392,9 +397,8 @@ func (this *orderedBuffer) Add(e ProcessingEntry) bool {
 		this.valid = next
 		next = next.Next()
 		increased = true
-		//fmt.Printf("increase to %v{%v}\n", n.Index, n.Value)
 	}
-	return increased
+	return increased, nil
 }
 
 func (this *orderedBuffer) Close() {
@@ -543,7 +547,10 @@ func NewEntryIterableFromIterable(data data.Iterable) ProcessingIterable {
 	go func() {
 		i := data.Iterator()
 		for idx := 0; i.HasNext(); idx++ {
-			c.Add(ProcessingEntry{Top(idx), -1, 0, true, i.Next()})
+			if _, err := c.Add(ProcessingEntry{Top(idx), -1, 0, true, i.Next()}); err != nil {
+				fmt.Printf("failed to add entries: %s", err)
+				break
+			}
 		}
 		c.Close()
 	}()

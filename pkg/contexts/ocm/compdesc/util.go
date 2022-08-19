@@ -18,10 +18,6 @@ type conversionError struct {
 	error
 }
 
-func ThrowConversionError(err error) {
-	panic(conversionError{err})
-}
-
 func (e conversionError) Error() string {
 	return "conversion error: " + e.error.Error()
 }

@@ -26,7 +26,10 @@ var _ = Describe("linked list", func() {
 		It("end", func() {
 			list := NewLinkedList()
 
-			list.Append(1).Append(2)
+			l, err := list.Append(1)
+			Expect(err).ToNot(HaveOccurred())
+			l, err = l.Append(2)
+			Expect(err).ToNot(HaveOccurred())
 
 			Expect(Slice(list)).To(Equal([]interface{}{1, 2}))
 		})
@@ -34,7 +37,12 @@ var _ = Describe("linked list", func() {
 		It("start", func() {
 			list := NewLinkedList()
 
-			list.Append(1).Insert(2).Insert(3)
+			l, err := list.Append(1)
+			Expect(err).ToNot(HaveOccurred())
+			l, err = l.Insert(2)
+			Expect(err).ToNot(HaveOccurred())
+			l, err = l.Insert(3)
+			Expect(err).ToNot(HaveOccurred())
 
 			Expect(Slice(list)).To(Equal([]interface{}{3, 2, 1}))
 		})

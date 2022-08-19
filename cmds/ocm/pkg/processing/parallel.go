@@ -18,10 +18,8 @@ import (
 	"fmt"
 	"sync"
 
-	data "github.com/open-component-model/ocm/cmds/ocm/pkg/data"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 )
-
-var log = false
 
 type _ParallelProcessing struct {
 	data    ProcessingIterable
@@ -97,23 +95,15 @@ type _ParallelStep struct {
 func (this *_ParallelStep) new(pool ProcessorPool, data ProcessingIterable, op operation, creator BufferCreator) *_ParallelStep {
 	buffer := creator()
 	this._ParallelProcessing.new(buffer, pool, creator)
+	// TODO: Error handling for buffer.Add
 	go func() {
-		if log {
-			fmt.Printf("start processing\n")
-		}
 		this.pool.Request()
 		i := data.ProcessingIterator()
 		var wg sync.WaitGroup
 		for i.HasNext() {
 			e := i.NextProcessingEntry()
-			if log {
-				fmt.Printf("start %v\n", e.Index)
-			}
 			wg.Add(1)
 			pool.Exec(func() {
-				if log {
-					fmt.Printf("process %v\n", e.Index)
-				}
 				var r operationResult
 				if e.Valid {
 					r, e.Valid = op.process(e.Value)
@@ -140,9 +130,6 @@ func (this *_ParallelStep) new(pool ProcessorPool, data ProcessingIterable, op o
 						}
 					}
 				}
-				if log {
-					fmt.Printf("done %v\n", e.Index)
-				}
 				wg.Done()
 
 			})
@@ -150,9 +137,6 @@ func (this *_ParallelStep) new(pool ProcessorPool, data ProcessingIterable, op o
 		wg.Wait()
 		this.pool.Release()
 		buffer.Close()
-		if log {
-			fmt.Printf("done processing\n")
-		}
 	}()
 	return this
 }

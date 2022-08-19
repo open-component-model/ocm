@@ -14,15 +14,17 @@
 
 package data
 
+import "fmt"
+
 type Appender interface {
-	Append(interface{}) ListElement
+	Append(interface{}) (ListElement, error)
 }
 
 type ListElement interface {
 	Set(interface{})
 	Get() interface{}
-	Append(interface{}) ListElement
-	Insert(interface{}) ListElement
+	Append(interface{}) (ListElement, error)
+	Insert(interface{}) (ListElement, error)
 }
 
 type listElement struct {
@@ -40,18 +42,22 @@ func (l *listElement) Get() interface{} {
 	return l.element
 }
 
-func (l *listElement) Append(e interface{}) ListElement {
+func (l *listElement) Append(e interface{}) (ListElement, error) {
 	n := &listElement{element: e}
 	n.dll.payload = n
-	l.dll.Append(&n.dll)
-	return n
+	if err := l.dll.Append(&n.dll); err != nil {
+		return nil, fmt.Errorf("list element append failed: %s", err)
+	}
+	return n, nil
 }
 
-func (l *listElement) Insert(e interface{}) ListElement {
+func (l *listElement) Insert(e interface{}) (ListElement, error) {
 	n := &listElement{element: e}
 	n.dll.payload = n
-	l.dll.Prev().Append(&n.dll)
-	return n
+	if err := l.dll.Prev().Append(&n.dll); err != nil {
+		return nil, fmt.Errorf("list element insert failed: %w", err)
+	}
+	return n, nil
 }
 
 type ElementIterator interface {
@@ -89,11 +95,13 @@ func (this *LinkedList) New() *LinkedList {
 	return this
 }
 
-func (this *LinkedList) Append(e interface{}) ListElement {
+func (this *LinkedList) Append(e interface{}) (ListElement, error) {
 	n := &listElement{element: e}
 	n.dll.payload = n
-	this.root.Append(&n.dll)
-	return n
+	if err := this.root.Append(&n.dll); err != nil {
+		return nil, fmt.Errorf("linked list append failed: %w", err)
+	}
+	return n, nil
 }
 
 func (this *LinkedList) Iterator() Iterator {

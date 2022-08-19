@@ -120,7 +120,11 @@ func (o *Command) Run() error {
 	if err != nil {
 		return err
 	}
-	return utils.HandleOutputs(opts, hdlr, utils.ElemSpecs(o.Ids)...)
+	specs, err := utils.ElemSpecs(o.Ids)
+	if err != nil {
+		return fmt.Errorf("failed to get elem specs: %w", err)
+	}
+	return utils.HandleOutputs(opts, hdlr, specs...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

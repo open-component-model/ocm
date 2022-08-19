@@ -15,6 +15,8 @@
 package support
 
 import (
+	"fmt"
+
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
@@ -58,7 +60,7 @@ func NewArtefact(container ArtefactSetContainerImpl, defs ...*artdesc.Artefact) 
 	}
 	state, err := accessobj.NewBlobStateForObject(mode, def, cpi.NewArtefactStateHandler())
 	if err != nil {
-		panic("oops: " + err.Error())
+		return nil, fmt.Errorf("failed to get blob state for object: %w", err)
 	}
 
 	return newArtefactImpl(container, state)

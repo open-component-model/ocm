@@ -40,8 +40,8 @@ func (s StringSpec) String() string {
 type TypeHandler interface {
 	// All returns all elements according to its context
 	All() ([]output.Object, error)
-	// Get returns the the elements for a dedicated specification
-	// according to the handlers context.
+	// Get returns the elements for a dedicated specification
+	// according to the handler context.
 	Get(name ElemSpec) ([]output.Object, error)
 	Close() error
 }
@@ -54,19 +54,19 @@ func StringElemSpecs(args ...string) []ElemSpec {
 	return r
 }
 
-func ElemSpecs(list interface{}) []ElemSpec {
+func ElemSpecs(list interface{}) ([]ElemSpec, error) {
 	if list == nil {
-		return nil
+		return nil, nil
 	}
 	v := reflect.ValueOf(list)
 	if v.Kind() != reflect.Array && v.Kind() != reflect.Slice {
-		panic("no array")
+		return nil, fmt.Errorf("kind was not an array: %s", v.Kind().String())
 	}
 	r := make([]ElemSpec, v.Len())
 	for i := 0; i < v.Len(); i++ {
 		r[i] = v.Index(i).Interface().(ElemSpec)
 	}
-	return r
+	return r, nil
 }
 
 func HandleArgs(opts *output.Options, handler TypeHandler, args ...string) error {
@@ -87,8 +87,7 @@ func HandleOutput(output output.Output, handler TypeHandler, specs ...ElemSpec) 
 			return fmt.Errorf("all mode not support")
 		}
 		for _, r := range result {
-			err := output.Add(r)
-			if err != nil {
+			if err := output.Add(r); err != nil {
 				fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 			}
 		}
@@ -99,14 +98,12 @@ func HandleOutput(output output.Output, handler TypeHandler, specs ...ElemSpec) 
 			return errors.Wrapf(err, "error processing %q", s.String())
 		}
 		for _, r := range result {
-			err := output.Add(r)
-			if err != nil {
+			if err := output.Add(r); err != nil {
 				fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 			}
 		}
 	}
-	err := output.Close()
-	if err != nil {
+	if err := output.Close(); err != nil {
 		return err
 	}
 	return output.Out()

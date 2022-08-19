@@ -71,7 +71,7 @@ func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r common.Resource, 
 		},
 		Type:      spec.Type,
 		Relation:  spec.Relation,
-		SourceRef: compdescv2.Convert_SourceRefs_to(spec.SourceRef),
+		SourceRef: compdescv2.ConvertSourceRefsTo(spec.SourceRef),
 	}
 	return v.SetResource(meta, acc)
 }

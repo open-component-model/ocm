@@ -15,6 +15,7 @@
 package data
 
 import (
+	"fmt"
 	"sync"
 )
 
@@ -35,8 +36,8 @@ func (this *DLLRoot) New(p interface{}) *DLLRoot {
 	return this
 }
 
-func (this *DLLRoot) Append(d *DLL) {
-	this.root.Append(d)
+func (this *DLLRoot) Append(d *DLL) error {
+	return this.root.Append(d)
 }
 
 func (this *DLLRoot) Next() *DLL {
@@ -87,9 +88,9 @@ func (this *DLL) Set(p interface{}) {
 	this.payload = p
 }
 
-func (this *DLL) Append(d *DLL) {
+func (this *DLL) Append(d *DLL) error {
 	if d.next != nil || d.prev != nil {
-		panic("dll element already in use")
+		return fmt.Errorf("dll element already in use")
 	}
 	if this.lock != nil {
 		this.lock.Lock()
@@ -102,6 +103,7 @@ func (this *DLL) Append(d *DLL) {
 		this.next.prev = d
 	}
 	this.next = d
+	return nil
 }
 
 func (this *DLL) Remove() {

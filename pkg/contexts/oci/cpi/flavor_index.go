@@ -15,6 +15,8 @@
 package cpi
 
 import (
+	"fmt"
+
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -41,12 +43,12 @@ func NewIndex(access ArtefactSetContainer, defs ...*artdesc.Index) (core.IndexAc
 	}
 	state, err := accessobj.NewBlobStateForObject(mode, def, NewIndexStateHandler())
 	if err != nil {
-		panic("oops")
+		return nil, fmt.Errorf("failed to get blob state for object: %w", err)
 	}
 
 	p, err := access.NewArtefactProvider(state)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create new artefact provider: %w", err)
 	}
 	i := &IndexImpl{
 		artefactBase: artefactBase{
