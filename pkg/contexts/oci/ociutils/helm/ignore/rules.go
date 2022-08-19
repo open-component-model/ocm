@@ -19,6 +19,7 @@ package ignore
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -152,7 +153,7 @@ func (r *Rules) parseRule(rule string) error {
 	// Fail any patterns that can't compile. A non-empty string must be
 	// given to Match() to avoid optimization that skips rule evaluation.
 	if _, err := filepath.Match(rule, "abc"); err != nil {
-		return err
+		return fmt.Errorf("failed to match rule: %w", err)
 	}
 
 	p := &pattern{raw: rule}

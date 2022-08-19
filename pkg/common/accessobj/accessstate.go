@@ -154,22 +154,25 @@ func newState(mode AccessMode, a StateAccess, p StateHandler) (*state, error) {
 			return nil, err
 		}
 	}
-	var current interface{}
-	var original interface{}
-	if blob == nil {
-		current = p.Initial()
-	} else {
+
+	var current, original interface{}
+
+	if blob != nil {
 		data, err := blob.Get()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to get blob data: %w", err)
 		}
+
 		blob = accessio.BlobAccessForData(blob.MimeType(), data) // cache orginal data
 		current, err = p.Decode(data)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to decode blob data: %w", err)
 		}
+
 		// we don't need a copy operation, because we can just deserialize it twice.
 		original, _ = p.Decode(data)
+	} else {
+		current = p.Initial()
 	}
 
 	return &state{
@@ -220,9 +223,11 @@ func (s *state) IsCreate() bool {
 func (s *state) Refresh() error {
 	n, err := newState(s.mode, s.access, s.handler)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to create new state: %w", err)
 	}
+
 	*s = *n
+
 	return nil
 }
 

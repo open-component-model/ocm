@@ -102,19 +102,22 @@ func (o *BootstrapperCLIOptions) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *BootstrapperCLIOptions) Complete() error {
-	err := o.ExecutorOptions.Complete()
-	if err != nil {
-		return err
+	if err := o.ExecutorOptions.Complete(); err != nil {
+		return fmt.Errorf("unable to complete options: %w", err)
 	}
+
 	id := credentials.ConsumerIdentity{}
 	attrs := common.Properties{}
+
 	for _, s := range o.CredentialSettings {
 		i := strings.Index(s, "=")
 		if i < 0 {
 			return errors.ErrInvalid("credential setting", s)
 		}
+
 		name := s[:i]
 		value := s[i+1:]
+
 		if strings.HasPrefix(name, ":") {
 			if len(attrs) != 0 {
 				o.Context.CredentialsContext().SetCredentialsForConsumer(id, credentials.NewCredentials(attrs))
@@ -126,10 +129,12 @@ func (o *BootstrapperCLIOptions) Complete() error {
 		} else {
 			attrs[name] = value
 		}
+
 		if len(name) == 0 {
 			return errors.ErrInvalid("credential setting", s)
 		}
 	}
+
 	if len(attrs) != 0 {
 		o.Context.CredentialsContext().SetCredentialsForConsumer(id, credentials.NewCredentials(attrs))
 	} else {
@@ -155,7 +160,12 @@ func (o *BootstrapperCLIOptions) Complete() error {
 		}
 		err = ctx.ApplyConfig(spec, "cli")
 	}
-	return err
+
+	if err != nil {
+		return fmt.Errorf("unable to parse labels: %w", err)
+	}
+
+	return nil
 }
 
 func NewVersionCommand() *cobra.Command {

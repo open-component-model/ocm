@@ -50,9 +50,11 @@ func New() *Config {
 func (c *Config) AddConfig(cfg cpi.Config) error {
 	g, err := cpi.ToGenericConfig(cfg)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to convert cpi config to generic: %w", err)
 	}
+
 	c.Configurations = append(c.Configurations, g)
+
 	return nil
 }
 

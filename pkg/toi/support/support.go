@@ -66,32 +66,40 @@ func (o *ExecutorOptions) Complete() error {
 	}
 	compvers, err := common.ParseNameVersion(o.ComponentVersionName)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to parse component name and version: %w", err)
 	}
+
 	if o.OutputContext == nil {
 		o.OutputContext = out.New()
 	}
+
 	if o.Action == "" {
 		o.Action = "install"
 	}
+
 	if o.Root == "" {
 		o.Root = install.PathTOI
 	}
+
 	if o.Inputs == "" {
 		o.Inputs = o.Root + "/" + install.Inputs
 	}
+
 	if o.Outputs == "" {
 		o.Outputs = o.Root + "/" + install.Outputs
 	}
+
 	if o.RepoPath == "" {
 		o.RepoPath = o.Inputs + "/" + install.InputOCMRepo
 	}
+
 	if o.Config == "" {
 		cfg := o.Inputs + "/" + install.InputConfig
 		if ok, err := vfs.FileExists(o.FileSystem(), cfg); ok && err == nil {
 			o.Config = cfg
 		}
 	}
+
 	if o.Config != "" && o.ConfigData == nil {
 		o.ConfigData, err = vfs.ReadFile(o.FileSystem(), o.Config)
 		if err != nil {
@@ -105,9 +113,10 @@ func (o *ExecutorOptions) Complete() error {
 			o.OCMConfig = cfg
 		}
 	}
+
 	o.Context, err = ocmutils.Configure(o.Context, o.OCMConfig)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to configure context: %w", err)
 	}
 
 	if o.Parameters == "" {
@@ -116,6 +125,7 @@ func (o *ExecutorOptions) Complete() error {
 			o.Parameters = p
 		}
 	}
+
 	if o.Parameters != "" && o.ParameterData == nil {
 		o.ParameterData, err = vfs.ReadFile(o.FileSystem(), o.Parameters)
 		if err != nil {
@@ -138,7 +148,7 @@ func (o *ExecutorOptions) Complete() error {
 	if o.ComponentVersion == nil {
 		cv, err := o.Repository.LookupComponentVersion(compvers.GetName(), compvers.GetVersion())
 		if err != nil {
-			return err
+			return fmt.Errorf("failed component version lookup: %w", err)
 		}
 		o.ComponentVersion = cv
 		versCloser = cv
@@ -183,7 +193,7 @@ func (e *Executor) Execute() error {
 	if !e.Completed {
 		err := e.Options.Complete()
 		if err != nil {
-			return err
+			return fmt.Errorf("unable to complete options: %w", err)
 		}
 	}
 	list := errors.ErrListf("executor:")

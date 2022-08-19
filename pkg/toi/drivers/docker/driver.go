@@ -136,30 +136,40 @@ func (d *Driver) SetContainerErr(w io.Writer) {
 func pullImage(ctx context.Context, cli command.Cli, image string) error {
 	ref, err := reference.ParseNormalizedNamed(image)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to parse normalized name: %w", err)
 	}
 
 	// Resolve the Repository name from fqn to RepositoryInfo
 	repoInfo, err := registry.ParseRepositoryInfo(ref)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to parse repository info: %w", err)
 	}
+
 	authConfig := command.ResolveAuthConfig(ctx, cli, repoInfo.Index)
+
 	encodedAuth, err := command.EncodeAuthToBase64(authConfig)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable encode auth: %w", err)
 	}
+
 	options := types.ImagePullOptions{
 		RegistryAuth: encodedAuth,
 	}
+
 	responseBody, err := cli.Client().ImagePull(ctx, image, options)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to pull image: %w", err)
 	}
+
 	defer responseBody.Close()
 
 	// passing isTerm = false here because of https://github.com/Nvveen/Gotty/pull/1
-	return jsonmessage.DisplayJSONMessagesStream(responseBody, cli.Out(), cli.Out().FD(), false, nil)
+	err = jsonmessage.DisplayJSONMessagesStream(responseBody, cli.Out(), cli.Out().FD(), false, nil)
+	if err != nil {
+		return fmt.Errorf("unable to display json message: %w", err)
+	}
+
+	return nil
 }
 
 func (d *Driver) initializeDockerCli() (command.Cli, error) {
@@ -312,9 +322,10 @@ func getContainerUserID(user string) int {
 func (d *Driver) ApplyConfigurationOptions() error {
 	for _, opt := range d.dockerConfigurationOptions {
 		if err := opt(&d.containerCfg, &d.containerHostCfg); err != nil {
-			return err
+			return fmt.Errorf("unable to apply docker configuration: %w", err)
 		}
 	}
+
 	return nil
 }
 
@@ -337,7 +348,7 @@ func (d *Driver) setConfigurationOptions(op *install.Operation) error {
 	d.containerHostCfg = container.HostConfig{}
 
 	if err := d.ApplyConfigurationOptions(); err != nil {
-		return err
+		return fmt.Errorf("failed to apply configuration: %w", err)
 	}
 
 	return nil

@@ -15,6 +15,7 @@
 package docker
 
 import (
+	"fmt"
 	"strings"
 	"sync"
 
@@ -71,12 +72,16 @@ func (n *NamespaceContainer) IsClosed() bool {
 
 func (n *NamespaceContainer) Close() error {
 	n.lock.Lock()
+
 	defer n.lock.Unlock()
+
 	if n.cache != nil {
 		err := n.cache.Unref()
 		n.cache = nil
-		return err
+
+		return fmt.Errorf("failed to unref: %w", err)
 	}
+
 	return nil
 }
 
@@ -120,8 +125,11 @@ func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (int64, cpi.DataA
 }
 
 func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
-	_, _, err := n.cache.AddBlob(blob)
-	return err
+	if _, _, err := n.cache.AddBlob(blob); err != nil {
+		return fmt.Errorf("failed to add blob to cache: %w", err)
+	}
+
+	return nil
 }
 
 func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error) {
@@ -210,17 +218,21 @@ func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	if ok, _ := artdesc.IsDigest(digest.String()); ok {
 		return errors.ErrNotSupported("image access by digest")
 	}
+
 	src := n.namespace + ":" + digest.String()
+
 	if pattern.MatchString(digest.String()) {
 		// this definately no digest, but the library expects it this way
 		src = digest.String()
 	}
+
 	for _, tag := range tags {
 		err := n.repo.client.ImageTag(dummyContext, src, n.namespace+":"+tag)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to add image tag: %w", err)
 		}
 	}
+
 	return nil
 }
 

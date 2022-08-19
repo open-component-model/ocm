@@ -71,24 +71,30 @@ func (a *Config) AddCredentials(name string, props common.Properties) error {
 func (a *Config) AddCredentialsRef(name string, refname string, spec cpi.RepositorySpec) error {
 	repo, err := cpi.ToGenericRepositorySpec(spec)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to convert cpi repository spec to generic: %w", err)
 	}
+
 	ref := cpi.NewGenericCredentialsSpec(refname, repo)
 	a.Credentials = append(a.Credentials, CredentialsSpec{CredentialsName: name, Reference: ref})
+
 	return nil
 }
 
 func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	list := errors.ErrListf("applying config")
+
 	t, ok := target.(cpi.Context)
 	if !ok {
 		return cfgcpi.ErrNoContext(ConfigType)
 	}
+
 	repo, err := t.RepositoryForSpec(memory.NewRepositorySpec(a.RepoName))
 	if err != nil {
-		return err
+		return fmt.Errorf("unabel to get repository for spec: %w", err)
 	}
+
 	mem := repo.(*memory.Repository)
+
 	for i, e := range a.Credentials {
 		var creds cpi.Credentials
 		if e.Reference != nil {

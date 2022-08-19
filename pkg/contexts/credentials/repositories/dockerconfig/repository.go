@@ -99,13 +99,14 @@ func (r *Repository) Read(force bool) error {
 
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to read file '%s': %w", path, err)
 	}
 
 	cfg, err := config.LoadFromReader(bytes.NewBuffer(data))
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to load config: %w", err)
 	}
+
 	defaultStore := dockercred.DetectDefaultStore(cfg.CredentialsStore)
 	store := dockercred.NewNativeStore(cfg, defaultStore)
 	// get default native credential store

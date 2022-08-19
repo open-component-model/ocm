@@ -15,6 +15,7 @@
 package accessio
 
 import (
+	"fmt"
 	"io"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -123,11 +124,18 @@ func (c *once) Close() error {
 	if c.closer == nil {
 		return nil
 	}
+
 	t := c.closer
 	c.closer = nil
 	err := t.Close()
+
 	for _, cb := range c.callbacks {
 		cb()
 	}
-	return err
+
+	if err != nil {
+		return fmt.Errorf("unable to close: %w", err)
+	}
+
+	return nil
 }

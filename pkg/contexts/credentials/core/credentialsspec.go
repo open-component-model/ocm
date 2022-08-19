@@ -16,6 +16,7 @@ package core
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/modern-go/reflect2"
 
@@ -74,7 +75,7 @@ func (s DefaultCredentialsSpec) MarshalJSON() ([]byte, error) {
 func (s *DefaultCredentialsSpec) UnmarshalJSON(data []byte) error {
 	repo, err := DefaultContext.RepositoryTypes().Decode(data, runtime.DefaultJSONEncoding)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to decode data: %w", err)
 	}
 
 	specdata := &struct {
@@ -82,7 +83,7 @@ func (s *DefaultCredentialsSpec) UnmarshalJSON(data []byte) error {
 	}{}
 	err = json.Unmarshal(data, specdata)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed ot unmarshal spec data: %w", err)
 	}
 
 	s.RepositorySpec = repo.(RepositorySpec)
@@ -160,9 +161,11 @@ func (s *GenericCredentialsSpec) UnmarshalJSON(data []byte) error {
 
 	err := json.Unmarshal(data, spec)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal spec data: %w", err)
 	}
+
 	s.CredentialsName = ""
+
 	if name, ok := spec.Object["credentialsName"]; ok {
 		if n, ok := name.(string); ok {
 			s.CredentialsName = n

@@ -15,6 +15,7 @@
 package genericocireg
 
 import (
+	"fmt"
 	"path"
 	"strings"
 
@@ -104,12 +105,16 @@ func (c *ComponentVersionContainer) Close() error {
 	if c.manifest == nil {
 		return accessio.ErrClosed
 	}
+
 	c.manifest = nil
+
 	err := c.access.Close()
 	if err != nil {
 		c.comp.Close()
-		return err
+
+		return fmt.Errorf("failed to close access artefact access: %w", err)
 	}
+
 	return c.comp.Close()
 }
 
@@ -160,15 +165,17 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMe
 func (c *ComponentVersionContainer) Update() error {
 	err := c.Check()
 	if err != nil {
-		return err
+		return fmt.Errorf("check failed: %w", err)
 	}
+
 	if c.state.HasChanged() {
 		desc := c.GetDescriptor()
 		for i, r := range desc.Resources {
 			s, err := c.evalLayer(r.Access)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed resource layer evaluation: %w", err)
 			}
+
 			if s != r.Access {
 				desc.Resources[i].Access = s
 			}
@@ -176,19 +183,24 @@ func (c *ComponentVersionContainer) Update() error {
 		for i, r := range desc.Sources {
 			s, err := c.evalLayer(r.Access)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed source layer evaluation: %w", err)
 			}
+
 			if s != r.Access {
 				desc.Sources[i].Access = s
 			}
 		}
-		_, err = c.state.Update()
-		if err != nil {
-			return err
+
+		if _, err := c.state.Update(); err != nil {
+			return fmt.Errorf("failed to update state: %w", err)
 		}
-		_, err = c.comp.namespace.AddArtefact(c.manifest, c.version)
+
+		if _, err := c.comp.namespace.AddArtefact(c.manifest, c.version); err != nil {
+			return fmt.Errorf("unable to add artefact: %w", err)
+		}
 	}
-	return err
+
+	return nil
 }
 
 func (c *ComponentVersionContainer) evalLayer(s compdesc.AccessSpec) (compdesc.AccessSpec, error) {

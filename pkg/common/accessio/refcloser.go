@@ -15,6 +15,7 @@
 package accessio
 
 import (
+	"fmt"
 	"io"
 	"sync"
 )
@@ -104,26 +105,32 @@ func (v *view) Release() error {
 func (v *view) Finalize() error {
 	v.lock.Lock()
 	defer v.lock.Unlock()
+
 	if v.closed {
 		return ErrClosed
 	}
-	err := v.ref.UnrefLast()
-	if err == nil {
-		v.closed = true
+
+	if err := v.ref.UnrefLast(); err != nil {
+		return fmt.Errorf("unable to unref last: %w", err)
 	}
-	return err
+
+	v.closed = true
+
+	return nil
 }
 
 func (v *view) Close() error {
 	if v.main {
 		return v.Finalize()
 	}
+
 	return v.Release()
 }
 
 func (v *view) IsClosed() bool {
 	v.lock.Lock()
 	defer v.lock.Unlock()
+
 	return v.closed
 }
 
@@ -134,21 +141,3 @@ func (v *view) View() (CloserView, error) {
 func (v *view) Closer() io.Closer {
 	return v.ref.Closer()
 }
-
-////////////////////////////////////////////////////////////////////////////////
-
-/*
-type ClosableViewProvider[T io.Closer] interface {
-	View(main...bool)(T,error)
-}
-
-func ExecuteViewed[T io.Closer](c ClosableViewProvider[T], f func() error) error {
-	v, err:=c.View()
-	if err != nil {
-		return err
-	}
-	err=f()
-	v.Close()
-	return nil
-}
-*/

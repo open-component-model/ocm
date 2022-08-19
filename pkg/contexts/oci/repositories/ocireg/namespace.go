@@ -84,24 +84,31 @@ func (n *NamespaceContainer) Close() error {
 
 func (n *NamespaceContainer) getPusher(vers string) (resolve.Pusher, error) {
 	ref := n.repo.getRef(n.namespace, vers)
-	fmt.Printf("pusher for %s\n", ref)
 	resolver := n.resolver
+
+	fmt.Printf("pusher for %s\n", ref)
+
 	if ok, _ := artdesc.IsDigest(vers); !ok {
 		var err error
+
 		resolver, err = n.repo.getResolver(ref)
+
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("unable get resolver: %w", err)
 		}
 	}
+
 	return resolver.Pusher(dummyContext, ref)
 }
 
 func (n *NamespaceContainer) push(vers string, blob cpi.BlobAccess) error {
 	p, err := n.getPusher(vers)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to get pusher: %w", err)
 	}
+
 	fmt.Printf("pushing %s\n", vers)
+
 	return push(dummyContext, p, blob)
 }
 
@@ -126,8 +133,11 @@ func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (int64, cpi.DataA
 }
 
 func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
-	_, _, err := n.blobs.Get("").AddBlob(blob)
-	return err
+	if _, _, err := n.blobs.Get("").AddBlob(blob); err != nil {
+		return fmt.Errorf("unable to add blob: %w", err)
+	}
+
+	return nil
 }
 
 func (n *NamespaceContainer) ListTags() ([]string, error) {
@@ -179,19 +189,22 @@ func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, tags ...string) 
 func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error {
 	_, desc, err := n.resolver.Resolve(context.Background(), n.repo.getRef(n.namespace, digest.String()))
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to resolve: %w", err)
 	}
+
 	acc, err := NewDataAccess(n.fetcher, desc.Digest, desc.MediaType, false)
 	if err != nil {
-		return err
+		return fmt.Errorf("error creating new data access: %w", err)
 	}
+
 	blob := accessio.BlobAccessForDataAccess(desc.Digest, desc.Size, desc.MediaType, acc)
 	for _, tag := range tags {
 		err := n.push(tag, blob)
 		if err != nil {
-			return err
+			return fmt.Errorf("unable to push: %w", err)
 		}
 	}
+
 	return nil
 }
 

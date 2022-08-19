@@ -15,6 +15,8 @@
 package artefactset
 
 import (
+	"fmt"
+
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -67,8 +69,9 @@ func TransferArtefact(art cpi.ArtefactAccess, set cpi.ArtefactSink, tags ...stri
 func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, error) {
 	art, err := ns.GetArtefact(ref)
 	if err != nil {
-		return nil, err
+		return nil, GetArtifactError{Original: err, Ref: ref}
 	}
+
 	defer art.Close()
 
 	blob, err := art.Blob()
@@ -80,16 +83,18 @@ func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, e
 	return SythesizeArtefactSet(blob.MimeType(), func(set *ArtefactSet) error {
 		err = TransferArtefact(art, set)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to transfer artifact: %w", err)
 		}
 
 		if ok, _ := artdesc.IsDigest(ref); !ok {
 			err = set.AddTags(digest, ref)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to add tag: %w", err)
 			}
 		}
+
 		set.Annotate(MAINARTEFACT_ANNOTATION, digest.String())
+
 		return nil
 	})
 }
