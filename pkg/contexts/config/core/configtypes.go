@@ -74,7 +74,11 @@ func (t *configTypeScheme) AddKnownTypes(scheme runtime.Scheme) error {
 		return errors.ErrInvalid("type", reflect.TypeOf(scheme).String())
 	}
 
-	return t.Scheme.AddKnownTypes(scheme)
+	if err := t.Scheme.AddKnownTypes(scheme); err != nil {
+		return fmt.Errorf("failed to add known type: %w", err)
+	}
+	
+	return nil
 }
 
 func (t *configTypeScheme) Register(name string, rtype ConfigType) {
