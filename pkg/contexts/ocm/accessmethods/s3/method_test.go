@@ -24,6 +24,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/common/accessio/downloader"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/tmpcache"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
@@ -54,7 +55,7 @@ var _ = Describe("Method", func() {
 	var (
 		env             *Builder
 		accessSpec      *s3.AccessSpec
-		downloader      s3.Downloader
+		downloader      downloader.Downloader
 		expectedContent []byte
 		err             error
 		mcc             ocm.Context

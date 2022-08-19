@@ -22,26 +22,35 @@ import (
 	"os"
 	"path/filepath"
 
-	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
-
 	"k8s.io/apimachinery/pkg/util/sets"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/tmpcache"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
+	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	me "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/github"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 )
 
-const doPrivate = false
-
 type mockDownloader struct {
-	expected        []byte
-	shouldMatchLink string
+	expected []byte
+	err      error
+}
+
+func (m *mockDownloader) Download(w io.WriterAt) error {
+	if _, err := w.WriteAt(m.expected, 0); err != nil {
+		return fmt.Errorf("failed to write to mock writer: %w", err)
+	}
+	return m.err
 }
 
 // RoundTripFunc .
@@ -60,32 +69,17 @@ func NewTestClient(fn RoundTripFunc) *http.Client {
 
 }
 
-func (m *mockDownloader) Download(link string) ([]byte, error) {
-	if link != m.shouldMatchLink {
-		return nil, fmt.Errorf("link mismatch; got: %s want: %s", link, m.shouldMatchLink)
-	}
-
-	return m.expected, nil
-}
-
-func Configure(ctx ocm.Context) {
-	data, err := os.ReadFile(filepath.Join(os.Getenv("HOME"), ".ocmconfig"))
-	if err != nil {
-		return
-	}
-	_, err = ctx.ConfigContext().ApplyData(data, nil, ".ocmconfig")
-	ExpectWithOffset(1, err).ToNot(HaveOccurred())
-
-}
-
 var _ = Describe("Method", func() {
 	var (
 		ctx                 ocm.Context
 		expectedBlobContent []byte
 		err                 error
-		testClient          *http.Client
 		defaultLink         string
 		accessSpec          *me.AccessSpec
+		dctx                datacontext.Context
+		fs                  vfs.FileSystem
+		expectedURL         string
+		clientFn            func(url string) *http.Client
 	)
 
 	BeforeEach(func() {
@@ -93,69 +87,43 @@ var _ = Describe("Method", func() {
 		expectedBlobContent, err = os.ReadFile(filepath.Join("testdata", "repo.tar.gz"))
 		Expect(err).ToNot(HaveOccurred())
 		defaultLink = "https://github.com/test/test/sha?token=token"
+		expectedURL = "https://api.github.com/repos/test/test/tarball/7b1445755ee2527f0bf80ef9eeb59a5d2e6e3e1f"
 
-		testClient = NewTestClient(func(req *http.Request) *http.Response {
-			return &http.Response{
-				StatusCode: 302,
-				Status:     http.StatusText(http.StatusFound),
-				Body:       io.NopCloser(bytes.NewBufferString(`{}`)),
-				// Must be set to non-nil value or it panics
-				Header: http.Header{
-					"Location": []string{defaultLink},
-				},
-			}
-		})
+		clientFn = func(url string) *http.Client {
+			return NewTestClient(func(req *http.Request) *http.Response {
+				if req.URL.String() != url {
+					Fail(fmt.Sprintf("failed to match url to expected url. want: %s; got: %s", expectedURL, req.URL.String()))
+				}
+				return &http.Response{
+					StatusCode: 302,
+					Status:     http.StatusText(http.StatusFound),
+					Body:       io.NopCloser(bytes.NewBufferString(`{}`)),
+					Header: http.Header{
+						"Location": []string{defaultLink},
+					},
+				}
+			})
+		}
+
 		accessSpec = me.New(
-			"hostname",
-			1234,
-			"repo",
-			"owner",
+			"https://github.com/test/test",
+			"",
 			"7b1445755ee2527f0bf80ef9eeb59a5d2e6e3e1f",
-			me.WithClient(testClient),
+			me.WithClient(clientFn(expectedURL)),
 			me.WithDownloader(&mockDownloader{
-				expected:        expectedBlobContent,
-				shouldMatchLink: defaultLink,
+				expected: expectedBlobContent,
 			}),
 		)
+		fs, err = osfs.NewTempFileSystem()
+		Expect(err).To(Succeed())
+		dctx = datacontext.New(nil)
+		vfsattr.Set(ctx, fs)
+		tmpcache.Set(ctx, &tmpcache.Attribute{Path: "/tmp"})
 	})
 
-	It("downloads public spiff commit", func() {
-		spec := me.New("github.com", 0, "spiff", "mandelsoft", "25d9a3f0031c0b42e9ef7ab0117c35378040ef82")
-
-		m, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
-		Expect(err).ToNot(HaveOccurred())
-		content, err := m.Get()
-		Expect(err).ToNot(HaveOccurred())
-		Expect(len(content)).To(Equal(281655))
+	AfterEach(func() {
+		vfs.Cleanup(fs)
 	})
-
-	if doPrivate {
-		Context("private access", func() {
-			It("downloads private commit", func() {
-				Configure(ctx)
-
-				spec := me.New("github.com", 0, "cnudie-pause", "mandelsoft", "76eaae596ba24e401240654c4ad19ae66ba1e1a2")
-
-				m, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
-				Expect(err).ToNot(HaveOccurred())
-				content, err := m.Get()
-				Expect(err).ToNot(HaveOccurred())
-				Expect(len(content)).To(Equal(3764))
-			})
-
-			It("downloads enterprise commit", func() {
-				Configure(ctx)
-
-				spec := me.New("github.tools.sap", 0, "dummy", "D021770", "d17e2c594f0ab71f2c0f050b9d7fb485af4d6850")
-
-				m, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
-				Expect(err).ToNot(HaveOccurred())
-				content, err := m.Get()
-				Expect(err).ToNot(HaveOccurred())
-				Expect(len(content)).To(Equal(284))
-			})
-		})
-	}
 
 	It("downloads artifacts", func() {
 		m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
@@ -169,14 +137,11 @@ var _ = Describe("Method", func() {
 		It("errors", func() {
 			accessSpec := me.New(
 				"hostname",
-				1234,
-				"repo",
-				"owner",
+				"",
 				"not-a-sha",
-				me.WithClient(testClient),
+				me.WithClient(clientFn(expectedURL)),
 				me.WithDownloader(&mockDownloader{
-					expected:        expectedBlobContent,
-					shouldMatchLink: defaultLink,
+					expected: expectedBlobContent,
 				}),
 			)
 			m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
@@ -191,14 +156,11 @@ var _ = Describe("Method", func() {
 		It("errors", func() {
 			accessSpec := me.New(
 				"hostname",
-				1234,
-				"repo",
-				"owner",
+				"1234",
 				"refs/heads/veryinteresting_branch_namess",
-				me.WithClient(testClient),
+				me.WithClient(clientFn(expectedURL)),
 				me.WithDownloader(&mockDownloader{
-					expected:        expectedBlobContent,
-					shouldMatchLink: defaultLink,
+					expected: expectedBlobContent,
 				}),
 			)
 			m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
@@ -210,9 +172,42 @@ var _ = Describe("Method", func() {
 	})
 
 	When("credentials are provided", func() {
+		BeforeEach(func() {
+			clientFn = func(url string) *http.Client {
+				return NewTestClient(func(req *http.Request) *http.Response {
+					if v, ok := req.Header["Authorization"]; ok {
+						Expect(v).To(ContainElement("Bearer test"))
+					} else {
+						Fail("Authorization header not found in request")
+					}
+					if req.URL.String() != url {
+						Fail(fmt.Sprintf("failed to match url to expected url. want: %s; got: %s", expectedURL, req.URL.String()))
+					}
+					return &http.Response{
+						StatusCode: 302,
+						Status:     http.StatusText(http.StatusFound),
+						// Must be set to non-nil value or it panics
+						Body: io.NopCloser(bytes.NewBufferString(`{}`)),
+						Header: http.Header{
+							"Location": []string{defaultLink},
+						},
+					}
+				})
+			}
+			accessSpec = me.New(
+				"https://github.com/test/test",
+				"",
+				"7b1445755ee2527f0bf80ef9eeb59a5d2e6e3e1f",
+				me.WithClient(clientFn(expectedURL)),
+				me.WithDownloader(&mockDownloader{
+					expected: expectedBlobContent,
+				}),
+			)
+		})
 		It("can use those to access private repos", func() {
 			called := false
-			mcc := &mockCredContext{
+			mcc := &mockContext{
+				dataContext: dctx,
 				creds: &mockCredSource{
 					cred: &mockCredentials{
 						value: func() string {
@@ -235,7 +230,7 @@ var _ = Describe("Method", func() {
 	When("GetCredentialsForConsumer returns an error", func() {
 		It("errors", func() {
 			called := false
-			mcc := &mockCredContext{
+			mcc := &mockContext{
 				creds: &mockCredSource{
 					cred: &mockCredentials{
 						value: func() string {
@@ -253,6 +248,33 @@ var _ = Describe("Method", func() {
 			Expect(called).To(BeFalse())
 		})
 	})
+
+	When("an enterprise repo URL is provided", func() {
+		It("uses that domain and includes api/v3 in the request URL", func() {
+			expectedURL = "https://github.tools.sap/api/v3/repos/test/test/tarball/25d9a3f0031c0b42e9ef7ab0117c35378040ef82"
+			spec := me.New("https://github.tools.sap/test/test", "", "25d9a3f0031c0b42e9ef7ab0117c35378040ef82", me.WithClient(clientFn(expectedURL)))
+			_, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
+			Expect(err).ToNot(HaveOccurred())
+		})
+	})
+
+	When("hostname is different from github.com", func() {
+		It("will use an enterprise client", func() {
+			expectedURL = "https://custom/api/v3/repos/test/test/tarball/25d9a3f0031c0b42e9ef7ab0117c35378040ef82"
+			spec := me.New("https://github.tools.sap/test/test", "custom", "25d9a3f0031c0b42e9ef7ab0117c35378040ef82", me.WithClient(clientFn(expectedURL)))
+			_, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
+			Expect(err).ToNot(HaveOccurred())
+		})
+	})
+
+	When("repoURL doesn't have an https prefix", func() {
+		It("will add one", func() {
+			expectedURL = "https://api.github.com/repos/test/test/tarball/25d9a3f0031c0b42e9ef7ab0117c35378040ef82"
+			spec := me.New("github.com/test/test", "", "25d9a3f0031c0b42e9ef7ab0117c35378040ef82", me.WithClient(clientFn(expectedURL)))
+			_, err := spec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
+			Expect(err).ToNot(HaveOccurred())
+		})
+	})
 })
 
 type mockComponentVersionAccess struct {
@@ -264,13 +286,18 @@ func (m *mockComponentVersionAccess) GetContext() ocm.Context {
 	return m.credContext
 }
 
-type mockCredContext struct {
+type mockContext struct {
 	ocm.Context
-	creds credentials.Context
+	creds       credentials.Context
+	dataContext datacontext.Context
 }
 
-func (m *mockCredContext) CredentialsContext() credentials.Context {
+func (m *mockContext) CredentialsContext() credentials.Context {
 	return m.creds
+}
+
+func (m *mockContext) GetAttributes() datacontext.Attributes {
+	return m.dataContext.GetAttributes()
 }
 
 type mockCredSource struct {

@@ -17,21 +17,21 @@ package github
 import (
 	"context"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"strings"
-	"sync"
 	"unicode"
 
 	"github.com/google/go-github/v45/github"
 	"golang.org/x/oauth2"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/downloader"
+	hd "github.com/open-component-model/ocm/pkg/common/accessio/downloader/http"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -67,30 +67,21 @@ type AccessSpec struct {
 	// RepoUrl is the repository URL, with host, owner and repository
 	RepoURL string `json:"repoUrl"`
 
-	// APIHostname is an optional different hostname for accessing the github REST API
+	// APIHostname is an optional different hostname for accessing the GitHub REST API
 	// for enterprise installations
 	APIHostname string `json:"apiHostname,omitempty"`
 
-	// Ref
-	Ref string `json:"ref,omitempty"`
-	// Commit defines the hash of the commit.
+	// Commit defines the hash of the commit
 	Commit string `json:"commit"`
 
 	client     *http.Client
-	downloader Downloader
+	downloader downloader.Downloader
 }
 
 var _ cpi.AccessSpec = (*AccessSpec)(nil)
 
 // AccessSpecOptions defines a set of options which can be applied to the access spec.
 type AccessSpecOptions func(s *AccessSpec)
-
-// WithRef creates an access spec with a specified reference field
-func WithRef(ref string) AccessSpecOptions {
-	return func(s *AccessSpec) {
-		s.Ref = ref
-	}
-}
 
 // WithClient creates an access spec with a custom http client.
 func WithClient(client *http.Client) AccessSpecOptions {
@@ -100,25 +91,18 @@ func WithClient(client *http.Client) AccessSpecOptions {
 }
 
 // WithDownloader defines a client with a custom downloader.
-func WithDownloader(downloader Downloader) AccessSpecOptions {
+func WithDownloader(downloader downloader.Downloader) AccessSpecOptions {
 	return func(s *AccessSpec) {
 		s.downloader = downloader
 	}
 }
 
-// New creates a new GitHub registry access spec version v1
-func New(hostname string, port int, repo, owner, commit string, opts ...AccessSpecOptions) *AccessSpec {
-	if hostname == "" {
-		hostname = "github.com"
-	}
-	p := ""
-	if port != 0 {
-		p = fmt.Sprintf(":%d", port)
-	}
-	url := fmt.Sprintf("%s%s/%s/%s", hostname, p, owner, repo)
+// New creates a new GitHub registry access spec version v1.
+func New(repoURL, apiHostname, commit string, opts ...AccessSpecOptions) *AccessSpec {
 	s := &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
-		RepoURL:             url,
+		RepoURL:             repoURL,
+		APIHostname:         apiHostname,
 		Commit:              commit,
 	}
 	for _, o := range opts {
@@ -139,7 +123,20 @@ func (a *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMetho
 	return newMethod(c, a)
 }
 
-////////////////////////////////////////////////////////////////////////////////
+func (a *AccessSpec) createHTTPClient(token string) *http.Client {
+	if token != "" {
+		ts := oauth2.StaticTokenSource(
+			&oauth2.Token{AccessToken: token},
+		)
+		ctx := context.Background()
+		// set up the test client if we have one
+		if a.client != nil {
+			ctx = context.WithValue(ctx, oauth2.HTTPClient, a.client)
+		}
+		return oauth2.NewClient(ctx, ts)
+	}
+	return a.client
+}
 
 // RepositoryService defines capabilities of a GitHub repository.
 type RepositoryService interface {
@@ -147,26 +144,20 @@ type RepositoryService interface {
 }
 
 type accessMethod struct {
-	lock              sync.Mutex
-	blob              artefactset.ArtefactBlob
+	accessio.BlobAccess
+
 	compvers          cpi.ComponentVersionAccess
 	spec              *AccessSpec
 	repositoryService RepositoryService
 	owner             string
 	repo              string
-	downloader        Downloader
 }
 
 var _ cpi.AccessMethod = (*accessMethod)(nil)
 
 func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (cpi.AccessMethod, error) {
-	if len(a.Commit) != ShaLength {
-		return nil, fmt.Errorf("commit is not a SHA")
-	}
-	for _, c := range a.Commit {
-		if !unicode.IsOneOf([]*unicode.RangeTable{unicode.Letter, unicode.Digit}, c) {
-			return nil, fmt.Errorf("commit contains invalid characters for a SHA")
-		}
+	if err := validateCommit(a.Commit); err != nil {
+		return nil, fmt.Errorf("failed to validate commit: %w", err)
 	}
 
 	unparsed := a.RepoURL
@@ -190,15 +181,8 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (cpi.AccessMethod, e
 	}
 
 	var client *github.Client
+	httpclient := a.createHTTPClient(token)
 
-	httpclient := a.client
-
-	if token != "" && httpclient == nil {
-		ts := oauth2.StaticTokenSource(
-			&oauth2.Token{AccessToken: token},
-		)
-		httpclient = oauth2.NewClient(context.Background(), ts)
-	}
 	if u.Hostname() == "github.com" {
 		client = github.NewClient(httpclient)
 	} else {
@@ -214,18 +198,40 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (cpi.AccessMethod, e
 		}
 	}
 
-	var downloader Downloader = &HTTPDownloader{}
-	if a.downloader != nil {
-		downloader = a.downloader
-	}
-	return &accessMethod{
+	method := &accessMethod{
 		spec:              a,
 		compvers:          c,
 		owner:             pathcomps[0],
 		repo:              pathcomps[1],
 		repositoryService: client.Repositories,
-		downloader:        downloader,
-	}, nil
+	}
+
+	link, err := method.getDownloadLink()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get download link: %w", err)
+	}
+
+	var d downloader.Downloader = hd.NewDownloader(link)
+	if a.downloader != nil {
+		d = a.downloader
+	}
+
+	w := accessio.NewWriteAtWriter(d.Download)
+	cacheBlobAccess := accessobj.CachedBlobAccessForWriter(c.GetContext(), method.MimeType(), w)
+	method.BlobAccess = cacheBlobAccess
+	return method, nil
+}
+
+func validateCommit(commit string) error {
+	if len(commit) != ShaLength {
+		return fmt.Errorf("commit is not a SHA")
+	}
+	for _, c := range commit {
+		if !unicode.IsOneOf([]*unicode.RangeTable{unicode.Letter, unicode.Digit}, c) {
+			return fmt.Errorf("commit contains invalid characters for a SHA")
+		}
+	}
+	return nil
 }
 
 func getCreds(hostname, port, path string, cctx credentials.Context) (string, error) {
@@ -258,79 +264,18 @@ func (m *accessMethod) GetKind() string {
 	return Type
 }
 
-// Close should clean up all cached data if present.
-// Exp.: Cache the blob data.
-func (m *accessMethod) Close() error {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-	if m.blob != nil {
-		tmp := m.blob
-		m.blob = nil
-		return tmp.Close()
-	}
-	return nil
-}
-
-func (m *accessMethod) Get() ([]byte, error) {
-	blob, err := m.getBlob()
-	if err != nil {
-		return nil, err
-	}
-	return blob.Get()
-}
-
-func (m *accessMethod) Reader() (io.ReadCloser, error) {
-	b, err := m.getBlob()
-	if err != nil {
-		return nil, err
-	}
-	r, err := b.Reader()
-	if err != nil {
-		return nil, err
-	}
-	return r, nil
-}
-
 func (m *accessMethod) MimeType() string {
 	return mime.MIME_TGZ
 }
 
-// TODO: Implement caching based on the SHA of the blob. If it is detected that that SHA already exists
-// return it. ( Use the virtual filesystem implementation so it can be in memory or via file system ).
-func (m *accessMethod) getBlob() (accessio.BlobAccess, error) {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-	if m.blob != nil {
-		return m.blob, nil
-	}
-	blob, err := m.downloadArchive()
-	if err != nil {
-		return nil, err
-	}
-
-	return accessio.BlobAccessForData(mime.MIME_TGZ, blob), nil
-}
-
-func (m *accessMethod) downloadArchive() ([]byte, error) {
-	if len(m.spec.Commit) != ShaLength {
-		return nil, fmt.Errorf("commit is not a SHA")
-	}
-	for _, c := range m.spec.Commit {
-		if !unicode.IsOneOf([]*unicode.RangeTable{unicode.Letter, unicode.Digit}, c) {
-			return nil, fmt.Errorf("commit contains invalid characters for a SHA")
-		}
-	}
-
+func (m *accessMethod) getDownloadLink() (string, error) {
 	link, resp, err := m.repositoryService.GetArchiveLink(context.Background(), m.owner, m.repo, github.Tarball, &github.RepositoryContentGetOptions{
 		Ref: m.spec.Commit,
 	}, true)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	defer func() {
-		if err := resp.Body.Close(); err != nil {
-			fmt.Println("failed to close body: ", err)
-		}
-	}()
-	return m.downloader.Download(link.String())
+	defer resp.Body.Close()
+
+	return link.String(), nil
 }
