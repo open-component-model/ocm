@@ -1,6 +1,6 @@
 # Open Component Model (OCM)
 
-The task of the open component model is to describe a machine read-able format 
+The goal of the Open Component Model is to describe a machine-readable format 
 for software-bill-of-deliveries (SBOD) with the focus on the delivery
 artefacts. Primarily, it does not deal with the content or packages those
 artefacts are composed of. This kind of meta information can be separately
@@ -54,8 +54,8 @@ in completely generic manner if there is a common interface and a discovery
 mechanism for the implementation of the access methods, based on the type
 information stored along with the artefact description in the component version.
 
-The go language binding for the Open Component Model provided by this
-project provides exactly such an extensible implementation frame and a
+This project contains a Go language binding for the Open Component Model, which
+exactly provides such an extensible implementation frame and a
 generic transport functionality based on this mechanism.
 
 Further, the description provides the possibility to add signatures, to
@@ -69,13 +69,13 @@ specifications used to access the artefact in the environment, where the
 signature is created.
 
 This way the Open Component model can be used as foundation or some kind of
-Lingua Franca for any number of tools dealing with software and software artefacts:
+Lingua Franca for any number of _tools_ dealing with software and software artefacts:
 - By using the location-agnostic component, component version and artefact
   identities to denote the entities they are dealing with
 - By using the location specific access methods described by a local version
   of the component description to
-  - get access to the content of an artefact in defined formats
-  - get the local location of the artefact
+  - get access to the content of an artefact in defined formats.
+  - get the local location of the artefact.
   - verify the authenticity of the artefacts found in the local environment.
 
 Because the identities and the content (but not the location of the content)

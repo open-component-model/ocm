@@ -10,8 +10,8 @@ type: OCIRegistry/v1
 
 ### Description
 
-The content of an OCM repository will be stored as OCI content using
-a dedicated OCI repository prefix.
+The content of the OCM repository will be stored in an OCI registry using
+a dedicated OCI repository name prefix.
 
 Supported specification version is `v1`.
 
@@ -25,11 +25,12 @@ The type specific specification fields are:
 
 - **`baseUrl`** *string*
 
-  OCI repository reference
+  OCI repository reference, containing the host part and the repository prefix
+  as path
 
 - **`legacyTypes`** (optional) *bool*
 
-  OCI repository requires docker legacy mime types for oci
+  OCI repository requires docker legacy mime types for OCI
   image manifests. (automatically enabled for docker.io)
 
   `docker.io` cannot be used to host an OCM repository because 
@@ -38,4 +39,4 @@ The type specific specification fields are:
 
 ### Go Bindings
 
-The go binding can be found [here](../../../oci/repositories/ocireg/type.go)
+The Go binding can be found [here](../../../oci/repositories/ocireg/type.go).

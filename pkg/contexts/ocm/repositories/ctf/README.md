@@ -10,9 +10,9 @@ type: CommonTransportFormat/v1
 
 ### Description
 
-The content of an OCM repository will be stored as Filesystem content.
+The content of an OCM repository will be stored on a filesystem.
 
-Supported specification version is `v1`
+Supported specification version is `v1`.
 
 ### Specification Versions
 
@@ -22,7 +22,7 @@ The type specific specification fields are:
 
 - **`filePath`** *string*
 
-  Path in the filesystem used to host the repository.
+  Path in filesystem used to host the repository.
 
 - **`fileFormat`** (optional) *string*
 
@@ -34,4 +34,4 @@ The type specific specification fields are:
 
 ### Go Bindings
 
-The go binding can be found [here](../../../oci/repositories/ctf/type.go)
+The Go binding can be found [here](../../../oci/repositories/ctf/type.go).

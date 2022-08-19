@@ -15,8 +15,6 @@ registry according to the [OCI distribution specification](https://github.com/op
 
 Supported specification version is `v1`.
 
-
-
 ### Specification Versions
 
 #### Version `v1`
@@ -29,10 +27,9 @@ The type specific specification fields are:
 
 - **`legacyTypes`** (optional) *bool*
 
-  OCI repository requires docker legacy mime types for oci
+  OCI repository requires Docker legacy mime types for OCI
   image manifests. (automatically enabled for docker.io)
-
 
 ### Go Bindings
 
-The go binding can be found [here](type.go)
+The Go binding can be found [here](type.go)
