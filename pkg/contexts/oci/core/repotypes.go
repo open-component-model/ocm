@@ -83,7 +83,11 @@ func (t *repositoryTypeScheme) AddKnownTypes(scheme runtime.Scheme) error {
 		return errors.ErrInvalid("type", reflect.TypeOf(scheme).String())
 	}
 
-	return t.Scheme.AddKnownTypes(scheme)
+	if err := t.Scheme.AddKnownTypes(scheme); err != nil {
+		return fmt.Errorf("failed to add known type: %w", err)
+	}
+	
+	return nil
 }
 
 func (t *repositoryTypeScheme) Register(name string, rtype RepositoryType) {
