@@ -86,7 +86,6 @@ type Attribute struct {
 	spec []byte
 
 	repo   oci.Repository
-	base   string
 	prefix string
 }
 

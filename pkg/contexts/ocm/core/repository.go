@@ -119,6 +119,7 @@ type ComponentVersionAccess interface {
 
 	SetReference(ref *ComponentReference) error
 
+	DiscardChanges()
 	io.Closer
 }
 

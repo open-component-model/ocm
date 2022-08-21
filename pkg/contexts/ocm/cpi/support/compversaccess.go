@@ -33,7 +33,7 @@ type ComponentVersionAccess struct {
 // the rest is directly taken from the artefact set implementation
 
 func (s *ComponentVersionAccess) Close() error {
-	err := s.base.Update()
+	err := s.Update(true)
 	if err != nil {
 		s.view.Close()
 		return err
@@ -48,9 +48,10 @@ func (s *ComponentVersionAccess) IsClosed() bool {
 ////////////////////////////////////////////////////////////////////////////////
 
 type componentVersionAccessImpl struct {
-	refs accessio.ReferencableCloser
-	lazy bool
-	base ComponentVersionContainer
+	refs           accessio.ReferencableCloser
+	lazy           bool
+	discardChanges bool
+	base           ComponentVersionContainer
 }
 
 var _ cpi.ComponentVersionAccess = (*ComponentVersionAccess)(nil)
@@ -73,7 +74,7 @@ func (a *componentVersionAccessImpl) View(main ...bool) (*ComponentVersionAccess
 }
 
 func (a *componentVersionAccessImpl) Close() error {
-	return errors.ErrListf("closing access").Add(a.base.Update(), a.base.Close()).Result()
+	return errors.ErrListf("closing access").Add(a.Update(true), a.base.Close()).Result()
 }
 
 func (c *componentVersionAccessImpl) Repository() cpi.Repository {
@@ -252,10 +253,7 @@ func (c *componentVersionAccessImpl) AdjustResourceAccess(meta *cpi.ResourceMeta
 	} else {
 		cd.Resources[idx].Access = acc
 	}
-	if c.lazy {
-		return nil
-	}
-	return c.base.Update()
+	return c.Update(false)
 }
 
 func (c *componentVersionAccessImpl) checkAccessSpec(acc compdesc.AccessSpec) error {
@@ -292,10 +290,7 @@ func (c *componentVersionAccessImpl) SetResource(meta *cpi.ResourceMeta, acc com
 		}
 		cd.Resources[idx] = *res
 	}
-	if c.lazy {
-		return nil
-	}
-	return c.base.Update()
+	return c.Update(false)
 }
 
 func (c *componentVersionAccessImpl) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec) error {
@@ -319,17 +314,14 @@ func (c *componentVersionAccessImpl) SetSource(meta *cpi.SourceMeta, acc compdes
 	} else {
 		c.GetDescriptor().Sources[idx] = *res
 	}
-	if c.lazy {
-		return nil
-	}
-	return c.base.Update()
+	return c.Update(false)
 }
 
 // AddResource adds a blob resource to the current archive.
 func (c *componentVersionAccessImpl) SetResourceBlob(meta *cpi.ResourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) error {
 	acc, err := c.AddBlob(blob, refName, global)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "adding resource blob")
 	}
 	return c.SetResource(meta, acc)
 }
@@ -351,10 +343,18 @@ func (c *componentVersionAccessImpl) SetReference(ref *cpi.ComponentReference) e
 	} else {
 		c.GetDescriptor().References[idx] = *ref
 	}
-	if c.lazy {
-		return nil
+	return c.Update(false)
+}
+
+func (a *componentVersionAccessImpl) DiscardChanges() {
+	a.discardChanges = true
+}
+
+func (a *componentVersionAccessImpl) Update(final bool) error {
+	if (final || !a.lazy) && !a.discardChanges {
+		return a.base.Update()
 	}
-	return c.base.Update()
+	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////

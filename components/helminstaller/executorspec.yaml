@@ -31,10 +31,10 @@ configScheme:
 
     release:
       type: string
-    namespace:
-      type: string
     createNamespace:
       type: boolean
+    namespace:
+      type: string
     imageMapping:
       additionalProperties: false
       anyOf:
