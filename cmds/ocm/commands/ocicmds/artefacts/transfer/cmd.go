@@ -89,6 +89,7 @@ $ ocm oci artefact transfer /tmp/ctf gcr.io/my-project
 	}
 }
 func (o *Command) AddFlags(flags *pflag.FlagSet) {
+	o.BaseCommand.AddFlags(flags)
 	flags.BoolVarP(&o.TransferRepo, "repo-name", "R", false, "transfer repository name")
 }
 
@@ -231,7 +232,7 @@ func (a *action) handleArtefact(src *artefacthdlr.Object) error {
 	if err == nil {
 		a.copied++
 	}
-	return nil
+	return err
 }
 
 func (a *action) Target(obj *artefacthdlr.Object) (string, string) {

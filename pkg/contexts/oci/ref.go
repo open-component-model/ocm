@@ -204,13 +204,14 @@ func (r *RefSpec) IsTagged() bool {
 }
 
 func (r *RefSpec) String() string {
+	art := r.Repository
 	if r.Tag != nil {
-		return fmt.Sprintf("%s:%s", r.Name(), *r.Tag)
+		art = fmt.Sprintf("%s:%s", art, *r.Tag)
 	}
 	if r.Digest != nil {
-		return fmt.Sprintf("%s@%s", r.Name(), r.Digest.String())
+		art = fmt.Sprintf("%s@%s", art, r.Digest.String())
 	}
-	return ""
+	return r.UniformRepositorySpec.ComposeRef(art)
 }
 
 // CredHost fallback to legacy docker domain if applicable

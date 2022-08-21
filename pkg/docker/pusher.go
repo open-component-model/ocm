@@ -18,6 +18,7 @@ package docker
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"net/url"
@@ -262,16 +263,15 @@ func (p dockerPusher) push(ctx context.Context, desc ocispec.Descriptor, ref str
 
 	pr, pw := io.Pipe()
 	respC := make(chan response, 1)
-	body := io.NopCloser(pr)
-
+	body, err := NewResendBuffer(pr, desc.Size)
+	if err != nil {
+		return nil, fmt.Errorf("cannot create resend buffer: %w", err)
+	}
 	req.body = func() (io.ReadCloser, error) {
 		if body == nil {
 			return nil, errors.New("cannot reuse body, request must be retried")
 		}
-		// Only use the body once since pipe cannot be seeked
-		ob := body
-		body = nil
-		return ob, nil
+		return body.Reset()
 	}
 	req.size = desc.Size
 
@@ -298,6 +298,7 @@ func (p dockerPusher) push(ctx context.Context, desc ocispec.Descriptor, ref str
 		base:       p.dockerBase,
 		ref:        ref,
 		pipe:       pw,
+		body:       body,
 		responseC:  respC,
 		isManifest: isManifest,
 		expected:   desc.Digest,
@@ -334,6 +335,7 @@ type pushWriter struct {
 	ref  string
 
 	pipe       *io.PipeWriter
+	body       *ResendBuffer
 	responseC  <-chan response
 	isManifest bool
 
@@ -376,8 +378,8 @@ func (pw *pushWriter) Commit(ctx context.Context, size int64, expected digest.Di
 	if _, err := pw.pipe.Write([]byte{}); err != nil && err != io.ErrClosedPipe {
 		return errors.Wrap(err, "pipe error before commit")
 	}
-
-	if err := pw.pipe.Close(); err != nil {
+	defer pw.body.Close()
+	if err := pw.Close(); err != nil {
 		return err
 	}
 	// TODO: timeout waiting for response

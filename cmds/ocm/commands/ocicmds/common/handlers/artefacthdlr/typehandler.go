@@ -194,7 +194,7 @@ func (h *TypeHandler) get(repo oci.Repository, elemspec utils.ElemSpec) ([]outpu
 		if err != nil {
 			return nil, errors.Wrapf(err, "reference %q", name)
 		}
-		spec.Host = repo.GetSpecification().Name()
+		spec.UniformRepositorySpec = *repo.GetSpecification().UniformRepositorySpec()
 		spec.Repository = art.Repository
 		spec.Tag = art.Tag
 		spec.Digest = art.Digest

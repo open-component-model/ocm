@@ -9,8 +9,9 @@ ocm transfer artefacts [<options>] {<artefact-reference>} <target>
 ### Options
 
 ```
-  -h, --help        help for artefacts
-  -R, --repo-name   transfer repository name
+  -h, --help          help for artefacts
+  -r, --repo string   repository name or spec
+  -R, --repo-name     transfer repository name
 ```
 
 ### Description
