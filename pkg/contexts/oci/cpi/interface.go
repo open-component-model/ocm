@@ -71,6 +71,10 @@ func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error
 	return core.ToGenericRepositorySpec(spec)
 }
 
+func UniformRepositorySpecForHostURL(typ string, host string) *UniformRepositorySpec {
+	return core.UniformRepositorySpecForHostURL(typ, host)
+}
+
 const KIND_OCIARTEFACT = core.KIND_OCIARTEFACT
 const KIND_MEDIATYPE = accessio.KIND_MEDIATYPE
 const KIND_BLOB = accessio.KIND_BLOB

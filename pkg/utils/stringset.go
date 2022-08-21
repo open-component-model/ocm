@@ -12,33 +12,27 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package oci
+package utils
 
-import (
-	"fmt"
+type StringSet map[string]struct{}
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
-)
-
-func AsTags(tag string) []string {
-	if tag != "" {
-		return []string{tag}
+func (s StringSet) Add(a string) bool {
+	if _, ok := s[a]; ok {
+		return false
 	}
-	return nil
+	s[a] = struct{}{}
+	return true
 }
 
-func StandardOCIRef(host, repository, version string) string {
-	sep := grammar.TagSeparator
-	if ok, _ := artdesc.IsDigest(version); ok {
-		sep = grammar.DigestSeparator
+func (s StringSet) Remove(a string) bool {
+	if _, ok := s[a]; !ok {
+		return false
 	}
-	return fmt.Sprintf("%s%s%s%s%s", host, grammar.RepositorySeparator, repository, sep, version)
+	delete(s, a)
+	return true
 }
 
-func IsIntermediate(spec RepositorySpec) bool {
-	if s, ok := spec.(IntermediateRepositorySpecAspect); ok {
-		return s.IsIntermediate()
-	}
-	return false
+func (s StringSet) Contains(a string) bool {
+	_, ok := s[a]
+	return ok
 }

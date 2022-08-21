@@ -66,7 +66,7 @@ func (r *Repository) GetSpecification() cpi.RepositorySpec {
 }
 
 func (r *Repository) NamespaceLister() cpi.NamespaceLister {
-	return nil
+	return anonymous
 }
 
 func (r *Repository) ExistsArtefact(name string, ref string) (bool, error) {
@@ -95,4 +95,22 @@ func (r Repository) Close() error {
 		r.arch.Close()
 	}
 	return nil
+}
+
+type NamespaceLister struct{}
+
+var anonymous cpi.NamespaceLister = &NamespaceLister{}
+
+func (n *NamespaceLister) NumNamespaces(prefix string) (int, error) {
+	if prefix == "" {
+		return 1, nil
+	}
+	return 0, nil
+}
+
+func (n *NamespaceLister) GetNamespaces(prefix string, closure bool) ([]string, error) {
+	if prefix == "" {
+		return []string{""}, nil
+	}
+	return nil, nil
 }

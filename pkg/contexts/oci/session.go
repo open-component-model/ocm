@@ -159,6 +159,9 @@ func (s *session) EvaluateRef(ctx Context, ref string) (*EvaluationResult, error
 	if err != nil {
 		return nil, err
 	}
+	if result.Ref.Repository == "" {
+		return result, nil
+	}
 	result.Namespace, err = s.LookupNamespace(result.Repository, result.Ref.Repository)
 
 	if !result.Ref.IsVersion() {

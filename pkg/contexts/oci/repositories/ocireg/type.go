@@ -78,6 +78,10 @@ func (a *RepositorySpec) Name() string {
 	return a.BaseURL
 }
 
+func (a *RepositorySpec) UniformRepositorySpec() *cpi.UniformRepositorySpec {
+	return cpi.UniformRepositorySpecForHostURL(Type, a.BaseURL)
+}
+
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	var u *url.URL
 	info := &RepositoryInfo{}

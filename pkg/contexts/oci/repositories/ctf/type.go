@@ -79,6 +79,15 @@ func (a *RepositorySpec) GetType() string {
 func (s *RepositorySpec) Name() string {
 	return s.FilePath
 }
+
+func (s *RepositorySpec) UniformRepositorySpec() *cpi.UniformRepositorySpec {
+	u := &cpi.UniformRepositorySpec{
+		Type: Type,
+		Info: s.FilePath,
+	}
+	return u
+}
+
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	return Open(ctx, a.AccessMode, a.FilePath, 0700, a.Options)
 }

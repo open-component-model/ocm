@@ -15,7 +15,10 @@
 package core
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/url"
+	"strings"
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -47,23 +50,71 @@ type UniformRepositorySpec struct {
 
 // CredHost fallback to legacy docker domain if applicable
 // this is how containerd translates the old domain for DockerHub to the new one, taken from containerd/reference/docker/reference.go:674
-func (r *UniformRepositorySpec) CredHost() string {
-	if r.Host == dockerHubDomain {
+func (u *UniformRepositorySpec) CredHost() string {
+	if u.Host == dockerHubDomain {
 		return dockerHubLegacyDomain
 	}
-	return r.Host
+	return u.Host
 }
 
-func (u *UniformRepositorySpec) String() string {
+func (u *UniformRepositorySpec) HostPort() (string, string) {
+	i := strings.Index(u.Host, ":")
+	if i < 0 {
+		return u.Host, ""
+	}
+	return u.Host[:i], u.Host[i+1:]
+}
+
+// ComposeRef joins the actual repository spec and a given artefact spec
+func (u *UniformRepositorySpec) ComposeRef(art string) string {
+	if art == "" {
+		return u.String()
+	}
+	sep := "/"
+	if u.Info != "" {
+		sep = "//"
+	}
+	return fmt.Sprintf("%s%s%s", u.String(), sep, art)
+}
+
+func (u *UniformRepositorySpec) RepositoryRef() string {
 	t := u.Type
 	if t != "" {
 		t = t + "::"
 	}
 	if u.Info != "" {
 		return fmt.Sprintf("%s%s", t, u.Info)
-
 	}
-	return fmt.Sprintf("%s%s", t, u.Host)
+	if u.Scheme == "" {
+		return fmt.Sprintf("%s%s", t, u.Host)
+	}
+	return fmt.Sprintf("%s%s://%s", t, u.Scheme, u.Host)
+}
+
+func (u *UniformRepositorySpec) String() string {
+	return u.RepositoryRef()
+}
+
+func UniformRepositorySpecForHostURL(typ string, host string) *UniformRepositorySpec {
+	scheme := ""
+	parsed, err := url.Parse(host)
+	if err == nil {
+		host = parsed.Host
+		scheme = parsed.Scheme
+	}
+	u := &UniformRepositorySpec{
+		Type:   typ,
+		Scheme: scheme,
+		Host:   host,
+	}
+	return u
+}
+
+func UniformRepositorySpecForUnstructured(un *runtime.UnstructuredVersionedTypedObject) *UniformRepositorySpec {
+	m := un.Object.FlatCopy()
+	delete(m, runtime.ATTR_TYPE)
+	d, _ := json.Marshal(m)
+	return &UniformRepositorySpec{Type: un.Type, Info: string(d)}
 }
 
 type RepositorySpecHandler interface {

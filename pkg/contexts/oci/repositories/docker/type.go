@@ -56,6 +56,10 @@ func (a *RepositorySpec) Name() string {
 	return Type
 }
 
+func (a *RepositorySpec) UniformRepositorySpec() *cpi.UniformRepositorySpec {
+	return cpi.UniformRepositorySpecForHostURL(Type, a.DockerHost)
+}
+
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	return NewRepository(ctx, a)
 }

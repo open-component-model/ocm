@@ -77,7 +77,7 @@ relative to the specified registry using the syntax
 </center>
 
 If no <code>--repo</code> option is specified the given names are interpreted 
-as extended CI artefact references.
+as extended OCI artefact references.
 
 <center>
     <pre>[&lt;repo type>::]&lt;host>[:&lt;port>]/&lt;OCI repository name>[:&lt;tag>][@&lt;digest>]</pre>

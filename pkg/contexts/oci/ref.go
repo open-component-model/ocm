@@ -16,7 +16,6 @@ package oci
 
 import (
 	"fmt"
-	"path"
 	"strings"
 
 	"github.com/opencontainers/go-digest"
@@ -179,22 +178,7 @@ func ParseRef(ref string) (RefSpec, error) {
 }
 
 func (r *RefSpec) Name() string {
-	return path.Join(r.Host, r.Repository)
-}
-
-func (r *RefSpec) Base() string {
-	if r.Scheme == "" {
-		return r.Host
-	}
-	return r.Scheme + "://" + r.Host
-}
-
-func (r *RefSpec) HostPort() (string, string) {
-	i := strings.Index(r.Host, ":")
-	if i < 0 {
-		return r.Host, ""
-	}
-	return r.Host[:i], r.Host[i+1:]
+	return r.UniformRepositorySpec.ComposeRef(r.Repository)
 }
 
 func (r *RefSpec) Version() string {
@@ -213,6 +197,10 @@ func (r *RefSpec) IsRegistry() bool {
 
 func (r *RefSpec) IsVersion() bool {
 	return r.Tag != nil || r.Digest != nil
+}
+
+func (r *RefSpec) IsTagged() bool {
+	return r.Tag != nil
 }
 
 func (r *RefSpec) String() string {

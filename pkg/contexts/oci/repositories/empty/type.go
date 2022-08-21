@@ -52,6 +52,13 @@ func (a *RepositorySpec) Name() string {
 	return Type
 }
 
+func (a *RepositorySpec) UniformRepositorySpec() *cpi.UniformRepositorySpec {
+	u := &cpi.UniformRepositorySpec{
+		Type: Type,
+	}
+	return u
+}
+
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	return ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepository).(*Repository), nil
 }

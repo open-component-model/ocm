@@ -58,6 +58,15 @@ func NewRepositorySpec(acc accessobj.AccessMode, filePath string, opts ...access
 func (s *RepositorySpec) Name() string {
 	return s.FilePath
 }
+
+func (s *RepositorySpec) UniformRepositorySpec() *cpi.UniformRepositorySpec {
+	u := &cpi.UniformRepositorySpec{
+		Type: Type,
+		Info: s.FilePath,
+	}
+	return u
+}
+
 func (a *RepositorySpec) GetType() string {
 	return Type
 }

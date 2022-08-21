@@ -122,10 +122,14 @@ func (h *TypeHandler) Close() error {
 }
 
 func (h *TypeHandler) All() ([]output.Object, error) {
-	if h.repobase == nil {
+	return h.all(h.repobase)
+}
+
+func (h *TypeHandler) all(repo oci.Repository) ([]output.Object, error) {
+	if repo == nil {
 		return nil, nil
 	}
-	lister := h.repobase.NamespaceLister()
+	lister := repo.NamespaceLister()
 	if lister == nil {
 		return nil, nil
 	}
@@ -135,7 +139,7 @@ func (h *TypeHandler) All() ([]output.Object, error) {
 	}
 	var result []output.Object
 	for _, l := range list {
-		part, err := h.get(utils.StringSpec(l))
+		part, err := h.get(repo, utils.StringSpec(l))
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Warning: %s\n", err)
 		}
@@ -146,23 +150,25 @@ func (h *TypeHandler) All() ([]output.Object, error) {
 }
 
 func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
-	result, err := h.get(elemspec)
+	result, err := h.get(h.repobase, elemspec)
 	output.Print(result, "get %s", elemspec)
 	return result, err
 }
 
-func (h *TypeHandler) get(elemspec utils.ElemSpec) ([]output.Object, error) {
+func (h *TypeHandler) get(repo oci.Repository, elemspec utils.ElemSpec) ([]output.Object, error) {
 	var namespace oci.NamespaceAccess
 	var result []output.Object
 	var err error
 
 	name := elemspec.String()
 	spec := oci.RefSpec{}
-	repo := h.repobase
 	if repo == nil {
 		evaluated, err := h.session.EvaluateRef(h.octx.Context(), name)
 		if err != nil {
 			return nil, errors.Wrapf(err, "repository %q", name)
+		}
+		if evaluated.Namespace == nil {
+			return h.all(evaluated.Repository)
 		}
 		spec = evaluated.Ref
 		namespace = evaluated.Namespace

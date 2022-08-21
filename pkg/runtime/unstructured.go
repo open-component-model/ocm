@@ -66,6 +66,15 @@ func (m UnstructuredMap) FlatMerge(o UnstructuredMap) UnstructuredMap {
 	return m
 }
 
+// FlatCopy just copies the attributes
+func (m UnstructuredMap) FlatCopy() UnstructuredMap {
+	r := UnstructuredMap{}
+	for k, v := range m {
+		r[k] = v
+	}
+	return r
+}
+
 // UnstructuredTypesEqual compares two unstructured object.
 func UnstructuredTypesEqual(a, b *UnstructuredTypedObject) bool {
 	if a == nil && b == nil {
