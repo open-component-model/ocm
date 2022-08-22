@@ -28,6 +28,7 @@ import (
 )
 
 const ARCH = "/tmp/ca"
+const ARCH2 = "/tmp/ca2"
 const VERSION = "v1"
 const COMP = "test.de/x"
 const COMP2 = "test.de/y"
@@ -114,11 +115,6 @@ test.de/x v1      mandelsoft /tmp/ca
 	Context("ctf", func() {
 		BeforeEach(func() {
 			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
-				env.Component(COMP, func() {
-					env.Version(VERSION, func() {
-						env.Provider(PROVIDER)
-					})
-				})
 				env.Component(COMP2, func() {
 					env.Version(VERSION, func() {
 						env.Provider(PROVIDER)
@@ -126,11 +122,18 @@ test.de/x v1      mandelsoft /tmp/ca
 					})
 				})
 			})
+			env.OCMCommonTransport(ARCH2, accessio.FormatDirectory, func() {
+				env.Component(COMP, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+					})
+				})
+			})
 		})
 		It("lists closure ctf file", func() {
 
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("get", "components", "-c", "--repo", ARCH, COMP2)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("get", "components", "--lookup", ARCH2, "-c", "--repo", ARCH, COMP2)).To(Succeed())
 			Expect("\n" + buf.String()).To(Equal(
 				`
 REFERENCEPATH COMPONENT VERSION PROVIDER   IDENTITY
@@ -151,7 +154,7 @@ NESTING COMPONENT VERSION PROVIDER
 		It("lists flat ctf file with closure", func() {
 
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("get", "components", "-o", "tree", "-c", "--repo", ARCH, COMP2)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("get", "components", "-o", "tree", "--lookup", ARCH2, "-c", "--repo", ARCH, COMP2)).To(Succeed())
 			Expect("\n" + buf.String()).To(Equal(
 				`
 NESTING    COMPONENT VERSION PROVIDER   IDENTITY

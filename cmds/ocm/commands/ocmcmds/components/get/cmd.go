@@ -23,6 +23,7 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/schemaoption"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 
@@ -53,7 +54,7 @@ type Command struct {
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), output.OutputOptions(outputs, closureoption.New(
-		"component reference", output.Fields("IDENTITY"), options.Not(output.Selected("tree")), addIdentityField), schemaoption.New(""),
+		"component reference", output.Fields("IDENTITY"), options.Not(output.Selected("tree")), addIdentityField), lookupoption.New(), schemaoption.New(""),
 	))}, utils.Names(Names, names...)...)
 }
 

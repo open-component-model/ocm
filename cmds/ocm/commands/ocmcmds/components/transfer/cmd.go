@@ -25,6 +25,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/overwriteoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
@@ -59,6 +60,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		repooption.New(),
 		formatoption.New(),
 		closureoption.New("component reference"),
+		lookupoption.New(),
 		overwriteoption.New(),
 		rscbyvalueoption.New(),
 		scriptoption.New(),
