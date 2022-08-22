@@ -102,6 +102,9 @@ func IdentityMatcher(identityType string) cpi.IdentityMatcher {
 		if cur[ID_PORT] == "" && (id[ID_PORT] != "" && pattern[ID_PORT] != "") {
 			return true
 		}
+		if cur[ID_SCHEME] == "" && (id[ID_SCHEME] != "" && pattern[ID_SCHEME] != "") {
+			return true
+		}
 
 		if len(cur[ID_PATHPREFIX]) < len(id[ID_PATHPREFIX]) {
 			return true

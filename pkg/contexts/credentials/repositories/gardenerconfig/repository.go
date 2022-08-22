@@ -118,7 +118,7 @@ func (r *Repository) read(force bool) error {
 			getCredentials := func() (cpi.Credentials, error) {
 				return r.LookupCredentials(cred.Name())
 			}
-			cg := CredentialGetter{
+			cg := credentialGetter{
 				getCredentials: getCredentials,
 			}
 			r.ctx.SetCredentialsForConsumer(cred.ConsumerIdentity(), cg)
