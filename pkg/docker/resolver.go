@@ -29,7 +29,6 @@ import (
 	"github.com/containerd/containerd/images"
 	"github.com/containerd/containerd/log"
 	"github.com/containerd/containerd/reference"
-	"github.com/containerd/containerd/remotes"
 	"github.com/containerd/containerd/remotes/docker/schema1"
 	"github.com/containerd/containerd/version"
 	digest "github.com/opencontainers/go-digest"
@@ -37,6 +36,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/net/context/ctxhttp"
+
+	"github.com/open-component-model/ocm/pkg/docker/resolve"
 )
 
 var (
@@ -132,7 +133,7 @@ type dockerResolver struct {
 }
 
 // NewResolver returns a new resolver to a Docker registry
-func NewResolver(options ResolverOptions) remotes.Resolver {
+func NewResolver(options ResolverOptions) resolve.Resolver {
 	if options.Tracker == nil {
 		options.Tracker = NewInMemoryTracker()
 	}
@@ -215,7 +216,7 @@ func (r *countingReader) Read(p []byte) (int, error) {
 	return n, err
 }
 
-var _ remotes.Resolver = &dockerResolver{}
+var _ resolve.Resolver = &dockerResolver{}
 
 func (r *dockerResolver) Resolve(ctx context.Context, ref string) (string, ocispec.Descriptor, error) {
 	base, err := r.resolveDockerBase(ref)
@@ -393,7 +394,7 @@ func (r *dockerResolver) Resolve(ctx context.Context, ref string) (string, ocisp
 	return "", ocispec.Descriptor{}, firstErr
 }
 
-func (r *dockerResolver) Fetcher(ctx context.Context, ref string) (remotes.Fetcher, error) {
+func (r *dockerResolver) Fetcher(ctx context.Context, ref string) (resolve.Fetcher, error) {
 	base, err := r.resolveDockerBase(ref)
 	if err != nil {
 		return nil, err
@@ -404,7 +405,7 @@ func (r *dockerResolver) Fetcher(ctx context.Context, ref string) (remotes.Fetch
 	}, nil
 }
 
-func (r *dockerResolver) Pusher(ctx context.Context, ref string) (remotes.Pusher, error) {
+func (r *dockerResolver) Pusher(ctx context.Context, ref string) (resolve.Pusher, error) {
 	base, err := r.resolveDockerBase(ref)
 	if err != nil {
 		return nil, err
@@ -542,6 +543,7 @@ func (r *request) do(ctx context.Context) (*http.Response, error) {
 		if r.size > 0 {
 			req.ContentLength = r.size
 		}
+		defer body.Close()
 	}
 
 	ctx = log.WithLogger(ctx, log.G(ctx).WithField("url", u))

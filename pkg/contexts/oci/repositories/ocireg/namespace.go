@@ -19,14 +19,13 @@ import (
 	"fmt"
 
 	"github.com/containerd/containerd/errdefs"
-	"github.com/containerd/containerd/remotes"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/open-component-model/ocm/pkg/docker"
+	"github.com/open-component-model/ocm/pkg/docker/resolve"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -37,10 +36,10 @@ type Namespace struct {
 type NamespaceContainer struct {
 	repo      *Repository
 	namespace string
-	resolver  remotes.Resolver
-	lister    docker.Lister
-	fetcher   remotes.Fetcher
-	pusher    remotes.Pusher
+	resolver  resolve.Resolver
+	lister    resolve.Lister
+	fetcher   resolve.Fetcher
+	pusher    resolve.Pusher
 	blobs     *BlobContainers
 }
 
@@ -61,7 +60,7 @@ func NewNamespace(repo *Repository, name string) (*Namespace, error) {
 	if err != nil {
 		return nil, err
 	}
-	lister, err := resolver.(docker.Resolver).Lister(context.Background(), ref)
+	lister, err := resolver.Lister(context.Background(), ref)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +82,7 @@ func (n *NamespaceContainer) Close() error {
 	return n.blobs.Release()
 }
 
-func (n *NamespaceContainer) getPusher(vers string) (remotes.Pusher, error) {
+func (n *NamespaceContainer) getPusher(vers string) (resolve.Pusher, error) {
 	ref := n.repo.getRef(n.namespace, vers)
 	fmt.Printf("pusher for %s\n", ref)
 	resolver := n.resolver

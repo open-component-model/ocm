@@ -15,20 +15,8 @@
 package docker
 
 import (
-	"context"
-
-	"github.com/containerd/containerd/remotes"
 	"github.com/containerd/containerd/remotes/docker"
 )
-
-type Resolver interface {
-	remotes.Resolver
-	Lister(ctx context.Context, ref string) (Lister, error)
-}
-
-type Lister interface {
-	List(context.Context) ([]string, error)
-}
 
 var ContextWithRepositoryScope = docker.ContextWithRepositoryScope
 var ContextWithAppendPullRepositoryScope = docker.ContextWithAppendPullRepositoryScope

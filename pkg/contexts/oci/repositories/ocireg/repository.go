@@ -20,7 +20,6 @@ import (
 	"strings"
 
 	"github.com/containerd/containerd/errdefs"
-	"github.com/containerd/containerd/remotes"
 	"github.com/containerd/containerd/remotes/docker/config"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -28,6 +27,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/docker"
+	"github.com/open-component-model/ocm/pkg/docker/resolve"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -113,7 +113,7 @@ func (r *Repository) getCreds(comp string) (credentials.Credentials, error) {
 	return creds, nil
 }
 
-func (r *Repository) getResolver(comp string) (remotes.Resolver, error) {
+func (r *Repository) getResolver(comp string) (resolve.Resolver, error) {
 	creds, err := r.getCreds(comp)
 	if err != nil {
 		if !errors.IsErrUnknownKind(err, credentials.KIND_CONSUMER) {
