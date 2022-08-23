@@ -15,6 +15,7 @@
 package artefactset
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -88,7 +89,11 @@ func (a *artefactSetImpl) Annotate(name string, value string) {
 	a.base.Lock()
 	defer a.base.Unlock()
 
-	d := a.GetIndex()
+	d, err := a.GetIndex()
+	if err != nil {
+		fmt.Printf("failed to get index: %s/n", err)
+		return
+	}
 	if d.Annotations == nil {
 		d.Annotations = map[string]string{}
 	}
@@ -105,7 +110,10 @@ func (a *artefactSetImpl) AddTags(digest digest.Digest, tags ...string) error {
 	a.base.Lock()
 	defer a.base.Unlock()
 
-	idx := a.GetIndex()
+	idx, err := a.GetIndex()
+	if err != nil {
+		return fmt.Errorf("failed to get index: %w", err)
+	}
 	for i, e := range idx.Manifests {
 		if e.Digest == digest {
 			if e.Annotations == nil {
@@ -155,18 +163,27 @@ func (a *artefactSetImpl) IsClosed() bool {
 // The manifst entries may describe dedicated tags
 // to use for the dedicated artefact as annotation
 // with the key TAGS_ANNOTATION.
-func (a *artefactSetImpl) GetIndex() *artdesc.Index {
+func (a *artefactSetImpl) GetIndex() (*artdesc.Index, error) {
 	if a.IsReadOnly() {
-		return a.base.GetState().GetOriginalState().(*artdesc.Index)
+
+		state, err := a.base.GetState().GetOriginalState()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get original state while getting index: %s\n", err)
+		}
+		return state.(*artdesc.Index), nil
 	}
-	return a.base.GetState().GetState().(*artdesc.Index)
+	return a.base.GetState().GetState().(*artdesc.Index), nil
 }
 
 // GetMain returns the digest of the main artefact
 // described by this artefact set.
 // There might be more, if the main artefact is an index.
 func (a *artefactSetImpl) GetMain() digest.Digest {
-	idx := a.GetIndex()
+	idx, err := a.GetIndex()
+	if err != nil {
+		fmt.Printf("failed to get index in main: %s/n", err)
+		return ""
+	}
 	if idx.Annotations == nil {
 		return ""
 	}
@@ -174,7 +191,12 @@ func (a *artefactSetImpl) GetMain() digest.Digest {
 }
 
 func (a *artefactSetImpl) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
-	return a.GetIndex().GetBlobDescriptor(digest)
+	// we are safe to return nil here, because most places check it already and return a blob not found error.
+	idx, err := a.GetIndex()
+	if err != nil {
+		return nil
+	}
+	return idx.GetBlobDescriptor(digest)
 }
 
 func (a *artefactSetImpl) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
@@ -198,7 +220,11 @@ func (a *artefactSetImpl) AddBlob(blob cpi.BlobAccess) error {
 
 func (a *artefactSetImpl) ListTags() ([]string, error) {
 	result := []string{}
-	for _, a := range a.GetIndex().Manifests {
+	index, err := a.GetIndex()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get index while listing tags: %w", err)
+	}
+	for _, a := range index.Manifests {
 		if a.Annotations != nil {
 			if tags, ok := a.Annotations[TAGS_ANNOTATION]; ok {
 				result = append(result, strings.Split(tags, ",")...)
@@ -210,7 +236,11 @@ func (a *artefactSetImpl) ListTags() ([]string, error) {
 
 func (a *artefactSetImpl) GetTags(digest digest.Digest) ([]string, error) {
 	result := []string{}
-	for _, a := range a.GetIndex().Manifests {
+	index, err := a.GetIndex()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get index while getting tags: %w", err)
+	}
+	for _, a := range index.Manifests {
 		if a.Digest == digest && a.Annotations != nil {
 			if tags, ok := a.Annotations[TAGS_ANNOTATION]; ok {
 				result = append(result, strings.Split(tags, ",")...)
@@ -258,7 +288,10 @@ func (a *artefactSetImpl) matcher(ref string) func(d *artdesc.Descriptor) bool {
 }
 
 func (a *artefactSetImpl) hasArtefact(ref string) (bool, error) {
-	idx := a.GetIndex()
+	idx, err := a.GetIndex()
+	if err != nil {
+		return false, fmt.Errorf("failed to get inde for artefact: %w", err)
+	}
 	match := a.matcher(ref)
 	for _, e := range idx.Manifests {
 		if match(&e) {
@@ -269,7 +302,10 @@ func (a *artefactSetImpl) hasArtefact(ref string) (bool, error) {
 }
 
 func (a *artefactSetImpl) getArtefact(ref string) (cpi.ArtefactAccess, error) {
-	idx := a.GetIndex()
+	idx, err := a.GetIndex()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get index while getting an artefact: %w", err)
+	}
 	match := a.matcher(ref)
 	for _, e := range idx.Manifests {
 		if match(&e) {
@@ -288,7 +324,10 @@ func (a *artefactSetImpl) AnnotateArtefact(digest digest.Digest, name, value str
 	}
 	a.base.Lock()
 	defer a.base.Unlock()
-	idx := a.GetIndex()
+	idx, err := a.GetIndex()
+	if err != nil {
+		return fmt.Errorf("failed to get index while annotating artefact: %w", err)
+	}
 	for i, e := range idx.Manifests {
 		if e.Digest == digest {
 			annos := e.Annotations
@@ -320,7 +359,10 @@ func (a *artefactSetImpl) AddPlatformArtefact(artefact cpi.Artefact, platform *a
 	}
 	a.base.Lock()
 	defer a.base.Unlock()
-	idx := a.GetIndex()
+	idx, err := a.GetIndex()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get index while adding platform artefact: %w", err)
+	}
 	blob, err := a.base.AddArtefactBlob(artefact)
 	if err != nil {
 		return nil, err

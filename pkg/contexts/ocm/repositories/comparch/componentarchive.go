@@ -15,6 +15,8 @@
 package comparch
 
 import (
+	"fmt"
+
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -93,11 +95,19 @@ func (c *ComponentArchive) Close() error {
 }
 
 func (c *ComponentArchive) SetName(n string) {
-	c.GetDescriptor().Name = n
+	descriptor, err := c.GetDescriptor()
+	if err != nil {
+		return
+	}
+	descriptor.Name = n
 }
 
 func (c *ComponentArchive) SetVersion(v string) {
-	c.GetDescriptor().Version = v
+	descriptor, err := c.GetDescriptor()
+	if err != nil {
+		return
+	}
+	descriptor.Version = v
 }
 
 func (c *ComponentArchive) AccessMethod(a cpi.AccessSpec) (cpi.AccessMethod, error) {
@@ -130,9 +140,13 @@ func (c *ComponentArchive) AddBlobFor(storagectx cpi.StorageContext, blob cpi.Bl
 	return localblob.New(common.DigestToFileName(blob.Digest()), refName, blob.MimeType(), global), nil
 }
 
-func (c *ComponentArchive) GetDescriptor() *compdesc.ComponentDescriptor {
+func (c *ComponentArchive) GetDescriptor() (*compdesc.ComponentDescriptor, error) {
 	if c.base.IsReadOnly() {
-		return c.base.GetState().GetOriginalState().(*compdesc.ComponentDescriptor)
+		state, err := c.base.GetState().GetOriginalState()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get original state: %w", err)
+		}
+		return state.(*compdesc.ComponentDescriptor), nil
 	}
-	return c.base.GetState().GetState().(*compdesc.ComponentDescriptor)
+	return c.base.GetState().GetState().(*compdesc.ComponentDescriptor), nil
 }

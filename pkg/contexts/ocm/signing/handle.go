@@ -52,7 +52,11 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 		return ToDigestSpec(state.Closure[nv]), err
 	}
 
-	cd := cv.GetDescriptor().Copy()
+	descriptor, err := cv.GetDescriptor()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get descriptor during apply: %w", err)
+	}
+	cd := descriptor.Copy()
 	printer.Printf("applying to version %q...\n", nv)
 	for i, reference := range cd.References {
 		var calculatedDigest *metav1.DigestSpec
@@ -128,7 +132,11 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 			return nil, errors.Newf(resMsg(raw, state, "calculated resource digest (%+v) mismatches existing digest (%+v) for", digest, raw.Digest))
 		}
 		cd.Resources[i].Digest = &digest[0]
-		printer.Printf("  resource %d:  %s: digest %s\n", i, res.Meta().GetIdentity(cv.GetDescriptor().Resources), &digest[0])
+		getDescriptor, err := cv.GetDescriptor()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get descriptor during apply: %w", err)
+		}
+		printer.Printf("  resource %d:  %s: digest %s\n", i, res.Meta().GetIdentity(getDescriptor.Resources), &digest[0])
 	}
 	digest, err := compdesc.Hash(cd, opts.NormalizationAlgo, opts.Hasher.Create())
 	if err != nil {
@@ -219,7 +227,10 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 		}
 	}
 	if opts.DoUpdate() {
-		orig := cv.GetDescriptor()
+		orig, err := cv.GetDescriptor()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get descriptor during apply: %w", err)
+		}
 		for i, res := range cd.Resources {
 			orig.Resources[i].Digest = res.Digest
 		}

@@ -15,6 +15,8 @@
 package comphdlr
 
 import (
+	"fmt"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/pkg/common"
@@ -34,7 +36,12 @@ func traverse(hist common.History, o *Object, octx out.Context, lookup ocm.Compo
 		return nil
 	}
 	result := []interface{}{o}
-	refs := o.ComponentVersion.GetDescriptor().References
+	descriptor, err := o.ComponentVersion.GetDescriptor()
+	if err != nil {
+		fmt.Println("failed to get descriptor while traversing: ", err)
+		return nil
+	}
+	refs := descriptor.References
 	/*
 		refs=append(refs[:0:0], refs...)
 		sort.Sort(refs)

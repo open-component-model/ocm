@@ -64,7 +64,7 @@ func (n NopOutput) Out() error {
 ////////////////////////////////////////////////////////////////////////////////
 
 type Manifest interface {
-	AsManifest() interface{}
+	AsManifest() (interface{}, error)
 }
 
 type ManifestOutput struct {
@@ -88,7 +88,11 @@ type YAMLOutput struct {
 func (this *YAMLOutput) Out() error {
 	for _, m := range this.data {
 		Outf(this.Context, "---\n")
-		d, err := yaml.Marshal(m.(Manifest).AsManifest())
+		manifest, err := m.(Manifest).AsManifest()
+		if err != nil {
+			return fmt.Errorf("failed to as manifest in out writer: %w", err)
+		}
+		d, err := yaml.Marshal(manifest)
 		if err != nil {
 			return err
 		}
@@ -118,7 +122,10 @@ func (this *YAMLProcessingOutput) Out() error {
 		Outf(this.Context, "---\n")
 		elem := i.Next()
 		if m, ok := elem.(Manifest); ok {
-			elem = m.AsManifest()
+			var err error
+			if elem, err = m.AsManifest(); err != nil {
+				return fmt.Errorf("failed to convert elem to manifest: %w", err)
+			}
 		}
 		d, err := yaml.Marshal(elem)
 		if err != nil {
@@ -143,7 +150,11 @@ type ItemList struct {
 func (this *JSONOutput) Out() error {
 	items := &ItemList{}
 	for _, m := range this.data {
-		items.Items = append(items.Items, m.(Manifest).AsManifest())
+		manifest, err := m.(Manifest).AsManifest()
+		if err != nil {
+			return fmt.Errorf("failed to convert to manifest in json out writer: %w", err)
+		}
+		items.Items = append(items.Items, manifest)
 	}
 	d, err := json.Marshal(items)
 	if err != nil {
@@ -185,7 +196,10 @@ func (this *JSONProcessingOutput) Out() error {
 	for i.HasNext() {
 		elem := i.Next()
 		if m, ok := elem.(Manifest); ok {
-			elem = m.AsManifest()
+			var err error
+			if elem, err = m.AsManifest(); err != nil {
+				return fmt.Errorf("failed to convert to manifest in json out writer: %w", err)
+			}
 		}
 		items.Items = append(items.Items, elem)
 	}

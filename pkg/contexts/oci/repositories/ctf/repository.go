@@ -15,6 +15,8 @@
 package ctf
 
 import (
+	"fmt"
+
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
@@ -108,11 +110,19 @@ func (r *RepositoryImpl) NamespaceLister() cpi.NamespaceLister {
 }
 
 func (r *RepositoryImpl) NumNamespaces(prefix string) (int, error) {
-	return len(cpi.FilterByNamespacePrefix(prefix, r.getIndex().RepositoryList())), nil
+	getIndex, err := r.getIndex()
+	if err != nil {
+		return -1, fmt.Errorf("failed to get index while checking number of namespaces: %w", err)
+	}
+	return len(cpi.FilterByNamespacePrefix(prefix, getIndex.RepositoryList())), nil
 }
 
 func (r *RepositoryImpl) GetNamespaces(prefix string, closure bool) ([]string, error) {
-	return cpi.FilterChildren(closure, cpi.FilterByNamespacePrefix(prefix, r.getIndex().RepositoryList())), nil
+	getIndex, err := r.getIndex()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get index while getting a namespace: %w", err)
+	}
+	return cpi.FilterChildren(closure, cpi.FilterByNamespacePrefix(prefix, getIndex.RepositoryList())), nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -138,18 +148,26 @@ func (r *RepositoryImpl) Close() error {
 	return r.base.Close()
 }
 
-func (a *RepositoryImpl) getIndex() *index.RepositoryIndex {
-	if a.IsReadOnly() {
-		return a.base.GetState().GetOriginalState().(*index.RepositoryIndex)
+func (r *RepositoryImpl) getIndex() (*index.RepositoryIndex, error) {
+	if r.IsReadOnly() {
+		state, err := r.base.GetState().GetOriginalState()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get state while getting repo index: %w", err)
+		}
+		return state.(*index.RepositoryIndex), nil
 	}
-	return a.base.GetState().GetState().(*index.RepositoryIndex)
+	return r.base.GetState().GetState().(*index.RepositoryIndex), nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // cpi.Repository methods
 
 func (r *RepositoryImpl) ExistsArtefact(name string, tag string) (bool, error) {
-	return r.getIndex().HasArtefact(name, tag), nil
+	repositoryIndex, err := r.getIndex()
+	if err != nil {
+		return false, fmt.Errorf("failed to get index while checking if the artefact exists: %w", err)
+	}
+	return repositoryIndex.HasArtefact(name, tag), nil
 }
 
 func (r *RepositoryImpl) LookupArtefact(name string, ref string) (cpi.ArtefactAccess, error) {
@@ -158,7 +176,11 @@ func (r *RepositoryImpl) LookupArtefact(name string, ref string) (cpi.ArtefactAc
 		return nil, err
 	}
 	defer v.Close()
-	a := r.getIndex().GetArtefactInfo(name, ref)
+	getIndex, err := r.getIndex()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get index while looking up an artefact: %w", err)
+	}
+	a := getIndex.GetArtefactInfo(name, ref)
 	if a == nil {
 		return nil, cpi.ErrUnknownArtefact(name, ref)
 	}

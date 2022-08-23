@@ -15,6 +15,8 @@
 package transfer
 
 import (
+	"fmt"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
@@ -52,7 +54,10 @@ func transferVersion(printer common.Printer, state common.WalkingState, repo ocm
 		}
 	}
 
-	d := src.GetDescriptor()
+	d, err := src.GetDescriptor()
+	if err != nil {
+		return fmt.Errorf("failed to get source descriptor: %w", err)
+	}
 
 	comp, err := tgt.LookupComponent(src.GetName())
 	if err != nil {
@@ -108,11 +113,14 @@ func transferVersion(printer common.Printer, state common.WalkingState, repo ocm
 			unstr = nil
 		}
 	}
-	cd := t.GetDescriptor()
+	cd, err := t.GetDescriptor()
+	if err != nil {
+		return fmt.Errorf("failed to get target descriptor: %w", err)
+	}
 	if unstr != nil {
 		cd.RepositoryContexts = append(cd.RepositoryContexts, unstr)
 	}
-	cd.Signatures = src.GetDescriptor().Signatures.Copy()
+	cd.Signatures = d.Signatures.Copy()
 	printer.Printf("...adding component version...\n")
 	return list.Add(comp.AddVersion(t)).Result()
 }
@@ -122,7 +130,15 @@ func CopyVersion(printer common.Printer, hist common.History, src ocm.ComponentV
 		handler = standard.NewDefaultHandler(nil)
 	}
 
-	*t.GetDescriptor() = *src.GetDescriptor().Copy()
+	srcDescriptor, err := src.GetDescriptor()
+	if err != nil {
+		return fmt.Errorf("failed to get source descriptor: %w", err)
+	}
+	targetDescriptor, err := t.GetDescriptor()
+	if err != nil {
+		return fmt.Errorf("failed to get target descriptor: %w", err)
+	}
+	*targetDescriptor = *srcDescriptor.Copy()
 	for i, r := range src.GetResources() {
 		var m ocm.AccessMethod
 		a, err := r.Access()

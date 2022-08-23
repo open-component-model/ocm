@@ -15,6 +15,8 @@
 package processing
 
 import (
+	"fmt"
+
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 )
 
@@ -90,7 +92,10 @@ func (this *_ProcessingSource) new() ProcessingSource {
 
 func (this *_ProcessingSource) Add(entries ...interface{}) IncrementalProcessingSource {
 	for _, e := range entries {
-		this.ProcessingBuffer.Add(NewEntry(Top(this.Len()), e))
+		if _, err := this.ProcessingBuffer.Add(NewEntry(Top(this.Len()), e)); err != nil {
+			fmt.Printf("failed to add entry %+v: %s\n", e, err)
+			break
+		}
 	}
 	return this
 }

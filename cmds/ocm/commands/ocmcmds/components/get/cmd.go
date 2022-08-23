@@ -117,7 +117,11 @@ func Format(opts *output.Options) processing.ProcessChain {
 		return nil
 	}
 	return processing.Map(func(in interface{}) interface{} {
-		desc := comphdlr.Elem(in).GetDescriptor()
+		desc, err := comphdlr.Elem(in).GetDescriptor()
+		if err != nil {
+			fmt.Println("failed to get descriptor: ", err)
+			return nil
+		}
 		out, err := compdesc.Convert(desc, compdesc.SchemaVersion(o.Schema))
 		if err != nil {
 			return struct {
@@ -139,24 +143,24 @@ func Format(opts *output.Options) processing.ProcessChain {
 
 /////////////////////////////////////////////////////////////////////////////
 
-var outputs = output.NewOutputs(get_regular, output.Outputs{
-	"wide": get_wide,
-	"tree": get_tree,
+var outputs = output.NewOutputs(getRegular, output.Outputs{
+	"wide": getWide,
+	"tree": getTree,
 }).AddChainedManifestOutputs(output.ComposeChain(closureoption.OutputChainFunction(comphdlr.ClosureExplode, comphdlr.Sort), Format))
 
-func get_regular(opts *output.Options) output.Output {
-	return TableOutput(opts, map_get_regular_output).New()
+func getRegular(opts *output.Options) output.Output {
+	return TableOutput(opts, mapGetRegularOutput).New()
 }
 
-func get_wide(opts *output.Options) output.Output {
-	return TableOutput(opts, map_get_wide_output, "REPOSITORY").New()
+func getWide(opts *output.Options) output.Output {
+	return TableOutput(opts, mapGetWideOutput, "REPOSITORY").New()
 }
 
-func get_tree(opts *output.Options) output.Output {
-	return output.TreeOutput(TableOutput(opts, map_get_regular_output), "NESTING").New()
+func getTree(opts *output.Options) output.Output {
+	return output.TreeOutput(TableOutput(opts, mapGetRegularOutput), "NESTING").New()
 }
 
-func map_get_regular_output(e interface{}) interface{} {
+func mapGetRegularOutput(e interface{}) interface{} {
 	p := e.(*comphdlr.Object)
 
 	tag := "-"
@@ -166,10 +170,14 @@ func map_get_regular_output(e interface{}) interface{} {
 	if p.ComponentVersion == nil {
 		return []string{p.Spec.Component, tag, "<unknown component version>"}
 	}
-	return []string{p.Spec.Component, tag, string(p.ComponentVersion.GetDescriptor().Provider.Name)}
+	descriptor, err := p.ComponentVersion.GetDescriptor()
+	if err != nil {
+		return []string{p.Spec.Component, tag, "<failed to get descriptor>"}
+	}
+	return []string{p.Spec.Component, tag, string(descriptor.Provider.Name)}
 }
 
-func map_get_wide_output(e interface{}) interface{} {
+func mapGetWideOutput(e interface{}) interface{} {
 	p := e.(*comphdlr.Object)
-	return output.Fields(map_get_regular_output(e), p.Spec.UniformRepositorySpec.String())
+	return output.Fields(mapGetRegularOutput(e), p.Spec.UniformRepositorySpec.String())
 }

@@ -118,8 +118,10 @@ var _ = Describe("Transfer handler", func() {
 		Expect(list).To(Equal([]string{COMPONENT}))
 		comp, err := tgt.LookupComponentVersion(COMPONENT, VERSION)
 		Expect(err).To(Succeed())
-		Expect(len(comp.GetDescriptor().Resources)).To(Equal(2))
-		data, err := json.Marshal(comp.GetDescriptor().Resources[1].Access)
+		descriptor, err := comp.GetDescriptor()
+		Expect(err).To(Succeed())
+		Expect(len(descriptor.Resources)).To(Equal(2))
+		data, err := json.Marshal(descriptor.Resources[1].Access)
 		Expect(err).To(Succeed())
 		Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 
@@ -162,7 +164,9 @@ var _ = Describe("Transfer handler", func() {
 		Expect(err).To(Succeed())
 		Expect(dig.Value).To(Equal(digest))
 
-		Expect(len(cv.GetDescriptor().Signatures)).To(Equal(1))
+		descriptor, err := cv.GetDescriptor()
+		Expect(err).To(Succeed())
+		Expect(len(descriptor.Signatures)).To(Equal(1))
 
 		tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env)
 		Expect(err).To(Succeed())

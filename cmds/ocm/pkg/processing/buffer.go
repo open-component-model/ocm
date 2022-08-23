@@ -65,10 +65,11 @@ func (i IndexArray) Copy() IndexArray {
 	return n
 }
 
-func (i IndexArray) Validate(max int) {
+func (i IndexArray) Validate(max int) error {
 	if max >= 0 && i[len(i)-1] >= max {
-		panic(fmt.Sprintf("index %d >= max %d", i[len(i)-1], max))
+		return fmt.Errorf("index %d >= max %d", i[len(i)-1], max)
 	}
+	return nil
 }
 
 type ProcessingEntry struct {
@@ -366,7 +367,9 @@ func (this *orderedBuffer) SetFrame(frame BufferFrame) {
 }
 
 func (this *orderedBuffer) Add(e ProcessingEntry) (bool, error) {
-	e.Index.Validate(e.MaxIndex)
+	if err := e.Index.Validate(e.MaxIndex); err != nil {
+		return false, err
+	}
 	if _, err := this.simple.Add(e); err != nil {
 		return false, fmt.Errorf("ordered buffer add failed: %w", err)
 	}

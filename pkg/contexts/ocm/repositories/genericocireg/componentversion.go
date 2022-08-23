@@ -114,11 +114,15 @@ func (c *ComponentVersionContainer) Close() error {
 }
 
 func (c *ComponentVersionContainer) Check() error {
-	if c.version != c.GetDescriptor().Version {
-		return errors.ErrInvalid("component version", c.GetDescriptor().Version)
+	descriptor, err := c.GetDescriptor()
+	if err != nil {
+		return err
 	}
-	if c.comp.name != c.GetDescriptor().Name {
-		return errors.ErrInvalid("component name", c.GetDescriptor().Name)
+	if c.version != descriptor.Version {
+		return errors.ErrInvalid("component version", descriptor.Version)
+	}
+	if c.comp.name != descriptor.Name {
+		return errors.ErrInvalid("component name", descriptor.Name)
 	}
 	return nil
 }
@@ -163,7 +167,10 @@ func (c *ComponentVersionContainer) Update() error {
 		return err
 	}
 	if c.state.HasChanged() {
-		desc := c.GetDescriptor()
+		desc, err := c.GetDescriptor()
+		if err != nil {
+			return err
+		}
 		for i, r := range desc.Resources {
 			s, err := c.evalLayer(r.Access)
 			if err != nil {
@@ -187,8 +194,11 @@ func (c *ComponentVersionContainer) Update() error {
 			return err
 		}
 		_, err = c.comp.namespace.AddArtefact(c.manifest, c.version)
+		if err != nil {
+			return err
+		}
 	}
-	return err
+	return nil
 }
 
 func (c *ComponentVersionContainer) evalLayer(s compdesc.AccessSpec) (compdesc.AccessSpec, error) {
@@ -204,8 +214,8 @@ func (c *ComponentVersionContainer) evalLayer(s compdesc.AccessSpec) (compdesc.A
 	return s, nil
 }
 
-func (c *ComponentVersionContainer) GetDescriptor() *compdesc.ComponentDescriptor {
-	return c.state.GetState().(*compdesc.ComponentDescriptor)
+func (c *ComponentVersionContainer) GetDescriptor() (*compdesc.ComponentDescriptor, error) {
+	return c.state.GetState().(*compdesc.ComponentDescriptor), nil
 }
 
 func (c *ComponentVersionContainer) GetBlobData(name string) (cpi.DataAccess, error) {

@@ -215,13 +215,15 @@ process: (( (*(rules[mode] || rules.default)).process ))
 			Expect(list).To(Equal([]string{COMPONENT}))
 			comp, err := tgt.LookupComponentVersion(COMPONENT, VERSION)
 			Expect(err).To(Succeed())
-			Expect(len(comp.GetDescriptor().Resources)).To(Equal(3))
+			descriptor, err := comp.GetDescriptor()
+			Expect(err).To(Succeed())
+			Expect(len(descriptor.Resources)).To(Equal(3))
 
-			data, err := json.Marshal(comp.GetDescriptor().Resources[2].Access)
+			data, err := json.Marshal(descriptor.Resources[2].Access)
 			Expect(err).To(Succeed())
 			Expect(string(data)).To(Equal("{\"localReference\":\"sha256:f6a519fb1d0c8cef5e8d7811911fc7cb170462bbce19d6df067dae041250de7f\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE2 + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 
-			data, err = json.Marshal(comp.GetDescriptor().Resources[1].Access)
+			data, err = json.Marshal(descriptor.Resources[1].Access)
 			Expect(err).To(Succeed())
 			Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 
@@ -261,15 +263,17 @@ process: (( (*(rules[mode] || rules.default)).process ))
 			Expect(list).To(Equal([]string{COMPONENT}))
 			comp, err := tgt.LookupComponentVersion(COMPONENT, VERSION)
 			Expect(err).To(Succeed())
-			Expect(len(comp.GetDescriptor().Resources)).To(Equal(3))
+			descriptor, err := comp.GetDescriptor()
+			Expect(err).To(Succeed())
+			Expect(len(descriptor.Resources)).To(Equal(3))
 
 			// index 2: by ref
-			data, err := json.Marshal(comp.GetDescriptor().Resources[2].Access)
+			data, err := json.Marshal(descriptor.Resources[2].Access)
 			Expect(err).To(Succeed())
 			Expect(string(data)).To(Equal("{\"imageReference\":\"" + oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION) + "\",\"type\":\"" + ociartefact.Type + "\"}"))
 
 			// index 1: by value
-			data, err = json.Marshal(comp.GetDescriptor().Resources[1].Access)
+			data, err = json.Marshal(descriptor.Resources[1].Access)
 			Expect(err).To(Succeed())
 			Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 

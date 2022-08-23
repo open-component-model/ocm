@@ -31,7 +31,7 @@ func TweakCommand(cmd *cobra.Command, ctx out.Context) {
 		cmd.SetErr(ctx.StdErr())
 		cmd.SetIn(ctx.StdIn())
 	}
-	cobra.AddTemplateFuncs(templatefuncs)
+	cobra.AddTemplateFuncs(templateFuncs)
 	CleanMarkdownUsageFunc(cmd)
 	SupportNestedHelpFunc(cmd)
 	cmd.SetHelpTemplate(HelpTemplate)

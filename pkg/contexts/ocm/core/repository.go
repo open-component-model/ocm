@@ -82,7 +82,7 @@ type ComponentVersionAccess interface {
 
 	GetContext() Context
 
-	GetDescriptor() *compdesc.ComponentDescriptor
+	GetDescriptor() (*compdesc.ComponentDescriptor, error)
 
 	GetResources() []ResourceAccess
 	GetResource(meta metav1.Identity) (ResourceAccess, error)

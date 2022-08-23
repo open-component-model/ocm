@@ -15,6 +15,8 @@
 package create
 
 import (
+	"fmt"
+
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -127,7 +129,10 @@ func (o *Command) Run() error {
 	if err != nil {
 		return err
 	}
-	desc := obj.GetDescriptor()
+	desc, err := obj.GetDescriptor()
+	if err != nil {
+		return fmt.Errorf("failed to get descriptor during run: %w", err)
+	}
 	desc.Metadata.ConfiguredVersion = schemaoption.From(o).Schema
 	desc.Name = o.Component
 	desc.Version = o.Version

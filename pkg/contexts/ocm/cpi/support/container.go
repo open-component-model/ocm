@@ -49,7 +49,7 @@ type ComponentVersionContainer interface {
 	IsClosed() bool
 	Update() error
 
-	GetDescriptor() *compdesc.ComponentDescriptor
+	GetDescriptor() (*compdesc.ComponentDescriptor, error)
 
 	BlobContainer
 

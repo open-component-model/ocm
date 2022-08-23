@@ -74,7 +74,11 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 
 	if len(cmd.Long) > 0 {
 		buf.WriteString("### Description\n\n")
-		buf.WriteString(cobrautils.SubstituteCommandLinks(cmd.Long, cobrautils.FormatLinkWithHandler(linkHandler)) + "\n\n")
+		links, err := cobrautils.SubstituteCommandLinks(cmd.Long, cobrautils.FormatLinkWithHandler(linkHandler))
+		if err != nil {
+			return fmt.Errorf("failed to run substitute command links built in template function: %w", err)
+		}
+		buf.WriteString(links + "\n\n")
 	}
 
 	if len(cmd.Example) > 0 {

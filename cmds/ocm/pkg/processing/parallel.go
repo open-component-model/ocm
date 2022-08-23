@@ -95,7 +95,6 @@ type _ParallelStep struct {
 func (this *_ParallelStep) new(pool ProcessorPool, data ProcessingIterable, op operation, creator BufferCreator) *_ParallelStep {
 	buffer := creator()
 	this._ParallelProcessing.new(buffer, pool, creator)
-	// TODO: Error handling for buffer.Add
 	go func() {
 		this.pool.Request()
 		i := data.ProcessingIterator()
@@ -111,22 +110,37 @@ func (this *_ParallelStep) new(pool ProcessorPool, data ProcessingIterable, op o
 				if !e.Valid {
 					e.Value = nil
 					// keep indicating index with for unused value
-					buffer.Add(e)
+					if _, err := buffer.Add(e); err != nil {
+						fmt.Printf("error encountered while adding item %+v: %s\n", e, err)
+						return
+					}
 				} else {
 					switch len(r) {
 					case 0:
 						e.Value = nil
-						buffer.Add(e)
+						if _, err := buffer.Add(e); err != nil {
+							fmt.Printf("error encountered while adding item %+v: %s\n", e, err)
+							return
+						}
 					case 1:
 						e.Value = r[0]
-						buffer.Add(e)
+						if _, err := buffer.Add(e); err != nil {
+							fmt.Printf("error encountered while adding item %+v: %s\n", e, err)
+							return
+						}
 					default:
 						sub := len(r)
 						// first: indicate number of sub entries with unused dummy entry
-						buffer.Add(NewEntry(e.Index, nil, SubEntries(sub), e.MaxIndex, false))
+						if _, err := buffer.Add(NewEntry(e.Index, nil, SubEntries(sub), e.MaxIndex, false)); err != nil {
+							fmt.Printf("error encountered while adding item %+v: %s\n", e, err)
+							return
+						}
 						// second: apply all sub entries
 						for idx, n := range r {
-							buffer.Add(NewEntry(append(e.Index.Copy(), idx), n, sub))
+							if _, err := buffer.Add(NewEntry(append(e.Index.Copy(), idx), n, sub)); err != nil {
+								fmt.Printf("error encountered while adding item %+v: %s\n", e, err)
+								return
+							}
 						}
 					}
 				}

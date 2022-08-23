@@ -69,8 +69,12 @@ var _ accessobj.State = (*indexMapper)(nil)
 func (m *indexMapper) GetState() interface{} {
 	return m.State.GetState().(*artdesc.Artefact).Index()
 }
-func (m *indexMapper) GetOriginalState() interface{} {
-	return m.State.GetOriginalState().(*artdesc.Artefact).Index()
+func (m *indexMapper) GetOriginalState() (interface{}, error) {
+	state, err := m.State.GetOriginalState()
+	if err != nil {
+		return nil, fmt.Errorf("failed to return original state: %w", err)
+	}
+	return state.(*artdesc.Artefact).Index(), nil
 }
 
 func NewIndexForArtefact(a *ArtefactImpl) *IndexImpl {

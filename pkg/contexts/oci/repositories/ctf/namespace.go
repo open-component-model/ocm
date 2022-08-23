@@ -15,6 +15,8 @@
 package ctf
 
 import (
+	"fmt"
+
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi/support"
@@ -103,7 +105,11 @@ func (n *NamespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi.Descri
 }
 
 func (n *NamespaceContainer) ListTags() ([]string, error) {
-	return n.repo.getIndex().GetTags(n.namespace), nil // return digests as tags, also
+	getIndex, err := n.repo.getIndex()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get index while listing tags: %w", err)
+	}
+	return getIndex.GetTags(n.namespace), nil // return digests as tags, also
 }
 
 func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
@@ -118,7 +124,11 @@ func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
 }
 
 func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error) {
-	meta := n.repo.getIndex().GetArtefactInfo(n.namespace, vers)
+	getIndex, err := n.repo.getIndex()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get index while getting an artefact: %w", err)
+	}
+	meta := getIndex.GetArtefactInfo(n.namespace, vers)
 	if meta == nil {
 		return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, vers, n.namespace)
 	}
@@ -133,7 +143,11 @@ func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, tags ...string) 
 	if err != nil {
 		return nil, err
 	}
-	n.repo.getIndex().AddArtefactInfo(&index.ArtefactMeta{
+	getIndex, err := n.repo.getIndex()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get index while adding an artefact: %w", err)
+	}
+	getIndex.AddArtefactInfo(&index.ArtefactMeta{
 		Repository: n.namespace,
 		Tag:        "",
 		Digest:     blob.Digest(),
@@ -142,7 +156,11 @@ func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, tags ...string) 
 }
 
 func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error {
-	return n.repo.getIndex().AddTagsFor(n.namespace, digest, tags...)
+	getIndex, err := n.repo.getIndex()
+	if err != nil {
+		return fmt.Errorf("failed to get index while adding tags: %w", err)
+	}
+	return getIndex.AddTagsFor(n.namespace, digest, tags...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

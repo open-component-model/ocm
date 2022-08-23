@@ -16,6 +16,7 @@ package support
 
 import (
 	"compress/gzip"
+	"fmt"
 
 	"github.com/opencontainers/go-digest"
 
@@ -42,8 +43,12 @@ var _ accessobj.State = (*manifestMapper)(nil)
 func (m *manifestMapper) GetState() interface{} {
 	return m.State.GetState().(*artdesc.Artefact).Manifest()
 }
-func (m *manifestMapper) GetOriginalState() interface{} {
-	return m.State.GetOriginalState().(*artdesc.Artefact).Manifest()
+func (m *manifestMapper) GetOriginalState() (interface{}, error) {
+	state, err := m.State.GetOriginalState()
+	if err != nil {
+		return nil, fmt.Errorf("failed to return original state: %w", err)
+	}
+	return state.(*artdesc.Artefact).Manifest(), nil
 }
 
 func NewManifestForArtefact(a *ArtefactImpl) *ManifestImpl {

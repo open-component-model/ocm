@@ -15,6 +15,8 @@
 package common
 
 import (
+	"fmt"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/elemhdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -34,7 +36,11 @@ type TypeHandler struct {
 }
 
 func NewTypeHandler(octx clictx.OCM, opts *output.Options, repo ocm.Repository, session ocm.Session, compspecs []string, hopts ...elemhdlr.Option) (utils.TypeHandler, error) {
-	return elemhdlr.NewTypeHandler(octx, opts, repo, session, ocm.KIND_SOURCE, compspecs, func(access ocm.ComponentVersionAccess) compdesc.ElementAccessor {
-		return access.GetDescriptor().Sources
+	return elemhdlr.NewTypeHandler(octx, opts, repo, session, ocm.KIND_SOURCE, compspecs, func(access ocm.ComponentVersionAccess) (compdesc.ElementAccessor, error) {
+		descriptor, err := access.GetDescriptor()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get descriptor for type handler: %w", err)
+		}
+		return descriptor.Sources, nil
 	}, hopts...)
 }

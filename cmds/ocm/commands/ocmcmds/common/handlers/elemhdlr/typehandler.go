@@ -15,6 +15,7 @@
 package elemhdlr
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
@@ -47,11 +48,11 @@ type Manifest struct {
 	Element compdesc.ElementMetaAccessor `json:"element"`
 }
 
-func (o *Object) AsManifest() interface{} {
+func (o *Object) AsManifest() (interface{}, error) {
 	return &Manifest{
 		History: o.History,
 		Element: o.Element,
-	}
+	}, nil
 }
 
 func (o *Object) GetHistory() common.History {
@@ -88,10 +89,10 @@ type TypeHandler struct {
 	session    ocm.Session
 	kind       string
 	forceEmpty bool
-	elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor
+	elemaccess func(ocm.ComponentVersionAccess) (compdesc.ElementAccessor, error)
 }
 
-func NewTypeHandler(octx clictx.OCM, oopts *output.Options, repobase ocm.Repository, session ocm.Session, kind string, compspecs []string, elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor, hopts ...Option) (utils.TypeHandler, error) {
+func NewTypeHandler(octx clictx.OCM, oopts *output.Options, repobase ocm.Repository, session ocm.Session, kind string, compspecs []string, elemaccess func(ocm.ComponentVersionAccess) (compdesc.ElementAccessor, error), hopts ...Option) (utils.TypeHandler, error) {
 	h := comphdlr.NewTypeHandler(octx, session, repobase)
 
 	comps := output.NewElementOutput(nil, closureoption.Closure(oopts, comphdlr.ClosureExplode, comphdlr.Sort))
@@ -140,7 +141,10 @@ func (h *TypeHandler) All() ([]output.Object, error) {
 func (h *TypeHandler) all(c *comphdlr.Object) ([]output.Object, error) {
 	result := []output.Object{}
 	if c.ComponentVersion != nil {
-		elemaccess := h.elemaccess(c.ComponentVersion)
+		elemaccess, err := h.elemaccess(c.ComponentVersion)
+		if err != nil {
+			return nil, fmt.Errorf("failed to access element: %w", err)
+		}
 		l := elemaccess.Len()
 		if l == 0 && h.forceEmpty {
 			result = append(result, &Object{
@@ -180,7 +184,10 @@ func (h *TypeHandler) get(c *comphdlr.Object, elemspec utils.ElemSpec) ([]output
 	var result []output.Object
 
 	selector := elemspec.(metav1.Identity)
-	elemaccess := h.elemaccess(c.ComponentVersion)
+	elemaccess, err := h.elemaccess(c.ComponentVersion)
+	if err != nil {
+		return nil, fmt.Errorf("failed to access element: %w", err)
+	}
 	l := elemaccess.Len()
 	for i := 0; i < l; i++ {
 		e := elemaccess.Get(i)

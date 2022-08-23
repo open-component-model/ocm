@@ -163,7 +163,9 @@ var _ = Describe("access method", func() {
 			cv, err = src.LookupComponentVersion(COMPONENTA, VERSION)
 			Expect(err).To(Succeed())
 			session.AddCloser(cv)
-			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(digest))
+			descriptor, err := cv.GetDescriptor()
+			Expect(err).To(Succeed())
+			Expect(descriptor.Signatures[0].Digest.Value).To(Equal(digest))
 
 			////////
 
@@ -213,7 +215,9 @@ var _ = Describe("access method", func() {
 			cv, err = src.LookupComponentVersion(COMPONENTA, VERSION)
 			Expect(err).To(Succeed())
 			session.AddCloser(cv)
-			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(digest))
+			descriptor, err := cv.GetDescriptor()
+			Expect(err).To(Succeed())
+			Expect(descriptor.Signatures[0].Digest.Value).To(Equal(digest))
 
 			////////
 
@@ -263,7 +267,9 @@ var _ = Describe("access method", func() {
 			cv, err = src.LookupComponentVersion(COMPONENTB, VERSION)
 			Expect(err).To(Succeed())
 			session.AddCloser(cv)
-			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(digest))
+			descriptor, err := cv.GetDescriptor()
+			Expect(err).To(Succeed())
+			Expect(descriptor.Signatures[0].Digest.Value).To(Equal(digest))
 
 			////////
 

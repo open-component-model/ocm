@@ -28,7 +28,9 @@ func (b *Builder) ComponentArchive(path string, fmt accessio.FileFormat, name, v
 	b.failOn(err)
 	r.SetName(name)
 	r.SetVersion(vers)
-	r.GetDescriptor().Provider.Name = metav1.ProviderName("ACME")
+	descriptor, err := r.GetDescriptor()
+	b.failOn(err)
+	descriptor.Provider.Name = metav1.ProviderName("ACME")
 
 	b.configure(&ocm_version{ComponentVersionAccess: r, kind: T_COMPARCH}, f)
 }

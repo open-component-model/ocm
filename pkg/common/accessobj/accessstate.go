@@ -118,7 +118,7 @@ type State interface {
 	GetBlob() (accessio.BlobAccess, error)
 
 	HasChanged() bool
-	GetOriginalState() interface{}
+	GetOriginalState() (interface{}, error)
 	GetState() interface{}
 
 	// Update updates the technical representation in its persistence
@@ -226,9 +226,9 @@ func (s *state) Refresh() error {
 	return nil
 }
 
-func (s *state) GetOriginalState() interface{} {
+func (s *state) GetOriginalState() (interface{}, error) {
 	if s.originalBlob == nil {
-		return nil
+		return nil, nil
 	}
 	// always provide a private copy to not corrupt the internal state
 	var original interface{}
@@ -237,9 +237,9 @@ func (s *state) GetOriginalState() interface{} {
 		original, err = s.handler.Decode(data)
 	}
 	if err != nil {
-		panic("use of invalid state: " + err.Error())
+		return nil, fmt.Errorf("use of invalid state: " + err.Error())
 	}
-	return original
+	return original, nil
 }
 
 func (s *state) GetState() interface{} {

@@ -65,7 +65,7 @@ func (o *Object) IsNode() *common.NameVersion {
 	return &nv
 }
 
-func (o *Object) AsManifest() interface{} {
+func (o *Object) AsManifest() (interface{}, error) {
 	var digest string
 	b, err := o.Artefact.Blob()
 	if err == nil {
@@ -77,7 +77,7 @@ func (o *Object) AsManifest() interface{} {
 		Spec:     o.Spec,
 		Digest:   digest,
 		Manifest: o.Artefact.GetDescriptor(),
-	}
+	}, nil
 }
 
 func (o *Object) String() string {

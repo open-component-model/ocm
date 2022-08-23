@@ -53,15 +53,19 @@ type Manifest struct {
 	Element *compdesc.ComponentDescriptor `json:"element"`
 }
 
-func (o *Object) AsManifest() interface{} {
+func (o *Object) AsManifest() (interface{}, error) {
 	h := o.History
 	if h == nil {
 		h = common.History{}
 	}
+	descriptor, err := o.ComponentVersion.GetDescriptor()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get descriptor in as manifest: %w", err)
+	}
 	return &Manifest{
 		h,
-		o.ComponentVersion.GetDescriptor(),
-	}
+		descriptor,
+	}, nil
 }
 
 func (o *Object) GetHistory() common.History {

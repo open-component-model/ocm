@@ -16,12 +16,13 @@ package cobrautils
 
 import (
 	"strings"
+	"text/template"
 
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
 
-var templatefuncs = map[string]interface{}{
+var templateFuncs = template.FuncMap{
 	"indent":                 indent,
 	"skipCommand":            skipCommand,
 	"soleCommand":            soleCommand,
@@ -29,7 +30,8 @@ var templatefuncs = map[string]interface{}{
 	"substituteCommandLinks": substituteCommandLinks,
 }
 
-func substituteCommandLinks(desc string) string {
+// The func map allows for an optional secondary return value of type error.
+func substituteCommandLinks(desc string) (string, error) {
 	return SubstituteCommandLinks(desc, func(pname string) string {
 		return "\u00ab" + pname + "\u00bb"
 	})

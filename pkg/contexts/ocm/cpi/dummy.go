@@ -45,7 +45,7 @@ func (d *DummyComponentVersionAccess) GetVersion() string {
 	panic("implement me")
 }
 
-func (d *DummyComponentVersionAccess) GetDescriptor() *compdesc.ComponentDescriptor {
+func (d *DummyComponentVersionAccess) GetDescriptor() (*compdesc.ComponentDescriptor, error) {
 	panic("implement me")
 }
 

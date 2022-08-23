@@ -15,6 +15,8 @@
 package utils
 
 import (
+	"fmt"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -46,11 +48,15 @@ func MatchResourceReference(cv ocm.ComponentVersionAccess, typ string, ref metav
 		return nil, nil, err
 	}
 
-	if len(eff.GetDescriptor().Resources) == 0 && len(ref.Resource) == 0 {
+	descriptor, err := eff.GetDescriptor()
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get descriptor during match resource reference: %w", err)
+	}
+	if len(descriptor.Resources) == 0 && len(ref.Resource) == 0 {
 		return nil, nil, errors.ErrNotFound(ocm.KIND_RESOURCE)
 	}
 outer:
-	for i, r := range eff.GetDescriptor().Resources {
+	for i, r := range descriptor.Resources {
 		if r.Type != typ && typ != "" {
 			continue
 		}

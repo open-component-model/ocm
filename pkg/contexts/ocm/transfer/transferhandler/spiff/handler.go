@@ -16,6 +16,7 @@ package spiff
 
 import (
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	"github.com/mandelsoft/spiff/dynaml"
@@ -63,7 +64,10 @@ func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionA
 		if h.opts.GetScript() == nil {
 			return repo, h, nil
 		}
-		binding := h.getBinding(src, nil, meta, nil)
+		binding, err := h.getBinding(src, nil, meta, nil)
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to get bindings when transfering a version: %w", err)
+		}
 		result, r, s, err := h.EvalRecursion("componentversion", binding, "process")
 		if err != nil {
 			return nil, nil, err
@@ -96,7 +100,10 @@ func (h *Handler) TransferResource(src ocm.ComponentVersionAccess, a ocm.AccessS
 	if h.opts.GetScript() == nil {
 		return true, nil
 	}
-	binding := h.getBinding(src, a, &r.Meta().ElementMeta, &r.Meta().Type)
+	binding, err := h.getBinding(src, a, &r.Meta().ElementMeta, &r.Meta().Type)
+	if err != nil {
+		return false, fmt.Errorf("failed to get bindings when transferring resource: %w", err)
+	}
 	return h.EvalBool("resource", binding, "process")
 }
 
@@ -107,14 +114,21 @@ func (h *Handler) TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpe
 	if h.opts.GetScript() == nil {
 		return true, nil
 	}
-	binding := h.getBinding(src, a, &r.Meta().ElementMeta, &r.Meta().Type)
+	binding, err := h.getBinding(src, a, &r.Meta().ElementMeta, &r.Meta().Type)
+	if err != nil {
+		return false, fmt.Errorf("failed to get bindings when transferring source: %w", err)
+	}
 	return h.EvalBool("source", binding, "process")
 }
 
-func (h *Handler) getBinding(src ocm.ComponentVersionAccess, a ocm.AccessSpec, m *compdesc.ElementMeta, typ *string) map[string]interface{} {
+func (h *Handler) getBinding(src ocm.ComponentVersionAccess, a ocm.AccessSpec, m *compdesc.ElementMeta, typ *string) (map[string]interface{}, error) {
 	binding := map[string]interface{}{}
 	if src != nil {
-		binding["component"] = getCVAttrs(src)
+		attr, err := getCVAttrs(src)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get attributes during binding: %w", err)
+		}
+		binding["component"] = attr
 	}
 
 	if a != nil {
@@ -124,7 +138,7 @@ func (h *Handler) getBinding(src ocm.ComponentVersionAccess, a ocm.AccessSpec, m
 	if typ != nil {
 		binding["element"].(map[string]interface{})["type"] = *typ
 	}
-	return binding
+	return binding, nil
 }
 
 func getData(in interface{}) interface{} {
@@ -134,19 +148,23 @@ func getData(in interface{}) interface{} {
 	return v
 }
 
-func getCVAttrs(cv ocm.ComponentVersionAccess) map[string]interface{} {
+func getCVAttrs(cv ocm.ComponentVersionAccess) (map[string]interface{}, error) {
 	provider := map[string]interface{}{}
-	data, _ := json.Marshal(cv.GetDescriptor().Provider)
+	descriptor, err := cv.GetDescriptor()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get descriptor when getting component version attributes: %w", err)
+	}
+	data, _ := json.Marshal(descriptor.Provider)
 	json.Unmarshal(data, &provider)
 
-	labels := cv.GetDescriptor().Labels.AsMap()
+	labels := descriptor.Labels.AsMap()
 
 	values := map[string]interface{}{}
 	values["name"] = cv.GetName()
 	values["version"] = cv.GetVersion()
 	values["provider"] = provider
 	values["labels"] = labels
-	return values
+	return values, nil
 }
 
 func (h *Handler) Eval(binding map[string]interface{}) (spiffing.Node, error) {

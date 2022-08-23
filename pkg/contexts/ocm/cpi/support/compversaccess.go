@@ -15,6 +15,7 @@
 package support
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -93,11 +94,19 @@ func (a *componentVersionAccessImpl) GetContext() cpi.Context {
 }
 
 func (a *componentVersionAccessImpl) GetName() string {
-	return a.base.GetDescriptor().GetName()
+	descriptor, err := a.base.GetDescriptor()
+	if err != nil {
+		return ""
+	}
+	return descriptor.GetName()
 }
 
 func (a *componentVersionAccessImpl) GetVersion() string {
-	return a.base.GetDescriptor().GetVersion()
+	descriptor, err := a.base.GetDescriptor()
+	if err != nil {
+		return ""
+	}
+	return descriptor.GetVersion()
 }
 
 func (a *componentVersionAccessImpl) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
@@ -126,12 +135,16 @@ func (c *componentVersionAccessImpl) AccessMethod(a cpi.AccessSpec) (cpi.AccessM
 	return c.base.AccessMethod(a)
 }
 
-func (a *componentVersionAccessImpl) GetDescriptor() *compdesc.ComponentDescriptor {
+func (a *componentVersionAccessImpl) GetDescriptor() (*compdesc.ComponentDescriptor, error) {
 	return a.base.GetDescriptor()
 }
 
 func (a *componentVersionAccessImpl) GetResource(id metav1.Identity) (cpi.ResourceAccess, error) {
-	r, err := a.base.GetDescriptor().GetResourceByIdentity(id)
+	descriptor, err := a.base.GetDescriptor()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get descriptor while getting resource: %w", err)
+	}
+	r, err := descriptor.GetResourceByIdentity(id)
 	if err != nil {
 		return nil, err
 	}
@@ -145,10 +158,18 @@ func (a *componentVersionAccessImpl) GetResource(id metav1.Identity) (cpi.Resour
 }
 
 func (a *componentVersionAccessImpl) GetResourceByIndex(i int) (cpi.ResourceAccess, error) {
-	if i < 0 || i > len(a.base.GetDescriptor().Resources) {
+	descriptor, err := a.base.GetDescriptor()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get descriptor while getting resource by index: %w", err)
+	}
+	if i < 0 || i > len(descriptor.Resources) {
 		return nil, errors.ErrInvalid("resource index", strconv.Itoa(i))
 	}
-	r := a.base.GetDescriptor().Resources[i]
+	getDescriptor, err := a.base.GetDescriptor()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get descriptor while getting resource: %w", err)
+	}
+	r := getDescriptor.Resources[i]
 	return &ResourceAccess{
 		BaseAccess: &BaseAccess{
 			vers:   a,
@@ -160,7 +181,12 @@ func (a *componentVersionAccessImpl) GetResourceByIndex(i int) (cpi.ResourceAcce
 
 func (a *componentVersionAccessImpl) GetResources() []cpi.ResourceAccess {
 	result := []cpi.ResourceAccess{}
-	for _, r := range a.GetDescriptor().Resources {
+	descriptor, err := a.GetDescriptor()
+	if err != nil {
+		fmt.Printf("failed to get descriptor: %s", err)
+		return result
+	}
+	for _, r := range descriptor.Resources {
 		result = append(result, &ResourceAccess{
 			BaseAccess: &BaseAccess{
 				vers:   a,
@@ -173,7 +199,11 @@ func (a *componentVersionAccessImpl) GetResources() []cpi.ResourceAccess {
 }
 
 func (a *componentVersionAccessImpl) GetSource(id metav1.Identity) (cpi.SourceAccess, error) {
-	r, err := a.base.GetDescriptor().GetSourceByIdentity(id)
+	descriptor, err := a.base.GetDescriptor()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get descriptor while getting source: %w", err)
+	}
+	r, err := descriptor.GetSourceByIdentity(id)
 	if err != nil {
 		return nil, err
 	}
@@ -187,10 +217,18 @@ func (a *componentVersionAccessImpl) GetSource(id metav1.Identity) (cpi.SourceAc
 }
 
 func (a *componentVersionAccessImpl) GetSourceByIndex(i int) (cpi.SourceAccess, error) {
-	if i < 0 || i > len(a.base.GetDescriptor().Sources) {
+	descriptor, err := a.base.GetDescriptor()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get descriptor while getting source by index: %w", err)
+	}
+	if i < 0 || i > len(descriptor.Sources) {
 		return nil, errors.ErrInvalid("source index", strconv.Itoa(i))
 	}
-	r := a.base.GetDescriptor().Sources[i]
+	getDescriptor, err := a.base.GetDescriptor()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get descriptor while getting source by index: %w", err)
+	}
+	r := getDescriptor.Sources[i]
 	return &SourceAccess{
 		BaseAccess: &BaseAccess{
 			vers:   a,
@@ -202,7 +240,12 @@ func (a *componentVersionAccessImpl) GetSourceByIndex(i int) (cpi.SourceAccess, 
 
 func (a *componentVersionAccessImpl) GetSources() []cpi.SourceAccess {
 	result := []cpi.SourceAccess{}
-	for _, r := range a.GetDescriptor().Sources {
+	descriptor, err := a.GetDescriptor()
+	if err != nil {
+		fmt.Println("failed to get descriptor for sources: ", err)
+		return result
+	}
+	for _, r := range descriptor.Sources {
 		result = append(result, &SourceAccess{
 			BaseAccess: &BaseAccess{
 				vers:   a,
@@ -215,14 +258,22 @@ func (a *componentVersionAccessImpl) GetSources() []cpi.SourceAccess {
 }
 
 func (a *componentVersionAccessImpl) GetReference(id metav1.Identity) (cpi.ComponentReference, error) {
-	return a.base.GetDescriptor().GetReferenceByIdentity(id)
+	descriptor, err := a.base.GetDescriptor()
+	if err != nil {
+		return cpi.ComponentReference{}, fmt.Errorf("failed to get descriptor when getting reference: %w", err)
+	}
+	return descriptor.GetReferenceByIdentity(id)
 }
 
 func (a *componentVersionAccessImpl) GetReferenceByIndex(i int) (cpi.ComponentReference, error) {
-	if i < 0 || i > len(a.base.GetDescriptor().References) {
+	descriptor, err := a.base.GetDescriptor()
+	if err != nil {
+		return cpi.ComponentReference{}, fmt.Errorf("failed to get descriptor for get reference by index: %w", err)
+	}
+	if i < 0 || i > len(descriptor.References) {
 		return cpi.ComponentReference{}, errors.ErrInvalid("reference index", strconv.Itoa(i))
 	}
-	return a.base.GetDescriptor().References[i], nil
+	return descriptor.References[i], nil
 }
 
 func (c *componentVersionAccessImpl) getAccessSpec(acc compdesc.AccessSpec) (cpi.AccessSpec, error) {
@@ -246,7 +297,10 @@ func (c *componentVersionAccessImpl) AdjustResourceAccess(meta *cpi.ResourceMeta
 		return err
 	}
 
-	cd := c.GetDescriptor()
+	cd, err := c.GetDescriptor()
+	if err != nil {
+		return fmt.Errorf("failed to get descriptor while adjusting resource access: %w", err)
+	}
 	if idx := cd.GetResourceIndex(meta); idx == -1 {
 		return errors.ErrUnknown(cpi.KIND_RESOURCE, meta.GetIdentity(cd.Resources).String())
 	} else {
@@ -282,9 +336,12 @@ func (c *componentVersionAccessImpl) SetResource(meta *cpi.ResourceMeta, acc com
 		}
 	}
 
-	cd := c.GetDescriptor()
+	cd, err := c.GetDescriptor()
+	if err != nil {
+		return fmt.Errorf("failed to get descriptor while settin resources: %w", err)
+	}
 	if idx := cd.GetResourceIndex(meta); idx == -1 {
-		cd.Resources = append(c.GetDescriptor().Resources, *res)
+		cd.Resources = append(cd.Resources, *res)
 		cd.Signatures = nil
 	} else {
 		if !cd.Resources[idx].ResourceMeta.HashEqual(&res.ResourceMeta) {
@@ -314,10 +371,14 @@ func (c *componentVersionAccessImpl) SetSource(meta *cpi.SourceMeta, acc compdes
 		res.Version = c.GetVersion()
 	}
 
-	if idx := c.GetDescriptor().GetSourceIndex(meta); idx == -1 {
-		c.GetDescriptor().Sources = append(c.GetDescriptor().Sources, *res)
+	descriptor, err := c.GetDescriptor()
+	if err != nil {
+		return err
+	}
+	if idx := descriptor.GetSourceIndex(meta); idx == -1 {
+		descriptor.Sources = append(descriptor.Sources, *res)
 	} else {
-		c.GetDescriptor().Sources[idx] = *res
+		descriptor.Sources[idx] = *res
 	}
 	if c.lazy {
 		return nil
@@ -346,10 +407,14 @@ func (c *componentVersionAccessImpl) SetSourceBlob(meta *cpi.SourceMeta, blob cp
 
 func (c *componentVersionAccessImpl) SetReference(ref *cpi.ComponentReference) error {
 
-	if idx := c.GetDescriptor().GetComponentReferenceIndex(*ref); idx == -1 {
-		c.GetDescriptor().References = append(c.GetDescriptor().References, *ref)
+	descriptor, err := c.GetDescriptor()
+	if err != nil {
+		return err
+	}
+	if idx := descriptor.GetComponentReferenceIndex(*ref); idx == -1 {
+		descriptor.References = append(descriptor.References, *ref)
 	} else {
-		c.GetDescriptor().References[idx] = *ref
+		descriptor.References[idx] = *ref
 	}
 	if c.lazy {
 		return nil

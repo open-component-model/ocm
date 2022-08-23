@@ -58,13 +58,19 @@ func Check(env *TestEnv, ldesc *artdesc.Descriptor, out string) {
 	Expect(list).To(Equal([]string{COMPONENT}))
 	comp, err := tgt.LookupComponentVersion(COMPONENT, VERSION)
 	Expect(err).To(Succeed())
-	Expect(len(comp.GetDescriptor().Resources)).To(Equal(3))
+	descriptor, err := comp.GetDescriptor()
+	Expect(err).To(Succeed())
+	Expect(len(descriptor.Resources)).To(Equal(3))
 
-	data, err := json.Marshal(comp.GetDescriptor().Resources[2].Access)
+	getDescriptor, err := comp.GetDescriptor()
+	Expect(err).To(Succeed())
+	data, err := json.Marshal(getDescriptor.Resources[2].Access)
 	Expect(err).To(Succeed())
 	Expect(string(data)).To(Equal("{\"localReference\":\"sha256:f6a519fb1d0c8cef5e8d7811911fc7cb170462bbce19d6df067dae041250de7f\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/ref:v2.0\",\"type\":\"localBlob\"}"))
 
-	data, err = json.Marshal(comp.GetDescriptor().Resources[1].Access)
+	componentDescriptor, err := comp.GetDescriptor()
+	Expect(err).To(Succeed())
+	data, err = json.Marshal(componentDescriptor.Resources[1].Access)
 	Expect(err).To(Succeed())
 	Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/value:v2.0\",\"type\":\"localBlob\"}"))
 

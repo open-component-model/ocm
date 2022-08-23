@@ -163,13 +163,16 @@ func (d *action) Out() error {
 			}
 			r := common.Elem(e)
 			f = path.Join(f, r.Name)
-			id := r.GetIdentity(e.Version.GetDescriptor().Resources)
+			descriptor, err := e.Version.GetDescriptor()
+			if err != nil {
+				return fmt.Errorf("failed to get descriptor in out: %w", err)
+			}
+			id := r.GetIdentity(descriptor.Resources)
 			delete(id, v1.SystemIdentityName)
 			if len(id) > 0 {
 				f += "-" + strings.ReplaceAll(id.String(), "\"", "")
 			}
-			err := d.Save(e, f)
-			if err != nil {
+			if err := d.Save(e, f); err != nil {
 				list.Add(err)
 				out.Outf(d.opts.Context, "%s failed: %s\n", f, err)
 			}
@@ -198,7 +201,11 @@ func (d *action) Save(o *elemhdlr.Object, f string) error {
 		tmp.Close()
 		defer dest.PathFilesystem.Remove(f)
 	}
-	id := r.GetIdentity(o.Version.GetDescriptor().Resources)
+	descriptor, err := o.Version.GetDescriptor()
+	if err != nil {
+		return fmt.Errorf("failed to get descriptor: %w", err)
+	}
+	id := r.GetIdentity(descriptor.Resources)
 	racc, err := o.Version.GetResource(id)
 	if err != nil {
 		return err

@@ -98,7 +98,9 @@ var _ = Describe("component repository mapping", func() {
 
 		vers, err = comp.LookupVersion("v1")
 		Expect(err).To(Succeed())
-		Expect(vers.GetDescriptor()).To(Equal(compdesc.New(COMPONENT, "v1")))
+		descriptor, err := vers.GetDescriptor()
+		Expect(err).To(Succeed())
+		Expect(descriptor).To(Equal(compdesc.New(COMPONENT, "v1")))
 
 		Expect(vers.Close()).To(Succeed())
 		Expect(comp.Close()).To(Succeed())

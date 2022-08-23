@@ -62,7 +62,8 @@ func CheckBlob(blob accessio.BlobAccess) oci.NamespaceAccess {
 		}
 	}()
 
-	idx := set.GetIndex()
+	idx, err := set.GetIndex()
+	Expect(err).To(Succeed())
 	Expect(idx.Annotations).To(Equal(map[string]string{
 		artefactset.MAINARTEFACT_ANNOTATION: "sha256:" + DIGEST_MANIFEST,
 	}))
