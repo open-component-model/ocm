@@ -110,13 +110,13 @@ func (r *Repository) read(force bool) error {
 
 	r.creds = map[string]core.Credentials{}
 	for _, cred := range creds {
-		cred := cred
-		if _, ok := r.creds[cred.Name()]; !ok {
-			r.creds[cred.Name()] = cred.Properties()
+		credName := cred.Name()
+		if _, ok := r.creds[credName]; !ok {
+			r.creds[credName] = cred.Properties()
 		}
 		if r.propagateConsumerIdentity {
 			getCredentials := func() (cpi.Credentials, error) {
-				return r.LookupCredentials(cred.Name())
+				return r.LookupCredentials(credName)
 			}
 			cg := credentialGetter{
 				getCredentials: getCredentials,
