@@ -401,7 +401,7 @@ global identity triple to the following procedure:
   [component descriptor](#component-descriptor) by using its
   component identity and version name in
   the desired [repository context](#repository-contexts)
-- identify the artefact by is local identity (distinguish between [source](#sources)
+- identify the artefact by its local [identity](#identity) (distinguish between [source](#sources)
   and [resource](#resources))
 - [apply](operations.md#access-methods) the described [access method](#artefact-access)
 

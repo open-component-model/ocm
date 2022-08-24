@@ -97,10 +97,15 @@ according to their [specifications](../formats/accessmethods/README.md).
 The local access method is mapped to the local blob access provided by
 the repository.
 
-They have to support read access, only. At least a stream access for the
-denoted blob is required.
+They have to support read access, only. At least a media type and stream access
+for the denoted blob is required.
 
-- **`<method>.GetStream(AccessSpecification) (Byte Stream, error)`**
+- **`<method>.GetMediaType(RepositoryContext, ComponentVersion, AccessSpecification) (string, error)`**
+
+  Provide the media type of the described artefact. It might explicitly be stored
+  as part of the access speficatio, or implicitly provided by the access method.
+
+- **`<method>.GetStream(RepositoryContext, ComponentVersion, AccessSpecification) (Byte Stream, error)`**
 
   Provide access to the blob content described by a dedicated access
   specification.
