@@ -182,7 +182,7 @@ func (s *StateAccess) writeComponentDescriptorFromTar(data []byte) (cpi.BlobAcce
 	tw := tar.NewWriter(&buf)
 	err := tw.WriteHeader(&tar.Header{
 		Typeflag: tar.TypeReg,
-		Name:     compdesc.ComponentDescriptorFileName,
+		Name:     componentmapping.ComponentDescriptorFileName,
 		Size:     int64(len(data)),
 		ModTime:  format.ModTime,
 	})

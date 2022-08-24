@@ -1,7 +1,7 @@
 # Open Component Model
 
 This project provides a go library binding for working with the
-Open Component Model (OCM) and an [OCM command line client](docs/reference/ocm.md).
+[Open Component Model (OCM)](docs/README.md) and an [OCM command line client](docs/reference/ocm.md).
 
 The library supports an extensible set of repository bindings for OCM repositories:
 - OCI: use a repository prefix path of an OCI repository to implement an OCM
