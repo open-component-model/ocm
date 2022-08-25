@@ -73,6 +73,10 @@ The following method types are centrally defined and available in the OCM toolse
 
   Access of a git commit in a [github](https://github.com) repository.
 
+- [`s3`](../../../pkg/contexts/ocm/accessmethods/s3/README.md) *external*
+
+  Access of a blob in an S3 blob store.
+
 - [`localBlob`](../../../pkg/contexts/ocm/accessmethods/localblob/README.md) *local*
 
   This is a special access method that has no global implementation.
