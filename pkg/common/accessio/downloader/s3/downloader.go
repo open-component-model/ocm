@@ -14,19 +14,14 @@ import (
 
 const defaultRegion = "us-west-1"
 
-// Downloader defines a downloader for AWS S3 objects.
-type Downloader interface {
-	Download(w io.WriterAt) error
-}
-
-// S3Downloader is a downloader capable of downloading S3 Objects.
-type S3Downloader struct {
+// Downloader is a downloader capable of downloading S3 Objects.
+type Downloader struct {
 	region, bucket, key, version string
 	creds                        *AWSCreds
 }
 
-func NewS3Downloader(region, bucket, key, version string, creds *AWSCreds) *S3Downloader {
-	return &S3Downloader{
+func NewDownloader(region, bucket, key, version string, creds *AWSCreds) *Downloader {
+	return &Downloader{
 		region:  region,
 		bucket:  bucket,
 		key:     key,
@@ -42,7 +37,7 @@ type AWSCreds struct {
 	SessionToken string
 }
 
-func (s *S3Downloader) Download(w io.WriterAt) error {
+func (s *Downloader) Download(w io.WriterAt) error {
 	ctx := context.Background()
 	opts := []func(*config.LoadOptions) error{
 		config.WithRegion(s.region),
@@ -79,6 +74,7 @@ func (s *S3Downloader) Download(w io.WriterAt) error {
 	}
 
 	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
+		// Pass in creds because of https://github.com/aws/aws-sdk-go-v2/issues/1797
 		o.Credentials = awsCred
 		o.Region = s.region
 	})

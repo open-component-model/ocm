@@ -16,11 +16,11 @@ package s3
 
 import (
 	"fmt"
-	"io"
 	"path"
-	"sync"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessio/downloader"
+	"github.com/open-component-model/ocm/pkg/common/accessio/downloader/s3"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
@@ -59,13 +59,13 @@ type AccessSpec struct {
 	// MediaType defines the mime type of the object to download.
 	// +optional
 	MediaType  string `json:"mediaType,omitempty"`
-	downloader Downloader
+	downloader downloader.Downloader
 }
 
 var _ cpi.AccessSpec = (*AccessSpec)(nil)
 
 // New creates a new GitHub registry access spec version v1
-func New(region, bucket, key, version, mediaType string, downloader Downloader) *AccessSpec {
+func New(region, bucket, key, version, mediaType string, downloader downloader.Downloader) *AccessSpec {
 	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		Region:              region,
@@ -92,10 +92,10 @@ func (a *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMetho
 ////////////////////////////////////////////////////////////////////////////////
 
 type accessMethod struct {
-	lock            sync.Mutex
-	comp            cpi.ComponentVersionAccess
-	spec            *AccessSpec
-	cacheBlobAccess accessio.BlobAccess
+	accessio.BlobAccess
+
+	comp cpi.ComponentVersionAccess
+	spec *AccessSpec
 }
 
 var _ cpi.AccessMethod = (*accessMethod)(nil)
@@ -114,14 +114,14 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, erro
 		accessKeyID = creds.GetProperty(credentials.ATTR_AWS_ACCESS_KEY_ID)
 		accessSecret = creds.GetProperty(credentials.ATTR_AWS_SECRET_ACCESS_KEY)
 	}
-	var awsCreds *AWSCreds
+	var awsCreds *s3.AWSCreds
 	if accessKeyID != "" {
-		awsCreds = &AWSCreds{
+		awsCreds = &s3.AWSCreds{
 			AccessKeyID:  accessKeyID,
 			AccessSecret: accessSecret,
 		}
 	}
-	var d Downloader = NewS3Downloader(a.Region, a.Bucket, a.Key, a.Version, awsCreds)
+	var d downloader.Downloader = s3.NewDownloader(a.Region, a.Bucket, a.Key, a.Version, awsCreds)
 	if a.downloader != nil {
 		d = a.downloader
 	}
@@ -133,9 +133,9 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, erro
 	}
 	cacheBlobAccess := accessobj.CachedBlobAccessForWriter(c.GetContext(), mediaType, w)
 	return &accessMethod{
-		spec:            a,
-		comp:            c,
-		cacheBlobAccess: cacheBlobAccess,
+		spec:       a,
+		comp:       c,
+		BlobAccess: cacheBlobAccess,
 	}, nil
 }
 
@@ -167,23 +167,4 @@ func getCreds(a *AccessSpec, cctx credentials.Context) (credentials.Credentials,
 
 func (m *accessMethod) GetKind() string {
 	return Type
-}
-
-func (m *accessMethod) Close() error {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-
-	return m.cacheBlobAccess.Close()
-}
-
-func (m *accessMethod) Get() ([]byte, error) {
-	return m.cacheBlobAccess.Get()
-}
-
-func (m *accessMethod) Reader() (io.ReadCloser, error) {
-	return m.cacheBlobAccess.Reader()
-}
-
-func (m *accessMethod) MimeType() string {
-	return m.cacheBlobAccess.MimeType()
 }

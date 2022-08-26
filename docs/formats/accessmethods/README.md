@@ -41,8 +41,8 @@ executable is not yet supported.
 
 ## Specification
 
-Every access method has [type](../../names/accessmethods.md) and a
-specification version. The specification version defined the attribute set
+Every access method has a [type](../../names/accessmethods.md) and a
+specification version. The specification version defines the attribute set
 used to describe the information required by the implementation to
 address the resource blob.
 
@@ -54,7 +54,7 @@ the following fields:
   This field describes the access method type and optional specification
   version according to the [access method naming scheme](../../names/accessmethods.md)
 
-Additional field are used to provide the type specific specification.
+Additional fields are used to provide the type specific specification.
 The fields may have any deep structure.
 
 ## Centrally defined Access Methods
