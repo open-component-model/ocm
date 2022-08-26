@@ -1,0 +1,1419 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.0
+  creationTimestamp: null
+  name: componentdescriptors.ocm.open-component-model.software
+spec:
+  group: ocm.open-component-model.software
+  names:
+    kind: ComponentDescriptor
+    listKind: ComponentDescriptorList
+    plural: componentdescriptors
+    singular: componentdescriptor
+  scope: Namespaced
+  versions:
+  - name: v2
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              access:
+                properties:
+                  type:
+                    description: Type is the base type for the access of a source
+                      or resource
+                    type: string
+                required:
+                - type
+                type: object
+              component:
+                description: Component is a component.
+                properties:
+                  componentReferences:
+                    items:
+                      description: ComponentReference is a reference to a component.
+                      properties:
+                        componentName:
+                          type: string
+                        digest:
+                          properties:
+                            hashAlgorithm:
+                              type: string
+                            normalisationAlgorithm:
+                              type: string
+                            value:
+                              type: string
+                          required:
+                          - hashAlgorithm
+                          - normalisationAlgorithm
+                          - value
+                          type: object
+                        extraIdentity:
+                          properties:
+                            identityAttributeKeys:
+                              items:
+                                minLength: 2
+                                pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                                type: string
+                              type: array
+                          type: object
+                        labels:
+                          items:
+                            properties:
+                              name:
+                                type: string
+                              values:
+                                type: string
+                            type: object
+                          type: array
+                        name:
+                          minLength: 2
+                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                          type: string
+                        version:
+                          description: 'RelaxedSemver taken from semver.org and adjusted
+                            to allow an optional leading ''v'', major-only, and major.minor-only
+                            this means the following strings are all valid relaxedSemvers:
+                            1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2
+                            v1-foo+bar'
+                          pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+                          type: string
+                      required:
+                      - componentName
+                      - name
+                      - version
+                      type: object
+                    type: array
+                  labels:
+                    items:
+                      properties:
+                        name:
+                          type: string
+                        values:
+                          type: string
+                      type: object
+                    type: array
+                  name:
+                    description: ComponentName (s) MUST start with a valid domain
+                      name (as specified by RFC-1034, RFC-1035) with an optional URL
+                      path suffix (as specified by RFC-1738)'
+                    maxLength: 255
+                    pattern: ^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$
+                    type: string
+                  provider:
+                    type: string
+                  repositoryContexts:
+                    items:
+                      properties:
+                        type:
+                          type: string
+                      required:
+                      - type
+                      type: object
+                    type: array
+                  resources:
+                    items:
+                      description: Resource is the base type for resources.
+                      properties:
+                        access:
+                          description: 'TODO: Access can be either of type Access
+                            or LocalBlobAccess. We can do this by making this field
+                            use *apiextensions.JSON which validates any valid JSON.
+                            Then, we can unmarshall it and use the values and not
+                            loose type safety. Or, have an explicit field called LocalBlobAccess
+                            which can either be provided or not.'
+                          properties:
+                            type:
+                              description: Type is the base type for the access of
+                                a source or resource
+                              type: string
+                          required:
+                          - type
+                          type: object
+                        digest:
+                          properties:
+                            hashAlgorithm:
+                              type: string
+                            normalisationAlgorithm:
+                              type: string
+                            value:
+                              type: string
+                          required:
+                          - hashAlgorithm
+                          - normalisationAlgorithm
+                          - value
+                          type: object
+                        extraIdentity:
+                          properties:
+                            identityAttributeKeys:
+                              items:
+                                minLength: 2
+                                pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                                type: string
+                              type: array
+                          type: object
+                        labels:
+                          items:
+                            properties:
+                              name:
+                                type: string
+                              values:
+                                type: string
+                            type: object
+                          type: array
+                        localBlobAccess:
+                          description: LocalBlobAccess identifier of the local blob
+                            within the current component descriptor.
+                          properties:
+                            digest:
+                              type: string
+                            type:
+                              enum:
+                              - localBlob
+                              type: string
+                          required:
+                          - digest
+                          - type
+                          type: object
+                        name:
+                          minLength: 2
+                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                          type: string
+                        relation:
+                          enum:
+                          - local
+                          - external
+                          type: string
+                        srcRefs:
+                          items:
+                            description: SourceReferences a reference to a (component-local)
+                              source
+                            properties:
+                              extraIdentity:
+                                properties:
+                                  identityAttributeKeys:
+                                    items:
+                                      minLength: 2
+                                      pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                                      type: string
+                                    type: array
+                                type: object
+                              name:
+                                minLength: 2
+                                pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                                type: string
+                            type: object
+                          type: array
+                        type:
+                          type: string
+                        version:
+                          description: 'RelaxedSemver taken from semver.org and adjusted
+                            to allow an optional leading ''v'', major-only, and major.minor-only
+                            this means the following strings are all valid relaxedSemvers:
+                            1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2
+                            v1-foo+bar'
+                          pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+                          type: string
+                      required:
+                      - name
+                      - type
+                      - version
+                      type: object
+                    type: array
+                  sources:
+                    items:
+                      properties:
+                        access:
+                          description: 'TODO: Access can be either of type Access
+                            or LocalBlobAccess. We can do this by making this field
+                            use *apiextensions.JSON which validates any valid JSON.
+                            Then, we can unmarshall it and use the values and not
+                            loose type safety. Or, have an explicit field called LocalBlobAccess
+                            which can either be provided or not.'
+                          properties:
+                            type:
+                              description: Type is the base type for the access of
+                                a source or resource
+                              type: string
+                          required:
+                          - type
+                          type: object
+                        extraIdentity:
+                          properties:
+                            identityAttributeKeys:
+                              items:
+                                minLength: 2
+                                pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                                type: string
+                              type: array
+                          type: object
+                        labels:
+                          items:
+                            properties:
+                              name:
+                                type: string
+                              values:
+                                type: string
+                            type: object
+                          type: array
+                        localBlobAccess:
+                          description: LocalBlobAccess identifier of the local blob
+                            within the current component descriptor.
+                          properties:
+                            digest:
+                              type: string
+                            type:
+                              enum:
+                              - localBlob
+                              type: string
+                          required:
+                          - digest
+                          - type
+                          type: object
+                        name:
+                          minLength: 2
+                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                          type: string
+                        type:
+                          type: string
+                        version:
+                          description: 'RelaxedSemver taken from semver.org and adjusted
+                            to allow an optional leading ''v'', major-only, and major.minor-only
+                            this means the following strings are all valid relaxedSemvers:
+                            1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2
+                            v1-foo+bar'
+                          pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+                          type: string
+                      required:
+                      - name
+                      - type
+                      - version
+                      type: object
+                    type: array
+                  version:
+                    description: 'RelaxedSemver taken from semver.org and adjusted
+                      to allow an optional leading ''v'', major-only, and major.minor-only
+                      this means the following strings are all valid relaxedSemvers:
+                      1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
+                    pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+                    type: string
+                required:
+                - name
+                - version
+                type: object
+              componentName:
+                description: ComponentName MUST start with a valid domain name (as
+                  specified by RFC-1034, RFC-1035) with an optional URL path suffix
+                  (as specified by RFC-1738)
+                maxLength: 255
+                pattern: ^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$
+                type: string
+              componentReference:
+                description: ComponentReference is a reference to a component.
+                properties:
+                  componentName:
+                    type: string
+                  digest:
+                    properties:
+                      hashAlgorithm:
+                        type: string
+                      normalisationAlgorithm:
+                        type: string
+                      value:
+                        type: string
+                    required:
+                    - hashAlgorithm
+                    - normalisationAlgorithm
+                    - value
+                    type: object
+                  extraIdentity:
+                    properties:
+                      identityAttributeKeys:
+                        items:
+                          minLength: 2
+                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                          type: string
+                        type: array
+                    type: object
+                  labels:
+                    items:
+                      properties:
+                        name:
+                          type: string
+                        values:
+                          type: string
+                      type: object
+                    type: array
+                  name:
+                    minLength: 2
+                    pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                    type: string
+                  version:
+                    description: 'RelaxedSemver taken from semver.org and adjusted
+                      to allow an optional leading ''v'', major-only, and major.minor-only
+                      this means the following strings are all valid relaxedSemvers:
+                      1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
+                    pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+                    type: string
+                required:
+                - componentName
+                - name
+                - version
+                type: object
+              digestSpec:
+                properties:
+                  hashAlgorithm:
+                    type: string
+                  normalisationAlgorithm:
+                    type: string
+                  value:
+                    type: string
+                required:
+                - hashAlgorithm
+                - normalisationAlgorithm
+                - value
+                type: object
+              identityAttribute:
+                properties:
+                  identityAttributeKeys:
+                    items:
+                      minLength: 2
+                      pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                      type: string
+                    type: array
+                type: object
+              label:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    values:
+                      type: string
+                  type: object
+                type: array
+              meta:
+                properties:
+                  schemaVersion:
+                    type: string
+                required:
+                - schemaVersion
+                type: object
+              relaxedSemver:
+                description: 'RelaxedSemver taken from semver.org and adjusted to
+                  allow an optional leading ''v'', major-only, and major.minor-only
+                  this means the following strings are all valid relaxedSemvers: 1.2.3
+                  1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
+                pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+                type: string
+              repositoryContext:
+                properties:
+                  type:
+                    type: string
+                required:
+                - type
+                type: object
+              resource:
+                description: Resource is the base type for resources.
+                properties:
+                  access:
+                    description: 'TODO: Access can be either of type Access or LocalBlobAccess.
+                      We can do this by making this field use *apiextensions.JSON
+                      which validates any valid JSON. Then, we can unmarshall it and
+                      use the values and not loose type safety. Or, have an explicit
+                      field called LocalBlobAccess which can either be provided or
+                      not.'
+                    properties:
+                      type:
+                        description: Type is the base type for the access of a source
+                          or resource
+                        type: string
+                    required:
+                    - type
+                    type: object
+                  digest:
+                    properties:
+                      hashAlgorithm:
+                        type: string
+                      normalisationAlgorithm:
+                        type: string
+                      value:
+                        type: string
+                    required:
+                    - hashAlgorithm
+                    - normalisationAlgorithm
+                    - value
+                    type: object
+                  extraIdentity:
+                    properties:
+                      identityAttributeKeys:
+                        items:
+                          minLength: 2
+                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                          type: string
+                        type: array
+                    type: object
+                  labels:
+                    items:
+                      properties:
+                        name:
+                          type: string
+                        values:
+                          type: string
+                      type: object
+                    type: array
+                  localBlobAccess:
+                    description: LocalBlobAccess identifier of the local blob within
+                      the current component descriptor.
+                    properties:
+                      digest:
+                        type: string
+                      type:
+                        enum:
+                        - localBlob
+                        type: string
+                    required:
+                    - digest
+                    - type
+                    type: object
+                  name:
+                    minLength: 2
+                    pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                    type: string
+                  relation:
+                    enum:
+                    - local
+                    - external
+                    type: string
+                  srcRefs:
+                    items:
+                      description: SourceReferences a reference to a (component-local)
+                        source
+                      properties:
+                        extraIdentity:
+                          properties:
+                            identityAttributeKeys:
+                              items:
+                                minLength: 2
+                                pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                                type: string
+                              type: array
+                          type: object
+                        name:
+                          minLength: 2
+                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                          type: string
+                      type: object
+                    type: array
+                  type:
+                    type: string
+                  version:
+                    description: 'RelaxedSemver taken from semver.org and adjusted
+                      to allow an optional leading ''v'', major-only, and major.minor-only
+                      this means the following strings are all valid relaxedSemvers:
+                      1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
+                    pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+                    type: string
+                required:
+                - name
+                - type
+                - version
+                type: object
+              signature:
+                properties:
+                  digest:
+                    properties:
+                      hashAlgorithm:
+                        type: string
+                      normalisationAlgorithm:
+                        type: string
+                      value:
+                        type: string
+                    required:
+                    - hashAlgorithm
+                    - normalisationAlgorithm
+                    - value
+                    type: object
+                  name:
+                    type: string
+                  signature:
+                    properties:
+                      algorithm:
+                        type: string
+                      mediaType:
+                        description: MediaType is the media type of the signature
+                          value
+                        type: string
+                      value:
+                        type: string
+                    required:
+                    - algorithm
+                    - mediaType
+                    - value
+                    type: object
+                required:
+                - digest
+                - name
+                - signature
+                type: object
+              signatureSpec:
+                properties:
+                  algorithm:
+                    type: string
+                  mediaType:
+                    description: MediaType is the media type of the signature value
+                    type: string
+                  value:
+                    type: string
+                required:
+                - algorithm
+                - mediaType
+                - value
+                type: object
+              source:
+                properties:
+                  access:
+                    description: 'TODO: Access can be either of type Access or LocalBlobAccess.
+                      We can do this by making this field use *apiextensions.JSON
+                      which validates any valid JSON. Then, we can unmarshall it and
+                      use the values and not loose type safety. Or, have an explicit
+                      field called LocalBlobAccess which can either be provided or
+                      not.'
+                    properties:
+                      type:
+                        description: Type is the base type for the access of a source
+                          or resource
+                        type: string
+                    required:
+                    - type
+                    type: object
+                  extraIdentity:
+                    properties:
+                      identityAttributeKeys:
+                        items:
+                          minLength: 2
+                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                          type: string
+                        type: array
+                    type: object
+                  labels:
+                    items:
+                      properties:
+                        name:
+                          type: string
+                        values:
+                          type: string
+                      type: object
+                    type: array
+                  localBlobAccess:
+                    description: LocalBlobAccess identifier of the local blob within
+                      the current component descriptor.
+                    properties:
+                      digest:
+                        type: string
+                      type:
+                        enum:
+                        - localBlob
+                        type: string
+                    required:
+                    - digest
+                    - type
+                    type: object
+                  name:
+                    minLength: 2
+                    pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                    type: string
+                  type:
+                    type: string
+                  version:
+                    description: 'RelaxedSemver taken from semver.org and adjusted
+                      to allow an optional leading ''v'', major-only, and major.minor-only
+                      this means the following strings are all valid relaxedSemvers:
+                      1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
+                    pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+                    type: string
+                required:
+                - name
+                - type
+                - version
+                type: object
+            required:
+            - access
+            type: object
+          status:
+            type: object
+        type: object
+    served: true
+    storage: true
+  - name: v3alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              access:
+                properties:
+                  type:
+                    description: Type is the base type for the access of a source
+                      or resource
+                    type: string
+                required:
+                - type
+                type: object
+              component:
+                description: Component is a component.
+                properties:
+                  componentReferences:
+                    items:
+                      description: ComponentReference is a reference to a component.
+                      properties:
+                        componentName:
+                          type: string
+                        digest:
+                          properties:
+                            hashAlgorithm:
+                              type: string
+                            normalisationAlgorithm:
+                              type: string
+                            value:
+                              type: string
+                          required:
+                          - hashAlgorithm
+                          - normalisationAlgorithm
+                          - value
+                          type: object
+                        extraIdentity:
+                          properties:
+                            identityAttributeKeys:
+                              items:
+                                minLength: 2
+                                pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                                type: string
+                              type: array
+                          type: object
+                        labels:
+                          items:
+                            properties:
+                              name:
+                                type: string
+                              signature:
+                                type: boolean
+                              values:
+                                type: string
+                              version:
+                                pattern: ^v[0-9]+$
+                                type: string
+                            required:
+                            - signature
+                            - version
+                            type: object
+                          type: array
+                        name:
+                          minLength: 2
+                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                          type: string
+                        version:
+                          description: 'RelaxedSemver taken from semver.org and adjusted
+                            to allow an optional leading ''v'', major-only, and major.minor-only
+                            this means the following strings are all valid relaxedSemvers:
+                            1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2
+                            v1-foo+bar'
+                          pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+                          type: string
+                      required:
+                      - componentName
+                      - name
+                      - version
+                      type: object
+                    type: array
+                  labels:
+                    items:
+                      properties:
+                        name:
+                          type: string
+                        signature:
+                          type: boolean
+                        values:
+                          type: string
+                        version:
+                          pattern: ^v[0-9]+$
+                          type: string
+                      required:
+                      - signature
+                      - version
+                      type: object
+                    type: array
+                  name:
+                    description: ComponentName (s) MUST start with a valid domain
+                      name (as specified by RFC-1034, RFC-1035) with an optional URL
+                      path suffix (as specified by RFC-1738)'
+                    maxLength: 255
+                    pattern: ^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$
+                    type: string
+                  provider:
+                    type: string
+                  repositoryContexts:
+                    items:
+                      properties:
+                        baseURL:
+                          type: string
+                        componentNameMapping:
+                          enum:
+                          - urlPath
+                          - sha256-digest
+                          type: string
+                        repositoryContext:
+                          properties:
+                            type:
+                              type: string
+                          required:
+                          - type
+                          type: object
+                        type:
+                          enum:
+                          - ociRegistry
+                          - OCIRegistry
+                          type: string
+                      required:
+                      - repositoryContext
+                      type: object
+                    type: array
+                  resources:
+                    description: 'TODO: This can be multiple types. So we need a JSON
+                      schema here too. Unless we define all of the accesses as a separate
+                      field. But I believe that defeats the purpose of the spec.'
+                    items:
+                      description: ResourceType is the base type for resources.
+                      properties:
+                        access:
+                          description: 'TODO: Access can be either of type Access
+                            or LocalBlobAccess. We can do this by making this field
+                            use *apiextensions.JSON which validates any valid JSON.
+                            Then, we can unmarshall it and use the values and not
+                            loose type safety. Or, have an explicit field called LocalBlobAccess
+                            which can either be provided or not.'
+                          properties:
+                            type:
+                              description: Type is the base type for the access of
+                                a source or resource
+                              type: string
+                          required:
+                          - type
+                          type: object
+                        digest:
+                          properties:
+                            hashAlgorithm:
+                              type: string
+                            normalisationAlgorithm:
+                              type: string
+                            value:
+                              type: string
+                          required:
+                          - hashAlgorithm
+                          - normalisationAlgorithm
+                          - value
+                          type: object
+                        extraIdentity:
+                          properties:
+                            identityAttributeKeys:
+                              items:
+                                minLength: 2
+                                pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                                type: string
+                              type: array
+                          type: object
+                        labels:
+                          items:
+                            properties:
+                              name:
+                                type: string
+                              signature:
+                                type: boolean
+                              values:
+                                type: string
+                              version:
+                                pattern: ^v[0-9]+$
+                                type: string
+                            required:
+                            - signature
+                            - version
+                            type: object
+                          type: array
+                        name:
+                          minLength: 2
+                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                          type: string
+                        relation:
+                          enum:
+                          - local
+                          - external
+                          type: string
+                        srcRefs:
+                          items:
+                            description: SourceReferences a reference to a (component-local)
+                              source
+                            properties:
+                              identitySelector:
+                                properties:
+                                  identityAttributeKeys:
+                                    items:
+                                      minLength: 2
+                                      pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                                      type: string
+                                    type: array
+                                type: object
+                              labels:
+                                items:
+                                  properties:
+                                    name:
+                                      type: string
+                                    signature:
+                                      type: boolean
+                                    values:
+                                      type: string
+                                    version:
+                                      pattern: ^v[0-9]+$
+                                      type: string
+                                  required:
+                                  - signature
+                                  - version
+                                  type: object
+                                type: array
+                            type: object
+                          type: array
+                        type:
+                          type: string
+                        version:
+                          description: 'RelaxedSemver taken from semver.org and adjusted
+                            to allow an optional leading ''v'', major-only, and major.minor-only
+                            this means the following strings are all valid relaxedSemvers:
+                            1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2
+                            v1-foo+bar'
+                          pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+                          type: string
+                      required:
+                      - name
+                      - type
+                      - version
+                      type: object
+                    type: array
+                  sources:
+                    items:
+                      properties:
+                        access:
+                          description: 'TODO: Access can be either of type Access
+                            or githubAccess or httpAccess. We can do this by making
+                            this field use *apiextensions.JSON which validates any
+                            valid JSON. Then, we can unmarshall it and use the values
+                            and not loose type safety. Or, have an explicit field
+                            called GithubAcess and HTTPAccess which can either be
+                            provided or not.'
+                          properties:
+                            type:
+                              description: Type is the base type for the access of
+                                a source or resource
+                              type: string
+                          required:
+                          - type
+                          type: object
+                        extraIdentity:
+                          properties:
+                            identityAttributeKeys:
+                              items:
+                                minLength: 2
+                                pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                                type: string
+                              type: array
+                          type: object
+                        labels:
+                          items:
+                            properties:
+                              name:
+                                type: string
+                              signature:
+                                type: boolean
+                              values:
+                                type: string
+                              version:
+                                pattern: ^v[0-9]+$
+                                type: string
+                            required:
+                            - signature
+                            - version
+                            type: object
+                          type: array
+                        name:
+                          minLength: 2
+                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                          type: string
+                        type:
+                          type: string
+                        version:
+                          description: 'RelaxedSemver taken from semver.org and adjusted
+                            to allow an optional leading ''v'', major-only, and major.minor-only
+                            this means the following strings are all valid relaxedSemvers:
+                            1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2
+                            v1-foo+bar'
+                          pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+                          type: string
+                      required:
+                      - name
+                      - type
+                      - version
+                      type: object
+                    type: array
+                  version:
+                    description: 'RelaxedSemver taken from semver.org and adjusted
+                      to allow an optional leading ''v'', major-only, and major.minor-only
+                      this means the following strings are all valid relaxedSemvers:
+                      1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
+                    pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+                    type: string
+                required:
+                - name
+                - version
+                type: object
+              componentName:
+                description: ComponentName MUST start with a valid domain name (as
+                  specified by RFC-1034, RFC-1035) with an optional URL path suffix
+                  (as specified by RFC-1738)
+                pattern: ^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$
+                type: string
+              componentReference:
+                description: ComponentReference is a reference to a component.
+                properties:
+                  componentName:
+                    type: string
+                  digest:
+                    properties:
+                      hashAlgorithm:
+                        type: string
+                      normalisationAlgorithm:
+                        type: string
+                      value:
+                        type: string
+                    required:
+                    - hashAlgorithm
+                    - normalisationAlgorithm
+                    - value
+                    type: object
+                  extraIdentity:
+                    properties:
+                      identityAttributeKeys:
+                        items:
+                          minLength: 2
+                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                          type: string
+                        type: array
+                    type: object
+                  labels:
+                    items:
+                      properties:
+                        name:
+                          type: string
+                        signature:
+                          type: boolean
+                        values:
+                          type: string
+                        version:
+                          pattern: ^v[0-9]+$
+                          type: string
+                      required:
+                      - signature
+                      - version
+                      type: object
+                    type: array
+                  name:
+                    minLength: 2
+                    pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                    type: string
+                  version:
+                    description: 'RelaxedSemver taken from semver.org and adjusted
+                      to allow an optional leading ''v'', major-only, and major.minor-only
+                      this means the following strings are all valid relaxedSemvers:
+                      1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
+                    pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+                    type: string
+                required:
+                - componentName
+                - name
+                - version
+                type: object
+              digestSpec:
+                properties:
+                  hashAlgorithm:
+                    type: string
+                  normalisationAlgorithm:
+                    type: string
+                  value:
+                    type: string
+                required:
+                - hashAlgorithm
+                - normalisationAlgorithm
+                - value
+                type: object
+              identityAttribute:
+                properties:
+                  identityAttributeKeys:
+                    items:
+                      minLength: 2
+                      pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                      type: string
+                    type: array
+                type: object
+              label:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    signature:
+                      type: boolean
+                    values:
+                      type: string
+                    version:
+                      pattern: ^v[0-9]+$
+                      type: string
+                  required:
+                  - signature
+                  - version
+                  type: object
+                type: array
+              meta:
+                description: Meta is component version metadata
+                properties:
+                  labels:
+                    items:
+                      properties:
+                        name:
+                          type: string
+                        signature:
+                          type: boolean
+                        values:
+                          type: string
+                        version:
+                          pattern: ^v[0-9]+$
+                          type: string
+                      required:
+                      - signature
+                      - version
+                      type: object
+                    type: array
+                  name:
+                    description: ComponentName (s) MUST start with a valid domain
+                      name (as specified by RFC-1034, RFC-1035) with an optional URL
+                      path suffix (as specified by RFC-1738)'
+                    maxLength: 255
+                    pattern: ^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$
+                    type: string
+                  provider:
+                    properties:
+                      labels:
+                        items:
+                          properties:
+                            name:
+                              type: string
+                            signature:
+                              type: boolean
+                            values:
+                              type: string
+                            version:
+                              pattern: ^v[0-9]+$
+                              type: string
+                          required:
+                          - signature
+                          - version
+                          type: object
+                        type: array
+                      name:
+                        type: string
+                    required:
+                    - labels
+                    - name
+                    type: object
+                  version:
+                    description: 'RelaxedSemver taken from semver.org and adjusted
+                      to allow an optional leading ''v'', major-only, and major.minor-only
+                      this means the following strings are all valid relaxedSemvers:
+                      1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
+                    pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+                    type: string
+                required:
+                - labels
+                - name
+                - provider
+                - version
+                type: object
+              relaxedSemver:
+                description: 'RelaxedSemver taken from semver.org and adjusted to
+                  allow an optional leading ''v'', major-only, and major.minor-only
+                  this means the following strings are all valid relaxedSemvers: 1.2.3
+                  1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
+                pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+                type: string
+              repositoryContext:
+                properties:
+                  type:
+                    type: string
+                required:
+                - type
+                type: object
+              resource:
+                description: ResourceType is the base type for resources.
+                properties:
+                  access:
+                    description: 'TODO: Access can be either of type Access or LocalBlobAccess.
+                      We can do this by making this field use *apiextensions.JSON
+                      which validates any valid JSON. Then, we can unmarshall it and
+                      use the values and not loose type safety. Or, have an explicit
+                      field called LocalBlobAccess which can either be provided or
+                      not.'
+                    properties:
+                      type:
+                        description: Type is the base type for the access of a source
+                          or resource
+                        type: string
+                    required:
+                    - type
+                    type: object
+                  digest:
+                    properties:
+                      hashAlgorithm:
+                        type: string
+                      normalisationAlgorithm:
+                        type: string
+                      value:
+                        type: string
+                    required:
+                    - hashAlgorithm
+                    - normalisationAlgorithm
+                    - value
+                    type: object
+                  extraIdentity:
+                    properties:
+                      identityAttributeKeys:
+                        items:
+                          minLength: 2
+                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                          type: string
+                        type: array
+                    type: object
+                  labels:
+                    items:
+                      properties:
+                        name:
+                          type: string
+                        signature:
+                          type: boolean
+                        values:
+                          type: string
+                        version:
+                          pattern: ^v[0-9]+$
+                          type: string
+                      required:
+                      - signature
+                      - version
+                      type: object
+                    type: array
+                  name:
+                    minLength: 2
+                    pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                    type: string
+                  relation:
+                    enum:
+                    - local
+                    - external
+                    type: string
+                  srcRefs:
+                    items:
+                      description: SourceReferences a reference to a (component-local)
+                        source
+                      properties:
+                        identitySelector:
+                          properties:
+                            identityAttributeKeys:
+                              items:
+                                minLength: 2
+                                pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                                type: string
+                              type: array
+                          type: object
+                        labels:
+                          items:
+                            properties:
+                              name:
+                                type: string
+                              signature:
+                                type: boolean
+                              values:
+                                type: string
+                              version:
+                                pattern: ^v[0-9]+$
+                                type: string
+                            required:
+                            - signature
+                            - version
+                            type: object
+                          type: array
+                      type: object
+                    type: array
+                  type:
+                    type: string
+                  version:
+                    description: 'RelaxedSemver taken from semver.org and adjusted
+                      to allow an optional leading ''v'', major-only, and major.minor-only
+                      this means the following strings are all valid relaxedSemvers:
+                      1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
+                    pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+                    type: string
+                required:
+                - name
+                - type
+                - version
+                type: object
+              signature:
+                properties:
+                  digest:
+                    properties:
+                      hashAlgorithm:
+                        type: string
+                      normalisationAlgorithm:
+                        type: string
+                      value:
+                        type: string
+                    required:
+                    - hashAlgorithm
+                    - normalisationAlgorithm
+                    - value
+                    type: object
+                  name:
+                    type: string
+                  signature:
+                    properties:
+                      algorithm:
+                        type: string
+                      mediaType:
+                        description: MediaType is the media type of the signature
+                          value
+                        type: string
+                      value:
+                        type: string
+                    required:
+                    - algorithm
+                    - mediaType
+                    - value
+                    type: object
+                required:
+                - digest
+                - name
+                - signature
+                type: object
+              signatureSpec:
+                properties:
+                  algorithm:
+                    type: string
+                  mediaType:
+                    description: MediaType is the media type of the signature value
+                    type: string
+                  value:
+                    type: string
+                required:
+                - algorithm
+                - mediaType
+                - value
+                type: object
+              source:
+                properties:
+                  access:
+                    description: 'TODO: Access can be either of type Access or githubAccess
+                      or httpAccess. We can do this by making this field use *apiextensions.JSON
+                      which validates any valid JSON. Then, we can unmarshall it and
+                      use the values and not loose type safety. Or, have an explicit
+                      field called GithubAcess and HTTPAccess which can either be
+                      provided or not.'
+                    properties:
+                      type:
+                        description: Type is the base type for the access of a source
+                          or resource
+                        type: string
+                    required:
+                    - type
+                    type: object
+                  extraIdentity:
+                    properties:
+                      identityAttributeKeys:
+                        items:
+                          minLength: 2
+                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                          type: string
+                        type: array
+                    type: object
+                  labels:
+                    items:
+                      properties:
+                        name:
+                          type: string
+                        signature:
+                          type: boolean
+                        values:
+                          type: string
+                        version:
+                          pattern: ^v[0-9]+$
+                          type: string
+                      required:
+                      - signature
+                      - version
+                      type: object
+                    type: array
+                  name:
+                    minLength: 2
+                    pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                    type: string
+                  type:
+                    type: string
+                  version:
+                    description: 'RelaxedSemver taken from semver.org and adjusted
+                      to allow an optional leading ''v'', major-only, and major.minor-only
+                      this means the following strings are all valid relaxedSemvers:
+                      1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
+                    pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+                    type: string
+                required:
+                - name
+                - type
+                - version
+                type: object
+            required:
+            - access
+            type: object
+          status:
+            type: object
+        type: object
+    served: true
+    storage: false

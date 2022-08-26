@@ -51,12 +51,7 @@ type Label struct {
 }
 
 type IdentityAttribute struct {
-	//TODO:
-	//  identityAttribute:
-	//    type: 'object'
-	//    propertyNames: { $ref: '#/definitions/identityAttributeKey' }
-	// How do I map this....?
-	PropertyNames []IdentityAttributeKey `json:"propertyNames,omitempty"`
+	IdentityAttributeKeys []IdentityAttributeKey `json:"identityAttributeKeys,omitempty"`
 }
 
 type RepositoryContext struct {
@@ -277,8 +272,8 @@ type GenericResource struct {
 }
 
 // ComponentName (s) MUST start with a valid domain name (as specified by RFC-1034, RFC-1035) with an optional URL path suffix (as specified by RFC-1738)'
-// +kubebuilder:validation:Pattern:=`^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$`
 // +kubebuilder:validation:MaxLength=255
+// +kubebuilder:validation:Pattern:=`^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$`
 type ComponentName string
 
 // Component is a component.
@@ -307,6 +302,7 @@ type ComponentDescriptorSpec struct {
 	Meta  Meta    `json:"meta,omitempty"`
 	Label []Label `json:"label,omitempty"`
 	// ComponentName MUST start with a valid domain name (as specified by RFC-1034, RFC-1035) with an optional URL path suffix (as specified by RFC-1738)
+	// +kubebuilder:validation:Pattern:=`^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$`
 	ComponentName     string            `json:"componentName,omitempty"`
 	IdentityAttribute IdentityAttribute `json:"identityAttribute,omitempty"`
 	RelaxedSemver     RelaxedSemver     `json:"relaxedSemver,omitempty"`

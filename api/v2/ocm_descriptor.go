@@ -39,7 +39,7 @@ type Label struct {
 }
 
 type IdentityAttribute struct {
-	PropertyNames []IdentityAttributeKey `json:"propertyNames,omitempty"`
+	IdentityAttributeKeys []IdentityAttributeKey `json:"identityAttributeKeys,omitempty"`
 }
 
 type RepositoryContext struct {
@@ -170,6 +170,8 @@ type Resource struct {
 }
 
 // ComponentName (s) MUST start with a valid domain name (as specified by RFC-1034, RFC-1035) with an optional URL path suffix (as specified by RFC-1738)'
+// +kubebuilder:validation:MaxLength=255
+// +kubebuilder:validation:Pattern:=`^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$`
 type ComponentName string
 
 // Component is a component.
@@ -196,7 +198,7 @@ type ComponentDescriptorSpec struct {
 	Meta  Meta    `json:"meta,omitempty"`
 	Label []Label `json:"label,omitempty"`
 	// ComponentName MUST start with a valid domain name (as specified by RFC-1034, RFC-1035) with an optional URL path suffix (as specified by RFC-1738)
-	ComponentName     string            `json:"componentName,omitempty"`
+	ComponentName     ComponentName     `json:"componentName,omitempty"`
 	IdentityAttribute IdentityAttribute `json:"identityAttribute,omitempty"`
 	RelaxedSemver     RelaxedSemver     `json:"relaxedSemver,omitempty"`
 	Component         Component         `json:"component,omitempty"`
@@ -218,6 +220,7 @@ type ComponentDescriptorStatus struct{}
 type IdentityAttributeKey string
 
 // +kubebuilder:object:root=true
+// +kubebuilder:storageversion
 
 type ComponentDescriptor struct {
 	metav1.TypeMeta   `json:",inline"`
