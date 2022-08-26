@@ -56,7 +56,12 @@ require (
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/text v0.3.7
 	gopkg.in/yaml.v3 v3.0.1
+<<<<<<< HEAD
 	helm.sh/helm/v3 v3.9.4
+=======
+	helm.sh/helm/v3 v3.9.1
+	sigs.k8s.io/controller-runtime v0.12.3
+>>>>>>> 1b9ec4ab (Added CRD definition for component-descriptor)
 )
 
 require (
@@ -148,7 +153,6 @@ require (
 	github.com/monochromegane/go-gitignore v0.0.0-20200626010858-205db1a8cc00 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/peterbourgon/diskv v2.0.1+incompatible // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
