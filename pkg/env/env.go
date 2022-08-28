@@ -18,6 +18,8 @@ import (
 	"fmt"
 
 	"github.com/mandelsoft/vfs/pkg/composefs"
+	"github.com/mandelsoft/vfs/pkg/layerfs"
+	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/readonlyfs"
@@ -62,8 +64,9 @@ func (o fsOpt) Mount(cfs *composefs.ComposedFileSystem) error {
 
 type tdOpt struct {
 	dummyOption
-	path   string
-	source string
+	path       string
+	source     string
+	modifiable bool
 }
 
 func TestData(paths ...string) tdOpt {
@@ -86,16 +89,42 @@ func TestData(paths ...string) tdOpt {
 	}
 }
 
+func ModifiableTestData(paths ...string) tdOpt {
+	path := "/testdata"
+	source := "testdata"
+
+	switch len(paths) {
+	case 0:
+	case 1:
+		source = paths[0]
+	case 2:
+		source = paths[0]
+		path = paths[1]
+	default:
+		panic("invalid number of arguments")
+	}
+	return tdOpt{
+		path:       path,
+		source:     source,
+		modifiable: true,
+	}
+}
+
 func (o tdOpt) Mount(cfs *composefs.ComposedFileSystem) error {
 	fs, err := projectionfs.New(osfs.New(), o.source)
 	if err != nil {
 		return fmt.Errorf("faild to create new project fs: %w", err)
 	}
 
-	fs = readonlyfs.New(fs)
-
-	if err := cfs.MkdirAll(o.path, vfs.ModePerm); err != nil {
-		return fmt.Errorf("faild to create directories '%s': %w", o.path, err)
+	if o.modifiable {
+		fs = layerfs.New(memoryfs.New(), fs)
+	} else {
+		fs = readonlyfs.New(fs)
+	}
+	
+	err = cfs.MkdirAll(o.path, vfs.ModePerm)
+	if err != nil {
+		return err
 	}
 
 	if err := cfs.Mount(o.path, fs); err != nil {
