@@ -58,6 +58,7 @@ var _ = Describe("image value mapping", func() {
 		Expect(err).To(Succeed())
 
 		cv, err = repo.LookupComponentVersion(COMPONENT, VERSION)
+		Expect(err).To(Succeed())
 	})
 
 	AfterEach(func() {
