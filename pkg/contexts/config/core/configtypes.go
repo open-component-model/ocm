@@ -54,6 +54,10 @@ func NewConfigTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) ConfigTy
 	return &configTypeScheme{scheme}
 }
 
+func (t *configTypeScheme) AddKnowntypes(s ConfigTypeScheme) {
+	t.Scheme.AddKnownTypes(s)
+}
+
 func (t *configTypeScheme) GetConfigType(name string) ConfigType {
 	d := t.GetDecoder(name)
 	if d == nil {

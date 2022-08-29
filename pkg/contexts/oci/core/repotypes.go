@@ -62,6 +62,10 @@ func NewRepositoryTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) Repo
 	return &repositoryTypeScheme{scheme}
 }
 
+func (t *repositoryTypeScheme) AddKnowntypes(s RepositoryTypeScheme) {
+	t.Scheme.AddKnownTypes(s)
+}
+
 func (t *repositoryTypeScheme) GetRepositoryType(name string) RepositoryType {
 	d := t.GetDecoder(name)
 	if d == nil {
