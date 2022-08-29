@@ -37,7 +37,7 @@ func NewRepository(ctx cpi.Context, spec *RepositorySpec) (*Repository, error) {
 	sysctx := &types.SystemContext{
 		DockerDaemonHost: spec.DockerHost,
 	}
-	client, err := newDockerClient(sysctx)
+	client, err := newDockerClient(spec.DockerHost)
 	if err != nil {
 		return nil, err
 	}

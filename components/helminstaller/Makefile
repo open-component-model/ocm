@@ -35,6 +35,12 @@ $(GEN)/ca: $(GEN)/image.$(NAME) $(GEN) resources.yaml executorspec.yaml
 	touch $(GEN)/ca
 
 
+.PHONY: plain-ca
+plain-ca: $(GEN)
+	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" mandelsoft $(GEN)/ca
+	$(OCM) add resources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" resources.yaml
+	touch $(GEN)/ca
+
 .PHONY: build
 build: $(GEN)/image.$(NAME)
 
