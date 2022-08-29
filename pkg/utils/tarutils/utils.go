@@ -152,11 +152,11 @@ func addFileToTar(fs vfs.FileSystem, tw *tar.Writer, path string, realPath strin
 			// log.Info(fmt.Sprintf("symlink found in %q but symlinks are not followed", path))
 			return nil
 		}
-		realPathResolved, err := vfs.EvalSymlinks(fs, realPath)
+		realPath, err := vfs.EvalSymlinks(fs, realPath)
 		if err != nil {
-			return fmt.Errorf("unable to follow symlink %s: %w", realPathResolved, err)
+			return fmt.Errorf("unable to follow symlink %s: %w", realPath, err)
 		}
-		return addFileToTar(fs, tw, path, realPathResolved, opts)
+		return addFileToTar(fs, tw, path, realPath, opts)
 	default:
 		return fmt.Errorf("unsupported file type %s in %s", info.Mode().String(), path)
 	}
