@@ -109,9 +109,9 @@ func (o *Command) Run() error {
 
 /////////////////////////////////////////////////////////////////////////////
 
-var outputs = output.NewOutputs(get_regular, output.Outputs{}).AddChainedManifestOutputs(infoChain)
+var outputs = output.NewOutputs(getRegular, output.Outputs{}).AddChainedManifestOutputs(infoChain)
 
-func get_regular(opts *output.Options) output.Output {
+func getRegular(opts *output.Options) output.Output {
 	return output.NewProcessingFunctionOutput(opts.Context, processing.Chain(), outInfo)
 }
 

@@ -91,9 +91,9 @@ func (o *Command) Run() error {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-var outputs = output.NewOutputs(get_download)
+var outputs = output.NewOutputs(getDownload)
 
-func get_download(opts *output.Options) output.Output {
+func getDownload(opts *output.Options) output.Output {
 	return &download{opts: opts}
 }
 

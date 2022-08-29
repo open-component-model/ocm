@@ -20,19 +20,19 @@ import (
 
 const T_OCIREPOSITORY = "oci repository"
 
-type oci_repository struct {
+type ociRepository struct {
 	base
 	kind string
 	cpi.Repository
 }
 
-func (r *oci_repository) Type() string {
+func (r *ociRepository) Type() string {
 	if r.kind != "" {
 		return r.kind
 	}
 	return T_OCIREPOSITORY
 }
 
-func (r *oci_repository) Set() {
+func (r *ociRepository) Set() {
 	r.Builder.oci_repo = r.Repository
 }

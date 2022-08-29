@@ -139,24 +139,24 @@ func Format(opts *output.Options) processing.ProcessChain {
 
 /////////////////////////////////////////////////////////////////////////////
 
-var outputs = output.NewOutputs(get_regular, output.Outputs{
-	"wide": get_wide,
-	"tree": get_tree,
+var outputs = output.NewOutputs(getRegular, output.Outputs{
+	"wide": getWide,
+	"tree": getTree,
 }).AddChainedManifestOutputs(output.ComposeChain(closureoption.OutputChainFunction(comphdlr.ClosureExplode, comphdlr.Sort), Format))
 
-func get_regular(opts *output.Options) output.Output {
-	return TableOutput(opts, map_get_regular_output).New()
+func getRegular(opts *output.Options) output.Output {
+	return TableOutput(opts, mapGetRegularOutput).New()
 }
 
-func get_wide(opts *output.Options) output.Output {
-	return TableOutput(opts, map_get_wide_output, "REPOSITORY").New()
+func getWide(opts *output.Options) output.Output {
+	return TableOutput(opts, mapGetWideOutput, "REPOSITORY").New()
 }
 
-func get_tree(opts *output.Options) output.Output {
-	return output.TreeOutput(TableOutput(opts, map_get_regular_output), "NESTING").New()
+func getTree(opts *output.Options) output.Output {
+	return output.TreeOutput(TableOutput(opts, mapGetRegularOutput), "NESTING").New()
 }
 
-func map_get_regular_output(e interface{}) interface{} {
+func mapGetRegularOutput(e interface{}) interface{} {
 	p := e.(*comphdlr.Object)
 
 	tag := "-"
@@ -169,7 +169,7 @@ func map_get_regular_output(e interface{}) interface{} {
 	return []string{p.Spec.Component, tag, string(p.ComponentVersion.GetDescriptor().Provider.Name)}
 }
 
-func map_get_wide_output(e interface{}) interface{} {
+func mapGetWideOutput(e interface{}) interface{} {
 	p := e.(*comphdlr.Object)
-	return output.Fields(map_get_regular_output(e), p.Spec.UniformRepositorySpec.String())
+	return output.Fields(mapGetRegularOutput(e), p.Spec.UniformRepositorySpec.String())
 }

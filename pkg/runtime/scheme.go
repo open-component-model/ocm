@@ -200,37 +200,37 @@ type defaultScheme struct {
 	types          KnownTypes
 }
 
-func MustNewDefaultScheme(proto_ifce interface{}, proto_unstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder) Scheme {
-	s, err := NewDefaultScheme(proto_ifce, proto_unstr, acceptUnknown, defaultdecoder)
+func MustNewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder) Scheme {
+	s, err := NewDefaultScheme(protoIfce, protoUnstr, acceptUnknown, defaultdecoder)
 	if err != nil {
 		panic(err)
 	}
 	return s
 }
 
-func NewDefaultScheme(proto_ifce interface{}, proto_unstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder) (Scheme, error) {
-	if proto_ifce == nil {
+func NewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder) (Scheme, error) {
+	if protoIfce == nil {
 		return nil, fmt.Errorf("object interface must be given by pointer to interace (is nil)")
 	}
-	it := reflect.TypeOf(proto_ifce)
+	it := reflect.TypeOf(protoIfce)
 	if it.Kind() != reflect.Ptr {
-		return nil, fmt.Errorf("object interface %T: must be given by pointer to interace (is not pointer)", proto_ifce)
+		return nil, fmt.Errorf("object interface %T: must be given by pointer to interace (is not pointer)", protoIfce)
 	}
 	it = it.Elem()
 	if it.Kind() != reflect.Interface {
-		return nil, fmt.Errorf("object interface %T: must be given by pointer to interace (does not point to interface)", proto_ifce)
+		return nil, fmt.Errorf("object interface %T: must be given by pointer to interace (does not point to interface)", protoIfce)
 	}
 	if !it.Implements(typeTypedObject) {
-		return nil, fmt.Errorf("object interface %T: must implement TypedObject", proto_ifce)
+		return nil, fmt.Errorf("object interface %T: must implement TypedObject", protoIfce)
 	}
 
-	ut, err := ProtoType(proto_unstr)
+	ut, err := ProtoType(protoUnstr)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unstructured prototype %T", proto_unstr)
+		return nil, errors.Wrapf(err, "unstructured prototype %T", protoUnstr)
 	}
 	if acceptUnknown {
 		if !reflect.PtrTo(ut).Implements(typeTypedObject) {
-			return nil, fmt.Errorf("unstructured type %T must implement TypedObject to be acceptale as unknown result", proto_unstr)
+			return nil, fmt.Errorf("unstructured type %T must implement TypedObject to be acceptale as unknown result", protoUnstr)
 		}
 	}
 
