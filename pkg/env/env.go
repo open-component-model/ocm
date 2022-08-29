@@ -121,7 +121,7 @@ func (o tdOpt) Mount(cfs *composefs.ComposedFileSystem) error {
 	} else {
 		fs = readonlyfs.New(fs)
 	}
-	
+
 	err = cfs.MkdirAll(o.path, vfs.ModePerm)
 	if err != nil {
 		return err

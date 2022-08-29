@@ -18,7 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/ghodss/yaml"
+	"github.com/open-component-model/ocm/pkg/runtime"
 
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 )
@@ -87,7 +87,7 @@ type Substitution struct {
 
 func (s *Substitution) GetValue() (interface{}, error) {
 	var value interface{}
-	err := yaml.Unmarshal(s.Value, &value)
+	err := runtime.DefaultYAMLEncoding.Unmarshal(s.Value, &value)
 	return value, err
 }
 
@@ -98,7 +98,7 @@ func (s *Substitutions) Add(name, file, path string, value interface{}) error {
 	var err error
 
 	if value != nil {
-		v, err = json.Marshal(value)
+		v, err = runtime.DefaultJSONEncoding.Marshal(value)
 		if err != nil {
 			return fmt.Errorf("cannot marshal substitution value: %w", err)
 		}

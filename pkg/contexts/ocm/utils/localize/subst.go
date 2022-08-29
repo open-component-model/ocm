@@ -15,12 +15,12 @@
 package localize
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
-	"github.com/ghodss/yaml"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
+	"github.com/open-component-model/ocm/pkg/runtime"
 
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -46,8 +46,8 @@ func Substitute(subs Substitutions, fs vfs.FileSystem) error {
 				return errors.Wrapf(err, "entry %d: cannot read file %q", i, file)
 			}
 			fi.json = true
-			if err = json.Unmarshal(data, &fi.content); err != nil {
-				if err = yaml.Unmarshal(data, &fi.content); err != nil {
+			if err = runtime.DefaultJSONEncoding.Unmarshal(data, &fi.content); err != nil {
+				if err = runtime.DefaultYAMLEncoding.Unmarshal(data, &fi.content); err != nil {
 					return errors.Wrapf(err, "entry %d: invalid YAML file %q", i, file)
 				}
 				fi.json = false
@@ -66,9 +66,9 @@ func Substitute(subs Substitutions, fs vfs.FileSystem) error {
 	}
 
 	for file, fi := range files {
-		marshal := yaml.Marshal
+		marshal := runtime.DefaultYAMLEncoding.Marshal
 		if fi.json {
-			marshal = json.Marshal
+			marshal = runtime.DefaultJSONEncoding.Marshal
 		}
 
 		data, err := marshal(fi.content)

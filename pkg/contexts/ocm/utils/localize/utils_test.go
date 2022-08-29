@@ -15,34 +15,35 @@
 package localize_test
 
 import (
-	"github.com/ghodss/yaml"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/gomega"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/localize"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 func Localizations(data string) []localize.Localization {
 	var v []localize.Localization
-	Expect(yaml.Unmarshal([]byte(data), &v)).To(Succeed())
+	Expect(runtime.DefaultYAMLEncoding.Unmarshal([]byte(data), &v)).To(Succeed())
 	return v
 }
 
 func Configurations(data string) []localize.Configuration {
 	var v []localize.Configuration
-	Expect(yaml.Unmarshal([]byte(data), &v)).To(Succeed())
+	Expect(runtime.DefaultYAMLEncoding.Unmarshal([]byte(data), &v)).To(Succeed())
 	return v
 }
 
 func Substitutions(data string) localize.Substitutions {
 	var v localize.Substitutions
-	Expect(yaml.Unmarshal([]byte(data), &v)).To(Succeed())
+	Expect(runtime.DefaultYAMLEncoding.Unmarshal([]byte(data), &v)).To(Succeed())
 	return v
 }
 
 func InstRules(data string) *localize.InstantiationRules {
 	var v localize.InstantiationRules
-	Expect(yaml.Unmarshal([]byte(data), &v)).To(Succeed())
+	Expect(runtime.DefaultYAMLEncoding.Unmarshal([]byte(data), &v)).To(Succeed())
 	return &v
 }
 

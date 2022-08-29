@@ -15,16 +15,15 @@
 package localize
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/mandelsoft/spiff/spiffing"
-	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/spiff"
 )
 
@@ -87,7 +86,7 @@ func Configure(mappings []Configuration, cursubst []Substitution, cv ocm.Compone
 			"adjustments": list,
 		}
 	} else {
-		if err = yaml.Unmarshal(template, &temp); err != nil {
+		if err = runtime.DefaultYAMLEncoding.Unmarshal(template, &temp); err != nil {
 			return nil, errors.Wrapf(err, "cannot unmarshal template")
 		}
 		if _, ok := temp["adjustments"]; ok {
@@ -100,7 +99,7 @@ func Configure(mappings []Configuration, cursubst []Substitution, cv ocm.Compone
 		temp["utilities"] = ""
 	}
 
-	template, err = json.Marshal(temp)
+	template, err = runtime.DefaultJSONEncoding.Marshal(temp)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot marshal adjustments")
 	}
@@ -113,6 +112,6 @@ func Configure(mappings []Configuration, cursubst []Substitution, cv ocm.Compone
 	var subst struct {
 		Adjustments Substitutions `json:"adjustments,omitempty"`
 	}
-	yaml.Unmarshal(config, &subst)
+	err = runtime.DefaultYAMLEncoding.Unmarshal(config, &subst)
 	return subst.Adjustments, err
 }
