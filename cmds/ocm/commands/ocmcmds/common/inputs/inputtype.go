@@ -103,13 +103,13 @@ func (t *inputTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedOb
 
 func (t *inputTypeScheme) AddKnownTypes(scheme runtime.Scheme) error {
 	if _, ok := scheme.(InputTypeScheme); !ok {
-		return errors.ErrInvalid("type", reflect.TypeOf(scheme).String())
+		return errors.ErrInvalid("type", reflect.TypeOf(scheme).String(), "expected", "InputTypeScheme")
 	}
 
 	if err := t.Scheme.AddKnownTypes(scheme); err != nil {
-		return fmt.Errorf("failed to add known type: %w", err)
+		return fmt.Errorf("failed to add known type in inputTypeScheme: %w", err)
 	}
-	
+
 	return nil
 }
 
