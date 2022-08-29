@@ -86,6 +86,10 @@ func NewInputTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) InputType
 	return &inputTypeScheme{scheme}
 }
 
+func (t *inputTypeScheme) AddKnowntypes(s InputTypeScheme) {
+	t.Scheme.AddKnownTypes(s)
+}
+
 func (t *inputTypeScheme) GetInputType(name string) InputType {
 	d := t.GetDecoder(name)
 	if d == nil {

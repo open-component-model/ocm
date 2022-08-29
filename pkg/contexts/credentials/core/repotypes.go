@@ -56,6 +56,10 @@ func NewRepositoryTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) Repo
 	return &repositoryTypeScheme{scheme}
 }
 
+func (t *repositoryTypeScheme) AddKnowntypes(s RepositoryTypeScheme) {
+	t.Scheme.AddKnownTypes(s)
+}
+
 func (t *repositoryTypeScheme) GetRepositoryType(name string) RepositoryType {
 	d := t.GetDecoder(name)
 	if d == nil {
@@ -79,7 +83,7 @@ func (t *repositoryTypeScheme) AddKnownTypes(scheme runtime.Scheme) error {
 	if err := t.Scheme.AddKnownTypes(scheme); err != nil {
 		return fmt.Errorf("failed to add known type: %w", err)
 	}
-	
+
 	return nil
 }
 

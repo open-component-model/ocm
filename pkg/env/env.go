@@ -43,7 +43,22 @@ func (dummyOption) Mount(*composefs.ComposedFileSystem) error {
 	return nil
 }
 
-////////////////////////////////////////////////////////////////////////////////
+type fsOpt struct {
+	dummyOption
+	path string
+	fs   vfs.FileSystem
+}
+
+func FileSystem(fs vfs.FileSystem, path string) fsOpt {
+	return fsOpt{
+		path: path,
+		fs:   fs,
+	}
+}
+
+func (o fsOpt) Mount(cfs *composefs.ComposedFileSystem) error {
+	return cfs.Mount(o.path, o.fs)
+}
 
 type tdOpt struct {
 	dummyOption

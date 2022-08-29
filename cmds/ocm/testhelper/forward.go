@@ -19,3 +19,4 @@ import (
 )
 
 var TestData = env.TestData
+var FileSystem = env.FileSystem
