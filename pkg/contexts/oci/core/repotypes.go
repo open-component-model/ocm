@@ -79,13 +79,13 @@ func (t *repositoryTypeScheme) RegisterByDecoder(name string, decoder runtime.Ty
 
 func (t *repositoryTypeScheme) AddKnownTypes(scheme runtime.Scheme) error {
 	if _, ok := scheme.(RepositoryTypeScheme); !ok {
-		return errors.ErrInvalid("type", reflect.TypeOf(scheme).String())
+		return errors.ErrInvalid("type", reflect.TypeOf(scheme).String(), "expected", "RepositoryTypeScheme")
 	}
 
 	if err := t.Scheme.AddKnownTypes(scheme); err != nil {
-		return fmt.Errorf("failed to add known type: %w", err)
+		return fmt.Errorf("failed to add known type in repository type scheme: %w", err)
 	}
-	
+
 	return nil
 }
 

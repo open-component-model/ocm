@@ -71,13 +71,13 @@ func (t *configTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedO
 
 func (t *configTypeScheme) AddKnownTypes(scheme runtime.Scheme) error {
 	if _, ok := scheme.(ConfigTypeScheme); !ok {
-		return errors.ErrInvalid("type", reflect.TypeOf(scheme).String())
+		return errors.ErrInvalid("type", reflect.TypeOf(scheme).String(), "expected", "ConfigTypeScheme")
 	}
 
 	if err := t.Scheme.AddKnownTypes(scheme); err != nil {
-		return fmt.Errorf("failed to add known type: %w", err)
+		return fmt.Errorf("failed to add known type in config type scheme: %w", err)
 	}
-	
+
 	return nil
 }
 
