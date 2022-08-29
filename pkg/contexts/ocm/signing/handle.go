@@ -15,11 +15,13 @@
 package signing
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/printer"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -34,26 +36,22 @@ func ToDigestSpec(v interface{}) *metav1.DigestSpec {
 	return v.(*metav1.DigestSpec)
 }
 
-func Apply(printer common.Printer, state *common.WalkingState, cv ocm.ComponentVersionAccess, opts *Options) (*metav1.DigestSpec, error) {
-	if printer == nil {
-		printer = common.NewPrinter(nil)
-	}
+func Apply(ctx context.Context, state *common.WalkingState, cv ocm.ComponentVersionAccess, opts *Options) (*metav1.DigestSpec, error) {
 	if state == nil {
 		s := common.NewWalkingState()
 		state = &s
 	}
-
-	return apply(printer, *state, cv, opts)
+	return apply(ctx, *state, cv, opts)
 }
 
-func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVersionAccess, opts *Options) (*metav1.DigestSpec, error) {
+func apply(ctx context.Context, state common.WalkingState, cv ocm.ComponentVersionAccess, opts *Options) (*metav1.DigestSpec, error) {
 	nv := common.VersionedElementKey(cv)
 	if ok, err := state.Add(ocm.KIND_COMPONENTVERSION, nv); !ok {
 		return ToDigestSpec(state.Closure[nv]), err
 	}
 
 	cd := cv.GetDescriptor().Copy()
-	printer.Printf("applying to version %q...\n", nv)
+	printer.Printf(ctx, "applying to version %q...\n", nv)
 	for i, reference := range cd.References {
 		var calculatedDigest *metav1.DigestSpec
 		if reference.Digest == nil && !opts.DoUpdate() {
@@ -70,7 +68,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 			if err != nil {
 				return nil, errors.Wrapf(err, refMsg(reference, state, "failed resolving hasher for existing digest for component reference"))
 			}
-			calculatedDigest, err = apply(printer.AddGap("  "), state, nested, opts)
+			calculatedDigest, err = apply(printer.WithGap(ctx, "  "), state, nested, opts)
 			if err != nil {
 				return nil, errors.Wrapf(err, refMsg(reference, state, "failed applying to component reference"))
 			}
@@ -84,7 +82,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 				return nil, errors.Newf(refMsg(reference, state, "calculated reference digest (%+v) mismatches existing digest (%+v) for", calculatedDigest, reference.Digest))
 			}
 		}
-		printer.Printf("  reference %d:  %s:%s: digest %s\n", i, reference.ComponentName, reference.Version, calculatedDigest)
+		printer.Printf(ctx,"  reference %d:  %s:%s: digest %s\n", i, reference.ComponentName, reference.Version, calculatedDigest)
 	}
 
 	blobdigesters := cv.GetContext().BlobDigesters()
@@ -128,7 +126,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 			return nil, errors.Newf(resMsg(raw, state, "calculated resource digest (%+v) mismatches existing digest (%+v) for", digest, raw.Digest))
 		}
 		cd.Resources[i].Digest = &digest[0]
-		printer.Printf("  resource %d:  %s: digest %s\n", i, res.Meta().GetIdentity(cv.GetDescriptor().Resources), &digest[0])
+		printer.Printf(ctx, "  resource %d:  %s: digest %s\n", i, res.Meta().GetIdentity(cv.GetDescriptor().Resources), &digest[0])
 	}
 	digest, err := compdesc.Hash(cd, opts.NormalizationAlgo, opts.Hasher.Create())
 	if err != nil {
@@ -161,7 +159,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 				if opts.SignatureConfigured(n) {
 					return nil, errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, n, state.History.String())
 				}
-				printer.Printf("Warning: no public key for signature %q in %s\n", n, state.History)
+				printer.Printf(ctx, "Warning: no public key for signature %q in %s\n", n, state.History)
 				continue
 			}
 			sig := &cd.Signatures[f]
@@ -170,7 +168,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 				if opts.SignatureConfigured(n) {
 					return nil, errors.ErrUnknown(compdesc.KIND_VERIFY_ALGORITHM, n, state.History.String())
 				}
-				printer.Printf("Warning: no verifier (%s) found for signature %q in %s\n", sig.Signature.Algorithm, n, state.History)
+				printer.Printf(ctx, "Warning: no verifier (%s) found for signature %q in %s\n", sig.Signature.Algorithm, n, state.History)
 				continue
 			}
 			hasher := opts.Registry.GetHasher(sig.Digest.HashAlgorithm)

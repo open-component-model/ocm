@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package common
+package printer
 
 import (
 	"fmt"
@@ -20,21 +20,14 @@ import (
 	"strings"
 )
 
-type Printer interface {
-	io.Writer
-	Printf(msg string, args ...interface{}) (int, error)
-
-	AddGap(gap string) Printer
-}
-
-type printerState struct {
-	pending bool
-}
-
 type printer struct {
 	writer io.Writer
 	gap    string
 	state  *printerState
+}
+
+type printerState struct {
+	pending bool
 }
 
 func NewPrinter(writer io.Writer) Printer {
@@ -42,6 +35,14 @@ func NewPrinter(writer io.Writer) Printer {
 }
 
 func (p *printer) AddGap(gap string) Printer {
+	return &printer{
+		writer: p.writer,
+		gap:    p.gap + gap,
+		state:  p.state,
+	}
+}
+
+func (p *printer) addGap(gap string) *printer {
 	return &printer{
 		writer: p.writer,
 		gap:    p.gap + gap,
@@ -78,4 +79,12 @@ func (p *printer) printf(msg string, args ...interface{}) (int, error) {
 
 func (p *printer) Printf(msg string, args ...interface{}) (int, error) {
 	return p.printf(msg, args...)
+}
+
+func (p *printer) Warnf(msg string, args ...interface{}) (int, error) {
+	return p.addGap("WARN: ").printf(msg, args...)
+}
+
+func (p *printer) Errorf(msg string, args ...interface{}) (int, error) {
+	return p.addGap("ERROR: ").printf(msg, args...)
 }

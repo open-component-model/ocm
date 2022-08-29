@@ -15,6 +15,9 @@
 package transfer
 
 import (
+	"context"
+
+	"github.com/open-component-model/ocm/pkg/common/printer"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -24,7 +27,6 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/scriptoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
@@ -108,7 +110,7 @@ func (o *Command) Run() error {
 		return err
 	}
 	a := &action{
-		printer: common.NewPrinter(o.Context.StdOut()),
+		ctx: printer.WithPrinter(nil,printer.NewPrinter(o.Context.StdOut())),
 		target:  target,
 		handler: thdlr,
 		closure: transfer.TransportClosure{},
@@ -120,7 +122,7 @@ func (o *Command) Run() error {
 /////////////////////////////////////////////////////////////////////////////
 
 type action struct {
-	printer common.Printer
+	ctx context.Context
 	target  ocm.Repository
 	handler transferhandler.TransferHandler
 	closure transfer.TransportClosure
@@ -128,5 +130,5 @@ type action struct {
 }
 
 func (a *action) Execute(src ocm.Repository) error {
-	return transfer.TransferComponents(a.printer, a.closure, src, "", true, a.target, a.handler)
+	return transfer.TransferComponents(a.ctx, a.closure, src, "", true, a.target, a.handler)
 }

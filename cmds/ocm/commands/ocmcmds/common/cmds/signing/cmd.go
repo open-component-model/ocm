@@ -15,8 +15,10 @@
 package signing
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/open-component-model/ocm/pkg/common/printer"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -106,7 +108,7 @@ func (o *SignatureCommand) Run() error {
 type action struct {
 	desc         []string
 	cmd          *SignatureCommand
-	printer      common.Printer
+	ctx          context.Context
 	state        common.WalkingState
 	baseresolver ocm.ComponentVersionResolver
 	sopts        *signing.Options
@@ -119,7 +121,7 @@ func NewAction(desc []string, cmd *SignatureCommand, sopts *signing.Options) out
 	return &action{
 		desc:         desc,
 		cmd:          cmd,
-		printer:      common.NewPrinter(cmd.Context.StdOut()),
+		ctx:          printer.WithPrinter(nil, printer.NewPrinter(cmd.Context.StdOut())),
 		state:        common.NewWalkingState(),
 		baseresolver: sopts.Resolver,
 		sopts:        sopts,
@@ -132,12 +134,12 @@ func (a *action) Add(e interface{}) error {
 	cv := o.ComponentVersion
 	sopts := *a.sopts
 	sopts.Resolver = ocm.NewCompoundResolver(o.Repository, a.sopts.Resolver)
-	d, err := signing.Apply(a.printer, &a.state, cv, &sopts)
+	d, err := signing.Apply(a.ctx, &a.state, cv, &sopts)
 	a.errlist.Add(err)
 	if err == nil {
-		a.printer.Printf("successfully %s %s:%s (digest %s:%s)\n", a.desc[0], cv.GetName(), cv.GetVersion(), d.HashAlgorithm, d.Value)
+		printer.Printf(a.ctx, "successfully %s %s:%s (digest %s:%s)\n", a.desc[0], cv.GetName(), cv.GetVersion(), d.HashAlgorithm, d.Value)
 	} else {
-		a.printer.Printf("failed %s %s:%s: %s\n", a.desc[1], cv.GetName(), cv.GetVersion(), err)
+		printer.Printf(a.ctx,"failed %s %s:%s: %s\n", a.desc[1], cv.GetName(), cv.GetVersion(), err)
 	}
 	return nil
 }
@@ -148,7 +150,7 @@ func (a *action) Close() error {
 
 func (a *action) Out() error {
 	if a.errlist.Len() > 0 {
-		a.printer.Printf("finished with %d error(s)\n", a.errlist.Len())
+		printer.Printf(a.ctx, "finished with %d error(s)\n", a.errlist.Len())
 	}
 	return a.errlist.Result()
 }

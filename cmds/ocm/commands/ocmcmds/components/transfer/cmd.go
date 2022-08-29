@@ -15,8 +15,10 @@
 package transfer
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/open-component-model/ocm/pkg/common/printer"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -33,7 +35,6 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
@@ -117,7 +118,7 @@ func (o *Command) Run() error {
 	hdlr := comphdlr.NewTypeHandler(o.Context.OCM(), session, repooption.From(o).Repository)
 	err = utils.HandleOutput(&action{
 		cmd:     o,
-		printer: common.NewPrinter(o.Context.StdOut()),
+		ctx: printer.WithPrinter(nil, printer.NewPrinter(o.Context.StdOut())),
 		target:  target,
 		handler: thdlr,
 		closure: transfer.TransportClosure{},
@@ -133,7 +134,7 @@ func (o *Command) Run() error {
 
 type action struct {
 	cmd     *Command
-	printer common.Printer
+	ctx context.Context
 	target  ocm.Repository
 	handler transferhandler.TransferHandler
 	closure transfer.TransportClosure
@@ -144,10 +145,10 @@ var _ output.Output = (*action)(nil)
 
 func (a *action) Add(e interface{}) error {
 	o := e.(*comphdlr.Object)
-	err := transfer.TransferVersion(a.printer, a.closure, o.Repository, o.ComponentVersion, a.target, a.handler)
+	err := transfer.TransferVersion(a.ctx, a.closure, o.Repository, o.ComponentVersion, a.target, a.handler)
 	a.errors.Add(err)
 	if err != nil {
-		a.printer.Printf("Error: %s\n", err)
+		printer.Errorf(a.ctx, "%s\n", err)
 	}
 	return nil
 }
@@ -157,7 +158,7 @@ func (a *action) Close() error {
 }
 
 func (a *action) Out() error {
-	a.printer.Printf("%d versions transferred\n", len(a.closure))
+	printer.Printf(a.ctx, "%d versions transferred\n", len(a.closure))
 	if a.errors.Result() != nil {
 		return fmt.Errorf("transfer finished with %d error(s)", a.errors.Len())
 	}

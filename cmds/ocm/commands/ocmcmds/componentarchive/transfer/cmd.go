@@ -15,6 +15,7 @@
 package transfer
 
 import (
+	"github.com/open-component-model/ocm/pkg/common/printer"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -23,7 +24,6 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
@@ -85,5 +85,5 @@ func (o *Command) Run() error {
 		return err
 	}
 
-	return transfer.TransferVersion(common.NewPrinter(o.Context.StdOut()), nil, nil, source, target, nil)
+	return transfer.TransferVersion(printer.WithPrinter(nil, printer.NewPrinter(o.Context.StdOut())), nil, nil, source, target, nil)
 }

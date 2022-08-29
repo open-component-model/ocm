@@ -15,7 +15,9 @@
 package transfer
 
 import (
-	"github.com/open-component-model/ocm/pkg/common"
+	"context"
+
+	"github.com/open-component-model/ocm/pkg/common/printer"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
@@ -23,12 +25,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-func TransferComponents(printer common.Printer, closure TransportClosure, repo ocm.Repository, prefix string, all bool, tgt ocm.Repository, handler transferhandler.TransferHandler) error {
+func TransferComponents(ctx context.Context, closure TransportClosure, repo ocm.Repository, prefix string, all bool, tgt ocm.Repository, handler transferhandler.TransferHandler) error {
 	if closure == nil {
 		closure = TransportClosure{}
-	}
-	if printer == nil {
-		printer = common.NewPrinter(nil)
 	}
 
 	lister := repo.ComponentLister()
@@ -45,9 +44,10 @@ func TransferComponents(printer common.Printer, closure TransportClosure, repo o
 	list := errors.ErrListf("component transport")
 	for _, c := range comps {
 		comp, err := repo.LookupComponent(c)
-		if list.Addf(printer, err, "component %s", c) == nil {
-			printer.Printf("transferring component %q...\n", c)
-			subp := printer.AddGap("  ")
+		if list.Addf(printer.For(ctx), err, "component %s", c) == nil {
+			printer.Printf(ctx, "transferring component %q...\n", c)
+			subc := printer.WithGap(ctx, "  ")
+			subp := printer.For(subc)
 			vers, err := comp.ListVersions()
 			if list.Addf(subp, err, "list versions for %s", c) == nil {
 				for _, v := range vers {
@@ -64,7 +64,7 @@ func TransferComponents(printer common.Printer, closure TransportClosure, repo o
 							}
 							compvers, err := subcomp.LookupVersion(v)
 							if list.Addf(subp, err, "version %s", v) == nil {
-								list.Addf(subp, TransferVersion(subp, closure, repo, compvers, tgt, h), "")
+								list.Addf(subp, TransferVersion(subc, closure, repo, compvers, tgt, h), "")
 							}
 						}
 					}

@@ -16,7 +16,8 @@ package errors
 
 import (
 	"fmt"
-	"io"
+
+	"github.com/open-component-model/ocm/pkg/common/printer"
 )
 
 type ErrorList struct {
@@ -48,14 +49,14 @@ func (l *ErrorList) Add(errs ...error) *ErrorList {
 	return l
 }
 
-func (l *ErrorList) Addf(writer io.Writer, err error, msg string, args ...interface{}) error {
+func (l *ErrorList) Addf(pr printer.Printer, err error, msg string, args ...interface{}) error {
 	if err != nil {
 		if msg != "" {
 			err = Wrapf(err, msg, args...)
 		}
 		l.errors = append(l.errors, err)
-		if writer != nil {
-			fmt.Fprintf(writer, "Error: %s\n", err)
+		if pr != nil {
+			pr.Errorf("%s\n", err)
 		}
 	}
 	return err

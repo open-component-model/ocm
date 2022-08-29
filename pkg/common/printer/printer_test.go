@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package common
+package printer
 
 import (
 	"bytes"
@@ -53,5 +53,25 @@ var _ = Describe("Printer", func() {
 		Expect(buf.String()).To(Equal("line\n  test\n  next\n"))
 		printer.Printf("back\n")
 		Expect(buf.String()).To(Equal("line\n  test\n  next\nback\n"))
+	})
+
+	It("prints gapped multi line string", func() {
+		printer.Printf("line\n")
+		p := printer.AddGap("  ")
+		p.Printf("multi\nline\n")
+		Expect(buf.String()).To(Equal("line\n  multi\n  line\n"))
+		printer.Printf("back\n")
+		Expect(buf.String()).To(Equal("line\n  multi\n  line\nback\n"))
+	})
+
+	It("prints error", func() {
+		printer.Printf("line\n")
+		p := printer.AddGap("  ")
+		p.Errorf("test\n")
+		Expect(buf.String()).To(Equal("line\n  ERROR: test\n"))
+		p.Printf("next\n")
+		Expect(buf.String()).To(Equal("line\n  ERROR: test\n  next\n"))
+		p.Errorf("multi\nline\n")
+		Expect(buf.String()).To(Equal("line\n  ERROR: test\n  next\n  ERROR: multi\n  ERROR: line\n"))
 	})
 })
