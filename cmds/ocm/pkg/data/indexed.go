@@ -117,12 +117,6 @@ func (this IndexedSliceAccess) Copy() IndexedSliceAccess {
 	return n
 }
 
-/*
-func (this IndexedSliceAccess) entry_iterator() entry_iterator {
-	return (&_slice_entry_iterator{}).new(this)
-}
-*/
-
 func NewSliceIterator(slice []interface{}) *IndexedIterator {
 	return NewIndexedIterator(IndexedSliceAccess(slice))
 }

@@ -20,20 +20,20 @@ import (
 
 const T_OCINAMESPACE = "oci namespace"
 
-type oci_namespace struct {
+type ociNamespace struct {
 	base
 	kind string
 	oci.NamespaceAccess
 }
 
-func (r *oci_namespace) Type() string {
+func (r *ociNamespace) Type() string {
 	if r.kind != "" {
 		return r.kind
 	}
 	return T_OCINAMESPACE
 }
 
-func (r *oci_namespace) Set() {
+func (r *ociNamespace) Set() {
 	r.Builder.oci_nsacc = r.NamespaceAccess
 }
 
@@ -43,5 +43,5 @@ func (b *Builder) Namespace(name string, f ...func()) {
 	b.expect(b.oci_repo, T_OCIREPOSITORY)
 	r, err := b.oci_repo.LookupNamespace(name)
 	b.failOn(err)
-	b.configure(&oci_namespace{NamespaceAccess: r, kind: T_OCIARTEFACTSET}, f)
+	b.configure(&ociNamespace{NamespaceAccess: r, kind: T_OCIARTEFACTSET}, f)
 }

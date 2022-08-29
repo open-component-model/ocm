@@ -30,5 +30,5 @@ func (b *Builder) ComponentArchive(path string, fmt accessio.FileFormat, name, v
 	r.SetVersion(vers)
 	r.GetDescriptor().Provider.Name = metav1.ProviderName("ACME")
 
-	b.configure(&ocm_version{ComponentVersionAccess: r, kind: T_COMPARCH}, f)
+	b.configure(&ocmVersion{ComponentVersionAccess: r, kind: T_COMPARCH}, f)
 }

@@ -22,20 +22,20 @@ import (
 
 const T_OCMVERSION = "component version"
 
-type ocm_version struct {
+type ocmVersion struct {
 	base
 	kind string
 	cpi.ComponentVersionAccess
 }
 
-func (r *ocm_version) Type() string {
+func (r *ocmVersion) Type() string {
 	if r.kind != "" {
 		return r.kind
 	}
 	return T_OCMVERSION
 }
 
-func (r *ocm_version) Set() {
+func (r *ocmVersion) Set() {
 	r.Builder.ocm_vers = r.ComponentVersionAccess
 }
 
@@ -51,7 +51,7 @@ func (b *Builder) Version(name string, f ...func()) {
 	}
 	b.failOn(err)
 	v.GetDescriptor().Provider.Name = metav1.ProviderName("ACME")
-	b.configure(&ocm_version{ComponentVersionAccess: v}, f)
+	b.configure(&ocmVersion{ComponentVersionAccess: v}, f)
 }
 
 func (b *Builder) ComponentVersion(name, version string, f ...func()) {
