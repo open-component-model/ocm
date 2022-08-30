@@ -159,7 +159,7 @@ func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error
 		ManifestMIMEType: artdesc.MediaTypeImageManifest,
 	}
 	un := image.UnparsedInstance(src, nil)
-	img, err := image.FromUnparsedImage(dummyContext, nil, un)
+	img, err := image.FromUnparsedImage(dummyContext, n.repo.sysctx, un)
 	if err != nil {
 		src.Close()
 		return nil, err

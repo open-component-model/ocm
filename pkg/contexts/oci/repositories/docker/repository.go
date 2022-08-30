@@ -41,6 +41,7 @@ func NewRepository(ctx cpi.Context, spec *RepositorySpec) (*Repository, error) {
 	if err != nil {
 		return nil, err
 	}
+	sysctx.DockerDaemonHost = client.DaemonHost()
 
 	return &Repository{
 		ctx:    ctx,
