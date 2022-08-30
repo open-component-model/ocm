@@ -1,7 +1,8 @@
 NAME      = helmdemo
-IMAGE     = mandelsoft/ocm$(NAME)
+PROVIDER  = mandelsoft
+IMAGE     = $(PROVIDER)/ocm$(NAME)
 COMPONENT = github.com/$(IMAGE)
-
+OCMREPO   = ghcr.io/$(PROVIDER)/cnudie
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
 VERSION                                        = $(shell git describe --tags --exact-match 2>/dev/null|| echo "$$(cat $(REPO_ROOT)/VERSION)-dev")
@@ -28,7 +29,7 @@ version:
 ca: $(GEN)/ca
 
 $(GEN)/ca: $(GEN) resources.yaml references.yaml $(CHARTSRCS) installerspec.yaml helmconfig.yaml
-	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" mandelsoft $(GEN)/ca
+	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" $(PROVIDER) $(GEN)/ca
 	$(OCM) add resources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" resources.yaml
 	$(OCM) add references $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" references.yaml
 	touch $(GEN)/ca
@@ -37,7 +38,7 @@ $(GEN)/ca: $(GEN) resources.yaml references.yaml $(CHARTSRCS) installerspec.yaml
 push: $(GEN)/ctf $(GEN)/push.$(NAME)
 
 $(GEN)/push.$(NAME): $(GEN)/ctf
-	$(OCM) transfer ctf -f $(GEN)/ctf ghcr.io/mandelsoft/cnudie
+	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
 	touch $(GEN)/push.$(NAME)
 
 $(GEN):
