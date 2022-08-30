@@ -137,7 +137,7 @@ func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error
 	if err != nil {
 		return nil, err
 	}
-	src, err := ref.NewImageSource(dummyContext, nil)
+	src, err := ref.NewImageSource(dummyContext, n.repo.sysctx)
 	if err != nil {
 		return nil, err
 	}
