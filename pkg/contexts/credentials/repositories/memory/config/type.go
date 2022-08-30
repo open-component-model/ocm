@@ -35,7 +35,7 @@ func init() {
 	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &Config{}, usage))
 }
 
-// Config describes a configuration for the config context
+// Config describes a configuration for the config context.
 type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	RepoName                    string            `json:"repoName"`
@@ -46,11 +46,11 @@ type CredentialsSpec struct {
 	CredentialsName string `json:"credentialsName"`
 	// Reference refers to credentials store in some othe repo
 	Reference *cpi.GenericCredentialsSpec `json:"reference,omitempty"`
-	// Credentials are direct credentials (one of Reference or Credentails must be set)
-	Credentails common.Properties `json:"credentials"`
+	// Credentials are direct credentials (one of Reference or Credentials must be set)
+	Credentials common.Properties `json:"credentials"`
 }
 
-// New creates a new memory ConfigSpec
+// New creates a new memory ConfigSpec.
 func New(repo string, credentials ...CredentialsSpec) *Config {
 	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
@@ -64,7 +64,7 @@ func (a *Config) GetType() string {
 }
 
 func (a *Config) AddCredentials(name string, props common.Properties) error {
-	a.Credentials = append(a.Credentials, CredentialsSpec{CredentialsName: name, Credentails: props})
+	a.Credentials = append(a.Credentials, CredentialsSpec{CredentialsName: name, Credentials: props})
 	return nil
 }
 
@@ -90,7 +90,7 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 
 	repo, err := t.RepositoryForSpec(memory.NewRepositorySpec(a.RepoName))
 	if err != nil {
-		return fmt.Errorf("unabel to get repository for spec: %w", err)
+		return fmt.Errorf("unable to get repository for spec: %w", err)
 	}
 
 	mem := repo.(*memory.Repository)
@@ -98,14 +98,13 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	for i, e := range a.Credentials {
 		var creds cpi.Credentials
 		if e.Reference != nil {
-			if len(e.Credentails) != 0 {
+			if len(e.Credentials) != 0 {
 				err = fmt.Errorf("credentials and reference set")
 			} else {
 				creds, err = e.Reference.Credentials(t)
-
 			}
 		} else {
-			creds = cpi.NewCredentials(e.Credentails)
+			creds = cpi.NewCredentials(e.Credentials)
 		}
 		if err != nil {
 			list.Add(errors.Wrapf(err, "config entry %d[%s]", i, e.CredentialsName))

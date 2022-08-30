@@ -20,12 +20,11 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -101,7 +100,7 @@ func (_ Handler) write(ctx out.Context, blob accessio.BlobAccess, path string, f
 		return err
 	}
 	defer cr.Close()
-	file, err := fs.OpenFile(path, vfs.O_TRUNC|vfs.O_CREATE|vfs.O_WRONLY, 0660)
+	file, err := fs.OpenFile(path, vfs.O_TRUNC|vfs.O_CREATE|vfs.O_WRONLY, 0o660)
 	if err != nil {
 		return err
 	}

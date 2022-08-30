@@ -21,17 +21,15 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
+	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
-
-	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
 var (

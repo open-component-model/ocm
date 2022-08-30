@@ -17,10 +17,9 @@ package ctf
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/index"
@@ -38,7 +37,7 @@ import (
    Digests used as filename will replace the ":" by a "."
 */
 
-// Repository is a closable view on a repository implementation
+// Repository is a closable view on a repository implementation.
 type Repository struct {
 	view accessio.CloserView
 	*RepositoryImpl
@@ -58,7 +57,7 @@ func (r *Repository) LookupArtefact(name string, ref string) (cpi.ArtefactAccess
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// RepositoryImpl is closed, if all views are released
+// RepositoryImpl is closed, if all views are released.
 type RepositoryImpl struct {
 	refs accessio.ReferencableCloser
 
@@ -69,7 +68,7 @@ type RepositoryImpl struct {
 
 var _ cpi.Repository = (*Repository)(nil)
 
-// New returns a new representation based repository
+// New returns a new representation based repository.
 func New(ctx cpi.Context, spec *RepositorySpec, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode) (*Repository, error) {
 	if spec.PathFileSystem == nil {
 		spec.PathFileSystem = vfsattr.Get(ctx)

@@ -19,11 +19,10 @@ import (
 	"os"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/errors"
-
-	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 type Options struct {
@@ -135,7 +134,7 @@ func (o Options) WriterFor(path string, mode vfs.FileMode) (io.WriteCloser, erro
 	var writer io.WriteCloser
 	var err error
 	if o.File == nil {
-		writer, err = o.PathFileSystem.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode&0666)
+		writer, err = o.PathFileSystem.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode&0o666)
 	} else {
 		writer = NopWriteCloser(o.File)
 		err = o.File.Truncate(0)
@@ -154,12 +153,12 @@ func (o Options) ApplyOptions(opts ...Option) Options {
 	return o
 }
 
-// Option is the interface to specify different archive options
+// Option is the interface to specify different archive options.
 type Option interface {
 	ApplyOption(options *Options)
 }
 
-// PathFileSystem set the evaluation filesystem for the path name
+// PathFileSystem set the evaluation filesystem for the path name.
 func PathFileSystem(fs vfs.FileSystem) Option {
 	return optPfs{fs}
 }
@@ -173,7 +172,7 @@ func (o optPfs) ApplyOption(options *Options) {
 	options.PathFileSystem = o.FileSystem
 }
 
-// RepresentationFileSystem set the evaltuation filesystem for the path name
+// RepresentationFileSystem set the evaltuation filesystem for the path name.
 func RepresentationFileSystem(fs vfs.FileSystem) Option {
 	return optRfs{fs}
 }
@@ -187,7 +186,7 @@ func (o optRfs) ApplyOption(options *Options) {
 	options.Representation = o.FileSystem
 }
 
-// File set open file to use
+// File set open file to use.
 func File(file vfs.File) Option {
 	return optF{file}
 }
@@ -196,12 +195,12 @@ type optF struct {
 	vfs.File
 }
 
-// ApplyOption applies the configured open file
+// ApplyOption applies the configured open file.
 func (o optF) ApplyOption(options *Options) {
 	options.File = o.File
 }
 
-// Reader set open reader to use
+// Reader set open reader to use.
 func Reader(reader io.ReadCloser) Option {
 	return optR{reader}
 }
@@ -210,7 +209,7 @@ type optR struct {
 	io.ReadCloser
 }
 
-// ApplyOption applies the configured open file
+// ApplyOption applies the configured open file.
 func (o optR) ApplyOption(options *Options) {
 	options.Reader = o.ReadCloser
 }

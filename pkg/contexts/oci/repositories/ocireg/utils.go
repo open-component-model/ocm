@@ -114,11 +114,11 @@ func pushData(ctx context.Context, p resolve.Pusher, desc artdesc.Descriptor, da
 		desc.Size = -1
 	}
 
-	fmt.Printf("*** push %s %s: %s\n", desc.MediaType, desc.Digest, key)
+	logrus.Debugf("*** push %s %s: %s", desc.MediaType, desc.Digest, key)
 	req, err := p.Push(ctx, desc, data)
 	if err != nil {
 		if errdefs.IsAlreadyExists(err) {
-			fmt.Printf("*** %s %s: already exists\n", desc.MediaType, desc.Digest)
+			logrus.Infof("*** %s %s: already exists", desc.MediaType, desc.Digest)
 
 			return nil
 		}

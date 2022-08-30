@@ -32,5 +32,5 @@ func Compare(a, b interface{}) int {
 	return c
 }
 
-// Sort is a processing chain sorting original objects provided by type handler
+// Sort is a processing chain sorting original objects provided by type handler.
 var Sort = processing.Sort(Compare)

@@ -139,7 +139,7 @@ func (a *ArtefactImpl) GetBlobDescriptor(digest digest.Digest) *Descriptor {
 		return d
 	}
 	return a.provider.GetBlobDescriptor(digest)
-	//return a.container.GetBlobDescriptor(digest)
+	// return a.container.GetBlobDescriptor(digest)
 }
 
 func (a *ArtefactImpl) Index() (*artdesc.Index, error) {

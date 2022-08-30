@@ -24,20 +24,20 @@ const KIND_CONFIGTYPE = "config type"
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type errNoContext struct {
+type noContextError struct {
 	name string
 }
 
-func (e *errNoContext) Error() string {
+func (e *noContextError) Error() string {
 	return fmt.Sprintf("unknown context %q", e.name)
 }
 
 func ErrNoContext(name string) error {
-	return &errNoContext{name}
+	return &noContextError{name}
 }
 
 func IsErrNoContext(err error) bool {
-	return errors.IsA(err, &errNoContext{})
+	return errors.IsA(err, &noContextError{})
 }
 
 func IsErrConfigNotApplicable(err error) bool {

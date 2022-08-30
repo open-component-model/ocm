@@ -36,10 +36,12 @@ type RepositorySpec struct {
 	Properties                  common.Properties `json:"properties"`
 }
 
-var _ cpi.RepositorySpec = &RepositorySpec{}
-var _ cpi.CredentialsSpec = &RepositorySpec{}
+var (
+	_ cpi.RepositorySpec  = &RepositorySpec{}
+	_ cpi.CredentialsSpec = &RepositorySpec{}
+)
 
-// NewRepositorySpec creates a new RepositorySpec
+// NewRepositorySpec creates a new RepositorySpec.
 func NewRepositorySpec(credentials common.Properties) *RepositorySpec {
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),

@@ -20,7 +20,6 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
 )
 

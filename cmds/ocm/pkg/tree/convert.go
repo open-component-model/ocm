@@ -1,7 +1,7 @@
 // Copyright 2022 SAP SE or an SAP affiliate company. All rights reserved. This file is licensed under the Apache Software License, v. 2 except as noted otherwise in the LICENSE file
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
-//  you may not use this file except in compliance with the License.
+//  you may not use o file except in compliance with the License.
 //  You may obtain a copy of the License at
 //
 //       http://www.apache.org/licenses/LICENSE-2.0
@@ -29,36 +29,40 @@ func ObjectSlice(s data.Iterable) Objects {
 	return a
 }
 
-var _ data.IndexedAccess = Objects{}
-var _ data.Iterable = Objects{}
+var (
+	_ data.IndexedAccess = Objects{}
+	_ data.Iterable      = Objects{}
+)
 
-func (this Objects) Len() int {
-	return len(this)
+func (o Objects) Len() int {
+	return len(o)
 }
 
-func (this Objects) Get(i int) interface{} {
-	return this[i]
+func (o Objects) Get(i int) interface{} {
+	return o[i]
 }
 
-func (this Objects) Iterator() data.Iterator {
-	return data.NewIndexedIterator(this)
+func (o Objects) Iterator() data.Iterator {
+	return data.NewIndexedIterator(o)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type TreeObjects []*TreeObject
 
-var _ data.IndexedAccess = TreeObjects{}
-var _ data.Iterable = TreeObjects{}
+var (
+	_ data.IndexedAccess = TreeObjects{}
+	_ data.Iterable      = TreeObjects{}
+)
 
-func (this TreeObjects) Len() int {
-	return len(this)
+func (o TreeObjects) Len() int {
+	return len(o)
 }
 
-func (this TreeObjects) Get(i int) interface{} {
-	return this[i]
+func (o TreeObjects) Get(i int) interface{} {
+	return o[i]
 }
 
-func (this TreeObjects) Iterator() data.Iterator {
-	return data.NewIndexedIterator(this)
+func (o TreeObjects) Iterator() data.Iterator {
+	return data.NewIndexedIterator(o)
 }

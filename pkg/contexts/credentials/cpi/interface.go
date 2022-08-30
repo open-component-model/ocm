@@ -21,24 +21,30 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
 )
 
-const KIND_CREDENTIALS = core.KIND_CREDENTIALS
-const KIND_REPOSITORY = core.KIND_REPOSITORY
+const (
+	KIND_CREDENTIALS = core.KIND_CREDENTIALS
+	KIND_REPOSITORY  = core.KIND_REPOSITORY
+)
 
 const CONTEXT_TYPE = core.CONTEXT_TYPE
 
-type Context = core.Context
-type Repository = core.Repository
-type RepositoryType = core.RepositoryType
-type Credentials = core.Credentials
-type CredentialsSource = core.CredentialsSource
-type CredentialsChain = core.CredentialsChain
-type CredentialsSpec = core.CredentialsSpec
-type RepositorySpec = core.RepositorySpec
-type GenericRepositorySpec = core.GenericRepositorySpec
-type GenericCredentialsSpec = core.GenericCredentialsSpec
+type (
+	Context                = core.Context
+	Repository             = core.Repository
+	RepositoryType         = core.RepositoryType
+	Credentials            = core.Credentials
+	CredentialsSource      = core.CredentialsSource
+	CredentialsChain       = core.CredentialsChain
+	CredentialsSpec        = core.CredentialsSpec
+	RepositorySpec         = core.RepositorySpec
+	GenericRepositorySpec  = core.GenericRepositorySpec
+	GenericCredentialsSpec = core.GenericCredentialsSpec
+)
 
-type ConsumerIdentity = core.ConsumerIdentity
-type IdentityMatcher = core.IdentityMatcher
+type (
+	ConsumerIdentity = core.ConsumerIdentity
+	IdentityMatcher  = core.IdentityMatcher
+)
 
 var DefaultContext = core.DefaultContext
 
@@ -78,6 +84,8 @@ func ErrUnknownRepository(kind, name string) error {
 	return core.ErrUnknownRepository(kind, name)
 }
 
-var CompleteMatch = core.CompleteMatch
-var NoMatch = core.NoMatch
-var PartialMatch = core.PartialMatch
+var (
+	CompleteMatch = core.CompleteMatch
+	NoMatch       = core.NoMatch
+	PartialMatch  = core.PartialMatch
+)

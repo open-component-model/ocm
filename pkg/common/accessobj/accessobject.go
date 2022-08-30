@@ -52,7 +52,6 @@ type AccessObject struct {
 
 func NewAccessObject(info *AccessObjectInfo, acc AccessMode, fs vfs.FileSystem, setup Setup, closer Closer, mode vfs.FileMode) (*AccessObject, error) {
 	defaulted, fs, err := InternalRepresentationFilesystem(acc, fs, info.ElementDirectoryName, mode)
-
 	if err != nil {
 		return nil, err
 	}

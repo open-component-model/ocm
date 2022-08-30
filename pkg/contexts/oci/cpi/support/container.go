@@ -17,13 +17,12 @@ package support
 import (
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 )
 
 // ArtefactSetContainer is the interface used by subsequent access objects
-// to access the base implementation
+// to access the base implementation.
 type ArtefactSetContainer interface {
 	IsReadOnly() bool
 	IsClosed() bool
@@ -40,7 +39,7 @@ type ArtefactSetContainer interface {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// ArtefactSetContainerInt is the implementation interface for a provider
+// ArtefactSetContainerInt is the implementation interface for a provider.
 type ArtefactSetContainerInt ArtefactSetContainer
 
 type artefactSetContainerImpl struct {

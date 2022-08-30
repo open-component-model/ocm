@@ -20,9 +20,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/pkg/out"
-
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
+	"github.com/open-component-model/ocm/pkg/out"
 )
 
 func TweakCommand(cmd *cobra.Command, ctx out.Context) {

@@ -127,7 +127,7 @@ func (t *repositoryTypeScheme) CreateRepositorySpec(obj runtime.TypedObject) (Re
 	return nil, fmt.Errorf("invalid object type %T for repository specs", obj)
 }
 
-// DefaultRepositoryTypeScheme contains all globally known access serializer
+// DefaultRepositoryTypeScheme contains all globally known access serializer.
 var DefaultRepositoryTypeScheme = NewRepositoryTypeScheme(nil)
 
 func RegisterRepositoryType(name string, atype RepositoryType) {
@@ -153,7 +153,7 @@ func (r *UnknownRepositorySpec) UniformRepositorySpec() *UniformRepositorySpec {
 }
 
 func (r *UnknownRepositorySpec) Repository(Context, credentials.Credentials) (Repository, error) {
-	return nil, errors.ErrUnknown("respository type", r.GetType())
+	return nil, errors.ErrUnknown("repository type", r.GetType())
 }
 
 ////////////////////////////////////////////////////////////////////////////////

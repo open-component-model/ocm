@@ -99,17 +99,19 @@ func (p dockerPusher) push(ctx context.Context, desc ocispec.Descriptor, src res
 
 	log.G(ctx).WithField("url", req.String()).Debugf("checking and pushing to")
 
-	resp, err := req.doWithRetries(ctx, nil)
+	headResp, err := req.doWithRetries(ctx, nil)
 	if err != nil {
 		if !errors.Is(err, ErrInvalidAuthorization) {
 			return nil, err
 		}
 		log.G(ctx).WithError(err).Debugf("Unable to check existence, continuing with push")
 	} else {
-		if resp.StatusCode == http.StatusOK {
+		defer headResp.Body.Close()
+
+		if headResp.StatusCode == http.StatusOK {
 			var exists bool
 			if isManifest && existCheck[1] != desc.Digest.String() {
-				dgstHeader := digest.Digest(resp.Header.Get("Docker-Content-Digest"))
+				dgstHeader := digest.Digest(headResp.Header.Get("Docker-Content-Digest"))
 				if dgstHeader == desc.Digest {
 					exists = true
 				}
@@ -127,16 +129,22 @@ func (p dockerPusher) push(ctx context.Context, desc ocispec.Descriptor, src res
 						// TODO: Set updated time?
 					},
 				})
-				resp.Body.Close()
+
 				return nil, errors.Wrapf(errdefs.ErrAlreadyExists, "content %v on remote", desc.Digest)
 			}
-		} else if resp.StatusCode != http.StatusNotFound {
-			err := remoteserrors.NewUnexpectedStatusErr(resp)
-			log.G(ctx).WithField("resp", resp).WithField("body", string(err.(remoteserrors.ErrUnexpectedStatus).Body)).Debug("unexpected response")
-			resp.Body.Close()
+		} else if headResp.StatusCode != http.StatusNotFound {
+			err := remoteserrors.NewUnexpectedStatusErr(headResp)
+
+			var statusError remoteserrors.ErrUnexpectedStatus
+			if errors.As(err, statusError) {
+				log.G(ctx).
+					WithField("resp", headResp).
+					WithField("body", string(statusError.Body)).
+					Debug("unexpected response")
+			}
+
 			return nil, err
 		}
-		resp.Body.Close()
 	}
 
 	if isManifest {
@@ -193,7 +201,15 @@ func (p dockerPusher) push(ctx context.Context, desc ocispec.Descriptor, src res
 			return nil, errors.Wrapf(errdefs.ErrAlreadyExists, "content %v on remote", desc.Digest)
 		default:
 			err := remoteserrors.NewUnexpectedStatusErr(resp)
-			log.G(ctx).WithField("resp", resp).WithField("body", string(err.(remoteserrors.ErrUnexpectedStatus).Body)).Debug("unexpected response")
+
+			var statusError remoteserrors.ErrUnexpectedStatus
+			if errors.As(err, statusError) {
+				log.G(ctx).
+					WithField("resp", resp).
+					WithField("body", string(statusError.Body)).
+					Debug("unexpected response")
+			}
+
 			return nil, err
 		}
 
@@ -218,7 +234,6 @@ func (p dockerPusher) push(ctx context.Context, desc ocispec.Descriptor, src res
 			}
 
 			if lurl.Host != lhost.Host || lhost.Scheme != lurl.Scheme {
-
 				lhost.Scheme = lurl.Scheme
 				lhost.Host = lurl.Host
 				log.G(ctx).WithField("host", lhost.Host).WithField("scheme", lhost.Scheme).Debug("upload changed destination")
@@ -272,7 +287,14 @@ func (p dockerPusher) push(ctx context.Context, desc ocispec.Descriptor, src res
 		case http.StatusOK, http.StatusCreated, http.StatusNoContent:
 		default:
 			err := remoteserrors.NewUnexpectedStatusErr(resp)
-			log.G(ctx).WithField("resp", resp).WithField("body", string(err.(remoteserrors.ErrUnexpectedStatus).Body)).Debug("unexpected response")
+
+			var statusError remoteserrors.ErrUnexpectedStatus
+			if errors.As(err, statusError) {
+				log.G(ctx).
+					WithField("resp", resp).
+					WithField("body", string(statusError.Body)).
+					Debug("unexpected response")
+			}
 		}
 		respC <- response{Response: resp}
 	}()
@@ -289,7 +311,6 @@ func getManifestPath(object string, dgst digest.Digest) []string {
 			// strip @<digest> for registry path to make tag
 			object = object[:i]
 		}
-
 	}
 
 	if object == "" {
@@ -322,7 +343,6 @@ func (pw *pushRequest) Status() (content.Status, error) {
 		return content.Status{}, err
 	}
 	return status.Status, nil
-
 }
 
 func (pw *pushRequest) Commit(ctx context.Context, size int64, expected digest.Digest, opts ...content.Opt) error {

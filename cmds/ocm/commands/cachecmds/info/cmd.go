@@ -20,17 +20,14 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
+	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/pkg/out"
-
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/attrs/cacheattr"
 	"github.com/open-component-model/ocm/pkg/errors"
-
-	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds/names"
+	"github.com/open-component-model/ocm/pkg/out"
 )
 
 var (

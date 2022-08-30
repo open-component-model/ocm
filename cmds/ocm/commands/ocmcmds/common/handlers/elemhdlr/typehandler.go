@@ -39,8 +39,10 @@ type Object struct {
 	Element compdesc.ElementMetaAccessor
 }
 
-var _ common.HistorySource = (*Object)(nil)
-var _ tree.Object = (*Object)(nil)
+var (
+	_ common.HistorySource = (*Object)(nil)
+	_ tree.Object          = (*Object)(nil)
+)
 
 type Manifest struct {
 	History common.History               `json:"context"`
@@ -57,6 +59,7 @@ func (o *Object) AsManifest() interface{} {
 func (o *Object) GetHistory() common.History {
 	return o.History
 }
+
 func (o *Object) IsNode() *common.NameVersion {
 	return o.Node
 }

@@ -62,10 +62,12 @@ func ValidateRelation(fldPath *field.Path, relation ResourceRelation) *field.Err
 	return nil
 }
 
-const GROUP = "ocm.gardener.cloud"
-const KIND = "ComponentVersion"
+const (
+	GROUP = "ocm.gardener.cloud"
+	KIND  = "ComponentVersion"
+)
 
-// TypeMeta describes the schema of a descriptor
+// TypeMeta describes the schema of a descriptor.
 type TypeMeta struct {
 	APIVersion string `json:"apiVersion"`
 	Kind       string `json:"kind"`
@@ -125,7 +127,7 @@ func (o *ObjectMeta) Copy() *ObjectMeta {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// Provider describes the provider information of a component version
+// Provider describes the provider information of a component version.
 type Provider struct {
 	Name ProviderName `json:"name"`
 	// Labels describe additional properties of provider
@@ -152,7 +154,7 @@ func (o *Provider) SetLabels(labels []Label) {
 	o.Labels = labels
 }
 
-// Copy copies the provider info
+// Copy copies the provider info.
 func (o *Provider) Copy() *Provider {
 	return &Provider{
 		Name:   o.Name,

@@ -73,7 +73,7 @@ func AssureTargetRepository(session Session, ctx Context, targetref string, opts
 		if ref.Type == "" {
 			return nil, fmt.Errorf("ctf format type required to create ctf")
 		}
-		target, err = ctf.Create(ctx, accessobj.ACC_CREATE, ref.Info, 0770, accessio.PathFileSystem(accessio.FileSystem(fs)))
+		target, err = ctf.Create(ctx, accessobj.ACC_CREATE, ref.Info, 0o770, accessio.PathFileSystem(accessio.FileSystem(fs)))
 		if err != nil {
 			return nil, err
 		}

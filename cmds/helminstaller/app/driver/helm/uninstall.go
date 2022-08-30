@@ -15,10 +15,10 @@
 package helm
 
 import (
-	"fmt"
 	"time"
 
 	helmclient "github.com/mittwald/go-helm-client"
+	"github.com/sirupsen/logrus"
 )
 
 func Uninstall(path string, release string, namespace string, createNamespace bool, values []byte, kubeconfig []byte) error {
@@ -29,9 +29,7 @@ func Uninstall(path string, release string, namespace string, createNamespace bo
 			RepositoryConfig: "/tmp/.helmrepo",
 			Debug:            true,
 			Linting:          true,
-			DebugLog: func(format string, v ...interface{}) {
-				fmt.Printf(format+"\n", v...)
-			},
+			DebugLog:         logrus.Debugf,
 		},
 		KubeContext: "",
 		KubeConfig:  kubeconfig,

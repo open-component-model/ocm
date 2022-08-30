@@ -47,7 +47,6 @@ func (this *AttrProcessingOutput) Out() error {
 		var set *AttributeSet
 		if this.mapper != nil {
 			set = this.mapper(elem)
-
 		} else {
 			set, ok = i.Next().(*AttributeSet)
 			if !ok {

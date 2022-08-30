@@ -49,7 +49,7 @@ func (r *Repository) Get() *ArtefactSet {
 }
 
 func (r *Repository) Open() (*ArtefactSet, error) {
-	a, err := Open(r.spec.AccessMode, r.spec.FilePath, 0700, r.spec.Options, accessio.PathFileSystem(r.spec.PathFileSystem))
+	a, err := Open(r.spec.AccessMode, r.spec.FilePath, 0o700, r.spec.Options, accessio.PathFileSystem(r.spec.PathFileSystem))
 	if err != nil {
 		return nil, err
 	}

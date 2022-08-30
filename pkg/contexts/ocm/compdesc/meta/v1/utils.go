@@ -27,7 +27,7 @@ func IsIdentity(s string) bool {
 	return identityKeyValidationRegexp.Match([]byte(s))
 }
 
-// IsAscii checks whether a string only contains ascii characters
+// IsAscii checks whether a string only contains ascii characters.
 func IsASCII(s string) bool {
 	for i := 0; i < len(s); i++ {
 		if s[i] > unicode.MaxASCII {

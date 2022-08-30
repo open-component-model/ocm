@@ -24,8 +24,10 @@ type Handler interface {
 	ParseConfig(io.Reader) ([]Credential, error)
 }
 
-var handlers = map[ConfigType]Handler{}
-var lock sync.RWMutex
+var (
+	handlers = map[ConfigType]Handler{}
+	lock     sync.RWMutex
+)
 
 func RegisterHandler(h Handler) {
 	lock.Lock()

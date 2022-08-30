@@ -64,7 +64,6 @@ func NewRelationResourceSelector(relation v1.ResourceRelation) ResourceSelectorF
 	return func(obj Resource) (bool, error) {
 		return obj.Relation == relation, nil
 	}
-
 }
 
 // NewNameSelector creates a new selector that matches a resource name.

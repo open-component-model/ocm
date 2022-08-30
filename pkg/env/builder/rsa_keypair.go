@@ -19,7 +19,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
-// TODO: switch to context local setting
+// TODO: switch to context local setting.
 func (b *Builder) RSAKeyPair(name string) {
 	priv, pub, err := rsa.Handler{}.CreateKeyPair()
 	b.failOn(err)

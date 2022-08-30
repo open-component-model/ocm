@@ -43,7 +43,7 @@ type RepositorySpec struct {
 	PropagateConsumerIdentity   bool                      `json:"propagateConsumerIdentity"`
 }
 
-// NewRepositorySpec creates a new memory RepositorySpec
+// NewRepositorySpec creates a new memory RepositorySpec.
 func NewRepositorySpec(url string, configType gardenercfgcpi.ConfigType, cipher Cipher, propagateConsumerIdentity bool) *RepositorySpec {
 	return &RepositorySpec{
 		ObjectVersionedType:       runtime.NewVersionedObjectType(RepositoryType),

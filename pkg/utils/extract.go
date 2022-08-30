@@ -16,6 +16,7 @@ package utils
 
 import (
 	"archive/tar"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -29,7 +30,7 @@ func ExtractTarToFs(fs vfs.FileSystem, in io.Reader) error {
 	for {
 		header, err := tr.Next()
 		if err != nil {
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				return nil
 			}
 			return err

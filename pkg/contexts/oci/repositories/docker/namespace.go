@@ -38,8 +38,10 @@ type NamespaceContainer struct {
 	cache     accessio.BlobCache
 }
 
-var _ cpi.ArtefactSetContainer = (*NamespaceContainer)(nil)
-var _ cpi.NamespaceAccess = (*Namespace)(nil)
+var (
+	_ cpi.ArtefactSetContainer = (*NamespaceContainer)(nil)
+	_ cpi.NamespaceAccess      = (*Namespace)(nil)
+)
 
 func NewNamespace(repo *Repository, name string) (*Namespace, error) {
 	cache, err := accessio.NewCascadedBlobCache(nil)
@@ -214,7 +216,6 @@ func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, tags ...string) 
 }
 
 func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error {
-
 	if ok, _ := artdesc.IsDigest(digest.String()); ok {
 		return errors.ErrNotSupported("image access by digest")
 	}
@@ -222,7 +223,7 @@ func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	src := n.namespace + ":" + digest.String()
 
 	if pattern.MatchString(digest.String()) {
-		// this definately no digest, but the library expects it this way
+		// this definitely no digest, but the library expects it this way
 		src = digest.String()
 	}
 

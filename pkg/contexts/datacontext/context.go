@@ -42,7 +42,7 @@ type Context interface {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// CONTEXT_TYPE is the global type for an attribute context
+// CONTEXT_TYPE is the global type for an attribute context.
 const CONTEXT_TYPE = "attributes.context.gardener.cloud"
 
 type AttributesContext interface {
@@ -51,7 +51,7 @@ type AttributesContext interface {
 	BindTo(ctx context.Context) context.Context
 }
 
-// AttributeFactory is used to atomicly create a new attribute for a context
+// AttributeFactory is used to atomicly create a new attribute for a context.
 type AttributeFactory func(Context) interface{}
 
 type Attributes interface {
@@ -63,16 +63,16 @@ type Attributes interface {
 
 var key = reflect.TypeOf(_context{})
 
-// DefaultContext is the default context initialized by init functions
+// DefaultContext is the default context initialized by init functions.
 var DefaultContext = New(nil)
 
 // ForContext returns the Context to use for context.Context.
-// This is eiter an explicit context or the default context.
+// This is either an explicit context or the default context.
 func ForContext(ctx context.Context) AttributesContext {
 	return ForContextByKey(ctx, key, DefaultContext).(AttributesContext)
 }
 
-// WithContext create a new Context bound to a context.Context
+// WithContext create a new Context bound to a context.Context.
 func WithContext(ctx context.Context, parentAttrs Attributes) (Context, context.Context) {
 	c := New(parentAttrs)
 	return c, c.BindTo(ctx)
@@ -98,7 +98,7 @@ type _context struct {
 }
 
 // New provides a default base implementation for a data context.
-// It can also be used as root attribute context
+// It can also be used as root attribute context.
 func New(parentAttrs Attributes) AttributesContext {
 	c := &_context{ctxtype: CONTEXT_TYPE, key: key}
 	c.effective = c
@@ -107,7 +107,7 @@ func New(parentAttrs Attributes) AttributesContext {
 }
 
 // NewContextBase creates a context base implementation supporting
-// context attributes and the binding to a context.Context
+// context attributes and the binding to a context.Context.
 func NewContextBase(eff Context, typ string, key interface{}, parentAttrs Attributes) Context {
 	updater, _ := eff.(Updater)
 	c := &_context{ctxtype: typ, key: key, effective: eff}
@@ -119,7 +119,7 @@ func (c *_context) GetType() string {
 	return c.ctxtype
 }
 
-// BindTo make the Context reachable via the resulting context.Context
+// BindTo make the Context reachable via the resulting context.Context.
 func (c *_context) BindTo(ctx context.Context) context.Context {
 	return context.WithValue(ctx, c.key, c.effective)
 }

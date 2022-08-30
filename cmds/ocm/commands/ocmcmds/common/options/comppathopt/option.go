@@ -41,7 +41,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.BoolVarP(&o.Active, "path", "p", false, "follow component references")
 }
 
-// Complete consumes path identities if option is activated
+// Complete consumes path identities if option is activated.
 func (o *Option) Complete(args []string) ([]string, error) {
 	var err error
 	rest := args
@@ -52,7 +52,6 @@ func (o *Option) Complete(args []string) ([]string, error) {
 }
 
 func (o *Option) Usage() string {
-
 	s := `
 The <code>--path</code> options accets a sequence of identities,
 that will be used to follow component references a the specified

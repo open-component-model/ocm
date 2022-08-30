@@ -22,9 +22,8 @@ import (
 	"github.com/modern-go/reflect2"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -150,7 +149,7 @@ func (t *inputTypeScheme) CreateInputSpec(obj runtime.TypedObject) (InputSpec, e
 	return nil, fmt.Errorf("invalid object type %T for repository specs", obj)
 }
 
-// DefaultInputTypeScheme contains all globally known access serializer
+// DefaultInputTypeScheme contains all globally known access serializer.
 var DefaultInputTypeScheme = NewInputTypeScheme(nil)
 
 func RegisterInputType(name string, atype InputType) {

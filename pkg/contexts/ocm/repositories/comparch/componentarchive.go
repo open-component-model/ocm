@@ -30,7 +30,7 @@ import (
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// ComponentArchive is the go representation for a component artefact
+// ComponentArchive is the go representation for a component artefact.
 type ComponentArchive struct {
 	base *accessobj.FileSystemBlobAccess
 	comp *ComponentAccess
@@ -39,7 +39,7 @@ type ComponentArchive struct {
 
 var _ support.ComponentVersionContainer = (*ComponentArchive)(nil)
 
-// New returns a new representation based element
+// New returns a new representation based element.
 func New(ctx cpi.Context, acc accessobj.AccessMode, fs vfs.FileSystem, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode) (*ComponentArchive, error) {
 	obj, err := accessobj.NewAccessObject(accessObjectInfo, acc, fs, setup, closer, mode)
 	return _Wrap(ctx, obj, NewRepositorySpec(acc, ""), err)
@@ -102,11 +102,11 @@ func (c *ComponentArchive) SetVersion(v string) {
 
 func (c *ComponentArchive) AccessMethod(a cpi.AccessSpec) (cpi.AccessMethod, error) {
 	if a.GetKind() == localblob.Type || a.GetKind() == localfsblob.Type {
-		a, err := c.GetContext().AccessSpecForSpec(a)
+		accessSpec, err := c.GetContext().AccessSpecForSpec(a)
 		if err != nil {
 			return nil, err
 		}
-		return newLocalFilesystemBlobAccessMethod(a.(*localblob.AccessSpec), c)
+		return newLocalFilesystemBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c)
 	}
 	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "component archive")
 }

@@ -22,21 +22,18 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
-	"github.com/open-component-model/ocm/pkg/errors"
-
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
-	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/pkg/out"
-
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/handlers/artefacthdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/out"
 )
 
 var (
@@ -88,6 +85,7 @@ $ ocm oci artefact transfer /tmp/ctf gcr.io/my-project
 `,
 	}
 }
+
 func (o *Command) AddFlags(flags *pflag.FlagSet) {
 	o.BaseCommand.AddFlags(flags)
 	flags.BoolVarP(&o.TransferRepo, "repo-name", "R", false, "transfer repository name")

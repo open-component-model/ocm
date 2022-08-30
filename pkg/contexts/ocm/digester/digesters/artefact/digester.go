@@ -81,7 +81,7 @@ func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferre
 		for {
 			header, err := tr.Next()
 			if err != nil {
-				if err == io.EOF {
+				if errors.Is(err, io.EOF) {
 					err = fmt.Errorf("descriptor not found in archive")
 					return nil, errors.ErrInvalidWrap(err, "artefact archive")
 				}

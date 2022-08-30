@@ -131,7 +131,7 @@ func (a *FileSystemBlobAccess) AddBlob(blob accessio.BlobAccess) error {
 	}
 
 	defer r.Close()
-	w, err := a.base.GetFileSystem().OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, a.base.GetMode()&0666)
+	w, err := a.base.GetFileSystem().OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, a.base.GetMode()&0o666)
 	if err != nil {
 		return fmt.Errorf("unable to open file '%s': %w", path, err)
 	}

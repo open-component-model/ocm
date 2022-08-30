@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	// The default API version to be used in case none is explicitly specified
+	// The default API version to be used in case none is explicitly specified.
 	defaultAPIVersion = "1.22"
 )
 

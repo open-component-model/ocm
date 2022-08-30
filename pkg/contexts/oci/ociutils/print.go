@@ -16,6 +16,7 @@ package ociutils
 
 import (
 	"archive/tar"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -101,7 +102,7 @@ func PrintLayer(blob accessio.BlobAccess) string {
 	for {
 		header, err := tr.Next()
 		if err != nil {
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				return s
 			}
 			if s == "" {

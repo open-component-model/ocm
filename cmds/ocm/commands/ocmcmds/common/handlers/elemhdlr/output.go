@@ -17,6 +17,8 @@ package elemhdlr
 import (
 	"encoding/json"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -46,7 +48,12 @@ func MapAccessOutput(e compdesc.AccessSpec) []string {
 			a = "invalid: " + err.Error()
 		} else {
 			delete(un, runtime.ATTR_TYPE)
-			data, _ = json.Marshal(un)
+
+			data, err = json.Marshal(un)
+			if err != nil {
+				logrus.Error(err)
+			}
+
 			a = string(data)
 		}
 	}

@@ -29,8 +29,10 @@ type Options struct {
 	fs     vfs.FileSystem
 }
 
-var _ ScriptOption = (*Options)(nil)
-var _ ScriptFilesystemOption = (*Options)(nil)
+var (
+	_ ScriptOption           = (*Options)(nil)
+	_ ScriptFilesystemOption = (*Options)(nil)
+)
 
 func (o *Options) SetScript(data []byte) {
 	o.script = data

@@ -29,7 +29,7 @@ const (
 )
 
 // UniformRepositorySpec is is generic specification of the repository
-// for handling as part of standard references
+// for handling as part of standard references.
 type UniformRepositorySpec struct {
 	// Type
 	Type string `json:"type,omitempty"`
@@ -47,7 +47,7 @@ type UniformRepositorySpec struct {
 }
 
 // CredHost fallback to legacy docker domain if applicable
-// this is how containerd translates the old domain for DockerHub to the new one, taken from containerd/reference/docker/reference.go:674
+// this is how containerd translates the old domain for DockerHub to the new one, taken from containerd/reference/docker/reference.go:674.
 func (r *UniformRepositorySpec) CredHost() string {
 	if r.Host == dockerHubDomain {
 		return dockerHubLegacyDomain
@@ -62,7 +62,6 @@ func (u *UniformRepositorySpec) String() string {
 	}
 	if u.Info != "" {
 		return fmt.Sprintf("%s%s", t, u.Info)
-
 	} else {
 		s := u.SubPath
 		if s != "" {

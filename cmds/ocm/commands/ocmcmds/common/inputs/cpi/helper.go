@@ -20,9 +20,8 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -79,7 +78,7 @@ func (s *MediaFileSpec) Compress() bool {
 	return *s.CompressWithGzip
 }
 
-// SetMediaTypeIfNotDefined sets the media type of the input blob if its not defined
+// SetMediaTypeIfNotDefined sets the media type of the input blob if its not defined.
 func (s *MediaFileSpec) SetMediaTypeIfNotDefined(mediaType string) {
 	if len(s.MediaType) != 0 {
 		return

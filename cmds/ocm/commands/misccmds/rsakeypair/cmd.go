@@ -26,19 +26,15 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
-
-	"github.com/open-component-model/ocm/pkg/signing"
-
 	"github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
+	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
-
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 )
 
 var (
@@ -211,7 +207,6 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
-
 	priv, pub, err := rsa.Handler{}.CreateKeyPair()
 	if err != nil {
 		return err
@@ -238,7 +233,7 @@ func (o *Command) Run() error {
 }
 
 func (o *Command) WriteKey(key interface{}, path string) error {
-	fd, err := o.Context.FileSystem().OpenFile(path, vfs.O_CREATE|vfs.O_WRONLY, 0600)
+	fd, err := o.Context.FileSystem().OpenFile(path, vfs.O_CREATE|vfs.O_WRONLY, 0o600)
 	if err != nil {
 		return err
 	}
@@ -258,5 +253,5 @@ func (o *Command) WriteKey(key interface{}, path string) error {
 	if err != nil {
 		return err
 	}
-	return o.FileSystem().Chmod(path, 0400)
+	return o.FileSystem().Chmod(path, 0o400)
 }

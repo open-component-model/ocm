@@ -17,15 +17,20 @@ package common
 import (
 	"encoding/json"
 
+	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/sets"
 )
 
 // Properties describes a set of name/value pairs.
 type Properties map[string]string
 
-// Digest returns the object digest of an Property set
+// Digest returns the object digest of an Property set.
 func (p Properties) Digest() []byte {
-	data, _ := json.Marshal(p)
+	data, err := json.Marshal(p)
+	if err != nil {
+		logrus.Error(err)
+	}
+
 	return data
 }
 
@@ -35,7 +40,7 @@ func (p Properties) SetNonEmptyValue(name, value string) {
 	}
 }
 
-// Equals compares two identities
+// Equals compares two identities.
 func (p Properties) Equals(o Properties) bool {
 	if len(p) != len(o) {
 		return false
@@ -59,12 +64,12 @@ func (p Properties) Match(obj map[string]string) (bool, error) {
 	return true, nil
 }
 
-// Names returns the set of property names
+// Names returns the set of property names.
 func (c Properties) Names() sets.String {
 	return sets.StringKeySet(c)
 }
 
-// Copy copies identity
+// Copy copies identity.
 func (p Properties) Copy() Properties {
 	if p == nil {
 		return nil

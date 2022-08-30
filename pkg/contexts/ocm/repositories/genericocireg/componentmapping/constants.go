@@ -19,7 +19,7 @@ import (
 )
 
 // ComponentDescriptorFileName is the filename of the component descriptor in a tar file used to store
-// the component descriptor in an OCI image layer
+// the component descriptor in an OCI image layer.
 const ComponentDescriptorFileName = compdesc.ComponentDescriptorFileName
 
 // ComponentDescriptorTarMimeType is the old mimetype for component-descriptor-blobs
@@ -47,8 +47,8 @@ var ComponentDescriptorMimeType = []string{
 // ComponentDescriptorConfigMimeType is the mimetype for component-descriptor-oci-cfg-blobs.
 const ComponentDescriptorConfigMimeType = "application/vnd.gardener.cloud.cnudie.component.config.v1+json"
 
-// ComponentDescriptorLegacyConfigMimeType is the mimetype for the legacy component-descriptor-oci-cfg-blobs
+// ComponentDescriptorLegacyConfigMimeType is the mimetype for the legacy component-descriptor-oci-cfg-blobs.
 const ComponentDescriptorLegacyConfigMimeType = "application/vnd.oci.gardener.cloud.cnudie.component-descriptor-metadata.config.v2+json"
 
-// ComponentDescriptorNamespace is the subpath for all component descriptor artifacts in an oci registry.‚
+// ComponentDescriptorNamespace is the subpath for all component descriptor artifacts in an oci registry.‚.
 const ComponentDescriptorNamespace = "component-descriptors"

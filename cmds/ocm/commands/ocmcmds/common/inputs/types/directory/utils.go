@@ -145,10 +145,10 @@ func addFileToTar(fs vfs.FileSystem, tw *tar.Writer, path string, realPath strin
 		return nil
 	case header.Typeflag == tar.TypeSymlink:
 		if !opts.FollowSymlinks {
-			//log.Info(fmt.Sprintf("symlink found in %q but symlinks are not followed", path))
+			// log.Info(fmt.Sprintf("symlink found in %q but symlinks are not followed", path))
 			return nil
 		}
-		realPath, err := vfs.EvalSymlinks(fs, realPath)
+		realPath, err = vfs.EvalSymlinks(fs, realPath)
 		if err != nil {
 			return fmt.Errorf("unable to follow symlink %s: %w", realPath, err)
 		}

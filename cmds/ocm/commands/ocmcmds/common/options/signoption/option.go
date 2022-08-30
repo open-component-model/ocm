@@ -22,10 +22,9 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/normalizations/jsonv1"
@@ -225,7 +224,6 @@ The following hash modes are supported with option <code>--hash</code>:
 ` + utils.FormatList(sha256.Algorithm, signing.DefaultRegistry().HasherNames()...)
 
 		signing.DefaultRegistry().HasherNames()
-
 	}
 	return s
 }

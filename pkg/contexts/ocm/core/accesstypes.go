@@ -54,7 +54,7 @@ type HintProvider interface {
 // AccessMethod described the access to a dedicate resource
 // It can allocate external resources, which should be released
 // with the Close() call.
-// Resources SHOULD onyl be allocated, if the content is accessed
+// Resources SHOULD only be allocated, if the content is accessed
 // via the DataAccess interface to avoid unnecessary effort
 // if the method object is just used to access meta data.
 type AccessMethod interface {
@@ -121,7 +121,7 @@ func (t *accessTypeScheme) CreateAccessSpec(obj runtime.TypedObject) (AccessSpec
 	return nil, errors.ErrInvalid("object type", fmt.Sprintf("%T", obj), "access specs")
 }
 
-// DefaultAccessTypeScheme contains all globally known access serializer
+// DefaultAccessTypeScheme contains all globally known access serializer.
 var DefaultAccessTypeScheme = NewAccessTypeScheme()
 
 func GetAccessType(name string) AccessType {

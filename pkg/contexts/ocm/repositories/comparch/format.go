@@ -64,8 +64,10 @@ var (
 
 ////////////////////////////////////////////////////////////////////////////////
 
-var fileFormats = map[accessio.FileFormat]*formatHandler{}
-var lock sync.RWMutex
+var (
+	fileFormats = map[accessio.FileFormat]*formatHandler{}
+	lock        sync.RWMutex
+)
 
 func RegisterFormat(f accessobj.FormatHandler) *formatHandler {
 	lock.Lock()
@@ -123,7 +125,7 @@ func (h *formatHandler) Create(ctx cpi.Context, path string, opts accessio.Optio
 	return _Wrap(ctx, obj, NewRepositorySpec(accessobj.ACC_CREATE, path, opts), err)
 }
 
-// WriteToFilesystem writes the current object to a filesystem
+// WriteToFilesystem writes the current object to a filesystem.
 func (h *formatHandler) Write(obj *Object, path string, opts accessio.Options, mode vfs.FileMode) error {
 	return h.FormatHandler.Write(obj.base.Access(), path, opts, mode)
 }

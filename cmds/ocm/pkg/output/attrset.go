@@ -31,7 +31,7 @@ func NewAttributeSet() *AttributeSet {
 }
 
 func (this *AttributeSet) ResetAttributes() {
-	this.attrs = [][]string{[]string{}}
+	this.attrs = [][]string{{}}
 }
 
 func (this *AttributeSet) Attribute(name, value string) {

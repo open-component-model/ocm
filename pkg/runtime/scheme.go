@@ -24,13 +24,13 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-// TypeGetter is the interface to be implemented for extracting a type
+// TypeGetter is the interface to be implemented for extracting a type.
 type TypeGetter interface {
 	// GetType returns the type of the access object.
 	GetType() string
 }
 
-// TypeSetter is the interface to be implemented for extracting a type
+// TypeSetter is the interface to be implemented for extracting a type.
 type TypeSetter interface {
 	// SetType sets the type of an abstract element
 	SetType(typ string)
@@ -50,7 +50,7 @@ type TypedObjectDecoder interface {
 }
 
 // TypedObjectEncoder is able to provide a versioned representation of
-// of an effective TypedObject
+// of an effective TypedObject.
 type TypedObjectEncoder interface {
 	Encode(TypedObject, Marshaler) ([]byte, error)
 }
@@ -150,7 +150,7 @@ func (d *ConvertingDecoder) CreateData() interface{} {
 // KnownTypes is a set of known type names mapped to appropriate object decoders.
 type KnownTypes map[string]TypedObjectDecoder
 
-// Copy provides a copy of the actually known types
+// Copy provides a copy of the actually known types.
 func (t KnownTypes) Copy() KnownTypes {
 	n := KnownTypes{}
 	for k, v := range t {
@@ -159,7 +159,7 @@ func (t KnownTypes) Copy() KnownTypes {
 	return n
 }
 
-// TypeNames return a sorted list of known type names
+// TypeNames return a sorted list of known type names.
 func (t KnownTypes) TypeNames() []string {
 	types := make([]string, 0, len(t))
 	for t := range t {
@@ -210,15 +210,15 @@ func MustNewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, accept
 
 func NewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder) (Scheme, error) {
 	if protoIfce == nil {
-		return nil, fmt.Errorf("object interface must be given by pointer to interace (is nil)")
+		return nil, fmt.Errorf("object interface must be given by pointer to interacted (is nil)")
 	}
 	it := reflect.TypeOf(protoIfce)
 	if it.Kind() != reflect.Ptr {
-		return nil, fmt.Errorf("object interface %T: must be given by pointer to interace (is not pointer)", protoIfce)
+		return nil, fmt.Errorf("object interface %T: must be given by pointer to interacted (is not pointer)", protoIfce)
 	}
 	it = it.Elem()
 	if it.Kind() != reflect.Interface {
-		return nil, fmt.Errorf("object interface %T: must be given by pointer to interace (does not point to interface)", protoIfce)
+		return nil, fmt.Errorf("object interface %T: must be given by pointer to interacted (does not point to interface)", protoIfce)
 	}
 	if !it.Implements(typeTypedObject) {
 		return nil, fmt.Errorf("object interface %T: must implement TypedObject", protoIfce)
@@ -258,7 +258,7 @@ func (d *defaultScheme) KnownTypes() KnownTypes {
 	return d.types.Copy()
 }
 
-// KnownTypeNames return a sorted list of known type names
+// KnownTypeNames return a sorted list of known type names.
 func (d *defaultScheme) KnownTypeNames() []string {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
@@ -402,9 +402,9 @@ func (d *defaultScheme) Convert(o TypedObject) (TypedObject, error) {
 	decoder := d.GetDecoder(o.GetType())
 	if decoder == nil {
 		if d.defaultdecoder != nil {
-			o, err := d.defaultdecoder.Decode(data, DefaultJSONEncoding)
+			object, err := d.defaultdecoder.Decode(data, DefaultJSONEncoding)
 			if err == nil {
-				return o, nil
+				return object, nil
 			}
 			if !errors.IsErrUnknownKind(err, errors.KIND_OBJECTTYPE) {
 				return nil, err

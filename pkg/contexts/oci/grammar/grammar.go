@@ -35,20 +35,20 @@ const (
 )
 
 var (
-	// TypeRegexp describes a type name for a repository
+	// TypeRegexp describes a type name for a repository.
 	TypeRegexp = Optional(Identifier)
 
-	// CapturedSchemeRegexp matches an optional scheme
+	// CapturedSchemeRegexp matches an optional scheme.
 	CapturedSchemeRegexp = Sequence(Capture(Match(`[a-z]+`)), Match("://"))
 
-	// AnchoredRegistryRegexp parses a uniform respository spec
+	// AnchoredRegistryRegexp parses a uniform repository spec.
 	AnchoredRegistryRegexp = Anchored(
 		Optional(Capture(TypeRegexp), Literal("::")),
 		Optional(CapturedSchemeRegexp),
 		Capture(DomainPortRegexp),
 	)
 
-	// AnchoredGenericRegistryRegexp describes a CTF reference
+	// AnchoredGenericRegistryRegexp describes a CTF reference.
 	AnchoredGenericRegistryRegexp = Anchored(
 		Optional(Capture(TypeRegexp), Literal("::")),
 		Capture(Match(".*")),
@@ -117,7 +117,7 @@ var (
 		Capture(RepositoryRegexp))
 
 	// CapturedArtefactVersionRegexp is used to parse an artefact version sped
-	// consisting of a repository part and an optional version part
+	// consisting of a repository part and an optional version part.
 	CapturedArtefactVersionRegexp = Sequence(
 		Capture(RepositoryRegexp),
 		CapturedVersionRegexp)
@@ -125,12 +125,12 @@ var (
 	// AnchoredArtefactVersionRegexp is used to parse artefact versions.
 	AnchoredArtefactVersionRegexp = Anchored(CapturedArtefactVersionRegexp)
 
-	// CapturedVersionRegexp described the version part of a reference
+	// CapturedVersionRegexp described the version part of a reference.
 	CapturedVersionRegexp = Sequence(
 		Optional(Literal(TagSeparator), Capture(TagRegexp)),
 		Optional(Literal(DigestSeparator), Capture(DigestRegexp)))
 
-	// ErrorCheckRegexp matches even wrong tags and/or digests
+	// ErrorCheckRegexp matches even wrong tags and/or digests.
 	ErrorCheckRegexp = Anchored(
 		Optional(Capture(Match(".*?")), Literal("::")),
 		Capture(Match(".*?")),
@@ -138,7 +138,7 @@ var (
 		Optional(Literal(DigestSeparator), Capture(Match(".*?"))))
 
 	////////////////////////////////////////////////////////////////////////////
-	// now the various full flegded artefact flavors
+	// now the various full flegded artefact flavors.
 
 	// ReferenceRegexp is the full supported format of a reference. The regexp
 	// is anchored and has capturing groups for name, tag, and digest
@@ -147,12 +147,12 @@ var (
 		Optional(Optional(CapturedSchemeRegexp), Capture(DomainPortRegexp), RepositorySeparatorRegexp),
 		CapturedArtefactVersionRegexp)
 
-	// DockerLibraryReferenceRegexp is a shortend docker library reference
+	// DockerLibraryReferenceRegexp is a shortened docker library reference.
 	DockerLibraryReferenceRegexp = Anchored(
 		Capture(NameComponentRegexp),
 		CapturedVersionRegexp)
 
-	// DockerReferenceRegexp is a shortend docker reference
+	// DockerReferenceRegexp is a shortened docker reference.
 	DockerReferenceRegexp = Anchored(
 		Capture(NameComponentRegexp, RepositorySeparatorRegexp, NameComponentRegexp),
 		CapturedVersionRegexp)
@@ -176,7 +176,7 @@ var (
 		Capture(Match("[./].*?"), Match("[^:]")), Match(RepositorySeparator+RepositorySeparator),
 		Optional(CapturedArtefactVersionRegexp))
 
-	// Unused
+	// Unused.
 
 	// IdentifierRegexp is the format for string identifier used as a
 	// content addressable identifier using sha256. These identifiers

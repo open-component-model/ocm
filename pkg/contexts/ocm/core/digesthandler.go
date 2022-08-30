@@ -42,13 +42,13 @@ func NewDigestDescriptor(digest, hashAlgo, normAlgo string) *DigestDescriptor {
 // for dedicated mime types.
 // If found the digest provided by the digester will
 // replace the standard digest calculated for the byte content
-// of the blob
+// of the blob.
 type BlobDigester interface {
 	GetType() DigesterType
 	DetermineDigest(resType string, meth AccessMethod, preferred signing.Hasher) (*DigestDescriptor, error)
 }
 
-// BlobDigesterRegistry registers blob handlers to use in a dedicated ocm context
+// BlobDigesterRegistry registers blob handlers to use in a dedicated ocm context.
 type BlobDigesterRegistry interface {
 	// RegisterDigester registers a blob digester for a dedicated exact mime type
 	//
@@ -73,7 +73,8 @@ func NewBlobDigesterRegistry() BlobDigesterRegistry {
 	return &blobDigesterRegistry{
 		typehandlers: map[string][]BlobDigester{},
 		normhandlers: map[string][]BlobDigester{},
-		digesters:    map[DigesterType]BlobDigester{}}
+		digesters:    map[DigesterType]BlobDigester{},
+	}
 }
 
 func (r *blobDigesterRegistry) RegisterDigester(digester BlobDigester, restypes ...string) {

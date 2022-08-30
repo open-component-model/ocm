@@ -154,8 +154,10 @@ type blobCache struct {
 	cache vfs.FileSystem
 }
 
-var _ sync.Locker = (*blobCache)(nil)
-var _ RootedCache = (*blobCache)(nil)
+var (
+	_ sync.Locker = (*blobCache)(nil)
+	_ RootedCache = (*blobCache)(nil)
+)
 
 func NewDefaultBlobCache(fss ...vfs.FileSystem) (BlobCache, error) {
 	var err error
@@ -175,7 +177,7 @@ func NewDefaultBlobCache(fss ...vfs.FileSystem) (BlobCache, error) {
 
 func NewStaticBlobCache(path string, fss ...vfs.FileSystem) (BlobCache, error) {
 	fs := FileSystem(fss...)
-	err := fs.MkdirAll(path, 0700)
+	err := fs.MkdirAll(path, 0o700)
 	if err != nil {
 		return nil, err
 	}

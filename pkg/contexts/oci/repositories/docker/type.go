@@ -36,7 +36,7 @@ type RepositorySpec struct {
 	DockerHost                  string `json:"dockerHost,omitempty"`
 }
 
-// NewRepositorySpec creates a new RepositorySpec for an optional host
+// NewRepositorySpec creates a new RepositorySpec for an optional host.
 func NewRepositorySpec(host ...string) *RepositorySpec {
 	h := ""
 	if len(host) > 0 {

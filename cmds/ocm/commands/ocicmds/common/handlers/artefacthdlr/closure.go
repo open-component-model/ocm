@@ -48,7 +48,7 @@ func traverse(hist common.History, o *Object, octx out.Context) []output.Object 
 			if err != nil {
 				out.Errf(octx, "Warning: lookup nested artefact %q [%s]: %s\n", ref.Digest, hist, err)
 			}
-			var obj = &Object{
+			obj := &Object{
 				History: hist.Copy(),
 				Key:     Key(nested),
 				Spec: oci.RefSpec{

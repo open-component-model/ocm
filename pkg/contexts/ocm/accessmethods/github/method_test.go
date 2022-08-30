@@ -22,14 +22,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"k8s.io/apimachinery/pkg/util/sets"
-
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
@@ -40,6 +36,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	me "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/github"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"k8s.io/apimachinery/pkg/util/sets"
 )
 
 type mockDownloader struct {
@@ -96,7 +93,7 @@ var _ = Describe("Method", func() {
 					Fail(fmt.Sprintf("failed to match url to expected url. want: %s; got: %s", expectedURL, req.URL.String()))
 				}
 				return &http.Response{
-					StatusCode: 302,
+					StatusCode: http.StatusFound,
 					Status:     http.StatusText(http.StatusFound),
 					Body:       io.NopCloser(bytes.NewBufferString(`{}`)),
 					Header: http.Header{
@@ -185,7 +182,7 @@ var _ = Describe("Method", func() {
 						Fail(fmt.Sprintf("failed to match url to expected url. want: %s; got: %s", expectedURL, req.URL.String()))
 					}
 					return &http.Response{
-						StatusCode: 302,
+						StatusCode: http.StatusFound,
 						Status:     http.StatusText(http.StatusFound),
 						// Must be set to non-nil value or it panics
 						Body: io.NopCloser(bytes.NewBufferString(`{}`)),

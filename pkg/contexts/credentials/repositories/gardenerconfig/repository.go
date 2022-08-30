@@ -2,6 +2,7 @@ package gardenerconfig
 
 import (
 	"bytes"
+	"context"
 	"crypto/aes"
 	"crypto/cipher"
 	"fmt"
@@ -145,7 +146,11 @@ func (r *Repository) getRawConfig() (io.ReadCloser, error) {
 		}
 		reader = f
 	} else {
-		res, err := http.Get(u.String())
+		req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, u.String(), nil)
+		if err != nil {
+			return nil, fmt.Errorf("request to secret server failed: %w", err)
+		}
+		res, err := http.DefaultClient.Do(req)
 		if err != nil {
 			// the secret server might be temporarily not available.
 			// for these situations we should allow a retry at a later point in time

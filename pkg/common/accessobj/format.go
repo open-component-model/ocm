@@ -29,13 +29,11 @@ import (
 const KIND_FILEFORMAT = accessio.KIND_FILEFORMAT
 
 const (
-	DirMode  = 0755
-	FileMode = 0644
+	DirMode  = 0o755
+	FileMode = 0o644
 )
 
-var (
-	ModTime = time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC)
-)
+var ModTime = time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC)
 
 type FileFormat = accessio.FileFormat
 
@@ -51,8 +49,10 @@ type FormatHandler interface {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-var fileFormats = map[FileFormat]FormatHandler{}
-var lock sync.RWMutex
+var (
+	fileFormats = map[FileFormat]FormatHandler{}
+	lock        sync.RWMutex
+)
 
 func RegisterFormat(f FormatHandler) {
 	lock.Lock()

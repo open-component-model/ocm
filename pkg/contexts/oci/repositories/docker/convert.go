@@ -24,12 +24,13 @@ import (
 	"github.com/containers/image/v5/manifest"
 	"github.com/containers/image/v5/types"
 	"github.com/opencontainers/go-digest"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 )
 
-// fakeSource implements required methods to call the manifest conversion
+// fakeSource implements required methods to call the manifest conversion.
 type fakeSource struct {
 	types.ImageSource
 	art   cpi.BlobAccess
@@ -124,7 +125,6 @@ func blobSource(art cpi.Artefact, blobs accessio.BlobSource) (accessio.BlobSourc
 }
 
 func Convert(art cpi.Artefact, blobs accessio.BlobSource, dst types.ImageDestination) (cpi.BlobAccess, error) {
-
 	blobs, err := blobSource(art, blobs)
 	if err != nil {
 		return nil, err
@@ -160,7 +160,7 @@ func Convert(art cpi.Artefact, blobs accessio.BlobSource, dst types.ImageDestina
 			Annotations: l.Annotations,
 			MediaType:   l.MediaType,
 		}
-		fmt.Printf("put blob  for layer %d\n", i)
+		logrus.Infof("put blob  for layer %d", i)
 		_, err = dst.PutBlob(dummyContext, r, bi, nil, false)
 		if err != nil {
 			return nil, err

@@ -18,12 +18,10 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
-
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 )
 
 func From(o options.OptionSetProvider) *Option {

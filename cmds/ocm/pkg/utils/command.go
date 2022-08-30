@@ -20,13 +20,12 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 )
 
 // OCMCommand is a command pattern, that can be instantiated for a dediated
-// sub command name to create a cobra command
+// sub command name to create a cobra command.
 type OCMCommand interface {
 	clictx.Context
 

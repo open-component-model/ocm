@@ -14,13 +14,13 @@
 
 package runtime
 
-// ObjectType describes the type of a object
+// ObjectType describes the type of a object.
 type ObjectType struct {
 	// Type describes the type of the object.
 	Type string `json:"type"`
 }
 
-// NewObjectType creates an ObjectType value
+// NewObjectType creates an ObjectType value.
 func NewObjectType(typ string) ObjectType {
 	return ObjectType{typ}
 }

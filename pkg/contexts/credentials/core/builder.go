@@ -71,5 +71,4 @@ func (b Builder) New() Context {
 		b.matchers = StandardIdentityMatchers
 	}
 	return newContext(b.config, b.reposcheme, b.matchers)
-
 }

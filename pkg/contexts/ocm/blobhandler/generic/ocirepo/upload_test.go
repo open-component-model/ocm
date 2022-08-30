@@ -19,26 +19,23 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
 	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/ociuploadattr"
-	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
-
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
+	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
+	tenv "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	"github.com/open-component-model/ocm/pkg/mime"
-
-	tenv "github.com/open-component-model/ocm/pkg/env"
 )
 
 const COMP = "github.com/compa"

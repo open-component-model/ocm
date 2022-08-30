@@ -33,8 +33,11 @@ import (
 
 // Type is the access type of S3 registry.
 const Type = "S3"
-const TypeV1 = Type + runtime.VersionSeparator + "v1"
-const CONSUMER_TYPE = "s3"
+
+const (
+	TypeV1        = Type + runtime.VersionSeparator + "v1"
+	CONSUMER_TYPE = "s3"
+)
 
 func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}))
@@ -64,7 +67,7 @@ type AccessSpec struct {
 
 var _ cpi.AccessSpec = (*AccessSpec)(nil)
 
-// New creates a new GitHub registry access spec version v1
+// New creates a new GitHub registry access spec version v1.
 func New(region, bucket, key, version, mediaType string, downloader downloader.Downloader) *AccessSpec {
 	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),

@@ -23,7 +23,7 @@ import (
 // UseLine puts out the full usage for a given command (including parents).
 func UseLine(c *cobra.Command) string {
 	useline := c.Use
-	if strings.Index(useline, " ") < 0 {
+	if !strings.Contains(useline, " ") {
 		// no syntax given
 		if c.HasAvailableLocalFlags() {
 			useline += " [<options>]"

@@ -34,7 +34,7 @@ type Templater interface {
 	Process(data string, values Values) (string, error)
 }
 
-// Options defines the options for cli templating
+// Options defines the options for cli templating.
 type Options struct {
 	Mode      string
 	UseEnv    bool
@@ -76,7 +76,7 @@ func (o *Options) Complete(fs vfs.FileSystem) error {
 	return nil
 }
 
-// Usage prints out the usage for templating
+// Usage prints out the usage for templating.
 func (o *Options) Usage() string {
 	return `
 Templating:
@@ -84,7 +84,7 @@ All yaml/json defined resources can be templated.
 Variables are specified as regular arguments following the syntax <code>&lt;name>=&lt;value></code>.
 Additionally settings can be specified by a yaml file using the <code>--settings <file></code>
 option. With the option <code>--addenv</code> environment variables are added to the binding.
-Values are overwritten in the order environment, settings file, commmand line settings. 
+Values are overwritten in the order environment, settings file, command line settings. 
 
 Note: Variable names are case-sensitive.
 
@@ -95,7 +95,7 @@ Example:
 
 There are several templaters that can be selected by the <code>--templater</code> option:
 - envsubst: simple value substitution with the <code>drone/envsubst</code> templater. It
-  supports string values, only. Complext settings will be json encoded.
+  supports string values, only. Complexity settings will be json encoded.
   <pre>
   key:
     subkey: "abc ${MY_VAL}"
@@ -117,7 +117,7 @@ There are several templaters that can be selected by the <code>--templater</code
 }
 
 // FilterSettings parses commandline argument variables.
-// it returns all non variable arguments
+// it returns all non variable arguments.
 func (o *Options) FilterSettings(args ...string) []string {
 	var addArgs []string
 	if o.Vars == nil {
@@ -200,7 +200,7 @@ func ReadSimpleSettings(fs vfs.FileSystem, path string) (map[string]string, erro
 			buffer.Reset()
 		}
 	}
-	if err == io.EOF {
+	if errors.Is(err, io.EOF) {
 		err = nil
 	}
 	return result, err

@@ -18,10 +18,10 @@ required to implement the OCM repository interface.
 
 This implementation is based on three interfaces that have to implemented:
 
-- BlobContainer
-  is used to provide access to blob data
-- ComponentVersionContainer
-  is used to provide access to component version for  component.
+  - BlobContainer
+    is used to provide access to blob data
+  - ComponentVersionContainer
+    is used to provide access to component version for  component.
 
 The function NewComponentVersionAccess can be used to create an
 object implementing the complete ComponentVersionAccess contract.

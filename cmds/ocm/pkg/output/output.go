@@ -279,8 +279,10 @@ var log bool
 
 func Print(list []Object, msg string, args ...interface{}) {
 	if log {
+		//nolint:forbidigo // It's an intentional Printf for formatted output.
 		fmt.Printf(msg+":\n", args...)
 		for i, e := range list {
+			//nolint:forbidigo // It's an intentional Printf for formatted output.
 			fmt.Printf("  %3d %s\n", i, e)
 		}
 	}

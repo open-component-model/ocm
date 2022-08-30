@@ -43,7 +43,7 @@ type Config struct {
 	OCIRepositories             map[string]*ocicpi.GenericRepositorySpec `json:"ociRepositories,omitempty"`
 }
 
-// New creates a new memory ConfigSpec
+// New creates a new memory ConfigSpec.
 func New() *Config {
 	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(OCMCmdConfigType),

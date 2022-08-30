@@ -161,8 +161,10 @@ type _buffer struct {
 	complete atomic.Bool
 }
 
-var _ ProcessingBuffer = &_buffer{}
-var _ data.Iterable = &_buffer{}
+var (
+	_ ProcessingBuffer = &_buffer{}
+	_ data.Iterable    = &_buffer{}
+)
 
 func NewProcessingBuffer(i BufferImplementation) ProcessingBuffer {
 	return (&_buffer{}).new(i)
@@ -274,8 +276,10 @@ type simpleBufferIterator struct {
 	current int
 }
 
-var _ ProcessingIterator = &simpleBufferIterator{}
-var _ data.Iterator = &simpleBufferIterator{}
+var (
+	_ ProcessingIterator = &simpleBufferIterator{}
+	_ data.Iterator      = &simpleBufferIterator{}
+)
 
 func (this *simpleBufferIterator) new(buffer *simpleBuffer, valid bool) *simpleBufferIterator {
 	this.valid = valid
@@ -288,7 +292,7 @@ func (this *simpleBufferIterator) HasNext() bool {
 	this.buffer.frame.Lock()
 	defer this.buffer.frame.Unlock()
 	for {
-		//fmt.Printf("HasNext: %d(%d) %t\n", this.current, this.container.len(), this.container.closed())
+		// fmt.Printf("HasNext: %d(%d) %t\n", this.current, this.container.len(), this.container.closed())
 		if len(this.buffer.entries) > this.current+1 {
 			if !this.valid || this.buffer.entries[this.current+1].Valid {
 				return true
@@ -311,7 +315,7 @@ func (this *simpleBufferIterator) NextProcessingEntry() ProcessingEntry {
 	this.buffer.frame.Lock()
 	defer this.buffer.frame.Unlock()
 	for {
-		//fmt.Printf("HasNext: %d(%d) %t\n", this.current, this.container.len(), this.container.closed())
+		// fmt.Printf("HasNext: %d(%d) %t\n", this.current, this.container.len(), this.container.closed())
 		if len(this.buffer.entries) > this.current+1 {
 			this.current++
 			if !this.valid || this.buffer.entries[this.current].Valid {
@@ -331,7 +335,7 @@ func (this *simpleBufferIterator) NextProcessingEntry() ProcessingEntry {
 // orderedBuffer is a buffer view offering an ordered list of entries.
 // the entry iterator provides access to an unordered sequence
 // while the value iterator offeres a sequence according the order
-// of the initially specified indices
+// of the initially specified indices.
 type orderedBuffer struct {
 	simple    simpleBuffer
 	root      data.DLLRoot
@@ -383,7 +387,7 @@ func (this *orderedBuffer) Add(e ProcessingEntry) bool {
 	}
 
 	increased := false
-	//fmt.Printf("add to %v{%v}  cur %v\n", e.Index, e.Value, this.nextIndex)
+	// fmt.Printf("add to %v{%v}  cur %v\n", e.Index, e.Value, this.nextIndex)
 
 	next := this.valid.Next()
 	for next != nil && !next.Get().(*ProcessingEntry).Index.After(this.nextIndex) {
@@ -392,7 +396,7 @@ func (this *orderedBuffer) Add(e ProcessingEntry) bool {
 		this.valid = next
 		next = next.Next()
 		increased = true
-		//fmt.Printf("increase to %v{%v}\n", n.Index, n.Value)
+		// fmt.Printf("increase to %v{%v}\n", n.Index, n.Value)
 	}
 	return increased
 }
@@ -494,7 +498,7 @@ func (this *orderedBufferIterator) Next() interface{} {
 		n := this.current.Next()
 		if n != nil && this.current != this.buffer.valid {
 			e := n.Get().(*ProcessingEntry)
-			this.current = n //always proceed
+			this.current = n // always proceed
 			if e.Valid {
 				return e.Value
 			}

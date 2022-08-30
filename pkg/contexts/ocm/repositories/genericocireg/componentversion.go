@@ -22,7 +22,6 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -146,18 +145,18 @@ func (c *ComponentVersionContainer) IsClosed() bool {
 
 func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMethod, error) {
 	if a.GetKind() == localblob.Type {
-		a, err := c.comp.GetContext().AccessSpecForSpec(a)
+		accessSpec, err := c.comp.GetContext().AccessSpecForSpec(a)
 		if err != nil {
 			return nil, err
 		}
-		return newLocalBlobAccessMethod(a.(*localblob.AccessSpec), c.comp.namespace, c.comp.GetContext())
+		return newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.comp.namespace, c.comp.GetContext())
 	}
 	if a.GetKind() == localociblob.Type {
-		a, err := c.comp.GetContext().AccessSpecForSpec(a)
+		accessSpec, err := c.comp.GetContext().AccessSpecForSpec(a)
 		if err != nil {
 			return nil, err
 		}
-		return newLocalOCIBlobAccessMethod(a.(*localociblob.AccessSpec), c.comp.namespace)
+		return newLocalOCIBlobAccessMethod(accessSpec.(*localociblob.AccessSpec), c.comp.namespace)
 	}
 	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "oci registry")
 }
@@ -244,9 +243,8 @@ func (c *ComponentVersionContainer) AddBlobFor(storagectx cpi.StorageContext, bl
 	return localblob.New(blob.Digest().String(), refName, blob.MimeType(), global), nil
 }
 
-// AssureGlobalRef provides a global manifest for a local OCI Artefact
+// AssureGlobalRef provides a global manifest for a local OCI Artefact.
 func (c *ComponentVersionContainer) AssureGlobalRef(d digest.Digest, url, name string) (cpi.AccessSpec, error) {
-
 	blob, err := c.manifest.GetBlob(d)
 	if err != nil {
 		return nil, err

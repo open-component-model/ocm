@@ -133,7 +133,7 @@ func (t *configTypeScheme) Usage() string {
 	return s + "\n"
 }
 
-// DefaultConfigTypeScheme contains all globally known access serializer
+// DefaultConfigTypeScheme contains all globally known access serializer.
 var DefaultConfigTypeScheme = NewConfigTypeScheme(nil)
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -34,7 +34,7 @@ func init() {
 	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &Config{}, usage))
 }
 
-// Config describes a configuration for the config context
+// Config describes a configuration for the config context.
 type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	// Consumers describe predefine logical cosumer specs mapped to credentials
@@ -45,7 +45,7 @@ type Config struct {
 	Consumers []ConsumerSpec `json:"consumers,omitempty"`
 	// Repositories describe preloaded credential repositories with potential credential chain
 	Repositories []RepositorySpec `json:"repositories,omitempty"`
-	// Aliases describe logical credential repositories mapped to implementig repositories
+	// Aliases describe logical credential repositories mapped to implementing repositories
 	Aliases map[string]RepositorySpec `json:"aliases,omitempty"`
 }
 
@@ -59,7 +59,7 @@ type RepositorySpec struct {
 	Credentials []cpi.GenericCredentialsSpec `json:"credentials,omitempty"`
 }
 
-// NewConfigSpec creates a new memory ConfigSpec
+// NewConfigSpec creates a new memory ConfigSpec.
 func New() *Config {
 	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),

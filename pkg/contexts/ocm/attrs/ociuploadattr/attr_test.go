@@ -19,13 +19,11 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
-
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	me "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/ociuploadattr"
 	"github.com/open-component-model/ocm/pkg/runtime"

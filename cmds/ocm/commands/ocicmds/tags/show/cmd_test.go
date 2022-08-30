@@ -19,11 +19,9 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/open-component-model/ocm/pkg/mime"
-
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/mime"
 )
 
 const ARCH = "/tmp/ctf"

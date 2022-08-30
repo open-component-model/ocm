@@ -15,7 +15,7 @@
 package output
 
 // Fields composes a (string) field list based on a sequence of strings and or
-// field lists
+// field lists.
 func Fields(fields ...interface{}) []string {
 	var result []string
 	for _, f := range fields {

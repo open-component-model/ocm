@@ -60,8 +60,10 @@ type ConvertedAccessType struct {
 	accessType
 }
 
-var _ AccessSpecVersion = &ConvertedAccessType{}
-var _ runtime.TypedObjectEncoder = &ConvertedAccessType{}
+var (
+	_ AccessSpecVersion          = &ConvertedAccessType{}
+	_ runtime.TypedObjectEncoder = &ConvertedAccessType{}
+)
 
 func NewConvertedAccessSpecType(name string, v AccessSpecVersion) *ConvertedAccessType {
 	return &ConvertedAccessType{
@@ -85,7 +87,7 @@ func (t *ConvertedAccessType) Encode(obj runtime.TypedObject, m runtime.Marshale
 
 func MarshalConvertedAccessSpec(ctx Context, s AccessSpec) ([]byte, error) {
 	t := ctx.AccessMethods().GetAccessType(s.GetType())
-	//fmt.Printf("found spec type %s: %T\n", s.Algorithm(), t)
+	// fmt.Printf("found spec type %s: %T\n", s.Algorithm(), t)
 	if c, ok := t.(AccessSpecConverter); ok {
 		out, err := c.ConvertFrom(s)
 		if err != nil {

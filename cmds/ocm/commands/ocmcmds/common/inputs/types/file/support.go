@@ -19,7 +19,6 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
@@ -66,7 +65,7 @@ func (s *ProcessSpec) GetBlob(ctx clictx.Context, inputFilePath string) (accessi
 
 	var data []byte
 	if s.Transformer != nil {
-		data, err = ioutil.ReadAll(inputBlob)
+		data, err = io.ReadAll(inputBlob)
 		inputBlob.Close()
 		if err != nil {
 			return nil, "", errors.Wrapf(err, "cannot read input file %s", inputPath)
@@ -80,7 +79,6 @@ func (s *ProcessSpec) GetBlob(ctx clictx.Context, inputFilePath string) (accessi
 			return nil, "", errors.Wrapf(err, "processing %a", inputPath)
 		}
 		reader = bytes.NewBuffer(data)
-
 	}
 	if !s.Compress() {
 		if s.MediaType == "" {

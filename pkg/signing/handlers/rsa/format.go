@@ -112,7 +112,7 @@ func ParsePublicKey(data []byte) (interface{}, error) {
 	if err != nil {
 		pub, err = x509.ParsePKCS1PublicKey(block.Bytes)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse DER encoded public key: %s", err)
+			return nil, fmt.Errorf("failed to parse DER encoded public key: %w", err)
 		}
 	}
 	switch pub := pub.(type) {

@@ -20,8 +20,6 @@ import (
 	"github.com/mandelsoft/spiff/features"
 	"github.com/mandelsoft/spiff/spiffing"
 
-	"github.com/open-component-model/ocm/pkg/utils"
-
 	"github.com/open-component-model/ocm/pkg/common"
 	globalconfig "github.com/open-component-model/ocm/pkg/contexts/config/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -31,6 +29,7 @@ import (
 	memorycfg "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/memory/config"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type CredentialsRequest struct {
@@ -73,8 +72,8 @@ type CredentialSpec struct {
 	ConsumerId credentials.ConsumerIdentity `json:"consumerId,omitempty"`
 	// Reference refers to credentials store in some othe repo
 	Reference *cpi.GenericCredentialsSpec `json:"reference,omitempty"`
-	// Credentials are direct credentials (one of Reference or Credentails must be set)
-	Credentails common.Properties `json:"credentials,omitempty"`
+	// Credentials are direct credentials (one of Reference or Credentials must be set)
+	Credentials common.Properties `json:"credentials,omitempty"`
 
 	// TargetConsumerId specifies the consumer id to feed with this crednetials
 	TargetConsumerId credentials.ConsumerIdentity `json:"targetConsumerId,omitempty"`
@@ -176,9 +175,9 @@ func evaluate(ctx credentials.Context, spec *CredentialSpec) (common.Properties,
 	var props common.Properties
 	var src credentials.CredentialsSource
 	cnt := 0
-	if len(spec.Credentails) > 0 {
+	if len(spec.Credentials) > 0 {
 		cnt++
-		props = spec.Credentails
+		props = spec.Credentials
 	}
 	if spec.Reference != nil {
 		cnt++
