@@ -172,7 +172,7 @@ func (t KnownTypes) TypeNames() []string {
 // Scheme is the interface to describe a set of object types
 // that implement a dedicated interface.
 // As such it knows about the desired interface of the instances
-// and can validate it. Additionally it provides an implementation
+// and can validate it. Additionally, it provides an implementation
 // for generic unstructured objects that can be used to decode
 // any serialized from of object candidates and provide the
 // effective type.
@@ -186,7 +186,7 @@ type Scheme interface {
 	Decode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
 	Encode(obj TypedObject, marshaler Marshaler) ([]byte, error)
 	EnforceDecode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
-	AddKnownTypes(scheme Scheme)
+	AddKnownTypes(scheme Scheme) error
 	KnownTypes() KnownTypes
 	KnownTypeNames() []string
 }
@@ -200,37 +200,37 @@ type defaultScheme struct {
 	types          KnownTypes
 }
 
-func MustNewDefaultScheme(proto_ifce interface{}, proto_unstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder) Scheme {
-	s, err := NewDefaultScheme(proto_ifce, proto_unstr, acceptUnknown, defaultdecoder)
+func MustNewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder) Scheme {
+	s, err := NewDefaultScheme(protoIfce, protoUnstr, acceptUnknown, defaultdecoder)
 	if err != nil {
 		panic(err)
 	}
 	return s
 }
 
-func NewDefaultScheme(proto_ifce interface{}, proto_unstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder) (Scheme, error) {
-	if proto_ifce == nil {
+func NewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder) (Scheme, error) {
+	if protoIfce == nil {
 		return nil, fmt.Errorf("object interface must be given by pointer to interace (is nil)")
 	}
-	it := reflect.TypeOf(proto_ifce)
+	it := reflect.TypeOf(protoIfce)
 	if it.Kind() != reflect.Ptr {
-		return nil, fmt.Errorf("object interface %T: must be given by pointer to interace (is not pointer)", proto_ifce)
+		return nil, fmt.Errorf("object interface %T: must be given by pointer to interace (is not pointer)", protoIfce)
 	}
 	it = it.Elem()
 	if it.Kind() != reflect.Interface {
-		return nil, fmt.Errorf("object interface %T: must be given by pointer to interace (does not point to interface)", proto_ifce)
+		return nil, fmt.Errorf("object interface %T: must be given by pointer to interace (does not point to interface)", protoIfce)
 	}
 	if !it.Implements(typeTypedObject) {
-		return nil, fmt.Errorf("object interface %T: must implement TypedObject", proto_ifce)
+		return nil, fmt.Errorf("object interface %T: must implement TypedObject", protoIfce)
 	}
 
-	ut, err := ProtoType(proto_unstr)
+	ut, err := ProtoType(protoUnstr)
 	if err != nil {
-		return nil, errors.Wrapf(err, "unstructured prototype %T", proto_unstr)
+		return nil, errors.Wrapf(err, "unstructured prototype %T", protoUnstr)
 	}
 	if acceptUnknown {
 		if !reflect.PtrTo(ut).Implements(typeTypedObject) {
-			return nil, fmt.Errorf("unstructured type %T must implement TypedObject to be acceptale as unknown result", proto_unstr)
+			return nil, fmt.Errorf("unstructured type %T must implement TypedObject to be acceptale as unknown result", protoUnstr)
 		}
 	}
 
@@ -243,12 +243,13 @@ func NewDefaultScheme(proto_ifce interface{}, proto_unstr Unstructured, acceptUn
 	}, nil
 }
 
-func (d *defaultScheme) AddKnownTypes(s Scheme) {
+func (d *defaultScheme) AddKnownTypes(s Scheme) error {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	for k, v := range s.KnownTypes() {
 		d.types[k] = v
 	}
+	return nil
 }
 
 func (d *defaultScheme) KnownTypes() KnownTypes {

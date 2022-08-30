@@ -22,20 +22,20 @@ import (
 
 const T_OCILAYER = "oci layer"
 
-type oci_layer struct {
+type ociLayer struct {
 	base
 	blob accessio.BlobAccess
 }
 
-func (r *oci_layer) Type() string {
+func (r *ociLayer) Type() string {
 	return T_OCILAYER
 }
 
-func (r *oci_layer) Set() {
+func (r *ociLayer) Set() {
 	r.Builder.blob = &r.blob
 }
 
-func (r *oci_layer) Close() error {
+func (r *ociLayer) Close() error {
 	if r.blob == nil {
 		return errors.Newf("config blob required")
 	}
@@ -56,5 +56,5 @@ func (r *oci_layer) Close() error {
 
 func (b *Builder) Layer(f ...func()) *artdesc.Descriptor {
 	b.expect(b.oci_artacc, T_OCIMANIFEST, func() bool { return b.oci_artacc.IsManifest() })
-	return b.configure(&oci_layer{}, f).(*artdesc.Descriptor)
+	return b.configure(&ociLayer{}, f).(*artdesc.Descriptor)
 }

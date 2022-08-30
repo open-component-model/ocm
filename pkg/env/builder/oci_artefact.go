@@ -25,7 +25,7 @@ const T_OCIARTEFACT = "artefact"
 const T_OCIINDEX = "index"
 const T_OCIMANIFEST = "manifest"
 
-type oci_artefact struct {
+type ociArtefact struct {
 	base
 	kind    string
 	artfunc func(a oci.ArtefactAccess) error
@@ -34,11 +34,11 @@ type oci_artefact struct {
 	tags []string
 }
 
-func (r *oci_artefact) Type() string {
+func (r *ociArtefact) Type() string {
 	return r.kind
 }
 
-func (r *oci_artefact) Set() {
+func (r *ociArtefact) Set() {
 	r.Builder.oci_nsacc = r.ns
 	r.Builder.oci_artacc = r.ArtefactAccess
 	r.Builder.oci_cleanuplayers = true
@@ -49,7 +49,7 @@ func (r *oci_artefact) Set() {
 	}
 }
 
-func (r *oci_artefact) Close() error {
+func (r *ociArtefact) Close() error {
 	err := r.ArtefactAccess.Close()
 	if err != nil {
 		return err
@@ -64,7 +64,7 @@ func (r *oci_artefact) Close() error {
 	return err
 }
 
-func (r *oci_artefact) addArtefact(a oci.ArtefactAccess) error {
+func (r *ociArtefact) addArtefact(a oci.ArtefactAccess) error {
 	_, err := r.ArtefactAccess.AddArtefact(a, nil)
 	return err
 }
@@ -93,7 +93,7 @@ func (b *Builder) artefact(tag string, ns cpi.NamespaceAccess, t func(access oci
 	if tag != "" {
 		tags = append(tags, tag)
 	}
-	r := b.configure(&oci_artefact{ArtefactAccess: v, kind: k, tags: tags, ns: ns, artfunc: b.oci_artfunc}, f, 1)
+	r := b.configure(&ociArtefact{ArtefactAccess: v, kind: k, tags: tags, ns: ns, artfunc: b.oci_artfunc}, f, 1)
 	if r == nil {
 		return nil
 	}

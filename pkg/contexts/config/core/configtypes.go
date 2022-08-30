@@ -68,16 +68,21 @@ func (t *configTypeScheme) GetConfigType(name string) ConfigType {
 
 func (t *configTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedObjectDecoder) error {
 	if _, ok := decoder.(ConfigType); !ok {
-		errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
+		return errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
 	}
 	return t.Scheme.RegisterByDecoder(name, decoder)
 }
 
-func (t *configTypeScheme) AddKnownTypes(scheme runtime.Scheme) {
+func (t *configTypeScheme) AddKnownTypes(scheme runtime.Scheme) error {
 	if _, ok := scheme.(ConfigTypeScheme); !ok {
-		panic("can only add RepositoryTypeSchemes")
+		return errors.ErrInvalid("type", reflect.TypeOf(scheme).String(), "expected", "ConfigTypeScheme")
 	}
-	t.Scheme.AddKnownTypes(scheme)
+
+	if err := t.Scheme.AddKnownTypes(scheme); err != nil {
+		return fmt.Errorf("failed to add known type in config type scheme: %w", err)
+	}
+
+	return nil
 }
 
 func (t *configTypeScheme) Register(name string, rtype ConfigType) {

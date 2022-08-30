@@ -77,16 +77,21 @@ func (t *repositoryTypeScheme) GetRepositoryType(name string) RepositoryType {
 
 func (t *repositoryTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedObjectDecoder) error {
 	if _, ok := decoder.(RepositoryType); !ok {
-		errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
+		return errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
 	}
 	return t.Scheme.RegisterByDecoder(name, decoder)
 }
 
-func (t *repositoryTypeScheme) AddKnownTypes(scheme runtime.Scheme) {
+func (t *repositoryTypeScheme) AddKnownTypes(scheme runtime.Scheme) error {
 	if _, ok := scheme.(RepositoryTypeScheme); !ok {
-		panic("can only add RepositoryTypeSchemes")
+		return errors.ErrInvalid("type", reflect.TypeOf(scheme).String(), "expected", "RepositoryTypeScheme")
 	}
-	t.Scheme.AddKnownTypes(scheme)
+
+	if err := t.Scheme.AddKnownTypes(scheme); err != nil {
+		return fmt.Errorf("failed to add known type in repository type scheme: %w", err)
+	}
+
+	return nil
 }
 
 func (t *repositoryTypeScheme) Register(name string, rtype RepositoryType) {

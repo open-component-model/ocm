@@ -20,19 +20,19 @@ import (
 
 const T_OCMREPOSITORY = "ocm repository"
 
-type ocm_repository struct {
+type ocmRepository struct {
 	base
 	kind string
 	cpi.Repository
 }
 
-func (r *ocm_repository) Type() string {
+func (r *ocmRepository) Type() string {
 	if r.kind != "" {
 		return r.kind
 	}
 	return T_OCMREPOSITORY
 }
 
-func (r *ocm_repository) Set() {
+func (r *ocmRepository) Set() {
 	r.Builder.ocm_repo = r.Repository
 }

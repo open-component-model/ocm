@@ -100,16 +100,21 @@ func (t *inputTypeScheme) GetInputType(name string) InputType {
 
 func (t *inputTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedObjectDecoder) error {
 	if _, ok := decoder.(InputType); !ok {
-		errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
+		return errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
 	}
 	return t.Scheme.RegisterByDecoder(name, decoder)
 }
 
-func (t *inputTypeScheme) AddKnownTypes(scheme runtime.Scheme) {
+func (t *inputTypeScheme) AddKnownTypes(scheme runtime.Scheme) error {
 	if _, ok := scheme.(InputTypeScheme); !ok {
-		panic("can only add RepositoryTypeSchemes")
+		return errors.ErrInvalid("type", reflect.TypeOf(scheme).String(), "expected", "InputTypeScheme")
 	}
-	t.Scheme.AddKnownTypes(scheme)
+
+	if err := t.Scheme.AddKnownTypes(scheme); err != nil {
+		return fmt.Errorf("failed to add known type in inputTypeScheme: %w", err)
+	}
+
+	return nil
 }
 
 func (t *inputTypeScheme) Register(name string, rtype InputType) {
