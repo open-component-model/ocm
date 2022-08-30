@@ -113,14 +113,17 @@ func pushData(ctx context.Context, p resolve.Pusher, desc artdesc.Descriptor, da
 	if desc.Size == 0 {
 		desc.Size = -1
 	}
+
 	fmt.Printf("*** push %s %s: %s\n", desc.MediaType, desc.Digest, key)
 	req, err := p.Push(ctx, desc, data)
 	if err != nil {
 		if errdefs.IsAlreadyExists(err) {
 			fmt.Printf("*** %s %s: already exists\n", desc.MediaType, desc.Digest)
+
 			return nil
 		}
-		return err
+
+		return fmt.Errorf("failed to push: %w", err)
 	}
 	return req.Commit(ctx, desc.Size, desc.Digest)
 }

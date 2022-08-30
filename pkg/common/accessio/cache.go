@@ -73,15 +73,23 @@ func (c *refMgmt) Unref() error {
 	if c.closed {
 		return ErrClosed
 	}
-	c.refcount--
+
 	var err error
+
+	c.refcount--
 	if c.refcount <= 0 {
 		if c.cleanup != nil {
 			err = c.cleanup()
 		}
+
 		c.closed = true
 	}
-	return err
+
+	if err != nil {
+		return fmt.Errorf("unable to unref: %w", err)
+	}
+
+	return nil
 }
 
 func (c *refMgmt) UnrefLast() error {
@@ -90,18 +98,27 @@ func (c *refMgmt) UnrefLast() error {
 	if c.closed {
 		return ErrClosed
 	}
+
 	if c.refcount > 1 {
 		return errors.Newf("object still in use: %d reference(s) pending", c.refcount)
 	}
-	c.refcount--
+
 	var err error
+
+	c.refcount--
 	if c.refcount <= 0 {
 		if c.cleanup != nil {
 			err = c.cleanup()
 		}
+
 		c.closed = true
 	}
-	return err
+
+	if err != nil {
+		return fmt.Errorf("unable to unref last: %w", err)
+	}
+
+	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////

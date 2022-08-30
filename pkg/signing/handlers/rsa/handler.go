@@ -87,10 +87,12 @@ func (h Handler) Sign(digest string, hash crypto.Hash, issuer string, key interf
 // Verify checks the signature, returns an error on verification failure
 func (h Handler) Verify(digest string, hash crypto.Hash, signature *signing.Signature, key interface{}) (err error) {
 	var signatureBytes []byte
+
 	publicKey, names, err := GetPublicKey(key)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get public key: %w", err)
 	}
+
 	switch signature.MediaType {
 	case MediaType:
 		signatureBytes, err = hex.DecodeString(signature.Value)
@@ -118,12 +120,14 @@ func (h Handler) Verify(digest string, hash crypto.Hash, signature *signing.Sign
 	if names != nil {
 		if signature.Issuer != "" {
 			found := false
+
 			for _, n := range names {
 				if n == signature.Issuer {
 					found = true
 					break
 				}
 			}
+
 			if !found {
 				return fmt.Errorf("issuer %q does not match %v", signature.Issuer, names)
 			}
@@ -136,6 +140,7 @@ func (h Handler) Verify(digest string, hash crypto.Hash, signature *signing.Sign
 	if err := rsa.VerifyPKCS1v15(publicKey, hash, decodedHash, signatureBytes); err != nil {
 		return fmt.Errorf("signature verification failed, %w", err)
 	}
+
 	return nil
 }
 

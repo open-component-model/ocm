@@ -21,6 +21,7 @@ limitations under the License.
 package sympath
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -42,10 +43,12 @@ func Walk(fs vfs.FileSystem, root string, walkFn vfs.WalkFunc) error {
 	} else {
 		err = symwalk(fs, root, info, walkFn)
 	}
-	if err == filepath.SkipDir {
-		return nil
+
+	if err != filepath.SkipDir && err != nil {
+		return fmt.Errorf("failed to walk fs: %w", err)
 	}
-	return err
+
+	return nil
 }
 
 // readDirNames reads the directory named by dirname and returns
@@ -72,18 +75,22 @@ func symwalk(fs vfs.FileSystem, path string, info os.FileInfo, walkFn vfs.WalkFu
 		if err != nil {
 			return errors.Wrapf(err, "error evaluating symlink %s", path)
 		}
+
 		log.Printf("found symbolic link in path: %s resolves to %s", path, resolved)
+
 		if info, err = fs.Lstat(resolved); err != nil {
-			return err
+			return fmt.Errorf("failed to fetch lstat: %w", err)
 		}
+
 		if err := symwalk(fs, path, info, walkFn); err != nil && err != filepath.SkipDir {
-			return err
+			return fmt.Errorf("error walking on symlink: %w", err)
 		}
+
 		return nil
 	}
 
 	if err := walkFn(path, info, nil); err != nil {
-		return err
+		return fmt.Errorf("failed to walk with function: %w", err)
 	}
 
 	if !info.IsDir() {
@@ -97,20 +104,22 @@ func symwalk(fs vfs.FileSystem, path string, info os.FileInfo, walkFn vfs.WalkFu
 
 	for _, name := range names {
 		filename := filepath.Join(path, name)
+
 		fileInfo, err := fs.Lstat(filename)
 		if err != nil {
 			if err := walkFn(filename, fileInfo, err); err != nil && err != filepath.SkipDir {
-				return err
+				return fmt.Errorf("failed to walk with function: %w", err)
 			}
 		} else {
 			err = symwalk(fs, filename, fileInfo, walkFn)
 			if err != nil {
 				if (!fileInfo.IsDir() && !IsSymlink(fileInfo)) || err != filepath.SkipDir {
-					return err
+					return fmt.Errorf("error walking on symlink: %w", err)
 				}
 			}
 		}
 	}
+
 	return nil
 }
 

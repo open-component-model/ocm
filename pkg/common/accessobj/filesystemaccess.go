@@ -15,6 +15,7 @@
 package accessobj
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"sync"
@@ -109,31 +110,37 @@ func (a *FileSystemBlobAccess) AddBlob(blob accessio.BlobAccess) error {
 	if a.base.IsClosed() {
 		return accessio.ErrClosed
 	}
+
 	if a.base.IsReadOnly() {
 		return accessio.ErrReadOnly
 	}
 
 	path := a.DigestPath(blob.Digest())
+
 	if ok, err := vfs.FileExists(a.base.GetFileSystem(), path); ok {
 		return nil
 	} else {
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to check if '%s' file exists: %w", path, err)
 		}
 	}
+
 	r, err := blob.Reader()
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to read blob: %w", err)
 	}
+
 	defer r.Close()
 	w, err := a.base.GetFileSystem().OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, a.base.GetMode()&0666)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to open file '%s': %w", path, err)
 	}
+
 	_, err = io.Copy(w, r)
 	if err != nil {
 		w.Close()
-		return err
+
+		return fmt.Errorf("unable to copy blob content: %w", err)
 	}
 	return w.Close()
 }

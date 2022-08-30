@@ -15,6 +15,8 @@
 package accessobj
 
 import (
+	"fmt"
+
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -117,17 +119,23 @@ func (a *AccessObject) Write(path string, mode vfs.FileMode, opts ...accessio.Op
 	if a.IsClosed() {
 		return accessio.ErrClosed
 	}
+
 	o := accessio.AccessOptions(opts...)
+
 	f := GetFormat(*o.FileFormat)
 	if f == nil {
 		return errors.ErrUnknown("file format", string(*o.FileFormat))
 	}
+
 	return f.Write(a, path, o, mode)
 }
 
 func (a *AccessObject) Update() error {
-	_, err := a.updateDescriptor()
-	return err
+	if _, err := a.updateDescriptor(); err != nil {
+		return fmt.Errorf("unable to update descriptor: %w", err)
+	}
+
+	return nil
 }
 
 func (a *AccessObject) Close() error {

@@ -16,6 +16,7 @@ package accessio
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"sync"
 
@@ -379,14 +380,22 @@ func (b *blobAccessView) IsClosed() bool {
 func (b *blobAccessView) Get() (result []byte, err error) {
 	return result, b.view.Execute(func() error {
 		result, err = b.access.Get()
-		return err
+		if err != nil {
+			return fmt.Errorf("unable to get access: %w", err)
+		}
+
+		return nil
 	})
 }
 
 func (b *blobAccessView) Reader() (result io.ReadCloser, err error) {
 	return result, b.view.Execute(func() error {
 		result, err = b.access.Reader()
-		return err
+		if err != nil {
+			return fmt.Errorf("unable to read access: %w", err)
+		}
+
+		return nil
 	})
 }
 

@@ -15,6 +15,8 @@
 package env
 
 import (
+	"fmt"
+
 	"github.com/mandelsoft/vfs/pkg/composefs"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
@@ -93,14 +95,20 @@ func TestData(paths ...string) tdOpt {
 func (o tdOpt) Mount(cfs *composefs.ComposedFileSystem) error {
 	fs, err := projectionfs.New(osfs.New(), o.source)
 	if err != nil {
-		return err
+		return fmt.Errorf("faild to create new project fs: %w", err)
 	}
+
 	fs = readonlyfs.New(fs)
-	err = cfs.MkdirAll(o.path, vfs.ModePerm)
-	if err != nil {
-		return err
+
+	if err := cfs.MkdirAll(o.path, vfs.ModePerm); err != nil {
+		return fmt.Errorf("faild to create directories '%s': %w", o.path, err)
 	}
-	return cfs.Mount(o.path, fs)
+
+	if err := cfs.Mount(o.path, fs); err != nil {
+		return fmt.Errorf("faild to mount cfs: %w", err)
+	}
+
+	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////

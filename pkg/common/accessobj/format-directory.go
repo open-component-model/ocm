@@ -87,22 +87,24 @@ func (_ DirectoryHandler) Write(obj *AccessObject, path string, opts accessio.Op
 
 	_, err := obj.updateDescriptor()
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to update descriptor: %w", err)
 	}
 
 	// copy descriptor
 	err = vfs.CopyFile(obj.fs, obj.info.DescriptorFileName, opts.PathFileSystem, filepath.Join(path, obj.info.DescriptorFileName))
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to copy file '%s': %w", obj.info.DescriptorFileName, err)
 	}
+
 	// copy all content
 	fileInfos, err := vfs.ReadDir(obj.fs, obj.info.ElementDirectoryName)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil
 		}
-		return fmt.Errorf("unable to read %s: %w", obj.info.ElementDirectoryName, err)
+		return fmt.Errorf("unable to read '%s': %w", obj.info.ElementDirectoryName, err)
 	}
+
 	for _, fileInfo := range fileInfos {
 		if fileInfo.IsDir() {
 			continue
