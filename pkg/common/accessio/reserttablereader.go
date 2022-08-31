@@ -19,6 +19,8 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type ResettableReader struct {
@@ -159,10 +161,5 @@ func (b *fileBuffer) Len() int {
 }
 
 func (b *fileBuffer) Close() error {
-	err := b.file.Close()
-	err2 := os.Remove(b.path)
-	if err2 != nil {
-		return err2
-	}
-	return err
+	return errors.ErrListf("closing file buffer").Add(b.file.Close(), os.Remove(b.path)).Result()
 }

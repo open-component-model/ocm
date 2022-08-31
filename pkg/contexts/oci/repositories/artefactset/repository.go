@@ -97,10 +97,16 @@ func (r Repository) Close() error {
 	return nil
 }
 
+// NamespaceLister handles the namespaces provided by an artefact set.
+// This is always single anonymous namespace, which by ddefinition
+// is the empty string.
 type NamespaceLister struct{}
 
 var anonymous cpi.NamespaceLister = &NamespaceLister{}
 
+// NumNamespaces returns the number of namespaces with a given prefix
+// for an artefact set. This is either one (the anonymous namespace) if
+// the prefix is empty (all namespaces) or zero if a prefix is given.
 func (n *NamespaceLister) NumNamespaces(prefix string) (int, error) {
 	if prefix == "" {
 		return 1, nil
@@ -108,6 +114,9 @@ func (n *NamespaceLister) NumNamespaces(prefix string) (int, error) {
 	return 0, nil
 }
 
+// GetNamespaces returns namespaces with a given prefix.
+// This is the anonymous namespace ("") for an empty prefix
+// or no namespace at all if a prefix is given.
 func (n *NamespaceLister) GetNamespaces(prefix string, closure bool) ([]string, error) {
 	if prefix == "" {
 		return []string{""}, nil

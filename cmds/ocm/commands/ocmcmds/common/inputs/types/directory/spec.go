@@ -26,6 +26,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
 type Spec struct {
@@ -80,7 +81,7 @@ func (s *Spec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.Tempo
 		return nil, "", fmt.Errorf("resource type is dir but a file was provided")
 	}
 
-	opts := TarFileSystemOptions{
+	opts := tarutils.TarFileSystemOptions{
 		IncludeFiles:   s.IncludeFiles,
 		ExcludeFiles:   s.ExcludeFiles,
 		PreserveDir:    s.PreserveDir != nil && *s.PreserveDir,
@@ -96,7 +97,7 @@ func (s *Spec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.Tempo
 	if s.Compress() {
 		s.SetMediaTypeIfNotDefined(mime.MIME_GZIP)
 		gw := gzip.NewWriter(temp.Writer())
-		if err := TarFileSystem(fs, inputPath, gw, opts); err != nil {
+		if err := tarutils.TarFileSystem(fs, inputPath, gw, opts); err != nil {
 			return nil, "", fmt.Errorf("unable to tar input artifact: %w", err)
 		}
 		if err := gw.Close(); err != nil {
@@ -104,7 +105,7 @@ func (s *Spec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.Tempo
 		}
 	} else {
 		s.SetMediaTypeIfNotDefined(mime.MIME_TAR)
-		if err := TarFileSystem(fs, inputPath, temp.Writer(), opts); err != nil {
+		if err := tarutils.TarFileSystem(fs, inputPath, temp.Writer(), opts); err != nil {
 			return nil, "", fmt.Errorf("unable to tar input artifact: %w", err)
 		}
 	}
