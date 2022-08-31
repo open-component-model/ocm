@@ -118,7 +118,6 @@ func (i ConsumerIdentity) String() string {
 	if err != nil {
 		logrus.Error(err)
 	}
-
 	return string(data)
 }
 
@@ -128,7 +127,6 @@ func (i ConsumerIdentity) Key() []byte {
 	if err != nil {
 		logrus.Error(err)
 	}
-
 	return data
 }
 

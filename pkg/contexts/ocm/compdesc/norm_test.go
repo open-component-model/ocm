@@ -17,6 +17,7 @@ package compdesc_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	compdesc "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/normalizations"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions"

@@ -136,6 +136,9 @@ issues:
   exclude:
     - composites
   exclude-rules:
+    - path: cmds/
+      linters:
+      - forbidigo
     - text: "should not use dot imports|don't use an underscore in package name"
       linters:
       - golint
@@ -157,7 +160,6 @@ issues:
       - dupl
       - funlen
       - scopelint
-      - testpackage
     - source: "// .* #\\d+"
       linters:
       - godox

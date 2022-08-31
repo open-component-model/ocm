@@ -17,6 +17,7 @@ package signing_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"

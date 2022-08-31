@@ -92,7 +92,6 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	for _, out := range o.Outputs {
 		if _, ok := out(o).(SortFields); ok {
 			fs.StringArrayVarP(&o.Sort, "sort", "s", nil, "sort fields")
-
 			break
 		}
 	}

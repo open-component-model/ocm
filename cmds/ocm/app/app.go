@@ -269,7 +269,6 @@ func NewVersionCommand() *cobra.Command {
 		Short:   "displays the version",
 		Run: func(cmd *cobra.Command, args []string) {
 			v := version.Get()
-			//nolint:forbidigo // It's an intentional Printf.
 			fmt.Printf("%#v", v)
 		},
 	}

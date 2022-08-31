@@ -30,7 +30,6 @@ func (p Properties) Digest() []byte {
 	if err != nil {
 		logrus.Error(err)
 	}
-
 	return data
 }
 
