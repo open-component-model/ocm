@@ -45,7 +45,7 @@ plain-ca: $(GEN)
 .PHONY: build
 build: $(GEN)/image.$(NAME)
 
-$(GEN)/image.$(NAME): Dockerfile $(CMDSRCS) $(OCMSRCS)
+$(GEN)/image.$(NAME): $(GEN) Dockerfile $(CMDSRCS) $(OCMSRCS)
 	docker build -t $(IMAGE):$(VERSION) --file Dockerfile $(REPO_ROOT) \
           --build-arg COMMIT=$(COMMIT) \
           --build-arg EFFECTIVE_VERSION=$(EFFECTIVE_VERSION) \
