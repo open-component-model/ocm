@@ -50,7 +50,7 @@ func (c *CompoundResolver) LookupComponentVersion(name string, version string) (
 			continue
 		}
 		cv, err := r.LookupComponentVersion(name, version)
-		if err == nil {
+		if err == nil && cv != nil {
 			return cv, nil
 		}
 		if !errors.IsErrNotFoundKind(err, KIND_COMPONENTVERSION) {
