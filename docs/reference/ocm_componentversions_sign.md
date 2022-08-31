@@ -17,7 +17,7 @@ ocm componentversions sign [<options>] {<component-reference>}
   -N, --normalization string      normalization algorithm (default "jsonNormalisation/v1")
   -K, --private-key stringArray   private key setting
   -k, --public-key stringArray    public key setting
-  -R, --recursive                 recursively sign component versions (default true)
+  -R, --recursive                 recursively sign component versions
   -r, --repo string               repository name or spec
   -s, --signature stringArray     signature name
       --update                    update digest in component versions (default true)

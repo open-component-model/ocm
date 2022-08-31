@@ -11,6 +11,7 @@ ocm verify componentversions [<options>] {<component-reference>}
 ```
       --ca-cert stringArray      Additional root certificates
   -h, --help                     help for componentversions
+  -L, --local                    non-recursively verify component versions
   -k, --public-key stringArray   public key setting
   -r, --repo string              repository name or spec
   -s, --signature stringArray    signature name

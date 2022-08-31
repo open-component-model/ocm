@@ -54,12 +54,31 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 
 	cd := cv.GetDescriptor().Copy()
 	printer.Printf("applying to version %q...\n", nv)
+
+	signatureNames := opts.SignatureNames
+	if len(signatureNames) == 0 {
+		for _, s := range cd.Signatures {
+			signatureNames = append(signatureNames, s.Name)
+		}
+		if len(signatureNames) == 0 && opts.DoVerify() {
+			return nil, errors.Newf("no signature found in %s", state.History)
+		}
+	}
+	if opts.DoVerify() && !opts.DoSign() {
+		for _, n := range signatureNames {
+			f := cd.GetSignatureIndex(n)
+			if f < 0 {
+				return nil, errors.Newf("signature %q not found in %s", n, state.History)
+			}
+		}
+	}
+
 	for i, reference := range cd.References {
 		var calculatedDigest *metav1.DigestSpec
 		if reference.Digest == nil && !opts.DoUpdate() {
-			return nil, errors.Newf(refMsg(reference, state, "no digest for component reference"))
+			printer.Printf("  no digest given for reference %s", reference)
 		}
-		if reference.Digest == nil || opts.Verify {
+		if reference.Digest == nil || opts.Recursively || opts.Verify {
 			nested, err := opts.Resolver.LookupComponentVersion(reference.GetComponentName(), reference.GetVersion())
 			if err != nil {
 				return nil, errors.Wrapf(err, refMsg(reference, state, "failed resolving component reference"))
@@ -75,6 +94,9 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 				return nil, errors.Wrapf(err, refMsg(reference, state, "failed applying to component reference"))
 			}
 			closer.Close()
+		} else {
+			printer.Printf("  accepting digest from reference %s", reference)
+			calculatedDigest = reference.Digest
 		}
 
 		if reference.Digest == nil {
@@ -136,22 +158,13 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 	}
 	spec := &metav1.DigestSpec{
 		HashAlgorithm:          opts.Hasher.Algorithm(),
-		NormalisationAlgorithm: compdesc.JsonNormalisationV1,
+		NormalisationAlgorithm: opts.NormalizationAlgo,
 		Value:                  digest,
 	}
 
 	if opts.DoVerify() {
-		list := opts.SignatureNames
-		if len(opts.SignatureNames) == 0 {
-			for _, s := range cd.Signatures {
-				list = append(list, s.Name)
-			}
-			if len(list) == 0 {
-				return nil, errors.Newf("no signature found in %s", state.History)
-			}
-		}
 		found := []string{}
-		for _, n := range list {
+		for _, n := range signatureNames {
 			f := cd.GetSignatureIndex(n)
 			if f < 0 {
 				continue
@@ -189,6 +202,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 			}
 		}
 	}
+
 	found := cd.GetSignatureIndex(opts.SignatureName())
 	if opts.DoSign() && (!opts.DoVerify() || found == -1) {
 		sig, err := opts.Signer.Sign(digest, opts.Hasher.Crypto(), opts.Issuer, opts.PrivateKey())
@@ -235,7 +249,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 }
 
 func refMsg(ref compdesc.ComponentReference, state common.WalkingState, msg string, args ...interface{}) string {
-	return fmt.Sprintf("%s %q [%s:%s] in %s", fmt.Sprintf(msg, args...), ref.Name, ref.ComponentName, ref.Version, state.History)
+	return fmt.Sprintf("%s %s in %s", fmt.Sprintf(msg, args...), ref, state.History)
 }
 
 func resMsg(ref *compdesc.Resource, state common.WalkingState, msg string, args ...interface{}) string {

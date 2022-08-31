@@ -59,6 +59,11 @@ $(GEN)/push.$(NAME): $(GEN)/ctf
 	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
 	touch $(GEN)/push.$(NAME)
 
+.PHONY: plain-push
+plain-push: $(GEN)
+	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
+	touch $(GEN)/push.$(NAME)
+
 $(GEN):
 	mkdir -p $(GEN)
 

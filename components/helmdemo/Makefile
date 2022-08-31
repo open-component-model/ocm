@@ -4,7 +4,7 @@ IMAGE     = $(PROVIDER)/ocm$(NAME)
 COMPONENT = github.com/$(IMAGE)
 OCMREPO   = ghcr.io/$(PROVIDER)/cnudie
 
-HELMINSTCOMP = gitgub.com/$(PROVIDER)/ocmhelminstaller
+HELMINSTCOMP = github.com/$(PROVIDER)/ocmhelminstaller
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
 VERSION                                        = $(shell git describe --tags --exact-match 2>/dev/null|| echo "$$(cat $(REPO_ROOT)/VERSION)-dev")
@@ -30,7 +30,7 @@ version:
 .PHONY: ca
 ca: $(GEN)/ca
 
-$(GEN)/ca: $(GEN) resources.yaml references.yaml $(CHARTSRCS) installerspec.yaml helmconfig.yaml
+$(GEN)/ca: $(GEN) resources.yaml references.yaml $(CHARTSRCS) packagespec.yaml helmconfig.yaml
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" $(PROVIDER) $(GEN)/ca
 	$(OCM) add resources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" resources.yaml
 	$(OCM) add references $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" HELMINSTCOMP=$(HELMINSTCOMP) references.yaml
@@ -40,6 +40,11 @@ $(GEN)/ca: $(GEN) resources.yaml references.yaml $(CHARTSRCS) installerspec.yaml
 push: $(GEN)/ctf $(GEN)/push.$(NAME)
 
 $(GEN)/push.$(NAME): $(GEN)/ctf
+	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
+	touch $(GEN)/push.$(NAME)
+
+.PHONY: plain-push
+plain-push: $(GEN)
 	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
 	touch $(GEN)/push.$(NAME)
 
