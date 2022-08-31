@@ -96,6 +96,9 @@ func (r *Repository) read(force bool) error {
 	if err != nil {
 		return fmt.Errorf("unable to get config: %w", err)
 	}
+	if configReader == nil {
+		return nil
+	}
 	defer configReader.Close()
 
 	handler := gardenercfgcpi.GetHandler(r.configType)
@@ -144,6 +147,13 @@ func (r *Repository) getRawConfig() (io.ReadCloser, error) {
 	} else {
 		res, err := http.Get(u.String())
 		if err != nil {
+			// the secret server might be temporarily not available.
+			// for these situations we should allow a retry at a later point in time
+			// while keeping the old data for the moment.
+			if errors.IsRetryable(err) {
+				// TODO: log error
+				return nil, nil
+			}
 			return nil, fmt.Errorf("request to secret server failed: %w", err)
 		}
 		reader = res.Body

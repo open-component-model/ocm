@@ -90,14 +90,11 @@ var _ = Describe("gardener config", func() {
 	})
 
 	It("resolves repository", func() {
-		svr := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-			writer.WriteHeader(200)
-			_, err := writer.Write([]byte(containerRegistryCfg))
-			Expect(err).ToNot(HaveOccurred())
-		}))
-		defer svr.Close()
-
-		specdata := fmt.Sprintf(repoSpecTemplate, svr.URL, local.Plaintext)
+		const (
+			url    = "http://localhost:8080/container_registry"
+			cipher = local.Plaintext
+		)
+		specdata := fmt.Sprintf(repoSpecTemplate, url, cipher)
 
 		repo, err := defaultContext.RepositoryForConfig([]byte(specdata), nil)
 		Expect(err).ToNot(HaveOccurred())
