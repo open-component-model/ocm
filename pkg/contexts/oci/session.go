@@ -71,6 +71,11 @@ func newSession(s datacontext.SessionBase) datacontext.Session {
 	}
 }
 
+func (s *session) Close() error {
+	return s.Session.Close()
+	// TODO: cleanup cache
+}
+
 func (s *session) LookupRepository(ctx Context, spec RepositorySpec) (Repository, error) {
 	spec, err := ctx.RepositoryTypes().CreateRepositorySpec(spec)
 	if err != nil {

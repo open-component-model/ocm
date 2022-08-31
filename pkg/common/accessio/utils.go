@@ -140,3 +140,10 @@ func (c *once) Close() error {
 
 	return nil
 }
+
+func Close(c io.Closer) error {
+	if c == nil {
+		return nil
+	}
+	return c.Close()
+}

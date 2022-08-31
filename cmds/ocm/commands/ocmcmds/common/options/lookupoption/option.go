@@ -62,7 +62,7 @@ func (o *Option) getResolver(ctx clictx.OCM, session ocm.Session) (ocm.Component
 			if err != nil {
 				return nil, err
 			}
-			resolvers = append(resolvers, ocm.NewSessionBasedResolver(session, r))
+			resolvers = append(resolvers, r)
 		}
 		return ocm.NewCompoundResolver(resolvers...), nil
 	}

@@ -16,6 +16,7 @@ package transfer
 
 import (
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
 	ocmcpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -61,9 +62,11 @@ func transferVersion(printer common.Printer, state common.WalkingState, src ocmc
 	defer comp.Close()
 
 	t, err := comp.LookupVersion(src.GetVersion())
+	defer accessio.Close(t)
 	if err != nil {
 		if errors.IsErrNotFound(err) {
 			t, err = comp.NewVersion(src.GetVersion())
+			defer accessio.Close(t)
 		}
 	} else {
 		var ok bool
@@ -76,7 +79,6 @@ func transferVersion(printer common.Printer, state common.WalkingState, src ocmc
 	if err != nil {
 		return errors.Wrapf(err, "%s: creating target version", state.History)
 	}
-	defer t.Close()
 
 	err = CopyVersion(printer, state.History, src, t, handler)
 	if err != nil {
@@ -91,6 +93,7 @@ func transferVersion(printer common.Printer, state common.WalkingState, src ocmc
 		}
 		if cv != nil {
 			list.Add(transferVersion(subp, state, cv, tgt, shdlr))
+			cv.Close()
 		}
 	}
 
