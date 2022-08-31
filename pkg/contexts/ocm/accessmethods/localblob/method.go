@@ -87,12 +87,12 @@ func (a *AccessSpec) GetMimeType() string {
 	return a.MediaType
 }
 
-func (a *AccessSpec) GetReferenceHint() string {
+func (a *AccessSpec) GetReferenceHint(cv cpi.ComponentVersionAccess) string {
 	return a.ReferenceName
 }
 
-func (a *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
-	return c.AccessMethod(a)
+func (a *AccessSpec) AccessMethod(cv cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
+	return cv.AccessMethod(a)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

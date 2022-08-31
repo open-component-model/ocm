@@ -16,6 +16,7 @@ package ociartefact
 
 import (
 	"io"
+	"strings"
 	"sync"
 
 	"github.com/opencontainers/go-digest"
@@ -76,12 +77,18 @@ func (_ *AccessSpec) IsLocal(cpi.Context) bool {
 	return false
 }
 
-func (a *AccessSpec) GetReferenceHint() string {
+func (a *AccessSpec) GetReferenceHint(cv cpi.ComponentVersionAccess) string {
 	ref, err := oci.ParseRef(a.ImageReference)
 	if err != nil {
 		return ""
 	}
+	prefix := cpi.RepositoryPrefix(cv.Repository().GetSpecification())
 	hint := ref.Repository
+	if strings.HasPrefix(hint, prefix+grammar.RepositorySeparator) {
+		// try to keep hint identical, even across intermediate
+		// artefact globalizations
+		hint = hint[len(prefix)+1:]
+	}
 	if ref.Tag != nil {
 		hint += grammar.TagSeparator + *ref.Tag
 	}

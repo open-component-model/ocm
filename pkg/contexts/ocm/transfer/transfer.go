@@ -133,13 +133,8 @@ func CopyVersion(printer common.Printer, hist common.History, src ocm.ComponentV
 					}
 				}
 				if ok {
-					hint := ""
-					if h, ok := a.(ocm.HintProvider); ok {
-						hint = h.GetReferenceHint()
-					}
-					if printer != nil {
-						printer.Printf("...resource %d...\n", i)
-					}
+					hint := ocmcpi.ArtefactNameHint(a, src)
+					printArtefactInfo(printer, "resource", i, hint)
 					err = handler.HandleTransferResource(r, m, hint, t)
 				}
 			}
@@ -165,13 +160,8 @@ func CopyVersion(printer common.Printer, hist common.History, src ocm.ComponentV
 					}
 				}
 				if ok {
-					hint := ""
-					if h, ok := a.(ocm.HintProvider); ok {
-						hint = h.GetReferenceHint()
-					}
-					if printer != nil {
-						printer.Printf("...source %d...\n", i)
-					}
+					hint := ocmcpi.ArtefactNameHint(a, src)
+					printArtefactInfo(printer, "source", i, hint)
 					err = handler.HandleTransferSource(r, m, hint, t)
 				}
 			}
@@ -184,4 +174,14 @@ func CopyVersion(printer common.Printer, hist common.History, src ocm.ComponentV
 		}
 	}
 	return nil
+}
+
+func printArtefactInfo(printer common.Printer, kind string, index int, hint string) {
+	if printer != nil {
+		if hint != "" {
+			printer.Printf("...resource %d(%s)...\n", index, hint)
+		} else {
+			printer.Printf("...resource %d...\n", index)
+		}
+	}
 }

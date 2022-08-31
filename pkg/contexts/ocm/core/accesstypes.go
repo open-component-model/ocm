@@ -49,7 +49,7 @@ type AccessSpec interface {
 // expanding a blob to a repository specific representation to determine a
 // useful name.
 type HintProvider interface {
-	GetReferenceHint() string
+	GetReferenceHint(cv ComponentVersionAccess) string
 }
 
 // AccessMethod described the access to a dedicate resource
