@@ -34,14 +34,14 @@ type Repository struct {
 var _ cpi.Repository = &Repository{}
 
 func NewRepository(ctx cpi.Context, spec *RepositorySpec) (*Repository, error) {
-	sysctx := &types.SystemContext{
-		DockerDaemonHost: spec.DockerHost,
-	}
 	client, err := newDockerClient(spec.DockerHost)
 	if err != nil {
 		return nil, err
 	}
-	sysctx.DockerDaemonHost = client.DaemonHost()
+
+	sysctx := &types.SystemContext{
+		DockerDaemonHost: client.DaemonHost(),
+	}
 
 	return &Repository{
 		ctx:    ctx,
