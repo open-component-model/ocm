@@ -110,6 +110,7 @@ func (o *Command) Run() error {
 		closureoption.From(o),
 		overwriteoption.From(o),
 		rscbyvalueoption.From(o),
+		lookupoption.From(o),
 		spiff.Script(scriptoption.From(o).ScriptData),
 		spiff.ScriptFilesystem(o.FileSystem()),
 	)
@@ -146,7 +147,7 @@ var _ output.Output = (*action)(nil)
 
 func (a *action) Add(e interface{}) error {
 	o := e.(*comphdlr.Object)
-	err := transfer.TransferVersion(a.printer, a.closure, o.Repository, o.ComponentVersion, a.target, a.handler)
+	err := transfer.TransferVersion(a.printer, a.closure, o.ComponentVersion, a.target, a.handler)
 	a.errors.Add(err)
 	if err != nil {
 		a.printer.Printf("Error: %s\n", err)

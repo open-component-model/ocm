@@ -110,7 +110,7 @@ var _ = Describe("upload", func() {
 		handler, err := standard.New(standard.ResourcesByValue())
 		Expect(err).To(Succeed())
 
-		err = transfer.TransferVersion(nil, nil, ca.Repository(), ca, ctf, handler)
+		err = transfer.TransferVersion(nil, nil, ca, ctf, handler)
 		Expect(err).To(Succeed())
 		oca.Close()
 
@@ -136,7 +136,7 @@ var _ = Describe("upload", func() {
 		attr := ociuploadattr.New(TARGET + grammar.RepositorySeparator + grammar.RepositorySeparator + "copy")
 		ociuploadattr.Set(ctx, attr)
 
-		err = transfer.TransferVersion(nil, nil, ctf, cv, copy, nil)
+		err = transfer.TransferVersion(nil, nil, cv, copy, nil)
 		Expect(err).To(Succeed())
 
 		// check type

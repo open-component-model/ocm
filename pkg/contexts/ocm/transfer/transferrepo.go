@@ -52,21 +52,13 @@ func TransferComponents(printer common.Printer, closure TransportClosure, repo o
 			if list.Addf(subp, err, "list versions for %s", c) == nil {
 				for _, v := range vers {
 					meta := &compdesc.ElementMeta{Name: c, Version: v}
-					sub, h, err := handler.TransferVersion(repo, nil, meta)
-					if list.Addf(subp, err, "version %s", v) == nil {
-						if sub != nil {
-							subcomp := comp
-							if sub != repo {
-								subcomp, err = sub.LookupComponent(c)
-								if list.Addf(subp, err, "component %s redirected for %s", c, v) != nil {
-									continue
-								}
-							}
-							compvers, err := subcomp.LookupVersion(v)
-							if list.Addf(subp, err, "version %s", v) == nil {
-								list.Addf(subp, TransferVersion(subp, closure, repo, compvers, tgt, h), "")
-							}
-						}
+					cv, h, err := handler.TransferVersion(repo, nil, meta)
+					if err != nil {
+						list.Addf(subp, err, "version %s", v)
+						continue
+					}
+					if cv != nil {
+						list.Addf(subp, TransferVersion(subp, closure, cv, tgt, h), "")
 					}
 				}
 			}

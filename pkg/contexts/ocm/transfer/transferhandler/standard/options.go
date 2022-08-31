@@ -15,6 +15,7 @@
 package standard
 
 import (
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 )
 
@@ -23,11 +24,13 @@ type Options struct {
 	resourcesByValue bool
 	sourcesByValue   bool
 	overwrite        bool
+	resolver         ocm.ComponentVersionResolver
 }
 
 var _ ResourcesByValueOption = (*Options)(nil)
 var _ SourcesByValueOption = (*Options)(nil)
 var _ RecursiveOption = (*Options)(nil)
+var _ ResolverOption = (*Options)(nil)
 
 func (o *Options) SetOverwrite(overwrite bool) {
 	o.overwrite = overwrite
@@ -45,6 +48,10 @@ func (o *Options) SetSourcesByValue(sourcesByValue bool) {
 	o.sourcesByValue = sourcesByValue
 }
 
+func (o *Options) SetResolver(resolver ocm.ComponentVersionResolver) {
+	o.resolver = resolver
+}
+
 func (o *Options) IsOverwrite() bool {
 	return o.overwrite
 }
@@ -59,6 +66,10 @@ func (o *Options) IsResourcesByValue() bool {
 
 func (o *Options) IsSourcesByValue() bool {
 	return o.sourcesByValue
+}
+
+func (o *Options) GetResolver() ocm.ComponentVersionResolver {
+	return o.resolver
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -159,5 +170,27 @@ func (o *sourcesByValueOption) ApplyTransferOption(to transferhandler.TransferOp
 func SourcesByValue(args ...bool) transferhandler.TransferOption {
 	return &sourcesByValueOption{
 		flag: GetFlag(args...),
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+type ResolverOption interface {
+	GetResolver() ocm.ComponentVersionResolver
+	SetResolver(ocm.ComponentVersionResolver)
+}
+
+type resolverOption struct {
+	resolver ocm.ComponentVersionResolver
+}
+
+func (o *resolverOption) ApplyTransferOption(to transferhandler.TransferOptions) error {
+	to.(ResolverOption).SetResolver(o.resolver)
+	return nil
+}
+
+func WithResolver(resolver ocm.ComponentVersionResolver) transferhandler.TransferOption {
+	return &resolverOption{
+		resolver: resolver,
 	}
 }

@@ -18,6 +18,8 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 
@@ -93,4 +95,8 @@ func (o *Option) LookupComponentVersion(name string, vers string) (ocm.Component
 		return nil, err
 	}
 	return cv, err
+}
+
+func (o *Option) ApplyTransferOption(opts transferhandler.TransferOptions) error {
+	return standard.WithResolver(o.Resolver).ApplyTransferOption(opts)
 }

@@ -27,7 +27,7 @@ import (
 
 type TransportClosure = common.NameVersionInfo
 
-func TransferVersion(printer common.Printer, closure TransportClosure, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
+func TransferVersion(printer common.Printer, closure TransportClosure, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
 	if closure == nil {
 		closure = TransportClosure{}
 	}
@@ -35,10 +35,10 @@ func TransferVersion(printer common.Printer, closure TransportClosure, repo ocmc
 		printer = common.NewPrinter(nil)
 	}
 	state := common.WalkingState{Closure: closure}
-	return transferVersion(printer, state, repo, src, tgt, handler)
+	return transferVersion(printer, state, src, tgt, handler)
 }
 
-func transferVersion(printer common.Printer, state common.WalkingState, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
+func transferVersion(printer common.Printer, state common.WalkingState, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
 	nv := common.VersionedElementKey(src)
 	if ok, err := state.Add(ocm.KIND_COMPONENTVERSION, nv); !ok {
 		return err
@@ -85,19 +85,12 @@ func transferVersion(printer common.Printer, state common.WalkingState, repo ocm
 	subp := printer.AddGap("  ")
 	list := errors.ErrListf("component references for %s", nv)
 	for _, r := range d.References {
-		srepo, shdlr, err := handler.TransferVersion(repo, src, &r.ElementMeta)
+		cv, shdlr, err := handler.TransferVersion(src.Repository(), src, &r.ElementMeta)
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "%s: nested component %s[%s:%s]", state.History, r.GetName(), r.ComponentName, r.GetVersion())
 		}
-		if srepo != nil {
-			c, err := srepo.LookupComponentVersion(r.ComponentName, r.GetVersion())
-			if err != nil {
-				return errors.Wrapf(err, "%s: nested component %s[%s:%s]", state.History, r.GetName(), r.ComponentName, r.GetVersion())
-			}
-			list.Add(transferVersion(subp, state, srepo, c, tgt, shdlr))
-			if srepo != repo {
-				srepo.Close()
-			}
+		if cv != nil {
+			list.Add(transferVersion(subp, state, cv, tgt, shdlr))
 		}
 	}
 
