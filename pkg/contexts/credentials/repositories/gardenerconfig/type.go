@@ -15,12 +15,23 @@ import (
 const (
 	RepositoryType   = "GardenerConfig"
 	RepositoryTypeV1 = RepositoryType + runtime.VersionSeparator + "v1"
-	CONSUMER_TYPE    = "gardenerConfig"
+	CONSUMER_TYPE    = "Config.gardener.cloud"
 )
+
+var identityMatcher = hostpath.IdentityMatcher(CONSUMER_TYPE)
+
+func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
+	return identityMatcher(pattern, cur, id)
+}
 
 func init() {
 	cpi.RegisterRepositoryType(RepositoryType, cpi.NewRepositoryType(RepositoryType, &RepositorySpec{}))
 	cpi.RegisterRepositoryType(RepositoryTypeV1, cpi.NewRepositoryType(RepositoryTypeV1, &RepositorySpec{}))
+
+	cpi.RegisterStandardIdentityMatcher(CONSUMER_TYPE, IdentityMatcher, `Gardener config credential matcher
+
+It matches the <code>`+CONSUMER_TYPE+`</code> consumer type and additionally acts like 
+the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`)
 }
 
 // RepositorySpec describes a secret server based credential repository interface.
@@ -73,7 +84,7 @@ func getKey(cctx cpi.Context, configURL string) ([]byte, error) {
 	id.SetNonEmptyValue(hostpath.ID_PORT, parsedURL.Port())
 
 	var creds cpi.Credentials
-	src, err := cctx.GetCredentialsForConsumer(id, hostpath.IdentityMatcher(CONSUMER_TYPE))
+	src, err := cctx.GetCredentialsForConsumer(id, identityMatcher)
 	if err != nil {
 		if !errors.IsErrUnknown(err) {
 			return nil, fmt.Errorf("unable to get credentials source: %w", err)

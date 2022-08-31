@@ -22,15 +22,11 @@ import (
 	local "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig"
 	gardenercfgcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 )
 
 var _ = Describe("gardener config", func() {
-	props := common.Properties{
-		"username": "abc",
-		"password": "123",
-	}
-
-	creds := `{
+	containerRegistryCfg := `{
 	"container_registry": {
 		"test-credentials": {
 			"username": "abc",
@@ -42,9 +38,20 @@ var _ = Describe("gardener config", func() {
 	}
 }`
 	encryptionKey := "abcdefghijklmnop"
-	encryptedCredentials := "Uz4mfePXFOUbjUEZnRrnG8zP2T7lRH6bR2rFHYgWDwZUXfW7D5wArwY4dsBACPVFNapF7kcM9z79+LvJXd2kNoIfvUyMOhrSDAyv4LtUqYSKBOoRH/aJMnXjmN9GQBCXSRSJs/Fu21AoDNo8fA9zYvvc7WxTldkYC/vHxLVNJu5j176e1QiaS9hwDjgNhgyUT3XUjHUyQ19PcRgwDglRLfiL4Cs/fYPPxdg4YZQdCnc="
+	encryptedContainerRegistryCfg := "Uz4mfePXFOUbjUEZnRrnG8zP2T7lRH6bR2rFHYgWDwZUXfW7D5wArwY4dsBACPVFNapF7kcM9z79+LvJXd2kNoIfvUyMOhrSDAyv4LtUqYSKBOoRH/aJMnXjmN9GQBCXSRSJs/Fu21AoDNo8fA9zYvvc7WxTldkYC/vHxLVNJu5j176e1QiaS9hwDjgNhgyUT3XUjHUyQ19PcRgwDglRLfiL4Cs/fYPPxdg4YZQdCnc="
 
-	specTemplate := `{"type":"GardenerConfig","url":"%s","configType":"container_registry","cipher":"%s","propagateConsumerIdentity":true}`
+	expectedConsumerId := cpi.ConsumerIdentity{
+		cpi.CONSUMER_ATTR_TYPE: identity.CONSUMER_TYPE,
+		hostpath.ID_HOSTNAME:   "eu.gcr.io",
+		hostpath.ID_PATHPREFIX: "test-project",
+	}
+
+	expectedCreds := cpi.NewCredentials(common.Properties{
+		cpi.ATTR_USERNAME: "abc",
+		cpi.ATTR_PASSWORD: "123",
+	})
+
+	repoSpecTemplate := `{"type":"GardenerConfig","url":"%s","configType":"container_registry","cipher":"%s","propagateConsumerIdentity":true}`
 
 	var defaultContext credentials.Context
 
@@ -57,7 +64,7 @@ var _ = Describe("gardener config", func() {
 			url    = "http://localhost:8080/container_registry"
 			cipher = local.Plaintext
 		)
-		expectedSpec := fmt.Sprintf(specTemplate, url, cipher)
+		expectedSpec := fmt.Sprintf(repoSpecTemplate, url, cipher)
 
 		spec := local.NewRepositorySpec("http://localhost:8080/container_registry", "container_registry", local.Plaintext, true)
 		data, err := json.Marshal(spec)
@@ -70,7 +77,7 @@ var _ = Describe("gardener config", func() {
 			url    = "http://localhost:8080/container_registry"
 			cipher = local.Plaintext
 		)
-		specdata := fmt.Sprintf(specTemplate, url, cipher)
+		specdata := fmt.Sprintf(repoSpecTemplate, url, cipher)
 
 		spec, err := defaultContext.RepositorySpecForConfig([]byte(specdata), nil)
 		Expect(err).ToNot(HaveOccurred())
@@ -85,12 +92,12 @@ var _ = Describe("gardener config", func() {
 	It("resolves repository", func() {
 		svr := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 			writer.WriteHeader(200)
-			_, err := writer.Write([]byte(creds))
+			_, err := writer.Write([]byte(containerRegistryCfg))
 			Expect(err).ToNot(HaveOccurred())
 		}))
 		defer svr.Close()
 
-		specdata := fmt.Sprintf(specTemplate, svr.URL, local.Plaintext)
+		specdata := fmt.Sprintf(repoSpecTemplate, svr.URL, local.Plaintext)
 
 		repo, err := defaultContext.RepositoryForConfig([]byte(specdata), nil)
 		Expect(err).ToNot(HaveOccurred())
@@ -101,26 +108,32 @@ var _ = Describe("gardener config", func() {
 	It("retrieves credentials from unencrypted server", func() {
 		svr := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 			writer.WriteHeader(200)
-			_, err := writer.Write([]byte(creds))
+			_, err := writer.Write([]byte(containerRegistryCfg))
 			Expect(err).ToNot(HaveOccurred())
 		}))
 		defer svr.Close()
 
-		spec := fmt.Sprintf(specTemplate, svr.URL, local.Plaintext)
+		spec := fmt.Sprintf(repoSpecTemplate, svr.URL, local.Plaintext)
 
 		repo, err := defaultContext.RepositoryForConfig([]byte(spec), nil)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(repo).ToNot(BeNil())
 
-		credentials, err := repo.LookupCredentials("test-credentials")
+		credentialsFromRepo, err := repo.LookupCredentials("test-credentials")
 		Expect(err).ToNot(HaveOccurred())
-		Expect(credentials.Properties()).To(Equal(props))
+		Expect(credentialsFromRepo).To(Equal(expectedCreds))
+
+		credSrc, err := defaultContext.GetCredentialsForConsumer(expectedConsumerId, hostpath.IdentityMatcher(identity.CONSUMER_TYPE))
+		Expect(err).ToNot(HaveOccurred())
+		credentialsFromCtx, err := credSrc.Credentials(defaultContext)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(credentialsFromCtx).To(Equal(expectedCreds))
 	})
 
 	It("retrieves credentials from encrypted server", func() {
 		svr := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 			writer.WriteHeader(200)
-			data, err := base64.StdEncoding.DecodeString(encryptedCredentials)
+			data, err := base64.StdEncoding.DecodeString(encryptedContainerRegistryCfg)
 			Expect(err).ToNot(HaveOccurred())
 			_, err = writer.Write(data)
 			Expect(err).ToNot(HaveOccurred())
@@ -144,16 +157,21 @@ var _ = Describe("gardener config", func() {
 
 		defaultContext.SetCredentialsForConsumer(id, creds)
 
-		spec := fmt.Sprintf(specTemplate, svr.URL, local.AESECB)
+		spec := fmt.Sprintf(repoSpecTemplate, svr.URL, local.AESECB)
 
 		repo, err := defaultContext.RepositoryForConfig([]byte(spec), nil)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(repo).ToNot(BeNil())
 
-		credentials, err := repo.LookupCredentials("test-credentials")
+		credentialsFromRepo, err := repo.LookupCredentials("test-credentials")
 		Expect(err).ToNot(HaveOccurred())
+		Expect(credentialsFromRepo).To(Equal(expectedCreds))
 
-		Expect(credentials.Properties()).To(Equal(props))
+		credSrc, err := defaultContext.GetCredentialsForConsumer(expectedConsumerId, hostpath.IdentityMatcher(identity.CONSUMER_TYPE))
+		Expect(err).ToNot(HaveOccurred())
+		credentialsFromCtx, err := credSrc.Credentials(defaultContext)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(credentialsFromCtx).To(Equal(expectedCreds))
 	})
 
 	It("retrieves credentials from file", func() {
@@ -164,22 +182,27 @@ var _ = Describe("gardener config", func() {
 		file, err := fs.Create(filename)
 		Expect(err).ToNot(HaveOccurred())
 
-		_, err = file.Write([]byte(creds))
+		_, err = file.Write([]byte(containerRegistryCfg))
 		Expect(err).ToNot(HaveOccurred())
 
 		err = file.Close()
 		Expect(err).ToNot(HaveOccurred())
 
-		spec := fmt.Sprintf(specTemplate, "file://"+filename, local.Plaintext)
+		spec := fmt.Sprintf(repoSpecTemplate, "file://"+filename, local.Plaintext)
 
 		repo, err := defaultContext.RepositoryForConfig([]byte(spec), nil)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(repo).ToNot(BeNil())
 
-		credentials, err := repo.LookupCredentials("test-credentials")
+		credentialsFromRepo, err := repo.LookupCredentials("test-credentials")
 		Expect(err).ToNot(HaveOccurred())
+		Expect(credentialsFromRepo).To(Equal(expectedCreds))
 
-		Expect(credentials.Properties()).To(Equal(props))
+		credSrc, err := defaultContext.GetCredentialsForConsumer(expectedConsumerId, hostpath.IdentityMatcher(identity.CONSUMER_TYPE))
+		Expect(err).ToNot(HaveOccurred())
+		credentialsFromCtx, err := credSrc.Credentials(defaultContext)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(credentialsFromCtx).To(Equal(expectedCreds))
 	})
 
 })
