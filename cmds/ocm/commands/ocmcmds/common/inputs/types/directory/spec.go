@@ -95,7 +95,7 @@ func (s *Spec) GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath 
 	defer temp.Close()
 
 	if s.Compress() {
-		s.SetMediaTypeIfNotDefined(mime.MIME_GZIP)
+		s.SetMediaTypeIfNotDefined(mime.MIME_TGZ)
 		gw := gzip.NewWriter(temp.Writer())
 		if err := tarutils.TarFileSystem(fs, inputPath, gw, opts); err != nil {
 			return nil, "", fmt.Errorf("unable to tar input artifact: %w", err)
