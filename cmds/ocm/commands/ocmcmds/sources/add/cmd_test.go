@@ -46,7 +46,7 @@ func CheckArchiveSource(env *TestEnv, cd *compdesc.ComponentDescriptor, name str
 	spec, err := env.OCMContext().AccessSpecForSpec(r.Access)
 	Expect(err).To(Succeed())
 	Expect(spec.GetType()).To(Equal(localblob.Type))
-	Expect(spec.(*localblob.AccessSpec).MediaType).To(Equal(mime.MIME_GZIP))
+	Expect(spec.(*localblob.AccessSpec).MediaType).To(Equal(mime.MIME_TGZ))
 
 	local := spec.(*localblob.AccessSpec).LocalReference
 	fmt.Printf("local: %s\n", local)

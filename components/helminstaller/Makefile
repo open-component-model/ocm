@@ -1,8 +1,8 @@
 NAME      = helminstaller
-PROVIDER  = mandelsoft
+PROVIDER  ?= mandelsoft
 IMAGE     = ocm$(NAME)
 COMPONENT = github.com/$(PROVIDER)/ocm$(NAME)
-OCMREPO   = ghcr.io/$(PROVIDER)/cnudie
+OCMREPO   ?= ghcr.io/$(PROVIDER)/cnudie
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
 VERSION                                        := $(shell git describe --tags --exact-match 2>/dev/null|| echo "$$(cat $(REPO_ROOT)/VERSION)-dev")
@@ -30,48 +30,63 @@ version:
 .PHONY: ca
 ca: $(GEN)/ca
 
-$(GEN)/ca: $(GEN)/image.$(NAME) $(GEN) resources.yaml executorspec.yaml
+$(GEN)/ca: $(GEN)/.exists $(GEN)/image.$(NAME) resources.yaml executorspec.yaml
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" $(PROVIDER) $(GEN)/ca
 	$(OCM) add resources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" resources.yaml
-	touch $(GEN)/ca
+	@touch $(GEN)/ca
 
 
 .PHONY: plain-ca
-plain-ca: $(GEN)
+plain-ca: $(GEN)/.exists
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" $(PROVIDER) $(GEN)/ca
 	$(OCM) add resources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" resources.yaml
-	touch $(GEN)/ca
+	@touch $(GEN)/ca
 
 .PHONY: build
 build: $(GEN)/image.$(NAME)
 
-$(GEN)/image.$(NAME): $(GEN) Dockerfile $(CMDSRCS) $(OCMSRCS)
+$(GEN)/image.$(NAME): $(GEN)/.exists Dockerfile $(CMDSRCS) $(OCMSRCS)
 	docker build -t $(IMAGE):$(VERSION) --file Dockerfile $(REPO_ROOT) \
           --build-arg COMMIT=$(COMMIT) \
           --build-arg EFFECTIVE_VERSION=$(EFFECTIVE_VERSION) \
           --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE)
-	touch $(GEN)/image.$(NAME)
+	@touch $(GEN)/image.$(NAME)
 
 .PHONY: push
 push: $(GEN)/ctf $(GEN)/push.$(NAME)
 
 $(GEN)/push.$(NAME): $(GEN)/ctf
 	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
-	touch $(GEN)/push.$(NAME)
+	@touch $(GEN)/push.$(NAME)
 
 .PHONY: plain-push
-plain-push: $(GEN)
+plain-push: $(GEN)/.exists
 	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
-	touch $(GEN)/push.$(NAME)
+	@touch $(GEN)/push.$(NAME)
 
-$(GEN):
-	mkdir -p $(GEN)
+.PHONY: transport
+transport:
+ifneq ($(TARGETREPO),)
+	$(OCM) transfer component -Vc  $(OCMREPO)//$(COMPONENT):$(VERSION) $(TARGETREPO)
+endif
+
+$(GEN)/.exists:
+	@mkdir -p $(GEN)
+	@touch $@
 
 .PHONY: info
 info:
 	@echo "ROOT:     $(REPO_ROOT)"
 	@echo "VERSION:  $(VERSION)"
 	@echo "COMMIT;   $(COMMIT)"
+
+.PHONY: describe
+describe: $(GEN)/ctf
+	ocm get resources --lookup $(OCMREPO) -c -o treewide $(GEN)/ctf
+
+.PHONY: descriptor
+descriptor: $(GEN)/ctf
+	ocm get component -S v3alpha1 -o yaml $(GEN)/ctf
 
 .PHONY: clean
 clean:
