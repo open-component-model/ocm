@@ -1,7 +1,7 @@
 NAME      = helminstaller
 PROVIDER  = mandelsoft
 IMAGE     = ocm$(NAME)
-COMPONENT = github.com/$(IMAGE)
+COMPONENT = github.com/$(PROVIDER)/ocm$(NAME)
 OCMREPO   = ghcr.io/$(PROVIDER)/cnudie
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
