@@ -15,6 +15,8 @@
 package utils
 
 import (
+	"fmt"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -22,6 +24,9 @@ import (
 
 func ResolveReferencePath(cv ocm.ComponentVersionAccess, path []metav1.Identity, resolver ocm.ComponentVersionResolver) (ocm.ComponentVersionAccess, error) {
 	eff := cv
+	if cv == nil {
+		return nil, fmt.Errorf("no component version specified")
+	}
 	for _, cr := range path {
 		if eff != cv {
 			defer eff.Close()
@@ -35,6 +40,9 @@ func ResolveReferencePath(cv ocm.ComponentVersionAccess, path []metav1.Identity,
 		eff, err = compundResolver.LookupComponentVersion(cref.GetComponentName(), cref.GetVersion())
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot resolve component reference")
+		}
+		if eff == nil {
+			return nil, errors.ErrNotFound(ocm.KIND_COMPONENTREFERENCE, cref.String())
 		}
 	}
 	return eff, nil
