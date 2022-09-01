@@ -18,6 +18,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/goccy/go-yaml/ast"
+	"github.com/goccy/go-yaml/parser"
+
 	"github.com/open-component-model/ocm/pkg/runtime"
 
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -89,6 +92,10 @@ func (s *Substitution) GetValue() (interface{}, error) {
 	var value interface{}
 	err := runtime.DefaultYAMLEncoding.Unmarshal(s.Value, &value)
 	return value, err
+}
+
+func (s *Substitution) GetAST() (*ast.File, error) {
+	return parser.ParseBytes(s.Value, 0)
 }
 
 type Substitutions []Substitution

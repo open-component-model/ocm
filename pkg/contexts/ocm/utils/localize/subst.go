@@ -15,18 +15,17 @@
 package localize
 
 import (
-	"fmt"
-	"strings"
-
+	yaml "github.com/goccy/go-yaml"
+	"github.com/goccy/go-yaml/ast"
+	"github.com/goccy/go-yaml/parser"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/runtime"
-
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 type fileinfo struct {
-	content interface{}
+	content *ast.File
 	json    bool
 }
 
@@ -46,16 +45,18 @@ func Substitute(subs Substitutions, fs vfs.FileSystem) error {
 				return errors.Wrapf(err, "entry %d: cannot read file %q", i, file)
 			}
 			fi.json = true
-			if err = runtime.DefaultJSONEncoding.Unmarshal(data, &fi.content); err != nil {
-				if err = runtime.DefaultYAMLEncoding.Unmarshal(data, &fi.content); err != nil {
-					return errors.Wrapf(err, "entry %d: invalid YAML file %q", i, file)
-				}
+			var content interface{}
+			if err = runtime.DefaultJSONEncoding.Unmarshal(data, &content); err != nil {
 				fi.json = false
+			}
+			fi.content, err = parser.ParseBytes(data, 0)
+			if err != nil {
+				return errors.Wrapf(err, "entry %d: invalid YAML file %q", i, file)
 			}
 			files[file] = fi
 		}
 
-		value, err := s.GetValue()
+		value, err := s.GetAST()
 		if err != nil {
 			return errors.Wrapf(err, "entry %d: cannot unmarshal value", i+1)
 		}
@@ -66,17 +67,18 @@ func Substitute(subs Substitutions, fs vfs.FileSystem) error {
 	}
 
 	for file, fi := range files {
-		marshal := runtime.DefaultYAMLEncoding.Marshal
+
+		data := []byte(fi.content.String())
 		if fi.json {
-			marshal = runtime.DefaultJSONEncoding.Marshal
+			// TODO: the package seems to keep the file type json/yaml, but I'm not sure
+			var err error
+			data, err = yaml.YAMLToJSON(data)
+			if err != nil {
+				return errors.Wrapf(err, "cannot marshal json %q after substitution ", file)
+			}
 		}
 
-		data, err := marshal(fi.content)
-		if err != nil {
-			return errors.Wrapf(err, "cannot marshal %q after substitution ", file)
-		}
-
-		err = vfs.WriteFile(fs, file, data, vfs.ModePerm)
+		err := vfs.WriteFile(fs, file, data, vfs.ModePerm)
 		if err != nil {
 			return errors.Wrapf(err, "file %q", file)
 		}
@@ -84,26 +86,10 @@ func Substitute(subs Substitutions, fs vfs.FileSystem) error {
 	return nil
 }
 
-func Set(content interface{}, path string, value interface{}) error {
-	values, ok := content.(map[string]interface{})
-	if !ok {
-		return fmt.Errorf("content must be a map")
+func Set(content *ast.File, path string, value *ast.File) error {
+	p, err := yaml.PathString("$." + path)
+	if err != nil {
+		return errors.Wrapf(err, "invalid substitution path")
 	}
-	fields := strings.Split(path, ".")
-	i := 0
-	for ; i < len(fields)-1; i++ {
-		f := strings.TrimSpace(fields[i])
-		v, ok := values[f]
-		if !ok {
-			v = map[string]interface{}{}
-			values[f] = v
-		} else {
-			if _, ok := v.(map[string]interface{}); !ok {
-				return fmt.Errorf("invalid field path %s", strings.Join(fields[:i+1], "."))
-			}
-		}
-		values = v.(map[string]interface{})
-	}
-	values[fields[len(fields)-1]] = value
-	return nil
+	return p.ReplaceWithFile(content, value)
 }

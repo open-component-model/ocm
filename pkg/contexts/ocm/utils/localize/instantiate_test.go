@@ -128,8 +128,8 @@ values:
 		Expect(err).To(Succeed())
 		CheckFile("dir/manifest1.yaml", fs, `
 manifest:
-  value1: ghcr.io/mandelsoft/test:v1
-  value2: mine
+  value1: "ghcr.io/mandelsoft/test:v1"
+  value2: "mine"
 `)
 	})
 })
