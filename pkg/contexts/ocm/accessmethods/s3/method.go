@@ -80,6 +80,10 @@ func New(region, bucket, key, version, mediaType string, downloader downloader.D
 	}
 }
 
+func (a *AccessSpec) Describe(ctx cpi.Context) string {
+	return fmt.Sprintf("S3 key %s in bucket %s", a.Key, a.Bucket)
+}
+
 func (_ *AccessSpec) IsLocal(cpi.Context) bool {
 	return false
 }

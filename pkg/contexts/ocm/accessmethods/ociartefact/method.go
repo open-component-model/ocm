@@ -15,6 +15,7 @@
 package ociartefact
 
 import (
+	"fmt"
 	"io"
 	"strings"
 	"sync"
@@ -71,6 +72,10 @@ func New(ref string) *AccessSpec {
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		ImageReference:      ref,
 	}
+}
+
+func (a *AccessSpec) Describe(ctx cpi.Context) string {
+	return fmt.Sprintf("OCI artefact %s", a.ImageReference)
 }
 
 func (_ *AccessSpec) IsLocal(cpi.Context) bool {

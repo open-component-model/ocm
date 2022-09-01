@@ -157,29 +157,29 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 			}
 			out.Outf(o.Context, "  processing document %d...\n", i)
 			if (tmp["input"] != nil || tmp["access"] != nil) && !h.RequireInputs() {
-				return errors.Newf("invalid spec %d in %q: no input or access possible for %s", i+1, filePath, listkey)
+				return errors.Newf("invalid spec %d in %q: no input or access possible for %s", i, filePath, listkey)
 			}
 
 			var list []json.RawMessage
 			if reslist, ok := tmp[listkey]; ok {
 				if len(tmp) != 1 {
-					return errors.Newf("invalid spec %d in %q: either a list or a single spec possible", i+1, filePath)
+					return errors.Newf("invalid spec %d in %q: either a list or a single spec possible", i, filePath)
 				}
 				l, ok := reslist.([]interface{})
 				if !ok {
-					return errors.Newf("invalid spec %d in %q: invalid resource list", i+1, filePath)
+					return errors.Newf("invalid spec %d in %q: invalid resource list", i, filePath)
 				}
 				for j, e := range l {
 					// cannot use json here, because yaml generates a map[interface{}]interface{}
 					data, err = yaml.Marshal(e)
 					if err != nil {
-						return errors.Newf("invalid spec %d[%d] in %q: %s", i+1, j+1, filePath, err.Error())
+						return errors.Newf("invalid spec %d[%d] in %q: %s", i, j+1, filePath, err.Error())
 					}
 					list = append(list, data)
 				}
 			} else {
 				if len(tmp) == 0 {
-					return errors.Newf("invalid spec %d in %q: empty", i+1, filePath)
+					return errors.Newf("invalid spec %d in %q: empty", i, filePath)
 				}
 				data, err := yaml.Marshal(tmp)
 				if err != nil {
@@ -189,11 +189,11 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 			}
 
 			for j, d := range list {
-				out.Outf(o.Context, "    processing index %d\n", j)
+				out.Outf(o.Context, "    processing index %d\n", j+1)
 				var input *ResourceInput
 				r, err := DecodeResource(d, h)
 				if err != nil {
-					return errors.Newf("invalid spec %d[%d] in %q: %s", i+1, j+1, filePath, err)
+					return errors.Newf("invalid spec %d[%d] in %q: %s", i, j+1, filePath, err)
 				}
 
 				if h.RequireInputs() {

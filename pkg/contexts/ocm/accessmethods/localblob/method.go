@@ -16,6 +16,7 @@ package localblob
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -77,6 +78,10 @@ var (
 
 func (a AccessSpec) MarshalJSON() ([]byte, error) {
 	return cpi.MarshalConvertedAccessSpec(cpi.DefaultContext(), &a)
+}
+
+func (a *AccessSpec) Describe(ctx cpi.Context) string {
+	return fmt.Sprintf("Local blob %s[%s]", a.LocalReference, a.ReferenceName)
 }
 
 func (a *AccessSpec) IsLocal(cpi.Context) bool {

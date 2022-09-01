@@ -53,6 +53,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 	}
 
 	cd := cv.GetDescriptor().Copy()
+	octx := cv.GetContext()
 	printer.Printf("applying to version %q...\n", nv)
 
 	signatureNames := opts.SignatureNames
@@ -114,7 +115,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 		raw := &cd.Resources[i]
 		acc, err := res.Access()
 		if err != nil {
-			return nil, errors.Wrapf(err, resMsg(raw, state, "failed getting access for resource"))
+			return nil, errors.Wrapf(err, resMsg(raw, "", state, "failed getting access for resource"))
 		}
 		if _, ok := opts.SkipAccessTypes[acc.GetKind()]; ok {
 			// set the do not sign digest notation on skip-access-type resources
@@ -128,7 +129,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 
 		meth, err := acc.AccessMethod(cv)
 		if err != nil {
-			return nil, errors.Wrapf(err, resMsg(raw, state, "failed creating access for resource"))
+			return nil, errors.Wrapf(err, resMsg(raw, acc.Describe(octx), state, "failed creating access for resource"))
 		}
 		var req []cpi.DigesterType
 		if raw.Digest != nil {
@@ -141,13 +142,13 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 		}
 		digest, err := blobdigesters.DetermineDigests(res.Meta().GetType(), opts.Hasher, opts.Registry, meth, req...)
 		if err != nil {
-			return nil, errors.Wrapf(err, resMsg(raw, state, "failed determining digest for resource"))
+			return nil, errors.Wrapf(err, resMsg(raw, acc.Describe(octx), state, "failed determining digest for resource"))
 		}
 		if len(digest) == 0 {
-			return nil, errors.Newf(resMsg(raw, state, "no digester accepts resource"))
+			return nil, errors.Newf(resMsg(raw, acc.Describe(octx), state, "no digester accepts resource"))
 		}
 		if raw.Digest != nil && !reflect.DeepEqual(*raw.Digest, digest[0]) {
-			return nil, errors.Newf(resMsg(raw, state, "calculated resource digest (%+v) mismatches existing digest (%+v) for", digest, raw.Digest))
+			return nil, errors.Newf(resMsg(raw, acc.Describe(octx), state, "calculated resource digest (%+v) mismatches existing digest (%+v) for", digest, raw.Digest))
 		}
 		cd.Resources[i].Digest = &digest[0]
 		printer.Printf("  resource %d:  %s: digest %s\n", i, res.Meta().GetIdentity(cv.GetDescriptor().Resources), &digest[0])
@@ -252,6 +253,9 @@ func refMsg(ref compdesc.ComponentReference, state common.WalkingState, msg stri
 	return fmt.Sprintf("%s %s in %s", fmt.Sprintf(msg, args...), ref, state.History)
 }
 
-func resMsg(ref *compdesc.Resource, state common.WalkingState, msg string, args ...interface{}) string {
+func resMsg(ref *compdesc.Resource, acc string, state common.WalkingState, msg string, args ...interface{}) string {
+	if acc != "" {
+		return fmt.Sprintf("%s %s:%s (%s) in %s", fmt.Sprintf(msg, args...), ref.Name, ref.Version, acc, state.History)
+	}
 	return fmt.Sprintf("%s %s:%s in %s", fmt.Sprintf(msg, args...), ref.Name, ref.Version, state.History)
 }
