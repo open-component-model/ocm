@@ -21,7 +21,7 @@ We decided to enable all linters with:
 * manageable amount of issues (no more than 20)
 * auto-fixable issues (--fix flag)
 
-All remaining linters is disabled until we decide to enable them.
+All remaining linters are disabled until we decide to enable them.
 
 ## Consequences
 
