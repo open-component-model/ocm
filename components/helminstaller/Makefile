@@ -1,6 +1,6 @@
 NAME      = helminstaller
 PROVIDER  = mandelsoft
-IMAGE     = $(PROVIDER)/ocm$(NAME)
+IMAGE     = ocm$(NAME)
 COMPONENT = github.com/$(IMAGE)
 OCMREPO   = ghcr.io/$(PROVIDER)/cnudie
 

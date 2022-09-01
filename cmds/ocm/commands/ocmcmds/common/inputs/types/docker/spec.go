@@ -15,10 +15,13 @@
 package docker
 
 import (
+	"fmt"
+
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
@@ -50,7 +53,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
 	locator, version, err := docker.ParseGenericRef(s.Path)
 	if err != nil {
 		return nil, "", err
@@ -65,9 +68,13 @@ func (s *Spec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.Tempo
 		return nil, "", err
 	}
 
+	if version == "" || version == "latest" {
+		version = nv.GetVersion()
+	}
 	blob, err := artefactset.SynthesizeArtefactBlob(ns, version)
 	if err != nil {
 		return nil, "", err
 	}
-	return blob, locator, nil
+	hint := fmt.Sprintf("%s/%s:%s", nv.GetName(), locator, version)
+	return blob, hint, nil
 }

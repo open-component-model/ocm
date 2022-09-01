@@ -29,6 +29,7 @@ import (
 	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -227,7 +228,7 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 			if r.input.Input != nil {
 				var acc ocm.AccessSpec
 				// Local Blob
-				blob, hint, berr := r.input.Input.GetBlob(o.Context, r.path)
+				blob, hint, berr := r.input.Input.GetBlob(o.Context, common.VersionedElementKey(obj), r.path)
 				if berr != nil {
 					return errors.Wrapf(berr, "cannot get resource blob for %q(%s)", r.spec.GetName(), r.source)
 				}

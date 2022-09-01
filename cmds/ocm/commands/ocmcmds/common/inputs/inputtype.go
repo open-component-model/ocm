@@ -22,6 +22,7 @@ import (
 	"github.com/modern-go/reflect2"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
@@ -35,7 +36,7 @@ import (
 type InputSpec interface {
 	runtime.VersionedTypedObject
 	Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath string) field.ErrorList
-	GetBlob(ctx clictx.Context, inputFilePath string) (accessio.TemporaryBlobAccess, string, error)
+	GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error)
 }
 type InputType interface {
 	runtime.TypedObjectDecoder
@@ -175,7 +176,7 @@ func (r *UnknownInputSpec) Validate(fldPath *field.Path, ctx clictx.Context, inp
 	return field.ErrorList{field.Invalid(fldPath.Child("type"), r.GetType(), "unknown type")}
 }
 
-func (r *UnknownInputSpec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (r *UnknownInputSpec) GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
 	return nil, "", errors.ErrUnknown("input type", r.GetType())
 }
 
@@ -228,7 +229,7 @@ func (s *GenericInputSpec) Validate(fldPath *field.Path, ctx clictx.Context, inp
 	return s.effective.Validate(fldPath, ctx, inputFilePath)
 }
 
-func (s *GenericInputSpec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (s *GenericInputSpec) GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
 	if s.effective == nil {
 		var err error
 		s.effective, err = s.Evaluate(For(ctx))
@@ -236,7 +237,7 @@ func (s *GenericInputSpec) GetBlob(ctx clictx.Context, inputFilePath string) (ac
 			return nil, "", err
 		}
 	}
-	return s.effective.GetBlob(ctx, inputFilePath)
+	return s.effective.GetBlob(ctx, nv, inputFilePath)
 }
 
 func (s *GenericInputSpec) Evaluate(scheme InputTypeScheme) (InputSpec, error) {
