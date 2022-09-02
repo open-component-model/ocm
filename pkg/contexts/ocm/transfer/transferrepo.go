@@ -51,8 +51,8 @@ func TransferComponents(printer common.Printer, closure TransportClosure, repo o
 			vers, err := comp.ListVersions()
 			if list.Addf(subp, err, "list versions for %s", c) == nil {
 				for _, v := range vers {
-					meta := &compdesc.ElementMeta{Name: c, Version: v}
-					cv, h, err := handler.TransferVersion(repo, nil, meta)
+					ref := compdesc.NewComponentReference("", c, v, nil)
+					cv, h, err := handler.TransferVersion(repo, nil, ref)
 					if err != nil {
 						list.Addf(subp, err, "version %s", v)
 						continue

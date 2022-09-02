@@ -85,7 +85,7 @@ func transferVersion(printer common.Printer, state common.WalkingState, src ocmc
 	subp := printer.AddGap("  ")
 	list := errors.ErrListf("component references for %s", nv)
 	for _, r := range d.References {
-		cv, shdlr, err := handler.TransferVersion(src.Repository(), src, &r.ElementMeta)
+		cv, shdlr, err := handler.TransferVersion(src.Repository(), src, &r)
 		if err != nil {
 			return errors.Wrapf(err, "%s: nested component %s[%s:%s]", state.History, r.GetName(), r.ComponentName, r.GetVersion())
 		}

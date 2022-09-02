@@ -58,12 +58,12 @@ func (h *Handler) OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.Compo
 	return h.Handler.OverwriteVersion(src, tgt)
 }
 
-func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ElementMeta) (ocm.ComponentVersionAccess, transferhandler.TransferHandler, error) {
+func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ComponentReference) (ocm.ComponentVersionAccess, transferhandler.TransferHandler, error) {
 	if src == nil || h.opts.IsRecursive() {
 		if h.opts.GetScript() == nil {
 			return h.Handler.TransferVersion(repo, src, meta)
 		}
-		binding := h.getBinding(src, nil, meta, nil)
+		binding := h.getBinding(src, nil, &meta.ElementMeta, nil)
 		result, r, s, err := h.EvalRecursion("componentversion", binding, "process")
 		if err != nil {
 			return nil, nil, err
