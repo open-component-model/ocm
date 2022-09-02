@@ -15,7 +15,7 @@ import (
 const (
 	RepositoryType   = "GardenerConfig"
 	RepositoryTypeV1 = RepositoryType + runtime.VersionSeparator + "v1"
-	CONSUMER_TYPE    = "Config.gardener.cloud"
+	CONSUMER_TYPE    = "Buildcredentials.gardener.cloud"
 )
 
 var identityMatcher = hostpath.IdentityMatcher(CONSUMER_TYPE)

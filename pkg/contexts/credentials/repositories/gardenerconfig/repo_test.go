@@ -39,13 +39,6 @@ var _ = Describe("gardener config", func() {
 }`
 	encryptionKey := "abcdefghijklmnop"
 	encryptedContainerRegistryCfg := "Uz4mfePXFOUbjUEZnRrnG8zP2T7lRH6bR2rFHYgWDwZUXfW7D5wArwY4dsBACPVFNapF7kcM9z79+LvJXd2kNoIfvUyMOhrSDAyv4LtUqYSKBOoRH/aJMnXjmN9GQBCXSRSJs/Fu21AoDNo8fA9zYvvc7WxTldkYC/vHxLVNJu5j176e1QiaS9hwDjgNhgyUT3XUjHUyQ19PcRgwDglRLfiL4Cs/fYPPxdg4YZQdCnc="
-
-	expectedConsumerId := cpi.ConsumerIdentity{
-		cpi.CONSUMER_ATTR_TYPE: identity.CONSUMER_TYPE,
-		hostpath.ID_HOSTNAME:   "eu.gcr.io",
-		hostpath.ID_PATHPREFIX: "test-project",
-	}
-
 	expectedCreds := cpi.NewCredentials(common.Properties{
 		cpi.ATTR_USERNAME: "abc",
 		cpi.ATTR_PASSWORD: "123",
@@ -119,8 +112,29 @@ var _ = Describe("gardener config", func() {
 		credentialsFromRepo, err := repo.LookupCredentials("test-credentials")
 		Expect(err).ToNot(HaveOccurred())
 		Expect(credentialsFromRepo).To(Equal(expectedCreds))
+	})
 
-		credSrc, err := defaultContext.GetCredentialsForConsumer(expectedConsumerId, hostpath.IdentityMatcher(identity.CONSUMER_TYPE))
+	It("propagates credentials with consumer ids in the context", func() {
+		expectedConsumerId := cpi.ConsumerIdentity{
+			cpi.CONSUMER_ATTR_TYPE: identity.CONSUMER_TYPE,
+			hostpath.ID_HOSTNAME:   "eu.gcr.io",
+			hostpath.ID_PATHPREFIX: "test-project",
+		}
+
+		svr := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			writer.WriteHeader(200)
+			_, err := writer.Write([]byte(containerRegistryCfg))
+			Expect(err).ToNot(HaveOccurred())
+		}))
+		defer svr.Close()
+
+		spec := fmt.Sprintf(repoSpecTemplate, svr.URL, local.Plaintext)
+
+		repo, err := defaultContext.RepositoryForConfig([]byte(spec), nil)
+		Expect(err).ToNot(HaveOccurred())
+		Expect(repo).ToNot(BeNil())
+
+		credSrc, err := defaultContext.GetCredentialsForConsumer(expectedConsumerId, local.IdentityMatcher)
 		Expect(err).ToNot(HaveOccurred())
 		credentialsFromCtx, err := credSrc.Credentials(defaultContext)
 		Expect(err).ToNot(HaveOccurred())
@@ -163,12 +177,6 @@ var _ = Describe("gardener config", func() {
 		credentialsFromRepo, err := repo.LookupCredentials("test-credentials")
 		Expect(err).ToNot(HaveOccurred())
 		Expect(credentialsFromRepo).To(Equal(expectedCreds))
-
-		credSrc, err := defaultContext.GetCredentialsForConsumer(expectedConsumerId, hostpath.IdentityMatcher(identity.CONSUMER_TYPE))
-		Expect(err).ToNot(HaveOccurred())
-		credentialsFromCtx, err := credSrc.Credentials(defaultContext)
-		Expect(err).ToNot(HaveOccurred())
-		Expect(credentialsFromCtx).To(Equal(expectedCreds))
 	})
 
 	It("retrieves credentials from file", func() {
@@ -194,12 +202,6 @@ var _ = Describe("gardener config", func() {
 		credentialsFromRepo, err := repo.LookupCredentials("test-credentials")
 		Expect(err).ToNot(HaveOccurred())
 		Expect(credentialsFromRepo).To(Equal(expectedCreds))
-
-		credSrc, err := defaultContext.GetCredentialsForConsumer(expectedConsumerId, hostpath.IdentityMatcher(identity.CONSUMER_TYPE))
-		Expect(err).ToNot(HaveOccurred())
-		credentialsFromCtx, err := credSrc.Credentials(defaultContext)
-		Expect(err).ToNot(HaveOccurred())
-		Expect(credentialsFromCtx).To(Equal(expectedCreds))
 	})
 
 })
