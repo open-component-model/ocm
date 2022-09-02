@@ -58,6 +58,10 @@ func Check(env *TestEnv, ldesc *artdesc.Descriptor, out string) {
 	list, err := tgt.ComponentLister().GetComponents("", true)
 	Expect(err).To(Succeed())
 	Expect(list).To(Equal([]string{COMPONENT}))
+	CheckComponent(env, ldesc, tgt)
+}
+
+func CheckComponent(env *TestEnv, ldesc *artdesc.Descriptor, tgt ocm.Repository) {
 	comp, err := tgt.LookupComponentVersion(COMPONENT, VERSION)
 	Expect(err).To(Succeed())
 	Expect(len(comp.GetDescriptor().Resources)).To(Equal(3))
@@ -186,7 +190,18 @@ transferring version "github.com/mandelsoft/test2:v1"...
 `))
 
 		Expect(env.DirExists(OUT)).To(BeTrue())
-		Check(env, ldesc, OUT)
+		tgt, err := ctfocm.Open(env.OCMContext(), accessobj.ACC_READONLY, OUT, 0, accessio.PathFileSystem(env.FileSystem()))
+		Expect(err).To(Succeed())
+		defer tgt.Close()
+
+		list, err := tgt.ComponentLister().GetComponents("", true)
+		Expect(err).To(Succeed())
+		Expect(list).To(ContainElements([]string{COMPONENT2, COMPONENT}))
+
+		_, err = tgt.LookupComponentVersion(COMPONENT2, VERSION)
+		Expect(err).To(Succeed())
+
+		CheckComponent(env, ldesc, tgt)
 	})
 
 	It("transfers ctf to tgz", func() {
