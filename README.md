@@ -20,7 +20,7 @@ Additionally it provides a generic solution
 This functionally is additionally put into a command line tool
 ([package `cmds/ocm`](cmds/ocm)), the 
 [`ocm` tool](docs/reference/ocm.md), which provides the
-most of the functionality of the library on the command line. This makes is easy
+most of the functionality of the [library](examples/lib/README.md) on the command line. This makes is easy
 to embed the creation of component versions in build processes, for example in a 
 [*makefile*](examples/make/Makefile).
 
