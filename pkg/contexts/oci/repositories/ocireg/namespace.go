@@ -48,7 +48,7 @@ var _ cpi.NamespaceAccess = (*Namespace)(nil)
 
 func NewNamespace(repo *Repository, name string) (*Namespace, error) {
 	ref := repo.getRef(name, "")
-	resolver, err := repo.getResolver(ref)
+	resolver, err := repo.getResolver(name)
 	if err != nil {
 		return nil, err
 	}

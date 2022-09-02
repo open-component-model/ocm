@@ -147,15 +147,22 @@ func (i ConsumerIdentity) Match(obj map[string]string) bool {
 }
 
 // Copy copies identity
-func (l ConsumerIdentity) Copy() ConsumerIdentity {
-	if l == nil {
+func (i ConsumerIdentity) Copy() ConsumerIdentity {
+	if i == nil {
 		return nil
 	}
 	n := ConsumerIdentity{}
-	for k, v := range l {
+	for k, v := range i {
 		n[k] = v
 	}
 	return n
+}
+
+// SetNonEmptyValue sets a key-value pair only if the value is not empty
+func (i ConsumerIdentity) SetNonEmptyValue(name, value string) {
+	if value != "" {
+		i[name] = value
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////

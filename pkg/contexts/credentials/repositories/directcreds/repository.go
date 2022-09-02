@@ -40,7 +40,7 @@ func (r *Repository) LookupCredentials(name string) (cpi.Credentials, error) {
 	return r.Credentials, nil
 }
 
-func (r Repository) WriteCredentials(name string, creds cpi.Credentials) (cpi.Credentials, error) {
+func (r *Repository) WriteCredentials(name string, creds cpi.Credentials) (cpi.Credentials, error) {
 	return nil, errors.ErrNotSupported(cpi.KIND_CREDENTIALS, "write", "constant credential")
 }
 

@@ -31,6 +31,9 @@ const ID_PORT = hostpath.ID_PORT
 // ID_PATHPREFIX is the artefact prefix
 const ID_PATHPREFIX = hostpath.ID_PATHPREFIX
 
+// ID_SCHEME is the scheme prefix.
+const ID_SCHEME = hostpath.ID_SCHEME
+
 func init() {
 	cpi.RegisterStandardIdentityMatcher(CONSUMER_TYPE, IdentityMatcher, `OCI registry credential matcher
 
