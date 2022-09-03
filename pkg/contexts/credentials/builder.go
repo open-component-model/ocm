@@ -19,6 +19,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 )
 
 func WithContext(ctx context.Context) core.Builder {
@@ -37,6 +38,6 @@ func WithStandardConumerMatchers(matchers core.IdentityMatcherRegistry) core.Bui
 	return core.Builder{}.WithStandardConumerMatchers(matchers)
 }
 
-func New() Context {
-	return core.Builder{}.New()
+func New(mode ...datacontext.BuilderMode) Context {
+	return core.Builder{}.New(mode...)
 }

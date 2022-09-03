@@ -48,6 +48,10 @@ func ForContext(ctx context.Context) Context {
 	return core.ForContext(ctx)
 }
 
+func DefinedForContext(ctx context.Context) (Context, bool) {
+	return core.DefinedForContext(ctx)
+}
+
 func NewGenericConfig(data []byte, unmarshaler runtime.Unmarshaler) (Config, error) {
 	return core.NewGenericConfig(data, unmarshaler)
 }

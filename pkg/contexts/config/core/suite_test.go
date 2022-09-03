@@ -12,27 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package config
+package core_test
 
 import (
-	"context"
+	"testing"
 
-	"github.com/open-component-model/ocm/pkg/contexts/config/core"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-func WithContext(ctx context.Context) core.Builder {
-	return core.Builder{}.WithContext(ctx)
-}
-
-func WithSharedAttributes(ctx datacontext.AttributesContext) core.Builder {
-	return core.Builder{}.WithSharedAttributes(ctx)
-}
-
-func WithConfigTypeScheme(scheme ConfigTypeScheme) core.Builder {
-	return core.Builder{}.WithConfigTypeScheme(scheme)
-}
-
-func New(mode ...datacontext.BuilderMode) Context {
-	return core.Builder{}.New(mode...)
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "Config Core Test Suite")
 }

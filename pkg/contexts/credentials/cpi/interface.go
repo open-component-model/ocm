@@ -19,6 +19,7 @@ package cpi
 import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 )
 
 const (
@@ -47,6 +48,10 @@ type (
 )
 
 var DefaultContext = core.DefaultContext
+
+func New(m ...datacontext.BuilderMode) Context {
+	return core.Builder{}.New(m...)
+}
 
 func NewGenericCredentialsSpec(name string, repospec *GenericRepositorySpec) *GenericCredentialsSpec {
 	return core.NewGenericCredentialsSpec(name, repospec)

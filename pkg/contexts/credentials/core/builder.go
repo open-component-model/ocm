@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 )
 
 type Builder struct {
@@ -59,13 +60,29 @@ func (b Builder) Bound() (Context, context.Context) {
 	return c, context.WithValue(b.getContext(), key, c)
 }
 
-func (b Builder) New() Context {
+func (b Builder) New(m ...datacontext.BuilderMode) Context {
+	mode := datacontext.Mode(m...)
 	ctx := b.getContext()
+
 	if b.config == nil {
-		b.config = config.ForContext(ctx)
+		var ok bool
+		b.config, ok = config.DefinedForContext(ctx)
+		if !ok && mode != datacontext.MODE_SHARED {
+			b.config = config.New(mode)
+		}
 	}
 	if b.reposcheme == nil {
-		b.reposcheme = DefaultRepositoryTypeScheme
+		switch mode {
+		case datacontext.MODE_INITIAL:
+			b.reposcheme = NewRepositoryTypeScheme(nil)
+		case datacontext.MODE_CONFIGURED:
+			b.reposcheme = NewRepositoryTypeScheme(nil)
+			b.reposcheme.AddKnownTypes(DefaultRepositoryTypeScheme)
+		case datacontext.MODE_DEFAULTED:
+			fallthrough
+		case datacontext.MODE_SHARED:
+			b.reposcheme = DefaultRepositoryTypeScheme
+		}
 	}
 	if b.matchers == nil {
 		b.matchers = StandardIdentityMatchers

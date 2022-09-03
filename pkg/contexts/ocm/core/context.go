@@ -66,12 +66,21 @@ type Context interface {
 var key = reflect.TypeOf(_context{})
 
 // DefaultContext is the default context initialized by init functions.
-var DefaultContext = Builder{}.New()
+var DefaultContext = Builder{}.New(datacontext.MODE_SHARED)
 
 // ForContext returns the Context to use for context.Context.
 // This is either an explicit context or the default context.
 func ForContext(ctx context.Context) Context {
-	return datacontext.ForContextByKey(ctx, key, DefaultContext).(Context)
+	c, _ := datacontext.ForContextByKey(ctx, key, DefaultContext)
+	return c.(Context)
+}
+
+func DefinedForContext(ctx context.Context) (Context, bool) {
+	c, ok := datacontext.ForContextByKey(ctx, key, DefaultContext)
+	if c != nil {
+		return c.(Context), ok
+	}
+	return nil, ok
 }
 
 ////////////////////////////////////////////////////////////////////////////////

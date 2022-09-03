@@ -50,12 +50,15 @@ type BlobDigester interface {
 
 // BlobDigesterRegistry registers blob handlers to use in a dedicated ocm context.
 type BlobDigesterRegistry interface {
+	IsInitial() bool
 	// RegisterDigester registers a blob digester for a dedicated exact mime type
 	//
 	RegisterDigester(handler BlobDigester, restypes ...string)
 	// GetDigester returns the digester for a given type
 	GetDigester(typ DigesterType) BlobDigester
 	DetermineDigests(typ string, preferred signing.Hasher, registry signing.Registry, acc AccessMethod, typs ...DigesterType) ([]DigestDescriptor, error)
+
+	Copy() BlobDigesterRegistry
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -75,6 +78,10 @@ func NewBlobDigesterRegistry() BlobDigesterRegistry {
 		normhandlers: map[string][]BlobDigester{},
 		digesters:    map[DigesterType]BlobDigester{},
 	}
+}
+
+func (r *blobDigesterRegistry) IsInitial() bool {
+	return len(r.typehandlers) == 0 && len(r.normhandlers) == 0 && len(r.digesters) == 0
 }
 
 func (r *blobDigesterRegistry) RegisterDigester(digester BlobDigester, restypes ...string) {
@@ -115,6 +122,23 @@ func (r *blobDigesterRegistry) GetDigester(typ DigesterType) BlobDigester {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 	return r.digesters[typ]
+}
+
+func (r *blobDigesterRegistry) Copy() BlobDigesterRegistry {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+
+	n := NewBlobDigesterRegistry().(*blobDigesterRegistry)
+	for k, v := range r.typehandlers {
+		n.typehandlers[k] = append(v[:0:len(v)], v...)
+	}
+	for k, v := range r.normhandlers {
+		n.normhandlers[k] = append(v[:0:len(v)], v...)
+	}
+	for k, v := range r.digesters {
+		n.digesters[k] = v
+	}
+	return n
 }
 
 func (r *blobDigesterRegistry) handle(list []BlobDigester, typ string, acc AccessMethod, preferred signing.Hasher) ([]DigestDescriptor, error) {

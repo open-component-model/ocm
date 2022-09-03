@@ -167,6 +167,8 @@ func ForMimeType(mimetype string) BlobHandlerOption {
 
 // BlobHandlerRegistry registers blob handlers to use in a dedicated ocm context.
 type BlobHandlerRegistry interface {
+	IsInitial() bool
+
 	// Copy provides a new independend copy of the registry
 	Copy() BlobHandlerRegistry
 	// RegisterBlobHandler registers a blob handler. It must specify either a sole mime type,
@@ -234,6 +236,10 @@ func (r *blobHandlerRegistry) Copy() BlobHandlerRegistry {
 		n.handlers[k] = h
 	}
 	return n
+}
+
+func (r *blobHandlerRegistry) IsInitial() bool {
+	return len(r.handlers) == 0 && len(r.defhandler) == 0
 }
 
 func (r *blobHandlerRegistry) RegisterBlobHandler(handler BlobHandler, olist ...BlobHandlerOption) BlobHandlerRegistry {
