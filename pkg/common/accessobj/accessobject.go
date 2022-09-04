@@ -24,34 +24,89 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-type DescriptorHandlerFactory func(system vfs.FileSystem) StateHandler
+type DescriptorHandlerFactory func(fs vfs.FileSystem) StateHandler
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type AccessObjectInfo struct {
+// AccessObjectInfo is used to control the persistence of
+// a serialization format for sets of elements.
+type AccessObjectInfo interface {
+	SetupFor(fs vfs.FileSystem) error
+	GetDescriptorFileName() string
+	GetObjectTypeName() string
+	GetElementTypeName() string
+	GetElementDirectoryName() string
+	GetAdditionalFiles(fs vfs.FileSystem) []string
+	SetupFileSystem(fs vfs.FileSystem, mode vfs.FileMode) error
+	SetupDescriptorState(fs vfs.FileSystem) StateHandler
+	SubPath(name string) string
+}
+
+// DefaultAccessObjectInfo is a default implementation for AccessObjectInfo
+// that can be used to host a simple static configuration.
+// The methods do not change the content, therefore an instance can be reused.
+type DefaultAccessObjectInfo struct {
 	DescriptorFileName       string
 	ObjectTypeName           string
 	ElementDirectoryName     string
 	ElementTypeName          string
 	DescriptorHandlerFactory DescriptorHandlerFactory
+	AdditionalFiles          []string
 }
 
-func (i *AccessObjectInfo) SubPath(name string) string {
+var _ AccessObjectInfo = (*DefaultAccessObjectInfo)(nil)
+
+func (i *DefaultAccessObjectInfo) SetupFor(fs vfs.FileSystem) error {
+	return nil
+}
+
+func (i *DefaultAccessObjectInfo) GetDescriptorFileName() string {
+	return i.DescriptorFileName
+}
+
+func (i *DefaultAccessObjectInfo) GetObjectTypeName() string {
+	return i.ObjectTypeName
+}
+
+func (i *DefaultAccessObjectInfo) GetElementTypeName() string {
+	return i.ElementTypeName
+}
+
+func (i *DefaultAccessObjectInfo) GetElementDirectoryName() string {
+	return i.ElementDirectoryName
+}
+
+func (i *DefaultAccessObjectInfo) GetAdditionalFiles(fs vfs.FileSystem) []string {
+	return i.AdditionalFiles
+}
+
+func (i *DefaultAccessObjectInfo) SetupFileSystem(fs vfs.FileSystem, mode vfs.FileMode) error {
+	if i.ElementDirectoryName != "" {
+		return fs.MkdirAll(i.ElementDirectoryName, mode)
+	}
+	return nil
+}
+
+func (i *DefaultAccessObjectInfo) SetupDescriptorState(fs vfs.FileSystem) StateHandler {
+	return i.DescriptorHandlerFactory(fs)
+}
+
+func (i *DefaultAccessObjectInfo) SubPath(name string) string {
 	return filepath.Join(i.ElementDirectoryName, name)
 }
 
 // AccessObject provides a basic functionality for descriptor based access objects
 // using a virtual filesystem for the internal representation.
 type AccessObject struct {
-	info   *AccessObjectInfo
+	info   AccessObjectInfo
 	fs     vfs.FileSystem
 	mode   vfs.FileMode
 	state  State
 	closer Closer
 }
 
-func NewAccessObject(info *AccessObjectInfo, acc AccessMode, fs vfs.FileSystem, setup Setup, closer Closer, mode vfs.FileMode) (*AccessObject, error) {
-	defaulted, fs, err := InternalRepresentationFilesystem(acc, fs, info.ElementDirectoryName, mode)
+func NewAccessObject(info AccessObjectInfo, acc AccessMode, fs vfs.FileSystem, setup Setup, closer Closer, mode vfs.FileMode) (*AccessObject, error) {
+	defaulted, fs, err := InternalRepresentationFilesystem(acc, fs, info.SetupFileSystem, mode)
 	if err != nil {
 		return nil, err
 	}
@@ -61,11 +116,14 @@ func NewAccessObject(info *AccessObjectInfo, acc AccessMode, fs vfs.FileSystem, 
 			return nil, err
 		}
 	}
+	if err = info.SetupFor(fs); err != nil {
+		return nil, err
+	}
 	if defaulted {
 		closer = FSCloser(closer)
 	}
 
-	s, err := NewFileBasedState(acc, fs, info.DescriptorFileName, "", info.DescriptorHandlerFactory(fs), mode)
+	s, err := NewFileBasedState(acc, fs, info.GetDescriptorFileName(), "", info.SetupDescriptorState(fs), mode)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +141,7 @@ func NewAccessObject(info *AccessObjectInfo, acc AccessMode, fs vfs.FileSystem, 
 	return obj, nil
 }
 
-func (a *AccessObject) GetInfo() *AccessObjectInfo {
+func (a *AccessObject) GetInfo() AccessObjectInfo {
 	return a.info
 }
 

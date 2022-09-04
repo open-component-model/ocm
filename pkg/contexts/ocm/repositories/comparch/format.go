@@ -32,7 +32,7 @@ const ComponentDescriptorFileName = compdesc.ComponentDescriptorFileName
 // BlobsDirectoryName is the name of the blob directory in the tar.
 const BlobsDirectoryName = "blobs"
 
-var accessObjectInfo = &accessobj.AccessObjectInfo{
+var accessObjectInfo = &accessobj.DefaultAccessObjectInfo{
 	DescriptorFileName:       ComponentDescriptorFileName,
 	ObjectTypeName:           "artefactset",
 	ElementDirectoryName:     BlobsDirectoryName,

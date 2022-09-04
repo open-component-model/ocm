@@ -31,7 +31,7 @@ const (
 	BlobsDirectoryName            = format.BlobsDirectoryName
 )
 
-var accessObjectInfo = &accessobj.AccessObjectInfo{
+var accessObjectInfo = &accessobj.DefaultAccessObjectInfo{
 	DescriptorFileName:       ArtefactSetDescriptorFileName,
 	ObjectTypeName:           "artefactset",
 	ElementDirectoryName:     BlobsDirectoryName,

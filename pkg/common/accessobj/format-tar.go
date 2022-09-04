@@ -22,6 +22,8 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/errors"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -63,11 +65,11 @@ func (h *TarHandler) Format() accessio.FileFormat {
 	return h.format
 }
 
-func (h *TarHandler) Open(info *AccessObjectInfo, acc AccessMode, path string, opts accessio.Options) (*AccessObject, error) {
+func (h *TarHandler) Open(info *DefaultAccessObjectInfo, acc AccessMode, path string, opts accessio.Options) (*AccessObject, error) {
 	return DefaultOpenOptsFileHandling(fmt.Sprintf("%s archive", h.format), info, acc, path, opts, h)
 }
 
-func (h *TarHandler) Create(info *AccessObjectInfo, path string, opts accessio.Options, mode vfs.FileMode) (*AccessObject, error) {
+func (h *TarHandler) Create(info *DefaultAccessObjectInfo, path string, opts accessio.Options, mode vfs.FileMode) (*AccessObject, error) {
 	return DefaultCreateOptsFileHandling(fmt.Sprintf("%s archive", h.format), info, path, opts, mode, h)
 }
 
@@ -107,7 +109,7 @@ func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts acce
 
 	tw := tar.NewWriter(writer)
 	cdHeader := &tar.Header{
-		Name:    obj.info.DescriptorFileName,
+		Name:    obj.info.GetDescriptorFileName(),
 		Size:    data.Size(),
 		Mode:    FileMode,
 		ModTime: ModTime,
@@ -121,30 +123,62 @@ func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts acce
 	if err != nil {
 		return fmt.Errorf("unable to get reader: %w", err)
 	}
-
 	defer r.Close()
 
 	if _, err := io.Copy(tw, r); err != nil {
 		return fmt.Errorf("unable to write descriptor content: %w", err)
 	}
 
-	// add all content
+	// Copy additional files
+	for _, f := range obj.info.GetAdditionalFiles(obj.fs) {
+		ok, err := vfs.IsFile(obj.fs, f)
+		if err != nil {
+			return errors.Wrapf(err, "cannot check for file %q", f)
+		}
+		if ok {
+			fi, err := obj.fs.Stat(f)
+			if err != nil {
+				return errors.Wrapf(err, "cannot stat file %q", f)
+			}
+			header := &tar.Header{
+				Name:    f,
+				Size:    fi.Size(),
+				Mode:    FileMode,
+				ModTime: ModTime,
+			}
+			if err := tw.WriteHeader(header); err != nil {
+				return errors.Wrapf(err, "unable to write descriptor header")
+			}
+
+			r, err := data.Reader()
+			if err != nil {
+				return errors.Wrapf(err, "unable to get reader")
+			}
+			if _, err := io.Copy(tw, r); err != nil {
+				r.Close()
+				return errors.Wrapf(err, "unable to write file %s", f)
+			}
+			r.Close()
+		}
+	}
+
+	// add all element content
 	err = tw.WriteHeader(&tar.Header{
 		Typeflag: tar.TypeDir,
-		Name:     obj.info.ElementDirectoryName,
+		Name:     obj.info.GetElementDirectoryName(),
 		Mode:     DirMode,
 		ModTime:  ModTime,
 	})
 	if err != nil {
-		return fmt.Errorf("unable to write %s directory: %w", obj.info.ElementTypeName, err)
+		return fmt.Errorf("unable to write %s directory: %w", obj.info.GetElementTypeName(), err)
 	}
 
-	fileInfos, err := vfs.ReadDir(obj.fs, obj.info.ElementDirectoryName)
+	fileInfos, err := vfs.ReadDir(obj.fs, obj.info.GetElementDirectoryName())
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil
 		}
-		return fmt.Errorf("unable to read %s directory: %w", obj.info.ElementTypeName, err)
+		return fmt.Errorf("unable to read %s directory: %w", obj.info.GetElementTypeName(), err)
 	}
 
 	for _, fileInfo := range fileInfos {
@@ -156,25 +190,25 @@ func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts acce
 			ModTime: ModTime,
 		}
 		if err := tw.WriteHeader(header); err != nil {
-			return fmt.Errorf("unable to write %s header: %w", obj.info.ElementTypeName, err)
+			return fmt.Errorf("unable to write %s header: %w", obj.info.GetElementTypeName(), err)
 		}
 
 		content, err := obj.fs.Open(path)
 		if err != nil {
-			return fmt.Errorf("unable to open %s: %w", obj.info.ElementTypeName, err)
+			return fmt.Errorf("unable to open %s: %w", obj.info.GetElementTypeName(), err)
 		}
 		if _, err := io.Copy(tw, content); err != nil {
-			return fmt.Errorf("unable to write %s content: %w", obj.info.ElementTypeName, err)
+			return fmt.Errorf("unable to write %s content: %w", obj.info.GetElementTypeName(), err)
 		}
 		if err := content.Close(); err != nil {
-			return fmt.Errorf("unable to close %s %s: %w", obj.info.ElementTypeName, path, err)
+			return fmt.Errorf("unable to close %s %s: %w", obj.info.GetElementTypeName(), path, err)
 		}
 	}
 
 	return tw.Close()
 }
 
-func (h *TarHandler) NewFromReader(info *AccessObjectInfo, acc AccessMode, in io.Reader, opts accessio.Options, closer Closer) (*AccessObject, error) {
+func (h *TarHandler) NewFromReader(info *DefaultAccessObjectInfo, acc AccessMode, in io.Reader, opts accessio.Options, closer Closer) (*AccessObject, error) {
 	if h.compression != nil {
 		reader, err := h.compression.Decompressor(in)
 		if err != nil {

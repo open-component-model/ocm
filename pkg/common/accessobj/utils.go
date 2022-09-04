@@ -22,8 +22,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
+type FilesystemSetup func(fs vfs.FileSystem, mode vfs.FileMode) error
+
 // InternalRepresentationFilesystem defaults a filesystem to temp filesystem and adapts.
-func InternalRepresentationFilesystem(acc AccessMode, fs vfs.FileSystem, dir string, mode vfs.FileMode) (bool, vfs.FileSystem, error) {
+func InternalRepresentationFilesystem(acc AccessMode, fs vfs.FileSystem, setup FilesystemSetup, mode vfs.FileMode) (bool, vfs.FileSystem, error) {
 	var err error
 
 	tmp := false
@@ -34,8 +36,8 @@ func InternalRepresentationFilesystem(acc AccessMode, fs vfs.FileSystem, dir str
 		}
 		tmp = true
 	}
-	if !acc.IsReadonly() && dir != "" {
-		err = fs.MkdirAll(dir, mode)
+	if !acc.IsReadonly() && setup != nil {
+		err = setup(fs, mode)
 		if err != nil {
 			return false, nil, err
 		}

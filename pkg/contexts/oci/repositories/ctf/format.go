@@ -33,7 +33,7 @@ const (
 	BlobsDirectoryName    = format.BlobsDirectoryName
 )
 
-var accessObjectInfo = &accessobj.AccessObjectInfo{
+var accessObjectInfo = &accessobj.DefaultAccessObjectInfo{
 	DescriptorFileName:       ArtefactIndexFileName,
 	ObjectTypeName:           "repository",
 	ElementDirectoryName:     BlobsDirectoryName,

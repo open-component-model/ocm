@@ -42,8 +42,8 @@ type FormatHandler interface {
 
 	Format() accessio.FileFormat
 
-	Open(info *AccessObjectInfo, acc AccessMode, path string, opts accessio.Options) (*AccessObject, error)
-	Create(info *AccessObjectInfo, path string, opts accessio.Options, mode vfs.FileMode) (*AccessObject, error)
+	Open(info *DefaultAccessObjectInfo, acc AccessMode, path string, opts accessio.Options) (*AccessObject, error)
+	Create(info *DefaultAccessObjectInfo, path string, opts accessio.Options, mode vfs.FileMode) (*AccessObject, error)
 	Write(obj *AccessObject, path string, opts accessio.Options, mode vfs.FileMode) error
 }
 
@@ -112,7 +112,7 @@ func FSCloser(closer Closer) Closer {
 }
 
 func (f fsCloser) Close(obj *AccessObject) error {
-	err := errors.ErrListf("cannot close %s", obj.info.ObjectTypeName)
+	err := errors.ErrListf("cannot close %s", obj.info.GetObjectTypeName())
 	if f.closer != nil {
 		err.Add(f.closer.Close(obj))
 	}
@@ -122,10 +122,10 @@ func (f fsCloser) Close(obj *AccessObject) error {
 
 type StandardReaderHandler interface {
 	Write(obj *AccessObject, path string, opts accessio.Options, mode vfs.FileMode) error
-	NewFromReader(info *AccessObjectInfo, acc AccessMode, in io.Reader, opts accessio.Options, closer Closer) (*AccessObject, error)
+	NewFromReader(info *DefaultAccessObjectInfo, acc AccessMode, in io.Reader, opts accessio.Options, closer Closer) (*AccessObject, error)
 }
 
-func DefaultOpenOptsFileHandling(kind string, info *AccessObjectInfo, acc AccessMode, path string, opts accessio.Options, handler StandardReaderHandler) (*AccessObject, error) {
+func DefaultOpenOptsFileHandling(kind string, info *DefaultAccessObjectInfo, acc AccessMode, path string, opts accessio.Options, handler StandardReaderHandler) (*AccessObject, error) {
 	if err := opts.ValidForPath(path); err != nil {
 		return nil, err
 	}
@@ -158,7 +158,7 @@ func DefaultOpenOptsFileHandling(kind string, info *AccessObjectInfo, acc Access
 	return handler.NewFromReader(info, acc, reader, opts, closer)
 }
 
-func DefaultCreateOptsFileHandling(kind string, info *AccessObjectInfo, path string, opts accessio.Options, mode vfs.FileMode, handler StandardReaderHandler) (*AccessObject, error) {
+func DefaultCreateOptsFileHandling(kind string, info *DefaultAccessObjectInfo, path string, opts accessio.Options, mode vfs.FileMode, handler StandardReaderHandler) (*AccessObject, error) {
 	if err := opts.ValidForPath(path); err != nil {
 		return nil, err
 	}
