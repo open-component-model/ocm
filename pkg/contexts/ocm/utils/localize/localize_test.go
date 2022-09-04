@@ -31,14 +31,18 @@ import (
 
 var _ = Describe("image value mapping", func() {
 
-	const ARCHIVE = "archive.ctf"
-	const COMPONENT = "github.com/comp"
-	const VERSION = "1.0.0"
-	const IMAGE = "image"
+	const (
+		ARCHIVE   = "archive.ctf"
+		COMPONENT = "github.com/comp"
+		VERSION   = "1.0.0"
+		IMAGE     = "image"
+	)
 
-	var repo ocm.Repository
-	var cv ocm.ComponentVersionAccess
-	var env *builder.Builder
+	var (
+		repo ocm.Repository
+		cv   ocm.ComponentVersionAccess
+		env  *builder.Builder
+	)
 
 	BeforeEach(func() {
 		env = builder.NewBuilder(nil)

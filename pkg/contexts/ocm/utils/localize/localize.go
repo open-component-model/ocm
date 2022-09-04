@@ -66,19 +66,25 @@ func Localize(mappings []Localization, cv ocm.ComponentVersionAccess, resolver o
 		}
 
 		if v.Repository != "" {
-			result.Add(substName(v.Name, "repository", cnt), v.FilePath, v.Repository, repo)
+			if err := result.Add(substitutionName(v.Name, "repository", cnt), v.FilePath, v.Repository, repo); err != nil {
+				return nil, errors.Wrapf(err, "setting repository for %s", substitutionName(v.Name, "repository", cnt))
+			}
 		}
 		if v.Tag != "" {
-			result.Add(substName(v.Name, "tag", cnt), v.FilePath, v.Tag, tag)
+			if err := result.Add(substitutionName(v.Name, "tag", cnt), v.FilePath, v.Tag, tag); err != nil {
+				return nil, errors.Wrapf(err, "setting tag for %s", substitutionName(v.Name, "tag", cnt))
+			}
 		}
 		if v.Image != "" {
-			result.Add(substName(v.Name, "image", cnt), v.FilePath, v.Image, ref)
+			if err := result.Add(substitutionName(v.Name, "image", cnt), v.FilePath, v.Image, ref); err != nil {
+				return nil, errors.Wrapf(err, "setting image for %s", substitutionName(v.Name, "image", cnt))
+			}
 		}
 	}
 	return result, nil
 }
 
-func substName(name, sub string, cnt int) string {
+func substitutionName(name, sub string, cnt int) string {
 	if name == "" {
 		return ""
 	}

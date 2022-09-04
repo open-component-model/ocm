@@ -18,18 +18,18 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/goccy/go-yaml/ast"
-	"github.com/goccy/go-yaml/parser"
-
 	"github.com/open-component-model/ocm/pkg/runtime"
 
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 )
 
-// Inbound substitution requests
+// Definition of inbound substitution requests.
+// - Localizations  image locations substitution resolved using a component version
+// - Configurations configuration substitution resolved by provided value data.
+//
 // Such requests can be given to merge externally provided data into
 // some filesystem template.
-// The evaluation of such a requests results in a list
+// The evaluation of such requests results in a list
 // of resolved substitution requests that can be applied without
 // further value context to a filesystem structure.
 
@@ -49,8 +49,10 @@ type ImageMapping struct {
 	Image string `json:"image,omitempty"`
 }
 
-// Localization is a request to substitute in a given files path the YAML/JSON
-// elements given by the value paths of the image mapping by the value calculated
+// Localization is a request to substitute an image location.
+// The specification describes substitution targets given by the file path and
+// the YAML/JSON value paths of the elements in this file.
+// The substitution value is calculated
 // from the access specification of the given resource provided by the actual
 // component version.
 type Localization struct {
@@ -62,21 +64,25 @@ type Localization struct {
 	ImageMapping `json:",inline"`
 }
 
-// Configuration is a request to substitute in a given files path the YAML/JSON
-// element given by the value path by the value calculated by the value expression
-// (spiff) based on given config data.
-// It has the same structure as Substitution, but is a met requests based
-// on external data.
+// Configuration is a request to substitute a configuration value.
+// The specification describes substitution targets given by the file path and
+// the YAML/JSON value paths of the elements in this file.
+// The substitution value is calculated
+// by the value expression (spiff) based on given config data.
+// It has the same structure as Substitution, but is a request based
+// on external configuration data, while a Substitution describes a fixed target
+// value.
 type Configuration Substitution
 
-// Here come the structure used for a resolved execution requests.
-// It can be applied to a filesystem content without further external
-// If basically has the same structure as the configuration request, but
+// Here comes the structure used for resolved execution requests.
+// They can be applied to a filesystem content without further external information.
+// It basically has the same structure as the configuration request, but
 // the given value is just the target value without any further interpretation.
 // This way configuration requests could just provide dedicated values, also
 
-// Substitution is a request to substitute in the given file path the YAML/JSON
-// element given by the value path by the given value.
+// Substitution is a request to substitute the YAML/JSON
+// element given by the value path in the given file path by the given
+// direct value.
 type Substitution struct {
 	// The optional but unique(!) name of the mapping to support referencing mapping entries
 	Name string `json:"name,omitempty"`
@@ -94,15 +100,13 @@ func (s *Substitution) GetValue() (interface{}, error) {
 	return value, err
 }
 
-func (s *Substitution) GetAST() (*ast.File, error) {
-	return parser.ParseBytes(s.Value, 0)
-}
-
 type Substitutions []Substitution
 
 func (s *Substitutions) Add(name, file, path string, value interface{}) error {
-	var v []byte
-	var err error
+	var (
+		v   []byte
+		err error
+	)
 
 	if value != nil {
 		v, err = runtime.DefaultJSONEncoding.Marshal(value)

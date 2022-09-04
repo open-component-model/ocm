@@ -17,20 +17,15 @@ package localize
 import (
 	yaml "github.com/goccy/go-yaml"
 	"github.com/goccy/go-yaml/ast"
-	"github.com/goccy/go-yaml/parser"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/utils/subst"
+
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-type fileinfo struct {
-	content *ast.File
-	json    bool
-}
-
 func Substitute(subs Substitutions, fs vfs.FileSystem) error {
-	files := map[string]fileinfo{}
+	files := map[string]subst.SubstitutionTarget{}
 
 	for i, s := range subs {
 		file, err := vfs.Canonical(fs, s.FilePath, true)
@@ -40,46 +35,25 @@ func Substitute(subs Substitutions, fs vfs.FileSystem) error {
 
 		fi, ok := files[file]
 		if !ok {
-			data, err := vfs.ReadFile(fs, file)
+			s, err := subst.ParseFile(file, fs)
 			if err != nil {
-				return errors.Wrapf(err, "entry %d: cannot read file %q", i, file)
+				return errors.Wrapf(err, "entry %d", i)
 			}
-			fi.json = true
-			var content interface{}
-			if err = runtime.DefaultJSONEncoding.Unmarshal(data, &content); err != nil {
-				fi.json = false
-			}
-			fi.content, err = parser.ParseBytes(data, 0)
-			if err != nil {
-				return errors.Wrapf(err, "entry %d: invalid YAML file %q", i, file)
-			}
-			files[file] = fi
+			files[file], fi = s, s
 		}
 
-		value, err := s.GetAST()
-		if err != nil {
-			return errors.Wrapf(err, "entry %d: cannot unmarshal value", i+1)
-		}
-		err = Set(fi.content, s.ValuePath, value)
-		if err != nil {
+		if err = fi.SubstituteByData(s.ValuePath, s.Value); err != nil {
 			return errors.Wrapf(err, "entry %d: cannot substitute value", i+1)
 		}
 	}
 
 	for file, fi := range files {
-
-		data := []byte(fi.content.String())
-		if fi.json {
-			// TODO: the package seems to keep the file type json/yaml, but I'm not sure
-			var err error
-			data, err = yaml.YAMLToJSON(data)
-			if err != nil {
-				return errors.Wrapf(err, "cannot marshal json %q after substitution ", file)
-			}
+		data, err := fi.Content()
+		if err != nil {
+			return errors.Wrapf(err, "cannot marshal %q after substitution ", file)
 		}
 
-		err := vfs.WriteFile(fs, file, data, vfs.ModePerm)
-		if err != nil {
+		if err := vfs.WriteFile(fs, file, data, vfs.ModePerm); err != nil {
 			return errors.Wrapf(err, "file %q", file)
 		}
 	}

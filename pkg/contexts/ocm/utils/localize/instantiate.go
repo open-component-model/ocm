@@ -53,12 +53,12 @@ func Instantiate(rules *InstantiationRules, cv ocm.ComponentVersionAccess, resol
 
 	reader, _, err := compression.AutoDecompress(r)
 	if err != nil {
-		return errors.Wrapf(err, "access template resource %s", rules.Template)
+		return errors.Wrapf(err, "cannot determine compression for template resource %s", rules.Template)
 	}
 	defer reader.Close()
-	err = utils2.ExtractTarToFs(fs, reader)
-	if err != nil {
-		return errors.Wrapf(err, "cannot extract template filesystem %s,", rules.Template)
+
+	if err = utils2.ExtractTarToFs(fs, reader); err != nil {
+		return errors.Wrapf(err, "cannot package template filesystem %s,", rules.Template)
 	}
 
 	return errors.Wrapf(Substitute(subs, fs), "applying substitutions to template")

@@ -126,15 +126,19 @@ helper:
 `)))
 	})
 
-	const ARCHIVE = "archive.ctf"
-	const COMPONENT = "github.com/comp"
-	const VERSION = "1.0.0"
-	const LIB = "lib"
+	const (
+		ARCHIVE   = "archive.ctf"
+		COMPONENT = "github.com/comp"
+		VERSION   = "1.0.0"
+		LIB       = "lib"
+	)
 
 	Context("with libs", func() {
-		var repo ocm.Repository
-		var cv ocm.ComponentVersionAccess
-		var env *builder.Builder
+		var (
+			repo ocm.Repository
+			cv   ocm.ComponentVersionAccess
+			env  *builder.Builder
+		)
 
 		BeforeEach(func() {
 			env = builder.NewBuilder(nil)

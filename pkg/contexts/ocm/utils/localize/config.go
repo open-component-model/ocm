@@ -27,7 +27,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/spiff"
 )
 
-func Configure(mappings []Configuration, cursubst []Substitution, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver, template []byte, config []byte, libraries []metav1.ResourceReference, schemedata []byte) (Substitutions, error) {
+func Configure(mappings []Configuration, cursubst []Substitution,
+	cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver,
+	template []byte, config []byte, libraries []metav1.ResourceReference, schemedata []byte) (Substitutions, error) {
 	var err error
 
 	if len(mappings) == 0 {
@@ -35,8 +37,7 @@ func Configure(mappings []Configuration, cursubst []Substitution, cv ocm.Compone
 	}
 	if len(config) == 0 {
 		if len(schemedata) > 0 {
-			err = spiff.ValidateByScheme([]byte("{}"), schemedata)
-			if err != nil {
+			if err = spiff.ValidateByScheme([]byte("{}"), schemedata); err != nil {
 				return nil, errors.Wrapf(err, "config validation failed")
 			}
 		}
@@ -47,21 +48,27 @@ func Configure(mappings []Configuration, cursubst []Substitution, cv ocm.Compone
 
 	stubs := spiff.Options{}
 	for i, lib := range libraries {
-		res, eff, err := utils.ResolveResourceReference(cv, lib, resolver)
+		opt, err := func() (spiff.OptionFunction, error) {
+			res, eff, err := utils.ResolveResourceReference(cv, lib, resolver)
+			if err != nil {
+				return nil, errors.ErrNotFound("library resource %s not found", lib.String())
+			}
+			defer eff.Close()
+			m, err := res.AccessMethod()
+			if err != nil {
+				return nil, errors.ErrNotFound("error accessing access method for library resource", lib.String())
+			}
+			data, err := m.Get()
+			m.Close()
+			if err != nil {
+				return nil, errors.ErrNotFound("cannot access library resource", lib.String())
+			}
+			return spiff.StubData(fmt.Sprintf("spiff lib%d", i), data), nil
+		}()
 		if err != nil {
-			return nil, errors.ErrNotFound("library resource %s not found", lib.String())
+			return nil, err
 		}
-		defer eff.Close()
-		m, err := res.AccessMethod()
-		if err != nil {
-			return nil, errors.ErrNotFound("cannot access library resource", lib.String())
-		}
-		data, err := m.Get()
-		m.Close()
-		if err != nil {
-			return nil, errors.ErrNotFound("cannot access library resource", lib.String())
-		}
-		stubs.Add(spiff.StubData(fmt.Sprintf("spiff lib%d", i), data))
+		stubs.Add(opt)
 	}
 
 	if len(schemedata) > 0 {
@@ -96,6 +103,7 @@ func Configure(mappings []Configuration, cursubst []Substitution, cv ocm.Compone
 	}
 
 	if _, ok := temp["utilities"]; !ok {
+		// prepare merging of spiff libraries using the node utilities as root path
 		temp["utilities"] = ""
 	}
 

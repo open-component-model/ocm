@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"io"
 	"os"
+	"sync"
 
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -109,6 +110,7 @@ type Buffer interface {
 	Reader() (io.ReadCloser, error)
 	Len() int
 	Close() error
+	Release() error
 }
 
 type memoryBuffer struct {
@@ -125,9 +127,15 @@ func (m *memoryBuffer) Close() error {
 	return nil
 }
 
+func (m *memoryBuffer) Release() error {
+	return nil
+}
+
 type fileBuffer struct {
-	path string
-	file *os.File
+	lock      sync.RWMutex
+	readcount int
+	path      string
+	file      *os.File
 }
 
 var _ Buffer = (*fileBuffer)(nil)
@@ -144,14 +152,38 @@ func NewFileBuffer() (*fileBuffer, error) {
 }
 
 func (b *fileBuffer) Write(out []byte) (int, error) {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
+	if b.file == nil {
+		return 0, ErrClosed
+	}
 	return b.file.Write(out)
 }
 
 func (b *fileBuffer) Reader() (io.ReadCloser, error) {
-	return os.Open(b.path)
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	if b.file == nil {
+		return nil, ErrClosed
+	}
+	r, err := os.Open(b.path)
+	if err != nil {
+		return nil, err
+	}
+	b.readcount++
+	return &bufferReader{buffer: b, ReadCloser: r}, nil
 }
 
 func (b *fileBuffer) Len() int {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+
+	if b.file == nil {
+		return -1
+	}
+
 	fi, err := b.file.Stat()
 	if err != nil {
 		return -1
@@ -160,5 +192,50 @@ func (b *fileBuffer) Len() int {
 }
 
 func (b *fileBuffer) Close() error {
-	return errors.ErrListf("closing file buffer").Add(b.file.Close(), os.Remove(b.path)).Result()
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	if b.file == nil {
+		return ErrClosed
+	}
+	return b.file.Close()
+}
+
+func (b *fileBuffer) Release() error {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+
+	if b.file == nil {
+		return nil
+	}
+	// just assure file to be closed
+	_ = b.file.Close()
+	b.file = nil
+	if b.readcount == 0 {
+		return os.Remove(b.path)
+	}
+	return nil
+}
+
+type bufferReader struct {
+	io.ReadCloser
+	buffer *fileBuffer
+}
+
+func (b *bufferReader) Close() error {
+	b.buffer.lock.Lock()
+	defer b.buffer.lock.Unlock()
+
+	if b.ReadCloser == nil {
+		return ErrClosed
+	}
+	list := errors.ErrListf("closing file buffer")
+	r := b.ReadCloser
+	b.ReadCloser = nil
+	b.buffer.readcount--
+	list.Add(r.Close())
+	if b.buffer.readcount <= 0 && b.buffer.file == nil {
+		list.Add(os.Remove(b.buffer.path))
+	}
+	return list.Result()
 }

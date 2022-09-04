@@ -26,8 +26,11 @@ import (
 )
 
 var _ = Describe("value substitution in filesystem", func() {
-	var env *builder.Builder
-	var payloadfs vfs.FileSystem
+	var (
+		env       *builder.Builder
+		payloadfs vfs.FileSystem
+	)
+
 	BeforeEach(func() {
 		env = builder.NewBuilder(env2.NewEnvironment(env2.ModifiableTestData()))
 		fs, err := projectionfs.New(env.FileSystem(), "testdata")
@@ -56,13 +59,13 @@ var _ = Describe("value substitution in filesystem", func() {
 
 		CheckFile("dir/manifest1.yaml", payloadfs, `
 manifest:
-  value1: "config1"
+  value1: config1
   value2: orig2
 `)
 		CheckFile("dir/manifest2.yaml", payloadfs, `
 manifest:
   value1: orig1
-  value2: "config2"
+  value2: config2
 `)
 	})
 
@@ -82,8 +85,8 @@ manifest:
 
 		CheckFile("dir/manifest1.yaml", payloadfs, `
 manifest:
-  value1: "config1"
-  value2: "config2"
+  value1: config1
+  value2: config2
 `)
 	})
 

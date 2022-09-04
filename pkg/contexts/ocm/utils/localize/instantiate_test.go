@@ -36,29 +36,32 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
-var template *bytes.Buffer
-
-func init() {
-	template = bytes.NewBuffer(nil)
-	w := gzip.NewWriter(template)
-	err := tarutils.TarFileSystem(osfs.New(), "testdata", w, tarutils.TarFileSystemOptions{})
-	w.Close()
-	if err != nil {
-		panic(err)
-	}
-}
-
 var _ = Describe("image value mapping", func() {
 
-	const ARCHIVE = "archive.ctf"
-	const COMPONENT = "github.com/comp"
-	const VERSION = "1.0.0"
-	const IMAGE = "image"
-	const TEMPLATE = "template"
+	const (
+		ARCHIVE   = "archive.ctf"
+		COMPONENT = "github.com/comp"
+		VERSION   = "1.0.0"
+		IMAGE     = "image"
+		TEMPLATE  = "template"
+	)
 
-	var repo ocm.Repository
-	var cv ocm.ComponentVersionAccess
-	var env *builder.Builder
+	var (
+		repo     ocm.Repository
+		cv       ocm.ComponentVersionAccess
+		env      *builder.Builder
+		template *bytes.Buffer
+	)
+
+	func() {
+		template = bytes.NewBuffer(nil)
+		w := gzip.NewWriter(template)
+		err := tarutils.TarFileSystem(osfs.New(), "testdata", w, tarutils.TarFileSystemOptions{})
+		w.Close()
+		if err != nil {
+			panic(err)
+		}
+	}()
 
 	BeforeEach(func() {
 		env = builder.NewBuilder(nil)
@@ -128,8 +131,8 @@ values:
 		Expect(err).To(Succeed())
 		CheckFile("dir/manifest1.yaml", fs, `
 manifest:
-  value1: "ghcr.io/mandelsoft/test:v1"
-  value2: "mine"
+  value1: ghcr.io/mandelsoft/test:v1
+  value2: mine
 `)
 	})
 })
