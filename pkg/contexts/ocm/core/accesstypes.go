@@ -16,6 +16,7 @@ package core
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -66,6 +67,7 @@ type AccessMethod interface {
 
 type AccessTypeScheme interface {
 	runtime.Scheme
+	AddKnownTypes(s AccessTypeScheme)
 
 	GetAccessType(name string) AccessType
 	Register(name string, atype AccessType)
@@ -75,13 +77,17 @@ type AccessTypeScheme interface {
 }
 
 type accessTypeScheme struct {
-	runtime.Scheme
+	runtime.SchemeBase
 }
 
 func NewAccessTypeScheme() AccessTypeScheme {
 	var at AccessSpec
 	scheme := runtime.MustNewDefaultScheme(&at, &UnknownAccessSpec{}, true, nil)
 	return &accessTypeScheme{scheme}
+}
+
+func (t *accessTypeScheme) AddKnownTypes(s AccessTypeScheme) {
+	t.SchemeBase.AddKnownTypes(s)
 }
 
 func (t *accessTypeScheme) GetAccessType(name string) AccessType {
@@ -93,7 +99,14 @@ func (t *accessTypeScheme) GetAccessType(name string) AccessType {
 }
 
 func (t *accessTypeScheme) Register(name string, atype AccessType) {
-	t.RegisterByDecoder(name, atype)
+	t.SchemeBase.RegisterByDecoder(name, atype)
+}
+
+func (t *accessTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedObjectDecoder) error {
+	if _, ok := decoder.(AccessType); !ok {
+		return errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
+	}
+	return t.SchemeBase.RegisterByDecoder(name, decoder)
 }
 
 func (t *accessTypeScheme) DecodeAccessSpec(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error) {

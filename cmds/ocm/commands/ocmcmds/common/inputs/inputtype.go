@@ -76,7 +76,7 @@ type InputTypeScheme interface {
 }
 
 type inputTypeScheme struct {
-	runtime.Scheme
+	runtime.SchemeBase
 }
 
 func NewInputTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) InputTypeScheme {
@@ -85,8 +85,8 @@ func NewInputTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) InputType
 	return &inputTypeScheme{scheme}
 }
 
-func (t *inputTypeScheme) AddKnowntypes(s InputTypeScheme) {
-	t.Scheme.AddKnownTypes(s)
+func (t *inputTypeScheme) AddKnownTypes(s InputTypeScheme) {
+	t.SchemeBase.AddKnownTypes(s)
 }
 
 func (t *inputTypeScheme) GetInputType(name string) InputType {
@@ -101,23 +101,11 @@ func (t *inputTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedOb
 	if _, ok := decoder.(InputType); !ok {
 		return errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
 	}
-	return t.Scheme.RegisterByDecoder(name, decoder)
-}
-
-func (t *inputTypeScheme) AddKnownTypes(scheme runtime.Scheme) error {
-	if _, ok := scheme.(InputTypeScheme); !ok {
-		return errors.ErrInvalid("type", reflect.TypeOf(scheme).String(), "expected", "InputTypeScheme")
-	}
-
-	if err := t.Scheme.AddKnownTypes(scheme); err != nil {
-		return fmt.Errorf("failed to add known type in inputTypeScheme: %w", err)
-	}
-
-	return nil
+	return t.SchemeBase.RegisterByDecoder(name, decoder)
 }
 
 func (t *inputTypeScheme) Register(name string, rtype InputType) {
-	t.Scheme.RegisterByDecoder(name, rtype)
+	t.SchemeBase.RegisterByDecoder(name, rtype)
 }
 
 func (t *inputTypeScheme) DecodeInputSpec(data []byte, unmarshaler runtime.Unmarshaler) (InputSpec, error) {
@@ -133,7 +121,7 @@ func (t *inputTypeScheme) DecodeInputSpec(data []byte, unmarshaler runtime.Unmar
 
 func (t *inputTypeScheme) CreateInputSpec(obj runtime.TypedObject) (InputSpec, error) {
 	if s, ok := obj.(InputSpec); ok {
-		r, err := t.Scheme.Convert(s)
+		r, err := t.SchemeBase.Convert(s)
 		if err != nil {
 			return nil, err
 		}

@@ -186,11 +186,14 @@ type Scheme interface {
 	Decode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
 	Encode(obj TypedObject, marshaler Marshaler) ([]byte, error)
 	EnforceDecode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
-	AddKnownTypes(scheme Scheme) error
 	KnownTypes() KnownTypes
 	KnownTypeNames() []string
 }
 
+type SchemeBase interface {
+	AddKnownTypes(scheme Scheme)
+	Scheme
+}
 type defaultScheme struct {
 	lock           sync.RWMutex
 	instance       reflect.Type
@@ -200,7 +203,7 @@ type defaultScheme struct {
 	types          KnownTypes
 }
 
-func MustNewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder) Scheme {
+func MustNewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder) SchemeBase {
 	s, err := NewDefaultScheme(protoIfce, protoUnstr, acceptUnknown, defaultdecoder)
 	if err != nil {
 		panic(err)
@@ -208,7 +211,7 @@ func MustNewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, accept
 	return s
 }
 
-func NewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder) (Scheme, error) {
+func NewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder) (SchemeBase, error) {
 	if protoIfce == nil {
 		return nil, fmt.Errorf("object interface must be given by pointer to interacted (is nil)")
 	}
@@ -243,13 +246,12 @@ func NewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnkn
 	}, nil
 }
 
-func (d *defaultScheme) AddKnownTypes(s Scheme) error {
+func (d *defaultScheme) AddKnownTypes(s Scheme) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	for k, v := range s.KnownTypes() {
 		d.types[k] = v
 	}
-	return nil
 }
 
 func (d *defaultScheme) KnownTypes() KnownTypes {
