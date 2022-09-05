@@ -41,7 +41,7 @@ type RepositorySpec struct {
 	Alias                       string `json:"alias"`
 }
 
-// NewRepositorySpec creates a new memory RepositorySpec
+// NewRepositorySpec creates a new memory RepositorySpec.
 func NewRepositorySpec(name string) *RepositorySpec {
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),

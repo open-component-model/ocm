@@ -29,6 +29,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/docker/resolve"
 )
 
 // TODO: add cache
@@ -102,35 +103,29 @@ func readAll(reader io.ReadCloser, err error) ([]byte, error) {
 	return data, nil
 }
 
-func push(ctx context.Context, p remotes.Pusher, blob accessio.BlobAccess) error {
+func push(ctx context.Context, p resolve.Pusher, blob accessio.BlobAccess) error {
 	desc := *artdesc.DefaultBlobDescriptor(blob)
 	return pushData(ctx, p, desc, blob)
 }
 
-func pushData(ctx context.Context, p remotes.Pusher, desc artdesc.Descriptor, data accessio.DataAccess) error {
+func pushData(ctx context.Context, p resolve.Pusher, desc artdesc.Descriptor, data accessio.DataAccess) error {
 	key := remotes.MakeRefKey(ctx, desc)
 	if desc.Size == 0 {
 		desc.Size = -1
 	}
-	fmt.Printf("*** push %s %s: %s\n", desc.MediaType, desc.Digest, key)
-	write, err := p.Push(ctx, desc)
+
+	logrus.Debugf("*** push %s %s: %s", desc.MediaType, desc.Digest, key)
+	req, err := p.Push(ctx, desc, data)
 	if err != nil {
 		if errdefs.IsAlreadyExists(err) {
-			fmt.Printf("*** %s %s: already exists\n", desc.MediaType, desc.Digest)
+			logrus.Infof("*** %s %s: already exists", desc.MediaType, desc.Digest)
+
 			return nil
 		}
-		return err
+
+		return fmt.Errorf("failed to push: %w", err)
 	}
-	read, err := data.Reader()
-	if err != nil {
-		return err
-	}
-	defer read.Close()
-	_, err = io.Copy(write, read)
-	if err != nil {
-		return err
-	}
-	return write.Commit(ctx, desc.Size, desc.Digest)
+	return req.Commit(ctx, desc.Size, desc.Digest)
 }
 
 var dummyContext = nologger()

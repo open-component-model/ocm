@@ -79,6 +79,7 @@ func LoadDir(fs vfs.FileSystem, dir string) (*chart.Chart, error) {
 		if err != nil {
 			return err
 		}
+
 		if fi.IsDir() {
 			// Directory-based ignore rules should involve skipping the entire
 			// contents of that directory.

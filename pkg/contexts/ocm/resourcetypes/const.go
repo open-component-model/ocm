@@ -15,15 +15,16 @@
 package resourcetypes
 
 const (
-	// OCI_ARTEFACT describes a generic OCI artefact follwoing the
-	//   [open containers image specification](https://github.com/opencontainers/image-spec/blob/main/spec.md)
+	// OCI_ARTEFACT describes a generic OCI artefact following the
+	//   [open containers image specification](https://github.com/opencontainers/image-spec/blob/main/spec.md).
 	OCI_ARTEFACT = "ociArtefact"
-	// OCI_IMAGE describes an OCIArtefact containing an image
+	// OCI_IMAGE describes an OCIArtefact containing an image.
 	OCI_IMAGE = "ociImage"
-	// HELM_CHART describes a helm chart, either stored as OCI artefact or as tar blob (tar media type)
+	// HELM_CHART describes a helm chart, either stored as OCI artefact or as tar
+	// blob (tar media type).
 	HELM_CHART = "helmChart"
-	// BLOB describes any anonymous untyped blob data
+	// BLOB describes any anonymous untyped blob data.
 	BLOB = "blob"
-	// FILESYSTEM describes a directory structure stored as archive (tar, tgz)
+	// FILESYSTEM describes a directory structure stored as archive (tar, tgz).
 	FILESYSTEM = "`filesytem"
 )

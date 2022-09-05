@@ -17,13 +17,11 @@ package lookupoption
 import (
 	"github.com/spf13/pflag"
 
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
-
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
 func From(o options.OptionSetProvider) *Option {

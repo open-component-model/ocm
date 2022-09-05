@@ -17,11 +17,10 @@ package docker
 import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
 )
@@ -46,7 +45,6 @@ func (s *Spec) Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath s
 		_, _, err := docker.ParseGenericRef(s.Path)
 		if err != nil {
 			allErrs = append(allErrs, field.Invalid(pathField, s.Path, err.Error()))
-
 		}
 	}
 	return allErrs

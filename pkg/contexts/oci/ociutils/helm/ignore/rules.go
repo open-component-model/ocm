@@ -19,6 +19,7 @@ package ignore
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -47,7 +48,7 @@ func Empty() *Rules {
 
 // AddDefaults adds default ignore patterns.
 //
-// Ignore all dotfiles in "templates/"
+// Ignore all dotfiles in "templates/".
 func (r *Rules) AddDefaults() {
 	r.parseRule(`templates/.?*`)
 }
@@ -62,7 +63,7 @@ func ParseFile(file string, fss ...vfs.FileSystem) (*Rules, error) {
 	return Parse(f)
 }
 
-// Parse parses a rules file
+// Parse parses a rules file.
 func Parse(file io.Reader) (*Rules, error) {
 	r := &Rules{patterns: []*pattern{}}
 
@@ -152,7 +153,7 @@ func (r *Rules) parseRule(rule string) error {
 	// Fail any patterns that can't compile. A non-empty string must be
 	// given to Match() to avoid optimization that skips rule evaluation.
 	if _, err := filepath.Match(rule, "abc"); err != nil {
-		return err
+		return fmt.Errorf("failed to match rule: %w", err)
 	}
 
 	p := &pattern{raw: rule}

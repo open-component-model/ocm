@@ -26,8 +26,7 @@ type ProcessorPool interface {
 
 /////////////////////////////////////////////////////////////////////////////
 
-type _UnlimitedPool struct {
-}
+type _UnlimitedPool struct{}
 
 func NewUnlimitedProcessorPool() ProcessorPool {
 	return &_UnlimitedPool{}
@@ -35,8 +34,10 @@ func NewUnlimitedProcessorPool() ProcessorPool {
 
 func (this *_UnlimitedPool) Request() {
 }
+
 func (this *_UnlimitedPool) Release() {
 }
+
 func (this *_UnlimitedPool) Exec(f func()) {
 	go f()
 }
@@ -47,7 +48,7 @@ type _ProcessorPool struct {
 	n    int
 	uses int
 	lock sync.Mutex
-	set  *processor_set
+	set  *processorSet
 }
 
 func NewProcessorPool(n int) ProcessorPool {
@@ -59,7 +60,7 @@ func (this *_ProcessorPool) Request() {
 	defer this.lock.Unlock()
 	this.uses++
 	if this.uses == 1 {
-		this.set = (&processor_set{}).new(this.n)
+		this.set = (&processorSet{}).new(this.n)
 	}
 }
 
@@ -86,11 +87,11 @@ func (this *_ProcessorPool) Release() {
 
 /////////////////////////////////////////////////////////////////////////////
 
-type processor_set struct {
+type processorSet struct {
 	request chan func()
 }
 
-func (this *processor_set) new(n int) *processor_set {
+func (this *processorSet) new(n int) *processorSet {
 	this.request = make(chan func(), n*2)
 	for i := 0; i < n; i++ {
 		go func() {
@@ -102,10 +103,10 @@ func (this *processor_set) new(n int) *processor_set {
 	return this
 }
 
-func (this *processor_set) exec(f func()) {
+func (this *processorSet) exec(f func()) {
 	this.request <- f
 }
 
-func (this *processor_set) stop() {
+func (this *processorSet) stop() {
 	close(this.request)
 }

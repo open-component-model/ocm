@@ -70,7 +70,6 @@ func (m *localBlobAccessMethod) getBlob() (cpi.DataAccess, error) {
 		return m.data, nil
 	}
 	if artdesc.IsOCIMediaType(m.spec.MediaType) {
-
 		// may be we should always store the blob, additionally to the
 		// exploded form to make things easier.
 

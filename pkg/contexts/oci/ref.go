@@ -16,7 +16,6 @@ package oci
 
 import (
 	"fmt"
-	"path"
 	"strings"
 
 	"github.com/opencontainers/go-digest"
@@ -25,7 +24,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-// to find a suitable secret for images on Docker Hub, we need its two domains to do matching
+// to find a suitable secret for images on Docker Hub, we need its two domains to do matching.
 const (
 	dockerHubDomain       = "docker.io"
 	dockerHubLegacyDomain = "index.docker.io"
@@ -52,7 +51,6 @@ func ParseRepo(ref string) (UniformRepositorySpec, error) {
 			Info:            string(match[2]),
 			CreateIfMissing: create,
 		}, nil
-
 	}
 	return UniformRepositorySpec{
 		Type:            string(match[1]),
@@ -66,7 +64,7 @@ func ParseRepo(ref string) (UniformRepositorySpec, error) {
 type RefSpec struct {
 	UniformRepositorySpec
 	// Repository is the part of a reference without its hostname
-	Repository string `json:"respository"`
+	Repository string `json:"repository"`
 	// +optional
 	Tag *string `json:"tag,omitempty"`
 	// +optional
@@ -179,22 +177,7 @@ func ParseRef(ref string) (RefSpec, error) {
 }
 
 func (r *RefSpec) Name() string {
-	return path.Join(r.Host, r.Repository)
-}
-
-func (r *RefSpec) Base() string {
-	if r.Scheme == "" {
-		return r.Host
-	}
-	return r.Scheme + "://" + r.Host
-}
-
-func (r *RefSpec) HostPort() (string, string) {
-	i := strings.Index(r.Host, ":")
-	if i < 0 {
-		return r.Host, ""
-	}
-	return r.Host[:i], r.Host[i+1:]
+	return r.UniformRepositorySpec.ComposeRef(r.Repository)
 }
 
 func (r *RefSpec) Version() string {
@@ -215,18 +198,23 @@ func (r *RefSpec) IsVersion() bool {
 	return r.Tag != nil || r.Digest != nil
 }
 
+func (r *RefSpec) IsTagged() bool {
+	return r.Tag != nil
+}
+
 func (r *RefSpec) String() string {
+	art := r.Repository
 	if r.Tag != nil {
-		return fmt.Sprintf("%s:%s", r.Name(), *r.Tag)
+		art = fmt.Sprintf("%s:%s", art, *r.Tag)
 	}
 	if r.Digest != nil {
-		return fmt.Sprintf("%s@%s", r.Name(), r.Digest.String())
+		art = fmt.Sprintf("%s@%s", art, r.Digest.String())
 	}
-	return ""
+	return r.UniformRepositorySpec.ComposeRef(art)
 }
 
 // CredHost fallback to legacy docker domain if applicable
-// this is how containerd translates the old domain for DockerHub to the new one, taken from containerd/reference/docker/reference.go:674
+// this is how containerd translates the old domain for DockerHub to the new one, taken from containerd/reference/docker/reference.go:674.
 func (r *RefSpec) CredHost() string {
 	if r.Host == dockerHubDomain {
 		return dockerHubLegacyDomain

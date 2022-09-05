@@ -20,7 +20,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-type ocm_source struct {
+type ocmSource struct {
 	base
 
 	meta   compdesc.SourceMeta
@@ -30,18 +30,18 @@ type ocm_source struct {
 
 const T_OCMSOURCE = "source"
 
-func (r *ocm_source) Type() string {
+func (r *ocmSource) Type() string {
 	return T_OCMSOURCE
 }
 
-func (r *ocm_source) Set() {
+func (r *ocmSource) Set() {
 	r.Builder.ocm_src = &r.meta
 	r.Builder.ocm_acc = &r.access
 	r.Builder.ocm_meta = &r.meta.ElementMeta
 	r.Builder.blob = &r.blob
 }
 
-func (r *ocm_source) Close() error {
+func (r *ocmSource) Close() error {
 	switch {
 	case r.access != nil:
 		return r.Builder.ocm_vers.SetSource(&r.meta, r.access)
@@ -55,7 +55,7 @@ func (r *ocm_source) Close() error {
 
 func (b *Builder) Source(name, vers, typ string, f ...func()) {
 	b.expect(b.ocm_vers, T_OCMVERSION)
-	r := &ocm_source{}
+	r := &ocmSource{}
 	r.meta.Name = name
 	r.meta.Type = typ
 	r.meta.Version = vers

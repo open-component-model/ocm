@@ -27,16 +27,18 @@ type IncrementalProcessingSource interface {
 
 type ProcessingSource interface {
 	IncrementalProcessingSource
-	//data.IndexedAccess
+	// data.IndexedAccess
 }
 
-type FilterFunction func(interface{}) bool
-type MappingFunction data.MappingFunction
-type ExplodeFunction func(interface{}) []interface{}
-type CompareFunction = data.CompareFunction
-type TransformFunction = func(iterable data.Iterable) data.Iterable
-type CompareIndexedFunction = data.CompareIndexedFunction
-type AggregationFunction func(e, aggr interface{}) interface{}
+type (
+	FilterFunction         func(interface{}) bool
+	MappingFunction        data.MappingFunction
+	ExplodeFunction        func(interface{}) []interface{}
+	CompareFunction        = data.CompareFunction
+	TransformFunction      = func(iterable data.Iterable) data.Iterable
+	CompareIndexedFunction = data.CompareIndexedFunction
+	AggregationFunction    func(e, aggr interface{}) interface{}
+)
 
 func Identity(e interface{}) interface{} {
 	return e
@@ -64,7 +66,7 @@ type ProcessingResult interface {
 ////////////////////////////////////////////////////////////////////////////
 
 // Process processes an initial empty chain by converting
-// an iterable into a ProcessingResult
+// an iterable into a ProcessingResult.
 func Process(data data.Iterable) ProcessingResult {
 	return (&_SynchronousProcessing{}).new(data)
 }
@@ -75,9 +77,11 @@ type _ProcessingSource struct {
 	ProcessingBuffer
 }
 
-var _ ProcessingSource = &_ProcessingSource{}
-var _ IncrementalProcessingSource = &_ProcessingSource{}
-var _ data.IndexedAccess = &_ProcessingSource{}
+var (
+	_ ProcessingSource            = &_ProcessingSource{}
+	_ IncrementalProcessingSource = &_ProcessingSource{}
+	_ data.IndexedAccess          = &_ProcessingSource{}
+)
 
 func NewIncrementalProcessingSource() ProcessingSource {
 	return (&_ProcessingSource{}).new()

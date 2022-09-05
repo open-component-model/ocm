@@ -72,7 +72,6 @@ func newSession(s datacontext.SessionBase) datacontext.Session {
 }
 
 func (s *session) LookupRepository(ctx Context, spec RepositorySpec) (Repository, error) {
-
 	spec, err := ctx.RepositoryTypes().CreateRepositorySpec(spec)
 	if err != nil {
 		return nil, err
@@ -158,6 +157,9 @@ func (s *session) EvaluateRef(ctx Context, ref string) (*EvaluationResult, error
 	result.Repository, err = s.DetermineRepositoryBySpec(ctx, &result.Ref.UniformRepositorySpec)
 	if err != nil {
 		return nil, err
+	}
+	if result.Ref.Repository == "" {
+		return result, nil
 	}
 	result.Namespace, err = s.LookupNamespace(result.Repository, result.Ref.Repository)
 

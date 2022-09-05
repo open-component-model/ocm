@@ -22,9 +22,8 @@ import (
 	"github.com/modern-go/reflect2"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -77,7 +76,7 @@ type InputTypeScheme interface {
 }
 
 type inputTypeScheme struct {
-	runtime.Scheme
+	runtime.SchemeBase
 }
 
 func NewInputTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) InputTypeScheme {
@@ -86,8 +85,8 @@ func NewInputTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) InputType
 	return &inputTypeScheme{scheme}
 }
 
-func (t *inputTypeScheme) AddKnowntypes(s InputTypeScheme) {
-	t.Scheme.AddKnownTypes(s)
+func (t *inputTypeScheme) AddKnownTypes(s InputTypeScheme) {
+	t.SchemeBase.AddKnownTypes(s)
 }
 
 func (t *inputTypeScheme) GetInputType(name string) InputType {
@@ -100,20 +99,13 @@ func (t *inputTypeScheme) GetInputType(name string) InputType {
 
 func (t *inputTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedObjectDecoder) error {
 	if _, ok := decoder.(InputType); !ok {
-		errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
+		return errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
 	}
-	return t.Scheme.RegisterByDecoder(name, decoder)
-}
-
-func (t *inputTypeScheme) AddKnownTypes(scheme runtime.Scheme) {
-	if _, ok := scheme.(InputTypeScheme); !ok {
-		panic("can only add RepositoryTypeSchemes")
-	}
-	t.Scheme.AddKnownTypes(scheme)
+	return t.SchemeBase.RegisterByDecoder(name, decoder)
 }
 
 func (t *inputTypeScheme) Register(name string, rtype InputType) {
-	t.Scheme.RegisterByDecoder(name, rtype)
+	t.SchemeBase.RegisterByDecoder(name, rtype)
 }
 
 func (t *inputTypeScheme) DecodeInputSpec(data []byte, unmarshaler runtime.Unmarshaler) (InputSpec, error) {
@@ -129,7 +121,7 @@ func (t *inputTypeScheme) DecodeInputSpec(data []byte, unmarshaler runtime.Unmar
 
 func (t *inputTypeScheme) CreateInputSpec(obj runtime.TypedObject) (InputSpec, error) {
 	if s, ok := obj.(InputSpec); ok {
-		r, err := t.Scheme.Convert(s)
+		r, err := t.SchemeBase.Convert(s)
 		if err != nil {
 			return nil, err
 		}
@@ -145,7 +137,7 @@ func (t *inputTypeScheme) CreateInputSpec(obj runtime.TypedObject) (InputSpec, e
 	return nil, fmt.Errorf("invalid object type %T for repository specs", obj)
 }
 
-// DefaultInputTypeScheme contains all globally known access serializer
+// DefaultInputTypeScheme contains all globally known access serializer.
 var DefaultInputTypeScheme = NewInputTypeScheme(nil)
 
 func RegisterInputType(name string, atype InputType) {

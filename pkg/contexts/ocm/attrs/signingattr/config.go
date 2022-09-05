@@ -53,6 +53,7 @@ var _ json.Unmarshaler = (*RawData)(nil)
 func (r RawData) MarshalJSON() ([]byte, error) {
 	return json.Marshal(base64.StdEncoding.EncodeToString(r))
 }
+
 func (r *RawData) UnmarshalJSON(data []byte) error {
 	var s string
 	err := json.Unmarshal(data, &s)
@@ -94,7 +95,7 @@ func (k *KeySpec) Get() (interface{}, error) {
 	return vfs.ReadFile(fs, k.Path)
 }
 
-// New creates a new memory ConfigSpec
+// New creates a new memory ConfigSpec.
 func New() *Config {
 	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),

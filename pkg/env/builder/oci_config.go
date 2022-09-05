@@ -22,20 +22,20 @@ import (
 
 const T_OCICONFIG = "oci config"
 
-type oci_config struct {
+type ociConfig struct {
 	base
 	blob accessio.BlobAccess
 }
 
-func (r *oci_config) Type() string {
+func (r *ociConfig) Type() string {
 	return T_OCICONFIG
 }
 
-func (r *oci_config) Set() {
+func (r *ociConfig) Set() {
 	r.Builder.blob = &r.blob
 }
 
-func (r *oci_config) Close() error {
+func (r *ociConfig) Close() error {
 	if r.blob == nil {
 		return errors.Newf("config blob required")
 	}
@@ -53,5 +53,5 @@ func (r *oci_config) Close() error {
 
 func (b *Builder) Config(f ...func()) {
 	b.expect(b.oci_artacc, T_OCIMANIFEST, func() bool { return b.oci_artacc.IsManifest() })
-	b.configure(&oci_config{}, f)
+	b.configure(&ociConfig{}, f)
 }

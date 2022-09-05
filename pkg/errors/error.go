@@ -20,10 +20,12 @@ import (
 	"reflect"
 )
 
-var New = errors.New
-var Unwrap = errors.Unwrap
-var Is = errors.Is
-var As = errors.As
+var (
+	New    = errors.New
+	Unwrap = errors.Unwrap
+	Is     = errors.Is
+	As     = errors.As
+)
 
 func Newf(msg string, args ...interface{}) error {
 	return New(fmt.Sprintf(msg, args...))
@@ -72,7 +74,7 @@ func (e *wrappedError) Unwrap() error {
 	return e.wrapped
 }
 
-//var errorType = reflect.TypeOf((*error)(nil)).Elem()
+// var errorType = reflect.TypeOf((*error)(nil)).Elem()
 
 ////////////////////////////////////////////////////////////////////////////////
 

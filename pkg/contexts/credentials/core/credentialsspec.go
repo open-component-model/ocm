@@ -16,13 +16,14 @@ package core
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/modern-go/reflect2"
 
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-// CredentialsSpec describes a dedicated credential provided by some repository
+// CredentialsSpec describes a dedicated credential provided by some repository.
 type CredentialsSpec interface {
 	CredentialsSource
 	GetCredentialsName() string
@@ -53,7 +54,7 @@ func (s *DefaultCredentialsSpec) Credentials(ctx Context, creds ...CredentialsSo
 	return ctx.CredentialsForSpec(s, creds...)
 }
 
-// MarshalJSON implements a custom json unmarshal method
+// MarshalJSON implements a custom json unmarshal method.
 func (s DefaultCredentialsSpec) MarshalJSON() ([]byte, error) {
 	ocispec, err := runtime.ToUnstructuredTypedObject(s.RepositorySpec)
 	if err != nil {
@@ -62,7 +63,6 @@ func (s DefaultCredentialsSpec) MarshalJSON() ([]byte, error) {
 	specdata, err := runtime.ToUnstructuredObject(struct {
 		Name string `json:"credentialsName,omitempty"`
 	}{Name: s.CredentialsName})
-
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (s DefaultCredentialsSpec) MarshalJSON() ([]byte, error) {
 func (s *DefaultCredentialsSpec) UnmarshalJSON(data []byte) error {
 	repo, err := DefaultContext.RepositoryTypes().Decode(data, runtime.DefaultJSONEncoding)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to decode data: %w", err)
 	}
 
 	specdata := &struct {
@@ -82,7 +82,7 @@ func (s *DefaultCredentialsSpec) UnmarshalJSON(data []byte) error {
 	}{}
 	err = json.Unmarshal(data, specdata)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed ot unmarshal spec data: %w", err)
 	}
 
 	s.RepositorySpec = repo.(RepositorySpec)
@@ -142,12 +142,11 @@ func (s *GenericCredentialsSpec) Credentials(ctx Context, creds ...CredentialsSo
 	return ctx.CredentialsForSpec(s, creds...)
 }
 
-// MarshalJSON implements a custom json unmarshal method
+// MarshalJSON implements a custom json unmarshal method.
 func (s GenericCredentialsSpec) MarshalJSON() ([]byte, error) {
 	specdata, err := runtime.ToUnstructuredObject(struct {
 		Name string `json:"credentialsName,omitempty"`
 	}{Name: s.CredentialsName})
-
 	if err != nil {
 		return nil, err
 	}
@@ -160,9 +159,11 @@ func (s *GenericCredentialsSpec) UnmarshalJSON(data []byte) error {
 
 	err := json.Unmarshal(data, spec)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal spec data: %w", err)
 	}
+
 	s.CredentialsName = ""
+
 	if name, ok := spec.Object["credentialsName"]; ok {
 		if n, ok := name.(string); ok {
 			s.CredentialsName = n

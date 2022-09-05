@@ -1,14 +1,14 @@
 # Resource Types in the Open Component Model
 
-The OCM component descriptor described a set of resources, their type and
-meaning with attached meta and access information.
+The OCM component descriptor described a set of artefacts, their type and
+meaning with attached meta, and access information.
 
 The meaning is basically encoded into a dedicated *resource type*.
 Therefore, the resource type must be globally unique.
 The OCM defines a dedicated naming scheme to guarantee this uniqueness.
 
-There are two kins of types:
-- centrally defined type name managed by the OCM organization
+There are two kinds of types:
+- centrally defined type names managed by the OCM organization
 
   These types use flat names following a camel case scheme with
   the first character in lower case (for example `ociArtefact`).

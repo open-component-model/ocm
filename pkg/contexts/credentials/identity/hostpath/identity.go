@@ -33,6 +33,9 @@ const ID_PORT = "port"
 // ID_PATHPREFIX is the path prefix below the host.
 const ID_PATHPREFIX = "pathprefix"
 
+// ID_SCHEME is the scheme prefix.
+const ID_SCHEME = "scheme"
+
 func init() {
 	cpi.RegisterStandardIdentityMatcher(IDENTITY_TYPE, IdentityMatcher(""), `Host and path based credential matcher
 
@@ -56,6 +59,12 @@ func IdentityMatcher(identityType string) cpi.IdentityMatcher {
 
 		if pattern[ID_PORT] != "" {
 			if id[ID_PORT] != "" && id[ID_PORT] != pattern[ID_PORT] {
+				return false
+			}
+		}
+
+		if pattern[ID_SCHEME] != "" {
+			if id[ID_SCHEME] != "" && id[ID_SCHEME] != pattern[ID_SCHEME] {
 				return false
 			}
 		}
@@ -91,6 +100,9 @@ func IdentityMatcher(identityType string) cpi.IdentityMatcher {
 			return true
 		}
 		if cur[ID_PORT] == "" && (id[ID_PORT] != "" && pattern[ID_PORT] != "") {
+			return true
+		}
+		if cur[ID_SCHEME] == "" && (id[ID_SCHEME] != "" && pattern[ID_SCHEME] != "") {
 			return true
 		}
 

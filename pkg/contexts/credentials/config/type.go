@@ -15,6 +15,8 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
@@ -32,7 +34,7 @@ func init() {
 	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &Config{}, usage))
 }
 
-// Config describes a configuration for the config context
+// Config describes a configuration for the config context.
 type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	// Consumers describe predefine logical cosumer specs mapped to credentials
@@ -43,7 +45,7 @@ type Config struct {
 	Consumers []ConsumerSpec `json:"consumers,omitempty"`
 	// Repositories describe preloaded credential repositories with potential credential chain
 	Repositories []RepositorySpec `json:"repositories,omitempty"`
-	// Aliases describe logical credential repositories mapped to implementig repositories
+	// Aliases describe logical credential repositories mapped to implementing repositories
 	Aliases map[string]RepositorySpec `json:"aliases,omitempty"`
 }
 
@@ -57,7 +59,7 @@ type RepositorySpec struct {
 	Credentials []cpi.GenericCredentialsSpec `json:"credentials,omitempty"`
 }
 
-// NewConfigSpec creates a new memory ConfigSpec
+// NewConfigSpec creates a new memory ConfigSpec.
 func New() *Config {
 	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
@@ -83,7 +85,7 @@ func (a *Config) MapCredentialsChain(creds ...cpi.CredentialsSpec) ([]cpi.Generi
 func (a *Config) AddConsumer(id cpi.ConsumerIdentity, creds ...cpi.CredentialsSpec) error {
 	cgens, err := a.MapCredentialsChain(creds...)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to map credentials chain: %w", err)
 	}
 
 	spec := &ConsumerSpec{
@@ -114,16 +116,18 @@ func (a *Config) MapRepository(repo cpi.RepositorySpec, creds ...cpi.Credentials
 func (a *Config) AddRepository(repo cpi.RepositorySpec, creds ...cpi.CredentialsSpec) error {
 	spec, err := a.MapRepository(repo, creds...)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to map repository: %w", err)
 	}
+
 	a.Repositories = append(a.Repositories, *spec)
+
 	return nil
 }
 
 func (a *Config) AddAlias(name string, repo cpi.RepositorySpec, creds ...cpi.CredentialsSpec) error {
 	spec, err := a.MapRepository(repo, creds...)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to map repository: %w", err)
 	}
 
 	if a.Aliases == nil {

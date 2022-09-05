@@ -17,11 +17,10 @@ package ctf
 import (
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi/support"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi/support"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/index"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -63,8 +62,10 @@ type NamespaceContainer struct {
 	ArtefactSetAccess *support.ArtefactSetAccess
 }
 
-var _ support.ArtefactSetContainer = (*NamespaceContainer)(nil)
-var _ cpi.NamespaceAccess = (*Namespace)(nil)
+var (
+	_ support.ArtefactSetContainer = (*NamespaceContainer)(nil)
+	_ cpi.NamespaceAccess          = (*Namespace)(nil)
+)
 
 func (a *NamespaceContainer) View(main ...bool) (support.ArtefactSetContainer, error) {
 	ns, err := a.view(main...)

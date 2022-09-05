@@ -35,7 +35,7 @@ type RepositorySpec struct {
 	RepositoryName              string `json:"repoName"`
 }
 
-// NewRepositorySpec creates a new memory RepositorySpec
+// NewRepositorySpec creates a new memory RepositorySpec.
 func NewRepositorySpec(name string) *RepositorySpec {
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),

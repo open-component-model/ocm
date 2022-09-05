@@ -18,26 +18,21 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-
-	"github.com/open-component-model/ocm/pkg/toi/install"
-
-	"github.com/open-component-model/ocm/pkg/cobrautils"
-
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/spf13/pflag"
 
 	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/common"
+	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	datactg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
-
-	"github.com/spf13/pflag"
-
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/toi/install"
 	"github.com/open-component-model/ocm/pkg/version"
-
-	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 )
 
 type BootstrapperCLIOptions struct {
@@ -74,7 +69,7 @@ func NewCLICommand(ctx ocm.Context, name string, exec func(options *ExecutorOpti
 			return opts.Complete()
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Printf("This is %s (%s)\n", name, version.Get().String())
+			logrus.Infof("This is %s (%s)", name, version.Get().String())
 			e := &Executor{Completed: true, Options: &opts.ExecutorOptions, Run: exec}
 			return e.Execute()
 		},
@@ -102,19 +97,22 @@ func (o *BootstrapperCLIOptions) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *BootstrapperCLIOptions) Complete() error {
-	err := o.ExecutorOptions.Complete()
-	if err != nil {
-		return err
+	if err := o.ExecutorOptions.Complete(); err != nil {
+		return fmt.Errorf("unable to complete options: %w", err)
 	}
+
 	id := credentials.ConsumerIdentity{}
 	attrs := common.Properties{}
+
 	for _, s := range o.CredentialSettings {
 		i := strings.Index(s, "=")
 		if i < 0 {
 			return errors.ErrInvalid("credential setting", s)
 		}
+
 		name := s[:i]
 		value := s[i+1:]
+
 		if strings.HasPrefix(name, ":") {
 			if len(attrs) != 0 {
 				o.Context.CredentialsContext().SetCredentialsForConsumer(id, credentials.NewCredentials(attrs))
@@ -126,10 +124,12 @@ func (o *BootstrapperCLIOptions) Complete() error {
 		} else {
 			attrs[name] = value
 		}
+
 		if len(name) == 0 {
 			return errors.ErrInvalid("credential setting", s)
 		}
 	}
+
 	if len(attrs) != 0 {
 		o.Context.CredentialsContext().SetCredentialsForConsumer(id, credentials.NewCredentials(attrs))
 	} else {
@@ -155,7 +155,12 @@ func (o *BootstrapperCLIOptions) Complete() error {
 		}
 		err = ctx.ApplyConfig(spec, "cli")
 	}
-	return err
+
+	if err != nil {
+		return fmt.Errorf("unable to parse labels: %w", err)
+	}
+
+	return nil
 }
 
 func NewVersionCommand() *cobra.Command {
@@ -165,6 +170,7 @@ func NewVersionCommand() *cobra.Command {
 		Short:   "displays the version",
 		Run: func(cmd *cobra.Command, args []string) {
 			v := version.Get()
+			//nolint:forbidigo // It's an intentional Printf.
 			fmt.Printf("%#v", v)
 		},
 	}

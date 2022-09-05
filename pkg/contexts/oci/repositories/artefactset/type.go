@@ -44,7 +44,7 @@ type RepositorySpec struct {
 	AccessMode accessobj.AccessMode `json:"accessMode,omitempty"`
 }
 
-// NewRepositorySpec creates a new RepositorySpec
+// NewRepositorySpec creates a new RepositorySpec.
 func NewRepositorySpec(acc accessobj.AccessMode, filePath string, opts ...accessio.Option) *RepositorySpec {
 	o := accessio.AccessOptions(opts...)
 	return &RepositorySpec{
@@ -58,12 +58,23 @@ func NewRepositorySpec(acc accessobj.AccessMode, filePath string, opts ...access
 func (s *RepositorySpec) Name() string {
 	return s.FilePath
 }
+
+func (s *RepositorySpec) UniformRepositorySpec() *cpi.UniformRepositorySpec {
+	u := &cpi.UniformRepositorySpec{
+		Type: Type,
+		Info: s.FilePath,
+	}
+	return u
+}
+
 func (a *RepositorySpec) GetType() string {
 	return Type
 }
+
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
 	return NewRepository(ctx, a)
 }
+
 func (a *RepositorySpec) AsUniformSpec(cpi.Context) cpi.UniformRepositorySpec {
 	opts := a.Options.Default()
 	p, err := vfs.Canonical(opts.PathFileSystem, a.FilePath, false)

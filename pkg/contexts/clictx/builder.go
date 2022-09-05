@@ -21,7 +21,6 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	core2 "github.com/open-component-model/ocm/pkg/contexts/clictx/core"
-
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )

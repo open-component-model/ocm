@@ -25,4 +25,5 @@ const (
 	ATTR_TOKEN                 = "token"
 	ATTR_AWS_ACCESS_KEY_ID     = "awsAccessKeyID"
 	ATTR_AWS_SECRET_ACCESS_KEY = "awsSecretAccessKey"
+	ATTR_KEY                   = "key"
 )

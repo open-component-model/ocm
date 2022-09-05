@@ -41,7 +41,7 @@ func NewState(mode accessobj.AccessMode, name, version string, access oci.Manife
 	return accessobj.NewState(mode, NewStateAccess(access), NewStateHandler(name, version))
 }
 
-// StateAccess handles the component descriptor persistence in an OCI Manifest
+// StateAccess handles the component descriptor persistence in an OCI Manifest.
 type StateAccess struct {
 	access oci.ManifestAccess
 }
@@ -104,13 +104,13 @@ func (s *StateAccess) get() (accessio.BlobAccess, error) {
 }
 
 // readComponentDescriptorFromTar reads the component descriptor from a tar.
-// The component is expected to be inside the tar at "/component-descriptor.yaml"
+// The component is expected to be inside the tar at "/component-descriptor.yaml".
 func (s *StateAccess) readComponentDescriptorFromTar(r io.Reader) ([]byte, error) {
 	tr := tar.NewReader(r)
 	for {
 		header, err := tr.Next()
 		if err != nil {
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				return nil, errors.New("no component descriptor found in tar")
 			}
 			return nil, fmt.Errorf("unable to read tar: %w", err)
@@ -176,13 +176,13 @@ func (s *StateAccess) Put(data []byte) error {
 }
 
 // readComponentDescriptorFromTar reads the component descriptor from a tar.
-// The component is expected to be inside the tar at "/component-descriptor.yaml"
+// The component is expected to be inside the tar at "/component-descriptor.yaml".
 func (s *StateAccess) writeComponentDescriptorFromTar(data []byte) (cpi.BlobAccess, error) {
 	var buf bytes.Buffer
 	tw := tar.NewWriter(&buf)
 	err := tw.WriteHeader(&tar.Header{
 		Typeflag: tar.TypeReg,
-		Name:     compdesc.ComponentDescriptorFileName,
+		Name:     componentmapping.ComponentDescriptorFileName,
 		Size:     int64(len(data)),
 		ModTime:  format.ModTime,
 	})
@@ -206,7 +206,7 @@ type ComponentDescriptorConfig struct {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// StateHandler handles the encoding of a component descriptor
+// StateHandler handles the encoding of a component descriptor.
 type StateHandler struct {
 	name    string
 	version string
@@ -225,7 +225,7 @@ func (i StateHandler) Initial() interface{} {
 	return compdesc.New(i.name, i.version)
 }
 
-// Encode always provides a yaml representation
+// Encode always provides a yaml representation.
 func (i StateHandler) Encode(d interface{}) ([]byte, error) {
 	desc := d.(*compdesc.ComponentDescriptor)
 	desc.Name = i.name
@@ -233,7 +233,7 @@ func (i StateHandler) Encode(d interface{}) ([]byte, error) {
 	return compdesc.Encode(desc)
 }
 
-// Decode always accepts a yaml representation, and therefore json, also
+// Decode always accepts a yaml representation, and therefore json, also.
 func (i StateHandler) Decode(data []byte) (interface{}, error) {
 	return compdesc.Decode(data)
 }

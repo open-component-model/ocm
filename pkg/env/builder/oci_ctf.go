@@ -23,7 +23,7 @@ import (
 const T_OCI_CTF = "oci common transport format"
 
 func (b *Builder) OCICommonTransport(path string, fmt accessio.FileFormat, f ...func()) {
-	r, err := ctf.Open(b.OCMContext().OCIContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, path, 0777, accessio.PathFileSystem(b.FileSystem()))
+	r, err := ctf.Open(b.OCMContext().OCIContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, path, 0o777, accessio.PathFileSystem(b.FileSystem()))
 	b.failOn(err)
-	b.configure(&oci_repository{Repository: r, kind: T_OCI_CTF}, f)
+	b.configure(&ociRepository{Repository: r, kind: T_OCI_CTF}, f)
 }

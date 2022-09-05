@@ -25,42 +25,48 @@ const CONTEXT_TYPE = core.CONTEXT_TYPE
 
 const CommonTransportFormat = core.CommonTransportFormat
 
-type Context = core.Context
-type ComponentVersionResolver = core.ComponentVersionResolver
-type Repository = core.Repository
-type RepositorySpecHandlers = core.RepositorySpecHandlers
-type RepositorySpecHandler = core.RepositorySpecHandler
-type UniformRepositorySpec = core.UniformRepositorySpec
-type ComponentLister = core.ComponentLister
-type ComponentAccess = core.ComponentAccess
-type ComponentVersionAccess = core.ComponentVersionAccess
-type AccessSpec = core.AccessSpec
-type GenericAccessSpec = core.GenericAccessSpec
-type HintProvider = core.HintProvider
-type AccessMethod = core.AccessMethod
-type AccessMethodSupport = core.AccessMethodSupport
-type AccessType = core.AccessType
-type DataAccess = core.DataAccess
-type BlobAccess = core.BlobAccess
-type SourceAccess = core.SourceAccess
-type SourceMeta = core.SourceMeta
-type ResourceAccess = core.ResourceAccess
-type ResourceMeta = core.ResourceMeta
-type RepositorySpec = core.RepositorySpec
-type IntermediateRepositorySpecAspect = core.IntermediateRepositorySpecAspect
-type GenericRepositorySpec = core.GenericRepositorySpec
-type RepositoryType = core.RepositoryType
-type ComponentReference = core.ComponentReference
+type (
+	Context                          = core.Context
+	ComponentVersionResolver         = core.ComponentVersionResolver
+	Repository                       = core.Repository
+	RepositorySpecHandlers           = core.RepositorySpecHandlers
+	RepositorySpecHandler            = core.RepositorySpecHandler
+	UniformRepositorySpec            = core.UniformRepositorySpec
+	ComponentLister                  = core.ComponentLister
+	ComponentAccess                  = core.ComponentAccess
+	ComponentVersionAccess           = core.ComponentVersionAccess
+	AccessSpec                       = core.AccessSpec
+	GenericAccessSpec                = core.GenericAccessSpec
+	HintProvider                     = core.HintProvider
+	AccessMethod                     = core.AccessMethod
+	AccessMethodSupport              = core.AccessMethodSupport
+	AccessType                       = core.AccessType
+	DataAccess                       = core.DataAccess
+	BlobAccess                       = core.BlobAccess
+	SourceAccess                     = core.SourceAccess
+	SourceMeta                       = core.SourceMeta
+	ResourceAccess                   = core.ResourceAccess
+	ResourceMeta                     = core.ResourceMeta
+	RepositorySpec                   = core.RepositorySpec
+	IntermediateRepositorySpecAspect = core.IntermediateRepositorySpecAspect
+	GenericRepositorySpec            = core.GenericRepositorySpec
+	RepositoryType                   = core.RepositoryType
+	ComponentReference               = core.ComponentReference
+)
 
-type BlobHandler = core.BlobHandler
-type BlobHandlerOption = core.BlobHandlerOption
-type StorageContext = core.StorageContext
-type ImplementationRepositoryType = core.ImplementationRepositoryType
+type (
+	BlobHandler                  = core.BlobHandler
+	BlobHandlerOption            = core.BlobHandlerOption
+	StorageContext               = core.StorageContext
+	ImplementationRepositoryType = core.ImplementationRepositoryType
+)
 
-type DigesterType = core.DigesterType
-type BlobDigester = core.BlobDigester
-type BlobDigesterRegistry = core.BlobDigesterRegistry
-type DigestDescriptor = core.DigestDescriptor
+type (
+	DigesterType         = core.DigesterType
+	BlobDigester         = core.BlobDigester
+	BlobDigesterRegistry = core.BlobDigesterRegistry
+	DigestDescriptor     = core.DigestDescriptor
+)
 
 func New() Context {
 	return core.Builder{}.New()
@@ -120,10 +126,12 @@ func NewRawAccessSpecRef(data []byte, unmarshaler runtime.Unmarshaler) (*AccessS
 	return core.NewRawAccessSpecRef(data, unmarshaler)
 }
 
-const KIND_COMPONENTVERSION = core.KIND_COMPONENTVERSION
-const KIND_RESOURCE = core.KIND_RESOURCE
-const KIND_SOURCE = core.KIND_SOURCE
-const KIND_REFERENCE = core.KIND_REFERENCE
+const (
+	KIND_COMPONENTVERSION = core.KIND_COMPONENTVERSION
+	KIND_RESOURCE         = core.KIND_RESOURCE
+	KIND_SOURCE           = core.KIND_SOURCE
+	KIND_REFERENCE        = core.KIND_REFERENCE
+)
 
 func ErrComponentVersionNotFound(name, version string) error {
 	return core.ErrComponentVersionNotFound(name, version)

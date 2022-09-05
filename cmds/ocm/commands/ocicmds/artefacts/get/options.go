@@ -30,8 +30,10 @@ type Attached struct {
 	Flag bool
 }
 
-var _ options.Condition = (*Attached)(nil)
-var _ options.Options = (*Attached)(nil)
+var (
+	_ options.Condition = (*Attached)(nil)
+	_ options.Options   = (*Attached)(nil)
+)
 
 func (a *Attached) IsTrue() bool {
 	return a.Flag

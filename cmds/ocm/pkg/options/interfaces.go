@@ -20,7 +20,6 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
 	"github.com/open-component-model/ocm/pkg/out"
 )
 
@@ -113,10 +112,10 @@ func (s OptionSet) Options(proto Options) interface{} {
 }
 
 // Get extracts the option for a given target. This might be a
-// - pointer to a struct implementing the Options interface which
-//   will fill the struct with a copy of the options OR
-// - a pointer to such a pointer which will be filled with the
-//   pointer to the actual member of the OptionSet.
+//   - pointer to a struct implementing the Options interface which
+//     will fill the struct with a copy of the options OR
+//   - a pointer to such a pointer which will be filled with the
+//     pointer to the actual member of the OptionSet.
 func (s OptionSet) Get(proto interface{}) bool {
 	val := true
 	t := reflect.TypeOf(proto)

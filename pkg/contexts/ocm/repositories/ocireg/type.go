@@ -32,13 +32,13 @@ const (
 )
 
 // ComponentRepositoryMeta describes config special for a mapping of
-// a component repository to an oci registry
+// a component repository to an oci registry.
 type ComponentRepositoryMeta = genericocireg.ComponentRepositoryMeta
 
 // RepositorySpec describes a component repository backed by a oci registry.
 type RepositorySpec = genericocireg.RepositorySpec
 
-// NewRepositorySpec creates a new RepositorySpec
+// NewRepositorySpec creates a new RepositorySpec.
 func NewRepositorySpec(baseURL string, meta *ComponentRepositoryMeta) *RepositorySpec {
 	return genericocireg.NewRepositorySpec(ocireg.NewRepositorySpec(baseURL), meta)
 }

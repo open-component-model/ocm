@@ -38,7 +38,7 @@ func NewRepository(ctx cpi.Context, s *RepositorySpec) (*Repository, error) {
 	if s.PathFileSystem == nil {
 		s.PathFileSystem = vfsattr.Get(ctx)
 	}
-	a, err := Open(ctx, s.AccessMode, s.FilePath, 0700, s)
+	a, err := Open(ctx, s.AccessMode, s.FilePath, 0o700, s)
 	if err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func (r *Repository) Open() (*ComponentArchive, error) {
 	if r.arch != nil {
 		return r.arch, nil
 	}
-	a, err := Open(r.ctx, r.spec.AccessMode, r.spec.FilePath, 0700, r.spec)
+	a, err := Open(r.ctx, r.spec.AccessMode, r.spec.FilePath, 0o700, r.spec)
 	if err != nil {
 		return nil, err
 	}

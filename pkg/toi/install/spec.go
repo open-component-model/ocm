@@ -20,11 +20,15 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 )
 
-const TypeTOIPackage = "toiPackage"
-const PackageSpecificationMimeType = "application/vnd.toi.gardener.cloud.package.v1+yaml"
+const (
+	TypeTOIPackage               = "toiPackage"
+	PackageSpecificationMimeType = "application/vnd.toi.gardener.cloud.package.v1+yaml"
+)
 
-const TypeTOIExecutor = "toiExecutor"
-const ExecutorSpecificationMimeType = "application/vnd.toi.gardener.cloud.executor.v1+yaml"
+const (
+	TypeTOIExecutor               = "toiExecutor"
+	ExecutorSpecificationMimeType = "application/vnd.toi.gardener.cloud.executor.v1+yaml"
+)
 
 type PackageSpecification struct {
 	CredentialsRequest `json:",inline"`

@@ -116,7 +116,7 @@ func (a *AccessSpecRef) assure(ctx Context) error {
 	return err
 }
 
-// UnmarshalJSON implements a custom json unmarshal method for an access spec ref
+// UnmarshalJSON implements a custom json unmarshal method for an access spec ref.
 func (a *AccessSpecRef) UnmarshalJSON(data []byte) error {
 	a.evaluated = nil
 	a.generic = &GenericAccessSpec{}

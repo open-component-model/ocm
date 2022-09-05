@@ -26,7 +26,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing"
 )
 
-// Algorithm defines the type for the RSA PKCS #1 v1.5 signature algorithm
+// Algorithm defines the type for the RSA PKCS #1 v1.5 signature algorithm.
 const Algorithm = "RSASSA-PKCS1-V1_5"
 
 // MediaType defines the media type for a plain RSA signature.
@@ -45,13 +45,14 @@ func init() {
 	signing.DefaultHandlerRegistry().RegisterSigner(Algorithm, Handler{})
 }
 
-type PrivateKey = rsa.PrivateKey
-type PublicKey = rsa.PublicKey
+type (
+	PrivateKey = rsa.PrivateKey
+	PublicKey  = rsa.PublicKey
+)
 
 // Handler is a signatures.Signer compatible struct to sign with RSASSA-PKCS1-V1_5.
 // and a signatures.Verifier compatible struct to verify RSASSA-PKCS1-V1_5 signatures.
-type Handler struct {
-}
+type Handler struct{}
 
 var _ Handler = Handler{}
 
@@ -84,13 +85,15 @@ func (h Handler) Sign(digest string, hash crypto.Hash, issuer string, key interf
 	}, nil
 }
 
-// Verify checks the signature, returns an error on verification failure
+// Verify checks the signature, returns an error on verification failure.
 func (h Handler) Verify(digest string, hash crypto.Hash, signature *signing.Signature, key interface{}) (err error) {
 	var signatureBytes []byte
+
 	publicKey, names, err := GetPublicKey(key)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get public key: %w", err)
 	}
+
 	switch signature.MediaType {
 	case MediaType:
 		signatureBytes, err = hex.DecodeString(signature.Value)
@@ -118,12 +121,14 @@ func (h Handler) Verify(digest string, hash crypto.Hash, signature *signing.Sign
 	if names != nil {
 		if signature.Issuer != "" {
 			found := false
+
 			for _, n := range names {
 				if n == signature.Issuer {
 					found = true
 					break
 				}
 			}
+
 			if !found {
 				return fmt.Errorf("issuer %q does not match %v", signature.Issuer, names)
 			}
@@ -136,10 +141,11 @@ func (h Handler) Verify(digest string, hash crypto.Hash, signature *signing.Sign
 	if err := rsa.VerifyPKCS1v15(publicKey, hash, decodedHash, signatureBytes); err != nil {
 		return fmt.Errorf("signature verification failed, %w", err)
 	}
+
 	return nil
 }
 
-// GetSignaturePEMBlocks returns all signature pem blocks from a list of pem blocks
+// GetSignaturePEMBlocks returns all signature pem blocks from a list of pem blocks.
 func GetSignaturePEMBlocks(pemData []byte) ([]*pem.Block, error) {
 	if len(pemData) == 0 {
 		return []*pem.Block{}, nil

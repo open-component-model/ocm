@@ -15,15 +15,14 @@
 package create
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
 	"github.com/spf13/cobra"
 
 	rsakeypair "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/rsakeypair"
 	ctf "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/ctf/create"
 	comparch "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 )
 
 // NewCommand creates a new command.

@@ -22,7 +22,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-// VersionedElement describes an element that has a name and a version
+// VersionedElement describes an element that has a name and a version.
 type VersionedElement interface {
 	// GetName gets the name of the element
 	GetName() string

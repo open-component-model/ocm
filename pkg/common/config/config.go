@@ -23,9 +23,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
-	"github.com/open-component-model/ocm/pkg/errors"
-
 	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func Configure(file string) error {

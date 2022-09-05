@@ -36,7 +36,7 @@ const (
 
 // IsNormalizeable checks if componentReferences and resources contain digest.
 // Resources are allowed to omit the digest, if res.access.type == None or res.access == nil.
-// Does NOT verify if the digests are correct
+// Does NOT verify if the digests are correct.
 func (cd *ComponentDescriptor) IsNormalizeable() error {
 	// check for digests on component references
 	for _, reference := range cd.References {
@@ -49,14 +49,14 @@ func (cd *ComponentDescriptor) IsNormalizeable() error {
 			return fmt.Errorf("missing digest in resource for %s:%s", res.Name, res.Version)
 		}
 		if (res.Access == nil || res.Access.GetType() == "None") && res.Digest != nil {
-			return fmt.Errorf("digest for resource with emtpy (None) access not allowed %s:%s", res.Name, res.Version)
+			return fmt.Errorf("digest for resource with empty (None) access not allowed %s:%s", res.Name, res.Version)
 		}
 	}
 	return nil
 }
 
 // Hash return the hash for the component-descriptor, if it is normalizeable
-// (= componentReferences and resources contain digest field)
+// (= componentReferences and resources contain digest field).
 func Hash(cd *ComponentDescriptor, normAlgo string, hash hash.Hash) (string, error) {
 	if hash == nil {
 		return metav1.NoDigest, nil
@@ -108,7 +108,7 @@ func Sign(cd *ComponentDescriptor, privateKey interface{}, signer signing.Signer
 // Does NOT resolve resources or referenced component-descriptors.
 // Returns error if verification fails.
 func Verify(cd *ComponentDescriptor, registry signing.Registry, signatureName string) error {
-	//find matching signature
+	// find matching signature
 	matchingSignature := cd.SelectSignatureByName(signatureName)
 	if matchingSignature == nil {
 		return errors.ErrNotFound(KIND_SIGNATURE, signatureName)
@@ -126,14 +126,14 @@ func Verify(cd *ComponentDescriptor, registry signing.Registry, signatureName st
 	if hasher == nil {
 		return errors.ErrUnknown(KIND_HASH_ALGORITHM, matchingSignature.Digest.HashAlgorithm)
 	}
-	//Verify author of signature
+	// Verify author of signature
 	err := verifier.Verify(matchingSignature.Digest.Value, hasher.Crypto(), matchingSignature.ConvertToSigning(), publicKey)
 	if err != nil {
 		return fmt.Errorf("failed verifying: %w", err)
 	}
 
 	hash := hasher.Create()
-	//Verify normalised cd to given (and verified) hash
+	// Verify normalised cd to given (and verified) hash
 	calculatedDigest, err := Hash(cd, matchingSignature.Digest.NormalisationAlgorithm, hash)
 	if err != nil {
 		return fmt.Errorf("failed hashing cd %s:%s: %w", cd.Name, cd.Version, err)
@@ -146,7 +146,7 @@ func Verify(cd *ComponentDescriptor, registry signing.Registry, signatureName st
 	return nil
 }
 
-// SelectSignatureByName returns the Signature (Digest and SigantureSpec) matching the given name
+// SelectSignatureByName returns the Signature (Digest and SigantureSpec) matching the given name.
 func (cd *ComponentDescriptor) SelectSignatureByName(signatureName string) *metav1.Signature {
 	for _, signature := range cd.Signatures {
 		if signature.Name == signatureName {

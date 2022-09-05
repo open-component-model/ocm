@@ -15,13 +15,12 @@
 package processing
 
 import (
-	"fmt"
 	"sync"
+
+	"github.com/sirupsen/logrus"
 
 	data "github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 )
-
-var log = false
 
 type _ParallelProcessing struct {
 	data    ProcessingIterable
@@ -41,17 +40,23 @@ func (this *_ParallelProcessing) new(data ProcessingIterable, pool ProcessorPool
 func (this *_ParallelProcessing) Explode(m ExplodeFunction) ProcessingResult {
 	return (&_ParallelStep{}).new(this.pool, this.data, explode(m), this.creator)
 }
+
 func (this *_ParallelProcessing) Map(m MappingFunction) ProcessingResult {
 	return (&_ParallelStep{}).new(this.pool, this.data, mapper(m), this.creator)
 }
+
 func (this *_ParallelProcessing) Filter(f FilterFunction) ProcessingResult {
 	return (&_ParallelStep{}).new(this.pool, this.data, filter(f), this.creator)
 }
+
 func (this *_ParallelProcessing) Sort(c CompareFunction) ProcessingResult {
 	setup := func() data.Iterable { return this.AsSlice().Sort(c) }
-	fmt.Printf("POOL %+v\n", this.pool)
+
+	logrus.Debugf("POOL: %+v", this.pool)
+
 	return (&_ParallelProcessing{}).new(NewAsyncProcessingSource(setup, this.pool).(ProcessingIterable), this.pool, NewOrderedBuffer)
 }
+
 func (this *_ParallelProcessing) Transform(t TransformFunction) ProcessingResult {
 	transform := func() data.Iterable { return t(this.data) }
 	return (&_ParallelProcessing{}).new(NewAsyncProcessingSource(transform, this.pool).(ProcessingIterable), this.pool, NewOrderedBuffer)
@@ -60,15 +65,19 @@ func (this *_ParallelProcessing) Transform(t TransformFunction) ProcessingResult
 func (this *_ParallelProcessing) WithPool(p ProcessorPool) ProcessingResult {
 	return (&_ParallelProcessing{}).new(this.data, p, this.creator)
 }
+
 func (this *_ParallelProcessing) Parallel(n int) ProcessingResult {
 	return this.WithPool(NewProcessorPool(n))
 }
+
 func (this *_ParallelProcessing) Synchronously() ProcessingResult {
 	return (&_SynchronousProcessing{}).new(this)
 }
+
 func (this *_ParallelProcessing) Asynchronously() ProcessingResult {
 	return (&_AsynchronousProcessing{}).new(this)
 }
+
 func (this *_ParallelProcessing) Unordered() ProcessingResult {
 	data := this.data
 	ordered, ok := data.(*orderedBuffer)
@@ -77,6 +86,7 @@ func (this *_ParallelProcessing) Unordered() ProcessingResult {
 	}
 	return (&_ParallelProcessing{}).new(data, this.pool, NewSimpleBuffer)
 }
+
 func (this *_ParallelProcessing) Apply(p ProcessChain) ProcessingResult {
 	return p.Process(this)
 }
@@ -84,6 +94,7 @@ func (this *_ParallelProcessing) Apply(p ProcessChain) ProcessingResult {
 func (this *_ParallelProcessing) Iterator() data.Iterator {
 	return this.data.Iterator()
 }
+
 func (this *_ParallelProcessing) AsSlice() data.IndexedSliceAccess {
 	return data.IndexedSliceAccess(data.Slice(this.data))
 }
@@ -98,22 +109,17 @@ func (this *_ParallelStep) new(pool ProcessorPool, data ProcessingIterable, op o
 	buffer := creator()
 	this._ParallelProcessing.new(buffer, pool, creator)
 	go func() {
-		if log {
-			fmt.Printf("start processing\n")
-		}
+		logrus.Debug("start processing")
+
 		this.pool.Request()
 		i := data.ProcessingIterator()
 		var wg sync.WaitGroup
 		for i.HasNext() {
 			e := i.NextProcessingEntry()
-			if log {
-				fmt.Printf("start %v\n", e.Index)
-			}
+			logrus.Debugf("start %v", e.Index)
 			wg.Add(1)
 			pool.Exec(func() {
-				if log {
-					fmt.Printf("process %v\n", e.Index)
-				}
+				logrus.Debugf("process %v", e.Index)
 				var r operationResult
 				if e.Valid {
 					r, e.Valid = op.process(e.Value)
@@ -140,19 +146,14 @@ func (this *_ParallelStep) new(pool ProcessorPool, data ProcessingIterable, op o
 						}
 					}
 				}
-				if log {
-					fmt.Printf("done %v\n", e.Index)
-				}
+				logrus.Debugf("done %v", e.Index)
 				wg.Done()
-
 			})
 		}
 		wg.Wait()
 		this.pool.Release()
 		buffer.Close()
-		if log {
-			fmt.Printf("done processing\n")
-		}
+		logrus.Debugf("done processing\n")
 	}()
 	return this
 }

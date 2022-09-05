@@ -27,15 +27,16 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const ATTR_KEY = "github.com/mandelsoft/ocm/ociuploadrepo"
-const ATTR_SHORT = "ociuploadrepo"
+const (
+	ATTR_KEY   = "github.com/mandelsoft/ocm/ociuploadrepo"
+	ATTR_SHORT = "ociuploadrepo"
+)
 
 func init() {
 	datacontext.RegisterAttributeType(ATTR_KEY, AttributeType{}, ATTR_SHORT)
 }
 
-type AttributeType struct {
-}
+type AttributeType struct{}
 
 func (a AttributeType) Name() string {
 	return ATTR_KEY
@@ -86,7 +87,6 @@ type Attribute struct {
 	spec []byte
 
 	repo   oci.Repository
-	base   string
 	prefix string
 }
 
@@ -96,7 +96,6 @@ func New(ref string) *Attribute {
 
 func (a *Attribute) reset() {
 	a.repo = nil
-	a.base = ""
 	a.prefix = ""
 	a.ref = nil
 	a.spec = nil
@@ -112,23 +111,22 @@ func (a *Attribute) Close() error {
 	return nil
 }
 
-func (a *Attribute) GetInfo(ctx cpi.Context) (oci.Repository, string, string, error) {
-
+func (a *Attribute) GetInfo(ctx cpi.Context) (oci.Repository, *oci.UniformRepositorySpec, string, error) {
 	if a.Ref != "" {
 		return a.getByRef(ctx)
 	}
 	if a.Repository != nil {
 		return a.getBySpec(ctx)
 	}
-	return nil, "", "", errors.ErrInvalid("ociuploadspec")
+	return nil, nil, "", errors.ErrInvalid("ociuploadspec")
 }
 
-func (a *Attribute) getBySpec(ctx cpi.Context) (oci.Repository, string, string, error) {
+func (a *Attribute) getBySpec(ctx cpi.Context) (oci.Repository, *oci.UniformRepositorySpec, string, error) {
 	data, _ := a.Repository.MarshalJSON()
 
 	spec, err := a.Repository.Evaluate(ctx.OCIContext())
 	if err != nil {
-		return nil, "", "", errors.ErrInvalidWrap(err, oci.KIND_OCI_REFERENCE, string(data))
+		return nil, nil, "", errors.ErrInvalidWrap(err, oci.KIND_OCI_REFERENCE, string(data))
 	}
 
 	a.lock.Lock()
@@ -142,23 +140,23 @@ func (a *Attribute) getBySpec(ctx cpi.Context) (oci.Repository, string, string, 
 
 		a.repo, err = ctx.OCIContext().RepositoryForSpec(spec)
 		if err != nil {
-			return nil, "", "", err
+			return nil, nil, "", err
 		}
 
 		a.prefix = a.NamespacePrefix
-		a.base = spec.Name()
 		a.spec = data
+		a.ref = &oci.RefSpec{UniformRepositorySpec: *spec.UniformRepositorySpec()}
 	}
-	return a.repo, a.base, a.prefix, nil
+	return a.repo, &a.ref.UniformRepositorySpec, a.prefix, nil
 }
 
-func (a *Attribute) getByRef(ctx cpi.Context) (oci.Repository, string, string, error) {
+func (a *Attribute) getByRef(ctx cpi.Context) (oci.Repository, *oci.UniformRepositorySpec, string, error) {
 	ref, err := oci.ParseRef(a.Ref)
 	if err != nil {
-		return nil, "", "", errors.ErrInvalidWrap(err, oci.KIND_OCI_REFERENCE, a.Ref)
+		return nil, nil, "", errors.ErrInvalidWrap(err, oci.KIND_OCI_REFERENCE, a.Ref)
 	}
 	if ref.Tag != nil || ref.Digest != nil {
-		return nil, "", "", errors.ErrInvalidWrap(err, oci.KIND_OCI_REFERENCE, a.Ref)
+		return nil, nil, "", errors.ErrInvalidWrap(err, oci.KIND_OCI_REFERENCE, a.Ref)
 	}
 
 	a.lock.Lock()
@@ -171,17 +169,16 @@ func (a *Attribute) getByRef(ctx cpi.Context) (oci.Repository, string, string, e
 
 		spec, err := ctx.OCIContext().MapUniformRepositorySpec(&ref.UniformRepositorySpec)
 		if err != nil {
-			return nil, "", "", err
+			return nil, nil, "", err
 		}
 		a.repo, err = ctx.OCIContext().RepositoryForSpec(spec)
 		if err != nil {
-			return nil, "", "", err
+			return nil, nil, "", err
 		}
 		a.prefix = ref.Repository
-		a.base = ref.UniformRepositorySpec.String()
 		a.ref = &ref
 	}
-	return a.repo, a.base, a.prefix, nil
+	return a.repo, &a.ref.UniformRepositorySpec, a.prefix, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -73,15 +73,23 @@ func (c *refMgmt) Unref() error {
 	if c.closed {
 		return ErrClosed
 	}
-	c.refcount--
+
 	var err error
+
+	c.refcount--
 	if c.refcount <= 0 {
 		if c.cleanup != nil {
 			err = c.cleanup()
 		}
+
 		c.closed = true
 	}
-	return err
+
+	if err != nil {
+		return fmt.Errorf("unable to unref: %w", err)
+	}
+
+	return nil
 }
 
 func (c *refMgmt) UnrefLast() error {
@@ -90,18 +98,27 @@ func (c *refMgmt) UnrefLast() error {
 	if c.closed {
 		return ErrClosed
 	}
+
 	if c.refcount > 1 {
 		return errors.Newf("object still in use: %d reference(s) pending", c.refcount)
 	}
-	c.refcount--
+
 	var err error
+
+	c.refcount--
 	if c.refcount <= 0 {
 		if c.cleanup != nil {
 			err = c.cleanup()
 		}
+
 		c.closed = true
 	}
-	return err
+
+	if err != nil {
+		return fmt.Errorf("unable to unref last: %w", err)
+	}
+
+	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -137,8 +154,10 @@ type blobCache struct {
 	cache vfs.FileSystem
 }
 
-var _ sync.Locker = (*blobCache)(nil)
-var _ RootedCache = (*blobCache)(nil)
+var (
+	_ sync.Locker = (*blobCache)(nil)
+	_ RootedCache = (*blobCache)(nil)
+)
 
 func NewDefaultBlobCache(fss ...vfs.FileSystem) (BlobCache, error) {
 	var err error
@@ -158,7 +177,7 @@ func NewDefaultBlobCache(fss ...vfs.FileSystem) (BlobCache, error) {
 
 func NewStaticBlobCache(path string, fss ...vfs.FileSystem) (BlobCache, error) {
 	fs := FileSystem(fss...)
-	err := fs.MkdirAll(path, 0700)
+	err := fs.MkdirAll(path, 0o700)
 	if err != nil {
 		return nil, err
 	}

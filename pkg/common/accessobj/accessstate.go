@@ -57,17 +57,17 @@ type StateHandler interface {
 }
 
 // StateAccess is responsible to handle the persistence
-// of a state object
+// of a state object.
 type StateAccess interface {
 	// Get returns the technical representation of a state object from its persistence
 	// It MUST return an errors.IsErrNotFound compatible error
 	// if the persistence not yet exists.
 	Get() (accessio.BlobAccess, error)
-	//Digest() digest.Digest
+	// Digest() digest.Digest
 	Put(data []byte) error
 }
 
-// BlobStateAccess provides state handling for data given by a blob access
+// BlobStateAccess provides state handling for data given by a blob access.
 type BlobStateAccess struct {
 	lock sync.RWMutex
 	blob accessio.BlobAccess
@@ -109,7 +109,7 @@ func (b *BlobStateAccess) Digest() digest.Digest {
 // State manages the modification and access of state
 // with a technical representation as byte array
 // It tries to keep the byte representation unchanged as long as
-// possible
+// possible.
 type State interface {
 	IsReadOnly() bool
 	IsCreate() bool
@@ -137,7 +137,7 @@ type state struct {
 var _ State = (*state)(nil)
 
 // NewState creates a new State based on its persistence handling
-// and the management of its technical representation as byte array
+// and the management of its technical representation as byte array.
 func NewState(mode AccessMode, a StateAccess, p StateHandler) (State, error) {
 	state, err := newState(mode, a, p)
 	// avoid nil pinter problem: go is great
@@ -154,22 +154,25 @@ func newState(mode AccessMode, a StateAccess, p StateHandler) (*state, error) {
 			return nil, err
 		}
 	}
-	var current interface{}
-	var original interface{}
-	if blob == nil {
-		current = p.Initial()
-	} else {
+
+	var current, original interface{}
+
+	if blob != nil {
 		data, err := blob.Get()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to get blob data: %w", err)
 		}
-		blob = accessio.BlobAccessForData(blob.MimeType(), data) // cache orginal data
+
+		blob = accessio.BlobAccessForData(blob.MimeType(), data) // cache original data
 		current, err = p.Decode(data)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to decode blob data: %w", err)
 		}
+
 		// we don't need a copy operation, because we can just deserialize it twice.
 		original, _ = p.Decode(data)
+	} else {
+		current = p.Initial()
 	}
 
 	return &state{
@@ -197,7 +200,7 @@ func NewBlobStateForBlob(mode AccessMode, blob accessio.BlobAccess, p StateHandl
 	return NewState(mode, NewBlobStateAccess(blob), p)
 }
 
-// NewBlobStateForObject returns a representation state handling for a given object
+// NewBlobStateForObject returns a representation state handling for a given object.
 func NewBlobStateForObject(mode AccessMode, obj interface{}, p StateHandler) (State, error) {
 	if reflect2.IsNil(obj) {
 		obj = p.Initial()
@@ -220,9 +223,11 @@ func (s *state) IsCreate() bool {
 func (s *state) Refresh() error {
 	n, err := newState(s.mode, s.access, s.handler)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to create new state: %w", err)
 	}
+
 	*s = *n
+
 	return nil
 }
 

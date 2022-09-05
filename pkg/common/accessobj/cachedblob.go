@@ -15,6 +15,7 @@
 package accessobj
 
 import (
+	"fmt"
 	"io"
 	"sync"
 
@@ -58,19 +59,23 @@ func (c *CachedBlobAccess) setup() error {
 	if c.effective != nil {
 		return nil
 	}
+
 	file, err := c.cache.CreateTempFile("blob*")
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to create temporary file: %w", err)
 	}
 	defer file.Close()
+
 	c.path = file.Name()
 
 	c.size, c.digest, err = c.source.WriteTo(file)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to write source to file '%s': %w", file.Name(), err)
 	}
+
 	c.effective = accessio.BlobAccessForFile(c.mime, c.path, c.cache.Filesystem)
-	return err
+
+	return nil
 }
 
 func (c *CachedBlobAccess) Get() ([]byte, error) {
@@ -94,12 +99,20 @@ func (c *CachedBlobAccess) Close() error {
 	defer c.lock.Unlock()
 
 	var err error
+
 	if c.effective != nil {
 		c.effective.Close()
+
 		err = c.cache.Filesystem.Remove(c.path)
 	}
+
 	c.effective = nil
-	return err
+
+	if err != nil {
+		return fmt.Errorf("failed to close blob access cache: %w", err)
+	}
+
+	return nil
 }
 
 func (c *CachedBlobAccess) Digest() digest.Digest {

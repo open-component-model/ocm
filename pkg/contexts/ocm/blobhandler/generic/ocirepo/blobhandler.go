@@ -22,7 +22,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/ociuploadattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -37,9 +36,8 @@ func init() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// artefactHandler stores artefact blobs as OCIArtefacts
-type artefactHandler struct {
-}
+// artefactHandler stores artefact blobs as OCIArtefacts.
+type artefactHandler struct{}
 
 func NewArtefactHandler() cpi.BlobHandler {
 	return &artefactHandler{}
@@ -59,11 +57,6 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi
 	repo, base, prefix, err := attr.GetInfo(ctx.GetContext())
 	if err != nil {
 		return nil, err
-	}
-	sep := ""
-	if !ocireg.Is(repo.GetSpecification()) {
-		// may be we should reject this, for non test scenario
-		sep = "//"
 	}
 	var namespace oci.NamespaceAccess
 	var version string
@@ -107,10 +100,7 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi
 		return nil, err
 	}
 
-	ref := path.Join(base, namespace.GetNamespace()) + version
-	if base != "" && sep != "" {
-		ref = base + sep + namespace.GetNamespace() + version
-	}
+	ref := base.ComposeRef(namespace.GetNamespace() + version)
 	var acc cpi.AccessSpec = ociartefact.New(ref)
 	return acc, nil
 }

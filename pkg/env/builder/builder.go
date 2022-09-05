@@ -34,8 +34,8 @@ type element interface {
 	Result() interface{}
 }
 
-type State struct {
-}
+type State struct{}
+
 type base struct {
 	*Builder
 	result interface{}
@@ -96,7 +96,6 @@ func (b *Builder) set() {
 	if len(b.stack) > 0 {
 		b.peek().Set()
 	}
-
 }
 
 func (b *Builder) expect(p interface{}, msg string, tests ...func() bool) {

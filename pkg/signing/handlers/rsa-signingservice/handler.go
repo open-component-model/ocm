@@ -24,7 +24,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 )
 
-// Algorithm defines the type for the RSA PKCS #1 v1.5 signature algorithm
+// Algorithm defines the type for the RSA PKCS #1 v1.5 signature algorithm.
 const Algorithm = rsa.Algorithm
 const Name = "rsa-signingsservice"
 
@@ -42,9 +42,8 @@ func init() {
 }
 
 // Handler is a signatures.Signer compatible struct to sign with RSASSA-PKCS1-V1_5.
-// using a signature service
-type Handler struct {
-}
+// using a signature service.
+type Handler struct{}
 
 var _ Handler = Handler{}
 

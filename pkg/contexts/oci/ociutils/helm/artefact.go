@@ -37,18 +37,22 @@ func SynthesizeArtefactBlob(path string, fss ...vfs.FileSystem) (artefactset.Art
 	return artefactset.SythesizeArtefactSet(artdesc.MediaTypeImageManifest, func(set *artefactset.ArtefactSet) error {
 		chart, blob, err := TransferAsArtefact(path, set, fss...)
 		if err != nil {
-			return err
+			return fmt.Errorf("unable to transfer as artefact: %w", err)
 		}
+
 		if chart.Metadata.Version != "" {
 			err = set.AddTags(blob.Digest, chart.Metadata.Version)
 			if err != nil {
-				return err
+				return fmt.Errorf("unable to add tag: %w", err)
 			}
 		}
+
 		set.Annotate(artefactset.MAINARTEFACT_ANNOTATION, blob.Digest.String())
-		return err
+
+		return nil
 	})
 }
+
 func TransferAsArtefact(path string, ns oci.NamespaceAccess, fss ...vfs.FileSystem) (*chart.Chart, *artdesc.Descriptor, error) {
 	fs := accessio.FileSystem(fss...)
 

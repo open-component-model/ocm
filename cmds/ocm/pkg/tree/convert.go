@@ -29,36 +29,40 @@ func ObjectSlice(s data.Iterable) Objects {
 	return a
 }
 
-var _ data.IndexedAccess = Objects{}
-var _ data.Iterable = Objects{}
+var (
+	_ data.IndexedAccess = Objects{}
+	_ data.Iterable      = Objects{}
+)
 
-func (this Objects) Len() int {
-	return len(this)
+func (o Objects) Len() int {
+	return len(o)
 }
 
-func (this Objects) Get(i int) interface{} {
-	return this[i]
+func (o Objects) Get(i int) interface{} {
+	return o[i]
 }
 
-func (this Objects) Iterator() data.Iterator {
-	return data.NewIndexedIterator(this)
+func (o Objects) Iterator() data.Iterator {
+	return data.NewIndexedIterator(o)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type TreeObjects []*TreeObject
 
-var _ data.IndexedAccess = TreeObjects{}
-var _ data.Iterable = TreeObjects{}
+var (
+	_ data.IndexedAccess = TreeObjects{}
+	_ data.Iterable      = TreeObjects{}
+)
 
-func (this TreeObjects) Len() int {
-	return len(this)
+func (o TreeObjects) Len() int {
+	return len(o)
 }
 
-func (this TreeObjects) Get(i int) interface{} {
-	return this[i]
+func (o TreeObjects) Get(i int) interface{} {
+	return o[i]
 }
 
-func (this TreeObjects) Iterator() data.Iterator {
-	return data.NewIndexedIterator(this)
+func (o TreeObjects) Iterator() data.Iterator {
+	return data.NewIndexedIterator(o)
 }

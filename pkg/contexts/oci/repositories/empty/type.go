@@ -37,7 +37,7 @@ type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 }
 
-// NewRepositorySpec creates a new RepositorySpec
+// NewRepositorySpec creates a new RepositorySpec.
 func NewRepositorySpec() *RepositorySpec {
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
@@ -50,6 +50,13 @@ func (a *RepositorySpec) GetType() string {
 
 func (a *RepositorySpec) Name() string {
 	return Type
+}
+
+func (a *RepositorySpec) UniformRepositorySpec() *cpi.UniformRepositorySpec {
+	u := &cpi.UniformRepositorySpec{
+		Type: Type,
+	}
+	return u
 }
 
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {

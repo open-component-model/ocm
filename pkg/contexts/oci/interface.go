@@ -21,30 +21,34 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
 )
 
-const KIND_OCIARTEFACT = core.KIND_OCIARTEFACT
-const KIND_MEDIATYPE = accessio.KIND_MEDIATYPE
-const KIND_BLOB = accessio.KIND_BLOB
+const (
+	KIND_OCIARTEFACT = core.KIND_OCIARTEFACT
+	KIND_MEDIATYPE   = accessio.KIND_MEDIATYPE
+	KIND_BLOB        = accessio.KIND_BLOB
+)
 
 const CONTEXT_TYPE = core.CONTEXT_TYPE
 
 const CommonTransportFormat = core.CommonTransportFormat
 
-type Context = core.Context
-type Repository = core.Repository
-type RepositorySpecHandlers = core.RepositorySpecHandlers
-type RepositorySpecHandler = core.RepositorySpecHandler
-type UniformRepositorySpec = core.UniformRepositorySpec
-type RepositoryTypeScheme = core.RepositoryTypeScheme
-type RepositorySpec = core.RepositorySpec
-type IntermediateRepositorySpecAspect = core.IntermediateRepositorySpecAspect
-type GenericRepositorySpec = core.GenericRepositorySpec
-type ArtefactAccess = core.ArtefactAccess
-type NamespaceLister = core.NamespaceLister
-type NamespaceAccess = core.NamespaceAccess
-type ManifestAccess = core.ManifestAccess
-type IndexAccess = core.IndexAccess
-type BlobAccess = core.BlobAccess
-type DataAccess = core.DataAccess
+type (
+	Context                          = core.Context
+	Repository                       = core.Repository
+	RepositorySpecHandlers           = core.RepositorySpecHandlers
+	RepositorySpecHandler            = core.RepositorySpecHandler
+	UniformRepositorySpec            = core.UniformRepositorySpec
+	RepositoryTypeScheme             = core.RepositoryTypeScheme
+	RepositorySpec                   = core.RepositorySpec
+	IntermediateRepositorySpecAspect = core.IntermediateRepositorySpecAspect
+	GenericRepositorySpec            = core.GenericRepositorySpec
+	ArtefactAccess                   = core.ArtefactAccess
+	NamespaceLister                  = core.NamespaceLister
+	NamespaceAccess                  = core.NamespaceAccess
+	ManifestAccess                   = core.ManifestAccess
+	IndexAccess                      = core.IndexAccess
+	BlobAccess                       = core.BlobAccess
+	DataAccess                       = core.DataAccess
+)
 
 func DefaultContext() core.Context {
 	return core.DefaultContext

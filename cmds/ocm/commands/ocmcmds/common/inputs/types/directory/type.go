@@ -34,7 +34,7 @@ If the field <code>followSymLinks</code> is set to <code>true</code>, symbolic
 links are not packed but their targets files or folders.
 With the list fields <code>includeFiles</code> and <code>excludeFiles</code> it is 
 possible to specify which files should be included or excluded. The values are
-regular expression used to match relative file paths. If no inlcudes are specified
+regular expression used to match relative file paths. If no includes are specified
 all file not explicitly excluded are used.
 
 This blob type specification supports the following fields: 

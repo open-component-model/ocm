@@ -56,8 +56,10 @@ type TableProcessingOutput struct {
 	opts   *Options
 }
 
-var _ Output = (*TableProcessingOutput)(nil)
-var _ SortFields = (*TableProcessingOutput)(nil)
+var (
+	_ Output     = (*TableProcessingOutput)(nil)
+	_ SortFields = (*TableProcessingOutput)(nil)
+)
 
 func NewProcessingTableOutput(opts *Options, chain ProcessChain, header ...string) *TableProcessingOutput {
 	return (&TableProcessingOutput{}).new(opts, chain, header)
@@ -98,7 +100,7 @@ func (this *TableProcessingOutput) Out() error {
 			if n < this.opts.FixedColums {
 				return errors.Newf("field '%s' not possible", k)
 			}
-			cmp := compare_column(idxs[key])
+			cmp := compareColumn(idxs[key])
 			if this.opts.FixedColums > 0 {
 				sortFixed(this.opts.FixedColums, slice, cmp)
 			} else {
@@ -111,7 +113,7 @@ func (this *TableProcessingOutput) Out() error {
 	return nil
 }
 
-func compare_column(c int) CompareFunction {
+func compareColumn(c int) CompareFunction {
 	return func(a interface{}, b interface{}) int {
 		aa := a.([]string)
 		ab := b.([]string)

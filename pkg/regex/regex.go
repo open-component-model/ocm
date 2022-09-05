@@ -27,7 +27,7 @@ var (
 	// component of names. This only allows upper and lower case characters and digits.
 	AlphaNumeric = Match(`[A-Za-z0-9]+`)
 
-	// Identifier is an AlphaNumeric regexp starting with an Alpha regexp
+	// Identifier is an AlphaNumeric regexp starting with an Alpha regexp.
 	Identifier = Sequence(Alpha, Match(`[A-Za-z0-9]`), Optional(Literal("+"), Alpha))
 )
 

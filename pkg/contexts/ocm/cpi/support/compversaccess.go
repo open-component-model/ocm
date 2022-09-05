@@ -15,6 +15,7 @@
 package support
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -33,11 +34,17 @@ type ComponentVersionAccess struct {
 // the rest is directly taken from the artefact set implementation
 
 func (s *ComponentVersionAccess) Close() error {
-	err := s.base.Update()
+	err := s.Update(true)
 	if err != nil {
 		s.view.Close()
-		return err
+
+		return UpdateComponentVersionContainerError{
+			Original: err,
+			Name:     s.base.GetDescriptor().ObjectMeta.GetName(),
+			Version:  s.base.GetDescriptor().ObjectMeta.GetVersion(),
+		}
 	}
+
 	return s.view.Close()
 }
 
@@ -48,9 +55,10 @@ func (s *ComponentVersionAccess) IsClosed() bool {
 ////////////////////////////////////////////////////////////////////////////////
 
 type componentVersionAccessImpl struct {
-	refs accessio.ReferencableCloser
-	lazy bool
-	base ComponentVersionContainer
+	refs           accessio.ReferencableCloser
+	lazy           bool
+	discardChanges bool
+	base           ComponentVersionContainer
 }
 
 var _ cpi.ComponentVersionAccess = (*ComponentVersionAccess)(nil)
@@ -73,7 +81,7 @@ func (a *componentVersionAccessImpl) View(main ...bool) (*ComponentVersionAccess
 }
 
 func (a *componentVersionAccessImpl) Close() error {
-	return errors.ErrListf("closing access").Add(a.base.Update(), a.base.Close()).Result()
+	return errors.ErrListf("closing access").Add(a.Update(true), a.base.Close()).Result()
 }
 
 func (c *componentVersionAccessImpl) Repository() cpi.Repository {
@@ -243,7 +251,12 @@ func (c *componentVersionAccessImpl) getAccessMethod(acc compdesc.AccessSpec) (c
 
 func (c *componentVersionAccessImpl) AdjustResourceAccess(meta *cpi.ResourceMeta, acc compdesc.AccessSpec) error {
 	if err := c.checkAccessSpec(acc); err != nil {
-		return err
+		return AccessCheckError{
+			Original: err,
+			Name:     meta.GetName(),
+			Version:  meta.GetVersion(),
+			Type:     meta.GetType(),
+		}
 	}
 
 	cd := c.GetDescriptor()
@@ -252,21 +265,28 @@ func (c *componentVersionAccessImpl) AdjustResourceAccess(meta *cpi.ResourceMeta
 	} else {
 		cd.Resources[idx].Access = acc
 	}
-	if c.lazy {
-		return nil
-	}
-	return c.base.Update()
+
+	return c.Update(false)
 }
 
 func (c *componentVersionAccessImpl) checkAccessSpec(acc compdesc.AccessSpec) error {
-	_, err := c.getAccessMethod(acc)
-	return err
+	if _, err := c.getAccessMethod(acc); err != nil {
+		return fmt.Errorf("unable to get access method: %w", err)
+	}
+
+	return nil
 }
 
 func (c *componentVersionAccessImpl) SetResource(meta *cpi.ResourceMeta, acc compdesc.AccessSpec) error {
 	if err := c.checkAccessSpec(acc); err != nil {
-		return err
+		return AccessCheckError{
+			Original: err,
+			Name:     meta.GetName(),
+			Version:  meta.GetVersion(),
+			Type:     meta.GetType(),
+		}
 	}
+
 	res := &compdesc.Resource{
 		ResourceMeta: *meta.Copy(),
 		Access:       acc,
@@ -292,18 +312,21 @@ func (c *componentVersionAccessImpl) SetResource(meta *cpi.ResourceMeta, acc com
 		}
 		cd.Resources[idx] = *res
 	}
-	if c.lazy {
-		return nil
-	}
-	return c.base.Update()
+	return c.Update(false)
 }
 
 func (c *componentVersionAccessImpl) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec) error {
 	if err := c.checkAccessSpec(acc); err != nil {
 		if !errors.IsErrUnknown(err) {
-			return err
+			return AccessCheckError{
+				Original: err,
+				Name:     meta.GetName(),
+				Version:  meta.GetVersion(),
+				Type:     meta.GetType(),
+			}
 		}
 	}
+
 	res := &compdesc.Source{
 		SourceMeta: *meta.Copy(),
 		Access:     acc,
@@ -319,42 +342,56 @@ func (c *componentVersionAccessImpl) SetSource(meta *cpi.SourceMeta, acc compdes
 	} else {
 		c.GetDescriptor().Sources[idx] = *res
 	}
-	if c.lazy {
-		return nil
-	}
-	return c.base.Update()
+	return c.Update(false)
 }
 
 // AddResource adds a blob resource to the current archive.
 func (c *componentVersionAccessImpl) SetResourceBlob(meta *cpi.ResourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) error {
 	acc, err := c.AddBlob(blob, refName, global)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to add blob: %w", err)
 	}
-	return c.SetResource(meta, acc)
+
+	if err := c.SetResource(meta, acc); err != nil {
+		return fmt.Errorf("unable to set resource: %w", err)
+	}
+
+	return nil
 }
 
 func (c *componentVersionAccessImpl) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) error {
 	acc, err := c.AddBlob(blob, refName, global)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to add blob: %w", err)
 	}
-	return c.SetSource(meta, acc)
+
+	if err := c.SetSource(meta, acc); err != nil {
+		return fmt.Errorf("unable to set source: %w", err)
+	}
+
+	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 func (c *componentVersionAccessImpl) SetReference(ref *cpi.ComponentReference) error {
-
 	if idx := c.GetDescriptor().GetComponentReferenceIndex(*ref); idx == -1 {
 		c.GetDescriptor().References = append(c.GetDescriptor().References, *ref)
 	} else {
 		c.GetDescriptor().References[idx] = *ref
 	}
-	if c.lazy {
-		return nil
+	return c.Update(false)
+}
+
+func (a *componentVersionAccessImpl) DiscardChanges() {
+	a.discardChanges = true
+}
+
+func (a *componentVersionAccessImpl) Update(final bool) error {
+	if (final || !a.lazy) && !a.discardChanges {
+		return a.base.Update()
 	}
-	return c.base.Update()
+	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////

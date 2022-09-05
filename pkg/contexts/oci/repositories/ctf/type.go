@@ -49,7 +49,7 @@ var _ cpi.RepositorySpec = (*RepositorySpec)(nil)
 
 var _ cpi.IntermediateRepositorySpecAspect = (*RepositorySpec)(nil)
 
-// NewRepositorySpec creates a new RepositorySpec
+// NewRepositorySpec creates a new RepositorySpec.
 func NewRepositorySpec(mode accessobj.AccessMode, filePath string, opts ...accessio.Option) *RepositorySpec {
 	o := accessio.AccessOptions(opts...)
 	if o.FileFormat == nil {
@@ -79,6 +79,15 @@ func (a *RepositorySpec) GetType() string {
 func (s *RepositorySpec) Name() string {
 	return s.FilePath
 }
+
+func (s *RepositorySpec) UniformRepositorySpec() *cpi.UniformRepositorySpec {
+	u := &cpi.UniformRepositorySpec{
+		Type: Type,
+		Info: s.FilePath,
+	}
+	return u
+}
+
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
-	return Open(ctx, a.AccessMode, a.FilePath, 0700, a.Options)
+	return Open(ctx, a.AccessMode, a.FilePath, 0o700, a.Options)
 }

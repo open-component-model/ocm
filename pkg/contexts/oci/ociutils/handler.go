@@ -25,8 +25,10 @@ type InfoHandler interface {
 	Info(m cpi.ManifestAccess, config []byte) interface{}
 }
 
-var lock sync.Mutex
-var handlers = map[string]InfoHandler{}
+var (
+	lock     sync.Mutex
+	handlers = map[string]InfoHandler{}
+)
 
 func RegisterInfoHandler(mime string, h InfoHandler) {
 	lock.Lock()

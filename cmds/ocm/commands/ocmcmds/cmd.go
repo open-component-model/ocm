@@ -15,11 +15,7 @@
 package ocmcmds
 
 import (
-	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
-
 	"github.com/spf13/cobra"
-
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
@@ -29,6 +25,8 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/versions"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 )
 
 // NewCommand creates a new command.

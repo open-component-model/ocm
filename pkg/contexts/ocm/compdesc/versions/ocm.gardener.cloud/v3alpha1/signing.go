@@ -23,7 +23,7 @@ import (
 
 // CDExcludes describes the fields relevant for Signing
 // ATTENTION: if changed, please adapt the HashEqual Functions
-// in the generic part, accordingly
+// in the generic part, accordingly.
 var CDExcludes = signing.MapExcludes{
 	"repositoryContexts": nil,
 	"metadata": signing.MapExcludes{
@@ -71,6 +71,6 @@ func (cd *ComponentDescriptor) Normalize(normAlgo string) ([]byte, error) {
 		return nil, fmt.Errorf("unsupported cd normalization %q", normAlgo)
 	}
 	data, err := signing.Normalize(cd, CDExcludes)
-	//fmt.Printf("**** normalized:\n %s\n", string(data))
+	// fmt.Printf("**** normalized:\n %s\n", string(data))
 	return data, err
 }

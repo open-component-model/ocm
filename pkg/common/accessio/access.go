@@ -16,6 +16,7 @@ package accessio
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"sync"
 
@@ -26,11 +27,15 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-var ErrClosed = errors.ErrClosed()
-var ErrReadOnly = errors.ErrReadOnly()
+var (
+	ErrClosed   = errors.ErrClosed()
+	ErrReadOnly = errors.ErrReadOnly()
+)
 
-const KIND_BLOB = "blob"
-const KIND_MEDIATYPE = "media type"
+const (
+	KIND_BLOB      = "blob"
+	KIND_MEDIATYPE = "media type"
+)
 
 func ErrBlobNotFound(digest digest.Digest) error {
 	return errors.ErrNotFound(KIND_BLOB, digest.String())
@@ -52,7 +57,7 @@ type DataReader interface {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// DataSource describes some data plus its origin
+// DataSource describes some data plus its origin.
 type DataSource interface {
 	DataAccess
 	Origin() string
@@ -60,7 +65,7 @@ type DataSource interface {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// DataAccess describes the access to sequence of bytes
+// DataAccess describes the access to sequence of bytes.
 type DataAccess interface {
 	DataGetter
 	DataReader
@@ -72,7 +77,7 @@ type MimeType interface {
 	MimeType() string
 }
 
-//  BlobAccess describes the access to a blob
+// BlobAccess describes the access to a blob.
 type BlobAccess interface {
 	DataAccess
 	DigestSource
@@ -85,7 +90,7 @@ type BlobAccess interface {
 }
 
 // TemporaryBlobAccess describes a blob with temporary allocated external resources.
-// They will be releases, when the close method is called
+// They will be releases, when the close method is called.
 type TemporaryBlobAccess interface {
 	BlobAccess
 	IsValid() bool
@@ -180,8 +185,10 @@ type blobAccess struct {
 	access   DataAccess
 }
 
-const BLOB_UNKNOWN_SIZE = int64(-1)
-const BLOB_UNKNOWN_DIGEST = digest.Digest("")
+const (
+	BLOB_UNKNOWN_SIZE   = int64(-1)
+	BLOB_UNKNOWN_DIGEST = digest.Digest("")
+)
 
 func BlobAccessForDataAccess(digest digest.Digest, size int64, mimeType string, access DataAccess) BlobAccess {
 	return &blobAccess{
@@ -254,15 +261,21 @@ func (b *blobAccess) Size() int64 {
 
 func (b *blobAccess) update() error {
 	reader, err := b.Reader()
-	if err == nil {
-		defer reader.Close()
-		count := NewCountingReader(reader)
-		digest, err := digest.Canonical.FromReader(count)
-		if err == nil {
-			b.size = count.Size()
-			b.digest = digest
-		}
+	if err != nil {
+		return err
 	}
+
+	defer reader.Close()
+	count := NewCountingReader(reader)
+
+	digest, err := digest.Canonical.FromReader(count)
+	if err != nil {
+		return err
+	}
+
+	b.size = count.Size()
+	b.digest = digest
+
 	return nil
 }
 
@@ -379,14 +392,22 @@ func (b *blobAccessView) IsClosed() bool {
 func (b *blobAccessView) Get() (result []byte, err error) {
 	return result, b.view.Execute(func() error {
 		result, err = b.access.Get()
-		return err
+		if err != nil {
+			return fmt.Errorf("unable to get access: %w", err)
+		}
+
+		return nil
 	})
 }
 
 func (b *blobAccessView) Reader() (result io.ReadCloser, err error) {
 	return result, b.view.Execute(func() error {
 		result, err = b.access.Reader()
-		return err
+		if err != nil {
+			return fmt.Errorf("unable to read access: %w", err)
+		}
+
+		return nil
 	})
 }
 

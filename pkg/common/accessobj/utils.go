@@ -22,7 +22,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-// InternalRepresentationFilesystem defaults a filesystem to temp filesystem and adapts
+// InternalRepresentationFilesystem defaults a filesystem to temp filesystem and adapts.
 func InternalRepresentationFilesystem(acc AccessMode, fs vfs.FileSystem, dir string, mode vfs.FileMode) (bool, vfs.FileSystem, error) {
 	var err error
 

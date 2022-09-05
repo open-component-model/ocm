@@ -16,6 +16,7 @@ package rsa_signingservice
 
 import (
 	"bytes"
+	"context"
 	"encoding/hex"
 	"encoding/pem"
 	"errors"
@@ -53,7 +54,12 @@ func (signer *SigningServerSigner) Sign(algo string, digest string, issuer strin
 		return nil, fmt.Errorf("failed decoding hash: %w", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/sign", signer.Url), bytes.NewBuffer(decodedHash))
+	req, err := http.NewRequestWithContext(
+		context.Background(),
+		http.MethodPost,
+		fmt.Sprintf("%s/sign", signer.Url),
+		bytes.NewBuffer(decodedHash),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("failed building http request: %w", err)
 	}

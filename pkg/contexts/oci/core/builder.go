@@ -71,5 +71,4 @@ func (b Builder) New() Context {
 		b.spechandlers = DefaultRepositorySpecHandlers
 	}
 	return newContext(b.credentials, b.reposcheme, b.spechandlers)
-
 }

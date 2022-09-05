@@ -18,6 +18,4 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 )
 
-var (
-	Components = names.Components
-)
+var Components = names.Components

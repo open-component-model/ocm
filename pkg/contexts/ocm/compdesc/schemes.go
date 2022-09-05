@@ -125,7 +125,7 @@ func (o *DecodeOptions) ApplyOptions(opts []DecodeOption) *DecodeOptions {
 	return o
 }
 
-// DecodeOption is the interface to specify different cache options
+// DecodeOption is the interface to specify different cache options.
 type DecodeOption interface {
 	ApplyDecodeOption(options *DecodeOptions)
 }
@@ -221,7 +221,7 @@ func (o *EncodeOptions) ApplyOptions(opts []EncodeOption) *EncodeOptions {
 	return o
 }
 
-// EncodeOption is the interface to specify different encode options
+// EncodeOption is the interface to specify different encode options.
 type EncodeOption interface {
 	ApplyEncodeOption(options *EncodeOptions)
 }

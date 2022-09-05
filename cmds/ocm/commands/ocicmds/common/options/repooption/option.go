@@ -17,9 +17,8 @@ package repooption
 import (
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -67,7 +66,6 @@ func (o *Option) GetRepository(ctx clictx.OCI, session oci.Session) (oci.Reposit
 }
 
 func (o *Option) Usage() string {
-
 	s := `
 If the repository/registry option is specified, the given names are interpreted
 relative to the specified registry using the syntax
@@ -77,7 +75,7 @@ relative to the specified registry using the syntax
 </center>
 
 If no <code>--repo</code> option is specified the given names are interpreted 
-as extended CI artefact references.
+as extended OCI artefact references.
 
 <center>
     <pre>[&lt;repo type>::]&lt;host>[:&lt;port>]/&lt;OCI repository name>[:&lt;tag>][@&lt;digest>]</pre>

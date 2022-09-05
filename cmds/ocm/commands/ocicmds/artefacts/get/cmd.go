@@ -19,19 +19,17 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
-	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/handlers/artefacthdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 )
 
@@ -104,24 +102,24 @@ func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide 
 	}
 }
 
-var outputs = output.NewOutputs(get_regular, output.Outputs{
-	"wide": get_wide,
-	"tree": get_tree,
+var outputs = output.NewOutputs(getRegular, output.Outputs{
+	"wide": getWide,
+	"tree": getTree,
 }).AddChainedManifestOutputs(OutputChainFunction())
 
-func get_regular(opts *output.Options) output.Output {
-	return closureoption.TableOutput(TableOutput(opts, map_get_regular_output)).New()
+func getRegular(opts *output.Options) output.Output {
+	return closureoption.TableOutput(TableOutput(opts, mapGetRegularOutput)).New()
 }
 
-func get_wide(opts *output.Options) output.Output {
-	return closureoption.TableOutput(TableOutput(opts, map_get_wide_output, "MIMETYPE", "CONFIGTYPE")).New()
+func getWide(opts *output.Options) output.Output {
+	return closureoption.TableOutput(TableOutput(opts, mapGetWideOutput, "MIMETYPE", "CONFIGTYPE")).New()
 }
 
-func get_tree(opts *output.Options) output.Output {
-	return output.TreeOutput(TableOutput(opts, map_get_regular_output), "NESTING").New()
+func getTree(opts *output.Options) output.Output {
+	return output.TreeOutput(TableOutput(opts, mapGetRegularOutput), "NESTING").New()
 }
 
-func map_get_regular_output(e interface{}) interface{} {
+func mapGetRegularOutput(e interface{}) interface{} {
 	digest := "unknown"
 	p := e.(*artefacthdlr.Object)
 	blob, err := p.Artefact.Blob()
@@ -142,12 +140,12 @@ func map_get_regular_output(e interface{}) interface{} {
 	return []string{p.Spec.UniformRepositorySpec.String(), p.Spec.Repository, kind, tag, digest}
 }
 
-func map_get_wide_output(e interface{}) interface{} {
+func mapGetWideOutput(e interface{}) interface{} {
 	p := e.(*artefacthdlr.Object)
 
 	config := "-"
 	if p.Artefact.IsManifest() {
 		config = p.Artefact.ManifestAccess().GetDescriptor().Config.MediaType
 	}
-	return output.Fields(map_get_regular_output(e), p.Artefact.GetDescriptor().MimeType(), config)
+	return output.Fields(mapGetRegularOutput(e), p.Artefact.GetDescriptor().MimeType(), config)
 }

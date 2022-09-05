@@ -47,7 +47,7 @@ func ParsePublicKey(data []byte) (interface{}, error) {
 }
 
 func ParsePrivateKey(data string) (interface{}, error) {
-	return parse.ParsePrivateKey(string(data))
+	return parse.ParsePrivateKey(data)
 }
 
 func ParseCertificate(data []byte) (*x509.Certificate, error) {
@@ -147,7 +147,8 @@ func VerifyCert(intermediate, root *x509.CertPool, cn string, cert *x509.Certifi
 }
 
 func CreateCertificate(subject pkix.Name, validFrom *time.Time, validity time.Duration,
-	pub interface{}, ca *x509.Certificate, priv interface{}, isCA bool, names ...string) ([]byte, error) {
+	pub interface{}, ca *x509.Certificate, priv interface{}, isCA bool, names ...string,
+) ([]byte, error) {
 	var notBefore time.Time
 
 	if validFrom == nil {

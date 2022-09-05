@@ -22,28 +22,24 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/sirupsen/logrus"
 	"github.com/xeipuuv/gojsonschema"
 
-	utils2 "github.com/open-component-model/ocm/pkg/utils"
-
-	"github.com/open-component-model/ocm/pkg/contexts/config/config"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
-
-	"github.com/open-component-model/ocm/pkg/spiff"
-
 	"github.com/open-component-model/ocm/pkg/common"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/config/config"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
-	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/runtime"
-
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/spiff"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
 func ValidateByScheme(src []byte, schemedata []byte) error {
@@ -169,7 +165,7 @@ func mappingKeyFor(value string, m map[string]string) string {
 	return ""
 }
 
-// CheckCredentialRequests determine required credentials for executor
+// CheckCredentialRequests determine required credentials for executor.
 func CheckCredentialRequests(executor *Executor, spec *PackageSpecification, espec *ExecutorSpecification) (map[string]CredentialsRequestSpec, map[string]string, error) {
 	credentials := spec.Credentials
 	credmapping := map[string]string{}
@@ -279,7 +275,7 @@ func ProcessConfig(name string, octx ocm.Context, cv ocm.ComponentVersionAccess,
 		}
 	}
 	if len(schemedata) > 0 {
-		fmt.Printf("validating %s by scheme...\n", name)
+		logrus.Infof("validating %s by scheme...", name)
 		err = ValidateByScheme(config, schemedata)
 		if err != nil {
 			return nil, errors.Wrapf(err, name+" validation failed")
@@ -351,9 +347,9 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 	}
 
 	if econfig == nil {
-		fmt.Printf("no executor config found\n")
+		logrus.Infof("no executor config found")
 	} else {
-		fmt.Printf("using executor config:\n%s\n", utils2.IndentLines(string(econfig), "  "))
+		logrus.Infof("using executor config:\n%s", utils2.IndentLines(string(econfig), "  "))
 	}
 	// handle credentials
 	credentials, credmapping, err := CheckCredentialRequests(executor, spec, &espec.Spec)
@@ -379,9 +375,9 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 		return nil, errors.Wrapf(err, "error processing parameters")
 	}
 	if params == nil {
-		fmt.Printf("no parameter config found\n")
+		logrus.Infof("no parameter config found")
 	} else {
-		fmt.Printf("using package parameters:\n%s\n", utils2.IndentLines(string(params), "  "))
+		logrus.Infof("using package parameters:\n%s", utils2.IndentLines(string(params), "  "))
 	}
 
 	if executor.ParameterMapping != nil {
@@ -392,7 +388,7 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 
 		if err == nil {
 			if !bytes.Equal(orig, params) {
-				fmt.Printf("using executor parameters:\n%s\n", utils2.IndentLines(string(params), "  "))
+				logrus.Infof("using executor parameters:\n%s", utils2.IndentLines(string(params), "  "))
 			}
 		}
 	}
@@ -406,8 +402,8 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 		names = append(names, n+"->"+m)
 	}
 	sort.Strings(names)
-	fmt.Printf("using executor image %s (%s)\n", espec.Image.Ref, executor.ResourceRef.String())
-	fmt.Printf("with credentials: %v\n", names)
+	logrus.Infof("using executor image %s (%s)", espec.Image.Ref, executor.ResourceRef.String())
+	logrus.Infof("with credentials: %v", names)
 	op := &Operation{
 		Action:      name,
 		Image:       *espec.Image,
@@ -438,7 +434,7 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 			return nil, errors.Wrapf(err, "cannot create temp file system")
 		}
 		defer vfs.Cleanup(fs)
-		repo, err := ctf.Create(octx, accessobj.ACC_CREATE, "arch", 0600, accessio.FormatTGZ, accessio.PathFileSystem(fs))
+		repo, err := ctf.Create(octx, accessobj.ACC_CREATE, "arch", 0o600, accessio.FormatTGZ, accessio.PathFileSystem(fs))
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot create repo for component version")
 		}

@@ -17,9 +17,8 @@ package topicocmrefs
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
 	topicocirefs "github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 )
 
 func New(ctx clictx.Context) *cobra.Command {

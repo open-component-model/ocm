@@ -49,7 +49,7 @@ func (r *Repository) Get() *ArtefactSet {
 }
 
 func (r *Repository) Open() (*ArtefactSet, error) {
-	a, err := Open(r.spec.AccessMode, r.spec.FilePath, 0700, r.spec.Options, accessio.PathFileSystem(r.spec.PathFileSystem))
+	a, err := Open(r.spec.AccessMode, r.spec.FilePath, 0o700, r.spec.Options, accessio.PathFileSystem(r.spec.PathFileSystem))
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (r *Repository) GetSpecification() cpi.RepositorySpec {
 }
 
 func (r *Repository) NamespaceLister() cpi.NamespaceLister {
-	return nil
+	return anonymous
 }
 
 func (r *Repository) ExistsArtefact(name string, ref string) (bool, error) {
@@ -95,4 +95,31 @@ func (r Repository) Close() error {
 		r.arch.Close()
 	}
 	return nil
+}
+
+// NamespaceLister handles the namespaces provided by an artefact set.
+// This is always single anonymous namespace, which by ddefinition
+// is the empty string.
+type NamespaceLister struct{}
+
+var anonymous cpi.NamespaceLister = &NamespaceLister{}
+
+// NumNamespaces returns the number of namespaces with a given prefix
+// for an artefact set. This is either one (the anonymous namespace) if
+// the prefix is empty (all namespaces) or zero if a prefix is given.
+func (n *NamespaceLister) NumNamespaces(prefix string) (int, error) {
+	if prefix == "" {
+		return 1, nil
+	}
+	return 0, nil
+}
+
+// GetNamespaces returns namespaces with a given prefix.
+// This is the anonymous namespace ("") for an empty prefix
+// or no namespace at all if a prefix is given.
+func (n *NamespaceLister) GetNamespaces(prefix string, closure bool) ([]string, error) {
+	if prefix == "" {
+		return []string{""}, nil
+	}
+	return nil, nil
 }

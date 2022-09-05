@@ -56,8 +56,10 @@ func (this *IndexedIterator) Reset() {
 
 type IndexedSliceAccess []interface{}
 
-var _ IndexedAccess = IndexedSliceAccess{}
-var _ Iterable = IndexedSliceAccess{}
+var (
+	_ IndexedAccess = IndexedSliceAccess{}
+	_ Iterable      = IndexedSliceAccess{}
+)
 
 func (this *IndexedSliceAccess) Add(elems ...interface{}) *IndexedSliceAccess {
 	*this = append(*this, elems...)
@@ -69,9 +71,8 @@ func (this *IndexedSliceAccess) Remove(i int) *IndexedSliceAccess {
 	return this
 }
 
-// Move [i:j] to [k:]
+// Move [i:j] to [k:].
 func (this *IndexedSliceAccess) Move(i, j, k int) *IndexedSliceAccess {
-
 	if k < i || k > j {
 		l := j - i
 
@@ -116,12 +117,6 @@ func (this IndexedSliceAccess) Copy() IndexedSliceAccess {
 	copy(n, this)
 	return n
 }
-
-/*
-func (this IndexedSliceAccess) entry_iterator() entry_iterator {
-	return (&_slice_entry_iterator{}).new(this)
-}
-*/
 
 func NewSliceIterator(slice []interface{}) *IndexedIterator {
 	return NewIndexedIterator(IndexedSliceAccess(slice))

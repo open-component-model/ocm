@@ -21,7 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 )
 
-// BlobContainer is the interface for an element capable to store blobs
+// BlobContainer is the interface for an element capable to store blobs.
 type BlobContainer interface {
 	GetBlobData(name string) (cpi.DataAccess, error)
 
@@ -39,7 +39,7 @@ type BlobContainer interface {
 	AddBlobFor(storagectx cpi.StorageContext, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error)
 }
 
-// ComponentVersionContainer is the interface of an element hosting a component version
+// ComponentVersionContainer is the interface of an element hosting a component version.
 type ComponentVersionContainer interface {
 	GetContext() cpi.Context
 

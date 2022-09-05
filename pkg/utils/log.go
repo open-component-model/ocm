@@ -20,7 +20,7 @@ import (
 	"github.com/go-logr/logr"
 )
 
-// logContextKey is the unique key for storing additional logging contexts
+// logContextKey is the unique key for storing additional logging contexts.
 type logContextKey struct{}
 
 // LogContextValues describes the context values.

@@ -26,13 +26,13 @@ func ResolveReferencePath(cv ocm.ComponentVersionAccess, path []metav1.Identity,
 		if eff != cv {
 			defer eff.Close()
 		}
-		resolver := ocm.NewCompoundResolver(eff.Repository(), resolver)
+		compundResolver := ocm.NewCompoundResolver(eff.Repository(), resolver)
 		cref, err := cv.GetReference(cr)
 		if err != nil {
 			return nil, err
 		}
 
-		eff, err = resolver.LookupComponentVersion(cref.GetComponentName(), cref.GetVersion())
+		eff, err = compundResolver.LookupComponentVersion(cref.GetComponentName(), cref.GetVersion())
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot resolve component reference")
 		}
@@ -86,7 +86,6 @@ outer:
 }
 
 func ResolveResourceReference(cv ocm.ComponentVersionAccess, ref metav1.ResourceReference, resolver ocm.ComponentVersionResolver) (ocm.ResourceAccess, ocm.ComponentVersionAccess, error) {
-
 	if len(ref.Resource) == 0 || len(ref.Resource["name"]) == 0 {
 		return nil, nil, errors.Newf("at least resource name must be specified for resource reference")
 	}
@@ -104,9 +103,9 @@ func ResolveResourceReference(cv ocm.ComponentVersionAccess, ref metav1.Resource
 	return r, eff, nil
 }
 
-func Dup(orig ocm.ComponentVersionAccess, new ocm.ComponentVersionAccess) ocm.ComponentVersionAccess {
-	if orig != new {
-		return new
+func Dup(orig ocm.ComponentVersionAccess, newcva ocm.ComponentVersionAccess) ocm.ComponentVersionAccess {
+	if orig != newcva {
+		return newcva
 	}
 	return &nopCloserAccess{orig}
 }

@@ -15,6 +15,7 @@
 package ocirepo
 
 import (
+	"fmt"
 	"path"
 	"strings"
 
@@ -32,6 +33,7 @@ import (
 	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 func init() {
@@ -57,7 +59,7 @@ func OCIRegBaseFunction(ctx *storagecontext.StorageContext) string {
 }
 
 // blobHandler is the default handling to store local blobs as local blobs but with an additional
-// globally accessible OCIBlob access method
+// globally accessible OCIBlob access method.
 type blobHandler struct {
 	base BaseFunction
 }
@@ -99,7 +101,7 @@ func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi.Acc
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// artefactHandler stores artefact blobs as OCIArtefacts
+// artefactHandler stores artefact blobs as OCIArtefacts.
 type artefactHandler struct {
 	blobHandler
 }
@@ -114,6 +116,8 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi
 	if !artdesc.IsOCIMediaType(mediaType) || (!strings.HasSuffix(mediaType, "+tar") && !strings.HasSuffix(mediaType, "+tar+gzip")) {
 		return nil, nil
 	}
+
+	errhint := "[" + hint + "]"
 
 	var namespace oci.NamespaceAccess
 	var version string
@@ -132,10 +136,10 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi
 		i := strings.LastIndex(hint, ":")
 		if i > 0 {
 			version = hint[i:]
-			name = path.Join(spec.SubPath, hint[:i])
 			tag = version[1:] // remove colon
+			name = path.Join(spec.SubPath, hint[:i])
 		} else {
-			name = hint
+			name = path.Join(spec.SubPath, hint)
 		}
 		namespace, err = ocictx.Repository.LookupNamespace(name)
 		if err != nil {
@@ -144,9 +148,11 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi
 		defer namespace.Close()
 	}
 
+	errhint += " namespace " + namespace.GetNamespace()
+
 	set, err := artefactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
 	if err != nil {
-		return nil, err
+		return nil, wrap(err, errhint, "open blob")
 	}
 	defer set.Close()
 	digest := set.GetMain()
@@ -155,12 +161,12 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi
 	}
 	art, err := set.GetArtefact(digest.String())
 	if err != nil {
-		return nil, err
+		return nil, wrap(err, errhint, "get artefact from blob")
 	}
 
 	err = artefactset.TransferArtefact(art, namespace, oci.AsTags(tag)...)
 	if err != nil {
-		return nil, err
+		return nil, wrap(err, errhint, "transfer artefact")
 	}
 
 	ref := path.Join(base, namespace.GetNamespace()) + version
@@ -169,13 +175,20 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi
 	if keep {
 		err := ocictx.Manifest.AddBlob(blob)
 		if err != nil {
-			return nil, err
+			return nil, wrap(err, errhint, "store local blob")
 		}
 		err = ocictx.AssureLayer(blob)
 		if err != nil {
-			return nil, err
+			return nil, wrap(err, errhint, "assure local blob layer")
 		}
 		acc = localblob.New(blob.Digest().String(), hint, blob.MimeType(), acc)
 	}
 	return acc, nil
+}
+
+func wrap(err error, msg string, args ...interface{}) error {
+	for _, a := range args {
+		msg = fmt.Sprintf("%s: %s", msg, a)
+	}
+	return errors.Wrapf(err, "exploding OCI artefact resource blob (%s)", msg)
 }

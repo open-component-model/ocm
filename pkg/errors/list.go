@@ -19,7 +19,8 @@ import (
 	"io"
 )
 
-type ErrorList struct {
+// ErrorList is an error type with erros in it.
+type ErrorList struct { //nolint: errname // Intentional naming.
 	msg    string
 	errors []error
 }

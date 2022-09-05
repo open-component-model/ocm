@@ -17,10 +17,6 @@ package get
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
-	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/elemhdlr"
@@ -28,9 +24,11 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 )
@@ -101,37 +99,37 @@ func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide 
 	}
 }
 
-var outputs = output.NewOutputs(get_regular, output.Outputs{
-	"wide":     get_wide,
-	"tree":     get_tree,
-	"treewide": get_treewide,
+var outputs = output.NewOutputs(getRegular, output.Outputs{
+	"wide":     getWide,
+	"tree":     getTree,
+	"treewide": getTreewide,
 }).AddManifestOutputs()
 
-func get_regular(opts *output.Options) output.Output {
-	return closureoption.TableOutput(TableOutput(opts, map_get_regular_output)).New()
+func getRegular(opts *output.Options) output.Output {
+	return closureoption.TableOutput(TableOutput(opts, mapGetRegularOutput)).New()
 }
 
-func get_wide(opts *output.Options) output.Output {
-	return closureoption.TableOutput(TableOutput(opts, map_get_wide_output, elemhdlr.AccessOutput...)).New()
+func getWide(opts *output.Options) output.Output {
+	return closureoption.TableOutput(TableOutput(opts, mapGetWideOutput, elemhdlr.AccessOutput...)).New()
 }
 
-func get_tree(opts *output.Options) output.Output {
-	return output.TreeOutput(TableOutput(opts, map_get_regular_output), "COMPONENTVERSION").New()
+func getTree(opts *output.Options) output.Output {
+	return output.TreeOutput(TableOutput(opts, mapGetRegularOutput), "COMPONENTVERSION").New()
 }
 
-func get_treewide(opts *output.Options) output.Output {
-	return output.TreeOutput(TableOutput(opts, map_get_treewide_output, "ACCESS"), "COMPONENTVERSION").New()
+func getTreewide(opts *output.Options) output.Output {
+	return output.TreeOutput(TableOutput(opts, mapGetTreewideOutput, "ACCESS"), "COMPONENTVERSION").New()
 }
 
-func map_get_regular_output(e interface{}) interface{} {
+func mapGetRegularOutput(e interface{}) interface{} {
 	r := common.Elem(e)
 	return append(elemhdlr.MapMetaOutput(e), r.Type, string(r.Relation))
 }
 
-func map_get_wide_output(e interface{}) interface{} {
-	return output.Fields(map_get_regular_output(e), elemhdlr.MapAccessOutput(common.Elem(e).Access))
+func mapGetWideOutput(e interface{}) interface{} {
+	return output.Fields(mapGetRegularOutput(e), elemhdlr.MapAccessOutput(common.Elem(e).Access))
 }
 
-func map_get_treewide_output(e interface{}) interface{} {
-	return output.Fields(map_get_regular_output(e), common.Elem(e).Access.GetKind())
+func mapGetTreewideOutput(e interface{}) interface{} {
+	return output.Fields(mapGetRegularOutput(e), common.Elem(e).Access.GetKind())
 }

@@ -22,15 +22,15 @@ import (
 
 const (
 	// ExcludeFromSignature used in digest field for normalisationAlgorithm (in combination with NoDigest for hashAlgorithm and value)
-	// to indicate the resource content should not be part of the signature
+	// to indicate the resource content should not be part of the signature.
 	ExcludeFromSignature = "EXCLUDE-FROM-SIGNATURE"
 
 	// NoDigest used in digest field for hashAlgorithm and value (in combination with ExcludeFromSignature for normalisationAlgorithm)
-	// to indicate the resource content should not be part of the signature
+	// to indicate the resource content should not be part of the signature.
 	NoDigest = "NO-DIGEST"
 )
 
-// Signatures is a list of signatures
+// Signatures is a list of signatures.
 type Signatures []Signature
 
 func (s Signatures) Len() int {
@@ -68,7 +68,7 @@ func (d *DigestSpec) String() string {
 	return fmt.Sprintf("%s:%s[%s]", d.HashAlgorithm, d.Value, d.NormalisationAlgorithm)
 }
 
-// Copy provides a copy of the digest spec
+// Copy provides a copy of the digest spec.
 func (d *DigestSpec) Copy() *DigestSpec {
 	if d == nil {
 		return nil
@@ -87,7 +87,7 @@ type SignatureSpec struct {
 	Issuer    string `json:"issuer,omitempty"`
 }
 
-// Signature defines a digest and corresponding signature, identifyable by name.
+// Signature defines a digest and corresponding signature, identifiable by name.
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
 type Signature struct {
@@ -96,7 +96,7 @@ type Signature struct {
 	Signature SignatureSpec `json:"signature"`
 }
 
-// Copy provides a copy of the signature data
+// Copy provides a copy of the signature data.
 func (s *Signature) Copy() *Signature {
 	if s == nil {
 		return nil
@@ -105,7 +105,7 @@ func (s *Signature) Copy() *Signature {
 	return &r
 }
 
-// ConvertToSigning converts a cd signature to a signing signature
+// ConvertToSigning converts a cd signature to a signing signature.
 func (s *Signature) ConvertToSigning() *signing.Signature {
 	return &signing.Signature{
 		Value:     s.Signature.Value,
@@ -115,7 +115,7 @@ func (s *Signature) ConvertToSigning() *signing.Signature {
 	}
 }
 
-//NewExcludeFromSignatureDigest returns the special digest notation to indicate the resource content should not be part of the signature
+// NewExcludeFromSignatureDigest returns the special digest notation to indicate the resource content should not be part of the signature.
 func NewExcludeFromSignatureDigest() *DigestSpec {
 	return &DigestSpec{
 		HashAlgorithm:          NoDigest,

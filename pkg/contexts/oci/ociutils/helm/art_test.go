@@ -20,14 +20,10 @@ import (
 	"sort"
 	"strings"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
-	. "github.com/open-component-model/ocm/pkg/testutils"
-
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chartutil"
 
@@ -38,6 +34,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/env"
 	"github.com/open-component-model/ocm/pkg/env/builder"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 type Files []*chart.File

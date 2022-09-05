@@ -35,8 +35,10 @@ type RepositorySource interface {
 	GetRepository() Repository
 }
 
-type BlobAccess = accessio.BlobAccess
-type DataAccess = accessio.DataAccess
+type (
+	BlobAccess = accessio.BlobAccess
+	DataAccess = accessio.DataAccess
+)
 
 type BlobSource interface {
 	GetBlobData(digest digest.Digest) (int64, DataAccess, error)
@@ -130,7 +132,7 @@ type IndexAccess interface {
 }
 
 // NamespaceLister provides the optional repository list functionality of
-// a repository
+// a repository.
 type NamespaceLister interface {
 	// NumNamespaces returns the number of namespaces found for a prefix
 	// If the given prefix does not end with a /, a repository with the

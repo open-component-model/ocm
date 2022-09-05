@@ -20,22 +20,22 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/errors"
-
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const ATTR_KEY = "github.com/mandelsoft/tempblobcache"
-const ATTR_SHORT = "blobcache"
+const (
+	ATTR_KEY   = "github.com/mandelsoft/tempblobcache"
+	ATTR_SHORT = "blobcache"
+)
 
 func init() {
 	datacontext.RegisterAttributeType(ATTR_KEY, AttributeType{}, ATTR_SHORT)
 }
 
-type AttributeType struct {
-}
+type AttributeType struct{}
 
 func (a AttributeType) Name() string {
 	return ATTR_KEY
@@ -62,7 +62,7 @@ func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (in
 	var s string
 	err := runtime.DefaultYAMLEncoding.Unmarshal(data, &s)
 	if err != nil {
-		return nil, errors.Wrapf(err, "invalid atribute value for %s", ATTR_KEY)
+		return nil, errors.Wrapf(err, "invalid attribute value for %s", ATTR_KEY)
 	}
 	return &Attribute{
 		Path: s,
@@ -77,7 +77,7 @@ type Attribute struct {
 }
 
 func (a *Attribute) CreateTempFile(pat string) (vfs.File, error) {
-	err := a.Filesystem.MkdirAll(a.Path, 0777)
+	err := a.Filesystem.MkdirAll(a.Path, 0o777)
 	if err != nil {
 		return nil, err
 	}

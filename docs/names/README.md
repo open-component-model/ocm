@@ -3,6 +3,12 @@
 In OCM there are several kinds of type names. For all those kinds there
 is a dedicated naming scheme.
 
+- [Repository Type Names](repositorytypes.md)
+
+  OCM repositories can be described by a repository specification. The repository
+  type determines the field structure of the specification and its technical
+  access procedure. 
+
 - [Label Names](labels.md)
 
   The OCM component descriptor itself, resources, sources  and component version

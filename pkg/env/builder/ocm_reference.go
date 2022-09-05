@@ -18,7 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 )
 
-type ocm_reference struct {
+type ocmReference struct {
 	base
 
 	meta compdesc.ComponentReference
@@ -26,15 +26,15 @@ type ocm_reference struct {
 
 const T_OCMREF = "reference"
 
-func (r *ocm_reference) Type() string {
+func (r *ocmReference) Type() string {
 	return T_OCMREF
 }
 
-func (r *ocm_reference) Set() {
+func (r *ocmReference) Set() {
 	r.Builder.ocm_meta = &r.meta.ElementMeta
 }
 
-func (r *ocm_reference) Close() error {
+func (r *ocmReference) Close() error {
 	return r.ocm_vers.SetReference(&r.meta)
 }
 
@@ -42,7 +42,7 @@ func (r *ocm_reference) Close() error {
 
 func (b *Builder) Reference(name, comp, vers string, f ...func()) {
 	b.expect(b.ocm_vers, T_OCMVERSION)
-	r := &ocm_reference{}
+	r := &ocmReference{}
 	r.meta.Name = name
 	r.meta.Version = vers
 	r.meta.ComponentName = comp

@@ -19,16 +19,17 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	mime2 "github.com/open-component-model/ocm/pkg/mime"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/format"
 	"github.com/open-component-model/ocm/pkg/errors"
+	mime2 "github.com/open-component-model/ocm/pkg/mime"
 )
 
-const ArtefactSetDescriptorFileName = format.ArtefactSetDescriptorFileName
-const BlobsDirectoryName = format.BlobsDirectoryName
+const (
+	ArtefactSetDescriptorFileName = format.ArtefactSetDescriptorFileName
+	BlobsDirectoryName            = format.BlobsDirectoryName
+)
 
 var accessObjectInfo = &accessobj.AccessObjectInfo{
 	DescriptorFileName:       ArtefactSetDescriptorFileName,
@@ -62,8 +63,10 @@ var (
 
 ////////////////////////////////////////////////////////////////////////////////
 
-var fileFormats = map[accessio.FileFormat]FormatHandler{}
-var lock sync.RWMutex
+var (
+	fileFormats = map[accessio.FileFormat]FormatHandler{}
+	lock        sync.RWMutex
+)
 
 func RegisterFormat(f accessobj.FormatHandler) FormatHandler {
 	lock.Lock()
@@ -139,7 +142,6 @@ func Create(acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...ac
 ////////////////////////////////////////////////////////////////////////////////
 
 func (h *formatHandler) Open(acc accessobj.AccessMode, path string, opts accessio.Options) (*Object, error) {
-
 	return _Wrap(h.FormatHandler.Open(accessObjectInfo, acc, path, opts))
 }
 
@@ -147,7 +149,7 @@ func (h *formatHandler) Create(path string, opts accessio.Options, mode vfs.File
 	return _Wrap(h.FormatHandler.Create(accessObjectInfo, path, opts, mode))
 }
 
-// WriteToFilesystem writes the current object to a filesystem
+// WriteToFilesystem writes the current object to a filesystem.
 func (h *formatHandler) Write(obj *Object, path string, opts accessio.Options, mode vfs.FileMode) error {
 	return h.FormatHandler.Write(obj.base.Access(), path, opts, mode)
 }

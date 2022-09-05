@@ -16,6 +16,7 @@ package core
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -54,7 +55,7 @@ type HintProvider interface {
 // AccessMethod described the access to a dedicate resource
 // It can allocate external resources, which should be released
 // with the Close() call.
-// Resources SHOULD onyl be allocated, if the content is accessed
+// Resources SHOULD only be allocated, if the content is accessed
 // via the DataAccess interface to avoid unnecessary effort
 // if the method object is just used to access meta data.
 type AccessMethod interface {
@@ -66,6 +67,7 @@ type AccessMethod interface {
 
 type AccessTypeScheme interface {
 	runtime.Scheme
+	AddKnownTypes(s AccessTypeScheme)
 
 	GetAccessType(name string) AccessType
 	Register(name string, atype AccessType)
@@ -75,13 +77,17 @@ type AccessTypeScheme interface {
 }
 
 type accessTypeScheme struct {
-	runtime.Scheme
+	runtime.SchemeBase
 }
 
 func NewAccessTypeScheme() AccessTypeScheme {
 	var at AccessSpec
 	scheme := runtime.MustNewDefaultScheme(&at, &UnknownAccessSpec{}, true, nil)
 	return &accessTypeScheme{scheme}
+}
+
+func (t *accessTypeScheme) AddKnownTypes(s AccessTypeScheme) {
+	t.SchemeBase.AddKnownTypes(s)
 }
 
 func (t *accessTypeScheme) GetAccessType(name string) AccessType {
@@ -93,7 +99,14 @@ func (t *accessTypeScheme) GetAccessType(name string) AccessType {
 }
 
 func (t *accessTypeScheme) Register(name string, atype AccessType) {
-	t.RegisterByDecoder(name, atype)
+	t.SchemeBase.RegisterByDecoder(name, atype)
+}
+
+func (t *accessTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedObjectDecoder) error {
+	if _, ok := decoder.(AccessType); !ok {
+		return errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
+	}
+	return t.SchemeBase.RegisterByDecoder(name, decoder)
 }
 
 func (t *accessTypeScheme) DecodeAccessSpec(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error) {
@@ -121,7 +134,7 @@ func (t *accessTypeScheme) CreateAccessSpec(obj runtime.TypedObject) (AccessSpec
 	return nil, errors.ErrInvalid("object type", fmt.Sprintf("%T", obj), "access specs")
 }
 
-// DefaultAccessTypeScheme contains all globally known access serializer
+// DefaultAccessTypeScheme contains all globally known access serializer.
 var DefaultAccessTypeScheme = NewAccessTypeScheme()
 
 func GetAccessType(name string) AccessType {

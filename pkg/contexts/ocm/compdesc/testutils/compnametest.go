@@ -20,6 +20,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -33,7 +34,7 @@ func TestCompName(dataBytes []byte, err error) {
 
 		pattern := scheme["definitions"].(map[string]interface{})["componentName"].(map[string]interface{})["pattern"].(string)
 
-		fmt.Printf("pattern=%s\n", pattern)
+		logrus.Infof("pattern=%s", pattern)
 
 		expr, err := regexp.Compile(pattern)
 		Expect(err).To(Succeed())

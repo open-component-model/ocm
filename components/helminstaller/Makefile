@@ -29,7 +29,7 @@ version:
 .PHONY: ca
 ca: $(GEN)/ca
 
-$(GEN)/ca: $(GEN)/image.$(NAME) $(GEN) resources.yaml
+$(GEN)/ca: $(GEN)/image.$(NAME) $(GEN) resources.yaml executorspec.yaml
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" mandelsoft $(GEN)/ca
 	$(OCM) add resources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" resources.yaml
 	touch $(GEN)/ca

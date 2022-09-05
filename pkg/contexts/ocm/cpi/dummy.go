@@ -113,6 +113,9 @@ func (d *DummyComponentVersionAccess) SetReference(ref *ComponentReference) erro
 	panic("implement me")
 }
 
+func (d *DummyComponentVersionAccess) DiscardChanges() {
+}
+
 func (d *DummyComponentVersionAccess) Close() error {
 	return nil
 }

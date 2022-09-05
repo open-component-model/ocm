@@ -20,8 +20,6 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 )
 
-/////////////////////////////////////////////////////////////////////////////
-
 type _SynchronousProcessing struct {
 	data data.Iterable
 }
@@ -36,33 +34,43 @@ func (this *_SynchronousProcessing) new(data data.Iterable) *_SynchronousProcess
 func (this *_SynchronousProcessing) Transform(t TransformFunction) ProcessingResult {
 	return (&_SynchronousStep{}).new(this, t)
 }
+
 func (this *_SynchronousProcessing) Explode(e ExplodeFunction) ProcessingResult {
 	return (&_SynchronousStep{}).new(this, process(explode(e)))
 }
+
 func (this *_SynchronousProcessing) Map(m MappingFunction) ProcessingResult {
 	return (&_SynchronousStep{}).new(this, process(mapper(m)))
 }
+
 func (this *_SynchronousProcessing) Filter(f FilterFunction) ProcessingResult {
 	return (&_SynchronousStep{}).new(this, process(filter(f)))
 }
+
 func (this *_SynchronousProcessing) Sort(c CompareFunction) ProcessingResult {
-	return (&_SynchronousStep{}).new(this, process_sort(c))
+	return (&_SynchronousStep{}).new(this, processSort(c))
 }
+
 func (this *_SynchronousProcessing) WithPool(p ProcessorPool) ProcessingResult {
 	return (&_ParallelProcessing{}).new(NewEntryIterableFromIterable(this.data), p, NewOrderedBuffer)
 }
+
 func (this *_SynchronousProcessing) Parallel(n int) ProcessingResult {
 	return this.WithPool(NewProcessorPool(n))
 }
+
 func (this *_SynchronousProcessing) Synchronously() ProcessingResult {
 	return this
 }
+
 func (this *_SynchronousProcessing) Asynchronously() ProcessingResult {
 	return (&_AsynchronousProcessing{}).new(this)
 }
+
 func (this *_SynchronousProcessing) Unordered() ProcessingResult {
 	return this
 }
+
 func (this *_SynchronousProcessing) Apply(c ProcessChain) ProcessingResult {
 	return c.Process(this)
 }
@@ -70,11 +78,10 @@ func (this *_SynchronousProcessing) Apply(c ProcessChain) ProcessingResult {
 func (this *_SynchronousProcessing) Iterator() data.Iterator {
 	return this.data.Iterator()
 }
+
 func (this *_SynchronousProcessing) AsSlice() data.IndexedSliceAccess {
 	return data.IndexedSliceAccess(data.Slice(this.data))
 }
-
-////////////////////////////////////////////////////////////////////////////
 
 type _SynchronousStep struct {
 	_SynchronousProcessing
@@ -84,8 +91,6 @@ func (this *_SynchronousStep) new(data data.Iterable, proc processing) *_Synchro
 	this.data = proc(data)
 	return this
 }
-
-/////////////////////////////////////////////////////////////////////////////
 
 type processing func(data.Iterable) data.Iterable
 
@@ -104,33 +109,43 @@ func (this *_AsynchronousProcessing) new(data data.Iterable) *_AsynchronousProce
 func (this *_AsynchronousProcessing) Transform(t TransformFunction) ProcessingResult {
 	return (&_AsynchronousStep{}).new(this, t)
 }
+
 func (this *_AsynchronousProcessing) Explode(m ExplodeFunction) ProcessingResult {
 	return (&_AsynchronousStep{}).new(this, process(explode(m)))
 }
+
 func (this *_AsynchronousProcessing) Map(m MappingFunction) ProcessingResult {
 	return (&_AsynchronousStep{}).new(this, process(mapper(m)))
 }
+
 func (this *_AsynchronousProcessing) Filter(f FilterFunction) ProcessingResult {
 	return (&_AsynchronousStep{}).new(this, process(filter(f)))
 }
+
 func (this *_AsynchronousProcessing) Sort(c CompareFunction) ProcessingResult {
-	return (&_AsynchronousStep{}).new(this, process_sort(c))
+	return (&_AsynchronousStep{}).new(this, processSort(c))
 }
+
 func (this *_AsynchronousProcessing) WithPool(p ProcessorPool) ProcessingResult {
 	return (&_ParallelProcessing{}).new(NewEntryIterableFromIterable(this.data), p, NewOrderedBuffer)
 }
+
 func (this *_AsynchronousProcessing) Parallel(n int) ProcessingResult {
 	return this.WithPool(NewProcessorPool(n))
 }
+
 func (this *_AsynchronousProcessing) Synchronously() ProcessingResult {
 	return (&_SynchronousProcessing{}).new(this)
 }
+
 func (this *_AsynchronousProcessing) Asynchronously() ProcessingResult {
 	return this
 }
+
 func (this *_AsynchronousProcessing) Unordered() ProcessingResult {
 	return this
 }
+
 func (this *_AsynchronousProcessing) Apply(c ProcessChain) ProcessingResult {
 	return c.Process(this)
 }
@@ -140,11 +155,10 @@ func (this *_AsynchronousProcessing) Iterator() data.Iterator {
 	defer this.lock.Unlock()
 	return this.data.Iterator()
 }
+
 func (this *_AsynchronousProcessing) AsSlice() data.IndexedSliceAccess {
 	return data.IndexedSliceAccess(data.Slice(this))
 }
-
-////////////////////////////////////////////////////////////////////////////
 
 type _AsynchronousStep struct {
 	_AsynchronousProcessing
@@ -160,40 +174,13 @@ func (this *_AsynchronousStep) new(data data.Iterable, proc processing) *_Asynch
 	return this
 }
 
-////////////////////////////////////////////////////////////////////////////
-
-func process_sort(c CompareFunction) func(data data.Iterable) data.Iterable {
+func processSort(c CompareFunction) func(data data.Iterable) data.Iterable {
 	return func(it data.Iterable) data.Iterable {
 		slice := data.Slice(it)
 		data.Sort(slice, c)
 		return data.IndexedSliceAccess(slice)
 	}
 }
-
-/*
-func process_aggregate(a AggregationFunction) func(data data.Iterable) data.Iterable {
-	return func(it data.Iterable) data.Iterable {
-		var result []interface{}
-		var state interface{}
-		i := it.Iterator()
-		for i.HasNext() {
-			s := a(i.Next(), state)
-			if s != nil {
-				if state != nil {
-					result = append(result, state)
-				}
-				state = s
-			}
-		}
-		if state != nil {
-			result = append(result, state)
-		}
-		return data.IndexedSliceAccess(result)
-	}
-}
-*/
-
-////////////////////////////////////////////////////////////////////////////
 
 func process(op operation) processing {
 	return func(it data.Iterable) data.Iterable {

@@ -41,12 +41,14 @@ type Object struct {
 
 	Spec       ocm.RefSpec
 	Repository ocm.Repository
-	//Component        ocm.ComponentAccess
+	// Component        ocm.ComponentAccess
 	ComponentVersion ocm.ComponentVersionAccess
 }
 
-var _ common.HistorySource = (*Object)(nil)
-var _ tree.Object = (*Object)(nil)
+var (
+	_ common.HistorySource = (*Object)(nil)
+	_ tree.Object          = (*Object)(nil)
+)
 
 type Manifest struct {
 	History common.History                `json:"context"`
@@ -145,7 +147,7 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 			result = append(result, &Object{
 				Spec:       evaluated.Ref,
 				Repository: evaluated.Repository,
-				//Component:        evaluated.Component,
+				// Component:        evaluated.Component,
 				ComponentVersion: evaluated.Version,
 			})
 			return result, nil
@@ -178,7 +180,7 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 		result = append(result, &Object{
 			Repository: repo,
 			Spec:       spec,
-			//Component:        component,
+			// Component:        component,
 			ComponentVersion: v,
 		})
 	} else {
@@ -200,7 +202,7 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 				result = append(result, &Object{
 					Repository: repo,
 					Spec:       s,
-					//Component:        component,
+					// Component:        component,
 					ComponentVersion: v,
 				})
 			}

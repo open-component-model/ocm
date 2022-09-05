@@ -36,12 +36,12 @@ func TypeName(args ...string) string {
 		}
 		return args[0] + VersionSeparator + args[1]
 	}
-	panic("invlid call to TypeName, one or two arguments required")
+	panic("invalid call to TypeName, one or two arguments required")
 }
 
 type ObjectVersionedType ObjectType
 
-// NewVersionedObjectType creates an ObjectVersionedType value
+// NewVersionedObjectType creates an ObjectVersionedType value.
 func NewVersionedObjectType(args ...string) ObjectVersionedType {
 	return ObjectVersionedType{Type: TypeName(args...)}
 }

@@ -25,15 +25,16 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const ATTR_KEY = "github.com/mandelsoft/vfs"
-const ATTR_SHORT = "vfs"
+const (
+	ATTR_KEY   = "github.com/mandelsoft/vfs"
+	ATTR_SHORT = "vfs"
+)
 
 func init() {
 	datacontext.RegisterAttributeType(ATTR_KEY, AttributeType{})
 }
 
-type AttributeType struct {
-}
+type AttributeType struct{}
 
 func (a AttributeType) Name() string {
 	return ATTR_KEY
@@ -68,7 +69,6 @@ func Get(ctx datacontext.Context) vfs.FileSystem {
 	}
 	fs, _ := v.(vfs.FileSystem)
 	return fs
-
 }
 
 func Set(ctx datacontext.Context, fs vfs.FileSystem) {

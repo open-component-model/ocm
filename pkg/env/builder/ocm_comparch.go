@@ -24,11 +24,11 @@ import (
 const T_COMPARCH = "component archive"
 
 func (b *Builder) ComponentArchive(path string, fmt accessio.FileFormat, name, vers string, f ...func()) {
-	r, err := comparch.Open(b.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, path, 0777, accessio.PathFileSystem(b.FileSystem()))
+	r, err := comparch.Open(b.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, path, 0o777, accessio.PathFileSystem(b.FileSystem()))
 	b.failOn(err)
 	r.SetName(name)
 	r.SetVersion(vers)
 	r.GetDescriptor().Provider.Name = metav1.ProviderName("ACME")
 
-	b.configure(&ocm_version{ComponentVersionAccess: r, kind: T_COMPARCH}, f)
+	b.configure(&ocmVersion{ComponentVersionAccess: r, kind: T_COMPARCH}, f)
 }

@@ -21,7 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-type ocm_resource struct {
+type ocmResource struct {
 	base
 
 	meta   compdesc.ResourceMeta
@@ -31,18 +31,18 @@ type ocm_resource struct {
 
 const T_OCMRESOURCE = "resource"
 
-func (r *ocm_resource) Type() string {
+func (r *ocmResource) Type() string {
 	return T_OCMRESOURCE
 }
 
-func (r *ocm_resource) Set() {
+func (r *ocmResource) Set() {
 	r.Builder.ocm_rsc = &r.meta
 	r.Builder.ocm_acc = &r.access
 	r.Builder.ocm_meta = &r.meta.ElementMeta
 	r.Builder.blob = &r.blob
 }
 
-func (r *ocm_resource) Close() error {
+func (r *ocmResource) Close() error {
 	switch {
 	case r.access != nil:
 		return r.Builder.ocm_vers.SetResource(&r.meta, r.access)
@@ -56,7 +56,7 @@ func (r *ocm_resource) Close() error {
 
 func (b *Builder) Resource(name, vers, typ string, relation metav1.ResourceRelation, f ...func()) {
 	b.expect(b.ocm_vers, T_OCMVERSION)
-	r := &ocm_resource{}
+	r := &ocmResource{}
 	r.meta.Name = name
 	r.meta.Version = vers
 	r.meta.Type = typ

@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/modern-go/reflect2"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -55,15 +56,24 @@ type JSONMarhaler interface {
 	MarshalJSON() ([]byte, error)
 }
 
-// UnstructuredMap is a generic data map
+// UnstructuredMap is a generic data map.
 type UnstructuredMap map[string]interface{}
 
-// FlatMerge just joins the direct attribute set
+// FlatMerge just joins the direct attribute set.
 func (m UnstructuredMap) FlatMerge(o UnstructuredMap) UnstructuredMap {
 	for k, v := range o {
 		m[k] = v
 	}
 	return m
+}
+
+// FlatCopy just copies the attributes.
+func (m UnstructuredMap) FlatCopy() UnstructuredMap {
+	r := UnstructuredMap{}
+	for k, v := range m {
+		r[k] = v
+	}
+	return r
 }
 
 // UnstructuredTypesEqual compares two unstructured object.
@@ -122,7 +132,7 @@ func NewUnstructuredType(ttype string, data UnstructuredMap) *UnstructuredTypedO
 	return unstr
 }
 
-// UnstructuredConverter converts the actual object to an UnstructuredTypedObject
+// UnstructuredConverter converts the actual object to an UnstructuredTypedObject.
 type UnstructuredConverter interface {
 	ToUnstructured() (*UnstructuredTypedObject, error)
 }
@@ -148,7 +158,12 @@ func (u *UnstructuredTypedObject) SetType(ttype string) {
 // DeepCopyInto is deepcopy function, copying the receiver, writing into out. in must be non-nil.
 func (u *UnstructuredTypedObject) DeepCopyInto(out *UnstructuredTypedObject) {
 	*out = *u
-	raw, _ := json.Marshal(u.Object)
+
+	raw, err := json.Marshal(u.Object)
+	if err != nil {
+		logrus.Error(err)
+	}
+
 	_ = out.setRaw(raw)
 }
 
@@ -198,7 +213,7 @@ func (u *UnstructuredTypedObject) Evaluate(types Scheme) (TypedObject, error) {
 
 // UnmarshalJSON implements a custom json unmarshal method for a unstructured typed object.
 func (u *UnstructuredTypedObject) UnmarshalJSON(data []byte) error {
-	//fmt.Printf("unmarshal raw: %s\n", string(data))
+	// fmt.Printf("unmarshal raw: %s\n", string(data))
 	typedObj := ObjectType{}
 	if err := json.Unmarshal(data, &typedObj); err != nil {
 		return err
@@ -277,8 +292,8 @@ type UnstructuredTypedObjectList []*UnstructuredTypedObject
 func (l UnstructuredTypedObjectList) Copy() UnstructuredTypedObjectList {
 	n := make(UnstructuredTypedObjectList, len(l))
 	for i, u := range l {
-		copy := *u
-		n[i] = &copy
+		copied := *u
+		n[i] = &copied
 	}
 	return n
 }

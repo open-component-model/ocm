@@ -37,7 +37,7 @@ type ValidTreeElement interface {
 type NodeCreator func(common.History, common.NameVersion) Object
 
 // TreeObject is an element enriched by a textual
-// tree graph prefix line
+// tree graph prefix line.
 type TreeObject struct {
 	Graph  string
 	Object Object
@@ -56,12 +56,14 @@ type TreeNode struct {
 	History common.History
 }
 
-var vertical = "│" + space[1:]
-var horizontal = "─"
-var corner = "└" + horizontal
-var fork = "├" + horizontal
-var space = "   "
-var node = "⊗" // \u2297
+var (
+	vertical   = "│" + space[1:]
+	horizontal = "─"
+	corner     = "└" + horizontal
+	fork       = "├" + horizontal
+	space      = "   "
+	node       = "⊗" // \u2297
+)
 
 // MapToTree maps a list of elements featuring a resolution history
 // into a list of elements providing an ascii tree graph field

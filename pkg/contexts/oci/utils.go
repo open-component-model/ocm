@@ -19,7 +19,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 )
 
 func AsTags(tag string) []string {
@@ -27,20 +26,6 @@ func AsTags(tag string) []string {
 		return []string{tag}
 	}
 	return nil
-}
-
-func EvaluateRefWithContext(ctx Context, ref string) (*RefSpec, NamespaceAccess, error) {
-	parsed, err := ParseRef(ref)
-	if err != nil {
-		return nil, nil, err
-	}
-	spec := ocireg.NewRepositorySpec(parsed.Base())
-	repo, err := ctx.RepositoryForSpec(spec)
-	if err != nil {
-		return nil, nil, err
-	}
-	ns, err := repo.LookupNamespace(parsed.Repository)
-	return &parsed, ns, err
 }
 
 func StandardOCIRef(host, repository, version string) string {

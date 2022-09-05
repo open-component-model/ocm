@@ -41,7 +41,7 @@ var _ = Describe("sort", func() {
 
 	It("sort a", func() {
 		slice := data.IndexedSliceAccess(values).Copy()
-		slice.Sort(compare_column(2))
+		slice.Sort(compareColumn(2))
 		Expect(slice).To(Equal(data.IndexedSliceAccess{
 			h1i2a1b3,
 			h2i2a1b3,
@@ -53,7 +53,7 @@ var _ = Describe("sort", func() {
 	})
 	It("sort b", func() {
 		slice := data.IndexedSliceAccess(values).Copy()
-		slice.Sort(compare_column(3))
+		slice.Sort(compareColumn(3))
 		Expect(slice).To(Equal(data.IndexedSliceAccess{
 			h1i2a2b1,
 			h2i2a2b1,
@@ -65,7 +65,7 @@ var _ = Describe("sort", func() {
 	})
 	It("sort fixed h a", func() {
 		slice := data.IndexedSliceAccess(values).Copy()
-		sortFixed(1, slice, compare_column(2))
+		sortFixed(1, slice, compareColumn(2))
 		Expect(slice).To(Equal(data.IndexedSliceAccess{
 			h1i2a1b3,
 			h1i2a2b1,
@@ -85,7 +85,7 @@ var _ = Describe("sort", func() {
 		}
 		slice = data.IndexedSliceAccess(values)
 		//slice.SortIndexed(compare_fixed_column(1, 2))
-		sortFixed(1, slice, compare_column(2))
+		sortFixed(1, slice, compareColumn(2))
 		Expect(slice).To(Equal(data.IndexedSliceAccess{
 			h1i2a1b3,
 			h2i2a1b3,

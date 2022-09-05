@@ -38,11 +38,11 @@ type ProcessChain interface {
 	Process(data data.Iterable) ProcessingResult
 }
 
-type step_creator func(ProcessingResult) ProcessingResult
+type stepCreator func(ProcessingResult) ProcessingResult
 
 type _ProcessChain struct {
 	parent  *_ProcessChain
-	creator step_creator
+	creator stepCreator
 }
 
 var _ ProcessChain = &_ProcessChain{}
@@ -51,7 +51,7 @@ func Chain() ProcessChain {
 	return (&_ProcessChain{}).new(nil, nil)
 }
 
-func (this *_ProcessChain) new(p *_ProcessChain, creator step_creator) *_ProcessChain {
+func (this *_ProcessChain) new(p *_ProcessChain, creator stepCreator) *_ProcessChain {
 	if p != nil {
 		if p.creator != nil {
 			this.parent = p
@@ -72,48 +72,54 @@ func (this *_ProcessChain) Transform(t TransformFunction) ProcessChain {
 	if t == nil {
 		return this
 	}
-	return (&_ProcessChain{}).new(this, chain_transform(t))
+	return (&_ProcessChain{}).new(this, chainTransform(t))
 }
 
 func (this *_ProcessChain) Explode(e ExplodeFunction) ProcessChain {
 	if e == nil {
 		return this
 	}
-	return (&_ProcessChain{}).new(this, chain_explode(e))
+	return (&_ProcessChain{}).new(this, chainExplode(e))
 }
+
 func (this *_ProcessChain) Map(m MappingFunction) ProcessChain {
 	if m == nil {
 		return this
 	}
-	return (&_ProcessChain{}).new(this, chain_map(m))
+	return (&_ProcessChain{}).new(this, chainMap(m))
 }
+
 func (this *_ProcessChain) Filter(f FilterFunction) ProcessChain {
 	if f == nil {
 		return this
 	}
-	return (&_ProcessChain{}).new(this, chain_filter(f))
+	return (&_ProcessChain{}).new(this, chainFilter(f))
 }
+
 func (this *_ProcessChain) Sort(c CompareFunction) ProcessChain {
 	if c == nil {
 		return this
 	}
-	return (&_ProcessChain{}).new(this, chain_sort(c))
+	return (&_ProcessChain{}).new(this, chainSort(c))
 }
+
 func (this *_ProcessChain) WithPool(p ProcessorPool) ProcessChain {
-	return (&_ProcessChain{}).new(this, chain_with_pool(p))
+	return (&_ProcessChain{}).new(this, chainWithPool(p))
 }
+
 func (this *_ProcessChain) Unordered() ProcessChain {
-	return (&_ProcessChain{}).new(this, chain_unordered)
+	return (&_ProcessChain{}).new(this, chainUnordered)
 }
+
 func (this *_ProcessChain) Parallel(n int) ProcessChain {
-	return (&_ProcessChain{}).new(this, chain_parallel(n))
+	return (&_ProcessChain{}).new(this, chainParallel(n))
 }
 
 func (this *_ProcessChain) Append(p ProcessChain) ProcessChain {
 	if p == nil {
 		return this
 	}
-	return (&_ProcessChain{}).new(this, chain_apply(p))
+	return (&_ProcessChain{}).new(this, chainApply(p))
 }
 
 // Process instantiates a processing chain for a dedicated input
@@ -138,30 +144,36 @@ func (this *_ProcessChain) step(p ProcessingResult) ProcessingResult {
 	return this.creator(p)
 }
 
-func chain_transform(t TransformFunction) step_creator {
+func chainTransform(t TransformFunction) stepCreator {
 	return func(p ProcessingResult) ProcessingResult { return p.Transform(t) }
 }
-func chain_explode(e ExplodeFunction) step_creator {
+
+func chainExplode(e ExplodeFunction) stepCreator {
 	return func(p ProcessingResult) ProcessingResult { return p.Explode(e) }
 }
-func chain_map(m MappingFunction) step_creator {
+
+func chainMap(m MappingFunction) stepCreator {
 	return func(p ProcessingResult) ProcessingResult { return p.Map(m) }
 }
-func chain_filter(f FilterFunction) step_creator {
+
+func chainFilter(f FilterFunction) stepCreator {
 	return func(p ProcessingResult) ProcessingResult { return p.Filter(f) }
 }
-func chain_sort(c CompareFunction) step_creator {
+
+func chainSort(c CompareFunction) stepCreator {
 	return func(p ProcessingResult) ProcessingResult { return p.Sort(c) }
 }
-func chain_with_pool(pool ProcessorPool) step_creator {
+
+func chainWithPool(pool ProcessorPool) stepCreator {
 	return func(p ProcessingResult) ProcessingResult { return p.WithPool(pool) }
 }
-func chain_parallel(n int) step_creator {
+
+func chainParallel(n int) stepCreator {
 	return func(p ProcessingResult) ProcessingResult { return p.Parallel(n) }
 }
-func chain_unordered(p ProcessingResult) ProcessingResult { return p.Unordered() }
+func chainUnordered(p ProcessingResult) ProcessingResult { return p.Unordered() }
 
-func chain_apply(c ProcessChain) step_creator {
+func chainApply(c ProcessChain) stepCreator {
 	return func(p ProcessingResult) ProcessingResult {
 		return p.Apply(c)
 	}

@@ -75,9 +75,11 @@ func (h *TarHandler) Create(info *AccessObjectInfo, path string, opts accessio.O
 func (h *TarHandler) Write(obj *AccessObject, path string, opts accessio.Options, mode vfs.FileMode) error {
 	writer, err := opts.WriterFor(path, mode)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to write: %w", err)
 	}
+
 	defer writer.Close()
+
 	return h.WriteToStream(obj, writer, opts)
 }
 
@@ -85,20 +87,24 @@ func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts acce
 	if h.compression != nil {
 		w, err := h.compression.Compressor(writer, nil, nil)
 		if err != nil {
-			return err
+			return fmt.Errorf("unable to compress writer: %w", err)
 		}
 		defer w.Close()
+
 		writer = w
 	}
+
 	// write descriptor
 	err := obj.Update()
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to update access object: %w", err)
 	}
+
 	data, err := obj.state.GetBlob()
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to write to get state blob: %w", err)
 	}
+
 	tw := tar.NewWriter(writer)
 	cdHeader := &tar.Header{
 		Name:    obj.info.DescriptorFileName,
@@ -110,11 +116,14 @@ func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts acce
 	if err := tw.WriteHeader(cdHeader); err != nil {
 		return fmt.Errorf("unable to write descriptor header: %w", err)
 	}
+
 	r, err := data.Reader()
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to get reader: %w", err)
 	}
+
 	defer r.Close()
+
 	if _, err := io.Copy(tw, r); err != nil {
 		return fmt.Errorf("unable to write descriptor content: %w", err)
 	}
@@ -137,6 +146,7 @@ func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts acce
 		}
 		return fmt.Errorf("unable to read %s directory: %w", obj.info.ElementTypeName, err)
 	}
+
 	for _, fileInfo := range fileInfos {
 		path := obj.info.SubPath(fileInfo.Name())
 		header := &tar.Header{

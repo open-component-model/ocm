@@ -40,26 +40,26 @@ import (
 // | Public Registry  | yes  | yes     | yes  |
 // | Private Registry | yes  | yes     | yes  |
 // | Public Mirror    | yes  | no      | no   |
-// | Private Mirror   | yes  | yes     | no   |
+// | Private Mirror   | yes  | yes     | no   |.
 type HostCapabilities uint8
 
 const (
 	// HostCapabilityPull represents the capability to fetch manifests
-	// and blobs by digest
+	// and blobs by digest.
 	HostCapabilityPull HostCapabilities = 1 << iota
 
 	// HostCapabilityResolve represents the capability to fetch manifests
-	// by name
+	// by name.
 	HostCapabilityResolve
 
 	// HostCapabilityPush represents the capability to push blobs and
-	// manifests
+	// manifests.
 	HostCapabilityPush
 
-	// Reserved for future capabilities (i.e. search, catalog, remove)
+	// Reserved for future capabilities (i.e. search, catalog, remove).
 )
 
-// Has checks whether the capabilities list has the provide capability
+// Has checks whether the capabilities list has the provide capability.
 func (c HostCapabilities) Has(t HostCapabilities) bool {
 	return c&t == t
 }
@@ -77,9 +77,14 @@ type RegistryHost struct {
 	Header       http.Header
 }
 
+const (
+	dockerHostname         = "docker.io"
+	dockerRegistryHostname = "registry-1.docker.io"
+)
+
 func (h RegistryHost) isProxy(refhost string) bool {
 	if refhost != h.Host {
-		if refhost != "docker.io" || h.Host != "registry-1.docker.io" {
+		if refhost != dockerHostname || h.Host != dockerRegistryHostname {
 			return true
 		}
 	}
@@ -118,7 +123,7 @@ type registryOpts struct {
 	client     *http.Client
 }
 
-// RegistryOpt defines a registry default option
+// RegistryOpt defines a registry default option.
 type RegistryOpt func(*registryOpts)
 
 // WithPlainHTTP configures registries to use plaintext http scheme
@@ -129,21 +134,21 @@ func WithPlainHTTP(f func(string) (bool, error)) RegistryOpt {
 	}
 }
 
-// WithAuthorizer configures the default authorizer for a registry
+// WithAuthorizer configures the default authorizer for a registry.
 func WithAuthorizer(a Authorizer) RegistryOpt {
 	return func(opts *registryOpts) {
 		opts.authorizer = a
 	}
 }
 
-// WithHostTranslator defines the default translator to use for registry hosts
+// WithHostTranslator defines the default translator to use for registry hosts.
 func WithHostTranslator(h func(string) (string, error)) RegistryOpt {
 	return func(opts *registryOpts) {
 		opts.host = h
 	}
 }
 
-// WithClient configures the default http client for a registry
+// WithClient configures the default http client for a registry.
 func WithClient(c *http.Client) RegistryOpt {
 	return func(opts *registryOpts) {
 		opts.client = c
@@ -153,7 +158,7 @@ func WithClient(c *http.Client) RegistryOpt {
 // ConfigureDefaultRegistries is used to create a default configuration for
 // registries. For more advanced configurations or per-domain setups,
 // the RegistryHosts interface should be used directly.
-// NOTE: This function will always return a non-empty value or error
+// NOTE: This function will always return a non-empty value or error.
 func ConfigureDefaultRegistries(ropts ...RegistryOpt) RegistryHosts {
 	var opts registryOpts
 	for _, opt := range ropts {
@@ -190,8 +195,8 @@ func ConfigureDefaultRegistries(ropts ...RegistryOpt) RegistryHosts {
 			if err != nil {
 				return nil, err
 			}
-		} else if host == "docker.io" {
-			config.Host = "registry-1.docker.io"
+		} else if host == dockerHostname {
+			config.Host = dockerRegistryHostname
 		}
 
 		return []RegistryHost{config}, nil

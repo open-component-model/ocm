@@ -20,8 +20,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-type TransferOptions interface {
-}
+type TransferOptions interface{}
 
 type TransferOption interface {
 	ApplyTransferOption(TransferOptions) error

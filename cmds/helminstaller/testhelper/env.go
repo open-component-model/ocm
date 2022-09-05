@@ -19,11 +19,9 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/cmds/helminstaller/app"
 	"github.com/open-component-model/ocm/cmds/helminstaller/app/driver"
 	"github.com/open-component-model/ocm/cmds/helminstaller/app/driver/helm"
-
-	"github.com/open-component-model/ocm/cmds/helminstaller/app"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
@@ -50,7 +48,6 @@ func (c *CLI) Execute(args ...string) error {
 	cmd := app.NewCliCommand(clictx.DefaultContext(), c.Driver)
 	cmd.SetArgs(args)
 	return cmd.Execute()
-
 }
 
 type TestEnv struct {

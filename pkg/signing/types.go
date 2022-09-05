@@ -18,6 +18,8 @@ import (
 	"crypto"
 	"encoding/json"
 	"hash"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Signature struct {
@@ -28,7 +30,11 @@ type Signature struct {
 }
 
 func (s *Signature) String() string {
-	data, _ := json.Marshal(s)
+	data, err := json.Marshal(s)
+	if err != nil {
+		logrus.Error(err)
+	}
+
 	return string(data)
 }
 
@@ -51,14 +57,14 @@ type Verifier interface {
 	Algorithm() string
 }
 
-// SignatureHandler can create and verify signature of a dedicated type
+// SignatureHandler can create and verify signature of a dedicated type.
 type SignatureHandler interface {
 	Algorithm() string
 	Signer
 	Verifier
 }
 
-// Hasher creates a new hash.Hash interface
+// Hasher creates a new hash.Hash interface.
 type Hasher interface {
 	Algorithm() string
 	Create() hash.Hash

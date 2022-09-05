@@ -28,10 +28,12 @@ type Options struct {
 	resolver         ocm.ComponentVersionResolver
 }
 
-var _ ResourcesByValueOption = (*Options)(nil)
-var _ SourcesByValueOption = (*Options)(nil)
-var _ RecursiveOption = (*Options)(nil)
-var _ ResolverOption = (*Options)(nil)
+var (
+	_ ResourcesByValueOption = (*Options)(nil)
+	_ SourcesByValueOption   = (*Options)(nil)
+	_ RecursiveOption        = (*Options)(nil)
+	_ ResolverOption         = (*Options)(nil)
+)
 
 func (o *Options) SetOverwrite(overwrite bool) {
 	o.overwrite = overwrite

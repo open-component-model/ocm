@@ -15,6 +15,8 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx/core"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
@@ -41,7 +43,7 @@ type Config struct {
 	OCIRepositories             map[string]*ocicpi.GenericRepositorySpec `json:"ociRepositories,omitempty"`
 }
 
-// New creates a new memory ConfigSpec
+// New creates a new memory ConfigSpec.
 func New() *Config {
 	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(OCMCmdConfigType),
@@ -55,25 +57,30 @@ func (a *Config) GetType() string {
 func (a *Config) AddOCIRepository(name string, spec ocicpi.RepositorySpec) error {
 	g, err := ocicpi.ToGenericRepositorySpec(spec)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to convert oci repository spec to generic spec: %w", err)
 	}
+
 	if a.OCIRepositories == nil {
 		a.OCIRepositories = map[string]*ocicpi.GenericRepositorySpec{}
 	}
+
 	a.OCIRepositories[name] = g
+
 	return nil
 }
 
 func (a *Config) AddOCMRepository(name string, spec ocmcpi.RepositorySpec) error {
 	g, err := ocmcpi.ToGenericRepositorySpec(spec)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to convert ocm repository spec to generic spec: %w", err)
 	}
+
 	if a.OCMRepositories == nil {
 		a.OCMRepositories = map[string]*ocmcpi.GenericRepositorySpec{}
 	}
 
 	a.OCMRepositories[name] = g
+
 	return nil
 }
 
