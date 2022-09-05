@@ -163,7 +163,7 @@ var _ = Describe("Transfer handler", func() {
 		tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env)
 		Expect(err).To(Succeed())
 		defer tgt.Close()
-		handler, err := standard.New(standard.Recursive(), standard.WithResolver(childSrc))
+		handler, err := standard.New(standard.Recursive(), standard.Resolver(childSrc))
 		Expect(err).To(Succeed())
 		err = transfer.TransferVersion(nil, nil, cv, tgt, handler)
 		Expect(err).To(Succeed())

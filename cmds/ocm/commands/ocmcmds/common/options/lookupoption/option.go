@@ -98,5 +98,5 @@ func (o *Option) LookupComponentVersion(name string, vers string) (ocm.Component
 }
 
 func (o *Option) ApplyTransferOption(opts transferhandler.TransferOptions) error {
-	return standard.WithResolver(o.Resolver).ApplyTransferOption(opts)
+	return standard.Resolver(o.Resolver).ApplyTransferOption(opts)
 }
