@@ -3,7 +3,7 @@
 Status: accepted
 Date: 2022.09.01.
 Authors: [@Skarlso]
-Deciders: [@Skarlso @mandelsoft]
+Deciders: [@Skarlso @mandelsoft @Yitsushi]
 
 ## Context
 
@@ -21,29 +21,6 @@ type PanicHandler func(interface{})bool
 
 // PanicHandlers is a list of functions which will be invoked when a panic happens.
 var PanicHandlers = []PanicHandler{}
-
-// HandleCrash simply catches a crash and runs any user defined panic handlers that exist.
-// The handlers can then decide to actually panic or not.
-//
-// E.g., you can provide one or more additional handlers for something like shutting down go routines gracefully.
-func HandleCrash(additionalHandlers ...PanicHandler) {
-	if r := recover(); r != nil {
-        if len(PanicHandlers) == 0 && len(additionalHandlers) == 0 {
-            // If there are no handlers, throw the panic.
-            panic(r)
-        }
-		for _, fn := range PanicHandlers {
-			if fn(r) {
-                panic(r)
-            }
-		}
-		for _, fn := range additionalHandlers {
-			if fn(r) {
-                panic(r)
-            }
-		}
-	}
-}
 ```
 
 In code, on every path at the top of the path or at the panic's location, there should be a single defer call to this
@@ -52,7 +29,7 @@ function such as:
 ```go
 func (this *DLL) Append(d *DLL) {
     // Add defer handling crashes
-    defer panics.HandleCrash()
+    defer panics.HandleCrash() // defer call all handlers.
 	if d.next != nil || d.prev != nil {
 		panic("dll element already in use")
 	}
@@ -70,31 +47,13 @@ func (this *DLL) Append(d *DLL) {
 }
 ```
 
-From a libraries perspective:
-
-```go
-func logPanic(r interface{}) {
-	if v, ok := r.(string); ok {
-		klog.Errorf("Encountered a panic: %s\n", v, stacktrace)
-	} else {
-		klog.Errorf("Encountered a panic: %#v (%v)\n", r, r)
-	}
-}
-
-func main() {
-    // TODO: Figure this out how a library would use OCM
-    // For now, this is an illustration.
-    ocm.RegisterPanicHandlers(logPanic)
-    // do other ocm things. a crash now will be logged instead of aborting.
-}
-```
-
 ### Discussion
 
 How do we add handlers? Two ways:
 
 - add them during initialization of the type handlers
-- add them as a new context such as `PanicHandlerContext` which any call then use
+- add them as a new context such as `PanicHandlerContext` which any call then can use
+  - however, this means a proliferation of ctx.
 
 ## Consequences
 
