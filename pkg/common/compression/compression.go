@@ -43,7 +43,7 @@ func noneCompressor(w io.Writer, _ map[string]string, _ *int) (io.WriteCloser, e
 
 var None = NewAlgorithm("none", "", nil, noneDecompressor, noneCompressor)
 
-// AlgorithmByName returns the compressor by its name
+// AlgorithmByName returns the compressor by its name.
 func AlgorithmByName(name string) (Algorithm, error) {
 	lock.RLock()
 	defer lock.RUnlock()

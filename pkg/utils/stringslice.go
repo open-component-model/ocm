@@ -36,6 +36,7 @@ func (l StringSlice) Contains(s string) bool {
 	}
 	return false
 }
+
 func (l StringSlice) Sort() {
 	sort.Strings(l)
 }

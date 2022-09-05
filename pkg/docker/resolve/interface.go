@@ -57,14 +57,14 @@ type Resolver interface {
 	Lister(ctx context.Context, ref string) (Lister, error)
 }
 
-// Fetcher fetches content
+// Fetcher fetches content.
 type Fetcher interface {
 	// Fetch the resource identified by the descriptor.
 	Fetch(ctx context.Context, desc ocispec.Descriptor) (io.ReadCloser, error)
 }
 
 // Pusher pushes content
-// don't use write interface of containerd remotes.Pusher
+// don't use write interface of containerd remotes.Pusher.
 type Pusher interface {
 	// Push returns a push request for the given resource identified
 	// by the descriptor and the given data source.
@@ -76,9 +76,8 @@ type Lister interface {
 }
 
 // PushRequest handles the result of a push request
-// replaces containerd content.Writer
+// replaces containerd content.Writer.
 type PushRequest interface {
-
 	// Commit commits the blob (but no roll-back is guaranteed on an error).
 	// size and expected can be zero-value when unknown.
 	// Commit always closes the writer, even on error.

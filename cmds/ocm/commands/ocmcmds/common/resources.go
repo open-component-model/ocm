@@ -25,27 +25,24 @@ import (
 	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/open-component-model/ocm/pkg/out"
-
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/runtime"
-
-	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
 )
 
 type ResourceInput struct {
 	Access *runtime.UnstructuredTypedObject `json:"access"`
-	//Input  *inputs.BlobInput                `json:"input,omitempty"`
+	// Input  *inputs.BlobInput                `json:"input,omitempty"`
 	Input *inputs.GenericInputSpec `json:"input,omitempty"`
 }
 
@@ -152,7 +149,7 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 			i++
 			err := decoder.Decode(&tmp)
 			if err != nil {
-				if err != io.EOF {
+				if !errors.Is(err, io.EOF) {
 					return err
 				}
 				break
@@ -322,6 +319,7 @@ func Validate(r *ResourceInput, ctx clictx.Context, inputFilePath string) error 
 				acc, err := r.Access.Evaluate(ctx.OCMContext().AccessMethods())
 				if err != nil {
 					if errors.IsErrUnknown(err) {
+						//nolint: errorlint // No way I can untagle this.
 						err.(errors.Kinded).SetKind(errors.KIND_ACCESSMETHOD)
 					}
 					raw, _ := r.Access.GetRaw()

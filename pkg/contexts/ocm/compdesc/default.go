@@ -19,7 +19,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-// DefaultComponent applies defaults to a component
+// DefaultComponent applies defaults to a component.
 func DefaultComponent(component *ComponentDescriptor) *ComponentDescriptor {
 	if component.RepositoryContexts == nil {
 		component.RepositoryContexts = make([]*runtime.UnstructuredTypedObject, 0)

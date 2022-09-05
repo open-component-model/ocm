@@ -21,16 +21,13 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/errors"
-
 	"github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 var (
@@ -55,7 +52,6 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
-
 	return &cobra.Command{
 		Use:   "{<consumer property>=<value>}",
 		Short: "Get credentials for a dedicated consumer spec",
@@ -111,7 +107,6 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
-
 	src, err := o.CredentialsContext().GetCredentialsForConsumer(o.Consumer, o.Matcher)
 	if err != nil {
 		return err
@@ -126,6 +121,6 @@ func (o *Command) Run() error {
 		list = append(list, []string{k, v})
 	}
 	sort.Slice(list, func(i, j int) bool { return strings.Compare(list[i][0], list[j][0]) < 0 })
-	output.FormatTable(o, "", append([][]string{[]string{"ATTRIBUTE", "VALUE"}}, list...))
+	output.FormatTable(o, "", append([][]string{{"ATTRIBUTE", "VALUE"}}, list...))
 	return nil
 }

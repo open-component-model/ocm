@@ -159,6 +159,8 @@ func GenMarkdownTree(cmd *cobra.Command, dir string) error {
 func GenMarkdownTreeCustom(cmd *cobra.Command, dir string, filePrepender, linkHandler func(string) string) error {
 	for _, c := range cmd.Commands() {
 		if c.Name() == "configfile" {
+			// I have no idea what this supposed to do.
+			// TrimSpace is a pure function but its return value is ignored.
 			strings.TrimSpace(c.Name())
 		}
 		if !c.IsAvailableCommand() && !c.IsAdditionalHelpTopicCommand() {

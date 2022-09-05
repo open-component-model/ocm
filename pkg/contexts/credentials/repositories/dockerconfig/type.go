@@ -41,7 +41,7 @@ func (s RepositorySpec) WithConsumerPropagation(propagate bool) *RepositorySpec 
 	return &s
 }
 
-// NewRepositorySpec creates a new memory RepositorySpec
+// NewRepositorySpec creates a new memory RepositorySpec.
 func NewRepositorySpec(path string, prop ...bool) *RepositorySpec {
 	p := false
 	for _, e := range prop {

@@ -81,27 +81,27 @@ func NewLinkedList() *LinkedList {
 	return (&LinkedList{}).New()
 }
 
-func (this *LinkedList) New() *LinkedList {
-	if this == nil {
-		this = &LinkedList{}
+func (ll *LinkedList) New() *LinkedList {
+	if ll == nil {
+		ll = &LinkedList{}
 	}
-	this.root.New(this)
-	return this
+	ll.root.New(ll)
+	return ll
 }
 
-func (this *LinkedList) Append(e interface{}) ListElement {
+func (ll *LinkedList) Append(e interface{}) ListElement {
 	n := &listElement{element: e}
 	n.dll.payload = n
-	this.root.Append(&n.dll)
+	ll.root.Append(&n.dll)
 	return n
 }
 
-func (this *LinkedList) Iterator() Iterator {
-	return &listIterator{this.root.Iterator().(*dllIterator)}
+func (ll *LinkedList) Iterator() Iterator {
+	return &listIterator{ll.root.Iterator().(*dllIterator)}
 }
 
-func (this *LinkedList) ElementIterator() ElementIterator {
-	return &listIterator{this.root.Iterator().(*dllIterator)}
+func (ll *LinkedList) ElementIterator() ElementIterator {
+	return &listIterator{ll.root.Iterator().(*dllIterator)}
 }
 
 type listIterator struct {

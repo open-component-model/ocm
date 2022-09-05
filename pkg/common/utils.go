@@ -23,12 +23,12 @@ import (
 	"github.com/opencontainers/go-digest"
 )
 
-// DigestToFileName returns teh file name for a digest
+// DigestToFileName returns the file name for a digest.
 func DigestToFileName(digest digest.Digest) string {
 	return strings.Replace(digest.String(), ":", ".", 1)
 }
 
-// PathToDigest retuurns the digest encoded into a file name
+// PathToDigest retuurns the digest encoded into a file name.
 func PathToDigest(path string) digest.Digest {
 	n := filepath.Base(path)
 	idx := strings.LastIndex(n, ".")

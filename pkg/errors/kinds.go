@@ -14,8 +14,10 @@
 
 package errors
 
-const KIND_FUNCTION = "function"
-const KIND_SCHEMAVERSION = "schema version"
-const KIND_COMPONENT = "component"
-const KIND_ACCESSMETHOD = "access method"
-const KIND_OBJECTTYPE = "object type"
+const (
+	KIND_FUNCTION      = "function"
+	KIND_SCHEMAVERSION = "schema version"
+	KIND_COMPONENT     = "component"
+	KIND_ACCESSMETHOD  = "access method"
+	KIND_OBJECTTYPE    = "object type"
+)

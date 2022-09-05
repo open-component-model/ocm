@@ -15,7 +15,7 @@
 package v1
 
 // ResourceReference describes re resource identity relative to an (aggregation)
-// component version
+// component version.
 type ResourceReference struct {
 	Resource      Identity   `json:"resource"`
 	ReferencePath []Identity `json:"referencePath,omitempty"`

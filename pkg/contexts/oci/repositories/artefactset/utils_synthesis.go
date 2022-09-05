@@ -43,7 +43,7 @@ func SythesizeArtefactSet(mime string, producer Producer) (ArtefactBlob, error) 
 	}
 	defer temp.Close()
 
-	set, err := Create(accessobj.ACC_CREATE, "", 0600, accessio.File(temp.Writer().(vfs.File)), accessobj.FormatTGZ)
+	set, err := Create(accessobj.ACC_CREATE, "", 0o600, accessio.File(temp.Writer().(vfs.File)), accessobj.FormatTGZ)
 	if err != nil {
 		return nil, err
 	}

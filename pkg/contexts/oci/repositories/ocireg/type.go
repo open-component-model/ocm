@@ -43,7 +43,7 @@ func init() {
 	cpi.RegisterRepositoryType(ShortTypeV1, cpi.NewRepositoryType(ShortTypeV1, &RepositorySpec{}))
 }
 
-// Is checks the kind
+// Is checks the kind.
 func Is(spec cpi.RepositorySpec) bool {
 	return spec != nil && spec.GetKind() == Type || spec.GetKind() == LegacyType
 }
@@ -62,7 +62,7 @@ type RepositorySpec struct {
 
 var _ cpi.RepositorySpec = (*RepositorySpec)(nil)
 
-// NewRepositorySpec creates a new RepositorySpec
+// NewRepositorySpec creates a new RepositorySpec.
 func NewRepositorySpec(baseURL string) *RepositorySpec {
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),

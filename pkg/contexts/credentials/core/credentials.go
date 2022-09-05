@@ -24,7 +24,7 @@ type CredentialsSource interface {
 }
 
 // CredentialsChain is a chain of credentials, where the
-// credential i+1 (is present) is used to resolve credential i
+// credential i+1 (is present) is used to resolve credential i.
 type CredentialsChain []CredentialsSource
 
 var _ CredentialsSource = CredentialsChain{}

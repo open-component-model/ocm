@@ -25,9 +25,11 @@ type Options struct {
 	overwrite        bool
 }
 
-var _ ResourcesByValueOption = (*Options)(nil)
-var _ SourcesByValueOption = (*Options)(nil)
-var _ RecursiveOption = (*Options)(nil)
+var (
+	_ ResourcesByValueOption = (*Options)(nil)
+	_ SourcesByValueOption   = (*Options)(nil)
+	_ RecursiveOption        = (*Options)(nil)
+)
 
 func (o *Options) SetOverwrite(overwrite bool) {
 	o.overwrite = overwrite

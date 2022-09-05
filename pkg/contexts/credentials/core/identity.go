@@ -19,6 +19,8 @@ import (
 	"sort"
 	"strings"
 	"sync"
+
+	"github.com/sirupsen/logrus"
 )
 
 func init() {
@@ -105,24 +107,30 @@ func orMatcher(list []IdentityMatcher) IdentityMatcher {
 // ConsumerIdentity describes the identity of a credential consumer.
 type ConsumerIdentity map[string]string
 
-// IdentityByURL return a simple url identity
+// IdentityByURL return a simple url identity.
 func IdentityByURL(url string) ConsumerIdentity {
 	return ConsumerIdentity{"url": url}
 }
 
-// String returns the string representation of an identity
+// String returns the string representation of an identity.
 func (i ConsumerIdentity) String() string {
-	data, _ := json.Marshal(i)
+	data, err := json.Marshal(i)
+	if err != nil {
+		logrus.Error(err)
+	}
 	return string(data)
 }
 
-// Key returns the object digest of an identity
+// Key returns the object digest of an identity.
 func (i ConsumerIdentity) Key() []byte {
-	data, _ := json.Marshal(i)
+	data, err := json.Marshal(i)
+	if err != nil {
+		logrus.Error(err)
+	}
 	return data
 }
 
-// Equals compares two identities
+// Equals compares two identities.
 func (i ConsumerIdentity) Equals(o ConsumerIdentity) bool {
 	if len(i) != len(o) {
 		return false
@@ -146,7 +154,7 @@ func (i ConsumerIdentity) Match(obj map[string]string) bool {
 	return true
 }
 
-// Copy copies identity
+// Copy copies identity.
 func (i ConsumerIdentity) Copy() ConsumerIdentity {
 	if i == nil {
 		return nil
@@ -158,7 +166,7 @@ func (i ConsumerIdentity) Copy() ConsumerIdentity {
 	return n
 }
 
-// SetNonEmptyValue sets a key-value pair only if the value is not empty
+// SetNonEmptyValue sets a key-value pair only if the value is not empty.
 func (i ConsumerIdentity) SetNonEmptyValue(name, value string) {
 	if value != "" {
 		i[name] = value

@@ -19,8 +19,7 @@ import (
 	"text/template"
 )
 
-type GoTemplater struct {
-}
+type GoTemplater struct{}
 
 func NewGo() Templater {
 	return &GoTemplater{}

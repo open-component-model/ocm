@@ -21,21 +21,19 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
-
-	"github.com/open-component-model/ocm/pkg/out"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/out"
 )
 
 const CONTEXT_TYPE = "ocm.cmd.context.gardener.cloud"
@@ -81,11 +79,11 @@ type Context interface {
 
 var key = reflect.TypeOf(_context{})
 
-// DefaultContext is the default context initialized by init functions
+// DefaultContext is the default context initialized by init functions.
 var DefaultContext = Builder{}.New()
 
 // ForContext returns the Context to use for context.Context.
-// This is eiter an explicit context or the default context.
+// This is either an explicit context or the default context.
 // The returned context incorporates the given context.
 func ForContext(ctx context.Context) Context {
 	return datacontext.ForContextByKey(ctx, key, DefaultContext).(Context)
@@ -262,6 +260,7 @@ func newOCM(ctx *_context, ocmctx ocm.Context) *_ocm {
 		repos:    map[string]ocm.RepositorySpec{},
 	}
 }
+
 func (c *_ocm) Context() ocm.Context {
 	return c.ctx
 }

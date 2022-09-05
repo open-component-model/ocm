@@ -62,5 +62,4 @@ func (b Builder) New() Context {
 		b.reposcheme = DefaultConfigTypeScheme
 	}
 	return newContext(b.shared, b.reposcheme)
-
 }

@@ -18,26 +18,21 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-
-	"github.com/open-component-model/ocm/pkg/toi/install"
-
-	"github.com/open-component-model/ocm/pkg/cobrautils"
-
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/spf13/pflag"
 
 	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/common"
+	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	datactg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
-
-	"github.com/spf13/pflag"
-
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/toi/install"
 	"github.com/open-component-model/ocm/pkg/version"
-
-	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 )
 
 type BootstrapperCLIOptions struct {
@@ -74,7 +69,7 @@ func NewCLICommand(ctx ocm.Context, name string, exec func(options *ExecutorOpti
 			return opts.Complete()
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Printf("This is %s (%s)\n", name, version.Get().String())
+			logrus.Infof("This is %s (%s)", name, version.Get().String())
 			e := &Executor{Completed: true, Options: &opts.ExecutorOptions, Run: exec}
 			return e.Execute()
 		},
@@ -175,6 +170,7 @@ func NewVersionCommand() *cobra.Command {
 		Short:   "displays the version",
 		Run: func(cmd *cobra.Command, args []string) {
 			v := version.Get()
+			//nolint:forbidigo // It's an intentional Printf.
 			fmt.Printf("%#v", v)
 		},
 	}

@@ -67,6 +67,7 @@ var _ accessobj.State = (*indexMapper)(nil)
 func (m *indexMapper) GetState() interface{} {
 	return m.State.GetState().(*artdesc.Artefact).Index()
 }
+
 func (m *indexMapper) GetOriginalState() interface{} {
 	return m.State.GetOriginalState().(*artdesc.Artefact).Index()
 }

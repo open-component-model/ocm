@@ -27,7 +27,7 @@ import (
 
 var _ processing.TransformFunction = clean
 
-// Clean is a processing chain cleaning and reordering closures
+// Clean is a processing chain cleaning and reordering closures.
 var Clean = processing.Transform(clean)
 
 func clean(iterable data.Iterable) data.Iterable {

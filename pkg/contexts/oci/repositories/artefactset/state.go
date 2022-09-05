@@ -23,7 +23,7 @@ import (
 
 // NewStateHandler implements the factory interface for the artefact set
 // state descriptor handling
-// Basically this is an index state
+// Basically this is an index state.
 func NewStateHandler(fs vfs.FileSystem) accessobj.StateHandler {
 	return &cpi.IndexStateHandler{}
 }

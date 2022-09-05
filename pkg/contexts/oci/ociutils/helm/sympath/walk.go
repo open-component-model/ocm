@@ -44,7 +44,7 @@ func Walk(fs vfs.FileSystem, root string, walkFn vfs.WalkFunc) error {
 		err = symwalk(fs, root, info, walkFn)
 	}
 
-	if err != filepath.SkipDir && err != nil {
+	if err != nil && errors.Is(err, filepath.SkipDir) {
 		return fmt.Errorf("failed to walk fs: %w", err)
 	}
 
@@ -82,7 +82,7 @@ func symwalk(fs vfs.FileSystem, path string, info os.FileInfo, walkFn vfs.WalkFu
 			return fmt.Errorf("failed to fetch lstat: %w", err)
 		}
 
-		if err := symwalk(fs, path, info, walkFn); err != nil && err != filepath.SkipDir {
+		if err := symwalk(fs, path, info, walkFn); err != nil && errors.Is(err, filepath.SkipDir) {
 			return fmt.Errorf("error walking on symlink: %w", err)
 		}
 
@@ -107,13 +107,13 @@ func symwalk(fs vfs.FileSystem, path string, info os.FileInfo, walkFn vfs.WalkFu
 
 		fileInfo, err := fs.Lstat(filename)
 		if err != nil {
-			if err := walkFn(filename, fileInfo, err); err != nil && err != filepath.SkipDir {
+			if err := walkFn(filename, fileInfo, err); err != nil && errors.Is(err, filepath.SkipDir) {
 				return fmt.Errorf("failed to walk with function: %w", err)
 			}
 		} else {
 			err = symwalk(fs, filename, fileInfo, walkFn)
 			if err != nil {
-				if (!fileInfo.IsDir() && !IsSymlink(fileInfo)) || err != filepath.SkipDir {
+				if (!fileInfo.IsDir() && !IsSymlink(fileInfo)) || errors.Is(err, filepath.SkipDir) {
 					return fmt.Errorf("error walking on symlink: %w", err)
 				}
 			}

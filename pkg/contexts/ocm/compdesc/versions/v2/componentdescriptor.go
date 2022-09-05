@@ -22,9 +22,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-var (
-	NotFound = errors.New("NotFound")
-)
+var ErrNotFound = errors.New("NotFound")
 
 // ComponentDescriptor defines a versioned component with a source and dependencies.
 // +k8s:deepcopy-gen=true
@@ -116,12 +114,12 @@ const (
 	SystemIdentityVersion = metav1.SystemIdentityVersion
 )
 
-// ElementMetaAccessor provides generic access an elements meta information
+// ElementMetaAccessor provides generic access an elements meta information.
 type ElementMetaAccessor interface {
 	GetMeta() *ElementMeta
 }
 
-// ElementAccessor provides generic access to list of elements
+// ElementAccessor provides generic access to list of elements.
 type ElementAccessor interface {
 	Len() int
 	Get(i int) ElementMetaAccessor
@@ -208,7 +206,7 @@ func (o *ElementMeta) GetIdentityDigest(accessor ElementAccessor) []byte {
 	return o.GetIdentity(accessor).Digest()
 }
 
-// Sources describes a set of source specifications
+// Sources describes a set of source specifications.
 type Sources []Source
 
 func (r Sources) Len() int {
@@ -263,7 +261,7 @@ type SourceRef struct {
 	Labels metav1.Labels `json:"labels,omitempty"`
 }
 
-// Resources describes a set of resource specifications
+// Resources describes a set of resource specifications.
 type Resources []Resource
 
 func (r Resources) Len() int {

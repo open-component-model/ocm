@@ -101,32 +101,32 @@ func (v *DescriptorVersion) ConvertTo(obj compdesc.ComponentDescriptorVersion) (
 			RepositoryContexts: in.RepositoryContexts.Copy(),
 			Sources:            convertSourcesTo(in.Sources),
 			Resources:          convertResourcesTo(in.Resources),
-			References:         convertComponentreferencesTo(in.ComponentReferences),
+			References:         convertComponentReferencesTo(in.ComponentReferences),
 		},
 		Signatures: in.Signatures.Copy(),
 	}
 	return out, nil
 }
 
-func convertComponentreferenceTo(in *ComponentReference) *compdesc.ComponentReference {
+func convertComponentReferenceTo(in *ComponentReference) *compdesc.ComponentReference {
 	if in == nil {
 		return nil
 	}
 	out := &compdesc.ComponentReference{
-		ElementMeta:   *convertElementmetaTo(&in.ElementMeta),
+		ElementMeta:   *convertElementMetaTo(&in.ElementMeta),
 		ComponentName: in.ComponentName,
 		Digest:        in.Digest.Copy(),
 	}
 	return out
 }
 
-func convertComponentreferencesTo(in []ComponentReference) compdesc.References {
+func convertComponentReferencesTo(in []ComponentReference) compdesc.References {
 	if in == nil {
 		return nil
 	}
 	out := make(compdesc.References, len(in))
 	for i, v := range in {
-		out[i] = *convertComponentreferenceTo(&v)
+		out[i] = *convertComponentReferenceTo(&v)
 	}
 	return out
 }
@@ -137,7 +137,7 @@ func convertSourceTo(in *Source) *compdesc.Source {
 	}
 	out := &compdesc.Source{
 		SourceMeta: compdesc.SourceMeta{
-			ElementMeta: *convertElementmetaTo(&in.ElementMeta),
+			ElementMeta: *convertElementMetaTo(&in.ElementMeta),
 			Type:        in.Type,
 		},
 		Access: compdesc.GenericAccessSpec(in.Access.DeepCopy()),
@@ -156,7 +156,7 @@ func convertSourcesTo(in Sources) compdesc.Sources {
 	return out
 }
 
-func convertElementmetaTo(in *ElementMeta) *compdesc.ElementMeta {
+func convertElementMetaTo(in *ElementMeta) *compdesc.ElementMeta {
 	if in == nil {
 		return nil
 	}
@@ -175,7 +175,7 @@ func convertResourceTo(in *Resource) *compdesc.Resource {
 	}
 	out := &compdesc.Resource{
 		ResourceMeta: compdesc.ResourceMeta{
-			ElementMeta: *convertElementmetaTo(&in.ElementMeta),
+			ElementMeta: *convertElementMetaTo(&in.ElementMeta),
 			Type:        in.Type,
 			Relation:    in.Relation,
 			SourceRef:   ConvertSourcerefsTo(in.SourceRef),
@@ -197,7 +197,7 @@ func convertResourcesTo(in Resources) compdesc.Resources {
 	return out
 }
 
-func convertSourcerefTo(in *SourceRef) *compdesc.SourceRef {
+func convertSourceRefTo(in *SourceRef) *compdesc.SourceRef {
 	if in == nil {
 		return nil
 	}
@@ -214,7 +214,7 @@ func ConvertSourcerefsTo(in []SourceRef) []compdesc.SourceRef {
 	}
 	out := make([]compdesc.SourceRef, len(in))
 	for i, v := range in {
-		out[i] = *convertSourcerefTo(&v)
+		out[i] = *convertSourceRefTo(&v)
 	}
 	return out
 }
@@ -249,7 +249,7 @@ func (v *DescriptorVersion) ConvertFrom(in *compdesc.ComponentDescriptor) (compd
 			Provider:            provider,
 			Sources:             convertSourcesFrom(in.Sources),
 			Resources:           convertResourcesFrom(in.Resources),
-			ComponentReferences: convertComponentreferencesFrom(in.References),
+			ComponentReferences: convertComponentReferencesFrom(in.References),
 		},
 		Signatures: in.Signatures.Copy(),
 	}
@@ -259,25 +259,25 @@ func (v *DescriptorVersion) ConvertFrom(in *compdesc.ComponentDescriptor) (compd
 	return out, nil
 }
 
-func convertComponentreferenceFrom(in *compdesc.ComponentReference) *ComponentReference {
+func convertComponentReferenceFrom(in *compdesc.ComponentReference) *ComponentReference {
 	if in == nil {
 		return nil
 	}
 	out := &ComponentReference{
-		ElementMeta:   *convertElementmetaFrom(&in.ElementMeta),
+		ElementMeta:   *convertElementMetaFrom(&in.ElementMeta),
 		ComponentName: in.ComponentName,
 		Digest:        in.Digest.Copy(),
 	}
 	return out
 }
 
-func convertComponentreferencesFrom(in []compdesc.ComponentReference) []ComponentReference {
+func convertComponentReferencesFrom(in []compdesc.ComponentReference) []ComponentReference {
 	if in == nil {
 		return nil
 	}
 	out := make([]ComponentReference, len(in))
 	for i, v := range in {
-		out[i] = *convertComponentreferenceFrom(&v)
+		out[i] = *convertComponentReferenceFrom(&v)
 	}
 	return out
 }
@@ -292,7 +292,7 @@ func convertSourceFrom(in *compdesc.Source) *Source {
 	}
 	out := &Source{
 		SourceMeta: SourceMeta{
-			ElementMeta: *convertElementmetaFrom(&in.ElementMeta),
+			ElementMeta: *convertElementMetaFrom(&in.ElementMeta),
 			Type:        in.Type,
 		},
 		Access: acc,
@@ -311,7 +311,7 @@ func convertSourcesFrom(in compdesc.Sources) Sources {
 	return out
 }
 
-func convertElementmetaFrom(in *compdesc.ElementMeta) *ElementMeta {
+func convertElementMetaFrom(in *compdesc.ElementMeta) *ElementMeta {
 	if in == nil {
 		return nil
 	}
@@ -333,10 +333,10 @@ func convertResourceFrom(in *compdesc.Resource) *Resource {
 		compdesc.ThrowConversionError(err)
 	}
 	out := &Resource{
-		ElementMeta: *convertElementmetaFrom(&in.ElementMeta),
+		ElementMeta: *convertElementMetaFrom(&in.ElementMeta),
 		Type:        in.Type,
 		Relation:    in.Relation,
-		SourceRef:   convertSourcerefsFrom(in.SourceRef),
+		SourceRef:   convertSourceRefsFrom(in.SourceRef),
 		Access:      acc,
 		Digest:      in.Digest.Copy(),
 	}
@@ -354,7 +354,7 @@ func convertResourcesFrom(in compdesc.Resources) Resources {
 	return out
 }
 
-func convertSourcerefFrom(in *compdesc.SourceRef) *SourceRef {
+func convertSourceRefFrom(in *compdesc.SourceRef) *SourceRef {
 	if in == nil {
 		return nil
 	}
@@ -365,13 +365,13 @@ func convertSourcerefFrom(in *compdesc.SourceRef) *SourceRef {
 	return out
 }
 
-func convertSourcerefsFrom(in []compdesc.SourceRef) []SourceRef {
+func convertSourceRefsFrom(in []compdesc.SourceRef) []SourceRef {
 	if in == nil {
 		return nil
 	}
 	out := make([]SourceRef, len(in))
 	for i, v := range in {
-		out[i] = *convertSourcerefFrom(&v)
+		out[i] = *convertSourceRefFrom(&v)
 	}
 	return out
 }

@@ -32,6 +32,7 @@ type FileFormat string
 func (f FileFormat) String() string {
 	return string(f)
 }
+
 func (o FileFormat) ApplyOption(options *Options) {
 	if o != "" {
 		options.FileFormat = &o
@@ -91,7 +92,6 @@ func DetectFormat(path string, fs vfs.FileSystem) (*FileFormat, error) {
 }
 
 func DetectFormatForFile(file vfs.File) (*FileFormat, error) {
-
 	fi, err := file.Stat()
 	if err != nil {
 		return nil, err

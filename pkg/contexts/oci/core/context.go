@@ -51,7 +51,7 @@ type Context interface {
 
 var key = reflect.TypeOf(_context{})
 
-// DefaultContext is the default context initialized by init functions
+// DefaultContext is the default context initialized by init functions.
 var DefaultContext = Builder{}.New()
 
 // ForContext returns the Context to use for context.Context.

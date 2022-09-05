@@ -2,6 +2,7 @@ package http
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -19,11 +20,17 @@ func NewDownloader(link string) *Downloader {
 }
 
 func (h *Downloader) Download(w io.WriterAt) error {
-	resp, err := http.Get(h.link)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, h.link, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("failed to get link: %w", err)
 	}
 	defer resp.Body.Close()
+
 	var blob []byte
 	buf := bytes.NewBuffer(blob)
 	if _, err := io.Copy(buf, resp.Body); err != nil {

@@ -27,7 +27,7 @@ var ociimpl OCISpecFunction
 
 func RegisterOCIImplementation(impl OCISpecFunction) {
 	if ociimpl != nil {
-		panic("oci implementation already registerd")
+		panic("oci implementation already registered")
 	}
 	ociimpl = impl
 }

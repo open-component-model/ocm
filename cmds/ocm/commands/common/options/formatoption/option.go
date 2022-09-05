@@ -18,11 +18,10 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -54,7 +53,6 @@ func (o *Option) setDefault() {
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	o.setDefault()
 	fs.StringVarP(&o.format, "type", "t", string(o.Default), "archive format")
-
 }
 
 func (o *Option) Complete(ctx clictx.Context) error {
@@ -83,9 +81,9 @@ target archive to use. The following formats are supported:
 }
 
 func (o *Option) Mode() vfs.FileMode {
-	mode := vfs.FileMode(0660)
+	mode := vfs.FileMode(0o660)
 	if o.Format == accessio.FormatDirectory {
-		mode = 0770
+		mode = 0o770
 	}
 	return mode
 }

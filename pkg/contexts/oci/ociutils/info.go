@@ -17,6 +17,7 @@ package ociutils
 import (
 	"archive/tar"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -183,7 +184,7 @@ func GetLayerInfo(blob accessio.BlobAccess, layerFiles bool) *LayerInfo {
 	for {
 		header, err := tr.Next()
 		if err != nil {
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				info.Content = files
 				return info
 			}

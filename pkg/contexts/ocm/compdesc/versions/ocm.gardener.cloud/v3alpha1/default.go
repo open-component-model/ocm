@@ -19,7 +19,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-// Default applies defaults to a component
+// Default applies defaults to a component.
 func (cd *ComponentDescriptor) Default() error {
 	if cd.RepositoryContexts == nil {
 		cd.RepositoryContexts = make([]*runtime.UnstructuredTypedObject, 0)

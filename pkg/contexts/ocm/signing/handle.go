@@ -66,11 +66,11 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 			}
 			closer := accessio.OnceCloser(nested)
 			defer closer.Close()
-			opts, err := opts.For(reference.Digest)
+			digestOpts, err := opts.For(reference.Digest)
 			if err != nil {
 				return nil, errors.Wrapf(err, refMsg(reference, state, "failed resolving hasher for existing digest for component reference"))
 			}
-			calculatedDigest, err = apply(printer.AddGap("  "), state, nested, opts)
+			calculatedDigest, err = apply(printer.AddGap("  "), state, nested, digestOpts)
 			if err != nil {
 				return nil, errors.Wrapf(err, refMsg(reference, state, "failed applying to component reference"))
 			}
@@ -111,7 +111,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 		var req []cpi.DigesterType
 		if raw.Digest != nil {
 			req = []cpi.DigesterType{
-				cpi.DigesterType{
+				{
 					HashAlgorithm:          raw.Digest.HashAlgorithm,
 					NormalizationAlgorithm: raw.Digest.NormalisationAlgorithm,
 				},

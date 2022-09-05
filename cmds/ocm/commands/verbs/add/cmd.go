@@ -15,15 +15,14 @@
 package add
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
 	"github.com/spf13/cobra"
 
 	references "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references/add"
 	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/add"
 	sources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources/add"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 )
 
 // NewCommand creates a new command.

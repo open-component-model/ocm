@@ -19,23 +19,23 @@ import (
 	"reflect"
 )
 
-type errRecursion struct {
+type recursionError struct {
 	wrapped error
 	kind    string
 	elem    interface{}
 	hist    []interface{}
 }
 
-// ErrRecusion describes a resursion errors caused by a dedicated element with an element history
+// ErrRecusion describes a resursion errors caused by a dedicated element with an element history.
 func ErrRecusion(kind string, elem interface{}, hist interface{}) error {
-	return &errRecursion{nil, kind, elem, ToInterfaceSlice(hist)}
+	return &recursionError{nil, kind, elem, ToInterfaceSlice(hist)}
 }
 
 func ErrRecusionWrap(err error, kind string, elem interface{}, hist interface{}) error {
-	return &errRecursion{err, kind, elem, ToInterfaceSlice(hist)}
+	return &recursionError{err, kind, elem, ToInterfaceSlice(hist)}
 }
 
-func (e *errRecursion) Error() string {
+func (e *recursionError) Error() string {
 	msg := fmt.Sprintf("%s recursion: use of %v", e.kind, e.elem)
 	if len(e.hist) > 0 {
 		s := ""
@@ -52,24 +52,24 @@ func (e *errRecursion) Error() string {
 	return msg
 }
 
-func (e *errRecursion) Unwrap() error {
+func (e *recursionError) Unwrap() error {
 	return e.wrapped
 }
 
-func (e *errRecursion) Elem() interface{} {
+func (e *recursionError) Elem() interface{} {
 	return e.elem
 }
 
-func (e *errRecursion) Kind() string {
+func (e *recursionError) Kind() string {
 	return e.kind
 }
 
 func IsErrRecusion(err error) bool {
-	return IsA(err, &errRecursion{})
+	return IsA(err, &recursionError{})
 }
 
 func IsErrRecursionKind(err error, kind string) bool {
-	var uerr *errRecursion
+	var uerr *recursionError
 	if err == nil || !As(err, &uerr) {
 		return false
 	}

@@ -19,7 +19,6 @@ import (
 	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
-
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
 	"github.com/open-component-model/ocm/pkg/common"
 )

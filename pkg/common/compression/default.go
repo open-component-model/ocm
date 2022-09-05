@@ -16,11 +16,12 @@ package compression
 
 import (
 	"bytes"
+	"errors"
 	"io"
 )
 
 // algorithm is a default implementation for Algorithm that can be used for CompressStream
-// based on Compression and DEcompression functions
+// based on Compression and DEcompression functions.
 type algorithm struct {
 	name         string
 	mime         string
@@ -73,9 +74,9 @@ func (c *algorithm) Match(r MatchReader) (bool, error) {
 	}
 	buf := make([]byte, len(c.prefix))
 	n, err := io.ReadAtLeast(r, buf, len(buf))
-	//fmt.Printf("%s: found %v\n", c.Name(), buf[:n])
+	// fmt.Printf("%s: found %v\n", c.Name(), buf[:n])
 	if err != nil {
-		if err == io.ErrUnexpectedEOF || err == io.EOF {
+		if errors.Is(err, io.ErrUnexpectedEOF) || errors.Is(err, io.EOF) {
 			err = nil
 		}
 		return false, err

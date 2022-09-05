@@ -17,15 +17,18 @@ package add
 import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	compdescv2 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+)
+
+const (
+	ComponentVersionTag = "<componentversion>"
 )
 
 type ResourceSpecHandler struct{}
@@ -49,8 +52,7 @@ func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r common.Resource, 
 	spec := r.Spec().(*ResourceDescription)
 	vers := spec.Version
 	if spec.Relation == metav1.LocalRelation {
-
-		if vers == "" || vers == "<componentversion>" {
+		if vers == "" || vers == ComponentVersionTag {
 			vers = v.GetVersion()
 		} else {
 			if vers != v.GetVersion() {
@@ -58,7 +60,7 @@ func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r common.Resource, 
 			}
 		}
 	}
-	if vers == "<componentversion>" {
+	if vers == ComponentVersionTag {
 		vers = v.GetVersion()
 	}
 
@@ -97,7 +99,7 @@ func (r *ResourceDescription) Validate(ctx clictx.Context, input *common.Resourc
 		}
 	}
 	if r.Version == "" && r.Relation == metav1.LocalRelation {
-		r.Version = "<componentversion>"
+		r.Version = ComponentVersionTag
 	}
 	if err := compdescv2.ValidateResource(fldPath, r.Resource, false); err != nil {
 		allErrs = append(allErrs, err...)

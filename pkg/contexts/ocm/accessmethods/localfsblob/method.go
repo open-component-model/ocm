@@ -41,7 +41,7 @@ func New(path string, media string) *localblob.AccessSpec {
 }
 
 // AccessSpec describes the access for a blob on the filesystem.
-// Deprecated: use LocalBlob
+// Deprecated: use LocalBlob.
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	// FileName is the

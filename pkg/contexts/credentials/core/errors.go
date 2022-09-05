@@ -18,9 +18,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-const KIND_CREDENTIALS = "credentials"
-const KIND_CONSUMER = "consumer"
-const KIND_REPOSITORY = "repository"
+const (
+	KIND_CREDENTIALS = "credentials"
+	KIND_CONSUMER    = "consumer"
+	KIND_REPOSITORY  = "repository"
+)
 
 func ErrUnknownCredentials(name string) error {
 	return errors.ErrUnknown(KIND_CREDENTIALS, name)

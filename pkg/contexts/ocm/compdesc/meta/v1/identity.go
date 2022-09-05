@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 )
 
@@ -28,7 +29,7 @@ import (
 // +k8s:openapi-gen=true
 type Identity map[string]string
 
-// NewIdentity return a simple name identity
+// NewIdentity return a simple name identity.
 func NewIdentity(name string, extras ...string) Identity {
 	id := Identity{SystemIdentityName: name}
 	i := 0
@@ -43,13 +44,17 @@ func NewIdentity(name string, extras ...string) Identity {
 	return id
 }
 
-// Digest returns the object digest of an identity
+// Digest returns the object digest of an identity.
 func (i Identity) Digest() []byte {
-	data, _ := json.Marshal(i)
+	data, err := json.Marshal(i)
+	if err != nil {
+		logrus.Error(err)
+	}
+
 	return data
 }
 
-// Equals compares two identities
+// Equals compares two identities.
 func (i Identity) Equals(o Identity) bool {
 	if len(i) != len(o) {
 		return false
@@ -63,35 +68,35 @@ func (i Identity) Equals(o Identity) bool {
 	return true
 }
 
-func (l *Identity) Set(name, value string) {
-	if *l == nil {
-		*l = Identity{name: value}
+func (i *Identity) Set(name, value string) {
+	if *i == nil {
+		*i = Identity{name: value}
 	} else {
-		(*l)[name] = value
+		(*i)[name] = value
 	}
 }
 
-func (l Identity) Remove(name string) bool {
-	if l != nil {
-		delete(l, name)
+func (i Identity) Remove(name string) bool {
+	if i != nil {
+		delete(i, name)
 	}
 	return false
 }
 
-func (l Identity) String() string {
-	if l == nil {
+func (i Identity) String() string {
+	if i == nil {
 		return ""
 	}
 
 	var keys []string
-	for k := range l {
+	for k := range i {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
 	s := ""
 	sep := ""
 	for _, k := range keys {
-		s = fmt.Sprintf("%s%s%q=%q", s, sep, k, l[k])
+		s = fmt.Sprintf("%s%s%q=%q", s, sep, k, i[k])
 		sep = ","
 	}
 	return s
@@ -107,13 +112,13 @@ func (i Identity) Match(obj map[string]string) (bool, error) {
 	return true, nil
 }
 
-// Copy copies identity
-func (l Identity) Copy() Identity {
-	if l == nil {
+// Copy copies identity.
+func (i Identity) Copy() Identity {
+	if i == nil {
 		return nil
 	}
 	n := Identity{}
-	for k, v := range l {
+	for k, v := range i {
 		n[k] = v
 	}
 	return n

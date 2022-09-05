@@ -24,7 +24,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-// to find a suitable secret for images on Docker Hub, we need its two domains to do matching
+// to find a suitable secret for images on Docker Hub, we need its two domains to do matching.
 const (
 	dockerHubDomain       = "docker.io"
 	dockerHubLegacyDomain = "index.docker.io"
@@ -51,7 +51,6 @@ func ParseRepo(ref string) (UniformRepositorySpec, error) {
 			Info:            string(match[2]),
 			CreateIfMissing: create,
 		}, nil
-
 	}
 	return UniformRepositorySpec{
 		Type:            string(match[1]),
@@ -65,7 +64,7 @@ func ParseRepo(ref string) (UniformRepositorySpec, error) {
 type RefSpec struct {
 	UniformRepositorySpec
 	// Repository is the part of a reference without its hostname
-	Repository string `json:"respository"`
+	Repository string `json:"repository"`
 	// +optional
 	Tag *string `json:"tag,omitempty"`
 	// +optional
@@ -215,7 +214,7 @@ func (r *RefSpec) String() string {
 }
 
 // CredHost fallback to legacy docker domain if applicable
-// this is how containerd translates the old domain for DockerHub to the new one, taken from containerd/reference/docker/reference.go:674
+// this is how containerd translates the old domain for DockerHub to the new one, taken from containerd/reference/docker/reference.go:674.
 func (r *RefSpec) CredHost() string {
 	if r.Host == dockerHubDomain {
 		return dockerHubLegacyDomain

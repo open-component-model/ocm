@@ -147,7 +147,6 @@ func (r dockerFetcher) Fetch(ctx context.Context, desc ocispec.Descriptor) (io.R
 		}
 
 		return nil, firstErr
-
 	})
 }
 
@@ -191,7 +190,6 @@ func (r dockerFetcher) open(ctx context.Context, req *request, mediatype string,
 		if cr != "" {
 			if !strings.HasPrefix(cr, fmt.Sprintf("bytes %d-", offset)) {
 				return nil, errors.Errorf("unhandled content range in response: %v", cr)
-
 			}
 		} else {
 			// TODO: Should any cases where use of content range
@@ -207,7 +205,6 @@ func (r dockerFetcher) open(ctx context.Context, req *request, mediatype string,
 			if n != offset {
 				return nil, errors.Errorf("unable to discard to offset")
 			}
-
 		}
 	}
 

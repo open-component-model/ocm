@@ -51,7 +51,6 @@ func ParseRepo(ref string) (UniformRepositorySpec, error) {
 			Info:            string(match[2]),
 			CreateIfMissing: create,
 		}, nil
-
 	}
 	return UniformRepositorySpec{
 		Type:            string(match[1]),

@@ -31,7 +31,7 @@ type Credentials struct {
 
 var _ cpi.Credentials = (*Credentials)(nil)
 
-// NewCredentials describes a default getter method for a authentication method
+// NewCredentials describes a default getter method for a authentication method.
 func NewCredentials(repo *Repository, name string, store dockercred.Store) cpi.Credentials {
 	return &Credentials{
 		repo:  repo,

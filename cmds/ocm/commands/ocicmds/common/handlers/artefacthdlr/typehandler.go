@@ -43,9 +43,11 @@ type Object struct {
 	Artefact   oci.ArtefactAccess
 }
 
-var _ common.HistoryElement = (*Object)(nil)
-var _ tree.Object = (*Object)(nil)
-var _ tree.Typed = (*Object)(nil)
+var (
+	_ common.HistoryElement = (*Object)(nil)
+	_ tree.Object           = (*Object)(nil)
+	_ tree.Typed            = (*Object)(nil)
+)
 
 func (o *Object) GetHistory() common.History {
 	return o.History

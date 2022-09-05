@@ -78,11 +78,11 @@ func (_ DirectoryHandler) Create(info *AccessObjectInfo, path string, opts acces
 	return NewAccessObject(info, ACC_CREATE, opts.Representation, nil, nil, mode)
 }
 
-// WriteToFilesystem writes the current object to a filesystem
+// WriteToFilesystem writes the current object to a filesystem.
 func (_ DirectoryHandler) Write(obj *AccessObject, path string, opts accessio.Options, mode vfs.FileMode) error {
 	// create the directory structure with the content directory
-	if err := opts.PathFileSystem.MkdirAll(filepath.Join(path, obj.info.ElementDirectoryName), mode|0400); err != nil {
-		return fmt.Errorf("unable to create output directory %q: %s", path, err.Error())
+	if err := opts.PathFileSystem.MkdirAll(filepath.Join(path, obj.info.ElementDirectoryName), mode|0o400); err != nil {
+		return fmt.Errorf("unable to create output directory %q: %w", path, err)
 	}
 
 	_, err := obj.updateDescriptor()
@@ -115,7 +115,7 @@ func (_ DirectoryHandler) Write(obj *AccessObject, path string, opts accessio.Op
 		if err != nil {
 			return fmt.Errorf("unable to open input %s %q: %w", obj.info.ElementTypeName, inpath, err)
 		}
-		out, err := opts.PathFileSystem.OpenFile(outpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode|0666)
+		out, err := opts.PathFileSystem.OpenFile(outpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode|0o666)
 		if err != nil {
 			return fmt.Errorf("unable to open output %s %q: %w", obj.info.ElementTypeName, outpath, err)
 		}

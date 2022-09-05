@@ -15,15 +15,13 @@
 package components
 
 import (
-	ocmcomp "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
-	toicomp "github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/components"
-
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
+	ocmcomp "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
+	toicomp "github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/components"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 )
 
 var Names = names.Components

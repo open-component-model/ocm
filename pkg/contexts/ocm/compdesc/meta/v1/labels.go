@@ -86,7 +86,7 @@ func NewLabel(name string, value interface{}, opts ...interface{}) (*Label, erro
 // +k8s:openapi-gen=true
 type Labels []Label
 
-// Get returns the label with the given name
+// Get returns the label with the given name.
 func (l Labels) Get(name string) ([]byte, bool) {
 	for _, label := range l {
 		if label.Name == name {
@@ -97,17 +97,17 @@ func (l Labels) Get(name string) ([]byte, bool) {
 }
 
 func (l *Labels) Set(name string, value interface{}) error {
-	new, err := NewLabel(name, value)
+	newLabel, err := NewLabel(name, value)
 	if err != nil {
 		return err
 	}
 	for _, label := range *l {
 		if label.Name == name {
-			label.Value = new.Value
+			label.Value = newLabel.Value
 			return nil
 		}
 	}
-	*l = append(*l, *new)
+	*l = append(*l, *newLabel)
 	return nil
 }
 
@@ -121,7 +121,7 @@ func (l *Labels) Remove(name string) bool {
 	return false
 }
 
-// AsMap return an unmarshalled map representation
+// AsMap return an unmarshalled map representation.
 func (l *Labels) AsMap() map[string]interface{} {
 	labels := map[string]interface{}{}
 	if l != nil {
@@ -134,7 +134,7 @@ func (l *Labels) AsMap() map[string]interface{} {
 	return labels
 }
 
-// Copy copies labels
+// Copy copies labels.
 func (l Labels) Copy() Labels {
 	if l == nil {
 		return nil

@@ -75,7 +75,6 @@ func (r *Request) GetSpiff() (spiffing.Spiff, error) {
 }
 
 func Cascade(req *Request) ([]byte, error) {
-
 	if req.Template == nil {
 		return nil, nil
 	}
@@ -119,5 +118,4 @@ func CascadeWith(opts ...Option) ([]byte, error) {
 		return nil, err
 	}
 	return Cascade(req)
-
 }

@@ -59,7 +59,7 @@ func OCIRegBaseFunction(ctx *storagecontext.StorageContext) string {
 }
 
 // blobHandler is the default handling to store local blobs as local blobs but with an additional
-// globally accessible OCIBlob access method
+// globally accessible OCIBlob access method.
 type blobHandler struct {
 	base BaseFunction
 }
@@ -101,7 +101,7 @@ func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi.Acc
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// artefactHandler stores artefact blobs as OCIArtefacts
+// artefactHandler stores artefact blobs as OCIArtefacts.
 type artefactHandler struct {
 	blobHandler
 }

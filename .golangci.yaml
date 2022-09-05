@@ -1,15 +1,165 @@
+run:
+  go: "1.18"
+  timeout: 10m
+  tests: false
+  allow-parallel-runners: true
+  issues-exit-code: 2
+  skip-dirs:
+    - "hack"
+
 linters:
+  enable-all: true
   disable:
-    - errcheck
+    # We are working on it
+    - wrapcheck
+
+    # Logical next step
+    - forcetypeassert  # Priority: that can lead to serious crashes.
+    - gocritic         # Priority:
+                       #   - security issues (slice copy)
+                       #   - unexpected behavior
+                       #   - Go practices ('p += k' and not 'p = p + k')
+    - gosec            # Priority: Security (as the name implies)
+    - revive           # Too many issues.
+                       #   It's important to at least address:
+                       #     - no camel_case
+                       #     - no this and self
+                       #     - receiver name a should be consistent
+    - gomoddirectives  # Replacement statements are not allowed in a library.
+                       #   if it has a replace statement, other can't use the
+                       #   library at all (go does not allow that)
+    - godox            # TODO/FIXME/BUG should not be in the code-base without
+                       # a related GitHub issue.
+                       #   Added an exclude-rules for that, if a TODO/FIXME/BUG
+                       #   line has an URL on the line, it counts as valid mark.
+    - errcheck         # Too many issues.
+    - stylecheck       # Too many issues.
+                       #   No snake_case in Go.
+                       #   convert_ComponentReferences_from should be convertComponentReferencesFrom
+    - nosnakecase
+    - prealloc         # Performance.
+    - exportloopref
+    - nilerr           # There a few places where we don't return with an error
+                       #   in an 'if err != nil {}' block. If it's intentional,
+                       #   we should add a '//nolint: nilerr // Reason why...'
+    - nlreturn         # Use empty line at least before return/break/continue.
+    - goerr113         # Do not define dynamic errors with Errorf.
+    - varnamelen       # m, d, p < These are not so meaningful variables.
+    - testpackage      # Blackbox testing is preffered.
+    - funlen           # Break long functions.
+    - gomnd            # Give constant values a name with constants.
+    - ireturn          # Accept interface, return concrate.
+    - nestif           # Some nexted if statements are 8 or 9 deep.
+    - dupl             # Check code duplications.
+    - cyclop           # Complex functions are not good.
+    - maintidx         # Too complex code is not good.
+                       #   name: push, Cyclomatic Complexity: 35
+                       #   name: apply, Cyclomatic Complexity: 51
+    - gochecknoinits   # Init functions cause an import to have side effects,
+                       #   and side effects are hard to test,
+                       #   reduce readability and increase the complexity of code.
+    - gocyclo          # We shouldn't have functions with complexity 51
+    - gocognit         # Another complexity check, they check different things.
+    - containedctx     # Struct should not contain context, action does.
+    - nilnil           # A function should return either something valuable
+                       #   or an error, but both value and error as nil is
+                       #   useless. Like when I call it, why is it nil? Tell me
+                       #   in an error why.
+    - bodyclose
+    - unparam
+    - nonamedreturns   # Either named return, or use simply `return`.
+
+    # Opinionated (we may want to keep it disabled)
+    - gochecknoglobals
+    - lll
+    - paralleltest
+    - tagliatelle
+    - wsl
+    - interfacebloat
+
+
+    # Disabled with reason
+    - exhaustruct      # Doesn't really make sense.
+    - exhaustive       # Doesn't really make sense.
+    - logrlint         # Doesn't really make sense.
+
+    # Disabled because of generics in go 1.18
+    - contextcheck
+    - rowserrcheck
+    - sqlclosecheck
+    - wastedassign
+
+    # Deprecated
+    - deadcode
+    - exhaustivestruct
+    - golint
+    - ifshort
+    - interfacer
+    - maligned
+    - scopelint
+    - structcheck
+    - varcheck
 
 linters-settings:
   goimports:
+    local-prefixes: github.com/open-component-model/ocm
+  gci:
     local-prefixes: github.com/open-component-model/ocm
   staticcheck:
     go: "1.18"
   stylecheck:
     go: "1.18"
+  funlen:
+    lines: 110
+    statements: 60
+  cyclop:
+    max-complexity: 15
+    skip-tests: true
+  nolintlint:
+    allow-leading-space: false
+    allow-unused: false
+    require-explanation: true
+    require-specific: false
+  varnamelen:
+    ignore-names:
+    - err
+    - wg
+    - id
+  govet:
+    check-shadowing: true
+  lll:
+    line-length: 120
+  gosec:
+    exclude-generated: true
 
 issues:
   exclude:
     - composites
+  exclude-rules:
+    - path: cmds/
+      linters:
+      - forbidigo
+    - text: "should not use dot imports|don't use an underscore in package name"
+      linters:
+      - golint
+    - source: "https://"
+      linters:
+      - lll
+    - text: "shadow: declaration of \"err\""
+      linters:
+        - govet
+    - text: "shadow: declaration of \"ok\""
+      linters:
+        - govet
+    - path: _test\.go
+      linters:
+      - goerr113
+      - gocyclo
+      - errcheck
+      - gosec
+      - dupl
+      - funlen
+      - scopelint
+    - source: "// .* #\\d+"
+      linters:
+      - godox

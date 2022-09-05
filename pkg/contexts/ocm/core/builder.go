@@ -123,5 +123,4 @@ func (b Builder) New() Context {
 		b.reposcheme = reposcheme
 	}
 	return newContext(b.credentials, b.oci, b.reposcheme, b.accessscheme, b.spechandlers, b.blobhandlers, b.blobdigesters)
-
 }

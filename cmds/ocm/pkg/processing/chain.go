@@ -81,30 +81,36 @@ func (this *_ProcessChain) Explode(e ExplodeFunction) ProcessChain {
 	}
 	return (&_ProcessChain{}).new(this, chainExplode(e))
 }
+
 func (this *_ProcessChain) Map(m MappingFunction) ProcessChain {
 	if m == nil {
 		return this
 	}
 	return (&_ProcessChain{}).new(this, chainMap(m))
 }
+
 func (this *_ProcessChain) Filter(f FilterFunction) ProcessChain {
 	if f == nil {
 		return this
 	}
 	return (&_ProcessChain{}).new(this, chainFilter(f))
 }
+
 func (this *_ProcessChain) Sort(c CompareFunction) ProcessChain {
 	if c == nil {
 		return this
 	}
 	return (&_ProcessChain{}).new(this, chainSort(c))
 }
+
 func (this *_ProcessChain) WithPool(p ProcessorPool) ProcessChain {
 	return (&_ProcessChain{}).new(this, chainWithPool(p))
 }
+
 func (this *_ProcessChain) Unordered() ProcessChain {
 	return (&_ProcessChain{}).new(this, chainUnordered)
 }
+
 func (this *_ProcessChain) Parallel(n int) ProcessChain {
 	return (&_ProcessChain{}).new(this, chainParallel(n))
 }
@@ -141,21 +147,27 @@ func (this *_ProcessChain) step(p ProcessingResult) ProcessingResult {
 func chainTransform(t TransformFunction) stepCreator {
 	return func(p ProcessingResult) ProcessingResult { return p.Transform(t) }
 }
+
 func chainExplode(e ExplodeFunction) stepCreator {
 	return func(p ProcessingResult) ProcessingResult { return p.Explode(e) }
 }
+
 func chainMap(m MappingFunction) stepCreator {
 	return func(p ProcessingResult) ProcessingResult { return p.Map(m) }
 }
+
 func chainFilter(f FilterFunction) stepCreator {
 	return func(p ProcessingResult) ProcessingResult { return p.Filter(f) }
 }
+
 func chainSort(c CompareFunction) stepCreator {
 	return func(p ProcessingResult) ProcessingResult { return p.Sort(c) }
 }
+
 func chainWithPool(pool ProcessorPool) stepCreator {
 	return func(p ProcessingResult) ProcessingResult { return p.WithPool(pool) }
 }
+
 func chainParallel(n int) stepCreator {
 	return func(p ProcessingResult) ProcessingResult { return p.Parallel(n) }
 }

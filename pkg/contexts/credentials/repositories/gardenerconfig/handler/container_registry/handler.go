@@ -18,7 +18,7 @@ func init() {
 	gardenercfgcpi.RegisterHandler(Handler{})
 }
 
-// config is the struct that describes the gardener config data structure
+// config is the struct that describes the gardener config data structure.
 type config struct {
 	ContainerRegistry map[string]*containerRegistryCredentials `json:"container_registry"`
 }

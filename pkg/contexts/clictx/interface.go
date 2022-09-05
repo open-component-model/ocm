@@ -18,9 +18,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx/core"
 )
 
-type Context = core.Context
-type OCI = core.OCI
-type OCM = core.OCM
+type (
+	Context = core.Context
+	OCI     = core.OCI
+	OCM     = core.OCM
+)
 
 func DefaultContext() Context {
 	return core.DefaultContext

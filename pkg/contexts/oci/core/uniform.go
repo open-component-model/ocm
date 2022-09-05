@@ -21,6 +21,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -31,7 +33,7 @@ const (
 )
 
 // UniformRepositorySpec is a generic specification of the repository
-// for handling as part of standard references
+// for handling as part of standard references.
 type UniformRepositorySpec struct {
 	// Type
 	Type string `json:"type,omitempty"`
@@ -49,7 +51,7 @@ type UniformRepositorySpec struct {
 }
 
 // CredHost fallback to legacy docker domain if applicable
-// this is how containerd translates the old domain for DockerHub to the new one, taken from containerd/reference/docker/reference.go:674
+// this is how containerd translates the old domain for DockerHub to the new one, taken from containerd/reference/docker/reference.go:674.
 func (u *UniformRepositorySpec) CredHost() string {
 	if u.Host == dockerHubDomain {
 		return dockerHubLegacyDomain
@@ -65,7 +67,7 @@ func (u *UniformRepositorySpec) HostPort() (string, string) {
 	return u.Host[:i], u.Host[i+1:]
 }
 
-// ComposeRef joins the actual repository spec and a given artefact spec
+// ComposeRef joins the actual repository spec and a given artefact spec.
 func (u *UniformRepositorySpec) ComposeRef(art string) string {
 	if art == "" {
 		return u.String()
@@ -113,7 +115,12 @@ func UniformRepositorySpecForHostURL(typ string, host string) *UniformRepository
 func UniformRepositorySpecForUnstructured(un *runtime.UnstructuredVersionedTypedObject) *UniformRepositorySpec {
 	m := un.Object.FlatCopy()
 	delete(m, runtime.ATTR_TYPE)
-	d, _ := json.Marshal(m)
+
+	d, err := json.Marshal(m)
+	if err != nil {
+		logrus.Error(err)
+	}
+
 	return &UniformRepositorySpec{Type: un.Type, Info: string(d)}
 }
 

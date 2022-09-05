@@ -31,9 +31,8 @@ func init() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// blobHandler is the default handling to store local blobs as local blobs
-type blobHandler struct {
-}
+// blobHandler is the default handling to store local blobs as local blobs.
+type blobHandler struct{}
 
 func NewBlobHandler() cpi.BlobHandler {
 	return &blobHandler{}

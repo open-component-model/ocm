@@ -56,8 +56,10 @@ type TableProcessingOutput struct {
 	opts   *Options
 }
 
-var _ Output = (*TableProcessingOutput)(nil)
-var _ SortFields = (*TableProcessingOutput)(nil)
+var (
+	_ Output     = (*TableProcessingOutput)(nil)
+	_ SortFields = (*TableProcessingOutput)(nil)
+)
 
 func NewProcessingTableOutput(opts *Options, chain ProcessChain, header ...string) *TableProcessingOutput {
 	return (&TableProcessingOutput{}).new(opts, chain, header)

@@ -25,11 +25,13 @@ const KIND_CONFIGTYPE = core.KIND_CONFIGTYPE
 
 const CONTEXT_TYPE = core.CONTEXT_TYPE
 
-type Context = core.Context
-type Config = core.Config
-type ConfigType = core.ConfigType
-type ConfigTypeScheme = core.ConfigTypeScheme
-type GenericConfig = core.GenericConfig
+type (
+	Context          = core.Context
+	Config           = core.Config
+	ConfigType       = core.ConfigType
+	ConfigTypeScheme = core.ConfigTypeScheme
+	GenericConfig    = core.GenericConfig
+)
 
 var DefaultContext = core.DefaultContext
 

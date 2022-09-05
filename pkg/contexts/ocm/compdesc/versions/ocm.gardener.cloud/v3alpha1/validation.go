@@ -21,7 +21,7 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 )
 
-// Validate validates a parsed v2 component descriptor
+// Validate validates a parsed v2 component descriptor.
 func (cd *ComponentDescriptor) Validate() error {
 	if err := Validate(nil, cd); err != nil {
 		return err.ToAggregate()
@@ -115,7 +115,7 @@ func ValidateSource(fldPath *field.Path, src Source, access bool) field.ErrorLis
 	return allErrs
 }
 
-// ValidateResource validates a components resource
+// ValidateResource validates a components resource.
 func ValidateResource(fldPath *field.Path, res Resource, access bool) field.ErrorList {
 	allErrs := field.ErrorList{}
 	allErrs = append(allErrs, ValidateObjectMeta(fldPath, &res)...)

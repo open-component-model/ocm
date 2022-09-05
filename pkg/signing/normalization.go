@@ -33,6 +33,7 @@ func (l *Entries) Add(key string, value interface{}) {
 func (l Entries) String() string {
 	return l.ToString("")
 }
+
 func (l Entries) ToString(gap string) string {
 	ngap := gap + "  "
 	s := "{"
@@ -72,7 +73,7 @@ func toString(v interface{}, gap string) string {
 	}
 }
 
-// Entry is used to keep exactly one key/value pair
+// Entry is used to keep exactly one key/value pair.
 type Entry struct {
 	key   string
 	value interface{}
@@ -120,7 +121,6 @@ func PrepareNormalization(v interface{}, excludes ExcludeRules) (Entries, error)
 }
 
 func prepare(v interface{}, ex ExcludeRules) (r Normalized, err error) {
-
 	switch e := v.(type) {
 	case map[string]interface{}:
 		r, err = prepareStruct(e, ex)

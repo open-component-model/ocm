@@ -22,7 +22,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
-
 	"sigs.k8s.io/yaml"
 )
 

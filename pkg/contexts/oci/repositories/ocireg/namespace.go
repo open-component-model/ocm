@@ -20,6 +20,7 @@ import (
 
 	"github.com/containerd/containerd/errdefs"
 	"github.com/opencontainers/go-digest"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -43,8 +44,10 @@ type NamespaceContainer struct {
 	blobs     *BlobContainers
 }
 
-var _ cpi.ArtefactSetContainer = (*NamespaceContainer)(nil)
-var _ cpi.NamespaceAccess = (*Namespace)(nil)
+var (
+	_ cpi.ArtefactSetContainer = (*NamespaceContainer)(nil)
+	_ cpi.NamespaceAccess      = (*Namespace)(nil)
+)
 
 func NewNamespace(repo *Repository, name string) (*Namespace, error) {
 	ref := repo.getRef(name, "")
@@ -86,7 +89,7 @@ func (n *NamespaceContainer) getPusher(vers string) (resolve.Pusher, error) {
 	ref := n.repo.getRef(n.namespace, vers)
 	resolver := n.resolver
 
-	fmt.Printf("pusher for %s\n", ref)
+	logrus.Infof("pusher for %s", ref)
 
 	if ok, _ := artdesc.IsDigest(vers); !ok {
 		var err error
@@ -107,7 +110,7 @@ func (n *NamespaceContainer) push(vers string, blob cpi.BlobAccess) error {
 		return fmt.Errorf("unable to get pusher: %w", err)
 	}
 
-	fmt.Printf("pushing %s\n", vers)
+	logrus.Infof("pushing %s", vers)
 
 	return push(dummyContext, p, blob)
 }

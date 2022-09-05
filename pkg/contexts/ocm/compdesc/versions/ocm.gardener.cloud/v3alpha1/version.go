@@ -22,9 +22,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const SchemaVersion = "v3alpha1"
-const GroupVersion = metav1.GROUP + "/" + SchemaVersion
-const Kind = metav1.KIND
+const (
+	SchemaVersion = "v3alpha1"
+	GroupVersion  = metav1.GROUP + "/" + SchemaVersion
+	Kind          = metav1.KIND
+)
 
 func init() {
 	compdesc.RegisterScheme(&DescriptorVersion{})

@@ -38,7 +38,7 @@ type Driver interface {
 	Exec(op *Operation) (*OperationResult, error)
 }
 
-// Operation describes the data passed into the driver to run an operation
+// Operation describes the data passed into the driver to run an operation.
 type Operation struct {
 	// Action is the action to be performed. It is passed a srgument to the executable
 	Action string

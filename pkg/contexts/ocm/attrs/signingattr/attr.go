@@ -21,15 +21,16 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing"
 )
 
-const ATTR_KEY = "github.com/mandelsoft/ocm/signing"
-const ATTR_SHORT = "signing"
+const (
+	ATTR_KEY   = "github.com/mandelsoft/ocm/signing"
+	ATTR_SHORT = "signing"
+)
 
 func init() {
 	datacontext.RegisterAttributeType(ATTR_KEY, AttributeType{})
 }
 
-type AttributeType struct {
-}
+type AttributeType struct{}
 
 func (a AttributeType) Name() string {
 	return ATTR_KEY

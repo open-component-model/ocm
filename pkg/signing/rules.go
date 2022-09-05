@@ -16,7 +16,7 @@ package signing
 
 type Normalized interface{}
 
-// ExcludeRules defines the rules for normalization excludes
+// ExcludeRules defines the rules for normalization excludes.
 type ExcludeRules interface {
 	Field(name string, value interface{}) (string, interface{}, ExcludeRules)
 	Element(v interface{}) (bool, interface{}, ExcludeRules)
@@ -46,8 +46,10 @@ type ExcludeEmpty struct {
 	ExcludeRules
 }
 
-var _ ExcludeRules = ExcludeEmpty{}
-var _ NormalizationFilter = ExcludeEmpty{}
+var (
+	_ ExcludeRules        = ExcludeEmpty{}
+	_ NormalizationFilter = ExcludeEmpty{}
+)
 
 func (ExcludeEmpty) Filter(v Normalized) (Normalized, error) {
 	if v == nil {
@@ -111,8 +113,10 @@ func (r MapExcludes) Element(value interface{}) (bool, interface{}, ExcludeRules
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type ValueMapper func(v interface{}) interface{}
-type ValueChecker func(value interface{}) bool
+type (
+	ValueMapper  func(v interface{}) interface{}
+	ValueChecker func(value interface{}) bool
+)
 
 type DynamicInclude struct {
 	ValueChecker ValueChecker

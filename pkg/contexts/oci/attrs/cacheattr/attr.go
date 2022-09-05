@@ -25,15 +25,16 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const ATTR_KEY = "github.com/mandelsoft/oci/cache"
-const ATTR_SHORT = "cache"
+const (
+	ATTR_KEY   = "github.com/mandelsoft/oci/cache"
+	ATTR_SHORT = "cache"
+)
 
 func init() {
 	datacontext.RegisterAttributeType(ATTR_KEY, AttributeType{}, ATTR_SHORT)
 }
 
-type AttributeType struct {
-}
+type AttributeType struct{}
 
 func (a AttributeType) Name() string {
 	return ATTR_KEY
@@ -65,7 +66,7 @@ func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (in
 			value = home + value[1:]
 		}
 		// TODO: This should use the virtual filesystem.
-		err = os.MkdirAll(value, 0700)
+		err = os.MkdirAll(value, 0o700)
 		if err == nil {
 			return accessio.NewStaticBlobCache(value)
 		}

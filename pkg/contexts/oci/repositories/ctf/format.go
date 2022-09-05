@@ -28,8 +28,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-const ArtefactIndexFileName = format.ArtefactIndexFileName
-const BlobsDirectoryName = format.BlobsDirectoryName
+const (
+	ArtefactIndexFileName = format.ArtefactIndexFileName
+	BlobsDirectoryName    = format.BlobsDirectoryName
+)
 
 var accessObjectInfo = &accessobj.AccessObjectInfo{
 	DescriptorFileName:       ArtefactIndexFileName,
@@ -63,8 +65,10 @@ var (
 
 ////////////////////////////////////////////////////////////////////////////////
 
-var fileFormats = map[accessio.FileFormat]FormatHandler{}
-var lock sync.RWMutex
+var (
+	fileFormats = map[accessio.FileFormat]FormatHandler{}
+	lock        sync.RWMutex
+)
 
 func RegisterFormat(f accessobj.FormatHandler) FormatHandler {
 	lock.Lock()
@@ -147,7 +151,7 @@ func (h *formatHandler) Create(ctx cpi.Context, path string, opts accessio.Optio
 	return _Wrap(ctx, NewRepositorySpec(accessobj.ACC_CREATE, path, opts), obj, err)
 }
 
-// WriteToFilesystem writes the current object to a filesystem
+// WriteToFilesystem writes the current object to a filesystem.
 func (h *formatHandler) Write(obj *Object, path string, opts accessio.Options, mode vfs.FileMode) error {
 	return h.FormatHandler.Write(obj.base.Access(), path, opts, mode)
 }

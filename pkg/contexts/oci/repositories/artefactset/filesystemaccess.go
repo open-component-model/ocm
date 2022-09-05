@@ -17,11 +17,10 @@ package artefactset
 import (
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi/support"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi/support"
 )
 
 type FileSystemBlobAccess struct {
@@ -33,7 +32,6 @@ func NewFileSystemBlobAccess(access *accessobj.AccessObject) *FileSystemBlobAcce
 }
 
 func (i *FileSystemBlobAccess) GetArtefact(access support.ArtefactSetContainerImpl, digest digest.Digest) (acc cpi.ArtefactAccess, err error) {
-
 	v, err := access.View()
 	if err != nil {
 		return nil, err

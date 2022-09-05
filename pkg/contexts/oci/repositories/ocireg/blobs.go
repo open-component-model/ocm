@@ -101,7 +101,7 @@ func NewBlobContainer(cache accessio.BlobCache, mime string, fetcher resolve.Fet
 }
 
 func (n *blobContainer) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
-	//fmt.Printf("orig get %s %s\n",n.mime, digest)
+	// fmt.Printf("orig get %s %s\n",n.mime, digest)
 	acc, err := NewDataAccess(n.fetcher, digest, n.mime, false)
 	return accessio.BLOB_UNKNOWN_SIZE, acc, err
 }

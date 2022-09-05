@@ -22,8 +22,7 @@ import (
 	"github.com/drone/envsubst"
 )
 
-type Subst struct {
-}
+type Subst struct{}
 
 var _ Templater = (*Subst)(nil)
 
@@ -37,7 +36,7 @@ func (s *Subst) Process(data string, values Values) (string, error) {
 }
 
 // mapping is a helper function for the envsubst to provide the value for a variable name.
-// It returns an emtpy string if the variable is not defined.
+// It returns an empty string if the variable is not defined.
 func stringmapping(values Values) func(variable string) string {
 	return func(variable string) string {
 		if values == nil {
