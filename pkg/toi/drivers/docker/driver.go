@@ -12,6 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
+//nolint:forbidigo  // part of a command line tool
 package docker
 
 import (
@@ -251,7 +252,7 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 	}
 
 	if err = done(); err != nil {
-		return nil, fmt.Errorf("unable send data: %v", err)
+		return nil, fmt.Errorf("unable to send data: %w", err)
 	}
 	tarContent.Close()
 

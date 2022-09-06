@@ -20,6 +20,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"

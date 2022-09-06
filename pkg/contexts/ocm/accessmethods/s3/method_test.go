@@ -20,10 +20,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/env"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
+
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"k8s.io/apimachinery/pkg/util/sets"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -35,8 +38,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3"
-	. "github.com/open-component-model/ocm/pkg/env"
-	. "github.com/open-component-model/ocm/pkg/env/builder"
 )
 
 type mockDownloader struct {

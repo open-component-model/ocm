@@ -9,14 +9,15 @@ ocm transfer componentversions [<options>] {<component-reference>} <target>
 ### Options
 
 ```
-  -c, --closure             follow component reference nesting
-  -h, --help                help for componentversions
-  -f, --overwrite           overwrite existing component versions
-  -r, --repo string         repository name or spec
-  -V, --resourcesByValue    transfer resources by-value
-      --script string       config name of transfer handler script
-  -s, --scriptFile string   filename of transfer handler script
-  -t, --type string         archive format (default "directory")
+  -c, --closure              follow component reference nesting
+  -h, --help                 help for componentversions
+      --lookup stringArray   repository name or spec for closure lookup fallback
+  -f, --overwrite            overwrite existing component versions
+  -r, --repo string          repository name or spec
+  -V, --resourcesByValue     transfer resources by-value
+      --script string        config name of transfer handler script
+  -s, --scriptFile string    filename of transfer handler script
+  -t, --type string          archive format (default "directory")
 ```
 
 ### Description
@@ -79,6 +80,16 @@ target archive to use. The following formats are supported:
 The default format is <code>directory</code>.
 
 With the option <code>--closure</code> the complete reference tree of a component reference is traversed.
+
+If a component lookup for building a reference closure is required
+the <code>--lookup</code>  option can be used to specify a fallback
+lookup repository. 
+By default the component versions are searched in the repository
+holding the component version for which the closure is determined.
+For *Component Archives* this is never possible, because it only
+contains a single component version. Therefore, in this scenario
+this option must always be specified to be able to follow component
+references.
 
 It the option <code>--overwrite</code> is given, component version in the
 target repository will be overwritten, if they already exist.

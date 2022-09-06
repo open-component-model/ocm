@@ -15,7 +15,8 @@ log() {
 pkgprefix="github.com/open-component-model/ocm"
 
 log "Format with gci"
-gci diff --skip-generated -s standard -s default -s="prefix(${pkgprefix})" $@ \
+GCIFMT=( -s standard -s blank -s dot -s default -s="prefix(${pkgprefix})" --custom-order )
+gci diff --skip-generated "${GCIFMT[@]}"  $@ \
   | awk '/^--- / { print $2 }' \
   | xargs -I "{}" \
-    gci write --skip-generated -s standard -s default -s="prefix(${pkgprefix})" "{}"
+    gci write --skip-generated  "${GCIFMT[@]}" "{}"

@@ -18,6 +18,8 @@ import (
 	"fmt"
 	"strings"
 
+	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -25,7 +27,6 @@ import (
 	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/common"
-	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	datactg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"

@@ -16,8 +16,9 @@ package processing
 
 import (
 	"fmt"
-	_ "fmt"
 	"sync"
+
+	_ "fmt"
 
 	"github.com/containerd/containerd/pkg/atomic"
 

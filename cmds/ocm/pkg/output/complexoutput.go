@@ -17,10 +17,11 @@ package output
 import (
 	"fmt"
 
-	"sigs.k8s.io/yaml"
-
 	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	. "github.com/open-component-model/ocm/pkg/out"
+
+	"sigs.k8s.io/yaml"
+
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
