@@ -103,6 +103,10 @@ func RegisterBlobHandler(handler BlobHandler, opts ...BlobHandlerOption) {
 	core.RegisterBlobHandler(handler, opts...)
 }
 
+func MustRegisterDigester(digester BlobDigester, arttypes ...string) {
+	core.MustRegisterDigester(digester, arttypes...)
+}
+
 func RegisterRepositoryType(name string, atype RepositoryType) {
 	core.DefaultRepositoryTypeScheme.Register(name, atype)
 }

@@ -116,7 +116,7 @@ func (s *specHandlers) Copy() RepositorySpecHandlers {
 
 	n := NewRepositorySpecHandlers().(*specHandlers)
 	for typ, hdlrs := range s.handlers {
-		n.handlers[typ] = append(hdlrs[:0:len(hdlrs)], hdlrs...)
+		n.handlers[typ] = append(hdlrs[:0:0], hdlrs...)
 	}
 	return n
 }
