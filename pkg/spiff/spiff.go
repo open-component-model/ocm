@@ -42,8 +42,10 @@ func (r Request) GetValues() (map[string]interface{}, error) {
 		return nil, nil
 	}
 
-	var err error
-	var data []byte
+	var (
+		err  error
+		data []byte
+	)
 
 	if b, ok := r.Values.([]byte); ok {
 		data = b

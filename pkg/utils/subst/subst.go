@@ -87,7 +87,7 @@ func (f *fileinfo) Content() ([]byte, error) {
 	if f.json {
 		// TODO: the package seems to keep the file type json/yaml, but I'm not sure
 		var err error
-		data, err = yaml.YAMLToJSON([]byte(data))
+		data, err = yaml.YAMLToJSON(data)
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot marshal json")
 		}

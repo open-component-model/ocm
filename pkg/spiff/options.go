@@ -135,6 +135,7 @@ func WorkDir(path string) OptionFunction {
 		return nil
 	}
 }
+
 func Mode(m int) OptionFunction {
 	return func(r *Request) error {
 		r.Mode = m

@@ -18,9 +18,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/runtime"
-
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 // Definition of inbound substitution requests.
@@ -124,7 +123,7 @@ func (s *Substitutions) Add(name, file, path string, value interface{}) error {
 }
 
 // InstantiationRules bundle the localization of a filesystem resource
-// covering image localization and applying instance configuration
+// covering image localization and applying instance configuration.
 type InstantiationRules struct {
 	Template          v1.ResourceReference   `json:"templateResource,omitempty"`
 	LocalizationRules []Localization         `json:"localizationRules,omitempty"`

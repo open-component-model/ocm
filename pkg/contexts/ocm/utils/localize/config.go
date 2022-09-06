@@ -27,9 +27,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/spiff"
 )
 
-func Configure(mappings []Configuration, cursubst []Substitution,
+func Configure(
+	mappings []Configuration, cursubst []Substitution,
 	cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver,
-	template []byte, config []byte, libraries []metav1.ResourceReference, schemedata []byte) (Substitutions, error) {
+	template []byte, config []byte, libraries []metav1.ResourceReference, schemedata []byte,
+) (Substitutions, error) {
 	var err error
 
 	if len(mappings) == 0 {
@@ -78,28 +80,42 @@ func Configure(mappings []Configuration, cursubst []Substitution,
 		}
 	}
 
-	list := []interface{}{}
+	extlist := []interface{}{}
 	for _, e := range cursubst {
 		// TODO: escape spiff expressions, but should not occur, so omit it so far
-		list = append(list, e)
+		extlist = append(extlist, e)
 	}
+
+	cfglist := []interface{}{}
 	for _, e := range mappings {
-		list = append(list, e)
+		cfglist = append(cfglist, e)
 	}
 
 	var temp map[string]interface{}
 	if len(template) == 0 {
 		temp = map[string]interface{}{
-			"adjustments": list,
+			"adjustments": extlist,
+			"configRules": cfglist,
 		}
 	} else {
-		if err = runtime.DefaultYAMLEncoding.Unmarshal(template, &temp); err != nil {
+		if err := runtime.DefaultYAMLEncoding.Unmarshal(template, &temp); err != nil {
 			return nil, errors.Wrapf(err, "cannot unmarshal template")
 		}
+
 		if _, ok := temp["adjustments"]; ok {
 			return nil, errors.Newf("template may not contain 'adjustments'")
 		}
-		temp["adjustments"] = list
+		temp["adjustments"] = extlist
+
+		if cur, ok := temp["configRules"]; ok {
+			if l, ok := cur.([]interface{}); !ok {
+				return nil, errors.Newf("node 'configRules' in template must be a list of configuration requests")
+			} else {
+				temp["configRules"] = append(l, cfglist...)
+			}
+		} else {
+			temp["configRules"] = cfglist
+		}
 	}
 
 	if _, ok := temp["utilities"]; !ok {
@@ -119,7 +135,8 @@ func Configure(mappings []Configuration, cursubst []Substitution,
 
 	var subst struct {
 		Adjustments Substitutions `json:"adjustments,omitempty"`
+		ConfigRules Substitutions `json:"configRules,omitempty"`
 	}
 	err = runtime.DefaultYAMLEncoding.Unmarshal(config, &subst)
-	return subst.Adjustments, err
+	return append(subst.Adjustments, subst.ConfigRules...), err
 }

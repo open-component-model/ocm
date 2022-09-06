@@ -15,9 +15,10 @@
 package localize_test
 
 import (
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -194,6 +195,51 @@ utilities:
   file: file1
   path: a.b.c
   value: lib va
+`)))
+		})
+
+		It("uses templated configRules", func() {
+
+			configs := Configurations(`
+- name: test1
+  file: file1
+  path: a.b.c
+  value: (( values.a ))
+`)
+
+			template := `
+list: [ "a", "b" ]
+helper:
+  <<<: (( &template ))
+  name: (( "gen" k ))
+  file: file1
+  path: (( "some.path." k ))
+  value: (( values.a ))
+
+configRules: 
+  - <<<: (( map[.list|k|->*.helper] )) 
+`
+
+			libs := []v1.ResourceReference{
+				v1.ResourceReference{
+					Resource: v1.NewIdentity(LIB),
+				},
+			}
+			subst, err := localize.Configure(configs, nil, cv, nil, []byte(template), config, libs, nil)
+			Expect(err).To(Succeed())
+			Expect(subst).To(Equal(Substitutions(`
+- name: gena
+  file: file1
+  path: some.path.a
+  value: va
+- name: genb
+  file: file1
+  path: some.path.b
+  value: va
+- name: test1
+  file: file1
+  path: a.b.c
+  value: va
 `)))
 		})
 	})
