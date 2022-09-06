@@ -569,6 +569,17 @@ type ComponentReference struct {
 	Digest *metav1.DigestSpec `json:"digest,omitempty"`
 }
 
+func NewComponentReference(name, componentName, version string, extraIdentity metav1.Identity) *ComponentReference {
+	return &ComponentReference{
+		ElementMeta: ElementMeta{
+			Name:          name,
+			Version:       version,
+			ExtraIdentity: extraIdentity,
+		},
+		ComponentName: componentName,
+	}
+}
+
 func (r *ComponentReference) GetMeta() *ElementMeta {
 	return &r.ElementMeta
 }

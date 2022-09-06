@@ -21,6 +21,7 @@ import (
 
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/signoption"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
@@ -58,7 +59,7 @@ func newOperation(op string, sign bool, terms []string, example string) *spec {
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, op string, sign bool, terms []string, example string, names ...string) *cobra.Command {
 	spec := newOperation(op, sign, terms, example)
-	return utils.SetupCommand(&SignatureCommand{spec: spec, BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), signoption.New(sign))}, names...)
+	return utils.SetupCommand(&SignatureCommand{spec: spec, BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), signoption.New(sign), lookupoption.New())}, names...)
 }
 
 func (o *SignatureCommand) ForName(name string) *cobra.Command {
@@ -90,8 +91,9 @@ func (o *SignatureCommand) Run() error {
 	}
 	sign := signoption.From(o)
 	repo := repooption.From(o).Repository
+	lookup := lookupoption.From(o)
 	handler := comphdlr.NewTypeHandler(o.Context.OCM(), session, repo)
-	sopts := signing.NewOptions(sign, signing.Resolver(repo))
+	sopts := signing.NewOptions(sign, signing.Resolver(repo, lookup.Resolver))
 	err = sopts.Complete(signingattr.Get(o.Context.OCMContext()))
 	if err != nil {
 		return err

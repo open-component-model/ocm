@@ -40,9 +40,11 @@ import (
 )
 
 const ARCH = "/tmp/ctf"
+const ARCH2 = "/tmp/ctf2"
 const PROVIDER = "mandelsoft"
 const VERSION = "v1"
 const COMPONENT = "github.com/mandelsoft/test"
+const COMPONENT2 = "github.com/mandelsoft/test2"
 const OUT = "/tmp/res"
 const OCIPATH = "/tmp/oci"
 const OCINAMESPACE = "ocm/value"
@@ -174,6 +176,15 @@ var _ = Describe("Transfer handler", func() {
 					})
 				})
 			})
+
+			env.OCMCommonTransport(ARCH2, accessio.FormatDirectory, func() {
+				env.Component(COMPONENT2, func() {
+					env.Version(VERSION, func() {
+						env.Reference("ref", COMPONENT, VERSION)
+						env.Provider(PROVIDER)
+					})
+				})
+			})
 		})
 
 		AfterEach(func() {
@@ -205,7 +216,7 @@ process: (( (*(rules[mode] || rules.default)).process ))
 
 			handler, err := spiff.New(standard.ResourcesByValue())
 			Expect(err).To(Succeed())
-			err = transfer.TransferVersion(nil, nil, src, cv, tgt, handler)
+			err = transfer.TransferVersion(nil, nil, cv, tgt, handler)
 			Expect(err).To(Succeed())
 			Expect(env.DirExists(OUT)).To(BeTrue())
 
@@ -251,7 +262,7 @@ process: (( (*(rules[mode] || rules.default)).process ))
 
 			handler, err := spiff.New(standard.ResourcesByValue(), spiff.Script([]byte(script2)))
 			Expect(err).To(Succeed())
-			err = transfer.TransferVersion(nil, nil, src, cv, tgt, handler)
+			err = transfer.TransferVersion(nil, nil, cv, tgt, handler)
 			Expect(err).To(Succeed())
 			Expect(env.DirExists(OUT)).To(BeTrue())
 
@@ -286,6 +297,31 @@ process: (( (*(rules[mode] || rules.default)).process ))
 			data, err = blob.Get()
 			Expect(err).To(Succeed())
 			Expect(string(data)).To(Equal("manifestlayer"))
+		})
+
+		It("it should use additional resolver to resolve component ref", func() {
+			parentSrc, err := ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH2, 0, env)
+			Expect(err).To(Succeed())
+			cv, err := parentSrc.LookupComponentVersion(COMPONENT2, VERSION)
+			Expect(err).To(Succeed())
+			childSrc, err := ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
+			Expect(err).To(Succeed())
+			tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env)
+			Expect(err).To(Succeed())
+			defer tgt.Close()
+			handler, err := standard.New(standard.Recursive(), standard.Resolver(childSrc))
+			Expect(err).To(Succeed())
+			err = transfer.TransferVersion(nil, nil, cv, tgt, handler)
+			Expect(err).To(Succeed())
+			Expect(env.DirExists(OUT)).To(BeTrue())
+
+			list, err := tgt.ComponentLister().GetComponents("", true)
+			Expect(err).To(Succeed())
+			Expect(list).To(ContainElements([]string{COMPONENT2, COMPONENT}))
+			_, err = tgt.LookupComponentVersion(COMPONENT2, VERSION)
+			Expect(err).To(Succeed())
+			_, err = tgt.LookupComponentVersion(COMPONENT, VERSION)
+			Expect(err).To(Succeed())
 		})
 	})
 })

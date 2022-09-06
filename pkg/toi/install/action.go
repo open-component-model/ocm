@@ -438,7 +438,7 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot create repo for component version")
 		}
-		err = transfer.TransferVersion(nil, nil, cv.Repository(), cv, repo, nil)
+		err = transfer.TransferVersion(nil, nil, cv, repo, nil)
 		repo.Close()
 		if err != nil {
 			return nil, errors.Wrapf(err, "component version transport failed")

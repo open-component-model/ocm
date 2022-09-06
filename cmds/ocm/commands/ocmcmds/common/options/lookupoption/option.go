@@ -20,6 +20,8 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 )
 
 func From(o options.OptionSetProvider) *Option {
@@ -91,4 +93,8 @@ func (o *Option) LookupComponentVersion(name string, vers string) (ocm.Component
 		return nil, err
 	}
 	return cv, err
+}
+
+func (o *Option) ApplyTransferOption(opts transferhandler.TransferOptions) error {
+	return standard.Resolver(o.Resolver).ApplyTransferOption(opts)
 }

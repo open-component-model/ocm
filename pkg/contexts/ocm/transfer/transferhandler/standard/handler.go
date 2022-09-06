@@ -45,9 +45,11 @@ func (h *Handler) OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.Compo
 	return h.opts.IsOverwrite(), nil
 }
 
-func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ElementMeta) (ocm.Repository, transferhandler.TransferHandler, error) {
+func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ComponentReference) (ocm.ComponentVersionAccess, transferhandler.TransferHandler, error) {
 	if src == nil || h.opts.IsRecursive() {
-		return repo, h, nil
+		compoundResolver := ocm.NewCompoundResolver(repo, h.opts.GetResolver())
+		cv, err := compoundResolver.LookupComponentVersion(meta.GetComponentName(), meta.Version)
+		return cv, h, err
 	}
 	return nil, nil, nil
 }
