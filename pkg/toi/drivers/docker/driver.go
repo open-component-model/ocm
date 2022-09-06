@@ -249,8 +249,8 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error copying to / in container: %w", err)
 	}
-	err = done()
-	if err != nil {
+
+	if err = done(); err != nil {
 		return nil, fmt.Errorf("unable send data: %v", err)
 	}
 	tarContent.Close()
@@ -437,8 +437,9 @@ func generateTar(files map[string]accessio.BlobAccess, uid int) (io.ReadCloser, 
 	fmt.Printf("waiting for successful data transfer...\n")
 	go func() {
 		defer wg.Done()
-		have := map[string]bool{}
+		defer w.Close()
 
+		have := map[string]bool{}
 		for path, content := range files {
 			path = unix_path.Join(install.PathInputs, path)
 			fmt.Printf("transferring %s...\n", path)
@@ -472,10 +473,10 @@ func generateTar(files map[string]accessio.BlobAccess, uid int) (io.ReadCloser, 
 			if e != nil {
 				fmt.Printf("cannot transfer %s: %s\n", path, e)
 				err = e
+				return
 			}
 			io.Copy(tw, reader)
 		}
-		w.Close()
 	}()
 	return r, func() error { wg.Wait(); return err }, nil
 }

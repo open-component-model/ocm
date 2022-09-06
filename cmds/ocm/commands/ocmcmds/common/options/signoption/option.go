@@ -85,7 +85,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 		fs.BoolVarP(&o.Update, "update", "", o.SignMode, "update digest in component versions")
 		fs.BoolVarP(&o.Recursively, "recursive", "R", false, "recursively sign component versions")
 	} else {
-		fs.BoolVarP(&o.local, "local", "L", false, "non-recursively verify component versions")
+		fs.BoolVarP(&o.local, "local", "L", false, "verification based on information found in component versions, only")
 	}
 	fs.BoolVarP(&o.Verify, "verify", "V", o.SignMode, "verify existing digests")
 	fs.StringArrayVarP(&o.rootca, "ca-cert", "", o.rootca, "Additional root certificates")
