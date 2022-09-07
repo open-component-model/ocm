@@ -34,6 +34,11 @@ func init() {
 	cpi.RegisterRepositoryType(TypeV1, cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
 }
 
+const (
+	FORMAT_OCI = "oci/v1"
+	FORMAT_OCM = "ocm/v1"
+)
+
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	accessio.Options            `json:",inline"`
@@ -42,6 +47,8 @@ type RepositorySpec struct {
 	FilePath string `json:"filePath"`
 	// AccessMode can be set to request readonly access or creation
 	AccessMode accessobj.AccessMode `json:"accessMode,omitempty"`
+
+	FormatVersion string `json:"formatVersion,omitempty"`
 }
 
 // NewRepositorySpec creates a new RepositorySpec.
@@ -57,6 +64,13 @@ func NewRepositorySpec(acc accessobj.AccessMode, filePath string, opts ...access
 
 func (s *RepositorySpec) Name() string {
 	return s.FilePath
+}
+
+func (s *RepositorySpec) GetFormatVersion() string {
+	if s.FormatVersion == "" {
+		return FORMAT_OCM
+	}
+	return s.FormatVersion
 }
 
 func (s *RepositorySpec) UniformRepositorySpec() *cpi.UniformRepositorySpec {

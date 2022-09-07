@@ -46,15 +46,16 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 	if !u.CreateIfMissing {
 		hint = ""
 	}
+
 	create, ok, err := accessobj.CheckFile(Type, hint, accessio.TypeForType(u.Type) == Type, path, fs, ArtefactSetDescriptorFileName)
-	if !ok || err != nil {
-		if err != nil {
-			return nil, err
-		}
-		if !ok {
-			return nil, nil
-		}
+	if err == nil && !ok {
+		create, ok, err = accessobj.CheckFile(Type, hint, accessio.TypeForType(u.Type) == Type, path, fs, OCIArtefactSetDescriptorFileName)
 	}
+
+	if !ok || err != nil {
+		return nil, err
+	}
+
 	mode := accessobj.ACC_WRITABLE
 	if create {
 		mode |= accessobj.ACC_CREATE

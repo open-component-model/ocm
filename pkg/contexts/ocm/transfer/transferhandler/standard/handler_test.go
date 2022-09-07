@@ -16,9 +16,11 @@ package standard_test
 
 import (
 	"encoding/json"
+	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/testhelper"
 	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 
@@ -50,8 +52,6 @@ const COMPONENT = "github.com/mandelsoft/test"
 const COMPONENT2 = "github.com/mandelsoft/test2"
 const OUT = "/tmp/res"
 const OCIPATH = "/tmp/oci"
-const OCINAMESPACE = "oci/test"
-const OCIVERSION = "v2.0"
 const OCIHOST = "alias"
 const SIGNATURE = "test"
 const SIGN_ALGO = rsa.Algorithm
@@ -66,16 +66,7 @@ var _ = Describe("Transfer handler", func() {
 		env.RSAKeyPair(SIGNATURE)
 
 		env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
-			env.Namespace(OCINAMESPACE, func() {
-				env.Manifest(OCIVERSION, func() {
-					env.Config(func() {
-						env.BlobStringData(mime.MIME_JSON, "{}")
-					})
-					ldesc = env.Layer(func() {
-						env.BlobStringData(mime.MIME_TEXT, "manifestlayer")
-					})
-				})
-			})
+			ldesc = OCIManifest1(env)
 		})
 
 		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
@@ -132,7 +123,10 @@ var _ = Describe("Transfer handler", func() {
 		Expect(len(comp.GetDescriptor().Resources)).To(Equal(2))
 		data, err := json.Marshal(comp.GetDescriptor().Resources[1].Access)
 		Expect(err).To(Succeed())
-		Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
+
+		fmt.Printf("%s\n", string(data))
+		hash := HashManifest1(artefactset.IsOCIDefaultFormat())
+		Expect(string(data)).To(Equal("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 
 		r, err := comp.GetResourceByIndex(1)
 		Expect(err).To(Succeed())

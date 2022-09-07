@@ -29,15 +29,94 @@ import (
 const (
 	ArtefactSetDescriptorFileName = format.ArtefactSetDescriptorFileName
 	BlobsDirectoryName            = format.BlobsDirectoryName
+
+	OCIArtefactSetDescriptorFileName = "index.json"
+	OCILayouFileName                 = "oci-layout"
 )
 
-var accessObjectInfo = &accessobj.DefaultAccessObjectInfo{
-	DescriptorFileName:       ArtefactSetDescriptorFileName,
-	ObjectTypeName:           "artefactset",
-	ElementDirectoryName:     BlobsDirectoryName,
-	ElementTypeName:          "blob",
-	DescriptorHandlerFactory: NewStateHandler,
+var DefaultArtefactSetDescriptorFileName = OCIArtefactSetDescriptorFileName
+
+func IsOCIDefaultFormat() bool {
+	return DefaultArtefactSetDescriptorFileName == OCIArtefactSetDescriptorFileName
 }
+
+type accessObjectInfo struct {
+	accessobj.DefaultAccessObjectInfo
+}
+
+var _ accessobj.AccessObjectInfo = (*accessObjectInfo)(nil)
+
+func NewAccessObjectInfo(fmts ...string) accessobj.AccessObjectInfo {
+	a := &accessObjectInfo{
+		accessobj.DefaultAccessObjectInfo{
+			ObjectTypeName:           "artefactset",
+			ElementDirectoryName:     BlobsDirectoryName,
+			ElementTypeName:          "blob",
+			DescriptorHandlerFactory: NewStateHandler,
+		},
+	}
+	oci := IsOCIDefaultFormat()
+	if len(fmts) > 0 {
+		switch fmts[0] {
+		case FORMAT_OCM:
+			oci = false
+		case FORMAT_OCI:
+			oci = true
+		}
+	}
+	if oci {
+		a.setOCI()
+	} else {
+		a.setOCM()
+	}
+	return a
+}
+
+func (a *accessObjectInfo) setOCI() {
+	a.DescriptorFileName = OCIArtefactSetDescriptorFileName
+	a.AdditionalFiles = []string{OCILayouFileName}
+}
+
+func (a *accessObjectInfo) setOCM() {
+	a.DescriptorFileName = ArtefactSetDescriptorFileName
+	a.AdditionalFiles = nil
+}
+
+func (a *accessObjectInfo) setupOCIFS(fs vfs.FileSystem, mode vfs.FileMode) error {
+	data := `{
+    "imageLayoutVersion": "1.0.0"
+}
+`
+	return vfs.WriteFile(fs, OCILayouFileName, []byte(data), mode)
+}
+
+func (a *accessObjectInfo) SetupFileSystem(fs vfs.FileSystem, mode vfs.FileMode) error {
+	if err := a.SetupFor(fs); err != nil {
+		return err
+	}
+	if err := a.DefaultAccessObjectInfo.SetupFileSystem(fs, mode); err != nil {
+		return err
+	}
+	if len(a.AdditionalFiles) > 0 {
+		return a.setupOCIFS(fs, mode)
+	}
+	return nil
+}
+
+func (a *accessObjectInfo) SetupFor(fs vfs.FileSystem) error {
+	ok, err := vfs.FileExists(fs, OCILayouFileName)
+	if err != nil {
+		return err
+	}
+	if ok {
+		a.setOCI()
+	} else { //nolint: staticcheck // keep comment for else
+		// keep configured format
+	}
+	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 type Object = ArtefactSet
 
@@ -142,11 +221,11 @@ func Create(acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...ac
 ////////////////////////////////////////////////////////////////////////////////
 
 func (h *formatHandler) Open(acc accessobj.AccessMode, path string, opts accessio.Options) (*Object, error) {
-	return _Wrap(h.FormatHandler.Open(accessObjectInfo, acc, path, opts))
+	return _Wrap(h.FormatHandler.Open(NewAccessObjectInfo(), acc, path, opts))
 }
 
 func (h *formatHandler) Create(path string, opts accessio.Options, mode vfs.FileMode) (*Object, error) {
-	return _Wrap(h.FormatHandler.Create(accessObjectInfo, path, opts, mode))
+	return _Wrap(h.FormatHandler.Create(NewAccessObjectInfo(), path, opts, mode))
 }
 
 // WriteToFilesystem writes the current object to a filesystem.

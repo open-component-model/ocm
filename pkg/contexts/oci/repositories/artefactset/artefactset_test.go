@@ -62,7 +62,8 @@ var _ = Describe("artefact management", func() {
 		defaultManifestFill(a)
 
 		Expect(a.Close()).To(Succeed())
-		Expect(vfs.FileExists(tempfs, "test/"+artefactset.ArtefactSetDescriptorFileName)).To(BeTrue())
+		Expect(vfs.FileExists(tempfs, "test/"+artefactset.DefaultArtefactSetDescriptorFileName)).To(BeTrue())
+		Expect(vfs.FileExists(tempfs, "test/"+artefactset.OCILayouFileName)).To(Equal(artefactset.DefaultArtefactSetDescriptorFileName == artefactset.OCIArtefactSetDescriptorFileName))
 
 		infos, err := vfs.ReadDir(tempfs, "test/"+artefactset.BlobsDirectoryName)
 		Expect(err).To(Succeed())
@@ -110,11 +111,16 @@ var _ = Describe("artefact management", func() {
 				files = append(files, header.Name)
 			}
 		}
-		Expect(files).To(ContainElements(
-			artefactset.ArtefactSetDescriptorFileName,
+		elems := []interface{}{
+			artefactset.DefaultArtefactSetDescriptorFileName,
 			"blobs/sha256.3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
 			"blobs/sha256.44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
-			"blobs/sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
+			"blobs/sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50",
+		}
+		if artefactset.IsOCIDefaultFormat() {
+			elems = append(elems, artefactset.OCILayouFileName)
+		}
+		Expect(files).To(ContainElements(elems))
 	})
 
 	It("instantiate tgz artefact for open file object", func() {
@@ -156,11 +162,13 @@ var _ = Describe("artefact management", func() {
 				files = append(files, header.Name)
 			}
 		}
-		Expect(files).To(ContainElements(
-			artefactset.ArtefactSetDescriptorFileName,
+		elems := []interface{}{
+			artefactset.DefaultArtefactSetDescriptorFileName,
 			"blobs/sha256.3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
 			"blobs/sha256.44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
-			"blobs/sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
+			"blobs/sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50",
+		}
+		Expect(files).To(ContainElements(elems))
 	})
 
 	Context("manifest", func() {

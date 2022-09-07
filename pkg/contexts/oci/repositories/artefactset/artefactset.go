@@ -32,6 +32,8 @@ const (
 	MAINARTEFACT_ANNOTATION = "cloud.gardener.ocm/main"
 	TAGS_ANNOTATION         = "cloud.gardener.ocm/tags"
 	TYPE_ANNOTATION         = "cloud.gardener.ocm/type"
+
+	OCITAG_ANNOTATION = "org.opencontainers.image.ref.name"
 )
 
 // ArtefactSet provides an artefact set view on the artefact set implementation.
@@ -68,7 +70,7 @@ var (
 
 // New returns a new representation based element.
 func New(acc accessobj.AccessMode, fs vfs.FileSystem, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode) (*ArtefactSet, error) {
-	return _Wrap(accessobj.NewAccessObject(accessObjectInfo, acc, fs, setup, closer, mode))
+	return _Wrap(accessobj.NewAccessObject(NewAccessObjectInfo(), acc, fs, setup, closer, mode))
 }
 
 func _Wrap(obj *accessobj.AccessObject, err error) (*ArtefactSet, error) {
@@ -105,6 +107,10 @@ func (a *artefactSetImpl) AddTags(digest digest.Digest, tags ...string) error {
 	if a.IsClosed() {
 		return accessio.ErrClosed
 	}
+	if len(tags) == 0 {
+		return nil
+	}
+
 	a.base.Lock()
 	defer a.base.Unlock()
 
@@ -121,8 +127,9 @@ func (a *artefactSetImpl) AddTags(digest digest.Digest, tags ...string) error {
 			} else {
 				cur = strings.Join(tags, ",")
 			}
-			if cur != "" {
-				e.Annotations[TAGS_ANNOTATION] = cur
+			e.Annotations[TAGS_ANNOTATION] = cur
+			if a.base.FileSystemBlobAccess.Access().GetInfo().GetDescriptorFileName() == OCIArtefactSetDescriptorFileName {
+				e.Annotations[OCITAG_ANNOTATION] = tags[0]
 			}
 			return nil
 		}

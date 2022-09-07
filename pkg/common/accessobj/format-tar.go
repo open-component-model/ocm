@@ -22,10 +22,9 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/errors"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/compression"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -65,11 +64,11 @@ func (h *TarHandler) Format() accessio.FileFormat {
 	return h.format
 }
 
-func (h *TarHandler) Open(info *DefaultAccessObjectInfo, acc AccessMode, path string, opts accessio.Options) (*AccessObject, error) {
+func (h *TarHandler) Open(info AccessObjectInfo, acc AccessMode, path string, opts accessio.Options) (*AccessObject, error) {
 	return DefaultOpenOptsFileHandling(fmt.Sprintf("%s archive", h.format), info, acc, path, opts, h)
 }
 
-func (h *TarHandler) Create(info *DefaultAccessObjectInfo, path string, opts accessio.Options, mode vfs.FileMode) (*AccessObject, error) {
+func (h *TarHandler) Create(info AccessObjectInfo, path string, opts accessio.Options, mode vfs.FileMode) (*AccessObject, error) {
 	return DefaultCreateOptsFileHandling(fmt.Sprintf("%s archive", h.format), info, path, opts, mode, h)
 }
 
@@ -150,7 +149,7 @@ func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts acce
 				return errors.Wrapf(err, "unable to write descriptor header")
 			}
 
-			r, err := data.Reader()
+			r, err := obj.fs.Open(f)
 			if err != nil {
 				return errors.Wrapf(err, "unable to get reader")
 			}
@@ -208,7 +207,7 @@ func (h TarHandler) WriteToStream(obj *AccessObject, writer io.Writer, opts acce
 	return tw.Close()
 }
 
-func (h *TarHandler) NewFromReader(info *DefaultAccessObjectInfo, acc AccessMode, in io.Reader, opts accessio.Options, closer Closer) (*AccessObject, error) {
+func (h *TarHandler) NewFromReader(info AccessObjectInfo, acc AccessMode, in io.Reader, opts accessio.Options, closer Closer) (*AccessObject, error) {
 	if h.compression != nil {
 		reader, err := h.compression.Decompressor(in)
 		if err != nil {

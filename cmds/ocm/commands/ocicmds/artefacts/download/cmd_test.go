@@ -65,6 +65,10 @@ var _ = Describe("Test Environment", func() {
 /tmp/res: downloaded
 `))
 		Expect(env.DirExists(OUT)).To(BeTrue())
-		Expect(env.ReadFile(OUT + "/" + artefactset.ArtefactSetDescriptorFileName)).To(Equal([]byte("{\"schemaVersion\":2,\"mediaType\":\"application/vnd.oci.image.index.v1+json\",\"manifests\":[{\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"digest\":\"sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9\",\"size\":342,\"annotations\":{\"cloud.gardener.ocm/tags\":\"v1\"}}],\"annotations\":{\"cloud.gardener.ocm/main\":\"sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9\"}}")))
+		tags := ""
+		if artefactset.IsOCIDefaultFormat() {
+			tags = ",\"org.opencontainers.image.ref.name\":\"v1\""
+		}
+		Expect(env.ReadFile(OUT + "/" + artefactset.DefaultArtefactSetDescriptorFileName)).To(Equal([]byte("{\"schemaVersion\":2,\"mediaType\":\"application/vnd.oci.image.index.v1+json\",\"manifests\":[{\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"digest\":\"sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9\",\"size\":342,\"annotations\":{\"cloud.gardener.ocm/tags\":\"v1\"" + tags + "}}],\"annotations\":{\"cloud.gardener.ocm/main\":\"sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9\"}}")))
 	})
 })

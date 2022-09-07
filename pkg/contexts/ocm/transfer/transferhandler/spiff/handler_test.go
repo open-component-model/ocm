@@ -16,9 +16,11 @@ package spiff_test
 
 import (
 	"encoding/json"
+	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/testhelper"
 	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 
@@ -47,9 +49,6 @@ const COMPONENT = "github.com/mandelsoft/test"
 const COMPONENT2 = "github.com/mandelsoft/test2"
 const OUT = "/tmp/res"
 const OCIPATH = "/tmp/oci"
-const OCINAMESPACE = "ocm/value"
-const OCINAMESPACE2 = "ocm/ref"
-const OCIVERSION = "v2.0"
 const OCIHOST = "alias"
 
 const script1 = `
@@ -133,26 +132,8 @@ var _ = Describe("Transfer handler", func() {
 			env.OCIContext().SetAlias(OCIHOST, ctfoci.NewRepositorySpec(accessobj.ACC_READONLY, OCIPATH, accessio.PathFileSystem(env.FileSystem())))
 
 			env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
-				env.Namespace(OCINAMESPACE, func() {
-					env.Manifest(OCIVERSION, func() {
-						env.Config(func() {
-							env.BlobStringData(mime.MIME_JSON, "{}")
-						})
-						ldesc = env.Layer(func() {
-							env.BlobStringData(mime.MIME_TEXT, "manifestlayer")
-						})
-					})
-				})
-				env.Namespace(OCINAMESPACE2, func() {
-					env.Manifest(OCIVERSION, func() {
-						env.Config(func() {
-							env.BlobStringData(mime.MIME_JSON, "{}")
-						})
-						env.Layer(func() {
-							env.BlobStringData(mime.MIME_TEXT, "otherlayer")
-						})
-					})
-				})
+				ldesc = OCIManifest1(env)
+				OCIManifest2(env)
 			})
 
 			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
@@ -229,11 +210,15 @@ process: (( (*(rules[mode] || rules.default)).process ))
 
 			data, err := json.Marshal(comp.GetDescriptor().Resources[2].Access)
 			Expect(err).To(Succeed())
-			Expect(string(data)).To(Equal("{\"localReference\":\"sha256:f6a519fb1d0c8cef5e8d7811911fc7cb170462bbce19d6df067dae041250de7f\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE2 + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
+			fmt.Printf("%s\n", string(data))
+			hash := HashManifest2(artefactset.IsOCIDefaultFormat())
+			Expect(string(data)).To(Equal("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE2 + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 
 			data, err = json.Marshal(comp.GetDescriptor().Resources[1].Access)
 			Expect(err).To(Succeed())
-			Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
+			fmt.Printf("%s\n", string(data))
+			hash = HashManifest1(artefactset.IsOCIDefaultFormat())
+			Expect(string(data)).To(Equal("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 
 			racc, err := comp.GetResourceByIndex(1)
 			Expect(err).To(Succeed())
@@ -281,7 +266,8 @@ process: (( (*(rules[mode] || rules.default)).process ))
 			// index 1: by value
 			data, err = json.Marshal(comp.GetDescriptor().Resources[1].Access)
 			Expect(err).To(Succeed())
-			Expect(string(data)).To(Equal("{\"localReference\":\"sha256:018520b2b249464a83e370619f544957b7936dd974468a128545eab88a0f53ed\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
+			hash := HashManifest1(artefactset.IsOCIDefaultFormat())
+			Expect(string(data)).To(Equal("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 
 			racc, err := comp.GetResourceByIndex(1)
 			Expect(err).To(Succeed())

@@ -111,12 +111,11 @@ func NewAccessObject(info AccessObjectInfo, acc AccessMode, fs vfs.FileSystem, s
 		return nil, err
 	}
 	if setup != nil {
-		err = setup.Setup(fs)
-		if err != nil {
+		if err := setup.Setup(fs); err != nil {
 			return nil, err
 		}
 	}
-	if err = info.SetupFor(fs); err != nil {
+	if err := info.SetupFor(fs); err != nil {
 		return nil, err
 	}
 	if defaulted {

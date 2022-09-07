@@ -70,6 +70,7 @@ func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferre
 			return nil, err
 		}
 		defer r.Close()
+
 		var reader io.Reader = r
 		if strings.HasSuffix(mime, "+gzip") {
 			reader, err = gzip.NewReader(reader)
@@ -78,20 +79,37 @@ func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferre
 			}
 		}
 		tr := tar.NewReader(reader)
+
+		var desc *cpi.DigestDescriptor
+		oci := false
+		layout := false
 		for {
 			header, err := tr.Next()
 			if err != nil {
 				if errors.Is(err, io.EOF) {
-					err = fmt.Errorf("descriptor not found in archive")
-					return nil, errors.ErrInvalidWrap(err, "artefact archive")
+					if oci {
+						if layout {
+							return desc, nil
+						} else {
+							err = fmt.Errorf("oci-layout not found")
+						}
+					} else {
+						err = fmt.Errorf("descriptor not found in archive")
+					}
 				}
-				return nil, err
+				return nil, errors.ErrInvalidWrap(err, "artefact archive")
 			}
 
 			switch header.Typeflag {
 			case tar.TypeDir:
 			case tar.TypeReg:
-				if header.Name == artefactset.ArtefactSetDescriptorFileName {
+				switch header.Name {
+				case artefactset.OCILayouFileName:
+					layout = true
+				case artefactset.OCIArtefactSetDescriptorFileName:
+					oci = true
+					fallthrough
+				case artefactset.ArtefactSetDescriptorFileName:
 					data, err := io.ReadAll(tr)
 					if err != nil {
 						return nil, fmt.Errorf("unable to read descriptor from archive: %w", err)
@@ -110,7 +128,10 @@ func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferre
 					if digest.Digest(main).Algorithm() != digest.Algorithm(d.GetType().HashAlgorithm) {
 						return nil, nil
 					}
-					return cpi.NewDigestDescriptor(digest.Digest(main).Hex(), d.GetType()), nil
+					desc = cpi.NewDigestDescriptor(digest.Digest(main).Hex(), d.GetType())
+					if !oci {
+						return desc, nil
+					}
 				}
 			}
 		}
