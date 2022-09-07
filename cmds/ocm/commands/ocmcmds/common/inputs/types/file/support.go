@@ -24,6 +24,7 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -46,7 +47,7 @@ func (s *ProcessSpec) Validate(fldPath *field.Path, ctx clictx.Context, inputFil
 	return allErrs
 }
 
-func (s *ProcessSpec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (s *ProcessSpec) GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
 	fs := ctx.FileSystem()
 	inputInfo, inputPath, err := inputs.FileInfo(ctx, s.Path, inputFilePath)
 	if err != nil {

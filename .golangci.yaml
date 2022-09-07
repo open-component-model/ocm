@@ -103,7 +103,13 @@ linters:
 
 linters-settings:
   gci:
-    local-prefixes: github.com/open-component-model/ocm
+    sections:
+      - standard
+      - blank
+      - dot
+      - default
+      - prefix(github.com/open-component-model/ocm)
+    custom-order: true
   staticcheck:
     go: "1.18"
   stylecheck:

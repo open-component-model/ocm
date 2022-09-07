@@ -107,6 +107,7 @@ type RepositorySpec struct {
 
 var (
 	_ cpi.RepositorySpec                   = (*RepositorySpec)(nil)
+	_ cpi.PrefixProvider                   = (*RepositorySpec)(nil)
 	_ cpi.IntermediateRepositorySpecAspect = (*RepositorySpec)(nil)
 )
 
@@ -115,6 +116,10 @@ func NewRepositorySpec(spec oci.RepositorySpec, meta *ComponentRepositoryMeta) *
 		RepositorySpec:          spec,
 		ComponentRepositoryMeta: *DefaultComponentRepositoryMeta(meta),
 	}
+}
+
+func (a *RepositorySpec) PathPrefix() string {
+	return a.SubPath
 }
 
 func (a *RepositorySpec) IsIntermediate() bool {

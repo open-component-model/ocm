@@ -32,7 +32,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
 	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -132,14 +131,14 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi
 	if hint == "" {
 		namespace = ocictx.Namespace
 	} else {
-		spec := ctx.TargetComponentRepository().GetSpecification().(*genericocireg.RepositorySpec)
+		prefix := cpi.RepositoryPrefix(ctx.TargetComponentRepository().GetSpecification())
 		i := strings.LastIndex(hint, ":")
 		if i > 0 {
 			version = hint[i:]
 			tag = version[1:] // remove colon
-			name = path.Join(spec.SubPath, hint[:i])
+			name = path.Join(prefix, hint[:i])
 		} else {
-			name = path.Join(spec.SubPath, hint)
+			name = path.Join(prefix, hint)
 		}
 		namespace, err = ocictx.Repository.LookupNamespace(name)
 		if err != nil {

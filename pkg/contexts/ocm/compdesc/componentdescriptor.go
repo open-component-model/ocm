@@ -15,6 +15,7 @@
 package compdesc
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -578,6 +579,10 @@ func NewComponentReference(name, componentName, version string, extraIdentity me
 		},
 		ComponentName: componentName,
 	}
+}
+
+func (r ComponentReference) String() string {
+	return fmt.Sprintf("%s[%s:%s]", r.Name, r.ComponentName, r.Version)
 }
 
 func (r *ComponentReference) GetMeta() *ElementMeta {

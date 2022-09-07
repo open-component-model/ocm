@@ -11,6 +11,8 @@ ocm ocm componentversions verify [<options>] {<component-reference>}
 ```
       --ca-cert stringArray      Additional root certificates
   -h, --help                     help for verify
+  -L, --local                    verification based on information found in component versions, only
+      --lookup stringArray       repository name or spec for closure lookup fallback
   -k, --public-key stringArray   public key setting
   -r, --repo string              repository name or spec
   -s, --signature stringArray    signature name
@@ -76,6 +78,16 @@ signature name specified with the option <code>--signature</code>.
 Alternatively a key can be specified as base64 encoded string if the argument
 start with the prefix <code>!</code> or as direct string with the prefix
 <code>=</code>.
+
+If a component lookup for building a reference closure is required
+the <code>--lookup</code>  option can be used to specify a fallback
+lookup repository. 
+By default the component versions are searched in the repository
+holding the component version for which the closure is determined.
+For *Component Archives* this is never possible, because it only
+contains a single component version. Therefore, in this scenario
+this option must always be specified to be able to follow component
+references.
 
 
 ### Examples

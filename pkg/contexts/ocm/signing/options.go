@@ -426,9 +426,10 @@ func (o *Options) PrivateKey() interface{} {
 
 func (o *Options) For(digest *metav1.DigestSpec) (*Options, error) {
 	opts := *o
+	opts.VerifySignature = false // TODO: may be we want a mode to verify signature if present
 	if !opts.Recursively {
 		opts.Signer = nil
-		opts.VerifySignature = false
+		opts.Update = false
 	}
 	if digest != nil {
 		opts.Hasher = opts.Registry.GetHasher(digest.HashAlgorithm)

@@ -15,6 +15,8 @@
 package localociblob
 
 import (
+	"fmt"
+
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -49,6 +51,10 @@ type AccessSpec struct {
 }
 
 var _ cpi.AccessSpec = (*AccessSpec)(nil)
+
+func (a *AccessSpec) Describe(ctx cpi.Context) string {
+	return fmt.Sprintf("Local OCI blob %s", a.Digest)
+}
 
 func (s AccessSpec) IsLocal(context cpi.Context) bool {
 	return true

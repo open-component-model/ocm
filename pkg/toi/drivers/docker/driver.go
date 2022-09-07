@@ -12,6 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
+//nolint:forbidigo  // part of a command line tool
 package docker
 
 import (
@@ -23,6 +24,7 @@ import (
 	unix_path "path"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/docker/cli/cli/command"
 	"github.com/docker/distribution/reference"
@@ -235,7 +237,7 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 	}
 
 	containerUID := getContainerUserID(ii.Config.User)
-	tarContent, err := generateTar(op.Files, containerUID)
+	tarContent, done, err := generateTar(op.Files, containerUID)
 	if err != nil {
 		return nil, fmt.Errorf("error staging files: %w", err)
 	}
@@ -248,6 +250,11 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error copying to / in container: %w", err)
 	}
+
+	if err = done(); err != nil {
+		return nil, fmt.Errorf("unable to send data: %w", err)
+	}
+	tarContent.Close()
 
 	attach, err := cli.Client().ContainerAttach(ctx, resp.ID, types.ContainerAttachOptions{
 		Stream: true,
@@ -417,19 +424,26 @@ func (d *Driver) fetchOutputs(ctx context.Context, container string, op *install
 // generateTar creates a tarfile containing the specified files, with the owner
 // set to the uid that the container runs as so that it is guaranteed to have
 // read access to the files we copy into the container.
-func generateTar(files map[string]accessio.BlobAccess, uid int) (io.Reader, error) {
+func generateTar(files map[string]accessio.BlobAccess, uid int) (io.ReadCloser, func() error, error) {
 	r, w := io.Pipe()
 	tw := tar.NewWriter(w)
 	for path := range files {
 		if unix_path.IsAbs(path) {
-			return nil, fmt.Errorf("destination path %s should be a relative unix path", path)
+			return nil, nil, fmt.Errorf("destination path %s should be a relative unix path", path)
 		}
 	}
+	var err error
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	fmt.Printf("waiting for successful data transfer...\n")
 	go func() {
-		have := map[string]bool{}
+		defer wg.Done()
+		defer w.Close()
 
+		have := map[string]bool{}
 		for path, content := range files {
 			path = unix_path.Join(install.PathInputs, path)
+			fmt.Printf("transferring %s...\n", path)
 			// Write a header for the parent directories so that newly created intermediate directories are accessible by the user
 			dir := path
 			for dir != "/" {
@@ -456,12 +470,16 @@ func generateTar(files map[string]accessio.BlobAccess, uid int) (io.Reader, erro
 				Uid:      uid,
 			}
 			tw.WriteHeader(fildHdr)
-			reader, _ := content.Reader()
+			reader, e := content.Reader()
+			if e != nil {
+				fmt.Printf("cannot transfer %s: %s\n", path, e)
+				err = e
+				return
+			}
 			io.Copy(tw, reader)
 		}
-		w.Close()
 	}()
-	return r, nil
+	return r, func() error { wg.Wait(); return err }, nil
 }
 
 // ConfigurationOption is an option used to customize docker driver container and host config.

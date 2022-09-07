@@ -19,10 +19,13 @@ import (
 	"compress/gzip"
 	"io"
 
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/testhelper"
+	. "github.com/open-component-model/ocm/pkg/testutils"
+
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -31,9 +34,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
-	. "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/testhelper"
 	"github.com/open-component-model/ocm/pkg/errors"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var _ = Describe("ctf management", func() {

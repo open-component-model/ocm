@@ -50,6 +50,7 @@ func New(sign bool) *Option {
 type Option struct {
 	rootca []string
 
+	local         bool
 	SignMode      bool
 	signAlgorithm string
 	hashAlgorithm string
@@ -82,7 +83,9 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 		fs.StringVarP(&o.hashAlgorithm, "hash", "H", sha256.Algorithm, "hash algorithm")
 		fs.StringVarP(&o.Issuer, "issuer", "I", "", "issuer name")
 		fs.BoolVarP(&o.Update, "update", "", o.SignMode, "update digest in component versions")
-		fs.BoolVarP(&o.Recursively, "recursive", "R", o.SignMode, "recursively sign component versions")
+		fs.BoolVarP(&o.Recursively, "recursive", "R", false, "recursively sign component versions")
+	} else {
+		fs.BoolVarP(&o.local, "local", "L", false, "verification based on information found in component versions, only")
 	}
 	fs.BoolVarP(&o.Verify, "verify", "V", o.SignMode, "verify existing digests")
 	fs.StringArrayVarP(&o.rootca, "ca-cert", "", o.rootca, "Additional root certificates")
@@ -125,7 +128,10 @@ func (o *Option) Complete(ctx clictx.Context) error {
 		if o.Hasher == nil {
 			return errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, o.hashAlgorithm)
 		}
+	} else {
+		o.Recursively = !o.local
 	}
+
 	err := o.handleKeys(ctx, "public key", o.publicKeys, o.Keys.RegisterPublicKey)
 	if err != nil {
 		return err

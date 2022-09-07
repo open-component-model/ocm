@@ -113,6 +113,10 @@ func New(repoURL, apiHostname, commit string, opts ...AccessSpecOptions) *Access
 	return s
 }
 
+func (a *AccessSpec) Describe(ctx cpi.Context) string {
+	return fmt.Sprintf("GitHub commit %s[%s]", a.RepoURL, a.Commit)
+}
+
 func (_ *AccessSpec) IsLocal(cpi.Context) bool {
 	return false
 }

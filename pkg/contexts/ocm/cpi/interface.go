@@ -37,7 +37,6 @@ type (
 	ComponentVersionAccess           = core.ComponentVersionAccess
 	AccessSpec                       = core.AccessSpec
 	GenericAccessSpec                = core.GenericAccessSpec
-	HintProvider                     = core.HintProvider
 	AccessMethod                     = core.AccessMethod
 	AccessMethodSupport              = core.AccessMethodSupport
 	AccessType                       = core.AccessType
@@ -139,4 +138,29 @@ func ErrComponentVersionNotFound(name, version string) error {
 
 func ErrComponentVersionNotFoundWrap(err error, name, version string) error {
 	return core.ErrComponentVersionNotFoundWrap(err, name, version)
+}
+
+// PrefixProvider is supported by RepositorySpecs to
+// provide info about a potential path prefix to
+// use for globalized local artifacts.
+type PrefixProvider interface {
+	PathPrefix() string
+}
+
+func RepositoryPrefix(spec RepositorySpec) string {
+	if s, ok := spec.(PrefixProvider); ok {
+		return s.PathPrefix()
+	}
+	return ""
+}
+
+// HintProvider is able to provide a name hint for globalization of local
+// artifacts.
+type HintProvider core.HintProvider
+
+func ArtefactNameHint(spec AccessSpec, cv ComponentVersionAccess) string {
+	if h, ok := spec.(HintProvider); ok {
+		return h.GetReferenceHint(cv)
+	}
+	return ""
 }

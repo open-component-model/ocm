@@ -44,25 +44,33 @@ func TransferComponents(printer common.Printer, closure TransportClosure, repo o
 	}
 	list := errors.ErrListf("component transport")
 	for _, c := range comps {
-		comp, err := repo.LookupComponent(c)
-		if list.Addf(printer, err, "component %s", c) == nil {
-			printer.Printf("transferring component %q...\n", c)
-			subp := printer.AddGap("  ")
-			vers, err := comp.ListVersions()
-			if list.Addf(subp, err, "list versions for %s", c) == nil {
-				for _, v := range vers {
-					ref := compdesc.NewComponentReference("", c, v, nil)
-					cv, h, err := handler.TransferVersion(repo, nil, ref)
-					if err != nil {
-						list.Addf(subp, err, "version %s", v)
-						continue
+		transferVersions(printer, closure, list, handler, repo, c, tgt)
+	}
+	return list.Result()
+}
+
+func transferVersions(printer common.Printer, closure TransportClosure, list *errors.ErrorList, handler transferhandler.TransferHandler, repo ocm.Repository, c string, tgt ocm.Repository) {
+	comp, err := repo.LookupComponent(c)
+	if list.Addf(printer, err, "component %s", c) == nil {
+		defer comp.Close()
+		printer.Printf("transferring component %q...\n", c)
+		subp := printer.AddGap("  ")
+		vers, err := comp.ListVersions()
+
+		if list.Addf(subp, err, "list versions for %s", c) == nil {
+			for _, v := range vers {
+				ref := compdesc.NewComponentReference("", c, v, nil)
+				sub, h, err := handler.TransferVersion(repo, nil, ref)
+				if list.Addf(subp, err, "version %s", v) != nil {
+					continue
+				}
+				if sub != nil {
+					if list.Addf(subp, err, "version %s", v) == nil {
+						list.Addf(subp, TransferVersion(subp, closure, sub, tgt, h), "")
 					}
-					if cv != nil {
-						list.Addf(subp, TransferVersion(subp, closure, cv, tgt, h), "")
-					}
+					sub.Close()
 				}
 			}
 		}
 	}
-	return list.Result()
 }

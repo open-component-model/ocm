@@ -15,10 +15,13 @@
 package helm
 
 import (
+	"fmt"
+
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
@@ -54,7 +57,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
 	_, inputPath, err := inputs.FileInfo(ctx, s.Path, inputFilePath)
 	if err != nil {
 		return nil, "", err
@@ -67,9 +70,17 @@ func (s *Spec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.Tempo
 	if s.Version != "" {
 		vers = s.Version
 	}
+	if vers == "" {
+		vers = nv.GetVersion()
+	}
 	blob, err := helm.SynthesizeArtefactBlob(inputPath, ctx.FileSystem())
 	if err != nil {
 		return nil, "", err
 	}
-	return blob, chart.Metadata.Name + ":" + vers, err
+	name := chart.Name()
+	hint := fmt.Sprintf("%s/%s:%s", nv.GetName(), name, vers)
+	if name == "" {
+		hint = fmt.Sprintf("%s:%s", nv.GetName(), vers)
+	}
+	return blob, hint, err
 }

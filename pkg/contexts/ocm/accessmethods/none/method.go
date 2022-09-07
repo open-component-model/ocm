@@ -43,6 +43,10 @@ type AccessSpec struct {
 
 var _ cpi.AccessSpec = (*AccessSpec)(nil)
 
+func (a *AccessSpec) Describe(ctx cpi.Context) string {
+	return "none"
+}
+
 func (s AccessSpec) IsLocal(context cpi.Context) bool {
 	return false
 }

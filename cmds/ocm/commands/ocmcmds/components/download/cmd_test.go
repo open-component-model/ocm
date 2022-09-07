@@ -17,11 +17,12 @@ package download_test
 import (
 	"bytes"
 
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+
+	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/grammar"

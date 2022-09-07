@@ -39,6 +39,7 @@ type AccessMethodSupport interface {
 // component version.
 type AccessSpec interface {
 	compdesc.AccessSpec
+	Describe(Context) string
 	IsLocal(Context) bool
 	AccessMethod(access ComponentVersionAccess) (AccessMethod, error)
 }
@@ -49,7 +50,7 @@ type AccessSpec interface {
 // expanding a blob to a repository specific representation to determine a
 // useful name.
 type HintProvider interface {
-	GetReferenceHint() string
+	GetReferenceHint(cv ComponentVersionAccess) string
 }
 
 // AccessMethod described the access to a dedicate resource
@@ -157,6 +158,10 @@ func (s *UnknownAccessSpec) AccessMethod(ComponentVersionAccess) (AccessMethod, 
 	return nil, errors.ErrUnknown(errors.KIND_ACCESSMETHOD, s.GetType())
 }
 
+func (s *UnknownAccessSpec) Describe(ctx Context) string {
+	return fmt.Sprintf("unknown access method type %q", s.GetType())
+}
+
 func (_ *UnknownAccessSpec) IsLocal(Context) bool {
 	return false
 }
@@ -176,6 +181,14 @@ func NewGenericAccessSpec(spec string) (*GenericAccessSpec, error) {
 		return nil, err
 	}
 	return &g, nil
+}
+
+func (s *GenericAccessSpec) Describe(ctx Context) string {
+	eff, err := s.Evaluate(ctx)
+	if err != nil {
+		return fmt.Sprintf("invalid access specificatio: %s", err.Error())
+	}
+	return eff.Describe(ctx)
 }
 
 func (s *GenericAccessSpec) Evaluate(ctx Context) (AccessSpec, error) {

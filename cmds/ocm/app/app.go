@@ -20,6 +20,9 @@ import (
 	"fmt"
 	"strings"
 
+	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
+	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -53,12 +56,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	datacfg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/version"

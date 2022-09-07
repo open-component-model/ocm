@@ -22,6 +22,7 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -70,7 +71,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
 	fs := ctx.FileSystem()
 	inputInfo, inputPath, err := inputs.FileInfo(ctx, s.Path, inputFilePath)
 	if err != nil {
@@ -94,7 +95,7 @@ func (s *Spec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.Tempo
 	defer temp.Close()
 
 	if s.Compress() {
-		s.SetMediaTypeIfNotDefined(mime.MIME_GZIP)
+		s.SetMediaTypeIfNotDefined(mime.MIME_TGZ)
 		gw := gzip.NewWriter(temp.Writer())
 		if err := tarutils.TarFileSystem(fs, inputPath, gw, opts); err != nil {
 			return nil, "", fmt.Errorf("unable to tar input artifact: %w", err)

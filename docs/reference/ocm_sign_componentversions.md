@@ -14,10 +14,11 @@ ocm sign componentversions [<options>] {<component-reference>}
   -H, --hash string               hash algorithm (default "sha256")
   -h, --help                      help for componentversions
   -I, --issuer string             issuer name
+      --lookup stringArray        repository name or spec for closure lookup fallback
   -N, --normalization string      normalization algorithm (default "jsonNormalisation/v1")
   -K, --private-key stringArray   private key setting
   -k, --public-key stringArray    public key setting
-  -R, --recursive                 recursively sign component versions (default true)
+  -R, --recursive                 recursively sign component versions
   -r, --repo string               repository name or spec
   -s, --signature stringArray     signature name
       --update                    update digest in component versions (default true)
@@ -112,6 +113,16 @@ The following hash modes are supported with option <code>--hash</code>:
 
   - <code>sha512</code>: 
 
+
+If a component lookup for building a reference closure is required
+the <code>--lookup</code>  option can be used to specify a fallback
+lookup repository. 
+By default the component versions are searched in the repository
+holding the component version for which the closure is determined.
+For *Component Archives* this is never possible, because it only
+contains a single component version. Therefore, in this scenario
+this option must always be specified to be able to follow component
+references.
 
 
 ### Examples
