@@ -23,8 +23,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/spf13/cobra"
+
+	"github.com/open-component-model/ocm/pkg/cobrautils"
 )
 
 func printOptions(buf *bytes.Buffer, cmd *cobra.Command, name string) error {
