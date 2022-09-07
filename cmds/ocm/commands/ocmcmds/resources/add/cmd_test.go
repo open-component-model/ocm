@@ -19,6 +19,8 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/opencontainers/go-digest"
+	"helm.sh/helm/v3/pkg/chart/loader"
 
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	"github.com/open-component-model/ocm/pkg/common"
@@ -32,8 +34,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/opencontainers/go-digest"
-	"helm.sh/helm/v3/pkg/chart/loader"
 )
 
 const ARCH = "/tmp/ca"

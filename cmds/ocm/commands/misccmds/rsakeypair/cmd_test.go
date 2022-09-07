@@ -19,10 +19,10 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/opencontainers/go-digest"
 
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
-	"github.com/opencontainers/go-digest"
 )
 
 const ISSUER = "mandelsoft"

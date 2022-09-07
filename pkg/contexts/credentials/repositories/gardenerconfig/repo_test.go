@@ -13,8 +13,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-component-model/ocm/pkg/utils"
-
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
@@ -23,6 +21,7 @@ import (
 	gardenercfgcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 var _ = Describe("gardener config", func() {
