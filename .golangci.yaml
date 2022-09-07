@@ -82,6 +82,7 @@ linters:
     - exhaustruct      # Doesn't really make sense.
     - exhaustive       # Doesn't really make sense.
     - logrlint         # Doesn't really make sense.
+    - goimports        # acts weirdly, dci handles imports anyway
 
     # Disabled because of generics in go 1.18
     - contextcheck
@@ -101,8 +102,6 @@ linters:
     - varcheck
 
 linters-settings:
-  goimports:
-    local-prefixes: github.com/open-component-model/ocm
   gci:
     local-prefixes: github.com/open-component-model/ocm
   staticcheck:

@@ -14,11 +14,8 @@ log() {
 
 pkgprefix="github.com/open-component-model/ocm"
 
-log "Format with goimports"
-goimports -l -w -local="${pkgprefix}" $@
-
 log "Format with gci"
-gci diff --skip-generated -s standard -s default -s="prefix(${pkgprefix})" . \
+gci diff --skip-generated -s standard -s default -s="prefix(${pkgprefix})" $@ \
   | awk '/^--- / { print $2 }' \
   | xargs -I "{}" \
     gci write --skip-generated -s standard -s default -s="prefix(${pkgprefix})" "{}"
