@@ -19,7 +19,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	local "github.com/open-component-model/ocm/pkg/contexts/config/core"
-
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 )
 

@@ -29,10 +29,10 @@ import (
 type BuilderMode int
 
 const (
-	// MODE_SHARED uses the default contexts for unset nested context types
+	// MODE_SHARED uses the default contexts for unset nested context types.
 	MODE_SHARED BuilderMode = iota
 	// MODE_DEFAULTED uses dedicated context instances configured with the
-	// context type specific default registrations
+	// context type specific default registrations.
 	MODE_DEFAULTED
 	// MODE_CONFIGURED uses dedicated context instances configured with the
 	// context type registrations configured with the actual state of the

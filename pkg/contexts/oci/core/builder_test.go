@@ -20,10 +20,8 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-
-	local "github.com/open-component-model/ocm/pkg/contexts/oci/core"
-
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	local "github.com/open-component-model/ocm/pkg/contexts/oci/core"
 )
 
 var _ = Describe("builder test", func() {
