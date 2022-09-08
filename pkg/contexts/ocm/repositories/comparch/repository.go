@@ -35,8 +35,8 @@ type Repository struct {
 var _ cpi.Repository = (*Repository)(nil)
 
 func NewRepository(ctx cpi.Context, s *RepositorySpec) (*Repository, error) {
-	if s.PathFileSystem == nil {
-		s.PathFileSystem = vfsattr.Get(ctx)
+	if s.GetPathFileSystem() == nil {
+		s.SetPathFileSystem(vfsattr.Get(ctx))
 	}
 	a, err := Open(ctx, s.AccessMode, s.FilePath, 0o700, s)
 	if err != nil {

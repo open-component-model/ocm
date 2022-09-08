@@ -69,8 +69,8 @@ var (
 )
 
 // New returns a new representation based element.
-func New(acc accessobj.AccessMode, fs vfs.FileSystem, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode) (*ArtefactSet, error) {
-	return _Wrap(accessobj.NewAccessObject(NewAccessObjectInfo(), acc, fs, setup, closer, mode))
+func New(acc accessobj.AccessMode, fs vfs.FileSystem, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode, formatVersion string) (*ArtefactSet, error) {
+	return _Wrap(accessobj.NewAccessObject(NewAccessObjectInfo(formatVersion), acc, fs, setup, closer, mode))
 }
 
 func _Wrap(obj *accessobj.AccessObject, err error) (*ArtefactSet, error) {

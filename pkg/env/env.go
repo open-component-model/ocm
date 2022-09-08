@@ -172,8 +172,9 @@ func NewEnvironment(opts ...Option) *Environment {
 
 var _ accessio.Option = (*Environment)(nil)
 
-func (e *Environment) ApplyOption(options *accessio.Options) {
-	options.PathFileSystem = e.FileSystem()
+func (e *Environment) ApplyOption(options accessio.Options) error {
+	options.SetPathFileSystem(e.FileSystem())
+	return nil
 }
 
 func (e *Environment) OCMContext() ocm.Context {

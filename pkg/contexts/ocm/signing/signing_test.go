@@ -17,6 +17,7 @@ package signing_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
@@ -25,7 +26,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
@@ -47,9 +47,6 @@ const COMPONENTA = "github.com/mandelsoft/test"
 const COMPONENTB = "github.com/mandelsoft/ref"
 const OUT = "/tmp/res"
 const OCIPATH = "/tmp/oci"
-const OCINAMESPACE = "ocm/value"
-const OCINAMESPACE2 = "ocm/ref"
-const OCIVERSION = "v2.0"
 const OCIHOST = "alias"
 
 const SIGNATURE = "test"
@@ -69,29 +66,11 @@ var _ = Describe("access method", func() {
 
 	Context("valid", func() {
 		BeforeEach(func() {
-			env.OCIContext().SetAlias(OCIHOST, ctfoci.NewRepositorySpec(accessobj.ACC_READONLY, OCIPATH, accessio.PathFileSystem(env.FileSystem())))
+			FakeOCIRepo(env, OCIPATH, OCIHOST)
 
 			env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
-				env.Namespace(OCINAMESPACE, func() {
-					env.Manifest(OCIVERSION, func() {
-						env.Config(func() {
-							env.BlobStringData(mime.MIME_JSON, "{}")
-						})
-						env.Layer(func() {
-							env.BlobStringData(mime.MIME_TEXT, "manifestlayer")
-						})
-					})
-				})
-				env.Namespace(OCINAMESPACE2, func() {
-					env.Manifest(OCIVERSION, func() {
-						env.Config(func() {
-							env.BlobStringData(mime.MIME_JSON, "{}")
-						})
-						env.Layer(func() {
-							env.BlobStringData(mime.MIME_TEXT, "otherlayer")
-						})
-					})
-				})
+				OCIManifest1(env)
+				OCIManifest2(env)
 			})
 
 			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {

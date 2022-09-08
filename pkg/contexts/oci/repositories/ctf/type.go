@@ -37,7 +37,7 @@ func init() {
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
-	accessio.Options            `json:",inline"`
+	accessio.StandardOptions    `json:",inline"`
 
 	// FileFormat is the format of the repository file
 	FilePath string `json:"filePath"`
@@ -50,22 +50,26 @@ var _ cpi.RepositorySpec = (*RepositorySpec)(nil)
 var _ cpi.IntermediateRepositorySpecAspect = (*RepositorySpec)(nil)
 
 // NewRepositorySpec creates a new RepositorySpec.
-func NewRepositorySpec(mode accessobj.AccessMode, filePath string, opts ...accessio.Option) *RepositorySpec {
-	o := accessio.AccessOptions(opts...)
-	if o.FileFormat == nil {
+func NewRepositorySpec(mode accessobj.AccessMode, filePath string, opts ...accessio.Option) (*RepositorySpec, error) {
+	o, err := accessio.AccessOptions(nil, opts...)
+	if err != nil {
+		return nil, err
+	}
+	if o.GetFileFormat() == nil {
 		for _, v := range SupportedFormats() {
 			if strings.HasSuffix(filePath, "."+v.String()) {
-				o.FileFormat = &v
+				o.SetFileFormat(v)
 				break
 			}
 		}
 	}
+	o.Default()
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		FilePath:            filePath,
-		Options:             o.Default(),
+		StandardOptions:     *o.(*accessio.StandardOptions),
 		AccessMode:          mode,
-	}
+	}, nil
 }
 
 func (a *RepositorySpec) IsIntermediate() bool {
@@ -89,5 +93,5 @@ func (s *RepositorySpec) UniformRepositorySpec() *cpi.UniformRepositorySpec {
 }
 
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
-	return Open(ctx, a.AccessMode, a.FilePath, 0o700, a.Options)
+	return Open(ctx, a.AccessMode, a.FilePath, 0o700, &a.StandardOptions)
 }

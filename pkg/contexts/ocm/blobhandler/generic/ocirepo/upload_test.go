@@ -63,7 +63,10 @@ var _ = Describe("upload", func() {
 		env = NewBuilder(tenv.NewEnvironment())
 
 		// fake OCI registry
-		env.OCIContext().SetAlias(OCIHOST, ctfoci.NewRepositorySpec(accessobj.ACC_READONLY, OCIPATH, accessio.PathFileSystem(env.FileSystem())))
+		spec, err := ctfoci.NewRepositorySpec(accessobj.ACC_READONLY, OCIPATH, accessio.PathFileSystem(env.FileSystem()))
+		Expect(err).To(Succeed())
+		env.OCIContext().SetAlias(OCIHOST, spec)
+
 		env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
 			env.Namespace(OCINAMESPACE, func() {
 				env.Manifest(OCIVERSION, func() {

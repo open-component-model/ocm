@@ -51,14 +51,17 @@ var (
 )
 
 // NewRepositorySpec creates a new RepositorySpec.
-func NewRepositorySpec(acc accessobj.AccessMode, filePath string, opts ...accessio.Option) *RepositorySpec {
-	o := accessio.AccessOptions(opts...)
+func NewRepositorySpec(acc accessobj.AccessMode, filePath string, opts ...accessio.Option) (*RepositorySpec, error) {
+	o, err := accessio.AccessOptions(nil, opts...)
+	if err != nil {
+		return nil, err
+	}
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		FilePath:            filePath,
 		Options:             o,
 		AccessMode:          acc,
-	}
+	}, nil
 }
 
 func (a *RepositorySpec) IsIntermediate() bool {
@@ -74,8 +77,9 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 }
 
 func (a *RepositorySpec) AsUniformSpec(cpi.Context) cpi.UniformRepositorySpec {
-	opts := a.Options.Default()
-	p, err := vfs.Canonical(opts.PathFileSystem, a.FilePath, false)
+	opts := &accessio.StandardOptions{}
+	opts.Default()
+	p, err := vfs.Canonical(opts.GetPathFileSystem(), a.FilePath, false)
 	if err != nil {
 		return cpi.UniformRepositorySpec{Type: a.GetKind(), SubPath: a.FilePath}
 	}

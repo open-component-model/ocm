@@ -98,8 +98,11 @@ func SupportedFormats() []accessio.FileFormat {
 ////////////////////////////////////////////////////////////////////////////////
 
 func OpenFromBlob(ctx cpi.Context, acc accessobj.AccessMode, blob accessio.BlobAccess, opts ...accessio.Option) (*Object, error) {
-	o := accessio.AccessOptions(opts...)
-	if o.File != nil || o.Reader != nil {
+	o, err := accessio.AccessOptions(nil, opts...)
+	if err != nil {
+		return nil, err
+	}
+	if o.GetFile() != nil || o.GetReader() != nil {
 		return nil, errors.ErrInvalid("file or reader option nor possible for blob access")
 	}
 	reader, err := blob.Reader()
@@ -107,24 +110,24 @@ func OpenFromBlob(ctx cpi.Context, acc accessobj.AccessMode, blob accessio.BlobA
 		return nil, err
 	}
 	defer reader.Close()
-	o.Reader = reader
+	o.SetReader(reader)
 	fmt := accessio.FormatTar
 	mime := blob.MimeType()
 	if strings.HasSuffix(mime, "+gzip") {
 		fmt = accessio.FormatTGZ
 	}
-	o.FileFormat = &fmt
+	o.SetFileFormat(fmt)
 	return Open(ctx, acc&accessobj.ACC_READONLY, "", 0, o)
 }
 
 func Open(ctx cpi.Context, acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessio.Option) (*Object, error) {
-	o, create, err := accessobj.HandleAccessMode(acc, path, opts...)
+	o, create, err := accessobj.HandleAccessMode(acc, path, nil, opts...)
 	if err != nil {
 		return nil, err
 	}
-	h, ok := fileFormats[*o.FileFormat]
+	h, ok := fileFormats[*o.GetFileFormat()]
 	if !ok {
-		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.FileFormat.String())
+		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.GetFileFormat().String())
 	}
 	if create {
 		return h.Create(ctx, path, o, mode)
@@ -133,22 +136,34 @@ func Open(ctx cpi.Context, acc accessobj.AccessMode, path string, mode vfs.FileM
 }
 
 func Create(ctx cpi.Context, acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessio.Option) (*Object, error) {
-	o := accessio.AccessOptions(opts...).DefaultFormat(accessio.FormatDirectory)
-	h, ok := fileFormats[*o.FileFormat]
+	o, err := accessio.AccessOptions(nil, opts...)
+	if err != nil {
+		return nil, err
+	}
+	o.DefaultFormat(accessio.FormatDirectory)
+	h, ok := fileFormats[*o.GetFileFormat()]
 	if !ok {
-		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.FileFormat.String())
+		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.GetFileFormat().String())
 	}
 	return h.Create(ctx, path, o, mode)
 }
 
 func (h *formatHandler) Open(ctx cpi.Context, acc accessobj.AccessMode, path string, opts accessio.Options) (*Object, error) {
 	obj, err := h.FormatHandler.Open(accessObjectInfo, acc, path, opts)
-	return _Wrap(ctx, NewRepositorySpec(acc, path, opts), obj, err)
+	if err != nil {
+		return nil, err
+	}
+	spec, err := NewRepositorySpec(acc, path, opts)
+	return _Wrap(ctx, spec, obj, err)
 }
 
 func (h *formatHandler) Create(ctx cpi.Context, path string, opts accessio.Options, mode vfs.FileMode) (*Object, error) {
 	obj, err := h.FormatHandler.Create(accessObjectInfo, path, opts, mode)
-	return _Wrap(ctx, NewRepositorySpec(accessobj.ACC_CREATE, path, opts), obj, err)
+	if err != nil {
+		return nil, err
+	}
+	spec, err := NewRepositorySpec(accessobj.ACC_CREATE, path, opts)
+	return _Wrap(ctx, spec, obj, err)
 }
 
 // WriteToFilesystem writes the current object to a filesystem.

@@ -47,7 +47,8 @@ var _ = Describe("artefact management", func() {
 		t, err := osfs.NewTempFileSystem()
 		Expect(err).To(Succeed())
 		tempfs = t
-		opts = accessio.AccessOptions(accessio.PathFileSystem(tempfs))
+		opts, err = accessio.AccessOptions(nil, accessio.PathFileSystem(tempfs))
+		Expect(err).To(Succeed())
 	})
 
 	AfterEach(func() {
@@ -124,11 +125,12 @@ var _ = Describe("artefact management", func() {
 	})
 
 	It("instantiate tgz artefact for open file object", func() {
-		file, err := vfs.TempFile(opts.PathFileSystem, "", "*.tgz")
+		file, err := vfs.TempFile(opts.GetPathFileSystem(), "", "*.tgz")
 		Expect(err).To(Succeed())
 		defer file.Close()
 
-		opts := accessio.AccessOptions(opts, accessio.File(file))
+		opts, err := accessio.AccessOptions(nil, opts, accessio.File(file))
+		Expect(err).To(Succeed())
 
 		a, err := artefactset.FormatTGZ.Create("", opts, 0600)
 		Expect(err).To(Succeed())

@@ -107,7 +107,8 @@ var _ = Describe("syntheses", func() {
 		t, err := osfs.NewTempFileSystem()
 		Expect(err).To(Succeed())
 		tempfs = t
-		spec = ctf.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessio.PathFileSystem(tempfs), accessobj.FormatDirectory)
+		spec, err = ctf.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessio.PathFileSystem(tempfs), accessobj.FormatDirectory)
+		Expect(err).To(Succeed())
 	})
 
 	AfterEach(func() {
@@ -115,7 +116,7 @@ var _ = Describe("syntheses", func() {
 	})
 
 	It("synthesize", func() {
-		r, err := ctf.FormatDirectory.Create(oci.DefaultContext(), "test", spec.Options, 0700)
+		r, err := ctf.FormatDirectory.Create(oci.DefaultContext(), "test", &spec.StandardOptions, 0700)
 		Expect(err).To(Succeed())
 		n, err := r.LookupNamespace("mandelsoft/test")
 		Expect(err).To(Succeed())
@@ -123,7 +124,7 @@ var _ = Describe("syntheses", func() {
 		Expect(n.Close()).To(Succeed())
 		Expect(r.Close()).To(Succeed())
 
-		r, err = ctf.Open(oci.DefaultContext(), accessobj.ACC_READONLY, "test", 0, spec.Options)
+		r, err = ctf.Open(oci.DefaultContext(), accessobj.ACC_READONLY, "test", 0, &spec.StandardOptions)
 		Expect(err).To(Succeed())
 		defer Close(r, "ctf")
 		n, err = r.LookupNamespace("mandelsoft/test")

@@ -45,12 +45,14 @@ func InternalRepresentationFilesystem(acc AccessMode, fs vfs.FileSystem, setup F
 	return tmp, fs, err
 }
 
-func HandleAccessMode(acc AccessMode, path string, opts ...accessio.Option) (accessio.Options, bool, error) {
-	var err error
+func HandleAccessMode(acc AccessMode, path string, opts accessio.Options, olist ...accessio.Option) (accessio.Options, bool, error) {
 	ok := true
-	o := accessio.AccessOptions(opts...)
-	if o.File == nil && o.Reader == nil {
-		ok, err = vfs.Exists(o.PathFileSystem, path)
+	o, err := accessio.AccessOptions(opts, olist...)
+	if err != nil {
+		return nil, false, err
+	}
+	if o.GetFile() == nil && o.GetReader() == nil {
+		ok, err = vfs.Exists(o.GetPathFileSystem(), path)
 		if err != nil {
 			return o, false, err
 		}
@@ -59,13 +61,12 @@ func HandleAccessMode(acc AccessMode, path string, opts ...accessio.Option) (acc
 		if !acc.IsCreate() {
 			return o, false, errors.ErrNotFoundWrap(vfs.ErrNotExist, "file", path)
 		}
-		if o.FileFormat == nil {
-			fmt := accessio.FormatDirectory
-			o.FileFormat = &fmt
+		if o.GetFileFormat() == nil {
+			o.SetFileFormat(accessio.FormatDirectory)
 		}
 		return o, true, nil
 	}
 
-	o, err = o.DefaultForPath(path)
+	err = o.DefaultForPath(path)
 	return o, false, err
 }

@@ -25,7 +25,36 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-type Options struct {
+type Options interface {
+	Option
+
+	SetFileFormat(FileFormat)
+	GetFileFormat() *FileFormat
+
+	SetPathFileSystem(vfs.FileSystem)
+	GetPathFileSystem() vfs.FileSystem
+
+	SetRepresentation(vfs.FileSystem)
+	GetRepresentation() vfs.FileSystem
+
+	SetFile(vfs.File)
+	GetFile() vfs.File
+
+	SetReader(closer io.ReadCloser)
+	GetReader() io.ReadCloser
+
+	ApplyOptions(opts ...Option) error
+
+	ValidForPath(path string) error
+	WriterFor(path string, mode vfs.FileMode) (io.WriteCloser, error)
+
+	DefaultFormat(fmt FileFormat)
+	Default()
+
+	DefaultForPath(path string) error
+}
+
+type StandardOptions struct {
 	// FilePath is the path of the repository base in the filesystem
 	FileFormat *FileFormat `json:"fileFormat"`
 	// FileSystem is the virtual filesystem to evaluate the file path. Default is the OS filesytem
@@ -46,62 +75,84 @@ type Options struct {
 	Reader io.ReadCloser `json:"-"`
 }
 
-var _ Option = &Options{}
+var _ Options = (*StandardOptions)(nil)
 
-var _osfs = osfs.New()
+func (o *StandardOptions) SetFileFormat(format FileFormat) {
+	o.FileFormat = &format
+}
 
-func (o Options) ApplyOption(options *Options) {
+func (o *StandardOptions) GetFileFormat() *FileFormat {
+	return o.FileFormat
+}
+
+func (o *StandardOptions) SetPathFileSystem(fs vfs.FileSystem) {
+	o.PathFileSystem = fs
+}
+
+func (o *StandardOptions) GetPathFileSystem() vfs.FileSystem {
+	return o.PathFileSystem
+}
+
+func (o *StandardOptions) SetRepresentation(fs vfs.FileSystem) {
+	o.Representation = fs
+}
+
+func (o *StandardOptions) GetRepresentation() vfs.FileSystem {
+	return o.Representation
+}
+
+func (o *StandardOptions) SetFile(file vfs.File) {
+	o.File = file
+}
+
+func (o *StandardOptions) GetFile() vfs.File {
+	return o.File
+}
+
+func (o *StandardOptions) SetReader(r io.ReadCloser) {
+	o.Reader = r
+}
+
+func (o *StandardOptions) GetReader() io.ReadCloser {
+	return o.Reader
+}
+
+func (o *StandardOptions) ApplyOption(options Options) error {
 	if o.PathFileSystem != nil {
-		options.PathFileSystem = o.PathFileSystem
+		options.SetPathFileSystem(o.PathFileSystem)
 	}
 	if o.Representation != nil {
-		options.Representation = o.Representation
+		options.SetRepresentation(o.Representation)
 	}
 	if o.FileFormat != nil {
-		options.FileFormat = o.FileFormat
+		options.SetFileFormat(*o.FileFormat)
 	}
 	if o.File != nil {
-		options.File = o.File
+		options.SetFile(o.File)
 	}
 	if o.Reader != nil {
-		options.Reader = o.Reader
-	}
-}
-
-func (o Options) Default() Options {
-	if o.PathFileSystem == nil {
-		o.PathFileSystem = _osfs
-	}
-	return o
-}
-
-func (o Options) DefaultFormat(fmt FileFormat) Options {
-	if o.FileFormat == nil {
-		o.FileFormat = &fmt
-	}
-	return o
-}
-
-func (o Options) ValidForPath(path string) error {
-	count := 0
-	if path != "" {
-		count++
-	}
-	if o.File != nil {
-		count++
-	}
-	if o.Reader != nil {
-		count++
-	}
-	if count > 1 {
-		return errors.ErrInvalid("only path,, file or reader can be set")
+		options.SetReader(o.Reader)
 	}
 	return nil
 }
 
-func (o Options) DefaultForPath(path string) (Options, error) {
+var _osfs = osfs.New()
+
+func (o *StandardOptions) Default() {
+	if o.PathFileSystem == nil {
+		o.PathFileSystem = _osfs
+	}
+}
+
+func (o *StandardOptions) DefaultFormat(fmt FileFormat) {
+	if o.FileFormat == nil {
+		o.FileFormat = &fmt
+	}
+}
+
+func (o *StandardOptions) DefaultForPath(path string) error {
 	if err := o.ValidForPath(path); err != nil {
-		return o, err
+		return err
 	}
 	if o.FileFormat == nil {
 		var fmt *FileFormat
@@ -122,12 +173,29 @@ func (o Options) DefaultForPath(path string) (Options, error) {
 		if err == nil {
 			o.FileFormat = fmt
 		}
-		return o, err
+		return err
 	}
-	return o, nil
+	return nil
 }
 
-func (o Options) WriterFor(path string, mode vfs.FileMode) (io.WriteCloser, error) {
+func (o *StandardOptions) ValidForPath(path string) error {
+	count := 0
+	if path != "" {
+		count++
+	}
+	if o.File != nil {
+		count++
+	}
+	if o.Reader != nil {
+		count++
+	}
+	if count > 1 {
+		return errors.ErrInvalid("only path,, file or reader can be set")
+	}
+	return nil
+}
+
+func (o *StandardOptions) WriterFor(path string, mode vfs.FileMode) (io.WriteCloser, error) {
 	if err := o.ValidForPath(path); err != nil {
 		return nil, err
 	}
@@ -142,20 +210,21 @@ func (o Options) WriterFor(path string, mode vfs.FileMode) (io.WriteCloser, erro
 	return writer, err
 }
 
-// ApplyOptions applies the given list options on these options,
-// and then returns itself (for convenient chaining).
-func (o Options) ApplyOptions(opts ...Option) Options {
+// ApplyOptions applies the given list options on these options.
+func (o *StandardOptions) ApplyOptions(opts ...Option) error {
 	for _, opt := range opts {
 		if opt != nil {
-			opt.ApplyOption(&o)
+			if err := opt.ApplyOption(o); err != nil {
+				return err
+			}
 		}
 	}
-	return o
+	return nil
 }
 
 // Option is the interface to specify different archive options.
 type Option interface {
-	ApplyOption(options *Options)
+	ApplyOption(options Options) error
 }
 
 // PathFileSystem set the evaluation filesystem for the path name.
@@ -168,8 +237,9 @@ type optPfs struct {
 }
 
 // ApplyOption applies the configured path filesystem.
-func (o optPfs) ApplyOption(options *Options) {
-	options.PathFileSystem = o.FileSystem
+func (o optPfs) ApplyOption(options Options) error {
+	options.SetPathFileSystem(o.FileSystem)
+	return nil
 }
 
 // RepresentationFileSystem set the evaltuation filesystem for the path name.
@@ -182,8 +252,9 @@ type optRfs struct {
 }
 
 // ApplyOption applies the configured path filesystem.
-func (o optRfs) ApplyOption(options *Options) {
-	options.Representation = o.FileSystem
+func (o optRfs) ApplyOption(options Options) error {
+	options.SetRepresentation(o.FileSystem)
+	return nil
 }
 
 // File set open file to use.
@@ -196,8 +267,9 @@ type optF struct {
 }
 
 // ApplyOption applies the configured open file.
-func (o optF) ApplyOption(options *Options) {
-	options.File = o.File
+func (o optF) ApplyOption(options Options) error {
+	options.SetFile(o.File)
+	return nil
 }
 
 // Reader set open reader to use.
@@ -210,12 +282,21 @@ type optR struct {
 }
 
 // ApplyOption applies the configured open file.
-func (o optR) ApplyOption(options *Options) {
-	options.Reader = o.ReadCloser
+func (o optR) ApplyOption(options Options) error {
+	options.SetReader(o.ReadCloser)
+	return nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func AccessOptions(opts ...Option) Options {
-	return Options{}.ApplyOptions(opts...).Default()
+func AccessOptions(opts Options, list ...Option) (Options, error) {
+	if opts == nil {
+		opts = &StandardOptions{}
+	}
+	err := opts.ApplyOptions(list...)
+	if err != nil {
+		return nil, err
+	}
+	opts.Default()
+	return opts, nil
 }

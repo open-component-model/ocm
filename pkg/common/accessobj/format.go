@@ -129,23 +129,23 @@ func DefaultOpenOptsFileHandling(kind string, info AccessObjectInfo, acc AccessM
 	if err := opts.ValidForPath(path); err != nil {
 		return nil, err
 	}
-	var reader io.ReadCloser
 	var file vfs.File
 	var err error
 	var closer Closer
+
+	reader := opts.GetReader()
 	switch {
-	case opts.Reader != nil:
-		reader = opts.Reader
-		defer opts.Reader.Close()
-	case opts.File == nil:
+	case reader != nil:
+		defer reader.Close()
+	case opts.GetFile() == nil:
 		// we expect that the path point to a tar
-		file, err = opts.PathFileSystem.Open(path)
+		file, err = opts.GetPathFileSystem().Open(path)
 		if err != nil {
 			return nil, fmt.Errorf("unable to open %s from %s: %w", kind, path, err)
 		}
 		defer file.Close()
 	default:
-		file = opts.File
+		file = opts.GetFile()
 	}
 	if file != nil {
 		reader = file
@@ -162,11 +162,11 @@ func DefaultCreateOptsFileHandling(kind string, info AccessObjectInfo, path stri
 	if err := opts.ValidForPath(path); err != nil {
 		return nil, err
 	}
-	if opts.Reader != nil {
+	if opts.GetReader() != nil {
 		return nil, errors.ErrNotSupported("reader option not supported")
 	}
-	if opts.File == nil {
-		ok, err := vfs.Exists(opts.PathFileSystem, path)
+	if opts.GetFile() == nil {
+		ok, err := vfs.Exists(opts.GetPathFileSystem(), path)
 		if err != nil {
 			return nil, err
 		}
@@ -175,5 +175,5 @@ func DefaultCreateOptsFileHandling(kind string, info AccessObjectInfo, path stri
 		}
 	}
 
-	return NewAccessObject(info, ACC_CREATE, opts.Representation, nil, CloserFunction(func(obj *AccessObject) error { return handler.Write(obj, path, opts, mode) }), DirMode)
+	return NewAccessObject(info, ACC_CREATE, opts.GetRepresentation(), nil, CloserFunction(func(obj *AccessObject) error { return handler.Write(obj, path, opts, mode) }), DirMode)
 }

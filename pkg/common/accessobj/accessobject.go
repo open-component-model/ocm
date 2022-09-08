@@ -176,11 +176,14 @@ func (a *AccessObject) Write(path string, mode vfs.FileMode, opts ...accessio.Op
 		return accessio.ErrClosed
 	}
 
-	o := accessio.AccessOptions(opts...)
+	o, err := accessio.AccessOptions(nil, opts...)
+	if err != nil {
+		return err
+	}
 
-	f := GetFormat(*o.FileFormat)
+	f := GetFormat(*o.GetFileFormat())
 	if f == nil {
-		return errors.ErrUnknown("file format", string(*o.FileFormat))
+		return errors.ErrUnknown("file format", string(*o.GetFileFormat()))
 	}
 
 	return f.Write(a, path, o, mode)

@@ -47,7 +47,8 @@ var _ = Describe("ctf management", func() {
 		Expect(err).To(Succeed())
 		tempfs = t
 
-		spec = ctf.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessio.PathFileSystem(tempfs), accessobj.FormatDirectory)
+		spec, err = ctf.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessio.PathFileSystem(tempfs), accessobj.FormatDirectory)
+		Expect(err).To(Succeed())
 	})
 
 	AfterEach(func() {
@@ -55,7 +56,7 @@ var _ = Describe("ctf management", func() {
 	})
 
 	It("instantiate filesystem ctf", func() {
-		r, err := ctf.FormatDirectory.Create(oci.DefaultContext(), "test", spec.Options, 0700)
+		r, err := ctf.FormatDirectory.Create(oci.DefaultContext(), "test", &spec.StandardOptions, 0700)
 		Expect(err).To(Succeed())
 		Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
 
@@ -111,7 +112,7 @@ var _ = Describe("ctf management", func() {
 	})
 
 	It("instantiate tgz artefact", func() {
-		ctf.FormatTGZ.ApplyOption(&spec.Options)
+		ctf.FormatTGZ.ApplyOption(&spec.StandardOptions)
 		spec.FilePath = "test.tgz"
 		r, err := spec.Repository(nil, nil)
 		Expect(err).To(Succeed())

@@ -53,8 +53,9 @@ type FileSystem struct {
 	vfs.FileSystem
 }
 
-func (f *FileSystem) ApplyOption(options *accessio.Options) {
-	options.PathFileSystem = f.FileSystem
+func (f *FileSystem) ApplyOption(options accessio.Options) error {
+	options.SetPathFileSystem(f.FileSystem)
+	return nil
 }
 
 type Context interface {
@@ -72,7 +73,7 @@ type Context interface {
 	OCI() OCI
 	OCM() OCM
 
-	ApplyOption(options *accessio.Options)
+	ApplyOption(options accessio.Options) error
 
 	out.Context
 	WithStdIO(r io.Reader, o io.Writer, e io.Writer) Context
@@ -172,8 +173,9 @@ func (c *_context) OCM() OCM {
 	return c.ocm
 }
 
-func (c *_context) ApplyOption(options *accessio.Options) {
-	options.PathFileSystem = c.FileSystem()
+func (c *_context) ApplyOption(options accessio.Options) error {
+	options.SetPathFileSystem(c.FileSystem())
+	return nil
 }
 
 func (c *_context) StdOut() io.Writer {

@@ -41,7 +41,7 @@ const (
 
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
-	accessio.Options            `json:",inline"`
+	Options                     `json:",inline"`
 
 	// FileFormat is the format of the repository file
 	FilePath string `json:"filePath"`
@@ -52,14 +52,17 @@ type RepositorySpec struct {
 }
 
 // NewRepositorySpec creates a new RepositorySpec.
-func NewRepositorySpec(acc accessobj.AccessMode, filePath string, opts ...accessio.Option) *RepositorySpec {
-	o := accessio.AccessOptions(opts...)
+func NewRepositorySpec(acc accessobj.AccessMode, filePath string, opts ...accessio.Option) (*RepositorySpec, error) {
+	o, err := accessio.AccessOptions(&Options{}, opts...)
+	if err != nil {
+		return nil, err
+	}
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		FilePath:            filePath,
-		Options:             o,
+		Options:             *o.(*Options),
 		AccessMode:          acc,
-	}
+	}, nil
 }
 
 func (s *RepositorySpec) Name() string {
@@ -90,8 +93,8 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 }
 
 func (a *RepositorySpec) AsUniformSpec(cpi.Context) cpi.UniformRepositorySpec {
-	opts := a.Options.Default()
-	p, err := vfs.Canonical(opts.PathFileSystem, a.FilePath, false)
+	opts, _ := NewOptions(&a.Options) // now unknown option possible (same Options type)
+	p, err := vfs.Canonical(opts.GetPathFileSystem(), a.FilePath, false)
 	if err != nil {
 		return cpi.UniformRepositorySpec{Type: a.GetKind(), Info: a.FilePath}
 	}

@@ -55,9 +55,9 @@ func NewTarHandlerWithCompression(format FileFormat, algorithm compression.Algor
 }
 
 // ApplyOption applies the configured path filesystem.
-func (h *TarHandler) ApplyOption(options *accessio.Options) {
-	f := h.Format()
-	options.FileFormat = &f
+func (h *TarHandler) ApplyOption(options accessio.Options) error {
+	options.SetFileFormat(h.Format())
+	return nil
 }
 
 func (h *TarHandler) Format() accessio.FileFormat {
@@ -222,5 +222,5 @@ func (h *TarHandler) NewFromReader(info AccessObjectInfo, acc AccessMode, in io.
 		}
 		return nil
 	}
-	return NewAccessObject(info, acc, opts.Representation, SetupFunction(setup), closer, DirMode)
+	return NewAccessObject(info, acc, opts.GetRepresentation(), SetupFunction(setup), closer, DirMode)
 }
