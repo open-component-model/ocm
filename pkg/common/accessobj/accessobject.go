@@ -43,7 +43,7 @@ type AccessObjectInfo interface {
 }
 
 // DefaultAccessObjectInfo is a default implementation for AccessObjectInfo
-// that can be used to host a simple static configuration.
+// that can be used to describe a simple static configuration.
 // The methods do not change the content, therefore an instance can be reused.
 type DefaultAccessObjectInfo struct {
 	DescriptorFileName       string
