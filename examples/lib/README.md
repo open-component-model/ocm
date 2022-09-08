@@ -4,14 +4,16 @@
 The complete library is arranged around area specific `Context` objects,
 which bundle all the settings and supported [extension points](../../docs/ocm/interoperability.md#support-library)
 of the Open Component Model.
-Extension points are implemented by handlers that can registered at dedicated
+Extension points are implemented by handlers that can be registered at dedicated
 context objects or at the default runtime environment.
+The context then provides all the methods required to access elements
+managed in the dedicated area.
 
-To just use the library the standard settings will be available by accessing the default
-contexts for the area of question.
+To just use the library without special configuration the standard settings will
+be available by accessing the default contexts for the area of question.
 
-For using [OCM repositories](../../docs/ocm/model.md#repositories) this can be
-done with:
+For working with [OCM repositories](../../docs/ocm/model.md#repositories) an appropriate
+context, which can be used to retrieve OCM repositories, can be access with:
 
 ```go
 import "github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -19,13 +21,14 @@ import "github.com/open-component-model/ocm/pkg/contexts/ocm"
 
 func MyFirstOCMApplication() {
    octx := ocm.DefaultContext()
+   
+   ...
 }
 ```
 
-
-If a decoupled environment with completely local settings is required, the 
+If a decoupled environment with dedicated special settings is required, the 
 builder methods of the ocm package (`With...`) can be used to compose
-a context according to dedicated requirements.
+a context.
 
 With `ocm.New()` a fresh `ocm` context is created using the default settings.
 It is possible to create any number of such contexts.
@@ -36,7 +39,7 @@ provide access to hosted components and component versions.
 
 To access a repository, a [repository specification](../../docs/formats/repositories/README.md)
 is required. Every repository type extension supported by this library 
-uses an own package under `github.com/open-component-model/ocm/pkg/contexts/ocm/repositories`.
+uses its own package under `github.com/open-component-model/ocm/pkg/contexts/ocm/repositories`.
 To access an OCM repository based on an OCI registry the package
 `github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg`
 contains the appropriate language binding for the OCI registry mappings.
@@ -64,18 +67,19 @@ Once a repository object is available it can be used to access component version
   defer compvers.Close()
 ```
 
-The component version now provides access to the described content.
-Resource, sources and component references.
+The component version now provides access to the described content, the
+[component descriptor](../../docs/ocm/model.md#component-descriptor),
+[resources](../../docs/ocm/model.md#resources),
+[sources](../../docs/ocm/model.md#sources),
+[component references](../../docs/ocm/model.md#references), and
+[signatures](../../docs/ocm/model.md#signatures).
 
-Additionally, a standardized Go representation of the descriptor
-is available.
+The component descriptor is accessible by a standardized Go representation,
+which is independent of the actually used serialization format.
+If can be encoded again in the original or any other supported scheme versions.
 
 ```go
   cd := compvers.GetDescriptor()
-  if err != nil {
-          return err
-  }
-
   data, err := compdesc.Encode(cd)
   if err != nil {
           return err
@@ -84,8 +88,8 @@ is available.
 ```
 
 Any resource (or source) can be accessed by getting the appropriate
-resource object by its resource identity in the context of the
-component version.
+resource object by its resource [identity](../../docs/ocm/model.md#identity) in
+the context of the  component version.
 
 ```go
   res, err := compvers.GetResource(metav1.NewIdentity(resourceName))
@@ -97,8 +101,8 @@ component version.
 ```
 
 The content of a described resource can be accessed using the appropriate
-[access method](../../docs/ocm/model.md#artefact-access)
-(another extension point of the model) of the resource.
+[access method](../../docs/ocm/model.md#artefact-access) described as part of
+the resource specification (another extension point of the model).
 It is described by an access specification. Supported methods can be 
 directly be requested using the resource object.
 

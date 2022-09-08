@@ -47,10 +47,6 @@ func MyFirstOCMApplication() error {
 	defer compvers.Close()
 
 	cd := compvers.GetDescriptor()
-	if err != nil {
-		return err
-	}
-
 	data, err := compdesc.Encode(cd)
 	if err != nil {
 		return err

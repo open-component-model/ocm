@@ -20,8 +20,7 @@ import (
 )
 
 func main() {
-	err:= MyFirstOCMApplication()
-	if err!=nil {
+	if err:= MyFirstOCMApplication(); err!=nil {
 		fmt.Fprintf(os.Stderr, "error: %s\n", err)
 		os.Exit(1)
 	}
