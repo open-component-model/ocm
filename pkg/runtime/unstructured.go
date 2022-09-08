@@ -213,7 +213,7 @@ func (u *UnstructuredTypedObject) Evaluate(types Scheme) (TypedObject, error) {
 
 // UnmarshalJSON implements a custom json unmarshal method for a unstructured typed object.
 func (u *UnstructuredTypedObject) UnmarshalJSON(data []byte) error {
-	// fmt.Printf("unmarshal raw: %s\n", string(data))
+	logrus.Debugf("unmarshal raw: %s\n", string(data))
 	typedObj := ObjectType{}
 	if err := json.Unmarshal(data, &typedObj); err != nil {
 		return err

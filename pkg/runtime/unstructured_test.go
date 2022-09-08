@@ -16,18 +16,18 @@ package runtime_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"reflect"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 func InOut(in runtime.TypedObject, encoding runtime.Encoding) (runtime.TypedObject, string, error) {
 	t := reflect.TypeOf(in)
-	fmt.Printf("in: %s\n", t)
+	logrus.Infof("in: %s\n", t)
 	for t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
@@ -37,14 +37,14 @@ func InOut(in runtime.TypedObject, encoding runtime.Encoding) (runtime.TypedObje
 	if t.Kind() == reflect.Map {
 		p = reflect.New(t)
 		m := reflect.MakeMap(t)
-		fmt.Printf("pointer: %s\n", p.Type())
+		logrus.Infof("pointer: %s\n", p.Type())
 		p.Elem().Set(m)
 	} else {
 		p = reflect.New(t)
 	}
 	out := p.Interface().(runtime.TypedObject)
 
-	fmt.Printf("out: %T\n", out)
+	logrus.Infof("out: %T\n", out)
 	data, err := encoding.Marshal(in)
 	if err != nil {
 		return nil, "", err
@@ -63,7 +63,7 @@ var _ = Describe("*** unstructured", func() {
 		Expect(string(data)).To(Equal("{\"type\":\"test\"}"))
 
 		un = &runtime.UnstructuredTypedObject{}
-		fmt.Printf("out: %T\n", un)
+		logrus.Infof("out: %T\n", un)
 		err = json.Unmarshal(data, un)
 		Expect(err).To(Succeed())
 		Expect(un.GetType()).To(Equal("test"))

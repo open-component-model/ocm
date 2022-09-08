@@ -17,11 +17,11 @@ package transfer_test
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -161,7 +161,7 @@ var _ = Describe("Test Environment", func() {
 	It("transfers ctf", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("transfer", "components", "--resourcesByValue", ARCH, ARCH, OUT)).To(Succeed())
-		fmt.Printf("%s\n", buf)
+		logrus.Infof("%s\n", buf)
 		Expect("\n" + buf.String()).To(Equal(`
 transferring version "github.com/mandelsoft/test:v1"...
 ...resource 0...
@@ -179,7 +179,7 @@ transferring version "github.com/mandelsoft/test:v1"...
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("transfer", "components", "--resourcesByValue", "--closure", "--lookup", ARCH, ARCH2, ARCH2, OUT)).To(Succeed())
 		str := buf.String()
-		fmt.Printf("%s\n", str)
+		logrus.Infof("%s\n", str)
 		Expect("\n" + str).To(Equal(`
 transferring version "github.com/mandelsoft/test2:v1"...
   transferring version "github.com/mandelsoft/test:v1"...

@@ -17,6 +17,8 @@ package cpi
 import (
 	"encoding/json"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -87,7 +89,7 @@ func (t *ConvertedAccessType) Encode(obj runtime.TypedObject, m runtime.Marshale
 
 func MarshalConvertedAccessSpec(ctx Context, s AccessSpec) ([]byte, error) {
 	t := ctx.AccessMethods().GetAccessType(s.GetType())
-	// fmt.Printf("found spec type %s: %T\n", s.Algorithm(), t)
+	logrus.Debugf("found spec type %s: %T\n", s.GetType(), t)
 	if c, ok := t.(AccessSpecConverter); ok {
 		out, err := c.ConvertFrom(s)
 		if err != nil {

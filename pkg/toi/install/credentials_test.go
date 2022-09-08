@@ -15,10 +15,9 @@
 package install_test
 
 import (
-	"fmt"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -93,7 +92,7 @@ credentials:
 		Expect(err).To(Succeed())
 		output, err := runtime.DefaultYAMLEncoding.Marshal(c)
 		Expect(err).To(Succeed())
-		fmt.Printf("%s", output)
+		logrus.Infof("%s", output)
 		Expect("\n" + string(output)).To(Equal(cfgdata))
 	})
 

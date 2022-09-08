@@ -18,10 +18,12 @@ import (
 	"bytes"
 	"errors"
 	"io"
+
+	"github.com/sirupsen/logrus"
 )
 
 // algorithm is a default implementation for Algorithm that can be used for CompressStream
-// based on Compression and DEcompression functions.
+// based on Compression and Decompression functions.
 type algorithm struct {
 	name         string
 	mime         string
@@ -49,7 +51,7 @@ func (c *algorithm) Name() string {
 }
 
 // InternalUnstableUndocumentedMIMEQuestionMark ???
-// DO NOT USE THIS anywhere outside of c/image until it is properly documented.
+// DO NOT USE THIS anywhere outside c/image until it is properly documented.
 func (c *algorithm) InternalUnstableUndocumentedMIMEQuestionMark() string {
 	return c.mime
 }
@@ -74,7 +76,7 @@ func (c *algorithm) Match(r MatchReader) (bool, error) {
 	}
 	buf := make([]byte, len(c.prefix))
 	n, err := io.ReadAtLeast(r, buf, len(buf))
-	// fmt.Printf("%s: found %v\n", c.Name(), buf[:n])
+	logrus.Debugf("%s: found %v\n", c.Name(), buf[:n])
 	if err != nil {
 		if errors.Is(err, io.ErrUnexpectedEOF) || errors.Is(err, io.EOF) {
 			err = nil

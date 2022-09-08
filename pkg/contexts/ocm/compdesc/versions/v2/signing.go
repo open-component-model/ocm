@@ -17,6 +17,8 @@ package compdesc
 import (
 	"fmt"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/signing"
 )
@@ -69,6 +71,6 @@ func (cd *ComponentDescriptor) Normalize(normAlgo string) ([]byte, error) {
 		return nil, fmt.Errorf("unsupported cd normalization %q", normAlgo)
 	}
 	data, err := signing.Normalize(cd, CDExcludes)
-	// fmt.Printf("**** normalized:\n %s\n", string(data))
+	logrus.Debugf("**** normalized:\n %s\n", string(data))
 	return data, err
 }

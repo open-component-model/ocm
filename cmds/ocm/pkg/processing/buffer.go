@@ -18,9 +18,8 @@ import (
 	"fmt"
 	"sync"
 
-	_ "fmt"
-
 	"github.com/containerd/containerd/pkg/atomic"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 )
@@ -293,7 +292,7 @@ func (this *simpleBufferIterator) HasNext() bool {
 	this.buffer.frame.Lock()
 	defer this.buffer.frame.Unlock()
 	for {
-		// fmt.Printf("HasNext: %d(%d) %t\n", this.current, this.container.len(), this.container.closed())
+		logrus.Debugf("HasNext: %d\n", this.current)
 		if len(this.buffer.entries) > this.current+1 {
 			if !this.valid || this.buffer.entries[this.current+1].Valid {
 				return true
@@ -316,7 +315,7 @@ func (this *simpleBufferIterator) NextProcessingEntry() ProcessingEntry {
 	this.buffer.frame.Lock()
 	defer this.buffer.frame.Unlock()
 	for {
-		// fmt.Printf("HasNext: %d(%d) %t\n", this.current, this.container.len(), this.container.closed())
+		logrus.Debugf("NextProcessingEntry: %d\n", this.current)
 		if len(this.buffer.entries) > this.current+1 {
 			this.current++
 			if !this.valid || this.buffer.entries[this.current].Valid {
@@ -335,7 +334,7 @@ func (this *simpleBufferIterator) NextProcessingEntry() ProcessingEntry {
 
 // orderedBuffer is a buffer view offering an ordered list of entries.
 // the entry iterator provides access to an unordered sequence
-// while the value iterator offeres a sequence according the order
+// while the value iterator offers a sequence according the order
 // of the initially specified indices.
 type orderedBuffer struct {
 	simple    simpleBuffer
@@ -388,7 +387,7 @@ func (this *orderedBuffer) Add(e ProcessingEntry) bool {
 	}
 
 	increased := false
-	// fmt.Printf("add to %v{%v}  cur %v\n", e.Index, e.Value, this.nextIndex)
+	logrus.Debugf("add to %v{%v}  cur %v\n", e.Index, e.Value, this.nextIndex)
 
 	next := this.valid.Next()
 	for next != nil && !next.Get().(*ProcessingEntry).Index.After(this.nextIndex) {
@@ -397,7 +396,7 @@ func (this *orderedBuffer) Add(e ProcessingEntry) bool {
 		this.valid = next
 		next = next.Next()
 		increased = true
-		// fmt.Printf("increase to %v{%v}\n", n.Index, n.Value)
+		logrus.Debugf("increase to %v{%v}\n", n.Index, n.Value)
 	}
 	return increased
 }

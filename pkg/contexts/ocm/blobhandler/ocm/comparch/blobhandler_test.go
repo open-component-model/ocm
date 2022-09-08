@@ -16,11 +16,11 @@ package comparch_test
 
 import (
 	"encoding/json"
-	"fmt"
 	"reflect"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/sirupsen/logrus"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -62,7 +62,7 @@ var _ = Describe("blobhandler", func() {
 
 			data, err = json.Marshal(cd.Resources[0].Access)
 			Expect(err).To(Succeed())
-			fmt.Printf("%s\n", string(data))
+			logrus.Infof("%s\n", string(data))
 			found := &localblob.AccessSpec{}
 			Expect(json.Unmarshal(data, found)).To(Succeed())
 
@@ -97,7 +97,7 @@ var _ = Describe("blobhandler", func() {
 
 			data, err = json.Marshal(cd.Resources[0].Access)
 			Expect(err).To(Succeed())
-			fmt.Printf("%s\n", string(data))
+			logrus.Infof("%s\n", string(data))
 			found := &localfsblob.AccessSpec{}
 			Expect(json.Unmarshal(data, found)).To(Succeed())
 

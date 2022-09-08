@@ -15,12 +15,11 @@
 package signing_test
 
 import (
-	"fmt"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -152,7 +151,7 @@ var _ = Describe("access method", func() {
 			Expect(err).To(Succeed())
 			Expect(closer.Close()).To(Succeed())
 			Expect(archcloser.Close()).To(Succeed())
-			fmt.Printf("%+v\n", dig)
+			logrus.Infof("%+v\n", dig)
 			Expect(dig.Value).To(Equal(digest))
 
 			src, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
@@ -202,7 +201,7 @@ var _ = Describe("access method", func() {
 			Expect(err).To(Succeed())
 			closer.Close()
 			archcloser.Close()
-			fmt.Printf("%+v\n", dig)
+			logrus.Infof("%+v\n", dig)
 			Expect(dig.Value).To(Equal(digest))
 
 			src, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
@@ -252,7 +251,7 @@ var _ = Describe("access method", func() {
 			Expect(err).To(Succeed())
 			closer.Close()
 			archcloser.Close()
-			fmt.Printf("%+v\n", dig)
+			logrus.Infof("%+v\n", dig)
 			Expect(dig.Value).To(Equal(digest))
 
 			src, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)

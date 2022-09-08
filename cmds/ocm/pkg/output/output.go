@@ -17,10 +17,10 @@ package output
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"os"
 
 	. "github.com/open-component-model/ocm/pkg/out"
+	"github.com/sirupsen/logrus"
 
 	"sigs.k8s.io/yaml"
 
@@ -280,9 +280,9 @@ var log bool
 
 func Print(list []Object, msg string, args ...interface{}) {
 	if log {
-		fmt.Printf(msg+":\n", args...)
+		logrus.Infof(msg+":\n", args...)
 		for i, e := range list {
-			fmt.Printf("  %3d %s\n", i, e)
+			logrus.Infof("  %3d %s\n", i, e)
 		}
 	}
 }

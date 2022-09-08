@@ -149,9 +149,9 @@ func (n *NamespaceContainer) ListTags() ([]string, error) {
 
 func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error) {
 	ref := n.repo.getRef(n.namespace, vers)
-	// fmt.Printf("resolve %s\n", ref)
+	logrus.Debugf("resolve %s\n", ref)
 	_, desc, err := n.resolver.Resolve(context.Background(), ref)
-	// fmt.Printf("done\n")
+	logrus.Debugf("done\n")
 	if err != nil {
 		if errdefs.IsNotFound(err) {
 			return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, ref, n.namespace)

@@ -5,18 +5,19 @@
 package main
 
 import (
-	"fmt"
 	"os"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/cmds/ocm/app"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 )
 
 func main() {
-	fmt.Println("> Generate Docs for OCM CLI")
+	logrus.Info("> Generate Docs for OCM CLI")
 
 	if len(os.Args) != 2 { // expect 2 as the first one is the programm name
-		fmt.Printf("Expected exactly one argument, but got %d", len(os.Args)-1)
+		logrus.Infof("Expected exactly one argument, but got %d", len(os.Args)-1)
 		os.Exit(1)
 	}
 	outputDir := os.Args[1]
@@ -28,18 +29,12 @@ func main() {
 	cmd := app.NewCliCommand(clictx.DefaultContext())
 	cmd.DisableAutoGenTag = true
 	check(GenMarkdownTree(cmd, outputDir))
-	fmt.Printf("Successfully written docs to %s\n", outputDir)
-}
-
-func printHelp() {
-	fmt.Print(`
-generate-docs [output-dir]
-`)
+	logrus.Infof("Successfully written docs to %s\n", outputDir)
 }
 
 func check(err error) {
 	if err != nil {
-		fmt.Println(err.Error())
+		logrus.Error(err.Error())
 		os.Exit(1)
 	}
 }

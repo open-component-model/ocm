@@ -17,6 +17,8 @@ package genericocireg
 import (
 	"encoding/json"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
@@ -136,7 +138,7 @@ func (a *RepositorySpec) AsUniformSpec(cpi.Context) cpi.UniformRepositorySpec {
 }
 
 func (u *RepositorySpec) UnmarshalJSON(data []byte) error {
-	// fmt.Printf("unmarshal generic ocireg spec %s\n", string(data))
+	logrus.Debugf("unmarshal generic ocireg spec %s\n", string(data))
 	ocispec := &oci.GenericRepositorySpec{}
 	if err := json.Unmarshal(data, ocispec); err != nil {
 		return err

@@ -17,12 +17,12 @@
 package app
 
 import (
-	"fmt"
 	"strings"
 
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -70,6 +70,7 @@ type CLIOptions struct {
 	Credentials []string
 	Context     clictx.Context
 	Settings    []string
+	Verbose     bool
 }
 
 var desc = `
@@ -203,9 +204,13 @@ func (o *CLIOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Config, "config", "", "", "configuration file")
 	fs.StringArrayVarP(&o.Credentials, "cred", "C", nil, "credential setting")
 	fs.StringArrayVarP(&o.Settings, "attribute", "X", nil, "attribute setting")
+	fs.BoolVarP(&o.Verbose, "verbose", "v", false, "-v for verbose logging")
 }
 
 func (o *CLIOptions) Complete() error {
+	if o.Verbose {
+		logrus.SetLevel(logrus.DebugLevel)
+	}
 	_, err := utils.Configure(o.Context.OCMContext(), o.Config, vfsattr.Get(o.Context))
 	if err != nil {
 		return err
@@ -270,7 +275,7 @@ func NewVersionCommand() *cobra.Command {
 		Short:   "displays the version",
 		Run: func(cmd *cobra.Command, args []string) {
 			v := version.Get()
-			fmt.Printf("%#v", v)
+			logrus.Infof("%#v", v)
 		},
 	}
 }
