@@ -53,7 +53,7 @@ func (o Options) ApplyToRequest(r *Request) error {
 }
 
 func GetRequest(opts ...Option) (*Request, error) {
-	req := &Request{}
+	req := &Request{Mode: spiffing.MODE_DEFAULT}
 	err := Options(opts).ApplyToRequest(req)
 	if err != nil {
 		return nil, err
@@ -132,6 +132,13 @@ func WorkDir(path string) OptionFunction {
 			return errors.Wrapf(err, "cannot set working directory %s", path)
 		}
 		r.FileSystem = fs
+		return nil
+	}
+}
+
+func Mode(m int) OptionFunction {
+	return func(r *Request) error {
+		r.Mode = m
 		return nil
 	}
 }

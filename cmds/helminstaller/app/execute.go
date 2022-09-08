@@ -119,6 +119,7 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 			}
 		}
 	}
+
 	ns := "default"
 	if cfg.Namespace != "" {
 		ns = cfg.Namespace
