@@ -40,6 +40,18 @@ func IsOCIDefaultFormat() bool {
 	return DefaultArtefactSetDescriptorFileName == OCIArtefactSetDescriptorFileName
 }
 
+func DescriptorFileName(format string) string {
+	switch format {
+	case FORMAT_OCI:
+		return OCIArtefactSetDescriptorFileName
+	case FORMAT_OCM:
+		return ArtefactSetDescriptorFileName
+	case "":
+		return DefaultArtefactSetDescriptorFileName
+	}
+	return ""
+}
+
 type accessObjectInfo struct {
 	accessobj.DefaultAccessObjectInfo
 }

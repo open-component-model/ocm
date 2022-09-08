@@ -27,7 +27,7 @@ type Options struct {
 
 func NewOptions(olist ...accessio.Option) (*Options, error) {
 	opts := &Options{}
-	err := opts.ApplyOptions(olist...)
+	err := accessio.ApplyOptions(opts, olist...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (o *Options) GetFormatVersion() string {
 }
 
 func (o *Options) ApplyOption(opts accessio.Options) error {
-	err := o.StandardOptions.ApplyOptions(opts)
+	err := o.StandardOptions.ApplyOption(opts)
 	if err != nil {
 		return err
 	}
@@ -69,4 +69,22 @@ func (o *Options) ApplyOption(opts accessio.Options) error {
 		}
 	}
 	return nil
+}
+
+type optFmt struct {
+	format string
+}
+
+var _ accessio.Option = (*optFmt)(nil)
+
+func StructureFormat(fmt string) accessio.Option {
+	return &optFmt{fmt}
+}
+
+func (o *optFmt) ApplyOption(opts accessio.Options) error {
+	if s, ok := opts.(FormatVersionOption); ok {
+		s.SetFormatVersion(o.format)
+		return nil
+	}
+	return errors.ErrNotSupported("format version option")
 }

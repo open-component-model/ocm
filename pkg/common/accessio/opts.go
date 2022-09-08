@@ -43,8 +43,6 @@ type Options interface {
 	SetReader(closer io.ReadCloser)
 	GetReader() io.ReadCloser
 
-	ApplyOptions(opts ...Option) error
-
 	ValidForPath(path string) error
 	WriterFor(path string, mode vfs.FileMode) (io.WriteCloser, error)
 
@@ -211,10 +209,10 @@ func (o *StandardOptions) WriterFor(path string, mode vfs.FileMode) (io.WriteClo
 }
 
 // ApplyOptions applies the given list options on these options.
-func (o *StandardOptions) ApplyOptions(opts ...Option) error {
-	for _, opt := range opts {
+func ApplyOptions(opts Options, olist ...Option) error {
+	for _, opt := range olist {
 		if opt != nil {
-			if err := opt.ApplyOption(o); err != nil {
+			if err := opt.ApplyOption(opts); err != nil {
 				return err
 			}
 		}
@@ -293,7 +291,7 @@ func AccessOptions(opts Options, list ...Option) (Options, error) {
 	if opts == nil {
 		opts = &StandardOptions{}
 	}
-	err := opts.ApplyOptions(list...)
+	err := ApplyOptions(opts, list...)
 	if err != nil {
 		return nil, err
 	}

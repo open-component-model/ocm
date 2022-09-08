@@ -23,6 +23,8 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/testhelper"
 
+	. "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset/testhelper"
+
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -55,7 +57,10 @@ var _ = Describe("artefact management", func() {
 		vfs.Cleanup(tempfs)
 	})
 
-	It("instantiate filesystem artefact", func() {
+	TestForAllFormats("instantiate filesystem artefact", func(format string) {
+		opts, err := accessio.AccessOptions(&artefactset.Options{}, opts, artefactset.StructureFormat(format))
+		Expect(err).To(Succeed())
+
 		a, err := artefactset.FormatDirectory.Create("test", opts, 0700)
 		Expect(err).To(Succeed())
 		Expect(vfs.DirExists(tempfs, "test/"+artefactset.BlobsDirectoryName)).To(BeTrue())
@@ -63,8 +68,10 @@ var _ = Describe("artefact management", func() {
 		defaultManifestFill(a)
 
 		Expect(a.Close()).To(Succeed())
-		Expect(vfs.FileExists(tempfs, "test/"+artefactset.DefaultArtefactSetDescriptorFileName)).To(BeTrue())
-		Expect(vfs.FileExists(tempfs, "test/"+artefactset.OCILayouFileName)).To(Equal(artefactset.DefaultArtefactSetDescriptorFileName == artefactset.OCIArtefactSetDescriptorFileName))
+
+		desc := artefactset.DescriptorFileName(format)
+		Expect(vfs.FileExists(tempfs, "test/"+desc)).To(BeTrue())
+		Expect(vfs.FileExists(tempfs, "test/"+artefactset.OCILayouFileName)).To(Equal(desc == artefactset.OCIArtefactSetDescriptorFileName))
 
 		infos, err := vfs.ReadDir(tempfs, "test/"+artefactset.BlobsDirectoryName)
 		Expect(err).To(Succeed())
@@ -78,7 +85,10 @@ var _ = Describe("artefact management", func() {
 			"sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
 	})
 
-	It("instantiate tgz artefact", func() {
+	TestForAllFormats("instantiate tgz artefact", func(format string) {
+		opts, err := accessio.AccessOptions(&artefactset.Options{}, opts, artefactset.StructureFormat(format))
+		Expect(err).To(Succeed())
+
 		a, err := artefactset.FormatTGZ.Create("test.tgz", opts, 0600)
 		Expect(err).To(Succeed())
 
@@ -113,23 +123,23 @@ var _ = Describe("artefact management", func() {
 			}
 		}
 		elems := []interface{}{
-			artefactset.DefaultArtefactSetDescriptorFileName,
+			artefactset.DescriptorFileName(format),
 			"blobs/sha256.3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
 			"blobs/sha256.44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
 			"blobs/sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50",
 		}
-		if artefactset.IsOCIDefaultFormat() {
+		if format == artefactset.FORMAT_OCI {
 			elems = append(elems, artefactset.OCILayouFileName)
 		}
 		Expect(files).To(ContainElements(elems))
 	})
 
-	It("instantiate tgz artefact for open file object", func() {
+	TestForAllFormats("instantiate tgz artefact for open file object", func(format string) {
 		file, err := vfs.TempFile(opts.GetPathFileSystem(), "", "*.tgz")
 		Expect(err).To(Succeed())
 		defer file.Close()
 
-		opts, err := accessio.AccessOptions(nil, opts, accessio.File(file))
+		opts, err := accessio.AccessOptions(&artefactset.Options{FormatVersion: format}, opts, accessio.File(file))
 		Expect(err).To(Succeed())
 
 		a, err := artefactset.FormatTGZ.Create("", opts, 0600)
@@ -165,16 +175,22 @@ var _ = Describe("artefact management", func() {
 			}
 		}
 		elems := []interface{}{
-			artefactset.DefaultArtefactSetDescriptorFileName,
+			artefactset.DescriptorFileName(format),
 			"blobs/sha256.3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a",
 			"blobs/sha256.44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
 			"blobs/sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50",
+		}
+		if format == artefactset.FORMAT_OCI {
+			elems = append(elems, artefactset.OCILayouFileName)
 		}
 		Expect(files).To(ContainElements(elems))
 	})
 
 	Context("manifest", func() {
-		It("read from filesystem artefact", func() {
+		TestForAllFormats("read from filesystem artefact", func(format string) {
+			opts, err := accessio.AccessOptions(&artefactset.Options{}, opts, artefactset.StructureFormat(format))
+			Expect(err).To(Succeed())
+
 			a, err := artefactset.FormatDirectory.Create("test", opts, 0700)
 			Expect(err).To(Succeed())
 			Expect(vfs.DirExists(tempfs, "test/"+artefactset.BlobsDirectoryName)).To(BeTrue())
@@ -193,7 +209,11 @@ var _ = Describe("artefact management", func() {
 			Expect(blob.Get()).To(Equal([]byte("testdata")))
 			Expect(blob.MimeType()).To(Equal(mime.MIME_OCTET))
 		})
-		It("read from tgz artefact", func() {
+
+		TestForAllFormats("read from tgz artefact", func(format string) {
+			opts, err := accessio.AccessOptions(&artefactset.Options{}, opts, artefactset.StructureFormat(format))
+			Expect(err).To(Succeed())
+
 			a, err := artefactset.FormatTGZ.Create("test.tgz", opts, 0700)
 			Expect(err).To(Succeed())
 			defaultManifestFill(a)
@@ -211,9 +231,5 @@ var _ = Describe("artefact management", func() {
 			Expect(blob.Get()).To(Equal([]byte("testdata")))
 			Expect(blob.MimeType()).To(Equal(mime.MIME_OCTET))
 		})
-
-	})
-	Context("index", func() {
-
 	})
 })

@@ -65,12 +65,12 @@ func CheckComponent(env *TestEnv, ldesc *artdesc.Descriptor, tgt ocm.Repository)
 
 	data, err := json.Marshal(comp.GetDescriptor().Resources[2].Access)
 	Expect(err).To(Succeed())
-	hash := HashManifest2(artefactset.IsOCIDefaultFormat())
+	hash := HashManifest2(artefactset.DefaultArtefactSetDescriptorFileName)
 	Expect(string(data)).To(Equal("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/ref:v2.0\",\"type\":\"localBlob\"}"))
 
 	data, err = json.Marshal(comp.GetDescriptor().Resources[1].Access)
 	Expect(err).To(Succeed())
-	hash = HashManifest1(artefactset.IsOCIDefaultFormat())
+	hash = HashManifest1(artefactset.DefaultArtefactSetDescriptorFileName)
 	Expect(string(data)).To(Equal("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/value:v2.0\",\"type\":\"localBlob\"}"))
 
 	racc, err := comp.GetResourceByIndex(1)

@@ -124,7 +124,7 @@ var _ = Describe("Transfer handler", func() {
 		Expect(err).To(Succeed())
 
 		fmt.Printf("%s\n", string(data))
-		hash := HashManifest1(artefactset.IsOCIDefaultFormat())
+		hash := HashManifest1(artefactset.DefaultArtefactSetDescriptorFileName)
 		Expect(string(data)).To(Equal("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 
 		r, err := comp.GetResourceByIndex(1)
