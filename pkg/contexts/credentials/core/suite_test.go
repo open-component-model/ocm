@@ -23,5 +23,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "CTF Test Suite")
+	RunSpecs(t, "Credentials Core Suite")
 }

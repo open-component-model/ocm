@@ -36,8 +36,8 @@ import (
 const OciArtifactDigestV1 string = "ociArtifactDigest/v1"
 
 func init() {
-	cpi.DefaultBlobDigesterRegistry().RegisterDigester(New(digest.SHA256), "")
-	cpi.DefaultBlobDigesterRegistry().RegisterDigester(New(digest.SHA512), "")
+	cpi.MustRegisterDigester(New(digest.SHA256), "")
+	cpi.MustRegisterDigester(New(digest.SHA512), "")
 }
 
 func New(algo digest.Algorithm) cpi.BlobDigester {

@@ -53,13 +53,29 @@ func (b Builder) Bound() (Context, context.Context) {
 	return c, context.WithValue(b.getContext(), key, c)
 }
 
-func (b Builder) New() Context {
+func (b Builder) New(m ...datacontext.BuilderMode) Context {
+	mode := datacontext.Mode(m...)
 	ctx := b.getContext()
+
 	if b.shared == nil {
-		b.shared = datacontext.ForContext(ctx)
+		if mode == datacontext.MODE_SHARED {
+			b.shared = datacontext.ForContext(ctx)
+		} else {
+			b.shared = datacontext.New(nil)
+		}
 	}
 	if b.reposcheme == nil {
-		b.reposcheme = DefaultConfigTypeScheme
+		switch mode {
+		case datacontext.MODE_INITIAL:
+			b.reposcheme = NewConfigTypeScheme(nil)
+		case datacontext.MODE_CONFIGURED:
+			b.reposcheme = NewConfigTypeScheme(nil)
+			b.reposcheme.AddKnownTypes(DefaultConfigTypeScheme)
+		case datacontext.MODE_DEFAULTED:
+			fallthrough
+		case datacontext.MODE_SHARED:
+			b.reposcheme = DefaultConfigTypeScheme
+		}
 	}
 	return newContext(b.shared, b.reposcheme)
 }

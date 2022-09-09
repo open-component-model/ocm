@@ -18,13 +18,12 @@ import (
 	"context"
 )
 
-func ForContextByKey(ctx context.Context, key interface{}, def Context) Context {
+// ForContextByKey retrieves the context for a given key to be used for a context.Context.
+// If not defined, it returns the given default context and false.
+func ForContextByKey(ctx context.Context, key interface{}, def Context) (Context, bool) {
 	c := ctx.Value(key)
 	if c == nil {
-		c = def
+		return def, false
 	}
-	if c == nil {
-		return nil
-	}
-	return c.(Context)
+	return c.(Context), true
 }

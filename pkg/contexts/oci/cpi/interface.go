@@ -21,6 +21,7 @@ import (
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
 )
 
@@ -57,8 +58,8 @@ type Descriptor = ociv1.Descriptor
 
 var DefaultContext = core.DefaultContext
 
-func New() Context {
-	return core.Builder{}.New()
+func New(m ...datacontext.BuilderMode) Context {
+	return core.Builder{}.New(m...)
 }
 
 func RegisterRepositoryType(name string, atype RepositoryType) {

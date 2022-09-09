@@ -19,6 +19,7 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 )
 
@@ -85,34 +86,87 @@ func (b Builder) Bound() (Context, context.Context) {
 	return c, context.WithValue(b.getContext(), key, c)
 }
 
-func (b Builder) New() Context {
+func (b Builder) New(m ...datacontext.BuilderMode) Context {
+	mode := datacontext.Mode(m...)
 	ctx := b.getContext()
 
 	if b.oci == nil {
 		if b.credentials != nil {
-			b.oci = oci.WithCredentials(b.credentials).New()
+			b.oci = oci.WithCredentials(b.credentials).New(mode)
 		} else {
-			b.oci = oci.ForContext(ctx)
+			var ok bool
+			b.oci, ok = oci.DefinedForContext(ctx)
+			if !ok && mode != datacontext.MODE_SHARED {
+				b.oci = oci.New(mode)
+			}
 		}
 	}
 	if b.credentials == nil {
 		b.credentials = b.oci.CredentialsContext()
 	}
 	if b.reposcheme == nil {
-		b.reposcheme = DefaultRepositoryTypeScheme
+		switch mode {
+		case datacontext.MODE_INITIAL:
+			b.reposcheme = NewRepositoryTypeScheme(nil)
+		case datacontext.MODE_CONFIGURED:
+			b.reposcheme = NewRepositoryTypeScheme(nil)
+			b.reposcheme.AddKnownTypes(DefaultRepositoryTypeScheme)
+		case datacontext.MODE_DEFAULTED:
+			fallthrough
+		case datacontext.MODE_SHARED:
+			b.reposcheme = DefaultRepositoryTypeScheme
+		}
 	}
 	if b.accessscheme == nil {
-		b.accessscheme = DefaultAccessTypeScheme
+		switch mode {
+		case datacontext.MODE_INITIAL:
+			b.accessscheme = NewAccessTypeScheme()
+		case datacontext.MODE_CONFIGURED:
+			b.accessscheme = NewAccessTypeScheme()
+			b.accessscheme.AddKnownTypes(DefaultAccessTypeScheme)
+		case datacontext.MODE_DEFAULTED:
+			fallthrough
+		case datacontext.MODE_SHARED:
+			b.accessscheme = DefaultAccessTypeScheme
+		}
 	}
 	if b.spechandlers == nil {
-		b.spechandlers = DefaultRepositorySpecHandlers
+		switch mode {
+		case datacontext.MODE_INITIAL:
+			b.spechandlers = NewRepositorySpecHandlers()
+		case datacontext.MODE_CONFIGURED:
+			b.spechandlers = DefaultRepositorySpecHandlers.Copy()
+		case datacontext.MODE_DEFAULTED:
+			fallthrough
+		case datacontext.MODE_SHARED:
+			b.spechandlers = DefaultRepositorySpecHandlers
+		}
 	}
 	if b.blobhandlers == nil {
-		b.blobhandlers = DefaultBlobHandlerRegistry
+		switch mode {
+		case datacontext.MODE_INITIAL:
+			b.blobhandlers = NewBlobHandlerRegistry()
+		case datacontext.MODE_CONFIGURED:
+			b.blobhandlers = DefaultBlobHandlerRegistry.Copy()
+		case datacontext.MODE_DEFAULTED:
+			fallthrough
+		case datacontext.MODE_SHARED:
+			b.blobhandlers = DefaultBlobHandlerRegistry
+		}
 	}
 	if b.blobdigesters == nil {
-		b.blobdigesters = DefaultBlobDigesterRegistry
+		switch mode {
+		case datacontext.MODE_INITIAL:
+			b.blobdigesters = NewBlobDigesterRegistry()
+		case datacontext.MODE_CONFIGURED:
+			b.blobdigesters = DefaultBlobDigesterRegistry.Copy()
+		case datacontext.MODE_DEFAULTED:
+			fallthrough
+		case datacontext.MODE_SHARED:
+			b.blobdigesters = DefaultBlobDigesterRegistry
+		}
 	}
+
 	if ociimpl != nil {
 		def, err := ociimpl(b.oci)
 		if err != nil {

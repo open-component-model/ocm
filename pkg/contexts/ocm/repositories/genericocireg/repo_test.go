@@ -111,7 +111,7 @@ var _ = Describe("component repository mapping", func() {
 		base := func(ctx *storagecontext.StorageContext) string {
 			return TESTBASE
 		}
-		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().RegisterBlobHandler(ocirepo.NewBlobHandler(base))).New()
+		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().Register(ocirepo.NewBlobHandler(base))).New()
 
 		blob := accessio.BlobAccessForString(mime.MIME_OCTET, "anydata")
 
@@ -152,7 +152,7 @@ var _ = Describe("component repository mapping", func() {
 		base := func(ctx *storagecontext.StorageContext) string {
 			return TESTBASE
 		}
-		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().RegisterBlobHandler(ocirepo.NewArtefactHandler(base), cpi.ForMimeType(mime))).New()
+		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().Register(ocirepo.NewArtefactHandler(base), cpi.ForMimeType(mime))).New()
 
 		// create artefactset
 		r, err := artefactset.FormatTGZ.Create("test.tgz", accessio.AccessOptions(accessio.PathFileSystem(tempfs)), 0700)

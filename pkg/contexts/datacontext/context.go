@@ -24,6 +24,33 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
+// BuilderMode controls the handling of unset information in the
+// builder configuration when calling the New method.
+type BuilderMode int
+
+const (
+	// MODE_SHARED uses the default contexts for unset nested context types.
+	MODE_SHARED BuilderMode = iota
+	// MODE_DEFAULTED uses dedicated context instances configured with the
+	// context type specific default registrations.
+	MODE_DEFAULTED
+	// MODE_CONFIGURED uses dedicated context instances configured with the
+	// context type registrations configured with the actual state of the
+	// default registrations.
+	MODE_CONFIGURED
+	// MODE_INITIAL uses completely new contexts for unset nested context types
+	// and initial registrations.
+	MODE_INITIAL
+)
+
+func Mode(m ...BuilderMode) BuilderMode {
+	mode := MODE_DEFAULTED
+	if len(m) > 0 {
+		mode = m[0]
+	}
+	return mode
+}
+
 // Context describes a common interface for a data context used for a dedicated
 // purpose.
 // Such has a type and always specific attribute store.
@@ -69,7 +96,11 @@ var DefaultContext = New(nil)
 // ForContext returns the Context to use for context.Context.
 // This is either an explicit context or the default context.
 func ForContext(ctx context.Context) AttributesContext {
-	return ForContextByKey(ctx, key, DefaultContext).(AttributesContext)
+	c, _ := ForContextByKey(ctx, key, DefaultContext)
+	if c == nil {
+		return nil
+	}
+	return c.(AttributesContext)
 }
 
 // WithContext create a new Context bound to a context.Context.

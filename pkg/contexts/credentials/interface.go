@@ -64,6 +64,10 @@ func ForContext(ctx context.Context) Context {
 	return core.ForContext(ctx)
 }
 
+func DefinedForContext(ctx context.Context) (Context, bool) {
+	return core.DefinedForContext(ctx)
+}
+
 func NewCredentialsSpec(name string, repospec RepositorySpec) CredentialsSpec {
 	return core.NewCredentialsSpec(name, repospec)
 }

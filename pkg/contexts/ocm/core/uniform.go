@@ -21,6 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -77,6 +78,9 @@ type RepositorySpecHandler interface {
 
 type RepositorySpecHandlers interface {
 	Register(hdlr RepositorySpecHandler, types ...string)
+	Copy() RepositorySpecHandlers
+	KnownTypeNames() []string
+	GetHandlers(typ string) []RepositorySpecHandler
 	MapUniformRepositorySpec(ctx Context, u *UniformRepositorySpec) (RepositorySpec, error)
 }
 
@@ -104,6 +108,37 @@ func (s *specHandlers) Register(hdlr RepositorySpecHandler, types ...string) {
 			s.handlers[typ] = append(s.handlers[typ], hdlr)
 		}
 	}
+}
+
+func (s *specHandlers) Copy() RepositorySpecHandlers {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+
+	n := NewRepositorySpecHandlers().(*specHandlers)
+	for typ, hdlrs := range s.handlers {
+		n.handlers[typ] = append(hdlrs[:0:0], hdlrs...)
+	}
+	return n
+}
+
+func (s *specHandlers) KnownTypeNames() []string {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+
+	return utils.StringMapKeys(s.handlers)
+}
+
+func (s *specHandlers) GetHandlers(typ string) []RepositorySpecHandler {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+
+	hdlrs := s.handlers[typ]
+	if len(hdlrs) == 0 {
+		return nil
+	}
+	result := make([]RepositorySpecHandler, len(hdlrs))
+	copy(result, hdlrs)
+	return result
 }
 
 func (s *specHandlers) MapUniformRepositorySpec(ctx Context, u *UniformRepositorySpec) (RepositorySpec, error) {
