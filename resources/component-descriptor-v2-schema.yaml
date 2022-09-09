@@ -273,6 +273,7 @@ definitions:
     type: 'object'
     required:
       - 'type'
+      - 'layer'
     properties:
       type:
         type: 'string'
@@ -307,7 +308,7 @@ definitions:
     type: 'object'
     required:
       - 'type'
-      - 'digest'
+      - 'filename'
     properties:
       type:
         type: 'string'

@@ -29,6 +29,7 @@ import (
 
 // ComponentNameMapping describes the method that is used to map the "Component Name", "Component Version"-tuples
 // to OCI Image References.
+// +kubebuilder:validation:Enum:=urlPath;sha256-digest
 type ComponentNameMapping string
 
 const (

@@ -32,628 +32,330 @@ spec:
           metadata:
             type: object
           spec:
+            description: ComponentSpec defines a virtual component with a repository
+              context, source and dependencies.
             properties:
-              access:
-                properties:
-                  type:
-                    description: Type is the base type for the access of a source
-                      or resource
-                    type: string
-                required:
-                - type
-                type: object
-              component:
-                description: Component is a component.
-                properties:
-                  componentReferences:
-                    items:
-                      description: ComponentReference is a reference to a component.
-                      properties:
-                        componentName:
-                          type: string
-                        digest:
-                          properties:
-                            hashAlgorithm:
-                              type: string
-                            normalisationAlgorithm:
-                              type: string
-                            value:
-                              type: string
-                          required:
-                          - hashAlgorithm
-                          - normalisationAlgorithm
-                          - value
-                          type: object
-                        extraIdentity:
-                          properties:
-                            identityAttributeKeys:
-                              items:
-                                minLength: 2
-                                pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                                type: string
-                              type: array
-                          type: object
-                        labels:
-                          items:
-                            properties:
-                              name:
-                                type: string
-                              values:
-                                type: string
-                            type: object
-                          type: array
-                        name:
-                          minLength: 2
-                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                          type: string
-                        version:
-                          description: 'RelaxedSemver taken from semver.org and adjusted
-                            to allow an optional leading ''v'', major-only, and major.minor-only
-                            this means the following strings are all valid relaxedSemvers:
-                            1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2
-                            v1-foo+bar'
-                          pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
-                          type: string
-                      required:
-                      - componentName
-                      - name
-                      - version
-                      type: object
-                    type: array
-                  labels:
-                    items:
-                      properties:
-                        name:
-                          type: string
-                        values:
-                          type: string
-                      type: object
-                    type: array
-                  name:
-                    description: ComponentName (s) MUST start with a valid domain
-                      name (as specified by RFC-1034, RFC-1035) with an optional URL
-                      path suffix (as specified by RFC-1738)'
-                    maxLength: 255
-                    pattern: ^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$
-                    type: string
-                  provider:
-                    type: string
-                  repositoryContexts:
-                    items:
-                      properties:
-                        type:
-                          type: string
-                      required:
-                      - type
-                      type: object
-                    type: array
-                  resources:
-                    items:
-                      description: Resource is the base type for resources.
-                      properties:
-                        access:
-                          description: 'TODO: Access can be either of type Access
-                            or LocalBlobAccess. We can do this by making this field
-                            use *apiextensions.JSON which validates any valid JSON.
-                            Then, we can unmarshall it and use the values and not
-                            loose type safety. Or, have an explicit field called LocalBlobAccess
-                            which can either be provided or not.'
-                          properties:
-                            type:
-                              description: Type is the base type for the access of
-                                a source or resource
-                              type: string
-                          required:
-                          - type
-                          type: object
-                        digest:
-                          properties:
-                            hashAlgorithm:
-                              type: string
-                            normalisationAlgorithm:
-                              type: string
-                            value:
-                              type: string
-                          required:
-                          - hashAlgorithm
-                          - normalisationAlgorithm
-                          - value
-                          type: object
-                        extraIdentity:
-                          properties:
-                            identityAttributeKeys:
-                              items:
-                                minLength: 2
-                                pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                                type: string
-                              type: array
-                          type: object
-                        labels:
-                          items:
-                            properties:
-                              name:
-                                type: string
-                              values:
-                                type: string
-                            type: object
-                          type: array
-                        localBlobAccess:
-                          description: LocalBlobAccess identifier of the local blob
-                            within the current component descriptor.
-                          properties:
-                            digest:
-                              type: string
-                            type:
-                              enum:
-                              - localBlob
-                              type: string
-                          required:
-                          - digest
-                          - type
-                          type: object
-                        name:
-                          minLength: 2
-                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                          type: string
-                        relation:
-                          enum:
-                          - local
-                          - external
-                          type: string
-                        srcRefs:
-                          items:
-                            description: SourceReferences a reference to a (component-local)
-                              source
-                            properties:
-                              extraIdentity:
-                                properties:
-                                  identityAttributeKeys:
-                                    items:
-                                      minLength: 2
-                                      pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                                      type: string
-                                    type: array
-                                type: object
-                              name:
-                                minLength: 2
-                                pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                                type: string
-                            type: object
-                          type: array
-                        type:
-                          type: string
-                        version:
-                          description: 'RelaxedSemver taken from semver.org and adjusted
-                            to allow an optional leading ''v'', major-only, and major.minor-only
-                            this means the following strings are all valid relaxedSemvers:
-                            1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2
-                            v1-foo+bar'
-                          pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
-                          type: string
-                      required:
-                      - name
-                      - type
-                      - version
-                      type: object
-                    type: array
-                  sources:
-                    items:
-                      properties:
-                        access:
-                          description: 'TODO: Access can be either of type Access
-                            or LocalBlobAccess. We can do this by making this field
-                            use *apiextensions.JSON which validates any valid JSON.
-                            Then, we can unmarshall it and use the values and not
-                            loose type safety. Or, have an explicit field called LocalBlobAccess
-                            which can either be provided or not.'
-                          properties:
-                            type:
-                              description: Type is the base type for the access of
-                                a source or resource
-                              type: string
-                          required:
-                          - type
-                          type: object
-                        extraIdentity:
-                          properties:
-                            identityAttributeKeys:
-                              items:
-                                minLength: 2
-                                pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                                type: string
-                              type: array
-                          type: object
-                        labels:
-                          items:
-                            properties:
-                              name:
-                                type: string
-                              values:
-                                type: string
-                            type: object
-                          type: array
-                        localBlobAccess:
-                          description: LocalBlobAccess identifier of the local blob
-                            within the current component descriptor.
-                          properties:
-                            digest:
-                              type: string
-                            type:
-                              enum:
-                              - localBlob
-                              type: string
-                          required:
-                          - digest
-                          - type
-                          type: object
-                        name:
-                          minLength: 2
-                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                          type: string
-                        type:
-                          type: string
-                        version:
-                          description: 'RelaxedSemver taken from semver.org and adjusted
-                            to allow an optional leading ''v'', major-only, and major.minor-only
-                            this means the following strings are all valid relaxedSemvers:
-                            1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2
-                            v1-foo+bar'
-                          pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
-                          type: string
-                      required:
-                      - name
-                      - type
-                      - version
-                      type: object
-                    type: array
-                  version:
-                    description: 'RelaxedSemver taken from semver.org and adjusted
-                      to allow an optional leading ''v'', major-only, and major.minor-only
-                      this means the following strings are all valid relaxedSemvers:
-                      1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
-                    pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
-                    type: string
-                required:
-                - name
-                - version
-                type: object
-              componentName:
-                description: ComponentName MUST start with a valid domain name (as
-                  specified by RFC-1034, RFC-1035) with an optional URL path suffix
-                  (as specified by RFC-1738)
-                maxLength: 255
-                pattern: ^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$
-                type: string
-              componentReference:
-                description: ComponentReference is a reference to a component.
-                properties:
-                  componentName:
-                    type: string
-                  digest:
-                    properties:
-                      hashAlgorithm:
-                        type: string
-                      normalisationAlgorithm:
-                        type: string
-                      value:
-                        type: string
-                    required:
-                    - hashAlgorithm
-                    - normalisationAlgorithm
-                    - value
-                    type: object
-                  extraIdentity:
-                    properties:
-                      identityAttributeKeys:
-                        items:
-                          minLength: 2
-                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                          type: string
-                        type: array
-                    type: object
-                  labels:
-                    items:
-                      properties:
-                        name:
-                          type: string
-                        values:
-                          type: string
-                      type: object
-                    type: array
-                  name:
-                    minLength: 2
-                    pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                    type: string
-                  version:
-                    description: 'RelaxedSemver taken from semver.org and adjusted
-                      to allow an optional leading ''v'', major-only, and major.minor-only
-                      this means the following strings are all valid relaxedSemvers:
-                      1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
-                    pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
-                    type: string
-                required:
-                - componentName
-                - name
-                - version
-                type: object
-              digestSpec:
-                properties:
-                  hashAlgorithm:
-                    type: string
-                  normalisationAlgorithm:
-                    type: string
-                  value:
-                    type: string
-                required:
-                - hashAlgorithm
-                - normalisationAlgorithm
-                - value
-                type: object
-              identityAttribute:
-                properties:
-                  identityAttributeKeys:
-                    items:
-                      minLength: 2
-                      pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                      type: string
-                    type: array
-                type: object
-              label:
+              componentReferences:
+                description: ComponentReferences references component dependencies
+                  that can be resolved in the current context.
                 items:
+                  description: ComponentReference describes the reference to another
+                    component in the registry.
                   properties:
+                    componentName:
+                      description: ComponentName describes the remote name of the
+                        referenced object
+                      maxLength: 255
+                      pattern: ^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$
+                      type: string
+                    digest:
+                      description: Digest is the optional digest of the referenced
+                        component.
+                      properties:
+                        hashAlgorithm:
+                          type: string
+                        normalisationAlgorithm:
+                          type: string
+                        value:
+                          type: string
+                      required:
+                      - hashAlgorithm
+                      - normalisationAlgorithm
+                      - value
+                      type: object
+                    extraIdentity:
+                      additionalProperties:
+                        type: string
+                      description: ExtraIdentity is the identity of an object. An
+                        additional label with key "name" ist not allowed
+                      type: object
+                    labels:
+                      description: Labels defines an optional set of additional labels
+                        describing the object.
+                      items:
+                        description: Label is a label that can be set on objects.
+                        properties:
+                          name:
+                            description: Name is the unique name of the label.
+                            type: string
+                          signing:
+                            description: Signing describes whether the label should
+                              be included into the signature
+                            type: boolean
+                          value:
+                            description: Value is the json/yaml data of the label
+                            format: byte
+                            type: string
+                          version:
+                            description: Version is the optional specification version
+                              of the attribute value
+                            pattern: ^v[0-9]+$
+                            type: string
+                        required:
+                        - name
+                        - value
+                        type: object
+                      type: array
                     name:
+                      description: Name is the context unique name of the object.
                       type: string
-                    values:
+                    version:
+                      description: Version is the semver version of the object.
                       type: string
+                  required:
+                  - componentName
+                  - name
+                  - version
                   type: object
                 type: array
-              meta:
-                properties:
-                  schemaVersion:
-                    type: string
-                required:
-                - schemaVersion
-                type: object
-              relaxedSemver:
-                description: 'RelaxedSemver taken from semver.org and adjusted to
-                  allow an optional leading ''v'', major-only, and major.minor-only
-                  this means the following strings are all valid relaxedSemvers: 1.2.3
-                  1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
-                pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
+              labels:
+                description: Labels defines an optional set of additional labels describing
+                  the object.
+                items:
+                  description: Label is a label that can be set on objects.
+                  properties:
+                    name:
+                      description: Name is the unique name of the label.
+                      type: string
+                    signing:
+                      description: Signing describes whether the label should be included
+                        into the signature
+                      type: boolean
+                    value:
+                      description: Value is the json/yaml data of the label
+                      format: byte
+                      type: string
+                    version:
+                      description: Version is the optional specification version of
+                        the attribute value
+                      pattern: ^v[0-9]+$
+                      type: string
+                  required:
+                  - name
+                  - value
+                  type: object
+                type: array
+              name:
+                description: Name is the context unique name of the object.
                 type: string
-              repositoryContext:
-                properties:
-                  type:
-                    type: string
-                required:
-                - type
-                type: object
-              resource:
-                description: Resource is the base type for resources.
-                properties:
-                  access:
-                    description: 'TODO: Access can be either of type Access or LocalBlobAccess.
-                      We can do this by making this field use *apiextensions.JSON
-                      which validates any valid JSON. Then, we can unmarshall it and
-                      use the values and not loose type safety. Or, have an explicit
-                      field called LocalBlobAccess which can either be provided or
-                      not.'
-                    properties:
-                      type:
-                        description: Type is the base type for the access of a source
-                          or resource
-                        type: string
-                    required:
-                    - type
-                    type: object
-                  digest:
-                    properties:
-                      hashAlgorithm:
-                        type: string
-                      normalisationAlgorithm:
-                        type: string
-                      value:
-                        type: string
-                    required:
-                    - hashAlgorithm
-                    - normalisationAlgorithm
-                    - value
-                    type: object
-                  extraIdentity:
-                    properties:
-                      identityAttributeKeys:
-                        items:
-                          minLength: 2
-                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                          type: string
-                        type: array
-                    type: object
-                  labels:
-                    items:
+              provider:
+                description: Provider defines the provider type of a component. It
+                  can be external or internal.
+                type: string
+              repositoryContexts:
+                description: RepositoryContexts defines the previous repositories
+                  of the component
+                items:
+                  description: UnstructuredTypedObject describes a generic typed object.
+                  properties:
+                    type:
+                      description: Type describes the type of the object.
+                      type: string
+                  required:
+                  - type
+                  type: object
+                type: array
+              resources:
+                description: Resources defines all resources that are created by the
+                  component and by a third party.
+                items:
+                  description: Resource describes a resource dependency of a component.
+                  properties:
+                    access:
+                      description: Access describes the type specific method to access
+                        the defined resource.
                       properties:
-                        name:
+                        type:
+                          description: Type describes the type of the object.
                           type: string
-                        values:
-                          type: string
+                      required:
+                      - type
                       type: object
-                    type: array
-                  localBlobAccess:
-                    description: LocalBlobAccess identifier of the local blob within
-                      the current component descriptor.
-                    properties:
-                      digest:
-                        type: string
-                      type:
-                        enum:
-                        - localBlob
-                        type: string
-                    required:
-                    - digest
-                    - type
-                    type: object
-                  name:
-                    minLength: 2
-                    pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                    type: string
-                  relation:
-                    enum:
-                    - local
-                    - external
-                    type: string
-                  srcRefs:
-                    items:
-                      description: SourceReferences a reference to a (component-local)
-                        source
+                    digest:
+                      description: Digest is the optional digest of the referenced
+                        resource.
                       properties:
-                        extraIdentity:
-                          properties:
-                            identityAttributeKeys:
-                              items:
-                                minLength: 2
-                                pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                                type: string
-                              type: array
-                          type: object
-                        name:
-                          minLength: 2
-                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
+                        hashAlgorithm:
                           type: string
+                        normalisationAlgorithm:
+                          type: string
+                        value:
+                          type: string
+                      required:
+                      - hashAlgorithm
+                      - normalisationAlgorithm
+                      - value
                       type: object
-                    type: array
-                  type:
-                    type: string
-                  version:
-                    description: 'RelaxedSemver taken from semver.org and adjusted
-                      to allow an optional leading ''v'', major-only, and major.minor-only
-                      this means the following strings are all valid relaxedSemvers:
-                      1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
-                    pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
-                    type: string
-                required:
-                - name
-                - type
-                - version
-                type: object
-              signature:
-                properties:
-                  digest:
-                    properties:
-                      hashAlgorithm:
+                    extraIdentity:
+                      additionalProperties:
                         type: string
-                      normalisationAlgorithm:
-                        type: string
-                      value:
-                        type: string
-                    required:
-                    - hashAlgorithm
-                    - normalisationAlgorithm
-                    - value
-                    type: object
-                  name:
-                    type: string
-                  signature:
-                    properties:
-                      algorithm:
-                        type: string
-                      mediaType:
-                        description: MediaType is the media type of the signature
-                          value
-                        type: string
-                      value:
-                        type: string
-                    required:
-                    - algorithm
-                    - mediaType
-                    - value
-                    type: object
-                required:
-                - digest
-                - name
-                - signature
-                type: object
-              signatureSpec:
-                properties:
-                  algorithm:
-                    type: string
-                  mediaType:
-                    description: MediaType is the media type of the signature value
-                    type: string
-                  value:
-                    type: string
-                required:
-                - algorithm
-                - mediaType
-                - value
-                type: object
-              source:
-                properties:
-                  access:
-                    description: 'TODO: Access can be either of type Access or LocalBlobAccess.
-                      We can do this by making this field use *apiextensions.JSON
-                      which validates any valid JSON. Then, we can unmarshall it and
-                      use the values and not loose type safety. Or, have an explicit
-                      field called LocalBlobAccess which can either be provided or
-                      not.'
-                    properties:
-                      type:
-                        description: Type is the base type for the access of a source
-                          or resource
-                        type: string
-                    required:
-                    - type
-                    type: object
-                  extraIdentity:
-                    properties:
-                      identityAttributeKeys:
-                        items:
-                          minLength: 2
-                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                          type: string
-                        type: array
-                    type: object
-                  labels:
-                    items:
+                      description: ExtraIdentity is the identity of an object. An
+                        additional label with key "name" ist not allowed
+                      type: object
+                    labels:
+                      description: Labels defines an optional set of additional labels
+                        describing the object.
+                      items:
+                        description: Label is a label that can be set on objects.
+                        properties:
+                          name:
+                            description: Name is the unique name of the label.
+                            type: string
+                          signing:
+                            description: Signing describes whether the label should
+                              be included into the signature
+                            type: boolean
+                          value:
+                            description: Value is the json/yaml data of the label
+                            format: byte
+                            type: string
+                          version:
+                            description: Version is the optional specification version
+                              of the attribute value
+                            pattern: ^v[0-9]+$
+                            type: string
+                        required:
+                        - name
+                        - value
+                        type: object
+                      type: array
+                    name:
+                      description: Name is the context unique name of the object.
+                      type: string
+                    relation:
+                      description: Relation describes the relation of the resource
+                        to the component. Can be a local or external resource
+                      type: string
+                    srcRef:
+                      description: SourceRef defines a list of source names. These
+                        names reference the sources defines in `component.sources`.
+                      items:
+                        description: SourceRef defines a reference to a source
+                        properties:
+                          identitySelector:
+                            additionalProperties:
+                              type: string
+                            description: IdentitySelector defines the identity that
+                              is used to match a source.
+                            type: object
+                          labels:
+                            description: Labels defines an optional set of additional
+                              labels describing the object.
+                            items:
+                              description: Label is a label that can be set on objects.
+                              properties:
+                                name:
+                                  description: Name is the unique name of the label.
+                                  type: string
+                                signing:
+                                  description: Signing describes whether the label
+                                    should be included into the signature
+                                  type: boolean
+                                value:
+                                  description: Value is the json/yaml data of the
+                                    label
+                                  format: byte
+                                  type: string
+                                version:
+                                  description: Version is the optional specification
+                                    version of the attribute value
+                                  pattern: ^v[0-9]+$
+                                  type: string
+                              required:
+                              - name
+                              - value
+                              type: object
+                            type: array
+                        type: object
+                      type: array
+                    type:
+                      description: Type describes the type of the object.
+                      type: string
+                    version:
+                      description: Version is the semver version of the object.
+                      type: string
+                  required:
+                  - access
+                  - name
+                  - type
+                  - version
+                  type: object
+                type: array
+              sources:
+                description: Sources defines sources that produced the component
+                items:
+                  description: Source is the definition of a component's source.
+                  properties:
+                    access:
+                      description: UnstructuredTypedObject describes a generic typed
+                        object.
                       properties:
-                        name:
+                        type:
+                          description: Type describes the type of the object.
                           type: string
-                        values:
-                          type: string
+                      required:
+                      - type
                       type: object
-                    type: array
-                  localBlobAccess:
-                    description: LocalBlobAccess identifier of the local blob within
-                      the current component descriptor.
-                    properties:
-                      digest:
+                    extraIdentity:
+                      additionalProperties:
                         type: string
-                      type:
-                        enum:
-                        - localBlob
-                        type: string
-                    required:
-                    - digest
-                    - type
-                    type: object
-                  name:
-                    minLength: 2
-                    pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                    type: string
-                  type:
-                    type: string
-                  version:
-                    description: 'RelaxedSemver taken from semver.org and adjusted
-                      to allow an optional leading ''v'', major-only, and major.minor-only
-                      this means the following strings are all valid relaxedSemvers:
-                      1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
-                    pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
-                    type: string
-                required:
-                - name
-                - type
-                - version
-                type: object
+                      description: ExtraIdentity is the identity of an object. An
+                        additional label with key "name" ist not allowed
+                      type: object
+                    labels:
+                      description: Labels defines an optional set of additional labels
+                        describing the object.
+                      items:
+                        description: Label is a label that can be set on objects.
+                        properties:
+                          name:
+                            description: Name is the unique name of the label.
+                            type: string
+                          signing:
+                            description: Signing describes whether the label should
+                              be included into the signature
+                            type: boolean
+                          value:
+                            description: Value is the json/yaml data of the label
+                            format: byte
+                            type: string
+                          version:
+                            description: Version is the optional specification version
+                              of the attribute value
+                            pattern: ^v[0-9]+$
+                            type: string
+                        required:
+                        - name
+                        - value
+                        type: object
+                      type: array
+                    name:
+                      description: Name is the context unique name of the object.
+                      type: string
+                    type:
+                      description: Type describes the type of the object.
+                      type: string
+                    version:
+                      description: Version is the semver version of the object.
+                      type: string
+                  required:
+                  - access
+                  - name
+                  - type
+                  - version
+                  type: object
+                type: array
+              version:
+                description: Version is the semver version of the object.
+                type: string
             required:
-            - access
+            - componentReferences
+            - name
+            - provider
+            - repositoryContexts
+            - resources
+            - sources
+            - version
             type: object
           status:
             type: object
@@ -677,740 +379,270 @@ spec:
           metadata:
             type: object
           spec:
+            description: ComponentVersionSpec defines a virtual component with a repository
+              context, source and dependencies.
             properties:
-              access:
-                properties:
-                  type:
-                    description: Type is the base type for the access of a source
-                      or resource
-                    type: string
-                required:
-                - type
-                type: object
-              component:
-                description: Component is a component.
-                properties:
-                  componentReferences:
-                    items:
-                      description: ComponentReference is a reference to a component.
-                      properties:
-                        componentName:
-                          type: string
-                        digest:
-                          properties:
-                            hashAlgorithm:
-                              type: string
-                            normalisationAlgorithm:
-                              type: string
-                            value:
-                              type: string
-                          required:
-                          - hashAlgorithm
-                          - normalisationAlgorithm
-                          - value
-                          type: object
-                        extraIdentity:
-                          properties:
-                            identityAttributeKeys:
-                              items:
-                                minLength: 2
-                                pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                                type: string
-                              type: array
-                          type: object
-                        labels:
-                          items:
-                            properties:
-                              name:
-                                type: string
-                              signature:
-                                type: boolean
-                              values:
-                                type: string
-                              version:
-                                pattern: ^v[0-9]+$
-                                type: string
-                            required:
-                            - signature
-                            - version
-                            type: object
-                          type: array
-                        name:
-                          minLength: 2
-                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                          type: string
-                        version:
-                          description: 'RelaxedSemver taken from semver.org and adjusted
-                            to allow an optional leading ''v'', major-only, and major.minor-only
-                            this means the following strings are all valid relaxedSemvers:
-                            1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2
-                            v1-foo+bar'
-                          pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
-                          type: string
-                      required:
-                      - componentName
-                      - name
-                      - version
-                      type: object
-                    type: array
-                  labels:
-                    items:
-                      properties:
-                        name:
-                          type: string
-                        signature:
-                          type: boolean
-                        values:
-                          type: string
-                        version:
-                          pattern: ^v[0-9]+$
-                          type: string
-                      required:
-                      - signature
-                      - version
-                      type: object
-                    type: array
-                  name:
-                    description: ComponentName (s) MUST start with a valid domain
-                      name (as specified by RFC-1034, RFC-1035) with an optional URL
-                      path suffix (as specified by RFC-1738)'
-                    maxLength: 255
-                    pattern: ^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$
-                    type: string
-                  provider:
-                    type: string
-                  repositoryContexts:
-                    items:
-                      properties:
-                        baseURL:
-                          type: string
-                        componentNameMapping:
-                          enum:
-                          - urlPath
-                          - sha256-digest
-                          type: string
-                        repositoryContext:
-                          properties:
-                            type:
-                              type: string
-                          required:
-                          - type
-                          type: object
-                        type:
-                          enum:
-                          - ociRegistry
-                          - OCIRegistry
-                          type: string
-                      required:
-                      - repositoryContext
-                      type: object
-                    type: array
-                  resources:
-                    description: 'TODO: This can be multiple types. So we need a JSON
-                      schema here too. Unless we define all of the accesses as a separate
-                      field. But I believe that defeats the purpose of the spec.'
-                    items:
-                      description: ResourceType is the base type for resources.
-                      properties:
-                        access:
-                          description: 'TODO: Access can be either of type Access
-                            or LocalBlobAccess. We can do this by making this field
-                            use *apiextensions.JSON which validates any valid JSON.
-                            Then, we can unmarshall it and use the values and not
-                            loose type safety. Or, have an explicit field called LocalBlobAccess
-                            which can either be provided or not.'
-                          properties:
-                            type:
-                              description: Type is the base type for the access of
-                                a source or resource
-                              type: string
-                          required:
-                          - type
-                          type: object
-                        digest:
-                          properties:
-                            hashAlgorithm:
-                              type: string
-                            normalisationAlgorithm:
-                              type: string
-                            value:
-                              type: string
-                          required:
-                          - hashAlgorithm
-                          - normalisationAlgorithm
-                          - value
-                          type: object
-                        extraIdentity:
-                          properties:
-                            identityAttributeKeys:
-                              items:
-                                minLength: 2
-                                pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                                type: string
-                              type: array
-                          type: object
-                        labels:
-                          items:
-                            properties:
-                              name:
-                                type: string
-                              signature:
-                                type: boolean
-                              values:
-                                type: string
-                              version:
-                                pattern: ^v[0-9]+$
-                                type: string
-                            required:
-                            - signature
-                            - version
-                            type: object
-                          type: array
-                        name:
-                          minLength: 2
-                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                          type: string
-                        relation:
-                          enum:
-                          - local
-                          - external
-                          type: string
-                        srcRefs:
-                          items:
-                            description: SourceReferences a reference to a (component-local)
-                              source
-                            properties:
-                              identitySelector:
-                                properties:
-                                  identityAttributeKeys:
-                                    items:
-                                      minLength: 2
-                                      pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                                      type: string
-                                    type: array
-                                type: object
-                              labels:
-                                items:
-                                  properties:
-                                    name:
-                                      type: string
-                                    signature:
-                                      type: boolean
-                                    values:
-                                      type: string
-                                    version:
-                                      pattern: ^v[0-9]+$
-                                      type: string
-                                  required:
-                                  - signature
-                                  - version
-                                  type: object
-                                type: array
-                            type: object
-                          type: array
-                        type:
-                          type: string
-                        version:
-                          description: 'RelaxedSemver taken from semver.org and adjusted
-                            to allow an optional leading ''v'', major-only, and major.minor-only
-                            this means the following strings are all valid relaxedSemvers:
-                            1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2
-                            v1-foo+bar'
-                          pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
-                          type: string
-                      required:
-                      - name
-                      - type
-                      - version
-                      type: object
-                    type: array
-                  sources:
-                    items:
-                      properties:
-                        access:
-                          description: 'TODO: Access can be either of type Access
-                            or githubAccess or httpAccess. We can do this by making
-                            this field use *apiextensions.JSON which validates any
-                            valid JSON. Then, we can unmarshall it and use the values
-                            and not loose type safety. Or, have an explicit field
-                            called GithubAcess and HTTPAccess which can either be
-                            provided or not.'
-                          properties:
-                            type:
-                              description: Type is the base type for the access of
-                                a source or resource
-                              type: string
-                          required:
-                          - type
-                          type: object
-                        extraIdentity:
-                          properties:
-                            identityAttributeKeys:
-                              items:
-                                minLength: 2
-                                pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                                type: string
-                              type: array
-                          type: object
-                        labels:
-                          items:
-                            properties:
-                              name:
-                                type: string
-                              signature:
-                                type: boolean
-                              values:
-                                type: string
-                              version:
-                                pattern: ^v[0-9]+$
-                                type: string
-                            required:
-                            - signature
-                            - version
-                            type: object
-                          type: array
-                        name:
-                          minLength: 2
-                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                          type: string
-                        type:
-                          type: string
-                        version:
-                          description: 'RelaxedSemver taken from semver.org and adjusted
-                            to allow an optional leading ''v'', major-only, and major.minor-only
-                            this means the following strings are all valid relaxedSemvers:
-                            1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2
-                            v1-foo+bar'
-                          pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
-                          type: string
-                      required:
-                      - name
-                      - type
-                      - version
-                      type: object
-                    type: array
-                  version:
-                    description: 'RelaxedSemver taken from semver.org and adjusted
-                      to allow an optional leading ''v'', major-only, and major.minor-only
-                      this means the following strings are all valid relaxedSemvers:
-                      1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
-                    pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
-                    type: string
-                required:
-                - name
-                - version
-                type: object
-              componentName:
-                description: ComponentName MUST start with a valid domain name (as
-                  specified by RFC-1034, RFC-1035) with an optional URL path suffix
-                  (as specified by RFC-1738)
-                pattern: ^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$
-                type: string
-              componentReference:
-                description: ComponentReference is a reference to a component.
-                properties:
-                  componentName:
-                    type: string
-                  digest:
-                    properties:
-                      hashAlgorithm:
-                        type: string
-                      normalisationAlgorithm:
-                        type: string
-                      value:
-                        type: string
-                    required:
-                    - hashAlgorithm
-                    - normalisationAlgorithm
-                    - value
-                    type: object
-                  extraIdentity:
-                    properties:
-                      identityAttributeKeys:
-                        items:
-                          minLength: 2
-                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                          type: string
-                        type: array
-                    type: object
-                  labels:
-                    items:
-                      properties:
-                        name:
-                          type: string
-                        signature:
-                          type: boolean
-                        values:
-                          type: string
-                        version:
-                          pattern: ^v[0-9]+$
-                          type: string
-                      required:
-                      - signature
-                      - version
-                      type: object
-                    type: array
-                  name:
-                    minLength: 2
-                    pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                    type: string
-                  version:
-                    description: 'RelaxedSemver taken from semver.org and adjusted
-                      to allow an optional leading ''v'', major-only, and major.minor-only
-                      this means the following strings are all valid relaxedSemvers:
-                      1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
-                    pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
-                    type: string
-                required:
-                - componentName
-                - name
-                - version
-                type: object
-              digestSpec:
-                properties:
-                  hashAlgorithm:
-                    type: string
-                  normalisationAlgorithm:
-                    type: string
-                  value:
-                    type: string
-                required:
-                - hashAlgorithm
-                - normalisationAlgorithm
-                - value
-                type: object
-              identityAttribute:
-                properties:
-                  identityAttributeKeys:
-                    items:
-                      minLength: 2
-                      pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                      type: string
-                    type: array
-                type: object
-              label:
+              references:
+                description: References references component version dependencies
+                  that can be resolved in the current context.
                 items:
+                  description: Reference describes the reference to another component
+                    in the registry.
                   properties:
-                    name:
+                    componentName:
+                      description: ComponentName describes the remote name of the
+                        referenced object
                       type: string
-                    signature:
-                      type: boolean
-                    values:
+                    digest:
+                      description: Digest is the optional digest of the referenced
+                        component.
+                      properties:
+                        hashAlgorithm:
+                          type: string
+                        normalisationAlgorithm:
+                          type: string
+                        value:
+                          type: string
+                      required:
+                      - hashAlgorithm
+                      - normalisationAlgorithm
+                      - value
+                      type: object
+                    extraIdentity:
+                      additionalProperties:
+                        type: string
+                      description: ExtraIdentity is the identity of an object. An
+                        additional label with key "name" ist not allowed
+                      type: object
+                    labels:
+                      description: Labels defines an optional set of additional labels
+                        describing the object.
+                      items:
+                        description: Label is a label that can be set on objects.
+                        properties:
+                          name:
+                            description: Name is the unique name of the label.
+                            type: string
+                          signing:
+                            description: Signing describes whether the label should
+                              be included into the signature
+                            type: boolean
+                          value:
+                            description: Value is the json/yaml data of the label
+                            format: byte
+                            type: string
+                          version:
+                            description: Version is the optional specification version
+                              of the attribute value
+                            pattern: ^v[0-9]+$
+                            type: string
+                        required:
+                        - name
+                        - value
+                        type: object
+                      type: array
+                    name:
+                      description: Name is the context unique name of the object.
                       type: string
                     version:
-                      pattern: ^v[0-9]+$
+                      description: Version is the semver version of the object.
                       type: string
                   required:
-                  - signature
+                  - componentName
+                  - name
                   - version
                   type: object
                 type: array
-              meta:
-                description: Meta is component version metadata
-                properties:
-                  labels:
-                    items:
+              resources:
+                description: Resources defines all resources that are created by the
+                  component and by a third party.
+                items:
+                  description: Resource describes a resource dependency of a component.
+                  properties:
+                    access:
+                      description: Access describes the type specific method to access
+                        the defined resource.
                       properties:
-                        name:
-                          type: string
-                        signature:
-                          type: boolean
-                        values:
-                          type: string
-                        version:
-                          pattern: ^v[0-9]+$
+                        type:
+                          description: Type describes the type of the object.
                           type: string
                       required:
-                      - signature
-                      - version
+                      - type
                       type: object
-                    type: array
-                  name:
-                    description: ComponentName (s) MUST start with a valid domain
-                      name (as specified by RFC-1034, RFC-1035) with an optional URL
-                      path suffix (as specified by RFC-1738)'
-                    maxLength: 255
-                    pattern: ^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$
-                    type: string
-                  provider:
-                    properties:
-                      labels:
-                        items:
-                          properties:
-                            name:
-                              type: string
-                            signature:
-                              type: boolean
-                            values:
-                              type: string
-                            version:
-                              pattern: ^v[0-9]+$
-                              type: string
-                          required:
-                          - signature
-                          - version
-                          type: object
-                        type: array
-                      name:
-                        type: string
-                    required:
-                    - labels
-                    - name
-                    type: object
-                  version:
-                    description: 'RelaxedSemver taken from semver.org and adjusted
-                      to allow an optional leading ''v'', major-only, and major.minor-only
-                      this means the following strings are all valid relaxedSemvers:
-                      1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
-                    pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
-                    type: string
-                required:
-                - labels
-                - name
-                - provider
-                - version
-                type: object
-              relaxedSemver:
-                description: 'RelaxedSemver taken from semver.org and adjusted to
-                  allow an optional leading ''v'', major-only, and major.minor-only
-                  this means the following strings are all valid relaxedSemvers: 1.2.3
-                  1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
-                pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
-                type: string
-              repositoryContext:
-                properties:
-                  type:
-                    type: string
-                required:
-                - type
-                type: object
-              resource:
-                description: ResourceType is the base type for resources.
-                properties:
-                  access:
-                    description: 'TODO: Access can be either of type Access or LocalBlobAccess.
-                      We can do this by making this field use *apiextensions.JSON
-                      which validates any valid JSON. Then, we can unmarshall it and
-                      use the values and not loose type safety. Or, have an explicit
-                      field called LocalBlobAccess which can either be provided or
-                      not.'
-                    properties:
-                      type:
-                        description: Type is the base type for the access of a source
-                          or resource
-                        type: string
-                    required:
-                    - type
-                    type: object
-                  digest:
-                    properties:
-                      hashAlgorithm:
-                        type: string
-                      normalisationAlgorithm:
-                        type: string
-                      value:
-                        type: string
-                    required:
-                    - hashAlgorithm
-                    - normalisationAlgorithm
-                    - value
-                    type: object
-                  extraIdentity:
-                    properties:
-                      identityAttributeKeys:
-                        items:
-                          minLength: 2
-                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                          type: string
-                        type: array
-                    type: object
-                  labels:
-                    items:
+                    digest:
+                      description: Digest is the optional digest of the referenced
+                        resource.
                       properties:
-                        name:
+                        hashAlgorithm:
                           type: string
-                        signature:
-                          type: boolean
-                        values:
+                        normalisationAlgorithm:
                           type: string
-                        version:
-                          pattern: ^v[0-9]+$
+                        value:
                           type: string
                       required:
-                      - signature
-                      - version
+                      - hashAlgorithm
+                      - normalisationAlgorithm
+                      - value
                       type: object
-                    type: array
-                  name:
-                    minLength: 2
-                    pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                    type: string
-                  relation:
-                    enum:
-                    - local
-                    - external
-                    type: string
-                  srcRefs:
-                    items:
-                      description: SourceReferences a reference to a (component-local)
-                        source
-                      properties:
-                        identitySelector:
-                          properties:
-                            identityAttributeKeys:
-                              items:
-                                minLength: 2
-                                pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                                type: string
-                              type: array
-                          type: object
-                        labels:
-                          items:
-                            properties:
-                              name:
-                                type: string
-                              signature:
-                                type: boolean
-                              values:
-                                type: string
-                              version:
-                                pattern: ^v[0-9]+$
-                                type: string
-                            required:
-                            - signature
-                            - version
+                    extraIdentity:
+                      additionalProperties:
+                        type: string
+                      description: ExtraIdentity is the identity of an object. An
+                        additional label with key "name" ist not allowed
+                      type: object
+                    labels:
+                      description: Labels defines an optional set of additional labels
+                        describing the object.
+                      items:
+                        description: Label is a label that can be set on objects.
+                        properties:
+                          name:
+                            description: Name is the unique name of the label.
+                            type: string
+                          signing:
+                            description: Signing describes whether the label should
+                              be included into the signature
+                            type: boolean
+                          value:
+                            description: Value is the json/yaml data of the label
+                            format: byte
+                            type: string
+                          version:
+                            description: Version is the optional specification version
+                              of the attribute value
+                            pattern: ^v[0-9]+$
+                            type: string
+                        required:
+                        - name
+                        - value
+                        type: object
+                      type: array
+                    name:
+                      description: Name is the context unique name of the object.
+                      type: string
+                    relation:
+                      description: Relation describes the relation of the resource
+                        to the component. Can be a local or external resource
+                      type: string
+                    srcRef:
+                      description: SourceRef defines a list of source names. These
+                        names reference the sources defines in `component.sources`.
+                      items:
+                        description: SourceRef defines a reference to a source
+                        properties:
+                          identitySelector:
+                            additionalProperties:
+                              type: string
+                            description: IdentitySelector defines the identity that
+                              is used to match a source.
                             type: object
-                          type: array
-                      type: object
-                    type: array
-                  type:
-                    type: string
-                  version:
-                    description: 'RelaxedSemver taken from semver.org and adjusted
-                      to allow an optional leading ''v'', major-only, and major.minor-only
-                      this means the following strings are all valid relaxedSemvers:
-                      1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
-                    pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
-                    type: string
-                required:
-                - name
-                - type
-                - version
-                type: object
-              signature:
-                properties:
-                  digest:
-                    properties:
-                      hashAlgorithm:
-                        type: string
-                      normalisationAlgorithm:
-                        type: string
-                      value:
-                        type: string
-                    required:
-                    - hashAlgorithm
-                    - normalisationAlgorithm
-                    - value
-                    type: object
-                  name:
-                    type: string
-                  signature:
-                    properties:
-                      algorithm:
-                        type: string
-                      mediaType:
-                        description: MediaType is the media type of the signature
-                          value
-                        type: string
-                      value:
-                        type: string
-                    required:
-                    - algorithm
-                    - mediaType
-                    - value
-                    type: object
-                required:
-                - digest
-                - name
-                - signature
-                type: object
-              signatureSpec:
-                properties:
-                  algorithm:
-                    type: string
-                  mediaType:
-                    description: MediaType is the media type of the signature value
-                    type: string
-                  value:
-                    type: string
-                required:
-                - algorithm
-                - mediaType
-                - value
-                type: object
-              source:
-                properties:
-                  access:
-                    description: 'TODO: Access can be either of type Access or githubAccess
-                      or httpAccess. We can do this by making this field use *apiextensions.JSON
-                      which validates any valid JSON. Then, we can unmarshall it and
-                      use the values and not loose type safety. Or, have an explicit
-                      field called GithubAcess and HTTPAccess which can either be
-                      provided or not.'
-                    properties:
-                      type:
-                        description: Type is the base type for the access of a source
-                          or resource
-                        type: string
-                    required:
-                    - type
-                    type: object
-                  extraIdentity:
-                    properties:
-                      identityAttributeKeys:
-                        items:
-                          minLength: 2
-                          pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                          type: string
-                        type: array
-                    type: object
-                  labels:
-                    items:
+                          labels:
+                            description: Labels defines an optional set of additional
+                              labels describing the object.
+                            items:
+                              description: Label is a label that can be set on objects.
+                              properties:
+                                name:
+                                  description: Name is the unique name of the label.
+                                  type: string
+                                signing:
+                                  description: Signing describes whether the label
+                                    should be included into the signature
+                                  type: boolean
+                                value:
+                                  description: Value is the json/yaml data of the
+                                    label
+                                  format: byte
+                                  type: string
+                                version:
+                                  description: Version is the optional specification
+                                    version of the attribute value
+                                  pattern: ^v[0-9]+$
+                                  type: string
+                              required:
+                              - name
+                              - value
+                              type: object
+                            type: array
+                        type: object
+                      type: array
+                    type:
+                      description: Type describes the type of the object.
+                      type: string
+                    version:
+                      description: Version is the semver version of the object.
+                      type: string
+                  required:
+                  - access
+                  - name
+                  - type
+                  - version
+                  type: object
+                type: array
+              sources:
+                description: Sources defines sources that produced the component
+                items:
+                  description: Source is the definition of a component's source.
+                  properties:
+                    access:
+                      description: UnstructuredTypedObject describes a generic typed
+                        object.
                       properties:
-                        name:
-                          type: string
-                        signature:
-                          type: boolean
-                        values:
-                          type: string
-                        version:
-                          pattern: ^v[0-9]+$
+                        type:
+                          description: Type describes the type of the object.
                           type: string
                       required:
-                      - signature
-                      - version
+                      - type
                       type: object
-                    type: array
-                  name:
-                    minLength: 2
-                    pattern: ^[a-z0-9]([-_+a-z0-9]*[a-z0-9])?$
-                    type: string
-                  type:
-                    type: string
-                  version:
-                    description: 'RelaxedSemver taken from semver.org and adjusted
-                      to allow an optional leading ''v'', major-only, and major.minor-only
-                      this means the following strings are all valid relaxedSemvers:
-                      1.2.3 1.2.3-foo+bar v1.2.3 v1.2.3-foo+bar 1.2 1 v1 v1.2 v1-foo+bar'
-                    pattern: ^[v]?(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?(?:\.(0|[1-9]\d*))?(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$
-                    type: string
-                required:
-                - name
-                - type
-                - version
-                type: object
-            required:
-            - access
+                    extraIdentity:
+                      additionalProperties:
+                        type: string
+                      description: ExtraIdentity is the identity of an object. An
+                        additional label with key "name" ist not allowed
+                      type: object
+                    labels:
+                      description: Labels defines an optional set of additional labels
+                        describing the object.
+                      items:
+                        description: Label is a label that can be set on objects.
+                        properties:
+                          name:
+                            description: Name is the unique name of the label.
+                            type: string
+                          signing:
+                            description: Signing describes whether the label should
+                              be included into the signature
+                            type: boolean
+                          value:
+                            description: Value is the json/yaml data of the label
+                            format: byte
+                            type: string
+                          version:
+                            description: Version is the optional specification version
+                              of the attribute value
+                            pattern: ^v[0-9]+$
+                            type: string
+                        required:
+                        - name
+                        - value
+                        type: object
+                      type: array
+                    name:
+                      description: Name is the context unique name of the object.
+                      type: string
+                    type:
+                      description: Type describes the type of the object.
+                      type: string
+                    version:
+                      description: Version is the semver version of the object.
+                      type: string
+                  required:
+                  - access
+                  - name
+                  - type
+                  - version
+                  type: object
+                type: array
             type: object
           status:
             type: object

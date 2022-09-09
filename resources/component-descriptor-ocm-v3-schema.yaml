@@ -317,7 +317,7 @@ definitions:
     type: 'object'
     required:
       - 'type'
-      - 'digest'
+      - 'filename'
     properties:
       type:
         type: 'string'
