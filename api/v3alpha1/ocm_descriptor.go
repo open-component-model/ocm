@@ -15,6 +15,8 @@
 package v3alpha1
 
 import (
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud/v3alpha1"
+	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -194,7 +196,7 @@ type SourceDefinition struct {
 	// use the values and not loose type safety. Or, have an explicit field called GithubAcess and HTTPAccess
 	// which can either be provided or not.
 	// +kubebuilder:validation:Required
-	Access Access `json:"access,omitempty"`
+	Access *apiextensions.JSON `json:"access,omitempty"`
 
 	ExtraIdentity IdentityAttribute `json:"extraIdentity,omitempty"`
 	Labels        []Label           `json:"labels,omitempty"`
@@ -298,26 +300,6 @@ type Component struct {
 	Labels []Label `json:"labels,omitempty"`
 }
 
-type ComponentDescriptorSpec struct {
-	Meta  Meta    `json:"meta,omitempty"`
-	Label []Label `json:"label,omitempty"`
-	// ComponentName MUST start with a valid domain name (as specified by RFC-1034, RFC-1035) with an optional URL path suffix (as specified by RFC-1738)
-	// +kubebuilder:validation:Pattern:=`^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$`
-	ComponentName     string            `json:"componentName,omitempty"`
-	IdentityAttribute IdentityAttribute `json:"identityAttribute,omitempty"`
-	RelaxedSemver     RelaxedSemver     `json:"relaxedSemver,omitempty"`
-	Component         Component         `json:"component,omitempty"`
-
-	RepositoryContext  RepositoryContext  `json:"repositoryContext,omitempty"`
-	Access             Access             `json:"access"`
-	DigestSpec         DigestSpec         `json:"digestSpec,omitempty"`
-	SignatureSpec      SignatureSpec      `json:"signatureSpec,omitempty"`
-	Signature          Signature          `json:"signature,omitempty"`
-	Source             SourceDefinition   `json:"source,omitempty"`
-	ComponentReference ComponentReference `json:"componentReference,omitempty"`
-	Resource           ResourceType       `json:"resource,omitempty"`
-}
-
 type ComponentDescriptorStatus struct{}
 
 // +kubebuilder:validation:MinLength=2
@@ -330,8 +312,9 @@ type ComponentDescriptor struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   ComponentDescriptorSpec   `json:"spec,omitempty"`
-	Status ComponentDescriptorStatus `json:"status,omitempty"`
+	// TODO: Use Go representations already available ComponentVersionSpec
+	Spec   v3alpha1.ComponentVersionSpec `json:"spec,omitempty"`
+	Status ComponentDescriptorStatus     `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true

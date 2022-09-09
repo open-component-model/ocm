@@ -56,12 +56,9 @@ require (
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/text v0.3.7
 	gopkg.in/yaml.v3 v3.0.1
-<<<<<<< HEAD
 	helm.sh/helm/v3 v3.9.4
-=======
-	helm.sh/helm/v3 v3.9.1
+	k8s.io/apiextensions-apiserver v0.24.2
 	sigs.k8s.io/controller-runtime v0.12.3
->>>>>>> 1b9ec4ab (Added CRD definition for component-descriptor)
 )
 
 require (
@@ -185,7 +182,6 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	k8s.io/api v0.24.3 // indirect
-	k8s.io/apiextensions-apiserver v0.24.2 // indirect
 	k8s.io/apiserver v0.24.2 // indirect
 	k8s.io/cli-runtime v0.24.3 // indirect
 	k8s.io/client-go v0.24.3 // indirect
