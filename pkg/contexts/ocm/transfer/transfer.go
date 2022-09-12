@@ -16,6 +16,7 @@ package transfer
 
 import (
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
 	ocmcpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -27,7 +28,7 @@ import (
 
 type TransportClosure = common.NameVersionInfo
 
-func TransferVersion(printer common.Printer, closure TransportClosure, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
+func TransferVersion(printer common.Printer, closure TransportClosure, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
 	if closure == nil {
 		closure = TransportClosure{}
 	}
@@ -35,10 +36,10 @@ func TransferVersion(printer common.Printer, closure TransportClosure, repo ocmc
 		printer = common.NewPrinter(nil)
 	}
 	state := common.WalkingState{Closure: closure}
-	return transferVersion(printer, state, repo, src, tgt, handler)
+	return transferVersion(printer, state, src, tgt, handler)
 }
 
-func transferVersion(printer common.Printer, state common.WalkingState, repo ocmcpi.Repository, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
+func transferVersion(printer common.Printer, state common.WalkingState, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
 	nv := common.VersionedElementKey(src)
 	if ok, err := state.Add(ocm.KIND_COMPONENTVERSION, nv); !ok {
 		return err
@@ -61,9 +62,11 @@ func transferVersion(printer common.Printer, state common.WalkingState, repo ocm
 	defer comp.Close()
 
 	t, err := comp.LookupVersion(src.GetVersion())
+	defer accessio.Close(t)
 	if err != nil {
 		if errors.IsErrNotFound(err) {
 			t, err = comp.NewVersion(src.GetVersion())
+			defer accessio.Close(t)
 		}
 	} else {
 		var ok bool
@@ -76,7 +79,6 @@ func transferVersion(printer common.Printer, state common.WalkingState, repo ocm
 	if err != nil {
 		return errors.Wrapf(err, "%s: creating target version", state.History)
 	}
-	defer t.Close()
 
 	err = CopyVersion(printer, state.History, src, t, handler)
 	if err != nil {
@@ -85,19 +87,13 @@ func transferVersion(printer common.Printer, state common.WalkingState, repo ocm
 	subp := printer.AddGap("  ")
 	list := errors.ErrListf("component references for %s", nv)
 	for _, r := range d.References {
-		srepo, shdlr, err := handler.TransferVersion(repo, src, &r.ElementMeta)
+		cv, shdlr, err := handler.TransferVersion(src.Repository(), src, &r)
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "%s: nested component %s[%s:%s]", state.History, r.GetName(), r.ComponentName, r.GetVersion())
 		}
-		if srepo != nil {
-			c, err := srepo.LookupComponentVersion(r.ComponentName, r.GetVersion())
-			if err != nil {
-				return errors.Wrapf(err, "%s: nested component %s[%s:%s]", state.History, r.GetName(), r.ComponentName, r.GetVersion())
-			}
-			list.Add(transferVersion(subp, state, srepo, c, tgt, shdlr))
-			if srepo != repo {
-				srepo.Close()
-			}
+		if cv != nil {
+			list.Add(transferVersion(subp, state, cv, tgt, shdlr))
+			cv.Close()
 		}
 	}
 
@@ -137,13 +133,8 @@ func CopyVersion(printer common.Printer, hist common.History, src ocm.ComponentV
 					}
 				}
 				if ok {
-					hint := ""
-					if h, ok := a.(ocm.HintProvider); ok {
-						hint = h.GetReferenceHint()
-					}
-					if printer != nil {
-						printer.Printf("...resource %d...\n", i)
-					}
+					hint := ocmcpi.ArtefactNameHint(a, src)
+					printArtefactInfo(printer, "resource", i, hint)
 					err = handler.HandleTransferResource(r, m, hint, t)
 				}
 			}
@@ -169,13 +160,8 @@ func CopyVersion(printer common.Printer, hist common.History, src ocm.ComponentV
 					}
 				}
 				if ok {
-					hint := ""
-					if h, ok := a.(ocm.HintProvider); ok {
-						hint = h.GetReferenceHint()
-					}
-					if printer != nil {
-						printer.Printf("...source %d...\n", i)
-					}
+					hint := ocmcpi.ArtefactNameHint(a, src)
+					printArtefactInfo(printer, "source", i, hint)
 					err = handler.HandleTransferSource(r, m, hint, t)
 				}
 			}
@@ -188,4 +174,14 @@ func CopyVersion(printer common.Printer, hist common.History, src ocm.ComponentV
 		}
 	}
 	return nil
+}
+
+func printArtefactInfo(printer common.Printer, kind string, index int, hint string) {
+	if printer != nil {
+		if hint != "" {
+			printer.Printf("...resource %d(%s)...\n", index, hint)
+		} else {
+			printer.Printf("...resource %d...\n", index)
+		}
+	}
 }

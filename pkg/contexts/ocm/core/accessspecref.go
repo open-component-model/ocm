@@ -16,6 +16,7 @@ package core
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/modern-go/reflect2"
 
@@ -62,6 +63,17 @@ func (a *AccessSpecRef) Set(spec AccessSpec) {
 		a.evaluated = spec
 		a.generic = nil
 	}
+}
+
+func (a *AccessSpecRef) Describe(ctx Context) string {
+	err := a.assure(ctx)
+	if a.evaluated != nil {
+		return a.evaluated.Describe(ctx)
+	}
+	if err != nil {
+		return fmt.Sprintf("invalid access specification: %s", err.Error())
+	}
+	return "invalid access specification"
 }
 
 func (a *AccessSpecRef) GetType() string {
@@ -116,7 +128,7 @@ func (a *AccessSpecRef) assure(ctx Context) error {
 	return err
 }
 
-// UnmarshalJSON implements a custom json unmarshal method for an access spec ref
+// UnmarshalJSON implements a custom json unmarshal method for an access spec ref.
 func (a *AccessSpecRef) UnmarshalJSON(data []byte) error {
 	a.evaluated = nil
 	a.generic = &GenericAccessSpec{}

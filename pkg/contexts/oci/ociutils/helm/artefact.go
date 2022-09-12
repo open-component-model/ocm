@@ -52,6 +52,7 @@ func SynthesizeArtefactBlob(path string, fss ...vfs.FileSystem) (artefactset.Art
 		return nil
 	})
 }
+
 func TransferAsArtefact(path string, ns oci.NamespaceAccess, fss ...vfs.FileSystem) (*chart.Chart, *artdesc.Descriptor, error) {
 	fs := accessio.FileSystem(fss...)
 

@@ -63,7 +63,7 @@ func ParseRef(name, version string) (types.ImageReference, error) {
 		}
 		// check for docker daemon image id
 		if pattern.MatchString(id) {
-			// this definately no digest, but the library expects it this way
+			// this definitely no digest, but the library expects it this way
 			return daemon.NewReference(digest.Digest(id), nil)
 		}
 		return nil, fmt.Errorf("no docker daemon image id")

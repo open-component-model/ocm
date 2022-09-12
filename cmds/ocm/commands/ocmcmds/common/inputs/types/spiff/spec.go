@@ -22,15 +22,14 @@ import (
 	"github.com/mandelsoft/vfs/pkg/cwdfs"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/file"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/runtime"
-
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/file"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 type Spec struct {
@@ -77,8 +76,8 @@ func (s *Spec) Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
-	return (&file.ProcessSpec{s.MediaFileSpec, s.process}).GetBlob(ctx, inputFilePath)
+func (s *Spec) GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+	return (&file.ProcessSpec{s.MediaFileSpec, s.process}).GetBlob(ctx, nv, inputFilePath)
 }
 
 func (s *Spec) process(ctx clictx.Context, inputFilePath string, data []byte) ([]byte, error) {

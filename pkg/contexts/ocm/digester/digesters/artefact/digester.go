@@ -36,8 +36,8 @@ import (
 const OciArtifactDigestV1 string = "ociArtifactDigest/v1"
 
 func init() {
-	cpi.DefaultBlobDigesterRegistry().RegisterDigester(New(digest.SHA256), "")
-	cpi.DefaultBlobDigesterRegistry().RegisterDigester(New(digest.SHA512), "")
+	cpi.MustRegisterDigester(New(digest.SHA256), "")
+	cpi.MustRegisterDigester(New(digest.SHA512), "")
 }
 
 func New(algo digest.Algorithm) cpi.BlobDigester {
@@ -81,7 +81,7 @@ func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferre
 		for {
 			header, err := tr.Next()
 			if err != nil {
-				if err == io.EOF {
+				if errors.Is(err, io.EOF) {
 					err = fmt.Errorf("descriptor not found in archive")
 					return nil, errors.ErrInvalidWrap(err, "artefact archive")
 				}

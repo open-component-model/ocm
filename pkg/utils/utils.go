@@ -31,6 +31,7 @@ import (
 	"time"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"sigs.k8s.io/yaml"
 )
@@ -40,11 +41,15 @@ func PrintPrettyYaml(obj interface{}, enabled bool) {
 	if !enabled {
 		return
 	}
+
 	data, err := yaml.Marshal(obj)
 	if err != nil {
-		fmt.Printf("unable to serialize object as yaml: %s", err.Error())
+		logrus.Errorf("unable to serialize object as yaml: %s", err)
+
 		return
 	}
+
+	//nolint: forbidigo // Intentional Println.
 	fmt.Println(string(data))
 }
 
@@ -66,7 +71,7 @@ func GetFileType(fs vfs.FileSystem, path string) (string, error) {
 
 // CleanMarkdownUsageFunc removes markdown tags from the long usage of the command.
 // With this func it is possible to generate the markdown docs but still have readable commandline help func.
-// Note: currently only "<pre>" tags are removed
+// Note: currently only "<pre>" tags are removed.
 func CleanMarkdownUsageFunc(cmd *cobra.Command) {
 	defaultHelpFunc := cmd.HelpFunc()
 	cmd.SetHelpFunc(func(cmd *cobra.Command, s []string) {
@@ -76,7 +81,7 @@ func CleanMarkdownUsageFunc(cmd *cobra.Command) {
 	})
 }
 
-// RawJSON converts an arbitrary value to json.RawMessage
+// RawJSON converts an arbitrary value to json.RawMessage.
 func RawJSON(value interface{}) (*json.RawMessage, error) {
 	jsonval, err := json.Marshal(value)
 	if err != nil {
@@ -85,7 +90,7 @@ func RawJSON(value interface{}) (*json.RawMessage, error) {
 	return (*json.RawMessage)(&jsonval), nil
 }
 
-// Gzip applies gzip compression to an arbitrary byte slice
+// Gzip applies gzip compression to an arbitrary byte slice.
 func Gzip(data []byte, compressionLevel int) ([]byte, error) {
 	buf := bytes.NewBuffer([]byte{})
 	gzipWriter, err := gzip.NewWriterLevel(buf, compressionLevel)
@@ -162,7 +167,7 @@ func BytesString(bytes uint64, accuracy int) string {
 	return fmt.Sprintf("%s %s", stringValue, unit)
 }
 
-// WriteFileToTARArchive writes a new file with name=filename and content=contentReader to archiveWriter
+// WriteFileToTARArchive writes a new file with name=filename and content=contentReader to archiveWriter.
 func WriteFileToTARArchive(filename string, contentReader io.Reader, archiveWriter *tar.Writer) error {
 	if filename == "" {
 		return errors.New("filename must not be empty")
@@ -193,8 +198,8 @@ func WriteFileToTARArchive(filename string, contentReader io.Reader, archiveWrit
 
 	header := tar.Header{
 		Name:    filename,
-		Size:    int64(fsize),
-		Mode:    0600,
+		Size:    fsize,
+		Mode:    0o600,
 		ModTime: time.Now(),
 	}
 

@@ -15,6 +15,8 @@
 package testhelper
 
 import (
+	. "github.com/onsi/gomega"
+
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -22,14 +24,14 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/mime"
-
-	. "github.com/onsi/gomega"
 )
 
-const TAG = "v1"
-const DIGEST_MANIFEST = "3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a"
-const DIGEST_LAYER = "810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"
-const DIGEST_CONFIG = "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+const (
+	TAG             = "v1"
+	DIGEST_MANIFEST = "3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a"
+	DIGEST_LAYER    = "810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"
+	DIGEST_CONFIG   = "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+)
 
 func DefaultManifestFill(n cpi.NamespaceAccess) {
 	art := NewArtefact(n)

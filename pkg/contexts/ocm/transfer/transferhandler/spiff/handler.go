@@ -22,6 +22,7 @@ import (
 	"github.com/mandelsoft/spiff/features"
 	"github.com/mandelsoft/spiff/spiffing"
 	"github.com/mandelsoft/spiff/yaml"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -58,12 +59,12 @@ func (h *Handler) OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.Compo
 	return h.Handler.OverwriteVersion(src, tgt)
 }
 
-func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ElementMeta) (ocm.Repository, transferhandler.TransferHandler, error) {
+func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ComponentReference) (ocm.ComponentVersionAccess, transferhandler.TransferHandler, error) {
 	if src == nil || h.opts.IsRecursive() {
 		if h.opts.GetScript() == nil {
-			return repo, h, nil
+			return h.Handler.TransferVersion(repo, src, meta)
 		}
-		binding := h.getBinding(src, nil, meta, nil)
+		binding := h.getBinding(src, nil, &meta.ElementMeta, nil)
 		result, r, s, err := h.EvalRecursion("componentversion", binding, "process")
 		if err != nil {
 			return nil, nil, err
@@ -76,14 +77,15 @@ func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionA
 				}
 			}
 			if s == nil {
-				return repo, h, nil
+				return h.Handler.TransferVersion(repo, src, meta)
 			}
 			opts := *h.opts
 			opts.script = s
-			return repo, &Handler{
+			cv, _, err := h.Handler.TransferVersion(repo, src, meta)
+			return cv, &Handler{
 				Handler: h.Handler,
 				opts:    &opts,
-			}, nil
+			}, err
 		}
 	}
 	return nil, nil, nil
@@ -129,14 +131,25 @@ func (h *Handler) getBinding(src ocm.ComponentVersionAccess, a ocm.AccessSpec, m
 
 func getData(in interface{}) interface{} {
 	var v interface{}
-	d, _ := json.Marshal(in)
-	json.Unmarshal(d, &v)
+
+	d, err := json.Marshal(in)
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	if err := json.Unmarshal(d, &v); err != nil {
+		logrus.Error(err)
+	}
+
 	return v
 }
 
 func getCVAttrs(cv ocm.ComponentVersionAccess) map[string]interface{} {
 	provider := map[string]interface{}{}
-	data, _ := json.Marshal(cv.GetDescriptor().Provider)
+	data, err := json.Marshal(cv.GetDescriptor().Provider)
+	if err != nil {
+		logrus.Error(err)
+	}
 	json.Unmarshal(data, &provider)
 
 	labels := cv.GetDescriptor().Labels.AsMap()
@@ -183,11 +196,11 @@ func (h *Handler) EvalRecursion(mode string, binding map[string]interface{}, key
 		return false, nil, nil, err
 	}
 
-	m, ok := r.Value().(map[string]spiffing.Node)
+	valueMap, ok := r.Value().(map[string]spiffing.Node)
 	if !ok {
 		return false, nil, nil, errors.ErrUnknown("transfer script field", key)
 	}
-	r = m[key]
+	r = valueMap[key]
 	if r == nil {
 		return false, nil, nil, errors.ErrUnknown("transfer script field", key)
 	}
@@ -197,7 +210,7 @@ func (h *Handler) EvalRecursion(mode string, binding map[string]interface{}, key
 		// flat boolean without result structure
 		return b, nil, nil, nil
 	}
-	m, ok = r.Value().(map[string]spiffing.Node)
+	valueMap, ok = r.Value().(map[string]spiffing.Node)
 	if !ok {
 		return false, nil, nil, errors.ErrInvalid("transfer script result field type", dynaml.ExpressionType(r))
 	}
@@ -210,7 +223,7 @@ func (h *Handler) EvalRecursion(mode string, binding map[string]interface{}, key
 		return false, nil, nil, err
 	}
 	var script []byte
-	v := m["script"]
+	v := valueMap["script"]
 	if v != nil && v.Value() != nil {
 		if t, ok := v.Value().(dynaml.TemplateValue); ok {
 			if m, ok := t.Orig.Value().(map[string]spiffing.Node); ok {
@@ -229,7 +242,7 @@ func (h *Handler) EvalRecursion(mode string, binding map[string]interface{}, key
 	}
 
 	var repospec []byte
-	v = m["repospec"]
+	v = valueMap["repospec"]
 	if v != nil && v.Value() != nil {
 		if _, ok := v.Value().(map[string]spiffing.Node); ok {
 			spec, err := yaml.Normalize(v)

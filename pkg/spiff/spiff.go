@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/ghodss/yaml"
 	"github.com/mandelsoft/spiff/features"
 	"github.com/mandelsoft/spiff/spiffing"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -32,6 +33,7 @@ type Request struct {
 	Stubs      []spiffing.Source
 	ValuesNode string
 	Values     interface{}
+	Mode       int
 	FileSystem vfs.FileSystem
 }
 
@@ -40,13 +42,22 @@ func (r Request) GetValues() (map[string]interface{}, error) {
 		return nil, nil
 	}
 
-	data, err := json.Marshal(r.Values)
-	if err != nil {
-		return nil, errors.ErrInvalidWrap(err, "values", fmt.Sprintf("%T", r.Values))
+	var (
+		err  error
+		data []byte
+	)
+
+	if b, ok := r.Values.([]byte); ok {
+		data = b
+	} else {
+		data, err = json.Marshal(r.Values)
+		if err != nil {
+			return nil, errors.ErrInvalidWrap(err, "values", fmt.Sprintf("%T", r.Values))
+		}
 	}
 
 	var values interface{}
-	err = json.Unmarshal(data, &values)
+	err = yaml.Unmarshal(data, &values)
 	if err != nil {
 		return nil, errors.ErrInvalidWrap(err, "values", fmt.Sprintf("%T", r.Values))
 	}
@@ -60,7 +71,7 @@ func (r Request) GetValues() (map[string]interface{}, error) {
 }
 
 func (r *Request) GetSpiff() (spiffing.Spiff, error) {
-	spiff := spiffing.New().WithFeatures(features.CONTROL, features.INTERPOLATION).WithFileSystem(accessio.FileSystem(r.FileSystem))
+	spiff := spiffing.New().WithFeatures(features.CONTROL, features.INTERPOLATION).WithFileSystem(accessio.FileSystem(r.FileSystem)).WithMode(r.Mode)
 	values, err := r.GetValues()
 	if err != nil {
 		return nil, err
@@ -75,7 +86,6 @@ func (r *Request) GetSpiff() (spiffing.Spiff, error) {
 }
 
 func Cascade(req *Request) ([]byte, error) {
-
 	if req.Template == nil {
 		return nil, nil
 	}
@@ -119,5 +129,4 @@ func CascadeWith(opts ...Option) ([]byte, error) {
 		return nil, err
 	}
 	return Cascade(req)
-
 }

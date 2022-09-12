@@ -46,7 +46,7 @@ func init() {
 }
 
 // ComponentRepositoryMeta describes config special for a mapping of
-// a component repository to an oci registry
+// a component repository to an oci registry.
 type ComponentRepositoryMeta struct {
 	// ComponentNameMapping describes the method that is used to map the "Component Name", "Component Version"-tuples
 	// to OCI Image References.
@@ -68,7 +68,7 @@ type RepositoryType struct {
 
 var _ cpi.RepositoryType = &RepositoryType{}
 
-// NewRepositoryType creates generic type for any OCI Repository Backend
+// NewRepositoryType creates generic type for any OCI Repository Backend.
 func NewRepositoryType(ocictx oci.Context) *RepositoryType {
 	return &RepositoryType{
 		ObjectVersionedType: runtime.NewVersionedObjectType("genericOCIRepositoryBackend"),
@@ -105,14 +105,21 @@ type RepositorySpec struct {
 	ComponentRepositoryMeta
 }
 
-var _ cpi.RepositorySpec = (*RepositorySpec)(nil)
-var _ cpi.IntermediateRepositorySpecAspect = (*RepositorySpec)(nil)
+var (
+	_ cpi.RepositorySpec                   = (*RepositorySpec)(nil)
+	_ cpi.PrefixProvider                   = (*RepositorySpec)(nil)
+	_ cpi.IntermediateRepositorySpecAspect = (*RepositorySpec)(nil)
+)
 
 func NewRepositorySpec(spec oci.RepositorySpec, meta *ComponentRepositoryMeta) *RepositorySpec {
 	return &RepositorySpec{
 		RepositorySpec:          spec,
 		ComponentRepositoryMeta: *DefaultComponentRepositoryMeta(meta),
 	}
+}
+
+func (a *RepositorySpec) PathPrefix() string {
+	return a.SubPath
 }
 
 func (a *RepositorySpec) IsIntermediate() bool {
@@ -129,7 +136,7 @@ func (a *RepositorySpec) AsUniformSpec(cpi.Context) cpi.UniformRepositorySpec {
 }
 
 func (u *RepositorySpec) UnmarshalJSON(data []byte) error {
-	//fmt.Printf("unmarshal generic ocireg spec %s\n", string(data))
+	// fmt.Printf("unmarshal generic ocireg spec %s\n", string(data))
 	ocispec := &oci.GenericRepositorySpec{}
 	if err := json.Unmarshal(data, ocispec); err != nil {
 		return err

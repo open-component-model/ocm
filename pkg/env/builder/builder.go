@@ -34,8 +34,8 @@ type element interface {
 	Result() interface{}
 }
 
-type State struct {
-}
+type State struct{}
+
 type base struct {
 	*Builder
 	result interface{}
@@ -72,8 +72,13 @@ type Builder struct {
 }
 
 func NewBuilder(t *env.Environment) *Builder {
+	if t == nil {
+		t = env.NewEnvironment()
+	}
 	return &Builder{Environment: t}
 }
+
+var _ accessio.Option = (*Builder)(nil)
 
 func (b *Builder) set() {
 	b.ocm_repo = nil
@@ -96,7 +101,6 @@ func (b *Builder) set() {
 	if len(b.stack) > 0 {
 		b.peek().Set()
 	}
-
 }
 
 func (b *Builder) expect(p interface{}, msg string, tests ...func() bool) {
@@ -165,4 +169,12 @@ func (b *Builder) BlobStringData(mime string, data string) {
 		Fail("access already set", 1)
 	}
 	*(b.blob) = accessio.BlobAccessForData(mime, []byte(data))
+}
+
+func (b *Builder) BlobData(mime string, data []byte) {
+	b.expect(b.blob, T_OCMACCESS)
+	if b.ocm_acc != nil && *b.ocm_acc != nil {
+		Fail("access already set", 1)
+	}
+	*(b.blob) = accessio.BlobAccessForData(mime, data)
 }

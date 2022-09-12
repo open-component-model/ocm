@@ -20,32 +20,23 @@ import (
 	"fmt"
 	"strings"
 
+	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
+	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
+
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
-
-	"github.com/open-component-model/ocm/cmds/ocm/topics/common/attributes"
-	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
-
-	"github.com/open-component-model/ocm/pkg/cobrautils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
-
-	// dedicated command sub areas
 	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds"
+	creds "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/credentials"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds"
-
-	// element commands
-	creds "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/credentials"
+	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
-
-	// verbs
+	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/add"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/bootstrap"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/clean"
@@ -57,26 +48,21 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/sign"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/transfer"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/verify"
-
-	// topics
+	"github.com/open-component-model/ocm/cmds/ocm/topics/common/attributes"
 	topicconfig "github.com/open-component-model/ocm/cmds/ocm/topics/common/config"
 	topicocirefs "github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
-
-	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
-
+	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
+	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	datacfg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
-
-	"github.com/spf13/pflag"
-
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/version"
-
-	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 )
 
 type CLIOptions struct {
@@ -197,7 +183,7 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 			break
 		}
 	}
-	//help.Use="help <topic>"
+	// help.Use="help <topic>"
 	help.DisableFlagsInUseLine = true
 	cmd.AddCommand(topicconfig.New(ctx))
 	cmd.AddCommand(topicocirefs.New(ctx))

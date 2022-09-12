@@ -42,7 +42,7 @@ type Config struct {
 	Attributes map[string]json.RawMessage `json:"attributes,omitempty"`
 }
 
-// New creates a new memory ConfigSpec
+// New creates a new memory ConfigSpec.
 func New() *Config {
 	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),

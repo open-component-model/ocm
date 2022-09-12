@@ -21,6 +21,11 @@ settings and show the found credential attributes.
 
 For the following usage contexts with matchers and standard identity matchers exist:
 
+  - <code>Buildcredentials.gardener.cloud</code>: Gardener config credential matcher
+    
+    It matches the <code>Buildcredentials.gardener.cloud</code> consumer type and additionally acts like 
+    the <code>hostpath</code> type.
+
   - <code>OCIRegistry</code>: OCI registry credential matcher
     
     It matches the <code>OCIRegistry</code> consumer type and additionally acts like 

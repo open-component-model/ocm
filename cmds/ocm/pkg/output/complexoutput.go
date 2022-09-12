@@ -19,11 +19,11 @@ import (
 
 	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	. "github.com/open-component-model/ocm/pkg/out"
-	"github.com/open-component-model/ocm/pkg/utils"
 
 	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type ComplexProcessingOutput struct {
@@ -52,7 +52,6 @@ func (this *ComplexProcessingOutput) Out() error {
 		var out interface{}
 		if this.mapper != nil {
 			out = this.mapper(elem)
-
 		}
 		data, err := runtime.DefaultYAMLEncoding.Marshal(out)
 		if err != nil {
@@ -62,7 +61,6 @@ func (this *ComplexProcessingOutput) Out() error {
 				m := map[string]interface{}{}
 				runtime.DefaultYAMLEncoding.Unmarshal(data, m)
 				this.out("", m)
-
 			} else {
 				Outf(this.Context, "%s\n", string(data))
 			}

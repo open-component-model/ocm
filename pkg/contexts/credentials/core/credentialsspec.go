@@ -23,7 +23,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-// CredentialsSpec describes a dedicated credential provided by some repository
+// CredentialsSpec describes a dedicated credential provided by some repository.
 type CredentialsSpec interface {
 	CredentialsSource
 	GetCredentialsName() string
@@ -54,7 +54,7 @@ func (s *DefaultCredentialsSpec) Credentials(ctx Context, creds ...CredentialsSo
 	return ctx.CredentialsForSpec(s, creds...)
 }
 
-// MarshalJSON implements a custom json unmarshal method
+// MarshalJSON implements a custom json unmarshal method.
 func (s DefaultCredentialsSpec) MarshalJSON() ([]byte, error) {
 	ocispec, err := runtime.ToUnstructuredTypedObject(s.RepositorySpec)
 	if err != nil {
@@ -63,7 +63,6 @@ func (s DefaultCredentialsSpec) MarshalJSON() ([]byte, error) {
 	specdata, err := runtime.ToUnstructuredObject(struct {
 		Name string `json:"credentialsName,omitempty"`
 	}{Name: s.CredentialsName})
-
 	if err != nil {
 		return nil, err
 	}
@@ -143,12 +142,11 @@ func (s *GenericCredentialsSpec) Credentials(ctx Context, creds ...CredentialsSo
 	return ctx.CredentialsForSpec(s, creds...)
 }
 
-// MarshalJSON implements a custom json unmarshal method
+// MarshalJSON implements a custom json unmarshal method.
 func (s GenericCredentialsSpec) MarshalJSON() ([]byte, error) {
 	specdata, err := runtime.ToUnstructuredObject(struct {
 		Name string `json:"credentialsName,omitempty"`
 	}{Name: s.CredentialsName})
-
 	if err != nil {
 		return nil, err
 	}

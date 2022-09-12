@@ -12,6 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
+//nolint:forbidigo  // part of a command line tool
 package docker
 
 import (
@@ -23,6 +24,7 @@ import (
 	unix_path "path"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/docker/cli/cli/command"
 	"github.com/docker/distribution/reference"
@@ -35,17 +37,21 @@ import (
 	"github.com/mitchellh/copystructure"
 	"github.com/pkg/errors"
 
-	"github.com/open-component-model/ocm/pkg/toi/install"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/toi/install"
 )
 
-const OptionQuiet = "DOCKER_DRIVER_QUIET"
-const OptionCleanup = "CLEANUP_CONTAINERS"
-const OptionPullPolicy = "PULL_POLICY"
-const PullPolicyAlways = "Always"
-const PullPolicyNever = "Never"
-const PullPolicyIfNotPresent = "IfNotPresent"
+const (
+	OptionQuiet            = "DOCKER_DRIVER_QUIET"
+	OptionCleanup          = "CLEANUP_CONTAINERS"
+	OptionPullPolicy       = "PULL_POLICY"
+	PullPolicyAlways       = "Always"
+	PullPolicyNever        = "Never"
+	PullPolicyIfNotPresent = "IfNotPresent"
+
+	trueAsString  = "true"
+	falseAsString = "false"
+)
 
 // Driver is capable of running Docker invocation images using Docker itself.
 type Driver struct {
@@ -67,7 +73,7 @@ func New() install.Driver {
 }
 
 // GetContainerConfig returns a copy of the container configuration
-// used by the driver during container exec
+// used by the driver during container exec.
 func (d *Driver) GetContainerConfig() (container.Config, error) {
 	cpy, err := copystructure.Copy(d.containerCfg)
 	if err != nil {
@@ -83,7 +89,7 @@ func (d *Driver) GetContainerConfig() (container.Config, error) {
 }
 
 // GetContainerHostConfig returns a copy of the container host configuration
-// used by the driver during container exec
+// used by the driver during container exec.
 func (d *Driver) GetContainerHostConfig() (container.HostConfig, error) {
 	cpy, err := copystructure.Copy(d.containerHostCfg)
 	if err != nil {
@@ -98,13 +104,13 @@ func (d *Driver) GetContainerHostConfig() (container.HostConfig, error) {
 	return cfg, nil
 }
 
-// SetConfig sets Docker driver configuration
+// SetConfig sets Docker driver configuration.
 func (d *Driver) SetConfig(settings map[string]string) error {
 	// Set default and provide feedback on acceptable input values.
 	value, ok := settings[OptionCleanup]
 	if !ok {
-		settings[OptionCleanup] = "true"
-	} else if value != "true" && value != "false" {
+		settings[OptionCleanup] = trueAsString
+	} else if value != trueAsString && value != falseAsString {
 		return fmt.Errorf("config variable %s has unexpected value %q. Supported values are 'true', 'false', or unset", OptionCleanup, value)
 	}
 
@@ -118,17 +124,17 @@ func (d *Driver) SetConfig(settings map[string]string) error {
 	return nil
 }
 
-// SetDockerCli makes the driver use an already initialized cli
+// SetDockerCli makes the driver use an already initialized cli.
 func (d *Driver) SetDockerCli(dockerCli command.Cli) {
 	d.dockerCli = dockerCli
 }
 
-// SetContainerOut sets the container output stream
+// SetContainerOut sets the container output stream.
 func (d *Driver) SetContainerOut(w io.Writer) {
 	d.containerOut = w
 }
 
-// SetContainerErr sets the container error stream
+// SetContainerErr sets the container error stream.
 func (d *Driver) SetContainerErr(w io.Writer) {
 	d.containerErr = w
 }
@@ -223,17 +229,17 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 
 	resp, err := cli.Client().ContainerCreate(ctx, &d.containerCfg, &d.containerHostCfg, nil, nil, "")
 	if err != nil {
-		return nil, fmt.Errorf("cannot create container: %v", err)
+		return nil, fmt.Errorf("cannot create container: %w", err)
 	}
 
-	if d.config[OptionCleanup] == "true" {
+	if d.config[OptionCleanup] == trueAsString {
 		defer cli.Client().ContainerRemove(ctx, resp.ID, types.ContainerRemoveOptions{})
 	}
 
 	containerUID := getContainerUserID(ii.Config.User)
-	tarContent, err := generateTar(op.Files, containerUID)
+	tarContent, done, err := generateTar(op.Files, containerUID)
 	if err != nil {
-		return nil, fmt.Errorf("error staging files: %s", err)
+		return nil, fmt.Errorf("error staging files: %w", err)
 	}
 	options := types.CopyToContainerOptions{
 		AllowOverwriteDirWithFile: false,
@@ -242,8 +248,13 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 	// path from the given file, starting at the /.
 	err = cli.Client().CopyToContainer(ctx, resp.ID, "/", tarContent, options)
 	if err != nil {
-		return nil, fmt.Errorf("error copying to / in container: %s", err)
+		return nil, fmt.Errorf("error copying to / in container: %w", err)
 	}
+
+	if err = done(); err != nil {
+		return nil, fmt.Errorf("unable to send data: %w", err)
+	}
+	tarContent.Close()
 
 	attach, err := cli.Client().ContainerAttach(ctx, resp.ID, types.ContainerAttachOptions{
 		Stream: true,
@@ -252,7 +263,7 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 		Logs:   true,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("unable to retrieve logs: %v", err)
+		return nil, fmt.Errorf("unable to retrieve logs: %w", err)
 	}
 	var (
 		stdout io.Writer = os.Stdout
@@ -279,7 +290,7 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 	}()
 
 	if err = cli.Client().ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
-		return nil, fmt.Errorf("cannot start container: %v", err)
+		return nil, fmt.Errorf("cannot start container: %w", err)
 	}
 	statusc, errc := cli.Client().ContainerWait(ctx, resp.ID, container.WaitConditionNotRunning)
 	select {
@@ -301,7 +312,7 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 	}
 	opResult, fetchErr := d.fetchOutputs(ctx, resp.ID, op)
 	if fetchErr != nil {
-		return opResult, fmt.Errorf("fetching outputs failed: %s", fetchErr)
+		return opResult, fmt.Errorf("fetching outputs failed: %w", fetchErr)
 	}
 	return opResult, err
 }
@@ -356,9 +367,9 @@ func (d *Driver) setConfigurationOptions(op *install.Operation) error {
 
 func containerError(containerMessage string, containerErr, fetchErr error) error {
 	if fetchErr != nil {
-		return fmt.Errorf("%s: %v. fetching outputs failed: %s", containerMessage, containerErr, fetchErr)
+		return fmt.Errorf("%s: %v. fetching outputs failed: %w", containerMessage, containerErr, fetchErr)
 	}
-	return fmt.Errorf("%s: %v", containerMessage, containerErr)
+	return fmt.Errorf("%s: %w", containerMessage, containerErr)
 }
 
 // fetchOutputs takes a context and a container ID; it copies the PathOutputs directory from that container.
@@ -376,7 +387,7 @@ func (d *Driver) fetchOutputs(ctx context.Context, container string, op *install
 	}
 	ioReader, _, err := d.dockerCli.Client().CopyFromContainer(ctx, container, install.PathOutputs)
 	if err != nil {
-		return nil, fmt.Errorf("error copying outputs from container: %s", err)
+		return nil, fmt.Errorf("error copying outputs from container: %w", err)
 	}
 	tarReader := tar.NewReader(ioReader)
 	header, err := tarReader.Next()
@@ -395,7 +406,7 @@ func (d *Driver) fetchOutputs(ctx context.Context, container string, op *install
 		if shouldCapture {
 			contents, err = io.ReadAll(tarReader)
 			if err != nil {
-				return opResult, fmt.Errorf("error while reading %q from outputs tar: %s", header.Name, err)
+				return opResult, fmt.Errorf("error while reading %q from outputs tar: %w", header.Name, err)
 			}
 			opResult.Outputs[outputName] = contents
 		}
@@ -403,7 +414,7 @@ func (d *Driver) fetchOutputs(ctx context.Context, container string, op *install
 		header, err = tarReader.Next()
 	}
 
-	if err != io.EOF {
+	if !errors.Is(err, io.EOF) {
 		return opResult, err
 	}
 
@@ -413,19 +424,26 @@ func (d *Driver) fetchOutputs(ctx context.Context, container string, op *install
 // generateTar creates a tarfile containing the specified files, with the owner
 // set to the uid that the container runs as so that it is guaranteed to have
 // read access to the files we copy into the container.
-func generateTar(files map[string]accessio.BlobAccess, uid int) (io.Reader, error) {
+func generateTar(files map[string]accessio.BlobAccess, uid int) (io.ReadCloser, func() error, error) {
 	r, w := io.Pipe()
 	tw := tar.NewWriter(w)
 	for path := range files {
 		if unix_path.IsAbs(path) {
-			return nil, fmt.Errorf("destination path %s should be a relative unix path", path)
+			return nil, nil, fmt.Errorf("destination path %s should be a relative unix path", path)
 		}
 	}
+	var err error
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	fmt.Printf("waiting for successful data transfer...\n")
 	go func() {
-		have := map[string]bool{}
+		defer wg.Done()
+		defer w.Close()
 
+		have := map[string]bool{}
 		for path, content := range files {
 			path = unix_path.Join(install.PathInputs, path)
+			fmt.Printf("transferring %s...\n", path)
 			// Write a header for the parent directories so that newly created intermediate directories are accessible by the user
 			dir := path
 			for dir != "/" {
@@ -434,7 +452,7 @@ func generateTar(files map[string]accessio.BlobAccess, uid int) (io.Reader, erro
 					dirHdr := &tar.Header{
 						Typeflag: tar.TypeDir,
 						Name:     dir,
-						Mode:     0700,
+						Mode:     0o700,
 						Uid:      uid,
 						Size:     0,
 					}
@@ -447,24 +465,28 @@ func generateTar(files map[string]accessio.BlobAccess, uid int) (io.Reader, erro
 			fildHdr := &tar.Header{
 				Typeflag: tar.TypeReg,
 				Name:     path,
-				Mode:     0600,
+				Mode:     0o600,
 				Size:     content.Size(),
 				Uid:      uid,
 			}
 			tw.WriteHeader(fildHdr)
-			reader, _ := content.Reader()
+			reader, e := content.Reader()
+			if e != nil {
+				fmt.Printf("cannot transfer %s: %s\n", path, e)
+				err = e
+				return
+			}
 			io.Copy(tw, reader)
 		}
-		w.Close()
 	}()
-	return r, nil
+	return r, func() error { wg.Wait(); return err }, nil
 }
 
-// ConfigurationOption is an option used to customize docker driver container and host config
+// ConfigurationOption is an option used to customize docker driver container and host config.
 type ConfigurationOption func(*container.Config, *container.HostConfig) error
 
 // inspectImage inspects the operation image and returns an object of types.ImageInspect,
-// pulling the image if not found locally
+// pulling the image if not found locally.
 func (d *Driver) inspectImage(ctx context.Context, image string) (types.ImageInspect, error) {
 	ii, _, err := d.dockerCli.Client().ImageInspectWithRaw(ctx, image)
 	switch {
@@ -487,7 +509,7 @@ func (d *Driver) inspectImage(ctx context.Context, image string) (types.ImageIns
 }
 
 // validateImageDigest validates the operation image digest, if exists, against
-// the supplied repoDigests
+// the supplied repoDigests.
 func (d *Driver) validateImageDigest(image install.Image, repoDigests []string) error {
 	if image.Digest == "" {
 		return nil

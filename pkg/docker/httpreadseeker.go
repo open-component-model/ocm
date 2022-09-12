@@ -59,25 +59,30 @@ func (hrs *httpReadSeeker) Read(p []byte) (n int, err error) {
 	if n > 0 || err == nil {
 		hrs.errsWithNoProgress = 0
 	}
-	if err == io.ErrUnexpectedEOF {
-		// connection closed unexpectedly. try reconnecting.
-		if n == 0 {
-			hrs.errsWithNoProgress++
-			if hrs.errsWithNoProgress > maxRetry {
-				return // too many retries for this offset with no progress
-			}
-		}
-		if hrs.rc != nil {
-			if clsErr := hrs.rc.Close(); clsErr != nil {
-				log.L.WithError(clsErr).Errorf("httpReadSeeker: failed to close ReadCloser")
-			}
-			hrs.rc = nil
-		}
-		if _, err2 := hrs.reader(); err2 == nil {
-			return n, nil
+
+	if !errors.Is(err, io.ErrUnexpectedEOF) {
+		return
+	}
+	// connection closed unexpectedly. try reconnecting.
+	if n == 0 {
+		hrs.errsWithNoProgress++
+		if hrs.errsWithNoProgress > maxRetry {
+			return // too many retries for this offset with no progress
 		}
 	}
-	return
+
+	if hrs.rc != nil {
+		if clsErr := hrs.rc.Close(); clsErr != nil {
+			log.L.WithError(clsErr).Errorf("httpReadSeeker: failed to close ReadCloser")
+		}
+		hrs.rc = nil
+	}
+
+	if _, err2 := hrs.reader(); err2 == nil {
+		return n, nil
+	}
+
+	return n, err
 }
 
 func (hrs *httpReadSeeker) Close() error {

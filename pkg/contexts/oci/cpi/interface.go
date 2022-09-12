@@ -21,6 +21,7 @@ import (
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
 )
 
@@ -28,35 +29,37 @@ const CONTEXT_TYPE = core.CONTEXT_TYPE
 
 const CommonTransportFormat = core.CommonTransportFormat
 
-type Context = core.Context
-type Repository = core.Repository
-type RepositorySpecHandlers = core.RepositorySpecHandlers
-type RepositorySpecHandler = core.RepositorySpecHandler
-type UniformRepositorySpec = core.UniformRepositorySpec
-type RepositoryType = core.RepositoryType
-type RepositorySpec = core.RepositorySpec
-type IntermediateRepositorySpecAspect = core.IntermediateRepositorySpecAspect
-type GenericRepositorySpec = core.GenericRepositorySpec
-type ArtefactAccess = core.ArtefactAccess
-type Artefact = core.Artefact
-type ArtefactSource = core.ArtefactSource
-type ArtefactSink = core.ArtefactSink
-type BlobSource = core.BlobSource
-type BlobSink = core.BlobSink
-type NamespaceLister = core.NamespaceLister
-type NamespaceAccess = core.NamespaceAccess
-type ManifestAccess = core.ManifestAccess
-type IndexAccess = core.IndexAccess
-type BlobAccess = core.BlobAccess
-type DataAccess = core.DataAccess
-type RepositorySource = core.RepositorySource
+type (
+	Context                          = core.Context
+	Repository                       = core.Repository
+	RepositorySpecHandlers           = core.RepositorySpecHandlers
+	RepositorySpecHandler            = core.RepositorySpecHandler
+	UniformRepositorySpec            = core.UniformRepositorySpec
+	RepositoryType                   = core.RepositoryType
+	RepositorySpec                   = core.RepositorySpec
+	IntermediateRepositorySpecAspect = core.IntermediateRepositorySpecAspect
+	GenericRepositorySpec            = core.GenericRepositorySpec
+	ArtefactAccess                   = core.ArtefactAccess
+	Artefact                         = core.Artefact
+	ArtefactSource                   = core.ArtefactSource
+	ArtefactSink                     = core.ArtefactSink
+	BlobSource                       = core.BlobSource
+	BlobSink                         = core.BlobSink
+	NamespaceLister                  = core.NamespaceLister
+	NamespaceAccess                  = core.NamespaceAccess
+	ManifestAccess                   = core.ManifestAccess
+	IndexAccess                      = core.IndexAccess
+	BlobAccess                       = core.BlobAccess
+	DataAccess                       = core.DataAccess
+	RepositorySource                 = core.RepositorySource
+)
 
 type Descriptor = ociv1.Descriptor
 
 var DefaultContext = core.DefaultContext
 
-func New() Context {
-	return core.Builder{}.New()
+func New(m ...datacontext.BuilderMode) Context {
+	return core.Builder{}.New(m...)
 }
 
 func RegisterRepositoryType(name string, atype RepositoryType) {
@@ -75,9 +78,11 @@ func UniformRepositorySpecForHostURL(typ string, host string) *UniformRepository
 	return core.UniformRepositorySpecForHostURL(typ, host)
 }
 
-const KIND_OCIARTEFACT = core.KIND_OCIARTEFACT
-const KIND_MEDIATYPE = accessio.KIND_MEDIATYPE
-const KIND_BLOB = accessio.KIND_BLOB
+const (
+	KIND_OCIARTEFACT = core.KIND_OCIARTEFACT
+	KIND_MEDIATYPE   = accessio.KIND_MEDIATYPE
+	KIND_BLOB        = accessio.KIND_BLOB
+)
 
 func ErrUnknownArtefact(name, version string) error {
 	return core.ErrUnknownArtefact(name, version)

@@ -34,6 +34,7 @@ type ConfigType interface {
 
 type ConfigTypeScheme interface {
 	runtime.Scheme
+	AddKnownTypes(s ConfigTypeScheme)
 
 	GetConfigType(name string) ConfigType
 	Register(name string, atype ConfigType)
@@ -45,7 +46,7 @@ type ConfigTypeScheme interface {
 }
 
 type configTypeScheme struct {
-	runtime.Scheme
+	runtime.SchemeBase
 }
 
 func NewConfigTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) ConfigTypeScheme {
@@ -54,8 +55,8 @@ func NewConfigTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) ConfigTy
 	return &configTypeScheme{scheme}
 }
 
-func (t *configTypeScheme) AddKnowntypes(s ConfigTypeScheme) {
-	t.Scheme.AddKnownTypes(s)
+func (t *configTypeScheme) AddKnownTypes(s ConfigTypeScheme) {
+	t.SchemeBase.AddKnownTypes(s)
 }
 
 func (t *configTypeScheme) GetConfigType(name string) ConfigType {
@@ -70,23 +71,11 @@ func (t *configTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedO
 	if _, ok := decoder.(ConfigType); !ok {
 		return errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
 	}
-	return t.Scheme.RegisterByDecoder(name, decoder)
-}
-
-func (t *configTypeScheme) AddKnownTypes(scheme runtime.Scheme) error {
-	if _, ok := scheme.(ConfigTypeScheme); !ok {
-		return errors.ErrInvalid("type", reflect.TypeOf(scheme).String(), "expected", "ConfigTypeScheme")
-	}
-
-	if err := t.Scheme.AddKnownTypes(scheme); err != nil {
-		return fmt.Errorf("failed to add known type in config type scheme: %w", err)
-	}
-
-	return nil
+	return t.SchemeBase.RegisterByDecoder(name, decoder)
 }
 
 func (t *configTypeScheme) Register(name string, rtype ConfigType) {
-	t.Scheme.RegisterByDecoder(name, rtype)
+	t.SchemeBase.RegisterByDecoder(name, rtype)
 }
 
 func (t *configTypeScheme) DecodeConfig(data []byte, unmarshaler runtime.Unmarshaler) (Config, error) {
@@ -133,7 +122,7 @@ func (t *configTypeScheme) Usage() string {
 	return s + "\n"
 }
 
-// DefaultConfigTypeScheme contains all globally known access serializer
+// DefaultConfigTypeScheme contains all globally known access serializer.
 var DefaultConfigTypeScheme = NewConfigTypeScheme(nil)
 
 ////////////////////////////////////////////////////////////////////////////////

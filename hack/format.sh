@@ -6,6 +6,17 @@
 
 set -e
 
-echo "> Format"
+log() {
+  msg=${1:-(no message)}
 
-goimports -l -w -local=github.com/open-component-model/ocm $@
+  echo " === ${msg}"
+}
+
+pkgprefix="github.com/open-component-model/ocm"
+
+log "Format with gci"
+GCIFMT=( -s standard -s blank -s dot -s default -s="prefix(${pkgprefix})" --custom-order )
+gci diff --skip-generated "${GCIFMT[@]}"  $@ \
+  | awk '/^--- / { print $2 }' \
+  | xargs -I "{}" \
+    gci write --skip-generated  "${GCIFMT[@]}" "{}"

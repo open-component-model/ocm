@@ -18,5 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/env"
 )
 
-var TestData = env.TestData
-var FileSystem = env.FileSystem
+var (
+	TestData   = env.TestData
+	FileSystem = env.FileSystem
+)

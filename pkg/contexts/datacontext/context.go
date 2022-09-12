@@ -24,6 +24,33 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
+// BuilderMode controls the handling of unset information in the
+// builder configuration when calling the New method.
+type BuilderMode int
+
+const (
+	// MODE_SHARED uses the default contexts for unset nested context types.
+	MODE_SHARED BuilderMode = iota
+	// MODE_DEFAULTED uses dedicated context instances configured with the
+	// context type specific default registrations.
+	MODE_DEFAULTED
+	// MODE_CONFIGURED uses dedicated context instances configured with the
+	// context type registrations configured with the actual state of the
+	// default registrations.
+	MODE_CONFIGURED
+	// MODE_INITIAL uses completely new contexts for unset nested context types
+	// and initial registrations.
+	MODE_INITIAL
+)
+
+func Mode(m ...BuilderMode) BuilderMode {
+	mode := MODE_DEFAULTED
+	if len(m) > 0 {
+		mode = m[0]
+	}
+	return mode
+}
+
 // Context describes a common interface for a data context used for a dedicated
 // purpose.
 // Such has a type and always specific attribute store.
@@ -42,7 +69,7 @@ type Context interface {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// CONTEXT_TYPE is the global type for an attribute context
+// CONTEXT_TYPE is the global type for an attribute context.
 const CONTEXT_TYPE = "attributes.context.gardener.cloud"
 
 type AttributesContext interface {
@@ -51,7 +78,7 @@ type AttributesContext interface {
 	BindTo(ctx context.Context) context.Context
 }
 
-// AttributeFactory is used to atomicly create a new attribute for a context
+// AttributeFactory is used to atomicly create a new attribute for a context.
 type AttributeFactory func(Context) interface{}
 
 type Attributes interface {
@@ -63,16 +90,20 @@ type Attributes interface {
 
 var key = reflect.TypeOf(_context{})
 
-// DefaultContext is the default context initialized by init functions
+// DefaultContext is the default context initialized by init functions.
 var DefaultContext = New(nil)
 
 // ForContext returns the Context to use for context.Context.
-// This is eiter an explicit context or the default context.
+// This is either an explicit context or the default context.
 func ForContext(ctx context.Context) AttributesContext {
-	return ForContextByKey(ctx, key, DefaultContext).(AttributesContext)
+	c, _ := ForContextByKey(ctx, key, DefaultContext)
+	if c == nil {
+		return nil
+	}
+	return c.(AttributesContext)
 }
 
-// WithContext create a new Context bound to a context.Context
+// WithContext create a new Context bound to a context.Context.
 func WithContext(ctx context.Context, parentAttrs Attributes) (Context, context.Context) {
 	c := New(parentAttrs)
 	return c, c.BindTo(ctx)
@@ -98,7 +129,7 @@ type _context struct {
 }
 
 // New provides a default base implementation for a data context.
-// It can also be used as root attribute context
+// It can also be used as root attribute context.
 func New(parentAttrs Attributes) AttributesContext {
 	c := &_context{ctxtype: CONTEXT_TYPE, key: key}
 	c.effective = c
@@ -107,7 +138,7 @@ func New(parentAttrs Attributes) AttributesContext {
 }
 
 // NewContextBase creates a context base implementation supporting
-// context attributes and the binding to a context.Context
+// context attributes and the binding to a context.Context.
 func NewContextBase(eff Context, typ string, key interface{}, parentAttrs Attributes) Context {
 	updater, _ := eff.(Updater)
 	c := &_context{ctxtype: typ, key: key, effective: eff}
@@ -119,7 +150,7 @@ func (c *_context) GetType() string {
 	return c.ctxtype
 }
 
-// BindTo make the Context reachable via the resulting context.Context
+// BindTo make the Context reachable via the resulting context.Context.
 func (c *_context) BindTo(ctx context.Context) context.Context {
 	return context.WithValue(ctx, c.key, c.effective)
 }

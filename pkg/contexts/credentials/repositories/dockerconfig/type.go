@@ -29,7 +29,7 @@ func init() {
 	cpi.RegisterRepositoryType(TypeV1, cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
 }
 
-// RepositorySpec describes a cocker config based credential repository interface.
+// RepositorySpec describes a docker config based credential repository interface.
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	DockerConfigFile            string `json:"dockerConfigFile"`
@@ -41,7 +41,7 @@ func (s RepositorySpec) WithConsumerPropagation(propagate bool) *RepositorySpec 
 	return &s
 }
 
-// NewRepositorySpec creates a new memory RepositorySpec
+// NewRepositorySpec creates a new memory RepositorySpec.
 func NewRepositorySpec(path string, prop ...bool) *RepositorySpec {
 	p := false
 	for _, e := range prop {

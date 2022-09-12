@@ -27,15 +27,16 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const ATTR_KEY = "github.com/mandelsoft/ocm/ociuploadrepo"
-const ATTR_SHORT = "ociuploadrepo"
+const (
+	ATTR_KEY   = "github.com/mandelsoft/ocm/ociuploadrepo"
+	ATTR_SHORT = "ociuploadrepo"
+)
 
 func init() {
 	datacontext.RegisterAttributeType(ATTR_KEY, AttributeType{}, ATTR_SHORT)
 }
 
-type AttributeType struct {
-}
+type AttributeType struct{}
 
 func (a AttributeType) Name() string {
 	return ATTR_KEY
@@ -111,7 +112,6 @@ func (a *Attribute) Close() error {
 }
 
 func (a *Attribute) GetInfo(ctx cpi.Context) (oci.Repository, *oci.UniformRepositorySpec, string, error) {
-
 	if a.Ref != "" {
 		return a.getByRef(ctx)
 	}

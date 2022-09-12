@@ -18,18 +18,22 @@ import (
 	"github.com/containerd/containerd/remotes/docker"
 )
 
-var ContextWithRepositoryScope = docker.ContextWithRepositoryScope
-var ContextWithAppendPullRepositoryScope = docker.ContextWithAppendPullRepositoryScope
-var NewInMemoryTracker = docker.NewInMemoryTracker
-var NewDockerAuthorizer = docker.NewDockerAuthorizer
-var WithAuthClient = docker.WithAuthClient
-var WithAuthHeader = docker.WithAuthHeader
-var WithAuthCreds = docker.WithAuthCreds
+var (
+	ContextWithRepositoryScope           = docker.ContextWithRepositoryScope
+	ContextWithAppendPullRepositoryScope = docker.ContextWithAppendPullRepositoryScope
+	NewInMemoryTracker                   = docker.NewInMemoryTracker
+	NewDockerAuthorizer                  = docker.NewDockerAuthorizer
+	WithAuthClient                       = docker.WithAuthClient
+	WithAuthHeader                       = docker.WithAuthHeader
+	WithAuthCreds                        = docker.WithAuthCreds
+)
 
-type Errors = docker.Errors
-type StatusTracker = docker.StatusTracker
-type Status = docker.Status
-type StatusTrackLocker = docker.StatusTrackLocker
+type (
+	Errors            = docker.Errors
+	StatusTracker     = docker.StatusTracker
+	Status            = docker.Status
+	StatusTrackLocker = docker.StatusTrackLocker
+)
 
 func ConvertHosts(hosts docker.RegistryHosts) RegistryHosts {
 	return func(host string) ([]RegistryHost, error) {

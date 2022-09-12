@@ -42,8 +42,10 @@ import (
 const Type = "gitHub"
 const TypeV1 = Type + runtime.VersionSeparator + "v1"
 
-const LegacyType = "github"
-const LegacyTypeV1 = LegacyType + runtime.VersionSeparator + "v1"
+const (
+	LegacyType   = "github"
+	LegacyTypeV1 = LegacyType + runtime.VersionSeparator + "v1"
+)
 
 const CONSUMER_TYPE = "Github"
 
@@ -109,6 +111,10 @@ func New(repoURL, apiHostname, commit string, opts ...AccessSpecOptions) *Access
 		o(s)
 	}
 	return s
+}
+
+func (a *AccessSpec) Describe(ctx cpi.Context) string {
+	return fmt.Sprintf("GitHub commit %s[%s]", a.RepoURL, a.Commit)
 }
 
 func (_ *AccessSpec) IsLocal(cpi.Context) bool {

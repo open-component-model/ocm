@@ -48,7 +48,7 @@ type ScriptSpec struct {
 	FileSystem vfs.FileSystem  `json:"-"`
 }
 
-// NewConfig creates a new memory ConfigSpec
+// NewConfig creates a new memory ConfigSpec.
 func NewConfig() *Config {
 	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),

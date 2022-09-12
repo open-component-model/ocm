@@ -21,7 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 )
 
-// ArtefactProvider manages the technical access to a dedicated artefact
+// ArtefactProvider manages the technical access to a dedicated artefact.
 type ArtefactProvider interface {
 	IsClosed() bool
 	IsReadOnly() bool
@@ -64,7 +64,7 @@ func NewNopCloserArtefactProvider(p ArtefactSetContainer) ArtefactProvider {
 ////////////////////////////////////////////////////////////////////////////////
 
 // ArtefactSetContainer is the interface used by subsequent access objects
-// to access the base implementation
+// to access the base implementation.
 type ArtefactSetContainer interface {
 	IsReadOnly() bool
 	IsClosed() bool

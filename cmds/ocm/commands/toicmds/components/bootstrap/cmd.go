@@ -19,32 +19,25 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
-
-	defaultd "github.com/open-component-model/ocm/pkg/toi/drivers/default"
-	"github.com/open-component-model/ocm/pkg/toi/install"
-
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-
+	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/runtime"
-
-	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-
-	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-
-	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
+	defaultd "github.com/open-component-model/ocm/pkg/toi/drivers/default"
+	"github.com/open-component-model/ocm/pkg/toi/install"
 )
 
 const (
@@ -208,7 +201,7 @@ func (a *action) Out() error {
 		if ok, _ := vfs.IsDir(a.cmd.FileSystem(), a.cmd.OutputFile); ok {
 			out.Outf(a.cmd, "writing outputs to directory %q...", a.cmd.OutputFile)
 			for n, o := range result.Outputs {
-				err := vfs.WriteFile(a.cmd.FileSystem(), vfs.Join(a.cmd.FileSystem(), a.cmd.OutputFile, n), o, 0600)
+				err := vfs.WriteFile(a.cmd.FileSystem(), vfs.Join(a.cmd.FileSystem(), a.cmd.OutputFile, n), o, 0o600)
 				if err != nil {
 					return errors.Wrapf(err, "cannot write output %q", n)
 				}
@@ -233,7 +226,7 @@ func (a *action) Out() error {
 		return errors.Wrapf(err, "cannot marshal outputs")
 	}
 	if a.cmd.OutputFile != "" {
-		vfs.WriteFile(a.cmd.FileSystem(), a.cmd.OutputFile, outputs, 0600)
+		vfs.WriteFile(a.cmd.FileSystem(), a.cmd.OutputFile, outputs, 0o600)
 	} else {
 		out.Outf(a.cmd, "Provided outputs:\n%s\n", outputs)
 	}

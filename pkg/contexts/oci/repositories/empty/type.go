@@ -37,7 +37,7 @@ type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 }
 
-// NewRepositorySpec creates a new RepositorySpec
+// NewRepositorySpec creates a new RepositorySpec.
 func NewRepositorySpec() *RepositorySpec {
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),

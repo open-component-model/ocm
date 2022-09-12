@@ -29,8 +29,10 @@ func ObjectSlice(s data.Iterable) Objects {
 	return a
 }
 
-var _ data.IndexedAccess = Objects{}
-var _ data.Iterable = Objects{}
+var (
+	_ data.IndexedAccess = Objects{}
+	_ data.Iterable      = Objects{}
+)
 
 func (this Objects) Len() int {
 	return len(this)

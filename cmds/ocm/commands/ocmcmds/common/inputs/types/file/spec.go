@@ -17,11 +17,11 @@ package file
 import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 )
 
 type Spec struct {
@@ -40,6 +40,6 @@ func (s *Spec) Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath s
 	return (&ProcessSpec{s.MediaFileSpec, nil}).Validate(fldPath, ctx, inputFilePath)
 }
 
-func (s *Spec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
-	return (&ProcessSpec{s.MediaFileSpec, nil}).GetBlob(ctx, inputFilePath)
+func (s *Spec) GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+	return (&ProcessSpec{s.MediaFileSpec, nil}).GetBlob(ctx, nv, inputFilePath)
 }

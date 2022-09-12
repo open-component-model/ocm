@@ -27,7 +27,6 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	credcfg "github.com/open-component-model/ocm/pkg/contexts/credentials/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"

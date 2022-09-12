@@ -38,7 +38,7 @@ type Config struct {
 	Aliases                     map[string]*cpi.GenericRepositorySpec `json:"aliases,omitempty"`
 }
 
-// New creates a new memory ConfigSpec
+// New creates a new memory ConfigSpec.
 func New() *Config {
 	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),

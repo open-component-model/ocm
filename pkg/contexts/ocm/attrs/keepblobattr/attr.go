@@ -21,15 +21,16 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const ATTR_KEY = "github.com/mandelsoft/ocm/keeplocalblob"
-const ATTR_SHORT = "keeplocalblob"
+const (
+	ATTR_KEY   = "github.com/mandelsoft/ocm/keeplocalblob"
+	ATTR_SHORT = "keeplocalblob"
+)
 
 func init() {
 	datacontext.RegisterAttributeType(ATTR_KEY, AttributeType{}, ATTR_SHORT)
 }
 
-type AttributeType struct {
-}
+type AttributeType struct{}
 
 func (a AttributeType) Name() string {
 	return ATTR_KEY

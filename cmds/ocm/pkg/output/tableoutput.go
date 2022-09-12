@@ -17,8 +17,9 @@ package output
 import (
 	"strings"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
+
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 )
@@ -56,8 +57,10 @@ type TableProcessingOutput struct {
 	opts   *Options
 }
 
-var _ Output = (*TableProcessingOutput)(nil)
-var _ SortFields = (*TableProcessingOutput)(nil)
+var (
+	_ Output     = (*TableProcessingOutput)(nil)
+	_ SortFields = (*TableProcessingOutput)(nil)
+)
 
 func NewProcessingTableOutput(opts *Options, chain ProcessChain, header ...string) *TableProcessingOutput {
 	return (&TableProcessingOutput{}).new(opts, chain, header)

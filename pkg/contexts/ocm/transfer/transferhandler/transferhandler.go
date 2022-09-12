@@ -20,8 +20,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-type TransferOptions interface {
-}
+type TransferOptions interface{}
 
 type TransferOption interface {
 	ApplyTransferOption(TransferOptions) error
@@ -30,7 +29,7 @@ type TransferOption interface {
 type TransferHandler interface {
 	OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error)
 
-	TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ElementMeta) (ocm.Repository, TransferHandler, error)
+	TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ComponentReference) (ocm.ComponentVersionAccess, TransferHandler, error)
 	TransferResource(src ocm.ComponentVersionAccess, a ocm.AccessSpec, r ocm.ResourceAccess) (bool, error)
 	TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpec, r ocm.SourceAccess) (bool, error)
 

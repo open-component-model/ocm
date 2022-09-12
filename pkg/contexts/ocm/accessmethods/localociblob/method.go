@@ -15,6 +15,8 @@
 package localociblob
 
 import (
+	"fmt"
+
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -31,7 +33,7 @@ func init() {
 }
 
 // New creates a new LocalOCIBlob accessor.
-// Deprecated: Use LocalBlob
+// Deprecated: Use LocalBlob.
 func New(digest digest.Digest) *AccessSpec {
 	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
@@ -40,7 +42,7 @@ func New(digest digest.Digest) *AccessSpec {
 }
 
 // AccessSpec describes the access for a oci registry.
-// Deprecated: Use LocalBlob
+// Deprecated: Use LocalBlob.
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 
@@ -49,6 +51,10 @@ type AccessSpec struct {
 }
 
 var _ cpi.AccessSpec = (*AccessSpec)(nil)
+
+func (a *AccessSpec) Describe(ctx cpi.Context) string {
+	return fmt.Sprintf("Local OCI blob %s", a.Digest)
+}
 
 func (s AccessSpec) IsLocal(context cpi.Context) bool {
 	return true

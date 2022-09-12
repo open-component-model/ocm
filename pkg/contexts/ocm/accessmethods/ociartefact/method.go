@@ -15,7 +15,9 @@
 package ociartefact
 
 import (
+	"fmt"
 	"io"
+	"strings"
 	"sync"
 
 	"github.com/opencontainers/go-digest"
@@ -34,8 +36,10 @@ import (
 const Type = "ociArtefact"
 const TypeV1 = Type + runtime.VersionSeparator + "v1"
 
-const LegacyType = "ociRegistry"
-const LegacyTypeV1 = LegacyType + runtime.VersionSeparator + "v1"
+const (
+	LegacyType   = "ociRegistry"
+	LegacyTypeV1 = LegacyType + runtime.VersionSeparator + "v1"
+)
 
 func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}))
@@ -43,7 +47,6 @@ func init() {
 
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyType, &AccessSpec{}))
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyTypeV1, &AccessSpec{}))
-
 }
 
 func Is(spec cpi.AccessSpec) bool {
@@ -58,10 +61,12 @@ type AccessSpec struct {
 	ImageReference string `json:"imageReference"`
 }
 
-var _ cpi.AccessSpec = (*AccessSpec)(nil)
-var _ cpi.HintProvider = (*AccessSpec)(nil)
+var (
+	_ cpi.AccessSpec   = (*AccessSpec)(nil)
+	_ cpi.HintProvider = (*AccessSpec)(nil)
+)
 
-// New creates a new oci registry access spec version v1
+// New creates a new oci registry access spec version v1.
 func New(ref string) *AccessSpec {
 	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
@@ -69,16 +74,26 @@ func New(ref string) *AccessSpec {
 	}
 }
 
+func (a *AccessSpec) Describe(ctx cpi.Context) string {
+	return fmt.Sprintf("OCI artefact %s", a.ImageReference)
+}
+
 func (_ *AccessSpec) IsLocal(cpi.Context) bool {
 	return false
 }
 
-func (a *AccessSpec) GetReferenceHint() string {
+func (a *AccessSpec) GetReferenceHint(cv cpi.ComponentVersionAccess) string {
 	ref, err := oci.ParseRef(a.ImageReference)
 	if err != nil {
 		return ""
 	}
+	prefix := cpi.RepositoryPrefix(cv.Repository().GetSpecification())
 	hint := ref.Repository
+	if strings.HasPrefix(hint, prefix+grammar.RepositorySeparator) {
+		// try to keep hint identical, even across intermediate
+		// artefact globalizations
+		hint = hint[len(prefix)+1:]
+	}
 	if ref.Tag != nil {
 		hint += grammar.TagSeparator + *ref.Tag
 	}
@@ -102,8 +117,10 @@ type accessMethod struct {
 	spec *AccessSpec
 }
 
-var _ cpi.AccessMethod = (*accessMethod)(nil)
-var _ accessio.DigestSource = (*accessMethod)(nil)
+var (
+	_ cpi.AccessMethod      = (*accessMethod)(nil)
+	_ accessio.DigestSource = (*accessMethod)(nil)
+)
 
 func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, error) {
 	return &accessMethod{
@@ -177,7 +194,7 @@ func (m *accessMethod) Reader() (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
-	//return accessio.AddCloser(r, b, "synthesized artefact"), nil
+	// return accessio.AddCloser(r, b, "synthesized artefact"), nil
 	return r, nil
 }
 

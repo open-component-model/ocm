@@ -81,7 +81,7 @@ type Authorizer interface {
 	AddResponses(context.Context, []*http.Response) error
 }
 
-// ResolverOptions are used to configured a new Docker register resolver
+// ResolverOptions are used to configured a new Docker register resolver.
 type ResolverOptions struct {
 	// Hosts returns registry host configurations for a namespace.
 	Hosts RegistryHosts
@@ -132,7 +132,7 @@ type dockerResolver struct {
 	tracker       StatusTracker
 }
 
-// NewResolver returns a new resolver to a Docker registry
+// NewResolver returns a new resolver to a Docker registry.
 func NewResolver(options ResolverOptions) resolve.Resolver {
 	if options.Tracker == nil {
 		options.Tracker = NewInMemoryTracker()
@@ -152,7 +152,8 @@ func NewResolver(options ResolverOptions) resolve.Resolver {
 			images.MediaTypeDockerSchema2Manifest,
 			images.MediaTypeDockerSchema2ManifestList,
 			ocispec.MediaTypeImageManifest,
-			ocispec.MediaTypeImageIndex, "*/*"}, ", "))
+			ocispec.MediaTypeImageIndex, "*/*",
+		}, ", "))
 	} else {
 		resolveHeader["Accept"] = options.Headers["Accept"]
 		delete(options.Headers, "Accept")
@@ -265,7 +266,7 @@ func (r *dockerResolver) Resolve(ctx context.Context, ref string) (string, ocisp
 
 	for _, u := range paths {
 		for _, host := range hosts {
-			ctx := log.WithLogger(ctx, log.G(ctx).WithField("host", host.Host))
+			ctxWithLogger := log.WithLogger(ctx, log.G(ctx).WithField("host", host.Host))
 
 			req := base.request(host, http.MethodHead, u...)
 			if err := req.addNamespace(base.refspec.Hostname()); err != nil {
@@ -276,8 +277,8 @@ func (r *dockerResolver) Resolve(ctx context.Context, ref string) (string, ocisp
 				req.header[key] = append(req.header[key], value...)
 			}
 
-			log.G(ctx).Debug("resolving")
-			resp, err := req.doWithRetries(ctx, nil)
+			log.G(ctxWithLogger).Debug("resolving")
+			resp, err := req.doWithRetries(ctxWithLogger, nil)
 			if err != nil {
 				if errors.Is(err, ErrInvalidAuthorization) {
 					err = errors.Wrapf(err, "pull access denied, repository does not exist or may require authorization")
@@ -286,14 +287,14 @@ func (r *dockerResolver) Resolve(ctx context.Context, ref string) (string, ocisp
 				if firstErr == nil {
 					firstErr = err
 				}
-				log.G(ctx).WithError(err).Info("trying next host")
+				log.G(ctxWithLogger).WithError(err).Info("trying next host")
 				continue // try another host
 			}
 			resp.Body.Close() // don't care about body contents.
 
 			if resp.StatusCode > 299 {
 				if resp.StatusCode == http.StatusNotFound {
-					log.G(ctx).Info("trying next host - response was http.StatusNotFound")
+					log.G(ctxWithLogger).Info("trying next host - response was http.StatusNotFound")
 					continue
 				}
 				if resp.StatusCode > 399 {
@@ -325,7 +326,7 @@ func (r *dockerResolver) Resolve(ctx context.Context, ref string) (string, ocisp
 				}
 			}
 			if dgst == "" || size == -1 {
-				log.G(ctx).Debug("no Docker-Content-Digest header, fetching manifest instead")
+				log.G(ctxWithLogger).Debug("no Docker-Content-Digest header, fetching manifest instead")
 
 				req = base.request(host, http.MethodGet, u...)
 				if err := req.addNamespace(base.refspec.Hostname()); err != nil {
@@ -336,7 +337,7 @@ func (r *dockerResolver) Resolve(ctx context.Context, ref string) (string, ocisp
 					req.header[key] = append(req.header[key], value...)
 				}
 
-				resp, err := req.doWithRetries(ctx, nil)
+				resp, err := req.doWithRetries(ctxWithLogger, nil)
 				if err != nil {
 					return "", ocispec.Descriptor{}, err
 				}
@@ -378,7 +379,7 @@ func (r *dockerResolver) Resolve(ctx context.Context, ref string) (string, ocisp
 				Size:      size,
 			}
 
-			log.G(ctx).WithField("desc.digest", desc.Digest).Debug("resolved")
+			log.G(ctxWithLogger).WithField("desc.digest", desc.Digest).Debug("resolved")
 			return ref, desc, nil
 		}
 	}
@@ -525,7 +526,7 @@ type request struct {
 
 func (r *request) do(ctx context.Context) (*http.Response, error) {
 	u := r.host.Scheme + "://" + r.host.Host + r.path
-	req, err := http.NewRequest(r.method, u, nil)
+	req, err := http.NewRequestWithContext(ctx, r.method, u, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -552,7 +553,7 @@ func (r *request) do(ctx context.Context) (*http.Response, error) {
 		return nil, errors.Wrap(err, "failed to authorize")
 	}
 
-	var client = &http.Client{}
+	client := &http.Client{}
 	if r.host.Client != nil {
 		*client = *r.host.Client
 	}

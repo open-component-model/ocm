@@ -125,10 +125,13 @@ func addFileToTar(fs vfs.FileSystem, tw *tar.Writer, path string, realPath strin
 				return fmt.Errorf("unable to calculate relative path for %s: %w", subFilePath, err)
 			}
 			err = addFileToTar(fs, tw, pathutil.Join(path, relPath), subFilePath, opts)
-			if err == nil && info.IsDir() {
-				err = vfs.SkipDir
+			if err != nil {
+				return fmt.Errorf("failed to tar the input from %q: %w", subFilePath, err)
 			}
-			return err
+			if info.IsDir() {
+				return vfs.SkipDir
+			}
+			return nil
 		})
 		return err
 	case info.Mode().IsRegular():
@@ -149,14 +152,14 @@ func addFileToTar(fs vfs.FileSystem, tw *tar.Writer, path string, realPath strin
 		return nil
 	case header.Typeflag == tar.TypeSymlink:
 		if !opts.FollowSymlinks {
-			//log.Info(fmt.Sprintf("symlink found in %q but symlinks are not followed", path))
+			// log.Info(fmt.Sprintf("symlink found in %q but symlinks are not followed", path))
 			return nil
 		}
-		realPath, err := vfs.EvalSymlinks(fs, realPath)
+		effPath, err := vfs.EvalSymlinks(fs, realPath)
 		if err != nil {
 			return fmt.Errorf("unable to follow symlink %s: %w", realPath, err)
 		}
-		return addFileToTar(fs, tw, path, realPath, opts)
+		return addFileToTar(fs, tw, path, effPath, opts)
 	default:
 		return fmt.Errorf("unsupported file type %s in %s", info.Mode().String(), path)
 	}

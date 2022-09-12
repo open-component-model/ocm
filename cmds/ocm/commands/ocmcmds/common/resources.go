@@ -20,32 +20,31 @@ import (
 	"fmt"
 	"io"
 
+	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
+
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/open-component-model/ocm/pkg/out"
-
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/runtime"
-
-	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
 )
 
 type ResourceInput struct {
 	Access *runtime.UnstructuredTypedObject `json:"access"`
-	//Input  *inputs.BlobInput                `json:"input,omitempty"`
+	// Input  *inputs.BlobInput                `json:"input,omitempty"`
 	Input *inputs.GenericInputSpec `json:"input,omitempty"`
 }
 
@@ -152,36 +151,36 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 			i++
 			err := decoder.Decode(&tmp)
 			if err != nil {
-				if err != io.EOF {
+				if !errors.Is(err, io.EOF) {
 					return err
 				}
 				break
 			}
 			out.Outf(o.Context, "  processing document %d...\n", i)
 			if (tmp["input"] != nil || tmp["access"] != nil) && !h.RequireInputs() {
-				return errors.Newf("invalid spec %d in %q: no input or access possible for %s", i+1, filePath, listkey)
+				return errors.Newf("invalid spec %d in %q: no input or access possible for %s", i, filePath, listkey)
 			}
 
 			var list []json.RawMessage
 			if reslist, ok := tmp[listkey]; ok {
 				if len(tmp) != 1 {
-					return errors.Newf("invalid spec %d in %q: either a list or a single spec possible", i+1, filePath)
+					return errors.Newf("invalid spec %d in %q: either a list or a single spec possible", i, filePath)
 				}
 				l, ok := reslist.([]interface{})
 				if !ok {
-					return errors.Newf("invalid spec %d in %q: invalid resource list", i+1, filePath)
+					return errors.Newf("invalid spec %d in %q: invalid resource list", i, filePath)
 				}
 				for j, e := range l {
 					// cannot use json here, because yaml generates a map[interface{}]interface{}
 					data, err = yaml.Marshal(e)
 					if err != nil {
-						return errors.Newf("invalid spec %d[%d] in %q: %s", i+1, j+1, filePath, err.Error())
+						return errors.Newf("invalid spec %d[%d] in %q: %s", i, j+1, filePath, err.Error())
 					}
 					list = append(list, data)
 				}
 			} else {
 				if len(tmp) == 0 {
-					return errors.Newf("invalid spec %d in %q: empty", i+1, filePath)
+					return errors.Newf("invalid spec %d in %q: empty", i, filePath)
 				}
 				data, err := yaml.Marshal(tmp)
 				if err != nil {
@@ -191,11 +190,11 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 			}
 
 			for j, d := range list {
-				out.Outf(o.Context, "    processing index %d\n", j)
+				out.Outf(o.Context, "    processing index %d\n", j+1)
 				var input *ResourceInput
 				r, err := DecodeResource(d, h)
 				if err != nil {
-					return errors.Newf("invalid spec %d[%d] in %q: %s", i+1, j+1, filePath, err)
+					return errors.Newf("invalid spec %d[%d] in %q: %s", i, j+1, filePath, err)
 				}
 
 				if h.RequireInputs() {
@@ -230,7 +229,7 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 			if r.input.Input != nil {
 				var acc ocm.AccessSpec
 				// Local Blob
-				blob, hint, berr := r.input.Input.GetBlob(o.Context, r.path)
+				blob, hint, berr := r.input.Input.GetBlob(o.Context, common.VersionedElementKey(obj), r.path)
 				if berr != nil {
 					return errors.Wrapf(berr, "cannot get resource blob for %q(%s)", r.spec.GetName(), r.source)
 				}
@@ -322,6 +321,7 @@ func Validate(r *ResourceInput, ctx clictx.Context, inputFilePath string) error 
 				acc, err := r.Access.Evaluate(ctx.OCMContext().AccessMethods())
 				if err != nil {
 					if errors.IsErrUnknown(err) {
+						//nolint: errorlint // No way I can untagle this.
 						err.(errors.Kinded).SetKind(errors.KIND_ACCESSMETHOD)
 					}
 					raw, _ := r.Access.GetRaw()

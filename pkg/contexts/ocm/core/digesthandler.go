@@ -42,20 +42,25 @@ func NewDigestDescriptor(digest, hashAlgo, normAlgo string) *DigestDescriptor {
 // for dedicated mime types.
 // If found the digest provided by the digester will
 // replace the standard digest calculated for the byte content
-// of the blob
+// of the blob.
 type BlobDigester interface {
 	GetType() DigesterType
 	DetermineDigest(resType string, meth AccessMethod, preferred signing.Hasher) (*DigestDescriptor, error)
 }
 
-// BlobDigesterRegistry registers blob handlers to use in a dedicated ocm context
+// BlobDigesterRegistry registers blob handlers to use in a dedicated ocm context.
 type BlobDigesterRegistry interface {
-	// RegisterDigester registers a blob digester for a dedicated exact mime type
+	IsInitial() bool
+	// MustRegisterDigester registers a blob digester for a dedicated exact mime type
 	//
-	RegisterDigester(handler BlobDigester, restypes ...string)
+	Register(handler BlobDigester, restypes ...string) error
 	// GetDigester returns the digester for a given type
 	GetDigester(typ DigesterType) BlobDigester
+
+	GetDigesterForType(t string) []BlobDigester
 	DetermineDigests(typ string, preferred signing.Hasher, registry signing.Registry, acc AccessMethod, typs ...DigesterType) ([]DigestDescriptor, error)
+
+	Copy() BlobDigesterRegistry
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -73,17 +78,22 @@ func NewBlobDigesterRegistry() BlobDigesterRegistry {
 	return &blobDigesterRegistry{
 		typehandlers: map[string][]BlobDigester{},
 		normhandlers: map[string][]BlobDigester{},
-		digesters:    map[DigesterType]BlobDigester{}}
+		digesters:    map[DigesterType]BlobDigester{},
+	}
 }
 
-func (r *blobDigesterRegistry) RegisterDigester(digester BlobDigester, restypes ...string) {
+func (r *blobDigesterRegistry) IsInitial() bool {
+	return len(r.typehandlers) == 0 && len(r.normhandlers) == 0 && len(r.digesters) == 0
+}
+
+func (r *blobDigesterRegistry) Register(digester BlobDigester, restypes ...string) error {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
 	t := digester.GetType()
 	old := r.digesters[t]
 	if old != nil && old != digester {
-		panic(fmt.Errorf("duplicate digester type %q: %T and %T", t, old, digester))
+		return fmt.Errorf("duplicate digester type %q: %T and %T", t, old, digester)
 	}
 	r.digesters[t] = digester
 
@@ -108,12 +118,36 @@ outer:
 		old = append(old, digester)
 		r.typehandlers[t] = old
 	}
+	return nil
 }
 
 func (r *blobDigesterRegistry) GetDigester(typ DigesterType) BlobDigester {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 	return r.digesters[typ]
+}
+
+func (r *blobDigesterRegistry) GetDigesterForType(typ string) []BlobDigester {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+	return append(r.typehandlers[typ][:0:0], r.typehandlers[typ]...)
+}
+
+func (r *blobDigesterRegistry) Copy() BlobDigesterRegistry {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+
+	n := NewBlobDigesterRegistry().(*blobDigesterRegistry)
+	for k, v := range r.typehandlers {
+		n.typehandlers[k] = append(v[:0:0], v...)
+	}
+	for k, v := range r.normhandlers {
+		n.normhandlers[k] = append(v[:0:0], v...)
+	}
+	for k, v := range r.digesters {
+		n.digesters[k] = v
+	}
+	return n
 }
 
 func (r *blobDigesterRegistry) handle(list []BlobDigester, typ string, acc AccessMethod, preferred signing.Hasher) ([]DigestDescriptor, error) {
@@ -200,8 +234,11 @@ func (r *blobDigesterRegistry) DetermineDigests(restype string, preferred signin
 	return result, nil
 }
 
-func RegisterDigester(digester BlobDigester, arttypes ...string) {
-	DefaultBlobDigesterRegistry.RegisterDigester(digester, arttypes...)
+func MustRegisterDigester(digester BlobDigester, arttypes ...string) {
+	err := DefaultBlobDigesterRegistry.Register(digester, arttypes...)
+	if err != nil {
+		panic(err)
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -209,7 +246,7 @@ func RegisterDigester(digester BlobDigester, arttypes ...string) {
 const GenericBlobDigestV1 = "genericBlobDigest/v1"
 
 func init() {
-	RegisterDigester(&defaultDigester{})
+	MustRegisterDigester(&defaultDigester{})
 }
 
 type defaultDigester struct{}

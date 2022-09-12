@@ -17,24 +17,50 @@
 package docker
 
 import (
-	"net/http"
-	"path/filepath"
+	"os"
 
-	"github.com/containers/image/v5/types"
+	"github.com/docker/cli/cli/command"
+	"github.com/docker/cli/cli/config"
+	cliflags "github.com/docker/cli/cli/flags"
 	dockerclient "github.com/docker/docker/client"
-	"github.com/docker/go-connections/tlsconfig"
+	"github.com/spf13/pflag"
 )
 
+func newDockerClient(dockerhost string) (*dockerclient.Client, error) {
+	if dockerhost == "" {
+		opts := cliflags.NewCommonOptions()
+		// set defaults
+		opts.SetDefaultOptions(pflag.NewFlagSet("", pflag.ContinueOnError))
+		configfile := config.LoadDefaultConfigFile(os.Stderr)
+		c, err := command.NewAPIClientFromFlags(opts, configfile)
+		if err != nil {
+			return nil, err
+		}
+		return c.(*dockerclient.Client), nil
+	}
+	c, err := dockerclient.NewClientWithOpts(dockerclient.FromEnv, dockerclient.WithHost(dockerhost))
+	if err != nil {
+		return nil, err
+	}
+	url, err := dockerclient.ParseHostURL(dockerhost)
+	if err == nil && url.Scheme == "unix" {
+		dockerclient.WithScheme(url.Scheme)(c)
+	}
+	return c, nil
+}
+
+/*
+
 const (
-	// The default API version to be used in case none is explicitly specified
+	// The default API version to be used in case none is explicitly specified.
 	defaultAPIVersion = "1.22"
 )
 
+
 // NewDockerClient initializes a new API client based on the passed SystemContext.
-func newDockerClient(sys *types.SystemContext) (*dockerclient.Client, error) {
-	host := dockerclient.DefaultDockerHost
-	if sys != nil && sys.DockerDaemonHost != "" {
-		host = sys.DockerDaemonHost
+func newDockerClient2(host string) (*dockerclient.Client, error) {
+	if host == "" {
+		host = dockerclient.DefaultDockerHost
 	}
 
 	// Sadly, unix:// sockets don't work transparently with dockerclient.NewClient.
@@ -55,7 +81,7 @@ func newDockerClient(sys *types.SystemContext) (*dockerclient.Client, error) {
 		if url.Scheme == "http" {
 			httpClient = httpConfig()
 		} else {
-			hc, err := tlsConfig(sys)
+			hc, err := tlsConfig(nil)
 			if err != nil {
 				return nil, err
 			}
@@ -99,3 +125,4 @@ func httpConfig() *http.Client {
 		CheckRedirect: dockerclient.CheckRedirect,
 	}
 }
+*/

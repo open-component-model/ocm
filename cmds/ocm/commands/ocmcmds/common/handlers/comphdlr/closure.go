@@ -60,7 +60,7 @@ func traverse(hist common.History, o *Object, octx out.Context, lookup ocm.Compo
 		if err != nil {
 			continue
 		}
-		var obj = &Object{
+		obj := &Object{
 			History:  hist,
 			Identity: ref.GetIdentity(refs),
 			Spec: ocm.RefSpec{
@@ -71,7 +71,7 @@ func traverse(hist common.History, o *Object, octx out.Context, lookup ocm.Compo
 				},
 			},
 			Repository: o.Repository,
-			//Component:        comp,
+			// Component:        comp,
 			ComponentVersion: nested,
 		}
 		if nested == nil {

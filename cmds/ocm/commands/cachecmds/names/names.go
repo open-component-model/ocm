@@ -14,6 +14,4 @@
 
 package names
 
-var (
-	Cache = []string{"cache"}
-)
+var Cache = []string{"cache"}

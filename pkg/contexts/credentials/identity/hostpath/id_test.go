@@ -34,6 +34,7 @@ var _ = Describe("ctf management", func() {
 			hostpath.ID_HOSTNAME:   "host",
 			hostpath.ID_PATHPREFIX: "a/b",
 			hostpath.ID_PORT:       "4711",
+			hostpath.ID_SCHEME:     "scheme://",
 		}
 
 		It("complete", func() {
@@ -41,6 +42,7 @@ var _ = Describe("ctf management", func() {
 				hostpath.ID_HOSTNAME:   "host",
 				hostpath.ID_PATHPREFIX: "a/b",
 				hostpath.ID_PORT:       "4711",
+				hostpath.ID_SCHEME:     "scheme://",
 			}
 			Expect(IdentityMatcher(pat, nil, id)).To(BeTrue())
 			Expect(IdentityMatcher(pat, id, id)).To(BeFalse())
@@ -51,6 +53,7 @@ var _ = Describe("ctf management", func() {
 				hostpath.ID_HOSTNAME:   "host",
 				hostpath.ID_PATHPREFIX: "a",
 				hostpath.ID_PORT:       "4711",
+				hostpath.ID_SCHEME:     "scheme://",
 			}
 			Expect(IdentityMatcher(pat, nil, id)).To(BeTrue())
 			Expect(IdentityMatcher(pat, pat, id)).To(BeFalse())
@@ -60,6 +63,7 @@ var _ = Describe("ctf management", func() {
 				hostpath.ID_HOSTNAME:   "host",
 				hostpath.ID_PATHPREFIX: "b",
 				hostpath.ID_PORT:       "4711",
+				hostpath.ID_SCHEME:     "scheme://",
 			}
 			Expect(IdentityMatcher(pat, nil, id)).To(BeFalse())
 			Expect(IdentityMatcher(pat, pat, id)).To(BeFalse())
@@ -69,6 +73,7 @@ var _ = Describe("ctf management", func() {
 				hostpath.ID_HOSTNAME:   "host",
 				hostpath.ID_PATHPREFIX: "a/b/c",
 				hostpath.ID_PORT:       "4711",
+				hostpath.ID_SCHEME:     "scheme://",
 			}
 			Expect(IdentityMatcher(pat, nil, id)).To(BeFalse())
 			Expect(IdentityMatcher(pat, pat, id)).To(BeFalse())
@@ -77,6 +82,7 @@ var _ = Describe("ctf management", func() {
 			id := credentials.ConsumerIdentity{
 				hostpath.ID_HOSTNAME: "host",
 				hostpath.ID_PORT:     "4711",
+				hostpath.ID_SCHEME:   "scheme://",
 			}
 			Expect(IdentityMatcher(pat, nil, id)).To(BeTrue())
 			Expect(IdentityMatcher(pat, pat, id)).To(BeFalse())
@@ -85,6 +91,7 @@ var _ = Describe("ctf management", func() {
 			id := credentials.ConsumerIdentity{
 				hostpath.ID_HOSTNAME:   "host",
 				hostpath.ID_PATHPREFIX: "a/b",
+				hostpath.ID_SCHEME:     "scheme://",
 			}
 			Expect(IdentityMatcher(pat, nil, id)).To(BeTrue())
 			Expect(IdentityMatcher(pat, pat, id)).To(BeFalse())
@@ -97,6 +104,7 @@ var _ = Describe("ctf management", func() {
 				hostpath.ID_HOSTNAME:   "host",
 				hostpath.ID_PATHPREFIX: "a/b",
 				hostpath.ID_PORT:       "0815",
+				hostpath.ID_SCHEME:     "scheme://",
 			}
 			Expect(IdentityMatcher(pat, nil, id)).To(BeFalse())
 			Expect(IdentityMatcher(pat, pat, id)).To(BeFalse())
@@ -107,12 +115,35 @@ var _ = Describe("ctf management", func() {
 				hostpath.ID_HOSTNAME:   "other",
 				hostpath.ID_PATHPREFIX: "a/b",
 				hostpath.ID_PORT:       "4711",
+				hostpath.ID_SCHEME:     "scheme://",
 			}
 			Expect(IdentityMatcher(pat, nil, id)).To(BeFalse())
 			Expect(IdentityMatcher(pat, pat, id)).To(BeFalse())
 		})
 		It("no host", func() {
 			id := credentials.ConsumerIdentity{
+				hostpath.ID_PATHPREFIX: "a/b",
+				hostpath.ID_PORT:       "4711",
+				hostpath.ID_SCHEME:     "scheme://",
+			}
+			Expect(IdentityMatcher(id, nil, pat)).To(BeTrue())
+			Expect(IdentityMatcher(pat, id, id)).To(BeFalse())
+			Expect(IdentityMatcher(pat, id, pat)).To(BeTrue())
+		})
+
+		It("different scheme", func() {
+			id := credentials.ConsumerIdentity{
+				hostpath.ID_HOSTNAME:   "host",
+				hostpath.ID_PATHPREFIX: "a/b",
+				hostpath.ID_PORT:       "4711",
+				hostpath.ID_SCHEME:     "otherscheme://",
+			}
+			Expect(IdentityMatcher(pat, nil, id)).To(BeFalse())
+			Expect(IdentityMatcher(pat, pat, id)).To(BeFalse())
+		})
+		It("no scheme", func() {
+			id := credentials.ConsumerIdentity{
+				hostpath.ID_HOSTNAME:   "host",
 				hostpath.ID_PATHPREFIX: "a/b",
 				hostpath.ID_PORT:       "4711",
 			}
@@ -126,12 +157,14 @@ var _ = Describe("ctf management", func() {
 		pat := credentials.ConsumerIdentity{
 			hostpath.ID_HOSTNAME: "host",
 			hostpath.ID_PORT:     "4711",
+			hostpath.ID_SCHEME:   "scheme://",
 		}
 
 		It("complete", func() {
 			id := credentials.ConsumerIdentity{
 				hostpath.ID_HOSTNAME: "host",
 				hostpath.ID_PORT:     "4711",
+				hostpath.ID_SCHEME:   "scheme://",
 			}
 			Expect(IdentityMatcher(pat, nil, id)).To(BeTrue())
 			Expect(IdentityMatcher(pat, id, id)).To(BeFalse())
@@ -142,6 +175,7 @@ var _ = Describe("ctf management", func() {
 				hostpath.ID_HOSTNAME:   "host",
 				hostpath.ID_PORT:       "4711",
 				hostpath.ID_PATHPREFIX: "b",
+				hostpath.ID_SCHEME:     "scheme://",
 			}
 			Expect(IdentityMatcher(pat, nil, id)).To(BeFalse())
 			Expect(IdentityMatcher(pat, pat, id)).To(BeFalse())
@@ -149,6 +183,7 @@ var _ = Describe("ctf management", func() {
 		It("missing port", func() {
 			id := credentials.ConsumerIdentity{
 				hostpath.ID_HOSTNAME: "host",
+				hostpath.ID_SCHEME:   "scheme://",
 			}
 			Expect(IdentityMatcher(pat, nil, id)).To(BeTrue())
 			Expect(IdentityMatcher(pat, pat, id)).To(BeFalse())
@@ -157,8 +192,27 @@ var _ = Describe("ctf management", func() {
 			id := credentials.ConsumerIdentity{
 				hostpath.ID_HOSTNAME: "host",
 				hostpath.ID_PORT:     "0815",
+				hostpath.ID_SCHEME:   "scheme://",
 			}
 			Expect(IdentityMatcher(pat, nil, id)).To(BeFalse())
+			Expect(IdentityMatcher(pat, pat, id)).To(BeFalse())
+		})
+
+		It("different scheme", func() {
+			id := credentials.ConsumerIdentity{
+				hostpath.ID_HOSTNAME: "host",
+				hostpath.ID_PORT:     "4711",
+				hostpath.ID_SCHEME:   "otherscheme://",
+			}
+			Expect(IdentityMatcher(pat, nil, id)).To(BeFalse())
+			Expect(IdentityMatcher(pat, pat, id)).To(BeFalse())
+		})
+		It("no scheme", func() {
+			id := credentials.ConsumerIdentity{
+				hostpath.ID_HOSTNAME: "host",
+				hostpath.ID_PORT:     "4711",
+			}
+			Expect(IdentityMatcher(pat, nil, id)).To(BeTrue())
 			Expect(IdentityMatcher(pat, pat, id)).To(BeFalse())
 		})
 	})

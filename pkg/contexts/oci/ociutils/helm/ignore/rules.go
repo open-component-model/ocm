@@ -48,7 +48,7 @@ func Empty() *Rules {
 
 // AddDefaults adds default ignore patterns.
 //
-// Ignore all dotfiles in "templates/"
+// Ignore all dotfiles in "templates/".
 func (r *Rules) AddDefaults() {
 	r.parseRule(`templates/.?*`)
 }
@@ -63,7 +63,7 @@ func ParseFile(file string, fss ...vfs.FileSystem) (*Rules, error) {
 	return Parse(f)
 }
 
-// Parse parses a rules file
+// Parse parses a rules file.
 func Parse(file io.Reader) (*Rules, error) {
 	r := &Rules{patterns: []*pattern{}}
 

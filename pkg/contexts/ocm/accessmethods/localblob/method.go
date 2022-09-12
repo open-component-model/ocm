@@ -16,6 +16,7 @@ package localblob
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -69,12 +70,18 @@ type AccessSpec struct {
 	ReferenceName string `json:"referenceName,omitempty"`
 }
 
-var _ json.Marshaler = (*AccessSpec)(nil)
-var _ cpi.HintProvider = (*AccessSpec)(nil)
-var _ cpi.AccessSpec = (*AccessSpec)(nil)
+var (
+	_ json.Marshaler   = (*AccessSpec)(nil)
+	_ cpi.HintProvider = (*AccessSpec)(nil)
+	_ cpi.AccessSpec   = (*AccessSpec)(nil)
+)
 
 func (a AccessSpec) MarshalJSON() ([]byte, error) {
 	return cpi.MarshalConvertedAccessSpec(cpi.DefaultContext(), &a)
+}
+
+func (a *AccessSpec) Describe(ctx cpi.Context) string {
+	return fmt.Sprintf("Local blob %s[%s]", a.LocalReference, a.ReferenceName)
 }
 
 func (a *AccessSpec) IsLocal(cpi.Context) bool {
@@ -85,12 +92,12 @@ func (a *AccessSpec) GetMimeType() string {
 	return a.MediaType
 }
 
-func (a *AccessSpec) GetReferenceHint() string {
+func (a *AccessSpec) GetReferenceHint(cv cpi.ComponentVersionAccess) string {
 	return a.ReferenceName
 }
 
-func (a *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
-	return c.AccessMethod(a)
+func (a *AccessSpec) AccessMethod(cv cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
+	return cv.AccessMethod(a)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

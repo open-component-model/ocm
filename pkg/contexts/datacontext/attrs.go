@@ -48,7 +48,7 @@ var DefaultAttributeScheme = NewDefaulAttritutetScheme()
 // KnownTypes is a set of known type names mapped to appropriate object decoders.
 type KnownTypes map[string]AttributeType
 
-// Copy provides a copy of the actually known types
+// Copy provides a copy of the actually known types.
 func (t KnownTypes) Copy() KnownTypes {
 	n := KnownTypes{}
 	for k, v := range t {
@@ -57,7 +57,7 @@ func (t KnownTypes) Copy() KnownTypes {
 	return n
 }
 
-// TypeNames return a sorted list of known type names
+// TypeNames return a sorted list of known type names.
 func (t KnownTypes) TypeNames() []string {
 	types := make([]string, 0, len(t))
 	for t := range t {
@@ -103,7 +103,7 @@ func (d *defaultScheme) Shortcuts() common.Properties {
 	return d.short.Copy()
 }
 
-// KnownTypeNames return a sorted list of known type names
+// KnownTypeNames return a sorted list of known type names.
 func (d *defaultScheme) KnownTypeNames() []string {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
@@ -179,8 +179,7 @@ func (d *defaultScheme) Decode(attr string, data []byte, unmarshaler runtime.Unm
 	return t.Decode(data, unmarshaler)
 }
 
-type DefaultAttributeType struct {
-}
+type DefaultAttributeType struct{}
 
 func (_ DefaultAttributeType) Encode(v interface{}, marshaller runtime.Marshaler) ([]byte, error) {
 	return marshaller.Marshal(v)

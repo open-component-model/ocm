@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/localize"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -31,12 +32,7 @@ type Config struct {
 	KubeConfigName  string               `json:"kubeConfigName,omitempty"`
 }
 
-type ImageMapping struct {
-	v1.ResourceReference
-	Tag        string `json:"tag,omitempty"`
-	Repository string `json:"repository,omitempty"`
-	Image      string `json:"image,omitempty"`
-}
+type ImageMapping = localize.ImageMapping
 
 func (c *Config) GetValues() (map[string]interface{}, error) {
 	if len(c.Values) == 0 {

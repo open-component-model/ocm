@@ -55,7 +55,7 @@ jobs:
           go install golang.org/x/tools/cmd/goimports@latest
       - name: Setup lint
         run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.47.2
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.49.0
       - name: Lint
         run: |
           PATH=$PATH:$(go env GOPATH)/bin make check

@@ -20,9 +20,11 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/handlers/artefacthdlr"
-	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -269,7 +271,7 @@ NESTING        REGISTRY REPOSITORY       KIND     TAG                           
 		It("get single artefact attachment tree with closure", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "artefact", "-a", "-c", "-o", "tree", ARCH+"//"+NS2+":"+VERSION1)).To(Succeed())
-			fmt.Println(buf.String())
+			logrus.Debug(buf.String())
 			Expect("\n" + buf.String()).To(Equal(
 				`
 NESTING             REGISTRY REPOSITORY       KIND     TAG                                                                          DIGEST

@@ -21,6 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type Options struct {
@@ -29,8 +30,10 @@ type Options struct {
 	fs     vfs.FileSystem
 }
 
-var _ ScriptOption = (*Options)(nil)
-var _ ScriptFilesystemOption = (*Options)(nil)
+var (
+	_ ScriptOption           = (*Options)(nil)
+	_ ScriptFilesystemOption = (*Options)(nil)
+)
 
 func (o *Options) SetScript(data []byte) {
 	o.script = data
@@ -72,8 +75,13 @@ func (o *scriptOption) ApplyTransferOption(to transferhandler.TransferOptions) e
 	if err != nil {
 		return err
 	}
-	to.(ScriptOption).SetScript(script)
-	return nil
+
+	if eff, ok := to.(ScriptOption); ok {
+		eff.SetScript(script)
+		return nil
+	} else {
+		return errors.ErrNotSupported("script")
+	}
 }
 
 func Script(data []byte) transferhandler.TransferOption {
@@ -107,8 +115,12 @@ type filesystemOption struct {
 }
 
 func (o *filesystemOption) ApplyTransferOption(to transferhandler.TransferOptions) error {
-	to.(ScriptFilesystemOption).SetScriptFilesystem(o.fs)
-	return nil
+	if eff, ok := to.(ScriptFilesystemOption); ok {
+		eff.SetScriptFilesystem(o.fs)
+		return nil
+	} else {
+		return errors.ErrNotSupported("script filesystem")
+	}
 }
 
 func ScriptFilesystem(fs vfs.FileSystem) transferhandler.TransferOption {

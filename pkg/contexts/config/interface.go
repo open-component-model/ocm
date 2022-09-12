@@ -30,19 +30,26 @@ const AllGenerations = core.AllGenerations
 
 const CONTEXT_TYPE = core.CONTEXT_TYPE
 
-type Context = core.Context
-type Config = core.Config
-type ConfigType = core.ConfigType
-type ConfigTypeScheme = core.ConfigTypeScheme
-type GenericConfig = core.GenericConfig
-type ConfigSelector = core.ConfigSelector
-type ConfigSelectorFunction = core.ConfigSelectorFunction
+type (
+	Context                = core.Context
+	Config                 = core.Config
+	ConfigType             = core.ConfigType
+	ConfigTypeScheme       = core.ConfigTypeScheme
+	GenericConfig          = core.GenericConfig
+	ConfigSelector         = core.ConfigSelector
+	ConfigSelectorFunction = core.ConfigSelectorFunction
+)
 
 func DefaultContext() core.Context {
 	return core.DefaultContext
 }
+
 func ForContext(ctx context.Context) Context {
 	return core.ForContext(ctx)
+}
+
+func DefinedForContext(ctx context.Context) (Context, bool) {
+	return core.DefinedForContext(ctx)
 }
 
 func NewGenericConfig(data []byte, unmarshaler runtime.Unmarshaler) (Config, error) {

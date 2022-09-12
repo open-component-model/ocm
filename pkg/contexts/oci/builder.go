@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
 )
 
@@ -37,6 +38,6 @@ func WithRepositorySpecHandlers(reg RepositorySpecHandlers) core.Builder {
 	return core.Builder{}.WithRepositorySpecHandlers(reg)
 }
 
-func New() Context {
-	return core.Builder{}.New()
+func New(mode ...datacontext.BuilderMode) Context {
+	return core.Builder{}.New(mode...)
 }

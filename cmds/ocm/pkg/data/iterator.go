@@ -40,9 +40,9 @@ func NewMappedIterator(iter Iterator, mapping MappingFunction) Iterator {
 	return &MappedIterator{iter, mapping}
 }
 
-func (this *MappedIterator) Next() interface{} {
-	if this.HasNext() {
-		return this.mapping(this.Iterator.Next())
+func (mi *MappedIterator) Next() interface{} {
+	if mi.HasNext() {
+		return mi.mapping(mi.Iterator.Next())
 	}
 	return nil
 }

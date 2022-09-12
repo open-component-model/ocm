@@ -15,6 +15,7 @@
 package ociblob
 
 import (
+	"fmt"
 	"io"
 	"sync"
 
@@ -52,7 +53,7 @@ func New(repository string, digest digest.Digest, mediaType string, size int64) 
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 
-	// Reference is the oci reference to the manifest
+	// Reference is the oci reference to the OCI repository
 	Reference string `json:"ref"`
 
 	// MediaType is the media type of the object this schema refers to.
@@ -66,6 +67,10 @@ type AccessSpec struct {
 }
 
 var _ cpi.AccessSpec = (*AccessSpec)(nil)
+
+func (a *AccessSpec) Describe(ctx cpi.Context) string {
+	return fmt.Sprintf("OCI blob %s in repository %s", a.Digest, a.Reference)
+}
 
 func (s AccessSpec) IsLocal(context cpi.Context) bool {
 	return false

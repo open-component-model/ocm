@@ -18,8 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/toi/install"
 )
 
-type Driver struct {
-}
+type Driver struct{}
 
 var _ install.Driver = (*Driver)(nil)
 

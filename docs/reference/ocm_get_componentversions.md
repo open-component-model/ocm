@@ -9,12 +9,13 @@ ocm get componentversions [<options>] {<component-reference>}
 ### Options
 
 ```
-  -c, --closure            follow component reference nesting
-  -h, --help               help for componentversions
-  -o, --output string      output mode (JSON, json, tree, wide, yaml)
-  -r, --repo string        repository name or spec
-  -S, --scheme string      schema version
-  -s, --sort stringArray   sort fields
+  -c, --closure              follow component reference nesting
+  -h, --help                 help for componentversions
+      --lookup stringArray   repository name or spec for closure lookup fallback
+  -o, --output string        output mode (JSON, json, tree, wide, yaml)
+  -r, --repo string          repository name or spec
+  -S, --scheme string        schema version
+  -s, --sort stringArray     sort fields
 ```
 
 ### Description
@@ -69,6 +70,16 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `ociRegistry`
 
 With the option <code>--closure</code> the complete reference tree of a component reference is traversed.
+
+If a component lookup for building a reference closure is required
+the <code>--lookup</code>  option can be used to specify a fallback
+lookup repository. 
+By default the component versions are searched in the repository
+holding the component version for which the closure is determined.
+For *Component Archives* this is never possible, because it only
+contains a single component version. Therefore, in this scenario
+this option must always be specified to be able to follow component
+references.
 
 It the option <code>--scheme</code> is given, the given component descriptor is converted to given format for output.
 The following schema versions are supported:

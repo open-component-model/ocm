@@ -20,10 +20,9 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/out"
-
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/out"
 )
 
 type Builder struct {
@@ -81,10 +80,16 @@ func (b Builder) Bound() (Context, context.Context) {
 	return c, context.WithValue(b.getContext(), key, c)
 }
 
-func (b Builder) New() Context {
+func (b Builder) New(m ...datacontext.BuilderMode) Context {
+	mode := datacontext.Mode(m...)
 	ctx := b.getContext()
+
 	if b.ocm == nil {
-		b.ocm = ocm.ForContext(ctx)
+		var ok bool
+		b.ocm, ok = ocm.DefinedForContext(ctx)
+		if !ok && mode != datacontext.MODE_SHARED {
+			b.ocm = ocm.New(mode)
+		}
 	}
 	if b.shared == nil {
 		b.shared = b.ocm.AttributesContext()

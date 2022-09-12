@@ -15,10 +15,10 @@
 package env
 
 import (
-	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 
 var _ = Describe("Environment", func() {

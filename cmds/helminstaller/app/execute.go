@@ -20,10 +20,10 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
-
-	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/cmds/helminstaller/app/driver"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
@@ -45,7 +45,6 @@ func Merge(values ...map[string]interface{}) map[string]interface{} {
 }
 
 func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, cv ocm.ComponentVersionAccess, cfg *Config, values map[string]interface{}, kubeconfig []byte) error {
-
 	if action != "install" && action != "uninstall" {
 		return errors.ErrNotSupported("action", action)
 	}
@@ -61,7 +60,7 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 	}
 	defer rcv.Close()
 
-	fmt.Printf("Installing helm chart from resource %s@%s\n", cfg.Chart, common.VersionedElementKey(cv))
+	logrus.Infof("Installing helm chart from resource %s@%s", cfg.Chart, common.VersionedElementKey(cv))
 	if acc.Meta().Type != consts.HelmChart {
 		return errors.Newf("resource type %q required, but found %q", consts.HelmChart, acc.Meta().Type)
 	}
@@ -119,8 +118,8 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 				return errors.Wrapf(err, "mapping %d: assigning image to property %q", v.Image)
 			}
 		}
-
 	}
+
 	ns := "default"
 	if cfg.Namespace != "" {
 		ns = cfg.Namespace

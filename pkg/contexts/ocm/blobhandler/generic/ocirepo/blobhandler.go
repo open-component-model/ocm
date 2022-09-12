@@ -36,9 +36,8 @@ func init() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// artefactHandler stores artefact blobs as OCIArtefacts
-type artefactHandler struct {
-}
+// artefactHandler stores artefact blobs as OCIArtefacts.
+type artefactHandler struct{}
 
 func NewArtefactHandler() cpi.BlobHandler {
 	return &artefactHandler{}

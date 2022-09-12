@@ -81,19 +81,28 @@ type Context interface {
 
 var key = reflect.TypeOf(_context{})
 
-// DefaultContext is the default context initialized by init functions
-var DefaultContext = Builder{}.New()
+// DefaultContext is the default context initialized by init functions.
+var DefaultContext = Builder{}.New(datacontext.MODE_SHARED)
 
 // ForContext returns the Context to use for context.Context.
-// This is eiter an explicit context or the default context.
+// This is either an explicit context or the default context.
 // The returned context incorporates the given context.
 func ForContext(ctx context.Context) Context {
-	return datacontext.ForContextByKey(ctx, key, DefaultContext).(Context)
+	c, _ := datacontext.ForContextByKey(ctx, key, DefaultContext)
+	return c.(Context)
+}
+
+func DefinedForContext(ctx context.Context) (Context, bool) {
+	c, ok := datacontext.ForContextByKey(ctx, key, DefaultContext)
+	if c != nil {
+		return c.(Context), ok
+	}
+	return nil, ok
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type __context struct {
+type coreContext struct {
 	datacontext.Context
 	updater Updater
 
@@ -105,7 +114,7 @@ type __context struct {
 }
 
 type _context struct {
-	*__context
+	*coreContext
 	description string
 }
 
@@ -113,7 +122,7 @@ var _ Context = &_context{}
 
 func newContext(shared datacontext.AttributesContext, reposcheme ConfigTypeScheme) Context {
 	c := &_context{
-		__context: &__context{
+		coreContext: &coreContext{
 			sharedAttributes: shared,
 			knownConfigTypes: reposcheme,
 			configs:          NewConfigStore(),
@@ -138,7 +147,7 @@ func (c *_context) WithInfo(desc string) Context {
 	if c.description != "" {
 		desc = desc + "--" + c.description
 	}
-	return &_context{c.__context, desc}
+	return &_context{c.coreContext, desc}
 }
 
 func (c *_context) AttributesContext() datacontext.AttributesContext {

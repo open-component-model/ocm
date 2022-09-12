@@ -25,14 +25,13 @@ import (
 	"github.com/docker/cli/cli/config/configfile"
 	dockercred "github.com/docker/cli/cli/config/credentials"
 	"github.com/docker/cli/cli/config/types"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
-
-var log = false
 
 type Repository struct {
 	lock      sync.RWMutex
@@ -124,14 +123,12 @@ func (r *Repository) Read(force bool) error {
 
 			var creds cpi.Credentials
 			if IsEmptyAuthConfig(a) {
-				if log {
-					fmt.Printf("propagate id %q with default store %q\n", id, defaultStore)
-				}
+				logrus.Debugf("propagate id %q with default store %q", id, defaultStore)
+
 				creds = NewCredentials(r, h, store)
 			} else {
-				if log {
-					fmt.Printf("propagate id %q\n", id)
-				}
+				logrus.Debugf("propagate id %q", id)
+
 				creds = newCredentials(a)
 			}
 			r.ctx.SetCredentialsForConsumer(id, creds)
@@ -145,9 +142,9 @@ func (r *Repository) Read(force bool) error {
 				cpi.ATTR_TYPE:        identity.CONSUMER_TYPE,
 				identity.ID_HOSTNAME: hostname,
 			}
-			if log {
-				fmt.Printf("propagate id %s with helper %s\n", id, helper)
-			}
+
+			logrus.Debugf("propagate id %s with helper %s", id, helper)
+
 			r.ctx.SetCredentialsForConsumer(id, NewCredentials(r, h, dockercred.NewNativeStore(cfg, helper)))
 		}
 	}
@@ -174,7 +171,7 @@ func norm(s string) string {
 	return s
 }
 
-// IsEmptyAuthConfig validates if the resulting auth config contains credentails
+// IsEmptyAuthConfig validates if the resulting auth config contains credentials.
 func IsEmptyAuthConfig(auth types.AuthConfig) bool {
 	if len(auth.Auth) != 0 {
 		return false

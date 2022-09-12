@@ -22,9 +22,9 @@ import (
 	"github.com/modern-go/reflect2"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -36,7 +36,7 @@ import (
 type InputSpec interface {
 	runtime.VersionedTypedObject
 	Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath string) field.ErrorList
-	GetBlob(ctx clictx.Context, inputFilePath string) (accessio.TemporaryBlobAccess, string, error)
+	GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error)
 }
 type InputType interface {
 	runtime.TypedObjectDecoder
@@ -77,7 +77,7 @@ type InputTypeScheme interface {
 }
 
 type inputTypeScheme struct {
-	runtime.Scheme
+	runtime.SchemeBase
 }
 
 func NewInputTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) InputTypeScheme {
@@ -86,8 +86,8 @@ func NewInputTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) InputType
 	return &inputTypeScheme{scheme}
 }
 
-func (t *inputTypeScheme) AddKnowntypes(s InputTypeScheme) {
-	t.Scheme.AddKnownTypes(s)
+func (t *inputTypeScheme) AddKnownTypes(s InputTypeScheme) {
+	t.SchemeBase.AddKnownTypes(s)
 }
 
 func (t *inputTypeScheme) GetInputType(name string) InputType {
@@ -102,23 +102,11 @@ func (t *inputTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedOb
 	if _, ok := decoder.(InputType); !ok {
 		return errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
 	}
-	return t.Scheme.RegisterByDecoder(name, decoder)
-}
-
-func (t *inputTypeScheme) AddKnownTypes(scheme runtime.Scheme) error {
-	if _, ok := scheme.(InputTypeScheme); !ok {
-		return errors.ErrInvalid("type", reflect.TypeOf(scheme).String(), "expected", "InputTypeScheme")
-	}
-
-	if err := t.Scheme.AddKnownTypes(scheme); err != nil {
-		return fmt.Errorf("failed to add known type in inputTypeScheme: %w", err)
-	}
-
-	return nil
+	return t.SchemeBase.RegisterByDecoder(name, decoder)
 }
 
 func (t *inputTypeScheme) Register(name string, rtype InputType) {
-	t.Scheme.RegisterByDecoder(name, rtype)
+	t.SchemeBase.RegisterByDecoder(name, rtype)
 }
 
 func (t *inputTypeScheme) DecodeInputSpec(data []byte, unmarshaler runtime.Unmarshaler) (InputSpec, error) {
@@ -134,7 +122,7 @@ func (t *inputTypeScheme) DecodeInputSpec(data []byte, unmarshaler runtime.Unmar
 
 func (t *inputTypeScheme) CreateInputSpec(obj runtime.TypedObject) (InputSpec, error) {
 	if s, ok := obj.(InputSpec); ok {
-		r, err := t.Scheme.Convert(s)
+		r, err := t.SchemeBase.Convert(s)
 		if err != nil {
 			return nil, err
 		}
@@ -150,7 +138,7 @@ func (t *inputTypeScheme) CreateInputSpec(obj runtime.TypedObject) (InputSpec, e
 	return nil, fmt.Errorf("invalid object type %T for repository specs", obj)
 }
 
-// DefaultInputTypeScheme contains all globally known access serializer
+// DefaultInputTypeScheme contains all globally known access serializer.
 var DefaultInputTypeScheme = NewInputTypeScheme(nil)
 
 func RegisterInputType(name string, atype InputType) {
@@ -188,7 +176,7 @@ func (r *UnknownInputSpec) Validate(fldPath *field.Path, ctx clictx.Context, inp
 	return field.ErrorList{field.Invalid(fldPath.Child("type"), r.GetType(), "unknown type")}
 }
 
-func (r *UnknownInputSpec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (r *UnknownInputSpec) GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
 	return nil, "", errors.ErrUnknown("input type", r.GetType())
 }
 
@@ -241,7 +229,7 @@ func (s *GenericInputSpec) Validate(fldPath *field.Path, ctx clictx.Context, inp
 	return s.effective.Validate(fldPath, ctx, inputFilePath)
 }
 
-func (s *GenericInputSpec) GetBlob(ctx clictx.Context, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (s *GenericInputSpec) GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
 	if s.effective == nil {
 		var err error
 		s.effective, err = s.Evaluate(For(ctx))
@@ -249,7 +237,7 @@ func (s *GenericInputSpec) GetBlob(ctx clictx.Context, inputFilePath string) (ac
 			return nil, "", err
 		}
 	}
-	return s.effective.GetBlob(ctx, inputFilePath)
+	return s.effective.GetBlob(ctx, nv, inputFilePath)
 }
 
 func (s *GenericInputSpec) Evaluate(scheme InputTypeScheme) (InputSpec, error) {

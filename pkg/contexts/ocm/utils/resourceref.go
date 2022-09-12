@@ -15,6 +15,8 @@
 package utils
 
 import (
+	"fmt"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -22,19 +24,25 @@ import (
 
 func ResolveReferencePath(cv ocm.ComponentVersionAccess, path []metav1.Identity, resolver ocm.ComponentVersionResolver) (ocm.ComponentVersionAccess, error) {
 	eff := cv
+	if cv == nil {
+		return nil, fmt.Errorf("no component version specified")
+	}
 	for _, cr := range path {
 		if eff != cv {
 			defer eff.Close()
 		}
-		resolver := ocm.NewCompoundResolver(eff.Repository(), resolver)
+		compundResolver := ocm.NewCompoundResolver(eff.Repository(), resolver)
 		cref, err := cv.GetReference(cr)
 		if err != nil {
 			return nil, err
 		}
 
-		eff, err = resolver.LookupComponentVersion(cref.GetComponentName(), cref.GetVersion())
+		eff, err = compundResolver.LookupComponentVersion(cref.GetComponentName(), cref.GetVersion())
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot resolve component reference")
+		}
+		if eff == nil {
+			return nil, errors.ErrNotFound(ocm.KIND_COMPONENTREFERENCE, cref.String())
 		}
 	}
 	return eff, nil
@@ -86,7 +94,6 @@ outer:
 }
 
 func ResolveResourceReference(cv ocm.ComponentVersionAccess, ref metav1.ResourceReference, resolver ocm.ComponentVersionResolver) (ocm.ResourceAccess, ocm.ComponentVersionAccess, error) {
-
 	if len(ref.Resource) == 0 || len(ref.Resource["name"]) == 0 {
 		return nil, nil, errors.Newf("at least resource name must be specified for resource reference")
 	}
@@ -104,9 +111,9 @@ func ResolveResourceReference(cv ocm.ComponentVersionAccess, ref metav1.Resource
 	return r, eff, nil
 }
 
-func Dup(orig ocm.ComponentVersionAccess, new ocm.ComponentVersionAccess) ocm.ComponentVersionAccess {
-	if orig != new {
-		return new
+func Dup(orig ocm.ComponentVersionAccess, newcva ocm.ComponentVersionAccess) ocm.ComponentVersionAccess {
+	if orig != newcva {
+		return newcva
 	}
 	return &nopCloserAccess{orig}
 }

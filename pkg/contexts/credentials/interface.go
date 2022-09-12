@@ -22,31 +22,39 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const KIND_CREDENTIALS = core.KIND_CREDENTIALS
-const KIND_CONSUMER = core.KIND_CONSUMER
-const KIND_REPOSITORY = core.KIND_REPOSITORY
+const (
+	KIND_CREDENTIALS = core.KIND_CREDENTIALS
+	KIND_CONSUMER    = core.KIND_CONSUMER
+	KIND_REPOSITORY  = core.KIND_REPOSITORY
+)
 
 const CONTEXT_TYPE = core.CONTEXT_TYPE
 
 const AliasRepositoryType = core.AliasRepositoryType
 
-type Context = core.Context
-type RepositoryTypeScheme = core.RepositoryTypeScheme
-type Repository = core.Repository
-type Credentials = core.Credentials
-type CredentialsSource = core.CredentialsSource
-type CredentialsChain = core.CredentialsChain
-type CredentialsSpec = core.CredentialsSpec
-type RepositorySpec = core.RepositorySpec
+type (
+	Context              = core.Context
+	RepositoryTypeScheme = core.RepositoryTypeScheme
+	Repository           = core.Repository
+	Credentials          = core.Credentials
+	CredentialsSource    = core.CredentialsSource
+	CredentialsChain     = core.CredentialsChain
+	CredentialsSpec      = core.CredentialsSpec
+	RepositorySpec       = core.RepositorySpec
+)
 
-type ConsumerIdentity = core.ConsumerIdentity
-type IdentityMatcher = core.IdentityMatcher
-type IdentityMatcherInfo = core.IdentityMatcherInfo
-type IdentityMatcherRegistry = core.IdentityMatcherRegistry
+type (
+	ConsumerIdentity        = core.ConsumerIdentity
+	IdentityMatcher         = core.IdentityMatcher
+	IdentityMatcherInfo     = core.IdentityMatcherInfo
+	IdentityMatcherRegistry = core.IdentityMatcherRegistry
+)
 
-type GenericRepositorySpec = core.GenericRepositorySpec
-type GenericCredentialsSpec = core.GenericCredentialsSpec
-type DirectCredentials = core.DirectCredentials
+type (
+	GenericRepositorySpec  = core.GenericRepositorySpec
+	GenericCredentialsSpec = core.GenericCredentialsSpec
+	DirectCredentials      = core.DirectCredentials
+)
 
 func DefaultContext() core.Context {
 	return core.DefaultContext
@@ -54,6 +62,10 @@ func DefaultContext() core.Context {
 
 func ForContext(ctx context.Context) Context {
 	return core.ForContext(ctx)
+}
+
+func DefinedForContext(ctx context.Context) (Context, bool) {
+	return core.DefinedForContext(ctx)
 }
 
 func NewCredentialsSpec(name string, repospec RepositorySpec) CredentialsSpec {
@@ -84,6 +96,8 @@ func ErrUnknownCredentials(name string) error {
 	return core.ErrUnknownCredentials(name)
 }
 
-var CompleteMatch = core.CompleteMatch
-var NoMatch = core.NoMatch
-var PartialMatch = core.PartialMatch
+var (
+	CompleteMatch = core.CompleteMatch
+	NoMatch       = core.NoMatch
+	PartialMatch  = core.PartialMatch
+)

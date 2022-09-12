@@ -36,7 +36,7 @@ func (t ImplementationRepositoryType) IsInitial() bool {
 
 // StorageContext is an object describing the storage context used for the
 // mapping of a component repository to a base repository (e.g. oci api)
-// It depends on the Context type of the used base repository
+// It depends on the Context type of the used base repository.
 type StorageContext interface {
 	GetContext() Context
 	TargetComponentVersion() ComponentVersionAccess
@@ -61,7 +61,7 @@ type BlobHandler interface {
 	StoreBlob(blob BlobAccess, hint string, global AccessSpec, ctx StorageContext) (AccessSpec, error)
 }
 
-// MultiBlobHandler is a BlobHandler consisting of a sequence of handlers
+// MultiBlobHandler is a BlobHandler consisting of a sequence of handlers.
 type MultiBlobHandler []BlobHandler
 
 var _ sort.Interface = MultiBlobHandler(nil)
@@ -125,7 +125,7 @@ func (o prio) ApplyBlobHandlerOptionTo(opts *BlobHandlerOptions) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// BlobHandlerKey is the registration key for BlobHandlers
+// BlobHandlerKey is the registration key for BlobHandlers.
 type BlobHandlerKey struct {
 	ImplementationRepositoryType
 	MimeType string
@@ -158,19 +158,22 @@ func (k BlobHandlerKey) ApplyBlobHandlerOptionTo(opts *BlobHandlerOptions) {
 func ForRepo(ctxtype, repotype string) BlobHandlerOption {
 	return BlobHandlerKey{ImplementationRepositoryType: ImplementationRepositoryType{ContextType: ctxtype, RepositoryType: repotype}}
 }
+
 func ForMimeType(mimetype string) BlobHandlerOption {
 	return BlobHandlerKey{MimeType: mimetype}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// BlobHandlerRegistry registers blob handlers to use in a dedicated ocm context
+// BlobHandlerRegistry registers blob handlers to use in a dedicated ocm context.
 type BlobHandlerRegistry interface {
+	IsInitial() bool
+
 	// Copy provides a new independend copy of the registry
 	Copy() BlobHandlerRegistry
 	// RegisterBlobHandler registers a blob handler. It must specify either a sole mime type,
 	// or a context and repository type, or all three keys
-	RegisterBlobHandler(handler BlobHandler, opts ...BlobHandlerOption) BlobHandlerRegistry
+	Register(handler BlobHandler, opts ...BlobHandlerOption) BlobHandlerRegistry
 	// GetHandler returns handler trying all matches in the following order:
 	//
 	// - a handle matching all keys
@@ -235,7 +238,11 @@ func (r *blobHandlerRegistry) Copy() BlobHandlerRegistry {
 	return n
 }
 
-func (r *blobHandlerRegistry) RegisterBlobHandler(handler BlobHandler, olist ...BlobHandlerOption) BlobHandlerRegistry {
+func (r *blobHandlerRegistry) IsInitial() bool {
+	return len(r.handlers) == 0 && len(r.defhandler) == 0
+}
+
+func (r *blobHandlerRegistry) Register(handler BlobHandler, olist ...BlobHandlerOption) BlobHandlerRegistry {
 	opts := &BlobHandlerOptions{}
 	for _, o := range olist {
 		o.ApplyBlobHandlerOptionTo(opts)
@@ -318,5 +325,9 @@ func (r *blobHandlerRegistry) getHandler(key BlobHandlerKey) (BlobHandler, *hand
 }
 
 func RegisterBlobHandler(handler BlobHandler, opts ...BlobHandlerOption) {
-	DefaultBlobHandlerRegistry.RegisterBlobHandler(handler, opts...)
+	DefaultBlobHandlerRegistry.Register(handler, opts...)
+}
+
+func MustRegisterBlobHandler(handler BlobHandler, opts ...BlobHandlerOption) {
+	DefaultBlobHandlerRegistry.Register(handler, opts...)
 }

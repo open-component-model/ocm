@@ -48,6 +48,7 @@ type RepositorySpec interface {
 
 type RepositoryTypeScheme interface {
 	runtime.Scheme
+	AddKnownTypes(s RepositoryTypeScheme)
 
 	GetRepositoryType(name string) RepositoryType
 	Register(name string, atype RepositoryType)
@@ -57,7 +58,7 @@ type RepositoryTypeScheme interface {
 }
 
 type repositoryTypeScheme struct {
-	runtime.Scheme
+	runtime.SchemeBase
 }
 
 func NewRepositoryTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) RepositoryTypeScheme {
@@ -66,8 +67,8 @@ func NewRepositoryTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) Repo
 	return &repositoryTypeScheme{scheme}
 }
 
-func (t *repositoryTypeScheme) AddKnowntypes(s RepositoryTypeScheme) {
-	t.Scheme.AddKnownTypes(s)
+func (t *repositoryTypeScheme) AddKnownTypes(s RepositoryTypeScheme) {
+	t.SchemeBase.AddKnownTypes(s)
 }
 
 func (t *repositoryTypeScheme) GetRepositoryType(name string) RepositoryType {
@@ -82,23 +83,11 @@ func (t *repositoryTypeScheme) RegisterByDecoder(name string, decoder runtime.Ty
 	if _, ok := decoder.(RepositoryType); !ok {
 		return errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
 	}
-	return t.Scheme.RegisterByDecoder(name, decoder)
-}
-
-func (t *repositoryTypeScheme) AddKnownTypes(scheme runtime.Scheme) error {
-	if _, ok := scheme.(RepositoryTypeScheme); !ok {
-		return errors.ErrInvalid("type", reflect.TypeOf(scheme).String(), "expected", "RepositoryTypeScheme")
-	}
-
-	if err := t.Scheme.AddKnownTypes(scheme); err != nil {
-		return fmt.Errorf("failed to add known type in repository type scheme: %w", err)
-	}
-
-	return nil
+	return t.SchemeBase.RegisterByDecoder(name, decoder)
 }
 
 func (t *repositoryTypeScheme) Register(name string, rtype RepositoryType) {
-	t.Scheme.RegisterByDecoder(name, rtype)
+	t.SchemeBase.RegisterByDecoder(name, rtype)
 }
 
 func (t *repositoryTypeScheme) DecodeRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
@@ -126,7 +115,7 @@ func (t *repositoryTypeScheme) CreateRepositorySpec(obj runtime.TypedObject) (Re
 	return nil, fmt.Errorf("invalid object type %T for repository specs", obj)
 }
 
-// DefaultRepositoryTypeScheme contains all globally known access serializer
+// DefaultRepositoryTypeScheme contains all globally known access serializer.
 var DefaultRepositoryTypeScheme = NewRepositoryTypeScheme(nil)
 
 func CreateRepositorySpec(t runtime.TypedObject) (RepositorySpec, error) {
@@ -144,7 +133,7 @@ func (a *UnknownRepositorySpec) AsUniformSpec(Context) UniformRepositorySpec {
 }
 
 func (r *UnknownRepositorySpec) Repository(Context, credentials.Credentials) (Repository, error) {
-	return nil, errors.ErrUnknown("respository type", r.GetType())
+	return nil, errors.ErrUnknown("repository type", r.GetType())
 }
 
 ////////////////////////////////////////////////////////////////////////////////

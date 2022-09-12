@@ -17,10 +17,13 @@ package transfer_test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -32,15 +35,14 @@ import (
 	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/mime"
-
-	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 )
 
 const ARCH = "/tmp/ctf"
+const ARCH2 = "/tmp/ctf2"
 const PROVIDER = "mandelsoft"
 const VERSION = "v1"
 const COMPONENT = "github.com/mandelsoft/test"
+const COMPONENT2 = "github.com/mandelsoft/test2"
 const OUT = "/tmp/res"
 const OCIPATH = "/tmp/oci"
 const OCINAMESPACE = "ocm/value"
@@ -56,6 +58,10 @@ func Check(env *TestEnv, ldesc *artdesc.Descriptor, out string) {
 	list, err := tgt.ComponentLister().GetComponents("", true)
 	Expect(err).To(Succeed())
 	Expect(list).To(Equal([]string{COMPONENT}))
+	CheckComponent(env, ldesc, tgt)
+}
+
+func CheckComponent(env *TestEnv, ldesc *artdesc.Descriptor, tgt ocm.Repository) {
 	comp, err := tgt.LookupComponentVersion(COMPONENT, VERSION)
 	Expect(err).To(Succeed())
 	Expect(len(comp.GetDescriptor().Resources)).To(Equal(3))
@@ -137,6 +143,15 @@ var _ = Describe("Test Environment", func() {
 				})
 			})
 		})
+
+		env.OCMCommonTransport(ARCH2, accessio.FormatDirectory, func() {
+			env.Component(COMPONENT2, func() {
+				env.Version(VERSION, func() {
+					env.Reference("ref", COMPONENT, VERSION)
+					env.Provider(PROVIDER)
+				})
+			})
+		})
 	})
 
 	AfterEach(func() {
@@ -146,11 +161,12 @@ var _ = Describe("Test Environment", func() {
 	It("transfers ctf", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("transfer", "components", "--resourcesByValue", ARCH, ARCH, OUT)).To(Succeed())
+		fmt.Printf("%s\n", buf)
 		Expect("\n" + buf.String()).To(Equal(`
 transferring version "github.com/mandelsoft/test:v1"...
 ...resource 0...
-...resource 1...
-...resource 2...
+...resource 1(ocm/value:v2.0)...
+...resource 2(ocm/ref:v2.0)...
 ...adding component version...
 1 versions transferred
 `))
@@ -159,14 +175,45 @@ transferring version "github.com/mandelsoft/test:v1"...
 		Check(env, ldesc, OUT)
 	})
 
+	It("transfers ctf with --closure --lookup", func() {
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("transfer", "components", "--resourcesByValue", "--closure", "--lookup", ARCH, ARCH2, ARCH2, OUT)).To(Succeed())
+		str := buf.String()
+		fmt.Printf("%s\n", str)
+		Expect("\n" + str).To(Equal(`
+transferring version "github.com/mandelsoft/test2:v1"...
+  transferring version "github.com/mandelsoft/test:v1"...
+  ...resource 0...
+  ...resource 1(ocm/value:v2.0)...
+  ...resource 2(ocm/ref:v2.0)...
+  ...adding component version...
+...adding component version...
+2 versions transferred
+`))
+
+		Expect(env.DirExists(OUT)).To(BeTrue())
+		tgt, err := ctfocm.Open(env.OCMContext(), accessobj.ACC_READONLY, OUT, 0, accessio.PathFileSystem(env.FileSystem()))
+		Expect(err).To(Succeed())
+		defer tgt.Close()
+
+		list, err := tgt.ComponentLister().GetComponents("", true)
+		Expect(err).To(Succeed())
+		Expect(list).To(ContainElements([]string{COMPONENT2, COMPONENT}))
+
+		_, err = tgt.LookupComponentVersion(COMPONENT2, VERSION)
+		Expect(err).To(Succeed())
+
+		CheckComponent(env, ldesc, tgt)
+	})
+
 	It("transfers ctf to tgz", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("transfer", "components", "--resourcesByValue", ARCH, ARCH, accessio.FormatTGZ.String()+"::"+OUT)).To(Succeed())
 		Expect("\n" + buf.String()).To(Equal(`
 transferring version "github.com/mandelsoft/test:v1"...
 ...resource 0...
-...resource 1...
-...resource 2...
+...resource 1(ocm/value:v2.0)...
+...resource 2(ocm/ref:v2.0)...
 ...adding component version...
 1 versions transferred
 `))
@@ -181,8 +228,8 @@ transferring version "github.com/mandelsoft/test:v1"...
 		Expect("\n" + buf.String()).To(Equal(`
 transferring version "github.com/mandelsoft/test:v1"...
 ...resource 0...
-...resource 1...
-...resource 2...
+...resource 1(ocm/value:v2.0)...
+...resource 2(ocm/ref:v2.0)...
 ...adding component version...
 1 versions transferred
 `))

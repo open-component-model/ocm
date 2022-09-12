@@ -32,7 +32,7 @@ func mapErr(forced bool, err error) (bool, bool, error) {
 	return false, true, err
 }
 
-// CheckFile returns create, acceptable, error
+// CheckFile returns create, acceptable, error.
 func CheckFile(kind string, createHint string, forcedType bool, path string, fs vfs.FileSystem, descriptorname string) (bool, bool, error) {
 	info, err := fs.Stat(path)
 	if err != nil {
@@ -58,7 +58,7 @@ func CheckFile(kind string, createHint string, forcedType bool, path string, fs 
 		for {
 			header, err := tr.Next()
 			if err != nil {
-				if err == io.EOF {
+				if errors.Is(err, io.EOF) {
 					break
 				}
 				return mapErr(forcedType, err)

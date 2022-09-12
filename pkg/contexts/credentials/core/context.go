@@ -25,7 +25,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-// CONTEXT_TYPE is the global type for a credential context
+// CONTEXT_TYPE is the global type for a credential context.
 const CONTEXT_TYPE = "credentials.context.gardener.cloud"
 
 type Context interface {
@@ -53,13 +53,22 @@ type Context interface {
 
 var key = reflect.TypeOf(_context{})
 
-// DefaultContext is the default context initialized by init functions
-var DefaultContext = Builder{}.New()
+// DefaultContext is the default context initialized by init functions.
+var DefaultContext = Builder{}.New(datacontext.MODE_SHARED)
 
 // ForContext returns the Context to use for context.Context.
-// This is eiter an explicit context or the default context.
+// This is either an explicit context or the default context.
 func ForContext(ctx context.Context) Context {
-	return datacontext.ForContextByKey(ctx, key, DefaultContext).(Context)
+	c, _ := datacontext.ForContextByKey(ctx, key, DefaultContext)
+	return c.(Context)
+}
+
+func DefinedForContext(ctx context.Context) (Context, bool) {
+	c, ok := datacontext.ForContextByKey(ctx, key, DefaultContext)
+	if c != nil {
+		return c.(Context), ok
+	}
+	return nil, ok
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -136,7 +145,6 @@ func (c *_context) CredentialsForSpec(spec CredentialsSpec, creds ...Credentials
 		return nil, err
 	}
 	return repo.LookupCredentials(spec.GetCredentialsName())
-
 }
 
 func (c *_context) CredentialsForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...CredentialsSource) (Credentials, error) {

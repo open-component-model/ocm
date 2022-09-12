@@ -56,7 +56,7 @@ func MatchSelectors(obj map[string]string, selectors ...Interface) (bool, error)
 //
 // Valid selectors are
 // - raw string value: identity value is compared to the selector value
-// - array of strings: or-operator identity value must be one of the defined strings in the array
+// - array of strings: or-operator identity value must be one of the defined strings in the array.
 type DefaultSelector map[string]interface{}
 
 var _ Interface = DefaultSelector{}
@@ -67,7 +67,7 @@ var _ Interface = DefaultSelector{}
 //
 // A selector can be
 // - a string: the value is directly matched
-// - a array of strings: one selector in the array must match
+// - a array of strings: one selector in the array must match.
 func ParseDefaultSelector(value interface{}) (DefaultSelector, error) {
 	switch v := value.(type) {
 	case map[string]interface{}:
@@ -126,7 +126,7 @@ func matchValue(selector interface{}, val string) (bool, error) {
 //
 // Valid selectors are
 // - raw string value: identity value is compared to the selector value
-// - array of strings: or-operator identity value must be one of the defined strings in the array
+// - array of strings: or-operator identity value must be one of the defined strings in the array.
 type RegexSelector map[string]interface{}
 
 var _ Interface = RegexSelector{}
@@ -137,7 +137,7 @@ var _ Interface = RegexSelector{}
 //
 // A selector can be
 // - a string: the value is directly matched
-// - a array of strings: one selector in the array must match
+// - a array of strings: one selector in the array must match.
 func ParseRegexSelector(value interface{}) (RegexSelector, error) {
 	switch v := value.(type) {
 	case map[string]interface{}:
@@ -195,12 +195,12 @@ type JSONSchemaSelector struct {
 	Scheme *gojsonschema.Schema
 }
 
-// NewJSONSchemaSelector creates a new jsonschema selector from a gojsonschema
+// NewJSONSchemaSelector creates a new jsonschema selector from a gojsonschema.
 func NewJSONSchemaSelector(scheme *gojsonschema.Schema) JSONSchemaSelector {
 	return JSONSchemaSelector{Scheme: scheme}
 }
 
-// NewJSONSchemaSelectorFromBytes creates a new jsonschema selector from a gojsonschema
+// NewJSONSchemaSelectorFromBytes creates a new jsonschema selector from a gojsonschema.
 func NewJSONSchemaSelectorFromBytes(src []byte) (JSONSchemaSelector, error) {
 	data, err := yaml.YAMLToJSON(src)
 	if err != nil {
@@ -213,12 +213,12 @@ func NewJSONSchemaSelectorFromBytes(src []byte) (JSONSchemaSelector, error) {
 	return JSONSchemaSelector{Scheme: scheme}, nil
 }
 
-// NewJSONSchemaSelectorFromString creates a new jsonschema selector from a gojsonschema
+// NewJSONSchemaSelectorFromString creates a new jsonschema selector from a gojsonschema.
 func NewJSONSchemaSelectorFromString(src string) (JSONSchemaSelector, error) {
 	return NewJSONSchemaSelectorFromBytes([]byte(src))
 }
 
-// NewJSONSchemaSelectorFromString creates a new jsonschema selector from a gojsonschema
+// NewJSONSchemaSelectorFromString creates a new jsonschema selector from a gojsonschema.
 func NewJSONSchemaSelectorFromGoStruct(src interface{}) (JSONSchemaSelector, error) {
 	scheme, err := gojsonschema.NewSchema(gojsonschema.NewGoLoader(src))
 	if err != nil {

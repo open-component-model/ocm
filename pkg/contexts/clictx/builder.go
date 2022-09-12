@@ -21,7 +21,6 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	core2 "github.com/open-component-model/ocm/pkg/contexts/clictx/core"
-
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
@@ -54,6 +53,6 @@ func WithInput(r io.Reader) core2.Builder {
 	return core2.Builder{}.WithInput(r)
 }
 
-func New() core2.Context {
-	return core2.Builder{}.New()
+func New(mode ...datacontext.BuilderMode) core2.Context {
+	return core2.Builder{}.New(mode...)
 }

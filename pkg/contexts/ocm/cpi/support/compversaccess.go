@@ -375,7 +375,6 @@ func (c *componentVersionAccessImpl) SetSourceBlob(meta *cpi.SourceMeta, blob cp
 ////////////////////////////////////////////////////////////////////////////////
 
 func (c *componentVersionAccessImpl) SetReference(ref *cpi.ComponentReference) error {
-
 	if idx := c.GetDescriptor().GetComponentReferenceIndex(*ref); idx == -1 {
 		c.GetDescriptor().References = append(c.GetDescriptor().References, *ref)
 	} else {

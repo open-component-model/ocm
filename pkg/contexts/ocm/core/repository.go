@@ -40,9 +40,11 @@ type Repository interface {
 	Close() error
 }
 
-type DataAccess = accessio.DataAccess
-type BlobAccess = accessio.BlobAccess
-type MimeType = accessio.MimeType
+type (
+	DataAccess = accessio.DataAccess
+	BlobAccess = accessio.BlobAccess
+	MimeType   = accessio.MimeType
+)
 
 type ComponentAccess interface {
 	GetContext() Context
@@ -55,8 +57,10 @@ type ComponentAccess interface {
 
 	Close() error
 }
-type ResourceMeta = compdesc.ResourceMeta
-type ComponentReference = compdesc.ComponentReference
+type (
+	ResourceMeta       = compdesc.ResourceMeta
+	ComponentReference = compdesc.ComponentReference
+)
 
 type BaseAccess interface {
 	Access() (AccessSpec, error)
@@ -124,7 +128,7 @@ type ComponentVersionAccess interface {
 }
 
 // ComponentLister provides the optional repository list functionality of
-// a repository
+// a repository.
 type ComponentLister interface {
 	// NumComponents returns the number of components found for a prefix
 	// If the given prefix does not end with a /, a repository with the

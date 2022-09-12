@@ -19,9 +19,8 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -29,16 +28,15 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	tenv "github.com/open-component-model/ocm/pkg/env"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
-
-	tenv "github.com/open-component-model/ocm/pkg/env"
-	. "github.com/open-component-model/ocm/pkg/env/builder"
 )
 
 var DefaultContext = ocm.New()
@@ -341,7 +339,7 @@ var _ = Describe("access method", func() {
 
 			_, err = Apply(nil, nil, cv, opts)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("failed resolving component reference \"ref\" [github.com/mandelsoft/test:v1] in github.com/mandelsoft/ref:v1: component version \"github.com/mandelsoft/test:v1\" not found: oci artefact \"v1\" not found in component-descriptors/github.com/mandelsoft/test"))
+			Expect(err.Error()).To(Equal("failed resolving component reference ref[github.com/mandelsoft/test:v1] in github.com/mandelsoft/ref:v1: component version \"github.com/mandelsoft/test:v1\" not found: oci artefact \"v1\" not found in component-descriptors/github.com/mandelsoft/test"))
 		})
 	})
 })

@@ -20,18 +20,19 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi/support"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi/support"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-const MAINARTEFACT_ANNOTATION = "cloud.gardener.ocm/main"
-const TAGS_ANNOTATION = "cloud.gardener.ocm/tags"
-const TYPE_ANNOTATION = "cloud.gardener.ocm/type"
+const (
+	MAINARTEFACT_ANNOTATION = "cloud.gardener.ocm/main"
+	TAGS_ANNOTATION         = "cloud.gardener.ocm/tags"
+	TYPE_ANNOTATION         = "cloud.gardener.ocm/type"
+)
 
 // ArtefactSet provides an artefact set view on the artefact set implementation.
 // Every ArtefactSet is separated closable. If the last view is closed
@@ -60,10 +61,12 @@ type artefactSetImpl struct {
 	*support.ArtefactSetAccess
 }
 
-var _ cpi.ArtefactSink = (*ArtefactSet)(nil)
-var _ cpi.NamespaceAccess = (*ArtefactSet)(nil)
+var (
+	_ cpi.ArtefactSink    = (*ArtefactSet)(nil)
+	_ cpi.NamespaceAccess = (*ArtefactSet)(nil)
+)
 
-// New returns a new representation based element
+// New returns a new representation based element.
 func New(acc accessobj.AccessMode, fs vfs.FileSystem, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode) (*ArtefactSet, error) {
 	return _Wrap(accessobj.NewAccessObject(accessObjectInfo, acc, fs, setup, closer, mode))
 }

@@ -77,8 +77,12 @@ func newSession(s datacontext.SessionBase) datacontext.Session {
 	}
 }
 
-func (s *session) LookupRepository(ctx Context, spec RepositorySpec) (Repository, error) {
+func (s *session) Close() error {
+	return s.Session.Close()
+	// TODO: cleanup cache
+}
 
+func (s *session) LookupRepository(ctx Context, spec RepositorySpec) (Repository, error) {
 	spec, err := ctx.RepositoryTypes().CreateRepositorySpec(spec)
 	if err != nil {
 		return nil, err
@@ -199,7 +203,7 @@ func (s *session) EvaluateComponentRef(ctx Context, ref string) (*EvaluationResu
 			if err != nil {
 				return evaluated, errors.Wrapf(err, "%s: listing components", ref)
 			}
-			//return evaluated, errors.Newf("%s: found %d components", ref, n)
+			// return evaluated, errors.Newf("%s: found %d components", ref, n)
 			return evaluated, nil // return repo ref
 		}
 		list, err := lister.GetComponents("", true)

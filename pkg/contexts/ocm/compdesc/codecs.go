@@ -20,14 +20,14 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-// Codec describes an encoding for en object
+// Codec describes an encoding for en object.
 type Codec interface {
 	Decoder
 	StrictDecoder
 	Encoder
 }
 
-// CodecWrapper is a simple struct that implements the Codec interface
+// CodecWrapper is a simple struct that implements the Codec interface.
 type CodecWrapper struct {
 	Decoder
 	StrictDecoder

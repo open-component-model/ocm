@@ -46,8 +46,11 @@ func (c *CompoundResolver) LookupComponentVersion(name string, version string) (
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 	for _, r := range c.resolvers {
+		if r == nil {
+			continue
+		}
 		cv, err := r.LookupComponentVersion(name, version)
-		if err == nil {
+		if err == nil && cv != nil {
 			return cv, nil
 		}
 		if !errors.IsErrNotFoundKind(err, KIND_COMPONENTVERSION) {

@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 )
@@ -54,6 +55,6 @@ func WithBlobDigesters(reg BlobDigesterRegistry) core.Builder {
 	return core.Builder{}.WithBlobDigesters(reg)
 }
 
-func New() Context {
-	return core.Builder{}.New()
+func New(mode ...datacontext.BuilderMode) Context {
+	return core.Builder{}.New(mode...)
 }

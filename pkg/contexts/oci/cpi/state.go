@@ -21,8 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 )
 
-type ManifestStateHandler struct {
-}
+type ManifestStateHandler struct{}
 
 var _ accessobj.StateHandler = &ManifestStateHandler{}
 
@@ -48,8 +47,7 @@ func (i ManifestStateHandler) Equivalent(a, b interface{}) bool {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type IndexStateHandler struct {
-}
+type IndexStateHandler struct{}
 
 var _ accessobj.StateHandler = &IndexStateHandler{}
 
@@ -75,8 +73,7 @@ func (i IndexStateHandler) Equivalent(a, b interface{}) bool {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type ArtefactStateHandler struct {
-}
+type ArtefactStateHandler struct{}
 
 var _ accessobj.StateHandler = &ArtefactStateHandler{}
 

@@ -21,9 +21,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-const T_OCIARTEFACT = "artefact"
-const T_OCIINDEX = "index"
-const T_OCIMANIFEST = "manifest"
+const (
+	T_OCIARTEFACT = "artefact"
+	T_OCIINDEX    = "index"
+	T_OCIMANIFEST = "manifest"
+)
 
 type ociArtefact struct {
 	base

@@ -16,6 +16,7 @@ func (e GetArtifactError) Error() string {
 
 	return message
 }
+
 func (e GetArtifactError) Unwrap() error {
 	return e.Original
 }

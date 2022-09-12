@@ -17,8 +17,9 @@ package output
 import (
 	"strings"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	. "github.com/open-component-model/ocm/pkg/out"
+
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 )
 
 type StringOutput struct {

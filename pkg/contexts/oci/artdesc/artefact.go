@@ -40,8 +40,10 @@ const (
 
 var legacy = false
 
-type Descriptor = ociv1.Descriptor
-type Platform = ociv1.Platform
+type (
+	Descriptor = ociv1.Descriptor
+	Platform   = ociv1.Platform
+)
 
 type BlobDescriptorSource interface {
 	GetBlobDescriptor(digest.Digest) *Descriptor
@@ -51,7 +53,7 @@ type BlobDescriptorSource interface {
 
 // Artefact is the unified representation of an OCI artefact
 // according to https://github.com/opencontainers/image-spec/blob/main/manifest.md
-// It is either an image manifest or an image index manifest (fat image)
+// It is either an image manifest or an image index manifest (fat image).
 type Artefact struct {
 	manifest *Manifest
 	index    *Index
@@ -158,7 +160,6 @@ func (d Artefact) MarshalJSON() ([]byte, error) {
 }
 
 func (d *Artefact) UnmarshalJSON(data []byte) error {
-
 	if string(data) == "null" {
 		return nil
 	}

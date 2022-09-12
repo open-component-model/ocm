@@ -15,6 +15,7 @@
 package compdesc
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -23,12 +24,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-var (
-	NotFound = errors.ErrNotFound()
-)
+var NotFound = errors.ErrNotFound()
 
-type ObjectMeta = metav1.ObjectMeta
-type Provider = metav1.Provider
+type (
+	ObjectMeta = metav1.ObjectMeta
+	Provider   = metav1.Provider
+)
 
 const ComponentDescriptorFileName = "component-descriptor.yaml"
 
@@ -68,7 +69,7 @@ func New(name, version string) *ComponentDescriptor {
 	})
 }
 
-// SchemaVersion returns the scheme version configured in the representation
+// SchemaVersion returns the scheme version configured in the representation.
 func (cd *ComponentDescriptor) SchemaVersion() string {
 	return cd.Metadata.ConfiguredVersion
 }
@@ -199,6 +200,7 @@ func (o *ElementMeta) GetIdentity(accessor ElementAccessor) metav1.Identity {
 			if m.Name == o.Name && m.ExtraIdentity.Equals(o.ExtraIdentity) {
 				if found {
 					identity[SystemIdentityVersion] = o.Version
+
 					break
 				}
 				found = true
@@ -208,7 +210,7 @@ func (o *ElementMeta) GetIdentity(accessor ElementAccessor) metav1.Identity {
 	return identity
 }
 
-// GetMatchBaseIdentity returns all possible identity attributes for resource matching
+// GetMatchBaseIdentity returns all possible identity attributes for resource matching.
 func (o *ElementMeta) GetMatchBaseIdentity() metav1.Identity {
 	identity := o.ExtraIdentity.Copy()
 	if identity == nil {
@@ -268,12 +270,12 @@ type ObjectMetaAccessor interface {
 	LabelsAccessor
 }
 
-// ElementMetaAccessor provides generic access an elements meta information
+// ElementMetaAccessor provides generic access an elements meta information.
 type ElementMetaAccessor interface {
 	GetMeta() *ElementMeta
 }
 
-// ElementAccessor provides generic access to list of elements
+// ElementAccessor provides generic access to list of elements.
 type ElementAccessor interface {
 	Len() int
 	Get(i int) ElementMetaAccessor
@@ -295,7 +297,7 @@ func GenericAccessSpec(un *runtime.UnstructuredTypedObject) AccessSpec {
 	}
 }
 
-// Sources describes a set of source specifications
+// Sources describes a set of source specifications.
 type Sources []Source
 
 var _ ElementAccessor = Sources{}
@@ -357,7 +359,7 @@ func (o *SourceMeta) SetType(ttype string) {
 	o.Type = ttype
 }
 
-// Copy copies a source meta
+// Copy copies a source meta.
 func (o *SourceMeta) Copy() *SourceMeta {
 	if o == nil {
 		return nil
@@ -380,7 +382,7 @@ type SourceRef struct {
 	Labels metav1.Labels `json:"labels,omitempty"`
 }
 
-// Copy copy a source ref
+// Copy copy a source ref.
 func (r *SourceRef) Copy() *SourceRef {
 	if r == nil {
 		return nil
@@ -393,7 +395,7 @@ func (r *SourceRef) Copy() *SourceRef {
 
 type SourceRefs []SourceRef
 
-// Copy copies a list of source refs
+// Copy copies a list of source refs.
 func (r SourceRefs) Copy() SourceRefs {
 	if r == nil {
 		return nil
@@ -406,7 +408,7 @@ func (r SourceRefs) Copy() SourceRefs {
 	return result
 }
 
-// Resources describes a set of resource specifications
+// Resources describes a set of resource specifications.
 type Resources []Resource
 
 var _ ElementAccessor = Resources{}
@@ -508,7 +510,7 @@ func (o *ResourceMeta) SetType(ttype string) {
 	o.Type = ttype
 }
 
-// Copy copies a resource meta
+// Copy copies a resource meta.
 func (o *ResourceMeta) Copy() *ResourceMeta {
 	if o == nil {
 		return nil
@@ -566,6 +568,21 @@ type ComponentReference struct {
 	// Digest is the optional digest of the referenced component.
 	// +optional
 	Digest *metav1.DigestSpec `json:"digest,omitempty"`
+}
+
+func NewComponentReference(name, componentName, version string, extraIdentity metav1.Identity) *ComponentReference {
+	return &ComponentReference{
+		ElementMeta: ElementMeta{
+			Name:          name,
+			Version:       version,
+			ExtraIdentity: extraIdentity,
+		},
+		ComponentName: componentName,
+	}
+}
+
+func (r ComponentReference) String() string {
+	return fmt.Sprintf("%s[%s:%s]", r.Name, r.ComponentName, r.Version)
 }
 
 func (r *ComponentReference) GetMeta() *ElementMeta {

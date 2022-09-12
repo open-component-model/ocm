@@ -77,7 +77,7 @@ func (r *dockerLister) List(ctx context.Context) ([]string, error) {
 
 	for _, u := range paths {
 		for _, host := range hosts {
-			ctx := log.WithLogger(ctx, log.G(ctx).WithField("host", host.Host))
+			ctxWithLogger := log.WithLogger(ctx, log.G(ctx).WithField("host", host.Host))
 
 			req := base.request(host, http.MethodGet, u...)
 			if err := req.addNamespace(base.refspec.Hostname()); err != nil {
@@ -86,8 +86,8 @@ func (r *dockerLister) List(ctx context.Context) ([]string, error) {
 
 			req.header["Accept"] = []string{"application/json"}
 
-			log.G(ctx).Debug("listing")
-			resp, err := req.doWithRetries(ctx, nil)
+			log.G(ctxWithLogger).Debug("listing")
+			resp, err := req.doWithRetries(ctxWithLogger, nil)
 			if err != nil {
 				if errors.Is(err, ErrInvalidAuthorization) {
 					err = errors.Wrapf(err, "pull access denied, repository does not exist or may require authorization")
@@ -96,14 +96,14 @@ func (r *dockerLister) List(ctx context.Context) ([]string, error) {
 				if firstErr == nil {
 					firstErr = err
 				}
-				log.G(ctx).WithError(err).Info("trying next host")
+				log.G(ctxWithLogger).WithError(err).Info("trying next host")
 				continue // try another host
 			}
 
 			if resp.StatusCode > 299 {
 				resp.Body.Close()
 				if resp.StatusCode == http.StatusNotFound {
-					log.G(ctx).Info("trying next host - response was http.StatusNotFound")
+					log.G(ctxWithLogger).Info("trying next host - response was http.StatusNotFound")
 					continue
 				}
 				if resp.StatusCode > 399 {

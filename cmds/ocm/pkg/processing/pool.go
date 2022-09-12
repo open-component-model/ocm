@@ -26,8 +26,7 @@ type ProcessorPool interface {
 
 /////////////////////////////////////////////////////////////////////////////
 
-type _UnlimitedPool struct {
-}
+type _UnlimitedPool struct{}
 
 func NewUnlimitedProcessorPool() ProcessorPool {
 	return &_UnlimitedPool{}
@@ -35,8 +34,10 @@ func NewUnlimitedProcessorPool() ProcessorPool {
 
 func (this *_UnlimitedPool) Request() {
 }
+
 func (this *_UnlimitedPool) Release() {
 }
+
 func (this *_UnlimitedPool) Exec(f func()) {
 	go f()
 }

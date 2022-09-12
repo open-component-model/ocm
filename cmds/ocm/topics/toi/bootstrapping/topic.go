@@ -17,13 +17,10 @@ package bootstapping
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
-
-	"github.com/open-component-model/ocm/pkg/toi/install"
-
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
 	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/toi/install"
 )
 
 func New(ctx clictx.Context, name string) *cobra.Command {

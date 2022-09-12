@@ -44,33 +44,33 @@ func TransferComponents(printer common.Printer, closure TransportClosure, repo o
 	}
 	list := errors.ErrListf("component transport")
 	for _, c := range comps {
-		comp, err := repo.LookupComponent(c)
-		if list.Addf(printer, err, "component %s", c) == nil {
-			printer.Printf("transferring component %q...\n", c)
-			subp := printer.AddGap("  ")
-			vers, err := comp.ListVersions()
-			if list.Addf(subp, err, "list versions for %s", c) == nil {
-				for _, v := range vers {
-					meta := &compdesc.ElementMeta{Name: c, Version: v}
-					sub, h, err := handler.TransferVersion(repo, nil, meta)
+		transferVersions(printer, closure, list, handler, repo, c, tgt)
+	}
+	return list.Result()
+}
+
+func transferVersions(printer common.Printer, closure TransportClosure, list *errors.ErrorList, handler transferhandler.TransferHandler, repo ocm.Repository, c string, tgt ocm.Repository) {
+	comp, err := repo.LookupComponent(c)
+	if list.Addf(printer, err, "component %s", c) == nil {
+		defer comp.Close()
+		printer.Printf("transferring component %q...\n", c)
+		subp := printer.AddGap("  ")
+		vers, err := comp.ListVersions()
+
+		if list.Addf(subp, err, "list versions for %s", c) == nil {
+			for _, v := range vers {
+				ref := compdesc.NewComponentReference("", c, v, nil)
+				sub, h, err := handler.TransferVersion(repo, nil, ref)
+				if list.Addf(subp, err, "version %s", v) != nil {
+					continue
+				}
+				if sub != nil {
 					if list.Addf(subp, err, "version %s", v) == nil {
-						if sub != nil {
-							subcomp := comp
-							if sub != repo {
-								subcomp, err = sub.LookupComponent(c)
-								if list.Addf(subp, err, "component %s redirected for %s", c, v) != nil {
-									continue
-								}
-							}
-							compvers, err := subcomp.LookupVersion(v)
-							if list.Addf(subp, err, "version %s", v) == nil {
-								list.Addf(subp, TransferVersion(subp, closure, repo, compvers, tgt, h), "")
-							}
-						}
+						list.Addf(subp, TransferVersion(subp, closure, sub, tgt, h), "")
 					}
+					sub.Close()
 				}
 			}
 		}
 	}
-	return list.Result()
 }

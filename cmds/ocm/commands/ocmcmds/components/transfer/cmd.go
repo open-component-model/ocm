@@ -19,12 +19,11 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/overwriteoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
@@ -34,6 +33,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
@@ -59,6 +59,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		repooption.New(),
 		formatoption.New(),
 		closureoption.New("component reference"),
+		lookupoption.New(),
 		overwriteoption.New(),
 		rscbyvalueoption.New(),
 		scriptoption.New(),
@@ -108,6 +109,7 @@ func (o *Command) Run() error {
 		closureoption.From(o),
 		overwriteoption.From(o),
 		rscbyvalueoption.From(o),
+		lookupoption.From(o),
 		spiff.Script(scriptoption.From(o).ScriptData),
 		spiff.ScriptFilesystem(o.FileSystem()),
 	)
@@ -144,7 +146,7 @@ var _ output.Output = (*action)(nil)
 
 func (a *action) Add(e interface{}) error {
 	o := e.(*comphdlr.Object)
-	err := transfer.TransferVersion(a.printer, a.closure, o.Repository, o.ComponentVersion, a.target, a.handler)
+	err := transfer.TransferVersion(a.printer, a.closure, o.ComponentVersion, a.target, a.handler)
 	a.errors.Add(err)
 	if err != nil {
 		a.printer.Printf("Error: %s\n", err)

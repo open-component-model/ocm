@@ -23,15 +23,14 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
-
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
@@ -47,7 +46,7 @@ func CheckArchiveSource(env *TestEnv, cd *compdesc.ComponentDescriptor, name str
 	spec, err := env.OCMContext().AccessSpecForSpec(r.Access)
 	Expect(err).To(Succeed())
 	Expect(spec.GetType()).To(Equal(localblob.Type))
-	Expect(spec.(*localblob.AccessSpec).MediaType).To(Equal(mime.MIME_GZIP))
+	Expect(spec.(*localblob.AccessSpec).MediaType).To(Equal(mime.MIME_TGZ))
 
 	local := spec.(*localblob.AccessSpec).LocalReference
 	fmt.Printf("local: %s\n", local)
