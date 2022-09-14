@@ -234,7 +234,7 @@ func (s *Source) GetMeta() *ElementMeta {
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
 type SourceMeta struct {
-	ElementMeta
+	ElementMeta `json:",inline"`
 	// Type describes the type of the object.
 	Type string `json:"type"`
 }
@@ -328,6 +328,8 @@ func (r ComponentReferences) Get(i int) ElementMetaAccessor {
 type ComponentReference struct {
 	ElementMeta `json:",inline"`
 	// ComponentName describes the remote name of the referenced object
+	// +kubebuilder:validation:MaxLength=255
+	// +kubebuilder:validation:Pattern:=`^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$`
 	ComponentName string `json:"componentName"`
 	// Digest is the optional digest of the referenced component.
 	// +optional

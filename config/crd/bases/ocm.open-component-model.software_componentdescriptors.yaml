@@ -1,0 +1,651 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.9.0
+  creationTimestamp: null
+  name: componentdescriptors.ocm.open-component-model.software
+spec:
+  group: ocm.open-component-model.software
+  names:
+    kind: ComponentDescriptor
+    listKind: ComponentDescriptorList
+    plural: componentdescriptors
+    singular: componentdescriptor
+  scope: Namespaced
+  versions:
+  - name: v2
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ComponentSpec defines a virtual component with a repository
+              context, source and dependencies.
+            properties:
+              componentReferences:
+                description: ComponentReferences references component dependencies
+                  that can be resolved in the current context.
+                items:
+                  description: ComponentReference describes the reference to another
+                    component in the registry.
+                  properties:
+                    componentName:
+                      description: ComponentName describes the remote name of the
+                        referenced object
+                      maxLength: 255
+                      pattern: ^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$
+                      type: string
+                    digest:
+                      description: Digest is the optional digest of the referenced
+                        component.
+                      properties:
+                        hashAlgorithm:
+                          type: string
+                        normalisationAlgorithm:
+                          type: string
+                        value:
+                          type: string
+                      required:
+                      - hashAlgorithm
+                      - normalisationAlgorithm
+                      - value
+                      type: object
+                    extraIdentity:
+                      additionalProperties:
+                        type: string
+                      description: ExtraIdentity is the identity of an object. An
+                        additional label with key "name" ist not allowed
+                      type: object
+                    labels:
+                      description: Labels defines an optional set of additional labels
+                        describing the object.
+                      items:
+                        description: Label is a label that can be set on objects.
+                        properties:
+                          name:
+                            description: Name is the unique name of the label.
+                            type: string
+                          signing:
+                            description: Signing describes whether the label should
+                              be included into the signature
+                            type: boolean
+                          value:
+                            description: Value is the json/yaml data of the label
+                            format: byte
+                            type: string
+                          version:
+                            description: Version is the optional specification version
+                              of the attribute value
+                            pattern: ^v[0-9]+$
+                            type: string
+                        required:
+                        - name
+                        - value
+                        type: object
+                      type: array
+                    name:
+                      description: Name is the context unique name of the object.
+                      type: string
+                    version:
+                      description: Version is the semver version of the object.
+                      type: string
+                  required:
+                  - componentName
+                  - name
+                  - version
+                  type: object
+                type: array
+              labels:
+                description: Labels defines an optional set of additional labels describing
+                  the object.
+                items:
+                  description: Label is a label that can be set on objects.
+                  properties:
+                    name:
+                      description: Name is the unique name of the label.
+                      type: string
+                    signing:
+                      description: Signing describes whether the label should be included
+                        into the signature
+                      type: boolean
+                    value:
+                      description: Value is the json/yaml data of the label
+                      format: byte
+                      type: string
+                    version:
+                      description: Version is the optional specification version of
+                        the attribute value
+                      pattern: ^v[0-9]+$
+                      type: string
+                  required:
+                  - name
+                  - value
+                  type: object
+                type: array
+              name:
+                description: Name is the context unique name of the object.
+                type: string
+              provider:
+                description: Provider defines the provider type of a component. It
+                  can be external or internal.
+                type: string
+              repositoryContexts:
+                description: RepositoryContexts defines the previous repositories
+                  of the component
+                items:
+                  description: UnstructuredTypedObject describes a generic typed object.
+                  properties:
+                    type:
+                      description: Type describes the type of the object.
+                      type: string
+                  required:
+                  - type
+                  type: object
+                type: array
+              resources:
+                description: Resources defines all resources that are created by the
+                  component and by a third party.
+                items:
+                  description: Resource describes a resource dependency of a component.
+                  properties:
+                    access:
+                      description: Access describes the type specific method to access
+                        the defined resource.
+                      properties:
+                        type:
+                          description: Type describes the type of the object.
+                          type: string
+                      required:
+                      - type
+                      type: object
+                    digest:
+                      description: Digest is the optional digest of the referenced
+                        resource.
+                      properties:
+                        hashAlgorithm:
+                          type: string
+                        normalisationAlgorithm:
+                          type: string
+                        value:
+                          type: string
+                      required:
+                      - hashAlgorithm
+                      - normalisationAlgorithm
+                      - value
+                      type: object
+                    extraIdentity:
+                      additionalProperties:
+                        type: string
+                      description: ExtraIdentity is the identity of an object. An
+                        additional label with key "name" ist not allowed
+                      type: object
+                    labels:
+                      description: Labels defines an optional set of additional labels
+                        describing the object.
+                      items:
+                        description: Label is a label that can be set on objects.
+                        properties:
+                          name:
+                            description: Name is the unique name of the label.
+                            type: string
+                          signing:
+                            description: Signing describes whether the label should
+                              be included into the signature
+                            type: boolean
+                          value:
+                            description: Value is the json/yaml data of the label
+                            format: byte
+                            type: string
+                          version:
+                            description: Version is the optional specification version
+                              of the attribute value
+                            pattern: ^v[0-9]+$
+                            type: string
+                        required:
+                        - name
+                        - value
+                        type: object
+                      type: array
+                    name:
+                      description: Name is the context unique name of the object.
+                      type: string
+                    relation:
+                      description: Relation describes the relation of the resource
+                        to the component. Can be a local or external resource
+                      type: string
+                    srcRef:
+                      description: SourceRef defines a list of source names. These
+                        names reference the sources defines in `component.sources`.
+                      items:
+                        description: SourceRef defines a reference to a source
+                        properties:
+                          identitySelector:
+                            additionalProperties:
+                              type: string
+                            description: IdentitySelector defines the identity that
+                              is used to match a source.
+                            type: object
+                          labels:
+                            description: Labels defines an optional set of additional
+                              labels describing the object.
+                            items:
+                              description: Label is a label that can be set on objects.
+                              properties:
+                                name:
+                                  description: Name is the unique name of the label.
+                                  type: string
+                                signing:
+                                  description: Signing describes whether the label
+                                    should be included into the signature
+                                  type: boolean
+                                value:
+                                  description: Value is the json/yaml data of the
+                                    label
+                                  format: byte
+                                  type: string
+                                version:
+                                  description: Version is the optional specification
+                                    version of the attribute value
+                                  pattern: ^v[0-9]+$
+                                  type: string
+                              required:
+                              - name
+                              - value
+                              type: object
+                            type: array
+                        type: object
+                      type: array
+                    type:
+                      description: Type describes the type of the object.
+                      type: string
+                    version:
+                      description: Version is the semver version of the object.
+                      type: string
+                  required:
+                  - access
+                  - name
+                  - type
+                  - version
+                  type: object
+                type: array
+              sources:
+                description: Sources defines sources that produced the component
+                items:
+                  description: Source is the definition of a component's source.
+                  properties:
+                    access:
+                      description: UnstructuredTypedObject describes a generic typed
+                        object.
+                      properties:
+                        type:
+                          description: Type describes the type of the object.
+                          type: string
+                      required:
+                      - type
+                      type: object
+                    extraIdentity:
+                      additionalProperties:
+                        type: string
+                      description: ExtraIdentity is the identity of an object. An
+                        additional label with key "name" ist not allowed
+                      type: object
+                    labels:
+                      description: Labels defines an optional set of additional labels
+                        describing the object.
+                      items:
+                        description: Label is a label that can be set on objects.
+                        properties:
+                          name:
+                            description: Name is the unique name of the label.
+                            type: string
+                          signing:
+                            description: Signing describes whether the label should
+                              be included into the signature
+                            type: boolean
+                          value:
+                            description: Value is the json/yaml data of the label
+                            format: byte
+                            type: string
+                          version:
+                            description: Version is the optional specification version
+                              of the attribute value
+                            pattern: ^v[0-9]+$
+                            type: string
+                        required:
+                        - name
+                        - value
+                        type: object
+                      type: array
+                    name:
+                      description: Name is the context unique name of the object.
+                      type: string
+                    type:
+                      description: Type describes the type of the object.
+                      type: string
+                    version:
+                      description: Version is the semver version of the object.
+                      type: string
+                  required:
+                  - access
+                  - name
+                  - type
+                  - version
+                  type: object
+                type: array
+              version:
+                description: Version is the semver version of the object.
+                type: string
+            required:
+            - componentReferences
+            - name
+            - provider
+            - repositoryContexts
+            - resources
+            - sources
+            - version
+            type: object
+          status:
+            type: object
+        type: object
+    served: true
+    storage: true
+  - name: v3alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ComponentVersionSpec defines a virtual component with a repository
+              context, source and dependencies.
+            properties:
+              references:
+                description: References references component version dependencies
+                  that can be resolved in the current context.
+                items:
+                  description: Reference describes the reference to another component
+                    in the registry.
+                  properties:
+                    componentName:
+                      description: ComponentName describes the remote name of the
+                        referenced object
+                      type: string
+                    digest:
+                      description: Digest is the optional digest of the referenced
+                        component.
+                      properties:
+                        hashAlgorithm:
+                          type: string
+                        normalisationAlgorithm:
+                          type: string
+                        value:
+                          type: string
+                      required:
+                      - hashAlgorithm
+                      - normalisationAlgorithm
+                      - value
+                      type: object
+                    extraIdentity:
+                      additionalProperties:
+                        type: string
+                      description: ExtraIdentity is the identity of an object. An
+                        additional label with key "name" ist not allowed
+                      type: object
+                    labels:
+                      description: Labels defines an optional set of additional labels
+                        describing the object.
+                      items:
+                        description: Label is a label that can be set on objects.
+                        properties:
+                          name:
+                            description: Name is the unique name of the label.
+                            type: string
+                          signing:
+                            description: Signing describes whether the label should
+                              be included into the signature
+                            type: boolean
+                          value:
+                            description: Value is the json/yaml data of the label
+                            format: byte
+                            type: string
+                          version:
+                            description: Version is the optional specification version
+                              of the attribute value
+                            pattern: ^v[0-9]+$
+                            type: string
+                        required:
+                        - name
+                        - value
+                        type: object
+                      type: array
+                    name:
+                      description: Name is the context unique name of the object.
+                      type: string
+                    version:
+                      description: Version is the semver version of the object.
+                      type: string
+                  required:
+                  - componentName
+                  - name
+                  - version
+                  type: object
+                type: array
+              resources:
+                description: Resources defines all resources that are created by the
+                  component and by a third party.
+                items:
+                  description: Resource describes a resource dependency of a component.
+                  properties:
+                    access:
+                      description: Access describes the type specific method to access
+                        the defined resource.
+                      properties:
+                        type:
+                          description: Type describes the type of the object.
+                          type: string
+                      required:
+                      - type
+                      type: object
+                    digest:
+                      description: Digest is the optional digest of the referenced
+                        resource.
+                      properties:
+                        hashAlgorithm:
+                          type: string
+                        normalisationAlgorithm:
+                          type: string
+                        value:
+                          type: string
+                      required:
+                      - hashAlgorithm
+                      - normalisationAlgorithm
+                      - value
+                      type: object
+                    extraIdentity:
+                      additionalProperties:
+                        type: string
+                      description: ExtraIdentity is the identity of an object. An
+                        additional label with key "name" ist not allowed
+                      type: object
+                    labels:
+                      description: Labels defines an optional set of additional labels
+                        describing the object.
+                      items:
+                        description: Label is a label that can be set on objects.
+                        properties:
+                          name:
+                            description: Name is the unique name of the label.
+                            type: string
+                          signing:
+                            description: Signing describes whether the label should
+                              be included into the signature
+                            type: boolean
+                          value:
+                            description: Value is the json/yaml data of the label
+                            format: byte
+                            type: string
+                          version:
+                            description: Version is the optional specification version
+                              of the attribute value
+                            pattern: ^v[0-9]+$
+                            type: string
+                        required:
+                        - name
+                        - value
+                        type: object
+                      type: array
+                    name:
+                      description: Name is the context unique name of the object.
+                      type: string
+                    relation:
+                      description: Relation describes the relation of the resource
+                        to the component. Can be a local or external resource
+                      type: string
+                    srcRef:
+                      description: SourceRef defines a list of source names. These
+                        names reference the sources defines in `component.sources`.
+                      items:
+                        description: SourceRef defines a reference to a source
+                        properties:
+                          identitySelector:
+                            additionalProperties:
+                              type: string
+                            description: IdentitySelector defines the identity that
+                              is used to match a source.
+                            type: object
+                          labels:
+                            description: Labels defines an optional set of additional
+                              labels describing the object.
+                            items:
+                              description: Label is a label that can be set on objects.
+                              properties:
+                                name:
+                                  description: Name is the unique name of the label.
+                                  type: string
+                                signing:
+                                  description: Signing describes whether the label
+                                    should be included into the signature
+                                  type: boolean
+                                value:
+                                  description: Value is the json/yaml data of the
+                                    label
+                                  format: byte
+                                  type: string
+                                version:
+                                  description: Version is the optional specification
+                                    version of the attribute value
+                                  pattern: ^v[0-9]+$
+                                  type: string
+                              required:
+                              - name
+                              - value
+                              type: object
+                            type: array
+                        type: object
+                      type: array
+                    type:
+                      description: Type describes the type of the object.
+                      type: string
+                    version:
+                      description: Version is the semver version of the object.
+                      type: string
+                  required:
+                  - access
+                  - name
+                  - type
+                  - version
+                  type: object
+                type: array
+              sources:
+                description: Sources defines sources that produced the component
+                items:
+                  description: Source is the definition of a component's source.
+                  properties:
+                    access:
+                      description: UnstructuredTypedObject describes a generic typed
+                        object.
+                      properties:
+                        type:
+                          description: Type describes the type of the object.
+                          type: string
+                      required:
+                      - type
+                      type: object
+                    extraIdentity:
+                      additionalProperties:
+                        type: string
+                      description: ExtraIdentity is the identity of an object. An
+                        additional label with key "name" ist not allowed
+                      type: object
+                    labels:
+                      description: Labels defines an optional set of additional labels
+                        describing the object.
+                      items:
+                        description: Label is a label that can be set on objects.
+                        properties:
+                          name:
+                            description: Name is the unique name of the label.
+                            type: string
+                          signing:
+                            description: Signing describes whether the label should
+                              be included into the signature
+                            type: boolean
+                          value:
+                            description: Value is the json/yaml data of the label
+                            format: byte
+                            type: string
+                          version:
+                            description: Version is the optional specification version
+                              of the attribute value
+                            pattern: ^v[0-9]+$
+                            type: string
+                        required:
+                        - name
+                        - value
+                        type: object
+                      type: array
+                    name:
+                      description: Name is the context unique name of the object.
+                      type: string
+                    type:
+                      description: Type describes the type of the object.
+                      type: string
+                    version:
+                      description: Version is the semver version of the object.
+                      type: string
+                  required:
+                  - access
+                  - name
+                  - type
+                  - version
+                  type: object
+                type: array
+            type: object
+          status:
+            type: object
+        type: object
+    served: true
+    storage: false

@@ -188,11 +188,11 @@ func (s *Source) GetMeta() *ElementMeta {
 	return &s.ElementMeta
 }
 
-// SourceMeta is the definition of the meta data of a source.
+// SourceMeta is the definition of the metadata of a source.
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
 type SourceMeta struct {
-	ElementMeta
+	ElementMeta `json:",inline"`
 	// Type describes the type of the object.
 	Type string `json:"type"`
 }
