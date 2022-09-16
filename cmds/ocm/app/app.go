@@ -204,7 +204,7 @@ func (o *CLIOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Config, "config", "", "", "configuration file")
 	fs.StringArrayVarP(&o.Credentials, "cred", "C", nil, "credential setting")
 	fs.StringArrayVarP(&o.Settings, "attribute", "X", nil, "attribute setting")
-	fs.BoolVarP(&o.Verbose, "verbose", "v", false, "-v for verbose logging")
+	fs.BoolVarP(&o.Verbose, "verbose", "v", false, "enable verbose logging")
 }
 
 func (o *CLIOptions) Complete() error {
