@@ -74,6 +74,8 @@ type TypeMeta struct {
 }
 
 // ObjectMeta defines the metadata of the component descriptor.
+// +k8s:deepcopy-gen=true
+// +k8s:openapi-gen=true
 type ObjectMeta struct {
 	// Name is the name of the component.
 	Name string `json:"name"`
@@ -128,6 +130,8 @@ func (o *ObjectMeta) Copy() *ObjectMeta {
 ////////////////////////////////////////////////////////////////////////////////
 
 // Provider describes the provider information of a component version.
+// +k8s:deepcopy-gen=true
+// +k8s:openapi-gen=true
 type Provider struct {
 	Name ProviderName `json:"name"`
 	// Labels describe additional properties of provider
