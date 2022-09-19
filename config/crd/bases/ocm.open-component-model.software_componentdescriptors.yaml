@@ -152,6 +152,7 @@ spec:
                   required:
                   - type
                   type: object
+                  x-kubernetes-preserve-unknown-fields: true
                 type: array
               resources:
                 description: Resources defines all resources that are created by the
@@ -169,6 +170,7 @@ spec:
                       required:
                       - type
                       type: object
+                      x-kubernetes-preserve-unknown-fields: true
                     digest:
                       description: Digest is the optional digest of the referenced
                         resource.
@@ -294,6 +296,7 @@ spec:
                       required:
                       - type
                       type: object
+                      x-kubernetes-preserve-unknown-fields: true
                     extraIdentity:
                       additionalProperties:
                         type: string
@@ -467,6 +470,7 @@ spec:
                       required:
                       - type
                       type: object
+                      x-kubernetes-preserve-unknown-fields: true
                     digest:
                       description: Digest is the optional digest of the referenced
                         resource.
@@ -592,6 +596,7 @@ spec:
                       required:
                       - type
                       type: object
+                      x-kubernetes-preserve-unknown-fields: true
                     extraIdentity:
                       additionalProperties:
                         type: string
