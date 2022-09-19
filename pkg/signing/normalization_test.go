@@ -94,8 +94,8 @@ var _ = Describe("normalization", func() {
 				Labels:   labels,
 				Provider: compdesc.Provider{Name: "provider"},
 			},
-			RepositoryContexts: []*runtime.UnstructuredTypedObject{
-				unstr,
+			RepositoryContexts: runtime.UnstructuredTypedObjectList{
+				*unstr,
 			},
 			Sources:    nil,
 			References: nil,

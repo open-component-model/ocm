@@ -287,13 +287,12 @@ func ToUnstructuredObject(obj interface{}) (UnstructuredMap, error) {
 	return uObj, nil
 }
 
-type UnstructuredTypedObjectList []*UnstructuredTypedObject
+type UnstructuredTypedObjectList []UnstructuredTypedObject
 
 func (l UnstructuredTypedObjectList) Copy() UnstructuredTypedObjectList {
 	n := make(UnstructuredTypedObjectList, len(l))
 	for i, u := range l {
-		copied := *u
-		n[i] = &copied
+		n[i] = *u.DeepCopy()
 	}
 	return n
 }

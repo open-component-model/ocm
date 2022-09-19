@@ -133,7 +133,7 @@ func convertSourceTo(in *Source) *compdesc.Source {
 			ElementMeta: *convertElementmetaTo(&in.ElementMeta),
 			Type:        in.Type,
 		},
-		Access: compdesc.GenericAccessSpec(in.Access.DeepCopy()),
+		Access: in.Access.DeepCopy(),
 	}
 	return out
 }
@@ -174,7 +174,7 @@ func convertResourceTo(in *Resource) *compdesc.Resource {
 			SourceRef:   ConvertSourcerefsTo(in.SourceRef),
 			Digest:      in.Digest.Copy(),
 		},
-		Access: compdesc.GenericAccessSpec(in.Access),
+		Access: in.Access,
 	}
 	return out
 }
@@ -267,7 +267,7 @@ func convertSourceFrom(in *compdesc.Source) *Source {
 	if in == nil {
 		return nil
 	}
-	acc, err := runtime.ToUnstructuredTypedObject(in.Access)
+	acc, err := runtime.ToUnstructuredVersionedTypedObject(in.Access)
 	if err != nil {
 		compdesc.ThrowConversionError(err)
 	}
@@ -309,7 +309,7 @@ func convertResourceFrom(in *compdesc.Resource) *Resource {
 	if in == nil {
 		return nil
 	}
-	acc, err := runtime.ToUnstructuredTypedObject(in.Access)
+	acc, err := runtime.ToUnstructuredVersionedTypedObject(in.Access)
 	if err != nil {
 		compdesc.ThrowConversionError(err)
 	}

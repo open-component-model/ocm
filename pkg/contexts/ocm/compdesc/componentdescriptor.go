@@ -27,7 +27,8 @@ import (
 var NotFound = errors.ErrNotFound()
 
 type (
-	Provider = metav1.Provider
+	ObjectMeta = metav1.ObjectMeta
+	Provider   = metav1.Provider
 )
 
 const ComponentDescriptorFileName = "component-descriptor.yaml"
@@ -105,7 +106,7 @@ func (c *ComponentDescriptor) Reset() {
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
 type ComponentSpec struct {
-	metav1.ObjectMeta `json:",inline"`
+	ObjectMeta `json:",inline"`
 	// RepositoryContexts defines the previous repositories of the component
 	RepositoryContexts runtime.UnstructuredTypedObjectList `json:"repositoryContexts"`
 	// Sources defines sources that produced the component
@@ -325,7 +326,7 @@ func (s Sources) Copy() Sources {
 // +k8s:openapi-gen=true
 type Source struct {
 	SourceMeta `json:",inline"`
-	Access     *runtime.UnstructuredVersionedTypedObject `json:"access"`
+	Access     AccessSpec `json:"access"`
 }
 
 func (s *Source) GetMeta() *ElementMeta {
@@ -438,7 +439,7 @@ type Resource struct {
 	ResourceMeta `json:",inline"`
 	// Access describes the type specific method to
 	// access the defined resource.
-	Access *runtime.UnstructuredVersionedTypedObject `json:"access"`
+	Access AccessSpec `json:"access"`
 }
 
 func (r *Resource) GetMeta() *ElementMeta {

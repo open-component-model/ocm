@@ -22,7 +22,7 @@ import (
 // DefaultComponent applies defaults to a component.
 func DefaultComponent(component *ComponentDescriptor) *ComponentDescriptor {
 	if component.RepositoryContexts == nil {
-		component.RepositoryContexts = make([]*runtime.UnstructuredTypedObject, 0)
+		component.RepositoryContexts = make(runtime.UnstructuredTypedObjectList, 0)
 	}
 	if component.Sources == nil {
 		component.Sources = make([]Source, 0)

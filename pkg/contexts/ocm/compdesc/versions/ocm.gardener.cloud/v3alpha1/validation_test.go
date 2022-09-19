@@ -52,7 +52,7 @@ var _ = Describe("Validation", func() {
 		BeforeEach(func() {
 			ociRegistry1 = ociartefact.New("docker/image1:1.2.3")
 
-			unstrucOCIRegistry1, err := runtime.ToUnstructuredTypedObject(ociRegistry1)
+			unstrucOCIRegistry1, err := runtime.ToUnstructuredVersionedTypedObject(ociRegistry1)
 			Expect(err).ToNot(HaveOccurred())
 
 			ociImage1 = &Resource{
@@ -64,7 +64,7 @@ var _ = Describe("Validation", func() {
 				Access:   unstrucOCIRegistry1,
 			}
 			ociRegistry2 = ociartefact.New("docker/image1:1.2.3")
-			unstrucOCIRegistry2, err := runtime.ToUnstructuredTypedObject(ociRegistry2)
+			unstrucOCIRegistry2, err := runtime.ToUnstructuredVersionedTypedObject(ociRegistry2)
 			Expect(err).ToNot(HaveOccurred())
 			ociImage2 = &Resource{
 				ElementMeta: ElementMeta{
@@ -152,7 +152,7 @@ var _ = Describe("Validation", func() {
 								Name: "a",
 							},
 						},
-						Access: runtime.NewEmptyUnstructured("custom"),
+						Access: runtime.NewEmptyUnstructuredVersioned("custom"),
 					},
 					{
 						SourceMeta: SourceMeta{
@@ -160,7 +160,7 @@ var _ = Describe("Validation", func() {
 								Name: "a",
 							},
 						},
-						Access: runtime.NewEmptyUnstructured("custom"),
+						Access: runtime.NewEmptyUnstructuredVersioned("custom"),
 					},
 				}
 				errList := Validate(nil, comp)
@@ -271,7 +271,7 @@ var _ = Describe("Validation", func() {
 							Version: "0.0.1",
 						},
 						Relation: meta.LocalRelation,
-						Access:   runtime.NewEmptyUnstructured(ociartefact.Type),
+						Access:   runtime.NewEmptyUnstructuredVersioned(ociartefact.Type),
 					},
 				}
 				errList := Validate(nil, comp)

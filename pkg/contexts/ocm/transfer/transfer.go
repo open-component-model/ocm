@@ -106,7 +106,7 @@ func transferVersion(printer common.Printer, state common.WalkingState, src ocmc
 	}
 	cd := t.GetDescriptor()
 	if unstr != nil {
-		cd.RepositoryContexts = append(cd.RepositoryContexts, unstr)
+		cd.RepositoryContexts = append(cd.RepositoryContexts, *unstr)
 	}
 	cd.Signatures = src.GetDescriptor().Signatures.Copy()
 	printer.Printf("...adding component version...\n")

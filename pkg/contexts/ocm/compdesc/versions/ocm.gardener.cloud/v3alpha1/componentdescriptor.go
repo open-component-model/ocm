@@ -181,7 +181,7 @@ func (r Sources) Get(i int) ElementMetaAccessor {
 type Source struct {
 	SourceMeta `json:",inline"`
 
-	Access *runtime.UnstructuredTypedObject `json:"access"`
+	Access *runtime.UnstructuredVersionedTypedObject `json:"access"`
 }
 
 func (s *Source) GetMeta() *ElementMeta {
@@ -249,7 +249,7 @@ type Resource struct {
 
 	// Access describes the type specific method to
 	// access the defined resource.
-	Access *runtime.UnstructuredTypedObject `json:"access"`
+	Access *runtime.UnstructuredVersionedTypedObject `json:"access"`
 
 	// Digest is the optional digest of the referenced resource.
 	// +optional

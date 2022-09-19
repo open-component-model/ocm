@@ -22,7 +22,7 @@ import (
 // Default applies defaults to a component.
 func (cd *ComponentDescriptor) Default() error {
 	if cd.RepositoryContexts == nil {
-		cd.RepositoryContexts = make([]*runtime.UnstructuredTypedObject, 0)
+		cd.RepositoryContexts = make(runtime.UnstructuredTypedObjectList, 0)
 	}
 	if cd.Spec.Sources == nil {
 		cd.Spec.Sources = make([]Source, 0)

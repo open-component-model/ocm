@@ -78,7 +78,7 @@ func (c *ComponentDescriptor) GetEffectiveRepositoryContext() *runtime.Unstructu
 	if len(c.RepositoryContexts) == 0 {
 		return nil
 	}
-	return c.RepositoryContexts[len(c.RepositoryContexts)-1]
+	return &c.RepositoryContexts[len(c.RepositoryContexts)-1]
 }
 
 // AddRepositoryContext appends the given repository context to components descriptor repository history.
@@ -93,7 +93,7 @@ func (c *ComponentDescriptor) AddRepositoryContext(repoCtx runtime.TypedObject) 
 		return err
 	}
 	if !runtime.UnstructuredTypesEqual(effective, uRepoCtx) {
-		c.RepositoryContexts = append(c.RepositoryContexts, uRepoCtx)
+		c.RepositoryContexts = append(c.RepositoryContexts, *uRepoCtx)
 	}
 	return nil
 }
