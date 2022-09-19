@@ -12,7 +12,6 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-//nolint:forbidigo  // part of a command line tool
 package docker
 
 import (
@@ -36,6 +35,7 @@ import (
 	"github.com/docker/docker/registry"
 	"github.com/mitchellh/copystructure"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/toi/install"
@@ -435,7 +435,7 @@ func generateTar(files map[string]accessio.BlobAccess, uid int) (io.ReadCloser, 
 	var err error
 	wg := sync.WaitGroup{}
 	wg.Add(1)
-	fmt.Printf("waiting for successful data transfer...\n")
+	logrus.Infof("waiting for successful data transfer...\n")
 	go func() {
 		defer wg.Done()
 		defer w.Close()
@@ -443,7 +443,7 @@ func generateTar(files map[string]accessio.BlobAccess, uid int) (io.ReadCloser, 
 		have := map[string]bool{}
 		for path, content := range files {
 			path = unix_path.Join(install.PathInputs, path)
-			fmt.Printf("transferring %s...\n", path)
+			logrus.Infof("transferring %s...\n", path)
 			// Write a header for the parent directories so that newly created intermediate directories are accessible by the user
 			dir := path
 			for dir != "/" {
@@ -472,7 +472,7 @@ func generateTar(files map[string]accessio.BlobAccess, uid int) (io.ReadCloser, 
 			tw.WriteHeader(fildHdr)
 			reader, e := content.Reader()
 			if e != nil {
-				fmt.Printf("cannot transfer %s: %s\n", path, e)
+				logrus.Infof("cannot transfer %s: %s\n", path, e)
 				err = e
 				return
 			}

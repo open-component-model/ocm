@@ -11,3 +11,4 @@ local
 /cmds/test/generics
 /gen
 bin/
+*.go.grc.bk

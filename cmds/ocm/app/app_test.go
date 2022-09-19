@@ -15,12 +15,13 @@
 package app
 
 import (
-	"fmt"
 	"os"
 	"testing"
+
+	"github.com/sirupsen/logrus"
 )
 
 func TestEnv(t *testing.T) {
 	wd, err := os.Getwd()
-	fmt.Printf("%s (%s)\n", wd, err)
+	logrus.Infof("%s (%s)\n", wd, err)
 }

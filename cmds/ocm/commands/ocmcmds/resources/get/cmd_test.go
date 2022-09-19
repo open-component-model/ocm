@@ -16,11 +16,11 @@ package get_test
 
 import (
 	"bytes"
-	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -97,7 +97,7 @@ testdata v1      "platform"="b" PlainText local
 
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH, "-c")).To(Succeed())
-			fmt.Printf("%s", buf)
+			logrus.Infof("%s", buf)
 			Expect("\n" + buf.String()).To(Equal(
 				`
 REFERENCEPATH NAME     VERSION IDENTITY TYPE      RELATION
@@ -115,7 +115,7 @@ test.de/x:v1  testdata v1               PlainText local
 
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH, "-c", "-o", "tree")).To(Succeed())
-			fmt.Printf("%s", buf)
+			logrus.Infof("%s", buf)
 			Expect("\n" + buf.String()).To(Equal(
 				`
 COMPONENTVERSION    NAME     VERSION IDENTITY TYPE      RELATION
@@ -239,7 +239,7 @@ COMPONENTVERSION       NAME     VERSION IDENTITY TYPE      RELATION
 			It("lists resource closure in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
 				Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-				fmt.Printf("%s", buf)
+				logrus.Infof("%s", buf)
 				Expect("\n" + buf.String()).To(Equal(
 					`
 REFERENCEPATH              NAME     VERSION IDENTITY TYPE      RELATION
@@ -269,7 +269,7 @@ COMPONENTVERSION    NAME VERSION IDENTITY TYPE RELATION
 			It("lists resource closure in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
 				Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "-o", "tree", "--repo", ARCH, COMP3+":"+VERSION)).To(Succeed())
-				fmt.Printf("%s", buf)
+				logrus.Infof("%s", buf)
 				Expect("\n" + buf.String()).To(Equal(
 					`
 COMPONENTVERSION          NAME     VERSION IDENTITY TYPE      RELATION
@@ -305,7 +305,7 @@ COMPONENTVERSION          NAME     VERSION IDENTITY TYPE      RELATION
 			It("lists resource closure in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
 				Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-				fmt.Printf("%s", buf)
+				logrus.Infof("%s", buf)
 				Expect("\n" + buf.String()).To(Equal(
 					`
 REFERENCEPATH NAME     VERSION IDENTITY TYPE      RELATION
@@ -316,7 +316,7 @@ test.de/y:v1  moredata v1               PlainText local
 			It("lists resource closure in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
 				Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-				fmt.Printf("%s", buf)
+				logrus.Infof("%s", buf)
 				Expect("\n" + buf.String()).To(Equal(
 					`
 COMPONENTVERSION       NAME     VERSION IDENTITY TYPE      RELATION

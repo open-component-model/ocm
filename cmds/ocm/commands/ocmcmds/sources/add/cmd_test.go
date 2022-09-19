@@ -17,13 +17,13 @@ package add_test
 import (
 	"archive/tar"
 	"compress/gzip"
-	"fmt"
 	"io"
 	"sort"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -49,7 +49,7 @@ func CheckArchiveSource(env *TestEnv, cd *compdesc.ComponentDescriptor, name str
 	Expect(spec.(*localblob.AccessSpec).MediaType).To(Equal(mime.MIME_TGZ))
 
 	local := spec.(*localblob.AccessSpec).LocalReference
-	fmt.Printf("local: %s\n", local)
+	logrus.Infof("local: %s\n", local)
 
 	bpath := env.Join(ARCH, comparch.BlobsDirectoryName, local)
 	Expect(env.FileExists(bpath)).To(BeTrue())

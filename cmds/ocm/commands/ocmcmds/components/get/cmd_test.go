@@ -21,6 +21,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	compdescv3 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud/v3alpha1"
@@ -67,7 +68,7 @@ test.de/x v1      mandelsoft /tmp/ca
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("get", "components", ARCH, "-c")).To(Succeed())
-		fmt.Printf("%s", buf)
+		logrus.Infof("%s", buf)
 		Expect("\n" + buf.String()).To(Equal(
 			`
 REFERENCEPATH COMPONENT VERSION PROVIDER                    IDENTITY
@@ -84,7 +85,7 @@ test.de/x:v1  test.de/y v1      <unknown component version> "name"="ref"
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("get", "components", ARCH, "-c", "-o", "tree")).To(Succeed())
-		fmt.Printf("%s", buf)
+		logrus.Infof("%s", buf)
 		Expect("\n" + buf.String()).To(Equal(
 			`
 NESTING    COMPONENT VERSION PROVIDER                    IDENTITY

@@ -20,6 +20,8 @@ import (
 	"os"
 	"sync"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -55,7 +57,7 @@ func (b *ResettableReader) Read(out []byte) (int, error) {
 }
 
 func (b *ResettableReader) Close() error {
-	// fmt.Printf("close resend buffer\n")
+	logrus.Debugf("close resend buffer\n")
 	b.buf.Close()
 	b.buf = nil
 	return b.orig.Close()
@@ -94,12 +96,12 @@ func (p *prefixReader) Read(out []byte) (int, error) {
 		p.prefix = nil
 	}
 	n, err := p.resend.Read(out)
-	// fmt.Printf("blob read %d: %s\n", n, err)
+	logrus.Debugf("blob read %d: %s\n", n, err)
 	return n, err
 }
 
 func (p *prefixReader) Close() error {
-	// fmt.Printf("close prefix reader\n")
+	logrus.Debugf("close prefix reader\n")
 	return nil
 }
 

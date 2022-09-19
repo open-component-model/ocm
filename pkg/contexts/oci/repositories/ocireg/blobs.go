@@ -19,6 +19,7 @@ import (
 
 	"github.com/containerd/containerd/remotes"
 	"github.com/opencontainers/go-digest"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/attrs/cacheattr"
@@ -101,7 +102,7 @@ func NewBlobContainer(cache accessio.BlobCache, mime string, fetcher resolve.Fet
 }
 
 func (n *blobContainer) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
-	// fmt.Printf("orig get %s %s\n",n.mime, digest)
+	logrus.Debugf("orig get %s %s\n", n.mime, digest)
 	acc, err := NewDataAccess(n.fetcher, digest, n.mime, false)
 	return accessio.BLOB_UNKNOWN_SIZE, acc, err
 }

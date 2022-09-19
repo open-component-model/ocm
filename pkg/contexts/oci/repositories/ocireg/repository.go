@@ -21,6 +21,7 @@ import (
 
 	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/remotes/docker/config"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -125,14 +126,14 @@ func (r *Repository) getResolver(comp string) (resolve.Resolver, error) {
 		Hosts: docker.ConvertHosts(config.ConfigureHosts(context.Background(), config.HostOptions{
 			Credentials: func(host string) (string, string, error) {
 				if creds != nil {
-					// fmt.Printf("************** creds for %s: %s\n", host, creds)
+					logrus.Debugf("************** creds for %s: %s\n", host, creds)
 					p := creds.GetProperty(credentials.ATTR_IDENTITY_TOKEN)
 					if p == "" {
 						p = creds.GetProperty(credentials.ATTR_PASSWORD)
 					}
 					return creds.GetProperty(credentials.ATTR_USERNAME), p, err
 				}
-				// fmt.Printf("************** no creds for %s\n", host)
+				logrus.Debugf("************** no creds for %s\n", host)
 				return "", "", nil
 			},
 			DefaultScheme: r.info.Scheme,

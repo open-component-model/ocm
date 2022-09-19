@@ -15,17 +15,17 @@
 package processing
 
 import (
-	"fmt"
 	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 )
 
 func AddOne(e interface{}) interface{} {
-	fmt.Printf("add 1 to %d\n", e.(int))
+	logrus.Infof("add 1 to %d\n", e.(int))
 	return e.(int) + 1
 }
 
@@ -33,7 +33,7 @@ func Mul(n, fac int) ExplodeFunction {
 	return func(e interface{}) []interface{} {
 		r := []interface{}{}
 		v := e.(int)
-		fmt.Printf("explode  %d\n", e.(int))
+		logrus.Infof("explode  %d\n", e.(int))
 		for i := 1; i <= n; i++ {
 			r = append(r, v)
 			v = v * fac
@@ -46,14 +46,14 @@ var _ = Describe("simple data processing", func() {
 
 	Context("sequential", func() {
 		It("map", func() {
-			fmt.Printf("*** sequential map\n")
+			logrus.Infof("*** sequential map\n")
 			data := data.IndexedSliceAccess([]interface{}{1, 2, 3})
 			result := Chain().Map(AddOne).Process(data).AsSlice()
 			Expect([]interface{}(result)).To(Equal([]interface{}{2, 3, 4}))
 		})
 
 		It("explode", func() {
-			fmt.Printf("*** sequential explode\n")
+			logrus.Infof("*** sequential explode\n")
 			data := data.IndexedSliceAccess([]interface{}{1, 2, 3})
 			result := Chain().Map(AddOne).Explode(Mul(3, 2)).Map(Identity).Process(data).AsSlice()
 			Expect([]interface{}(result)).To(Equal([]interface{}{
@@ -65,7 +65,7 @@ var _ = Describe("simple data processing", func() {
 	})
 	Context("parallel", func() {
 		It("map", func() {
-			fmt.Printf("*** parallel map\n")
+			logrus.Infof("*** parallel map\n")
 			data := data.IndexedSliceAccess([]interface{}{1, 2, 3})
 			result := Chain().Map(Identity).Parallel(3).Map(AddOne).Process(data).AsSlice()
 			Expect([]interface{}(result)).To(Equal([]interface{}{
@@ -73,7 +73,7 @@ var _ = Describe("simple data processing", func() {
 			}))
 		})
 		It("explode", func() {
-			fmt.Printf("*** parallel explode\n")
+			logrus.Infof("*** parallel explode\n")
 
 			data := data.IndexedSliceAccess([]interface{}{1, 2, 3})
 			result := Chain().Parallel(3).Explode(Mul(3, 2)).Process(data).AsSlice()
@@ -84,7 +84,7 @@ var _ = Describe("simple data processing", func() {
 			}))
 		})
 		It("explode-map", func() {
-			fmt.Printf("*** parallel explode\n")
+			logrus.Infof("*** parallel explode\n")
 
 			data := data.IndexedSliceAccess([]interface{}{1, 2, 3})
 			result := Chain().Parallel(3).Explode(Mul(3, 2)).Map(AddOne).Process(data).AsSlice()

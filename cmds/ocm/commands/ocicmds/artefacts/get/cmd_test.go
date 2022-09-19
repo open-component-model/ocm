@@ -16,7 +16,6 @@ package get_test
 
 import (
 	"bytes"
-	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -247,7 +246,7 @@ NESTING     REGISTRY REPOSITORY       KIND     TAG DIGEST
 		It("get single artefact and attachment", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "artefact", "-a", ARCH+"//"+NS2+":"+VERSION1)).To(Succeed())
-			fmt.Printf("%s\n", buf.String())
+			logrus.Infof("%s\n", buf.String())
 			Expect("\n" + buf.String()).To(Equal(
 				`
 REGISTRY REPOSITORY       KIND     TAG                                                                          DIGEST
@@ -259,7 +258,7 @@ REGISTRY REPOSITORY       KIND     TAG                                          
 		It("get single artefact attachment tree", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "artefact", "-a", "-o", "tree", ARCH+"//"+NS2+":"+VERSION1)).To(Succeed())
-			fmt.Printf("%s\n", buf.String())
+			logrus.Infof("%s\n", buf.String())
 			Expect("\n" + buf.String()).To(Equal(
 				`
 NESTING        REGISTRY REPOSITORY       KIND     TAG                                                                          DIGEST

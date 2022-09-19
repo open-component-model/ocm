@@ -16,13 +16,13 @@ package verify_test
 
 import (
 	"bytes"
-	"fmt"
 	"os"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
+	"github.com/sirupsen/logrus"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -165,7 +165,7 @@ var _ = Describe("access method", func() {
 		Expect(err).To(Succeed())
 		closer.Close()
 		archcloser.Close()
-		fmt.Printf("%+v\n", dig)
+		logrus.Infof("%+v\n", dig)
 		Expect(dig.Value).To(Equal(digest))
 
 		Expect(env.CatchOutput(buf).Execute("verify", "components", "-V", "-s", SIGNATURE, "-k", PUBKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(Succeed())
