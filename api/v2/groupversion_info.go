@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-// Package v1alpha1 contains API Schema definitions for the infrastructure v2 API group
+// Package v2 contains API Schema definitions for the infrastructure v2 API group
 // +kubebuilder:object:generate=true
 // +groupName=ocm.open-component-model.software
 package v2
@@ -24,7 +24,7 @@ import (
 
 var (
 	// GroupVersion is group version used to register these objects.
-	GroupVersion = schema.GroupVersion{Group: "open-component-model.ocm.software", Version: "v2"}
+	GroupVersion = schema.GroupVersion{Group: "ocm.open-component-model.software", Version: "v2"}
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme.
 	SchemeBuilder = &scheme.Builder{GroupVersion: GroupVersion}

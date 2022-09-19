@@ -45,8 +45,6 @@ spec:
                     componentName:
                       description: ComponentName describes the remote name of the
                         referenced object
-                      maxLength: 255
-                      pattern: ^[a-z][-a-z0-9]*([.][a-z][-a-z0-9]*)*[.][a-z]{2,}(/[a-z][-a-z0-9_]*([.][a-z][-a-z0-9_]*)*)+$
                       type: string
                     digest:
                       description: Digest is the optional digest of the referenced
