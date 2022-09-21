@@ -17,6 +17,7 @@
 package app
 
 import (
+	"fmt"
 	"strings"
 
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
@@ -275,7 +276,7 @@ func NewVersionCommand() *cobra.Command {
 		Short:   "displays the version",
 		Run: func(cmd *cobra.Command, args []string) {
 			v := version.Get()
-			logrus.Infof("%#v", v)
+			fmt.Printf("%#v", v)
 		},
 	}
 }

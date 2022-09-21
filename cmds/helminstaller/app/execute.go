@@ -20,7 +20,6 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/cmds/helminstaller/app/driver"
 	"github.com/open-component-model/ocm/pkg/common"
@@ -60,7 +59,7 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 	}
 	defer rcv.Close()
 
-	logrus.Infof("Installing helm chart from resource %s@%s", cfg.Chart, common.VersionedElementKey(cv))
+	fmt.Printf("Installing helm chart from resource %s@%s", cfg.Chart, common.VersionedElementKey(cv))
 	if acc.Meta().Type != consts.HelmChart {
 		return errors.Newf("resource type %q required, but found %q", consts.HelmChart, acc.Meta().Type)
 	}
