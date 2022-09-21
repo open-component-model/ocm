@@ -138,6 +138,7 @@ type UnstructuredConverter interface {
 }
 
 // UnstructuredTypedObject describes a generic typed object.
+// +kubebuilder:pruning:PreserveUnknownFields
 type UnstructuredTypedObject struct {
 	ObjectType `json:",inline"`
 	Object     UnstructuredMap `json:"-"`
