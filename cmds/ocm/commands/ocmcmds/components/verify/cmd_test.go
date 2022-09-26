@@ -22,9 +22,9 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
-	"github.com/sirupsen/logrus"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"

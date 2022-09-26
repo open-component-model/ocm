@@ -19,7 +19,11 @@ import (
 )
 
 const (
-	CONSUMER_ATTR_TYPE  = core.CONSUMER_ATTR_TYPE
+	// deprecated: use ID_TYPE
+	CONSUMER_ATTR_TYPE = core.ID_TYPE
+
+	ID_TYPE = core.ID_TYPE
+
 	ATTR_TYPE           = core.ATTR_TYPE
 	ATTR_USERNAME       = core.ATTR_USERNAME
 	ATTR_PASSWORD       = core.ATTR_PASSWORD

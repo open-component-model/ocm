@@ -13,6 +13,7 @@ ocm [<options>] <sub command> ...
       --config string           configuration file
   -C, --cred stringArray        credential setting
   -h, --help                    help for ocm
+  -v, --verbose                 enable verbose logging
 ```
 
 ### Description

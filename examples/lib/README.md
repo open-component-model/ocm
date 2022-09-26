@@ -1,6 +1,5 @@
 # How to work with the library
 
-
 The complete library is arranged around area specific `Context` objects,
 which bundle all the settings and supported [extension points](../../docs/ocm/interoperability.md#support-library)
 of the Open Component Model.
@@ -127,3 +126,7 @@ Here a stream access or a byte array access is possible.
 
   fmt.Printf("  content:\n%s\n", utils.IndentLines(string(data), "    ",))
 ```
+
+Besides this simple example, there are more usage scenarios, which
+typicaly require more configuration:
+- [creating content and credential handling](creds.md)

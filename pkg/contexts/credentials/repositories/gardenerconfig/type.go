@@ -76,7 +76,7 @@ func getKey(cctx cpi.Context, configURL string) ([]byte, error) {
 	}
 
 	id := cpi.ConsumerIdentity{
-		cpi.CONSUMER_ATTR_TYPE: CONSUMER_TYPE,
+		cpi.ID_TYPE: CONSUMER_TYPE,
 	}
 	id.SetNonEmptyValue(hostpath.ID_HOSTNAME, parsedURL.Host)
 	id.SetNonEmptyValue(hostpath.ID_SCHEME, parsedURL.Scheme)

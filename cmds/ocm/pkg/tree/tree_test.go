@@ -19,6 +19,7 @@ import (
 	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"

@@ -20,8 +20,8 @@ import (
 	"os"
 
 	. "github.com/open-component-model/ocm/pkg/out"
-	"github.com/sirupsen/logrus"
 
+	"github.com/sirupsen/logrus"
 	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"

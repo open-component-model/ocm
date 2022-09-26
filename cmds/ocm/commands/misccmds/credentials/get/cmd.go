@@ -94,7 +94,7 @@ func (o *Command) Complete(args []string) error {
 		}
 		o.Consumer[name] = value
 	}
-	if t, ok := o.Consumer[credentials.CONSUMER_ATTR_TYPE]; ok {
+	if t, ok := o.Consumer[credentials.ID_TYPE]; ok {
 		m, _ := o.CredentialsContext().ConsumerIdentityMatchers().Get(t)
 		if m != nil {
 			o.Matcher = m
