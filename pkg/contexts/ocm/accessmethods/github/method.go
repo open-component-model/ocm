@@ -242,8 +242,8 @@ func validateCommit(commit string) error {
 
 func getCreds(hostname, port, path string, cctx credentials.Context) (string, error) {
 	id := credentials.ConsumerIdentity{
-		credentials.CONSUMER_ATTR_TYPE: CONSUMER_TYPE,
-		identity.ID_HOSTNAME:           hostname,
+		identity.ID_TYPE:     CONSUMER_TYPE,
+		identity.ID_HOSTNAME: hostname,
 	}
 	if port != "" {
 		id[identity.ID_PORT] = port

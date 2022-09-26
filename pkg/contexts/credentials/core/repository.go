@@ -71,3 +71,7 @@ func (c DirectCredentials) Credentials(Context, ...CredentialsSource) (Credentia
 func (c DirectCredentials) Copy() DirectCredentials {
 	return DirectCredentials(common.Properties(c).Copy())
 }
+
+func (c DirectCredentials) String() string {
+	return common.Properties(c).String()
+}

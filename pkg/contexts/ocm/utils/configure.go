@@ -67,18 +67,8 @@ func Configure(ctx ocm.Context, path string, fss ...vfs.FileSystem) (ocm.Context
 			return nil, errors.Wrapf(err, "cannot read ocm config file %q", path)
 		}
 
-		sctx := spiffing.New().WithFeatures(features.INTERPOLATION, features.CONTROL)
-		data, err = spiffing.Process(sctx, spiffing.NewSourceData(path, data))
-		if err != nil {
-			return nil, errors.Wrapf(err, "processing ocm config %q", path)
-		}
-		cfg, err := config.DefaultContext().GetConfigForData(data, nil)
-		if err != nil {
-			return nil, errors.Wrapf(err, "invalid ocm config file %q", path)
-		}
-		err = config.DefaultContext().ApplyConfig(cfg, path)
-		if err != nil {
-			return nil, errors.Wrapf(err, "cannot apply ocm config %q", path)
+		if err = ConfigureByData(ctx, data, path); err != nil {
+			return nil, err
 		}
 	} else {
 		// use docker config as default config for ocm cli
@@ -93,4 +83,23 @@ func Configure(ctx ocm.Context, path string, fss ...vfs.FileSystem) (ocm.Context
 		}
 	}
 	return ctx, nil
+}
+
+func ConfigureByData(ctx ocm.Context, data []byte, info string) error {
+	var err error
+
+	sctx := spiffing.New().WithFeatures(features.INTERPOLATION, features.CONTROL)
+	data, err = spiffing.Process(sctx, spiffing.NewSourceData(info, data))
+	if err != nil {
+		return errors.Wrapf(err, "processing ocm config %q", info)
+	}
+	cfg, err := config.DefaultContext().GetConfigForData(data, nil)
+	if err != nil {
+		return errors.Wrapf(err, "invalid ocm config file %q", info)
+	}
+	err = config.DefaultContext().ApplyConfig(cfg, info)
+	if err != nil {
+		return errors.Wrapf(err, "cannot apply ocm config %q", info)
+	}
+	return nil
 }
