@@ -24,6 +24,9 @@ import (
 // IDENTITY_TYPE is the identity of this matcher.
 const IDENTITY_TYPE = "hostpath"
 
+// ID_TYPE is the type of the consumer.
+const ID_TYPE = cpi.ID_TYPE
+
 // ID_HOSTNAME is a hostname.
 const ID_HOSTNAME = "hostname"
 
@@ -50,9 +53,14 @@ This matcher works on the following properties:
 
 func IdentityMatcher(identityType string) cpi.IdentityMatcher {
 	return func(pattern, cur, id core.ConsumerIdentity) bool {
-		if identityType != "" && pattern[identityType] != "" && id[identityType] != "" && pattern[identityType] != id[identityType] {
+		if pattern[ID_TYPE] != "" && id[ID_TYPE] != "" && pattern[ID_TYPE] != id[ID_TYPE] {
 			return false
 		}
+
+		if identityType != "" && pattern[ID_TYPE] != "" && identityType != pattern[ID_TYPE] {
+			return false
+		}
+
 		if pattern[ID_HOSTNAME] != "" && pattern[ID_HOSTNAME] != id[ID_HOSTNAME] {
 			return false
 		}

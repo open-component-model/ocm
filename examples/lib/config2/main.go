@@ -12,22 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package credentials
+package main
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
+	"fmt"
+	"os"
 )
 
-const (
-	ID_TYPE = core.ID_TYPE
-
-	ATTR_TYPE                  = core.ATTR_TYPE
-	ATTR_USERNAME              = core.ATTR_USERNAME
-	ATTR_PASSWORD              = core.ATTR_PASSWORD
-	ATTR_SERVER_ADDRESS        = core.ATTR_SERVER_ADDRESS
-	ATTR_IDENTITY_TOKEN        = core.ATTR_IDENTITY_TOKEN
-	ATTR_REGISTRY_TOKEN        = core.ATTR_REGISTRY_TOKEN
-	ATTR_TOKEN                 = core.ATTR_TOKEN
-	ATTR_AWS_ACCESS_KEY_ID     = core.ATTR_AWS_ACCESS_KEY_ID
-	ATTR_AWS_SECRET_ACCESS_KEY = core.ATTR_AWS_SECRET_ACCESS_KEY
-)
+func main() {
+	if err := UsingConfigs(); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %s\n", err)
+		os.Exit(1)
+	}
+}

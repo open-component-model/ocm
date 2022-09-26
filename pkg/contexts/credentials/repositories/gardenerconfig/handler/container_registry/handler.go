@@ -69,7 +69,7 @@ func (h Handler) ParseConfig(configReader io.Reader) ([]gardenercfgcpi.Credentia
 			}
 
 			consumerIdentity := cpi.ConsumerIdentity{
-				cpi.CONSUMER_ATTR_TYPE: identity.CONSUMER_TYPE,
+				cpi.ID_TYPE:            identity.CONSUMER_TYPE,
 				hostpath.ID_HOSTNAME:   parsedImgPrefix.Host,
 				hostpath.ID_PATHPREFIX: strings.Trim(parsedImgPrefix.Path, "/"),
 			}

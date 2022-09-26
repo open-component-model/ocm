@@ -68,6 +68,16 @@ func (c Properties) Names() sets.String {
 	return sets.StringKeySet(c)
 }
 
+// String returns a string representation.
+func (c Properties) String() string {
+	if c == nil {
+		return "<none>"
+	}
+	//nolint: errchkjson // just a string map
+	d, _ := json.Marshal(c)
+	return string(d)
+}
+
 // Copy copies identity.
 func (p Properties) Copy() Properties {
 	if p == nil {

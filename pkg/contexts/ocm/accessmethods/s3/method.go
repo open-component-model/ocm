@@ -148,8 +148,8 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, erro
 
 func getCreds(a *AccessSpec, cctx credentials.Context) (credentials.Credentials, error) {
 	id := credentials.ConsumerIdentity{
-		credentials.CONSUMER_ATTR_TYPE: CONSUMER_TYPE,
-		identity.ID_HOSTNAME:           a.Bucket,
+		identity.ID_TYPE:     CONSUMER_TYPE,
+		identity.ID_HOSTNAME: a.Bucket,
 	}
 	if a.Version != "" {
 		id[identity.ID_PORT] = a.Version

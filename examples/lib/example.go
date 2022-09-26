@@ -30,7 +30,7 @@ const componentVersion = "0.1.0-dev"
 const resourceName = "package"
 
 func MyFirstOCMApplication() error {
-	octx:=ocm.DefaultContext()
+	octx := ocm.DefaultContext()
 
 	repoSpec := ocireg.NewRepositorySpec("ghcr.io/mandelsoft/ocm", nil)
 
@@ -74,7 +74,7 @@ func MyFirstOCMApplication() error {
 		return err
 	}
 
-	fmt.Printf("  content:\n%s\n", utils.IndentLines(string(data), "    ",))
+	fmt.Printf("  content:\n%s\n", utils.IndentLines(string(data), "    "))
 
 	return nil
 }

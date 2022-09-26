@@ -22,6 +22,9 @@ import (
 // CONSUMER_TYPE is the OCT registry type.
 const CONSUMER_TYPE = "OCIRegistry"
 
+// ID_TYPE is the type field of a consumer identity.
+const ID_TYPE = cpi.ID_TYPE
+
 // ID_HOSTNAME is the hostname of an OCT repository.
 const ID_HOSTNAME = hostpath.ID_HOSTNAME
 

@@ -116,7 +116,7 @@ var _ = Describe("gardener config", func() {
 
 	It("propagates credentials with consumer ids in the context", func() {
 		expectedConsumerId := cpi.ConsumerIdentity{
-			cpi.CONSUMER_ATTR_TYPE: identity.CONSUMER_TYPE,
+			cpi.ID_TYPE:            identity.CONSUMER_TYPE,
 			hostpath.ID_HOSTNAME:   "eu.gcr.io",
 			hostpath.ID_PATHPREFIX: "test-project",
 		}
@@ -134,7 +134,7 @@ var _ = Describe("gardener config", func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(repo).ToNot(BeNil())
 
-		credSrc, err := defaultContext.GetCredentialsForConsumer(expectedConsumerId, local.IdentityMatcher)
+		credSrc, err := defaultContext.GetCredentialsForConsumer(expectedConsumerId, identity.IdentityMatcher)
 		Expect(err).ToNot(HaveOccurred())
 		credentialsFromCtx, err := credSrc.Credentials(defaultContext)
 		Expect(err).ToNot(HaveOccurred())
@@ -155,7 +155,7 @@ var _ = Describe("gardener config", func() {
 		Expect(err).ToNot(HaveOccurred())
 
 		id := cpi.ConsumerIdentity{
-			cpi.CONSUMER_ATTR_TYPE: local.CONSUMER_TYPE,
+			cpi.ID_TYPE: local.CONSUMER_TYPE,
 		}
 		id.SetNonEmptyValue(hostpath.ID_HOSTNAME, parsedURL.Host)
 		id.SetNonEmptyValue(hostpath.ID_SCHEME, parsedURL.Scheme)
