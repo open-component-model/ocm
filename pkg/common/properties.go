@@ -16,21 +16,21 @@ package common
 
 import (
 	"encoding/json"
+	"fmt"
 
-	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/util/sets"
 )
 
 // Properties describes a set of name/value pairs.
 type Properties map[string]string
 
-// Digest returns the object digest of an Property set.
-func (p Properties) Digest() []byte {
+// Digest returns the object digest of a Property set.
+func (p Properties) Digest() ([]byte, error) {
 	data, err := json.Marshal(p)
 	if err != nil {
-		logrus.Error(err)
+		return nil, fmt.Errorf("failed to produce digest: %w", err)
 	}
-	return data
+	return data, nil
 }
 
 func (p Properties) SetNonEmptyValue(name, value string) {

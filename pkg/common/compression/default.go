@@ -18,8 +18,6 @@ import (
 	"bytes"
 	"errors"
 	"io"
-
-	"github.com/sirupsen/logrus"
 )
 
 // algorithm is a default implementation for Algorithm that can be used for CompressStream
@@ -76,7 +74,6 @@ func (c *algorithm) Match(r MatchReader) (bool, error) {
 	}
 	buf := make([]byte, len(c.prefix))
 	n, err := io.ReadAtLeast(r, buf, len(buf))
-	logrus.Debugf("%s: found %v\n", c.Name(), buf[:n])
 	if err != nil {
 		if errors.Is(err, io.ErrUnexpectedEOF) || errors.Is(err, io.EOF) {
 			err = nil

@@ -18,11 +18,10 @@ import (
 	"encoding/json"
 	"reflect"
 
+	"github.com/mandelsoft/logging"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
@@ -34,15 +33,17 @@ import (
 	"github.com/open-component-model/ocm/pkg/env/builder"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils/logger"
 )
 
 const ARCHIVE = "archive"
 
 var _ = Describe("blobhandler", func() {
-
+	var log logging.Logger
 	Context("regular", func() {
 		var b *builder.Builder
 		BeforeEach(func() {
+			log = logger.NewDefaultLoggerContext().Logger()
 			b = builder.NewBuilder(env.NewEnvironment())
 		})
 		AfterEach(func() {
@@ -62,7 +63,7 @@ var _ = Describe("blobhandler", func() {
 
 			data, err = json.Marshal(cd.Resources[0].Access)
 			Expect(err).To(Succeed())
-			logrus.Infof("%s\n", string(data))
+			log.Info("marshal result", "data", string(data))
 			found := &localblob.AccessSpec{}
 			Expect(json.Unmarshal(data, found)).To(Succeed())
 
@@ -97,7 +98,7 @@ var _ = Describe("blobhandler", func() {
 
 			data, err = json.Marshal(cd.Resources[0].Access)
 			Expect(err).To(Succeed())
-			logrus.Infof("%s\n", string(data))
+			log.Info("marshal result", "data", string(data))
 			found := &localfsblob.AccessSpec{}
 			Expect(json.Unmarshal(data, found)).To(Succeed())
 

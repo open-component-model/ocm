@@ -21,7 +21,6 @@ import (
 
 	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/remotes/docker/config"
-	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -115,6 +114,7 @@ func (r *Repository) getCreds(comp string) (credentials.Credentials, error) {
 }
 
 func (r *Repository) getResolver(comp string) (resolve.Resolver, error) {
+	log := r.ctx.Logger()
 	creds, err := r.getCreds(comp)
 	if err != nil {
 		if !errors.IsErrUnknownKind(err, credentials.KIND_CONSUMER) {
@@ -126,14 +126,14 @@ func (r *Repository) getResolver(comp string) (resolve.Resolver, error) {
 		Hosts: docker.ConvertHosts(config.ConfigureHosts(context.Background(), config.HostOptions{
 			Credentials: func(host string) (string, string, error) {
 				if creds != nil {
-					logrus.Debugf("************** creds for %s: %s\n", host, creds)
+					log.Debug("************** creds **************", "host", host, "creds", creds)
 					p := creds.GetProperty(credentials.ATTR_IDENTITY_TOKEN)
 					if p == "" {
 						p = creds.GetProperty(credentials.ATTR_PASSWORD)
 					}
 					return creds.GetProperty(credentials.ATTR_USERNAME), p, err
 				}
-				logrus.Debugf("************** no creds for %s\n", host)
+				log.Debug("************** no creds for host **************", "host", host)
 				return "", "", nil
 			},
 			DefaultScheme: r.info.Scheme,

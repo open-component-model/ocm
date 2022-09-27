@@ -18,6 +18,8 @@ import (
 	"context"
 	"reflect"
 
+	"github.com/mandelsoft/logging"
+
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
@@ -85,7 +87,7 @@ type _context struct {
 
 var _ Context = &_context{}
 
-func newContext(configctx config.Context, reposcheme RepositoryTypeScheme, consumerMatchers IdentityMatcherRegistry) Context {
+func newContext(configctx config.Context, reposcheme RepositoryTypeScheme, consumerMatchers IdentityMatcherRegistry, logger logging.Context) Context {
 	c := &_context{
 		sharedattributes:         configctx.AttributesContext(),
 		updater:                  cfgcpi.NewUpdate(configctx),
@@ -93,7 +95,7 @@ func newContext(configctx config.Context, reposcheme RepositoryTypeScheme, consu
 		consumerIdentityMatchers: consumerMatchers,
 		consumers:                newConsumers(),
 	}
-	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, configctx.GetAttributes())
+	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, configctx.GetAttributes(), logger)
 	return c
 }
 

@@ -22,6 +22,7 @@ import (
 	"github.com/containers/image/v5/image"
 	"github.com/containers/image/v5/types"
 	dockertypes "github.com/docker/docker/api/types"
+	"github.com/mandelsoft/logging"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -36,6 +37,7 @@ type NamespaceContainer struct {
 	repo      *Repository
 	namespace string
 	cache     accessio.BlobCache
+	log       logging.Logger
 }
 
 var (
@@ -53,6 +55,7 @@ func NewNamespace(repo *Repository, name string) (*Namespace, error) {
 			repo:      repo,
 			namespace: name,
 			cache:     cache,
+			log:       repo.ctx.Logger(),
 		},
 	}
 	return n, nil

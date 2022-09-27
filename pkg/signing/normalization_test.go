@@ -61,7 +61,6 @@ var CDExcludes = signing.MapExcludes{
 }
 
 var _ = Describe("normalization", func() {
-
 	labeldata, err := json.Marshal(map[string]interface{}{
 		"a1": "v1",
 		"a2": "v2",
@@ -665,7 +664,6 @@ var _ = Describe("normalization", func() {
 	})
 
 	It("Normalizes with recursive includes", func() {
-
 		rules := signing.MapIncludes{
 			"component": signing.MapIncludes{
 				"name": nil,
@@ -682,7 +680,6 @@ var _ = Describe("normalization", func() {
 	})
 
 	It("Normalizes with recursive modifying includes", func() {
-
 		rules := signing.DynamicMapIncludes{
 			"component": &signing.DynamicInclude{
 				Continue: signing.DynamicMapIncludes{

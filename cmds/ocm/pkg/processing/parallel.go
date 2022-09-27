@@ -17,23 +17,26 @@ package processing
 import (
 	"sync"
 
-	"github.com/sirupsen/logrus"
+	"github.com/mandelsoft/logging"
 
-	data "github.com/open-component-model/ocm/cmds/ocm/pkg/data"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
+	"github.com/open-component-model/ocm/pkg/utils/logger"
 )
 
 type _ParallelProcessing struct {
 	data    ProcessingIterable
 	pool    ProcessorPool
 	creator BufferCreator
+	logger  logging.Logger
 }
 
 var _ data.Iterable = &_ParallelProcessing{}
 
-func (this *_ParallelProcessing) new(data ProcessingIterable, pool ProcessorPool, creator BufferCreator) *_ParallelProcessing {
+func (this *_ParallelProcessing) new(data ProcessingIterable, pool ProcessorPool, creator BufferCreator, logger logging.Logger) *_ParallelProcessing {
 	this.data = data
 	this.pool = pool
 	this.creator = creator
+	this.logger = logger
 	return this
 }
 
@@ -52,18 +55,18 @@ func (this *_ParallelProcessing) Filter(f FilterFunction) ProcessingResult {
 func (this *_ParallelProcessing) Sort(c CompareFunction) ProcessingResult {
 	setup := func() data.Iterable { return this.AsSlice().Sort(c) }
 
-	logrus.Debugf("POOL: %+v", this.pool)
+	this.logger.Debug("sorting pool", "pool", this.pool)
 
-	return (&_ParallelProcessing{}).new(NewAsyncProcessingSource(setup, this.pool).(ProcessingIterable), this.pool, NewOrderedBuffer)
+	return (&_ParallelProcessing{}).new(NewAsyncProcessingSource(setup, this.pool).(ProcessingIterable), this.pool, NewOrderedBuffer, logger.NewDefaultLoggerContext().Logger())
 }
 
 func (this *_ParallelProcessing) Transform(t TransformFunction) ProcessingResult {
 	transform := func() data.Iterable { return t(this.data) }
-	return (&_ParallelProcessing{}).new(NewAsyncProcessingSource(transform, this.pool).(ProcessingIterable), this.pool, NewOrderedBuffer)
+	return (&_ParallelProcessing{}).new(NewAsyncProcessingSource(transform, this.pool).(ProcessingIterable), this.pool, NewOrderedBuffer, logger.NewDefaultLoggerContext().Logger())
 }
 
 func (this *_ParallelProcessing) WithPool(p ProcessorPool) ProcessingResult {
-	return (&_ParallelProcessing{}).new(this.data, p, this.creator)
+	return (&_ParallelProcessing{}).new(this.data, p, this.creator, logger.NewDefaultLoggerContext().Logger())
 }
 
 func (this *_ParallelProcessing) Parallel(n int) ProcessingResult {
@@ -84,7 +87,7 @@ func (this *_ParallelProcessing) Unordered() ProcessingResult {
 	if ok {
 		data = &ordered.simple
 	}
-	return (&_ParallelProcessing{}).new(data, this.pool, NewSimpleBuffer)
+	return (&_ParallelProcessing{}).new(data, this.pool, NewSimpleBuffer, logger.NewDefaultLoggerContext().Logger())
 }
 
 func (this *_ParallelProcessing) Apply(p ProcessChain) ProcessingResult {
@@ -107,19 +110,19 @@ type _ParallelStep struct {
 
 func (this *_ParallelStep) new(pool ProcessorPool, data ProcessingIterable, op operation, creator BufferCreator) *_ParallelStep {
 	buffer := creator()
-	this._ParallelProcessing.new(buffer, pool, creator)
+	this._ParallelProcessing.new(buffer, pool, creator, logger.NewDefaultLoggerContext().Logger())
 	go func() {
-		logrus.Debug("start processing")
+		this.logger.Debug("start processing")
 
 		this.pool.Request()
 		i := data.ProcessingIterator()
 		var wg sync.WaitGroup
 		for i.HasNext() {
 			e := i.NextProcessingEntry()
-			logrus.Debugf("start %v", e.Index)
+			this.logger.Debug("start", "index", e.Index)
 			wg.Add(1)
 			pool.Exec(func() {
-				logrus.Debugf("process %v", e.Index)
+				this.logger.Debug("process", "index", e.Index)
 				var r operationResult
 				if e.Valid {
 					r, e.Valid = op.process(e.Value)
@@ -146,14 +149,14 @@ func (this *_ParallelStep) new(pool ProcessorPool, data ProcessingIterable, op o
 						}
 					}
 				}
-				logrus.Debugf("done %v", e.Index)
+				this.logger.Debug("done", "index", e.Index)
 				wg.Done()
 			})
 		}
 		wg.Wait()
 		this.pool.Release()
 		buffer.Close()
-		logrus.Debugf("done processing\n")
+		this.logger.Debug("done processing")
 	}()
 	return this
 }

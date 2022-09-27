@@ -24,8 +24,6 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
@@ -50,7 +48,7 @@ func CheckArchiveSource(env *TestEnv, cd *compdesc.ComponentDescriptor, name str
 	Expect(spec.(*localblob.AccessSpec).MediaType).To(Equal(mime.MIME_TGZ))
 
 	local := spec.(*localblob.AccessSpec).LocalReference
-	logrus.Infof("local: %s\n", local)
+	env.Logger().Info("local", "local", local)
 
 	bpath := env.Join(ARCH, comparch.BlobsDirectoryName, local)
 	Expect(env.FileExists(bpath)).To(BeTrue())

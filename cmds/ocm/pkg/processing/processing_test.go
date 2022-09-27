@@ -17,46 +17,55 @@ package processing
 import (
 	"strings"
 
+	"github.com/mandelsoft/logging"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
+	"github.com/open-component-model/ocm/pkg/utils/logger"
 )
 
-func AddOne(e interface{}) interface{} {
-	logrus.Infof("add 1 to %d\n", e.(int))
-	return e.(int) + 1
+var AddOne = func(log logging.Logger) func(e interface{}) interface{} {
+	return func(e interface{}) interface{} {
+		log.Info("add one to number", "num", e.(int))
+		return e.(int) + 1
+	}
 }
 
-func Mul(n, fac int) ExplodeFunction {
-	return func(e interface{}) []interface{} {
-		r := []interface{}{}
-		v := e.(int)
-		logrus.Infof("explode  %d\n", e.(int))
-		for i := 1; i <= n; i++ {
-			r = append(r, v)
-			v = v * fac
+var Mul = func(log logging.Logger) func(n, fac int) ExplodeFunction {
+	return func(n, fac int) ExplodeFunction {
+		return func(e interface{}) []interface{} {
+			r := []interface{}{}
+			v := e.(int)
+			log.Info("explode", "num", e.(int))
+			for i := 1; i <= n; i++ {
+				r = append(r, v)
+				v = v * fac
+			}
+			return r
 		}
-		return r
 	}
 }
 
 var _ = Describe("simple data processing", func() {
+	var log logging.Logger
+
+	BeforeEach(func() {
+		log = logger.NewDefaultLoggerContext().Logger()
+	})
 
 	Context("sequential", func() {
 		It("map", func() {
-			logrus.Infof("*** sequential map\n")
+			By("*** sequential map")
 			data := data.IndexedSliceAccess([]interface{}{1, 2, 3})
-			result := Chain().Map(AddOne).Process(data).AsSlice()
+			result := Chain().Map(AddOne(log)).Process(data).AsSlice()
 			Expect([]interface{}(result)).To(Equal([]interface{}{2, 3, 4}))
 		})
 
 		It("explode", func() {
-			logrus.Infof("*** sequential explode\n")
+			By("*** sequential explode")
 			data := data.IndexedSliceAccess([]interface{}{1, 2, 3})
-			result := Chain().Map(AddOne).Explode(Mul(3, 2)).Map(Identity).Process(data).AsSlice()
+			result := Chain().Map(AddOne(log)).Explode(Mul(log)(3, 2)).Map(Identity).Process(data).AsSlice()
 			Expect([]interface{}(result)).To(Equal([]interface{}{
 				2, 4, 8,
 				3, 6, 12,
@@ -66,18 +75,18 @@ var _ = Describe("simple data processing", func() {
 	})
 	Context("parallel", func() {
 		It("map", func() {
-			logrus.Infof("*** parallel map\n")
+			By("*** parallel map")
 			data := data.IndexedSliceAccess([]interface{}{1, 2, 3})
-			result := Chain().Map(Identity).Parallel(3).Map(AddOne).Process(data).AsSlice()
+			result := Chain().Map(Identity).Parallel(3).Map(AddOne(log)).Process(data).AsSlice()
 			Expect([]interface{}(result)).To(Equal([]interface{}{
 				2, 3, 4,
 			}))
 		})
 		It("explode", func() {
-			logrus.Infof("*** parallel explode\n")
+			By("*** parallel explode")
 
 			data := data.IndexedSliceAccess([]interface{}{1, 2, 3})
-			result := Chain().Parallel(3).Explode(Mul(3, 2)).Process(data).AsSlice()
+			result := Chain().Parallel(3).Explode(Mul(log)(3, 2)).Process(data).AsSlice()
 			Expect([]interface{}(result)).To(Equal([]interface{}{
 				1, 2, 4,
 				2, 4, 8,
@@ -85,10 +94,10 @@ var _ = Describe("simple data processing", func() {
 			}))
 		})
 		It("explode-map", func() {
-			logrus.Infof("*** parallel explode\n")
+			By("*** parallel explode")
 
 			data := data.IndexedSliceAccess([]interface{}{1, 2, 3})
-			result := Chain().Parallel(3).Explode(Mul(3, 2)).Map(AddOne).Process(data).AsSlice()
+			result := Chain().Parallel(3).Explode(Mul(log)(3, 2)).Map(AddOne(log)).Process(data).AsSlice()
 			Expect([]interface{}(result)).To(Equal([]interface{}{
 				2, 3, 5,
 				3, 5, 9,
@@ -96,13 +105,11 @@ var _ = Describe("simple data processing", func() {
 			}))
 		})
 	})
-
 	Context("compose", func() {
-		chain := Chain().Map(AddOne)
-
 		It("appends a chain", func() {
+			chain := Chain().Map(AddOne(log))
 			slice := data.IndexedSliceAccess([]interface{}{1, 2, 3})
-			sub := Chain().Explode(Mul(2, 2))
+			sub := Chain().Explode(Mul(log)(2, 2))
 			r := chain.Append(sub).Process(slice).AsSlice()
 			Expect(r).To(Equal(data.IndexedSliceAccess([]interface{}{
 				2, 4, 3, 6, 4, 8,
@@ -110,6 +117,7 @@ var _ = Describe("simple data processing", func() {
 
 		})
 	})
+
 	Split := func(text interface{}) []interface{} {
 		var words []interface{}
 		t := text.(string)
@@ -159,12 +167,3 @@ var _ = Describe("simple data processing", func() {
 		})
 	})
 })
-
-/*
-
-
-
-	})
-})
-
-*/

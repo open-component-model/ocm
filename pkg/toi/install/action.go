@@ -310,6 +310,8 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 		return nil, errors.Newf("no executor found for action %s", name)
 	}
 
+	log := octx.Logger()
+
 	// validate executor config
 	espec, err := DetermineExecutor(executor, octx, cv, resolver)
 	if err != nil {
@@ -347,9 +349,9 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 	}
 
 	if econfig == nil {
-		logrus.Infof("no executor config found")
+		log.Info("no executor config found")
 	} else {
-		logrus.Infof("using executor config:\n%s", utils2.IndentLines(string(econfig), "  "))
+		log.Info("using executor config", "config", utils2.IndentLines(string(econfig), "  "))
 	}
 	// handle credentials
 	credentials, credmapping, err := CheckCredentialRequests(executor, spec, &espec.Spec)
@@ -375,9 +377,9 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 		return nil, errors.Wrapf(err, "error processing parameters")
 	}
 	if params == nil {
-		logrus.Infof("no parameter config found")
+		log.Info("no parameter config found")
 	} else {
-		logrus.Infof("using package parameters:\n%s", utils2.IndentLines(string(params), "  "))
+		log.Info("using package parameters", "parameters", utils2.IndentLines(string(params), "  "))
 	}
 
 	if executor.ParameterMapping != nil {
@@ -388,7 +390,7 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 
 		if err == nil {
 			if !bytes.Equal(orig, params) {
-				logrus.Infof("using executor parameters:\n%s", utils2.IndentLines(string(params), "  "))
+				log.Info("using executor parameters", "parameters", utils2.IndentLines(string(params), "  "))
 			}
 		}
 	}
@@ -402,8 +404,7 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 		names = append(names, n+"->"+m)
 	}
 	sort.Strings(names)
-	logrus.Infof("using executor image %s (%s)", espec.Image.Ref, executor.ResourceRef.String())
-	logrus.Infof("with credentials: %v", names)
+	log.Info("using executor image", "ref", espec.Image.Ref, "executor", executor.ResourceRef.String(), "credentials", names)
 	op := &Operation{
 		Action:      name,
 		Image:       *espec.Image,

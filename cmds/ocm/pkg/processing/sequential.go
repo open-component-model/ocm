@@ -18,6 +18,7 @@ import (
 	"sync"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
+	"github.com/open-component-model/ocm/pkg/utils/logger"
 )
 
 type _SynchronousProcessing struct {
@@ -52,7 +53,7 @@ func (this *_SynchronousProcessing) Sort(c CompareFunction) ProcessingResult {
 }
 
 func (this *_SynchronousProcessing) WithPool(p ProcessorPool) ProcessingResult {
-	return (&_ParallelProcessing{}).new(NewEntryIterableFromIterable(this.data), p, NewOrderedBuffer)
+	return (&_ParallelProcessing{}).new(NewEntryIterableFromIterable(this.data), p, NewOrderedBuffer, logger.NewDefaultLoggerContext().Logger())
 }
 
 func (this *_SynchronousProcessing) Parallel(n int) ProcessingResult {
@@ -127,7 +128,7 @@ func (this *_AsynchronousProcessing) Sort(c CompareFunction) ProcessingResult {
 }
 
 func (this *_AsynchronousProcessing) WithPool(p ProcessorPool) ProcessingResult {
-	return (&_ParallelProcessing{}).new(NewEntryIterableFromIterable(this.data), p, NewOrderedBuffer)
+	return (&_ParallelProcessing{}).new(NewEntryIterableFromIterable(this.data), p, NewOrderedBuffer, logger.NewDefaultLoggerContext().Logger())
 }
 
 func (this *_AsynchronousProcessing) Parallel(n int) ProcessingResult {

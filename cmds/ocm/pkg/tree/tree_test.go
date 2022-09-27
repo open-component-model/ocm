@@ -20,8 +20,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
 	"github.com/open-component-model/ocm/pkg/common"
 )
@@ -93,11 +91,6 @@ func Check(t tree.TreeObjects, result string) {
 	min := len(t)
 	if len(lines) < min {
 		min = len(lines)
-	}
-
-	logrus.Infof("found:\n")
-	for _, l := range t {
-		logrus.Infof("%s\n", l)
 	}
 
 	for i, l := range lines {

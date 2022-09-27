@@ -19,9 +19,10 @@ import (
 	"sync"
 
 	"github.com/containerd/containerd/pkg/atomic"
-	"github.com/sirupsen/logrus"
+	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
+	"github.com/open-component-model/ocm/pkg/utils/logger"
 )
 
 type Index = IndexArray
@@ -224,13 +225,15 @@ func (this *_buffer) Get(i int) interface{} {
 type simpleBuffer struct {
 	frame   BufferFrame
 	entries []ProcessingEntry
+	log     logging.Logger
 }
 
 func NewSimpleBuffer() ProcessingBuffer {
-	return NewProcessingBuffer((&simpleBuffer{}).new())
+	return NewProcessingBuffer((&simpleBuffer{}).new(logger.NewDefaultLoggerContext().Logger()))
 }
 
-func (this *simpleBuffer) new() *simpleBuffer {
+func (this *simpleBuffer) new(log logging.Logger) *simpleBuffer {
+	this.log = log
 	this.entries = []ProcessingEntry{}
 	return this
 }
@@ -246,11 +249,11 @@ func (this *simpleBuffer) Close() {
 }
 
 func (this *simpleBuffer) Iterator() data.Iterator {
-	return (&simpleBufferIterator{}).new(this, true)
+	return (&simpleBufferIterator{}).new(this, true, this.log)
 }
 
 func (this *simpleBuffer) ProcessingIterator() ProcessingIterator {
-	return (&simpleBufferIterator{}).new(this, false)
+	return (&simpleBufferIterator{}).new(this, false, this.log)
 }
 
 func (this *simpleBuffer) Add(e ProcessingEntry) bool {
@@ -274,6 +277,7 @@ type simpleBufferIterator struct {
 	buffer  *simpleBuffer
 	valid   bool
 	current int
+	log     logging.Logger
 }
 
 var (
@@ -281,10 +285,11 @@ var (
 	_ data.Iterator      = &simpleBufferIterator{}
 )
 
-func (this *simpleBufferIterator) new(buffer *simpleBuffer, valid bool) *simpleBufferIterator {
+func (this *simpleBufferIterator) new(buffer *simpleBuffer, valid bool, log logging.Logger) *simpleBufferIterator {
 	this.valid = valid
 	this.current = -1
 	this.buffer = buffer
+	this.log = log
 	return this
 }
 
@@ -292,7 +297,7 @@ func (this *simpleBufferIterator) HasNext() bool {
 	this.buffer.frame.Lock()
 	defer this.buffer.frame.Unlock()
 	for {
-		logrus.Debugf("HasNext: %d\n", this.current)
+		this.log.Debug("HasNext", "current", this.current)
 		if len(this.buffer.entries) > this.current+1 {
 			if !this.valid || this.buffer.entries[this.current+1].Valid {
 				return true
@@ -315,7 +320,7 @@ func (this *simpleBufferIterator) NextProcessingEntry() ProcessingEntry {
 	this.buffer.frame.Lock()
 	defer this.buffer.frame.Unlock()
 	for {
-		logrus.Debugf("NextProcessingEntry: %d\n", this.current)
+		this.log.Debug("NextProcessingEntry", "current", this.current)
 		if len(this.buffer.entries) > this.current+1 {
 			this.current++
 			if !this.valid || this.buffer.entries[this.current].Valid {
@@ -343,6 +348,7 @@ type orderedBuffer struct {
 	valid     *data.DLL
 	nextIndex Index
 	size      int
+	log       logging.Logger
 }
 
 type CheckNext interface {
@@ -350,15 +356,16 @@ type CheckNext interface {
 }
 
 func NewOrderedBuffer() ProcessingBuffer {
-	return NewProcessingBuffer((&orderedBuffer{}).new())
+	return NewProcessingBuffer((&orderedBuffer{}).new(logger.NewDefaultLoggerContext().Logger()))
 }
 
-func (this *orderedBuffer) new() *orderedBuffer {
-	(&this.simple).new()
+func (this *orderedBuffer) new(log logging.Logger) *orderedBuffer {
+	(&this.simple).new(log)
 	this.root.New(this)
 	this.valid = this.root.DLL()
 	this.last = this.valid
 	this.nextIndex = this.nextIndex.Next(-1, 0)
+	this.log = log
 	return this
 }
 
@@ -387,7 +394,7 @@ func (this *orderedBuffer) Add(e ProcessingEntry) bool {
 	}
 
 	increased := false
-	logrus.Debugf("add to %v{%v}  cur %v\n", e.Index, e.Value, this.nextIndex)
+	this.log.Debug("add index to cur value", "index", e.Index, "value", e.Value, "next-index", this.nextIndex)
 
 	next := this.valid.Next()
 	for next != nil && !next.Get().(*ProcessingEntry).Index.After(this.nextIndex) {
@@ -396,7 +403,7 @@ func (this *orderedBuffer) Add(e ProcessingEntry) bool {
 		this.valid = next
 		next = next.Next()
 		increased = true
-		logrus.Debugf("increase to %v{%v}\n", n.Index, n.Value)
+		this.log.Debug("increase to index to value", "index", n.Index, "value", n.Value)
 	}
 	return increased
 }

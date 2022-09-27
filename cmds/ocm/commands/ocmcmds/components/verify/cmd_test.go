@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"os"
 
+	"github.com/mandelsoft/logging"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
@@ -25,8 +26,6 @@ import (
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/sirupsen/logrus"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
@@ -62,7 +61,10 @@ const PUBKEY = "/tmp/pub"
 const PRIVKEY = "/tmp/priv"
 
 var _ = Describe("access method", func() {
-	var env *TestEnv
+	var (
+		env *TestEnv
+		log logging.Logger
+	)
 
 	priv, pub, err := rsa.Handler{}.CreateKeyPair()
 	Expect(err).To(Succeed())
@@ -71,6 +73,7 @@ var _ = Describe("access method", func() {
 
 	BeforeEach(func() {
 		env = NewTestEnv()
+		log = env.Logger()
 		data, err := rsa.KeyData(pub)
 		Expect(err).To(Succeed())
 		Expect(vfs.WriteFile(env.FileSystem(), PUBKEY, data, os.ModePerm)).To(Succeed())
@@ -166,7 +169,7 @@ var _ = Describe("access method", func() {
 		Expect(err).To(Succeed())
 		closer.Close()
 		archcloser.Close()
-		logrus.Infof("%+v\n", dig)
+		log.Info("dig result", "dig", dig.String())
 		Expect(dig.Value).To(Equal(digest))
 
 		Expect(env.CatchOutput(buf).Execute("verify", "components", "-V", "-s", SIGNATURE, "-k", PUBKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(Succeed())

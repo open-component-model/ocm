@@ -91,8 +91,10 @@ func CheckComponent(env *TestEnv, ldesc *artdesc.Descriptor, tgt ocm.Repository)
 }
 
 var _ = Describe("Test Environment", func() {
-	var env *TestEnv
-	var ldesc *artdesc.Descriptor
+	var (
+		env   *TestEnv
+		ldesc *artdesc.Descriptor
+	)
 
 	_ = ldesc
 	BeforeEach(func() {

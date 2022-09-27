@@ -61,7 +61,6 @@ var _ = Describe("access method", func() {
 	BeforeEach(func() {
 		env = NewBuilder(tenv.NewEnvironment())
 		env.RSAKeyPair(SIGNATURE)
-
 	})
 
 	AfterEach(func() {
