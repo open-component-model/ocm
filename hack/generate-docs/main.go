@@ -5,6 +5,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -17,7 +18,7 @@ func main() {
 	logrus.Info("> Generate Docs for OCM CLI")
 
 	if len(os.Args) != 2 { // expect 2 as the first one is the programm name
-		logrus.Infof("Expected exactly one argument, but got %d", len(os.Args)-1)
+		fmt.Fprintf(os.Stderr, "Expected exactly one argument, but got %d", len(os.Args)-1)
 		os.Exit(1)
 	}
 	outputDir := os.Args[1]
@@ -34,7 +35,7 @@ func main() {
 
 func check(err error) {
 	if err != nil {
-		logrus.Error(err.Error())
+		fmt.Fprintf(os.Stderr, err.Error())
 		os.Exit(1)
 	}
 }
