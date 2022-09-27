@@ -48,7 +48,12 @@ type CredentialsRequestSpec struct {
 	Optional bool `json:"optional,omitempty"`
 }
 
+var ErrUndefined error = errors.New("nil reference")
+
 func (s *CredentialsRequestSpec) Match(o *CredentialsRequestSpec) error {
+	if o == nil {
+		return ErrUndefined
+	}
 	if !s.ConsumerId.Equals(o.ConsumerId) {
 		return fmt.Errorf("consumer id mismatch")
 	}

@@ -18,11 +18,12 @@ import (
 	"archive/tar"
 	"bytes"
 	"compress/gzip"
+	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"math/rand"
+	"math/big"
 	"net/http"
 	"os"
 	"reflect"
@@ -116,7 +117,11 @@ var chars = []rune("abcdefghijklmnopqrstuvwxyz1234567890")
 func RandomString(n int) string {
 	b := make([]rune, n)
 	for i := range b {
-		b[i] = chars[rand.Intn(len(chars))]
+		value, err := rand.Int(rand.Reader, big.NewInt(int64(len(chars))))
+		if err != nil {
+			logrus.Errorf("failed to generate random number: %s", err)
+		}
+		b[i] = chars[value.Int64()]
 	}
 	return string(b)
 }

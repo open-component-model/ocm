@@ -294,14 +294,14 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 	var err error
 
 	var executor *Executor
-	for _, e := range spec.Executors {
+	for idx, e := range spec.Executors {
 		if e.Actions == nil {
-			executor = &e
+			executor = &spec.Executors[idx]
 			break
 		}
 		for _, a := range e.Actions {
 			if a == name {
-				executor = &e
+				executor = &spec.Executors[idx]
 				break
 			}
 		}

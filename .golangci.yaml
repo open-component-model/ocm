@@ -15,7 +15,6 @@ linters:
 
     # Logical next step
     - forcetypeassert  # Priority: that can lead to serious crashes.
-    - gosec            # Priority: Security (as the name implies)
     - revive           # Too many issues.
                        #   It's important to at least address:
                        #     - no camel_case
@@ -161,6 +160,13 @@ issues:
       - dupl
       - funlen
       - scopelint
+    - text: "Spec.DeepCopyInto undefined"
+      linters:
+      - typecheck
+    - text: "G601: Implicit memory aliasing in for loop"
+      # Ignored cos why not, that was the request.
+      linters:
+      - gosec
     - source: "// .* #\\d+"
       linters:
       - godox
