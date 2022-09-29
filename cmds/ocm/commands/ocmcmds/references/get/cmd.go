@@ -100,13 +100,14 @@ outer:
 		o := slice[i]
 		e := common.Elem(o)
 		key := gcommom.NewNameVersion(e.ComponentName, e.Version)
+		hist := o.GetHistory()
 		nested := make(gcommom.History, 0)
-		copy(nested, o.GetHistory())
+		copy(nested, hist)
 		nested = append(nested, key)
 		var j int
 		for j = i + 1; j < len(slice); j++ {
 			n := slice[j]
-			if !n.GetHistory().HasPrefix(o.GetHistory()) {
+			if !n.GetHistory().HasPrefix(hist) {
 				continue outer
 			}
 			if n.GetHistory().Equals(nested) {
