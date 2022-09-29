@@ -257,10 +257,8 @@ func AdjustSize(d *artdesc.Descriptor, size int64) error {
 	if size != accessio.BLOB_UNKNOWN_SIZE {
 		if d.Size == accessio.BLOB_UNKNOWN_SIZE {
 			d.Size = size
-		} else {
-			if d.Size != size {
-				return errors.Newf("blob size mismatch %d != %d", size, d.Size)
-			}
+		} else if d.Size != size {
+			return errors.Newf("blob size mismatch %d != %d", size, d.Size)
 		}
 	}
 	return nil

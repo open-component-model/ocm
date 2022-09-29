@@ -82,7 +82,7 @@ func (u *UniformRepositorySpec) ComposeRef(art string) string {
 func (u *UniformRepositorySpec) RepositoryRef() string {
 	t := u.Type
 	if t != "" {
-		t = t + "::"
+		t += "::"
 	}
 	if u.Info != "" {
 		return fmt.Sprintf("%s%s", t, u.Info)

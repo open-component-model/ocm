@@ -135,10 +135,8 @@ func (r *RepositoryIndex) GetTags(repo string) []string {
 		if !strings.HasPrefix(t, "@") {
 			result = append(result, t)
 			digests[a.Digest] = true
-		} else {
-			if !digests[a.Digest] {
-				digests[a.Digest] = false
-			}
+		} else if !digests[a.Digest] {
+			digests[a.Digest] = false
 		}
 	}
 	/* TODO: how to query untagged entries at api level

@@ -27,7 +27,7 @@ func LinkForCmd(cmd *cobra.Command) string {
 
 func LinkForPath(path string) string {
 	link := path + ".md"
-	link = strings.Replace(link, " ", "_", -1)
+	link = strings.ReplaceAll(link, " ", "_")
 	return link
 }
 

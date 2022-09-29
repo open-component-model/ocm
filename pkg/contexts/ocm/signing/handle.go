@@ -102,10 +102,8 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 
 		if reference.Digest == nil {
 			cd.References[i].Digest = calculatedDigest
-		} else {
-			if calculatedDigest != nil && !reflect.DeepEqual(reference.Digest, calculatedDigest) {
-				return nil, errors.Newf(refMsg(reference, state, "calculated reference digest (%+v) mismatches existing digest (%+v) for", calculatedDigest, reference.Digest))
-			}
+		} else if calculatedDigest != nil && !reflect.DeepEqual(reference.Digest, calculatedDigest) {
+			return nil, errors.Newf(refMsg(reference, state, "calculated reference digest (%+v) mismatches existing digest (%+v) for", calculatedDigest, reference.Digest))
 		}
 		printer.Printf("  reference %d:  %s:%s: digest %s\n", i, reference.ComponentName, reference.Version, calculatedDigest)
 	}

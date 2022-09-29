@@ -156,10 +156,8 @@ func (m *accessMethod) getBlob() (cpi.BlobAccess, error) {
 	}
 	if m.spec.Size == accessio.BLOB_UNKNOWN_SIZE {
 		m.spec.Size = size
-	} else {
-		if size != accessio.BLOB_UNKNOWN_SIZE {
-			return nil, errors.Newf("blob size mismatch %d != %d", size, m.spec.Size)
-		}
+	} else if size != accessio.BLOB_UNKNOWN_SIZE {
+		return nil, errors.Newf("blob size mismatch %d != %d", size, m.spec.Size)
 	}
 	m.blob = accessio.BlobAccessForDataAccess(m.spec.Digest, m.spec.Size, m.spec.MediaType, acc)
 	return m.blob, nil

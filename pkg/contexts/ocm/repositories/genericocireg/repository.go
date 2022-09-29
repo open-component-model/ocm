@@ -102,7 +102,7 @@ func (r *RepositoryImpl) NumComponents(prefix string) (int, error) {
 	}
 	p := path.Join(r.meta.SubPath, componentmapping.ComponentDescriptorNamespace, prefix)
 	if strings.HasSuffix(prefix, "/") && !strings.HasSuffix(p, "/") {
-		p = p + "/"
+		p += "/"
 	}
 	return lister.NumNamespaces(p)
 }
@@ -116,7 +116,7 @@ func (r *RepositoryImpl) GetComponents(prefix string, closure bool) ([]string, e
 	compprefix := len(p) + 1
 	p = path.Join(p, prefix)
 	if strings.HasSuffix(prefix, "/") && !strings.HasSuffix(p, "/") {
-		p = p + "/"
+		p += "/"
 	}
 	tmp, err := lister.GetNamespaces(p, closure)
 	if err != nil {

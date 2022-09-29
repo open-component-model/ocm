@@ -41,10 +41,8 @@ func FormatTable(ctx Context, gap string, data [][]string) {
 		for i, col := range row {
 			if i >= len(columns) {
 				columns = append(columns, len(col))
-			} else {
-				if columns[i] < len(col) {
-					columns[i] = len(col)
-				}
+			} else if columns[i] < len(col) {
+				columns[i] = len(col)
 			}
 			if len(col) > max {
 				max = len(col)

@@ -119,10 +119,8 @@ func (a *FileSystemBlobAccess) AddBlob(blob accessio.BlobAccess) error {
 
 	if ok, err := vfs.FileExists(a.base.GetFileSystem(), path); ok {
 		return nil
-	} else {
-		if err != nil {
-			return fmt.Errorf("failed to check if '%s' file exists: %w", path, err)
-		}
+	} else if err != nil {
+		return fmt.Errorf("failed to check if '%s' file exists: %w", path, err)
 	}
 
 	r, err := blob.Reader()

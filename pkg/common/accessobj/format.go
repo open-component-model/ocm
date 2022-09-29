@@ -133,17 +133,18 @@ func DefaultOpenOptsFileHandling(kind string, info *AccessObjectInfo, acc Access
 	var file vfs.File
 	var err error
 	var closer Closer
-	if opts.Reader != nil {
+	switch {
+	case opts.Reader != nil:
 		reader = opts.Reader
 		defer opts.Reader.Close()
-	} else if opts.File == nil {
+	case opts.File == nil:
 		// we expect that the path point to a tar
 		file, err = opts.PathFileSystem.Open(path)
 		if err != nil {
 			return nil, fmt.Errorf("unable to open %s from %s: %w", kind, path, err)
 		}
 		defer file.Close()
-	} else {
+	default:
 		file = opts.File
 	}
 	if file != nil {

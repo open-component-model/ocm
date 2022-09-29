@@ -26,7 +26,7 @@ type defaultFormatter struct {
 
 func NewDefaultFormatter(verb, msg, preposition string) ErrorFormatter {
 	if verb != "" {
-		verb = verb + " "
+		verb += " "
 	}
 	return &defaultFormatter{
 		verb:        verb,
@@ -44,7 +44,7 @@ func (f *defaultFormatter) Format(kind string, elem *string, ctx string) string 
 		elems = "\"" + *elem + "\" "
 	}
 	if kind != "" {
-		kind = kind + " "
+		kind += " "
 	}
 	if kind == "" && elems == "" {
 		return f.msg + ctx

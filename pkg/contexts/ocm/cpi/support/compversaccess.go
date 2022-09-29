@@ -304,7 +304,7 @@ func (c *componentVersionAccessImpl) SetResource(meta *cpi.ResourceMeta, acc com
 
 	cd := c.GetDescriptor()
 	if idx := cd.GetResourceIndex(meta); idx == -1 {
-		cd.Resources = append(c.GetDescriptor().Resources, *res)
+		cd.Resources = append(cd.Resources, *res)
 		cd.Signatures = nil
 	} else {
 		if !cd.Resources[idx].ResourceMeta.HashEqual(&res.ResourceMeta) {
@@ -332,8 +332,7 @@ func (c *componentVersionAccessImpl) SetSource(meta *cpi.SourceMeta, acc compdes
 		Access:     acc,
 	}
 
-	switch res.Version {
-	case "":
+	if res.Version == "" {
 		res.Version = c.GetVersion()
 	}
 

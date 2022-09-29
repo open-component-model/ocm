@@ -326,11 +326,9 @@ func Validate(r *ResourceInput, ctx clictx.Context, inputFilePath string) error 
 					}
 					raw, _ := r.Access.GetRaw()
 					allErrs = append(allErrs, field.Invalid(fldPath.Child("access"), string(raw), err.Error()))
-				} else {
-					if acc.(ocm.AccessSpec).IsLocal(ctx.OCMContext()) {
-						kind := runtime.ObjectVersionedType(r.Access.ObjectType).GetKind()
-						allErrs = append(allErrs, field.Invalid(fldPath.Child("access", "type"), kind, "local access no possible"))
-					}
+				} else if acc.(ocm.AccessSpec).IsLocal(ctx.OCMContext()) {
+					kind := runtime.ObjectVersionedType(r.Access.ObjectType).GetKind()
+					allErrs = append(allErrs, field.Invalid(fldPath.Child("access", "type"), kind, "local access no possible"))
 				}
 			}
 		}

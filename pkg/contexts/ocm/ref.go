@@ -133,7 +133,7 @@ func (r *RefSpec) HostPort() (string, string) {
 func (r *RefSpec) Reference() string {
 	t := r.Type
 	if t != "" {
-		t = t + "::"
+		t += "::"
 	}
 	s := r.SubPath
 	if s != "" {
