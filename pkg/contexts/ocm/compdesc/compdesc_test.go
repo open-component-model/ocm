@@ -19,8 +19,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/sirupsen/logrus"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	compdescv3 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud/v3alpha1"
@@ -177,9 +176,7 @@ spec:
 		data, err := compdesc.Encode(cd)
 		Expect(err).To(Succeed())
 
-		logrus.Infof("%s\n", string(data))
-
-		Expect(string(data)).To(Equal(CDv3))
+		ExpectStringEqual(string(data), CDv3)
 
 		//_ = CDv3
 

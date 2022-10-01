@@ -20,6 +20,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -60,10 +61,10 @@ var _ = Describe("Test Environment", func() {
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("download", "resources", "-O", OUT, ARCH)).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(
+		ExpectTrimmedStringEqual(buf.String(),
 			`
 /tmp/res: 8 byte(s) written
-`))
+`)
 		Expect(env.FileExists(OUT)).To(BeTrue())
 		Expect(env.ReadFile(OUT)).To(Equal([]byte("testdata")))
 	})
@@ -98,11 +99,11 @@ var _ = Describe("Test Environment", func() {
 		It("downloads multiple files", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("download", "resources", "-O", OUT, "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-			Expect("\n" + buf.String()).To(Equal(
+			ExpectTrimmedStringEqual(buf.String(),
 				`
 /tmp/res/test.de/y/v1/moredata: 8 byte(s) written
 /tmp/res/test.de/y/v1/otherdata-id=test: 9 byte(s) written
-`))
+`)
 
 			Expect(env.FileExists(vfs.Join(env.FileSystem(), OUT, COMP2+"/"+VERSION+"/moredata"))).To(BeTrue())
 			Expect(env.ReadFile(vfs.Join(env.FileSystem(), OUT, COMP2+"/"+VERSION+"/moredata"))).To(Equal([]byte("moredata")))
@@ -113,12 +114,12 @@ var _ = Describe("Test Environment", func() {
 		It("downloads closure", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("download", "resources", "-c", "-O", OUT, "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-			Expect("\n" + buf.String()).To(Equal(
+			ExpectTrimmedStringEqual(buf.String(),
 				`
 /tmp/res/test.de/y/v1/moredata: 8 byte(s) written
 /tmp/res/test.de/y/v1/otherdata-id=test: 9 byte(s) written
 /tmp/res/test.de/y/v1/test.de/x/v1/testdata: 8 byte(s) written
-`))
+`)
 
 			Expect(env.FileExists(vfs.Join(env.FileSystem(), OUT, COMP2+"/"+VERSION+"/moredata"))).To(BeTrue())
 			Expect(env.ReadFile(vfs.Join(env.FileSystem(), OUT, COMP2+"/"+VERSION+"/moredata"))).To(Equal([]byte("moredata")))

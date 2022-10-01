@@ -20,6 +20,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -64,11 +65,11 @@ var _ = Describe("Test Environment", func() {
 	It("get unknown type with partial matcher", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("get", "credentials", credentials.CONSUMER_ATTR_TYPE+"=test", identity.ID_HOSTNAME+"=ghcr.io")).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(`
+		ExpectTrimmedStringEqual(buf.String(), `
 ATTRIBUTE VALUE
 pass      testpass
 user      testuser
-`))
+`)
 	})
 	It("fail with partial matcher", func() {
 		buf := bytes.NewBuffer(nil)
@@ -80,10 +81,10 @@ user      testuser
 	It("get oci type with oci matcher", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("get", "credentials", credentials.CONSUMER_ATTR_TYPE+"="+identity.CONSUMER_TYPE, identity.ID_HOSTNAME+"=ghcr.io", identity.ID_PATHPREFIX+"=a/b")).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(`
+		ExpectTrimmedStringEqual(buf.String(), `
 ATTRIBUTE VALUE
 password  testpass
 username  testuser
-`))
+`)
 	})
 })
