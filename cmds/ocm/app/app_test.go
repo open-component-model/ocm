@@ -12,16 +12,97 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package app
+package app_test
 
 import (
-	"os"
-	"testing"
+	"bytes"
+	"strings"
 
-	"github.com/sirupsen/logrus"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/testutils"
+
+	"github.com/mandelsoft/logging"
+	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/spf13/cobra"
+	"github.com/tonglil/buflogr"
+
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	ocmlog "github.com/open-component-model/ocm/pkg/logging"
+	"github.com/open-component-model/ocm/pkg/logging/testhelper"
 )
 
-func TestEnv(t *testing.T) {
-	wd, err := os.Getwd()
-	logrus.Infof("%s (%s)\n", wd, err)
+func addTestCommands(ctx clictx.Context, cmd *cobra.Command) {
+	c := &cobra.Command{
+		Use:   "logtest",
+		Short: "test log output",
+		Run: func(cmd *cobra.Command, args []string) {
+			testhelper.LogTest(ocmlog.Context())
+			testhelper.LogTest(ctx, "ctx")
+		},
+	}
+	cmd.AddCommand(c)
 }
+
+var _ = Describe("Test Environment", func() {
+	var log bytes.Buffer
+	var env *TestEnv
+	var oldlog *ocmlog.StaticContext
+
+	BeforeEach(func() {
+		oldlog = ocmlog.Context()
+		log.Reset()
+		def := buflogr.NewWithBuffer(&log)
+		n := ocmlog.NewContext(logging.New(def))
+		ocmlog.SetContext(n)
+		env = NewTestEnv()
+	})
+
+	AfterEach(func() {
+		env.Cleanup()
+		ocmlog.SetContext(oldlog)
+	})
+
+	It("get gets the version", func() {
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("version")).To(Succeed())
+		Expect(strings.HasPrefix(buf.String(), "version.Info{Major:")).To(BeTrue())
+
+	})
+	It("do logging", func() {
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "logtest")).To(Succeed())
+		Expect(log.String()).To(StringEqualTrimmedWithContext(`
+ERROR <nil> error
+ERROR <nil> ctxerror
+`))
+	})
+
+	It("sets logging", func() {
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "-l", "Debug", "logtest")).To(Succeed())
+		Expect(log.String()).To(StringEqualTrimmedWithContext(`
+V[4] debug
+V[3] info
+V[2] warn
+ERROR <nil> error
+V[4] ctxdebug
+V[3] ctxinfo
+V[2] ctxwarn
+ERROR <nil> ctxerror
+`))
+	})
+
+	It("sets log file", func() {
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "-L", "logfile", "logtest")).To(Succeed())
+
+		data, err := vfs.ReadFile(env.FileSystem(), "logfile")
+		Expect(err).To(Succeed())
+
+		// fmt.Printf(string(data))
+		Expect(len(string(data))).To(Equal(141))
+	})
+
+})

@@ -18,7 +18,6 @@ import (
 	"context"
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/logging"
 )
 
 type Builder struct {
@@ -78,6 +77,5 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 			b.reposcheme = DefaultConfigTypeScheme
 		}
 	}
-	logger := logging.NewDefaultContext()
-	return newContext(b.shared, b.reposcheme, logger)
+	return newContext(b.shared, b.reposcheme, b.shared.LoggingContext())
 }

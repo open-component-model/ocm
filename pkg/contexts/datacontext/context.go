@@ -74,8 +74,10 @@ type Context interface {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+const CONTEXT_TYPE_SUFFIX = "context.gardener.cloud"
+
 // CONTEXT_TYPE is the global type for an attribute context.
-const CONTEXT_TYPE = "attributes.context.gardener.cloud"
+const CONTEXT_TYPE = "attributes." + CONTEXT_TYPE_SUFFIX
 
 type AttributesContext interface {
 	Context
@@ -92,8 +94,6 @@ type Attributes interface {
 	SetEncodedAttribute(name string, data []byte, unmarshaller runtime.Unmarshaler) error
 	GetOrCreateAttribute(name string, creator AttributeFactory) interface{}
 }
-
-var key = reflect.TypeOf(_context{})
 
 // DefaultContext is the default context initialized by init functions.
 var DefaultContext = New(nil)
@@ -126,56 +126,99 @@ func (u UpdateFunc) Update() error {
 	return u()
 }
 
-type _context struct {
+type contextBase struct {
 	ctxtype    string
 	key        interface{}
 	effective  Context
 	attributes Attributes
-	logctx     logging.Context
+	logging    logging.Context
 }
 
-// New provides a default base implementation for a data context.
-// It can also be used as root attribute context.
-func New(parentAttrs Attributes) AttributesContext {
-	c := &_context{ctxtype: CONTEXT_TYPE, key: key}
-	c.effective = c
-	c.attributes = newAttributes(c, parentAttrs, nil)
-	return c
-}
+var _ Context = (*contextBase)(nil)
 
 // NewContextBase creates a context base implementation supporting
 // context attributes and the binding to a context.Context.
-func NewContextBase(eff Context, typ string, key interface{}, parentAttrs Attributes, logger logging.Context) Context {
+func NewContextBase(eff Context, typ string, key interface{}, parentAttrs Attributes, parentLogging logging.Context) Context {
 	updater, _ := eff.(Updater)
-	c := &_context{ctxtype: typ, key: key, effective: eff}
-	c.attributes = newAttributes(eff, parentAttrs, updater)
-	c.logctx = logger
+	c := &contextBase{ctxtype: typ, key: key, effective: eff}
+	c.attributes = newAttributes(eff, parentAttrs, &updater)
+	c.logging = logging.NewWithBase(parentLogging)
 	return c
 }
 
-func (c *_context) Logger(messageContext ...logging.MessageContext) logging.Logger {
-	return c.logctx.Logger(messageContext)
-}
-
-func (c *_context) LoggingContext() logging.Context {
-	return c.logctx
-}
-
-func (c *_context) GetType() string {
+func (c *contextBase) GetType() string {
 	return c.ctxtype
 }
 
 // BindTo make the Context reachable via the resulting context.Context.
-func (c *_context) BindTo(ctx context.Context) context.Context {
+func (c *contextBase) BindTo(ctx context.Context) context.Context {
 	return context.WithValue(ctx, c.key, c.effective)
 }
 
-func (c *_context) AttributesContext() AttributesContext {
+func (c *contextBase) AttributesContext() AttributesContext {
 	return c
 }
 
-func (c *_context) GetAttributes() Attributes {
+func (c *contextBase) GetAttributes() Attributes {
 	return c.attributes
+}
+
+func (c *contextBase) LoggingContext() logging.Context {
+	return c.logging
+}
+
+func (c *contextBase) Logger(messageContext ...logging.MessageContext) logging.Logger {
+	return c.logging.Logger(messageContext...)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type _context struct {
+	Context
+	updater Updater
+}
+
+var key = reflect.TypeOf(contextBase{})
+
+// New provides a root attribute context.
+func New(parentAttrs Attributes) AttributesContext {
+	c := &_context{}
+
+	c.Context = &contextBase{
+		ctxtype:    CONTEXT_TYPE,
+		key:        key,
+		effective:  c,
+		attributes: newAttributes(c, parentAttrs, &c.updater),
+		logging:    logging.NewWithBase(ocmlog.Context()),
+	}
+	return c
+}
+
+// AssureUpdater is used to assure the existence of an updater in
+// a root context if a config context is down the context hierarchy.
+// This method SHOULD only be called by a config context.
+func AssureUpdater(attrs AttributesContext, u Updater) {
+	c, ok := attrs.(*_context)
+	if !ok {
+		return
+	}
+	if c.updater == nil {
+		c.updater = u
+	}
+}
+
+func (c *_context) LoggingContext() logging.Context {
+	if c.updater != nil {
+		c.updater.Update()
+	}
+	return c.Context.LoggingContext()
+}
+
+func (c *_context) Logger(messageContext ...logging.MessageContext) logging.Logger {
+	if c.updater != nil {
+		c.updater.Update()
+	}
+	return c.Context.Logger(messageContext...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -184,17 +227,17 @@ type _attributes struct {
 	sync.RWMutex
 	ctx        Context
 	parent     Attributes
-	updater    Updater
+	updater    *Updater
 	attributes map[string]interface{}
 }
 
 var _ Attributes = &_attributes{}
 
-func NewAttributes(ctx Context, parent Attributes, updater Updater) Attributes {
+func NewAttributes(ctx Context, parent Attributes, updater *Updater) Attributes {
 	return newAttributes(ctx, parent, updater)
 }
 
-func newAttributes(ctx Context, parent Attributes, updater Updater) *_attributes {
+func newAttributes(ctx Context, parent Attributes, updater *Updater) *_attributes {
 	return &_attributes{
 		ctx:        ctx,
 		parent:     parent,
@@ -204,8 +247,8 @@ func newAttributes(ctx Context, parent Attributes, updater Updater) *_attributes
 }
 
 func (c *_attributes) GetAttribute(name string, def ...interface{}) interface{} {
-	if c.updater != nil {
-		c.updater.Update()
+	if *c.updater != nil {
+		(*c.updater).Update()
 	}
 	c.RLock()
 	defer c.RUnlock()

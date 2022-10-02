@@ -90,13 +90,17 @@ var _ Context = &_context{}
 func newContext(configctx config.Context, reposcheme RepositoryTypeScheme, consumerMatchers IdentityMatcherRegistry, logger logging.Context) Context {
 	c := &_context{
 		sharedattributes:         configctx.AttributesContext(),
-		updater:                  cfgcpi.NewUpdate(configctx),
 		knownRepositoryTypes:     reposcheme,
 		consumerIdentityMatchers: consumerMatchers,
 		consumers:                newConsumers(),
 	}
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, configctx.GetAttributes(), logger)
+	c.updater = cfgcpi.NewUpdater(configctx, c)
 	return c
+}
+
+func (c *_context) Update() error {
+	return c.updater.Update()
 }
 
 func (c *_context) GetType() string {
@@ -109,10 +113,6 @@ func (c *_context) AttributesContext() datacontext.AttributesContext {
 
 func (c *_context) ConfigContext() config.Context {
 	return c.updater.GetContext()
-}
-
-func (c *_context) Update() error {
-	return c.updater.Update(c)
 }
 
 func (c *_context) RepositoryTypes() RepositoryTypeScheme {

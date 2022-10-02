@@ -85,20 +85,24 @@ type _context struct {
 	aliases              map[string]RepositorySpec
 }
 
-func newContext(creds credentials.Context, reposcheme RepositoryTypeScheme, specHandlers RepositorySpecHandlers, logger logging.Context) Context {
+var _ Context = &_context{}
+
+func newContext(credctx credentials.Context, reposcheme RepositoryTypeScheme, specHandlers RepositorySpecHandlers, logger logging.Context) Context {
 	c := &_context{
-		sharedattributes:     creds.AttributesContext(),
-		updater:              cfgcpi.NewUpdate(creds.ConfigContext()),
-		credentials:          creds,
+		sharedattributes:     credctx.AttributesContext(),
+		credentials:          credctx,
 		knownRepositoryTypes: reposcheme,
 		specHandlers:         specHandlers,
 		aliases:              map[string]RepositorySpec{},
 	}
-	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, creds.ConfigContext().GetAttributes(), logger)
+	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, credctx.ConfigContext().GetAttributes(), logger)
+	c.updater = cfgcpi.NewUpdater(credctx.ConfigContext(), c)
 	return c
 }
 
-var _ Context = &_context{}
+func (c *_context) Update() error {
+	return c.updater.Update()
+}
 
 func (c *_context) AttributesContext() datacontext.AttributesContext {
 	return c.sharedattributes
@@ -145,7 +149,7 @@ func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarsha
 }
 
 func (c *_context) GetAlias(name string) RepositorySpec {
-	err := c.updater.Update(c)
+	err := c.updater.Update()
 	if err != nil {
 		return nil
 	}

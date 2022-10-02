@@ -23,11 +23,10 @@ import (
 // made to a configuration context.
 type Updater interface {
 	// Update replays missing configuration requests
-	// applicable for a dedicated type of context
+	// applicable for a dedicated type of context or configuration target
 	// stored in a configuration context.
-	// It should be called from within such a context with
-	// the actual context as argument.
-	Update(target interface{}) error
+	// It should be created for and called from within such a context
+	Update() error
 	GetContext() Context
 
 	Lock()
@@ -39,13 +38,17 @@ type Updater interface {
 type updater struct {
 	sync.RWMutex
 	ctx            Context
+	target         interface{}
 	lastGeneration int64
 	inupdate       bool
 }
 
-func NewUpdater(ctx Context) Updater {
+// NewUpdater create a configuration updater for a configuration target
+// based on a dedicated configuration context.
+func NewUpdater(ctx Context, target interface{}) Updater {
 	return &updater{
-		ctx: ctx,
+		ctx:    ctx,
+		target: target,
 	}
 }
 
@@ -53,7 +56,11 @@ func (u *updater) GetContext() Context {
 	return u.ctx
 }
 
-func (u *updater) Update(target interface{}) error {
+func (u *updater) GetTarget() interface{} {
+	return u.target
+}
+
+func (u *updater) Update() error {
 	u.Lock()
 	if u.inupdate {
 		u.Unlock()
@@ -62,7 +69,7 @@ func (u *updater) Update(target interface{}) error {
 	u.inupdate = true
 	u.Unlock()
 
-	gen, err := u.ctx.ApplyTo(u.lastGeneration, target)
+	gen, err := u.ctx.ApplyTo(u.lastGeneration, u.target)
 
 	u.Lock()
 	defer u.Unlock()

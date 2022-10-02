@@ -57,7 +57,7 @@ func (o *Option) Complete(ctx clictx.Context) error {
 		return nil
 	}
 	if o.Script != "" {
-		err := cfgcpi.NewUpdate(ctx.ConfigContext()).Update(o)
+		err := cfgcpi.NewUpdater(ctx.ConfigContext(), o).Update()
 		if err != nil {
 			return err
 		}
@@ -74,7 +74,7 @@ func (o *Option) Complete(ctx clictx.Context) error {
 	}
 	if o.ScriptData == nil {
 		o.Script = "default"
-		err := cfgcpi.NewUpdate(ctx.ConfigContext()).Update(o)
+		err := cfgcpi.NewUpdater(ctx.ConfigContext(), o).Update()
 		if o.ScriptData == nil {
 			o.Script = ""
 		}

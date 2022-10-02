@@ -19,7 +19,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/logging"
 )
 
 type Builder struct {
@@ -88,6 +87,5 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 	if b.matchers == nil {
 		b.matchers = StandardIdentityMatchers
 	}
-	logger := logging.NewDefaultContext()
-	return newContext(b.config, b.reposcheme, b.matchers, logger)
+	return newContext(b.config, b.reposcheme, b.matchers, b.config.LoggingContext())
 }
