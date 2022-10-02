@@ -18,6 +18,7 @@ import (
 	"io"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/app"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -48,6 +49,12 @@ func (c *CLI) Execute(args ...string) error {
 	return cmd.Execute()
 }
 
+func (c *CLI) ExecuteModified(mod func(ctx clictx.Context, cmd *cobra.Command), args ...string) error {
+	cmd := app.NewCliCommand(c, mod)
+	cmd.SetArgs(args)
+	return cmd.Execute()
+}
+
 type TestEnv struct {
 	*builder.Builder
 	CLI
@@ -56,7 +63,6 @@ type TestEnv struct {
 func NewTestEnv(opts ...env.Option) *TestEnv {
 	b := builder.NewBuilder(env.NewEnvironment(opts...))
 	ctx := clictx.WithOCM(b.OCMContext()).WithSharedAttributes(datacontext.New(nil)).New()
-	ctx.Logger().Info("this should work.")
 	return &TestEnv{
 		Builder: b,
 		CLI:     *NewCLI(ctx),

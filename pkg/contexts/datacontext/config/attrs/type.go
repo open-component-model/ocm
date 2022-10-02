@@ -12,13 +12,12 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package config
+package attrs
 
 import (
 	"encoding/json"
 
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/config"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -72,7 +71,7 @@ func (a *Config) AddRawAttribute(attr string, data []byte) error {
 
 func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	list := errors.ErrListf("applying config")
-	t, ok := target.(config.Context)
+	t, ok := target.(cfgcpi.Context)
 	if !ok {
 		return cfgcpi.ErrNoContext(ConfigType)
 	}

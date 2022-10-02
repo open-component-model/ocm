@@ -130,13 +130,14 @@ func newContext(shared datacontext.AttributesContext, reposcheme ConfigTypeSchem
 			configs:          NewConfigStore(),
 		},
 	}
-	c.updater = NewUpdater(c)
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes(), logger)
+	c.updater = NewUpdater(c, c)
+	datacontext.AssureUpdater(shared, NewUpdater(c, shared))
 	return c
 }
 
 func (c *_context) Update() error {
-	return c.updater.Update(c)
+	return c.updater.Update()
 }
 
 var _ datacontext.Updater = (*_context)(nil)
@@ -153,7 +154,7 @@ func (c *_context) WithInfo(desc string) Context {
 }
 
 func (c *_context) AttributesContext() datacontext.AttributesContext {
-	c.updater.Update(c)
+	c.updater.Update()
 	return c.sharedAttributes
 }
 

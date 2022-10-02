@@ -12,19 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package core_test
+package app_test
 
 import (
+	"testing"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/open-component-model/ocm/pkg/contexts/config"
-	"github.com/open-component-model/ocm/pkg/contexts/config/core"
 )
 
-var _ = Describe("setup", func() {
-	It("creates initial", func() {
-		Expect(len(config.DefaultContext().ConfigTypes().KnownTypeNames())).To(Equal(6))
-		Expect(len(core.DefaultConfigTypeScheme.KnownTypeNames())).To(Equal(6))
-	})
-})
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "App Suite")
+}

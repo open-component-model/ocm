@@ -83,6 +83,25 @@ The following configuration types are supported:
          ...
   </pre>
 
+- <code>logging.config.ocm.gardener.cloud</code>
+  The config type <code>logging.config.ocm.gardener.cloud</code> can be used to configure the logging
+  aspect of a dedicated context type:
+  
+  <pre>
+      type: logging.config.ocm.gardener.cloud
+      contextType: attributes.context.gardener.cloud
+      settings:
+        defaultLevel: Info
+        rules:
+          - ...
+  </pre>
+  
+  The context type attributes.context.gardener.cloud is the root context of a
+  context hierarchy.
+  
+  If no context type is specified, the config will be applies to any target
+  acting as logging context provider, which is not a non-root context.
+
 - <code>memory.credentials.config.ocm.gardener.cloud</code>
   The config type <code>memory.credentials.config.ocm.gardener.cloud</code> can be used to define a list
   of arbitrary credentials stored in a memory based credentials repository:

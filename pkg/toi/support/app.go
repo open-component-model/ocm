@@ -29,7 +29,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	datactg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
+	datactg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config/attrs"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/toi/install"

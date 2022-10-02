@@ -59,8 +59,8 @@ func IsGeneric(cfg Config) bool {
 
 type Updater = core.Updater
 
-func NewUpdate(ctx Context) Updater {
-	return core.NewUpdater(ctx)
+func NewUpdater(ctx Context, target interface{}) Updater {
+	return core.NewUpdater(ctx, target)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

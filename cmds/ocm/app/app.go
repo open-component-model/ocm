@@ -17,12 +17,15 @@
 package app
 
 import (
-	"fmt"
 	"strings"
 
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 
+	"github.com/mandelsoft/logging"
+	"github.com/mandelsoft/logging/config"
+	"github.com/mandelsoft/logging/logrusr"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -60,9 +63,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
-	datacfg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
+	datacfg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config/attrs"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
+	ocmlog "github.com/open-component-model/ocm/pkg/logging"
+	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/version"
 )
 
@@ -72,6 +77,11 @@ type CLIOptions struct {
 	Context     clictx.Context
 	Settings    []string
 	Verbose     bool
+	LogLevel    string
+	LogFile     string
+	LogConfig   string
+
+	logFile vfs.File
 }
 
 var desc = `
@@ -128,7 +138,7 @@ The value can be a simple type or a json string for complex values. The followin
 attributes are supported:
 ` + attributes.Attributes()
 
-func NewCliCommand(ctx clictx.Context) *cobra.Command {
+func NewCliCommand(ctx clictx.Context, mod ...func(clictx.Context, *cobra.Command)) *cobra.Command {
 	if ctx == nil {
 		ctx = clictx.DefaultContext()
 	}
@@ -146,10 +156,13 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return opts.Complete()
 		},
+		PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
+			return opts.Close()
+		},
 	}
 	cobrautils.TweakCommand(cmd, ctx)
 
-	cmd.AddCommand(NewVersionCommand())
+	cmd.AddCommand(NewVersionCommand(opts.Context))
 
 	cmd.AddCommand(get.NewCommand(opts.Context))
 	cmd.AddCommand(create.NewCommand(opts.Context))
@@ -198,6 +211,11 @@ func NewCliCommand(ctx clictx.Context) *cobra.Command {
 	help.AddCommand(topicocmrefs.New(ctx))
 	help.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 
+	for _, m := range mod {
+		if m != nil {
+			m(ctx, cmd)
+		}
+	}
 	return cmd
 }
 
@@ -206,13 +224,56 @@ func (o *CLIOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.StringArrayVarP(&o.Credentials, "cred", "C", nil, "credential setting")
 	fs.StringArrayVarP(&o.Settings, "attribute", "X", nil, "attribute setting")
 	fs.BoolVarP(&o.Verbose, "verbose", "v", false, "enable verbose logging")
+	fs.StringVarP(&o.LogLevel, "loglevel", "l", "", "set log level")
+	fs.StringVarP(&o.LogFile, "logfile", "L", "", "set log file")
+	fs.StringVarP(&o.LogConfig, "logconfig", "", "", "log config")
+}
+
+func (o *CLIOptions) Close() error {
+	if o.logFile == nil {
+		return nil
+	}
+	return o.logFile.Close()
 }
 
 func (o *CLIOptions) Complete() error {
+	var err error
 	if o.Verbose {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
-	_, err := utils.Configure(o.Context.OCMContext(), o.Config, vfsattr.Get(o.Context))
+
+	if o.LogLevel != "" {
+		l, err := logging.ParseLevel(o.LogLevel)
+		if err != nil {
+			return errors.Wrapf(err, "invalid log level %q", o.LogLevel)
+		}
+		ocmlog.Context().SetDefaultLevel(l)
+	} else {
+		ocmlog.Context().SetDefaultLevel(logging.ErrorLevel)
+	}
+
+	if o.LogFile != "" {
+		o.logFile, err = o.Context.FileSystem().OpenFile(o.LogFile, vfs.O_CREATE|vfs.O_WRONLY, 0o600)
+		if err != nil {
+			return errors.Wrapf(err, "cannot open log file %q", o.LogFile)
+		}
+		log := logrus.New()
+		//log.SetFormatter(&logrus.JSONFormatter{})
+		log.SetOutput(o.logFile)
+		ocmlog.Context().SetBaseLogger(logrusr.New(log))
+	}
+
+	if o.LogConfig != "" {
+		cfg, err := vfs.ReadFile(o.Context.FileSystem(), o.LogConfig)
+		if err != nil {
+			return errors.Wrapf(err, "cannot read logging config %q", o.LogFile)
+		}
+		if err = config.ConfigureWithData(ocmlog.Context(), cfg); err != nil {
+			return errors.Wrapf(err, "cinvalid logging config: %q", o.LogFile)
+		}
+	}
+
+	_, err = utils.Configure(o.Context.OCMContext(), o.Config, vfsattr.Get(o.Context))
 	if err != nil {
 		return err
 	}
@@ -267,14 +328,14 @@ func (o *CLIOptions) Complete() error {
 	return err
 }
 
-func NewVersionCommand() *cobra.Command {
+func NewVersionCommand(ctx clictx.Context) *cobra.Command {
 	return &cobra.Command{
 		Use:     "version",
 		Aliases: []string{"v"},
 		Short:   "displays the version",
 		Run: func(cmd *cobra.Command, args []string) {
 			v := version.Get()
-			fmt.Printf("%#v", v)
+			out.Outf(ctx, "%#v\n", v)
 		},
 	}
 }

@@ -42,7 +42,6 @@ func Apply(printer common.Printer, state *common.WalkingState, cv ocm.ComponentV
 		s := common.NewWalkingState()
 		state = &s
 	}
-
 	return apply(printer, *state, cv, opts)
 }
 

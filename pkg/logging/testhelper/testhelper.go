@@ -12,19 +12,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package core_test
+package testhelper
 
 import (
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
-	"github.com/open-component-model/ocm/pkg/contexts/config"
-	"github.com/open-component-model/ocm/pkg/contexts/config/core"
+	"github.com/mandelsoft/logging"
 )
 
-var _ = Describe("setup", func() {
-	It("creates initial", func() {
-		Expect(len(config.DefaultContext().ConfigTypes().KnownTypeNames())).To(Equal(6))
-		Expect(len(core.DefaultConfigTypeScheme.KnownTypeNames())).To(Equal(6))
-	})
-})
+func LogTest(ctx logging.ContextProvider, prefix ...string) {
+	p := ""
+	for _, e := range prefix {
+		p += e
+	}
+	ctx.LoggingContext().Logger().Trace(p + "trace")
+	ctx.LoggingContext().Logger().Debug(p + "debug")
+	ctx.LoggingContext().Logger().Info(p + "info")
+	ctx.LoggingContext().Logger().Warn(p + "warn")
+	ctx.LoggingContext().Logger().Error(p + "error")
+}

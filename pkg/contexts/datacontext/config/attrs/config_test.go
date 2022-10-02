@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package config
+package attrs_test
 
 import (
 	"fmt"
@@ -23,6 +23,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	local "github.com/open-component-model/ocm/pkg/contexts/datacontext/config/attrs"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -77,7 +78,7 @@ var _ = Describe("generic attributes", func() {
 		It("applies later attribute config", func() {
 
 			sub := credentials.WithConfigs(ctx).New()
-			spec := New()
+			spec := local.New()
 			Expect(spec.AddAttribute(ATTR_KEY, attribute)).To(Succeed())
 			Expect(ctx.ApplyConfig(spec, "test")).To(Succeed())
 
@@ -86,7 +87,7 @@ var _ = Describe("generic attributes", func() {
 
 		It("applies earlier attribute config", func() {
 
-			spec := New()
+			spec := local.New()
 			Expect(spec.AddAttribute(ATTR_KEY, attribute)).To(Succeed())
 			Expect(ctx.ApplyConfig(spec, "test")).To(Succeed())
 

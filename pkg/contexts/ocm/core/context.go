@@ -109,7 +109,6 @@ var _ Context = &_context{}
 func newContext(credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, specHandlers RepositorySpecHandlers, blobHandlers BlobHandlerRegistry, blobDigesters BlobDigesterRegistry, logger logging.Context) Context {
 	c := &_context{
 		sharedattributes:     credctx.AttributesContext(),
-		updater:              cfgcpi.NewUpdate(credctx.ConfigContext()),
 		credctx:              credctx,
 		ocictx:               ocictx,
 		specHandlers:         specHandlers,
@@ -120,7 +119,12 @@ func newContext(credctx credentials.Context, ocictx oci.Context, reposcheme Repo
 		aliases:              map[string]RepositorySpec{},
 	}
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, credctx.GetAttributes(), logger)
+	c.updater = cfgcpi.NewUpdater(credctx.ConfigContext(), c)
 	return c
+}
+
+func (c *_context) Update() error {
+	return c.updater.Update()
 }
 
 func (c *_context) AttributesContext() datacontext.AttributesContext {
@@ -211,7 +215,7 @@ func (c *_context) Encode(spec AccessSpec, marshaler runtime.Marshaler) ([]byte,
 }
 
 func (c *_context) GetAlias(name string) RepositorySpec {
-	err := c.updater.Update(c)
+	err := c.updater.Update()
 	if err != nil {
 		return nil
 	}

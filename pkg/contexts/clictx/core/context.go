@@ -129,16 +129,20 @@ func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context, outctx
 		sharedAttributes: shared,
 		credentials:      ocmctx.CredentialsContext(),
 		config:           ocmctx.CredentialsContext().ConfigContext(),
-		updater:          cfgcpi.NewUpdate(ocmctx.CredentialsContext().ConfigContext()),
 		out:              outctx,
 	}
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, ocmctx.GetAttributes(), logger)
+	c.updater = cfgcpi.NewUpdater(ocmctx.CredentialsContext().ConfigContext(), c)
 	c.oci = newOCI(c, ocmctx)
 	c.ocm = newOCM(c, ocmctx)
 	if fs != nil {
 		vfsattr.Set(c.AttributesContext(), fs)
 	}
 	return c
+}
+
+func (c *_context) Update() error {
+	return c.updater.Update()
 }
 
 func (c *_context) AttributesContext() datacontext.AttributesContext {
