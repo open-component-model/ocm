@@ -20,7 +20,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -62,10 +61,10 @@ var _ = Describe("Download Component Version", func() {
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("download", "component", "-O", OUT, "-r", ARCH, COMPONENT+grammar.VersionSeparator+VERSION)).To(Succeed())
-		ExpectTrimmedStringEqual(buf.String(),
+		Expect("\n" + buf.String()).To(Equal(
 			`
 /tmp/res: downloaded
-`)
+`))
 		Expect(env.DirExists(OUT)).To(BeTrue())
 		Expect(env.ReadFile(vfs.Join(env, OUT, comparch.BlobsDirectoryName, "sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))).To(Equal([]byte("testdata")))
 

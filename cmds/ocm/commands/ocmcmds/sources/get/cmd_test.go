@@ -20,7 +20,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -56,11 +55,11 @@ var _ = Describe("Test Environment", func() {
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("get", "sources", ARCH)).To(Succeed())
-		ExpectTrimmedStringEqual(buf.String(),
+		Expect("\n" + buf.String()).To(Equal(
 			`
 NAME     VERSION IDENTITY TYPE
 testdata v1               git
-`)
+`))
 	})
 
 	It("lists ambigious source in component archive", func() {
@@ -78,12 +77,12 @@ testdata v1               git
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("get", "sources", ARCH)).To(Succeed())
-		ExpectTrimmedStringEqual(buf.String(),
+		Expect("\n" + buf.String()).To(Equal(
 			`
 NAME     VERSION IDENTITY       TYPE
 testdata v1      "platform"="a" git
 testdata v1      "platform"="b" git
-`)
+`))
 	})
 
 	It("lists single source in ctf file", func() {
@@ -100,11 +99,11 @@ testdata v1      "platform"="b" git
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("get", "sources", ARCH)).To(Succeed())
-		ExpectTrimmedStringEqual(buf.String(),
+		Expect("\n" + buf.String()).To(Equal(
 			`
 NAME     VERSION IDENTITY TYPE
 testdata v1               git
-`)
+`))
 	})
 
 	Context("with closure", func() {
@@ -133,35 +132,35 @@ testdata v1               git
 		It("lists resource closure in ctf file", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "sources", "-c", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-			ExpectTrimmedStringEqual(buf.String(),
+			Expect("\n" + buf.String()).To(Equal(
 				`
 REFERENCEPATH              NAME     VERSION IDENTITY TYPE
 test.de/y:v1               source   v1               git
 test.de/y:v1->test.de/x:v1 testdata v1               git
-`)
+`))
 		})
 		It("lists flat tree in ctf file", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "sources", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-			ExpectTrimmedStringEqual(buf.String(),
+			Expect("\n" + buf.String()).To(Equal(
 				`
 COMPONENTVERSION    NAME   VERSION IDENTITY TYPE
 └─ test.de/y:v1                             
    └─               source v1               git
-`)
+`))
 		})
 
 		It("lists resource closure in ctf file", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "sources", "-c", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-			ExpectTrimmedStringEqual(buf.String(),
+			Expect("\n" + buf.String()).To(Equal(
 				`
 COMPONENTVERSION       NAME     VERSION IDENTITY TYPE
 └─ test.de/y:v1                                  
    ├─                  source   v1               git
    └─ test.de/x:v1                               
       └─               testdata v1               git
-`)
+`))
 		})
 	})
 })

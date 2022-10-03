@@ -20,7 +20,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
@@ -60,10 +59,10 @@ var _ = Describe("Test Environment", func() {
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("download", "artefact", "-O", OUT, "-r", ARCH, NS+grammar.TagSeparator+VERSION)).To(Succeed())
-		ExpectTrimmedStringEqual(buf.String(),
+		Expect("\n" + buf.String()).To(Equal(
 			`
 /tmp/res: downloaded
-`)
+`))
 		Expect(env.DirExists(OUT)).To(BeTrue())
 		Expect(env.ReadFile(OUT + "/" + artefactset.ArtefactSetDescriptorFileName)).To(Equal([]byte("{\"schemaVersion\":2,\"mediaType\":\"application/vnd.oci.image.index.v1+json\",\"manifests\":[{\"mediaType\":\"application/vnd.oci.image.manifest.v1+json\",\"digest\":\"sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9\",\"size\":342,\"annotations\":{\"cloud.gardener.ocm/tags\":\"v1\"}}],\"annotations\":{\"cloud.gardener.ocm/main\":\"sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9\"}}")))
 	})
