@@ -21,7 +21,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -108,12 +107,12 @@ var _ = Describe("Test Environment", func() {
 	It("transfers ctf", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("transfer", "ctf", ARCH, OUT)).To(Succeed())
-		ExpectTrimmedStringEqual(buf.String(), `
+		Expect("\n" + buf.String()).To(Equal(`
 transferring component "github.com/mandelsoft/test"...
   transferring version "github.com/mandelsoft/test:v1"...
   ...resource 0...
   ...adding component version...
-`)
+`))
 
 		Expect(env.DirExists(OUT)).To(BeTrue())
 

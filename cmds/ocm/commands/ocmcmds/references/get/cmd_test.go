@@ -20,7 +20,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 )
@@ -55,12 +54,12 @@ var _ = Describe("Test Environment", func() {
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("get", "references", "-o", "wide", CA)).To(Succeed())
-		ExpectTrimmedStringEqual(buf.String(),
+		Expect("\n" + buf.String()).To(Equal(
 			`
 NAME   COMPONENT VERSION IDENTITY
 test   test.de/y v1      "name"="test"
 withid test.de/z v1      "id"="test","name"="withid"
-`)
+`))
 	})
 
 	Context("with closure", func() {
@@ -84,34 +83,34 @@ withid test.de/z v1      "id"="test","name"="withid"
 		It("lists single reference in component archive", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "references", "--lookup", CTF, "-c", "-o", "wide", CA)).To(Succeed())
-			ExpectTrimmedStringEqual(buf.String(),
+			Expect("\n" + buf.String()).To(Equal(
 				`
 REFERENCEPATH              NAME   COMPONENT VERSION IDENTITY
 test.de/x:v1               test   test.de/y v1      "name"="test"
 test.de/x:v1->test.de/y:v1 withid test.de/z v1      "id"="test","name"="withid"
-`)
+`))
 		})
 		It("lists flat tree in ctf file", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "references", "-o", "tree", "--lookup", CTF, CA)).To(Succeed())
-			ExpectTrimmedStringEqual(buf.String(),
+			Expect("\n" + buf.String()).To(Equal(
 				`
 COMPONENTVERSION    NAME COMPONENT VERSION IDENTITY
 └─ test.de/x:v1                            
    └─               test test.de/y v1      "name"="test"
-`)
+`))
 		})
 
 		It("lits reference closure in ctf file", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "references", "-c", "-o", "tree", "--lookup", CTF, CA)).To(Succeed())
-			ExpectTrimmedStringEqual(buf.String(),
+			Expect("\n" + buf.String()).To(Equal(
 				`
 COMPONENTVERSION    NAME   COMPONENT VERSION IDENTITY
 └─ test.de/x:v1                              
    └─ ⊗             test   test.de/y v1      "name"="test"
       └─            withid test.de/z v1      "id"="test","name"="withid"
-`)
+`))
 		})
 	})
 })
