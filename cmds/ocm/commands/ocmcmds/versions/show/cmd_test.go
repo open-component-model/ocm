@@ -20,6 +20,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 )
@@ -72,7 +73,7 @@ var _ = Describe("Test Environment", func() {
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("ocm", "versions", "show", "--repo", ARCH, COMPONENT)).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(`
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 v1.3
 v1.3.1
 v1.3.2-beta.1
@@ -85,7 +86,7 @@ v2.0
 	It("lists filtered versions", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("ocm", "versions", "show", "--repo", ARCH, COMPONENT, "1.3.x", "1.4")).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(`
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 v1.3
 v1.3.1
 v1.3.2
@@ -97,7 +98,7 @@ v1.4
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("ocm", "versions", "show", "--semantic", "--repo", ARCH, COMPONENT, "1.3", "1.4")).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(`
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 1.3.0
 1.3.1
 1.3.2
@@ -109,7 +110,7 @@ v1.4
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("ocm", "versions", "show", "--latest", "--repo", ARCH, COMPONENT, "1.3")).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(`
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 v1.3.2
 `))
 	})
