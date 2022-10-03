@@ -21,8 +21,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
-
-	"github.com/sirupsen/logrus"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -162,15 +161,14 @@ var _ = Describe("Test Environment", func() {
 	It("transfers ctf", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("transfer", "components", "--resourcesByValue", ARCH, ARCH, OUT)).To(Succeed())
-		logrus.Infof("%s\n", buf)
-		Expect("\n" + buf.String()).To(Equal(`
+		ExpectTrimmedStringEqual(buf.String(), `
 transferring version "github.com/mandelsoft/test:v1"...
 ...resource 0...
 ...resource 1(ocm/value:v2.0)...
 ...resource 2(ocm/ref:v2.0)...
 ...adding component version...
 1 versions transferred
-`))
+`)
 
 		Expect(env.DirExists(OUT)).To(BeTrue())
 		Check(env, ldesc, OUT)
@@ -180,8 +178,7 @@ transferring version "github.com/mandelsoft/test:v1"...
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("transfer", "components", "--resourcesByValue", "--closure", "--lookup", ARCH, ARCH2, ARCH2, OUT)).To(Succeed())
 		str := buf.String()
-		logrus.Infof("%s\n", str)
-		Expect("\n" + str).To(Equal(`
+		ExpectTrimmedStringEqual(str, `
 transferring version "github.com/mandelsoft/test2:v1"...
   transferring version "github.com/mandelsoft/test:v1"...
   ...resource 0...
@@ -190,7 +187,7 @@ transferring version "github.com/mandelsoft/test2:v1"...
   ...adding component version...
 ...adding component version...
 2 versions transferred
-`))
+`)
 
 		Expect(env.DirExists(OUT)).To(BeTrue())
 		tgt, err := ctfocm.Open(env.OCMContext(), accessobj.ACC_READONLY, OUT, 0, accessio.PathFileSystem(env.FileSystem()))
@@ -210,14 +207,14 @@ transferring version "github.com/mandelsoft/test2:v1"...
 	It("transfers ctf to tgz", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("transfer", "components", "--resourcesByValue", ARCH, ARCH, accessio.FormatTGZ.String()+"::"+OUT)).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(`
+		ExpectTrimmedStringEqual(buf.String(), `
 transferring version "github.com/mandelsoft/test:v1"...
 ...resource 0...
 ...resource 1(ocm/value:v2.0)...
 ...resource 2(ocm/ref:v2.0)...
 ...adding component version...
 1 versions transferred
-`))
+`)
 
 		Expect(env.FileExists(OUT)).To(BeTrue())
 		Check(env, ldesc, OUT)
@@ -226,14 +223,14 @@ transferring version "github.com/mandelsoft/test:v1"...
 	It("transfers ctf to ctf+tgz", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("transfer", "components", "--resourcesByValue", ARCH, ARCH, "ctf+"+accessio.FormatTGZ.String()+"::"+OUT)).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(`
+		ExpectTrimmedStringEqual(buf.String(), `
 transferring version "github.com/mandelsoft/test:v1"...
 ...resource 0...
 ...resource 1(ocm/value:v2.0)...
 ...resource 2(ocm/ref:v2.0)...
 ...adding component version...
 1 versions transferred
-`))
+`)
 
 		Expect(env.FileExists(OUT)).To(BeTrue())
 		Check(env, ldesc, OUT)

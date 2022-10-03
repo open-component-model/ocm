@@ -19,8 +19,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/sirupsen/logrus"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
@@ -153,14 +152,9 @@ var _ = Describe("normalization", func() {
 		entries, err := signing.PrepareNormalization(cd, signing.NoExcludes{})
 		Expect(err).To(Succeed())
 
-		data, err := signing.Marshal("  ", entries)
+		_, err = signing.Marshal("  ", entries)
 		Expect(err).To(Succeed())
-		logrus.Infof("%s\n", string(data))
-
-		r := entries.ToString("")
-		logrus.Infof("******\n%s\n", r)
-
-		Expect("\n" + r).To(Equal(`
+		ExpectTrimmedStringEqual(entries.ToString(""), `
 {
   component: {
     componentReferences: []
@@ -226,7 +220,7 @@ var _ = Describe("normalization", func() {
       {
         access: {
           imageReference: blob
-          type: ` + ociartefact.Type + `
+          type: `+ociartefact.Type+`
         }
         labels: [
           {
@@ -254,7 +248,7 @@ var _ = Describe("normalization", func() {
   meta: {
     configuredSchemaVersion: v2
   }
-}`))
+}`)
 	})
 
 	It("Normalizes struct without repositoryContexts", func() {
@@ -265,8 +259,7 @@ var _ = Describe("normalization", func() {
 			},
 		})
 		Expect(err).To(Succeed())
-
-		Expect("\n" + entries.ToString("")).To(Equal(`
+		ExpectTrimmedStringEqual(entries.ToString(""), `
 {
   component: {
     componentReferences: []
@@ -326,7 +319,7 @@ var _ = Describe("normalization", func() {
       {
         access: {
           imageReference: blob
-          type: ` + ociartefact.Type + `
+          type: `+ociartefact.Type+`
         }
         labels: [
           {
@@ -354,7 +347,7 @@ var _ = Describe("normalization", func() {
   meta: {
     configuredSchemaVersion: v2
   }
-}`))
+}`)
 	})
 
 	It("Normalizes struct without access", func() {
@@ -369,8 +362,7 @@ var _ = Describe("normalization", func() {
 			},
 		})
 		Expect(err).To(Succeed())
-
-		Expect("\n" + entries.ToString("")).To(Equal(`
+		ExpectTrimmedStringEqual(entries.ToString(""), `
 {
   component: {
     componentReferences: []
@@ -454,7 +446,7 @@ var _ = Describe("normalization", func() {
   meta: {
     configuredSchemaVersion: v2
   }
-}`))
+}`)
 	})
 
 	It("Normalizes struct without resources of type localBlob", func() {
@@ -470,7 +462,7 @@ var _ = Describe("normalization", func() {
 			},
 		})
 		Expect(err).To(Succeed())
-		Expect("\n" + entries.ToString("")).To(Equal(`
+		ExpectTrimmedStringEqual(entries.ToString(""), `
 {
   component: {
     componentReferences: []
@@ -528,7 +520,7 @@ var _ = Describe("normalization", func() {
   meta: {
     configuredSchemaVersion: v2
   }
-}`))
+}`)
 	})
 
 	It("Normalizes struct without no-signing resource labels", func() {
@@ -546,8 +538,7 @@ var _ = Describe("normalization", func() {
 			},
 		})
 		Expect(err).To(Succeed())
-		r := entries.ToString("")
-		Expect("\n" + r).To(Equal(`
+		ExpectTrimmedStringEqual(entries.ToString(""), `
 {
   component: {
     componentReferences: []
@@ -618,17 +609,14 @@ var _ = Describe("normalization", func() {
   meta: {
     configuredSchemaVersion: v2
   }
-}`))
+}`)
 	})
 
 	It("Normalizes cd", func() {
 
 		entries, err := signing.PrepareNormalization(cd, CDExcludes)
 		Expect(err).To(Succeed())
-		r := entries.ToString("")
-		logrus.Infof("%s\n", r)
-
-		Expect("\n" + r).To(Equal(`
+		ExpectTrimmedStringEqual(entries.ToString(""), `
 {
   component: {
     componentReferences: []
@@ -673,7 +661,7 @@ var _ = Describe("normalization", func() {
   meta: {
     configuredSchemaVersion: v2
   }
-}`))
+}`)
 	})
 
 	It("Normalizes with recursive includes", func() {
@@ -685,14 +673,12 @@ var _ = Describe("normalization", func() {
 		}
 		entries, err := signing.PrepareNormalization(cd, rules)
 		Expect(err).To(Succeed())
-		logrus.Infof("%s\n", entries.ToString(""))
-
-		Expect("\n" + entries.ToString("")).To(Equal(`
+		ExpectTrimmedStringEqual(entries.ToString(""), `
 {
   component: {
     name: test
   }
-}`))
+}`)
 	})
 
 	It("Normalizes with recursive modifying includes", func() {
@@ -707,13 +693,11 @@ var _ = Describe("normalization", func() {
 		}
 		entries, err := signing.PrepareNormalization(cd, rules)
 		Expect(err).To(Succeed())
-		logrus.Infof("%s\n", entries.ToString(""))
-
-		Expect("\n" + entries.ToString("")).To(Equal(`
+		ExpectTrimmedStringEqual(entries.ToString(""), `
 {
   modified: {
     name: test
   }
-}`))
+}`)
 	})
 })
