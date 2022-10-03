@@ -21,8 +21,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
-
-	"github.com/sirupsen/logrus"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	compdescv3 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud/v3alpha1"
@@ -54,7 +53,7 @@ var _ = Describe("Test Environment", func() {
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("get", "components", ARCH, "-o", "wide")).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
 COMPONENT VERSION PROVIDER   REPOSITORY
 test.de/x v1      mandelsoft /tmp/ca
@@ -69,8 +68,7 @@ test.de/x v1      mandelsoft /tmp/ca
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("get", "components", ARCH, "-c")).To(Succeed())
-		logrus.Infof("%s", buf)
-		Expect("\n" + buf.String()).To(Equal(
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
 REFERENCEPATH COMPONENT VERSION PROVIDER                    IDENTITY
               test.de/x v1      mandelsoft                  
@@ -86,8 +84,7 @@ test.de/x:v1  test.de/y v1      <unknown component version> "name"="ref"
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("get", "components", ARCH, "-c", "-o", "tree")).To(Succeed())
-		logrus.Infof("%s", buf)
-		Expect("\n" + buf.String()).To(Equal(
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
 NESTING    COMPONENT VERSION PROVIDER                    IDENTITY
 └─ ⊗       test.de/x v1      mandelsoft                  
@@ -106,7 +103,7 @@ NESTING    COMPONENT VERSION PROVIDER                    IDENTITY
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("get", "components", ARCH, "-o", "wide")).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
 COMPONENT VERSION PROVIDER   REPOSITORY
 test.de/x v1      mandelsoft /tmp/ca
@@ -135,7 +132,7 @@ test.de/x v1      mandelsoft /tmp/ca
 
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "components", "--lookup", ARCH2, "-c", "--repo", ARCH, COMP2)).To(Succeed())
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 REFERENCEPATH COMPONENT VERSION PROVIDER   IDENTITY
               test.de/y v1      mandelsoft 
@@ -146,7 +143,7 @@ test.de/y:v1  test.de/x v1      mandelsoft "name"="xx"
 
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "components", "-o", "tree", "--repo", ARCH, COMP2)).To(Succeed())
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 NESTING COMPONENT VERSION PROVIDER
 └─      test.de/y v1      mandelsoft
@@ -156,7 +153,7 @@ NESTING COMPONENT VERSION PROVIDER
 
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "components", "-o", "tree", "--lookup", ARCH2, "-c", "--repo", ARCH, COMP2)).To(Succeed())
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 NESTING    COMPONENT VERSION PROVIDER   IDENTITY
 └─ ⊗       test.de/y v1      mandelsoft 
@@ -168,7 +165,7 @@ NESTING    COMPONENT VERSION PROVIDER   IDENTITY
 
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "components", "-S", compdescv3.SchemaVersion, "-o", "yaml", "--repo", ARCH, COMP2)).To(Succeed())
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				fmt.Sprintf(`
 ---
 apiVersion: ocm.gardener.cloud/%s

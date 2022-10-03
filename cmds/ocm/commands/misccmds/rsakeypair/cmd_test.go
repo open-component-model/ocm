@@ -20,6 +20,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/opencontainers/go-digest"
 
@@ -43,7 +44,7 @@ var _ = Describe("Test Environment", func() {
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "key.priv")).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(`
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 created rsa key pair key.priv[key.pub]
 `))
 		priv, err := env.ReadFile("key.priv")
@@ -66,7 +67,7 @@ created rsa key pair key.priv[key.pub]
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("create", "rsakeypair", "key.priv", "CN=mandelsoft")).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(`
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 created rsa key pair key.priv[key.cert]
 `))
 		priv, err := env.ReadFile("key.priv")

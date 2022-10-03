@@ -20,8 +20,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
-
-	"github.com/sirupsen/logrus"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/common/handlers/artefacthdlr"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -100,7 +99,7 @@ var _ = Describe("Test Environment", func() {
 
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "artefact", ARCH+"//"+NS1+":"+VERSION1)).To(Succeed())
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 REGISTRY REPOSITORY      KIND     TAG DIGEST
 /tmp/ctf mandelsoft/test manifest v1  sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9
@@ -110,7 +109,7 @@ REGISTRY REPOSITORY      KIND     TAG DIGEST
 
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "artefact", ARCH+"//"+NS1)).To(Succeed())
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 REGISTRY REPOSITORY      KIND     TAG DIGEST
 /tmp/ctf mandelsoft/test manifest v1  sha256:2c3e2c59e0ac9c99864bf0a9f9727c09f21a66080f9f9b03b36a2dad3cce6ff9
@@ -121,7 +120,7 @@ REGISTRY REPOSITORY      KIND     TAG DIGEST
 		It("get all artefacts in other namespace", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "artefact", ARCH+"//"+NS2)).To(Succeed())
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 REGISTRY REPOSITORY       KIND     TAG DIGEST
 /tmp/ctf mandelsoft/index index    v1  sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
@@ -132,7 +131,7 @@ REGISTRY REPOSITORY       KIND     TAG DIGEST
 		It("get closure of all artefacts in other namespace", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "artefact", "-c", ARCH+"//"+NS2)).To(Succeed())
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 REFERENCEPATH                                                           REGISTRY REPOSITORY       KIND     TAG DIGEST
                                                                         /tmp/ctf mandelsoft/index index    v1  sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
@@ -144,7 +143,7 @@ sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627 /tmp/ctf
 		It("get tree of all tagged artefacts in other namespace", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "artefact", "-o", "tree", ARCH+"//"+NS2)).To(Succeed())
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 NESTING REGISTRY REPOSITORY       KIND     TAG DIGEST
 ├─      /tmp/ctf mandelsoft/index index    v1  sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
@@ -155,7 +154,7 @@ NESTING REGISTRY REPOSITORY       KIND     TAG DIGEST
 		It("get tree of all artefacts in other namespace", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "artefact", "-c", "-o", "tree", ARCH+"//"+NS2)).To(Succeed())
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 NESTING     REGISTRY REPOSITORY       KIND     TAG DIGEST
 ├─ ⊗        /tmp/ctf mandelsoft/index index    v1  sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
@@ -246,8 +245,7 @@ NESTING     REGISTRY REPOSITORY       KIND     TAG DIGEST
 		It("get single artefact and attachment", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "artefact", "-a", ARCH+"//"+NS2+":"+VERSION1)).To(Succeed())
-			logrus.Infof("%s\n", buf.String())
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 REGISTRY REPOSITORY       KIND     TAG                                                                          DIGEST
 /tmp/ctf mandelsoft/index index    v1                                                                           sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
@@ -258,8 +256,7 @@ REGISTRY REPOSITORY       KIND     TAG                                          
 		It("get single artefact attachment tree", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "artefact", "-a", "-o", "tree", ARCH+"//"+NS2+":"+VERSION1)).To(Succeed())
-			logrus.Infof("%s\n", buf.String())
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 NESTING        REGISTRY REPOSITORY       KIND     TAG                                                                          DIGEST
 └─ ⊗           /tmp/ctf mandelsoft/index index    v1                                                                           sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627
@@ -270,8 +267,7 @@ NESTING        REGISTRY REPOSITORY       KIND     TAG                           
 		It("get single artefact attachment tree with closure", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "artefact", "-a", "-c", "-o", "tree", ARCH+"//"+NS2+":"+VERSION1)).To(Succeed())
-			logrus.Debug(buf.String())
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 NESTING             REGISTRY REPOSITORY       KIND     TAG                                                                          DIGEST
 └─ ⊗                /tmp/ctf mandelsoft/index index    v1                                                                           sha256:d6c3ddc587296fd09f56d2f4c8482f05575306a64705b06fae1d5695cb88d627

@@ -19,8 +19,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/sirupsen/logrus"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
@@ -153,14 +152,9 @@ var _ = Describe("normalization", func() {
 		entries, err := signing.PrepareNormalization(cd, signing.NoExcludes{})
 		Expect(err).To(Succeed())
 
-		data, err := signing.Marshal("  ", entries)
+		_, err = signing.Marshal("  ", entries)
 		Expect(err).To(Succeed())
-		logrus.Infof("%s\n", string(data))
-
-		r := entries.ToString("")
-		logrus.Infof("******\n%s\n", r)
-
-		Expect("\n" + r).To(Equal(`
+		Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
 {
   component: {
     componentReferences: []
@@ -265,8 +259,7 @@ var _ = Describe("normalization", func() {
 			},
 		})
 		Expect(err).To(Succeed())
-
-		Expect("\n" + entries.ToString("")).To(Equal(`
+		Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
 {
   component: {
     componentReferences: []
@@ -369,8 +362,7 @@ var _ = Describe("normalization", func() {
 			},
 		})
 		Expect(err).To(Succeed())
-
-		Expect("\n" + entries.ToString("")).To(Equal(`
+		Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
 {
   component: {
     componentReferences: []
@@ -470,7 +462,7 @@ var _ = Describe("normalization", func() {
 			},
 		})
 		Expect(err).To(Succeed())
-		Expect("\n" + entries.ToString("")).To(Equal(`
+		Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
 {
   component: {
     componentReferences: []
@@ -546,8 +538,7 @@ var _ = Describe("normalization", func() {
 			},
 		})
 		Expect(err).To(Succeed())
-		r := entries.ToString("")
-		Expect("\n" + r).To(Equal(`
+		Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
 {
   component: {
     componentReferences: []
@@ -625,10 +616,7 @@ var _ = Describe("normalization", func() {
 
 		entries, err := signing.PrepareNormalization(cd, CDExcludes)
 		Expect(err).To(Succeed())
-		r := entries.ToString("")
-		logrus.Infof("%s\n", r)
-
-		Expect("\n" + r).To(Equal(`
+		Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
 {
   component: {
     componentReferences: []
@@ -685,9 +673,7 @@ var _ = Describe("normalization", func() {
 		}
 		entries, err := signing.PrepareNormalization(cd, rules)
 		Expect(err).To(Succeed())
-		logrus.Infof("%s\n", entries.ToString(""))
-
-		Expect("\n" + entries.ToString("")).To(Equal(`
+		Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
 {
   component: {
     name: test
@@ -707,9 +693,7 @@ var _ = Describe("normalization", func() {
 		}
 		entries, err := signing.PrepareNormalization(cd, rules)
 		Expect(err).To(Succeed())
-		logrus.Infof("%s\n", entries.ToString(""))
-
-		Expect("\n" + entries.ToString("")).To(Equal(`
+		Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
 {
   modified: {
     name: test

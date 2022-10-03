@@ -20,6 +20,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -87,7 +88,7 @@ var _ = Describe("Show OCI Tags", func() {
 	It("lists tags", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("oci", "tags", "show", "--repo", ARCH, NAMESAPCE)).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(`
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 sometag
 v1.3
 v1.3.1
@@ -101,7 +102,7 @@ v2.0
 	It("lists tags for same artefact", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("oci", "tags", "show", "--repo", ARCH, NAMESAPCE+":"+V13)).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(`
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 sometag
 v1.3
 v1.3.1
@@ -111,7 +112,7 @@ v1.3.1
 	It("lists semver tags", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("oci", "tags", "show", "--semver", "--repo", ARCH, NAMESAPCE)).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(`
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 v1.3
 v1.3.1
 v1.3.2-beta.1
@@ -124,7 +125,7 @@ v2.0
 	It("lists semver tags for same artefact", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("oci", "tags", "show", "--semver", "--repo", ARCH, NAMESAPCE+":"+V13)).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(`
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 v1.3
 v1.3.1
 `))
