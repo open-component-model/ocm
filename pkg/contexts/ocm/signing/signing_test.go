@@ -19,8 +19,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
-
-	"github.com/sirupsen/logrus"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -152,8 +151,7 @@ var _ = Describe("access method", func() {
 			Expect(err).To(Succeed())
 			Expect(closer.Close()).To(Succeed())
 			Expect(archcloser.Close()).To(Succeed())
-			logrus.Infof("%+v\n", dig)
-			Expect(dig.Value).To(Equal(digest))
+			Expect(dig.Value).To(StringEqualWithContext(digest))
 
 			src, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
 			Expect(err).To(Succeed())
@@ -202,8 +200,7 @@ var _ = Describe("access method", func() {
 			Expect(err).To(Succeed())
 			closer.Close()
 			archcloser.Close()
-			logrus.Infof("%+v\n", dig)
-			Expect(dig.Value).To(Equal(digest))
+			Expect(dig.Value).To(StringEqualWithContext(digest))
 
 			src, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
 			Expect(err).To(Succeed())
@@ -252,8 +249,7 @@ var _ = Describe("access method", func() {
 			Expect(err).To(Succeed())
 			closer.Close()
 			archcloser.Close()
-			logrus.Infof("%+v\n", dig)
-			Expect(dig.Value).To(Equal(digest))
+			Expect(dig.Value).To(StringEqualWithContext(digest))
 
 			src, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
 			Expect(err).To(Succeed())

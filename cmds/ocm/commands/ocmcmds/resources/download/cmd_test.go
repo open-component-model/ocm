@@ -20,6 +20,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -60,7 +61,7 @@ var _ = Describe("Test Environment", func() {
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("download", "resources", "-O", OUT, ARCH)).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
 /tmp/res: 8 byte(s) written
 `))
@@ -98,7 +99,7 @@ var _ = Describe("Test Environment", func() {
 		It("downloads multiple files", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("download", "resources", "-O", OUT, "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 /tmp/res/test.de/y/v1/moredata: 8 byte(s) written
 /tmp/res/test.de/y/v1/otherdata-id=test: 9 byte(s) written
@@ -113,7 +114,7 @@ var _ = Describe("Test Environment", func() {
 		It("downloads closure", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("download", "resources", "-c", "-O", OUT, "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 /tmp/res/test.de/y/v1/moredata: 8 byte(s) written
 /tmp/res/test.de/y/v1/otherdata-id=test: 9 byte(s) written

@@ -20,8 +20,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
-
-	"github.com/sirupsen/logrus"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -57,7 +56,7 @@ var _ = Describe("Test Environment", func() {
 
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH)).To(Succeed())
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 NAME     VERSION IDENTITY TYPE      RELATION
 testdata v1               PlainText local
@@ -79,7 +78,7 @@ testdata v1               PlainText local
 
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH)).To(Succeed())
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 NAME     VERSION IDENTITY       TYPE      RELATION
 testdata v1      "platform"="a" PlainText local
@@ -98,8 +97,7 @@ testdata v1      "platform"="b" PlainText local
 
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH, "-c")).To(Succeed())
-			logrus.Infof("%s", buf)
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 REFERENCEPATH NAME     VERSION IDENTITY TYPE      RELATION
 test.de/x:v1  testdata v1               PlainText local
@@ -116,8 +114,7 @@ test.de/x:v1  testdata v1               PlainText local
 
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH, "-c", "-o", "tree")).To(Succeed())
-			logrus.Infof("%s", buf)
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 COMPONENTVERSION    NAME     VERSION IDENTITY TYPE      RELATION
 └─ test.de/x:v1                                         
@@ -142,7 +139,7 @@ COMPONENTVERSION    NAME     VERSION IDENTITY TYPE      RELATION
 
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH)).To(Succeed())
-			Expect("\n" + buf.String()).To(Equal(
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 NAME     VERSION IDENTITY TYPE      RELATION
 testdata v1               PlainText local
@@ -175,7 +172,7 @@ testdata v1               PlainText local
 			It("lists resource closure in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
 				Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-				Expect("\n" + buf.String()).To(Equal(
+				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
 REFERENCEPATH              NAME     VERSION IDENTITY TYPE      RELATION
 test.de/y:v1               moredata v1               PlainText local
@@ -186,7 +183,7 @@ test.de/y:v1->test.de/x:v1 testdata v1               PlainText local
 			It("lists flat tree in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
 				Expect(env.CatchOutput(buf).Execute("get", "resources", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-				Expect("\n" + buf.String()).To(Equal(
+				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
 COMPONENTVERSION    NAME     VERSION IDENTITY TYPE      RELATION
 └─ test.de/y:v1                                         
@@ -197,7 +194,7 @@ COMPONENTVERSION    NAME     VERSION IDENTITY TYPE      RELATION
 			It("lists resource closure in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
 				Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-				Expect("\n" + buf.String()).To(Equal(
+				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
 COMPONENTVERSION       NAME     VERSION IDENTITY TYPE      RELATION
 └─ test.de/y:v1                                            
@@ -240,8 +237,7 @@ COMPONENTVERSION       NAME     VERSION IDENTITY TYPE      RELATION
 			It("lists resource closure in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
 				Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-				logrus.Infof("%s", buf)
-				Expect("\n" + buf.String()).To(Equal(
+				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
 REFERENCEPATH              NAME     VERSION IDENTITY TYPE      RELATION
 test.de/y:v1->test.de/x:v1 testdata v1               PlainText local
@@ -251,7 +247,7 @@ test.de/y:v1->test.de/x:v1 testdata v1               PlainText local
 			It("lists flat in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
 				Expect(env.CatchOutput(buf).Execute("get", "resources", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-				Expect("\n" + buf.String()).To(Equal(
+				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
 no elements found
 `))
@@ -260,7 +256,7 @@ no elements found
 			It("lists flat tree in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
 				Expect(env.CatchOutput(buf).Execute("get", "resources", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-				Expect("\n" + buf.String()).To(Equal(
+				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
 COMPONENTVERSION    NAME VERSION IDENTITY TYPE RELATION
 └─ test.de/y:v1                                
@@ -270,8 +266,7 @@ COMPONENTVERSION    NAME VERSION IDENTITY TYPE RELATION
 			It("lists resource closure in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
 				Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "-o", "tree", "--repo", ARCH, COMP3+":"+VERSION)).To(Succeed())
-				logrus.Infof("%s", buf)
-				Expect("\n" + buf.String()).To(Equal(
+				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
 COMPONENTVERSION          NAME     VERSION IDENTITY TYPE      RELATION
 └─ test.de/z:v1                                               
@@ -306,8 +301,7 @@ COMPONENTVERSION          NAME     VERSION IDENTITY TYPE      RELATION
 			It("lists resource closure in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
 				Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-				logrus.Infof("%s", buf)
-				Expect("\n" + buf.String()).To(Equal(
+				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
 REFERENCEPATH NAME     VERSION IDENTITY TYPE      RELATION
 test.de/y:v1  moredata v1               PlainText local
@@ -317,8 +311,7 @@ test.de/y:v1  moredata v1               PlainText local
 			It("lists resource closure in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
 				Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
-				logrus.Infof("%s", buf)
-				Expect("\n" + buf.String()).To(Equal(
+				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
 COMPONENTVERSION       NAME     VERSION IDENTITY TYPE      RELATION
 └─ test.de/y:v1                                            

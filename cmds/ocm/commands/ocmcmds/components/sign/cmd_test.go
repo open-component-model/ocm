@@ -21,6 +21,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -85,7 +86,7 @@ var _ = Describe("access method", func() {
 			digest := "05c4edd25661703e0c5caec8b0680c93738d8a8126d825adb755431fec29b7cb"
 			Expect(env.CatchOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(Succeed())
 
-			Expect("\n" + buf.String()).To(Equal(`
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 applying to version "github.com/mandelsoft/ref:v1"...
   applying to version "github.com/mandelsoft/test:v1"...
     resource 0:  "name"="testdata": digest sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50[genericBlobDigest/v1]
@@ -115,7 +116,7 @@ successfully signed github.com/mandelsoft/ref:v1 (digest sha256:` + digest + `)
 			digest := "05c4edd25661703e0c5caec8b0680c93738d8a8126d825adb755431fec29b7cb"
 			Expect(env.CatchOutput(buf).Execute("sign", "components", "--lookup", ARCH2, "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(Succeed())
 
-			Expect("\n" + buf.String()).To(Equal(`
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 applying to version "github.com/mandelsoft/ref:v1"...
   applying to version "github.com/mandelsoft/test:v1"...
     resource 0:  "name"="testdata": digest sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50[genericBlobDigest/v1]
@@ -158,7 +159,7 @@ successfully signed github.com/mandelsoft/ref:v1 (digest sha256:` + digest + `)
 		It("sign version", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchErrorOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(HaveOccurred())
-			Expect("\n" + buf.String()).To(Equal(`
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 Error: {signing: failed resolving component reference ref[github.com/mandelsoft/test:v1] in github.com/mandelsoft/ref:v1: ocm reference "github.com/mandelsoft/test:v1" not found}
 `))
 		})
@@ -166,7 +167,7 @@ Error: {signing: failed resolving component reference ref[github.com/mandelsoft/
 		It("sign archive", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchErrorOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, ARCH)).To(HaveOccurred())
-			Expect("\n" + buf.String()).To(Equal(`
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 Error: {signing: failed resolving component reference ref[github.com/mandelsoft/test:v1] in github.com/mandelsoft/ref:v1: ocm reference "github.com/mandelsoft/test:v1" not found}
 `))
 		})
@@ -186,7 +187,7 @@ Error: {signing: failed resolving component reference ref[github.com/mandelsoft/
 		It("sign version", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchErrorOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(HaveOccurred())
-			Expect("\n" + buf.String()).To(Equal(`
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 Error: {signing: failed resolving component reference ref[github.com/mandelsoft/test:v1] in github.com/mandelsoft/ref:v1: ocm reference "github.com/mandelsoft/test:v1" not found}
 `))
 		})
@@ -194,7 +195,7 @@ Error: {signing: failed resolving component reference ref[github.com/mandelsoft/
 		It("sign archive", func() {
 			buf := bytes.NewBuffer(nil)
 			Expect(env.CatchErrorOutput(buf).Execute("sign", "components", "-s", SIGNATURE, "-K", PRIVKEY, ARCH)).To(HaveOccurred())
-			Expect("\n" + buf.String()).To(Equal(`
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 Error: {signing: failed resolving component reference ref[github.com/mandelsoft/test:v1] in github.com/mandelsoft/ref:v1: ocm reference "github.com/mandelsoft/test:v1" not found}
 `))
 		})

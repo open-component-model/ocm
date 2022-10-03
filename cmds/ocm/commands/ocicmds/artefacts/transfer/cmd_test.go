@@ -20,6 +20,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
@@ -59,7 +60,7 @@ var _ = Describe("Test Environment", func() {
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("transfer", "artefact", ARCH+"//"+NS+":"+VERSION, "directory::"+OUT)).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
 copying /tmp/ctf//mandelsoft/test:v1 to directory::` + OUT + `//mandelsoft/test:v1...
 copied 1 from 1 artefact(s) and 1 repositories
@@ -83,7 +84,7 @@ copied 1 from 1 artefact(s) and 1 repositories
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("transfer", "artefact", ARCH+"//"+NS+":"+VERSION, "directory::"+OUT+"//changed")).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
 copying /tmp/ctf//mandelsoft/test:v1 to directory::` + OUT + `//changed:v1...
 copied 1 from 1 artefact(s) and 1 repositories
@@ -107,7 +108,7 @@ copied 1 from 1 artefact(s) and 1 repositories
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("transfer", "artefact", "-R", ARCH+"//"+NS+":"+VERSION, "directory::"+OUT+"//sub")).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
 copying /tmp/ctf//mandelsoft/test:v1 to directory::` + OUT + `//sub/mandelsoft/test:v1...
 copied 1 from 1 artefact(s) and 1 repositories
@@ -129,7 +130,7 @@ copied 1 from 1 artefact(s) and 1 repositories
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("transfer", "artefact", ARCH, "directory::"+OUT+"//"+NS)).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
 copying ArtefactSet::/tmp/ctf//:v1 to directory::` + OUT + `//mandelsoft/test:v1...
 copied 1 from 1 artefact(s) and 1 repositories

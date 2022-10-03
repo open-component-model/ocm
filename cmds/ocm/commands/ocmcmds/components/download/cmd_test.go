@@ -20,6 +20,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -61,7 +62,7 @@ var _ = Describe("Download Component Version", func() {
 
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("download", "component", "-O", OUT, "-r", ARCH, COMPONENT+grammar.VersionSeparator+VERSION)).To(Succeed())
-		Expect("\n" + buf.String()).To(Equal(
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
 /tmp/res: downloaded
 `))

@@ -22,6 +22,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/sirupsen/logrus"
@@ -170,7 +171,7 @@ var _ = Describe("access method", func() {
 
 		Expect(env.CatchOutput(buf).Execute("verify", "components", "-V", "-s", SIGNATURE, "-k", PUBKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(Succeed())
 
-		Expect("\n" + buf.String()).To(Equal(`
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 applying to version "github.com/mandelsoft/ref:v1"...
   applying to version "github.com/mandelsoft/test:v1"...
     resource 0:  "name"="testdata": digest sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50[genericBlobDigest/v1]
