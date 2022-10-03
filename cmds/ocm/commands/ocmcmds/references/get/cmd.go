@@ -29,7 +29,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	gcommom "github.com/open-component-model/ocm/pkg/common"
+	gcommon "github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -99,11 +99,9 @@ outer:
 	for i := 0; i < len(slice); i++ {
 		o := slice[i]
 		e := common.Elem(o)
-		key := gcommom.NewNameVersion(e.ComponentName, e.Version)
+		key := gcommon.NewNameVersion(e.ComponentName, e.Version)
 		hist := o.GetHistory()
-		nested := make(gcommom.History, 0)
-		copy(nested, hist)
-		nested = append(nested, key)
+		nested := hist.Append(key)
 		var j int
 		for j = i + 1; j < len(slice); j++ {
 			n := slice[j]

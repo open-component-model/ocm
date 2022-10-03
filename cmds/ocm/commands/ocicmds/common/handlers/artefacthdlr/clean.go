@@ -60,9 +60,7 @@ func clean(iterable data.Iterable) data.Iterable {
 		d := depth[dig]
 		if l == 0 && l < d && (e.Spec.Tag == nil || *e.Spec.Tag == tags[dig]) {
 			j := i + 1
-			prefix := make(common.History, len(e.History))
-			copy(prefix, e.History)
-			prefix = append(prefix, common.NewNameVersion("", dig.String()))
+			prefix := e.History.Append(common.NewNameVersion("", dig.String()))
 			for ; j < len(data) && data[j].(*Object).History.HasPrefix(prefix); j++ {
 			}
 			data = append(data[:i], data[j:]...)
