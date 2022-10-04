@@ -37,8 +37,7 @@ func GetPublicKey(key interface{}) (*rsa.PublicKey, []string, error) {
 	case *rsa.PrivateKey:
 		return &k.PublicKey, nil, nil
 	case *x509.Certificate:
-		switch p := k.PublicKey.(type) {
-		case *rsa.PublicKey:
+		if p, ok := k.PublicKey.(*rsa.PublicKey); ok {
 			return p, k.DNSNames, nil
 		}
 		return nil, nil, fmt.Errorf("unknown key public key %T in certificate", k)

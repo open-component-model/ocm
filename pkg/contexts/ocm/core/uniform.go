@@ -59,7 +59,7 @@ func (r *UniformRepositorySpec) CredHost() string {
 func (u *UniformRepositorySpec) String() string {
 	t := u.Type
 	if t != "" && !ocireg.IsKind(t) {
-		t = t + "::"
+		t += "::"
 	}
 	if u.Info != "" {
 		return fmt.Sprintf("%s%s", t, u.Info)

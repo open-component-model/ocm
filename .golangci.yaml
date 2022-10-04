@@ -15,10 +15,6 @@ linters:
 
     # Logical next step
     - forcetypeassert  # Priority: that can lead to serious crashes.
-    - gocritic         # Priority:
-                       #   - security issues (slice copy)
-                       #   - unexpected behavior
-                       #   - Go practices ('p += k' and not 'p = p + k')
     - gosec            # Priority: Security (as the name implies)
     - revive           # Too many issues.
                        #   It's important to at least address:

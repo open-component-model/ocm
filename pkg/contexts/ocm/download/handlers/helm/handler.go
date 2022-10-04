@@ -70,7 +70,7 @@ func (h Handler) Download(ctx out.Context, racc cpi.ResourceAccess, path string,
 		return true, "", errors.Newf("no layers found")
 	}
 	if !strings.HasSuffix(path, ".tgz") {
-		path = path + ".tgz"
+		path += ".tgz"
 	}
 	blob, err := m.GetBlob(m.GetDescriptor().Layers[0].Digest)
 	if err != nil {

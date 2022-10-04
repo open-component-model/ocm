@@ -112,7 +112,7 @@ func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 		return err
 	}
 	if u, ok := ocmcmd.(options.Usage); ok {
-		c.Long = c.Long + u.Usage()
+		c.Long += u.Usage()
 	}
 	ocmcmd.AddFlags(c.Flags())
 	return c

@@ -133,10 +133,8 @@ func (o *BootstrapperCLIOptions) Complete() error {
 
 	if len(attrs) != 0 {
 		o.Context.CredentialsContext().SetCredentialsForConsumer(id, credentials.NewCredentials(attrs))
-	} else {
-		if len(id) != 0 {
-			return errors.Newf("empty credential attribute set for %s", id.String())
-		}
+	} else if len(id) != 0 {
+		return errors.Newf("empty credential attribute set for %s", id.String())
 	}
 
 	set, err := common2.ParseLabels(o.Settings, "attribute setting")

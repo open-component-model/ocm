@@ -471,7 +471,7 @@ func (r *dockerBase) request(host RegistryHost, method string, ps ...string) *re
 	p := path.Join(parts...)
 	// Join strips trailing slash, re-add ending "/" if included
 	if len(parts) > 0 && strings.HasSuffix(parts[len(parts)-1], "/") {
-		p = p + "/"
+		p += "/"
 	}
 	return &request{
 		method: method,
@@ -505,12 +505,12 @@ func (r *request) addNamespace(ns string) (err error) {
 			return
 		}
 	} else {
-		r.path = r.path + "?"
+		r.path += "?"
 		q = url.Values{}
 	}
 	q.Add("ns", ns)
 
-	r.path = r.path + q.Encode()
+	r.path += q.Encode()
 
 	return
 }

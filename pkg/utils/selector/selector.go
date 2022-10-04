@@ -229,9 +229,9 @@ func NewJSONSchemaSelectorFromGoStruct(src interface{}) (JSONSchemaSelector, err
 
 var _ Interface = JSONSchemaSelector{}
 
-func (J JSONSchemaSelector) Match(obj map[string]string) (bool, error) {
+func (j JSONSchemaSelector) Match(obj map[string]string) (bool, error) {
 	documentLoader := gojsonschema.NewGoLoader(obj)
-	res, err := J.Scheme.Validate(documentLoader)
+	res, err := j.Scheme.Validate(documentLoader)
 	if err != nil {
 		return false, err
 	}

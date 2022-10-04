@@ -70,10 +70,8 @@ func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (in
 		if err == nil {
 			return accessio.NewStaticBlobCache(value)
 		}
-	} else {
-		if err == nil {
-			err = errors.Newf("file path missing")
-		}
+	} else if err == nil {
+		err = errors.Newf("file path missing")
 	}
 	return value, err
 }

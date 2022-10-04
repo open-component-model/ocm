@@ -55,10 +55,8 @@ func (this *_ProcessChain) new(p *_ProcessChain, creator stepCreator) *_ProcessC
 	if p != nil {
 		if p.creator != nil {
 			this.parent = p
-		} else {
-			if p.parent != nil {
-				this.parent = p.parent
-			}
+		} else if p.parent != nil {
+			this.parent = p.parent
 		}
 	}
 	if this.parent != nil && creator == nil {
@@ -129,10 +127,8 @@ func (this *_ProcessChain) Process(data data.Iterable) ProcessingResult {
 	p, ok := data.(ProcessingResult)
 	if this.parent != nil {
 		p = this.parent.Process(data)
-	} else {
-		if !ok {
-			p = Process(data)
-		}
+	} else if !ok {
+		p = Process(data)
 	}
 	return this.step(p)
 }

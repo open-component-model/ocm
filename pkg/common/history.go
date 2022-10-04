@@ -85,6 +85,13 @@ func (h *History) Add(kind string, nv NameVersion) error {
 	return nil
 }
 
+func (h History) Append(nv ...NameVersion) History {
+	result := make(History, len(h)+len(nv))
+	copy(result, h)
+	copy(result[len(h):], nv)
+	return result
+}
+
 func (h History) Copy() History {
 	return append(h[:0:0], h...)
 }

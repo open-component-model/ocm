@@ -229,10 +229,8 @@ func (d *action) Save(o *elemhdlr.Object, f string) error {
 		if err != nil {
 			return err
 		}
-	} else {
-		if eff != f && pathIn {
-			out.Outf(d.opts.Context, "output path %q changed to %q by downloader", f, eff)
-		}
+	} else if eff != f && pathIn {
+		out.Outf(d.opts.Context, "output path %q changed to %q by downloader", f, eff)
 	}
 	return nil
 }

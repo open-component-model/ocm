@@ -69,10 +69,6 @@ func (h Handler) Sign(digest string, hash crypto.Hash, issuer string, key interf
 	if err != nil {
 		return nil, fmt.Errorf("failed decoding hash to bytes")
 	}
-	// ensure length of hash is correct
-	//if len(decodedHash) != 32 {
-	//	return "", "", fmt.Errorf("hash to sign has invalid length")
-	//}
 	sig, err := rsa.SignPKCS1v15(rand.Reader, privateKey, hash, decodedHash)
 	if err != nil {
 		return nil, fmt.Errorf("failed signing hash, %w", err)
@@ -134,10 +130,6 @@ func (h Handler) Verify(digest string, hash crypto.Hash, signature *signing.Sign
 			}
 		}
 	}
-	// ensure length of hash is correct
-	//if len(decodedHash) != 32 {
-	//	return fmt.Errorf("hash to verify has invalid length")
-	//}
 	if err := rsa.VerifyPKCS1v15(publicKey, hash, decodedHash, signatureBytes); err != nil {
 		return fmt.Errorf("signature verification failed, %w", err)
 	}

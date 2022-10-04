@@ -147,13 +147,13 @@ func BytesString(bytes uint64, accuracy int) string {
 	switch {
 	case bytes >= GIBIBYTE:
 		unit = "GiB"
-		value = value / GIBIBYTE
+		value /= GIBIBYTE
 	case bytes >= MEBIBYTE:
 		unit = "MiB"
-		value = value / MEBIBYTE
+		value /= MEBIBYTE
 	case bytes >= KIBIBYTE:
 		unit = "KiB"
-		value = value / KIBIBYTE
+		value /= KIBIBYTE
 	case bytes >= BYTE:
 		unit = "bytes"
 	case bytes == 0:
