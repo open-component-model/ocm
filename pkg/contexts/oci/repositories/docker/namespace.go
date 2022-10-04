@@ -74,16 +74,15 @@ func (n *NamespaceContainer) IsClosed() bool {
 
 func (n *NamespaceContainer) Close() error {
 	n.lock.Lock()
-
 	defer n.lock.Unlock()
 
 	if n.cache != nil {
 		err := n.cache.Unref()
 		n.cache = nil
-
-		return fmt.Errorf("failed to unref: %w", err)
+		if err != nil {
+			return fmt.Errorf("failed to unref: %w", err)
+		}
 	}
-
 	return nil
 }
 

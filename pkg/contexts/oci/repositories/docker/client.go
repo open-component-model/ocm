@@ -27,7 +27,7 @@ import (
 )
 
 func newDockerClient(dockerhost string) (*dockerclient.Client, error) {
-	if dockerhost == "" {
+	if dockerhost == "" || dockerhost == "localhost" {
 		opts := cliflags.NewCommonOptions()
 		// set defaults
 		opts.SetDefaultOptions(pflag.NewFlagSet("", pflag.ContinueOnError))
