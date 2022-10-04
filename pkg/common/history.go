@@ -46,6 +46,7 @@ func (h History) Contains(nv NameVersion) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -53,11 +54,13 @@ func (h History) HasPrefix(o History) bool {
 	if len(o) > len(h) {
 		return false
 	}
+
 	for i, e := range o {
 		if e != h[i] {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -65,6 +68,7 @@ func (h History) Equals(o History) bool {
 	if len(h) != len(o) {
 		return false
 	}
+
 	if h == nil || o == nil {
 		return false
 	}
@@ -74,6 +78,7 @@ func (h History) Equals(o History) bool {
 			return false
 		}
 	}
+
 	return true
 }
 
@@ -81,7 +86,9 @@ func (h *History) Add(kind string, nv NameVersion) error {
 	if h.Contains(nv) {
 		return errors.ErrRecusion(kind, nv, *h)
 	}
+
 	*h = append(*h, nv)
+
 	return nil
 }
 
@@ -107,6 +114,7 @@ func (h History) RemovePrefix(prefix History) History {
 
 func (h History) Compare(o History) int {
 	c, _ := h.Compare2(o)
+
 	return c
 }
 
@@ -115,11 +123,13 @@ func (h History) Compare2(o History) (int, bool) {
 		if len(o) <= i {
 			break
 		}
+
 		c := h.Compare(o[i])
 		if c != 0 {
 			return c, true
 		}
 	}
+
 	return len(h) - len(o), false
 }
 
