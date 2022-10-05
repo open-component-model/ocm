@@ -95,6 +95,14 @@ var (
 		DomainRegexp,
 		Optional(Literal(`:`), Match(`[0-9]+`)))
 
+	PathRegexp = Sequence(
+		Optional(Literal("/")),
+		Match(`[a-zA-Z0-9-_.]+(?:/[a-zA-Z0-9-_.]+)+`))
+
+	PathPortRegexp = Sequence(
+		PathRegexp,
+		Optional(Literal(`:`), Match(`[0-9]+`)))
+
 	// TagRegexp matches valid tag names. From docker/docker:graph/tags.go.
 	TagRegexp = Match(`[\w][\w.-]{0,127}`)
 
@@ -161,9 +169,14 @@ var (
 		Capture(TypeRegexp), Literal("::"),
 		Optional(CapturedSchemeRegexp), Capture(DomainPortRegexp))
 
+	TypedURIRegexp = Anchored(
+		Capture(TypeRegexp), Literal("::"),
+		Optional(CapturedSchemeRegexp, Optional(Literal("//")), Capture(PathPortRegexp)),
+		Optional(RepositorySeparatorRegexp, RepositorySeparatorRegexp, Optional(CapturedArtefactVersionRegexp)))
+
 	TypedReferenceRegexp = Anchored(
 		Capture(TypeRegexp), Literal("::"),
-		Optional(CapturedSchemeRegexp), Capture(DomainPortRegexp),
+		Optional(CapturedSchemeRegexp, Optional(Literal("//"))), Capture(DomainPortRegexp),
 		Optional(RepositorySeparatorRegexp, Optional(CapturedArtefactVersionRegexp)))
 
 	TypedGenericReferenceRegexp = Anchored(

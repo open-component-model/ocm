@@ -25,10 +25,16 @@ func init() {
 type repospechandler struct{}
 
 func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepositorySpec) (cpi.RepositorySpec, error) {
-	host := u.Info
-	if u.Host != "" && host == "" {
-		host = u.Host
+	host := u.Host
+	if u.Scheme != "" && host != "" {
+		host = u.Scheme + "://" + u.Host
 	}
-
+	if u.Info != "" {
+		if u.Info == "default" {
+			host = ""
+		} else if host == "" {
+			host = u.Info
+		}
+	}
 	return NewRepositorySpec(host), nil
 }
