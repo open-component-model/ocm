@@ -141,6 +141,16 @@ func ParseRef(ref string) (RefSpec, error) {
 		spec.Digest = dig(match[6])
 		return spec, nil
 	}
+	match = grammar.TypedURIRegexp.FindSubmatch([]byte(ref))
+	if match != nil {
+		spec.Type = string(match[1])
+		spec.Scheme = string(match[2])
+		spec.Host = string(match[3])
+		spec.Repository = string(match[4])
+		spec.Tag = pointer(match[5])
+		spec.Digest = dig(match[6])
+		return spec, nil
+	}
 	match = grammar.TypedGenericReferenceRegexp.FindSubmatch([]byte(ref))
 	if match != nil {
 		spec.Type = string(match[1])
