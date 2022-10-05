@@ -12,26 +12,27 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package docker
+package dockermulti
 
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/opencontainers/go-digest"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociimage"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Spec struct {
@@ -55,7 +56,7 @@ func New(pathtags ...string) *Spec {
 	}
 }
 
-func (s *Spec) Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath string) field.ErrorList {
+func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath string) field.ErrorList {
 	allErrs := field.ErrorList{}
 	variantsField := fldPath.Child("variants")
 	if len(s.Variants) == 0 {
@@ -103,7 +104,7 @@ func (s *Spec) getVariant(ctx clictx.Context, finalize *utils.Finalizer, variant
 	return art, nil
 }
 
-func (s *Spec) GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
 	index := artdesc.NewIndexArtefact()
 	i := 0
 
@@ -139,6 +140,7 @@ func (s *Spec) GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath 
 			// end loop
 		case i == len(s.Variants):
 			// provide index (main) artefact
+			ctx.Printf("image %d: INDEX\n", i)
 			fac = func(set *artefactset.ArtefactSet) (digest.Digest, string, error) {
 				art, err = set.NewArtefact(index)
 				if err != nil {
@@ -155,6 +157,7 @@ func (s *Spec) GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath 
 			main = true
 		default:
 			// provide variant
+			ctx.Printf("image %d: %s\n", i, s.Variants[i])
 			var finalize utils.Finalizer
 
 			art, err = s.getVariant(ctx, &finalize, s.Variants[i])
@@ -173,9 +176,5 @@ func (s *Spec) GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath 
 	if err != nil {
 		return nil, "", err
 	}
-	hint := fmt.Sprintf("%s:%s", nv.GetName(), nv.GetVersion())
-	if s.Repository != "" {
-		hint = fmt.Sprintf("%s/%s:%s", nv.GetName(), s.Repository, nv.GetVersion())
-	}
-	return blob, hint, nil
+	return blob, ociimage.Hint(nv, nv.GetName(), s.Repository, nv.GetVersion()), nil
 }

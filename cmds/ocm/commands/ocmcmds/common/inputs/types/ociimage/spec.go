@@ -12,10 +12,11 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package helm
+package ociimage
 
 import (
 	"fmt"
+	"strings"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
@@ -23,63 +24,79 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm/loader"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
 )
 
 type Spec struct {
-	// PathSpec hold the path that points to the helm chart file
-	cpi.PathSpec `json:",inline"`
-	Version      string `json:"version,omitempty"`
+	// PathSpec holds the repository path and tag of the image in the docker daemon
+	cpi.PathSpec
+	// Repository is the repository hint for the index artefact
+	Repository string `json:"repository,omitempty"`
 }
 
 var _ inputs.InputSpec = (*Spec)(nil)
 
-func New(path string) *Spec {
+func New(pathtag string) *Spec {
 	return &Spec{
-		PathSpec: cpi.NewPathSpec(TYPE, path),
+		PathSpec: cpi.NewPathSpec(TYPE, pathtag),
 	}
 }
 
 func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath string) field.ErrorList {
 	allErrs := s.PathSpec.Validate(fldPath, ctx, inputFilePath)
 	if s.Path != "" {
-		path := fldPath.Child("path")
-		inputInfo, filePath, err := inputs.FileInfo(ctx, s.Path, inputFilePath)
+		pathField := fldPath.Child("path")
+		_, _, err := docker.ParseGenericRef(s.Path)
 		if err != nil {
-			allErrs = append(allErrs, field.Invalid(path, filePath, err.Error()))
-		}
-		if !inputInfo.Mode().IsDir() && !inputInfo.Mode().IsRegular() {
-			allErrs = append(allErrs, field.Invalid(path, filePath, "no regular file or directory"))
+			allErrs = append(allErrs, field.Invalid(pathField, s.Path, err.Error()))
 		}
 	}
 	return allErrs
 }
 
 func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
-	_, inputPath, err := inputs.FileInfo(ctx, s.Path, inputFilePath)
+	ctx.Printf("image %s\n", s.Path)
+	ref, err := oci.ParseRef(s.Path)
 	if err != nil {
 		return nil, "", err
 	}
-	chart, err := loader.Load(inputPath, ctx.FileSystem())
+
+	spec, err := ctx.OCIContext().MapUniformRepositorySpec(&ref.UniformRepositorySpec)
 	if err != nil {
 		return nil, "", err
 	}
-	vers := chart.Metadata.Version
-	if s.Version != "" {
-		vers = s.Version
-	}
-	if vers == "" {
-		vers = nv.GetVersion()
-	}
-	blob, err := helm.SynthesizeArtefactBlob(inputPath, ctx.FileSystem())
+
+	repo, err := ctx.OCIContext().RepositoryForSpec(spec)
 	if err != nil {
 		return nil, "", err
 	}
-	name := chart.Name()
-	hint := fmt.Sprintf("%s/%s:%s", nv.GetName(), name, vers)
-	if name == "" {
-		hint = fmt.Sprintf("%s:%s", nv.GetName(), vers)
+	ns, err := repo.LookupNamespace(ref.Repository)
+	if err != nil {
+		return nil, "", err
 	}
-	return blob, hint, err
+
+	version := ref.Version()
+	if version == "" || version == "latest" {
+		version = nv.GetVersion()
+	}
+	blob, err := artefactset.SynthesizeArtefactBlob(ns, version)
+	if err != nil {
+		return nil, "", err
+	}
+	return blob, Hint(nv, ref.Repository, s.Repository, version), nil
+}
+
+func Hint(nv common.NameVersion, locator, repo, version string) string {
+	repository := fmt.Sprintf("%s/%s", nv.GetName(), locator)
+	if repo != "" {
+		if strings.HasPrefix(repo, grammar.RepositorySeparator) {
+			repository = repo[1:]
+		} else {
+			repository = fmt.Sprintf("%s/%s", nv.GetName(), repo)
+		}
+	}
+	return fmt.Sprintf("%s:%s", repository, version)
 }

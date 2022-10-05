@@ -20,7 +20,18 @@ import (
 	"reflect"
 
 	"github.com/drone/envsubst"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 )
+
+func init() {
+	Register("subst", func(_ vfs.FileSystem) Templater { return NewSubst() }, `simple value substitution with the <code>drone/envsubst</code> templater.
+It supports string values, only. Complex settings will be json encoded.
+<pre>
+  key:
+    subkey: "abc ${MY_VAL}"
+</pre>
+`)
+}
 
 type Subst struct{}
 

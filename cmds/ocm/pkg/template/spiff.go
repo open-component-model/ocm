@@ -15,10 +15,23 @@
 package template
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/mandelsoft/spiff/features"
 	"github.com/mandelsoft/spiff/spiffing"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
+
+func init() {
+	Register("spiff", NewSpiff, `[spiff templating](https://github.com/mandelsoft/spiff).
+It supports complex values. the settings are accessible using the binding <code>values</code>.
+<pre>
+  key:
+    subkey: "abc (( values.MY_VAL ))"
+</pre>
+`)
+}
 
 type Spiff struct {
 	spiff spiffing.Spiff
@@ -35,9 +48,24 @@ func (s *Spiff) Process(data string, values Values) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	result, err := spiffing.Process(spiff, spiffing.NewSourceData("resourcespec", []byte(data)))
+	docs, err := SplitYamlDocuments([]byte(data))
 	if err != nil {
 		return "", err
 	}
-	return string(result), nil
+
+	result := ""
+	for i, d := range docs {
+		tmp, err := spiffing.Process(spiff, spiffing.NewSourceData(fmt.Sprintf("spec document %d", i), d))
+		if err != nil {
+			return "", err
+		}
+		if result != "" {
+			if !strings.HasSuffix(result, "\n") {
+				result += "\n"
+			}
+			result += "---\n"
+		}
+		result += string(tmp)
+	}
+	return result, nil
 }

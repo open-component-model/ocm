@@ -1,16 +1,18 @@
 ---
 name: toiimage
 type: ociImage
-version: ${VERSION}
+version: (( values.VERSION ))
 input:
-  type: docker
-  path: ${IMAGE}
+  type: (( values.MULTI ? "dockermulti" :"docker" ))
+  repository: (( values.IMAGE ))
+  variants: (( values.MULTI ? map[split(" ", values.PLATFORMS)|v|-> values.IMAGE "-" replace(v,"/","-")] :~~ ))
+  path: (( !values.MULTI ? values.IMAGE :~~ ))
 ---
 name: toiexecutor
 type: toiExecutor
 labels:
   - name: commit
-    value: ${COMMIT}
+    value: (( values.COMMIT ))
 input:
   type: file
   mediaType: application/x-yaml

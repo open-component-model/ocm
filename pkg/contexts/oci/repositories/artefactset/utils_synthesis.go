@@ -19,6 +19,8 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/opencontainers/go-digest"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -26,7 +28,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
-	"github.com/opencontainers/go-digest"
 )
 
 const SynthesizedBlobFormat = "+tar+gzip"
@@ -101,10 +102,17 @@ func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, e
 	})
 }
 
+// ArtefactFactory add an artefact to the given set and provides descriptor metadata.
 type ArtefactFactory func(set *ArtefactSet) (digest.Digest, string, error)
+
+// ArtefactIterator provides a sequence of artefact factories by successive calls.
+// The sequence is finished if nil is returned for the factory.
 type ArtefactIterator func() (ArtefactFactory, bool, error)
+
+// ArtefactFeedback is called after an artefact has successfully be added.
 type ArtefactFeedback func(blob accessio.BlobAccess, art cpi.ArtefactAccess) error
 
+// ArtefactTransferCreator provides an ArtefactFactory transferring the given artefact.
 func ArtefactTransferCreator(art cpi.ArtefactAccess, finalizer *utils.Finalizer, feedback ...ArtefactFeedback) ArtefactFactory {
 	return func(set *ArtefactSet) (digest.Digest, string, error) {
 		var f utils.Finalizer
@@ -139,10 +147,13 @@ func SynthesizeArtefactBlobFor(tag string, iter ArtefactIterator) (ArtefactBlob,
 		for {
 			art, main, err := iter()
 			if err != nil || art == nil {
-				return "", err
+				return mime, err
 			}
 
 			digest, _mime, err := art(set)
+			if err != nil {
+				return "", err
+			}
 			if main {
 				if mime != "" {
 					mime = _mime
@@ -156,6 +167,5 @@ func SynthesizeArtefactBlobFor(tag string, iter ArtefactIterator) (ArtefactBlob,
 				}
 			}
 		}
-		return mime, nil
 	})
 }

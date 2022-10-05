@@ -15,6 +15,8 @@
 package add
 
 import (
+	"fmt"
+
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -40,7 +42,7 @@ func (ResourceSpecHandler) RequireInputs() bool {
 }
 
 func (ResourceSpecHandler) Decode(data []byte) (common.ResourceSpec, error) {
-	var desc ResourceDescription
+	var desc ResourceSpec
 	err := runtime.DefaultYAMLEncoding.Unmarshal(data, &desc)
 	if err != nil {
 		return nil, err
@@ -49,7 +51,7 @@ func (ResourceSpecHandler) Decode(data []byte) (common.ResourceSpec, error) {
 }
 
 func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r common.Resource, acc compdesc.AccessSpec) error {
-	spec := r.Spec().(*ResourceDescription)
+	spec := r.Spec().(*ResourceSpec)
 	vers := spec.Version
 	if spec.Relation == metav1.LocalRelation {
 		if vers == "" || vers == ComponentVersionTag {
@@ -78,13 +80,17 @@ func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r common.Resource, 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type ResourceDescription struct {
+type ResourceSpec struct {
 	compdescv2.Resource `json:",inline"`
 }
 
-var _ common.ResourceSpec = (*ResourceDescription)(nil)
+var _ common.ResourceSpec = (*ResourceSpec)(nil)
 
-func (r *ResourceDescription) Validate(ctx clictx.Context, input *common.ResourceInput) error {
+func (r *ResourceSpec) Info() string {
+	return fmt.Sprintf("resource %s: %s", r.Type, r.GetRawIdentity())
+}
+
+func (r *ResourceSpec) Validate(ctx clictx.Context, input *common.ResourceInput) error {
 	allErrs := field.ErrorList{}
 	var fldPath *field.Path
 

@@ -143,7 +143,7 @@ type ElementMeta struct {
 }
 
 // GetName returns the name of the object.
-func (o ElementMeta) GetName() string {
+func (o *ElementMeta) GetName() string {
 	return o.Name
 }
 
@@ -204,6 +204,18 @@ func (o *ElementMeta) GetIdentity(accessor ElementAccessor) metav1.Identity {
 // GetIdentityDigest returns the digest of the object's identity.
 func (o *ElementMeta) GetIdentityDigest(accessor ElementAccessor) []byte {
 	return o.GetIdentity(accessor).Digest()
+}
+
+func (o *ElementMeta) GetRawIdentity() metav1.Identity {
+	identity := o.ExtraIdentity.Copy()
+	if identity == nil {
+		identity = metav1.Identity{}
+	}
+	identity[SystemIdentityName] = o.Name
+	if o.Version != "" {
+		identity[SystemIdentityVersion] = o.Version
+	}
+	return identity
 }
 
 // Sources describes a set of source specifications.

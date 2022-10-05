@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package docker
+package dockermulti
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
@@ -25,11 +25,19 @@ func init() {
 }
 
 const usage = `
-The path must denote an image tag that can be found in the local
-docker daemon. The denoted image is packed an OCI artefact set.
+This input type describes the composition of a multi-platform OCI image.
+The various variants are taken from the local docker daemon. They should be 
+built with the buildx command for cross platform docker builds.
+The denoted images, as well as the wrapping image index is packed as OCI artefact set.
 
-This blob type specification supports the following fields: 
-- **<code>path</code>** *string*
+This blob type specification supports the following fields:
+- **<code>variants</code>** *[]string*
 
-  This REQUIRED property describes the image name to import from the
-  local docker daemon.`
+  This REQUIRED property describes a set of  image names to import from the
+  local docker daemon used to compose a resulting image index.
+
+- **<code>repository</code>** *string*
+
+  This OPTIONAL property can be used to specify the repository hint for the
+  generated local artefact access. It is prefixed by the component name if
+  it does not start with slash "/".`

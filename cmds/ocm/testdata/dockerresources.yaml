@@ -1,6 +1,6 @@
 ---
-name: kubelink
+name: ocmhelminstaller
 type: Image
 input:
   type: docker
-  path: ghcr.io/mandelsoft/kubelink:qual
+  path: mandelsoft/ocmhelminstaller:0.1.0-dev

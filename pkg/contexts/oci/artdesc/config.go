@@ -17,8 +17,9 @@ package artdesc
 import (
 	"encoding/json"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 )
 
 type ImageConfig = ociv1.Image
@@ -30,7 +31,7 @@ func ParseImageConfig(blob accessio.BlobAccess) (*ImageConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	err := json.Unmarshal(data, &cfg)
+	err = json.Unmarshal(data, &cfg)
 	if err != nil {
 		return nil, err
 	}
