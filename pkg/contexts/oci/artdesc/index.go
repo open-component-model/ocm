@@ -63,6 +63,10 @@ func (i *Index) ToBlobAccess() (accessio.BlobAccess, error) {
 	return accessio.BlobAccessForData(i.MediaType, data), nil
 }
 
+func (i *Index) AddManifest(d *Descriptor) {
+	i.Manifests = append(i.Manifests, *d)
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 func DecodeIndex(data []byte) (*Index, error) {
