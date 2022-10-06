@@ -17,6 +17,7 @@ package output
 import (
 	"strings"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	. "github.com/open-component-model/ocm/pkg/out"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
@@ -29,13 +30,13 @@ type StringOutput struct {
 
 var _ Output = &StringOutput{}
 
-func NewStringOutput(ctx Context, mapper processing.MappingFunction, linesep string) *StringOutput {
-	return (&StringOutput{}).new(ctx, mapper, linesep)
+func NewStringOutput(octx ocm.Context, ctx Context, mapper processing.MappingFunction, linesep string) *StringOutput {
+	return (&StringOutput{}).new(octx, ctx, mapper, linesep)
 }
 
-func (this *StringOutput) new(ctx Context, mapper processing.MappingFunction, lineseperator string) *StringOutput {
+func (this *StringOutput) new(octx ocm.Context, ctx Context, mapper processing.MappingFunction, lineseperator string) *StringOutput {
 	this.linesep = lineseperator
-	this.ElementOutput.new(ctx, processing.Chain().Parallel(20).Map(mapper))
+	this.ElementOutput.new(octx, ctx, processing.Chain(octx).Parallel(20).Map(mapper))
 	return this
 }
 

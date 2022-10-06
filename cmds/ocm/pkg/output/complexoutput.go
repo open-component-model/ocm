@@ -18,6 +18,7 @@ import (
 	"fmt"
 
 	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	. "github.com/open-component-model/ocm/pkg/out"
 
 	"sigs.k8s.io/yaml"
@@ -34,12 +35,12 @@ type ComplexProcessingOutput struct {
 
 var _ Output = &ComplexProcessingOutput{}
 
-func NewProcessingComplexOutput(ctx Context, chain ProcessChain, fields ...string) *ComplexProcessingOutput {
-	return (&ComplexProcessingOutput{}).new(ctx, chain, fields)
+func NewProcessingComplexOutput(ocmctx ocm.Context, ctx Context, chain ProcessChain, fields ...string) *ComplexProcessingOutput {
+	return (&ComplexProcessingOutput{}).new(ocmctx, ctx, chain, fields)
 }
 
-func (this *ComplexProcessingOutput) new(ctx Context, chain ProcessChain, fields []string) *ComplexProcessingOutput {
-	this.ElementOutput.new(ctx, chain)
+func (this *ComplexProcessingOutput) new(ocmctx ocm.Context, ctx Context, chain ProcessChain, fields []string) *ComplexProcessingOutput {
+	this.ElementOutput.new(ocmctx, ctx, chain)
 	this.fields = fields
 	return this
 }

@@ -16,6 +16,7 @@ package output
 
 import (
 	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	. "github.com/open-component-model/ocm/pkg/out"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
@@ -29,17 +30,17 @@ type ElementOutput struct {
 
 var _ Output = (*ElementOutput)(nil)
 
-func NewElementOutput(ctx Context, chain ProcessChain) *ElementOutput {
-	return (&ElementOutput{}).new(ctx, chain)
+func NewElementOutput(ocmctx ocm.Context, ctx Context, chain ProcessChain) *ElementOutput {
+	return (&ElementOutput{}).new(ocmctx, ctx, chain)
 }
 
-func (this *ElementOutput) new(ctx Context, chain ProcessChain) *ElementOutput {
-	this.source = NewIncrementalProcessingSource()
+func (this *ElementOutput) new(ocmctx ocm.Context, ctx Context, chain ProcessChain) *ElementOutput {
+	this.source = NewIncrementalProcessingSource(ocmctx)
 	this.Context = ctx
 	if chain == nil {
 		this.Elems = this.source
 	} else {
-		this.Elems = Process(this.source).Asynchronously().Apply(chain)
+		this.Elems = Process(ocmctx, this.source).Asynchronously().Apply(chain)
 	}
 	return this
 }

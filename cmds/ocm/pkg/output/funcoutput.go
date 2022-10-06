@@ -16,6 +16,7 @@ package output
 
 import (
 	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	. "github.com/open-component-model/ocm/pkg/out"
 )
 
@@ -28,12 +29,12 @@ type FunctionProcessingOutput struct {
 
 var _ Output = &FunctionProcessingOutput{}
 
-func NewProcessingFunctionOutput(ctx Context, chain ProcessChain, f OutputFunction) *FunctionProcessingOutput {
-	return (&FunctionProcessingOutput{}).new(ctx, chain, f)
+func NewProcessingFunctionOutput(octx ocm.Context, ctx Context, chain ProcessChain, f OutputFunction) *FunctionProcessingOutput {
+	return (&FunctionProcessingOutput{}).new(octx, ctx, chain, f)
 }
 
-func (this *FunctionProcessingOutput) new(ctx Context, chain ProcessChain, f OutputFunction) *FunctionProcessingOutput {
-	this.ElementOutput.new(ctx, chain)
+func (this *FunctionProcessingOutput) new(octx ocm.Context, ctx Context, chain ProcessChain, f OutputFunction) *FunctionProcessingOutput {
+	this.ElementOutput.new(octx, ctx, chain)
 	this.function = f
 	return this
 }

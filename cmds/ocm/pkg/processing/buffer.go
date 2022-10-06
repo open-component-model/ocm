@@ -19,10 +19,9 @@ import (
 	"sync"
 
 	"github.com/containerd/containerd/pkg/atomic"
-	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
-	"github.com/open-component-model/ocm/pkg/utils/logger"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
 type Index = IndexArray
@@ -110,7 +109,7 @@ func NewEntry(i Index, v interface{}, opts ...interface{}) ProcessingEntry {
 	}
 }
 
-type BufferCreator func() ProcessingBuffer
+type BufferCreator func(ctx ocm.Context) ProcessingBuffer
 
 type ProcessingIterable interface {
 	ProcessingIterator() ProcessingIterator
@@ -160,6 +159,7 @@ type _buffer struct {
 	*sync.Cond
 	sync.Mutex
 	complete atomic.Bool
+	ctx      ocm.Context
 }
 
 var (
@@ -167,15 +167,16 @@ var (
 	_ data.Iterable    = &_buffer{}
 )
 
-func NewProcessingBuffer(i BufferImplementation) ProcessingBuffer {
-	return (&_buffer{}).new(i)
+func NewProcessingBuffer(ctx ocm.Context, i BufferImplementation) ProcessingBuffer {
+	return (&_buffer{}).new(ctx, i)
 }
 
-func (this *_buffer) new(i BufferImplementation) *_buffer {
+func (this *_buffer) new(ctx ocm.Context, i BufferImplementation) *_buffer {
 	this.BufferImplementation = i
 	this.Cond = sync.NewCond(&this.Mutex)
 	this.complete = atomic.NewBool(false)
 	i.SetFrame(this)
+	this.ctx = ctx
 	return this
 }
 
@@ -225,16 +226,16 @@ func (this *_buffer) Get(i int) interface{} {
 type simpleBuffer struct {
 	frame   BufferFrame
 	entries []ProcessingEntry
-	log     logging.Logger
+	ctx     ocm.Context
 }
 
-func NewSimpleBuffer() ProcessingBuffer {
-	return NewProcessingBuffer((&simpleBuffer{}).new(logger.NewDefaultLoggerContext().Logger()))
+func NewSimpleBuffer(ctx ocm.Context) ProcessingBuffer {
+	return NewProcessingBuffer(ctx, (&simpleBuffer{}).new(ctx))
 }
 
-func (this *simpleBuffer) new(log logging.Logger) *simpleBuffer {
-	this.log = log
+func (this *simpleBuffer) new(ctx ocm.Context) *simpleBuffer {
 	this.entries = []ProcessingEntry{}
+	this.ctx = ctx
 	return this
 }
 
@@ -249,11 +250,11 @@ func (this *simpleBuffer) Close() {
 }
 
 func (this *simpleBuffer) Iterator() data.Iterator {
-	return (&simpleBufferIterator{}).new(this, true, this.log)
+	return (&simpleBufferIterator{}).new(this, true, this.ctx)
 }
 
 func (this *simpleBuffer) ProcessingIterator() ProcessingIterator {
-	return (&simpleBufferIterator{}).new(this, false, this.log)
+	return (&simpleBufferIterator{}).new(this, false, this.ctx)
 }
 
 func (this *simpleBuffer) Add(e ProcessingEntry) bool {
@@ -277,7 +278,7 @@ type simpleBufferIterator struct {
 	buffer  *simpleBuffer
 	valid   bool
 	current int
-	log     logging.Logger
+	ctx     ocm.Context
 }
 
 var (
@@ -285,11 +286,11 @@ var (
 	_ data.Iterator      = &simpleBufferIterator{}
 )
 
-func (this *simpleBufferIterator) new(buffer *simpleBuffer, valid bool, log logging.Logger) *simpleBufferIterator {
+func (this *simpleBufferIterator) new(buffer *simpleBuffer, valid bool, ctx ocm.Context) *simpleBufferIterator {
 	this.valid = valid
 	this.current = -1
 	this.buffer = buffer
-	this.log = log
+	this.ctx = ctx
 	return this
 }
 
@@ -297,7 +298,7 @@ func (this *simpleBufferIterator) HasNext() bool {
 	this.buffer.frame.Lock()
 	defer this.buffer.frame.Unlock()
 	for {
-		this.log.Debug("HasNext", "current", this.current)
+		this.ctx.Logger().Debug("HasNext", "current", this.current)
 		if len(this.buffer.entries) > this.current+1 {
 			if !this.valid || this.buffer.entries[this.current+1].Valid {
 				return true
@@ -320,7 +321,7 @@ func (this *simpleBufferIterator) NextProcessingEntry() ProcessingEntry {
 	this.buffer.frame.Lock()
 	defer this.buffer.frame.Unlock()
 	for {
-		this.log.Debug("NextProcessingEntry", "current", this.current)
+		this.ctx.Logger().Debug("NextProcessingEntry", "current", this.current)
 		if len(this.buffer.entries) > this.current+1 {
 			this.current++
 			if !this.valid || this.buffer.entries[this.current].Valid {
@@ -348,24 +349,24 @@ type orderedBuffer struct {
 	valid     *data.DLL
 	nextIndex Index
 	size      int
-	log       logging.Logger
+	ctx       ocm.Context
 }
 
 type CheckNext interface {
 	CheckNext() bool
 }
 
-func NewOrderedBuffer() ProcessingBuffer {
-	return NewProcessingBuffer((&orderedBuffer{}).new(logger.NewDefaultLoggerContext().Logger()))
+func NewOrderedBuffer(ctx ocm.Context) ProcessingBuffer {
+	return NewProcessingBuffer(ctx, (&orderedBuffer{}).new(ctx))
 }
 
-func (this *orderedBuffer) new(log logging.Logger) *orderedBuffer {
-	(&this.simple).new(log)
+func (this *orderedBuffer) new(ctx ocm.Context) *orderedBuffer {
+	(&this.simple).new(ctx)
 	this.root.New(this)
 	this.valid = this.root.DLL()
 	this.last = this.valid
 	this.nextIndex = this.nextIndex.Next(-1, 0)
-	this.log = log
+	this.ctx = ctx
 	return this
 }
 
@@ -394,7 +395,7 @@ func (this *orderedBuffer) Add(e ProcessingEntry) bool {
 	}
 
 	increased := false
-	this.log.Debug("add index to cur value", "index", e.Index, "value", e.Value, "next-index", this.nextIndex)
+	this.ctx.Logger().Debug("add index to cur value", "index", e.Index, "value", e.Value, "next-index", this.nextIndex)
 
 	next := this.valid.Next()
 	for next != nil && !next.Get().(*ProcessingEntry).Index.After(this.nextIndex) {
@@ -403,7 +404,7 @@ func (this *orderedBuffer) Add(e ProcessingEntry) bool {
 		this.valid = next
 		next = next.Next()
 		increased = true
-		this.log.Debug("increase to index to value", "index", n.Index, "value", n.Value)
+		this.ctx.Logger().Debug("increase to index to value", "index", n.Index, "value", n.Value)
 	}
 	return increased
 }
@@ -544,12 +545,12 @@ func ValueIterable(i ProcessingIterable) ProcessingIterable {
 	return &valueIterable{i}
 }
 
-func NewEntryIterableFromIterable(data data.Iterable) ProcessingIterable {
+func NewEntryIterableFromIterable(ctx ocm.Context, data data.Iterable) ProcessingIterable {
 	e, ok := data.(ProcessingIterable)
 	if ok {
 		return e
 	}
-	c := NewOrderedBuffer()
+	c := NewOrderedBuffer(ctx)
 
 	go func() {
 		i := data.Iterator()

@@ -21,6 +21,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
 type Result struct {
@@ -106,7 +107,7 @@ var _ = Describe("processing buffer", func() {
 
 	Context("simple", func() {
 		It("add", func() {
-			buf := NewSimpleBuffer()
+			buf := NewSimpleBuffer(ocm.DefaultContext())
 
 			promise := Gather(buf)
 
@@ -119,7 +120,7 @@ var _ = Describe("processing buffer", func() {
 			Expect(data.Slice(ValueIterable(buf))).To(Equal([]interface{}{0, 1, 2, 3}))
 		})
 		It("add filtered", func() {
-			buf := NewSimpleBuffer()
+			buf := NewSimpleBuffer(ocm.DefaultContext())
 
 			promise := Gather(buf)
 
@@ -135,7 +136,7 @@ var _ = Describe("processing buffer", func() {
 
 	Context("add ordered", func() {
 		It("add in order", func() {
-			buf := NewOrderedBuffer()
+			buf := NewOrderedBuffer(ocm.DefaultContext())
 
 			promise := Gather(buf)
 			it := buf.Iterator()
@@ -160,7 +161,7 @@ var _ = Describe("processing buffer", func() {
 		})
 
 		It("add filtered", func() {
-			buf := NewOrderedBuffer()
+			buf := NewOrderedBuffer(ocm.DefaultContext())
 
 			promise := Gather(buf)
 			it := buf.Iterator()
@@ -183,7 +184,7 @@ var _ = Describe("processing buffer", func() {
 			Expect(data.Slice(ValueIterable(buf))).To(Equal([]interface{}{0, 1, 2, 3}))
 		})
 		It("add mixed order", func() {
-			buf := NewOrderedBuffer()
+			buf := NewOrderedBuffer(ocm.DefaultContext())
 
 			promise := Gather(buf)
 			it := buf.Iterator()
@@ -208,7 +209,7 @@ var _ = Describe("processing buffer", func() {
 		})
 
 		It("add mixed order filtered", func() {
-			buf := NewOrderedBuffer()
+			buf := NewOrderedBuffer(ocm.DefaultContext())
 
 			promise := Gather(buf)
 			it := buf.Iterator()
@@ -233,7 +234,7 @@ var _ = Describe("processing buffer", func() {
 		})
 
 		Context("exploded", func() {
-			buf := NewOrderedBuffer()
+			buf := NewOrderedBuffer(ocm.DefaultContext())
 			promise := Gather(buf)
 			it := buf.Iterator()
 			Expect(it.(CheckNext).CheckNext()).To(BeFalse())

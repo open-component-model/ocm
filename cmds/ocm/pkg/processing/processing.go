@@ -16,6 +16,7 @@ package processing
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
 type IncrementalProcessingSource interface {
@@ -67,8 +68,8 @@ type ProcessingResult interface {
 
 // Process processes an initial empty chain by converting
 // an iterable into a ProcessingResult.
-func Process(data data.Iterable) ProcessingResult {
-	return (&_SynchronousProcessing{}).new(data)
+func Process(ctx ocm.Context, data data.Iterable) ProcessingResult {
+	return (&_SynchronousProcessing{}).new(ctx, data)
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -83,12 +84,12 @@ var (
 	_ data.IndexedAccess          = &_ProcessingSource{}
 )
 
-func NewIncrementalProcessingSource() ProcessingSource {
-	return (&_ProcessingSource{}).new()
+func NewIncrementalProcessingSource(ctx ocm.Context) ProcessingSource {
+	return (&_ProcessingSource{}).new(ctx)
 }
 
-func (this *_ProcessingSource) new() ProcessingSource {
-	this.ProcessingBuffer = NewSimpleBuffer()
+func (this *_ProcessingSource) new(ctx ocm.Context) ProcessingSource {
+	this.ProcessingBuffer = NewSimpleBuffer(ctx)
 	return this
 }
 
@@ -101,8 +102,8 @@ func (this *_ProcessingSource) Add(entries ...interface{}) IncrementalProcessing
 
 /////////////////////////////////////////////////////////////////////////////
 
-func NewAsyncProcessingSource(f func() data.Iterable, pool ProcessorPool) ProcessingSource {
-	p := (&_ProcessingSource{}).new()
+func NewAsyncProcessingSource(ctx ocm.Context, f func() data.Iterable, pool ProcessorPool) ProcessingSource {
+	p := (&_ProcessingSource{}).new(ctx)
 	pool.Request()
 	pool.Exec(func() {
 		i := f().Iterator()

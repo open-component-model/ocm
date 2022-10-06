@@ -18,6 +18,7 @@ import (
 	"io"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
 	"github.com/open-component-model/ocm/cmds/ocm/app"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -55,6 +56,7 @@ type TestEnv struct {
 func NewTestEnv(opts ...env.Option) *TestEnv {
 	b := builder.NewBuilder(env.NewEnvironment(opts...))
 	ctx := clictx.WithOCM(b.OCMContext()).WithSharedAttributes(datacontext.New(nil)).New()
+	ctx.Logger().Info("this should work.")
 	return &TestEnv{
 		Builder: b,
 		CLI:     *NewCLI(ctx),
