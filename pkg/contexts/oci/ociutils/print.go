@@ -19,7 +19,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/compression"
@@ -81,16 +80,6 @@ func PrintLayer(blob accessio.BlobAccess) string {
 	reader, err := blob.Reader()
 	if err != nil {
 		return "cannot read blob: " + err.Error()
-	}
-	file, err := os.Create("/tmp/blob")
-	if err == nil {
-		io.Copy(file, reader)
-		file.Close()
-		reader.Close()
-		reader, err = blob.Reader()
-		if err != nil {
-			return "cannot read blob: " + err.Error()
-		}
 	}
 	defer reader.Close()
 	reader, _, err = compression.AutoDecompress(reader)

@@ -46,6 +46,12 @@ func ExtractTarToFs(fs vfs.FileSystem, in io.Reader) error {
 			if err != nil {
 				return fmt.Errorf("unable to open file %s: %w", header.Name, err)
 			}
+			//nolint:gosec // We don't know what size limit we could set, the tar
+			// archive can be an image layer and that can even reach the gigabyte range.
+			// For now, we acknowledge the risk.
+			//
+			// We checked other softwares and tried to figure out how they manage this,
+			// but it's handled the same way.
 			if _, err := io.Copy(file, tr); err != nil {
 				return fmt.Errorf("unable to copy tar file to filesystem: %w", err)
 			}

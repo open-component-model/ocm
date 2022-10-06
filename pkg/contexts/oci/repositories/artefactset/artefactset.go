@@ -263,8 +263,8 @@ func (a *artefactSetImpl) matcher(ref string) func(d *artdesc.Descriptor) bool {
 func (a *artefactSetImpl) hasArtefact(ref string) (bool, error) {
 	idx := a.GetIndex()
 	match := a.matcher(ref)
-	for _, e := range idx.Manifests {
-		if match(&e) {
+	for i := range idx.Manifests {
+		if match(&idx.Manifests[i]) {
 			return true, nil
 		}
 	}
@@ -274,8 +274,8 @@ func (a *artefactSetImpl) hasArtefact(ref string) (bool, error) {
 func (a *artefactSetImpl) getArtefact(ref string) (cpi.ArtefactAccess, error) {
 	idx := a.GetIndex()
 	match := a.matcher(ref)
-	for _, e := range idx.Manifests {
-		if match(&e) {
+	for i, e := range idx.Manifests {
+		if match(&idx.Manifests[i]) {
 			return a.base.GetArtefact(a.impl, e.Digest)
 		}
 	}

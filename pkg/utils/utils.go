@@ -18,10 +18,12 @@ import (
 	"archive/tar"
 	"bytes"
 	"compress/gzip"
+	crypto "crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"math/big"
 	"math/rand"
 	"net/http"
 	"os"
@@ -116,7 +118,15 @@ var chars = []rune("abcdefghijklmnopqrstuvwxyz1234567890")
 func RandomString(n int) string {
 	b := make([]rune, n)
 	for i := range b {
-		b[i] = chars[rand.Intn(len(chars))]
+		var value int
+		if v, err := crypto.Int(crypto.Reader, big.NewInt(int64(len(chars)))); err == nil {
+			value = int(v.Int64())
+		} else {
+			// insecure fallback to provide a valid result
+			logrus.Warnf("failed to generate random number: %s", err)
+			value = rand.Intn(len(chars)) //nolint: gosec // only used as fallback
+		}
+		b[i] = chars[value]
 	}
 	return string(b)
 }
