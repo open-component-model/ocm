@@ -23,8 +23,8 @@ import (
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/errors"
+	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils/logger"
 )
 
 // BuilderMode controls the handling of unset information in the
@@ -68,7 +68,8 @@ type Context interface {
 	// retrievable by a ForContext method
 	BindTo(ctx context.Context) context.Context
 	GetAttributes() Attributes
-	logger.LoggingContextProvider
+
+	ocmlog.LogProvider
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -154,6 +155,10 @@ func NewContextBase(eff Context, typ string, key interface{}, parentAttrs Attrib
 
 func (c *_context) Logger(messageContext ...logging.MessageContext) logging.Logger {
 	return c.logctx.Logger(messageContext)
+}
+
+func (c *_context) LoggingContext() logging.Context {
+	return c.logctx
 }
 
 func (c *_context) GetType() string {

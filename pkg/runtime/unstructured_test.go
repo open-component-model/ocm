@@ -18,12 +18,12 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/mandelsoft/logging"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/mandelsoft/logging"
+
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils/logger"
 )
 
 func InOut(log logging.Logger, in runtime.TypedObject, encoding runtime.Encoding) (runtime.TypedObject, string, error) {
@@ -56,7 +56,7 @@ func InOut(log logging.Logger, in runtime.TypedObject, encoding runtime.Encoding
 
 var _ = Describe("*** unstructured", func() {
 	result := "{\"type\":\"test\"}"
-	log := logger.NewDefaultLoggerContext().Logger()
+	log := logging.DefaultContext().Logger()
 
 	It("unmarshal simple unstructured", func() {
 		un := runtime.NewEmptyUnstructured("test")

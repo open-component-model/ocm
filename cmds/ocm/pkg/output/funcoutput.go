@@ -16,8 +16,9 @@ package output
 
 import (
 	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	. "github.com/open-component-model/ocm/pkg/out"
+
+	"github.com/mandelsoft/logging"
 )
 
 type OutputFunction func(Context, interface{})
@@ -29,12 +30,12 @@ type FunctionProcessingOutput struct {
 
 var _ Output = &FunctionProcessingOutput{}
 
-func NewProcessingFunctionOutput(octx ocm.Context, ctx Context, chain ProcessChain, f OutputFunction) *FunctionProcessingOutput {
-	return (&FunctionProcessingOutput{}).new(octx, ctx, chain, f)
+func NewProcessingFunctionOutput(log logging.Context, ctx Context, chain ProcessChain, f OutputFunction) *FunctionProcessingOutput {
+	return (&FunctionProcessingOutput{}).new(log, ctx, chain, f)
 }
 
-func (this *FunctionProcessingOutput) new(octx ocm.Context, ctx Context, chain ProcessChain, f OutputFunction) *FunctionProcessingOutput {
-	this.ElementOutput.new(octx, ctx, chain)
+func (this *FunctionProcessingOutput) new(log logging.Context, ctx Context, chain ProcessChain, f OutputFunction) *FunctionProcessingOutput {
+	this.ElementOutput.new(log, ctx, chain)
 	this.function = f
 	return this
 }

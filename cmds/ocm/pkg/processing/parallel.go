@@ -17,54 +17,55 @@ package processing
 import (
 	"sync"
 
+	"github.com/mandelsoft/logging"
+
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
 type _ParallelProcessing struct {
 	data    ProcessingIterable
 	pool    ProcessorPool
 	creator BufferCreator
-	ctx     ocm.Context
+	log     logging.Context
 }
 
 var _ data.Iterable = &_ParallelProcessing{}
 
-func (this *_ParallelProcessing) new(data ProcessingIterable, pool ProcessorPool, creator BufferCreator, ctx ocm.Context) *_ParallelProcessing {
+func (this *_ParallelProcessing) new(data ProcessingIterable, pool ProcessorPool, creator BufferCreator, log logging.Context) *_ParallelProcessing {
 	this.data = data
 	this.pool = pool
 	this.creator = creator
-	this.ctx = ctx
+	this.log = log
 	return this
 }
 
 func (this *_ParallelProcessing) Explode(m ExplodeFunction) ProcessingResult {
-	return (&_ParallelStep{}).new(this.ctx, this.pool, this.data, explode(m), this.creator)
+	return (&_ParallelStep{}).new(this.log, this.pool, this.data, explode(m), this.creator)
 }
 
 func (this *_ParallelProcessing) Map(m MappingFunction) ProcessingResult {
-	return (&_ParallelStep{}).new(this.ctx, this.pool, this.data, mapper(m), this.creator)
+	return (&_ParallelStep{}).new(this.log, this.pool, this.data, mapper(m), this.creator)
 }
 
 func (this *_ParallelProcessing) Filter(f FilterFunction) ProcessingResult {
-	return (&_ParallelStep{}).new(this.ctx, this.pool, this.data, filter(f), this.creator)
+	return (&_ParallelStep{}).new(this.log, this.pool, this.data, filter(f), this.creator)
 }
 
 func (this *_ParallelProcessing) Sort(c CompareFunction) ProcessingResult {
 	setup := func() data.Iterable { return this.AsSlice().Sort(c) }
 
-	this.ctx.Logger().Debug("sorting pool", "pool", this.pool)
+	this.log.Logger().Debug("sorting pool", "pool", this.pool)
 
-	return (&_ParallelProcessing{}).new(NewAsyncProcessingSource(this.ctx, setup, this.pool).(ProcessingIterable), this.pool, NewOrderedBuffer, this.ctx)
+	return (&_ParallelProcessing{}).new(NewAsyncProcessingSource(this.log, setup, this.pool).(ProcessingIterable), this.pool, NewOrderedBuffer, this.log)
 }
 
 func (this *_ParallelProcessing) Transform(t TransformFunction) ProcessingResult {
 	transform := func() data.Iterable { return t(this.data) }
-	return (&_ParallelProcessing{}).new(NewAsyncProcessingSource(this.ctx, transform, this.pool).(ProcessingIterable), this.pool, NewOrderedBuffer, this.ctx)
+	return (&_ParallelProcessing{}).new(NewAsyncProcessingSource(this.log, transform, this.pool).(ProcessingIterable), this.pool, NewOrderedBuffer, this.log)
 }
 
 func (this *_ParallelProcessing) WithPool(p ProcessorPool) ProcessingResult {
-	return (&_ParallelProcessing{}).new(this.data, p, this.creator, this.ctx)
+	return (&_ParallelProcessing{}).new(this.data, p, this.creator, this.log)
 }
 
 func (this *_ParallelProcessing) Parallel(n int) ProcessingResult {
@@ -72,11 +73,11 @@ func (this *_ParallelProcessing) Parallel(n int) ProcessingResult {
 }
 
 func (this *_ParallelProcessing) Synchronously() ProcessingResult {
-	return (&_SynchronousProcessing{}).new(this.ctx, this)
+	return (&_SynchronousProcessing{}).new(this.log, this)
 }
 
 func (this *_ParallelProcessing) Asynchronously() ProcessingResult {
-	return (&_AsynchronousProcessing{}).new(this.ctx, this)
+	return (&_AsynchronousProcessing{}).new(this.log, this)
 }
 
 func (this *_ParallelProcessing) Unordered() ProcessingResult {
@@ -85,7 +86,7 @@ func (this *_ParallelProcessing) Unordered() ProcessingResult {
 	if ok {
 		data = &ordered.simple
 	}
-	return (&_ParallelProcessing{}).new(data, this.pool, NewSimpleBuffer, this.ctx)
+	return (&_ParallelProcessing{}).new(data, this.pool, NewSimpleBuffer, this.log)
 }
 
 func (this *_ParallelProcessing) Apply(p ProcessChain) ProcessingResult {
@@ -106,22 +107,22 @@ type _ParallelStep struct {
 	_ParallelProcessing
 }
 
-func (this *_ParallelStep) new(ctx ocm.Context, pool ProcessorPool, data ProcessingIterable, op operation, creator BufferCreator) *_ParallelStep {
-	this.ctx = ctx
-	buffer := creator(ctx)
-	this._ParallelProcessing.new(buffer, pool, creator, this.ctx)
+func (this *_ParallelStep) new(log logging.Context, pool ProcessorPool, data ProcessingIterable, op operation, creator BufferCreator) *_ParallelStep {
+	this.log = log
+	buffer := creator(log)
+	this._ParallelProcessing.new(buffer, pool, creator, this.log)
 	go func() {
-		this.ctx.Logger().Debug("start processing")
+		this.log.Logger().Debug("start processing")
 
 		this.pool.Request()
 		i := data.ProcessingIterator()
 		var wg sync.WaitGroup
 		for i.HasNext() {
 			e := i.NextProcessingEntry()
-			this.ctx.Logger().Debug("start", "index", e.Index)
+			this.log.Logger().Debug("start", "index", e.Index)
 			wg.Add(1)
 			pool.Exec(func() {
-				this.ctx.Logger().Debug("process", "index", e.Index)
+				this.log.Logger().Debug("process", "index", e.Index)
 				var r operationResult
 				if e.Valid {
 					r, e.Valid = op.process(e.Value)
@@ -148,14 +149,14 @@ func (this *_ParallelStep) new(ctx ocm.Context, pool ProcessorPool, data Process
 						}
 					}
 				}
-				this.ctx.Logger().Debug("done", "index", e.Index)
+				this.log.Logger().Debug("done", "index", e.Index)
 				wg.Done()
 			})
 		}
 		wg.Wait()
 		this.pool.Release()
 		buffer.Close()
-		this.ctx.Logger().Debug("done processing")
+		this.log.Logger().Debug("done processing")
 	}()
 	return this
 }

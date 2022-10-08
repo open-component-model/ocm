@@ -68,7 +68,7 @@ func NewProcessingTableOutput(opts *Options, chain ProcessChain, header ...strin
 
 func (this *TableProcessingOutput) new(opts *Options, chain ProcessChain, header []string) *TableProcessingOutput {
 	this.header = header
-	this.ElementOutput.new(opts.OcmContext, opts.Context, chain)
+	this.ElementOutput.new(opts.LogContext(), opts.Context, chain)
 	this.opts = opts
 	return this
 }

@@ -34,7 +34,7 @@ func NewProcessingAttrOutput(opts *Options, chain ProcessChain, header ...string
 }
 
 func (this *AttrProcessingOutput) new(opts *Options, chain ProcessChain, header []string) *AttrProcessingOutput {
-	this.ElementOutput.new(opts.OcmContext, opts.Context, chain)
+	this.ElementOutput.new(opts.LogContext(), opts.Context, chain)
 	this.opts = opts
 	return this
 }

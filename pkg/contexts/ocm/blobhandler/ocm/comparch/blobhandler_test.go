@@ -18,10 +18,11 @@ import (
 	"encoding/json"
 	"reflect"
 
-	"github.com/mandelsoft/logging"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/mandelsoft/logging"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
@@ -33,22 +34,24 @@ import (
 	"github.com/open-component-model/ocm/pkg/env/builder"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils/logger"
 )
 
 const ARCHIVE = "archive"
 
 var _ = Describe("blobhandler", func() {
-	var log logging.Logger
+	log := logging.DefaultContext().Logger()
+
 	Context("regular", func() {
 		var b *builder.Builder
+
 		BeforeEach(func() {
-			log = logger.NewDefaultLoggerContext().Logger()
 			b = builder.NewBuilder(env.NewEnvironment())
 		})
+
 		AfterEach(func() {
 			b.Cleanup()
 		})
+
 		It("uses generic local access", func() {
 			b.ComponentArchive(ARCHIVE, accessio.FormatDirectory, "github.com/mandelsoft/test", "1.0.0", func() {
 				b.Resource("test", "1.0.0", "Test", v1.LocalRelation, func() {

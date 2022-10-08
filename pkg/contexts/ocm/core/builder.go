@@ -21,7 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/utils/logger"
+	"github.com/open-component-model/ocm/pkg/logging"
 )
 
 type Builder struct {
@@ -177,6 +177,6 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 		reposcheme.AddKnownTypes(b.reposcheme) // TODO: implement delegation
 		b.reposcheme = reposcheme
 	}
-	logger := logger.NewDefaultLoggerContext()
+	logger := logging.NewDefaultContext()
 	return newContext(b.credentials, b.oci, b.reposcheme, b.accessscheme, b.spechandlers, b.blobhandlers, b.blobdigesters, logger)
 }

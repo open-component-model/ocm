@@ -16,8 +16,9 @@ package output
 
 import (
 	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	. "github.com/open-component-model/ocm/pkg/out"
+
+	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 )
@@ -30,17 +31,20 @@ type ElementOutput struct {
 
 var _ Output = (*ElementOutput)(nil)
 
-func NewElementOutput(ocmctx ocm.Context, ctx Context, chain ProcessChain) *ElementOutput {
-	return (&ElementOutput{}).new(ocmctx, ctx, chain)
+func NewElementOutput(log logging.Context, ctx Context, chain ProcessChain) *ElementOutput {
+	return (&ElementOutput{}).new(log, ctx, chain)
 }
 
-func (this *ElementOutput) new(ocmctx ocm.Context, ctx Context, chain ProcessChain) *ElementOutput {
-	this.source = NewIncrementalProcessingSource(ocmctx)
+func (this *ElementOutput) new(log logging.Context, ctx Context, chain ProcessChain) *ElementOutput {
+	if log == nil {
+		log = logging.DefaultContext()
+	}
+	this.source = NewIncrementalProcessingSource(log)
 	this.Context = ctx
 	if chain == nil {
 		this.Elems = this.source
 	} else {
-		this.Elems = Process(ocmctx, this.source).Asynchronously().Apply(chain)
+		this.Elems = Process(log, this.source).Asynchronously().Apply(chain)
 	}
 	return this
 }

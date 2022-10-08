@@ -22,8 +22,8 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/out"
-	"github.com/open-component-model/ocm/pkg/utils/logger"
 )
 
 type Builder struct {
@@ -95,6 +95,6 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 	if b.shared == nil {
 		b.shared = b.ocm.AttributesContext()
 	}
-	logger := logger.NewDefaultLoggerContext()
+	logger := logging.NewDefaultContext()
 	return newContext(b.shared, b.ocm, out.NewFor(b.out), b.filesystem, logger)
 }

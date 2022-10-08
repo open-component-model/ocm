@@ -20,8 +20,10 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/mandelsoft/logging"
+
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 )
 
 type Result struct {
@@ -54,8 +56,14 @@ func ExpectNext(it data.Iterator, v int, next bool) {
 }
 
 var _ = Describe("processing buffer", func() {
+	var log logging.Context
+
+	BeforeEach(func() {
+		log, _ = ocmlog.NewBufferedContext()
+	})
 
 	Context("index array", func() {
+
 		It("after empty", func() {
 			i := IndexArray{}
 			Expect(i.After(IndexArray{1, 2, 3})).To(BeFalse())
@@ -107,7 +115,7 @@ var _ = Describe("processing buffer", func() {
 
 	Context("simple", func() {
 		It("add", func() {
-			buf := NewSimpleBuffer(ocm.DefaultContext())
+			buf := NewSimpleBuffer(log)
 
 			promise := Gather(buf)
 
@@ -120,7 +128,7 @@ var _ = Describe("processing buffer", func() {
 			Expect(data.Slice(ValueIterable(buf))).To(Equal([]interface{}{0, 1, 2, 3}))
 		})
 		It("add filtered", func() {
-			buf := NewSimpleBuffer(ocm.DefaultContext())
+			buf := NewSimpleBuffer(log)
 
 			promise := Gather(buf)
 
@@ -136,7 +144,7 @@ var _ = Describe("processing buffer", func() {
 
 	Context("add ordered", func() {
 		It("add in order", func() {
-			buf := NewOrderedBuffer(ocm.DefaultContext())
+			buf := NewOrderedBuffer(log)
 
 			promise := Gather(buf)
 			it := buf.Iterator()
@@ -161,7 +169,7 @@ var _ = Describe("processing buffer", func() {
 		})
 
 		It("add filtered", func() {
-			buf := NewOrderedBuffer(ocm.DefaultContext())
+			buf := NewOrderedBuffer(log)
 
 			promise := Gather(buf)
 			it := buf.Iterator()
@@ -184,7 +192,7 @@ var _ = Describe("processing buffer", func() {
 			Expect(data.Slice(ValueIterable(buf))).To(Equal([]interface{}{0, 1, 2, 3}))
 		})
 		It("add mixed order", func() {
-			buf := NewOrderedBuffer(ocm.DefaultContext())
+			buf := NewOrderedBuffer(log)
 
 			promise := Gather(buf)
 			it := buf.Iterator()
@@ -209,7 +217,7 @@ var _ = Describe("processing buffer", func() {
 		})
 
 		It("add mixed order filtered", func() {
-			buf := NewOrderedBuffer(ocm.DefaultContext())
+			buf := NewOrderedBuffer(log)
 
 			promise := Gather(buf)
 			it := buf.Iterator()
@@ -233,8 +241,8 @@ var _ = Describe("processing buffer", func() {
 			Expect(data.Slice(ValueIterable(buf))).To(Equal([]interface{}{3, 0, 2, 1}))
 		})
 
-		Context("exploded", func() {
-			buf := NewOrderedBuffer(ocm.DefaultContext())
+		It("exploded", func() {
+			buf := NewOrderedBuffer(log)
 			promise := Gather(buf)
 			it := buf.Iterator()
 			Expect(it.(CheckNext).CheckNext()).To(BeFalse())

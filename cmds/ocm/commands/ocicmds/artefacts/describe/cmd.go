@@ -110,11 +110,11 @@ func (o *Command) Run() error {
 var outputs = output.NewOutputs(getRegular, output.Outputs{}).AddChainedManifestOutputs(infoChain)
 
 func getRegular(opts *output.Options) output.Output {
-	return output.NewProcessingFunctionOutput(opts.OcmContext, opts.Context, processing.Chain(opts.OcmContext), outInfo)
+	return output.NewProcessingFunctionOutput(opts.LogContext(), opts.Context, processing.Chain(opts.LogContext()), outInfo)
 }
 
 func infoChain(options *output.Options) processing.ProcessChain {
-	return processing.Chain(options.OcmContext).Parallel(4).Map(mapInfo(From(options)))
+	return processing.Chain(options.LogContext()).Parallel(4).Map(mapInfo(From(options)))
 }
 
 func outInfo(ctx out.Context, e interface{}) {

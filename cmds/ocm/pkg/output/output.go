@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	. "github.com/open-component-model/ocm/pkg/out"
 
+	"github.com/mandelsoft/logging"
 	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
@@ -105,12 +105,12 @@ type YAMLProcessingOutput struct {
 
 var _ Output = &YAMLProcessingOutput{}
 
-func NewProcessingYAMLOutput(octx ocm.Context, ctx Context, chain processing.ProcessChain) *YAMLProcessingOutput {
-	return (&YAMLProcessingOutput{}).new(octx, ctx, chain)
+func NewProcessingYAMLOutput(log logging.Context, ctx Context, chain processing.ProcessChain) *YAMLProcessingOutput {
+	return (&YAMLProcessingOutput{}).new(log, ctx, chain)
 }
 
-func (this *YAMLProcessingOutput) new(octx ocm.Context, ctx Context, chain processing.ProcessChain) *YAMLProcessingOutput {
-	this.ElementOutput.new(octx, ctx, chain)
+func (this *YAMLProcessingOutput) new(log logging.Context, ctx Context, chain processing.ProcessChain) *YAMLProcessingOutput {
+	this.ElementOutput.new(log, ctx, chain)
 	return this
 }
 
@@ -171,12 +171,12 @@ type JSONProcessingOutput struct {
 
 var _ Output = &JSONProcessingOutput{}
 
-func NewProcessingJSONOutput(octx ocm.Context, ctx Context, chain processing.ProcessChain, pretty bool) *JSONProcessingOutput {
-	return (&JSONProcessingOutput{}).new(octx, ctx, chain, pretty)
+func NewProcessingJSONOutput(log logging.Context, ctx Context, chain processing.ProcessChain, pretty bool) *JSONProcessingOutput {
+	return (&JSONProcessingOutput{}).new(log, ctx, chain, pretty)
 }
 
-func (this *JSONProcessingOutput) new(octx ocm.Context, ctx Context, chain processing.ProcessChain, pretty bool) *JSONProcessingOutput {
-	this.ElementOutput.new(octx, ctx, chain)
+func (this *JSONProcessingOutput) new(log logging.Context, ctx Context, chain processing.ProcessChain, pretty bool) *JSONProcessingOutput {
+	this.ElementOutput.new(log, ctx, chain)
 	this.pretty = pretty
 	return this
 }
@@ -266,13 +266,13 @@ func (this Outputs) AddManifestOutputs() Outputs {
 
 func (this Outputs) AddChainedManifestOutputs(chain ChainFunction) Outputs {
 	this["yaml"] = func(opts *Options) Output {
-		return NewProcessingYAMLOutput(opts.OcmContext, opts.Context, chain(opts))
+		return NewProcessingYAMLOutput(opts.LogContext(), opts.Context, chain(opts))
 	}
 	this["json"] = func(opts *Options) Output {
-		return NewProcessingJSONOutput(opts.OcmContext, opts.Context, chain(opts), true)
+		return NewProcessingJSONOutput(opts.LogContext(), opts.Context, chain(opts), true)
 	}
 	this["JSON"] = func(opts *Options) Output {
-		return NewProcessingJSONOutput(opts.OcmContext, opts.Context, chain(opts), false)
+		return NewProcessingJSONOutput(opts.LogContext(), opts.Context, chain(opts), false)
 	}
 	return this
 }

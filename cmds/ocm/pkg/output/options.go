@@ -19,11 +19,11 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/mandelsoft/logging"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -53,7 +53,7 @@ type Options struct {
 	Sort        []string
 	FixedColums int
 	Context     out.Context // this context could be ocm context.
-	OcmContext  ocm.Context
+	Logging     logging.Context
 }
 
 func OutputOptions(outputs Outputs, opts ...options.Options) *Options {
@@ -61,6 +61,13 @@ func OutputOptions(outputs Outputs, opts ...options.Options) *Options {
 		Outputs:   outputs,
 		OptionSet: opts,
 	}
+}
+
+func (o *Options) LogContext() logging.Context {
+	if o.Logging != nil {
+		return o.Logging
+	}
+	return logging.DefaultContext()
 }
 
 func (o *Options) Options(proto options.Options) interface{} {
@@ -103,7 +110,6 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 
 func (o *Options) Complete(ctx clictx.Context) error {
 	o.Context = ctx
-	o.OcmContext = ctx.OCMContext()
 	var fields []string
 
 	if f := o.Outputs[o.OutputMode]; f == nil {

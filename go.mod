@@ -33,7 +33,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.12.12
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.11.23
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.27.4
-	github.com/bombsimon/logrusr/v3 v3.0.0
 	github.com/containerd/containerd v1.6.6
 	github.com/containers/image/v5 v5.20.0
 	github.com/docker/distribution v2.8.1+incompatible
@@ -44,7 +43,7 @@ require (
 	github.com/google/go-github/v45 v45.2.0
 	github.com/klauspost/compress v1.14.4
 	github.com/klauspost/pgzip v1.2.5
-	github.com/mandelsoft/logging v0.0.0-20220929203032-cfba13e262df
+	github.com/mandelsoft/logging v0.0.0-20221008125016-927a97d3006c
 	github.com/mandelsoft/vfs v0.0.0-20220805210647-bf14a11bfe31
 	github.com/marstr/guid v1.1.0
 	github.com/mitchellh/copystructure v1.2.0
@@ -53,6 +52,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.2
+	github.com/tonglil/buflogr v1.0.1
 	github.com/ulikunitz/xz v0.5.10
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8

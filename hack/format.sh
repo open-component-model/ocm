@@ -6,7 +6,7 @@
 
 set -e
 
-Logger() {
+log() {
   msg=${1:-(no message)}
 
   echo " === ${msg}"
