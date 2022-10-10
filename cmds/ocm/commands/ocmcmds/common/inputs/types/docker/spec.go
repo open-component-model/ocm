@@ -43,6 +43,8 @@ func New(pathtag string) *Spec {
 
 func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath string) field.ErrorList {
 	allErrs := s.PathSpec.Validate(fldPath, ctx, inputFilePath)
+	allErrs = ociimage.ValidateRepository(fldPath.Child("repository"), allErrs, s.Repository)
+
 	if s.Path != "" {
 		pathField := fldPath.Child("path")
 		_, _, err := docker.ParseGenericRef(s.Path)

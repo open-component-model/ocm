@@ -18,7 +18,7 @@ OCM = go run $(REPO_ROOT)/cmds/ocm
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(NAME) -type f)
 OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
 
-ifneq ($(MULTI),true)
+ifeq ($(MULTI),true)
 FLAGSUF     = .multi
 endif
 
@@ -26,6 +26,11 @@ endif
 ctf: $(GEN)/ctf
 
 $(GEN)/ctf: $(GEN)/ca
+	$(OCM) transfer ca $(GEN)/ca $(GEN)/ctf
+	touch $(GEN)/ctf
+
+.PHONY: plain-ctf
+plain-ctf:
 	$(OCM) transfer ca $(GEN)/ca $(GEN)/ctf
 	touch $(GEN)/ctf
 

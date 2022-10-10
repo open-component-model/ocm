@@ -47,6 +47,7 @@ func New(pathtag string) *Spec {
 
 func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath string) field.ErrorList {
 	allErrs := s.PathSpec.Validate(fldPath, ctx, inputFilePath)
+	allErrs = ValidateRepository(fldPath.Child("repository"), allErrs, s.Repository)
 	if s.Path != "" {
 		pathField := fldPath.Child("path")
 		_, _, err := docker.ParseGenericRef(s.Path)
@@ -90,6 +91,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 }
 
 func Hint(nv common.NameVersion, locator, repo, version string) string {
+	fmt.Printf("locator: %s, repo: %s, version %s\n", locator, repo, version)
 	repository := fmt.Sprintf("%s/%s", nv.GetName(), locator)
 	if repo != "" {
 		if strings.HasPrefix(repo, grammar.RepositorySeparator) {
@@ -99,4 +101,17 @@ func Hint(nv common.NameVersion, locator, repo, version string) string {
 		}
 	}
 	return fmt.Sprintf("%s:%s", repository, version)
+}
+
+func ValidateRepository(fldPath *field.Path, allErrs field.ErrorList, repo string) field.ErrorList {
+	if repo == "" {
+		return allErrs
+	}
+	if strings.Contains(repo, grammar.DigestSeparator) || strings.Contains(repo, grammar.TagSeparator) {
+		return append(allErrs, field.Invalid(fldPath, repo, "unexpected digest or tag"))
+	}
+	if !grammar.AnchoredRepositoryRegexp.MatchString(repo) {
+		return append(allErrs, field.Invalid(fldPath, repo, "no repository name"))
+	}
+	return allErrs
 }

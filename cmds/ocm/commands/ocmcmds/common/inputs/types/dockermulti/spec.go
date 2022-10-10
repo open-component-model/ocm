@@ -58,6 +58,7 @@ func New(pathtags ...string) *Spec {
 
 func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath string) field.ErrorList {
 	allErrs := field.ErrorList{}
+	allErrs = ociimage.ValidateRepository(fldPath.Child("repository"), allErrs, s.Repository)
 	variantsField := fldPath.Child("variants")
 	if len(s.Variants) == 0 {
 		allErrs = append(allErrs, field.Required(variantsField, fmt.Sprintf("variants is required for input of type %q and must has at least one entry", s.GetType())))
