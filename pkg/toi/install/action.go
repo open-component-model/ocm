@@ -290,7 +290,7 @@ func ProcessConfig(name string, octx ocm.Context, cv ocm.ComponentVersionAccess,
 	return config, err
 }
 
-func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Credentials, params []byte, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
+func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecification, creds *Credentials, params []byte, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
 	var err error
 
 	var executor *Executor
@@ -309,8 +309,6 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 	if executor == nil {
 		return nil, errors.Newf("no executor found for action %s", name)
 	}
-
-	log := octx.Logger()
 
 	// validate executor config
 	espec, err := DetermineExecutor(executor, octx, cv, resolver)
@@ -349,9 +347,9 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 	}
 
 	if econfig == nil {
-		log.Info("no executor config found")
+		p.Printf("no executor config found\n")
 	} else {
-		log.Info("using executor config", "config", utils2.IndentLines(string(econfig), "  "))
+		p.Printf("using executor config %s\n", utils2.IndentLines(string(econfig), "  "))
 	}
 	// handle credentials
 	credentials, credmapping, err := CheckCredentialRequests(executor, spec, &espec.Spec)
@@ -377,9 +375,9 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 		return nil, errors.Wrapf(err, "error processing parameters")
 	}
 	if params == nil {
-		log.Info("no parameter config found")
+		p.Printf("no parameter config found\n")
 	} else {
-		log.Info("using package parameters", "parameters", utils2.IndentLines(string(params), "  "))
+		p.Printf("using package parameters %s\n", utils2.IndentLines(string(params), "  "))
 	}
 
 	if executor.ParameterMapping != nil {
@@ -390,7 +388,7 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 
 		if err == nil {
 			if !bytes.Equal(orig, params) {
-				log.Info("using executor parameters", "parameters", utils2.IndentLines(string(params), "  "))
+				p.Printf("using executor parameters %s\n", utils2.IndentLines(string(params), "  "))
 			}
 		}
 	}
@@ -404,7 +402,7 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 		names = append(names, n+"->"+m)
 	}
 	sort.Strings(names)
-	log.Info("using executor image", "ref", espec.Image.Ref, "executor", executor.ResourceRef.String(), "credentials", names)
+	p.Printf("using executor image %s[%s] with credentials %v\n", espec.Image.Ref, executor.ResourceRef.String(), names)
 	op := &Operation{
 		Action:      name,
 		Image:       *espec.Image,

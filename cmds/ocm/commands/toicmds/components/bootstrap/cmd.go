@@ -28,6 +28,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
@@ -192,7 +193,8 @@ type Binary struct {
 }
 
 func (a *action) Out() error {
-	result, err := install.Execute(defaultd.New(), a.cmd.Action, a.cmd.Id, a.cmd.Credentials, a.cmd.Parameters, a.cmd.OCMContext(), a.data[0].ComponentVersion, lookupoption.From(a.cmd))
+	common.NewPrinter(a.cmd.StdOut())
+	result, err := install.Execute(common.NewPrinter(a.cmd.StdOut()), defaultd.New(), a.cmd.Action, a.cmd.Id, a.cmd.Credentials, a.cmd.Parameters, a.cmd.OCMContext(), a.data[0].ComponentVersion, lookupoption.From(a.cmd))
 	if err != nil {
 		return err
 	}
