@@ -48,7 +48,12 @@ type CredentialsRequestSpec struct {
 	Optional bool `json:"optional,omitempty"`
 }
 
+var ErrUndefined error = errors.New("nil reference")
+
 func (s *CredentialsRequestSpec) Match(o *CredentialsRequestSpec) error {
+	if o == nil {
+		return ErrUndefined
+	}
 	if !s.ConsumerId.Equals(o.ConsumerId) {
 		return fmt.Errorf("consumer id mismatch")
 	}
@@ -188,7 +193,7 @@ func evaluate(ctx credentials.Context, spec *CredentialSpec) (common.Properties,
 	}
 	if spec.ConsumerId != nil {
 		cnt++
-		match, _ := ctx.ConsumerIdentityMatchers().Get(credentials.CONSUMER_ATTR_TYPE)
+		match, _ := ctx.ConsumerIdentityMatchers().Get(credentials.ID_TYPE)
 		if match == nil {
 			match = credentials.PartialMatch
 		}

@@ -65,7 +65,7 @@ func (r *RepositoryIndex) AddTagsFor(repo string, digest digest.Digest, tags ...
 	for _, tag := range tags {
 		n := *a
 		n.Tag = tag
-		r.addArtefactInfo(&n)
+		r.addArtefactInfo(n)
 	}
 	return nil
 }
@@ -73,12 +73,10 @@ func (r *RepositoryIndex) AddTagsFor(repo string, digest digest.Digest, tags ...
 func (r *RepositoryIndex) AddArtefactInfo(n *ArtefactMeta) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	r.addArtefactInfo(n)
+	r.addArtefactInfo(*n)
 }
 
-func (r *RepositoryIndex) addArtefactInfo(n *ArtefactMeta) {
-	m := *n
-
+func (r *RepositoryIndex) addArtefactInfo(m ArtefactMeta) {
 	repos := r.byRepository[m.Repository]
 	if len(repos) == 0 {
 		repos = map[string]*ArtefactMeta{}

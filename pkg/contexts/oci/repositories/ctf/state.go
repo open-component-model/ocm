@@ -52,8 +52,8 @@ func (i StateHandler) Decode(data []byte) (interface{}, error) {
 	}
 
 	artefacts := index.NewRepositoryIndex()
-	for _, a := range idx.Index {
-		artefacts.AddArtefactInfo(&a)
+	for i := range idx.Index {
+		artefacts.AddArtefactInfo(&idx.Index[i])
 	}
 	return artefacts, nil
 }

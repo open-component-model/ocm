@@ -20,7 +20,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/opencontainers/go-digest"
 	"sigs.k8s.io/yaml"
@@ -161,17 +160,6 @@ func GetLayerInfo(blob accessio.BlobAccess, layerFiles bool) *LayerInfo {
 	if err != nil {
 		info.Error = "cannot read blob: " + err.Error()
 		return info
-	}
-	file, err := os.Create("/tmp/blob")
-	if err == nil {
-		io.Copy(file, reader)
-		file.Close()
-		reader.Close()
-		reader, err = blob.Reader()
-		if err != nil {
-			info.Error = "cannot read blob: " + err.Error()
-			return info
-		}
 	}
 	defer reader.Close()
 	reader, _, err = compression.AutoDecompress(reader)
