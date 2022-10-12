@@ -35,6 +35,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"sigs.k8s.io/yaml"
+
+	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 )
 
 // PrintPrettyYaml prints the given objects as yaml if enabled.
@@ -122,7 +124,7 @@ func RandomString(n int) string {
 			value = int(v.Int64())
 		} else {
 			// insecure fallback to provide a valid result
-			logrus.Warnf("failed to generate random number: %s", err)
+			ocmlog.Logger().Error("failed to generate random number", "error", err)
 			value = rand.Intn(len(chars)) //nolint: gosec // only used as fallback
 		}
 		b[i] = chars[value]
