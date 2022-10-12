@@ -258,7 +258,7 @@ func (o *CLIOptions) Complete() error {
 			return errors.Wrapf(err, "cannot open log file %q", o.LogFile)
 		}
 		log := logrus.New()
-		//log.SetFormatter(&logrus.JSONFormatter{})
+		log.SetFormatter(&logrus.JSONFormatter{TimestampFormat: "2006-01-02 15:04:05"})
 		log.SetOutput(o.logFile)
 		ocmlog.Context().SetBaseLogger(logrusr.New(log))
 	}

@@ -19,13 +19,17 @@ import (
 )
 
 func LogTest(ctx logging.ContextProvider, prefix ...string) {
+	LoggerTest(ctx.LoggingContext().Logger(), prefix...)
+}
+
+func LoggerTest(logger logging.Logger, prefix ...string) {
 	p := ""
 	for _, e := range prefix {
 		p += e
 	}
-	ctx.LoggingContext().Logger().Trace(p + "trace")
-	ctx.LoggingContext().Logger().Debug(p + "debug")
-	ctx.LoggingContext().Logger().Info(p + "info")
-	ctx.LoggingContext().Logger().Warn(p + "warn")
-	ctx.LoggingContext().Logger().Error(p + "error")
+	logger.Trace(p + "trace")
+	logger.Debug(p + "debug")
+	logger.Info(p + "info")
+	logger.Warn(p + "warn")
+	logger.Error(p + "error")
 }

@@ -1,0 +1,6 @@
+defaultLevel: Warn
+rules:
+  - rule:
+      level: Debug
+      conditions:
+        - realm: test
