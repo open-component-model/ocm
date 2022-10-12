@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/open-component-model/ocm/pkg/common/accessio/downloader"
 )
 
 // Downloader simply uses the default HTTP client to download the contents of a URL.
@@ -13,7 +15,7 @@ type Downloader struct {
 	link string
 }
 
-func NewDownloader(link string) *Downloader {
+func NewDownloader(link string) downloader.Downloader {
 	return &Downloader{
 		link: link,
 	}

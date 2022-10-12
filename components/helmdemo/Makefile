@@ -30,8 +30,9 @@ version:
 .PHONY: ca
 ca: $(GEN)/ca
 
-$(GEN)/ca: $(GEN)/.exists resources.yaml references.yaml $(CHARTSRCS) packagespec.yaml helmconfig.yaml
+$(GEN)/ca: $(GEN)/.exists sources.yaml resources.yaml references.yaml $(CHARTSRCS) packagespec.yaml helmconfig.yaml
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" $(PROVIDER) $(GEN)/ca
+	$(OCM) add sources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" sources.yaml
 	$(OCM) add resources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" resources.yaml
 	$(OCM) add references $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" HELMINSTCOMP=$(HELMINSTCOMP) references.yaml
 	@touch $(GEN)/ca
