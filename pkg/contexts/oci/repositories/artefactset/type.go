@@ -34,29 +34,46 @@ func init() {
 	cpi.RegisterRepositoryType(TypeV1, cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
 }
 
+const (
+	FORMAT_OCI = "oci/v1"
+	FORMAT_OCM = "ocm/v1"
+)
+
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
-	accessio.Options            `json:",inline"`
+	Options                     `json:",inline"`
 
 	// FileFormat is the format of the repository file
 	FilePath string `json:"filePath"`
 	// AccessMode can be set to request readonly access or creation
 	AccessMode accessobj.AccessMode `json:"accessMode,omitempty"`
+
+	FormatVersion string `json:"formatVersion,omitempty"`
 }
 
 // NewRepositorySpec creates a new RepositorySpec.
-func NewRepositorySpec(acc accessobj.AccessMode, filePath string, opts ...accessio.Option) *RepositorySpec {
-	o := accessio.AccessOptions(opts...)
+func NewRepositorySpec(acc accessobj.AccessMode, filePath string, opts ...accessio.Option) (*RepositorySpec, error) {
+	o, err := accessio.AccessOptions(&Options{}, opts...)
+	if err != nil {
+		return nil, err
+	}
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
 		FilePath:            filePath,
-		Options:             o,
+		Options:             *o.(*Options),
 		AccessMode:          acc,
-	}
+	}, nil
 }
 
 func (s *RepositorySpec) Name() string {
 	return s.FilePath
+}
+
+func (s *RepositorySpec) GetFormatVersion() string {
+	if s.FormatVersion == "" {
+		return FORMAT_OCM
+	}
+	return s.FormatVersion
 }
 
 func (s *RepositorySpec) UniformRepositorySpec() *cpi.UniformRepositorySpec {
@@ -76,8 +93,8 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 }
 
 func (a *RepositorySpec) AsUniformSpec(cpi.Context) cpi.UniformRepositorySpec {
-	opts := a.Options.Default()
-	p, err := vfs.Canonical(opts.PathFileSystem, a.FilePath, false)
+	opts, _ := NewOptions(&a.Options) // now unknown option possible (same Options type)
+	p, err := vfs.Canonical(opts.GetPathFileSystem(), a.FilePath, false)
 	if err != nil {
 		return cpi.UniformRepositorySpec{Type: a.GetKind(), Info: a.FilePath}
 	}

@@ -42,7 +42,11 @@ var _ support.ComponentVersionContainer = (*ComponentArchive)(nil)
 // New returns a new representation based element.
 func New(ctx cpi.Context, acc accessobj.AccessMode, fs vfs.FileSystem, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode) (*ComponentArchive, error) {
 	obj, err := accessobj.NewAccessObject(accessObjectInfo, acc, fs, setup, closer, mode)
-	return _Wrap(ctx, obj, NewRepositorySpec(acc, ""), err)
+	if err != nil {
+		return nil, err
+	}
+	spec, err := NewRepositorySpec(acc, "")
+	return _Wrap(ctx, obj, spec, err)
 }
 
 func _Wrap(ctx cpi.Context, obj *accessobj.AccessObject, spec *RepositorySpec, err error) (*ComponentArchive, error) {

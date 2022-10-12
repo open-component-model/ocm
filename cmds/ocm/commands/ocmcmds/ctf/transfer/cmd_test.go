@@ -21,13 +21,13 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
@@ -41,9 +41,6 @@ const VERSION = "v1"
 const COMPONENT = "github.com/mandelsoft/test"
 const OUT = "/tmp/res"
 const OCIPATH = "/tmp/oci"
-const OCINAMESPACE = "ocm/value"
-const OCINAMESPACE2 = "ocm/ref"
-const OCIVERSION = "v2.0"
 const OCIHOST = "alias"
 
 var _ = Describe("Test Environment", func() {
@@ -53,29 +50,12 @@ var _ = Describe("Test Environment", func() {
 	_ = ldesc
 	BeforeEach(func() {
 		env = NewTestEnv()
-		env.OCIContext().SetAlias(OCIHOST, ctfoci.NewRepositorySpec(accessobj.ACC_READONLY, OCIPATH, accessio.PathFileSystem(env.FileSystem())))
+
+		FakeOCIRepo(env.Builder, OCIPATH, OCIHOST)
 
 		env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
-			env.Namespace(OCINAMESPACE, func() {
-				env.Manifest(OCIVERSION, func() {
-					env.Config(func() {
-						env.BlobStringData(mime.MIME_JSON, "{}")
-					})
-					ldesc = env.Layer(func() {
-						env.BlobStringData(mime.MIME_TEXT, "manifestlayer")
-					})
-				})
-			})
-			env.Namespace(OCINAMESPACE2, func() {
-				env.Manifest(OCIVERSION, func() {
-					env.Config(func() {
-						env.BlobStringData(mime.MIME_JSON, "{}")
-					})
-					env.Layer(func() {
-						env.BlobStringData(mime.MIME_TEXT, "otherlayer")
-					})
-				})
-			})
+			OCIManifest1(env.Builder)
+			OCIManifest2(env.Builder)
 		})
 
 		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {

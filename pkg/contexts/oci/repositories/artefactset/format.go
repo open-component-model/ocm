@@ -29,15 +29,107 @@ import (
 const (
 	ArtefactSetDescriptorFileName = format.ArtefactSetDescriptorFileName
 	BlobsDirectoryName            = format.BlobsDirectoryName
+
+	OCIArtefactSetDescriptorFileName = "index.json"
+	OCILayouFileName                 = "oci-layout"
 )
 
-var accessObjectInfo = &accessobj.AccessObjectInfo{
-	DescriptorFileName:       ArtefactSetDescriptorFileName,
-	ObjectTypeName:           "artefactset",
-	ElementDirectoryName:     BlobsDirectoryName,
-	ElementTypeName:          "blob",
-	DescriptorHandlerFactory: NewStateHandler,
+var DefaultArtefactSetDescriptorFileName = OCIArtefactSetDescriptorFileName
+
+func IsOCIDefaultFormat() bool {
+	return DefaultArtefactSetDescriptorFileName == OCIArtefactSetDescriptorFileName
 }
+
+func DescriptorFileName(format string) string {
+	switch format {
+	case FORMAT_OCI:
+		return OCIArtefactSetDescriptorFileName
+	case FORMAT_OCM:
+		return ArtefactSetDescriptorFileName
+	case "":
+		return DefaultArtefactSetDescriptorFileName
+	}
+	return ""
+}
+
+type accessObjectInfo struct {
+	accessobj.DefaultAccessObjectInfo
+}
+
+var _ accessobj.AccessObjectInfo = (*accessObjectInfo)(nil)
+
+func NewAccessObjectInfo(fmts ...string) accessobj.AccessObjectInfo {
+	a := &accessObjectInfo{
+		accessobj.DefaultAccessObjectInfo{
+			ObjectTypeName:           "artefactset",
+			ElementDirectoryName:     BlobsDirectoryName,
+			ElementTypeName:          "blob",
+			DescriptorHandlerFactory: NewStateHandler,
+		},
+	}
+	oci := IsOCIDefaultFormat()
+	if len(fmts) > 0 {
+		switch fmts[0] {
+		case FORMAT_OCM:
+			oci = false
+		case FORMAT_OCI:
+			oci = true
+		case "":
+		}
+	}
+	if oci {
+		a.setOCI()
+	} else {
+		a.setOCM()
+	}
+	return a
+}
+
+func (a *accessObjectInfo) setOCI() {
+	a.DescriptorFileName = OCIArtefactSetDescriptorFileName
+	a.AdditionalFiles = []string{OCILayouFileName}
+}
+
+func (a *accessObjectInfo) setOCM() {
+	a.DescriptorFileName = ArtefactSetDescriptorFileName
+	a.AdditionalFiles = nil
+}
+
+func (a *accessObjectInfo) setupOCIFS(fs vfs.FileSystem, mode vfs.FileMode) error {
+	data := `{
+    "imageLayoutVersion": "1.0.0"
+}
+`
+	return vfs.WriteFile(fs, OCILayouFileName, []byte(data), mode)
+}
+
+func (a *accessObjectInfo) SetupFileSystem(fs vfs.FileSystem, mode vfs.FileMode) error {
+	if err := a.SetupFor(fs); err != nil {
+		return err
+	}
+	if err := a.DefaultAccessObjectInfo.SetupFileSystem(fs, mode); err != nil {
+		return err
+	}
+	if len(a.AdditionalFiles) > 0 {
+		return a.setupOCIFS(fs, mode)
+	}
+	return nil
+}
+
+func (a *accessObjectInfo) SetupFor(fs vfs.FileSystem) error {
+	ok, err := vfs.FileExists(fs, OCILayouFileName)
+	if err != nil {
+		return err
+	}
+	if ok {
+		a.setOCI()
+	} else { //nolint: staticcheck // keep comment for else
+		// keep configured format
+	}
+	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 type Object = ArtefactSet
 
@@ -95,8 +187,11 @@ func SupportedFormats() []accessio.FileFormat {
 ////////////////////////////////////////////////////////////////////////////////
 
 func OpenFromBlob(acc accessobj.AccessMode, blob accessio.BlobAccess, opts ...accessio.Option) (*Object, error) {
-	o := accessio.AccessOptions(opts...)
-	if o.File != nil || o.Reader != nil {
+	o, err := accessio.AccessOptions(nil, opts...)
+	if err != nil {
+		return nil, err
+	}
+	if o.GetFile() != nil || o.GetReader() != nil {
 		return nil, errors.ErrInvalid("file or reader option nor possible for blob access")
 	}
 	reader, err := blob.Reader()
@@ -104,25 +199,25 @@ func OpenFromBlob(acc accessobj.AccessMode, blob accessio.BlobAccess, opts ...ac
 		return nil, err
 	}
 	defer reader.Close()
-	o.Reader = reader
+	o.SetReader(reader)
 	fmt := accessio.FormatTar
 	mime := blob.MimeType()
 
 	if mime2.IsGZip(mime) {
 		fmt = accessio.FormatTGZ
 	}
-	o.FileFormat = &fmt
+	o.SetFileFormat(fmt)
 	return Open(acc&accessobj.ACC_READONLY, "", 0, o)
 }
 
-func Open(acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessio.Option) (*Object, error) {
-	o, create, err := accessobj.HandleAccessMode(acc, path, opts...)
+func Open(acc accessobj.AccessMode, path string, mode vfs.FileMode, olist ...accessio.Option) (*Object, error) {
+	o, create, err := accessobj.HandleAccessMode(acc, path, &Options{}, olist...)
 	if err != nil {
 		return nil, err
 	}
-	h, ok := fileFormats[*o.FileFormat]
+	h, ok := fileFormats[*o.GetFileFormat()]
 	if !ok {
-		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.FileFormat.String())
+		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.GetFileFormat().String())
 	}
 	if create {
 		return h.Create(path, o, mode)
@@ -131,10 +226,14 @@ func Open(acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...acce
 }
 
 func Create(acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessio.Option) (*Object, error) {
-	o := accessio.AccessOptions(opts...).DefaultFormat(accessio.FormatDirectory)
-	h, ok := fileFormats[*o.FileFormat]
+	o, err := accessio.AccessOptions(&Options{}, opts...)
+	if err != nil {
+		return nil, err
+	}
+	o.DefaultFormat(accessio.FormatDirectory)
+	h, ok := fileFormats[*o.GetFileFormat()]
 	if !ok {
-		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.FileFormat.String())
+		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.GetFileFormat().String())
 	}
 	return h.Create(path, o, mode)
 }
@@ -142,11 +241,11 @@ func Create(acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...ac
 ////////////////////////////////////////////////////////////////////////////////
 
 func (h *formatHandler) Open(acc accessobj.AccessMode, path string, opts accessio.Options) (*Object, error) {
-	return _Wrap(h.FormatHandler.Open(accessObjectInfo, acc, path, opts))
+	return _Wrap(h.FormatHandler.Open(NewAccessObjectInfo(GetFormatVersion(opts)), acc, path, opts))
 }
 
 func (h *formatHandler) Create(path string, opts accessio.Options, mode vfs.FileMode) (*Object, error) {
-	return _Wrap(h.FormatHandler.Create(accessObjectInfo, path, opts, mode))
+	return _Wrap(h.FormatHandler.Create(NewAccessObjectInfo(GetFormatVersion(opts)), path, opts, mode))
 }
 
 // WriteToFilesystem writes the current object to a filesystem.

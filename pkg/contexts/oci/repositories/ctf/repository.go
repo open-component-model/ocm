@@ -70,10 +70,10 @@ var _ cpi.Repository = (*Repository)(nil)
 
 // New returns a new representation based repository.
 func New(ctx cpi.Context, spec *RepositorySpec, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode) (*Repository, error) {
-	if spec.PathFileSystem == nil {
-		spec.PathFileSystem = vfsattr.Get(ctx)
+	if spec.GetPathFileSystem() == nil {
+		spec.SetPathFileSystem(vfsattr.Get(ctx))
 	}
-	base, err := accessobj.NewAccessObject(accessObjectInfo, spec.AccessMode, spec.Options.Representation, setup, closer, mode)
+	base, err := accessobj.NewAccessObject(accessObjectInfo, spec.AccessMode, spec.GetRepresentation(), setup, closer, mode)
 	return _Wrap(ctx, spec, base, err)
 }
 

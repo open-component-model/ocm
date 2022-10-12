@@ -22,8 +22,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
+type FilesystemSetup func(fs vfs.FileSystem, mode vfs.FileMode) error
+
 // InternalRepresentationFilesystem defaults a filesystem to temp filesystem and adapts.
-func InternalRepresentationFilesystem(acc AccessMode, fs vfs.FileSystem, dir string, mode vfs.FileMode) (bool, vfs.FileSystem, error) {
+func InternalRepresentationFilesystem(acc AccessMode, fs vfs.FileSystem, setup FilesystemSetup, mode vfs.FileMode) (bool, vfs.FileSystem, error) {
 	var err error
 
 	tmp := false
@@ -34,8 +36,8 @@ func InternalRepresentationFilesystem(acc AccessMode, fs vfs.FileSystem, dir str
 		}
 		tmp = true
 	}
-	if !acc.IsReadonly() && dir != "" {
-		err = fs.MkdirAll(dir, mode)
+	if !acc.IsReadonly() && setup != nil {
+		err = setup(fs, mode)
 		if err != nil {
 			return false, nil, err
 		}
@@ -43,12 +45,14 @@ func InternalRepresentationFilesystem(acc AccessMode, fs vfs.FileSystem, dir str
 	return tmp, fs, err
 }
 
-func HandleAccessMode(acc AccessMode, path string, opts ...accessio.Option) (accessio.Options, bool, error) {
-	var err error
+func HandleAccessMode(acc AccessMode, path string, opts accessio.Options, olist ...accessio.Option) (accessio.Options, bool, error) {
 	ok := true
-	o := accessio.AccessOptions(opts...)
-	if o.File == nil && o.Reader == nil {
-		ok, err = vfs.Exists(o.PathFileSystem, path)
+	o, err := accessio.AccessOptions(opts, olist...)
+	if err != nil {
+		return nil, false, err
+	}
+	if o.GetFile() == nil && o.GetReader() == nil {
+		ok, err = vfs.Exists(o.GetPathFileSystem(), path)
 		if err != nil {
 			return o, false, err
 		}
@@ -57,13 +61,12 @@ func HandleAccessMode(acc AccessMode, path string, opts ...accessio.Option) (acc
 		if !acc.IsCreate() {
 			return o, false, errors.ErrNotFoundWrap(vfs.ErrNotExist, "file", path)
 		}
-		if o.FileFormat == nil {
-			fmt := accessio.FormatDirectory
-			o.FileFormat = &fmt
+		if o.GetFileFormat() == nil {
+			o.SetFileFormat(accessio.FormatDirectory)
 		}
 		return o, true, nil
 	}
 
-	o, err = o.DefaultForPath(path)
+	err = o.DefaultForPath(path)
 	return o, false, err
 }

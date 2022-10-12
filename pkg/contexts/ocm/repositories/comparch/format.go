@@ -32,7 +32,7 @@ const ComponentDescriptorFileName = compdesc.ComponentDescriptorFileName
 // BlobsDirectoryName is the name of the blob directory in the tar.
 const BlobsDirectoryName = "blobs"
 
-var accessObjectInfo = &accessobj.AccessObjectInfo{
+var accessObjectInfo = &accessobj.DefaultAccessObjectInfo{
 	DescriptorFileName:       ComponentDescriptorFileName,
 	ObjectTypeName:           "artefactset",
 	ElementDirectoryName:     BlobsDirectoryName,
@@ -90,13 +90,13 @@ func GetFormat(name accessio.FileFormat) FormatHandler {
 ////////////////////////////////////////////////////////////////////////////////
 
 func Open(ctx cpi.Context, acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessio.Option) (*Object, error) {
-	o, create, err := accessobj.HandleAccessMode(acc, path, opts...)
+	o, create, err := accessobj.HandleAccessMode(acc, path, nil, opts...)
 	if err != nil {
 		return nil, err
 	}
-	h, ok := fileFormats[*o.FileFormat]
+	h, ok := fileFormats[*o.GetFileFormat()]
 	if !ok {
-		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.FileFormat.String())
+		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.GetFileFormat().String())
 	}
 	if create {
 		return h.Create(ctx, path, o, mode)
@@ -105,10 +105,14 @@ func Open(ctx cpi.Context, acc accessobj.AccessMode, path string, mode vfs.FileM
 }
 
 func Create(ctx cpi.Context, acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessio.Option) (*Object, error) {
-	o := accessio.AccessOptions(opts...).DefaultFormat(accessio.FormatDirectory)
-	h, ok := fileFormats[*o.FileFormat]
+	o, err := accessio.AccessOptions(nil, opts...)
+	if err != nil {
+		return nil, err
+	}
+	o.DefaultFormat(accessio.FormatDirectory)
+	h, ok := fileFormats[*o.GetFileFormat()]
 	if !ok {
-		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.FileFormat.String())
+		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.GetFileFormat().String())
 	}
 	return h.Create(ctx, path, o, mode)
 }
@@ -117,12 +121,20 @@ func Create(ctx cpi.Context, acc accessobj.AccessMode, path string, mode vfs.Fil
 
 func (h *formatHandler) Open(ctx cpi.Context, acc accessobj.AccessMode, path string, opts accessio.Options) (*Object, error) {
 	obj, err := h.FormatHandler.Open(accessObjectInfo, acc, path, opts)
-	return _Wrap(ctx, obj, NewRepositorySpec(acc, path, opts), err)
+	if err != nil {
+		return nil, err
+	}
+	spec, err := NewRepositorySpec(acc, path, opts)
+	return _Wrap(ctx, obj, spec, err)
 }
 
 func (h *formatHandler) Create(ctx cpi.Context, path string, opts accessio.Options, mode vfs.FileMode) (*Object, error) {
 	obj, err := h.FormatHandler.Create(accessObjectInfo, path, opts, mode)
-	return _Wrap(ctx, obj, NewRepositorySpec(accessobj.ACC_CREATE, path, opts), err)
+	if err != nil {
+		return nil, err
+	}
+	spec, err := NewRepositorySpec(accessobj.ACC_CREATE, path, opts)
+	return _Wrap(ctx, obj, spec, err)
 }
 
 // WriteToFilesystem writes the current object to a filesystem.

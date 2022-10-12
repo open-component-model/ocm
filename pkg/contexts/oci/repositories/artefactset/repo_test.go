@@ -51,7 +51,8 @@ var _ = Describe("", func() {
 			})
 		})
 
-		spec := artefactset.NewRepositorySpec(accessobj.ACC_READONLY, "/tmp/set", accessio.PathFileSystem(env))
+		spec, err := artefactset.NewRepositorySpec(accessobj.ACC_READONLY, "/tmp/set", accessio.PathFileSystem(env))
+		Expect(err).To(Succeed())
 
 		r, err := cpi.DefaultContext.RepositoryForSpec(spec)
 		Expect(err).To(Succeed())

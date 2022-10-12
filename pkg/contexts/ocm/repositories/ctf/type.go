@@ -24,9 +24,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
 )
 
-func NewRepositorySpec(acc accessobj.AccessMode, path string, opts ...accessio.Option) *genericocireg.RepositorySpec {
-	spec := ctf.NewRepositorySpec(acc, path, opts...)
-	return genericocireg.NewRepositorySpec(spec, nil)
+func NewRepositorySpec(acc accessobj.AccessMode, path string, opts ...accessio.Option) (*genericocireg.RepositorySpec, error) {
+	spec, err := ctf.NewRepositorySpec(acc, path, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return genericocireg.NewRepositorySpec(spec, nil), nil
 }
 
 func Open(ctx cpi.Context, acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessio.Option) (cpi.Repository, error) {

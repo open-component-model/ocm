@@ -64,8 +64,8 @@ func NewTestEnv(opts ...env.Option) *TestEnv {
 	}
 }
 
-func (e *TestEnv) ApplyOption(opts *accessio.Options) {
-	e.Builder.ApplyOption(opts)
+func (e *TestEnv) ApplyOption(opts accessio.Options) error {
+	return e.Builder.ApplyOption(opts)
 }
 
 func (e *TestEnv) ConfigContext() config.Context {

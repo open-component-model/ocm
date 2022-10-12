@@ -42,8 +42,8 @@ type FormatHandler interface {
 
 	Format() accessio.FileFormat
 
-	Open(info *AccessObjectInfo, acc AccessMode, path string, opts accessio.Options) (*AccessObject, error)
-	Create(info *AccessObjectInfo, path string, opts accessio.Options, mode vfs.FileMode) (*AccessObject, error)
+	Open(info AccessObjectInfo, acc AccessMode, path string, opts accessio.Options) (*AccessObject, error)
+	Create(info AccessObjectInfo, path string, opts accessio.Options, mode vfs.FileMode) (*AccessObject, error)
 	Write(obj *AccessObject, path string, opts accessio.Options, mode vfs.FileMode) error
 }
 
@@ -112,7 +112,7 @@ func FSCloser(closer Closer) Closer {
 }
 
 func (f fsCloser) Close(obj *AccessObject) error {
-	err := errors.ErrListf("cannot close %s", obj.info.ObjectTypeName)
+	err := errors.ErrListf("cannot close %s", obj.info.GetObjectTypeName())
 	if f.closer != nil {
 		err.Add(f.closer.Close(obj))
 	}
@@ -122,30 +122,30 @@ func (f fsCloser) Close(obj *AccessObject) error {
 
 type StandardReaderHandler interface {
 	Write(obj *AccessObject, path string, opts accessio.Options, mode vfs.FileMode) error
-	NewFromReader(info *AccessObjectInfo, acc AccessMode, in io.Reader, opts accessio.Options, closer Closer) (*AccessObject, error)
+	NewFromReader(info AccessObjectInfo, acc AccessMode, in io.Reader, opts accessio.Options, closer Closer) (*AccessObject, error)
 }
 
-func DefaultOpenOptsFileHandling(kind string, info *AccessObjectInfo, acc AccessMode, path string, opts accessio.Options, handler StandardReaderHandler) (*AccessObject, error) {
+func DefaultOpenOptsFileHandling(kind string, info AccessObjectInfo, acc AccessMode, path string, opts accessio.Options, handler StandardReaderHandler) (*AccessObject, error) {
 	if err := opts.ValidForPath(path); err != nil {
 		return nil, err
 	}
-	var reader io.ReadCloser
 	var file vfs.File
 	var err error
 	var closer Closer
+
+	reader := opts.GetReader()
 	switch {
-	case opts.Reader != nil:
-		reader = opts.Reader
-		defer opts.Reader.Close()
-	case opts.File == nil:
+	case reader != nil:
+		defer reader.Close()
+	case opts.GetFile() == nil:
 		// we expect that the path point to a tar
-		file, err = opts.PathFileSystem.Open(path)
+		file, err = opts.GetPathFileSystem().Open(path)
 		if err != nil {
 			return nil, fmt.Errorf("unable to open %s from %s: %w", kind, path, err)
 		}
 		defer file.Close()
 	default:
-		file = opts.File
+		file = opts.GetFile()
 	}
 	if file != nil {
 		reader = file
@@ -158,15 +158,15 @@ func DefaultOpenOptsFileHandling(kind string, info *AccessObjectInfo, acc Access
 	return handler.NewFromReader(info, acc, reader, opts, closer)
 }
 
-func DefaultCreateOptsFileHandling(kind string, info *AccessObjectInfo, path string, opts accessio.Options, mode vfs.FileMode, handler StandardReaderHandler) (*AccessObject, error) {
+func DefaultCreateOptsFileHandling(kind string, info AccessObjectInfo, path string, opts accessio.Options, mode vfs.FileMode, handler StandardReaderHandler) (*AccessObject, error) {
 	if err := opts.ValidForPath(path); err != nil {
 		return nil, err
 	}
-	if opts.Reader != nil {
+	if opts.GetReader() != nil {
 		return nil, errors.ErrNotSupported("reader option not supported")
 	}
-	if opts.File == nil {
-		ok, err := vfs.Exists(opts.PathFileSystem, path)
+	if opts.GetFile() == nil {
+		ok, err := vfs.Exists(opts.GetPathFileSystem(), path)
 		if err != nil {
 			return nil, err
 		}
@@ -175,5 +175,5 @@ func DefaultCreateOptsFileHandling(kind string, info *AccessObjectInfo, path str
 		}
 	}
 
-	return NewAccessObject(info, ACC_CREATE, opts.Representation, nil, CloserFunction(func(obj *AccessObject) error { return handler.Write(obj, path, opts, mode) }), DirMode)
+	return NewAccessObject(info, ACC_CREATE, opts.GetRepresentation(), nil, CloserFunction(func(obj *AccessObject) error { return handler.Write(obj, path, opts, mode) }), DirMode)
 }

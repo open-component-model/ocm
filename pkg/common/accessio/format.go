@@ -33,10 +33,11 @@ func (f FileFormat) String() string {
 	return string(f)
 }
 
-func (o FileFormat) ApplyOption(options *Options) {
+func (o FileFormat) ApplyOption(options Options) error {
 	if o != "" {
-		options.FileFormat = &o
+		options.SetFileFormat(o)
 	}
+	return nil
 }
 
 const (

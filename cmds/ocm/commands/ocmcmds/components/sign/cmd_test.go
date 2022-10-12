@@ -21,6 +21,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -46,9 +47,6 @@ const COMPONENTA = "github.com/mandelsoft/test"
 const COMPONENTB = "github.com/mandelsoft/ref"
 const OUT = "/tmp/res"
 const OCIPATH = "/tmp/oci"
-const OCINAMESPACE = "ocm/value"
-const OCINAMESPACE2 = "ocm/ref"
-const OCIVERSION = "v2.0"
 const OCIHOST = "alias"
 
 const SIGNATURE = "test"
@@ -78,6 +76,45 @@ var _ = Describe("access method", func() {
 	})
 
 	Context("valid", func() {
+		BeforeEach(func() {
+			FakeOCIRepo(env.Builder, OCIPATH, OCIHOST)
+
+			env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
+				OCIManifest1(env.Builder)
+				OCIManifest2(env.Builder)
+			})
+
+			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+				env.Component(COMPONENTA, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
+							env.BlobStringData(mime.MIME_TEXT, "testdata")
+						})
+						env.Resource("value", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
+							env.Access(
+								ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
+							)
+							env.Label("transportByValue", true)
+						})
+						env.Resource("ref", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
+							env.Access(
+								ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION)),
+							)
+						})
+					})
+				})
+				env.Component(COMPONENTB, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+						env.Resource("otherdata", "", "PlainText", metav1.LocalRelation, func() {
+							env.BlobStringData(mime.MIME_TEXT, "otherdata")
+						})
+						env.Reference("ref", COMPONENTA, VERSION)
+					})
+				})
+			})
+		})
 
 		It("sign component archive", func() {
 			prepareEnv(env, ARCH, ARCH)
@@ -203,7 +240,9 @@ Error: {signing: failed resolving component reference ref[github.com/mandelsoft/
 })
 
 func prepareEnv(env *TestEnv, componentAArchive, componentBArchive string) {
-	env.OCIContext().SetAlias(OCIHOST, ctfoci.NewRepositorySpec(accessobj.ACC_READONLY, OCIPATH, accessio.PathFileSystem(env.FileSystem())))
+	spec, err := ctfoci.NewRepositorySpec(accessobj.ACC_READONLY, OCIPATH, accessio.PathFileSystem(env.FileSystem()))
+	Expect(err).To(Succeed())
+	env.OCIContext().SetAlias(OCIHOST, spec)
 
 	env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
 		env.Namespace(OCINAMESPACE, func() {

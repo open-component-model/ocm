@@ -62,5 +62,5 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 	if create {
 		mode |= accessobj.ACC_CREATE
 	}
-	return NewRepositorySpec(mode, path, accessio.FileFormatForType(u.Type), accessio.PathFileSystem(fs)), nil
+	return NewRepositorySpec(mode, path, accessio.FileFormatForType(u.Type), accessio.PathFileSystem(fs))
 }
