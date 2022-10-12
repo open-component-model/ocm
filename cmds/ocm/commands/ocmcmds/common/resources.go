@@ -38,7 +38,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -56,6 +55,7 @@ type ResourceSpecHandler interface {
 
 type ResourceSpec interface {
 	GetName() string
+	Info() string
 	Validate(ctx clictx.Context, input *ResourceInput) error
 }
 
@@ -127,9 +127,12 @@ func (o *ResourceAdderCommand) Complete(args []string) error {
 
 func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h ResourceSpecHandler) error {
 	fs := o.Context.FileSystem()
+	printer := common.NewPrinter(o.Context.StdOut())
+	ictx := inputs.NewContext(o.Context, printer)
+
 	resources := []*resource{}
 	for _, filePath := range o.Paths {
-		out.Outf(o.Context, "processing %s...\n", filePath)
+		printer.Printf("processing %s...\n", filePath)
 		data, err := vfs.ReadFile(fs, filePath)
 		if err != nil {
 			return errors.Wrapf(err, "cannot read resource file %q", filePath)
@@ -141,7 +144,7 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 		}
 		// sigs parser has no multi document stream parsing
 		// but yaml.v3 does not recognize json tagged fields.
-		// Therefore we first use the v3 parser to parse the multi doc,
+		// Therefore, we first use the v3 parser to parse the multi doc,
 		// marshal it again and finally unmarshal it with the sigs parser.
 		decoder := yaml.NewDecoder(bytes.NewBuffer([]byte(parsed)))
 		i := 0
@@ -156,7 +159,7 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 				}
 				break
 			}
-			out.Outf(o.Context, "  processing document %d...\n", i)
+			printer.Printf("  processing document %d...\n", i)
 			if (tmp["input"] != nil || tmp["access"] != nil) && !h.RequireInputs() {
 				return errors.Newf("invalid spec %d in %q: no input or access possible for %s", i, filePath, listkey)
 			}
@@ -190,7 +193,7 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 			}
 
 			for j, d := range list {
-				out.Outf(o.Context, "    processing index %d\n", j+1)
+				printer.Printf("    processing index %d\n", j+1)
 				var input *ResourceInput
 				r, err := DecodeResource(d, h)
 				if err != nil {
@@ -202,7 +205,7 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 					if err != nil {
 						return errors.Newf("invalid spec %d[%d] in %q: %s", i+1, j+1, filePath, err)
 					}
-					if err = Validate(input, o.Context, filePath); err != nil {
+					if err = Validate(input, ictx, filePath); err != nil {
 						return errors.Wrapf(err, "invalid spec %d[%d] in %q", i+1, j+1, filePath)
 					}
 				}
@@ -216,7 +219,7 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 		}
 	}
 
-	out.Outf(o.Context, "found %d %s\n", len(resources), listkey)
+	printer.Printf("found %d %s\n", len(resources), listkey)
 
 	obj, err := comparch.Open(o.Context.OCMContext(), accessobj.ACC_WRITABLE, o.Archive, 0, accessio.PathFileSystem(fs))
 	if err != nil {
@@ -225,11 +228,12 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 	defer obj.Close()
 
 	for _, r := range resources {
+		ictx := ictx.Section("adding %s...", r.Spec().Info())
 		if h.RequireInputs() {
 			if r.input.Input != nil {
 				var acc ocm.AccessSpec
 				// Local Blob
-				blob, hint, berr := r.input.Input.GetBlob(o.Context, common.VersionedElementKey(obj), r.path)
+				blob, hint, berr := r.input.Input.GetBlob(ictx, common.VersionedElementKey(obj), r.path)
 				if berr != nil {
 					return errors.Wrapf(berr, "cannot get resource blob for %q(%s)", r.spec.GetName(), r.source)
 				}
@@ -304,7 +308,7 @@ func DecodeInput(data []byte, ctx clictx.Context) (*ResourceInput, error) {
 	return &input, err
 }
 
-func Validate(r *ResourceInput, ctx clictx.Context, inputFilePath string) error {
+func Validate(r *ResourceInput, ctx inputs.Context, inputFilePath string) error {
 	allErrs := field.ErrorList{}
 	var fldPath *field.Path
 

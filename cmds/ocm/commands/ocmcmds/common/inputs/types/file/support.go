@@ -36,7 +36,7 @@ type ProcessSpec struct {
 	Transformer func(ctx clictx.Context, inputDir string, data []byte) ([]byte, error)
 }
 
-func (s *ProcessSpec) Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath string) field.ErrorList {
+func (s *ProcessSpec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath string) field.ErrorList {
 	fileInfo, filePath, allErrs := s.MediaFileSpec.ValidateFile(fldPath, ctx, inputFilePath)
 	if len(allErrs) == 0 {
 		if !fileInfo.Mode().IsRegular() {
@@ -47,7 +47,7 @@ func (s *ProcessSpec) Validate(fldPath *field.Path, ctx clictx.Context, inputFil
 	return allErrs
 }
 
-func (s *ProcessSpec) GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (s *ProcessSpec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
 	fs := ctx.FileSystem()
 	inputInfo, inputPath, err := inputs.FileInfo(ctx, s.Path, inputFilePath)
 	if err != nil {

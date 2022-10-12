@@ -19,12 +19,15 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const SynthesizedBlobFormat = "+tar+gzip"
@@ -33,9 +36,9 @@ type ArtefactBlob interface {
 	accessio.TemporaryFileSystemBlobAccess
 }
 
-type Producer func(set *ArtefactSet) error
+type Producer func(set *ArtefactSet) (string, error)
 
-func SythesizeArtefactSet(mime string, producer Producer) (ArtefactBlob, error) {
+func SythesizeArtefactSet(producer Producer) (ArtefactBlob, error) {
 	fs := osfs.New()
 	temp, err := accessio.NewTempFile(fs, "", "artefactblob*.tgz")
 	if err != nil {
@@ -47,7 +50,7 @@ func SythesizeArtefactSet(mime string, producer Producer) (ArtefactBlob, error) 
 	if err != nil {
 		return nil, err
 	}
-	err = producer(set)
+	mime, err := producer(set)
 	err2 := set.Close()
 	if err != nil {
 		return nil, err
@@ -80,21 +83,89 @@ func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, e
 	}
 	digest := blob.Digest()
 
-	return SythesizeArtefactSet(blob.MimeType(), func(set *ArtefactSet) error {
+	return SythesizeArtefactSet(func(set *ArtefactSet) (string, error) {
 		err = TransferArtefact(art, set)
 		if err != nil {
-			return fmt.Errorf("failed to transfer artifact: %w", err)
+			return "", fmt.Errorf("failed to transfer artifact: %w", err)
 		}
 
 		if ok, _ := artdesc.IsDigest(ref); !ok {
 			err = set.AddTags(digest, ref)
 			if err != nil {
-				return fmt.Errorf("failed to add tag: %w", err)
+				return "", fmt.Errorf("failed to add tag: %w", err)
 			}
 		}
 
 		set.Annotate(MAINARTEFACT_ANNOTATION, digest.String())
 
-		return nil
+		return blob.MimeType(), nil
+	})
+}
+
+// ArtefactFactory add an artefact to the given set and provides descriptor metadata.
+type ArtefactFactory func(set *ArtefactSet) (digest.Digest, string, error)
+
+// ArtefactIterator provides a sequence of artefact factories by successive calls.
+// The sequence is finished if nil is returned for the factory.
+type ArtefactIterator func() (ArtefactFactory, bool, error)
+
+// ArtefactFeedback is called after an artefact has successfully be added.
+type ArtefactFeedback func(blob accessio.BlobAccess, art cpi.ArtefactAccess) error
+
+// ArtefactTransferCreator provides an ArtefactFactory transferring the given artefact.
+func ArtefactTransferCreator(art cpi.ArtefactAccess, finalizer *utils.Finalizer, feedback ...ArtefactFeedback) ArtefactFactory {
+	return func(set *ArtefactSet) (digest.Digest, string, error) {
+		var f utils.Finalizer
+		defer f.Finalize()
+
+		f.Include(finalizer)
+
+		blob, err := art.Blob()
+		if err != nil {
+			return "", "", errors.Wrapf(err, "cannot access artefact manifest blob")
+		}
+		f.Close(blob)
+
+		err = TransferArtefact(art, set)
+		if err != nil {
+			return "", "", fmt.Errorf("failed to transfer artifact: %w", err)
+		}
+
+		list := errors.ErrListf("add artefact")
+		for _, fb := range feedback {
+			list.Add(fb(blob, art))
+		}
+		return blob.Digest(), blob.MimeType(), list.Result()
+	}
+}
+
+// SynthesizeArtefactBlobFor synthesizes an artefact blob incorporating all artefacts
+// provided ba a factory.
+func SynthesizeArtefactBlobFor(tag string, iter ArtefactIterator) (ArtefactBlob, error) {
+	return SythesizeArtefactSet(func(set *ArtefactSet) (string, error) {
+		mime := artdesc.MediaTypeImageManifest
+		for {
+			art, main, err := iter()
+			if err != nil || art == nil {
+				return mime, err
+			}
+
+			digest, _mime, err := art(set)
+			if err != nil {
+				return "", err
+			}
+			if main {
+				if mime != "" {
+					mime = _mime
+				}
+				set.Annotate(MAINARTEFACT_ANNOTATION, digest.String())
+				if tag != "" {
+					err = set.AddTags(digest, tag)
+					if err != nil {
+						return "", fmt.Errorf("failed to add tag: %w", err)
+					}
+				}
+			}
+		}
 	})
 }

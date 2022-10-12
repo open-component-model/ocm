@@ -23,6 +23,7 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
+	"gopkg.in/yaml.v3"
 
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -48,6 +49,8 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *Options) Complete(fs vfs.FileSystem) error {
+	var err error
+
 	if o.Vars == nil {
 		o.Vars = Values{}
 	}
@@ -63,15 +66,9 @@ func (o *Options) Complete(fs vfs.FileSystem) error {
 			}
 		}
 	}
-	switch o.Mode {
-	case "subst":
-		o.Templater = NewSubst()
-	case "go":
-		o.Templater = NewGo()
-	case "spiff":
-		o.Templater = NewSpiff(fs)
-	default:
-		return errors.Newf("unsupported templater %q", o.Mode)
+	o.Templater, err = DefaultRegistry().Create(o.Mode, fs)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -92,28 +89,7 @@ Example:
 <pre>
 <command> <options> -- MY_VAL=test <args>
 </pre>
-
-There are several templaters that can be selected by the <code>--templater</code> option:
-- envsubst: simple value substitution with the <code>drone/envsubst</code> templater. It
-  supports string values, only. Complexity settings will be json encoded.
-  <pre>
-  key:
-    subkey: "abc ${MY_VAL}"
-  </pre>
-
-- go: go templating supports complex values.
-  <pre>
-  key:
-    subkey: "abc {{.MY_VAL}}"
-  </pre>
-
-- spiff: [spiff templating](https://github.com/mandelsoft/spiff) supports
-  complex values. the settings are accessible using the binding <tt>values</tt>.
-  <pre>
-  key:
-    subkey: "abc (( values.MY_VAL ))"
-  </pre>
-`
+` + Usage(DefaultRegistry())
 }
 
 // FilterSettings parses commandline argument variables.
@@ -204,4 +180,29 @@ func ReadSimpleSettings(fs vfs.FileSystem, path string) (map[string]string, erro
 		err = nil
 	}
 	return result, err
+}
+
+func SplitYamlDocuments(data []byte) ([][]byte, error) {
+	decoder := yaml.NewDecoder(bytes.NewBuffer([]byte(data)))
+	list := [][]byte{}
+	i := 0
+	for {
+		var tmp interface{}
+
+		i++
+		err := decoder.Decode(&tmp)
+		if err != nil {
+			if !errors.Is(err, io.EOF) {
+				return nil, errors.Wrapf(err, "cannot parse document %d", i)
+			}
+			break
+		}
+		out, err := yaml.Marshal(tmp)
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot marshal document %d", i)
+		}
+
+		list = append(list, out)
+	}
+	return list, nil
 }

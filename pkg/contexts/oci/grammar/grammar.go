@@ -118,6 +118,9 @@ var (
 		NameComponentRegexp,
 		Optional(Repeated(RepositorySeparatorRegexp, NameComponentRegexp)))
 
+	// AnchoredRepositoryRegexp matches a plain OCI repository name.
+	AnchoredRepositoryRegexp = Anchored(RepositoryRegexp)
+
 	// AnchoredNameRegexp is used to parse a name value, capturing the
 	// domain and trailing components.
 	AnchoredNameRegexp = Anchored(

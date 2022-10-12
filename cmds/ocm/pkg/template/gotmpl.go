@@ -17,7 +17,18 @@ package template
 import (
 	"bytes"
 	"text/template"
+
+	"github.com/mandelsoft/vfs/pkg/vfs"
 )
+
+func init() {
+	Register("go", func(_ vfs.FileSystem) Templater { return NewGo() }, `go templating supports complex values.
+<pre>
+  key:
+    subkey: "abc {{.MY_VAL}}"
+</pre>
+`)
+}
 
 type GoTemplater struct{}
 

@@ -33,11 +33,47 @@ import (
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type Context interface {
+	clictx.Context
+	Printf(msg string, args ...interface{}) (int, error)
+	Section(msg string, args ...interface{}) Context
+	AddGap(gap string) Context
+}
+
+type context struct {
+	clictx.Context
+	printer common.Printer
+}
+
+func NewContext(ctx clictx.Context, pr common.Printer) Context {
+	return &context{
+		Context: ctx,
+		printer: pr,
+	}
+}
+
+func (c *context) Printf(msg string, args ...interface{}) (int, error) {
+	return c.printer.Printf(msg, args...)
+}
+
+func (c *context) Section(msg string, args ...interface{}) Context {
+	c.printer.Printf(msg+"\n", args...)
+	return c.AddGap("  ")
+}
+
+func (c *context) AddGap(gap string) Context {
+	return &context{
+		Context: c.Context,
+		printer: c.printer.AddGap(gap),
+	}
+}
+
 type InputSpec interface {
 	runtime.VersionedTypedObject
-	Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath string) field.ErrorList
-	GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error)
+	Validate(fldPath *field.Path, ctx Context, inputFilePath string) field.ErrorList
+	GetBlob(ctx Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error)
 }
+
 type InputType interface {
 	runtime.TypedObjectDecoder
 	runtime.VersionedTypedObject
@@ -172,11 +208,11 @@ type UnknownInputSpec struct {
 
 var _ InputSpec = &UnknownInputSpec{}
 
-func (r *UnknownInputSpec) Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath string) field.ErrorList {
+func (r *UnknownInputSpec) Validate(fldPath *field.Path, ctx Context, inputFilePath string) field.ErrorList {
 	return field.ErrorList{field.Invalid(fldPath.Child("type"), r.GetType(), "unknown type")}
 }
 
-func (r *UnknownInputSpec) GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (r *UnknownInputSpec) GetBlob(ctx Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
 	return nil, "", errors.ErrUnknown("input type", r.GetType())
 }
 
@@ -210,7 +246,7 @@ func (s *GenericInputSpec) GetVersion() string {
 	return s.unstructured.GetVersion()
 }
 
-func (s *GenericInputSpec) Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath string) field.ErrorList {
+func (s *GenericInputSpec) Validate(fldPath *field.Path, ctx Context, inputFilePath string) field.ErrorList {
 	if s.effective == nil {
 		scheme := For(ctx)
 		typeField := fldPath.Child("type")
@@ -229,7 +265,7 @@ func (s *GenericInputSpec) Validate(fldPath *field.Path, ctx clictx.Context, inp
 	return s.effective.Validate(fldPath, ctx, inputFilePath)
 }
 
-func (s *GenericInputSpec) GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (s *GenericInputSpec) GetBlob(ctx Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
 	if s.effective == nil {
 		var err error
 		s.effective, err = s.Evaluate(For(ctx))

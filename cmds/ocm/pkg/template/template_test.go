@@ -256,5 +256,19 @@ var _ = Describe("Template", func() {
 			Expect(err).ToNot(HaveOccurred())
 			Expect(res).To(Equal("my value\n"))
 		})
+
+		It("should handle multi document", func() {
+			s := `
+a: alice (( values.MY_VAR ))
+---
+b: bob (( values.MY_VAR ))
+`
+			opts.Vars = map[string]interface{}{
+				"MY_VAR": "miller",
+			}
+			res, err := opts.Execute(s)
+			Expect(err).ToNot(HaveOccurred())
+			Expect(res).To(Equal("a: alice miller\n---\nb: bob miller\n"))
+		})
 	})
 })

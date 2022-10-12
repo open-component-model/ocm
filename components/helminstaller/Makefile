@@ -3,6 +3,8 @@ PROVIDER  ?= mandelsoft
 IMAGE     = ocm$(NAME)
 COMPONENT = github.com/$(PROVIDER)/ocm$(NAME)
 OCMREPO   ?= ghcr.io/$(PROVIDER)/cnudie
+MULTI     ?= true
+PLATFORMS = linux/amd64 linux/arm64
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
 VERSION                                        := $(shell git describe --tags --exact-match 2>/dev/null|| echo "$$(cat $(REPO_ROOT)/VERSION)-dev")
@@ -16,10 +18,19 @@ OCM = go run $(REPO_ROOT)/cmds/ocm
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(NAME) -type f)
 OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
 
+ifeq ($(MULTI),true)
+FLAGSUF     = .multi
+endif
+
 .PHONY: ctf
 ctf: $(GEN)/ctf
 
 $(GEN)/ctf: $(GEN)/ca
+	$(OCM) transfer ca $(GEN)/ca $(GEN)/ctf
+	touch $(GEN)/ctf
+
+.PHONY: plain-ctf
+plain-ctf:
 	$(OCM) transfer ca $(GEN)/ca $(GEN)/ctf
 	touch $(GEN)/ctf
 
@@ -30,16 +41,16 @@ version:
 .PHONY: ca
 ca: $(GEN)/ca
 
-$(GEN)/ca: $(GEN)/.exists $(GEN)/image.$(NAME) resources.yaml executorspec.yaml
+$(GEN)/ca: $(GEN)/.exists $(GEN)/image.$(NAME)$(FLAGSUF) resources.yaml executorspec.yaml
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" $(PROVIDER) $(GEN)/ca
-	$(OCM) add resources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" resources.yaml
+	$(OCM) add resources --templater spiff $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" PLATFORMS="$(PLATFORMS)" MULTI=$(MULTI) resources.yaml
 	@touch $(GEN)/ca
 
 
 .PHONY: plain-ca
 plain-ca: $(GEN)/.exists
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" $(PROVIDER) $(GEN)/ca
-	$(OCM) add resources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" resources.yaml
+	$(OCM) add resources --templater spiff $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" PLATFORMS="$(PLATFORMS)" MULTI=$(MULTI) resources.yaml
 	@touch $(GEN)/ca
 
 .PHONY: build
@@ -51,6 +62,19 @@ $(GEN)/image.$(NAME): $(GEN)/.exists Dockerfile $(CMDSRCS) $(OCMSRCS)
           --build-arg EFFECTIVE_VERSION=$(EFFECTIVE_VERSION) \
           --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE)
 	@touch $(GEN)/image.$(NAME)
+
+.PHONY: multi
+multi: $(GEN)/image.$(NAME).multi
+
+$(GEN)/image.$(NAME).multi: $(GEN)/.exists Dockerfile $(CMDSRCS) $(OCMSRCS)
+	for i in $(PLATFORMS); do \
+	tag=$$(echo $$i | sed -e s:/:-:g); \
+	docker buildx build -t $(IMAGE):$(VERSION)-$$tag --platform $$i --file Dockerfile $(REPO_ROOT) \
+          --build-arg COMMIT=$(COMMIT) \
+          --build-arg EFFECTIVE_VERSION=$(EFFECTIVE_VERSION) \
+          --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE); \
+	done
+	@touch $(GEN)/image.$(NAME).multi
 
 .PHONY: push
 push: $(GEN)/ctf $(GEN)/push.$(NAME)

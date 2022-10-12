@@ -60,7 +60,7 @@ func New(path, mediatype string, compress bool, values interface{}, libs ...stri
 	}, nil
 }
 
-func (s *Spec) Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath string) field.ErrorList {
+func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath string) field.ErrorList {
 	allErrs := (&file.ProcessSpec{s.MediaFileSpec, nil}).Validate(fldPath, ctx, inputFilePath)
 	for i, v := range s.Libraries {
 		pathField := fldPath.Index(i)
@@ -74,7 +74,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx clictx.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx clictx.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
 	return (&file.ProcessSpec{s.MediaFileSpec, s.process}).GetBlob(ctx, nv, inputFilePath)
 }
 

@@ -15,6 +15,8 @@
 package add
 
 import (
+	"fmt"
+
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -67,6 +69,10 @@ type ResourceSpec struct {
 }
 
 var _ common.ResourceSpec = (*ResourceSpec)(nil)
+
+func (r *ResourceSpec) Info() string {
+	return fmt.Sprintf("reference %s: %s", r.ComponentName, r.GetRawIdentity())
+}
 
 func (r *ResourceSpec) Validate(ctx clictx.Context, input *common.ResourceInput) error {
 	allErrs := field.ErrorList{}

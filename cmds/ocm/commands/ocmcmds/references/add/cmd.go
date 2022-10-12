@@ -46,7 +46,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Args:  cobra.MinimumNArgs(2),
 		Short: "add aggregation information to a component version",
 		Long: `
-Add  aggregation information specified in a resource file to a component version.
+Add aggregation information specified in a resource file to a component version.
 So far only component archives are supported as target.
 ` + (&template.Options{}).Usage() + `
 This command accepts reference specification files describing the references

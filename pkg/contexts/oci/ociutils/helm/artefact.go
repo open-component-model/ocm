@@ -34,22 +34,22 @@ import (
 )
 
 func SynthesizeArtefactBlob(path string, fss ...vfs.FileSystem) (artefactset.ArtefactBlob, error) {
-	return artefactset.SythesizeArtefactSet(artdesc.MediaTypeImageManifest, func(set *artefactset.ArtefactSet) error {
+	return artefactset.SythesizeArtefactSet(func(set *artefactset.ArtefactSet) (string, error) {
 		chart, blob, err := TransferAsArtefact(path, set, fss...)
 		if err != nil {
-			return fmt.Errorf("unable to transfer as artefact: %w", err)
+			return "", fmt.Errorf("unable to transfer as artefact: %w", err)
 		}
 
 		if chart.Metadata.Version != "" {
 			err = set.AddTags(blob.Digest, chart.Metadata.Version)
 			if err != nil {
-				return fmt.Errorf("unable to add tag: %w", err)
+				return "", fmt.Errorf("unable to add tag: %w", err)
 			}
 		}
 
 		set.Annotate(artefactset.MAINARTEFACT_ANNOTATION, blob.Digest.String())
 
-		return nil
+		return artdesc.MediaTypeImageManifest, nil
 	})
 }
 

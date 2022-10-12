@@ -19,16 +19,19 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/spiff"
 	"github.com/open-component-model/ocm/pkg/common"
 )
 
 var _ = Describe("spiff processing", func() {
 	var env *TestEnv
+	var ictx inputs.Context
 
 	nv := common.NewNameVersion("test", "v1")
 	BeforeEach(func() {
 		env = NewTestEnv(TestData())
+		ictx = inputs.NewContext(env.Context, common.NewPrinter(env.Context.StdOut()))
 	})
 
 	AfterEach(func() {
@@ -38,7 +41,7 @@ var _ = Describe("spiff processing", func() {
 	It("processes template", func() {
 		spec, err := spiff.New("test1.yaml", "", false, nil)
 		Expect(err).To(Succeed())
-		blob, s, err := spec.GetBlob(env.Context, nv, "/testdata/dummy")
+		blob, s, err := spec.GetBlob(ictx, nv, "/testdata/dummy")
 		Expect(err).To(Succeed())
 		Expect(s).To(Equal(""))
 		data, err := blob.Get()
@@ -51,7 +54,7 @@ bob: 25
 	It("processes template with values", func() {
 		spec, err := spiff.New("test1.yaml", "", false, map[string]interface{}{"diff": 2})
 		Expect(err).To(Succeed())
-		blob, s, err := spec.GetBlob(env.Context, nv, "/testdata/dummy")
+		blob, s, err := spec.GetBlob(ictx, nv, "/testdata/dummy")
 		Expect(err).To(Succeed())
 		Expect(s).To(Equal(""))
 		data, err := blob.Get()
@@ -64,7 +67,7 @@ bob: 26
 	It("processes template with values with local working directory", func() {
 		spec, err := spiff.New("test.yaml", "", false, map[string]interface{}{"diff": 2})
 		Expect(err).To(Succeed())
-		blob, s, err := spec.GetBlob(env.Context, nv, "/testdata/subdir/dummy")
+		blob, s, err := spec.GetBlob(ictx, nv, "/testdata/subdir/dummy")
 		Expect(err).To(Succeed())
 		Expect(s).To(Equal(""))
 		data, err := blob.Get()

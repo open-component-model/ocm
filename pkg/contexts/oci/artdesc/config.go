@@ -12,15 +12,28 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package file
+package artdesc
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	"encoding/json"
+
+	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
+
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 )
 
-const TYPE = "file"
+type ImageConfig = ociv1.Image
 
-func init() {
-	inputs.DefaultInputTypeScheme.Register(TYPE, inputs.NewInputType(TYPE, &Spec{},
-		Usage("The path must denote a file relative the resources file.")))
+func ParseImageConfig(blob accessio.BlobAccess) (*ImageConfig, error) {
+	var cfg ImageConfig
+
+	data, err := blob.Get()
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(data, &cfg)
+	if err != nil {
+		return nil, err
+	}
+	return &cfg, nil
 }
