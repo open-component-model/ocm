@@ -1,6 +1,11 @@
 name: lint-and-test
 
-on: [ pull_request_target, pull_request, push, workflow_dispatch ]
+on: 
+  pull_request_target:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -14,6 +19,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
       - name: Cache go-build and mod
         uses: actions/cache@v3
@@ -39,6 +45,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
       - name: Cache go-build and mod
         uses: actions/cache@v3
