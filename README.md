@@ -1,5 +1,7 @@
 # Open Component Model
 
+TODO
+
 The Open Component Model provides a standard for describing delivery [artefacts](https://github.com/gardener/ocm-spec/tree/main/doc/specification/elements#artifacts) that can be accessed from many types of [component repositories](https://github.com/gardener/ocm-spec/tree/main/doc/specification/elements#repositories).
 
 ## OCM Specifications
