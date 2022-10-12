@@ -817,6 +817,8 @@ github.com/mandelsoft/filepath v0.0.0-20220503095057-4432a2285b68 h1:99GWPlKVS11
 github.com/mandelsoft/filepath v0.0.0-20220503095057-4432a2285b68/go.mod h1:n4xEiUD2HNHnn2w5ZKF0qgjDecHVCWAl5DxZ7+pcFU8=
 github.com/mandelsoft/logging v0.0.0-20221008125016-927a97d3006c h1:ZQV4QUvXKbbScq83qg1q2EILSP2ht1JvcVEMOoMaJtc=
 github.com/mandelsoft/logging v0.0.0-20221008125016-927a97d3006c/go.mod h1:vxGpzOesdqLGRSWb4fz5DaH0ekJvkISst4qq6UZ2xFA=
+github.com/mandelsoft/logging v0.0.0-20221012190501-e17f7961076e h1:vhm0x0KCMwjyrm/WkFXYw68QCWCBVzL1HVnOk0uOJa0=
+github.com/mandelsoft/logging v0.0.0-20221012190501-e17f7961076e/go.mod h1:vxGpzOesdqLGRSWb4fz5DaH0ekJvkISst4qq6UZ2xFA=
 github.com/mandelsoft/spiff v1.7.0-beta-3 h1:AvZldpnctpyfQqtAA5uxokD5rlCK52mGAXxg7tnW5Ag=
 github.com/mandelsoft/spiff v1.7.0-beta-3/go.mod h1:3Kg6qrggWO4oc1k++acd6xhcWisJ2YkzxpVZpuYONGg=
 github.com/mandelsoft/vfs v0.0.0-20201002080026-d03d33d5889a/go.mod h1:74aV7kulg9C434HiI3zNALN79QHc9IZMN+SI4UdLn14=

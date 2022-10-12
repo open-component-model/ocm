@@ -33,13 +33,15 @@ import (
 	"github.com/open-component-model/ocm/pkg/logging/testhelper"
 )
 
+var realm = logging.NewRealm("test")
+
 func addTestCommands(ctx clictx.Context, cmd *cobra.Command) {
 	c := &cobra.Command{
 		Use:   "logtest",
 		Short: "test log output",
 		Run: func(cmd *cobra.Command, args []string) {
-			testhelper.LogTest(ocmlog.Context())
-			testhelper.LogTest(ctx, "ctx")
+			testhelper.LoggerTest(ocmlog.Context().Logger(realm))
+			testhelper.LoggerTest(ctx.LoggingContext().Logger(realm), "ctx")
 		},
 	}
 	cmd.AddCommand(c)
@@ -56,7 +58,7 @@ var _ = Describe("Test Environment", func() {
 		def := buflogr.NewWithBuffer(&log)
 		n := ocmlog.NewContext(logging.New(def))
 		ocmlog.SetContext(n)
-		env = NewTestEnv()
+		env = NewTestEnv(TestData())
 	})
 
 	AfterEach(func() {
@@ -74,8 +76,8 @@ var _ = Describe("Test Environment", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "logtest")).To(Succeed())
 		Expect(log.String()).To(StringEqualTrimmedWithContext(`
-ERROR <nil> error
-ERROR <nil> ctxerror
+ERROR <nil> test error
+ERROR <nil> test ctxerror
 `))
 	})
 
@@ -83,14 +85,29 @@ ERROR <nil> ctxerror
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "-l", "Debug", "logtest")).To(Succeed())
 		Expect(log.String()).To(StringEqualTrimmedWithContext(`
-V[4] debug
-V[3] info
-V[2] warn
-ERROR <nil> error
-V[4] ctxdebug
-V[3] ctxinfo
-V[2] ctxwarn
-ERROR <nil> ctxerror
+V[4] test debug
+V[3] test info
+V[2] test warn
+ERROR <nil> test error
+V[4] test ctxdebug
+V[3] test ctxinfo
+V[2] test ctxwarn
+ERROR <nil> test ctxerror
+`))
+	})
+
+	It("sets logging by config", func() {
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "--logconfig", "testdata/logcfg.yaml", "logtest")).To(Succeed())
+		Expect(log.String()).To(StringEqualTrimmedWithContext(`
+V[4] test debug
+V[3] test info
+V[2] test warn
+ERROR <nil> test error
+V[4] test ctxdebug
+V[3] test ctxinfo
+V[2] test ctxwarn
+ERROR <nil> test ctxerror
 `))
 	})
 
@@ -101,8 +118,7 @@ ERROR <nil> ctxerror
 		data, err := vfs.ReadFile(env.FileSystem(), "logfile")
 		Expect(err).To(Succeed())
 
-		// fmt.Printf(string(data))
-		Expect(len(string(data))).To(Equal(141))
+		Expect(len(string(data))).To(Equal(183))
 	})
 
 })
