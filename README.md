@@ -37,6 +37,6 @@ The OCI and OCM support can be found in packages
 
 ## Contributing
 
-Code contributions, feature requests, bug reports, and help requests are very welcome.
+Code contributions, feature requests, bug reports, and help requests are very welcome. Please refer to the [Contributing Guide in the Community repository](https://github.com/open-component-model/community/blob/main/CONTRIBUTING.md) for more information on how to contribute to OCM.
 
 OCM follows the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md).
