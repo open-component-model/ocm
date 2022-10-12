@@ -17,9 +17,11 @@ package github
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
+	"sync"
 	"unicode"
 
 	"github.com/google/go-github/v45/github"
@@ -150,7 +152,8 @@ type RepositoryService interface {
 }
 
 type accessMethod struct {
-	accessio.BlobAccess
+	lock   sync.Mutex
+	access accessio.BlobAccess
 
 	compvers          cpi.ComponentVersionAccess
 	spec              *AccessSpec
@@ -204,28 +207,13 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (cpi.AccessMethod, e
 		}
 	}
 
-	method := &accessMethod{
+	return &accessMethod{
 		spec:              a,
 		compvers:          c,
 		owner:             pathcomps[0],
 		repo:              pathcomps[1],
 		repositoryService: client.Repositories,
-	}
-
-	link, err := method.getDownloadLink()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get download link: %w", err)
-	}
-
-	var d downloader.Downloader = hd.NewDownloader(link)
-	if a.downloader != nil {
-		d = a.downloader
-	}
-
-	w := accessio.NewWriteAtWriter(d.Download)
-	cacheBlobAccess := accessobj.CachedBlobAccessForWriter(c.GetContext(), method.MimeType(), w)
-	method.BlobAccess = cacheBlobAccess
-	return method, nil
+	}, nil
 }
 
 func validateCommit(commit string) error {
@@ -272,6 +260,54 @@ func (m *accessMethod) GetKind() string {
 
 func (m *accessMethod) MimeType() string {
 	return mime.MIME_TGZ
+}
+
+func (m *accessMethod) Get() ([]byte, error) {
+	if err := m.setup(); err != nil {
+		return nil, err
+	}
+	return m.access.Get()
+}
+
+func (m *accessMethod) Reader() (io.ReadCloser, error) {
+	if err := m.setup(); err != nil {
+		return nil, err
+	}
+	return m.access.Reader()
+}
+
+func (m *accessMethod) Close() error {
+	if m.access == nil {
+		return nil
+	}
+	return m.access.Close()
+}
+
+func (m *accessMethod) setup() error {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	if m.access != nil {
+		return nil
+	}
+
+	// to get the download link technical access to the github repo is required.
+	// therefore, this part has to be delayed until the effective access and cannot
+	// be done during creation of the access method object.
+	link, err := m.getDownloadLink()
+	if err != nil {
+		return fmt.Errorf("failed to get download link: %w", err)
+	}
+
+	d := hd.NewDownloader(link)
+	if m.spec.downloader != nil {
+		d = m.spec.downloader
+	}
+
+	w := accessio.NewWriteAtWriter(d.Download)
+	cacheBlobAccess := accessobj.CachedBlobAccessForWriter(m.compvers.GetContext(), m.MimeType(), w)
+	m.access = cacheBlobAccess
+	return nil
 }
 
 func (m *accessMethod) getDownloadLink() (string, error) {
