@@ -97,7 +97,7 @@ type TypeHandler struct {
 func NewTypeHandler(octx clictx.OCM, oopts *output.Options, repobase ocm.Repository, session ocm.Session, kind string, compspecs []string, elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor, hopts ...Option) (utils.TypeHandler, error) {
 	h := comphdlr.NewTypeHandler(octx, session, repobase)
 
-	comps := output.NewElementOutput(nil, closureoption.Closure(oopts, comphdlr.ClosureExplode, comphdlr.Sort))
+	comps := output.NewElementOutput(octx.Context().LoggingContext(), nil, closureoption.Closure(oopts, comphdlr.ClosureExplode, comphdlr.Sort))
 	err := utils.HandleOutput(comps, h, utils.StringElemSpecs(compspecs...)...)
 	if err != nil {
 		return nil, err

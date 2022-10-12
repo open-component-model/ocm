@@ -76,14 +76,14 @@ that can be created for a data context.
 It can be set by the context constructor:
 
 ```go
-func newContext(shared datacontext.AttributesContext, configctx config.Context, reposcheme RepositoryTypeScheme) Context {
+func newContext(shared datacontext.AttributesContext, configctx config.Context, reposcheme RepositoryTypeScheme, logger logging.Context) Context {
 	c := &_context{
 		sharedattributes:     shared,
 		updater:              cfgcpi.NewUpdate(configctx),
 		knownRepositoryTypes: reposcheme,
 		...
 	}
-	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes())
+	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes(), logger)
 	return c
 }
 ```

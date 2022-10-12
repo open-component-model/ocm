@@ -15,6 +15,8 @@
 package processing
 
 import (
+	"github.com/mandelsoft/logging"
+
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 )
 
@@ -67,8 +69,8 @@ type ProcessingResult interface {
 
 // Process processes an initial empty chain by converting
 // an iterable into a ProcessingResult.
-func Process(data data.Iterable) ProcessingResult {
-	return (&_SynchronousProcessing{}).new(data)
+func Process(log logging.Context, data data.Iterable) ProcessingResult {
+	return (&_SynchronousProcessing{}).new(log, data)
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -83,12 +85,12 @@ var (
 	_ data.IndexedAccess          = &_ProcessingSource{}
 )
 
-func NewIncrementalProcessingSource() ProcessingSource {
-	return (&_ProcessingSource{}).new()
+func NewIncrementalProcessingSource(log logging.Context) ProcessingSource {
+	return (&_ProcessingSource{}).new(log)
 }
 
-func (this *_ProcessingSource) new() ProcessingSource {
-	this.ProcessingBuffer = NewSimpleBuffer()
+func (this *_ProcessingSource) new(log logging.Context) ProcessingSource {
+	this.ProcessingBuffer = NewSimpleBuffer(log)
 	return this
 }
 
@@ -101,8 +103,8 @@ func (this *_ProcessingSource) Add(entries ...interface{}) IncrementalProcessing
 
 /////////////////////////////////////////////////////////////////////////////
 
-func NewAsyncProcessingSource(f func() data.Iterable, pool ProcessorPool) ProcessingSource {
-	p := (&_ProcessingSource{}).new()
+func NewAsyncProcessingSource(log logging.Context, f func() data.Iterable, pool ProcessorPool) ProcessingSource {
+	p := (&_ProcessingSource{}).new(log)
 	pool.Request()
 	pool.Exec(func() {
 		i := f().Iterator()

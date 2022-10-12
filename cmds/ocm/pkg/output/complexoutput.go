@@ -20,6 +20,7 @@ import (
 	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	. "github.com/open-component-model/ocm/pkg/out"
 
+	"github.com/mandelsoft/logging"
 	"sigs.k8s.io/yaml"
 
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -34,12 +35,12 @@ type ComplexProcessingOutput struct {
 
 var _ Output = &ComplexProcessingOutput{}
 
-func NewProcessingComplexOutput(ctx Context, chain ProcessChain, fields ...string) *ComplexProcessingOutput {
-	return (&ComplexProcessingOutput{}).new(ctx, chain, fields)
+func NewProcessingComplexOutput(log logging.Context, ctx Context, chain ProcessChain, fields ...string) *ComplexProcessingOutput {
+	return (&ComplexProcessingOutput{}).new(log, ctx, chain, fields)
 }
 
-func (this *ComplexProcessingOutput) new(ctx Context, chain ProcessChain, fields []string) *ComplexProcessingOutput {
-	this.ElementOutput.new(ctx, chain)
+func (this *ComplexProcessingOutput) new(log logging.Context, ctx Context, chain ProcessChain, fields []string) *ComplexProcessingOutput {
+	this.ElementOutput.new(log, ctx, chain)
 	this.fields = fields
 	return this
 }

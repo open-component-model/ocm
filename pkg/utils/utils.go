@@ -33,7 +33,6 @@ import (
 	"time"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"sigs.k8s.io/yaml"
 )
@@ -46,8 +45,8 @@ func PrintPrettyYaml(obj interface{}, enabled bool) {
 
 	data, err := yaml.Marshal(obj)
 	if err != nil {
-		logrus.Errorf("unable to serialize object as yaml: %s", err)
-
+		//nolint: forbidigo // Intentional Println to not mess up potential output parsers.
+		fmt.Println(err)
 		return
 	}
 
@@ -71,8 +70,8 @@ func GetFileType(fs vfs.FileSystem, path string) (string, error) {
 	return http.DetectContentType(buf), nil
 }
 
-// CleanMarkdownUsageFunc removes markdown tags from the long usage of the command.
-// With this func it is possible to generate the markdown docs but still have readable commandline help func.
+// CleanMarkdownUsageFunc removes Markdown tags from the long usage of the command.
+// With this func it is possible to generate the Markdown docs but still have readable commandline help func.
 // Note: currently only "<pre>" tags are removed.
 func CleanMarkdownUsageFunc(cmd *cobra.Command) {
 	defaultHelpFunc := cmd.HelpFunc()
@@ -148,7 +147,7 @@ const (
 	GIBIBYTE
 )
 
-// BytesString converts bytes into a human readable string.
+// BytesString converts bytes into a human-readable string.
 // This function is inspired by https://www.reddit.com/r/golang/comments/8micn7/review_bytes_to_human_readable_format/
 func BytesString(bytes uint64, accuracy int) string {
 	unit := ""

@@ -24,6 +24,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/env"
@@ -54,7 +55,8 @@ type TestEnv struct {
 
 func NewTestEnv(opts ...env.Option) *TestEnv {
 	b := builder.NewBuilder(env.NewEnvironment(opts...))
-	ctx := clictx.WithOCM(b.OCMContext()).New()
+	ctx := clictx.WithOCM(b.OCMContext()).WithSharedAttributes(datacontext.New(nil)).New()
+	ctx.Logger().Info("this should work.")
 	return &TestEnv{
 		Builder: b,
 		CLI:     *NewCLI(ctx),

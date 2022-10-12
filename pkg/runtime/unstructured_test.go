@@ -21,14 +21,14 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/sirupsen/logrus"
+	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-func InOut(in runtime.TypedObject, encoding runtime.Encoding) (runtime.TypedObject, string, error) {
+func InOut(log logging.Logger, in runtime.TypedObject, encoding runtime.Encoding) (runtime.TypedObject, string, error) {
 	t := reflect.TypeOf(in)
-	logrus.Infof("in: %s\n", t)
+	log.Info("in", "type", t)
 	for t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
@@ -38,14 +38,14 @@ func InOut(in runtime.TypedObject, encoding runtime.Encoding) (runtime.TypedObje
 	if t.Kind() == reflect.Map {
 		p = reflect.New(t)
 		m := reflect.MakeMap(t)
-		logrus.Infof("pointer: %s\n", p.Type())
+		log.Info("pointer", "type", p.Type())
 		p.Elem().Set(m)
 	} else {
 		p = reflect.New(t)
 	}
 	out := p.Interface().(runtime.TypedObject)
 
-	logrus.Infof("out: %T\n", out)
+	log.Info("out", "out", out)
 	data, err := encoding.Marshal(in)
 	if err != nil {
 		return nil, "", err
@@ -56,6 +56,7 @@ func InOut(in runtime.TypedObject, encoding runtime.Encoding) (runtime.TypedObje
 
 var _ = Describe("*** unstructured", func() {
 	result := "{\"type\":\"test\"}"
+	log := logging.DefaultContext().Logger()
 
 	It("unmarshal simple unstructured", func() {
 		un := runtime.NewEmptyUnstructured("test")
@@ -64,31 +65,31 @@ var _ = Describe("*** unstructured", func() {
 		Expect(string(data)).To(Equal("{\"type\":\"test\"}"))
 
 		un = &runtime.UnstructuredTypedObject{}
-		logrus.Infof("out: %T\n", un)
+		log.Info("out", "object", un)
 		err = json.Unmarshal(data, un)
 		Expect(err).To(Succeed())
 		Expect(un.GetType()).To(Equal("test"))
 	})
 
 	It("unmarshal json test", func() {
-		out, data, err := InOut(runtime.NewEmptyUnstructured("test"), runtime.DefaultJSONEncoding)
+		out, data, err := InOut(log, runtime.NewEmptyUnstructured("test"), runtime.DefaultJSONEncoding)
 		Expect(err).To(Succeed())
 		Expect(out.GetType()).To(Equal("test"))
 		Expect(data).To(Equal(result))
 
-		out, data, err = InOut(runtime.NewEmptyUnstructuredVersioned("test"), runtime.DefaultJSONEncoding)
+		out, data, err = InOut(log, runtime.NewEmptyUnstructuredVersioned("test"), runtime.DefaultJSONEncoding)
 		Expect(err).To(Succeed())
 		Expect(out.GetType()).To(Equal("test"))
 		Expect(data).To(Equal(result))
 	})
 
 	It("unmarshal yaml test", func() {
-		out, data, err := InOut(runtime.NewEmptyUnstructured("test"), runtime.DefaultYAMLEncoding)
+		out, data, err := InOut(log, runtime.NewEmptyUnstructured("test"), runtime.DefaultYAMLEncoding)
 		Expect(err).To(Succeed())
 		Expect(out.GetType()).To(Equal("test"))
 		Expect(data).To(Equal("type: test\n"))
 
-		out, data, err = InOut(runtime.NewEmptyUnstructuredVersioned("test"), runtime.DefaultYAMLEncoding)
+		out, data, err = InOut(log, runtime.NewEmptyUnstructuredVersioned("test"), runtime.DefaultYAMLEncoding)
 		Expect(err).To(Succeed())
 		Expect(out.GetType()).To(Equal("test"))
 		Expect(data).To(Equal("type: test\n"))

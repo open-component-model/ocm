@@ -290,7 +290,7 @@ func ProcessConfig(name string, octx ocm.Context, cv ocm.ComponentVersionAccess,
 	return config, err
 }
 
-func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Credentials, params []byte, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
+func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecification, creds *Credentials, params []byte, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
 	var err error
 
 	var executor *Executor
@@ -347,9 +347,9 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 	}
 
 	if econfig == nil {
-		logrus.Infof("no executor config found")
+		p.Printf("no executor config found\n")
 	} else {
-		logrus.Infof("using executor config:\n%s", utils2.IndentLines(string(econfig), "  "))
+		p.Printf("using executor config %s\n", utils2.IndentLines(string(econfig), "  "))
 	}
 	// handle credentials
 	credentials, credmapping, err := CheckCredentialRequests(executor, spec, &espec.Spec)
@@ -375,9 +375,9 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 		return nil, errors.Wrapf(err, "error processing parameters")
 	}
 	if params == nil {
-		logrus.Infof("no parameter config found")
+		p.Printf("no parameter config found\n")
 	} else {
-		logrus.Infof("using package parameters:\n%s", utils2.IndentLines(string(params), "  "))
+		p.Printf("using package parameters %s\n", utils2.IndentLines(string(params), "  "))
 	}
 
 	if executor.ParameterMapping != nil {
@@ -388,7 +388,7 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 
 		if err == nil {
 			if !bytes.Equal(orig, params) {
-				logrus.Infof("using executor parameters:\n%s", utils2.IndentLines(string(params), "  "))
+				p.Printf("using executor parameters %s\n", utils2.IndentLines(string(params), "  "))
 			}
 		}
 	}
@@ -402,8 +402,7 @@ func ExecuteAction(d Driver, name string, spec *PackageSpecification, creds *Cre
 		names = append(names, n+"->"+m)
 	}
 	sort.Strings(names)
-	logrus.Infof("using executor image %s (%s)", espec.Image.Ref, executor.ResourceRef.String())
-	logrus.Infof("with credentials: %v", names)
+	p.Printf("using executor image %s[%s] with credentials %v\n", espec.Image.Ref, executor.ResourceRef.String(), names)
 	op := &Operation{
 		Action:      name,
 		Image:       *espec.Image,

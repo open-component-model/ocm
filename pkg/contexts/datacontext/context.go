@@ -20,7 +20,10 @@ import (
 	"reflect"
 	"sync"
 
+	"github.com/mandelsoft/logging"
+
 	"github.com/open-component-model/ocm/pkg/errors"
+	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -65,6 +68,8 @@ type Context interface {
 	// retrievable by a ForContext method
 	BindTo(ctx context.Context) context.Context
 	GetAttributes() Attributes
+
+	ocmlog.LogProvider
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -126,6 +131,7 @@ type _context struct {
 	key        interface{}
 	effective  Context
 	attributes Attributes
+	logctx     logging.Context
 }
 
 // New provides a default base implementation for a data context.
@@ -139,11 +145,20 @@ func New(parentAttrs Attributes) AttributesContext {
 
 // NewContextBase creates a context base implementation supporting
 // context attributes and the binding to a context.Context.
-func NewContextBase(eff Context, typ string, key interface{}, parentAttrs Attributes) Context {
+func NewContextBase(eff Context, typ string, key interface{}, parentAttrs Attributes, logger logging.Context) Context {
 	updater, _ := eff.(Updater)
 	c := &_context{ctxtype: typ, key: key, effective: eff}
 	c.attributes = newAttributes(eff, parentAttrs, updater)
+	c.logctx = logger
 	return c
+}
+
+func (c *_context) Logger(messageContext ...logging.MessageContext) logging.Logger {
+	return c.logctx.Logger(messageContext)
+}
+
+func (c *_context) LoggingContext() logging.Context {
+	return c.logctx
 }
 
 func (c *_context) GetType() string {

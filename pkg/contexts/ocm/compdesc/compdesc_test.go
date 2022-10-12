@@ -157,7 +157,6 @@ spec:
 `, compdescv3.SchemaVersion))
 
 	It("deserializes v2", func() {
-
 		cd, err := compdesc.Decode([]byte(CDv2))
 		Expect(err).To(Succeed())
 
@@ -168,18 +167,13 @@ spec:
 	})
 
 	It("deserializes "+compdescv3.SchemaVersion, func() {
-
 		cd, err := compdesc.Decode([]byte(CDv2))
 		Expect(err).To(Succeed())
 
 		cd.Metadata.ConfiguredVersion = compdescv3.GroupVersion
 		data, err := compdesc.Encode(cd)
 		Expect(err).To(Succeed())
-
 		Expect(string(data)).To(StringEqualWithContext(CDv3))
-
-		//_ = CDv3
-
 		cd2, err := compdesc.Decode(data)
 		Expect(err).To(Succeed())
 		Expect(cd2).To(Equal(cd))

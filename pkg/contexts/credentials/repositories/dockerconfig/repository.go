@@ -25,7 +25,6 @@ import (
 	"github.com/docker/cli/cli/config/configfile"
 	dockercred "github.com/docker/cli/cli/config/credentials"
 	"github.com/docker/cli/cli/config/types"
-	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
@@ -105,7 +104,7 @@ func (r *Repository) Read(force bool) error {
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
-
+	log := r.ctx.Logger()
 	defaultStore := dockercred.DetectDefaultStore(cfg.CredentialsStore)
 	store := dockercred.NewNativeStore(cfg, defaultStore)
 	// get default native credential store
@@ -123,11 +122,11 @@ func (r *Repository) Read(force bool) error {
 
 			var creds cpi.Credentials
 			if IsEmptyAuthConfig(a) {
-				logrus.Debugf("propagate id %q with default store %q", id, defaultStore)
+				log.Debug("propagate id with default store", "id", id, "store", defaultStore)
 
 				creds = NewCredentials(r, h, store)
 			} else {
-				logrus.Debugf("propagate id %q", id)
+				log.Debug("propagate id", "id", id)
 
 				creds = newCredentials(a)
 			}
@@ -143,7 +142,7 @@ func (r *Repository) Read(force bool) error {
 				identity.ID_HOSTNAME: hostname,
 			}
 
-			logrus.Debugf("propagate id %s with helper %s", id, helper)
+			log.Debug("propagate id with helper", "id", id, "helper", helper)
 
 			r.ctx.SetCredentialsForConsumer(id, NewCredentials(r, h, dockercred.NewNativeStore(cfg, helper)))
 		}

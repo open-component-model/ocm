@@ -17,42 +17,46 @@ package processing
 import (
 	"sync"
 
+	"github.com/mandelsoft/logging"
+
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
 )
 
 type _SynchronousProcessing struct {
 	data data.Iterable
+	log  logging.Context
 }
 
 var _ data.Iterable = &_SynchronousProcessing{}
 
-func (this *_SynchronousProcessing) new(data data.Iterable) *_SynchronousProcessing {
+func (this *_SynchronousProcessing) new(log logging.Context, data data.Iterable) *_SynchronousProcessing {
 	this.data = data
+	this.log = log
 	return this
 }
 
 func (this *_SynchronousProcessing) Transform(t TransformFunction) ProcessingResult {
-	return (&_SynchronousStep{}).new(this, t)
+	return (&_SynchronousStep{}).new(this.log, this, t)
 }
 
 func (this *_SynchronousProcessing) Explode(e ExplodeFunction) ProcessingResult {
-	return (&_SynchronousStep{}).new(this, process(explode(e)))
+	return (&_SynchronousStep{}).new(this.log, this, process(explode(e)))
 }
 
 func (this *_SynchronousProcessing) Map(m MappingFunction) ProcessingResult {
-	return (&_SynchronousStep{}).new(this, process(mapper(m)))
+	return (&_SynchronousStep{}).new(this.log, this, process(mapper(m)))
 }
 
 func (this *_SynchronousProcessing) Filter(f FilterFunction) ProcessingResult {
-	return (&_SynchronousStep{}).new(this, process(filter(f)))
+	return (&_SynchronousStep{}).new(this.log, this, process(filter(f)))
 }
 
 func (this *_SynchronousProcessing) Sort(c CompareFunction) ProcessingResult {
-	return (&_SynchronousStep{}).new(this, processSort(c))
+	return (&_SynchronousStep{}).new(this.log, this, processSort(c))
 }
 
 func (this *_SynchronousProcessing) WithPool(p ProcessorPool) ProcessingResult {
-	return (&_ParallelProcessing{}).new(NewEntryIterableFromIterable(this.data), p, NewOrderedBuffer)
+	return (&_ParallelProcessing{}).new(NewEntryIterableFromIterable(this.log, this.data), p, NewOrderedBuffer, this.log)
 }
 
 func (this *_SynchronousProcessing) Parallel(n int) ProcessingResult {
@@ -64,7 +68,7 @@ func (this *_SynchronousProcessing) Synchronously() ProcessingResult {
 }
 
 func (this *_SynchronousProcessing) Asynchronously() ProcessingResult {
-	return (&_AsynchronousProcessing{}).new(this)
+	return (&_AsynchronousProcessing{}).new(this.log, this)
 }
 
 func (this *_SynchronousProcessing) Unordered() ProcessingResult {
@@ -80,15 +84,16 @@ func (this *_SynchronousProcessing) Iterator() data.Iterator {
 }
 
 func (this *_SynchronousProcessing) AsSlice() data.IndexedSliceAccess {
-	return data.IndexedSliceAccess(data.Slice(this.data))
+	return data.Slice(this.data)
 }
 
 type _SynchronousStep struct {
 	_SynchronousProcessing
 }
 
-func (this *_SynchronousStep) new(data data.Iterable, proc processing) *_SynchronousStep {
+func (this *_SynchronousStep) new(log logging.Context, data data.Iterable, proc processing) *_SynchronousStep {
 	this.data = proc(data)
+	this.log = log
 	return this
 }
 
@@ -97,12 +102,14 @@ type processing func(data.Iterable) data.Iterable
 type _AsynchronousProcessing struct {
 	data data.Iterable
 	lock sync.Mutex
+	log  logging.Context
 }
 
 var _ data.Iterable = &_AsynchronousProcessing{}
 
-func (this *_AsynchronousProcessing) new(data data.Iterable) *_AsynchronousProcessing {
+func (this *_AsynchronousProcessing) new(log logging.Context, data data.Iterable) *_AsynchronousProcessing {
 	this.data = data
+	this.log = log
 	return this
 }
 
@@ -127,7 +134,7 @@ func (this *_AsynchronousProcessing) Sort(c CompareFunction) ProcessingResult {
 }
 
 func (this *_AsynchronousProcessing) WithPool(p ProcessorPool) ProcessingResult {
-	return (&_ParallelProcessing{}).new(NewEntryIterableFromIterable(this.data), p, NewOrderedBuffer)
+	return (&_ParallelProcessing{}).new(NewEntryIterableFromIterable(this.log, this.data), p, NewOrderedBuffer, this.log)
 }
 
 func (this *_AsynchronousProcessing) Parallel(n int) ProcessingResult {
@@ -135,7 +142,7 @@ func (this *_AsynchronousProcessing) Parallel(n int) ProcessingResult {
 }
 
 func (this *_AsynchronousProcessing) Synchronously() ProcessingResult {
-	return (&_SynchronousProcessing{}).new(this)
+	return (&_SynchronousProcessing{}).new(this.log, this)
 }
 
 func (this *_AsynchronousProcessing) Asynchronously() ProcessingResult {

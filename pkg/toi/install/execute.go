@@ -23,7 +23,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-func Execute(d Driver, name string, rid metav1.Identity, credsrc accessio.DataSource, paramsrc accessio.DataSource, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
+func Execute(p common.Printer, d Driver, name string, rid metav1.Identity, credsrc accessio.DataSource, paramsrc accessio.DataSource, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
 	var creds *Credentials
 	var params []byte
 	var err error
@@ -56,5 +56,5 @@ func Execute(d Driver, name string, rid metav1.Identity, credsrc accessio.DataSo
 	if err != nil {
 		return nil, errors.ErrInvalidWrap(err, "installer spec")
 	}
-	return ExecuteAction(d, name, &spec, creds, params, octx, cv, resolver)
+	return ExecuteAction(p, d, name, &spec, creds, params, octx, cv, resolver)
 }

@@ -19,6 +19,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/logging"
 )
 
 type Builder struct {
@@ -89,5 +90,6 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 	if b.spechandlers == nil {
 		b.spechandlers = DefaultRepositorySpecHandlers
 	}
-	return newContext(b.credentials, b.reposcheme, b.spechandlers)
+	logger := logging.NewDefaultContext()
+	return newContext(b.credentials, b.reposcheme, b.spechandlers, logger)
 }

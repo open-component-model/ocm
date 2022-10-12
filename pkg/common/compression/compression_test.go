@@ -21,7 +21,6 @@ import (
 	"testing"
 
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -53,9 +52,6 @@ func TestDetectCompression(t *testing.T) {
 		"fixtures/Hello.xz",
 		"fixtures/Hello.zst",
 	}
-
-	// The original stream is preserved.
-	logrus.Infof("***preserve***\n")
 	for _, c := range cases {
 		originalContents, err := os.ReadFile(c)
 		require.NoError(t, err, c)
@@ -64,7 +60,6 @@ func TestDetectCompression(t *testing.T) {
 		require.NoError(t, err, c)
 		defer stream.Close()
 
-		logrus.Infof("preserve %s\n", c)
 		_, updatedStream, err := DetectCompression(stream)
 		require.NoError(t, err, c)
 
@@ -73,8 +68,6 @@ func TestDetectCompression(t *testing.T) {
 		assert.Equal(t, originalContents, updatedContents, c)
 	}
 
-	// The correct decompressor is chosen, and the result is as expected.
-	logrus.Infof("***decompress***\n")
 	for _, c := range cases {
 		stream, err := os.Open(c)
 		require.NoError(t, err, c)
@@ -82,8 +75,6 @@ func TestDetectCompression(t *testing.T) {
 
 		algo, updatedStream, err := DetectCompression(stream)
 		require.NoError(t, err, c)
-
-		logrus.Infof("decompress %s -> %s\n", c, algo.Name())
 
 		s, err := algo.Decompressor(updatedStream)
 		require.NoError(t, err)
@@ -94,8 +85,6 @@ func TestDetectCompression(t *testing.T) {
 		require.NoError(t, err, c)
 		assert.Equal(t, []byte("Hello"), uncompressedContents, c)
 	}
-
-	logrus.Infof("***empty***\n")
 
 	// Empty input is handled reasonably.
 	algo, updatedStream, err := DetectCompression(bytes.NewReader([]byte{}))

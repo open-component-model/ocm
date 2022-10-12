@@ -19,6 +19,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/mandelsoft/logging"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
@@ -51,7 +52,8 @@ type Options struct {
 	Output      Output
 	Sort        []string
 	FixedColums int
-	Context     out.Context
+	Context     out.Context // this context could be ocm context.
+	Logging     logging.Context
 }
 
 func OutputOptions(outputs Outputs, opts ...options.Options) *Options {
@@ -59,6 +61,13 @@ func OutputOptions(outputs Outputs, opts ...options.Options) *Options {
 		Outputs:   outputs,
 		OptionSet: opts,
 	}
+}
+
+func (o *Options) LogContext() logging.Context {
+	if o.Logging != nil {
+		return o.Logging
+	}
+	return logging.DefaultContext()
 }
 
 func (o *Options) Options(proto options.Options) interface{} {
