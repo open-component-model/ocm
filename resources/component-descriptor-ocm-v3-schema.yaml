@@ -444,7 +444,7 @@ required:
 properties:
   apiVersion:
     type: 'string'
-    enum: [ 'ocm.gardener.cloud/v3alpha1' ]
+    enum: [ 'ocm.gardener.cloud/v3alpha1', 'ocm.software/v3alpha1' ]
   kind:
     type: 'string'
     const: 'ComponentVersion'

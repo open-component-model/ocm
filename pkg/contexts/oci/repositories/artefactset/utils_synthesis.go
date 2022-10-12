@@ -97,6 +97,7 @@ func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, e
 		}
 
 		set.Annotate(MAINARTEFACT_ANNOTATION, digest.String())
+		set.Annotate(LEGACY_MAINARTEFACT_ANNOTATION, digest.String())
 
 		return blob.MimeType(), nil
 	})
@@ -159,6 +160,7 @@ func SynthesizeArtefactBlobFor(tag string, iter ArtefactIterator) (ArtefactBlob,
 					mime = _mime
 				}
 				set.Annotate(MAINARTEFACT_ANNOTATION, digest.String())
+				set.Annotate(LEGACY_MAINARTEFACT_ANNOTATION, digest.String())
 				if tag != "" {
 					err = set.AddTags(digest, tag)
 					if err != nil {

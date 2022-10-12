@@ -22,7 +22,7 @@ import (
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	compdescv3 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud/v3alpha1"
+	compdescv3 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.software/v3alpha1"
 )
 
 func NormalizeYAML(y string) string {
@@ -96,7 +96,7 @@ var _ = Describe("serialization", func() {
 `)
 
 	var CDv3 = NormalizeYAML(fmt.Sprintf(`
-apiVersion: ocm.gardener.cloud/%s
+apiVersion: ocm.software/%s
 kind: ComponentVersion
 metadata:
   name: github.com/vasu1124/introspect

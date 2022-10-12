@@ -37,7 +37,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/out"
 )
 
-const CONTEXT_TYPE = "ocm.cmd.context.gardener.cloud"
+const CONTEXT_TYPE = "ocm.cmd" + datacontext.OCM_CONTEXT_SUFFIX
 
 type OCI interface {
 	Context() oci.Context

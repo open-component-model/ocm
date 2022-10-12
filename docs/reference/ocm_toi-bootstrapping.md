@@ -48,7 +48,7 @@ contained in the component version, which contains the package resource.
 
 It is a plain yaml resource with the media types media type <code>application/x-yaml</code>,
 <code>text/yaml</code> or 
-<code>application/vnd.toi.gardener.cloud.package.v1+yaml</code>) containing
+<code>application/vnd.toi.ocm.software.package.v1+yaml</code>) containing
 information required to control the instantiation of an executor.
 
 It has the following format:
@@ -166,7 +166,7 @@ Instead of directly describing an image resource i the package file, it is
 possible to refer to a resource of type toiExecutor. This
 is a yaml file with the media type <code>application/x-yaml</code>,
 <code>text/yaml</code> or 
-<code>application/vnd.toi.gardener.cloud.package.v1+yaml</code>) containing
+<code>application/vnd.toi.ocm.software.package.v1+yaml</code>) containing
 common information about the executor executor. If used by the package,
 this information is used to validate settings in the package specification.
 

@@ -22,12 +22,12 @@ import (
 
 const (
 	TypeTOIPackage               = "toiPackage"
-	PackageSpecificationMimeType = "application/vnd.toi.gardener.cloud.package.v1+yaml"
+	PackageSpecificationMimeType = "application/vnd.toi.ocm.software.package.v1+yaml"
 )
 
 const (
 	TypeTOIExecutor               = "toiExecutor"
-	ExecutorSpecificationMimeType = "application/vnd.toi.gardener.cloud.executor.v1+yaml"
+	ExecutorSpecificationMimeType = "application/vnd.toi.ocm.software.executor.v1+yaml"
 )
 
 type PackageSpecification struct {

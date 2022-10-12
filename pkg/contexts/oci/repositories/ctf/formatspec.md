@@ -127,18 +127,18 @@ Additionally this specification describes two special annotations, that can be
 set for any described artefact in the annotations attribute of the manifest
 list entries:
 
-- **`cloud.gardener.ocm/tags`**
+- **`software.ocm/tags`**
   
   This annotation can be used to describe a comma-separated list of tags.
   that should be added for this index entry, when imported into an OCI registry.
 
-- **`cloud.gardener.ocm/type`**
+- **`software.ocm/type`**
 
   This annotation can be used for some additional type information.
 
 For the annotations of the index itself the following keys are defined:
 
-- **`cloud.gardener.ocm/main`** *digest*
+- **`software.ocm/main`** *digest*
 
   This annotation describes the digest of the main artefact of the set, if used
   as blob format for an artefact

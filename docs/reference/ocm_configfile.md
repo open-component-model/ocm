@@ -11,27 +11,27 @@ The file format is yaml. It uses the same type mechanism used for all
 kinds of typed specification in the ocm area. The file must have the type of
 a configuration specification. Instead, the command line client supports
 a generic configuration specification able to host a list of arbitrary configuration
-specifications. The type for this spec is <code>generic.config.ocm.gardener.cloud/v1</code>.
+specifications. The type for this spec is <code>generic.config.ocm.software/v1</code>.
 
 The following configuration types are supported:
 
-- <code>attributes.config.ocm.gardener.cloud</code>
-  The config type <code>attributes.config.ocm.gardener.cloud</code> can be used to define a list
+- <code>attributes.config.ocm.software</code>
+  The config type <code>attributes.config.ocm.software</code> can be used to define a list
   of arbitrary attribute specifications:
   
   <pre>
-      type: attributes.config.ocm.gardener.cloud
+      type: attributes.config.ocm.software
       attributes:
          &lt;name>: &lt;yaml defining the attribute>
          ...
   </pre>
 
-- <code>credentials.config.ocm.gardener.cloud</code>
-  The config type <code>credentials.config.ocm.gardener.cloud</code> can be used to define a list
+- <code>credentials.config.ocm.software</code>
+  The config type <code>credentials.config.ocm.software</code> can be used to define a list
   of arbitrary configuration specifications:
   
   <pre>
-      type: credentials.config.ocm.gardener.cloud
+      type: credentials.config.ocm.software
       consumers:
         - identity:
             &lt;name>: &lt;value>
@@ -52,27 +52,27 @@ The following configuration types are supported:
             ... credential chain
   </pre>
 
-- <code>generic.config.ocm.gardener.cloud</code>
-  The config type <code>generic.config.ocm.gardener.cloud</code> can be used to define a list
+- <code>generic.config.ocm.software</code>
+  The config type <code>generic.config.ocm.software</code> can be used to define a list
   of arbitrary configuration specifications:
   
   <pre>
-      type: generic.config.ocm.gardener.cloud
+      type: generic.config.ocm.software
       configurations:
         - type: &lt;any config type>
           ...
         ...
   </pre>
 
-- <code>keys.config.ocm.gardener.cloud</code>
-  The config type <code>keys.config.ocm.gardener.cloud</code> can be used to define
+- <code>keys.config.ocm.software</code>
+  The config type <code>keys.config.ocm.software</code> can be used to define
   public and private keys. A key value might be given by one of the fields:
   - <code>path</code>: path of file with key data
   - <code>data</code>: base64 encoded binary data
   - <code>stringdata</code>: data a string parsed by key handler
   
   <pre>
-      type: keys.config.ocm.gardener.cloud
+      type: keys.config.ocm.software
       privateKeys:
          &lt;name>:
            path: &lt;file path>
@@ -83,31 +83,31 @@ The following configuration types are supported:
          ...
   </pre>
 
-- <code>logging.config.ocm.gardener.cloud</code>
-  The config type <code>logging.config.ocm.gardener.cloud</code> can be used to configure the logging
+- <code>logging.config.ocm.software</code>
+  The config type <code>logging.config.ocm.software</code> can be used to configure the logging
   aspect of a dedicated context type:
   
   <pre>
-      type: logging.config.ocm.gardener.cloud
-      contextType: attributes.context.gardener.cloud
+      type: logging.config.ocm.software
+      contextType: attributes.context.ocm.software
       settings:
         defaultLevel: Info
         rules:
           - ...
   </pre>
   
-  The context type attributes.context.gardener.cloud is the root context of a
+  The context type attributes.context.ocm.software is the root context of a
   context hierarchy.
   
   If no context type is specified, the config will be applies to any target
   acting as logging context provider, which is not a non-root context.
 
-- <code>memory.credentials.config.ocm.gardener.cloud</code>
-  The config type <code>memory.credentials.config.ocm.gardener.cloud</code> can be used to define a list
+- <code>memory.credentials.config.ocm.software</code>
+  The config type <code>memory.credentials.config.ocm.software</code> can be used to define a list
   of arbitrary credentials stored in a memory based credentials repository:
   
   <pre>
-      type: memory.credentials.config.ocm.gardener.cloud
+      type: memory.credentials.config.ocm.software
       repoName: default
       credentials:
         - credentialsName: ref
@@ -122,24 +122,24 @@ The following configuration types are supported:
               password: specialsecret2
   </pre>
 
-- <code>oci.config.ocm.gardener.cloud</code>
-  The config type <code>oci.config.ocm.gardener.cloud</code> can be used to define
+- <code>oci.config.ocm.software</code>
+  The config type <code>oci.config.ocm.software</code> can be used to define
   OCI registry aliases:
   
   <pre>
-      type: oci.config.ocm.gardener.cloud
+      type: oci.config.ocm.software
       aliases:
          &lt;name>: &lt;OCI registry specification>
          ...
   </pre>
 
-- <code>ocm.cmd.config.ocm.gardener.cloud</code>
-  The config type <code>ocm.cmd.config.ocm.gardener.cloud</code> can be used to 
+- <code>ocm.cmd.config.ocm.software</code>
+  The config type <code>ocm.cmd.config.ocm.software</code> can be used to 
   configure predefined aliases for dedicated OCM repositories and 
   OCI registries.
   
   <pre>
-     type: ocm.cmd.config.ocm.gardener.cloud
+     type: ocm.cmd.config.ocm.software
      ocmRepositories:
      &lt;name>: &lt;specification of OCM repository>
      ...
@@ -148,11 +148,11 @@ The following configuration types are supported:
      ...
   </pre>
 
-- <code>scripts.ocm.config.ocm.gardener.cloud</code>
-  The config type <code>scripts.ocm.config.ocm.gardener.cloud</code> can be used to define transfer scripts:
+- <code>scripts.ocm.config.ocm.software</code>
+  The config type <code>scripts.ocm.config.ocm.software</code> can be used to define transfer scripts:
   
   <pre>
-      type: scripts.ocm.config.ocm.gardener.cloud
+      type: scripts.ocm.config.ocm.software
       scripts:
         &lt;name>:
           path: &lt;>file path>
@@ -166,18 +166,18 @@ The following configuration types are supported:
 
 ```
 
-type: generic.config.ocm.gardener.cloud/v1
+type: generic.config.ocm.software/v1
 configurations:
-  - type: credentials.config.ocm.gardener.cloud
+  - type: credentials.config.ocm.software
     repositories:
       - repository:
           type: DockerConfig/v1
           dockerConfigFile: "~/.docker/config.json"
           propagateConsumerIdentity: true
-   - type: attributes.config.ocm.gardener.cloud
+   - type: attributes.config.ocm.software
      attributes:  # map of attribute settings
        compat: true
-#  - type: scripts.ocm.config.ocm.gardener.cloud
+#  - type: scripts.ocm.config.ocm.software
 #    scripts:
 #      "default":
 #         script:

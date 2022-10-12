@@ -29,12 +29,40 @@ import (
 )
 
 const (
-	MAINARTEFACT_ANNOTATION = "cloud.gardener.ocm/main"
-	TAGS_ANNOTATION         = "cloud.gardener.ocm/tags"
-	TYPE_ANNOTATION         = "cloud.gardener.ocm/type"
+	MAINARTEFACT_ANNOTATION = "software.ocm/main"
+	TAGS_ANNOTATION         = "software.ocm/tags"
+	TYPE_ANNOTATION         = "software.ocm/type"
+
+	LEGACY_MAINARTEFACT_ANNOTATION = "cloud.gardener.ocm/main"
+	LEGACY_TAGS_ANNOTATION         = "cloud.gardener.ocm/tags"
+	LEGACY_TYPE_ANNOTATION         = "cloud.gardener.ocm/type"
 
 	OCITAG_ANNOTATION = "org.opencontainers.image.ref.name"
 )
+
+func RetrieveMainArtefact(m map[string]string) string {
+	f, ok := m[MAINARTEFACT_ANNOTATION]
+	if ok {
+		return f
+	}
+	return m[LEGACY_MAINARTEFACT_ANNOTATION]
+}
+
+func RetrieveTags(m map[string]string) string {
+	f, ok := m[TAGS_ANNOTATION]
+	if ok {
+		return f
+	}
+	return m[LEGACY_TAGS_ANNOTATION]
+}
+
+func RetrieveType(m map[string]string) string {
+	f, ok := m[TYPE_ANNOTATION]
+	if ok {
+		return f
+	}
+	return m[LEGACY_TYPE_ANNOTATION]
+}
 
 // ArtefactSet provides an artefact set view on the artefact set implementation.
 // Every ArtefactSet is separated closable. If the last view is closed
@@ -121,13 +149,14 @@ func (a *artefactSetImpl) AddTags(digest digest.Digest, tags ...string) error {
 				e.Annotations = map[string]string{}
 				idx.Manifests[i].Annotations = e.Annotations
 			}
-			cur := e.Annotations[TAGS_ANNOTATION]
+			cur := RetrieveTags(e.Annotations)
 			if cur != "" {
 				cur = strings.Join(append([]string{cur}, tags...), ",")
 			} else {
 				cur = strings.Join(tags, ",")
 			}
 			e.Annotations[TAGS_ANNOTATION] = cur
+			e.Annotations[LEGACY_TAGS_ANNOTATION] = cur
 			if a.base.FileSystemBlobAccess.Access().GetInfo().GetDescriptorFileName() == OCIArtefactSetDescriptorFileName {
 				e.Annotations[OCITAG_ANNOTATION] = tags[0]
 			}
@@ -180,7 +209,7 @@ func (a *artefactSetImpl) GetMain() digest.Digest {
 	if idx.Annotations == nil {
 		return ""
 	}
-	return digest.Digest(idx.Annotations[MAINARTEFACT_ANNOTATION])
+	return digest.Digest(RetrieveMainArtefact(idx.Annotations))
 }
 
 func (a *artefactSetImpl) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
@@ -210,7 +239,7 @@ func (a *artefactSetImpl) ListTags() ([]string, error) {
 	result := []string{}
 	for _, a := range a.GetIndex().Manifests {
 		if a.Annotations != nil {
-			if tags, ok := a.Annotations[TAGS_ANNOTATION]; ok {
+			if tags := RetrieveTags(a.Annotations); tags != "" {
 				result = append(result, strings.Split(tags, ",")...)
 			}
 		}
@@ -222,7 +251,7 @@ func (a *artefactSetImpl) GetTags(digest digest.Digest) ([]string, error) {
 	result := []string{}
 	for _, a := range a.GetIndex().Manifests {
 		if a.Digest == digest && a.Annotations != nil {
-			if tags, ok := a.Annotations[TAGS_ANNOTATION]; ok {
+			if tags := RetrieveTags(a.Annotations); tags != "" {
 				result = append(result, strings.Split(tags, ",")...)
 			}
 		}
@@ -258,7 +287,7 @@ func (a *artefactSetImpl) matcher(ref string) func(d *artdesc.Descriptor) bool {
 		if d.Annotations == nil {
 			return false
 		}
-		for _, tag := range strings.Split(d.Annotations[TAGS_ANNOTATION], ",") {
+		for _, tag := range strings.Split(RetrieveTags(d.Annotations), ",") {
 			if tag == ref {
 				return true
 			}

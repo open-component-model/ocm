@@ -28,7 +28,7 @@ import (
 )
 
 // CONTEXT_TYPE is the global type for a credential context.
-const CONTEXT_TYPE = "credentials.context.gardener.cloud"
+const CONTEXT_TYPE = "credentials" + datacontext.OCM_CONTEXT_SUFFIX
 
 type Context interface {
 	datacontext.Context

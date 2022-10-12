@@ -20,10 +20,15 @@ import (
 
 	"github.com/mandelsoft/logging"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
+
+// OCM_CONFIG_TYPE_SUFFIX is the standard suffix used for configuration
+// types provided by this library.
+const OCM_CONFIG_TYPE_SUFFIX = ".config" + common.OCM_TYPE_GROUP_SUFFIX
 
 type ConfigSelector interface {
 	Select(Config) bool
@@ -36,7 +41,7 @@ var AllConfigs = AppliedConfigSelectorFunction(func(*AppliedConfig) bool { retur
 
 const AllGenerations int64 = 0
 
-const CONTEXT_TYPE = "config.context.gardener.cloud"
+const CONTEXT_TYPE = "config" + datacontext.OCM_CONTEXT_SUFFIX
 
 type Context interface {
 	datacontext.Context

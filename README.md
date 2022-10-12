@@ -1,13 +1,13 @@
 # Open Component Model
 
-The Open Component Model provides a standard for describing delivery [artefacts](https://github.com/gardener/ocm-spec/tree/main/doc/specification/elements#artifacts) that can be accessed from many types of [component repositories](https://github.com/gardener/ocm-spec/tree/main/doc/specification/elements#repositories).
+The Open Component Model provides a standard for describing delivery [artefacts](docs/ocm/model.md#artefacts) that can be accessed from many types of [component repositories](docs/ocm/model.md#repositories).
 
 ## OCM Specifications
-OCM defines a set of semantic, formatting, and other types of specifications that can be found in the [`ocm-spec` repository](https://github.com/gardener/ocm-spec/tree/main/doc/specification). Start learning about the core concepts of OCM elements [here](https://github.com/gardener/ocm-spec/tree/main/doc/specification/elements).
+OCM defines a set of semantic, formatting, and other types of specifications that can be found in the [`ocm-spec` repository](https://github.com/open-component-mode/ocm-spec). Start learning about the core concepts of OCM elements [here](https://github.com/open-component-model/ocm-spec/tree/main/doc/specification/elements).
 
 ## OCM Library
 This project provides a Go library containing an API for interacting with the
-[Open Component Model (OCM)](https://github.com/gardener/ocm-spec) elements and mechanisms.
+[Open Component Model (OCM)](https://github.com/open-component-model/ocm-spec) elements and mechanisms.
 
 The library currently supports the following [repository mappings](docs/ocm/interoperability.md):
 - **OCI**: Use the repository prefix path of an OCI repository to implement an OCM
@@ -26,11 +26,11 @@ Additionally, OCM provides a generic solution for how to:
 ## OCM CLI
 The [`ocm` CLI](docs/reference/ocm.md) may also be used to interact with OCM mechanisms. It makes it easy to create component versions and embed them in build processes.
 
-The `ocm` CLI documentation can be found [here]((https://github.com/gardener/ocm/blob/main/docs/reference/ocm.md)).
+The `ocm` CLI documentation can be found [here]((https://github.com/open-component-model/ocm/blob/main/docs/reference/ocm.md)).
 
-The code for the CLI can be found in [package `cmds/ocm`](https://github.com/gardener/ocm/blob/main/cmds/ocm).
+The code for the CLI can be found in [package `cmds/ocm`](https://github.com/open-component-model/ocm/blob/main/cmds/ocm).
 
-An example of how to use the `ocm` CLI in a Makefile can be found in [`examples/make`](https://github.com/gardener/ocm/blob/main/examples/make/Makefile).
+An example of how to use the `ocm` CLI in a Makefile can be found in [`examples/make`](https://github.com/open-component-model/ocm/blob/main/examples/make/Makefile).
 
 The OCI and OCM support can be found in packages
 [`pkg/contexts/oci`](pkg/contexts/oci) and [`pkg/contexts/ocm`](pkg/contexts/ocm).

@@ -166,6 +166,7 @@ func (d *download) Save(o *artefacthdlr.Object, f string) error {
 		}
 	}
 	set.Annotate(artefactset.MAINARTEFACT_ANNOTATION, digest.String())
+	set.Annotate(artefactset.LEGACY_MAINARTEFACT_ANNOTATION, digest.String())
 
 	if err == nil {
 		out.Outf(d.opts.Context, "%s: downloaded\n", f)

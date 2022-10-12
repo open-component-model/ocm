@@ -44,7 +44,7 @@ by a file name. With <code>--script</code> it can be taken from the
 CLI config using an entry of the following format:
 
 <pre>
-type: scripts.ocm.config.ocm.gardener.cloud
+type: scripts.ocm.config.ocm.software
 scripts:
   &lt;name>: 
     path: &lt;filepath> 

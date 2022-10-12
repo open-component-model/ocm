@@ -17,5 +17,5 @@ the storage method and supported media type.
 Besides those types, there are some vendor types that are typically used:
 
 - `landscaper.gardener.cloud/blueprint`: an installation description for the landscaper tool
-- `landscaper.gardener.cloud/gitOpsTemplate`: a filesystem content (tar, tgz)
+- `landscaper.ocm.software/gitOpsTemplate`: a filesystem content (tar, tgz)
   intended to be used as git ops template to set up a git repo used for continuous deployment (for example flux)

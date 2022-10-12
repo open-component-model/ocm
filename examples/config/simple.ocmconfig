@@ -1,16 +1,16 @@
-type: generic.config.ocm.gardener.cloud/v1
+type: generic.config.ocm.software/v1
 configurations:
-  - type: credentials.config.ocm.gardener.cloud
+  - type: credentials.config.ocm.software
     repositories:
       - repository:
           type: DockerConfig/v1
           dockerConfigFile: "~/.docker/config.json"
           propagateConsumerIdentity: true
-  - type: attributes.config.ocm.gardener.cloud
+  - type: attributes.config.ocm.software
     attributes:
       cache: ~/.ocm/cache
 
-#  - type: scripts.ocm.config.ocm.gardener.cloud
+#  - type: scripts.ocm.config.ocm.software
 #    scripts:
 #      "default":
 #         script:

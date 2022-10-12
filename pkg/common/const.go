@@ -14,4 +14,4 @@
 
 package common
 
-const TypeGroupSuffix = ".ocm.gardener.cloud"
+const OCM_TYPE_GROUP_SUFFIX = ".ocm.software"
