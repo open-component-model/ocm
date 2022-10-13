@@ -138,7 +138,6 @@ definitions:
         $ref: '#/definitions/relaxedSemver'
       type:
         type: 'string'
-        enum: ['git']
       labels:
         $ref: '#/definitions/labels'
       access:

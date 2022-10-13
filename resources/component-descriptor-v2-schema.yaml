@@ -125,7 +125,6 @@ definitions:
         $ref: '#/definitions/relaxedSemver'
       type:
         type: 'string'
-        enum: ['git']
       labels:
         type: 'array'
         items:
