@@ -56,6 +56,20 @@ var _ = Describe("artefact management", func() {
 		vfs.Cleanup(tempfs)
 	})
 
+	It("creates with default format", func() {
+		a, err := artefactset.FormatDirectory.Create("test", opts, 0700)
+		Expect(err).To(Succeed())
+		Expect(vfs.DirExists(tempfs, "test/"+artefactset.BlobsDirectoryName)).To(BeTrue())
+
+		defaultManifestFill(a)
+
+		Expect(a.Close()).To(Succeed())
+
+		desc := artefactset.DescriptorFileName("")
+		Expect(vfs.FileExists(tempfs, "test/"+desc)).To(BeTrue())
+		Expect(vfs.FileExists(tempfs, "test/"+artefactset.OCILayouFileName)).To(Equal(desc == artefactset.OCIArtefactSetDescriptorFileName))
+	})
+
 	TestForAllFormats("instantiate filesystem artefact", func(format string) {
 		opts, err := accessio.AccessOptions(&artefactset.Options{}, opts, artefactset.StructureFormat(format))
 		Expect(err).To(Succeed())

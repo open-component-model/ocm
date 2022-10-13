@@ -117,15 +117,34 @@ func (a *accessObjectInfo) SetupFileSystem(fs vfs.FileSystem, mode vfs.FileMode)
 }
 
 func (a *accessObjectInfo) SetupFor(fs vfs.FileSystem) error {
-	ok, err := vfs.FileExists(fs, OCILayouFileName)
+	ok, err := vfs.FileExists(fs, OCIArtefactSetDescriptorFileName)
 	if err != nil {
 		return err
 	}
 	if ok {
 		a.setOCI()
-	} else { //nolint: staticcheck // keep comment for else
-		// keep configured format
+		return nil
 	}
+
+	ok, err = vfs.FileExists(fs, ArtefactSetDescriptorFileName)
+	if err != nil {
+		return err
+	}
+	if ok {
+		a.setOCM()
+		return nil
+	}
+
+	ok, err = vfs.FileExists(fs, OCILayouFileName)
+	if err != nil {
+		return err
+	}
+	if ok {
+		a.setOCI()
+		return nil
+	}
+
+	// keep configured format
 	return nil
 }
 
