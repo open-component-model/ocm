@@ -93,11 +93,11 @@ func ConfigureByData(ctx ocm.Context, data []byte, info string) error {
 	if err != nil {
 		return errors.Wrapf(err, "processing ocm config %q", info)
 	}
-	cfg, err := config.DefaultContext().GetConfigForData(data, nil)
+	cfg, err := ctx.ConfigContext().GetConfigForData(data, nil)
 	if err != nil {
 		return errors.Wrapf(err, "invalid ocm config file %q", info)
 	}
-	err = config.DefaultContext().ApplyConfig(cfg, info)
+	err = ctx.ConfigContext().ApplyConfig(cfg, info)
 	if err != nil {
 		return errors.Wrapf(err, "cannot apply ocm config %q", info)
 	}
