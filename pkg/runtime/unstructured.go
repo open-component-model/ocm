@@ -157,24 +157,25 @@ func (u *UnstructuredTypedObject) SetType(ttype string) {
 }
 
 // DeepCopyInto is deepcopy function, copying the receiver, writing into out. in must be non-nil.
-func (u *UnstructuredTypedObject) DeepCopyInto(out *UnstructuredTypedObject) {
-	*out = *u
+func (u *UnstructuredTypedObject) DeepCopyInto(out **UnstructuredTypedObject) {
+	*out = new(UnstructuredTypedObject)
+	**out = *u
 
 	raw, err := json.Marshal(u.Object)
 	if err != nil {
 		logrus.Error(err)
 	}
 
-	_ = out.setRaw(raw)
+	_ = (*out).setRaw(raw)
 }
 
-// DeepCopy is deepcopy function, copying the receiver, creating a new UnstructuredTypedObject.
+// DeepCopy is a deepcopy function, copying the receiver, creating a new UnstructuredTypedObject.
 func (u *UnstructuredTypedObject) DeepCopy() *UnstructuredTypedObject {
 	if u == nil {
 		return nil
 	}
-	out := new(UnstructuredTypedObject)
-	u.DeepCopyInto(out)
+	var out *UnstructuredTypedObject
+	u.DeepCopyInto(&out)
 	return out
 }
 
