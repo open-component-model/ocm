@@ -39,7 +39,7 @@ type Option struct {
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVarP(&o.Spec, "repo", "r", "", "repository name or spec")
+	fs.StringVarP(&o.Spec, "repo", "", "", "repository name or spec")
 }
 
 func (o *Option) Complete(ctx clictx.Context) error {

@@ -15,6 +15,9 @@
 package create
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -47,6 +50,7 @@ type Command struct {
 	Handler comparch.FormatHandler
 	Force   bool
 	Path    string
+	Format  string
 
 	Component      string
 	Version        string
@@ -57,17 +61,19 @@ type Command struct {
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, formatoption.New(), schemaoption.New(compdesc.DefaultSchemeVersion))}, utils.Names(Names, names...)...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, formatoption.New(comparch.GetFormats()...), schemaoption.New(compdesc.DefaultSchemeVersion))}, utils.Names(Names, names...)...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
-		Use:   "[<options>] <component> <version> <provider> <path> {--provider <label>=<value>} {<label>=<value>}",
-		Args:  cobra.MinimumNArgs(4),
+		Use:   "[<options>] <component> <version> --provider <provider-name> {--provider <label>=<value>} {<label>=<value>}",
+		Args:  cobra.MinimumNArgs(2),
 		Short: "create new component archive",
 		Long: `
 Create a new component archive. This might be either a directory prepared
-to host component version content or a tar/tgz file.
+to host component version content or a tar/tgz file (see option --type).
+
+A provider must be specified, additional provider labels are optional.
 `,
 	}
 }
@@ -76,6 +82,7 @@ func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	o.BaseCommand.AddFlags(fs)
 	fs.BoolVarP(&o.Force, "force", "f", false, "remove existing content")
 	fs.StringArrayVarP(&o.providerattrs, "provider", "p", nil, "provider attribute")
+	fs.StringVarP(&o.Path, "file", "F", "component-archive", "target file/directory")
 }
 
 func (o *Command) Complete(args []string) error {
@@ -89,20 +96,28 @@ func (o *Command) Complete(args []string) error {
 
 	o.Component = args[0]
 	o.Version = args[1]
-	o.Provider = args[2]
-	o.Path = args[3]
 
-	for _, a := range args[4:] {
+	for _, a := range args[2:] {
 		o.Labels, err = common.AddParsedLabel(o.Labels, a)
 		if err != nil {
 			return err
 		}
 	}
 	for _, a := range o.providerattrs {
+		if !strings.Contains(a, "=") {
+			if o.Provider != "" {
+				return fmt.Errorf("%s: provider name is already set (%s)", a, o.Provider)
+			}
+			o.Provider = a
+			continue
+		}
 		o.ProviderLabels, err = common.AddParsedLabel(o.ProviderLabels, a)
 		if err != nil {
 			return err
 		}
+	}
+	if o.Provider == "" {
+		return fmt.Errorf("provider name missing")
 	}
 	return nil
 }

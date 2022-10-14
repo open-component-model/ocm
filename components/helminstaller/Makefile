@@ -42,14 +42,14 @@ version:
 ca: $(GEN)/ca
 
 $(GEN)/ca: $(GEN)/.exists $(GEN)/image.$(NAME)$(FLAGSUF) resources.yaml executorspec.yaml
-	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" $(PROVIDER) $(GEN)/ca
+	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider $(PROVIDER) --file $(GEN)/ca
 	$(OCM) add resources --templater spiff $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" PLATFORMS="$(PLATFORMS)" MULTI=$(MULTI) resources.yaml
 	@touch $(GEN)/ca
 
 
 .PHONY: plain-ca
 plain-ca: $(GEN)/.exists
-	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" $(PROVIDER) $(GEN)/ca
+	$(OCM) create ca -f $(COMPONENT) "$(VERSION)"--provider  $(PROVIDER) --file $(GEN)/ca
 	$(OCM) add resources --templater spiff $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" PLATFORMS="$(PLATFORMS)" MULTI=$(MULTI) resources.yaml
 	@touch $(GEN)/ca
 

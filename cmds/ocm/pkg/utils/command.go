@@ -76,6 +76,11 @@ outer:
 	return strings.Join(lines, "\n")
 }
 
+func HideCommand(cmd *cobra.Command) *cobra.Command {
+	cmd.Hidden = true
+	return cmd
+}
+
 func MassageCommand(cmd *cobra.Command, names ...string) *cobra.Command {
 	cmd.Use = addCommand(names, cmd.Use)
 	if len(names) > 1 {

@@ -132,7 +132,7 @@ testdata v1               git
 
 		It("lists resource closure in ctf file", func() {
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("get", "sources", "-c", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("get", "sources", "-r", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 REFERENCEPATH              NAME     VERSION IDENTITY TYPE
@@ -153,7 +153,7 @@ COMPONENTVERSION    NAME   VERSION IDENTITY TYPE
 
 		It("lists resource closure in ctf file", func() {
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("get", "sources", "-c", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("get", "sources", "-r", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 COMPONENTVERSION       NAME     VERSION IDENTITY TYPE

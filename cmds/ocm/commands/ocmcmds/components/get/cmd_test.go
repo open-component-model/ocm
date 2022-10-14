@@ -67,7 +67,7 @@ test.de/x v1      mandelsoft /tmp/ca
 		})
 
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("get", "components", ARCH, "-c")).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("get", "components", ARCH, "-r")).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
 REFERENCEPATH COMPONENT VERSION PROVIDER                    IDENTITY
@@ -83,7 +83,7 @@ test.de/x:v1  test.de/y v1      <unknown component version> "name"="ref"
 		})
 
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("get", "components", ARCH, "-c", "-o", "tree")).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("get", "components", ARCH, "-r", "-o", "tree")).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
 NESTING    COMPONENT VERSION PROVIDER                    IDENTITY
@@ -131,7 +131,7 @@ test.de/x v1      mandelsoft /tmp/ca
 		It("lists closure ctf file", func() {
 
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("get", "components", "--lookup", ARCH2, "-c", "--repo", ARCH, COMP2)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("get", "components", "--lookup", ARCH2, "-r", "--repo", ARCH, COMP2)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 REFERENCEPATH COMPONENT VERSION PROVIDER   IDENTITY
@@ -152,7 +152,7 @@ NESTING COMPONENT VERSION PROVIDER
 		It("lists flat ctf file with closure", func() {
 
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("get", "components", "-o", "tree", "--lookup", ARCH2, "-c", "--repo", ARCH, COMP2)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("get", "components", "-o", "tree", "--lookup", ARCH2, "-r", "--repo", ARCH, COMP2)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 NESTING    COMPONENT VERSION PROVIDER   IDENTITY

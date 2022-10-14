@@ -43,7 +43,7 @@ type Option struct {
 var _ common.OptionWithSessionCompleter = (*Option)(nil)
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVarP(&o.Spec, "repo", "r", "", "repository name or spec")
+	fs.StringVarP(&o.Spec, "repo", "", "", "repository name or spec")
 }
 
 func (o *Option) CompleteWithSession(octx clictx.OCM, session ocm.Session) error {

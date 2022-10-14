@@ -75,7 +75,7 @@ var _ = Describe("Add resources", func() {
 
 	BeforeEach(func() {
 		env = NewTestEnv(TestData())
-		Expect(env.Execute("create", "ca", "-ft", "directory", "test.de/x", VERSION, "mandelsoft", ARCH)).To(Succeed())
+		Expect(env.Execute("create", "ca", "-ft", "directory", "test.de/x", VERSION, "--provider", "mandelsoft", "--file", ARCH)).To(Succeed())
 	})
 
 	AfterEach(func() {
@@ -114,6 +114,7 @@ var _ = Describe("Add resources", func() {
 
 		CheckTextResource(env, cd, "testdata")
 	})
+
 	It("adds helm chart", func() {
 		Expect(env.Execute("add", "resources", ARCH, "/testdata/helm.yaml")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
