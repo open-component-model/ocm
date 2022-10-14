@@ -131,23 +131,13 @@ attributes are supported:
 
 * [ocm <b>add</b>](ocm_add.md)	 &mdash; Add resources or sources to a component archive
 * [ocm <b>bootstrap</b>](ocm_bootstrap.md)	 &mdash; bootstrap components
-* [ocm <b>cache</b>](ocm_cache.md)	 &mdash; Cache related commands
 * [ocm <b>clean</b>](ocm_clean.md)	 &mdash; Cleanup/re-organize elements
-* [ocm <b>componentarchive</b>](ocm_componentarchive.md)	 &mdash; Commands acting on component archives
-* [ocm <b>componentversions</b>](ocm_componentversions.md)	 &mdash; Commands acting on components
 * [ocm <b>create</b>](ocm_create.md)	 &mdash; Create transport or component archive
-* [ocm <b>credentials</b>](ocm_credentials.md)	 &mdash; Commands acting on credentials
 * [ocm <b>describe</b>](ocm_describe.md)	 &mdash; Describe artefacts
 * [ocm <b>download</b>](ocm_download.md)	 &mdash; Download oci artefacts, resources or complete components
 * [ocm <b>get</b>](ocm_get.md)	 &mdash; Get information about artefacts and components
-* [ocm <b>oci</b>](ocm_oci.md)	 &mdash; Dedicated command flavors for the OCI layer
-* [ocm <b>ocm</b>](ocm_ocm.md)	 &mdash; Dedicated command flavors for the Open Component Model
-* [ocm <b>references</b>](ocm_references.md)	 &mdash; Commands related to component references in component versions
-* [ocm <b>resources</b>](ocm_resources.md)	 &mdash; Commands acting on component resources
 * [ocm <b>show</b>](ocm_show.md)	 &mdash; Show tags or versions
 * [ocm <b>sign</b>](ocm_sign.md)	 &mdash; Sign components
-* [ocm <b>sources</b>](ocm_sources.md)	 &mdash; Commands acting on component sources
-* [ocm <b>toi</b>](ocm_toi.md)	 &mdash; Dedicated command flavors for the TOI layer
 * [ocm <b>transfer</b>](ocm_transfer.md)	 &mdash; Transfer artefacts or components
 * [ocm <b>verify</b>](ocm_verify.md)	 &mdash; Verify component version signatures
 * [ocm <b>version</b>](ocm_version.md)	 &mdash; displays the version

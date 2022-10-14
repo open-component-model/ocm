@@ -52,6 +52,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/sign"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/transfer"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/verify"
+	cmdutils "github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/cmds/ocm/topics/common/attributes"
 	topicconfig "github.com/open-component-model/ocm/cmds/ocm/topics/common/config"
 	topicocirefs "github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
@@ -176,18 +177,18 @@ func NewCliCommand(ctx clictx.Context, mod ...func(clictx.Context, *cobra.Comman
 	cmd.AddCommand(bootstrap.NewCommand(opts.Context))
 	cmd.AddCommand(clean.NewCommand(opts.Context))
 
-	cmd.AddCommand(componentarchive.NewCommand(opts.Context))
-	cmd.AddCommand(resources.NewCommand(opts.Context))
-	cmd.AddCommand(references.NewCommand(opts.Context))
-	cmd.AddCommand(sources.NewCommand(opts.Context))
-	cmd.AddCommand(components.NewCommand(opts.Context))
+	cmd.AddCommand(cmdutils.HideCommand(componentarchive.NewCommand(opts.Context)))
+	cmd.AddCommand(cmdutils.HideCommand(resources.NewCommand(opts.Context)))
+	cmd.AddCommand(cmdutils.HideCommand(references.NewCommand(opts.Context)))
+	cmd.AddCommand(cmdutils.HideCommand(sources.NewCommand(opts.Context)))
+	cmd.AddCommand(cmdutils.HideCommand(components.NewCommand(opts.Context)))
 
-	cmd.AddCommand(cachecmds.NewCommand(opts.Context))
-	cmd.AddCommand(ocicmds.NewCommand(opts.Context))
-	cmd.AddCommand(ocmcmds.NewCommand(opts.Context))
-	cmd.AddCommand(toicmds.NewCommand(opts.Context))
+	cmd.AddCommand(cmdutils.HideCommand(cachecmds.NewCommand(opts.Context)))
+	cmd.AddCommand(cmdutils.HideCommand(ocicmds.NewCommand(opts.Context)))
+	cmd.AddCommand(cmdutils.HideCommand(ocmcmds.NewCommand(opts.Context)))
+	cmd.AddCommand(cmdutils.HideCommand(toicmds.NewCommand(opts.Context)))
 
-	cmd.AddCommand(creds.NewCommand(opts.Context))
+	cmd.AddCommand(cmdutils.HideCommand(creds.NewCommand(opts.Context)))
 
 	opts.AddFlags(cmd.Flags())
 	cmd.InitDefaultHelpCmd()
