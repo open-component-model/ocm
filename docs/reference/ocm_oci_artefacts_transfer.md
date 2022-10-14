@@ -10,7 +10,7 @@ ocm oci artefacts transfer [<options>] {<artefact-reference>} <target>
 
 ```
   -h, --help          help for transfer
-  -r, --repo string   repository name or spec
+      --repo string   repository name or spec
   -R, --repo-name     transfer repository name
 ```
 

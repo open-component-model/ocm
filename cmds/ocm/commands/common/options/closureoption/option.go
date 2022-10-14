@@ -73,11 +73,11 @@ func (o *Option) ApplyTransferOption(opts transferhandler.TransferOptions) error
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	fs.BoolVarP(&o.Closure, "closure", "c", false, fmt.Sprintf("follow %s nesting", o.ElementName))
+	fs.BoolVarP(&o.Closure, "recursive", "r", false, fmt.Sprintf("follow %s nesting", o.ElementName))
 }
 
 func (o *Option) Usage() string {
-	return fmt.Sprintf("\nWith the option <code>--closure</code> the complete reference tree of a %s is traversed.\n", o.ElementName)
+	return fmt.Sprintf("\nWith the option <code>--recursive</code> the complete reference tree of a %s is traversed.\n", o.ElementName)
 }
 
 func (o *Option) Explode(e processing.ExplodeFunction) processing.ProcessChain {

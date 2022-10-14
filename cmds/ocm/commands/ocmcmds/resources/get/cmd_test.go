@@ -96,7 +96,7 @@ testdata v1      "platform"="b" PlainText local
 			})
 
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH, "-c")).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH, "-r")).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 REFERENCEPATH NAME     VERSION IDENTITY TYPE      RELATION
@@ -113,7 +113,7 @@ test.de/x:v1  testdata v1               PlainText local
 			})
 
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH, "-c", "-o", "tree")).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH, "-r", "-o", "tree")).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 COMPONENTVERSION    NAME     VERSION IDENTITY TYPE      RELATION
@@ -171,7 +171,7 @@ testdata v1               PlainText local
 
 			It("lists resource closure in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
-				Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
+				Expect(env.CatchOutput(buf).Execute("get", "resources", "-r", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
 REFERENCEPATH              NAME     VERSION IDENTITY TYPE      RELATION
@@ -193,7 +193,7 @@ COMPONENTVERSION    NAME     VERSION IDENTITY TYPE      RELATION
 
 			It("lists resource closure in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
-				Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
+				Expect(env.CatchOutput(buf).Execute("get", "resources", "-r", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
 COMPONENTVERSION       NAME     VERSION IDENTITY TYPE      RELATION
@@ -236,7 +236,7 @@ COMPONENTVERSION       NAME     VERSION IDENTITY TYPE      RELATION
 
 			It("lists resource closure in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
-				Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
+				Expect(env.CatchOutput(buf).Execute("get", "resources", "-r", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
 REFERENCEPATH              NAME     VERSION IDENTITY TYPE      RELATION
@@ -265,7 +265,7 @@ COMPONENTVERSION    NAME VERSION IDENTITY TYPE RELATION
 
 			It("lists resource closure in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
-				Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "-o", "tree", "--repo", ARCH, COMP3+":"+VERSION)).To(Succeed())
+				Expect(env.CatchOutput(buf).Execute("get", "resources", "-r", "-o", "tree", "--repo", ARCH, COMP3+":"+VERSION)).To(Succeed())
 				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
 COMPONENTVERSION          NAME     VERSION IDENTITY TYPE      RELATION
@@ -300,7 +300,7 @@ COMPONENTVERSION          NAME     VERSION IDENTITY TYPE      RELATION
 
 			It("lists resource closure in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
-				Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
+				Expect(env.CatchOutput(buf).Execute("get", "resources", "-r", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
 REFERENCEPATH NAME     VERSION IDENTITY TYPE      RELATION
@@ -310,7 +310,7 @@ test.de/y:v1  moredata v1               PlainText local
 
 			It("lists resource closure in ctf file", func() {
 				buf := bytes.NewBuffer(nil)
-				Expect(env.CatchOutput(buf).Execute("get", "resources", "-c", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
+				Expect(env.CatchOutput(buf).Execute("get", "resources", "-r", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
 COMPONENTVERSION       NAME     VERSION IDENTITY TYPE      RELATION

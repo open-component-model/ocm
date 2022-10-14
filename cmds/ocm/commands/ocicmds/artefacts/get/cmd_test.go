@@ -130,7 +130,7 @@ REGISTRY REPOSITORY       KIND     TAG DIGEST
 
 		It("get closure of all artefacts in other namespace", func() {
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("get", "artefact", "-c", ARCH+"//"+NS2)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("get", "artefact", "-r", ARCH+"//"+NS2)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 REFERENCEPATH                                                           REGISTRY REPOSITORY       KIND     TAG DIGEST
@@ -153,7 +153,7 @@ NESTING REGISTRY REPOSITORY       KIND     TAG DIGEST
 
 		It("get tree of all artefacts in other namespace", func() {
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("get", "artefact", "-c", "-o", "tree", ARCH+"//"+NS2)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("get", "artefact", "-r", "-o", "tree", ARCH+"//"+NS2)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 NESTING     REGISTRY REPOSITORY       KIND     TAG DIGEST
@@ -266,7 +266,7 @@ NESTING        REGISTRY REPOSITORY       KIND     TAG                           
 
 		It("get single artefact attachment tree with closure", func() {
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("get", "artefact", "-a", "-c", "-o", "tree", ARCH+"//"+NS2+":"+VERSION1)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("get", "artefact", "-a", "-r", "-o", "tree", ARCH+"//"+NS2+":"+VERSION1)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 NESTING             REGISTRY REPOSITORY       KIND     TAG                                                                          DIGEST

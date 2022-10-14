@@ -11,7 +11,7 @@ ocm ocm versions show [<options>] <component> {<version pattern>}
 ```
   -h, --help          help for show
   -l, --latest        show only latest version
-  -r, --repo string   repository name or spec
+      --repo string   repository name or spec
   -s, --semantic      show semantic version
 ```
 

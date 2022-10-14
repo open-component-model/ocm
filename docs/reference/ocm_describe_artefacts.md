@@ -12,7 +12,7 @@ ocm describe artefacts [<options>] {<artefact-reference>}
   -h, --help            help for artefacts
       --layerfiles      list layer files
   -o, --output string   output mode (JSON, json, yaml)
-  -r, --repo string     repository name or spec
+      --repo string     repository name or spec
 ```
 
 ### Description

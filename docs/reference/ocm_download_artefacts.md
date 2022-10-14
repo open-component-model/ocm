@@ -11,7 +11,7 @@ ocm download artefacts [<options>]  {<artefact>}
 ```
   -h, --help             help for artefacts
   -O, --outfile string   output file or directory
-  -r, --repo string      repository name or spec
+      --repo string      repository name or spec
   -t, --type string      archive format (default "directory")
 ```
 

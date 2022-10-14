@@ -10,10 +10,10 @@ ocm get artefacts [<options>] {<artefact-reference>}
 
 ```
   -a, --attached           show attached artefacts
-  -c, --closure            follow index nesting
   -h, --help               help for artefacts
   -o, --output string      output mode (JSON, json, tree, wide, yaml)
-  -r, --repo string        repository name or spec
+  -r, --recursive          follow index nesting
+      --repo string        repository name or spec
   -s, --sort stringArray   sort fields
 ```
 
@@ -56,7 +56,7 @@ linked library can be used:
 - `oci`
 - `ociRegistry`
 
-With the option <code>--closure</code> the complete reference tree of a index is traversed.
+With the option <code>--recursive</code> the complete reference tree of a index is traversed.
 
 With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:

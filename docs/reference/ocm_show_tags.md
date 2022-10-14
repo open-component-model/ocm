@@ -11,7 +11,7 @@ ocm show tags [<options>] <component> {<version pattern>}
 ```
   -h, --help          help for tags
   -l, --latest        show only latest tags
-  -r, --repo string   repository name or spec
+      --repo string   repository name or spec
   -o, --semantic      show semantic tags
   -s, --semver        show only semver compliant tags
 ```

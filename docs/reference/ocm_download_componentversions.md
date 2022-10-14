@@ -11,7 +11,7 @@ ocm download componentversions [<options>] {<components>}
 ```
   -h, --help             help for componentversions
   -O, --outfile string   output file or directory
-  -r, --repo string      repository name or spec
+      --repo string      repository name or spec
   -t, --type string      archive format (default "directory")
 ```
 

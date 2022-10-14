@@ -9,11 +9,11 @@ ocm transfer componentversions [<options>] {<component-reference>} <target>
 ### Options
 
 ```
-  -c, --closure              follow component reference nesting
   -h, --help                 help for componentversions
       --lookup stringArray   repository name or spec for closure lookup fallback
   -f, --overwrite            overwrite existing component versions
-  -r, --repo string          repository name or spec
+  -r, --recursive            follow component reference nesting
+      --repo string          repository name or spec
   -V, --resourcesByValue     transfer resources by-value
       --script string        config name of transfer handler script
   -s, --scriptFile string    filename of transfer handler script
@@ -79,7 +79,7 @@ target archive to use. The following formats are supported:
 - tgz
 The default format is <code>directory</code>.
 
-With the option <code>--closure</code> the complete reference tree of a component reference is traversed.
+With the option <code>--recursive</code> the complete reference tree of a component reference is traversed.
 
 If a component lookup for building a reference closure is required
 the <code>--lookup</code>  option can be used to specify a fallback

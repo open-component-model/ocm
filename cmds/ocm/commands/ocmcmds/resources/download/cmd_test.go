@@ -113,7 +113,7 @@ var _ = Describe("Test Environment", func() {
 
 		It("downloads closure", func() {
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("download", "resources", "-c", "-O", OUT, "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("download", "resources", "-r", "-O", OUT, "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 /tmp/res/test.de/y/v1/moredata: 8 byte(s) written

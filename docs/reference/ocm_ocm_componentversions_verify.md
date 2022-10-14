@@ -14,7 +14,7 @@ ocm ocm componentversions verify [<options>] {<component-reference>}
   -L, --local                    verification based on information found in component versions, only
       --lookup stringArray       repository name or spec for closure lookup fallback
   -k, --public-key stringArray   public key setting
-  -r, --repo string              repository name or spec
+      --repo string              repository name or spec
   -s, --signature stringArray    signature name
   -V, --verify                   verify existing digests
 ```

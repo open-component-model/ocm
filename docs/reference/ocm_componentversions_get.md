@@ -9,11 +9,11 @@ ocm componentversions get [<options>] {<component-reference>}
 ### Options
 
 ```
-  -c, --closure              follow component reference nesting
   -h, --help                 help for get
       --lookup stringArray   repository name or spec for closure lookup fallback
   -o, --output string        output mode (JSON, json, tree, wide, yaml)
-  -r, --repo string          repository name or spec
+  -r, --recursive            follow component reference nesting
+      --repo string          repository name or spec
   -S, --scheme string        schema version
   -s, --sort stringArray     sort fields
 ```
@@ -69,7 +69,7 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `oci`
 - `ociRegistry`
 
-With the option <code>--closure</code> the complete reference tree of a component reference is traversed.
+With the option <code>--recursive</code> the complete reference tree of a component reference is traversed.
 
 If a component lookup for building a reference closure is required
 the <code>--lookup</code>  option can be used to specify a fallback

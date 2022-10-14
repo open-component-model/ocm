@@ -59,7 +59,7 @@ var _ = Describe("Test Environment", func() {
 		})
 
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("download", "artefact", "-O", OUT, "-r", ARCH, NS+grammar.TagSeparator+VERSION)).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("download", "artefact", "-O", OUT, "--repo", ARCH, NS+grammar.TagSeparator+VERSION)).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
 /tmp/res: downloaded

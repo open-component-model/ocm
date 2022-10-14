@@ -83,7 +83,7 @@ withid test.de/z v1      "id"="test","name"="withid"
 		})
 		It("lists single reference in component archive", func() {
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("get", "references", "--lookup", CTF, "-c", "-o", "wide", CA)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("get", "references", "--lookup", CTF, "-r", "-o", "wide", CA)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 REFERENCEPATH              NAME   COMPONENT VERSION IDENTITY
@@ -104,7 +104,7 @@ COMPONENTVERSION    NAME COMPONENT VERSION IDENTITY
 
 		It("lits reference closure in ctf file", func() {
 			buf := bytes.NewBuffer(nil)
-			Expect(env.CatchOutput(buf).Execute("get", "references", "-c", "-o", "tree", "--lookup", CTF, CA)).To(Succeed())
+			Expect(env.CatchOutput(buf).Execute("get", "references", "-r", "-o", "tree", "--lookup", CTF, CA)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
 COMPONENTVERSION    NAME   COMPONENT VERSION IDENTITY

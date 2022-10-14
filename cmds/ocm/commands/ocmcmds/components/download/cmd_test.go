@@ -61,7 +61,7 @@ var _ = Describe("Download Component Version", func() {
 		})
 
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("download", "component", "-O", OUT, "-r", ARCH, COMPONENT+grammar.VersionSeparator+VERSION)).To(Succeed())
+		Expect(env.CatchOutput(buf).Execute("download", "component", "-O", OUT, "--repo", ARCH, COMPONENT+grammar.VersionSeparator+VERSION)).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
 /tmp/res: downloaded
