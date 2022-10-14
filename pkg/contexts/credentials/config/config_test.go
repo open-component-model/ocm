@@ -28,6 +28,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/aliases"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/memory"
+	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var DefaultContext = credentials.New()
@@ -160,5 +162,69 @@ var _ = Describe("generic credentials", func() {
 			Expect(err).To(Succeed())
 			Expect(reflect.TypeOf(repo).String()).To(Equal("*memory.Repository"))
 		})
+
+		It("applies a config for consumers", func() {
+			cfg := localconfig.New()
+
+			consumer := credentials.ConsumerIdentity{
+				credentials.ID_TYPE: "mytype",
+				"host":              "localhost",
+			}
+			props := common.Properties{"token": "mytoken"}
+			creds := directcreds.NewCredentials(props)
+			Expect(cfg.AddConsumer(consumer, creds)).To(Succeed())
+
+			data, err := runtime.DefaultYAMLEncoding.Marshal(cfg)
+			Expect(err).To(Succeed())
+			Expect(string(data)).To(testutils.StringEqualTrimmedWithContext(`
+consumers:
+- credentials:
+  - credentialsName: Credentials
+    properties:
+      token: mytoken
+    type: Credentials
+  identity:
+    host: localhost
+    type: mytype
+type: credentials.config.ocm.software
+`))
+
+			ctx.ConfigContext().ApplyConfig(cfg, "testconfig")
+
+			found, err := ctx.GetCredentialsForConsumer(consumer, credentials.CompleteMatch)
+			Expect(err).To(Succeed())
+			result, err := found.Credentials(ctx)
+			Expect(err).To(Succeed())
+
+			Expect(result.Properties()).To(Equal(props))
+		})
+
+		It("applies a config for consumers", func() {
+			props := common.Properties{"token": "mytoken"}
+			consumer := credentials.ConsumerIdentity{
+				credentials.ID_TYPE: "mytype",
+				"host":              "localhost",
+			}
+			data := `
+type: credentials.config.ocm.software
+consumers:
+- credentials:
+  - type: Credentials
+    properties:
+      token: mytoken
+  identity:
+    host: localhost
+    type: mytype
+`
+			ctx.ConfigContext().ApplyData([]byte(data), nil, "testconfig")
+
+			found, err := ctx.GetCredentialsForConsumer(consumer, credentials.CompleteMatch)
+			Expect(err).To(Succeed())
+			result, err := found.Credentials(ctx)
+			Expect(err).To(Succeed())
+
+			Expect(result.Properties()).To(Equal(props))
+		})
+
 	})
 })

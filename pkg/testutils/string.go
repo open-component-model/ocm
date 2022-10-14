@@ -65,7 +65,7 @@ func (matcher *StringEqualMatcher) FailureMessage(actual interface{}) (message s
 	actualString, actualOK := actual.(string)
 	if actualOK {
 		if matcher.Trim {
-			actualString = strings.TrimSpace(actualString)
+			return "Found\n" + strings.TrimSpace(actualString) + "\n" + format.MessageWithDiff(actualString, "to equal", strings.TrimSpace(matcher.Expected))
 		}
 		return "Found\n" + actualString + "\n" + format.MessageWithDiff(actualString, "to equal", matcher.Expected)
 	}
