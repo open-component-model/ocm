@@ -15,9 +15,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
@@ -31,12 +33,16 @@ const (
 )
 
 type SigningServerSigner struct {
-	ServerURL string
+	ServerURL *url.URL
 }
 
 func NewSigningClient(serverURL string) (*SigningServerSigner, error) {
+	u, err := url.Parse(serverURL)
+	if err != nil {
+		return nil, errors.Wrapf(err, "invalid signing server URL (%q)", serverURL)
+	}
 	signer := SigningServerSigner{
-		ServerURL: serverURL,
+		ServerURL: u,
 	}
 	return &signer, nil
 }
@@ -47,10 +53,18 @@ func (signer *SigningServerSigner) Sign(cctx credentials.Context, signatureAlgo 
 		return nil, fmt.Errorf("unable to hex decode hash: %w", err)
 	}
 
+	u := *signer.ServerURL
+	if !strings.HasSuffix(u.Path, "/") {
+		u.Path += "/"
+	}
+	u.Path += "sign/" + strings.ToLower(signatureAlgo)
+	q := u.Query()
+	q.Set("hashAlgorithm", hashAlgo.String())
+	u.RawQuery = q.Encode()
 	req, err := http.NewRequestWithContext(
 		context.Background(),
 		http.MethodPost,
-		fmt.Sprintf("%s/sign/%s?hashAlgorithm=%s", signer.ServerURL, strings.ToLower(signatureAlgo), hashAlgo.String()),
+		u.String(),
 		bytes.NewBuffer(decodedHash),
 	)
 	if err != nil {
@@ -61,9 +75,12 @@ func (signer *SigningServerSigner) Sign(cctx credentials.Context, signatureAlgo 
 	// TODO: split up signing server url into protocol, host, and port for matching?
 	consumerId := credentials.ConsumerIdentity{
 		credentials.ID_TYPE: CONSUMER_TYPE,
-		ID_HOSTNAME:         signer.ServerURL,
+		ID_HOSTNAME:         signer.ServerURL.Hostname(),
+		ID_PORT:             signer.ServerURL.Port(),
+		ID_SCHEME:           signer.ServerURL.Scheme,
+		ID_PATHPREFIX:       signer.ServerURL.Path,
 	}
-	credSource, err := cctx.GetCredentialsForConsumer(consumerId, credentials.CompleteMatch)
+	credSource, err := cctx.GetCredentialsForConsumer(consumerId, hostpath.Matcher)
 	if err != nil && !errors.IsErrUnknown(err) {
 		return nil, fmt.Errorf("unable to get credential source: %w", err)
 	}

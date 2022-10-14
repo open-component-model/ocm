@@ -29,7 +29,7 @@ const ID_PATHPREFIX = "pathprefix"
 const ID_SCHEME = "scheme"
 
 func init() {
-	cpi.RegisterStandardIdentityMatcher(IDENTITY_TYPE, IdentityMatcher(""), `Host and path based credential matcher
+	cpi.RegisterStandardIdentityMatcher(IDENTITY_TYPE, Matcher, `Host and path based credential matcher
 
 This matcher works on the following properties:
 
@@ -40,6 +40,8 @@ This matcher works on the following properties:
   element with the most matching path components is selected (separator is <code>/</code>).
 `)
 }
+
+var Matcher = IdentityMatcher("")
 
 func IdentityMatcher(identityType string) cpi.IdentityMatcher {
 	return func(pattern, cur, id cpi.ConsumerIdentity) bool {

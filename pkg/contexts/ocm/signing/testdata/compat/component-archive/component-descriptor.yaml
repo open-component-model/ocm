@@ -1,0 +1,32 @@
+component:
+  componentReferences: []
+  name: github.com/mandelsoft/test
+  provider: mandelsoft
+  repositoryContexts: []
+  resources:
+  - access:
+      localReference: sha256.c893900c1106f13d55648a425f502dd6518e40eaa3ac7d24023d4c73d55dc12e
+      mediaType: application/octet-stream
+      type: localBlob
+    digest:
+      hashAlgorithm: sha256
+      normalisationAlgorithm: genericBlobDigest/v1
+      value: c893900c1106f13d55648a425f502dd6518e40eaa3ac7d24023d4c73d55dc12e
+    name: text
+    relation: local
+    type: PlainText
+    version: 1.0.0
+  sources: []
+  version: 1.0.0
+meta:
+  schemaVersion: v2
+signatures:
+- digest:
+    hashAlgorithm: sha256
+    normalisationAlgorithm: jsonNormalisation/v1
+    value: 4aa3e99afc6f91f345eb757908d1097d01beeec4a5512bfa8b4d2d0ff44b6566
+  name: test
+  signature:
+    algorithm: RSASSA-PKCS1-V1_5
+    mediaType: application/vnd.ocm.signature.rsa
+    value: 5e3d818d829cc21c2f633d1814db78eea9ba04f80e363ec7823269101e7fc445cf97b44977ebfd3d699904e3ca4355a7763913cccb8217af3f2b374e5de875663757548e69164bfb629d47a76e57e6437d15c2862ce3414ec6ab7b93fd92a073194761a20a6e964b4dd1005c616491ea0d73b4294f4fb82fff96e2021453b35ca0be9158e64d3c3c0bfd8b7ed10882cc99a5b18b0234a47b8f147b8c99e06717d2a4e6bc9e4b5b808cf07432d65a87e19c562b3b66d635a83453559ab0ef4967f04996d80b4b265d33daa32e3a80c606855a683add0f8f3ddee10e26f4a5b85462560755287d17ad806f5c3f14f83f5b536eb75823ab432a1ab9b1a1cdb89244

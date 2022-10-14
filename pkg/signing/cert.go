@@ -36,8 +36,8 @@ func ParsePublicKey(data []byte) (interface{}, error) {
 	return parse.ParsePublicKey(string(data))
 }
 
-func ParsePrivateKey(data string) (interface{}, error) {
-	return parse.ParsePrivateKey(data)
+func ParsePrivateKey(data []byte) (interface{}, error) {
+	return parse.ParsePrivateKey(string(data))
 }
 
 func ParseCertificate(data []byte) (*x509.Certificate, error) {

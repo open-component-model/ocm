@@ -20,12 +20,14 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	tenv "github.com/open-component-model/ocm/pkg/env"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 )
 
 var DefaultContext = ocm.New()
@@ -46,12 +48,54 @@ var _ = Describe("access method", func() {
 	var env *Builder
 
 	BeforeEach(func() {
-		env = NewBuilder(tenv.NewEnvironment())
+		env = NewBuilder(tenv.NewEnvironment(tenv.ModifiableTestData()))
 		env.RSAKeyPair(SIGNATURE)
 	})
 
 	AfterEach(func() {
 		env.Cleanup()
+	})
+
+	Context("compatibility", func() {
+		It("verifies older hash types (sha256[digest type] instead of SHA-256(crypto type))", func() {
+			session := datacontext.NewSession()
+			defer session.Close()
+
+			env.ReadRSAKeyPair(SIGNATURE, "/testdata/compat")
+			cv, err := comparch.Open(env.OCMContext(), accessobj.ACC_READONLY, "/testdata/compat/component-archive", 0, env)
+			Expect(err).To(Succeed())
+			session.AddCloser(cv)
+			opts := NewOptions(
+				VerifySignature(SIGNATURE),
+				VerifyDigests(),
+			)
+			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+
+			dig, err := Apply(nil, nil, cv, opts)
+			Expect(err).To(Succeed())
+			Expect(dig.Value).To(Equal("4aa3e99afc6f91f345eb757908d1097d01beeec4a5512bfa8b4d2d0ff44b6566"))
+			Expect(dig.HashAlgorithm).To(Equal(sha256.Algorithm))
+		})
+		It("resigns with older hash types", func() {
+			session := datacontext.NewSession()
+			defer session.Close()
+
+			env.ReadRSAKeyPair(SIGNATURE, "/testdata/compat")
+			cv, err := comparch.Open(env.OCMContext(), accessobj.ACC_READONLY, "/testdata/compat/component-archive", 0, env)
+			Expect(err).To(Succeed())
+			session.AddCloser(cv)
+			opts := NewOptions(
+				Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+				VerifySignature(SIGNATURE),
+				VerifyDigests(),
+			)
+			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+
+			dig, err := Apply(nil, nil, cv, opts)
+			Expect(err).To(Succeed())
+			Expect(dig.Value).To(Equal("4aa3e99afc6f91f345eb757908d1097d01beeec4a5512bfa8b4d2d0ff44b6566"))
+			Expect(dig.HashAlgorithm).To(Equal(sha256.Algorithm))
+		})
 	})
 
 	Context("valid", func() {

@@ -121,7 +121,7 @@ func (r *handlerRegistry) GetVerifier(name string) Verifier {
 func (r *handlerRegistry) GetHasher(name string) Hasher {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
-	return r.hasher[name]
+	return r.hasher[NormalizeHashAlgorithm(name)]
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -247,7 +247,7 @@ func (r *registry) RegisterHasher(hasher Hasher) {
 }
 
 func (r *registry) GetHasher(name string) Hasher {
-	s := r.handlers.GetHasher(name)
+	s := r.handlers.GetHasher(NormalizeHashAlgorithm(name))
 	if s == nil && r.baseHandlers != nil {
 		s = r.baseHandlers.GetHasher(name)
 	}

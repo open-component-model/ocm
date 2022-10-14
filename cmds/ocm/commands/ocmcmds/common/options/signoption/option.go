@@ -148,7 +148,7 @@ func (o *Option) handleKeys(ctx clictx.Context, desc string, keys []string, add 
 		}
 		file := k
 		sep := strings.Index(k, "=")
-		if sep >= 0 {
+		if sep > 0 {
 			name = k[:sep]
 			file = k[sep+1:]
 		}

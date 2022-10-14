@@ -14,9 +14,17 @@
 
 package rsa_signingservice
 
+import (
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
+)
+
 const (
-	ID_HOSTNAME   = "host"
 	CONSUMER_TYPE = "Signingserver.gardener.cloud"
+
+	ID_HOSTNAME   = hostpath.ID_HOSTNAME
+	ID_PORT       = hostpath.ID_PORT
+	ID_PATHPREFIX = hostpath.ID_PATHPREFIX
+	ID_SCHEME     = hostpath.ID_SCHEME
 	CLIENT_CERT   = "clientCert"
 	PRIVATE_KEY   = "privateKey"
 	CA_CERTS      = "caCerts"
