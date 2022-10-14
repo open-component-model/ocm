@@ -9,12 +9,12 @@ ocm transfer componentversions [<options>] {<component-reference>} <target>
 ### Options
 
 ```
+  -V, --copy-resources       transfer referenced resources by-value
   -h, --help                 help for componentversions
       --lookup stringArray   repository name or spec for closure lookup fallback
   -f, --overwrite            overwrite existing component versions
   -r, --recursive            follow component reference nesting
       --repo string          repository name or spec
-  -V, --resourcesByValue     transfer resources by-value
       --script string        config name of transfer handler script
   -s, --scriptFile string    filename of transfer handler script
   -t, --type string          archive format (directory, tar, tgz) (default "directory")
@@ -94,7 +94,7 @@ references.
 It the option <code>--overwrite</code> is given, component version in the
 target repository will be overwritten, if they already exist.
 
-It the option <code>--resourcesByValue</code> is given, all referential 
+It the option <code>--copy-resources</code> is given, all referential 
 resources will potentially be localized, mapped to component version local
 resources in the target repository.
 This behaviour can be further influenced by specifying a transfer script
