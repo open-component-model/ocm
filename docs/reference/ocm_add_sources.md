@@ -9,9 +9,12 @@ ocm add sources [<options>] <target> {<resourcefile> | <var>=<value>}
 ### Options
 
 ```
+      --access string          access specification
       --addenv                 access environment for templating
   -h, --help                   help for sources
+      --input string           input specification
   -s, --settings stringArray   settings file with variable settings (yaml)
+      --source string          source meta data (yaml)
       --templater string       templater to use (subst, spiff, go) (default "subst")
 ```
 
@@ -60,6 +63,12 @@ There are several templaters that can be selected by the <code>--templater</code
   </pre>
   
 
+
+It is possible to describe a single source via command line options.
+This requires the option <code>--resource</code> and one of the options
+<code>--access</code> or <code>--input</code>. All three options require
+a yaml or json value describing an attribute set. This is similar
+to the one supported for the specification via yaml file.
 
 This command accepts (re)source specification files describing the sources
 to add to a component version.
