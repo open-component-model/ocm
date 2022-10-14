@@ -15,6 +15,7 @@
 package comparch
 
 import (
+	"sort"
 	"sync"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -75,6 +76,28 @@ func RegisterFormat(f accessobj.FormatHandler) *formatHandler {
 	h := &formatHandler{f}
 	fileFormats[f.Format()] = h
 	return h
+}
+
+func GetFormats() []string {
+	lock.RLock()
+	defer lock.RUnlock()
+
+	var def accessio.FileFormat
+
+	list := []string{}
+	for k := range fileFormats {
+		// as favorite default, directory should be the first entry in the list
+		if k != accessio.FormatDirectory {
+			list = append(list, string(k))
+		} else {
+			def = k
+		}
+	}
+	sort.Strings(list)
+	if def != "" {
+		return append(append(list[:0:0], string(def)), list...)
+	}
+	return list
 }
 
 func GetFormat(name accessio.FileFormat) FormatHandler {

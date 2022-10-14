@@ -103,7 +103,7 @@ var _ = Describe("Add sources", func() {
 
 	BeforeEach(func() {
 		env = NewTestEnv(TestData())
-		Expect(env.Execute("create", "ca", "-ft", "directory", "test.de/x", VERSION, "mandelsoft", ARCH)).To(Succeed())
+		Expect(env.Execute("create", "ca", "-ft", "directory", "test.de/x", VERSION, "--provider", "mandelsoft", "--file", ARCH)).To(Succeed())
 	})
 
 	AfterEach(func() {

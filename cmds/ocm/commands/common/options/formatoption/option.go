@@ -15,6 +15,9 @@
 package formatoption
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 
@@ -31,20 +34,24 @@ func From(o options.OptionSetProvider) *Option {
 	return opt
 }
 
-func New(f ...accessio.FileFormat) *Option {
-	if len(f) > 0 {
-		return &Option{Default: f[0]}
+func New(list ...string) *Option {
+	if len(list) > 0 {
+		return &Option{List: list, Default: accessio.FileFormat(list[0])}
 	}
 	return &Option{Default: accessio.FormatDirectory}
 }
 
 type Option struct {
 	format  string
+	List    []string
 	Default accessio.FileFormat
 	Format  accessio.FileFormat
 }
 
 func (o *Option) setDefault() {
+	if o.List == nil {
+		o.List = accessio.GetFormats()
+	}
 	if o.Default == "" {
 		o.Default = accessio.FormatDirectory
 	}
@@ -52,15 +59,17 @@ func (o *Option) setDefault() {
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	o.setDefault()
-	fs.StringVarP(&o.format, "type", "t", string(o.Default), "archive format")
+	fs.StringVarP(&o.format, "type", "t", string(o.Default), fmt.Sprintf("archive format (%s)", strings.Join(o.List, ", ")))
 }
 
 func (o *Option) Complete(ctx clictx.Context) error {
 	o.Format = accessio.FileFormat(o.format)
-	if accessobj.GetFormat(o.Format) == nil {
-		return accessio.ErrInvalidFileFormat(o.format)
+	for _, f := range o.List {
+		if f == string(o.Format) {
+			return nil
+		}
 	}
-	return nil
+	return accessio.ErrInvalidFileFormat(o.format)
 }
 
 func (o *Option) Usage() string {

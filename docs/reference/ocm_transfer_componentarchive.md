@@ -10,7 +10,7 @@ ocm transfer componentarchive [<options>]  <source> <target>
 
 ```
   -h, --help          help for componentarchive
-  -t, --type string   archive format (default "directory")
+  -t, --type string   archive format (directory, tar, tgz) (default "directory")
 ```
 
 ### Description

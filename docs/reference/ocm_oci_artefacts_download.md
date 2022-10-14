@@ -12,7 +12,7 @@ ocm oci artefacts download [<options>]  {<artefact>}
   -h, --help             help for download
   -O, --outfile string   output file or directory
       --repo string      repository name or spec
-  -t, --type string      archive format (default "directory")
+  -t, --type string      archive format (directory, tar, tgz) (default "directory")
 ```
 
 ### Description

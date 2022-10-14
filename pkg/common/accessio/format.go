@@ -52,6 +52,10 @@ func ErrInvalidFileFormat(fmt string) error {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+func GetFormats() []string {
+	return []string{string(FormatDirectory), string(FormatTar), string(FormatTGZ)}
+}
+
 func FileFormatForType(t string) FileFormat {
 	i := strings.Index(t, "+")
 	if i < 0 {

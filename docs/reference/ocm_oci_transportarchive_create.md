@@ -11,7 +11,7 @@ ocm oci transportarchive create [<options>] <path>
 ```
   -f, --force         remove existing content
   -h, --help          help for create
-  -t, --type string   archive format (default "directory")
+  -t, --type string   archive format (directory, tar, tgz) (default "directory")
 ```
 
 ### Description
