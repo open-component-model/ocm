@@ -48,8 +48,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 		inputInfo, filePath, err := inputs.FileInfo(ctx, s.Path, inputFilePath)
 		if err != nil {
 			allErrs = append(allErrs, field.Invalid(path, filePath, err.Error()))
-		}
-		if !inputInfo.Mode().IsDir() && !inputInfo.Mode().IsRegular() {
+		} else if !inputInfo.Mode().IsDir() && !inputInfo.Mode().IsRegular() {
 			allErrs = append(allErrs, field.Invalid(path, filePath, "no regular file or directory"))
 		}
 	}
