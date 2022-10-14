@@ -132,23 +132,160 @@ func (r *ResourcesFile) Origin() string {
 	return r.path
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+type AdderOptions interface {
+	AddFlags(fs *pflag.FlagSet)
+	Complete() error
+	GetResources() ([]Resources, error)
+	Description() string
+}
+
+type ResourceAdder struct {
+	typename string
+	resource string
+	input    string
+	access   string
+}
+
+var _ AdderOptions = (*ResourceAdder)(nil)
+var _ Resources = (*ResourceAdder)(nil)
+
+func NewResourceAdder(name string) AdderOptions {
+	return &ResourceAdder{typename: name}
+}
+
+func (a *ResourceAdder) Description() string {
+	return fmt.Sprintf(`
+It is possible to describe a single %s via command line options.
+This requires the option <code>--resource</code> and one of the options
+<code>--access</code> or <code>--input</code>. All three options require
+a yaml or json value describing an attribute set. This is similar
+to the one supported for the specification via yaml file.
+`, a.typename)
+}
+
+func (a *ResourceAdder) AddFlags(fs *pflag.FlagSet) {
+	fs.StringVarP(&a.resource, a.typename, "", "", fmt.Sprintf("%s meta data (yaml)", a.typename))
+	fs.StringVarP(&a.input, "input", "", "", "input specification")
+	fs.StringVarP(&a.access, "access", "", "", "access specification")
+}
+
+func (a *ResourceAdder) check(n string, v string) error {
+	if v == "" {
+		return nil
+	}
+	var data map[string]interface{}
+	if err := yaml.Unmarshal([]byte(v), &data); err != nil {
+		return errors.Wrapf(err, "%s %s is no valid yaml", a.typename, n)
+	}
+	return nil
+}
+
+func (a *ResourceAdder) Complete() error {
+	if a.resource == "" && a.input == "" && a.access == "" {
+		return nil
+	}
+	if a.resource == "" {
+		return fmt.Errorf("%s meta data is missing (--%s)", a.typename, a.typename)
+	}
+	if a.access != "" && a.input != "" {
+		return fmt.Errorf("either --input or --access is possible")
+	}
+	if a.access == "" && a.input == "" {
+		return fmt.Errorf("either --input or --access is required")
+	}
+
+	if err := a.check("meta data", a.resource); err != nil {
+		return err
+	}
+	if err := a.check("input", a.input); err != nil {
+		return err
+	}
+	if err := a.check("access", a.access); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a *ResourceAdder) GetResources() ([]Resources, error) {
+	if a.resource == "" {
+		return nil, nil
+	}
+	return []Resources{a}, nil
+}
+
+func (a *ResourceAdder) Origin() string {
+	return a.typename + " (by options)"
+}
+
+func (a *ResourceAdder) Get(printer common.Printer, topts template.Options) (string, error) {
+	printer.Printf("processing %s...\n", a.Origin())
+
+	var data map[string]interface{}
+
+	yaml.Unmarshal([]byte(a.resource), &data)
+
+	if a.input != "" {
+		var input map[string]interface{}
+		yaml.Unmarshal([]byte(a.input), &input)
+		data["input"] = input
+	}
+	if a.access != "" {
+		var access map[string]interface{}
+		yaml.Unmarshal([]byte(a.access), &access)
+		data["access"] = access
+	}
+	r, err := json.Marshal(data)
+	if err != nil {
+		return "", errors.Wrapf(err, "cannot marshal option based %s specification", a.typename)
+	}
+
+	parsed, err := topts.Execute(string(r))
+	if err != nil {
+		return "", errors.Wrapf(err, "error during variable substitution for %q", a.Origin())
+	}
+
+	return parsed, nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type ResourceAdderCommand struct {
 	utils.BaseCommand
 
-	Archive    string
-	Resources  []Resources
-	Envs       []string
 	Templating template.Options
+	Adder      AdderOptions
+
+	Archive   string
+	Resources []Resources
+	Envs      []string
 }
 
 func (o *ResourceAdderCommand) AddFlags(fs *pflag.FlagSet) {
 	fs.StringArrayVarP(&o.Envs, "settings", "s", nil, "settings file with variable settings (yaml)")
 	o.Templating.AddFlags(fs)
+	if o.Adder != nil {
+		o.Adder.AddFlags(fs)
+	}
 }
 
 func (o *ResourceAdderCommand) Complete(args []string) error {
 	o.Archive = args[0]
 	o.Templating.Complete(o.Context.FileSystem())
+
+	if o.Adder != nil {
+		err := o.Adder.Complete()
+		if err != nil {
+			return err
+		}
+
+		rsc, err := o.Adder.GetResources()
+		if err != nil {
+			return err
+		}
+		o.Resources = append(o.Resources, rsc...)
+	}
 
 	err := o.Templating.ParseSettings(o.Context.FileSystem(), o.Envs...)
 	if err != nil {
@@ -160,6 +297,9 @@ func (o *ResourceAdderCommand) Complete(args []string) error {
 		o.Resources = append(o.Resources, NewResourcesFile(p, o.FileSystem()))
 	}
 
+	if len(o.Resources) == 0 {
+		return fmt.Errorf("no specifications given")
+	}
 	return nil
 }
 
@@ -236,18 +376,18 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 				if h.RequireInputs() {
 					input, err = DecodeInput(d, o.Context)
 					if err != nil {
-						return errors.Newf("invalid spec %d[%d] in %q: %s", i+1, j+1, origin, err)
+						return errors.Newf("invalid spec %d[%d] in %q: %s", i, j+1, origin, err)
 					}
 					if err = Validate(input, ictx, origin); err != nil {
-						return errors.Wrapf(err, "invalid spec %d[%d] in %q", i+1, j+1, origin)
+						return errors.Wrapf(err, "invalid spec %d[%d] in %q", i, j+1, origin)
 					}
 				}
 
 				if err = r.Validate(o.Context, input); err != nil {
-					return errors.Wrapf(err, "invalid spec %d[%d] in %q", i+1, j+1, origin)
+					return errors.Wrapf(err, "invalid spec %d[%d] in %q", i, j+1, origin)
 				}
 
-				resources = append(resources, NewResource(r, input, origin, i, j))
+				resources = append(resources, NewResource(r, input, origin, i, j+1))
 			}
 		}
 	}

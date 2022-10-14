@@ -37,18 +37,26 @@ type Command struct {
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{common.ResourceAdderCommand{BaseCommand: utils.NewBaseCommand(ctx)}}, utils.Names(Names, names...)...)
+	return utils.SetupCommand(
+		&Command{
+			common.ResourceAdderCommand{
+				BaseCommand: utils.NewBaseCommand(ctx),
+				Adder:       common.NewResourceAdder("source"),
+			},
+		},
+		utils.Names(Names, names...)...,
+	)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
 		Use:   "[<options>] <target> {<resourcefile> | <var>=<value>}",
-		Args:  cobra.MinimumNArgs(2),
+		Args:  cobra.MinimumNArgs(1),
 		Short: "add source information to a component version",
 		Long: `
 Add source information specified in a resource file to a component version.
 So far only component archives are supported as target.
-` + (&template.Options{}).Usage() + `
+` + (&template.Options{}).Usage() + o.Adder.Description() + `
 This command accepts (re)source specification files describing the sources
 to add to a component version.
 ` + inputs.Usage(inputs.DefaultInputTypeScheme),

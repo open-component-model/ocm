@@ -176,4 +176,78 @@ var _ = Describe("Add resources", func() {
 		Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*ociartefact.AccessSpec)(nil))))
 		Expect(acc.(*ociartefact.AccessSpec).ImageReference).To(Equal("ghcr.io/mandelsoft/pause:v0.1.0"))
 	})
+
+	Context("resource by options", func() {
+		It("adds simple text blob", func() {
+			meta := `
+name: testdata
+type: PlainText
+`
+			input := `
+type: file
+path: testdata/testcontent
+mediaType: text/plain
+`
+			Expect(env.Execute("add", "resources", ARCH, "--resource", meta, "--input", input)).To(Succeed())
+			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+			Expect(err).To(Succeed())
+			cd, err := compdesc.Decode(data)
+			Expect(err).To(Succeed())
+			Expect(len(cd.Resources)).To(Equal(1))
+
+			CheckTextResource(env, cd, "testdata")
+		})
+
+		It("adds simple text blob by cli variable", func() {
+			meta := `
+name: testdata
+type: PlainText
+`
+			input := `
+type: file
+path: ${CONTENT}
+mediaType: text/plain
+`
+			Expect(env.Execute("add", "resources", ARCH, "CONTENT=testdata/testcontent", "--resource", meta, "--input", input)).To(Succeed())
+			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+			Expect(err).To(Succeed())
+			cd, err := compdesc.Decode(data)
+			Expect(err).To(Succeed())
+			Expect(len(cd.Resources)).To(Equal(1))
+
+			CheckTextResource(env, cd, "testdata")
+		})
+
+		It("adds external image", func() {
+			meta := `
+type: ociImage
+name: image
+version: v0.1.0
+relation: external
+`
+			access := `
+type: ociArtefact
+imageReference: ghcr.io/mandelsoft/pause:v0.1.0
+`
+			Expect(env.Execute("add", "resources", ARCH, "--resource", meta, "--access", access)).To(Succeed())
+			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+			Expect(err).To(Succeed())
+			cd, err := compdesc.Decode(data)
+			Expect(err).To(Succeed())
+			Expect(len(cd.Resources)).To(Equal(1))
+
+			r, err := cd.GetResourceByIdentity(metav1.NewIdentity("image"))
+			Expect(err).To(Succeed())
+			Expect(r.Type).To(Equal("ociImage"))
+			Expect(r.Version).To(Equal("v0.1.0"))
+			Expect(r.Relation).To(Equal(metav1.ResourceRelation("external")))
+
+			Expect(r.Access.GetType()).To(Equal(ociartefact.Type))
+
+			acc, err := env.OCMContext().AccessSpecForSpec(r.Access)
+			Expect(err).To(Succeed())
+			Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*ociartefact.AccessSpec)(nil))))
+			Expect(acc.(*ociartefact.AccessSpec).ImageReference).To(Equal("ghcr.io/mandelsoft/pause:v0.1.0"))
+		})
+	})
 })

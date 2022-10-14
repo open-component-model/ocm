@@ -143,4 +143,26 @@ var _ = Describe("Add sources", func() {
 
 		CheckTextSource(env, cd, "testdata")
 	})
+
+	Context("resource by options", func() {
+		It("adds simple text blob", func() {
+			meta := `
+name: testdata
+type: git
+`
+			input := `
+type: file
+path: testdata/testcontent
+mediaType: text/plain
+`
+			Expect(env.Execute("add", "sources", ARCH, "--source", meta, "--input", input)).To(Succeed())
+			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+			Expect(err).To(Succeed())
+			cd, err := compdesc.Decode(data)
+			Expect(err).To(Succeed())
+			Expect(len(cd.Sources)).To(Equal(1))
+
+			CheckTextSource(env, cd, "testdata")
+		})
+	})
 })
