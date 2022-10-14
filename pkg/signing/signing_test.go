@@ -8,6 +8,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
@@ -18,6 +19,11 @@ var registry = signing.DefaultRegistry()
 const NAME = "testsignature"
 
 var _ = Describe("normalization", func() {
+	var defaultContext credentials.Context
+
+	BeforeEach(func() {
+		defaultContext = credentials.New()
+	})
 
 	It("Normalizes struct without excludes", func() {
 
@@ -30,7 +36,7 @@ var _ = Describe("normalization", func() {
 		registry.RegisterPublicKey(NAME, pub)
 		registry.RegisterPrivateKey(NAME, priv)
 
-		sig, err := registry.GetSigner(rsa.Algorithm).Sign(hash, hasher.Crypto(), "mandelsoft", registry.GetPrivateKey(NAME))
+		sig, err := registry.GetSigner(rsa.Algorithm).Sign(defaultContext, hash, hasher.Crypto(), "mandelsoft", registry.GetPrivateKey(NAME))
 
 		Expect(err).To(Succeed())
 		Expect(sig.MediaType).To(Equal(rsa.MediaType))

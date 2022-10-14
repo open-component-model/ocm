@@ -12,7 +12,7 @@ ocm sign componentversions [<options>] {<component-reference>}
   -S, --algorithm string          signature handler (default "RSASSA-PKCS1-V1_5")
       --ca-cert stringArray       Additional root certificates
   -c, --constraints constraints   version constraint
-  -H, --hash string               hash algorithm (default "sha256")
+  -H, --hash string               hash algorithm (default "SHA-256")
   -h, --help                      help for componentversions
   -I, --issuer string             issuer name
       --latest                    restrict component versions to latest
@@ -98,7 +98,7 @@ given signature name will be verified, instead of recreated.
 The following signing types are supported with option <code>--algorithm</code>:
 
   - <code>RSASSA-PKCS1-V1_5</code> (default): 
-  - <code>rsa-signingsservice</code>: 
+  - <code>rsa-signingservice</code>: 
 
 
 The following normalization modes are supported with option <code>--normalization</code>:
@@ -110,8 +110,8 @@ The following normalization modes are supported with option <code>--normalizatio
 The following hash modes are supported with option <code>--hash</code>:
 
   - <code>NO-DIGEST</code>: 
-  - <code>sha256</code> (default): 
-  - <code>sha512</code>: 
+  - <code>SHA-256</code> (default): 
+  - <code>SHA-512</code>: 
 
 If a component lookup for building a reference closure is required
 the <code>--lookup</code>  option can be used to specify a fallback

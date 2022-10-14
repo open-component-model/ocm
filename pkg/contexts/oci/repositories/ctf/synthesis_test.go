@@ -46,8 +46,7 @@ func (d *DummyMethod) AccessSpec() cpi.AccessSpec {
 }
 
 func CheckBlob(blob accessio.BlobAccess) oci.NamespaceAccess {
-	set, err := artifactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
-	Expect(err).To(Succeed())
+	set := Must(artifactset.OpenFromBlob(accessobj.ACC_READONLY, blob))
 	defer func() {
 		if set != nil {
 			set.Close()
@@ -73,19 +72,16 @@ func CheckBlob(blob accessio.BlobAccess) oci.NamespaceAccess {
 		},
 	}))
 
-	art, err := set.GetArtifact("sha256:" + DIGEST_MANIFEST)
-	Expect(err).To(Succeed())
+	art := Must(set.GetArtifact("sha256:" + DIGEST_MANIFEST))
 	defer Close(art)
-	m, err := art.Manifest()
-	Expect(err).To(Succeed())
+	m := Must(art.Manifest())
 	Expect(m.Config).To(Equal(artdesc.Descriptor{
 		MediaType: mime.MIME_OCTET,
 		Digest:    "sha256:" + DIGEST_CONFIG,
 		Size:      2,
 	}))
 
-	layer, err := art.GetBlob(digest.Digest("sha256:" + DIGEST_LAYER))
-	Expect(err).To(Succeed())
+	layer := Must(art.GetBlob(digest.Digest("sha256:" + DIGEST_LAYER)))
 	Expect(layer.Get()).To(Equal([]byte("testdata")))
 
 	result := set
@@ -98,11 +94,9 @@ var _ = Describe("syntheses", func() {
 	var spec *ctf.RepositorySpec
 
 	BeforeEach(func() {
-		t, err := osfs.NewTempFileSystem()
-		Expect(err).To(Succeed())
+		t := Must(osfs.NewTempFileSystem())
 		tempfs = t
-		spec, err = ctf.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessio.PathFileSystem(tempfs), accessobj.FormatDirectory)
-		Expect(err).To(Succeed())
+		spec = Must(ctf.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessio.PathFileSystem(tempfs), accessobj.FormatDirectory))
 	})
 
 	AfterEach(func() {
@@ -110,22 +104,17 @@ var _ = Describe("syntheses", func() {
 	})
 
 	It("synthesize", func() {
-		r, err := ctf.FormatDirectory.Create(oci.DefaultContext(), "test", &spec.StandardOptions, 0700)
-		Expect(err).To(Succeed())
-		n, err := r.LookupNamespace("mandelsoft/test")
-		Expect(err).To(Succeed())
+		r := Must(ctf.FormatDirectory.Create(oci.DefaultContext(), "test", &spec.StandardOptions, 0700))
+		n := Must(r.LookupNamespace("mandelsoft/test"))
 		DefaultManifestFill(n)
 		Expect(n.Close()).To(Succeed())
 		Expect(r.Close()).To(Succeed())
 
-		r, err = ctf.Open(oci.DefaultContext(), accessobj.ACC_READONLY, "test", 0, &spec.StandardOptions)
-		Expect(err).To(Succeed())
+		r = Must(ctf.Open(oci.DefaultContext(), accessobj.ACC_READONLY, "test", 0, &spec.StandardOptions))
 		defer Close(r, "ctf")
-		n, err = r.LookupNamespace("mandelsoft/test")
-		Expect(err).To(Succeed())
+		n = Must(r.LookupNamespace("mandelsoft/test"))
 		defer Close(n, "namespace")
-		blob, err := artifactset.SynthesizeArtifactBlob(n, TAG)
-		Expect(err).To(Succeed())
+		blob := Must(artifactset.SynthesizeArtifactBlob(n, TAG))
 		defer Close(blob, "blob")
 		path := blob.Path()
 		Expect(path).To(MatchRegexp(filepath.Join(blob.FileSystem().FSTempDir(), "artifactblob.*\\.tgz")))
@@ -138,21 +127,19 @@ var _ = Describe("syntheses", func() {
 		Expect(vfs.Exists(blob.FileSystem(), path)).To(BeFalse())
 
 		// use syntesized blob to extract new blob, useless but should work
-		newblob, err := artifactset.SynthesizeArtifactBlob(set, TAG)
-		Expect(err).To(Succeed())
+		newblob := Must(artifactset.SynthesizeArtifactBlob(set, TAG))
 		defer Close(newblob, "newblob")
 
 		Expect(CheckBlob(newblob).Close()).To(Succeed())
 
 		meth := &DummyMethod{newblob}
-		digest, err := artifact.New(digest.SHA256).DetermineDigest("", meth, nil)
-		Expect(err).To(Succeed())
+		digest := Must(artifact.New(sha256.Algorithm).DetermineDigest("", meth, nil))
+		Expect(digest).NotTo(BeNil())
 		Expect(digest.Value).To(Equal(DIGEST_MANIFEST))
 		Expect(digest.NormalisationAlgorithm).To(Equal(artifact.OciArtifactDigestV1))
 		Expect(digest.HashAlgorithm).To(Equal(sha256.Algorithm))
 
-		digests, err := ocm.DefaultContext().BlobDigesters().DetermineDigests("", nil, signing.DefaultRegistry(), meth)
-		Expect(err).To(Succeed())
+		digests := Must(ocm.DefaultContext().BlobDigesters().DetermineDigests("", nil, signing.DefaultRegistry(), meth))
 		Expect(digests).To(Equal([]cpi.DigestDescriptor{
 			{
 				Value:                  DIGEST_MANIFEST,
@@ -160,6 +147,5 @@ var _ = Describe("syntheses", func() {
 				NormalisationAlgorithm: artifact.OciArtifactDigestV1,
 			},
 		}))
-
 	})
 })

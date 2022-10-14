@@ -21,6 +21,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/pkg/signing/hasher"
+	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
+	"github.com/open-component-model/ocm/pkg/signing/hasher/sha512"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -29,18 +32,22 @@ const OciArtifactDigestV1 string = "ociArtifactDigest/v1"
 const LegacyOciArtifactDigestV1 string = "ociArtefactDigest/v1"
 
 func init() {
-	cpi.MustRegisterDigester(New(digest.SHA256, OciArtifactDigestV1), "")
-	cpi.MustRegisterDigester(New(digest.SHA512, OciArtifactDigestV1), "")
+	cpi.MustRegisterDigester(New(sha256.Algorithm), "")
+	cpi.MustRegisterDigester(New(sha512.Algorithm), "")
 
-	cpi.MustRegisterDigester(New(digest.SHA256, LegacyOciArtifactDigestV1), "")
-	cpi.MustRegisterDigester(New(digest.SHA512, LegacyOciArtifactDigestV1), "")
+	// legacy digester types
+	cpi.MustRegisterDigester(New(digest.SHA256.String(), OciArtifactDigestV1), "")
+	cpi.MustRegisterDigester(New(digest.SHA512.String(), OciArtifactDigestV1), "")
+
+	cpi.MustRegisterDigester(New(digest.SHA256.String(), LegacyOciArtifactDigestV1), "")
+	cpi.MustRegisterDigester(New(digest.SHA512.String(), LegacyOciArtifactDigestV1), "")
 }
 
-func New(algo digest.Algorithm, ts ...string) cpi.BlobDigester {
+func New(algo string, ts ...string) cpi.BlobDigester {
 	norm := utils.OptionalDefaulted(OciArtifactDigestV1, ts...)
 	return &Digester{
 		cpi.DigesterType{
-			HashAlgorithm:          algo.String(),
+			HashAlgorithm:          algo,
 			NormalizationAlgorithm: norm,
 		},
 	}
@@ -122,7 +129,7 @@ func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferre
 					if main == "" {
 						return nil, fmt.Errorf("no main artifact found")
 					}
-					if digest.Digest(main).Algorithm() != digest.Algorithm(d.GetType().HashAlgorithm) {
+					if d.GetType().HashAlgorithm != hasher.NormalizeHashAlgorithm(string(digest.Digest(main).Algorithm())) {
 						return nil, nil
 					}
 					desc = cpi.NewDigestDescriptor(digest.Digest(main).Hex(), d.GetType())
@@ -137,7 +144,7 @@ func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferre
 	if ociartifact.Is(acc.AccessSpec()) {
 		dig := acc.(accessio.DigestSource).Digest()
 		if dig != "" {
-			if dig.Algorithm() != digest.Algorithm(d.GetType().HashAlgorithm) {
+			if d.GetType().HashAlgorithm != hasher.NormalizeHashAlgorithm(dig.Algorithm().String()) {
 				return nil, nil
 			}
 			return cpi.NewDigestDescriptor(dig.Hex(), d.GetType()), nil

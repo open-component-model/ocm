@@ -8,6 +8,7 @@ import (
 	"crypto"
 	"fmt"
 
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing"
@@ -17,13 +18,11 @@ import (
 // Algorithm defines the type for the RSA PKCS #1 v1.5 signature algorithm.
 const (
 	Algorithm = rsa.Algorithm
-	Name      = "rsa-signingsservice"
+	Name      = "rsa-signingservice"
 )
 
 type Key struct {
-	URL      string `json:"url"`
-	Username string `json:"username"`
-	Password string `json:"password"`
+	URL string `json:"url"`
 }
 
 // SignaturePEMBlockAlgorithmHeader defines the header in a signature pem block where the signature algorithm is defined.
@@ -43,16 +42,16 @@ func (h Handler) Algorithm() string {
 	return Algorithm
 }
 
-func (h Handler) Sign(digest string, hash crypto.Hash, issuer string, key interface{}) (signature *signing.Signature, err error) {
+func (h Handler) Sign(cctx credentials.Context, digest string, hash crypto.Hash, issuer string, key interface{}) (signature *signing.Signature, err error) {
 	privateKey, err := PrivateKey(key)
 	if err != nil {
-		return nil, errors.Wrapf(err, "invalid rsa private key")
+		return nil, errors.Wrapf(err, "invalid signing server access configuration")
 	}
-	server, err := NewSigningClient(privateKey.URL, privateKey.Username, privateKey.Password)
+	server, err := NewSigningClient(privateKey.URL)
 	if err != nil {
 		return nil, err
 	}
-	return server.Sign(h.Algorithm(), digest, issuer, key)
+	return server.Sign(cctx, h.Algorithm(), hash, digest, issuer, key)
 }
 
 func PrivateKey(k interface{}) (*Key, error) {

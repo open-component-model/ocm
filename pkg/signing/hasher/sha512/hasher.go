@@ -12,7 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing"
 )
 
-const Algorithm = "sha512"
+var Algorithm = crypto.SHA512.String()
 
 func init() {
 	signing.DefaultHandlerRegistry().RegisterHasher(Handler{})

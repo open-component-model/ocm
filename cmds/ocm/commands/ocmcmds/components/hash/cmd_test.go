@@ -9,6 +9,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
@@ -62,8 +63,8 @@ test.de/x v1      7aff33d597be2bd358672bd79fb904666d955c3890d75d32cde356eb86355c
 			`
 COMPONENT      : test.de/x
 VERSION        : v1
-HASH           : c3f4916f8913fe99ad0abb18106c5f4b89950bae19b57aeb342bc054eebad056
-NORMALIZED FORM: [{"component":[{"componentReferences":[]},{"name":"test.de/x"},{"provider":"mandelsoft"},{"resources":[[{"digest":[{"hashAlgorithm":"sha256"},{"normalisationAlgorithm":"genericBlobDigest/v1"},{"value":"810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"}]},{"name":"test"},{"relation":"local"},{"type":"plainText"},{"version":"v1"}]]},{"sources":[]},{"version":"v1"}]},{"meta":[{"schemaVersion":"v2"}]}]
+HASH           : 3652e5a6bcf56a6b0d863c674f5365f6fcca6f772d8ceb69942fc91289f4cb93
+NORMALIZED FORM: [{"component":[{"componentReferences":[]},{"name":"test.de/x"},{"provider":"mandelsoft"},{"resources":[[{"digest":[{"hashAlgorithm":"SHA-256"},{"normalisationAlgorithm":"genericBlobDigest/v1"},{"value":"810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"}]},{"name":"test"},{"relation":"local"},{"type":"plainText"},{"version":"v1"}]]},{"sources":[]},{"version":"v1"}]},{"meta":[{"schemaVersion":"v2"}]}]
 ---`))
 	})
 

@@ -172,7 +172,7 @@ func _apply(printer common.Printer, state WalkingState, nv common.NameVersion, c
 
 	found := cd.GetSignatureIndex(opts.SignatureName())
 	if opts.DoSign() && (!opts.DoVerify() || found == -1) {
-		sig, err := opts.Signer.Sign(vi.Digest.Value, opts.Hasher.Crypto(), opts.Issuer, opts.PrivateKey())
+		sig, err := opts.Signer.Sign(cv.GetContext().CredentialsContext(), vi.Digest.Value, opts.Hasher.Crypto(), opts.Issuer, opts.PrivateKey())
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed signing component descriptor")
 		}
