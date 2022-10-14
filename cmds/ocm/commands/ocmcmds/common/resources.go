@@ -97,11 +97,46 @@ func NewResource(spec ResourceSpec, input *ResourceInput, path string, indices .
 	}
 }
 
+type Resources interface {
+	Origin() string
+	Get(printer common.Printer, topts template.Options) (string, error)
+}
+
+type ResourcesFile struct {
+	filesystem vfs.FileSystem
+	path       string
+}
+
+func NewResourcesFile(path string, fss ...vfs.FileSystem) Resources {
+	return &ResourcesFile{
+		filesystem: accessio.FileSystem(fss...),
+		path:       path,
+	}
+}
+
+func (r *ResourcesFile) Get(printer common.Printer, topts template.Options) (string, error) {
+	printer.Printf("processing %s...\n", r.path)
+	data, err := vfs.ReadFile(r.filesystem, r.path)
+	if err != nil {
+		return "", errors.Wrapf(err, "cannot read resource file %q", r.path)
+	}
+
+	parsed, err := topts.Execute(string(data))
+	if err != nil {
+		return "", errors.Wrapf(err, "error during variable substitution for %q", r.path)
+	}
+	return parsed, nil
+}
+
+func (r *ResourcesFile) Origin() string {
+	return r.path
+}
+
 type ResourceAdderCommand struct {
 	utils.BaseCommand
 
 	Archive    string
-	Paths      []string
+	Resources  []Resources
 	Envs       []string
 	Templating template.Options
 }
@@ -120,7 +155,10 @@ func (o *ResourceAdderCommand) Complete(args []string) error {
 		return err
 	}
 
-	o.Paths = o.Templating.FilterSettings(args[1:]...)
+	paths := o.Templating.FilterSettings(args[1:]...)
+	for _, p := range paths {
+		o.Resources = append(o.Resources, NewResourcesFile(p, o.FileSystem()))
+	}
 
 	return nil
 }
@@ -131,16 +169,11 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 	ictx := inputs.NewContext(o.Context, printer)
 
 	resources := []*resource{}
-	for _, filePath := range o.Paths {
-		printer.Printf("processing %s...\n", filePath)
-		data, err := vfs.ReadFile(fs, filePath)
+	for _, source := range o.Resources {
+		origin := source.Origin()
+		parsed, err := source.Get(printer, o.Templating)
 		if err != nil {
-			return errors.Wrapf(err, "cannot read resource file %q", filePath)
-		}
-
-		parsed, err := o.Templating.Execute(string(data))
-		if err != nil {
-			return errors.Wrapf(err, "error during variable substitution for %q", filePath)
+			return err
 		}
 		// sigs parser has no multi document stream parsing
 		// but yaml.v3 does not recognize json tagged fields.
@@ -161,29 +194,29 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 			}
 			printer.Printf("  processing document %d...\n", i)
 			if (tmp["input"] != nil || tmp["access"] != nil) && !h.RequireInputs() {
-				return errors.Newf("invalid spec %d in %q: no input or access possible for %s", i, filePath, listkey)
+				return errors.Newf("invalid spec %d in %q: no input or access possible for %s", i, origin, listkey)
 			}
 
 			var list []json.RawMessage
 			if reslist, ok := tmp[listkey]; ok {
 				if len(tmp) != 1 {
-					return errors.Newf("invalid spec %d in %q: either a list or a single spec possible", i, filePath)
+					return errors.Newf("invalid spec %d in %q: either a list or a single spec possible", i, origin)
 				}
 				l, ok := reslist.([]interface{})
 				if !ok {
-					return errors.Newf("invalid spec %d in %q: invalid resource list", i, filePath)
+					return errors.Newf("invalid spec %d in %q: invalid resource list", i, origin)
 				}
 				for j, e := range l {
 					// cannot use json here, because yaml generates a map[interface{}]interface{}
-					data, err = yaml.Marshal(e)
+					data, err := yaml.Marshal(e)
 					if err != nil {
-						return errors.Newf("invalid spec %d[%d] in %q: %s", i, j+1, filePath, err.Error())
+						return errors.Newf("invalid spec %d[%d] in %q: %s", i, j+1, origin, err.Error())
 					}
 					list = append(list, data)
 				}
 			} else {
 				if len(tmp) == 0 {
-					return errors.Newf("invalid spec %d in %q: empty", i, filePath)
+					return errors.Newf("invalid spec %d in %q: empty", i, origin)
 				}
 				data, err := yaml.Marshal(tmp)
 				if err != nil {
@@ -197,24 +230,24 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 				var input *ResourceInput
 				r, err := DecodeResource(d, h)
 				if err != nil {
-					return errors.Newf("invalid spec %d[%d] in %q: %s", i, j+1, filePath, err)
+					return errors.Newf("invalid spec %d[%d] in %q: %s", i, j+1, origin, err)
 				}
 
 				if h.RequireInputs() {
 					input, err = DecodeInput(d, o.Context)
 					if err != nil {
-						return errors.Newf("invalid spec %d[%d] in %q: %s", i+1, j+1, filePath, err)
+						return errors.Newf("invalid spec %d[%d] in %q: %s", i+1, j+1, origin, err)
 					}
-					if err = Validate(input, ictx, filePath); err != nil {
-						return errors.Wrapf(err, "invalid spec %d[%d] in %q", i+1, j+1, filePath)
+					if err = Validate(input, ictx, origin); err != nil {
+						return errors.Wrapf(err, "invalid spec %d[%d] in %q", i+1, j+1, origin)
 					}
 				}
 
 				if err = r.Validate(o.Context, input); err != nil {
-					return errors.Wrapf(err, "invalid spec %d[%d] in %q", i+1, j+1, filePath)
+					return errors.Wrapf(err, "invalid spec %d[%d] in %q", i+1, j+1, origin)
 				}
 
-				resources = append(resources, NewResource(r, input, filePath, i, j))
+				resources = append(resources, NewResource(r, input, origin, i, j))
 			}
 		}
 	}
