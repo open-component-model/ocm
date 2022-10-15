@@ -13,9 +13,12 @@ ocm add resources [<options>] <target> {<resourcefile> | <var>=<value>}
       --addenv                 access environment for templating
   -h, --help                   help for resources
       --input string           input specification
+      --name string            resource name
       --resource string        resource meta data (yaml)
   -s, --settings stringArray   settings file with variable settings (yaml)
       --templater string       templater to use (subst, spiff, go) (default "subst")
+      --type string            resource type
+      --version string         resource version
 ```
 
 ### Description
@@ -23,6 +26,29 @@ ocm add resources [<options>] <target> {<resourcefile> | <var>=<value>}
 
 Add resources specified in a resource file to a component version.
 So far only component archives are supported as target.
+
+This command accepts  resource specification files describing the resources
+to add to a component version. Elements must follow the resource meta data
+description scheme of the component descriptor.
+
+It is possible to describe a single resource via command line options, also.
+The meta data of this element is described by the argument of option <code>--resource</code>,
+which must be a YAML or JSON string.
+Alternatively, the <em>name</em> and <em>version</em> can be specified with the
+options <code>--name</code> and <code>--version</code>. Explicitly specified options
+override values specified by the <code>--resource</code> option.
+(Note: Go templates are not supported for YAML-based option values. Besides
+this restriction, the finally composed element description is still processd
+by the selected templater.) 
+
+The resource type can be specified with the option <code>--type</code>. Therefore, the
+minimal required meta data for elements can be completely specified by dedicated
+options and don't need the YAML option.
+
+To describe the content of this element one of the options <code>--access</code> or
+<code>--input</code> must be given. They take a YAML or JSON value describing an
+attribute set, also. The structure of those values is similar to the <code>access</code>
+or <code>input</code> fields of the description file format.
 
 Templating:
 All yaml/json defined resources can be templated.
@@ -35,7 +61,7 @@ Note: Variable names are case-sensitive.
 
 Example:
 <pre>
-<command> <options> -- MY_VAL=test <args>
+&lt;command> &lt;options> -- MY_VAL=test &lt;args>
 </pre>
 
 There are several templaters that can be selected by the <code>--templater</code> option:
@@ -63,15 +89,6 @@ There are several templaters that can be selected by the <code>--templater</code
   </pre>
   
 
-
-It is possible to describe a single resource via command line options.
-This requires the option <code>--resource</code> and one of the options
-<code>--access</code> or <code>--input</code>. All three options require
-a yaml or json value describing an attribute set. This is similar
-to the one supported for the specification via yaml file.
-
-This command accepts  resource specification files describing the resources
-to add to a component version.
 
 The resource specification supports the following blob input types, specified
 with the field <code>type</code> in the <code>input</code> field:

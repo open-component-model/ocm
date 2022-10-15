@@ -87,7 +87,7 @@ Note: Variable names are case-sensitive.
 
 Example:
 <pre>
-<command> <options> -- MY_VAL=test <args>
+&lt;command> &lt;options> -- MY_VAL=test &lt;args>
 </pre>
 ` + Usage(DefaultRegistry())
 }

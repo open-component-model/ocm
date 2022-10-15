@@ -41,7 +41,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		&Command{
 			common.ResourceAdderCommand{
 				BaseCommand: utils.NewBaseCommand(ctx),
-				Adder:       common.NewResourceAdder("source"),
+				Adder:       common.NewContentResourceSpecificationProvider("source"),
 			},
 		},
 		utils.Names(Names, names...)...,
@@ -56,10 +56,11 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Long: `
 Add source information specified in a resource file to a component version.
 So far only component archives are supported as target.
-` + (&template.Options{}).Usage() + o.Adder.Description() + `
-This command accepts (re)source specification files describing the sources
-to add to a component version.
-` + inputs.Usage(inputs.DefaultInputTypeScheme),
+
+This command accepts source specification files describing the sources
+to add to a component version. Elements must follow the source meta data
+description scheme of the component descriptor.
+` + o.Adder.Description() + (&template.Options{}).Usage() + inputs.Usage(inputs.DefaultInputTypeScheme),
 	}
 }
 
