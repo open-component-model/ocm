@@ -239,5 +239,21 @@ imageReference: ghcr.io/mandelsoft/pause:v0.1.0
 			Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*ociartefact.AccessSpec)(nil))))
 			Expect(acc.(*ociartefact.AccessSpec).ImageReference).To(Equal("ghcr.io/mandelsoft/pause:v0.1.0"))
 		})
+
+		It("adds simple text blob with metadata via explicit options", func() {
+			input := `
+type: file
+path: testdata/testcontent
+mediaType: text/plain
+`
+			Expect(env.Execute("add", "resources", ARCH, "--name", "testdata", "--type", "PlainText", "--input", input)).To(Succeed())
+			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+			Expect(err).To(Succeed())
+			cd, err := compdesc.Decode(data)
+			Expect(err).To(Succeed())
+			Expect(len(cd.Resources)).To(Equal(1))
+
+			CheckTextResource(env, cd, "testdata")
+		})
 	})
 })

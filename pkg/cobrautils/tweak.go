@@ -71,6 +71,8 @@ func cleanMarkdown(s string) string {
 	s = strings.ReplaceAll(s, "&lt;", "<")
 	s = strings.ReplaceAll(s, "&gt;", ">")
 	s = strings.ReplaceAll(s, "**", "")
+	s = strings.ReplaceAll(s, "<em>", "")
+	s = strings.ReplaceAll(s, "</em>", "")
 	s = string(center.ReplaceAll([]byte(s), nil))
 	return s
 }

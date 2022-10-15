@@ -87,81 +87,105 @@ func NewResource(spec ResourceSpec, input *ResourceInput, path string, indices .
 	}
 }
 
-type Resources interface {
+////////////////////////////////////////////////////////////////////////////////
+
+type ResourceSpecifications interface {
 	Origin() string
-	Get(printer common.Printer, topts template.Options) (string, error)
+	Get() (string, error)
 }
 
-type ResourcesFile struct {
+type ResourceSpecificationsFile struct {
 	filesystem vfs.FileSystem
 	path       string
 }
 
-func NewResourcesFile(path string, fss ...vfs.FileSystem) Resources {
-	return &ResourcesFile{
+func NewResourceSpecificationsFile(path string, fss ...vfs.FileSystem) ResourceSpecifications {
+	return &ResourceSpecificationsFile{
 		filesystem: accessio.FileSystem(fss...),
 		path:       path,
 	}
 }
 
-func (r *ResourcesFile) Get(printer common.Printer, topts template.Options) (string, error) {
-	printer.Printf("processing %s...\n", r.path)
+func (r *ResourceSpecificationsFile) Get() (string, error) {
 	data, err := vfs.ReadFile(r.filesystem, r.path)
 	if err != nil {
 		return "", errors.Wrapf(err, "cannot read resource file %q", r.path)
 	}
-
-	parsed, err := topts.Execute(string(data))
-	if err != nil {
-		return "", errors.Wrapf(err, "error during variable substitution for %q", r.path)
-	}
-	return parsed, nil
+	return string(data), nil
 }
 
-func (r *ResourcesFile) Origin() string {
+func (r *ResourceSpecificationsFile) Origin() string {
 	return r.path
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type AdderOptions interface {
+type ResourceSpecificationsProvider interface {
 	AddFlags(fs *pflag.FlagSet)
 	Complete() error
-	GetResources() ([]Resources, error)
+	Resources() ([]ResourceSpecifications, error)
 	Description() string
+	IsSpecified() bool
 }
 
-type ResourceAdder struct {
+////////////////////////////////////////////////////////////////////////////////
+
+type ResourceMetaDataSpecificationsProvider struct {
 	typename string
-	resource string
-	input    string
-	access   string
+	meta     string
+	name     string
+	version  string
 }
 
-var _ AdderOptions = (*ResourceAdder)(nil)
-var _ Resources = (*ResourceAdder)(nil)
-
-func NewResourceAdder(name string) AdderOptions {
-	return &ResourceAdder{typename: name}
+func NewResourceMetaDataSpecificationsProvider(name string) ResourceMetaDataSpecificationsProvider {
+	return ResourceMetaDataSpecificationsProvider{typename: name}
 }
 
-func (a *ResourceAdder) Description() string {
+func (a *ResourceMetaDataSpecificationsProvider) ElementType() string {
+	return a.typename
+}
+
+func (a *ResourceMetaDataSpecificationsProvider) IsSpecified() bool {
+	return a.meta != "" || a.name != "" || a.version != ""
+}
+
+func (a *ResourceMetaDataSpecificationsProvider) Description() string {
 	return fmt.Sprintf(`
-It is possible to describe a single %s via command line options.
-This requires the option <code>--resource</code> and one of the options
-<code>--access</code> or <code>--input</code>. All three options require
-a yaml or json value describing an attribute set. This is similar
-to the one supported for the specification via yaml file.
-`, a.typename)
+It is possible to describe a single %s via command line options, also.
+The meta data of this element is described by the argument of option <code>--%s</code>,
+which must be a YAML or JSON string.
+Alternatively, the <em>name</em> and <em>version</em> can be specified with the
+options <code>--name</code> and <code>--version</code>. Explicitly specified options
+override values specified by the <code>--%s</code> option.
+(Note: Go templates are not supported for YAML-based option values. Besides
+this restriction, the finally composed element description is still processd
+by the selected templater.) 
+`, a.typename, a.typename, a.typename)
 }
 
-func (a *ResourceAdder) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVarP(&a.resource, a.typename, "", "", fmt.Sprintf("%s meta data (yaml)", a.typename))
-	fs.StringVarP(&a.input, "input", "", "", "input specification")
-	fs.StringVarP(&a.access, "access", "", "", "access specification")
+func (a *ResourceMetaDataSpecificationsProvider) AddFlags(fs *pflag.FlagSet) {
+	fs.StringVarP(&a.meta, a.typename, "", "", fmt.Sprintf("%s meta data (yaml)", a.typename))
+	fs.StringVarP(&a.name, "name", "", "", fmt.Sprintf("%s name", a.typename))
+	fs.StringVarP(&a.version, "version", "", "", fmt.Sprintf("%s version", a.typename))
 }
 
-func (a *ResourceAdder) check(n string, v string) error {
+func (a *ResourceMetaDataSpecificationsProvider) Complete() error {
+	if !a.IsSpecified() {
+		return nil
+	}
+	if a.meta != "" {
+		if err := a.CheckData("meta data", a.meta); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (a *ResourceMetaDataSpecificationsProvider) Origin() string {
+	return a.typename + " (by options)"
+}
+
+func (a *ResourceMetaDataSpecificationsProvider) CheckData(n string, v string) error {
 	if v == "" {
 		return nil
 	}
@@ -172,12 +196,73 @@ func (a *ResourceAdder) check(n string, v string) error {
 	return nil
 }
 
-func (a *ResourceAdder) Complete() error {
-	if a.resource == "" && a.input == "" && a.access == "" {
+func (a *ResourceMetaDataSpecificationsProvider) ParsedMeta() (map[string]interface{}, error) {
+	data := map[string]interface{}{}
+	if a.IsSpecified() {
+		if a.meta != "" {
+			err := yaml.Unmarshal([]byte(a.meta), &data)
+			if err != nil {
+				return nil, err
+			}
+		}
+		if a.name != "" {
+			data["name"] = a.name
+		}
+		if a.version != "" {
+			data["version"] = a.version
+		}
+	}
+	return data, nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type ContentResourceSpecificationsProvider struct {
+	ResourceMetaDataSpecificationsProvider
+	rtype  string
+	input  string
+	access string
+}
+
+var _ ResourceSpecificationsProvider = (*ContentResourceSpecificationsProvider)(nil)
+var _ ResourceSpecifications = (*ContentResourceSpecificationsProvider)(nil)
+
+func NewContentResourceSpecificationProvider(name string) ResourceSpecificationsProvider {
+	return &ContentResourceSpecificationsProvider{
+		ResourceMetaDataSpecificationsProvider: NewResourceMetaDataSpecificationsProvider(name),
+	}
+}
+
+func (a *ContentResourceSpecificationsProvider) Description() string {
+	return a.ResourceMetaDataSpecificationsProvider.Description() + fmt.Sprintf(`
+The %s type can be specified with the option <code>--type</code>. Therefore, the
+minimal required meta data for elements can be completely specified by dedicated
+options and don't need the YAML option.
+
+To describe the content of this element one of the options <code>--access</code> or
+<code>--input</code> must be given. They take a YAML or JSON value describing an
+attribute set, also. The structure of those values is similar to the <code>access</code>
+or <code>input</code> fields of the description file format.
+`, a.typename)
+}
+
+func (a *ContentResourceSpecificationsProvider) AddFlags(fs *pflag.FlagSet) {
+	a.ResourceMetaDataSpecificationsProvider.AddFlags(fs)
+	fs.StringVarP(&a.rtype, "type", "", "", fmt.Sprintf("%s type", a.typename))
+	fs.StringVarP(&a.input, "input", "", "", "input specification")
+	fs.StringVarP(&a.access, "access", "", "", "access specification")
+}
+
+func (a *ContentResourceSpecificationsProvider) IsSpecified() bool {
+	return a.ResourceMetaDataSpecificationsProvider.IsSpecified() || a.rtype != "" || a.input != "" || a.access != ""
+}
+
+func (a *ContentResourceSpecificationsProvider) Complete() error {
+	if !a.IsSpecified() {
 		return nil
 	}
-	if a.resource == "" {
-		return fmt.Errorf("%s meta data is missing (--%s)", a.typename, a.typename)
+	if err := a.ResourceMetaDataSpecificationsProvider.Complete(); err != nil {
+		return err
 	}
 	if a.access != "" && a.input != "" {
 		return fmt.Errorf("either --input or --access is possible")
@@ -186,35 +271,31 @@ func (a *ResourceAdder) Complete() error {
 		return fmt.Errorf("either --input or --access is required")
 	}
 
-	if err := a.check("meta data", a.resource); err != nil {
+	if err := a.CheckData("input", a.input); err != nil {
 		return err
 	}
-	if err := a.check("input", a.input); err != nil {
-		return err
-	}
-	if err := a.check("access", a.access); err != nil {
+	if err := a.CheckData("access", a.access); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (a *ResourceAdder) GetResources() ([]Resources, error) {
-	if a.resource == "" {
+func (a *ContentResourceSpecificationsProvider) Resources() ([]ResourceSpecifications, error) {
+	if !a.IsSpecified() {
 		return nil, nil
 	}
-	return []Resources{a}, nil
+	return []ResourceSpecifications{a}, nil
 }
 
-func (a *ResourceAdder) Origin() string {
-	return a.typename + " (by options)"
-}
+func (a *ContentResourceSpecificationsProvider) Get() (string, error) {
+	data, err := a.ParsedMeta()
+	if err != nil {
+		return "", err
+	}
 
-func (a *ResourceAdder) Get(printer common.Printer, topts template.Options) (string, error) {
-	printer.Printf("processing %s...\n", a.Origin())
-
-	var data map[string]interface{}
-
-	yaml.Unmarshal([]byte(a.resource), &data)
+	if a.rtype != "" {
+		data["type"] = a.rtype
+	}
 
 	if a.input != "" {
 		var input map[string]interface{}
@@ -226,17 +307,9 @@ func (a *ResourceAdder) Get(printer common.Printer, topts template.Options) (str
 		yaml.Unmarshal([]byte(a.access), &access)
 		data["access"] = access
 	}
+
 	r, err := json.Marshal(data)
-	if err != nil {
-		return "", errors.Wrapf(err, "cannot marshal option based %s specification", a.typename)
-	}
-
-	parsed, err := topts.Execute(string(r))
-	if err != nil {
-		return "", errors.Wrapf(err, "error during variable substitution for %q", a.Origin())
-	}
-
-	return parsed, nil
+	return string(r), nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -245,10 +318,10 @@ type ResourceAdderCommand struct {
 	utils.BaseCommand
 
 	Templating template.Options
-	Adder      AdderOptions
+	Adder      ResourceSpecificationsProvider
 
 	Archive   string
-	Resources []Resources
+	Resources []ResourceSpecifications
 	Envs      []string
 }
 
@@ -270,7 +343,7 @@ func (o *ResourceAdderCommand) Complete(args []string) error {
 			return err
 		}
 
-		rsc, err := o.Adder.GetResources()
+		rsc, err := o.Adder.Resources()
 		if err != nil {
 			return err
 		}
@@ -284,7 +357,7 @@ func (o *ResourceAdderCommand) Complete(args []string) error {
 
 	paths := o.Templating.FilterSettings(args[1:]...)
 	for _, p := range paths {
-		o.Resources = append(o.Resources, NewResourcesFile(p, o.FileSystem()))
+		o.Resources = append(o.Resources, NewResourceSpecificationsFile(p, o.FileSystem()))
 	}
 
 	if len(o.Resources) == 0 {
@@ -301,10 +374,18 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 	resources := []*resource{}
 	for _, source := range o.Resources {
 		origin := source.Origin()
-		parsed, err := source.Get(printer, o.Templating)
+		printer.Printf("processing %s...\n", origin)
+
+		r, err := source.Get()
 		if err != nil {
 			return err
 		}
+
+		parsed, err := o.Templating.Execute(string(r))
+		if err != nil {
+			return errors.Wrapf(err, "error during variable substitution for %q", origin)
+		}
+
 		// sigs parser has no multi document stream parsing
 		// but yaml.v3 does not recognize json tagged fields.
 		// Therefore, we first use the v3 parser to parse the multi doc,
