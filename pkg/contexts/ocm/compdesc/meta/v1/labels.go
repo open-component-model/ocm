@@ -41,6 +41,12 @@ type Label struct {
 	Signing bool `json:"signing,omitempty"`
 }
 
+// DeepCopyInto copies labels.
+func (in *Label) DeepCopyInto(out *Label) {
+	*out = *in
+	out.Value = append(out.Value[:0:0], in.Value...)
+}
+
 var versionRegex = regexp.MustCompile("^v[0-9]+$")
 
 func NewLabel(name string, value interface{}, opts ...interface{}) (*Label, error) {

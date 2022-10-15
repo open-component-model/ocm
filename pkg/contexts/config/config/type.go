@@ -17,14 +17,13 @@ package config
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const (
-	ConfigType   = "generic.config" + common.TypeGroupSuffix
+	ConfigType   = "generic" + cpi.OCM_CONFIG_TYPE_SUFFIX
 	ConfigTypeV1 = ConfigType + runtime.VersionSeparator + "v1"
 )
 

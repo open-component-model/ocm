@@ -15,21 +15,20 @@
 package config
 
 import (
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
-	cfg "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
+	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const (
-	ConfigType   = "ocm.config" + common.TypeGroupSuffix
+	ConfigType   = "ocm" + cfgcpi.OCM_CONFIG_TYPE_SUFFIX
 	ConfigTypeV1 = ConfigType + runtime.VersionSeparator + "v1"
 )
 
 func init() {
-	cfg.RegisterConfigType(ConfigType, cfg.NewConfigType(ConfigType, &Config{}))
-	cfg.RegisterConfigType(ConfigTypeV1, cfg.NewConfigType(ConfigTypeV1, &Config{}))
+	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &Config{}))
+	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &Config{}))
 }
 
 // Config describes a memory based config interface.

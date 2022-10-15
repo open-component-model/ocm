@@ -19,7 +19,6 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -27,7 +26,7 @@ import (
 )
 
 const (
-	ConfigType   = "scripts.ocm.config" + common.TypeGroupSuffix
+	ConfigType   = "scripts.ocm" + cfgcpi.OCM_CONFIG_TYPE_SUFFIX
 	ConfigTypeV1 = ConfigType + runtime.VersionSeparator + "v1"
 )
 

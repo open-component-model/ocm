@@ -57,7 +57,9 @@ func NewStateAccess(access oci.ManifestAccess) accessobj.StateAccess {
 func (s *StateAccess) Get() (accessio.BlobAccess, error) {
 	mediaType := s.access.GetDescriptor().Config.MediaType
 	switch mediaType {
-	case componentmapping.ComponentDescriptorConfigMimeType, componentmapping.ComponentDescriptorLegacyConfigMimeType:
+	case componentmapping.ComponentDescriptorConfigMimeType,
+		componentmapping.LegacyComponentDescriptorConfigMimeType,
+		componentmapping.Legacy2ComponentDescriptorConfigMimeType:
 		return s.get()
 	case "":
 		return nil, errors.ErrNotFound(cpi.KIND_COMPONENTVERSION)
@@ -81,9 +83,14 @@ func (s *StateAccess) get() (accessio.BlobAccess, error) {
 		return nil, errors.ErrInvalid("component descriptor config")
 	}
 	switch config.ComponentDescriptorLayer.MediaType {
-	case componentmapping.ComponentDescriptorJSONMimeType, componentmapping.ComponentDescriptorYAMLMimeType:
+	case componentmapping.ComponentDescriptorJSONMimeType,
+		componentmapping.LegacyComponentDescriptorJSONMimeType,
+		componentmapping.ComponentDescriptorYAMLMimeType,
+		componentmapping.LegacyComponentDescriptorYAMLMimeType:
 		return s.access.GetBlob(config.ComponentDescriptorLayer.Digest)
-	case componentmapping.ComponentDescriptorTarMimeType, componentmapping.LegacyComponentDescriptorTarMimeType:
+	case componentmapping.ComponentDescriptorTarMimeType,
+		componentmapping.Legacy2ComponentDescriptorTarMimeType,
+		componentmapping.LegacyComponentDescriptorTarMimeType:
 		d, err := s.access.GetBlob(config.ComponentDescriptorLayer.Digest)
 		if err != nil {
 			return nil, err

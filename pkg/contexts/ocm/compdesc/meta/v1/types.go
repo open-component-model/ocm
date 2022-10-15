@@ -63,7 +63,7 @@ func ValidateRelation(fldPath *field.Path, relation ResourceRelation) *field.Err
 }
 
 const (
-	GROUP = "ocm.gardener.cloud"
+	GROUP = "ocm.software"
 	KIND  = "ComponentVersion"
 )
 

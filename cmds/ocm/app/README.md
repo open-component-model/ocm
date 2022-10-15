@@ -16,9 +16,9 @@ the dedicated configuration format.
 The basic layout looks as follows:
 
 ```yaml
-type: generic.config.ocm.gardener.cloud/v1
+type: generic.config.ocm.software/v1
 configurations:
-  - type: credentials.config.ocm.gardener.cloud
+  - type: credentials.config.ocm.software
     repositories:
       - repository:
           type: DockerConfig/v1

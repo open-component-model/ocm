@@ -25,18 +25,18 @@ func New(ctx clictx.Context) *cobra.Command {
 		Use:   "configfile",
 		Short: "configuration file",
 		Example: `
-type: generic.config.ocm.gardener.cloud/v1
+type: generic.config.ocm.software/v1
 configurations:
-  - type: credentials.config.ocm.gardener.cloud
+  - type: credentials.config.ocm.software
     repositories:
       - repository:
           type: DockerConfig/v1
           dockerConfigFile: "~/.docker/config.json"
           propagateConsumerIdentity: true
-   - type: attributes.config.ocm.gardener.cloud
+   - type: attributes.config.ocm.software
      attributes:  # map of attribute settings
        compat: true
-#  - type: scripts.ocm.config.ocm.gardener.cloud
+#  - type: scripts.ocm.config.ocm.software
 #    scripts:
 #      "default":
 #         script:
@@ -51,7 +51,7 @@ The file format is yaml. It uses the same type mechanism used for all
 kinds of typed specification in the ocm area. The file must have the type of
 a configuration specification. Instead, the command line client supports
 a generic configuration specification able to host a list of arbitrary configuration
-specifications. The type for this spec is <code>generic.config.ocm.gardener.cloud/v1</code>.
+specifications. The type for this spec is <code>generic.config.ocm.software/v1</code>.
 ` + ctx.ConfigContext().ConfigTypes().Usage(),
 	}
 }

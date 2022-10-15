@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	gardenercfgcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
@@ -15,7 +16,7 @@ import (
 const (
 	RepositoryType   = "GardenerConfig"
 	RepositoryTypeV1 = RepositoryType + runtime.VersionSeparator + "v1"
-	CONSUMER_TYPE    = "Buildcredentials.gardener.cloud"
+	CONSUMER_TYPE    = "Buildcredentials" + common.OCM_TYPE_GROUP_SUFFIX
 )
 
 var identityMatcher = hostpath.IdentityMatcher(CONSUMER_TYPE)

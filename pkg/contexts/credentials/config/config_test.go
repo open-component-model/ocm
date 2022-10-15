@@ -42,9 +42,9 @@ var _ = Describe("generic credentials", func() {
 	credspec := credentials.NewCredentialsSpec("cred", repospec)
 	direct := directcreds.NewRepositorySpec(props)
 
-	cfgconsumerdata := "{\"type\":\"credentials.config.ocm.gardener.cloud\",\"consumers\":[{\"identity\":{\"type\":\"oci\",\"url\":\"https://acme.com\"},\"credentials\":[{\"credentialsName\":\"cred\",\"repoName\":\"test\",\"type\":\"Memory\"}]}]}"
-	cfgrepodata := "{\"type\":\"credentials.config.ocm.gardener.cloud\",\"repositories\":[{\"repository\":{\"repoName\":\"test\",\"type\":\"Memory\"},\"credentials\":[{\"properties\":{\"password\":\"PASSWORD\",\"user\":\"USER\"},\"type\":\"Credentials\"}]}]}"
-	cfgaliasdata := "{\"type\":\"credentials.config.ocm.gardener.cloud\",\"aliases\":{\"alias\":{\"repository\":{\"repoName\":\"test\",\"type\":\"Memory\"},\"credentials\":[{\"properties\":{\"password\":\"PASSWORD\",\"user\":\"USER\"},\"type\":\"Credentials\"}]}}}"
+	cfgconsumerdata := "{\"type\":\"credentials.config.ocm.software\",\"consumers\":[{\"identity\":{\"type\":\"oci\",\"url\":\"https://acme.com\"},\"credentials\":[{\"credentialsName\":\"cred\",\"repoName\":\"test\",\"type\":\"Memory\"}]}]}"
+	cfgrepodata := "{\"type\":\"credentials.config.ocm.software\",\"repositories\":[{\"repository\":{\"repoName\":\"test\",\"type\":\"Memory\"},\"credentials\":[{\"properties\":{\"password\":\"PASSWORD\",\"user\":\"USER\"},\"type\":\"Credentials\"}]}]}"
+	cfgaliasdata := "{\"type\":\"credentials.config.ocm.software\",\"aliases\":{\"alias\":{\"repository\":{\"repoName\":\"test\",\"type\":\"Memory\"},\"credentials\":[{\"properties\":{\"password\":\"PASSWORD\",\"user\":\"USER\"},\"type\":\"Credentials\"}]}}}"
 	_ = props
 
 	Context("serialize", func() {

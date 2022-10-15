@@ -117,9 +117,9 @@ specifications), the serialized form always features a type field.
 A  configuration object for the configuration context could look as follows:
 
 ```yaml
-type: generic.config.ocm.gardener.cloud/v1
+type: generic.config.ocm.software/v1
 configurations:
-  - type: credentials.config.ocm.gardener.cloud
+  - type: credentials.config.ocm.software
     consumers:
       - identity:
           type: OCIRegistry
@@ -360,7 +360,7 @@ documentation provided by *cobra*.
 Now it is possible use a configuration file
 
 ```yaml
-type: generic.config.ocm.gardener.cloud/v1
+type: generic.config.ocm.software/v1
 configurations:
   - type: mytype.config.mandelsoft.org
     value: external configuration

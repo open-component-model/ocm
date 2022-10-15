@@ -17,7 +17,6 @@ package config
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx/core"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
@@ -27,7 +26,7 @@ import (
 )
 
 const (
-	OCMCmdConfigType   = "ocm.cmd.config" + common.TypeGroupSuffix
+	OCMCmdConfigType   = "ocm.cmd" + cpi.OCM_CONFIG_TYPE_SUFFIX
 	OCMCmdConfigTypeV1 = OCMCmdConfigType + runtime.VersionSeparator + "v1"
 )
 

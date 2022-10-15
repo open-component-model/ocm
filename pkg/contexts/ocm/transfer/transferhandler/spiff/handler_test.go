@@ -38,6 +38,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/spiff"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/testutils"
 )
 
 const ARCH = "/tmp/ctf"
@@ -212,7 +213,7 @@ process: (( (*(rules[mode] || rules.default)).process ))
 			Expect(err).To(Succeed())
 			fmt.Printf("%s\n", string(data))
 			hash := HashManifest2(artefactset.DefaultArtefactSetDescriptorFileName)
-			Expect(string(data)).To(Equal("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE2 + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
+			Expect(string(data)).To(testutils.StringEqualWithContext("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE2 + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 
 			data, err = json.Marshal(comp.GetDescriptor().Resources[1].Access)
 			Expect(err).To(Succeed())

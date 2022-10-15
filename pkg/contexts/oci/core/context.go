@@ -28,7 +28,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const CONTEXT_TYPE = "oci.context.gardener.cloud"
+const CONTEXT_TYPE = "oci" + datacontext.OCM_CONTEXT_SUFFIX
 
 const CommonTransportFormat = "CommonTransportFormat"
 

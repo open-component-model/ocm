@@ -8,8 +8,8 @@ COPY go.* ./
 COPY pkg pkg
 COPY cmds cmds
 #COPY go/pkg pkg
-RUN go get -d ./...
-RUN CGO_ENABLED=0 go build -o /main -ldflags "-s -w \
+RUN --mount=type=cache,target=/root/.cache/go-build go get -d ./...
+RUN --mount=type=cache,target=/root/.cache/go-build CGO_ENABLED=0 go build -o /main -ldflags "-s -w \
 	-X github.com/open-component-model/ocm/pkg/version.gitVersion=$EFFECTIVE_VERSION \
 	-X github.com/open-component-model/ocm/pkg/version.gitTreeState=$GIT_TREE_STATE \
 	-X github.com/open-component-model/ocm/pkg/version.gitCommit=$COMMIT \

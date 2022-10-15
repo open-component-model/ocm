@@ -20,7 +20,6 @@ import (
 	"github.com/mandelsoft/logging"
 	logcfg "github.com/mandelsoft/logging/config"
 
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -29,7 +28,7 @@ import (
 )
 
 const (
-	ConfigType   = "logging.config" + common.TypeGroupSuffix
+	ConfigType   = "logging" + cpi.OCM_CONFIG_TYPE_SUFFIX
 	ConfigTypeV1 = ConfigType + runtime.VersionSeparator + "v1"
 )
 

@@ -1,6 +1,6 @@
-type: generic.config.ocm.gardener.cloud/v1
+type: generic.config.ocm.software/v1
 configurations:
-  - type: credentials.config.ocm.gardener.cloud
+  - type: credentials.config.ocm.software
     consumers:
       - identity:
           type: OCIRegistry

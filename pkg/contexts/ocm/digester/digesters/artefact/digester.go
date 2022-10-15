@@ -121,7 +121,7 @@ func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferre
 					if index == nil {
 						return nil, fmt.Errorf("no main artefact found")
 					}
-					main := index.Annotations[artefactset.MAINARTEFACT_ANNOTATION]
+					main := artefactset.RetrieveMainArtefact(index.Annotations)
 					if main == "" {
 						return nil, fmt.Errorf("no main artefact found")
 					}

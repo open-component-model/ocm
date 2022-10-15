@@ -24,7 +24,7 @@ import (
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	compdescv3 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.gardener.cloud/v3alpha1"
+	compdescv3 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.software/v3alpha1"
 )
 
 const ARCH = "/tmp/ca"
@@ -168,7 +168,7 @@ NESTING    COMPONENT VERSION PROVIDER   IDENTITY
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				fmt.Sprintf(`
 ---
-apiVersion: ocm.gardener.cloud/%s
+apiVersion: ocm.software/%s
 kind: ComponentVersion
 metadata:
   name: test.de/y

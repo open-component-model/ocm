@@ -22,6 +22,10 @@ import (
 
 const KIND_CONFIGTYPE = "config type"
 
+// OCM_CONFIG_SUFFIX is the standard suffix used for all configuration types
+// provided by this library.
+const OCM_CONFIG_SUFFIX = ".config.ocm.software"
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type noContextError struct {

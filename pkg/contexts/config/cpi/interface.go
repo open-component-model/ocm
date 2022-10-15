@@ -23,6 +23,8 @@ import (
 
 const KIND_CONFIGTYPE = core.KIND_CONFIGTYPE
 
+const OCM_CONFIG_TYPE_SUFFIX = core.OCM_CONFIG_TYPE_SUFFIX
+
 const CONTEXT_TYPE = core.CONTEXT_TYPE
 
 type (

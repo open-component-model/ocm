@@ -6,7 +6,7 @@ labels:
     value: ${COMMIT}
 input:
   type: spiff
-  mediaType: application/vnd.toi.gardener.cloud.package.v1+yaml
+  mediaType: application/vnd.toi.ocm.software.package.v1+yaml
   path: packagespec.yaml
 ---
 name: chart

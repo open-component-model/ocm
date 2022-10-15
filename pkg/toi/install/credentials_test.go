@@ -43,7 +43,7 @@ configurations:
       token: XXX
     credentialsName: target
   repoName: default
-  type: memory.credentials.config.ocm.gardener.cloud
+  type: memory.credentials.config.ocm.software
 - consumers:
   - credentials:
     - credentialsName: target
@@ -52,8 +52,8 @@ configurations:
     identity:
       name: target
       type: KubernetesCLuster
-  type: credentials.config.ocm.gardener.cloud
-type: generic.config.ocm.gardener.cloud
+  type: credentials.config.ocm.software
+type: generic.config.ocm.software
 `
 	It("creates config data", FlakeAttempts(50), func() {
 		ctx := credentials.New()

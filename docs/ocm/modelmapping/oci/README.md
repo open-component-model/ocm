@@ -20,7 +20,7 @@ An OCM *version name* of a component version is mapped to an OCI *tag*.
 
 The *component version* is represented as OCI *image manifest*.
 
-This manifest uses a config media type `application/vnd.gardener.cloud.cnudie.component.config.v1+json`.
+This manifest uses a config media type `application/vnd.ocm.software.component.config.v1+json`.
 According to the [OCI image specification](https://github.com/opencontainers/image-spec/blob/main/spec.md) this must be a JSON blob.
 This json file has one defined formal field:
 
@@ -28,7 +28,7 @@ This json file has one defined formal field:
 
   It references the layer blob containing the component descriptor. The layer
   always must be layer 0 of the manifest. It uses the media type
-  `application/vnd.gardener.cloud.cnudie.component-descriptor.v2+yaml+tar`
+  `application/vnd.ocm.software.component-descriptor.v2+yaml+tar`
 
 
 TODO: decide which media type to use for v3 descriptors.

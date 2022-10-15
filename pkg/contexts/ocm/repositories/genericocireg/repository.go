@@ -148,7 +148,9 @@ func (r *RepositoryImpl) ExistsComponentVersion(name string, version string) (bo
 		return false, err
 	}
 	switch desc.Config.MediaType {
-	case componentmapping.ComponentDescriptorConfigMimeType, componentmapping.ComponentDescriptorLegacyConfigMimeType:
+	case componentmapping.ComponentDescriptorConfigMimeType,
+		componentmapping.LegacyComponentDescriptorConfigMimeType,
+		componentmapping.Legacy2ComponentDescriptorConfigMimeType:
 		return true, nil
 	}
 	return false, nil

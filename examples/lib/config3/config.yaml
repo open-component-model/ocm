@@ -1,4 +1,4 @@
-type: generic.config.ocm.gardener.cloud/v1
+type: generic.config.ocm.software/v1
 configurations:
   - type: mytype.config.mandelsoft.org
     value: external configuration

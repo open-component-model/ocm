@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	ConfigType   = "memory.credentials.config" + common.TypeGroupSuffix
+	ConfigType   = "memory.credentials" + cfgcpi.OCM_CONFIG_TYPE_SUFFIX
 	ConfigTypeV1 = ConfigType + runtime.VersionSeparator + "v1"
 )
 
