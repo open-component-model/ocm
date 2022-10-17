@@ -383,94 +383,11 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 
 	resources := []*resource{}
 	for _, source := range o.Resources {
-		origin := source.Origin()
-		printer.Printf("processing %s...\n", origin)
-
-		r, err := source.Get()
+		tmp, err := determineResources(printer, o.Context, ictx, o.Templating, listkey, h, source)
 		if err != nil {
-			return err
+			return errors.Wrapf(err, "%s", source.Origin())
 		}
-
-		parsed, err := o.Templating.Execute(string(r))
-		if err != nil {
-			return errors.Wrapf(err, "error during variable substitution for %q", origin)
-		}
-
-		// sigs parser has no multi document stream parsing
-		// but yaml.v3 does not recognize json tagged fields.
-		// Therefore, we first use the v3 parser to parse the multi doc,
-		// marshal it again and finally unmarshal it with the sigs parser.
-		decoder := yaml.NewDecoder(bytes.NewBuffer([]byte(parsed)))
-		i := 0
-		for {
-			var tmp map[string]interface{}
-
-			i++
-			err := decoder.Decode(&tmp)
-			if err != nil {
-				if !errors.Is(err, io.EOF) {
-					return err
-				}
-				break
-			}
-			printer.Printf("  processing document %d...\n", i)
-			if (tmp["input"] != nil || tmp["access"] != nil) && !h.RequireInputs() {
-				return errors.Newf("invalid spec %d in %q: no input or access possible for %s", i, origin, listkey)
-			}
-
-			var list []json.RawMessage
-			if reslist, ok := tmp[listkey]; ok {
-				if len(tmp) != 1 {
-					return errors.Newf("invalid spec %d in %q: either a list or a single spec possible", i, origin)
-				}
-				l, ok := reslist.([]interface{})
-				if !ok {
-					return errors.Newf("invalid spec %d in %q: invalid resource list", i, origin)
-				}
-				for j, e := range l {
-					// cannot use json here, because yaml generates a map[interface{}]interface{}
-					data, err := yaml.Marshal(e)
-					if err != nil {
-						return errors.Newf("invalid spec %d[%d] in %q: %s", i, j+1, origin, err.Error())
-					}
-					list = append(list, data)
-				}
-			} else {
-				if len(tmp) == 0 {
-					return errors.Newf("invalid spec %d in %q: empty", i, origin)
-				}
-				data, err := yaml.Marshal(tmp)
-				if err != nil {
-					return err
-				}
-				list = append(list, data)
-			}
-
-			for j, d := range list {
-				printer.Printf("    processing index %d\n", j+1)
-				var input *ResourceInput
-				r, err := DecodeResource(d, h)
-				if err != nil {
-					return errors.Newf("invalid spec %d[%d] in %q: %s", i, j+1, origin, err)
-				}
-
-				if h.RequireInputs() {
-					input, err = DecodeInput(d, o.Context)
-					if err != nil {
-						return errors.Newf("invalid spec %d[%d] in %q: %s", i, j+1, origin, err)
-					}
-					if err = Validate(input, ictx, origin); err != nil {
-						return errors.Wrapf(err, "invalid spec %d[%d] in %q", i, j+1, origin)
-					}
-				}
-
-				if err = r.Validate(o.Context, input); err != nil {
-					return errors.Wrapf(err, "invalid spec %d[%d] in %q", i, j+1, origin)
-				}
-
-				resources = append(resources, NewResource(r, input, origin, i, j+1))
-			}
-		}
+		resources = append(resources, tmp...)
 	}
 
 	printer.Printf("found %d %s\n", len(resources), listkey)
@@ -507,6 +424,98 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 		}
 	}
 	return nil
+}
+
+func determineResources(printer common.Printer, ctx clictx.Context, ictx inputs.Context, templ template.Options, listkey string, h ResourceSpecHandler, source ResourceSpecifications) ([]*resource, error) {
+	resources := []*resource{}
+	origin := source.Origin()
+
+	printer.Printf("processing %s...\n", origin)
+	r, err := source.Get()
+	if err != nil {
+		return nil, err
+	}
+	parsed, err := templ.Execute(string(r))
+	if err != nil {
+		return nil, errors.Wrapf(err, "error during variable substitution")
+	}
+
+	// sigs parser has no multi document stream parsing
+	// but yaml.v3 does not recognize json tagged fields.
+	// Therefore, we first use the v3 parser to parse the multi doc,
+	// marshal it again and finally unmarshal it with the sigs parser.
+	decoder := yaml.NewDecoder(bytes.NewBuffer([]byte(parsed)))
+	i := 0
+	for {
+		var tmp map[string]interface{}
+
+		i++
+		err := decoder.Decode(&tmp)
+		if err != nil {
+			if !errors.Is(err, io.EOF) {
+				return nil, err
+			}
+			break
+		}
+		printer.Printf("  processing document %d...\n", i)
+		if (tmp["input"] != nil || tmp["access"] != nil) && !h.RequireInputs() {
+			return nil, errors.Newf("invalid spec %d: no input or access possible for %s", i, listkey)
+		}
+
+		var list []json.RawMessage
+		if reslist, ok := tmp[listkey]; ok {
+			if len(tmp) != 1 {
+				return nil, errors.Newf("invalid spec %d: either a list or a single spec possible", i)
+			}
+			l, ok := reslist.([]interface{})
+			if !ok {
+				return nil, errors.Newf("invalid spec %d: invalid resource list", i)
+			}
+			for j, e := range l {
+				// cannot use json here, because yaml generates a map[interface{}]interface{}
+				data, err := yaml.Marshal(e)
+				if err != nil {
+					return nil, errors.Newf("invalid spec %d[%d]: %s", i, j+1, err.Error())
+				}
+				list = append(list, data)
+			}
+		} else {
+			if len(tmp) == 0 {
+				return nil, errors.Newf("invalid spec %d: empty", i)
+			}
+			data, err := yaml.Marshal(tmp)
+			if err != nil {
+				return nil, err
+			}
+			list = append(list, data)
+		}
+
+		for j, d := range list {
+			printer.Printf("    processing index %d\n", j+1)
+			var input *ResourceInput
+			r, err := DecodeResource(d, h)
+			if err != nil {
+				return nil, errors.Newf("invalid spec %d[%d]: %s", i, j+1, err)
+			}
+
+			if h.RequireInputs() {
+				input, err = DecodeInput(d, ctx)
+				if err != nil {
+					return nil, errors.Newf("invalid spec %d[%d]: %s", i, j+1, err)
+				}
+				if err = Validate(input, ictx, origin); err != nil {
+					return nil, errors.Wrapf(err, "invalid spec %d[%d]", i, j+1)
+				}
+			}
+
+			if err = r.Validate(ctx, input); err != nil {
+				return nil, errors.Wrapf(err, "invalid spec %d[%d]", i, j+1)
+			}
+
+			resources = append(resources, NewResource(r, input, origin, i, j+1))
+		}
+	}
+	return resources, nil
 }
 
 func DecodeResource(data []byte, h ResourceSpecHandler) (ResourceSpec, error) {

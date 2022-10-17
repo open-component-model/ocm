@@ -12,15 +12,24 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package names
+package resourceconfig
 
-var (
-	ComponentArchive       = []string{"componentarchive", "comparch", "ca"}
-	CommonTransportArchive = []string{"commontransportarchive", "ctf"}
-	Components             = []string{"componentversions", "componentversion", "cv", "components", "component", "comps", "comp", "c"}
-	ResourceConfig         = []string{"resource-configuration", "resourceconfig", "rsccfg", "rcfg"}
-	Resources              = []string{"resources", "resource", "res", "r"}
-	Sources                = []string{"sources", "source", "src", "s"}
-	References             = []string{"references", "reference", "refs"}
-	Versions               = []string{"versions", "vers", "v"}
+import (
+	"github.com/spf13/cobra"
+
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resourceconfig/add"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 )
+
+var Names = names.ResourceConfig
+
+// NewCommand creates a new command.
+func NewCommand(ctx clictx.Context) *cobra.Command {
+	cmd := utils.MassageCommand(&cobra.Command{
+		Short: "Commands acting on component resource specifications",
+	}, Names...)
+	cmd.AddCommand(add.NewCommand(ctx, add.Verb))
+	return cmd
+}

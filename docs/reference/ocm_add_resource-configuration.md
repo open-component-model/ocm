@@ -1,9 +1,9 @@
-## ocm add resources &mdash; Add Resources To A Component Version
+## ocm add resource-configuration &mdash; Add A Resource Specification To A Resource Config File
 
 ### Synopsis
 
 ```
-ocm add resources [<options>] <target> {<resourcefile> | <var>=<value>}
+ocm add resource-configuration [<options>] <target> {<resourcefile> | <var>=<value>}
 ```
 
 ### Options
@@ -11,12 +11,12 @@ ocm add resources [<options>] <target> {<resourcefile> | <var>=<value>}
 ```
       --access string          access specification
       --addenv                 access environment for templating
-  -h, --help                   help for resources
+  -h, --help                   help for resource-configuration
       --input string           input specification
       --name string            resource name
       --resource string        resource meta data (yaml)
   -s, --settings stringArray   settings file with variable settings (yaml)
-      --templater string       templater to use (subst, spiff, go) (default "subst")
+      --templater string       templater to use (subst, spiff, go) (default "none")
       --type string            resource type
       --version string         resource version
 ```
@@ -24,10 +24,13 @@ ocm add resources [<options>] <target> {<resourcefile> | <var>=<value>}
 ### Description
 
 
-Add resources specified in a resource file to a component version.
-So far only component archives are supported as target.
+Add a resource specification to a resource config file used by [ocm add resources](ocm_add_resources.md).
 
-This command accepts  resource specification files describing the resources
+If expressions/templates are used in the specification file an appropriate
+templater and the required settings might be required to provide
+a correct input validation.
+
+This command accepts resource specification files describing the resources
 to add to a component version. Elements must follow the resource meta data
 description scheme of the component descriptor.
 

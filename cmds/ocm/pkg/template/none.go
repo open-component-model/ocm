@@ -12,15 +12,26 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package names
+package template
 
-var (
-	ComponentArchive       = []string{"componentarchive", "comparch", "ca"}
-	CommonTransportArchive = []string{"commontransportarchive", "ctf"}
-	Components             = []string{"componentversions", "componentversion", "cv", "components", "component", "comps", "comp", "c"}
-	ResourceConfig         = []string{"resource-configuration", "resourceconfig", "rsccfg", "rcfg"}
-	Resources              = []string{"resources", "resource", "res", "r"}
-	Sources                = []string{"sources", "source", "src", "s"}
-	References             = []string{"references", "reference", "refs"}
-	Versions               = []string{"versions", "vers", "v"}
+import (
+	"github.com/mandelsoft/vfs/pkg/vfs"
 )
+
+func init() {
+	Register("none", func(_ vfs.FileSystem) Templater { return NewSubst() }, `do not do any substitution.
+`)
+}
+
+type None struct{}
+
+var _ Templater = (*None)(nil)
+
+func NewNone() Templater {
+	return &None{}
+}
+
+// Template templates a string with the parsed vars.
+func (s *None) Process(data string, values Values) (string, error) {
+	return data, nil
+}

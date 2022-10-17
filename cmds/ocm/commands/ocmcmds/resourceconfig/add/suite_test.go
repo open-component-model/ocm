@@ -12,15 +12,16 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package names
+package add_test
 
-var (
-	ComponentArchive       = []string{"componentarchive", "comparch", "ca"}
-	CommonTransportArchive = []string{"commontransportarchive", "ctf"}
-	Components             = []string{"componentversions", "componentversion", "cv", "components", "component", "comps", "comp", "c"}
-	ResourceConfig         = []string{"resource-configuration", "resourceconfig", "rsccfg", "rcfg"}
-	Resources              = []string{"resources", "resource", "res", "r"}
-	Sources                = []string{"sources", "source", "src", "s"}
-	References             = []string{"references", "reference", "refs"}
-	Versions               = []string{"versions", "vers", "v"}
+import (
+	"testing"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
+
+func TestConfig(t *testing.T) {
+	RegisterFailHandler(Fail)
+	RunSpecs(t, "OCM add resource configurations")
+}
