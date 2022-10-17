@@ -22,6 +22,7 @@ ocm add [<options>] <sub command> ...
 ##### Sub Commands
 
 * [ocm add <b>references</b>](ocm_add_references.md)	 &mdash; add aggregation information to a component version
+* [ocm add <b>resource-configuration</b>](ocm_add_resource-configuration.md)	 &mdash; add a resource specification to a resource config file
 * [ocm add <b>resources</b>](ocm_add_resources.md)	 &mdash; add resources to a component version
 * [ocm add <b>sources</b>](ocm_add_sources.md)	 &mdash; add source information to a component version
 

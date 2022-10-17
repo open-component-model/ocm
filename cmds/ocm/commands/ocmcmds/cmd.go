@@ -11,6 +11,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/ctf"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resourceconfig"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/versions"
@@ -24,6 +25,7 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
 		Short: "Dedicated command flavors for the Open Component Model",
 	}, "ocm")
+	cmd.AddCommand(resourceconfig.NewCommand(ctx))
 	cmd.AddCommand(resources.NewCommand(ctx))
 	cmd.AddCommand(sources.NewCommand(ctx))
 	cmd.AddCommand(references.NewCommand(ctx))

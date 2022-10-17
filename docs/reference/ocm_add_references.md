@@ -66,6 +66,9 @@ There are several templaters that can be selected by the <code>--templater</code
       subkey: "abc {{.MY_VAL}}"
   </pre>
   
+- <code>none</code> do not do any substitution.
+
+  
 - <code>spiff</code> [spiff templating](https://github.com/mandelsoft/spiff).
 
   It supports complex values. the settings are accessible using the binding <code>values</code>.
