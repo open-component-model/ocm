@@ -1,9 +1,9 @@
-## ocm add resources &mdash; Add Resources To A Component Version
+## ocm add source-configuration &mdash; Add A Source Specification To A Source Config File
 
 ### Synopsis
 
 ```
-ocm add resources [<options>] <target> {<resourcefile> | <var>=<value>}
+ocm add source-configuration [<options>] <target> {<configfile> | <var>=<value>}
 ```
 
 ### Options
@@ -11,37 +11,32 @@ ocm add resources [<options>] <target> {<resourcefile> | <var>=<value>}
 ```
       --access string          access specification
       --addenv                 access environment for templating
-  -h, --help                   help for resources
+  -h, --help                   help for source-configuration
       --input string           input specification
-      --name string            resource name
-      --resource string        resource meta data (yaml)
+      --name string            source name
   -s, --settings stringArray   settings file with variable settings (yaml)
-      --templater string       templater to use (subst, spiff, go) (default "subst")
-      --type string            resource type
-      --version string         resource version
+      --source string          source meta data (yaml)
+      --templater string       templater to use (subst, spiff, go) (default "none")
+      --type string            source type
+      --version string         source version
 ```
 
 ### Description
 
 
-Add resources specified in a resource file to a component version.
-So far only component archives are supported as target.
+Add a source specification to a source config file used by [ocm add sources](ocm_add_sources.md).
 
-This command accepts  resource specification files describing the resources
-to add to a component version. Elements must follow the resource meta data
-description scheme of the component descriptor.
-
-It is possible to describe a single resource via command line options, also.
-The meta data of this element is described by the argument of option <code>--resource</code>,
+It is possible to describe a single source via command line options, also.
+The meta data of this element is described by the argument of option <code>--source</code>,
 which must be a YAML or JSON string.
 Alternatively, the <em>name</em> and <em>version</em> can be specified with the
 options <code>--name</code> and <code>--version</code>. Explicitly specified options
-override values specified by the <code>--resource</code> option.
+override values specified by the <code>--source</code> option.
 (Note: Go templates are not supported for YAML-based option values. Besides
 this restriction, the finally composed element description is still processd
 by the selected templater.) 
 
-The resource type can be specified with the option <code>--type</code>. Therefore, the
+The source type can be specified with the option <code>--type</code>. Therefore, the
 minimal required meta data for elements can be completely specified by dedicated
 options and don't need the YAML option.
 
@@ -49,6 +44,18 @@ To describe the content of this element one of the options <code>--access</code>
 <code>--input</code> must be given. They take a YAML or JSON value describing an
 attribute set, also. The structure of those values is similar to the <code>access</code>
 or <code>input</code> fields of the description file format.
+ Elements must follow the resource meta data
+description scheme of the component descriptor.
+
+If not specified anywhere the artifact type will be defaulted to <code>filesystem</code>.
+
+If expressions/templates are used in the specification file an appropriate
+templater and the required settings might be required to provide
+a correct input validation.
+
+This command accepts additional source specification files describing the sources
+to add to a component version.
+
 
 Templating:
 All yaml/json defined resources can be templated.
@@ -287,36 +294,9 @@ with the field <code>type</code> in the <code>input</code> field:
 
 ### Examples
 
-
-
-Add a resource directly by options
-
-<pre>
-$ ocm add resources path/to/ca &dash;&dash;name myresource &dash;&dash;type PlainText &dash;&dash;input '{ "type": "file", "path": "testdata/testcontent", "mediaType": "text/plain" }'
-</pre>
-
-
-Add a resource by a description file:
-
-*resources.yaml*:
-
-<pre>
-&dash;&dash;&dash;
-name: myrresource
-type: PlainText
-version: ${version]
-input:
-  type: file
-  path: testdata/testcontent
-  mediaType: text/plain
-</pre>
-
-
-<pre>
-$ ocm add resources  path/to/ca  resources.yaml VERSION=1.0.0
-</pre>
-
-
+```
+$ ocm add source-config sources.yaml --name sources --type filesystem --access '{ "type": "gitHub", "repoUrl": "github.com/open-component-model/ocm", "commit": "xyz" }'
+```
 
 ### SEE ALSO
 

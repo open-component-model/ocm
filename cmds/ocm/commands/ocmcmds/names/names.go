@@ -9,6 +9,7 @@ var (
 	CommonTransportArchive = []string{"commontransportarchive", "ctf"}
 	Components             = []string{"componentversions", "componentversion", "cv", "components", "component", "comps", "comp", "c"}
 	ResourceConfig         = []string{"resource-configuration", "resourceconfig", "rsccfg", "rcfg"}
+	SourceConfig           = []string{"source-configuration", "sourceconfig", "srccfg", "scfg"}
 	Resources              = []string{"resources", "resource", "res", "r"}
 	Sources                = []string{"sources", "source", "src", "s"}
 	References             = []string{"references", "reference", "refs"}

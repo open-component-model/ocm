@@ -3,7 +3,7 @@
 ### Synopsis
 
 ```
-ocm add resource-configuration [<options>] <target> {<resourcefile> | <var>=<value>}
+ocm add resource-configuration [<options>] <target> {<configfile> | <var>=<value>}
 ```
 
 ### Options
@@ -26,14 +26,6 @@ ocm add resource-configuration [<options>] <target> {<resourcefile> | <var>=<val
 
 Add a resource specification to a resource config file used by [ocm add resources](ocm_add_resources.md).
 
-If expressions/templates are used in the specification file an appropriate
-templater and the required settings might be required to provide
-a correct input validation.
-
-This command accepts resource specification files describing the resources
-to add to a component version. Elements must follow the resource meta data
-description scheme of the component descriptor.
-
 It is possible to describe a single resource via command line options, also.
 The meta data of this element is described by the argument of option <code>--resource</code>,
 which must be a YAML or JSON string.
@@ -52,6 +44,16 @@ To describe the content of this element one of the options <code>--access</code>
 <code>--input</code> must be given. They take a YAML or JSON value describing an
 attribute set, also. The structure of those values is similar to the <code>access</code>
 or <code>input</code> fields of the description file format.
+ Elements must follow the resource meta data
+description scheme of the component descriptor.
+
+If expressions/templates are used in the specification file an appropriate
+templater and the required settings might be required to provide
+a correct input validation.
+
+This command accepts additional resource specification files describing the sources
+to add to a component version.
+
 
 Templating:
 All yaml/json defined resources can be templated.
@@ -287,6 +289,12 @@ with the field <code>type</code> in the <code>input</code> field:
   
 
 
+
+### Examples
+
+```
+$ ocm add resource-config resources.yaml --name myresource --type PlainText --input '{ "type": "file", "path": "testdata/testcontent", "mediaType": "text/plain" }'
+```
 
 ### SEE ALSO
 

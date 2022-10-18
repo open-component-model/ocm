@@ -10,6 +10,7 @@ import (
 	references "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references/add"
 	resourceconfig "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resourceconfig/add"
 	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/add"
+	sourceconfig "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sourceconfig/add"
 	sources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources/add"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -22,6 +23,7 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 		Short: "Add resources or sources to a component archive",
 	}, verbs.Add)
 	cmd.AddCommand(resourceconfig.NewCommand(ctx))
+	cmd.AddCommand(sourceconfig.NewCommand(ctx))
 
 	cmd.AddCommand(resources.NewCommand(ctx))
 	cmd.AddCommand(sources.NewCommand(ctx))

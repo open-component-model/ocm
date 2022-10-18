@@ -38,11 +38,9 @@ character. The following formats are supported: <code>directory</code>, <code>ta
 ### Examples
 
 ```
-
 ghcr.io/mandelsoft/cnudie//github.com/mandelsoft/pause:1.0.0
 
 ctf+tgz::./ctf
-
 ```
 
 ### SEE ALSO

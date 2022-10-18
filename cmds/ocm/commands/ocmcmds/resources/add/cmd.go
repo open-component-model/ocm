@@ -51,6 +51,29 @@ This command accepts  resource specification files describing the resources
 to add to a component version. Elements must follow the resource meta data
 description scheme of the component descriptor.
 ` + o.Adder.Description() + (&template.Options{}).Usage() + inputs.Usage(inputs.DefaultInputTypeScheme),
+		Example: `
+Add a resource directly by options
+<pre>
+$ ocm add resources path/to/ca --name myresource --type PlainText --input '{ "type": "file", "path": "testdata/testcontent", "mediaType": "text/plain" }'
+</pre>
+
+Add a resource by a description file:
+
+*resources.yaml*:
+<pre>
+---
+name: myrresource
+type: PlainText
+version: ${version]
+input:
+  type: file
+  path: testdata/testcontent
+  mediaType: text/plain
+</pre>
+<pre>
+$ ocm add resources  path/to/ca  resources.yaml VERSION=1.0.0
+</pre>
+`,
 	}
 }
 

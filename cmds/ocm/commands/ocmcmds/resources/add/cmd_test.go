@@ -242,9 +242,7 @@ imageReference: ghcr.io/mandelsoft/pause:v0.1.0
 
 		It("adds simple text blob with metadata via explicit options", func() {
 			input := `
-type: file
-path: testdata/testcontent
-mediaType: text/plain
+{ "type": "file", "path": "testdata/testcontent", "mediaType": "text/plain" }
 `
 			Expect(env.Execute("add", "resources", ARCH, "--name", "testdata", "--type", "PlainText", "--input", input)).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))

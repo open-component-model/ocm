@@ -151,7 +151,7 @@ func (a *ResourceMetaDataSpecificationsProvider) IsSpecified() bool {
 
 func (a *ResourceMetaDataSpecificationsProvider) Description() string {
 	return fmt.Sprintf(`
-It is possible to describe a single %s via command line options, also.
+It is possible to describe a single %s via command line options.
 The meta data of this element is described by the argument of option <code>--%s</code>,
 which must be a YAML or JSON string.
 Alternatively, the <em>name</em> and <em>version</em> can be specified with the
@@ -219,17 +219,23 @@ func (a *ResourceMetaDataSpecificationsProvider) ParsedMeta() (map[string]interf
 
 type ContentResourceSpecificationsProvider struct {
 	ResourceMetaDataSpecificationsProvider
-	rtype  string
-	input  string
-	access string
+	DefaultType string
+	rtype       string
+	input       string
+	access      string
 }
 
 var _ ResourceSpecificationsProvider = (*ContentResourceSpecificationsProvider)(nil)
 var _ ResourceSpecifications = (*ContentResourceSpecificationsProvider)(nil)
 
-func NewContentResourceSpecificationProvider(name string) ResourceSpecificationsProvider {
+func NewContentResourceSpecificationProvider(name string, deftype ...string) ResourceSpecificationsProvider {
+	def := ""
+	if len(deftype) > 0 {
+		def = deftype[0]
+	}
 	return &ContentResourceSpecificationsProvider{
 		ResourceMetaDataSpecificationsProvider: NewResourceMetaDataSpecificationsProvider(name),
+		DefaultType:                            def,
 	}
 }
 
@@ -295,6 +301,10 @@ func (a *ContentResourceSpecificationsProvider) Get() (string, error) {
 
 	if a.rtype != "" {
 		data["type"] = a.rtype
+	}
+
+	if data["type"] == nil && a.DefaultType != "" {
+		data["type"] = a.DefaultType
 	}
 
 	if a.input != "" {

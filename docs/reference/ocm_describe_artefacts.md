@@ -66,10 +66,8 @@ The following modes are supported:
 ### Examples
 
 ```
-
 $ ocm describe artefact ghcr.io/mandelsoft/kubelink
 $ ocm describe artefact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
-
 ```
 
 ### SEE ALSO

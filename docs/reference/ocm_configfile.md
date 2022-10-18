@@ -165,7 +165,6 @@ The following configuration types are supported:
 ### Examples
 
 ```
-
 type: generic.config.ocm.software/v1
 configurations:
   - type: credentials.config.ocm.software
@@ -182,7 +181,6 @@ configurations:
 #      "default":
 #         script:
 #           process: true
-
 ```
 
 ### SEE ALSO
