@@ -70,10 +70,8 @@ The following modes are supported:
 ### Examples
 
 ```
-
 $ ocm get artefact ghcr.io/mandelsoft/kubelink
 $ ocm get artefact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
-
 ```
 
 ### SEE ALSO

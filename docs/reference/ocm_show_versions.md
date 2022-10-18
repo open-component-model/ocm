@@ -69,9 +69,7 @@ OCI Repository types (using standard component repository to OCI mapping):
 ### Examples
 
 ```
-
 $ ocm show versions ghcr.io/mandelsoft/cnudie//github.com/mandelsoft/playground
-
 ```
 
 ### SEE ALSO

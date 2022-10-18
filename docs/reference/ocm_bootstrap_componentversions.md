@@ -104,9 +104,7 @@ references.
 ### Examples
 
 ```
-
 $ ocm toi bootstrap componentversion ghcr.io/mandelsoft/ocmdemoinstaller:0.0.1-dev
-
 ```
 
 ### SEE ALSO

@@ -88,6 +88,35 @@ There are several templaters that can be selected by the <code>--templater</code
 
 
 
+### Examples
+
+
+
+Add a reference directly by options
+
+<pre>
+$ ocm add references path/to/ca &dash;&dash;name myref &dash;&dash;component github.com/my/component &dash;&dash;version ${VERSION}
+</pre>
+
+
+Add a reference by a description file:
+
+*references.yaml*:
+
+<pre>
+&dash;&dash;&dash;
+name: myref
+component: github.com/my/component
+version: ${VERSION]
+</pre>
+
+
+<pre>
+$ ocm add references  path/to/ca  references.yaml VERSION=1.0.0
+</pre>
+
+
+
 ### SEE ALSO
 
 ##### Parents

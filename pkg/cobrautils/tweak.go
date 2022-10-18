@@ -69,6 +69,7 @@ func CleanMarkdownUsageFunc(cmd *cobra.Command) {
 	defaultHelpFunc := cmd.HelpFunc()
 	cmd.SetHelpFunc(func(cmd *cobra.Command, s []string) {
 		cmd.Long = cleanMarkdown(cmd.Long)
+		cmd.Example = cleanMarkdown(cmd.Example)
 		defaultHelpFunc(cmd, s)
 	})
 }
@@ -83,6 +84,8 @@ func cleanMarkdown(s string) string {
 	s = strings.ReplaceAll(s, "**", "")
 	s = strings.ReplaceAll(s, "<em>", "")
 	s = strings.ReplaceAll(s, "</em>", "")
+	s = strings.ReplaceAll(s, "<EXAMPLE>", "")
+	s = strings.ReplaceAll(s, "</EXAMPLE>", "")
 	s = string(center.ReplaceAll([]byte(s), nil))
 	return s
 }

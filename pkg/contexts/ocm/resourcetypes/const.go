@@ -26,5 +26,5 @@ const (
 	// BLOB describes any anonymous untyped blob data.
 	BLOB = "blob"
 	// FILESYSTEM describes a directory structure stored as archive (tar, tgz).
-	FILESYSTEM = "`filesytem"
+	FILESYSTEM = "filesystem"
 )

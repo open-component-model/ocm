@@ -54,20 +54,25 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
-		Use:   "[<options>] <target> {<resourcefile> | <var>=<value>}",
+		Use:   "[<options>] <target> {<configfile> | <var>=<value>}",
 		Args:  cobra.MinimumNArgs(1),
 		Short: "add a resource specification to a resource config file",
 		Long: `
 Add a resource specification to a resource config file used by <CMD>ocm add resources</CMD>.
+` + o.Adder.Description() + ` Elements must follow the resource meta data
+description scheme of the component descriptor.
 
 If expressions/templates are used in the specification file an appropriate
 templater and the required settings might be required to provide
 a correct input validation.
 
-This command accepts resource specification files describing the resources
-to add to a component version. Elements must follow the resource meta data
-description scheme of the component descriptor.
-` + o.Adder.Description() + (&template.Options{}).Usage() + inputs.Usage(inputs.DefaultInputTypeScheme),
+This command accepts additional resource specification files describing the sources
+to add to a component version.
+
+` + (&template.Options{}).Usage() + inputs.Usage(inputs.DefaultInputTypeScheme),
+		Example: `
+$ ocm add resource-config resources.yaml --name myresource --type PlainText --input '{ "type": "file", "path": "testdata/testcontent", "mediaType": "text/plain" }'
+`,
 	}
 }
 

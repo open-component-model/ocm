@@ -304,7 +304,6 @@ by the TOI toolset.
 ### Examples
 
 ```
-
 executors:
   - actions:
     - install
@@ -343,7 +342,6 @@ configScheme:
           type: string
         password:
           type: string
-
 ```
 
 ### SEE ALSO
