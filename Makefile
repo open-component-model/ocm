@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Gardener contributors.
+# SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
 #
 # SPDX-License-Identifier: Apache-2.0
 
@@ -121,3 +121,9 @@ manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and Cust
 .PHONY: generate-deepcopy
 generate-deepcopy: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./api/..." paths="./pkg/contexts/ocm/compdesc/versions/..." 
+
+.PHONY: generate-license
+generate-license:
+	for f in $(shell find . -name "*.go" -o -name "*.sh"); do \
+		reuse addheader -r --copyright="SAP SE or an SAP affiliate company and Open Component Model contributors." --license="Apache-2.0" $$f --skip-unrecognised; \
+	done
