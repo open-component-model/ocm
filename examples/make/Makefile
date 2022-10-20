@@ -7,7 +7,7 @@ COMMIT                                         = $(shell git rev-parse HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
 
 .PHONY: ctf
-ctf: ca ## Create CTF from componet archive
+ctf: ca ## Create CTF from component archive
 	ocm transfer ca gen/ca gen/ctf
 	
 .PHONY: ca
