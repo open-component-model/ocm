@@ -31,6 +31,7 @@ The `ocm` CLI documentation can be found [here]((https://github.com/open-compone
 The code for the CLI can be found in [package `cmds/ocm`](https://github.com/open-component-model/ocm/blob/main/cmds/ocm).
 
 An example of how to use the `ocm` CLI in a Makefile can be found in [`examples/make`](https://github.com/open-component-model/ocm/blob/main/examples/make/Makefile).
+More comprehensive examples can be taken from the [`components`](https://github.com/open-component-model/ocm/tree/main/components) contained in this repository. Here a complete component build including a multi-arch image is done and finally packaged into a CTF archive which can be tranported into an OCI repository.
 
 The OCI and OCM support can be found in packages
 [`pkg/contexts/oci`](pkg/contexts/oci) and [`pkg/contexts/ocm`](pkg/contexts/ocm).
