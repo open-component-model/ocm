@@ -106,7 +106,7 @@ func (o *ResourceConfigAdderCommand) Complete(args []string) error {
 func (o *ResourceConfigAdderCommand) ProcessResourceDescriptions(listkey string, h ResourceSpecHandler) error {
 	fs := o.Context.FileSystem()
 	printer := common.NewPrinter(o.Context.StdOut())
-	ictx := inputs.NewContext(o.Context, printer)
+	ictx := inputs.NewContext(o.Context, printer, o.Templating.Vars)
 	mode := vfs.FileMode(0o600)
 
 	var current string

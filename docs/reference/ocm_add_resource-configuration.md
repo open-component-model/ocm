@@ -167,7 +167,7 @@ with the field <code>type</code> in the <code>input</code> field:
     that should be included in the tar file. If this option is not given
     all files not explicitly excluded are used.
   
-  Options used to configure fields: <code>--inputMediatype</code>, <code>--inputCompress</code>, <code>--inputIncludes</code>, <code>--inputExcludes</code>, <code>--inputPreserveDir</code>, <code>--inputFollowSymlinks</code>, <code>--inputPath</code>
+  Options used to configure fields: <code>--inputIncludes</code>, <code>--inputExcludes</code>, <code>--inputPreserveDir</code>, <code>--inputFollowSymlinks</code>, <code>--inputPath</code>, <code>--inputMediatype</code>, <code>--inputCompress</code>
 
 
 - Input type <code>docker</code>
@@ -235,7 +235,7 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property describes whether the file content should be stored
     compressed or not.
   
-  Options used to configure fields: <code>--inputPath</code>, <code>--inputMediatype</code>, <code>--inputCompress</code>
+  Options used to configure fields: <code>--inputCompress</code>, <code>--inputPath</code>, <code>--inputMediatype</code>
 
 
 - Input type <code>helm</code>
@@ -262,7 +262,7 @@ with the field <code>type</code> in the <code>input</code> field:
     Basically, it is a good practice to use the component version for local resources
     This can be achieved by using templating for this attribute in the resource file.
   
-  Options used to configure fields: <code>--inputMediatype</code>, <code>--inputCompress</code>, <code>--inputPath</code>, <code>--inputVersion</code>
+  Options used to configure fields: <code>--inputPath</code>, <code>--inputVersion</code>, <code>--inputMediatype</code>, <code>--inputCompress</code>
 
 
 - Input type <code>ociImage</code>
@@ -309,13 +309,16 @@ with the field <code>type</code> in the <code>input</code> field:
   
   - **<code>values</code>** *map[string]any*
   
-    This OPTIONAL property describes an additioanl value binding for the template processing. It will be available
-    under the node <code>values</code>.
+    This OPTIONAL property describes an additional value binding for the template processing. It will be available
+    under the node <code>inputvalues</code>.
   
   - **<code>libraries</code>** *[]string*
   
     This OPTIONAL property describes a list of spiff libraries to include in template
     processing.
+  
+  The variable settigs from the command line are available as binding, also. They are provided under the node
+  <code>values</code>.
   
   Options used to configure fields: <code>--inputLibraries</code>, <code>--inputValues</code>, <code>--inputPath</code>, <code>--inputMediatype</code>, <code>--inputCompress</code>
 

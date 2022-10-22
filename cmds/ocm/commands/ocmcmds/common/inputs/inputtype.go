@@ -30,24 +30,31 @@ const KIND_INPUTTYPE = "input type"
 type Context interface {
 	clictx.Context
 	Printf(msg string, args ...interface{}) (int, error)
+	Variables() map[string]interface{}
 	Section(msg string, args ...interface{}) Context
 	AddGap(gap string) Context
 }
 
 type context struct {
 	clictx.Context
-	printer common.Printer
+	printer   common.Printer
+	variables map[string]interface{}
 }
 
-func NewContext(ctx clictx.Context, pr common.Printer) Context {
+func NewContext(ctx clictx.Context, pr common.Printer, variables map[string]interface{}) Context {
 	return &context{
-		Context: ctx,
-		printer: pr,
+		Context:   ctx,
+		printer:   pr,
+		variables: variables,
 	}
 }
 
 func (c *context) Printf(msg string, args ...interface{}) (int, error) {
 	return c.printer.Printf(msg, args...)
+}
+
+func (c *context) Variables() map[string]interface{} {
+	return c.variables
 }
 
 func (c *context) Section(msg string, args ...interface{}) Context {
@@ -57,8 +64,9 @@ func (c *context) Section(msg string, args ...interface{}) Context {
 
 func (c *context) AddGap(gap string) Context {
 	return &context{
-		Context: c.Context,
-		printer: c.printer.AddGap(gap),
+		Context:   c.Context,
+		printer:   c.printer.AddGap(gap),
+		variables: c.variables,
 	}
 }
 

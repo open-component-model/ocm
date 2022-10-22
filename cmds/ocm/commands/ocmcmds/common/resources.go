@@ -385,7 +385,7 @@ func (o *ResourceAdderCommand) Complete(args []string) error {
 func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h ResourceSpecHandler) error {
 	fs := o.Context.FileSystem()
 	printer := common.NewPrinter(o.Context.StdOut())
-	ictx := inputs.NewContext(o.Context, printer)
+	ictx := inputs.NewContext(o.Context, printer, o.Templating.Vars)
 
 	resources := []*resource{}
 	for _, source := range o.Resources {

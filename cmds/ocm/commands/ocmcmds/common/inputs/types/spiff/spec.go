@@ -19,7 +19,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/clisupport"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -75,7 +74,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 	return (&file.ProcessSpec{s.MediaFileSpec, s.process}).GetBlob(ctx, nv, inputFilePath)
 }
 
-func (s *Spec) process(ctx clictx.Context, inputFilePath string, data []byte) ([]byte, error) {
+func (s *Spec) process(ctx inputs.Context, inputFilePath string, data []byte) ([]byte, error) {
 	fs, err := cwdfs.New(ctx.FileSystem(), inputFilePath)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create local directory view %q", inputFilePath)
@@ -87,16 +86,24 @@ func (s *Spec) process(ctx clictx.Context, inputFilePath string, data []byte) ([
 		return nil, err
 	}
 
+	add := map[string]interface{}{}
+	if ctx.Variables() != nil {
+		add["values"] = ctx.Variables()
+	}
+
 	if s.Values != nil {
 		var values interface{}
 		err := json.Unmarshal(s.Values, &values)
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot parse values")
 		}
-		env, err = env.WithValues(map[string]interface{}{"values": values})
-		if err != nil {
-			return nil, errors.Wrapf(err, "invalid values")
-		}
+		add["inputvalues"] = values
+	}
+	if len(add) > 0 {
+		env, err = env.WithValues(add)
+	}
+	if err != nil {
+		return nil, errors.Wrapf(err, "invalid values")
 	}
 	var stubs []spiffing.Node
 	for i, l := range s.Libraries {
@@ -114,7 +121,7 @@ func (s *Spec) process(ctx clictx.Context, inputFilePath string, data []byte) ([
 }
 
 func AddConfig(opts clisupport.ConfigOptions, config clisupport.Config) error {
-	if err := cpi.AddPathSpecConfig(opts, config); err != nil {
+	if err := cpi.AddMediaFileSpecConfig(opts, config); err != nil {
 		return err
 	}
 	if v, ok := opts.GetValue(options.LibrariesOption.Name()); ok {
