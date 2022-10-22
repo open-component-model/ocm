@@ -15,12 +15,14 @@
 package add_test
 
 import (
+	"fmt"
 	"reflect"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 	"helm.sh/helm/v3/pkg/chart/loader"
 
@@ -42,12 +44,33 @@ const VERSION = "v1"
 
 func CheckTextResource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string) {
 	rblob := accessio.BlobAccessForFile("text/plain", "/testdata/testcontent", env)
+	CheckTextResourceBlob(env, cd, name, rblob)
+}
+
+func CheckTextResourceWith(env *TestEnv, cd *compdesc.ComponentDescriptor, name, txt string) {
+	rblob := accessio.BlobAccessForString("text/plain", txt)
+	CheckTextResourceBlob(env, cd, name, rblob)
+}
+
+func CheckTextResourceBlob(env *TestEnv, cd *compdesc.ComponentDescriptor, name string, rblob accessio.BlobAccess) {
 	dig := rblob.Digest()
 	data, err := rblob.Get()
 	Expect(err).To(Succeed())
-	bpath := env.Join(ARCH, comparch.BlobsDirectoryName, common.DigestToFileName(dig))
-	Expect(env.FileExists(bpath)).To(BeTrue())
-	Expect(env.ReadFile(bpath)).To(Equal(data))
+
+	list, err := vfs.ReadDir(env, env.Join(ARCH, comparch.BlobsDirectoryName))
+	found := map[string]string{}
+	blobname := common.DigestToFileName(dig)
+	for _, e := range list {
+		data, err := env.ReadFile(env.Join(ARCH, comparch.BlobsDirectoryName, e.Name()))
+		Expect(err).To(Succeed())
+		found[e.Name()] = string(data)
+	}
+	Expect(err).To(Succeed())
+	if content, ok := found[blobname]; !ok {
+		Fail(fmt.Sprintf("expected blob %s not found, but %v", blobname, found))
+	} else {
+		Expect(content).To(Equal(string(data)))
+	}
 
 	r, err := cd.GetResourceByIdentity(metav1.NewIdentity(name))
 	Expect(err).To(Succeed())
@@ -277,6 +300,21 @@ type: PlainText
 			Expect(len(cd.Resources)).To(Equal(1))
 
 			CheckTextResource(env, cd, "testdata")
+		})
+
+		It("adds spiff processed text blob by dedicated input options", func() {
+			meta := `
+name: testdata
+type: PlainText
+`
+			Expect(env.Execute("add", "resources", ARCH, "--resource", meta, "--inputType", "spiff", "--inputPath", "testdata/spiffcontent", "--inputMediatype", "text/plain", "IMAGE=test")).To(Succeed())
+			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+			Expect(err).To(Succeed())
+			cd, err := compdesc.Decode(data)
+			Expect(err).To(Succeed())
+			Expect(len(cd.Resources)).To(Equal(1))
+
+			CheckTextResourceWith(env, cd, "testdata", "data: test\n")
 		})
 	})
 })

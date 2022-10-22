@@ -26,14 +26,13 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
 type ProcessSpec struct {
 	cpi.MediaFileSpec
-	Transformer func(ctx clictx.Context, inputDir string, data []byte) ([]byte, error)
+	Transformer func(ctx inputs.Context, inputDir string, data []byte) ([]byte, error)
 }
 
 func (s *ProcessSpec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath string) field.ErrorList {
