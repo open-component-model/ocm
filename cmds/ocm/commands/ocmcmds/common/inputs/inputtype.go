@@ -8,10 +8,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/modern-go/reflect2"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
+	"github.com/open-component-model/ocm/pkg/clisupport"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -20,6 +22,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
+
+const KIND_INPUTTYPE = "input type"
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -67,16 +71,21 @@ type InputSpec interface {
 type InputType interface {
 	runtime.TypedObjectDecoder
 	runtime.VersionedTypedObject
+
+	clisupport.ConfigHandler
+
+	ConfigOptionTypeSetHandler() clisupport.ConfigOptionTypeSetHandler
 	Usage() string
 }
 
 type DefaultInputType struct {
 	runtime.ObjectVersionedType
 	runtime.TypedObjectDecoder
-	usage string
+	usage      string
+	clihandler clisupport.ConfigOptionTypeSetHandler
 }
 
-func NewInputType(name string, proto InputSpec, usage string) InputType {
+func NewInputType(name string, proto InputSpec, usage string, cfg clisupport.ConfigOptionTypeSetHandler) InputType {
 	t := reflect.TypeOf(proto)
 	for t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -85,15 +94,39 @@ func NewInputType(name string, proto InputSpec, usage string) InputType {
 		ObjectVersionedType: runtime.NewVersionedObjectType(name),
 		TypedObjectDecoder:  runtime.MustNewDirectDecoder(proto),
 		usage:               usage,
+		clihandler:          cfg,
 	}
 }
 
+func (t *DefaultInputType) ConfigOptionTypeSetHandler() clisupport.ConfigOptionTypeSetHandler {
+	return t.clihandler
+}
+
 func (t *DefaultInputType) Usage() string {
-	return t.usage
+	group := ""
+	if t.clihandler != nil {
+		opts := t.clihandler.OptionTypes()
+		var names []string
+		if len(opts) > 0 {
+			for _, o := range opts {
+				names = append(names, "<code>--"+o.Name()+"</code>")
+			}
+			group = "\nOptions used to configure fields: " + strings.Join(names, ", ")
+		}
+	}
+	return t.usage + group
+}
+
+func (t *DefaultInputType) ApplyConfig(opts clisupport.ConfigOptions, config clisupport.Config) error {
+	if t.clihandler != nil {
+		return t.clihandler.ApplyConfig(opts, config)
+	}
+	return nil
 }
 
 type InputTypeScheme interface {
 	runtime.Scheme
+	clisupport.ConfigProvider
 
 	GetInputType(name string) InputType
 	Register(name string, atype InputType)
@@ -104,16 +137,25 @@ type InputTypeScheme interface {
 
 type inputTypeScheme struct {
 	runtime.SchemeBase
+	optionTypes clisupport.ConfigTypeOptionSetConfigProvider
 }
 
 func NewInputTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) InputTypeScheme {
 	var rt InputSpec
 	scheme := runtime.MustNewDefaultScheme(&rt, &UnknownInputSpec{}, false, defaultRepoDecoder)
-	return &inputTypeScheme{scheme}
+	return &inputTypeScheme{scheme, clisupport.NewTypedConfigProvider("input", "blob input specification")}
 }
 
 func (t *inputTypeScheme) AddKnownTypes(s InputTypeScheme) {
 	t.SchemeBase.AddKnownTypes(s)
+}
+
+func (t *inputTypeScheme) CreateOptions() clisupport.ConfigOptions {
+	return t.optionTypes.CreateOptions()
+}
+
+func (t *inputTypeScheme) GetConfigFor(opts clisupport.ConfigOptions) (clisupport.Config, error) {
+	return t.optionTypes.GetConfigFor(opts)
 }
 
 func (t *inputTypeScheme) GetInputType(name string) InputType {
@@ -125,14 +167,20 @@ func (t *inputTypeScheme) GetInputType(name string) InputType {
 }
 
 func (t *inputTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedObjectDecoder) error {
-	if _, ok := decoder.(InputType); !ok {
-		return errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
+	i, ok := decoder.(InputType)
+	if !ok {
+		return errors.ErrInvalid("GO type", reflect.TypeOf(decoder).String())
 	}
-	return t.SchemeBase.RegisterByDecoder(name, decoder)
+	t.Register(name, i)
+	return nil
 }
 
 func (t *inputTypeScheme) Register(name string, rtype InputType) {
+	if rtype == nil {
+		return
+	}
 	t.SchemeBase.RegisterByDecoder(name, rtype)
+	t.optionTypes.AddTypeSet(rtype.ConfigOptionTypeSetHandler())
 }
 
 func (t *inputTypeScheme) DecodeInputSpec(data []byte, unmarshaler runtime.Unmarshaler) (InputSpec, error) {
@@ -341,7 +389,7 @@ The resource specification supports the following blob input types, specified
 with the field <code>type</code> in the <code>input</code> field:
 `
 	for _, t := range scheme.KnownTypeNames() {
-		s = fmt.Sprintf("%s\n- Input type <code>%s</code>\n\n%s", s, t, utils.IndentLines(scheme.GetInputType(t).Usage(), "  "))
+		s = fmt.Sprintf("%s\n\n- Input type <code>%s</code>\n\n%s", s, t, utils.IndentLines(scheme.GetInputType(t).Usage(), "  "))
 	}
 	return s + "\n"
 }

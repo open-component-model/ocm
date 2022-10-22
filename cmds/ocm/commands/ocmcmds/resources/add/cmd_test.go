@@ -253,5 +253,20 @@ imageReference: ghcr.io/mandelsoft/pause:v0.1.0
 
 			CheckTextResource(env, cd, "testdata")
 		})
+
+		It("adds simple text blob by dedicated input options", func() {
+			meta := `
+name: testdata
+type: PlainText
+`
+			Expect(env.Execute("add", "resources", ARCH, "--resource", meta, "--inputType", "file", "--inputPath", "testdata/testcontent", "--inputMediatype", "text/plain")).To(Succeed())
+			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+			Expect(err).To(Succeed())
+			cd, err := compdesc.Decode(data)
+			Expect(err).To(Succeed())
+			Expect(len(cd.Resources)).To(Equal(1))
+
+			CheckTextResource(env, cd, "testdata")
+		})
 	})
 })

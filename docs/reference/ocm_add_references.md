@@ -29,7 +29,7 @@ This command accepts reference specification files describing the references
 to add to a component version. Elements must follow the reference meta data
 description scheme of the component descriptor.
 
-It is possible to describe a single reference via command line options, also.
+It is possible to describe a single reference via command line options.
 The meta data of this element is described by the argument of option <code>--reference</code>,
 which must be a YAML or JSON string.
 Alternatively, the <em>name</em> and <em>version</em> can be specified with the

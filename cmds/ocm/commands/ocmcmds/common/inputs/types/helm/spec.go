@@ -11,11 +11,18 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
+	"github.com/open-component-model/ocm/pkg/clisupport"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm/loader"
 )
+
+func ConfigHandler() clisupport.ConfigOptionTypeSetHandler {
+	return cpi.NewMediaFileSpecOptionType(TYPE, AddConfig,
+		options.PathOption, options.VersionOption)
+}
 
 type Spec struct {
 	// PathSpec hold the path that points to the helm chart file
@@ -71,4 +78,14 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 		hint = fmt.Sprintf("%s:%s", nv.GetName(), vers)
 	}
 	return blob, hint, err
+}
+
+func AddConfig(opts clisupport.ConfigOptions, config clisupport.Config) error {
+	if err := cpi.AddPathSpecConfig(opts, config); err != nil {
+		return err
+	}
+	if v, ok := opts.GetValue(options.VersionOption.Name()); ok {
+		config["version"] = v
+	}
+	return nil
 }

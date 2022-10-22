@@ -14,13 +14,20 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/file"
+	"github.com/open-component-model/ocm/pkg/clisupport"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
+
+func ConfigHandler() clisupport.ConfigOptionTypeSetHandler {
+	return cpi.NewMediaFileSpecOptionType(TYPE, AddConfig,
+		options.LibrariesOption, options.ValuesOption)
+}
 
 type Spec struct {
 	cpi.MediaFileSpec `json:",inline"`
@@ -104,4 +111,17 @@ func (s *Spec) process(ctx clictx.Context, inputFilePath string, data []byte) ([
 		return nil, errors.Wrapf(err, "failed to process template")
 	}
 	return env.Marshal(out)
+}
+
+func AddConfig(opts clisupport.ConfigOptions, config clisupport.Config) error {
+	if err := cpi.AddPathSpecConfig(opts, config); err != nil {
+		return err
+	}
+	if v, ok := opts.GetValue(options.LibrariesOption.Name()); ok {
+		config["libraries"] = v
+	}
+	if v, ok := opts.GetValue(options.LibrariesOption.Name()); ok {
+		config["values"] = v
+	}
+	return nil
 }

@@ -12,11 +12,23 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
+	"github.com/open-component-model/ocm/pkg/clisupport"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
+
+func ConfigHandler() clisupport.ConfigOptionTypeSetHandler {
+	return cpi.NewMediaFileSpecOptionType(
+		TYPE, AddConfig,
+		options.IncludeOption,
+		options.ExcludeOption,
+		options.PreserveDirOption,
+		options.FollowSymlinksOption,
+	)
+}
 
 type Spec struct {
 	cpi.MediaFileSpec `json:",inline"`
@@ -99,4 +111,23 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 		}
 	}
 	return temp.AsBlob(s.MediaType), "", nil
+}
+
+func AddConfig(opts clisupport.ConfigOptions, config clisupport.Config) error {
+	if err := cpi.AddMediaFileSpecConfig(opts, config); err != nil {
+		return err
+	}
+	if v, ok := opts.GetValue(options.PreserveDirOption.Name()); ok {
+		config["preserveDir"] = v
+	}
+	if v, ok := opts.GetValue(options.FollowSymlinksOption.Name()); ok {
+		config["followSymlinks"] = v
+	}
+	if v, ok := opts.GetValue(options.ExcludeOption.Name()); ok {
+		config["excludeFiles"] = v
+	}
+	if v, ok := opts.GetValue(options.IncludeOption.Name()); ok {
+		config["includeFiles"] = v
+	}
+	return nil
 }

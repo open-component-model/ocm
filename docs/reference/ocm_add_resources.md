@@ -9,16 +9,29 @@ ocm add resources [<options>] <target> {<resourcefile> | <var>=<value>}
 ### Options
 
 ```
-      --access string          access specification
-      --addenv                 access environment for templating
-  -h, --help                   help for resources
-      --input string           input specification
-      --name string            resource name
-      --resource string        resource meta data (yaml)
-  -s, --settings stringArray   settings file with variable settings (yaml)
-      --templater string       templater to use (subst, spiff, go) (default "subst")
-      --type string            resource type
-      --version string         resource version
+      --access string                access specification
+      --addenv                       access environment for templating
+  -h, --help                         help for resources
+      --input YAML                   blob input specification (YAML) (default null)
+      --inputCompress                compress option for input
+      --inputExcludes stringArray    excludes (path) for inputs
+      --inputFollowSymlinks          follow symbolic links during archive creation for inputs
+      --inputHint string             (repository) hint local artifacts for inputs
+      --inputIncludes stringArray    includes (path) for inputs
+      --inputLibraries stringArray   library path for inputs
+      --inputMediatype string        media type for input
+      --inputPath string             path field for input
+      --inputPreserveDir             preserve directory in archive for inputs
+      --inputType string             type of blob input specification
+      --inputValues YAML             YAML based generic values for inputs (default null)
+      --inputVariants stringArray    (platform) variants for inputs
+      --inputVersion stringArray     version info for inputs
+      --name string                  resource name
+      --resource string              resource meta data (yaml)
+  -s, --settings stringArray         settings file with variable settings (yaml)
+      --templater string             templater to use (subst, spiff, go) (default "subst")
+      --type string                  resource type
+      --version string               resource version
 ```
 
 ### Description
@@ -31,7 +44,7 @@ This command accepts  resource specification files describing the resources
 to add to a component version. Elements must follow the resource meta data
 description scheme of the component descriptor.
 
-It is possible to describe a single resource via command line options, also.
+It is possible to describe a single resource via command line options.
 The meta data of this element is described by the argument of option <code>--resource</code>,
 which must be a YAML or JSON string.
 Alternatively, the <em>name</em> and <em>version</em> can be specified with the
@@ -96,6 +109,7 @@ There are several templaters that can be selected by the <code>--templater</code
 The resource specification supports the following blob input types, specified
 with the field <code>type</code> in the <code>input</code> field:
 
+
 - Input type <code>dir</code>
 
   The path must denote a directory relative to the resources file, which is packed
@@ -148,6 +162,8 @@ with the field <code>type</code> in the <code>input</code> field:
     that should be included in the tar file. If this option is not given
     all files not explicitly excluded are used.
   
+  Options used to configure fields: <code>--inputPreserveDir</code>, <code>--inputFollowSymlinks</code>, <code>--inputPath</code>, <code>--inputMediatype</code>, <code>--inputCompress</code>, <code>--inputIncludes</code>, <code>--inputExcludes</code>
+
 
 - Input type <code>docker</code>
 
@@ -165,6 +181,9 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property can be used to specify the repository hint for the
     generated local artefact access. It is prefixed by the component name if
     it does not start with slash "/".
+  
+  Options used to configure fields: <code>--inputPath</code>, <code>--inputHint</code>
+
 
 - Input type <code>dockermulti</code>
 
@@ -184,10 +203,13 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property can be used to specify the repository hint for the
     generated local artefact access. It is prefixed by the component name if
     it does not start with slash "/".
+  
+  Options used to configure fields: <code>--inputVariants</code>, <code>--inputHint</code>
+
 
 - Input type <code>file</code>
 
-  The path must denote a file relative the resources file.
+  The path must denote a file relative the resources file. 
   The content is compressed if the <code>compress</code> field
   is set to <code>true</code>.
   
@@ -208,6 +230,8 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property describes whether the file content should be stored
     compressed or not.
   
+  Options used to configure fields: <code>--inputCompress</code>, <code>--inputPath</code>, <code>--inputMediatype</code>
+
 
 - Input type <code>helm</code>
 
@@ -232,6 +256,9 @@ with the field <code>type</code> in the <code>input</code> field:
     If not specified the versio from the chart will be used.
     Basically, it is a good practice to use the component version for local resources
     This can be achieved by using templating for this attribute in the resource file.
+  
+  Options used to configure fields: <code>--inputPath</code>, <code>--inputVersion</code>, <code>--inputMediatype</code>, <code>--inputCompress</code>
+
 
 - Input type <code>ociImage</code>
 
@@ -248,6 +275,9 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property can be used to specify the repository hint for the
     generated local artefact access. It is prefixed by the component name if
     it does not start with slash "/".
+  
+  Options used to configure fields: <code>--inputPath</code>, <code>--inputHint</code>, <code>--inputMediatype</code>, <code>--inputCompress</code>
+
 
 - Input type <code>spiff</code>
 
@@ -282,6 +312,7 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property describes a list of spiff libraries to include in template
     processing.
   
+  Options used to configure fields: <code>--inputMediatype</code>, <code>--inputCompress</code>, <code>--inputLibraries</code>, <code>--inputValues</code>, <code>--inputPath</code>
 
 
 
