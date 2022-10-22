@@ -21,7 +21,7 @@ import (
 const TYPE = "dockermulti"
 
 func init() {
-	inputs.DefaultInputTypeScheme.Register(TYPE, inputs.NewInputType(TYPE, &Spec{}, usage))
+	inputs.DefaultInputTypeScheme.Register(TYPE, inputs.NewInputType(TYPE, &Spec{}, usage, ConfigHandler()))
 }
 
 const usage = `
@@ -40,4 +40,5 @@ This blob type specification supports the following fields:
 
   This OPTIONAL property can be used to specify the repository hint for the
   generated local artefact access. It is prefixed by the component name if
-  it does not start with slash "/".`
+  it does not start with slash "/".
+`

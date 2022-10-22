@@ -21,7 +21,7 @@ import (
 const TYPE = "helm"
 
 func init() {
-	inputs.DefaultInputTypeScheme.Register(TYPE, inputs.NewInputType(TYPE, &Spec{}, usage))
+	inputs.DefaultInputTypeScheme.Register(TYPE, inputs.NewInputType(TYPE, &Spec{}, usage, ConfigHandler()))
 }
 
 const usage = `
@@ -45,4 +45,5 @@ This blob type specification supports the following fields:
   This OPTIONAL property can be set to configure an explicit version hint.
   If not specified the versio from the chart will be used.
   Basically, it is a good practice to use the component version for local resources
-  This can be achieved by using templating for this attribute in the resource file.`
+  This can be achieved by using templating for this attribute in the resource file.
+`

@@ -30,6 +30,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/clisupport"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -229,16 +230,18 @@ func (a *ResourceMetaDataSpecificationsProvider) ParsedMeta() (map[string]interf
 
 type ContentResourceSpecificationsProvider struct {
 	ResourceMetaDataSpecificationsProvider
-	DefaultType string
-	rtype       string
-	input       string
-	access      string
+	ctx           clictx.Context
+	DefaultType   string
+	rtype         string
+	access        string
+	inputOptions  clisupport.ConfigOptions
+	accessOptions clisupport.ConfigOptions
 }
 
 var _ ResourceSpecificationsProvider = (*ContentResourceSpecificationsProvider)(nil)
 var _ ResourceSpecifications = (*ContentResourceSpecificationsProvider)(nil)
 
-func NewContentResourceSpecificationProvider(name string, deftype ...string) ResourceSpecificationsProvider {
+func NewContentResourceSpecificationProvider(ctx clictx.Context, name string, deftype ...string) ResourceSpecificationsProvider {
 	def := ""
 	if len(deftype) > 0 {
 		def = deftype[0]
@@ -246,6 +249,7 @@ func NewContentResourceSpecificationProvider(name string, deftype ...string) Res
 	return &ContentResourceSpecificationsProvider{
 		ResourceMetaDataSpecificationsProvider: NewResourceMetaDataSpecificationsProvider(name),
 		DefaultType:                            def,
+		ctx:                                    ctx,
 	}
 }
 
@@ -265,12 +269,14 @@ or <code>input</code> fields of the description file format.
 func (a *ContentResourceSpecificationsProvider) AddFlags(fs *pflag.FlagSet) {
 	a.ResourceMetaDataSpecificationsProvider.AddFlags(fs)
 	fs.StringVarP(&a.rtype, "type", "", "", fmt.Sprintf("%s type", a.typename))
-	fs.StringVarP(&a.input, "input", "", "", "input specification")
 	fs.StringVarP(&a.access, "access", "", "", "access specification")
+
+	a.inputOptions = inputs.For(a.ctx).CreateOptions()
+	a.inputOptions.AddFlags(fs)
 }
 
 func (a *ContentResourceSpecificationsProvider) IsSpecified() bool {
-	return a.ResourceMetaDataSpecificationsProvider.IsSpecified() || a.rtype != "" || a.input != "" || a.access != ""
+	return a.ResourceMetaDataSpecificationsProvider.IsSpecified() || a.rtype != "" || a.inputOptions.Changed() || a.access != ""
 }
 
 func (a *ContentResourceSpecificationsProvider) Complete() error {
@@ -280,16 +286,13 @@ func (a *ContentResourceSpecificationsProvider) Complete() error {
 	if err := a.ResourceMetaDataSpecificationsProvider.Complete(); err != nil {
 		return err
 	}
-	if a.access != "" && a.input != "" {
+	if a.access != "" && a.inputOptions.Changed() {
 		return fmt.Errorf("either --input or --access is possible")
 	}
-	if a.access == "" && a.input == "" {
-		return fmt.Errorf("either --input or --access is required")
+	if a.access == "" && !a.inputOptions.Changed() {
+		return fmt.Errorf("either --input, --inputType or --access is required")
 	}
 
-	if err := a.CheckData("input", a.input); err != nil {
-		return err
-	}
 	if err := a.CheckData("access", a.access); err != nil {
 		return err
 	}
@@ -317,15 +320,18 @@ func (a *ContentResourceSpecificationsProvider) Get() (string, error) {
 		data["type"] = a.DefaultType
 	}
 
-	if a.input != "" {
-		var input map[string]interface{}
-		yaml.Unmarshal([]byte(a.input), &input)
-		data["input"] = input
-	}
 	if a.access != "" {
 		var access map[string]interface{}
 		yaml.Unmarshal([]byte(a.access), &access)
 		data["access"] = access
+	}
+
+	in, err := inputs.For(a.ctx).GetConfigFor(a.inputOptions)
+	if err != nil {
+		return "", errors.Wrapf(err, "input specification")
+	}
+	if in != nil {
+		data["input"] = in
 	}
 
 	r, err := json.Marshal(data)

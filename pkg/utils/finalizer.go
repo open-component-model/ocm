@@ -35,25 +35,37 @@ type Finalizer struct {
 	pending []func() error
 }
 
-func (f *Finalizer) With(fi func() error) {
+func (f *Finalizer) Lock(locker sync.Locker) *Finalizer {
+	locker.Lock()
+	return f.WithVoid(locker.Unlock)
+}
+
+func (f *Finalizer) WithVoid(fi func()) *Finalizer {
+	return f.With(func() error { fi(); return nil })
+}
+
+func (f *Finalizer) With(fi func() error) *Finalizer {
 	if fi != nil {
 		f.lock.Lock()
 		defer f.lock.Unlock()
 
 		f.pending = append(f.pending, fi)
 	}
+	return f
 }
 
-func (f *Finalizer) Close(c io.Closer) {
+func (f *Finalizer) Close(c io.Closer) *Finalizer {
 	if c != nil {
 		f.With(c.Close)
 	}
+	return f
 }
 
-func (f *Finalizer) Include(c *Finalizer) {
+func (f *Finalizer) Include(c *Finalizer) *Finalizer {
 	if c != nil {
 		f.With(c.Finalize)
 	}
+	return f
 }
 
 func (f *Finalizer) Length() int {
