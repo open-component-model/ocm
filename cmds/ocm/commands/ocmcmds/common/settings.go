@@ -10,7 +10,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-func ParseSettings(args ...string) (map[string]string, error) {
+func ParseSettings(args []string, kinds ...string) (map[string]string, error) {
+	kind := "setting"
+	if len(kinds) > 0 {
+		kind = kinds[0]
+	}
+
 	settings := map[string]string{}
 	for _, arg := range args {
 		if i := strings.Index(arg, "="); i > 0 {
@@ -18,7 +23,7 @@ func ParseSettings(args ...string) (map[string]string, error) {
 			name := strings.TrimSpace(arg[0:i])
 			settings[name] = value
 		} else {
-			return nil, errors.Newf("invalid settings %q (assignment required)", arg)
+			return nil, errors.Newf("invalid %s %q (assignment required)", kind, arg)
 		}
 	}
 	return settings, nil

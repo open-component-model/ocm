@@ -2,7 +2,7 @@
 //
 //  SPDX-License-Identifier: Apache-2.0
 
-package clisupport
+package flagsets
 
 import (
 	"fmt"
@@ -18,6 +18,8 @@ type ConfigProvider interface {
 type ConfigTypeOptionSetConfigProvider interface {
 	ConfigProvider
 	ConfigOptionTypeSet
+
+	IsExplicitlySelected(opts ConfigOptions) bool
 }
 
 type typedConfigProvider struct {
@@ -48,6 +50,12 @@ func (p *typedConfigProvider) ApplyConfig(options ConfigOptions, config Config) 
 	return nil
 }
 
+func (p *typedConfigProvider) IsExplicitlySelected(opts ConfigOptions) bool {
+	typv, _ := opts.GetValue(p.Name() + "Type")
+	cfgv, _ := opts.GetValue(p.Name())
+	return cfgv != nil || typv.(string) != ""
+}
+
 func (p *typedConfigProvider) GetConfigFor(opts ConfigOptions) (Config, error) {
 	typv, _ := opts.GetValue(p.Name() + "Type")
 	cfgv, _ := opts.GetValue(p.Name())
@@ -58,6 +66,7 @@ func (p *typedConfigProvider) GetConfigFor(opts ConfigOptions) (Config, error) {
 	}
 	typ := typv.(string)
 
+	opts = opts.FilterBy(p.HasOptionType)
 	if typ == "" && data != nil && data["type"] != nil {
 		t := data["type"]
 		if t != nil {

@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package clisupport
+package flagsets
 
 import (
 	"fmt"
@@ -26,13 +26,21 @@ type Option interface {
 	Value() interface{}
 }
 
+type Filter func(name string) bool
+
 type ConfigOptions interface {
 	AddFlags(fs *pflag.FlagSet)
 	Check(set ConfigOptionTypeSet, desc string) error
 	GetValue(name string) (interface{}, bool)
-	Changed() bool
+	Changed(names ...string) bool
 
-	FilterBy(func(name string) bool) ConfigOptions
+	FilterBy(Filter) ConfigOptions
+}
+
+func Not(f Filter) Filter {
+	return func(name string) bool {
+		return !f(name)
+	}
 }
 
 type configOptions struct {
@@ -60,16 +68,31 @@ func (o *configOptions) AddFlags(fs *pflag.FlagSet) {
 	o.flags = fs
 }
 
-func (o *configOptions) Changed() bool {
+func (o *configOptions) Changed(names ...string) bool {
+	if len(names) == 0 {
+		for _, opt := range o.options {
+			if o.flags.Changed(opt.Name()) {
+				return true
+			}
+		}
+		return false
+	}
+
+	set := map[string]struct{}{}
+	for _, n := range names {
+		set[n] = struct{}{}
+	}
 	for _, opt := range o.options {
-		if o.flags.Changed(opt.Name()) {
-			return true
+		if _, ok := set[opt.Name()]; ok {
+			if o.flags.Changed(opt.Name()) {
+				return true
+			}
 		}
 	}
 	return false
 }
 
-func (o *configOptions) FilterBy(filter func(name string) bool) ConfigOptions {
+func (o *configOptions) FilterBy(filter Filter) ConfigOptions {
 	if filter == nil {
 		return o
 	}

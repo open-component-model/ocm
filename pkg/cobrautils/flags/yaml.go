@@ -23,7 +23,13 @@ func NewYAMLValue[T any](val T, p *T) *YAMLValue[T] {
 }
 
 //nolint: errchkjson // initialized by unmarshal
-func (i *YAMLValue[T]) String() string { data, _ := json.Marshal(*i.addr); return string(data) }
+func (i *YAMLValue[T]) String() string {
+	if i.addr == nil {
+		return ""
+	}
+	data, _ := json.Marshal(*i.addr)
+	return string(data)
+}
 
 func (i *YAMLValue[T]) Set(s string) error {
 	err := yaml.Unmarshal([]byte(s), i.addr)

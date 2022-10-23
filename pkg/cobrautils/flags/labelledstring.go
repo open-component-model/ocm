@@ -23,7 +23,12 @@ func NewLabelledStringValue(val LabelledString, p *LabelledString) *LabelledStri
 	return (*LabelledStringValue)(p)
 }
 
-func (i *LabelledStringValue) String() string { return i.Name + "=" + i.Value }
+func (i *LabelledStringValue) String() string {
+	if i.Name == "" {
+		return ""
+	}
+	return i.Name + "=" + i.Value
+}
 
 func (i *LabelledStringValue) Set(s string) error {
 	idx := strings.Index(s, "=")

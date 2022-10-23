@@ -22,6 +22,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
@@ -282,7 +283,7 @@ imageReference: ghcr.io/mandelsoft/pause:v0.1.0
 name: testdata
 type: PlainText
 `
-			Expect(env.Execute("add", "resources", ARCH, "--resource", meta, "--inputType", "file", "--inputPath", "testdata/testcontent", "--inputMediatype", "text/plain")).To(Succeed())
+			Expect(env.Execute("add", "resources", ARCH, "--resource", meta, "--inputType", "file", "--inputPath", "testdata/testcontent", "--"+options.MediatypeOption.Name(), "text/plain")).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 			Expect(err).To(Succeed())
 			cd, err := compdesc.Decode(data)
@@ -297,7 +298,7 @@ type: PlainText
 name: testdata
 type: PlainText
 `
-			Expect(env.Execute("add", "resources", ARCH, "--resource", meta, "--inputType", "spiff", "--inputPath", "testdata/spiffcontent", "--inputMediatype", "text/plain", "IMAGE=test")).To(Succeed())
+			Expect(env.Execute("add", "resources", ARCH, "--resource", meta, "--inputType", "spiff", "--inputPath", "testdata/spiffcontent", "--"+options.MediatypeOption.Name(), "text/plain", "IMAGE=test")).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 			Expect(err).To(Succeed())
 			cd, err := compdesc.Decode(data)
@@ -305,6 +306,34 @@ type: PlainText
 			Expect(len(cd.Resources)).To(Equal(1))
 
 			CheckTextResourceWith(env, cd, "testdata", "data: test\n")
+		})
+
+		It("adds external image by options", func() {
+			Expect(env.Execute("add", "resources", ARCH,
+				"--type", "ociImage",
+				"--name", "image",
+				"--version", "v0.1.0",
+				"--external",
+				"--accessType", "ociArtefact",
+				"--reference", "ghcr.io/mandelsoft/pause:v0.1.0")).To(Succeed())
+			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+			Expect(err).To(Succeed())
+			cd, err := compdesc.Decode(data)
+			Expect(err).To(Succeed())
+			Expect(len(cd.Resources)).To(Equal(1))
+
+			r, err := cd.GetResourceByIdentity(metav1.NewIdentity("image"))
+			Expect(err).To(Succeed())
+			Expect(r.Type).To(Equal("ociImage"))
+			Expect(r.Version).To(Equal("v0.1.0"))
+			Expect(r.Relation).To(Equal(metav1.ResourceRelation("external")))
+
+			Expect(r.Access.GetType()).To(Equal(ociartefact.Type))
+
+			acc, err := env.OCMContext().AccessSpecForSpec(r.Access)
+			Expect(err).To(Succeed())
+			Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*ociartefact.AccessSpec)(nil))))
+			Expect(acc.(*ociartefact.AccessSpec).ImageReference).To(Equal("ghcr.io/mandelsoft/pause:v0.1.0"))
 		})
 	})
 })

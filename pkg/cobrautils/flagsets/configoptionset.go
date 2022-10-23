@@ -2,7 +2,7 @@
 //
 //  SPDX-License-Identifier: Apache-2.0
 
-package clisupport
+package flagsets
 
 import (
 	"fmt"
@@ -36,6 +36,7 @@ type ConfigOptionTypeSet interface {
 
 	AddOptionType(ConfigOptionType) error
 	AddTypeSet(ConfigOptionTypeSet) error
+	AddAll(o ConfigOptionTypeSet) (duplicated ConfigOptionTypeSet, err error)
 
 	Align(parent ConfigOptionTypeSet) error
 
@@ -72,13 +73,8 @@ func (s *configOptionTypeSet) Align(parent ConfigOptionTypeSet) error {
 	if s.parent != nil {
 		return errors.ErrClosed("config option set")
 	}
-	for _, o := range parent.OptionTypes() {
-		old := s.options[o.Name()]
-		if old != nil {
-			if !old.Equal(o) {
-				return fmt.Errorf("alignment option type %s doesn not match (%T<->%T)", o.Name(), o, old)
-			}
-		}
+	if err := s.check(parent); err != nil {
+		return err
 	}
 	for _, o := range parent.OptionTypes() {
 		old := s.options[o.Name()]
@@ -186,6 +182,10 @@ func (s *configOptionTypeSet) AddTypeSet(set ConfigOptionTypeSet) error {
 	var finalize utils.Finalizer
 	defer finalize.Lock(&s.lock).Finalize()
 
+	if s.parent != nil {
+		return errors.ErrClosed("config option set")
+	}
+
 	name := set.Name()
 	if nested, ok := s.sets[name]; ok {
 		if nested == set {
@@ -227,4 +227,39 @@ func (s *configOptionTypeSet) CreateOptions() ConfigOptions {
 		opts = append(opts, s.getOptionType(n).Create())
 	}
 	return NewOptions(opts)
+}
+
+func (s *configOptionTypeSet) AddAll(o ConfigOptionTypeSet) (duplicates ConfigOptionTypeSet, err error) {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	if s.parent != nil {
+		return nil, errors.ErrClosed("config option set")
+	}
+
+	if err := s.check(o); err != nil {
+		return nil, err
+	}
+	duplicates = NewConfigOptionSet("duplicates")
+	for _, t := range o.OptionTypes() {
+		_, ok := s.options[t.Name()]
+		if !ok {
+			s.options[t.Name()] = t
+		} else {
+			duplicates.AddOptionType(t)
+		}
+	}
+	return duplicates, nil
+}
+
+func (s *configOptionTypeSet) check(o ConfigOptionTypeSet) error {
+	for _, t := range o.OptionTypes() {
+		old := s.options[t.Name()]
+		if old != nil {
+			if !old.Equal(t) {
+				return fmt.Errorf("option type %s doesn not match (%T<->%T)", t.Name(), t, old)
+			}
+		}
+	}
+	return nil
 }

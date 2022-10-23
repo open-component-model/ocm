@@ -26,6 +26,9 @@ func NewLabelledValueValue(val LabelledValue, p *LabelledValue) *LabelledValueVa
 }
 
 func (i *LabelledValueValue) String() string {
+	if i.Name == "" {
+		return ""
+	}
 	//nolint: errchkjson // initialized by unmarshal
 	data, _ := json.Marshal(i.Value)
 	return i.Name + "=" + string(data)
