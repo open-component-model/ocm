@@ -16,9 +16,7 @@ package v1
 
 import (
 	"encoding/json"
-	"fmt"
 	"regexp"
-	"strconv"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
@@ -49,7 +47,7 @@ func (in *Label) DeepCopyInto(out *Label) {
 
 var versionRegex = regexp.MustCompile("^v[0-9]+$")
 
-func NewLabel(name string, value interface{}, opts ...interface{}) (*Label, error) {
+func NewLabel(name string, value interface{}, opts ...LabelOption) (*Label, error) {
 	var data []byte
 	var err error
 	var ok bool
@@ -68,21 +66,8 @@ func NewLabel(name string, value interface{}, opts ...interface{}) (*Label, erro
 	}
 	l := &Label{Name: name, Value: data}
 	for _, o := range opts {
-		switch v := o.(type) {
-		case bool:
-			l.Signing = v
-		case string:
-			if versionRegex.MatchString(v) {
-				l.Version = v
-			} else {
-				b, err := strconv.ParseBool(v)
-				if err != nil {
-					return nil, fmt.Errorf("invalid label option '%v'[%T]", v, v)
-				}
-				l.Signing = b
-			}
-		default:
-			return nil, fmt.Errorf("invalid label option '%v'[%T]", v, v)
+		if err := o.ApplyToLabel(l); err != nil {
+			return nil, errors.Wrapf(err, "label %q", name)
 		}
 	}
 	return l, nil
@@ -103,8 +88,8 @@ func (l Labels) Get(name string) ([]byte, bool) {
 	return nil, false
 }
 
-func (l *Labels) Set(name string, value interface{}) error {
-	newLabel, err := NewLabel(name, value)
+func (l *Labels) Set(name string, value interface{}, opts ...LabelOption) error {
+	newLabel, err := NewLabel(name, value, opts...)
 	if err != nil {
 		return err
 	}
@@ -169,4 +154,49 @@ func ValidateLabels(fldPath *field.Path, labels Labels) field.ErrorList {
 		labelNames[label.Name] = struct{}{}
 	}
 	return allErrs
+}
+
+type LabelOption interface {
+	ApplyToLabel(l *Label) error
+}
+
+type labelOptVersion struct {
+	version string
+}
+
+var _ LabelOption = (*labelOptVersion)(nil)
+
+func WithVersion(v string) LabelOption {
+	return &labelOptVersion{v}
+}
+
+func CheckLabelVersion(v string) bool {
+	return versionRegex.MatchString(v)
+}
+
+func (o labelOptVersion) ApplyToLabel(l *Label) error {
+	if !CheckLabelVersion(o.version) {
+		return errors.ErrInvalid("version", o.version)
+	}
+	l.Version = o.version
+	return nil
+}
+
+type labelOptSigning struct {
+	sign bool
+}
+
+var _ LabelOption = (*labelOptSigning)(nil)
+
+func WithSigning(b ...bool) LabelOption {
+	s := true
+	for _, o := range b {
+		s = o
+	}
+	return &labelOptSigning{s}
+}
+
+func (o *labelOptSigning) ApplyToLabel(l *Label) error {
+	l.Signing = o.sign
+	return nil
 }

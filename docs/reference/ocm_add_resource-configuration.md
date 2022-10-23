@@ -19,7 +19,7 @@ ocm add resource-configuration [<options>] <target> {<configfile> | <var>=<value
       --commit string                git commit id
       --digest string                blob digest
       --external                     flag non-local resource
-      --extra stringArray            resource extra identity
+      --extra <name>=<value>         resource extra identity (default [])
       --globalAccess YAML            access specification for global access
   -h, --help                         help for resource-configuration
       --hint string                  (repository) hint for local artifacts
@@ -35,6 +35,7 @@ ocm add resource-configuration [<options>] <target> {<configfile> | <var>=<value
       --inputValues YAML             YAML based generic values for inputs
       --inputVariants stringArray    (platform) variants for inputs
       --inputVersion stringArray     version info for inputs
+      --label <name>=<YAML>          resource label (leading * indicates signature relevant, optional version separated by @)
       --mediaType string             media type for artifact blob representation
       --name string                  resource name
       --reference string             reference name
@@ -201,7 +202,7 @@ with the field <code>type</code> in the <code>input</code> field:
     generated local artefact access. It is prefixed by the component name if
     it does not start with slash "/".
   
-  Options used to configure fields: <code>--inputPath</code>, <code>--hint</code>
+  Options used to configure fields: <code>--hint</code>, <code>--inputPath</code>
 
 
 - Input type <code>dockermulti</code>

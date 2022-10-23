@@ -2,7 +2,7 @@
 //
 //  SPDX-License-Identifier: Apache-2.0
 
-package flags
+package flag
 
 import (
 	"encoding/json"
@@ -23,13 +23,13 @@ func NewYAMLValue[T any](val T, p *T) *YAMLValue[T] {
 	return &YAMLValue[T]{p}
 }
 
-//nolint: errchkjson // initialized by unmarshal
 func (i *YAMLValue[T]) String() string {
 	v := reflect.ValueOf(i.addr)
 
 	if v.Elem().IsZero() {
 		return ""
 	}
+	//nolint: errchkjson // initialized by unmarshal
 	data, _ := json.Marshal(*i.addr)
 	return string(data)
 }
@@ -37,7 +37,7 @@ func (i *YAMLValue[T]) String() string {
 func (i *YAMLValue[T]) Set(s string) error {
 	err := yaml.Unmarshal([]byte(s), i.addr)
 	if err != nil {
-		return errors.Wrapf(err, "failed to parse YAML: %q", s)
+		return err
 	}
 	return nil
 }
@@ -48,4 +48,13 @@ func (i *YAMLValue[T]) Type() string {
 
 func YAMLVarP[T any](flags *pflag.FlagSet, p *T, name, shorthand string, value T, usage string) {
 	flags.VarP(NewYAMLValue(value, p), name, shorthand, usage)
+}
+
+func parseValue(s string) (interface{}, error) {
+	var v interface{}
+	err := yaml.Unmarshal([]byte(s), &v)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to parse YAML: %q", s)
+	}
+	return v, nil
 }

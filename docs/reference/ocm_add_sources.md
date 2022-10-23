@@ -18,7 +18,7 @@ ocm add sources [<options>] <target> {<resourcefile> | <var>=<value>}
       --bucket string                bucket name
       --commit string                git commit id
       --digest string                blob digest
-      --extra stringArray            source extra identity
+      --extra <name>=<value>         source extra identity (default [])
       --globalAccess YAML            access specification for global access
   -h, --help                         help for sources
       --hint string                  (repository) hint for local artifacts
@@ -34,6 +34,7 @@ ocm add sources [<options>] <target> {<resourcefile> | <var>=<value>}
       --inputValues YAML             YAML based generic values for inputs
       --inputVariants stringArray    (platform) variants for inputs
       --inputVersion stringArray     version info for inputs
+      --label <name>=<YAML>          source label (leading * indicates signature relevant, optional version separated by @)
       --mediaType string             media type for artifact blob representation
       --name string                  source name
       --reference string             reference name
@@ -175,7 +176,7 @@ with the field <code>type</code> in the <code>input</code> field:
     that should be included in the tar file. If this option is not given
     all files not explicitly excluded are used.
   
-  Options used to configure fields: <code>--inputIncludes</code>, <code>--inputExcludes</code>, <code>--inputPreserveDir</code>, <code>--inputFollowSymlinks</code>, <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>
+  Options used to configure fields: <code>--inputCompress</code>, <code>--inputIncludes</code>, <code>--inputExcludes</code>, <code>--inputPreserveDir</code>, <code>--inputFollowSymlinks</code>, <code>--inputPath</code>, <code>--mediaType</code>
 
 
 - Input type <code>docker</code>
@@ -243,7 +244,7 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property describes whether the file content should be stored
     compressed or not.
   
-  Options used to configure fields: <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputPath</code>
+  Options used to configure fields: <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>
 
 
 - Input type <code>helm</code>
@@ -270,7 +271,7 @@ with the field <code>type</code> in the <code>input</code> field:
     Basically, it is a good practice to use the component version for local resources
     This can be achieved by using templating for this attribute in the resource file.
   
-  Options used to configure fields: <code>--inputVersion</code>, <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputPath</code>
+  Options used to configure fields: <code>--inputPath</code>, <code>--inputVersion</code>, <code>--mediaType</code>, <code>--inputCompress</code>
 
 
 - Input type <code>ociImage</code>
@@ -289,7 +290,7 @@ with the field <code>type</code> in the <code>input</code> field:
     generated local artefact access. It is prefixed by the component name if
     it does not start with slash "/".
   
-  Options used to configure fields: <code>--hint</code>, <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputPath</code>
+  Options used to configure fields: <code>--inputPath</code>, <code>--hint</code>, <code>--mediaType</code>, <code>--inputCompress</code>
 
 
 - Input type <code>spiff</code>
@@ -328,7 +329,7 @@ with the field <code>type</code> in the <code>input</code> field:
   The variable settigs from the command line are available as binding, also. They are provided under the node
   <code>values</code>.
   
-  Options used to configure fields: <code>--inputLibraries</code>, <code>--inputValues</code>, <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>
+  Options used to configure fields: <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputLibraries</code>, <code>--inputValues</code>
 
 
 

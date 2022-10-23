@@ -323,7 +323,7 @@ type: PlainText
 				"--type", "ociImage",
 				"--name", "image",
 				"--version", "v0.1.0",
-				"--external",
+				//	"--external",
 				"--accessType", "ociArtefact",
 				"--reference", "ghcr.io/mandelsoft/pause:v0.1.0")).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))

@@ -165,10 +165,24 @@ labels:
 			labels := metav1.Labels{}
 			labels.Set("test", "value")
 			CheckReference(env, cd, "testdata", func(r compdesc.ComponentReference) {
-				//Expect(r.GetLabels()).To(Equal(labels))
 				Expect(r.ExtraIdentity).To(Equal(metav1.Identity{"purpose": "test", "label": "local"}))
 			})
 		})
 
+		It("completely specified by options with labels", func() {
+			Expect(env.Execute("add", "references", ARCH, "--name", "testdata", "--component", REF, "--version", VERSION, "--label", "*purpose=test", "--label", `label@v1={"local": true}`)).To(Succeed())
+			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+			Expect(err).To(Succeed())
+			cd, err := compdesc.Decode(data)
+			Expect(err).To(Succeed())
+			Expect(len(cd.References)).To(Equal(1))
+
+			labels := metav1.Labels{}
+			labels.Set("purpose", "test", metav1.WithSigning())
+			labels.Set("label", map[string]interface{}{"local": true}, metav1.WithVersion("v1"))
+			CheckReference(env, cd, "testdata", func(r compdesc.ComponentReference) {
+				Expect(r.GetLabels()).To(Equal(labels))
+			})
+		})
 	})
 })
