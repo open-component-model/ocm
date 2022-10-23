@@ -12,7 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package clisupport
+package flagsets_test
 
 import (
 	"testing"

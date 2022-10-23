@@ -11,6 +11,7 @@ ocm add references [<options>] <target> {<referencefile> | <var>=<value>}
 ```
       --addenv                 access environment for templating
       --component string       component name
+      --extra strings          reference extra identity
   -h, --help                   help for references
       --name string            reference name
       --reference string       reference meta data (yaml)
@@ -33,7 +34,8 @@ It is possible to describe a single reference via command line options.
 The meta data of this element is described by the argument of option <code>--reference</code>,
 which must be a YAML or JSON string.
 Alternatively, the <em>name</em> and <em>version</em> can be specified with the
-options <code>--name</code> and <code>--version</code>. Explicitly specified options
+options <code>--name</code> and <code>--version</code>. With the option <code>--extra</code>
+it is possible to add extra identity attributes. Explicitly specified options
 override values specified by the <code>--reference</code> option.
 (Note: Go templates are not supported for YAML-based option values. Besides
 this restriction, the finally composed element description is still processd

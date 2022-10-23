@@ -25,7 +25,7 @@ import (
 )
 
 type ReferenceResourceSpecificationProvider struct {
-	ocmcomm.ResourceMetaDataSpecificationsProvider
+	*ocmcomm.ResourceMetaDataSpecificationsProvider
 	component string
 }
 

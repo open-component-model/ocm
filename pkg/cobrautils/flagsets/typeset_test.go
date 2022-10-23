@@ -12,43 +12,45 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package clisupport
+package flagsets_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 )
 
 var _ = Describe("type set", func() {
-	var set ConfigOptionTypeSet
+	var set flagsets.ConfigOptionTypeSet
 
 	BeforeEach(func() {
-		set = NewConfigOptionSet("set")
+		set = flagsets.NewConfigOptionSet("set")
 	})
 
 	It("composes type set", func() {
-		set.AddOptionType(NewStringOptionType("string", "a test string"))
-		set.AddOptionType(NewStringOptionType("other", "another test string"))
+		set.AddOptionType(flagsets.NewStringOptionType("string", "a test string"))
+		set.AddOptionType(flagsets.NewStringOptionType("other", "another test string"))
 
-		Expect(set.GetOptionType("string")).To(Equal(NewStringOptionType("string", "a test string")))
-		Expect(set.GetOptionType("other")).To(Equal(NewStringOptionType("other", "another test string")))
+		Expect(set.GetOptionType("string")).To(Equal(flagsets.NewStringOptionType("string", "a test string")))
+		Expect(set.GetOptionType("other")).To(Equal(flagsets.NewStringOptionType("other", "another test string")))
 	})
 
 	It("aligns two sets", func() {
-		set1 := NewConfigOptionSet("first")
-		set1.AddOptionType(NewStringOptionType("string", "a test string"))
-		set1.AddOptionType(NewStringOptionType("other", "another test string"))
+		set1 := flagsets.NewConfigOptionSet("first")
+		set1.AddOptionType(flagsets.NewStringOptionType("string", "a test string"))
+		set1.AddOptionType(flagsets.NewStringOptionType("other", "another test string"))
 
-		set2 := NewConfigOptionSet("second")
-		set2.AddOptionType(NewStringOptionType("string", "a test string"))
-		set2.AddOptionType(NewStringOptionType("third", "a third string"))
+		set2 := flagsets.NewConfigOptionSet("second")
+		set2.AddOptionType(flagsets.NewStringOptionType("string", "a test string"))
+		set2.AddOptionType(flagsets.NewStringOptionType("third", "a third string"))
 
 		Expect(set.AddTypeSet(set1)).To(Succeed())
 		Expect(set.AddTypeSet(set2)).To(Succeed())
 
-		Expect(set.GetOptionType("string")).To(Equal(NewStringOptionType("string", "a test string")))
-		Expect(set.GetOptionType("other")).To(Equal(NewStringOptionType("other", "another test string")))
-		Expect(set.GetOptionType("third")).To(Equal(NewStringOptionType("third", "a third string")))
+		Expect(set.GetOptionType("string")).To(Equal(flagsets.NewStringOptionType("string", "a test string")))
+		Expect(set.GetOptionType("other")).To(Equal(flagsets.NewStringOptionType("other", "another test string")))
+		Expect(set.GetOptionType("third")).To(Equal(flagsets.NewStringOptionType("third", "a third string")))
 
 		Expect(set.GetOptionType("string")).To(BeIdenticalTo(set1.GetOptionType("string")))
 		Expect(set.GetOptionType("string")).To(BeIdenticalTo(set2.GetOptionType("string")))

@@ -17,9 +17,11 @@ package add
 import (
 	"fmt"
 
+	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -120,4 +122,42 @@ func (r *ResourceSpec) Validate(ctx clictx.Context, input *common.ResourceInput)
 		}
 	}
 	return allErrs.ToAggregate()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type ResourceSpecificationsProvider struct {
+	*common.ContentResourceSpecificationsProvider
+	external bool
+}
+
+func NewResourceSpecificationsProvider(ctx clictx.Context, deftype ...string) common.ResourceSpecificationsProvider {
+	return &ResourceSpecificationsProvider{
+		ContentResourceSpecificationsProvider: common.NewContentResourceSpecificationProvider(ctx, "resource", deftype...),
+	}
+}
+
+func (p *ResourceSpecificationsProvider) AddFlags(fs *pflag.FlagSet) {
+	p.ContentResourceSpecificationsProvider.AddFlags(fs)
+	fs.BoolVarP(&p.external, "external", "", false, "flag non-local resource")
+}
+
+func (p *ResourceSpecificationsProvider) Description() string {
+	d := p.ContentResourceSpecificationsProvider.Description()
+	return d + "Non-local resources can be indicated using the option <code>--external</code>."
+}
+
+func (a *ResourceSpecificationsProvider) IsSpecified() bool {
+	return a.external || a.ContentResourceSpecificationsProvider.IsSpecified()
+}
+func (a *ResourceSpecificationsProvider) ParseMeta() (flagsets.Config, error) {
+	data, err := a.ContentResourceSpecificationsProvider.ParsedMeta()
+	if err != nil {
+		return nil, err
+	}
+
+	if a.external {
+		data["relation"] = metav1.ExternalRelation
+	}
+	return data, nil
 }

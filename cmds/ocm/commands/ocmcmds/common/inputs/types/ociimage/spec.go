@@ -22,8 +22,6 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
-	"github.com/open-component-model/ocm/pkg/clisupport"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -31,11 +29,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
 )
-
-func ConfigHandler() clisupport.ConfigOptionTypeSetHandler {
-	return cpi.NewMediaFileSpecOptionType(TYPE, AddConfig,
-		options.PathOption, options.HintOption)
-}
 
 type Spec struct {
 	// PathSpec holds the repository path and tag of the image in the docker daemon
@@ -121,14 +114,4 @@ func ValidateRepository(fldPath *field.Path, allErrs field.ErrorList, repo strin
 		return append(allErrs, field.Invalid(fldPath, repo, "no repository name"))
 	}
 	return allErrs
-}
-
-func AddConfig(opts clisupport.ConfigOptions, config clisupport.Config) error {
-	if err := cpi.AddPathSpecConfig(opts, config); err != nil {
-		return err
-	}
-	if v, ok := opts.GetValue(options.HintOption.Name()); ok {
-		config["repository"] = v
-	}
-	return nil
 }

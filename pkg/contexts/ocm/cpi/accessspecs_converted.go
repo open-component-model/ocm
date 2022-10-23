@@ -19,6 +19,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -67,11 +68,12 @@ var (
 	_ runtime.TypedObjectEncoder = &ConvertedAccessType{}
 )
 
-func NewConvertedAccessSpecType(name string, v AccessSpecVersion) *ConvertedAccessType {
+func NewConvertedAccessSpecType(name string, v AccessSpecVersion, handler ...flagsets.ConfigOptionTypeSetHandler) *ConvertedAccessType {
 	return &ConvertedAccessType{
 		accessType: accessType{
 			ObjectVersionedType: runtime.NewVersionedObjectType(name),
 			TypedObjectDecoder:  v,
+			handler:             _handler(handler),
 		},
 		AccessSpecVersion: v,
 	}

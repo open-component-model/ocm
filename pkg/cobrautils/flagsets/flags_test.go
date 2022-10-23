@@ -12,32 +12,34 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-package clisupport
+package flagsets_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/spf13/pflag"
+
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 )
 
 var _ = Describe("type set", func() {
-	var set ConfigOptionTypeSet
+	var set flagsets.ConfigOptionTypeSet
 	var flags *pflag.FlagSet
 
 	BeforeEach(func() {
-		set = NewConfigOptionSet("first")
+		set = flagsets.NewConfigOptionSet("first")
 		flags = pflag.NewFlagSet("flags", pflag.ContinueOnError)
 	})
 
 	It("handles option group in args", func() {
-		set1 := NewConfigOptionSet("first")
-		set1.AddOptionType(NewStringOptionType("string", "a test string"))
-		set1.AddOptionType(NewStringOptionType("other", "another test string"))
+		set1 := flagsets.NewConfigOptionSet("first")
+		set1.AddOptionType(flagsets.NewStringOptionType("string", "a test string"))
+		set1.AddOptionType(flagsets.NewStringOptionType("other", "another test string"))
 
-		set2 := NewConfigOptionSet("second")
-		set2.AddOptionType(NewStringOptionType("string", "a test string"))
-		set2.AddOptionType(NewStringOptionType("third", "a third string"))
+		set2 := flagsets.NewConfigOptionSet("second")
+		set2.AddOptionType(flagsets.NewStringOptionType("string", "a test string"))
+		set2.AddOptionType(flagsets.NewStringOptionType("third", "a third string"))
 
 		Expect(set.AddTypeSet(set1)).To(Succeed())
 		Expect(set.AddTypeSet(set2)).To(Succeed())
@@ -52,13 +54,13 @@ var _ = Describe("type set", func() {
 	})
 
 	It("fails for mixed option group in args", func() {
-		set1 := NewConfigOptionSet("first")
-		set1.AddOptionType(NewStringOptionType("string", "a test string"))
-		set1.AddOptionType(NewStringOptionType("other", "another test string"))
+		set1 := flagsets.NewConfigOptionSet("first")
+		set1.AddOptionType(flagsets.NewStringOptionType("string", "a test string"))
+		set1.AddOptionType(flagsets.NewStringOptionType("other", "another test string"))
 
-		set2 := NewConfigOptionSet("second")
-		set2.AddOptionType(NewStringOptionType("string", "a test string"))
-		set2.AddOptionType(NewStringOptionType("third", "a third string"))
+		set2 := flagsets.NewConfigOptionSet("second")
+		set2.AddOptionType(flagsets.NewStringOptionType("string", "a test string"))
+		set2.AddOptionType(flagsets.NewStringOptionType("third", "a third string"))
 
 		Expect(set.AddTypeSet(set1)).To(Succeed())
 		Expect(set.AddTypeSet(set2)).To(Succeed())
@@ -74,8 +76,8 @@ var _ = Describe("type set", func() {
 	})
 
 	It("provides config value", func() {
-		set.AddOptionType(NewStringOptionType("string", "a test string"))
-		set.AddOptionType(NewStringOptionType("other", "another test string"))
+		set.AddOptionType(flagsets.NewStringOptionType("string", "a test string"))
+		set.AddOptionType(flagsets.NewStringOptionType("other", "another test string"))
 
 		opts := set.CreateOptions()
 		opts.AddFlags(flags)

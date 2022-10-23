@@ -2,7 +2,7 @@
 //
 //  SPDX-License-Identifier: Apache-2.0
 
-package clisupport
+package flagsets
 
 type Config = map[string]interface{}
 

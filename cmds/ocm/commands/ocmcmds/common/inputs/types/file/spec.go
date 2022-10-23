@@ -19,14 +19,9 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
-	"github.com/open-component-model/ocm/pkg/clisupport"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 )
-
-func ConfigHandler() clisupport.ConfigOptionTypeSetHandler {
-	return cpi.NewMediaFileSpecOptionType(TYPE, AddConfig)
-}
 
 type Spec struct {
 	cpi.MediaFileSpec `json:",inline"`
@@ -46,8 +41,4 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 
 func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
 	return (&ProcessSpec{s.MediaFileSpec, nil}).GetBlob(ctx, nv, inputFilePath)
-}
-
-func AddConfig(opts clisupport.ConfigOptions, config clisupport.Config) error {
-	return cpi.AddMediaFileSpecConfig(opts, config)
 }

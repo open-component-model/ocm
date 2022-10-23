@@ -2,17 +2,24 @@
 //
 //  SPDX-License-Identifier: Apache-2.0
 
-package clisupport
+package flagsets_test
 
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 )
+
+type Config = flagsets.Config
+
+var GetField = flagsets.GetField
+var SetField = flagsets.SetField
 
 var _ = Describe("config", func() {
 	Context("get", func() {
 		It("gets a field from empty map", func() {
-			m := Config{}
+			m := flagsets.Config{}
 			Expect(GetField(m, "a")).To(BeNil())
 		})
 
@@ -96,7 +103,7 @@ var _ = Describe("config", func() {
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(Equal("a is no map"))
 		})
-		
+
 		It("fails for non map intermediate", func() {
 			m := Config{"a": "va"}
 			err := SetField(m, "x", "a", "b", "c")

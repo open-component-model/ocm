@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -26,6 +27,8 @@ import (
 type AccessType interface {
 	runtime.TypedObjectDecoder
 	runtime.VersionedTypedObject
+
+	ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHandler
 }
 
 type AccessMethodSupport interface {
@@ -75,20 +78,36 @@ type AccessTypeScheme interface {
 
 	DecodeAccessSpec(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error)
 	CreateAccessSpec(obj runtime.TypedObject) (AccessSpec, error)
+
+	ConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider
+	flagsets.ConfigProvider
 }
 
 type accessTypeScheme struct {
 	runtime.SchemeBase
+	optionTypes flagsets.ConfigTypeOptionSetConfigProvider
 }
 
 func NewAccessTypeScheme() AccessTypeScheme {
 	var at AccessSpec
 	scheme := runtime.MustNewDefaultScheme(&at, &UnknownAccessSpec{}, true, nil)
-	return &accessTypeScheme{scheme}
+	return &accessTypeScheme{scheme, flagsets.NewTypedConfigProvider("access", "blob access specification")}
 }
 
 func (t *accessTypeScheme) AddKnownTypes(s AccessTypeScheme) {
 	t.SchemeBase.AddKnownTypes(s)
+}
+
+func (t *accessTypeScheme) ConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider {
+	return t.optionTypes
+}
+
+func (t *accessTypeScheme) CreateOptions() flagsets.ConfigOptions {
+	return t.optionTypes.CreateOptions()
+}
+
+func (t *accessTypeScheme) GetConfigFor(opts flagsets.ConfigOptions) (flagsets.Config, error) {
+	return t.optionTypes.GetConfigFor(opts)
 }
 
 func (t *accessTypeScheme) GetAccessType(name string) AccessType {
@@ -101,13 +120,18 @@ func (t *accessTypeScheme) GetAccessType(name string) AccessType {
 
 func (t *accessTypeScheme) Register(name string, atype AccessType) {
 	t.SchemeBase.RegisterByDecoder(name, atype)
+	if h := atype.ConfigOptionTypeSetHandler(); h != nil {
+		t.optionTypes.AddTypeSet(h)
+	}
 }
 
 func (t *accessTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedObjectDecoder) error {
-	if _, ok := decoder.(AccessType); !ok {
+	if atype, ok := decoder.(AccessType); !ok {
 		return errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
+	} else {
+		t.Register(name, atype)
 	}
-	return t.SchemeBase.RegisterByDecoder(name, decoder)
+	return nil
 }
 
 func (t *accessTypeScheme) DecodeAccessSpec(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error) {

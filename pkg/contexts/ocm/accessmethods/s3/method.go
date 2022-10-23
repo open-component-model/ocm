@@ -40,7 +40,7 @@ const (
 )
 
 func init() {
-	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}, ConfigHandler()))
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}))
 }
 

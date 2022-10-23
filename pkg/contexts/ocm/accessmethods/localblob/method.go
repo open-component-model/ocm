@@ -28,7 +28,7 @@ const Type = "localBlob"
 const TypeV1 = Type + runtime.VersionSeparator + "v1"
 
 func init() {
-	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(Type, LocalBlobV1))
+	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(Type, LocalBlobV1, ConfigHandler()))
 	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(TypeV1, LocalBlobV1))
 }
 

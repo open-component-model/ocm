@@ -23,7 +23,7 @@ import (
 	"github.com/modern-go/reflect2"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/open-component-model/ocm/pkg/clisupport"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -90,9 +90,8 @@ type InputType interface {
 	runtime.TypedObjectDecoder
 	runtime.VersionedTypedObject
 
-	clisupport.ConfigHandler
+	ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHandler
 
-	ConfigOptionTypeSetHandler() clisupport.ConfigOptionTypeSetHandler
 	Usage() string
 }
 
@@ -100,10 +99,10 @@ type DefaultInputType struct {
 	runtime.ObjectVersionedType
 	runtime.TypedObjectDecoder
 	usage      string
-	clihandler clisupport.ConfigOptionTypeSetHandler
+	clihandler flagsets.ConfigOptionTypeSetHandler
 }
 
-func NewInputType(name string, proto InputSpec, usage string, cfg clisupport.ConfigOptionTypeSetHandler) InputType {
+func NewInputType(name string, proto InputSpec, usage string, cfg flagsets.ConfigOptionTypeSetHandler) InputType {
 	t := reflect.TypeOf(proto)
 	for t.Kind() == reflect.Ptr {
 		t = t.Elem()
@@ -116,7 +115,7 @@ func NewInputType(name string, proto InputSpec, usage string, cfg clisupport.Con
 	}
 }
 
-func (t *DefaultInputType) ConfigOptionTypeSetHandler() clisupport.ConfigOptionTypeSetHandler {
+func (t *DefaultInputType) ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHandler {
 	return t.clihandler
 }
 
@@ -135,7 +134,7 @@ func (t *DefaultInputType) Usage() string {
 	return t.usage + group
 }
 
-func (t *DefaultInputType) ApplyConfig(opts clisupport.ConfigOptions, config clisupport.Config) error {
+func (t *DefaultInputType) ApplyConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 	if t.clihandler != nil {
 		return t.clihandler.ApplyConfig(opts, config)
 	}
@@ -144,7 +143,9 @@ func (t *DefaultInputType) ApplyConfig(opts clisupport.ConfigOptions, config cli
 
 type InputTypeScheme interface {
 	runtime.Scheme
-	clisupport.ConfigProvider
+
+	ConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider
+	flagsets.ConfigProvider
 
 	GetInputType(name string) InputType
 	Register(name string, atype InputType)
@@ -155,24 +156,28 @@ type InputTypeScheme interface {
 
 type inputTypeScheme struct {
 	runtime.SchemeBase
-	optionTypes clisupport.ConfigTypeOptionSetConfigProvider
+	optionTypes flagsets.ConfigTypeOptionSetConfigProvider
 }
 
 func NewInputTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) InputTypeScheme {
 	var rt InputSpec
 	scheme := runtime.MustNewDefaultScheme(&rt, &UnknownInputSpec{}, false, defaultRepoDecoder)
-	return &inputTypeScheme{scheme, clisupport.NewTypedConfigProvider("input", "blob input specification")}
+	return &inputTypeScheme{scheme, flagsets.NewTypedConfigProvider("input", "blob input specification")}
 }
 
 func (t *inputTypeScheme) AddKnownTypes(s InputTypeScheme) {
 	t.SchemeBase.AddKnownTypes(s)
 }
 
-func (t *inputTypeScheme) CreateOptions() clisupport.ConfigOptions {
+func (t *inputTypeScheme) ConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider {
+	return t.optionTypes
+}
+
+func (t *inputTypeScheme) CreateOptions() flagsets.ConfigOptions {
 	return t.optionTypes.CreateOptions()
 }
 
-func (t *inputTypeScheme) GetConfigFor(opts clisupport.ConfigOptions) (clisupport.Config, error) {
+func (t *inputTypeScheme) GetConfigFor(opts flagsets.ConfigOptions) (flagsets.Config, error) {
 	return t.optionTypes.GetConfigFor(opts)
 }
 

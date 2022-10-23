@@ -22,7 +22,7 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
-	"github.com/open-component-model/ocm/pkg/clisupport"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -101,22 +101,22 @@ func (s *MediaFileSpec) ValidateFile(fldPath *field.Path, ctx clictx.Context, in
 	return nil, "", allErrs
 }
 
-func NewMediaFileSpecOptionType(name string, adder clisupport.ConfigAdder, types ...clisupport.ConfigOptionType) clisupport.ConfigOptionTypeSetHandler {
-	set := clisupport.NewConfigOptionTypeSetHandler(name, adder, types...)
+func NewMediaFileSpecOptionType(name string, adder flagsets.ConfigAdder, types ...flagsets.ConfigOptionType) flagsets.ConfigOptionTypeSetHandler {
+	set := flagsets.NewConfigOptionTypeSetHandler(name, adder, types...)
 	set.AddOptionType(options.PathOption)
 	set.AddOptionType(options.MediaTypeOption)
 	set.AddOptionType(options.CompressOption)
 	return set
 }
 
-func AddPathSpecConfig(opts clisupport.ConfigOptions, config clisupport.Config) error {
+func AddPathSpecConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 	if v, ok := opts.GetValue(options.PathOption.Name()); ok {
 		config["path"] = v
 	}
 	return nil
 }
 
-func AddMediaFileSpecConfig(opts clisupport.ConfigOptions, config clisupport.Config) error {
+func AddMediaFileSpecConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 	if err := AddPathSpecConfig(opts, config); err != nil {
 		return err
 	}

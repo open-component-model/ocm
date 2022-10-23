@@ -21,9 +21,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociimage"
-	"github.com/open-component-model/ocm/pkg/clisupport"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -36,14 +34,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
-
-func ConfigHandler() clisupport.ConfigOptionTypeSetHandler {
-	return clisupport.NewConfigOptionTypeSetHandler(
-		TYPE, AddConfig,
-		options.VariantsOption,
-		options.HintOption,
-	)
-}
 
 type Spec struct {
 	runtime.ObjectVersionedType `json:",inline"`
@@ -188,14 +178,4 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 		return nil, "", err
 	}
 	return blob, ociimage.Hint(nv, nv.GetName(), s.Repository, nv.GetVersion()), nil
-}
-
-func AddConfig(opts clisupport.ConfigOptions, config clisupport.Config) error {
-	if v, ok := opts.GetValue(options.VariantsOption.Name()); ok {
-		config["variants"] = v
-	}
-	if v, ok := opts.GetValue(options.HintOption.Name()); ok {
-		config["repository"] = v
-	}
-	return nil
 }

@@ -15,24 +15,26 @@
 package options
 
 import (
-	"github.com/open-component-model/ocm/pkg/clisupport"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 )
 
-var PathOption = clisupport.NewStringOptionType("inputPath", "path field for input")
-var MediaTypeOption = clisupport.NewStringOptionType("inputMediatype", "media type for input")
-var CompressOption = clisupport.NewBoolOptionType("inputCompress", "compress option for input")
+var HintOption = options.HintOption
+var MediaTypeOption = options.MediatypeOption
 
-var ExcludeOption = clisupport.NewStringArrayOptionType("inputExcludes", "excludes (path) for inputs")
-var IncludeOption = clisupport.NewStringArrayOptionType("inputIncludes", "includes (path) for inputs")
+var PathOption = flagsets.NewStringOptionType("inputPath", "path field for input")
 
-var PreserveDirOption = clisupport.NewBoolOptionType("inputPreserveDir", "preserve directory in archive for inputs")
-var FollowSymlinksOption = clisupport.NewBoolOptionType("inputFollowSymlinks", "follow symbolic links during archive creation for inputs")
+var CompressOption = flagsets.NewBoolOptionType("inputCompress", "compress option for input")
+var ExcludeOption = flagsets.NewStringArrayOptionType("inputExcludes", "excludes (path) for inputs")
 
-var HintOption = clisupport.NewStringOptionType("inputHint", "(repository) hint local artifacts for inputs")
-var VariantsOption = clisupport.NewStringArrayOptionType("inputVariants", "(platform) variants for inputs")
+var IncludeOption = flagsets.NewStringArrayOptionType("inputIncludes", "includes (path) for inputs")
+var PreserveDirOption = flagsets.NewBoolOptionType("inputPreserveDir", "preserve directory in archive for inputs")
 
-var LibrariesOption = clisupport.NewStringArrayOptionType("inputLibraries", "library path for inputs")
+var FollowSymlinksOption = flagsets.NewBoolOptionType("inputFollowSymlinks", "follow symbolic links during archive creation for inputs")
+var VariantsOption = flagsets.NewStringArrayOptionType("inputVariants", "(platform) variants for inputs")
 
-var VersionOption = clisupport.NewStringArrayOptionType("inputVersion", "version info for inputs")
+var LibrariesOption = flagsets.NewStringArrayOptionType("inputLibraries", "library path for inputs")
 
-var ValuesOption = clisupport.NewValueMapOptionType("inputValues", "YAML based generic values for inputs")
+var VersionOption = flagsets.NewStringArrayOptionType("inputVersion", "version info for inputs")
+
+var ValuesOption = flagsets.NewValueMapOptionType("inputValues", "YAML based generic values for inputs")
