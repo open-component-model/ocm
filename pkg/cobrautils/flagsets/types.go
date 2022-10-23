@@ -19,7 +19,7 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/cobrautils/flags"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
 )
 
 type TypeOptionBase struct {
@@ -225,7 +225,7 @@ type YAMLOption struct {
 var _ Option = (*YAMLOption)(nil)
 
 func (o *YAMLOption) AddFlags(fs *pflag.FlagSet) {
-	flags.YAMLVarP(fs, &o.value, o.otyp.Name(), "", nil, o.otyp.Description())
+	flag.YAMLVarP(fs, &o.value, o.otyp.Name(), "", nil, o.otyp.Description())
 }
 
 func (o *YAMLOption) Value() interface{} {
@@ -237,6 +237,43 @@ func (s *YAMLOptionType) Equal(optionType ConfigOptionType) bool {
 }
 
 func (s *YAMLOptionType) Create() Option {
+	return &YAMLOption{
+		OptionBase: NewOptionBase(s),
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+type ValueMapYAMLOptionType struct {
+	TypeOptionBase
+}
+
+func NewValueMapYAMLOptionType(name string, description string) ConfigOptionType {
+	return &ValueMapYAMLOptionType{
+		TypeOptionBase: TypeOptionBase{name, description},
+	}
+}
+
+type ValueMapYAMLOption struct {
+	OptionBase
+	value map[string]interface{}
+}
+
+var _ Option = (*ValueMapYAMLOption)(nil)
+
+func (o *ValueMapYAMLOption) AddFlags(fs *pflag.FlagSet) {
+	flag.YAMLVarP(fs, &o.value, o.otyp.Name(), "", nil, o.otyp.Description())
+}
+
+func (o *ValueMapYAMLOption) Value() interface{} {
+	return o.value
+}
+
+func (s *ValueMapYAMLOptionType) Equal(optionType ConfigOptionType) bool {
+	return reflect.DeepEqual(s, optionType)
+}
+
+func (s *ValueMapYAMLOptionType) Create() Option {
 	return &YAMLOption{
 		OptionBase: NewOptionBase(s),
 	}
@@ -262,7 +299,7 @@ type ValueMapOption struct {
 var _ Option = (*ValueMapOption)(nil)
 
 func (o *ValueMapOption) AddFlags(fs *pflag.FlagSet) {
-	flags.YAMLVarP(fs, &o.value, o.otyp.Name(), "", nil, o.otyp.Description())
+	flag.ValueMapVarP(fs, &o.value, o.otyp.Name(), "", nil, o.otyp.Description())
 }
 
 func (o *ValueMapOption) Value() interface{} {
@@ -274,7 +311,44 @@ func (s *ValueMapOptionType) Equal(optionType ConfigOptionType) bool {
 }
 
 func (s *ValueMapOptionType) Create() Option {
-	return &YAMLOption{
+	return &ValueMapOption{
+		OptionBase: NewOptionBase(s),
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+type StringMapOptionType struct {
+	TypeOptionBase
+}
+
+func NewStringMapOptionType(name string, description string) ConfigOptionType {
+	return &StringMapOptionType{
+		TypeOptionBase: TypeOptionBase{name, description},
+	}
+}
+
+type StringMapOption struct {
+	OptionBase
+	value map[string]string
+}
+
+var _ Option = (*StringMapOption)(nil)
+
+func (o *StringMapOption) AddFlags(fs *pflag.FlagSet) {
+	flag.StringMapVarP(fs, &o.value, o.otyp.Name(), "", nil, o.otyp.Description())
+}
+
+func (o *StringMapOption) Value() interface{} {
+	return o.value
+}
+
+func (s *StringMapOptionType) Equal(optionType ConfigOptionType) bool {
+	return reflect.DeepEqual(s, optionType)
+}
+
+func (s *StringMapOptionType) Create() Option {
+	return &StringMapOption{
 		OptionBase: NewOptionBase(s),
 	}
 }

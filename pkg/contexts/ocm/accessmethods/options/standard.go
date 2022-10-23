@@ -43,7 +43,7 @@ var HostnameOption = flagsets.NewStringOptionType("accessHostname", "hostname us
 var CommitOption = flagsets.NewStringOptionType("commit", "git commit id")
 
 // GlobalAccessOption.
-var GlobalAccessOption = flagsets.NewValueMapOptionType("globalAccess", "access specification for global access")
+var GlobalAccessOption = flagsets.NewValueMapYAMLOptionType("globalAccess", "access specification for global access")
 
 // RegionOption.
 var RegionOption = flagsets.NewStringOptionType("region", "region name")

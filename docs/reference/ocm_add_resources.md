@@ -19,7 +19,7 @@ ocm add resources [<options>] <target> {<resourcefile> | <var>=<value>}
       --commit string                git commit id
       --digest string                blob digest
       --external                     flag non-local resource
-      --extra stringArray            resource extra identity
+      --extra <name>=<value>         resource extra identity (default [])
       --globalAccess YAML            access specification for global access
   -h, --help                         help for resources
       --hint string                  (repository) hint for local artifacts
@@ -35,6 +35,7 @@ ocm add resources [<options>] <target> {<resourcefile> | <var>=<value>}
       --inputValues YAML             YAML based generic values for inputs
       --inputVariants stringArray    (platform) variants for inputs
       --inputVersion stringArray     version info for inputs
+      --label <name>=<YAML>          resource label (leading * indicates signature relevant, optional version separated by @)
       --mediaType string             media type for artifact blob representation
       --name string                  resource name
       --reference string             reference name
@@ -176,7 +177,7 @@ with the field <code>type</code> in the <code>input</code> field:
     that should be included in the tar file. If this option is not given
     all files not explicitly excluded are used.
   
-  Options used to configure fields: <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputIncludes</code>, <code>--inputExcludes</code>, <code>--inputPreserveDir</code>, <code>--inputFollowSymlinks</code>, <code>--inputPath</code>
+  Options used to configure fields: <code>--inputExcludes</code>, <code>--inputPreserveDir</code>, <code>--inputFollowSymlinks</code>, <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputIncludes</code>
 
 
 - Input type <code>docker</code>
@@ -218,7 +219,7 @@ with the field <code>type</code> in the <code>input</code> field:
     generated local artefact access. It is prefixed by the component name if
     it does not start with slash "/".
   
-  Options used to configure fields: <code>--inputVariants</code>, <code>--hint</code>
+  Options used to configure fields: <code>--hint</code>, <code>--inputVariants</code>
 
 
 - Input type <code>file</code>
@@ -244,7 +245,7 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property describes whether the file content should be stored
     compressed or not.
   
-  Options used to configure fields: <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>
+  Options used to configure fields: <code>--inputCompress</code>, <code>--inputPath</code>, <code>--mediaType</code>
 
 
 - Input type <code>helm</code>
@@ -290,7 +291,7 @@ with the field <code>type</code> in the <code>input</code> field:
     generated local artefact access. It is prefixed by the component name if
     it does not start with slash "/".
   
-  Options used to configure fields: <code>--inputCompress</code>, <code>--inputPath</code>, <code>--hint</code>, <code>--mediaType</code>
+  Options used to configure fields: <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputPath</code>, <code>--hint</code>
 
 
 - Input type <code>spiff</code>
@@ -329,7 +330,7 @@ with the field <code>type</code> in the <code>input</code> field:
   The variable settigs from the command line are available as binding, also. They are provided under the node
   <code>values</code>.
   
-  Options used to configure fields: <code>--inputCompress</code>, <code>--inputLibraries</code>, <code>--inputValues</code>, <code>--inputPath</code>, <code>--mediaType</code>
+  Options used to configure fields: <code>--inputValues</code>, <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputLibraries</code>
 
 
 

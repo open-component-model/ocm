@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
 func ConsumeIdentities(pattern bool, args []string, stop ...string) ([]metav1.Identity, []string, error) {
@@ -79,4 +80,43 @@ func CompleteOptionsWithSession(ctx clictx.Context, session ocm.Session) options
 		}
 		return nil
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func MapLabelSpecs(d interface{}) (interface{}, error) {
+	if d == nil {
+		return nil, nil
+	}
+
+	m, ok := d.(map[string]interface{})
+	if !ok {
+		return nil, errors.ErrInvalid("go type", fmt.Sprintf("%T", d))
+	}
+
+	var labels []interface{}
+	found := map[string]struct{}{}
+	for _, k := range utils2.StringMapKeys(m) {
+		v := m[k]
+		entry := map[string]interface{}{}
+		if strings.HasPrefix(k, "*") {
+			entry["signing"] = true
+			k = k[1:]
+		}
+		if i := strings.Index(k, "@"); i > 0 {
+			vers := k[i+1:]
+			if !metav1.CheckLabelVersion(vers) {
+				return nil, errors.ErrInvalid("invalid version %q for label %q", vers, k[:i])
+			}
+			entry["version"] = vers
+			k = k[:i]
+		}
+		if _, ok := found[k]; ok {
+			return nil, fmt.Errorf("duplicate label %q", k)
+		}
+		entry["name"] = k
+		entry["value"] = v
+		labels = append(labels, entry)
+	}
+	return labels, nil
 }

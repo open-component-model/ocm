@@ -37,4 +37,4 @@ var LibrariesOption = flagsets.NewStringArrayOptionType("inputLibraries", "libra
 
 var VersionOption = flagsets.NewStringArrayOptionType("inputVersion", "version info for inputs")
 
-var ValuesOption = flagsets.NewValueMapOptionType("inputValues", "YAML based generic values for inputs")
+var ValuesOption = flagsets.NewValueMapYAMLOptionType("inputValues", "YAML based generic values for inputs")

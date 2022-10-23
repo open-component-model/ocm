@@ -63,7 +63,7 @@ type typedConfigProvider struct {
 var _ ConfigTypeOptionSetConfigProvider = (*typedConfigProvider)(nil)
 
 func NewTypedConfigProvider(name string, desc string) ConfigTypeOptionSetConfigProvider {
-	set := NewConfigOptionSet(name, NewValueMapOptionType(name, desc+" (YAML)"), NewStringOptionType(name+"Type", "type of "+desc))
+	set := NewConfigOptionSet(name, NewValueMapYAMLOptionType(name, desc+" (YAML)"), NewStringOptionType(name+"Type", "type of "+desc))
 	return &typedConfigProvider{
 		ConfigOptionTypeSet: set,
 	}

@@ -145,7 +145,8 @@ func NewResourceMetaDataSpecificationsProvider(name string, adder flagsets.Confi
 				flagsets.NewYAMLOptionType(name, fmt.Sprintf("%s meta data (yaml)", name)),
 				flagsets.NewStringOptionType("name", fmt.Sprintf("%s name", name)),
 				flagsets.NewStringOptionType("version", fmt.Sprintf("%s version", name)),
-				flagsets.NewStringArrayOptionType("extra", fmt.Sprintf("%s extra identity", name)),
+				flagsets.NewStringMapOptionType("extra", fmt.Sprintf("%s extra identity", name)),
+				flagsets.NewValueMapOptionType("label", fmt.Sprintf("%s label (leading * indicates signature relevant, optional version separated by @)", name)),
 			)...,
 		),
 	}
@@ -163,15 +164,9 @@ func addMeta(typename string) flagsets.ConfigAdder {
 
 		flagsets.AddFieldByOption(opts, "name", config)
 		flagsets.AddFieldByOption(opts, "version", config)
-
-		if o, ok := opts.GetValue("extra"); ok {
-			id, err := ParseSettings(o.([]string), "extra identity")
-			if err != nil {
-				return err
-			}
-			if len(id) > 0 {
-				config["extraIdentity"] = id
-			}
+		flagsets.AddFieldByOption(opts, "extra", config, "extraIdentity")
+		if err := flagsets.AddFieldByMappedOption(opts, "label", config, MapLabelSpecs, "labels"); err != nil {
+			return err
 		}
 		return nil
 	}

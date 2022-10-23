@@ -2,7 +2,7 @@
 //
 //  SPDX-License-Identifier: Apache-2.0
 
-package flags
+package flag
 
 import (
 	"fmt"
@@ -16,21 +16,21 @@ type LabelledString struct {
 	Value string
 }
 
-type LabelledStringValue LabelledString
+type labelledStringValue LabelledString
 
-func NewLabelledStringValue(val LabelledString, p *LabelledString) *LabelledStringValue {
+func NewLabelledStringValue(val LabelledString, p *LabelledString) *labelledStringValue {
 	*p = val
-	return (*LabelledStringValue)(p)
+	return (*labelledStringValue)(p)
 }
 
-func (i *LabelledStringValue) String() string {
+func (i *labelledStringValue) String() string {
 	if i.Name == "" {
 		return ""
 	}
 	return i.Name + "=" + i.Value
 }
 
-func (i *LabelledStringValue) Set(s string) error {
+func (i *labelledStringValue) Set(s string) error {
 	idx := strings.Index(s, "=")
 	if idx <= 0 {
 		return fmt.Errorf("expected <name>=<value>")
@@ -40,7 +40,7 @@ func (i *LabelledStringValue) Set(s string) error {
 	return nil
 }
 
-func (i *LabelledStringValue) Type() string {
+func (i *labelledStringValue) Type() string {
 	return "LabelledString"
 }
 
