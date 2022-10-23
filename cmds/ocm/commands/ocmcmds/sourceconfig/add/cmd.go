@@ -43,7 +43,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		&Command{
 			common.ResourceConfigAdderCommand{
 				BaseCommand: utils.NewBaseCommand(ctx),
-				Adder:       common.NewContentResourceSpecificationProvider(ctx, "source", resourcetypes.FILESYSTEM),
+				Adder:       common.NewContentResourceSpecificationProvider(ctx, "source", nil, resourcetypes.FILESYSTEM),
 				Templating: template.Options{
 					Default: "none",
 				},

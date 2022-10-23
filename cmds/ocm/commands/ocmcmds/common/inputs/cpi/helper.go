@@ -110,9 +110,7 @@ func NewMediaFileSpecOptionType(name string, adder flagsets.ConfigAdder, types .
 }
 
 func AddPathSpecConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
-	if v, ok := opts.GetValue(options.PathOption.Name()); ok {
-		config["path"] = v
-	}
+	flagsets.AddFieldByOptionP(opts, options.PathOption, config, "path")
 	return nil
 }
 
@@ -120,11 +118,7 @@ func AddMediaFileSpecConfig(opts flagsets.ConfigOptions, config flagsets.Config)
 	if err := AddPathSpecConfig(opts, config); err != nil {
 		return err
 	}
-	if v, ok := opts.GetValue(options.MediaTypeOption.Name()); ok {
-		config["mediaType"] = v
-	}
-	if v, ok := opts.GetValue(options.CompressOption.Name()); ok {
-		config["compress"] = v
-	}
+	flagsets.AddFieldByOptionP(opts, options.MediaTypeOption, config, "mediaType")
+	flagsets.AddFieldByOptionP(opts, options.CompressOption, config, "compress")
 	return nil
 }

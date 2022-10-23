@@ -17,8 +17,6 @@ func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 }
 
 func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
-	if v, ok := opts.GetValue(options.ReferenceOption.Name()); ok {
-		config["imageReference"] = v
-	}
+	flagsets.AddFieldByOptionP(opts, options.ReferenceOption, config, "imageReference")
 	return nil
 }

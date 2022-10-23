@@ -20,17 +20,9 @@ func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 }
 
 func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
-	if v, ok := opts.GetValue(options.ReferenceOption.Name()); ok {
-		config["ref"] = v
-	}
-	if v, ok := opts.GetValue(options.MediatypeOption.Name()); ok {
-		config["mediaType"] = v
-	}
-	if v, ok := opts.GetValue(options.SizeOption.Name()); ok {
-		config["size"] = v
-	}
-	if v, ok := opts.GetValue(options.DigestOption.Name()); ok {
-		config["digest"] = v
-	}
+	flagsets.AddFieldByOptionP(opts, options.ReferenceOption, config, "ref")
+	flagsets.AddFieldByOptionP(opts, options.MediatypeOption, config, "mediaType")
+	flagsets.AddFieldByOptionP(opts, options.SizeOption, config, "size")
+	flagsets.AddFieldByOptionP(opts, options.DigestOption, config, "digest")
 	return nil
 }

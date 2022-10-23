@@ -22,6 +22,40 @@ type ConfigTypeOptionSetConfigProvider interface {
 	IsExplicitlySelected(opts ConfigOptions) bool
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+type plainConfigProvider struct {
+	ConfigOptionTypeSetHandler
+}
+
+var _ ConfigTypeOptionSetConfigProvider = (*plainConfigProvider)(nil)
+
+func NewPlainConfigProvider(name string, adder ConfigAdder, types ...ConfigOptionType) ConfigTypeOptionSetConfigProvider {
+	h := NewConfigOptionTypeSetHandler(name, adder, types...)
+	return &plainConfigProvider{
+		ConfigOptionTypeSetHandler: h,
+	}
+}
+
+func (p *plainConfigProvider) GetConfigOptionTypeSet() ConfigOptionTypeSet {
+	return p
+}
+
+func (p *plainConfigProvider) IsExplicitlySelected(opts ConfigOptions) bool {
+	return opts.FilterBy(p.HasOptionType).Changed()
+}
+
+func (p *plainConfigProvider) GetConfigFor(opts ConfigOptions) (Config, error) {
+	if !p.IsExplicitlySelected(opts) {
+		return nil, nil
+	}
+	config := Config{}
+	err := p.ApplyConfig(opts, config)
+	return config, err
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type typedConfigProvider struct {
 	ConfigOptionTypeSet
 }
@@ -39,21 +73,8 @@ func (p *typedConfigProvider) GetConfigOptionTypeSet() ConfigOptionTypeSet {
 	return p
 }
 
-func (p *typedConfigProvider) ApplyConfig(options ConfigOptions, config Config) error {
-	cfg, err := p.GetConfigFor(options)
-	if err != nil {
-		return err
-	}
-	if cfg != nil {
-		config[p.Name()] = cfg
-	}
-	return nil
-}
-
 func (p *typedConfigProvider) IsExplicitlySelected(opts ConfigOptions) bool {
-	typv, _ := opts.GetValue(p.Name() + "Type")
-	cfgv, _ := opts.GetValue(p.Name())
-	return cfgv != nil || typv.(string) != ""
+	return opts.Changed(p.Name()+"Type", p.Name())
 }
 
 func (p *typedConfigProvider) GetConfigFor(opts ConfigOptions) (Config, error) {

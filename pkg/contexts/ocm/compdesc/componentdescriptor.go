@@ -74,31 +74,31 @@ func (cd *ComponentDescriptor) SchemaVersion() string {
 	return cd.Metadata.ConfiguredVersion
 }
 
-func (c *ComponentDescriptor) Copy() *ComponentDescriptor {
+func (cd *ComponentDescriptor) Copy() *ComponentDescriptor {
 	out := &ComponentDescriptor{
-		Metadata: c.Metadata,
+		Metadata: cd.Metadata,
 		ComponentSpec: ComponentSpec{
-			ObjectMeta:         *c.ObjectMeta.Copy(),
-			RepositoryContexts: c.RepositoryContexts.Copy(),
-			Sources:            c.Sources.Copy(),
-			References:         c.References.Copy(),
-			Resources:          c.Resources.Copy(),
+			ObjectMeta:         *cd.ObjectMeta.Copy(),
+			RepositoryContexts: cd.RepositoryContexts.Copy(),
+			Sources:            cd.Sources.Copy(),
+			References:         cd.References.Copy(),
+			Resources:          cd.Resources.Copy(),
 		},
-		Signatures: c.Signatures.Copy(),
+		Signatures: cd.Signatures.Copy(),
 	}
 	return out
 }
 
-func (c *ComponentDescriptor) Reset() {
-	c.Provider.Name = ""
-	c.Provider.Labels = nil
-	c.Resources = nil
-	c.Sources = nil
-	c.References = nil
-	c.RepositoryContexts = nil
-	c.Signatures = nil
-	c.Labels = nil
-	DefaultComponent(c)
+func (cd *ComponentDescriptor) Reset() {
+	cd.Provider.Name = ""
+	cd.Provider.Labels = nil
+	cd.Resources = nil
+	cd.Sources = nil
+	cd.References = nil
+	cd.RepositoryContexts = nil
+	cd.Signatures = nil
+	cd.Labels = nil
+	DefaultComponent(cd)
 }
 
 // ComponentSpec defines a virtual component with
@@ -140,7 +140,7 @@ type ElementMeta struct {
 }
 
 // GetName returns the name of the object.
-func (o ElementMeta) GetName() string {
+func (o *ElementMeta) GetName() string {
 	return o.Name
 }
 
@@ -150,7 +150,7 @@ func (o *ElementMeta) SetName(name string) {
 }
 
 // GetVersion returns the version of the object.
-func (o ElementMeta) GetVersion() string {
+func (o *ElementMeta) GetVersion() string {
 	return o.Version
 }
 
@@ -160,7 +160,7 @@ func (o *ElementMeta) SetVersion(version string) {
 }
 
 // GetLabels returns the label of the object.
-func (o ElementMeta) GetLabels() metav1.Labels {
+func (o *ElementMeta) GetLabels() metav1.Labels {
 	return o.Labels
 }
 
@@ -350,7 +350,7 @@ type SourceMeta struct {
 }
 
 // GetType returns the type of the object.
-func (o SourceMeta) GetType() string {
+func (o *SourceMeta) GetType() string {
 	return o.Type
 }
 
@@ -501,7 +501,7 @@ func (o *ResourceMeta) HashEqual(r *ResourceMeta) bool {
 }
 
 // GetType returns the type of the object.
-func (o ResourceMeta) GetType() string {
+func (o *ResourceMeta) GetType() string {
 	return o.Type
 }
 

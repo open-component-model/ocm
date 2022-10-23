@@ -19,14 +19,8 @@ func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 }
 
 func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
-	if v, ok := opts.GetValue(options.RepositoryOption.Name()); ok {
-		config["repoUrl"] = v
-	}
-	if v, ok := opts.GetValue(options.CommitOption.Name()); ok {
-		config["commit"] = v
-	}
-	if v, ok := opts.GetValue(options.HostnameOption.Name()); ok {
-		config["apiHostname"] = v
-	}
+	flagsets.AddFieldByOptionP(opts, options.RepositoryOption, config, "repoUrl")
+	flagsets.AddFieldByOptionP(opts, options.CommitOption, config, "commit")
+	flagsets.AddFieldByOptionP(opts, options.HostnameOption, config, "apiHostname")
 	return nil
 }

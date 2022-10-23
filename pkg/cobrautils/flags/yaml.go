@@ -6,6 +6,7 @@ package flags
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/spf13/pflag"
 	"sigs.k8s.io/yaml"
@@ -24,7 +25,9 @@ func NewYAMLValue[T any](val T, p *T) *YAMLValue[T] {
 
 //nolint: errchkjson // initialized by unmarshal
 func (i *YAMLValue[T]) String() string {
-	if i.addr == nil {
+	v := reflect.ValueOf(i.addr)
+
+	if v.Elem().IsZero() {
 		return ""
 	}
 	data, _ := json.Marshal(*i.addr)

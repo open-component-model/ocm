@@ -9,7 +9,7 @@ ocm add resources [<options>] <target> {<resourcefile> | <var>=<value>}
 ### Options
 
 ```
-      --access YAML                  blob access specification (YAML) (default null)
+      --access YAML                  blob access specification (YAML)
       --accessHostname string        hostname used for access
       --accessRepository string      repository URL
       --accessType string            type of blob access specification
@@ -19,11 +19,11 @@ ocm add resources [<options>] <target> {<resourcefile> | <var>=<value>}
       --commit string                git commit id
       --digest string                blob digest
       --external                     flag non-local resource
-      --extra strings                resource extra identity
-      --globalAccess YAML            access specification for global access (default null)
+      --extra stringArray            resource extra identity
+      --globalAccess YAML            access specification for global access
   -h, --help                         help for resources
       --hint string                  (repository) hint for local artifacts
-      --input YAML                   blob input specification (YAML) (default null)
+      --input YAML                   blob input specification (YAML)
       --inputCompress                compress option for input
       --inputExcludes stringArray    excludes (path) for inputs
       --inputFollowSymlinks          follow symbolic links during archive creation for inputs
@@ -32,14 +32,14 @@ ocm add resources [<options>] <target> {<resourcefile> | <var>=<value>}
       --inputPath string             path field for input
       --inputPreserveDir             preserve directory in archive for inputs
       --inputType string             type of blob input specification
-      --inputValues YAML             YAML based generic values for inputs (default null)
+      --inputValues YAML             YAML based generic values for inputs
       --inputVariants stringArray    (platform) variants for inputs
       --inputVersion stringArray     version info for inputs
       --mediaType string             media type for artifact blob representation
       --name string                  resource name
       --reference string             reference name
       --region string                region name
-      --resource string              resource meta data (yaml)
+      --resource YAML                resource meta data (yaml)
   -s, --settings stringArray         settings file with variable settings (yaml)
       --size int                     blob size
       --templater string             templater to use (subst, spiff, go) (default "subst")
@@ -176,7 +176,7 @@ with the field <code>type</code> in the <code>input</code> field:
     that should be included in the tar file. If this option is not given
     all files not explicitly excluded are used.
   
-  Options used to configure fields: <code>--inputExcludes</code>, <code>--inputPreserveDir</code>, <code>--inputFollowSymlinks</code>, <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputIncludes</code>
+  Options used to configure fields: <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputIncludes</code>, <code>--inputExcludes</code>, <code>--inputPreserveDir</code>, <code>--inputFollowSymlinks</code>, <code>--inputPath</code>
 
 
 - Input type <code>docker</code>
@@ -218,7 +218,7 @@ with the field <code>type</code> in the <code>input</code> field:
     generated local artefact access. It is prefixed by the component name if
     it does not start with slash "/".
   
-  Options used to configure fields: <code>--hint</code>, <code>--inputVariants</code>
+  Options used to configure fields: <code>--inputVariants</code>, <code>--hint</code>
 
 
 - Input type <code>file</code>
@@ -329,7 +329,7 @@ with the field <code>type</code> in the <code>input</code> field:
   The variable settigs from the command line are available as binding, also. They are provided under the node
   <code>values</code>.
   
-  Options used to configure fields: <code>--inputValues</code>, <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputLibraries</code>
+  Options used to configure fields: <code>--inputCompress</code>, <code>--inputLibraries</code>, <code>--inputValues</code>, <code>--inputPath</code>, <code>--mediaType</code>
 
 
 

@@ -19,8 +19,6 @@ func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 	if err := cpi.AddPathSpecConfig(opts, config); err != nil {
 		return err
 	}
-	if v, ok := opts.GetValue(options.VersionOption.Name()); ok {
-		config["version"] = v
-	}
+	flagsets.AddFieldByOptionP(opts, options.VersionOption, config, "version")
 	return nil
 }

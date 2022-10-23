@@ -19,11 +19,7 @@ func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 	if err := cpi.AddMediaFileSpecConfig(opts, config); err != nil {
 		return err
 	}
-	if v, ok := opts.GetValue(options.LibrariesOption.Name()); ok {
-		config["libraries"] = v
-	}
-	if v, ok := opts.GetValue(options.LibrariesOption.Name()); ok {
-		config["values"] = v
-	}
+	flagsets.AddFieldByOptionP(opts, options.LibrariesOption, config, "libraries")
+	flagsets.AddFieldByOptionP(opts, options.ValuesOption, config, "values")
 	return nil
 }

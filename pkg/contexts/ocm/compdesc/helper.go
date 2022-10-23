@@ -74,17 +74,17 @@ func NewNameSelector(name string) selector.Interface {
 }
 
 // GetEffectiveRepositoryContext returns the currently active repository context.
-func (c *ComponentDescriptor) GetEffectiveRepositoryContext() *runtime.UnstructuredTypedObject {
-	if len(c.RepositoryContexts) == 0 {
+func (cd *ComponentDescriptor) GetEffectiveRepositoryContext() *runtime.UnstructuredTypedObject {
+	if len(cd.RepositoryContexts) == 0 {
 		return nil
 	}
-	return c.RepositoryContexts[len(c.RepositoryContexts)-1]
+	return cd.RepositoryContexts[len(cd.RepositoryContexts)-1]
 }
 
 // AddRepositoryContext appends the given repository context to components descriptor repository history.
 // The context is not appended if the effective repository context already matches the current context.
-func (c *ComponentDescriptor) AddRepositoryContext(repoCtx runtime.TypedObject) error {
-	effective, err := runtime.ToUnstructuredTypedObject(c.GetEffectiveRepositoryContext())
+func (cd *ComponentDescriptor) AddRepositoryContext(repoCtx runtime.TypedObject) error {
+	effective, err := runtime.ToUnstructuredTypedObject(cd.GetEffectiveRepositoryContext())
 	if err != nil {
 		return err
 	}
@@ -93,16 +93,16 @@ func (c *ComponentDescriptor) AddRepositoryContext(repoCtx runtime.TypedObject) 
 		return err
 	}
 	if !runtime.UnstructuredTypesEqual(effective, uRepoCtx) {
-		c.RepositoryContexts = append(c.RepositoryContexts, uRepoCtx)
+		cd.RepositoryContexts = append(cd.RepositoryContexts, uRepoCtx)
 	}
 	return nil
 }
 
 // GetComponentReferences returns all component references that matches the given selectors.
-func (c *ComponentDescriptor) GetComponentReferences(selectors ...IdentitySelector) ([]ComponentReference, error) {
+func (cd *ComponentDescriptor) GetComponentReferences(selectors ...IdentitySelector) ([]ComponentReference, error) {
 	refs := make([]ComponentReference, 0)
-	for _, ref := range c.References {
-		ok, err := selector.MatchSelectors(ref.GetIdentity(c.References), selectors...)
+	for _, ref := range cd.References {
+		ok, err := selector.MatchSelectors(ref.GetIdentity(cd.References), selectors...)
 		if err != nil {
 			return nil, fmt.Errorf("unable to match selector for resource %s: %w", ref.Name, err)
 		}
@@ -117,53 +117,48 @@ func (c *ComponentDescriptor) GetComponentReferences(selectors ...IdentitySelect
 }
 
 // GetResourceByIdentity returns resource that match the given identity.
-func (c *ComponentDescriptor) GetResourceByIdentity(id v1.Identity) (Resource, error) {
+func (cd *ComponentDescriptor) GetResourceByIdentity(id v1.Identity) (Resource, error) {
 	dig := id.Digest()
-	for _, res := range c.Resources {
-		if bytes.Equal(res.GetIdentityDigest(c.Resources), dig) {
+	for _, res := range cd.Resources {
+		if bytes.Equal(res.GetIdentityDigest(cd.Resources), dig) {
 			return res, nil
 		}
 	}
 	return Resource{}, NotFound
 }
 
-// GetComponentReferencesByName returns all component references with a given name.
-func (c *ComponentDescriptor) GetComponentReferencesByName(name string) ([]ComponentReference, error) {
-	return c.GetComponentReferences(NewNameSelector(name))
-}
-
 // GetResourceByJSONScheme returns resources that match the given selectors.
-func (c *ComponentDescriptor) GetResourceByJSONScheme(src interface{}) ([]Resource, error) {
+func (cd *ComponentDescriptor) GetResourceByJSONScheme(src interface{}) ([]Resource, error) {
 	sel, err := selector.NewJSONSchemaSelectorFromGoStruct(src)
 	if err != nil {
 		return nil, err
 	}
-	return c.GetResourcesBySelector(sel)
+	return cd.GetResourcesBySelector(sel)
 }
 
 // GetResourceByDefaultSelector returns resources that match the given selectors.
-func (c *ComponentDescriptor) GetResourceByDefaultSelector(sel interface{}) ([]Resource, error) {
+func (cd *ComponentDescriptor) GetResourceByDefaultSelector(sel interface{}) ([]Resource, error) {
 	identitySelector, err := selector.ParseDefaultSelector(sel)
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse selector: %w", err)
 	}
-	return c.GetResourcesBySelector(identitySelector)
+	return cd.GetResourcesBySelector(identitySelector)
 }
 
 // GetResourceByRegexSelector returns resources that match the given selectors.
-func (c ComponentDescriptor) GetResourceByRegexSelector(sel interface{}) ([]Resource, error) {
+func (cd *ComponentDescriptor) GetResourceByRegexSelector(sel interface{}) ([]Resource, error) {
 	identitySelector, err := selector.ParseRegexSelector(sel)
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse selector: %w", err)
 	}
-	return c.GetResourcesBySelector(identitySelector)
+	return cd.GetResourcesBySelector(identitySelector)
 }
 
 // GetResourcesBySelector returns resources that match the given selector.
-func (c *ComponentDescriptor) GetResourcesBySelector(selectors ...IdentitySelector) ([]Resource, error) {
+func (cd *ComponentDescriptor) GetResourcesBySelector(selectors ...IdentitySelector) ([]Resource, error) {
 	resources := make([]Resource, 0)
-	for _, res := range c.Resources {
-		ok, err := selector.MatchSelectors(res.GetIdentity(c.Resources), selectors...)
+	for _, res := range cd.Resources {
+		ok, err := selector.MatchSelectors(res.GetIdentity(cd.Resources), selectors...)
 		if err != nil {
 			return nil, fmt.Errorf("unable to match selector for resource %s: %w", res.Name, err)
 		}
@@ -178,10 +173,10 @@ func (c *ComponentDescriptor) GetResourcesBySelector(selectors ...IdentitySelect
 }
 
 // GetResourcesBySelector returns resources that match the given selector.
-func (c *ComponentDescriptor) getResourceBySelectors(selectors []IdentitySelector, resourceSelectors []ResourceSelectorFunc) ([]Resource, error) {
+func (cd *ComponentDescriptor) getResourceBySelectors(selectors []IdentitySelector, resourceSelectors []ResourceSelectorFunc) ([]Resource, error) {
 	resources := make([]Resource, 0)
-	for _, res := range c.Resources {
-		ok, err := selector.MatchSelectors(res.GetIdentity(c.Resources), selectors...)
+	for _, res := range cd.Resources {
+		ok, err := selector.MatchSelectors(res.GetIdentity(cd.Resources), selectors...)
 		if err != nil {
 			return nil, fmt.Errorf("unable to match selector for resource %s: %w", res.Name, err)
 		}
@@ -203,9 +198,9 @@ func (c *ComponentDescriptor) getResourceBySelectors(selectors []IdentitySelecto
 	return resources, nil
 }
 
-// GetExternalResources returns a external resource with the given type, name and version.
-func (c *ComponentDescriptor) GetExternalResources(rtype, name, version string) ([]Resource, error) {
-	return c.getResourceBySelectors(
+// GetExternalResources returns external resource with the given type, name and version.
+func (cd *ComponentDescriptor) GetExternalResources(rtype, name, version string) ([]Resource, error) {
+	return cd.getResourceBySelectors(
 		[]selector.Interface{NewNameSelector(name)},
 		[]ResourceSelectorFunc{
 			NewTypeResourceSelector(rtype),
@@ -214,10 +209,10 @@ func (c *ComponentDescriptor) GetExternalResources(rtype, name, version string) 
 		})
 }
 
-// GetExternalResource returns a external resource with the given type, name and version.
+// GetExternalResource returns external resource with the given type, name and version.
 // If multiple resources match, the first one is returned.
-func (c *ComponentDescriptor) GetExternalResource(rtype, name, version string) (Resource, error) {
-	resources, err := c.GetExternalResources(rtype, name, version)
+func (cd *ComponentDescriptor) GetExternalResource(rtype, name, version string) (Resource, error) {
+	resources, err := cd.GetExternalResources(rtype, name, version)
 	if err != nil {
 		return Resource{}, err
 	}
@@ -226,8 +221,8 @@ func (c *ComponentDescriptor) GetExternalResource(rtype, name, version string) (
 }
 
 // GetLocalResources returns all local resources with the given type, name and version.
-func (c *ComponentDescriptor) GetLocalResources(rtype, name, version string) ([]Resource, error) {
-	return c.getResourceBySelectors(
+func (cd *ComponentDescriptor) GetLocalResources(rtype, name, version string) ([]Resource, error) {
+	return cd.getResourceBySelectors(
 		[]selector.Interface{NewNameSelector(name)},
 		[]ResourceSelectorFunc{
 			NewTypeResourceSelector(rtype),
@@ -238,8 +233,8 @@ func (c *ComponentDescriptor) GetLocalResources(rtype, name, version string) ([]
 
 // GetLocalResource returns a local resource with the given type, name and version.
 // If multiple resources match, the first one is returned.
-func (c *ComponentDescriptor) GetLocalResource(rtype, name, version string) (Resource, error) {
-	resources, err := c.GetLocalResources(rtype, name, version)
+func (cd *ComponentDescriptor) GetLocalResource(rtype, name, version string) (Resource, error) {
+	resources, err := cd.GetLocalResources(rtype, name, version)
 	if err != nil {
 		return Resource{}, err
 	}
@@ -248,8 +243,8 @@ func (c *ComponentDescriptor) GetLocalResource(rtype, name, version string) (Res
 }
 
 // GetResourcesByType returns all resources that match the given type and selectors.
-func (c *ComponentDescriptor) GetResourcesByType(rtype string, selectors ...IdentitySelector) ([]Resource, error) {
-	return c.getResourceBySelectors(
+func (cd *ComponentDescriptor) GetResourcesByType(rtype string, selectors ...IdentitySelector) ([]Resource, error) {
+	return cd.getResourceBySelectors(
 		selectors,
 		[]ResourceSelectorFunc{
 			NewTypeResourceSelector(rtype),
@@ -257,18 +252,18 @@ func (c *ComponentDescriptor) GetResourcesByType(rtype string, selectors ...Iden
 }
 
 // GetResourcesByName returns all local and external resources with a name.
-func (c *ComponentDescriptor) GetResourcesByName(name string, selectors ...IdentitySelector) ([]Resource, error) {
-	return c.getResourceBySelectors(
+func (cd *ComponentDescriptor) GetResourcesByName(name string, selectors ...IdentitySelector) ([]Resource, error) {
+	return cd.getResourceBySelectors(
 		append(selectors, NewNameSelector(name)),
 		nil)
 }
 
 // GetResourceIndex returns the index of a given resource.
 // If the index is not found -1 is returned.
-func (c *ComponentDescriptor) GetResourceIndex(res *ResourceMeta) int {
-	id := res.GetIdentity(c.Resources)
-	for i, cur := range c.Resources {
-		if cur.GetIdentity(c.Resources).Equals(id) {
+func (cd *ComponentDescriptor) GetResourceIndex(res *ResourceMeta) int {
+	id := res.GetIdentity(cd.Resources)
+	for i, cur := range cd.Resources {
+		if cur.GetIdentity(cd.Resources).Equals(id) {
 			return i
 		}
 	}
@@ -277,10 +272,10 @@ func (c *ComponentDescriptor) GetResourceIndex(res *ResourceMeta) int {
 
 // GetComponentReferenceIndex returns the index of a given component reference.
 // If the index is not found -1 is returned.
-func (c *ComponentDescriptor) GetComponentReferenceIndex(ref ComponentReference) int {
-	id := ref.GetIdentityDigest(c.References)
-	for i, cur := range c.References {
-		if bytes.Equal(cur.GetIdentityDigest(c.References), id) {
+func (cd *ComponentDescriptor) GetComponentReferenceIndex(ref ComponentReference) int {
+	id := ref.GetIdentityDigest(cd.References)
+	for i, cur := range cd.References {
+		if bytes.Equal(cur.GetIdentityDigest(cd.References), id) {
 			return i
 		}
 	}
@@ -288,21 +283,32 @@ func (c *ComponentDescriptor) GetComponentReferenceIndex(ref ComponentReference)
 }
 
 // GetComponentReferenceByIdentity returns reference that match the given identity.
-func (c *ComponentDescriptor) GetComponentReferenceByIdentity(id v1.Identity) (ComponentReference, error) {
+func (cd *ComponentDescriptor) GetComponentReferenceByIdentity(id v1.Identity) (ComponentReference, error) {
 	dig := id.Digest()
-	for _, ref := range c.References {
-		if bytes.Equal(ref.GetIdentityDigest(c.References), dig) {
+	for _, ref := range cd.References {
+		if bytes.Equal(ref.GetIdentityDigest(cd.References), dig) {
 			return ref, nil
 		}
 	}
 	return ComponentReference{}, NotFound
 }
 
+// GetComponentReferencesByName returns references that match the given name.
+func (cd *ComponentDescriptor) GetComponentReferencesByName(name string) []ComponentReference {
+	var refs []ComponentReference
+	for _, ref := range cd.References {
+		if ref.Name == name {
+			refs = append(refs, ref)
+		}
+	}
+	return refs
+}
+
 // GetSourceByIdentity returns source that match the given identity.
-func (c *ComponentDescriptor) GetSourceByIdentity(id v1.Identity) (Source, error) {
+func (cd *ComponentDescriptor) GetSourceByIdentity(id v1.Identity) (Source, error) {
 	dig := id.Digest()
-	for _, res := range c.Sources {
-		if bytes.Equal(res.GetIdentityDigest(c.Resources), dig) {
+	for _, res := range cd.Sources {
+		if bytes.Equal(res.GetIdentityDigest(cd.Resources), dig) {
 			return res, nil
 		}
 	}
@@ -311,10 +317,10 @@ func (c *ComponentDescriptor) GetSourceByIdentity(id v1.Identity) (Source, error
 
 // GetSourceIndex returns the index of a given source.
 // If the index is not found -1 is returned.
-func (c *ComponentDescriptor) GetSourceIndex(src *SourceMeta) int {
-	id := src.GetIdentityDigest(c.Sources)
-	for i, cur := range c.Sources {
-		if bytes.Equal(cur.GetIdentityDigest(c.Sources), id) {
+func (cd *ComponentDescriptor) GetSourceIndex(src *SourceMeta) int {
+	id := src.GetIdentityDigest(cd.Sources)
+	for i, cur := range cd.Sources {
+		if bytes.Equal(cur.GetIdentityDigest(cd.Sources), id) {
 			return i
 		}
 	}
@@ -322,10 +328,10 @@ func (c *ComponentDescriptor) GetSourceIndex(src *SourceMeta) int {
 }
 
 // GetReferenceByIdentity returns reference that match the given identity.
-func (c *ComponentDescriptor) GetReferenceByIdentity(id v1.Identity) (ComponentReference, error) {
+func (cd *ComponentDescriptor) GetReferenceByIdentity(id v1.Identity) (ComponentReference, error) {
 	dig := id.Digest()
-	for _, ref := range c.References {
-		if bytes.Equal(ref.GetIdentityDigest(c.Resources), dig) {
+	for _, ref := range cd.References {
+		if bytes.Equal(ref.GetIdentityDigest(cd.Resources), dig) {
 			return ref, nil
 		}
 	}
@@ -334,10 +340,10 @@ func (c *ComponentDescriptor) GetReferenceByIdentity(id v1.Identity) (ComponentR
 
 // GetReferenceIndex returns the index of a given source.
 // If the index is not found -1 is returned.
-func (c *ComponentDescriptor) GetReferenceIndex(src *ElementMeta) int {
-	id := src.GetIdentityDigest(c.References)
-	for i, cur := range c.References {
-		if bytes.Equal(cur.GetIdentityDigest(c.References), id) {
+func (cd *ComponentDescriptor) GetReferenceIndex(src *ElementMeta) int {
+	id := src.GetIdentityDigest(cd.References)
+	for i, cur := range cd.References {
+		if bytes.Equal(cur.GetIdentityDigest(cd.References), id) {
 			return i
 		}
 	}
@@ -346,8 +352,8 @@ func (c *ComponentDescriptor) GetReferenceIndex(src *ElementMeta) int {
 
 // GetSignatureIndex returns the index of the signature with the given name
 // If the index is not found -1 is returned.
-func (c *ComponentDescriptor) GetSignatureIndex(name string) int {
-	for i, cur := range c.Signatures {
+func (cd *ComponentDescriptor) GetSignatureIndex(name string) int {
+	for i, cur := range cd.Signatures {
 		if cur.Name == name {
 			return i
 		}

@@ -21,20 +21,10 @@ func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 }
 
 func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
-	if v, ok := opts.GetValue(options.ReferenceOption.Name()); ok {
-		config["key"] = v
-	}
-	if v, ok := opts.GetValue(options.MediatypeOption.Name()); ok {
-		config["mediaType"] = v
-	}
-	if v, ok := opts.GetValue(options.RegionOption.Name()); ok {
-		config["region"] = v
-	}
-	if v, ok := opts.GetValue(options.BucketOption.Name()); ok {
-		config["bucket"] = v
-	}
-	if v, ok := opts.GetValue(options.VersionOption.Name()); ok {
-		config["version"] = v
-	}
+	flagsets.AddFieldByOptionP(opts, options.ReferenceOption, config, "key")
+	flagsets.AddFieldByOptionP(opts, options.MediatypeOption, config, "mediaType")
+	flagsets.AddFieldByOptionP(opts, options.RegionOption, config, "region")
+	flagsets.AddFieldByOptionP(opts, options.BucketOption, config, "bucket")
+	flagsets.AddFieldByOptionP(opts, options.VersionOption, config, "version")
 	return nil
 }

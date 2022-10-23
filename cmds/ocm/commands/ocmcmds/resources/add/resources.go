@@ -17,7 +17,6 @@ package add
 import (
 	"fmt"
 
-	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
@@ -128,36 +127,24 @@ func (r *ResourceSpec) Validate(ctx clictx.Context, input *common.ResourceInput)
 
 type ResourceSpecificationsProvider struct {
 	*common.ContentResourceSpecificationsProvider
-	external bool
 }
 
-func NewResourceSpecificationsProvider(ctx clictx.Context, deftype ...string) common.ResourceSpecificationsProvider {
-	return &ResourceSpecificationsProvider{
-		ContentResourceSpecificationsProvider: common.NewContentResourceSpecificationProvider(ctx, "resource", deftype...),
+func NewResourceSpecificationsProvider(ctx clictx.Context, deftype string) common.ResourceSpecificationsProvider {
+	a := &ResourceSpecificationsProvider{}
+	a.ContentResourceSpecificationsProvider = common.NewContentResourceSpecificationProvider(ctx, "resource", a.addMeta, deftype,
+		flagsets.NewBoolOptionType("external", "flag non-local resource"),
+	)
+	return a
+}
+
+func (p *ResourceSpecificationsProvider) addMeta(opts flagsets.ConfigOptions, config flagsets.Config) error {
+	if o, ok := opts.GetValue("external"); ok && o.(bool) {
+		config["relation"] = metav1.ExternalRelation
 	}
-}
-
-func (p *ResourceSpecificationsProvider) AddFlags(fs *pflag.FlagSet) {
-	p.ContentResourceSpecificationsProvider.AddFlags(fs)
-	fs.BoolVarP(&p.external, "external", "", false, "flag non-local resource")
+	return nil
 }
 
 func (p *ResourceSpecificationsProvider) Description() string {
 	d := p.ContentResourceSpecificationsProvider.Description()
 	return d + "Non-local resources can be indicated using the option <code>--external</code>."
-}
-
-func (a *ResourceSpecificationsProvider) IsSpecified() bool {
-	return a.external || a.ContentResourceSpecificationsProvider.IsSpecified()
-}
-func (a *ResourceSpecificationsProvider) ParseMeta() (flagsets.Config, error) {
-	data, err := a.ContentResourceSpecificationsProvider.ParsedMeta()
-	if err != nil {
-		return nil, err
-	}
-
-	if a.external {
-		data["relation"] = metav1.ExternalRelation
-	}
-	return data, nil
 }

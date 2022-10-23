@@ -15,6 +15,8 @@
 package add_test
 
 import (
+	"fmt"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
@@ -29,10 +31,13 @@ const VERSION = "v1.1.1"
 const REF = "github.com/mandelsoft/ref"
 
 func CheckReference(env *TestEnv, cd *compdesc.ComponentDescriptor, name string, add ...func(compdesc.ComponentReference)) {
-	r, err := cd.GetComponentReferenceByIdentity(metav1.NewIdentity(name))
-	ExpectWithOffset(1, err).To(Succeed())
-	Expect(r.Version).To(Equal(VERSION))
-	Expect(r.ComponentName).To(Equal(REF))
+	rs := cd.GetComponentReferencesByName(name)
+	if len(rs) != 1 {
+		Fail(fmt.Sprintf("%d reference(s) with name %s found", len(rs), name), 1)
+	}
+	r := rs[0]
+	ExpectWithOffset(1, r.Version).To(Equal(VERSION))
+	ExpectWithOffset(1, r.ComponentName).To(Equal(REF))
 	for _, a := range add {
 		a(r)
 	}
@@ -59,6 +64,19 @@ var _ = Describe("Add references", func() {
 		Expect(len(cd.References)).To(Equal(1))
 
 		CheckReference(env, cd, "testdata")
+	})
+
+	It("adds simple ref wth extra identity", func() {
+		Expect(env.Execute("add", "references", ARCH, "/testdata/referenceswithid.yaml")).To(Succeed())
+		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+		Expect(err).To(Succeed())
+		cd, err := compdesc.Decode(data)
+		Expect(err).To(Succeed())
+		Expect(len(cd.References)).To(Equal(1))
+
+		CheckReference(env, cd, "testdata", func(r compdesc.ComponentReference) {
+			Expect(r.ExtraIdentity).To(Equal(metav1.Identity{"purpose": "test", "label": "local"}))
+		})
 	})
 
 	It("adds simple ref by cli env file", func() {
@@ -132,7 +150,23 @@ labels:
 			labels := metav1.Labels{}
 			labels.Set("test", "value")
 			CheckReference(env, cd, "testdata", func(r compdesc.ComponentReference) {
-				ExpectWithOffset(2, r.GetLabels()).To(Equal(labels))
+				Expect(r.GetLabels()).To(Equal(labels))
+			})
+		})
+
+		It("completely specified by options with extra identity", func() {
+			Expect(env.Execute("add", "references", ARCH, "--name", "testdata", "--component", REF, "--version", VERSION, "--extra", "purpose=test", "--extra", "label=local")).To(Succeed())
+			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+			Expect(err).To(Succeed())
+			cd, err := compdesc.Decode(data)
+			Expect(err).To(Succeed())
+			Expect(len(cd.References)).To(Equal(1))
+
+			labels := metav1.Labels{}
+			labels.Set("test", "value")
+			CheckReference(env, cd, "testdata", func(r compdesc.ComponentReference) {
+				//Expect(r.GetLabels()).To(Equal(labels))
+				Expect(r.ExtraIdentity).To(Equal(metav1.Identity{"purpose": "test", "label": "local"}))
 			})
 		})
 

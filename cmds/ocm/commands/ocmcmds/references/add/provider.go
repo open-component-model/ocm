@@ -16,26 +16,30 @@ package add
 
 import (
 	"encoding/json"
-	"fmt"
-
-	"github.com/spf13/pflag"
 
 	ocmcomm "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 )
 
 type ReferenceResourceSpecificationProvider struct {
 	*ocmcomm.ResourceMetaDataSpecificationsProvider
-	component string
 }
 
 var _ ocmcomm.ResourceSpecificationsProvider = (*ReferenceResourceSpecificationProvider)(nil)
 var _ ocmcomm.ResourceSpecifications = (*ReferenceResourceSpecificationProvider)(nil)
 
 func NewReferenceSpecificatonProvider() ocmcomm.ResourceSpecificationsProvider {
-	return &ReferenceResourceSpecificationProvider{
-		ResourceMetaDataSpecificationsProvider: ocmcomm.NewResourceMetaDataSpecificationsProvider("reference"),
+	a := &ReferenceResourceSpecificationProvider{
+		ResourceMetaDataSpecificationsProvider: ocmcomm.NewResourceMetaDataSpecificationsProvider("reference", addMeta,
+			flagsets.NewStringOptionType("component", "component name"),
+		),
 	}
+	return a
+}
+
+func addMeta(opts flagsets.ConfigOptions, config flagsets.Config) error {
+	flagsets.AddFieldByOption(opts, "component", config, "componentName")
+	return nil
 }
 
 func (a *ReferenceResourceSpecificationProvider) Description() string {
@@ -47,30 +51,14 @@ for the YAML option.
 `
 }
 
-func (a *ReferenceResourceSpecificationProvider) AddFlags(fs *pflag.FlagSet) {
-	a.ResourceMetaDataSpecificationsProvider.AddFlags(fs)
-	fs.StringVarP(&a.component, "component", "", "", "component name")
-}
-
-func (a *ReferenceResourceSpecificationProvider) IsSpecified() bool {
-	return a.ResourceMetaDataSpecificationsProvider.IsSpecified() || a.component != ""
-}
-
-func (a *ReferenceResourceSpecificationProvider) Complete() error {
-	if !a.IsSpecified() {
-		return nil
+func (a *ReferenceResourceSpecificationProvider) Get() (string, error) {
+	data, err := a.ParsedMeta()
+	if err != nil {
+		return "", err
 	}
-	generic := a.ResourceMetaDataSpecificationsProvider.IsSpecified()
-	if generic {
-		if err := a.ResourceMetaDataSpecificationsProvider.Complete(); err != nil {
-			return err
-		}
-	} else {
-		if a.component == "" {
-			return fmt.Errorf("--component is required")
-		}
-	}
-	return nil
+
+	r, err := json.Marshal(data)
+	return string(r), nil
 }
 
 func (a *ReferenceResourceSpecificationProvider) Resources() ([]ocmcomm.ResourceSpecifications, error) {
@@ -78,21 +66,4 @@ func (a *ReferenceResourceSpecificationProvider) Resources() ([]ocmcomm.Resource
 		return nil, nil
 	}
 	return []ocmcomm.ResourceSpecifications{a}, nil
-}
-
-func (a *ReferenceResourceSpecificationProvider) Get() (string, error) {
-	data, err := a.ParsedMeta()
-	if err != nil {
-		return "", err
-	}
-
-	if a.component != "" {
-		data["componentName"] = a.component
-	}
-
-	r, err := json.Marshal(data)
-	if err != nil {
-		return "", errors.Wrapf(err, "cannot marshal %s", a.Origin())
-	}
-	return string(r), nil
 }
