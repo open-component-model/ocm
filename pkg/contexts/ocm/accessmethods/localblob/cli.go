@@ -20,17 +20,9 @@ func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 }
 
 func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
-	if v, ok := opts.GetValue(options.ReferenceOption.Name()); ok {
-		config["localReference"] = v
-	}
-	if v, ok := opts.GetValue(options.HintOption.Name()); ok {
-		config["referenceName"] = v
-	}
-	if v, ok := opts.GetValue(options.MediatypeOption.Name()); ok {
-		config["mediaType"] = v
-	}
-	if v, ok := opts.GetValue(options.GlobalAccessOption.Name()); ok {
-		config["globalAccess"] = v
-	}
+	flagsets.AddFieldByOptionP(opts, options.ReferenceOption, config, "localReference")
+	flagsets.AddFieldByOptionP(opts, options.HintOption, config, "referenceName")
+	flagsets.AddFieldByOptionP(opts, options.MediatypeOption, config, "mediaType")
+	flagsets.AddFieldByOptionP(opts, options.GlobalAccessOption, config, "globalAccess")
 	return nil
 }

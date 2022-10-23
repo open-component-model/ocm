@@ -24,17 +24,10 @@ func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 	if err := cpi.AddMediaFileSpecConfig(opts, config); err != nil {
 		return err
 	}
-	if v, ok := opts.GetValue(options.PreserveDirOption.Name()); ok {
-		config["preserveDir"] = v
-	}
-	if v, ok := opts.GetValue(options.FollowSymlinksOption.Name()); ok {
-		config["followSymlinks"] = v
-	}
-	if v, ok := opts.GetValue(options.ExcludeOption.Name()); ok {
-		config["excludeFiles"] = v
-	}
-	if v, ok := opts.GetValue(options.IncludeOption.Name()); ok {
-		config["includeFiles"] = v
-	}
+
+	flagsets.AddFieldByOptionP(opts, options.PreserveDirOption, config, "preserveDir")
+	flagsets.AddFieldByOptionP(opts, options.FollowSymlinksOption, config, "followSymlinks")
+	flagsets.AddFieldByOptionP(opts, options.ExcludeOption, config, "excludeFiles")
+	flagsets.AddFieldByOptionP(opts, options.IncludeOption, config, "includeFiles")
 	return nil
 }

@@ -9,7 +9,7 @@ ocm add resource-configuration [<options>] <target> {<configfile> | <var>=<value
 ### Options
 
 ```
-      --access YAML                  blob access specification (YAML) (default null)
+      --access YAML                  blob access specification (YAML)
       --accessHostname string        hostname used for access
       --accessRepository string      repository URL
       --accessType string            type of blob access specification
@@ -19,11 +19,11 @@ ocm add resource-configuration [<options>] <target> {<configfile> | <var>=<value
       --commit string                git commit id
       --digest string                blob digest
       --external                     flag non-local resource
-      --extra strings                resource extra identity
-      --globalAccess YAML            access specification for global access (default null)
+      --extra stringArray            resource extra identity
+      --globalAccess YAML            access specification for global access
   -h, --help                         help for resource-configuration
       --hint string                  (repository) hint for local artifacts
-      --input YAML                   blob input specification (YAML) (default null)
+      --input YAML                   blob input specification (YAML)
       --inputCompress                compress option for input
       --inputExcludes stringArray    excludes (path) for inputs
       --inputFollowSymlinks          follow symbolic links during archive creation for inputs
@@ -32,14 +32,14 @@ ocm add resource-configuration [<options>] <target> {<configfile> | <var>=<value
       --inputPath string             path field for input
       --inputPreserveDir             preserve directory in archive for inputs
       --inputType string             type of blob input specification
-      --inputValues YAML             YAML based generic values for inputs (default null)
+      --inputValues YAML             YAML based generic values for inputs
       --inputVariants stringArray    (platform) variants for inputs
       --inputVersion stringArray     version info for inputs
       --mediaType string             media type for artifact blob representation
       --name string                  resource name
       --reference string             reference name
       --region string                region name
-      --resource string              resource meta data (yaml)
+      --resource YAML                resource meta data (yaml)
   -s, --settings stringArray         settings file with variable settings (yaml)
       --size int                     blob size
       --templater string             templater to use (subst, spiff, go) (default "none")
@@ -181,7 +181,7 @@ with the field <code>type</code> in the <code>input</code> field:
     that should be included in the tar file. If this option is not given
     all files not explicitly excluded are used.
   
-  Options used to configure fields: <code>--inputFollowSymlinks</code>, <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputIncludes</code>, <code>--inputExcludes</code>, <code>--inputPreserveDir</code>
+  Options used to configure fields: <code>--inputIncludes</code>, <code>--inputExcludes</code>, <code>--inputPreserveDir</code>, <code>--inputFollowSymlinks</code>, <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>
 
 
 - Input type <code>docker</code>

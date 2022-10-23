@@ -18,11 +18,7 @@ func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 }
 
 func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
-	if v, ok := opts.GetValue(options.VariantsOption.Name()); ok {
-		config["variants"] = v
-	}
-	if v, ok := opts.GetValue(options.HintOption.Name()); ok {
-		config["repository"] = v
-	}
+	flagsets.AddFieldByOptionP(opts, options.VariantsOption, config, "variants")
+	flagsets.AddFieldByOptionP(opts, options.HintOption, config, "repository")
 	return nil
 }

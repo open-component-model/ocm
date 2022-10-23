@@ -9,7 +9,7 @@ ocm add sources [<options>] <target> {<resourcefile> | <var>=<value>}
 ### Options
 
 ```
-      --access YAML                  blob access specification (YAML) (default null)
+      --access YAML                  blob access specification (YAML)
       --accessHostname string        hostname used for access
       --accessRepository string      repository URL
       --accessType string            type of blob access specification
@@ -18,11 +18,11 @@ ocm add sources [<options>] <target> {<resourcefile> | <var>=<value>}
       --bucket string                bucket name
       --commit string                git commit id
       --digest string                blob digest
-      --extra strings                source extra identity
-      --globalAccess YAML            access specification for global access (default null)
+      --extra stringArray            source extra identity
+      --globalAccess YAML            access specification for global access
   -h, --help                         help for sources
       --hint string                  (repository) hint for local artifacts
-      --input YAML                   blob input specification (YAML) (default null)
+      --input YAML                   blob input specification (YAML)
       --inputCompress                compress option for input
       --inputExcludes stringArray    excludes (path) for inputs
       --inputFollowSymlinks          follow symbolic links during archive creation for inputs
@@ -31,7 +31,7 @@ ocm add sources [<options>] <target> {<resourcefile> | <var>=<value>}
       --inputPath string             path field for input
       --inputPreserveDir             preserve directory in archive for inputs
       --inputType string             type of blob input specification
-      --inputValues YAML             YAML based generic values for inputs (default null)
+      --inputValues YAML             YAML based generic values for inputs
       --inputVariants stringArray    (platform) variants for inputs
       --inputVersion stringArray     version info for inputs
       --mediaType string             media type for artifact blob representation
@@ -40,7 +40,7 @@ ocm add sources [<options>] <target> {<resourcefile> | <var>=<value>}
       --region string                region name
   -s, --settings stringArray         settings file with variable settings (yaml)
       --size int                     blob size
-      --source string                source meta data (yaml)
+      --source YAML                  source meta data (yaml)
       --templater string             templater to use (subst, spiff, go) (default "subst")
       --type string                  source type
       --version string               source version
@@ -175,7 +175,7 @@ with the field <code>type</code> in the <code>input</code> field:
     that should be included in the tar file. If this option is not given
     all files not explicitly excluded are used.
   
-  Options used to configure fields: <code>--inputCompress</code>, <code>--inputIncludes</code>, <code>--inputExcludes</code>, <code>--inputPreserveDir</code>, <code>--inputFollowSymlinks</code>, <code>--inputPath</code>, <code>--mediaType</code>
+  Options used to configure fields: <code>--inputIncludes</code>, <code>--inputExcludes</code>, <code>--inputPreserveDir</code>, <code>--inputFollowSymlinks</code>, <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>
 
 
 - Input type <code>docker</code>
@@ -217,7 +217,7 @@ with the field <code>type</code> in the <code>input</code> field:
     generated local artefact access. It is prefixed by the component name if
     it does not start with slash "/".
   
-  Options used to configure fields: <code>--hint</code>, <code>--inputVariants</code>
+  Options used to configure fields: <code>--inputVariants</code>, <code>--hint</code>
 
 
 - Input type <code>file</code>
@@ -243,7 +243,7 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property describes whether the file content should be stored
     compressed or not.
   
-  Options used to configure fields: <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>
+  Options used to configure fields: <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputPath</code>
 
 
 - Input type <code>helm</code>
@@ -270,7 +270,7 @@ with the field <code>type</code> in the <code>input</code> field:
     Basically, it is a good practice to use the component version for local resources
     This can be achieved by using templating for this attribute in the resource file.
   
-  Options used to configure fields: <code>--inputPath</code>, <code>--inputVersion</code>, <code>--mediaType</code>, <code>--inputCompress</code>
+  Options used to configure fields: <code>--inputVersion</code>, <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputPath</code>
 
 
 - Input type <code>ociImage</code>
@@ -289,7 +289,7 @@ with the field <code>type</code> in the <code>input</code> field:
     generated local artefact access. It is prefixed by the component name if
     it does not start with slash "/".
   
-  Options used to configure fields: <code>--inputPath</code>, <code>--hint</code>, <code>--mediaType</code>, <code>--inputCompress</code>
+  Options used to configure fields: <code>--hint</code>, <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputPath</code>
 
 
 - Input type <code>spiff</code>

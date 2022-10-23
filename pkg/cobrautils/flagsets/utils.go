@@ -48,5 +48,55 @@ func SetField(config Config, value interface{}, names ...string) error {
 		last = m
 		cur = m[n]
 	}
-	return fmt.Errorf("oops")
+	return fmt.Errorf("no field path given")
+}
+
+type NameProvider interface {
+	Name() string
+}
+
+type OptionName string
+
+func (n OptionName) Name() string {
+	return string(n)
+}
+
+// AddFieldByOption sets the specified target field with the option value, if given.
+// If no target field is specified the name of the option is used.
+func AddFieldByOption(opts ConfigOptions, oname string, config Config, names ...string) error {
+	if v, ok := opts.GetValue(oname); ok {
+		if len(names) == 0 {
+			names = []string{oname}
+		}
+		return SetField(config, v, names...)
+	}
+	return nil
+}
+
+// AddFieldByOptionP sets the specified target field with the option value, if given.
+// The option is specified by a name provider instead of its name.
+// If no target field is specified the name of the option is used.
+func AddFieldByOptionP(opts ConfigOptions, p NameProvider, config Config, names ...string) error {
+	return AddFieldByOption(opts, p.Name(), config, names...)
+}
+
+func ComposedAdder(adders ...ConfigAdder) ConfigAdder {
+	switch len(adders) {
+	case 0:
+		return nil
+	case 1:
+		return adders[0]
+	default:
+		return func(opts ConfigOptions, config Config) error {
+			for _, a := range adders {
+				if a == nil {
+					continue
+				}
+				if err := a(opts, config); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}
 }

@@ -27,7 +27,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -133,17 +132,49 @@ type ResourceSpecificationsProvider interface {
 ////////////////////////////////////////////////////////////////////////////////
 
 type ResourceMetaDataSpecificationsProvider struct {
-	typename string
-	meta     string
-	name     string
-	version  string
-	extra    []string
-
-	extraIdentity metav1.Identity
+	typename     string
+	metaProvider flagsets.ConfigTypeOptionSetConfigProvider
+	metaOptions  flagsets.ConfigOptions
 }
 
-func NewResourceMetaDataSpecificationsProvider(name string) *ResourceMetaDataSpecificationsProvider {
-	return &ResourceMetaDataSpecificationsProvider{typename: name}
+func NewResourceMetaDataSpecificationsProvider(name string, adder flagsets.ConfigAdder, types ...flagsets.ConfigOptionType) *ResourceMetaDataSpecificationsProvider {
+	a := &ResourceMetaDataSpecificationsProvider{
+		typename: name,
+		metaProvider: flagsets.NewPlainConfigProvider(name, flagsets.ComposedAdder(addMeta(name), adder),
+			append(types,
+				flagsets.NewYAMLOptionType(name, fmt.Sprintf("%s meta data (yaml)", name)),
+				flagsets.NewStringOptionType("name", fmt.Sprintf("%s name", name)),
+				flagsets.NewStringOptionType("version", fmt.Sprintf("%s version", name)),
+				flagsets.NewStringArrayOptionType("extra", fmt.Sprintf("%s extra identity", name)),
+			)...,
+		),
+	}
+	a.metaOptions = a.metaProvider.CreateOptions()
+	return a
+}
+
+func addMeta(typename string) flagsets.ConfigAdder {
+	return func(opts flagsets.ConfigOptions, config flagsets.Config) error {
+		if o, ok := opts.GetValue(typename); ok {
+			for k, v := range o.(flagsets.Config) {
+				config[k] = v
+			}
+		}
+
+		flagsets.AddFieldByOption(opts, "name", config)
+		flagsets.AddFieldByOption(opts, "version", config)
+
+		if o, ok := opts.GetValue("extra"); ok {
+			id, err := ParseSettings(o.([]string), "extra identity")
+			if err != nil {
+				return err
+			}
+			if len(id) > 0 {
+				config["extraIdentity"] = id
+			}
+		}
+		return nil
+	}
 }
 
 func (a *ResourceMetaDataSpecificationsProvider) ElementType() string {
@@ -151,7 +182,7 @@ func (a *ResourceMetaDataSpecificationsProvider) ElementType() string {
 }
 
 func (a *ResourceMetaDataSpecificationsProvider) IsSpecified() bool {
-	return a.meta != "" || a.name != "" || a.version != "" || len(a.extra) > 0
+	return a.metaOptions.Changed()
 }
 
 func (a *ResourceMetaDataSpecificationsProvider) Description() string {
@@ -170,28 +201,10 @@ by the selected templater.)
 }
 
 func (a *ResourceMetaDataSpecificationsProvider) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVarP(&a.meta, a.typename, "", "", fmt.Sprintf("%s meta data (yaml)", a.typename))
-	fs.StringVarP(&a.name, "name", "", "", fmt.Sprintf("%s name", a.typename))
-	fs.StringVarP(&a.version, "version", "", "", fmt.Sprintf("%s version", a.typename))
-	fs.StringSliceVarP(&a.extra, "extra", "", nil, fmt.Sprintf("%s extra identity", a.typename))
+	a.metaOptions.AddFlags(fs)
 }
 
 func (a *ResourceMetaDataSpecificationsProvider) Complete() error {
-	if !a.IsSpecified() {
-		return nil
-	}
-	if a.meta != "" {
-		if err := a.CheckData("meta data", a.meta); err != nil {
-			return err
-		}
-	}
-	if len(a.extra) > 0 {
-		var err error
-		a.extraIdentity, err = ParseSettings(a.extra, "extra identity")
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
@@ -199,37 +212,8 @@ func (a *ResourceMetaDataSpecificationsProvider) Origin() string {
 	return a.typename + " (by options)"
 }
 
-func (a *ResourceMetaDataSpecificationsProvider) CheckData(n string, v string) error {
-	if v == "" {
-		return nil
-	}
-	var data map[string]interface{}
-	if err := yaml.Unmarshal([]byte(v), &data); err != nil {
-		return errors.Wrapf(err, "%s %s is no valid yaml", a.typename, n)
-	}
-	return nil
-}
-
 func (a *ResourceMetaDataSpecificationsProvider) ParsedMeta() (flagsets.Config, error) {
-	data := flagsets.Config{}
-	if a.IsSpecified() {
-		if a.meta != "" {
-			err := yaml.Unmarshal([]byte(a.meta), &data)
-			if err != nil {
-				return nil, err
-			}
-		}
-		if a.name != "" {
-			data["name"] = a.name
-		}
-		if a.version != "" {
-			data["version"] = a.version
-		}
-		if len(a.extraIdentity) > 0 {
-			data["extraIdentity"] = a.extraIdentity
-		}
-	}
-	return data, nil
+	return a.metaProvider.GetConfigFor(a.metaOptions)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -238,7 +222,6 @@ type ContentResourceSpecificationsProvider struct {
 	*ResourceMetaDataSpecificationsProvider
 	ctx         clictx.Context
 	DefaultType string
-	rtype       string
 
 	shared  flagsets.ConfigOptionTypeSet
 	options flagsets.ConfigOptions
@@ -247,16 +230,22 @@ type ContentResourceSpecificationsProvider struct {
 var _ ResourceSpecificationsProvider = (*ContentResourceSpecificationsProvider)(nil)
 var _ ResourceSpecifications = (*ContentResourceSpecificationsProvider)(nil)
 
-func NewContentResourceSpecificationProvider(ctx clictx.Context, name string, deftype ...string) *ContentResourceSpecificationsProvider {
-	def := ""
-	if len(deftype) > 0 {
-		def = deftype[0]
+func NewContentResourceSpecificationProvider(ctx clictx.Context, name string, adder flagsets.ConfigAdder, deftype string, types ...flagsets.ConfigOptionType) *ContentResourceSpecificationsProvider {
+	a := &ContentResourceSpecificationsProvider{
+		DefaultType: deftype,
+		ctx:         ctx,
+		ResourceMetaDataSpecificationsProvider: NewResourceMetaDataSpecificationsProvider(name, flagsets.ComposedAdder(addContentMeta, adder),
+			append(types,
+				flagsets.NewStringOptionType("type", fmt.Sprintf("%s type", name)),
+			)...,
+		),
 	}
-	return &ContentResourceSpecificationsProvider{
-		ResourceMetaDataSpecificationsProvider: NewResourceMetaDataSpecificationsProvider(name),
-		DefaultType:                            def,
-		ctx:                                    ctx,
-	}
+	return a
+}
+
+func addContentMeta(opts flagsets.ConfigOptions, config flagsets.Config) error {
+	flagsets.AddFieldByOption(opts, "type", config)
+	return nil
 }
 
 func (a *ContentResourceSpecificationsProvider) Description() string {
@@ -274,7 +263,6 @@ or <code>input</code> fields of the description file format.
 
 func (a *ContentResourceSpecificationsProvider) AddFlags(fs *pflag.FlagSet) {
 	a.ResourceMetaDataSpecificationsProvider.AddFlags(fs)
-	fs.StringVarP(&a.rtype, "type", "", "", fmt.Sprintf("%s type", a.typename))
 
 	set := flagsets.NewConfigOptionSet("resources")
 	set.AddAll(a.ctx.OCMContext().AccessMethods().ConfigTypeSetConfigProvider())
@@ -288,7 +276,7 @@ func (a *ContentResourceSpecificationsProvider) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (a *ContentResourceSpecificationsProvider) IsSpecified() bool {
-	return a.ResourceMetaDataSpecificationsProvider.IsSpecified() || a.rtype != "" || a.options.Changed()
+	return a.ResourceMetaDataSpecificationsProvider.IsSpecified() || a.options.Changed()
 }
 
 func (a *ContentResourceSpecificationsProvider) Complete() error {
@@ -312,13 +300,6 @@ func (a *ContentResourceSpecificationsProvider) Complete() error {
 	return nil
 }
 
-func (a *ContentResourceSpecificationsProvider) Resources() ([]ResourceSpecifications, error) {
-	if !a.IsSpecified() {
-		return nil, nil
-	}
-	return []ResourceSpecifications{a}, nil
-}
-
 func (a *ContentResourceSpecificationsProvider) apply(p flagsets.ConfigTypeOptionSetConfigProvider, data flagsets.Config) error {
 	if p.IsExplicitlySelected(a.options) {
 		ac, err := p.GetConfigFor(a.options)
@@ -332,18 +313,25 @@ func (a *ContentResourceSpecificationsProvider) apply(p flagsets.ConfigTypeOptio
 	return nil
 }
 
+func (a *ContentResourceSpecificationsProvider) ParsedMeta() (flagsets.Config, error) {
+	data, err := a.ResourceMetaDataSpecificationsProvider.ParsedMeta()
+	if err != nil {
+		return nil, err
+	}
+	if data["type"] == nil && a.DefaultType != "" {
+		data["type"] = a.DefaultType
+	}
+
+	if data["type"] == nil {
+		return nil, fmt.Errorf("resource type is required")
+	}
+	return data, err
+}
+
 func (a *ContentResourceSpecificationsProvider) Get() (string, error) {
 	data, err := a.ParsedMeta()
 	if err != nil {
 		return "", err
-	}
-
-	if a.rtype != "" {
-		data["type"] = a.rtype
-	}
-
-	if data["type"] == nil && a.DefaultType != "" {
-		data["type"] = a.DefaultType
 	}
 
 	err = a.apply(a.ctx.OCMContext().AccessMethods().ConfigTypeSetConfigProvider(), data)
@@ -357,6 +345,13 @@ func (a *ContentResourceSpecificationsProvider) Get() (string, error) {
 
 	r, err := json.Marshal(data)
 	return string(r), nil
+}
+
+func (a *ContentResourceSpecificationsProvider) Resources() ([]ResourceSpecifications, error) {
+	if !a.IsSpecified() {
+		return nil, nil
+	}
+	return []ResourceSpecifications{a}, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
