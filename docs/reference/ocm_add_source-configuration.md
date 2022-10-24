@@ -183,7 +183,7 @@ with the field <code>type</code> in the <code>input</code> field:
     that should be included in the tar file. If this option is not given
     all files not explicitly excluded are used.
   
-  Options used to configure fields: <code>--inputFollowSymlinks</code>, <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputIncludes</code>, <code>--inputExcludes</code>, <code>--inputPreserveDir</code>
+  Options used to configure fields: <code>--inputIncludes</code>, <code>--inputExcludes</code>, <code>--inputPreserveDir</code>, <code>--inputFollowSymlinks</code>, <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>
 
 
 - Input type <code>docker</code>
@@ -297,7 +297,7 @@ with the field <code>type</code> in the <code>input</code> field:
     generated local artefact access. It is prefixed by the component name if
     it does not start with slash "/".
   
-  Options used to configure fields: <code>--hint</code>, <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputPath</code>
+  Options used to configure fields: <code>--inputPath</code>, <code>--hint</code>, <code>--mediaType</code>, <code>--inputCompress</code>
 
 
 - Input type <code>spiff</code>
@@ -390,7 +390,7 @@ are handled:
   
     The sha/id of the git commit
   
-  Options used to configure fields: <code>--accessHostname</code>, <code>--commit</code>, <code>--accessRepository</code>
+  Options used to configure fields: <code>--accessRepository</code>, <code>--accessHostname</code>, <code>--commit</code>
 
 
 - Access type <code>localBlob</code>
@@ -445,7 +445,7 @@ are handled:
     This additional external access information can be added using
     a second external access method specification.
   
-  Options used to configure fields: <code>--reference</code>, <code>--mediaType</code>, <code>--hint</code>, <code>--globalAccess</code>
+  Options used to configure fields: <code>--mediaType</code>, <code>--hint</code>, <code>--globalAccess</code>, <code>--reference</code>
 
 
 - Access type <code>ociArtefact</code>
@@ -490,7 +490,7 @@ are handled:
     The size of the blob
   
   
-  Options used to configure fields: <code>--digest</code>, <code>--reference</code>, <code>--mediaType</code>, <code>--size</code>
+  Options used to configure fields: <code>--reference</code>, <code>--mediaType</code>, <code>--size</code>, <code>--digest</code>
 
 
 
