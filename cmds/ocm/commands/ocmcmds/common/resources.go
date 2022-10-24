@@ -287,7 +287,7 @@ func (a *ContentResourceSpecificationsProvider) Complete() error {
 	iopts := unique.FilterBy(inputs.For(a.ctx).ConfigTypeSetConfigProvider().HasOptionType)
 
 	if aopts.Changed() && iopts.Changed() {
-		return fmt.Errorf("either input or access specifivcation is possible")
+		return fmt.Errorf("either input or access specification is possible")
 	}
 	if !a.options.Changed("input", "inputType", "access", "accessType") {
 		return fmt.Errorf("either --input, --inputType, --access or --accessType is required")

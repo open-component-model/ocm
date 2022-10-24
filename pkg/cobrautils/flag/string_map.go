@@ -107,7 +107,7 @@ func StringMap(f *pflag.FlagSet, name string, value map[string]string, usage str
 	return &p
 }
 
-func StringSliceP(f *pflag.FlagSet, name, shorthand string, value map[string]string, usage string) *map[string]string {
+func StringMapP(f *pflag.FlagSet, name, shorthand string, value map[string]string, usage string) *map[string]string {
 	p := map[string]string{}
 	StringMapVarP(f, &p, name, shorthand, value, usage)
 	return &p

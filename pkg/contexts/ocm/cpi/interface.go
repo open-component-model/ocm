@@ -102,7 +102,7 @@ func RegisterRepositoryType(name string, atype RepositoryType) {
 }
 
 func RegisterAccessType(atype AccessType) {
-	core.DefaultAccessTypeScheme.Register(atype.GetKind(), atype)
+	core.DefaultAccessTypeScheme.Register(atype.GetType(), atype)
 }
 
 func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {

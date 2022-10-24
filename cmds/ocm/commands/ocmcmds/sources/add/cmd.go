@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
 var (
@@ -50,7 +51,9 @@ So far only component archives are supported as target.
 This command accepts source specification files describing the sources
 to add to a component version. Elements must follow the source meta data
 description scheme of the component descriptor.
-` + o.Adder.Description() + (&template.Options{}).Usage() + inputs.Usage(inputs.DefaultInputTypeScheme),
+` + o.Adder.Description() + (&template.Options{}).Usage() +
+			inputs.Usage(inputs.DefaultInputTypeScheme) +
+			ocm.AccessUsage(o.OCMContext().AccessMethods(), true),
 	}
 }
 

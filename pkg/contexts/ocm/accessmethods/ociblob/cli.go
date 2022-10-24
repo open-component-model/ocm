@@ -26,3 +26,28 @@ func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 	flagsets.AddFieldByOptionP(opts, options.DigestOption, config, "digest")
 	return nil
 }
+
+var usage = `
+This method implements the access of an OCI blob stored in an OCI repository.
+
+Supported specification version is <code>v1</code>
+
+The type specific specification fields are:
+
+- **<code>imageReference</code>** *string*
+
+  OCI repository reference (this artefact name used to store the blob).
+
+- **<code>mediaType</code>** *string*
+
+  The media type of the blob
+
+- **<code>digest</code>** *string*
+
+  The digest of the blob used to access the blob in the OCI repository.
+
+- **<code>size</code>** *integer*
+
+  The size of the blob
+
+`

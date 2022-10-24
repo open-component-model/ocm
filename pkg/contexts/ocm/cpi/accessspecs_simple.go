@@ -5,6 +5,8 @@
 package cpi
 
 import (
+	"strings"
+
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -20,17 +22,34 @@ func _handler(handler []flagsets.ConfigOptionTypeSetHandler) flagsets.ConfigOpti
 type accessType struct {
 	runtime.ObjectVersionedType
 	runtime.TypedObjectDecoder
-	handler flagsets.ConfigOptionTypeSetHandler
+	description string
+	handler     flagsets.ConfigOptionTypeSetHandler
 }
 
-func NewAccessSpecType(name string, proto core.AccessSpec, handler ...flagsets.ConfigOptionTypeSetHandler) core.AccessType {
+func NewAccessSpecType(name string, proto core.AccessSpec, desc string, handler ...flagsets.ConfigOptionTypeSetHandler) core.AccessType {
 	return &accessType{
 		ObjectVersionedType: runtime.NewVersionedObjectType(name),
 		TypedObjectDecoder:  runtime.MustNewDirectDecoder(proto),
+		description:         desc,
 		handler:             _handler(handler),
 	}
 }
 
 func (t *accessType) ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHandler {
 	return t.handler
+}
+
+func (t *accessType) Description(cli bool) string {
+	group := ""
+	if t.handler != nil && cli {
+		opts := t.handler.OptionTypes()
+		var names []string
+		if len(opts) > 0 {
+			for _, o := range opts {
+				names = append(names, "<code>--"+o.Name()+"</code>")
+			}
+			group = "\nOptions used to configure fields: " + strings.Join(names, ", ")
+		}
+	}
+	return t.description + group
 }

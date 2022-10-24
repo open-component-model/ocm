@@ -25,6 +25,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
 var (
@@ -69,7 +70,9 @@ a correct input validation.
 This command accepts additional resource specification files describing the sources
 to add to a component version.
 
-` + (&template.Options{}).Usage() + inputs.Usage(inputs.DefaultInputTypeScheme),
+` + (&template.Options{}).Usage() +
+			inputs.Usage(inputs.DefaultInputTypeScheme) +
+			ocm.AccessUsage(o.OCMContext().AccessMethods(), true),
 		Example: `
 $ ocm add resource-config resources.yaml --name myresource --type PlainText --input '{ "type": "file", "path": "testdata/testcontent", "mediaType": "text/plain" }'
 `,

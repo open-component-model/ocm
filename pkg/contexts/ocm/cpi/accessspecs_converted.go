@@ -58,11 +58,12 @@ var (
 	_ runtime.TypedObjectEncoder = &ConvertedAccessType{}
 )
 
-func NewConvertedAccessSpecType(name string, v AccessSpecVersion, handler ...flagsets.ConfigOptionTypeSetHandler) *ConvertedAccessType {
+func NewConvertedAccessSpecType(name string, v AccessSpecVersion, desc string, handler ...flagsets.ConfigOptionTypeSetHandler) *ConvertedAccessType {
 	return &ConvertedAccessType{
 		accessType: accessType{
 			ObjectVersionedType: runtime.NewVersionedObjectType(name),
 			TypedObjectDecoder:  v,
+			description:         desc,
 			handler:             _handler(handler),
 		},
 		AccessSpecVersion: v,

@@ -28,3 +28,23 @@ func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 	flagsets.AddFieldByOptionP(opts, options.VersionOption, config, "version")
 	return nil
 }
+
+var usage = `
+This method implements the access of a blob stored in an S3 bucket.
+
+Supported specification version is <code>v1</code>
+
+The type specific specification fields are:
+
+- **<code>region</code>** (optional) *string*
+
+  OCI repository reference (this artefact name used to store the blob).
+
+- **<code>bucket</code>** *string*
+
+  The name of the S3 bucket containing the blob
+
+- **<code>key</code>** *string*
+
+  The key of the desired blob
+`

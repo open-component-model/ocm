@@ -24,3 +24,24 @@ func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 	flagsets.AddFieldByOptionP(opts, options.HostnameOption, config, "apiHostname")
 	return nil
 }
+
+var usage = `
+This method implements the access of the content of a git commit stored in a
+GitHub repository.
+
+Supported specification version is <code>v1</code>
+
+The type specific specification fields are:
+
+- **<code>repoUrl</code>**  *string*
+
+  Repository URL with or without scheme.
+
+- **<code>ref</code>** (optional) *string*
+
+  Original ref used to get the commit from
+
+- **<code>commit</code>** *string*
+
+  The sha/id of the git commit
+`

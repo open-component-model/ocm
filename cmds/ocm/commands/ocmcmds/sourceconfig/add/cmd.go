@@ -25,6 +25,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 )
 
@@ -72,7 +73,9 @@ a correct input validation.
 This command accepts additional source specification files describing the sources
 to add to a component version.
 
-` + (&template.Options{}).Usage() + inputs.Usage(inputs.DefaultInputTypeScheme),
+` + (&template.Options{}).Usage() +
+			inputs.Usage(inputs.DefaultInputTypeScheme) +
+			ocm.AccessUsage(o.OCMContext().AccessMethods(), true),
 		Example: `
 $ ocm add source-config sources.yaml --name sources --type filesystem --access '{ "type": "gitHub", "repoUrl": "github.com/open-component-model/ocm", "commit": "xyz" }'
 `,

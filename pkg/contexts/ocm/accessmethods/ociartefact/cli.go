@@ -20,3 +20,17 @@ func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 	flagsets.AddFieldByOptionP(opts, options.ReferenceOption, config, "imageReference")
 	return nil
 }
+
+var usage = `
+This method implements the access of an OCI artefact stored in an OCI registry.
+
+Supported specification version is <code>v1</code>
+
+The type specific specification fields are:
+
+- **<code>imageReference</code>** *string*
+
+  OCI image/artefact reference following the possible docker schemes:
+  - <code>&lt;repo>/&lt;artefact>:&lt;digest>@&lt;tag></code>
+  - <code><host>[&lt;port>]/&lt;repo path>/&lt;artefact>:&lt;version>@&lt;tag></code>
+`

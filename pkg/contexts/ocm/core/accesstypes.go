@@ -19,6 +19,8 @@ type AccessType interface {
 	runtime.VersionedTypedObject
 
 	ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHandler
+
+	Description(cli bool) string
 }
 
 type AccessMethodSupport interface {

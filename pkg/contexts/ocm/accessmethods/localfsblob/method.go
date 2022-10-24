@@ -17,8 +17,8 @@ const TypeV1 = Type + "/v1"
 // Keep old access method and map generic one to this implementation for component archives
 
 func init() {
-	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(Type, LocalFilesystemBlobV1))
-	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(TypeV1, LocalFilesystemBlobV1))
+	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(Type, LocalFilesystemBlobV1, ""))
+	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(TypeV1, LocalFilesystemBlobV1, ""))
 }
 
 // New creates a new localFilesystemBlob accessor.
