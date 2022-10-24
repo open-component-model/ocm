@@ -25,6 +25,7 @@ type ConfigOptionTypeSet interface {
 	Name() string
 
 	OptionTypes() []ConfigOptionType
+	OptionTypeNames() []string
 	SharedOptionTypes() []ConfigOptionType
 
 	HasOptionType(name string) bool
@@ -114,6 +115,13 @@ func (s *configOptionTypeSet) OptionTypes() []ConfigOptionType {
 		list = append(list, o)
 	}
 	return list
+}
+
+func (s *configOptionTypeSet) OptionTypeNames() []string {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+
+	return utils.StringMapKeys(s.options)
 }
 
 func (s *configOptionTypeSet) SharedOptionTypes() []ConfigOptionType {

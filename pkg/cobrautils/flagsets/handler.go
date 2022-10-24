@@ -4,14 +4,23 @@
 
 package flagsets
 
+// Config is a generic structured config stored in a string map.
 type Config = map[string]interface{}
 
+// ConfigAdder is used to incorporate a partial config into an existing one.
 type ConfigAdder func(options ConfigOptions, config Config) error
 
+func (c ConfigAdder) ApplyConfig(options ConfigOptions, config Config) error {
+	return c(options, config)
+}
+
+// ConfigHandler describes the ConfigAdder functionality.
 type ConfigHandler interface {
 	ApplyConfig(options ConfigOptions, config Config) error
 }
 
+// ConfigOptionTypeSetHandler describes a ConfigOptionTypeSet, which also
+// provides the possibility to provide config.
 type ConfigOptionTypeSetHandler interface {
 	ConfigOptionTypeSet
 	ConfigHandler
@@ -21,6 +30,7 @@ type configOptionTypeSetHandler struct {
 	ConfigOptionTypeSet
 }
 
+// NewConfigOptionTypeSetHandler creates a new ConfigOptionTypeSetHandler.
 func NewConfigOptionTypeSetHandler(name string, adder ConfigAdder, types ...ConfigOptionType) ConfigOptionTypeSetHandler {
 	return &configOptionTypeSetHandler{
 		adder:               adder,
@@ -37,6 +47,7 @@ func (c *configOptionTypeSetHandler) ApplyConfig(options ConfigOptions, config C
 
 type nopConfigHandler struct{}
 
+// NopConfigHandler is a dummy config handler doing nothing.
 var NopConfigHandler = NewNopConfigHandler()
 
 func NewNopConfigHandler() ConfigHandler {

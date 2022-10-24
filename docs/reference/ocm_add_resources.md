@@ -177,7 +177,7 @@ with the field <code>type</code> in the <code>input</code> field:
     that should be included in the tar file. If this option is not given
     all files not explicitly excluded are used.
   
-  Options used to configure fields: <code>--inputFollowSymlinks</code>, <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputIncludes</code>, <code>--inputExcludes</code>, <code>--inputPreserveDir</code>
+  Options used to configure fields: <code>--inputCompress</code>, <code>--inputExcludes</code>, <code>--inputFollowSymlinks</code>, <code>--inputIncludes</code>, <code>--inputPath</code>, <code>--inputPreserveDir</code>, <code>--mediaType</code>
 
 
 - Input type <code>docker</code>
@@ -219,7 +219,7 @@ with the field <code>type</code> in the <code>input</code> field:
     generated local artefact access. It is prefixed by the component name if
     it does not start with slash "/".
   
-  Options used to configure fields: <code>--inputVariants</code>, <code>--hint</code>
+  Options used to configure fields: <code>--hint</code>, <code>--inputVariants</code>
 
 
 - Input type <code>file</code>
@@ -245,7 +245,7 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property describes whether the file content should be stored
     compressed or not.
   
-  Options used to configure fields: <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>
+  Options used to configure fields: <code>--inputCompress</code>, <code>--inputPath</code>, <code>--mediaType</code>
 
 
 - Input type <code>helm</code>
@@ -272,7 +272,7 @@ with the field <code>type</code> in the <code>input</code> field:
     Basically, it is a good practice to use the component version for local resources
     This can be achieved by using templating for this attribute in the resource file.
   
-  Options used to configure fields: <code>--inputVersion</code>, <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputPath</code>
+  Options used to configure fields: <code>--inputCompress</code>, <code>--inputPath</code>, <code>--inputVersion</code>, <code>--mediaType</code>
 
 
 - Input type <code>ociImage</code>
@@ -291,7 +291,7 @@ with the field <code>type</code> in the <code>input</code> field:
     generated local artefact access. It is prefixed by the component name if
     it does not start with slash "/".
   
-  Options used to configure fields: <code>--inputPath</code>, <code>--hint</code>, <code>--mediaType</code>, <code>--inputCompress</code>
+  Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputPath</code>, <code>--mediaType</code>
 
 
 - Input type <code>spiff</code>
@@ -330,7 +330,7 @@ with the field <code>type</code> in the <code>input</code> field:
   The variable settigs from the command line are available as binding, also. They are provided under the node
   <code>values</code>.
   
-  Options used to configure fields: <code>--inputValues</code>, <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputLibraries</code>
+  Options used to configure fields: <code>--inputCompress</code>, <code>--inputLibraries</code>, <code>--inputPath</code>, <code>--inputValues</code>, <code>--mediaType</code>
 
 
 The following access methods are known by the system.
@@ -360,7 +360,7 @@ are handled:
   
     The key of the desired blob
   
-  Options used to configure fields: <code>--bucket</code>, <code>--reference</code>, <code>--mediaType</code>, <code>--accessVersion</code>, <code>--region</code>
+  Options used to configure fields: <code>--mediaType</code>, <code>--accessVersion</code>, <code>--region</code>, <code>--bucket</code>, <code>--reference</code>
 
 
 - Access type <code>gitHub</code>
@@ -439,7 +439,7 @@ are handled:
     This additional external access information can be added using
     a second external access method specification.
   
-  Options used to configure fields: <code>--reference</code>, <code>--mediaType</code>, <code>--hint</code>, <code>--globalAccess</code>
+  Options used to configure fields: <code>--globalAccess</code>, <code>--reference</code>, <code>--mediaType</code>, <code>--hint</code>
 
 
 - Access type <code>ociArtefact</code>
@@ -484,7 +484,7 @@ are handled:
     The size of the blob
   
   
-  Options used to configure fields: <code>--reference</code>, <code>--mediaType</code>, <code>--size</code>, <code>--digest</code>
+  Options used to configure fields: <code>--digest</code>, <code>--reference</code>, <code>--mediaType</code>, <code>--size</code>
 
 
 

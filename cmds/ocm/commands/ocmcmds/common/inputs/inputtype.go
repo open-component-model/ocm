@@ -112,11 +112,11 @@ func (t *DefaultInputType) ConfigOptionTypeSetHandler() flagsets.ConfigOptionTyp
 func (t *DefaultInputType) Usage() string {
 	group := ""
 	if t.clihandler != nil {
-		opts := t.clihandler.OptionTypes()
+		opts := t.clihandler.OptionTypeNames()
 		var names []string
 		if len(opts) > 0 {
 			for _, o := range opts {
-				names = append(names, "<code>--"+o.Name()+"</code>")
+				names = append(names, "<code>--"+o+"</code>")
 			}
 			group = "\nOptions used to configure fields: " + strings.Join(names, ", ")
 		}

@@ -176,7 +176,7 @@ with the field <code>type</code> in the <code>input</code> field:
     that should be included in the tar file. If this option is not given
     all files not explicitly excluded are used.
   
-  Options used to configure fields: <code>--inputPreserveDir</code>, <code>--inputFollowSymlinks</code>, <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>, <code>--inputIncludes</code>, <code>--inputExcludes</code>
+  Options used to configure fields: <code>--inputCompress</code>, <code>--inputExcludes</code>, <code>--inputFollowSymlinks</code>, <code>--inputIncludes</code>, <code>--inputPath</code>, <code>--inputPreserveDir</code>, <code>--mediaType</code>
 
 
 - Input type <code>docker</code>
@@ -196,7 +196,7 @@ with the field <code>type</code> in the <code>input</code> field:
     generated local artefact access. It is prefixed by the component name if
     it does not start with slash "/".
   
-  Options used to configure fields: <code>--inputPath</code>, <code>--hint</code>
+  Options used to configure fields: <code>--hint</code>, <code>--inputPath</code>
 
 
 - Input type <code>dockermulti</code>
@@ -218,7 +218,7 @@ with the field <code>type</code> in the <code>input</code> field:
     generated local artefact access. It is prefixed by the component name if
     it does not start with slash "/".
   
-  Options used to configure fields: <code>--inputVariants</code>, <code>--hint</code>
+  Options used to configure fields: <code>--hint</code>, <code>--inputVariants</code>
 
 
 - Input type <code>file</code>
@@ -244,7 +244,7 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property describes whether the file content should be stored
     compressed or not.
   
-  Options used to configure fields: <code>--inputPath</code>, <code>--mediaType</code>, <code>--inputCompress</code>
+  Options used to configure fields: <code>--inputCompress</code>, <code>--inputPath</code>, <code>--mediaType</code>
 
 
 - Input type <code>helm</code>
@@ -290,7 +290,7 @@ with the field <code>type</code> in the <code>input</code> field:
     generated local artefact access. It is prefixed by the component name if
     it does not start with slash "/".
   
-  Options used to configure fields: <code>--inputPath</code>, <code>--hint</code>, <code>--mediaType</code>, <code>--inputCompress</code>
+  Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputPath</code>, <code>--mediaType</code>
 
 
 - Input type <code>spiff</code>
@@ -329,7 +329,7 @@ with the field <code>type</code> in the <code>input</code> field:
   The variable settigs from the command line are available as binding, also. They are provided under the node
   <code>values</code>.
   
-  Options used to configure fields: <code>--inputCompress</code>, <code>--inputLibraries</code>, <code>--inputValues</code>, <code>--inputPath</code>, <code>--mediaType</code>
+  Options used to configure fields: <code>--inputCompress</code>, <code>--inputLibraries</code>, <code>--inputPath</code>, <code>--inputValues</code>, <code>--mediaType</code>
 
 
 The following access methods are known by the system.
@@ -359,7 +359,7 @@ are handled:
   
     The key of the desired blob
   
-  Options used to configure fields: <code>--region</code>, <code>--bucket</code>, <code>--reference</code>, <code>--mediaType</code>, <code>--accessVersion</code>
+  Options used to configure fields: <code>--reference</code>, <code>--mediaType</code>, <code>--accessVersion</code>, <code>--region</code>, <code>--bucket</code>
 
 
 - Access type <code>gitHub</code>
@@ -383,7 +383,7 @@ are handled:
   
     The sha/id of the git commit
   
-  Options used to configure fields: <code>--accessHostname</code>, <code>--commit</code>, <code>--accessRepository</code>
+  Options used to configure fields: <code>--commit</code>, <code>--accessRepository</code>, <code>--accessHostname</code>
 
 
 - Access type <code>localBlob</code>
