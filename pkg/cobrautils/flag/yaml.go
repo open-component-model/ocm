@@ -29,8 +29,11 @@ func (i *YAMLValue[T]) String() string {
 	if v.Elem().IsZero() {
 		return ""
 	}
-	//nolint: errchkjson // initialized by unmarshal
-	data, _ := json.Marshal(*i.addr)
+
+	data, err := json.Marshal(*i.addr)
+	if err != nil {
+		return "error " + err.Error()
+	}
 	return string(data)
 }
 

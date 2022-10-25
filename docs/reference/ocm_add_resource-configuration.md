@@ -365,7 +365,7 @@ are handled:
   
     The key of the desired blob
   
-  Options used to configure fields: <code>--reference</code>, <code>--mediaType</code>, <code>--accessVersion</code>, <code>--region</code>, <code>--bucket</code>
+  Options used to configure fields: <code>--bucket</code>, <code>--reference</code>, <code>--mediaType</code>, <code>--accessVersion</code>, <code>--region</code>
 
 
 - Access type <code>gitHub</code>
@@ -389,7 +389,7 @@ are handled:
   
     The sha/id of the git commit
   
-  Options used to configure fields: <code>--accessRepository</code>, <code>--accessHostname</code>, <code>--commit</code>
+  Options used to configure fields: <code>--commit</code>, <code>--accessRepository</code>, <code>--accessHostname</code>
 
 
 - Access type <code>localBlob</code>
@@ -444,7 +444,7 @@ are handled:
     This additional external access information can be added using
     a second external access method specification.
   
-  Options used to configure fields: <code>--reference</code>, <code>--mediaType</code>, <code>--hint</code>, <code>--globalAccess</code>
+  Options used to configure fields: <code>--hint</code>, <code>--globalAccess</code>, <code>--reference</code>, <code>--mediaType</code>
 
 
 - Access type <code>ociArtefact</code>

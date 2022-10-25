@@ -366,7 +366,7 @@ are handled:
   
     The key of the desired blob
   
-  Options used to configure fields: <code>--reference</code>, <code>--mediaType</code>, <code>--accessVersion</code>, <code>--region</code>, <code>--bucket</code>
+  Options used to configure fields: <code>--accessVersion</code>, <code>--region</code>, <code>--bucket</code>, <code>--reference</code>, <code>--mediaType</code>
 
 
 - Access type <code>gitHub</code>

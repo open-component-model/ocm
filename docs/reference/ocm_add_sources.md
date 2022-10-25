@@ -359,7 +359,7 @@ are handled:
   
     The key of the desired blob
   
-  Options used to configure fields: <code>--reference</code>, <code>--mediaType</code>, <code>--accessVersion</code>, <code>--region</code>, <code>--bucket</code>
+  Options used to configure fields: <code>--mediaType</code>, <code>--accessVersion</code>, <code>--region</code>, <code>--bucket</code>, <code>--reference</code>
 
 
 - Access type <code>gitHub</code>
@@ -383,7 +383,7 @@ are handled:
   
     The sha/id of the git commit
   
-  Options used to configure fields: <code>--commit</code>, <code>--accessRepository</code>, <code>--accessHostname</code>
+  Options used to configure fields: <code>--accessRepository</code>, <code>--accessHostname</code>, <code>--commit</code>
 
 
 - Access type <code>localBlob</code>
@@ -483,7 +483,7 @@ are handled:
     The size of the blob
   
   
-  Options used to configure fields: <code>--reference</code>, <code>--mediaType</code>, <code>--size</code>, <code>--digest</code>
+  Options used to configure fields: <code>--mediaType</code>, <code>--size</code>, <code>--digest</code>, <code>--reference</code>
 
 
 

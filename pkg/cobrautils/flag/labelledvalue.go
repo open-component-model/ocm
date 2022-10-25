@@ -29,8 +29,10 @@ func (i *LabelledValueValue) String() string {
 	if i.Name == "" {
 		return ""
 	}
-	//nolint: errchkjson // initialized by unmarshal
-	data, _ := json.Marshal(i.Value)
+	data, err := json.Marshal(i.Value)
+	if err != nil {
+		return "error " + err.Error()
+	}
 	return i.Name + "=" + string(data)
 }
 
@@ -50,7 +52,7 @@ func (i *LabelledValueValue) Set(s string) error {
 }
 
 func (i *LabelledValueValue) Type() string {
-	return "LabelledString"
+	return "<name>=<YAML>"
 }
 
 func LabelledValueVarP(flags *pflag.FlagSet, p *LabelledValue, name, shorthand string, value LabelledValue, usage string) {
