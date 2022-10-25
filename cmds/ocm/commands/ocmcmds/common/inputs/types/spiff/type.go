@@ -12,19 +12,22 @@ import (
 const TYPE = "spiff"
 
 func init() {
-	inputs.DefaultInputTypeScheme.Register(TYPE, inputs.NewInputType(TYPE, &Spec{}, usage()))
+	inputs.DefaultInputTypeScheme.Register(TYPE, inputs.NewInputType(TYPE, &Spec{}, usage(), ConfigHandler()))
 }
 
 func usage() string {
 	return file.Usage("The path must denote a [spiff](https://github.com/mandelsoft/spiff) template relative the the resources file.") + `
 - **<code>values</code>** *map[string]any*
 
-  This OPTIONAL property describes an additioanl value binding for the template processing. It will be available
-  under the node <code>values</code>.
+  This OPTIONAL property describes an additional value binding for the template processing. It will be available
+  under the node <code>inputvalues</code>.
 
 - **<code>libraries</code>** *[]string*
 
   This OPTIONAL property describes a list of spiff libraries to include in template
   processing.
+
+The variable settigs from the command line are available as binding, also. They are provided under the node
+<code>values</code>.
 `
 }

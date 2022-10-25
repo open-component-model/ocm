@@ -27,14 +27,22 @@ type Templater interface {
 
 // Options defines the options for cli templating.
 type Options struct {
+	Default   string
 	Mode      string
 	UseEnv    bool
 	Templater Templater
 	Vars      Values
 }
 
+func (o *Options) defaultMode() string {
+	if o.Default == "" {
+		return "subst"
+	}
+	return o.Default
+}
+
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVarP(&o.Mode, "templater", "", "subst", "templater to use (subst, spiff, go)")
+	fs.StringVarP(&o.Mode, "templater", "", o.defaultMode(), "templater to use (subst, spiff, go)")
 	fs.BoolVarP(&o.UseEnv, "addenv", "", false, "access environment for templating")
 }
 
@@ -77,7 +85,7 @@ Note: Variable names are case-sensitive.
 
 Example:
 <pre>
-<command> <options> -- MY_VAL=test <args>
+&lt;command> &lt;options> -- MY_VAL=test &lt;args>
 </pre>
 ` + Usage(DefaultRegistry())
 }

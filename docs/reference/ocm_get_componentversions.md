@@ -101,10 +101,8 @@ The following modes are supported:
 ### Examples
 
 ```
-
 $ ocm get componentversion ghcr.io/mandelsoft/kubelink
 $ ocm get componentversion --repo OCIRegistry:ghcr.io mandelsoft/kubelink
-
 ```
 
 ### SEE ALSO

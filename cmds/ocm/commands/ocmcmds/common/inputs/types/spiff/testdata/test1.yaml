@@ -1,3 +1,3 @@
 
 alice: 24
-bob: (( alice + (values.diff || 1) ))
+bob: (( alice + (inputvalues.diff || 1) ))

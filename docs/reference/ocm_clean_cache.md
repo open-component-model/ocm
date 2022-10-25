@@ -21,9 +21,7 @@ Cleanup all blobs stored in oci blob cache (if given).
 ### Examples
 
 ```
-
 $ ocm clean cache
-
 ```
 
 ### SEE ALSO

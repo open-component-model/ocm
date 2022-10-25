@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
 var (
@@ -27,21 +28,32 @@ type Command struct {
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{common.ResourceAdderCommand{BaseCommand: utils.NewBaseCommand(ctx)}}, utils.Names(Names, names...)...)
+	return utils.SetupCommand(
+		&Command{
+			common.ResourceAdderCommand{
+				BaseCommand: utils.NewBaseCommand(ctx),
+				Adder:       common.NewContentResourceSpecificationProvider(ctx, "source", nil, ""),
+			},
+		},
+		utils.Names(Names, names...)...,
+	)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
 		Use:   "[<options>] <target> {<resourcefile> | <var>=<value>}",
-		Args:  cobra.MinimumNArgs(2),
+		Args:  cobra.MinimumNArgs(1),
 		Short: "add source information to a component version",
 		Long: `
 Add source information specified in a resource file to a component version.
 So far only component archives are supported as target.
-` + (&template.Options{}).Usage() + `
-This command accepts (re)source specification files describing the sources
-to add to a component version.
-` + inputs.Usage(inputs.DefaultInputTypeScheme),
+
+This command accepts source specification files describing the sources
+to add to a component version. Elements must follow the source meta data
+description scheme of the component descriptor.
+` + o.Adder.Description() + (&template.Options{}).Usage() +
+			inputs.Usage(inputs.DefaultInputTypeScheme) +
+			ocm.AccessUsage(o.OCMContext().AccessMethods(), true),
 	}
 }
 

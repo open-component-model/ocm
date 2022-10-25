@@ -42,9 +42,7 @@ For signing the public key the following subject attributes are supported:
 ### Examples
 
 ```
-
 $ ocm create rsakeypair mandelsoft.priv mandelsoft.cert issuer=mandelsoft
-
 ```
 
 ### SEE ALSO

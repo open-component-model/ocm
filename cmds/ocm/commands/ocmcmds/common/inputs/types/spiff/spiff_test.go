@@ -21,7 +21,7 @@ var _ = Describe("spiff processing", func() {
 	nv := common.NewNameVersion("test", "v1")
 	BeforeEach(func() {
 		env = NewTestEnv(TestData())
-		ictx = inputs.NewContext(env.Context, common.NewPrinter(env.Context.StdOut()))
+		ictx = inputs.NewContext(env.Context, common.NewPrinter(env.Context.StdOut()), nil)
 	})
 
 	AfterEach(func() {

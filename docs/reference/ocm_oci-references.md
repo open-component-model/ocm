@@ -42,9 +42,7 @@ character. The following formats are supported: <code>directory</code>, <code>ta
 ### Examples
 
 ```
-
 ghcr.io/mandelsoft/cnudie:1.0.0
-
 ```
 
 ### SEE ALSO

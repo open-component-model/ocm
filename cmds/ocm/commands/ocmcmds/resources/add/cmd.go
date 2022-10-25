@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
 var (
@@ -27,21 +28,55 @@ type Command struct {
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{common.ResourceAdderCommand{BaseCommand: utils.NewBaseCommand(ctx)}}, utils.Names(Names, names...)...)
+	return utils.SetupCommand(
+		&Command{
+			common.ResourceAdderCommand{
+				BaseCommand: utils.NewBaseCommand(ctx),
+				Adder:       NewResourceSpecificationsProvider(ctx, ""),
+			},
+		},
+		utils.Names(Names, names...)...,
+	)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
 		Use:   "[<options>] <target> {<resourcefile> | <var>=<value>}",
-		Args:  cobra.MinimumNArgs(2),
+		Args:  cobra.MinimumNArgs(1),
 		Short: "add resources to a component version",
 		Long: `
 Add resources specified in a resource file to a component version.
 So far only component archives are supported as target.
-` + (&template.Options{}).Usage() + `
+
 This command accepts  resource specification files describing the resources
-to add to a component version.
-` + inputs.Usage(inputs.DefaultInputTypeScheme),
+to add to a component version. Elements must follow the resource meta data
+description scheme of the component descriptor.
+` + o.Adder.Description() + (&template.Options{}).Usage() +
+			inputs.Usage(inputs.DefaultInputTypeScheme) +
+			ocm.AccessUsage(o.OCMContext().AccessMethods(), true),
+		Example: `
+Add a resource directly by options
+<pre>
+$ ocm add resources path/to/ca --name myresource --type PlainText --input '{ "type": "file", "path": "testdata/testcontent", "mediaType": "text/plain" }'
+</pre>
+
+Add a resource by a description file:
+
+*resources.yaml*:
+<pre>
+---
+name: myrresource
+type: PlainText
+version: ${version]
+input:
+  type: file
+  path: testdata/testcontent
+  mediaType: text/plain
+</pre>
+<pre>
+$ ocm add resources  path/to/ca  resources.yaml VERSION=1.0.0
+</pre>
+`,
 	}
 }
 

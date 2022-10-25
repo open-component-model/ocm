@@ -61,9 +61,7 @@ this one is used.
 ### Examples
 
 ```
-
 $ ocm transfer ctf ctf.tgz ghcr.io/mandelsoft/components
-
 ```
 
 ### SEE ALSO

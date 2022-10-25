@@ -11,6 +11,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/options"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -87,4 +89,26 @@ func (s *MediaFileSpec) ValidateFile(fldPath *field.Path, ctx clictx.Context, in
 		return fileInfo, filePath, allErrs
 	}
 	return nil, "", allErrs
+}
+
+func NewMediaFileSpecOptionType(name string, adder flagsets.ConfigAdder, types ...flagsets.ConfigOptionType) flagsets.ConfigOptionTypeSetHandler {
+	set := flagsets.NewConfigOptionTypeSetHandler(name, adder, types...)
+	set.AddOptionType(options.PathOption)
+	set.AddOptionType(options.MediaTypeOption)
+	set.AddOptionType(options.CompressOption)
+	return set
+}
+
+func AddPathSpecConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
+	flagsets.AddFieldByOptionP(opts, options.PathOption, config, "path")
+	return nil
+}
+
+func AddMediaFileSpecConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
+	if err := AddPathSpecConfig(opts, config); err != nil {
+		return err
+	}
+	flagsets.AddFieldByOptionP(opts, options.MediaTypeOption, config, "mediaType")
+	flagsets.AddFieldByOptionP(opts, options.CompressOption, config, "compress")
+	return nil
 }

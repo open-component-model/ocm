@@ -44,3 +44,28 @@ type byName []*cobra.Command
 func (s byName) Len() int           { return len(s) }
 func (s byName) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 func (s byName) Less(i, j int) bool { return s[i].Name() < s[j].Name() }
+
+func SanitizePre(in string) string {
+	str := ""
+	for {
+		i := strings.Index(in, "<pre>")
+		if i < 0 {
+			break
+		}
+
+		after := ""
+		e := strings.Index(in, "</pre>")
+		if e < 0 {
+			e = len(in)
+		} else {
+			after = in[e+6:]
+		}
+
+		msg := in[i+5 : e]
+		msg = strings.ReplaceAll(msg, "-", "&dash;")
+
+		str += in[:i] + "\n<pre>" + msg + "</pre>\n"
+		in = after
+	}
+	return str + in
+}

@@ -58,9 +58,7 @@ linked library can be used:
 ### Examples
 
 ```
-
 $ oci show tags ghcr.io/mandelsoft/kubelink
-
 ```
 
 ### SEE ALSO

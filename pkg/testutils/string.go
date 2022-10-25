@@ -54,12 +54,17 @@ func (matcher *StringEqualMatcher) Match(actual interface{}) (success bool, err 
 func (matcher *StringEqualMatcher) FailureMessage(actual interface{}) (message string) {
 	actualString, actualOK := actual.(string)
 	if actualOK {
+		compare, expected := actualString, matcher.Expected
 		if matcher.Trim {
-			actualString = strings.TrimSpace(actualString)
+			compare = strings.TrimSpace(actualString)
+			expected = strings.TrimSpace(matcher.Expected)
 		}
-		return "Found\n" + actualString + "\n" + format.MessageWithDiff(actualString, "to equal", matcher.Expected)
+		return fmt.Sprintf(
+			"Found\n%s\n%s",
+			actualString,
+			format.MessageWithDiff(compare, "to equal", expected),
+		)
 	}
-
 	return format.Message(actual, "to equal", matcher.Expected)
 }
 
