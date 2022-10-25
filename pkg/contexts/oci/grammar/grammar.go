@@ -57,6 +57,18 @@ var (
 	// dashes.
 	separatorRegexp = Match(`(?:[._]|__|[-]*)`)
 
+	// dockerOrgSeparatorRegexp defines the separators allowed to be
+	// embedded in a docker organization name.
+	// https://docs.docker.com/docker-hub/repos/
+	dockerOrgSeparatorRegexp = Match(`(?:_|__|[-]*)`)
+
+	// DockerOrgRegexp restricts registry path component names to start
+	// with at least one letter or number, with following parts able to be
+	// separated by one or two underscore and multiple dashes.
+	DockerOrgRegexp = Sequence(
+		AlphaNumericRegexp,
+		Optional(Repeated(dockerOrgSeparatorRegexp, AlphaNumericRegexp)))
+
 	// NameComponentRegexp restricts registry path component names to start
 	// with at least one letter or number, with following parts able to be
 	// separated by one period, one or two underscore and multiple dashes.
@@ -155,7 +167,7 @@ var (
 
 	// DockerReferenceRegexp is a shortened docker reference.
 	DockerReferenceRegexp = Anchored(
-		Capture(NameComponentRegexp, RepositorySeparatorRegexp, NameComponentRegexp),
+		Capture(DockerOrgRegexp, RepositorySeparatorRegexp, NameComponentRegexp),
 		CapturedVersionRegexp)
 
 	TypedRepoRegexp = Anchored(
