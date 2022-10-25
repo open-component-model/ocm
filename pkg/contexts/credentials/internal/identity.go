@@ -102,6 +102,11 @@ func IdentityByURL(url string) ConsumerIdentity {
 	return ConsumerIdentity{"url": url}
 }
 
+// Type returns the required consumer type.
+func (i ConsumerIdentity) Type() string {
+	return i[ID_TYPE]
+}
+
 // String returns the string representation of an identity.
 func (i ConsumerIdentity) String() string {
 	data, err := json.Marshal(i)

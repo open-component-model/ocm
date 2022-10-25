@@ -55,6 +55,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	datacfg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config/attrs"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
@@ -316,7 +317,7 @@ func (o *CLIOptions) Complete() error {
 		}
 		err = ctx.ApplyConfig(spec, "cli")
 	}
-	return err
+	return plugincacheattr.Get(o.Context.OCMContext()).RegisterExtensions(nil)
 }
 
 func NewVersionCommand(ctx clictx.Context) *cobra.Command {

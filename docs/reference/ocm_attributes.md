@@ -30,6 +30,10 @@ OCM library:
 
   Upload local OCI artefact blobs to a dedicated repository.
 
+- <code>github.com/mandelsoft/ocm/plugindir</code> [<code>plugindir</code>]: *plugin directory*
+
+  Directory to look for OCM plugin executables.
+
 - <code>github.com/mandelsoft/ocm/signing</code>: *JSON*
 
   Public and private Key settings given as JSON document with the following

@@ -10,6 +10,7 @@ import (
 	credentials "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/credentials/get"
 	artefacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/get"
 	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/get"
+	plugins "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/plugins/get"
 	references "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references/get"
 	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/get"
 	sources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources/get"
@@ -29,5 +30,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(references.NewCommand(ctx))
 	cmd.AddCommand(sources.NewCommand(ctx))
 	cmd.AddCommand(credentials.NewCommand(ctx))
+	cmd.AddCommand(plugins.NewCommand(ctx))
 	return cmd
 }

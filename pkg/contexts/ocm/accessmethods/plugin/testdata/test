@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+NAME="$(basename "$0")"
+
+Error() {
+  echo '{ "error": "'$1'" }' >&2
+  exit 1
+}
+
+Info() {
+  echo '{"version":"v1","pluginName":"'$NAME'","pluginVersion":"v1","shortDescription":"a test plugin","description":"a test plugin with access method test","accessMethods":[{"name":"test","shortDescription":"test access","description":""},{"name":"test","version":"v1","shortDescription":"test access","description":""}]}
+'
+}
+
+Get() {
+  echo "test content"
+}
+
+Validate() {
+  echo '{"short":"a test","mediaType":"plain/text","description":"","hint":"testfile","consumerId":{"hostname":"localhost","type":"test"}}'
+}
+
+AccessMethod() {
+  case "$1" in
+    get) Get "${@:2}";;
+    validate) Validate "${@:2}";;
+    *) Error "invalid accessmethod command $1";;
+  esac
+}
+
+case "$1" in
+  info) Info;;
+  accessmethod) AccessMethod "${@:2}";;
+  *) Error "invalid command $1";;
+esac

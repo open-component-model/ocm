@@ -74,7 +74,7 @@ func HandleOutput(output output.Output, handler TypeHandler, specs ...ElemSpec) 
 			return err
 		}
 		if result == nil {
-			return fmt.Errorf("all mode not support")
+			return fmt.Errorf("all mode not supported")
 		}
 		for _, r := range result {
 			err := output.Add(r)

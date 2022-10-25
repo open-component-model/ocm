@@ -99,7 +99,10 @@ var _ = Describe("Transfer handler", func() {
 		tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env)
 		Expect(err).To(Succeed())
 		defer tgt.Close()
-		handler, err := standard.New(standard.ResourcesByValue())
+		opts := &standard.Options{}
+		opts.SetResourcesByValue(true)
+		handler := standard.NewDefaultHandler(opts)
+		//handler, err := standard.New(standard.ResourcesByValue())
 		Expect(err).To(Succeed())
 		err = transfer.TransferVersion(nil, nil, cv, tgt, handler)
 		Expect(err).To(Succeed())

@@ -30,7 +30,6 @@ build: ${SOURCES}
 		-X github.com/open-component-model/ocm/pkg/version.buildDate=$(shell date --rfc-3339=seconds | sed 's/ /T/')" \
 		-o bin/ocm \
 		./cmds/ocm
-
 	go build -ldflags "-s -w \
 		-X github.com/open-component-model/ocm/pkg/version.gitVersion=$(EFFECTIVE_VERSION) \
 		-X github.com/open-component-model/ocm/pkg/version.gitTreeState=$(GIT_TREE_STATE) \
@@ -38,6 +37,14 @@ build: ${SOURCES}
 		-X github.com/open-component-model/ocm/pkg/version.buildDate=$(shell date --rfc-3339=seconds | sed 's/ /T/')" \
 		-o bin/helminstaller \
 		./cmds/helminstaller
+	go build -ldflags "-s -w \
+		-X github.com/open-component-model/ocm/pkg/version.gitVersion=$(EFFECTIVE_VERSION) \
+		-X github.com/open-component-model/ocm/pkg/version.gitTreeState=$(GIT_TREE_STATE) \
+		-X github.com/open-component-model/ocm/pkg/version.gitCommit=$(COMMIT) \
+		-X github.com/open-component-model/ocm/pkg/version.buildDate=$(shell date --rfc-3339=seconds | sed 's/ /T/')" \
+		-o bin/demor \
+		./cmds/demoplugin
+
 
 .PHONY: install-requirements
 install-requirements:
