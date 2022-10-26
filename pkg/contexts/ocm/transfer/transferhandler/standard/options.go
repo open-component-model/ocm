@@ -8,6 +8,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Options struct {
@@ -67,19 +68,6 @@ func (o *Options) GetResolver() ocm.ComponentVersionResolver {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-func GetFlag(args ...bool) bool {
-	flag := len(args) == 0
-	for _, f := range args {
-		if f {
-			flag = true
-			break
-		}
-	}
-	return flag
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
 type OverwriteOption interface {
 	SetOverwrite(bool)
 	IsOverwrite() bool
@@ -100,7 +88,7 @@ func (o *overwriteOption) ApplyTransferOption(to transferhandler.TransferOptions
 
 func Overwrite(args ...bool) transferhandler.TransferOption {
 	return &overwriteOption{
-		overwrite: GetFlag(args...),
+		overwrite: utils.GetOptionFlag(args...),
 	}
 }
 
@@ -126,7 +114,7 @@ func (o *recursiveOption) ApplyTransferOption(to transferhandler.TransferOptions
 
 func Recursive(args ...bool) transferhandler.TransferOption {
 	return &recursiveOption{
-		recursive: GetFlag(args...),
+		recursive: utils.GetOptionFlag(args...),
 	}
 }
 
@@ -152,7 +140,7 @@ func (o *resourcesByValueOption) ApplyTransferOption(to transferhandler.Transfer
 
 func ResourcesByValue(args ...bool) transferhandler.TransferOption {
 	return &resourcesByValueOption{
-		flag: GetFlag(args...),
+		flag: utils.GetOptionFlag(args...),
 	}
 }
 
@@ -178,7 +166,7 @@ func (o *sourcesByValueOption) ApplyTransferOption(to transferhandler.TransferOp
 
 func SourcesByValue(args ...bool) transferhandler.TransferOption {
 	return &sourcesByValueOption{
-		flag: GetFlag(args...),
+		flag: utils.GetOptionFlag(args...),
 	}
 }
 

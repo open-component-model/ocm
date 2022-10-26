@@ -13,6 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type AccessSpecConverter interface {
@@ -64,7 +65,7 @@ func NewConvertedAccessSpecType(name string, v AccessSpecVersion, desc string, h
 			ObjectVersionedType: runtime.NewVersionedObjectType(name),
 			TypedObjectDecoder:  v,
 			description:         desc,
-			handler:             _handler(handler),
+			handler:             utils.Optional(handler...),
 		},
 		AccessSpecVersion: v,
 	}

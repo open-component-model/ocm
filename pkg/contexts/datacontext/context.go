@@ -16,6 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const OCM_CONTEXT_SUFFIX = ".context" + common.OCM_TYPE_GROUP_SUFFIX
@@ -40,11 +41,7 @@ const (
 )
 
 func Mode(m ...BuilderMode) BuilderMode {
-	mode := MODE_DEFAULTED
-	if len(m) > 0 {
-		mode = m[0]
-	}
-	return mode
+	return utils.OptionalDefaulted(MODE_DEFAULTED, m...)
 }
 
 // Context describes a common interface for a data context used for a dedicated
@@ -251,12 +248,7 @@ func (c *_attributes) GetAttribute(name string, def ...interface{}) interface{} 
 			return a
 		}
 	}
-	for _, d := range def {
-		if d != nil {
-			return d
-		}
-	}
-	return nil
+	return utils.Optional(def...)
 }
 
 func (c *_attributes) SetEncodedAttribute(name string, data []byte, unmarshaller runtime.Unmarshaler) error {

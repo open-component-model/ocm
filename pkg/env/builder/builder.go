@@ -13,6 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/env"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type element interface {
@@ -106,11 +107,7 @@ func (b *Builder) expect(p interface{}, msg string, tests ...func() bool) {
 
 func (b *Builder) failOn(err error, callerSkip ...int) {
 	if err != nil {
-		skip := 2
-		if len(callerSkip) > 0 {
-			skip = callerSkip[0]
-		}
-		Fail(err.Error(), skip)
+		Fail(err.Error(), utils.Optional(callerSkip...)+2)
 	}
 }
 
@@ -142,11 +139,7 @@ func (b *Builder) configure(e element, funcs []func(), skip ...int) interface{} 
 	}
 	err := b.pop().Close()
 	if err != nil {
-		cs := 2
-		if len(skip) > 0 {
-			cs += skip[0]
-		}
-		Fail(err.Error(), cs)
+		Fail(err.Error(), utils.Optional(skip...)+2)
 	}
 	return e.Result()
 }

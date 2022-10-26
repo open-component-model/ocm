@@ -10,14 +10,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
-
-func _handler(handler []flagsets.ConfigOptionTypeSetHandler) flagsets.ConfigOptionTypeSetHandler {
-	if len(handler) > 0 {
-		return handler[0]
-	}
-	return nil
-}
 
 type accessType struct {
 	runtime.ObjectVersionedType
@@ -31,7 +25,7 @@ func NewAccessSpecType(name string, proto core.AccessSpec, desc string, handler 
 		ObjectVersionedType: runtime.NewVersionedObjectType(name),
 		TypedObjectDecoder:  runtime.MustNewDirectDecoder(proto),
 		description:         desc,
-		handler:             _handler(handler),
+		handler:             utils.Optional(handler...),
 	}
 }
 

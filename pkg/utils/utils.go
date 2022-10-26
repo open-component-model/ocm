@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/modern-go/reflect2"
 	"github.com/spf13/cobra"
 	"sigs.k8s.io/yaml"
 
@@ -254,4 +255,46 @@ func StringMapKeys(m interface{}) []string {
 	}
 	sort.Strings(keys)
 	return keys
+}
+
+// Optional returns the first optional non-zero element given as variadic argument,
+// if given, or the zero element as default.
+func Optional[T any](list ...T) T {
+	var zero T
+	for _, e := range list {
+		if !reflect.DeepEqual(e, zero) {
+			return e
+		}
+	}
+	return zero
+}
+
+// OptionalDefaulted returns the first optional non-nil element given as variadic
+// argument, or the given default element. For value types a given zero
+// argument is excepted, also.
+func OptionalDefaulted[T any](def T, list ...T) T {
+	for _, e := range list {
+		if !reflect2.IsNil(e) {
+			return e
+		}
+	}
+	return def
+}
+
+// OptionalDefaultedBool checks all args for true. If no true is given
+// the given default is returned.
+func OptionalDefaultedBool(def bool, list ...bool) bool {
+	for _, e := range list {
+		if e {
+			return e
+		}
+	}
+	return def
+}
+
+// GetOptionFlag returns the flag value used to set a bool option
+// based on optionally specified explicit value(s).
+// The default value is to enable the option (true).
+func GetOptionFlag(list ...bool) bool {
+	return OptionalDefaultedBool(len(list) == 0, list...)
 }
