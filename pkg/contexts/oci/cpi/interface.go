@@ -12,70 +12,70 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/internal"
 )
 
-const CONTEXT_TYPE = core.CONTEXT_TYPE
+const CONTEXT_TYPE = internal.CONTEXT_TYPE
 
-const CommonTransportFormat = core.CommonTransportFormat
+const CommonTransportFormat = internal.CommonTransportFormat
 
 type (
-	Context                          = core.Context
-	Repository                       = core.Repository
-	RepositorySpecHandlers           = core.RepositorySpecHandlers
-	RepositorySpecHandler            = core.RepositorySpecHandler
-	UniformRepositorySpec            = core.UniformRepositorySpec
-	RepositoryType                   = core.RepositoryType
-	RepositorySpec                   = core.RepositorySpec
-	IntermediateRepositorySpecAspect = core.IntermediateRepositorySpecAspect
-	GenericRepositorySpec            = core.GenericRepositorySpec
-	ArtefactAccess                   = core.ArtefactAccess
-	Artefact                         = core.Artefact
-	ArtefactSource                   = core.ArtefactSource
-	ArtefactSink                     = core.ArtefactSink
-	BlobSource                       = core.BlobSource
-	BlobSink                         = core.BlobSink
-	NamespaceLister                  = core.NamespaceLister
-	NamespaceAccess                  = core.NamespaceAccess
-	ManifestAccess                   = core.ManifestAccess
-	IndexAccess                      = core.IndexAccess
-	BlobAccess                       = core.BlobAccess
-	DataAccess                       = core.DataAccess
-	RepositorySource                 = core.RepositorySource
+	Context                          = internal.Context
+	Repository                       = internal.Repository
+	RepositorySpecHandlers           = internal.RepositorySpecHandlers
+	RepositorySpecHandler            = internal.RepositorySpecHandler
+	UniformRepositorySpec            = internal.UniformRepositorySpec
+	RepositoryType                   = internal.RepositoryType
+	RepositorySpec                   = internal.RepositorySpec
+	IntermediateRepositorySpecAspect = internal.IntermediateRepositorySpecAspect
+	GenericRepositorySpec            = internal.GenericRepositorySpec
+	ArtefactAccess                   = internal.ArtefactAccess
+	Artefact                         = internal.Artefact
+	ArtefactSource                   = internal.ArtefactSource
+	ArtefactSink                     = internal.ArtefactSink
+	BlobSource                       = internal.BlobSource
+	BlobSink                         = internal.BlobSink
+	NamespaceLister                  = internal.NamespaceLister
+	NamespaceAccess                  = internal.NamespaceAccess
+	ManifestAccess                   = internal.ManifestAccess
+	IndexAccess                      = internal.IndexAccess
+	BlobAccess                       = internal.BlobAccess
+	DataAccess                       = internal.DataAccess
+	RepositorySource                 = internal.RepositorySource
 )
 
 type Descriptor = ociv1.Descriptor
 
-var DefaultContext = core.DefaultContext
+var DefaultContext = internal.DefaultContext
 
 func New(m ...datacontext.BuilderMode) Context {
-	return core.Builder{}.New(m...)
+	return internal.Builder{}.New(m...)
 }
 
 func RegisterRepositoryType(name string, atype RepositoryType) {
-	core.DefaultRepositoryTypeScheme.Register(name, atype)
+	internal.DefaultRepositoryTypeScheme.Register(name, atype)
 }
 
 func RegisterRepositorySpecHandler(handler RepositorySpecHandler, types ...string) {
-	core.RegisterRepositorySpecHandler(handler, types...)
+	internal.RegisterRepositorySpecHandler(handler, types...)
 }
 
 func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {
-	return core.ToGenericRepositorySpec(spec)
+	return internal.ToGenericRepositorySpec(spec)
 }
 
 func UniformRepositorySpecForHostURL(typ string, host string) *UniformRepositorySpec {
-	return core.UniformRepositorySpecForHostURL(typ, host)
+	return internal.UniformRepositorySpecForHostURL(typ, host)
 }
 
 const (
-	KIND_OCIARTEFACT = core.KIND_OCIARTEFACT
+	KIND_OCIARTEFACT = internal.KIND_OCIARTEFACT
 	KIND_MEDIATYPE   = accessio.KIND_MEDIATYPE
 	KIND_BLOB        = accessio.KIND_BLOB
 )
 
 func ErrUnknownArtefact(name, version string) error {
-	return core.ErrUnknownArtefact(name, version)
+	return internal.ErrUnknownArtefact(name, version)
 }
 
 func ErrBlobNotFound(digest digest.Digest) error {

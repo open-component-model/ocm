@@ -7,22 +7,22 @@ package config
 import (
 	"context"
 
-	"github.com/open-component-model/ocm/pkg/contexts/config/core"
+	"github.com/open-component-model/ocm/pkg/contexts/config/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 )
 
-func WithContext(ctx context.Context) core.Builder {
-	return core.Builder{}.WithContext(ctx)
+func WithContext(ctx context.Context) internal.Builder {
+	return internal.Builder{}.WithContext(ctx)
 }
 
-func WithSharedAttributes(ctx datacontext.AttributesContext) core.Builder {
-	return core.Builder{}.WithSharedAttributes(ctx)
+func WithSharedAttributes(ctx datacontext.AttributesContext) internal.Builder {
+	return internal.Builder{}.WithSharedAttributes(ctx)
 }
 
-func WithConfigTypeScheme(scheme ConfigTypeScheme) core.Builder {
-	return core.Builder{}.WithConfigTypeScheme(scheme)
+func WithConfigTypeScheme(scheme ConfigTypeScheme) internal.Builder {
+	return internal.Builder{}.WithConfigTypeScheme(scheme)
 }
 
 func New(mode ...datacontext.BuilderMode) Context {
-	return core.Builder{}.New(mode...)
+	return internal.Builder{}.New(mode...)
 }

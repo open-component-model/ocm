@@ -10,39 +10,39 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx/core"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
-func WithContext(ctx context.Context) core.Builder {
-	return core.Builder{}.WithContext(ctx)
+func WithContext(ctx context.Context) internal.Builder {
+	return internal.Builder{}.WithContext(ctx)
 }
 
-func WithSharedAttributes(ctx datacontext.AttributesContext) core.Builder {
-	return core.Builder{}.WithSharedAttributes(ctx)
+func WithSharedAttributes(ctx datacontext.AttributesContext) internal.Builder {
+	return internal.Builder{}.WithSharedAttributes(ctx)
 }
 
-func WithOCM(ctx ocm.Context) core.Builder {
-	return core.Builder{}.WithOCM(ctx)
+func WithOCM(ctx ocm.Context) internal.Builder {
+	return internal.Builder{}.WithOCM(ctx)
 }
 
-func WithFileSystem(fs vfs.FileSystem) core.Builder {
-	return core.Builder{}.WithFileSystem(fs)
+func WithFileSystem(fs vfs.FileSystem) internal.Builder {
+	return internal.Builder{}.WithFileSystem(fs)
 }
 
-func WithOutput(w io.Writer) core.Builder {
-	return core.Builder{}.WithOutput(w)
+func WithOutput(w io.Writer) internal.Builder {
+	return internal.Builder{}.WithOutput(w)
 }
 
-func WithErrorOutput(w io.Writer) core.Builder {
-	return core.Builder{}.WithErrorOutput(w)
+func WithErrorOutput(w io.Writer) internal.Builder {
+	return internal.Builder{}.WithErrorOutput(w)
 }
 
-func WithInput(r io.Reader) core.Builder {
-	return core.Builder{}.WithInput(r)
+func WithInput(r io.Reader) internal.Builder {
+	return internal.Builder{}.WithInput(r)
 }
 
-func New(mode ...datacontext.BuilderMode) core.Context {
-	return core.Builder{}.New(mode...)
+func New(mode ...datacontext.BuilderMode) internal.Context {
+	return internal.Builder{}.New(mode...)
 }

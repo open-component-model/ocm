@@ -10,7 +10,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -20,7 +20,7 @@ type IndexImpl struct {
 
 var _ IndexAccess = (*IndexImpl)(nil)
 
-func NewIndex(access ArtefactSetContainer, defs ...*artdesc.Index) (core.IndexAccess, error) {
+func NewIndex(access ArtefactSetContainer, defs ...*artdesc.Index) (internal.IndexAccess, error) {
 	var def *artdesc.Index
 	if len(defs) != 0 && defs[0] != nil {
 		def = defs[0]
@@ -77,7 +77,7 @@ func (a *IndexImpl) NewArtefact(art ...*artdesc.Artefact) (ArtefactAccess, error
 	return a.newArtefact(art...)
 }
 
-func (i *IndexImpl) AddBlob(blob core.BlobAccess) error {
+func (i *IndexImpl) AddBlob(blob internal.BlobAccess) error {
 	return i.provider.AddBlob(blob)
 }
 
@@ -107,7 +107,7 @@ func (i *IndexImpl) GetBlobDescriptor(digest digest.Digest) *Descriptor {
 	return i.provider.GetBlobDescriptor(digest)
 }
 
-func (i *IndexImpl) GetBlob(digest digest.Digest) (core.BlobAccess, error) {
+func (i *IndexImpl) GetBlob(digest digest.Digest) (internal.BlobAccess, error) {
 	d := i.GetBlobDescriptor(digest)
 	if d != nil {
 		size, data, err := i.provider.GetBlobData(digest)
@@ -123,7 +123,7 @@ func (i *IndexImpl) GetBlob(digest digest.Digest) (core.BlobAccess, error) {
 	return nil, ErrBlobNotFound(digest)
 }
 
-func (i *IndexImpl) GetArtefact(digest digest.Digest) (core.ArtefactAccess, error) {
+func (i *IndexImpl) GetArtefact(digest digest.Digest) (internal.ArtefactAccess, error) {
 	for _, d := range i.GetDescriptor().Manifests {
 		if d.Digest == digest {
 			return i.provider.GetArtefact(digest)
@@ -132,7 +132,7 @@ func (i *IndexImpl) GetArtefact(digest digest.Digest) (core.ArtefactAccess, erro
 	return nil, errors.ErrNotFound(KIND_OCIARTEFACT, digest.String())
 }
 
-func (i *IndexImpl) GetIndex(digest digest.Digest) (core.IndexAccess, error) {
+func (i *IndexImpl) GetIndex(digest digest.Digest) (internal.IndexAccess, error) {
 	a, err := i.GetArtefact(digest)
 	if err != nil {
 		return nil, err
@@ -143,7 +143,7 @@ func (i *IndexImpl) GetIndex(digest digest.Digest) (core.IndexAccess, error) {
 	return nil, errors.New("no index")
 }
 
-func (i *IndexImpl) GetManifest(digest digest.Digest) (core.ManifestAccess, error) {
+func (i *IndexImpl) GetManifest(digest digest.Digest) (internal.ManifestAccess, error) {
 	a, err := i.GetArtefact(digest)
 	if err != nil {
 		return nil, err

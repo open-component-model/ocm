@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -20,7 +20,7 @@ type accessType struct {
 	handler     flagsets.ConfigOptionTypeSetHandler
 }
 
-func NewAccessSpecType(name string, proto core.AccessSpec, desc string, handler ...flagsets.ConfigOptionTypeSetHandler) core.AccessType {
+func NewAccessSpecType(name string, proto internal.AccessSpec, desc string, handler ...flagsets.ConfigOptionTypeSetHandler) internal.AccessType {
 	return &accessType{
 		ObjectVersionedType: runtime.NewVersionedObjectType(name),
 		TypedObjectDecoder:  runtime.MustNewDirectDecoder(proto),

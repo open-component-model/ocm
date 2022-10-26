@@ -8,79 +8,79 @@ package cpi
 
 import (
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 )
 
 const (
-	KIND_CREDENTIALS = core.KIND_CREDENTIALS
-	KIND_REPOSITORY  = core.KIND_REPOSITORY
+	KIND_CREDENTIALS = internal.KIND_CREDENTIALS
+	KIND_REPOSITORY  = internal.KIND_REPOSITORY
 )
 
-const CONTEXT_TYPE = core.CONTEXT_TYPE
+const CONTEXT_TYPE = internal.CONTEXT_TYPE
 
 type (
-	Context                = core.Context
-	Repository             = core.Repository
-	RepositoryType         = core.RepositoryType
-	Credentials            = core.Credentials
-	CredentialsSource      = core.CredentialsSource
-	CredentialsChain       = core.CredentialsChain
-	CredentialsSpec        = core.CredentialsSpec
-	RepositorySpec         = core.RepositorySpec
-	GenericRepositorySpec  = core.GenericRepositorySpec
-	GenericCredentialsSpec = core.GenericCredentialsSpec
+	Context                = internal.Context
+	Repository             = internal.Repository
+	RepositoryType         = internal.RepositoryType
+	Credentials            = internal.Credentials
+	CredentialsSource      = internal.CredentialsSource
+	CredentialsChain       = internal.CredentialsChain
+	CredentialsSpec        = internal.CredentialsSpec
+	RepositorySpec         = internal.RepositorySpec
+	GenericRepositorySpec  = internal.GenericRepositorySpec
+	GenericCredentialsSpec = internal.GenericCredentialsSpec
 )
 
 type (
-	ConsumerIdentity = core.ConsumerIdentity
-	IdentityMatcher  = core.IdentityMatcher
+	ConsumerIdentity = internal.ConsumerIdentity
+	IdentityMatcher  = internal.IdentityMatcher
 )
 
-var DefaultContext = core.DefaultContext
+var DefaultContext = internal.DefaultContext
 
 func New(m ...datacontext.BuilderMode) Context {
-	return core.Builder{}.New(m...)
+	return internal.Builder{}.New(m...)
 }
 
 func NewGenericCredentialsSpec(name string, repospec *GenericRepositorySpec) *GenericCredentialsSpec {
-	return core.NewGenericCredentialsSpec(name, repospec)
+	return internal.NewGenericCredentialsSpec(name, repospec)
 }
 
 func NewCredentialsSpec(name string, repospec RepositorySpec) CredentialsSpec {
-	return core.NewCredentialsSpec(name, repospec)
+	return internal.NewCredentialsSpec(name, repospec)
 }
 
 func ToGenericCredentialsSpec(spec CredentialsSpec) (*GenericCredentialsSpec, error) {
-	return core.ToGenericCredentialsSpec(spec)
+	return internal.ToGenericCredentialsSpec(spec)
 }
 
 func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {
-	return core.ToGenericRepositorySpec(spec)
+	return internal.ToGenericRepositorySpec(spec)
 }
 
 func RegisterRepositoryType(name string, atype RepositoryType) {
-	core.DefaultRepositoryTypeScheme.Register(name, atype)
+	internal.DefaultRepositoryTypeScheme.Register(name, atype)
 }
 
 func RegisterStandardIdentityMatcher(typ string, matcher IdentityMatcher, desc string) {
-	core.StandardIdentityMatchers.Register(typ, matcher, desc)
+	internal.StandardIdentityMatchers.Register(typ, matcher, desc)
 }
 
 func NewCredentials(props common.Properties) Credentials {
-	return core.NewCredentials(props)
+	return internal.NewCredentials(props)
 }
 
 func ErrUnknownCredentials(name string) error {
-	return core.ErrUnknownCredentials(name)
+	return internal.ErrUnknownCredentials(name)
 }
 
 func ErrUnknownRepository(kind, name string) error {
-	return core.ErrUnknownRepository(kind, name)
+	return internal.ErrUnknownRepository(kind, name)
 }
 
 var (
-	CompleteMatch = core.CompleteMatch
-	NoMatch       = core.NoMatch
-	PartialMatch  = core.PartialMatch
+	CompleteMatch = internal.CompleteMatch
+	NoMatch       = internal.NoMatch
+	PartialMatch  = internal.PartialMatch
 )

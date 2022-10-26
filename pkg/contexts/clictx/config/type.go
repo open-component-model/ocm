@@ -7,7 +7,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx/core"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	ocicpi "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
@@ -74,7 +74,7 @@ func (a *Config) AddOCMRepository(name string, spec ocmcpi.RepositorySpec) error
 }
 
 func (a *Config) ApplyTo(ctx config.Context, target interface{}) error {
-	t, ok := target.(core.Context)
+	t, ok := target.(internal.Context)
 	if !ok {
 		return config.ErrNoContext(OCMCmdConfigType)
 	}

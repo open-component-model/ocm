@@ -5,17 +5,17 @@
 package cpi
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
 )
 
 const (
-	ID_TYPE = core.ID_TYPE
+	ID_TYPE = internal.ID_TYPE
 
-	ATTR_TYPE           = core.ATTR_TYPE
-	ATTR_USERNAME       = core.ATTR_USERNAME
-	ATTR_PASSWORD       = core.ATTR_PASSWORD
-	ATTR_SERVER_ADDRESS = core.ATTR_SERVER_ADDRESS
-	ATTR_IDENTITY_TOKEN = core.ATTR_IDENTITY_TOKEN
-	ATTR_REGISTRY_TOKEN = core.ATTR_REGISTRY_TOKEN
-	ATTR_KEY            = core.ATTR_KEY
+	ATTR_TYPE           = internal.ATTR_TYPE
+	ATTR_USERNAME       = internal.ATTR_USERNAME
+	ATTR_PASSWORD       = internal.ATTR_PASSWORD
+	ATTR_SERVER_ADDRESS = internal.ATTR_SERVER_ADDRESS
+	ATTR_IDENTITY_TOKEN = internal.ATTR_IDENTITY_TOKEN
+	ATTR_REGISTRY_TOKEN = internal.ATTR_REGISTRY_TOKEN
+	ATTR_KEY            = internal.ATTR_KEY
 )

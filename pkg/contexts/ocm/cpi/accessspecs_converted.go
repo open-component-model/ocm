@@ -10,15 +10,15 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type AccessSpecConverter interface {
-	ConvertFrom(object core.AccessSpec) (runtime.TypedObject, error)
-	ConvertTo(object interface{}) (core.AccessSpec, error)
+	ConvertFrom(object internal.AccessSpec) (runtime.TypedObject, error)
+	ConvertTo(object interface{}) (internal.AccessSpec, error)
 }
 
 type AccessSpecVersion interface {

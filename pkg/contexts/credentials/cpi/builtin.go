@@ -5,21 +5,21 @@
 package cpi
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
 )
 
-const AliasRepositoryType = core.AliasRepositoryType
+const AliasRepositoryType = internal.AliasRepositoryType
 
-type AliasRegistry = core.AliasRegistry
+type AliasRegistry = internal.AliasRegistry
 
 type aliasRegistry struct {
 	RepositoryType
-	setter core.SetAliasFunction
+	setter internal.SetAliasFunction
 }
 
 var _ AliasRegistry = &aliasRegistry{}
 
-func NewAliasRegistry(t RepositoryType, setter core.SetAliasFunction) RepositoryType {
+func NewAliasRegistry(t RepositoryType, setter internal.SetAliasFunction) RepositoryType {
 	return &aliasRegistry{
 		RepositoryType: t,
 		setter:         setter,

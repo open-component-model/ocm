@@ -9,25 +9,25 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/internal"
 )
 
-func WithContext(ctx context.Context) core.Builder {
-	return core.Builder{}.WithContext(ctx)
+func WithContext(ctx context.Context) internal.Builder {
+	return internal.Builder{}.WithContext(ctx)
 }
 
-func WithCredentials(ctx credentials.Context) core.Builder {
-	return core.Builder{}.WithCredentials(ctx)
+func WithCredentials(ctx credentials.Context) internal.Builder {
+	return internal.Builder{}.WithCredentials(ctx)
 }
 
-func WithRepositoyTypeScheme(scheme RepositoryTypeScheme) core.Builder {
-	return core.Builder{}.WithRepositoyTypeScheme(scheme)
+func WithRepositoyTypeScheme(scheme RepositoryTypeScheme) internal.Builder {
+	return internal.Builder{}.WithRepositoyTypeScheme(scheme)
 }
 
-func WithRepositorySpecHandlers(reg RepositorySpecHandlers) core.Builder {
-	return core.Builder{}.WithRepositorySpecHandlers(reg)
+func WithRepositorySpecHandlers(reg RepositorySpecHandlers) internal.Builder {
+	return internal.Builder{}.WithRepositorySpecHandlers(reg)
 }
 
 func New(mode ...datacontext.BuilderMode) Context {
-	return core.Builder{}.New(mode...)
+	return internal.Builder{}.New(mode...)
 }

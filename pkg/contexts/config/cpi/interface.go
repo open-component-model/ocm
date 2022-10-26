@@ -7,64 +7,64 @@ package cpi
 // This is the Context Provider Interface for credential providers
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/config/core"
+	"github.com/open-component-model/ocm/pkg/contexts/config/internal"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const KIND_CONFIGTYPE = core.KIND_CONFIGTYPE
+const KIND_CONFIGTYPE = internal.KIND_CONFIGTYPE
 
-const OCM_CONFIG_TYPE_SUFFIX = core.OCM_CONFIG_TYPE_SUFFIX
+const OCM_CONFIG_TYPE_SUFFIX = internal.OCM_CONFIG_TYPE_SUFFIX
 
-const CONTEXT_TYPE = core.CONTEXT_TYPE
+const CONTEXT_TYPE = internal.CONTEXT_TYPE
 
 type (
-	Context          = core.Context
-	Config           = core.Config
-	ConfigType       = core.ConfigType
-	ConfigTypeScheme = core.ConfigTypeScheme
-	GenericConfig    = core.GenericConfig
+	Context          = internal.Context
+	Config           = internal.Config
+	ConfigType       = internal.ConfigType
+	ConfigTypeScheme = internal.ConfigTypeScheme
+	GenericConfig    = internal.GenericConfig
 )
 
-var DefaultContext = core.DefaultContext
+var DefaultContext = internal.DefaultContext
 
 func RegisterConfigType(name string, atype ConfigType) {
-	core.DefaultConfigTypeScheme.Register(name, atype)
+	internal.DefaultConfigTypeScheme.Register(name, atype)
 }
 
 func NewGenericConfig(data []byte, unmarshaler runtime.Unmarshaler) (Config, error) {
-	return core.NewGenericConfig(data, unmarshaler)
+	return internal.NewGenericConfig(data, unmarshaler)
 }
 
 func ToGenericConfig(c Config) (*GenericConfig, error) {
-	return core.ToGenericConfig(c)
+	return internal.ToGenericConfig(c)
 }
 
 func NewConfigTypeScheme() ConfigTypeScheme {
-	return core.NewConfigTypeScheme(nil)
+	return internal.NewConfigTypeScheme(nil)
 }
 
 func IsGeneric(cfg Config) bool {
-	return core.IsGeneric(cfg)
+	return internal.IsGeneric(cfg)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type Updater = core.Updater
+type Updater = internal.Updater
 
 func NewUpdater(ctx Context, target interface{}) Updater {
-	return core.NewUpdater(ctx, target)
+	return internal.NewUpdater(ctx, target)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 func ErrNoContext(name string) error {
-	return core.ErrNoContext(name)
+	return internal.ErrNoContext(name)
 }
 
 func IsErrNoContext(err error) bool {
-	return core.IsErrNoContext(err)
+	return internal.IsErrNoContext(err)
 }
 
 func IsErrConfigNotApplicable(err error) bool {
-	return core.IsErrConfigNotApplicable(err)
+	return internal.IsErrConfigNotApplicable(err)
 }

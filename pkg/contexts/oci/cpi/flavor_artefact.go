@@ -10,7 +10,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -160,7 +160,7 @@ func (a *ArtefactImpl) Manifest() (*artdesc.Manifest, error) {
 	return m, nil
 }
 
-func (a *ArtefactImpl) ManifestAccess() core.ManifestAccess {
+func (a *ArtefactImpl) ManifestAccess() internal.ManifestAccess {
 	a.lock.Lock()
 	defer a.lock.Unlock()
 	d := a.state.GetState().(*artdesc.Artefact)
@@ -174,7 +174,7 @@ func (a *ArtefactImpl) ManifestAccess() core.ManifestAccess {
 	return NewManifestForArtefact(a)
 }
 
-func (a *ArtefactImpl) IndexAccess() core.IndexAccess {
+func (a *ArtefactImpl) IndexAccess() internal.IndexAccess {
 	a.lock.Lock()
 	defer a.lock.Unlock()
 	d := a.state.GetState().(*artdesc.Artefact)

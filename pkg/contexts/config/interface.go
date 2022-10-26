@@ -7,61 +7,61 @@ package config
 import (
 	"context"
 
-	"github.com/open-component-model/ocm/pkg/contexts/config/core"
 	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/config/internal"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const KIND_CONFIGTYPE = core.KIND_CONFIGTYPE
+const KIND_CONFIGTYPE = internal.KIND_CONFIGTYPE
 
-const OCM_CONFIG_TYPE_SUFFIX = core.OCM_CONFIG_TYPE_SUFFIX
+const OCM_CONFIG_TYPE_SUFFIX = internal.OCM_CONFIG_TYPE_SUFFIX
 
-const CONTEXT_TYPE = core.CONTEXT_TYPE
+const CONTEXT_TYPE = internal.CONTEXT_TYPE
 
-var AllConfigs = core.AllConfigs
+var AllConfigs = internal.AllConfigs
 
-const AllGenerations = core.AllGenerations
+const AllGenerations = internal.AllGenerations
 
 type (
-	Context                = core.Context
-	Config                 = core.Config
-	ConfigType             = core.ConfigType
-	ConfigTypeScheme       = core.ConfigTypeScheme
-	GenericConfig          = core.GenericConfig
-	ConfigSelector         = core.ConfigSelector
-	ConfigSelectorFunction = core.ConfigSelectorFunction
+	Context                = internal.Context
+	Config                 = internal.Config
+	ConfigType             = internal.ConfigType
+	ConfigTypeScheme       = internal.ConfigTypeScheme
+	GenericConfig          = internal.GenericConfig
+	ConfigSelector         = internal.ConfigSelector
+	ConfigSelectorFunction = internal.ConfigSelectorFunction
 )
 
-func DefaultContext() core.Context {
-	return core.DefaultContext
+func DefaultContext() internal.Context {
+	return internal.DefaultContext
 }
 
 func ForContext(ctx context.Context) Context {
-	return core.ForContext(ctx)
+	return internal.ForContext(ctx)
 }
 
 func DefinedForContext(ctx context.Context) (Context, bool) {
-	return core.DefinedForContext(ctx)
+	return internal.DefinedForContext(ctx)
 }
 
 func NewGenericConfig(data []byte, unmarshaler runtime.Unmarshaler) (Config, error) {
-	return core.NewGenericConfig(data, unmarshaler)
+	return internal.NewGenericConfig(data, unmarshaler)
 }
 
 func ToGenericConfig(c Config) (*GenericConfig, error) {
-	return core.ToGenericConfig(c)
+	return internal.ToGenericConfig(c)
 }
 
 func NewConfigTypeScheme() ConfigTypeScheme {
-	return core.NewConfigTypeScheme(nil)
+	return internal.NewConfigTypeScheme(nil)
 }
 
 func IsGeneric(cfg Config) bool {
-	return core.IsGeneric(cfg)
+	return internal.IsGeneric(cfg)
 }
 
 func ErrNoContext(name string) error {
-	return core.ErrNoContext(name)
+	return internal.ErrNoContext(name)
 }
 
 func IsErrNoContext(err error) bool {

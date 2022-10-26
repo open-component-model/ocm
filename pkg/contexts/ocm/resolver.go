@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -32,7 +32,7 @@ func NewCompoundResolver(res ...ComponentVersionResolver) ComponentVersionResolv
 	return &CompoundResolver{resolvers: res}
 }
 
-func (c *CompoundResolver) LookupComponentVersion(name string, version string) (core.ComponentVersionAccess, error) {
+func (c *CompoundResolver) LookupComponentVersion(name string, version string) (internal.ComponentVersionAccess, error) {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 	for _, r := range c.resolvers {
@@ -65,6 +65,6 @@ func NewSessionBasedResolver(session Session, repo Repository) ComponentVersionR
 	return &sessionBasedResolver{session, repo}
 }
 
-func (c *sessionBasedResolver) LookupComponentVersion(name string, version string) (core.ComponentVersionAccess, error) {
+func (c *sessionBasedResolver) LookupComponentVersion(name string, version string) (internal.ComponentVersionAccess, error) {
 	return c.session.LookupComponentVersion(c.repository, name, version)
 }

@@ -9,7 +9,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -83,7 +83,7 @@ func (d *DummyComponentVersionAccess) SetResourceBlob(meta *ResourceMeta, blob B
 	panic("implement me")
 }
 
-func (d *DummyComponentVersionAccess) AdjustResourceAccess(meta *core.ResourceMeta, acc compdesc.AccessSpec) error {
+func (d *DummyComponentVersionAccess) AdjustResourceAccess(meta *internal.ResourceMeta, acc compdesc.AccessSpec) error {
 	panic("implement me")
 }
 

@@ -10,8 +10,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -49,7 +49,7 @@ func (a *IndexImpl) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, e
 	return a.newArtefact(art...)
 }
 
-func (i *IndexImpl) AddBlob(blob core.BlobAccess) error {
+func (i *IndexImpl) AddBlob(blob internal.BlobAccess) error {
 	return i.container.AddBlob(blob)
 }
 
@@ -79,7 +79,7 @@ func (i *IndexImpl) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 	return i.container.GetBlobDescriptor(digest)
 }
 
-func (i *IndexImpl) GetBlob(digest digest.Digest) (core.BlobAccess, error) {
+func (i *IndexImpl) GetBlob(digest digest.Digest) (internal.BlobAccess, error) {
 	d := i.GetBlobDescriptor(digest)
 	if d != nil {
 		size, data, err := i.container.GetBlobData(digest)
@@ -95,7 +95,7 @@ func (i *IndexImpl) GetBlob(digest digest.Digest) (core.BlobAccess, error) {
 	return nil, cpi.ErrBlobNotFound(digest)
 }
 
-func (i *IndexImpl) GetArtefact(digest digest.Digest) (core.ArtefactAccess, error) {
+func (i *IndexImpl) GetArtefact(digest digest.Digest) (internal.ArtefactAccess, error) {
 	for _, d := range i.GetDescriptor().Manifests {
 		if d.Digest == digest {
 			return i.container.GetArtefact("@" + digest.String())
