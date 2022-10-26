@@ -48,12 +48,23 @@ var _ = Describe("ref parsing", func() {
 		CheckRef("ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "library/ubuntu"})
 		CheckRef("ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "library/ubuntu", Tag: &tag})
 		CheckRef("test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "test/ubuntu"})
+		CheckRef("test_test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "test_test/ubuntu"})
+		CheckRef("test__test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "test__test/ubuntu"})
+		CheckRef("test-test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "test-test/ubuntu"})
+		CheckRef("test--test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "test--test/ubuntu"})
+		CheckRef("test-----test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "test-----test/ubuntu"})
 		CheckRef("test/ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "test/ubuntu", Tag: &tag})
 		CheckRef("ghcr.io/test/ubuntu", &oci.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu"})
+		CheckRef("ghcr.io/test", &oci.RefSpec{UniformRepositorySpec: ghcr, Repository: "test"})
 		CheckRef("ghcr.io:8080/test/ubuntu", &oci.RefSpec{UniformRepositorySpec: oci.UniformRepositorySpec{Host: "ghcr.io:8080"}, Repository: "test/ubuntu"})
 		CheckRef("ghcr.io/test/ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu", Tag: &tag})
 		CheckRef("ghcr.io/test/ubuntu@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", &oci.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu", Digest: &digest})
 		CheckRef("ghcr.io/test/ubuntu:v1@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", &oci.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu", Tag: &tag, Digest: &digest})
+		CheckRef("test___test/ubuntu", &oci.RefSpec{
+			UniformRepositorySpec: oci.UniformRepositorySpec{
+				Info: "test___test/ubuntu",
+			},
+		})
 		CheckRef("type::https://ghcr.io/repo/repo:v1@"+digest.String(), &oci.RefSpec{
 			UniformRepositorySpec: oci.UniformRepositorySpec{
 				Type:   "type",
