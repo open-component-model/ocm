@@ -4,26 +4,26 @@
 
 package errors
 
-type errInvalid struct {
+type InvalidError struct {
 	errinfo
 }
 
 var formatInvalid = NewDefaultFormatter("is", "invalid", "for")
 
 func ErrInvalid(spec ...string) error {
-	return &errInvalid{newErrInfo(formatInvalid, spec...)}
+	return &InvalidError{newErrInfo(formatInvalid, spec...)}
 }
 
 func ErrInvalidWrap(err error, spec ...string) error {
-	return &errInvalid{wrapErrInfo(err, formatInvalid, spec...)}
+	return &InvalidError{wrapErrInfo(err, formatInvalid, spec...)}
 }
 
 func IsErrInvalid(err error) bool {
-	return IsA(err, &errInvalid{})
+	return IsA(err, &InvalidError{})
 }
 
 func IsErrInvalidKind(err error, kind string) bool {
-	var uerr *errInvalid
+	var uerr *InvalidError
 	if err == nil || !As(err, &uerr) {
 		return false
 	}

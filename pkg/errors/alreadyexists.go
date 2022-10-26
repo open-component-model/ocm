@@ -4,26 +4,26 @@
 
 package errors
 
-type errAlreadyExists struct {
+type AlreadyExistsError struct {
 	errinfo
 }
 
 var formatAlreadyExists = NewDefaultFormatter("", "already exists", "in")
 
 func ErrAlreadyExists(spec ...string) error {
-	return &errAlreadyExists{newErrInfo(formatAlreadyExists, spec...)}
+	return &AlreadyExistsError{newErrInfo(formatAlreadyExists, spec...)}
 }
 
 func ErrAlreadyExistsWrap(err error, spec ...string) error {
-	return &errAlreadyExists{wrapErrInfo(err, formatAlreadyExists, spec...)}
+	return &AlreadyExistsError{wrapErrInfo(err, formatAlreadyExists, spec...)}
 }
 
 func IsErrAlreadyExists(err error) bool {
-	return IsA(err, &errAlreadyExists{})
+	return IsA(err, &AlreadyExistsError{})
 }
 
 func IsErrAlreadyExistsKind(err error, kind string) bool {
-	var uerr *errNotFound
+	var uerr *NotFoundError
 	if err == nil || !As(err, &uerr) {
 		return false
 	}

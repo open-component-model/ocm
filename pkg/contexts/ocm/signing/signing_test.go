@@ -263,7 +263,7 @@ var _ = Describe("access method", func() {
 
 			_, err = Apply(nil, nil, cv, opts)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("no signature found in github.com/mandelsoft/test:v1"))
+			Expect(err.Error()).To(StringEqualWithContext("github.com/mandelsoft/test:v1: no signature found"))
 		})
 	})
 
@@ -303,7 +303,7 @@ var _ = Describe("access method", func() {
 
 			_, err = Apply(nil, nil, cv, opts)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(Equal("failed resolving component reference ref[github.com/mandelsoft/test:v1] in github.com/mandelsoft/ref:v1: component version \"github.com/mandelsoft/test:v1\" not found: oci artefact \"v1\" not found in component-descriptors/github.com/mandelsoft/test"))
+			Expect(err.Error()).To(StringEqualWithContext("github.com/mandelsoft/ref:v1: failed resolving component reference ref[github.com/mandelsoft/test:v1]: component version \"github.com/mandelsoft/test:v1\" not found: oci artefact \"v1\" not found in component-descriptors/github.com/mandelsoft/test"))
 		})
 	})
 })

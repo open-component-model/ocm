@@ -62,7 +62,7 @@ var _ = Describe("generic config handling", func() {
 
 		err = cfgctx.ApplyConfig(cfg, "testconfig")
 		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).To(Equal("testconfig: {applying generic config list: config entry 0--testconfig: config type \"Dummy\" is unknown, config entry 1--testconfig: config type \"Dummy\" is unknown}"))
+		Expect(err.Error()).To(Equal("testconfig: applying generic config list: {config entry 0--testconfig: config type \"Dummy\" is unknown, config entry 1--testconfig: config type \"Dummy\" is unknown}"))
 		gen, cfgs := cfgctx.GetConfig(config.AllGenerations, nil)
 		Expect(gen).To(Equal(int64(3)))
 		Expect(len(cfgs)).To(Equal(3))

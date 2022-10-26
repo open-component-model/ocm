@@ -16,11 +16,15 @@ type ErrorList struct { //nolint: errname // Intentional naming.
 }
 
 func (l *ErrorList) Error() string {
-	msg := "{" + l.msg
-	sep := ""
-	if msg != "" {
-		sep = ": "
+	msg := ""
+	if l.msg != "" {
+		msg = fmt.Sprintf("%s: ", l.msg)
 	}
+
+	if len(l.errors) == 1 {
+		return fmt.Sprintf("%s%s", msg, l.errors[0].Error())
+	}
+	sep := "{"
 	for _, e := range l.errors {
 		if e != nil {
 			msg = fmt.Sprintf("%s%s%s", msg, sep, e)
@@ -60,6 +64,9 @@ func (l *ErrorList) Result() error {
 	if l == nil || len(l.errors) == 0 {
 		return nil
 	}
+	if l.msg == "" && len(l.errors) == 1 {
+		return l.errors[0]
+	}
 	return l
 }
 
@@ -70,5 +77,11 @@ func (l *ErrorList) Clear() {
 func ErrListf(msg string, args ...interface{}) *ErrorList {
 	return &ErrorList{
 		msg: fmt.Sprintf(msg, args...),
+	}
+}
+
+func ErrList(args ...interface{}) *ErrorList {
+	return &ErrorList{
+		msg: fmt.Sprint(args...),
 	}
 }

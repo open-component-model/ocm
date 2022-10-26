@@ -4,22 +4,22 @@
 
 package errors
 
-type errUnknown struct {
+type UnknownError struct {
 	errinfo
 }
 
 var formatUnknown = NewDefaultFormatter("is", "unknown", "for")
 
 func ErrUnknown(spec ...string) error {
-	return &errUnknown{newErrInfo(formatUnknown, spec...)}
+	return &UnknownError{newErrInfo(formatUnknown, spec...)}
 }
 
 func IsErrUnknown(err error) bool {
-	return IsA(err, &errUnknown{})
+	return IsA(err, &UnknownError{})
 }
 
 func IsErrUnknownKind(err error, kind string) bool {
-	var uerr *errUnknown
+	var uerr *UnknownError
 	if err == nil || !As(err, &uerr) {
 		return false
 	}

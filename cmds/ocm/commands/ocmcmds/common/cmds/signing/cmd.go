@@ -122,7 +122,7 @@ func (a *action) Add(e interface{}) error {
 	cv := o.ComponentVersion
 	sopts := *a.sopts
 	sopts.Resolver = ocm.NewCompoundResolver(o.Repository, a.sopts.Resolver)
-	d, err := signing.Apply(a.printer, &a.state, cv, &sopts)
+	d, err := signing.Apply(a.printer, &a.state, cv, &sopts, true)
 	a.errlist.Add(err)
 	if err == nil {
 		a.printer.Printf("successfully %s %s:%s (digest %s:%s)\n", a.desc[0], cv.GetName(), cv.GetVersion(), d.HashAlgorithm, d.Value)

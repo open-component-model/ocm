@@ -4,26 +4,26 @@
 
 package errors
 
-type errNotFound struct {
+type NotFoundError struct {
 	errinfo
 }
 
 var formatNotFound = NewDefaultFormatter("", "not found", "in")
 
 func ErrNotFound(spec ...string) error {
-	return &errNotFound{newErrInfo(formatNotFound, spec...)}
+	return &NotFoundError{newErrInfo(formatNotFound, spec...)}
 }
 
 func ErrNotFoundWrap(err error, spec ...string) error {
-	return &errNotFound{wrapErrInfo(err, formatNotFound, spec...)}
+	return &NotFoundError{wrapErrInfo(err, formatNotFound, spec...)}
 }
 
 func IsErrNotFound(err error) bool {
-	return IsA(err, &errNotFound{})
+	return IsA(err, &NotFoundError{})
 }
 
 func IsErrNotFoundKind(err error, kind string) bool {
-	var uerr *errNotFound
+	var uerr *NotFoundError
 	if err == nil || !As(err, &uerr) {
 		return false
 	}
