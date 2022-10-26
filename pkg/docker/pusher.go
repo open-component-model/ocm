@@ -124,7 +124,7 @@ func (p dockerPusher) push(ctx context.Context, desc ocispec.Descriptor, src res
 			err := remoteserrors.NewUnexpectedStatusErr(headResp)
 
 			var statusError remoteserrors.ErrUnexpectedStatus
-			if errors.As(err, statusError) {
+			if errors.As(err, &statusError) {
 				log.G(ctx).
 					WithField("resp", headResp).
 					WithField("body", string(statusError.Body)).
@@ -191,7 +191,7 @@ func (p dockerPusher) push(ctx context.Context, desc ocispec.Descriptor, src res
 			err := remoteserrors.NewUnexpectedStatusErr(resp)
 
 			var statusError remoteserrors.ErrUnexpectedStatus
-			if errors.As(err, statusError) {
+			if errors.As(err, &statusError) {
 				log.G(ctx).
 					WithField("resp", resp).
 					WithField("body", string(statusError.Body)).
@@ -277,7 +277,7 @@ func (p dockerPusher) push(ctx context.Context, desc ocispec.Descriptor, src res
 			err := remoteserrors.NewUnexpectedStatusErr(resp)
 
 			var statusError remoteserrors.ErrUnexpectedStatus
-			if errors.As(err, statusError) {
+			if errors.As(err, &statusError) {
 				log.G(ctx).
 					WithField("resp", resp).
 					WithField("body", string(statusError.Body)).
