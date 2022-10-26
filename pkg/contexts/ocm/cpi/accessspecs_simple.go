@@ -42,11 +42,11 @@ func (t *accessType) ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHa
 func (t *accessType) Description(cli bool) string {
 	group := ""
 	if t.handler != nil && cli {
-		opts := t.handler.OptionTypes()
+		opts := t.handler.OptionTypeNames()
 		var names []string
 		if len(opts) > 0 {
 			for _, o := range opts {
-				names = append(names, "<code>--"+o.Name()+"</code>")
+				names = append(names, "<code>--"+o+"</code>")
 			}
 			group = "\nOptions used to configure fields: " + strings.Join(names, ", ")
 		}
