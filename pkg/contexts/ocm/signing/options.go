@@ -14,18 +14,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Option interface {
 	ApplySigningOption(o *Options)
-}
-
-func evalFlag(flags ...bool) bool {
-	flag := len(flags) == 0
-	for _, f := range flags {
-		flag = flag || f
-	}
-	return flag
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,7 +28,7 @@ type recursive struct {
 }
 
 func Recursive(flags ...bool) Option {
-	return &recursive{evalFlag(flags...)}
+	return &recursive{utils.GetOptionFlag(flags...)}
 }
 
 func (o *recursive) ApplySigningOption(opts *Options) {
@@ -49,7 +42,7 @@ type update struct {
 }
 
 func Update(flags ...bool) Option {
-	return &update{evalFlag(flags...)}
+	return &update{utils.GetOptionFlag(flags...)}
 }
 
 func (o *update) ApplySigningOption(opts *Options) {
@@ -63,7 +56,7 @@ type verify struct {
 }
 
 func VerifyDigests(flags ...bool) Option {
-	return &verify{evalFlag(flags...)}
+	return &verify{utils.GetOptionFlag(flags...)}
 }
 
 func (o *verify) ApplySigningOption(opts *Options) {

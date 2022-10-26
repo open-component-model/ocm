@@ -4,15 +4,15 @@
 
 package common
 
+import (
+	"github.com/open-component-model/ocm/pkg/utils"
+)
+
 type NameVersionInfo map[NameVersion]interface{}
 
 func (s NameVersionInfo) Add(nv NameVersion, data ...interface{}) bool {
-	var d interface{}
-	if len(data) > 0 {
-		d = data[0]
-	}
 	if _, ok := s[nv]; !ok {
-		s[nv] = d
+		s[nv] = utils.Optional(data...)
 		return true
 	}
 	return false

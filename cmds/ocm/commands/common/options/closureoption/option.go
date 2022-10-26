@@ -15,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func From(o options.OptionSetProvider) *Option {
@@ -166,10 +167,7 @@ func AddChain(opts *output.Options, chain, add processing.ProcessChain) processi
 }
 
 func TableOutput(in *output.TableOutput, closure ...ClosureFunction) *output.TableOutput {
-	var cf ClosureFunction
-	if len(closure) > 0 {
-		cf = closure[0]
-	}
+	cf := utils.Optional(closure...)
 	chain := processing.Append(in.Chain, processing.Explode(cf.Exploder(in.Options)))
 	copts := From(in.Options)
 	return &output.TableOutput{

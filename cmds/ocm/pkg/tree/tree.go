@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Object interface {
@@ -63,12 +64,9 @@ var (
 // is not desired, pass an empty symbol string.
 func MapToTree(objs Objects, creator NodeCreator, symbols ...string) TreeObjects {
 	result := TreeObjects{}
-	nodeSym := " " + node
-	if len(symbols) > 0 {
-		nodeSym = symbols[0]
-		if nodeSym != "" && !strings.HasPrefix(nodeSym, " ") {
-			nodeSym = " " + nodeSym
-		}
+	nodeSym := utils.OptionalDefaulted(node, symbols...)
+	if nodeSym != "" && !strings.HasPrefix(nodeSym, " ") {
+		nodeSym = " " + nodeSym
 	}
 	handleLevel(objs, "", nil, 0, creator, &result, nodeSym)
 	return result

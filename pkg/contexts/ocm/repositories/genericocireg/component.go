@@ -12,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type ComponentAccess struct {
@@ -138,12 +139,8 @@ func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (cpi
 		return nil, err
 	}
 	defer v.Close()
-	override := false
-	for _, o := range overrides {
-		if o {
-			override = o
-		}
-	}
+
+	override := utils.Optional(overrides...)
 	acc, err := c.namespace.GetArtefact(version)
 	if err == nil {
 		if override {

@@ -80,7 +80,7 @@ func (b *Builder) artefact(tag string, ns cpi.NamespaceAccess, t func(access oci
 	if v != nil {
 		k, err = t(v)
 	}
-	b.failOn(err, 2)
+	b.failOn(err, 1)
 	tags := []string{}
 	if tag != "" {
 		tags = append(tags, tag)

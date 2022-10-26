@@ -11,6 +11,8 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io"
+
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func GetPublicKey(key interface{}) (*rsa.PublicKey, []string, error) {
@@ -63,7 +65,7 @@ func KeyData(key interface{}) ([]byte, error) {
 func PemBlockForKey(priv interface{}, gen ...bool) *pem.Block {
 	switch k := priv.(type) {
 	case *rsa.PublicKey:
-		if len(gen) > 0 && gen[0] {
+		if utils.Optional(gen...) {
 			bytes, err := x509.MarshalPKIXPublicKey(k)
 			if err != nil {
 				panic(err)

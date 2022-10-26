@@ -8,6 +8,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -28,13 +29,9 @@ type RepositorySpec struct {
 
 // NewRepositorySpec creates a new RepositorySpec for an optional host.
 func NewRepositorySpec(host ...string) *RepositorySpec {
-	h := ""
-	if len(host) > 0 {
-		h = host[0]
-	}
 	return &RepositorySpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
-		DockerHost:          h,
+		DockerHost:          utils.Optional(host...),
 	}
 }
 
