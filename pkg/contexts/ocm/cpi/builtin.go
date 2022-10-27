@@ -5,11 +5,11 @@
 package cpi
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 )
 
-type OCISpecFunction = core.OCISpecFunction
+type OCISpecFunction = internal.OCISpecFunction
 
 func RegisterOCIImplementation(impl OCISpecFunction) {
-	core.RegisterOCIImplementation(impl)
+	internal.RegisterOCIImplementation(impl)
 }

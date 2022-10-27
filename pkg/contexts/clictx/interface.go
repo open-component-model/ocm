@@ -5,15 +5,15 @@
 package clictx
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/clictx/core"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx/internal"
 )
 
 type (
-	Context = core.Context
-	OCI     = core.OCI
-	OCM     = core.OCM
+	Context = internal.Context
+	OCI     = internal.OCI
+	OCM     = internal.OCM
 )
 
 func DefaultContext() Context {
-	return core.DefaultContext
+	return internal.DefaultContext
 }

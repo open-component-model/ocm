@@ -7,8 +7,8 @@ package hostpath
 import (
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
 )
 
 // IDENTITY_TYPE is the identity of this matcher.
@@ -42,7 +42,7 @@ This matcher works on the following properties:
 }
 
 func IdentityMatcher(identityType string) cpi.IdentityMatcher {
-	return func(pattern, cur, id core.ConsumerIdentity) bool {
+	return func(pattern, cur, id internal.ConsumerIdentity) bool {
 		if pattern[ID_TYPE] != "" && id[ID_TYPE] != "" && pattern[ID_TYPE] != id[ID_TYPE] {
 			return false
 		}

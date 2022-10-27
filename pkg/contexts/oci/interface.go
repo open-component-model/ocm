@@ -8,48 +8,48 @@ import (
 	"context"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/core"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/internal"
 )
 
 const (
-	KIND_OCIARTEFACT = core.KIND_OCIARTEFACT
+	KIND_OCIARTEFACT = internal.KIND_OCIARTEFACT
 	KIND_MEDIATYPE   = accessio.KIND_MEDIATYPE
 	KIND_BLOB        = accessio.KIND_BLOB
 )
 
-const CONTEXT_TYPE = core.CONTEXT_TYPE
+const CONTEXT_TYPE = internal.CONTEXT_TYPE
 
-const CommonTransportFormat = core.CommonTransportFormat
+const CommonTransportFormat = internal.CommonTransportFormat
 
 type (
-	Context                          = core.Context
-	Repository                       = core.Repository
-	RepositorySpecHandlers           = core.RepositorySpecHandlers
-	RepositorySpecHandler            = core.RepositorySpecHandler
-	UniformRepositorySpec            = core.UniformRepositorySpec
-	RepositoryTypeScheme             = core.RepositoryTypeScheme
-	RepositorySpec                   = core.RepositorySpec
-	IntermediateRepositorySpecAspect = core.IntermediateRepositorySpecAspect
-	GenericRepositorySpec            = core.GenericRepositorySpec
-	ArtefactAccess                   = core.ArtefactAccess
-	NamespaceLister                  = core.NamespaceLister
-	NamespaceAccess                  = core.NamespaceAccess
-	ManifestAccess                   = core.ManifestAccess
-	IndexAccess                      = core.IndexAccess
-	BlobAccess                       = core.BlobAccess
-	DataAccess                       = core.DataAccess
+	Context                          = internal.Context
+	Repository                       = internal.Repository
+	RepositorySpecHandlers           = internal.RepositorySpecHandlers
+	RepositorySpecHandler            = internal.RepositorySpecHandler
+	UniformRepositorySpec            = internal.UniformRepositorySpec
+	RepositoryTypeScheme             = internal.RepositoryTypeScheme
+	RepositorySpec                   = internal.RepositorySpec
+	IntermediateRepositorySpecAspect = internal.IntermediateRepositorySpecAspect
+	GenericRepositorySpec            = internal.GenericRepositorySpec
+	ArtefactAccess                   = internal.ArtefactAccess
+	NamespaceLister                  = internal.NamespaceLister
+	NamespaceAccess                  = internal.NamespaceAccess
+	ManifestAccess                   = internal.ManifestAccess
+	IndexAccess                      = internal.IndexAccess
+	BlobAccess                       = internal.BlobAccess
+	DataAccess                       = internal.DataAccess
 )
 
-func DefaultContext() core.Context {
-	return core.DefaultContext
+func DefaultContext() internal.Context {
+	return internal.DefaultContext
 }
 
 func ForContext(ctx context.Context) Context {
-	return core.ForContext(ctx)
+	return internal.ForContext(ctx)
 }
 
 func DefinedForContext(ctx context.Context) (Context, bool) {
-	return core.DefinedForContext(ctx)
+	return internal.DefinedForContext(ctx)
 }
 
 func IsErrBlobNotFound(err error) bool {
@@ -57,5 +57,5 @@ func IsErrBlobNotFound(err error) bool {
 }
 
 func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {
-	return core.ToGenericRepositorySpec(spec)
+	return internal.ToGenericRepositorySpec(spec)
 }

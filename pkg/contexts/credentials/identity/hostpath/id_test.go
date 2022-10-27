@@ -9,11 +9,11 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/core"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
 )
 
-func IdentityMatcher(pattern, cur, id core.ConsumerIdentity) bool {
+func IdentityMatcher(pattern, cur, id internal.ConsumerIdentity) bool {
 	return hostpath.IdentityMatcher("OCIRegistry")(pattern, cur, id)
 }
 

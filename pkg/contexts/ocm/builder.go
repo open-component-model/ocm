@@ -10,41 +10,41 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/core"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 )
 
-func WithContext(ctx context.Context) core.Builder {
-	return core.Builder{}.WithContext(ctx)
+func WithContext(ctx context.Context) internal.Builder {
+	return internal.Builder{}.WithContext(ctx)
 }
 
-func WithCredentials(ctx credentials.Context) core.Builder {
-	return core.Builder{}.WithCredentials(ctx)
+func WithCredentials(ctx credentials.Context) internal.Builder {
+	return internal.Builder{}.WithCredentials(ctx)
 }
 
-func WithOCIRepositories(ctx oci.Context) core.Builder {
-	return core.Builder{}.WithOCIRepositories(ctx)
+func WithOCIRepositories(ctx oci.Context) internal.Builder {
+	return internal.Builder{}.WithOCIRepositories(ctx)
 }
 
-func WithRepositoyTypeScheme(scheme RepositoryTypeScheme) core.Builder {
-	return core.Builder{}.WithRepositoyTypeScheme(scheme)
+func WithRepositoyTypeScheme(scheme RepositoryTypeScheme) internal.Builder {
+	return internal.Builder{}.WithRepositoyTypeScheme(scheme)
 }
 
-func WithAccessypeScheme(scheme AccessTypeScheme) core.Builder {
-	return core.Builder{}.WithAccessTypeScheme(scheme)
+func WithAccessypeScheme(scheme AccessTypeScheme) internal.Builder {
+	return internal.Builder{}.WithAccessTypeScheme(scheme)
 }
 
-func WithRepositorySpecHandlers(reg RepositorySpecHandlers) core.Builder {
-	return core.Builder{}.WithRepositorySpecHandlers(reg)
+func WithRepositorySpecHandlers(reg RepositorySpecHandlers) internal.Builder {
+	return internal.Builder{}.WithRepositorySpecHandlers(reg)
 }
 
-func WithBlobHandlers(reg BlobHandlerRegistry) core.Builder {
-	return core.Builder{}.WithBlobHandlers(reg)
+func WithBlobHandlers(reg BlobHandlerRegistry) internal.Builder {
+	return internal.Builder{}.WithBlobHandlers(reg)
 }
 
-func WithBlobDigesters(reg BlobDigesterRegistry) core.Builder {
-	return core.Builder{}.WithBlobDigesters(reg)
+func WithBlobDigesters(reg BlobDigesterRegistry) internal.Builder {
+	return internal.Builder{}.WithBlobDigesters(reg)
 }
 
 func New(mode ...datacontext.BuilderMode) Context {
-	return core.Builder{}.New(mode...)
+	return internal.Builder{}.New(mode...)
 }
