@@ -3,7 +3,7 @@ module github.com/open-component-model/ocm
 go 1.18
 
 replace (
-	github.com/spf13/cobra => github.com/mandelsoft/cobra v1.4.1-0.20220816123314-fd3b703d78bf
+	github.com/spf13/cobra => github.com/mandelsoft/cobra v1.5.1-0.20221030110806-c236cde1e2bd
 	github.com/spf13/pflag => github.com/mandelsoft/pflag v0.0.0-20221101220350-bbff7bc4f7b5
 )
 
@@ -20,7 +20,7 @@ require (
 	github.com/opencontainers/go-digest v1.0.0
 	github.com/opencontainers/image-spec v1.0.3-0.20211202193544-a5463b7f9c84
 	github.com/sirupsen/logrus v1.9.0
-	github.com/spf13/cobra v1.5.0
+	github.com/spf13/cobra v1.6.1
 	github.com/xeipuuv/gojsonschema v1.2.0
 	golang.org/x/net v0.0.0-20220722155237-a158d28d115b
 	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect

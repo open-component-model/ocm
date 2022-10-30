@@ -32,5 +32,5 @@ func (p *ResourceSpecificationsProvider) addMeta(opts flagsets.ConfigOptions, co
 
 func (p *ResourceSpecificationsProvider) Description() string {
 	d := p.ContentResourceSpecificationsProvider.Description()
-	return d + "Non-local resources can be indicated using the option <code>--external</code>."
+	return d + "Non-local resources can be indicated using the option <code>--external</code>.\n"
 }

@@ -44,16 +44,6 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Use:   "[<options>] <target> {<resourcefile> | <var>=<value>}",
 		Args:  cobra.MinimumNArgs(1),
 		Short: "add resources to a component version",
-		Long: `
-Add resources specified in a resource file to a component version.
-So far only component archives are supported as target.
-
-This command accepts  resource specification files describing the resources
-to add to a component version. Elements must follow the resource meta data
-description scheme of the component descriptor.
-` + o.Adder.Description() + (&template.Options{}).Usage() +
-			inputs.Usage(inputs.DefaultInputTypeScheme) +
-			ocm.AccessUsage(o.OCMContext().AccessMethods(), true),
 		Example: `
 Add a resource directly by options
 <pre>
@@ -78,6 +68,19 @@ $ ocm add resources  path/to/ca  resources.yaml VERSION=1.0.0
 </pre>
 `,
 	}
+}
+
+func (o *Command) Long() string {
+	return `
+Add resources specified in a resource file to a component version.
+So far only component archives are supported as target.
+
+This command accepts  resource specification files describing the resources
+to add to a component version. Elements must follow the resource meta data
+description scheme of the component descriptor.
+` + o.Adder.Description() + (&template.Options{}).Usage() +
+		inputs.Usage(inputs.DefaultInputTypeScheme) +
+		ocm.AccessUsage(o.OCMContext().AccessMethods(), true)
 }
 
 func (o *Command) Run() error {

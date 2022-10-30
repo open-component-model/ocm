@@ -19,6 +19,9 @@ import (
 
 const CONSUMER_TYPE = "demo"
 
+const NAME = "demo"
+const VERSION = "v1"
+
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 
@@ -34,7 +37,7 @@ var _ ppi.AccessMethod = (*AccessMethod)(nil)
 
 func New() ppi.AccessMethod {
 	return &AccessMethod{
-		AccessMethodBase: ppi.MustNewAccessMethodBase("demo", "", &AccessSpec{}),
+		AccessMethodBase: ppi.MustNewAccessMethodBase(NAME, "", &AccessSpec{}, "demo access to temp files", ""),
 	}
 }
 
@@ -79,13 +82,4 @@ func (a *AccessMethod) Reader(p ppi.Plugin, spec ppi.AccessSpec, creds credentia
 	my := spec.(*AccessSpec)
 
 	return os.Open(filepath.Join(os.TempDir(), my.Path))
-}
-
-func (a *AccessMethod) Writer(p ppi.Plugin, mediatype string, creds credentials.Credentials) (io.WriteCloser, ppi.AccessSpecProvider, error) {
-	file, err := os.CreateTemp(os.TempDir(), "demo.*.blob")
-	if err != nil {
-		return nil, nil, err
-	}
-	writer := NewWriter(file, mediatype, a.Name(), a.Version())
-	return writer, writer.Specification, nil
 }

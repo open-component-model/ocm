@@ -48,7 +48,14 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Use:   "[<options>] <target> {<configfile> | <var>=<value>}",
 		Args:  cobra.MinimumNArgs(1),
 		Short: "add a resource specification to a resource config file",
-		Long: `
+		Example: `
+$ ocm add resource-config resources.yaml --name myresource --type PlainText --input '{ "type": "file", "path": "testdata/testcontent", "mediaType": "text/plain" }'
+`,
+	}
+}
+
+func (o *Command) Long() string {
+	return `
 Add a resource specification to a resource config file used by <CMD>ocm add resources</CMD>.
 ` + o.Adder.Description() + ` Elements must follow the resource meta data
 description scheme of the component descriptor.
@@ -61,12 +68,8 @@ This command accepts additional resource specification files describing the sour
 to add to a component version.
 
 ` + (&template.Options{}).Usage() +
-			inputs.Usage(inputs.DefaultInputTypeScheme) +
-			ocm.AccessUsage(o.OCMContext().AccessMethods(), true),
-		Example: `
-$ ocm add resource-config resources.yaml --name myresource --type PlainText --input '{ "type": "file", "path": "testdata/testcontent", "mediaType": "text/plain" }'
-`,
-	}
+		inputs.Usage(inputs.DefaultInputTypeScheme) +
+		ocm.AccessUsage(o.OCMContext().AccessMethods(), true)
 }
 
 func (o *Command) Run() error {

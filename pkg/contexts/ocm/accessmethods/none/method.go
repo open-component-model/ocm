@@ -12,13 +12,13 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-// Type is the access type for a blob in an OCI repository.
+// Type is the access type for no blob.
 const Type = "none"
 const TypeV1 = Type + runtime.VersionSeparator + "v1"
 
 func init() {
-	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}, ""))
-	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}, ""))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}, cpi.WithDescription("dummy resource with no access")))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}))
 }
 
 // New creates a new OCIBlob accessor.

@@ -10,6 +10,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/ctf"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/plugins"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resourceconfig"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources"
@@ -35,6 +36,7 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(ctf.NewCommand(ctx))
 	cmd.AddCommand(componentarchive.NewCommand(ctx))
 	cmd.AddCommand(versions.NewCommand(ctx))
+	cmd.AddCommand(plugins.NewCommand(ctx))
 
 	cmd.AddCommand(topicocmrefs.New(ctx))
 	return cmd

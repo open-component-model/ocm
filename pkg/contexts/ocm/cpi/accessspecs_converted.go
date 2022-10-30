@@ -9,11 +9,9 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type AccessSpecConverter interface {
@@ -59,16 +57,18 @@ var (
 	_ runtime.TypedObjectEncoder = &ConvertedAccessType{}
 )
 
-func NewConvertedAccessSpecType(name string, v AccessSpecVersion, desc string, handler ...flagsets.ConfigOptionTypeSetHandler) *ConvertedAccessType {
-	return &ConvertedAccessType{
+func NewConvertedAccessSpecType(name string, v AccessSpecVersion, opts ...AccessSpecTypeOption) *ConvertedAccessType {
+	t := &ConvertedAccessType{
 		accessType: accessType{
 			ObjectVersionedType: runtime.NewVersionedObjectType(name),
 			TypedObjectDecoder:  v,
-			description:         desc,
-			handler:             utils.Optional(handler...),
 		},
 		AccessSpecVersion: v,
 	}
+	for _, o := range opts {
+		o.ApplyToAccessSpecOptionTarget(accessTypeTarget{&t.accessType})
+	}
+	return t
 }
 
 func (t *ConvertedAccessType) Encode(obj runtime.TypedObject, m runtime.Marshaler) ([]byte, error) {

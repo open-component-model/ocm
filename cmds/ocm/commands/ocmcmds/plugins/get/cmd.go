@@ -44,15 +44,18 @@ func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
 		Use:   "[<options>] {<plugin name>}",
 		Short: "get plugins",
-		Long: `
-Get lists information for all plugins specified, if no plugin is specified
-all registered ones are listed.
-`,
 		Example: `
 $ ocm get plugins
 $ ocm get plugins demo -o yaml
 `,
 	}
+}
+
+func (o *Command) Long() string {
+	return `
+Get lists information for all plugins specified, if no plugin is specified
+all registered ones are listed.
+`
 }
 
 func (o *Command) Complete(args []string) error {

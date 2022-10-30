@@ -150,7 +150,7 @@ func (c *cacheImpl) RegisterExtensions(ctx ocm.Context) error {
 			if m.Version != "" {
 				name = name + runtime.VersionSeparator + m.Version
 			}
-			ctx.AccessMethods().Register(name, access.NewType(name, m.Long, p))
+			ctx.AccessMethods().Register(name, access.NewType(name, p, m.Description, m.Format))
 		}
 	}
 	return nil

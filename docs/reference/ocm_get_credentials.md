@@ -25,14 +25,11 @@ For the following usage contexts with matchers and standard identity matchers ex
     
     It matches the <code>Buildcredentials.ocm.software</code> consumer type and additionally acts like 
     the <code>hostpath</code> type.
-
   - <code>OCIRegistry</code>: OCI registry credential matcher
     
     It matches the <code>OCIRegistry</code> consumer type and additionally acts like 
     the <code>hostpath</code> type.
-
   - <code>exact</code>: exact match of given pattern set
-
   - <code>hostpath</code>: Host and path based credential matcher
     
     This matcher works on the following properties:
@@ -42,9 +39,7 @@ For the following usage contexts with matchers and standard identity matchers ex
     - *<code>pathprefix</code>* (optional): a path prefix to match. The 
       element with the most matching path components is selected (separator is <code>/</code>).
     
-
   - <code>partial</code>: complete match of given pattern ignoring additional attributes
-
 
 The used matcher is derived from the consumer attribute <code>type</code>.
 For all other consumer types a matcher matching all attributes will be used.

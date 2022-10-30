@@ -42,7 +42,7 @@ build: ${SOURCES}
 		-X github.com/open-component-model/ocm/pkg/version.gitTreeState=$(GIT_TREE_STATE) \
 		-X github.com/open-component-model/ocm/pkg/version.gitCommit=$(COMMIT) \
 		-X github.com/open-component-model/ocm/pkg/version.buildDate=$(shell date --rfc-3339=seconds | sed 's/ /T/')" \
-		-o bin/demor \
+		-o bin/demo \
 		./cmds/demoplugin
 
 

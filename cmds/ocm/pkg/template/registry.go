@@ -94,13 +94,17 @@ There are several templaters that can be selected by the <code>--templater</code
 				title = desc[:idx]
 				desc = desc[idx+1:]
 			}
-			s = fmt.Sprintf("%s- <code>%s</code> %s\n\n%s", s, t, title, utils.IndentLines(desc, "  "))
+			if strings.TrimSpace(desc) == "" {
+				s = fmt.Sprintf("%s- <code>%s</code> %s\n\n", s, t, title)
+			} else {
+				s = fmt.Sprintf("%s- <code>%s</code> %s\n\n%s", s, t, title, utils.IndentLines(desc, "  "))
+			}
 			if !strings.HasSuffix(s, "\n") {
 				s += "\n"
 			}
 		}
 	}
-	return s + "\n"
+	return s
 }
 
 var _registry = NewRegistry()

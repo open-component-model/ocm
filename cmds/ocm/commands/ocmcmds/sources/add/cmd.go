@@ -44,7 +44,11 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Use:   "[<options>] <target> {<resourcefile> | <var>=<value>}",
 		Args:  cobra.MinimumNArgs(1),
 		Short: "add source information to a component version",
-		Long: `
+	}
+}
+
+func (o *Command) Long() string {
+	return `
 Add source information specified in a resource file to a component version.
 So far only component archives are supported as target.
 
@@ -52,9 +56,8 @@ This command accepts source specification files describing the sources
 to add to a component version. Elements must follow the source meta data
 description scheme of the component descriptor.
 ` + o.Adder.Description() + (&template.Options{}).Usage() +
-			inputs.Usage(inputs.DefaultInputTypeScheme) +
-			ocm.AccessUsage(o.OCMContext().AccessMethods(), true),
-	}
+		inputs.Usage(inputs.DefaultInputTypeScheme) +
+		ocm.AccessUsage(o.OCMContext().AccessMethods(), true)
 }
 
 func (o *Command) Run() error {

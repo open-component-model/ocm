@@ -5,6 +5,8 @@
 package ppi
 
 import (
+	"fmt"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -16,6 +18,9 @@ type plugin struct {
 	descriptor internal.Descriptor
 	options    Options
 
+	uploaders map[string]Uploader
+	mappings  *internal.Registry[Uploader]
+
 	methods      map[string]AccessMethod
 	accessScheme runtime.Scheme
 }
@@ -26,6 +31,8 @@ func NewPlugin(name string, version string) Plugin {
 		name:         name,
 		version:      version,
 		methods:      map[string]AccessMethod{},
+		uploaders:    map[string]Uploader{},
+		mappings:     internal.NewRegistry[Uploader](),
 		accessScheme: runtime.MustNewDefaultScheme(&rt, &runtime.UnstructuredVersionedTypedObject{}, false, nil),
 		descriptor: internal.Descriptor{
 			Version:       internal.VERSION,
@@ -51,11 +58,70 @@ func (p *plugin) Options() *Options {
 	return &p.options
 }
 
+func (p *plugin) SetLong(s string) {
+	p.descriptor.Long = s
+}
+
+func (p *plugin) SetShort(s string) {
+	p.descriptor.Short = s
+}
+
+func (p *plugin) RegisterUploader(arttype, mediatype string, u Uploader) error {
+	old := p.uploaders[u.Name()]
+	if old != nil && old != u {
+		return fmt.Errorf("uploader name %q already in use", u.Name())
+	}
+
+	var d *UploaderDescriptor
+	if old == nil {
+		d = &UploaderDescriptor{
+			Name:        u.Name(),
+			Description: u.Description(),
+			Costraints:  []UploaderKey{},
+		}
+		p.descriptor.Uploaders = append(p.descriptor.Uploaders, *d)
+		d = &p.descriptor.Uploaders[len(p.descriptor.Uploaders)-1]
+	} else {
+		for i := range p.descriptor.Uploaders {
+			if p.descriptor.Uploaders[i].Name == u.Name() {
+				d = &p.descriptor.Uploaders[i]
+			}
+		}
+	}
+	p.uploaders[u.Name()] = u
+
+	key := UploaderKey{
+		ArtifactType: arttype,
+		MediaType:    mediatype,
+	}
+	cur := p.mappings.GetHandler(key)
+	if cur != nil && cur != u {
+		return fmt.Errorf("uploader mapping key %q already in use", key)
+	}
+	if cur == nil {
+		p.mappings.Register(key, u)
+
+		if key.ArtifactType == "" {
+			key.ArtifactType = "*"
+		}
+		if key.MediaType == "" {
+			key.MediaType = "*"
+		}
+		d.Costraints = append(d.Costraints, key)
+	}
+	return nil
+}
+
+func (p *plugin) GetUploader(arttype, mediatype string) Uploader {
+	u, _ := p.mappings.LookupHandler(arttype, mediatype)
+	return u
+}
+
 func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 	if p.GetAccessMethod(m.Name(), m.Version()) != nil {
 		n := m.Name()
 		if m.Version() != "" {
-			n += "/" + m.Version()
+			n += runtime.VersionSeparator + m.Version()
 		}
 		return errors.ErrAlreadyExists(errors.KIND_ACCESSMETHOD, n)
 	}
@@ -63,7 +129,9 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 	vers := m.Version()
 	if vers == "" {
 		meth := internal.AccessMethodDescriptor{
-			Name: m.Name(),
+			Name:        m.Name(),
+			Description: m.Description(),
+			Format:      m.Format(),
 		}
 		p.descriptor.AccessMethods = append(p.descriptor.AccessMethods, meth)
 		p.accessScheme.RegisterByDecoder(m.Name(), m)
@@ -71,8 +139,10 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 		p.methods[m.Name()] = m
 	}
 	meth := internal.AccessMethodDescriptor{
-		Name:    m.Name(),
-		Version: vers,
+		Name:        m.Name(),
+		Version:     vers,
+		Description: m.Description(),
+		Format:      m.Format(),
 	}
 	p.descriptor.AccessMethods = append(p.descriptor.AccessMethods, meth)
 	p.accessScheme.RegisterByDecoder(m.Name()+"/"+vers, m)

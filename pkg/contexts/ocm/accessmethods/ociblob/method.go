@@ -24,8 +24,8 @@ const Type = "ociBlob"
 const TypeV1 = Type + runtime.VersionSeparator + "v1"
 
 func init() {
-	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}, usage, ConfigHandler()))
-	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}, ""))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}, cpi.WithDescription(usage)))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}, cpi.WithFormatSpec(formatV1), cpi.WithConfigHandler(ConfigHandler())))
 }
 
 // New creates a new OCIBlob accessor.

@@ -17,9 +17,12 @@ type accessType struct {
 
 var _ cpi.AccessType = (*accessType)(nil)
 
-func NewType(name string, desc string, p plugin.Plugin) cpi.AccessType {
+func NewType(name string, p plugin.Plugin, desc, format string) cpi.AccessType {
+	if format != "" {
+		format = "\n" + format
+	}
 	t := &accessType{
-		AccessType: cpi.NewAccessSpecType(name, &AccessSpec{}, desc),
+		AccessType: cpi.NewAccessSpecType(name, &AccessSpec{}, cpi.WithDescription(desc), cpi.WithFormatSpec(format)),
 		plug:       p,
 	}
 	return t

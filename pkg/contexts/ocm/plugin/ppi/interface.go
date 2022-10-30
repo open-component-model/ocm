@@ -9,20 +9,34 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/internal"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 type (
-	Descriptor     = internal.Descriptor
-	AccessSpecInfo = internal.AccessSpecInfo
+	Descriptor             = internal.Descriptor
+	AccessSpecInfo         = internal.AccessSpecInfo
+	UploaderKey            = internal.UploaderKey
+	UploaderDescriptor     = internal.UploaderDescriptor
+	AccessMethodDescriptor = internal.AccessMethodDescriptor
 )
 
-const KIND_PLUGIN = "plugin"
+const (
+	KIND_PLUGIN       = "plugin"
+	KIND_UPLOADER     = "uploader"
+	KIND_ACCESSMETHOD = errors.KIND_ACCESSMETHOD
+)
 
 type Plugin interface {
 	Name() string
 	Version() string
 	Descriptor() internal.Descriptor
+
+	SetShort(s string)
+	SetLong(s string)
+
+	RegisterUploader(arttype, mediatype string, u Uploader) error
+	GetUploader(arttype, mediatype string) Uploader
 
 	RegisterAccessMethod(m AccessMethod) error
 	DecodeAccessSpecification(data []byte) (AccessSpec, error)
@@ -37,7 +51,22 @@ type AccessMethod interface {
 	Name() string
 	Version() string
 
+	// Description provides a general description for the access mehod kind.
+	Description() string
+	// Format describes the attributes of the dedicated version.
+	Format() string
+
 	ValidateSpecification(p Plugin, spec AccessSpec) (info *AccessSpecInfo, err error)
 	Reader(p Plugin, spec AccessSpec, creds credentials.Credentials) (io.ReadCloser, error)
-	Writer(p Plugin, mediatype string, creds credentials.Credentials) (io.WriteCloser, AccessSpecProvider, error)
+}
+
+type AccessSpec runtime.VersionedTypedObject
+
+type AccessSpecProvider func() AccessSpec
+
+type Uploader interface {
+	Name() string
+	Description() string
+
+	Writer(p Plugin, arttyoe, mediatype string, hint string, creds credentials.Credentials) (io.WriteCloser, AccessSpecProvider, error)
 }

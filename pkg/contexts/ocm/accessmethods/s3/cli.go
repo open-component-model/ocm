@@ -31,9 +31,9 @@ func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 
 var usage = `
 This method implements the access of a blob stored in an S3 bucket.
+`
 
-Supported specification version is <code>v1</code>
-
+var formatV1 = `
 The type specific specification fields are:
 
 - **<code>region</code>** (optional) *string*

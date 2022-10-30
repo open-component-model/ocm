@@ -6,6 +6,7 @@ package cmds
 
 import (
 	"encoding/json"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/info"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload"
 )
 
 type PluginCommand struct {
@@ -35,10 +37,14 @@ func NewPluginCommand(p ppi.Plugin) *PluginCommand {
 		SilenceErrors:         true,
 	}
 
+	cmd.SetOut(os.Stdout)
+	cmd.SetErr(os.Stderr)
+
 	cobrautils.TweakCommand(cmd, nil)
 
 	cmd.AddCommand(info.New(p))
 	cmd.AddCommand(accessmethod.New(p))
+	cmd.AddCommand(upload.New(p))
 
 	cmd.InitDefaultHelpCmd()
 	var help *cobra.Command

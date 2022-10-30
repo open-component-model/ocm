@@ -38,9 +38,9 @@ but it MUST provide an implementation for this method.
 
 Regardless of the chosen implementation the attribute specification is
 defined globally the same.
+`
 
-Supported specification version is <code>v1</code>
-
+var formatV1 = `
 The type specific specification fields are:
 
 - **<code>localReference</code>** *string*

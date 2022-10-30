@@ -18,8 +18,8 @@ const Type = "localOciBlob"
 const TypeV1 = Type + runtime.VersionSeparator + "v1"
 
 func init() {
-	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}, ""))
-	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}, ""))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}))
 }
 
 // New creates a new LocalOCIBlob accessor.

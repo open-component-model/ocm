@@ -810,8 +810,8 @@ github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e/go.mod h1:C1wdFJiN
 github.com/mailru/easyjson v0.7.0/go.mod h1:KAzv3t3aY1NaHWoQz1+4F1ccyAH66Jk7yos7ldAVICs=
 github.com/mailru/easyjson v0.7.6 h1:8yTIVnZgCoiM1TgqoeTl+LfU5Jg6/xL3QhGQnimLYnA=
 github.com/mailru/easyjson v0.7.6/go.mod h1:xzfreul335JAWq5oZzymOObrkdz5UnU4kGfJJLY9Nlc=
-github.com/mandelsoft/cobra v1.4.1-0.20220816123314-fd3b703d78bf h1:rlZ3V+9Kkyk8j07D18kDmMFTZ60ecDSGHu5nP5BYPzI=
-github.com/mandelsoft/cobra v1.4.1-0.20220816123314-fd3b703d78bf/go.mod h1:IOw/AERYS7UzyrGinqmz6HLUo219MORXGxhbaJUqzrY=
+github.com/mandelsoft/cobra v1.5.1-0.20221030110806-c236cde1e2bd h1:tORGCEWEUztpMw5JRkKINckDRkd+3xgyHwfCWRr9NMg=
+github.com/mandelsoft/cobra v1.5.1-0.20221030110806-c236cde1e2bd/go.mod h1:IOw/AERYS7UzyrGinqmz6HLUo219MORXGxhbaJUqzrY=
 github.com/mandelsoft/filepath v0.0.0-20200909114706-3df73d378d55/go.mod h1:n4xEiUD2HNHnn2w5ZKF0qgjDecHVCWAl5DxZ7+pcFU8=
 github.com/mandelsoft/filepath v0.0.0-20220503095057-4432a2285b68 h1:99GWPlKVS110Cm+/YRVRaUJN5CpTeWFazWg2sXJdf70=
 github.com/mandelsoft/filepath v0.0.0-20220503095057-4432a2285b68/go.mod h1:n4xEiUD2HNHnn2w5ZKF0qgjDecHVCWAl5DxZ7+pcFU8=

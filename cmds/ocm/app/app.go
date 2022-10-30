@@ -27,6 +27,7 @@ import (
 	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/plugins"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
@@ -173,6 +174,7 @@ func NewCliCommand(ctx clictx.Context, mod ...func(clictx.Context, *cobra.Comman
 	cmd.AddCommand(cmdutils.HideCommand(references.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(sources.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(components.NewCommand(opts.Context)))
+	cmd.AddCommand(cmdutils.HideCommand(plugins.NewCommand(opts.Context)))
 
 	cmd.AddCommand(cmdutils.HideCommand(cachecmds.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(ocicmds.NewCommand(opts.Context)))

@@ -2,13 +2,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package put
+package upload
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"os"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -20,14 +20,14 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const Name = "put"
+const Name = "upload"
 
 func New(p ppi.Plugin) *cobra.Command {
 	opts := Options{}
 
 	cmd := &cobra.Command{
-		Use:   Name + "<flags> <access spec type>",
-		Short: "put blob",
+		Use:   Name + " <flags> <repository specification>",
+		Short: "upload blob to external repository",
 		Long:  "",
 		Args:  cobra.ExactArgs(1),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
@@ -44,45 +44,34 @@ func New(p ppi.Plugin) *cobra.Command {
 type Options struct {
 	Credentials credentials.DirectCredentials
 
-	MediaType     string
-	MethodName    string
-	MethodVersion string
+	MediaType    string
+	ArtifactType string
+	Hint         string
 
-	Hint string
+	Repository json.RawMessage
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	flag.YAMLVarP(fs, &o.Credentials, "credentials", "c", nil, "credentials")
 	flag.StringMapVarPA(fs, &o.Credentials, "credential", "C", nil, "dedicated credential value")
 	fs.StringVarP(&o.MediaType, "mediaType", "m", "", "media type of input blob")
-	fs.StringVarP(&o.Hint, "hint", "h", "", "reference hint for storing blob")
+	fs.StringVarP(&o.ArtifactType, "artifactType", "a", "", "artifact type of input blob")
+	fs.StringVarP(&o.Hint, "hint", "H", "", "reference hint for storing blob")
 }
 
 func (o *Options) Complete(args []string) error {
-	fields := strings.Split(args[0], runtime.VersionSeparator)
-	o.MethodName = fields[0]
-	if len(fields) > 1 {
-		o.MethodVersion = fields[1]
-	}
-	if len(fields) > 2 {
-		return errors.ErrInvalid(errors.KIND_ACCESSMETHOD, args[0])
+	if err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(args[0]), o.Repository); err != nil {
+		return errors.Wrapf(err, "invalid repository specification")
 	}
 	return nil
 }
 
-func (o *Options) Method() string {
-	if o.MethodVersion == "" {
-		return o.MethodName
-	}
-	return o.MethodName + runtime.VersionSeparator + o.MethodVersion
-}
-
 func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
-	m := p.GetAccessMethod(opts.MethodName, opts.MethodVersion)
-	if m == nil {
-		return errors.ErrUnknown(errors.KIND_ACCESSMETHOD, opts.Method())
+	u := p.GetUploader(opts.ArtifactType, opts.MediaType)
+	if u == nil {
+		return errors.ErrNotFound(ppi.KIND_UPLOADER, fmt.Sprintf("%s:%s", opts.ArtifactType, opts.MediaType))
 	}
-	w, h, err := m.Writer(p, opts.MediaType, opts.Credentials)
+	w, h, err := u.Writer(p, opts.ArtifactType, opts.MediaType, opts.Hint, opts.Credentials)
 	if err != nil {
 		return err
 	}

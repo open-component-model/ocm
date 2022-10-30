@@ -9,7 +9,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/get"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/put"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/validate"
 )
 
@@ -24,6 +23,5 @@ func New(p ppi.Plugin) *cobra.Command {
 
 	cmd.AddCommand(validate.New(p))
 	cmd.AddCommand(get.New(p))
-	cmd.AddCommand(put.New(p))
 	return cmd
 }

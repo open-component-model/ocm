@@ -20,7 +20,8 @@ type AccessType interface {
 
 	ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHandler
 
-	Description(cli bool) string
+	Description() string
+	Format(cli bool) string
 }
 
 type AccessMethodSupport interface {

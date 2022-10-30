@@ -98,7 +98,7 @@ To describe the content of this element one of the options <code>--access</code>
 attribute set, also. The structure of those values is similar to the <code>access</code>
 or <code>input</code> fields of the description file format.
 Non-local resources can be indicated using the option <code>--external</code>.
-Templating:
+
 All yaml/json defined resources can be templated.
 Variables are specified as regular arguments following the syntax <code>&lt;name>=&lt;value></code>.
 Additionally settings can be specified by a yaml file using the <code>--settings <file></code>
@@ -122,7 +122,6 @@ There are several templaters that can be selected by the <code>--templater</code
   
 - <code>none</code> do not do any substitution.
 
-  
 - <code>spiff</code> [spiff templating](https://github.com/mandelsoft/spiff).
 
   It supports complex values. the settings are accessible using the binding <code>values</code>.
@@ -140,10 +139,8 @@ There are several templaters that can be selected by the <code>--templater</code
   </pre>
   
 
-
 The resource specification supports the following blob input types, specified
 with the field <code>type</code> in the <code>input</code> field:
-
 
 - Input type <code>dir</code>
 
@@ -199,7 +196,6 @@ with the field <code>type</code> in the <code>input</code> field:
   
   Options used to configure fields: <code>--inputCompress</code>, <code>--inputExcludes</code>, <code>--inputFollowSymlinks</code>, <code>--inputIncludes</code>, <code>--inputPath</code>, <code>--inputPreserveDir</code>, <code>--mediaType</code>
 
-
 - Input type <code>docker</code>
 
   The path must denote an image tag that can be found in the local
@@ -218,7 +214,6 @@ with the field <code>type</code> in the <code>input</code> field:
     it does not start with slash "/".
   
   Options used to configure fields: <code>--hint</code>, <code>--inputPath</code>
-
 
 - Input type <code>dockermulti</code>
 
@@ -240,7 +235,6 @@ with the field <code>type</code> in the <code>input</code> field:
     it does not start with slash "/".
   
   Options used to configure fields: <code>--hint</code>, <code>--inputVariants</code>
-
 
 - Input type <code>file</code>
 
@@ -266,7 +260,6 @@ with the field <code>type</code> in the <code>input</code> field:
     compressed or not.
   
   Options used to configure fields: <code>--inputCompress</code>, <code>--inputPath</code>, <code>--mediaType</code>
-
 
 - Input type <code>helm</code>
 
@@ -294,7 +287,6 @@ with the field <code>type</code> in the <code>input</code> field:
   
   Options used to configure fields: <code>--inputCompress</code>, <code>--inputPath</code>, <code>--inputVersion</code>, <code>--mediaType</code>
 
-
 - Input type <code>ociImage</code>
 
   The path must denote an OCI image reference.
@@ -312,7 +304,6 @@ with the field <code>type</code> in the <code>input</code> field:
     it does not start with slash "/".
   
   Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputPath</code>, <code>--mediaType</code>
-
 
 - Input type <code>spiff</code>
 
@@ -352,60 +343,59 @@ with the field <code>type</code> in the <code>input</code> field:
   
   Options used to configure fields: <code>--inputCompress</code>, <code>--inputLibraries</code>, <code>--inputPath</code>, <code>--inputValues</code>, <code>--mediaType</code>
 
-
 The following access methods are known by the system.
 Typically there is special support for the CLI artifact add commands.
 The following types (with the field <code>type</code> in the <code>access</code> field
 are handled:
 
-
-
 - Access type <code>S3</code>
 
   This method implements the access of a blob stored in an S3 bucket.
-  
-  Supported specification version is <code>v1</code>
-  
-  The type specific specification fields are:
-  
-  - **<code>region</code>** (optional) *string*
-  
-    OCI repository reference (this artefact name used to store the blob).
-  
-  - **<code>bucket</code>** *string*
-  
-    The name of the S3 bucket containing the blob
-  
-  - **<code>key</code>** *string*
-  
-    The key of the desired blob
-  
-  Options used to configure fields: <code>--accessVersion</code>, <code>--bucket</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--region</code>
 
+  The following versions are supported:
+  - Version <code>v1</code>
+  
+    The type specific specification fields are:
+    
+    - **<code>region</code>** (optional) *string*
+    
+      OCI repository reference (this artefact name used to store the blob).
+    
+    - **<code>bucket</code>** *string*
+    
+      The name of the S3 bucket containing the blob
+    
+    - **<code>key</code>** *string*
+    
+      The key of the desired blob
+    
+    Options used to configure fields: <code>--accessVersion</code>, <code>--bucket</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--region</code>
+  
 
 - Access type <code>gitHub</code>
 
   This method implements the access of the content of a git commit stored in a
   GitHub repository.
-  
-  Supported specification version is <code>v1</code>
-  
-  The type specific specification fields are:
-  
-  - **<code>repoUrl</code>**  *string*
-  
-    Repository URL with or without scheme.
-  
-  - **<code>ref</code>** (optional) *string*
-  
-    Original ref used to get the commit from
-  
-  - **<code>commit</code>** *string*
-  
-    The sha/id of the git commit
-  
-  Options used to configure fields: <code>--accessHostname</code>, <code>--accessRepository</code>, <code>--commit</code>
 
+  The following versions are supported:
+  - Version <code>v1</code>
+  
+    The type specific specification fields are:
+    
+    - **<code>repoUrl</code>**  *string*
+    
+      Repository URL with or without scheme.
+    
+    - **<code>ref</code>** (optional) *string*
+    
+      Original ref used to get the commit from
+    
+    - **<code>commit</code>** *string*
+    
+      The sha/id of the git commit
+    
+    Options used to configure fields: <code>--accessHostname</code>, <code>--accessRepository</code>, <code>--commit</code>
+  
 
 - Access type <code>localBlob</code>
 
@@ -419,93 +409,100 @@ are handled:
   
   Regardless of the chosen implementation the attribute specification is
   defined globally the same.
+
+  The following versions are supported:
+  - Version <code>v1</code>
   
-  Supported specification version is <code>v1</code>
-  
-  The type specific specification fields are:
-  
-  - **<code>localReference</code>** *string*
-  
-    Repository type specific location information as string. The value
-    may encode any deep structure, but typically just an access path is sufficient.
-  
-  - **<code>mediaType</code>** *string*
-  
-    The media type of the blob used to store the resource. It may add 
-    format information like <code>+tar</code> or <code>+gzip</code>.
-  
-  - **<code>referenceName</code>** (optional) *string*
-  
-    This optional attribute may contain identity information used by
-    other repositories to restore some global access with an identity
-    related to the original source.
-  
-    For example, if an OCI artefact originally referenced using the
-    access method [<code>ociArtefact</code>](../../../../../docs/formats/accessmethods/ociArtefact.md) is stored during
-    some transport step as local artefact, the reference name can be set
-    to its original repository name. An import step into an OCI based OCM
-    repository may then decide to make this artefact available again as 
-    regular OCI artefact.
-  
-  - **<code>globalAccess</code>** (optional) *access method specification*
-  
-    If a resource blob is stored locally, the repository implementation
-    may decide to provide an external access information (independent
-    of the OCM model).
-  
-    For example, an OCI artefact stored as local blob
-    can be additionally stored as regular OCI artefact in an OCI registry.
+    The type specific specification fields are:
     
-    This additional external access information can be added using
-    a second external access method specification.
+    - **<code>localReference</code>** *string*
+    
+      Repository type specific location information as string. The value
+      may encode any deep structure, but typically just an access path is sufficient.
+    
+    - **<code>mediaType</code>** *string*
+    
+      The media type of the blob used to store the resource. It may add 
+      format information like <code>+tar</code> or <code>+gzip</code>.
+    
+    - **<code>referenceName</code>** (optional) *string*
+    
+      This optional attribute may contain identity information used by
+      other repositories to restore some global access with an identity
+      related to the original source.
+    
+      For example, if an OCI artefact originally referenced using the
+      access method [<code>ociArtefact</code>](../../../../../docs/formats/accessmethods/ociArtefact.md) is stored during
+      some transport step as local artefact, the reference name can be set
+      to its original repository name. An import step into an OCI based OCM
+      repository may then decide to make this artefact available again as 
+      regular OCI artefact.
+    
+    - **<code>globalAccess</code>** (optional) *access method specification*
+    
+      If a resource blob is stored locally, the repository implementation
+      may decide to provide an external access information (independent
+      of the OCM model).
+    
+      For example, an OCI artefact stored as local blob
+      can be additionally stored as regular OCI artefact in an OCI registry.
+      
+      This additional external access information can be added using
+      a second external access method specification.
+    
+    Options used to configure fields: <code>--globalAccess</code>, <code>--hint</code>, <code>--mediaType</code>, <code>--reference</code>
   
-  Options used to configure fields: <code>--globalAccess</code>, <code>--hint</code>, <code>--mediaType</code>, <code>--reference</code>
+
+- Access type <code>none</code>
+
+  dummy resource with no access
 
 
 - Access type <code>ociArtefact</code>
 
   This method implements the access of an OCI artefact stored in an OCI registry.
-  
-  Supported specification version is <code>v1</code>
-  
-  The type specific specification fields are:
-  
-  - **<code>imageReference</code>** *string*
-  
-    OCI image/artefact reference following the possible docker schemes:
-    - <code>&lt;repo>/&lt;artefact>:&lt;digest>@&lt;tag></code>
-    - <code><host>[&lt;port>]/&lt;repo path>/&lt;artefact>:&lt;version>@&lt;tag></code>
-  
-  Options used to configure fields: <code>--reference</code>
 
+  The following versions are supported:
+  - Version <code>v1</code>
+  
+    The type specific specification fields are:
+    
+    - **<code>imageReference</code>** *string*
+    
+      OCI image/artefact reference following the possible docker schemes:
+      - <code>&lt;repo>/&lt;artefact>:&lt;digest>@&lt;tag></code>
+      - <code><host>[&lt;port>]/&lt;repo path>/&lt;artefact>:&lt;version>@&lt;tag></code>
+    
+    Options used to configure fields: <code>--reference</code>
+  
 
 - Access type <code>ociBlob</code>
 
   This method implements the access of an OCI blob stored in an OCI repository.
-  
-  Supported specification version is <code>v1</code>
-  
-  The type specific specification fields are:
-  
-  - **<code>imageReference</code>** *string*
-  
-    OCI repository reference (this artefact name used to store the blob).
-  
-  - **<code>mediaType</code>** *string*
-  
-    The media type of the blob
-  
-  - **<code>digest</code>** *string*
-  
-    The digest of the blob used to access the blob in the OCI repository.
-  
-  - **<code>size</code>** *integer*
-  
-    The size of the blob
-  
-  
-  Options used to configure fields: <code>--digest</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--size</code>
 
+  The following versions are supported:
+  - Version <code>v1</code>
+  
+    The type specific specification fields are:
+    
+    - **<code>imageReference</code>** *string*
+    
+      OCI repository reference (this artefact name used to store the blob).
+    
+    - **<code>mediaType</code>** *string*
+    
+      The media type of the blob
+    
+    - **<code>digest</code>** *string*
+    
+      The digest of the blob used to access the blob in the OCI repository.
+    
+    - **<code>size</code>** *integer*
+    
+      The size of the blob
+    
+    Options used to configure fields: <code>--digest</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--size</code>
+  
 
 
 ### Examples

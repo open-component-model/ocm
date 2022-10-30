@@ -12,11 +12,13 @@ type decoder runtime.TypedObjectDecoder
 
 type AccessMethodBase struct {
 	decoder
-	name    string
+	nameDescription
+
 	version string
+	format  string
 }
 
-func MustNewAccessMethodBase(name, version string, proto AccessSpec) AccessMethodBase {
+func MustNewAccessMethodBase(name, version string, proto AccessSpec, desc string, format string) AccessMethodBase {
 	decoder, err := runtime.NewDirectDecoder(proto)
 	if err != nil {
 		panic(err)
@@ -24,15 +26,45 @@ func MustNewAccessMethodBase(name, version string, proto AccessSpec) AccessMetho
 
 	return AccessMethodBase{
 		decoder: decoder,
-		name:    name,
+		nameDescription: nameDescription{
+			name: name,
+			desc: desc,
+		},
 		version: version,
+		format:  format,
 	}
-}
-
-func (b *AccessMethodBase) Name() string {
-	return b.name
 }
 
 func (b *AccessMethodBase) Version() string {
 	return b.version
+}
+
+func (b *AccessMethodBase) Format() string {
+	return b.format
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type UploaderBase = nameDescription
+
+func MustNewUploaderBase(name, desc string) UploaderBase {
+	return UploaderBase{
+		name: name,
+		desc: desc,
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type nameDescription struct {
+	name string
+	desc string
+}
+
+func (b *nameDescription) Name() string {
+	return b.name
+}
+
+func (b *nameDescription) Description() string {
+	return b.desc
 }

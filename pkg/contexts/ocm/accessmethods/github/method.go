@@ -44,10 +44,10 @@ const CONSUMER_TYPE = "Github"
 const ShaLength = 40
 
 func init() {
-	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}, usage, ConfigHandler()))
-	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}, ""))
-	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyType, &AccessSpec{}, ""))
-	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyTypeV1, &AccessSpec{}, ""))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}, cpi.WithDescription(usage)))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}, cpi.WithFormatSpec(formatV1), cpi.WithConfigHandler(ConfigHandler())))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyType, &AccessSpec{}))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyTypeV1, &AccessSpec{}))
 }
 
 func Is(spec cpi.AccessSpec) bool {

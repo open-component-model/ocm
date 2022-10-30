@@ -64,7 +64,7 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 
 	m := p.GetAccessMethod(spec.GetKind(), spec.GetVersion())
 	if m == nil {
-		return errors.ErrUnknown(errors.KIND_ACCESSMETHOD, spec.GetType())
+		return errors.ErrUnknown(ppi.KIND_ACCESSMETHOD, spec.GetType())
 	}
 	_, err = m.ValidateSpecification(p, spec)
 	if err != nil {
