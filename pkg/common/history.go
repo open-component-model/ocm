@@ -67,6 +67,9 @@ func (h History) Equals(o History) bool {
 	return true
 }
 
+// Add provided a new extended non-cyclic history.
+// If the new entry would lead to a cycle an appropriate
+// error is returned.
 func (h *History) Add(kind string, nv NameVersion) error {
 	if h.Contains(nv) {
 		return errors.ErrRecusion(kind, nv, *h)
@@ -75,6 +78,7 @@ func (h *History) Add(kind string, nv NameVersion) error {
 	return nil
 }
 
+// Append provides a new extended history without cycle check.
 func (h History) Append(nv ...NameVersion) History {
 	result := make(History, len(h)+len(nv))
 	copy(result, h)

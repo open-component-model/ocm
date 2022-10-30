@@ -4,22 +4,22 @@
 
 package errors
 
-type errNotImplemented struct {
+type NotImplementedError struct {
 	errinfo
 }
 
 var formatNotImplemented = NewDefaultFormatter("", "not implemented", "by")
 
 func ErrNotImplemented(spec ...string) error {
-	return &errNotImplemented{newErrInfo(formatNotImplemented, spec...)}
+	return &NotImplementedError{newErrInfo(formatNotImplemented, spec...)}
 }
 
 func IsErrNotImplemented(err error) bool {
-	return IsA(err, &errNotImplemented{})
+	return IsA(err, &NotImplementedError{})
 }
 
 func IsErrNotImplementedKind(err error, kind string) bool {
-	var uerr *errNotImplemented
+	var uerr *NotImplementedError
 	if err == nil || !As(err, &uerr) {
 		return false
 	}

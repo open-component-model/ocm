@@ -4,22 +4,22 @@
 
 package errors
 
-type errNotSupported struct {
+type NotSupportedError struct {
 	errinfo
 }
 
 var formatNotSupported = NewDefaultFormatter("", "not supported", "by")
 
 func ErrNotSupported(spec ...string) error {
-	return &errNotSupported{newErrInfo(formatNotSupported, spec...)}
+	return &NotSupportedError{newErrInfo(formatNotSupported, spec...)}
 }
 
 func IsErrNotSupported(err error) bool {
-	return IsA(err, &errNotSupported{})
+	return IsA(err, &NotSupportedError{})
 }
 
 func IsErrNotSupportedKind(err error, kind string) bool {
-	var uerr *errNotSupported
+	var uerr *NotSupportedError
 	if err == nil || !As(err, &uerr) {
 		return false
 	}

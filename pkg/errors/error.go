@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+// //nolint: errorlint // this is the new As method, also handling error lists
 package errors
 
 import (
@@ -13,15 +14,56 @@ import (
 var (
 	New    = errors.New
 	Unwrap = errors.Unwrap
-	Is     = errors.Is
-	As     = errors.As
 )
 
 func Newf(msg string, args ...interface{}) error {
 	return New(fmt.Sprintf(msg, args...))
 }
 
+func As(err error, target any) bool {
+	if errors.As(err, target) {
+		return true
+	}
+
+	for err != nil {
+		if list, ok := err.(*ErrorList); ok {
+			for _, n := range list.errors {
+				if As(n, target) {
+					return true
+				}
+			}
+		}
+		err = Unwrap(err)
+	}
+	return false
+}
+
+func Is(err error, target error) bool {
+	if target == nil || err == nil {
+		return err == target
+	}
+
+	if errors.Is(err, target) {
+		return true
+	}
+
+	for err != nil {
+		if list, ok := err.(*ErrorList); ok {
+			for _, n := range list.errors {
+				if Is(n, target) {
+					return true
+				}
+			}
+		}
+		err = Unwrap(err)
+	}
+	return false
+}
+
 func IsA(err error, target error) bool {
+	if target == nil {
+		return err == target
+	}
 	if err == nil {
 		return false
 	}
@@ -30,6 +72,13 @@ func IsA(err error, target error) bool {
 	for err != nil {
 		if reflect.TypeOf(err).AssignableTo(typ) {
 			return true
+		}
+		if list, ok := err.(*ErrorList); ok {
+			for _, n := range list.errors {
+				if IsA(n, target) {
+					return true
+				}
+			}
 		}
 		err = Unwrap(err)
 	}

@@ -4,22 +4,22 @@
 
 package errors
 
-type errClosed struct {
+type ClosedError struct {
 	errinfo
 }
 
 var formatClosed = NewDefaultFormatter("is", "closed", "for")
 
 func ErrClosed(spec ...string) error {
-	return &errClosed{newErrInfo(formatClosed, spec...)}
+	return &ClosedError{newErrInfo(formatClosed, spec...)}
 }
 
 func IsErrClosed(err error) bool {
-	return IsA(err, &errClosed{})
+	return IsA(err, &ClosedError{})
 }
 
 func IsErrClosedKind(err error, kind string) bool {
-	var uerr *errClosed
+	var uerr *ClosedError
 	if err == nil || !As(err, &uerr) {
 		return false
 	}
