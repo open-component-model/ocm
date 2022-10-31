@@ -118,18 +118,20 @@ func (o prio) ApplyBlobHandlerOptionTo(opts *BlobHandlerOptions) {
 // BlobHandlerKey is the registration key for BlobHandlers.
 type BlobHandlerKey struct {
 	ImplementationRepositoryType
-	MimeType string
+	ArtefactType string
+	MimeType     string
 }
 
 var _ BlobHandlerOption = BlobHandlerKey{}
 
-func NewBlobHandlerKey(ctxtype, repotype, mimetype string) BlobHandlerKey {
+func NewBlobHandlerKey(ctxtype, repotype, artefactType, mimetype string) BlobHandlerKey {
 	return BlobHandlerKey{
 		ImplementationRepositoryType: ImplementationRepositoryType{
 			ContextType:    ctxtype,
 			RepositoryType: repotype,
 		},
-		MimeType: mimetype,
+		ArtefactType: artefactType,
+		MimeType:     mimetype,
 	}
 }
 
@@ -139,6 +141,9 @@ func (k BlobHandlerKey) ApplyBlobHandlerOptionTo(opts *BlobHandlerOptions) {
 	}
 	if k.RepositoryType != "" {
 		opts.RepositoryType = k.RepositoryType
+	}
+	if k.ArtefactType != "" {
+		opts.ArtefactType = k.ArtefactType
 	}
 	if k.MimeType != "" {
 		opts.MimeType = k.MimeType
@@ -151,6 +156,10 @@ func ForRepo(ctxtype, repotype string) BlobHandlerOption {
 
 func ForMimeType(mimetype string) BlobHandlerOption {
 	return BlobHandlerKey{MimeType: mimetype}
+}
+
+func ForArtefactType(artefacttype string) BlobHandlerOption {
+	return BlobHandlerKey{ArtefactType: artefacttype}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -166,14 +175,15 @@ type BlobHandlerRegistry interface {
 	Register(handler BlobHandler, opts ...BlobHandlerOption) BlobHandlerRegistry
 	// GetHandler returns handler trying all matches in the following order:
 	//
-	// - a handle matching all keys
-	//
+	// - a handler matching all keys
+	// - handlers matching the repo and mime type (from specific to more general by discarding + components)
+	//   - with artefact type
+	//   - without artefact type
+	// - handlers matching artefact type
 	// - handlers matching a sole mimetype handler (from specific to more general by discarding + components)
-	//
 	// - a handler matching the repo
 	//
-	// - handlers matching everything
-	GetHandler(repotype ImplementationRepositoryType, mimeType string) BlobHandler
+	GetHandler(repotype ImplementationRepositoryType, artefacttype, mimeType string) BlobHandler
 }
 
 const DEFAULT_BLOBHANDLER_PRIO = 100
@@ -256,12 +266,12 @@ func (r *blobHandlerRegistry) Register(handler BlobHandler, olist ...BlobHandler
 	return r
 }
 
-func (r *blobHandlerRegistry) forMimeType(ctxtype, repotype, mimetype string) MultiBlobHandler {
+func (r *blobHandlerRegistry) forMimeType(ctxtype, repotype, artefacttype, mimetype string) MultiBlobHandler {
 	var multi MultiBlobHandler
 
 	mime := mimetype
 	for {
-		if h := r.handlers[NewBlobHandlerKey(ctxtype, repotype, mime)]; h != nil {
+		if h := r.handlers[NewBlobHandlerKey(ctxtype, repotype, artefacttype, mime)]; h != nil {
 			multi = append(multi, h)
 		}
 		idx := strings.LastIndex(mime, "+")
@@ -273,9 +283,10 @@ func (r *blobHandlerRegistry) forMimeType(ctxtype, repotype, mimetype string) Mu
 	return multi
 }
 
-func (r *blobHandlerRegistry) GetHandler(repotype ImplementationRepositoryType, mimetype string) BlobHandler {
+func (r *blobHandlerRegistry) GetHandler(repotype ImplementationRepositoryType, artefacttype, mimetype string) BlobHandler {
 	key := BlobHandlerKey{
 		ImplementationRepositoryType: repotype,
+		ArtefactType:                 artefacttype,
 		MimeType:                     mimetype,
 	}
 	h, cache := r.getHandler(key)
@@ -300,12 +311,24 @@ func (r *blobHandlerRegistry) getHandler(key BlobHandlerKey) (BlobHandler, *hand
 	}
 	var multi MultiBlobHandler
 	if !key.ImplementationRepositoryType.IsInitial() {
-		multi = append(multi, r.forMimeType(key.ContextType, key.RepositoryType, key.MimeType)...)
+		multi = append(multi, r.forMimeType(key.ContextType, key.RepositoryType, key.ArtefactType, key.MimeType)...)
 		if key.MimeType != "" {
-			multi = append(multi, r.forMimeType(key.ContextType, key.RepositoryType, "")...)
+			multi = append(multi, r.forMimeType(key.ContextType, key.RepositoryType, key.ArtefactType, "")...)
+		}
+		if key.ArtefactType != "" {
+			multi = append(multi, r.forMimeType(key.ContextType, key.RepositoryType, "", key.MimeType)...)
 		}
 	}
-	multi = append(multi, r.forMimeType("", "", key.MimeType)...)
+	multi = append(multi, r.forMimeType("", "", key.ArtefactType, key.MimeType)...)
+	if key.MimeType != "" {
+		multi = append(multi, r.forMimeType("", "", key.ArtefactType, "")...)
+	}
+	if key.ArtefactType != "" {
+		multi = append(multi, r.forMimeType("", "", "", key.MimeType)...)
+	}
+	if !key.ImplementationRepositoryType.IsInitial() && key.ArtefactType != "" && key.MimeType != "" {
+		multi = append(multi, r.forMimeType(key.ContextType, key.RepositoryType, "", "")...)
+	}
 	multi = append(multi, r.defhandler...)
 	if len(multi) == 0 {
 		return nil, r.cache

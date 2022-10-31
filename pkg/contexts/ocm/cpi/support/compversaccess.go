@@ -98,12 +98,12 @@ func (a *componentVersionAccessImpl) GetVersion() string {
 	return a.base.GetDescriptor().GetVersion()
 }
 
-func (a *componentVersionAccessImpl) AddBlob(blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
+func (a *componentVersionAccessImpl) AddBlob(blob cpi.BlobAccess, artType, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
 	storagectx := a.base.GetStorageContext(a)
-	h := a.GetContext().BlobHandlers().GetHandler(storagectx.GetImplementationRepositoryType(), blob.MimeType())
+	h := a.GetContext().BlobHandlers().GetHandler(storagectx.GetImplementationRepositoryType(), artType, blob.MimeType())
 	if h != nil {
 		acc, err := h.StoreBlob(blob, refName, nil, storagectx)
 		if err != nil {
@@ -336,7 +336,7 @@ func (c *componentVersionAccessImpl) SetSource(meta *cpi.SourceMeta, acc compdes
 
 // AddResource adds a blob resource to the current archive.
 func (c *componentVersionAccessImpl) SetResourceBlob(meta *cpi.ResourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) error {
-	acc, err := c.AddBlob(blob, refName, global)
+	acc, err := c.AddBlob(blob, meta.Type, refName, global)
 	if err != nil {
 		return fmt.Errorf("unable to add blob: %w", err)
 	}
@@ -349,7 +349,7 @@ func (c *componentVersionAccessImpl) SetResourceBlob(meta *cpi.ResourceMeta, blo
 }
 
 func (c *componentVersionAccessImpl) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) error {
-	acc, err := c.AddBlob(blob, refName, global)
+	acc, err := c.AddBlob(blob, meta.Type, refName, global)
 	if err != nil {
 		return fmt.Errorf("unable to add blob: %w", err)
 	}

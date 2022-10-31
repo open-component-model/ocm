@@ -117,7 +117,7 @@ var _ = Describe("component repository mapping", func() {
 		vers, err := comp.NewVersion("v1")
 		Expect(err).To(Succeed())
 
-		acc, err := vers.AddBlob(blob, "", nil)
+		acc, err := vers.AddBlob(blob, "", "", nil)
 		Expect(err).To(Succeed())
 
 		// check provided actual access to be local blob
@@ -172,7 +172,7 @@ var _ = Describe("component repository mapping", func() {
 		defer vers.Close()
 		blob := accessio.BlobAccessForFile(mime, "test.tgz", tempfs)
 
-		acc, err := vers.AddBlob(blob, "artefact1", nil)
+		acc, err := vers.AddBlob(blob, "", "artefact1", nil)
 		Expect(err).To(Succeed())
 		Expect(acc.GetKind()).To(Equal(ociartefact.Type))
 		o := acc.(*ociartefact.AccessSpec)
@@ -180,7 +180,7 @@ var _ = Describe("component repository mapping", func() {
 		err = comp.AddVersion(vers)
 		Expect(err).To(Succeed())
 
-		acc, err = vers.AddBlob(blob, "artefact2:v1", nil)
+		acc, err = vers.AddBlob(blob, "", "artefact2:v1", nil)
 		Expect(err).To(Succeed())
 		Expect(acc.GetKind()).To(Equal(ociartefact.Type))
 		o = acc.(*ociartefact.AccessSpec)

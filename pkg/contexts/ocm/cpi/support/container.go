@@ -25,7 +25,8 @@ type BlobContainer interface {
 	// potentially provides a global reference according to the OCI distribution spec
 	// if the blob described an oci artefact.
 	// The resulting access information (global and local) is provided as
-	// an access method specification usable in a component descriptor
+	// an access method specification usable in a component descriptor.
+	// This is the direct technical storage, without caring about any handler.
 	AddBlobFor(storagectx cpi.StorageContext, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error)
 }
 

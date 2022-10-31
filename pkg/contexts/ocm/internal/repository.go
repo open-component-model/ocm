@@ -101,7 +101,7 @@ type ComponentVersionAccess interface {
 	AccessMethod(AccessSpec) (AccessMethod, error)
 
 	// AddBlob adds a local blob and returns an appropriate local access spec
-	AddBlob(blob BlobAccess, refName string, global AccessSpec) (AccessSpec, error)
+	AddBlob(blob BlobAccess, artType, refName string, global AccessSpec) (AccessSpec, error)
 
 	SetResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string, global AccessSpec) error
 	SetResource(*ResourceMeta, compdesc.AccessSpec) error
