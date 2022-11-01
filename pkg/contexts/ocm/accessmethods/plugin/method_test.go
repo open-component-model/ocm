@@ -16,7 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 )
 
@@ -27,7 +27,7 @@ const PROVIDER = "mandelsoft"
 
 var _ = Describe("setup plugin cache", func() {
 	var ctx ocm.Context
-	var registry cache.Cache
+	var registry plugins.Set
 	var env *Builder
 
 	var accessSpec ocm.AccessSpec
@@ -46,7 +46,7 @@ someattr: value
 		plugindirattr.Set(ctx, "testdata")
 		registry = plugincacheattr.Get(ctx)
 		Expect(registry.RegisterExtensions(ctx)).To(Succeed())
-		p := registry.GetPlugin("test")
+		p := registry.Get("test")
 		Expect(p).NotTo(BeNil())
 	})
 

@@ -15,26 +15,41 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
 )
 
 var _ = Describe("setup plugin cache", func() {
 	var ctx ocm.Context
-	var registry cache.Cache
+	var registry plugins.Set
 
 	BeforeEach(func() {
+		cache.DirectoryCache.Reset()
 		ctx = ocm.New()
 		plugindirattr.Set(ctx, "testdata")
 		registry = plugincacheattr.Get(ctx)
 	})
 
 	It("finds plugin", func() {
-		p := registry.GetPlugin("test")
+		p := registry.Get("test")
 		Expect(p).NotTo(BeNil())
 		Expect(p.GetDescriptor().Short).To(Equal("a test plugin"))
 	})
 
+	It("scans only once", func() {
+		ctx = ocm.New()
+		plugindirattr.Set(ctx, "testdata")
+		registry = plugincacheattr.Get(ctx)
+
+		p := registry.Get("test")
+		Expect(p).NotTo(BeNil())
+		Expect(p.GetDescriptor().Short).To(Equal("a test plugin"))
+
+		Expect(cache.DirectoryCache.Count()).To(Equal(1))
+		Expect(cache.DirectoryCache.Requests()).To(Equal(2))
+	})
+
 	It("registers access methods", func() {
-		p := registry.GetPlugin("test")
+		p := registry.Get("test")
 		Expect(p).NotTo(BeNil())
 		Expect(len(p.GetDescriptor().AccessMethods)).To(Equal(2))
 		Expect(registry.RegisterExtensions(nil)).To(Succeed())

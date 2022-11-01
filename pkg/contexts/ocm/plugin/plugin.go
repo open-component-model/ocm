@@ -6,100 +6,36 @@ package plugin
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
-	"os/exec"
+	"sync"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/internal"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type Plugin = *pluginImpl
 
+type impl = cache.Plugin
+
 // //nolint: errname // is no error.
 type pluginImpl struct {
-	name       string
-	config     json.RawMessage
-	descriptor *internal.Descriptor
-	path       string
-	error      string
+	lock sync.RWMutex
+	impl
+	config json.RawMessage
 }
 
-func NewPlugin(name string, path string, config json.RawMessage, desc *Descriptor, errmsg string) Plugin {
+func NewPlugin(impl cache.Plugin, config json.RawMessage) Plugin {
 	return &pluginImpl{
-		name:       name,
-		path:       path,
-		config:     config,
-		descriptor: desc,
-		error:      errmsg,
+		impl:   impl,
+		config: config,
 	}
 }
 
-func (p *pluginImpl) GetDescriptor() *internal.Descriptor {
-	return p.descriptor
-}
-
-func (p *pluginImpl) Name() string {
-	return p.name
-}
-
-func (p *pluginImpl) Path() string {
-	return p.path
-}
-
-func (p *pluginImpl) Version() string {
-	if !p.IsValid() {
-		return "-"
-	}
-	return p.descriptor.PluginVersion
-}
-
-func (p *pluginImpl) IsValid() bool {
-	return p.descriptor != nil
-}
-
-func (p *pluginImpl) Error() string {
-	return p.error
-}
-
-func (p *pluginImpl) SetConfig(data json.RawMessage) {
-	p.config = data
-}
-
-func (p *pluginImpl) GetAccessMethodDescriptor(name, version string) *internal.AccessMethodDescriptor {
-	if !p.IsValid() {
-		return nil
-	}
-
-	var fallback internal.AccessMethodDescriptor
-	fallbackFound := false
-	for _, m := range p.descriptor.AccessMethods {
-		if m.Name == name {
-			if m.Version == version {
-				return &m
-			}
-			if m.Version == "" || m.Version == "v1" {
-				fallback = m
-				fallbackFound = true
-			}
-		}
-	}
-	if fallbackFound && (version == "" || version == "v1") {
-		return &fallback
-	}
-	return nil
-}
-
-func (p *pluginImpl) Message() string {
-	if p.IsValid() {
-		return p.descriptor.Short
-	}
-	if p.error != "" {
-		return "Error: " + p.error
-	}
-	return "unknown state"
+func (p *pluginImpl) SetConfig(config json.RawMessage) {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+	p.config = config
 }
 
 func (p *pluginImpl) Validate(spec []byte) (*ppi.AccessSpecInfo, error) {
@@ -117,42 +53,5 @@ func (p *pluginImpl) Validate(spec []byte) (*ppi.AccessSpecInfo, error) {
 }
 
 func (p *pluginImpl) Exec(r io.Reader, w io.Writer, args ...string) ([]byte, error) {
-	return Exec(p.path, p.config, r, w, args...)
-}
-
-func Exec(execpath string, config json.RawMessage, r io.Reader, w io.Writer, args ...string) ([]byte, error) {
-	if len(config) > 0 {
-		args = append([]string{"-c", string(config)}, args...)
-	}
-	cmd := exec.Command(execpath, args...)
-
-	stdout := w
-	if w == nil {
-		stdout = LimitBuffer(LIMIT)
-	}
-
-	stderr := LimitBuffer(LIMIT)
-
-	cmd.Stdin = r
-	cmd.Stdout = stdout
-	cmd.Stderr = stderr
-
-	err := cmd.Run()
-	if err != nil {
-		var result cmds.Error
-		var msg string
-		if err := json.Unmarshal(stderr.Bytes(), &result); err == nil {
-			msg = result.Error
-		} else {
-			msg = fmt.Sprintf("[%s]", string(stderr.Bytes()))
-		}
-		return nil, fmt.Errorf("%s", msg)
-	}
-	if l, ok := stdout.(*LimitedBuffer); ok {
-		if l.Exceeded() {
-			return nil, fmt.Errorf("stdout limit exceeded")
-		}
-		return l.Bytes(), nil
-	}
-	return nil, nil
+	return cache.Exec(p.Path(), p.config, r, w, args...)
 }

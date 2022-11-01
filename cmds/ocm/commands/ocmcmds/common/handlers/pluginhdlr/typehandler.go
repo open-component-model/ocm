@@ -55,7 +55,7 @@ func (h *TypeHandler) All() ([]output.Object, error) {
 	result := []output.Object{}
 
 	for _, n := range cache.PluginNames() {
-		result = append(result, &Object{cache.GetPlugin(n)})
+		result = append(result, &Object{cache.Get(n)})
 	}
 	return result, nil
 }
@@ -63,7 +63,7 @@ func (h *TypeHandler) All() ([]output.Object, error) {
 func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 	cache := plugincacheattr.Get(h.octx.Context())
 
-	p := cache.GetPlugin(elemspec.String())
+	p := cache.Get(elemspec.String())
 	if p == nil {
 		return nil, errors.ErrNotFound(ppi.KIND_PLUGIN, elemspec.String())
 	}
