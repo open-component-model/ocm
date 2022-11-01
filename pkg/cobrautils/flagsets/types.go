@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
+	"github.com/open-component-model/ocm/pkg/cobrautils/groups"
 )
 
 type TypeOptionBase struct {
@@ -28,23 +29,50 @@ func (b *TypeOptionBase) Description() string {
 ////////////////////////////////////////////////////////////////////////////////
 
 type OptionBase struct {
-	otyp ConfigOptionType
+	otyp   ConfigOptionType
+	flag   *pflag.Flag
+	groups []string
 }
 
 func NewOptionBase(otyp ConfigOptionType) OptionBase {
 	return OptionBase{otyp: otyp}
 }
 
-func (b OptionBase) Type() ConfigOptionType {
+func (b *OptionBase) Type() ConfigOptionType {
 	return b.otyp
 }
 
-func (b OptionBase) Name() string {
+func (b *OptionBase) Name() string {
 	return b.otyp.Name()
 }
 
-func (b OptionBase) Description() string {
+func (b *OptionBase) Description() string {
 	return b.otyp.Description()
+}
+
+func (b *OptionBase) Changed() bool {
+	return b.flag.Changed
+}
+
+func (b *OptionBase) AddGroups(groups ...string) {
+	b.groups = AddGroups(b.groups, groups...)
+	b.addGroups()
+}
+
+func (b *OptionBase) addGroups() {
+	if len(b.groups) == 0 || b.flag == nil {
+		return
+	}
+	if b.flag.Annotations == nil {
+		b.flag.Annotations = map[string][]string{}
+	}
+	list := b.flag.Annotations[groups.FlagGroupAnnotation]
+	b.flag.Annotations[groups.FlagGroupAnnotation] = AddGroups(list, b.groups...)
+}
+
+func (b *OptionBase) TweakFlag(f *pflag.Flag) {
+	b.flag = f
+	b.addGroups()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -67,7 +95,7 @@ type StringOption struct {
 var _ Option = (*StringOption)(nil)
 
 func (o *StringOption) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVarP(&o.value, o.otyp.Name(), "", "", o.otyp.Description())
+	o.TweakFlag(fs.StringVarPF(&o.value, o.otyp.Name(), "", "", o.otyp.Description()))
 }
 
 func (o *StringOption) Value() interface{} {
@@ -104,7 +132,7 @@ type StringArrayOption struct {
 var _ Option = (*StringArrayOption)(nil)
 
 func (o *StringArrayOption) AddFlags(fs *pflag.FlagSet) {
-	fs.StringArrayVarP(&o.value, o.otyp.Name(), "", nil, o.otyp.Description())
+	o.TweakFlag(fs.StringArrayVarPF(&o.value, o.otyp.Name(), "", nil, o.otyp.Description()))
 }
 
 func (o *StringArrayOption) Value() interface{} {
@@ -141,7 +169,7 @@ type BoolOption struct {
 var _ Option = (*BoolOption)(nil)
 
 func (o *BoolOption) AddFlags(fs *pflag.FlagSet) {
-	fs.BoolVarP(&o.value, o.otyp.Name(), "", false, o.otyp.Description())
+	o.TweakFlag(fs.BoolVarPF(&o.value, o.otyp.Name(), "", false, o.otyp.Description()))
 }
 
 func (o *BoolOption) Value() interface{} {
@@ -178,7 +206,7 @@ type IntOption struct {
 var _ Option = (*IntOption)(nil)
 
 func (o *IntOption) AddFlags(fs *pflag.FlagSet) {
-	fs.IntVarP(&o.value, o.otyp.Name(), "", 0, o.otyp.Description())
+	o.TweakFlag(fs.IntVarPF(&o.value, o.otyp.Name(), "", 0, o.otyp.Description()))
 }
 
 func (o *IntOption) Value() interface{} {
@@ -215,7 +243,7 @@ type YAMLOption struct {
 var _ Option = (*YAMLOption)(nil)
 
 func (o *YAMLOption) AddFlags(fs *pflag.FlagSet) {
-	flag.YAMLVarP(fs, &o.value, o.otyp.Name(), "", nil, o.otyp.Description())
+	o.TweakFlag(flag.YAMLVarPF(fs, &o.value, o.otyp.Name(), "", nil, o.otyp.Description()))
 }
 
 func (o *YAMLOption) Value() interface{} {
@@ -252,7 +280,7 @@ type ValueMapYAMLOption struct {
 var _ Option = (*ValueMapYAMLOption)(nil)
 
 func (o *ValueMapYAMLOption) AddFlags(fs *pflag.FlagSet) {
-	flag.YAMLVarP(fs, &o.value, o.otyp.Name(), "", nil, o.otyp.Description())
+	o.TweakFlag(flag.YAMLVarPF(fs, &o.value, o.otyp.Name(), "", nil, o.otyp.Description()))
 }
 
 func (o *ValueMapYAMLOption) Value() interface{} {
@@ -289,7 +317,7 @@ type ValueMapOption struct {
 var _ Option = (*ValueMapOption)(nil)
 
 func (o *ValueMapOption) AddFlags(fs *pflag.FlagSet) {
-	flag.ValueMapVarP(fs, &o.value, o.otyp.Name(), "", nil, o.otyp.Description())
+	o.TweakFlag(flag.StringToValueVarPF(fs, &o.value, o.otyp.Name(), "", nil, o.otyp.Description()))
 }
 
 func (o *ValueMapOption) Value() interface{} {
@@ -326,7 +354,7 @@ type StringMapOption struct {
 var _ Option = (*StringMapOption)(nil)
 
 func (o *StringMapOption) AddFlags(fs *pflag.FlagSet) {
-	flag.StringMapVarP(fs, &o.value, o.otyp.Name(), "", nil, o.otyp.Description())
+	o.TweakFlag(fs.StringToStringVarPF(&o.value, o.otyp.Name(), "", nil, o.otyp.Description()))
 }
 
 func (o *StringMapOption) Value() interface{} {

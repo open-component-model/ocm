@@ -815,10 +815,10 @@ github.com/mandelsoft/cobra v1.4.1-0.20220816123314-fd3b703d78bf/go.mod h1:IOw/A
 github.com/mandelsoft/filepath v0.0.0-20200909114706-3df73d378d55/go.mod h1:n4xEiUD2HNHnn2w5ZKF0qgjDecHVCWAl5DxZ7+pcFU8=
 github.com/mandelsoft/filepath v0.0.0-20220503095057-4432a2285b68 h1:99GWPlKVS110Cm+/YRVRaUJN5CpTeWFazWg2sXJdf70=
 github.com/mandelsoft/filepath v0.0.0-20220503095057-4432a2285b68/go.mod h1:n4xEiUD2HNHnn2w5ZKF0qgjDecHVCWAl5DxZ7+pcFU8=
-github.com/mandelsoft/logging v0.0.0-20221008125016-927a97d3006c h1:ZQV4QUvXKbbScq83qg1q2EILSP2ht1JvcVEMOoMaJtc=
-github.com/mandelsoft/logging v0.0.0-20221008125016-927a97d3006c/go.mod h1:vxGpzOesdqLGRSWb4fz5DaH0ekJvkISst4qq6UZ2xFA=
 github.com/mandelsoft/logging v0.0.0-20221012190501-e17f7961076e h1:vhm0x0KCMwjyrm/WkFXYw68QCWCBVzL1HVnOk0uOJa0=
 github.com/mandelsoft/logging v0.0.0-20221012190501-e17f7961076e/go.mod h1:vxGpzOesdqLGRSWb4fz5DaH0ekJvkISst4qq6UZ2xFA=
+github.com/mandelsoft/pflag v0.0.0-20221101220350-bbff7bc4f7b5 h1:yt0I6oxpTzxAPh+lwUinBiWibbmGXvQJdGzdu0sNMAM=
+github.com/mandelsoft/pflag v0.0.0-20221101220350-bbff7bc4f7b5/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=
 github.com/mandelsoft/spiff v1.7.0-beta-3 h1:AvZldpnctpyfQqtAA5uxokD5rlCK52mGAXxg7tnW5Ag=
 github.com/mandelsoft/spiff v1.7.0-beta-3/go.mod h1:3Kg6qrggWO4oc1k++acd6xhcWisJ2YkzxpVZpuYONGg=
 github.com/mandelsoft/vfs v0.0.0-20201002080026-d03d33d5889a/go.mod h1:74aV7kulg9C434HiI3zNALN79QHc9IZMN+SI4UdLn14=
@@ -1111,13 +1111,6 @@ github.com/spf13/jwalterweatherman v0.0.0-20141219030609-3d60171a6431/go.mod h1:
 github.com/spf13/jwalterweatherman v1.0.0/go.mod h1:cQK4TGJAtQXfYWX+Ddv3mKDzgVb68N+wFjFa4jdeBTo=
 github.com/spf13/jwalterweatherman v1.1.0 h1:ue6voC5bR5F8YxI5S67j9i582FU4Qvo2bmqnqMYADFk=
 github.com/spf13/jwalterweatherman v1.1.0/go.mod h1:aNWZUN0dPAAO/Ljvb5BEdw96iTZ0EXowPYD95IqWIGo=
-github.com/spf13/pflag v0.0.0-20170130214245-9ff6c6923cff/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
-github.com/spf13/pflag v1.0.0/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
-github.com/spf13/pflag v1.0.1-0.20171106142849-4c012f6dcd95/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
-github.com/spf13/pflag v1.0.1/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
-github.com/spf13/pflag v1.0.3/go.mod h1:DYY7MBk1bdzusC3SYhjObp+wFpr4gzcvqqNjLnInEg4=
-github.com/spf13/pflag v1.0.5 h1:iy+VFUOCP1a+8yFto/drg2CJ5u0yRoB7fZw3DKv/JXA=
-github.com/spf13/pflag v1.0.5/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=
 github.com/spf13/viper v0.0.0-20150530192845-be5ff3e4840c/go.mod h1:A8kyI5cUJhb8N+3pkfONlcEcZbueH6nhAm0Fq7SrnBM=
 github.com/spf13/viper v1.7.1 h1:pM5oEahlgWv/WnHXpgbKz7iLIxRf65tye2Ci+XFK5sk=
 github.com/spf13/viper v1.7.1/go.mod h1:8WkrPz2fc9jxqZNCJI/76HCieCp4Q8HaLFoCha5qpdg=

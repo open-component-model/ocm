@@ -22,7 +22,7 @@ var _ = Describe("value map", func() {
 
 	It("handles simple map content", func() {
 		var flag map[string]interface{}
-		ValueMapVarP(flags, &flag, "flag", "", nil, "test flag")
+		StringToValueVarP(flags, &flag, "flag", "", nil, "test flag")
 
 		value := `a=b`
 
@@ -32,7 +32,7 @@ var _ = Describe("value map", func() {
 
 	It("handles generic yaml content", func() {
 		var flag map[string]interface{}
-		ValueMapVarP(flags, &flag, "flag", "", nil, "test flag")
+		StringToValueVarP(flags, &flag, "flag", "", nil, "test flag")
 
 		value := `a={"a":"va"}`
 
@@ -42,14 +42,14 @@ var _ = Describe("value map", func() {
 
 	It("shows default", func() {
 		var flag map[string]interface{}
-		ValueMapVarP(flags, &flag, "flag", "", map[string]interface{}{"x": map[string]interface{}{"a": "b"}}, "test flag")
+		StringToValueVarP(flags, &flag, "flag", "", map[string]interface{}{"x": map[string]interface{}{"a": "b"}}, "test flag")
 
 		Expect(flags.FlagUsages()).To(testutils.StringEqualTrimmedWithContext(`--flag <name>=<YAML>   test flag (default [x={"a":"b"}])`))
 	})
 
 	It("handles replaces default content", func() {
 		var flag map[string]interface{}
-		ValueMapVarP(flags, &flag, "flag", "", map[string]interface{}{"x": "y"}, "test flag")
+		StringToValueVarP(flags, &flag, "flag", "", map[string]interface{}{"x": "y"}, "test flag")
 
 		value := `a=b`
 
@@ -59,7 +59,7 @@ var _ = Describe("value map", func() {
 
 	It("rejects invalid value", func() {
 		var flag map[string]interface{}
-		ValueMapVarP(flags, &flag, "flag", "", nil, "test flag")
+		StringToValueVarP(flags, &flag, "flag", "", nil, "test flag")
 
 		value := `a={"a":"va"`
 
@@ -70,7 +70,7 @@ var _ = Describe("value map", func() {
 
 	It("rejects invalid assignment", func() {
 		var flag map[string]interface{}
-		ValueMapVarP(flags, &flag, "flag", "", nil, "test flag")
+		StringToValueVarP(flags, &flag, "flag", "", nil, "test flag")
 
 		value := `a`
 

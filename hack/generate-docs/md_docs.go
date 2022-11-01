@@ -14,26 +14,43 @@ import (
 	"strings"
 	"time"
 
+	"github.com/open-component-model/ocm/pkg/cobrautils/groups"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils"
 )
+
+func printOptionGroups(buf *bytes.Buffer, title string, flags *pflag.FlagSet) {
+	buf.WriteString(fmt.Sprintf("### %s\n\n", title))
+	groups := groups.GroupedFlagUsagesWrapped(flags, 0)
+	if len(groups) > 1 {
+		for _, g := range groups {
+			if g.Title != "" {
+				buf.WriteString("\n#### " + g.Title + "\n\n")
+			}
+			buf.WriteString("```\n")
+			buf.WriteString(g.Usages)
+			buf.WriteString("```\n\n")
+		}
+	} else {
+		buf.WriteString("```\n")
+		buf.WriteString(groups[0].Usages)
+		buf.WriteString("```\n\n")
+	}
+}
 
 func printOptions(buf *bytes.Buffer, cmd *cobra.Command, name string) error {
 	flags := cmd.NonInheritedFlags()
 	flags.SetOutput(buf)
 	if flags.HasAvailableFlags() {
-		buf.WriteString("### Options\n\n```\n")
-		flags.PrintDefaults()
-		buf.WriteString("```\n\n")
+		printOptionGroups(buf, "Options", flags)
 	}
 
 	parentFlags := cmd.InheritedFlags()
 	parentFlags.SetOutput(buf)
 	if parentFlags.HasAvailableFlags() {
-		buf.WriteString("### Options inherited from parent commands\n\n```\n")
-		parentFlags.PrintDefaults()
-		buf.WriteString("```\n\n")
+		printOptionGroups(buf, "Options inherited from parent commands", parentFlags)
 	}
 	return nil
 }

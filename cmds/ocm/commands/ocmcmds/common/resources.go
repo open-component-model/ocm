@@ -14,6 +14,8 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
@@ -138,17 +140,19 @@ type ResourceMetaDataSpecificationsProvider struct {
 }
 
 func NewResourceMetaDataSpecificationsProvider(name string, adder flagsets.ConfigAdder, types ...flagsets.ConfigOptionType) *ResourceMetaDataSpecificationsProvider {
+	meta := flagsets.NewPlainConfigProvider(name, flagsets.ComposedAdder(addMeta(name), adder),
+		append(types,
+			flagsets.NewYAMLOptionType(name, fmt.Sprintf("%s meta data (yaml)", name)),
+			flagsets.NewStringOptionType("name", fmt.Sprintf("%s name", name)),
+			flagsets.NewStringOptionType("version", fmt.Sprintf("%s version", name)),
+			flagsets.NewStringMapOptionType("extra", fmt.Sprintf("%s extra identity", name)),
+			flagsets.NewValueMapOptionType("label", fmt.Sprintf("%s label (leading * indicates signature relevant, optional version separated by @)", name)),
+		)...,
+	)
+	meta.AddGroups(cases.Title(language.English).String(fmt.Sprintf("%s meta data options", name)))
 	a := &ResourceMetaDataSpecificationsProvider{
-		typename: name,
-		metaProvider: flagsets.NewPlainConfigProvider(name, flagsets.ComposedAdder(addMeta(name), adder),
-			append(types,
-				flagsets.NewYAMLOptionType(name, fmt.Sprintf("%s meta data (yaml)", name)),
-				flagsets.NewStringOptionType("name", fmt.Sprintf("%s name", name)),
-				flagsets.NewStringOptionType("version", fmt.Sprintf("%s version", name)),
-				flagsets.NewStringMapOptionType("extra", fmt.Sprintf("%s extra identity", name)),
-				flagsets.NewValueMapOptionType("label", fmt.Sprintf("%s label (leading * indicates signature relevant, optional version separated by @)", name)),
-			)...,
-		),
+		typename:     name,
+		metaProvider: meta,
 	}
 	a.metaOptions = a.metaProvider.CreateOptions()
 	return a
@@ -259,14 +263,19 @@ or <code>input</code> fields of the description file format.
 func (a *ContentResourceSpecificationsProvider) AddFlags(fs *pflag.FlagSet) {
 	a.ResourceMetaDataSpecificationsProvider.AddFlags(fs)
 
+	acctypes := a.ctx.OCMContext().AccessMethods().ConfigTypeSetConfigProvider()
+	inptypes := inputs.For(a.ctx).ConfigTypeSetConfigProvider()
+
 	set := flagsets.NewConfigOptionSet("resources")
-	set.AddAll(a.ctx.OCMContext().AccessMethods().ConfigTypeSetConfigProvider())
-	dup, err := set.AddAll(inputs.For(a.ctx).ConfigTypeSetConfigProvider())
+	set.AddAll(acctypes)
+	dup, err := set.AddAll(inptypes)
 	if err != nil {
 		panic(err)
 	}
 	a.shared = dup
 	a.options = set.CreateOptions()
+	a.options.AddTypeSetGroupsToOptions(acctypes)
+	a.options.AddTypeSetGroupsToOptions(inptypes)
 	a.options.AddFlags(fs)
 }
 

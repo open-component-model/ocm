@@ -83,7 +83,9 @@ type accessTypeScheme struct {
 func NewAccessTypeScheme() AccessTypeScheme {
 	var at AccessSpec
 	scheme := runtime.MustNewDefaultScheme(&at, &UnknownAccessSpec{}, true, nil)
-	return &accessTypeScheme{scheme, flagsets.NewTypedConfigProvider("access", "blob access specification")}
+	prov := flagsets.NewTypedConfigProvider("access", "blob access specification")
+	prov.AddGroups("Access Specification Options")
+	return &accessTypeScheme{scheme, prov}
 }
 
 func (t *accessTypeScheme) AddKnownTypes(s AccessTypeScheme) {

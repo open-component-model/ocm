@@ -118,3 +118,16 @@ func ComposedAdder(adders ...ConfigAdder) ConfigAdder {
 		}
 	}
 }
+
+func AddGroups(list []string, groups ...string) []string {
+outer:
+	for _, g := range groups {
+		for _, f := range list {
+			if g == f {
+				continue outer
+			}
+		}
+		list = append(list, g)
+	}
+	return list
+}
