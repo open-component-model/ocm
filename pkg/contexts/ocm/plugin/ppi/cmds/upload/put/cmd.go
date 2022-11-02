@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package get
+package put
 
 import (
 	"encoding/json"
@@ -20,16 +20,16 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const Name = "get"
+const Name = "put"
 
 func New(p ppi.Plugin) *cobra.Command {
 	opts := Options{}
 
 	cmd := &cobra.Command{
-		Use:   Name + " [<flags>] <access spec>",
-		Short: "get blob",
+		Use:   Name + " [<flags>] <name> <repository specification>",
+		Short: "upload blob to external repository",
 		Long:  "",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(2),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return opts.Complete(args)
 		},
@@ -42,43 +42,59 @@ func New(p ppi.Plugin) *cobra.Command {
 }
 
 type Options struct {
-	Credentials   credentials.DirectCredentials
+	Name          string
 	Specification json.RawMessage
+
+	Credentials  credentials.DirectCredentials
+	MediaType    string
+	ArtifactType string
+
+	Hint string
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	flag.YAMLVarP(fs, &o.Credentials, "credentials", "c", nil, "credentials")
 	flag.StringMapVarPA(fs, &o.Credentials, "credential", "C", nil, "dedicated credential value")
+	fs.StringVarP(&o.MediaType, "mediaType", "m", "", "media type of input blob")
+	fs.StringVarP(&o.ArtifactType, "artifactType", "a", "", "artifact type of input blob")
+	fs.StringVarP(&o.Hint, "hint", "H", "", "reference hint for storing blob")
 }
 
 func (o *Options) Complete(args []string) error {
-	if err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(args[0]), &o.Specification); err != nil {
+	o.Name = args[0]
+	if err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(args[1]), &o.Specification); err != nil {
 		return errors.Wrapf(err, "invalid repository specification")
 	}
-
-	fmt.Fprintf(os.Stderr, "credentials: %s\n", o.Credentials.String())
 	return nil
 }
 
 func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
-	spec, err := p.DecodeAccessSpecification(opts.Specification)
+	spec, err := p.DecodeUploadTargetSpecification(opts.Specification)
 	if err != nil {
 		return err
 	}
 
-	m := p.GetAccessMethod(spec.GetKind(), spec.GetVersion())
-	if m == nil {
-		return errors.ErrUnknown(ppi.KIND_ACCESSMETHOD, spec.GetType())
+	u := p.GetUploader(opts.Name)
+	if u == nil {
+		return errors.ErrNotFound(ppi.KIND_UPLOADER, fmt.Sprintf("%s:%s", opts.ArtifactType, opts.MediaType))
 	}
-	_, err = m.ValidateSpecification(p, spec)
+	w, h, err := u.Writer(p, opts.ArtifactType, opts.MediaType, opts.Hint, spec, opts.Credentials)
 	if err != nil {
 		return err
 	}
-	r, err := m.Reader(p, spec, opts.Credentials)
+	_, err = io.Copy(w, os.Stdin)
+	if err != nil {
+		w.Close()
+		return err
+	}
+	err = w.Close()
 	if err != nil {
 		return err
 	}
-	_, err = io.Copy(os.Stdout, r)
-	r.Close()
+	acc := h()
+	data, err := json.Marshal(acc)
+	if err == nil {
+		cmd.Printf("%s\n", string(data))
+	}
 	return err
 }

@@ -2,34 +2,28 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package get
+package validate
 
 import (
 	"encoding/json"
-	"fmt"
-	"io"
-	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const Name = "get"
-
 func New(p ppi.Plugin) *cobra.Command {
 	opts := Options{}
 
 	cmd := &cobra.Command{
-		Use:   Name + " [<flags>] <access spec>",
-		Short: "get blob",
+		Use:   "validate [flags>] <name> <spec>",
+		Short: "validate upload specification",
 		Long:  "",
-		Args:  cobra.ExactArgs(1),
+		Args:  cobra.ExactArgs(2),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return opts.Complete(args)
 		},
@@ -42,43 +36,49 @@ func New(p ppi.Plugin) *cobra.Command {
 }
 
 type Options struct {
-	Credentials   credentials.DirectCredentials
+	Name          string
 	Specification json.RawMessage
+
+	ArtifactType string
+	MediaType    string
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
-	flag.YAMLVarP(fs, &o.Credentials, "credentials", "c", nil, "credentials")
-	flag.StringMapVarPA(fs, &o.Credentials, "credential", "C", nil, "dedicated credential value")
+	fs.StringVarP(&o.MediaType, "mediaType", "m", "", "media type of input blob")
+	fs.StringVarP(&o.ArtifactType, "artifactType", "a", "", "artifact type of input blob")
 }
 
 func (o *Options) Complete(args []string) error {
-	if err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(args[0]), &o.Specification); err != nil {
+	o.Name = args[0]
+	if err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(args[1]), &o.Specification); err != nil {
 		return errors.Wrapf(err, "invalid repository specification")
 	}
-
-	fmt.Fprintf(os.Stderr, "credentials: %s\n", o.Credentials.String())
 	return nil
 }
 
+type Result struct {
+	ConsumerId credentials.ConsumerIdentity `json:"consumerId"`
+}
+
 func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
-	spec, err := p.DecodeAccessSpecification(opts.Specification)
+	spec, err := p.DecodeUploadTargetSpecification(opts.Specification)
 	if err != nil {
 		return err
 	}
 
-	m := p.GetAccessMethod(spec.GetKind(), spec.GetVersion())
+	m := p.GetUploader(opts.Name)
 	if m == nil {
-		return errors.ErrUnknown(ppi.KIND_ACCESSMETHOD, spec.GetType())
+		return errors.ErrUnknown(ppi.KIND_UPLOADER, spec.GetType())
 	}
-	_, err = m.ValidateSpecification(p, spec)
+	info, err := m.ValidateSpecification(p, spec)
 	if err != nil {
 		return err
 	}
-	r, err := m.Reader(p, spec, opts.Credentials)
+	result := Result{info.ConsumerId}
+	data, err := json.Marshal(result)
 	if err != nil {
 		return err
 	}
-	_, err = io.Copy(os.Stdout, r)
-	r.Close()
-	return err
+	cmd.Printf("%s\n", string(data))
+	return nil
 }

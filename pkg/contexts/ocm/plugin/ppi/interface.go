@@ -16,6 +16,7 @@ import (
 type (
 	Descriptor             = internal.Descriptor
 	AccessSpecInfo         = internal.AccessSpecInfo
+	UploadTargetSpecInfo   = internal.UploadTargetSpecInfo
 	UploaderKey            = internal.UploaderKey
 	UploaderDescriptor     = internal.UploaderDescriptor
 	AccessMethodDescriptor = internal.AccessMethodDescriptor
@@ -36,7 +37,9 @@ type Plugin interface {
 	SetLong(s string)
 
 	RegisterUploader(arttype, mediatype string, u Uploader) error
-	GetUploader(arttype, mediatype string) Uploader
+	GetUploader(name string) Uploader
+	GetUploaderFor(arttype, mediatype string) Uploader
+	DecodeUploadTargetSpecification(data []byte) (UploadTargetSpec, error)
 
 	RegisterAccessMethod(m AccessMethod) error
 	DecodeAccessSpecification(data []byte) (AccessSpec, error)
@@ -65,8 +68,13 @@ type AccessSpec runtime.VersionedTypedObject
 type AccessSpecProvider func() AccessSpec
 
 type Uploader interface {
+	Decoders() map[string]runtime.TypedObjectDecoder
+
 	Name() string
 	Description() string
 
-	Writer(p Plugin, arttyoe, mediatype string, hint string, creds credentials.Credentials) (io.WriteCloser, AccessSpecProvider, error)
+	ValidateSpecification(p Plugin, spec UploadTargetSpec) (info *UploadTargetSpecInfo, err error)
+	Writer(p Plugin, arttype, mediatype string, hint string, spec UploadTargetSpec, creds credentials.Credentials) (io.WriteCloser, AccessSpecProvider, error)
 }
+
+type UploadTargetSpec runtime.VersionedTypedObject

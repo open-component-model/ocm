@@ -9,6 +9,7 @@ import (
 )
 
 type (
-	Descriptor     = internal.Descriptor
-	AccessSpecInfo = internal.AccessSpecInfo
+	Descriptor           = internal.Descriptor
+	AccessSpecInfo       = internal.AccessSpecInfo
+	UploadTargetSpecInfo = internal.UploadTargetSpecInfo
 )

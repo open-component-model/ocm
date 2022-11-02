@@ -13,6 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 func New(p ppi.Plugin) *cobra.Command {
@@ -35,14 +36,16 @@ func New(p ppi.Plugin) *cobra.Command {
 }
 
 type Options struct {
-	Specification []byte
+	Specification json.RawMessage
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *Options) Complete(args []string) error {
-	o.Specification = []byte(args[0])
+	if err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(args[0]), &o.Specification); err != nil {
+		return errors.Wrapf(err, "invalid access specification")
+	}
 	return nil
 }
 

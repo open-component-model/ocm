@@ -18,8 +18,9 @@ type plugin struct {
 	descriptor internal.Descriptor
 	options    Options
 
-	uploaders map[string]Uploader
-	mappings  *internal.Registry[Uploader]
+	uploaders      map[string]Uploader
+	uploaderScheme runtime.Scheme
+	mappings       *internal.Registry[Uploader]
 
 	methods      map[string]AccessMethod
 	accessScheme runtime.Scheme
@@ -28,12 +29,13 @@ type plugin struct {
 func NewPlugin(name string, version string) Plugin {
 	var rt runtime.VersionedTypedObject
 	return &plugin{
-		name:         name,
-		version:      version,
-		methods:      map[string]AccessMethod{},
-		uploaders:    map[string]Uploader{},
-		mappings:     internal.NewRegistry[Uploader](),
-		accessScheme: runtime.MustNewDefaultScheme(&rt, &runtime.UnstructuredVersionedTypedObject{}, false, nil),
+		name:           name,
+		version:        version,
+		methods:        map[string]AccessMethod{},
+		uploaders:      map[string]Uploader{},
+		mappings:       internal.NewRegistry[Uploader](),
+		accessScheme:   runtime.MustNewDefaultScheme(&rt, &runtime.UnstructuredVersionedTypedObject{}, false, nil),
+		uploaderScheme: runtime.MustNewDefaultScheme(&rt, &runtime.UnstructuredVersionedTypedObject{}, false, nil),
 		descriptor: internal.Descriptor{
 			Version:       internal.VERSION,
 			PluginName:    name,
@@ -109,12 +111,27 @@ func (p *plugin) RegisterUploader(arttype, mediatype string, u Uploader) error {
 		}
 		d.Costraints = append(d.Costraints, key)
 	}
+	for n, d := range u.Decoders() {
+		p.uploaderScheme.RegisterByDecoder(n, d)
+	}
 	return nil
 }
 
-func (p *plugin) GetUploader(arttype, mediatype string) Uploader {
+func (p *plugin) GetUploader(name string) Uploader {
+	return p.uploaders[name]
+}
+
+func (p *plugin) GetUploaderFor(arttype, mediatype string) Uploader {
 	u, _ := p.mappings.LookupHandler(arttype, mediatype)
 	return u
+}
+
+func (p *plugin) DecodeUploadTargetSpecification(data []byte) (UploadTargetSpec, error) {
+	o, err := p.uploaderScheme.Decode(data, nil)
+	if err != nil {
+		return nil, err
+	}
+	return o.(UploadTargetSpec), nil
 }
 
 func (p *plugin) RegisterAccessMethod(m AccessMethod) error {

@@ -11,13 +11,12 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/open-component-model/ocm/cmds/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
-
-const CONSUMER_TYPE = "demo"
 
 const NAME = "demo"
 const VERSION = "v1"
@@ -69,7 +68,7 @@ func (a *AccessMethod) ValidateSpecification(p ppi.Plugin, spec ppi.AccessSpec) 
 	}
 	info.MediaType = my.MediaType
 	info.ConsumerId = credentials.ConsumerIdentity{
-		identity.ID_TYPE:       CONSUMER_TYPE,
+		identity.ID_TYPE:       common.CONSUMER_TYPE,
 		identity.ID_HOSTNAME:   "localhost",
 		identity.ID_PATHPREFIX: my.Path,
 	}

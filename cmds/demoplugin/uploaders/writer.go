@@ -21,6 +21,7 @@ type writer = accessio.DigestWriter
 type Writer struct {
 	*writer
 	file    *os.File
+	path    string
 	rename  bool
 	name    string
 	version string
@@ -28,10 +29,11 @@ type Writer struct {
 	spec    *accessmethods.AccessSpec
 }
 
-func NewWriter(file *os.File, media string, rename bool, name, version string) *Writer {
+func NewWriter(file *os.File, path string, media string, rename bool, name, version string) *Writer {
 	return &Writer{
 		writer:  accessio.NewDefaultDigestWriter(file),
 		file:    file,
+		path:    path,
 		rename:  rename,
 		name:    name,
 		version: version,
@@ -42,9 +44,9 @@ func NewWriter(file *os.File, media string, rename bool, name, version string) *
 func (w *Writer) Close() error {
 	err := w.writer.Close()
 	if err == nil {
-		n := w.file.Name()
+		n := w.path
 		if w.rename {
-			n = filepath.Join(os.TempDir(), common.DigestToFileName(w.writer.Digest()))
+			n = filepath.Join(os.TempDir(), n, common.DigestToFileName(w.writer.Digest()))
 			err := os.Rename(w.file.Name(), n)
 			if err != nil {
 				return errors.Wrapf(err, "cannot rename %q to %q", w.file.Name(), n)
