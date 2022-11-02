@@ -81,13 +81,10 @@ func (c *pluginsImpl) Get(name string) plugin.Plugin {
 
 // RegisterExtensions registers all the extension provided the found plugin
 // at the given context. If no context is given, the cache context is used.
-func (c *pluginsImpl) RegisterExtensions(ctx ocm.Context) error {
+func (c *pluginsImpl) RegisterExtensions() error {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 
-	if ctx == nil {
-		ctx = c.ctx
-	}
 	for _, p := range c.plugins {
 		if !p.IsValid() {
 			continue
@@ -97,7 +94,7 @@ func (c *pluginsImpl) RegisterExtensions(ctx ocm.Context) error {
 			if m.Version != "" {
 				name = name + runtime.VersionSeparator + m.Version
 			}
-			ctx.AccessMethods().Register(name, access.NewType(name, p, m.Description, m.Format))
+			c.ctx.AccessMethods().Register(name, access.NewType(name, p, m.Description, m.Format))
 		}
 	}
 	return nil

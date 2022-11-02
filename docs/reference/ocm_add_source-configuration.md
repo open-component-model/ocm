@@ -59,7 +59,7 @@ ocm add source-configuration [<options>] <target> {<configfile> | <var>=<value>}
 #### Source Meta Data Options
 
 ```
-      --extra <name>=<value>         source extra identity (default [])
+      --extra stringToString         source extra identity
       --label <name>=<YAML>          source label (leading * indicates signature relevant, optional version separated by @)
       --name string                  source name
       --source YAML                  source meta data (yaml)

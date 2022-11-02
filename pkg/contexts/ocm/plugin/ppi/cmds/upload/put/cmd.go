@@ -45,7 +45,7 @@ type Options struct {
 	Name          string
 	Specification json.RawMessage
 
-	Credentials  credentials.DirectCredentials
+	Credentials  map[string]string
 	MediaType    string
 	ArtifactType string
 
@@ -54,7 +54,7 @@ type Options struct {
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	flag.YAMLVarP(fs, &o.Credentials, "credentials", "c", nil, "credentials")
-	flag.StringMapVarPA(fs, &o.Credentials, "credential", "C", nil, "dedicated credential value")
+	fs.StringToStringVarPF(&o.Credentials, "credential", "C", nil, "dedicated credential value")
 	fs.StringVarP(&o.MediaType, "mediaType", "m", "", "media type of input blob")
 	fs.StringVarP(&o.ArtifactType, "artifactType", "a", "", "artifact type of input blob")
 	fs.StringVarP(&o.Hint, "hint", "H", "", "reference hint for storing blob")
@@ -78,7 +78,7 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	if u == nil {
 		return errors.ErrNotFound(ppi.KIND_UPLOADER, fmt.Sprintf("%s:%s", opts.ArtifactType, opts.MediaType))
 	}
-	w, h, err := u.Writer(p, opts.ArtifactType, opts.MediaType, opts.Hint, spec, opts.Credentials)
+	w, h, err := u.Writer(p, opts.ArtifactType, opts.MediaType, opts.Hint, spec, credentials.DirectCredentials(opts.Credentials))
 	if err != nil {
 		return err
 	}

@@ -45,7 +45,7 @@ someattr: value
 		ctx = env.OCMContext()
 		plugindirattr.Set(ctx, "testdata")
 		registry = plugincacheattr.Get(ctx)
-		Expect(registry.RegisterExtensions(ctx)).To(Succeed())
+		Expect(registry.RegisterExtensions()).To(Succeed())
 		p := registry.Get("test")
 		Expect(p).NotTo(BeNil())
 	})

@@ -19,9 +19,9 @@ var _ = Describe("lookup", func() {
 	})
 
 	It("looks up complete", func() {
-		reg.Register(internal.UploaderKey{"a", "m"}, "test")
-		reg.Register(internal.UploaderKey{"a", "m1"}, "testm")
-		reg.Register(internal.UploaderKey{"a1", "m"}, "testa")
+		reg.Register(internal.UploaderKey{ArtifactType: "a", MediaType: "m"}, "test")
+		reg.Register(internal.UploaderKey{ArtifactType: "a", MediaType: "m1"}, "testm")
+		reg.Register(internal.UploaderKey{ArtifactType: "a1", MediaType: "m"}, "testa")
 
 		h, ok := reg.LookupHandler("a", "m")
 		Expect(ok).To(BeTrue())
@@ -29,9 +29,9 @@ var _ = Describe("lookup", func() {
 	})
 
 	It("looks up partial artifact", func() {
-		reg.Register(internal.UploaderKey{"a", ""}, "test")
-		reg.Register(internal.UploaderKey{"a", "m1"}, "testm")
-		reg.Register(internal.UploaderKey{"a1", "m"}, "testa")
+		reg.Register(internal.UploaderKey{ArtifactType: "a", MediaType: ""}, "test")
+		reg.Register(internal.UploaderKey{ArtifactType: "a", MediaType: "m1"}, "testm")
+		reg.Register(internal.UploaderKey{ArtifactType: "a1", MediaType: "m"}, "testa")
 
 		h, ok := reg.LookupHandler("a", "m")
 		Expect(ok).To(BeTrue())
@@ -39,9 +39,9 @@ var _ = Describe("lookup", func() {
 	})
 
 	It("looks up partial media", func() {
-		reg.Register(internal.UploaderKey{"", "m"}, "test")
-		reg.Register(internal.UploaderKey{"a", "m1"}, "testm")
-		reg.Register(internal.UploaderKey{"a1", "m"}, "testa")
+		reg.Register(internal.UploaderKey{ArtifactType: "", MediaType: "m"}, "test")
+		reg.Register(internal.UploaderKey{ArtifactType: "a", MediaType: "m1"}, "testm")
+		reg.Register(internal.UploaderKey{ArtifactType: "a1", MediaType: "m"}, "testa")
 
 		h, ok := reg.LookupHandler("a", "m")
 		Expect(ok).To(BeTrue())
@@ -49,9 +49,9 @@ var _ = Describe("lookup", func() {
 	})
 
 	It("looks complete with media sub type", func() {
-		reg.Register(internal.UploaderKey{"a", "m"}, "test")
-		reg.Register(internal.UploaderKey{"a", "m1"}, "testm")
-		reg.Register(internal.UploaderKey{"a1", "m"}, "testa")
+		reg.Register(internal.UploaderKey{ArtifactType: "a", MediaType: "m"}, "test")
+		reg.Register(internal.UploaderKey{ArtifactType: "a", MediaType: "m1"}, "testm")
+		reg.Register(internal.UploaderKey{ArtifactType: "a1", MediaType: "m"}, "testa")
 
 		h, ok := reg.LookupHandler("a", "m+tar")
 		Expect(ok).To(BeTrue())
@@ -59,9 +59,9 @@ var _ = Describe("lookup", func() {
 	})
 
 	It("looks partial with media sub type", func() {
-		reg.Register(internal.UploaderKey{"", "m"}, "test")
-		reg.Register(internal.UploaderKey{"a", "m1"}, "testm")
-		reg.Register(internal.UploaderKey{"a1", "m"}, "testa")
+		reg.Register(internal.UploaderKey{ArtifactType: "", MediaType: "m"}, "test")
+		reg.Register(internal.UploaderKey{ArtifactType: "a", MediaType: "m1"}, "testm")
+		reg.Register(internal.UploaderKey{ArtifactType: "a1", MediaType: "m"}, "testa")
 
 		h, ok := reg.LookupHandler("a", "m+tar")
 		Expect(ok).To(BeTrue())
@@ -69,9 +69,9 @@ var _ = Describe("lookup", func() {
 	})
 
 	It("prefers art", func() {
-		reg.Register(internal.UploaderKey{"", "m"}, "testm")
-		reg.Register(internal.UploaderKey{"a", ""}, "test")
-		reg.Register(internal.UploaderKey{"a1", "m"}, "testa")
+		reg.Register(internal.UploaderKey{ArtifactType: "", MediaType: "m"}, "testm")
+		reg.Register(internal.UploaderKey{ArtifactType: "a", MediaType: ""}, "test")
+		reg.Register(internal.UploaderKey{ArtifactType: "a1", MediaType: "m"}, "testa")
 
 		h, ok := reg.LookupHandler("a", "m+tar")
 		Expect(ok).To(BeTrue())

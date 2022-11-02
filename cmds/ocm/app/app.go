@@ -319,7 +319,7 @@ func (o *CLIOptions) Complete() error {
 		}
 		err = ctx.ApplyConfig(spec, "cli")
 	}
-	return plugincacheattr.Get(o.Context.OCMContext()).RegisterExtensions(nil)
+	return plugincacheattr.Get(o.Context.OCMContext()).RegisterExtensions()
 }
 
 func NewVersionCommand(ctx clictx.Context) *cobra.Command {

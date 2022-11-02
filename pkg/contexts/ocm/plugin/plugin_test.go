@@ -52,7 +52,7 @@ var _ = Describe("setup plugin cache", func() {
 		p := registry.Get("test")
 		Expect(p).NotTo(BeNil())
 		Expect(len(p.GetDescriptor().AccessMethods)).To(Equal(2))
-		Expect(registry.RegisterExtensions(nil)).To(Succeed())
+		Expect(registry.RegisterExtensions()).To(Succeed())
 		t := ctx.AccessMethods().GetAccessType("test")
 		Expect(t).NotTo(BeNil())
 		raw := `

@@ -123,6 +123,16 @@ The descriptor for an uploader has the following preliminary fields:
   
     Restrict the usage to a dedicated media type of the artifact blob.
 
+  - **`contextType`** *string*
+
+    Restrict the usage to a dedicated implementation backend technology.
+    If specified, the attribute `repositoryType` must be set, also.
+
+  - **`repositoryType`** *string*
+
+    Restrict the usage to a dedicated implementation of the backend technology.
+    If specified, the attribute `contextType` must be set, also.
+
 ### `accessmethods` (Access Method related Commands))
 
 This command group provides all commands used to implement an access method
@@ -139,7 +149,6 @@ specification.
 
 This meta data has to be provided as JSON string on *stdout* and has the 
 following fields: 
-
 
 - **`mediaType`** *string*
 
@@ -183,7 +192,7 @@ nested commands:
 
 #### `validate` (Validate an Upload Target Specification)
 
-**Synopsis:** `<plugin> [-c <pluginconfig>] accessmethod validate <name> <spec>`
+**Synopsis:** `<plugin> [-c <pluginconfig>] upload validate <name> <spec>`
 
 **Options:**
 

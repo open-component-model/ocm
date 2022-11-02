@@ -22,11 +22,16 @@ type Descriptor struct {
 }
 
 type UploaderKey struct {
-	ArtifactType string `json:"artifactType"`
-	MediaType    string `json:"mediaType"`
+	ContextType    string `json:"contextType"`
+	RepositoryType string `json:"repositoryType"`
+	ArtifactType   string `json:"artifactType"`
+	MediaType      string `json:"mediaType"`
 }
 
 func (k UploaderKey) String() string {
+	if k.RepositoryType != "" || k.ContextType != "" {
+		return fmt.Sprintf("%s:%s[%s:%s]", k.ContextType, k.RepositoryType, k.ArtifactType, k.MediaType)
+	}
 	return fmt.Sprintf("%s:%s", k.ArtifactType, k.MediaType)
 }
 
