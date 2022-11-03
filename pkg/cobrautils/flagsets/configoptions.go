@@ -14,12 +14,18 @@ type Option interface {
 	Name() string
 	AddFlags(fs *pflag.FlagSet)
 	Value() interface{}
+
+	Changed() bool
+	AddGroups(groups ...string)
 }
 
 type Filter func(name string) bool
 
 type ConfigOptions interface {
+	AddTypeSetGroupsToOptions(set ConfigOptionTypeSet)
+
 	AddFlags(fs *pflag.FlagSet)
+
 	Check(set ConfigOptionTypeSet, desc string) error
 	GetValue(name string) (interface{}, bool)
 	Changed(names ...string) bool
@@ -40,6 +46,12 @@ type configOptions struct {
 
 func NewOptions(opts []Option) ConfigOptions {
 	return &configOptions{options: opts}
+}
+
+func (o *configOptions) AddTypeSetGroupsToOptions(set ConfigOptionTypeSet) {
+	for _, opt := range o.options {
+		set.AddGroupsToOption(opt)
+	}
 }
 
 func (o *configOptions) GetValue(name string) (interface{}, bool) {

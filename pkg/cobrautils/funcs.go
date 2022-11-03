@@ -7,8 +7,11 @@ package cobrautils
 import (
 	"strings"
 
+	"github.com/spf13/pflag"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
+
+	"github.com/open-component-model/ocm/pkg/cobrautils/groups"
 )
 
 var templatefuncs = map[string]interface{}{
@@ -17,6 +20,11 @@ var templatefuncs = map[string]interface{}{
 	"soleCommand":            soleCommand,
 	"title":                  cases.Title(language.English).String,
 	"substituteCommandLinks": substituteCommandLinks,
+	"flagUsages":             flagUsages,
+}
+
+func flagUsages(fs *pflag.FlagSet) string {
+	return groups.FlagUsagesWrapped(fs, 0)
 }
 
 func substituteCommandLinks(desc string) string {

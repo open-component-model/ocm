@@ -2,7 +2,10 @@ module github.com/open-component-model/ocm
 
 go 1.18
 
-replace github.com/spf13/cobra => github.com/mandelsoft/cobra v1.4.1-0.20220816123314-fd3b703d78bf
+replace (
+	github.com/spf13/cobra => github.com/mandelsoft/cobra v1.4.1-0.20220816123314-fd3b703d78bf
+	github.com/spf13/pflag => github.com/mandelsoft/pflag v0.0.0-20221101220350-bbff7bc4f7b5
+)
 
 require (
 	github.com/docker/cli v20.10.17+incompatible

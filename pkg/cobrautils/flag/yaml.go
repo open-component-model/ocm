@@ -53,6 +53,10 @@ func YAMLVarP[T any](flags *pflag.FlagSet, p *T, name, shorthand string, value T
 	flags.VarP(NewYAMLValue(value, p), name, shorthand, usage)
 }
 
+func YAMLVarPF[T any](flags *pflag.FlagSet, p *T, name, shorthand string, value T, usage string) *pflag.Flag {
+	return flags.VarPF(NewYAMLValue(value, p), name, shorthand, usage)
+}
+
 func parseValue(s string) (interface{}, error) {
 	var v interface{}
 	err := yaml.Unmarshal([]byte(s), &v)

@@ -10,14 +10,20 @@ ocm add references [<options>] <target> {<referencefile> | <var>=<value>}
 
 ```
       --addenv                 access environment for templating
+  -h, --help                   help for references
+  -s, --settings stringArray   settings file with variable settings (yaml)
+      --templater string       templater to use (subst, spiff, go) (default "subst")
+```
+
+
+#### Reference Meta Data Options
+
+```
       --component string       component name
       --extra <name>=<value>   reference extra identity (default [])
-  -h, --help                   help for references
       --label <name>=<YAML>    reference label (leading * indicates signature relevant, optional version separated by @)
       --name string            reference name
       --reference YAML         reference meta data (yaml)
-  -s, --settings stringArray   settings file with variable settings (yaml)
-      --templater string       templater to use (subst, spiff, go) (default "subst")
       --version string         reference version
 ```
 

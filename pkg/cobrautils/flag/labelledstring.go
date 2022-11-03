@@ -47,3 +47,7 @@ func (i *labelledStringValue) Type() string {
 func LabelledStringVarP(flags *pflag.FlagSet, p *LabelledString, name, shorthand string, value LabelledString, usage string) {
 	flags.VarP(NewLabelledStringValue(value, p), name, shorthand, usage)
 }
+
+func LabelledStringVarPF(flags *pflag.FlagSet, p *LabelledString, name, shorthand string, value LabelledString, usage string) *pflag.Flag {
+	return flags.VarPF(NewLabelledStringValue(value, p), name, shorthand, usage)
+}

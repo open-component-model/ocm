@@ -22,6 +22,8 @@ type ConfigOptionType interface {
 }
 
 type ConfigOptionTypeSet interface {
+	AddGroups(groups ...string)
+
 	Name() string
 
 	OptionTypes() []ConfigOptionType
@@ -42,6 +44,7 @@ type ConfigOptionTypeSet interface {
 	Align(parent ConfigOptionTypeSet) error
 
 	CreateOptions() ConfigOptions
+	AddGroupsToOption(o Option)
 }
 
 type configOptionTypeSet struct {
@@ -49,7 +52,8 @@ type configOptionTypeSet struct {
 	name    string
 	options map[string]ConfigOptionType
 	sets    map[string]ConfigOptionTypeSet
-	shared  map[string]struct{}
+	shared  map[string][]ConfigOptionTypeSet
+	groups  []string
 
 	parent ConfigOptionTypeSet
 }
@@ -59,12 +63,16 @@ func NewConfigOptionSet(name string, types ...ConfigOptionType) ConfigOptionType
 		name:    name,
 		options: map[string]ConfigOptionType{},
 		sets:    map[string]ConfigOptionTypeSet{},
-		shared:  map[string]struct{}{},
+		shared:  map[string][]ConfigOptionTypeSet{},
 	}
 	for _, t := range types {
 		set.AddOptionType(t)
 	}
 	return set
+}
+
+func (s *configOptionTypeSet) AddGroups(groups ...string) {
+	s.groups = AddGroups(s.groups, groups...)
 }
 
 func (s *configOptionTypeSet) Align(parent ConfigOptionTypeSet) error {
@@ -208,7 +216,7 @@ func (s *configOptionTypeSet) AddTypeSet(set ConfigOptionTypeSet) error {
 		if old == nil {
 			s.options[o.Name()] = o
 		}
-		s.shared[o.Name()] = struct{}{}
+		s.shared[o.Name()] = append(s.shared[o.Name()], set)
 	}
 	finalize.Finalize()
 	if err := set.Align(s); err != nil {
@@ -225,6 +233,18 @@ func (s *configOptionTypeSet) GetTypeSet(name string) ConfigOptionTypeSet {
 	return s.sets[name]
 }
 
+func (s *configOptionTypeSet) AddGroupsToOption(o Option) {
+	if !s.HasOptionType(o.Name()) {
+		return
+	}
+	if len(s.groups) > 0 {
+		o.AddGroups(s.groups...)
+	}
+	for _, set := range s.shared[o.Name()] {
+		set.AddGroupsToOption(o)
+	}
+}
+
 func (s *configOptionTypeSet) CreateOptions() ConfigOptions {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
@@ -232,7 +252,9 @@ func (s *configOptionTypeSet) CreateOptions() ConfigOptions {
 	var opts []Option
 
 	for n := range s.options {
-		opts = append(opts, s.getOptionType(n).Create())
+		opt := s.getOptionType(n).Create()
+		s.AddGroupsToOption(opt)
+		opts = append(opts, opt)
 	}
 	return NewOptions(opts)
 }

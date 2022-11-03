@@ -152,7 +152,9 @@ type inputTypeScheme struct {
 func NewInputTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) InputTypeScheme {
 	var rt InputSpec
 	scheme := runtime.MustNewDefaultScheme(&rt, &UnknownInputSpec{}, false, defaultRepoDecoder)
-	return &inputTypeScheme{scheme, flagsets.NewTypedConfigProvider("input", "blob input specification")}
+	prov := flagsets.NewTypedConfigProvider("input", "blob input specification")
+	prov.AddGroups("Input Specification Options")
+	return &inputTypeScheme{scheme, prov}
 }
 
 func (t *inputTypeScheme) AddKnownTypes(s InputTypeScheme) {

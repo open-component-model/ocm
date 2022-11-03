@@ -9,19 +9,36 @@ ocm add resources [<options>] <target> {<resourcefile> | <var>=<value>}
 ### Options
 
 ```
+      --addenv                       access environment for templating
+  -h, --help                         help for resources
+  -s, --settings stringArray         settings file with variable settings (yaml)
+      --templater string             templater to use (subst, spiff, go) (default "subst")
+```
+
+
+#### Access Specification Options
+
+```
       --access YAML                  blob access specification (YAML)
       --accessHostname string        hostname used for access
       --accessRepository string      repository URL
       --accessType string            type of blob access specification
       --accessVersion string         version for access specification
-      --addenv                       access environment for templating
       --bucket string                bucket name
       --commit string                git commit id
       --digest string                blob digest
-      --external                     flag non-local resource
-      --extra <name>=<value>         resource extra identity (default [])
       --globalAccess YAML            access specification for global access
-  -h, --help                         help for resources
+      --hint string                  (repository) hint for local artifacts
+      --mediaType string             media type for artifact blob representation
+      --reference string             reference name
+      --region string                region name
+      --size int                     blob size
+```
+
+
+#### Input Specification Options
+
+```
       --hint string                  (repository) hint for local artifacts
       --input YAML                   blob input specification (YAML)
       --inputCompress                compress option for input
@@ -35,15 +52,18 @@ ocm add resources [<options>] <target> {<resourcefile> | <var>=<value>}
       --inputValues YAML             YAML based generic values for inputs
       --inputVariants stringArray    (platform) variants for inputs
       --inputVersion stringArray     version info for inputs
-      --label <name>=<YAML>          resource label (leading * indicates signature relevant, optional version separated by @)
       --mediaType string             media type for artifact blob representation
+```
+
+
+#### Resource Meta Data Options
+
+```
+      --external                     flag non-local resource
+      --extra <name>=<value>         resource extra identity (default [])
+      --label <name>=<YAML>          resource label (leading * indicates signature relevant, optional version separated by @)
       --name string                  resource name
-      --reference string             reference name
-      --region string                region name
       --resource YAML                resource meta data (yaml)
-  -s, --settings stringArray         settings file with variable settings (yaml)
-      --size int                     blob size
-      --templater string             templater to use (subst, spiff, go) (default "subst")
       --type string                  resource type
       --version string               resource version
 ```
