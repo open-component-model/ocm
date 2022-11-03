@@ -20,7 +20,7 @@ ocm add references [<options>] <target> {<referencefile> | <var>=<value>}
 
 ```
       --component string       component name
-      --extra <name>=<value>   reference extra identity (default [])
+      --extra <name>=<value>   reference extra identity
       --label <name>=<YAML>    reference label (leading * indicates signature relevant, optional version separated by @)
       --name string            reference name
       --reference YAML         reference meta data (yaml)
@@ -53,7 +53,6 @@ Therefore, basic references not requiring any additional labels or extra
 identities can just be specified by those simple value options without the need
 for the YAML option.
 
-Templating:
 All yaml/json defined resources can be templated.
 Variables are specified as regular arguments following the syntax <code>&lt;name>=&lt;value></code>.
 Additionally settings can be specified by a yaml file using the <code>--settings <file></code>
@@ -77,7 +76,6 @@ There are several templaters that can be selected by the <code>--templater</code
   
 - <code>none</code> do not do any substitution.
 
-  
 - <code>spiff</code> [spiff templating](https://github.com/mandelsoft/spiff).
 
   It supports complex values. the settings are accessible using the binding <code>values</code>.
@@ -94,7 +92,6 @@ There are several templaters that can be selected by the <code>--templater</code
       subkey: "abc ${MY_VAL}"
   </pre>
   
-
 
 
 ### Examples

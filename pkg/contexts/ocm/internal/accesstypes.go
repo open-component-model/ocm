@@ -20,7 +20,8 @@ type AccessType interface {
 
 	ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHandler
 
-	Description(cli bool) string
+	Description() string
+	Format(cli bool) string
 }
 
 type AccessMethodSupport interface {
@@ -188,6 +189,11 @@ var _ AccessSpec = &UnknownAccessSpec{}
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type EvaluatableAccessSpec interface {
+	AccessSpec
+	Evaluate(ctx Context) (AccessSpec, error)
+}
+
 type GenericAccessSpec struct {
 	runtime.UnstructuredVersionedTypedObject `json:",inline"`
 }
@@ -204,7 +210,7 @@ func NewGenericAccessSpec(spec string) (*GenericAccessSpec, error) {
 func (s *GenericAccessSpec) Describe(ctx Context) string {
 	eff, err := s.Evaluate(ctx)
 	if err != nil {
-		return fmt.Sprintf("invalid access specificatio: %s", err.Error())
+		return fmt.Sprintf("invalid access specification: %s", err.Error())
 	}
 	return eff.Describe(ctx)
 }

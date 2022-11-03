@@ -221,20 +221,19 @@ func IndentLines(orig string, gap string, skipfirst ...bool) string {
 }
 
 func JoinIndentLines(orig []string, gap string, skipfirst ...bool) string {
+	if len(orig) == 0 {
+		return ""
+	}
 	skip := false
 	for _, b := range skipfirst {
 		skip = skip || b
 	}
 
 	s := ""
-	for _, l := range orig {
-		if !skip {
-			s += gap
-		}
-		s += l + "\n"
-		skip = false
+	if !skip {
+		s = gap
 	}
-	return s
+	return s + strings.Join(orig, "\n"+gap)
 }
 
 func StringMapKeys(m interface{}) []string {

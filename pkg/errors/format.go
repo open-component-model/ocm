@@ -5,7 +5,7 @@
 package errors
 
 type ErrorFormatter interface {
-	Format(kind string, elem *string, ctx string) string
+	Format(kind string, elem *string, ctxkind string, ctx string) string
 }
 
 type defaultFormatter struct {
@@ -25,8 +25,11 @@ func NewDefaultFormatter(verb, msg, preposition string) ErrorFormatter {
 	}
 }
 
-func (f *defaultFormatter) Format(kind string, elem *string, ctx string) string {
+func (f *defaultFormatter) Format(kind string, elem *string, ctxkind string, ctx string) string {
 	if ctx != "" {
+		if ctxkind != "" {
+			ctx = ctxkind + " " + ctx
+		}
 		ctx = " " + f.preposition + " " + ctx
 	}
 	elems := ""

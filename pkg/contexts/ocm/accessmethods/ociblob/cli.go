@@ -29,9 +29,9 @@ func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 
 var usage = `
 This method implements the access of an OCI blob stored in an OCI repository.
+`
 
-Supported specification version is <code>v1</code>
-
+var formatV1 = `
 The type specific specification fields are:
 
 - **<code>imageReference</code>** *string*
@@ -49,5 +49,4 @@ The type specific specification fields are:
 - **<code>size</code>** *integer*
 
   The size of the blob
-
 `

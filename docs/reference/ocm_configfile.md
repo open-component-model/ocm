@@ -25,7 +25,6 @@ The following configuration types are supported:
          &lt;name>: &lt;yaml defining the attribute>
          ...
   </pre>
-
 - <code>credentials.config.ocm.software</code>
   The config type <code>credentials.config.ocm.software</code> can be used to define a list
   of arbitrary configuration specifications:
@@ -51,7 +50,6 @@ The following configuration types are supported:
             - &lt;credential specification>
             ... credential chain
   </pre>
-
 - <code>generic.config.ocm.software</code>
   The config type <code>generic.config.ocm.software</code> can be used to define a list
   of arbitrary configuration specifications:
@@ -63,7 +61,6 @@ The following configuration types are supported:
           ...
         ...
   </pre>
-
 - <code>keys.config.ocm.software</code>
   The config type <code>keys.config.ocm.software</code> can be used to define
   public and private keys. A key value might be given by one of the fields:
@@ -82,7 +79,6 @@ The following configuration types are supported:
            data: &lt;base64 encoded key representation>
          ...
   </pre>
-
 - <code>logging.config.ocm.software</code>
   The config type <code>logging.config.ocm.software</code> can be used to configure the logging
   aspect of a dedicated context type:
@@ -101,7 +97,6 @@ The following configuration types are supported:
   
   If no context type is specified, the config will be applies to any target
   acting as logging context provider, which is not a non-root context.
-
 - <code>memory.credentials.config.ocm.software</code>
   The config type <code>memory.credentials.config.ocm.software</code> can be used to define a list
   of arbitrary credentials stored in a memory based credentials repository:
@@ -121,7 +116,6 @@ The following configuration types are supported:
               username: mandelsoft2
               password: specialsecret2
   </pre>
-
 - <code>oci.config.ocm.software</code>
   The config type <code>oci.config.ocm.software</code> can be used to define
   OCI registry aliases:
@@ -132,7 +126,6 @@ The following configuration types are supported:
          &lt;name>: &lt;OCI registry specification>
          ...
   </pre>
-
 - <code>ocm.cmd.config.ocm.software</code>
   The config type <code>ocm.cmd.config.ocm.software</code> can be used to 
   configure predefined aliases for dedicated OCM repositories and 
@@ -147,7 +140,6 @@ The following configuration types are supported:
      &lt;name>: &lt;specification of OCI registry>
      ...
   </pre>
-
 - <code>scripts.ocm.config.ocm.software</code>
   The config type <code>scripts.ocm.config.ocm.software</code> can be used to define transfer scripts:
   
@@ -159,7 +151,6 @@ The following configuration types are supported:
         &lt;other name>:
           script: &lt;>nested script as yaml>
   </pre>
-
 
 
 ### Examples

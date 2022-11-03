@@ -17,7 +17,7 @@ func Close(c io.Closer, msg ...interface{}) {
 	if err != nil {
 		switch len(msg) {
 		case 0:
-			Expect(err).To(Succeed())
+			ExpectWithOffset(1, err).To(Succeed())
 		case 1:
 			Fail(fmt.Sprintf("%s: %s", msg[0], err), 1)
 		default:

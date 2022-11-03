@@ -74,7 +74,6 @@ func (o *Options) Complete(fs vfs.FileSystem) error {
 // Usage prints out the usage for templating.
 func (o *Options) Usage() string {
 	return `
-Templating:
 All yaml/json defined resources can be templated.
 Variables are specified as regular arguments following the syntax <code>&lt;name>=&lt;value></code>.
 Additionally settings can be specified by a yaml file using the <code>--settings <file></code>

@@ -10,30 +10,54 @@ import (
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
+
+type accessTypeTarget struct {
+	*accessType
+}
+
+func (t accessTypeTarget) SetDescription(value string) {
+	t.description = value
+}
+
+func (t accessTypeTarget) SetFormat(value string) {
+	t.format = value
+}
+
+func (t accessTypeTarget) SetConfigHandler(value flagsets.ConfigOptionTypeSetHandler) {
+	t.handler = value
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 type accessType struct {
 	runtime.ObjectVersionedType
 	runtime.TypedObjectDecoder
 	description string
+	format      string
 	handler     flagsets.ConfigOptionTypeSetHandler
 }
 
-func NewAccessSpecType(name string, proto internal.AccessSpec, desc string, handler ...flagsets.ConfigOptionTypeSetHandler) internal.AccessType {
-	return &accessType{
+func NewAccessSpecType(name string, proto internal.AccessSpec, opts ...AccessSpecTypeOption) AccessType {
+	t := accessTypeTarget{&accessType{
 		ObjectVersionedType: runtime.NewVersionedObjectType(name),
 		TypedObjectDecoder:  runtime.MustNewDirectDecoder(proto),
-		description:         desc,
-		handler:             utils.Optional(handler...),
+	}}
+	for _, o := range opts {
+		o.ApplyToAccessSpecOptionTarget(t)
 	}
+	return t.accessType
 }
 
 func (t *accessType) ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHandler {
 	return t.handler
 }
 
-func (t *accessType) Description(cli bool) string {
+func (t *accessType) Description() string {
+	return t.description
+}
+
+func (t *accessType) Format(cli bool) string {
 	group := ""
 	if t.handler != nil && cli {
 		opts := t.handler.OptionTypeNames()
@@ -45,5 +69,5 @@ func (t *accessType) Description(cli bool) string {
 			group = "\nOptions used to configure fields: " + strings.Join(names, ", ")
 		}
 	}
-	return t.description + group
+	return t.format + group
 }

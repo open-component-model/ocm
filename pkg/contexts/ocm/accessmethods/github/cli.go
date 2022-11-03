@@ -28,9 +28,9 @@ func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 var usage = `
 This method implements the access of the content of a git commit stored in a
 GitHub repository.
+`
 
-Supported specification version is <code>v1</code>
-
+var formatV1 = `
 The type specific specification fields are:
 
 - **<code>repoUrl</code>**  *string*

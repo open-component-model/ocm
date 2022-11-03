@@ -122,6 +122,7 @@ type errinfo struct {
 	format  ErrorFormatter
 	kind    string
 	elem    *string
+	ctxkind string
 	ctx     string
 }
 
@@ -136,6 +137,13 @@ func newErrInfo(fmt ErrorFormatter, spec ...string) errinfo {
 		format: fmt,
 	}
 
+	if len(spec) > 3 {
+		e.kind = spec[0]
+		e.elem = &spec[1]
+		e.ctxkind = spec[2]
+		e.ctx = spec[3]
+		return e
+	}
 	if len(spec) > 2 {
 		e.kind = spec[0]
 		e.elem = &spec[1]
@@ -147,6 +155,7 @@ func newErrInfo(fmt ErrorFormatter, spec ...string) errinfo {
 		e.elem = &spec[1]
 		return e
 	}
+
 	if len(spec) > 0 {
 		e.elem = &spec[0]
 	}
@@ -154,7 +163,7 @@ func newErrInfo(fmt ErrorFormatter, spec ...string) errinfo {
 }
 
 func (e *errinfo) Error() string {
-	msg := e.format.Format(e.kind, e.elem, e.ctx)
+	msg := e.format.Format(e.kind, e.elem, e.ctxkind, e.ctx)
 	if e.wrapped != nil {
 		return msg + ": " + e.wrapped.Error()
 	}
@@ -171,6 +180,10 @@ func (e *errinfo) Elem() *string {
 
 func (e *errinfo) Kind() string {
 	return e.kind
+}
+
+func (e *errinfo) CtxKind() string {
+	return e.ctxkind
 }
 
 func (e *errinfo) Ctx() string {

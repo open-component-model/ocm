@@ -93,3 +93,11 @@ func (v *ObjectVersionedType) SetVersion(version string) {
 		}
 	}
 }
+
+func KindVersion(t string) (string, string) {
+	i := strings.LastIndex(t, VersionSeparator)
+	if i > 0 {
+		return t[:i], t[i+1:]
+	}
+	return t, ""
+}

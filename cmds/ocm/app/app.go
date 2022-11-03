@@ -27,6 +27,7 @@ import (
 	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/plugins"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
@@ -55,6 +56,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	datacfg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config/attrs"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
@@ -172,6 +174,7 @@ func NewCliCommand(ctx clictx.Context, mod ...func(clictx.Context, *cobra.Comman
 	cmd.AddCommand(cmdutils.HideCommand(references.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(sources.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(components.NewCommand(opts.Context)))
+	cmd.AddCommand(cmdutils.HideCommand(plugins.NewCommand(opts.Context)))
 
 	cmd.AddCommand(cmdutils.HideCommand(cachecmds.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(ocicmds.NewCommand(opts.Context)))
@@ -316,7 +319,7 @@ func (o *CLIOptions) Complete() error {
 		}
 		err = ctx.ApplyConfig(spec, "cli")
 	}
-	return err
+	return plugincacheattr.Get(o.Context.OCMContext()).RegisterExtensions()
 }
 
 func NewVersionCommand(ctx clictx.Context) *cobra.Command {

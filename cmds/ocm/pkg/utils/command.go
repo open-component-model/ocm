@@ -5,6 +5,7 @@
 package utils
 
 import (
+	"reflect"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -32,6 +33,34 @@ type OCMCommand interface {
 	Complete(args []string) error
 	Run() error
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// optional interfaces for a Command
+
+// Updater is a generic update function.
+type Updater interface {
+	Update(cmd *cobra.Command, args []string)
+}
+
+// Long is used to provide the long description by a method of the
+// command.
+type Long interface {
+	Long() string
+}
+
+// Short is used to provide the short description by a method of the
+// command.
+type Short interface {
+	Short() string
+}
+
+// Example is used to provide the example description by a method of the
+// command.
+type Example interface {
+	Example() string
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 // BaseCommand provides the basic functionality of an OCM command
 // to carry a context and a set of reusable option specs.
@@ -81,13 +110,65 @@ func MassageCommand(cmd *cobra.Command, names ...string) *cobra.Command {
 	return cmd
 }
 
-// SetupCommand uses the OCMCommand to create and tweaks a cobra command
+// updateFunction composes an update function for field setter or a generic
+// update function used to update cobra command attributes based on optional
+// methods provided by the OCM command.
+// The generated update function is then called to update attributes of the
+// cobra command prior to help output.
+// If field setters are found, their values will override explicit settings
+// configured for the cobra command structure.
+// If no updaters are found, the statically configured values at the cobra
+// command struct will be used.
+func updateFunction[T any](f func(cmd *cobra.Command, args []string), source OCMCommand, target *cobra.Command) func(cmd *cobra.Command, args []string) {
+	var rf func(cmd *cobra.Command, args []string)
+
+	if t, ok := source.(T); ok {
+		var i *T
+		name := reflect.TypeOf(i).Elem().Method(0).Name
+		m := reflect.ValueOf(t).MethodByName(name)
+
+		tv := reflect.ValueOf(target).Elem()
+		if field := tv.FieldByName(name); field.IsValid() {
+			rf = func(cmd *cobra.Command, args []string) {
+				field.Set(m.Call([]reflect.Value{})[0])
+			}
+			rf(target, nil)
+		} else {
+			rf = func(cmd *cobra.Command, args []string) {
+				m.Call([]reflect.Value{reflect.ValueOf(cmd), reflect.ValueOf(args)})
+			}
+		}
+	}
+	if f == nil {
+		return rf
+	}
+	if rf == nil {
+		return f
+	}
+	return func(cmd *cobra.Command, args []string) {
+		f(cmd, args)
+		rf(cmd, args)
+	}
+}
+
+// SetupCommand uses the OCMCommand to create and tweak a cobra command
 // to incorporate the additional reusable option specs and their usage documentation.
 // Before the command executions the various Complete method flavors are
 // executed on the additional options ond the OCMCommand.
+// It also prepares the help system to reflect dynamic settings provided
+// by root command options by using a generated update function based
+// on optional methods of the OCM command.
 func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 	c := ocmcmd.ForName(names[0])
 	MassageCommand(c, names...)
+
+	var update func(cmd *cobra.Command, args []string)
+
+	update = updateFunction[Long](update, ocmcmd, c)
+	update = updateFunction[Short](update, ocmcmd, c)
+	update = updateFunction[Example](update, ocmcmd, c)
+	update = updateFunction[Updater](update, ocmcmd, c)
+
 	c.RunE = func(cmd *cobra.Command, args []string) error {
 		var err error
 		if set, ok := ocmcmd.(options.OptionSetProvider); ok {
@@ -108,6 +189,33 @@ func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 	}
 	if u, ok := ocmcmd.(options.Usage); ok {
 		c.Long += u.Usage()
+	}
+
+	help := c.HelpFunc()
+	if update != nil {
+		c.SetHelpFunc(func(cmd *cobra.Command, args []string) {
+			// assure root options are evaluated to provide appropriate base
+			// for update functions. PreRun functions will not be called
+			// if option --help is used to call the help function, so just
+			// call it in such a case.
+			for _, a := range args {
+				if a == "--help" {
+					root := cmd.Root()
+					if cmd != root {
+						if root.PersistentPreRunE != nil {
+							root.PersistentPreRunE(cmd, args)
+						} else {
+							if root.PersistentPreRun != nil {
+								root.PersistentPreRun(cmd, args)
+							}
+						}
+					}
+					break
+				}
+			}
+			update(cmd, args)
+			help(cmd, args)
+		})
 	}
 	ocmcmd.AddFlags(c.Flags())
 	return c

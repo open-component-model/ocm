@@ -49,7 +49,14 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Use:   "[<options>] <target> {<configfile> | <var>=<value>}",
 		Args:  cobra.MinimumNArgs(1),
 		Short: "add a source specification to a source config file",
-		Long: `
+		Example: `
+$ ocm add source-config sources.yaml --name sources --type filesystem --access '{ "type": "gitHub", "repoUrl": "github.com/open-component-model/ocm", "commit": "xyz" }'
+`,
+	}
+}
+
+func (o *Command) Long() string {
+	return `
 Add a source specification to a source config file used by <CMD>ocm add sources</CMD>.
 ` + o.Adder.Description() + ` Elements must follow the resource meta data
 description scheme of the component descriptor.
@@ -64,12 +71,8 @@ This command accepts additional source specification files describing the source
 to add to a component version.
 
 ` + (&template.Options{}).Usage() +
-			inputs.Usage(inputs.DefaultInputTypeScheme) +
-			ocm.AccessUsage(o.OCMContext().AccessMethods(), true),
-		Example: `
-$ ocm add source-config sources.yaml --name sources --type filesystem --access '{ "type": "gitHub", "repoUrl": "github.com/open-component-model/ocm", "commit": "xyz" }'
-`,
-	}
+		inputs.Usage(inputs.DefaultInputTypeScheme) +
+		ocm.AccessUsage(o.OCMContext().AccessMethods(), true)
 }
 
 func (o *Command) Run() error {

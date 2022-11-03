@@ -177,12 +177,14 @@ func (c *_context) AccessSpecForConfig(data []byte, unmarshaler runtime.Unmarsha
 	return c.knownAccessTypes.DecodeAccessSpec(data, unmarshaler)
 }
 
+// AccessSpecForSpec takes an anonymous access specification and tries to map
+// it to an effective implementation.
 func (c *_context) AccessSpecForSpec(spec compdesc.AccessSpec) (AccessSpec, error) {
 	if spec == nil {
 		return nil, nil
 	}
 	if n, ok := spec.(AccessSpec); ok {
-		if g, ok := spec.(*GenericAccessSpec); ok {
+		if g, ok := spec.(EvaluatableAccessSpec); ok {
 			return g.Evaluate(c)
 		}
 		return n, nil

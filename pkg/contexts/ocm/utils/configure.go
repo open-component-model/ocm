@@ -26,6 +26,8 @@ import (
 
 const DEFAULT_OCM_CONFIG = ".ocmconfig"
 
+const DEFAULT_OCM_CONFIG_DIR = ".ocm"
+
 func Configure(ctx ocm.Context, path string, fss ...vfs.FileSystem) (ocm.Context, error) {
 	fs := accessio.FileSystem(fss...)
 	if ctx == nil {
@@ -38,7 +40,7 @@ func Configure(ctx ocm.Context, path string, fss ...vfs.FileSystem) (ocm.Context
 			if ok, err := vfs.FileExists(fs, cfg); ok && err == nil {
 				path = cfg
 			} else {
-				cfg := h + "/.ocm/ocmconfig"
+				cfg := h + "/" + DEFAULT_OCM_CONFIG_DIR + "/ocmconfig"
 				if ok, err := vfs.FileExists(fs, cfg); ok && err == nil {
 					path = cfg
 				}

@@ -36,9 +36,7 @@ It the option <code>--scheme</code> is given, the given component descriptor for
 The following schema versions are supported:
 
   - <code>ocm.software/v3alpha1</code>: 
-
   - <code>v2</code> (default): 
-
 
 
 ### SEE ALSO

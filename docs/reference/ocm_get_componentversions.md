@@ -85,9 +85,7 @@ It the option <code>--scheme</code> is given, the given component descriptor is 
 The following schema versions are supported:
 
   - <code>ocm.software/v3alpha1</code>: 
-
   - <code>v2</code>: 
-
 
 With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:
