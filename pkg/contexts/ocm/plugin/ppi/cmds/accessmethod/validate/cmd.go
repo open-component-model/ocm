@@ -16,11 +16,13 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
+const Name = "validate"
+
 func New(p ppi.Plugin) *cobra.Command {
 	opts := Options{}
 
 	cmd := &cobra.Command{
-		Use:   "validate <spec>",
+		Use:   Name + " <spec>",
 		Short: "validate access specification",
 		Long:  "",
 		Args:  cobra.ExactArgs(1),

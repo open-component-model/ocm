@@ -44,16 +44,21 @@ func Mode(m ...BuilderMode) BuilderMode {
 	return utils.OptionalDefaulted(MODE_DEFAULTED, m...)
 }
 
+type ContextProvider interface {
+	// AttributesContext returns the shared attributes
+	AttributesContext() AttributesContext
+}
+
 // Context describes a common interface for a data context used for a dedicated
 // purpose.
 // Such has a type and always specific attribute store.
 // Every Context can be bound to a context.Context.
 type Context interface {
+	ContextProvider
+
 	// GetType returns the context type
 	GetType() string
 
-	// AttributesContext returns the shared attributes
-	AttributesContext() AttributesContext
 	// BindTo binds the context to a context.Context and makes it
 	// retrievable by a ForContext method
 	BindTo(ctx context.Context) context.Context

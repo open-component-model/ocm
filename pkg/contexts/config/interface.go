@@ -24,6 +24,7 @@ const AllGenerations = internal.AllGenerations
 
 type (
 	Context                = internal.Context
+	ContextProvider        = internal.ContextProvider
 	Config                 = internal.Config
 	ConfigType             = internal.ConfigType
 	ConfigTypeScheme       = internal.ConfigTypeScheme

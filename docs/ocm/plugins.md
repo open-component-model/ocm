@@ -2,9 +2,9 @@
 
 The library has several extension points,which can be used by a registration
 mechanism to add further variants, like repository types, backend technologies,
-access methods, blob downloaders and uploader.
+access methods, blob downloaders and uploaders.
 
-This requiries Go coding, which is feasable for additional standard
+This requires Go coding, which is feasible for additional standard
 implementations. Nevertheless, it is useful to provide a more dynamic 
 way to enrich the functionality of the library and the OCM command line
 tool.
@@ -31,10 +31,10 @@ Errors have to be reported on *stderr* as JSON string with the fields:
 
 **Synopsis:** `<plugin> [-c <pluginconfig>] info`
 
-The capapilities provided by a plugin are queried using the
+The capabilities provided by a plugin are queried using the
 command `info`.
 
-It must reposond with JSON *Plugin Descriptor* on standard output 
+It must respond with JSON *Plugin Descriptor* on standard output 
 
 #### Plugin Descriptor
 
@@ -48,7 +48,7 @@ following fields:
 
 - **`pluginName`** *string*
 
-  The name of the plugin, it mist correspond to the file name of the executable.
+  The name of the plugin, it must correspond to the file name of the executable.
 
 - **`pluginVersion`** *string*
 
@@ -57,7 +57,7 @@ following fields:
 
 - **`shortDescription`** *string*
 
-  A short description shown in the plugin overview provided by the commad 
+  A short description shown in the plugin overview provided by the command 
   `ocm ger plugins`.
 
 - **`description`** *string*
@@ -87,11 +87,11 @@ It uses the following fields:
 
 - **`version`** *string*
 
-  The version of the access method (default is `v1`.
+  The version of the access method (default is `v1`).
 
 - **`description`** *string*
 
-  The description of the dedicated kind of an access method. It must
+  The description of the dedicated kind of access method. It must
   only be reported for one supported version.
 
 - **`format`** *string*
@@ -147,7 +147,7 @@ This command accepts an access specification as argument. It is used to
 validate the specification and to provide some metadata for the given
 specification.
 
-This meta data has to be provided as JSON string on *stdout* and has the 
+This metadata has to be provided as JSON string on *stdout* and has the 
 following fields: 
 
 - **`mediaType`** *string*
@@ -161,7 +161,7 @@ following fields:
 
 - **`hint`** *string*
 
-  A name hint of the described location used to recontruct a useful
+  A name hint of the described location used to reconstruct a useful
   name for local blobs uploaded to a dedicated repository technology.
 
 - **`consumerId`** *map[string]string*
@@ -197,7 +197,7 @@ nested commands:
 **Options:**
 
 
-```go
+```
   -a, --artifactType string   artifact type of input blob
   -m, --mediaType string      media type of input blob
 ```
@@ -206,7 +206,7 @@ This command accepts a target specification as argument. It is used to
 validate the specification and to provide some metadata for the given
 specification.
 
-This meta data has to be provided as JSON string on *stdout* and has the
+This metadata has to be provided as JSON string on *stdout* and has the
 following fields:
 
 - **`consumerId`** *map[string]string*

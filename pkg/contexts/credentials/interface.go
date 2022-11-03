@@ -24,6 +24,7 @@ const AliasRepositoryType = internal.AliasRepositoryType
 
 type (
 	Context              = internal.Context
+	ContextProvider      = internal.ContextProvider
 	RepositoryTypeScheme = internal.RepositoryTypeScheme
 	Repository           = internal.Repository
 	Credentials          = internal.Credentials
@@ -84,6 +85,10 @@ func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error
 
 func ErrUnknownCredentials(name string) error {
 	return internal.ErrUnknownCredentials(name)
+}
+
+func CredentialsForConsumer(ctx ContextProvider, id ConsumerIdentity, matchers ...IdentityMatcher) (Credentials, error) {
+	return internal.CredentialsForConsumer(ctx, id, matchers...)
 }
 
 var (

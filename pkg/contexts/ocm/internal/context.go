@@ -25,13 +25,15 @@ const CONTEXT_TYPE = "ocm" + datacontext.OCM_CONTEXT_SUFFIX
 
 const CommonTransportFormat = ctf.Type
 
+type ContextProvider interface {
+	OCMContext() Context
+}
+
 type Context interface {
 	datacontext.Context
-
-	AttributesContext() datacontext.AttributesContext
-	ConfigContext() config.Context
-	CredentialsContext() credentials.Context
-	OCIContext() oci.Context
+	config.ContextProvider
+	credentials.ContextProvider
+	oci.ContextProvider
 
 	RepositoryTypes() RepositoryTypeScheme
 	AccessMethods() AccessTypeScheme
@@ -110,6 +112,10 @@ func newContext(credctx credentials.Context, ocictx oci.Context, reposcheme Repo
 	}
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, credctx.GetAttributes(), logger)
 	c.updater = cfgcpi.NewUpdater(credctx.ConfigContext(), c)
+	return c
+}
+
+func (c *_context) OCMContext() Context {
 	return c
 }
 

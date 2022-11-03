@@ -20,11 +20,16 @@ import (
 // CONTEXT_TYPE is the global type for a credential context.
 const CONTEXT_TYPE = "credentials" + datacontext.OCM_CONTEXT_SUFFIX
 
+type ContextProvider interface {
+	CredentialsContext() Context
+}
+
 type Context interface {
 	datacontext.Context
+	ContextProvider
+	config.ContextProvider
 
 	AttributesContext() datacontext.AttributesContext
-	ConfigContext() config.Context
 	RepositoryTypes() RepositoryTypeScheme
 
 	RepositorySpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error)
@@ -86,6 +91,10 @@ func newContext(configctx config.Context, reposcheme RepositoryTypeScheme, consu
 	}
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, configctx.GetAttributes(), logger)
 	c.updater = cfgcpi.NewUpdater(configctx, c)
+	return c
+}
+
+func (c *_context) CredentialsContext() Context {
 	return c
 }
 

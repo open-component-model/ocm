@@ -33,8 +33,13 @@ const AllGenerations int64 = 0
 
 const CONTEXT_TYPE = "config" + datacontext.OCM_CONTEXT_SUFFIX
 
+type ContextProvider interface {
+	ConfigContext() Context
+}
+
 type Context interface {
 	datacontext.Context
+	ContextProvider
 
 	AttributesContext() datacontext.AttributesContext
 
@@ -128,6 +133,10 @@ func newContext(shared datacontext.AttributesContext, reposcheme ConfigTypeSchem
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, shared.GetAttributes(), logger)
 	c.updater = NewUpdater(c, c)
 	datacontext.AssureUpdater(shared, NewUpdater(c, shared))
+	return c
+}
+
+func (c *_context) ConfigContext() Context {
 	return c
 }
 

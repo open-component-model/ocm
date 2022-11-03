@@ -12,11 +12,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload/validate"
 )
 
-const NAME = "upload"
+const Name = "upload"
 
 func New(p ppi.Plugin) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   NAME,
+		Use:   Name,
 		Short: "upload specific operations",
 		Long:  "",
 	}

@@ -21,6 +21,7 @@ const CONTEXT_TYPE = internal.CONTEXT_TYPE
 
 type (
 	Context                = internal.Context
+	ContextProvider        = internal.ContextProvider
 	Repository             = internal.Repository
 	RepositoryType         = internal.RepositoryType
 	Credentials            = internal.Credentials
@@ -77,6 +78,10 @@ func ErrUnknownCredentials(name string) error {
 
 func ErrUnknownRepository(kind, name string) error {
 	return internal.ErrUnknownRepository(kind, name)
+}
+
+func CredentialsForConsumer(ctx ContextProvider, id ConsumerIdentity, matchers ...IdentityMatcher) (Credentials, error) {
+	return internal.CredentialsForConsumer(ctx, id, matchers...)
 }
 
 var (

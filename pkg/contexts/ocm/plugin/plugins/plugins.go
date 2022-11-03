@@ -11,6 +11,8 @@ import (
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	access "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/plugin"
+	blob "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/generic/plugin"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/config"
@@ -33,46 +35,46 @@ type pluginsImpl struct {
 var _ config.Target = (*pluginsImpl)(nil)
 
 func New(ctx ocm.Context, path string) Set {
-	c := &pluginsImpl{
+	pi := &pluginsImpl{
 		ctx:     ctx,
 		configs: map[string]json.RawMessage{},
 		plugins: map[string]plugin.Plugin{},
 	}
-	c.updater = cfgcpi.NewUpdater(ctx.ConfigContext(), c)
-	c.Update()
-	c.base = cache.Get(path)
-	for _, n := range c.base.PluginNames() {
-		c.plugins[n] = plugin.NewPlugin(c.base.Get(n), c.configs[n])
+	pi.updater = cfgcpi.NewUpdater(ctx.ConfigContext(), pi)
+	pi.Update()
+	pi.base = cache.Get(path)
+	for _, n := range pi.base.PluginNames() {
+		pi.plugins[n] = plugin.NewPlugin(ctx, pi.base.Get(n), pi.configs[n])
 	}
-	return c
+	return pi
 }
 
-func (c *pluginsImpl) Update() {
-	err := c.updater.Update()
+func (pi *pluginsImpl) Update() {
+	err := pi.updater.Update()
 	if err != nil {
-		c.ctx.Logger(plugin.PKG).Error("config update failed", "error", err)
+		pi.ctx.Logger(plugin.PKG).Error("config update failed", "error", err)
 	}
 }
 
-func (c *pluginsImpl) ConfigurePlugin(name string, config json.RawMessage) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+func (pi *pluginsImpl) ConfigurePlugin(name string, config json.RawMessage) {
+	pi.lock.Lock()
+	defer pi.lock.Unlock()
 
-	c.configs[name] = config
+	pi.configs[name] = config
 }
 
-func (c *pluginsImpl) PluginNames() []string {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
+func (pi *pluginsImpl) PluginNames() []string {
+	pi.lock.RLock()
+	defer pi.lock.RUnlock()
 
-	return utils.StringMapKeys(c.plugins)
+	return utils.StringMapKeys(pi.plugins)
 }
 
-func (c *pluginsImpl) Get(name string) plugin.Plugin {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
+func (pi *pluginsImpl) Get(name string) plugin.Plugin {
+	pi.lock.RLock()
+	defer pi.lock.RUnlock()
 
-	p, ok := c.plugins[name]
+	p, ok := pi.plugins[name]
 	if ok {
 		return p
 	}
@@ -81,11 +83,11 @@ func (c *pluginsImpl) Get(name string) plugin.Plugin {
 
 // RegisterExtensions registers all the extension provided the found plugin
 // at the given context. If no context is given, the cache context is used.
-func (c *pluginsImpl) RegisterExtensions() error {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
+func (pi *pluginsImpl) RegisterExtensions() error {
+	pi.lock.RLock()
+	defer pi.lock.RUnlock()
 
-	for _, p := range c.plugins {
+	for _, p := range pi.plugins {
 		if !p.IsValid() {
 			continue
 		}
@@ -94,7 +96,27 @@ func (c *pluginsImpl) RegisterExtensions() error {
 			if m.Version != "" {
 				name = name + runtime.VersionSeparator + m.Version
 			}
-			c.ctx.AccessMethods().Register(name, access.NewType(name, p, m.Description, m.Format))
+			pi.ctx.Logger(plugin.PKG).Info("registering access method",
+				"plugin", p.Name(),
+				"type", name)
+			pi.ctx.AccessMethods().Register(name, access.NewType(name, p, m.Description, m.Format))
+		}
+
+		for _, u := range p.GetDescriptor().Uploaders {
+			for _, c := range u.Costraints {
+				if c.ContextType != "" && c.RepositoryType != "" && c.MediaType != "" {
+					hdlr, err := blob.New(p, u.Name, nil)
+					if err != nil {
+						pi.ctx.Logger(plugin.PKG).Error("cannot create blob handler fpr plugin", "plugin", p.Name(), "handler", u.Name)
+					} else {
+						pi.ctx.Logger(plugin.PKG).Info("registering repository blob handler",
+							"context", c.ContextType+":"+c.RepositoryType,
+							"plugin", p.Name(),
+							"handler", u.Name)
+						pi.ctx.BlobHandlers().Register(hdlr, cpi.ForRepo(c.ContextType, c.RepositoryType), cpi.ForMimeType(c.MediaType))
+					}
+				}
+			}
 		}
 	}
 	return nil

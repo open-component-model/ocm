@@ -20,7 +20,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const Name = "get"
+const (
+	Name     = "get"
+	OptCreds = "credentials"
+)
 
 func New(p ppi.Plugin) *cobra.Command {
 	opts := Options{}
@@ -47,7 +50,7 @@ type Options struct {
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
-	flag.YAMLVarP(fs, &o.Credentials, "credentials", "c", nil, "credentials")
+	flag.YAMLVarP(fs, &o.Credentials, OptCreds, "c", nil, "credentials")
 	flag.StringToStringVarPFA(fs, &o.Credentials, "credential", "C", nil, "dedicated credential value")
 }
 

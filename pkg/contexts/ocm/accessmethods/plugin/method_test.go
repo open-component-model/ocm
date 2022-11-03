@@ -84,6 +84,6 @@ someattr: value
 
 		data, err := m.Get()
 		Expect(err).To(Succeed())
-		Expect(string(data)).To(Equal("test content\n"))
+		Expect(string(data)).To(Equal("test content\n{\"someattr\":\"value\",\"type\":\"test\"}\n"))
 	})
 })

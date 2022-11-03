@@ -78,6 +78,19 @@ func (p *pluginImpl) GetAccessMethodDescriptor(name, version string) *internal.A
 	return nil
 }
 
+func (p *pluginImpl) GetUploaderDescriptor(name string) *internal.UploaderDescriptor {
+	if !p.IsValid() {
+		return nil
+	}
+
+	for _, m := range p.descriptor.Uploaders {
+		if m.Name == name {
+			return &m
+		}
+	}
+	return nil
+}
+
 func (p *pluginImpl) Message() string {
 	if p.IsValid() {
 		return p.descriptor.Short

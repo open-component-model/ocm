@@ -5,25 +5,26 @@
 package plugin
 
 import (
+	"encoding/json"
+
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/get"
 )
 
 type AccessDataWriter struct {
 	plugin  Plugin
-	acctype string
+	creds   json.RawMessage
+	accspec json.RawMessage
 }
 
-func NewAccessDataWriter(p Plugin, acctype string) *AccessDataWriter {
-	return &AccessDataWriter{p, acctype}
+func NewAccessDataWriter(p Plugin, creds, accspec json.RawMessage) *AccessDataWriter {
+	return &AccessDataWriter{p, creds, accspec}
 }
 
 func (d *AccessDataWriter) WriteTo(w accessio.Writer) (int64, digest.Digest, error) {
 	dw := accessio.NewDefaultDigestWriter(accessio.NopWriteCloser(w))
-	_, err := d.plugin.Exec(nil, dw, accessmethod.NAME, get.Name, d.acctype)
+	err := d.plugin.Get(dw, d.creds, d.accspec)
 	if err != nil {
 		return accessio.BLOB_UNKNOWN_SIZE, accessio.BLOB_UNKNOWN_DIGEST, err
 	}

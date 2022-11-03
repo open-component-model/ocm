@@ -18,6 +18,9 @@ Info() {
 
 Get() {
   echo "test content"
+  for arg; do
+    echo "$arg"
+  done
 }
 
 Validate() {

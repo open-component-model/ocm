@@ -27,7 +27,7 @@ type BlobHandler struct {
 
 var _ internal.BlobHandler = (*BlobHandler)(nil)
 
-func (b BlobHandler) StoreBlob(blob internal.BlobAccess, hint string, global internal.AccessSpec, ctx internal.StorageContext) (internal.AccessSpec, error) {
+func (b BlobHandler) StoreBlob(blob internal.BlobAccess, artType string, hint string, global internal.AccessSpec, ctx internal.StorageContext) (internal.AccessSpec, error) {
 	return nil, fmt.Errorf(b.name)
 }
 
@@ -47,7 +47,7 @@ var _ = Describe("blob handler registry test", func() {
 
 		h := reg.GetHandler(IMPL, ART, mime.MIME_TEXT)
 		Expect(h).NotTo(BeNil())
-		_, err := h.StoreBlob(nil, "", nil, nil)
+		_, err := h.StoreBlob(nil, "", "", nil, nil)
 		Expect(err).To(MatchError(fmt.Errorf("all")))
 	})
 
@@ -58,7 +58,7 @@ var _ = Describe("blob handler registry test", func() {
 
 		h := reg.GetHandler(IMPL, ART, mime.MIME_TEXT)
 		Expect(h).NotTo(BeNil())
-		_, err := h.StoreBlob(nil, "", nil, nil)
+		_, err := h.StoreBlob(nil, "", "", nil, nil)
 		Expect(err).To(MatchError(fmt.Errorf("repomime")))
 	})
 
@@ -70,7 +70,7 @@ var _ = Describe("blob handler registry test", func() {
 
 		h := reg.GetHandler(IMPL, ART, mime.MIME_TEXT)
 		Expect(h).NotTo(BeNil())
-		_, err := h.StoreBlob(nil, "", nil, nil)
+		_, err := h.StoreBlob(nil, "", "", nil, nil)
 		Expect(err).To(MatchError(fmt.Errorf("repoart")))
 	})
 
@@ -82,7 +82,7 @@ var _ = Describe("blob handler registry test", func() {
 
 		h := reg.GetHandler(IMPL, ART, mime.MIME_TEXT)
 		Expect(h).NotTo(BeNil())
-		_, err := h.StoreBlob(nil, "", nil, nil)
+		_, err := h.StoreBlob(nil, "", "", nil, nil)
 		Expect(err).To(MatchError(fmt.Errorf("high")))
 	})
 
