@@ -354,7 +354,7 @@ type StringMapOption struct {
 var _ Option = (*StringMapOption)(nil)
 
 func (o *StringMapOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(fs.StringToStringVarPF(&o.value, o.otyp.Name(), "", nil, o.otyp.Description()))
+	o.TweakFlag(flag.StringToStringVarPF(fs, &o.value, o.otyp.Name(), "", nil, o.otyp.Description()))
 }
 
 func (o *StringMapOption) Value() interface{} {

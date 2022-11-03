@@ -4,7 +4,7 @@ go 1.18
 
 replace (
 	github.com/spf13/cobra => github.com/mandelsoft/cobra v1.5.1-0.20221030110806-c236cde1e2bd
-	github.com/spf13/pflag => github.com/mandelsoft/pflag v0.0.0-20221103085724-8329072bfc34
+	github.com/spf13/pflag => github.com/mandelsoft/pflag v0.0.0-20221103113840-a15b5f7fa89e
 )
 
 require (

@@ -20,7 +20,7 @@ ocm add references [<options>] <target> {<referencefile> | <var>=<value>}
 
 ```
       --component string       component name
-      --extra stringToString   reference extra identity
+      --extra <name>=<value>   reference extra identity
       --label <name>=<YAML>    reference label (leading * indicates signature relevant, optional version separated by @)
       --name string            reference name
       --reference YAML         reference meta data (yaml)

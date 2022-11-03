@@ -42,13 +42,13 @@ func New(p ppi.Plugin) *cobra.Command {
 }
 
 type Options struct {
-	Credentials   map[string]string
+	Credentials   credentials.DirectCredentials
 	Specification json.RawMessage
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	flag.YAMLVarP(fs, &o.Credentials, "credentials", "c", nil, "credentials")
-	fs.StringToStringVarPFA(&o.Credentials, "credential", "C", nil, "dedicated credential value")
+	flag.StringToStringVarPFA(fs, &o.Credentials, "credential", "C", nil, "dedicated credential value")
 }
 
 func (o *Options) Complete(args []string) error {
@@ -56,7 +56,7 @@ func (o *Options) Complete(args []string) error {
 		return errors.Wrapf(err, "invalid repository specification")
 	}
 
-	fmt.Fprintf(os.Stderr, "credentials: %s\n", credentials.DirectCredentials(o.Credentials).String())
+	fmt.Fprintf(os.Stderr, "credentials: %s\n", o.Credentials.String())
 	return nil
 }
 
@@ -74,7 +74,7 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	if err != nil {
 		return err
 	}
-	r, err := m.Reader(p, spec, credentials.DirectCredentials(opts.Credentials))
+	r, err := m.Reader(p, spec, opts.Credentials)
 	if err != nil {
 		return err
 	}
