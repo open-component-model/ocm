@@ -77,6 +77,13 @@ func (r *resource) Input() *ResourceInput {
 	return r.input
 }
 
+func (r *resource) Type() string {
+	if c, ok := r.spec.(interface{ GetType() string }); ok {
+		return c.GetType()
+	}
+	return ""
+}
+
 func NewResource(spec ResourceSpec, input *ResourceInput, path string, indices ...int) *resource {
 	id := path
 	for _, i := range indices {
@@ -444,7 +451,7 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 				if berr != nil {
 					return errors.Wrapf(berr, "cannot get resource blob for %q(%s)", r.spec.GetName(), r.source)
 				}
-				acc, err = obj.AddBlob(blob, hint, nil)
+				acc, err = obj.AddBlob(blob, r.Type(), hint, nil)
 				if err == nil {
 					err = h.Set(obj, r, acc)
 				}

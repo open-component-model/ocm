@@ -16,7 +16,10 @@ import (
 
 const REPO = "repo"
 
-var IMPL = internal.ImplementationRepositoryType{internal.CONTEXT_TYPE, REPO}
+var (
+	IMPL = internal.ImplementationRepositoryType{internal.CONTEXT_TYPE, REPO}
+	ART  = "myType"
+)
 
 type BlobHandler struct {
 	name string
@@ -38,21 +41,46 @@ var _ = Describe("blob handler registry test", func() {
 	It("priortizes complete specs", func() {
 		reg.Register(&BlobHandler{"mine"}, internal.ForMimeType(mime.MIME_TEXT))
 		reg.Register(&BlobHandler{"repo"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO))
-		reg.Register(&BlobHandler{"all"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO), internal.ForMimeType(mime.MIME_TEXT))
+		reg.Register(&BlobHandler{"art"}, internal.ForArtefactType(ART))
+		reg.Register(&BlobHandler{"all"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO), internal.ForArtefactType(ART), internal.ForMimeType(mime.MIME_TEXT))
+		reg.Register(&BlobHandler{"repomime"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO), internal.ForMimeType(mime.MIME_TEXT))
 
-		h := reg.GetHandler(IMPL, mime.MIME_TEXT)
+		h := reg.GetHandler(IMPL, ART, mime.MIME_TEXT)
 		Expect(h).NotTo(BeNil())
 		_, err := h.StoreBlob(nil, "", nil, nil)
 		Expect(err).To(MatchError(fmt.Errorf("all")))
 	})
 
-	It("priortizes complete specs", func() {
+	It("priortizes mime", func() {
+		reg.Register(&BlobHandler{"mine"}, internal.ForMimeType(mime.MIME_TEXT))
+		reg.Register(&BlobHandler{"repo"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO))
+		reg.Register(&BlobHandler{"repomime"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO), internal.ForMimeType(mime.MIME_TEXT))
+
+		h := reg.GetHandler(IMPL, ART, mime.MIME_TEXT)
+		Expect(h).NotTo(BeNil())
+		_, err := h.StoreBlob(nil, "", nil, nil)
+		Expect(err).To(MatchError(fmt.Errorf("repomime")))
+	})
+
+	It("priortizes mime", func() {
+		reg.Register(&BlobHandler{"mine"}, internal.ForMimeType(mime.MIME_TEXT))
+		reg.Register(&BlobHandler{"repo"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO))
+		reg.Register(&BlobHandler{"repomine"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO), internal.ForMimeType(mime.MIME_TEXT))
+		reg.Register(&BlobHandler{"repoart"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO), internal.ForArtefactType(ART))
+
+		h := reg.GetHandler(IMPL, ART, mime.MIME_TEXT)
+		Expect(h).NotTo(BeNil())
+		_, err := h.StoreBlob(nil, "", nil, nil)
+		Expect(err).To(MatchError(fmt.Errorf("repoart")))
+	})
+
+	It("priortizes prio", func() {
 		reg.Register(&BlobHandler{"mine"}, internal.ForMimeType(mime.MIME_TEXT))
 		reg.Register(&BlobHandler{"repo"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO))
 		reg.Register(&BlobHandler{"all"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO), internal.ForMimeType(mime.MIME_TEXT))
 		reg.Register(&BlobHandler{"high"}, internal.WithPrio(internal.DEFAULT_BLOBHANDLER_PRIO+1))
 
-		h := reg.GetHandler(IMPL, mime.MIME_TEXT)
+		h := reg.GetHandler(IMPL, ART, mime.MIME_TEXT)
 		Expect(h).NotTo(BeNil())
 		_, err := h.StoreBlob(nil, "", nil, nil)
 		Expect(err).To(MatchError(fmt.Errorf("high")))
@@ -64,17 +92,17 @@ var _ = Describe("blob handler registry test", func() {
 		reg.Register(mine, internal.ForMimeType(mime.MIME_TEXT))
 		reg.Register(repo, internal.ForRepo(internal.CONTEXT_TYPE, REPO))
 
-		h := reg.GetHandler(internal.ImplementationRepositoryType{internal.CONTEXT_TYPE, REPO}, mime.MIME_OCTET)
+		h := reg.GetHandler(internal.ImplementationRepositoryType{internal.CONTEXT_TYPE, REPO}, ART, mime.MIME_OCTET)
 		Expect(h).To(Equal(internal.MultiBlobHandler{repo}))
 
 		copy := reg.Copy()
 		new := &BlobHandler{"repo2"}
 		copy.Register(new, internal.ForRepo(internal.CONTEXT_TYPE, REPO))
 
-		h = reg.GetHandler(internal.ImplementationRepositoryType{internal.CONTEXT_TYPE, REPO}, mime.MIME_OCTET)
+		h = reg.GetHandler(internal.ImplementationRepositoryType{internal.CONTEXT_TYPE, REPO}, ART, mime.MIME_OCTET)
 		Expect(h).To(Equal(internal.MultiBlobHandler{repo}))
 
-		h = copy.GetHandler(internal.ImplementationRepositoryType{internal.CONTEXT_TYPE, REPO}, mime.MIME_OCTET)
+		h = copy.GetHandler(internal.ImplementationRepositoryType{internal.CONTEXT_TYPE, REPO}, ART, mime.MIME_OCTET)
 		Expect(h).To(Equal(internal.MultiBlobHandler{new}))
 
 	})
