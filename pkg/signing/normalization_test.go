@@ -6,6 +6,7 @@ package signing_test
 
 import (
 	"encoding/json"
+	"fmt"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -512,6 +513,78 @@ var _ = Describe("normalization", func() {
 }`))
 	})
 
+	It("list of plain values", func() {
+		v := struct {
+			List    []string `json:"list"`
+			Empty   []string `json:"empty"`
+			Omitted []string `json:"omitted,omitempty"`
+		}{
+			Empty:   []string{},
+			Omitted: []string{},
+		}
+		d, err := json.Marshal(v)
+		Expect(err).To(Succeed())
+		var m map[string]interface{}
+
+		err = json.Unmarshal(d, &m)
+		Expect(err).To(Succeed())
+
+		entries, err := signing.PrepareNormalization(v, signing.ExcludeEmpty{})
+		Expect(err).To(Succeed())
+		Expect(entries.String()).To(Equal(`[]`))
+	})
+
+	It("list of plain values", func() {
+		v := map[string]interface{}{
+			"list": []interface{}{
+				"alice", "bob",
+			},
+		}
+		entries, err := signing.PrepareNormalization(v, signing.NoExcludes{})
+		Expect(err).To(Succeed())
+		fmt.Printf("%s\n", entries.String())
+		Expect(entries.String()).To(Equal(`[
+  {
+    "list": [
+      "alice",
+      "bob"
+    ]
+  }
+]`))
+	})
+
+	It("list of complex values", func() {
+		v := map[string]interface{}{
+			"list": []map[string]interface{}{
+				map[string]interface{}{
+					"alice": 25,
+				},
+				map[string]interface{}{
+					"bob": 26,
+				},
+			},
+		}
+		entries, err := signing.PrepareNormalization(v, signing.NoExcludes{})
+		Expect(err).To(Succeed())
+		fmt.Printf("%s\n", entries.String())
+		Expect(entries.String()).To(Equal(`[
+  {
+    "list": [
+      [
+        {
+          "alice": 25
+        }
+      ],
+      [
+        {
+          "bob": 26
+        }
+      ]
+    ]
+  }
+]`))
+	})
+
 	It("Normalizes struct without no-signing resource labels", func() {
 
 		entries, err := signing.PrepareNormalization(cd, signing.MapExcludes{
@@ -527,6 +600,7 @@ var _ = Describe("normalization", func() {
 			},
 		})
 		Expect(err).To(Succeed())
+		fmt.Printf("%s\n", entries.String())
 		Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
 {
   component: {

@@ -12,6 +12,7 @@ import (
 	"strconv"
 
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Entries []Entry
@@ -21,7 +22,7 @@ func (l *Entries) Add(key string, value interface{}) {
 }
 
 func (l Entries) String() string {
-	return l.ToString("")
+	return string(utils.Must(json.MarshalIndent(l, "", "  ")))
 }
 
 func (l Entries) ToString(gap string) string {
