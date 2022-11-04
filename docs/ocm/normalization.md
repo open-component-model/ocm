@@ -109,12 +109,12 @@ normalized to (for better readability formatted, not the format which is signed)
       "bar",
       [
         {
-          "some": "thing"
+          "hello": 26
         }
-      ],
+       ],
       [
         {
-          "hello": 26
+          "some": "thing"
         }
       ]
     ]
