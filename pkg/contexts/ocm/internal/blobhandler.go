@@ -9,6 +9,8 @@ import (
 	"sort"
 	"strings"
 	"sync"
+
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type ImplementationRepositoryType struct {
@@ -168,12 +170,16 @@ func ForArtefactType(artefacttype string) BlobHandlerOption {
 type BlobHandlerRegistry interface {
 	IsInitial() bool
 
-	// Copy provides a new independend copy of the registry
+	// Copy provides a new independend copy of the registry.
 	Copy() BlobHandlerRegistry
 	// RegisterBlobHandler registers a blob handler. It must specify either a sole mime type,
-	// or a context and repository type, or all three keys
+	// or a context and repository type, or all three keys.
 	Register(handler BlobHandler, opts ...BlobHandlerOption) BlobHandlerRegistry
-	// GetHandler returns handler trying all matches in the following order:
+
+	// GetHandler returns the handler with the given key.
+	GetHandler(key BlobHandlerKey) BlobHandler
+
+	// LookupHandler returns handler trying all matches in the following order:
 	//
 	// - a handler matching all keys
 	// - handlers matching the repo and mime type (from specific to more general by discarding + components)
@@ -183,7 +189,7 @@ type BlobHandlerRegistry interface {
 	// - handlers matching a sole mimetype handler (from specific to more general by discarding + components)
 	// - a handler matching the repo
 	//
-	GetHandler(repotype ImplementationRepositoryType, artefacttype, mimeType string) BlobHandler
+	LookupHandler(repotype ImplementationRepositoryType, artefacttype, mimeType string) BlobHandler
 }
 
 const DEFAULT_BLOBHANDLER_PRIO = 100
@@ -216,6 +222,7 @@ func (c *handlerCache) set(key BlobHandlerKey, h BlobHandler) {
 
 type blobHandlerRegistry struct {
 	lock       sync.RWMutex
+	base       BlobHandlerRegistry
 	handlers   map[BlobHandlerKey]BlobHandler
 	defhandler MultiBlobHandler
 	cache      *handlerCache
@@ -223,14 +230,14 @@ type blobHandlerRegistry struct {
 
 var DefaultBlobHandlerRegistry = NewBlobHandlerRegistry()
 
-func NewBlobHandlerRegistry() BlobHandlerRegistry {
-	return &blobHandlerRegistry{handlers: map[BlobHandlerKey]BlobHandler{}, cache: newHandlerCache()}
+func NewBlobHandlerRegistry(base ...BlobHandlerRegistry) BlobHandlerRegistry {
+	return &blobHandlerRegistry{handlers: map[BlobHandlerKey]BlobHandler{}, cache: newHandlerCache(), base: utils.Optional(base...)}
 }
 
 func (r *blobHandlerRegistry) Copy() BlobHandlerRegistry {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
-	n := NewBlobHandlerRegistry().(*blobHandlerRegistry)
+	n := NewBlobHandlerRegistry(r.base).(*blobHandlerRegistry)
 	n.defhandler = append(n.defhandler, r.defhandler...)
 	for k, h := range r.handlers {
 		n.handlers[k] = h
@@ -239,6 +246,9 @@ func (r *blobHandlerRegistry) Copy() BlobHandlerRegistry {
 }
 
 func (r *blobHandlerRegistry) IsInitial() bool {
+	if r.base != nil && !r.base.IsInitial() {
+		return false
+	}
 	return len(r.handlers) == 0 && len(r.defhandler) == 0
 }
 
@@ -271,7 +281,7 @@ func (r *blobHandlerRegistry) forMimeType(ctxtype, repotype, artefacttype, mimet
 
 	mime := mimetype
 	for {
-		if h := r.handlers[NewBlobHandlerKey(ctxtype, repotype, artefacttype, mime)]; h != nil {
+		if h := r.getHandler(NewBlobHandlerKey(ctxtype, repotype, artefacttype, mime)); h != nil {
 			multi = append(multi, h)
 		}
 		idx := strings.LastIndex(mime, "+")
@@ -283,13 +293,37 @@ func (r *blobHandlerRegistry) forMimeType(ctxtype, repotype, artefacttype, mimet
 	return multi
 }
 
-func (r *blobHandlerRegistry) GetHandler(repotype ImplementationRepositoryType, artefacttype, mimetype string) BlobHandler {
+func (r *blobHandlerRegistry) GetHandler(key BlobHandlerKey) BlobHandler {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+	return r.getHandler(key)
+}
+
+func (r *blobHandlerRegistry) getHandler(key BlobHandlerKey) BlobHandler {
+	def := BlobHandlerKey{}
+
+	if key == def {
+		if len(r.defhandler) > 0 {
+			return r.defhandler
+		}
+	}
+	h := r.handlers[key]
+	if h != nil {
+		return h
+	}
+	if r.base != nil {
+		return r.base.GetHandler(key)
+	}
+	return nil
+}
+
+func (r *blobHandlerRegistry) LookupHandler(repotype ImplementationRepositoryType, artefacttype, mimetype string) BlobHandler {
 	key := BlobHandlerKey{
 		ImplementationRepositoryType: repotype,
 		ArtefactType:                 artefacttype,
 		MimeType:                     mimetype,
 	}
-	h, cache := r.getHandler(key)
+	h, cache := r.lookupHandler(key)
 	if cache != nil {
 		r.lock.Lock()
 		defer r.lock.Unlock()
@@ -302,7 +336,7 @@ func (r *blobHandlerRegistry) GetHandler(repotype ImplementationRepositoryType, 
 	return h
 }
 
-func (r *blobHandlerRegistry) getHandler(key BlobHandlerKey) (BlobHandler, *handlerCache) {
+func (r *blobHandlerRegistry) lookupHandler(key BlobHandlerKey) (BlobHandler, *handlerCache) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
@@ -329,7 +363,15 @@ func (r *blobHandlerRegistry) getHandler(key BlobHandlerKey) (BlobHandler, *hand
 	if !key.ImplementationRepositoryType.IsInitial() && key.ArtefactType != "" && key.MimeType != "" {
 		multi = append(multi, r.forMimeType(key.ContextType, key.RepositoryType, "", "")...)
 	}
-	multi = append(multi, r.defhandler...)
+
+	def := r.getHandler(BlobHandlerKey{})
+	if def != nil {
+		if m, ok := def.(MultiBlobHandler); ok {
+			multi = append(multi, m...)
+		} else {
+			multi = append(multi, def)
+		}
+	}
 	if len(multi) == 0 {
 		return nil, r.cache
 	}

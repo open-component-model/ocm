@@ -70,6 +70,8 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 		case datacontext.MODE_CONFIGURED:
 			b.reposcheme = NewRepositoryTypeScheme(nil)
 			b.reposcheme.AddKnownTypes(DefaultRepositoryTypeScheme)
+		case datacontext.MODE_EXTENDED:
+			b.reposcheme = NewRepositoryTypeScheme(nil, DefaultRepositoryTypeScheme)
 		case datacontext.MODE_DEFAULTED:
 			fallthrough
 		case datacontext.MODE_SHARED:
@@ -77,7 +79,18 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 		}
 	}
 	if b.spechandlers == nil {
-		b.spechandlers = DefaultRepositorySpecHandlers
+		switch mode {
+		case datacontext.MODE_INITIAL:
+			b.spechandlers = NewRepositorySpecHandlers()
+		case datacontext.MODE_CONFIGURED:
+			b.spechandlers = DefaultRepositorySpecHandlers.Copy()
+		case datacontext.MODE_EXTENDED:
+			fallthrough
+		case datacontext.MODE_DEFAULTED:
+			fallthrough
+		case datacontext.MODE_SHARED:
+			b.spechandlers = DefaultRepositorySpecHandlers
+		}
 	}
 	return newContext(b.credentials, b.reposcheme, b.spechandlers, b.credentials.LoggingContext())
 }

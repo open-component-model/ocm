@@ -43,7 +43,8 @@ var _ = Describe("type set", func() {
 		Expect(set.GetOptionType("third")).To(Equal(flagsets.NewStringOptionType("third", "a third string")))
 
 		Expect(set.GetOptionType("string")).To(BeIdenticalTo(set1.GetOptionType("string")))
-		Expect(set.GetOptionType("string")).To(BeIdenticalTo(set2.GetOptionType("string")))
+		Expect(set.GetOptionType("string")).NotTo(BeIdenticalTo(set2.GetOptionType("string")))
+		Expect(set.GetOptionType("string")).To(Equal(set2.GetOptionType("string")))
 		Expect(set.GetOptionType("other")).To(BeIdenticalTo(set1.GetOptionType("other")))
 		Expect(set.GetOptionType("third")).To(BeIdenticalTo(set2.GetOptionType("third")))
 	})

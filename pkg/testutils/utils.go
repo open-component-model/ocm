@@ -25,3 +25,12 @@ func Close(c io.Closer, msg ...interface{}) {
 		}
 	}
 }
+
+func Must[T any](o T, err error) T {
+	ExpectWithOffset(1, err).To(Succeed())
+	return o
+}
+
+func BeSuccessful(err error) {
+	ExpectWithOffset(1, err).To(Succeed())
+}

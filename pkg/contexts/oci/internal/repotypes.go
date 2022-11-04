@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type RepositoryType interface {
@@ -48,9 +49,9 @@ type repositoryTypeScheme struct {
 	runtime.SchemeBase
 }
 
-func NewRepositoryTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) RepositoryTypeScheme {
+func NewRepositoryTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder, base ...RepositoryTypeScheme) RepositoryTypeScheme {
 	var rt RepositorySpec
-	scheme := runtime.MustNewDefaultScheme(&rt, &UnknownRepositorySpec{}, true, defaultRepoDecoder)
+	scheme := runtime.MustNewDefaultScheme(&rt, &UnknownRepositorySpec{}, true, defaultRepoDecoder, utils.Optional(base...))
 	return &repositoryTypeScheme{scheme}
 }
 

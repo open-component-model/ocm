@@ -229,6 +229,7 @@ type ContentResourceSpecificationsProvider struct {
 	ctx         clictx.Context
 	DefaultType string
 
+	accprov flagsets.ConfigTypeOptionSetConfigProvider
 	shared  flagsets.ConfigOptionTypeSet
 	options flagsets.ConfigOptions
 }
@@ -270,18 +271,18 @@ or <code>input</code> fields of the description file format.
 func (a *ContentResourceSpecificationsProvider) AddFlags(fs *pflag.FlagSet) {
 	a.ResourceMetaDataSpecificationsProvider.AddFlags(fs)
 
-	acctypes := a.ctx.OCMContext().AccessMethods().ConfigTypeSetConfigProvider()
+	a.accprov = a.ctx.OCMContext().AccessMethods().CreateConfigTypeSetConfigProvider()
 	inptypes := inputs.For(a.ctx).ConfigTypeSetConfigProvider()
 
 	set := flagsets.NewConfigOptionSet("resources")
-	set.AddAll(acctypes)
+	set.AddAll(a.accprov)
 	dup, err := set.AddAll(inptypes)
 	if err != nil {
 		panic(err)
 	}
 	a.shared = dup
 	a.options = set.CreateOptions()
-	a.options.AddTypeSetGroupsToOptions(acctypes)
+	a.options.AddTypeSetGroupsToOptions(a.accprov)
 	a.options.AddTypeSetGroupsToOptions(inptypes)
 	a.options.AddFlags(fs)
 }
@@ -299,7 +300,7 @@ func (a *ContentResourceSpecificationsProvider) Complete() error {
 	}
 
 	unique := a.options.FilterBy(flagsets.Not(a.shared.HasOptionType))
-	aopts := unique.FilterBy(a.ctx.OCMContext().AccessMethods().ConfigTypeSetConfigProvider().HasOptionType)
+	aopts := unique.FilterBy(a.accprov.HasOptionType)
 	iopts := unique.FilterBy(inputs.For(a.ctx).ConfigTypeSetConfigProvider().HasOptionType)
 
 	if aopts.Changed() && iopts.Changed() {
@@ -345,7 +346,7 @@ func (a *ContentResourceSpecificationsProvider) Get() (string, error) {
 		return "", err
 	}
 
-	err = a.apply(a.ctx.OCMContext().AccessMethods().ConfigTypeSetConfigProvider(), data)
+	err = a.apply(a.accprov, data)
 	if err != nil {
 		return "", err
 	}

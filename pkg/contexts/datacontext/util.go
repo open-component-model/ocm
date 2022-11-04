@@ -6,6 +6,7 @@ package datacontext
 
 import (
 	"context"
+	"fmt"
 )
 
 // ForContextByKey retrieves the context for a given key to be used for a context.Context.
@@ -16,4 +17,31 @@ func ForContextByKey(ctx context.Context, key interface{}, def Context) (Context
 		return def, false
 	}
 	return c.(Context), true
+}
+
+type ElementCopyable[T any] interface {
+	comparable
+	Copy() T
+}
+
+type ElementCreator[T any] func(base ...T) T
+
+func SetupElement[T ElementCopyable[T]](mode BuilderMode, target *T, create ElementCreator[T], def T) {
+	var zero T
+	if *target == zero {
+		switch mode {
+		case MODE_INITIAL:
+			*target = create()
+		case MODE_CONFIGURED:
+			*target = def.Copy()
+		case MODE_EXTENDED:
+			*target = create(def)
+		case MODE_DEFAULTED:
+			fallthrough
+		case MODE_SHARED:
+			*target = def
+		default:
+			panic(fmt.Sprintf("invalid context creation mode %s", mode))
+		}
+	}
 }

@@ -6,6 +6,7 @@ package datacontext
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"reflect"
 	"sync"
@@ -31,6 +32,9 @@ const (
 	// MODE_DEFAULTED uses dedicated context instances configured with the
 	// context type specific default registrations.
 	MODE_DEFAULTED
+	// MODE_EXTENDED uses dedicated context instances configured with
+	// context type registrations extending the default registrations.
+	MODE_EXTENDED
 	// MODE_CONFIGURED uses dedicated context instances configured with the
 	// context type registrations configured with the actual state of the
 	// default registrations.
@@ -40,8 +44,25 @@ const (
 	MODE_INITIAL
 )
 
+func (m BuilderMode) String() string {
+	switch m {
+	case MODE_SHARED:
+		return "shared"
+	case MODE_DEFAULTED:
+		return "defaulted"
+	case MODE_EXTENDED:
+		return "extended"
+	case MODE_CONFIGURED:
+		return "configured"
+	case MODE_INITIAL:
+		return "initial"
+	default:
+		return fmt.Sprintf("(invalid %d)", m)
+	}
+}
+
 func Mode(m ...BuilderMode) BuilderMode {
-	return utils.OptionalDefaulted(MODE_DEFAULTED, m...)
+	return utils.OptionalDefaulted(MODE_EXTENDED, m...)
 }
 
 type ContextProvider interface {
