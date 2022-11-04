@@ -447,8 +447,8 @@ CompVers: `A:1.0.0`
 ```
 - Resources: 
   - name: DEPLOYER
-  - type: mySpecialDeploymentDescription
-- 
+    type: mySpecialDeploymentDescription
+ 
 - References:
   - name: content
     component: B:1.0.0
@@ -476,6 +476,16 @@ deploymentImages:
 This description contains a resource reference indicating to
 use the resource `IMAGE` in component version `B:1.0.0` when evaluated
 in the context of component version `A:1.0.0`.
+
+The reference path may contain any number (including zero) entries, describing 
+the path from the root component version along the nested `references` entries
+of involved component versions to the component version finally describing the
+desired resource. Hereby, the `name` is the name of the reference entry in the
+component descriptor, it is NOT the component name. If no or an empty path is given,
+the resource is looked up in the actual component version.
+
+Besides the name, there might also be extra identities to uniquely identify the next
+element.
 
 This way any content-related tool can interact with the Open Component Model,
 by identifying resources and finally access resources described by the component
