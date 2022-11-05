@@ -16,16 +16,17 @@ import (
 	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/common"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const (
 	Name     = "put"
-	OptCreds = "credentials"
-	OptHint  = "hint"
-	OptMedia = "mediaType"
-	OptArt   = "artifactType"
+	OptCreds = common.OptCreds
+	OptHint  = common.OptHint
+	OptMedia = common.OptMedia
+	OptArt   = common.OptArt
 )
 
 func New(p ppi.Plugin) *cobra.Command {

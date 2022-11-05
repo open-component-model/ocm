@@ -86,6 +86,10 @@ func ForMimeType(mimetype string) BlobHandlerOption {
 	return internal.ForMimeType(mimetype)
 }
 
+func ForArtefactType(arttype string) BlobHandlerOption {
+	return internal.ForArtefactType(arttype)
+}
+
 func RegisterRepositorySpecHandler(handler RepositorySpecHandler, types ...string) {
 	internal.RegisterRepositorySpecHandler(handler, types...)
 }

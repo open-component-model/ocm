@@ -16,6 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/config"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/internal"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -52,7 +53,7 @@ func New(ctx ocm.Context, path string) Set {
 func (pi *pluginsImpl) Update() {
 	err := pi.updater.Update()
 	if err != nil {
-		pi.ctx.Logger(plugin.PKG).Error("config update failed", "error", err)
+		pi.ctx.Logger(internal.TAG).Error("config update failed", "error", err)
 	}
 }
 
@@ -61,6 +62,9 @@ func (pi *pluginsImpl) ConfigurePlugin(name string, config json.RawMessage) {
 	defer pi.lock.Unlock()
 
 	pi.configs[name] = config
+	if pi.plugins[name] != nil {
+		pi.plugins[name].SetConfig(config)
+	}
 }
 
 func (pi *pluginsImpl) PluginNames() []string {
@@ -71,6 +75,8 @@ func (pi *pluginsImpl) PluginNames() []string {
 }
 
 func (pi *pluginsImpl) Get(name string) plugin.Plugin {
+	pi.Update()
+
 	pi.lock.RLock()
 	defer pi.lock.RUnlock()
 
@@ -84,6 +90,8 @@ func (pi *pluginsImpl) Get(name string) plugin.Plugin {
 // RegisterExtensions registers all the extension provided the found plugin
 // at the given context. If no context is given, the cache context is used.
 func (pi *pluginsImpl) RegisterExtensions() error {
+	pi.Update()
+
 	pi.lock.RLock()
 	defer pi.lock.RUnlock()
 
@@ -96,7 +104,7 @@ func (pi *pluginsImpl) RegisterExtensions() error {
 			if m.Version != "" {
 				name = name + runtime.VersionSeparator + m.Version
 			}
-			pi.ctx.Logger(plugin.PKG).Info("registering access method",
+			pi.ctx.Logger(internal.TAG).Info("registering access method",
 				"plugin", p.Name(),
 				"type", name)
 			pi.ctx.AccessMethods().Register(name, access.NewType(name, p, m.Description, m.Format))
@@ -107,9 +115,9 @@ func (pi *pluginsImpl) RegisterExtensions() error {
 				if c.ContextType != "" && c.RepositoryType != "" && c.MediaType != "" {
 					hdlr, err := blob.New(p, u.Name, nil)
 					if err != nil {
-						pi.ctx.Logger(plugin.PKG).Error("cannot create blob handler fpr plugin", "plugin", p.Name(), "handler", u.Name)
+						pi.ctx.Logger(internal.TAG).Error("cannot create blob handler fpr plugin", "plugin", p.Name(), "handler", u.Name)
 					} else {
-						pi.ctx.Logger(plugin.PKG).Info("registering repository blob handler",
+						pi.ctx.Logger(internal.TAG).Info("registering repository blob handler",
 							"context", c.ContextType+":"+c.RepositoryType,
 							"plugin", p.Name(),
 							"handler", u.Name)

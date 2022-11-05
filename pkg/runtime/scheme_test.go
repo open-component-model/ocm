@@ -38,7 +38,7 @@ var _ = Describe("scheme", func() {
 	BeforeEach(func() {
 		var rt runtime.TypedObject
 		scheme = Must(runtime.NewDefaultScheme(&rt, &runtime.UnstructuredTypedObject{}, false, nil))
-		BeSuccessful(scheme.RegisterByDecoder("t1", T1Decoder))
+		MustBeSuccessful(scheme.RegisterByDecoder("t1", T1Decoder))
 	})
 
 	It("decodes object", func() {
@@ -56,7 +56,7 @@ var _ = Describe("scheme", func() {
 	It("extends derived scheme", func() {
 		var rt runtime.TypedObject
 		derived := Must(runtime.NewDefaultScheme(&rt, &runtime.UnstructuredTypedObject{}, false, nil, scheme))
-		BeSuccessful(derived.RegisterByDecoder("t2", T2Decoder))
+		MustBeSuccessful(derived.RegisterByDecoder("t2", T2Decoder))
 		Expect(Must(derived.Decode(t2data, nil))).To(Equal(t2))
 
 		Expect(scheme.KnownTypeNames()).To(Equal([]string{"t1"}))

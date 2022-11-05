@@ -16,14 +16,31 @@ type pluginImpl struct {
 	descriptor *internal.Descriptor
 	path       string
 	error      string
+	mappings   *internal.Registry[*internal.UploaderDescriptor]
+	uploaders  map[string]*internal.Registry[*internal.UploaderDescriptor]
 }
 
 func NewPlugin(name string, path string, desc *internal.Descriptor, errmsg string) Plugin {
+	reg := internal.NewRegistry[*internal.UploaderDescriptor]()
+	uploaders := map[string]*internal.Registry[*internal.UploaderDescriptor]{}
+
+	for i := range desc.Uploaders {
+		d := desc.Uploaders[i]
+		nested := internal.NewRegistry[*internal.UploaderDescriptor]()
+		for _, c := range d.Costraints {
+			reg.Register(c, &d)
+			nested.Register(c, &d)
+		}
+		uploaders[d.Name] = nested
+	}
 	return &pluginImpl{
 		name:       name,
 		path:       path,
 		descriptor: desc,
 		error:      errmsg,
+
+		mappings:  reg,
+		uploaders: uploaders,
 	}
 }
 
@@ -74,6 +91,27 @@ func (p *pluginImpl) GetAccessMethodDescriptor(name, version string) *internal.A
 	}
 	if fallbackFound && (version == "" || version == "v1") {
 		return &fallback
+	}
+	return nil
+}
+
+func (p *pluginImpl) LookupUploader(name string, artType, mediaType string) *internal.UploaderDescriptor {
+	if !p.IsValid() {
+		return nil
+	}
+
+	if name == "" {
+		if d, ok := p.mappings.LookupHandler(artType, mediaType); ok {
+			return d
+		}
+	}
+
+	u := p.uploaders[name]
+	if u == nil {
+		return nil
+	}
+	if d, ok := u.LookupHandler(artType, mediaType); ok {
+		return d
 	}
 	return nil
 }

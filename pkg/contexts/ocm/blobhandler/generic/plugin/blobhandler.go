@@ -34,7 +34,7 @@ func New(p plugin.Plugin, name string, target json.RawMessage) (cpi.BlobHandler,
 
 	var info *plugin.UploadTargetSpecInfo
 	if target != nil {
-		info, err = p.ValidateUploadTarget(target)
+		info, err = p.ValidateUploadTarget(name, target)
 		if err != nil {
 			return nil, err
 		}
@@ -47,9 +47,8 @@ func New(p plugin.Plugin, name string, target json.RawMessage) (cpi.BlobHandler,
 	}, nil
 }
 
-func (b *pluginHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *pluginHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (acc cpi.AccessSpec, err error) {
 	var creds credentials.Credentials
-	var err error
 
 	if b.targetinfo != nil {
 		if len(b.targetinfo.ConsumerId) > 0 {
@@ -78,7 +77,7 @@ func (b *pluginHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, glo
 	}
 
 	r := accessio.NewOndemandReader(blob)
-	defer r.Close()
+	defer errors.PropagateError(&err, r.Close)
 
-	return b.plugin.Put(r, artType, blob.MimeType(), hint, creddata, target)
+	return b.plugin.Put(b.name, r, artType, blob.MimeType(), hint, creddata, target)
 }

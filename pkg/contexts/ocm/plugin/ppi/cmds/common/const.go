@@ -2,10 +2,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package plugin
+package common
 
-import (
-	"github.com/mandelsoft/logging"
+const (
+	OptCreds = "credentials"
+	OptHint  = "hint"
+	OptMedia = "mediaType"
+	OptArt   = "artifactType"
 )
-
-var PKG = logging.Package()

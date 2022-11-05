@@ -30,9 +30,11 @@ type Config struct {
 }
 
 // New creates a new memory ConfigSpec.
-func New() *Config {
+func New(name string, data []byte) *Config {
 	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
+		Plugin:              name,
+		Config:              data,
 	}
 }
 

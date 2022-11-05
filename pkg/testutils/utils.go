@@ -31,6 +31,11 @@ func Must[T any](o T, err error) T {
 	return o
 }
 
-func BeSuccessful(err error) {
+func MustBeSuccessful(err error) {
 	ExpectWithOffset(1, err).To(Succeed())
+}
+
+func MustFailWithMessage(err error, msg string) {
+	ExpectWithOffset(1, err).NotTo(BeNil())
+	ExpectWithOffset(1, err.Error()).To(Equal(msg))
 }

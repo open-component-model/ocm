@@ -7,6 +7,8 @@ package accessio
 import (
 	"io"
 	"sync"
+
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type ReaderProvider interface {
@@ -17,6 +19,7 @@ type OnDemandReader struct {
 	lock     sync.Mutex
 	provider ReaderProvider
 	reader   io.ReadCloser
+	err      error
 }
 
 var _ io.Reader = (*OnDemandReader)(nil)
@@ -32,11 +35,16 @@ func (o *OnDemandReader) Read(p []byte) (n int, err error) {
 	if o.reader == nil {
 		r, err := o.provider.Reader()
 		if err != nil {
+			o.err = err
 			return 0, err
 		}
 		o.reader = r
 	}
-	return o.reader.Read(p)
+	data, err := o.reader.Read(p)
+	if err != nil && !errors.Is(err, io.EOF) {
+		o.err = err
+	}
+	return data, err
 }
 
 func (o *OnDemandReader) Close() error {
@@ -44,7 +52,11 @@ func (o *OnDemandReader) Close() error {
 	defer o.lock.Unlock()
 
 	if o.reader == nil {
-		return nil
+		return o.err
+	}
+	if o.err != nil {
+		o.reader.Close()
+		return o.err
 	}
 	return o.reader.Close()
 }

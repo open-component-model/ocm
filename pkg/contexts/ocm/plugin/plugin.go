@@ -11,6 +11,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/config"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/get"
@@ -23,6 +24,8 @@ import (
 )
 
 type Plugin = *pluginImpl
+
+var _ config.Target = (*pluginImpl)(nil)
 
 type impl = cache.Plugin
 
@@ -39,6 +42,12 @@ func NewPlugin(ctx ocm.Context, impl cache.Plugin, config json.RawMessage) Plugi
 		ctx:    ctx,
 		impl:   impl,
 		config: config,
+	}
+}
+
+func (p *pluginImpl) ConfigurePlugin(name string, data json.RawMessage) {
+	if name == p.Name() {
+		p.config = data
 	}
 }
 
@@ -62,8 +71,8 @@ func (p *pluginImpl) ValidateAccessMethod(spec []byte) (*ppi.AccessSpecInfo, err
 	return &info, nil
 }
 
-func (p *pluginImpl) ValidateUploadTarget(spec []byte) (*ppi.UploadTargetSpecInfo, error) {
-	result, err := p.Exec(nil, nil, upload.Name, uplval.Name, string(spec))
+func (p *pluginImpl) ValidateUploadTarget(name string, spec []byte) (*ppi.UploadTargetSpecInfo, error) {
+	result, err := p.Exec(nil, nil, upload.Name, uplval.Name, name, string(spec))
 	if err != nil {
 		return nil, errors.Wrapf(err, "plugin %s", p.Name())
 	}
@@ -79,26 +88,26 @@ func (p *pluginImpl) ValidateUploadTarget(spec []byte) (*ppi.UploadTargetSpecInf
 func (p *pluginImpl) Get(w io.Writer, creds, spec json.RawMessage) error {
 	args := []string{accessmethod.Name, get.Name, string(spec)}
 	if creds != nil {
-		args = append(args, get.OptCreds, string(creds))
+		args = append(args, "--"+get.OptCreds, string(creds))
 	}
 	_, err := p.Exec(nil, w, args...)
 	return err
 }
 
-func (p *pluginImpl) Put(r io.Reader, artType, mimeType, hint string, creds, target json.RawMessage) (ocm.AccessSpec, error) {
-	args := []string{upload.Name, put.Name, string(target)}
+func (p *pluginImpl) Put(name string, r io.Reader, artType, mimeType, hint string, creds, target json.RawMessage) (ocm.AccessSpec, error) {
+	args := []string{upload.Name, put.Name, name, string(target)}
 
 	if creds != nil {
-		args = append(args, put.OptCreds, string(creds))
+		args = append(args, "--"+put.OptCreds, string(creds))
 	}
 	if hint != "" {
-		args = append(args, put.OptHint, hint)
+		args = append(args, "--"+put.OptHint, hint)
 	}
 	if mimeType != "" {
-		args = append(args, put.OptMedia, mimeType)
+		args = append(args, "--"+put.OptMedia, mimeType)
 	}
 	if artType != "" {
-		args = append(args, put.OptArt, artType)
+		args = append(args, "--"+put.OptArt, artType)
 	}
 	result, err := p.Exec(r, nil, args...)
 	if err != nil {

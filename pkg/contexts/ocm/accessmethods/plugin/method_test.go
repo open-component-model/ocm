@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+//go:build unix
+
 package plugin_test
 
 import (
@@ -67,23 +69,18 @@ someattr: value
 			})
 		})
 
-		repo, err := ctf.Open(ctx, accessobj.ACC_READONLY, ARCH, 0, env)
-		Expect(err).To(Succeed())
+		repo := Must(ctf.Open(ctx, accessobj.ACC_READONLY, ARCH, 0, env))
 		defer Close(repo)
 
-		cv, err := repo.LookupComponentVersion(COMP, VERS)
-		Expect(err).To(Succeed())
+		cv := Must(repo.LookupComponentVersion(COMP, VERS))
 		defer Close(cv)
 
-		r, err := cv.GetResourceByIndex(0)
-		Expect(err).To(Succeed())
+		r := Must(cv.GetResourceByIndex(0))
 
-		m, err := r.AccessMethod()
-		Expect(err).To(Succeed())
+		m := Must(r.AccessMethod())
 		Expect(m.MimeType()).To(Equal("plain/text"))
 
-		data, err := m.Get()
-		Expect(err).To(Succeed())
+		data := Must(m.Get())
 		Expect(string(data)).To(Equal("test content\n{\"someattr\":\"value\",\"type\":\"test\"}\n"))
 	})
 })

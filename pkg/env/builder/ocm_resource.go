@@ -17,6 +17,7 @@ type ocmResource struct {
 	meta   compdesc.ResourceMeta
 	access compdesc.AccessSpec
 	blob   accessio.BlobAccess
+	hint   string
 }
 
 const T_OCMRESOURCE = "resource"
@@ -30,6 +31,7 @@ func (r *ocmResource) Set() {
 	r.Builder.ocm_acc = &r.access
 	r.Builder.ocm_meta = &r.meta.ElementMeta
 	r.Builder.blob = &r.blob
+	r.Builder.hint = &r.hint
 }
 
 func (r *ocmResource) Close() error {
@@ -37,7 +39,7 @@ func (r *ocmResource) Close() error {
 	case r.access != nil:
 		return r.Builder.ocm_vers.SetResource(&r.meta, r.access)
 	case r.blob != nil:
-		return r.Builder.ocm_vers.SetResourceBlob(&r.meta, r.blob, "", nil)
+		return r.Builder.ocm_vers.SetResourceBlob(&r.meta, r.blob, r.hint, nil)
 	}
 	return errors.New("access or blob required")
 }

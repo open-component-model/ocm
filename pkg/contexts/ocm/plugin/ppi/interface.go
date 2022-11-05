@@ -9,7 +9,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/internal"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -23,10 +22,12 @@ type (
 )
 
 const (
-	KIND_PLUGIN       = "plugin"
-	KIND_UPLOADER     = "uploader"
-	KIND_ACCESSMETHOD = errors.KIND_ACCESSMETHOD
+	KIND_PLUGIN       = internal.KIND_PLUGIN
+	KIND_UPLOADER     = internal.KIND_UPLOADER
+	KIND_ACCESSMETHOD = internal.KIND_ACCESSMETHOD
 )
+
+var TAG = internal.TAG
 
 type Plugin interface {
 	Name() string
