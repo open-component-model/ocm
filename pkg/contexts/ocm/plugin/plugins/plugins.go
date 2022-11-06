@@ -111,7 +111,7 @@ func (pi *pluginsImpl) RegisterExtensions() error {
 		}
 
 		for _, u := range p.GetDescriptor().Uploaders {
-			for _, c := range u.Costraints {
+			for _, c := range u.Constraints {
 				if c.ContextType != "" && c.RepositoryType != "" && c.MediaType != "" {
 					hdlr, err := blob.New(p, u.Name, nil)
 					if err != nil {

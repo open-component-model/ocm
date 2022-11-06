@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package internal_test
+package registry_test
 
 import (
 	"testing"
@@ -13,5 +13,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Plugin Internal Test Suite")
+	RunSpecs(t, "Artefact Context Registry Test Suite")
 }

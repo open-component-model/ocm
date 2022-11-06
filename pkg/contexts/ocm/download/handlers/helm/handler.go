@@ -27,7 +27,7 @@ const TYPE = consts.HelmChart
 type Handler struct{}
 
 func init() {
-	download.Register(TYPE, &Handler{})
+	download.RegisterForArtefactType(TYPE, &Handler{})
 }
 
 func (h Handler) Download(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {

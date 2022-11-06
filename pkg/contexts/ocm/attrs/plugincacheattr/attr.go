@@ -42,3 +42,11 @@ func RegisterBlobHandler(ctx ocm.Context, pname, name string, artType, mediaType
 	}
 	return set.RegisterBlobHandler(pname, name, artType, mediaType, target)
 }
+
+func RegisterDownloadHandler(ctx ocm.Context, pname, name string, artType, mediaType string) error {
+	set := Get(ctx)
+	if set == nil {
+		return errors.ErrUnknown(plugin.KIND_PLUGIN, pname)
+	}
+	return set.RegisterDownloadHandler(pname, name, artType, mediaType)
+}

@@ -7,7 +7,6 @@
 package plugin_test
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -17,27 +16,23 @@ import (
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/config"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
+	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const PLUGIN = "test"
 
 const ARCH = "ctf"
-const OUT = "/tmp/res"
 const COMP = "github.com/mandelsoft/comp"
 const VERS = "1.0.0"
 const PROVIDER = "mandelsoft"
@@ -46,21 +41,8 @@ const MEDIA = "text/plain"
 
 const REPOTYPE = "test/v1"
 const ACCTYPE = "test/v1"
-const REPO = "plugin"
 const CONTENT = "some test content\n"
 const HINT = "given"
-
-type RepoSpec struct {
-	runtime.ObjectVersionedType
-	Path string `json:"path"`
-}
-
-func NewRepoSpec(path string) *RepoSpec {
-	return &RepoSpec{
-		ObjectVersionedType: runtime.ObjectVersionedType{Type: REPOTYPE},
-		Path:                path,
-	}
-}
 
 type AccessSpec struct {
 	runtime.ObjectVersionedType
@@ -84,9 +66,6 @@ var _ = Describe("setup plugin cache", func() {
 	var repodir string
 	var env *Builder
 
-	var accessSpec = NewAccessSpec(MEDIA, "given", REPO)
-	var repoSpec = NewRepoSpec(REPO)
-
 	BeforeEach(func() {
 		repodir = Must(os.MkdirTemp(os.TempDir(), "uploadtest-*"))
 
@@ -98,7 +77,6 @@ var _ = Describe("setup plugin cache", func() {
 		Expect(p).NotTo(BeNil())
 
 		ctx.ConfigContext().ApplyConfig(config.New(PLUGIN, []byte(fmt.Sprintf(`{"root": "`+repodir+`"}`))), "plugin config")
-		registry.RegisterExtensions()
 	})
 
 	AfterEach(func() {
@@ -106,8 +84,7 @@ var _ = Describe("setup plugin cache", func() {
 		os.RemoveAll(repodir)
 	})
 
-	It("uploads artefact", func() {
-
+	It("downloads resource", func() {
 		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
 			env.Component(COMP, func() {
 				env.Version(VERS, func() {
@@ -115,7 +92,6 @@ var _ = Describe("setup plugin cache", func() {
 					env.Resource("testdata", VERS, RSCTYPE, metav1.LocalRelation, func() {
 						env.Hint(HINT)
 						env.BlobStringData(MEDIA, CONTENT)
-						//env.Access(NewAccessSpec(MEDIA, "given", "dummy"))
 					})
 				})
 			})
@@ -127,33 +103,27 @@ var _ = Describe("setup plugin cache", func() {
 		cv := Must(repo.LookupComponentVersion(COMP, VERS))
 		defer Close(cv, "source version")
 
-		MustFailWithMessage(plugincacheattr.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", []byte("{}")),
-			"plugin test: path missing in repository spec",
+		MustFailWithMessage(plugincacheattr.RegisterDownloadHandler(env.OCMContext(), "test", "", "blah", ""),
+			"no downloader found for [art:\"blah\", media:\"\"]",
 		)
-		repospec := Must(json.Marshal(repoSpec))
-		MustBeSuccessful(plugincacheattr.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", repospec))
+		MustBeSuccessful(plugincacheattr.RegisterDownloadHandler(env.OCMContext(), "test", "", RSCTYPE, ""))
 
-		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
-		defer Close(tgt, "target repo")
+		racc := Must(cv.GetResourceByIndex(0))
 
-		MustBeSuccessful(transfer.TransferVersion(nil, nil, cv, tgt, Must(standard.New(standard.ResourcesByValue()))))
-		Expect(env.DirExists(OUT)).To(BeTrue())
+		file := filepath.Join(repodir, "download")
 
-		Expect(vfs.FileExists(osfs.New(), filepath.Join(repodir, REPO, HINT))).To(BeTrue())
+		octx, buf := out.NewBuffered()
+		ok, eff, err := download.For(env.OCMContext()).Download(octx, racc, file, nil)
 
-		tcv := Must(tgt.LookupComponentVersion(COMP, VERS))
-		defer Close(tcv, "target version")
+		MustBeSuccessful(err)
+		Expect(buf.String()).To(Equal(""))
+		Expect(eff).To(Equal(file))
+		Expect(ok).To(BeTrue())
 
-		r := Must(tcv.GetResourceByIndex(0))
-		a := Must(r.Access())
+		data := Must(os.ReadFile(file))
+		Expect(string(data)).To(StringEqualTrimmedWithContext(`
+downloaded
+` + CONTENT))
 
-		var spec AccessSpec
-		MustBeSuccessful(json.Unmarshal(Must(json.Marshal(a)), &spec))
-		Expect(spec).To(Equal(*accessSpec))
-
-		m := Must(a.AccessMethod(tcv))
-		defer Close(m, "method")
-
-		Expect(string(Must(m.Get()))).To(Equal(CONTENT))
 	})
 })

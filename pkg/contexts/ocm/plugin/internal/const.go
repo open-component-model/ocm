@@ -12,6 +12,7 @@ import (
 
 const (
 	KIND_PLUGIN       = "plugin"
+	KIND_DOWNLOADER   = "downloader"
 	KIND_UPLOADER     = "uploader"
 	KIND_ACCESSMETHOD = errors.KIND_ACCESSMETHOD
 )

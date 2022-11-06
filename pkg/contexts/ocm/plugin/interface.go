@@ -19,5 +19,9 @@ var TAG = internal.TAG
 type (
 	Descriptor           = internal.Descriptor
 	AccessSpecInfo       = internal.AccessSpecInfo
+	DownloaderDescriptor = internal.DownloaderDescriptor
+	DownloaderKey        = internal.DownloaderKey
+	UploaderDescriptor   = internal.UploaderDescriptor
+	UploaderKey          = internal.UploaderKey
 	UploadTargetSpecInfo = internal.UploadTargetSpecInfo
 )

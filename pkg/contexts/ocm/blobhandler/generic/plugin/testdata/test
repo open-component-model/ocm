@@ -59,7 +59,7 @@ extract() {
 }
 
 Info() {
-  echo '{"accessMethods":[{"description":"","name":"test","shortDescription":"test access"},{"description":"","name":"test","shortDescription":"test access","version":"v1"}],"description":"a test plugin with access method test","pluginName":"'$NAME'","pluginVersion":"v1","shortDescription":"a test plugin","uploaders":[{"constraints":[{"artefactType":"TestArtefact"}],"name":"testuploader"}],"version":"v1"}'
+  echo '{"accessMethods":[{"description":"","name":"test","shortDescription":"test access"},{"description":"","name":"test","shortDescription":"test access","version":"v1"}],"description":"a test plugin with access method test","pluginName":"'$NAME'","pluginVersion":"v1","shortDescription":"a test plugin","uploaders":[{"constraints":[{"artifactType":"TestArtefact"}],"name":"testuploader"}],"version":"v1"}'
 }
 
 Configure() {

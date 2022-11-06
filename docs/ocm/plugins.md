@@ -70,11 +70,20 @@ following fields:
   This feature is already used to establish new access types, if
   the plugins are registered at an OCM context.
 
-- **`uploaders`** *[]UploaderDescriptor*  **Not yet used**
+- **`uploaders`** *[]UploaderDescriptor*
   
   The list of supported uploaders. Uploaders will be used in a future
   version to describe foreign repository targets for local blobs
   of dedicated types imported into an OCM registry.
+
+- **`downloaders`** *[]DownloaderDescriptor*
+
+  The list of supported downloaders. Downloaders will be used by the
+  CLI download command to provide downloaded artifacts in a filesystem format
+  applicable to the type specific tools, regatdless of the format it is stored
+  as blob in a component version. Therefore they can be registered for
+  combination of artifact type and optional mime type (describing the actually
+  used blob format).
 
 #### Access Method Descriptor
 
@@ -100,7 +109,7 @@ It uses the following fields:
 
 #### Uploader Descriptor
 
-The descriptor for an uploader has the following preliminary fields:
+The descriptor for an uploader has the following fields:
 
 - **`name`** *string*
 
@@ -133,7 +142,32 @@ The descriptor for an uploader has the following preliminary fields:
     Restrict the usage to a dedicated implementation of the backend technology.
     If specified, the attribute `contextType` must be set, also.
 
-### `accessmethods` (Access Method related Commands))
+#### Downloader Descriptor
+
+The descriptor for a downloader has the following fields:
+
+- **`name`** *string*
+
+  The name of the uploader.
+
+- **`description`** *string*
+
+  The description of the uploader
+
+- **`constraints`** *[]DownloadConstraint*
+
+  The list of constraints the downloader is usable for. A constraint is described
+  by two fields:
+
+  - **`artifactType`** *string*
+
+    Restrict the usage to a dedicated artifact type.
+
+  - **`mediaType`** *string* (optional)
+
+    Restrict the usage to a dedicated media type of the artifact blob.
+
+### `accessmethods` (Access Method related Commands)
 
 This command group provides all commands used to implement an access method
 described by an access method descriptor. It requires the following 
@@ -231,6 +265,26 @@ following fields:
 Read the blob content from *stdin*, store the blob and return the
 access specification (as JSON string) usable to retrieve the blob, again,
 on * stdout* 
+
+### `download` (Download an Artifact Bob to a (set of) filesystem file(s))
+
+**Synopsis:** `<plugin> [-c <pluginconfig>] download <name> <targetpath>`
+
+**Options:**
+
+```
+  -a, --artifactType string   artifact type of input blob
+  -m, --mediaType string      media type of input blob
+```
+
+This command accepts a target filepath as argument. It is used as base name
+to store the downloaded content. The blob content is provided on the
+standard input.
+
+The task of this command is to transform the content of the provided 
+blob into a filesystem structure applicable to the tools working
+with content of the given artifact type.
+
 
 ## Implementation support
 

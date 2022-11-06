@@ -6,6 +6,7 @@ package plugin
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"sync"
 
@@ -16,6 +17,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/get"
 	accval "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/validate"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload/put"
 	uplval "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload/validate"
@@ -122,6 +124,30 @@ func (p *pluginImpl) Put(name string, r io.Reader, artType, mimeType, hint strin
 		return nil, nil // not used
 	}
 	return p.ctx.AccessSpecForConfig(result, runtime.DefaultJSONEncoding)
+}
+
+func (p *pluginImpl) Download(name string, r io.Reader, artType, mimeType, target string) (bool, string, error) {
+	args := []string{download.Name, name, target}
+
+	if mimeType != "" {
+		args = append(args, "--"+put.OptMedia, mimeType)
+	}
+	if artType != "" {
+		args = append(args, "--"+put.OptArt, artType)
+	}
+	result, err := p.Exec(r, nil, args...)
+	if err != nil {
+		return true, "", err
+	}
+	var m download.Result
+	err = json.Unmarshal(result, &m)
+	if err != nil {
+		return true, "", errors.Wrapf(err, "cannot unmarshal put result")
+	}
+	if m.Error != "" {
+		return true, "", fmt.Errorf("%s", m.Error)
+	}
+	return m.Path != "", m.Path, nil
 }
 
 func (p *pluginImpl) Exec(r io.Reader, w io.Writer, args ...string) ([]byte, error) {

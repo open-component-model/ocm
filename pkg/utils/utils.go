@@ -236,21 +236,14 @@ func JoinIndentLines(orig []string, gap string, skipfirst ...bool) string {
 	return s + strings.Join(orig, "\n"+gap)
 }
 
-func StringMapKeys(m interface{}) []string {
+func StringMapKeys[E any](m map[string]E) []string {
 	if m == nil {
 		return nil
 	}
-	v := reflect.ValueOf(m)
-	if v.Kind() != reflect.Map {
-		panic(fmt.Sprintf("%T is no map", m))
-	}
-	if v.Type().Key().Kind() != reflect.String {
-		panic(fmt.Sprintf("map key of %T is no string", m))
-	}
 
 	keys := []string{}
-	for _, k := range v.MapKeys() {
-		keys = append(keys, k.Interface().(string))
+	for k := range m {
+		keys = append(keys, k)
 	}
 	sort.Strings(keys)
 	return keys
