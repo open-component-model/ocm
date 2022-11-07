@@ -3,7 +3,7 @@
 The Open Component Model provides a standard for describing delivery [artefacts](docs/ocm/model.md#artefacts) that can be accessed from many types of [component repositories](docs/ocm/model.md#repositories).
 
 ## OCM Specifications
-OCM defines a set of semantic, formatting, and other types of specifications that can be found in the [`ocm-spec` repository](https://github.com/open-component-mode/ocm-spec). Start learning about the core concepts of OCM elements [here](https://github.com/open-component-model/ocm-spec/tree/main/doc/specification/elements).
+OCM defines a set of semantic, formatting, and other types of specifications that can be found in the [`ocm-spec` repository](https://github.com/open-component-model/ocm-spec). Start learning about the core concepts of OCM elements [here](https://github.com/open-component-model/ocm-spec/tree/main/doc/specification/elements).
 
 ## OCM Library
 This project provides a Go library containing an API for interacting with the
