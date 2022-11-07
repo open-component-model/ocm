@@ -26,6 +26,8 @@ type ConfigOptions interface {
 
 	AddFlags(fs *pflag.FlagSet)
 
+	Options() []Option
+
 	Check(set ConfigOptionTypeSet, desc string) error
 	GetValue(name string) (interface{}, bool)
 	Changed(names ...string) bool
@@ -52,6 +54,10 @@ func (o *configOptions) AddTypeSetGroupsToOptions(set ConfigOptionTypeSet) {
 	for _, opt := range o.options {
 		set.AddGroupsToOption(opt)
 	}
+}
+
+func (o *configOptions) Options() []Option {
+	return append(o.options[:0:0], o.options...)
 }
 
 func (o *configOptions) GetValue(name string) (interface{}, bool) {

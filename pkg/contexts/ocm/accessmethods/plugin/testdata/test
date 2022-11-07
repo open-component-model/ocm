@@ -11,8 +11,38 @@ Error() {
   exit 1
 }
 
+extract() {
+   v="$(echo "$2" | sed 's/.*"'$1'": *"\([^"]*\)".*/\1/')"
+  if [ "$v" != "$2" ]; then
+     echo "$v"
+  fi
+}
+
+setfield() {
+  local v
+  v="$(echo "$BASE" | sed 's/"'$1'": *"[^"]*"/"'$1'":"'${2//\//\\\/}'"/')"
+  if [ "$v" == "$BASE" ]; then
+    v="$(echo "$BASE" | sed 's/^{"/{"'$1'":"'${2//\//\\\/}'","/')"
+  fi
+  if [ "$v" == "$BASE" ]; then
+    v="$(echo "$BASE" | sed 's/^{/{"'$1'":"'${2//\//\\\/}'"/')"
+  fi
+  BASE="$v"
+}
+
+setopt() {
+  local v
+  v="$(extract "$1" "$OPTS")"
+  if [ -n "$v" ]; then
+    setfield "$2" "$v"
+  fi
+}
+
 Info() {
-  echo '{"version":"v1","pluginName":"'$NAME'","pluginVersion":"v1","shortDescription":"a test plugin","description":"a test plugin with access method test","accessMethods":[{"name":"test","shortDescription":"test access","description":""},{"name":"test","version":"v1","shortDescription":"test access","description":""}]}
+  PATHOPT='{"name":"accessPath","type":"string","description":"file path"}'
+  MEDIAOPT='{"name":"mediaType"}'
+  OPTS='['$PATHOPT','$MEDIAOPT']'
+  echo '{"version":"v1","pluginName":"'$NAME'","pluginVersion":"v1","shortDescription":"a test plugin","description":"a test plugin with access method test","accessMethods":[{"name":"test","shortDescription":"test access","description":"","options":'$OPTS'},{"name":"test","version":"v1","shortDescription":"test access","description":""}]}
 '
 }
 
@@ -27,10 +57,20 @@ Validate() {
   echo '{"short":"a test","mediaType":"plain/text","description":"","hint":"testfile","consumerId":{"hostname":"localhost","type":"test"}}'
 }
 
+Compose() {
+  BASE="$3"
+  OPTS="$2"
+
+  setopt accessPath path
+  setopt mediaType mediaType
+  echo "$BASE"
+}
+
 AccessMethod() {
   case "$1" in
     get) Get "${@:2}";;
     validate) Validate "${@:2}";;
+    compose) Compose "${@:2}";;
     *) Error "invalid accessmethod command $1";;
   esac
 }

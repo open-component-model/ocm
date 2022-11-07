@@ -107,7 +107,7 @@ func (pi *pluginsImpl) RegisterExtensions() error {
 			pi.ctx.Logger(internal.TAG).Info("registering access method",
 				"plugin", p.Name(),
 				"type", name)
-			pi.ctx.AccessMethods().Register(name, access.NewType(name, p, m.Description, m.Format))
+			pi.ctx.AccessMethods().Register(name, access.NewType(name, p, &m))
 		}
 
 		for _, u := range p.GetDescriptor().Uploaders {

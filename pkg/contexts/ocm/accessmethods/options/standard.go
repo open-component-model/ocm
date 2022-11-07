@@ -9,37 +9,37 @@ import (
 )
 
 // HintOption.
-var HintOption = flagsets.NewStringOptionType("hint", "(repository) hint for local artifacts")
+var HintOption = RegisterOption(flagsets.NewStringOptionType("hint", "(repository) hint for local artifacts"))
 
 // MediatypeOption.
-var MediatypeOption = flagsets.NewStringOptionType("mediaType", "media type for artifact blob representation")
+var MediatypeOption = RegisterOption(flagsets.NewStringOptionType("mediaType", "media type for artifact blob representation"))
 
 // SizeOption.
-var SizeOption = flagsets.NewIntOptionType("size", "blob size")
+var SizeOption = RegisterOption(flagsets.NewIntOptionType("size", "blob size"))
 
 // DigestOption.
-var DigestOption = flagsets.NewStringOptionType("digest", "blob digest")
+var DigestOption = RegisterOption(flagsets.NewStringOptionType("digest", "blob digest"))
 
 // ReferenceOption.
-var ReferenceOption = flagsets.NewStringOptionType("reference", "reference name")
+var ReferenceOption = RegisterOption(flagsets.NewStringOptionType("reference", "reference name"))
 
 // RepositoryOption.
-var RepositoryOption = flagsets.NewStringOptionType("accessRepository", "repository URL")
+var RepositoryOption = RegisterOption(flagsets.NewStringOptionType("accessRepository", "repository URL"))
 
 // HostnameOption.
-var HostnameOption = flagsets.NewStringOptionType("accessHostname", "hostname used for access")
+var HostnameOption = RegisterOption(flagsets.NewStringOptionType("accessHostname", "hostname used for access"))
 
 // CommitOption.
-var CommitOption = flagsets.NewStringOptionType("commit", "git commit id")
+var CommitOption = RegisterOption(flagsets.NewStringOptionType("commit", "git commit id"))
 
 // GlobalAccessOption.
-var GlobalAccessOption = flagsets.NewValueMapYAMLOptionType("globalAccess", "access specification for global access")
+var GlobalAccessOption = RegisterOption(flagsets.NewValueMapYAMLOptionType("globalAccess", "access specification for global access"))
 
 // RegionOption.
-var RegionOption = flagsets.NewStringOptionType("region", "region name")
+var RegionOption = RegisterOption(flagsets.NewStringOptionType("region", "region name"))
 
 // BucketOption.
-var BucketOption = flagsets.NewStringOptionType("bucket", "bucket name")
+var BucketOption = RegisterOption(flagsets.NewStringOptionType("bucket", "bucket name"))
 
 // VersionOption.
 var VersionOption = flagsets.NewStringOptionType("accessVersion", "version for access specification")

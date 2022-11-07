@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package plugin_test
+package options_test
 
 import (
 	"testing"
@@ -11,13 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-type AccessSpec struct {
-	Type      string `json:"type"`
-	Path      string `json:"path"`
-	MediaType string `json:"mediaType"`
-}
-
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Plugin Access Method Test Suite")
+	RunSpecs(t, "CLI Option Definition Test Suite")
 }

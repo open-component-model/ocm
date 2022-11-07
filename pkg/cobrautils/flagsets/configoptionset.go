@@ -26,6 +26,7 @@ type ConfigOptionTypeSet interface {
 
 	Name() string
 
+	Size() int
 	OptionTypes() []ConfigOptionType
 	OptionTypeNames() []string
 	SharedOptionTypes() []ConfigOptionType
@@ -109,6 +110,12 @@ func (s *configOptionTypeSet) AddOptionType(optionType ConfigOptionType) error {
 	name := optionType.Name()
 	s.options[name] = optionType
 	return nil
+}
+
+func (s *configOptionTypeSet) Size() int {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+	return len(s.options)
 }
 
 func (s *configOptionTypeSet) OptionTypes() []ConfigOptionType {

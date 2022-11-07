@@ -69,6 +69,7 @@ type AccessMethod interface {
 
 	ValidateSpecification(p Plugin, spec AccessSpec) (info *AccessSpecInfo, err error)
 	Reader(p Plugin, spec AccessSpec, creds credentials.Credentials) (io.ReadCloser, error)
+	ComposeAccessSpecification(p Plugin, opts Config, config Config) error
 }
 
 type AccessSpec runtime.VersionedTypedObject
