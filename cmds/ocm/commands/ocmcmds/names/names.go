@@ -14,5 +14,5 @@ var (
 	Sources                = []string{"sources", "source", "src", "s"}
 	References             = []string{"references", "reference", "refs"}
 	Versions               = []string{"versions", "vers", "v"}
-	Plugins                = []string{"plugins", "p"}
+	Plugins                = []string{"plugins", "plugin", "p"}
 )

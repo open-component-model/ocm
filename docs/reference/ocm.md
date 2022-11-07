@@ -140,6 +140,7 @@ attributes are supported:
 * [ocm <b>describe</b>](ocm_describe.md)	 &mdash; Describe artefacts
 * [ocm <b>download</b>](ocm_download.md)	 &mdash; Download oci artefacts, resources or complete components
 * [ocm <b>get</b>](ocm_get.md)	 &mdash; Get information about artefacts and components
+* [ocm <b>install</b>](ocm_install.md)	 &mdash; Install elements.
 * [ocm <b>show</b>](ocm_show.md)	 &mdash; Show tags or versions
 * [ocm <b>sign</b>](ocm_sign.md)	 &mdash; Sign components
 * [ocm <b>transfer</b>](ocm_transfer.md)	 &mdash; Transfer artefacts or components
@@ -153,5 +154,6 @@ attributes are supported:
 * [ocm <b>attributes</b>](ocm_attributes.md)	 &mdash; configuration attributes used to control the behaviour
 * [ocm <b>configfile</b>](ocm_configfile.md)	 &mdash; configuration file
 * [ocm <b>oci-references</b>](ocm_oci-references.md)	 &mdash; notation for OCI references
+* [ocm <b>ocm-accessmethods</b>](ocm_ocm-accessmethods.md)	 &mdash; List of all supported access methods
 * [ocm <b>ocm-references</b>](ocm_ocm-references.md)	 &mdash; notation for OCM references
 * [ocm <b>toi-bootstrapping</b>](ocm_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions

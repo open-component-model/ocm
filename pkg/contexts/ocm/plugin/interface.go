@@ -24,5 +24,6 @@ type (
 	DownloaderKey          = internal.DownloaderKey
 	UploaderDescriptor     = internal.UploaderDescriptor
 	UploaderKey            = internal.UploaderKey
+	UploaderKeySet         = internal.UploaderKeySet
 	UploadTargetSpecInfo   = internal.UploadTargetSpecInfo
 )

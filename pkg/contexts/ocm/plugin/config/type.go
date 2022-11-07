@@ -18,8 +18,8 @@ const (
 )
 
 func init() {
-	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &Config{}))
-	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &Config{}))
+	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &Config{}, usage))
+	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &Config{}, usage))
 }
 
 // Config describes a memory based config interface.
@@ -54,3 +54,14 @@ func (a *Config) ApplyTo(ctx config.Context, target interface{}) error {
 type Target interface {
 	ConfigurePlugin(name string, config json.RawMessage)
 }
+
+const usage = `
+The config type <code>` + ConfigType + `</code> can be used to configure a 
+plugin.
+
+<pre>
+    type: ` + ConfigType + `
+    plugin: &lt;plugin name>
+    config: &lt;arbitrary configuration structure>
+</pre>
+`

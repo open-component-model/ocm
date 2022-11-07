@@ -9,15 +9,16 @@ ocm transfer componentversions [<options>] {<component-reference>} <target>
 ### Options
 
 ```
-  -V, --copy-resources       transfer referenced resources by-value
-  -h, --help                 help for componentversions
-      --lookup stringArray   repository name or spec for closure lookup fallback
-  -f, --overwrite            overwrite existing component versions
-  -r, --recursive            follow component reference nesting
-      --repo string          repository name or spec
-      --script string        config name of transfer handler script
-  -s, --scriptFile string    filename of transfer handler script
-  -t, --type string          archive format (directory, tar, tgz) (default "directory")
+  -V, --copy-resources            transfer referenced resources by-value
+  -h, --help                      help for componentversions
+      --lookup stringArray        repository name or spec for closure lookup fallback
+  -f, --overwrite                 overwrite existing component versions
+  -r, --recursive                 follow component reference nesting
+      --repo string               repository name or spec
+      --script string             config name of transfer handler script
+  -s, --scriptFile string         filename of transfer handler script
+  -t, --type string               archive format (directory, tar, tgz) (default "directory")
+      --uploader <name>=<value>   repository uploader (<name>:<artefact type>:<media type>=<JSON target config)
 ```
 
 ### Description
@@ -99,6 +100,18 @@ resources will potentially be localized, mapped to component version local
 resources in the target repository.
 This behaviour can be further influenced by specifying a transfer script
 with the <code>script</code> option family.
+
+If the <code>--uploader</code> option is specified, appropriate uploaders
+are configured for the transport target. It has the following format
+
+<center>
+    <pre>&lt;name>:&lt;artefact type>:&lt;media type>=&lt;yaml target config></pre>
+</center>
+
+The uploader name may be a path expression with the following possibilities:
+- <code>ocm/ociRegistry</code>: oci Registry upload for local OCI artefact blobs.
+  The media type is optional. If given ist must be an OCI artefact media type.
+- <code>plugin/<plugin name>[/<uploader name]</code>: uploader provided by plugin.
 
 It is possible to use a dedicated transfer script based on spiff.
 The option <code>--scriptFile</code> can be used to specify this script

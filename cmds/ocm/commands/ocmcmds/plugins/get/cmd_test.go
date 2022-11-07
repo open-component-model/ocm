@@ -39,8 +39,8 @@ var _ = Describe("Test Environment", func() {
 		Expect(env.CatchOutput(buf).Execute("-X", "plugindir="+path, "get", "plugins")).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
-PLUGIN VERSION DESCRIPTION
-test   v1      a test plugin without function
+PLUGIN VERSION SOURCE DESCRIPTION
+test   v1      local  a test plugin without function
 `))
 	})
 	It("get plugins with additional info", func() {
@@ -48,8 +48,8 @@ test   v1      a test plugin without function
 		Expect(env.CatchOutput(buf).Execute("-X", "plugindir="+path, "get", "plugins", "-o", "wide")).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
-PLUGIN VERSION DESCRIPTION                    ACCESSMETHODS UPLOADERS DOWNLOADERS
-test   v1      a test plugin without function test,test/v1
+PLUGIN VERSION SOURCE DESCRIPTION                    ACCESSMETHODS UPLOADERS DOWNLOADERS
+test   v1      local  a test plugin without function test[v1]
 `))
 	})
 

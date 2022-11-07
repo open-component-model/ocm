@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/ociuploadattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func init() {
@@ -29,14 +30,19 @@ func init() {
 ////////////////////////////////////////////////////////////////////////////////
 
 // artefactHandler stores artefact blobs as OCIArtefacts.
-type artefactHandler struct{}
+type artefactHandler struct {
+	spec *ociuploadattr.Attribute
+}
 
-func NewArtefactHandler() cpi.BlobHandler {
-	return &artefactHandler{}
+func NewArtefactHandler(repospec ...*ociuploadattr.Attribute) cpi.BlobHandler {
+	return &artefactHandler{utils.Optional(repospec...)}
 }
 
 func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
-	attr := ociuploadattr.Get(ctx.GetContext())
+	attr := b.spec
+	if attr == nil {
+		attr = ociuploadattr.Get(ctx.GetContext())
+	}
 	if attr == nil {
 		return nil, nil
 	}

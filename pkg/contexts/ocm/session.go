@@ -67,6 +67,22 @@ func newSession(s datacontext.SessionBase) datacontext.Session {
 	}
 }
 
+type Finalizer interface {
+	Finalize() error
+}
+
+type finalizer struct {
+	finalizer Finalizer
+}
+
+func (f *finalizer) Close() error {
+	return f.finalizer.Finalize()
+}
+
+func (s *session) Finalize(f Finalizer) {
+	s.Session.AddCloser(&finalizer{f})
+}
+
 func (s *session) Close() error {
 	return s.Session.Close()
 	// TODO: cleanup cache

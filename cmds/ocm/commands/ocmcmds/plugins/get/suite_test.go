@@ -13,5 +13,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "OCM get components")
+	RunSpecs(t, "OCM get plugins")
 }

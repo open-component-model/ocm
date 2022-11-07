@@ -9,23 +9,23 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/out"
 )
 
 const ALL = "*"
 
 type Handler interface {
-	Download(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error)
+	Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error)
 }
 
 type Registry interface {
 	Register(arttype, mediatype string, hdlr Handler)
 	Handler
-	DownloadAsBlob(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error)
+	DownloadAsBlob(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error)
 }
 
 type _registry struct {
@@ -52,7 +52,7 @@ func (r *_registry) getHandlers(arttype, mediatype string) []Handler {
 	return r.handlers.LookupHandler(registry.RegistrationKey{arttype, mediatype})
 }
 
-func (r *_registry) Download(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
+func (r *_registry) Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
 	art := racc.Meta().GetType()
 	m, err := racc.AccessMethod()
 	if err != nil {
@@ -60,20 +60,20 @@ func (r *_registry) Download(ctx out.Context, racc cpi.ResourceAccess, path stri
 	}
 	defer m.Close()
 	mime := m.MimeType()
-	if ok, p, err := r.download(r.getHandlers(art, mime), ctx, racc, path, fs); ok {
+	if ok, p, err := r.download(r.getHandlers(art, mime), p, racc, path, fs); ok {
 		return ok, p, err
 	}
-	return r.download(r.getHandlers(ALL, ""), ctx, racc, path, fs)
+	return r.download(r.getHandlers(ALL, ""), p, racc, path, fs)
 }
 
-func (r *_registry) DownloadAsBlob(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
-	return r.download(r.getHandlers(ALL, ""), ctx, racc, path, fs)
+func (r *_registry) DownloadAsBlob(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
+	return r.download(r.getHandlers(ALL, ""), p, racc, path, fs)
 }
 
-func (r *_registry) download(list []Handler, ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
+func (r *_registry) download(list []Handler, p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
 	errs := errors.ErrListf("download")
 	for _, h := range list {
-		ok, p, err := h.Download(ctx, racc, path, fs)
+		ok, p, err := h.Download(p, racc, path, fs)
 		if ok {
 			return ok, p, err
 		}

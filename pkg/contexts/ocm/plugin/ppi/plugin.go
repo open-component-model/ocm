@@ -5,6 +5,7 @@
 package ppi
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
@@ -29,6 +30,8 @@ type plugin struct {
 
 	methods      map[string]AccessMethod
 	accessScheme runtime.Scheme
+
+	configParser func(message json.RawMessage) (interface{}, error)
 }
 
 func NewPlugin(name string, version string) Plugin {
@@ -66,7 +69,7 @@ func (p *plugin) Descriptor() internal.Descriptor {
 	return p.descriptor
 }
 
-func (p *plugin) Options() *Options {
+func (p *plugin) GetOptions() *Options {
 	return &p.options
 }
 
@@ -76,6 +79,10 @@ func (p *plugin) SetLong(s string) {
 
 func (p *plugin) SetShort(s string) {
 	p.descriptor.Short = s
+}
+
+func (p *plugin) SetConfigParser(config func(raw json.RawMessage) (interface{}, error)) {
+	p.configParser = config
 }
 
 func (p *plugin) RegisterDownloader(arttype, mediatype string, hdlr Downloader) error {
@@ -232,7 +239,7 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 			optlist = append(optlist, CLIOption{
 				Name:        o.GetName(),
 				Type:        o.ValueType(),
-				Description: o.GetDescription(),
+				Description: o.GetDescriptionText(),
 			})
 		}
 	}
@@ -242,13 +249,11 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 			Name:        m.Name(),
 			Description: m.Description(),
 			Format:      m.Format(),
-			CLIOptions:  optlist,
 		}
 		p.descriptor.AccessMethods = append(p.descriptor.AccessMethods, meth)
 		p.accessScheme.RegisterByDecoder(m.Name(), m)
 		p.methods[m.Name()] = m
 		vers = "v1"
-		optlist = nil
 	}
 	meth := internal.AccessMethodDescriptor{
 		Name:        m.Name(),
@@ -277,4 +282,18 @@ func (p *plugin) GetAccessMethod(name string, version string) AccessMethod {
 		n += "/" + version
 	}
 	return p.methods[n]
+}
+
+func (p *plugin) GetConfig() (interface{}, error) {
+	if len(p.options.Config) == 0 {
+		return nil, nil
+	}
+	if p.configParser == nil {
+		var cfg interface{}
+		if err := json.Unmarshal(p.options.Config, &cfg); err != nil {
+			return nil, err
+		}
+		return &cfg, nil
+	}
+	return p.configParser(p.options.Config)
 }

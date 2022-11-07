@@ -19,6 +19,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 )
 
@@ -47,7 +48,7 @@ someattr: value
 		ctx = env.OCMContext()
 		plugindirattr.Set(ctx, "testdata")
 		registry = plugincacheattr.Get(ctx)
-		Expect(registry.RegisterExtensions()).To(Succeed())
+		Expect(registration.RegisterExtensions(ctx)).To(Succeed())
 		p := registry.Get("test")
 		Expect(p).NotTo(BeNil())
 	})

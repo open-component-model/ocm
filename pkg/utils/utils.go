@@ -298,3 +298,6 @@ func Must[T any](o T, err error) T {
 	}
 	return o
 }
+
+func IgnoreError(_ error) {
+}

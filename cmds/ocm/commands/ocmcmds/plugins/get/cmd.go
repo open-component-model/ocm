@@ -6,19 +6,21 @@ package get
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/spf13/cobra"
 
 	handler "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/pluginhdlr"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/plugins/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
 var (
@@ -36,7 +38,7 @@ type Command struct {
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(
 		&Command{
-			BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), output.OutputOptions(outputs)),
+			BaseCommand: utils.NewBaseCommand(ctx, output.OutputOptions(outputs)),
 		},
 		utils.Names(Names, names...)...,
 	)
@@ -46,18 +48,15 @@ func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
 		Use:   "[<options>] {<plugin name>}",
 		Short: "get plugins",
+		Long: `
+Get lists information for all plugins specified, if no plugin is specified
+all registered ones are listed.
+`,
 		Example: `
 $ ocm get plugins
 $ ocm get plugins demo -o yaml
 `,
 	}
-}
-
-func (o *Command) Long() string {
-	return `
-Get lists information for all plugins specified, if no plugin is specified
-all registered ones are listed.
-`
 }
 
 func (o *Command) Complete(args []string) error {
@@ -74,7 +73,7 @@ func (o *Command) Run() error {
 
 func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide ...string) *output.TableOutput {
 	def := &output.TableOutput{
-		Headers: output.Fields("PLUGIN", "VERSION", "DESCRIPTION", wide),
+		Headers: output.Fields("PLUGIN", "VERSION", "SOURCE", "DESCRIPTION", wide),
 		Options: opts,
 		Mapping: mapping,
 	}
@@ -97,50 +96,42 @@ func getWide(opts *output.Options) output.Output {
 
 func mapGetRegularOutput(e interface{}) interface{} {
 	p := handler.Elem(e)
-	return []string{p.Name(), p.Version(), p.Message()}
+	loc := "local"
+	src := p.GetSource()
+	if src != nil {
+		loc = src.Component + ":" + src.Version
+	}
+	return []string{p.Name(), p.Version(), loc, p.Message()}
 }
 
 func mapGetWideOutput(e interface{}) interface{} {
 	p := handler.Elem(e)
 	d := p.GetDescriptor()
 
-	var list []string
+	found := map[string][]string{}
 	for _, m := range d.AccessMethods {
-		n := m.Name
-		if m.Version != "" {
-			n += "/" + m.Version
+		l := found[m.Name]
+		v := m.Version
+		if v != "" {
+			l = append(l, v)
 		}
-		list = append(list, n)
+		found[m.Name] = l
+	}
+
+	var list []string
+	for _, m := range utils2.StringMapKeys(found) {
+		l := found[m]
+		if len(l) == 0 {
+			list = append(list, m)
+		} else {
+			sort.Strings(l)
+			list = append(list, fmt.Sprintf("%s[%s]", m, strings.Join(l, ",")))
+		}
 	}
 
 	// a working type inference would be really great
-	ups := Describe[plugin.UploaderDescriptor, plugin.UploaderKey](d.Uploaders)
-	downs := Describe[plugin.DownloaderDescriptor, plugin.DownloaderKey](d.Downloaders)
+	ups := common.DescribeElements[plugin.UploaderDescriptor, plugin.UploaderKey](d.Uploaders)
+	downs := common.DescribeElements[plugin.DownloaderDescriptor, plugin.DownloaderKey](d.Downloaders)
 
 	return output.Fields(mapGetRegularOutput(e), strings.Join(list, ","), ups, downs)
-}
-
-func Describe[E Element[C], C Stringer](elems []E) string {
-	var list []string
-	for _, m := range elems {
-		n := m.GetName()
-		var clist []string
-		for _, c := range m.GetConstraints() {
-			clist = append(clist, c.String())
-		}
-		if len(clist) > 0 {
-			n = fmt.Sprintf("%s[%s]", n, strings.Join(clist, ","))
-		}
-		list = append(list, n)
-	}
-	return strings.Join(list, ",")
-}
-
-type Stringer interface {
-	String() string
-}
-
-type Element[C Stringer] interface {
-	GetName() string
-	GetConstraints() []C
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/describe"
+	plugins "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/plugins/describe"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -19,5 +20,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 		Short: "Describe artefacts",
 	}, verbs.Describe)
 	cmd.AddCommand(resources.NewCommand(ctx))
+	cmd.AddCommand(plugins.NewCommand(ctx))
 	return cmd
 }

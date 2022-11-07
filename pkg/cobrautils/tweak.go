@@ -58,15 +58,15 @@ func SupportNestedHelpFunc(cmd *cobra.Command) {
 func CleanMarkdownUsageFunc(cmd *cobra.Command) {
 	defaultHelpFunc := cmd.HelpFunc()
 	cmd.SetHelpFunc(func(cmd *cobra.Command, s []string) {
-		cmd.Long = cleanMarkdown(cmd.Long)
-		cmd.Example = cleanMarkdown(cmd.Example)
+		cmd.Long = CleanMarkdown(cmd.Long)
+		cmd.Example = CleanMarkdown(cmd.Example)
 		defaultHelpFunc(cmd, s)
 	})
 }
 
 var center = regexp.MustCompile(" *</?(pre|center)> *\n?")
 
-func cleanMarkdown(s string) string {
+func CleanMarkdown(s string) string {
 	if strings.HasPrefix(s, "##") {
 		for strings.HasPrefix(s, "#") {
 			s = s[1:]
@@ -82,5 +82,33 @@ func cleanMarkdown(s string) string {
 	s = strings.ReplaceAll(s, "<EXAMPLE>", "")
 	s = strings.ReplaceAll(s, "</EXAMPLE>", "")
 	s = string(center.ReplaceAll([]byte(s), nil))
-	return s
+
+	var r []string
+	found := false
+	mask := false
+	for _, l := range strings.Split(s, "\n") {
+		if strings.Contains(l, "<pre>") {
+			mask = true
+		}
+		if strings.Contains(l, "</pre>") {
+			mask = false
+		}
+		if !mask {
+			if strings.HasSuffix(l, "\\") {
+				l = l[:len(l)-1]
+				found = true
+			} else {
+				if strings.TrimSpace(l) == "" {
+					if !found {
+						found = true
+						continue
+					}
+				} else {
+					found = false
+				}
+			}
+		}
+		r = append(r, l)
+	}
+	return strings.Join(r, "\n")
 }

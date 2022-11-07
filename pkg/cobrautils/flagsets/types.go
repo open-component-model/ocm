@@ -87,6 +87,16 @@ func NewStringOptionType(name string, description string) ConfigOptionType {
 	}
 }
 
+func (s *StringOptionType) Equal(optionType ConfigOptionType) bool {
+	return reflect.DeepEqual(s, optionType)
+}
+
+func (s *StringOptionType) Create() Option {
+	return &StringOption{
+		OptionBase: NewOptionBase(s),
+	}
+}
+
 type StringOption struct {
 	OptionBase
 	value string
@@ -102,16 +112,6 @@ func (o *StringOption) Value() interface{} {
 	return o.value
 }
 
-func (s *StringOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
-}
-
-func (s *StringOptionType) Create() Option {
-	return &StringOption{
-		OptionBase: NewOptionBase(s),
-	}
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 type StringArrayOptionType struct {
@@ -121,6 +121,16 @@ type StringArrayOptionType struct {
 func NewStringArrayOptionType(name string, description string) ConfigOptionType {
 	return &StringArrayOptionType{
 		TypeOptionBase: TypeOptionBase{name, description},
+	}
+}
+
+func (s *StringArrayOptionType) Equal(optionType ConfigOptionType) bool {
+	return reflect.DeepEqual(s, optionType)
+}
+
+func (s *StringArrayOptionType) Create() Option {
+	return &StringArrayOption{
+		OptionBase: NewOptionBase(s),
 	}
 }
 
@@ -139,16 +149,6 @@ func (o *StringArrayOption) Value() interface{} {
 	return o.value
 }
 
-func (s *StringArrayOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
-}
-
-func (s *StringArrayOptionType) Create() Option {
-	return &StringArrayOption{
-		OptionBase: NewOptionBase(s),
-	}
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 type BoolOptionType struct {
@@ -158,6 +158,16 @@ type BoolOptionType struct {
 func NewBoolOptionType(name string, description string) ConfigOptionType {
 	return &BoolOptionType{
 		TypeOptionBase: TypeOptionBase{name, description},
+	}
+}
+
+func (s *BoolOptionType) Equal(optionType ConfigOptionType) bool {
+	return reflect.DeepEqual(s, optionType)
+}
+
+func (s *BoolOptionType) Create() Option {
+	return &BoolOption{
+		OptionBase: NewOptionBase(s),
 	}
 }
 
@@ -176,16 +186,6 @@ func (o *BoolOption) Value() interface{} {
 	return o.value
 }
 
-func (s *BoolOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
-}
-
-func (s *BoolOptionType) Create() Option {
-	return &BoolOption{
-		OptionBase: NewOptionBase(s),
-	}
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 type IntOptionType struct {
@@ -195,6 +195,16 @@ type IntOptionType struct {
 func NewIntOptionType(name string, description string) ConfigOptionType {
 	return &IntOptionType{
 		TypeOptionBase: TypeOptionBase{name, description},
+	}
+}
+
+func (s *IntOptionType) Equal(optionType ConfigOptionType) bool {
+	return reflect.DeepEqual(s, optionType)
+}
+
+func (s *IntOptionType) Create() Option {
+	return &IntOption{
+		OptionBase: NewOptionBase(s),
 	}
 }
 
@@ -213,16 +223,6 @@ func (o *IntOption) Value() interface{} {
 	return o.value
 }
 
-func (s *IntOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
-}
-
-func (s *IntOptionType) Create() Option {
-	return &IntOption{
-		OptionBase: NewOptionBase(s),
-	}
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 type YAMLOptionType struct {
@@ -232,6 +232,16 @@ type YAMLOptionType struct {
 func NewYAMLOptionType(name string, description string) ConfigOptionType {
 	return &YAMLOptionType{
 		TypeOptionBase: TypeOptionBase{name, description},
+	}
+}
+
+func (s *YAMLOptionType) Equal(optionType ConfigOptionType) bool {
+	return reflect.DeepEqual(s, optionType)
+}
+
+func (s *YAMLOptionType) Create() Option {
+	return &YAMLOption{
+		OptionBase: NewOptionBase(s),
 	}
 }
 
@@ -250,16 +260,6 @@ func (o *YAMLOption) Value() interface{} {
 	return o.value
 }
 
-func (s *YAMLOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
-}
-
-func (s *YAMLOptionType) Create() Option {
-	return &YAMLOption{
-		OptionBase: NewOptionBase(s),
-	}
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 type ValueMapYAMLOptionType struct {
@@ -269,6 +269,16 @@ type ValueMapYAMLOptionType struct {
 func NewValueMapYAMLOptionType(name string, description string) ConfigOptionType {
 	return &ValueMapYAMLOptionType{
 		TypeOptionBase: TypeOptionBase{name, description},
+	}
+}
+
+func (s *ValueMapYAMLOptionType) Equal(optionType ConfigOptionType) bool {
+	return reflect.DeepEqual(s, optionType)
+}
+
+func (s *ValueMapYAMLOptionType) Create() Option {
+	return &YAMLOption{
+		OptionBase: NewOptionBase(s),
 	}
 }
 
@@ -287,16 +297,6 @@ func (o *ValueMapYAMLOption) Value() interface{} {
 	return o.value
 }
 
-func (s *ValueMapYAMLOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
-}
-
-func (s *ValueMapYAMLOptionType) Create() Option {
-	return &YAMLOption{
-		OptionBase: NewOptionBase(s),
-	}
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 type ValueMapOptionType struct {
@@ -306,6 +306,16 @@ type ValueMapOptionType struct {
 func NewValueMapOptionType(name string, description string) ConfigOptionType {
 	return &ValueMapOptionType{
 		TypeOptionBase: TypeOptionBase{name, description},
+	}
+}
+
+func (s *ValueMapOptionType) Equal(optionType ConfigOptionType) bool {
+	return reflect.DeepEqual(s, optionType)
+}
+
+func (s *ValueMapOptionType) Create() Option {
+	return &ValueMapOption{
+		OptionBase: NewOptionBase(s),
 	}
 }
 
@@ -324,16 +334,6 @@ func (o *ValueMapOption) Value() interface{} {
 	return o.value
 }
 
-func (s *ValueMapOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
-}
-
-func (s *ValueMapOptionType) Create() Option {
-	return &ValueMapOption{
-		OptionBase: NewOptionBase(s),
-	}
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 type StringMapOptionType struct {
@@ -343,6 +343,16 @@ type StringMapOptionType struct {
 func NewStringMapOptionType(name string, description string) ConfigOptionType {
 	return &StringMapOptionType{
 		TypeOptionBase: TypeOptionBase{name, description},
+	}
+}
+
+func (s *StringMapOptionType) Equal(optionType ConfigOptionType) bool {
+	return reflect.DeepEqual(s, optionType)
+}
+
+func (s *StringMapOptionType) Create() Option {
+	return &StringMapOption{
+		OptionBase: NewOptionBase(s),
 	}
 }
 
@@ -359,14 +369,4 @@ func (o *StringMapOption) AddFlags(fs *pflag.FlagSet) {
 
 func (o *StringMapOption) Value() interface{} {
 	return o.value
-}
-
-func (s *StringMapOptionType) Equal(optionType ConfigOptionType) bool {
-	return reflect.DeepEqual(s, optionType)
-}
-
-func (s *StringMapOptionType) Create() Option {
-	return &StringMapOption{
-		OptionBase: NewOptionBase(s),
-	}
 }

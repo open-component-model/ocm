@@ -5,11 +5,14 @@
 package pluginhdlr
 
 import (
+	"strings"
+
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -65,7 +68,22 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 
 	p := cache.Get(elemspec.String())
 	if p == nil {
-		return nil, errors.ErrNotFound(ppi.KIND_PLUGIN, elemspec.String())
+		objs := Lookup(elemspec.String(), cache)
+		if len(objs) == 0 {
+			return nil, errors.ErrNotFound(ppi.KIND_PLUGIN, elemspec.String())
+		}
+		return objs, nil
 	}
-	return []output.Object{p}, nil
+	return []output.Object{&Object{p}}, nil
+}
+
+func Lookup(prefix string, cache plugins.Set) []output.Object {
+	var objs []output.Object
+	prefix = prefix + "."
+	for _, n := range cache.PluginNames() {
+		if strings.HasPrefix(n, prefix) {
+			objs = append(objs, &Object{cache.Get(n)})
+		}
+	}
+	return objs
 }

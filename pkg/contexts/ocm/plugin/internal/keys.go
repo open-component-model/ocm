@@ -6,6 +6,8 @@ package internal
 
 import (
 	"fmt"
+
+	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 type RepositoryContext struct {
@@ -24,6 +26,13 @@ func (k RepositoryContext) IsValid() bool {
 func (k RepositoryContext) String() string {
 	if k.HasRepo() {
 		return fmt.Sprintf("[%s:%s]", k.ContextType, k.RepositoryType)
+	}
+	return ""
+}
+
+func (k RepositoryContext) Describe() string {
+	if k.HasRepo() {
+		return fmt.Sprintf("Default Repository Upload:\n  Context Type:   %s\n  RepositoryType: %s", k.ContextType, k.RepositoryType)
 	}
 	return ""
 }
@@ -49,6 +58,10 @@ func (k ArtefactContext) String() string {
 	return fmt.Sprintf("%s:%s", k.ArtifactType, k.MediaType)
 }
 
+func (k ArtefactContext) Describe() string {
+	return fmt.Sprintf("Artefact Type: %s\nMedia Type   :%s", k.ArtifactType, k.MediaType)
+}
+
 func (k ArtefactContext) SetArtefact(arttype, mediatype string) ArtefactContext {
 	k.ArtifactType = arttype
 	k.MediaType = mediatype
@@ -68,6 +81,10 @@ func (k UploaderKey) String() string {
 	return fmt.Sprintf("%s%s", k.ArtefactContext.String(), k.RepositoryContext.String())
 }
 
+func (k UploaderKey) Describe() string {
+	return fmt.Sprintf("%s%s", k.ArtefactContext.Describe(), k.RepositoryContext.Describe())
+}
+
 func (k UploaderKey) SetArtefact(arttype, mediatype string) UploaderKey {
 	k.ArtifactType = arttype
 	k.MediaType = mediatype
@@ -79,3 +96,5 @@ func (k UploaderKey) SetRepo(contexttype, repotype string) UploaderKey {
 	k.RepositoryType = repotype
 	return k
 }
+
+type UploaderKeySet = generics.Set[UploaderKey]

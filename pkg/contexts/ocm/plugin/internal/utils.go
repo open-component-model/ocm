@@ -5,11 +5,19 @@
 package internal
 
 import (
+	"sort"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
 )
 
 type Named interface {
 	GetName() string
+}
+
+type StringName string
+
+func (e StringName) GetName() string {
+	return string(e)
 }
 
 type Element[K registry.Key[K]] interface {
@@ -26,4 +34,27 @@ func (l List[T]) Get(name string) *T {
 		}
 	}
 	return nil
+}
+
+func (l List[T]) GetNames() []string {
+	var n []string
+	for _, e := range l {
+		n = append(n, e.GetName())
+	}
+	sort.Strings(n)
+	return n
+}
+
+func (l List[T]) MergeWith(o List[T]) List[T] {
+	var list []T
+next:
+	for _, e := range o {
+		for _, f := range l {
+			if e.GetName() == f.GetName() {
+				continue next
+			}
+		}
+		list = append(list, e)
+	}
+	return append(append(l[:0:0], l...), list...)
 }

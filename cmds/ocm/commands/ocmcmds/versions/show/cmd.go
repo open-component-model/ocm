@@ -5,8 +5,6 @@
 package show
 
 import (
-	"sort"
-
 	"github.com/Masterminds/semver/v3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -20,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
+	"github.com/open-component-model/ocm/pkg/semverutils"
 )
 
 var (
@@ -139,21 +138,7 @@ func (o *Command) Run() error {
 		}
 	}
 
-	// Filter by patterns
-	for i := 0; i < len(versions); i++ {
-		found := len(o.Constraints) == 0
-		for _, c := range o.Constraints {
-			if c.Check(versions[i]) {
-				found = true
-			}
-		}
-		if !found {
-			versions = append(versions[:i], versions[i+1:]...)
-			i--
-		}
-	}
-
-	sort.Sort(versions)
+	versions = semverutils.MatchVersions(versions, o.Constraints...)
 	if len(versions) > 1 && o.Latest {
 		versions = versions[len(versions)-1:]
 	}

@@ -19,6 +19,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const CONTEXT_TYPE = "ocm" + datacontext.OCM_CONTEXT_SUFFIX
@@ -53,6 +54,16 @@ type Context interface {
 
 	GetAlias(name string) RepositorySpec
 	SetAlias(name string, spec RepositorySpec)
+
+	// Finalize finalizes elements implicitly opened during resource operations.
+	// For example, registered blob handler may open objects, which are kept open
+	// for performance reasons. At the end of a usage finalize should be called
+	// to finalize those elements. This method can be called any time by a context
+	// user to cleanup temporarily allocated resources. Therefore, only
+	// elements should be added to the finalzer, which can be reopened/created
+	// on-the fly whenever required.
+	Finalize() error
+	Finalizer() *utils.Finalizer
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -94,6 +105,7 @@ type _context struct {
 	blobHandlers  BlobHandlerRegistry
 	blobDigesters BlobDigesterRegistry
 	aliases       map[string]RepositorySpec
+	finalizer     utils.Finalizer
 }
 
 var _ Context = &_context{}
@@ -121,6 +133,14 @@ func (c *_context) OCMContext() Context {
 
 func (c *_context) Update() error {
 	return c.updater.Update()
+}
+
+func (c *_context) Finalize() error {
+	return c.finalizer.Finalize()
+}
+
+func (c *_context) Finalizer() *utils.Finalizer {
+	return &c.finalizer
 }
 
 func (c *_context) AttributesContext() datacontext.AttributesContext {

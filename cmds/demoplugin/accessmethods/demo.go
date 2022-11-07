@@ -11,8 +11,9 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/open-component-model/ocm/cmds/demoplugin/common"
 
-	"github.com/open-component-model/ocm/cmds/common"
+	"github.com/open-component-model/ocm/cmds/demoplugin/config"
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
@@ -105,5 +106,15 @@ func (a *AccessMethod) ComposeAccessSpecification(p ppi.Plugin, opts ppi.Config,
 func (a *AccessMethod) Reader(p ppi.Plugin, spec ppi.AccessSpec, creds credentials.Credentials) (io.ReadCloser, error) {
 	my := spec.(*AccessSpec)
 
-	return os.Open(filepath.Join(os.TempDir(), my.Path))
+	cfg, _ := p.GetConfig()
+	root := os.TempDir()
+	if cfg != nil && cfg.(*config.Config).AccessMethods.Path != "" {
+		root = cfg.(*config.Config).Uploaders.Path
+		err := os.MkdirAll(root, 0o700)
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot create root dir")
+		}
+	}
+
+	return os.Open(filepath.Join(root, my.Path))
 }

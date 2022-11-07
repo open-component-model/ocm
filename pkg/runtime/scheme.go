@@ -195,6 +195,12 @@ type defaultScheme struct {
 	types          KnownTypes
 }
 
+type BaseScheme interface {
+	BaseScheme() Scheme
+}
+
+var _ BaseScheme = (*defaultScheme)(nil)
+
 func MustNewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder, base ...Scheme) SchemeBase {
 	return utils.Must(NewDefaultScheme(protoIfce, protoUnstr, acceptUnknown, defaultdecoder, base...))
 }
@@ -233,6 +239,10 @@ func NewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnkn
 		types:          KnownTypes{},
 		acceptUnknown:  acceptUnknown,
 	}, nil
+}
+
+func (d *defaultScheme) BaseScheme() Scheme {
+	return d.base
 }
 
 func (d *defaultScheme) AddKnownTypes(s Scheme) {
@@ -345,9 +355,10 @@ func (d *defaultScheme) Decode(data []byte, unmarshal Unmarshaler) (TypedObject,
 		if d.defaultdecoder != nil {
 			o, err := d.defaultdecoder.Decode(data, unmarshal)
 			if err == nil {
-				return o, nil
-			}
-			if !errors.IsErrUnknownKind(err, errors.KIND_OBJECTTYPE) {
+				if o != nil {
+					return o, nil
+				}
+			} else if !errors.IsErrUnknownKind(err, errors.KIND_OBJECTTYPE) {
 				return nil, err
 			}
 		}

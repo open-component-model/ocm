@@ -76,7 +76,7 @@ func (p *printer) Write(data []byte) (int, error) {
 }
 
 func (p *printer) printf(msg string, args ...interface{}) (int, error) {
-	if p.writer == nil {
+	if p == nil || p.writer == nil {
 		return 0, nil
 	}
 	if p.gap == "" {

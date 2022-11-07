@@ -39,6 +39,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/describe"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/download"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/get"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/install"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/show"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/sign"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/transfer"
@@ -47,6 +48,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/topics/common/attributes"
 	topicconfig "github.com/open-component-model/ocm/cmds/ocm/topics/common/config"
 	topicocirefs "github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
+	topicocmaccessmethods "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/accessmethods"
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
 	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
 	"github.com/open-component-model/ocm/pkg/cobrautils"
@@ -56,7 +58,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	datacfg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config/attrs"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
@@ -191,6 +193,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(download.NewCommand(opts.Context))
 	cmd.AddCommand(bootstrap.NewCommand(opts.Context))
 	cmd.AddCommand(clean.NewCommand(opts.Context))
+	cmd.AddCommand(install.NewCommand(opts.Context))
 
 	cmd.AddCommand(cmdutils.HideCommand(componentarchive.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(resources.NewCommand(opts.Context)))
@@ -220,12 +223,14 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(topicconfig.New(ctx))
 	cmd.AddCommand(topicocirefs.New(ctx))
 	cmd.AddCommand(topicocmrefs.New(ctx))
+	cmd.AddCommand(topicocmaccessmethods.New(ctx))
 	cmd.AddCommand(attributes.New(ctx))
 	cmd.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 
 	help.AddCommand(topicconfig.New(ctx))
 	help.AddCommand(topicocirefs.New(ctx))
 	help.AddCommand(topicocmrefs.New(ctx))
+	help.AddCommand(topicocmaccessmethods.New(ctx))
 	help.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 
 	for _, m := range mod {
@@ -347,7 +352,7 @@ func (o *CLIOptions) Complete() error {
 		}
 		_ = ctx.ApplyConfig(spec, "cli")
 	}
-	return plugincacheattr.Get(o.Context.OCMContext()).RegisterExtensions()
+	return registration.RegisterExtensions(o.Context.OCMContext())
 }
 
 func NewVersionCommand(ctx clictx.Context) *cobra.Command {

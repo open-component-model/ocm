@@ -39,3 +39,19 @@ func BaseType(mime string) string {
 func IsGZip(mime string) bool {
 	return strings.HasSuffix(mime, "/gzip") || strings.HasSuffix(mime, "+gzip")
 }
+
+func IsMoreGeneral(m string, specific string) bool {
+	if m == "" {
+		return true
+	}
+	for {
+		if m == specific {
+			return true
+		}
+		i := strings.LastIndex(specific, "+")
+		if i < 0 {
+			return false
+		}
+		specific = specific[:i]
+	}
+}

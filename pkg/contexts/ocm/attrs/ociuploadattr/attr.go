@@ -50,10 +50,16 @@ func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (in
 	var value Attribute
 	err := unmarshaller.Unmarshal(data, &value)
 	if err == nil {
-		if value.Repository.GetType() == "" {
-			return nil, errors.ErrInvalidWrap(errors.Newf("missing repository type"), oci.KIND_OCI_REFERENCE, string(data))
+		if value.Repository != nil {
+			if value.Repository.GetType() == "" {
+				return nil, errors.ErrInvalidWrap(errors.Newf("missing repository type"), oci.KIND_OCI_REFERENCE, string(data))
+			}
+			return &value, nil
 		}
-		return &value, nil
+		if value.Ref == "" {
+			return nil, errors.ErrInvalidWrap(errors.Newf("missing repository or ref"), oci.KIND_OCI_REFERENCE, string(data))
+		}
+		data = []byte(value.Ref)
 	}
 	ref, err := oci.ParseRef(string(data))
 	if err != nil {
@@ -136,6 +142,7 @@ func (a *Attribute) getBySpec(ctx cpi.Context) (oci.Repository, *oci.UniformRepo
 		a.prefix = a.NamespacePrefix
 		a.spec = data
 		a.ref = &oci.RefSpec{UniformRepositorySpec: *spec.UniformRepositorySpec()}
+		ctx.Finalizer().Close(a)
 	}
 	return a.repo, &a.ref.UniformRepositorySpec, a.prefix, nil
 }
@@ -167,6 +174,7 @@ func (a *Attribute) getByRef(ctx cpi.Context) (oci.Repository, *oci.UniformRepos
 		}
 		a.prefix = ref.Repository
 		a.ref = &ref
+		ctx.Finalizer().Close(a)
 	}
 	return a.repo, &a.ref.UniformRepositorySpec, a.prefix, nil
 }

@@ -7,10 +7,12 @@ package internal
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 type Builder struct {
@@ -167,15 +169,32 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 		}
 	}
 
-	if ociimpl != nil {
-		def, err := ociimpl(b.oci)
+	b.reposcheme = NewRepositoryTypeScheme(&delegatingDecoder{oci: b.oci}, b.reposcheme)
+	return newContext(b.credentials, b.oci, b.reposcheme, b.accessscheme, b.spechandlers,
+		b.blobhandlers, b.blobdigesters, b.credentials.ConfigContext().LoggingContext())
+}
+
+type delegatingDecoder struct {
+	lock     sync.Mutex
+	oci      oci.Context
+	delegate runtime.TypedObjectDecoder
+}
+
+var _ runtime.TypedObjectDecoder = (*delegatingDecoder)(nil)
+
+func (d *delegatingDecoder) Decode(data []byte, unmarshaler runtime.Unmarshaler) (runtime.TypedObject, error) {
+	d.lock.Lock()
+	defer d.lock.Unlock()
+
+	if d.delegate == nil && ociimpl != nil {
+		def, err := ociimpl(d.oci)
 		if err != nil {
 			panic(fmt.Sprintf("cannot create oci default decoder: %s", err))
 		}
-		reposcheme := NewRepositoryTypeScheme(def)
-		reposcheme.AddKnownTypes(b.reposcheme) // TODO: implement delegation
-		b.reposcheme = reposcheme
+		d.delegate = def
 	}
-	return newContext(b.credentials, b.oci, b.reposcheme, b.accessscheme, b.spechandlers,
-		b.blobhandlers, b.blobdigesters, b.credentials.ConfigContext().LoggingContext())
+	if d.delegate != nil {
+		return d.delegate.Decode(data, unmarshaler)
+	}
+	return nil, nil
 }

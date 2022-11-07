@@ -13,6 +13,7 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 // OCMCommand is a command pattern, that can be instantiated for a dediated
@@ -189,7 +190,10 @@ func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 				out.Error(ocmcmd, err.Error())
 			}
 		*/
-		return err
+		list := errors.ErrListf("")
+		list.Add(err)
+		list.Add(ocmcmd.OCMContext().Finalize())
+		return list.Result()
 	}
 	if t, ok := ocmcmd.(CommandTweaker); ok {
 		t.TweakCommand(c)

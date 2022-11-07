@@ -25,9 +25,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/generic/plugin"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	plugin2 "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/config"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
@@ -98,15 +101,7 @@ var _ = Describe("setup plugin cache", func() {
 		Expect(p).NotTo(BeNil())
 
 		ctx.ConfigContext().ApplyConfig(config.New(PLUGIN, []byte(fmt.Sprintf(`{"root": "`+repodir+`"}`))), "plugin config")
-		registry.RegisterExtensions()
-	})
-
-	AfterEach(func() {
-		env.Cleanup()
-		os.RemoveAll(repodir)
-	})
-
-	It("uploads artefact", func() {
+		registration.RegisterExtensions(ctx)
 
 		env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
 			env.Component(COMP, func() {
@@ -120,18 +115,67 @@ var _ = Describe("setup plugin cache", func() {
 				})
 			})
 		})
+	})
 
+	AfterEach(func() {
+		env.Cleanup()
+		os.RemoveAll(repodir)
+	})
+
+	It("uploads artefact", func() {
 		repo := Must(ctf.Open(ctx, accessobj.ACC_READONLY, ARCH, 0, env))
 		defer Close(repo, "source repo")
 
 		cv := Must(repo.LookupComponentVersion(COMP, VERS))
 		defer Close(cv, "source version")
 
-		MustFailWithMessage(plugincacheattr.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", []byte("{}")),
-			"plugin test: path missing in repository spec",
+		_, _, err := plugin.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", []byte("{}"))
+		MustFailWithMessage(err,
+			"plugin uploader test/testuploader: path missing in repository spec",
 		)
 		repospec := Must(json.Marshal(repoSpec))
-		MustBeSuccessful(plugincacheattr.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", repospec))
+		name, keys, err := plugin.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", repospec)
+		MustBeSuccessful(err)
+		Expect(name).To(Equal("testuploader"))
+		Expect(keys).To(Equal(plugin2.UploaderKeySet{}.Add(plugin2.UploaderKey{}.SetArtefact(RSCTYPE, ""))))
+
+		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
+		defer Close(tgt, "target repo")
+
+		MustBeSuccessful(transfer.TransferVersion(nil, nil, cv, tgt, Must(standard.New(standard.ResourcesByValue()))))
+		Expect(env.DirExists(OUT)).To(BeTrue())
+
+		Expect(vfs.FileExists(osfs.New(), filepath.Join(repodir, REPO, HINT))).To(BeTrue())
+
+		tcv := Must(tgt.LookupComponentVersion(COMP, VERS))
+		defer Close(tcv, "target version")
+
+		r := Must(tcv.GetResourceByIndex(0))
+		a := Must(r.Access())
+
+		var spec AccessSpec
+		MustBeSuccessful(json.Unmarshal(Must(json.Marshal(a)), &spec))
+		Expect(spec).To(Equal(*accessSpec))
+
+		m := Must(a.AccessMethod(tcv))
+		defer Close(m, "method")
+
+		Expect(string(Must(m.Get()))).To(Equal(CONTENT))
+	})
+
+	It("uploads after abstract registration", func() {
+		repo := Must(ctf.Open(ctx, accessobj.ACC_READONLY, ARCH, 0, env))
+		defer Close(repo, "source repo")
+
+		cv := Must(repo.LookupComponentVersion(COMP, VERS))
+		defer Close(cv, "source version")
+
+		MustFailWithMessage(registration.RegisterBlobHandlerByName(ctx, "plugin/test", []byte("{}"), registration.ForArtefactType(RSCTYPE)),
+			//MustFailWithMessage(plugin.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", []byte("{}")),
+			"plugin uploader test/testuploader: path missing in repository spec",
+		)
+		repospec := Must(json.Marshal(repoSpec))
+		MustBeSuccessful(registration.RegisterBlobHandlerByName(ctx, "plugin/test", repospec))
 
 		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
 		defer Close(tgt, "target repo")
