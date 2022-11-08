@@ -15,8 +15,10 @@ type ReferenceResourceSpecificationProvider struct {
 	*ocmcomm.ResourceMetaDataSpecificationsProvider
 }
 
-var _ ocmcomm.ResourceSpecificationsProvider = (*ReferenceResourceSpecificationProvider)(nil)
-var _ ocmcomm.ResourceSpecifications = (*ReferenceResourceSpecificationProvider)(nil)
+var (
+	_ ocmcomm.ResourceSpecificationsProvider = (*ReferenceResourceSpecificationProvider)(nil)
+	_ ocmcomm.ResourceSpecifications         = (*ReferenceResourceSpecificationProvider)(nil)
+)
 
 func NewReferenceSpecificatonProvider() ocmcomm.ResourceSpecificationsProvider {
 	a := &ReferenceResourceSpecificationProvider{
@@ -47,7 +49,8 @@ func (a *ReferenceResourceSpecificationProvider) Get() (string, error) {
 		return "", err
 	}
 
-	r, err := json.Marshal(data)
+	//nolint:errchkjson // We don't care about this error.
+	r, _ := json.Marshal(data)
 	return string(r), nil
 }
 

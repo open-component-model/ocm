@@ -19,7 +19,7 @@ const (
 	dockerHubLegacyDomain = "index.docker.io"
 )
 
-// UniformRepositorySpec is is generic specification of the repository
+// UniformRepositorySpec is generic specification of the repository
 // for handling as part of standard references.
 type UniformRepositorySpec struct {
 	// Type

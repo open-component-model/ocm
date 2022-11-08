@@ -47,9 +47,6 @@ linters:
     - nestif           # Some nexted if statements are 8 or 9 deep.
     - dupl             # Check code duplications.
     - cyclop           # Complex functions are not good.
-    - maintidx         # Too complex code is not good.
-                       #   name: push, Cyclomatic Complexity: 35
-                       #   name: apply, Cyclomatic Complexity: 51
     - gochecknoinits   # Init functions cause an import to have side effects,
                        #   and side effects are hard to test,
                        #   reduce readability and increase the complexity of code.

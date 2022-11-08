@@ -73,37 +73,8 @@ func _apply(printer common.Printer, state common.WalkingState, nv common.NameVer
 		}
 	}
 
-	for i, reference := range cd.References {
-		var calculatedDigest *metav1.DigestSpec
-		if reference.Digest == nil && !opts.DoUpdate() {
-			printer.Printf("  no digest given for reference %s", reference)
-		}
-		if reference.Digest == nil || opts.Recursively || opts.Verify {
-			nested, err := opts.Resolver.LookupComponentVersion(reference.GetComponentName(), reference.GetVersion())
-			if err != nil {
-				return nil, errors.Wrapf(err, refMsg(reference, "failed resolving component reference"))
-			}
-			closer := accessio.OnceCloser(nested)
-			defer closer.Close()
-			digestOpts, err := opts.For(reference.Digest)
-			if err != nil {
-				return nil, errors.Wrapf(err, refMsg(reference, "failed resolving hasher for existing digest for component reference"))
-			}
-			calculatedDigest, err = apply(printer.AddGap("  "), state, nested, digestOpts, true)
-			if err != nil {
-				return nil, errors.Wrapf(err, refMsg(reference, "failed applying to component reference"))
-			}
-		} else {
-			printer.Printf("  accepting digest from reference %s", reference)
-			calculatedDigest = reference.Digest
-		}
-
-		if reference.Digest == nil {
-			cd.References[i].Digest = calculatedDigest
-		} else if calculatedDigest != nil && !reflect.DeepEqual(reference.Digest, calculatedDigest) {
-			return nil, errors.Newf(refMsg(reference, "calculated reference digest (%+v) mismatches existing digest (%+v) for", calculatedDigest, reference.Digest))
-		}
-		printer.Printf("  reference %d:  %s:%s: digest %s\n", i, reference.ComponentName, reference.Version, calculatedDigest)
+	if err := calculateReferenceDigests(printer, cd, state, opts); err != nil {
+		return nil, err
 	}
 
 	blobdigesters := cv.GetContext().BlobDigesters()
@@ -160,43 +131,8 @@ func _apply(printer common.Printer, state common.WalkingState, nv common.NameVer
 	}
 
 	if opts.DoVerify() {
-		found := []string{}
-		for _, n := range signatureNames {
-			f := cd.GetSignatureIndex(n)
-			if f < 0 {
-				continue
-			}
-			pub := opts.PublicKey(n)
-			if pub == nil {
-				if opts.SignatureConfigured(n) {
-					return nil, errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, n)
-				}
-				printer.Printf("Warning: no public key for signature %q in %s\n", n, state.History)
-				continue
-			}
-			sig := &cd.Signatures[f]
-			verifier := opts.Registry.GetVerifier(sig.Signature.Algorithm)
-			if verifier == nil {
-				if opts.SignatureConfigured(n) {
-					return nil, errors.ErrUnknown(compdesc.KIND_VERIFY_ALGORITHM, n)
-				}
-				printer.Printf("Warning: no verifier (%s) found for signature %q in %s\n", sig.Signature.Algorithm, n, state.History)
-				continue
-			}
-			hasher := opts.Registry.GetHasher(sig.Digest.HashAlgorithm)
-			if hasher == nil {
-				return nil, errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, sig.Digest.HashAlgorithm)
-			}
-			err = verifier.Verify(sig.Digest.Value, hasher.Crypto(), sig.ConvertToSigning(), pub)
-			if err != nil {
-				return nil, errors.ErrInvalidWrap(err, compdesc.KIND_SIGNATURE, sig.Signature.Algorithm)
-			}
-			found = append(found, n)
-		}
-		if len(found) == 0 {
-			if !opts.DoSign() {
-				return nil, errors.Newf("no verifiable signature found")
-			}
+		if err := doVerify(printer, cd, state, signatureNames, opts); err != nil {
+			return nil, err
 		}
 	}
 
@@ -254,4 +190,84 @@ func resMsg(ref *compdesc.Resource, acc string, msg string, args ...interface{})
 		return fmt.Sprintf("%s %s:%s (%s)", fmt.Sprintf(msg, args...), ref.Name, ref.Version, acc)
 	}
 	return fmt.Sprintf("%s %s:%s", fmt.Sprintf(msg, args...), ref.Name, ref.Version)
+}
+
+func doVerify(printer common.Printer, cd *compdesc.ComponentDescriptor, state common.WalkingState, signatureNames []string, opts *Options) error {
+	var err error
+	found := []string{}
+	for _, n := range signatureNames {
+		f := cd.GetSignatureIndex(n)
+		if f < 0 {
+			continue
+		}
+		pub := opts.PublicKey(n)
+		if pub == nil {
+			if opts.SignatureConfigured(n) {
+				return errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, n)
+			}
+			printer.Printf("Warning: no public key for signature %q in %s\n", n, state.History)
+			continue
+		}
+		sig := &cd.Signatures[f]
+		verifier := opts.Registry.GetVerifier(sig.Signature.Algorithm)
+		if verifier == nil {
+			if opts.SignatureConfigured(n) {
+				return errors.ErrUnknown(compdesc.KIND_VERIFY_ALGORITHM, n)
+			}
+			printer.Printf("Warning: no verifier (%s) found for signature %q in %s\n", sig.Signature.Algorithm, n, state.History)
+			continue
+		}
+		hasher := opts.Registry.GetHasher(sig.Digest.HashAlgorithm)
+		if hasher == nil {
+			return errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, sig.Digest.HashAlgorithm)
+		}
+		err = verifier.Verify(sig.Digest.Value, hasher.Crypto(), sig.ConvertToSigning(), pub)
+		if err != nil {
+			return errors.ErrInvalidWrap(err, compdesc.KIND_SIGNATURE, sig.Signature.Algorithm)
+		}
+		found = append(found, n)
+	}
+	if len(found) == 0 {
+		if !opts.DoSign() {
+			return errors.Newf("no verifiable signature found")
+		}
+	}
+
+	return nil
+}
+
+func calculateReferenceDigests(printer common.Printer, cd *compdesc.ComponentDescriptor, state common.WalkingState, opts *Options) error {
+	for i, reference := range cd.References {
+		var calculatedDigest *metav1.DigestSpec
+		if reference.Digest == nil && !opts.DoUpdate() {
+			printer.Printf("  no digest given for reference %s", reference)
+		}
+		if reference.Digest == nil || opts.Recursively || opts.Verify {
+			nested, err := opts.Resolver.LookupComponentVersion(reference.GetComponentName(), reference.GetVersion())
+			if err != nil {
+				return errors.Wrapf(err, refMsg(reference, "failed resolving component reference"))
+			}
+			closer := accessio.OnceCloser(nested)
+			defer closer.Close()
+			digestOpts, err := opts.For(reference.Digest)
+			if err != nil {
+				return errors.Wrapf(err, refMsg(reference, "failed resolving hasher for existing digest for component reference"))
+			}
+			calculatedDigest, err = apply(printer.AddGap("  "), state, nested, digestOpts, true)
+			if err != nil {
+				return errors.Wrapf(err, refMsg(reference, "failed applying to component reference"))
+			}
+		} else {
+			printer.Printf("  accepting digest from reference %s", reference)
+			calculatedDigest = reference.Digest
+		}
+
+		if reference.Digest == nil {
+			cd.References[i].Digest = calculatedDigest
+		} else if calculatedDigest != nil && !reflect.DeepEqual(reference.Digest, calculatedDigest) {
+			return errors.Newf(refMsg(reference, "calculated reference digest (%+v) mismatches existing digest (%+v) for", calculatedDigest, reference.Digest))
+		}
+		printer.Printf("  reference %d:  %s:%s: digest %s\n", i, reference.ComponentName, reference.Version, calculatedDigest)
+	}
+	return nil
 }

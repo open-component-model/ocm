@@ -12,16 +12,17 @@ import (
 	"strings"
 
 	"github.com/open-component-model/ocm/cmds/common"
+	"github.com/open-component-model/ocm/cmds/demoplugin/accessmethods"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/runtime"
-
-	"github.com/open-component-model/ocm/cmds/demoplugin/accessmethods"
 )
 
-const NAME = "demo"
-const VERSION = "v1"
+const (
+	NAME    = "demo"
+	VERSION = "v1"
+)
 
 type TargetSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`

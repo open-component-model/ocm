@@ -14,8 +14,10 @@ import (
 )
 
 // Type is the access type for a component version local blob in an OCI repository.
-const Type = "localOciBlob"
-const TypeV1 = Type + runtime.VersionSeparator + "v1"
+const (
+	Type   = "localOciBlob"
+	TypeV1 = Type + runtime.VersionSeparator + "v1"
+)
 
 func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}))

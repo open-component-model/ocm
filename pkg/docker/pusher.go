@@ -140,102 +140,15 @@ func (p dockerPusher) push(ctx context.Context, desc ocispec.Descriptor, src res
 		req = p.request(host, http.MethodPut, putPath...)
 		req.header.Add("Content-Type", desc.MediaType)
 	} else {
-		// Start upload request
-		req = p.request(host, http.MethodPost, "blobs", "uploads/")
-
-		var resp *http.Response
-		if fromRepo := selectRepositoryMountCandidate(p.refspec, desc.Annotations); fromRepo != "" {
-			preq := requestWithMountFrom(req, desc.Digest.String(), fromRepo)
-			pctx := ContextWithAppendPullRepositoryScope(ctx, fromRepo)
-
-			// NOTE: the fromRepo might be private repo and
-			// auth service still can grant token without error.
-			// but the post request will fail because of 401.
-			//
-			// for the private repo, we should remove mount-from
-			// query and send the request again.
-			resp, err = preq.doWithRetries(pctx, nil)
-			if err != nil {
-				return nil, err
-			}
-
-			if resp.StatusCode == http.StatusUnauthorized {
-				log.G(ctx).Debugf("failed to mount from repository %s", fromRepo)
-
-				resp.Body.Close()
-				resp = nil
-			}
-		}
-
-		if resp == nil {
-			resp, err = req.doWithRetries(ctx, nil)
-			if err != nil {
-				return nil, err
-			}
-		}
-		defer resp.Body.Close()
-
-		switch resp.StatusCode {
-		case http.StatusOK, http.StatusAccepted, http.StatusNoContent:
-		case http.StatusCreated:
-			p.tracker.SetStatus(ref, Status{
-				Committed: true,
-				Status: content.Status{
-					Ref:    ref,
-					Total:  desc.Size,
-					Offset: desc.Size,
-				},
-			})
-			return nil, errors.Wrapf(errdefs.ErrAlreadyExists, "content %v on remote", desc.Digest)
-		default:
-			err := remoteserrors.NewUnexpectedStatusErr(resp)
-
-			var statusError remoteserrors.ErrUnexpectedStatus
-			if errors.As(err, &statusError) {
-				log.G(ctx).
-					WithField("resp", resp).
-					WithField("body", string(statusError.Body)).
-					Debug("unexpected response")
-			}
-
+		req, err = upload(ctx, uploadOptions{
+			Host:       host,
+			Pusher:     p,
+			Descriptor: desc,
+			Reference:  ref,
+		})
+		if err != nil {
 			return nil, err
 		}
-
-		var (
-			location = resp.Header.Get("Location")
-			lurl     *url.URL
-			lhost    = host
-		)
-		// Support paths without host in location
-		if strings.HasPrefix(location, "/") {
-			lurl, err = url.Parse(lhost.Scheme + "://" + lhost.Host + location)
-			if err != nil {
-				return nil, errors.Wrapf(err, "unable to parse location %v", location)
-			}
-		} else {
-			if !strings.Contains(location, "://") {
-				location = lhost.Scheme + "://" + location
-			}
-			lurl, err = url.Parse(location)
-			if err != nil {
-				return nil, errors.Wrapf(err, "unable to parse location %v", location)
-			}
-
-			if lurl.Host != lhost.Host || lhost.Scheme != lurl.Scheme {
-				lhost.Scheme = lurl.Scheme
-				lhost.Host = lurl.Host
-				log.G(ctx).WithField("host", lhost.Host).WithField("scheme", lhost.Scheme).Debug("upload changed destination")
-
-				// Strip authorizer if change to host or scheme
-				lhost.Authorizer = nil
-			}
-		}
-		q := lurl.Query()
-		q.Add("digest", desc.Digest.String())
-
-		req = p.request(lhost, http.MethodPut)
-		req.header.Set("Content-Type", "application/octet-stream")
-		req.path = lurl.Path + "?" + q.Encode()
 	}
 	p.tracker.SetStatus(ref, Status{
 		Status: content.Status{
@@ -424,4 +337,115 @@ func requestWithMountFrom(req *request, mount, from string) *request {
 	creq.path = creq.path + sep + "mount=" + mount + "&from=" + from
 
 	return &creq
+}
+
+type uploadOptions struct {
+	Host       RegistryHost
+	Pusher     dockerPusher
+	Descriptor ocispec.Descriptor
+	Reference  string
+}
+
+func upload(ctx context.Context, opts uploadOptions) (*request, error) {
+	req := opts.Pusher.request(opts.Host, http.MethodPost, "blobs", "uploads/")
+
+	var (
+		resp *http.Response
+		err  error
+	)
+	if fromRepo := selectRepositoryMountCandidate(opts.Pusher.refspec, opts.Descriptor.Annotations); fromRepo != "" {
+		preq := requestWithMountFrom(req, opts.Descriptor.Digest.String(), fromRepo)
+		pctx := ContextWithAppendPullRepositoryScope(ctx, fromRepo)
+
+		// NOTE: the fromRepo might be private repo and
+		// auth service still can grant token without error.
+		// but the post request will fail because of 401.
+		//
+		// for the private repo, we should remove mount-from
+		// query and send the request again.
+		resp, err = preq.doWithRetries(pctx, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		if resp.StatusCode == http.StatusUnauthorized {
+			log.G(ctx).Debugf("failed to mount from repository %s", fromRepo)
+
+			resp.Body.Close()
+			resp = nil
+		}
+	}
+
+	if resp == nil {
+		resp, err = req.doWithRetries(ctx, nil)
+		if err != nil {
+			return nil, err
+		}
+	}
+	defer resp.Body.Close()
+
+	switch resp.StatusCode {
+	case http.StatusOK, http.StatusAccepted, http.StatusNoContent:
+	case http.StatusCreated:
+		opts.Pusher.tracker.SetStatus(opts.Reference, Status{
+			Committed: true,
+			Status: content.Status{
+				Ref:    opts.Reference,
+				Total:  opts.Descriptor.Size,
+				Offset: opts.Descriptor.Size,
+			},
+		})
+		return nil, errors.Wrapf(errdefs.ErrAlreadyExists, "content %v on remote", opts.Descriptor.Digest)
+	default:
+		err := remoteserrors.NewUnexpectedStatusErr(resp)
+
+		var statusError remoteserrors.ErrUnexpectedStatus
+		if errors.As(err, &statusError) {
+			log.G(ctx).
+				WithField("resp", resp).
+				WithField("body", string(statusError.Body)).
+				Debug("unexpected response")
+		}
+
+		return nil, err
+	}
+
+	var (
+		location = resp.Header.Get("Location")
+		lurl     *url.URL
+		lhost    = opts.Host
+	)
+	// Support paths without host in location
+	if strings.HasPrefix(location, "/") {
+		lurl, err = url.Parse(lhost.Scheme + "://" + lhost.Host + location)
+		if err != nil {
+			return nil, errors.Wrapf(err, "unable to parse location %v", location)
+		}
+	} else {
+		if !strings.Contains(location, "://") {
+			location = lhost.Scheme + "://" + location
+		}
+		lurl, err = url.Parse(location)
+		if err != nil {
+			return nil, errors.Wrapf(err, "unable to parse location %v", location)
+		}
+
+		if lurl.Host != lhost.Host || lhost.Scheme != lurl.Scheme {
+			lhost.Scheme = lurl.Scheme
+			lhost.Host = lurl.Host
+			log.G(ctx).WithField("host", lhost.Host).WithField("scheme", lhost.Scheme).Debug("upload changed destination")
+
+			// Strip authorizer if change to host or scheme
+			lhost.Authorizer = nil
+		}
+	}
+
+	q := lurl.Query()
+	q.Add("digest", opts.Descriptor.Digest.String())
+
+	req = opts.Pusher.request(lhost, http.MethodPut)
+	req.header.Set("Content-Type", "application/octet-stream")
+	req.path = lurl.Path + "?" + q.Encode()
+
+	return req, nil
 }

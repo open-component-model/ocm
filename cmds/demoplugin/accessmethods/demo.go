@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
+
 	"github.com/open-component-model/ocm/cmds/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
@@ -18,8 +19,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const NAME = "demo"
-const VERSION = "v1"
+const (
+	NAME    = "demo"
+	VERSION = "v1"
+)
 
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`

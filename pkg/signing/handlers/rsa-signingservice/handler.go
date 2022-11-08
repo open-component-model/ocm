@@ -15,8 +15,10 @@ import (
 )
 
 // Algorithm defines the type for the RSA PKCS #1 v1.5 signature algorithm.
-const Algorithm = rsa.Algorithm
-const Name = "rsa-signingsservice"
+const (
+	Algorithm = rsa.Algorithm
+	Name      = "rsa-signingsservice"
+)
 
 type Key struct {
 	URL      string `json:"url"`

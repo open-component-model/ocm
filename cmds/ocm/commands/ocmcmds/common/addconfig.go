@@ -129,7 +129,7 @@ func (o *ResourceConfigAdderCommand) ProcessResourceDescriptions(listkey string,
 			}
 			r = string(b)
 		}
-		current += "\n---\n" + string(r)
+		current += "\n---\n" + r
 	}
 
 	source := NewModifiedResourceSpecificationsFile(current, o.ConfigFile, fs)

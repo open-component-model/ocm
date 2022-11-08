@@ -137,7 +137,7 @@ func NewAction(ctx clictx.Context, session oci.Session, target string, transferR
 	}
 
 	if ref.IsVersion() && transferRepo {
-		return nil, errors.Newf("repository names cannot be transferred for for a given target version")
+		return nil, errors.Newf("repository names cannot be transferred for a given target version")
 	}
 	if ref.IsRegistry() {
 		transferRepo = true

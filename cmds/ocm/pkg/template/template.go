@@ -180,7 +180,7 @@ func ReadSimpleSettings(fs vfs.FileSystem, path string) (map[string]string, erro
 }
 
 func SplitYamlDocuments(data []byte) ([][]byte, error) {
-	decoder := yaml.NewDecoder(bytes.NewBuffer([]byte(data)))
+	decoder := yaml.NewDecoder(bytes.NewBuffer(data))
 	list := [][]byte{}
 	i := 0
 	for {

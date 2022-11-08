@@ -210,7 +210,7 @@ that contains the resource reference. It uses the following fields:
 #### *Identity*
 
 An identity specification is a <code>map[string]string</code>. It describes
-the identity attributes of a desired resource in a a component version.
+the identity attributes of a desired resource in a component version.
 It always has at least one identity attribute <code>name</code>, which
 is the resource name field of the desired resource. If this resource
 defines additional identity attributes, the complete set must be specified.
@@ -254,7 +254,7 @@ It has the following format:
   Here the executor may request the provisioning of some credentials with a
   dedicated name/purpose and structure. If specified it will be propagated
   to a using package. It this uses an own credentials section, this one 
-  will be filtered and checked for the the actual executor.
+  will be filtered and checked for the actual executor.
 
 - **<code>outputs</code>** (optional) *map[string]OutputSpecification*
 
@@ -332,7 +332,7 @@ execution and reading provided executor outputs after the execution.
 /
 └── toi
     ├── inputs
-    │   ├── config      config info from package specification
+    │   ├── config      info from package specification
     │   ├── ocmrepo     OCM filesystem repository containing the complete
     │   │               component version of the package
     │   └── parameters  merged complete parameter file
