@@ -12,6 +12,7 @@ import (
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 // TypeGetter is the interface to be implemented for extracting a type.
@@ -186,6 +187,7 @@ type SchemeBase interface {
 }
 type defaultScheme struct {
 	lock           sync.RWMutex
+	base           Scheme
 	instance       reflect.Type
 	unstructured   reflect.Type
 	defaultdecoder TypedObjectDecoder
@@ -193,15 +195,11 @@ type defaultScheme struct {
 	types          KnownTypes
 }
 
-func MustNewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder) SchemeBase {
-	s, err := NewDefaultScheme(protoIfce, protoUnstr, acceptUnknown, defaultdecoder)
-	if err != nil {
-		panic(err)
-	}
-	return s
+func MustNewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder, base ...Scheme) SchemeBase {
+	return utils.Must(NewDefaultScheme(protoIfce, protoUnstr, acceptUnknown, defaultdecoder, base...))
 }
 
-func NewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder) (SchemeBase, error) {
+func NewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder, base ...Scheme) (SchemeBase, error) {
 	if protoIfce == nil {
 		return nil, fmt.Errorf("object interface must be given by pointer to interacted (is nil)")
 	}
@@ -228,6 +226,7 @@ func NewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnkn
 	}
 
 	return &defaultScheme{
+		base:           utils.Optional(base...),
 		instance:       it,
 		unstructured:   ut,
 		defaultdecoder: defaultdecoder,
@@ -247,16 +246,27 @@ func (d *defaultScheme) AddKnownTypes(s Scheme) {
 func (d *defaultScheme) KnownTypes() KnownTypes {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
-	return d.types.Copy()
+	if d.base == nil {
+		return d.types.Copy()
+	}
+	kt := d.base.KnownTypes()
+	for n, t := range d.types {
+		kt[n] = t
+	}
+	return kt
 }
 
 // KnownTypeNames return a sorted list of known type names.
 func (d *defaultScheme) KnownTypeNames() []string {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
+
 	types := make([]string, 0, len(d.types))
 	for t := range d.types {
 		types = append(types, t)
+	}
+	if d.base != nil {
+		types = append(types, d.base.KnownTypeNames()...)
 	}
 	sort.Strings(types)
 	return types
@@ -291,7 +301,11 @@ func (d *defaultScheme) ValidateInterface(object TypedObject) error {
 func (d *defaultScheme) GetDecoder(typ string) TypedObjectDecoder {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
-	return d.types[typ]
+	decoder := d.types[typ]
+	if decoder == nil && d.base != nil {
+		decoder = d.base.GetDecoder(typ)
+	}
+	return decoder
 }
 
 func (d *defaultScheme) CreateUnstructured() Unstructured {
@@ -413,106 +427,3 @@ func (d *defaultScheme) Convert(o TypedObject) (TypedObject, error) {
 	}
 	return r, nil
 }
-
-////////////////////////////////////////////////////////////////////////////////
-
-/*
-// KnownTypeValidationFunc defines a function that can validate types.
-type KnownTypeValidationFunc func(ttype string) error
-
-// KnownTypes defines a set of known types.
-type KnownTypes interface {
-	GetDecoder(otype string) TypedObjectDecoder
-}
-
-type SimpleKnownTypes map[string]TypedObjectDecoder
-
-func (t SimpleKnownTypes) GetDecoder(otype string) TypedObjectDecoder {
-	return t[otype]
-}
-
-// TypedObjectDecoder describes a known component type and how it is decoded and encoded
-type TypedObjectDecoder interface {
-	Decode(data []byte) (TypedObject, error)
-}
-
-// TypedObjectDecoderWrapper is a simple struct that implements the TypedObjectDecoder interface
-type TypedObjectDecoderWrapper struct {
-	TypedObjectDecoder
-}
-
-// TypedObjectDecoderFunc is a simple function that implements the XXX interface.
-type TypedObjectDecoderFunc func(data []byte) error
-
-// Decode is the Decode implementation of the XXX interface.
-func (e TypedObjectDecoderFunc) Decode(data []byte) error {
-	return e(data)
-}
-
-// DefaultJSONTypedObjectDecoder is a simple decoder that implements the XXX interface.
-// It simply decodes the access using the json marshaller.
-type DefaultJSONTypedObjectDecoder struct{}
-
-var _ TypedObjectDecoder = DefaultJSONTypedObjectDecoder{}
-
-// Decode is the Decode implementation of the XXX interface.
-func (e DefaultJSONTypedObjectDecoder) Decode(data []byte) (TypedObject, error) {
-	var unstructured *UnstructuredTypedObject
-	err := json.Unmarshal(data, unstructured)
-	if err != nil {
-		return nil, err
-	}
-	return unstructured, nil
-}
-
-type codec struct {
-	knownTypes     KnownTypes
-	defaultCodec   TypedObjectDecoder
-	validationFunc KnownTypeValidationFunc
-}
-
-// NewCodec creates a new typed object codec.
-func NewCodec(knownTypes KnownTypes, defaultDecoder TypedObjectDecoder, validationFunc KnownTypeValidationFunc) TypedObjectDecoder {
-	if defaultDecoder == nil {
-		defaultDecoder = DefaultJSONTypedObjectDecoder{}
-	}
-
-	return &codec{
-		defaultCodec:   defaultDecoder,
-		knownTypes:     knownTypes,
-		validationFunc: validationFunc,
-	}
-}
-
-// Decode unmarshals a unstructured typed object into a TypedObject.
-// The given known types are used to decode the data into a specific.
-// Unknown types are decoded into UnstructuredTypesObjects.
-// An error is returned when the type is unknown and the default codec is nil.
-func (c *codec) Decode(data []byte) (TypedObject, error) {
-	accessType := &ObjectType{}
-	if err := json.Unmarshal(data, accessType); err != nil {
-		return nil, err
-	}
-
-	if c.validationFunc != nil {
-		if err := c.validationFunc(accessType.Algorithm()); err != nil {
-			return nil, err
-		}
-	}
-
-	codec := c.knownTypes.GetDecoder(accessType.Algorithm())
-	if codec == nil {
-		codec = c.defaultCodec
-	}
-
-	return codec.Decode(data)
-}
-
-func UnmarshalInto(data []byte, obj TypedObject) (TypedObject, error) {
-	err := json.Unmarshal(data, obj)
-	if err != nil {
-		return nil, err
-	}
-	return obj, nil
-}
-*/

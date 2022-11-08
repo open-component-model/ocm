@@ -11,6 +11,7 @@ import (
 
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type DigesterType struct {
@@ -57,6 +58,7 @@ type BlobDigesterRegistry interface {
 
 type blobDigesterRegistry struct {
 	lock         sync.RWMutex
+	base         BlobDigesterRegistry
 	typehandlers map[string][]BlobDigester
 	normhandlers map[string][]BlobDigester
 	digesters    map[DigesterType]BlobDigester
@@ -64,8 +66,9 @@ type blobDigesterRegistry struct {
 
 var DefaultBlobDigesterRegistry = NewBlobDigesterRegistry()
 
-func NewBlobDigesterRegistry() BlobDigesterRegistry {
+func NewBlobDigesterRegistry(base ...BlobDigesterRegistry) BlobDigesterRegistry {
 	return &blobDigesterRegistry{
+		base:         utils.Optional(base...),
 		typehandlers: map[string][]BlobDigester{},
 		normhandlers: map[string][]BlobDigester{},
 		digesters:    map[DigesterType]BlobDigester{},
@@ -73,6 +76,9 @@ func NewBlobDigesterRegistry() BlobDigesterRegistry {
 }
 
 func (r *blobDigesterRegistry) IsInitial() bool {
+	if r.base != nil && !r.base.IsInitial() {
+		return false
+	}
 	return len(r.typehandlers) == 0 && len(r.normhandlers) == 0 && len(r.digesters) == 0
 }
 
@@ -114,20 +120,40 @@ outer:
 func (r *blobDigesterRegistry) GetDigester(typ DigesterType) BlobDigester {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
-	return r.digesters[typ]
+	return r.getDigester(typ)
+}
+
+func (r *blobDigesterRegistry) getDigester(typ DigesterType) BlobDigester {
+	d := r.digesters[typ]
+	if d != nil {
+		return d
+	}
+	if r.base != nil {
+		return r.base.GetDigester(typ)
+	}
+	return nil
 }
 
 func (r *blobDigesterRegistry) GetDigesterForType(typ string) []BlobDigester {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
-	return append(r.typehandlers[typ][:0:0], r.typehandlers[typ]...)
+	return r.getDigesterForType(typ)
+}
+
+func (r *blobDigesterRegistry) getDigesterForType(typ string) []BlobDigester {
+	//nolint: gocritic // yes
+	list := append(r.typehandlers[typ][:0:0], r.typehandlers[typ]...)
+	if r.base != nil {
+		list = append(list, r.base.GetDigesterForType(typ)...)
+	}
+	return list
 }
 
 func (r *blobDigesterRegistry) Copy() BlobDigesterRegistry {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
-	n := NewBlobDigesterRegistry().(*blobDigesterRegistry)
+	n := NewBlobDigesterRegistry(r.base).(*blobDigesterRegistry)
 	for k, v := range r.typehandlers {
 		n.typehandlers[k] = append(v[:0:0], v...)
 	}
@@ -168,11 +194,11 @@ func (r *blobDigesterRegistry) DetermineDigests(restype string, preferred signin
 	}
 	if len(dtyps) == 0 {
 		var err error
-		res, err := r.handle(r.typehandlers[restype], restype, acc, preferred)
+		res, err := r.handle(r.getDigesterForType(restype), restype, acc, preferred)
 		if res != nil || err != nil {
 			return res, err
 		}
-		res, err = r.handle(r.typehandlers[""], restype, acc, preferred)
+		res, err = r.handle(r.getDigesterForType(""), restype, acc, preferred)
 		if res != nil || err != nil {
 			return res, err
 		}
@@ -187,7 +213,7 @@ func (r *blobDigesterRegistry) DetermineDigests(restype string, preferred signin
 
 	var result []DigestDescriptor
 	for _, dtyp := range dtyps {
-		t := r.digesters[dtyp]
+		t := r.getDigester(dtyp)
 		if t != nil {
 			d, err := t.DetermineDigest(restype, acc, preferred)
 			if err != nil {
@@ -220,6 +246,9 @@ func (r *blobDigesterRegistry) DetermineDigests(restype string, preferred signin
 				}
 			}
 		}
+		if len(result) == 0 && r.base != nil {
+			return r.base.DetermineDigests(restype, preferred, registry, acc, dtyps...)
+		}
 	}
 	return result, nil
 }
@@ -228,6 +257,18 @@ func MustRegisterDigester(digester BlobDigester, arttypes ...string) {
 	err := DefaultBlobDigesterRegistry.Register(digester, arttypes...)
 	if err != nil {
 		panic(err)
+	}
+}
+
+func AppendUnique(list *[]BlobDigester, elems ...BlobDigester) {
+outer:
+	for _, e := range elems {
+		for _, f := range *list {
+			if f.GetType() == e.GetType() {
+				continue outer
+			}
+		}
+		*list = append(*list, e)
 	}
 }
 

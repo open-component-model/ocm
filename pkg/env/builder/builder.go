@@ -53,6 +53,7 @@ type Builder struct {
 	ocm_acc  *compdesc.AccessSpec
 
 	blob *accessio.BlobAccess
+	hint *string
 
 	oci_repo          oci.Repository
 	oci_nsacc         oci.NamespaceAccess
@@ -81,6 +82,7 @@ func (b *Builder) set() {
 	b.ocm_acc = nil
 
 	b.blob = nil
+	b.hint = nil
 
 	b.oci_repo = nil
 	b.oci_nsacc = nil
@@ -160,4 +162,12 @@ func (b *Builder) BlobData(mime string, data []byte) {
 		Fail("access already set", 1)
 	}
 	*(b.blob) = accessio.BlobAccessForData(mime, data)
+}
+
+func (b *Builder) Hint(hint string) {
+	b.expect(b.hint, T_OCMACCESS)
+	if b.ocm_acc != nil && *b.ocm_acc != nil {
+		Fail("access already set", 1)
+	}
+	*(b.hint) = hint
 }

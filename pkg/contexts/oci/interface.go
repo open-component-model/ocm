@@ -23,6 +23,7 @@ const CommonTransportFormat = internal.CommonTransportFormat
 
 type (
 	Context                          = internal.Context
+	ContextProvider                  = internal.ContextProvider
 	Repository                       = internal.Repository
 	RepositorySpecHandlers           = internal.RepositorySpecHandlers
 	RepositorySpecHandler            = internal.RepositorySpecHandler

@@ -4,10 +4,6 @@
 
 package internal
 
-import (
-	"fmt"
-)
-
 const VERSION = "v1"
 
 type Descriptor struct {
@@ -17,28 +13,46 @@ type Descriptor struct {
 	Short         string `json:"shortDescription"`
 	Long          string `json:"description"`
 
-	AccessMethods []AccessMethodDescriptor `json:"accessMethods,omitempty"`
-	Uploaders     []UploaderDescriptor     `json:"uploaders,omitempty"`
+	AccessMethods []AccessMethodDescriptor   `json:"accessMethods,omitempty"`
+	Uploaders     List[UploaderDescriptor]   `json:"uploaders,omitempty"`
+	Downloaders   List[DownloaderDescriptor] `json:"downloaders,omitempty"`
 }
 
-type UploaderKey struct {
-	ContextType    string `json:"contextType"`
-	RepositoryType string `json:"repositoryType"`
-	ArtifactType   string `json:"artifactType"`
-	MediaType      string `json:"mediaType"`
-}
+type DownloaderKey = ArtefactContext
 
-func (k UploaderKey) String() string {
-	if k.RepositoryType != "" || k.ContextType != "" {
-		return fmt.Sprintf("%s:%s[%s:%s]", k.ContextType, k.RepositoryType, k.ArtifactType, k.MediaType)
+func NewDownloaderKey(arttype, mediatype string) DownloaderKey {
+	return DownloaderKey{
+		ArtifactType: arttype,
+		MediaType:    mediatype,
 	}
-	return fmt.Sprintf("%s:%s", k.ArtifactType, k.MediaType)
+}
+
+type DownloaderDescriptor struct {
+	Name        string          `json:"name"`
+	Description string          `json:"description"`
+	Constraints []DownloaderKey `json:"constraints"`
+}
+
+func (d DownloaderDescriptor) GetName() string {
+	return d.Name
+}
+
+func (d DownloaderDescriptor) GetConstraints() []DownloaderKey {
+	return d.Constraints
 }
 
 type UploaderDescriptor struct {
 	Name        string        `json:"name"`
 	Description string        `json:"description"`
-	Costraints  []UploaderKey `json:"constraints"`
+	Constraints []UploaderKey `json:"constraints"`
+}
+
+func (d UploaderDescriptor) GetName() string {
+	return d.Name
+}
+
+func (d UploaderDescriptor) GetConstraints() []UploaderKey {
+	return d.Constraints
 }
 
 type AccessMethodDescriptor struct {

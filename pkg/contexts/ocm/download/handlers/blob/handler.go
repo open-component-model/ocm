@@ -18,7 +18,7 @@ import (
 type Handler struct{}
 
 func init() {
-	download.Register(download.ALL, &Handler{})
+	download.RegisterForArtefactType(download.ALL, &Handler{})
 }
 
 func wrapErr(err error, racc cpi.ResourceAccess) error {

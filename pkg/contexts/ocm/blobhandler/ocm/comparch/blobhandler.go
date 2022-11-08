@@ -28,7 +28,7 @@ func NewBlobHandler() cpi.BlobHandler {
 	return &blobHandler{}
 }
 
-func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	ocmctx := ctx.(storagecontext.StorageContext)
 
 	if blob == nil {

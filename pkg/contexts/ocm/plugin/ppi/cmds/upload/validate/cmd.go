@@ -12,15 +12,22 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/common"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+)
+
+const (
+	Name     = "validate"
+	OptMedia = common.OptMedia
+	OptArt   = common.OptArt
 )
 
 func New(p ppi.Plugin) *cobra.Command {
 	opts := Options{}
 
 	cmd := &cobra.Command{
-		Use:   "validate [flags>] <name> <spec>",
+		Use:   Name + " [<flags>] <name> <spec>",
 		Short: "validate upload specification",
 		Long:  "",
 		Args:  cobra.ExactArgs(2),
@@ -44,8 +51,8 @@ type Options struct {
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVarP(&o.MediaType, "mediaType", "m", "", "media type of input blob")
-	fs.StringVarP(&o.ArtifactType, "artifactType", "a", "", "artifact type of input blob")
+	fs.StringVarP(&o.MediaType, OptMedia, "m", "", "media type of input blob")
+	fs.StringVarP(&o.ArtifactType, OptArt, "a", "", "artifact type of input blob")
 }
 
 func (o *Options) Complete(args []string) error {

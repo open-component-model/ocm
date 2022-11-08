@@ -11,7 +11,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type AccessType interface {
@@ -72,37 +74,47 @@ type AccessTypeScheme interface {
 	DecodeAccessSpec(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error)
 	CreateAccessSpec(obj runtime.TypedObject) (AccessSpec, error)
 
-	ConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider
-	flagsets.ConfigProvider
+	CreateConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider
 }
 
 type accessTypeScheme struct {
 	runtime.SchemeBase
-	optionTypes flagsets.ConfigTypeOptionSetConfigProvider
+	base        AccessTypeScheme
+	optionTypes map[string]AccessType
 }
 
-func NewAccessTypeScheme() AccessTypeScheme {
+func NewAccessTypeScheme(base ...AccessTypeScheme) AccessTypeScheme {
 	var at AccessSpec
-	scheme := runtime.MustNewDefaultScheme(&at, &UnknownAccessSpec{}, true, nil)
-	prov := flagsets.NewTypedConfigProvider("access", "blob access specification")
-	prov.AddGroups("Access Specification Options")
-	return &accessTypeScheme{scheme, prov}
+	b := utils.Optional(base...)
+	scheme := runtime.MustNewDefaultScheme(&at, &UnknownAccessSpec{}, true, nil, b)
+	return &accessTypeScheme{scheme, b, map[string]AccessType{}}
 }
 
 func (t *accessTypeScheme) AddKnownTypes(s AccessTypeScheme) {
 	t.SchemeBase.AddKnownTypes(s)
 }
 
-func (t *accessTypeScheme) ConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider {
-	return t.optionTypes
-}
+func (t *accessTypeScheme) CreateConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider {
+	prov := flagsets.NewTypedConfigProvider("access", "blob access specification")
+	prov.AddGroups("Access Specification Options")
+	for _, p := range t.optionTypes {
+		err := prov.AddTypeSet(p.ConfigOptionTypeSetHandler())
+		if err != nil {
+			logging.Logger().Error("cannot compose access type CLI options: %s", err)
+		}
+	}
+	if t.base != nil {
+		for _, s := range t.base.CreateConfigTypeSetConfigProvider().OptionTypeSets() {
+			if prov.GetTypeSet(s.Name()) == nil {
+				err := prov.AddTypeSet(s)
+				if err != nil {
+					logging.Logger().Error("cannot compose access type CLI options: %s", err)
+				}
+			}
+		}
+	}
 
-func (t *accessTypeScheme) CreateOptions() flagsets.ConfigOptions {
-	return t.optionTypes.CreateOptions()
-}
-
-func (t *accessTypeScheme) GetConfigFor(opts flagsets.ConfigOptions) (flagsets.Config, error) {
-	return t.optionTypes.GetConfigFor(opts)
+	return prov
 }
 
 func (t *accessTypeScheme) GetAccessType(name string) AccessType {
@@ -115,9 +127,7 @@ func (t *accessTypeScheme) GetAccessType(name string) AccessType {
 
 func (t *accessTypeScheme) Register(name string, atype AccessType) {
 	t.SchemeBase.RegisterByDecoder(name, atype)
-	if h := atype.ConfigOptionTypeSetHandler(); h != nil {
-		t.optionTypes.AddTypeSet(h)
-	}
+	t.optionTypes[atype.GetType()] = atype
 }
 
 func (t *accessTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedObjectDecoder) error {

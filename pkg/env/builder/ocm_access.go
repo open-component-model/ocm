@@ -19,6 +19,9 @@ func (b *Builder) Access(acc compdesc.AccessSpec) {
 	if b.blob != nil && *b.blob != nil {
 		Fail("access already set", 1)
 	}
+	if b.hint != nil && *b.hint != "" {
+		Fail("hint requires blob", 1)
+	}
 
 	*(b.ocm_acc) = acc
 }

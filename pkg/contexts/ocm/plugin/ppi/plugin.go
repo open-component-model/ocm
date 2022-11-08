@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/internal"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -18,9 +19,12 @@ type plugin struct {
 	descriptor internal.Descriptor
 	options    Options
 
+	downloaders  map[string]Downloader
+	downmappings *registry.Registry[Downloader, DownloaderKey]
+
 	uploaders      map[string]Uploader
+	upmappings     *registry.Registry[Uploader, UploaderKey]
 	uploaderScheme runtime.Scheme
-	mappings       *internal.Registry[Uploader]
 
 	methods      map[string]AccessMethod
 	accessScheme runtime.Scheme
@@ -29,11 +33,16 @@ type plugin struct {
 func NewPlugin(name string, version string) Plugin {
 	var rt runtime.VersionedTypedObject
 	return &plugin{
-		name:           name,
-		version:        version,
-		methods:        map[string]AccessMethod{},
-		uploaders:      map[string]Uploader{},
-		mappings:       internal.NewRegistry[Uploader](),
+		name:    name,
+		version: version,
+		methods: map[string]AccessMethod{},
+
+		downloaders:  map[string]Downloader{},
+		downmappings: registry.NewRegistry[Downloader, DownloaderKey](),
+
+		uploaders:  map[string]Uploader{},
+		upmappings: registry.NewRegistry[Uploader, UploaderKey](),
+
 		accessScheme:   runtime.MustNewDefaultScheme(&rt, &runtime.UnstructuredVersionedTypedObject{}, false, nil),
 		uploaderScheme: runtime.MustNewDefaultScheme(&rt, &runtime.UnstructuredVersionedTypedObject{}, false, nil),
 		descriptor: internal.Descriptor{
@@ -68,52 +77,114 @@ func (p *plugin) SetShort(s string) {
 	p.descriptor.Short = s
 }
 
-func (p *plugin) RegisterUploader(arttype, mediatype string, u Uploader) error {
-	old := p.uploaders[u.Name()]
-	if old != nil && old != u {
-		return fmt.Errorf("uploader name %q already in use", u.Name())
+func (p *plugin) RegisterDownloader(arttype, mediatype string, hdlr Downloader) error {
+	key := DownloaderKey{}.SetArtefact(arttype, mediatype)
+	if !key.IsValid() {
+		return errors.ErrInvalid("artefact context")
 	}
 
-	var d *UploaderDescriptor
+	old := p.downloaders[hdlr.Name()]
+	if old != nil && old != hdlr {
+		return fmt.Errorf("downloader name %q already in use", hdlr.Name())
+	}
+
+	var desc *DownloaderDescriptor
 	if old == nil {
-		d = &UploaderDescriptor{
-			Name:        u.Name(),
-			Description: u.Description(),
-			Costraints:  []UploaderKey{},
+		desc = &DownloaderDescriptor{
+			Name:        hdlr.Name(),
+			Description: hdlr.Description(),
+			Constraints: []DownloaderKey{},
 		}
-		p.descriptor.Uploaders = append(p.descriptor.Uploaders, *d)
-		d = &p.descriptor.Uploaders[len(p.descriptor.Uploaders)-1]
+		p.descriptor.Downloaders = append(p.descriptor.Downloaders, *desc)
+		desc = &p.descriptor.Downloaders[len(p.descriptor.Downloaders)-1]
 	} else {
-		for i := range p.descriptor.Uploaders {
-			if p.descriptor.Uploaders[i].Name == u.Name() {
-				d = &p.descriptor.Uploaders[i]
+		for i := range p.descriptor.Downloaders {
+			if p.descriptor.Downloaders[i].Name == hdlr.Name() {
+				desc = &p.descriptor.Downloaders[i]
 			}
 		}
 	}
-	p.uploaders[u.Name()] = u
 
-	key := UploaderKey{
-		ArtifactType: arttype,
-		MediaType:    mediatype,
-	}
-	cur := p.mappings.GetHandler(key)
-	if cur != nil && cur != u {
-		return fmt.Errorf("uploader mapping key %q already in use", key)
+	cur := p.downmappings.GetHandler(key)
+	if len(cur) > 0 && cur[0] != hdlr {
+		return fmt.Errorf("downloader mapping key %q already in use", key)
 	}
 	if cur == nil {
-		p.mappings.Register(key, u)
+		p.downmappings.Register(key, hdlr)
+		desc.Constraints = append(desc.Constraints, DownloaderKey{ArtifactType: key.ArtifactType, MediaType: key.MediaType})
+	}
+	p.downloaders[hdlr.Name()] = hdlr
+	return nil
+}
 
-		if key.ArtifactType == "" {
-			key.ArtifactType = "*"
-		}
-		if key.MediaType == "" {
-			key.MediaType = "*"
-		}
-		d.Costraints = append(d.Costraints, key)
+func (p *plugin) GetDownloader(name string) Downloader {
+	return p.downloaders[name]
+}
+
+func (p *plugin) GetDownloaderFor(arttype, mediatype string) Downloader {
+	h := p.downmappings.LookupHandler(DownloaderKey{}.SetArtefact(arttype, mediatype))
+	if len(h) == 0 {
+		return nil
 	}
-	for n, d := range u.Decoders() {
-		p.uploaderScheme.RegisterByDecoder(n, d)
+	return h[0]
+}
+
+func (p *plugin) RegisterRepositoryContextUploader(contexttype, repotype, arttype, mediatype string, u Uploader) error {
+	if contexttype == "" || repotype == "" {
+		return fmt.Errorf("repository context required")
 	}
+	return p.registerUploader(UploaderKey{}.SetArtefact(arttype, mediatype).SetRepo(contexttype, repotype), u)
+}
+
+func (p *plugin) RegisterUploader(arttype, mediatype string, u Uploader) error {
+	return p.registerUploader(UploaderKey{}.SetArtefact(arttype, mediatype), u)
+}
+
+func (p *plugin) registerUploader(key UploaderKey, hdlr Uploader) error {
+	if !key.RepositoryContext.IsValid() {
+		return errors.ErrInvalid("repository context")
+	}
+	if !key.ArtefactContext.IsValid() {
+		return errors.ErrInvalid("artefact context")
+	}
+	old := p.uploaders[hdlr.Name()]
+	if old != nil && old != hdlr {
+		return fmt.Errorf("uploader name %q already in use", hdlr.Name())
+	}
+
+	var desc *UploaderDescriptor
+	if old == nil {
+		desc = &UploaderDescriptor{
+			Name:        hdlr.Name(),
+			Description: hdlr.Description(),
+			Constraints: []UploaderKey{},
+		}
+		p.descriptor.Uploaders = append(p.descriptor.Uploaders, *desc)
+		desc = &p.descriptor.Uploaders[len(p.descriptor.Uploaders)-1]
+	} else {
+		for i := range p.descriptor.Uploaders {
+			if p.descriptor.Uploaders[i].Name == hdlr.Name() {
+				desc = &p.descriptor.Uploaders[i]
+			}
+		}
+	}
+
+	cur := p.upmappings.GetHandler(key)
+	if len(cur) > 0 && cur[0] != hdlr {
+		return fmt.Errorf("uploader mapping key %q already in use", key)
+	}
+	list := errors.ErrListf("uploader decoders")
+	for n, d := range hdlr.Decoders() {
+		list.Add(p.uploaderScheme.RegisterByDecoder(n, d))
+	}
+	if list.Len() > 0 {
+		return list.Result()
+	}
+	if cur == nil {
+		p.upmappings.Register(key, hdlr)
+		desc.Constraints = append(desc.Constraints, key)
+	}
+	p.uploaders[hdlr.Name()] = hdlr
 	return nil
 }
 
@@ -122,8 +193,11 @@ func (p *plugin) GetUploader(name string) Uploader {
 }
 
 func (p *plugin) GetUploaderFor(arttype, mediatype string) Uploader {
-	u, _ := p.mappings.LookupHandler(arttype, mediatype)
-	return u
+	h := p.upmappings.LookupHandler(UploaderKey{}.SetArtefact(arttype, mediatype))
+	if len(h) == 0 {
+		return nil
+	}
+	return h[0]
 }
 
 func (p *plugin) DecodeUploadTargetSpecification(data []byte) (UploadTargetSpec, error) {

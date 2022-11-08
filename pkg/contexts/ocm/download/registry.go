@@ -11,6 +11,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 )
@@ -22,49 +23,54 @@ type Handler interface {
 }
 
 type Registry interface {
-	Register(typ string, hdlr Handler)
+	Register(arttype, mediatype string, hdlr Handler)
 	Handler
 	DownloadAsBlob(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error)
 }
 
-type registry struct {
+type _registry struct {
 	lock     sync.RWMutex
-	handlers map[string][]Handler
+	handlers *registry.Registry[Handler, registry.RegistrationKey]
 }
 
 func NewRegistry() Registry {
-	return &registry{
-		handlers: map[string][]Handler{},
+	return &_registry{
+		handlers: registry.NewRegistry[Handler, registry.RegistrationKey](),
 	}
 }
 
-func (r *registry) Register(typ string, hdlr Handler) {
+func (r *_registry) Register(arttype, mediatype string, hdlr Handler) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	list := r.handlers[typ]
-	list = append(list, hdlr)
-	r.handlers[typ] = list
+	r.handlers.Register(registry.RegistrationKey{arttype, mediatype}, hdlr)
 }
 
-func (r *registry) getHandlers(typ string) []Handler {
+func (r *_registry) getHandlers(arttype, mediatype string) []Handler {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
-	return r.handlers[typ]
+	return r.handlers.LookupHandler(registry.RegistrationKey{arttype, mediatype})
 }
 
-func (r *registry) Download(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
-	if ok, p, err := r.download(r.getHandlers(racc.Meta().GetType()), ctx, racc, path, fs); ok {
+func (r *_registry) Download(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
+	art := racc.Meta().GetType()
+	m, err := racc.AccessMethod()
+	if err != nil {
+		return false, "", err
+	}
+	defer m.Close()
+	mime := m.MimeType()
+	if ok, p, err := r.download(r.getHandlers(art, mime), ctx, racc, path, fs); ok {
 		return ok, p, err
 	}
-	return r.download(r.getHandlers(ALL), ctx, racc, path, fs)
+	return r.download(r.getHandlers(ALL, ""), ctx, racc, path, fs)
 }
 
-func (r *registry) DownloadAsBlob(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
-	return r.download(r.getHandlers(ALL), ctx, racc, path, fs)
+func (r *_registry) DownloadAsBlob(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
+	return r.download(r.getHandlers(ALL, ""), ctx, racc, path, fs)
 }
 
-func (r *registry) download(list []Handler, ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
+func (r *_registry) download(list []Handler, ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
 	errs := errors.ErrListf("download")
 	for _, h := range list {
 		ok, p, err := h.Download(ctx, racc, path, fs)
@@ -78,8 +84,12 @@ func (r *registry) download(list []Handler, ctx out.Context, racc cpi.ResourceAc
 
 var DefaultRegistry = NewRegistry()
 
-func Register(typ string, hdlr Handler) {
-	DefaultRegistry.Register(typ, hdlr)
+func RegisterForArtefactType(arttype string, hdlr Handler) {
+	DefaultRegistry.Register(arttype, "", hdlr)
+}
+
+func Register(arttype, mediatype string, hdlr Handler) {
+	DefaultRegistry.Register(arttype, mediatype, hdlr)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

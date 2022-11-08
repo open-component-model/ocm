@@ -103,9 +103,9 @@ func (a *componentVersionAccessImpl) AddBlob(blob cpi.BlobAccess, artType, refNa
 		return nil, errors.New("a resource has to be defined")
 	}
 	storagectx := a.base.GetStorageContext(a)
-	h := a.GetContext().BlobHandlers().GetHandler(storagectx.GetImplementationRepositoryType(), artType, blob.MimeType())
+	h := a.GetContext().BlobHandlers().LookupHandler(storagectx.GetImplementationRepositoryType(), artType, blob.MimeType())
 	if h != nil {
-		acc, err := h.StoreBlob(blob, refName, nil, storagectx)
+		acc, err := h.StoreBlob(blob, artType, refName, nil, storagectx)
 		if err != nil {
 			return nil, err
 		}

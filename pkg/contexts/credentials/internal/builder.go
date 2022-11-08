@@ -68,6 +68,8 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 		case datacontext.MODE_CONFIGURED:
 			b.reposcheme = NewRepositoryTypeScheme(nil)
 			b.reposcheme.AddKnownTypes(DefaultRepositoryTypeScheme)
+		case datacontext.MODE_EXTENDED:
+			b.reposcheme = NewRepositoryTypeScheme(nil, DefaultRepositoryTypeScheme)
 		case datacontext.MODE_DEFAULTED:
 			fallthrough
 		case datacontext.MODE_SHARED:

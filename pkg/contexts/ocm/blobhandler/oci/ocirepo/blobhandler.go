@@ -64,7 +64,7 @@ func NewBlobHandler(base BaseFunction) cpi.BlobHandler {
 	return &blobHandler{base}
 }
 
-func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	ocictx := ctx.(*storagecontext.StorageContext)
 
 	err := ocictx.Manifest.AddBlob(blob)
@@ -99,7 +99,7 @@ func NewArtefactHandler(base BaseFunction) cpi.BlobHandler {
 	return &artefactHandler{blobHandler{base}}
 }
 
-func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	mediaType := blob.MimeType()
 
 	if !artdesc.IsOCIMediaType(mediaType) || (!strings.HasSuffix(mediaType, "+tar") && !strings.HasSuffix(mediaType, "+tar+gzip")) {

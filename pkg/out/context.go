@@ -5,6 +5,7 @@
 package out
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -67,6 +68,16 @@ func New() Context {
 		out: os.Stdout,
 		err: os.Stderr,
 	}
+}
+
+func NewBuffered() (Context, *bytes.Buffer) {
+	var buffer bytes.Buffer
+
+	return &outputContext{
+		in:  os.Stdin,
+		out: &buffer,
+		err: &buffer,
+	}, &buffer
 }
 
 func NewFor(ctx Context) Context {
