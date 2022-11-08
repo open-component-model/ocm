@@ -23,7 +23,6 @@ type Label struct {
 	Value json.RawMessage `json:"value"`
 
 	// Version is the optional specification version of the attribute value
-	// +kubebuilder:validation:Pattern:=`^v[0-9]+$`
 	Version string `json:"version,omitempty"`
 	// Signing describes whether the label should be included into the signature
 	Signing bool `json:"signing,omitempty"`
