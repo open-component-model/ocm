@@ -10,6 +10,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	errors "github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -19,19 +20,28 @@ const (
 
 type Creator func(name string, description string) flagsets.ConfigOptionType
 
+type TypeInfo struct {
+	Creator
+	Description string
+}
+
+func (i TypeInfo) GetDescription() string {
+	return i.Description
+}
+
 type Registry = *registry
 
 var DefaultRegistry = New()
 
 type registry struct {
 	lock    sync.RWMutex
-	types   map[string]Creator
+	types   map[string]TypeInfo
 	options map[string]flagsets.ConfigOptionType
 }
 
 func New() Registry {
 	return &registry{
-		types:   map[string]Creator{},
+		types:   map[string]TypeInfo{},
 		options: map[string]flagsets.ConfigOptionType{},
 	}
 }
@@ -39,19 +49,22 @@ func New() Registry {
 func (r *registry) RegisterOption(t flagsets.ConfigOptionType) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	r.options[t.Name()] = t
+	r.options[t.GetName()] = t
 }
 
-func (r *registry) RegisterType(name string, c Creator) {
+func (r *registry) RegisterType(name string, c Creator, desc string) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	r.types[name] = c
+	r.types[name] = TypeInfo{Creator: c, Description: desc}
 }
 
-func (r *registry) GetType(name string) Creator {
+func (r *registry) GetType(name string) *TypeInfo {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
-	return r.types[name]
+	if t, ok := r.types[name]; ok {
+		return &t
+	}
+	return nil
 }
 
 func (r *registry) GetOption(name string) flagsets.ConfigOptionType {
@@ -63,12 +76,12 @@ func (r *registry) GetOption(name string) flagsets.ConfigOptionType {
 func (r *registry) CreateOption(typ, name, desc string) (flagsets.ConfigOptionType, error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
-	t := r.types[typ]
-	if t == nil {
+	t, ok := r.types[typ]
+	if !ok {
 		return nil, errors.ErrUnknown(KIND_OPTIONTYPE, typ)
 	}
 
-	n := t(name, desc)
+	n := t.Creator(name, desc)
 	o := r.options[name]
 	if o != nil {
 		if reflect.TypeOf(o) != reflect.TypeOf(n) {
@@ -77,4 +90,21 @@ func (r *registry) CreateOption(typ, name, desc string) (flagsets.ConfigOptionTy
 		return o, nil
 	}
 	return n, nil
+}
+
+func (r *registry) Usage() string {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+
+	tinfo := utils.FormatMap("", r.types)
+	oinfo := utils.FormatMap("", r.options)
+
+	return `
+The following predifined options can be used:
+
+` + oinfo + `
+
+The following predefined option types are supported:
+
+` + tinfo
 }

@@ -8,21 +8,24 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/open-component-model/ocm/cmds/ocm/app"
 	"github.com/open-component-model/ocm/hack/generate-docs/cobradoc"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds"
+	"github.com/open-component-model/ocm/pkg/version"
 )
 
 func main() {
-	//nolint: forbidigo // Intentional Println because this is a supplementary tool.
-	fmt.Println("> Generate Docs for OCM CLI")
+	fmt.Println("> Generate Docs for OCM Plugins")
 
 	if len(os.Args) != 2 { // expect 2 as the first one is the program name
 		fmt.Fprintf(os.Stderr, "Expected exactly one argument, but got %d", len(os.Args)-1)
 		os.Exit(1)
 	}
 
-	cmd := app.NewCliCommand(clictx.DefaultContext())
+	p := ppi.NewPlugin("plugin", version.Get().String())
+	p.SetLong(cmds.Description(p.Name()))
+	p.SetShort("OCM Plugin")
+	cmd := cmds.NewPluginCommand(p).Command()
 	cmd.DisableAutoGenTag = true
-	cobradoc.Generate("OCM CLI", cmd, os.Args[1], true)
+	cobradoc.Generate("OCM Plugin", cmd, os.Args[1], true)
 }

@@ -523,3 +523,9 @@ $ ocm add source-config sources.yaml --name sources --type filesystem --access '
 * [ocm add](ocm_add.md)	 &mdash; Add resources or sources to a component archive
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
+
+
+##### Additional Links
+
+* [<b>ocm add sources</b>](ocm_add_sources.md)	 &mdash; add source information to a component version
+

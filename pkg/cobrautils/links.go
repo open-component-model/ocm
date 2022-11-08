@@ -31,17 +31,19 @@ func FormatLinkWithHandler(linkhandler func(string) string) func(string) string 
 	}
 }
 
-func SubstituteCommandLinks(desc string, linkformat func(string) string) string {
+func SubstituteCommandLinks(desc string, linkformat func(string) string) ([]string, string) {
+	var links []string
 	for {
 		link := strings.Index(desc, "<CMD>")
 		if link < 0 {
-			return desc
+			return links, desc
 		}
 		end := strings.Index(desc, "</CMD>")
 		if end < 0 {
 			panic("missing </CMD> in:\n" + desc)
 		}
 		path := desc[link+5 : end]
+		links = append(links, path)
 		desc = desc[:link] + linkformat(path) + desc[end+6:]
 	}
 }

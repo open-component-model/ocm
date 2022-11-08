@@ -11,7 +11,7 @@ import (
 )
 
 type Option interface {
-	Name() string
+	GetName() string
 	AddFlags(fs *pflag.FlagSet)
 	Value() interface{}
 
@@ -62,7 +62,7 @@ func (o *configOptions) Options() []Option {
 
 func (o *configOptions) GetValue(name string) (interface{}, bool) {
 	for _, opt := range o.options {
-		if opt.Name() == name {
+		if opt.GetName() == name {
 			return opt.Value(), o.flags.Changed(name)
 		}
 	}
@@ -79,7 +79,7 @@ func (o *configOptions) AddFlags(fs *pflag.FlagSet) {
 func (o *configOptions) Changed(names ...string) bool {
 	if len(names) == 0 {
 		for _, opt := range o.options {
-			if o.flags.Changed(opt.Name()) {
+			if o.flags.Changed(opt.GetName()) {
 				return true
 			}
 		}
@@ -91,8 +91,8 @@ func (o *configOptions) Changed(names ...string) bool {
 		set[n] = struct{}{}
 	}
 	for _, opt := range o.options {
-		if _, ok := set[opt.Name()]; ok {
-			if o.flags.Changed(opt.Name()) {
+		if _, ok := set[opt.GetName()]; ok {
+			if o.flags.Changed(opt.GetName()) {
 				return true
 			}
 		}
@@ -107,7 +107,7 @@ func (o *configOptions) FilterBy(filter Filter) ConfigOptions {
 	var options []Option
 
 	for _, opt := range o.options {
-		if filter(opt.Name()) {
+		if filter(opt.GetName()) {
 			options = append(options, opt)
 		}
 	}
@@ -124,17 +124,17 @@ func (o *configOptions) Check(set ConfigOptionTypeSet, desc string) error {
 
 	if set == nil {
 		for _, opt := range o.options {
-			if o.flags.Changed(opt.Name()) {
-				return fmt.Errorf("option %q given, but not possible%s", opt.Name(), desc)
+			if o.flags.Changed(opt.GetName()) {
+				return fmt.Errorf("option %q given, but not possible%s", opt.GetName(), desc)
 			}
 		}
 	} else {
 		for _, opt := range o.options {
-			if o.flags.Changed(opt.Name()) && set.GetOptionType(opt.Name()) == nil {
+			if o.flags.Changed(opt.GetName()) && set.GetOptionType(opt.GetName()) == nil {
 				if desc == "" {
-					return fmt.Errorf("option %q given, but not valid for option set %q", opt.Name(), set.Name())
+					return fmt.Errorf("option %q given, but not valid for option set %q", opt.GetName(), set.GetName())
 				}
-				return fmt.Errorf("option %q given, but not possible%s", opt.Name(), desc)
+				return fmt.Errorf("option %q given, but not possible%s", opt.GetName(), desc)
 			}
 		}
 	}

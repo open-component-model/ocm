@@ -32,8 +32,10 @@ func New(p ppi.Plugin) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   Name + " [<flags>] <access spec>",
 		Short: "get blob",
-		Long:  "",
-		Args:  cobra.ExactArgs(1),
+		Long: `
+Evaluate the given access specification and return the describes blob on
+*stdout*.`,
+		Args: cobra.ExactArgs(1),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return opts.Complete(args)
 		},

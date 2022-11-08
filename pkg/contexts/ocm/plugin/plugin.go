@@ -82,7 +82,7 @@ func (p *pluginImpl) ValidateAccessMethod(spec []byte) (*ppi.AccessSpecInfo, err
 func (p *pluginImpl) ComposeAccessMethod(name string, opts flagsets.ConfigOptions, base flagsets.Config) error {
 	cfg := flagsets.Config{}
 	for _, o := range opts.Options() {
-		cfg[o.Name()] = o.Value()
+		cfg[o.GetName()] = o.Value()
 	}
 	optsdata, err := json.Marshal(cfg)
 	if err != nil {

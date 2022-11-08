@@ -316,10 +316,10 @@ func (a *ContentResourceSpecificationsProvider) apply(p flagsets.ConfigTypeOptio
 	if p.IsExplicitlySelected(a.options) {
 		ac, err := p.GetConfigFor(a.options)
 		if err != nil {
-			return errors.Wrapf(err, "%s specification", p.Name())
+			return errors.Wrapf(err, "%s specification", p.GetName())
 		}
 		if ac != nil {
-			data[p.Name()] = ac
+			data[p.GetName()] = ac
 		}
 	}
 	return nil

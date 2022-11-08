@@ -74,12 +74,12 @@ func (p *typedConfigProvider) GetConfigOptionTypeSet() ConfigOptionTypeSet {
 }
 
 func (p *typedConfigProvider) IsExplicitlySelected(opts ConfigOptions) bool {
-	return opts.Changed(p.Name()+"Type", p.Name())
+	return opts.Changed(p.GetName()+"Type", p.GetName())
 }
 
 func (p *typedConfigProvider) GetConfigFor(opts ConfigOptions) (Config, error) {
-	typv, _ := opts.GetValue(p.Name() + "Type")
-	cfgv, _ := opts.GetValue(p.Name())
+	typv, _ := opts.GetValue(p.GetName() + "Type")
+	cfgv, _ := opts.GetValue(p.GetName())
 
 	var data Config
 	if cfgv != nil {
@@ -122,13 +122,13 @@ func (p *typedConfigProvider) applyConfigForType(name string, opts ConfigOptions
 		return errors.ErrUnknown(name)
 	}
 
-	err := opts.FilterBy(p.HasSharedOptionType).Check(set, p.Name()+" type "+name)
+	err := opts.FilterBy(p.HasSharedOptionType).Check(set, p.GetName()+" type "+name)
 	if err != nil {
 		return err
 	}
 	handler, ok := set.(ConfigHandler)
 	if !ok {
-		return fmt.Errorf("no config handler defined for %s type %s", p.Name(), name)
+		return fmt.Errorf("no config handler defined for %s type %s", p.GetName(), name)
 	}
 	return handler.ApplyConfig(opts, config)
 }

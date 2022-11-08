@@ -54,12 +54,12 @@ func SetField(config Config, value interface{}, names ...string) error {
 }
 
 type NameProvider interface {
-	Name() string
+	GetName() string
 }
 
 type OptionName string
 
-func (n OptionName) Name() string {
+func (n OptionName) GetName() string {
 	return string(n)
 }
 
@@ -97,11 +97,11 @@ func AddFieldByMappedOption(opts OptionValueProvider, oname string, config Confi
 // The option is specified by a name provider instead of its name.
 // If no target field is specified the name of the option is used.
 func AddFieldByOptionP(opts OptionValueProvider, p NameProvider, config Config, names ...string) error {
-	return AddFieldByMappedOption(opts, p.Name(), config, nil, names...)
+	return AddFieldByMappedOption(opts, p.GetName(), config, nil, names...)
 }
 
 func AddFieldByMappedOptionP(opts OptionValueProvider, p NameProvider, config Config, mapper func(interface{}) (interface{}, error), names ...string) error {
-	return AddFieldByMappedOption(opts, p.Name(), config, mapper, names...)
+	return AddFieldByMappedOption(opts, p.GetName(), config, mapper, names...)
 }
 
 func ComposedAdder(adders ...ConfigAdder) ConfigAdder {

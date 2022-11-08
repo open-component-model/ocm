@@ -30,8 +30,16 @@ func New(p ppi.Plugin) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   Name + " [<flags>] <name> <filepath>",
 		Short: "download blob into filesystem",
-		Long:  "",
-		Args:  cobra.ExactArgs(2),
+		Long: `
+This command accepts a target filepath as argument. It is used as base name
+to store the downloaded content. The blob content is provided on the
+*stdin*. The first argument specified the downloader to use for the operation.
+
+The task of this command is to transform the content of the provided 
+blob into a filesystem structure applicable to the type specific tools working
+with content of the given artifact type.
+`,
+		Args: cobra.ExactArgs(2),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return opts.Complete(args)
 		},

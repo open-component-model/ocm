@@ -283,7 +283,7 @@ imageReference: ghcr.io/mandelsoft/pause:v0.1.0
 name: testdata
 type: PlainText
 `
-			Expect(env.Execute("add", "resources", ARCH, "--resource", meta, "--inputType", "file", "--inputPath", "testdata/testcontent", "--"+options.MediatypeOption.Name(), "text/plain")).To(Succeed())
+			Expect(env.Execute("add", "resources", ARCH, "--resource", meta, "--inputType", "file", "--inputPath", "testdata/testcontent", "--"+options.MediatypeOption.GetName(), "text/plain")).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 			Expect(err).To(Succeed())
 			cd, err := compdesc.Decode(data)
@@ -298,7 +298,7 @@ type: PlainText
 name: testdata
 type: PlainText
 `
-			Expect(env.Execute("add", "resources", ARCH, "--resource", meta, "--inputType", "spiff", "--inputPath", "testdata/spiffcontent", "--"+options.MediatypeOption.Name(), "text/plain", "IMAGE=test")).To(Succeed())
+			Expect(env.Execute("add", "resources", ARCH, "--resource", meta, "--inputType", "spiff", "--inputPath", "testdata/spiffcontent", "--"+options.MediatypeOption.GetName(), "text/plain", "IMAGE=test")).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 			Expect(err).To(Succeed())
 			cd, err := compdesc.Decode(data)

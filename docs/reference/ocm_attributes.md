@@ -70,3 +70,9 @@ OCM library:
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
+
+
+##### Additional Links
+
+* [<b>ocm configfile</b>](ocm_configfile.md)	 &mdash; configuration file
+

@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+//go:generate go run -mod=mod ./doc ../../../../../../docs/pluginreference
+
 package cmds
 
 import (
@@ -15,6 +17,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/info"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/topics/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload"
 )
 
@@ -23,14 +26,23 @@ type PluginCommand struct {
 	plugin  ppi.Plugin
 }
 
+func (p *PluginCommand) Command() *cobra.Command {
+	return p.command
+}
+
 func NewPluginCommand(p ppi.Plugin) *PluginCommand {
+	short := p.Descriptor().Short
+	if short == "" {
+		short = "OCM plugin " + p.Name()
+	}
+
 	pcmd := &PluginCommand{
 		plugin: p,
 	}
 	cmd := &cobra.Command{
 		Use:                   p.Name() + " <subcommand> <options> <args>",
-		Short:                 "OCM plugin " + p.Name(),
-		Long:                  "OCM plugin " + p.Name(),
+		Short:                 short,
+		Long:                  p.Descriptor().Long,
 		Version:               p.Version(),
 		TraverseChildren:      true,
 		SilenceUsage:          true,
@@ -58,6 +70,9 @@ func NewPluginCommand(p ppi.Plugin) *PluginCommand {
 	}
 	// help.Use="help <topic>"
 	help.DisableFlagsInUseLine = true
+	cmd.AddCommand(descriptor.New())
+
+	help.AddCommand(descriptor.New())
 
 	p.Options().AddFlags(cmd.Flags())
 	pcmd.command = cmd

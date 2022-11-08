@@ -523,3 +523,9 @@ $ ocm add resource-config resources.yaml --name myresource --type PlainText --in
 * [ocm add](ocm_add.md)	 &mdash; Add resources or sources to a component archive
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
+
+
+##### Additional Links
+
+* [<b>ocm add resources</b>](ocm_add_resources.md)	 &mdash; add resources to a component version
+

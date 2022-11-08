@@ -120,3 +120,8 @@ $ ocm toi bootstrap componentversion ghcr.io/mandelsoft/ocmdemoinstaller:0.0.1-d
 
 * [ocm bootstrap componentversions <b>toi-bootstrapping</b>](ocm_bootstrap_componentversions_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions
 
+
+##### Additional Links
+
+* [<b>ocm toi toi-bootstrapping</b>](ocm_toi_toi-bootstrapping.md)
+
