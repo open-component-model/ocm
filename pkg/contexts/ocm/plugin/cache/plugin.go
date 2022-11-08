@@ -12,10 +12,12 @@ type Plugin = *pluginImpl
 
 // //nolint: errname // is no error.
 type pluginImpl struct {
-	name       string
-	descriptor *internal.Descriptor
-	path       string
-	error      string
+	name        string
+	descriptor  *internal.Descriptor
+	path        string
+	error       string
+	uploaders   *ConstraintRegistry[internal.UploaderDescriptor, internal.UploaderKey]
+	downloaders *ConstraintRegistry[internal.DownloaderDescriptor, internal.DownloaderKey]
 }
 
 func NewPlugin(name string, path string, desc *internal.Descriptor, errmsg string) Plugin {
@@ -24,6 +26,9 @@ func NewPlugin(name string, path string, desc *internal.Descriptor, errmsg strin
 		path:       path,
 		descriptor: desc,
 		error:      errmsg,
+
+		uploaders:   NewConstraintRegistry[internal.UploaderDescriptor, internal.UploaderKey](desc.Uploaders),
+		downloaders: NewConstraintRegistry[internal.DownloaderDescriptor, internal.DownloaderKey](desc.Downloaders),
 	}
 }
 
@@ -76,6 +81,36 @@ func (p *pluginImpl) GetAccessMethodDescriptor(name, version string) *internal.A
 		return &fallback
 	}
 	return nil
+}
+
+func (p *pluginImpl) LookupDownloader(name string, artType, mediaType string) []*internal.DownloaderDescriptor {
+	if !p.IsValid() {
+		return nil
+	}
+
+	return p.downloaders.LookupFor(name, internal.NewDownloaderKey(artType, mediaType))
+}
+
+func (p *pluginImpl) GetDownloaderDescriptor(name string) *internal.DownloaderDescriptor {
+	if !p.IsValid() {
+		return nil
+	}
+	return p.descriptor.Downloaders.Get(name)
+}
+
+func (p *pluginImpl) LookupUploader(name string, artType, mediaType string) []*internal.UploaderDescriptor {
+	if !p.IsValid() {
+		return nil
+	}
+
+	return p.uploaders.LookupFor(name, internal.UploaderKey{}.SetArtefact(artType, mediaType))
+}
+
+func (p *pluginImpl) GetUploaderDescriptor(name string) *internal.UploaderDescriptor {
+	if !p.IsValid() {
+		return nil
+	}
+	return p.descriptor.Uploaders.Get(name)
 }
 
 func (p *pluginImpl) Message() string {

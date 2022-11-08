@@ -5,16 +5,17 @@
 package plugin
 
 import (
+	"encoding/json"
 	"io"
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -62,12 +63,12 @@ type accessMethod struct {
 	handler *PluginHandler
 	spec    *AccessSpec
 	info    *ppi.AccessSpecInfo
-	creds   credentials.Credentials
+	creds   json.RawMessage
 }
 
 var _ cpi.AccessMethod = (*accessMethod)(nil)
 
-func newMethod(p *PluginHandler, spec *AccessSpec, ctx ocm.Context, info *ppi.AccessSpecInfo, creds credentials.Credentials) *accessMethod {
+func newMethod(p *PluginHandler, spec *AccessSpec, ctx ocm.Context, info *ppi.AccessSpecInfo, creds json.RawMessage) *accessMethod {
 	return &accessMethod{
 		ctx:     ctx,
 		handler: p,
@@ -111,6 +112,10 @@ func (m *accessMethod) getBlob() (cpi.BlobAccess, error) {
 		return m.blob, nil
 	}
 
-	m.blob = accessobj.CachedBlobAccessForWriter(m.ctx, m.MimeType(), plugin.NewAccessDataWriter(m.handler.plug, m.spec.GetType()))
+	spec, err := json.Marshal(m.spec)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot marshal access spec")
+	}
+	m.blob = accessobj.CachedBlobAccessForWriter(m.ctx, m.MimeType(), plugin.NewAccessDataWriter(m.handler.plug, m.creds, spec))
 	return m.blob, nil
 }

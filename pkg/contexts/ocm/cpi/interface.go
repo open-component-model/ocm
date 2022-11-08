@@ -17,6 +17,7 @@ const CommonTransportFormat = internal.CommonTransportFormat
 
 type (
 	Context                          = internal.Context
+	ContextProvider                  = internal.ContextProvider
 	ComponentVersionResolver         = internal.ComponentVersionResolver
 	Repository                       = internal.Repository
 	RepositorySpecHandlers           = internal.RepositorySpecHandlers
@@ -83,6 +84,10 @@ func ForRepo(ctxtype, repostype string) BlobHandlerOption {
 
 func ForMimeType(mimetype string) BlobHandlerOption {
 	return internal.ForMimeType(mimetype)
+}
+
+func ForArtefactType(arttype string) BlobHandlerOption {
+	return internal.ForArtefactType(arttype)
 }
 
 func RegisterRepositorySpecHandler(handler RepositorySpecHandler, types ...string) {

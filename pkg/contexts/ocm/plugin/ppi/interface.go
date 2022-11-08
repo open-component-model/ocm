@@ -9,7 +9,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/internal"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -19,14 +18,19 @@ type (
 	UploadTargetSpecInfo   = internal.UploadTargetSpecInfo
 	UploaderKey            = internal.UploaderKey
 	UploaderDescriptor     = internal.UploaderDescriptor
+	DownloaderKey          = internal.DownloaderKey
+	DownloaderDescriptor   = internal.DownloaderDescriptor
 	AccessMethodDescriptor = internal.AccessMethodDescriptor
 )
 
 const (
-	KIND_PLUGIN       = "plugin"
-	KIND_UPLOADER     = "uploader"
-	KIND_ACCESSMETHOD = errors.KIND_ACCESSMETHOD
+	KIND_PLUGIN       = internal.KIND_PLUGIN
+	KIND_DOWNLOADER   = internal.KIND_DOWNLOADER
+	KIND_UPLOADER     = internal.KIND_UPLOADER
+	KIND_ACCESSMETHOD = internal.KIND_ACCESSMETHOD
 )
+
+var TAG = internal.TAG
 
 type Plugin interface {
 	Name() string
@@ -35,6 +39,10 @@ type Plugin interface {
 
 	SetShort(s string)
 	SetLong(s string)
+
+	RegisterDownloader(arttype, mediatype string, u Downloader) error
+	GetDownloader(name string) Downloader
+	GetDownloaderFor(arttype, mediatype string) Downloader
 
 	RegisterUploader(arttype, mediatype string, u Uploader) error
 	GetUploader(name string) Uploader
@@ -78,3 +86,12 @@ type Uploader interface {
 }
 
 type UploadTargetSpec runtime.VersionedTypedObject
+
+type DownloadResultProvider func() (string, error)
+
+type Downloader interface {
+	Name() string
+	Description() string
+
+	Writer(p Plugin, arttype, mediatype string, filepath string) (io.WriteCloser, DownloadResultProvider, error)
+}

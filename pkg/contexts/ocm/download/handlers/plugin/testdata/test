@@ -1,0 +1,117 @@
+#!/bin/bash
+
+# SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+NAME="$(basename "$0")"
+
+Error() {
+  echo '{ "error": "'$@'" }' >&2
+  exit 1
+}
+
+media=
+artifact=
+args=( )
+
+parseArgs() {
+  while [ $# -gt 0 ]; do
+    case "$1" in
+    --mediaType|-m)
+        media="$2"
+        shift 2;;
+    --artifactType|-a)
+        artifact="$2"
+        shift 2;;
+    -*) Error "invalid option $1";;
+    *)  args+=( "$1" )
+        shift;;
+    esac
+  done
+}
+
+printArgs() {
+  echo "media: $media"
+  echo "artifact: $artifact"
+  for i in "${args[@]}"; do
+    echo ": $i"
+  done
+}
+
+extract() {
+  v="$(echo "$2" | sed 's/.*"'$1'": *"\([^"]*\)".*/\1/')"
+  if [ "$v" != "$2" ]; then
+     echo "$v"
+  fi
+}
+
+Info() {
+  echo '{"description":"a test plugin with access method test","pluginName":"'$NAME'","pluginVersion":"v1","shortDescription":"a test plugin","downloaders":[{"constraints":[{"artifactType":"TestArtefact"}],"name":"testdownloader"}],"version":"v1"}'
+}
+
+Configure() {
+  true
+}
+
+Get() {
+  Error "no access methods supported"
+}
+
+AccValidate() {
+  Error "no access methods supported"
+}
+
+
+Download() {
+  parseArgs "$@"
+
+  P="${args[1]}"
+  if { echo "downloaded"; cat; } >"$P"; then
+    echo '{"path":"'$P'","error":""}'
+  else
+    echo '{"path":"","error":"cannot write to '$P'"}'
+  fi
+}
+
+Put() {
+  Error "no uploaders supported"
+}
+
+UplValidate() {
+  Error "no uploaders upported"
+}
+
+AccessMethod() {
+  case "$1" in
+    get) Get "${@:2}";;
+    validate) AccValidate "${@:2}";;
+    *) Error "invalid accessmethod command $1";;
+  esac
+}
+
+UpLoad() {
+  case "$1" in
+    put) Put "${@:2}";;
+    validate) UplValidate "${@:2}";;
+    *) Error "invalid upload command $1";;
+  esac
+}
+
+# skip main arguments
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -c) Configure "$2"
+        shift 2;;
+    -*) shift 2;;
+    *) break;;
+  esac
+done
+
+case "$1" in
+  info) Info;;
+  accessmethod) AccessMethod "${@:2}";;
+  upload) UpLoad "${@:2}";;
+  download) Download "${@:2}";;
+  *) Error "invalid command $1";;
+esac

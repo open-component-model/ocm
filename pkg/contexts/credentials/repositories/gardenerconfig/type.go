@@ -12,7 +12,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	gardenercfgcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -88,19 +87,9 @@ func getKey(cctx cpi.Context, configURL string) ([]byte, error) {
 	id.SetNonEmptyValue(hostpath.ID_PATHPREFIX, strings.Trim(parsedURL.Path, "/"))
 	id.SetNonEmptyValue(hostpath.ID_PORT, parsedURL.Port())
 
-	var creds cpi.Credentials
-	src, err := cctx.GetCredentialsForConsumer(id, identityMatcher)
+	creds, err := cpi.CredentialsForConsumer(cctx, id, identityMatcher)
 	if err != nil {
-		if !errors.IsErrUnknown(err) {
-			return nil, fmt.Errorf("unable to get credentials source: %w", err)
-		}
-		return nil, nil
-	}
-	if src != nil {
-		creds, err = src.Credentials(cctx)
-		if err != nil {
-			return nil, fmt.Errorf("unable to get credentials from credentials source: %w", err)
-		}
+		return nil, err
 	}
 
 	var key string

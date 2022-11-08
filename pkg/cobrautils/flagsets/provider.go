@@ -119,7 +119,7 @@ func (p *typedConfigProvider) GetConfigFor(opts ConfigOptions) (Config, error) {
 func (p *typedConfigProvider) applyConfigForType(name string, opts ConfigOptions, config Config) error {
 	set := p.GetTypeSet(name)
 	if set == nil {
-		return errors.ErrUnknown(p.Name())
+		return errors.ErrUnknown(name)
 	}
 
 	err := opts.FilterBy(p.HasSharedOptionType).Check(set, p.Name()+" type "+name)

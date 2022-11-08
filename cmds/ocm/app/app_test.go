@@ -73,7 +73,7 @@ ERROR <nil> test ctxerror
 
 	It("sets logging", func() {
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "-l", "Debug", "logtest")).To(Succeed())
+		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "-X", "plugindir=xxx", "-l", "Debug", "logtest")).To(Succeed())
 		Expect(log.String()).To(StringEqualTrimmedWithContext(`
 V[4] test debug
 V[3] test info

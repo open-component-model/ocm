@@ -12,11 +12,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/validate"
 )
 
-const NAME = "accessmethod"
+const Name = "accessmethod"
 
 func New(p ppi.Plugin) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   NAME,
+		Use:   Name,
 		Short: "access method operations",
 		Long:  "",
 	}

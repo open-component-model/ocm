@@ -1,0 +1,156 @@
+#!/bin/bash
+
+# SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+NAME="$(basename "$0")"
+
+Error() {
+  echo '{ "error": "'$@'" }' >&2
+  exit 1
+}
+
+ROOT=/tmp
+
+media=
+artifact=
+hint=
+creds=
+args=( )
+
+parseArgs() {
+  while [ $# -gt 0 ]; do
+    case "$1" in
+    --mediaType|-m)
+        media="$2"
+        shift 2;;
+    --artifactType|-a)
+        artifact="$2"
+        shift 2;;
+    --hint|-H)
+        hint="$2"
+        shift 2;;
+    --credentials|-c)
+        creds="$2"
+        shift 2;;
+    -*) Error "invalid option $1";;
+    *)  args+=( "$1" )
+        shift;;
+    esac
+  done
+}
+
+printArgs() {
+  echo "media: $media"
+  echo "artifact: $artifact"
+  echo "hint: $hint"
+  echo "creds: $creds"
+  for i in "${args[@]}"; do
+    echo ": $i"
+  done
+}
+
+extract() {
+  v="$(echo "$2" | sed 's/.*"'$1'": *"\([^"]*\)".*/\1/')"
+  if [ "$v" != "$2" ]; then
+     echo "$v"
+  fi
+}
+
+Info() {
+  echo '{"accessMethods":[{"description":"","name":"test","shortDescription":"test access"},{"description":"","name":"test","shortDescription":"test access","version":"v1"}],"description":"a test plugin with access method test","pluginName":"'$NAME'","pluginVersion":"v1","shortDescription":"a test plugin","uploaders":[{"constraints":[{"artifactType":"TestArtefact"}],"name":"testuploader"}],"version":"v1"}'
+}
+
+Configure() {
+  ROOT="$(extract root "$1")"
+  if [ -z "$ROOT" ]; then
+    Error "invalid plugin config: root not set"
+  fi
+  mkdir -p "$ROOT" || Error cannot created root $ROOT
+}
+
+Get() {
+  parseArgs "$@"
+  hint="$(extract path "${args[0]}")"
+  repo="$(extract repo "${args[0]}")"
+  if [ -z "$hint" ]; then
+    Error "path missing in access spec"
+  fi
+  if [ -z "$repo" ]; then
+      Error "repo missing in access spec"
+    fi
+  P="$ROOT/$repo/$hint"
+  if [ ! -f "$P" ]; then
+    Error "artifact $hint not found in $repo"
+  fi
+  cat "$P"
+}
+
+AccValidate() {
+  parseArgs "$@"
+  media="$(extract mediaType "${args[0]}")"
+  hint="$(extract path "${args[0]}")"
+  repo="$(extract repo "${args[0]}")"
+  echo '{"short":"a test '$hint'","mediaType":"'$media'","description":"","hint":"'$hint'","consumerId":{"hostname":"localhost","pathprefix":"'$repo'","type":"test"}}'
+}
+
+
+Put() {
+  parseArgs "$@"
+
+  repo="$(extract path "${args[1]}")"
+  if [ -z "$repo" ]; then
+    Error "path missing in repository spec"
+  fi
+
+  if [ -z "$hint" ]; then
+    hint="$NAME-$$.blob"
+  fi
+  P="$ROOT/$repo/$hint"
+  mkdir -p "$(dirname "$P")"
+  cat >"$P"
+  echo '{"type":"test/v1","mediaType":"'$media'","path":"'$hint'","repo":"'$repo'"}'
+}
+
+UplValidate() {
+  parseArgs "$@"
+  repo="$(extract path "${args[1]}")"
+  if [ -z "$repo" ]; then
+      Error "path missing in repository spec"
+  fi
+  echo '{"consumerId":{"hostname":"localhost","pathprefix":"'$repo'","type":"test"}}'
+}
+
+AccessMethod() {
+  case "$1" in
+    get) Get "${@:2}";;
+    validate) AccValidate "${@:2}";;
+    *) Error "invalid accessmethod command $1";;
+  esac
+}
+
+UpLoad() {
+  case "$1" in
+    put) Put "${@:2}";;
+    validate) UplValidate "${@:2}";;
+    *) Error "invalid upload command $1";;
+  esac
+}
+
+# skip main arguments
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -c) Configure "$2"
+        shift 2;;
+    -*) shift 2;;
+    *) break;;
+  esac
+done
+
+case "$1" in
+  info) Info;;
+  accessmethod) AccessMethod "${@:2}";;
+  upload) UpLoad "${@:2}";;
+  *) Error "invalid command $1";;
+esac

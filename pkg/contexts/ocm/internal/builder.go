@@ -101,6 +101,8 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 		case datacontext.MODE_CONFIGURED:
 			b.reposcheme = NewRepositoryTypeScheme(nil)
 			b.reposcheme.AddKnownTypes(DefaultRepositoryTypeScheme)
+		case datacontext.MODE_EXTENDED:
+			b.reposcheme = NewRepositoryTypeScheme(nil, DefaultRepositoryTypeScheme)
 		case datacontext.MODE_DEFAULTED:
 			fallthrough
 		case datacontext.MODE_SHARED:
@@ -114,6 +116,8 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 		case datacontext.MODE_CONFIGURED:
 			b.accessscheme = NewAccessTypeScheme()
 			b.accessscheme.AddKnownTypes(DefaultAccessTypeScheme)
+		case datacontext.MODE_EXTENDED:
+			b.accessscheme = NewAccessTypeScheme(DefaultAccessTypeScheme)
 		case datacontext.MODE_DEFAULTED:
 			fallthrough
 		case datacontext.MODE_SHARED:
@@ -126,6 +130,8 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 			b.spechandlers = NewRepositorySpecHandlers()
 		case datacontext.MODE_CONFIGURED:
 			b.spechandlers = DefaultRepositorySpecHandlers.Copy()
+		case datacontext.MODE_EXTENDED:
+			fallthrough
 		case datacontext.MODE_DEFAULTED:
 			fallthrough
 		case datacontext.MODE_SHARED:
@@ -138,6 +144,8 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 			b.blobhandlers = NewBlobHandlerRegistry()
 		case datacontext.MODE_CONFIGURED:
 			b.blobhandlers = DefaultBlobHandlerRegistry.Copy()
+		case datacontext.MODE_EXTENDED:
+			b.blobhandlers = NewBlobHandlerRegistry(DefaultBlobHandlerRegistry)
 		case datacontext.MODE_DEFAULTED:
 			fallthrough
 		case datacontext.MODE_SHARED:
@@ -150,6 +158,8 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 			b.blobdigesters = NewBlobDigesterRegistry()
 		case datacontext.MODE_CONFIGURED:
 			b.blobdigesters = DefaultBlobDigesterRegistry.Copy()
+		case datacontext.MODE_EXTENDED:
+			b.blobdigesters = NewBlobDigesterRegistry(DefaultBlobDigesterRegistry)
 		case datacontext.MODE_DEFAULTED:
 			fallthrough
 		case datacontext.MODE_SHARED:

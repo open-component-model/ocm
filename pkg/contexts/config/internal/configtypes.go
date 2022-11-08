@@ -39,9 +39,9 @@ type configTypeScheme struct {
 	runtime.SchemeBase
 }
 
-func NewConfigTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) ConfigTypeScheme {
+func NewConfigTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder, base ...ConfigTypeScheme) ConfigTypeScheme {
 	var rt Config
-	scheme := runtime.MustNewDefaultScheme(&rt, &GenericConfig{}, true, defaultRepoDecoder)
+	scheme := runtime.MustNewDefaultScheme(&rt, &GenericConfig{}, true, defaultRepoDecoder, utils.Optional(base...))
 	return &configTypeScheme{scheme}
 }
 

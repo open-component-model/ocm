@@ -33,7 +33,7 @@ func NewArtefactHandler() cpi.BlobHandler {
 	return &artefactHandler{}
 }
 
-func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	attr := ociuploadattr.Get(ctx.GetContext())
 	if attr == nil {
 		return nil, nil

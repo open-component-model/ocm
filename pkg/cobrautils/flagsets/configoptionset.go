@@ -36,12 +36,13 @@ type ConfigOptionTypeSet interface {
 	GetSharedOptionType(name string) ConfigOptionType
 	GetOptionType(name string) ConfigOptionType
 	GetTypeSet(name string) ConfigOptionTypeSet
+	OptionTypeSets() []ConfigOptionTypeSet
 
 	AddOptionType(ConfigOptionType) error
 	AddTypeSet(ConfigOptionTypeSet) error
 	AddAll(o ConfigOptionTypeSet) (duplicated ConfigOptionTypeSet, err error)
 
-	Align(parent ConfigOptionTypeSet) error
+	Close(funcs ...func([]ConfigOptionType) error) error
 
 	CreateOptions() ConfigOptions
 	AddGroupsToOption(o Option)
@@ -55,7 +56,7 @@ type configOptionTypeSet struct {
 	shared  map[string][]ConfigOptionTypeSet
 	groups  []string
 
-	parent ConfigOptionTypeSet
+	closed bool
 }
 
 func NewConfigOptionSet(name string, types ...ConfigOptionType) ConfigOptionTypeSet {
@@ -75,23 +76,22 @@ func (s *configOptionTypeSet) AddGroups(groups ...string) {
 	s.groups = AddGroups(s.groups, groups...)
 }
 
-func (s *configOptionTypeSet) Align(parent ConfigOptionTypeSet) error {
+func (s *configOptionTypeSet) Close(funcs ...func([]ConfigOptionType) error) error {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
-	if s.parent != nil {
-		return errors.ErrClosed("config option set")
-	}
-	if err := s.check(parent); err != nil {
-		return err
-	}
-	for _, o := range parent.OptionTypes() {
-		old := s.options[o.Name()]
-		if old != nil {
-			s.options[o.Name()] = nil
+	if len(funcs) > 0 {
+		list := s.optionTypes()
+		for _, f := range funcs {
+			if f != nil {
+				err := f(list)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
-	s.parent = parent
+	s.closed = true
 	return nil
 }
 
@@ -103,7 +103,7 @@ func (s *configOptionTypeSet) AddOptionType(optionType ConfigOptionType) error {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
-	if s.parent != nil {
+	if s.closed {
 		return errors.ErrClosed("config option set")
 	}
 	name := optionType.Name()
@@ -114,12 +114,12 @@ func (s *configOptionTypeSet) AddOptionType(optionType ConfigOptionType) error {
 func (s *configOptionTypeSet) OptionTypes() []ConfigOptionType {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
+	return s.optionTypes()
+}
 
+func (s *configOptionTypeSet) optionTypes() []ConfigOptionType {
 	var list []ConfigOptionType
-	for n, o := range s.options {
-		if o == nil {
-			o = s.parent.GetOptionType(n)
-		}
+	for _, o := range s.options {
 		list = append(list, o)
 	}
 	return list
@@ -138,12 +138,9 @@ func (s *configOptionTypeSet) SharedOptionTypes() []ConfigOptionType {
 
 	var list []ConfigOptionType
 	for n, o := range s.options {
-		if o == nil {
-			if _, ok := s.shared[n]; ok {
-				o = s.parent.GetOptionType(n)
-			}
+		if _, ok := s.shared[n]; ok {
+			list = append(list, o)
 		}
-		list = append(list, o)
 	}
 	return list
 }
@@ -168,7 +165,7 @@ func (s *configOptionTypeSet) GetOptionType(name string) ConfigOptionType {
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
-	return s.getOptionType(name)
+	return s.options[name]
 }
 
 func (s *configOptionTypeSet) GetSharedOptionType(name string) ConfigOptionType {
@@ -176,17 +173,7 @@ func (s *configOptionTypeSet) GetSharedOptionType(name string) ConfigOptionType 
 	defer s.lock.RUnlock()
 
 	if _, ok := s.shared[name]; ok {
-		return s.getOptionType(name)
-	}
-	return nil
-}
-
-func (s *configOptionTypeSet) getOptionType(name string) ConfigOptionType {
-	if t, ok := s.options[name]; ok {
-		if t == nil {
-			return s.parent.GetOptionType(name)
-		}
-		return t
+		return s.options[name]
 	}
 	return nil
 }
@@ -195,10 +182,11 @@ func (s *configOptionTypeSet) AddTypeSet(set ConfigOptionTypeSet) error {
 	if set == nil {
 		return nil
 	}
-	var finalize utils.Finalizer
-	defer finalize.Lock(&s.lock).Finalize()
 
-	if s.parent != nil {
+	s.lock.Lock()
+	defer s.lock.Unlock()
+
+	if s.closed {
 		return errors.ErrClosed("config option set")
 	}
 
@@ -209,21 +197,24 @@ func (s *configOptionTypeSet) AddTypeSet(set ConfigOptionTypeSet) error {
 		}
 		return fmt.Errorf("%s: config type set with name %q already added", s.Name(), name)
 	}
-	list := set.OptionTypes()
 
-	for _, o := range list {
-		old := s.options[o.Name()]
-		if old == nil {
-			s.options[o.Name()] = o
+	return set.Close(func(list []ConfigOptionType) error {
+		// check for problem first
+		err := s.check(list)
+		if err != nil {
+			return err
 		}
-		s.shared[o.Name()] = append(s.shared[o.Name()], set)
-	}
-	finalize.Finalize()
-	if err := set.Align(s); err != nil {
-		return err
-	}
-	s.sets[name] = set
-	return nil
+		// now align data structure
+		for _, o := range list {
+			if _, ok := s.options[o.Name()]; ok {
+				s.shared[o.Name()] = append(s.shared[o.Name()], set)
+			} else {
+				s.options[o.Name()] = o
+			}
+		}
+		s.sets[name] = set
+		return nil
+	})
 }
 
 func (s *configOptionTypeSet) GetTypeSet(name string) ConfigOptionTypeSet {
@@ -231,6 +222,17 @@ func (s *configOptionTypeSet) GetTypeSet(name string) ConfigOptionTypeSet {
 	defer s.lock.RUnlock()
 
 	return s.sets[name]
+}
+
+func (s *configOptionTypeSet) OptionTypeSets() []ConfigOptionTypeSet {
+	s.lock.RLock()
+	defer s.lock.RUnlock()
+
+	result := make([]ConfigOptionTypeSet, 0, len(s.sets))
+	for _, t := range s.sets {
+		result = append(result, t)
+	}
+	return result
 }
 
 func (s *configOptionTypeSet) AddGroupsToOption(o Option) {
@@ -252,7 +254,7 @@ func (s *configOptionTypeSet) CreateOptions() ConfigOptions {
 	var opts []Option
 
 	for n := range s.options {
-		opt := s.getOptionType(n).Create()
+		opt := s.options[n].Create()
 		s.AddGroupsToOption(opt)
 		opts = append(opts, opt)
 	}
@@ -263,15 +265,16 @@ func (s *configOptionTypeSet) AddAll(o ConfigOptionTypeSet) (duplicates ConfigOp
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
-	if s.parent != nil {
+	if s.closed {
 		return nil, errors.ErrClosed("config option set")
 	}
 
-	if err := s.check(o); err != nil {
+	list := o.OptionTypes()
+	if err := s.check(list); err != nil {
 		return nil, err
 	}
 	duplicates = NewConfigOptionSet("duplicates")
-	for _, t := range o.OptionTypes() {
+	for _, t := range list {
 		_, ok := s.options[t.Name()]
 		if !ok {
 			s.options[t.Name()] = t
@@ -282,13 +285,11 @@ func (s *configOptionTypeSet) AddAll(o ConfigOptionTypeSet) (duplicates ConfigOp
 	return duplicates, nil
 }
 
-func (s *configOptionTypeSet) check(o ConfigOptionTypeSet) error {
-	for _, t := range o.OptionTypes() {
-		old := s.options[t.Name()]
-		if old != nil {
-			if !old.Equal(t) {
-				return fmt.Errorf("option type %s doesn not match (%T<->%T)", t.Name(), t, old)
-			}
+func (s *configOptionTypeSet) check(list []ConfigOptionType) error {
+	for _, o := range list {
+		old := s.options[o.Name()]
+		if old != nil && !old.Equal(o) {
+			return fmt.Errorf("option type %s doesn not match (%T<->%T)", o.Name(), o, old)
 		}
 	}
 	return nil

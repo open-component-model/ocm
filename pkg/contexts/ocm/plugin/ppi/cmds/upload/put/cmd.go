@@ -16,11 +16,18 @@ import (
 	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/common"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const Name = "put"
+const (
+	Name     = "put"
+	OptCreds = common.OptCreds
+	OptHint  = common.OptHint
+	OptMedia = common.OptMedia
+	OptArt   = common.OptArt
+)
 
 func New(p ppi.Plugin) *cobra.Command {
 	opts := Options{}
@@ -53,11 +60,11 @@ type Options struct {
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
-	flag.YAMLVarP(fs, &o.Credentials, "credentials", "c", nil, "credentials")
+	flag.YAMLVarP(fs, &o.Credentials, OptCreds, "c", nil, "credentials")
 	flag.StringToStringVarPF(fs, &o.Credentials, "credential", "C", nil, "dedicated credential value")
-	fs.StringVarP(&o.MediaType, "mediaType", "m", "", "media type of input blob")
-	fs.StringVarP(&o.ArtifactType, "artifactType", "a", "", "artifact type of input blob")
-	fs.StringVarP(&o.Hint, "hint", "H", "", "reference hint for storing blob")
+	fs.StringVarP(&o.MediaType, OptMedia, "m", "", "media type of input blob")
+	fs.StringVarP(&o.ArtifactType, OptArt, "a", "", "artifact type of input blob")
+	fs.StringVarP(&o.Hint, OptHint, "H", "", "reference hint for storing blob")
 }
 
 func (o *Options) Complete(args []string) error {

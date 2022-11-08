@@ -22,12 +22,14 @@ const CONTEXT_TYPE = "oci" + datacontext.OCM_CONTEXT_SUFFIX
 
 const CommonTransportFormat = "CommonTransportFormat"
 
+type ContextProvider interface {
+	OCIContext() Context
+}
+
 type Context interface {
 	datacontext.Context
-
-	AttributesContext() datacontext.AttributesContext
-	ConfigContext() config.Context
-	CredentialsContext() credentials.Context
+	config.ContextProvider
+	credentials.ContextProvider
 
 	RepositorySpecHandlers() RepositorySpecHandlers
 	MapUniformRepositorySpec(u *UniformRepositorySpec) (RepositorySpec, error)
@@ -87,6 +89,10 @@ func newContext(credctx credentials.Context, reposcheme RepositoryTypeScheme, sp
 	}
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, credctx.ConfigContext().GetAttributes(), logger)
 	c.updater = cfgcpi.NewUpdater(credctx.ConfigContext(), c)
+	return c
+}
+
+func (c *_context) OCIContext() Context {
 	return c
 }
 

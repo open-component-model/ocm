@@ -16,11 +16,15 @@ import (
 	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/common"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const Name = "get"
+const (
+	Name     = "get"
+	OptCreds = common.OptCreds
+)
 
 func New(p ppi.Plugin) *cobra.Command {
 	opts := Options{}
@@ -47,7 +51,7 @@ type Options struct {
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
-	flag.YAMLVarP(fs, &o.Credentials, "credentials", "c", nil, "credentials")
+	flag.YAMLVarP(fs, &o.Credentials, OptCreds, "c", nil, "credentials")
 	flag.StringToStringVarPFA(fs, &o.Credentials, "credential", "C", nil, "dedicated credential value")
 }
 

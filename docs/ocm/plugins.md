@@ -2,9 +2,9 @@
 
 The library has several extension points,which can be used by a registration
 mechanism to add further variants, like repository types, backend technologies,
-access methods, blob downloaders and uploader.
+access methods, blob downloaders and uploaders.
 
-This requiries Go coding, which is feasable for additional standard
+This requires Go coding, which is feasible for additional standard
 implementations. Nevertheless, it is useful to provide a more dynamic 
 way to enrich the functionality of the library and the OCM command line
 tool.
@@ -31,10 +31,10 @@ Errors have to be reported on *stderr* as JSON string with the fields:
 
 **Synopsis:** `<plugin> [-c <pluginconfig>] info`
 
-The capapilities provided by a plugin are queried using the
+The capabilities provided by a plugin are queried using the
 command `info`.
 
-It must reposond with JSON *Plugin Descriptor* on standard output 
+It must respond with JSON *Plugin Descriptor* on standard output 
 
 #### Plugin Descriptor
 
@@ -48,7 +48,7 @@ following fields:
 
 - **`pluginName`** *string*
 
-  The name of the plugin, it mist correspond to the file name of the executable.
+  The name of the plugin, it must correspond to the file name of the executable.
 
 - **`pluginVersion`** *string*
 
@@ -57,7 +57,7 @@ following fields:
 
 - **`shortDescription`** *string*
 
-  A short description shown in the plugin overview provided by the commad 
+  A short description shown in the plugin overview provided by the command 
   `ocm ger plugins`.
 
 - **`description`** *string*
@@ -70,11 +70,20 @@ following fields:
   This feature is already used to establish new access types, if
   the plugins are registered at an OCM context.
 
-- **`uploaders`** *[]UploaderDescriptor*  **Not yet used**
+- **`uploaders`** *[]UploaderDescriptor*
   
   The list of supported uploaders. Uploaders will be used in a future
   version to describe foreign repository targets for local blobs
   of dedicated types imported into an OCM registry.
+
+- **`downloaders`** *[]DownloaderDescriptor*
+
+  The list of supported downloaders. Downloaders will be used by the
+  CLI download command to provide downloaded artifacts in a filesystem format
+  applicable to the type specific tools, regatdless of the format it is stored
+  as blob in a component version. Therefore they can be registered for
+  combination of artifact type and optional mime type (describing the actually
+  used blob format).
 
 #### Access Method Descriptor
 
@@ -87,11 +96,11 @@ It uses the following fields:
 
 - **`version`** *string*
 
-  The version of the access method (default is `v1`.
+  The version of the access method (default is `v1`).
 
 - **`description`** *string*
 
-  The description of the dedicated kind of an access method. It must
+  The description of the dedicated kind of access method. It must
   only be reported for one supported version.
 
 - **`format`** *string*
@@ -100,7 +109,7 @@ It uses the following fields:
 
 #### Uploader Descriptor
 
-The descriptor for an uploader has the following preliminary fields:
+The descriptor for an uploader has the following fields:
 
 - **`name`** *string*
 
@@ -133,7 +142,32 @@ The descriptor for an uploader has the following preliminary fields:
     Restrict the usage to a dedicated implementation of the backend technology.
     If specified, the attribute `contextType` must be set, also.
 
-### `accessmethods` (Access Method related Commands))
+#### Downloader Descriptor
+
+The descriptor for a downloader has the following fields:
+
+- **`name`** *string*
+
+  The name of the uploader.
+
+- **`description`** *string*
+
+  The description of the uploader
+
+- **`constraints`** *[]DownloadConstraint*
+
+  The list of constraints the downloader is usable for. A constraint is described
+  by two fields:
+
+  - **`artifactType`** *string*
+
+    Restrict the usage to a dedicated artifact type.
+
+  - **`mediaType`** *string* (optional)
+
+    Restrict the usage to a dedicated media type of the artifact blob.
+
+### `accessmethods` (Access Method related Commands)
 
 This command group provides all commands used to implement an access method
 described by an access method descriptor. It requires the following 
@@ -147,7 +181,7 @@ This command accepts an access specification as argument. It is used to
 validate the specification and to provide some metadata for the given
 specification.
 
-This meta data has to be provided as JSON string on *stdout* and has the 
+This metadata has to be provided as JSON string on *stdout* and has the 
 following fields: 
 
 - **`mediaType`** *string*
@@ -161,7 +195,7 @@ following fields:
 
 - **`hint`** *string*
 
-  A name hint of the described location used to recontruct a useful
+  A name hint of the described location used to reconstruct a useful
   name for local blobs uploaded to a dedicated repository technology.
 
 - **`consumerId`** *map[string]string*
@@ -197,7 +231,7 @@ nested commands:
 **Options:**
 
 
-```go
+```
   -a, --artifactType string   artifact type of input blob
   -m, --mediaType string      media type of input blob
 ```
@@ -206,7 +240,7 @@ This command accepts a target specification as argument. It is used to
 validate the specification and to provide some metadata for the given
 specification.
 
-This meta data has to be provided as JSON string on *stdout* and has the
+This metadata has to be provided as JSON string on *stdout* and has the
 following fields:
 
 - **`consumerId`** *map[string]string*
@@ -231,6 +265,26 @@ following fields:
 Read the blob content from *stdin*, store the blob and return the
 access specification (as JSON string) usable to retrieve the blob, again,
 on * stdout* 
+
+### `download` (Download an Artifact Bob to a (set of) filesystem file(s))
+
+**Synopsis:** `<plugin> [-c <pluginconfig>] download <name> <targetpath>`
+
+**Options:**
+
+```
+  -a, --artifactType string   artifact type of input blob
+  -m, --mediaType string      media type of input blob
+```
+
+This command accepts a target filepath as argument. It is used as base name
+to store the downloaded content. The blob content is provided on the
+standard input.
+
+The task of this command is to transform the content of the provided 
+blob into a filesystem structure applicable to the tools working
+with content of the given artifact type.
+
 
 ## Implementation support
 

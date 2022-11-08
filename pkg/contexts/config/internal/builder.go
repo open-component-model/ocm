@@ -61,6 +61,8 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 		case datacontext.MODE_CONFIGURED:
 			b.reposcheme = NewConfigTypeScheme(nil)
 			b.reposcheme.AddKnownTypes(DefaultConfigTypeScheme)
+		case datacontext.MODE_EXTENDED:
+			b.reposcheme = NewConfigTypeScheme(nil, DefaultConfigTypeScheme)
 		case datacontext.MODE_DEFAULTED:
 			fallthrough
 		case datacontext.MODE_SHARED:

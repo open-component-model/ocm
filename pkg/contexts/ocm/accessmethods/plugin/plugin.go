@@ -6,6 +6,7 @@ package plugin
 
 import (
 	"bytes"
+	"encoding/json"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
@@ -53,22 +54,23 @@ func (p *PluginHandler) AccessMethod(spec *AccessSpec, cv cpi.ComponentVersionAc
 	if err != nil {
 		return nil, err
 	}
-	var creds credentials.Credentials
 
+	var creds credentials.Credentials
 	if len(info.ConsumerId) > 0 {
-		src, err := cv.GetContext().CredentialsContext().GetCredentialsForConsumer(info.ConsumerId, hostpath.IdentityMatcher(info.ConsumerId.Type()))
+		creds, err = credentials.CredentialsForConsumer(cv.GetContext(), info.ConsumerId, hostpath.IdentityMatcher(info.ConsumerId.Type()))
 		if err != nil {
-			if !errors.IsErrUnknown(err) {
-				return nil, errors.Wrapf(err, "lookup credentials failed for %s", info.ConsumerId)
-			}
-		} else {
-			creds, err = src.Credentials(cv.GetContext().CredentialsContext())
-			if err != nil {
-				return nil, errors.Wrapf(err, "lookup credentials failed for %s", info.ConsumerId)
-			}
+			return nil, err
 		}
 	}
-	return newMethod(p, spec, cv.GetContext(), info, creds), nil
+
+	var creddata json.RawMessage
+	if creds != nil {
+		creddata, err = json.Marshal(creds)
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot marshal access spec")
+		}
+	}
+	return newMethod(p, spec, cv.GetContext(), info, creddata), nil
 }
 
 func (p *PluginHandler) Describe(spec *AccessSpec, ctx cpi.Context) string {
@@ -112,5 +114,5 @@ func (p *PluginHandler) Validate(spec *AccessSpec) (*ppi.AccessSpecInfo, error) 
 	if err != nil {
 		return nil, err
 	}
-	return p.plug.Validate(data)
+	return p.plug.ValidateAccessMethod(data)
 }
