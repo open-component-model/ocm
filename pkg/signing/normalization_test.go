@@ -543,7 +543,7 @@ var _ = Describe("normalization", func() {
 		entries, err := signing.PrepareNormalization(v, signing.NoExcludes{})
 		Expect(err).To(Succeed())
 		fmt.Printf("%s\n", entries.String())
-		Expect(entries.String()).To(Equal(`[
+		Expect(entries.Formatted()).To(Equal(`[
   {
     "list": [
       "alice",
@@ -567,7 +567,7 @@ var _ = Describe("normalization", func() {
 		entries, err := signing.PrepareNormalization(v, signing.NoExcludes{})
 		Expect(err).To(Succeed())
 		fmt.Printf("%s\n", entries.String())
-		Expect(entries.String()).To(Equal(`[
+		Expect(entries.Formatted()).To(Equal(`[
   {
     "list": [
       [
@@ -583,6 +583,103 @@ var _ = Describe("normalization", func() {
     ]
   }
 ]`))
+	})
+
+	It("simple map", func() {
+		v := map[string]interface{}{
+			"bob":   26,
+			"alice": 25,
+		}
+		entries, err := signing.PrepareNormalization(v, signing.NoExcludes{})
+		Expect(err).To(Succeed())
+		fmt.Printf("%s\n", entries.String())
+		Expect(entries.Formatted()).To(Equal(`[
+  {
+    "alice": 25
+  },
+  {
+    "bob": 26
+  }
+]`))
+	})
+
+	It("map with maps", func() {
+		v := map[string]interface{}{
+			"people": map[string]interface{}{
+				"bob":   26,
+				"alice": 25,
+			},
+		}
+		entries, err := signing.PrepareNormalization(v, signing.NoExcludes{})
+		Expect(err).To(Succeed())
+		fmt.Printf("%s\n", entries.String())
+		Expect(entries.Formatted()).To(Equal(`[
+  {
+    "people": [
+      {
+        "alice": 25
+      },
+      {
+        "bob": 26
+      }
+    ]
+  }
+]`))
+	})
+
+	It("simple lists", func() {
+		v := []interface{}{
+			"bob",
+			"alice",
+		}
+		entries, err := signing.Prepare(v, signing.NoExcludes{})
+		Expect(err).To(Succeed())
+		data, err := json.Marshal(entries)
+		Expect(err).To(Succeed())
+		fmt.Printf("%s\n", string(data))
+		Expect(string(data)).To(Equal(`["bob","alice"]`))
+	})
+
+	It("list of maps", func() {
+		v := []interface{}{
+			map[string]interface{}{
+				"bob": 26,
+			},
+			map[string]interface{}{
+				"alice": 25,
+			},
+		}
+		entries, err := signing.Prepare(v, signing.NoExcludes{})
+		Expect(err).To(Succeed())
+		data, err := json.Marshal(entries)
+		Expect(err).To(Succeed())
+		fmt.Printf("%s\n", string(data))
+		Expect(string(data)).To(Equal(`[[{"bob":26}],[{"alice":25}]]`))
+	})
+
+	It("list of maps", func() {
+		in := `
+resources:
+- access:
+    localReference: blob
+    mediaType: text/plain
+    referenceName: ref
+    type: localBlob
+  extraIdentity:
+    additional: value
+    other: othervalue
+  name: elem1
+  relation: local
+  type: elemtype
+  version: 1
+`
+		var v interface{}
+		err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(in), &v)
+		Expect(err).To(Succeed())
+		entries, err := signing.PrepareNormalization(v, signing.NoExcludes{})
+		Expect(err).To(Succeed())
+		fmt.Printf("%s\n", entries.Formatted())
+		Expect(entries.String()).To(Equal(`[{"resources":[[{"access":[{"localReference":"blob"},{"mediaType":"text/plain"},{"referenceName":"ref"},{"type":"localBlob"}]},{"extraIdentity":[{"additional":"value"},{"other":"othervalue"}]},{"name":"elem1"},{"relation":"local"},{"type":"elemtype"},{"version":1}]]}]`))
 	})
 
 	It("Normalizes struct without no-signing resource labels", func() {

@@ -16,6 +16,7 @@ as part of the Open Component Model specification
       - [Artefact Access](#artefact-access)
     - [Labels](#labels)
 - [Repository Contexts](#repository-contexts)
+- [Signatures](#signatures)
 
 Those elements partly use further sub-level elements that are
 defined in the context of their usage.
@@ -595,3 +596,16 @@ A [component descriptor](#component-descriptor) may contain information
 about the transport history by keeping a list of repository contexts.
 It should at least describe the last repository context for a remotely accessible
 OCM repository it was transported into.
+
+## Signatures
+
+A component version can be signed. The signatures are stored along with the
+[component descriptor](#component-descriptor).
+There may be multiple signatures. Every signature is defined by its name, a type,
+a normalization algorithm, a digest and a digest algorithm used to calculate the digest
+on the normalization.
+
+Because a component descriptor contains information, which might change over time,
+a [normalized version](normalization.md) of the component descriptor, containing
+only signature relevant  information, is used to calculate the digest of a
+component version.
