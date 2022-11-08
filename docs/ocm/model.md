@@ -605,6 +605,31 @@ There may be multiple signatures. Every signature is defined by its name, a type
 a normalization algorithm, a digest and a digest algorithm used to calculate the digest
 on the normalization.
 
+### Artifact Digests
+
+Signing of a component version incorporates the described artifacts
+(resources and sources). Therefore, the artifact content is digested.
+This digest is then incorporated into the digest of a component version.
+
+Because every artifact is provided in dedicated blob formats, such
+a digest can be calculated based on this blob. This is the default behaviour.
+Nevertheless, there might be technology specific ways to provide an immutable
+digest for a dedicated type of artifact. For example, an OCI artifact
+is always uniquely identified by its manifest digest. This can be exploited
+for the calculation of OCM artifact digests. 
+
+Together with the digest and its algorithm, for example SHA-256, a
+normalization is kept for an artifact. This algorithm specifies the way
+the digest is determined. For example, for OCI artifacts, the algorithm
+`ociArtifactDigest/v1` is used by default. This behaviour can be controlled by
+appropriate digest handlers. Supported algorithms can be found [here](../formats/artifactdigests/README.md).
+
+If the digest algorithm `NO-DIGEST` is specified for an artifact,
+this artifact content is not included into the component version digest.
+This is typically configured for source artifacts, which are not deliverable.
+
+### Component Version Digests
+
 Because a component descriptor contains information, which might change over time,
 a [normalized version](normalization.md) of the component descriptor, containing
 only signature relevant  information, is used to calculate the digest of a
