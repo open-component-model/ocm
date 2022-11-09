@@ -1,0 +1,18 @@
+---
+helper:
+  <<<: (( &temporary ))
+  executable:
+    <<<: (( &template ))
+    name: ocmcli
+    type: executable
+    version: (( values.VERSION ))
+    extraIdentity:
+      os: ((dirname(p) ))
+      architecture: (( basename(p) ))
+    input:
+      type: file
+      path: (( values.GEN "/" values.NAME "." replace(p,"/","-") ))
+
+
+resources: (( map[split(" ", values.PLATFORMS)|p|-> *helper.executable] ))
+
