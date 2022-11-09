@@ -4,10 +4,6 @@
 
 package options
 
-import (
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
-)
-
 const (
 	TYPE_STRING        = "string"
 	TYPE_STRINGARRAY   = "[]string"
@@ -20,17 +16,17 @@ const (
 )
 
 func init() {
-	DefaultRegistry.RegisterType(TYPE_STRING, flagsets.NewStringOptionType, "string value")
-	DefaultRegistry.RegisterType(TYPE_STRINGARRAY, flagsets.NewStringArrayOptionType, "list of string values")
-	DefaultRegistry.RegisterType(TYPE_STRING2STRING, flagsets.NewStringMapOptionType, "string map defined by dedicated assignments")
-	DefaultRegistry.RegisterType(TYPE_INT, flagsets.NewIntOptionType, "integer value")
-	DefaultRegistry.RegisterType(TYPE_BOOL, flagsets.NewBoolOptionType, "boolean flag")
-	DefaultRegistry.RegisterType(TYPE_YAML, flagsets.NewYAMLOptionType, "JSON or YAML document string")
-	DefaultRegistry.RegisterType(TYPE_STRINGMAP, flagsets.NewValueMapYAMLOptionType, "JSON or YAML map")
-	DefaultRegistry.RegisterType(TYPE_STRING2YAML, flagsets.NewValueMapOptionType, "string map with arbitrary values defined by dedicated assignments")
+	DefaultRegistry.RegisterValueType(TYPE_STRING, NewStringOptionType, "string value")
+	DefaultRegistry.RegisterValueType(TYPE_STRINGARRAY, NewStringArrayOptionType, "list of string values")
+	DefaultRegistry.RegisterValueType(TYPE_STRING2STRING, NewStringMapOptionType, "string map defined by dedicated assignments")
+	DefaultRegistry.RegisterValueType(TYPE_INT, NewIntOptionType, "integer value")
+	DefaultRegistry.RegisterValueType(TYPE_BOOL, NewBoolOptionType, "boolean flag")
+	DefaultRegistry.RegisterValueType(TYPE_YAML, NewYAMLOptionType, "JSON or YAML document string")
+	DefaultRegistry.RegisterValueType(TYPE_STRINGMAP, NewValueMapYAMLOptionType, "JSON or YAML map")
+	DefaultRegistry.RegisterValueType(TYPE_STRING2YAML, NewValueMapOptionType, "string map with arbitrary values defined by dedicated assignments")
 }
 
-func RegisterOption(o flagsets.ConfigOptionType) flagsets.ConfigOptionType {
-	DefaultRegistry.RegisterOption(o)
+func RegisterOption(o OptionType) OptionType {
+	DefaultRegistry.RegisterOptionType(o)
 	return o
 }

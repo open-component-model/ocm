@@ -131,6 +131,16 @@ The value can be a simple type or a json string for complex values. The followin
 attributes are supported:
 ` + attributes.Attributes()
 
+func NewCliCommandForArgs(ctx clictx.Context, args []string, mod ...func(clictx.Context, *cobra.Command)) (*cobra.Command, error) {
+	opts, args, err := Prepare(ctx, args)
+	if err != nil {
+		return nil, err
+	}
+	cmd := newCliCommand(opts, mod...)
+	cmd.SetArgs(args)
+	return cmd, nil
+}
+
 func NewCliCommand(ctx clictx.Context, mod ...func(clictx.Context, *cobra.Command)) *cobra.Command {
 	if ctx == nil {
 		ctx = clictx.DefaultContext()
@@ -138,6 +148,18 @@ func NewCliCommand(ctx clictx.Context, mod ...func(clictx.Context, *cobra.Comman
 	opts := &CLIOptions{
 		Context: ctx,
 	}
+	return newCliCommand(opts, append(mod, func(_ clictx.Context, cmd *cobra.Command) { cmd.PersistentPreRun = nil })...)
+}
+
+func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)) *cobra.Command {
+	if opts == nil {
+		opts = &CLIOptions{}
+	}
+	if opts.Context == nil {
+		opts.Context = clictx.DefaultContext()
+	}
+
+	ctx := opts.Context
 	cmd := &cobra.Command{
 		Use:                   "ocm",
 		Short:                 "Open Component Model command line client",

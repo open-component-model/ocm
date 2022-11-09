@@ -9,11 +9,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
 )
 
-type Element[K registry.Key[K]] interface {
-	internal.Named
-	GetConstraints() []K
-}
-
 type ConstraintRegistry[T any, K registry.Key[K]] struct {
 	mapping *registry.Registry[*T, K]
 	elems   map[string]*registry.Registry[*T, K]
@@ -34,7 +29,7 @@ func (r *ConstraintRegistry[T, K]) LookupFor(name string, key K) []*T {
 	return m.GetHandler(key)
 }
 
-func NewConstraintRegistry[T Element[K], K registry.Key[K]](list []T) *ConstraintRegistry[T, K] {
+func NewConstraintRegistry[T internal.Element[K], K registry.Key[K]](list []T) *ConstraintRegistry[T, K] {
 	reg := registry.NewRegistry[*T, K]()
 	m := map[string]*registry.Registry[*T, K]{}
 

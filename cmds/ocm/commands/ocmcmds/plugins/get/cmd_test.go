@@ -48,8 +48,8 @@ test   v1      a test plugin without function
 		Expect(env.CatchOutput(buf).Execute("-X", "plugindir="+path, "get", "plugins", "-o", "wide")).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
-PLUGIN VERSION DESCRIPTION                    ACCESSMETHODS
-test   v1      a test plugin without function test, test/v1
+PLUGIN VERSION DESCRIPTION                    ACCESSMETHODS UPLOADERS DOWNLOADERS
+test   v1      a test plugin without function test,test/v1
 `))
 	})
 

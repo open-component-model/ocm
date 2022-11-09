@@ -8,6 +8,7 @@ import (
 	"io"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/internal"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -21,6 +22,7 @@ type (
 	DownloaderKey          = internal.DownloaderKey
 	DownloaderDescriptor   = internal.DownloaderDescriptor
 	AccessMethodDescriptor = internal.AccessMethodDescriptor
+	CLIOption              = internal.CLIOption
 )
 
 const (
@@ -61,6 +63,10 @@ type AccessMethod interface {
 
 	Name() string
 	Version() string
+
+	// Options provides the list of CLI options supported to compose the access
+	// specification.
+	Options() []options.OptionType
 
 	// Description provides a general description for the access mehod kind.
 	Description() string

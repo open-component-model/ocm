@@ -5,13 +5,9 @@
 package options
 
 import (
-	"reflect"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/testutils"
-
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 )
 
 var _ = Describe("registry", func() {
@@ -22,38 +18,37 @@ var _ = Describe("registry", func() {
 	})
 
 	It("sets and retrieves type", func() {
-		reg.RegisterType("string", flagsets.NewStringOptionType, "string")
+		reg.RegisterValueType("string", NewStringOptionType, "string")
 
-		t := reg.GetType("string")
+		t := reg.GetValueType("string")
 		Expect(t).NotTo(BeNil())
 
-		o := Must(reg.CreateOption("string", "test", "some test"))
+		o := Must(reg.CreateOptionType("string", "test", "some test"))
 		Expect(o.GetName()).To(Equal("test"))
-		Expect(o.GetDescription()).To(Equal("some test"))
-		Expect(reflect.TypeOf(o)).To(Equal(reflect.TypeOf(flagsets.NewStringOptionType("", ""))))
+		Expect(o.GetDescription()).To(Equal("[*string*] some test"))
 	})
 
 	It("sets and retrieves option", func() {
-		reg.RegisterOption(HostnameOption)
+		reg.RegisterOptionType(HostnameOption)
 
-		t := reg.GetOption(HostnameOption.GetName())
+		t := reg.GetOptionType(HostnameOption.GetName())
 		Expect(t).NotTo(BeNil())
 	})
 
 	It("creates merges a new type", func() {
-		reg.RegisterType("string", flagsets.NewStringOptionType, "string")
-		reg.RegisterOption(HostnameOption)
+		reg.RegisterValueType("string", NewStringOptionType, "string")
+		reg.RegisterOptionType(HostnameOption)
 
-		o := Must(reg.CreateOption("string", HostnameOption.GetName(), "some test"))
+		o := Must(reg.CreateOptionType("string", HostnameOption.GetName(), "some test"))
 		Expect(o).To(BeIdenticalTo(HostnameOption))
 	})
 
 	It("fails creating existing", func() {
-		reg.RegisterType("string", flagsets.NewStringOptionType, "string")
-		reg.RegisterType("int", flagsets.NewIntOptionType, "int")
-		reg.RegisterOption(HostnameOption)
+		reg.RegisterValueType("string", NewStringOptionType, "string")
+		reg.RegisterValueType("int", NewIntOptionType, "int")
+		reg.RegisterOptionType(HostnameOption)
 
-		_, err := reg.CreateOption("int", HostnameOption.GetName(), "some test")
+		_, err := reg.CreateOptionType("int", HostnameOption.GetName(), "some test")
 		MustFailWithMessage(err, "option \"accessHostname\" already exists")
 	})
 })

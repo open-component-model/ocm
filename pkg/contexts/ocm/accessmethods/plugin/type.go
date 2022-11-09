@@ -34,13 +34,13 @@ func NewType(name string, p plugin.Plugin, desc *plugin.AccessMethodDescriptor) 
 	for _, o := range desc.CLIOptions {
 		var opt flagsets.ConfigOptionType
 		if o.Type == "" {
-			opt = options.DefaultRegistry.GetOption(o.Name)
+			opt = options.DefaultRegistry.GetOptionType(o.Name)
 			if opt == nil {
 				p.Context().Logger(plugin.TAG).Warn("unknown option", "plugin", p.Name(), "accessmethod", name, "option", o.Name)
 			}
 		} else {
 			var err error
-			opt, err = options.DefaultRegistry.CreateOption(o.Type, o.Name, o.Description)
+			opt, err = options.DefaultRegistry.CreateOptionType(o.Type, o.Name, o.Description)
 			if err != nil {
 				p.Context().Logger(plugin.TAG).Warn("invalid option", "plugin", p.Name(), "accessmethod", name, "option", o.Name, "error", err.Error())
 			}

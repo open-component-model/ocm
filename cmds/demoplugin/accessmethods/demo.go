@@ -38,11 +38,20 @@ type AccessMethod struct {
 	ppi.AccessMethodBase
 }
 
+var PathOption = options.NewStringOptionType("accessPath", "path in temp repository")
+
 var _ ppi.AccessMethod = (*AccessMethod)(nil)
 
 func New() ppi.AccessMethod {
 	return &AccessMethod{
 		AccessMethodBase: ppi.MustNewAccessMethodBase(NAME, "", &AccessSpec{}, "demo access to temp files", ""),
+	}
+}
+
+func (a *AccessMethod) Options() []options.OptionType {
+	return []options.OptionType{
+		options.MediatypeOption,
+		PathOption,
 	}
 }
 
@@ -85,7 +94,7 @@ func (a *AccessMethod) ValidateSpecification(p ppi.Plugin, spec ppi.AccessSpec) 
 
 func (a *AccessMethod) ComposeAccessSpecification(p ppi.Plugin, opts ppi.Config, config ppi.Config) error {
 	list := errors.ErrListf("configuring options")
-	list.Add(flagsets.AddFieldByOptionP(opts, options.HostnameOption, config, "path"))
+	list.Add(flagsets.AddFieldByOptionP(opts, PathOption, config, "path"))
 	list.Add(flagsets.AddFieldByOptionP(opts, options.MediatypeOption, config, "mediaType"))
 	return list.Result()
 }

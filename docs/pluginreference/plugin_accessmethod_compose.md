@@ -32,22 +32,23 @@ by other plugins. Therefore it is highly recommended to use use names prefixed
 by the plugin name.
 
 
-The following predifined options can be used:
+The following predefined option types can be used:
 
 
-  - <code>accessHostname</code>: hostname used for access
-  - <code>accessRepository</code>: repository URL
-  - <code>bucket</code>: bucket name
-  - <code>commit</code>: git commit id
-  - <code>digest</code>: blob digest
-  - <code>globalAccess</code>: access specification for global access
-  - <code>hint</code>: (repository) hint for local artifacts
-  - <code>mediaType</code>: media type for artifact blob representation
-  - <code>reference</code>: reference name
-  - <code>region</code>: region name
-  - <code>size</code>: blob size
+  - <code>accessHostname</code>: [*string*] hostname used for access
+  - <code>accessRepository</code>: [*string*] repository URL
+  - <code>accessVersion</code>: [*string*] version for access specification
+  - <code>bucket</code>: [*string*] bucket name
+  - <code>commit</code>: [*string*] git commit id
+  - <code>digest</code>: [*string*] blob digest
+  - <code>globalAccess</code>: [*map[string]YAML*] access specification for global access
+  - <code>hint</code>: [*string*] (repository) hint for local artifacts
+  - <code>mediaType</code>: [*string*] media type for artifact blob representation
+  - <code>reference</code>: [*string*] reference name
+  - <code>region</code>: [*string*] region name
+  - <code>size</code>: [*int*] blob size
 
-The following predefined option types are supported:
+The following predefined value types are supported:
 
 
   - <code>YAML</code>: JSON or YAML document string

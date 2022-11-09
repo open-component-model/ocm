@@ -5,10 +5,8 @@
 package options
 
 import (
-	"reflect"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	errors "github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -18,14 +16,14 @@ const (
 	KIND_OPTION     = "option"
 )
 
-type Creator func(name string, description string) flagsets.ConfigOptionType
+type OptionTypeCreator func(name string, description string) OptionType
 
-type TypeInfo struct {
-	Creator
+type ValueTypeInfo struct {
+	OptionTypeCreator
 	Description string
 }
 
-func (i TypeInfo) GetDescription() string {
+func (i ValueTypeInfo) GetDescription() string {
 	return i.Description
 }
 
@@ -34,57 +32,57 @@ type Registry = *registry
 var DefaultRegistry = New()
 
 type registry struct {
-	lock    sync.RWMutex
-	types   map[string]TypeInfo
-	options map[string]flagsets.ConfigOptionType
+	lock        sync.RWMutex
+	valueTypes  map[string]ValueTypeInfo
+	optionTypes map[string]OptionType
 }
 
 func New() Registry {
 	return &registry{
-		types:   map[string]TypeInfo{},
-		options: map[string]flagsets.ConfigOptionType{},
+		valueTypes:  map[string]ValueTypeInfo{},
+		optionTypes: map[string]OptionType{},
 	}
 }
 
-func (r *registry) RegisterOption(t flagsets.ConfigOptionType) {
+func (r *registry) RegisterOptionType(t OptionType) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	r.options[t.GetName()] = t
+	r.optionTypes[t.GetName()] = t
 }
 
-func (r *registry) RegisterType(name string, c Creator, desc string) {
+func (r *registry) RegisterValueType(name string, c OptionTypeCreator, desc string) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	r.types[name] = TypeInfo{Creator: c, Description: desc}
+	r.valueTypes[name] = ValueTypeInfo{OptionTypeCreator: c, Description: desc}
 }
 
-func (r *registry) GetType(name string) *TypeInfo {
+func (r *registry) GetValueType(name string) *ValueTypeInfo {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
-	if t, ok := r.types[name]; ok {
+	if t, ok := r.valueTypes[name]; ok {
 		return &t
 	}
 	return nil
 }
 
-func (r *registry) GetOption(name string) flagsets.ConfigOptionType {
+func (r *registry) GetOptionType(name string) OptionType {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
-	return r.options[name]
+	return r.optionTypes[name]
 }
 
-func (r *registry) CreateOption(typ, name, desc string) (flagsets.ConfigOptionType, error) {
+func (r *registry) CreateOptionType(typ, name, desc string) (OptionType, error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
-	t, ok := r.types[typ]
+	t, ok := r.valueTypes[typ]
 	if !ok {
 		return nil, errors.ErrUnknown(KIND_OPTIONTYPE, typ)
 	}
 
-	n := t.Creator(name, desc)
-	o := r.options[name]
+	n := t.OptionTypeCreator(name, desc)
+	o := r.optionTypes[name]
 	if o != nil {
-		if reflect.TypeOf(o) != reflect.TypeOf(n) {
+		if o.ValueType() != n.ValueType() {
 			return nil, errors.ErrAlreadyExists(KIND_OPTION, name)
 		}
 		return o, nil
@@ -96,15 +94,15 @@ func (r *registry) Usage() string {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
-	tinfo := utils.FormatMap("", r.types)
-	oinfo := utils.FormatMap("", r.options)
+	tinfo := utils.FormatMap("", r.valueTypes)
+	oinfo := utils.FormatMap("", r.optionTypes)
 
 	return `
-The following predifined options can be used:
+The following predefined option types can be used:
 
 ` + oinfo + `
 
-The following predefined option types are supported:
+The following predefined value types are supported:
 
 ` + tinfo
 }

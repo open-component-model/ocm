@@ -7,6 +7,7 @@ package ppi
 import (
 	"fmt"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -217,23 +218,44 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 		return errors.ErrAlreadyExists(errors.KIND_ACCESSMETHOD, n)
 	}
 
+	var optlist []CLIOption
+	for _, o := range m.Options() {
+		known := options.DefaultRegistry.GetOptionType(o.GetName())
+		if known != nil {
+			if o.ValueType() != known.ValueType() {
+				return fmt.Errorf("option type %s[%s] conflicts with standard option type using value type %s", o.GetName(), o.ValueType(), known.ValueType())
+			}
+			optlist = append(optlist, CLIOption{
+				Name: o.GetName(),
+			})
+		} else {
+			optlist = append(optlist, CLIOption{
+				Name:        o.GetName(),
+				Type:        o.ValueType(),
+				Description: o.GetDescription(),
+			})
+		}
+	}
 	vers := m.Version()
 	if vers == "" {
 		meth := internal.AccessMethodDescriptor{
 			Name:        m.Name(),
 			Description: m.Description(),
 			Format:      m.Format(),
+			CLIOptions:  optlist,
 		}
 		p.descriptor.AccessMethods = append(p.descriptor.AccessMethods, meth)
 		p.accessScheme.RegisterByDecoder(m.Name(), m)
-		vers = "v1"
 		p.methods[m.Name()] = m
+		vers = "v1"
+		optlist = nil
 	}
 	meth := internal.AccessMethodDescriptor{
 		Name:        m.Name(),
 		Version:     vers,
 		Description: m.Description(),
 		Format:      m.Format(),
+		CLIOptions:  optlist,
 	}
 	p.descriptor.AccessMethods = append(p.descriptor.AccessMethods, meth)
 	p.accessScheme.RegisterByDecoder(m.Name()+"/"+vers, m)
