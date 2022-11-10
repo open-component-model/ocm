@@ -5,9 +5,9 @@
 package download
 
 import (
-	"path"
 	"strings"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/destoption"
@@ -106,12 +106,15 @@ func (d *download) Out() error {
 		out.Outf(d.opts.Context, "no artefacts found\n")
 	}
 	if len(d.data) == 1 {
-		return d.Save(d.data[0], dest.Destination)
+		f := dest.Destination
+		e := d.data[0]
+		if f == "" {
+			f = composePath(dest, e)
+		}
+		return d.Save(e, f)
 	} else {
 		for _, e := range d.data {
-			f := e.Spec.UniformRepositorySpec.String()
-			f = strings.ReplaceAll(f, "::", "-")
-			f = path.Join(f, e.Spec.Repository)
+			f := composePath(dest, e)
 			err := d.Save(e, f)
 			if err != nil {
 				list.Add(err)
@@ -122,10 +125,20 @@ func (d *download) Out() error {
 	return list.Result()
 }
 
+func composePath(dest *destoption.Option, e *artefacthdlr.Object) string {
+	f := e.Spec.UniformRepositorySpec.String()
+	f = strings.ReplaceAll(f, "::", "-")
+	f = vfs.Join(dest.PathFilesystem, f, e.Spec.Repository)
+	if dest.Destination != "" {
+		return vfs.Join(dest.PathFilesystem, dest.Destination, f)
+	}
+	return f
+}
+
 func (d *download) Save(o *artefacthdlr.Object, f string) error {
 	dest := destoption.From(d.opts)
 	art := o.Artefact
-	dir := path.Dir(f)
+	dir := vfs.Dir(dest.PathFilesystem, f)
 
 	err := dest.PathFilesystem.MkdirAll(dir, 0o770)
 	if err != nil {
