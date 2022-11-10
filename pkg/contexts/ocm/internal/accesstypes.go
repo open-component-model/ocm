@@ -100,15 +100,15 @@ func (t *accessTypeScheme) CreateConfigTypeSetConfigProvider() flagsets.ConfigTy
 	for _, p := range t.optionTypes {
 		err := prov.AddTypeSet(p.ConfigOptionTypeSetHandler())
 		if err != nil {
-			logging.Logger().Error("cannot compose access type CLI options: %s", err)
+			logging.Logger().LogError(err, "cannot compose access type CLI options")
 		}
 	}
 	if t.base != nil {
 		for _, s := range t.base.CreateConfigTypeSetConfigProvider().OptionTypeSets() {
-			if prov.GetTypeSet(s.Name()) == nil {
+			if prov.GetTypeSet(s.GetName()) == nil {
 				err := prov.AddTypeSet(s)
 				if err != nil {
-					logging.Logger().Error("cannot compose access type CLI options: %s", err)
+					logging.Logger().LogError(err, "cannot compose access type CLI options")
 				}
 			}
 		}

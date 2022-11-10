@@ -5,6 +5,7 @@
 package get
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -17,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 )
 
 var (
@@ -90,7 +92,7 @@ func getRegular(opts *output.Options) output.Output {
 }
 
 func getWide(opts *output.Options) output.Output {
-	return TableOutput(opts, mapGetWideOutput, "ACCESSMETHODS").New()
+	return TableOutput(opts, mapGetWideOutput, "ACCESSMETHODS", "UPLOADERS", "DOWNLOADERS").New()
 }
 
 func mapGetRegularOutput(e interface{}) interface{} {
@@ -110,5 +112,35 @@ func mapGetWideOutput(e interface{}) interface{} {
 		}
 		list = append(list, n)
 	}
-	return output.Fields(mapGetRegularOutput(e), strings.Join(list, ", "))
+
+	// a working type inference would be really great
+	ups := Describe[plugin.UploaderDescriptor, plugin.UploaderKey](d.Uploaders)
+	downs := Describe[plugin.DownloaderDescriptor, plugin.DownloaderKey](d.Downloaders)
+
+	return output.Fields(mapGetRegularOutput(e), strings.Join(list, ","), ups, downs)
+}
+
+func Describe[E Element[C], C Stringer](elems []E) string {
+	var list []string
+	for _, m := range elems {
+		n := m.GetName()
+		var clist []string
+		for _, c := range m.GetConstraints() {
+			clist = append(clist, c.String())
+		}
+		if len(clist) > 0 {
+			n = fmt.Sprintf("%s[%s]", n, strings.Join(clist, ","))
+		}
+		list = append(list, n)
+	}
+	return strings.Join(list, ",")
+}
+
+type Stringer interface {
+	String() string
+}
+
+type Element[C Stringer] interface {
+	GetName() string
+	GetConstraints() []C
 }

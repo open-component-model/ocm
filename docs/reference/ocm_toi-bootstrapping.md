@@ -350,3 +350,10 @@ configScheme:
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
+
+
+##### Additional Links
+
+* [<b>ocm bootstrap componentversions</b>](ocm_bootstrap_componentversions.md)	 &mdash; bootstrap component version
+* [<b>ocm configfile</b>](ocm_configfile.md)	 &mdash; configuration file
+

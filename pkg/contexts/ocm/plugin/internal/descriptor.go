@@ -56,8 +56,15 @@ func (d UploaderDescriptor) GetConstraints() []UploaderKey {
 }
 
 type AccessMethodDescriptor struct {
+	Name        string      `json:"name"`
+	Version     string      `json:"version,omitempty"`
+	Description string      `json:"description"`
+	Format      string      `json:"format"`
+	CLIOptions  []CLIOption `json:"options"`
+}
+
+type CLIOption struct {
 	Name        string `json:"name"`
-	Version     string `json:"version,omitempty"`
-	Description string `json:"description"`
-	Format      string `json:"format"`
+	Type        string `json:"type,omitempty"`
+	Description string `json:"description,omitempty"`
 }

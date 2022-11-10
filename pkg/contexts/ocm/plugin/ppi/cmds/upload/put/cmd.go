@@ -35,8 +35,14 @@ func New(p ppi.Plugin) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   Name + " [<flags>] <name> <repository specification>",
 		Short: "upload blob to external repository",
-		Long:  "",
-		Args:  cobra.ExactArgs(2),
+		Long: `
+Read the blob content from *stdin*, store the blob in the repository specified
+by the given repository specification and return the access specification
+(as JSON document string) usable to retrieve the blob, again, on * stdout*.
+The uploader to use is specified by the first argument. This might only be
+relevant, if the plugin supports multiple uploaders.
+`,
+		Args: cobra.ExactArgs(2),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return opts.Complete(args)
 		},

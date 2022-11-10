@@ -13,9 +13,12 @@ import (
 	"github.com/mandelsoft/filepath/pkg/filepath"
 
 	"github.com/open-component-model/ocm/cmds/common"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -31,15 +34,27 @@ type AccessSpec struct {
 	MediaType string `json:"mediaType,omitempty"`
 }
 
+const OPT_PATH = "path"
+const OPT_MEDIA = "mediaType"
+
 type AccessMethod struct {
 	ppi.AccessMethodBase
 }
+
+var PathOption = options.NewStringOptionType("accessPath", "path in temp repository")
 
 var _ ppi.AccessMethod = (*AccessMethod)(nil)
 
 func New() ppi.AccessMethod {
 	return &AccessMethod{
 		AccessMethodBase: ppi.MustNewAccessMethodBase(NAME, "", &AccessSpec{}, "demo access to temp files", ""),
+	}
+}
+
+func (a *AccessMethod) Options() []options.OptionType {
+	return []options.OptionType{
+		options.MediatypeOption,
+		PathOption,
 	}
 }
 
@@ -78,6 +93,13 @@ func (a *AccessMethod) ValidateSpecification(p ppi.Plugin, spec ppi.AccessSpec) 
 	info.Short = "temp file " + my.Path
 	info.Hint = "temp file " + my.Path
 	return &info, nil
+}
+
+func (a *AccessMethod) ComposeAccessSpecification(p ppi.Plugin, opts ppi.Config, config ppi.Config) error {
+	list := errors.ErrListf("configuring options")
+	list.Add(flagsets.AddFieldByOptionP(opts, PathOption, config, "path"))
+	list.Add(flagsets.AddFieldByOptionP(opts, options.MediatypeOption, config, "mediaType"))
+	return list.Result()
 }
 
 func (a *AccessMethod) Reader(p ppi.Plugin, spec ppi.AccessSpec, creds credentials.Credentials) (io.ReadCloser, error) {

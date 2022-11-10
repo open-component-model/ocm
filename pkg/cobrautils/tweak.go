@@ -67,6 +67,11 @@ func CleanMarkdownUsageFunc(cmd *cobra.Command) {
 var center = regexp.MustCompile(" *</?(pre|center)> *\n?")
 
 func cleanMarkdown(s string) string {
+	if strings.HasPrefix(s, "##") {
+		for strings.HasPrefix(s, "#") {
+			s = s[1:]
+		}
+	}
 	s = strings.ReplaceAll(s, "<code>", "\u00ab")
 	s = strings.ReplaceAll(s, "</code>", "\u00bb")
 	s = strings.ReplaceAll(s, "&lt;", "<")

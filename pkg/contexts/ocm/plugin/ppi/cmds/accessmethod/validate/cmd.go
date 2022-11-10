@@ -24,8 +24,34 @@ func New(p ppi.Plugin) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   Name + " <spec>",
 		Short: "validate access specification",
-		Long:  "",
-		Args:  cobra.ExactArgs(1),
+		Long: `
+This command accepts an access specification as argument. It is used to
+validate the specification and to provide some metadata for the given
+specification.
+
+This metadata has to be provided as JSON string on *stdout* and has the 
+following fields: 
+
+- **<code>mediaType</code>** *string*
+
+  The media type of the artifact described by the specification. It may be part
+  of the specification or implicitly determined by the access method.
+
+- **<code>description</code>** *string*
+
+  A short textual description of the described location.
+
+- **<code>hint</code>** *string*
+
+  A name hint of the described location used to reconstruct a useful
+  name for local blobs uploaded to a dedicated repository technology.
+
+- **<code>consumerId</code>** *map[string]string*
+
+  The consumer id used to determine optional credentials for the
+  underlying repository. If specified, at least the <code>type</code> field must be set.
+`,
+		Args: cobra.ExactArgs(1),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return opts.Complete(args)
 		},

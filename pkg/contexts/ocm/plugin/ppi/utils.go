@@ -68,3 +68,13 @@ func (b *nameDescription) Name() string {
 func (b *nameDescription) Description() string {
 	return b.desc
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+// Config is a generic structured config stored in a string map.
+type Config map[string]interface{}
+
+func (c Config) GetValue(name string) (interface{}, bool) {
+	v, ok := c[name]
+	return v, ok
+}

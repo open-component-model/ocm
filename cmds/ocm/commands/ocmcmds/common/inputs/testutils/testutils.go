@@ -17,7 +17,7 @@ import (
 )
 
 type NameProvider interface {
-	Name() string
+	GetName() string
 }
 
 type InputTest struct {
@@ -36,11 +36,11 @@ func NewInputTest(name string) *InputTest {
 }
 
 func (t *InputTest) Set(opt NameProvider, value string) {
-	ExpectWithOffset(1, t.Flags.Set(opt.Name(), value)).To(Succeed())
+	ExpectWithOffset(1, t.Flags.Set(opt.GetName(), value)).To(Succeed())
 }
 
 func (t *InputTest) SetWithFailure(opt NameProvider, value string, msg string) {
-	err := t.Flags.Set(opt.Name(), value)
+	err := t.Flags.Set(opt.GetName(), value)
 	ExpectWithOffset(1, err).To(HaveOccurred())
 	ExpectWithOffset(1, err.Error()).To(Equal(msg))
 }

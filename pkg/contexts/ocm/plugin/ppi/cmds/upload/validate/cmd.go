@@ -29,8 +29,21 @@ func New(p ppi.Plugin) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   Name + " [<flags>] <name> <spec>",
 		Short: "validate upload specification",
-		Long:  "",
-		Args:  cobra.ExactArgs(2),
+		Long: `
+This command accepts a target specification as argument. It is used to
+validate the specification for the specified upoader and to provide some
+metadata for the given specification.
+
+This metadata has to be provided as JSON document string on *stdout* and has the
+following fields:
+
+- **<code>consumerId</code>** *map[string]string*
+
+  The consumer id used to determine optional credentials for the
+  underlying repository. If specified, at least the <code>type</code> field must
+  be set.
+`,
+		Args: cobra.ExactArgs(2),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return opts.Complete(args)
 		},

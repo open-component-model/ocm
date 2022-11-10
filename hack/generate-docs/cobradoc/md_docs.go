@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package main
+package cobradoc
 
 import (
 	"bytes"
@@ -81,9 +81,13 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 		}
 	}
 
+	var links []string
 	if len(cmd.Long) > 0 {
+		var desc string
+
+		links, desc = cobrautils.SubstituteCommandLinks(cmd.Long, cobrautils.FormatLinkWithHandler(linkHandler))
 		buf.WriteString("### Description\n\n")
-		buf.WriteString(cobrautils.SubstituteCommandLinks(cmd.Long, cobrautils.FormatLinkWithHandler(linkHandler)) + "\n\n")
+		buf.WriteString(desc + "\n\n")
 	}
 
 	if len(cmd.Example) > 0 {
@@ -96,8 +100,19 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 		}
 	}
 
-	if hasSeeAlso(cmd) {
-		header := cmd.HasHelpSubCommands() && cmd.HasAvailableSubCommands()
+	if len(links) > 0 || hasSeeAlso(cmd) {
+		var shown_links []string
+		cnt := 0
+		if cmd.HasHelpSubCommands() {
+			cnt++
+		}
+		if cmd.HasAvailableSubCommands() {
+			cnt++
+		}
+		if len(links) > 0 {
+			cnt++
+		}
+		header := cnt > 1
 		buf.WriteString("### SEE ALSO\n\n")
 		if cmd.HasParent() {
 			header = true
@@ -106,7 +121,9 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 			for parent.HasParent() {
 				parent = parent.Parent()
 				pname := parent.CommandPath()
-				buf.WriteString(fmt.Sprintf("* [%s](%s)\t &mdash; %s\n", pname, linkHandler(parent.CommandPath()), parent.Short))
+				path := parent.CommandPath()
+				shown_links = append(shown_links, path)
+				buf.WriteString(fmt.Sprintf("* [%s](%s)\t &mdash; %s\n", pname, linkHandler(path), parent.Short))
 			}
 			cmd.VisitParents(func(c *cobra.Command) {
 				if c.DisableAutoGenTag {
@@ -127,8 +144,10 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 				buf.WriteString("\n\n##### Sub Commands\n\n")
 				subheader = true
 			}
+			path := child.CommandPath()
+			shown_links = append(shown_links, path)
 			cname := name + " " + "<b>" + child.Name() + "</b>"
-			buf.WriteString(fmt.Sprintf("* [%s](%s)\t &mdash; %s\n", cname, linkHandler(child.CommandPath()), child.Short))
+			buf.WriteString(fmt.Sprintf("* [%s](%s)\t &mdash; %s\n", cname, linkHandler(path), child.Short))
 		}
 		buf.WriteString("\n")
 
@@ -141,9 +160,50 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 				buf.WriteString("\n\n##### Additional Help Topics\n\n")
 				subheader = true
 			}
+			path := child.CommandPath()
+			shown_links = append(shown_links, path)
 			cname := name + " " + "<b>" + child.Name() + "</b>"
-			buf.WriteString(fmt.Sprintf("* [%s](%s)\t &mdash; %s\n", cname, linkHandler(child.CommandPath()), child.Short))
+			buf.WriteString(fmt.Sprintf("* [%s](%s)\t &mdash; %s\n", cname, linkHandler(path), child.Short))
 		}
+
+		subheader = false
+		root := cmd.Root()
+	nextlink:
+		for _, link := range links {
+			var sub *cobra.Command
+			for _, s := range shown_links {
+				if s == link {
+					continue nextlink
+				}
+			}
+			path := strings.Split(link, " ")
+			if len(path) > 1 {
+				sub = root
+			outer:
+				for _, c := range path[1:] {
+					for _, n := range sub.Commands() {
+						if n.Name() == c {
+							sub = n
+							continue outer
+						}
+					}
+					sub = nil
+					break
+				}
+			}
+
+			if header && !subheader {
+				buf.WriteString("\n\n##### Additional Links\n\n")
+				subheader = true
+			}
+			cname := "<b>" + link + "</b>"
+			if sub != nil {
+				buf.WriteString(fmt.Sprintf("* [%s](%s)\t &mdash; %s\n", cname, linkHandler(link), sub.Short))
+			} else {
+				buf.WriteString(fmt.Sprintf("* [%s](%s)\n", cname, linkHandler(link)))
+			}
+		}
+
 		if subheader {
 			buf.WriteString("\n")
 		}

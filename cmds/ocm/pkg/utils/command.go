@@ -60,6 +60,10 @@ type Example interface {
 	Example() string
 }
 
+type CommandTweaker interface {
+	TweakCommand(cmd *cobra.Command)
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // BaseCommand provides the basic functionality of an OCM command
@@ -186,6 +190,9 @@ func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 			}
 		*/
 		return err
+	}
+	if t, ok := ocmcmd.(CommandTweaker); ok {
+		t.TweakCommand(c)
 	}
 	if u, ok := ocmcmd.(options.Usage); ok {
 		c.Long += u.Usage()

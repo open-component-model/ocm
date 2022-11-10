@@ -18,7 +18,9 @@ func New(p ppi.Plugin) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   Name,
 		Short: "upload specific operations",
-		Long:  "",
+		Long: `
+This command group provides all commands used to implement an uploader
+described by an uploader descriptor.`,
 	}
 
 	cmd.AddCommand(validate.New(p))

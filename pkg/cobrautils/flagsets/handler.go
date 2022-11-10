@@ -25,6 +25,7 @@ type ConfigOptionTypeSetHandler interface {
 	ConfigOptionTypeSet
 	ConfigHandler
 }
+
 type configOptionTypeSetHandler struct {
 	adder ConfigAdder
 	ConfigOptionTypeSet

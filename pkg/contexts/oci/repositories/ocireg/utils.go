@@ -20,6 +20,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
+	"github.com/open-component-model/ocm/pkg/logging"
 )
 
 // TODO: add cache
@@ -94,11 +95,11 @@ func pushData(ctx context.Context, p resolve.Pusher, desc artdesc.Descriptor, da
 		desc.Size = -1
 	}
 
-	logrus.Debugf("*** push %s %s: %s", desc.MediaType, desc.Digest, key)
+	logging.Logger().Info("*** push blob", "mediatype", desc.MediaType, "digest", desc.Digest, "key", key)
 	req, err := p.Push(ctx, desc, data)
 	if err != nil {
 		if errdefs.IsAlreadyExists(err) {
-			logrus.Infof("*** %s %s: already exists", desc.MediaType, desc.Digest)
+			logging.Logger().Info("blob already exists", "mediatype", desc.MediaType, "digest", desc.Digest)
 
 			return nil
 		}

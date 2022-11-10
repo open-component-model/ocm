@@ -31,7 +31,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
 type ResourceInput struct {
@@ -280,7 +282,7 @@ func (a *ContentResourceSpecificationsProvider) AddFlags(fs *pflag.FlagSet) {
 	set.AddAll(a.accprov)
 	dup, err := set.AddAll(inptypes)
 	if err != nil {
-		panic(err)
+		logging.Logger().LogError(err, "composing resources flags")
 	}
 	a.shared = dup
 	a.options = set.CreateOptions()
@@ -318,10 +320,10 @@ func (a *ContentResourceSpecificationsProvider) apply(p flagsets.ConfigTypeOptio
 	if p.IsExplicitlySelected(a.options) {
 		ac, err := p.GetConfigFor(a.options)
 		if err != nil {
-			return errors.Wrapf(err, "%s specification", p.Name())
+			return errors.Wrapf(err, "%s specification", p.GetName())
 		}
 		if ac != nil {
-			data[p.Name()] = ac
+			data[p.GetName()] = ac
 		}
 	}
 	return nil
@@ -512,7 +514,7 @@ func determineResources(printer common.Printer, ctx clictx.Context, ictx inputs.
 		var list []json.RawMessage
 		if reslist, ok := tmp[listkey]; ok {
 			if len(tmp) != 1 {
-				return nil, errors.Newf("invalid spec %d: either a list or a single spec possible", i)
+				return nil, errors.Newf("invalid spec %d: either a list or a single spec possible for %s (found keys %s)", i, listkey, utils2.StringMapKeys(tmp))
 			}
 			l, ok := reslist.([]interface{})
 			if !ok {

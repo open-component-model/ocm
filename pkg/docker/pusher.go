@@ -21,9 +21,16 @@ import (
 	digest "github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
 )
+
+func init() {
+	l := logrus.New()
+	l.Level = logrus.WarnLevel
+	log.L = logrus.NewEntry(l)
+}
 
 type dockerPusher struct {
 	*dockerBase
@@ -400,9 +407,11 @@ type sizeTrackingReader struct {
 }
 
 func (t *sizeTrackingReader) Read(in []byte) (int, error) {
+	// fmt.Printf("reading next...\n")
 	n, err := t.ReadCloser.Read(in)
 	if n > 0 {
 		status, err := t.pw.tracker.GetStatus(t.pw.ref)
+		// fmt.Printf("read %d[%d] bytes\n", n, status.Offset)
 		if err != nil {
 			return n, err
 		}

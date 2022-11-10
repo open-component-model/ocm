@@ -10,11 +10,13 @@ import (
 	"io"
 	"sync"
 
+	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/config"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/compose"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/get"
 	accval "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/validate"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/download"
@@ -47,6 +49,10 @@ func NewPlugin(ctx ocm.Context, impl cache.Plugin, config json.RawMessage) Plugi
 	}
 }
 
+func (p *pluginImpl) Context() ocm.Context {
+	return p.ctx
+}
+
 func (p *pluginImpl) ConfigurePlugin(name string, data json.RawMessage) {
 	if name == p.Name() {
 		p.config = data
@@ -71,6 +77,38 @@ func (p *pluginImpl) ValidateAccessMethod(spec []byte) (*ppi.AccessSpecInfo, err
 		return nil, errors.Wrapf(err, "plugin %s: cannot unmarshal access spec info", p.Name())
 	}
 	return &info, nil
+}
+
+func (p *pluginImpl) ComposeAccessMethod(name string, opts flagsets.ConfigOptions, base flagsets.Config) error {
+	cfg := flagsets.Config{}
+	for _, o := range opts.Options() {
+		cfg[o.GetName()] = o.Value()
+	}
+	optsdata, err := json.Marshal(cfg)
+	if err != nil {
+		return errors.Wrapf(err, "cannot marshal option values")
+	}
+	basedata, err := json.Marshal(base)
+	if err != nil {
+		return errors.Wrapf(err, "cannot marshal access specification base value")
+	}
+	result, err := p.Exec(nil, nil, accessmethod.Name, compose.Name, name, string(optsdata), string(basedata))
+	if err != nil {
+		return err
+	}
+	var r flagsets.Config
+	err = json.Unmarshal(result, &r)
+	if err != nil {
+		return errors.Wrapf(err, "cannot unmarshal composition result")
+	}
+
+	for k := range base {
+		delete(base, k)
+	}
+	for k, v := range r {
+		base[k] = v
+	}
+	return nil
 }
 
 func (p *pluginImpl) ValidateUploadTarget(name string, spec []byte) (*ppi.UploadTargetSpecInfo, error) {

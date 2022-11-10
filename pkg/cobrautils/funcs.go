@@ -28,9 +28,10 @@ func flagUsages(fs *pflag.FlagSet) string {
 }
 
 func substituteCommandLinks(desc string) string {
-	return SubstituteCommandLinks(desc, func(pname string) string {
+	_, desc = SubstituteCommandLinks(desc, func(pname string) string {
 		return "\u00ab" + pname + "\u00bb"
 	})
+	return desc
 }
 
 func soleCommand(s string) bool {

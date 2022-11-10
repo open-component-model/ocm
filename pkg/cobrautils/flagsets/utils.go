@@ -54,22 +54,27 @@ func SetField(config Config, value interface{}, names ...string) error {
 }
 
 type NameProvider interface {
-	Name() string
+	GetName() string
 }
 
 type OptionName string
 
-func (n OptionName) Name() string {
+func (n OptionName) GetName() string {
 	return string(n)
+}
+
+// OptionValueProvider provides values for named options.
+type OptionValueProvider interface {
+	GetValue(name string) (interface{}, bool)
 }
 
 // AddFieldByOption sets the specified target field with the option value, if given.
 // If no target field is specified the name of the option is used.
-func AddFieldByOption(opts ConfigOptions, oname string, config Config, names ...string) error {
+func AddFieldByOption(opts OptionValueProvider, oname string, config Config, names ...string) error {
 	return AddFieldByMappedOption(opts, oname, config, nil, names...)
 }
 
-func AddFieldByMappedOption(opts ConfigOptions, oname string, config Config, mapper func(interface{}) (interface{}, error), names ...string) error {
+func AddFieldByMappedOption(opts OptionValueProvider, oname string, config Config, mapper func(interface{}) (interface{}, error), names ...string) error {
 	var err error
 
 	if v, ok := opts.GetValue(oname); ok {
@@ -84,18 +89,19 @@ func AddFieldByMappedOption(opts ConfigOptions, oname string, config Config, map
 		}
 		return SetField(config, v, names...)
 	}
+
 	return nil
 }
 
 // AddFieldByOptionP sets the specified target field with the option value, if given.
 // The option is specified by a name provider instead of its name.
 // If no target field is specified the name of the option is used.
-func AddFieldByOptionP(opts ConfigOptions, p NameProvider, config Config, names ...string) error {
-	return AddFieldByMappedOption(opts, p.Name(), config, nil, names...)
+func AddFieldByOptionP(opts OptionValueProvider, p NameProvider, config Config, names ...string) error {
+	return AddFieldByMappedOption(opts, p.GetName(), config, nil, names...)
 }
 
-func AddFieldByMappedOptionP(opts ConfigOptions, p NameProvider, config Config, mapper func(interface{}) (interface{}, error), names ...string) error {
-	return AddFieldByMappedOption(opts, p.Name(), config, mapper, names...)
+func AddFieldByMappedOptionP(opts OptionValueProvider, p NameProvider, config Config, mapper func(interface{}) (interface{}, error), names ...string) error {
+	return AddFieldByMappedOption(opts, p.GetName(), config, mapper, names...)
 }
 
 func ComposedAdder(adders ...ConfigAdder) ConfigAdder {

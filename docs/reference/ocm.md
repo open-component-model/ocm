@@ -155,4 +155,3 @@ attributes are supported:
 * [ocm <b>oci-references</b>](ocm_oci-references.md)	 &mdash; notation for OCI references
 * [ocm <b>ocm-references</b>](ocm_ocm-references.md)	 &mdash; notation for OCM references
 * [ocm <b>toi-bootstrapping</b>](ocm_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions
-
