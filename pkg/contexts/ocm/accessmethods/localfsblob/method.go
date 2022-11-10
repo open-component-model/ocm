@@ -13,7 +13,7 @@ import (
 // Type is the access type of a blob in a local filesystem.
 const (
 	Type   = "localFilesystemBlob"
-	TypeV1 = Type + "/v1"
+	TypeV1 = Type + runtime.VersionSeparator + "v1"
 )
 
 // Keep old access method and map generic one to this implementation for component archives

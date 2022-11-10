@@ -28,7 +28,7 @@ The formatting rules are as follows:
 
 Example:
 
-	# Match exact file name
+	# Match any file named foo.txt
 	foo.txt
 
 	# Match any text file

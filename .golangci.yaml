@@ -6,6 +6,8 @@ run:
   issues-exit-code: 2
   skip-dirs:
     - "hack"
+    # External code from containerd/containerd
+    - "pkg/docker"
 
 linters:
   enable-all: true
@@ -167,3 +169,6 @@ issues:
     - source: "// .* #\\d+"
       linters:
       - godox
+    - path: ignore/.*\.go
+      linters:
+      - dupword

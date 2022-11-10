@@ -332,7 +332,7 @@ execution and reading provided executor outputs after the execution.
 /
 └── toi
     ├── inputs
-    │   ├── config      info from package specification
+    │   ├── config      configuration from package specification
     │   ├── ocmrepo     OCM filesystem repository containing the complete
     │   │               component version of the package
     │   └── parameters  merged complete parameter file
