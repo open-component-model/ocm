@@ -41,6 +41,26 @@ var (
 	_ NormalizationFilter = ExcludeEmpty{}
 )
 
+func (e ExcludeEmpty) Field(name string, value interface{}) (string, interface{}, ExcludeRules) {
+	if e.ExcludeRules == nil {
+		if value == nil {
+			return "", nil, e
+		}
+		return name, value, e
+	}
+	return e.ExcludeRules.Field(name, value)
+}
+
+func (e ExcludeEmpty) Element(value interface{}) (bool, interface{}, ExcludeRules) {
+	if e.ExcludeRules == nil {
+		if value == nil {
+			return true, nil, e
+		}
+		return false, value, e
+	}
+	return e.ExcludeRules.Element(value)
+}
+
 func (ExcludeEmpty) Filter(v Normalized) (Normalized, error) {
 	if v == nil {
 		return nil, nil

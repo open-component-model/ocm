@@ -12,6 +12,7 @@ import (
 	"strconv"
 
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Entries []Entry
@@ -21,7 +22,11 @@ func (l *Entries) Add(key string, value interface{}) {
 }
 
 func (l Entries) String() string {
-	return l.ToString("")
+	return string(utils.Must(json.Marshal(l)))
+}
+
+func (l Entries) Formatted() string {
+	return string(utils.Must(json.MarshalIndent(l, "", "  ")))
 }
 
 func (l Entries) ToString(gap string) string {
@@ -100,7 +105,8 @@ func PrepareNormalization(v interface{}, excludes ExcludeRules) (Entries, error)
 	if err != nil {
 		return nil, err
 	}
-	raw := map[string]interface{}{}
+
+	var raw map[string]interface{}
 
 	err = json.Unmarshal(data, &raw)
 	if err != nil {
@@ -110,7 +116,7 @@ func PrepareNormalization(v interface{}, excludes ExcludeRules) (Entries, error)
 	return prepareStruct(raw, excludes)
 }
 
-func prepare(v interface{}, ex ExcludeRules) (r Normalized, err error) {
+func Prepare(v interface{}, ex ExcludeRules) (r Normalized, err error) {
 	switch e := v.(type) {
 	case map[string]interface{}:
 		r, err = prepareStruct(e, ex)
@@ -133,7 +139,7 @@ func prepareStruct(v map[string]interface{}, ex ExcludeRules) ([]Entry, error) {
 	for key, value := range v {
 		name, mapped, prop := ex.Field(key, value)
 		if name != "" {
-			nested, err := prepare(mapped, prop)
+			nested, err := Prepare(mapped, prop)
 			if err != nil {
 				return nil, errors.Wrapf(err, "field %q", key)
 			}
@@ -154,7 +160,7 @@ func prepareArray(v []interface{}, ex ExcludeRules) ([]Normalized, error) {
 	for index, value := range v {
 		exclude, mapped, prop := ex.Element(value)
 		if !exclude {
-			nested, err := prepare(mapped, prop)
+			nested, err := Prepare(mapped, prop)
 			if err != nil {
 				return nil, errors.Wrapf(err, "entry %d", index)
 			}
