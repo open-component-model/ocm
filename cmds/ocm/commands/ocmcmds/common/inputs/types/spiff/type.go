@@ -16,7 +16,7 @@ func init() {
 }
 
 func usage() string {
-	return file.Usage("The path must denote a [spiff](https://github.com/mandelsoft/spiff) template relative the the resources file.") + `
+	return file.Usage("The path must denote a [spiff](https://github.com/mandelsoft/spiff) template relative the resources file.") + `
 - **<code>values</code>** *map[string]any*
 
   This OPTIONAL property describes an additional value binding for the template processing. It will be available

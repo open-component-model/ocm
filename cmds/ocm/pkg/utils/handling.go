@@ -30,7 +30,7 @@ func (s StringSpec) String() string {
 type TypeHandler interface {
 	// All returns all elements according to its context
 	All() ([]output.Object, error)
-	// Get returns the the elements for a dedicated specification
+	// Get returns the elements for a dedicated specification
 	// according to the handlers context.
 	Get(name ElemSpec) ([]output.Object, error)
 	Close() error

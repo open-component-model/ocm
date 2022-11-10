@@ -6,6 +6,8 @@ run:
   issues-exit-code: 2
   skip-dirs:
     - "hack"
+    # External code from containerd/containerd
+    - "pkg/docker"
 
 linters:
   enable-all: true
@@ -47,9 +49,6 @@ linters:
     - nestif           # Some nexted if statements are 8 or 9 deep.
     - dupl             # Check code duplications.
     - cyclop           # Complex functions are not good.
-    - maintidx         # Too complex code is not good.
-                       #   name: push, Cyclomatic Complexity: 35
-                       #   name: apply, Cyclomatic Complexity: 51
     - gochecknoinits   # Init functions cause an import to have side effects,
                        #   and side effects are hard to test,
                        #   reduce readability and increase the complexity of code.
@@ -170,3 +169,6 @@ issues:
     - source: "// .* #\\d+"
       linters:
       - godox
+    - path: ignore/.*\.go
+      linters:
+      - dupword

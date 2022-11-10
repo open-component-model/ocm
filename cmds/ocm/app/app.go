@@ -317,7 +317,7 @@ func (o *CLIOptions) Complete() error {
 				return errors.Wrapf(err, "attribute %s", s.Name)
 			}
 		}
-		err = ctx.ApplyConfig(spec, "cli")
+		_ = ctx.ApplyConfig(spec, "cli")
 	}
 	return plugincacheattr.Get(o.Context.OCMContext()).RegisterExtensions()
 }
@@ -327,7 +327,7 @@ func NewVersionCommand(ctx clictx.Context) *cobra.Command {
 		Use:     "version",
 		Aliases: []string{"v"},
 		Short:   "displays the version",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(_ *cobra.Command, _ []string) {
 			v := version.Get()
 			out.Outf(ctx, "%#v\n", v)
 		},

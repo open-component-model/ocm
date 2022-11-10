@@ -41,7 +41,7 @@ type TypedObjectDecoder interface {
 }
 
 // TypedObjectEncoder is able to provide a versioned representation of
-// of an effective TypedObject.
+// an effective TypedObject.
 type TypedObjectEncoder interface {
 	Encode(TypedObject, Marshaler) ([]byte, error)
 }

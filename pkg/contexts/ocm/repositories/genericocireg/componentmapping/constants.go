@@ -18,18 +18,24 @@ const ComponentDescriptorTarMimeType = "application/vnd.ocm.software.component-d
 
 // LegacyComponentDescriptorTarMimeType is the legacy mimetype for component-descriptor-blobs
 // that are stored as tar.
-const LegacyComponentDescriptorTarMimeType = "application/vnd.oci.gardener.cloud.cnudie.component-descriptor.config.v2+yaml+tar"
-const Legacy2ComponentDescriptorTarMimeType = "application/vnd.gardener.cloud.cnudie.component-descriptor.v2+yaml+tar"
+const (
+	LegacyComponentDescriptorTarMimeType  = "application/vnd.oci.gardener.cloud.cnudie.component-descriptor.config.v2+yaml+tar"
+	Legacy2ComponentDescriptorTarMimeType = "application/vnd.gardener.cloud.cnudie.component-descriptor.v2+yaml+tar"
+)
 
 // ComponentDescriptorJSONMimeType is the mimetype for component-descriptor-blobs
 // that are stored as JSON.
-const ComponentDescriptorJSONMimeType = "application/vnd.ocm.software.component-descriptor.v2+json"
-const LegacyComponentDescriptorJSONMimeType = "application/vnd.gardener.cloud.cnudie.component-descriptor.v2+json"
+const (
+	ComponentDescriptorJSONMimeType       = "application/vnd.ocm.software.component-descriptor.v2+json"
+	LegacyComponentDescriptorJSONMimeType = "application/vnd.gardener.cloud.cnudie.component-descriptor.v2+json"
+)
 
 // ComponentDescriptorJSONMimeType is the mimetype for component-descriptor-blobs
 // that are stored as YAML.
-const ComponentDescriptorYAMLMimeType = "application/vnd.ocm.software.component-descriptor.v2+yaml"
-const LegacyComponentDescriptorYAMLMimeType = "application/vnd.gardener.cloud.cnudie.component-descriptor.v2+yaml"
+const (
+	ComponentDescriptorYAMLMimeType       = "application/vnd.ocm.software.component-descriptor.v2+yaml"
+	LegacyComponentDescriptorYAMLMimeType = "application/vnd.gardener.cloud.cnudie.component-descriptor.v2+yaml"
+)
 
 // ComponentDescriptorMimeType are the mimetypes for component-descriptor-blobs.
 var ComponentDescriptorMimeType = []string{
@@ -43,8 +49,10 @@ var ComponentDescriptorMimeType = []string{
 const ComponentDescriptorConfigMimeType = "application/vnd.ocm.software.component.config.v1+json"
 
 // LegacyComponentDescriptorConfigMimeType is the mimetype for the legacy component-descriptor-oci-cfg-blobs.
-const LegacyComponentDescriptorConfigMimeType = "application/vnd.gardener.cloud.cnudie.component.config.v1+json"
-const Legacy2ComponentDescriptorConfigMimeType = "application/vnd.oci.gardener.cloud.cnudie.component-descriptor-metadata.config.v2+json"
+const (
+	LegacyComponentDescriptorConfigMimeType  = "application/vnd.gardener.cloud.cnudie.component.config.v1+json"
+	Legacy2ComponentDescriptorConfigMimeType = "application/vnd.oci.gardener.cloud.cnudie.component-descriptor-metadata.config.v2+json"
+)
 
 // ComponentDescriptorNamespace is the subpath for all component descriptor artifacts in an oci registry.‚.
 const ComponentDescriptorNamespace = "component-descriptors"

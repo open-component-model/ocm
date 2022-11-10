@@ -161,54 +161,54 @@ func NewProcessingBuffer(log logging.Context, i BufferImplementation) Processing
 	return (&_buffer{}).new(log, i)
 }
 
-func (this *_buffer) new(log logging.Context, i BufferImplementation) *_buffer {
-	this.BufferImplementation = i
-	this.Cond = sync.NewCond(&this.Mutex)
-	this.complete = atomic.NewBool(false)
-	i.SetFrame(this)
-	this.log = log
-	return this
+func (b *_buffer) new(log logging.Context, i BufferImplementation) *_buffer {
+	b.BufferImplementation = i
+	b.Cond = sync.NewCond(&b.Mutex)
+	b.complete = atomic.NewBool(false)
+	i.SetFrame(b)
+	b.log = log
+	return b
 }
 
-func (this *_buffer) Add(e ProcessingEntry) ProcessingBuffer {
-	this.Lock()
-	notify := this.BufferImplementation.Add(e)
-	this.Unlock()
+func (b *_buffer) Add(e ProcessingEntry) ProcessingBuffer {
+	b.Lock()
+	notify := b.BufferImplementation.Add(e)
+	b.Unlock()
 	if notify {
-		this.Broadcast()
+		b.Broadcast()
 	}
-	return this
+	return b
 }
 
-func (this *_buffer) Open() {
-	this.Lock()
-	this.BufferImplementation.Open()
-	this.complete.Unset()
-	this.Unlock()
+func (b *_buffer) Open() {
+	b.Lock()
+	b.BufferImplementation.Open()
+	b.complete.Unset()
+	b.Unlock()
 }
 
-func (this *_buffer) Close() {
-	this.Lock()
-	this.BufferImplementation.Close()
-	this.complete.Set()
-	this.Unlock()
-	this.Broadcast()
+func (b *_buffer) Close() {
+	b.Lock()
+	b.BufferImplementation.Close()
+	b.complete.Set()
+	b.Unlock()
+	b.Broadcast()
 }
 
-func (this *_buffer) IsClosed() bool {
-	return this.complete.IsSet()
+func (b *_buffer) IsClosed() bool {
+	return b.complete.IsSet()
 }
 
-func (this *_buffer) Len() int {
-	this.Lock()
-	defer this.Unlock()
-	return this.BufferImplementation.Len()
+func (b *_buffer) Len() int {
+	b.Lock()
+	defer b.Unlock()
+	return b.BufferImplementation.Len()
 }
 
-func (this *_buffer) Get(i int) interface{} {
-	this.Lock()
-	defer this.Unlock()
-	return this.BufferImplementation.Get(i)
+func (b *_buffer) Get(i int) interface{} {
+	b.Lock()
+	defer b.Unlock()
+	return b.BufferImplementation.Get(i)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -223,41 +223,41 @@ func NewSimpleBuffer(log logging.Context) ProcessingBuffer {
 	return NewProcessingBuffer(log, (&simpleBuffer{}).new(log))
 }
 
-func (this *simpleBuffer) new(log logging.Context) *simpleBuffer {
-	this.entries = []ProcessingEntry{}
-	this.log = log
-	return this
+func (sb *simpleBuffer) new(log logging.Context) *simpleBuffer {
+	sb.entries = []ProcessingEntry{}
+	sb.log = log
+	return sb
 }
 
-func (this *simpleBuffer) SetFrame(frame BufferFrame) {
-	this.frame = frame
+func (sb *simpleBuffer) SetFrame(frame BufferFrame) {
+	sb.frame = frame
 }
 
-func (this *simpleBuffer) Open() {
+func (sb *simpleBuffer) Open() {
 }
 
-func (this *simpleBuffer) Close() {
+func (sb *simpleBuffer) Close() {
 }
 
-func (this *simpleBuffer) Iterator() data.Iterator {
-	return (&simpleBufferIterator{}).new(this, true, this.log)
+func (sb *simpleBuffer) Iterator() data.Iterator {
+	return (&simpleBufferIterator{}).new(sb, true, sb.log)
 }
 
-func (this *simpleBuffer) ProcessingIterator() ProcessingIterator {
-	return (&simpleBufferIterator{}).new(this, false, this.log)
+func (sb *simpleBuffer) ProcessingIterator() ProcessingIterator {
+	return (&simpleBufferIterator{}).new(sb, false, sb.log)
 }
 
-func (this *simpleBuffer) Add(e ProcessingEntry) bool {
-	this.entries = append(this.entries, e)
+func (sb *simpleBuffer) Add(e ProcessingEntry) bool {
+	sb.entries = append(sb.entries, e)
 	return true
 }
 
-func (this *simpleBuffer) Len() int {
-	return len(this.entries)
+func (sb *simpleBuffer) Len() int {
+	return len(sb.entries)
 }
 
-func (this *simpleBuffer) Get(i int) interface{} {
-	e := this.entries[i]
+func (sb *simpleBuffer) Get(i int) interface{} {
+	e := sb.entries[i]
 	if e.Valid {
 		return e.Value
 	}
@@ -276,53 +276,53 @@ var (
 	_ data.Iterator      = &simpleBufferIterator{}
 )
 
-func (this *simpleBufferIterator) new(buffer *simpleBuffer, valid bool, log logging.Context) *simpleBufferIterator {
-	this.valid = valid
-	this.current = -1
-	this.buffer = buffer
-	this.log = log
-	return this
+func (sbi *simpleBufferIterator) new(buffer *simpleBuffer, valid bool, log logging.Context) *simpleBufferIterator {
+	sbi.valid = valid
+	sbi.current = -1
+	sbi.buffer = buffer
+	sbi.log = log
+	return sbi
 }
 
-func (this *simpleBufferIterator) HasNext() bool {
-	this.buffer.frame.Lock()
-	defer this.buffer.frame.Unlock()
+func (sbi *simpleBufferIterator) HasNext() bool {
+	sbi.buffer.frame.Lock()
+	defer sbi.buffer.frame.Unlock()
 	for {
-		this.log.Logger().Debug("HasNext", "current", this.current)
-		if len(this.buffer.entries) > this.current+1 {
-			if !this.valid || this.buffer.entries[this.current+1].Valid {
+		sbi.log.Logger().Debug("HasNext", "current", sbi.current)
+		if len(sbi.buffer.entries) > sbi.current+1 {
+			if !sbi.valid || sbi.buffer.entries[sbi.current+1].Valid {
 				return true
 			}
-			this.current++
+			sbi.current++
 			continue
 		}
-		if this.buffer.frame.IsClosed() {
+		if sbi.buffer.frame.IsClosed() {
 			return false
 		}
-		this.buffer.frame.Wait()
+		sbi.buffer.frame.Wait()
 	}
 }
 
-func (this *simpleBufferIterator) Next() interface{} {
-	return this.NextProcessingEntry().Value
+func (sbi *simpleBufferIterator) Next() interface{} {
+	return sbi.NextProcessingEntry().Value
 }
 
-func (this *simpleBufferIterator) NextProcessingEntry() ProcessingEntry {
-	this.buffer.frame.Lock()
-	defer this.buffer.frame.Unlock()
+func (sbi *simpleBufferIterator) NextProcessingEntry() ProcessingEntry {
+	sbi.buffer.frame.Lock()
+	defer sbi.buffer.frame.Unlock()
 	for {
-		this.log.Logger().Debug("NextProcessingEntry", "current", this.current)
-		if len(this.buffer.entries) > this.current+1 {
-			this.current++
-			if !this.valid || this.buffer.entries[this.current].Valid {
-				return this.buffer.entries[this.current]
+		sbi.log.Logger().Debug("NextProcessingEntry", "current", sbi.current)
+		if len(sbi.buffer.entries) > sbi.current+1 {
+			sbi.current++
+			if !sbi.valid || sbi.buffer.entries[sbi.current].Valid {
+				return sbi.buffer.entries[sbi.current]
 			}
 			continue
 		}
-		if this.buffer.frame.IsClosed() {
+		if sbi.buffer.frame.IsClosed() {
 			return ProcessingEntry{}
 		}
-		this.buffer.frame.Wait()
+		sbi.buffer.frame.Wait()
 	}
 }
 
@@ -350,26 +350,26 @@ func NewOrderedBuffer(log logging.Context) ProcessingBuffer {
 	return NewProcessingBuffer(log, (&orderedBuffer{}).new(log))
 }
 
-func (this *orderedBuffer) new(log logging.Context) *orderedBuffer {
-	(&this.simple).new(log)
-	this.root.New(this)
-	this.valid = this.root.DLL()
-	this.last = this.valid
-	this.nextIndex = this.nextIndex.Next(-1, 0)
-	this.log = log
-	return this
+func (ob *orderedBuffer) new(log logging.Context) *orderedBuffer {
+	(&ob.simple).new(log)
+	ob.root.New(ob)
+	ob.valid = ob.root.DLL()
+	ob.last = ob.valid
+	ob.nextIndex = ob.nextIndex.Next(-1, 0)
+	ob.log = log
+	return ob
 }
 
-func (this *orderedBuffer) SetFrame(frame BufferFrame) {
-	this.simple.SetFrame(frame)
+func (ob *orderedBuffer) SetFrame(frame BufferFrame) {
+	ob.simple.SetFrame(frame)
 }
 
-func (this *orderedBuffer) Add(e ProcessingEntry) bool {
+func (ob *orderedBuffer) Add(e ProcessingEntry) bool {
 	e.Index.Validate(e.MaxIndex)
-	this.simple.Add(e)
+	ob.simple.Add(e)
 	n := data.NewDLL(&e)
 
-	c := this.root.DLL()
+	c := ob.root.DLL()
 	i := c.Next()
 	for i != nil {
 		v := i.Get().(*ProcessingEntry)
@@ -379,54 +379,52 @@ func (this *orderedBuffer) Add(e ProcessingEntry) bool {
 		c, i = i, i.Next()
 	}
 	c.Append(n)
-	this.size++
+	ob.size++
 	if n.Next() == nil {
-		this.last = n
+		ob.last = n
 	}
 
 	increased := false
-	this.log.Logger().Debug("add index to cur value", "index", e.Index, "value", e.Value, "next-index", this.nextIndex)
+	ob.log.Logger().Debug("add index to cur value", "index", e.Index, "value", e.Value, "next-index", ob.nextIndex)
 
-	next := this.valid.Next()
-	for next != nil && !next.Get().(*ProcessingEntry).Index.After(this.nextIndex) {
+	next := ob.valid.Next()
+	for next != nil && !next.Get().(*ProcessingEntry).Index.After(ob.nextIndex) {
 		n := next.Get().(*ProcessingEntry)
-		this.nextIndex = n.Index.Next(n.MaxIndex, n.MaxSub)
-		this.valid = next
+		ob.nextIndex = n.Index.Next(n.MaxIndex, n.MaxSub)
+		ob.valid = next
 		next = next.Next()
 		increased = true
-		this.log.Logger().Debug("increase to index to value", "index", n.Index, "value", n.Value)
+		ob.log.Logger().Debug("increase to index to value", "index", n.Index, "value", n.Value)
 	}
 	return increased
 }
 
-func (this *orderedBuffer) Close() {
-	this.simple.Close()
-	if this.valid != this.last {
-		this.valid = this.last
-		this.nextIndex = this.valid.Get().(*ProcessingEntry).Index
+func (ob *orderedBuffer) Close() {
+	ob.simple.Close()
+	if ob.valid != ob.last {
+		ob.valid = ob.last
+		ob.nextIndex = ob.valid.Get().(*ProcessingEntry).Index
 	}
 }
 
-func (this *orderedBuffer) Open() {
-	this.simple.Open()
+func (ob *orderedBuffer) Open() {
+	ob.simple.Open()
 }
 
-func (this *orderedBuffer) Iterator() data.Iterator {
-	// this this is another this than this in iter() in this.container
-	// still inherited to offer the unordered entries for processing
-	return (&orderedBufferIterator{}).new(this)
+func (ob *orderedBuffer) Iterator() data.Iterator {
+	return (&orderedBufferIterator{}).new(ob)
 }
 
-func (this *orderedBuffer) ProcessingIterator() ProcessingIterator {
-	return this.simple.ProcessingIterator()
+func (ob *orderedBuffer) ProcessingIterator() ProcessingIterator {
+	return ob.simple.ProcessingIterator()
 }
 
-func (this *orderedBuffer) Len() int {
-	return this.size
+func (ob *orderedBuffer) Len() int {
+	return ob.size
 }
 
-func (this *orderedBuffer) Get(i int) interface{} {
-	e := this.root.DLL()
+func (ob *orderedBuffer) Get(i int) interface{} {
+	e := ob.root.DLL()
 	for e != nil && i >= 0 {
 		e = e.Next()
 		i--
@@ -448,64 +446,64 @@ type orderedBufferIterator struct {
 
 var _ data.Iterator = (*orderedBufferIterator)(nil)
 
-func (this *orderedBufferIterator) new(buffer *orderedBuffer) *orderedBufferIterator {
-	this.buffer = buffer
-	this.current = this.buffer.root.DLL()
-	return this
+func (obi *orderedBufferIterator) new(buffer *orderedBuffer) *orderedBufferIterator {
+	obi.buffer = buffer
+	obi.current = obi.buffer.root.DLL()
+	return obi
 }
 
-func (this *orderedBufferIterator) HasNext() bool {
-	this.buffer.simple.frame.Lock()
-	defer this.buffer.simple.frame.Unlock()
+func (obi *orderedBufferIterator) HasNext() bool {
+	obi.buffer.simple.frame.Lock()
+	defer obi.buffer.simple.frame.Unlock()
 	for {
-		n := this.current.Next()
-		if n != nil && this.current != this.buffer.valid {
+		n := obi.current.Next()
+		if n != nil && obi.current != obi.buffer.valid {
 			if n.Get().(*ProcessingEntry).Valid {
 				return true
 			}
-			this.current = n // skip invalid entries
+			obi.current = n // skip invalid entries
 			continue
 		}
-		if this.buffer.simple.frame.IsClosed() {
+		if obi.buffer.simple.frame.IsClosed() {
 			return false
 		}
-		this.buffer.simple.frame.Wait()
+		obi.buffer.simple.frame.Wait()
 	}
 }
 
-func (this *orderedBufferIterator) CheckNext() bool {
-	this.buffer.simple.frame.Lock()
-	defer this.buffer.simple.frame.Unlock()
+func (obi *orderedBufferIterator) CheckNext() bool {
+	obi.buffer.simple.frame.Lock()
+	defer obi.buffer.simple.frame.Unlock()
 	for {
-		n := this.current.Next()
-		if n != nil && this.current != this.buffer.valid {
+		n := obi.current.Next()
+		if n != nil && obi.current != obi.buffer.valid {
 			if n.Get().(*ProcessingEntry).Valid {
 				return true
 			}
-			this.current = n // skip invalid entries
+			obi.current = n // skip invalid entries
 			continue
 		}
 		return false
 	}
 }
 
-func (this *orderedBufferIterator) Next() interface{} {
-	this.buffer.simple.frame.Lock()
-	defer this.buffer.simple.frame.Unlock()
+func (obi *orderedBufferIterator) Next() interface{} {
+	obi.buffer.simple.frame.Lock()
+	defer obi.buffer.simple.frame.Unlock()
 	for {
-		n := this.current.Next()
-		if n != nil && this.current != this.buffer.valid {
+		n := obi.current.Next()
+		if n != nil && obi.current != obi.buffer.valid {
 			e := n.Get().(*ProcessingEntry)
-			this.current = n // always proceed
+			obi.current = n // always proceed
 			if e.Valid {
 				return e.Value
 			}
 			continue
 		}
-		if this.buffer.simple.frame.IsClosed() {
+		if obi.buffer.simple.frame.IsClosed() {
 			return ProcessingEntry{}
 		}
-		this.buffer.simple.frame.Wait()
+		obi.buffer.simple.frame.Wait()
 	}
 }
 

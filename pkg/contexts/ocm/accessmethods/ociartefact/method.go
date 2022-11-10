@@ -23,8 +23,10 @@ import (
 )
 
 // Type is the access type of a oci registry.
-const Type = "ociArtefact"
-const TypeV1 = Type + runtime.VersionSeparator + "v1"
+const (
+	Type   = "ociArtefact"
+	TypeV1 = Type + runtime.VersionSeparator + "v1"
+)
 
 const (
 	LegacyType   = "ociRegistry"

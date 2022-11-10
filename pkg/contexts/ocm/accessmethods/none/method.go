@@ -13,8 +13,10 @@ import (
 )
 
 // Type is the access type for no blob.
-const Type = "none"
-const TypeV1 = Type + runtime.VersionSeparator + "v1"
+const (
+	Type   = "none"
+	TypeV1 = Type + runtime.VersionSeparator + "v1"
+)
 
 func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}, cpi.WithDescription("dummy resource with no access")))

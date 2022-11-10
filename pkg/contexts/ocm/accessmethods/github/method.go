@@ -31,8 +31,10 @@ import (
 )
 
 // Type is the access type of GitHub registry.
-const Type = "gitHub"
-const TypeV1 = Type + runtime.VersionSeparator + "v1"
+const (
+	Type   = "gitHub"
+	TypeV1 = Type + runtime.VersionSeparator + "v1"
+)
 
 const (
 	LegacyType   = "github"

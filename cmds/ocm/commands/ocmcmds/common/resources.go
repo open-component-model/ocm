@@ -234,8 +234,10 @@ type ContentResourceSpecificationsProvider struct {
 	options flagsets.ConfigOptions
 }
 
-var _ ResourceSpecificationsProvider = (*ContentResourceSpecificationsProvider)(nil)
-var _ ResourceSpecifications = (*ContentResourceSpecificationsProvider)(nil)
+var (
+	_ ResourceSpecificationsProvider = (*ContentResourceSpecificationsProvider)(nil)
+	_ ResourceSpecifications         = (*ContentResourceSpecificationsProvider)(nil)
+)
 
 func NewContentResourceSpecificationProvider(ctx clictx.Context, name string, adder flagsets.ConfigAdder, deftype string, types ...flagsets.ConfigOptionType) *ContentResourceSpecificationsProvider {
 	a := &ContentResourceSpecificationsProvider{
@@ -355,7 +357,8 @@ func (a *ContentResourceSpecificationsProvider) Get() (string, error) {
 		return "", err
 	}
 
-	r, err := json.Marshal(data)
+	//nolint:errchkjson // We don't care about this error.
+	r, _ := json.Marshal(data)
 	return string(r), nil
 }
 
@@ -443,12 +446,12 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 	defer obj.Close()
 
 	for _, r := range resources {
-		ictx := ictx.Section("adding %s...", r.Spec().Info())
+		isctx := ictx.Section("adding %s...", r.Spec().Info())
 		if h.RequireInputs() {
 			if r.input.Input != nil {
 				var acc ocm.AccessSpec
 				// Local Blob
-				blob, hint, berr := r.input.Input.GetBlob(ictx, common.VersionedElementKey(obj), r.path)
+				blob, hint, berr := r.input.Input.GetBlob(isctx, common.VersionedElementKey(obj), r.path)
 				if berr != nil {
 					return errors.Wrapf(berr, "cannot get resource blob for %q(%s)", r.spec.GetName(), r.source)
 				}
@@ -479,7 +482,7 @@ func determineResources(printer common.Printer, ctx clictx.Context, ictx inputs.
 	if err != nil {
 		return nil, err
 	}
-	parsed, err := templ.Execute(string(r))
+	parsed, err := templ.Execute(r)
 	if err != nil {
 		return nil, errors.Wrapf(err, "error during variable substitution")
 	}

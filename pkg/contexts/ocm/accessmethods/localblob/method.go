@@ -14,8 +14,10 @@ import (
 )
 
 // Type is the access type of a blob local to a component.
-const Type = "localBlob"
-const TypeV1 = Type + runtime.VersionSeparator + "v1"
+const (
+	Type   = "localBlob"
+	TypeV1 = Type + runtime.VersionSeparator + "v1"
+)
 
 func init() {
 	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(Type, LocalBlobV1, cpi.WithDescription(usage)))

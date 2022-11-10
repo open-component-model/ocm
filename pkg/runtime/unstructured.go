@@ -17,7 +17,7 @@ import (
 
 const ATTR_TYPE = "type"
 
-// ATTENTION: UnstructuredTypedObject CANNOT be be used as anonymous
+// ATTENTION: UnstructuredTypedObject CANNOT be used as anonymous
 // field together with the default struct marshalling with the
 // great json marshallers.
 // Anonymous inline struct fields are always marshaled by the default struct

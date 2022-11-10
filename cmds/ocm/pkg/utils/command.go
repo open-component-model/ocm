@@ -204,10 +204,8 @@ func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 					if cmd != root {
 						if root.PersistentPreRunE != nil {
 							root.PersistentPreRunE(cmd, args)
-						} else {
-							if root.PersistentPreRun != nil {
-								root.PersistentPreRun(cmd, args)
-							}
+						} else if root.PersistentPreRun != nil {
+							root.PersistentPreRun(cmd, args)
 						}
 					}
 					break

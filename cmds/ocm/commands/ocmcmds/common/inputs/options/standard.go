@@ -9,19 +9,27 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 )
 
-var HintOption = options.HintOption
-var MediaTypeOption = options.MediatypeOption
+var (
+	HintOption      = options.HintOption
+	MediaTypeOption = options.MediatypeOption
+)
 
 var PathOption = flagsets.NewStringOptionType("inputPath", "path field for input")
 
-var CompressOption = flagsets.NewBoolOptionType("inputCompress", "compress option for input")
-var ExcludeOption = flagsets.NewStringArrayOptionType("inputExcludes", "excludes (path) for inputs")
+var (
+	CompressOption = flagsets.NewBoolOptionType("inputCompress", "compress option for input")
+	ExcludeOption  = flagsets.NewStringArrayOptionType("inputExcludes", "excludes (path) for inputs")
+)
 
-var IncludeOption = flagsets.NewStringArrayOptionType("inputIncludes", "includes (path) for inputs")
-var PreserveDirOption = flagsets.NewBoolOptionType("inputPreserveDir", "preserve directory in archive for inputs")
+var (
+	IncludeOption     = flagsets.NewStringArrayOptionType("inputIncludes", "includes (path) for inputs")
+	PreserveDirOption = flagsets.NewBoolOptionType("inputPreserveDir", "preserve directory in archive for inputs")
+)
 
-var FollowSymlinksOption = flagsets.NewBoolOptionType("inputFollowSymlinks", "follow symbolic links during archive creation for inputs")
-var VariantsOption = flagsets.NewStringArrayOptionType("inputVariants", "(platform) variants for inputs")
+var (
+	FollowSymlinksOption = flagsets.NewBoolOptionType("inputFollowSymlinks", "follow symbolic links during archive creation for inputs")
+	VariantsOption       = flagsets.NewStringArrayOptionType("inputVariants", "(platform) variants for inputs")
+)
 
 var LibrariesOption = flagsets.NewStringArrayOptionType("inputLibraries", "library path for inputs")
 
