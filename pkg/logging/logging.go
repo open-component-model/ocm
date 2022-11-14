@@ -15,6 +15,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
+// REALM is used to tag all logging done by this library with the ocm tag.
+// This is also used as message context to configure settings for all
+// log output provided by this library.
+var REALM = logging.NewRealm("ocm")
+
 type StaticContext struct {
 	logging.Context
 	applied map[string]struct{}
@@ -26,7 +31,7 @@ func NewContext(ctx logging.Context) *StaticContext {
 		ctx = logging.DefaultContext()
 	}
 	return &StaticContext{
-		Context: ctx,
+		Context: ctx.WithContext(REALM),
 		applied: map[string]struct{}{},
 	}
 }

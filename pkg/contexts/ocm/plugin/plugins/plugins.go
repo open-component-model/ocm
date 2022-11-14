@@ -53,7 +53,7 @@ func New(ctx ocm.Context, path string) Set {
 func (pi *pluginsImpl) Update() {
 	err := pi.updater.Update()
 	if err != nil {
-		pi.ctx.Logger(internal.TAG).Error("config update failed", "error", err)
+		pi.ctx.Logger(internal.TAG).Error("config update failed", "error", err.Error())
 	}
 }
 

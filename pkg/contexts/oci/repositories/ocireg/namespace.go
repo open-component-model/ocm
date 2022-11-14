@@ -9,15 +9,14 @@ import (
 	"fmt"
 
 	"github.com/containerd/containerd/errdefs"
-	"github.com/opencontainers/go-digest"
-	"github.com/sirupsen/logrus"
-
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/logging"
+	"github.com/opencontainers/go-digest"
 )
 
 type Namespace struct {
@@ -79,7 +78,7 @@ func (n *NamespaceContainer) getPusher(vers string) (resolve.Pusher, error) {
 	ref := n.repo.getRef(n.namespace, vers)
 	resolver := n.resolver
 
-	logrus.Infof("pusher for %s", ref)
+	n.repo.ctx.Logger().Trace("get pusher", "ref", ref)
 
 	if ok, _ := artdesc.IsDigest(vers); !ok {
 		var err error
@@ -99,9 +98,7 @@ func (n *NamespaceContainer) push(vers string, blob cpi.BlobAccess) error {
 	if err != nil {
 		return fmt.Errorf("unable to get pusher: %w", err)
 	}
-
-	logrus.Infof("pushing %s", vers)
-
+	n.repo.ctx.Logger().Trace("pushing", "version", vers)
 	return push(dummyContext, p, blob)
 }
 
@@ -122,14 +119,18 @@ func (n *NamespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi.Descri
 }
 
 func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
-	return n.blobs.Get("").GetBlobData(digest)
+	n.repo.ctx.Logger().Info("getting blob", "digest", digest)
+	size, acc, err := n.blobs.Get("").GetBlobData(digest)
+	n.repo.ctx.Logger().Info("getting blob done", "digest", digest, "size", size, "error", logging.ErrorMessage(err))
+	return size, acc, err
+
 }
 
 func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
+	n.repo.ctx.Logger().Info("adding blob", "digest", blob.Digest())
 	if _, _, err := n.blobs.Get("").AddBlob(blob); err != nil {
 		return fmt.Errorf("unable to add blob: %w", err)
 	}
-
 	return nil
 }
 
@@ -139,9 +140,9 @@ func (n *NamespaceContainer) ListTags() ([]string, error) {
 
 func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error) {
 	ref := n.repo.getRef(n.namespace, vers)
-	logrus.Debugf("resolve %s\n", ref)
+	n.repo.ctx.Logger().Info("get artefact", "ref", ref)
 	_, desc, err := n.resolver.Resolve(context.Background(), ref)
-	logrus.Debugf("done\n")
+	n.repo.ctx.Logger().Info("done", "digest", desc.Digest, "size", desc.Size, "mimetype", desc.MediaType, "error", logging.ErrorMessage(err))
 	if err != nil {
 		if errdefs.IsNotFound(err) {
 			return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, ref, n.namespace)
@@ -163,6 +164,7 @@ func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, tags ...string) 
 	if n.repo.info.Legacy {
 		blob = artdesc.MapArtefactBlobMimeType(blob, true)
 	}
+	n.repo.ctx.Logger().Info("adding artefact", "digest", blob.Digest(), "mimetype", blob.MimeType())
 	_, _, err = n.blobs.Get(blob.MimeType()).AddBlob(blob)
 	if err != nil {
 		return nil, err

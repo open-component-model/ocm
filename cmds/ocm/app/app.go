@@ -65,6 +65,7 @@ import (
 )
 
 type CLIOptions struct {
+	Completed   bool
 	Config      string
 	Credentials []string
 	Context     clictx.Context
@@ -253,6 +254,11 @@ func (o *CLIOptions) Close() error {
 }
 
 func (o *CLIOptions) Complete() error {
+	if o.Completed {
+		return nil
+	}
+	o.Completed = true
+
 	var err error
 	if o.Verbose {
 		logrus.SetLevel(logrus.DebugLevel)

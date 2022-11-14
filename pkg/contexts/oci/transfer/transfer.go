@@ -7,6 +7,7 @@ package transfer
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/logging"
 )
 
 func TransferArtefact(art cpi.ArtefactAccess, set cpi.ArtefactSink, tags ...string) error {
@@ -17,8 +18,14 @@ func TransferArtefact(art cpi.ArtefactAccess, set cpi.ArtefactSink, tags ...stri
 	}
 }
 
-func TransferIndex(art cpi.IndexAccess, set cpi.ArtefactSink, tags ...string) error {
+func TransferIndex(art cpi.IndexAccess, set cpi.ArtefactSink, tags ...string) (err error) {
+	logging.Logger().Info("transfer OCI index", "digest", art.Digest())
+	defer func() {
+		logging.Logger().Info("transfer OCI index done", "error", logging.ErrorMessage(err))
+	}()
+
 	for _, l := range art.GetDescriptor().Manifests {
+		logging.Logger().Info("indexed manifest", "digest", "digest", l.Digest, "size", l.Size)
 		art, err := art.GetArtefact(l.Digest)
 		if err != nil {
 			return errors.Wrapf(err, "getting indexed artefact %s", l.Digest)
@@ -28,14 +35,19 @@ func TransferIndex(art cpi.IndexAccess, set cpi.ArtefactSink, tags ...string) er
 			return errors.Wrapf(err, "transferring indexed artefact %s", l.Digest)
 		}
 	}
-	_, err := set.AddArtefact(art, tags...)
+	_, err = set.AddArtefact(art, tags...)
 	if err != nil {
 		return errors.Wrapf(err, "transferring index artefact")
 	}
 	return err
 }
 
-func TransferManifest(art cpi.ManifestAccess, set cpi.ArtefactSink, tags ...string) error {
+func TransferManifest(art cpi.ManifestAccess, set cpi.ArtefactSink, tags ...string) (err error) {
+	logging.Logger().Info("transfer OCI manifest", "digest", art.Digest())
+	defer func() {
+		logging.Logger().Info("transfer OCI manifest done", "error", logging.ErrorMessage(err))
+	}()
+
 	blob, err := art.GetConfigBlob()
 	if err != nil {
 		return errors.Wrapf(err, "getting config blob")
@@ -44,7 +56,8 @@ func TransferManifest(art cpi.ManifestAccess, set cpi.ArtefactSink, tags ...stri
 	if err != nil {
 		return errors.Wrapf(err, "transferring config blob")
 	}
-	for _, l := range art.GetDescriptor().Layers {
+	for i, l := range art.GetDescriptor().Layers {
+		logging.Logger().Info("layer", "digest", "digest", l.Digest, "size", l.Size, "index", i)
 		blob, err = art.GetBlob(l.Digest)
 		if err != nil {
 			return errors.Wrapf(err, "getting layer blob %s", l.Digest)

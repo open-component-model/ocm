@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -212,7 +213,9 @@ func (m *accessMethod) getBlob() (artefactset.ArtefactBlob, error) {
 	if err != nil {
 		return nil, err
 	}
+	m.comp.GetContext().Logger().Info("synthesize artefact blob", "ref", m.spec.ImageReference)
 	m.blob, err = artefactset.SynthesizeArtefactBlob(ns, ref.Version())
+	m.comp.GetContext().Logger().Info("synthesize artefact blob done", "ref", m.spec.ImageReference, "error", logging.ErrorMessage(err))
 	if err != nil {
 		return nil, err
 	}
