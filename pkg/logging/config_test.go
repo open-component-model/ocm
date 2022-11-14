@@ -37,9 +37,9 @@ var _ = Describe("logging configuration", func() {
 	It("just logs with defaults", func() {
 		LogTest(ctx)
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[3] info
-V[2] warn
-ERROR <nil> error
+V[3] ocm info
+V[2] ocm warn
+ERROR <nil> ocm error
 `))
 	})
 	It("just logs with config", func() {
@@ -53,10 +53,10 @@ ERROR <nil> error
 		Expect(local.Configure(cfg)).To(Succeed())
 		LogTest(ctx)
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[4] debug
-V[3] info
-V[2] warn
-ERROR <nil> error
+V[4] ocm debug
+V[3] ocm info
+V[2] ocm warn
+ERROR <nil> ocm error
 `))
 	})
 

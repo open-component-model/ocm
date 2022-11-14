@@ -7,8 +7,6 @@ package describe
 import (
 	"fmt"
 
-	common2 "github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -20,9 +18,11 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	common2 "github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/out"
 )
 

@@ -104,7 +104,7 @@ func (pi *pluginsImpl) RegisterExtensions() error {
 			if m.Version != "" {
 				name = name + runtime.VersionSeparator + m.Version
 			}
-			pi.ctx.Logger(internal.TAG).Info("registering access method",
+			pi.ctx.Logger(internal.TAG).Debug("registering access method",
 				"plugin", p.Name(),
 				"type", name)
 			pi.ctx.AccessMethods().Register(name, access.NewType(name, p, &m))
@@ -117,7 +117,7 @@ func (pi *pluginsImpl) RegisterExtensions() error {
 					if err != nil {
 						pi.ctx.Logger(internal.TAG).Error("cannot create blob handler fpr plugin", "plugin", p.Name(), "handler", u.Name)
 					} else {
-						pi.ctx.Logger(internal.TAG).Info("registering repository blob handler",
+						pi.ctx.Logger(internal.TAG).Debug("registering repository blob handler",
 							"context", c.ContextType+":"+c.RepositoryType,
 							"plugin", p.Name(),
 							"handler", u.Name)

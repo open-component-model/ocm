@@ -95,11 +95,11 @@ func pushData(ctx context.Context, p resolve.Pusher, desc artdesc.Descriptor, da
 		desc.Size = -1
 	}
 
-	logging.Logger().Info("*** push blob", "mediatype", desc.MediaType, "digest", desc.Digest, "key", key)
+	logging.Logger().Debug("*** push blob", "mediatype", desc.MediaType, "digest", desc.Digest, "key", key)
 	req, err := p.Push(ctx, desc, data)
 	if err != nil {
 		if errdefs.IsAlreadyExists(err) {
-			logging.Logger().Info("blob already exists", "mediatype", desc.MediaType, "digest", desc.Digest)
+			logging.Logger().Debug("blob already exists", "mediatype", desc.MediaType, "digest", desc.Digest)
 
 			return nil
 		}

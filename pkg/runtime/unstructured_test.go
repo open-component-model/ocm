@@ -13,6 +13,7 @@ import (
 
 	"github.com/mandelsoft/logging"
 
+	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -46,7 +47,7 @@ func InOut(log logging.Logger, in runtime.TypedObject, encoding runtime.Encoding
 
 var _ = Describe("*** unstructured", func() {
 	result := "{\"type\":\"test\"}"
-	log := logging.DefaultContext().Logger()
+	log := ocmlog.Logger()
 
 	It("unmarshal simple unstructured", func() {
 		un := runtime.NewEmptyUnstructured("test")

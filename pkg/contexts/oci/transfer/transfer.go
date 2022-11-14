@@ -19,13 +19,13 @@ func TransferArtefact(art cpi.ArtefactAccess, set cpi.ArtefactSink, tags ...stri
 }
 
 func TransferIndex(art cpi.IndexAccess, set cpi.ArtefactSink, tags ...string) (err error) {
-	logging.Logger().Info("transfer OCI index", "digest", art.Digest())
+	logging.Logger().Debug("transfer OCI index", "digest", art.Digest())
 	defer func() {
-		logging.Logger().Info("transfer OCI index done", "error", logging.ErrorMessage(err))
+		logging.Logger().Debug("transfer OCI index done", "error", logging.ErrorMessage(err))
 	}()
 
 	for _, l := range art.GetDescriptor().Manifests {
-		logging.Logger().Info("indexed manifest", "digest", "digest", l.Digest, "size", l.Size)
+		logging.Logger().Debug("indexed manifest", "digest", "digest", l.Digest, "size", l.Size)
 		art, err := art.GetArtefact(l.Digest)
 		if err != nil {
 			return errors.Wrapf(err, "getting indexed artefact %s", l.Digest)
@@ -43,9 +43,9 @@ func TransferIndex(art cpi.IndexAccess, set cpi.ArtefactSink, tags ...string) (e
 }
 
 func TransferManifest(art cpi.ManifestAccess, set cpi.ArtefactSink, tags ...string) (err error) {
-	logging.Logger().Info("transfer OCI manifest", "digest", art.Digest())
+	logging.Logger().Debug("transfer OCI manifest", "digest", art.Digest())
 	defer func() {
-		logging.Logger().Info("transfer OCI manifest done", "error", logging.ErrorMessage(err))
+		logging.Logger().Debug("transfer OCI manifest done", "error", logging.ErrorMessage(err))
 	}()
 
 	blob, err := art.GetConfigBlob()
@@ -57,7 +57,7 @@ func TransferManifest(art cpi.ManifestAccess, set cpi.ArtefactSink, tags ...stri
 		return errors.Wrapf(err, "transferring config blob")
 	}
 	for i, l := range art.GetDescriptor().Layers {
-		logging.Logger().Info("layer", "digest", "digest", l.Digest, "size", l.Size, "index", i)
+		logging.Logger().Debug("layer", "digest", "digest", l.Digest, "size", l.Size, "index", i)
 		blob, err = art.GetBlob(l.Digest)
 		if err != nil {
 			return errors.Wrapf(err, "getting layer blob %s", l.Digest)

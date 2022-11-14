@@ -28,6 +28,7 @@ var _ = Describe("logging configuration", func() {
 
 	BeforeEach(func() {
 		logging.SetDefaultContext(logging.NewDefault())
+		log.SetContext(nil)
 		ctx = datacontext.New(nil)
 		cfg = config.WithSharedAttributes(ctx).New()
 
@@ -42,9 +43,9 @@ var _ = Describe("logging configuration", func() {
 		LogTest(ctx)
 
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[3] info
-V[2] warn
-ERROR <nil> error
+V[3] ocm info
+V[2] ocm warn
+ERROR <nil> ocm error
 `))
 	})
 
@@ -53,10 +54,10 @@ ERROR <nil> error
 		LogTest(ctx)
 
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[4] debug
-V[3] info
-V[2] warn
-ERROR <nil> error
+V[4] ocm debug
+V[3] ocm info
+V[2] ocm warn
+ERROR <nil> ocm error
 `))
 	})
 
@@ -65,10 +66,10 @@ ERROR <nil> error
 		LogTest(cfg)
 
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[4] debug
-V[3] info
-V[2] warn
-ERROR <nil> error
+V[4] ocm debug
+V[3] ocm info
+V[2] ocm warn
+ERROR <nil> ocm error
 `))
 	})
 
@@ -87,14 +88,14 @@ settings:
 		LogTest(cfg, "cfg")
 
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[4] debug
-V[3] info
-V[2] warn
-ERROR <nil> error
-V[4] cfgdebug
-V[3] cfginfo
-V[2] cfgwarn
-ERROR <nil> cfgerror
+V[4] ocm debug
+V[3] ocm info
+V[2] ocm warn
+ERROR <nil> ocm error
+V[4] ocm cfgdebug
+V[3] ocm cfginfo
+V[2] ocm cfgwarn
+ERROR <nil> ocm cfgerror
 `))
 	})
 
@@ -113,14 +114,14 @@ settings:
 		LogTest(cfg, "cfg")
 
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[4] debug
-V[3] info
-V[2] warn
-ERROR <nil> error
-V[4] cfgdebug
-V[3] cfginfo
-V[2] cfgwarn
-ERROR <nil> cfgerror
+V[4] ocm debug
+V[3] ocm info
+V[2] ocm warn
+ERROR <nil> ocm error
+V[4] ocm cfgdebug
+V[3] ocm cfginfo
+V[2] ocm cfgwarn
+ERROR <nil> ocm cfgerror
 `))
 	})
 
@@ -140,13 +141,13 @@ settings:
 		LogTest(cfg, "cfg")
 
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[3] info
-V[2] warn
-ERROR <nil> error
-V[4] cfgdebug
-V[3] cfginfo
-V[2] cfgwarn
-ERROR <nil> cfgerror
+V[3] ocm info
+V[2] ocm warn
+ERROR <nil> ocm error
+V[4] ocm cfgdebug
+V[3] ocm cfginfo
+V[2] ocm cfgwarn
+ERROR <nil> ocm cfgerror
 `))
 	})
 
@@ -193,10 +194,10 @@ settings:
 			LogTest(ctx)
 
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[4] debug
-V[3] info
-V[2] warn
-ERROR <nil> error
+V[4] ocm debug
+V[3] ocm info
+V[2] ocm warn
+ERROR <nil> ocm error
 `))
 		})
 
@@ -211,9 +212,9 @@ ERROR <nil> error
 			LogTest(ctx)
 
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[3] info
-V[2] warn
-ERROR <nil> error
+V[3] ocm info
+V[2] ocm warn
+ERROR <nil> ocm error
 `))
 		})
 		It("re-applies config with extra id", func() {
@@ -227,10 +228,10 @@ ERROR <nil> error
 			LogTest(ctx)
 
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-V[4] debug
-V[3] info
-V[2] warn
-ERROR <nil> error
+V[4] ocm debug
+V[3] ocm info
+V[2] ocm warn
+ERROR <nil> ocm error
 `))
 		})
 	})
