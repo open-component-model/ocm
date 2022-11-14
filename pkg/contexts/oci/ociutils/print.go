@@ -7,113 +7,121 @@ package ociutils
 import (
 	"archive/tar"
 	"errors"
-	"fmt"
 	"io"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-func PrintArtefact(art cpi.ArtefactAccess) string {
+func PrintArtefact(pr common.Printer, art cpi.ArtefactAccess, listFiles bool) {
 	if art.IsManifest() {
-		return fmt.Sprintf("type: %s\n", artdesc.MediaTypeImageManifest) + PrintManifest(art.ManifestAccess())
+		pr.Printf("type: %s\n", artdesc.MediaTypeImageManifest)
+		PrintManifest(pr, art.ManifestAccess(), listFiles)
+		return
 	}
 	if art.IsIndex() {
-		return fmt.Sprintf("type: %s\n", artdesc.MediaTypeImageIndex+PrintIndex(art.IndexAccess()))
+		pr.Printf("type: %s\n", artdesc.MediaTypeImageIndex)
+		PrintIndex(pr, art.IndexAccess(), listFiles)
+		return
 	}
-	return "unspecific"
+	pr.Printf("unspecific\n")
 }
 
-func PrintManifest(m cpi.ManifestAccess) string {
-	s := ""
+func PrintManifest(pr common.Printer, m cpi.ManifestAccess, listFiles bool) {
 	data, err := accessio.BlobData(m.Blob())
 	if err != nil {
-		s += fmt.Sprintf("descriptor: invalid: %s\n", err)
+		pr.Printf("descriptor: invalid: %s\n", err)
 	} else {
-		s += fmt.Sprintf("descriptor: %s\n", string(data))
+		pr.Printf("descriptor: %s\n", string(data))
 	}
 	man := m.GetDescriptor()
-	s += "config:\n"
-	s += fmt.Sprintf("  type:        %s\n", man.Config.MediaType)
-	s += fmt.Sprintf("  digest:      %s\n", man.Config.Digest)
-	s += fmt.Sprintf("  size:        %d\n", man.Config.Size)
+	pr.Printf("config:\n")
+	pr.Printf("  type:        %s\n", man.Config.MediaType)
+	pr.Printf("  digest:      %s\n", man.Config.Digest)
+	pr.Printf("  size:        %d\n", man.Config.Size)
 
 	config, err := accessio.BlobData(m.GetBlob(man.Config.Digest))
 	if err != nil {
-		s += "  error getting config blob: " + err.Error() + "\n"
+		pr.Printf("  error getting config blob: %s\n", err.Error())
 	} else {
-		s += fmt.Sprintf("  config json: %s\n", string(config))
+		pr.Printf("  config json: %s\n", string(config))
 	}
 	h := getHandler(man.Config.MediaType)
 
 	if h != nil {
-		s += utils.IndentLines(h.Description(m, config), "  ")
+		h.Description(pr.AddGap("  "), m, config)
 	}
-	s += "layers:\n"
+	pr.Printf("layers:\n")
 	for _, l := range man.Layers {
-		s += fmt.Sprintf("- type:   %s\n", l.MediaType)
-		s += fmt.Sprintf("  digest: %s\n", l.Digest)
-		s += fmt.Sprintf("  size:   %d\n", l.Size)
+		pr.Printf("- type:   %s\n", l.MediaType)
+		pr.Printf("  digest: %s\n", l.Digest)
+		pr.Printf("  size:   %d\n", l.Size)
 		blob, err := m.GetBlob(l.Digest)
 		if err != nil {
-			s += "  error getting blob: " + err.Error() + "\n"
+			pr.Printf("  error getting blob: %s\n", err.Error())
 		}
-		s += utils.IndentLines(PrintLayer(blob), "  ")
+		PrintLayer(pr.AddGap("  "), blob, listFiles)
 	}
-	return s
 }
 
-func PrintLayer(blob accessio.BlobAccess) string {
+func PrintLayer(pr common.Printer, blob accessio.BlobAccess, listFiles bool) {
 	reader, err := blob.Reader()
 	if err != nil {
-		return "cannot read blob: " + err.Error()
+		pr.Printf("cannot read blob: %s\n", err.Error())
+		return
 	}
 	defer reader.Close()
 	reader, _, err = compression.AutoDecompress(reader)
 	if err != nil {
-		return "cannot decompress blob: " + err.Error()
+		pr.Printf("cannot decompress blob: %s\n", err.Error())
+		return
 	}
 	tr := tar.NewReader(reader)
-	s := ""
+	first := true
 	for {
 		header, err := tr.Next()
 		if err != nil {
 			if errors.Is(err, io.EOF) {
-				return s
+				return
 			}
-			if s == "" {
-				return "no tar"
+			if first {
+				pr.Printf("no tar\n")
+				return
 			}
-			return s + fmt.Sprintf("tar error: %s", err)
+			pr.Printf("tar error: %s\n", err)
+			return
 		}
-		if s == "" {
-			s = "tar filesystem:\n"
+		if !listFiles {
+			return
 		}
+		if first {
+			pr.Printf("tar filesystem:\n")
+		}
+		first = false
 
 		switch header.Typeflag {
 		case tar.TypeDir:
-			s += fmt.Sprintf("  dir:  %s\n", header.Name)
+			pr.Printf("  dir:  %s\n", header.Name)
 		case tar.TypeReg:
-			s += fmt.Sprintf("  file: %s\n", header.Name)
+			pr.Printf("  file: %s\n", header.Name)
 		}
 	}
 }
 
-func PrintIndex(i cpi.IndexAccess) string {
-	s := "manifests:\n"
+func PrintIndex(pr common.Printer, i cpi.IndexAccess, listFiles bool) {
+	pr.Printf("manifests:\n")
 	for _, l := range i.GetDescriptor().Manifests {
-		s += fmt.Sprintf("- type:   %s\n", l.MediaType)
-		s += fmt.Sprintf("  digest: %s\n", l.Digest)
+		pr.Printf("- type:   %s\n", l.MediaType)
+		pr.Printf("  digest: %s\n", l.Digest)
 		a, err := i.GetArtefact(l.Digest)
 		if err != nil {
-			s += fmt.Sprintf("  error: %s\n", err)
+			pr.Printf("  error: %s\n", err)
 		} else {
-			s += "  resolved artefact:\n"
-			s += utils.IndentLines(PrintArtefact(a), "    ")
+			pr.Printf("  resolved artefact:\n")
+			PrintArtefact(pr.AddGap("    "), a, listFiles)
 		}
 	}
-	return s
 }

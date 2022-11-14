@@ -7,6 +7,7 @@ package genericocireg
 import (
 	"encoding/json"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils"
@@ -47,25 +48,28 @@ func (h handler) Info(m cpi.ManifestAccess, config []byte) interface{} {
 	return info
 }
 
-func (h handler) Description(m cpi.ManifestAccess, config []byte) string {
-	s := "component version:\n"
+func (h handler) Description(pr common.Printer, m cpi.ManifestAccess, config []byte) {
+	pr.Printf("component version:\n")
 	acc := NewStateAccess(m)
 	data, err := accessio.BlobData(acc.Get())
 	if err != nil {
-		return s + "  cannot read component descriptor: " + err.Error()
+		pr.Printf("  cannot read component descriptor: %s\n", err.Error())
+		return
 	}
-	s += "  descriptor:\n"
+	pr.Printf("  descriptor:\n")
 	var raw interface{}
 	err = runtime.DefaultYAMLEncoding.Unmarshal(data, &raw)
 	if err != nil {
-		s += "    " + string(data)
-		return s + "  cannot get unmarshal component descriptor: " + err.Error()
+		pr.Printf("    data: %s\n", string(data))
+		pr.Printf("  cannot get unmarshal component descriptor: %s\n", err.Error())
+		return
 	}
 
 	form, err := json.MarshalIndent(raw, "  ", "    ")
 	if err != nil {
-		s += "    " + string(data)
-		return s + "  cannot get marshal component descriptor: " + err.Error()
+		pr.Printf("    data: %s\n", string(data))
+		pr.Printf("  cannot get marshal component descriptor: %s\n", err.Error())
+		return
 	}
-	return s + string(form)
+	pr.Printf("%s\n", string(form))
 }

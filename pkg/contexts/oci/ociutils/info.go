@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/opencontainers/go-digest"
 	"sigs.k8s.io/yaml"
 
@@ -76,7 +77,9 @@ func GetManifestInfo(m cpi.ManifestAccess, layerFiles bool) *ArtefactInfo {
 	h := getHandler(man.Config.MediaType)
 
 	if h != nil {
-		cfg.Info = h.Description(m, config)
+		pr, buf := common.NewBufferedPrinter()
+		h.Description(pr, m, config)
+		cfg.Info = buf.String()
 	}
 	for _, l := range man.Layers {
 		blobinfo := &BlobInfo{

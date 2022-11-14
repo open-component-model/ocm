@@ -7,11 +7,12 @@ package ociutils
 import (
 	"sync"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 )
 
 type InfoHandler interface {
-	Description(m cpi.ManifestAccess, config []byte) string
+	Description(pr common.Printer, m cpi.ManifestAccess, config []byte)
 	Info(m cpi.ManifestAccess, config []byte) interface{}
 }
 
