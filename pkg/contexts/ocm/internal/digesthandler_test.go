@@ -104,6 +104,10 @@ func (a AccessMethod) GetKind() string {
 	return "demo"
 }
 
+func (a AccessMethod) AccessSpec() internal.AccessSpec {
+	return nil
+}
+
 func (a AccessMethod) Get() ([]byte, error) {
 	return nil, nil
 }

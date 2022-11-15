@@ -165,3 +165,7 @@ func getCreds(a *AccessSpec, cctx credentials.Context) (credentials.Credentials,
 func (m *accessMethod) GetKind() string {
 	return Type
 }
+
+func (m *accessMethod) AccessSpec() cpi.AccessSpec {
+	return m.spec
+}

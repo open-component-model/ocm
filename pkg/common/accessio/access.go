@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"sync"
+	"sync/atomic"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -167,12 +168,19 @@ func (a *bytesAccess) Origin() string {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type blobAccess struct {
+// AnnotatedBlobAccess provides access to the original underlying data source.
+type AnnotatedBlobAccess[T DataAccess] interface {
+	BlobAccess
+	Source() T
+}
+
+type blobAccess[T DataAccess] struct {
 	lock     sync.RWMutex
 	digest   digest.Digest
 	size     int64
 	mimeType string
-	access   DataAccess
+	closed   atomic.Bool
+	access   T
 }
 
 const (
@@ -180,8 +188,8 @@ const (
 	BLOB_UNKNOWN_DIGEST = digest.Digest("")
 )
 
-func BlobAccessForDataAccess(digest digest.Digest, size int64, mimeType string, access DataAccess) BlobAccess {
-	return &blobAccess{
+func BlobAccessForDataAccess[T DataAccess](digest digest.Digest, size int64, mimeType string, access T) AnnotatedBlobAccess[T] {
+	return &blobAccess[T]{
 		digest:   digest,
 		size:     size,
 		mimeType: mimeType,
@@ -194,7 +202,7 @@ func BlobAccessForString(mimeType string, data string) BlobAccess {
 }
 
 func BlobAccessForData(mimeType string, data []byte) BlobAccess {
-	return &blobAccess{
+	return &blobAccess[DataAccess]{
 		digest:   digest.FromBytes(data),
 		size:     int64(len(data)),
 		mimeType: mimeType,
@@ -202,36 +210,46 @@ func BlobAccessForData(mimeType string, data []byte) BlobAccess {
 	}
 }
 
-func (b *blobAccess) Close() error {
+func (b *blobAccess[T]) Close() error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
-	if b.access != nil {
+	if !b.closed.Load() {
 		tmp := b.access
-		b.access = nil
+		b.closed.Store(true)
 		return tmp.Close()
 	}
 	return ErrClosed
 }
 
-func (b *blobAccess) Get() ([]byte, error) {
+func (b *blobAccess[T]) Get() ([]byte, error) {
+	if b.closed.Load() {
+		return nil, ErrClosed
+	}
 	return b.access.Get()
 }
 
-func (b *blobAccess) Reader() (io.ReadCloser, error) {
+func (b *blobAccess[T]) Reader() (io.ReadCloser, error) {
+	if b.closed.Load() {
+		return nil, ErrClosed
+	}
 	return b.access.Reader()
 }
 
-func (b *blobAccess) MimeType() string {
+func (b *blobAccess[T]) Source() T {
+	return b.access
+}
+
+func (b *blobAccess[T]) MimeType() string {
 	return b.mimeType
 }
 
-func (b *blobAccess) DigestKnown() bool {
+func (b *blobAccess[T]) DigestKnown() bool {
 	b.lock.RLock()
 	defer b.lock.RUnlock()
 	return b.digest != ""
 }
 
-func (b *blobAccess) Digest() digest.Digest {
+func (b *blobAccess[T]) Digest() digest.Digest {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 	if b.digest == "" {
@@ -240,7 +258,7 @@ func (b *blobAccess) Digest() digest.Digest {
 	return b.digest
 }
 
-func (b *blobAccess) Size() int64 {
+func (b *blobAccess[T]) Size() int64 {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 	if b.size < 0 {
@@ -249,7 +267,7 @@ func (b *blobAccess) Size() int64 {
 	return b.size
 }
 
-func (b *blobAccess) update() error {
+func (b *blobAccess[T]) update() error {
 	reader, err := b.Reader()
 	if err != nil {
 		return err

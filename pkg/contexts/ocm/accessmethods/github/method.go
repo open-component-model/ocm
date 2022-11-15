@@ -254,6 +254,10 @@ func (m *accessMethod) MimeType() string {
 	return mime.MIME_TGZ
 }
 
+func (m *accessMethod) AccessSpec() cpi.AccessSpec {
+	return m.spec
+}
+
 func (m *accessMethod) Get() ([]byte, error) {
 	if err := m.setup(); err != nil {
 		return nil, err

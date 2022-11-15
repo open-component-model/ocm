@@ -34,6 +34,10 @@ func (m *localOCIBlobAccessMethod) GetKind() string {
 	return localociblob.Type
 }
 
+func (m *localOCIBlobAccessMethod) AccessSpec() cpi.AccessSpec {
+	return m.spec
+}
+
 func (m *localOCIBlobAccessMethod) Close() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()

@@ -21,6 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 // Type is the access type of a oci registry.
@@ -103,11 +104,18 @@ func (a *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMetho
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type AccessMethod = *accessMethod
+
 type accessMethod struct {
 	lock sync.Mutex
-	blob artefactset.ArtefactBlob
 	comp cpi.ComponentVersionAccess
 	spec *AccessSpec
+
+	finalizer utils.Finalizer
+	err       error
+	art       oci.ArtefactAccess
+	ref       *oci.RefSpec
+	blob      artefactset.ArtefactBlob
 }
 
 var (
@@ -126,15 +134,16 @@ func (m *accessMethod) GetKind() string {
 	return Type
 }
 
+func (m *accessMethod) AccessSpec() cpi.AccessSpec {
+	return m.spec
+}
+
 func (m *accessMethod) Close() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	if m.blob != nil {
-		tmp := m.blob
-		m.blob = nil
-		return tmp.Close()
-	}
-	return nil
+
+	m.blob = nil
+	return m.finalizer.Finalize()
 }
 
 func (m *accessMethod) eval() (oci.Repository, *oci.RefSpec, error) {
@@ -151,21 +160,38 @@ func (m *accessMethod) eval() (oci.Repository, *oci.RefSpec, error) {
 	return repo, &ref, err
 }
 
-func (m *accessMethod) getArtefact() (oci.ArtefactAccess, error) {
+func (m *accessMethod) GetArtefact(finalizer *utils.Finalizer) (oci.ArtefactAccess, *oci.RefSpec, error) {
 	repo, ref, err := m.eval()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return repo.LookupArtefact(ref.Repository, ref.Version())
+	finalizer.Close(repo)
+	art, err := repo.LookupArtefact(ref.Repository, ref.Version())
+	return art, ref, err
+}
+
+func (m *accessMethod) getArtefact() (oci.ArtefactAccess, *oci.RefSpec, error) {
+	if m.art == nil && m.err == nil {
+		m.art, m.ref, m.err = m.GetArtefact(&m.finalizer)
+		if m.err == nil {
+			m.finalizer.Close(m.art)
+		}
+	}
+	return m.art, m.ref, m.err
 }
 
 func (m *accessMethod) Digest() digest.Digest {
-	art, err := m.getArtefact()
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	art, _, err := m.getArtefact()
 	if err == nil {
+		m.art = art
 		blob, err := art.Blob()
 		if err == nil {
 			return blob.Digest()
 		}
+		m.finalizer.Close(blob)
 	}
 	return ""
 }
@@ -192,7 +218,10 @@ func (m *accessMethod) Reader() (io.ReadCloser, error) {
 }
 
 func (m *accessMethod) MimeType() string {
-	art, err := m.getArtefact()
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	art, _, err := m.getArtefact()
 	if err != nil {
 		return ""
 	}
@@ -202,19 +231,17 @@ func (m *accessMethod) MimeType() string {
 func (m *accessMethod) getBlob() (artefactset.ArtefactBlob, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
+
 	if m.blob != nil {
 		return m.blob, nil
 	}
-	repo, ref, err := m.eval()
-	if err != nil {
-		return nil, err
-	}
-	ns, err := repo.LookupNamespace(ref.Repository)
+
+	art, ref, err := m.getArtefact()
 	if err != nil {
 		return nil, err
 	}
 	m.comp.GetContext().Logger().Info("synthesize artefact blob", "ref", m.spec.ImageReference)
-	m.blob, err = artefactset.SynthesizeArtefactBlob(ns, ref.Version())
+	m.blob, err = artefactset.SynthesizeArtefactBlobForArtefact(art, ref.Version())
 	m.comp.GetContext().Logger().Info("synthesize artefact blob done", "ref", m.spec.ImageReference, "error", logging.ErrorMessage(err))
 	if err != nil {
 		return nil, err

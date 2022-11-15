@@ -40,6 +40,10 @@ func (m *localBlobAccessMethod) GetKind() string {
 	return localblob.Type
 }
 
+func (m *localBlobAccessMethod) AccessSpec() cpi.AccessSpec {
+	return m.spec
+}
+
 func (m *localBlobAccessMethod) Close() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()

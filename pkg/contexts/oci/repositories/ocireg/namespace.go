@@ -127,10 +127,13 @@ func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (int64, cpi.DataA
 }
 
 func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
-	n.repo.ctx.Logger().Debug("adding blob", "digest", blob.Digest())
+	log := n.repo.ctx.Logger()
+	log.Debug("adding blob", "digest", blob.Digest())
 	if _, _, err := n.blobs.Get("").AddBlob(blob); err != nil {
+		log.Debug("adding blob failed", "digest", blob.Digest(), "error", err.Error())
 		return fmt.Errorf("unable to add blob: %w", err)
 	}
+	log.Debug("adding blob done", "digest", blob.Digest())
 	return nil
 }
 

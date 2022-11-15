@@ -30,6 +30,10 @@ func newLocalFilesystemBlobAccessMethod(a *localblob.AccessSpec, base support.Co
 	}, nil
 }
 
+func (m *localFilesystemBlobAccessMethod) AccessSpec() cpi.AccessSpec {
+	return m.spec
+}
+
 func (m *localFilesystemBlobAccessMethod) GetKind() string {
 	return localblob.Type
 }

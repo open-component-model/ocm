@@ -189,5 +189,10 @@ func (p *pluginImpl) Download(name string, r io.Reader, artType, mimeType, targe
 }
 
 func (p *pluginImpl) Exec(r io.Reader, w io.Writer, args ...string) ([]byte, error) {
+	if len(p.config) == 0 {
+		p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", args)
+	} else {
+		p.ctx.Logger(TAG).Debug("execute plugin action", "path", p.Path(), "args", args, "config", p.config)
+	}
 	return cache.Exec(p.Path(), p.config, r, w, args...)
 }
