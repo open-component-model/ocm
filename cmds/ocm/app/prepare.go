@@ -27,8 +27,12 @@ func Prepare(ctx clictx.Context, args []string) (*CLIOptions, []string, error) {
 
 	flags := []string{}
 	inFlag := false
+	help := false
 	for i, arg := range args {
 		switch {
+		case arg == "--help" || arg == "-h":
+			help = true
+			continue
 		// A long flag with a space separated value
 		case strings.HasPrefix(arg, "--") && !strings.Contains(arg, "="):
 			// TODO: this isn't quite right, we should really check ahead for 'true' or 'false'
@@ -56,6 +60,9 @@ func Prepare(ctx clictx.Context, args []string) (*CLIOptions, []string, error) {
 	err := flagset.Parse(flags)
 	if err != nil {
 		return nil, nil, err
+	}
+	if help {
+		args = append([]string{"--help"}, args...)
 	}
 	return opts, args, opts.Complete()
 }
