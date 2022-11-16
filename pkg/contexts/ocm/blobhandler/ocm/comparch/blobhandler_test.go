@@ -11,7 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -29,8 +28,6 @@ import (
 const ARCHIVE = "archive"
 
 var _ = Describe("blobhandler", func() {
-	log := logging.DefaultContext().Logger()
-
 	Context("regular", func() {
 		var b *builder.Builder
 
@@ -56,7 +53,6 @@ var _ = Describe("blobhandler", func() {
 
 			data, err = json.Marshal(cd.Resources[0].Access)
 			Expect(err).To(Succeed())
-			log.Info("marshal result", "data", string(data))
 			found := &localblob.AccessSpec{}
 			Expect(json.Unmarshal(data, found)).To(Succeed())
 
@@ -91,7 +87,6 @@ var _ = Describe("blobhandler", func() {
 
 			data, err = json.Marshal(cd.Resources[0].Access)
 			Expect(err).To(Succeed())
-			log.Info("marshal result", "data", string(data))
 			found := &localfsblob.AccessSpec{}
 			Expect(json.Unmarshal(data, found)).To(Succeed())
 

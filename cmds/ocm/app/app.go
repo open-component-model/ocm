@@ -65,6 +65,7 @@ import (
 )
 
 type CLIOptions struct {
+	Completed   bool
 	Config      string
 	Credentials []string
 	Context     clictx.Context
@@ -253,6 +254,11 @@ func (o *CLIOptions) Close() error {
 }
 
 func (o *CLIOptions) Complete() error {
+	if o.Completed {
+		return nil
+	}
+	o.Completed = true
+
 	var err error
 	if o.Verbose {
 		logrus.SetLevel(logrus.DebugLevel)
@@ -285,7 +291,7 @@ func (o *CLIOptions) Complete() error {
 			return errors.Wrapf(err, "cannot read logging config %q", o.LogFile)
 		}
 		if err = config.ConfigureWithData(ocmlog.Context(), cfg); err != nil {
-			return errors.Wrapf(err, "cinvalid logging config: %q", o.LogFile)
+			return errors.Wrapf(err, "invalid logging config: %q", o.LogFile)
 		}
 	}
 

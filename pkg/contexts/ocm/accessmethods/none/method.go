@@ -63,6 +63,10 @@ func (m *accessMethod) GetKind() string {
 	return Type
 }
 
+func (m *accessMethod) AccessSpec() cpi.AccessSpec {
+	return m.spec
+}
+
 func (m *accessMethod) Close() error {
 	return nil
 }

@@ -13,10 +13,16 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	ocicpi "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
+
+type OCIBasedRepository interface {
+	cpi.Repository
+	OCIRepository() ocicpi.Repository
+}
 
 type Repository struct {
 	view accessio.CloserView
@@ -39,7 +45,7 @@ type RepositoryImpl struct {
 	ocirepo oci.Repository
 }
 
-var _ cpi.Repository = (*Repository)(nil)
+var _ OCIBasedRepository = (*Repository)(nil)
 
 func NewRepository(ctx cpi.Context, meta *ComponentRepositoryMeta, ocirepo oci.Repository) (cpi.Repository, error) {
 	repo := &RepositoryImpl{
@@ -65,6 +71,10 @@ func (r *RepositoryImpl) Close() error {
 
 func (r *RepositoryImpl) GetContext() cpi.Context {
 	return r.ctx
+}
+
+func (r *RepositoryImpl) OCIRepository() ocicpi.Repository {
+	return r.ocirepo
 }
 
 func (r *RepositoryImpl) GetSpecification() cpi.RepositorySpec {

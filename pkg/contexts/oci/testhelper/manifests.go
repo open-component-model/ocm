@@ -17,6 +17,7 @@ import (
 const (
 	OCINAMESPACE = "ocm/value"
 	OCIVERSION   = "v2.0"
+	OCILAYER     = "manifestlayer"
 )
 
 func OCIManifest1(env *builder.Builder) *artdesc.Descriptor {
@@ -28,7 +29,7 @@ func OCIManifest1(env *builder.Builder) *artdesc.Descriptor {
 				env.BlobStringData(mime.MIME_JSON, "{}")
 			})
 			ldesc = env.Layer(func() {
-				env.BlobStringData(mime.MIME_TEXT, "manifestlayer")
+				env.BlobStringData(mime.MIME_TEXT, OCILAYER)
 			})
 		})
 	})
@@ -48,7 +49,10 @@ func HashManifest1(fmt string) string {
 ////////////////////////////////////////////////////////////////////////////////
 // otherlayer
 
-const OCINAMESPACE2 = "ocm/ref"
+const (
+	OCINAMESPACE2 = "ocm/ref"
+	OCILAYER2     = "otherlayer"
+)
 
 func OCIManifest2(env *builder.Builder) *artdesc.Descriptor {
 	var ldesc *artdesc.Descriptor
@@ -59,7 +63,7 @@ func OCIManifest2(env *builder.Builder) *artdesc.Descriptor {
 				env.BlobStringData(mime.MIME_JSON, "{}")
 			})
 			ldesc = env.Layer(func() {
-				env.BlobStringData(mime.MIME_TEXT, "otherlayer")
+				env.BlobStringData(mime.MIME_TEXT, OCILAYER2)
 			})
 		})
 	})

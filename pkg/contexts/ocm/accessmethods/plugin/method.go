@@ -82,6 +82,10 @@ func (m *accessMethod) GetKind() string {
 	return m.spec.GetKind()
 }
 
+func (m *accessMethod) AccessSpec() cpi.AccessSpec {
+	return m.spec
+}
+
 func (m *accessMethod) Close() error {
 	m.lock.Lock()
 	defer m.lock.Unlock()

@@ -816,8 +816,8 @@ github.com/mandelsoft/cobra v1.5.1-0.20221030110806-c236cde1e2bd/go.mod h1:IOw/A
 github.com/mandelsoft/filepath v0.0.0-20200909114706-3df73d378d55/go.mod h1:n4xEiUD2HNHnn2w5ZKF0qgjDecHVCWAl5DxZ7+pcFU8=
 github.com/mandelsoft/filepath v0.0.0-20220503095057-4432a2285b68 h1:99GWPlKVS110Cm+/YRVRaUJN5CpTeWFazWg2sXJdf70=
 github.com/mandelsoft/filepath v0.0.0-20220503095057-4432a2285b68/go.mod h1:n4xEiUD2HNHnn2w5ZKF0qgjDecHVCWAl5DxZ7+pcFU8=
-github.com/mandelsoft/logging v0.0.0-20221109072921-61e96e2ac9fd h1:YJ8lwCvIVueAduRGfWjWjtNfOWVTsMvSwrEfQzWL+1A=
-github.com/mandelsoft/logging v0.0.0-20221109072921-61e96e2ac9fd/go.mod h1:vxGpzOesdqLGRSWb4fz5DaH0ekJvkISst4qq6UZ2xFA=
+github.com/mandelsoft/logging v0.0.0-20221114215048-ab754b164dd6 h1:xlUJPmMJo1IVQVn42ELLDUNY3sfwzKVp4kyuy7Q2QwI=
+github.com/mandelsoft/logging v0.0.0-20221114215048-ab754b164dd6/go.mod h1:vxGpzOesdqLGRSWb4fz5DaH0ekJvkISst4qq6UZ2xFA=
 github.com/mandelsoft/pflag v0.0.0-20221103113840-a15b5f7fa89e h1:XW05FCl7x4ZLYL109cCqZbyF7vq5ihmOWIleT+luIr4=
 github.com/mandelsoft/pflag v0.0.0-20221103113840-a15b5f7fa89e/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=
 github.com/mandelsoft/spiff v1.7.0-beta-3 h1:AvZldpnctpyfQqtAA5uxokD5rlCK52mGAXxg7tnW5Ag=

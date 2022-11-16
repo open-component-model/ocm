@@ -336,6 +336,7 @@ func (c *componentVersionAccessImpl) SetSource(meta *cpi.SourceMeta, acc compdes
 
 // AddResource adds a blob resource to the current archive.
 func (c *componentVersionAccessImpl) SetResourceBlob(meta *cpi.ResourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) error {
+	c.GetContext().Logger().Info("adding resource blob", "resource", meta.Name)
 	acc, err := c.AddBlob(blob, meta.Type, refName, global)
 	if err != nil {
 		return fmt.Errorf("unable to add blob: %w", err)
@@ -349,6 +350,7 @@ func (c *componentVersionAccessImpl) SetResourceBlob(meta *cpi.ResourceMeta, blo
 }
 
 func (c *componentVersionAccessImpl) SetSourceBlob(meta *cpi.SourceMeta, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) error {
+	c.GetContext().Logger().Info("adding source blob", "source", meta.Name)
 	acc, err := c.AddBlob(blob, meta.Type, refName, global)
 	if err != nil {
 		return fmt.Errorf("unable to add blob: %w", err)

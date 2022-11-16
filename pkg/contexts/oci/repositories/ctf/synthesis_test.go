@@ -41,6 +41,10 @@ func (d *DummyMethod) GetKind() string {
 	return localblob.Type
 }
 
+func (d *DummyMethod) AccessSpec() cpi.AccessSpec {
+	return nil
+}
+
 func CheckBlob(blob accessio.BlobAccess) oci.NamespaceAccess {
 	set, err := artefactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
 	Expect(err).To(Succeed())

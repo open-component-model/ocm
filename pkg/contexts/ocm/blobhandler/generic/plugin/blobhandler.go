@@ -68,6 +68,15 @@ func (b *pluginHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, glo
 		}
 	}
 
+	cpi.BlobHandlerLogger(ctx.GetContext()).Debug("plugin blob handler",
+		"plugin", b.plugin.Name(),
+		"uploader", b.name,
+		"arttype", artType,
+		"mediatype", blob.MimeType(),
+		"hint", hint,
+		"target", string(target),
+	)
+
 	var creddata json.RawMessage
 	if creds != nil {
 		creddata, err = json.Marshal(creds.Properties())

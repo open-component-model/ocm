@@ -46,7 +46,7 @@ var _ = Describe("Test Environment", func() {
 		oldlog = ocmlog.Context()
 		log.Reset()
 		def := buflogr.NewWithBuffer(&log)
-		n := ocmlog.NewContext(logging.New(def))
+		n := logging.New(def)
 		ocmlog.SetContext(n)
 		env = NewTestEnv(TestData())
 	})
@@ -66,8 +66,8 @@ var _ = Describe("Test Environment", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "logtest")).To(Succeed())
 		Expect(log.String()).To(StringEqualTrimmedWithContext(`
-ERROR <nil> test error
-ERROR <nil> test ctxerror
+ERROR <nil> ocm/test error
+ERROR <nil> ocm/test ctxerror
 `))
 	})
 
@@ -75,14 +75,14 @@ ERROR <nil> test ctxerror
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "-X", "plugindir=xxx", "-l", "Debug", "logtest")).To(Succeed())
 		Expect(log.String()).To(StringEqualTrimmedWithContext(`
-V[4] test debug
-V[3] test info
-V[2] test warn
-ERROR <nil> test error
-V[4] test ctxdebug
-V[3] test ctxinfo
-V[2] test ctxwarn
-ERROR <nil> test ctxerror
+V[4] ocm/test debug
+V[3] ocm/test info
+V[2] ocm/test warn
+ERROR <nil> ocm/test error
+V[4] ocm/test ctxdebug
+V[3] ocm/test ctxinfo
+V[2] ocm/test ctxwarn
+ERROR <nil> ocm/test ctxerror
 `))
 	})
 
@@ -90,14 +90,14 @@ ERROR <nil> test ctxerror
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "--logconfig", "testdata/logcfg.yaml", "logtest")).To(Succeed())
 		Expect(log.String()).To(StringEqualTrimmedWithContext(`
-V[4] test debug
-V[3] test info
-V[2] test warn
-ERROR <nil> test error
-V[4] test ctxdebug
-V[3] test ctxinfo
-V[2] test ctxwarn
-ERROR <nil> test ctxerror
+V[4] ocm/test debug
+V[3] ocm/test info
+V[2] ocm/test warn
+ERROR <nil> ocm/test error
+V[4] ocm/test ctxdebug
+V[3] ocm/test ctxinfo
+V[2] ocm/test ctxwarn
+ERROR <nil> ocm/test ctxerror
 `))
 	})
 
@@ -108,7 +108,7 @@ ERROR <nil> test ctxerror
 		data, err := vfs.ReadFile(env.FileSystem(), "logfile")
 		Expect(err).To(Succeed())
 
-		Expect(len(string(data))).To(Equal(183))
+		Expect(len(string(data))).To(Equal(191))
 	})
 
 })

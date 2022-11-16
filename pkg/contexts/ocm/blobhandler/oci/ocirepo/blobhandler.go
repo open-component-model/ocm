@@ -9,11 +9,15 @@ import (
 	"path"
 	"strings"
 
+	"github.com/opencontainers/go-digest"
+
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localociblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
@@ -23,6 +27,7 @@ import (
 	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func init() {
@@ -67,6 +72,19 @@ func NewBlobHandler(base BaseFunction) cpi.BlobHandler {
 func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	ocictx := ctx.(*storagecontext.StorageContext)
 
+	values := []interface{}{
+		"arttype", artType,
+		"mediatype", blob.MimeType(),
+		"hint", hint,
+	}
+	if m, ok := blob.(accessio.AnnotatedBlobAccess[cpi.AccessMethod]); ok {
+		cpi.BlobHandlerLogger(ctx.GetContext()).Debug("oci blob handler with ocm access source",
+			append(values, "sourcetype", m.Source().AccessSpec().GetType())...,
+		)
+	} else {
+		cpi.BlobHandlerLogger(ctx.GetContext()).Debug("oci blob handler", values...)
+	}
+
 	err := ocictx.Manifest.AddBlob(blob)
 	if err != nil {
 		return nil, err
@@ -107,14 +125,42 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	}
 
 	errhint := "[" + hint + "]"
+	log := cpi.BlobHandlerLogger(ctx.GetContext())
+
+	values := []interface{}{
+		"arttype", artType,
+		"mediatype", mediaType,
+		"hint", hint,
+	}
+
+	var art oci.ArtefactAccess
+	var err error
+	var finalizer utils.Finalizer
+	defer finalizer.Finalize()
+
+	keep := keepblobattr.Get(ctx.GetContext())
+
+	if m, ok := blob.(accessio.AnnotatedBlobAccess[cpi.AccessMethod]); ok {
+		// prepare for optimized point to point implementation
+		log.Debug("oci artefact handler with ocm access source",
+			append(values, "sourcetype", m.Source().AccessSpec().GetType())...,
+		)
+		if ocimeth, ok := m.Source().(ociartefact.AccessMethod); !keep && ok {
+			art, _, err = ocimeth.GetArtefact(&finalizer)
+			if err != nil {
+				return nil, errors.Wrapf(err, "cannot access source artefact")
+			}
+			defer art.Close()
+		}
+	} else {
+		log.Debug("oci artefact handler", values...)
+	}
 
 	var namespace oci.NamespaceAccess
 	var version string
 	var name string
 	var tag string
-	var err error
-
-	keep := keepblobattr.Get(ctx.GetContext())
+	var digest digest.Digest
 
 	ocictx := ctx.(*storagecontext.StorageContext)
 	base := b.GetBaseURL(ocictx)
@@ -139,21 +185,29 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 
 	errhint += " namespace " + namespace.GetNamespace()
 
-	set, err := artefactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
-	if err != nil {
-		return nil, wrap(err, errhint, "open blob")
+	if art == nil {
+		log.Debug("using artefact set transfer mode")
+		set, err := artefactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
+		if err != nil {
+			return nil, wrap(err, errhint, "open blob")
+		}
+		defer set.Close()
+		digest = set.GetMain()
+		art, err = set.GetArtefact(digest.String())
+		if err != nil {
+			return nil, wrap(err, errhint, "get artefact from blob")
+		}
+		defer art.Close()
+	} else {
+		log.Debug("using direct transfer mode")
+		digest = art.Digest()
 	}
-	defer set.Close()
-	digest := set.GetMain()
+
 	if version == "" {
 		version = "@" + digest.String()
 	}
-	art, err := set.GetArtefact(digest.String())
-	if err != nil {
-		return nil, wrap(err, errhint, "get artefact from blob")
-	}
 
-	err = artefactset.TransferArtefact(art, namespace, oci.AsTags(tag)...)
+	err = transfer.TransferArtefact(art, namespace, oci.AsTags(tag)...)
 	if err != nil {
 		return nil, wrap(err, errhint, "transfer artefact")
 	}

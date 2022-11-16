@@ -7,6 +7,8 @@ package cpi
 // This is the Context Provider Interface for credential providers
 
 import (
+	"github.com/mandelsoft/logging"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -14,6 +16,17 @@ import (
 const CONTEXT_TYPE = internal.CONTEXT_TYPE
 
 const CommonTransportFormat = internal.CommonTransportFormat
+
+var TAG_BLOBHANDLER = logging.NewTag("blobhandler")
+
+func BlobHandlerLogger(ctx Context, messageContext ...logging.MessageContext) logging.Logger {
+	if len(messageContext) > 0 {
+		messageContext = append(append(messageContext[:0:0], messageContext...), TAG_BLOBHANDLER)
+		return ctx.Logger(messageContext...)
+	} else {
+		return ctx.Logger(TAG_BLOBHANDLER)
+	}
+}
 
 type (
 	Context                          = internal.Context

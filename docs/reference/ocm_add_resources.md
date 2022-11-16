@@ -307,7 +307,7 @@ with the field <code>type</code> in the <code>input</code> field:
 
 - Input type <code>spiff</code>
 
-  The path must denote a [spiff](https://github.com/mandelsoft/spiff) template relative the the resources file.
+  The path must denote a [spiff](https://github.com/mandelsoft/spiff) template relative the resources file.
   The content is compressed if the <code>compress</code> field
   is set to <code>true</code>.
   

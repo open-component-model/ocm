@@ -51,15 +51,17 @@ type HintProvider interface {
 	GetReferenceHint(cv ComponentVersionAccess) string
 }
 
-// AccessMethod described the access to a dedicate resource
+// AccessMethod described the access to a dedicated resource
 // It can allocate external resources, which should be released
 // with the Close() call.
 // Resources SHOULD only be allocated, if the content is accessed
 // via the DataAccess interface to avoid unnecessary effort
 // if the method object is just used to access meta data.
 type AccessMethod interface {
-	GetKind() string
 	DataAccess
+
+	GetKind() string
+	AccessSpec() AccessSpec
 	MimeType
 	Close() error
 }

@@ -64,9 +64,11 @@ func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, e
 	if err != nil {
 		return nil, GetArtifactError{Original: err, Ref: ref}
 	}
-
 	defer art.Close()
+	return SynthesizeArtefactBlobForArtefact(art, ref)
+}
 
+func SynthesizeArtefactBlobForArtefact(art cpi.ArtefactAccess, ref string) (ArtefactBlob, error) {
 	blob, err := art.Blob()
 	if err != nil {
 		return nil, err

@@ -18,9 +18,11 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	common2 "github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/out"
 )
 
@@ -100,7 +102,8 @@ func (o *Command) Run() error {
 var outputs = output.NewOutputs(getRegular, output.Outputs{}).AddChainedManifestOutputs(infoChain)
 
 func getRegular(opts *output.Options) output.Output {
-	return output.NewProcessingFunctionOutput(opts.LogContext(), opts.Context, processing.Chain(opts.LogContext()), outInfo)
+	return output.NewProcessingFunctionOutput(opts.LogContext(), opts.Context, processing.Chain(opts.LogContext()),
+		generics.Conditional(From(opts).BlobFiles, outInfoWithFiles, outInfo))
 }
 
 func infoChain(options *output.Options) processing.ProcessChain {
@@ -109,7 +112,14 @@ func infoChain(options *output.Options) processing.ProcessChain {
 
 func outInfo(ctx out.Context, e interface{}) {
 	p := e.(*artefacthdlr.Object)
-	out.Outf(ctx, "%s", ociutils.PrintArtefact(p.Artefact))
+
+	ociutils.PrintArtefact(common2.NewPrinter(ctx.StdOut()), p.Artefact, false)
+}
+
+func outInfoWithFiles(ctx out.Context, e interface{}) {
+	p := e.(*artefacthdlr.Object)
+
+	ociutils.PrintArtefact(common2.NewPrinter(ctx.StdOut()), p.Artefact, true)
 }
 
 type Info struct {
