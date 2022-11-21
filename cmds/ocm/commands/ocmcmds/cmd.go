@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/versions"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	topicocmaccessmethods "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/accessmethods"
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 )
@@ -39,5 +40,7 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(plugins.NewCommand(ctx))
 
 	cmd.AddCommand(topicocmrefs.New(ctx))
+	cmd.AddCommand(topicocmaccessmethods.New(ctx))
+
 	return cmd
 }

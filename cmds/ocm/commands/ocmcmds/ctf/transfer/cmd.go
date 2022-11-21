@@ -12,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/overwriteoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/scriptoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/uploaderoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -44,6 +45,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		formatoption.New(),
 		overwriteoption.New(),
 		rscbyvalueoption.New(),
+		uploaderoption.New(),
 		scriptoption.New(),
 	)}, utils.Names(Names, names...)...)
 }
@@ -73,6 +75,11 @@ func (o *Command) Run() error {
 	defer session.Close()
 
 	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithSession(o, session))
+	if err != nil {
+		return err
+	}
+
+	err = uploaderoption.From(o).Register(o.Context)
 	if err != nil {
 		return err
 	}

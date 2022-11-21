@@ -30,11 +30,15 @@ func NewDownloaderKey(arttype, mediatype string) DownloaderKey {
 type DownloaderDescriptor struct {
 	Name        string          `json:"name"`
 	Description string          `json:"description"`
-	Constraints []DownloaderKey `json:"constraints"`
+	Constraints []DownloaderKey `json:"constraints,omitempty"`
 }
 
 func (d DownloaderDescriptor) GetName() string {
 	return d.Name
+}
+
+func (d DownloaderDescriptor) GetDescription() string {
+	return d.Description
 }
 
 func (d DownloaderDescriptor) GetConstraints() []DownloaderKey {
@@ -44,11 +48,15 @@ func (d DownloaderDescriptor) GetConstraints() []DownloaderKey {
 type UploaderDescriptor struct {
 	Name        string        `json:"name"`
 	Description string        `json:"description"`
-	Constraints []UploaderKey `json:"constraints"`
+	Constraints []UploaderKey `json:"constraints,omitempty"`
 }
 
 func (d UploaderDescriptor) GetName() string {
 	return d.Name
+}
+
+func (d UploaderDescriptor) GetDescription() string {
+	return d.Description
 }
 
 func (d UploaderDescriptor) GetConstraints() []UploaderKey {
@@ -60,7 +68,7 @@ type AccessMethodDescriptor struct {
 	Version     string      `json:"version,omitempty"`
 	Description string      `json:"description"`
 	Format      string      `json:"format"`
-	CLIOptions  []CLIOption `json:"options"`
+	CLIOptions  []CLIOption `json:"options,omitempty"`
 }
 
 type CLIOption struct {

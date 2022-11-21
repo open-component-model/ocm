@@ -80,7 +80,6 @@ func (n *NamespaceContainer) getPusher(vers string) (resolve.Pusher, error) {
 	resolver := n.resolver
 
 	n.repo.ctx.Logger().Trace("get pusher", "ref", ref)
-
 	if ok, _ := artdesc.IsDigest(vers); !ok {
 		var err error
 

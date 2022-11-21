@@ -12,7 +12,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	local "github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 var _ = Describe("builder test", func() {
@@ -21,7 +23,7 @@ var _ = Describe("builder test", func() {
 
 		Expect(ctx.AttributesContext()).To(BeIdenticalTo(datacontext.DefaultContext))
 		Expect(ctx).NotTo(BeIdenticalTo(local.DefaultContext))
-		Expect(ctx.RepositoryTypes()).To(BeIdenticalTo(local.DefaultRepositoryTypeScheme))
+		Expect(BaseRepoTypes(ctx.RepositoryTypes())).To(BeIdenticalTo(local.DefaultRepositoryTypeScheme))
 		Expect(ctx.AccessMethods()).To(BeIdenticalTo(local.DefaultAccessTypeScheme))
 		Expect(ctx.RepositorySpecHandlers()).To(BeIdenticalTo(local.DefaultRepositorySpecHandlers))
 		Expect(ctx.BlobHandlers()).To(BeIdenticalTo(local.DefaultBlobHandlerRegistry))
@@ -39,7 +41,7 @@ var _ = Describe("builder test", func() {
 
 		Expect(ctx.AttributesContext()).NotTo(BeIdenticalTo(datacontext.DefaultContext))
 		Expect(ctx).NotTo(BeIdenticalTo(local.DefaultContext))
-		Expect(ctx.RepositoryTypes()).To(BeIdenticalTo(local.DefaultRepositoryTypeScheme))
+		Expect(BaseRepoTypes(ctx.RepositoryTypes())).To(BeIdenticalTo(local.DefaultRepositoryTypeScheme))
 		Expect(ctx.AccessMethods()).To(BeIdenticalTo(local.DefaultAccessTypeScheme))
 		Expect(ctx.RepositorySpecHandlers()).To(BeIdenticalTo(local.DefaultRepositorySpecHandlers))
 		Expect(ctx.BlobHandlers()).To(BeIdenticalTo(local.DefaultBlobHandlerRegistry))
@@ -98,5 +100,11 @@ var _ = Describe("builder test", func() {
 		Expect(ctx.CredentialsContext()).NotTo(BeIdenticalTo(credentials.DefaultContext()))
 		Expect(len(ctx.CredentialsContext().RepositoryTypes().KnownTypeNames())).To(Equal(0))
 	})
-
 })
+
+func BaseRepoTypes(r cpi.RepositoryTypeScheme) runtime.Scheme {
+	if m, ok := r.(runtime.BaseScheme); ok {
+		return m.BaseScheme()
+	}
+	return nil
+}

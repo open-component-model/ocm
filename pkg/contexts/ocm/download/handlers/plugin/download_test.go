@@ -16,6 +16,7 @@ import (
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -23,6 +24,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/config"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
@@ -103,17 +105,17 @@ var _ = Describe("setup plugin cache", func() {
 		cv := Must(repo.LookupComponentVersion(COMP, VERS))
 		defer Close(cv, "source version")
 
-		MustFailWithMessage(plugincacheattr.RegisterDownloadHandler(env.OCMContext(), "test", "", "blah", ""),
+		MustFailWithMessage(plugin.RegisterDownloadHandler(env.OCMContext(), "test", "", "blah", ""),
 			"no downloader found for [art:\"blah\", media:\"\"]",
 		)
-		MustBeSuccessful(plugincacheattr.RegisterDownloadHandler(env.OCMContext(), "test", "", RSCTYPE, ""))
+		MustBeSuccessful(plugin.RegisterDownloadHandler(env.OCMContext(), "test", "", RSCTYPE, ""))
 
 		racc := Must(cv.GetResourceByIndex(0))
 
 		file := filepath.Join(repodir, "download")
 
 		octx, buf := out.NewBuffered()
-		ok, eff, err := download.For(env.OCMContext()).Download(octx, racc, file, nil)
+		ok, eff, err := download.For(env.OCMContext()).Download(common.NewPrinter(octx.StdOut()), racc, file, nil)
 
 		MustBeSuccessful(err)
 		Expect(buf.String()).To(Equal(""))

@@ -57,6 +57,9 @@ func (s *stringToStringValue[T]) Set(val string) error {
 	if !s.changed {
 		*s.value = out
 	} else {
+		if *s.value == nil {
+			*s.value = map[string]string{}
+		}
 		for k, v := range out {
 			(*s.value)[k] = v
 		}

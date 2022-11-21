@@ -114,13 +114,13 @@ func (p *pluginImpl) ComposeAccessMethod(name string, opts flagsets.ConfigOption
 func (p *pluginImpl) ValidateUploadTarget(name string, spec []byte) (*ppi.UploadTargetSpecInfo, error) {
 	result, err := p.Exec(nil, nil, upload.Name, uplval.Name, name, string(spec))
 	if err != nil {
-		return nil, errors.Wrapf(err, "plugin %s", p.Name())
+		return nil, errors.Wrapf(err, "plugin uploader %s/%s", p.Name(), name)
 	}
 
 	var info ppi.UploadTargetSpecInfo
 	err = json.Unmarshal(result, &info)
 	if err != nil {
-		return nil, errors.Wrapf(err, "plugin %s: cannot unmarshal upload target info", p.Name())
+		return nil, errors.Wrapf(err, "plugin uploader %s/%s: cannot unmarshal upload target info", p.Name(), name)
 	}
 	return &info, nil
 }

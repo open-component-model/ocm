@@ -5,6 +5,7 @@
 package ppi
 
 import (
+	"encoding/json"
 	"io"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -41,6 +42,7 @@ type Plugin interface {
 
 	SetShort(s string)
 	SetLong(s string)
+	SetConfigParser(config func(raw json.RawMessage) (interface{}, error))
 
 	RegisterDownloader(arttype, mediatype string, u Downloader) error
 	GetDownloader(name string) Downloader
@@ -55,7 +57,8 @@ type Plugin interface {
 	DecodeAccessSpecification(data []byte) (AccessSpec, error)
 	GetAccessMethod(name string, version string) AccessMethod
 
-	Options() *Options
+	GetOptions() *Options
+	GetConfig() (interface{}, error)
 }
 
 type AccessMethod interface {

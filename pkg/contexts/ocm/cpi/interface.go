@@ -33,6 +33,7 @@ type (
 	ContextProvider                  = internal.ContextProvider
 	ComponentVersionResolver         = internal.ComponentVersionResolver
 	Repository                       = internal.Repository
+	RepositoryTypeScheme             = internal.RepositoryTypeScheme
 	RepositorySpecHandlers           = internal.RepositorySpecHandlers
 	RepositorySpecHandler            = internal.RepositorySpecHandler
 	UniformRepositorySpec            = internal.UniformRepositorySpec
@@ -60,8 +61,13 @@ type (
 type (
 	BlobHandler                  = internal.BlobHandler
 	BlobHandlerOption            = internal.BlobHandlerOption
+	BlobHandlerOptions           = internal.BlobHandlerOptions
+	BlobHandlerRegistry          = internal.BlobHandlerRegistry
 	StorageContext               = internal.StorageContext
 	ImplementationRepositoryType = internal.ImplementationRepositoryType
+
+	BlobHandlerConfig              = internal.BlobHandlerConfig
+	BlobHandlerRegistrationHandler = internal.BlobHandlerRegistrationHandler
 )
 
 type (
@@ -70,6 +76,16 @@ type (
 	BlobDigesterRegistry = internal.BlobDigesterRegistry
 	DigestDescriptor     = internal.DigestDescriptor
 )
+
+type NamePath = internal.NamePath
+
+func NewNamePath(p string) NamePath {
+	return internal.NewNamePath(p)
+}
+
+func NewBlobHandlerOptions(olist ...BlobHandlerOption) *BlobHandlerOptions {
+	return internal.NewBlobHandlerOptions(olist...)
+}
 
 func New() Context {
 	return internal.Builder{}.New()
@@ -109,6 +125,10 @@ func RegisterRepositorySpecHandler(handler RepositorySpecHandler, types ...strin
 
 func RegisterBlobHandler(handler BlobHandler, opts ...BlobHandlerOption) {
 	internal.RegisterBlobHandler(handler, opts...)
+}
+
+func RegisterBlobHandlerRegistrationHandler(path string, handler BlobHandlerRegistrationHandler) {
+	internal.RegisterBlobHandlerRegistrationHandler(path, handler)
 }
 
 func MustRegisterDigester(digester BlobDigester, arttypes ...string) {

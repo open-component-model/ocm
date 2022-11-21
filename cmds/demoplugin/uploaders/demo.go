@@ -11,11 +11,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/open-component-model/ocm/cmds/common"
 	"github.com/open-component-model/ocm/cmds/demoplugin/accessmethods"
+	"github.com/open-component-model/ocm/cmds/demoplugin/common"
+	"github.com/open-component-model/ocm/cmds/demoplugin/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -76,10 +78,18 @@ func (a *Uploader) Writer(p ppi.Plugin, arttype, mediatype, hint string, repo pp
 	var file *os.File
 	var err error
 
-	my := repo.(*TargetSpec)
+	cfg, _ := p.GetConfig()
+	root := os.TempDir()
+	if cfg != nil && cfg.(*config.Config).Uploaders.Path != "" {
+		root = cfg.(*config.Config).Uploaders.Path
+		err := os.MkdirAll(root, 0o700)
+		if err != nil {
+			return nil, nil, errors.Wrapf(err, "cannot create root dir")
+		}
+	}
 
 	path := hint
-	root := os.TempDir()
+	my := repo.(*TargetSpec)
 	dir := root
 	if my.Path != "" {
 		root = filepath.Join(root, my.Path)

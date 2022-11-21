@@ -6,7 +6,6 @@ package options
 
 import (
 	"fmt"
-	"reflect"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 )
@@ -14,6 +13,7 @@ import (
 type OptionType interface {
 	flagsets.ConfigOptionType
 	ValueType() string
+	GetDescriptionText() string
 }
 
 type base = flagsets.ConfigOptionType
@@ -24,7 +24,10 @@ type option struct {
 }
 
 func (o *option) Equal(t flagsets.ConfigOptionType) bool {
-	return reflect.DeepEqual(o, t)
+	if ot, ok := t.(*option); ok {
+		return o.valueType == ot.valueType && o.GetName() == ot.GetName()
+	}
+	return false
 }
 
 func (o *option) ValueType() string {
@@ -33,6 +36,10 @@ func (o *option) ValueType() string {
 
 func (o *option) GetDescription() string {
 	return fmt.Sprintf("[*%s*] %s", o.ValueType(), o.base.GetDescription())
+}
+
+func (o *option) GetDescriptionText() string {
+	return o.base.GetDescription()
 }
 
 ////////////////////////////////////////////////////////////////////////////////

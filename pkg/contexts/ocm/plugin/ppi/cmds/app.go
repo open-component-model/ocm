@@ -74,7 +74,7 @@ func NewPluginCommand(p ppi.Plugin) *PluginCommand {
 
 	help.AddCommand(descriptor.New())
 
-	p.Options().AddFlags(cmd.Flags())
+	p.GetOptions().AddFlags(cmd.Flags())
 	pcmd.command = cmd
 	return pcmd
 }

@@ -17,4 +17,8 @@ const (
 	BLOB = "blob"
 	// FILESYSTEM describes a directory structure stored as archive (tar, tgz).
 	FILESYSTEM = "filesystem"
+	// EXECUTABLE describes an OS executable.
+	EXECUTABLE = "executable"
+	// OCM_PLUGIN describes an OS executable OCM plugin.
+	OCM_PLUGIN = "ocmPlugin"
 )

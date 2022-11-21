@@ -140,6 +140,15 @@ The following configuration types are supported:
      &lt;name>: &lt;specification of OCI registry>
      ...
   </pre>
+- <code>plugin.config.ocm.software</code>
+  The config type <code>plugin.config.ocm.software</code> can be used to configure a 
+  plugin.
+  
+  <pre>
+      type: plugin.config.ocm.software
+      plugin: &lt;plugin name>
+      config: &lt;arbitrary configuration structure>
+  </pre>
 - <code>scripts.ocm.config.ocm.software</code>
   The config type <code>scripts.ocm.config.ocm.software</code> can be used to define transfer scripts:
   

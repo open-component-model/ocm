@@ -87,7 +87,7 @@ type Result struct {
 func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	spec, err := p.DecodeAccessSpecification(opts.Specification)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "access specification")
 	}
 
 	m := p.GetAccessMethod(spec.GetKind(), spec.GetVersion())
@@ -98,7 +98,7 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	if err != nil {
 		return err
 	}
-	result := Result{MediaType: info.MediaType, ConsumerId: info.ConsumerId, Hint: info.Hint}
+	result := Result{MediaType: info.MediaType, ConsumerId: info.ConsumerId, Hint: info.Hint, Short: info.Short}
 	data, err := json.Marshal(result)
 	if err != nil {
 		return err

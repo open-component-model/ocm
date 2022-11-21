@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 )
 
 var _ = Describe("setup plugin cache", func() {
@@ -54,7 +55,7 @@ var _ = Describe("setup plugin cache", func() {
 		p := registry.Get("test")
 		Expect(p).NotTo(BeNil())
 		Expect(len(p.GetDescriptor().AccessMethods)).To(Equal(2))
-		Expect(registry.RegisterExtensions()).To(Succeed())
+		Expect(registration.RegisterExtensions(registry.GetContext())).To(Succeed())
 		t := ctx.AccessMethods().GetAccessType("test")
 		Expect(t).NotTo(BeNil())
 		raw := `

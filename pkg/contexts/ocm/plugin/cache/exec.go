@@ -34,10 +34,15 @@ func Exec(execpath string, config json.RawMessage, r io.Reader, w io.Writer, arg
 	if err != nil {
 		var result cmds.Error
 		var msg string
-		if err := json.Unmarshal(stderr.Bytes(), &result); err == nil {
-			msg = result.Error
+		data := stderr.Bytes()
+		if len(data) == 0 {
+			msg = err.Error()
 		} else {
-			msg = fmt.Sprintf("[%s]", string(stderr.Bytes()))
+			if err := json.Unmarshal(stderr.Bytes(), &result); err == nil {
+				msg = result.Error
+			} else {
+				msg = fmt.Sprintf("[%s]", string(stderr.Bytes()))
+			}
 		}
 		return nil, fmt.Errorf("%s", msg)
 	}

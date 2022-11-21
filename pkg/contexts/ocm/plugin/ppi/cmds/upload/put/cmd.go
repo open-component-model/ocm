@@ -84,7 +84,7 @@ func (o *Options) Complete(args []string) error {
 func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	spec, err := p.DecodeUploadTargetSpecification(opts.Specification)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "target specification")
 	}
 
 	u := p.GetUploader(opts.Name)

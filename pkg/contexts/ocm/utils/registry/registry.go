@@ -6,6 +6,9 @@ package registry
 
 import (
 	"strings"
+
+	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/pkg/mime"
 )
 
 type Key[K any] interface {
@@ -59,13 +62,38 @@ func (p *Registry[H, K]) LookupHandler(key K) []H {
 
 	mediatype := key.GetMediaType()
 	arttype := key.GetArtefactType()
-	if mediatype == "" || arttype == "" {
+	if h := p.mappings[key.SetArtefact(arttype, "")]; len(h) > 0 {
 		return h
 	}
-	if h := p.mappings[key.SetArtefact(key.GetArtefactType(), "")]; len(h) > 0 {
-		return h
+	return p.lookupMedia(key.SetArtefact("", mediatype))
+}
+
+func (p *Registry[H, K]) LookupKeys(key K) generics.Set[K] {
+	found := generics.Set[K]{}
+
+	if len(p.LookupHandler(key)) > 0 {
+		found.Add(key)
 	}
-	return p.lookupMedia(key.SetArtefact("", key.GetMediaType()))
+	if key.GetArtefactType() == "" {
+		for k := range p.mappings {
+			if k.GetArtefactType() != "" {
+				c := k.SetArtefact(k.GetArtefactType(), key.GetMediaType())
+				if !found.Contains(c) && len(p.LookupHandler(c)) > 0 {
+					found.Add(c)
+				}
+			}
+		}
+	} else {
+		for k := range p.mappings {
+			if mime.IsMoreGeneral(key.GetMediaType(), k.GetMediaType()) {
+				c := k.SetArtefact(key.GetArtefactType(), k.GetMediaType())
+				if !found.Contains(c) && len(p.LookupHandler(c)) > 0 {
+					found.Add(c)
+				}
+			}
+		}
+	}
+	return found
 }
 
 func (p *Registry[H, K]) Register(key K, h H) {

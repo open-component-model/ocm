@@ -66,6 +66,13 @@ func (i *Identity) Set(name, value string) {
 	}
 }
 
+func (i Identity) Get(name string) string {
+	if i != nil {
+		return i[name]
+	}
+	return ""
+}
+
 func (i Identity) Remove(name string) bool {
 	if i != nil {
 		delete(i, name)

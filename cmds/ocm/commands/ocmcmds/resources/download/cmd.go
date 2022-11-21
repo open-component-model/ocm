@@ -24,6 +24,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	common2 "github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -195,10 +196,11 @@ func (d *action) Save(o *elemhdlr.Object, f string) error {
 	}
 	var ok bool
 	var eff string
+	printer := common2.NewPrinter(d.opts.Context.StdOut())
 	if local.UseHandlers {
-		ok, eff, err = d.downloaders.Download(d.opts.Context, racc, f, dest.PathFilesystem)
+		ok, eff, err = d.downloaders.Download(printer, racc, f, dest.PathFilesystem)
 	} else {
-		ok, eff, err = d.downloaders.DownloadAsBlob(d.opts.Context, racc, f, dest.PathFilesystem)
+		ok, eff, err = d.downloaders.DownloadAsBlob(printer, racc, f, dest.PathFilesystem)
 	}
 	if err != nil {
 		return err

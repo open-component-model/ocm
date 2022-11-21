@@ -128,6 +128,7 @@ func (o *Command) Run() error {
 	}
 	obj, err := comparch.Create(o.Context.OCMContext(), accessobj.ACC_CREATE, o.Path, mode, o.Handler, fs)
 	if err != nil {
+		fs.RemoveAll(o.Path)
 		return err
 	}
 	desc := obj.GetDescriptor()
@@ -141,7 +142,12 @@ func (o *Command) Run() error {
 	err = compdesc.Validate(desc)
 	if err != nil {
 		obj.Close()
+		fs.RemoveAll(o.Path)
 		return errors.Newf("invalid component info: %s", err)
 	}
-	return obj.Close()
+	err = obj.Close()
+	if err != nil {
+		fs.RemoveAll(o.Path)
+	}
+	return err
 }

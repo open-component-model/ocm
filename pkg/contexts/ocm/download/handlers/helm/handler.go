@@ -10,6 +10,7 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -19,7 +20,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/out"
 )
 
 const TYPE = consts.HelmChart
@@ -30,7 +30,7 @@ func init() {
 	download.RegisterForArtefactType(TYPE, &Handler{})
 }
 
-func (h Handler) Download(ctx out.Context, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
+func (h Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
 	meth, err := racc.AccessMethod()
 	if err != nil {
 		return false, "", err
@@ -66,7 +66,7 @@ func (h Handler) Download(ctx out.Context, racc cpi.ResourceAccess, path string,
 	if err != nil {
 		return true, "", err
 	}
-	err = h.write(ctx, blob, path, fs)
+	err = h.write(p, blob, path, fs)
 	if err != nil {
 		return true, "", err
 	}
@@ -76,7 +76,7 @@ func (h Handler) Download(ctx out.Context, racc cpi.ResourceAccess, path string,
 		if err != nil {
 			return true, "", err
 		}
-		err = h.write(ctx, blob, path, fs)
+		err = h.write(p, blob, path, fs)
 		if err != nil {
 			return true, "", err
 		}
@@ -84,7 +84,7 @@ func (h Handler) Download(ctx out.Context, racc cpi.ResourceAccess, path string,
 	return true, path, nil
 }
 
-func (_ Handler) write(ctx out.Context, blob accessio.BlobAccess, path string, fs vfs.FileSystem) error {
+func (_ Handler) write(p common.Printer, blob accessio.BlobAccess, path string, fs vfs.FileSystem) error {
 	cr, err := blob.Reader()
 	if err != nil {
 		return err
@@ -97,7 +97,7 @@ func (_ Handler) write(ctx out.Context, blob accessio.BlobAccess, path string, f
 	defer file.Close()
 	n, err := io.Copy(file, cr)
 	if err == nil {
-		out.Outf(ctx, "%s: %d byte(s) written\n", path, n)
+		p.Printf("%s: %d byte(s) written\n", path, n)
 	}
 	return nil
 }

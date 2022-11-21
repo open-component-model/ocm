@@ -69,7 +69,7 @@ func (o *Options) Complete(args []string) error {
 func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	spec, err := p.DecodeAccessSpecification(opts.Specification)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "access specification")
 	}
 
 	m := p.GetAccessMethod(spec.GetKind(), spec.GetVersion())

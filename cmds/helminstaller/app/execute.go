@@ -64,7 +64,7 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 	file.Close()
 	os.Remove(path)
 
-	_, path, err = download.For(ctx).Download(octx, acc, path, osfs.New())
+	_, path, err = download.For(ctx).Download(common.NewPrinter(octx.StdOut()), acc, path, osfs.New())
 	if err != nil {
 		return errors.Wrapf(err, "downloading helm chart")
 	}

@@ -14,12 +14,13 @@ import (
 
 func AccessUsage(scheme AccessTypeScheme, cli bool) string {
 	s := `
-The following access methods are known by the system.
+The following list describes the supported access methods, their versions
+and specification formats.
 Typically there is special support for the CLI artifact add commands.
-The following types (with the field <code>type</code> in the <code>access</code> field
-are handled:
+The access method specification can be put below the <code>access</code> field.
+If always requires the field <code>type</code> describing the kind and version
+shown below.
 `
-
 	versions := map[string]map[string]string{}
 	descs := map[string]string{}
 

@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/open-component-model/ocm/cmds/demoplugin/accessmethods"
+	"github.com/open-component-model/ocm/cmds/demoplugin/config"
 	"github.com/open-component-model/ocm/cmds/demoplugin/uploaders"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds"
@@ -19,6 +20,7 @@ func main() {
 
 	p.SetShort("demo plugin")
 	p.SetLong("plugin providing access to temp files.")
+	p.SetConfigParser(config.GetConfig)
 
 	p.RegisterAccessMethod(accessmethods.New())
 	u := uploaders.New()

@@ -83,7 +83,7 @@ type Result struct {
 func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	spec, err := p.DecodeUploadTargetSpecification(opts.Specification)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "target specification")
 	}
 
 	m := p.GetUploader(opts.Name)

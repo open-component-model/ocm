@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 )
 
@@ -35,7 +36,7 @@ var _ = Describe("Add with new access method", func() {
 
 		plugindirattr.Set(ctx, "testdata")
 		registry = plugincacheattr.Get(ctx)
-		Expect(registry.RegisterExtensions()).To(Succeed())
+		Expect(registration.RegisterExtensions(ctx)).To(Succeed())
 		p := registry.Get("test")
 		Expect(p).NotTo(BeNil())
 

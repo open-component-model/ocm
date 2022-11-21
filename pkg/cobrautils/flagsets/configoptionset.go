@@ -296,7 +296,7 @@ func (s *configOptionTypeSet) check(list []ConfigOptionType) error {
 	for _, o := range list {
 		old := s.options[o.GetName()]
 		if old != nil && !old.Equal(o) {
-			return fmt.Errorf("option type %s doesn not match (%T<->%T)", o.GetName(), o, old)
+			return fmt.Errorf("option type %s doesn't match (%T<->%T)", o.GetName(), o, old)
 		}
 	}
 	return nil

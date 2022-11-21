@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/scriptoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/uploaderoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
@@ -52,6 +53,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		lookupoption.New(),
 		overwriteoption.New(),
 		rscbyvalueoption.New(),
+		uploaderoption.New(),
 		scriptoption.New(),
 	)}, utils.Names(Names, names...)...)
 }
@@ -90,6 +92,12 @@ func (o *Command) Run() error {
 	if err != nil {
 		return err
 	}
+
+	err = uploaderoption.From(o).Register(o.Context)
+	if err != nil {
+		return err
+	}
+
 	target, err := ocm.AssureTargetRepository(session, o.Context.OCMContext(), o.TargetName, ocm.CommonTransportFormat, formatoption.From(o).Format, o.Context.FileSystem())
 	if err != nil {
 		return err

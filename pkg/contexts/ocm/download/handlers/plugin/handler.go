@@ -7,13 +7,13 @@ package plugin
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/out"
 )
 
 // pluginHandler stores artefact blobs as OCIArtefacts.
@@ -34,7 +34,7 @@ func New(p plugin.Plugin, name string) (download.Handler, error) {
 	}, nil
 }
 
-func (b *pluginHandler) Download(ctx out.Context, racc cpi.ResourceAccess, path string, _ vfs.FileSystem) (bool, string, error) {
+func (b *pluginHandler) Download(_ common.Printer, racc cpi.ResourceAccess, path string, _ vfs.FileSystem) (bool, string, error) {
 	m, err := racc.AccessMethod()
 	if err != nil {
 		return true, "", err

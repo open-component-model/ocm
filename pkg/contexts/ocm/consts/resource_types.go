@@ -20,4 +20,8 @@ const (
 	Blob = resourcetypes.BLOB
 	// FileSystem describes a directory structure stored as archive (tar, tgz).
 	FileSystem = resourcetypes.FILESYSTEM
+	// Executable describes an OS executable.
+	Executable = resourcetypes.EXECUTABLE
+	// OCMPlugin describes an OS executable OCM plugin.
+	OCMPlugin = resourcetypes.OCM_PLUGIN
 )
