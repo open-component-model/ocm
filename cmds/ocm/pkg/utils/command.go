@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -202,6 +203,7 @@ func SetupCommand(ocmcmd OCMCommand, names ...string) *cobra.Command {
 		c.Long += u.Usage()
 	}
 
+	cobrautils.CleanMarkdownUsageFunc(c)
 	help := c.HelpFunc()
 	if update != nil {
 		c.SetHelpFunc(func(cmd *cobra.Command, args []string) {
