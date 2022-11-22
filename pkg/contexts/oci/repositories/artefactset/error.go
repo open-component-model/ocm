@@ -6,13 +6,13 @@ package artefactset
 
 import "fmt"
 
-type GetArtifactError struct {
+type GetArtefactError struct {
 	Original error
 	Ref      string
 }
 
-func (e GetArtifactError) Error() string {
-	message := fmt.Sprintf("failed to get artifact '%s'", e.Ref)
+func (e GetArtefactError) Error() string {
+	message := fmt.Sprintf("failed to get artefact '%s'", e.Ref)
 
 	if e.Original != nil {
 		message = fmt.Sprintf("%s: %s", message, e.Original.Error())
@@ -21,6 +21,6 @@ func (e GetArtifactError) Error() string {
 	return message
 }
 
-func (e GetArtifactError) Unwrap() error {
+func (e GetArtefactError) Unwrap() error {
 	return e.Original
 }

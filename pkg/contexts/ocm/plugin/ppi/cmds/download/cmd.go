@@ -37,7 +37,7 @@ to store the downloaded content. The blob content is provided on the
 
 The task of this command is to transform the content of the provided 
 blob into a filesystem structure applicable to the type specific tools working
-with content of the given artifact type.
+with content of the given artefact type.
 `,
 		Args: cobra.ExactArgs(2),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
@@ -56,12 +56,12 @@ type Options struct {
 	Path string
 
 	MediaType    string
-	ArtifactType string
+	ArtefactType string
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.MediaType, OptMedia, "m", "", "media type of input blob")
-	fs.StringVarP(&o.ArtifactType, OptArt, "a", "", "artifact type of input blob")
+	fs.StringVarP(&o.ArtefactType, OptArt, "a", "", "artefact type of input blob")
 }
 
 func (o *Options) Complete(args []string) error {
@@ -78,9 +78,9 @@ type Result struct {
 func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	d := p.GetDownloader(opts.Name)
 	if d == nil {
-		return errors.ErrNotFound(ppi.KIND_DOWNLOADER, fmt.Sprintf("%s:%s", opts.ArtifactType, opts.MediaType))
+		return errors.ErrNotFound(ppi.KIND_DOWNLOADER, fmt.Sprintf("%s:%s", opts.ArtefactType, opts.MediaType))
 	}
-	w, h, err := d.Writer(p, opts.ArtifactType, opts.MediaType, opts.Path)
+	w, h, err := d.Writer(p, opts.ArtefactType, opts.MediaType, opts.Path)
 	if err != nil {
 		return err
 	}

@@ -42,8 +42,8 @@ The following predefined option types can be used:
   - <code>commit</code>: [*string*] git commit id
   - <code>digest</code>: [*string*] blob digest
   - <code>globalAccess</code>: [*map[string]YAML*] access specification for global access
-  - <code>hint</code>: [*string*] (repository) hint for local artifacts
-  - <code>mediaType</code>: [*string*] media type for artifact blob representation
+  - <code>hint</code>: [*string*] (repository) hint for local artefacts
+  - <code>mediaType</code>: [*string*] media type for artefact blob representation
   - <code>reference</code>: [*string*] reference name
   - <code>region</code>: [*string*] region name
   - <code>size</code>: [*int*] blob size

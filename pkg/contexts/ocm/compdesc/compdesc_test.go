@@ -42,7 +42,7 @@ var _ = Describe("serialization", func() {
         type: localBlob
       digest:
         hashAlgorithm: sha256
-        normalisationAlgorithm: ociArtifactDigest/v1
+        normalisationAlgorithm: ociArtefactDigest/v1
         value: 6a1c7637a528ab5957ab60edf73b5298a0a03de02a96be0313ee89b22544840c
       name: introspect-image
       relation: local
@@ -67,7 +67,7 @@ var _ = Describe("serialization", func() {
         type: localBlob
       digest:
         hashAlgorithm: sha256
-        normalisationAlgorithm: ociArtifactDigest/v1
+        normalisationAlgorithm: ociArtefactDigest/v1
         value: 6229be2be7e328f74ba595d93b814b590b1aa262a1b85e49cc1492795a9e564c
       name: introspect-helm
       relation: external
@@ -106,7 +106,7 @@ spec:
       type: localBlob
     digest:
       hashAlgorithm: sha256
-      normalisationAlgorithm: ociArtifactDigest/v1
+      normalisationAlgorithm: ociArtefactDigest/v1
       value: 6a1c7637a528ab5957ab60edf73b5298a0a03de02a96be0313ee89b22544840c
     name: introspect-image
     relation: local
@@ -131,7 +131,7 @@ spec:
       type: localBlob
     digest:
       hashAlgorithm: sha256
-      normalisationAlgorithm: ociArtifactDigest/v1
+      normalisationAlgorithm: ociArtefactDigest/v1
       value: 6229be2be7e328f74ba595d93b814b590b1aa262a1b85e49cc1492795a9e564c
     name: introspect-helm
     relation: external

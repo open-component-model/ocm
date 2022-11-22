@@ -115,7 +115,7 @@ var _ = Describe("Method", func() {
 		vfs.Cleanup(fs)
 	})
 
-	It("downloads artifacts", func() {
+	It("downloads artefacts", func() {
 		m, err := accessSpec.AccessMethod(&cpi.DummyComponentVersionAccess{Context: ctx})
 		Expect(err).ToNot(HaveOccurred())
 		content, err := m.Get()

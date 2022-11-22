@@ -62,7 +62,7 @@ func (h *TarHandler) Create(info AccessObjectInfo, path string, opts accessio.Op
 	return DefaultCreateOptsFileHandling(fmt.Sprintf("%s archive", h.format), info, path, opts, mode, h)
 }
 
-// Write tars the current descriptor and its artifacts.
+// Write tars the current descriptor and its artefacts.
 func (h *TarHandler) Write(obj *AccessObject, path string, opts accessio.Options, mode vfs.FileMode) error {
 	writer, err := opts.WriterFor(path, mode)
 	if err != nil {

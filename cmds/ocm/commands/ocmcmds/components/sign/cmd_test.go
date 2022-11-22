@@ -117,8 +117,8 @@ var _ = Describe("access method", func() {
 applying to version "github.com/mandelsoft/ref:v1"...
   applying to version "github.com/mandelsoft/test:v1"...
     resource 0:  "name"="testdata": digest sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50[genericBlobDigest/v1]
-    resource 1:  "name"="value": digest sha256:0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f[ociArtifactDigest/v1]
-    resource 2:  "name"="ref": digest sha256:c2d2dca275c33c1270dea6168a002d67c0e98780d7a54960758139ae19984bd7[ociArtifactDigest/v1]
+    resource 1:  "name"="value": digest sha256:0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f[ociArtefactDigest/v1]
+    resource 2:  "name"="ref": digest sha256:c2d2dca275c33c1270dea6168a002d67c0e98780d7a54960758139ae19984bd7[ociArtefactDigest/v1]
   reference 0:  github.com/mandelsoft/test:v1: digest sha256:39ea26ac4391052a638319f64b8da2628acb51d304c3a1ac8f920a46f2d6dce7[jsonNormalisation/v1]
   resource 0:  "name"="otherdata": digest sha256:54b8007913ec5a907ca69001d59518acfd106f7b02f892eabf9cae3f8b2414b4[genericBlobDigest/v1]
 successfully signed github.com/mandelsoft/ref:v1 (digest sha256:` + digest + `)
@@ -147,8 +147,8 @@ successfully signed github.com/mandelsoft/ref:v1 (digest sha256:` + digest + `)
 applying to version "github.com/mandelsoft/ref:v1"...
   applying to version "github.com/mandelsoft/test:v1"...
     resource 0:  "name"="testdata": digest sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50[genericBlobDigest/v1]
-    resource 1:  "name"="value": digest sha256:0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f[ociArtifactDigest/v1]
-    resource 2:  "name"="ref": digest sha256:c2d2dca275c33c1270dea6168a002d67c0e98780d7a54960758139ae19984bd7[ociArtifactDigest/v1]
+    resource 1:  "name"="value": digest sha256:0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f[ociArtefactDigest/v1]
+    resource 2:  "name"="ref": digest sha256:c2d2dca275c33c1270dea6168a002d67c0e98780d7a54960758139ae19984bd7[ociArtefactDigest/v1]
   reference 0:  github.com/mandelsoft/test:v1: digest sha256:39ea26ac4391052a638319f64b8da2628acb51d304c3a1ac8f920a46f2d6dce7[jsonNormalisation/v1]
   resource 0:  "name"="otherdata": digest sha256:54b8007913ec5a907ca69001d59518acfd106f7b02f892eabf9cae3f8b2414b4[genericBlobDigest/v1]
 successfully signed github.com/mandelsoft/ref:v1 (digest sha256:` + digest + `)

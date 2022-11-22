@@ -59,13 +59,13 @@ type Options struct {
 	Name          string
 	Specification json.RawMessage
 
-	ArtifactType string
+	ArtefactType string
 	MediaType    string
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.MediaType, OptMedia, "m", "", "media type of input blob")
-	fs.StringVarP(&o.ArtifactType, OptArt, "a", "", "artifact type of input blob")
+	fs.StringVarP(&o.ArtefactType, OptArt, "a", "", "artefact type of input blob")
 }
 
 func (o *Options) Complete(args []string) error {

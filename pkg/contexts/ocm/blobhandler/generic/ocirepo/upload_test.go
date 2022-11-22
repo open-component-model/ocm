@@ -156,7 +156,7 @@ var _ = Describe("upload", func() {
 
 		// prepare upload to target OCI repo
 		attr := ociuploadattr.New(TARGET + grammar.RepositorySeparator + grammar.RepositorySeparator + "copy")
-		MustBeSuccessful(registration.RegisterBlobHandlerByName(ctx, "ocm/ociArtifacts", attr))
+		MustBeSuccessful(registration.RegisterBlobHandlerByName(ctx, "ocm/ociArtefacts", attr))
 
 		MustBeSuccessful(transfer.TransferVersion(nil, nil, cv, copy, nil))
 
