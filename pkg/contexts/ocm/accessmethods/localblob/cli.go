@@ -50,7 +50,7 @@ The type specific specification fields are:
 
 - **<code>mediaType</code>** *string*
 
-  The media type of the blob used to store the resource. It may add 
+  The media type of the blob used to store the resource. It may add
   format information like <code>+tar</code> or <code>+gzip</code>.
 
 - **<code>referenceName</code>** (optional) *string*
@@ -60,10 +60,10 @@ The type specific specification fields are:
   related to the original source.
 
   For example, if an OCI artefact originally referenced using the
-  access method [<code>ociArtefact</code>](../../../../../docs/formats/accessmethods/ociArtefact.md) is stored during
+  access method <code>ociArtefact</code> is stored during
   some transport step as local artefact, the reference name can be set
   to its original repository name. An import step into an OCI based OCM
-  repository may then decide to make this artefact available again as 
+  repository may then decide to make this artefact available again as
   regular OCI artefact.
 
 - **<code>globalAccess</code>** (optional) *access method specification*
@@ -74,7 +74,7 @@ The type specific specification fields are:
 
   For example, an OCI artefact stored as local blob
   can be additionally stored as regular OCI artefact in an OCI registry.
-  
+
   This additional external access information can be added using
   a second external access method specification.
 `
