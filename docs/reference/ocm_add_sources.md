@@ -28,8 +28,8 @@ ocm add sources [<options>] <target> {<resourcefile> | <var>=<value>}
       --commit string                git commit id
       --digest string                blob digest
       --globalAccess YAML            access specification for global access
-      --hint string                  (repository) hint for local artifacts
-      --mediaType string             media type for artifact blob representation
+      --hint string                  (repository) hint for local artefacts
+      --mediaType string             media type for artefact blob representation
       --reference string             reference name
       --region string                region name
       --size int                     blob size
@@ -39,7 +39,7 @@ ocm add sources [<options>] <target> {<resourcefile> | <var>=<value>}
 #### Input Specification Options
 
 ```
-      --hint string                  (repository) hint for local artifacts
+      --hint string                  (repository) hint for local artefacts
       --input YAML                   blob input specification (YAML)
       --inputCompress                compress option for input
       --inputExcludes stringArray    excludes (path) for inputs
@@ -52,7 +52,7 @@ ocm add sources [<options>] <target> {<resourcefile> | <var>=<value>}
       --inputValues YAML             YAML based generic values for inputs
       --inputVariants stringArray    (platform) variants for inputs
       --inputVersion stringArray     version info for inputs
-      --mediaType string             media type for artifact blob representation
+      --mediaType string             media type for artefact blob representation
 ```
 
 
@@ -343,7 +343,7 @@ with the field <code>type</code> in the <code>input</code> field:
 
 The following list describes the supported access methods, their versions
 and specification formats.
-Typically there is special support for the CLI artifact add commands.
+Typically there is special support for the CLI artefact add commands.
 The access method specification can be put below the <code>access</code> field.
 If always requires the field <code>type</code> describing the kind and version
 shown below.

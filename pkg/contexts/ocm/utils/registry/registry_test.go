@@ -36,7 +36,7 @@ var _ = Describe("lookup", func() {
 			Expect(h).To(Equal([]string{"test"}))
 		})
 
-		It("looks up partial artifact", func() {
+		It("looks up partial artefact", func() {
 			reg.Register(registry.RegistrationKey{}.SetArtefact("a", ""), "test")
 			reg.Register(registry.RegistrationKey{}.SetArtefact("a", "m1"), "testm")
 			reg.Register(registry.RegistrationKey{}.SetArtefact("a1", "m"), "testa")

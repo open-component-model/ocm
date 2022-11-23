@@ -3,15 +3,15 @@
 ### Description
 
 
-Access methods are used to handle the access to the content of artifacts
-described in a component version. Therefore, an artifact entry contains
+Access methods are used to handle the access to the content of artefacts
+described in a component version. Therefore, an artefact entry contains
 an access specification describing the access attributes for the dedicated
-artifact.
+artefact.
 
 
 The following list describes the supported access methods, their versions
 and specification formats.
-Typically there is special support for the CLI artifact add commands.
+Typically there is special support for the CLI artefact add commands.
 The access method specification can be put below the <code>access</code> field.
 If always requires the field <code>type</code> describing the kind and version
 shown below.

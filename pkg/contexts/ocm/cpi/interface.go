@@ -174,7 +174,7 @@ func ErrComponentVersionNotFoundWrap(err error, name, version string) error {
 
 // PrefixProvider is supported by RepositorySpecs to
 // provide info about a potential path prefix to
-// use for globalized local artifacts.
+// use for globalized local artefacts.
 type PrefixProvider interface {
 	PathPrefix() string
 }
@@ -187,7 +187,7 @@ func RepositoryPrefix(spec RepositorySpec) string {
 }
 
 // HintProvider is able to provide a name hint for globalization of local
-// artifacts.
+// artefacts.
 type HintProvider internal.HintProvider
 
 func ArtefactNameHint(spec AccessSpec, cv ComponentVersionAccess) string {

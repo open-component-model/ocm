@@ -4,8 +4,8 @@ The [component descriptor](../formats/compdesc/README.md) is used to describe
 a [component version](model.md#component-versions). It contains several kinds
 of information:
 - volatile label settings, which might be changeable.
-- artifact access information, which might be changed during transport steps.
-- static information describing the features and artifacts of a component
+- artefact access information, which might be changed during transport steps.
+- static information describing the features and artefacts of a component
   version.
 
 <!-- If a component version should be signed, to be able to verify its authenticity

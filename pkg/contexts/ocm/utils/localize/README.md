@@ -24,7 +24,7 @@ information provided by a component version or some user config.
   references to specify the resource whose image reference is used as basis
   for the substituted value.
 
-  This specification is intended to be stored as part of a resource artifact in a
+  This specification is intended to be stored as part of a resource artefact in a
   component version which is then used to apply it. Thereby the contained relative
   [resource reference](../../../../../docs/ocm/model.md#resource-reference)
   are evaluated against the component version containing the specification to resolve

@@ -9,7 +9,7 @@ plugin upload validate [<flags>] <name> <spec> [<options>]
 ### Options
 
 ```
-  -a, --artifactType string   artifact type of input blob
+  -a, --artefactType string   artefact type of input blob
   -h, --help                  help for validate
   -m, --mediaType string      media type of input blob
 ```

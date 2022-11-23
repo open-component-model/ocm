@@ -38,16 +38,16 @@ func (k RepositoryContext) Describe() string {
 }
 
 type ArtefactContext struct {
-	ArtifactType string `json:"artifactType"`
+	ArtefactType string `json:"artefactType"`
 	MediaType    string `json:"mediaType"`
 }
 
 func (k ArtefactContext) IsValid() bool {
-	return k.ArtifactType != "" || k.MediaType != ""
+	return k.ArtefactType != "" || k.MediaType != ""
 }
 
 func (k ArtefactContext) GetArtefactType() string {
-	return k.ArtifactType
+	return k.ArtefactType
 }
 
 func (k ArtefactContext) GetMediaType() string {
@@ -55,15 +55,15 @@ func (k ArtefactContext) GetMediaType() string {
 }
 
 func (k ArtefactContext) String() string {
-	return fmt.Sprintf("%s:%s", k.ArtifactType, k.MediaType)
+	return fmt.Sprintf("%s:%s", k.ArtefactType, k.MediaType)
 }
 
 func (k ArtefactContext) Describe() string {
-	return fmt.Sprintf("Artefact Type: %s\nMedia Type   :%s", k.ArtifactType, k.MediaType)
+	return fmt.Sprintf("Artefact Type: %s\nMedia Type   :%s", k.ArtefactType, k.MediaType)
 }
 
 func (k ArtefactContext) SetArtefact(arttype, mediatype string) ArtefactContext {
-	k.ArtifactType = arttype
+	k.ArtefactType = arttype
 	k.MediaType = mediatype
 	return k
 }
@@ -86,7 +86,7 @@ func (k UploaderKey) Describe() string {
 }
 
 func (k UploaderKey) SetArtefact(arttype, mediatype string) UploaderKey {
-	k.ArtifactType = arttype
+	k.ArtefactType = arttype
 	k.MediaType = mediatype
 	return k
 }

@@ -23,7 +23,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/signing"
 )
 
-const OciArtifactDigestV1 string = "ociArtifactDigest/v1"
+const OciArtefactDigestV1 string = "ociArtefactDigest/v1"
 
 func init() {
 	cpi.MustRegisterDigester(New(digest.SHA256), "")
@@ -34,7 +34,7 @@ func New(algo digest.Algorithm) cpi.BlobDigester {
 	return &Digester{
 		cpi.DigesterType{
 			HashAlgorithm:          algo.String(),
-			NormalizationAlgorithm: OciArtifactDigestV1,
+			NormalizationAlgorithm: OciArtefactDigestV1,
 		},
 	}
 }

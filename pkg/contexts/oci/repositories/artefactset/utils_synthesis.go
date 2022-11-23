@@ -62,7 +62,7 @@ func TransferArtefact(art cpi.ArtefactAccess, set cpi.ArtefactSink, tags ...stri
 func SynthesizeArtefactBlob(ns cpi.NamespaceAccess, ref string) (ArtefactBlob, error) {
 	art, err := ns.GetArtefact(ref)
 	if err != nil {
-		return nil, GetArtifactError{Original: err, Ref: ref}
+		return nil, GetArtefactError{Original: err, Ref: ref}
 	}
 	defer art.Close()
 	return SynthesizeArtefactBlobForArtefact(art, ref)
@@ -78,7 +78,7 @@ func SynthesizeArtefactBlobForArtefact(art cpi.ArtefactAccess, ref string) (Arte
 	return SythesizeArtefactSet(func(set *ArtefactSet) (string, error) {
 		err = TransferArtefact(art, set)
 		if err != nil {
-			return "", fmt.Errorf("failed to transfer artifact: %w", err)
+			return "", fmt.Errorf("failed to transfer artefact: %w", err)
 		}
 
 		if ok, _ := artdesc.IsDigest(ref); !ok {
@@ -121,7 +121,7 @@ func ArtefactTransferCreator(art cpi.ArtefactAccess, finalizer *utils.Finalizer,
 
 		err = TransferArtefact(art, set)
 		if err != nil {
-			return "", "", fmt.Errorf("failed to transfer artifact: %w", err)
+			return "", "", fmt.Errorf("failed to transfer artefact: %w", err)
 		}
 
 		list := errors.ErrListf("add artefact")
