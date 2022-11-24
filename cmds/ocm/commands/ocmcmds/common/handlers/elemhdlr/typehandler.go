@@ -75,17 +75,30 @@ func (o *Object) Compare(b *Object) int {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type ElementFilter interface {
+	Accept(e compdesc.ElementMetaAccessor) bool
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type TypeHandler struct {
 	repository ocm.Repository
 	components []*comphdlr.Object
 	session    ocm.Session
 	kind       string
 	forceEmpty bool
+	filter     ElementFilter
 	elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor
 }
 
 func NewTypeHandler(octx clictx.OCM, oopts *output.Options, repobase ocm.Repository, session ocm.Session, kind string, compspecs []string, elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor, hopts ...Option) (utils.TypeHandler, error) {
-	h := comphdlr.NewTypeHandler(octx, session, repobase)
+	var copts []comphdlr.Option
+	for _, o := range hopts {
+		if c, ok := o.(comphdlr.Option); ok {
+			copts = append(copts, c)
+		}
+	}
+	h := comphdlr.NewTypeHandler(octx, session, repobase, copts...)
 
 	comps := output.NewElementOutput(octx.Context().LoggingContext(), nil, closureoption.Closure(oopts, comphdlr.ClosureExplode, comphdlr.Sort))
 	err := utils.HandleOutput(comps, h, utils.StringElemSpecs(compspecs...)...)
@@ -98,7 +111,10 @@ func NewTypeHandler(octx clictx.OCM, oopts *output.Options, repobase ocm.Reposit
 		components = append(components, i.Next().(*comphdlr.Object))
 	}
 	if len(components) == 0 {
-		return nil, errors.Newf("no component specified")
+		if len(compspecs) == 0 {
+			return nil, errors.Newf("no component version specified")
+		}
+		return nil, errors.Newf("no component version found")
 	}
 
 	t := &TypeHandler{
@@ -109,9 +125,13 @@ func NewTypeHandler(octx clictx.OCM, oopts *output.Options, repobase ocm.Reposit
 		kind:       kind,
 	}
 	for _, o := range hopts {
-		o.Apply(t)
+		o.ApplyToElemHandler(t)
 	}
 	return t, nil
+}
+
+func (h *TypeHandler) SetFilter(f ElementFilter) {
+	h.filter = f
 }
 
 func (h *TypeHandler) Close() error {
@@ -130,21 +150,21 @@ func (h *TypeHandler) All() ([]output.Object, error) {
 	return result, nil
 }
 
+func (h *TypeHandler) filterElement(e compdesc.ElementMetaAccessor) bool {
+	if h.filter == nil {
+		return true
+	}
+	return h.filter.Accept(e)
+}
+
 func (h *TypeHandler) all(c *comphdlr.Object) ([]output.Object, error) {
 	result := []output.Object{}
 	if c.ComponentVersion != nil {
 		elemaccess := h.elemaccess(c.ComponentVersion)
 		l := elemaccess.Len()
-		if l == 0 && h.forceEmpty {
-			result = append(result, &Object{
-				History: append(c.History, common.VersionedElementKey(c.ComponentVersion)),
-				Version: c.ComponentVersion,
-				Id:      metav1.Identity{},
-				Element: nil,
-			})
-		} else {
-			for i := 0; i < l; i++ {
-				e := elemaccess.Get(i)
+		for i := 0; i < l; i++ {
+			e := elemaccess.Get(i)
+			if h.filterElement(e) {
 				result = append(result, &Object{
 					History: append(c.History, common.VersionedElementKey(c.ComponentVersion)),
 					Version: c.ComponentVersion,
@@ -152,6 +172,15 @@ func (h *TypeHandler) all(c *comphdlr.Object) ([]output.Object, error) {
 					Element: e,
 				})
 			}
+		}
+
+		if len(result) == 0 && h.forceEmpty {
+			result = append(result, &Object{
+				History: append(c.History, common.VersionedElementKey(c.ComponentVersion)),
+				Version: c.ComponentVersion,
+				Id:      metav1.Identity{},
+				Element: nil,
+			})
 		}
 	}
 	return result, nil
@@ -177,6 +206,9 @@ func (h *TypeHandler) get(c *comphdlr.Object, elemspec utils.ElemSpec) ([]output
 	l := elemaccess.Len()
 	for i := 0; i < l; i++ {
 		e := elemaccess.Get(i)
+		if !h.filterElement(e) {
+			continue
+		}
 		m := e.GetMeta()
 		eid := m.GetMatchBaseIdentity()
 		ok, _ := selector.Match(eid)

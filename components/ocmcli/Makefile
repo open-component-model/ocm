@@ -1,15 +1,17 @@
-NAME      = ocm
-PROVIDER  ?= mandelsoft
-COMPONENT = github.com/$(PROVIDER)/$(NAME)
-OCMREPO   ?= ghcr.io/$(PROVIDER)/cnudie
-PLATFORMS = linux/amd64 linux/arm64
+NAME      = ocmcli
+CMD       = ocm
+PROVIDER  ?= ocm.software
+GITHUBORG  ?= open-component-model
+COMPONENT = $(PROVIDER)/$(NAME)
+OCMREPO   ?= ghcr.io/$(GITHUBORG)/ocm
+PLATFORMS = linux/amd64 linux/arm64 darwin/arm64 darwin/amd64
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
-VERSION                                        = $(shell git describe --tags --exact-match 2>/dev/null|| echo "$$(cat $(REPO_ROOT)/VERSION)-dev")
+VERSION                                        = $(shell git describe --tags --exact-match 2>/dev/null|| echo "$$(cat $(REPO_ROOT)/VERSION)")
 COMMIT                                         = $(shell git rev-parse HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
 
-CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(NAME) -type f)
+CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(CMD) -type f)
 OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
 
 GEN = $(REPO_ROOT)/gen/$(shell basename $(realpath .))
@@ -29,8 +31,8 @@ build: $(GEN)/build
 $(GEN)/build: $(CMDSRCS) $(OCMSRCS)
 	@for i in $(PLATFORMS); do \
     tag=$$(echo $$i | sed -e s:/:-:g); \
-    echo GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) go build -ldflags $(BUILD_FLAGS) -o $(GEN)/$(NAME).$$tag ../../cmds/$(NAME); \
-    GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) go build -ldflags $(BUILD_FLAGS) -o $(GEN)/$(NAME).$$tag ../../cmds/$(NAME); \
+    echo GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) go build -ldflags $(BUILD_FLAGS) -o $(GEN)/$(NAME).$$tag ../../cmds/$(CMD); \
+    GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) go build -ldflags $(BUILD_FLAGS) -o $(GEN)/$(NAME).$$tag ../../cmds/$(CMD); \
     done
 	@touch $(GEN)/build
 

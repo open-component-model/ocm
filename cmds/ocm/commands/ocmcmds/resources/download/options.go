@@ -21,7 +21,9 @@ func NewOptions() *Option {
 }
 
 type Option struct {
-	UseHandlers bool
+	UseHandlers   bool
+	Executable    bool
+	ResourceTypes []string
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {

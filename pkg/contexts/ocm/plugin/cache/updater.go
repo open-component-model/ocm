@@ -20,6 +20,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -191,8 +192,8 @@ func (o *PluginUpdater) download(session ocm.Session, cv ocm.ComponentVersionAcc
 			continue
 		}
 		if r.Meta().Type == "ocmPlugin" {
-			if r.Meta().ExtraIdentity.Get("os") == runtime.GOOS &&
-				r.Meta().ExtraIdentity.Get("architecture") == runtime.GOARCH {
+			if r.Meta().ExtraIdentity.Get(consts.ExecutableOperatingSystem) == runtime.GOOS &&
+				r.Meta().ExtraIdentity.Get(consts.ExecutableArchitecture) == runtime.GOARCH {
 				found = r
 				break
 			}

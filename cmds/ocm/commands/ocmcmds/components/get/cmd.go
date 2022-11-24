@@ -15,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/schemaoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/versionconstraintsoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
@@ -39,9 +40,14 @@ type Command struct {
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), output.OutputOptions(outputs, closureoption.New(
-		"component reference", output.Fields("IDENTITY"), options.Not(output.Selected("tree")), addIdentityField), lookupoption.New(), schemaoption.New(""),
-	))}, utils.Names(Names, names...)...)
+	return utils.SetupCommand(
+		&Command{BaseCommand: utils.NewBaseCommand(ctx,
+			versionconstraintsoption.New(), repooption.New(),
+			output.OutputOptions(outputs, closureoption.New(
+				"component reference", output.Fields("IDENTITY"), options.Not(output.Selected("tree")), addIdentityField), lookupoption.New(), schemaoption.New(""),
+			))},
+		utils.Names(Names, names...)...,
+	)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -75,7 +81,7 @@ func (o *Command) Run() error {
 	if err != nil {
 		return err
 	}
-	handler := comphdlr.NewTypeHandler(o.Context.OCM(), session, repooption.From(o).Repository)
+	handler := comphdlr.NewTypeHandler(o.Context.OCM(), session, repooption.From(o).Repository, comphdlr.OptionsFor(o))
 	return utils.HandleArgs(output.From(o), handler, o.Refs...)
 }
 

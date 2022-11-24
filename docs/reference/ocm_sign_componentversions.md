@@ -11,9 +11,11 @@ ocm sign componentversions [<options>] {<component-reference>}
 ```
   -S, --algorithm string          signature handler (default "RSASSA-PKCS1-V1_5")
       --ca-cert stringArray       Additional root certificates
+  -c, --constraints constraints   version constraint
   -H, --hash string               hash algorithm (default "sha256")
   -h, --help                      help for componentversions
   -I, --issuer string             issuer name
+      --latest                    restrict component versions to latest
       --lookup stringArray        repository name or spec for closure lookup fallback
   -N, --normalization string      normalization algorithm (default "jsonNormalisation/v1")
   -K, --private-key stringArray   private key setting
@@ -29,6 +31,10 @@ ocm sign componentversions [<options>] {<component-reference>}
 
 
 Sign specified component versions. 
+
+If the option <code>--constraints</code> is given, and no version is specified for a component, only versions matching
+the given version constraints (semver https://github.com/Masterminds/semver) are selected. With <code>--latest</code> only
+the latest matching versions will be selected.
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax

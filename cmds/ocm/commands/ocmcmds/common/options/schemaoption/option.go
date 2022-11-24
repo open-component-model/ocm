@@ -56,11 +56,11 @@ func (o *Option) Usage() string {
 	s := ""
 	if o.Defaulted != "" {
 		s = `
-It the option <code>--scheme</code> is given, the given component descriptor format is used/generated.
+If the option <code>--scheme</code> is given, the specified component descriptor format is used/generated.
 `
 	} else {
 		s = `
-It the option <code>--scheme</code> is given, the given component descriptor is converted to given format for output.
+If the option <code>--scheme</code> is given, the component descriptor is converted to specified format for output.
 `
 	}
 	s += `The following schema versions are supported:

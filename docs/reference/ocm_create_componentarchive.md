@@ -32,7 +32,7 @@ target archive to use. The following formats are supported:
 - tgz
 The default format is <code>directory</code>.
 
-It the option <code>--scheme</code> is given, the given component descriptor format is used/generated.
+If the option <code>--scheme</code> is given, the specified component descriptor format is used/generated.
 The following schema versions are supported:
 
   - <code>ocm.software/v3alpha1</code>: 
