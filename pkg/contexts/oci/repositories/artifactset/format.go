@@ -11,14 +11,14 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/format"
 	"github.com/open-component-model/ocm/pkg/errors"
 	mime2 "github.com/open-component-model/ocm/pkg/mime"
 )
 
 const (
-	ArtifactSetDescriptorFileName = format.ArtifactSetDescriptorFileName
-	BlobsDirectoryName            = format.BlobsDirectoryName
+	// The artifact descriptor name for artifact format.
+	ArtifactSetDescriptorFileName = "artifact-descriptor.json"
+	BlobsDirectoryName            = "blobs"
 
 	OCIArtifactSetDescriptorFileName = "index.json"
 	OCILayouFileName                 = "oci-layout"

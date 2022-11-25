@@ -56,12 +56,10 @@ func CheckBlob(blob accessio.BlobAccess) oci.NamespaceAccess {
 
 	idx := set.GetIndex()
 	Expect(idx.Annotations).To(Equal(map[string]string{
-		artifactset.MAINARTIFACT_ANNOTATION:        "sha256:" + DIGEST_MANIFEST,
-		artifactset.LEGACY_MAINARTIFACT_ANNOTATION: "sha256:" + DIGEST_MANIFEST,
+		artifactset.MAINARTIFACT_ANNOTATION: "sha256:" + DIGEST_MANIFEST,
 	}))
 	annos := map[string]string{
-		artifactset.TAGS_ANNOTATION:        "v1",
-		artifactset.LEGACY_TAGS_ANNOTATION: "v1",
+		artifactset.TAGS_ANNOTATION: "v1",
 	}
 	if artifactset.IsOCIDefaultFormat() {
 		annos[artifactset.OCITAG_ANNOTATION] = "v1"

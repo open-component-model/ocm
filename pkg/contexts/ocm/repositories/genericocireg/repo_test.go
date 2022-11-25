@@ -152,7 +152,6 @@ var _ = Describe("component repository mapping", func() {
 		Expect(err).To(Succeed())
 		testhelper.DefaultManifestFill(r)
 		r.Annotate(artifactset.MAINARTIFACT_ANNOTATION, "sha256:"+testhelper.DIGEST_MANIFEST)
-		r.Annotate(artifactset.LEGACY_MAINARTIFACT_ANNOTATION, "sha256:"+testhelper.DIGEST_MANIFEST)
 		Expect(r.Close()).To(Succeed())
 
 		// create repository

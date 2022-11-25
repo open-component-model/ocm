@@ -38,7 +38,6 @@ func SynthesizeArtifactBlob(path string, fss ...vfs.FileSystem) (artifactset.Art
 		}
 
 		set.Annotate(artifactset.MAINARTIFACT_ANNOTATION, blob.Digest.String())
-		set.Annotate(artifactset.LEGACY_MAINARTIFACT_ANNOTATION, blob.Digest.String())
 
 		return artdesc.MediaTypeImageManifest, nil
 	})

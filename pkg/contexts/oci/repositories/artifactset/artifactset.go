@@ -23,35 +23,19 @@ const (
 	TAGS_ANNOTATION         = "software.ocm/tags"
 	TYPE_ANNOTATION         = "software.ocm/type"
 
-	LEGACY_MAINARTIFACT_ANNOTATION = "cloud.gardener.ocm/main"
-	LEGACY_TAGS_ANNOTATION         = "cloud.gardener.ocm/tags"
-	LEGACY_TYPE_ANNOTATION         = "cloud.gardener.ocm/type"
-
 	OCITAG_ANNOTATION = "org.opencontainers.image.ref.name"
 )
 
 func RetrieveMainArtifact(m map[string]string) string {
-	f, ok := m[MAINARTIFACT_ANNOTATION]
-	if ok {
-		return f
-	}
-	return m[LEGACY_MAINARTIFACT_ANNOTATION]
+	return m[MAINARTIFACT_ANNOTATION]
 }
 
 func RetrieveTags(m map[string]string) string {
-	f, ok := m[TAGS_ANNOTATION]
-	if ok {
-		return f
-	}
-	return m[LEGACY_TAGS_ANNOTATION]
+	return m[TAGS_ANNOTATION]
 }
 
 func RetrieveType(m map[string]string) string {
-	f, ok := m[TYPE_ANNOTATION]
-	if ok {
-		return f
-	}
-	return m[LEGACY_TYPE_ANNOTATION]
+	return m[TYPE_ANNOTATION]
 }
 
 // ArtifactSet provides an artifact set view on the artifact set implementation.
@@ -146,7 +130,6 @@ func (a *artifactSetImpl) AddTags(digest digest.Digest, tags ...string) error {
 				cur = strings.Join(tags, ",")
 			}
 			e.Annotations[TAGS_ANNOTATION] = cur
-			e.Annotations[LEGACY_TAGS_ANNOTATION] = cur
 			if a.base.FileSystemBlobAccess.Access().GetInfo().GetDescriptorFileName() == OCIArtifactSetDescriptorFileName {
 				e.Annotations[OCITAG_ANNOTATION] = tags[0]
 			}
