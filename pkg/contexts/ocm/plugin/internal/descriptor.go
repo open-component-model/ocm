@@ -18,7 +18,7 @@ type Descriptor struct {
 	Downloaders   List[DownloaderDescriptor] `json:"downloaders,omitempty"`
 }
 
-type DownloaderKey = ArtefactContext
+type DownloaderKey = ArtifactContext
 
 func NewDownloaderKey(arttype, mediatype string) DownloaderKey {
 	return DownloaderKey{

@@ -34,7 +34,7 @@ var _ = Describe("uploader option", func() {
 
 		Expect(opt.Registrations).To(Equal([]*Registration{&Registration{
 			Name:         "plugin/name",
-			ArtefactType: "art",
+			ArtifactType: "art",
 			MediaType:    "media",
 			Config:       json.RawMessage(`{"name":"Name"}`),
 		}}))
@@ -46,7 +46,7 @@ var _ = Describe("uploader option", func() {
 
 		Expect(opt.Registrations).To(Equal([]*Registration{&Registration{
 			Name:         "plugin/name",
-			ArtefactType: "art",
+			ArtifactType: "art",
 			MediaType:    "",
 			Config:       json.RawMessage(`{"name":"Name"}`),
 		}}))
@@ -58,7 +58,7 @@ var _ = Describe("uploader option", func() {
 
 		Expect(opt.Registrations).To(Equal([]*Registration{&Registration{
 			Name:         "plugin/name",
-			ArtefactType: "",
+			ArtifactType: "",
 			MediaType:    "",
 			Config:       json.RawMessage(`{"name":"Name"}`),
 		}}))
@@ -70,7 +70,7 @@ var _ = Describe("uploader option", func() {
 
 		Expect(opt.Registrations).To(Equal([]*Registration{&Registration{
 			Name:         "plugin/name",
-			ArtefactType: "",
+			ArtifactType: "",
 			MediaType:    "",
 			Config:       json.RawMessage(`{"name":"Name"}`),
 		}}))
@@ -82,7 +82,7 @@ var _ = Describe("uploader option", func() {
 
 		Expect(opt.Registrations).To(Equal([]*Registration{&Registration{
 			Name:         "plugin/name",
-			ArtefactType: "",
+			ArtifactType: "",
 			MediaType:    "",
 			Config:       json.RawMessage(`"Name"`),
 		}}))
@@ -90,6 +90,6 @@ var _ = Describe("uploader option", func() {
 
 	It("fails", func() {
 		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name:::=Name`}))
-		MustFailWithMessage(opt.Complete(ctx), "invalid uploader registration plugin/name::: must be of <name>[:<artefact type>[:<media type>]]")
+		MustFailWithMessage(opt.Complete(ctx), "invalid uploader registration plugin/name::: must be of <name>[:<artifact type>[:<media type>]]")
 	})
 })

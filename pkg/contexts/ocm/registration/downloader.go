@@ -16,6 +16,6 @@ func RegisterDownloadHandler(ctx internal.Context, hdlr download.Handler, olist 
 	if opts.Priority > 0 {
 		return errors.ErrInvalid("option", "priority")
 	}
-	download.For(ctx).Register(opts.ArtefactType, opts.MimeType, hdlr)
+	download.For(ctx).Register(opts.ArtifactType, opts.MimeType, hdlr)
 	return nil
 }

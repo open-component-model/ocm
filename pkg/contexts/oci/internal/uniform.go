@@ -57,7 +57,7 @@ func (u *UniformRepositorySpec) HostPort() (string, string) {
 	return u.Host[:i], u.Host[i+1:]
 }
 
-// ComposeRef joins the actual repository spec and a given artefact spec.
+// ComposeRef joins the actual repository spec and a given artifact spec.
 func (u *UniformRepositorySpec) ComposeRef(art string) string {
 	if art == "" {
 		return u.String()

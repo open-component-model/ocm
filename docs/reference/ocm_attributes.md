@@ -20,15 +20,15 @@ OCM library:
 
 - <code>github.com/mandelsoft/ocm/keeplocalblob</code> [<code>keeplocalblob</code>]: *bool*
 
-  Keep local blobs when importing OCI artefacts to OCI registries from <code>localBlob</code>
-  access methods. By default they will be expanded to OCI artefacts with the
+  Keep local blobs when importing OCI artifacts to OCI registries from <code>localBlob</code>
+  access methods. By default they will be expanded to OCI artifacts with the
   access method <code>ociRegistry</code>. If this option is set to true, they will be stored
   as local blobs, also. The access method will still be <code>localBlob</code> but with a nested
   <code>ociRegistry</code> access method for describing the global access.
 
 - <code>github.com/mandelsoft/ocm/ociuploadrepo</code> [<code>ociuploadrepo</code>]: *oci base repository ref*
 
-  Upload local OCI artefact blobs to a dedicated repository.
+  Upload local OCI artifact blobs to a dedicated repository.
 
 - <code>github.com/mandelsoft/ocm/plugindir</code> [<code>plugindir</code>]: *plugin directory*
 

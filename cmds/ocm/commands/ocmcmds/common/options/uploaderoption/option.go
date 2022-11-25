@@ -29,7 +29,7 @@ func From(o options.OptionSetProvider) *Option {
 
 type Registration struct {
 	Name         string
-	ArtefactType string
+	ArtifactType string
 	MediaType    string
 	Config       json.RawMessage
 }
@@ -44,11 +44,11 @@ type Option struct {
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	flag.StringToStringVarP(fs, &o.spec, "uploader", "", nil, "repository uploader (<name>:<artefact type>:<media type>=<JSON target config)")
+	flag.StringToStringVarP(fs, &o.spec, "uploader", "", nil, "repository uploader (<name>:<artifact type>:<media type>=<JSON target config)")
 }
 
 func (o *Option) Complete(ctx clictx.Context) error {
-	desc := "<name>[:<artefact type>[:<media type>]]"
+	desc := "<name>[:<artifact type>[:<media type>]]"
 	for n, v := range o.spec {
 		nam := n
 		art := ""
@@ -87,7 +87,7 @@ func (o *Option) Complete(ctx clictx.Context) error {
 		}
 		o.Registrations = append(o.Registrations, &Registration{
 			Name:         nam,
-			ArtefactType: art,
+			ArtifactType: art,
 			MediaType:    med,
 			Config:       data,
 		})
@@ -98,7 +98,7 @@ func (o *Option) Complete(ctx clictx.Context) error {
 func (o *Option) Register(ctx ocm.ContextProvider) error {
 	for _, s := range o.Registrations {
 		err := registration.RegisterBlobHandlerByName(ctx.OCMContext(), s.Name, s.Config,
-			registration.ForArtefactType(s.ArtefactType), registration.ForMimeType(s.MediaType))
+			registration.ForArtifactType(s.ArtifactType), registration.ForMimeType(s.MediaType))
 		if err != nil {
 			return err
 		}
@@ -112,12 +112,12 @@ If the <code>--uploader</code> option is specified, appropriate uploaders
 are configured for the transport target. It has the following format
 
 <center>
-    <pre>&lt;name>:&lt;artefact type>:&lt;media type>=&lt;yaml target config></pre>
+    <pre>&lt;name>:&lt;artifact type>:&lt;media type>=&lt;yaml target config></pre>
 </center>
 
 The uploader name may be a path expression with the following possibilities:
-- <code>ocm/ociRegistry</code>: oci Registry upload for local OCI artefact blobs.
-  The media type is optional. If given ist must be an OCI artefact media type.
+- <code>ocm/ociRegistry</code>: oci Registry upload for local OCI artifact blobs.
+  The media type is optional. If given ist must be an OCI artifact media type.
 - <code>plugin/<plugin name>[/<uploader name]</code>: uploader provided by plugin.
 `
 	return s

@@ -57,10 +57,10 @@ type Builder struct {
 
 	oci_repo          oci.Repository
 	oci_nsacc         oci.NamespaceAccess
-	oci_artacc        oci.ArtefactAccess
+	oci_artacc        oci.ArtifactAccess
 	oci_cleanuplayers bool
 	oci_tags          *[]string
-	oci_artfunc       func(oci.ArtefactAccess) error
+	oci_artfunc       func(oci.ArtifactAccess) error
 }
 
 func NewBuilder(t *env.Environment) *Builder {

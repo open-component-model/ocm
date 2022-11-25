@@ -60,7 +60,7 @@ Dedicated OCM repository types:
 - `ComponentArchive`
 
 OCI Repository types (using standard component repository to OCI mapping):
-- `ArtefactSet`
+- `ArtifactSet`
 - `CommonTransportFormat`
 - `DockerDaemon`
 - `Empty`
@@ -80,6 +80,6 @@ The default format is <code>directory</code>.
 
 ##### Parents
 
-* [ocm download](ocm_download.md)	 &mdash; Download oci artefacts, resources or complete components
+* [ocm download](ocm_download.md)	 &mdash; Download oci artifacts, resources or complete components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

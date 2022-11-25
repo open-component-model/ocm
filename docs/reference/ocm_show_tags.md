@@ -1,4 +1,4 @@
-## ocm show tags &mdash; Show Dedicated Tags Of OCI Artefacts
+## ocm show tags &mdash; Show Dedicated Tags Of OCI Artifacts
 
 ### Synopsis
 
@@ -19,7 +19,7 @@ ocm show tags [<options>] <component> {<version pattern>}
 ### Description
 
 
-Match tags of an artefact against some patterns.
+Match tags of an artifact against some patterns.
 
 If the repository/registry option is specified, the given names are interpreted
 relative to the specified registry using the syntax
@@ -29,7 +29,7 @@ relative to the specified registry using the syntax
 </center>
 
 If no <code>--repo</code> option is specified the given names are interpreted 
-as extended OCI artefact references.
+as extended OCI artifact references.
 
 <center>
     <pre>[&lt;repo type>::]&lt;host>[:&lt;port>]/&lt;OCI repository name>[:&lt;tag>][@&lt;digest>]</pre>
@@ -46,7 +46,7 @@ For the *Common Transport Format* the types <code>directory</code>,
 
 Using the JSON variant any repository type supported by the 
 linked library can be used:
-- `ArtefactSet`
+- `ArtifactSet`
 - `CommonTransportFormat`
 - `DockerDaemon`
 - `Empty`

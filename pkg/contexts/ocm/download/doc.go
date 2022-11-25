@@ -7,8 +7,8 @@
 // blob as provided by the access method is the resukt of a download.
 // A download handler can influence the outbound blob format according
 // to the concrete type of the resource.
-// For example, a helm download for a helm artefact stored as oci artefact
-// will not provide the oci format chosen for representing the artefact
+// For example, a helm download for a helm artifact stored as oci artifact
+// will not provide the oci format chosen for representing the artifact
 // in OCI but a regular helm archive according to its specification.
 // The sub package handlers provides dedicated packages for standard handlers.
 //

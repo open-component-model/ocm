@@ -16,10 +16,10 @@ const (
 var ModTime = accessobj.ModTime
 
 const (
-	// The artefact descriptor name for artefact format.
-	ArtefactSetDescriptorFileName = "artefact-descriptor.json"
-	// BlobsDirectoryName is the name of the directory holding the artefact archives.
+	// The artifact descriptor name for artifact format.
+	ArtifactSetDescriptorFileName = "artifact-descriptor.json"
+	// BlobsDirectoryName is the name of the directory holding the artifact archives.
 	BlobsDirectoryName = "blobs"
-	// ArtefactIndexFileName is the artefact index descriptor name for CommanTransportFormat.
-	ArtefactIndexFileName = "artefact-index.json"
+	// ArtifactIndexFileName is the artifact index descriptor name for CommanTransportFormat.
+	ArtifactIndexFileName = "artifact-index.json"
 )

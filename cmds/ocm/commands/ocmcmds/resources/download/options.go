@@ -31,7 +31,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 func (o *Option) Usage() string {
 	s := `
 The library supports some downloads with semantics based on resource types. For example a helm chart
-can be download directly as helm chart archive, even if stored as OCI artefact.
+can be download directly as helm chart archive, even if stored as OCI artifact.
 This is handled by download handler. Their usage can be enabled with the <code>--download-handlers</code>
 option. Otherwise the resource as returned by the access method is stored.
 `

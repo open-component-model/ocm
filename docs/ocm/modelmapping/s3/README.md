@@ -11,7 +11,7 @@ by a namespace component `__versions__`.
 The OCM *component version* is stored below an additional folder with the
 version name of the component version.
 
-All artefacts belonging to a component version are stored as blobs below
+All artifacts belonging to a component version are stored as blobs below
 this folder.
 
 The OCM *component descriptor* of a component version is stored with the

@@ -62,7 +62,7 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 	if len(path) > 1 {
 		name = path[1]
 	}
-	_, _, err := RegisterBlobHandler(ctx, path[0], name, opts.ArtefactType, opts.MimeType, attr)
+	_, _, err := RegisterBlobHandler(ctx, path[0], name, opts.ArtifactType, opts.MimeType, attr)
 	return true, err
 }
 
@@ -82,7 +82,7 @@ func RegisterBlobHandler(ctx ocm.Context, pname, name string, artType, mediaType
 			return "", nil, fmt.Errorf("uploader %s not found in plugin %q", name, pname)
 		}
 	}
-	keys := plugin.UploaderKeySet{}.Add(plugin.UploaderKey{}.SetArtefact(artType, mediaType))
+	keys := plugin.UploaderKeySet{}.Add(plugin.UploaderKey{}.SetArtifact(artType, mediaType))
 	d := p.LookupUploader(name, artType, mediaType)
 
 	if len(d) == 0 {
@@ -103,7 +103,7 @@ func RegisterBlobHandler(ctx ocm.Context, pname, name string, artType, mediaType
 		return d[0].Name, nil, err
 	}
 	for k := range keys {
-		ctx.BlobHandlers().Register(h, cpi.ForArtefactType(k.GetArtefactType()), cpi.ForMimeType(k.GetMediaType()))
+		ctx.BlobHandlers().Register(h, cpi.ForArtifactType(k.GetArtifactType()), cpi.ForMimeType(k.GetMediaType()))
 	}
 	return d[0].Name, keys, nil
 }

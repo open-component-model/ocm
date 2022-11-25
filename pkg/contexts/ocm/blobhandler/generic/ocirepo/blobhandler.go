@@ -13,8 +13,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/ociuploadattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -23,22 +23,22 @@ import (
 
 func init() {
 	for _, mime := range artdesc.ArchiveBlobTypes() {
-		cpi.RegisterBlobHandler(NewArtefactHandler(), cpi.ForMimeType(mime), cpi.WithPrio(10))
+		cpi.RegisterBlobHandler(NewArtifactHandler(), cpi.ForMimeType(mime), cpi.WithPrio(10))
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// artefactHandler stores artefact blobs as OCIArtefacts.
-type artefactHandler struct {
+// artifactHandler stores artifact blobs as OCIArtifacts.
+type artifactHandler struct {
 	spec *ociuploadattr.Attribute
 }
 
-func NewArtefactHandler(repospec ...*ociuploadattr.Attribute) cpi.BlobHandler {
-	return &artefactHandler{utils.Optional(repospec...)}
+func NewArtifactHandler(repospec ...*ociuploadattr.Attribute) cpi.BlobHandler {
+	return &artifactHandler{utils.Optional(repospec...)}
 }
 
-func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	attr := b.spec
 	if attr == nil {
 		attr = ociuploadattr.Get(ctx.GetContext())
@@ -69,11 +69,11 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	}
 	if m, ok := blob.(accessio.AnnotatedBlobAccess[cpi.AccessMethod]); ok {
 		// prepare for optimized point to point implementation
-		cpi.BlobHandlerLogger(ctx.GetContext()).Debug("oci generic artefact handler with ocm access source",
+		cpi.BlobHandlerLogger(ctx.GetContext()).Debug("oci generic artifact handler with ocm access source",
 			append(values, "sourcetype", m.Source().AccessSpec().GetType())...,
 		)
 	} else {
-		cpi.BlobHandlerLogger(ctx.GetContext()).Debug("oci generic artefact handler", values...)
+		cpi.BlobHandlerLogger(ctx.GetContext()).Debug("oci generic artifact handler", values...)
 	}
 
 	var namespace oci.NamespaceAccess
@@ -99,7 +99,7 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	}
 	defer namespace.Close()
 
-	set, err := artefactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
+	set, err := artifactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
 	if err != nil {
 		return nil, err
 	}
@@ -108,17 +108,17 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	if version == "" {
 		version = "@" + digest.String()
 	}
-	art, err := set.GetArtefact(digest.String())
+	art, err := set.GetArtifact(digest.String())
 	if err != nil {
 		return nil, err
 	}
 
-	err = artefactset.TransferArtefact(art, namespace, oci.AsTags(tag)...)
+	err = artifactset.TransferArtifact(art, namespace, oci.AsTags(tag)...)
 	if err != nil {
 		return nil, err
 	}
 
 	ref := base.ComposeRef(namespace.GetNamespace() + version)
-	var acc cpi.AccessSpec = ociartefact.New(ref)
+	var acc cpi.AccessSpec = ociartifact.New(ref)
 	return acc, nil
 }

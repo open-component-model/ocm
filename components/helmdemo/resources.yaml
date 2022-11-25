@@ -19,5 +19,5 @@ name: image
 type: ociImage
 version: "1.0"
 access:
-  type: ociArtefact
+  type: ociArtifact
   imageReference: gcr.io/google_containers/echoserver:1.10

@@ -20,7 +20,7 @@ const (
 	dockerHubLegacyDomain = "index.docker.io"
 
 	KIND_OCI_REFERENCE       = "oci reference"
-	KIND_ARETEFACT_REFERENCE = "artefact reference"
+	KIND_ARETEFACT_REFERENCE = "artifact reference"
 )
 
 // ParseRepo parses a standard oci repository reference into a internal representation.
@@ -237,7 +237,7 @@ func (r RefSpec) DeepCopy() RefSpec {
 ////////////////////////////////////////////////////////////////////////////////
 
 func ParseArt(art string) (ArtSpec, error) {
-	match := grammar.AnchoredArtefactVersionRegexp.FindSubmatch([]byte(art))
+	match := grammar.AnchoredArtifactVersionRegexp.FindSubmatch([]byte(art))
 
 	if match == nil {
 		return ArtSpec{}, errors.ErrInvalid(KIND_ARETEFACT_REFERENCE, art)

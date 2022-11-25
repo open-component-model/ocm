@@ -11,17 +11,17 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/index"
 )
 
 /*
-   A common transport archive is just a folder with artefact archives.
+   A common transport archive is just a folder with artifact archives.
    in tar format and an index.json file. The name of the archive
-   is the digest of the artefact descriptor.
+   is the digest of the artifact descriptor.
 
-   The artefact archive is a filesystem structure with a file
-   artefact-descriptor.json and a folder blobs containing
+   The artifact archive is a filesystem structure with a file
+   artifact-descriptor.json and a folder blobs containing
    the flat blob files with the name according to the blob digest.
 
    Digests used as filename will replace the ":" by a "."
@@ -41,8 +41,8 @@ func (r *Repository) Close() error {
 	return r.view.Close()
 }
 
-func (r *Repository) LookupArtefact(name string, ref string) (cpi.ArtefactAccess, error) {
-	return r.RepositoryImpl.LookupArtefact(name, ref)
+func (r *Repository) LookupArtifact(name string, ref string) (cpi.ArtifactAccess, error) {
+	return r.RepositoryImpl.LookupArtifact(name, ref)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ type RepositoryImpl struct {
 
 	ctx  cpi.Context
 	spec *RepositorySpec
-	base *artefactset.FileSystemBlobAccess
+	base *artifactset.FileSystemBlobAccess
 }
 
 var _ cpi.Repository = (*Repository)(nil)
@@ -74,7 +74,7 @@ func _Wrap(ctx cpi.Context, spec *RepositorySpec, obj *accessobj.AccessObject, e
 	r := &RepositoryImpl{
 		ctx:  ctx,
 		spec: spec,
-		base: artefactset.NewFileSystemBlobAccess(obj),
+		base: artifactset.NewFileSystemBlobAccess(obj),
 	}
 	r.refs = accessio.NewRefCloser(r, true)
 	return r.View(true)
@@ -137,19 +137,19 @@ func (a *RepositoryImpl) getIndex() *index.RepositoryIndex {
 ////////////////////////////////////////////////////////////////////////////////
 // cpi.Repository methods
 
-func (r *RepositoryImpl) ExistsArtefact(name string, tag string) (bool, error) {
-	return r.getIndex().HasArtefact(name, tag), nil
+func (r *RepositoryImpl) ExistsArtifact(name string, tag string) (bool, error) {
+	return r.getIndex().HasArtifact(name, tag), nil
 }
 
-func (r *RepositoryImpl) LookupArtefact(name string, ref string) (cpi.ArtefactAccess, error) {
+func (r *RepositoryImpl) LookupArtifact(name string, ref string) (cpi.ArtifactAccess, error) {
 	v, err := r.View()
 	if err != nil {
 		return nil, err
 	}
 	defer v.Close()
-	a := r.getIndex().GetArtefactInfo(name, ref)
+	a := r.getIndex().GetArtifactInfo(name, ref)
 	if a == nil {
-		return nil, cpi.ErrUnknownArtefact(name, ref)
+		return nil, cpi.ErrUnknownArtifact(name, ref)
 	}
 
 	ns, err := newNamespace(r, name, false) // share repo view.namespace not exposed
@@ -157,7 +157,7 @@ func (r *RepositoryImpl) LookupArtefact(name string, ref string) (cpi.ArtefactAc
 		return nil, err
 	}
 	defer ns.Close()
-	return ns.GetArtefact(ref)
+	return ns.GetArtifact(ref)
 }
 
 func (r *RepositoryImpl) LookupNamespace(name string) (cpi.NamespaceAccess, error) {

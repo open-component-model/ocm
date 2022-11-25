@@ -115,8 +115,8 @@ func ForMimeType(mimetype string) BlobHandlerOption {
 	return internal.ForMimeType(mimetype)
 }
 
-func ForArtefactType(arttype string) BlobHandlerOption {
-	return internal.ForArtefactType(arttype)
+func ForArtifactType(arttype string) BlobHandlerOption {
+	return internal.ForArtifactType(arttype)
 }
 
 func RegisterRepositorySpecHandler(handler RepositorySpecHandler, types ...string) {
@@ -190,7 +190,7 @@ func RepositoryPrefix(spec RepositorySpec) string {
 // artifacts.
 type HintProvider internal.HintProvider
 
-func ArtefactNameHint(spec AccessSpec, cv ComponentVersionAccess) string {
+func ArtifactNameHint(spec AccessSpec, cv ComponentVersionAccess) string {
 	if h, ok := spec.(HintProvider); ok {
 		return h.GetReferenceHint(cv)
 	}

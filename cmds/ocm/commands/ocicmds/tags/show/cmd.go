@@ -49,9 +49,9 @@ func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
 		Use:   "[<options>] <component> {<version pattern>}",
 		Args:  cobra.MinimumNArgs(1),
-		Short: "show dedicated tags of OCI artefacts",
+		Short: "show dedicated tags of OCI artifacts",
 		Long: `
-Match tags of an artefact against some patterns.
+Match tags of an artifact against some patterns.
 `,
 		Example: `
 $ oci show tags ghcr.io/mandelsoft/kubelink
@@ -96,7 +96,7 @@ func (o *Command) Run() error {
 	tags := utils2.StringSlice{}
 	repo := repooption.From(o)
 
-	var art oci.ArtefactAccess
+	var art oci.ArtifactAccess
 	var ns oci.NamespaceAccess
 
 	// determine version source
@@ -110,7 +110,7 @@ func (o *Command) Run() error {
 			return err
 		}
 		if cr.IsVersion() {
-			art, err = session.GetArtefact(ns, cr.Reference())
+			art, err = session.GetArtifact(ns, cr.Reference())
 			if err != nil {
 				return err
 			}
@@ -124,7 +124,7 @@ func (o *Command) Run() error {
 			return errors.Newf("no namespace specified")
 		}
 		ns = r.Namespace
-		art = r.Artefact
+		art = r.Artifact
 	}
 
 	list, err := ns.ListTags()
@@ -136,7 +136,7 @@ func (o *Command) Run() error {
 	if art != nil {
 		dig := art.Digest()
 		for i := 0; i < len(tags); i++ {
-			a, err := ns.GetArtefact(tags[i])
+			a, err := ns.GetArtifact(tags[i])
 			if err != nil {
 				return err
 			}

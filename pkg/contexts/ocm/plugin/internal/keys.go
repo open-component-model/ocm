@@ -37,32 +37,32 @@ func (k RepositoryContext) Describe() string {
 	return ""
 }
 
-type ArtefactContext struct {
+type ArtifactContext struct {
 	ArtifactType string `json:"artifactType"`
 	MediaType    string `json:"mediaType"`
 }
 
-func (k ArtefactContext) IsValid() bool {
+func (k ArtifactContext) IsValid() bool {
 	return k.ArtifactType != "" || k.MediaType != ""
 }
 
-func (k ArtefactContext) GetArtefactType() string {
+func (k ArtifactContext) GetArtifactType() string {
 	return k.ArtifactType
 }
 
-func (k ArtefactContext) GetMediaType() string {
+func (k ArtifactContext) GetMediaType() string {
 	return k.MediaType
 }
 
-func (k ArtefactContext) String() string {
+func (k ArtifactContext) String() string {
 	return fmt.Sprintf("%s:%s", k.ArtifactType, k.MediaType)
 }
 
-func (k ArtefactContext) Describe() string {
-	return fmt.Sprintf("Artefact Type: %s\nMedia Type   :%s", k.ArtifactType, k.MediaType)
+func (k ArtifactContext) Describe() string {
+	return fmt.Sprintf("Artifact Type: %s\nMedia Type   :%s", k.ArtifactType, k.MediaType)
 }
 
-func (k ArtefactContext) SetArtefact(arttype, mediatype string) ArtefactContext {
+func (k ArtifactContext) SetArtifact(arttype, mediatype string) ArtifactContext {
 	k.ArtifactType = arttype
 	k.MediaType = mediatype
 	return k
@@ -70,22 +70,22 @@ func (k ArtefactContext) SetArtefact(arttype, mediatype string) ArtefactContext 
 
 type UploaderKey struct {
 	RepositoryContext `json:",inline"`
-	ArtefactContext   `json:",inline"`
+	ArtifactContext   `json:",inline"`
 }
 
 func (k UploaderKey) IsValid() bool {
-	return k.ArtefactContext.IsValid() && k.RepositoryContext.IsValid()
+	return k.ArtifactContext.IsValid() && k.RepositoryContext.IsValid()
 }
 
 func (k UploaderKey) String() string {
-	return fmt.Sprintf("%s%s", k.ArtefactContext.String(), k.RepositoryContext.String())
+	return fmt.Sprintf("%s%s", k.ArtifactContext.String(), k.RepositoryContext.String())
 }
 
 func (k UploaderKey) Describe() string {
-	return fmt.Sprintf("%s%s", k.ArtefactContext.Describe(), k.RepositoryContext.Describe())
+	return fmt.Sprintf("%s%s", k.ArtifactContext.Describe(), k.RepositoryContext.Describe())
 }
 
-func (k UploaderKey) SetArtefact(arttype, mediatype string) UploaderKey {
+func (k UploaderKey) SetArtifact(arttype, mediatype string) UploaderKey {
 	k.ArtifactType = arttype
 	k.MediaType = mediatype
 	return k

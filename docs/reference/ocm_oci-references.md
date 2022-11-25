@@ -6,7 +6,7 @@
 The command line client supports a special notation scheme for specifying
 references to instances of oci like registries. This allows for specifying
 references to any registry supported by the OCM toolset that can host OCI
-artefacts. As a subset the regular OCI artefact notation used for docker
+artifacts. As a subset the regular OCI artifact notation used for docker
 images are possible:
 
 <center>
@@ -21,7 +21,7 @@ images are possible:
     <pre>&lt;docker repository>/&lt;docker image>[:&lt;tag>][@&lt;digest>]</pre>
 </center>
 
-Besides dedicated artefacts it is also possible to denote registries
+Besides dedicated artifacts it is also possible to denote registries
 as a whole:
 
 <center>

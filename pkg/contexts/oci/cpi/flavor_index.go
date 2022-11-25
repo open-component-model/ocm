@@ -15,12 +15,12 @@ import (
 )
 
 type IndexImpl struct {
-	artefactBase
+	artifactBase
 }
 
 var _ IndexAccess = (*IndexImpl)(nil)
 
-func NewIndex(access ArtefactSetContainer, defs ...*artdesc.Index) (internal.IndexAccess, error) {
+func NewIndex(access ArtifactSetContainer, defs ...*artdesc.Index) (internal.IndexAccess, error) {
 	var def *artdesc.Index
 	if len(defs) != 0 && defs[0] != nil {
 		def = defs[0]
@@ -34,12 +34,12 @@ func NewIndex(access ArtefactSetContainer, defs ...*artdesc.Index) (internal.Ind
 		panic("oops")
 	}
 
-	p, err := access.NewArtefactProvider(state)
+	p, err := access.NewArtifactProvider(state)
 	if err != nil {
 		return nil, err
 	}
 	i := &IndexImpl{
-		artefactBase: artefactBase{
+		artifactBase: artifactBase{
 			container: access,
 			provider:  p,
 			state:     state,
@@ -55,16 +55,16 @@ type indexMapper struct {
 var _ accessobj.State = (*indexMapper)(nil)
 
 func (m *indexMapper) GetState() interface{} {
-	return m.State.GetState().(*artdesc.Artefact).Index()
+	return m.State.GetState().(*artdesc.Artifact).Index()
 }
 
 func (m *indexMapper) GetOriginalState() interface{} {
-	return m.State.GetOriginalState().(*artdesc.Artefact).Index()
+	return m.State.GetOriginalState().(*artdesc.Artifact).Index()
 }
 
-func NewIndexForArtefact(a *ArtefactImpl) *IndexImpl {
+func NewIndexForArtifact(a *ArtifactImpl) *IndexImpl {
 	m := &IndexImpl{
-		artefactBase: artefactBase{
+		artifactBase: artifactBase{
 			container: a.container,
 			provider:  a.provider,
 			state:     &indexMapper{a.state},
@@ -73,8 +73,8 @@ func NewIndexForArtefact(a *ArtefactImpl) *IndexImpl {
 	return m
 }
 
-func (a *IndexImpl) NewArtefact(art ...*artdesc.Artefact) (ArtefactAccess, error) {
-	return a.newArtefact(art...)
+func (a *IndexImpl) NewArtifact(art ...*artdesc.Artifact) (ArtifactAccess, error) {
+	return a.newArtifact(art...)
 }
 
 func (i *IndexImpl) AddBlob(blob internal.BlobAccess) error {
@@ -89,7 +89,7 @@ func (i *IndexImpl) Index() (*artdesc.Index, error) {
 	return i.GetDescriptor(), nil
 }
 
-func (i *IndexImpl) Artefact() *artdesc.Artefact {
+func (i *IndexImpl) Artifact() *artdesc.Artifact {
 	a := artdesc.New()
 	_ = a.SetIndex(i.GetDescriptor())
 	return a
@@ -123,17 +123,17 @@ func (i *IndexImpl) GetBlob(digest digest.Digest) (internal.BlobAccess, error) {
 	return nil, ErrBlobNotFound(digest)
 }
 
-func (i *IndexImpl) GetArtefact(digest digest.Digest) (internal.ArtefactAccess, error) {
+func (i *IndexImpl) GetArtifact(digest digest.Digest) (internal.ArtifactAccess, error) {
 	for _, d := range i.GetDescriptor().Manifests {
 		if d.Digest == digest {
-			return i.provider.GetArtefact(digest)
+			return i.provider.GetArtifact(digest)
 		}
 	}
-	return nil, errors.ErrNotFound(KIND_OCIARTEFACT, digest.String())
+	return nil, errors.ErrNotFound(KIND_OCIARTIFACT, digest.String())
 }
 
 func (i *IndexImpl) GetIndex(digest digest.Digest) (internal.IndexAccess, error) {
-	a, err := i.GetArtefact(digest)
+	a, err := i.GetArtifact(digest)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func (i *IndexImpl) GetIndex(digest digest.Digest) (internal.IndexAccess, error)
 }
 
 func (i *IndexImpl) GetManifest(digest digest.Digest) (internal.ManifestAccess, error) {
-	a, err := i.GetArtefact(digest)
+	a, err := i.GetArtifact(digest)
 	if err != nil {
 		return nil, err
 	}
@@ -154,8 +154,8 @@ func (i *IndexImpl) GetManifest(digest digest.Digest) (internal.ManifestAccess, 
 	return nil, errors.New("no manifest")
 }
 
-func (a *IndexImpl) AddArtefact(art Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
-	blob, err := a.provider.AddArtefact(art)
+func (a *IndexImpl) AddArtifact(art Artifact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
+	blob, err := a.provider.AddArtifact(art)
 	if err != nil {
 		return nil, err
 	}

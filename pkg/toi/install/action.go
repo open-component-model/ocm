@@ -131,7 +131,7 @@ func DetermineExecutor(executor *Executor, octx ocm.Context, cv ocm.ComponentVer
 		if res.Meta().Type != consts.OCIImage {
 			return nil, errors.ErrInvalid("executor resource type", res.Meta().Type)
 		}
-		ref, err := utils.GetOCIArtefactRef(octx, res)
+		ref, err := utils.GetOCIArtifactRef(octx, res)
 		if err != nil {
 			return nil, errors.Wrapf(err, "image ref for executor resource %s not found", executor.ResourceRef.String())
 		}

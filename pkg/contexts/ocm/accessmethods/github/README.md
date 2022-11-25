@@ -10,7 +10,7 @@ type: gitHub/v1
 
 Provided blobs use the following media type for: `application/x-tgz`
 
-The artefact content is provided as gnu-zipped tar archive
+The artifact content is provided as gnu-zipped tar archive
 
 ### Description
 

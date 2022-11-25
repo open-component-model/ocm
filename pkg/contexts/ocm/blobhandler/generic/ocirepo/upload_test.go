@@ -16,7 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
 	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/ociuploadattr"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
@@ -70,7 +70,7 @@ var _ = Describe("upload", func() {
 			env.Provider("mandelsoft")
 			env.Resource("value", "", resourcetypes.OCI_IMAGE, v1.LocalRelation, func() {
 				env.Access(
-					ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
+					ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
 				)
 			})
 		})
@@ -94,7 +94,7 @@ var _ = Describe("upload", func() {
 		env.Cleanup()
 	})
 
-	It("transfers oci artefact", func() {
+	It("transfers oci artifact", func() {
 		ctx := env.OCMContext()
 
 		ctf := Must(ctfocm.Open(ctx, accessobj.ACC_READONLY, CTF, 0700, env))
@@ -124,19 +124,19 @@ var _ = Describe("upload", func() {
 		defer Close(ocv2)
 		ra = Must(cv2.GetResourceByIndex(0))
 		acc = Must(ra.Access())
-		Expect(acc.GetKind()).To(Equal(ociartefact.Type))
+		Expect(acc.GetKind()).To(Equal(ociartifact.Type))
 		val := Must(ctx.AccessSpecForSpec(acc))
 		// TODO: the result is invalid for ctf: better handling for ctf refs
-		Expect(val.(*ociartefact.AccessSpec).ImageReference).To(Equal("/tmp/target//copy/ocm/value:v2.0"))
+		Expect(val.(*ociartifact.AccessSpec).ImageReference).To(Equal("/tmp/target//copy/ocm/value:v2.0"))
 
 		attr.Close()
 		target, err := ctfoci.Open(ctx.OCIContext(), accessobj.ACC_READONLY, TARGET, 0, env)
 		Expect(err).To(Succeed())
 		defer Close(target)
-		Expect(target.ExistsArtefact("copy/ocm/value", "v2.0")).To(BeTrue())
+		Expect(target.ExistsArtifact("copy/ocm/value", "v2.0")).To(BeTrue())
 	})
 
-	It("transfers oci artefact with named handler", func() {
+	It("transfers oci artifact with named handler", func() {
 		ctx := env.OCMContext()
 
 		ctf := Must(ctfocm.Open(ctx, accessobj.ACC_READONLY, CTF, 0700, env))
@@ -166,15 +166,15 @@ var _ = Describe("upload", func() {
 		defer Close(ocv2)
 		ra = Must(cv2.GetResourceByIndex(0))
 		acc = Must(ra.Access())
-		Expect(acc.GetKind()).To(Equal(ociartefact.Type))
+		Expect(acc.GetKind()).To(Equal(ociartifact.Type))
 		val := Must(ctx.AccessSpecForSpec(acc))
 		// TODO: the result is invalid for ctf: better handling for ctf refs
-		Expect(val.(*ociartefact.AccessSpec).ImageReference).To(Equal("/tmp/target//copy/ocm/value:v2.0"))
+		Expect(val.(*ociartifact.AccessSpec).ImageReference).To(Equal("/tmp/target//copy/ocm/value:v2.0"))
 
 		attr.Close()
 		target, err := ctfoci.Open(ctx.OCIContext(), accessobj.ACC_READONLY, TARGET, 0, env)
 		Expect(err).To(Succeed())
 		defer Close(target)
-		Expect(target.ExistsArtefact("copy/ocm/value", "v2.0")).To(BeTrue())
+		Expect(target.ExistsArtifact("copy/ocm/value", "v2.0")).To(BeTrue())
 	})
 })

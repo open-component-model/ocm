@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	KIND_OCIARTEFACT = internal.KIND_OCIARTEFACT
+	KIND_OCIARTIFACT = internal.KIND_OCIARTIFACT
 	KIND_MEDIATYPE   = accessio.KIND_MEDIATYPE
 	KIND_BLOB        = accessio.KIND_BLOB
 )
@@ -32,7 +32,7 @@ type (
 	RepositorySpec                   = internal.RepositorySpec
 	IntermediateRepositorySpecAspect = internal.IntermediateRepositorySpecAspect
 	GenericRepositorySpec            = internal.GenericRepositorySpec
-	ArtefactAccess                   = internal.ArtefactAccess
+	ArtifactAccess                   = internal.ArtifactAccess
 	NamespaceLister                  = internal.NamespaceLister
 	NamespaceAccess                  = internal.NamespaceAccess
 	ManifestAccess                   = internal.ManifestAccess

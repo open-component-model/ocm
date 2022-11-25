@@ -84,7 +84,7 @@ func (r *_registry) download(list []Handler, p common.Printer, racc cpi.Resource
 
 var DefaultRegistry = NewRegistry()
 
-func RegisterForArtefactType(arttype string, hdlr Handler) {
+func RegisterForArtifactType(arttype string, hdlr Handler) {
 	DefaultRegistry.Register(arttype, "", hdlr)
 }
 

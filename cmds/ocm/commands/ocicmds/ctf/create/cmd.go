@@ -46,7 +46,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Short: "create new OCI/OCM transport  archive",
 		Long: `
 Create a new empty OCM/OCI transport archive. This might be either a directory prepared
-to host artefact content or a tar/tgz file.
+to host artifact content or a tar/tgz file.
 `,
 	}
 }

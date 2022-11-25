@@ -38,7 +38,7 @@ const ARCH = "ctf"
 const COMP = "github.com/mandelsoft/comp"
 const VERS = "1.0.0"
 const PROVIDER = "mandelsoft"
-const RSCTYPE = "TestArtefact"
+const RSCTYPE = "TestArtifact"
 const MEDIA = "text/plain"
 
 const REPOTYPE = "test/v1"

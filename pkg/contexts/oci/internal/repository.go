@@ -15,8 +15,8 @@ type Repository interface {
 	GetSpecification() RepositorySpec
 	NamespaceLister() NamespaceLister
 
-	ExistsArtefact(name string, ref string) (bool, error)
-	LookupArtefact(name string, ref string) (ArtefactAccess, error)
+	ExistsArtifact(name string, ref string) (bool, error)
+	LookupArtifact(name string, ref string) (ArtifactAccess, error)
 	LookupNamespace(name string) (NamespaceAccess, error)
 	Close() error
 }
@@ -38,61 +38,61 @@ type BlobSink interface {
 	AddBlob(BlobAccess) error
 }
 
-type ArtefactSink interface {
+type ArtifactSink interface {
 	AddBlob(BlobAccess) error
-	AddArtefact(a Artefact, tags ...string) (BlobAccess, error)
+	AddArtifact(a Artifact, tags ...string) (BlobAccess, error)
 	AddTags(digest digest.Digest, tags ...string) error
 }
 
-type ArtefactSource interface {
-	GetArtefact(version string) (ArtefactAccess, error)
+type ArtifactSource interface {
+	GetArtifact(version string) (ArtifactAccess, error)
 	GetBlobData(digest digest.Digest) (int64, DataAccess, error)
 }
 
 type NamespaceAccess interface {
-	ArtefactSource
-	ArtefactSink
+	ArtifactSource
+	ArtifactSink
 
 	GetNamespace() string
 	ListTags() ([]string, error)
 
-	NewArtefact(...*artdesc.Artefact) (ArtefactAccess, error)
+	NewArtifact(...*artdesc.Artifact) (ArtifactAccess, error)
 
 	Close() error
 }
 
-type Artefact interface {
+type Artifact interface {
 	IsManifest() bool
 	IsIndex() bool
 
 	Digest() digest.Digest
 	Blob() (BlobAccess, error)
-	Artefact() *artdesc.Artefact
+	Artifact() *artdesc.Artifact
 	Manifest() (*artdesc.Manifest, error)
 	Index() (*artdesc.Index, error)
 }
 
-type ArtefactAccess interface {
-	Artefact
+type ArtifactAccess interface {
+	Artifact
 	BlobSource
 	BlobSink
 
-	GetDescriptor() *artdesc.Artefact
+	GetDescriptor() *artdesc.Artifact
 	ManifestAccess() ManifestAccess
 	IndexAccess() IndexAccess
 	GetBlob(digest digest.Digest) (BlobAccess, error)
 
-	GetArtefact(digest digest.Digest) (ArtefactAccess, error)
+	GetArtifact(digest digest.Digest) (ArtifactAccess, error)
 	AddBlob(BlobAccess) error
 
-	AddArtefact(Artefact, *artdesc.Platform) (BlobAccess, error)
+	AddArtifact(Artifact, *artdesc.Platform) (BlobAccess, error)
 	AddLayer(BlobAccess, *artdesc.Descriptor) (int, error)
 
 	Close() error
 }
 
 type ManifestAccess interface {
-	Artefact
+	Artifact
 
 	GetDescriptor() *artdesc.Manifest
 	GetBlobDescriptor(digest digest.Digest) *artdesc.Descriptor
@@ -105,20 +105,20 @@ type ManifestAccess interface {
 }
 
 type IndexAccess interface {
-	Artefact
+	Artifact
 
 	GetDescriptor() *artdesc.Index
 	GetBlobDescriptor(digest digest.Digest) *artdesc.Descriptor
 	GetBlob(digest digest.Digest) (BlobAccess, error)
 
-	GetArtefact(digest digest.Digest) (ArtefactAccess, error)
+	GetArtifact(digest digest.Digest) (ArtifactAccess, error)
 	/*
 		GetIndex(digest digest.Digest) (IndexAccess, error)
 		GetManifest(digest digest.Digest) (ManifestAccess, error)
 	*/
 
 	AddBlob(BlobAccess) error
-	AddArtefact(Artefact, *artdesc.Platform) (BlobAccess, error)
+	AddArtifact(Artifact, *artdesc.Platform) (BlobAccess, error)
 }
 
 // NamespaceLister provides the optional repository list functionality of

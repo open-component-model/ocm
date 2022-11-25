@@ -22,7 +22,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -55,16 +55,16 @@ var _ = Describe("ctf management", func() {
 		DefaultManifestFill(n)
 		Expect(n.Close()).To(Succeed())
 
-		Expect(r.ExistsArtefact("mandelsoft/test", TAG)).To(BeTrue())
+		Expect(r.ExistsArtifact("mandelsoft/test", TAG)).To(BeTrue())
 
-		art, err := r.LookupArtefact("mandelsoft/test", TAG)
+		art, err := r.LookupArtifact("mandelsoft/test", TAG)
 		Expect(err).To(Succeed())
 		Close(art, "art")
 
 		Expect(r.Close()).To(Succeed())
-		Expect(vfs.FileExists(tempfs, "test/"+ctf.ArtefactIndexFileName)).To(BeTrue())
+		Expect(vfs.FileExists(tempfs, "test/"+ctf.ArtifactIndexFileName)).To(BeTrue())
 
-		infos, err := vfs.ReadDir(tempfs, "test/"+artefactset.BlobsDirectoryName)
+		infos, err := vfs.ReadDir(tempfs, "test/"+artifactset.BlobsDirectoryName)
 		Expect(err).To(Succeed())
 		blobs := []string{}
 		for _, fi := range infos {
@@ -87,9 +87,9 @@ var _ = Describe("ctf management", func() {
 
 		Expect(n.Close()).To(Succeed())
 		Expect(r.Close()).To(Succeed())
-		Expect(vfs.FileExists(tempfs, "test/"+ctf.ArtefactIndexFileName)).To(BeTrue())
+		Expect(vfs.FileExists(tempfs, "test/"+ctf.ArtifactIndexFileName)).To(BeTrue())
 
-		infos, err := vfs.ReadDir(tempfs, "test/"+artefactset.BlobsDirectoryName)
+		infos, err := vfs.ReadDir(tempfs, "test/"+artifactset.BlobsDirectoryName)
 		Expect(err).To(Succeed())
 		blobs := []string{}
 		for _, fi := range infos {
@@ -101,7 +101,7 @@ var _ = Describe("ctf management", func() {
 			"sha256."+DIGEST_LAYER))
 	})
 
-	It("instantiate tgz artefact", func() {
+	It("instantiate tgz artifact", func() {
 		ctf.FormatTGZ.ApplyOption(&spec.StandardOptions)
 		spec.FilePath = "test.tgz"
 		r, err := spec.Repository(nil, nil)
@@ -135,13 +135,13 @@ var _ = Describe("ctf management", func() {
 
 			switch header.Typeflag {
 			case tar.TypeDir:
-				Expect(header.Name).To(Equal(artefactset.BlobsDirectoryName))
+				Expect(header.Name).To(Equal(artifactset.BlobsDirectoryName))
 			case tar.TypeReg:
 				files = append(files, header.Name)
 			}
 		}
 		Expect(files).To(ContainElements(
-			ctf.ArtefactIndexFileName,
+			ctf.ArtifactIndexFileName,
 			"blobs/sha256."+DIGEST_MANIFEST,
 			"blobs/sha256."+DIGEST_CONFIG,
 			"blobs/sha256."+DIGEST_LAYER))
@@ -165,24 +165,24 @@ var _ = Describe("ctf management", func() {
 			n, err = r.LookupNamespace("mandelsoft/test")
 			Expect(err).To(Succeed())
 
-			art, err := n.GetArtefact("sha256:" + DIGEST_MANIFEST)
+			art, err := n.GetArtifact("sha256:" + DIGEST_MANIFEST)
 			Expect(err).To(Succeed())
-			CheckArtefact(art)
-			art, err = n.GetArtefact(TAG)
+			CheckArtifact(art)
+			art, err = n.GetArtifact(TAG)
 			Expect(err).To(Succeed())
-			b, err := art.Artefact().ToBlobAccess()
+			b, err := art.Artifact().ToBlobAccess()
 			Expect(err).To(Succeed())
 			Expect(b.Digest()).To(Equal(digest.Digest("sha256:" + DIGEST_MANIFEST)))
 
-			_, err = n.GetArtefact("dummy")
-			Expect(err).To(Equal(errors.ErrNotFound(cpi.KIND_OCIARTEFACT, "dummy", "mandelsoft/test")))
+			_, err = n.GetArtifact("dummy")
+			Expect(err).To(Equal(errors.ErrNotFound(cpi.KIND_OCIARTIFACT, "dummy", "mandelsoft/test")))
 
 			Expect(n.AddBlob(accessio.BlobAccessForString("", "dummy"))).To(Equal(accessobj.ErrReadOnly))
 
 			n, err = r.LookupNamespace("mandelsoft/other")
 			Expect(err).To(Succeed())
-			_, err = n.GetArtefact("sha256:" + DIGEST_MANIFEST)
-			Expect(err).To(Equal(errors.ErrNotFound(cpi.KIND_OCIARTEFACT, "sha256:"+DIGEST_MANIFEST, "mandelsoft/other")))
+			_, err = n.GetArtifact("sha256:" + DIGEST_MANIFEST)
+			Expect(err).To(Equal(errors.ErrNotFound(cpi.KIND_OCIARTIFACT, "sha256:"+DIGEST_MANIFEST, "mandelsoft/other")))
 		})
 	})
 })

@@ -19,9 +19,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
@@ -66,9 +66,9 @@ var _ = Describe("Transfer handler", func() {
 					env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
 						env.BlobStringData(mime.MIME_TEXT, "testdata")
 					})
-					env.Resource("artefact", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
+					env.Resource("artifact", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
 						env.Access(
-							ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
+							ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
 						)
 					})
 				})
@@ -118,7 +118,7 @@ var _ = Describe("Transfer handler", func() {
 		Expect(err).To(Succeed())
 
 		fmt.Printf("%s\n", string(data))
-		hash := HashManifest1(artefactset.DefaultArtefactSetDescriptorFileName)
+		hash := HashManifest1(artifactset.DefaultArtifactSetDescriptorFileName)
 		Expect(string(data)).To(StringEqualWithContext("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
 
 		r, err := comp.GetResourceByIndex(1)
@@ -129,7 +129,7 @@ var _ = Describe("Transfer handler", func() {
 		reader, err := meth.Reader()
 		Expect(err).To(Succeed())
 		defer reader.Close()
-		set, err := artefactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(reader))
+		set, err := artifactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(reader))
 		Expect(err).To(Succeed())
 		defer set.Close()
 
@@ -179,7 +179,7 @@ var _ = Describe("Transfer handler", func() {
 			ocmsign.Update(), ocmsign.VerifyDigests(),
 		)
 		Expect(opts.Complete(signingattr.Get(env.OCMContext()))).To(Succeed())
-		digest := "b65a1ae56a380d34a87aa5e52704d238a3cfbc6e6cc9a3cdb686db9ba084bc15"
+		digest := "7deeb1dc9ca3501a38d73df68beabc45a82777c3b5fbd2cc11a13781954d39d8"
 		dig, err := ocmsign.Apply(nil, nil, cv, opts)
 		Expect(err).To(Succeed())
 		Expect(dig.Value).To(Equal(digest))

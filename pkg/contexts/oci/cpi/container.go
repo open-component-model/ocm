@@ -11,8 +11,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 )
 
-// ArtefactProvider manages the technical access to a dedicated artefact.
-type ArtefactProvider interface {
+// ArtifactProvider manages the technical access to a dedicated artifact.
+type ArtifactProvider interface {
 	IsClosed() bool
 	IsReadOnly() bool
 	GetBlobDescriptor(digest digest.Digest) *Descriptor
@@ -21,41 +21,41 @@ type ArtefactProvider interface {
 	BlobSource
 	BlobSink
 
-	// GetArtefact is used to access nested artefacts (only)
-	GetArtefact(digest digest.Digest) (ArtefactAccess, error)
-	// AddArtefact is used to add nested artefacts (only)
-	AddArtefact(art Artefact) (access accessio.BlobAccess, err error)
+	// GetArtifact is used to access nested artifacts (only)
+	GetArtifact(digest digest.Digest) (ArtifactAccess, error)
+	// AddArtifact is used to add nested artifacts (only)
+	AddArtifact(art Artifact) (access accessio.BlobAccess, err error)
 }
 
-type NopCloserArtefactProvider struct {
-	ArtefactSetContainer
+type NopCloserArtifactProvider struct {
+	ArtifactSetContainer
 }
 
-var _ ArtefactProvider = (*NopCloserArtefactProvider)(nil)
+var _ ArtifactProvider = (*NopCloserArtifactProvider)(nil)
 
-func (p *NopCloserArtefactProvider) Close() error {
+func (p *NopCloserArtifactProvider) Close() error {
 	return nil
 }
 
-func (p *NopCloserArtefactProvider) AddArtefact(art Artefact) (access accessio.BlobAccess, err error) {
-	return p.ArtefactSetContainer.AddArtefact(art)
+func (p *NopCloserArtifactProvider) AddArtifact(art Artifact) (access accessio.BlobAccess, err error) {
+	return p.ArtifactSetContainer.AddArtifact(art)
 }
 
-func (p *NopCloserArtefactProvider) GetArtefact(digest digest.Digest) (ArtefactAccess, error) {
-	return p.ArtefactSetContainer.GetArtefact("@" + digest.String())
+func (p *NopCloserArtifactProvider) GetArtifact(digest digest.Digest) (ArtifactAccess, error) {
+	return p.ArtifactSetContainer.GetArtifact("@" + digest.String())
 }
 
-func NewNopCloserArtefactProvider(p ArtefactSetContainer) ArtefactProvider {
-	return &NopCloserArtefactProvider{
+func NewNopCloserArtifactProvider(p ArtifactSetContainer) ArtifactProvider {
+	return &NopCloserArtifactProvider{
 		p,
 	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// ArtefactSetContainer is the interface used by subsequent access objects
+// ArtifactSetContainer is the interface used by subsequent access objects
 // to access the base implementation.
-type ArtefactSetContainer interface {
+type ArtifactSetContainer interface {
 	IsReadOnly() bool
 	IsClosed() bool
 
@@ -65,50 +65,50 @@ type ArtefactSetContainer interface {
 	GetBlobData(digest digest.Digest) (int64, DataAccess, error)
 	AddBlob(blob BlobAccess) error
 
-	GetArtefact(vers string) (ArtefactAccess, error)
-	AddArtefact(artefact Artefact, tags ...string) (access accessio.BlobAccess, err error)
+	GetArtifact(vers string) (ArtifactAccess, error)
+	AddArtifact(artifact Artifact, tags ...string) (access accessio.BlobAccess, err error)
 
-	NewArtefactProvider(state accessobj.State) (ArtefactProvider, error)
+	NewArtifactProvider(state accessobj.State) (ArtifactProvider, error)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type artefactSetContainerImpl struct {
+type artifactSetContainerImpl struct {
 	refs accessio.ReferencableCloser
-	ArtefactSetContainer
+	ArtifactSetContainer
 }
 
-func NewArtefactSetContainer(c ArtefactSetContainer) ArtefactSetContainer {
-	i := &artefactSetContainerImpl{
+func NewArtifactSetContainer(c ArtifactSetContainer) ArtifactSetContainer {
+	i := &artifactSetContainerImpl{
 		refs:                 accessio.NewRefCloser(c, true),
-		ArtefactSetContainer: c,
+		ArtifactSetContainer: c,
 	}
 	v, _ := i.View()
 	return v
 }
 
-func (i *artefactSetContainerImpl) View() (ArtefactSetContainer, error) {
+func (i *artifactSetContainerImpl) View() (ArtifactSetContainer, error) {
 	v, err := i.refs.View()
 	if err != nil {
 		return nil, err
 	}
-	return &artefactSetContainerView{
+	return &artifactSetContainerView{
 		view:                 v,
-		ArtefactSetContainer: i.ArtefactSetContainer,
+		ArtifactSetContainer: i.ArtifactSetContainer,
 	}, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type artefactSetContainerView struct {
+type artifactSetContainerView struct {
 	view accessio.CloserView
-	ArtefactSetContainer
+	ArtifactSetContainer
 }
 
-func (v *artefactSetContainerView) IsClosed() bool {
+func (v *artifactSetContainerView) IsClosed() bool {
 	return v.view.IsClosed()
 }
 
-func (v *artefactSetContainerView) Close() error {
+func (v *artifactSetContainerView) Close() error {
 	return v.view.Close()
 }

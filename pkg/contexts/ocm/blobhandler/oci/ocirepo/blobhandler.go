@@ -15,12 +15,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localociblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
@@ -32,11 +32,11 @@ import (
 
 func init() {
 	for _, mime := range artdesc.ArchiveBlobTypes() {
-		cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.Type),
+		cpi.RegisterBlobHandler(NewArtifactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.Type),
 			cpi.ForMimeType(mime))
-		cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.LegacyType),
+		cpi.RegisterBlobHandler(NewArtifactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.LegacyType),
 			cpi.ForMimeType(mime))
-		cpi.RegisterBlobHandler(NewArtefactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.ShortType),
+		cpi.RegisterBlobHandler(NewArtifactHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.ShortType),
 			cpi.ForMimeType(mime))
 	}
 	cpi.RegisterBlobHandler(NewBlobHandler(OCIRegBaseFunction), cpi.ForRepo(oci.CONTEXT_TYPE, ocireg.Type))
@@ -108,16 +108,16 @@ func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, globa
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// artefactHandler stores artefact blobs as OCIArtefacts.
-type artefactHandler struct {
+// artifactHandler stores artifact blobs as OCIArtifacts.
+type artifactHandler struct {
 	blobHandler
 }
 
-func NewArtefactHandler(base BaseFunction) cpi.BlobHandler {
-	return &artefactHandler{blobHandler{base}}
+func NewArtifactHandler(base BaseFunction) cpi.BlobHandler {
+	return &artifactHandler{blobHandler{base}}
 }
 
-func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
+func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
 	mediaType := blob.MimeType()
 
 	if !artdesc.IsOCIMediaType(mediaType) || (!strings.HasSuffix(mediaType, "+tar") && !strings.HasSuffix(mediaType, "+tar+gzip")) {
@@ -133,7 +133,7 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 		"hint", hint,
 	}
 
-	var art oci.ArtefactAccess
+	var art oci.ArtifactAccess
 	var err error
 	var finalizer utils.Finalizer
 	defer finalizer.Finalize()
@@ -142,18 +142,18 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 
 	if m, ok := blob.(accessio.AnnotatedBlobAccess[cpi.AccessMethod]); ok {
 		// prepare for optimized point to point implementation
-		log.Debug("oci artefact handler with ocm access source",
+		log.Debug("oci artifact handler with ocm access source",
 			append(values, "sourcetype", m.Source().AccessSpec().GetType())...,
 		)
-		if ocimeth, ok := m.Source().(ociartefact.AccessMethod); !keep && ok {
-			art, _, err = ocimeth.GetArtefact(&finalizer)
+		if ocimeth, ok := m.Source().(ociartifact.AccessMethod); !keep && ok {
+			art, _, err = ocimeth.GetArtifact(&finalizer)
 			if err != nil {
-				return nil, errors.Wrapf(err, "cannot access source artefact")
+				return nil, errors.Wrapf(err, "cannot access source artifact")
 			}
 			defer art.Close()
 		}
 	} else {
-		log.Debug("oci artefact handler", values...)
+		log.Debug("oci artifact handler", values...)
 	}
 
 	var namespace oci.NamespaceAccess
@@ -186,16 +186,16 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	errhint += " namespace " + namespace.GetNamespace()
 
 	if art == nil {
-		log.Debug("using artefact set transfer mode")
-		set, err := artefactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
+		log.Debug("using artifact set transfer mode")
+		set, err := artifactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
 		if err != nil {
 			return nil, wrap(err, errhint, "open blob")
 		}
 		defer set.Close()
 		digest = set.GetMain()
-		art, err = set.GetArtefact(digest.String())
+		art, err = set.GetArtifact(digest.String())
 		if err != nil {
-			return nil, wrap(err, errhint, "get artefact from blob")
+			return nil, wrap(err, errhint, "get artifact from blob")
 		}
 		defer art.Close()
 	} else {
@@ -207,13 +207,13 @@ func (b *artefactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 		version = "@" + digest.String()
 	}
 
-	err = transfer.TransferArtefact(art, namespace, oci.AsTags(tag)...)
+	err = transfer.TransferArtifact(art, namespace, oci.AsTags(tag)...)
 	if err != nil {
-		return nil, wrap(err, errhint, "transfer artefact")
+		return nil, wrap(err, errhint, "transfer artifact")
 	}
 
 	ref := path.Join(base, namespace.GetNamespace()) + version
-	var acc cpi.AccessSpec = ociartefact.New(ref)
+	var acc cpi.AccessSpec = ociartifact.New(ref)
 
 	if keep {
 		err := ocictx.Manifest.AddBlob(blob)
@@ -233,5 +233,5 @@ func wrap(err error, msg string, args ...interface{}) error {
 	for _, a := range args {
 		msg = fmt.Sprintf("%s: %s", msg, a)
 	}
-	return errors.Wrapf(err, "exploding OCI artefact resource blob (%s)", msg)
+	return errors.Wrapf(err, "exploding OCI artifact resource blob (%s)", msg)
 }

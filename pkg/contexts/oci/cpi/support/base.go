@@ -16,61 +16,61 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-type artefactBase struct {
+type artifactBase struct {
 	lock      sync.RWMutex
-	view      ArtefactSetContainer
-	container ArtefactSetContainerImpl
+	view      ArtifactSetContainer
+	container ArtifactSetContainerImpl
 	state     accessobj.State
 }
 
-func newArtefactBase(view ArtefactSetContainer, container ArtefactSetContainerImpl, state accessobj.State) *artefactBase {
-	return &artefactBase{
+func newArtifactBase(view ArtifactSetContainer, container ArtifactSetContainerImpl, state accessobj.State) *artifactBase {
+	return &artifactBase{
 		view:      view,
 		container: container,
 		state:     state,
 	}
 }
 
-func (a *artefactBase) IsClosed() bool {
+func (a *artifactBase) IsClosed() bool {
 	return a.view.IsClosed()
 }
 
-func (a *artefactBase) IsReadOnly() bool {
+func (a *artifactBase) IsReadOnly() bool {
 	return a.container.IsReadOnly()
 }
 
-func (a *artefactBase) IsIndex() bool {
-	d := a.state.GetState().(*artdesc.Artefact)
+func (a *artifactBase) IsIndex() bool {
+	d := a.state.GetState().(*artdesc.Artifact)
 	return d.IsIndex()
 }
 
-func (a *artefactBase) IsManifest() bool {
-	d := a.state.GetState().(*artdesc.Artefact)
+func (a *artifactBase) IsManifest() bool {
+	d := a.state.GetState().(*artdesc.Artifact)
 	return d.IsManifest()
 }
 
-func (a *artefactBase) blob() (cpi.BlobAccess, error) {
+func (a *artifactBase) blob() (cpi.BlobAccess, error) {
 	return a.state.GetBlob()
 }
 
-func (a *artefactBase) addBlob(access cpi.BlobAccess) error {
+func (a *artifactBase) addBlob(access cpi.BlobAccess) error {
 	return a.container.AddBlob(access)
 }
 
-func (a *artefactBase) newArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
+func (a *artifactBase) newArtifact(art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
 	if a.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	return NewArtefact(a.container, art...)
+	return NewArtifact(a.container, art...)
 }
 
-func (a *artefactBase) Blob() (accessio.BlobAccess, error) {
+func (a *artifactBase) Blob() (accessio.BlobAccess, error) {
 	d := a.state.GetState().(artdesc.BlobDescriptorSource)
 	if !d.IsValid() {
-		return nil, errors.ErrUnknown("artefact type")
+		return nil, errors.ErrUnknown("artifact type")
 	}
 	blob, err := a.blob()
 	if err != nil {
@@ -79,7 +79,7 @@ func (a *artefactBase) Blob() (accessio.BlobAccess, error) {
 	return accessio.BlobWithMimeType(d.MimeType(), blob), nil
 }
 
-func (a *artefactBase) Digest() digest.Digest {
+func (a *artifactBase) Digest() digest.Digest {
 	d := a.state.GetState().(artdesc.BlobDescriptorSource)
 	if !d.IsValid() {
 		return ""

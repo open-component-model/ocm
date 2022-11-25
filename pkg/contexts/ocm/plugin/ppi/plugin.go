@@ -86,9 +86,9 @@ func (p *plugin) SetConfigParser(config func(raw json.RawMessage) (interface{}, 
 }
 
 func (p *plugin) RegisterDownloader(arttype, mediatype string, hdlr Downloader) error {
-	key := DownloaderKey{}.SetArtefact(arttype, mediatype)
+	key := DownloaderKey{}.SetArtifact(arttype, mediatype)
 	if !key.IsValid() {
-		return errors.ErrInvalid("artefact context")
+		return errors.ErrInvalid("artifact context")
 	}
 
 	old := p.downloaders[hdlr.Name()]
@@ -130,7 +130,7 @@ func (p *plugin) GetDownloader(name string) Downloader {
 }
 
 func (p *plugin) GetDownloaderFor(arttype, mediatype string) Downloader {
-	h := p.downmappings.LookupHandler(DownloaderKey{}.SetArtefact(arttype, mediatype))
+	h := p.downmappings.LookupHandler(DownloaderKey{}.SetArtifact(arttype, mediatype))
 	if len(h) == 0 {
 		return nil
 	}
@@ -141,19 +141,19 @@ func (p *plugin) RegisterRepositoryContextUploader(contexttype, repotype, arttyp
 	if contexttype == "" || repotype == "" {
 		return fmt.Errorf("repository context required")
 	}
-	return p.registerUploader(UploaderKey{}.SetArtefact(arttype, mediatype).SetRepo(contexttype, repotype), u)
+	return p.registerUploader(UploaderKey{}.SetArtifact(arttype, mediatype).SetRepo(contexttype, repotype), u)
 }
 
 func (p *plugin) RegisterUploader(arttype, mediatype string, u Uploader) error {
-	return p.registerUploader(UploaderKey{}.SetArtefact(arttype, mediatype), u)
+	return p.registerUploader(UploaderKey{}.SetArtifact(arttype, mediatype), u)
 }
 
 func (p *plugin) registerUploader(key UploaderKey, hdlr Uploader) error {
 	if !key.RepositoryContext.IsValid() {
 		return errors.ErrInvalid("repository context")
 	}
-	if !key.ArtefactContext.IsValid() {
-		return errors.ErrInvalid("artefact context")
+	if !key.ArtifactContext.IsValid() {
+		return errors.ErrInvalid("artifact context")
 	}
 	old := p.uploaders[hdlr.Name()]
 	if old != nil && old != hdlr {
@@ -201,7 +201,7 @@ func (p *plugin) GetUploader(name string) Uploader {
 }
 
 func (p *plugin) GetUploaderFor(arttype, mediatype string) Uploader {
-	h := p.upmappings.LookupHandler(UploaderKey{}.SetArtefact(arttype, mediatype))
+	h := p.upmappings.LookupHandler(UploaderKey{}.SetArtifact(arttype, mediatype))
 	if len(h) == 0 {
 		return nil
 	}

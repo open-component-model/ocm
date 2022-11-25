@@ -27,7 +27,7 @@ shown below.
     
     - **<code>region</code>** (optional) *string*
     
-      OCI repository reference (this artefact name used to store the blob).
+      OCI repository reference (this artifact name used to store the blob).
     
     - **<code>bucket</code>** *string*
     
@@ -99,12 +99,12 @@ shown below.
       other repositories to restore some global access with an identity
       related to the original source.
     
-      For example, if an OCI artefact originally referenced using the
-      access method [<code>ociArtefact</code>](../../../../../docs/formats/accessmethods/ociArtefact.md) is stored during
-      some transport step as local artefact, the reference name can be set
+      For example, if an OCI artifact originally referenced using the
+      access method [<code>ociArtifact</code>](../../../../../docs/formats/accessmethods/ociArtifact.md) is stored during
+      some transport step as local artifact, the reference name can be set
       to its original repository name. An import step into an OCI based OCM
-      repository may then decide to make this artefact available again as 
-      regular OCI artefact.
+      repository may then decide to make this artifact available again as 
+      regular OCI artifact.
     
     - **<code>globalAccess</code>** (optional) *access method specification*
     
@@ -112,8 +112,8 @@ shown below.
       may decide to provide an external access information (independent
       of the OCM model).
     
-      For example, an OCI artefact stored as local blob
-      can be additionally stored as regular OCI artefact in an OCI registry.
+      For example, an OCI artifact stored as local blob
+      can be additionally stored as regular OCI artifact in an OCI registry.
       
       This additional external access information can be added using
       a second external access method specification.
@@ -126,9 +126,9 @@ shown below.
   dummy resource with no access
 
 
-- Access type <code>ociArtefact</code>
+- Access type <code>ociArtifact</code>
 
-  This method implements the access of an OCI artefact stored in an OCI registry.
+  This method implements the access of an OCI artifact stored in an OCI registry.
 
   The following versions are supported:
   - Version <code>v1</code>
@@ -137,9 +137,9 @@ shown below.
     
     - **<code>imageReference</code>** *string*
     
-      OCI image/artefact reference following the possible docker schemes:
-      - <code>&lt;repo>/&lt;artefact>:&lt;digest>@&lt;tag></code>
-      - <code><host>[&lt;port>]/&lt;repo path>/&lt;artefact>:&lt;version>@&lt;tag></code>
+      OCI image/artifact reference following the possible docker schemes:
+      - <code>&lt;repo>/&lt;artifact>:&lt;digest>@&lt;tag></code>
+      - <code><host>[&lt;port>]/&lt;repo path>/&lt;artifact>:&lt;version>@&lt;tag></code>
     
     Options used to configure fields: <code>--reference</code>
   
@@ -155,7 +155,7 @@ shown below.
     
     - **<code>imageReference</code>** *string*
     
-      OCI repository reference (this artefact name used to store the blob).
+      OCI repository reference (this artifact name used to store the blob).
     
     - **<code>mediaType</code>** *string*
     

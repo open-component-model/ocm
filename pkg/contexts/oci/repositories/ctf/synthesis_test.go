@@ -19,12 +19,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/artefact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/artifact"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
@@ -46,7 +46,7 @@ func (d *DummyMethod) AccessSpec() cpi.AccessSpec {
 }
 
 func CheckBlob(blob accessio.BlobAccess) oci.NamespaceAccess {
-	set, err := artefactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
+	set, err := artifactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
 	Expect(err).To(Succeed())
 	defer func() {
 		if set != nil {
@@ -56,15 +56,15 @@ func CheckBlob(blob accessio.BlobAccess) oci.NamespaceAccess {
 
 	idx := set.GetIndex()
 	Expect(idx.Annotations).To(Equal(map[string]string{
-		artefactset.MAINARTEFACT_ANNOTATION:        "sha256:" + DIGEST_MANIFEST,
-		artefactset.LEGACY_MAINARTEFACT_ANNOTATION: "sha256:" + DIGEST_MANIFEST,
+		artifactset.MAINARTIFACT_ANNOTATION:        "sha256:" + DIGEST_MANIFEST,
+		artifactset.LEGACY_MAINARTIFACT_ANNOTATION: "sha256:" + DIGEST_MANIFEST,
 	}))
 	annos := map[string]string{
-		artefactset.TAGS_ANNOTATION:        "v1",
-		artefactset.LEGACY_TAGS_ANNOTATION: "v1",
+		artifactset.TAGS_ANNOTATION:        "v1",
+		artifactset.LEGACY_TAGS_ANNOTATION: "v1",
 	}
-	if artefactset.IsOCIDefaultFormat() {
-		annos[artefactset.OCITAG_ANNOTATION] = "v1"
+	if artifactset.IsOCIDefaultFormat() {
+		annos[artifactset.OCITAG_ANNOTATION] = "v1"
 	}
 	Expect(idx.Manifests).To(Equal([]artdesc.Descriptor{
 		{
@@ -75,7 +75,7 @@ func CheckBlob(blob accessio.BlobAccess) oci.NamespaceAccess {
 		},
 	}))
 
-	art, err := set.GetArtefact("sha256:" + DIGEST_MANIFEST)
+	art, err := set.GetArtifact("sha256:" + DIGEST_MANIFEST)
 	Expect(err).To(Succeed())
 	defer Close(art)
 	m, err := art.Manifest()
@@ -126,11 +126,11 @@ var _ = Describe("syntheses", func() {
 		n, err = r.LookupNamespace("mandelsoft/test")
 		Expect(err).To(Succeed())
 		defer Close(n, "namespace")
-		blob, err := artefactset.SynthesizeArtefactBlob(n, TAG)
+		blob, err := artifactset.SynthesizeArtifactBlob(n, TAG)
 		Expect(err).To(Succeed())
 		defer Close(blob, "blob")
 		path := blob.Path()
-		Expect(path).To(MatchRegexp(filepath.Join(blob.FileSystem().FSTempDir(), "artefactblob.*\\.tgz")))
+		Expect(path).To(MatchRegexp(filepath.Join(blob.FileSystem().FSTempDir(), "artifactblob.*\\.tgz")))
 		Expect(vfs.Exists(blob.FileSystem(), path)).To(BeTrue())
 
 		set := CheckBlob(blob)
@@ -140,17 +140,17 @@ var _ = Describe("syntheses", func() {
 		Expect(vfs.Exists(blob.FileSystem(), path)).To(BeFalse())
 
 		// use syntesized blob to extract new blob, useless but should work
-		newblob, err := artefactset.SynthesizeArtefactBlob(set, TAG)
+		newblob, err := artifactset.SynthesizeArtifactBlob(set, TAG)
 		Expect(err).To(Succeed())
 		defer Close(newblob, "newblob")
 
 		Expect(CheckBlob(newblob).Close()).To(Succeed())
 
 		meth := &DummyMethod{newblob}
-		digest, err := artefact.New(digest.SHA256).DetermineDigest("", meth, nil)
+		digest, err := artifact.New(digest.SHA256).DetermineDigest("", meth, nil)
 		Expect(err).To(Succeed())
 		Expect(digest.Value).To(Equal(DIGEST_MANIFEST))
-		Expect(digest.NormalisationAlgorithm).To(Equal(artefact.OciArtifactDigestV1))
+		Expect(digest.NormalisationAlgorithm).To(Equal(artifact.OciArtifactDigestV1))
 		Expect(digest.HashAlgorithm).To(Equal(sha256.Algorithm))
 
 		digests, err := ocm.DefaultContext().BlobDigesters().DetermineDigests("", nil, signing.DefaultRegistry(), meth)
@@ -159,7 +159,7 @@ var _ = Describe("syntheses", func() {
 			{
 				Value:                  DIGEST_MANIFEST,
 				HashAlgorithm:          sha256.Algorithm,
-				NormalisationAlgorithm: artefact.OciArtifactDigestV1,
+				NormalisationAlgorithm: artifact.OciArtifactDigestV1,
 			},
 		}))
 

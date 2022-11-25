@@ -61,13 +61,13 @@ The fields may have any deep structure.
 
 The following method types are centrally defined and available in the OCM toolset:
 
-- [`ociArtefact`](../../../pkg/contexts/ocm/accessmethods/ociartefact/README.md) *external*
+- [`ociArtifact`](../../../pkg/contexts/ocm/accessmethods/ociartifact/README.md) *external*
   
-  Access of an OCI artefact stored in any OCI registry.
+  Access of an OCI artifact stored in any OCI registry.
 
 - [`ociBlob`](../../../pkg/contexts/ocm/accessmethods/ociblob/README.md) *external*
 
-  Access of an OCI artefact stored in any OCI registry.
+  Access of an OCI artifact stored in any OCI registry.
 
 - [`gitHub`](../../../pkg/contexts/ocm/accessmethods/github/README.md) *external*
 
@@ -85,13 +85,13 @@ The following method types are centrally defined and available in the OCM toolse
   MUST explicitly provide an implementation for this method.
 
   For example, in an OCI based OCM repository the implementation stores
-  local blobs as additional artefact layers according to the OCI model.
+  local blobs as additional artifact layers according to the OCI model.
 
 ### Legacy Types
 
-- [`ociRegistry`](../../../pkg/contexts/ocm/accessmethods/ociartefact/README.md) *external* (deprecated)
+- [`ociRegistry`](../../../pkg/contexts/ocm/accessmethods/ociartifact/README.md) *external* (deprecated)
 
-  It is a legacy name on the new official access method `ociArtefact`
+  It is a legacy name on the new official access method `ociArtifact`
 
 - [`github`](../../../pkg/contexts/ocm/accessmethods/github/README.md) *external*
 

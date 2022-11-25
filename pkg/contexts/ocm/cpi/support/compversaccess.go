@@ -21,7 +21,7 @@ type ComponentVersionAccess struct {
 }
 
 // implemented by view
-// the rest is directly taken from the artefact set implementation
+// the rest is directly taken from the artifact set implementation
 
 func (s *ComponentVersionAccess) Close() error {
 	err := s.Update(true)

@@ -13,5 +13,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "OCI Artefact Descriptors")
+	RunSpecs(t, "OCI Artifact Descriptors")
 }

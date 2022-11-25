@@ -18,9 +18,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
@@ -55,12 +55,12 @@ func CheckComponent(env *TestEnv, ldesc *artdesc.Descriptor, tgt ocm.Repository)
 
 	data, err := json.Marshal(comp.GetDescriptor().Resources[2].Access)
 	Expect(err).To(Succeed())
-	hash := HashManifest2(artefactset.DefaultArtefactSetDescriptorFileName)
+	hash := HashManifest2(artifactset.DefaultArtifactSetDescriptorFileName)
 	Expect(string(data)).To(Equal("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/ref:v2.0\",\"type\":\"localBlob\"}"))
 
 	data, err = json.Marshal(comp.GetDescriptor().Resources[1].Access)
 	Expect(err).To(Succeed())
-	hash = HashManifest1(artefactset.DefaultArtefactSetDescriptorFileName)
+	hash = HashManifest1(artifactset.DefaultArtifactSetDescriptorFileName)
 	Expect(string(data)).To(Equal("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/value:v2.0\",\"type\":\"localBlob\"}"))
 
 	racc, err := comp.GetResourceByIndex(1)
@@ -68,7 +68,7 @@ func CheckComponent(env *TestEnv, ldesc *artdesc.Descriptor, tgt ocm.Repository)
 	reader, err := ocm.ResourceReader(racc)
 	Expect(err).To(Succeed())
 	defer reader.Close()
-	set, err := artefactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(reader))
+	set, err := artifactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(reader))
 	Expect(err).To(Succeed())
 	defer set.Close()
 
@@ -105,13 +105,13 @@ var _ = Describe("Test Environment", func() {
 					})
 					env.Resource("value", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
 						env.Access(
-							ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
+							ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
 						)
 						env.Label("transportByValue", true)
 					})
 					env.Resource("ref", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
 						env.Access(
-							ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION)),
+							ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION)),
 						)
 					})
 				})

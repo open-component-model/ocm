@@ -17,7 +17,7 @@ import (
 )
 
 type ManifestImpl struct {
-	*artefactBase
+	*artifactBase
 }
 
 var _ cpi.ManifestAccess = (*ManifestImpl)(nil)
@@ -29,16 +29,16 @@ type manifestMapper struct {
 var _ accessobj.State = (*manifestMapper)(nil)
 
 func (m *manifestMapper) GetState() interface{} {
-	return m.State.GetState().(*artdesc.Artefact).Manifest()
+	return m.State.GetState().(*artdesc.Artifact).Manifest()
 }
 
 func (m *manifestMapper) GetOriginalState() interface{} {
-	return m.State.GetOriginalState().(*artdesc.Artefact).Manifest()
+	return m.State.GetOriginalState().(*artdesc.Artifact).Manifest()
 }
 
-func NewManifestForArtefact(a *ArtefactImpl) *ManifestImpl {
+func NewManifestForArtifact(a *ArtifactImpl) *ManifestImpl {
 	m := &ManifestImpl{
-		artefactBase: newArtefactBase(a.view, a.container, &manifestMapper{a.state}),
+		artifactBase: newArtifactBase(a.view, a.container, &manifestMapper{a.state}),
 	}
 	return m
 }
@@ -55,7 +55,7 @@ func (m *ManifestImpl) Index() (*artdesc.Index, error) {
 	return nil, errors.ErrInvalid()
 }
 
-func (m *ManifestImpl) Artefact() *artdesc.Artefact {
+func (m *ManifestImpl) Artifact() *artdesc.Artifact {
 	a := artdesc.New()
 	_ = a.SetManifest(m.GetDescriptor())
 	return a

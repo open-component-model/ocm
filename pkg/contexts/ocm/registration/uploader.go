@@ -23,8 +23,8 @@ func WithPrio(prio int) BlobHandlerOption {
 	return internal.WithPrio(prio)
 }
 
-func ForArtefactType(t string) BlobHandlerOption {
-	return internal.ForArtefactType(t)
+func ForArtifactType(t string) BlobHandlerOption {
+	return internal.ForArtifactType(t)
 }
 
 func ForMimeType(t string) BlobHandlerOption {

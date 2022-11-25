@@ -76,7 +76,7 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 			return errors.ErrNotFoundWrap(err, "mapping", fmt.Sprintf("%d (%s)", i+1, &v.ResourceReference))
 		}
 		rcv.Close()
-		ref, err := utils.GetOCIArtefactRef(ctx, acc)
+		ref, err := utils.GetOCIArtifactRef(ctx, acc)
 		if err != nil {
 			return errors.Wrapf(err, "mapping %d: cannot resolve resource %s to an OCI Reference", i+1, v)
 		}

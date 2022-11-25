@@ -63,26 +63,26 @@ func (i IndexStateHandler) Equivalent(a, b interface{}) bool {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type ArtefactStateHandler struct{}
+type ArtifactStateHandler struct{}
 
-var _ accessobj.StateHandler = &ArtefactStateHandler{}
+var _ accessobj.StateHandler = &ArtifactStateHandler{}
 
-func NewArtefactStateHandler() accessobj.StateHandler {
-	return &ArtefactStateHandler{}
+func NewArtifactStateHandler() accessobj.StateHandler {
+	return &ArtifactStateHandler{}
 }
 
-func (i ArtefactStateHandler) Initial() interface{} {
+func (i ArtifactStateHandler) Initial() interface{} {
 	return artdesc.New()
 }
 
-func (i ArtefactStateHandler) Encode(d interface{}) ([]byte, error) {
-	return artdesc.Encode(d.(*artdesc.Artefact))
+func (i ArtifactStateHandler) Encode(d interface{}) ([]byte, error) {
+	return artdesc.Encode(d.(*artdesc.Artifact))
 }
 
-func (i ArtefactStateHandler) Decode(data []byte) (interface{}, error) {
+func (i ArtifactStateHandler) Decode(data []byte) (interface{}, error) {
 	return artdesc.Decode(data)
 }
 
-func (i ArtefactStateHandler) Equivalent(a, b interface{}) bool {
+func (i ArtifactStateHandler) Equivalent(a, b interface{}) bool {
 	return reflect.DeepEqual(a, b)
 }

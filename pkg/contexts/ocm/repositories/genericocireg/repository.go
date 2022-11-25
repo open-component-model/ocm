@@ -138,7 +138,7 @@ func (r *RepositoryImpl) ExistsComponentVersion(name string, version string) (bo
 	if err != nil {
 		return false, err
 	}
-	a, err := r.ocirepo.LookupArtefact(namespace, version)
+	a, err := r.ocirepo.LookupArtifact(namespace, version)
 	if err != nil {
 		return false, err
 	}

@@ -14,7 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 )
 
-var _ = Describe("artefact management", func() {
+var _ = Describe("artifact management", func() {
 	var tempfs vfs.FileSystem
 
 	BeforeEach(func() {

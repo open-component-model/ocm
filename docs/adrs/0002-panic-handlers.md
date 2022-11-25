@@ -64,7 +64,7 @@ it to parse OCM components. During the parsing, it also applies and verifies the
 
 Let's assume that a panic happens inside OCM. Since the requiring library is unaware that a panic can happen inside the
 library, it doesn't have recovery code in place. The controller crashes and can't further process any other OCM
-artefacts that exist in the cluster.
+artifacts that exist in the cluster.
 
 ### Avoids try-panic-crash-try-panic-crash loops
 

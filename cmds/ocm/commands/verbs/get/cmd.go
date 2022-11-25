@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	credentials "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/credentials/get"
-	artefacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/get"
+	artifacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artifacts/get"
 	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/get"
 	plugins "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/plugins/get"
 	references "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references/get"
@@ -22,9 +22,9 @@ import (
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "Get information about artefacts and components",
+		Short: "Get information about artifacts and components",
 	}, verbs.Get)
-	cmd.AddCommand(artefacts.NewCommand(ctx))
+	cmd.AddCommand(artifacts.NewCommand(ctx))
 	cmd.AddCommand(components.NewCommand(ctx))
 	cmd.AddCommand(resources.NewCommand(ctx))
 	cmd.AddCommand(references.NewCommand(ctx))

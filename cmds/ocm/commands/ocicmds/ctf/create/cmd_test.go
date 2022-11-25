@@ -29,6 +29,6 @@ var _ = Describe("Test Environment", func() {
 
 		Expect(env.Execute("create", "ctf", "-ft", "directory", ARCH)).To(Succeed())
 		Expect(env.DirExists(ARCH)).To(BeTrue())
-		Expect(env.ReadTextFile(env.Join(ARCH, ctf.ArtefactIndexFileName))).To(Equal("{\"schemaVersion\":1,\"artefacts\":null}"))
+		Expect(env.ReadTextFile(env.Join(ARCH, ctf.ArtifactIndexFileName))).To(Equal("{\"schemaVersion\":1,\"artifacts\":null}"))
 	})
 })

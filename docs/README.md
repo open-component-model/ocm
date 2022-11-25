@@ -2,22 +2,22 @@
 
 The goal of the Open Component Model is to describe a machine-readable format 
 for software-bill-of-deliveries (SBOD) with the focus on the delivery
-artefacts. Primarily, it does not deal with the content or packages those
-artefacts are composed of. This kind of meta information can be separately
-attached to described artefacts by labels, separate resources or even by separate
+artifacts. Primarily, it does not deal with the content or packages those
+artifacts are composed of. This kind of meta information can be separately
+attached to described artifacts by labels, separate resources or even by separate
 components.
 
-It is a completely technology-agnostic model to describe artefacts and
+It is a completely technology-agnostic model to describe artifacts and
 the technical access to their content. Technology-agnostic means:
 
-- it can describe any artefact regardless of its technology
-- the artefacts can basically be stored using any storage backend technology or
+- it can describe any artifact regardless of its technology
+- the artifacts can basically be stored using any storage backend technology or
   repository
 - the model information can be stored using any storage backend technology or
   repository
 
 The only constraint is, that there must be
-- an implementation for accessing artefacts in the desired repository technology 
+- an implementation for accessing artifacts in the desired repository technology 
   and map them to a blob format
 - and a specification for a [mapping scheme](ocm/interoperability.md) describing how
   to map the elements
@@ -27,32 +27,32 @@ The only constraint is, that there must be
 
 The model uses a globally unique naming scheme for software [components](ocm/model.md#components).
 Components are versioned. Every component version describes
-a set of formally typed delivery artefacts (like OCI images). Those artefacts
+a set of formally typed delivery artifacts (like OCI images). Those artifacts
 get assigned unique identities in the context of the component version.
 
-Those artefact definitions may carry an additional arbitrary attribution, and 
+Those artifact definitions may carry an additional arbitrary attribution, and 
 they provide a formal specification of the access method, which can be used
-to access the technical content of the artefact in the actual evaluation
+to access the technical content of the artifact in the actual evaluation
 context of a component version.
 
 The description model allows to transport content from one repository 
-landscape (hosting the real technical artefacts and the component version
+landscape (hosting the real technical artifacts and the component version
 descriptions) into other, especially private,
 environments without losing the validity of the access information. In any
 environment the actual description of the component version carries valid
-environment-specific information for the artefact location.
+environment-specific information for the artifact location.
 
 A transport tool can use the bill of material to determine the set of
-artefacts that have to be transferred and use the access information to access
-the technical content of the artefacts in the source environment. They will then
+artifacts that have to be transferred and use the access information to access
+the technical content of the artifacts in the source environment. They will then
 be copied into a repository landscape on the target side. In the target
 environment, the model description will be stored, also, after it has been
-adapted to reflect the new location of the described artefacts.
+adapted to reflect the new location of the described artifacts.
 
 Using provided implementations for the used access types, this can be done 
 in completely generic manner if there is a common interface and a discovery
 mechanism for the implementation of the access methods, based on the type
-information stored along with the artefact description in the component version.
+information stored along with the artifact description in the component version.
 
 This project contains a Go language binding for the Open Component Model, which
 exactly provides such an extensible implementation frame and a
@@ -64,19 +64,19 @@ number of transportation steps.
 
 This is achieved by signing a normalized form of a component version description,
 which is independent of a concrete serialization format of a [component descriptor](ocm/model.md#component-descriptor)
-It includes the digests of the described artefacts, but not the technical access
-specifications used to access the artefact in the environment, where the
+It includes the digests of the described artifacts, but not the technical access
+specifications used to access the artifact in the environment, where the
 signature is created.
 
 This way the Open Component model can be used as foundation or some kind of
-Lingua Franca for any number of _tools_ dealing with software and software artefacts:
-- By using the location-agnostic component, component version and artefact
+Lingua Franca for any number of _tools_ dealing with software and software artifacts:
+- By using the location-agnostic component, component version and artifact
   identities to denote the entities they are dealing with
 - By using the location specific access methods described by a local version
   of the component description to
-  - get access to the content of an artefact in defined formats.
-  - get the local location of the artefact.
-  - verify the authenticity of the artefacts found in the local environment.
+  - get access to the content of an artifact in defined formats.
+  - get the local location of the artifact.
+  - verify the authenticity of the artifacts found in the local environment.
 
 Because the identities and the content (but not the location of the content)
 are stable after transportation steps, information stored or provided by

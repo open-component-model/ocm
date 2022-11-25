@@ -7,7 +7,7 @@ package download
 import (
 	"github.com/spf13/cobra"
 
-	artefacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/download"
+	artifacts "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artifacts/download"
 	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/download"
 	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/download"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
@@ -18,10 +18,10 @@ import (
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "Download oci artefacts, resources or complete components",
+		Short: "Download oci artifacts, resources or complete components",
 	}, verbs.Download)
 	cmd.AddCommand(resources.NewCommand(ctx))
-	cmd.AddCommand(artefacts.NewCommand(ctx))
+	cmd.AddCommand(artifacts.NewCommand(ctx))
 	cmd.AddCommand(components.NewCommand(ctx))
 	return cmd
 }

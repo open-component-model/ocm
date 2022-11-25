@@ -25,7 +25,7 @@ const BlobsDirectoryName = "blobs"
 
 var accessObjectInfo = &accessobj.DefaultAccessObjectInfo{
 	DescriptorFileName:       ComponentDescriptorFileName,
-	ObjectTypeName:           "artefactset",
+	ObjectTypeName:           "artifactset",
 	ElementDirectoryName:     BlobsDirectoryName,
 	ElementTypeName:          "blob",
 	DescriptorHandlerFactory: NewStateHandler,

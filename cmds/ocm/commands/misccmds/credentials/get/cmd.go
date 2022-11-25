@@ -36,7 +36,7 @@ type Command struct {
 
 var _ utils.OCMCommand = (*Command)(nil)
 
-// NewCommand creates a new artefact command.
+// NewCommand creates a new artifact command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx)}, utils.Names(Names, names...)...)
 }

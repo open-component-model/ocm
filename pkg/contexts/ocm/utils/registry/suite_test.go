@@ -13,5 +13,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Artefact Context Registry Test Suite")
+	RunSpecs(t, "Artifact Context Registry Test Suite")
 }

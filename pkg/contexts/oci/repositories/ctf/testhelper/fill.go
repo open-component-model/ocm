@@ -24,15 +24,15 @@ const (
 )
 
 func DefaultManifestFill(n cpi.NamespaceAccess) {
-	art := NewArtefact(n)
-	blob, err := n.AddArtefact(art)
+	art := NewArtifact(n)
+	blob, err := n.AddArtifact(art)
 	Expect(err).To(Succeed())
 	n.AddTags(blob.Digest(), TAG)
 	art.Close()
 }
 
-func NewArtefact(n cpi.NamespaceAccess) cpi.ArtefactAccess {
-	art, err := n.NewArtefact()
+func NewArtifact(n cpi.NamespaceAccess) cpi.ArtifactAccess {
+	art, err := n.NewArtifact()
 	Expect(err).To(Succeed())
 	Expect(art.AddLayer(accessio.BlobAccessForString(mime.MIME_OCTET, "testdata"), nil)).To(Equal(0))
 	desc, err := art.Manifest()
@@ -49,7 +49,7 @@ func NewArtefact(n cpi.NamespaceAccess) cpi.ArtefactAccess {
 	return art
 }
 
-func CheckArtefact(art oci.ArtefactAccess) {
+func CheckArtifact(art oci.ArtifactAccess) {
 	Expect(art.IsManifest()).To(BeTrue())
 	blob, err := art.GetBlob("sha256:" + DIGEST_LAYER)
 	Expect(err).To(Succeed())

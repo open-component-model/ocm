@@ -1,4 +1,4 @@
-## ocm describe &mdash; Describe Artefacts
+## ocm describe &mdash; Describe Artifacts
 
 ### Synopsis
 
@@ -21,6 +21,6 @@ ocm describe [<options>] <sub command> ...
 
 ##### Sub Commands
 
-* [ocm describe <b>artefacts</b>](ocm_describe_artefacts.md)	 &mdash; describe artefact version
+* [ocm describe <b>artifacts</b>](ocm_describe_artifacts.md)	 &mdash; describe artifact version
 * [ocm describe <b>plugins</b>](ocm_describe_plugins.md)	 &mdash; get plugins
 

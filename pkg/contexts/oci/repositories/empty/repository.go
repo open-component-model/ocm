@@ -34,12 +34,12 @@ func (r *Repository) GetNamespaces(prefix string, closure bool) ([]string, error
 	return nil, nil
 }
 
-func (r Repository) ExistsArtefact(name string, version string) (bool, error) {
+func (r Repository) ExistsArtifact(name string, version string) (bool, error) {
 	return false, nil
 }
 
-func (r Repository) LookupArtefact(name string, version string) (cpi.ArtefactAccess, error) {
-	return nil, cpi.ErrUnknownArtefact(name, version)
+func (r Repository) LookupArtifact(name string, version string) (cpi.ArtifactAccess, error) {
+	return nil, cpi.ErrUnknownArtifact(name, version)
 }
 
 func (r Repository) LookupNamespace(name string) (cpi.NamespaceAccess, error) {

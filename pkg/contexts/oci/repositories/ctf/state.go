@@ -35,17 +35,17 @@ func (i StateHandler) Encode(d interface{}) ([]byte, error) {
 func (i StateHandler) Decode(data []byte) (interface{}, error) {
 	idx, err := index.Decode(data)
 	if err != nil {
-		return nil, fmt.Errorf("unable to parse artefact index read from %s: %w", ArtefactIndexFileName, err)
+		return nil, fmt.Errorf("unable to parse artifact index read from %s: %w", ArtifactIndexFileName, err)
 	}
 	if idx.SchemaVersion != index.SchemaVersion {
-		return nil, fmt.Errorf("unknown schema version %d for artefact index %s", index.SchemaVersion, ArtefactIndexFileName)
+		return nil, fmt.Errorf("unknown schema version %d for artifact index %s", index.SchemaVersion, ArtifactIndexFileName)
 	}
 
-	artefacts := index.NewRepositoryIndex()
+	artifacts := index.NewRepositoryIndex()
 	for i := range idx.Index {
-		artefacts.AddArtefactInfo(&idx.Index[i])
+		artifacts.AddArtifactInfo(&idx.Index[i])
 	}
-	return artefacts, nil
+	return artifacts, nil
 }
 
 func (i StateHandler) Equivalent(a, b interface{}) bool {

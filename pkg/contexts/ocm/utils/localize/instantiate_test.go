@@ -18,7 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/localize"
@@ -61,7 +61,7 @@ var _ = Describe("image value mapping", func() {
 				env.Version(VERSION, func() {
 					env.Provider("mandelsoft")
 					env.Resource(IMAGE, "", "Spiff", v1.LocalRelation, func() {
-						env.Access(ociartefact.New("ghcr.io/mandelsoft/test:v1"))
+						env.Access(ociartifact.New("ghcr.io/mandelsoft/test:v1"))
 					})
 					env.Resource(TEMPLATE, "", "GitOpsTemplate", v1.LocalRelation, func() {
 						env.BlobData(mime.MIME_TGZ, template.Bytes())

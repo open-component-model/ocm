@@ -39,6 +39,6 @@ $ ocm get plugins demo -o yaml
 
 ##### Parents
 
-* [ocm get](ocm_get.md)	 &mdash; Get information about artefacts and components
+* [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

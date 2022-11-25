@@ -1,2 +1,2 @@
 
-## Context Provider Interface for Repository with OCI-Artefact-Data
+## Context Provider Interface for Repository with OCI-Artifact-Data

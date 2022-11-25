@@ -18,7 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -28,7 +28,7 @@ import (
 type Spec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 
-	// Repository is the repository hint for the index artefact
+	// Repository is the repository hint for the index artifact
 	Repository string `json:"repository"`
 	// Variants holds the list of repository path and tag of the images in the docker daemon
 	// used to compose a multi-arch image.
@@ -67,13 +67,13 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) getVariant(ctx clictx.Context, finalize *utils.Finalizer, variant string) (oci.ArtefactAccess, error) {
+func (s *Spec) getVariant(ctx clictx.Context, finalize *utils.Finalizer, variant string) (oci.ArtifactAccess, error) {
 	locator, version, err := docker.ParseGenericRef(variant)
 	if err != nil {
 		return nil, err
 	}
 	if version == "" {
-		return nil, fmt.Errorf("artefact version required")
+		return nil, fmt.Errorf("artifact version required")
 	}
 	spec := docker.NewRepositorySpec()
 	repo, err := ctx.OCIContext().RepositoryForSpec(spec)
@@ -87,19 +87,19 @@ func (s *Spec) getVariant(ctx clictx.Context, finalize *utils.Finalizer, variant
 	}
 	finalize.Close(ns)
 
-	art, err := ns.GetArtefact(version)
+	art, err := ns.GetArtifact(version)
 	if err != nil {
-		return nil, artefactset.GetArtifactError{Original: err, Ref: version}
+		return nil, artifactset.GetArtifactError{Original: err, Ref: version}
 	}
 	finalize.Close(art)
 	return art, nil
 }
 
 func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
-	index := artdesc.NewIndexArtefact()
+	index := artdesc.NewIndexArtifact()
 	i := 0
 
-	feedback := func(blob accessio.BlobAccess, art cpi.ArtefactAccess) error {
+	feedback := func(blob accessio.BlobAccess, art cpi.ArtifactAccess) error {
 		desc := artdesc.DefaultBlobDescriptor(blob)
 		if art.IsManifest() {
 			cfgBlob, err := art.ManifestAccess().GetConfigBlob()
@@ -122,25 +122,25 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 		return nil
 	}
 
-	blob, err := artefactset.SynthesizeArtefactBlobFor(nv.GetVersion(), func() (fac artefactset.ArtefactFactory, main bool, err error) {
-		var art cpi.ArtefactAccess
+	blob, err := artifactset.SynthesizeArtifactBlobFor(nv.GetVersion(), func() (fac artifactset.ArtifactFactory, main bool, err error) {
+		var art cpi.ArtifactAccess
 		var blob accessio.BlobAccess
 
 		switch {
 		case i > len(s.Variants):
 			// end loop
 		case i == len(s.Variants):
-			// provide index (main) artefact
+			// provide index (main) artifact
 			ctx.Printf("image %d: INDEX\n", i)
-			fac = func(set *artefactset.ArtefactSet) (digest.Digest, string, error) {
-				art, err = set.NewArtefact(index)
+			fac = func(set *artifactset.ArtifactSet) (digest.Digest, string, error) {
+				art, err = set.NewArtifact(index)
 				if err != nil {
-					return "", "", errors.Wrapf(err, "cannot create index artefact")
+					return "", "", errors.Wrapf(err, "cannot create index artifact")
 				}
 				defer art.Close()
-				blob, err = set.AddArtefact(art)
+				blob, err = set.AddArtifact(art)
 				if err != nil {
-					return "", "", errors.Wrapf(err, "cannot add index artefact")
+					return "", "", errors.Wrapf(err, "cannot add index artifact")
 				}
 				defer blob.Close()
 				return blob.Digest(), blob.MimeType(), nil
@@ -157,7 +157,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 				blob, err = art.Blob()
 				if err == nil {
 					finalize.Close(art)
-					fac = artefactset.ArtefactTransferCreator(art, &finalize, feedback)
+					fac = artifactset.ArtifactTransferCreator(art, &finalize, feedback)
 				}
 			}
 		}

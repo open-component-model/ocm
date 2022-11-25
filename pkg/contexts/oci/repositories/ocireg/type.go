@@ -45,7 +45,7 @@ func IsKind(k string) bool {
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
-	// BaseURL is the base url of the repository to resolve artefacts.
+	// BaseURL is the base url of the repository to resolve artifacts.
 	BaseURL     string `json:"baseUrl"`
 	LegacyTypes *bool  `json:"legacyTypes,omitempty"`
 }

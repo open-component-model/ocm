@@ -18,7 +18,7 @@ const usage = `
 This input type describes the composition of a multi-platform OCI image.
 The various variants are taken from the local docker daemon. They should be 
 built with the buildx command for cross platform docker builds.
-The denoted images, as well as the wrapping image index is packed as OCI artefact set.
+The denoted images, as well as the wrapping image index is packed as OCI artifact set.
 
 This blob type specification supports the following fields:
 - **<code>variants</code>** *[]string*
@@ -29,6 +29,6 @@ This blob type specification supports the following fields:
 - **<code>repository</code>** *string*
 
   This OPTIONAL property can be used to specify the repository hint for the
-  generated local artefact access. It is prefixed by the component name if
+  generated local artifact access. It is prefixed by the component name if
   it does not start with slash "/".
 `

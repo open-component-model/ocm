@@ -54,7 +54,7 @@ func (s *StateAccess) Get() (accessio.BlobAccess, error) {
 	case "":
 		return nil, errors.ErrNotFound(cpi.KIND_COMPONENTVERSION)
 	default:
-		return nil, errors.Newf("artefact is no component: %s", mediaType)
+		return nil, errors.Newf("artifact is no component: %s", mediaType)
 	}
 }
 
