@@ -119,7 +119,7 @@ func (p *plugin) RegisterDownloader(arttype, mediatype string, hdlr Downloader) 
 	}
 	if cur == nil {
 		p.downmappings.Register(key, hdlr)
-		desc.Constraints = append(desc.Constraints, DownloaderKey{ArtefactType: key.ArtefactType, MediaType: key.MediaType})
+		desc.Constraints = append(desc.Constraints, DownloaderKey{ArtifactType: key.ArtifactType, MediaType: key.MediaType})
 	}
 	p.downloaders[hdlr.Name()] = hdlr
 	return nil

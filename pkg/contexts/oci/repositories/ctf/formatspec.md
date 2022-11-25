@@ -155,7 +155,7 @@ models for the OCI specification:
    This is supported by this format by providing a possibility to describe
    additional tags by an annotation in the index
 
- - [*ORAS*](https://github.com/oras-project/artefacts-spec)
+ - [*ORAS*](https://github.com/oras-project/artifacts-spec)
 
    Here a new third top-level manifest type is introduced, that can be 
    stored via the manifest endpoint of the distribution spec. No additional

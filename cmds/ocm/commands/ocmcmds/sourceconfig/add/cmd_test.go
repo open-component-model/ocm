@@ -56,7 +56,7 @@ type: PlainText
 `)
 		})
 
-		It("defaults artefact type", func() {
+		It("defaults artifact type", func() {
 			access := `
 type: gitHub
 repoUrl: github.com/open-component-model/ocm

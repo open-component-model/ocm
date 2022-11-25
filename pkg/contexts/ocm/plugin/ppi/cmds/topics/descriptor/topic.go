@@ -38,7 +38,7 @@ func New() *cobra.Command {
     {
       "constraints": [
         {
-          "artefactType": "TestArtefact"
+          "artifactType": "TestArtefact"
         }
       ],
       "name": "testuploader"
@@ -88,10 +88,10 @@ following fields:
 - **<code>downloaders</code>** *[]DownloaderDescriptor*
 
   The list of supported downloaders. Downloaders will be used by the
-  CLI download command to provide downloaded artefacts in a filesystem format
+  CLI download command to provide downloaded artifacts in a filesystem format
   applicable to the type specific tools, regatdless of the format it is stored
   as blob in a component version. Therefore they can be registered for
-  combination of artefact type and optional mime type (describing the actually
+  combination of artifact type and optional mime type (describing the actually
   used blob format).
 
 #### Access Method Descriptor
@@ -162,13 +162,13 @@ The descriptor for an uploader has the following fields:
   The list of constraints the uploader is usable for. A constraint is described
   by two fields:
 
-  - **<code>artefactType</code>** *string*
+  - **<code>artifactType</code>** *string*
 
-    Restrict the usage to a dedicated artefact type.
+    Restrict the usage to a dedicated artifact type.
 
   - **<code>mediaType</code>** *string*
 
-    Restrict the usage to a dedicated media type of the artefact blob.
+    Restrict the usage to a dedicated media type of the artifact blob.
 
   - **<code>contextType</code>** *string*
 
@@ -197,13 +197,13 @@ The descriptor for a downloader has the following fields:
   The list of constraints the downloader is usable for. A constraint is described
   by two fields:
 
-  - **<code>artefactType</code>** *string*
+  - **<code>artifactType</code>** *string*
 
-    Restrict the usage to a dedicated artefact type.
+    Restrict the usage to a dedicated artifact type.
 
   - **<code>mediaType</code>** *string* (optional)
 
-    Restrict the usage to a dedicated media type of the artefact blob.
+    Restrict the usage to a dedicated media type of the artifact blob.
 `,
 	}
 }

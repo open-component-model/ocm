@@ -5,10 +5,10 @@
 package options
 
 // HintOption.
-var HintOption = RegisterOption(NewStringOptionType("hint", "(repository) hint for local artefacts"))
+var HintOption = RegisterOption(NewStringOptionType("hint", "(repository) hint for local artifacts"))
 
 // MediatypeOption.
-var MediatypeOption = RegisterOption(NewStringOptionType("mediaType", "media type for artefact blob representation"))
+var MediatypeOption = RegisterOption(NewStringOptionType("mediaType", "media type for artifact blob representation"))
 
 // SizeOption.
 var SizeOption = RegisterOption(NewIntOptionType("size", "blob size"))

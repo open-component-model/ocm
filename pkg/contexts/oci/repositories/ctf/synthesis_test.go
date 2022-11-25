@@ -150,7 +150,7 @@ var _ = Describe("syntheses", func() {
 		digest, err := artefact.New(digest.SHA256).DetermineDigest("", meth, nil)
 		Expect(err).To(Succeed())
 		Expect(digest.Value).To(Equal(DIGEST_MANIFEST))
-		Expect(digest.NormalisationAlgorithm).To(Equal(artefact.OciArtefactDigestV1))
+		Expect(digest.NormalisationAlgorithm).To(Equal(artefact.OciArtifactDigestV1))
 		Expect(digest.HashAlgorithm).To(Equal(sha256.Algorithm))
 
 		digests, err := ocm.DefaultContext().BlobDigesters().DetermineDigests("", nil, signing.DefaultRegistry(), meth)
@@ -159,7 +159,7 @@ var _ = Describe("syntheses", func() {
 			{
 				Value:                  DIGEST_MANIFEST,
 				HashAlgorithm:          sha256.Algorithm,
-				NormalisationAlgorithm: artefact.OciArtefactDigestV1,
+				NormalisationAlgorithm: artefact.OciArtifactDigestV1,
 			},
 		}))
 

@@ -22,7 +22,7 @@ type DownloaderKey = ArtefactContext
 
 func NewDownloaderKey(arttype, mediatype string) DownloaderKey {
 	return DownloaderKey{
-		ArtefactType: arttype,
+		ArtifactType: arttype,
 		MediaType:    mediatype,
 	}
 }

@@ -98,7 +98,7 @@ var _ = Describe("upload", func() {
 		config := Must(json.Marshal(ociuploadattr.New(TARGET + grammar.RepositorySeparator + grammar.RepositorySeparator + "copy")))
 
 		buf := bytes.NewBuffer(nil)
-		err := env.CatchOutput(buf).Execute("transfer", "components", "--uploader", "ocm/ociArtefacts="+string(config), "--copy-resources", CTF, COPY)
+		err := env.CatchOutput(buf).Execute("transfer", "components", "--uploader", "ocm/ociArtifacts="+string(config), "--copy-resources", CTF, COPY)
 		if err != nil {
 			fmt.Printf("%s\n", buf.String())
 			Expect(err).To(Succeed())

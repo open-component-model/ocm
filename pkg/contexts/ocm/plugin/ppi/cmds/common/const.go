@@ -8,5 +8,5 @@ const (
 	OptCreds = "credentials"
 	OptHint  = "hint"
 	OptMedia = "mediaType"
-	OptArt   = "artefactType"
+	OptArt   = "artifactType"
 )

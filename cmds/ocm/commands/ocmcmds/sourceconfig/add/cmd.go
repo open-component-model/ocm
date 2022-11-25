@@ -61,7 +61,7 @@ Add a source specification to a source config file used by <CMD>ocm add sources<
 ` + o.Adder.Description() + ` Elements must follow the resource meta data
 description scheme of the component descriptor.
 
-If not specified anywhere the artefact type will be defaulted to <code>` + resourcetypes.FILESYSTEM + `</code>.
+If not specified anywhere the artifact type will be defaulted to <code>` + resourcetypes.FILESYSTEM + `</code>.
 
 If expressions/templates are used in the specification file an appropriate
 templater and the required settings might be required to provide

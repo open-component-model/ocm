@@ -114,7 +114,7 @@ var _ = Describe("access method", func() {
 				Update(), VerifyDigests(),
 			)
 			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
-			digest := "938c211a6016b9c6eca13cbdb0c9ad3e703febb92bbed515b76c8ba95eef9568"
+			digest := "39ea26ac4391052a638319f64b8da2628acb51d304c3a1ac8f920a46f2d6dce7"
 			dig, err := Apply(nil, nil, cv, opts)
 			Expect(err).To(Succeed())
 			Expect(closer.Close()).To(Succeed())
@@ -163,7 +163,7 @@ var _ = Describe("access method", func() {
 				Update(), VerifyDigests(),
 			)
 			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
-			digest := "938c211a6016b9c6eca13cbdb0c9ad3e703febb92bbed515b76c8ba95eef9568"
+			digest := "39ea26ac4391052a638319f64b8da2628acb51d304c3a1ac8f920a46f2d6dce7"
 			dig, err := Apply(nil, nil, cv, opts)
 			Expect(err).To(Succeed())
 			closer.Close()
@@ -211,7 +211,7 @@ var _ = Describe("access method", func() {
 				Resolver(resolver),
 				Update(), VerifyDigests(),
 			)
-			digest := "53646c07f50e0d5c5e7c0fbc10a8be64a7f1fe24f7cde7868f7e25bacfb8094a"
+			digest := "05c4edd25661703e0c5caec8b0680c93738d8a8126d825adb755431fec29b7cb"
 			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
 			dig, err := Apply(nil, nil, cv, opts)
 			Expect(err).To(Succeed())

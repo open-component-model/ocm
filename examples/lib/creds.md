@@ -53,7 +53,7 @@ not yet pushed to the repository.
 Using various interface methods, it is possible to configure
 the content for this new version. The example below just sets the provider
 information and adds a
-single [resource artefact](../../docs/ocm/model.md#resources) consisting of
+single [resource artifact](../../docs/ocm/model.md#resources) consisting of
 some text.
 
 ```go
@@ -92,12 +92,12 @@ If only a single repository is used during the access of a component version,
 the direct provisioning of credentials might be sufficient.
 
 But even a read access might require credentials. A main task of a component 
-version is to describe resource artefacts and provide access to the content of
-those artefacts. They may be located not only in the
+version is to describe resource artifacts and provide access to the content of
+those artifacts. They may be located not only in the
 actually used component repository but in any other kind of repository, which is 
 supported by an access method.
 
-So, accessing content of artefacts, as described in the main example, might
+So, accessing content of artifacts, as described in the main example, might
 require access to any repository described by an access specification 
 used in a component version. 
 
