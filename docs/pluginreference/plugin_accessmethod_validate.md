@@ -24,7 +24,7 @@ following fields:
 
 - **<code>mediaType</code>** *string*
 
-  The media type of the artefact described by the specification. It may be part
+  The media type of the artifact described by the specification. It may be part
   of the specification or implicitly determined by the access method.
 
 - **<code>description</code>** *string*

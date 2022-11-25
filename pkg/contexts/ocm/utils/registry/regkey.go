@@ -9,7 +9,7 @@ import (
 )
 
 type RegistrationKey struct {
-	ArtefactType string `json:"artefactType"`
+	ArtifactType string `json:"artifactType"`
 	MediaType    string `json:"mediaType"`
 }
 
@@ -17,11 +17,11 @@ type RegistrationKey struct {
 var _ Registry[string, RegistrationKey]
 
 func (k RegistrationKey) IsValid() bool {
-	return k.ArtefactType != "" || k.MediaType != ""
+	return k.ArtifactType != "" || k.MediaType != ""
 }
 
 func (k RegistrationKey) GetArtefactType() string {
-	return k.ArtefactType
+	return k.ArtifactType
 }
 
 func (k RegistrationKey) GetMediaType() string {
@@ -29,7 +29,7 @@ func (k RegistrationKey) GetMediaType() string {
 }
 
 func (k RegistrationKey) SetArtefact(arttype, medtatype string) RegistrationKey {
-	k.ArtefactType = arttype
+	k.ArtifactType = arttype
 	k.MediaType = medtatype
 	return k
 }
@@ -39,5 +39,5 @@ func (k RegistrationKey) Key() RegistrationKey {
 }
 
 func (k RegistrationKey) String() string {
-	return fmt.Sprintf("%s:%s", k.ArtefactType, k.MediaType)
+	return fmt.Sprintf("%s:%s", k.ArtifactType, k.MediaType)
 }

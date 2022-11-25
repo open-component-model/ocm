@@ -54,5 +54,5 @@ const (
 	Legacy2ComponentDescriptorConfigMimeType = "application/vnd.oci.gardener.cloud.cnudie.component-descriptor-metadata.config.v2+json"
 )
 
-// ComponentDescriptorNamespace is the subpath for all component descriptor artefacts in an oci registry.‚.
+// ComponentDescriptorNamespace is the subpath for all component descriptor artifacts in an oci registry.‚.
 const ComponentDescriptorNamespace = "component-descriptors"

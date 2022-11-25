@@ -18,7 +18,7 @@ import (
 type Config = ociuploadattr.Attribute
 
 func init() {
-	cpi.RegisterBlobHandlerRegistrationHandler("ocm/ociArtefacts", &RegistrationHandler{})
+	cpi.RegisterBlobHandlerRegistrationHandler("ocm/ociArtifacts", &RegistrationHandler{})
 }
 
 type RegistrationHandler struct{}

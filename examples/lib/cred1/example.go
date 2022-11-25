@@ -49,7 +49,7 @@ func SimpleWriteWithCredentials() error {
 	// add provider information
 	compvers.GetDescriptor().Provider = metav1.Provider{Name: "mandelsoft"}
 
-	// add a new resource artefact with the local identity `name="test"`.
+	// add a new resource artifact with the local identity `name="test"`.
 	err = compvers.SetResourceBlob(
 		&compdesc.ResourceMeta{
 			ElementMeta: compdesc.ElementMeta{

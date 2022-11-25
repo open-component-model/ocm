@@ -28,8 +28,8 @@ ocm add source-configuration [<options>] <target> {<configfile> | <var>=<value>}
       --commit string                git commit id
       --digest string                blob digest
       --globalAccess YAML            access specification for global access
-      --hint string                  (repository) hint for local artefacts
-      --mediaType string             media type for artefact blob representation
+      --hint string                  (repository) hint for local artifacts
+      --mediaType string             media type for artifact blob representation
       --reference string             reference name
       --region string                region name
       --size int                     blob size
@@ -39,7 +39,7 @@ ocm add source-configuration [<options>] <target> {<configfile> | <var>=<value>}
 #### Input Specification Options
 
 ```
-      --hint string                  (repository) hint for local artefacts
+      --hint string                  (repository) hint for local artifacts
       --input YAML                   blob input specification (YAML)
       --inputCompress                compress option for input
       --inputExcludes stringArray    excludes (path) for inputs
@@ -52,7 +52,7 @@ ocm add source-configuration [<options>] <target> {<configfile> | <var>=<value>}
       --inputValues YAML             YAML based generic values for inputs
       --inputVariants stringArray    (platform) variants for inputs
       --inputVersion stringArray     version info for inputs
-      --mediaType string             media type for artefact blob representation
+      --mediaType string             media type for artifact blob representation
 ```
 
 
@@ -94,7 +94,7 @@ or <code>input</code> fields of the description file format.
  Elements must follow the resource meta data
 description scheme of the component descriptor.
 
-If not specified anywhere the artefact type will be defaulted to <code>filesystem</code>.
+If not specified anywhere the artifact type will be defaulted to <code>filesystem</code>.
 
 If expressions/templates are used in the specification file an appropriate
 templater and the required settings might be required to provide
@@ -350,7 +350,7 @@ with the field <code>type</code> in the <code>input</code> field:
 
 The following list describes the supported access methods, their versions
 and specification formats.
-Typically there is special support for the CLI artefact add commands.
+Typically there is special support for the CLI artifact add commands.
 The access method specification can be put below the <code>access</code> field.
 If always requires the field <code>type</code> describing the kind and version
 shown below.

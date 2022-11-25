@@ -9,7 +9,7 @@ plugin download [<flags>] <name> <filepath> [<options>]
 ### Options
 
 ```
-  -a, --artefactType string   artefact type of input blob
+  -a, --artifactType string   artifact type of input blob
   -h, --help                  help for download
   -m, --mediaType string      media type of input blob
 ```
@@ -23,7 +23,7 @@ to store the downloaded content. The blob content is provided on the
 
 The task of this command is to transform the content of the provided 
 blob into a filesystem structure applicable to the type specific tools working
-with content of the given artefact type.
+with content of the given artifact type.
 
 
 ### SEE ALSO

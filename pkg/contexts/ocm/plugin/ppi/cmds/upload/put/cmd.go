@@ -60,7 +60,7 @@ type Options struct {
 
 	Credentials  credentials.DirectCredentials
 	MediaType    string
-	ArtefactType string
+	ArtifactType string
 
 	Hint string
 }
@@ -69,7 +69,7 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	flag.YAMLVarP(fs, &o.Credentials, OptCreds, "c", nil, "credentials")
 	flag.StringToStringVarPF(fs, &o.Credentials, "credential", "C", nil, "dedicated credential value")
 	fs.StringVarP(&o.MediaType, OptMedia, "m", "", "media type of input blob")
-	fs.StringVarP(&o.ArtefactType, OptArt, "a", "", "artefact type of input blob")
+	fs.StringVarP(&o.ArtifactType, OptArt, "a", "", "artifact type of input blob")
 	fs.StringVarP(&o.Hint, OptHint, "H", "", "reference hint for storing blob")
 }
 
@@ -89,9 +89,9 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 
 	u := p.GetUploader(opts.Name)
 	if u == nil {
-		return errors.ErrNotFound(ppi.KIND_UPLOADER, fmt.Sprintf("%s:%s", opts.ArtefactType, opts.MediaType))
+		return errors.ErrNotFound(ppi.KIND_UPLOADER, fmt.Sprintf("%s:%s", opts.ArtifactType, opts.MediaType))
 	}
-	w, h, err := u.Writer(p, opts.ArtefactType, opts.MediaType, opts.Hint, spec, opts.Credentials)
+	w, h, err := u.Writer(p, opts.ArtifactType, opts.MediaType, opts.Hint, spec, opts.Credentials)
 	if err != nil {
 		return err
 	}
