@@ -14,8 +14,8 @@ import (
 	"github.com/open-component-model/ocm/cmds/helminstaller/app/driver"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
@@ -50,8 +50,8 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 	defer rcv.Close()
 
 	fmt.Printf("Installing helm chart from resource %s@%s", cfg.Chart, common.VersionedElementKey(cv))
-	if acc.Meta().Type != consts.HelmChart {
-		return errors.Newf("resource type %q required, but found %q", consts.HelmChart, acc.Meta().Type)
+	if acc.Meta().Type != resourcetypes.HELM_CHART {
+		return errors.Newf("resource type %q required, but found %q", resourcetypes.HELM_CHART, acc.Meta().Type)
 	}
 
 	// have to use the OS filesystem here for using the helm library

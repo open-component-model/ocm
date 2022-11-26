@@ -25,8 +25,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
@@ -139,7 +139,7 @@ var _ = Describe("Add resources", func() {
 
 		r, err := cd.GetResourceByIdentity(metav1.NewIdentity("chart"))
 		Expect(err).To(Succeed())
-		Expect(r.Type).To(Equal(consts.HelmChart))
+		Expect(r.Type).To(Equal(resourcetypes.HELM_CHART))
 		Expect(r.Version).To(Equal(VERSION))
 
 		Expect(r.Access.GetType()).To(Equal(localblob.Type))

@@ -429,7 +429,7 @@ shown below.
     
     - **<code>mediaType</code>** *string*
     
-      The media type of the blob used to store the resource. It may add 
+      The media type of the blob used to store the resource. It may add
       format information like <code>+tar</code> or <code>+gzip</code>.
     
     - **<code>referenceName</code>** (optional) *string*
@@ -439,10 +439,10 @@ shown below.
       related to the original source.
     
       For example, if an OCI artifact originally referenced using the
-      access method [<code>ociArtifact</code>](../../../../../docs/formats/accessmethods/ociArtifact.md) is stored during
+      access method <code>ociArtifact</code> is stored during
       some transport step as local artifact, the reference name can be set
       to its original repository name. An import step into an OCI based OCM
-      repository may then decide to make this artifact available again as 
+      repository may then decide to make this artifact available again as
       regular OCI artifact.
     
     - **<code>globalAccess</code>** (optional) *access method specification*
@@ -453,7 +453,7 @@ shown below.
     
       For example, an OCI artifact stored as local blob
       can be additionally stored as regular OCI artifact in an OCI registry.
-      
+    
       This additional external access information can be added using
       a second external access method specification.
     

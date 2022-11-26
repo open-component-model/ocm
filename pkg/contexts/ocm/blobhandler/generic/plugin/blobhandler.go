@@ -16,7 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-// pluginHandler stores artifact blobs as OCIArtifacts.
+// pluginHandler delegates storage of blobs to a plugin based handler.
 type pluginHandler struct {
 	plugin     plugin.Plugin
 	name       string

@@ -21,20 +21,27 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const OciArtifactDigestV1 string = "ociArtifactDigest/v1"
 
+const LegacyOciArtifactDigestV1 string = "ociArtefactDigest/v1"
+
 func init() {
-	cpi.MustRegisterDigester(New(digest.SHA256), "")
-	cpi.MustRegisterDigester(New(digest.SHA512), "")
+	cpi.MustRegisterDigester(New(digest.SHA256, OciArtifactDigestV1), "")
+	cpi.MustRegisterDigester(New(digest.SHA512, OciArtifactDigestV1), "")
+
+	cpi.MustRegisterDigester(New(digest.SHA256, LegacyOciArtifactDigestV1), "")
+	cpi.MustRegisterDigester(New(digest.SHA512, LegacyOciArtifactDigestV1), "")
 }
 
-func New(algo digest.Algorithm) cpi.BlobDigester {
+func New(algo digest.Algorithm, ts ...string) cpi.BlobDigester {
+	norm := utils.OptionalDefaulted(OciArtifactDigestV1, ts...)
 	return &Digester{
 		cpi.DigesterType{
 			HashAlgorithm:          algo.String(),
-			NormalizationAlgorithm: OciArtifactDigestV1,
+			NormalizationAlgorithm: norm,
 		},
 	}
 }
@@ -127,7 +134,7 @@ func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferre
 		}
 		// not reached (endless for)
 	}
-	if acc.GetKind() == ociartifact.Type {
+	if ociartifact.Is(acc.AccessSpec()) {
 		dig := acc.(accessio.DigestSource).Digest()
 		if dig != "" {
 			if dig.Algorithm() != digest.Algorithm(d.GetType().HashAlgorithm) {
