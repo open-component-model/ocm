@@ -1,4 +1,4 @@
-FROM golang:1.17 AS builder
+FROM golang:1.19 AS builder
 ARG COMMIT
 ARG EFFECTIVE_VERSION
 ARG GIT_TREE_STATE
@@ -7,6 +7,7 @@ WORKDIR /go/src/github.com/open-component-model/ocm/
 COPY go.* ./
 COPY pkg pkg
 COPY cmds cmds
+COPY hack/generate-docs hack/generate-docs
 #COPY go/pkg pkg
 RUN --mount=type=cache,target=/root/.cache/go-build go get -d ./...
 RUN --mount=type=cache,target=/root/.cache/go-build CGO_ENABLED=0 go build -o /main -ldflags "-s -w \

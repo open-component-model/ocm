@@ -46,7 +46,7 @@ var _ = Describe("Add references", func() {
 	})
 
 	It("adds simple ref", func() {
-		Expect(env.Execute("add", "references", ARCH, "/testdata/references.yaml")).To(Succeed())
+		Expect(env.Execute("add", "references", "--file", ARCH, "/testdata/references.yaml")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
@@ -57,7 +57,7 @@ var _ = Describe("Add references", func() {
 	})
 
 	It("adds simple ref wth extra identity", func() {
-		Expect(env.Execute("add", "references", ARCH, "/testdata/referenceswithid.yaml")).To(Succeed())
+		Expect(env.Execute("add", "references", "--file", ARCH, "/testdata/referenceswithid.yaml")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
@@ -70,7 +70,7 @@ var _ = Describe("Add references", func() {
 	})
 
 	It("adds simple ref by cli env file", func() {
-		Expect(env.Execute("add", "references", ARCH, "--settings", "/testdata/settings", "/testdata/references.tmpl")).To(Succeed())
+		Expect(env.Execute("add", "references", "--file", ARCH, "--settings", "/testdata/settings", "/testdata/references.tmpl")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
@@ -81,7 +81,7 @@ var _ = Describe("Add references", func() {
 	})
 
 	It("adds simple ref by cli variable", func() {
-		Expect(env.Execute("add", "references", ARCH, "VERSION=v1.1.1", "/testdata/references.tmpl")).To(Succeed())
+		Expect(env.Execute("add", "references", "--file", ARCH, "VERSION=v1.1.1", "/testdata/references.tmpl")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
@@ -93,7 +93,7 @@ var _ = Describe("Add references", func() {
 
 	Context("reference by options", func() {
 		It("adds simple ref", func() {
-			Expect(env.Execute("add", "references", ARCH, "--name", "testdata", "--component", REF, "--version", VERSION)).To(Succeed())
+			Expect(env.Execute("add", "references", "--file", ARCH, "--name", "testdata", "--component", REF, "--version", VERSION)).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 			Expect(err).To(Succeed())
 			cd, err := compdesc.Decode(data)
@@ -109,7 +109,7 @@ labels:
 - name: test
   value: value
 `
-			Expect(env.Execute("add", "references", ARCH, "--name", "testdata", "--component", REF, "--version", VERSION, "--reference", spec)).To(Succeed())
+			Expect(env.Execute("add", "references", "--file", ARCH, "--name", "testdata", "--component", REF, "--version", VERSION, "--reference", spec)).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 			Expect(err).To(Succeed())
 			cd, err := compdesc.Decode(data)
@@ -130,7 +130,7 @@ labels:
 - name: test
   value: value
 `
-			Expect(env.Execute("add", "references", ARCH, "--name", "testdata", "--component", REF, "--version", VERSION, "--reference", spec)).To(Succeed())
+			Expect(env.Execute("add", "references", "--file", ARCH, "--name", "testdata", "--component", REF, "--version", VERSION, "--reference", spec)).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 			Expect(err).To(Succeed())
 			cd, err := compdesc.Decode(data)
@@ -145,7 +145,7 @@ labels:
 		})
 
 		It("completely specified by options with extra identity", func() {
-			Expect(env.Execute("add", "references", ARCH, "--name", "testdata", "--component", REF, "--version", VERSION, "--extra", "purpose=test", "--extra", "label=local")).To(Succeed())
+			Expect(env.Execute("add", "references", "--file", ARCH, "--name", "testdata", "--component", REF, "--version", VERSION, "--extra", "purpose=test", "--extra", "label=local")).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 			Expect(err).To(Succeed())
 			cd, err := compdesc.Decode(data)
@@ -160,7 +160,7 @@ labels:
 		})
 
 		It("completely specified by options with labels", func() {
-			Expect(env.Execute("add", "references", ARCH, "--name", "testdata", "--component", REF, "--version", VERSION, "--label", "*purpose=test", "--label", `label@v1={"local": true}`)).To(Succeed())
+			Expect(env.Execute("add", "references", "--file", ARCH, "--name", "testdata", "--component", REF, "--version", VERSION, "--label", "*purpose=test", "--label", `label@v1={"local": true}`)).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 			Expect(err).To(Succeed())
 			cd, err := compdesc.Decode(data)

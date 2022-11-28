@@ -40,7 +40,7 @@ const OCIHOST = "alias"
 func Check(env *TestEnv, ldesc *artdesc.Descriptor, out string) {
 	tgt, err := ctfocm.Open(env.OCMContext(), accessobj.ACC_READONLY, out, 0, accessio.PathFileSystem(env.FileSystem()))
 	Expect(err).To(Succeed())
-	defer tgt.Close()
+	defer Close(tgt, "ctf")
 
 	list, err := tgt.ComponentLister().GetComponents("", true)
 	Expect(err).To(Succeed())
@@ -51,6 +51,7 @@ func Check(env *TestEnv, ldesc *artdesc.Descriptor, out string) {
 func CheckComponent(env *TestEnv, ldesc *artdesc.Descriptor, tgt ocm.Repository) {
 	comp, err := tgt.LookupComponentVersion(COMPONENT, VERSION)
 	Expect(err).To(Succeed())
+	defer Close(comp, "comvers")
 	Expect(len(comp.GetDescriptor().Resources)).To(Equal(3))
 
 	data, err := json.Marshal(comp.GetDescriptor().Resources[2].Access)
@@ -74,6 +75,7 @@ func CheckComponent(env *TestEnv, ldesc *artdesc.Descriptor, tgt ocm.Repository)
 
 	blob, err := set.GetBlob(ldesc.Digest)
 	Expect(err).To(Succeed())
+	defer Close(blob, "blob")
 	data, err = blob.Get()
 	Expect(err).To(Succeed())
 	Expect(string(data)).To(Equal("manifestlayer"))
@@ -165,14 +167,13 @@ transferring version "github.com/mandelsoft/test2:v1"...
 		Expect(env.DirExists(OUT)).To(BeTrue())
 		tgt, err := ctfocm.Open(env.OCMContext(), accessobj.ACC_READONLY, OUT, 0, accessio.PathFileSystem(env.FileSystem()))
 		Expect(err).To(Succeed())
-		defer tgt.Close()
+		defer Close(tgt, "ctf")
 
 		list, err := tgt.ComponentLister().GetComponents("", true)
 		Expect(err).To(Succeed())
 		Expect(list).To(ContainElements([]string{COMPONENT2, COMPONENT}))
 
-		_, err = tgt.LookupComponentVersion(COMPONENT2, VERSION)
-		Expect(err).To(Succeed())
+		Expect(tgt.ExistsComponentVersion(COMPONENT2, VERSION)).To(BeTrue())
 
 		CheckComponent(env, ldesc, tgt)
 	})

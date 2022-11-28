@@ -3,13 +3,14 @@
 ### Synopsis
 
 ```
-ocm add references [<options>] <target> {<referencefile> | <var>=<value>}
+ocm add references [<options>] [<target>] {<referencefile> | <var>=<value>}
 ```
 
 ### Options
 
 ```
       --addenv                 access environment for templating
+  -F, --file string            target file/directory (default "component-archive")
   -h, --help                   help for references
   -s, --settings stringArray   settings file with variable settings (yaml)
       --templater string       templater to use (subst, spiff, go) (default "subst")
@@ -101,7 +102,7 @@ There are several templaters that can be selected by the <code>--templater</code
 Add a reference directly by options
 
 <pre>
-$ ocm add references path/to/ca &dash;&dash;name myref &dash;&dash;component github.com/my/component &dash;&dash;version ${VERSION}
+$ ocm add references &dash;&dash;file path/to/ca &dash;&dash;name myref &dash;&dash;component github.com/my/component &dash;&dash;version ${VERSION}
 </pre>
 
 

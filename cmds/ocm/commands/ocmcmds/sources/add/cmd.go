@@ -30,10 +30,7 @@ type Command struct {
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(
 		&Command{
-			common.ResourceAdderCommand{
-				BaseCommand: utils.NewBaseCommand(ctx),
-				Adder:       common.NewContentResourceSpecificationProvider(ctx, "source", nil, ""),
-			},
+			common.NewResourceAdderCommand(ctx, common.NewContentResourceSpecificationProvider(ctx, "source", nil, "")),
 		},
 		utils.Names(Names, names...)...,
 	)
@@ -41,9 +38,12 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
-		Use:   "[<options>] <target> {<resourcefile> | <var>=<value>}",
-		Args:  cobra.MinimumNArgs(1),
+		Use:   "[<options>] [<target>] {<resourcefile> | <var>=<value>}",
+		Args:  cobra.MinimumNArgs(0),
 		Short: "add source information to a component version",
+		Example: `
+$ ocm add sources --file path/to/cafile sources.yaml
+`,
 	}
 }
 

@@ -13,7 +13,7 @@ ctf: ca ## Create CTF from component archive
 .PHONY: ca
 ca: gen releasenotes ## Create component archive
 	ocm create ca -f $(COMPONENT) "$(VERSION)" mandelsoft gen/ca
-	ocm add resources gen/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" resources.yaml
+	ocm add resources --file gen/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" resources.yaml
 
 .PHONY: dummy
 dummy: commit ca ## Commit and create component archive

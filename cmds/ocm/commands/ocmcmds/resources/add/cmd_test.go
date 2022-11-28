@@ -11,6 +11,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
@@ -97,6 +98,17 @@ var _ = Describe("Add resources", func() {
 	})
 
 	It("adds simple text blob", func() {
+		Expect(env.Execute("add", "resources", "--file", ARCH, "/testdata/resources.yaml")).To(Succeed())
+		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+		Expect(err).To(Succeed())
+		cd, err := compdesc.Decode(data)
+		Expect(err).To(Succeed())
+		Expect(len(cd.Resources)).To(Equal(1))
+
+		CheckTextResource(env, cd, "testdata")
+	})
+
+	It("adds simple text blob with direct archive file", func() {
 		Expect(env.Execute("add", "resources", ARCH, "/testdata/resources.yaml")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
@@ -108,7 +120,7 @@ var _ = Describe("Add resources", func() {
 	})
 
 	It("adds simple text blob by cli env file", func() {
-		Expect(env.Execute("add", "resources", ARCH, "--settings", "/testdata/settings", "/testdata/resources.tmpl")).To(Succeed())
+		Expect(env.Execute("add", "resources", "--file", ARCH, "--settings", "/testdata/settings", "/testdata/resources.tmpl")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
@@ -119,7 +131,7 @@ var _ = Describe("Add resources", func() {
 	})
 
 	It("adds simple text blob by cli variable", func() {
-		Expect(env.Execute("add", "resources", ARCH, "CONTENT=testcontent", "/testdata/resources.tmpl")).To(Succeed())
+		Expect(env.Execute("add", "resources", "--file", ARCH, "CONTENT=testcontent", "/testdata/resources.tmpl")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
@@ -130,7 +142,7 @@ var _ = Describe("Add resources", func() {
 	})
 
 	It("adds helm chart", func() {
-		Expect(env.Execute("add", "resources", ARCH, "/testdata/helm.yaml")).To(Succeed())
+		Expect(env.Execute("add", "resources", "--file", ARCH, "/testdata/helm.yaml")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
@@ -154,23 +166,25 @@ var _ = Describe("Add resources", func() {
 
 		set, err := artifactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
 		Expect(err).To(Succeed())
-		defer set.Close()
+		defer Close(set, "artefactset")
 		art, err := set.GetArtifact(set.GetMain().String())
 		Expect(err).To(Succeed())
+		defer Close(art, "artefact")
 		m := art.ManifestAccess().GetDescriptor()
 		Expect(len(m.Layers)).To(Equal(1))
 
 		blob, err = set.GetBlob(m.Layers[0].Digest)
 		Expect(err).To(Succeed())
+		defer Close(blob, "blob")
 		reader, err := blob.Reader()
 		Expect(err).To(Succeed())
-
+		defer reader.Close()
 		_, err = loader.LoadArchive(reader)
 		Expect(err).To(Succeed())
 	})
 
 	It("adds external image", func() {
-		Expect(env.Execute("add", "resources", ARCH, "/testdata/image.yaml")).To(Succeed())
+		Expect(env.Execute("add", "resources", "--file", ARCH, "/testdata/image.yaml")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
@@ -202,7 +216,7 @@ type: file
 path: testdata/testcontent
 mediaType: text/plain
 `
-			Expect(env.Execute("add", "resources", ARCH, "--resource", meta, "--input", input)).To(Succeed())
+			Expect(env.Execute("add", "resources", "--file", ARCH, "--resource", meta, "--input", input)).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 			Expect(err).To(Succeed())
 			cd, err := compdesc.Decode(data)
@@ -222,7 +236,7 @@ type: file
 path: ${CONTENT}
 mediaType: text/plain
 `
-			Expect(env.Execute("add", "resources", ARCH, "CONTENT=testdata/testcontent", "--resource", meta, "--input", input)).To(Succeed())
+			Expect(env.Execute("add", "resources", "--file", ARCH, "CONTENT=testdata/testcontent", "--resource", meta, "--input", input)).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 			Expect(err).To(Succeed())
 			cd, err := compdesc.Decode(data)
@@ -243,7 +257,7 @@ relation: external
 type: ociArtifact
 imageReference: ghcr.io/mandelsoft/pause:v0.1.0
 `
-			Expect(env.Execute("add", "resources", ARCH, "--resource", meta, "--access", access)).To(Succeed())
+			Expect(env.Execute("add", "resources", "--file", ARCH, "--resource", meta, "--access", access)).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 			Expect(err).To(Succeed())
 			cd, err := compdesc.Decode(data)
@@ -268,7 +282,7 @@ imageReference: ghcr.io/mandelsoft/pause:v0.1.0
 			input := `
 { "type": "file", "path": "testdata/testcontent", "mediaType": "text/plain" }
 `
-			Expect(env.Execute("add", "resources", ARCH, "--name", "testdata", "--type", "PlainText", "--input", input)).To(Succeed())
+			Expect(env.Execute("add", "resources", "--file", ARCH, "--name", "testdata", "--type", "PlainText", "--input", input)).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 			Expect(err).To(Succeed())
 			cd, err := compdesc.Decode(data)
@@ -283,7 +297,7 @@ imageReference: ghcr.io/mandelsoft/pause:v0.1.0
 name: testdata
 type: PlainText
 `
-			Expect(env.Execute("add", "resources", ARCH, "--resource", meta, "--inputType", "file", "--inputPath", "testdata/testcontent", "--"+options.MediatypeOption.GetName(), "text/plain")).To(Succeed())
+			Expect(env.Execute("add", "resources", "--file", ARCH, "--resource", meta, "--inputType", "file", "--inputPath", "testdata/testcontent", "--"+options.MediatypeOption.GetName(), "text/plain")).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 			Expect(err).To(Succeed())
 			cd, err := compdesc.Decode(data)
@@ -298,7 +312,7 @@ type: PlainText
 name: testdata
 type: PlainText
 `
-			Expect(env.Execute("add", "resources", ARCH, "--resource", meta, "--inputType", "spiff", "--inputPath", "testdata/spiffcontent", "--"+options.MediatypeOption.GetName(), "text/plain", "IMAGE=test")).To(Succeed())
+			Expect(env.Execute("add", "resources", "--file", ARCH, "--resource", meta, "--inputType", "spiff", "--inputPath", "testdata/spiffcontent", "--"+options.MediatypeOption.GetName(), "text/plain", "IMAGE=test")).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 			Expect(err).To(Succeed())
 			cd, err := compdesc.Decode(data)
@@ -309,7 +323,7 @@ type: PlainText
 		})
 
 		It("adds external image by options", func() {
-			Expect(env.Execute("add", "resources", ARCH,
+			Expect(env.Execute("add", "resources", "--file", ARCH,
 				"--type", "ociImage",
 				"--name", "image",
 				"--version", "v0.1.0",

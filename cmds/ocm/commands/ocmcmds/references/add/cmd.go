@@ -28,10 +28,7 @@ type Command struct {
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(
 		&Command{
-			common.ResourceAdderCommand{
-				BaseCommand: utils.NewBaseCommand(ctx),
-				Adder:       NewReferenceSpecificatonProvider(),
-			},
+			common.NewResourceAdderCommand(ctx, NewReferenceSpecificatonProvider()),
 		},
 		utils.Names(Names, names...)...,
 	)
@@ -39,8 +36,8 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
-		Use:   "[<options>] <target> {<referencefile> | <var>=<value>}",
-		Args:  cobra.MinimumNArgs(1),
+		Use:   "[<options>] [<target>] {<referencefile> | <var>=<value>}",
+		Args:  cobra.MinimumNArgs(0),
 		Short: "add aggregation information to a component version",
 		Long: `
 Add aggregation information specified in a reference file to a component version.
@@ -53,7 +50,7 @@ description scheme of the component descriptor.
 		Example: `
 Add a reference directly by options
 <pre>
-$ ocm add references path/to/ca --name myref --component github.com/my/component --version ${VERSION}
+$ ocm add references --file path/to/ca --name myref --component github.com/my/component --version ${VERSION}
 </pre>
 
 Add a reference by a description file:

@@ -30,6 +30,7 @@ type EvaluationResult struct {
 type Session interface {
 	datacontext.Session
 
+	Finalize(Finalizer)
 	LookupRepository(Context, RepositorySpec) (Repository, error)
 	LookupComponent(ComponentContainer, string) (ComponentAccess, error)
 	LookupComponentVersion(r Repository, comp, vers string) (ComponentVersionAccess, error)

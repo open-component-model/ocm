@@ -3,13 +3,14 @@
 ### Synopsis
 
 ```
-ocm add resources [<options>] <target> {<resourcefile> | <var>=<value>}
+ocm add resources [<options>] [<target>] {<resourcefile> | <var>=<value>}
 ```
 
 ### Options
 
 ```
       --addenv                       access environment for templating
+  -F, --file string                  target file/directory (default "component-archive")
   -h, --help                         help for resources
   -s, --settings stringArray         settings file with variable settings (yaml)
       --templater string             templater to use (subst, spiff, go) (default "subst")
@@ -514,7 +515,7 @@ shown below.
 Add a resource directly by options
 
 <pre>
-$ ocm add resources path/to/ca &dash;&dash;name myresource &dash;&dash;type PlainText &dash;&dash;input '{ "type": "file", "path": "testdata/testcontent", "mediaType": "text/plain" }'
+$ ocm add resources &dash;&dash;file path/to/ca &dash;&dash;name myresource &dash;&dash;type PlainText &dash;&dash;input '{ "type": "file", "path": "testdata/testcontent", "mediaType": "text/plain" }'
 </pre>
 
 
@@ -535,7 +536,7 @@ input:
 
 
 <pre>
-$ ocm add resources  path/to/ca  resources.yaml VERSION=1.0.0
+$ ocm add resources &dash;&dash;file path/to/ca  resources.yaml VERSION=1.0.0
 </pre>
 
 

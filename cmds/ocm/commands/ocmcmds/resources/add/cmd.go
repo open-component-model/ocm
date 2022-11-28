@@ -30,10 +30,7 @@ type Command struct {
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(
 		&Command{
-			common.ResourceAdderCommand{
-				BaseCommand: utils.NewBaseCommand(ctx),
-				Adder:       NewResourceSpecificationsProvider(ctx, ""),
-			},
+			common.NewResourceAdderCommand(ctx, NewResourceSpecificationsProvider(ctx, "")),
 		},
 		utils.Names(Names, names...)...,
 	)
@@ -41,13 +38,13 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 
 func (o *Command) ForName(name string) *cobra.Command {
 	return &cobra.Command{
-		Use:   "[<options>] <target> {<resourcefile> | <var>=<value>}",
-		Args:  cobra.MinimumNArgs(1),
+		Use:   "[<options>] [<target>] {<resourcefile> | <var>=<value>}",
+		Args:  cobra.MinimumNArgs(0),
 		Short: "add resources to a component version",
 		Example: `
 Add a resource directly by options
 <pre>
-$ ocm add resources path/to/ca --name myresource --type PlainText --input '{ "type": "file", "path": "testdata/testcontent", "mediaType": "text/plain" }'
+$ ocm add resources --file path/to/ca --name myresource --type PlainText --input '{ "type": "file", "path": "testdata/testcontent", "mediaType": "text/plain" }'
 </pre>
 
 Add a resource by a description file:
@@ -64,7 +61,7 @@ input:
   mediaType: text/plain
 </pre>
 <pre>
-$ ocm add resources  path/to/ca  resources.yaml VERSION=1.0.0
+$ ocm add resources --file path/to/ca  resources.yaml VERSION=1.0.0
 </pre>
 `,
 	}

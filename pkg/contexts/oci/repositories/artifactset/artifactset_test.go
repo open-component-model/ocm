@@ -13,6 +13,7 @@ import (
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset/testhelper"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/testhelper"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -191,46 +192,39 @@ var _ = Describe("artifact management", func() {
 
 	Context("manifest", func() {
 		TestForAllFormats("read from filesystem artifact", func(format string) {
-			opts, err := accessio.AccessOptions(&artifactset.Options{}, opts, artifactset.StructureFormat(format))
-			Expect(err).To(Succeed())
+			opts := Must(accessio.AccessOptions(&artifactset.Options{}, opts, artifactset.StructureFormat(format)))
 
-			a, err := artifactset.FormatDirectory.Create("test", opts, 0700)
-			Expect(err).To(Succeed())
+			a := Must(artifactset.FormatDirectory.Create("test", opts, 0700))
 			Expect(vfs.DirExists(tempfs, "test/"+artifactset.BlobsDirectoryName)).To(BeTrue())
 			defaultManifestFill(a)
 			Expect(a.Close()).To(Succeed())
 
-			a, err = artifactset.FormatDirectory.Open(accessobj.ACC_READONLY, "test", opts)
-			Expect(err).To(Succeed())
-			defer a.Close()
+			a = Must(artifactset.FormatDirectory.Open(accessobj.ACC_READONLY, "test", opts))
+			defer Close(a, "artefactset")
 			Expect(len(a.GetIndex().Manifests)).To(Equal(1))
-			art, err := a.GetArtifact(a.GetIndex().Manifests[0].Digest.String())
-			Expect(err).To(Succeed())
+			art := Must(a.GetArtifact(a.GetIndex().Manifests[0].Digest.String()))
+			defer Close(art, "artefact")
 			Expect(art.IsManifest()).To(BeTrue())
-			blob, err := art.GetBlob("sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50")
-			Expect(err).To(Succeed())
+			blob := Must(art.GetBlob("sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
 			Expect(blob.Get()).To(Equal([]byte("testdata")))
 			Expect(blob.MimeType()).To(Equal(mime.MIME_OCTET))
 		})
 
 		TestForAllFormats("read from tgz artifact", func(format string) {
-			opts, err := accessio.AccessOptions(&artifactset.Options{}, opts, artifactset.StructureFormat(format))
-			Expect(err).To(Succeed())
+			opts := Must(accessio.AccessOptions(&artifactset.Options{}, opts, artifactset.StructureFormat(format)))
 
-			a, err := artifactset.FormatTGZ.Create("test.tgz", opts, 0700)
-			Expect(err).To(Succeed())
+			a := Must(artifactset.FormatTGZ.Create("test.tgz", opts, 0700))
 			defaultManifestFill(a)
 			Expect(a.Close()).To(Succeed())
 
-			a, err = artifactset.Open(accessobj.ACC_READONLY, "test.tgz", 0, opts)
-			Expect(err).To(Succeed())
-			defer a.Close()
+			a = Must(artifactset.Open(accessobj.ACC_READONLY, "test.tgz", 0, opts))
+			defer Close(a, "artefactset")
 			Expect(len(a.GetIndex().Manifests)).To(Equal(1))
-			art, err := a.GetArtifact(a.GetIndex().Manifests[0].Digest.String())
-			Expect(err).To(Succeed())
+			art := Must(a.GetArtifact(a.GetIndex().Manifests[0].Digest.String()))
+			defer Close(art, "artefact")
 			Expect(art.IsManifest()).To(BeTrue())
-			blob, err := art.GetBlob("sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50")
-			Expect(err).To(Succeed())
+			blob := Must(art.GetBlob("sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
+			defer Close(blob, "blob")
 			Expect(blob.Get()).To(Equal([]byte("testdata")))
 			Expect(blob.MimeType()).To(Equal(mime.MIME_OCTET))
 		})

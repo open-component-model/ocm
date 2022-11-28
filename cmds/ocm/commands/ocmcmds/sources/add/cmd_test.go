@@ -101,7 +101,7 @@ var _ = Describe("Add sources", func() {
 	})
 
 	It("adds simple text blob", func() {
-		Expect(env.Execute("add", "sources", ARCH, "/testdata/sources.yaml")).To(Succeed())
+		Expect(env.Execute("add", "sources", "--file", ARCH, "/testdata/sources.yaml")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
@@ -113,7 +113,7 @@ var _ = Describe("Add sources", func() {
 	})
 
 	It("adds simple text blob by cli env file", func() {
-		Expect(env.Execute("add", "sources", ARCH, "--settings", "/testdata/settings", "/testdata/sources.tmpl")).To(Succeed())
+		Expect(env.Execute("add", "sources", "--file", ARCH, "--settings", "/testdata/settings", "/testdata/sources.tmpl")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
@@ -124,7 +124,7 @@ var _ = Describe("Add sources", func() {
 	})
 
 	It("adds simple text blob by cli variable", func() {
-		Expect(env.Execute("add", "sources", ARCH, "CONTENT=testcontent", "/testdata/sources.tmpl")).To(Succeed())
+		Expect(env.Execute("add", "sources", "--file", ARCH, "CONTENT=testcontent", "/testdata/sources.tmpl")).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
@@ -145,7 +145,7 @@ type: file
 path: testdata/testcontent
 mediaType: text/plain
 `
-			Expect(env.Execute("add", "sources", ARCH, "--source", meta, "--input", input)).To(Succeed())
+			Expect(env.Execute("add", "sources", "--file", ARCH, "--source", meta, "--input", input)).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 			Expect(err).To(Succeed())
 			cd, err := compdesc.Decode(data)
