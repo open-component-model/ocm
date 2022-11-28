@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Masterminds/semver/v3"
+
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -17,6 +19,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/semverutils"
 )
 
 func Elem(e interface{}) ocm.ComponentVersionAccess {
@@ -73,17 +76,23 @@ func (o *Object) IsNode() *common.NameVersion {
 ////////////////////////////////////////////////////////////////////////////////
 
 type TypeHandler struct {
-	octx     clictx.OCM
-	session  ocm.Session
-	repobase ocm.Repository
+	octx        clictx.OCM
+	session     ocm.Session
+	repobase    ocm.Repository
+	constraints []*semver.Constraints
+	latest      bool
 }
 
-func NewTypeHandler(octx clictx.OCM, session ocm.Session, repobase ocm.Repository) utils.TypeHandler {
-	return &TypeHandler{
+func NewTypeHandler(octx clictx.OCM, session ocm.Session, repobase ocm.Repository, opts ...Option) utils.TypeHandler {
+	h := &TypeHandler{
 		octx:     octx,
 		session:  session,
 		repobase: repobase,
 	}
+	for _, o := range opts {
+		o.ApplyToCompHandler(h)
+	}
+	return h
 }
 
 func (h *TypeHandler) Close() error {
@@ -119,6 +128,21 @@ func (h *TypeHandler) all(repo ocm.Repository) ([]output.Object, error) {
 
 func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 	return h.get(h.repobase, elemspec)
+}
+
+func (h *TypeHandler) filterVersions(vers []string) []string {
+	if len(h.constraints) == 0 && !h.latest {
+		return vers
+	}
+	versions, _ := semverutils.MatchVersionStrings(vers, h.constraints...)
+	if h.latest && len(versions) > 1 {
+		versions = versions[len(versions)-1:]
+	}
+	vers = nil
+	for _, v := range versions {
+		vers = append(vers, v.Original())
+	}
+	return vers
 }
 
 func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]output.Object, error) {
@@ -181,6 +205,8 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 			if err != nil {
 				return nil, err
 			}
+			versions = h.filterVersions(versions)
+
 			for _, vers := range versions {
 				v, err := h.session.GetComponentVersion(component, vers)
 				if err != nil {

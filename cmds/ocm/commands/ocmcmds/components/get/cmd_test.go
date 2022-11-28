@@ -20,6 +20,8 @@ import (
 const ARCH = "/tmp/ca"
 const ARCH2 = "/tmp/ca2"
 const VERSION = "v1"
+const VERSION11 = "v1.1"
+const VERSION2 = "v2"
 const COMP = "test.de/x"
 const COMP2 = "test.de/y"
 const COMP3 = "test.de/z"
@@ -98,6 +100,72 @@ NESTING    COMPONENT VERSION PROVIDER                    IDENTITY
 COMPONENT VERSION PROVIDER   REPOSITORY
 test.de/x v1      mandelsoft /tmp/ca
 `))
+	})
+
+	Context("ctf with multiple versions", func() {
+		BeforeEach(func() {
+			env.OCMCommonTransport(ARCH, accessio.FormatDirectory, func() {
+				env.Component(COMP, func() {
+					env.Version(VERSION, func() {
+						env.Provider(PROVIDER)
+					})
+				})
+				env.Component(COMP, func() {
+					env.Version(VERSION11, func() {
+						env.Provider(PROVIDER)
+					})
+				})
+				env.Component(COMP, func() {
+					env.Version(VERSION2, func() {
+						env.Provider(PROVIDER)
+					})
+				})
+			})
+		})
+
+		It("lists all versions", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("get", "components", "--repo", ARCH, COMP)).To(Succeed())
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
+				`
+COMPONENT VERSION PROVIDER
+test.de/x v1      mandelsoft
+test.de/x v1.1    mandelsoft
+test.de/x v2      mandelsoft
+`))
+		})
+
+		It("lists latest version", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("get", "components", "--latest", "--repo", ARCH, COMP)).To(Succeed())
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
+				`
+COMPONENT VERSION PROVIDER
+test.de/x v2      mandelsoft
+`))
+		})
+
+		It("lists constrainted version", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("get", "components", "--constraints", ">1.0", "--repo", ARCH, COMP)).To(Succeed())
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
+				`
+COMPONENT VERSION PROVIDER
+test.de/x v1.1    mandelsoft
+test.de/x v2      mandelsoft
+`))
+		})
+
+		It("lists constrainted version", func() {
+			buf := bytes.NewBuffer(nil)
+			Expect(env.CatchOutput(buf).Execute("get", "components", "--constraints", "1.x.x", "--latest", "--repo", ARCH, COMP)).To(Succeed())
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(
+				`
+COMPONENT VERSION PROVIDER
+test.de/x v1.1    mandelsoft
+`))
+		})
+
 	})
 
 	Context("ctf", func() {

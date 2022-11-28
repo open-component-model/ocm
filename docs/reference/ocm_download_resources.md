@@ -9,12 +9,16 @@ ocm download resources [<options>]  <component> {<name> { <key>=<value> }}
 ### Options
 
 ```
-  -d, --download-handlers    use download handler if possible
-  -h, --help                 help for resources
-      --lookup stringArray   repository name or spec for closure lookup fallback
-  -O, --outfile string       output file or directory
-  -r, --recursive            follow component reference nesting
-      --repo string          repository name or spec
+  -c, --constraints constraints   version constraint
+  -d, --download-handlers         use download handler if possible
+  -x, --executable                download executable for local platform
+  -h, --help                      help for resources
+      --latest                    restrict component versions to latest
+      --lookup stringArray        repository name or spec for closure lookup fallback
+  -O, --outfile string            output file or directory
+  -r, --recursive                 follow component reference nesting
+      --repo string               repository name or spec
+  -t, --type stringArray          resource type filter
 ```
 
 ### Description
@@ -46,6 +50,10 @@ order:
     <pre>&lt;resource name>[-[&lt;name>=&lt>value>]{,&lt;name>=&lt>value>}]</pre>
 </center>
 
+
+If the option <code>--constraints</code> is given, and no version is specified for a component, only versions matching
+the given version constraints (semver https://github.com/Masterminds/semver) are selected. With <code>--latest</code> only
+the latest matching versions will be selected.
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax

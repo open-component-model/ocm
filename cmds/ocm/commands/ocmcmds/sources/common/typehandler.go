@@ -17,6 +17,8 @@ func Elem(e interface{}) *compdesc.Source {
 	return e.(*elemhdlr.Object).Element.(*compdesc.Source)
 }
 
+var OptionsFor = elemhdlr.OptionsFor
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type TypeHandler struct {

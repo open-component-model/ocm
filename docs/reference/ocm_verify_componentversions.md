@@ -9,20 +9,26 @@ ocm verify componentversions [<options>] {<component-reference>}
 ### Options
 
 ```
-      --ca-cert stringArray      Additional root certificates
-  -h, --help                     help for componentversions
-  -L, --local                    verification based on information found in component versions, only
-      --lookup stringArray       repository name or spec for closure lookup fallback
-  -k, --public-key stringArray   public key setting
-      --repo string              repository name or spec
-  -s, --signature stringArray    signature name
-  -V, --verify                   verify existing digests
+      --ca-cert stringArray       Additional root certificates
+  -c, --constraints constraints   version constraint
+  -h, --help                      help for componentversions
+      --latest                    restrict component versions to latest
+  -L, --local                     verification based on information found in component versions, only
+      --lookup stringArray        repository name or spec for closure lookup fallback
+  -k, --public-key stringArray    public key setting
+      --repo string               repository name or spec
+  -s, --signature stringArray     signature name
+  -V, --verify                    verify existing digests
 ```
 
 ### Description
 
 
 Verify signature of specified component versions. 
+
+If the option <code>--constraints</code> is given, and no version is specified for a component, only versions matching
+the given version constraints (semver https://github.com/Masterminds/semver) are selected. With <code>--latest</code> only
+the latest matching versions will be selected.
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax

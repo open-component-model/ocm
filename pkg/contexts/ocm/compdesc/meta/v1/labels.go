@@ -67,7 +67,7 @@ func NewLabel(name string, value interface{}, opts ...LabelOption) (*Label, erro
 // +k8s:openapi-gen=true
 type Labels []Label
 
-// Get returns the label with the given name.
+// Get returns the label value with the given name as json string.
 func (l Labels) Get(name string) ([]byte, bool) {
 	for _, label := range l {
 		if label.Name == name {
@@ -75,6 +75,16 @@ func (l Labels) Get(name string) ([]byte, bool) {
 		}
 	}
 	return nil, false
+}
+
+// GetValue returns the label value with the given name as parsed object.
+func (l Labels) GetValue(name string, dest interface{}) (bool, error) {
+	for _, label := range l {
+		if label.Name == name {
+			return true, json.Unmarshal(label.Value, dest)
+		}
+	}
+	return false, nil
 }
 
 func (l *Labels) Set(name string, value interface{}, opts ...LabelOption) error {

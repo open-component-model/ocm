@@ -17,6 +17,8 @@ func Elem(e interface{}) *compdesc.ComponentReference {
 	return e.(*elemhdlr.Object).Element.(*compdesc.ComponentReference)
 }
 
+var OptionsFor = elemhdlr.OptionsFor
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type TypeHandler struct {

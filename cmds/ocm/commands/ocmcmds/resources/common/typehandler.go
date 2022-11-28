@@ -17,6 +17,37 @@ func Elem(e interface{}) *compdesc.Resource {
 	return e.(*elemhdlr.Object).Element.(*compdesc.Resource)
 }
 
+var WithVersionConstraints = elemhdlr.WithVersionConstraints
+var LatestOnly = elemhdlr.LatestOnly
+var OptionsFor = elemhdlr.OptionsFor
+
+type typeFilter struct {
+	types []string
+}
+
+func (t typeFilter) ApplyToElemHandler(handler *elemhdlr.TypeHandler) {
+	if len(t.types) > 0 {
+		handler.SetFilter(t)
+	}
+}
+
+func (t typeFilter) Accept(e compdesc.ElementMetaAccessor) bool {
+	if len(t.types) == 0 {
+		return true
+	}
+	typ := e.(*compdesc.Resource).GetType()
+	for _, a := range t.types {
+		if a == typ {
+			return true
+		}
+	}
+	return false
+}
+
+func WithTypes(types []string) elemhdlr.Option {
+	return typeFilter{types}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type TypeHandler struct {

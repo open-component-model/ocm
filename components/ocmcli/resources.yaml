@@ -6,6 +6,9 @@ helper:
     name: ocmcli
     type: executable
     version: (( values.VERSION ))
+    labels:
+      - name: "downloadName"
+        value: "ocm"
     extraIdentity:
       os: ((dirname(p) ))
       architecture: (( basename(p) ))

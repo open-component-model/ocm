@@ -9,8 +9,10 @@ ocm transfer componentversions [<options>] {<component-reference>} <target>
 ### Options
 
 ```
+  -c, --constraints constraints   version constraint
   -V, --copy-resources            transfer referenced resources by-value
   -h, --help                      help for componentversions
+      --latest                    restrict component versions to latest
       --lookup stringArray        repository name or spec for closure lookup fallback
   -f, --overwrite                 overwrite existing component versions
   -r, --recursive                 follow component reference nesting
@@ -27,6 +29,10 @@ ocm transfer componentversions [<options>] {<component-reference>} <target>
 Transfer all component versions specified to the given target repository.
 If only a component (instead of a component version) is specified all versions
 are transferred.
+
+If the option <code>--constraints</code> is given, and no version is specified for a component, only versions matching
+the given version constraints (semver https://github.com/Masterminds/semver) are selected. With <code>--latest</code> only
+the latest matching versions will be selected.
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
