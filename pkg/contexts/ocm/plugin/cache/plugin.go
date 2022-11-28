@@ -113,7 +113,7 @@ func (p *pluginImpl) LookupUploader(name string, artType, mediaType string) inte
 		return nil
 	}
 
-	return p.uploaders.LookupFor(name, internal.UploaderKey{}.SetArtefact(artType, mediaType))
+	return p.uploaders.LookupFor(name, internal.UploaderKey{}.SetArtifact(artType, mediaType))
 }
 
 func (p *pluginImpl) LookupUploadersForKeys(name string, keys internal.UploaderKeySet) internal.List[*internal.UploaderDescriptor] {
@@ -133,7 +133,7 @@ func (p *pluginImpl) LookupUploaderKeys(name string, artType, mediaType string) 
 		return nil
 	}
 
-	return p.uploaders.LookupKeysFor(name, internal.UploaderKey{}.SetArtefact(artType, mediaType))
+	return p.uploaders.LookupKeysFor(name, internal.UploaderKey{}.SetArtifact(artType, mediaType))
 }
 
 func (p *pluginImpl) GetUploaderDescriptor(name string) *internal.UploaderDescriptor {

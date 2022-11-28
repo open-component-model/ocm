@@ -17,7 +17,7 @@ func init() {
 const usage = `
 The path must denote an helm chart archive or directory
 relative to the resources file.
-The denoted chart is packed as an OCI artefact set.
+The denoted chart is packed as an OCI artifact set.
 Additional provider info is taken from a file with the same name
 and the suffix <code>.prov</code>.
 

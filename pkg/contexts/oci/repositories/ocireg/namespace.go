@@ -35,7 +35,7 @@ type NamespaceContainer struct {
 }
 
 var (
-	_ cpi.ArtefactSetContainer = (*NamespaceContainer)(nil)
+	_ cpi.ArtifactSetContainer = (*NamespaceContainer)(nil)
 	_ cpi.NamespaceAccess      = (*Namespace)(nil)
 )
 
@@ -140,14 +140,14 @@ func (n *NamespaceContainer) ListTags() ([]string, error) {
 	return n.lister.List(dummyContext)
 }
 
-func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error) {
+func (n *NamespaceContainer) GetArtifact(vers string) (cpi.ArtifactAccess, error) {
 	ref := n.repo.getRef(n.namespace, vers)
-	n.repo.ctx.Logger().Debug("get artefact", "ref", ref)
+	n.repo.ctx.Logger().Debug("get artifact", "ref", ref)
 	_, desc, err := n.resolver.Resolve(context.Background(), ref)
 	n.repo.ctx.Logger().Debug("done", "digest", desc.Digest, "size", desc.Size, "mimetype", desc.MediaType, "error", logging.ErrorMessage(err))
 	if err != nil {
 		if errdefs.IsNotFound(err) {
-			return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, ref, n.namespace)
+			return nil, errors.ErrNotFound(cpi.KIND_OCIARTIFACT, ref, n.namespace)
 		}
 		return nil, err
 	}
@@ -155,18 +155,18 @@ func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error
 	if err != nil {
 		return nil, err
 	}
-	return cpi.NewArtefactForBlob(n, accessio.BlobAccessForDataAccess(desc.Digest, desc.Size, desc.MediaType, acc))
+	return cpi.NewArtifactForBlob(n, accessio.BlobAccessForDataAccess(desc.Digest, desc.Size, desc.MediaType, acc))
 }
 
-func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, tags ...string) (access accessio.BlobAccess, err error) {
-	blob, err := artefact.Blob()
+func (n *NamespaceContainer) AddArtifact(artifact cpi.Artifact, tags ...string) (access accessio.BlobAccess, err error) {
+	blob, err := artifact.Blob()
 	if err != nil {
 		return nil, err
 	}
 	if n.repo.info.Legacy {
-		blob = artdesc.MapArtefactBlobMimeType(blob, true)
+		blob = artdesc.MapArtifactBlobMimeType(blob, true)
 	}
-	n.repo.ctx.Logger().Debug("adding artefact", "digest", blob.Digest(), "mimetype", blob.MimeType())
+	n.repo.ctx.Logger().Debug("adding artifact", "digest", blob.Digest(), "mimetype", blob.MimeType())
 	_, _, err = n.blobs.Get(blob.MimeType()).AddBlob(blob)
 	if err != nil {
 		return nil, err
@@ -205,8 +205,8 @@ func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	return nil
 }
 
-func (n *NamespaceContainer) NewArtefactProvider(state accessobj.State) (cpi.ArtefactProvider, error) {
-	return cpi.NewNopCloserArtefactProvider(n), nil
+func (n *NamespaceContainer) NewArtifactProvider(state accessobj.State) (cpi.ArtifactProvider, error) {
+	return cpi.NewNopCloserArtifactProvider(n), nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -227,23 +227,23 @@ func (n *Namespace) ListTags() ([]string, error) {
 	return n.access.ListTags()
 }
 
-func (n *Namespace) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
+func (n *Namespace) NewArtifact(art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
 	if n.access.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	return cpi.NewArtefact(n.access, art...)
+	return cpi.NewArtifact(n.access, art...)
 }
 
 func (n *Namespace) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
 	return n.access.GetBlobData(digest)
 }
 
-func (n *Namespace) GetArtefact(vers string) (cpi.ArtefactAccess, error) {
-	return n.access.GetArtefact(vers)
+func (n *Namespace) GetArtifact(vers string) (cpi.ArtifactAccess, error) {
+	return n.access.GetArtifact(vers)
 }
 
-func (n *Namespace) AddArtefact(artefact cpi.Artefact, tags ...string) (accessio.BlobAccess, error) {
-	return n.access.AddArtefact(artefact, tags...)
+func (n *Namespace) AddArtifact(artifact cpi.Artifact, tags ...string) (accessio.BlobAccess, error) {
+	return n.access.AddArtifact(artifact, tags...)
 }
 
 func (n *Namespace) AddTags(digest digest.Digest, tags ...string) error {

@@ -27,7 +27,7 @@ var _ cpi.BlobHandlerRegistrationHandler = (*RegistrationHandler)(nil)
 
 func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, config cpi.BlobHandlerConfig, olist ...cpi.BlobHandlerOption) (bool, error) {
 	if handler != "" {
-		return true, fmt.Errorf("invalid ociArtefact handler %q", handler)
+		return true, fmt.Errorf("invalid ociArtifact handler %q", handler)
 	}
 	if config == nil {
 		return true, fmt.Errorf("oci target specification required")
@@ -70,7 +70,7 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 		mimes = artdesc.ArchiveBlobTypes()
 	}
 
-	h := NewArtefactHandler(attr)
+	h := NewArtifactHandler(attr)
 	for _, m := range mimes {
 		opts.MimeType = m
 		ctx.BlobHandlers().Register(h, opts)

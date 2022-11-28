@@ -17,12 +17,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/testhelper"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociblob"
 	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci/ocirepo"
@@ -138,21 +138,20 @@ var _ = Describe("component repository mapping", func() {
 		Expect(err).To(Succeed())
 	})
 
-	It("imports artefact", func() {
+	It("imports artifact", func() {
 		mime := artdesc.ToContentMediaType(artdesc.MediaTypeImageManifest) + "+tar+gzip"
 		base := func(ctx *storagecontext.StorageContext) string {
 			return TESTBASE
 		}
-		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().Register(ocirepo.NewArtefactHandler(base), cpi.ForMimeType(mime))).New()
+		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().Register(ocirepo.NewArtifactHandler(base), cpi.ForMimeType(mime))).New()
 
-		// create artefactset
+		// create artifactset
 		opts, err := accessio.AccessOptions(nil, accessio.PathFileSystem(tempfs))
 		Expect(err).To(Succeed())
-		r, err := artefactset.FormatTGZ.Create("test.tgz", opts, 0700)
+		r, err := artifactset.FormatTGZ.Create("test.tgz", opts, 0700)
 		Expect(err).To(Succeed())
 		testhelper.DefaultManifestFill(r)
-		r.Annotate(artefactset.MAINARTEFACT_ANNOTATION, "sha256:"+testhelper.DIGEST_MANIFEST)
-		r.Annotate(artefactset.LEGACY_MAINARTEFACT_ANNOTATION, "sha256:"+testhelper.DIGEST_MANIFEST)
+		r.Annotate(artifactset.MAINARTIFACT_ANNOTATION, "sha256:"+testhelper.DIGEST_MANIFEST)
 		Expect(r.Close()).To(Succeed())
 
 		// create repository
@@ -172,32 +171,32 @@ var _ = Describe("component repository mapping", func() {
 		defer vers.Close()
 		blob := accessio.BlobAccessForFile(mime, "test.tgz", tempfs)
 
-		acc, err := vers.AddBlob(blob, "", "artefact1", nil)
+		acc, err := vers.AddBlob(blob, "", "artifact1", nil)
 		Expect(err).To(Succeed())
-		Expect(acc.GetKind()).To(Equal(ociartefact.Type))
-		o := acc.(*ociartefact.AccessSpec)
-		Expect(o.ImageReference).To(Equal(TESTBASE + "/artefact1@sha256:" + testhelper.DIGEST_MANIFEST))
+		Expect(acc.GetKind()).To(Equal(ociartifact.Type))
+		o := acc.(*ociartifact.AccessSpec)
+		Expect(o.ImageReference).To(Equal(TESTBASE + "/artifact1@sha256:" + testhelper.DIGEST_MANIFEST))
 		err = comp.AddVersion(vers)
 		Expect(err).To(Succeed())
 
-		acc, err = vers.AddBlob(blob, "", "artefact2:v1", nil)
+		acc, err = vers.AddBlob(blob, "", "artifact2:v1", nil)
 		Expect(err).To(Succeed())
-		Expect(acc.GetKind()).To(Equal(ociartefact.Type))
-		o = acc.(*ociartefact.AccessSpec)
-		Expect(o.ImageReference).To(Equal(TESTBASE + "/artefact2:v1"))
+		Expect(acc.GetKind()).To(Equal(ociartifact.Type))
+		o = acc.(*ociartifact.AccessSpec)
+		Expect(o.ImageReference).To(Equal(TESTBASE + "/artifact2:v1"))
 		err = comp.AddVersion(vers)
 		Expect(err).To(Succeed())
 
 		Expect(vers.Close()).To(Succeed())
 		Expect(comp.Close()).To(Succeed())
 
-		ns, err := ocirepo.LookupNamespace("artefact2")
+		ns, err := ocirepo.LookupNamespace("artifact2")
 		Expect(err).To(Succeed())
 		defer ns.Close()
-		art, err := ns.GetArtefact("v1")
+		art, err := ns.GetArtifact("v1")
 		Expect(err).To(Succeed())
 		defer art.Close()
-		testhelper.CheckArtefact(art)
+		testhelper.CheckArtifact(art)
 		Expect(art.Close()).To(Succeed())
 		Expect(ns.Close()).To(Succeed())
 		Expect(repo.(*genericocireg.Repository).Close()).To(Succeed())

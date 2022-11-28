@@ -156,8 +156,8 @@ var _ = Describe("blob handler registry test", func() {
 			func(eff *internal.BlobHandlerRegistry) {
 				reg.Register(&BlobHandler{"mine"}, internal.ForMimeType(mime.MIME_TEXT))
 				reg.Register(&BlobHandler{"repo"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO))
-				reg.Register(&BlobHandler{"art"}, internal.ForArtefactType(ART))
-				reg.Register(&BlobHandler{"all"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO), internal.ForArtefactType(ART), internal.ForMimeType(mime.MIME_TEXT))
+				reg.Register(&BlobHandler{"art"}, internal.ForArtifactType(ART))
+				reg.Register(&BlobHandler{"all"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO), internal.ForArtifactType(ART), internal.ForMimeType(mime.MIME_TEXT))
 				reg.Register(&BlobHandler{"repomime"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO), internal.ForMimeType(mime.MIME_TEXT))
 
 				h := (*eff).LookupHandler(IMPL, ART, mime.MIME_TEXT)
@@ -189,7 +189,7 @@ var _ = Describe("blob handler registry test", func() {
 				reg.Register(&BlobHandler{"mine"}, internal.ForMimeType(mime.MIME_TEXT))
 				reg.Register(&BlobHandler{"repo"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO))
 				reg.Register(&BlobHandler{"repomine"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO), internal.ForMimeType(mime.MIME_TEXT))
-				reg.Register(&BlobHandler{"repoart"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO), internal.ForArtefactType(ART))
+				reg.Register(&BlobHandler{"repoart"}, internal.ForRepo(internal.CONTEXT_TYPE, REPO), internal.ForArtifactType(ART))
 
 				h := (*eff).LookupHandler(IMPL, ART, mime.MIME_TEXT)
 				Expect(h).NotTo(BeNil())

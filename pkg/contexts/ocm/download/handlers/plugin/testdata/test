@@ -47,7 +47,7 @@ extract() {
 }
 
 Info() {
-  echo '{"description":"a test plugin with access method test","pluginName":"'$NAME'","pluginVersion":"v1","shortDescription":"a test plugin","downloaders":[{"constraints":[{"artifactType":"TestArtefact"}],"name":"testdownloader"}],"version":"v1"}'
+  echo '{"description":"a test plugin with access method test","pluginName":"'$NAME'","pluginVersion":"v1","shortDescription":"a test plugin","downloaders":[{"constraints":[{"artifactType":"TestArtifact"}],"name":"testdownloader"}],"version":"v1"}'
 }
 
 Configure() {

@@ -1,4 +1,4 @@
-## ocm get &mdash; Get Information About Artefacts And Components
+## ocm get &mdash; Get Information About Artifacts And Components
 
 ### Synopsis
 
@@ -21,7 +21,7 @@ ocm get [<options>] <sub command> ...
 
 ##### Sub Commands
 
-* [ocm get <b>artefacts</b>](ocm_get_artefacts.md)	 &mdash; get artefact version
+* [ocm get <b>artifacts</b>](ocm_get_artifacts.md)	 &mdash; get artifact version
 * [ocm get <b>componentversions</b>](ocm_get_componentversions.md)	 &mdash; get component version
 * [ocm get <b>credentials</b>](ocm_get_credentials.md)	 &mdash; Get credentials for a dedicated consumer spec
 * [ocm get <b>plugins</b>](ocm_get_plugins.md)	 &mdash; get plugins

@@ -21,7 +21,7 @@ const ID_HOSTNAME = hostpath.ID_HOSTNAME
 // ID_PORT is the port number of an OCT repository.
 const ID_PORT = hostpath.ID_PORT
 
-// ID_PATHPREFIX is the artefact prefix.
+// ID_PATHPREFIX is the artifact prefix.
 const ID_PATHPREFIX = hostpath.ID_PATHPREFIX
 
 // ID_SCHEME is the scheme prefix.

@@ -100,7 +100,7 @@ the context of the  component version.
 ```
 
 The content of a described resource can be accessed using the appropriate
-[access method](../../docs/ocm/model.md#artefact-access) described as part of
+[access method](../../docs/ocm/model.md#artifact-access) described as part of
 the resource specification (another extension point of the model).
 It is described by an access specification. Supported methods can be 
 directly be requested using the resource object.

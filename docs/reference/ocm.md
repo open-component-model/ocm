@@ -23,10 +23,10 @@ ocm [<options>] <sub command> ...
 
 
 The Open Component Model command line client support the work with OCM
-artefacts, like Component Archives, Common Transport Archive,  
+artifacts, like Component Archives, Common Transport Archive,  
 Component Repositories, and component versions.
 
-Additionally it provides some limited support for the docker daemon, OCI artefacts and
+Additionally it provides some limited support for the docker daemon, OCI artifacts and
 registries.
 
 It can be used in two ways:
@@ -83,15 +83,15 @@ attributes are supported:
 
 - <code>github.com/mandelsoft/ocm/keeplocalblob</code> [<code>keeplocalblob</code>]: *bool*
 
-  Keep local blobs when importing OCI artefacts to OCI registries from <code>localBlob</code>
-  access methods. By default they will be expanded to OCI artefacts with the
+  Keep local blobs when importing OCI artifacts to OCI registries from <code>localBlob</code>
+  access methods. By default they will be expanded to OCI artifacts with the
   access method <code>ociRegistry</code>. If this option is set to true, they will be stored
   as local blobs, also. The access method will still be <code>localBlob</code> but with a nested
   <code>ociRegistry</code> access method for describing the global access.
 
 - <code>github.com/mandelsoft/ocm/ociuploadrepo</code> [<code>ociuploadrepo</code>]: *oci base repository ref*
 
-  Upload local OCI artefact blobs to a dedicated repository.
+  Upload local OCI artifact blobs to a dedicated repository.
 
 - <code>github.com/mandelsoft/ocm/plugindir</code> [<code>plugindir</code>]: *plugin directory*
 
@@ -137,13 +137,13 @@ attributes are supported:
 * [ocm <b>bootstrap</b>](ocm_bootstrap.md)	 &mdash; bootstrap components
 * [ocm <b>clean</b>](ocm_clean.md)	 &mdash; Cleanup/re-organize elements
 * [ocm <b>create</b>](ocm_create.md)	 &mdash; Create transport or component archive
-* [ocm <b>describe</b>](ocm_describe.md)	 &mdash; Describe artefacts
-* [ocm <b>download</b>](ocm_download.md)	 &mdash; Download oci artefacts, resources or complete components
-* [ocm <b>get</b>](ocm_get.md)	 &mdash; Get information about artefacts and components
+* [ocm <b>describe</b>](ocm_describe.md)	 &mdash; Describe artifacts
+* [ocm <b>download</b>](ocm_download.md)	 &mdash; Download oci artifacts, resources or complete components
+* [ocm <b>get</b>](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm <b>install</b>](ocm_install.md)	 &mdash; Install elements.
 * [ocm <b>show</b>](ocm_show.md)	 &mdash; Show tags or versions
 * [ocm <b>sign</b>](ocm_sign.md)	 &mdash; Sign components
-* [ocm <b>transfer</b>](ocm_transfer.md)	 &mdash; Transfer artefacts or components
+* [ocm <b>transfer</b>](ocm_transfer.md)	 &mdash; Transfer artifacts or components
 * [ocm <b>verify</b>](ocm_verify.md)	 &mdash; Verify component version signatures
 * [ocm <b>version</b>](ocm_version.md)	 &mdash; displays the version
 

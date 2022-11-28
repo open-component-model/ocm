@@ -215,7 +215,7 @@ The descriptor for a downloader has the following fields:
     {
       "constraints": [
         {
-          "artifactType": "TestArtefact"
+          "artifactType": "TestArtifact"
         }
       ],
       "name": "testuploader"

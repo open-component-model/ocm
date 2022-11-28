@@ -16,7 +16,7 @@ func init() {
 
 const usage = `
 The path must denote an image tag that can be found in the local
-docker daemon. The denoted image is packed as OCI artefact set.
+docker daemon. The denoted image is packed as OCI artifact set.
 
 This blob type specification supports the following fields: 
 - **<code>path</code>** *string*
@@ -27,6 +27,6 @@ This blob type specification supports the following fields:
 - **<code>repository</code>** *string*
 
   This OPTIONAL property can be used to specify the repository hint for the
-  generated local artefact access. It is prefixed by the component name if
+  generated local artifact access. It is prefixed by the component name if
   it does not start with slash "/".
 `

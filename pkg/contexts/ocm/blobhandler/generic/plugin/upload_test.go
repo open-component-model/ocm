@@ -44,7 +44,7 @@ const OUT = "/tmp/res"
 const COMP = "github.com/mandelsoft/comp"
 const VERS = "1.0.0"
 const PROVIDER = "mandelsoft"
-const RSCTYPE = "TestArtefact"
+const RSCTYPE = "TestArtifact"
 const MEDIA = "text/plain"
 
 const REPOTYPE = "test/v1"
@@ -122,7 +122,7 @@ var _ = Describe("setup plugin cache", func() {
 		os.RemoveAll(repodir)
 	})
 
-	It("uploads artefact", func() {
+	It("uploads artifact", func() {
 		repo := Must(ctf.Open(ctx, accessobj.ACC_READONLY, ARCH, 0, env))
 		defer Close(repo, "source repo")
 
@@ -137,7 +137,7 @@ var _ = Describe("setup plugin cache", func() {
 		name, keys, err := plugin.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", repospec)
 		MustBeSuccessful(err)
 		Expect(name).To(Equal("testuploader"))
-		Expect(keys).To(Equal(plugin2.UploaderKeySet{}.Add(plugin2.UploaderKey{}.SetArtefact(RSCTYPE, ""))))
+		Expect(keys).To(Equal(plugin2.UploaderKeySet{}.Add(plugin2.UploaderKey{}.SetArtifact(RSCTYPE, ""))))
 
 		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
 		defer Close(tgt, "target repo")
@@ -170,7 +170,7 @@ var _ = Describe("setup plugin cache", func() {
 		cv := Must(repo.LookupComponentVersion(COMP, VERS))
 		defer Close(cv, "source version")
 
-		MustFailWithMessage(registration.RegisterBlobHandlerByName(ctx, "plugin/test", []byte("{}"), registration.ForArtefactType(RSCTYPE)),
+		MustFailWithMessage(registration.RegisterBlobHandlerByName(ctx, "plugin/test", []byte("{}"), registration.ForArtifactType(RSCTYPE)),
 			//MustFailWithMessage(plugin.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", []byte("{}")),
 			"plugin uploader test/testuploader: path missing in repository spec",
 		)

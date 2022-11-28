@@ -14,7 +14,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	meta "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/testutils"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.software/v3alpha1/jsonscheme"
@@ -34,13 +34,13 @@ var _ = Describe("Validation", func() {
 			comp *ComponentDescriptor
 
 			ociImage1    *Resource
-			ociRegistry1 *ociartefact.AccessSpec
+			ociRegistry1 *ociartifact.AccessSpec
 			ociImage2    *Resource
-			ociRegistry2 *ociartefact.AccessSpec
+			ociRegistry2 *ociartifact.AccessSpec
 		)
 
 		BeforeEach(func() {
-			ociRegistry1 = ociartefact.New("docker/image1:1.2.3")
+			ociRegistry1 = ociartifact.New("docker/image1:1.2.3")
 
 			unstrucOCIRegistry1, err := runtime.ToUnstructuredTypedObject(ociRegistry1)
 			Expect(err).ToNot(HaveOccurred())
@@ -53,7 +53,7 @@ var _ = Describe("Validation", func() {
 				Relation: meta.ExternalRelation,
 				Access:   unstrucOCIRegistry1,
 			}
-			ociRegistry2 = ociartefact.New("docker/image1:1.2.3")
+			ociRegistry2 = ociartifact.New("docker/image1:1.2.3")
 			unstrucOCIRegistry2, err := runtime.ToUnstructuredTypedObject(ociRegistry2)
 			Expect(err).ToNot(HaveOccurred())
 			ociImage2 = &Resource{
@@ -261,7 +261,7 @@ var _ = Describe("Validation", func() {
 							Version: "0.0.1",
 						},
 						Relation: meta.LocalRelation,
-						Access:   runtime.NewEmptyUnstructured(ociartefact.Type),
+						Access:   runtime.NewEmptyUnstructured(ociartifact.Type),
 					},
 				}
 				errList := Validate(nil, comp)

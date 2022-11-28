@@ -149,7 +149,7 @@ func (r *Repository) GetBaseURL() string {
 	return r.spec.BaseURL
 }
 
-func (r *Repository) ExistsArtefact(name string, version string) (bool, error) {
+func (r *Repository) ExistsArtifact(name string, version string) (bool, error) {
 	res, err := r.getResolver(name)
 	if err != nil {
 		return false, err
@@ -166,12 +166,12 @@ func (r *Repository) ExistsArtefact(name string, version string) (bool, error) {
 	return true, nil
 }
 
-func (r *Repository) LookupArtefact(name string, version string) (cpi.ArtefactAccess, error) {
+func (r *Repository) LookupArtifact(name string, version string) (cpi.ArtifactAccess, error) {
 	n, err := r.LookupNamespace(name)
 	if err != nil {
 		return nil, err
 	}
-	return n.GetArtefact(version)
+	return n.GetArtifact(version)
 }
 
 func (r *Repository) LookupNamespace(name string) (cpi.NamespaceAccess, error) {

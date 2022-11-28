@@ -6,7 +6,7 @@ must be incorporated. Therefore, a digest for the artifact content must be
 determined.
 
 By default, this digest is calculated based on the blob provided by the 
-[access method](../../ocm/model.md#artefact-access)
+[access method](../../ocm/model.md#artifact-access)
 of an artifact. But there might be technology specific ways to uniquely identify
 the content for dedicated artifact types.
 
@@ -17,7 +17,7 @@ The following algorithms are centrally defined and available in the OCM toolset:
 
 - `ociArtifactDigest/v1`: OCI manifest digest
 
-  This algorithm is used for artifacts of type `ociArtefact`. It just uses the
+  This algorithm is used for artifacts of type `ociArtifact`. It just uses the
   manifest digest of the OCI artifact.
 
 - `genericBlobDigest/v1`: Blob byte stream digest

@@ -28,7 +28,7 @@ of method names:
   access methods can be use across local organizational extension.
 
   These types use flat names following a camel case scheme with
-  the first character in lower case (for example `ociArtefact`).
+  the first character in lower case (for example `ociArtifact`).
 
   Their format is described by the following regexp:
 
@@ -77,15 +77,15 @@ v[0-9]+([a-z][a-z0-9]*)?
 ```
 
 Examples:
-- `ociArtefact/v1`
+- `ociArtifact/v1`
 - `myprotocol.acme.org/v1alpha1`
 
 If no version is specified, implicitly the version `v1` is assumed.
 
-The access method type is part of the access specification of an artefact
+The access method type is part of the access specification of an artifact
 in the component descriptor. The access method type may define
 additional specification attributes required to finally identify the 
-concrete access path to the artefact blob.
+concrete access path to the artifact blob.
 
 For example, the access method `ociBlob` requires the OCI repository reference
 and the blob digest to be able to access the blob.

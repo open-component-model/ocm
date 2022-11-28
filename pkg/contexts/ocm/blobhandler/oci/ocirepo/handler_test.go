@@ -20,7 +20,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	ocictf "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci/ocirepo"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -47,7 +47,7 @@ func FakeOCIRegBaseFunction(ctx *storagecontext.StorageContext) string {
 	return "baseurl.io"
 }
 
-var _ = Describe("oci artefact transfer", func() {
+var _ = Describe("oci artifact transfer", func() {
 	var env *Builder
 	var ldesc *artdesc.Descriptor
 
@@ -65,9 +65,9 @@ var _ = Describe("oci artefact transfer", func() {
 					env.Resource("testdata", "", "PlainText", metav1.LocalRelation, func() {
 						env.BlobStringData(mime.MIME_TEXT, "testdata")
 					})
-					env.Resource("artefact", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
+					env.Resource("artifact", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
 						env.Access(
-							ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
+							ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
 						)
 					})
 				})
@@ -85,7 +85,7 @@ var _ = Describe("oci artefact transfer", func() {
 
 	It("it should copy a resource by value to a ctf file", func() {
 
-		env.OCMContext().BlobHandlers().Register(ocirepo.NewArtefactHandler(FakeOCIRegBaseFunction),
+		env.OCMContext().BlobHandlers().Register(ocirepo.NewArtifactHandler(FakeOCIRegBaseFunction),
 			cpi.ForRepo(oci.CONTEXT_TYPE, ocictf.Type), cpi.ForMimeType(artdesc.ToContentMediaType(artdesc.MediaTypeImageManifest)))
 
 		src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env))
@@ -107,12 +107,12 @@ var _ = Describe("oci artefact transfer", func() {
 		data := Must(json.Marshal(comp.GetDescriptor().Resources[1].Access))
 
 		fmt.Printf("%s\n", string(data))
-		Expect(string(data)).To(StringEqualWithContext("{\"imageReference\":\"baseurl.io/ocm/value:v2.0\",\"type\":\"ociArtefact\"}"))
+		Expect(string(data)).To(StringEqualWithContext("{\"imageReference\":\"baseurl.io/ocm/value:v2.0\",\"type\":\"ociArtifact\"}"))
 
 		ocirepo := tgt.(genericocireg.OCIBasedRepository).OCIRepository()
 
-		art := Must(ocirepo.LookupArtefact(OCINAMESPACE, OCIVERSION))
-		defer Close(art, "artefact")
+		art := Must(ocirepo.LookupArtifact(OCINAMESPACE, OCIVERSION))
+		defer Close(art, "artifact")
 
 		man := MustBeNonNil(art.ManifestAccess())
 		Expect(len(man.GetDescriptor().Layers)).To(Equal(1))

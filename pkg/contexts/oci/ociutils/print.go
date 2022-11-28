@@ -16,7 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 )
 
-func PrintArtefact(pr common.Printer, art cpi.ArtefactAccess, listFiles bool) {
+func PrintArtifact(pr common.Printer, art cpi.ArtifactAccess, listFiles bool) {
 	if art.IsManifest() {
 		pr.Printf("type: %s\n", artdesc.MediaTypeImageManifest)
 		PrintManifest(pr, art.ManifestAccess(), listFiles)
@@ -116,12 +116,12 @@ func PrintIndex(pr common.Printer, i cpi.IndexAccess, listFiles bool) {
 	for _, l := range i.GetDescriptor().Manifests {
 		pr.Printf("- type:   %s\n", l.MediaType)
 		pr.Printf("  digest: %s\n", l.Digest)
-		a, err := i.GetArtefact(l.Digest)
+		a, err := i.GetArtifact(l.Digest)
 		if err != nil {
 			pr.Printf("  error: %s\n", err)
 		} else {
-			pr.Printf("  resolved artefact:\n")
-			PrintArtefact(pr.AddGap("    "), a, listFiles)
+			pr.Printf("  resolved artifact:\n")
+			PrintArtifact(pr.AddGap("    "), a, listFiles)
 		}
 	}
 }

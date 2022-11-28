@@ -14,20 +14,20 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-const TYPE = consts.HelmChart
+const TYPE = resourcetypes.HELM_CHART
 
 type Handler struct{}
 
 func init() {
-	download.RegisterForArtefactType(TYPE, &Handler{})
+	download.RegisterForArtifactType(TYPE, &Handler{})
 }
 
 func (h Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
@@ -44,17 +44,17 @@ func (h Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string
 		return true, "", err
 	}
 	defer rd.Close()
-	set, err := artefactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(rd))
+	set, err := artifactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(rd))
 	if err != nil {
 		return true, "", err
 	}
-	art, err := set.GetArtefact(set.GetMain().String())
+	art, err := set.GetArtifact(set.GetMain().String())
 	if err != nil {
 		return true, "", err
 	}
 	m := art.ManifestAccess()
 	if m == nil {
-		return true, "", errors.Newf("artefact is no image manifest")
+		return true, "", errors.Newf("artifact is no image manifest")
 	}
 	if len(m.GetDescriptor().Layers) < 1 {
 		return true, "", errors.Newf("no layers found")

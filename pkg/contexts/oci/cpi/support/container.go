@@ -11,9 +11,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 )
 
-// ArtefactSetContainer is the interface used by subsequent access objects
+// ArtifactSetContainer is the interface used by subsequent access objects
 // to access the base implementation.
-type ArtefactSetContainer interface {
+type ArtifactSetContainer interface {
 	IsReadOnly() bool
 	IsClosed() bool
 
@@ -23,56 +23,56 @@ type ArtefactSetContainer interface {
 	GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error)
 	AddBlob(blob cpi.BlobAccess) error
 
-	GetArtefact(vers string) (cpi.ArtefactAccess, error)
-	AddArtefact(artefact cpi.Artefact, tags ...string) (access accessio.BlobAccess, err error)
+	GetArtifact(vers string) (cpi.ArtifactAccess, error)
+	AddArtifact(artifact cpi.Artifact, tags ...string) (access accessio.BlobAccess, err error)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// ArtefactSetContainerInt is the implementation interface for a provider.
-type ArtefactSetContainerInt ArtefactSetContainer
+// ArtifactSetContainerInt is the implementation interface for a provider.
+type ArtifactSetContainerInt ArtifactSetContainer
 
-type artefactSetContainerImpl struct {
+type artifactSetContainerImpl struct {
 	refs accessio.ReferencableCloser
-	ArtefactSetContainerInt
+	ArtifactSetContainerInt
 }
 
-type ArtefactSetContainerImpl interface {
-	ArtefactSetContainer
-	View(main ...bool) (ArtefactSetContainer, error)
+type ArtifactSetContainerImpl interface {
+	ArtifactSetContainer
+	View(main ...bool) (ArtifactSetContainer, error)
 }
 
-func NewArtefactSetContainer(c ArtefactSetContainerInt) (ArtefactSetContainer, ArtefactSetContainerImpl) {
-	i := &artefactSetContainerImpl{
+func NewArtifactSetContainer(c ArtifactSetContainerInt) (ArtifactSetContainer, ArtifactSetContainerImpl) {
+	i := &artifactSetContainerImpl{
 		refs:                    accessio.NewRefCloser(c, true),
-		ArtefactSetContainerInt: c,
+		ArtifactSetContainerInt: c,
 	}
 	v, _ := i.View(true)
 	return v, i
 }
 
-func (i *artefactSetContainerImpl) View(main ...bool) (ArtefactSetContainer, error) {
+func (i *artifactSetContainerImpl) View(main ...bool) (ArtifactSetContainer, error) {
 	v, err := i.refs.View(main...)
 	if err != nil {
 		return nil, err
 	}
-	return &artefactSetContainerView{
+	return &artifactSetContainerView{
 		view:                     v,
-		ArtefactSetContainerImpl: i,
+		ArtifactSetContainerImpl: i,
 	}, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type artefactSetContainerView struct {
+type artifactSetContainerView struct {
 	view accessio.CloserView
-	ArtefactSetContainerImpl
+	ArtifactSetContainerImpl
 }
 
-func (v *artefactSetContainerView) IsClosed() bool {
+func (v *artifactSetContainerView) IsClosed() bool {
 	return v.view.IsClosed()
 }
 
-func (v *artefactSetContainerView) Close() error {
+func (v *artifactSetContainerView) Close() error {
 	return v.view.Close()
 }

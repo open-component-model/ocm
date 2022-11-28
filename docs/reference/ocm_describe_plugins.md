@@ -30,6 +30,6 @@ $ ocm describe plugins demo
 
 ##### Parents
 
-* [ocm describe](ocm_describe.md)	 &mdash; Describe artefacts
+* [ocm describe](ocm_describe.md)	 &mdash; Describe artifacts
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

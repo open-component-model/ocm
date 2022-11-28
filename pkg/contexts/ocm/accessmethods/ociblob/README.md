@@ -24,7 +24,7 @@ The type specific specification fields are:
 
 - **`imageReference`** *string*
 
-  OCI repository reference (this artefact name used to store the blob).
+  OCI repository reference (this artifact name used to store the blob).
 
 - **`mediaType`** *string*
 

@@ -12,11 +12,11 @@ import (
 )
 
 const (
-	KIND_OCIARTEFACT = "oci artefact"
+	KIND_OCIARTIFACT = "oci artifact"
 	KIND_BLOB        = accessio.KIND_BLOB
 	KIND_MEDIATYPE   = accessio.KIND_MEDIATYPE
 )
 
-func ErrUnknownArtefact(name, version string) error {
-	return errors.ErrUnknown(KIND_OCIARTEFACT, fmt.Sprintf("%s:%s", name, version))
+func ErrUnknownArtifact(name, version string) error {
+	return errors.ErrUnknown(KIND_OCIARTIFACT, fmt.Sprintf("%s:%s", name, version))
 }

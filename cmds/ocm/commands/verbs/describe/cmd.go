@@ -7,7 +7,7 @@ package describe
 import (
 	"github.com/spf13/cobra"
 
-	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts/describe"
+	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artifacts/describe"
 	plugins "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/plugins/describe"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -17,7 +17,7 @@ import (
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "Describe artefacts",
+		Short: "Describe artifacts",
 	}, verbs.Describe)
 	cmd.AddCommand(resources.NewCommand(ctx))
 	cmd.AddCommand(plugins.NewCommand(ctx))

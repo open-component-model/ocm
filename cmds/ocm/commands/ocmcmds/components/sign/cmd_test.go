@@ -21,7 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ctfoci "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
@@ -83,13 +83,13 @@ var _ = Describe("access method", func() {
 						})
 						env.Resource("value", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
 							env.Access(
-								ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
+								ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
 							)
 							env.Label("transportByValue", true)
 						})
 						env.Resource("ref", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
 							env.Access(
-								ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION)),
+								ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION)),
 							)
 						})
 					})
@@ -266,13 +266,13 @@ func prepareEnv(env *TestEnv, componentAArchive, componentBArchive string) {
 				})
 				env.Resource("value", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
 					env.Access(
-						ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
+						ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE, OCIVERSION)),
 					)
 					env.Label("transportByValue", true)
 				})
 				env.Resource("ref", "", resourcetypes.OCI_IMAGE, metav1.LocalRelation, func() {
 					env.Access(
-						ociartefact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION)),
+						ociartifact.New(oci.StandardOCIRef(OCIHOST+".alias", OCINAMESPACE2, OCIVERSION)),
 					)
 				})
 			})

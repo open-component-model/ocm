@@ -23,7 +23,7 @@ The type specific specification fields are:
 
 - **`region`** (optional) *string*
 
-  OCI repository reference (this artefact name used to store the blob).
+  OCI repository reference (this artifact name used to store the blob).
 
 - **`bucket`** *string*
 

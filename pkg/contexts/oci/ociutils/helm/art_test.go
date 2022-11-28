@@ -23,7 +23,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm/loader"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/env"
 	"github.com/open-component-model/ocm/pkg/env/builder"
 )
@@ -80,13 +80,13 @@ var _ = Describe("art parsing", func() {
 		meta, err := json.Marshal(chart.Metadata)
 		Expect(err).To(Succeed())
 
-		artblob, err := helm.SynthesizeArtefactBlob("/testdata/testchart", env)
+		artblob, err := helm.SynthesizeArtifactBlob("/testdata/testchart", env)
 		Expect(err).To(Succeed())
 		defer Close(artblob)
-		set, err := artefactset.OpenFromBlob(accessobj.ACC_READONLY, artblob)
+		set, err := artifactset.OpenFromBlob(accessobj.ACC_READONLY, artblob)
 		Expect(err).To(Succeed())
 		defer Close(set)
-		art, err := set.GetArtefact(set.GetMain().String())
+		art, err := set.GetArtifact(set.GetMain().String())
 		Expect(err).To(Succeed())
 		defer Close(art)
 		m := art.ManifestAccess().GetDescriptor()

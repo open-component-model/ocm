@@ -41,7 +41,7 @@ func (i *Index) GetBlobDescriptor(digest digest.Digest) *Descriptor {
 }
 
 func (i *Index) MimeType() string {
-	return ArtefactMimeType(i.MediaType, MediaTypeImageIndex, legacy)
+	return ArtifactMimeType(i.MediaType, MediaTypeImageIndex, legacy)
 }
 
 func (i *Index) ToBlobAccess() (accessio.BlobAccess, error) {

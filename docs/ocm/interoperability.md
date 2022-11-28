@@ -44,8 +44,8 @@ repository types.
 There are several such extension points:
 - repository types
 - access method types
-- specialized artefact down-loaders (for example foe helm charts)
-- specialized artefact digesters (for example for OCI images)
+- specialized artifact down-loaders (for example foe helm charts)
+- specialized artifact digesters (for example for OCI images)
 - transport policies
 - credential repositories and types
 - signing handlers

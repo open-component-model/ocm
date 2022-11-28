@@ -2,7 +2,7 @@
 
 [![REUSE status](https://api.reuse.software/badge/github.com/open-component-model/ocm)](https://api.reuse.software/info/github.com/open-component-model/ocm)
 
-The Open Component Model provides a standard for describing delivery [artefacts](docs/ocm/model.md#artefacts) that can be accessed from many types of [component repositories](docs/ocm/model.md#repositories).
+The Open Component Model provides a standard for describing delivery [artifacts](docs/ocm/model.md#artifacts) that can be accessed from many types of [component repositories](docs/ocm/model.md#repositories).
 
 ## OCM Specifications
 

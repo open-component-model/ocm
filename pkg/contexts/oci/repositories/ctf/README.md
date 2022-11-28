@@ -10,7 +10,7 @@ type: CommonTransportFormat/v1
 
 ### Description
 
-Artefact namespaces/repositories of the API layer will be mapped to a
+Artifact namespaces/repositories of the API layer will be mapped to a
 filesystem-based representation according to the [Common Transport Format specification](formatspec.md).
 
 Supported specification version is `v1`.

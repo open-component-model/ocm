@@ -8,7 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/toi/install"
 )
@@ -81,7 +81,7 @@ the bootstrap command. Every action refers to an executor, which is executed
 to perform the action. Finally, an executor is an image following the TOI
 specification for passing information into the image execution and receiving
 results from the execution. Such an image is described in two ways:
-- it either describes a resource of type <code>` + consts.OCIImage + `</code> or
+- it either describes a resource of type <code>` + resourcetypes.OCI_IMAGE + `</code> or
 - it describes a resource of type <code>` + install.TypeTOIExecutor + `</code>, which defines
   the image to use and some default settings and further describes the features
   and requirements of the executor image.

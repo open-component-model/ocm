@@ -5,5 +5,5 @@
 package digesters
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/artefact"
+	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/artifact"
 )

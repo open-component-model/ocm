@@ -11,9 +11,9 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/compression"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
@@ -21,10 +21,10 @@ import (
 type Handler struct{}
 
 func init() {
-	download.Register(consts.OCMPlugin, mime.MIME_OCTET, &Handler{})
-	download.Register(consts.OCMPlugin, mime.MIME_GZIP, &Handler{})
-	download.Register(consts.Executable, mime.MIME_OCTET, &Handler{})
-	download.Register(consts.Executable, mime.MIME_GZIP, &Handler{})
+	download.Register(resourcetypes.OCM_PLUGIN, mime.MIME_OCTET, &Handler{})
+	download.Register(resourcetypes.OCM_PLUGIN, mime.MIME_GZIP, &Handler{})
+	download.Register(resourcetypes.EXECUTABLE, mime.MIME_OCTET, &Handler{})
+	download.Register(resourcetypes.EXECUTABLE, mime.MIME_GZIP, &Handler{})
 }
 
 func wrapErr(err error, racc cpi.ResourceAccess) error {

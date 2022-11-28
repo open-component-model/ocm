@@ -4,5 +4,5 @@ name: image
 version: v0.1.0
 relation: external
 access:
-  type: ociArtefact
+  type: ociArtifact
   imageReference: ghcr.io/mandelsoft/pause:v0.1.0

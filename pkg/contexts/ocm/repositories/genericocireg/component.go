@@ -21,7 +21,7 @@ type ComponentAccess struct {
 }
 
 // implemented by view
-// the rest is directly taken from the artefact set implementation
+// the rest is directly taken from the artifact set implementation
 
 func (s *ComponentAccess) Close() error {
 	return s.view.Close()
@@ -113,7 +113,7 @@ func (c *componentAccessImpl) LookupVersion(version string) (cpi.ComponentVersio
 		return nil, err
 	}
 	defer v.Close()
-	acc, err := c.namespace.GetArtefact(version)
+	acc, err := c.namespace.GetArtifact(version)
 	if err != nil {
 		if errors.IsErrNotFound(err) {
 			return nil, cpi.ErrComponentVersionNotFoundWrap(err, c.name, version)
@@ -141,17 +141,17 @@ func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (cpi
 	defer v.Close()
 
 	override := utils.Optional(overrides...)
-	acc, err := c.namespace.GetArtefact(version)
+	acc, err := c.namespace.GetArtifact(version)
 	if err == nil {
 		if override {
 			return newComponentVersionAccess(accessobj.ACC_CREATE, c, version, acc)
 		}
 		return nil, errors.ErrAlreadyExists(cpi.KIND_COMPONENTVERSION, c.name+"/"+version)
 	}
-	if !errors.IsErrNotFoundKind(err, oci.KIND_OCIARTEFACT) {
+	if !errors.IsErrNotFoundKind(err, oci.KIND_OCIARTIFACT) {
 		return nil, err
 	}
-	acc, err = c.namespace.NewArtefact()
+	acc, err = c.namespace.NewArtifact()
 	if err != nil {
 		return nil, err
 	}

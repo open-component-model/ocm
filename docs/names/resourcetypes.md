@@ -1,6 +1,6 @@
 # Resource Types in the Open Component Model
 
-The OCM component descriptor described a set of artefacts, their type and
+The OCM component descriptor described a set of artifacts, their type and
 meaning with attached meta, and access information.
 
 The meaning is basically encoded into a dedicated *resource type*.
@@ -11,7 +11,7 @@ There are two kinds of types:
 - centrally defined type names managed by the OCM organization
 
   These types use flat names following a camel case scheme with
-  the first character in lower case (for example `ociArtefact`).
+  the first character in lower case (for example `ociArtifact`).
 
   Their format is described by the following regexp:
   

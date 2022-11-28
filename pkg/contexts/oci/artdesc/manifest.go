@@ -45,7 +45,7 @@ func (m *Manifest) GetBlobDescriptor(digest digest.Digest) *Descriptor {
 }
 
 func (m *Manifest) MimeType() string {
-	return ArtefactMimeType(m.MediaType, MediaTypeImageManifest, legacy)
+	return ArtifactMimeType(m.MediaType, MediaTypeImageManifest, legacy)
 }
 
 func (m *Manifest) ToBlobAccess() (accessio.BlobAccess, error) {

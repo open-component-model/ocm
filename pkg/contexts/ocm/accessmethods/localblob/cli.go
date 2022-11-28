@@ -59,12 +59,12 @@ The type specific specification fields are:
   other repositories to restore some global access with an identity
   related to the original source.
 
-  For example, if an OCI artefact originally referenced using the
-  access method <code>ociArtefact</code> is stored during
-  some transport step as local artefact, the reference name can be set
+  For example, if an OCI artifact originally referenced using the
+  access method <code>ociArtifact</code> is stored during
+  some transport step as local artifact, the reference name can be set
   to its original repository name. An import step into an OCI based OCM
-  repository may then decide to make this artefact available again as
-  regular OCI artefact.
+  repository may then decide to make this artifact available again as
+  regular OCI artifact.
 
 - **<code>globalAccess</code>** (optional) *access method specification*
 
@@ -72,8 +72,8 @@ The type specific specification fields are:
   may decide to provide an external access information (independent
   of the OCM model).
 
-  For example, an OCI artefact stored as local blob
-  can be additionally stored as regular OCI artefact in an OCI registry.
+  For example, an OCI artifact stored as local blob
+  can be additionally stored as regular OCI artifact in an OCI registry.
 
   This additional external access information can be added using
   a second external access method specification.

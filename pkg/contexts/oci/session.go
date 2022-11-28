@@ -15,15 +15,15 @@ import (
 type NamespaceContainer interface {
 	LookupNamespace(name string) (NamespaceAccess, error)
 }
-type ArtefactContainer interface {
-	GetArtefact(version string) (ArtefactAccess, error)
+type ArtifactContainer interface {
+	GetArtifact(version string) (ArtifactAccess, error)
 }
 
 type EvaluationResult struct {
 	Ref        RefSpec
 	Repository Repository
 	Namespace  NamespaceAccess
-	Artefact   ArtefactAccess
+	Artifact   ArtifactAccess
 }
 
 type Session interface {
@@ -31,7 +31,7 @@ type Session interface {
 
 	LookupRepository(Context, RepositorySpec) (Repository, error)
 	LookupNamespace(NamespaceContainer, string) (NamespaceAccess, error)
-	GetArtefact(ArtefactContainer, string) (ArtefactAccess, error)
+	GetArtifact(ArtifactContainer, string) (ArtifactAccess, error)
 	EvaluateRef(ctx Context, ref string) (*EvaluationResult, error)
 	DetermineRepository(ctx Context, ref string) (Repository, UniformRepositorySpec, error)
 	DetermineRepositoryBySpec(ctx Context, spec *UniformRepositorySpec) (Repository, error)
@@ -42,7 +42,7 @@ type session struct {
 	base         datacontext.SessionBase
 	repositories map[datacontext.ObjectKey]Repository
 	namespaces   map[datacontext.ObjectKey]NamespaceAccess
-	artefacts    map[datacontext.ObjectKey]ArtefactAccess
+	artifacts    map[datacontext.ObjectKey]ArtifactAccess
 }
 
 var key = reflect.TypeOf(session{})
@@ -57,7 +57,7 @@ func newSession(s datacontext.SessionBase) datacontext.Session {
 		base:         s,
 		repositories: map[datacontext.ObjectKey]Repository{},
 		namespaces:   map[datacontext.ObjectKey]NamespaceAccess{},
-		artefacts:    map[datacontext.ObjectKey]ArtefactAccess{},
+		artifacts:    map[datacontext.ObjectKey]ArtifactAccess{},
 	}
 }
 
@@ -120,7 +120,7 @@ func (s *session) LookupNamespace(c NamespaceContainer, name string) (NamespaceA
 	return ns, err
 }
 
-func (s *session) GetArtefact(c ArtefactContainer, version string) (ArtefactAccess, error) {
+func (s *session) GetArtifact(c ArtifactContainer, version string) (ArtifactAccess, error) {
 	key := datacontext.ObjectKey{
 		Object: c,
 		Name:   version,
@@ -130,14 +130,14 @@ func (s *session) GetArtefact(c ArtefactContainer, version string) (ArtefactAcce
 	if s.base.IsClosed() {
 		return nil, errors.ErrClosed("session")
 	}
-	if obj := s.artefacts[key]; obj != nil {
+	if obj := s.artifacts[key]; obj != nil {
 		return obj, nil
 	}
-	obj, err := c.GetArtefact(version)
+	obj, err := c.GetArtifact(version)
 	if err != nil {
 		return nil, err
 	}
-	s.artefacts[key] = obj
+	s.artifacts[key] = obj
 	s.base.AddCloser(obj)
 	return obj, err
 }
@@ -161,7 +161,7 @@ func (s *session) EvaluateRef(ctx Context, ref string) (*EvaluationResult, error
 	if !result.Ref.IsVersion() {
 		return result, err
 	}
-	result.Artefact, err = s.GetArtefact(result.Namespace, result.Ref.Version())
+	result.Artifact, err = s.GetArtifact(result.Namespace, result.Ref.Version())
 	return result, err
 }
 

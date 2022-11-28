@@ -38,7 +38,7 @@ func New() *cobra.Command {
     {
       "constraints": [
         {
-          "artifactType": "TestArtefact"
+          "artifactType": "TestArtifact"
         }
       ],
       "name": "testuploader"

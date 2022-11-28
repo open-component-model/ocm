@@ -35,7 +35,7 @@ func (a AttributeType) Name() string {
 func (a AttributeType) Description() string {
 	return `
 *oci base repository ref*
-Upload local OCI artefact blobs to a dedicated repository.
+Upload local OCI artifact blobs to a dedicated repository.
 `
 }
 

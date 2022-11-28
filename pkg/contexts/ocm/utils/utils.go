@@ -7,11 +7,11 @@ package utils
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-func GetOCIArtefactRef(ctx ocm.Context, r ocm.ResourceAccess) (string, error) {
+func GetOCIArtifactRef(ctx ocm.Context, r ocm.ResourceAccess) (string, error) {
 	acc, err := r.Access()
 	if err != nil {
 		return "", err
@@ -26,8 +26,8 @@ func GetOCIArtefactRef(ctx ocm.Context, r ocm.ResourceAccess) (string, error) {
 			}
 		}
 	}
-	if ociartefact.Is(acc) {
-		return acc.(*ociartefact.AccessSpec).ImageReference, nil
+	if ociartifact.Is(acc) {
+		return acc.(*ociartifact.AccessSpec).ImageReference, nil
 	}
 	return "", errors.Newf("cannot map access to external image reference")
 }

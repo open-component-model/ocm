@@ -129,14 +129,14 @@ var (
 		Optional(Capture(DomainPortRegexp), RepositorySeparatorRegexp),
 		Capture(RepositoryRegexp))
 
-	// CapturedArtefactVersionRegexp is used to parse an artefact version sped
+	// CapturedArtifactVersionRegexp is used to parse an artifact version sped
 	// consisting of a repository part and an optional version part.
-	CapturedArtefactVersionRegexp = Sequence(
+	CapturedArtifactVersionRegexp = Sequence(
 		Capture(RepositoryRegexp),
 		CapturedVersionRegexp)
 
-	// AnchoredArtefactVersionRegexp is used to parse artefact versions.
-	AnchoredArtefactVersionRegexp = Anchored(CapturedArtefactVersionRegexp)
+	// AnchoredArtifactVersionRegexp is used to parse artifact versions.
+	AnchoredArtifactVersionRegexp = Anchored(CapturedArtifactVersionRegexp)
 
 	// CapturedVersionRegexp described the version part of a reference.
 	CapturedVersionRegexp = Sequence(
@@ -151,14 +151,14 @@ var (
 		Optional(Literal(DigestSeparator), Capture(Match(".*?"))))
 
 	////////////////////////////////////////////////////////////////////////////
-	// now the various full flegded artefact flavors.
+	// now the various full flegded artifact flavors.
 
 	// ReferenceRegexp is the full supported format of a reference. The regexp
 	// is anchored and has capturing groups for name, tag, and digest
 	// components.
 	ReferenceRegexp = Anchored(
 		Optional(Optional(CapturedSchemeRegexp), Capture(DomainPortRegexp), RepositorySeparatorRegexp),
-		CapturedArtefactVersionRegexp)
+		CapturedArtifactVersionRegexp)
 
 	// DockerLibraryReferenceRegexp is a shortened docker library reference.
 	DockerLibraryReferenceRegexp = Anchored(
@@ -177,22 +177,22 @@ var (
 	TypedURIRegexp = Anchored(
 		Capture(TypeRegexp), Literal("::"),
 		Optional(CapturedSchemeRegexp, Optional(Literal("//")), Capture(PathPortRegexp)),
-		Optional(RepositorySeparatorRegexp, RepositorySeparatorRegexp, Optional(CapturedArtefactVersionRegexp)))
+		Optional(RepositorySeparatorRegexp, RepositorySeparatorRegexp, Optional(CapturedArtifactVersionRegexp)))
 
 	TypedReferenceRegexp = Anchored(
 		Capture(TypeRegexp), Literal("::"),
 		Optional(CapturedSchemeRegexp, Optional(Literal("//"))), Capture(DomainPortRegexp),
-		Optional(RepositorySeparatorRegexp, Optional(CapturedArtefactVersionRegexp)))
+		Optional(RepositorySeparatorRegexp, Optional(CapturedArtifactVersionRegexp)))
 
 	TypedGenericReferenceRegexp = Anchored(
 		Optional(Capture(TypeRegexp), Literal("::")),
 		Capture(Match(".*?"), Match("[^:]")), Match(RepositorySeparator+RepositorySeparator),
-		Optional(CapturedArtefactVersionRegexp))
+		Optional(CapturedArtifactVersionRegexp))
 
 	FileReferenceRegexp = Anchored(
 		Optional(Capture(TypeRegexp), Literal("::")),
 		Capture(Match("[./].*?"), Match("[^:]")), Match(RepositorySeparator+RepositorySeparator),
-		Optional(CapturedArtefactVersionRegexp))
+		Optional(CapturedArtifactVersionRegexp))
 
 	// Unused.
 

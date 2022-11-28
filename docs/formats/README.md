@@ -21,11 +21,11 @@ to represent content:
 
   - Raw Helm Chart Format
   
-    Helm Charts can be stored as OCI artefacts in OCI repositories. When
-    downloading those artefacts by default they will be transformed to the
+    Helm Charts can be stored as OCI artifacts in OCI repositories. When
+    downloading those artifacts by default they will be transformed to the
     regular helm file system representation by some download handlers.
     If a raw format is chosen the 
-    [OCI representation](../../pkg/contexts/oci/repositories/ctf/README.md#artefact-set-archive-format)
+    [OCI representation](../../pkg/contexts/oci/repositories/ctf/README.md#artifact-set-archive-format)
     is used to represent the chart content.
   
 - Component Descriptor

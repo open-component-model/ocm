@@ -27,7 +27,7 @@ func Localize(mappings []Localization, cv ocm.ComponentVersionAccess, resolver o
 			return nil, errors.ErrNotFoundWrap(err, "mapping", fmt.Sprintf("%d (%s)", i+1, &v.ResourceReference))
 		}
 		rcv.Close()
-		ref, err := utils.GetOCIArtefactRef(ctx, acc)
+		ref, err := utils.GetOCIArtifactRef(ctx, acc)
 		if err != nil {
 			return nil, errors.Wrapf(err, "mapping %d: cannot resolve resource %s to an OCI Reference", i+1, v)
 		}

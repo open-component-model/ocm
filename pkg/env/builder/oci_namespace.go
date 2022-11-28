@@ -33,5 +33,5 @@ func (b *Builder) Namespace(name string, f ...func()) {
 	b.expect(b.oci_repo, T_OCIREPOSITORY)
 	r, err := b.oci_repo.LookupNamespace(name)
 	b.failOn(err)
-	b.configure(&ociNamespace{NamespaceAccess: r, kind: T_OCIARTEFACTSET}, f)
+	b.configure(&ociNamespace{NamespaceAccess: r, kind: T_OCIARTIFACTSET}, f)
 }

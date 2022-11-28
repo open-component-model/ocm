@@ -16,12 +16,12 @@ import (
 )
 
 type ManifestImpl struct {
-	artefactBase
+	artifactBase
 }
 
 var _ ManifestAccess = (*ManifestImpl)(nil)
 
-func NewManifest(access ArtefactSetContainer, defs ...*artdesc.Manifest) (*ManifestImpl, error) {
+func NewManifest(access ArtifactSetContainer, defs ...*artdesc.Manifest) (*ManifestImpl, error) {
 	var def *artdesc.Manifest
 	if len(defs) != 0 && defs[0] != nil {
 		def = defs[0]
@@ -35,13 +35,13 @@ func NewManifest(access ArtefactSetContainer, defs ...*artdesc.Manifest) (*Manif
 		panic("oops")
 	}
 
-	p, err := access.NewArtefactProvider(state)
+	p, err := access.NewArtifactProvider(state)
 	if err != nil {
 		return nil, err
 	}
 
 	m := &ManifestImpl{
-		artefactBase: artefactBase{
+		artifactBase: artifactBase{
 			container: access,
 			state:     state,
 			provider:  p,
@@ -57,16 +57,16 @@ type manifestMapper struct {
 var _ accessobj.State = (*manifestMapper)(nil)
 
 func (m *manifestMapper) GetState() interface{} {
-	return m.State.GetState().(*artdesc.Artefact).Manifest()
+	return m.State.GetState().(*artdesc.Artifact).Manifest()
 }
 
 func (m *manifestMapper) GetOriginalState() interface{} {
-	return m.State.GetOriginalState().(*artdesc.Artefact).Manifest()
+	return m.State.GetOriginalState().(*artdesc.Artifact).Manifest()
 }
 
-func NewManifestForArtefact(a *ArtefactImpl) *ManifestImpl {
+func NewManifestForArtifact(a *ArtifactImpl) *ManifestImpl {
 	m := &ManifestImpl{
-		artefactBase: artefactBase{
+		artifactBase: artifactBase{
 			container: a.container,
 			state:     &manifestMapper{a.state},
 			provider:  a.provider,
@@ -87,7 +87,7 @@ func (m *ManifestImpl) Index() (*artdesc.Index, error) {
 	return nil, errors.ErrInvalid()
 }
 
-func (m *ManifestImpl) Artefact() *artdesc.Artefact {
+func (m *ManifestImpl) Artifact() *artdesc.Artifact {
 	a := artdesc.New()
 	_ = a.SetManifest(m.GetDescriptor())
 	return a

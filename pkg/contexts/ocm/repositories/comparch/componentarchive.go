@@ -20,7 +20,7 @@ import (
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// ComponentArchive is the go representation for a component artefact.
+// ComponentArchive is the go representation for a component artifact.
 type ComponentArchive struct {
 	base *accessobj.FileSystemBlobAccess
 	comp *ComponentAccess

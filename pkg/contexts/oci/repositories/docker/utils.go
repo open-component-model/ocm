@@ -61,7 +61,7 @@ func ParseRef(name, version string) (types.ImageReference, error) {
 	return daemon.ParseReference(name + ":" + version)
 }
 
-func ImageId(art cpi.Artefact) digest.Digest {
+func ImageId(art cpi.Artifact) digest.Digest {
 	m, err := art.Manifest()
 	if err != nil {
 		return ""

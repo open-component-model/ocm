@@ -204,7 +204,7 @@ with the field <code>type</code> in the <code>input</code> field:
 - Input type <code>docker</code>
 
   The path must denote an image tag that can be found in the local
-  docker daemon. The denoted image is packed as OCI artefact set.
+  docker daemon. The denoted image is packed as OCI artifact set.
   
   This blob type specification supports the following fields: 
   - **<code>path</code>** *string*
@@ -215,7 +215,7 @@ with the field <code>type</code> in the <code>input</code> field:
   - **<code>repository</code>** *string*
   
     This OPTIONAL property can be used to specify the repository hint for the
-    generated local artefact access. It is prefixed by the component name if
+    generated local artifact access. It is prefixed by the component name if
     it does not start with slash "/".
   
   Options used to configure fields: <code>--hint</code>, <code>--inputPath</code>
@@ -225,7 +225,7 @@ with the field <code>type</code> in the <code>input</code> field:
   This input type describes the composition of a multi-platform OCI image.
   The various variants are taken from the local docker daemon. They should be 
   built with the buildx command for cross platform docker builds.
-  The denoted images, as well as the wrapping image index is packed as OCI artefact set.
+  The denoted images, as well as the wrapping image index is packed as OCI artifact set.
   
   This blob type specification supports the following fields:
   - **<code>variants</code>** *[]string*
@@ -236,7 +236,7 @@ with the field <code>type</code> in the <code>input</code> field:
   - **<code>repository</code>** *string*
   
     This OPTIONAL property can be used to specify the repository hint for the
-    generated local artefact access. It is prefixed by the component name if
+    generated local artifact access. It is prefixed by the component name if
     it does not start with slash "/".
   
   Options used to configure fields: <code>--hint</code>, <code>--inputVariants</code>
@@ -270,7 +270,7 @@ with the field <code>type</code> in the <code>input</code> field:
 
   The path must denote an helm chart archive or directory
   relative to the resources file.
-  The denoted chart is packed as an OCI artefact set.
+  The denoted chart is packed as an OCI artifact set.
   Additional provider info is taken from a file with the same name
   and the suffix <code>.prov</code>.
   
@@ -305,7 +305,7 @@ with the field <code>type</code> in the <code>input</code> field:
   - **<code>repository</code>** *string*
   
     This OPTIONAL property can be used to specify the repository hint for the
-    generated local artefact access. It is prefixed by the component name if
+    generated local artifact access. It is prefixed by the component name if
     it does not start with slash "/".
   
   Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputPath</code>, <code>--mediaType</code>
@@ -366,7 +366,7 @@ shown below.
     
     - **<code>region</code>** (optional) *string*
     
-      OCI repository reference (this artefact name used to store the blob).
+      OCI repository reference (this artifact name used to store the blob).
     
     - **<code>bucket</code>** *string*
     
@@ -429,7 +429,7 @@ shown below.
     
     - **<code>mediaType</code>** *string*
     
-      The media type of the blob used to store the resource. It may add 
+      The media type of the blob used to store the resource. It may add
       format information like <code>+tar</code> or <code>+gzip</code>.
     
     - **<code>referenceName</code>** (optional) *string*
@@ -438,12 +438,12 @@ shown below.
       other repositories to restore some global access with an identity
       related to the original source.
     
-      For example, if an OCI artefact originally referenced using the
-      access method [<code>ociArtefact</code>](../../../../../docs/formats/accessmethods/ociArtefact.md) is stored during
-      some transport step as local artefact, the reference name can be set
+      For example, if an OCI artifact originally referenced using the
+      access method <code>ociArtifact</code> is stored during
+      some transport step as local artifact, the reference name can be set
       to its original repository name. An import step into an OCI based OCM
-      repository may then decide to make this artefact available again as 
-      regular OCI artefact.
+      repository may then decide to make this artifact available again as
+      regular OCI artifact.
     
     - **<code>globalAccess</code>** (optional) *access method specification*
     
@@ -451,9 +451,9 @@ shown below.
       may decide to provide an external access information (independent
       of the OCM model).
     
-      For example, an OCI artefact stored as local blob
-      can be additionally stored as regular OCI artefact in an OCI registry.
-      
+      For example, an OCI artifact stored as local blob
+      can be additionally stored as regular OCI artifact in an OCI registry.
+    
       This additional external access information can be added using
       a second external access method specification.
     
@@ -465,9 +465,9 @@ shown below.
   dummy resource with no access
 
 
-- Access type <code>ociArtefact</code>
+- Access type <code>ociArtifact</code>
 
-  This method implements the access of an OCI artefact stored in an OCI registry.
+  This method implements the access of an OCI artifact stored in an OCI registry.
 
   The following versions are supported:
   - Version <code>v1</code>
@@ -476,9 +476,9 @@ shown below.
     
     - **<code>imageReference</code>** *string*
     
-      OCI image/artefact reference following the possible docker schemes:
-      - <code>&lt;repo>/&lt;artefact>:&lt;digest>@&lt;tag></code>
-      - <code><host>[&lt;port>]/&lt;repo path>/&lt;artefact>:&lt;version>@&lt;tag></code>
+      OCI image/artifact reference following the possible docker schemes:
+      - <code>&lt;repo>/&lt;artifact>:&lt;digest>@&lt;tag></code>
+      - <code><host>[&lt;port>]/&lt;repo path>/&lt;artifact>:&lt;version>@&lt;tag></code>
     
     Options used to configure fields: <code>--reference</code>
   
@@ -494,7 +494,7 @@ shown below.
     
     - **<code>imageReference</code>** *string*
     
-      OCI repository reference (this artefact name used to store the blob).
+      OCI repository reference (this artifact name used to store the blob).
     
     - **<code>mediaType</code>** *string*
     

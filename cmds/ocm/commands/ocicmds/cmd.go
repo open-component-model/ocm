@@ -7,7 +7,7 @@ package ocicmds
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artefacts"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artifacts"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/ctf"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/tags"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -20,7 +20,7 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
 		Short: "Dedicated command flavors for the OCI layer",
 	}, "oci")
-	cmd.AddCommand(artefacts.NewCommand(ctx))
+	cmd.AddCommand(artifacts.NewCommand(ctx))
 	cmd.AddCommand(ctf.NewCommand(ctx))
 	cmd.AddCommand(tags.NewCommand(ctx))
 

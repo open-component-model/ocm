@@ -24,7 +24,7 @@ func main() {
 
 	p.RegisterAccessMethod(accessmethods.New())
 	u := uploaders.New()
-	p.RegisterUploader("testArtefact", "", u)
+	p.RegisterUploader("testArtifact", "", u)
 	err := cmds.NewPluginCommand(p).Execute(os.Args[1:])
 	if err != nil {
 		os.Exit(1)

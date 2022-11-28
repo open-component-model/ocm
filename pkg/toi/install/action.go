@@ -21,8 +21,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/config/config"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -103,7 +103,7 @@ func DetermineExecutor(executor *Executor, octx ocm.Context, cv ocm.ComponentVer
 			}
 		}()
 		switch res.Meta().Type {
-		case consts.OCIImage:
+		case resourcetypes.OCI_IMAGE:
 		case TypeTOIExecutor:
 			err := GetResource(res, &espec.Spec)
 			if err != nil {
@@ -128,10 +128,10 @@ func DetermineExecutor(executor *Executor, octx ocm.Context, cv ocm.ComponentVer
 			return nil, errors.ErrInvalid("executor resource type", res.Meta().Type, executor.ResourceRef.String())
 		}
 
-		if res.Meta().Type != consts.OCIImage {
+		if res.Meta().Type != resourcetypes.OCI_IMAGE {
 			return nil, errors.ErrInvalid("executor resource type", res.Meta().Type)
 		}
-		ref, err := utils.GetOCIArtefactRef(octx, res)
+		ref, err := utils.GetOCIArtifactRef(octx, res)
 		if err != nil {
 			return nil, errors.Wrapf(err, "image ref for executor resource %s not found", executor.ResourceRef.String())
 		}

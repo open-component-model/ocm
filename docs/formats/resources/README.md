@@ -2,10 +2,10 @@
 
 The following resource types are centrally defined:
 
-- `ociArtefact`: a generic OCI artefact following the
+- `ociArtifact`: a generic OCI artifact following the
    [open containers image specification](https://github.com/opencontainers/image-spec/blob/main/spec.md)
 - `ociImage`: an OCI image or image list
-- `helmChart`: a helm chart, either stored as OCI artefact or as tar blob (tar media type)
+- `helmChart`: a helm chart, either stored as OCI artifact or as tar blob (tar media type)
 - `blob`: any anonymous untyped blob data
 - `filesytem`: a directory structures stored as archive (tar, tgz).
 

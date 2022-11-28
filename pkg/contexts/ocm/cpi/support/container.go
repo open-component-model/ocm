@@ -23,7 +23,7 @@ type BlobContainer interface {
 
 	// AddBlobFor stores a local blob together with the component and
 	// potentially provides a global reference according to the OCI distribution spec
-	// if the blob described an oci artefact.
+	// if the blob described an oci artifact.
 	// The resulting access information (global and local) is provided as
 	// an access method specification usable in a component descriptor.
 	// This is the direct technical storage, without caring about any handler.

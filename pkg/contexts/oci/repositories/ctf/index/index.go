@@ -17,12 +17,12 @@ import (
 
 type RepositoryIndex struct {
 	lock         sync.RWMutex
-	byDigest     map[digest.Digest][]*ArtefactMeta
-	byRepository map[string]map[string]*ArtefactMeta
+	byDigest     map[digest.Digest][]*ArtifactMeta
+	byRepository map[string]map[string]*ArtifactMeta
 }
 
-func NewMeta(repo string, tag string, digest digest.Digest) *ArtefactMeta {
-	return &ArtefactMeta{
+func NewMeta(repo string, tag string, digest digest.Digest) *ArtifactMeta {
+	return &ArtifactMeta{
 		Repository: repo,
 		Tag:        tag,
 		Digest:     digest,
@@ -31,8 +31,8 @@ func NewMeta(repo string, tag string, digest digest.Digest) *ArtefactMeta {
 
 func NewRepositoryIndex() *RepositoryIndex {
 	return &RepositoryIndex{
-		byDigest:     map[digest.Digest][]*ArtefactMeta{},
-		byRepository: map[string]map[string]*ArtefactMeta{},
+		byDigest:     map[digest.Digest][]*ArtifactMeta{},
+		byRepository: map[string]map[string]*ArtifactMeta{},
 	}
 }
 
@@ -48,34 +48,34 @@ func (r *RepositoryIndex) AddTagsFor(repo string, digest digest.Digest, tags ...
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	a := r.getArtefactInfo(repo, digest.String())
+	a := r.getArtifactInfo(repo, digest.String())
 	if a == nil {
-		return cpi.ErrUnknownArtefact(repo, digest.String())
+		return cpi.ErrUnknownArtifact(repo, digest.String())
 	}
 	for _, tag := range tags {
 		n := *a
 		n.Tag = tag
-		r.addArtefactInfo(n)
+		r.addArtifactInfo(n)
 	}
 	return nil
 }
 
-func (r *RepositoryIndex) AddArtefactInfo(n *ArtefactMeta) {
+func (r *RepositoryIndex) AddArtifactInfo(n *ArtifactMeta) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	r.addArtefactInfo(*n)
+	r.addArtifactInfo(*n)
 }
 
-func (r *RepositoryIndex) addArtefactInfo(m ArtefactMeta) {
+func (r *RepositoryIndex) addArtifactInfo(m ArtifactMeta) {
 	repos := r.byRepository[m.Repository]
 	if len(repos) == 0 {
-		repos = map[string]*ArtefactMeta{}
+		repos = map[string]*ArtifactMeta{}
 		r.byRepository[m.Repository] = repos
 	}
 
 	list := r.byDigest[m.Digest]
 	if list == nil {
-		list = []*ArtefactMeta{&m}
+		list = []*ArtifactMeta{&m}
 	} else {
 		for _, e := range list {
 			if m.Repository == e.Repository && m.Digest == e.Digest {
@@ -98,7 +98,7 @@ func (r *RepositoryIndex) addArtefactInfo(m ArtefactMeta) {
 	}
 }
 
-func (r *RepositoryIndex) HasArtefact(repo, tag string) bool {
+func (r *RepositoryIndex) HasArtifact(repo, tag string) bool {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 	repos := r.byRepository[repo]
@@ -137,7 +137,7 @@ func (r *RepositoryIndex) GetTags(repo string) []string {
 	return result
 }
 
-func (r *RepositoryIndex) GetArtefacts(repo string) []string {
+func (r *RepositoryIndex) GetArtifacts(repo string) []string {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
@@ -152,19 +152,19 @@ func (r *RepositoryIndex) GetArtefacts(repo string) []string {
 	return result
 }
 
-func (r *RepositoryIndex) GetArtefactInfos(digest digest.Digest) []*ArtefactMeta {
+func (r *RepositoryIndex) GetArtifactInfos(digest digest.Digest) []*ArtifactMeta {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 	return r.byDigest[digest]
 }
 
-func (r *RepositoryIndex) GetArtefactInfo(repo, reference string) *ArtefactMeta {
+func (r *RepositoryIndex) GetArtifactInfo(repo, reference string) *ArtifactMeta {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
-	return r.getArtefactInfo(repo, reference)
+	return r.getArtifactInfo(repo, reference)
 }
 
-func (r *RepositoryIndex) getArtefactInfo(repo, reference string) *ArtefactMeta {
+func (r *RepositoryIndex) getArtifactInfo(repo, reference string) *ArtifactMeta {
 	repos := r.byRepository[repo]
 	if repos == nil {
 		return nil
@@ -180,10 +180,10 @@ func (r *RepositoryIndex) getArtefactInfo(repo, reference string) *ArtefactMeta 
 	return &result
 }
 
-func (r *RepositoryIndex) GetDescriptor() *ArtefactIndex {
+func (r *RepositoryIndex) GetDescriptor() *ArtifactIndex {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
-	index := &ArtefactIndex{
+	index := &ArtifactIndex{
 		Versioned: specs.Versioned{SchemaVersion},
 	}
 
@@ -207,7 +207,7 @@ func (r *RepositoryIndex) GetDescriptor() *ArtefactIndex {
 		for _, name := range versions {
 			vers := repo[name]
 			if "@"+vers.Digest.String() != name || vers.Tag == "" {
-				d := &ArtefactMeta{
+				d := &ArtifactMeta{
 					Repository: vers.Repository,
 					Tag:        vers.Tag,
 					Digest:     vers.Digest,

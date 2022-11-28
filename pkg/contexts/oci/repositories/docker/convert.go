@@ -56,12 +56,12 @@ func (f *fakeSource) Reference() types.ImageReference {
 ////////////////////////////////////////////////////////////////////////////////
 
 type artBlobCache struct {
-	access cpi.ArtefactAccess
+	access cpi.ArtifactAccess
 }
 
 var _ accessio.BlobCache = (*artBlobCache)(nil)
 
-func ArtefactAsBlobCache(access cpi.ArtefactAccess) accessio.BlobCache {
+func ArtifactAsBlobCache(access cpi.ArtifactAccess) accessio.BlobCache {
 	return &artBlobCache{access}
 }
 
@@ -95,17 +95,17 @@ func (c *artBlobCache) AddData(data accessio.DataAccess) (int64, digest.Digest, 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func blobSource(art cpi.Artefact, blobs accessio.BlobSource) (accessio.BlobSource, error) {
+func blobSource(art cpi.Artifact, blobs accessio.BlobSource) (accessio.BlobSource, error) {
 	var err error
 	if blobs == nil {
-		if t, ok := art.(cpi.ArtefactAccess); !ok {
+		if t, ok := art.(cpi.ArtifactAccess); !ok {
 			return nil, fmt.Errorf("blob source required")
 		} else {
-			blobs = ArtefactAsBlobCache(t)
+			blobs = ArtifactAsBlobCache(t)
 		}
 	} else {
-		if t, ok := art.(cpi.ArtefactAccess); ok {
-			blobs, err = accessio.NewCascadedBlobCacheForSource(blobs, ArtefactAsBlobCache(t))
+		if t, ok := art.(cpi.ArtifactAccess); ok {
+			blobs, err = accessio.NewCascadedBlobCacheForSource(blobs, ArtifactAsBlobCache(t))
 			if err != nil {
 				return nil, err
 			}
@@ -114,7 +114,7 @@ func blobSource(art cpi.Artefact, blobs accessio.BlobSource) (accessio.BlobSourc
 	return blobs, nil
 }
 
-func Convert(art cpi.Artefact, blobs accessio.BlobSource, dst types.ImageDestination) (cpi.BlobAccess, error) {
+func Convert(art cpi.Artifact, blobs accessio.BlobSource, dst types.ImageDestination) (cpi.BlobAccess, error) {
 	blobs, err := blobSource(art, blobs)
 	if err != nil {
 		return nil, err

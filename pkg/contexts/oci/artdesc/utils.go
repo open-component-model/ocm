@@ -96,14 +96,14 @@ func ArchiveBlobTypes() []string {
 	return r
 }
 
-func ArtefactMimeType(cur, def string, legacy bool) string {
+func ArtifactMimeType(cur, def string, legacy bool) string {
 	if cur != "" {
 		return cur
 	}
-	return MapArtefactMimeType(def, legacy)
+	return MapArtifactMimeType(def, legacy)
 }
 
-func MapArtefactMimeType(mime string, legacy bool) string {
+func MapArtifactMimeType(mime string, legacy bool) string {
 	if legacy {
 		switch mime {
 		case MediaTypeImageManifest:
@@ -122,9 +122,9 @@ func MapArtefactMimeType(mime string, legacy bool) string {
 	return mime
 }
 
-func MapArtefactBlobMimeType(blob accessio.BlobAccess, legacy bool) accessio.BlobAccess {
+func MapArtifactBlobMimeType(blob accessio.BlobAccess, legacy bool) accessio.BlobAccess {
 	mime := blob.MimeType()
-	mapped := MapArtefactMimeType(mime, legacy)
+	mapped := MapArtifactMimeType(mime, legacy)
 	if mapped != mime {
 		return accessio.BlobWithMimeType(mapped, blob)
 	}

@@ -57,7 +57,7 @@ Dedicated OCM repository types:
 - `ComponentArchive`
 
 OCI Repository types (using standard component repository to OCI mapping):
-- `ArtefactSet`
+- `ArtifactSet`
 - `CommonTransportFormat`
 - `DockerDaemon`
 - `Empty`

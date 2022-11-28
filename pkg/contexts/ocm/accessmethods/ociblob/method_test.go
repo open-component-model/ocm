@@ -32,7 +32,7 @@ var _ = Describe("Method", func() {
 		env.Cleanup()
 	})
 
-	It("accesses artefact", func() {
+	It("accesses artifact", func() {
 		var desc *artdesc.Descriptor
 		env.OCICommonTransport(OCIPATH, accessio.FormatDirectory, func() {
 			desc = OCIManifest1(env)

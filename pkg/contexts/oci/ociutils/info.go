@@ -31,7 +31,7 @@ type BlobInfo struct {
 	Size     int64           `json:"size,omitempty"`
 	Info     interface{}     `json:"info,omitempty"`
 }
-type ArtefactInfo struct {
+type ArtifactInfo struct {
 	Digest     digest.Digest `json:"digest"`
 	Type       string        `json:"type"`
 	Descriptor interface{}   `json:"descriptor"`
@@ -40,18 +40,18 @@ type ArtefactInfo struct {
 	Manifests  []*BlobInfo   `json:"manifests,omitempty"`
 }
 
-func GetArtefactInfo(art cpi.ArtefactAccess, layerFiles bool) *ArtefactInfo {
+func GetArtifactInfo(art cpi.ArtifactAccess, layerFiles bool) *ArtifactInfo {
 	if art.IsManifest() {
 		return GetManifestInfo(art.ManifestAccess(), layerFiles)
 	}
 	if art.IsIndex() {
 		return GetIndexInfo(art.IndexAccess(), layerFiles)
 	}
-	return &ArtefactInfo{Type: "unspecific"}
+	return &ArtifactInfo{Type: "unspecific"}
 }
 
-func GetManifestInfo(m cpi.ManifestAccess, layerFiles bool) *ArtefactInfo {
-	info := &ArtefactInfo{
+func GetManifestInfo(m cpi.ManifestAccess, layerFiles bool) *ArtifactInfo {
+	info := &ArtifactInfo{
 		Type:       artdesc.MediaTypeImageManifest,
 		Descriptor: m.GetDescriptor(),
 	}
@@ -189,8 +189,8 @@ func GetLayerInfo(blob accessio.BlobAccess, layerFiles bool) *LayerInfo {
 	}
 }
 
-func GetIndexInfo(i cpi.IndexAccess, layerFiles bool) *ArtefactInfo {
-	info := &ArtefactInfo{
+func GetIndexInfo(i cpi.IndexAccess, layerFiles bool) *ArtifactInfo {
+	info := &ArtifactInfo{
 		Type:       artdesc.MediaTypeImageIndex,
 		Descriptor: i.GetDescriptor(),
 	}
@@ -204,11 +204,11 @@ func GetIndexInfo(i cpi.IndexAccess, layerFiles bool) *ArtefactInfo {
 			Digest: l.Digest,
 			Size:   l.Size,
 		}
-		a, err := i.GetArtefact(l.Digest)
+		a, err := i.GetArtifact(l.Digest)
 		if err != nil {
-			blobinfo.Error = fmt.Sprintf("cannot get artefact: %s\n", err)
+			blobinfo.Error = fmt.Sprintf("cannot get artifact: %s\n", err)
 		} else {
-			blobinfo.Info = GetArtefactInfo(a, layerFiles)
+			blobinfo.Info = GetArtifactInfo(a, layerFiles)
 		}
 		info.Layers = append(info.Layers, blobinfo)
 	}

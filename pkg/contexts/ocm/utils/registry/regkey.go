@@ -20,7 +20,7 @@ func (k RegistrationKey) IsValid() bool {
 	return k.ArtifactType != "" || k.MediaType != ""
 }
 
-func (k RegistrationKey) GetArtefactType() string {
+func (k RegistrationKey) GetArtifactType() string {
 	return k.ArtifactType
 }
 
@@ -28,7 +28,7 @@ func (k RegistrationKey) GetMediaType() string {
 	return k.MediaType
 }
 
-func (k RegistrationKey) SetArtefact(arttype, medtatype string) RegistrationKey {
+func (k RegistrationKey) SetArtifact(arttype, medtatype string) RegistrationKey {
 	k.ArtifactType = arttype
 	k.MediaType = medtatype
 	return k

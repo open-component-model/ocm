@@ -30,10 +30,10 @@ type (
 	RepositorySpec                   = internal.RepositorySpec
 	IntermediateRepositorySpecAspect = internal.IntermediateRepositorySpecAspect
 	GenericRepositorySpec            = internal.GenericRepositorySpec
-	ArtefactAccess                   = internal.ArtefactAccess
-	Artefact                         = internal.Artefact
-	ArtefactSource                   = internal.ArtefactSource
-	ArtefactSink                     = internal.ArtefactSink
+	ArtifactAccess                   = internal.ArtifactAccess
+	Artifact                         = internal.Artifact
+	ArtifactSource                   = internal.ArtifactSource
+	ArtifactSink                     = internal.ArtifactSink
 	BlobSource                       = internal.BlobSource
 	BlobSink                         = internal.BlobSink
 	NamespaceLister                  = internal.NamespaceLister
@@ -70,13 +70,13 @@ func UniformRepositorySpecForHostURL(typ string, host string) *UniformRepository
 }
 
 const (
-	KIND_OCIARTEFACT = internal.KIND_OCIARTEFACT
+	KIND_OCIARTIFACT = internal.KIND_OCIARTIFACT
 	KIND_MEDIATYPE   = accessio.KIND_MEDIATYPE
 	KIND_BLOB        = accessio.KIND_BLOB
 )
 
-func ErrUnknownArtefact(name, version string) error {
-	return internal.ErrUnknownArtefact(name, version)
+func ErrUnknownArtifact(name, version string) error {
+	return internal.ErrUnknownArtifact(name, version)
 }
 
 func ErrBlobNotFound(digest digest.Digest) error {

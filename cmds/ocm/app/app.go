@@ -82,10 +82,10 @@ type CLIOptions struct {
 
 var desc = `
 The Open Component Model command line client support the work with OCM
-artefacts, like Component Archives, Common Transport Archive,  
+artifacts, like Component Archives, Common Transport Archive,  
 Component Repositories, and component versions.
 
-Additionally it provides some limited support for the docker daemon, OCI artefacts and
+Additionally it provides some limited support for the docker daemon, OCI artifacts and
 registries.
 
 It can be used in two ways:

@@ -5,7 +5,7 @@
 package names
 
 var (
-	Artefacts        = []string{"artefacts", "artefact", "art", "a"}
+	Artifacts        = []string{"artifacts", "artifact", "art", "a"}
 	Tags             = []string{"tags"}
 	TransportArchive = []string{"transportarchive", "ctf"}
 )

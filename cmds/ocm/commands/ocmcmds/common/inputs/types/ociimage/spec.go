@@ -16,14 +16,14 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
 )
 
 type Spec struct {
 	// PathSpec holds the repository path and tag of the image in the docker daemon
 	cpi.PathSpec
-	// Repository is the repository hint for the index artefact
+	// Repository is the repository hint for the index artifact
 	Repository string `json:"repository,omitempty"`
 }
 
@@ -73,7 +73,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 	if version == "" || version == "latest" {
 		version = nv.GetVersion()
 	}
-	blob, err := artefactset.SynthesizeArtefactBlob(ns, version)
+	blob, err := artifactset.SynthesizeArtifactBlob(ns, version)
 	if err != nil {
 		return nil, "", err
 	}

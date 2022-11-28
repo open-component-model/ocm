@@ -19,14 +19,14 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artefactset"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
@@ -139,23 +139,23 @@ var _ = Describe("Add resources", func() {
 
 		r, err := cd.GetResourceByIdentity(metav1.NewIdentity("chart"))
 		Expect(err).To(Succeed())
-		Expect(r.Type).To(Equal(consts.HelmChart))
+		Expect(r.Type).To(Equal(resourcetypes.HELM_CHART))
 		Expect(r.Version).To(Equal(VERSION))
 
 		Expect(r.Access.GetType()).To(Equal(localblob.Type))
 
 		acc, err := env.OCMContext().AccessSpecForSpec(r.Access)
 		Expect(err).To(Succeed())
-		// sha is always different for helm artefact
+		// sha is always different for helm artifact
 		// Expect(acc.(*localblob.AccessSpec).LocalReference).To(Equal("sha256.817db2696ed23f7779a7f848927e2958d2236e5483ad40875274462d8fa8ef9a"))
 
 		blobpath := env.Join(ARCH, comparch.BlobsDirectoryName, common.DigestToFileName(digest.Digest(acc.(*localblob.AccessSpec).LocalReference)))
 		blob := accessio.BlobAccessForFile(mime.MIME_GZIP, blobpath, env)
 
-		set, err := artefactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
+		set, err := artifactset.OpenFromBlob(accessobj.ACC_READONLY, blob)
 		Expect(err).To(Succeed())
 		defer set.Close()
-		art, err := set.GetArtefact(set.GetMain().String())
+		art, err := set.GetArtifact(set.GetMain().String())
 		Expect(err).To(Succeed())
 		m := art.ManifestAccess().GetDescriptor()
 		Expect(len(m.Layers)).To(Equal(1))
@@ -183,12 +183,12 @@ var _ = Describe("Add resources", func() {
 		Expect(r.Version).To(Equal("v0.1.0"))
 		Expect(r.Relation).To(Equal(metav1.ResourceRelation("external")))
 
-		Expect(r.Access.GetType()).To(Equal(ociartefact.Type))
+		Expect(r.Access.GetType()).To(Equal(ociartifact.Type))
 
 		acc, err := env.OCMContext().AccessSpecForSpec(r.Access)
 		Expect(err).To(Succeed())
-		Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*ociartefact.AccessSpec)(nil))))
-		Expect(acc.(*ociartefact.AccessSpec).ImageReference).To(Equal("ghcr.io/mandelsoft/pause:v0.1.0"))
+		Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*ociartifact.AccessSpec)(nil))))
+		Expect(acc.(*ociartifact.AccessSpec).ImageReference).To(Equal("ghcr.io/mandelsoft/pause:v0.1.0"))
 	})
 
 	Context("resource by options", func() {
@@ -240,7 +240,7 @@ version: v0.1.0
 relation: external
 `
 			access := `
-type: ociArtefact
+type: ociArtifact
 imageReference: ghcr.io/mandelsoft/pause:v0.1.0
 `
 			Expect(env.Execute("add", "resources", ARCH, "--resource", meta, "--access", access)).To(Succeed())
@@ -256,12 +256,12 @@ imageReference: ghcr.io/mandelsoft/pause:v0.1.0
 			Expect(r.Version).To(Equal("v0.1.0"))
 			Expect(r.Relation).To(Equal(metav1.ResourceRelation("external")))
 
-			Expect(r.Access.GetType()).To(Equal(ociartefact.Type))
+			Expect(r.Access.GetType()).To(Equal(ociartifact.Type))
 
 			acc, err := env.OCMContext().AccessSpecForSpec(r.Access)
 			Expect(err).To(Succeed())
-			Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*ociartefact.AccessSpec)(nil))))
-			Expect(acc.(*ociartefact.AccessSpec).ImageReference).To(Equal("ghcr.io/mandelsoft/pause:v0.1.0"))
+			Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*ociartifact.AccessSpec)(nil))))
+			Expect(acc.(*ociartifact.AccessSpec).ImageReference).To(Equal("ghcr.io/mandelsoft/pause:v0.1.0"))
 		})
 
 		It("adds simple text blob with metadata via explicit options", func() {
@@ -314,7 +314,7 @@ type: PlainText
 				"--name", "image",
 				"--version", "v0.1.0",
 				//	"--external",
-				"--accessType", "ociArtefact",
+				"--accessType", "ociArtifact",
 				"--reference", "ghcr.io/mandelsoft/pause:v0.1.0")).To(Succeed())
 			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 			Expect(err).To(Succeed())
@@ -328,12 +328,12 @@ type: PlainText
 			Expect(r.Version).To(Equal("v0.1.0"))
 			Expect(r.Relation).To(Equal(metav1.ResourceRelation("external")))
 
-			Expect(r.Access.GetType()).To(Equal(ociartefact.Type))
+			Expect(r.Access.GetType()).To(Equal(ociartifact.Type))
 
 			acc, err := env.OCMContext().AccessSpecForSpec(r.Access)
 			Expect(err).To(Succeed())
-			Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*ociartefact.AccessSpec)(nil))))
-			Expect(acc.(*ociartefact.AccessSpec).ImageReference).To(Equal("ghcr.io/mandelsoft/pause:v0.1.0"))
+			Expect(reflect.TypeOf(acc)).To(Equal(reflect.TypeOf((*ociartifact.AccessSpec)(nil))))
+			Expect(acc.(*ociartifact.AccessSpec).ImageReference).To(Equal("ghcr.io/mandelsoft/pause:v0.1.0"))
 		})
 	})
 })

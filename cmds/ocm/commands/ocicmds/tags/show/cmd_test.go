@@ -89,7 +89,7 @@ v2.0
 `))
 	})
 
-	It("lists tags for same artefact", func() {
+	It("lists tags for same artifact", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("oci", "tags", "show", "--repo", ARCH, NAMESAPCE+":"+V13)).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
@@ -112,7 +112,7 @@ v2.0
 `))
 	})
 
-	It("lists semver tags for same artefact", func() {
+	It("lists semver tags for same artifact", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("oci", "tags", "show", "--semver", "--repo", ARCH, NAMESAPCE+":"+V13)).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`

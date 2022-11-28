@@ -13,7 +13,7 @@ import (
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartefact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -129,7 +129,7 @@ var _ = Describe("normalization", func() {
 						Relation:  "local",
 						SourceRef: nil,
 					},
-					Access: ociartefact.New("blob"),
+					Access: ociartifact.New("blob"),
 				},
 			},
 		},
@@ -210,7 +210,7 @@ var _ = Describe("normalization", func() {
       {
         access: {
           imageReference: blob
-          type: ` + ociartefact.Type + `
+          type: ` + ociartifact.Type + `
         }
         labels: [
           {
@@ -309,7 +309,7 @@ var _ = Describe("normalization", func() {
       {
         access: {
           imageReference: blob
-          type: ` + ociartefact.Type + `
+          type: ` + ociartifact.Type + `
         }
         labels: [
           {
@@ -748,7 +748,7 @@ resources:
       {
         access: {
           imageReference: blob
-          type: ociArtefact
+          type: ociArtifact
         }
         labels: [
           {

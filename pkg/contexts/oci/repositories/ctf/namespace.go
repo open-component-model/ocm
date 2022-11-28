@@ -21,7 +21,7 @@ type Namespace struct {
 }
 
 // implemented by view
-// the rest is directly taken from the artefact set implementation
+// the rest is directly taken from the artifact set implementation
 
 func (s *Namespace) Close() error {
 	return s.view.Close()
@@ -41,7 +41,7 @@ func newNamespace(repo *RepositoryImpl, name string, main bool) (*Namespace, err
 		namespace: name,
 	}
 	container.refs = accessio.NewRefCloser(container, true)
-	container.ArtefactSetAccess = support.NewArtefactSetAccess(container)
+	container.ArtifactSetAccess = support.NewArtifactSetAccess(container)
 	return container.view(main)
 }
 
@@ -49,15 +49,15 @@ type NamespaceContainer struct {
 	refs              accessio.ReferencableCloser
 	repo              *Repository
 	namespace         string
-	ArtefactSetAccess *support.ArtefactSetAccess
+	ArtifactSetAccess *support.ArtifactSetAccess
 }
 
 var (
-	_ support.ArtefactSetContainer = (*NamespaceContainer)(nil)
+	_ support.ArtifactSetContainer = (*NamespaceContainer)(nil)
 	_ cpi.NamespaceAccess          = (*Namespace)(nil)
 )
 
-func (a *NamespaceContainer) View(main ...bool) (support.ArtefactSetContainer, error) {
+func (a *NamespaceContainer) View(main ...bool) (support.ArtifactSetContainer, error) {
 	ns, err := a.view(main...)
 	if err != nil || ns == nil {
 		return nil, err
@@ -108,23 +108,23 @@ func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
 	return n.repo.base.AddBlob(blob)
 }
 
-func (n *NamespaceContainer) GetArtefact(vers string) (cpi.ArtefactAccess, error) {
-	meta := n.repo.getIndex().GetArtefactInfo(n.namespace, vers)
+func (n *NamespaceContainer) GetArtifact(vers string) (cpi.ArtifactAccess, error) {
+	meta := n.repo.getIndex().GetArtifactInfo(n.namespace, vers)
 	if meta == nil {
-		return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, vers, n.namespace)
+		return nil, errors.ErrNotFound(cpi.KIND_OCIARTIFACT, vers, n.namespace)
 	}
-	return n.repo.base.GetArtefact(n, meta.Digest)
+	return n.repo.base.GetArtifact(n, meta.Digest)
 }
 
-func (n *NamespaceContainer) AddArtefact(artefact cpi.Artefact, tags ...string) (access accessio.BlobAccess, err error) {
+func (n *NamespaceContainer) AddArtifact(artifact cpi.Artifact, tags ...string) (access accessio.BlobAccess, err error) {
 	n.repo.base.Lock()
 	defer n.repo.base.Unlock()
 
-	blob, err := n.repo.base.AddArtefactBlob(artefact)
+	blob, err := n.repo.base.AddArtifactBlob(artifact)
 	if err != nil {
 		return nil, err
 	}
-	n.repo.getIndex().AddArtefactInfo(&index.ArtefactMeta{
+	n.repo.getIndex().AddArtifactInfo(&index.ArtifactMeta{
 		Repository: n.namespace,
 		Tag:        "",
 		Digest:     blob.Digest(),
@@ -142,9 +142,9 @@ func (n *NamespaceContainer) GetRepository() cpi.Repository {
 	return n.repo
 }
 
-func (n *NamespaceContainer) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
+func (n *NamespaceContainer) NewArtifact(art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
 	if n.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	return support.NewArtefact(n, art...)
+	return support.NewArtifact(n, art...)
 }

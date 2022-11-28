@@ -61,7 +61,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 	if vers == "" {
 		vers = nv.GetVersion()
 	}
-	blob, err := helm.SynthesizeArtefactBlob(inputPath, ctx.FileSystem())
+	blob, err := helm.SynthesizeArtifactBlob(inputPath, ctx.FileSystem())
 	if err != nil {
 		return nil, "", err
 	}

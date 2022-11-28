@@ -41,17 +41,17 @@ The following operations are mandatory:
   the blob, again (together with the component version identity).
 
   Additionally, a dedicated media type can be used to decide how to internally
-  represent the artefact content.
+  represent the artifact content.
 
   Optionally, the operation may decide to store the blob in dedicated ways according
   to its media type. For example, an OCI based implementation can represent 
-  blobs containing an OCI artefact as regular, globally addressable object.
+  blobs containing an OCI artifact as regular, globally addressable object.
 
   A type-specific optional *ReferenceHint* can be passed to guide the
   operation for generating an identity, if it decided to make the object
   externally visible.
 
-  If this is the case, an external [access specification](model.md#artefact-access)
+  If this is the case, an external [access specification](model.md#artifact-access)
   has to be returned. At least a blob identity or an external access specification
   has to be returned for not successful executions.
 
@@ -102,7 +102,7 @@ for the denoted blob is required.
 
 - **`<method>.GetMediaType(RepositoryContext, ComponentVersion, AccessSpecification) (string, error)`**
 
-  Provide the media type of the described artefact. It might explicitly be stored
+  Provide the media type of the described artifact. It might explicitly be stored
   as part of the access speficatio, or implicitly provided by the access method.
 
 - **`<method>.GetStream(RepositoryContext, ComponentVersion, AccessSpecification) (Byte Stream, error)`**

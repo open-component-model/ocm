@@ -10,7 +10,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/logging"
 )
 
-func TransferArtefact(art cpi.ArtefactAccess, set cpi.ArtefactSink, tags ...string) error {
+func TransferArtifact(art cpi.ArtifactAccess, set cpi.ArtifactSink, tags ...string) error {
 	if art.GetDescriptor().IsIndex() {
 		return TransferIndex(art.IndexAccess(), set, tags...)
 	} else {
@@ -18,7 +18,7 @@ func TransferArtefact(art cpi.ArtefactAccess, set cpi.ArtefactSink, tags ...stri
 	}
 }
 
-func TransferIndex(art cpi.IndexAccess, set cpi.ArtefactSink, tags ...string) (err error) {
+func TransferIndex(art cpi.IndexAccess, set cpi.ArtifactSink, tags ...string) (err error) {
 	logging.Logger().Debug("transfer OCI index", "digest", art.Digest())
 	defer func() {
 		logging.Logger().Debug("transfer OCI index done", "error", logging.ErrorMessage(err))
@@ -26,23 +26,23 @@ func TransferIndex(art cpi.IndexAccess, set cpi.ArtefactSink, tags ...string) (e
 
 	for _, l := range art.GetDescriptor().Manifests {
 		logging.Logger().Debug("indexed manifest", "digest", "digest", l.Digest, "size", l.Size)
-		art, err := art.GetArtefact(l.Digest)
+		art, err := art.GetArtifact(l.Digest)
 		if err != nil {
-			return errors.Wrapf(err, "getting indexed artefact %s", l.Digest)
+			return errors.Wrapf(err, "getting indexed artifact %s", l.Digest)
 		}
-		err = TransferArtefact(art, set)
+		err = TransferArtifact(art, set)
 		if err != nil {
-			return errors.Wrapf(err, "transferring indexed artefact %s", l.Digest)
+			return errors.Wrapf(err, "transferring indexed artifact %s", l.Digest)
 		}
 	}
-	_, err = set.AddArtefact(art, tags...)
+	_, err = set.AddArtifact(art, tags...)
 	if err != nil {
-		return errors.Wrapf(err, "transferring index artefact")
+		return errors.Wrapf(err, "transferring index artifact")
 	}
 	return err
 }
 
-func TransferManifest(art cpi.ManifestAccess, set cpi.ArtefactSink, tags ...string) (err error) {
+func TransferManifest(art cpi.ManifestAccess, set cpi.ArtifactSink, tags ...string) (err error) {
 	logging.Logger().Debug("transfer OCI manifest", "digest", art.Digest())
 	defer func() {
 		logging.Logger().Debug("transfer OCI manifest done", "error", logging.ErrorMessage(err))
@@ -67,9 +67,9 @@ func TransferManifest(art cpi.ManifestAccess, set cpi.ArtefactSink, tags ...stri
 			return errors.Wrapf(err, "transferring layer blob %s", l.Digest)
 		}
 	}
-	_, err = set.AddArtefact(art, tags...)
+	_, err = set.AddArtifact(art, tags...)
 	if err != nil {
-		return errors.Wrapf(err, "transferring image artefact")
+		return errors.Wrapf(err, "transferring image artifact")
 	}
 	return err
 }

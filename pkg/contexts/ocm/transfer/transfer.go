@@ -132,8 +132,8 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 					}
 				}
 				if ok {
-					hint := ocmcpi.ArtefactNameHint(a, src)
-					printArtefactInfo(printer, log, "resource", i, hint)
+					hint := ocmcpi.ArtifactNameHint(a, src)
+					printArtifactInfo(printer, log, "resource", i, hint)
 					err = handler.HandleTransferResource(r, m, hint, t)
 				}
 			}
@@ -161,8 +161,8 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 					}
 				}
 				if ok {
-					hint := ocmcpi.ArtefactNameHint(a, src)
-					printArtefactInfo(printer, log, "source", i, hint)
+					hint := ocmcpi.ArtifactNameHint(a, src)
+					printArtifactInfo(printer, log, "source", i, hint)
 					err = handler.HandleTransferSource(r, m, hint, t)
 				}
 			}
@@ -177,7 +177,7 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 	return nil
 }
 
-func printArtefactInfo(printer common.Printer, log logging.Logger, kind string, index int, hint string) {
+func printArtifactInfo(printer common.Printer, log logging.Logger, kind string, index int, hint string) {
 	if printer != nil {
 		if hint != "" {
 			printer.Printf("...%s %d(%s)...\n", kind, index, hint)

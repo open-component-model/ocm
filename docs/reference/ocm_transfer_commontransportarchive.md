@@ -15,7 +15,7 @@ ocm transfer commontransportarchive [<options>] <ctf> <target>
       --script string             config name of transfer handler script
   -s, --scriptFile string         filename of transfer handler script
   -t, --type string               archive format (directory, tar, tgz) (default "directory")
-      --uploader <name>=<value>   repository uploader (<name>:<artefact type>:<media type>=<JSON target config)
+      --uploader <name>=<value>   repository uploader (<name>:<artifact type>:<media type>=<JSON target config)
 ```
 
 ### Description
@@ -43,12 +43,12 @@ If the <code>--uploader</code> option is specified, appropriate uploaders
 are configured for the transport target. It has the following format
 
 <center>
-    <pre>&lt;name>:&lt;artefact type>:&lt;media type>=&lt;yaml target config></pre>
+    <pre>&lt;name>:&lt;artifact type>:&lt;media type>=&lt;yaml target config></pre>
 </center>
 
 The uploader name may be a path expression with the following possibilities:
-- <code>ocm/ociRegistry</code>: oci Registry upload for local OCI artefact blobs.
-  The media type is optional. If given ist must be an OCI artefact media type.
+- <code>ocm/ociRegistry</code>: oci Registry upload for local OCI artifact blobs.
+  The media type is optional. If given ist must be an OCI artifact media type.
 - <code>plugin/<plugin name>[/<uploader name]</code>: uploader provided by plugin.
 
 It is possible to use a dedicated transfer script based on spiff.
@@ -81,6 +81,6 @@ $ ocm transfer ctf ctf.tgz ghcr.io/mandelsoft/components
 
 ##### Parents
 
-* [ocm transfer](ocm_transfer.md)	 &mdash; Transfer artefacts or components
+* [ocm transfer](ocm_transfer.md)	 &mdash; Transfer artifacts or components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

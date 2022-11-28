@@ -16,7 +16,7 @@ import (
 )
 
 type IndexImpl struct {
-	artefactBase
+	artifactBase
 }
 
 var _ cpi.IndexAccess = (*IndexImpl)(nil)
@@ -28,16 +28,16 @@ type indexMapper struct {
 var _ accessobj.State = (*indexMapper)(nil)
 
 func (m *indexMapper) GetState() interface{} {
-	return m.State.GetState().(*artdesc.Artefact).Index()
+	return m.State.GetState().(*artdesc.Artifact).Index()
 }
 
 func (m *indexMapper) GetOriginalState() interface{} {
-	return m.State.GetOriginalState().(*artdesc.Artefact).Index()
+	return m.State.GetOriginalState().(*artdesc.Artifact).Index()
 }
 
-func NewIndexForArtefact(a *ArtefactImpl) *IndexImpl {
+func NewIndexForArtifact(a *ArtifactImpl) *IndexImpl {
 	m := &IndexImpl{
-		artefactBase: artefactBase{
+		artifactBase: artifactBase{
 			container: a.container,
 			state:     &indexMapper{a.state},
 		},
@@ -45,8 +45,8 @@ func NewIndexForArtefact(a *ArtefactImpl) *IndexImpl {
 	return m
 }
 
-func (a *IndexImpl) NewArtefact(art ...*artdesc.Artefact) (cpi.ArtefactAccess, error) {
-	return a.newArtefact(art...)
+func (a *IndexImpl) NewArtifact(art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+	return a.newArtifact(art...)
 }
 
 func (i *IndexImpl) AddBlob(blob internal.BlobAccess) error {
@@ -61,7 +61,7 @@ func (i *IndexImpl) Index() (*artdesc.Index, error) {
 	return i.GetDescriptor(), nil
 }
 
-func (i *IndexImpl) Artefact() *artdesc.Artefact {
+func (i *IndexImpl) Artifact() *artdesc.Artifact {
 	a := artdesc.New()
 	_ = a.SetIndex(i.GetDescriptor())
 	return a
@@ -95,17 +95,17 @@ func (i *IndexImpl) GetBlob(digest digest.Digest) (internal.BlobAccess, error) {
 	return nil, cpi.ErrBlobNotFound(digest)
 }
 
-func (i *IndexImpl) GetArtefact(digest digest.Digest) (internal.ArtefactAccess, error) {
+func (i *IndexImpl) GetArtifact(digest digest.Digest) (internal.ArtifactAccess, error) {
 	for _, d := range i.GetDescriptor().Manifests {
 		if d.Digest == digest {
-			return i.container.GetArtefact("@" + digest.String())
+			return i.container.GetArtifact("@" + digest.String())
 		}
 	}
-	return nil, errors.ErrNotFound(cpi.KIND_OCIARTEFACT, digest.String())
+	return nil, errors.ErrNotFound(cpi.KIND_OCIARTIFACT, digest.String())
 }
 
-func (a *IndexImpl) AddArtefact(art cpi.Artefact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
-	blob, err := a.container.AddArtefact(art)
+func (a *IndexImpl) AddArtifact(art cpi.Artifact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
+	blob, err := a.container.AddArtifact(art)
 	if err != nil {
 		return nil, err
 	}

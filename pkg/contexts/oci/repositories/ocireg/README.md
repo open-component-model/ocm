@@ -10,7 +10,7 @@ type: OCIRegistry/v1
 
 ### Description
 
-Artefact namespaces/repositories of the API layer will be mapped to an OCI
+Artifact namespaces/repositories of the API layer will be mapped to an OCI
 registry according to the [OCI distribution specification](https://github.com/opencontainers/distribution-spec/blob/main/spec.md).
 
 Supported specification version is `v1`.

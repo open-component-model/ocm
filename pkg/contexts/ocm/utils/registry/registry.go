@@ -16,9 +16,9 @@ type Key[K any] interface {
 	IsValid() bool
 
 	GetMediaType() string
-	GetArtefactType() string
+	GetArtifactType() string
 
-	SetArtefact(arttype, medtatype string) K
+	SetArtifact(arttype, medtatype string) K
 }
 
 type Registry[H any, K Key[K]] struct {
@@ -38,7 +38,7 @@ func (p *Registry[H, K]) lookupMedia(key K) []H {
 			return h
 		}
 		if i := strings.LastIndex(lookup.GetMediaType(), "+"); i > 0 {
-			lookup = lookup.SetArtefact(lookup.GetArtefactType(), lookup.GetMediaType()[:i])
+			lookup = lookup.SetArtifact(lookup.GetArtifactType(), lookup.GetMediaType()[:i])
 		} else {
 			break
 		}
@@ -61,11 +61,11 @@ func (p *Registry[H, K]) LookupHandler(key K) []H {
 	}
 
 	mediatype := key.GetMediaType()
-	arttype := key.GetArtefactType()
-	if h := p.mappings[key.SetArtefact(arttype, "")]; len(h) > 0 {
+	arttype := key.GetArtifactType()
+	if h := p.mappings[key.SetArtifact(arttype, "")]; len(h) > 0 {
 		return h
 	}
-	return p.lookupMedia(key.SetArtefact("", mediatype))
+	return p.lookupMedia(key.SetArtifact("", mediatype))
 }
 
 func (p *Registry[H, K]) LookupKeys(key K) generics.Set[K] {
@@ -74,10 +74,10 @@ func (p *Registry[H, K]) LookupKeys(key K) generics.Set[K] {
 	if len(p.LookupHandler(key)) > 0 {
 		found.Add(key)
 	}
-	if key.GetArtefactType() == "" {
+	if key.GetArtifactType() == "" {
 		for k := range p.mappings {
-			if k.GetArtefactType() != "" {
-				c := k.SetArtefact(k.GetArtefactType(), key.GetMediaType())
+			if k.GetArtifactType() != "" {
+				c := k.SetArtifact(k.GetArtifactType(), key.GetMediaType())
 				if !found.Contains(c) && len(p.LookupHandler(c)) > 0 {
 					found.Add(c)
 				}
@@ -86,7 +86,7 @@ func (p *Registry[H, K]) LookupKeys(key K) generics.Set[K] {
 	} else {
 		for k := range p.mappings {
 			if mime.IsMoreGeneral(key.GetMediaType(), k.GetMediaType()) {
-				c := k.SetArtefact(key.GetArtefactType(), k.GetMediaType())
+				c := k.SetArtifact(key.GetArtifactType(), k.GetMediaType())
 				if !found.Contains(c) && len(p.LookupHandler(c)) > 0 {
 					found.Add(c)
 				}

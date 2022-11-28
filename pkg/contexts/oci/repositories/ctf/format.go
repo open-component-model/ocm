@@ -19,12 +19,12 @@ import (
 )
 
 const (
-	ArtefactIndexFileName = format.ArtefactIndexFileName
+	ArtifactIndexFileName = format.ArtifactIndexFileName
 	BlobsDirectoryName    = format.BlobsDirectoryName
 )
 
 var accessObjectInfo = &accessobj.DefaultAccessObjectInfo{
-	DescriptorFileName:       ArtefactIndexFileName,
+	DescriptorFileName:       ArtifactIndexFileName,
 	ObjectTypeName:           "repository",
 	ElementDirectoryName:     BlobsDirectoryName,
 	ElementTypeName:          "blob",

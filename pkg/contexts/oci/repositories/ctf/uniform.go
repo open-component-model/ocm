@@ -40,7 +40,7 @@ func MapReference(ctx cpi.Context, u *cpi.UniformRepositorySpec) (cpi.Repository
 	if !u.CreateIfMissing {
 		hint = ""
 	}
-	create, ok, err := accessobj.CheckFile(Type, hint, accessio.TypeForType(u.Type) != "", path, fs, ArtefactIndexFileName)
+	create, ok, err := accessobj.CheckFile(Type, hint, accessio.TypeForType(u.Type) != "", path, fs, ArtifactIndexFileName)
 	if !ok || err != nil {
 		if err != nil {
 			return nil, err

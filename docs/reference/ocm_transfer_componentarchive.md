@@ -36,6 +36,6 @@ The default format is <code>directory</code>.
 
 ##### Parents
 
-* [ocm transfer](ocm_transfer.md)	 &mdash; Transfer artefacts or components
+* [ocm transfer](ocm_transfer.md)	 &mdash; Transfer artifacts or components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 

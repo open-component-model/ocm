@@ -1,11 +1,11 @@
 
 - [X] Transfer should support force option for override
-- [ ] Clarify how to list digests in (oci) ctf and artefact set under common oci API abstraction
+- [ ] Clarify how to list digests in (oci) ctf and artifact set under common oci API abstraction
 - [ ] Align OCI and OCM Repository Name with type structure and reference syntax
 - [ ] Aligned Denotation for OCM and OCI elements
 - [X] Generalize Sort Field Detection and check
   - first ugly implementation done
-- [ ] Artefact download with side artefacts (based on dedicated option)
+- [ ] Artifact download with side artifacts (based on dedicated option)
 - [ ] Rework Processing Chain/Iterable to work go-like with channels
 - [ ] Generic History based sort function to be used to transform object sequence for tree output
 - [ ] Recursion + Tree mode for OCI Indices
@@ -20,7 +20,7 @@
 - [ ] CD validation for sources enforces git
 - [ ] decide on and introduce logging framework
 - [ ] add optional reference name to resource input
-- [ ] remove registry from default output and show only with wide output option (get artefact)
+- [ ] remove registry from default output and show only with wide output option (get artifact)
 - [ ] error handling for applying config (especially usage of ErrNoContext)
 - [X] migrate resource add input spec to typed spec
 - [X] Add Close method to access method to support external resource management
