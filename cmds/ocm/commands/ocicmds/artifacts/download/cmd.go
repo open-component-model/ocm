@@ -50,7 +50,7 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Args:  cobra.MinimumNArgs(1),
 		Short: "download oci artifacts",
 		Long: `
-Download artifacts from an OCI registry. The result is stored in
+Download artifacts. The result is stored in
 artifact set format, without the repository part
 
 The files are named according to the artifact repository name.
