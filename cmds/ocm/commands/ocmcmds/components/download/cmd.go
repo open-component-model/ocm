@@ -66,7 +66,7 @@ The files are named according to the component version name.
 
 func (o *Command) Complete(args []string) error {
 	var err error
-	o.Refs = args[1:]
+	o.Refs = args
 	return err
 }
 
