@@ -39,6 +39,12 @@ The following schema versions are supported:
   - <code>v2</code> (default): 
 
 
+### Examples
+
+```
+$ ocm create componentarchive --file myfirst --provider acme.org --provider email=alice@acme.org amcme.org/demo 1.0
+```
+
 ### SEE ALSO
 
 ##### Parents

@@ -14,6 +14,7 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/fileoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/schemaoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
@@ -39,7 +40,6 @@ type Command struct {
 
 	Handler comparch.FormatHandler
 	Force   bool
-	Path    string
 	Format  string
 
 	Component      string
@@ -51,7 +51,7 @@ type Command struct {
 
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, formatoption.New(comparch.GetFormats()...), schemaoption.New(compdesc.DefaultSchemeVersion))}, utils.Names(Names, names...)...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, formatoption.New(comparch.GetFormats()...), fileoption.NewCompArch(), schemaoption.New(compdesc.DefaultSchemeVersion))}, utils.Names(Names, names...)...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -59,6 +59,9 @@ func (o *Command) ForName(name string) *cobra.Command {
 		Use:   "[<options>] <component> <version> --provider <provider-name> {--provider <label>=<value>} {<label>=<value>}",
 		Args:  cobra.MinimumNArgs(2),
 		Short: "create new component archive",
+		Example: `
+$ ocm create componentarchive --file myfirst --provider acme.org --provider email=alice@acme.org amcme.org/demo 1.0
+`,
 		Long: `
 Create a new component archive. This might be either a directory prepared
 to host component version content or a tar/tgz file (see option --type).
@@ -72,7 +75,6 @@ func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	o.BaseCommand.AddFlags(fs)
 	fs.BoolVarP(&o.Force, "force", "f", false, "remove existing content")
 	fs.StringArrayVarP(&o.providerattrs, "provider", "p", nil, "provider attribute")
-	fs.StringVarP(&o.Path, "file", "F", "component-archive", "target file/directory")
 }
 
 func (o *Command) Complete(args []string) error {
@@ -115,20 +117,21 @@ func (o *Command) Complete(args []string) error {
 func (o *Command) Run() error {
 	mode := formatoption.From(o).Mode()
 	fs := o.Context.FileSystem()
-	if ok, err := vfs.Exists(fs, o.Path); ok || err != nil {
+	fp := fileoption.From(o).Path
+	if ok, err := vfs.Exists(fs, fp); ok || err != nil {
 		if err != nil {
 			return err
 		}
 		if o.Force {
-			err = fs.RemoveAll(o.Path)
+			err = fs.RemoveAll(fp)
 			if err != nil {
-				return errors.Wrapf(err, "cannot remove old %q", o.Path)
+				return errors.Wrapf(err, "cannot remove old %q", fp)
 			}
 		}
 	}
-	obj, err := comparch.Create(o.Context.OCMContext(), accessobj.ACC_CREATE, o.Path, mode, o.Handler, fs)
+	obj, err := comparch.Create(o.Context.OCMContext(), accessobj.ACC_CREATE, fp, mode, o.Handler, fs)
 	if err != nil {
-		fs.RemoveAll(o.Path)
+		fs.RemoveAll(fp)
 		return err
 	}
 	desc := obj.GetDescriptor()
@@ -142,12 +145,12 @@ func (o *Command) Run() error {
 	err = compdesc.Validate(desc)
 	if err != nil {
 		obj.Close()
-		fs.RemoveAll(o.Path)
+		fs.RemoveAll(fp)
 		return errors.Newf("invalid component info: %s", err)
 	}
 	err = obj.Close()
 	if err != nil {
-		fs.RemoveAll(o.Path)
+		fs.RemoveAll(fp)
 	}
 	return err
 }

@@ -41,6 +41,7 @@ var _ = Describe("utils", func() {
 
 			_, err = tr.Next()
 			Expect(err).To(Equal(io.EOF))
+
 		})
 
 		It("should write empty file", func() {

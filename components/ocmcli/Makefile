@@ -41,6 +41,7 @@ $(GEN)/build: $(CMDSRCS) $(OCMSRCS)
 ctf: $(GEN)/ctf
 
 $(GEN)/ctf: $(GEN)/ca.done
+	@rm -rf "$(GEN)/ctf"
 	$(OCM) transfer ca $(GEN)/ca $(GEN)/ctf
 	touch $(GEN)/ctf
 
@@ -53,7 +54,7 @@ ca: $(GEN)/ca.done
 
 $(GEN)/ca.done: $(GEN)/.exists $(GEN)/build resources.yaml $(CHARTSRCS)
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider $(PROVIDER) --file $(GEN)/ca
-	$(OCM) add resources --templater=spiff $(GEN)/ca VERSION="$(VERSION)" NAME="$(NAME)" COMMIT="$(COMMIT)" GEN="$(GEN)" PLATFORMS="$(PLATFORMS)" resources.yaml
+	$(OCM) add resources --templater=spiff --file $(GEN)/ca VERSION="$(VERSION)" NAME="$(NAME)" COMMIT="$(COMMIT)" GEN="$(GEN)" PLATFORMS="$(PLATFORMS)" resources.yaml
 	@touch $(GEN)/ca.done
 
 .PHONY: push

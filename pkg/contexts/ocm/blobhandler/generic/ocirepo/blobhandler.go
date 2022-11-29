@@ -112,6 +112,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	if err != nil {
 		return nil, err
 	}
+	defer art.Close()
 
 	err = artifactset.TransferArtifact(art, namespace, oci.AsTags(tag)...)
 	if err != nil {

@@ -1,13 +1,14 @@
 NAME      = helmdemo
-PROVIDER  ?= mandelsoft
-IMAGE     = ocm$(NAME)
-COMPONENT = github.com/$(PROVIDER)/ocm$(NAME)
-OCMREPO   ?= ghcr.io/$(PROVIDER)/cnudie
+PROVIDER  ?= ocm.software
+GITHUBORG  ?= open-component-model
+IMAGE     = $(NAME)
+COMPONENT = $(PROVIDER)/toi/demo/$(NAME)
+OCMREPO   ?= ghcr.io/$(GITHUBORG)/ocm
 
-HELMINSTCOMP = github.com/$(PROVIDER)/ocmhelminstaller
+HELMINSTCOMP = $(PROVIDER)/toi/installers/helminstaller
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
-VERSION                                        = $(shell git describe --tags --exact-match 2>/dev/null|| echo "$$(cat $(REPO_ROOT)/VERSION)-dev")
+VERSION                                        = $(shell git describe --tags --exact-match 2>/dev/null|| echo "$$(cat $(REPO_ROOT)/VERSION)")
 COMMIT                                         = $(shell git rev-parse HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
 
@@ -20,6 +21,7 @@ CHARTSRCS=$(shell find echoserver -type f)
 ctf: $(GEN)/ctf
 
 $(GEN)/ctf: $(GEN)/ca
+	@rm -f $(GEN)/ctf
 	$(OCM) transfer ca $(GEN)/ca $(GEN)/ctf
 	touch $(GEN)/ctf
 
@@ -34,7 +36,7 @@ $(GEN)/ca: $(GEN)/.exists sources.yaml resources.yaml references.yaml $(CHARTSRC
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider $(PROVIDER) --file $(GEN)/ca
 	$(OCM) add sources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" sources.yaml
 	$(OCM) add resources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" resources.yaml
-	$(OCM) add references $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" HELMINSTCOMP=$(HELMINSTCOMP) references.yaml
+	$(OCM) add references  $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" HELMINSTCOMP=$(HELMINSTCOMP) references.yaml
 	@touch $(GEN)/ca
 
 .PHONY: push

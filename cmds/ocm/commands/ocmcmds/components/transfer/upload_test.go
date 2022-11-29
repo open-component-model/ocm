@@ -112,13 +112,11 @@ transferring version "github.com/compa:1.0.0"...
 `))
 
 		copy := Must(ctfocm.Open(ctx, accessobj.ACC_READONLY, COPY, 0700, env))
-		ocopy := accessio.OnceCloser(copy)
-		defer Close(ocopy)
+		defer Close(copy)
 
 		// check type
 		cv2 := Must(copy.LookupComponentVersion(COMP, VERS))
-		ocv2 := accessio.OnceCloser(cv2)
-		defer Close(ocv2)
+		defer Close(cv2)
 		ra := Must(cv2.GetResourceByIndex(0))
 		acc := Must(ra.Access())
 		Expect(acc.GetKind()).To(Equal(ociartifact.Type))

@@ -213,6 +213,7 @@ var _ = Describe("Method", func() {
 			Expect(err).ToNot(HaveOccurred())
 			_, err = m.Get()
 			Expect(err).ToNot(HaveOccurred())
+			m.Close()
 			Expect(called).To(BeTrue())
 		})
 	})

@@ -1,16 +1,18 @@
 NAME      = helminstaller
-PROVIDER  ?= mandelsoft
-IMAGE     = ocm$(NAME)
-COMPONENT = github.com/$(PROVIDER)/ocm$(NAME)
-OCMREPO   ?= ghcr.io/$(PROVIDER)/cnudie
+PROVIDER  ?= ocm.software
+GITHUBORG  ?= open-component-model
+IMAGE     = $(NAME)
+COMPONENT = $(PROVIDER)/toi/installers/$(NAME)
+OCMREPO   ?= ghcr.io/$(GITHUBORG)/ocm
 MULTI     ?= true
 PLATFORMS = linux/amd64 linux/arm64
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
-VERSION                                        := $(shell git describe --tags --exact-match 2>/dev/null|| echo "$$(cat $(REPO_ROOT)/VERSION)-dev")
+VERSION                                        := $(shell git describe --tags --exact-match 2>/dev/null|| echo "$$(cat $(REPO_ROOT)/VERSION)")
 COMMIT                                         := $(shell git rev-parse --verify HEAD)
 EFFECTIVE_VERSION                              := $(VERSION)-$(COMMIT)
-GIT_TREE_STATE                                 := $(shell [ -z git status --porcelain 2>/dev/null ] && echo clean || echo dirty)
+GIT_TREE_STATE                                 := $(shell [ -z "$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
+
 
 GEN = $(REPO_ROOT)/gen/$(NAME)
 OCM = go run $(REPO_ROOT)/cmds/ocm
@@ -26,6 +28,7 @@ endif
 ctf: $(GEN)/ctf
 
 $(GEN)/ctf: $(GEN)/ca
+	@rm -rf "$(GEN)/ctf"
 	$(OCM) transfer ca $(GEN)/ca $(GEN)/ctf
 	touch $(GEN)/ctf
 
@@ -69,6 +72,7 @@ multi: $(GEN)/image.$(NAME).multi
 $(GEN)/image.$(NAME).multi: $(GEN)/.exists Dockerfile $(CMDSRCS) $(OCMSRCS)
 	for i in $(PLATFORMS); do \
 	tag=$$(echo $$i | sed -e s:/:-:g); \
+        echo building platform $$i; \
 	docker buildx build -t $(IMAGE):$(VERSION)-$$tag --platform $$i --file Dockerfile $(REPO_ROOT) \
           --build-arg COMMIT=$(COMMIT) \
           --build-arg EFFECTIVE_VERSION=$(EFFECTIVE_VERSION) \
@@ -111,6 +115,10 @@ describe: $(GEN)/ctf
 .PHONY: descriptor
 descriptor: $(GEN)/ctf
 	ocm get component -S v3alpha1 -o yaml $(GEN)/ctf
+
+.PHONY: setup
+setup:
+	docker run --userns=host --privileged --rm docker/binfmt:a7996909642ee92942dcd6cff44b9b95f08dad64
 
 .PHONY: clean
 clean:

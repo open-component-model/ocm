@@ -30,7 +30,11 @@ func GetPublicKey(key interface{}) (*rsa.PublicKey, []string, error) {
 		return &k.PublicKey, nil, nil
 	case *x509.Certificate:
 		if p, ok := k.PublicKey.(*rsa.PublicKey); ok {
-			return p, k.DNSNames, nil
+			names := append(k.DNSNames[:0:0], k.DNSNames...) //nolint: gocritic // yes
+			if k.Issuer.CommonName != "" {
+				names = append(names, k.Issuer.CommonName)
+			}
+			return p, names, nil
 		}
 		return nil, nil, fmt.Errorf("unknown key public key %T in certificate", k)
 	default:

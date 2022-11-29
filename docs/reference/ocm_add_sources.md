@@ -3,13 +3,14 @@
 ### Synopsis
 
 ```
-ocm add sources [<options>] <target> {<resourcefile> | <var>=<value>}
+ocm add sources [<options>] [<target>] {<resourcefile> | <var>=<value>}
 ```
 
 ### Options
 
 ```
       --addenv                       access environment for templating
+  -F, --file string                  target file/directory (default "component-archive")
   -h, --help                         help for sources
   -s, --settings stringArray         settings file with variable settings (yaml)
       --templater string             templater to use (subst, spiff, go) (default "subst")
@@ -504,6 +505,12 @@ shown below.
     Options used to configure fields: <code>--digest</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--size</code>
   
 
+
+### Examples
+
+```
+$ ocm add sources --file path/to/cafile sources.yaml
+```
 
 ### SEE ALSO
 

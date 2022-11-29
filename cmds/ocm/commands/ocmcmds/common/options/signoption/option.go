@@ -152,7 +152,7 @@ func (o *Option) Complete(ctx clictx.Context) error {
 }
 
 func (o *Option) handleKeys(ctx clictx.Context, desc string, keys []string, add func(string, interface{})) error {
-	for i, k := range keys {
+	for _, k := range keys {
 		name := ""
 		if len(o.SignatureNames) > 0 {
 			name = o.SignatureNames[0]
@@ -161,7 +161,7 @@ func (o *Option) handleKeys(ctx clictx.Context, desc string, keys []string, add 
 		sep := strings.Index(k, "=")
 		if sep >= 0 {
 			name = k[:sep]
-			file = k[i+1:]
+			file = k[sep+1:]
 		}
 		if len(file) == 0 {
 			return errors.Newf("empty file name")

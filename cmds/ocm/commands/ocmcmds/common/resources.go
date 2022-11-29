@@ -20,6 +20,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/fileoption"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
@@ -379,12 +381,21 @@ type ResourceAdderCommand struct {
 	Templating template.Options
 	Adder      ResourceSpecificationsProvider
 
-	Archive   string
 	Resources []ResourceSpecifications
 	Envs      []string
+
+	Archive string
+}
+
+func NewResourceAdderCommand(ctx clictx.Context, provider ResourceSpecificationsProvider, opts ...options.Options) ResourceAdderCommand {
+	return ResourceAdderCommand{
+		BaseCommand: utils.NewBaseCommand(ctx, append(opts, fileoption.NewCompArch())...),
+		Adder:       provider,
+	}
 }
 
 func (o *ResourceAdderCommand) AddFlags(fs *pflag.FlagSet) {
+	o.BaseCommand.AddFlags(fs)
 	fs.StringArrayVarP(&o.Envs, "settings", "s", nil, "settings file with variable settings (yaml)")
 	o.Templating.AddFlags(fs)
 	if o.Adder != nil {
@@ -393,7 +404,12 @@ func (o *ResourceAdderCommand) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *ResourceAdderCommand) Complete(args []string) error {
-	o.Archive = args[0]
+	err := o.OptionSet.ProcessOnOptions(options.CompleteOptionsWithCLIContext(o.Context))
+	if err != nil {
+		return err
+	}
+
+	o.Archive, args = fileoption.From(o).GetPath(args, o.Context.FileSystem())
 	o.Templating.Complete(o.Context.FileSystem())
 
 	if o.Adder != nil {
@@ -409,12 +425,12 @@ func (o *ResourceAdderCommand) Complete(args []string) error {
 		o.Resources = append(o.Resources, rsc...)
 	}
 
-	err := o.Templating.ParseSettings(o.Context.FileSystem(), o.Envs...)
+	err = o.Templating.ParseSettings(o.Context.FileSystem(), o.Envs...)
 	if err != nil {
 		return err
 	}
 
-	paths := o.Templating.FilterSettings(args[1:]...)
+	paths := o.Templating.FilterSettings(args...)
 	for _, p := range paths {
 		o.Resources = append(o.Resources, NewResourceSpecificationsFile(p, o.FileSystem()))
 	}
