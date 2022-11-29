@@ -187,7 +187,10 @@ func WriteFileToTARArchive(filename string, contentReader io.Reader, archiveWrit
 	if err != nil {
 		return fmt.Errorf("unable to create tempfile: %w", err)
 	}
-	defer tempfile.Close()
+	defer func() {
+		tempfile.Close()
+		os.Remove(tempfile.Name())
+	}()
 
 	fsize, err := io.Copy(tempfile, contentReader)
 	if err != nil {

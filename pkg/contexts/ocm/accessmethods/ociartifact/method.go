@@ -246,5 +246,6 @@ func (m *accessMethod) getBlob() (artifactset.ArtifactBlob, error) {
 	if err != nil {
 		return nil, err
 	}
+	m.finalizer.Close(m.blob)
 	return m.blob, nil
 }

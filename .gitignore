@@ -1,4 +1,5 @@
 /cmds/test
+/pkg/test
 .idea
 *.sw[pqo]
 main
