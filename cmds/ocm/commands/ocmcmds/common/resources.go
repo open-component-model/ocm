@@ -30,10 +30,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/logging"
+	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
@@ -48,6 +50,44 @@ type ResourceSpecHandler interface {
 	RequireInputs() bool
 	Decode(data []byte) (ResourceSpec, error)
 	Set(v ocm.ComponentVersionAccess, r Resource, acc compdesc.AccessSpec) error
+}
+
+func CheckHint(v ocm.ComponentVersionAccess, acc compdesc.AccessSpec) error {
+	err := checkHint(v, "source", compdesc.SourceArtifacts, acc)
+	if err != nil {
+		return err
+	}
+	return checkHint(v, "resource", compdesc.ResourceArtifacts, acc)
+}
+
+func checkHint(v ocm.ComponentVersionAccess, typ string, artacc compdesc.ArtifactAccess, acc compdesc.AccessSpec) error {
+	spec, err := v.GetContext().AccessSpecForSpec(acc)
+	if err != nil {
+		return err
+	}
+	local, ok := spec.(*localblob.AccessSpec)
+	if !ok {
+		return nil
+	}
+	accessor := artacc(v.GetDescriptor())
+	for i := 0; i < accessor.Len(); i++ {
+		a := accessor.GetArtifact(i)
+		other, err := v.GetContext().AccessSpecForSpec(a.GetAccess())
+		if err != nil {
+			continue
+		}
+		olocal, ok := other.(*localblob.AccessSpec)
+		if !ok {
+			continue
+		}
+		if olocal.ReferenceName != local.ReferenceName {
+			continue
+		}
+		if mime.BaseType(local.MediaType) == mime.BaseType(olocal.MediaType) {
+			return fmt.Errorf("reference name (hint) with base media type %s already used for %s %s:%s", mime.BaseType(local.MediaType), typ, a.GetMeta().Name, a.GetMeta().Version)
+		}
+	}
+	return nil
 }
 
 type ResourceSpec interface {
@@ -475,11 +515,18 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 				}
 				acc, err = obj.AddBlob(blob, r.Type(), hint, nil)
 				if err == nil {
-					err = h.Set(obj, r, acc)
+					err = CheckHint(obj, acc)
+					if err == nil {
+						err = h.Set(obj, r, acc)
+					}
 				}
 				blob.Close()
 			} else {
-				err = h.Set(obj, r, compdesc.GenericAccessSpec(r.input.Access))
+				acc := compdesc.GenericAccessSpec(r.input.Access)
+				err = CheckHint(obj, acc)
+				if err == nil {
+					err = h.Set(obj, r, acc)
+				}
 			}
 		} else {
 			err = h.Set(obj, r, nil)

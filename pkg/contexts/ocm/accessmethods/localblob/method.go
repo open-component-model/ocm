@@ -39,7 +39,7 @@ func New(local, hint string, mediaType string, global cpi.AccessSpec) *AccessSpe
 	}
 }
 
-// AccessSpec describes the access for a blob on the filesystem.
+// AccessSpec describes the access for a local blob.
 type AccessSpec struct {
 	runtime.ObjectVersionedType
 	// LocalReference is the repository local identity of the blob.
