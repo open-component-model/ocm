@@ -271,6 +271,23 @@ type ElementAccessor interface {
 	Get(i int) ElementMetaAccessor
 }
 
+// ElementArtifactAccessor provides access to generic artifact information of an element.
+type ElementArtifactAccessor interface {
+	ElementMetaAccessor
+	GetAccess() AccessSpec
+}
+
+// ArtifactAccessor provides generic access to list of artifacts.
+// There are resources or sources.
+type ArtifactAccessor interface {
+	Len() int
+	GetArtifact(i int) ElementArtifactAccessor
+}
+
+// ArtifactAccess provides access to a dedicated kind of artifact set
+// in the component descriptor (resources or sources).
+type ArtifactAccess func(cd *ComponentDescriptor) ArtifactAccessor
+
 // AccessSpec is an abstract specification of an access method
 // The outbound object is typicall a runtime.UnstructuredTypedObject.
 // Inbound any serializable AccessSpec implementation is possible.
@@ -292,11 +309,19 @@ type Sources []Source
 
 var _ ElementAccessor = Sources{}
 
+func SourceArtifacts(cd *ComponentDescriptor) ArtifactAccessor {
+	return cd.Sources
+}
+
 func (s Sources) Len() int {
 	return len(s)
 }
 
 func (s Sources) Get(i int) ElementMetaAccessor {
+	return &s[i]
+}
+
+func (s Sources) GetArtifact(i int) ElementArtifactAccessor {
 	return &s[i]
 }
 
@@ -321,6 +346,10 @@ type Source struct {
 
 func (s *Source) GetMeta() *ElementMeta {
 	return &s.ElementMeta
+}
+
+func (s *Source) GetAccess() AccessSpec {
+	return s.Access
 }
 
 func (s *Source) Copy() *Source {
@@ -403,11 +432,19 @@ type Resources []Resource
 
 var _ ElementAccessor = Resources{}
 
+func ResourceArtifacts(cd *ComponentDescriptor) ArtifactAccessor {
+	return cd.Resources
+}
+
 func (r Resources) Len() int {
 	return len(r)
 }
 
 func (r Resources) Get(i int) ElementMetaAccessor {
+	return &r[i]
+}
+
+func (r Resources) GetArtifact(i int) ElementArtifactAccessor {
 	return &r[i]
 }
 
@@ -434,6 +471,10 @@ type Resource struct {
 
 func (r *Resource) GetMeta() *ElementMeta {
 	return &r.ElementMeta
+}
+
+func (r *Resource) GetAccess() AccessSpec {
+	return r.Access
 }
 
 func (r *Resource) Copy() *Resource {
