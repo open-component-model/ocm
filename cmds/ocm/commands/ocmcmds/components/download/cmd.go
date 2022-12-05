@@ -104,13 +104,16 @@ func (d *action) Close() error {
 func (d *action) Out() error {
 	list := errors.ErrListf("downloading component versions")
 	dest := destoption.From(d.cmd)
+	format := formatoption.From(d.cmd)
 	if len(d.data) == 1 {
-		return d.Save(d.data[0], dest.Destination)
+		f := dest.Destination
+		if f == "" {
+			f = DefaultFileName(d.data[0]) + format.Format.Suffix()
+		}
+		return d.Save(d.data[0], f)
 	} else {
 		for _, e := range d.data {
-			f := e.Spec.UniformRepositorySpec.String()
-			f = strings.ReplaceAll(f, "::", "-")
-			f = path.Join(f, e.Spec.Component, *e.Spec.Version)
+			f := DefaultFileName(e) + format.Format.Suffix()
 			err := d.Save(e, f)
 			if err != nil {
 				list.Add(err)
@@ -121,12 +124,12 @@ func (d *action) Out() error {
 	return list.Result()
 }
 
-func (d *action) Save(o *comphdlr.Object, f string) error {
+func (d *action) Save(o *comphdlr.Object, f string) (err error) {
 	dest := destoption.From(d.cmd)
 	src := o.ComponentVersion
 	dir := path.Dir(f)
 
-	err := dest.PathFilesystem.MkdirAll(dir, 0o770)
+	err = dest.PathFilesystem.MkdirAll(dir, 0o770)
 	if err != nil {
 		return err
 	}
@@ -136,7 +139,7 @@ func (d *action) Save(o *comphdlr.Object, f string) error {
 	if err != nil {
 		return err
 	}
-	defer set.Close()
+	defer errors.PropagateError(&err, set.Close)
 
 	nv := common.NewNameVersion(src.GetName(), src.GetVersion())
 	hist := common.History{nv}
@@ -146,4 +149,11 @@ func (d *action) Save(o *comphdlr.Object, f string) error {
 		out.Outf(d.cmd.Context, "%s: downloaded\n", f)
 	}
 	return err
+}
+
+func DefaultFileName(obj *comphdlr.Object) string {
+	f := obj.Spec.UniformRepositorySpec.String()
+	f = strings.ReplaceAll(f, "::", "-")
+	f = path.Join(f, obj.Spec.Component, *obj.Spec.Version)
+	return f
 }
