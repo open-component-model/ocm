@@ -23,6 +23,10 @@ func (f FileFormat) String() string {
 	return string(f)
 }
 
+func (f FileFormat) Suffix() string {
+	return suffixes[f]
+}
+
 func (o FileFormat) ApplyOption(options Options) error {
 	if o != "" {
 		options.SetFileFormat(o)
@@ -35,6 +39,11 @@ const (
 	FormatTGZ       FileFormat = "tgz"
 	FormatDirectory FileFormat = "directory"
 )
+
+var suffixes = map[FileFormat]string{
+	FormatTar: "." + string(FormatTar),
+	FormatTGZ: "." + string(FormatTGZ),
+}
 
 func ErrInvalidFileFormat(fmt string) error {
 	return errors.ErrInvalid(KIND_FILEFORMAT, fmt)
