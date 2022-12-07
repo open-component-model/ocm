@@ -119,9 +119,9 @@ func (o *Command) Complete(args []string) error {
 				subject.Province = append(subject.Province, v)
 			case "country", "c":
 				subject.Country = append(subject.Country, v)
-			case "origanization", "org", "o":
+			case "organization", "org", "o":
 				subject.Country = append(subject.Country, v)
-			case "origanizational-unit", "org-unit", "ou":
+			case "organizational-unit", "org-unit", "ou":
 				subject.OrganizationalUnit = append(subject.OrganizationalUnit, v)
 			case "postal-code", "postalcode":
 				subject.PostalCode = append(subject.PostalCode, v)
@@ -153,7 +153,7 @@ func (o *Command) Complete(args []string) error {
 		if err != nil {
 			data, err := vfs.ReadFile(o.Context.FileSystem(), o.cacert)
 			if err != nil {
-				return errors.Wrapf(err, "cannot read provate key file %q", o.cacert)
+				return errors.Wrapf(err, "cannot read private key file %q", o.cacert)
 			}
 			key, err = parse.ParsePrivateKey(string(data))
 			if err != nil {
