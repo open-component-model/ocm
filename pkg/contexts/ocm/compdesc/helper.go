@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils/selector"
 )
@@ -325,7 +326,7 @@ func (cd *ComponentDescriptor) GetReferenceByIdentity(id v1.Identity) (Component
 			return ref, nil
 		}
 	}
-	return ComponentReference{}, NotFound
+	return ComponentReference{}, errors.ErrNotFound(KIND_REFERENCE, id.String())
 }
 
 // GetReferenceIndex returns the index of a given source.

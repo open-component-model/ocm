@@ -7,6 +7,7 @@ package utils
 import (
 	"fmt"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -19,7 +20,7 @@ func ResolveReferencePath(cv ocm.ComponentVersionAccess, path []metav1.Identity,
 	}
 	eff, err := cv.Dup()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "component version already closed")
 	}
 
 	var final utils.Finalizer
@@ -27,18 +28,18 @@ func ResolveReferencePath(cv ocm.ComponentVersionAccess, path []metav1.Identity,
 
 	for _, cr := range path {
 		final.Close(eff)
-		compoundResolver := ocm.NewCompoundResolver(eff.Repository(), resolver)
 		cref, err := eff.GetReference(cr)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrapf(err, "%s", common.VersionedElementKey(cv))
 		}
 
+		compoundResolver := ocm.NewCompoundResolver(eff.Repository(), resolver)
 		eff, err = compoundResolver.LookupComponentVersion(cref.GetComponentName(), cref.GetVersion())
 		if err != nil {
-			return nil, errors.Wrapf(err, "cannot resolve component reference")
+			return nil, errors.Wrapf(err, "cannot resolve component version for reference %s", cr.String())
 		}
 		if eff == nil {
-			return nil, errors.ErrNotFound(ocm.KIND_COMPONENTREFERENCE, cref.String())
+			return nil, errors.ErrNotFound(ocm.KIND_COMPONENTVERSION, cref.String())
 		}
 		final.Finalize()
 	}

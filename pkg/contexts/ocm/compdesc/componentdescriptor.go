@@ -16,6 +16,8 @@ import (
 
 var NotFound = errors.ErrNotFound()
 
+const KIND_REFERENCE = "component reference"
+
 type (
 	ObjectMeta = metav1.ObjectMeta
 	Provider   = metav1.Provider

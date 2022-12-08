@@ -31,6 +31,11 @@ func Must[T any](o T, err error) T {
 	return o
 }
 
+func MustWithOffset[T any](offset int, o T, err error) T {
+	ExpectWithOffset(offset+1, err).To(Succeed())
+	return o
+}
+
 func MustBeNonNil[T any](o T) T {
 	ExpectWithOffset(1, o).NotTo(BeNil())
 	return o
