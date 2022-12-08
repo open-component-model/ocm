@@ -165,6 +165,10 @@ func (c *ComponentAccess) Close() error {
 	return nil
 }
 
+func (c *ComponentAccess) Dup() (cpi.ComponentAccess, error) {
+	return c, nil
+}
+
 func (c *ComponentAccess) GetName() string {
 	return c.repo.arch.GetName()
 }

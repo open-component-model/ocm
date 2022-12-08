@@ -65,6 +65,10 @@ func newComponentAccess(repo *RepositoryImpl, name string, main bool) (*Componen
 	return n.View(main)
 }
 
+func (a *componentAccessImpl) Dup() (cpi.ComponentAccess, error) {
+	return a.View(false)
+}
+
 func (a *componentAccessImpl) View(main ...bool) (*ComponentAccess, error) {
 	v, err := a.refs.View(main...)
 	if err != nil {

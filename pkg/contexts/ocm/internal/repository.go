@@ -46,6 +46,7 @@ type ComponentAccess interface {
 	NewVersion(version string, overrides ...bool) (ComponentVersionAccess, error)
 
 	Close() error
+	Dup() (ComponentAccess, error)
 }
 type (
 	ResourceMeta       = compdesc.ResourceMeta
@@ -114,6 +115,10 @@ type ComponentVersionAccess interface {
 	SetReference(ref *ComponentReference) error
 
 	DiscardChanges()
+
+	// Dup provides a separately closeable view to a component version access.
+	// If the actual instance is already closed, an error is returned.
+	Dup() (ComponentVersionAccess, error)
 	io.Closer
 }
 
