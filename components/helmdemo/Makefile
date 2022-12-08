@@ -39,6 +39,10 @@ $(GEN)/ca: $(GEN)/.exists sources.yaml resources.yaml references.yaml $(CHARTSRC
 	$(OCM) add references  $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" HELMINSTCOMP=$(HELMINSTCOMP) references.yaml
 	@touch $(GEN)/ca
 
+.PHONY: eval-resources
+eval-resources:
+	$(OCM) add resources --dry-run VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" resources.yaml -O "$(GEN)/resources.yaml"
+
 .PHONY: push
 push: $(GEN)/ctf $(GEN)/push.$(NAME)
 

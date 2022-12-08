@@ -10,8 +10,10 @@ ocm add resources [<options>] [<target>] {<resourcefile> | <var>=<value>}
 
 ```
       --addenv                       access environment for templating
+      --dry-run                      evaluate and print resource specifications
   -F, --file string                  target file/directory (default "component-archive")
   -h, --help                         help for resources
+  -O, --output string                output file for dry-run
   -s, --settings stringArray         settings file with variable settings (yaml)
       --templater string             templater to use (subst, spiff, go) (default "subst")
 ```
