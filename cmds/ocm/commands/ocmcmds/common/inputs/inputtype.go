@@ -53,6 +53,10 @@ func (c *context) Printf(msg string, args ...interface{}) (int, error) {
 	return c.printer.Printf(msg, args...)
 }
 
+func (c *context) Printer() common.Printer {
+	return c.printer
+}
+
 func (c *context) Variables() map[string]interface{} {
 	return c.variables
 }

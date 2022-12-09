@@ -21,6 +21,7 @@ ocm add [<options>] <sub command> ...
 
 ##### Sub Commands
 
+* [ocm add <b>componentversions</b>](ocm_add_componentversions.md)	 &mdash; add component version(s) to a (new) transport archive
 * [ocm add <b>references</b>](ocm_add_references.md)	 &mdash; add aggregation information to a component version
 * [ocm add <b>resource-configuration</b>](ocm_add_resource-configuration.md)	 &mdash; add a resource specification to a resource config file
 * [ocm add <b>resources</b>](ocm_add_resources.md)	 &mdash; add resources to a component version

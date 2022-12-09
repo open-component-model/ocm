@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/pflag"
 	"sigs.k8s.io/yaml"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -21,15 +22,15 @@ import (
 )
 
 type ModifiedResourceSpecificationsFile struct {
-	ResourceSpecificationsFile
+	ElementFileSource
 	modified string
 }
 
-func NewModifiedResourceSpecificationsFile(data string, path string, fss ...vfs.FileSystem) ResourceSpecifications {
+func NewModifiedResourceSpecificationsFile(data string, path string, fss ...vfs.FileSystem) addhdlrs.ElementSource {
 	return &ModifiedResourceSpecificationsFile{
-		ResourceSpecificationsFile: ResourceSpecificationsFile{
+		ElementFileSource: ElementFileSource{
 			filesystem: accessio.FileSystem(fss...),
-			path:       path,
+			path:       addhdlrs.NewSourceInfo(path),
 		},
 		modified: data,
 	}
@@ -45,10 +46,10 @@ type ResourceConfigAdderCommand struct {
 	utils.BaseCommand
 
 	Templating template.Options
-	Adder      ResourceSpecificationsProvider
+	Adder      ElementSpecificationsProvider
 
 	ConfigFile string
-	Resources  []ResourceSpecifications
+	Resources  []addhdlrs.ElementSource
 	Envs       []string
 }
 
@@ -84,7 +85,7 @@ func (o *ResourceConfigAdderCommand) Complete(args []string) error {
 
 	paths := o.Templating.FilterSettings(args[1:]...)
 	for _, p := range paths {
-		o.Resources = append(o.Resources, NewResourceSpecificationsFile(p, o.FileSystem()))
+		o.Resources = append(o.Resources, NewElementFileSource(p, o.FileSystem()))
 	}
 
 	if len(o.Resources) == 0 {
@@ -93,11 +94,11 @@ func (o *ResourceConfigAdderCommand) Complete(args []string) error {
 	return nil
 }
 
-func (o *ResourceConfigAdderCommand) ProcessResourceDescriptions(listkey string, h ResourceSpecHandler) error {
+func (o *ResourceConfigAdderCommand) ProcessResourceDescriptions(h ResourceSpecHandler) error {
 	fs := o.Context.FileSystem()
-	printer := common.NewPrinter(o.Context.StdOut())
-	ictx := inputs.NewContext(o.Context, printer, o.Templating.Vars)
+	ictx := inputs.NewContext(o.Context, common.NewPrinter(o.Context.StdOut()), o.Templating.Vars)
 	mode := vfs.FileMode(0o600)
+	listkey := utils.Plural(h.Key(), 0)
 
 	var current string
 	if ok, err := vfs.FileExists(fs, o.ConfigFile); ok {
@@ -133,12 +134,12 @@ func (o *ResourceConfigAdderCommand) ProcessResourceDescriptions(listkey string,
 	}
 
 	source := NewModifiedResourceSpecificationsFile(current, o.ConfigFile, fs)
-	resources, err := determineResources(printer, o.Context, ictx, o.Templating, listkey, h, source)
+	resources, err := addhdlrs.DetermineElementsForSource(o.Context, ictx, o.Templating, h, source)
 	if err != nil {
 		return errors.Wrapf(err, "%s", source.Origin())
 	}
 
-	printer.Printf("found %d %s\n", len(resources), listkey)
+	ictx.Printf("found %d %s\n", len(resources), listkey)
 
 	err = vfs.WriteFile(fs, o.ConfigFile, []byte(current), mode)
 	if err != nil {

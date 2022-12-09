@@ -30,6 +30,7 @@ target archive to use. The following formats are supported:
 - directory
 - tar
 - tgz
+
 The default format is <code>directory</code>.
 
 If the option <code>--scheme</code> is given, the specified component descriptor format is used/generated.

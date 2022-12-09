@@ -202,6 +202,19 @@ func (o *ElementMeta) GetIdentity(accessor ElementAccessor) metav1.Identity {
 	return identity
 }
 
+// GetRawIdentity returns the identity plus version.
+func (o *ElementMeta) GetRawIdentity() metav1.Identity {
+	identity := o.ExtraIdentity.Copy()
+	if identity == nil {
+		identity = metav1.Identity{}
+	}
+	identity[SystemIdentityName] = o.Name
+	if o.Version != "" {
+		identity[SystemIdentityVersion] = o.Version
+	}
+	return identity
+}
+
 // GetMatchBaseIdentity returns all possible identity attributes for resource matching.
 func (o *ElementMeta) GetMatchBaseIdentity() metav1.Identity {
 	identity := o.ExtraIdentity.Copy()

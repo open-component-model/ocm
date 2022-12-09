@@ -370,3 +370,40 @@ func (o *StringMapOption) AddFlags(fs *pflag.FlagSet) {
 func (o *StringMapOption) Value() interface{} {
 	return o.value
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+type BytesOptionType struct {
+	TypeOptionBase
+}
+
+func NewBytesOptionType(name string, description string) ConfigOptionType {
+	return &BytesOptionType{
+		TypeOptionBase: TypeOptionBase{name, description},
+	}
+}
+
+func (s *BytesOptionType) Equal(optionType ConfigOptionType) bool {
+	return reflect.DeepEqual(s, optionType)
+}
+
+func (s *BytesOptionType) Create() Option {
+	return &BytesOption{
+		OptionBase: NewOptionBase(s),
+	}
+}
+
+type BytesOption struct {
+	OptionBase
+	value []byte
+}
+
+var _ Option = (*BytesOption)(nil)
+
+func (o *BytesOption) AddFlags(fs *pflag.FlagSet) {
+	o.TweakFlag(flag.BytesBase64VarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
+}
+
+func (o *BytesOption) Value() interface{} {
+	return o.value
+}

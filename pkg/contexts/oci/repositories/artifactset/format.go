@@ -177,6 +177,12 @@ func RegisterFormat(f accessobj.FormatHandler) FormatHandler {
 	return h
 }
 
+func GetFormats() []string {
+	lock.RLock()
+	defer lock.RUnlock()
+	return accessio.GetFormatsFor(fileFormats)
+}
+
 func GetFormat(name accessio.FileFormat) FormatHandler {
 	lock.RLock()
 	defer lock.RUnlock()

@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/rscs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
@@ -72,14 +73,23 @@ func (o *Command) Long() string {
 Add resources specified in a resource file to a component version.
 So far only component archives are supported as target.
 
-This command accepts  resource specification files describing the resources
+This command accepts resource specification files describing the resources
 to add to a component version. Elements must follow the resource meta data
-description scheme of the component descriptor.
+description scheme of the component descriptor. Besides referential resources
+using the <code>access</code> attribute to describe the access method, it
+is possible to describe local resources fed by local data using the <code>input</code>
+field (see below).
+
+The description file might contain:
+- a single resource
+- a list of resources under the key <code>resources</code>
+- a list of yaml documents with a single resource or resource list
+
 ` + o.Adder.Description() + (&template.Options{}).Usage() +
 		inputs.Usage(inputs.DefaultInputTypeScheme) +
 		ocm.AccessUsage(o.OCMContext().AccessMethods(), true)
 }
 
 func (o *Command) Run() error {
-	return o.ProcessResourceDescriptions("resources", ResourceSpecHandler{})
+	return o.ProcessResourceDescriptions(rscs.ResourceSpecHandler{})
 }

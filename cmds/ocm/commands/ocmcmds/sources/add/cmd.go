@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/srcs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
@@ -54,12 +55,21 @@ So far only component archives are supported as target.
 
 This command accepts source specification files describing the sources
 to add to a component version. Elements must follow the source meta data
-description scheme of the component descriptor.
+description scheme of the component descriptor. Besides referential sources
+using the <code>access</code> attribute to describe the access method, it
+is possible to describe local sources fed by local data using the <code>input</code>
+field (see below).
+
+The description file might contain:
+- a single source
+- a list of sources under the key <code>sources</code>
+- a list of yaml documents with a single source or source list
+
 ` + o.Adder.Description() + (&template.Options{}).Usage() +
 		inputs.Usage(inputs.DefaultInputTypeScheme) +
 		ocm.AccessUsage(o.OCMContext().AccessMethods(), true)
 }
 
 func (o *Command) Run() error {
-	return o.ProcessResourceDescriptions("sources", ResourceSpecHandler{})
+	return o.ProcessResourceDescriptions(srcs.ResourceSpecHandler{})
 }

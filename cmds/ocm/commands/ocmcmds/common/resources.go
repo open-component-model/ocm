@@ -5,20 +5,18 @@
 package common
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 
 	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
+	"github.com/open-component-model/ocm/pkg/runtime"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
-	"gopkg.in/yaml.v3"
-	"k8s.io/apimachinery/pkg/util/validation/field"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/fileoption"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
@@ -36,20 +34,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
-type ResourceInput struct {
-	Access *runtime.UnstructuredTypedObject `json:"access"`
-	// Input  *inputs.BlobInput                `json:"input,omitempty"`
-	Input *inputs.GenericInputSpec `json:"input,omitempty"`
-}
-
 type ResourceSpecHandler interface {
-	RequireInputs() bool
-	Decode(data []byte) (ResourceSpec, error)
-	Set(v ocm.ComponentVersionAccess, r Resource, acc compdesc.AccessSpec) error
+	addhdlrs.ElementSpecHandler
+	Set(v ocm.ComponentVersionAccess, r addhdlrs.Element, acc compdesc.AccessSpec) error
 }
 
 func CheckHint(v ocm.ComponentVersionAccess, acc compdesc.AccessSpec) error {
@@ -69,6 +58,9 @@ func checkHint(v ocm.ComponentVersionAccess, typ string, artacc compdesc.Artifac
 	if !ok {
 		return nil
 	}
+	if local.ReferenceName == "" {
+		return nil
+	}
 	accessor := artacc(v.GetDescriptor())
 	for i := 0; i < accessor.Len(); i++ {
 		a := accessor.GetArtifact(i)
@@ -84,119 +76,58 @@ func checkHint(v ocm.ComponentVersionAccess, typ string, artacc compdesc.Artifac
 			continue
 		}
 		if mime.BaseType(local.MediaType) == mime.BaseType(olocal.MediaType) {
-			return fmt.Errorf("reference name (hint) with base media type %s already used for %s %s:%s", mime.BaseType(local.MediaType), typ, a.GetMeta().Name, a.GetMeta().Version)
+			return fmt.Errorf("reference name (hint) %q with base media type %s already used for %s %s:%s",
+				local.ReferenceName, mime.BaseType(local.MediaType), typ, a.GetMeta().Name, a.GetMeta().Version)
 		}
 	}
 	return nil
 }
 
-type ResourceSpec interface {
-	GetName() string
-	Info() string
-	Validate(ctx clictx.Context, input *ResourceInput) error
-}
-
-type Resource interface {
-	Source() string
-	Spec() ResourceSpec
-	Input() *ResourceInput
-}
-
-type resource struct {
-	path   string
-	source string
-	data   []byte
-	spec   ResourceSpec
-	input  *ResourceInput
-}
-
-func (r *resource) Source() string {
-	return r.source
-}
-
-func (r *resource) Data() []byte {
-	return r.data
-}
-
-func (r *resource) Spec() ResourceSpec {
-	return r.spec
-}
-
-func (r *resource) Input() *ResourceInput {
-	return r.input
-}
-
-func (r *resource) Type() string {
-	if c, ok := r.spec.(interface{ GetType() string }); ok {
-		return c.GetType()
-	}
-	return ""
-}
-
-func NewResource(spec ResourceSpec, input *ResourceInput, path string, data []byte, indices ...int) *resource {
-	id := path
-	for _, i := range indices {
-		id += fmt.Sprintf("[%d]", i)
-	}
-	return &resource{
-		data:   data,
-		path:   path,
-		source: id,
-		spec:   spec,
-		input:  input,
-	}
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
-type ResourceSpecifications interface {
-	Origin() string
-	Get() (string, error)
-}
-
-type ResourceSpecificationsFile struct {
+type ElementFileSource struct {
 	filesystem vfs.FileSystem
-	path       string
+	path       addhdlrs.SourceInfo
 }
 
-func NewResourceSpecificationsFile(path string, fss ...vfs.FileSystem) ResourceSpecifications {
-	return &ResourceSpecificationsFile{
+func NewElementFileSource(path string, fss ...vfs.FileSystem) addhdlrs.ElementSource {
+	return &ElementFileSource{
 		filesystem: accessio.FileSystem(fss...),
-		path:       path,
+		path:       addhdlrs.NewSourceInfo(path),
 	}
 }
 
-func (r *ResourceSpecificationsFile) Get() (string, error) {
-	data, err := vfs.ReadFile(r.filesystem, r.path)
+func (r *ElementFileSource) Get() (string, error) {
+	data, err := vfs.ReadFile(r.filesystem, r.path.Origin())
 	if err != nil {
 		return "", errors.Wrapf(err, "cannot read resource file %q", r.path)
 	}
 	return string(data), nil
 }
 
-func (r *ResourceSpecificationsFile) Origin() string {
+func (r *ElementFileSource) Origin() addhdlrs.SourceInfo {
 	return r.path
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type ResourceSpecificationsProvider interface {
+type ElementSpecificationsProvider interface {
 	AddFlags(fs *pflag.FlagSet)
 	Complete() error
-	Resources() ([]ResourceSpecifications, error)
+	Resources() ([]addhdlrs.ElementSource, error)
 	Description() string
 	IsSpecified() bool
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type ResourceMetaDataSpecificationsProvider struct {
+type ElementMetaDataSpecificationsProvider struct {
 	typename     string
 	metaProvider flagsets.ConfigTypeOptionSetConfigProvider
 	metaOptions  flagsets.ConfigOptions
 }
 
-func NewResourceMetaDataSpecificationsProvider(name string, adder flagsets.ConfigAdder, types ...flagsets.ConfigOptionType) *ResourceMetaDataSpecificationsProvider {
+func NewElementMetaDataSpecificationsProvider(name string, adder flagsets.ConfigAdder, types ...flagsets.ConfigOptionType) *ElementMetaDataSpecificationsProvider {
 	meta := flagsets.NewPlainConfigProvider(name, flagsets.ComposedAdder(addMeta(name), adder),
 		append(types,
 			flagsets.NewYAMLOptionType(name, fmt.Sprintf("%s meta data (yaml)", name)),
@@ -207,7 +138,7 @@ func NewResourceMetaDataSpecificationsProvider(name string, adder flagsets.Confi
 		)...,
 	)
 	meta.AddGroups(cases.Title(language.English).String(fmt.Sprintf("%s meta data options", name)))
-	a := &ResourceMetaDataSpecificationsProvider{
+	a := &ElementMetaDataSpecificationsProvider{
 		typename:     name,
 		metaProvider: meta,
 	}
@@ -233,15 +164,15 @@ func addMeta(typename string) flagsets.ConfigAdder {
 	}
 }
 
-func (a *ResourceMetaDataSpecificationsProvider) ElementType() string {
+func (a *ElementMetaDataSpecificationsProvider) ElementType() string {
 	return a.typename
 }
 
-func (a *ResourceMetaDataSpecificationsProvider) IsSpecified() bool {
+func (a *ElementMetaDataSpecificationsProvider) IsSpecified() bool {
 	return a.metaOptions.Changed()
 }
 
-func (a *ResourceMetaDataSpecificationsProvider) Description() string {
+func (a *ElementMetaDataSpecificationsProvider) Description() string {
 	return fmt.Sprintf(`
 It is possible to describe a single %s via command line options.
 The meta data of this element is described by the argument of option <code>--%s</code>,
@@ -256,26 +187,26 @@ by the selected templater.)
 `, a.typename, a.typename, a.typename)
 }
 
-func (a *ResourceMetaDataSpecificationsProvider) AddFlags(fs *pflag.FlagSet) {
+func (a *ElementMetaDataSpecificationsProvider) AddFlags(fs *pflag.FlagSet) {
 	a.metaOptions.AddFlags(fs)
 }
 
-func (a *ResourceMetaDataSpecificationsProvider) Complete() error {
+func (a *ElementMetaDataSpecificationsProvider) Complete() error {
 	return nil
 }
 
-func (a *ResourceMetaDataSpecificationsProvider) Origin() string {
-	return a.typename + " (by options)"
+func (a *ElementMetaDataSpecificationsProvider) Origin() addhdlrs.SourceInfo {
+	return addhdlrs.NewSourceInfo(a.typename + " (by options)")
 }
 
-func (a *ResourceMetaDataSpecificationsProvider) ParsedMeta() (flagsets.Config, error) {
+func (a *ElementMetaDataSpecificationsProvider) ParsedMeta() (flagsets.Config, error) {
 	return a.metaProvider.GetConfigFor(a.metaOptions)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type ContentResourceSpecificationsProvider struct {
-	*ResourceMetaDataSpecificationsProvider
+	*ElementMetaDataSpecificationsProvider
 	ctx         clictx.Context
 	DefaultType string
 
@@ -285,15 +216,15 @@ type ContentResourceSpecificationsProvider struct {
 }
 
 var (
-	_ ResourceSpecificationsProvider = (*ContentResourceSpecificationsProvider)(nil)
-	_ ResourceSpecifications         = (*ContentResourceSpecificationsProvider)(nil)
+	_ ElementSpecificationsProvider = (*ContentResourceSpecificationsProvider)(nil)
+	_ addhdlrs.ElementSource        = (*ContentResourceSpecificationsProvider)(nil)
 )
 
 func NewContentResourceSpecificationProvider(ctx clictx.Context, name string, adder flagsets.ConfigAdder, deftype string, types ...flagsets.ConfigOptionType) *ContentResourceSpecificationsProvider {
 	a := &ContentResourceSpecificationsProvider{
 		DefaultType: deftype,
 		ctx:         ctx,
-		ResourceMetaDataSpecificationsProvider: NewResourceMetaDataSpecificationsProvider(name, flagsets.ComposedAdder(addContentMeta, adder),
+		ElementMetaDataSpecificationsProvider: NewElementMetaDataSpecificationsProvider(name, flagsets.ComposedAdder(addContentMeta, adder),
 			append(types,
 				flagsets.NewStringOptionType("type", fmt.Sprintf("%s type", name)),
 			)...,
@@ -308,7 +239,7 @@ func addContentMeta(opts flagsets.ConfigOptions, config flagsets.Config) error {
 }
 
 func (a *ContentResourceSpecificationsProvider) Description() string {
-	return a.ResourceMetaDataSpecificationsProvider.Description() + fmt.Sprintf(`
+	return a.ElementMetaDataSpecificationsProvider.Description() + fmt.Sprintf(`
 The %s type can be specified with the option <code>--type</code>. Therefore, the
 minimal required meta data for elements can be completely specified by dedicated
 options and don't need the YAML option.
@@ -321,7 +252,7 @@ or <code>input</code> fields of the description file format.
 }
 
 func (a *ContentResourceSpecificationsProvider) AddFlags(fs *pflag.FlagSet) {
-	a.ResourceMetaDataSpecificationsProvider.AddFlags(fs)
+	a.ElementMetaDataSpecificationsProvider.AddFlags(fs)
 
 	a.accprov = a.ctx.OCMContext().AccessMethods().CreateConfigTypeSetConfigProvider()
 	inptypes := inputs.For(a.ctx).ConfigTypeSetConfigProvider()
@@ -340,14 +271,14 @@ func (a *ContentResourceSpecificationsProvider) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (a *ContentResourceSpecificationsProvider) IsSpecified() bool {
-	return a.ResourceMetaDataSpecificationsProvider.IsSpecified() || a.options.Changed()
+	return a.ElementMetaDataSpecificationsProvider.IsSpecified() || a.options.Changed()
 }
 
 func (a *ContentResourceSpecificationsProvider) Complete() error {
 	if !a.IsSpecified() {
 		return nil
 	}
-	if err := a.ResourceMetaDataSpecificationsProvider.Complete(); err != nil {
+	if err := a.ElementMetaDataSpecificationsProvider.Complete(); err != nil {
 		return err
 	}
 
@@ -378,7 +309,7 @@ func (a *ContentResourceSpecificationsProvider) apply(p flagsets.ConfigTypeOptio
 }
 
 func (a *ContentResourceSpecificationsProvider) ParsedMeta() (flagsets.Config, error) {
-	data, err := a.ResourceMetaDataSpecificationsProvider.ParsedMeta()
+	data, err := a.ElementMetaDataSpecificationsProvider.ParsedMeta()
 	if err != nil {
 		return nil, err
 	}
@@ -412,11 +343,11 @@ func (a *ContentResourceSpecificationsProvider) Get() (string, error) {
 	return string(r), nil
 }
 
-func (a *ContentResourceSpecificationsProvider) Resources() ([]ResourceSpecifications, error) {
+func (a *ContentResourceSpecificationsProvider) Resources() ([]addhdlrs.ElementSource, error) {
 	if !a.IsSpecified() {
 		return nil, nil
 	}
-	return []ResourceSpecifications{a}, nil
+	return []addhdlrs.ElementSource{a}, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -425,9 +356,9 @@ type ResourceAdderCommand struct {
 	utils.BaseCommand
 
 	Templating template.Options
-	Adder      ResourceSpecificationsProvider
+	Adder      ElementSpecificationsProvider
 
-	Resources []ResourceSpecifications
+	Resources []addhdlrs.ElementSource
 	Envs      []string
 
 	DryRun  bool
@@ -435,7 +366,7 @@ type ResourceAdderCommand struct {
 	Archive string
 }
 
-func NewResourceAdderCommand(ctx clictx.Context, provider ResourceSpecificationsProvider, opts ...options.Options) ResourceAdderCommand {
+func NewResourceAdderCommand(ctx clictx.Context, provider ElementSpecificationsProvider, opts ...options.Options) ResourceAdderCommand {
 	return ResourceAdderCommand{
 		BaseCommand: utils.NewBaseCommand(ctx, append(opts, fileoption.NewCompArch())...),
 		Adder:       provider,
@@ -485,7 +416,7 @@ func (o *ResourceAdderCommand) Complete(args []string) error {
 
 	paths := o.Templating.FilterSettings(args...)
 	for _, p := range paths {
-		o.Resources = append(o.Resources, NewResourceSpecificationsFile(p, o.FileSystem()))
+		o.Resources = append(o.Resources, NewElementFileSource(p, o.FileSystem()))
 	}
 
 	if len(o.Resources) == 0 {
@@ -494,21 +425,10 @@ func (o *ResourceAdderCommand) Complete(args []string) error {
 	return nil
 }
 
-func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h ResourceSpecHandler) error {
+func (o *ResourceAdderCommand) ProcessResourceDescriptions(h ResourceSpecHandler) error {
 	fs := o.Context.FileSystem()
 	printer := common.NewPrinter(o.Context.StdOut())
-	ictx := inputs.NewContext(o.Context, printer, o.Templating.Vars)
-
-	resources := []*resource{}
-	for _, source := range o.Resources {
-		tmp, err := determineResources(printer, o.Context, ictx, o.Templating, listkey, h, source)
-		if err != nil {
-			return errors.Wrapf(err, "%s", source.Origin())
-		}
-		resources = append(resources, tmp...)
-	}
-
-	printer.Printf("found %d %s\n", len(resources), listkey)
+	elems, ictx, err := addhdlrs.ProcessDescriptions(o.Context, printer, o.Templating, h, o.Resources)
 
 	if o.DryRun {
 		p := printer
@@ -520,239 +440,62 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 			p = common.NewPrinter(f)
 		}
 
-		for _, r := range resources {
+		for _, r := range elems {
 			var i interface{}
-			err := yaml.Unmarshal(r.Data(), &i)
+			err := runtime.DefaultYAMLEncoding.Unmarshal(r.Data(), &i)
 			if err != nil {
 				return errors.Wrapf(err, "cannot eval data %q", string(r.Data()))
 			}
-			data, err := yaml.Marshal(i)
+			data, err := runtime.DefaultYAMLEncoding.Marshal(i)
 			if err != nil {
 				return err
 			}
 			p.Printf("---\n%s\n", string(data))
 		}
-	} else {
-		obj, err := comparch.Open(o.Context.OCMContext(), accessobj.ACC_WRITABLE, o.Archive, 0, accessio.PathFileSystem(fs))
-		if err != nil {
-			return err
-		}
-		defer obj.Close()
+		return nil
+	}
 
-		for _, r := range resources {
-			isctx := ictx.Section("adding %s...", r.Spec().Info())
-			if h.RequireInputs() {
-				if r.input.Input != nil {
-					var acc ocm.AccessSpec
-					// Local Blob
-					blob, hint, berr := r.input.Input.GetBlob(isctx, common.VersionedElementKey(obj), r.path)
-					if berr != nil {
-						return errors.Wrapf(berr, "cannot get resource blob for %q(%s)", r.spec.GetName(), r.source)
-					}
-					acc, err = obj.AddBlob(blob, r.Type(), hint, nil)
+	obj, err := comparch.Open(o.Context.OCMContext(), accessobj.ACC_WRITABLE, o.Archive, 0, accessio.PathFileSystem(fs))
+	if err != nil {
+		return err
+	}
+	defer obj.Close()
+	return ProcessElements(ictx, obj, elems, h)
+}
+
+// ProcessElements add a list of evaluated elements to a component version.
+func ProcessElements(ictx inputs.Context, cv ocm.ComponentVersionAccess, elems []addhdlrs.Element, h ResourceSpecHandler) error {
+	var err error
+	for _, elem := range elems {
+		ictx := ictx.Section("adding %s...", elem.Spec().Info())
+		if h.RequireInputs() {
+			if elem.Input().Input != nil {
+				var acc ocm.AccessSpec
+				// Local Blob
+				blob, hint, berr := elem.Input().Input.GetBlob(ictx, common.VersionedElementKey(cv), elem.Source().Origin())
+				if berr != nil {
+					return errors.Wrapf(berr, "cannot get %s blob for %q(%s)", h.Key(), elem.Spec().GetName(), elem.Source())
+				}
+				acc, err = cv.AddBlob(blob, elem.Type(), hint, nil)
+				if err == nil {
+					err = CheckHint(cv, acc)
 					if err == nil {
-						err = CheckHint(obj, acc)
-						if err == nil {
-							err = h.Set(obj, r, acc)
-						}
-					}
-					blob.Close()
-				} else {
-					acc := compdesc.GenericAccessSpec(r.input.Access)
-					err = CheckHint(obj, acc)
-					if err == nil {
-						err = h.Set(obj, r, acc)
+						err = h.Set(cv, elem, acc)
 					}
 				}
 			} else {
-				err = h.Set(obj, r, nil)
+				acc := compdesc.GenericAccessSpec(elem.Input().Access)
+				err = CheckHint(cv, acc)
+				if err == nil {
+					err = h.Set(cv, elem, acc)
+				}
 			}
-			if err != nil {
-				return errors.Wrapf(err, "cannot add resource %q(%s)", r.spec.GetName(), r.source)
-			}
+		} else {
+			err = h.Set(cv, elem, nil)
+		}
+		if err != nil {
+			return errors.Wrapf(err, "cannot add %s %q(%s)", h.Key(), elem.Spec().GetName(), elem.Source())
 		}
 	}
 	return nil
-}
-
-func determineResources(printer common.Printer, ctx clictx.Context, ictx inputs.Context, templ template.Options, listkey string, h ResourceSpecHandler, source ResourceSpecifications) ([]*resource, error) {
-	resources := []*resource{}
-	origin := source.Origin()
-
-	printer.Printf("processing %s...\n", origin)
-	r, err := source.Get()
-	if err != nil {
-		return nil, err
-	}
-	parsed, err := templ.Execute(r)
-	if err != nil {
-		return nil, errors.Wrapf(err, "error during variable substitution")
-	}
-
-	// sigs parser has no multi document stream parsing
-	// but yaml.v3 does not recognize json tagged fields.
-	// Therefore, we first use the v3 parser to parse the multi doc,
-	// marshal it again and finally unmarshal it with the sigs parser.
-	decoder := yaml.NewDecoder(bytes.NewBuffer([]byte(parsed)))
-	i := 0
-	for {
-		var tmp map[string]interface{}
-
-		i++
-		err := decoder.Decode(&tmp)
-		if err != nil {
-			if !errors.Is(err, io.EOF) {
-				return nil, err
-			}
-			break
-		}
-		printer.Printf("  processing document %d...\n", i)
-		if (tmp["input"] != nil || tmp["access"] != nil) && !h.RequireInputs() {
-			return nil, errors.Newf("invalid spec %d: no input or access possible for %s", i, listkey)
-		}
-
-		var list []json.RawMessage
-		if reslist, ok := tmp[listkey]; ok {
-			if len(tmp) != 1 {
-				return nil, errors.Newf("invalid spec %d: either a list or a single spec possible for %s (found keys %s)", i, listkey, utils2.StringMapKeys(tmp))
-			}
-			l, ok := reslist.([]interface{})
-			if !ok {
-				return nil, errors.Newf("invalid spec %d: invalid resource list", i)
-			}
-			for j, e := range l {
-				// cannot use json here, because yaml generates a map[interface{}]interface{}
-				data, err := yaml.Marshal(e)
-				if err != nil {
-					return nil, errors.Newf("invalid spec %d[%d]: %s", i, j+1, err.Error())
-				}
-				list = append(list, data)
-			}
-		} else {
-			if len(tmp) == 0 {
-				return nil, errors.Newf("invalid spec %d: empty", i)
-			}
-			data, err := yaml.Marshal(tmp)
-			if err != nil {
-				return nil, err
-			}
-			list = append(list, data)
-		}
-
-		for j, d := range list {
-			printer.Printf("    processing index %d\n", j+1)
-			var input *ResourceInput
-			r, err := DecodeResource(d, h)
-			if err != nil {
-				return nil, errors.Newf("invalid spec %d[%d]: %s", i, j+1, err)
-			}
-
-			if h.RequireInputs() {
-				input, err = DecodeInput(d, ctx)
-				if err != nil {
-					return nil, errors.Newf("invalid spec %d[%d]: %s", i, j+1, err)
-				}
-				if err = Validate(input, ictx, origin); err != nil {
-					return nil, errors.Wrapf(err, "invalid spec %d[%d]", i, j+1)
-				}
-			}
-
-			if err = r.Validate(ctx, input); err != nil {
-				return nil, errors.Wrapf(err, "invalid spec %d[%d]", i, j+1)
-			}
-
-			resources = append(resources, NewResource(r, input, origin, d, i, j+1))
-		}
-	}
-	return resources, nil
-}
-
-func DecodeResource(data []byte, h ResourceSpecHandler) (ResourceSpec, error) {
-	result, err := h.Decode(data)
-	if err != nil {
-		return nil, err
-	}
-	accepted, err := runtime.DefaultJSONEncoding.Marshal(result)
-	if err != nil {
-		return nil, err
-	}
-	var plainAccepted interface{}
-	err = runtime.DefaultJSONEncoding.Unmarshal(accepted, &plainAccepted)
-	if err != nil {
-		return nil, err
-	}
-	var plainOrig map[string]interface{}
-	err = runtime.DefaultYAMLEncoding.Unmarshal(data, &plainOrig)
-	if err != nil {
-		return nil, err
-	}
-	delete(plainOrig, "input")
-	err = utils.CheckForUnknown(nil, plainOrig, plainAccepted).ToAggregate()
-	return result, err
-}
-
-func DecodeInput(data []byte, ctx clictx.Context) (*ResourceInput, error) {
-	var input ResourceInput
-	err := runtime.DefaultYAMLEncoding.Unmarshal(data, &input)
-	if err != nil {
-		return nil, err
-	}
-	_, err = input.Input.Evaluate(inputs.For(ctx))
-	if err != nil {
-		return nil, err
-	}
-	accepted, err := runtime.DefaultJSONEncoding.Marshal(input.Input)
-	if err != nil {
-		return nil, err
-	}
-	var plainAccepted interface{}
-	err = runtime.DefaultJSONEncoding.Unmarshal(accepted, &plainAccepted)
-	if err != nil {
-		return nil, err
-	}
-	var plainOrig map[string]interface{}
-	err = runtime.DefaultYAMLEncoding.Unmarshal(data, &plainOrig)
-	if err != nil {
-		return nil, err
-	}
-	var fldPath *field.Path
-	err = utils.CheckForUnknown(fldPath.Child("input"), plainOrig["input"], plainAccepted).ToAggregate()
-	return &input, err
-}
-
-func Validate(r *ResourceInput, ctx inputs.Context, inputFilePath string) error {
-	allErrs := field.ErrorList{}
-	var fldPath *field.Path
-
-	if r.Input != nil && r.Access != nil {
-		allErrs = append(allErrs, field.Forbidden(fldPath, "only either input or access might be specified"))
-	} else {
-		if r.Input == nil && r.Access == nil {
-			allErrs = append(allErrs, field.Forbidden(fldPath, "either input or access must be specified"))
-		}
-		if r.Access != nil {
-			if r.Access.GetType() == "" {
-				allErrs = append(allErrs, field.Required(fldPath.Child("access", "type"), "type of access required"))
-			} else {
-				acc, err := r.Access.Evaluate(ctx.OCMContext().AccessMethods())
-				if err != nil {
-					if errors.IsErrUnknown(err) {
-						//nolint: errorlint // No way I can untagle this.
-						err.(errors.Kinded).SetKind(errors.KIND_ACCESSMETHOD)
-					}
-					raw, _ := r.Access.GetRaw()
-					allErrs = append(allErrs, field.Invalid(fldPath.Child("access"), string(raw), err.Error()))
-				} else if acc.(ocm.AccessSpec).IsLocal(ctx.OCMContext()) {
-					kind := runtime.ObjectVersionedType(r.Access.ObjectType).GetKind()
-					allErrs = append(allErrs, field.Invalid(fldPath.Child("access", "type"), kind, "local access no possible"))
-				}
-			}
-		}
-		if r.Input != nil {
-			if err := r.Input.Validate(fldPath.Child("input"), ctx, inputFilePath); err != nil {
-				allErrs = append(allErrs, err...)
-			}
-		}
-	}
-	return allErrs.ToAggregate()
 }

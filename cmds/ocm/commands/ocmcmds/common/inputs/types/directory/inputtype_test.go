@@ -36,8 +36,7 @@ var _ = Describe("Input Type", func() {
 				PathSpec: cpi.PathSpec{
 					Path: "mypath",
 				},
-				MediaType:        "media",
-				CompressWithGzip: &True,
+				ProcessSpec: cpi.NewProcessSpec("media", true),
 			},
 			PreserveDir:    &False,
 			IncludeFiles:   []string{"x"},

@@ -15,7 +15,7 @@ type ResourceSpecificationsProvider struct {
 	*common.ContentResourceSpecificationsProvider
 }
 
-func NewResourceSpecificationsProvider(ctx clictx.Context, deftype string) common.ResourceSpecificationsProvider {
+func NewResourceSpecificationsProvider(ctx clictx.Context, deftype string) common.ElementSpecificationsProvider {
 	a := &ResourceSpecificationsProvider{}
 	a.ContentResourceSpecificationsProvider = common.NewContentResourceSpecificationProvider(ctx, "resource", a.addMeta, deftype,
 		flagsets.NewBoolOptionType("external", "flag non-local resource"),

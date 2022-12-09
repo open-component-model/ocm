@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/refs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
@@ -46,6 +47,12 @@ So far only component archives are supported as target.
 This command accepts reference specification files describing the references
 to add to a component version. Elements must follow the reference meta data
 description scheme of the component descriptor.
+
+The description file might contain:
+- a single reference
+- a list of references under the key <code>references</code>
+- a list of yaml documents with a single reference or reference list
+
 ` + o.Adder.Description() + (&template.Options{}).Usage(),
 		Example: `
 Add a reference directly by options
@@ -70,5 +77,5 @@ $ ocm add references  path/to/ca  references.yaml VERSION=1.0.0
 }
 
 func (o *Command) Run() error {
-	return o.ProcessResourceDescriptions("references", ResourceSpecHandler{})
+	return o.ProcessResourceDescriptions(refs.ResourceSpecHandler{})
 }

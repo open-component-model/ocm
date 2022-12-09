@@ -173,6 +173,8 @@ func (o *Option) handleKeys(ctx clictx.Context, desc string, keys []string, add 
 			data = []byte(file[1:])
 		case '!':
 			data, err = base64.StdEncoding.DecodeString(file[1:])
+		case '@':
+			data, err = vfs.ReadFile(ctx.FileSystem(), file[1:])
 		default:
 			data, err = vfs.ReadFile(ctx.FileSystem(), file)
 		}

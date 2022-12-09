@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package add
+package rscs
 
 import (
 	"fmt"
@@ -10,6 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -27,11 +28,15 @@ type ResourceSpecHandler struct{}
 
 var _ common.ResourceSpecHandler = (*ResourceSpecHandler)(nil)
 
+func (ResourceSpecHandler) Key() string {
+	return "resource"
+}
+
 func (ResourceSpecHandler) RequireInputs() bool {
 	return true
 }
 
-func (ResourceSpecHandler) Decode(data []byte) (common.ResourceSpec, error) {
+func (ResourceSpecHandler) Decode(data []byte) (addhdlrs.ElementSpec, error) {
 	var desc ResourceSpec
 	err := runtime.DefaultYAMLEncoding.Unmarshal(data, &desc)
 	if err != nil {
@@ -40,7 +45,7 @@ func (ResourceSpecHandler) Decode(data []byte) (common.ResourceSpec, error) {
 	return &desc, nil
 }
 
-func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r common.Resource, acc compdesc.AccessSpec) error {
+func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Element, acc compdesc.AccessSpec) error {
 	spec := r.Spec().(*ResourceSpec)
 	vers := spec.Version
 	if spec.Relation == metav1.LocalRelation {
@@ -71,16 +76,29 @@ func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r common.Resource, 
 ////////////////////////////////////////////////////////////////////////////////
 
 type ResourceSpec struct {
-	compdescv2.Resource `json:",inline"`
+	compdescv2.ElementMeta `json:",inline"`
+
+	// Type describes the type of the object.
+	Type string `json:"type"`
+
+	// Relation describes the relation of the resource to the component.
+	// Can be a local or external resource
+	Relation metav1.ResourceRelation `json:"relation,omitempty"`
+
+	// SourceRef defines a list of source names.
+	// These names reference the sources defines in `component.sources`.
+	SourceRef []compdescv2.SourceRef `json:"srcRef"`
+
+	addhdlrs.ResourceInput `json:",inline"`
 }
 
-var _ common.ResourceSpec = (*ResourceSpec)(nil)
+var _ addhdlrs.ElementSpec = (*ResourceSpec)(nil)
 
 func (r *ResourceSpec) Info() string {
 	return fmt.Sprintf("resource %s: %s", r.Type, r.GetRawIdentity())
 }
 
-func (r *ResourceSpec) Validate(ctx clictx.Context, input *common.ResourceInput) error {
+func (r *ResourceSpec) Validate(ctx clictx.Context, input *addhdlrs.ResourceInput) error {
 	allErrs := field.ErrorList{}
 	var fldPath *field.Path
 
@@ -95,7 +113,13 @@ func (r *ResourceSpec) Validate(ctx clictx.Context, input *common.ResourceInput)
 	if r.Version == "" && r.Relation == metav1.LocalRelation {
 		r.Version = ComponentVersionTag
 	}
-	if err := compdescv2.ValidateResource(fldPath, r.Resource, false); err != nil {
+	rsc := compdescv2.Resource{
+		ElementMeta: r.ElementMeta,
+		Type:        r.Type,
+		Relation:    r.Relation,
+		SourceRef:   r.SourceRef,
+	}
+	if err := compdescv2.ValidateResource(fldPath, rsc, false); err != nil {
 		allErrs = append(allErrs, err...)
 	}
 
