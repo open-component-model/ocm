@@ -109,3 +109,7 @@ func (d *DummyComponentVersionAccess) DiscardChanges() {
 func (d *DummyComponentVersionAccess) Close() error {
 	return nil
 }
+
+func (d *DummyComponentVersionAccess) Dup() (ComponentVersionAccess, error) {
+	return d, nil
+}

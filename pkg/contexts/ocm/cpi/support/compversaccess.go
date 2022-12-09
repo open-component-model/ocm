@@ -62,6 +62,10 @@ func NewComponentVersionAccess(container ComponentVersionContainer, lazy bool) (
 	return s.View(true)
 }
 
+func (a *componentVersionAccessImpl) Dup() (cpi.ComponentVersionAccess, error) {
+	return a.View(false)
+}
+
 func (a *componentVersionAccessImpl) View(main ...bool) (*ComponentVersionAccess, error) {
 	v, err := a.refs.View(main...)
 	if err != nil {
