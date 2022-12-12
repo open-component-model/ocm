@@ -15,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/comp"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/dryrunoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/fileoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/schemaoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
@@ -56,7 +57,13 @@ type Command struct {
 }
 
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, formatoption.New(ctf.GetFormats()...), fileoption.New("transport-archive"), schemaoption.New(compdesc.DefaultSchemeVersion), &template.Options{})}, utils.Names(Names, names...)...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx,
+		formatoption.New(ctf.GetFormats()...),
+		fileoption.New("transport-archive"),
+		schemaoption.New(compdesc.DefaultSchemeVersion),
+		&template.Options{},
+		dryrunoption.New("evaluate and print component specifications", true)),
+	}, utils.Names(Names, names...)...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -132,7 +139,6 @@ func (o *Command) Complete(args []string) error {
 	if err != nil {
 		return err
 	}
-
 	o.Archive, args = fileoption.From(o).GetPath(args, o.Context.FileSystem())
 	o.Templating.Complete(o.Context.FileSystem())
 
@@ -160,10 +166,20 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
-	var err error
+	printer := common2.NewPrinter(o.Context.StdOut())
+	fs := o.Context.FileSystem()
+	h := comp.NewResourceSpecHandler(o.Version)
+	elems, ictx, err := addhdlrs.ProcessDescriptions(o.Context, printer, o.Templating, h, o.Elements)
+	if err != nil {
+		return err
+	}
+
+	dr := dryrunoption.From(o)
+	if dr.DryRun {
+		return addhdlrs.PrintElements(printer, elems, dr.Outfile, o.Context.FileSystem())
+	}
 
 	mode := formatoption.From(o).Mode()
-	fs := o.Context.FileSystem()
 	fp := fileoption.From(o).Path
 	if ok, err := vfs.Exists(fs, fp); ok || err != nil {
 		if err != nil {
@@ -176,14 +192,16 @@ func (o *Command) Run() error {
 			}
 		}
 	}
+
 	var repo ocm.Repository
 	if o.Create {
 		repo, err = ctf.Create(o.Context.OCMContext(), accessobj.ACC_CREATE, fp, mode, o.Handler, fs)
 	} else {
 		repo, err = ctf.Open(o.Context.OCMContext(), accessobj.ACC_CREATE, fp, mode, fs)
 	}
+
 	if err == nil {
-		err = comp.ProcessComponentDescriptions(o.Context, common2.NewPrinter(o.Context.StdOut()), o.Templating, repo, comp.NewResourceSpecHandler(o.Version), o.Elements)
+		err = comp.ProcessComponents(o.Context, ictx, repo, h, elems)
 		cerr := repo.Close()
 		if err == nil {
 			err = cerr

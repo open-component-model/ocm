@@ -29,7 +29,7 @@ type Command struct {
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(
 		&Command{
-			common.NewResourceAdderCommand(ctx, NewReferenceSpecificatonProvider()),
+			common.NewResourceAdderCommand(ctx, refs.ResourceSpecHandler{}, NewReferenceSpecificatonProvider()),
 		},
 		utils.Names(Names, names...)...,
 	)
@@ -77,5 +77,5 @@ $ ocm add references  path/to/ca  references.yaml VERSION=1.0.0
 }
 
 func (o *Command) Run() error {
-	return o.ProcessResourceDescriptions(refs.ResourceSpecHandler{})
+	return o.ProcessResourceDescriptions()
 }

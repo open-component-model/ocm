@@ -10,7 +10,7 @@ ocm add references [<options>] [<target>] {<referencefile> | <var>=<value>}
 
 ```
       --addenv                 access environment for templating
-      --dry-run                evaluate and print resource specifications
+      --dry-run                evaluate and print reference specifications
   -F, --file string            target file/directory (default "component-archive")
   -h, --help                   help for references
   -O, --output string          output file for dry-run

@@ -31,7 +31,7 @@ type Command struct {
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(
 		&Command{
-			common.NewResourceAdderCommand(ctx, NewResourceSpecificationsProvider(ctx, "")),
+			common.NewResourceAdderCommand(ctx, rscs.ResourceSpecHandler{}, NewResourceSpecificationsProvider(ctx, "")),
 		},
 		utils.Names(Names, names...)...,
 	)
@@ -91,5 +91,5 @@ The description file might contain:
 }
 
 func (o *Command) Run() error {
-	return o.ProcessResourceDescriptions(rscs.ResourceSpecHandler{})
+	return o.ProcessResourceDescriptions()
 }

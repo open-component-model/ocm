@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
@@ -17,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	common2 "github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -267,4 +269,28 @@ func Validate(r *ResourceInput, ctx inputs.Context, inputFilePath string) error 
 		}
 	}
 	return allErrs.ToAggregate()
+}
+
+func PrintElements(p common2.Printer, elems []Element, outfile string, fss ...vfs.FileSystem) error {
+	if outfile != "" && outfile != "-" {
+		f, err := accessio.FileSystem(fss...).OpenFile(outfile, vfs.O_TRUNC|vfs.O_CREATE|vfs.O_WRONLY, 0o644)
+		if err != nil {
+			return errors.Wrapf(err, "cannot create output file %q", outfile)
+		}
+		p = common2.NewPrinter(f)
+	}
+
+	for _, r := range elems {
+		var i interface{}
+		err := runtime.DefaultYAMLEncoding.Unmarshal(r.Data(), &i)
+		if err != nil {
+			return errors.Wrapf(err, "cannot eval data %q", string(r.Data()))
+		}
+		data, err := runtime.DefaultYAMLEncoding.Marshal(i)
+		if err != nil {
+			return err
+		}
+		p.Printf("---\n%s\n", string(data))
+	}
+	return nil
 }

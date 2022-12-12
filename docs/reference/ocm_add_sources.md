@@ -10,7 +10,7 @@ ocm add sources [<options>] [<target>] {<resourcefile> | <var>=<value>}
 
 ```
       --addenv                       access environment for templating
-      --dry-run                      evaluate and print resource specifications
+      --dry-run                      evaluate and print source specifications
   -F, --file string                  target file/directory (default "component-archive")
   -h, --help                         help for sources
   -O, --output string                output file for dry-run

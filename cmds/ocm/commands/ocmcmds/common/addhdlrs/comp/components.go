@@ -6,19 +6,13 @@ package comp
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
-	common2 "github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-func ProcessComponentDescriptions(ctx clictx.Context, printer common2.Printer, templ template.Options, repo ocm.Repository, h *ResourceSpecHandler, sources []addhdlrs.ElementSource) error {
-	elems, ictx, err := addhdlrs.ProcessDescriptions(ctx, printer, templ, h, sources)
-	if err != nil {
-		return err
-	}
-
+func ProcessComponents(ctx clictx.Context, ictx inputs.Context, repo ocm.Repository, h *ResourceSpecHandler, elems []addhdlrs.Element) error {
 	for _, elem := range elems {
 		err := h.Add(ctx, ictx.Section("adding %s...", elem.Spec().Info()), elem, repo)
 		if err != nil {

@@ -9,7 +9,6 @@ import (
 	"fmt"
 
 	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types"
-	"github.com/open-component-model/ocm/pkg/runtime"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
@@ -18,6 +17,7 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/dryrunoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/fileoption"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
@@ -361,23 +361,25 @@ type ResourceAdderCommand struct {
 	Resources []addhdlrs.ElementSource
 	Envs      []string
 
-	DryRun  bool
-	Outfile string
 	Archive string
+
+	Handler ResourceSpecHandler
 }
 
-func NewResourceAdderCommand(ctx clictx.Context, provider ElementSpecificationsProvider, opts ...options.Options) ResourceAdderCommand {
+func NewResourceAdderCommand(ctx clictx.Context, h ResourceSpecHandler, provider ElementSpecificationsProvider, opts ...options.Options) ResourceAdderCommand {
 	return ResourceAdderCommand{
-		BaseCommand: utils.NewBaseCommand(ctx, append(opts, fileoption.NewCompArch())...),
-		Adder:       provider,
+		BaseCommand: utils.NewBaseCommand(ctx, append(opts,
+			fileoption.NewCompArch(),
+			dryrunoption.New(fmt.Sprintf("evaluate and print %s specifications", h.Key()), true),
+		)...),
+		Adder:   provider,
+		Handler: h,
 	}
 }
 
 func (o *ResourceAdderCommand) AddFlags(fs *pflag.FlagSet) {
 	o.BaseCommand.AddFlags(fs)
 	fs.StringArrayVarP(&o.Envs, "settings", "s", nil, "settings file with variable settings (yaml)")
-	fs.BoolVarP(&o.DryRun, "dry-run", "", false, "evaluate and print resource specifications")
-	fs.StringVarP(&o.Outfile, "output", "O", "", "output file for dry-run")
 	o.Templating.AddFlags(fs)
 	if o.Adder != nil {
 		o.Adder.AddFlags(fs)
@@ -390,9 +392,6 @@ func (o *ResourceAdderCommand) Complete(args []string) error {
 		return err
 	}
 
-	if o.Outfile != "" && !o.DryRun {
-		return fmt.Errorf("--output only usable for dry-run mode")
-	}
 	o.Archive, args = fileoption.From(o).GetPath(args, o.Context.FileSystem())
 	o.Templating.Complete(o.Context.FileSystem())
 
@@ -425,34 +424,17 @@ func (o *ResourceAdderCommand) Complete(args []string) error {
 	return nil
 }
 
-func (o *ResourceAdderCommand) ProcessResourceDescriptions(h ResourceSpecHandler) error {
+func (o *ResourceAdderCommand) ProcessResourceDescriptions() error {
 	fs := o.Context.FileSystem()
 	printer := common.NewPrinter(o.Context.StdOut())
-	elems, ictx, err := addhdlrs.ProcessDescriptions(o.Context, printer, o.Templating, h, o.Resources)
+	elems, ictx, err := addhdlrs.ProcessDescriptions(o.Context, printer, o.Templating, o.Handler, o.Resources)
+	if err != nil {
+		return err
+	}
 
-	if o.DryRun {
-		p := printer
-		if o.Outfile != "" {
-			f, err := o.FileSystem().OpenFile(o.Outfile, vfs.O_TRUNC|vfs.O_CREATE|vfs.O_WRONLY, 0o644)
-			if err != nil {
-				return errors.Wrapf(err, "cannot create output file %q", o.Outfile)
-			}
-			p = common.NewPrinter(f)
-		}
-
-		for _, r := range elems {
-			var i interface{}
-			err := runtime.DefaultYAMLEncoding.Unmarshal(r.Data(), &i)
-			if err != nil {
-				return errors.Wrapf(err, "cannot eval data %q", string(r.Data()))
-			}
-			data, err := runtime.DefaultYAMLEncoding.Marshal(i)
-			if err != nil {
-				return err
-			}
-			p.Printf("---\n%s\n", string(data))
-		}
-		return nil
+	dr := dryrunoption.From(o)
+	if dr.DryRun {
+		return addhdlrs.PrintElements(printer, elems, dr.Outfile, o.Context.FileSystem())
 	}
 
 	obj, err := comparch.Open(o.Context.OCMContext(), accessobj.ACC_WRITABLE, o.Archive, 0, accessio.PathFileSystem(fs))
@@ -460,7 +442,7 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(h ResourceSpecHandler
 		return err
 	}
 	defer obj.Close()
-	return ProcessElements(ictx, obj, elems, h)
+	return ProcessElements(ictx, obj, elems, o.Handler)
 }
 
 // ProcessElements add a list of evaluated elements to a component version.
