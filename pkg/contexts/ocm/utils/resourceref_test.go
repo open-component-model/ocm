@@ -13,6 +13,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
@@ -31,6 +32,16 @@ const OCIPATH = "/tmp/oci"
 const OCIHOST = "alias"
 const SIGNATURE = "test"
 const SIGN_ALGO = rsa.Algorithm
+
+func Check(cv ocm.ComponentVersionAccess, name string, path ...metav1.Identity) {
+	ref := metav1.NewNestedResourceRef(metav1.NewIdentity(name), path)
+	res, eff, err := utils.ResolveResourceReference(cv, ref, nil)
+	ExpectWithOffset(1, err).To(Succeed())
+	defer Close(eff)
+	m := Must(res.AccessMethod())
+	data := Must(m.Get())
+	ExpectWithOffset(1, string(data)).To(Equal(name))
+}
 
 var _ = Describe("resolving local resource references", func() {
 	var env *Builder
@@ -79,14 +90,7 @@ var _ = Describe("resolving local resource references", func() {
 		cv := Must(src.LookupComponentVersion(COMPONENT3, VERSION))
 		defer Close(cv)
 
-		ref := metav1.NewResourceRef(metav1.NewIdentity("topdata"))
-
-		res, eff, err := utils.ResolveResourceReference(cv, ref, nil)
-		Expect(err).To(Succeed())
-		m := Must(res.AccessMethod())
-		data := Must(m.Get())
-		Expect(string(data)).To(Equal("topdata"))
-		MustBeSuccessful(eff.Close())
+		Check(cv, "topdata")
 	})
 
 	It("resolves an indirect resource", func() {
@@ -95,14 +99,7 @@ var _ = Describe("resolving local resource references", func() {
 		cv := Must(src.LookupComponentVersion(COMPONENT3, VERSION))
 		defer Close(cv)
 
-		ref := metav1.NewNestedResourceRef(metav1.NewIdentity("otherdata"), []metav1.Identity{metav1.NewIdentity("nested")})
-
-		res, eff, err := utils.ResolveResourceReference(cv, ref, nil)
-		Expect(err).To(Succeed())
-		m := Must(res.AccessMethod())
-		data := Must(m.Get())
-		Expect(string(data)).To(Equal("otherdata"))
-		MustBeSuccessful(eff.Close())
+		Check(cv, "otherdata", metav1.NewIdentity("nested"))
 	})
 
 	It("skips an intermediate component version", func() {
@@ -111,14 +108,31 @@ var _ = Describe("resolving local resource references", func() {
 		cv := Must(src.LookupComponentVersion(COMPONENT3, VERSION))
 		defer Close(cv)
 
-		ref := metav1.NewNestedResourceRef(metav1.NewIdentity("testdata"), []metav1.Identity{metav1.NewIdentity("nested"), metav1.NewIdentity("ref")})
+		Check(cv, "testdata", metav1.NewIdentity("nested"), metav1.NewIdentity("ref"))
+	})
 
-		res, eff, err := utils.ResolveResourceReference(cv, ref, nil)
-		Expect(err).To(Succeed())
-		defer Close(eff)
+	It("multiple lookups", func() {
+		src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env))
+		defer Close(src)
+		cv := Must(src.LookupComponentVersion(COMPONENT3, VERSION))
+		defer Close(cv)
 
-		m := Must(res.AccessMethod())
-		data := Must(m.Get())
-		Expect(string(data)).To(Equal("testdata"))
+		Check(cv, "testdata", metav1.NewIdentity("nested"), metav1.NewIdentity("ref"))
+		Check(cv, "otherdata", metav1.NewIdentity("nested"))
+		Check(cv, "topdata")
+	})
+
+	It("access closed", func() {
+		src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env))
+		defer Close(src)
+		cv := Must(src.LookupComponentVersion(COMPONENT3, VERSION))
+		defer Close(cv)
+
+		dup := Must(cv.Dup())
+		Close(dup)
+
+		ref := metav1.NewResourceRef(metav1.NewIdentity("topdata"))
+		_, _, err := utils.ResolveResourceReference(dup, ref, nil)
+		MustFailWithMessage(err, "component version already closed: closed")
 	})
 })

@@ -17,6 +17,7 @@ ocm [<options>] <sub command> ...
   -L, --logfile string          set log file
   -l, --loglevel string         set log level
   -v, --verbose                 enable verbose logging
+      --version                 show version
 ```
 
 ### Description

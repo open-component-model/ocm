@@ -7,6 +7,7 @@ package internal
 import (
 	"fmt"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -14,7 +15,7 @@ const (
 	KIND_COMPONENTVERSION = "component version"
 	KIND_RESOURCE         = "component resource"
 	KIND_SOURCE           = "component source"
-	KIND_REFERENCE        = "component reference"
+	KIND_REFERENCE        = compdesc.KIND_REFERENCE
 )
 
 func ErrComponentVersionNotFound(name, version string) error {

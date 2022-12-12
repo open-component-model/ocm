@@ -76,6 +76,7 @@ type CLIOptions struct {
 	LogLevel    string
 	LogFile     string
 	LogConfig   string
+	Version     bool
 
 	logFile vfs.File
 }
@@ -249,6 +250,7 @@ func (o *CLIOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.LogLevel, "loglevel", "l", "", "set log level")
 	fs.StringVarP(&o.LogFile, "logfile", "L", "", "set log file")
 	fs.StringVarP(&o.LogConfig, "logconfig", "", "", "log config")
+	fs.BoolVarP(&o.Version, "version", "", false, "show version") // otherwise it is implicitly added by cobra
 }
 
 func (o *CLIOptions) Close() error {

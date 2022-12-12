@@ -23,6 +23,13 @@ type ComponentAccess struct {
 // implemented by view
 // the rest is directly taken from the artifact set implementation
 
+func (s *ComponentAccess) Dup() (cpi.ComponentAccess, error) {
+	if s.view.IsClosed() {
+		return nil, accessio.ErrClosed
+	}
+	return s.componentAccessImpl.Dup()
+}
+
 func (s *ComponentAccess) Close() error {
 	return s.view.Close()
 }

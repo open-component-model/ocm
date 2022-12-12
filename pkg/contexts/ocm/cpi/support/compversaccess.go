@@ -23,6 +23,13 @@ type ComponentVersionAccess struct {
 // implemented by view
 // the rest is directly taken from the artifact set implementation
 
+func (s *ComponentVersionAccess) Dup() (cpi.ComponentVersionAccess, error) {
+	if s.view.IsClosed() {
+		return nil, accessio.ErrClosed
+	}
+	return s.componentVersionAccessImpl.Dup()
+}
+
 func (s *ComponentVersionAccess) Close() error {
 	err := s.Update(true)
 	if err != nil {
