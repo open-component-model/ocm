@@ -105,12 +105,17 @@ type Resource interface {
 type resource struct {
 	path   string
 	source string
+	data   []byte
 	spec   ResourceSpec
 	input  *ResourceInput
 }
 
 func (r *resource) Source() string {
 	return r.source
+}
+
+func (r *resource) Data() []byte {
+	return r.data
 }
 
 func (r *resource) Spec() ResourceSpec {
@@ -128,12 +133,13 @@ func (r *resource) Type() string {
 	return ""
 }
 
-func NewResource(spec ResourceSpec, input *ResourceInput, path string, indices ...int) *resource {
+func NewResource(spec ResourceSpec, input *ResourceInput, path string, data []byte, indices ...int) *resource {
 	id := path
 	for _, i := range indices {
 		id += fmt.Sprintf("[%d]", i)
 	}
 	return &resource{
+		data:   data,
 		path:   path,
 		source: id,
 		spec:   spec,
@@ -424,6 +430,8 @@ type ResourceAdderCommand struct {
 	Resources []ResourceSpecifications
 	Envs      []string
 
+	DryRun  bool
+	Outfile string
 	Archive string
 }
 
@@ -437,6 +445,8 @@ func NewResourceAdderCommand(ctx clictx.Context, provider ResourceSpecifications
 func (o *ResourceAdderCommand) AddFlags(fs *pflag.FlagSet) {
 	o.BaseCommand.AddFlags(fs)
 	fs.StringArrayVarP(&o.Envs, "settings", "s", nil, "settings file with variable settings (yaml)")
+	fs.BoolVarP(&o.DryRun, "dry-run", "", false, "evaluate and print resource specifications")
+	fs.StringVarP(&o.Outfile, "output", "O", "", "output file for dry-run")
 	o.Templating.AddFlags(fs)
 	if o.Adder != nil {
 		o.Adder.AddFlags(fs)
@@ -449,6 +459,9 @@ func (o *ResourceAdderCommand) Complete(args []string) error {
 		return err
 	}
 
+	if o.Outfile != "" && !o.DryRun {
+		return fmt.Errorf("--output only usable for dry-run mode")
+	}
 	o.Archive, args = fileoption.From(o).GetPath(args, o.Context.FileSystem())
 	o.Templating.Complete(o.Context.FileSystem())
 
@@ -497,42 +510,66 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions(listkey string, h Res
 
 	printer.Printf("found %d %s\n", len(resources), listkey)
 
-	obj, err := comparch.Open(o.Context.OCMContext(), accessobj.ACC_WRITABLE, o.Archive, 0, accessio.PathFileSystem(fs))
-	if err != nil {
-		return err
-	}
-	defer obj.Close()
+	if o.DryRun {
+		p := printer
+		if o.Outfile != "" {
+			f, err := o.FileSystem().OpenFile(o.Outfile, vfs.O_TRUNC|vfs.O_CREATE|vfs.O_WRONLY, 0o644)
+			if err != nil {
+				return errors.Wrapf(err, "cannot create output file %q", o.Outfile)
+			}
+			p = common.NewPrinter(f)
+		}
 
-	for _, r := range resources {
-		isctx := ictx.Section("adding %s...", r.Spec().Info())
-		if h.RequireInputs() {
-			if r.input.Input != nil {
-				var acc ocm.AccessSpec
-				// Local Blob
-				blob, hint, berr := r.input.Input.GetBlob(isctx, common.VersionedElementKey(obj), r.path)
-				if berr != nil {
-					return errors.Wrapf(berr, "cannot get resource blob for %q(%s)", r.spec.GetName(), r.source)
-				}
-				acc, err = obj.AddBlob(blob, r.Type(), hint, nil)
-				if err == nil {
+		for _, r := range resources {
+			var i interface{}
+			err := yaml.Unmarshal(r.Data(), &i)
+			if err != nil {
+				return errors.Wrapf(err, "cannot eval data %q", string(r.Data()))
+			}
+			data, err := yaml.Marshal(i)
+			if err != nil {
+				return err
+			}
+			p.Printf("---\n%s\n", string(data))
+		}
+	} else {
+		obj, err := comparch.Open(o.Context.OCMContext(), accessobj.ACC_WRITABLE, o.Archive, 0, accessio.PathFileSystem(fs))
+		if err != nil {
+			return err
+		}
+		defer obj.Close()
+
+		for _, r := range resources {
+			isctx := ictx.Section("adding %s...", r.Spec().Info())
+			if h.RequireInputs() {
+				if r.input.Input != nil {
+					var acc ocm.AccessSpec
+					// Local Blob
+					blob, hint, berr := r.input.Input.GetBlob(isctx, common.VersionedElementKey(obj), r.path)
+					if berr != nil {
+						return errors.Wrapf(berr, "cannot get resource blob for %q(%s)", r.spec.GetName(), r.source)
+					}
+					acc, err = obj.AddBlob(blob, r.Type(), hint, nil)
+					if err == nil {
+						err = CheckHint(obj, acc)
+						if err == nil {
+							err = h.Set(obj, r, acc)
+						}
+					}
+					blob.Close()
+				} else {
+					acc := compdesc.GenericAccessSpec(r.input.Access)
 					err = CheckHint(obj, acc)
 					if err == nil {
 						err = h.Set(obj, r, acc)
 					}
 				}
-				blob.Close()
 			} else {
-				acc := compdesc.GenericAccessSpec(r.input.Access)
-				err = CheckHint(obj, acc)
-				if err == nil {
-					err = h.Set(obj, r, acc)
-				}
+				err = h.Set(obj, r, nil)
 			}
-		} else {
-			err = h.Set(obj, r, nil)
-		}
-		if err != nil {
-			return errors.Wrapf(err, "cannot add resource %q(%s)", r.spec.GetName(), r.source)
+			if err != nil {
+				return errors.Wrapf(err, "cannot add resource %q(%s)", r.spec.GetName(), r.source)
+			}
 		}
 	}
 	return nil
@@ -624,7 +661,7 @@ func determineResources(printer common.Printer, ctx clictx.Context, ictx inputs.
 				return nil, errors.Wrapf(err, "invalid spec %d[%d]", i, j+1)
 			}
 
-			resources = append(resources, NewResource(r, input, origin, i, j+1))
+			resources = append(resources, NewResource(r, input, origin, d, i, j+1))
 		}
 	}
 	return resources, nil

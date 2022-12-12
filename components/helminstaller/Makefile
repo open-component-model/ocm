@@ -20,6 +20,8 @@ OCM = go run $(REPO_ROOT)/cmds/ocm
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(NAME) -type f)
 OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
 
+ATTRIBUTES = VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" PLATFORMS="$(PLATFORMS)" MULTI=$(MULTI) 
+
 ifeq ($(MULTI),true)
 FLAGSUF     = .multi
 endif
@@ -46,15 +48,19 @@ ca: $(GEN)/ca
 
 $(GEN)/ca: $(GEN)/.exists $(GEN)/image.$(NAME)$(FLAGSUF) resources.yaml executorspec.yaml
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider $(PROVIDER) --file $(GEN)/ca
-	$(OCM) add resources --templater spiff $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" PLATFORMS="$(PLATFORMS)" MULTI=$(MULTI) resources.yaml
+	$(OCM) add resources --templater spiff $(GEN)/ca $(ATTRIBUTES)  resources.yaml
 	@touch $(GEN)/ca
 
 
 .PHONY: plain-ca
 plain-ca: $(GEN)/.exists
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)"--provider  $(PROVIDER) --file $(GEN)/ca
-	$(OCM) add resources --templater spiff $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" PLATFORMS="$(PLATFORMS)" MULTI=$(MULTI) resources.yaml
+	$(OCM) add resources --templater spiff $(GEN)/ca $(ATTRIBUTES) resources.yaml
 	@touch $(GEN)/ca
+
+.PHONY: eval-resources
+eval-resources:
+	$(OCM) add resources --dry-run --templater spiff $(ATTRIBUTES) resources.yaml
 
 .PHONY: build
 build: $(GEN)/image.$(NAME)
