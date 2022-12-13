@@ -60,7 +60,7 @@ ocm add resource-configuration [<options>] <target> {<configfile> | <var>=<value
 
 ```
       --external                     flag non-local resource
-      --extra <name>=<value>         resource extra identity
+      --extra <name>=<value>         resource extra identity (default [])
       --label <name>=<YAML>          resource label (leading * indicates signature relevant, optional version separated by @)
       --name string                  resource name
       --resource YAML                resource meta data (yaml)

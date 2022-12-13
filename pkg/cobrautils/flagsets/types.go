@@ -105,7 +105,7 @@ type StringOption struct {
 var _ Option = (*StringOption)(nil)
 
 func (o *StringOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(fs.StringVarPF(&o.value, o.otyp.GetName(), "", "", o.otyp.GetDescription()))
+	o.TweakFlag(flag.StringVarPF(fs, &o.value, o.otyp.GetName(), "", "", o.otyp.GetDescription()))
 }
 
 func (o *StringOption) Value() interface{} {
@@ -142,7 +142,7 @@ type StringArrayOption struct {
 var _ Option = (*StringArrayOption)(nil)
 
 func (o *StringArrayOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(fs.StringArrayVarPF(&o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
+	o.TweakFlag(flag.StringArrayVarPF(fs, &o.value, o.otyp.GetName(), "", nil, o.otyp.GetDescription()))
 }
 
 func (o *StringArrayOption) Value() interface{} {
@@ -179,7 +179,7 @@ type BoolOption struct {
 var _ Option = (*BoolOption)(nil)
 
 func (o *BoolOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(fs.BoolVarPF(&o.value, o.otyp.GetName(), "", false, o.otyp.GetDescription()))
+	o.TweakFlag(flag.BoolVarPF(fs, &o.value, o.otyp.GetName(), "", false, o.otyp.GetDescription()))
 }
 
 func (o *BoolOption) Value() interface{} {
@@ -216,7 +216,7 @@ type IntOption struct {
 var _ Option = (*IntOption)(nil)
 
 func (o *IntOption) AddFlags(fs *pflag.FlagSet) {
-	o.TweakFlag(fs.IntVarPF(&o.value, o.otyp.GetName(), "", 0, o.otyp.GetDescription()))
+	o.TweakFlag(flag.IntVarPF(fs, &o.value, o.otyp.GetName(), "", 0, o.otyp.GetDescription()))
 }
 
 func (o *IntOption) Value() interface{} {

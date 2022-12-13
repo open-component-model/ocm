@@ -2,10 +2,7 @@ module github.com/open-component-model/ocm
 
 go 1.19
 
-replace (
-	github.com/spf13/cobra => github.com/mandelsoft/cobra v1.5.1-0.20221030110806-c236cde1e2bd
-	github.com/spf13/pflag => github.com/mandelsoft/pflag v0.0.0-20221103113840-a15b5f7fa89e
-)
+replace github.com/spf13/cobra => github.com/mandelsoft/cobra v1.5.1-0.20221030110806-c236cde1e2bd
 
 require (
 	github.com/docker/cli v20.10.17+incompatible
@@ -41,6 +38,7 @@ require (
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/drone/envsubst v1.0.3
+	github.com/gertd/go-pluralize v0.2.1
 	github.com/goccy/go-yaml v1.9.5
 	github.com/golang/mock v1.6.0
 	github.com/google/go-github/v45 v45.2.0
@@ -57,6 +55,7 @@ require (
 	github.com/stretchr/testify v1.8.0
 	github.com/tonglil/buflogr v1.0.1
 	github.com/ulikunitz/xz v0.5.10
+	golang.org/x/exp v0.0.0-20221212164502-fae10dda9338
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/text v0.4.0
