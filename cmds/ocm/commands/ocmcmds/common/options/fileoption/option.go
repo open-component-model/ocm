@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/compression"
 )
@@ -42,7 +43,7 @@ type Option struct {
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	o.flag = fs.StringVarPF(&o.Path, "file", "F", o.def, o.usage)
+	o.flag = flag.StringVarPF(fs, &o.Path, "file", "F", o.def, o.usage)
 }
 
 func (o *Option) IsSet() bool {

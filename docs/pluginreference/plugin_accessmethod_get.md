@@ -9,7 +9,7 @@ plugin accessmethod get [<flags>] <access spec> [<options>]
 ### Options
 
 ```
-  -C, --credential <name>=<value>   dedicated credential value
+  -C, --credential <name>=<value>   dedicated credential value (default [])
   -c, --credentials YAML            credentials
   -h, --help                        help for get
 ```

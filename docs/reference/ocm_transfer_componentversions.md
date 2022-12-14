@@ -20,7 +20,7 @@ ocm transfer componentversions [<options>] {<component-reference>} <target>
       --script string             config name of transfer handler script
   -s, --scriptFile string         filename of transfer handler script
   -t, --type string               archive format (directory, tar, tgz) (default "directory")
-      --uploader <name>=<value>   repository uploader (<name>:<artifact type>:<media type>=<JSON target config)
+      --uploader <name>=<value>   repository uploader (<name>:<artifact type>:<media type>=<JSON target config) (default [])
 ```
 
 ### Description
