@@ -84,6 +84,7 @@ target archive to use. The following formats are supported:
 - directory
 - tar
 - tgz
+
 The default format is <code>directory</code>.
 
 With the option <code>--recursive</code> the complete reference tree of a component reference is traversed.

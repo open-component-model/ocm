@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 )
 
 var _ = Describe("Blob Inputs", func() {
@@ -18,7 +18,7 @@ var _ = Describe("Blob Inputs", func() {
 access:
   type: localBlob
 `
-		_, err := common.DecodeInput([]byte(in), nil)
+		_, err := addhdlrs.DecodeInput([]byte(in), nil)
 		Expect(err).To(Succeed())
 	})
 
@@ -31,7 +31,7 @@ input:
   path: test
   type: file
 `
-		_, err := common.DecodeInput([]byte(in), nil)
+		_, err := addhdlrs.DecodeInput([]byte(in), nil)
 		Expect(err).To(Succeed())
 	})
 	It("complains about additional input field", func() {
@@ -44,7 +44,7 @@ input:
   type: file
   bla: blub
 `
-		_, err := common.DecodeInput([]byte(in), nil)
+		_, err := addhdlrs.DecodeInput([]byte(in), nil)
 		Expect(err.Error()).To(Equal("input.bla: Forbidden: unknown field"))
 	})
 
@@ -59,7 +59,7 @@ input:
   excludeFiles:
      - xyz
 `
-		_, err := common.DecodeInput([]byte(in), nil)
+		_, err := addhdlrs.DecodeInput([]byte(in), nil)
 		Expect(err).To(Succeed())
 	})
 
@@ -74,7 +74,7 @@ input:
   excludeFiles:
   - xyz
 `
-		_, err := common.DecodeInput([]byte(in), nil)
+		_, err := addhdlrs.DecodeInput([]byte(in), nil)
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(Equal("input.excludeFiles: Forbidden: unknown field"))
 	})

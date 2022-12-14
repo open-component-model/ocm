@@ -1,0 +1,22 @@
+components:
+- name: ocm.software/demo/test
+  provider:
+    name: ocm.software
+    labels:
+      - name: city
+        value: Karlsruhe
+  labels:
+    - name: purpose
+      value: test
+
+  resources:
+    - name: text
+      type: PlainText
+      input:
+        type: file
+        path: testdata
+    - name: data
+      type: PlainText
+      input:
+        type: binary
+        data: IXN0cmluZ2RhdGE=

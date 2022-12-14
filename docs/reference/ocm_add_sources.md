@@ -10,12 +10,12 @@ ocm add sources [<options>] [<target>] {<resourcefile> | <var>=<value>}
 
 ```
       --addenv                       access environment for templating
-      --dry-run                      evaluate and print resource specifications
+      --dry-run                      evaluate and print source specifications
   -F, --file string                  target file/directory (default "component-archive")
   -h, --help                         help for sources
   -O, --output string                output file for dry-run
   -s, --settings stringArray         settings file with variable settings (yaml)
-      --templater string             templater to use (subst, spiff, go) (default "subst")
+      --templater string             templater to use (go, none, spiff, subst) (default "subst")
 ```
 
 
@@ -45,6 +45,7 @@ ocm add sources [<options>] [<target>] {<resourcefile> | <var>=<value>}
       --hint string                  (repository) hint for local artifacts
       --input YAML                   blob input specification (YAML)
       --inputCompress                compress option for input
+      --inputData !bytesBase64       data (string, !!string or !<base64>
       --inputExcludes stringArray    excludes (path) for inputs
       --inputFollowSymlinks          follow symbolic links during archive creation for inputs
       --inputIncludes stringArray    includes (path) for inputs
@@ -78,7 +79,16 @@ So far only component archives are supported as target.
 
 This command accepts source specification files describing the sources
 to add to a component version. Elements must follow the source meta data
-description scheme of the component descriptor.
+description scheme of the component descriptor. Besides referential sources
+using the <code>access</code> attribute to describe the access method, it
+is possible to describe local sources fed by local data using the <code>input</code>
+field (see below).
+
+The description file might contain:
+- a single source
+- a list of sources under the key <code>sources</code>
+- a list of yaml documents with a single source or source list
+
 
 It is possible to describe a single source via command line options.
 The meta data of this element is described by the argument of option <code>--source</code>,
@@ -142,6 +152,29 @@ There are several templaters that can be selected by the <code>--templater</code
 
 The resource specification supports the following blob input types, specified
 with the field <code>type</code> in the <code>input</code> field:
+
+- Input type <code>binary</code>
+
+  The content is compressed if the <code>compress</code> field
+  is set to <code>true</code>.
+  
+  This blob type specification supports the following fields:
+  - **<code>data</code>** *[]byte*
+  
+    The binary data to provide.
+  
+  - **<code>mediaType</code>** *string*
+  
+    This OPTIONAL property describes the media type to store with the local blob.
+    The default media type is application/octet-stream and
+    application/gzip if compression is enabled.
+  
+  - **<code>compress</code>** *bool*
+  
+    This OPTIONAL property describes whether the file content should be stored
+    compressed or not.
+  
+  Options used to configure fields: <code>--inputCompress</code>, <code>--inputData</code>, <code>--mediaType</code>
 
 - Input type <code>dir</code>
 

@@ -8,21 +8,22 @@ import (
 	"encoding/json"
 
 	ocmcomm "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 )
 
 type ReferenceResourceSpecificationProvider struct {
-	*ocmcomm.ResourceMetaDataSpecificationsProvider
+	*ocmcomm.ElementMetaDataSpecificationsProvider
 }
 
 var (
-	_ ocmcomm.ResourceSpecificationsProvider = (*ReferenceResourceSpecificationProvider)(nil)
-	_ ocmcomm.ResourceSpecifications         = (*ReferenceResourceSpecificationProvider)(nil)
+	_ ocmcomm.ElementSpecificationsProvider = (*ReferenceResourceSpecificationProvider)(nil)
+	_ addhdlrs.ElementSource                = (*ReferenceResourceSpecificationProvider)(nil)
 )
 
-func NewReferenceSpecificatonProvider() ocmcomm.ResourceSpecificationsProvider {
+func NewReferenceSpecificatonProvider() ocmcomm.ElementSpecificationsProvider {
 	a := &ReferenceResourceSpecificationProvider{
-		ResourceMetaDataSpecificationsProvider: ocmcomm.NewResourceMetaDataSpecificationsProvider("reference", addMeta,
+		ElementMetaDataSpecificationsProvider: ocmcomm.NewElementMetaDataSpecificationsProvider("reference", addMeta,
 			flagsets.NewStringOptionType("component", "component name"),
 		),
 	}
@@ -35,7 +36,7 @@ func addMeta(opts flagsets.ConfigOptions, config flagsets.Config) error {
 }
 
 func (a *ReferenceResourceSpecificationProvider) Description() string {
-	return a.ResourceMetaDataSpecificationsProvider.Description() + `
+	return a.ElementMetaDataSpecificationsProvider.Description() + `
 The component name can be specified with the option <code>--component</code>. 
 Therefore, basic references not requiring any additional labels or extra
 identities can just be specified by those simple value options without the need
@@ -54,9 +55,9 @@ func (a *ReferenceResourceSpecificationProvider) Get() (string, error) {
 	return string(r), nil
 }
 
-func (a *ReferenceResourceSpecificationProvider) Resources() ([]ocmcomm.ResourceSpecifications, error) {
+func (a *ReferenceResourceSpecificationProvider) Resources() ([]addhdlrs.ElementSource, error) {
 	if !a.IsSpecified() {
 		return nil, nil
 	}
-	return []ocmcomm.ResourceSpecifications{a}, nil
+	return []addhdlrs.ElementSource{a}, nil
 }

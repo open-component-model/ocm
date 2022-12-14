@@ -7,6 +7,7 @@ package template
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"strings"
@@ -34,7 +35,7 @@ type Options struct {
 	Vars      Values
 }
 
-func (o *Options) defaultMode() string {
+func (o *Options) DefaultMode() string {
 	if o.Default == "" {
 		return "subst"
 	}
@@ -42,7 +43,8 @@ func (o *Options) defaultMode() string {
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
-	fs.StringVarP(&o.Mode, "templater", "", o.defaultMode(), "templater to use (subst, spiff, go)")
+	fs.StringVarP(&o.Mode, "templater", "", o.DefaultMode(),
+		fmt.Sprintf("templater to use (%s)", strings.Join(DefaultRegistry().KnownTypeNames(), ", ")))
 	fs.BoolVarP(&o.UseEnv, "addenv", "", false, "access environment for templating")
 }
 
@@ -53,7 +55,7 @@ func (o *Options) Complete(fs vfs.FileSystem) error {
 		o.Vars = Values{}
 	}
 	if o.Mode == "" {
-		o.Mode = "subst"
+		o.Mode = o.DefaultMode()
 	}
 	if o.UseEnv {
 		for _, v := range os.Environ() {

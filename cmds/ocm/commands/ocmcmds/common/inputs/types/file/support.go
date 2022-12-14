@@ -20,12 +20,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
-type ProcessSpec struct {
+type FileProcessSpec struct {
 	cpi.MediaFileSpec
 	Transformer func(ctx inputs.Context, inputDir string, data []byte) ([]byte, error)
 }
 
-func (s *ProcessSpec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath string) field.ErrorList {
+func (s *FileProcessSpec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath string) field.ErrorList {
 	fileInfo, filePath, allErrs := s.MediaFileSpec.ValidateFile(fldPath, ctx, inputFilePath)
 	if len(allErrs) == 0 {
 		if !fileInfo.Mode().IsRegular() {
@@ -36,7 +36,7 @@ func (s *ProcessSpec) Validate(fldPath *field.Path, ctx inputs.Context, inputFil
 	return allErrs
 }
 
-func (s *ProcessSpec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (s *FileProcessSpec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
 	fs := ctx.FileSystem()
 	inputInfo, inputPath, err := inputs.FileInfo(ctx, s.Path, inputFilePath)
 	if err != nil {
@@ -110,16 +110,5 @@ This blob type specification supports the following fields:
 
   This REQUIRED property describes the file path to the helm chart relative to the
   resource file location.
-
-- **<code>mediaType</code>** *string*
-
-  This OPTIONAL property describes the media type to store with the local blob.
-  The default media type is ` + mime.MIME_OCTET + ` and
-  ` + mime.MIME_GZIP + ` if compression is enabled.
-
-- **<code>compress</code>** *bool*
-
-  This OPTIONAL property describes whether the file content should be stored
-  compressed or not.
-`
+` + cpi.ProcessSpecUsage
 }

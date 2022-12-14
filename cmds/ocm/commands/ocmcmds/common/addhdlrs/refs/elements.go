@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package add
+package refs
 
 import (
 	"fmt"
@@ -10,6 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -21,11 +22,15 @@ type ResourceSpecHandler struct{}
 
 var _ common.ResourceSpecHandler = (*ResourceSpecHandler)(nil)
 
-func (ResourceSpecHandler) RequireInputs() bool {
-	return true
+func (ResourceSpecHandler) Key() string {
+	return "reference"
 }
 
-func (ResourceSpecHandler) Decode(data []byte) (common.ResourceSpec, error) {
+func (ResourceSpecHandler) RequireInputs() bool {
+	return false
+}
+
+func (ResourceSpecHandler) Decode(data []byte) (addhdlrs.ElementSpec, error) {
 	var desc ResourceSpec
 	err := runtime.DefaultYAMLEncoding.Unmarshal(data, &desc)
 	if err != nil {
@@ -34,56 +39,48 @@ func (ResourceSpecHandler) Decode(data []byte) (common.ResourceSpec, error) {
 	return &desc, nil
 }
 
-func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r common.Resource, acc compdesc.AccessSpec) error {
+func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Element, acc compdesc.AccessSpec) error {
 	spec := r.Spec().(*ResourceSpec)
 	vers := spec.Version
 	if vers == "" {
 		vers = v.GetVersion()
 	}
-	meta := &compdesc.SourceMeta{
+	meta := &compdesc.ComponentReference{
 		ElementMeta: compdesc.ElementMeta{
 			Name:          spec.Name,
 			Version:       vers,
 			ExtraIdentity: spec.ExtraIdentity,
 			Labels:        spec.Labels,
 		},
-		Type: spec.Type,
+		ComponentName: spec.ComponentName,
 	}
-	return v.SetSource(meta, acc)
+	return v.SetReference(meta)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type ResourceSpec struct {
-	compdescv2.Source `json:",inline"`
+	compdescv2.ElementMeta `json:",inline"`
+	// ComponentName describes the remote name of the referenced object
+	ComponentName string `json:"componentName"`
 }
 
-var _ common.ResourceSpec = (*ResourceSpec)(nil)
+var _ addhdlrs.ElementSpec = (*ResourceSpec)(nil)
 
 func (r *ResourceSpec) Info() string {
-	return fmt.Sprintf("source %s: %s", r.Type, r.GetRawIdentity())
+	return fmt.Sprintf("reference %s: %s", r.ComponentName, r.GetRawIdentity())
 }
 
-func (r *ResourceSpec) Validate(ctx clictx.Context, input *common.ResourceInput) error {
+func (r *ResourceSpec) Validate(ctx clictx.Context, input *addhdlrs.ResourceInput) error {
 	allErrs := field.ErrorList{}
 	var fldPath *field.Path
 
-	if err := compdescv2.ValidateSource(fldPath, r.Source, false); err != nil {
-		allErrs = append(allErrs, err...)
+	ref := compdescv2.ComponentReference{
+		ElementMeta:   r.ElementMeta,
+		ComponentName: r.ComponentName,
 	}
-	if r.Access != nil {
-		if r.Access.GetType() == "" {
-			allErrs = append(allErrs, field.Required(fldPath.Child("access", "type"), "type of access required"))
-		} else {
-			acc, err := r.Access.Evaluate(ctx.OCMContext().AccessMethods())
-			if err != nil {
-				raw, _ := r.Access.GetRaw()
-				allErrs = append(allErrs, field.Invalid(fldPath.Child("access"), string(raw), err.Error()))
-			} else if acc.(ocm.AccessSpec).IsLocal(ctx.OCMContext()) {
-				kind := runtime.ObjectVersionedType(r.Access.ObjectType).GetKind()
-				allErrs = append(allErrs, field.Invalid(fldPath.Child("access", "type"), kind, "local access no possible"))
-			}
-		}
+	if err := compdescv2.ValidateComponentReference(fldPath, ref); err != nil {
+		allErrs = append(allErrs, err...)
 	}
 	return allErrs.ToAggregate()
 }

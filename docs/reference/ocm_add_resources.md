@@ -15,7 +15,7 @@ ocm add resources [<options>] [<target>] {<resourcefile> | <var>=<value>}
   -h, --help                         help for resources
   -O, --output string                output file for dry-run
   -s, --settings stringArray         settings file with variable settings (yaml)
-      --templater string             templater to use (subst, spiff, go) (default "subst")
+      --templater string             templater to use (go, none, spiff, subst) (default "subst")
 ```
 
 
@@ -45,6 +45,7 @@ ocm add resources [<options>] [<target>] {<resourcefile> | <var>=<value>}
       --hint string                  (repository) hint for local artifacts
       --input YAML                   blob input specification (YAML)
       --inputCompress                compress option for input
+      --inputData !bytesBase64       data (string, !!string or !<base64>
       --inputExcludes stringArray    excludes (path) for inputs
       --inputFollowSymlinks          follow symbolic links during archive creation for inputs
       --inputIncludes stringArray    includes (path) for inputs
@@ -77,9 +78,18 @@ ocm add resources [<options>] [<target>] {<resourcefile> | <var>=<value>}
 Add resources specified in a resource file to a component version.
 So far only component archives are supported as target.
 
-This command accepts  resource specification files describing the resources
+This command accepts resource specification files describing the resources
 to add to a component version. Elements must follow the resource meta data
-description scheme of the component descriptor.
+description scheme of the component descriptor. Besides referential resources
+using the <code>access</code> attribute to describe the access method, it
+is possible to describe local resources fed by local data using the <code>input</code>
+field (see below).
+
+The description file might contain:
+- a single resource
+- a list of resources under the key <code>resources</code>
+- a list of yaml documents with a single resource or resource list
+
 
 It is possible to describe a single resource via command line options.
 The meta data of this element is described by the argument of option <code>--resource</code>,
@@ -144,6 +154,29 @@ There are several templaters that can be selected by the <code>--templater</code
 
 The resource specification supports the following blob input types, specified
 with the field <code>type</code> in the <code>input</code> field:
+
+- Input type <code>binary</code>
+
+  The content is compressed if the <code>compress</code> field
+  is set to <code>true</code>.
+  
+  This blob type specification supports the following fields:
+  - **<code>data</code>** *[]byte*
+  
+    The binary data to provide.
+  
+  - **<code>mediaType</code>** *string*
+  
+    This OPTIONAL property describes the media type to store with the local blob.
+    The default media type is application/octet-stream and
+    application/gzip if compression is enabled.
+  
+  - **<code>compress</code>** *bool*
+  
+    This OPTIONAL property describes whether the file content should be stored
+    compressed or not.
+  
+  Options used to configure fields: <code>--inputCompress</code>, <code>--inputData</code>, <code>--mediaType</code>
 
 - Input type <code>dir</code>
 

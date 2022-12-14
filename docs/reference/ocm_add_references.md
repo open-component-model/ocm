@@ -10,12 +10,12 @@ ocm add references [<options>] [<target>] {<referencefile> | <var>=<value>}
 
 ```
       --addenv                 access environment for templating
-      --dry-run                evaluate and print resource specifications
+      --dry-run                evaluate and print reference specifications
   -F, --file string            target file/directory (default "component-archive")
   -h, --help                   help for references
   -O, --output string          output file for dry-run
   -s, --settings stringArray   settings file with variable settings (yaml)
-      --templater string       templater to use (subst, spiff, go) (default "subst")
+      --templater string       templater to use (go, none, spiff, subst) (default "subst")
 ```
 
 
@@ -39,6 +39,12 @@ So far only component archives are supported as target.
 This command accepts reference specification files describing the references
 to add to a component version. Elements must follow the reference meta data
 description scheme of the component descriptor.
+
+The description file might contain:
+- a single reference
+- a list of references under the key <code>references</code>
+- a list of yaml documents with a single reference or reference list
+
 
 It is possible to describe a single reference via command line options.
 The meta data of this element is described by the argument of option <code>--reference</code>,

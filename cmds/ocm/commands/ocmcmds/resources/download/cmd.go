@@ -212,6 +212,7 @@ func (d *action) Out() error {
 }
 
 func (d *action) Save(o *elemhdlr.Object, f string) error {
+	printer := common2.NewPrinter(d.opts.Context.StdOut())
 	dest := destoption.From(d.opts)
 	local := From(d.opts)
 	pathIn := true
@@ -229,6 +230,7 @@ func (d *action) Save(o *elemhdlr.Object, f string) error {
 		}
 		f = tmp.Name()
 		tmp.Close()
+		printer = common2.NewPrinter(nil)
 		defer dest.PathFilesystem.Remove(f)
 	}
 	id := r.GetIdentity(o.Version.GetDescriptor().Resources)
@@ -243,7 +245,6 @@ func (d *action) Save(o *elemhdlr.Object, f string) error {
 	}
 	var ok bool
 	var eff string
-	printer := common2.NewPrinter(d.opts.Context.StdOut())
 	if local.UseHandlers {
 		ok, eff, err = d.downloaders.Download(printer, racc, f, dest.PathFilesystem)
 	} else {

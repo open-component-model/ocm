@@ -7,6 +7,7 @@ package add
 import (
 	"github.com/spf13/cobra"
 
+	components "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/add"
 	references "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references/add"
 	resourceconfig "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resourceconfig/add"
 	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/add"
@@ -28,5 +29,6 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd.AddCommand(resources.NewCommand(ctx))
 	cmd.AddCommand(sources.NewCommand(ctx))
 	cmd.AddCommand(references.NewCommand(ctx))
+	cmd.AddCommand(components.NewCommand(ctx))
 	return cmd
 }

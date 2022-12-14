@@ -5,6 +5,7 @@
 package handlers
 
 import (
+	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/binary"
 	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/directory"
 	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/docker"
 	_ "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/dockermulti"

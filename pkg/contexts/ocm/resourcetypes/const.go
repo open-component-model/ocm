@@ -19,6 +19,8 @@ const (
 	FILESYSTEM = "filesystem"
 	// EXECUTABLE describes an OS executable.
 	EXECUTABLE = "executable"
+	// PLAIN_TEXT describes plain text.
+	PLAIN_TEXT = "plainText"
 	// OCM_PLUGIN describes an OS executable OCM plugin.
 	OCM_PLUGIN = "ocmPlugin"
 )

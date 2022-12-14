@@ -8,6 +8,7 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"io"
+	"sort"
 	"strings"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -53,6 +54,25 @@ func ErrInvalidFileFormat(fmt string) error {
 
 func GetFormats() []string {
 	return []string{string(FormatDirectory), string(FormatTar), string(FormatTGZ)}
+}
+
+func GetFormatsFor[T any](fileFormats map[FileFormat]T) []string {
+	var def FileFormat
+
+	list := []string{}
+	for k := range fileFormats {
+		// as favorite default, directory should be the first entry in the list
+		if k != FormatDirectory {
+			list = append(list, string(k))
+		} else {
+			def = k
+		}
+	}
+	sort.Strings(list)
+	if def != "" {
+		return append(append(list[:0:0], string(def)), list...)
+	}
+	return list
 }
 
 func FileFormatForType(t string) FileFormat {

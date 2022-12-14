@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/rscs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	rscadd "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources/add"
@@ -73,5 +74,5 @@ to add to a component version.
 }
 
 func (o *Command) Run() error {
-	return o.ProcessResourceDescriptions("resources", rscadd.ResourceSpecHandler{})
+	return o.ProcessResourceDescriptions(rscs.ResourceSpecHandler{})
 }
