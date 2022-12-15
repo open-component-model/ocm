@@ -52,6 +52,7 @@ ocm add resources [<options>] [<target>] {<resourcefile> | <var>=<value>}
       --inputLibraries stringArray   library path for inputs
       --inputPath string             path field for input
       --inputPreserveDir             preserve directory in archive for inputs
+      --inputText string             utf8 text
       --inputType string             type of blob input specification
       --inputValues YAML             YAML based generic values for inputs
       --inputVariants stringArray    (platform) variants for inputs
@@ -157,10 +158,8 @@ with the field <code>type</code> in the <code>input</code> field:
 
 - Input type <code>binary</code>
 
-  The content is compressed if the <code>compress</code> field
-  is set to <code>true</code>.
-  
-  This blob type specification supports the following fields:
+  This blob type is used to provide base64 encoded binary content. The
+  specification supports the following fields:
   - **<code>data</code>** *[]byte*
   
     The binary data to provide.
@@ -173,7 +172,7 @@ with the field <code>type</code> in the <code>input</code> field:
   
   - **<code>compress</code>** *bool*
   
-    This OPTIONAL property describes whether the file content should be stored
+    This OPTIONAL property describes whether the content should be stored
     compressed or not.
   
   Options used to configure fields: <code>--inputCompress</code>, <code>--inputData</code>, <code>--mediaType</code>
@@ -292,7 +291,7 @@ with the field <code>type</code> in the <code>input</code> field:
   
   - **<code>compress</code>** *bool*
   
-    This OPTIONAL property describes whether the file content should be stored
+    This OPTIONAL property describes whether the content should be stored
     compressed or not.
   
   Options used to configure fields: <code>--inputCompress</code>, <code>--inputPath</code>, <code>--mediaType</code>
@@ -361,7 +360,7 @@ with the field <code>type</code> in the <code>input</code> field:
   
   - **<code>compress</code>** *bool*
   
-    This OPTIONAL property describes whether the file content should be stored
+    This OPTIONAL property describes whether the content should be stored
     compressed or not.
   
   - **<code>values</code>** *map[string]any*
@@ -378,6 +377,27 @@ with the field <code>type</code> in the <code>input</code> field:
   <code>values</code>.
   
   Options used to configure fields: <code>--inputCompress</code>, <code>--inputLibraries</code>, <code>--inputPath</code>, <code>--inputValues</code>, <code>--mediaType</code>
+
+- Input type <code>utf8</code>
+
+  This blob type is used to provide inline text based content (UTF8). The
+  specification supports the following fields:
+  - **<code>text</code>** *string*
+  
+    The utf8 string content to provide.
+  
+  - **<code>mediaType</code>** *string*
+  
+    This OPTIONAL property describes the media type to store with the local blob.
+    The default media type is application/octet-stream and
+    application/gzip if compression is enabled.
+  
+  - **<code>compress</code>** *bool*
+  
+    This OPTIONAL property describes whether the content should be stored
+    compressed or not.
+  
+  Options used to configure fields: <code>--inputCompress</code>, <code>--inputText</code>, <code>--mediaType</code>
 
 The following list describes the supported access methods, their versions
 and specification formats.
@@ -540,6 +560,46 @@ shown below.
       The size of the blob
     
     Options used to configure fields: <code>--digest</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--size</code>
+  
+
+All yaml/json defined resources can be templated.
+Variables are specified as regular arguments following the syntax <code>&lt;name>=&lt;value></code>.
+Additionally settings can be specified by a yaml file using the <code>--settings <file></code>
+option. With the option <code>--addenv</code> environment variables are added to the binding.
+Values are overwritten in the order environment, settings file, command line settings. 
+
+Note: Variable names are case-sensitive.
+
+Example:
+<pre>
+&lt;command> &lt;options> -- MY_VAL=test &lt;args>
+</pre>
+
+There are several templaters that can be selected by the <code>--templater</code> option:
+- <code>go</code> go templating supports complex values.
+
+  <pre>
+    key:
+      subkey: "abc {{.MY_VAL}}"
+  </pre>
+  
+- <code>none</code> do not do any substitution.
+
+- <code>spiff</code> [spiff templating](https://github.com/mandelsoft/spiff).
+
+  It supports complex values. the settings are accessible using the binding <code>values</code>.
+  <pre>
+    key:
+      subkey: "abc (( values.MY_VAL ))"
+  </pre>
+  
+- <code>subst</code> simple value substitution with the <code>drone/envsubst</code> templater.
+
+  It supports string values, only. Complex settings will be json encoded.
+  <pre>
+    key:
+      subkey: "abc ${MY_VAL}"
+  </pre>
   
 
 

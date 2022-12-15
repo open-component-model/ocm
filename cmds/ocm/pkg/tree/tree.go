@@ -32,7 +32,7 @@ type NodeCreator func(common.History, common.NameVersion) Object
 type TreeObject struct {
 	Graph  string
 	Object Object
-	Node   *TreeNode // for syntesized noded this entry is used if no object can be synthesized
+	Node   *TreeNode // for synthesized nodes this entry is used if no object can be synthesized
 }
 
 func (t *TreeObject) String() string {
@@ -44,7 +44,8 @@ func (t *TreeObject) String() string {
 
 type TreeNode struct {
 	common.NameVersion
-	History common.History
+	History  common.History
+	CausedBy Object // the object causing the synthesized node to be inserted
 }
 
 var (
@@ -59,7 +60,7 @@ var (
 // MapToTree maps a list of elements featuring a resolution history
 // into a list of elements providing an ascii tree graph field
 // Intermediate nodes are synthesized, so only leaf elements are required.
-// If an element should act as explicit node, it must stat to be a node,
+// If an element should act as explicit node, it must state to be a node,
 // in this case the node will be tagged with the nodeSymbol. If this
 // is not desired, pass an empty symbol string.
 func MapToTree(objs Objects, creator NodeCreator, symbols ...string) TreeObjects {
@@ -132,7 +133,7 @@ func handleLevel(objs Objects, header string, prefix common.History, start int, 
 					o = creator(prefix, h[len(prefix)])
 				}
 				if o == nil {
-					n = &TreeNode{h[len(prefix)], prefix}
+					n = &TreeNode{h[len(prefix)], prefix, objs[i]}
 				}
 				*result = append(*result, &TreeObject{
 					Graph:  header + ftag, // + " " + h[len(prefix)].String(),

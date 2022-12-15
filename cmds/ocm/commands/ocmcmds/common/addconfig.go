@@ -14,10 +14,12 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/templateroption"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -45,17 +47,23 @@ func (r *ModifiedResourceSpecificationsFile) Get() (string, error) {
 type ResourceConfigAdderCommand struct {
 	utils.BaseCommand
 
-	Templating template.Options
-	Adder      ElementSpecificationsProvider
+	Adder ElementSpecificationsProvider
 
 	ConfigFile string
 	Resources  []addhdlrs.ElementSource
 	Envs       []string
 }
 
+// NewCommand creates a new ctf command.
+func NewResourceConfigAdderCommand(ctx clictx.Context, adder ElementSpecificationsProvider, opts ...options.Options) ResourceConfigAdderCommand {
+	return ResourceConfigAdderCommand{
+		BaseCommand: utils.NewBaseCommand(ctx, append(opts, templateroption.New("none"))...),
+		Adder:       adder,
+	}
+}
+
 func (o *ResourceConfigAdderCommand) AddFlags(fs *pflag.FlagSet) {
 	fs.StringArrayVarP(&o.Envs, "settings", "s", nil, "settings file with variable settings (yaml)")
-	o.Templating.AddFlags(fs)
 	if o.Adder != nil {
 		o.Adder.AddFlags(fs)
 	}
@@ -63,7 +71,6 @@ func (o *ResourceConfigAdderCommand) AddFlags(fs *pflag.FlagSet) {
 
 func (o *ResourceConfigAdderCommand) Complete(args []string) error {
 	o.ConfigFile = args[0]
-	o.Templating.Complete(o.Context.FileSystem())
 
 	if o.Adder != nil {
 		err := o.Adder.Complete()
@@ -78,12 +85,13 @@ func (o *ResourceConfigAdderCommand) Complete(args []string) error {
 		o.Resources = append(o.Resources, rsc...)
 	}
 
-	err := o.Templating.ParseSettings(o.Context.FileSystem(), o.Envs...)
+	t := templateroption.From(o)
+	err := t.ParseSettings(o.Context.FileSystem(), o.Envs...)
 	if err != nil {
 		return err
 	}
 
-	paths := o.Templating.FilterSettings(args[1:]...)
+	paths := t.FilterSettings(args[1:]...)
 	for _, p := range paths {
 		o.Resources = append(o.Resources, NewElementFileSource(p, o.FileSystem()))
 	}
@@ -96,7 +104,7 @@ func (o *ResourceConfigAdderCommand) Complete(args []string) error {
 
 func (o *ResourceConfigAdderCommand) ProcessResourceDescriptions(h ResourceSpecHandler) error {
 	fs := o.Context.FileSystem()
-	ictx := inputs.NewContext(o.Context, common.NewPrinter(o.Context.StdOut()), o.Templating.Vars)
+	ictx := inputs.NewContext(o.Context, common.NewPrinter(o.Context.StdOut()), templateroption.From(o).Vars)
 	mode := vfs.FileMode(0o600)
 	listkey := utils.Plural(h.Key(), 0)
 
@@ -134,7 +142,7 @@ func (o *ResourceConfigAdderCommand) ProcessResourceDescriptions(h ResourceSpecH
 	}
 
 	source := NewModifiedResourceSpecificationsFile(current, o.ConfigFile, fs)
-	resources, err := addhdlrs.DetermineElementsForSource(o.Context, ictx, o.Templating, h, source)
+	resources, err := addhdlrs.DetermineElementsForSource(o.Context, ictx, templateroption.From(o).Options, h, source)
 	if err != nil {
 		return errors.Wrapf(err, "%s", source.Origin())
 	}

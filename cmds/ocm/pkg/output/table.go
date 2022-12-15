@@ -29,13 +29,14 @@ func FormatTable(ctx Context, gap string, data [][]string) {
 
 	for _, row := range data {
 		for i, col := range row {
+			l := len([]rune(col))
 			if i >= len(columns) {
-				columns = append(columns, len(col))
-			} else if columns[i] < len(col) {
-				columns[i] = len(col)
+				columns = append(columns, l)
+			} else if columns[i] < l {
+				columns[i] = l
 			}
-			if len(col) > max {
-				max = len(col)
+			if l > max {
+				max = l
 			}
 		}
 	}

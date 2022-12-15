@@ -32,13 +32,7 @@ type Command struct {
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(
 		&Command{
-			common.ResourceConfigAdderCommand{
-				BaseCommand: utils.NewBaseCommand(ctx),
-				Adder:       common.NewContentResourceSpecificationProvider(ctx, "source", nil, resourcetypes.FILESYSTEM),
-				Templating: template.Options{
-					Default: "none",
-				},
-			},
+			common.NewResourceConfigAdderCommand(ctx, common.NewContentResourceSpecificationProvider(ctx, "source", nil, resourcetypes.FILESYSTEM)),
 		},
 		utils.Names(Names, names...)...,
 	)

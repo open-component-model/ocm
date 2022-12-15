@@ -104,7 +104,7 @@ func getWide(opts *output.Options) output.Output {
 }
 
 func getTree(opts *output.Options) output.Output {
-	return output.TreeOutput(TableOutput(opts, mapGetRegularOutput), "COMPONENTVERSION").New()
+	return output.TreeOutput(TableOutput(opts, mapGetRegularOutput), "COMPONENT", elemhdlr.NodeMapping(1), output.TreeNodeTitleFunc(elemhdlr.NodeTitle)).New()
 }
 
 func mapGetRegularOutput(e interface{}) interface{} {

@@ -102,6 +102,46 @@ There are several templaters that can be selected by the <code>--templater</code
   </pre>
   
 
+All yaml/json defined resources can be templated.
+Variables are specified as regular arguments following the syntax <code>&lt;name>=&lt;value></code>.
+Additionally settings can be specified by a yaml file using the <code>--settings <file></code>
+option. With the option <code>--addenv</code> environment variables are added to the binding.
+Values are overwritten in the order environment, settings file, command line settings. 
+
+Note: Variable names are case-sensitive.
+
+Example:
+<pre>
+&lt;command> &lt;options> -- MY_VAL=test &lt;args>
+</pre>
+
+There are several templaters that can be selected by the <code>--templater</code> option:
+- <code>go</code> go templating supports complex values.
+
+  <pre>
+    key:
+      subkey: "abc {{.MY_VAL}}"
+  </pre>
+  
+- <code>none</code> do not do any substitution.
+
+- <code>spiff</code> [spiff templating](https://github.com/mandelsoft/spiff).
+
+  It supports complex values. the settings are accessible using the binding <code>values</code>.
+  <pre>
+    key:
+      subkey: "abc (( values.MY_VAL ))"
+  </pre>
+  
+- <code>subst</code> simple value substitution with the <code>drone/envsubst</code> templater.
+
+  It supports string values, only. Complex settings will be json encoded.
+  <pre>
+    key:
+      subkey: "abc ${MY_VAL}"
+  </pre>
+  
+
 
 ### Examples
 

@@ -78,9 +78,9 @@ test.de/x:v1  test.de/y v1      <unknown component version> "name"="ref"
 		Expect(env.CatchOutput(buf).Execute("get", "components", ARCH, "-r", "-o", "tree")).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
-NESTING    COMPONENT VERSION PROVIDER                    IDENTITY
-└─ ⊗       test.de/x v1      mandelsoft                  
-   └─      test.de/y v1      <unknown component version> "name"="ref"
+NESTING COMPONENT VERSION PROVIDER                    IDENTITY
+└─ ⊗    test.de/x v1      mandelsoft                  
+   └─   test.de/y v1      <unknown component version> "name"="ref"
 `))
 	})
 
@@ -213,9 +213,9 @@ NESTING COMPONENT VERSION PROVIDER
 			Expect(env.CatchOutput(buf).Execute("get", "components", "-o", "tree", "--lookup", ARCH2, "-r", "--repo", ARCH, COMP2)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
-NESTING    COMPONENT VERSION PROVIDER   IDENTITY
-└─ ⊗       test.de/y v1      mandelsoft 
-   └─      test.de/x v1      mandelsoft "name"="xx"
+NESTING COMPONENT VERSION PROVIDER   IDENTITY
+└─ ⊗    test.de/y v1      mandelsoft 
+   └─   test.de/x v1      mandelsoft "name"="xx"
 `))
 		})
 

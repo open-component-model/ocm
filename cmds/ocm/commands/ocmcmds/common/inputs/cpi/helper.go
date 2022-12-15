@@ -130,7 +130,7 @@ const ProcessSpecUsage = `
 
 - **<code>compress</code>** *bool*
 
-  This OPTIONAL property describes whether the file content should be stored
+  This OPTIONAL property describes whether the content should be stored
   compressed or not.
 `
 

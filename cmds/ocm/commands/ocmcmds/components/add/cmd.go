@@ -18,10 +18,10 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/dryrunoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/fileoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/schemaoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/templateroption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	common2 "github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -47,9 +47,8 @@ type Command struct {
 	Handler ctf.FormatHandler
 	Format  string
 
-	Version    string
-	Templating template.Options
-	Envs       []string
+	Version string
+	Envs    []string
 
 	Archive string
 
@@ -61,7 +60,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		formatoption.New(ctf.GetFormats()...),
 		fileoption.New("transport-archive"),
 		schemaoption.New(compdesc.DefaultSchemeVersion),
-		&template.Options{},
+		templateroption.New(""),
 		dryrunoption.New("evaluate and print component specifications", true)),
 	}, utils.Names(Names, names...)...)
 }
@@ -140,14 +139,14 @@ func (o *Command) Complete(args []string) error {
 		return err
 	}
 	o.Archive, args = fileoption.From(o).GetPath(args, o.Context.FileSystem())
-	o.Templating.Complete(o.Context.FileSystem())
 
-	err = o.Templating.ParseSettings(o.Context.FileSystem(), o.Envs...)
+	t := templateroption.From(o)
+	err = t.ParseSettings(o.Context.FileSystem(), o.Envs...)
 	if err != nil {
 		return err
 	}
 
-	paths := o.Templating.FilterSettings(args...)
+	paths := t.FilterSettings(args...)
 	for _, p := range paths {
 		o.Elements = append(o.Elements, common.NewElementFileSource(p, o.FileSystem()))
 	}
@@ -169,7 +168,7 @@ func (o *Command) Run() error {
 	printer := common2.NewPrinter(o.Context.StdOut())
 	fs := o.Context.FileSystem()
 	h := comp.NewResourceSpecHandler(o.Version)
-	elems, ictx, err := addhdlrs.ProcessDescriptions(o.Context, printer, o.Templating, h, o.Elements)
+	elems, ictx, err := addhdlrs.ProcessDescriptions(o.Context, printer, templateroption.From(o).Options, h, o.Elements)
 	if err != nil {
 		return err
 	}

@@ -20,3 +20,4 @@ gci diff --skip-generated "${GCIFMT[@]}"  $@ \
   | awk '/^--- / { print $2 }' \
   | xargs -I "{}" \
     gci write --skip-generated  "${GCIFMT[@]}" "{}"
+log "Format done"

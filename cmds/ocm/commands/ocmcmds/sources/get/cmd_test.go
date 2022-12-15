@@ -135,9 +135,9 @@ test.de/y:v1->test.de/x:v1 testdata v1               git
 			Expect(env.CatchOutput(buf).Execute("get", "sources", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
-COMPONENTVERSION    NAME   VERSION IDENTITY TYPE
-└─ test.de/y:v1                             
-   └─               source v1               git
+COMPONENT    NAME   VERSION IDENTITY TYPE
+└─ test.de/y        v1               
+   └─        source v1               git
 `))
 		})
 
@@ -146,11 +146,11 @@ COMPONENTVERSION    NAME   VERSION IDENTITY TYPE
 			Expect(env.CatchOutput(buf).Execute("get", "sources", "-r", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
-COMPONENTVERSION       NAME     VERSION IDENTITY TYPE
-└─ test.de/y:v1                                  
-   ├─                  source   v1               git
-   └─ test.de/x:v1                               
-      └─               testdata v1               git
+COMPONENT       NAME     VERSION IDENTITY TYPE
+└─ test.de/y             v1               
+   ├─           source   v1               git
+   └─ test.de/x base     v1               
+      └─        testdata v1               git
 `))
 		})
 	})

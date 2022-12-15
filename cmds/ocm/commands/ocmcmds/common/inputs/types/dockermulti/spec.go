@@ -89,7 +89,7 @@ func (s *Spec) getVariant(ctx clictx.Context, finalize *utils.Finalizer, variant
 
 	art, err := ns.GetArtifact(version)
 	if err != nil {
-		return nil, artifactset.GetArtifactError{Original: err, Ref: version}
+		return nil, artifactset.GetArtifactError{Original: err, Ref: locator + ":" + version}
 	}
 	finalize.Close(art)
 	return art, nil
