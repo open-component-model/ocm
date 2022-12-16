@@ -94,12 +94,7 @@ type TypeHandler struct {
 }
 
 func NewTypeHandler(octx clictx.OCM, oopts *output.Options, repobase ocm.Repository, session ocm.Session, kind string, compspecs []string, elemaccess func(ocm.ComponentVersionAccess) compdesc.ElementAccessor, hopts ...Option) (utils.TypeHandler, error) {
-	var copts []comphdlr.Option
-	for _, o := range hopts {
-		if c, ok := o.(comphdlr.Option); ok {
-			copts = append(copts, c)
-		}
-	}
+	copts := MapToCompHandlerOptions(hopts...)
 	h := comphdlr.NewTypeHandler(octx, session, repobase, copts...)
 
 	comps := output.NewElementOutput(octx.Context().LoggingContext(), nil, closureoption.Closure(oopts, comphdlr.ClosureExplode, comphdlr.Sort))
@@ -237,4 +232,18 @@ func (h *TypeHandler) get(c *comphdlr.Object, elemspec utils.ElemSpec) ([]output
 		})
 	}
 	return result, nil
+}
+
+func MapToCompHandlerOptions(opts ...Option) comphdlr.Options {
+	var copts []comphdlr.Option
+	for _, o := range opts {
+		if c, ok := o.(comphdlr.Option); ok {
+			copts = append(copts, c)
+		} else {
+			if c, ok := o.(Options); ok {
+				copts = append(copts, MapToCompHandlerOptions(c...))
+			}
+		}
+	}
+	return copts
 }
