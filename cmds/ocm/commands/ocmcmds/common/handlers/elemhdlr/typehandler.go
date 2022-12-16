@@ -21,8 +21,10 @@ import (
 )
 
 type Object struct {
-	History common.History
-	Version ocm.ComponentVersionAccess
+	History   common.History
+	Version   ocm.ComponentVersionAccess
+	VersionId metav1.Identity
+
 	Spec    metav1.Identity
 	Id      metav1.Identity
 	Node    *common.NameVersion
@@ -166,20 +168,22 @@ func (h *TypeHandler) all(c *comphdlr.Object) ([]output.Object, error) {
 			e := elemaccess.Get(i)
 			if h.filterElement(e) {
 				result = append(result, &Object{
-					History: append(c.History, common.VersionedElementKey(c.ComponentVersion)),
-					Version: c.ComponentVersion,
-					Id:      e.GetMeta().GetIdentity(elemaccess),
-					Element: e,
+					History:   append(c.History, common.VersionedElementKey(c.ComponentVersion)),
+					Version:   c.ComponentVersion,
+					VersionId: c.Identity,
+					Id:        e.GetMeta().GetIdentity(elemaccess),
+					Element:   e,
 				})
 			}
 		}
 
 		if len(result) == 0 && h.forceEmpty {
 			result = append(result, &Object{
-				History: append(c.History, common.VersionedElementKey(c.ComponentVersion)),
-				Version: c.ComponentVersion,
-				Id:      metav1.Identity{},
-				Element: nil,
+				History:   append(c.History, common.VersionedElementKey(c.ComponentVersion)),
+				Version:   c.ComponentVersion,
+				VersionId: c.Identity,
+				Id:        metav1.Identity{},
+				Element:   nil,
 			})
 		}
 	}
@@ -214,20 +218,22 @@ func (h *TypeHandler) get(c *comphdlr.Object, elemspec utils.ElemSpec) ([]output
 		ok, _ := selector.Match(eid)
 		if ok {
 			result = append(result, &Object{
-				History: append(c.History, common.VersionedElementKey(c.ComponentVersion)),
-				Version: c.ComponentVersion,
-				Spec:    selector,
-				Id:      m.GetIdentity(elemaccess),
-				Element: e,
+				History:   append(c.History, common.VersionedElementKey(c.ComponentVersion)),
+				Version:   c.ComponentVersion,
+				VersionId: c.Identity,
+				Spec:      selector,
+				Id:        m.GetIdentity(elemaccess),
+				Element:   e,
 			})
 		}
 	}
 	if len(result) == 0 && h.forceEmpty {
 		result = append(result, &Object{
-			History: append(c.History, common.VersionedElementKey(c.ComponentVersion)),
-			Version: c.ComponentVersion,
-			Id:      metav1.Identity{},
-			Element: nil,
+			History:   append(c.History, common.VersionedElementKey(c.ComponentVersion)),
+			Version:   c.ComponentVersion,
+			VersionId: c.Identity,
+			Id:        metav1.Identity{},
+			Element:   nil,
 		})
 	}
 	return result, nil

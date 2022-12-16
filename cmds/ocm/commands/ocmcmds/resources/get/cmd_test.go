@@ -106,9 +106,9 @@ test.de/x:v1  testdata v1               PlainText local
 			Expect(env.CatchOutput(buf).Execute("get", "resources", ARCH, "-r", "-o", "tree")).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
-COMPONENTVERSION    NAME     VERSION IDENTITY TYPE      RELATION
-└─ test.de/x:v1                                         
-   └─               testdata v1               PlainText local
+COMPONENT    NAME     VERSION IDENTITY TYPE      RELATION
+└─ test.de/x          v1                         
+   └─        testdata v1               PlainText local
 `))
 		})
 
@@ -175,9 +175,9 @@ test.de/y:v1->test.de/x:v1 testdata v1               PlainText local
 				Expect(env.CatchOutput(buf).Execute("get", "resources", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
-COMPONENTVERSION    NAME     VERSION IDENTITY TYPE      RELATION
-└─ test.de/y:v1                                         
-   └─               moredata v1               PlainText local
+COMPONENT    NAME     VERSION IDENTITY TYPE      RELATION
+└─ test.de/y          v1                         
+   └─        moredata v1               PlainText local
 `))
 			})
 
@@ -186,11 +186,11 @@ COMPONENTVERSION    NAME     VERSION IDENTITY TYPE      RELATION
 				Expect(env.CatchOutput(buf).Execute("get", "resources", "-r", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
-COMPONENTVERSION       NAME     VERSION IDENTITY TYPE      RELATION
-└─ test.de/y:v1                                            
-   ├─                  moredata v1               PlainText local
-   └─ test.de/x:v1                                         
-      └─               testdata v1               PlainText local
+COMPONENT       NAME     VERSION IDENTITY TYPE      RELATION
+└─ test.de/y             v1                         
+   ├─           moredata v1               PlainText local
+   └─ test.de/x base     v1                         
+      └─        testdata v1               PlainText local
 `))
 			})
 		})
@@ -218,7 +218,7 @@ COMPONENTVERSION       NAME     VERSION IDENTITY TYPE      RELATION
 							env.Resource("moredata", "", "PlainText", metav1.LocalRelation, func() {
 								env.BlobStringData(mime.MIME_TEXT, "moredata")
 							})
-							env.Reference("base", COMP2, VERSION)
+							env.Reference("base2", COMP2, VERSION)
 						})
 					})
 				})
@@ -248,8 +248,8 @@ no elements found
 				Expect(env.CatchOutput(buf).Execute("get", "resources", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
-COMPONENTVERSION    NAME VERSION IDENTITY TYPE RELATION
-└─ test.de/y:v1                                
+COMPONENT    NAME VERSION IDENTITY TYPE RELATION
+└─ test.de/y      v1                    
 `))
 			})
 
@@ -258,12 +258,12 @@ COMPONENTVERSION    NAME VERSION IDENTITY TYPE RELATION
 				Expect(env.CatchOutput(buf).Execute("get", "resources", "-r", "-o", "tree", "--repo", ARCH, COMP3+":"+VERSION)).To(Succeed())
 				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
-COMPONENTVERSION          NAME     VERSION IDENTITY TYPE      RELATION
-└─ test.de/z:v1                                               
-   ├─                     moredata v1               PlainText local
-   └─ test.de/y:v1                                            
-      └─ test.de/x:v1                                         
-         └─               testdata v1               PlainText local
+COMPONENT          NAME     VERSION IDENTITY TYPE      RELATION
+└─ test.de/z                v1                         
+   ├─              moredata v1               PlainText local
+   └─ test.de/y    base2    v1                         
+      └─ test.de/x base     v1                         
+         └─        testdata v1               PlainText local
 `))
 			})
 		})
@@ -303,10 +303,10 @@ test.de/y:v1  moredata v1               PlainText local
 				Expect(env.CatchOutput(buf).Execute("get", "resources", "-r", "-o", "tree", "--repo", ARCH, COMP2+":"+VERSION)).To(Succeed())
 				Expect(buf.String()).To(StringEqualTrimmedWithContext(
 					`
-COMPONENTVERSION       NAME     VERSION IDENTITY TYPE      RELATION
-└─ test.de/y:v1                                            
-   ├─                  moredata v1               PlainText local
-   └─ test.de/x:v1                                         
+COMPONENT       NAME     VERSION IDENTITY TYPE      RELATION
+└─ test.de/y             v1                         
+   ├─           moredata v1               PlainText local
+   └─ test.de/x base     v1                         
 `))
 			})
 		})

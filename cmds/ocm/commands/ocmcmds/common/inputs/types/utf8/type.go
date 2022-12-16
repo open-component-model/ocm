@@ -2,14 +2,14 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package binary
+package utf8
 
 import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
 )
 
-const TYPE = "binary"
+const TYPE = "utf8"
 
 func init() {
 	inputs.DefaultInputTypeScheme.Register(TYPE, inputs.NewInputType(TYPE, &Spec{},
@@ -17,9 +17,9 @@ func init() {
 }
 
 const usage = `
-This blob type is used to provide base64 encoded binary content. The
+This blob type is used to provide inline text based content (UTF8). The
 specification supports the following fields:
-- **<code>data</code>** *[]byte*
+- **<code>text</code>** *string*
 
-  The binary data to provide.
+  The utf8 string content to provide.
 ` + cpi.ProcessSpecUsage

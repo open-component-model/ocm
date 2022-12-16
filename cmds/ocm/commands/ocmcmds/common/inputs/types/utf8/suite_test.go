@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package binary
+package utf8
 
 import (
 	"testing"
@@ -13,5 +13,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Input Type Binary")
+	RunSpecs(t, "Input Type UTF8 String")
 }

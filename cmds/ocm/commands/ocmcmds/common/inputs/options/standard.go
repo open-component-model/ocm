@@ -38,3 +38,5 @@ var VersionOption = flagsets.NewStringArrayOptionType("inputVersion", "version i
 var ValuesOption = flagsets.NewValueMapYAMLOptionType("inputValues", "YAML based generic values for inputs")
 
 var DataOption = flagsets.NewBytesOptionType("inputData", "data (string, !!string or !<base64>")
+
+var TextOption = flagsets.NewStringOptionType("inputText", "utf8 text")

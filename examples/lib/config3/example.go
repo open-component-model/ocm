@@ -22,9 +22,9 @@ type Target struct {
 }
 
 func NewTarget(ctx cpi.Context) *Target {
-	return &Target{
-		updater: cpi.NewUpdate(ctx),
-	}
+	t := &Target{}
+	t.updater = cpi.NewUpdater(ctx, t)
+	return t
 }
 
 func (t *Target) SetValue(v string) {
@@ -32,7 +32,7 @@ func (t *Target) SetValue(v string) {
 }
 
 func (t *Target) GetValue() string {
-	t.updater.Update(t)
+	t.updater.Update()
 	return t.value
 }
 

@@ -86,9 +86,9 @@ test.de/x:v1->test.de/y:v1 withid test.de/z v1      "id"="test","name"="withid"
 			Expect(env.CatchOutput(buf).Execute("get", "references", "-o", "tree", "--lookup", CTF, CA)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
-COMPONENTVERSION    NAME COMPONENT VERSION IDENTITY
-└─ test.de/x:v1                            
-   └─               test test.de/y v1      "name"="test"
+COMPONENTVERSION NAME COMPONENT VERSION IDENTITY
+└─ test.de/x:v1                         
+   └─            test test.de/y v1      "name"="test"
 `))
 		})
 
@@ -97,10 +97,10 @@ COMPONENTVERSION    NAME COMPONENT VERSION IDENTITY
 			Expect(env.CatchOutput(buf).Execute("get", "references", "-r", "-o", "tree", "--lookup", CTF, CA)).To(Succeed())
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(
 				`
-COMPONENTVERSION    NAME   COMPONENT VERSION IDENTITY
-└─ test.de/x:v1                              
-   └─ ⊗             test   test.de/y v1      "name"="test"
-      └─            withid test.de/z v1      "id"="test","name"="withid"
+COMPONENTVERSION NAME   COMPONENT VERSION IDENTITY
+└─ test.de/x:v1                           
+   └─ ⊗          test   test.de/y v1      "name"="test"
+      └─         withid test.de/z v1      "id"="test","name"="withid"
 `))
 		})
 	})
