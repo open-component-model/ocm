@@ -4,14 +4,15 @@ PROVIDER  ?= ocm.software
 GITHUBORG  ?= open-component-model
 COMPONENT = $(PROVIDER)/$(NAME)
 OCMREPO   ?= ghcr.io/$(GITHUBORG)/ocm
-PLATFORMS = linux/amd64 linux/arm64 darwin/arm64 darwin/amd64
+PLATFORMS = linux/amd64 linux/arm64 darwin/arm64 darwin/amd64 windows/amd64
 
-REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
+REPO_ROOT                                      := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))../..
+GIT_TREE_STATE                                 = $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 VERSION                                        = $(shell git describe --tags --exact-match 2>/dev/null|| echo "$$(cat $(REPO_ROOT)/VERSION)")
 COMMIT                                         = $(shell git rev-parse HEAD)
-EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
+EFFECTIVE_VERSION                              = $(VERSION)+$(COMMIT)
 
-CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(CMD) -type f)
+CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(CMD) -type f) Makefile
 OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
 
 GEN = $(REPO_ROOT)/gen/$(shell basename $(realpath .))
@@ -52,7 +53,7 @@ version:
 .PHONY: ca
 ca: $(GEN)/ca.done
 
-$(GEN)/ca.done: $(GEN)/.exists $(GEN)/build resources.yaml $(CHARTSRCS)
+$(GEN)/ca.done: $(GEN)/.exists $(GEN)/build resources.yaml $(CHARTSRCS) Makefile
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider $(PROVIDER) --file $(GEN)/ca
 	$(OCM) add resources --templater=spiff --file $(GEN)/ca VERSION="$(VERSION)" NAME="$(NAME)" COMMIT="$(COMMIT)" GEN="$(GEN)" PLATFORMS="$(PLATFORMS)" resources.yaml
 	@touch $(GEN)/ca.done
@@ -83,7 +84,8 @@ $(GEN)/.exists:
 info:
 	@echo "ROOT:     $(REPO_ROOT)"
 	@echo "VERSION:  $(VERSION)"
-	@echo "COMMIT;   $(COMMIT)"
+	@echo "COMMIT:   $(COMMIT)"
+	@echo "GIT_TREE: $(GIT_TREE_STATE)"
 
 .PHONY: describe
 describe: $(GEN)/ctf

@@ -11,7 +11,7 @@ REPO_ROOT                                      := $(shell dirname $(realpath $(l
 VERSION                                        := $(shell git describe --tags --exact-match 2>/dev/null|| echo "$$(cat $(REPO_ROOT)/VERSION)")
 COMMIT                                         := $(shell git rev-parse --verify HEAD)
 EFFECTIVE_VERSION                              := $(VERSION)-$(COMMIT)
-GIT_TREE_STATE                                 := $(shell [ -z "$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
+GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 
 
 GEN = $(REPO_ROOT)/gen/$(NAME)
