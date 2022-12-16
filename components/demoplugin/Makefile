@@ -8,8 +8,8 @@ PLATFORMS = linux/amd64 linux/arm64
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
 VERSION                                        = $(shell git describe --tags --exact-match 2>/dev/null|| echo "$$(cat $(REPO_ROOT)/VERSION)-dev")
 COMMIT                                         = $(shell git rev-parse HEAD)
-EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
-GIT_TREE_STATE                                 := $(shell [ -z "$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
+EFFECTIVE_VERSION                              = $(VERSION)+$(COMMIT)
+GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(NAME) -type f)
 OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*

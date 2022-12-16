@@ -5,7 +5,7 @@
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 VERSION                                        := $(shell cat $(REPO_ROOT)/VERSION)
 EFFECTIVE_VERSION                              := $(VERSION)+$(shell git rev-parse HEAD)
-GIT_TREE_STATE                                 := $(shell [ -z "$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
+GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 COMMIT                                         := $(shell git rev-parse --verify HEAD)
 
 REGISTRY                                       := ghcr.io/mandelsoft/ocm

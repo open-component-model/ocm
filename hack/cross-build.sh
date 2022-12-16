@@ -15,10 +15,10 @@ fi
 
 mkdir -p dist
 
-build_matrix=("linux,amd64" "darwin,amd64" "darwin,arm64" "windows,amd64")
+build_matrix=("linux/amd64" "linux/arm64" "darwin/amd64" "darwin/arm64" "windows/amd64")
 
 for i in "${build_matrix[@]}"; do
-  IFS=',' read os arch <<< "${i}"
+  IFS='/' read os arch <<< "${i}"
 
   echo "Build $os/$arch"
   bin_path="dist/ocm-$os-$arch"
