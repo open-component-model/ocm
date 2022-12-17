@@ -57,7 +57,7 @@ func mergeMatcher(no IdentityMatcher, merge func([]IdentityMatcher) IdentityMatc
 }
 
 func defaultMatcher(matchers ...IdentityMatcher) IdentityMatcher {
-	return mergeMatcher(nil, andMatcher, matchers)
+	return mergeMatcher(PartialMatch, andMatcher, matchers)
 }
 
 func AndMatcher(matchers ...IdentityMatcher) IdentityMatcher {

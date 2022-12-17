@@ -97,11 +97,7 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
-	src, err := o.CredentialsContext().GetCredentialsForConsumer(o.Consumer, o.Matcher)
-	if err != nil {
-		return err
-	}
-	creds, err := src.Credentials(o.CredentialsContext())
+	creds, err := credentials.RequiredCredentialsForConsumer(o.CredentialsContext(), o.Consumer, o.Matcher)
 	if err != nil {
 		return err
 	}

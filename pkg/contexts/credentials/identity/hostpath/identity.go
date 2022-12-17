@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
 )
 
 // IDENTITY_TYPE is the identity of this matcher.
@@ -34,7 +33,8 @@ func init() {
 
 This matcher works on the following properties:
 
-- *<code>`+ID_HOSTNAME+`</code>* (required): the hostname of a server
+- *<code>`+ID_TYPE+`</code>* (required if set in pattern): the identity type 
+- *<code>`+ID_HOSTNAME+`</code>* (required if set in pattern): the hostname of a server
 - *<code>`+ID_PORT+`</code>* (optional): the port of a server
 - *<code>`+ID_PATHPREFIX+`</code>* (optional): a path prefix to match. The 
   element with the most matching path components is selected (separator is <code>/</code>).
@@ -42,8 +42,8 @@ This matcher works on the following properties:
 }
 
 func IdentityMatcher(identityType string) cpi.IdentityMatcher {
-	return func(pattern, cur, id internal.ConsumerIdentity) bool {
-		if pattern[ID_TYPE] != "" && id[ID_TYPE] != "" && pattern[ID_TYPE] != id[ID_TYPE] {
+	return func(pattern, cur, id cpi.ConsumerIdentity) bool {
+		if pattern[ID_TYPE] != "" && pattern[ID_TYPE] != id[ID_TYPE] {
 			return false
 		}
 
@@ -51,7 +51,7 @@ func IdentityMatcher(identityType string) cpi.IdentityMatcher {
 			return false
 		}
 
-		if pattern[ID_HOSTNAME] != "" && pattern[ID_HOSTNAME] != id[ID_HOSTNAME] {
+		if pattern[ID_HOSTNAME] != "" && id[ID_HOSTNAME] != "" && pattern[ID_HOSTNAME] != id[ID_HOSTNAME] {
 			return false
 		}
 

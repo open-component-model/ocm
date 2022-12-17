@@ -17,9 +17,7 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"k8s.io/apimachinery/pkg/util/sets"
 
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio/downloader"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
@@ -72,17 +70,11 @@ var _ = Describe("Method", func() {
 		ctx = datacontext.New(nil)
 		vfsattr.Set(ctx, fs)
 		tmpcache.Set(ctx, &tmpcache.Attribute{Path: "/tmp"})
-		mcc = &mockContext{
-			dataContext: ctx,
-			creds: &mockCredSource{
-				cred: &mockCredentials{
-					value: map[string]string{
-						"accessKeyID":  "accessKeyID",
-						"accessSecret": "accessSecret",
-					},
-				},
-			},
-		}
+		mcc = ocm.New(datacontext.MODE_INITIAL)
+		mcc.CredentialsContext().SetCredentialsForConsumer(credentials.ConsumerIdentity{credentials.ID_TYPE: s3.CONSUMER_TYPE}, credentials.DirectCredentials{
+			"accessKeyID":  "accessKeyID",
+			"accessSecret": "accessSecret",
+		})
 	})
 
 	AfterEach(func() {
@@ -126,56 +118,4 @@ type mockComponentVersionAccess struct {
 
 func (m *mockComponentVersionAccess) GetContext() ocm.Context {
 	return m.context
-}
-
-type mockContext struct {
-	ocm.Context
-	creds       credentials.Context
-	dataContext datacontext.Context
-}
-
-func (m *mockContext) CredentialsContext() credentials.Context {
-	return m.creds
-}
-
-func (m *mockContext) GetAttributes() datacontext.Attributes {
-	return m.dataContext.GetAttributes()
-}
-
-type mockCredSource struct {
-	credentials.Context
-	cred credentials.Credentials
-	err  error
-}
-
-func (m *mockCredSource) GetCredentialsForConsumer(credentials.ConsumerIdentity, ...credentials.IdentityMatcher) (credentials.CredentialsSource, error) {
-	return m, m.err
-}
-
-func (m *mockCredSource) Credentials(credentials.Context, ...credentials.CredentialsSource) (credentials.Credentials, error) {
-	return m.cred, nil
-}
-
-type mockCredentials struct {
-	value map[string]string
-}
-
-func (m *mockCredentials) Credentials(context credentials.Context, source ...credentials.CredentialsSource) (credentials.Credentials, error) {
-	panic("implement me")
-}
-
-func (m *mockCredentials) ExistsProperty(name string) bool {
-	panic("implement me")
-}
-
-func (m *mockCredentials) PropertyNames() sets.String {
-	panic("implement me")
-}
-
-func (m *mockCredentials) Properties() common.Properties {
-	panic("implement me")
-}
-
-func (m *mockCredentials) GetProperty(name string) string {
-	return m.value[name]
 }

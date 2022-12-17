@@ -87,8 +87,18 @@ func ErrUnknownCredentials(name string) error {
 	return internal.ErrUnknownCredentials(name)
 }
 
+// CredentialsForConsumer determine effective credentials for a consumer.
+// If no credentials are configured no error and nil is returned.
+// It evaluates a found credentials source for the consumer to determine the
+// final credential properties.
 func CredentialsForConsumer(ctx ContextProvider, id ConsumerIdentity, matchers ...IdentityMatcher) (Credentials, error) {
-	return internal.CredentialsForConsumer(ctx, id, matchers...)
+	return internal.CredentialsForConsumer(ctx, id, false, matchers...)
+}
+
+// RequiredCredentialsForConsumer like CredentialsForConsumer, but an errors is returned
+// if no credentials are found.
+func RequiredCredentialsForConsumer(ctx ContextProvider, id ConsumerIdentity, matchers ...IdentityMatcher) (Credentials, error) {
+	return internal.CredentialsForConsumer(ctx, id, true, matchers...)
 }
 
 var (

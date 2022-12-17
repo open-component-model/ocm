@@ -82,12 +82,10 @@ var _ = Describe("docker config", func() {
 		_, err := DefaultContext.RepositoryForConfig([]byte(specdata2), nil)
 		Expect(err).To(Succeed())
 
-		csrc, err := DefaultContext.GetCredentialsForConsumer(credentials.ConsumerIdentity{
+		creds, err := credentials.CredentialsForConsumer(DefaultContext, credentials.ConsumerIdentity{
 			cpi.ATTR_TYPE:        identity.CONSUMER_TYPE,
 			identity.ID_HOSTNAME: "ghcr.io",
 		})
-		Expect(err).To(Succeed())
-		creds, err := csrc.Credentials(DefaultContext)
 		Expect(err).To(Succeed())
 		Expect(creds.Properties()).To(Equal(props2))
 	})

@@ -75,6 +75,8 @@ func (r *Repository) IsClosed() bool {
 }
 
 func (r *Repository) getCreds(comp string) (credentials.Credentials, error) {
+	var err error
+
 	host, port, base := r.info.HostInfo()
 	id := credentials.ConsumerIdentity{
 		identity.ID_TYPE:     identity.CONSUMER_TYPE,
@@ -86,21 +88,9 @@ func (r *Repository) getCreds(comp string) (credentials.Credentials, error) {
 	id[identity.ID_PATHPREFIX] = path.Join(base, comp)
 	creds := r.info.Creds
 	if creds == nil {
-		src, err := r.ctx.CredentialsContext().GetCredentialsForConsumer(id, identity.IdentityMatcher)
-		if err != nil {
-			if !errors.IsErrUnknown(err) {
-				return nil, err
-			}
-			return nil, nil
-		}
-		if src != nil {
-			creds, err = src.Credentials(r.ctx.CredentialsContext())
-			if err != nil {
-				return nil, err
-			}
-		}
+		creds, err = credentials.CredentialsForConsumer(r.ctx, id, identity.IdentityMatcher)
 	}
-	return creds, nil
+	return creds, err
 }
 
 func (r *Repository) getResolver(comp string) (resolve.Resolver, error) {

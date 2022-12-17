@@ -229,19 +229,9 @@ func getCreds(hostname, port, path string, cctx credentials.Context) (string, er
 		id[identity.ID_PORT] = port
 	}
 	id[identity.ID_PATHPREFIX] = path
-	var creds credentials.Credentials
-	src, err := cctx.GetCredentialsForConsumer(id, hostpath.IdentityMatcher(CONSUMER_TYPE))
-	if err != nil {
-		if !errors.IsErrUnknown(err) {
-			return "", err
-		}
-		return "", nil
-	}
-	if src != nil {
-		creds, err = src.Credentials(cctx)
-		if err != nil {
-			return "", err
-		}
+	creds, err := credentials.CredentialsForConsumer(cctx, id, hostpath.IdentityMatcher(CONSUMER_TYPE))
+	if creds == nil || err != nil {
+		return "", err
 	}
 	return creds.GetProperty(credentials.ATTR_TOKEN), nil
 }

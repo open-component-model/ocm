@@ -397,30 +397,6 @@ The access method specification can be put below the <code>access</code> field.
 If always requires the field <code>type</code> describing the kind and version
 shown below.
 
-- Access type <code>S3</code>
-
-  This method implements the access of a blob stored in an S3 bucket.
-
-  The following versions are supported:
-  - Version <code>v1</code>
-  
-    The type specific specification fields are:
-    
-    - **<code>region</code>** (optional) *string*
-    
-      OCI repository reference (this artifact name used to store the blob).
-    
-    - **<code>bucket</code>** *string*
-    
-      The name of the S3 bucket containing the blob
-    
-    - **<code>key</code>** *string*
-    
-      The key of the desired blob
-    
-    Options used to configure fields: <code>--accessVersion</code>, <code>--bucket</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--region</code>
-  
-
 - Access type <code>gitHub</code>
 
   This method implements the access of the content of a git commit stored in a
@@ -551,6 +527,30 @@ shown below.
       The size of the blob
     
     Options used to configure fields: <code>--digest</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--size</code>
+  
+
+- Access type <code>s3</code>
+
+  This method implements the access of a blob stored in an S3 bucket.
+
+  The following versions are supported:
+  - Version <code>v1</code>
+  
+    The type specific specification fields are:
+    
+    - **<code>region</code>** (optional) *string*
+    
+      OCI repository reference (this artifact name used to store the blob).
+    
+    - **<code>bucket</code>** *string*
+    
+      The name of the S3 bucket containing the blob
+    
+    - **<code>key</code>** *string*
+    
+      The key of the desired blob
+    
+    Options used to configure fields: <code>--accessVersion</code>, <code>--bucket</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--region</code>
   
 
 All yaml/json defined resources can be templated.
