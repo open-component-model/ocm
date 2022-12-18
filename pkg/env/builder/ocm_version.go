@@ -29,6 +29,15 @@ func (r *ocmVersion) Set() {
 	r.Builder.ocm_vers = r.ComponentVersionAccess
 }
 
+func (r *ocmVersion) Close() error {
+	list := errors.ErrListf("adding component version")
+	if r.Builder.ocm_comp != nil {
+		list.Add(r.Builder.ocm_comp.AddVersion(r.ComponentVersionAccess))
+	}
+	list.Add(r.ComponentVersionAccess.Close())
+	return list.Result()
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 func (b *Builder) Version(name string, f ...func()) {

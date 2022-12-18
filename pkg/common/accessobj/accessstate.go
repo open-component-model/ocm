@@ -175,7 +175,7 @@ func newState(mode AccessMode, a StateAccess, p StateHandler) (*state, error) {
 	}, nil
 }
 
-// NewBlobState provides state handling for and object persisted as a blob.
+// NewBlobStateForBlob provides state handling for an object persisted as a blob.
 // It tries to keep the blob representation unchanged as long as possible
 // consulting the state handler responsible for analysing the binary blob data
 // and the object.
@@ -217,7 +217,6 @@ func (s *state) Refresh() error {
 	}
 
 	*s = *n
-
 	return nil
 }
 

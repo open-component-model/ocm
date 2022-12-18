@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package genericocireg_test
+package ctf_test
 
 import (
 	"testing"
@@ -13,5 +13,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Generic OCI OCM Repository Test Suite")
+	RunSpecs(t, "CTF Test Suite")
 }

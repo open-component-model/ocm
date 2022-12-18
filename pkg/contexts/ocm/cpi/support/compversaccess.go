@@ -49,6 +49,10 @@ func (s *ComponentVersionAccess) IsClosed() bool {
 	return s.view.IsClosed()
 }
 
+func (s *ComponentVersionAccess) EnablePersistence() {
+	s.discardChanges = false
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type componentVersionAccessImpl struct {
@@ -60,10 +64,11 @@ type componentVersionAccessImpl struct {
 
 var _ cpi.ComponentVersionAccess = (*ComponentVersionAccess)(nil)
 
-func NewComponentVersionAccess(container ComponentVersionContainer, lazy bool) (*ComponentVersionAccess, error) {
+func NewComponentVersionAccess(container ComponentVersionContainer, lazy bool, persistent bool) (*ComponentVersionAccess, error) {
 	s := &componentVersionAccessImpl{
-		lazy: lazy,
-		base: container,
+		lazy:           lazy,
+		discardChanges: !persistent,
+		base:           container,
 	}
 	s.refs = accessio.NewRefCloser(s, true)
 	return s.View(true)
