@@ -7,6 +7,7 @@ package verbs
 const (
 	Get       = "get"
 	Describe  = "describe"
+	Hash      = "hash"
 	Add       = "add"
 	Create    = "create"
 	Transfer  = "transfer"

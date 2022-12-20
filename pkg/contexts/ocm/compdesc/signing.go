@@ -64,6 +64,23 @@ func Hash(cd *ComponentDescriptor, normAlgo string, hash hash.Hash) (string, err
 	return hex.EncodeToString(hash.Sum(nil)), nil
 }
 
+func NormHash(cd *ComponentDescriptor, normAlgo string, hash hash.Hash) ([]byte, string, error) {
+	if hash == nil {
+		return nil, metav1.NoDigest, nil
+	}
+
+	normalized, err := Normalize(cd, normAlgo)
+	if err != nil {
+		return nil, "", fmt.Errorf("failed normalising component descriptor %w", err)
+	}
+	hash.Reset()
+	if _, err = hash.Write(normalized); err != nil {
+		return nil, "", fmt.Errorf("failed hashing the normalisedComponentDescriptorJson: %w", err)
+	}
+
+	return normalized, hex.EncodeToString(hash.Sum(nil)), nil
+}
+
 // Sign signs the given component-descriptor with the signer.
 // The component-descriptor has to contain digests for componentReferences and resources.
 func Sign(cd *ComponentDescriptor, privateKey interface{}, signer signing.Signer, hasher signing.Hasher, signatureName, issuer string) error {

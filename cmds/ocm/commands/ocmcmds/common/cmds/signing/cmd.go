@@ -21,6 +21,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -89,16 +91,20 @@ func (o *SignatureCommand) Run() error {
 	if err != nil {
 		return err
 	}
-	return utils.HandleOutput(NewAction(o.spec.terms, o, sopts), handler, utils.StringElemSpecs(o.Refs...)...)
+	return utils.HandleOutput(NewAction(o.spec.terms, common.NewPrinter(o.Context.StdOut()), sopts), handler, utils.StringElemSpecs(o.Refs...)...)
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
+type Action interface {
+	output.Output
+	Digest(o *comphdlr.Object) (*metav1.DigestSpec, *compdesc.ComponentDescriptor, error)
+}
+
 type action struct {
 	desc         []string
-	cmd          *SignatureCommand
 	printer      common.Printer
-	state        common.WalkingState
+	state        signing.WalkingState
 	baseresolver ocm.ComponentVersionResolver
 	sopts        *signing.Options
 	errlist      *errors.ErrorList
@@ -106,24 +112,33 @@ type action struct {
 
 var _ output.Output = (*action)(nil)
 
-func NewAction(desc []string, cmd *SignatureCommand, sopts *signing.Options) output.Output {
+func NewAction(desc []string, p common.Printer, sopts *signing.Options) Action {
 	return &action{
 		desc:         desc,
-		cmd:          cmd,
-		printer:      common.NewPrinter(cmd.Context.StdOut()),
-		state:        common.NewWalkingState(),
+		printer:      p,
+		state:        signing.NewWalkingState(),
 		baseresolver: sopts.Resolver,
 		sopts:        sopts,
 		errlist:      errors.ErrListf(desc[1]),
 	}
 }
 
+func (a *action) Digest(o *comphdlr.Object) (*metav1.DigestSpec, *compdesc.ComponentDescriptor, error) {
+	sopts := *a.sopts
+	sopts.Resolver = ocm.NewCompoundResolver(o.Repository, a.sopts.Resolver)
+	d, err := signing.Apply(a.printer, &a.state, o.ComponentVersion, &sopts, true)
+	var cd *compdesc.ComponentDescriptor
+	vi := a.state.Get(common.VersionedElementKey(o.ComponentVersion))
+	if vi != nil {
+		cd = vi.Descriptor
+	}
+	return d, cd, err
+}
+
 func (a *action) Add(e interface{}) error {
 	o := e.(*comphdlr.Object)
 	cv := o.ComponentVersion
-	sopts := *a.sopts
-	sopts.Resolver = ocm.NewCompoundResolver(o.Repository, a.sopts.Resolver)
-	d, err := signing.Apply(a.printer, &a.state, cv, &sopts, true)
+	d, _, err := a.Digest(o)
 	a.errlist.Add(err)
 	if err == nil {
 		a.printer.Printf("successfully %s %s:%s (digest %s:%s)\n", a.desc[0], cv.GetName(), cv.GetVersion(), d.HashAlgorithm, d.Value)

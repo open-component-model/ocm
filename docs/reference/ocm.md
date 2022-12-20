@@ -141,6 +141,7 @@ attributes are supported:
 * [ocm <b>describe</b>](ocm_describe.md)	 &mdash; Describe artifacts
 * [ocm <b>download</b>](ocm_download.md)	 &mdash; Download oci artifacts, resources or complete components
 * [ocm <b>get</b>](ocm_get.md)	 &mdash; Get information about artifacts and components
+* [ocm <b>hash</b>](ocm_hash.md)	 &mdash; Hash and normalization operations
 * [ocm <b>install</b>](ocm_install.md)	 &mdash; Install elements.
 * [ocm <b>show</b>](ocm_show.md)	 &mdash; Show tags or versions
 * [ocm <b>sign</b>](ocm_sign.md)	 &mdash; Sign components

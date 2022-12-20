@@ -18,25 +18,36 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
+type VersionInfo struct {
+	Descriptor *compdesc.ComponentDescriptor
+	Digest     *metav1.DigestSpec
+}
+
 func ToDigestSpec(v interface{}) *metav1.DigestSpec {
 	if v == nil {
 		return nil
 	}
-	return v.(*metav1.DigestSpec)
+	return v.(*VersionInfo).Digest
 }
 
-func Apply(printer common.Printer, state *common.WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv ...bool) (*metav1.DigestSpec, error) {
+type WalkingState = common.WalkingState[*VersionInfo]
+
+func NewWalkingState() WalkingState {
+	return common.NewWalkingState[*VersionInfo]()
+}
+
+func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv ...bool) (*metav1.DigestSpec, error) {
 	if printer == nil {
 		printer = common.NewPrinter(nil)
 	}
 	if state == nil {
-		s := common.NewWalkingState()
+		s := common.NewWalkingState[*VersionInfo]()
 		state = &s
 	}
 	return apply(printer, *state, cv, opts, utils.Optional(closecv...))
 }
 
-func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv bool) (d *metav1.DigestSpec, efferr error) {
+func apply(printer common.Printer, state WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv bool) (d *metav1.DigestSpec, efferr error) {
 	var closer errors.ErrorFunction
 	if closecv {
 		closer = cv.Close
@@ -50,7 +61,7 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 	return _apply(printer, state, nv, cv, opts)
 }
 
-func _apply(printer common.Printer, state common.WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAccess, opts *Options) (*metav1.DigestSpec, error) {
+func _apply(printer common.Printer, state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAccess, opts *Options) (*metav1.DigestSpec, error) {
 	cd := cv.GetDescriptor().Copy()
 	octx := cv.GetContext()
 	printer.Printf("applying to version %q...\n", nv)
@@ -177,7 +188,10 @@ func _apply(printer common.Printer, state common.WalkingState, nv common.NameVer
 			orig.Signatures = cd.Signatures
 		}
 	}
-	state.Closure[nv] = spec
+	state.Closure[nv] = &VersionInfo{
+		Descriptor: cd,
+		Digest:     spec,
+	}
 	return spec, nil
 }
 
@@ -192,7 +206,7 @@ func resMsg(ref *compdesc.Resource, acc string, msg string, args ...interface{})
 	return fmt.Sprintf("%s %s:%s", fmt.Sprintf(msg, args...), ref.Name, ref.Version)
 }
 
-func doVerify(printer common.Printer, cd *compdesc.ComponentDescriptor, state common.WalkingState, signatureNames []string, opts *Options) error {
+func doVerify(printer common.Printer, cd *compdesc.ComponentDescriptor, state WalkingState, signatureNames []string, opts *Options) error {
 	var err error
 	found := []string{}
 	for _, n := range signatureNames {
@@ -236,7 +250,7 @@ func doVerify(printer common.Printer, cd *compdesc.ComponentDescriptor, state co
 	return nil
 }
 
-func calculateReferenceDigests(printer common.Printer, cd *compdesc.ComponentDescriptor, state common.WalkingState, opts *Options) error {
+func calculateReferenceDigests(printer common.Printer, cd *compdesc.ComponentDescriptor, state WalkingState, opts *Options) error {
 	for i, reference := range cd.References {
 		var calculatedDigest *metav1.DigestSpec
 		if reference.Digest == nil && !opts.DoUpdate() {
