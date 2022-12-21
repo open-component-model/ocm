@@ -1,26 +1,4 @@
 
-- [X] Transfer should support force option for override
-- [ ] Clarify how to list digests in (oci) ctf and artifact set under common oci API abstraction
-- [ ] Align OCI and OCM Repository Name with type structure and reference syntax
-- [ ] Aligned Denotation for OCM and OCI elements
-- [X] Generalize Sort Field Detection and check
-  - first ugly implementation done
-- [ ] Artifact download with side artifacts (based on dedicated option)
+- [ ] Rework option complete handling with sessions
 - [ ] Rework Processing Chain/Iterable to work go-like with channels
-- [ ] Generic History based sort function to be used to transform object sequence for tree output
-- [ ] Recursion + Tree mode for OCI Indices
 - [ ] Better separation between typehandler/chain and chain/output
-- [X] Rework digest handling based on Resource Type and Access Method Spec
-  - first cut and reorg done
-- [X] Complete handling of all possible input variations for the various CLI commands.
-- [X] Add signature handling
-- [ ] Identify required scenarios for OCM transport handling and improve transport handler accordingly
-- [ ] Add type factories for generic spec
-- [ ] Provide size and digest info for OCM blob access
-- [ ] CD validation for sources enforces git
-- [ ] decide on and introduce logging framework
-- [ ] add optional reference name to resource input
-- [ ] remove registry from default output and show only with wide output option (get artifact)
-- [ ] error handling for applying config (especially usage of ErrNoContext)
-- [X] migrate resource add input spec to typed spec
-- [X] Add Close method to access method to support external resource management

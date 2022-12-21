@@ -7,7 +7,14 @@ package hash
 import (
 	"github.com/spf13/pflag"
 
+	signingcmd "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/cmds/signing"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/hashoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 )
 
 func From(o options.OptionSetProvider) *Option {
@@ -20,10 +27,26 @@ var _ options.Options = (*Option)(nil)
 
 type Option struct {
 	Actual bool
+
+	action signingcmd.Action
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.BoolVarP(&o.Actual, "actual", "", false, "use actual component descriptor")
+}
+
+func (o *Option) Complete(cmd *Command) error {
+	if o.Actual {
+		return nil
+	}
+	repo := repooption.From(cmd).Repository
+	lookup := lookupoption.From(cmd)
+	sopts := signing.NewOptions(hashoption.From(cmd), signing.Resolver(repo, lookup.Resolver))
+	err := sopts.Complete(signingattr.Get(cmd.Context.OCMContext()))
+	if err == nil {
+		o.action = signingcmd.NewAction([]string{"", ""}, common.NewPrinter(nil), sopts)
+	}
+	return err
 }
 
 func (o *Option) Usage() string {

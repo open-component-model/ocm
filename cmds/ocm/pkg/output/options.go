@@ -15,7 +15,6 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -42,7 +41,7 @@ type Options struct {
 	Output      Output
 	Sort        []string
 	FixedColums int
-	Context     out.Context // this context could be ocm context.
+	Context     clictx.Context // this context could be ocm context.
 	Logging     logging.Context
 }
 
@@ -100,14 +99,24 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 
 func (o *Options) Complete(ctx clictx.Context) error {
 	o.Context = ctx
-	var fields []string
+
+	// process sub options first, to assure that output options are available for output
+	// mode creation
+	err := o.OptionSet.ProcessOnOptions(options.CompleteOptionsWithCLIContext(ctx))
+	if err != nil {
+		return err
+	}
 
 	if f := o.Outputs[o.OutputMode]; f == nil {
 		return errors.ErrInvalid("output mode", o.OutputMode)
 	} else {
 		o.Output = f(o)
 	}
+
 	var avail utils.StringSlice
+
+	var fields []string
+
 	if s, ok := o.Output.(SortFields); ok {
 		avail = s.GetSortFields()
 	}
@@ -125,11 +134,7 @@ func (o *Options) Complete(ctx clictx.Context) error {
 		}
 	}
 	o.Sort = fields
-	err := o.OptionSet.ProcessOnOptions(options.CompleteOptionsWithCLIContext(ctx))
-	if err != nil {
-		return err
-	}
-	return err
+	return nil
 }
 
 func (o *Options) CompleteAll(ctx clictx.Context) error {

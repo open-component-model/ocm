@@ -11,7 +11,6 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
-	signingcmd "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/cmds/signing"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/hashoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
@@ -25,9 +24,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 )
 
 var (
@@ -45,9 +42,9 @@ type Command struct {
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(
 		&Command{BaseCommand: utils.NewBaseCommand(ctx,
-			versionconstraintsoption.New(), repooption.New(),
+			versionconstraintsoption.New(),
 			output.OutputOptions(outputs, &Option{}, closureoption.New(
-				"component reference", output.Fields("IDENTITY"), addIdentityField), lookupoption.New(), hashoption.New(),
+				"component reference", output.Fields("IDENTITY"), addIdentityField), lookupoption.New(), hashoption.New(), repooption.New(),
 			))},
 		utils.Names(Names, names...)...,
 	)
@@ -84,15 +81,13 @@ func (o *Command) Run() error {
 	if err != nil {
 		return err
 	}
-	repo := repooption.From(o).Repository
-	lookup := lookupoption.From(o)
-	sopts := signing.NewOptions(hashoption.From(o), signing.Resolver(repo, lookup.Resolver))
-	err = sopts.Complete(signingattr.Get(o.Context.OCMContext()))
+
+	err = From(o).Complete(o)
 	if err != nil {
 		return err
 	}
 
-	handler := comphdlr.NewTypeHandler(o.Context.OCM(), session, repo, comphdlr.OptionsFor(o))
+	handler := comphdlr.NewTypeHandler(o.Context.OCM(), session, repooption.From(o).Repository, comphdlr.OptionsFor(o))
 	return utils.HandleArgs(output.From(o), handler, o.Refs...)
 }
 
@@ -113,55 +108,106 @@ func TableOutput(opts *output.Options, h *handler, mapping processing.MappingFun
 	return closureoption.TableOutput(def, comphdlr.ClosureExplode)
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
 type Object struct {
 	Spec       ocm.RefSpec
+	History    common.History
 	Descriptor *compdesc.ComponentDescriptor
 	Error      error
 }
 
-/////////////////////////////////////////////////////////////////////////////
+type Manifest struct {
+	History    common.History `json:"context"`
+	Component  string         `json:"component"`
+	Version    string         `json:"version"`
+	Normalized string         `json:"normalized,omitempty"`
+	Hash       string         `json:"hash,omitempty"`
+	Error      string         `json:"error,omitempty"`
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 var outputs = output.NewOutputs(getRegular, output.Outputs{
 	"wide": getWide,
-}).AddChainedManifestOutputs(output.ComposeChain(closureoption.OutputChainFunction(comphdlr.ClosureExplode, comphdlr.Sort)))
+}).AddChainedManifestOutputs(output.ComposeChain(closureoption.OutputChainFunction(comphdlr.ClosureExplode, comphdlr.Sort), mapManifest))
+
+func mapManifest(opts *output.Options) processing.ProcessChain {
+	h := newHandler(opts)
+	return processing.Map(h.digester).Map(h.manifester)
+}
 
 func getRegular(opts *output.Options) output.Output {
-	h := newHandler(hashoption.From(opts), From(opts))
+	h := newHandler(opts)
 	return TableOutput(opts, h, h.mapGetRegularOutput).New()
 }
 
 func getWide(opts *output.Options) output.Output {
-	h := newHandler(hashoption.From(opts), From(opts))
+	h := newHandler(opts)
 	return TableOutput(opts, h, h.mapGetWideOutput, "NORMALIZED FORM").New()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type handler struct {
-	opts   *hashoption.Option
-	action signingcmd.Action
+	opts *hashoption.Option
+	mode *Option
 }
 
-func newHandler(opts *hashoption.Option, myopts *Option) *handler {
-	sopts := signing.NewOptions(opts)
-	h := &handler{
-		opts: opts,
+func newHandler(opts *output.Options) *handler {
+	return &handler{
+		opts: hashoption.From(opts),
+		mode: From(opts),
 	}
-	if !myopts.Actual {
-		h.action = signingcmd.NewAction([]string{"", ""}, common.NewPrinter(nil), sopts)
+}
+
+func (h *handler) manifester(e interface{}) interface{} {
+	p := e.(*Object)
+
+	tag := "-"
+	if p.Spec.Version != nil {
+		tag = *p.Spec.Version
 	}
-	return h
+
+	hist := p.History
+	if hist == nil {
+		hist = common.History{}
+	}
+
+	m := &Manifest{
+		History:   hist,
+		Version:   tag,
+		Component: p.Spec.Component,
+	}
+
+	if p.Descriptor == nil {
+		if p.Error == nil {
+			m.Error = fmt.Sprintf("<unknown component version>")
+		} else {
+			m.Error = p.Error.Error()
+		}
+		return m
+	}
+	norm, hash, err := compdesc.NormHash(p.Descriptor, h.opts.NormAlgorithm, h.opts.Hasher.Create())
+	if err != nil {
+		m.Error = err.Error()
+	} else {
+		m.Normalized = string(norm)
+		m.Hash = hash
+	}
+	return m
 }
 
 func (h *handler) digester(e interface{}) interface{} {
 	p := e.(*comphdlr.Object)
 	o := &Object{
-		Spec: p.Spec,
+		Spec:    p.Spec,
+		History: p.History,
 	}
 	if p.ComponentVersion != nil {
 		o.Descriptor = p.ComponentVersion.GetDescriptor()
-		if h.action != nil {
-			_, o.Descriptor, o.Error = h.action.Digest(p)
+		if h.mode.action != nil {
+			_, o.Descriptor, o.Error = h.mode.action.Digest(p)
 		}
 	}
 	return o
