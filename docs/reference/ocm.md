@@ -138,9 +138,10 @@ attributes are supported:
 * [ocm <b>bootstrap</b>](ocm_bootstrap.md)	 &mdash; bootstrap components
 * [ocm <b>clean</b>](ocm_clean.md)	 &mdash; Cleanup/re-organize elements
 * [ocm <b>create</b>](ocm_create.md)	 &mdash; Create transport or component archive
-* [ocm <b>describe</b>](ocm_describe.md)	 &mdash; Describe artifacts
+* [ocm <b>describe</b>](ocm_describe.md)	 &mdash; Describe various elements by using appropriate sub commands.
 * [ocm <b>download</b>](ocm_download.md)	 &mdash; Download oci artifacts, resources or complete components
 * [ocm <b>get</b>](ocm_get.md)	 &mdash; Get information about artifacts and components
+* [ocm <b>hash</b>](ocm_hash.md)	 &mdash; Hash and normalization operations
 * [ocm <b>install</b>](ocm_install.md)	 &mdash; Install elements.
 * [ocm <b>show</b>](ocm_show.md)	 &mdash; Show tags or versions
 * [ocm <b>sign</b>](ocm_sign.md)	 &mdash; Sign components

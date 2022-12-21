@@ -18,25 +18,44 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
+type VersionInfo struct {
+	Descriptor *compdesc.ComponentDescriptor
+	Digest     *metav1.DigestSpec
+	Signed     bool
+}
+
 func ToDigestSpec(v interface{}) *metav1.DigestSpec {
 	if v == nil {
 		return nil
 	}
-	return v.(*metav1.DigestSpec)
+	return v.(*VersionInfo).Digest
 }
 
-func Apply(printer common.Printer, state *common.WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv ...bool) (*metav1.DigestSpec, error) {
+type WalkingState = common.WalkingState[*VersionInfo]
+
+func NewWalkingState() WalkingState {
+	return common.NewWalkingState[*VersionInfo]()
+}
+
+func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv ...bool) (*metav1.DigestSpec, error) {
 	if printer == nil {
 		printer = common.NewPrinter(nil)
 	}
 	if state == nil {
-		s := common.NewWalkingState()
+		s := common.NewWalkingState[*VersionInfo]()
 		state = &s
 	}
 	return apply(printer, *state, cv, opts, utils.Optional(closecv...))
 }
 
-func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv bool) (d *metav1.DigestSpec, efferr error) {
+func RequireReProcessing(vi *VersionInfo, opts *Options) bool {
+	if vi == nil {
+		return true
+	}
+	return opts.DoSign() && !vi.Signed
+}
+
+func apply(printer common.Printer, state WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv bool) (d *metav1.DigestSpec, efferr error) {
 	var closer errors.ErrorFunction
 	if closecv {
 		closer = cv.Close
@@ -44,16 +63,28 @@ func apply(printer common.Printer, state common.WalkingState, cv ocm.ComponentVe
 	nv := common.VersionedElementKey(cv)
 	defer errors.PropagateErrorf(&efferr, closer, "%s", state.History.Append(nv))
 
+	vi := state.Get(nv)
 	if ok, err := state.Add(ocm.KIND_COMPONENTVERSION, nv); !ok {
-		return ToDigestSpec(state.Closure[nv]), err
+		if err != nil || !RequireReProcessing(vi, opts) {
+			return ToDigestSpec(vi), err
+		}
 	}
-	return _apply(printer, state, nv, cv, opts)
+	return _apply(printer, state, nv, cv, vi, opts)
 }
 
-func _apply(printer common.Printer, state common.WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAccess, opts *Options) (*metav1.DigestSpec, error) {
-	cd := cv.GetDescriptor().Copy()
+func _apply(printer common.Printer, state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAccess, vi *VersionInfo, opts *Options) (*metav1.DigestSpec, error) {
+	var cd *compdesc.ComponentDescriptor
+
+	prefix := ""
+	if vi == nil {
+		cd = cv.GetDescriptor().Copy()
+		vi = &VersionInfo{Descriptor: cd}
+	} else {
+		cd = vi.Descriptor
+		prefix = "re"
+	}
 	octx := cv.GetContext()
-	printer.Printf("applying to version %q...\n", nv)
+	printer.Printf("%sapplying to version %q...\n", prefix, nv)
 
 	signatureNames := opts.SignatureNames
 	if len(signatureNames) == 0 {
@@ -73,61 +104,64 @@ func _apply(printer common.Printer, state common.WalkingState, nv common.NameVer
 		}
 	}
 
-	if err := calculateReferenceDigests(printer, cd, state, opts); err != nil {
-		return nil, err
-	}
-
-	blobdigesters := cv.GetContext().BlobDigesters()
-	for i, res := range cv.GetResources() {
-		raw := &cd.Resources[i]
-		acc, err := res.Access()
-		if err != nil {
-			return nil, errors.Wrapf(err, resMsg(raw, "", "failed getting access for resource"))
-		}
-		if _, ok := opts.SkipAccessTypes[acc.GetKind()]; ok {
-			// set the do not sign digest notation on skip-access-type resources
-			cd.Resources[i].Digest = metav1.NewExcludeFromSignatureDigest()
-			continue
-		}
-		// special digest notation indicates to not digest the content
-		if cd.Resources[i].Digest != nil && reflect.DeepEqual(cd.Resources[i].Digest, metav1.NewExcludeFromSignatureDigest()) {
-			continue
+	if vi.Digest == nil {
+		if err := calculateReferenceDigests(printer, cd, state, opts); err != nil {
+			return nil, err
 		}
 
-		meth, err := acc.AccessMethod(cv)
-		if err != nil {
-			return nil, errors.Wrapf(err, resMsg(raw, acc.Describe(octx), "failed creating access for resource"))
-		}
-		var req []cpi.DigesterType
-		if raw.Digest != nil {
-			req = []cpi.DigesterType{
-				{
-					HashAlgorithm:          raw.Digest.HashAlgorithm,
-					NormalizationAlgorithm: raw.Digest.NormalisationAlgorithm,
-				},
+		blobdigesters := cv.GetContext().BlobDigesters()
+		for i, res := range cv.GetResources() {
+			raw := &cd.Resources[i]
+			acc, err := res.Access()
+			if err != nil {
+				return nil, errors.Wrapf(err, resMsg(raw, "", "failed getting access for resource"))
 			}
+			if _, ok := opts.SkipAccessTypes[acc.GetKind()]; ok {
+				// set the do not sign digest notation on skip-access-type resources
+				cd.Resources[i].Digest = metav1.NewExcludeFromSignatureDigest()
+				continue
+			}
+			// special digest notation indicates to not digest the content
+			if cd.Resources[i].Digest != nil && reflect.DeepEqual(cd.Resources[i].Digest, metav1.NewExcludeFromSignatureDigest()) {
+				continue
+			}
+
+			meth, err := acc.AccessMethod(cv)
+			if err != nil {
+				return nil, errors.Wrapf(err, resMsg(raw, acc.Describe(octx), "failed creating access for resource"))
+			}
+			var req []cpi.DigesterType
+			if raw.Digest != nil {
+				req = []cpi.DigesterType{
+					{
+						HashAlgorithm:          raw.Digest.HashAlgorithm,
+						NormalizationAlgorithm: raw.Digest.NormalisationAlgorithm,
+					},
+				}
+			}
+			digest, err := blobdigesters.DetermineDigests(res.Meta().GetType(), opts.Hasher, opts.Registry, meth, req...)
+			if err != nil {
+				return nil, errors.Wrapf(err, resMsg(raw, acc.Describe(octx), "failed determining digest for resource"))
+			}
+			if len(digest) == 0 {
+				return nil, errors.Newf(resMsg(raw, acc.Describe(octx), "no digester accepts resource"))
+			}
+			if raw.Digest != nil && !reflect.DeepEqual(*raw.Digest, digest[0]) {
+				return nil, errors.Newf(resMsg(raw, acc.Describe(octx), "calculated resource digest (%+v) mismatches existing digest (%+v) for", digest, raw.Digest))
+			}
+			cd.Resources[i].Digest = &digest[0]
+			printer.Printf("  resource %d:  %s: digest %s\n", i, res.Meta().GetIdentity(cv.GetDescriptor().Resources), &digest[0])
 		}
-		digest, err := blobdigesters.DetermineDigests(res.Meta().GetType(), opts.Hasher, opts.Registry, meth, req...)
+		digest, err := compdesc.Hash(cd, opts.NormalizationAlgo, opts.Hasher.Create())
 		if err != nil {
-			return nil, errors.Wrapf(err, resMsg(raw, acc.Describe(octx), "failed determining digest for resource"))
+			return nil, errors.Wrapf(err, "failed hashing component descriptor")
 		}
-		if len(digest) == 0 {
-			return nil, errors.Newf(resMsg(raw, acc.Describe(octx), "no digester accepts resource"))
+		spec := &metav1.DigestSpec{
+			HashAlgorithm:          opts.Hasher.Algorithm(),
+			NormalisationAlgorithm: opts.NormalizationAlgo,
+			Value:                  digest,
 		}
-		if raw.Digest != nil && !reflect.DeepEqual(*raw.Digest, digest[0]) {
-			return nil, errors.Newf(resMsg(raw, acc.Describe(octx), "calculated resource digest (%+v) mismatches existing digest (%+v) for", digest, raw.Digest))
-		}
-		cd.Resources[i].Digest = &digest[0]
-		printer.Printf("  resource %d:  %s: digest %s\n", i, res.Meta().GetIdentity(cv.GetDescriptor().Resources), &digest[0])
-	}
-	digest, err := compdesc.Hash(cd, opts.NormalizationAlgo, opts.Hasher.Create())
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed hashing component descriptor")
-	}
-	spec := &metav1.DigestSpec{
-		HashAlgorithm:          opts.Hasher.Algorithm(),
-		NormalisationAlgorithm: opts.NormalizationAlgo,
-		Value:                  digest,
+		vi.Digest = spec
 	}
 
 	if opts.DoVerify() {
@@ -138,7 +172,7 @@ func _apply(printer common.Printer, state common.WalkingState, nv common.NameVer
 
 	found := cd.GetSignatureIndex(opts.SignatureName())
 	if opts.DoSign() && (!opts.DoVerify() || found == -1) {
-		sig, err := opts.Signer.Sign(digest, opts.Hasher.Crypto(), opts.Issuer, opts.PrivateKey())
+		sig, err := opts.Signer.Sign(vi.Digest.Value, opts.Hasher.Crypto(), opts.Issuer, opts.PrivateKey())
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed signing component descriptor")
 		}
@@ -151,7 +185,7 @@ func _apply(printer common.Printer, state common.WalkingState, nv common.NameVer
 		}
 		signature := metav1.Signature{
 			Name:   opts.SignatureName(),
-			Digest: *spec,
+			Digest: *vi.Digest,
 			Signature: metav1.SignatureSpec{
 				Algorithm: sig.Algorithm,
 				Value:     sig.Value,
@@ -175,10 +209,11 @@ func _apply(printer common.Printer, state common.WalkingState, nv common.NameVer
 		}
 		if opts.DoSign() {
 			orig.Signatures = cd.Signatures
+			vi.Signed = true
 		}
 	}
-	state.Closure[nv] = spec
-	return spec, nil
+	state.Closure[nv] = vi
+	return vi.Digest, nil
 }
 
 func refMsg(ref compdesc.ComponentReference, msg string, args ...interface{}) string {
@@ -192,7 +227,7 @@ func resMsg(ref *compdesc.Resource, acc string, msg string, args ...interface{})
 	return fmt.Sprintf("%s %s:%s", fmt.Sprintf(msg, args...), ref.Name, ref.Version)
 }
 
-func doVerify(printer common.Printer, cd *compdesc.ComponentDescriptor, state common.WalkingState, signatureNames []string, opts *Options) error {
+func doVerify(printer common.Printer, cd *compdesc.ComponentDescriptor, state WalkingState, signatureNames []string, opts *Options) error {
 	var err error
 	found := []string{}
 	for _, n := range signatureNames {
@@ -236,7 +271,7 @@ func doVerify(printer common.Printer, cd *compdesc.ComponentDescriptor, state co
 	return nil
 }
 
-func calculateReferenceDigests(printer common.Printer, cd *compdesc.ComponentDescriptor, state common.WalkingState, opts *Options) error {
+func calculateReferenceDigests(printer common.Printer, cd *compdesc.ComponentDescriptor, state WalkingState, opts *Options) error {
 	for i, reference := range cd.References {
 		var calculatedDigest *metav1.DigestSpec
 		if reference.Digest == nil && !opts.DoUpdate() {

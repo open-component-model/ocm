@@ -20,7 +20,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-type TransportClosure = common.NameVersionInfo
+type WalkingState = common.WalkingState[*struct{}]
+
+type TransportClosure = common.NameVersionInfo[*struct{}]
 
 func TransferVersion(printer common.Printer, closure TransportClosure, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
 	if closure == nil {
@@ -29,11 +31,11 @@ func TransferVersion(printer common.Printer, closure TransportClosure, src ocmcp
 	if printer == nil {
 		printer = common.NewPrinter(nil)
 	}
-	state := common.WalkingState{Closure: closure}
+	state := WalkingState{Closure: closure}
 	return transferVersion(printer, Logger(src), state, src, tgt, handler)
 }
 
-func transferVersion(printer common.Printer, log logging.Logger, state common.WalkingState, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
+func transferVersion(printer common.Printer, log logging.Logger, state WalkingState, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {
 	nv := common.VersionedElementKey(src)
 	log = log.WithValues("history", state.History.String(), "version", nv)
 	if ok, err := state.Add(ocm.KIND_COMPONENTVERSION, nv); !ok {

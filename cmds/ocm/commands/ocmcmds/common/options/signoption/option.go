@@ -12,6 +12,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/hashoption"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -43,7 +44,6 @@ type Option struct {
 	local         bool
 	SignMode      bool
 	signAlgorithm string
-	hashAlgorithm string
 	publicKeys    []string
 	privateKeys   []string
 	Issuer        string
@@ -58,19 +58,18 @@ type Option struct {
 	SignatureNames []string
 	Update         bool
 	Signer         signing.Signer
-	Hasher         signing.Hasher
 	Keys           signing.KeyRegistry
-	NormAlgorithm  string
+
+	Hash hashoption.Option
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringArrayVarP(&o.SignatureNames, "signature", "s", nil, "signature name")
 	fs.StringArrayVarP(&o.publicKeys, "public-key", "k", nil, "public key setting")
 	if o.SignMode {
+		o.Hash.AddFlags(fs)
 		fs.StringArrayVarP(&o.privateKeys, "private-key", "K", nil, "private key setting")
 		fs.StringVarP(&o.signAlgorithm, "algorithm", "S", rsa.Algorithm, "signature handler")
-		fs.StringVarP(&o.NormAlgorithm, "normalization", "N", jsonv1.Algorithm, "normalization algorithm")
-		fs.StringVarP(&o.hashAlgorithm, "hash", "H", sha256.Algorithm, "hash algorithm")
 		fs.StringVarP(&o.Issuer, "issuer", "I", "", "issuer name")
 		fs.BoolVarP(&o.Update, "update", "", o.SignMode, "update digest in component versions")
 		fs.BoolVarP(&o.Recursively, "recursive", "R", false, "recursively sign component versions")
@@ -97,26 +96,16 @@ func (o *Option) Complete(ctx clictx.Context) error {
 		o.Keys = signing.NewKeyRegistry()
 	}
 	if o.SignMode {
-		if o.NormAlgorithm == "" {
-			o.NormAlgorithm = jsonv1.Algorithm
+		err := o.Hash.Complete(ctx)
+		if err != nil {
+			return err
 		}
 		if o.signAlgorithm == "" {
 			o.signAlgorithm = rsa.Algorithm
 		}
-		if o.hashAlgorithm == "" {
-			o.hashAlgorithm = sha256.Algorithm
-		}
-		x := compdesc.Normalizations.Get(o.NormAlgorithm)
-		if x == nil {
-			return errors.ErrUnknown(compdesc.KIND_NORM_ALGORITHM, o.NormAlgorithm)
-		}
 		o.Signer = signingattr.Get(ctx).GetSigner(o.signAlgorithm)
 		if o.Signer == nil {
 			return errors.ErrUnknown(compdesc.KIND_SIGN_ALGORITHM, o.signAlgorithm)
-		}
-		o.Hasher = signingattr.Get(ctx).GetHasher(o.hashAlgorithm)
-		if o.Hasher == nil {
-			return errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, o.hashAlgorithm)
 		}
 	} else {
 		o.Recursively = !o.local
@@ -236,8 +225,8 @@ func (o *Option) ApplySigningOption(opts *ocmsign.Options) {
 	opts.Verify = o.Verify
 	opts.Recursively = o.Recursively
 	opts.Keys = o.Keys
-	opts.NormalizationAlgo = o.NormAlgorithm
-	opts.Hasher = o.Hasher
+	opts.NormalizationAlgo = o.Hash.NormAlgorithm
+	opts.Hasher = o.Hash.Hasher
 	if o.Issuer != "" {
 		opts.Issuer = o.Issuer
 	}

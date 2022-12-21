@@ -8,9 +8,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-type NameVersionInfo map[NameVersion]interface{}
+type NameVersionInfo[T any] map[NameVersion]T
 
-func (s NameVersionInfo) Add(nv NameVersion, data ...interface{}) bool {
+func (s NameVersionInfo[T]) Add(nv NameVersion, data ...T) bool {
 	if _, ok := s[nv]; !ok {
 		s[nv] = utils.Optional(data...)
 		return true
@@ -18,28 +18,32 @@ func (s NameVersionInfo) Add(nv NameVersion, data ...interface{}) bool {
 	return false
 }
 
-func (s NameVersionInfo) Contains(nv NameVersion) bool {
+func (s NameVersionInfo[T]) Contains(nv NameVersion) bool {
 	_, ok := s[nv]
 	return ok
 }
 
-type WalkingState struct {
-	Closure NameVersionInfo
+type WalkingState[T any] struct {
+	Closure NameVersionInfo[T]
 	History History
 }
 
-func NewWalkingState() WalkingState {
-	return WalkingState{Closure: NameVersionInfo{}}
+func NewWalkingState[T any]() WalkingState[T] {
+	return WalkingState[T]{Closure: NameVersionInfo[T]{}}
 }
 
-func (s *WalkingState) Add(kind string, nv NameVersion) (bool, error) {
+func (s *WalkingState[T]) Add(kind string, nv NameVersion) (bool, error) {
 	if err := s.History.Add(kind, nv); err != nil {
 		return false, err
 	}
 	return s.Closure.Add(nv), nil
 }
 
-func (s *WalkingState) Contains(nv NameVersion) bool {
+func (s *WalkingState[T]) Contains(nv NameVersion) bool {
 	_, ok := s.Closure[nv]
 	return ok
+}
+
+func (s *WalkingState[T]) Get(nv NameVersion) T {
+	return s.Closure[nv]
 }

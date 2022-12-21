@@ -14,6 +14,7 @@ import (
 func FormatTable(ctx Context, gap string, data [][]string) {
 	columns := []int{}
 	max := 0
+	maxtitle := 0
 
 	formats := []string{}
 	if len(data) > 1 {
@@ -23,6 +24,9 @@ func FormatTable(ctx Context, gap string, data [][]string) {
 				data[0][i] = f[1:]
 			} else {
 				formats = append(formats, "-")
+			}
+			if len(data[0][i]) > maxtitle {
+				maxtitle = len(data[0][i])
 			}
 		}
 	}
@@ -50,7 +54,7 @@ func FormatTable(ctx Context, gap string, data [][]string) {
 			} else {
 				for c, col := range row {
 					if c < len(first) {
-						Outf(ctx, "%s%s: %s\n", gap, first[c], col)
+						Outf(ctx, "%s%-*s: %s\n", gap, maxtitle, first[c], col)
 					} else {
 						Outf(ctx, "%s%d: %s\n", gap, c, col)
 					}
