@@ -1,4 +1,4 @@
-## ocm describe &mdash; Describe Artifacts
+## ocm describe &mdash; Describe Various Elements By Using Appropriate Sub Commands.
 
 ### Synopsis
 
