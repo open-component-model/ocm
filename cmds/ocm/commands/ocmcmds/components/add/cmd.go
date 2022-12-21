@@ -189,6 +189,7 @@ func (o *Command) Run() error {
 			if err != nil {
 				return errors.Wrapf(err, "cannot remove old %q", fp)
 			}
+			o.Create = true
 		}
 	}
 
@@ -196,7 +197,7 @@ func (o *Command) Run() error {
 	if o.Create {
 		repo, err = ctf.Create(o.Context.OCMContext(), accessobj.ACC_CREATE, fp, mode, o.Handler, fs)
 	} else {
-		repo, err = ctf.Open(o.Context.OCMContext(), accessobj.ACC_CREATE, fp, mode, fs)
+		repo, err = ctf.Open(o.Context.OCMContext(), accessobj.ACC_WRITABLE, fp, mode, fs)
 	}
 
 	if err == nil {
