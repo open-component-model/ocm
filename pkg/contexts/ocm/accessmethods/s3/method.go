@@ -16,22 +16,25 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 // Type is the access type of S3 registry.
-const Type = "S3"
-
 const (
-	TypeV1        = Type + runtime.VersionSeparator + "v1"
-	CONSUMER_TYPE = "s3"
+	Type   = "s3"
+	TypeV1 = Type + runtime.VersionSeparator + "v1"
+
+	LegacyType    = "S3"
+	LegacyTypeV1  = LegacyType + runtime.VersionSeparator + "v1"
+	CONSUMER_TYPE = "S3"
 )
 
 func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}, cpi.WithDescription(usage)))
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}, cpi.WithFormatSpec(formatV1), cpi.WithConfigHandler(ConfigHandler())))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyType, &AccessSpec{}))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyTypeV1, &AccessSpec{}))
 }
 
 // AccessSpec describes the access for a GitHub registry.
@@ -145,21 +148,11 @@ func getCreds(a *AccessSpec, cctx credentials.Context) (credentials.Credentials,
 		id[identity.ID_PORT] = a.Version
 	}
 	id[identity.ID_PATHPREFIX] = path.Join(a.Bucket, a.Key, a.Version)
-	var creds credentials.Credentials
-	src, err := cctx.GetCredentialsForConsumer(id, hostpath.IdentityMatcher(CONSUMER_TYPE))
-	if err != nil {
-		if !errors.IsErrUnknown(err) {
-			return nil, err
-		}
-		return nil, nil
-	}
-	if src != nil {
-		creds, err = src.Credentials(cctx)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return creds, nil
+	return credentials.CredentialsForConsumer(cctx,
+		credentials.ConsumerIdentity{
+			identity.ID_TYPE: CONSUMER_TYPE,
+		},
+		hostpath.IdentityMatcher(CONSUMER_TYPE))
 }
 
 func (m *accessMethod) GetKind() string {

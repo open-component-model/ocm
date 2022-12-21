@@ -18,7 +18,6 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
@@ -43,10 +42,10 @@ var _ = Describe("gardener config", func() {
 }`
 	encryptionKey := "abcdefghijklmnop"
 	encryptedContainerRegistryCfg := "Uz4mfePXFOUbjUEZnRrnG8zP2T7lRH6bR2rFHYgWDwZUXfW7D5wArwY4dsBACPVFNapF7kcM9z79+LvJXd2kNoIfvUyMOhrSDAyv4LtUqYSKBOoRH/aJMnXjmN9GQBCXSRSJs/Fu21AoDNo8fA9zYvvc7WxTldkYC/vHxLVNJu5j176e1QiaS9hwDjgNhgyUT3XUjHUyQ19PcRgwDglRLfiL4Cs/fYPPxdg4YZQdCnc="
-	expectedCreds := cpi.NewCredentials(common.Properties{
+	expectedCreds := cpi.DirectCredentials{
 		cpi.ATTR_USERNAME: "abc",
 		cpi.ATTR_PASSWORD: "123",
-	})
+	}
 
 	repoSpecTemplate := `{"type":"GardenerConfig","url":"%s","configType":"container_registry","cipher":"%s","propagateConsumerIdentity":true}`
 
@@ -138,9 +137,7 @@ var _ = Describe("gardener config", func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(repo).ToNot(BeNil())
 
-		credSrc, err := defaultContext.GetCredentialsForConsumer(expectedConsumerId, identity.IdentityMatcher)
-		Expect(err).ToNot(HaveOccurred())
-		credentialsFromCtx, err := credSrc.Credentials(defaultContext)
+		credentialsFromCtx, err := credentials.CredentialsForConsumer(defaultContext, expectedConsumerId, identity.IdentityMatcher)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(credentialsFromCtx).To(Equal(expectedCreds))
 	})
@@ -166,10 +163,9 @@ var _ = Describe("gardener config", func() {
 		id.SetNonEmptyValue(hostpath.ID_PATHPREFIX, strings.Trim(parsedURL.Path, "/"))
 		id.SetNonEmptyValue(hostpath.ID_PORT, parsedURL.Port())
 
-		creds := credentials.NewCredentials(common.Properties{
+		creds := credentials.DirectCredentials{
 			cpi.ATTR_KEY: encryptionKey,
-		})
-
+		}
 		defaultContext.SetCredentialsForConsumer(id, creds)
 
 		spec := fmt.Sprintf(repoSpecTemplate, svr.URL, local.AESECB)

@@ -12,7 +12,6 @@ import (
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 )
@@ -28,10 +27,10 @@ var _ = Describe("Test Environment", func() {
 			identity.ID_TYPE:     "test",
 			identity.ID_HOSTNAME: "ghcr.io",
 		}
-		creds := credentials.NewCredentials(common.Properties{
+		creds := credentials.DirectCredentials{
 			"user": "testuser",
 			"pass": "testpass",
-		})
+		}
 
 		cctx.SetCredentialsForConsumer(ids, creds)
 
@@ -40,10 +39,10 @@ var _ = Describe("Test Environment", func() {
 			identity.ID_HOSTNAME:   "ghcr.io",
 			identity.ID_PATHPREFIX: "a",
 		}
-		creds = credentials.NewCredentials(common.Properties{
+		creds = credentials.DirectCredentials{
 			"username": "testuser",
 			"password": "testpass",
-		})
+		}
 
 		cctx.SetCredentialsForConsumer(ids, creds)
 	})

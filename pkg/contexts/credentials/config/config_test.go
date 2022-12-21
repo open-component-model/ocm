@@ -181,9 +181,7 @@ type: credentials.config.ocm.software
 
 			ctx.ConfigContext().ApplyConfig(cfg, "testconfig")
 
-			found, err := ctx.GetCredentialsForConsumer(consumer, credentials.CompleteMatch)
-			Expect(err).To(Succeed())
-			result, err := found.Credentials(ctx)
+			result, err := credentials.CredentialsForConsumer(ctx, consumer, credentials.CompleteMatch)
 			Expect(err).To(Succeed())
 
 			Expect(result.Properties()).To(Equal(props))
@@ -208,9 +206,7 @@ consumers:
 `
 			ctx.ConfigContext().ApplyData([]byte(data), nil, "testconfig")
 
-			found, err := ctx.GetCredentialsForConsumer(consumer, credentials.CompleteMatch)
-			Expect(err).To(Succeed())
-			result, err := found.Credentials(ctx)
+			result, err := credentials.CredentialsForConsumer(ctx, consumer, credentials.CompleteMatch)
 			Expect(err).To(Succeed())
 
 			Expect(result.Properties()).To(Equal(props))

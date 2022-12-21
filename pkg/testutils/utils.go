@@ -13,7 +13,11 @@ import (
 )
 
 func Close(c io.Closer, msg ...interface{}) {
-	err := c.Close()
+	Defer(c.Close)
+}
+
+func Defer(f func() error, msg ...interface{}) {
+	err := f()
 	if err != nil {
 		switch len(msg) {
 		case 0:

@@ -49,7 +49,6 @@ func NewArtifact(container ArtifactSetContainerImpl, defs ...*artdesc.Artifact) 
 	if err != nil {
 		panic("oops: " + err.Error())
 	}
-
 	return newArtifactImpl(container, state)
 }
 

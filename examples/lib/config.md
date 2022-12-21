@@ -91,6 +91,10 @@ OCI registry.
 	fmt.Printf("found: %s\n", got)
 ```
 
+The first call provides a potentially dynamic credential source for the requested consumer. This object can then be used to dtermine actual credentials valid for an actual resource access. This indirection is introduced to support dynamic just-in-time credential generation processes.
+
+The function `credentials.CredentialsForConsumer` can be used, instead, to directly get access to the credential properties with a single function call.
+
 ## Configurations in Configuration Files
 
 The previous example just demonstrates the basic flow, it might not be 

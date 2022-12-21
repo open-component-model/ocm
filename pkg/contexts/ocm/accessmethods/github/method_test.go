@@ -19,9 +19,7 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"k8s.io/apimachinery/pkg/util/sets"
 
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/tmpcache"
@@ -66,7 +64,6 @@ var _ = Describe("Method", func() {
 		err                 error
 		defaultLink         string
 		accessSpec          *me.AccessSpec
-		dctx                datacontext.Context
 		fs                  vfs.FileSystem
 		expectedURL         string
 		clientFn            func(url string) *http.Client
@@ -106,7 +103,6 @@ var _ = Describe("Method", func() {
 		)
 		fs, err = osfs.NewTempFileSystem()
 		Expect(err).To(Succeed())
-		dctx = datacontext.New(nil)
 		vfsattr.Set(ctx, fs)
 		tmpcache.Set(ctx, &tmpcache.Attribute{Path: "/tmp"})
 	})
@@ -195,48 +191,38 @@ var _ = Describe("Method", func() {
 			)
 		})
 		It("can use those to access private repos", func() {
-			called := false
-			mcc := &mockContext{
-				dataContext: dctx,
-				creds: &mockCredSource{
-					cred: &mockCredentials{
-						value: func() string {
-							called = true
-							return "test"
-						},
-					},
+			mcc := ocm.New(datacontext.MODE_INITIAL)
+			src := &mockCredSource{
+				Context: mcc.CredentialsContext(),
+				cred: credentials.DirectCredentials{
+					credentials.ATTR_TOKEN: "test",
 				},
 			}
+			mcc.CredentialsContext().SetCredentialsForConsumer(credentials.ConsumerIdentity{credentials.ID_TYPE: me.CONSUMER_TYPE}, src)
 			m, err := accessSpec.AccessMethod(&mockComponentVersionAccess{
-				credContext: mcc,
+				ocmContext: mcc,
 			})
 			Expect(err).ToNot(HaveOccurred())
 			_, err = m.Get()
 			Expect(err).ToNot(HaveOccurred())
 			m.Close()
-			Expect(called).To(BeTrue())
+			Expect(src.called).To(BeTrue())
 		})
 	})
 
 	When("GetCredentialsForConsumer returns an error", func() {
 		It("errors", func() {
-			called := false
-			mcc := &mockContext{
-				creds: &mockCredSource{
-					cred: &mockCredentials{
-						value: func() string {
-							called = true
-							return "test"
-						},
-					},
-					err: fmt.Errorf("danger will robinson"),
-				},
+			mcc := ocm.New(datacontext.MODE_INITIAL)
+			src := &mockCredSource{
+				Context: mcc.CredentialsContext(),
+				err:     fmt.Errorf("danger will robinson"),
 			}
+			mcc.CredentialsContext().SetCredentialsForConsumer(credentials.ConsumerIdentity{credentials.ID_TYPE: me.CONSUMER_TYPE}, src)
 			_, err := accessSpec.AccessMethod(&mockComponentVersionAccess{
-				credContext: mcc,
+				ocmContext: mcc,
 			})
 			Expect(err).To(MatchError(ContainSubstring("danger will robinson")))
-			Expect(called).To(BeFalse())
+			Expect(src.called).To(BeTrue())
 		})
 	})
 
@@ -270,61 +256,21 @@ var _ = Describe("Method", func() {
 
 type mockComponentVersionAccess struct {
 	ocm.ComponentVersionAccess
-	credContext ocm.Context
+	ocmContext ocm.Context
 }
 
 func (m *mockComponentVersionAccess) GetContext() ocm.Context {
-	return m.credContext
-}
-
-type mockContext struct {
-	ocm.Context
-	creds       credentials.Context
-	dataContext datacontext.Context
-}
-
-func (m *mockContext) CredentialsContext() credentials.Context {
-	return m.creds
-}
-
-func (m *mockContext) GetAttributes() datacontext.Attributes {
-	return m.dataContext.GetAttributes()
+	return m.ocmContext
 }
 
 type mockCredSource struct {
 	credentials.Context
-	cred credentials.Credentials
-	err  error
-}
-
-func (m *mockCredSource) GetCredentialsForConsumer(credentials.ConsumerIdentity, ...credentials.IdentityMatcher) (credentials.CredentialsSource, error) {
-	return m, m.err
+	cred   credentials.Credentials
+	called bool
+	err    error
 }
 
 func (m *mockCredSource) Credentials(credentials.Context, ...credentials.CredentialsSource) (credentials.Credentials, error) {
-	return m.cred, nil
-}
-
-type mockCredentials struct {
-	value func() string
-}
-
-func (m *mockCredentials) Credentials(context credentials.Context, source ...credentials.CredentialsSource) (credentials.Credentials, error) {
-	panic("implement me")
-}
-
-func (m *mockCredentials) ExistsProperty(name string) bool {
-	panic("implement me")
-}
-
-func (m *mockCredentials) PropertyNames() sets.String {
-	panic("implement me")
-}
-
-func (m *mockCredentials) Properties() common.Properties {
-	panic("implement me")
-}
-
-func (m *mockCredentials) GetProperty(name string) string {
-	return m.value()
+	m.called = true
+	return m.cred, m.err
 }

@@ -7,7 +7,6 @@ package helper
 import (
 	"io/ioutil"
 
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -35,8 +34,8 @@ func ReadConfig(path string) (*Config, error) {
 }
 
 func (c *Config) GetCredentials() credentials.Credentials {
-	return credentials.NewCredentials(common.Properties{
+	return credentials.DirectCredentials{
 		credentials.ATTR_USERNAME: c.Username,
 		credentials.ATTR_PASSWORD: c.Password,
-	})
+	}
 }

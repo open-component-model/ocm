@@ -31,6 +31,7 @@ type (
 	RepositorySpec         = internal.RepositorySpec
 	GenericRepositorySpec  = internal.GenericRepositorySpec
 	GenericCredentialsSpec = internal.GenericCredentialsSpec
+	DirectCredentials      = internal.DirectCredentials
 )
 
 type (
@@ -81,7 +82,11 @@ func ErrUnknownRepository(kind, name string) error {
 }
 
 func CredentialsForConsumer(ctx ContextProvider, id ConsumerIdentity, matchers ...IdentityMatcher) (Credentials, error) {
-	return internal.CredentialsForConsumer(ctx, id, matchers...)
+	return internal.CredentialsForConsumer(ctx, id, false, matchers...)
+}
+
+func RequiredCredentialsForConsumer(ctx ContextProvider, id ConsumerIdentity, matchers ...IdentityMatcher) (Credentials, error) {
+	return internal.CredentialsForConsumer(ctx, id, true, matchers...)
 }
 
 var (

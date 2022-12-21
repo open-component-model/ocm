@@ -5,6 +5,7 @@
 package genericocireg
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -131,7 +132,7 @@ func (c *componentAccessImpl) LookupVersion(version string) (cpi.ComponentVersio
 		}
 		return nil, err
 	}
-	return newComponentVersionAccess(accessobj.ACC_WRITABLE, c, version, acc)
+	return newComponentVersionAccess(accessobj.ACC_WRITABLE, c, version, acc, true)
 }
 
 func (c *componentAccessImpl) AddVersion(access cpi.ComponentVersionAccess) error {
@@ -139,6 +140,10 @@ func (c *componentAccessImpl) AddVersion(access cpi.ComponentVersionAccess) erro
 		if a.GetName() != c.GetName() {
 			return errors.ErrInvalid("component name", a.GetName())
 		}
+		if a.container.comp.componentAccessImpl != c {
+			return fmt.Errorf("cannot add component version: component version access %s not created for target", a.GetName()+":"+a.GetVersion())
+		}
+		a.EnablePersistence()
 		return a.container.Update()
 	}
 	return errors.ErrInvalid("component version")
@@ -155,7 +160,7 @@ func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (cpi
 	acc, err := c.namespace.GetArtifact(version)
 	if err == nil {
 		if override {
-			return newComponentVersionAccess(accessobj.ACC_CREATE, c, version, acc)
+			return newComponentVersionAccess(accessobj.ACC_CREATE, c, version, acc, false)
 		}
 		return nil, errors.ErrAlreadyExists(cpi.KIND_COMPONENTVERSION, c.name+"/"+version)
 	}
@@ -166,5 +171,5 @@ func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (cpi
 	if err != nil {
 		return nil, err
 	}
-	return newComponentVersionAccess(accessobj.ACC_CREATE, c, version, acc)
+	return newComponentVersionAccess(accessobj.ACC_CREATE, c, version, acc, false)
 }

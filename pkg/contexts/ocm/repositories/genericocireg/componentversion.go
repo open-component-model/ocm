@@ -34,12 +34,12 @@ type ComponentVersion struct {
 var _ cpi.ComponentVersionAccess = (*ComponentVersion)(nil)
 
 // newComponentVersionAccess creates an component access for the artifact access, if this fails the artifact acess is closed.
-func newComponentVersionAccess(mode accessobj.AccessMode, comp *componentAccessImpl, version string, access oci.ArtifactAccess) (*ComponentVersion, error) {
+func newComponentVersionAccess(mode accessobj.AccessMode, comp *componentAccessImpl, version string, access oci.ArtifactAccess, persistent bool) (*ComponentVersion, error) {
 	c, err := newComponentVersionContainer(mode, comp, version, access)
 	if err != nil {
 		return nil, err
 	}
-	acc, err := support.NewComponentVersionAccess(c, true)
+	acc, err := support.NewComponentVersionAccess(c, true, persistent)
 	if err != nil {
 		c.Close()
 		return nil, err

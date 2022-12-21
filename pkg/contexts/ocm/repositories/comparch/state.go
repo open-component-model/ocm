@@ -13,14 +13,12 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 )
 
-type StateHandler struct {
-	fs vfs.FileSystem
-}
+type StateHandler struct{}
 
 var _ accessobj.StateHandler = &StateHandler{}
 
 func NewStateHandler(fs vfs.FileSystem) accessobj.StateHandler {
-	return &StateHandler{fs}
+	return &StateHandler{}
 }
 
 func (i StateHandler) Initial() interface{} {
