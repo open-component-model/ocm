@@ -85,5 +85,5 @@ generate-license:
 	done
 
 .PHONY: prepare-release
-prepare-release: ## Create release
-	hack/build/tag-release.sh
+prepare-release: ## Prepare release
+	hack/build/prepare-release.sh

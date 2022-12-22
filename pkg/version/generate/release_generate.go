@@ -14,12 +14,12 @@ func main() {
 		log.Fatal("missing argument")
 	}
 
-	ver := semver.MustParse(version.ReleaseVersion)
+	_ = semver.MustParse(version.ReleaseVersion)
 
 	cmd := os.Args[1]
 
 	switch cmd {
 	case "print-version":
-		fmt.Println(ver)
+		fmt.Println(version.ReleaseVersion)
 	}
 }
