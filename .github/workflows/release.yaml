@@ -1,0 +1,30 @@
+name: Release
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  lint-and-test:
+    uses: ./.github/workflows/lint_and_test.yaml
+  release:
+    name: Trigger release build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      repository-projects: read
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Cache go-build and mod
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build/
+          ~/go/pkg/mod/
+        key: go-${{ hashFiles('go.sum') }}
+        restore-keys: |
+          go-
+    - name: Push tag and open PR to default branch
+      run: make prepare-release
