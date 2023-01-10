@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
+//
+// SPDX-License-Identifier: Apache-2.0
+
 package main
 
 import (
@@ -10,7 +14,7 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 1 {
+	if len(os.Args) <= 1 {
 		log.Fatal("missing argument")
 	}
 
@@ -20,6 +24,6 @@ func main() {
 
 	switch cmd {
 	case "print-version":
-		fmt.Println(version.ReleaseVersion)
+		fmt.Print(version.ReleaseVersion)
 	}
 }

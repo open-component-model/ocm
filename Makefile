@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-VERSION                                        := $(shell cat $(REPO_ROOT)/VERSION)
+VERSION                                        := $(shell go run pkg/version/generate/release_generate.go print-version)
 EFFECTIVE_VERSION                              := $(VERSION)+$(shell git rev-parse HEAD)
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 COMMIT                                         := $(shell git rev-parse --verify HEAD)
@@ -85,5 +85,5 @@ generate-license:
 	done
 
 .PHONY: prepare-release
-prepare-release: ## Prepare release
+prepare-release:
 	hack/build/prepare-release.sh
