@@ -16,7 +16,8 @@ ocm hash componentversions [<options>] {<component-reference>}
       --latest                    restrict component versions to latest
       --lookup stringArray        repository name or spec for closure lookup fallback
   -N, --normalization string      normalization algorithm (default "jsonNormalisation/v1")
-  -o, --output string             output mode (JSON, json, wide, yaml)
+  -O, --outfile string            Output file for normalized component descriptor (default "norm.ncd")
+  -o, --output string             output mode (JSON, json, norm, wide, yaml)
   -r, --recursive                 follow component reference nesting
       --repo string               repository name or spec
   -s, --sort stringArray          sort fields
@@ -108,6 +109,7 @@ With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:
  - JSON
  - json
+ - norm
  - wide
  - yaml
 

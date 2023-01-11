@@ -6,6 +6,7 @@ package genericocireg
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 )
 
@@ -22,6 +23,9 @@ func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepository
 	var meta *ComponentRepositoryMeta
 	if u.SubPath != "" {
 		meta = NewComponentRepositoryMeta(u.SubPath, "")
+	}
+	if compatattr.Get(ctx) {
+		return NewRepositorySpec(ocireg.NewLegacyRepositorySpec(u.Host), meta), nil
 	}
 	return NewRepositorySpec(ocireg.NewRepositorySpec(u.Host), meta), nil
 }

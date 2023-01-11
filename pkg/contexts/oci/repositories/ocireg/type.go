@@ -60,6 +60,13 @@ func NewRepositorySpec(baseURL string) *RepositorySpec {
 	}
 }
 
+func NewLegacyRepositorySpec(baseURL string) *RepositorySpec {
+	return &RepositorySpec{
+		ObjectVersionedType: runtime.NewVersionedObjectType(LegacyType),
+		BaseURL:             baseURL,
+	}
+}
+
 func (a *RepositorySpec) GetType() string {
 	return Type
 }

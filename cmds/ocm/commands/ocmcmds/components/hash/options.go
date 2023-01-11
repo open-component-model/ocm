@@ -28,11 +28,13 @@ var _ options.Options = (*Option)(nil)
 type Option struct {
 	Actual bool
 
-	action signingcmd.Action
+	action  signingcmd.Action
+	outfile string
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.BoolVarP(&o.Actual, "actual", "", false, "use actual component descriptor")
+	fs.StringVarP(&o.outfile, "outfile", "O", "norm.ncd", "Output file for normalized component descriptor")
 }
 
 func (o *Option) Complete(cmd *Command) error {
