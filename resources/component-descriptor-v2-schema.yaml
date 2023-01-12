@@ -412,6 +412,9 @@ definitions:
         $ref: '#/definitions/componentName'
       version:
         $ref: '#/definitions/relaxedSemver'
+      creationTime:
+        type: string
+        format: date-time
       repositoryContexts:
         type: 'array'
         items:

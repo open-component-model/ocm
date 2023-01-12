@@ -82,6 +82,7 @@ func (*ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem ad
 
 	cd.Labels = r.Labels
 	cd.Provider = r.Provider
+	cd.CreationTime = metav1.NewTimestampP()
 
 	err = handle(ctx, ictx, elem.Source(), cv, r.Sources, srcs.ResourceSpecHandler{})
 	if err != nil {

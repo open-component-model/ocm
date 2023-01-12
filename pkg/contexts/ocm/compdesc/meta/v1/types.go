@@ -5,7 +5,11 @@
 package v1
 
 import (
+	"time"
+
 	"k8s.io/apimachinery/pkg/util/validation/field"
+
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 const (
@@ -73,6 +77,9 @@ type ObjectMeta struct {
 	Labels Labels `json:"labels,omitempty"`
 	// Provider described the component provider
 	Provider Provider `json:"provider"`
+	// CreationTime is the creation time of component version
+	// +optional
+	CreationTime *Timestamp `json:"creationTime,omitempty"`
 }
 
 // GetName returns the name of the object.
@@ -150,4 +157,70 @@ func (o *Provider) Copy() *Provider {
 		Name:   o.Name,
 		Labels: o.Labels.Copy(),
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type _time = time.Time
+
+// Timestamp is time rounded to seconds.
+type Timestamp struct {
+	_time
+}
+
+func NewTimestamp() Timestamp {
+	return Timestamp{time.Now().Round(time.Second)}
+}
+
+func NewTimestampP() *Timestamp {
+	return &Timestamp{time.Now().Round(time.Second)}
+}
+
+func NewTimestampFor(t time.Time) Timestamp {
+	return Timestamp{t.Round(time.Second)}
+}
+
+// MarshalJSON implements the json.Marshaler interface.
+// The time is a quoted string in RFC 3339 format, with sub-second precision added if present.
+func (t Timestamp) MarshalJSON() ([]byte, error) {
+	if y := t.Year(); y < 0 || y >= 10000 {
+		// RFC 3339 is clear that years are 4 digits exactly.
+		// See golang.org/issue/4556#c15 for more discussion.
+		return nil, errors.New("Time.MarshalJSON: year outside of range [0,9999]")
+	}
+
+	b := make([]byte, 0, len(time.RFC3339)+2)
+	b = append(b, '"')
+	b = t.AppendFormat(b, time.RFC3339)
+	b = append(b, '"')
+	return b, nil
+}
+
+// UnmarshalJSON implements the json.Unmarshaler interface.
+// The time is expected to be a quoted string in RFC 3339 format.
+func (t *Timestamp) UnmarshalJSON(data []byte) error {
+	// Ignore null, like in the main JSON package.
+	if string(data) == "null" {
+		return nil
+	}
+	// Fractional seconds are handled implicitly by Parse.
+	tt, err := time.Parse(`"`+time.RFC3339+`"`, string(data))
+	*t = NewTimestampFor(tt)
+	return err
+}
+
+func (t *Timestamp) Time() time.Time {
+	return t._time
+}
+
+func (t *Timestamp) Equal(o Timestamp) bool {
+	return t._time.Equal(o._time)
+}
+
+func (t *Timestamp) UTC() Timestamp {
+	return NewTimestampFor(t._time.UTC())
+}
+
+func (t *Timestamp) Add(d time.Duration) Timestamp {
+	return NewTimestampFor(t._time.Add(d))
 }

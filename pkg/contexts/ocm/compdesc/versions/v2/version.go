@@ -83,10 +83,11 @@ func (v *DescriptorVersion) ConvertTo(obj compdesc.ComponentDescriptorVersion) (
 		Metadata: compdesc.Metadata{ConfiguredVersion: in.Metadata.Version},
 		ComponentSpec: compdesc.ComponentSpec{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:     in.Name,
-				Version:  in.Version,
-				Labels:   in.Labels.Copy(),
-				Provider: provider,
+				Name:         in.Name,
+				Version:      in.Version,
+				Labels:       in.Labels.Copy(),
+				Provider:     provider,
+				CreationTime: in.CreationTime,
 			},
 			RepositoryContexts: in.RepositoryContexts.Copy(),
 			Sources:            convertSourcesTo(in.Sources),
@@ -211,9 +212,10 @@ func (v *DescriptorVersion) ConvertFrom(in *compdesc.ComponentDescriptor) (compd
 		},
 		ComponentSpec: ComponentSpec{
 			ObjectMeta: ObjectMeta{
-				Name:    in.Name,
-				Version: in.Version,
-				Labels:  in.Labels.Copy(),
+				Name:         in.Name,
+				Version:      in.Version,
+				Labels:       in.Labels.Copy(),
+				CreationTime: in.CreationTime,
 			},
 			RepositoryContexts:  in.RepositoryContexts.Copy(),
 			Provider:            provider,

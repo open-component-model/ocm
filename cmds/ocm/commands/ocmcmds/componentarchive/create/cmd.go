@@ -141,6 +141,7 @@ func (o *Command) Run() error {
 	desc.Provider.Name = metav1.ProviderName(o.Provider)
 	desc.Provider.Labels = o.ProviderLabels
 	desc.Labels = o.Labels
+	desc.CreationTime = metav1.NewTimestampP()
 
 	err = compdesc.Validate(desc)
 	if err != nil {

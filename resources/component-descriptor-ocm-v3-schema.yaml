@@ -18,6 +18,9 @@ definitions:
         $ref: '#/definitions/labels'
       provider:
         $ref: '#/definitions/provider'
+      creationTime:
+        type: string
+        format: date-time
 
   labels:
     type: 'array'
