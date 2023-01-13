@@ -11,7 +11,7 @@ ocm hash componentversions [<options>] {<component-reference>}
 ```
       --actual                    use actual component descriptor
   -c, --constraints constraints   version constraint
-  -H, --hash string               hash algorithm (default "sha256")
+  -H, --hash string               hash algorithm (default "SHA-256")
   -h, --help                      help for componentversions
       --latest                    restrict component versions to latest
       --lookup stringArray        repository name or spec for closure lookup fallback
@@ -57,8 +57,8 @@ The following normalization modes are supported with option <code>--normalizatio
 The following hash modes are supported with option <code>--hash</code>:
 
   - <code>NO-DIGEST</code>: 
-  - <code>sha256</code> (default): 
-  - <code>sha512</code>: 
+  - <code>SHA-256</code> (default): 
+  - <code>SHA-512</code>: 
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax

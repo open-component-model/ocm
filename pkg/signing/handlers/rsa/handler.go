@@ -12,6 +12,7 @@ import (
 	"encoding/pem"
 	"fmt"
 
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
 )
@@ -29,7 +30,7 @@ const MediaTypePEM = "application/x-pem-file"
 const SignaturePEMBlockType = "SIGNATURE"
 
 // SignaturePEMBlockAlgorithmHeader defines the header in a signature pem block where the signature algorithm is defined.
-const SignaturePEMBlockAlgorithmHeader = "Algorithm"
+const SignaturePEMBlockAlgorithmHeader = "Signature Algorithm"
 
 func init() {
 	signing.DefaultHandlerRegistry().RegisterSigner(Algorithm, Handler{})
@@ -50,7 +51,7 @@ func (h Handler) Algorithm() string {
 	return Algorithm
 }
 
-func (h Handler) Sign(digest string, hash crypto.Hash, issuer string, key interface{}) (signature *signing.Signature, err error) {
+func (h Handler) Sign(cctx credentials.Context, digest string, hash crypto.Hash, issuer string, key interface{}) (signature *signing.Signature, err error) {
 	privateKey, err := GetPrivateKey(key)
 	if err != nil {
 		return nil, errors.Wrapf(err, "invalid rsa private key")

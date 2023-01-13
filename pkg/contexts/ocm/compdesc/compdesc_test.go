@@ -41,7 +41,7 @@ var _ = Describe("serialization", func() {
         referenceName: vasu1124/introspect:1.0.0
         type: localBlob
       digest:
-        hashAlgorithm: sha256
+        hashAlgorithm: SHA-256
         normalisationAlgorithm: ociArtifactDigest/v1
         value: 6a1c7637a528ab5957ab60edf73b5298a0a03de02a96be0313ee89b22544840c
       name: introspect-image
@@ -53,7 +53,7 @@ var _ = Describe("serialization", func() {
         mediaType: ""
         type: localBlob
       digest:
-        hashAlgorithm: sha256
+        hashAlgorithm: SHA-256
         normalisationAlgorithm: genericBlobDigest/v1
         value: d1187ac17793b2f5fa26175c21cabb6ce388871ae989e16ff9a38bd6b32507bf
       name: introspect-blueprint
@@ -66,7 +66,7 @@ var _ = Describe("serialization", func() {
         referenceName: vasu1124/helm/introspect-helm:0.1.0
         type: localBlob
       digest:
-        hashAlgorithm: sha256
+        hashAlgorithm: SHA-256
         normalisationAlgorithm: ociArtifactDigest/v1
         value: 6229be2be7e328f74ba595d93b814b590b1aa262a1b85e49cc1492795a9e564c
       name: introspect-helm
@@ -105,7 +105,7 @@ spec:
       referenceName: vasu1124/introspect:1.0.0
       type: localBlob
     digest:
-      hashAlgorithm: sha256
+      hashAlgorithm: SHA-256
       normalisationAlgorithm: ociArtifactDigest/v1
       value: 6a1c7637a528ab5957ab60edf73b5298a0a03de02a96be0313ee89b22544840c
     name: introspect-image
@@ -117,7 +117,7 @@ spec:
       mediaType: ""
       type: localBlob
     digest:
-      hashAlgorithm: sha256
+      hashAlgorithm: SHA-256
       normalisationAlgorithm: genericBlobDigest/v1
       value: d1187ac17793b2f5fa26175c21cabb6ce388871ae989e16ff9a38bd6b32507bf
     name: introspect-blueprint
@@ -130,7 +130,7 @@ spec:
       referenceName: vasu1124/helm/introspect-helm:0.1.0
       type: localBlob
     digest:
-      hashAlgorithm: sha256
+      hashAlgorithm: SHA-256
       normalisationAlgorithm: ociArtifactDigest/v1
       value: 6229be2be7e328f74ba595d93b814b590b1aa262a1b85e49cc1492795a9e564c
     name: introspect-helm

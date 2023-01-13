@@ -20,12 +20,14 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	tenv "github.com/open-component-model/ocm/pkg/env"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/handlers/rsa"
+	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 )
 
 var DefaultContext = ocm.New()
@@ -46,12 +48,54 @@ var _ = Describe("access method", func() {
 	var env *Builder
 
 	BeforeEach(func() {
-		env = NewBuilder(tenv.NewEnvironment())
+		env = NewBuilder(tenv.NewEnvironment(tenv.ModifiableTestData()))
 		env.RSAKeyPair(SIGNATURE)
 	})
 
 	AfterEach(func() {
 		env.Cleanup()
+	})
+
+	Context("compatibility", func() {
+		It("verifies older hash types (sha256[digest type] instead of SHA-256(crypto type))", func() {
+			session := datacontext.NewSession()
+			defer session.Close()
+
+			env.ReadRSAKeyPair(SIGNATURE, "/testdata/compat")
+			cv, err := comparch.Open(env.OCMContext(), accessobj.ACC_READONLY, "/testdata/compat/component-archive", 0, env)
+			Expect(err).To(Succeed())
+			session.AddCloser(cv)
+			opts := NewOptions(
+				VerifySignature(SIGNATURE),
+				VerifyDigests(),
+			)
+			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+
+			dig, err := Apply(nil, nil, cv, opts)
+			Expect(err).To(Succeed())
+			Expect(dig.Value).To(Equal("4aa3e99afc6f91f345eb757908d1097d01beeec4a5512bfa8b4d2d0ff44b6566"))
+			Expect(dig.HashAlgorithm).To(Equal(sha256.Algorithm))
+		})
+		It("resigns with older hash types", func() {
+			session := datacontext.NewSession()
+			defer session.Close()
+
+			env.ReadRSAKeyPair(SIGNATURE, "/testdata/compat")
+			cv, err := comparch.Open(env.OCMContext(), accessobj.ACC_READONLY, "/testdata/compat/component-archive", 0, env)
+			Expect(err).To(Succeed())
+			session.AddCloser(cv)
+			opts := NewOptions(
+				Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
+				VerifySignature(SIGNATURE),
+				VerifyDigests(),
+			)
+			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
+
+			dig, err := Apply(nil, nil, cv, opts)
+			Expect(err).To(Succeed())
+			Expect(dig.Value).To(Equal("4aa3e99afc6f91f345eb757908d1097d01beeec4a5512bfa8b4d2d0ff44b6566"))
+			Expect(dig.HashAlgorithm).To(Equal(sha256.Algorithm))
+		})
 	})
 
 	Context("valid", func() {
@@ -114,7 +158,7 @@ var _ = Describe("access method", func() {
 				Update(), VerifyDigests(),
 			)
 			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
-			digest := "39ea26ac4391052a638319f64b8da2628acb51d304c3a1ac8f920a46f2d6dce7"
+			digest := "8ae7ab0c1578d1292922b2a3884833c380a57df2cc7dfab7213ee051b092edc3"
 			dig, err := Apply(nil, nil, cv, opts)
 			Expect(err).To(Succeed())
 			Expect(closer.Close()).To(Succeed())
@@ -163,7 +207,7 @@ var _ = Describe("access method", func() {
 				Update(), VerifyDigests(),
 			)
 			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
-			digest := "39ea26ac4391052a638319f64b8da2628acb51d304c3a1ac8f920a46f2d6dce7"
+			digest := "8ae7ab0c1578d1292922b2a3884833c380a57df2cc7dfab7213ee051b092edc3"
 			dig, err := Apply(nil, nil, cv, opts)
 			Expect(err).To(Succeed())
 			closer.Close()
@@ -211,7 +255,7 @@ var _ = Describe("access method", func() {
 				Resolver(resolver),
 				Update(), VerifyDigests(),
 			)
-			digest := "05c4edd25661703e0c5caec8b0680c93738d8a8126d825adb755431fec29b7cb"
+			digest := "2aa8f24b0dfea50365927bbe1c77191828658e7758b49ad62faafcf0395351c5"
 			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
 			dig, err := Apply(nil, nil, cv, opts)
 			Expect(err).To(Succeed())

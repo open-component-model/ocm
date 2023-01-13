@@ -62,7 +62,7 @@ default credential, always used if no dedicated match is found.
 For example:
 
 <center>
-    <pre>--cred :type=ociRegistry --cred hostname=ghcr.io --cred usename=mandelsoft --cred password=xyz</pre>
+    <pre>--cred :type=ociRegistry --cred :hostname=ghcr.io --cred usename=mandelsoft --cred password=xyz</pre>
 </center>
 
 With the option <code>-X</code> it is possible to pass global settings of the 

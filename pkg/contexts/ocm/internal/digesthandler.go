@@ -29,6 +29,11 @@ func NewDigestDescriptor(digest, hashAlgo, normAlgo string) *DigestDescriptor {
 	}
 }
 
+func (d DigesterType) Normalize() DigesterType {
+	d.HashAlgorithm = signing.NormalizeHashAlgorithm(d.HashAlgorithm)
+	return d
+}
+
 // BlobDigester is the interface for digest providers
 // for dedicated mime types.
 // If found the digest provided by the digester will
@@ -124,7 +129,7 @@ func (r *blobDigesterRegistry) GetDigester(typ DigesterType) BlobDigester {
 }
 
 func (r *blobDigesterRegistry) getDigester(typ DigesterType) BlobDigester {
-	d := r.digesters[typ]
+	d := r.digesters[typ.Normalize()]
 	if d != nil {
 		return d
 	}
@@ -181,15 +186,15 @@ func (r *blobDigesterRegistry) handle(list []BlobDigester, typ string, acc Acces
 	return nil, nil
 }
 
-func (r *blobDigesterRegistry) DetermineDigests(restype string, preferred signing.Hasher, registry signing.Registry, acc AccessMethod, dtyps ...DigesterType) ([]DigestDescriptor, error) {
+func (r *blobDigesterRegistry) DetermineDigests(restype string, preferred signing.Hasher, registry signing.Registry, acc AccessMethod, pref ...DigesterType) ([]DigestDescriptor, error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 
 	none := DigesterType{}
-	for i := 0; i < len(dtyps); i++ {
-		if dtyps[i] == none {
-			dtyps = append(dtyps[:i], dtyps[i+1:]...)
-			i--
+	var dtyps []DigesterType
+	for _, d := range pref {
+		if d != none {
+			dtyps = append(dtyps, d.Normalize())
 		}
 	}
 	if len(dtyps) == 0 {

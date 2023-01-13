@@ -15,6 +15,7 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -146,7 +147,7 @@ func _apply(printer common.Printer, state WalkingState, nv common.NameVersion, c
 			if len(digest) == 0 {
 				return nil, errors.Newf(resMsg(raw, acc.Describe(octx), "no digester accepts resource"))
 			}
-			if raw.Digest != nil && !reflect.DeepEqual(*raw.Digest, digest[0]) {
+			if !checkDigest(raw.Digest, &digest[0]) {
 				return nil, errors.Newf(resMsg(raw, acc.Describe(octx), "calculated resource digest (%+v) mismatches existing digest (%+v) for", digest, raw.Digest))
 			}
 			cd.Resources[i].Digest = &digest[0]
@@ -172,7 +173,7 @@ func _apply(printer common.Printer, state WalkingState, nv common.NameVersion, c
 
 	found := cd.GetSignatureIndex(opts.SignatureName())
 	if opts.DoSign() && (!opts.DoVerify() || found == -1) {
-		sig, err := opts.Signer.Sign(vi.Digest.Value, opts.Hasher.Crypto(), opts.Issuer, opts.PrivateKey())
+		sig, err := opts.Signer.Sign(cv.GetContext().CredentialsContext(), vi.Digest.Value, opts.Hasher.Crypto(), opts.Issuer, opts.PrivateKey())
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed signing component descriptor")
 		}
@@ -214,6 +215,19 @@ func _apply(printer common.Printer, state WalkingState, nv common.NameVersion, c
 	}
 	state.Closure[nv] = vi
 	return vi.Digest, nil
+}
+
+func checkDigest(orig *metav1.DigestSpec, act *metav1.DigestSpec) bool {
+	if orig != nil {
+		algo := signing.NormalizeHashAlgorithm(orig.HashAlgorithm)
+		if algo == act.HashAlgorithm {
+			act.HashAlgorithm = orig.HashAlgorithm
+		}
+		if !reflect.DeepEqual(orig, act) {
+			return false
+		}
+	}
+	return true
 }
 
 func refMsg(ref compdesc.ComponentReference, msg string, args ...interface{}) string {
