@@ -21,9 +21,7 @@ func main() {
 	_ = semver.MustParse(version.ReleaseVersion)
 
 	cmd := os.Args[1]
-
-	switch cmd {
-	case "print-version":
+	if cmd == "print-version" {
 		fmt.Print(version.ReleaseVersion)
 	}
 }
