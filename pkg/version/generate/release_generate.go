@@ -21,6 +21,7 @@ func main() {
 	_ = semver.MustParse(version.ReleaseVersion)
 
 	cmd := os.Args[1]
+	//nolint:forbidigo
 	if cmd == "print-version" {
 		fmt.Print(version.ReleaseVersion)
 	}
