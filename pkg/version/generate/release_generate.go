@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/Masterminds/semver/v3"
+
 	"github.com/open-component-model/ocm/pkg/version"
 )
 
