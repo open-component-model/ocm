@@ -1,0 +1,70 @@
+name: Release
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  lint-and-test:
+    uses: ./.github/workflows/lint_and_test.yaml
+  release:
+    name: Trigger release build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      repository-projects: read
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Cache go-build and mod
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build/
+          ~/go/pkg/mod/
+        key: go-${{ hashFiles('go.sum') }}
+        restore-keys: |
+          go-
+    - name: Set release version
+      run: |
+        echo "RELEASE_VERSION=$(go run $GITHUB_WORKSPACE/pkg/version/generate/release_generate.go print-version)" >> $GITHUB_ENV
+    - name: Set release notes file and branch
+      run: |
+        echo "RELEASE_NOTES_FILE=docs/release_notes/$(echo $RELEASE_VERSION).md" >> $GITHUB_ENV
+    - name: Validate release notes
+      run: |
+        if [[ ! -f ${{ env.RELEASE_NOTES_FILE }} ]]; then
+          >&2 echo "Must have release notes ${{ env.RELEASE_NOTES_FILE }}"
+          exit 6
+        fi
+    - name: Create and push branch
+      env:
+        RELEASE_BRANCH: release-${{ env.RELEASE_VERSION }}
+      run: |
+        if ! git checkout ${RELEASE_BRANCH} >/dev/null; then
+            echo "Creating ${RELEASE_BRANCH} from $(git branch --show-current)"
+            git checkout -b ${RELEASE_BRANCH}
+            git push origin "$(git branch --show-current)"
+        else
+            git checkout ${RELEASE_BRANCH}
+            git pull --ff-only origin ${RELEASE_BRANCH}
+        fi
+    - name: Setup git config
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
+    - name: Create and push tag
+      run: |
+        msg="Release ${{ env.RELEASE_VERSION }}"
+        git tag --annotate --message "${msg}" ${{ env.RELEASE_VERSION }}
+        git push origin ${{ env.RELEASE_VERSION }}
+    - name: Run goreleaser
+      uses: goreleaser/goreleaser-action@v4
+      with:
+        distribution: goreleaser
+        version: latest
+        args: release --rm-dist --timeout 60m --skip-validate --config=./.goreleaser.yaml --release-notes=${{ env.RELEASE_NOTES_FILE }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GORELEASER_CURRENT_TAG: ${{ env.RELEASE_VERSION }}
