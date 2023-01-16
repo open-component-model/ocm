@@ -119,6 +119,7 @@ A component descriptor describes:
 - a history of [Repository Contexts](#repository-contexts) describing
   former repository locations of the component version along a transportation
   chain
+- an optional creation timestamp (RFC3339) rounded to seconds.
 - a set of [Labels](#labels) to assign arbitrary kinds of information to the
   component version, which is not formally defined by the Open Component Model
 - an optional set of [Sources](#sources), that were used to generate the 

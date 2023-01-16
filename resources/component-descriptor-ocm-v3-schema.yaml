@@ -37,7 +37,7 @@ definitions:
       value: {}
       version:
         pattern: '^v[0-9]+$'
-      signature:
+      signing:
         type: 'boolean'
     additionalProperties: false
 
