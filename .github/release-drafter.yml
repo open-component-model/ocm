@@ -1,0 +1,11 @@
+name-template: '$NEXT_MINOR_VERSION'
+tag-template: '$NEXT_MINOR_VERSION'
+version-template: '$COMPLETE'
+change-template: '- $TITLE (#$NUMBER)'
+change-title-escapes: '\<*_&#@`'
+template: |
+  # Release $NEXT_MINOR_VERSION
+
+  $CHANGES
+exclude-labels:
+  - 'kind/skip-release-notes'

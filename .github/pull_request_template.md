@@ -5,15 +5,10 @@ Fixes #
 
 **Special notes for your reviewer**:
 
-**Release note**:
-<!--  Write your release note:
-1. Enter your release note in the below block.
-2. If no release note is required, just write "NONE" within the block.
-
-Format of block header: <category> <target_group>
-Possible values:
-- category:       breaking|feature|bugfix|doc|other
-- target_group:   user|operator|developer|dependency
+**Release Notes**:
+<!--
+Please ensure that the title of this PR is suitable for the release notes.
+To exclude this PR from the release notes, add the tag "kind/skip-release-notes".
 -->
 ```feature user
 
