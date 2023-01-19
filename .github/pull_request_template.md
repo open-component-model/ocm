@@ -7,7 +7,7 @@ Fixes #
 
 **Release Notes**:
 <!--
-Please ensure that the title of this PR is good so that it can be added to the release notes.
+Please ensure that the title of this PR is suitable for the release notes.
 To exclude this PR from the release notes, add the tag "kind/skip-release-notes".
 -->
 ```feature user
