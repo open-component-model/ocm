@@ -11,6 +11,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -120,6 +121,9 @@ func _apply(printer common.Printer, state WalkingState, nv common.NameVersion, c
 			if _, ok := opts.SkipAccessTypes[acc.GetKind()]; ok {
 				// set the do not sign digest notation on skip-access-type resources
 				cd.Resources[i].Digest = metav1.NewExcludeFromSignatureDigest()
+				continue
+			}
+			if none.IsNone(acc.GetKind()) {
 				continue
 			}
 			// special digest notation indicates to not digest the content

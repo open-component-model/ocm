@@ -14,18 +14,24 @@ import (
 
 // Type is the access type for no blob.
 const (
-	Type   = "none"
-	TypeV1 = Type + runtime.VersionSeparator + "v1"
+	Type       = "none"
+	TypeV1     = Type + runtime.VersionSeparator + "v1"
+	LegacyType = "None"
 )
 
 func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}, cpi.WithDescription("dummy resource with no access")))
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyType, &AccessSpec{}))
 }
 
 // New creates a new OCIBlob accessor.
 func New() *AccessSpec {
 	return &AccessSpec{}
+}
+
+func IsNone(kind string) bool {
+	return kind == Type || kind == LegacyType
 }
 
 // AccessSpec describes the access for a oci registry.
