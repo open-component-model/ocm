@@ -23,7 +23,10 @@ func main() {
 
 	cmd := os.Args[1]
 	//nolint:forbidigo // Logger not needed for this command.
-	if cmd == "print-version" {
+	switch cmd {
+	case "print-version":
 		fmt.Print(version.ReleaseVersion)
+	case "print-rc-version":
+		fmt.Printf("%s-%s", version.ReleaseVersion, version.ReleaseCandidate)
 	}
 }
