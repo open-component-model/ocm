@@ -16,6 +16,7 @@ jobs:
       contents: read
       pull-requests: read
   release:
+    needs: lint-and-test
     name: Trigger release build
     runs-on: ubuntu-latest
     permissions:
@@ -29,6 +30,7 @@ jobs:
     - name: Cache go-build and mod
       uses: actions/cache@v3
       with:
+        go-version-file: go.mod
         path: |
           ~/.cache/go-build/
           ~/go/pkg/mod/
