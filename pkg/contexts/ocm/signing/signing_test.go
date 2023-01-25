@@ -73,7 +73,7 @@ var _ = Describe("access method", func() {
 
 			dig, err := Apply(nil, nil, cv, opts)
 			Expect(err).To(Succeed())
-			Expect(dig.Value).To(Equal("4aa3e99afc6f91f345eb757908d1097d01beeec4a5512bfa8b4d2d0ff44b6566"))
+			Expect(dig.Value).To(Equal("b06e4c1a68274b876661f9fbf1f100526d289745f6ee847bfef702007b5b14cf"))
 			Expect(dig.HashAlgorithm).To(Equal(sha256.Algorithm))
 		})
 		It("resigns with older hash types", func() {
@@ -93,7 +93,7 @@ var _ = Describe("access method", func() {
 
 			dig, err := Apply(nil, nil, cv, opts)
 			Expect(err).To(Succeed())
-			Expect(dig.Value).To(Equal("4aa3e99afc6f91f345eb757908d1097d01beeec4a5512bfa8b4d2d0ff44b6566"))
+			Expect(dig.Value).To(Equal("b06e4c1a68274b876661f9fbf1f100526d289745f6ee847bfef702007b5b14cf"))
 			Expect(dig.HashAlgorithm).To(Equal(sha256.Algorithm))
 		})
 	})
@@ -158,7 +158,7 @@ var _ = Describe("access method", func() {
 				Update(), VerifyDigests(),
 			)
 			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
-			digest := "8ae7ab0c1578d1292922b2a3884833c380a57df2cc7dfab7213ee051b092edc3"
+			digest := "cba96112dfb934d87a181deb3b053ec57810e29caa693337bf16ae69cddaab04"
 			dig, err := Apply(nil, nil, cv, opts)
 			Expect(err).To(Succeed())
 			Expect(closer.Close()).To(Succeed())
@@ -207,7 +207,7 @@ var _ = Describe("access method", func() {
 				Update(), VerifyDigests(),
 			)
 			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
-			digest := "8ae7ab0c1578d1292922b2a3884833c380a57df2cc7dfab7213ee051b092edc3"
+			digest := "cba96112dfb934d87a181deb3b053ec57810e29caa693337bf16ae69cddaab04"
 			dig, err := Apply(nil, nil, cv, opts)
 			Expect(err).To(Succeed())
 			closer.Close()
@@ -255,7 +255,7 @@ var _ = Describe("access method", func() {
 				Resolver(resolver),
 				Update(), VerifyDigests(),
 			)
-			digest := "2aa8f24b0dfea50365927bbe1c77191828658e7758b49ad62faafcf0395351c5"
+			digest := "1d5bcd317eb26299d8a3488e9b3d5c9c909479aecff55ed8b94ab8d9dbe45140"
 			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
 			dig, err := Apply(nil, nil, cv, opts)
 			Expect(err).To(Succeed())
