@@ -44,7 +44,7 @@ var _ = Describe("Test Environment", func() {
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
 COMPONENT VERSION HASH                                                             NORMALIZED FORM
-test.de/x v1      7aff33d597be2bd358672bd79fb904666d955c3890d75d32cde356eb86355c65 [{"component":[{"componentReferences":[]},{"name":"test.de/x"},{"provider":"mandelsoft"},{"resources":[]},{"sources":[]},{"version":"v1"}]},{"meta":[{"schemaVersion":"v2"}]}]
+test.de/x v1      37f7f500d87f4b0a8765649f7c047db382e272b73e042805131df57279991b2b [{"component":[{"componentReferences":[]},{"name":"test.de/x"},{"provider":"mandelsoft"},{"resources":[]},{"version":"v1"}]},{"meta":[{"schemaVersion":"v2"}]}]
 `))
 	})
 
@@ -62,8 +62,8 @@ test.de/x v1      7aff33d597be2bd358672bd79fb904666d955c3890d75d32cde356eb86355c
 			`
 COMPONENT      : test.de/x
 VERSION        : v1
-HASH           : 3652e5a6bcf56a6b0d863c674f5365f6fcca6f772d8ceb69942fc91289f4cb93
-NORMALIZED FORM: [{"component":[{"componentReferences":[]},{"name":"test.de/x"},{"provider":"mandelsoft"},{"resources":[[{"digest":[{"hashAlgorithm":"SHA-256"},{"normalisationAlgorithm":"genericBlobDigest/v1"},{"value":"810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"}]},{"name":"test"},{"relation":"local"},{"type":"plainText"},{"version":"v1"}]]},{"sources":[]},{"version":"v1"}]},{"meta":[{"schemaVersion":"v2"}]}]
+HASH           : 49145d28aee8dfebdde5432bdbe2cf8e365d56cbd17fbfa959770057d6127edc
+NORMALIZED FORM: [{"component":[{"componentReferences":[]},{"name":"test.de/x"},{"provider":"mandelsoft"},{"resources":[[{"digest":[{"hashAlgorithm":"SHA-256"},{"normalisationAlgorithm":"genericBlobDigest/v1"},{"value":"810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"}]},{"name":"test"},{"relation":"local"},{"type":"plainText"},{"version":"v1"}]]},{"version":"v1"}]},{"meta":[{"schemaVersion":"v2"}]}]
 ---`))
 	})
 
@@ -81,8 +81,8 @@ NORMALIZED FORM: [{"component":[{"componentReferences":[]},{"name":"test.de/x"},
 			`
 COMPONENT      : test.de/x
 VERSION        : v1
-HASH           : f8a0fcfc2e0501d35657aa88ca6848abc15fc527a3a2b0055f72db977cf01d6b
-NORMALIZED FORM: [{"component":[{"componentReferences":[]},{"name":"test.de/x"},{"provider":"mandelsoft"},{"resources":[[{"name":"test"},{"relation":"local"},{"type":"plainText"},{"version":"v1"}]]},{"sources":[]},{"version":"v1"}]},{"meta":[{"schemaVersion":"v2"}]}]
+HASH           : aa8fc0f82d47ae7dd30016e0d99a720081bf1018b72d0642cc16cab7d0f6673d
+NORMALIZED FORM: [{"component":[{"componentReferences":[]},{"name":"test.de/x"},{"provider":"mandelsoft"},{"resources":[[{"name":"test"},{"relation":"local"},{"type":"plainText"},{"version":"v1"}]]},{"version":"v1"}]},{"meta":[{"schemaVersion":"v2"}]}]
 ---`))
 	})
 })

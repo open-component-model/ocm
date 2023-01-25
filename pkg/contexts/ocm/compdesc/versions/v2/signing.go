@@ -34,16 +34,7 @@ var CDExcludes = signing.MapExcludes{
 				}},
 			},
 		},
-		"sources": signing.DynamicArrayExcludes{
-			ValueChecker: signing.IgnoreResourcesWithNoneAccess,
-			Continue: signing.MapExcludes{
-				"access": nil,
-				"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
-					ValueChecker: signing.IgnoreLabelsWithoutSignature,
-					Continue:     signing.NoExcludes{},
-				}},
-			},
-		},
+		"sources": nil,
 		"references": signing.ArrayExcludes{
 			signing.MapExcludes{
 				"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{

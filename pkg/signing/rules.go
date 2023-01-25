@@ -269,20 +269,23 @@ func IgnoreLabelsWithoutSignature(v interface{}) bool {
 ////////////////////////////////////////////////////////////////////////////////
 
 func IgnoreResourcesWithNoneAccess(v interface{}) bool {
-	return CheckIgnoreResourcesWithAccessType("none", v)
+	return CheckIgnoreResourcesWithAccessType(func(k string) bool { return k == "none" || k == "None" }, v)
 }
 
 func IgnoreResourcesWithAccessType(t string) func(v interface{}) bool {
 	return func(v interface{}) bool {
-		return CheckIgnoreResourcesWithAccessType(t, v)
+		return CheckIgnoreResourcesWithAccessType(func(k string) bool { return k == t }, v)
 	}
 }
 
-func CheckIgnoreResourcesWithAccessType(t string, v interface{}) bool {
+func CheckIgnoreResourcesWithAccessType(t func(string) bool, v interface{}) bool {
 	access := v.(map[string]interface{})["access"]
 	if access == nil {
 		return true
 	}
 	typ := access.(map[string]interface{})["type"]
-	return typ == t
+	if s, ok := typ.(string); ok {
+		return t(s)
+	}
+	return false
 }
