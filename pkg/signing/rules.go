@@ -270,7 +270,6 @@ func IgnoreLabelsWithoutSignature(v interface{}) bool {
 
 func IgnoreResourcesWithNoneAccess(v interface{}) bool {
 	return CheckIgnoreResourcesWithAccessType(func(k string) bool { return k == "none" || k == "None" }, v)
-
 }
 
 func IgnoreResourcesWithAccessType(t string) func(v interface{}) bool {
