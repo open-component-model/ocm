@@ -12,6 +12,9 @@ on:
 jobs:
   lint-and-test:
     uses: ./.github/workflows/lint_and_test.yaml
+    permissions:
+      contents: read
+      pull-requests: read
   release:
     name: Trigger release build
     runs-on: ubuntu-latest
