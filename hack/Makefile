@@ -59,6 +59,10 @@ go-bindata:
 $(GOPATH)/bin/goimports:
 	go install -v golang.org/x/tools/cmd/goimports@latest
 
+Linux_jq:
+	$(info -> jq is missing)
+	$(info -  sudo apt-get install jq / sudo dnf install jq / sudo zypper install jq / sudo pacman -S jq)
+
 Darwin_sed: Darwin
 	$(info -> GNU sed is missing)
 	$(info -  brew install gnu-sed)

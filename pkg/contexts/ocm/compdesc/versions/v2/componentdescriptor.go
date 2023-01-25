@@ -67,6 +67,9 @@ type ObjectMeta struct {
 	// describing the object.
 	// +optional
 	Labels metav1.Labels `json:"labels,omitempty"`
+	// CreationTime is the creation time of the component version
+	// +optional
+	CreationTime *metav1.Timestamp `json:"creationTime,omitempty"`
 }
 
 // GetName returns the name of the object.
