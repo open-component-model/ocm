@@ -30,7 +30,7 @@ jobs:
     - name: Setup Go
       uses: actions/setup-go@v3
       with:
-        go-version-file: ${{ env.GITHUB_WORKSPACE }}/go.mod
+        go-version-file: '${{ github.workspace }}/go.mod'
     - name: Cache go-build and mod
       uses: actions/cache@v3
       with:
