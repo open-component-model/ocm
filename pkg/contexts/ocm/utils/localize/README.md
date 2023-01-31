@@ -48,3 +48,7 @@ Such a specification object can be applied by the function `Instantiate`
 together with configuration values to
 a component version. As substitution result it returns a virtual filesystem
 with the snapshot according to the resolved substitutions.
+
+Additionally, there is a set of more basic types and methods, which can be used
+to describe end execute localizations for single data objects (see `ImageMappings`,
+`LocalizeMappings` and `SubstituteMappings`).

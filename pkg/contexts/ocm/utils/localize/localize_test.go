@@ -74,7 +74,7 @@ var _ = Describe("image value mapping", func() {
 		subst, err := localize.Localize(mappings, cv, nil)
 		Expect(err).To(Succeed())
 		Expect(subst).To(Equal(Substitutions(`
-- name: test1
+- name: image mapping "test1"
   file: file1
   path: a.b.img
   value: ghcr.io/mandelsoft/test:v1
@@ -95,15 +95,15 @@ var _ = Describe("image value mapping", func() {
 		subst, err := localize.Localize(mappings, cv, nil)
 		Expect(err).To(Succeed())
 		Expect(subst).To(Equal(Substitutions(`
-- name: test1-repository
+- name: image mapping "test1"-repository
   file: file1
   path: a.b.rep
   value: ghcr.io/mandelsoft/test
-- name: test1-tag
+- name: image mapping "test1"-tag
   file: file1
   path: a.b.tag
   value: v1
-- name: test1-image
+- name: image mapping "test1"-image
   file: file1
   path: a.b.img
   value: ghcr.io/mandelsoft/test:v1
