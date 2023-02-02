@@ -86,3 +86,11 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GORELEASER_CURRENT_TAG: ${{ env.RELEASE_VERSION }}
+    - name: Repository Dispatch
+      if: inputs.release_candidate == false
+      uses: peter-evans/repository-dispatch@v2
+      with:
+        token: ${{ secrets.EVENT_API }}
+        repository: open-component-model/ocm-website
+        event-type: ocm-cli-release
+        client-payload: '{"tag": "${{ env.RELEASE_VERSION }}"}'
