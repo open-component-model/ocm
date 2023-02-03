@@ -85,6 +85,7 @@ jobs:
         args: release --rm-dist --timeout 60m --skip-validate --config=./.goreleaser.yaml --release-notes=${{ env.RELEASE_NOTES_FILE }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.EVENT_API }}
         GORELEASER_CURRENT_TAG: ${{ env.RELEASE_VERSION }}
     - name: Repository Dispatch
       if: inputs.release_candidate == false
