@@ -42,7 +42,7 @@ jobs:
           go-
     - name: Set release version
       run: |
-        if $INPUT_RELEASE_CANDIDATE; then
+        if ${{ inputs.release_candidate }}; then
           echo "RELEASE_VERSION=$(go run $GITHUB_WORKSPACE/pkg/version/generate/release_generate.go print-rc-version)" >> $GITHUB_ENV
         else
           echo "RELEASE_VERSION=$(go run $GITHUB_WORKSPACE/pkg/version/generate/release_generate.go print-version)" >> $GITHUB_ENV
