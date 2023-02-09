@@ -326,7 +326,7 @@ intended for deployment into a runtime environment, or describing additional
 content, relevant for a deployment mechanism. For example, installation procedures
 or meta-model descriptions controlling orchestration and/or deployment mechanisms.
 (A simple example how such elements could be used to construct a deployment
-mechanism on top of the Open Component Model can be found [here](../reference/ocm_toi.md).)
+mechanism on top of the Open Component Model can be found [here](../reference/ocm_toi-bootstrapping.md).)
 
 The Open Component Model makes absolutely no assumptions, about how content described
 by the model is finally deployed or used. All this is left to external tools and tool
