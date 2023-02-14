@@ -13,13 +13,14 @@ import (
 )
 
 type Config struct {
-	Chart           v1.ResourceReference `json:"chart,omitempty"`
-	Release         string               `json:"release,omitempty"`
-	Namespace       string               `json:"namespace,omitempty"`
-	CreateNamespace bool                 `json:"createNamespace,omitempty"`
-	ImageMapping    []ImageMapping       `json:"imageMapping"`
-	Values          json.RawMessage      `json:"values,omitempty"`
-	KubeConfigName  string               `json:"kubeConfigName,omitempty"`
+	Chart           v1.ResourceReference            `json:"chart,omitempty"`
+	SubCharts       map[string]v1.ResourceReference `json:"subCharts,omitempty"`
+	Release         string                          `json:"release,omitempty"`
+	Namespace       string                          `json:"namespace,omitempty"`
+	CreateNamespace bool                            `json:"createNamespace,omitempty"`
+	ImageMapping    []ImageMapping                  `json:"imageMapping"`
+	Values          json.RawMessage                 `json:"values,omitempty"`
+	KubeConfigName  string                          `json:"kubeConfigName,omitempty"`
 }
 
 type ImageMapping = localize.ImageMapping

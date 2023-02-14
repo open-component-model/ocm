@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 
 	"github.com/open-component-model/ocm/cmds/helminstaller/app/driver"
@@ -20,6 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
 func Merge(values ...map[string]interface{}) map[string]interface{} {
@@ -43,13 +45,13 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 	}
 	values = Merge(cfgv, values)
 
+	fmt.Printf("Loading helm chart from resource %s@%s\n", cfg.Chart, common.VersionedElementKey(cv))
 	acc, rcv, err := utils.ResolveResourceReference(cv, cfg.Chart, nil)
 	if err != nil {
 		return errors.ErrNotFoundWrap(err, "chart reference", cfg.Chart.String())
 	}
 	defer rcv.Close()
 
-	fmt.Printf("Installing helm chart from resource %s@%s", cfg.Chart, common.VersionedElementKey(cv))
 	if acc.Meta().Type != resourcetypes.HELM_CHART {
 		return errors.Newf("resource type %q required, but found %q", resourcetypes.HELM_CHART, acc.Meta().Type)
 	}
@@ -69,6 +71,33 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 		return errors.Wrapf(err, "downloading helm chart")
 	}
 	defer os.Remove(path)
+
+	if len(cfg.SubCharts) > 0 {
+		fmt.Printf("Loading %d sub charts...\n", len(cfg.SubCharts))
+		var finalize utils2.Finalizer
+		defer finalize.Finalize()
+		for n, r := range cfg.SubCharts {
+			fmt.Printf("  Loading sub chart %q from resource %s@%s\n", n, r, common.VersionedElementKey(cv))
+			acc, rcv, err := utils.ResolveResourceReference(cv, r, nil)
+			if err != nil {
+				return errors.ErrNotFoundWrap(err, "chart reference", r.String())
+			}
+			finalize.Close(rcv)
+
+			if acc.Meta().Type != resourcetypes.HELM_CHART {
+				return errors.Newf("%s: resource type %q required, but found %q", r, resourcetypes.HELM_CHART, acc.Meta().Type)
+			}
+
+			subpath := filepath.Join(path, "charts", n)
+			_, _, err = download.For(ctx).Download(common.NewPrinter(octx.StdOut()), acc, subpath, osfs.New())
+			if err != nil {
+				return errors.Wrapf(err, "downloading helm chart %s", r)
+			}
+			finalize.Finalize()
+		}
+	}
+
+	fmt.Printf("Localizing helm chart...\n")
 
 	for i, v := range cfg.ImageMapping {
 		acc, rcv, err := utils.ResolveResourceReference(cv, v.ResourceReference, nil)
@@ -108,6 +137,8 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 			}
 		}
 	}
+
+	fmt.Printf("Installing helm chart...\n")
 
 	ns := "default"
 	if cfg.Namespace != "" {
