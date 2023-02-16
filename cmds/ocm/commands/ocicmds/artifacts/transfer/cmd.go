@@ -152,7 +152,10 @@ func NewAction(ctx clictx.Context, session oci.Session, target string, transferR
 }
 
 func (a *action) Add(e interface{}) error {
-	src := e.(*artifacthdlr.Object)
+	src, ok := e.(*artifacthdlr.Object)
+	if !ok {
+		return fmt.Errorf("failed type assertion for type %T to artifacthtlr.Object", e)
+	}
 
 	ns := src.Namespace.GetNamespace()
 	if ns == "" && a.Ref.IsRegistry() {

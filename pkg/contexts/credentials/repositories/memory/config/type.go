@@ -83,7 +83,10 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 		return fmt.Errorf("unable to get repository for spec: %w", err)
 	}
 
-	mem := repo.(*memory.Repository)
+	mem, ok := repo.(*memory.Repository)
+	if !ok {
+		return fmt.Errorf("invalid type assertion of type %T to memory.Repository", repo)
+	}
 
 	for i, e := range a.Credentials {
 		var creds cpi.Credentials

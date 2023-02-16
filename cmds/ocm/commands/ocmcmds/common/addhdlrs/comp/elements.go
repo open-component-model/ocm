@@ -65,7 +65,10 @@ func (*ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem ad
 	var final utils.Finalizer
 	defer final.FinalizeWithErrorPropagation(&err)
 
-	r := elem.Spec().(*ResourceSpec)
+	r, ok := elem.Spec().(*ResourceSpec)
+	if !ok {
+		return fmt.Errorf("element spec is not a valid resource spec")
+	}
 	comp, err := repo.LookupComponent(r.Name)
 	if err != nil {
 		return errors.ErrNotFound(errors.KIND_COMPONENT, r.Name)

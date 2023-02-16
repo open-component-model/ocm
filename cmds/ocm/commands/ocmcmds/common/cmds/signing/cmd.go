@@ -60,7 +60,7 @@ func (o *SignatureCommand) ForName(name string) *cobra.Command {
 		Use:   "[<options>] {<component-reference>}",
 		Short: o.spec.op + " component version",
 		Long: `
-` + o.spec.op + ` specified component versions. 
+` + o.spec.op + ` specified component versions.
 `,
 		Example: o.spec.example,
 	}
@@ -136,7 +136,10 @@ func (a *action) Digest(o *comphdlr.Object) (*metav1.DigestSpec, *compdesc.Compo
 }
 
 func (a *action) Add(e interface{}) error {
-	o := e.(*comphdlr.Object)
+	o, ok := e.(*comphdlr.Object)
+	if !ok {
+		return fmt.Errorf("failed to assert %T to *comphdlr.Object", e)
+	}
 	cv := o.ComponentVersion
 	d, _, err := a.Digest(o)
 	a.errlist.Add(err)
