@@ -1,6 +1,6 @@
 FROM --platform=$BUILDPLATFORM golang:1.19 AS builder
 ARG COMMIT EFFECTIVE_VERSION GIT_TREE_STATE
-ARG TARGETOS TARGETARCH 
+ARG TARGETOS TARGETARCH
 
 WORKDIR /go/src/github.com/open-component-model/ocm/
 COPY go.* ./
@@ -14,7 +14,7 @@ RUN --mount=type=cache,target=/root/.cache/go-build CGO_ENABLED=0 GOOS=$TARGETOS
 	-X github.com/open-component-model/ocm/pkg/version.gitVersion=$EFFECTIVE_VERSION \
 	-X github.com/open-component-model/ocm/pkg/version.gitTreeState=$GIT_TREE_STATE \
 	-X github.com/open-component-model/ocm/pkg/version.gitCommit=$COMMIT \
-	-X github.com/open-component-model/ocm/pkg/version.buildDate=$(date --rfc-3339=seconds | sed 's/ /T/')" \
+	-X github.com/open-component-model/ocm/pkg/version.buildDate=$(date -u +%FT%T%:z)" \
 	./cmds/helminstaller
 
 ###################################################################################
