@@ -174,7 +174,7 @@ utilities:
 `)
 
 			libs := []v1.ResourceReference{
-				v1.ResourceReference{
+				{
 					Resource: v1.NewIdentity(LIB),
 				},
 			}
@@ -211,7 +211,7 @@ configRules:
 `
 
 			libs := []v1.ResourceReference{
-				v1.ResourceReference{
+				{
 					Resource: v1.NewIdentity(LIB),
 				},
 			}

@@ -68,7 +68,7 @@ var _ = Describe("generic credentials", func() {
 			Expect(err).To(Succeed())
 			s := &S{
 				Repositories: map[string]localconfig.RepositorySpec{
-					"repo": localconfig.RepositorySpec{Repository: *rspec},
+					"repo": {Repository: *rspec},
 				},
 			}
 			data, err := json.Marshal(s)
