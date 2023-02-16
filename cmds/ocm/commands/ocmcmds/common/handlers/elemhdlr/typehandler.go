@@ -203,7 +203,7 @@ func (h *TypeHandler) get(c *comphdlr.Object, elemspec utils.ElemSpec) ([]output
 
 	selector, ok := elemspec.(metav1.Identity)
 	if !ok {
-		return nil, fmt.Errorf("element spec is not a valid identity")
+		return nil, fmt.Errorf("element spec is not a valid identity, failed to assert type %T to metav1.Identity", elemspec)
 	}
 	elemaccess := h.elemaccess(c.ComponentVersion)
 	l := elemaccess.Len()
