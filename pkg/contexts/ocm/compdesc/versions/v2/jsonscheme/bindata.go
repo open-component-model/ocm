@@ -158,11 +158,13 @@ var _bindata = map[string]func() (*asset, error){
 // directory embedded in the file by go-bindata.
 // For example if you run go-bindata on data/... and data contains the
 // following hierarchy:
-//     data/
-//       foo.txt
-//       img/
-//         a.png
-//         b.png
+//
+//	data/
+//	  foo.txt
+//	  img/
+//	    a.png
+//	    b.png
+//
 // then AssetDir("data") would return []string{"foo.txt", "img"}
 // AssetDir("data/img") would return []string{"a.png", "b.png"}
 // AssetDir("foo.txt") and AssetDir("nonexistent") would return an error
@@ -195,15 +197,15 @@ type bintree struct {
 }
 
 var _bintree = &bintree{nil, map[string]*bintree{
-	"..": &bintree{nil, map[string]*bintree{
-		"..": &bintree{nil, map[string]*bintree{
-			"..": &bintree{nil, map[string]*bintree{
-				"..": &bintree{nil, map[string]*bintree{
-					"..": &bintree{nil, map[string]*bintree{
-						"..": &bintree{nil, map[string]*bintree{
-							"..": &bintree{nil, map[string]*bintree{
-								"resources": &bintree{nil, map[string]*bintree{
-									"component-descriptor-v2-schema.yaml": &bintree{ResourcesComponentDescriptorV2SchemaYaml, map[string]*bintree{}},
+	"..": {nil, map[string]*bintree{
+		"..": {nil, map[string]*bintree{
+			"..": {nil, map[string]*bintree{
+				"..": {nil, map[string]*bintree{
+					"..": {nil, map[string]*bintree{
+						"..": {nil, map[string]*bintree{
+							"..": {nil, map[string]*bintree{
+								"resources": {nil, map[string]*bintree{
+									"component-descriptor-v2-schema.yaml": {ResourcesComponentDescriptorV2SchemaYaml, map[string]*bintree{}},
 								}},
 							}},
 						}},

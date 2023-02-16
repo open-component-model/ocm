@@ -556,10 +556,10 @@ var _ = Describe("normalization", func() {
 	It("list of complex values", func() {
 		v := map[string]interface{}{
 			"list": []map[string]interface{}{
-				map[string]interface{}{
+				{
 					"alice": 25,
 				},
-				map[string]interface{}{
+				{
 					"bob": 26,
 				},
 			},
