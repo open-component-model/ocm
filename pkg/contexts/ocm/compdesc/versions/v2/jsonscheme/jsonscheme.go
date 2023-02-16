@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 //go:generate go-bindata -pkg jsonscheme ../../../../../../../resources/component-descriptor-v2-schema.yaml
+//go:generate gofmt -s -w bindata.go
 
 package jsonscheme
 

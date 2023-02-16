@@ -113,7 +113,7 @@ func (o *Command) Complete(args []string) error {
 		}
 		if len(o.Ids) == 0 {
 			o.Ids = []v1.Identity{
-				v1.Identity{},
+				{},
 			}
 		}
 		for _, id := range o.Ids {

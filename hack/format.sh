@@ -21,3 +21,7 @@ gci diff --skip-generated "${GCIFMT[@]}"  $@ </dev/null \
   | xargs -I "{}" \
     gci write --skip-generated  "${GCIFMT[@]}" "{}"
 log "Format done"
+
+log "Format with gofmt"
+gofmt -s -w $@
+log "Format done"
