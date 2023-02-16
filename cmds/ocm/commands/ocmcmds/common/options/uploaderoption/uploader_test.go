@@ -32,7 +32,7 @@ var _ = Describe("uploader option", func() {
 		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name:art:media={"name":"Name"}`}))
 		MustBeSuccessful(opt.Complete(ctx))
 
-		Expect(opt.Registrations).To(Equal([]*Registration{&Registration{
+		Expect(opt.Registrations).To(Equal([]*Registration{{
 			Name:         "plugin/name",
 			ArtifactType: "art",
 			MediaType:    "media",
@@ -44,7 +44,7 @@ var _ = Describe("uploader option", func() {
 		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name:art={"name":"Name"}`}))
 		MustBeSuccessful(opt.Complete(ctx))
 
-		Expect(opt.Registrations).To(Equal([]*Registration{&Registration{
+		Expect(opt.Registrations).To(Equal([]*Registration{{
 			Name:         "plugin/name",
 			ArtifactType: "art",
 			MediaType:    "",
@@ -56,7 +56,7 @@ var _ = Describe("uploader option", func() {
 		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name={"name":"Name"}`}))
 		MustBeSuccessful(opt.Complete(ctx))
 
-		Expect(opt.Registrations).To(Equal([]*Registration{&Registration{
+		Expect(opt.Registrations).To(Equal([]*Registration{{
 			Name:         "plugin/name",
 			ArtifactType: "",
 			MediaType:    "",
@@ -68,7 +68,7 @@ var _ = Describe("uploader option", func() {
 		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name::={"name":"Name"}`}))
 		MustBeSuccessful(opt.Complete(ctx))
 
-		Expect(opt.Registrations).To(Equal([]*Registration{&Registration{
+		Expect(opt.Registrations).To(Equal([]*Registration{{
 			Name:         "plugin/name",
 			ArtifactType: "",
 			MediaType:    "",
@@ -80,7 +80,7 @@ var _ = Describe("uploader option", func() {
 		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name=Name`}))
 		MustBeSuccessful(opt.Complete(ctx))
 
-		Expect(opt.Registrations).To(Equal([]*Registration{&Registration{
+		Expect(opt.Registrations).To(Equal([]*Registration{{
 			Name:         "plugin/name",
 			ArtifactType: "",
 			MediaType:    "",
