@@ -5,6 +5,8 @@
 package comparch
 
 import (
+	"fmt"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localfsblob"
@@ -29,7 +31,10 @@ func NewBlobHandler() cpi.BlobHandler {
 }
 
 func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
-	ocmctx := ctx.(storagecontext.StorageContext)
+	ocmctx, ok := ctx.(storagecontext.StorageContext)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert type %T to storagecontext.StorageContext", ctx)
+	}
 
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")

@@ -70,7 +70,10 @@ func NewBlobHandler(base BaseFunction) cpi.BlobHandler {
 }
 
 func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, global cpi.AccessSpec, ctx cpi.StorageContext) (cpi.AccessSpec, error) {
-	ocictx := ctx.(*storagecontext.StorageContext)
+	ocictx, ok := ctx.(*storagecontext.StorageContext)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert type %T to storagecontext.StorageContext", ctx)
+	}
 
 	values := []interface{}{
 		"arttype", artType,
@@ -162,7 +165,10 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	var tag string
 	var digest digest.Digest
 
-	ocictx := ctx.(*storagecontext.StorageContext)
+	ocictx, ok := ctx.(*storagecontext.StorageContext)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert type %T to storagecontext.StorageContext", ctx)
+	}
 	base := b.GetBaseURL(ocictx)
 	if hint == "" {
 		namespace = ocictx.Namespace

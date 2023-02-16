@@ -5,6 +5,8 @@
 package support
 
 import (
+	"fmt"
+
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -109,7 +111,10 @@ func (a *ArtifactImpl) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 func (a *ArtifactImpl) Index() (*artdesc.Index, error) {
 	a.lock.Lock()
 	defer a.lock.Unlock()
-	d := a.state.GetState().(*artdesc.Artifact)
+	d, ok := a.state.GetState().(*artdesc.Artifact)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert type %T to *artdesc.Artifact", a.state.GetState())
+	}
 	idx := d.Index()
 	if idx == nil {
 		idx = artdesc.NewIndex()

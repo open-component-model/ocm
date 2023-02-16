@@ -5,6 +5,8 @@
 package aliases
 
 import (
+	"fmt"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -20,7 +22,11 @@ func init() {
 }
 
 func setAlias(ctx cpi.Context, name string, spec cpi.RepositorySpec, creds cpi.CredentialsSource) error {
-	repos := ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories).(*Repositories)
+	r := ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories)
+	repos, ok := r.(*Repositories)
+	if !ok {
+		return fmt.Errorf("failed to assert type %T to Repositories", r)
+	}
 	repos.Set(name, spec, creds)
 	return nil
 }
@@ -44,7 +50,11 @@ func (a *RepositorySpec) GetType() string {
 }
 
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi.Repository, error) {
-	repos := ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories).(*Repositories)
+	r := ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories)
+	repos, ok := r.(*Repositories)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert type %T to Repositories", r)
+	}
 	alias := repos.GetRepository(a.Alias)
 	if alias == nil {
 		return nil, cpi.ErrUnknownRepository(Type, a.Alias)

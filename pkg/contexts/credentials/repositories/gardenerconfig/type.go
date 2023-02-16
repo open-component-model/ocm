@@ -34,7 +34,7 @@ func init() {
 
 	cpi.RegisterStandardIdentityMatcher(CONSUMER_TYPE, IdentityMatcher, `Gardener config credential matcher
 
-It matches the <code>`+CONSUMER_TYPE+`</code> consumer type and additionally acts like 
+It matches the <code>`+CONSUMER_TYPE+`</code> consumer type and additionally acts like
 the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`)
 }
 
@@ -63,7 +63,11 @@ func (a *RepositorySpec) GetType() string {
 }
 
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi.Repository, error) {
-	repos := ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories).(*Repositories)
+	r := ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories)
+	repos, ok := r.(*Repositories)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert type %T to Responsitories", r)
+	}
 
 	key, err := getKey(ctx, a.URL)
 	if err != nil {

@@ -230,7 +230,10 @@ func (i StateHandler) Initial() interface{} {
 
 // Encode always provides a yaml representation.
 func (i StateHandler) Encode(d interface{}) ([]byte, error) {
-	desc := d.(*compdesc.ComponentDescriptor)
+	desc, ok := d.(*compdesc.ComponentDescriptor)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert type %t to *compdesc.ComponentDescriptor", d)
+	}
 	desc.Name = i.name
 	desc.Version = i.version
 	return compdesc.Encode(desc)

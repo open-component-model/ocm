@@ -5,6 +5,8 @@
 package localfsblob
 
 import (
+	"fmt"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -49,7 +51,10 @@ type localfsblobConverterV1 struct{}
 var LocalFilesystemBlobV1 = cpi.NewAccessSpecVersion(&AccessSpec{}, localfsblobConverterV1{})
 
 func (_ localfsblobConverterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, error) {
-	in := object.(*localblob.AccessSpec)
+	in, ok := object.(*localblob.AccessSpec)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert type %T to localblob.AccessSpec", object)
+	}
 	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
 		Filename:            in.LocalReference,
@@ -58,7 +63,10 @@ func (_ localfsblobConverterV1) ConvertFrom(object cpi.AccessSpec) (runtime.Type
 }
 
 func (_ localfsblobConverterV1) ConvertTo(object interface{}) (cpi.AccessSpec, error) {
-	in := object.(*AccessSpec)
+	in, ok := object.(*AccessSpec)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert type %T to localfsblob.AccessSpec", object)
+	}
 	return &localblob.AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
 		LocalReference:      in.Filename,
