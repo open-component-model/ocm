@@ -14,7 +14,7 @@ COMPONENT_CLI_IMAGE_REPOSITORY                 := $(REGISTRY)/cli
 SOURCES := $(shell go list -f '{{$$I:=.Dir}}{{range .GoFiles }}{{$$I}}/{{.}} {{end}}' ./... )
 GOPATH                                         := $(shell go env GOPATH)
 
-NOW         := $(shell date -u +%FT%TZ)
+NOW         := $(shell date -u +%FT%T%:z)
 BUILD_FLAGS := "-s -w \
  -X github.com/open-component-model/ocm/pkg/version.gitVersion=$(EFFECTIVE_VERSION) \
  -X github.com/open-component-model/ocm/pkg/version.gitTreeState=$(GIT_TREE_STATE) \
