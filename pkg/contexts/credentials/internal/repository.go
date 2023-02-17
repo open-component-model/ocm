@@ -5,9 +5,8 @@
 package internal
 
 import (
-	"k8s.io/apimachinery/pkg/util/sets"
-
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 type Repository interface {
@@ -20,7 +19,7 @@ type Credentials interface {
 	CredentialsSource
 	ExistsProperty(name string) bool
 	GetProperty(name string) string
-	PropertyNames() sets.String
+	PropertyNames() generics.Set[string]
 	Properties() common.Properties
 }
 
@@ -46,7 +45,7 @@ func (c DirectCredentials) GetProperty(name string) string {
 	return c[name]
 }
 
-func (c DirectCredentials) PropertyNames() sets.String {
+func (c DirectCredentials) PropertyNames() generics.Set[string] {
 	return common.Properties(c).Names()
 }
 

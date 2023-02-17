@@ -32,3 +32,11 @@ func (s Set[K]) Contains(keys ...K) bool {
 	}
 	return true
 }
+
+func KeySet[K comparable, V any](m map[K]V) Set[K] {
+	s := Set[K]{}
+	for k := range m {
+		s.Add(k)
+	}
+	return s
+}

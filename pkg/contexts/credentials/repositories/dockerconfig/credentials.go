@@ -7,10 +7,10 @@ package dockerconfig
 import (
 	dockercred "github.com/docker/cli/cli/config/credentials"
 	"github.com/docker/cli/cli/config/types"
-	"k8s.io/apimachinery/pkg/util/sets"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 type Credentials struct {
@@ -61,7 +61,7 @@ func (c *Credentials) GetProperty(name string) string {
 	return c.get()[name]
 }
 
-func (c *Credentials) PropertyNames() sets.String {
+func (c *Credentials) PropertyNames() generics.Set[string] {
 	return c.get().Names()
 }
 
