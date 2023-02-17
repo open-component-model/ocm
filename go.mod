@@ -19,8 +19,8 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.6.1
 	github.com/xeipuuv/gojsonschema v1.2.0
-	golang.org/x/net v0.5.0
-	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/net v0.7.0
+	golang.org/x/sys v0.5.0 // indirect
 	gotest.tools/v3 v3.1.0 // indirect
 	k8s.io/apimachinery v0.26.0
 	sigs.k8s.io/yaml v1.3.0
@@ -58,7 +58,7 @@ require (
 	golang.org/x/exp v0.0.0-20221212164502-fae10dda9338
 	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616
 	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b
-	golang.org/x/text v0.6.0
+	golang.org/x/text v0.7.0
 	gopkg.in/yaml.v3 v3.0.1
 	helm.sh/helm/v3 v3.11.1
 )
@@ -172,7 +172,7 @@ require (
 	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/mod v0.6.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/term v0.4.0 // indirect
+	golang.org/x/term v0.5.0 // indirect
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
 	golang.org/x/tools v0.2.0 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
