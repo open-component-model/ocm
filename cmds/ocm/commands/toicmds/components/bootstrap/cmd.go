@@ -5,6 +5,8 @@
 package bootstrap
 
 import (
+	"fmt"
+
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -88,7 +90,7 @@ printed to standard out. If the output file is a directory, for every output a
 dedicated file is created, otherwise the yaml representation is stored to the
 file.
 
-If no credentials file name is provided (option -c) the file 
+If no credentials file name is provided (option -c) the file
 <code>` + DEFAULT_CREDENTIALS_FILE + `</code> is used, if present. If no parameter file name is
 provided (option -p) the file <code>` + DEFAULT_PARAMETER_FILE + `</code> is used, if present.
 `,
@@ -166,7 +168,10 @@ func (a *action) Add(e interface{}) error {
 	if len(a.data) > 0 {
 		return errors.New("found multiple component versions")
 	}
-	o := e.(*comphdlr.Object)
+	o, ok := e.(*comphdlr.Object)
+	if !ok {
+		return fmt.Errorf("object of type %T is not a valid comphdlr.Object", e)
+	}
 	if o.ComponentVersion != nil && !ocireg.IsKind(o.Repository.GetSpecification().GetKind()) {
 		out.Outf(a.cmd, "Warning: repository is no OCI registry, consider importing it or use upload repository with option ' -X ociuploadrepo=...'")
 	}

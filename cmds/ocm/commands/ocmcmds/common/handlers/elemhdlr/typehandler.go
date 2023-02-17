@@ -5,6 +5,7 @@
 package elemhdlr
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
@@ -200,7 +201,10 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 func (h *TypeHandler) get(c *comphdlr.Object, elemspec utils.ElemSpec) ([]output.Object, error) {
 	var result []output.Object
 
-	selector := elemspec.(metav1.Identity)
+	selector, ok := elemspec.(metav1.Identity)
+	if !ok {
+		return nil, fmt.Errorf("element spec is not a valid identity, failed to assert type %T to metav1.Identity", elemspec)
+	}
 	elemaccess := h.elemaccess(c.ComponentVersion)
 	l := elemaccess.Len()
 	for i := 0; i < l; i++ {

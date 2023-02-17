@@ -5,6 +5,8 @@
 package memory
 
 import (
+	"fmt"
+
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -38,6 +40,10 @@ func (a *RepositorySpec) GetType() string {
 }
 
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi.Repository, error) {
-	repos := ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories).(*Repositories)
+	r := ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepositories)
+	repos, ok := r.(*Repositories)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert type %T to Repositories", r)
+	}
 	return repos.GetRepository(a.RepositoryName), nil
 }

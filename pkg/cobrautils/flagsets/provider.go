@@ -83,9 +83,16 @@ func (p *typedConfigProvider) GetConfigFor(opts ConfigOptions) (Config, error) {
 
 	var data Config
 	if cfgv != nil {
-		data = cfgv.(Config)
+		var ok bool
+		data, ok = cfgv.(Config)
+		if !ok {
+			return nil, fmt.Errorf("failed to assert type %T as Config", cfgv)
+		}
 	}
-	typ := typv.(string)
+	typ, ok := typv.(string)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert type %T as string", typv)
+	}
 
 	opts = opts.FilterBy(p.HasOptionType)
 	if typ == "" && data != nil && data["type"] != nil {

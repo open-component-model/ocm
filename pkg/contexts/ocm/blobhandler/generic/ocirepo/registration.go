@@ -33,6 +33,7 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 		return true, fmt.Errorf("oci target specification required")
 	}
 	var attr *Config
+	var ok bool
 	switch a := config.(type) {
 	case *ociuploadattr.Attribute:
 		attr = a
@@ -41,13 +42,19 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 		if err != nil {
 			return true, errors.Wrapf(err, "cannot unmarshal blob handler target configuration")
 		}
-		attr = r.(*ociuploadattr.Attribute)
+		attr, ok = r.(*ociuploadattr.Attribute)
+		if !ok {
+			return true, fmt.Errorf("failed to assert type %T to ociuploadattr.Attribute", r)
+		}
 	case []byte:
 		r, err := ociuploadattr.AttributeType{}.Decode(a, runtime.DefaultYAMLEncoding)
 		if err != nil {
 			return true, errors.Wrapf(err, "cannot unmarshal blob handler target configuration")
 		}
-		attr = r.(*ociuploadattr.Attribute)
+		attr, ok = r.(*ociuploadattr.Attribute)
+		if !ok {
+			return true, fmt.Errorf("failed to assert type %T to ociuploadattr.Attribute", r)
+		}
 	default:
 		return true, fmt.Errorf("unexpected type %T for oci blob handler target", a)
 	}

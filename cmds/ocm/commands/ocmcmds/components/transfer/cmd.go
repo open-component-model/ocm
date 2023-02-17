@@ -146,7 +146,10 @@ type action struct {
 var _ output.Output = (*action)(nil)
 
 func (a *action) Add(e interface{}) error {
-	o := e.(*comphdlr.Object)
+	o, ok := e.(*comphdlr.Object)
+	if !ok {
+		return fmt.Errorf("object of type %T is not a valid comphdlr.Object", e)
+	}
 	err := transfer.TransferVersion(a.printer, a.closure, o.ComponentVersion, a.target, a.handler)
 	a.errors.Add(err)
 	if err != nil {

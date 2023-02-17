@@ -121,7 +121,10 @@ type converterV1 struct{}
 var LocalBlobV1 = cpi.NewAccessSpecVersion(&AccessSpecV1{}, converterV1{})
 
 func (_ converterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, error) {
-	in := object.(*AccessSpec)
+	in, ok := object.(*AccessSpec)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert type %T to AccessSpec", object)
+	}
 	return &AccessSpecV1{
 		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
 		LocalReference:      in.LocalReference,
@@ -132,7 +135,10 @@ func (_ converterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, er
 }
 
 func (_ converterV1) ConvertTo(object interface{}) (cpi.AccessSpec, error) {
-	in := object.(*AccessSpecV1)
+	in, ok := object.(*AccessSpecV1)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert type %T to AccessSpecV1", object)
+	}
 	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
 		LocalReference:      in.LocalReference,

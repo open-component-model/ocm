@@ -5,6 +5,7 @@
 package cpi
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/opencontainers/go-digest"
@@ -67,7 +68,10 @@ func (a *artifactBase) newArtifact(art ...*artdesc.Artifact) (ArtifactAccess, er
 }
 
 func (a *artifactBase) Blob() (accessio.BlobAccess, error) {
-	d := a.state.GetState().(artdesc.BlobDescriptorSource)
+	d, ok := a.state.GetState().(artdesc.BlobDescriptorSource)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert type %T to artdesc.BlobDescriptorSource", a.state.GetState())
+	}
 	if !d.IsValid() {
 		return nil, errors.ErrUnknown("artifact type")
 	}
