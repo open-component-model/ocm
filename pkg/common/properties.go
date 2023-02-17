@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"k8s.io/apimachinery/pkg/util/sets"
+	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 // Properties describes a set of name/value pairs.
@@ -54,8 +54,8 @@ func (p Properties) Match(obj map[string]string) (bool, error) {
 }
 
 // Names returns the set of property names.
-func (c Properties) Names() sets.String {
-	return sets.StringKeySet(c)
+func (c Properties) Names() generics.Set[string] {
+	return generics.KeySet(c)
 }
 
 // String returns a string representation.
