@@ -9,6 +9,7 @@ package app
 import (
 	"strings"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/controller"
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 
@@ -197,6 +198,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(bootstrap.NewCommand(opts.Context))
 	cmd.AddCommand(clean.NewCommand(opts.Context))
 	cmd.AddCommand(install.NewCommand(opts.Context))
+	cmd.AddCommand(controller.NewCommand(opts.Context))
 
 	cmd.AddCommand(cmdutils.HideCommand(componentarchive.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(resources.NewCommand(opts.Context)))
