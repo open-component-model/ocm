@@ -20,8 +20,8 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/controllercmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	common2 "github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -36,6 +36,7 @@ type Command struct {
 	Version       string
 	BaseURL       string
 	ReleaseAPIURL string
+	DryRun        bool
 }
 
 var _ utils.OCMCommand = (*Command)(nil)
@@ -56,6 +57,7 @@ func (o *Command) AddFlags(set *pflag.FlagSet) {
 	set.StringVarP(&o.Version, "version", "v", "latest", "the version of the controller to install")
 	set.StringVarP(&o.BaseURL, "base-url", "u", "https://github.com/open-component-model/ocm-controller/releases", "the base url to the ocm-controller's release page")
 	set.StringVarP(&o.ReleaseAPIURL, "release-api-url", "a", "https://api.github.com/repos/open-component-model/ocm-controller/releases", "the base url to the ocm-controller's API release page")
+	set.BoolVarP(&o.DryRun, "dry-run", "d", false, "if enabled, prints the downloaded manifest file")
 }
 
 func (o *Command) Complete(args []string) error {
@@ -63,15 +65,14 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
-	p := common2.NewPrinter(os.Stdout)
-	p.Printf("► installing ocm-controller with version %s\n", o.Version)
+	out.Outf(o.Context, "► installing ocm-controller with version %s\n", o.Version)
 	version := o.Version
 	if version == "latest" {
 		latest, err := o.GetLatestVersion()
 		if err != nil {
 			return fmt.Errorf("✗ failed to retrieve latest version for ocm-controller: %s", err)
 		}
-		p.Printf("► got latest version %q\n", latest)
+		out.Outf(o.Context, "► got latest version %q\n", latest)
 		version = latest
 	} else {
 		exists, err := o.ExistingVersion(version)
@@ -97,22 +98,30 @@ func (o *Command) Run() error {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return fmt.Errorf("✗ failed to find install.yaml file at location: %w", err)
 	}
-	p.Printf("✔ successfully fetched install file to %s\n", path)
-	p.Printf("► applying to cluster...\n")
+	out.Outf(o.Context, "✔ successfully fetched install file\n")
+	if o.DryRun {
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return fmt.Errorf("✗ failed to read install.yaml file at location: %w", err)
+		}
+		out.Outf(o.Context, string(content))
+		return nil
+	}
+	out.Outf(o.Context, "► applying to cluster...\n")
 
 	kubectlArgs := []string{"apply", "-f", path}
 	if _, err := ExecKubectlCommand(context.Background(), ModeOS, "", "", kubectlArgs...); err != nil {
 		return fmt.Errorf("✗ failed to apply manifest to cluster: %w", err)
 	}
 
-	p.Printf("✔ successfully applied manifests to cluster\n")
-	p.Printf("◎ waiting for pod to become Ready\n")
+	out.Outf(o.Context, "✔ successfully applied manifests to cluster\n")
+	out.Outf(o.Context, "◎ waiting for pod to become Ready\n")
 	kubectlArgs = []string{"wait", "-l", "app=ocm-controller", "-n", "ocm-system", "--for", "condition=Ready", "--timeout=90s", "pod"}
 	if _, err := ExecKubectlCommand(context.Background(), ModeOS, "", "", kubectlArgs...); err != nil {
 		return fmt.Errorf("✗ failed to wait for pod to be ready: %w", err)
 	}
 
-	p.Printf("✔ ocm-controller successfully installed\n")
+	out.Outf(o.Context, "✔ ocm-controller successfully installed\n")
 	return nil
 }
 

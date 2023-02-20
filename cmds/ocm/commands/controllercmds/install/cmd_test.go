@@ -6,74 +6,66 @@ package install_test
 
 import (
 	"bytes"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
-
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 )
 
 var _ = Describe("Test Environment", func() {
-	var env *TestEnv
+	var (
+		env        *TestEnv
+		testServer *httptest.Server
+	)
 
 	BeforeEach(func() {
 		env = NewTestEnv()
-		cctx := env.CLI.CredentialsContext()
+		testServer = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if strings.Contains(r.URL.String(), "download") {
+				content, err := os.ReadFile(filepath.Join("testdata", "install.yaml"))
+				if err != nil {
+					fmt.Fprintf(w, "failed")
+					return
+				}
 
-		ids := credentials.ConsumerIdentity{
-			identity.ID_TYPE:     "test",
-			identity.ID_HOSTNAME: "ghcr.io",
-		}
-		creds := credentials.DirectCredentials{
-			"user": "testuser",
-			"pass": "testpass",
-		}
+				fmt.Fprintf(w, string(content))
+				return
+			}
 
-		cctx.SetCredentialsForConsumer(ids, creds)
-
-		ids = credentials.ConsumerIdentity{
-			identity.ID_TYPE:       identity.CONSUMER_TYPE,
-			identity.ID_HOSTNAME:   "ghcr.io",
-			identity.ID_PATHPREFIX: "a",
-		}
-		creds = credentials.DirectCredentials{
-			"username": "testuser",
-			"password": "testpass",
-		}
-
-		cctx.SetCredentialsForConsumer(ids, creds)
+			fmt.Fprintf(w, `{
+	"tag_name": "v0.0.1-test"
+}
+`)
+		}))
 	})
 
 	AfterEach(func() {
 		env.Cleanup()
 	})
 
-	It("get unknown type with partial matcher", func() {
+	It("install latest version", func() {
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("get", "credentials", identity.ID_TYPE+"=test", identity.ID_HOSTNAME+"=ghcr.io")).To(Succeed())
-		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-ATTRIBUTE VALUE
-pass      testpass
-user      testuser
+		Expect(env.CatchOutput(buf).Execute("controller", "install", "-d", "-u", testServer.URL, "-a", testServer.URL)).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`► installing ocm-controller with version latest
+► got latest version "v0.0.1-test"
+✔ successfully fetched install file
+test: content
 `))
 	})
-	It("fail with partial matcher", func() {
-		buf := bytes.NewBuffer(nil)
-		err := env.CatchOutput(buf).Execute("get", "credentials", identity.ID_TYPE+"=test", identity.ID_HOSTNAME+"=gcr.io")
-		Expect(err).NotTo(BeNil())
-		Expect(err.Error()).To(Equal("consumer \"{\"hostname\":\"gcr.io\",\"type\":\"test\"}\" is unknown"))
-	})
 
-	It("get oci type with oci matcher", func() {
+	It("install specific version", func() {
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).Execute("get", "credentials", identity.ID_TYPE+"="+identity.CONSUMER_TYPE, identity.ID_HOSTNAME+"=ghcr.io", identity.ID_PATHPREFIX+"=a/b")).To(Succeed())
-		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-ATTRIBUTE VALUE
-password  testpass
-username  testuser
+		Expect(env.CatchOutput(buf).Execute("controller", "install", "-d", "-u", testServer.URL, "-a", testServer.URL, "-v", "v0.1.0-test-2")).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`► installing ocm-controller with version v0.1.0-test-2
+✔ successfully fetched install file
+test: content
 `))
 	})
 })
