@@ -27,14 +27,15 @@ import (
 )
 
 var (
-	Names   = names.Controller
-	Verb    = verbs.Install
-	BaseURL = "https://github.com/open-component-model/ocm-controller/releases"
+	Names = names.Controller
+	Verb  = verbs.Install
 )
 
 type Command struct {
 	utils.BaseCommand
-	Version string
+	Version       string
+	BaseURL       string
+	ReleaseAPIURL string
 }
 
 var _ utils.OCMCommand = (*Command)(nil)
@@ -53,6 +54,8 @@ func (o *Command) ForName(name string) *cobra.Command {
 
 func (o *Command) AddFlags(set *pflag.FlagSet) {
 	set.StringVarP(&o.Version, "version", "v", "latest", "the version of the controller to install")
+	set.StringVarP(&o.BaseURL, "base-url", "u", "https://github.com/open-component-model/ocm-controller/releases", "the base url to the ocm-controller's release page")
+	set.StringVarP(&o.ReleaseAPIURL, "release-api-url", "a", "https://api.github.com/repos/open-component-model/ocm-controller/releases", "the base url to the ocm-controller's API release page")
 }
 
 func (o *Command) Complete(args []string) error {
@@ -64,57 +67,49 @@ func (o *Command) Run() error {
 	p.Printf("► installing ocm-controller with version %s\n", o.Version)
 	version := o.Version
 	if version == "latest" {
-		latest, err := GetLatestVersion()
+		latest, err := o.GetLatestVersion()
 		if err != nil {
-			p.Printf("✗ failed to retrieve latest version for ocm-controller: %s", err.Error())
-			return err
+			return fmt.Errorf("✗ failed to retrieve latest version for ocm-controller: %s", err)
 		}
 		p.Printf("► got latest version %q\n", latest)
 		version = latest
 	} else {
-		exists, err := ExistingVersion(version)
+		exists, err := o.ExistingVersion(version)
 		if err != nil {
-			p.Printf("✗ failed to check if version exists: %s", err.Error())
-			return err
+			return fmt.Errorf("✗ failed to check if version exists: %w", err)
 		}
 		if !exists {
-			p.Printf("✗ version %q does not exist\n", version)
-			return err
+			return fmt.Errorf("✗ version %q does not exist", version)
 		}
 	}
 
 	temp, err := os.MkdirTemp("", "ocm-controller-download")
 	if err != nil {
-		p.Printf("✗ failed to create temp folder: %w", err)
-		return err
+		return fmt.Errorf("✗ failed to create temp folder: %w", err)
 	}
 	defer os.RemoveAll(temp)
 
-	if err := fetch(context.Background(), version, temp); err != nil {
-		p.Printf("✗ failed to download install.yaml file: %w", err)
-		return err
+	if err := o.fetch(context.Background(), version, temp); err != nil {
+		return fmt.Errorf("✗ failed to download install.yaml file: %w", err)
 	}
 
 	path := filepath.Join(temp, "install.yaml")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		p.Printf("✗ failed to find install.yaml file at location: %s", path)
-		return err
+		return fmt.Errorf("✗ failed to find install.yaml file at location: %w", err)
 	}
 	p.Printf("✔ successfully fetched install file to %s\n", path)
 	p.Printf("► applying to cluster...\n")
 
 	kubectlArgs := []string{"apply", "-f", path}
 	if _, err := ExecKubectlCommand(context.Background(), ModeOS, "", "", kubectlArgs...); err != nil {
-		p.Printf("✗ failed to apply manifest to cluster: %w", err)
-		return err
+		return fmt.Errorf("✗ failed to apply manifest to cluster: %w", err)
 	}
 
 	p.Printf("✔ successfully applied manifests to cluster\n")
 	p.Printf("◎ waiting for pod to become Ready\n")
 	kubectlArgs = []string{"wait", "-l", "app=ocm-controller", "-n", "ocm-system", "--for", "condition=Ready", "--timeout=90s", "pod"}
 	if _, err := ExecKubectlCommand(context.Background(), ModeOS, "", "", kubectlArgs...); err != nil {
-		p.Printf("✗ failed to wait for pod to be ready: %w", err)
-		return err
+		return fmt.Errorf("✗ failed to wait for pod to be ready: %w", err)
 	}
 
 	p.Printf("✔ ocm-controller successfully installed\n")
@@ -122,12 +117,11 @@ func (o *Command) Run() error {
 }
 
 // GetLatestVersion calls the GitHub API and returns the latest released version.
-func GetLatestVersion() (string, error) {
-	ghURL := "https://api.github.com/repos/open-component-model/ocm-controller/releases/latest"
+func (o *Command) GetLatestVersion() (string, error) {
 	c := http.DefaultClient
 	c.Timeout = 15 * time.Second
 
-	res, err := c.Get(ghURL)
+	res, err := c.Get(o.ReleaseAPIURL + "/latest")
 	if err != nil {
 		return "", fmt.Errorf("GitHub API call failed: %w", err)
 	}
@@ -148,12 +142,12 @@ func GetLatestVersion() (string, error) {
 }
 
 // ExistingVersion calls the GitHub API to confirm the given version does exist.
-func ExistingVersion(version string) (bool, error) {
+func (o *Command) ExistingVersion(version string) (bool, error) {
 	if !strings.HasPrefix(version, "v") {
 		version = "v" + version
 	}
 
-	ghURL := fmt.Sprintf("https://api.github.com/repos/fluxcd/flux2/releases/tags/%s", version)
+	ghURL := fmt.Sprintf(o.ReleaseAPIURL+"/tags/%s", version)
 	c := http.DefaultClient
 	c.Timeout = 15 * time.Second
 
@@ -176,10 +170,10 @@ func ExistingVersion(version string) (bool, error) {
 	}
 }
 
-func fetch(ctx context.Context, version, dir string) error {
-	ghURL := fmt.Sprintf("%s/latest/download/install.yaml", BaseURL)
+func (o *Command) fetch(ctx context.Context, version, dir string) error {
+	ghURL := fmt.Sprintf("%s/latest/download/install.yaml", o.BaseURL)
 	if strings.HasPrefix(version, "v") {
-		ghURL = fmt.Sprintf("%s/download/%s/install.yaml", BaseURL, version)
+		ghURL = fmt.Sprintf("%s/download/%s/install.yaml", o.BaseURL, version)
 	}
 
 	req, err := http.NewRequest("GET", ghURL, nil)
