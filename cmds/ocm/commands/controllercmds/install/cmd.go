@@ -5,18 +5,18 @@
 package install
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/fluxcd/flux2/pkg/log"
+	"github.com/fluxcd/flux2/pkg/status"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/controllercmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -24,6 +24,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/cli-runtime/pkg/genericclioptions"
+	"sigs.k8s.io/cli-utils/pkg/object"
 )
 
 var (
@@ -33,10 +36,13 @@ var (
 
 type Command struct {
 	utils.BaseCommand
-	Version       string
-	BaseURL       string
-	ReleaseAPIURL string
-	DryRun        bool
+	Namespace      string
+	ControllerName string
+	Timeout        time.Duration
+	Version        string
+	BaseURL        string
+	ReleaseAPIURL  string
+	DryRun         bool
 }
 
 var _ utils.OCMCommand = (*Command)(nil)
@@ -57,6 +63,9 @@ func (o *Command) AddFlags(set *pflag.FlagSet) {
 	set.StringVarP(&o.Version, "version", "v", "latest", "the version of the controller to install")
 	set.StringVarP(&o.BaseURL, "base-url", "u", "https://github.com/open-component-model/ocm-controller/releases", "the base url to the ocm-controller's release page")
 	set.StringVarP(&o.ReleaseAPIURL, "release-api-url", "a", "https://api.github.com/repos/open-component-model/ocm-controller/releases", "the base url to the ocm-controller's API release page")
+	set.StringVarP(&o.ControllerName, "controller-name", "c", "ocm-controller", "name of the controller that's used for status check")
+	set.StringVarP(&o.Namespace, "namespace", "n", "ocm-system", "the namespace into which the controller is installed")
+	set.DurationVarP(&o.Timeout, "timeout", "t", 1*time.Minute, "maximum time to wait for deployment to be ready")
 	set.BoolVarP(&o.DryRun, "dry-run", "d", false, "if enabled, prints the downloaded manifest file")
 }
 
@@ -109,16 +118,28 @@ func (o *Command) Run() error {
 	}
 	out.Outf(o.Context, "► applying to cluster...\n")
 
-	kubectlArgs := []string{"apply", "-f", path}
-	if _, err := ExecKubectlCommand(context.Background(), ModeOS, "", "", kubectlArgs...); err != nil {
+	kubeconfigArgs := genericclioptions.NewConfigFlags(false)
+	if _, err := Apply(context.Background(), kubeconfigArgs, path); err != nil {
 		return fmt.Errorf("✗ failed to apply manifest to cluster: %w", err)
 	}
 
-	out.Outf(o.Context, "✔ successfully applied manifests to cluster\n")
-	out.Outf(o.Context, "◎ waiting for pod to become Ready\n")
-	kubectlArgs = []string{"wait", "-l", "app=ocm-controller", "-n", "ocm-system", "--for", "condition=Ready", "--timeout=90s", "pod"}
-	if _, err := ExecKubectlCommand(context.Background(), ModeOS, "", "", kubectlArgs...); err != nil {
-		return fmt.Errorf("✗ failed to wait for pod to be ready: %w", err)
+	cfg, err := kubeconfigArgs.ToRESTConfig()
+	if err != nil {
+		return fmt.Errorf("✗ failed to create kube config: %w", err)
+	}
+
+	statusChecker, err := status.NewStatusChecker(cfg, 5*time.Second, o.Timeout, log.NopLogger{})
+	if err != nil {
+		return fmt.Errorf("✗ failed to create status checker: %w", err)
+	}
+
+	out.Outf(o.Context, "► waiting for ocm deployment to be ready\n")
+	if err := statusChecker.Assess(object.ObjMetadata{
+		Namespace: o.Namespace,
+		Name:      o.ControllerName,
+		GroupKind: schema.GroupKind{Group: "apps", Kind: "Deployment"},
+	}); err != nil {
+		return fmt.Errorf("✗ failed to wait for deployment to become ready: %w", err)
 	}
 
 	out.Outf(o.Context, "✔ ocm-controller successfully installed\n")
@@ -212,54 +233,4 @@ func (o *Command) fetch(ctx context.Context, version, dir string) error {
 	}
 
 	return nil
-}
-
-type ExecMode string
-
-const (
-	ModeOS       ExecMode = "os.stderr|stdout"
-	ModeStderrOS ExecMode = "os.stderr"
-	ModeCapture  ExecMode = "capture.stderr|stdout"
-)
-
-func ExecKubectlCommand(ctx context.Context, mode ExecMode, kubeConfigPath string, kubeContext string, args ...string) (string, error) {
-	var stdoutBuf, stderrBuf bytes.Buffer
-
-	if kubeConfigPath != "" && len(filepath.SplitList(kubeConfigPath)) == 1 {
-		args = append(args, "--kubeconfig="+kubeConfigPath)
-	}
-
-	if kubeContext != "" {
-		args = append(args, "--context="+kubeContext)
-	}
-
-	c := exec.CommandContext(ctx, "kubectl", args...)
-
-	if mode == ModeStderrOS {
-		c.Stderr = io.MultiWriter(os.Stderr, &stderrBuf)
-	}
-	if mode == ModeOS {
-		c.Stdout = io.MultiWriter(os.Stdout, &stdoutBuf)
-		c.Stderr = io.MultiWriter(os.Stderr, &stderrBuf)
-	}
-
-	if mode == ModeStderrOS || mode == ModeOS {
-		if err := c.Run(); err != nil {
-			return "", err
-		} else {
-			return "", nil
-		}
-	}
-
-	if mode == ModeCapture {
-		c.Stdout = &stdoutBuf
-		c.Stderr = &stderrBuf
-		if err := c.Run(); err != nil {
-			return stderrBuf.String(), err
-		} else {
-			return stdoutBuf.String(), nil
-		}
-	}
-
-	return "", nil
 }
