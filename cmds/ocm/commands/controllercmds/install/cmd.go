@@ -15,8 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fluxcd/flux2/pkg/log"
-	"github.com/fluxcd/flux2/pkg/status"
+	"github.com/fluxcd/pkg/ssa"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/controllercmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -24,9 +23,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
-	"sigs.k8s.io/cli-utils/pkg/object"
 )
 
 var (
@@ -119,27 +116,23 @@ func (o *Command) Run() error {
 	out.Outf(o.Context, "► applying to cluster...\n")
 
 	kubeconfigArgs := genericclioptions.NewConfigFlags(false)
-	if _, err := Apply(context.Background(), kubeconfigArgs, path); err != nil {
-		return fmt.Errorf("✗ failed to apply manifest to cluster: %w", err)
+	sm, err := NewResourceManager(kubeconfigArgs)
+	if err != nil {
+		return fmt.Errorf("✗ failed to create resource manager: %w", err)
 	}
 
-	cfg, err := kubeconfigArgs.ToRESTConfig()
+	objects, err := readObjects(path)
 	if err != nil {
-		return fmt.Errorf("✗ failed to create kube config: %w", err)
+		return fmt.Errorf("✗ failed to construct objects to apply: %w", err)
 	}
 
-	statusChecker, err := status.NewStatusChecker(cfg, 5*time.Second, o.Timeout, log.NopLogger{})
-	if err != nil {
-		return fmt.Errorf("✗ failed to create status checker: %w", err)
+	if _, err := sm.ApplyAllStaged(context.Background(), objects, ssa.DefaultApplyOptions()); err != nil {
+		return fmt.Errorf("✗ failed to apply manifests: %w", err)
 	}
 
 	out.Outf(o.Context, "► waiting for ocm deployment to be ready\n")
-	if err := statusChecker.Assess(object.ObjMetadata{
-		Namespace: o.Namespace,
-		Name:      o.ControllerName,
-		GroupKind: schema.GroupKind{Group: "apps", Kind: "Deployment"},
-	}); err != nil {
-		return fmt.Errorf("✗ failed to wait for deployment to become ready: %w", err)
+	if err = sm.Wait(objects, ssa.DefaultWaitOptions()); err != nil {
+		return fmt.Errorf("✗ failed to wait for objects to be ready: %w", err)
 	}
 
 	out.Outf(o.Context, "✔ ocm-controller successfully installed\n")

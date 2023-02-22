@@ -1,27 +1,13 @@
-/*
-Copyright 2021 The Flux authors
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
+// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 package install
 
 import (
 	"bufio"
-	"context"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/fluxcd/pkg/ssa"
 	corev1 "k8s.io/api/core/v1"
@@ -34,62 +20,6 @@ import (
 
 	"github.com/open-component-model/ocm-controller/api/v1alpha1"
 )
-
-// Apply is the equivalent of 'kubectl apply --server-side -f'.
-// This is partially lifted from Flux internal here:
-// https://github.com/fluxcd/flux2/blob/e4d19c84ebc3aa8d8d76f3b15de8e40b1075e394/internal/utils/apply.go
-func Apply(ctx context.Context, rcg genericclioptions.RESTClientGetter, manifestPath string) (string, error) {
-	objs, err := readObjects(manifestPath)
-	if err != nil {
-		return "", err
-	}
-
-	if len(objs) == 0 {
-		return "", fmt.Errorf("no Kubernetes objects found at: %s", manifestPath)
-	}
-
-	if err := ssa.SetNativeKindsDefaults(objs); err != nil {
-		return "", err
-	}
-
-	changeSet := ssa.NewChangeSet()
-
-	// contains only CRDs and Namespaces
-	var stageOne []*unstructured.Unstructured
-
-	// contains all objects except for CRDs and Namespaces
-	var stageTwo []*unstructured.Unstructured
-
-	for _, u := range objs {
-		if ssa.IsClusterDefinition(u) {
-			stageOne = append(stageOne, u)
-		} else {
-			stageTwo = append(stageTwo, u)
-		}
-	}
-
-	if len(stageOne) > 0 {
-		cs, err := applySet(ctx, rcg, stageOne)
-		if err != nil {
-			return "", err
-		}
-		changeSet.Append(cs.Entries)
-	}
-
-	if err := waitForSet(rcg, changeSet); err != nil {
-		return "", err
-	}
-
-	if len(stageTwo) > 0 {
-		cs, err := applySet(ctx, rcg, stageTwo)
-		if err != nil {
-			return "", err
-		}
-		changeSet.Append(cs.Entries)
-	}
-
-	return changeSet.String(), nil
-}
 
 func readObjects(manifestPath string) ([]*unstructured.Unstructured, error) {
 	fi, err := os.Lstat(manifestPath)
@@ -109,43 +39,36 @@ func readObjects(manifestPath string) ([]*unstructured.Unstructured, error) {
 	return ssa.ReadObjects(bufio.NewReader(ms))
 }
 
-func newManager(rcg genericclioptions.RESTClientGetter) (*ssa.ResourceManager, error) {
+// ownerRef contains the server-side apply field manager and ownership labels group.
+var ownerRef = ssa.Owner{
+	Field: "ocm",
+	Group: "ocm-controller.delivery.ocm.software",
+}
+
+// NewResourceManager creates a ResourceManager for the given cluster.
+func NewResourceManager(rcg genericclioptions.RESTClientGetter) (*ssa.ResourceManager, error) {
 	cfg, err := rcg.ToRESTConfig()
 	if err != nil {
-		return nil, fmt.Errorf("kubernetes configuration load failed: %w", err)
+		return nil, fmt.Errorf("loading kubeconfig failed: %w", err)
 	}
+
+	// bump limits
+	cfg.QPS = 100.0
+	cfg.Burst = 300
+
 	restMapper, err := rcg.ToRESTMapper()
 	if err != nil {
 		return nil, err
 	}
+
 	kubeClient, err := client.New(cfg, client.Options{Mapper: restMapper, Scheme: newScheme()})
 	if err != nil {
 		return nil, err
 	}
+
 	kubePoller := polling.NewStatusPoller(kubeClient, restMapper, polling.Options{})
 
-	return ssa.NewResourceManager(kubeClient, kubePoller, ssa.Owner{
-		Field: "flux",
-		Group: "fluxcd.io",
-	}), nil
-
-}
-
-func applySet(ctx context.Context, rcg genericclioptions.RESTClientGetter, objects []*unstructured.Unstructured) (*ssa.ChangeSet, error) {
-	man, err := newManager(rcg)
-	if err != nil {
-		return nil, err
-	}
-
-	return man.ApplyAll(ctx, objects, ssa.DefaultApplyOptions())
-}
-
-func waitForSet(rcg genericclioptions.RESTClientGetter, changeSet *ssa.ChangeSet) error {
-	man, err := newManager(rcg)
-	if err != nil {
-		return err
-	}
-	return man.WaitForSet(changeSet.ToObjMetadataSet(), ssa.WaitOptions{Interval: 2 * time.Second, Timeout: time.Minute})
+	return ssa.NewResourceManager(kubeClient, kubePoller, ownerRef), nil
 }
 
 func newScheme() *apiruntime.Scheme {
