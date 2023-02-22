@@ -17,7 +17,7 @@ OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
 GEN = $(REPO_ROOT)/gen/$(NAME)
 OCM = go run $(REPO_ROOT)/cmds/ocm
 
-NOW         := $(shell date --rfc-3339=seconds | sed 's/ /T/')
+NOW         := $(shell date -u +%FT%T%z)
 BUILD_FLAGS := "-s -w \
  -X github.com/open-component-model/ocm/pkg/version.gitVersion=$(EFFECTIVE_VERSION) \
  -X github.com/open-component-model/ocm/pkg/version.gitTreeState=$(GIT_TREE_STATE) \
