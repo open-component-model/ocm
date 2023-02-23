@@ -13,9 +13,7 @@ import (
 
 type PanicHandler func(interface{}) bool
 
-var (
-	PanicHandlers = []PanicHandler{logHandler}
-)
+var PanicHandlers = []PanicHandler{logHandler}
 
 func HandlePanic(additionalHandlers ...PanicHandler) {
 	reallyCrash := true

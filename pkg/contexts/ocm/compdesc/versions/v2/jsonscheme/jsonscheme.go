@@ -12,8 +12,9 @@ import (
 	"fmt"
 
 	"github.com/ghodss/yaml"
-	"github.com/open-component-model/ocm/pkg/utils/panics"
 	"github.com/xeipuuv/gojsonschema"
+
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 var Schema *gojsonschema.Schema

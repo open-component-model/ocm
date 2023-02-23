@@ -13,8 +13,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/utils/panics"
 	"github.com/spf13/pflag"
+
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 type stringToStringValue[T ~map[string]string] struct {

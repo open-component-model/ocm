@@ -8,8 +8,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/utils/panics"
 	"github.com/spf13/cobra"
+
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 func LinkForCmd(cmd *cobra.Command) string {
