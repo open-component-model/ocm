@@ -13,6 +13,7 @@ import (
 	"io"
 
 	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 func GetPublicKey(key interface{}) (*rsa.PublicKey, []string, error) {
@@ -67,6 +68,7 @@ func KeyData(key interface{}) ([]byte, error) {
 }
 
 func PemBlockForKey(priv interface{}, gen ...bool) *pem.Block {
+	defer panics.HandlePanic()
 	switch k := priv.(type) {
 	case *rsa.PublicKey:
 		if utils.Optional(gen...) {

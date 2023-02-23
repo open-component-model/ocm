@@ -15,11 +15,13 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
 
 func AssureTargetRepository(session Session, ctx Context, targetref string, opts ...interface{}) (Repository, error) {
+	defer panics.HandlePanic()
 	var format accessio.FileFormat
 	var archive string
 	var fs vfs.FileSystem

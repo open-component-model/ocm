@@ -6,6 +6,8 @@ package data
 
 import (
 	"sync"
+
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 type DLLRoot struct {
@@ -78,6 +80,7 @@ func (this *DLL) Set(p interface{}) {
 }
 
 func (this *DLL) Append(d *DLL) {
+	defer panics.HandlePanic()
 	if d.next != nil || d.prev != nil {
 		panic("dll element already in use")
 	}

@@ -6,6 +6,7 @@ package ppi
 
 import (
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 type decoder runtime.TypedObjectDecoder
@@ -19,6 +20,7 @@ type AccessMethodBase struct {
 }
 
 func MustNewAccessMethodBase(name, version string, proto AccessSpec, desc string, format string) AccessMethodBase {
+	defer panics.HandlePanic()
 	decoder, err := runtime.NewDirectDecoder(proto)
 	if err != nil {
 		panic(err)

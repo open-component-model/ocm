@@ -6,6 +6,8 @@ package processing
 
 import (
 	"sync"
+
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 type ProcessorPool interface {
@@ -55,6 +57,7 @@ func (this *_ProcessorPool) Request() {
 }
 
 func (this *_ProcessorPool) Exec(f func()) {
+	defer panics.HandlePanic()
 	this.lock.Lock()
 	defer this.lock.Unlock()
 	if this.uses == 0 {

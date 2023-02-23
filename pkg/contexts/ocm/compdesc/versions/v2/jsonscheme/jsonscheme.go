@@ -12,12 +12,14 @@ import (
 	"fmt"
 
 	"github.com/ghodss/yaml"
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 	"github.com/xeipuuv/gojsonschema"
 )
 
 var Schema *gojsonschema.Schema
 
 func init() {
+	defer panics.HandlePanic()
 	dataBytes, err := ResourcesComponentDescriptorV2SchemaYamlBytes()
 	if err != nil {
 		panic(err)

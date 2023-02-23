@@ -13,6 +13,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 // TypeGetter is the interface to be implemented for extracting a type.
@@ -53,6 +54,7 @@ type DirectDecoder struct {
 var _ TypedObjectDecoder = &DirectDecoder{}
 
 func MustNewDirectDecoder(proto interface{}) *DirectDecoder {
+	defer panics.HandlePanic()
 	d, err := NewDirectDecoder(proto)
 	if err != nil {
 		panic(err)
@@ -107,6 +109,7 @@ type ConvertingDecoder struct {
 var _ TypedObjectDecoder = &ConvertingDecoder{}
 
 func MustNewConvertingDecoder(proto interface{}, conv TypedObjectConverter) *ConvertingDecoder {
+	defer panics.HandlePanic()
 	d, err := NewConvertingDecoder(proto, conv)
 	if err != nil {
 		panic(err)

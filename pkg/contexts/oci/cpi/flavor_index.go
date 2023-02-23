@@ -12,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 type IndexImpl struct {
@@ -21,6 +22,7 @@ type IndexImpl struct {
 var _ IndexAccess = (*IndexImpl)(nil)
 
 func NewIndex(access ArtifactSetContainer, defs ...*artdesc.Index) (internal.IndexAccess, error) {
+	defer panics.HandlePanic()
 	var def *artdesc.Index
 	if len(defs) != 0 && defs[0] != nil {
 		def = defs[0]

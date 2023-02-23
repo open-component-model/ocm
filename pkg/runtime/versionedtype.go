@@ -6,6 +6,8 @@ package runtime
 
 import (
 	"strings"
+
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 const VersionSeparator = "/"
@@ -17,6 +19,7 @@ type VersionedTypedObject interface {
 }
 
 func TypeName(args ...string) string {
+	defer panics.HandlePanic()
 	if len(args) == 1 {
 		return args[0]
 	}

@@ -6,6 +6,7 @@ package internal
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 //
@@ -16,6 +17,7 @@ type OCISpecFunction func(ctx oci.Context) (RepositoryType, error)
 var ociimpl OCISpecFunction
 
 func RegisterOCIImplementation(impl OCISpecFunction) {
+	defer panics.HandlePanic()
 	if ociimpl != nil {
 		panic("oci implementation already registered")
 	}

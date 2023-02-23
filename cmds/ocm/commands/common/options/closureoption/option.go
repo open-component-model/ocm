@@ -16,6 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 func From(o options.OptionSetProvider) *Option {
@@ -34,6 +35,7 @@ type Option struct {
 }
 
 func New(elemname string, settings ...interface{}) *Option {
+	defer panics.HandlePanic()
 	o := &Option{ElementName: elemname, AddReferencePath: options.Always()}
 	for _, s := range settings {
 		switch v := s.(type) {

@@ -13,6 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 type ManifestImpl struct {
@@ -22,6 +23,7 @@ type ManifestImpl struct {
 var _ ManifestAccess = (*ManifestImpl)(nil)
 
 func NewManifest(access ArtifactSetContainer, defs ...*artdesc.Manifest) (*ManifestImpl, error) {
+	defer panics.HandlePanic()
 	var def *artdesc.Manifest
 	if len(defs) != 0 && defs[0] != nil {
 		def = defs[0]

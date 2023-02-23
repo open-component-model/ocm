@@ -13,6 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 const (
@@ -45,6 +46,7 @@ func (a AttributeType) Encode(v interface{}, marshaller runtime.Marshaler) ([]by
 }
 
 func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (interface{}, error) {
+	defer panics.HandlePanic()
 	var value string
 	err := unmarshaller.Unmarshal(data, &value)
 	if value != "" {

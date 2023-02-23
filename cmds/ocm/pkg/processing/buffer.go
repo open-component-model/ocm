@@ -12,6 +12,7 @@ import (
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 type Index = IndexArray
@@ -72,6 +73,7 @@ type ProcessingEntry struct {
 type SubEntries int
 
 func NewEntry(i Index, v interface{}, opts ...interface{}) ProcessingEntry {
+	defer panics.HandlePanic()
 	max := -1
 	sub := 0
 	valid := true
@@ -365,6 +367,7 @@ func (ob *orderedBuffer) SetFrame(frame BufferFrame) {
 }
 
 func (ob *orderedBuffer) Add(e ProcessingEntry) bool {
+	defer panics.HandlePanic()
 	e.Index.Validate(e.MaxIndex)
 	ob.simple.Add(e)
 	n := data.NewDLL(&e)

@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 	"github.com/spf13/pflag"
 )
 
@@ -73,6 +74,7 @@ func (s *stringToStringValue[T]) Type() string {
 }
 
 func (s *stringToStringValue[T]) String() string {
+	defer panics.HandlePanic()
 	records := make([]string, 0, len(*s.value)>>1)
 	for k, v := range *s.value {
 		records = append(records, k+"="+v)

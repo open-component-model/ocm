@@ -11,6 +11,7 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 type ElemSpec interface {
@@ -45,6 +46,7 @@ func StringElemSpecs(args ...string) []ElemSpec {
 }
 
 func ElemSpecs(list interface{}) []ElemSpec {
+	defer panics.HandlePanic()
 	if list == nil {
 		return nil
 	}
