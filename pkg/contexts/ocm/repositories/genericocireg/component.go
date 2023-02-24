@@ -6,11 +6,11 @@ package genericocireg
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -112,7 +112,7 @@ func (c *componentAccessImpl) ListVersions() ([]string, error) {
 	result := make([]string, 0, len(tags))
 	for _, t := range tags {
 		// omit reported digests (typically for ctf)
-		if !strings.HasPrefix(t, "@") {
+		if ok, _ := artdesc.IsDigest(t); !ok {
 			result = append(result, t)
 		}
 	}
