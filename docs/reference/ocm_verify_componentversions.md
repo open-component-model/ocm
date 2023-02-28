@@ -24,7 +24,7 @@ ocm verify componentversions [<options>] {<component-reference>}
 ### Description
 
 
-Verify signature of specified component versions. 
+Verify signature of specified component versions.
 
 If the option <code>--constraints</code> is given, and no version is specified for a component, only versions matching
 the given version constraints (semver https://github.com/Masterminds/semver) are selected. With <code>--latest</code> only
