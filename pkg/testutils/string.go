@@ -8,14 +8,21 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/drone/envsubst"
 	"github.com/onsi/gomega/format"
 	"github.com/onsi/gomega/types"
 )
 
 // StringEqualTrimmedWithContext compares two trimmed strings and provides the complete actual value
 // as error context.
+// If value mappings are given, the expected string is evaluated by envsubst, first.
 // It is an error for actual to be nil.  Use BeNil() instead.
-func StringEqualTrimmedWithContext(expected string) types.GomegaMatcher {
+func StringEqualTrimmedWithContext(expected string, subst ...map[string]string) types.GomegaMatcher {
+	var err error
+	expected, err = eval(expected, subst...)
+	if err != nil {
+		return &reportError{err}
+	}
 	return &StringEqualMatcher{
 		Expected: expected,
 		Trim:     true,
@@ -24,8 +31,14 @@ func StringEqualTrimmedWithContext(expected string) types.GomegaMatcher {
 
 // StringEqualWithContext compares two strings and provides the complete actual value
 // as error context.
+// If value mappings are given, the expected string is evaluated by envsubst, first.
 // It is an error for actual to be nil.  Use BeNil() instead.
-func StringEqualWithContext(expected string) types.GomegaMatcher {
+func StringEqualWithContext(expected string, subst ...map[string]string) types.GomegaMatcher {
+	var err error
+	expected, err = eval(expected, subst...)
+	if err != nil {
+		return &reportError{err}
+	}
 	return &StringEqualMatcher{
 		Expected: expected,
 	}
@@ -70,4 +83,38 @@ func (matcher *StringEqualMatcher) FailureMessage(actual interface{}) (message s
 
 func (matcher *StringEqualMatcher) NegatedFailureMessage(actual interface{}) (message string) {
 	return format.Message(actual, "not to equal", matcher.Expected)
+}
+
+func eval(expected string, subst ...map[string]string) (string, error) {
+	if len(subst) > 0 {
+		return envsubst.Eval(expected, stringmapping(subst...))
+	}
+	return expected, nil
+}
+
+func stringmapping(values ...map[string]string) func(variable string) string {
+	return func(variable string) string {
+		for _, m := range values {
+			if v, ok := m[variable]; ok {
+				return v
+			}
+		}
+		return "${" + variable + "}"
+	}
+}
+
+type reportError struct {
+	err error
+}
+
+func (r *reportError) Match(actual interface{}) (success bool, err error) {
+	return false, err
+}
+
+func (r *reportError) FailureMessage(actual interface{}) (message string) {
+	return r.err.Error()
+}
+
+func (r *reportError) NegatedFailureMessage(actual interface{}) (message string) {
+	return r.err.Error()
 }
