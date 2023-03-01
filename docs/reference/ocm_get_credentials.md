@@ -23,7 +23,7 @@ For the following usage contexts with matchers and standard identity matchers ex
 
   - <code>Buildcredentials.ocm.software</code>: Gardener config credential matcher
     
-    It matches the <code>Buildcredentials.ocm.software</code> consumer type and additionally acts like 
+    It matches the <code>Buildcredentials.ocm.software</code> consumer type and additionally acts like
     the <code>hostpath</code> type.
   - <code>OCIRegistry</code>: OCI registry credential matcher
     
