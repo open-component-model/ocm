@@ -8,6 +8,8 @@ import (
 	"io"
 
 	"github.com/opencontainers/go-digest"
+
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type Writer interface {
@@ -29,10 +31,10 @@ func NewReaderWriter(r io.ReadCloser) DataWriter {
 	return &readerWriter{r}
 }
 
-func (d *readerWriter) WriteTo(w Writer) (int64, digest.Digest, error) {
-	defer d.reader.Close()
+func (d *readerWriter) WriteTo(w Writer) (size int64, dig digest.Digest, err error) {
+	defer errors.PropagateError(&err, d.reader.Close)
 	dr := NewDefaultDigestReader(d.reader)
-	_, err := io.Copy(w, dr)
+	_, err = io.Copy(w, dr)
 	if err != nil {
 		return BLOB_UNKNOWN_SIZE, BLOB_UNKNOWN_DIGEST, err
 	}

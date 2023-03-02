@@ -10,6 +10,8 @@ import (
 	"io"
 
 	"github.com/opencontainers/go-digest"
+
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 // wow. digest does support a map with supported digesters. Unfortunately this one does not
@@ -76,4 +78,41 @@ func Digest(access DataAccess) (digest.Digest, error) {
 		return "", err
 	}
 	return dig, nil
+}
+
+type verifiedReader struct {
+	closer io.Closer
+	*DigestReader
+	hash   string
+	digest string
+}
+
+func (v *verifiedReader) Close() error {
+	err := v.closer.Close()
+	if err != nil {
+		return err
+	}
+	dig := v.DigestReader.Digest()
+	if dig.Hex() != v.digest {
+		return errors.Newf("%s digest mismatch: expected %s, found %s", v.hash, v.digest, dig.Hex())
+	}
+	return nil
+}
+
+func VerifyingReader(r io.ReadCloser, digest digest.Digest) io.ReadCloser {
+	return &verifiedReader{
+		closer:       r,
+		DigestReader: NewDigestReaderWith(digest.Algorithm(), r),
+		hash:         digest.Algorithm().String(),
+		digest:       digest.Hex(),
+	}
+}
+
+func VerifyingReaderWithHash(r io.ReadCloser, hash crypto.Hash, digest string) io.ReadCloser {
+	return &verifiedReader{
+		closer:       r,
+		DigestReader: NewDigestReaderWithHash(hash, r),
+		hash:         hash.String(),
+		digest:       digest,
+	}
 }

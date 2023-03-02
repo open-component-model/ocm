@@ -7,6 +7,7 @@ package npm
 import (
 	"bytes"
 	"context"
+	"crypto"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -110,7 +111,20 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, erro
 		return nil, errors.Wrapf(err, "cannot unmarshal version metadata for %s", url)
 	}
 
-	acc := accessio.DataAccessForReaderFunction(func() (io.ReadCloser, error) { return reader(meta.Dist.Tarball, vfsattr.Get(c.GetContext())) }, meta.Dist.Tarball)
+	f := func() (io.ReadCloser, error) {
+		return reader(meta.Dist.Tarball, vfsattr.Get(c.GetContext()))
+	}
+	if meta.Dist.Shasum != "" {
+		tf := f
+		f = func() (io.ReadCloser, error) {
+			r, err := tf()
+			if err != nil {
+				return nil, err
+			}
+			return accessio.VerifyingReaderWithHash(r, crypto.SHA1, meta.Dist.Shasum), nil
+		}
+	}
+	acc := accessio.DataAccessForReaderFunction(f, meta.Dist.Tarball)
 	cacheBlobAccess := accessobj.CachedBlobAccessForWriter(c.GetContext(), mime.MIME_TGZ, accessio.NewDataAccessWriter(acc))
 	return &accessMethod{
 		spec:       a,
@@ -148,9 +162,9 @@ func reader(url string, fs vfs.FileSystem) (io.ReadCloser, error) {
 		buf := &bytes.Buffer{}
 		_, err = io.Copy(buf, io.LimitReader(resp.Body, 2000))
 		if err != nil {
-			return nil, fmt.Errorf("version meta data request %s provides %s", url, resp.Status)
+			return nil, errors.Newf("version meta data request %s provides %s", url, resp.Status)
 		}
-		return nil, fmt.Errorf("version meta data request %s provides %s: %s", url, resp.Status, buf.String())
+		return nil, errors.Newf("version meta data request %s provides %s: %s", url, resp.Status, buf.String())
 	}
 	return resp.Body, nil
 }

@@ -114,12 +114,13 @@ func DataAccessForReaderFunction(reader func() (io.ReadCloser, error), origin st
 	return &readerAccess{reader: reader, origin: origin}
 }
 
-func (a *readerAccess) Get() ([]byte, error) {
+func (a *readerAccess) Get() (data []byte, err error) {
 	r, err := a.Reader()
 	if err != nil {
 		return nil, err
 	}
-	defer r.Close()
+	defer errors.PropagateError(&err, r.Close)
+
 	buf := bytes.Buffer{}
 	_, err = io.Copy(&buf, r)
 	if err != nil {
