@@ -73,6 +73,10 @@ func (_ *AccessSpec) IsLocal(cpi.Context) bool {
 	return false
 }
 
+func (a *AccessSpec) GetReferenceHint(cv cpi.ComponentVersionAccess) string {
+	return a.Package + ":" + a.Version
+}
+
 func (_ *AccessSpec) GetType() string {
 	return Type
 }
