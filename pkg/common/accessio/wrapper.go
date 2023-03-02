@@ -21,6 +21,24 @@ type DataWriter interface {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type readerWriter struct {
+	reader io.ReadCloser
+}
+
+func NewReaderWriter(r io.ReadCloser) DataWriter {
+	return &readerWriter{r}
+}
+
+func (d *readerWriter) WriteTo(w Writer) (int64, digest.Digest, error) {
+	defer d.reader.Close()
+	dr := NewDefaultDigestReader(d.reader)
+	_, err := io.Copy(w, dr)
+	if err != nil {
+		return BLOB_UNKNOWN_SIZE, BLOB_UNKNOWN_DIGEST, err
+	}
+	return dr.Size(), dr.Digest(), err
+}
+
 type dataAccessWriter struct {
 	access DataAccess
 }
@@ -34,16 +52,7 @@ func (d *dataAccessWriter) WriteTo(w Writer) (int64, digest.Digest, error) {
 	if err != nil {
 		return BLOB_UNKNOWN_SIZE, BLOB_UNKNOWN_DIGEST, err
 	}
-	defer r.Close()
-	dr := NewDefaultDigestReader(r)
-	if err != nil {
-		return BLOB_UNKNOWN_SIZE, BLOB_UNKNOWN_DIGEST, err
-	}
-	_, err = io.Copy(w, dr)
-	if err != nil {
-		return BLOB_UNKNOWN_SIZE, BLOB_UNKNOWN_DIGEST, err
-	}
-	return dr.Size(), dr.Digest(), err
+	return (&readerWriter{r}).WriteTo(w)
 }
 
 type writerAtWrapper struct {
