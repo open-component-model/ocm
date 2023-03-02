@@ -11,23 +11,23 @@ import (
 	"github.com/open-component-model/ocm/pkg/logging"
 )
 
-type PanicHandler func(interface{}) bool
+var ReallyCrash = true
+
+type PanicHandler func(interface{})
 
 var PanicHandlers = []PanicHandler{logHandler}
 
 func HandlePanic(additionalHandlers ...PanicHandler) {
-	reallyCrash := true
-
 	if r := recover(); r != nil {
 		for _, fn := range PanicHandlers {
-			reallyCrash = fn(r)
+			fn(r)
 		}
 
 		for _, fn := range additionalHandlers {
-			reallyCrash = fn(r)
+			fn(r)
 		}
 
-		if reallyCrash {
+		if ReallyCrash {
 			panic(r)
 		}
 	}
@@ -37,7 +37,7 @@ func RegisterPanicHandler(handler PanicHandler) {
 	PanicHandlers = append(PanicHandlers, handler)
 }
 
-func logHandler(r interface{}) bool {
+func logHandler(r interface{}) {
 	// Same as stdlib http server code. Manually allocate stack trace buffer size
 	// to prevent excessively large logs
 	const size = 64 << 10
@@ -48,6 +48,4 @@ func logHandler(r interface{}) bool {
 	} else {
 		logging.Logger().Error(fmt.Sprintf("Observed a panic: %#v (%v)\n%s", r, r, stacktrace))
 	}
-
-	return true
 }
