@@ -37,7 +37,7 @@ func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyTypeV1, &AccessSpec{}))
 }
 
-// AccessSpec describes the access for a GitHub registry.
+// AccessSpec describes the access for a S3 registry.
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 

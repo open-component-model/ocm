@@ -77,6 +77,10 @@ The following method types are centrally defined and available in the OCM toolse
 
   Access of a blob in an S3 blob store.
 
+- [`npm`](../../../pkg/contexts/ocm/accessmethods/npm/README.md) *external*
+
+  Access of an NPM module from an NPM registry.
+
 - [`localBlob`](../../../pkg/contexts/ocm/accessmethods/localblob/README.md) *local*
 
   This is a special access method that has no global implementation.
