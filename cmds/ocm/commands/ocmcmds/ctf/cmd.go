@@ -7,8 +7,7 @@ package ctf
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive/create"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive/transfer"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/ctf/transfer"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -22,6 +21,5 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 		Short: "Commands acting on common transport archives",
 	}, Names...)
 	cmd.AddCommand(transfer.NewCommand(ctx, transfer.Verb))
-	cmd.AddCommand(create.NewCommand(ctx, create.Verb))
 	return cmd
 }
