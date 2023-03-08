@@ -17,8 +17,6 @@ import (
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"sigs.k8s.io/cli-utils/pkg/kstatus/polling"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-
-	"github.com/open-component-model/ocm-controller/api/v1alpha1"
 )
 
 func readObjects(manifestPath string) ([]*unstructured.Unstructured, error) {
@@ -75,6 +73,5 @@ func newScheme() *apiruntime.Scheme {
 	scheme := apiruntime.NewScheme()
 	_ = apiextensionsv1.AddToScheme(scheme)
 	_ = corev1.AddToScheme(scheme)
-	_ = v1alpha1.AddToScheme(scheme)
 	return scheme
 }
