@@ -137,6 +137,7 @@ attributes are supported:
 * [ocm <b>add</b>](ocm_add.md)	 &mdash; Add resources or sources to a component archive
 * [ocm <b>bootstrap</b>](ocm_bootstrap.md)	 &mdash; bootstrap components
 * [ocm <b>clean</b>](ocm_clean.md)	 &mdash; Cleanup/re-organize elements
+* [ocm <b>controller</b>](ocm_controller.md)	 &mdash; Commands acting on the ocm-controller
 * [ocm <b>create</b>](ocm_create.md)	 &mdash; Create transport or component archive
 * [ocm <b>describe</b>](ocm_describe.md)	 &mdash; Describe various elements by using appropriate sub commands.
 * [ocm <b>download</b>](ocm_download.md)	 &mdash; Download oci artifacts, resources or complete components

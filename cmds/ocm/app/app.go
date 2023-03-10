@@ -9,7 +9,6 @@ package app
 import (
 	"strings"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/controller"
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 
@@ -36,6 +35,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/add"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/bootstrap"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/clean"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/controller"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/create"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/describe"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/download"
