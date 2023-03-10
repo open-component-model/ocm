@@ -117,7 +117,8 @@ Archive. This might be either a directory prepared to host component version
 content or a tar/tgz file (see option --type).
 
 If option <code>--create</code> is given, the archive is created first. An
-additional option <code>--force</code> will recreate an empty archive if it already exists.
+additional option <code>--force</code> will recreate an empty archive if it
+already exists.
 
 If option <code>--complete</code> is given all component versions referenced by
 the added one, will be added, also. Therefore, the <code>--lookup</code> is required
@@ -125,13 +126,19 @@ to specify an OCM repository to lookup the missing component versions. If
 additionally the <code>-V</code> is given, the resources of those additional
 components will be added by value.
 
-The source, resource and reference list can be composed according the commands
-<CMD>ocm add sources</CMD>, <CMD>ocm add resources</CMD>, <CMD>ocm add references</CMD>, respectively.
+The source, resource and reference list can be composed according to the commands
+<CMD>ocm add sources</CMD>, <CMD>ocm add resources</CMD>, <CMD>ocm add references</CMD>,
+respectively.
 
 The description file might contain:
 - a single component as shown in the example
 - a list of components under the key <code>components</code>
 - a list of yaml documents with a single component or component list
+
+The optional field <code>meta.configuredSchemaVersion</code> for a component
+entry can be used to specify a dedicated serialization format to use for the
+component descriptor. If given it overrides the <code>--schema</code> option
+of the command. By default v2 is used.
 `,
 	}
 }
@@ -186,7 +193,7 @@ func (o *Command) Run() error {
 
 	printer := common2.NewPrinter(o.Context.StdOut())
 	fs := o.Context.FileSystem()
-	h := comp.NewResourceSpecHandler(o.Version)
+	h := comp.NewResourceSpecHandler(o.Version, schemaoption.From(o).Schema)
 	elems, ictx, err := addhdlrs.ProcessDescriptions(o.Context, printer, templateroption.From(o).Options, h, o.Elements)
 	if err != nil {
 		return err

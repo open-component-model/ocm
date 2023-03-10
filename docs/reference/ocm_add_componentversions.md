@@ -34,7 +34,8 @@ Archive. This might be either a directory prepared to host component version
 content or a tar/tgz file (see option --type).
 
 If option <code>--create</code> is given, the archive is created first. An
-additional option <code>--force</code> will recreate an empty archive if it already exists.
+additional option <code>--force</code> will recreate an empty archive if it
+already exists.
 
 If option <code>--complete</code> is given all component versions referenced by
 the added one, will be added, also. Therefore, the <code>--lookup</code> is required
@@ -42,13 +43,19 @@ to specify an OCM repository to lookup the missing component versions. If
 additionally the <code>-V</code> is given, the resources of those additional
 components will be added by value.
 
-The source, resource and reference list can be composed according the commands
-[ocm add sources](ocm_add_sources.md), [ocm add resources](ocm_add_resources.md), [ocm add references](ocm_add_references.md), respectively.
+The source, resource and reference list can be composed according to the commands
+[ocm add sources](ocm_add_sources.md), [ocm add resources](ocm_add_resources.md), [ocm add references](ocm_add_references.md),
+respectively.
 
 The description file might contain:
 - a single component as shown in the example
 - a list of components under the key <code>components</code>
 - a list of yaml documents with a single component or component list
+
+The optional field <code>meta.configuredSchemaVersion</code> for a component
+entry can be used to specify a dedicated serialization format to use for the
+component descriptor. If given it overrides the <code>--schema</code> option
+of the command. By default v2 is used.
 
 The <code>--type</code> option accepts a file format for the
 target archive to use. The following formats are supported:
@@ -59,7 +66,8 @@ target archive to use. The following formats are supported:
 The default format is <code>directory</code>.
 
 If the option <code>--scheme</code> is given, the specified component descriptor format is used/generated.
-The following schema versions are supported:
+
+The following schema versions are supported for explicit conversions:
 
   - <code>ocm.software/v3alpha1</code>: 
   - <code>v2</code> (default): 

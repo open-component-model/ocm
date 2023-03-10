@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package compdesc_test
+package v2_test
 
 import (
 	"testing"
