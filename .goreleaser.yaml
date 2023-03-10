@@ -30,13 +30,13 @@ builds:
     goos:
       - windows
 archives:
-  - name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  - name_template: "{{ .Binary }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     id: nix
     builds: [linux, darwin]
     format: tar.gz
     files:
       - none*
-  - name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  - name_template: "{{ .Binary }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     id: windows
     builds: [windows]
     format: zip
@@ -44,12 +44,12 @@ archives:
       - none*
 source:
   enabled: true
-  name_template: '{{ .ProjectName }}_{{ .Version }}_source_code'
+  name_template: '{{ .ProjectName }}-{{ .Version }}-source_code'
 sboms:
   - id: source
     artifacts: source
     documents:
-      - "{{ .ProjectName }}_{{ .Version }}_sbom.spdx.json"
+      - "{{ .ProjectName }}-{{ .Version }}-sbom.spdx.json"
 signs:
   - cmd: cosign
     env:
