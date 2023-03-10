@@ -14,6 +14,21 @@ builds:
       - linux
     goarch:
       - amd64
+      - arm64
+      - arm
+    goarm:
+      - 7
+  - <<: *build_defaults
+    id: darwin
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+  - <<: *build_defaults
+    id: windows
+    goos:
+      - windows
 archives:
   - name_template: "{{ .Binary }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
     id: nix
