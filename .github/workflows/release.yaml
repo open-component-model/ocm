@@ -13,8 +13,9 @@ jobs:
   lint-and-test:
     uses: ./.github/workflows/lint_and_test.yaml
     permissions:
-      contents: read
+      contents: write
       pull-requests: read
+      id-token: write
   release:
     needs: lint-and-test
     name: Trigger release build
@@ -105,14 +106,4 @@ jobs:
         args: release --rm-dist --timeout 60m --skip-validate --config=./.goreleaser.yaml --release-notes=${{ env.RELEASE_NOTES_FILE }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.EVENT_API }}
         GORELEASER_CURRENT_TAG: ${{ env.RELEASE_VERSION }}
-
-    - name: Publish Release Event
-      if: inputs.release_candidate == false
-      uses: peter-evans/repository-dispatch@v2
-      with:
-        token: ${{ secrets.EVENT_API }}
-        repository: open-component-model/ocm-website
-        event-type: ocm-cli-release
-        client-payload: '{"tag": "${{ env.RELEASE_VERSION }}"}'
