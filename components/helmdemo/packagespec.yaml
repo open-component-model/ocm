@@ -4,7 +4,6 @@ description: |
 executors:
   - resourceRef:
       resource:
-        #name: toiimage
         name: toiexecutor
       referencePath:
         - name: installer
@@ -12,12 +11,19 @@ executors:
 credentials:
   target:
     description: Kubeconfig for installation
+
+# template used for generating the values file passed to helm
+# merges the values from executors/config/values
+# default helm values can be provided here. Do not forget merging the client
+# parameters. Otherwise no client values can be provided.
 configTemplate:
   namespace: default
   release: echoserver
+  replicaCount: 1
+  <<: (( merge ))     # merge all user provided values with configured defaults
 configScheme:
   type: object
-  additionalProperties: false
+  additionalProperties: true
   properties:
     release:
       type: string
