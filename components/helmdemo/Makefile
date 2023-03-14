@@ -8,9 +8,10 @@ OCMREPO   ?= ghcr.io/$(GITHUBORG)/ocm
 HELMINSTCOMP = $(PROVIDER)/toi/installers/helminstaller
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
-VERSION                                        = $(shell git describe --tags --exact-match 2>/dev/null|| echo "$$(cat $(REPO_ROOT)/VERSION)")
+VERSION                                        = $(shell git describe --tags --abbrev=0 2>/dev/null)
 COMMIT                                         = $(shell git rev-parse HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
+HELMINSTVERSION ?= $(VERSION)
 
 GEN = $(REPO_ROOT)/gen/$(NAME)
 OCM = go run $(REPO_ROOT)/cmds/ocm
@@ -36,7 +37,7 @@ $(GEN)/ca: $(GEN)/.exists sources.yaml resources.yaml references.yaml $(CHARTSRC
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider $(PROVIDER) --file $(GEN)/ca
 	$(OCM) add sources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" sources.yaml
 	$(OCM) add resources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" resources.yaml
-	$(OCM) add references  $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" HELMINSTCOMP=$(HELMINSTCOMP) references.yaml
+	$(OCM) add references  $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" HELMINSTCOMP=$(HELMINSTCOMP) HELMINSTVERSION=$(HELMINSTVERSION) references.yaml
 	@touch $(GEN)/ca
 
 .PHONY: eval-resources
@@ -69,7 +70,8 @@ $(GEN)/.exists:
 info:
 	@echo "ROOT:     $(REPO_ROOT)"
 	@echo "VERSION:  $(VERSION)"
-	@echo "COMMIT;   $(COMMIT)"
+	@echo "COMMIT:   $(COMMIT)"
+	@echo "version for helminstaller:  $(HELMINSTVERSION)"
 
 .PHONY: describe
 describe: $(GEN)/ctf
