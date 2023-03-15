@@ -24,8 +24,8 @@ CHARTSRCS=$(shell find echoserver -type f)
 ctf: $(GEN)/ctf
 
 $(GEN)/ctf: $(GEN)/ca
-	@rm -rf $(GEN)/ctf
-	$(OCM) transfer ca $(GEN)/ca $(GEN)/ctf
+	@rm -f $(GEN)/ctf
+	$(OCM) -X keeplocalblob=true transfer ca $(GEN)/ca $(GEN)/ctf
 	touch $(GEN)/ctf
 
 .PHONY: version
@@ -50,18 +50,18 @@ eval-resources:
 push: $(GEN)/ctf $(GEN)/push.$(NAME)
 
 $(GEN)/push.$(NAME): $(GEN)/ctf
-	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
+	$(OCM) -X keeplocalblob=true transfer ctf -f $(GEN)/ctf $(OCMREPO)
 	@touch $(GEN)/push.$(NAME)
 
 .PHONY: plain-push
 plain-push: $(GEN)
-	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
+	$(OCM) -X keeplocalblob=true transfer ctf -f $(GEN)/ctf $(OCMREPO)
 	@touch $(GEN)/push.$(NAME)
 
 .PHONY: transport
 transport:
 ifneq ($(TARGETREPO),)
-	$(OCM) transfer component -Vc  $(OCMREPO)//$(COMPONENT):$(VERSION) $(TARGETREPO)
+	$(OCM) -X keeplocalblob=true transfer component -Vc  $(OCMREPO)//$(COMPONENT):$(VERSION) $(TARGETREPO)
 endif
 
 $(GEN)/.exists:
