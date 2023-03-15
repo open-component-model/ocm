@@ -15,6 +15,7 @@ The main targets are:
 * `make descriptor`: displays the component descriptor
 * `make describe`: displays the component and it dependencies in a tree structure
 
+You can find more information [here](../../cmds/helminstaller/README.md).
 
 # Installation
 
