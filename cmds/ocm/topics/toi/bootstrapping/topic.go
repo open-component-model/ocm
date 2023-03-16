@@ -222,7 +222,7 @@ An OCM resource reference describes a resource of a component version. It is
 always evaluated relative to the component version providing the resource
 that contains the resource reference. It uses the following fields:
 
-- **<code>resourcePath</code>** (optional) *[]Identity*
+- **<code>referencePath</code>** (optional) *[]Identity*
 
   This is sequence of reference identities used to follow a chain of
   component version references starting with the actual component version.
