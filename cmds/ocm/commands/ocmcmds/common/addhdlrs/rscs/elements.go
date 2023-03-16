@@ -54,12 +54,13 @@ func (ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Element,
 	if spec.Relation == metav1.LocalRelation {
 		if vers == "" || vers == ComponentVersionTag {
 			vers = v.GetVersion()
-		} else if vers != v.GetVersion() {
-			return errors.Newf("local resource %q (%s) has non-matching version %q", spec.Name, r.Source(), vers)
 		}
 	}
 	if vers == ComponentVersionTag {
 		vers = v.GetVersion()
+	}
+	if vers == "" {
+		return errors.Newf("resource %q (%s): missing version", spec.Name, r.Source())
 	}
 
 	meta := &compdesc.ResourceMeta{
