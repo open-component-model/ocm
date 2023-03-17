@@ -17,6 +17,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/helminstaller/app/driver"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/compression"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm/loader"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
@@ -111,6 +112,24 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 		}
 		path = filepath.Join(dir, entries[0].Name())
 
+		// prepare dependencies
+		chartFile := filepath.Join(path, "Chart.yaml")
+		chartData, err := vfs.ReadFile(fs, chartFile)
+		if err != nil {
+			return errors.Wrapf(err, "cannot read Chart.yaml")
+		}
+		var chart map[string]interface{}
+		err = runtime.DefaultYAMLEncoding.Unmarshal(chartData, &chart)
+		if err != nil {
+			return errors.Wrapf(err, "cannot parse Chart.yaml")
+		}
+		deps := []interface{}{}
+		if d := chart["dependencies"]; d != nil {
+			if a, ok := d.([]interface{}); ok {
+				deps = a
+			}
+		}
+
 		out.Outf(octx, "Loading %d sub charts into %s...\n", len(cfg.SubCharts), path)
 		var finalize utils2.Finalizer
 		defer finalize.Finalize()
@@ -132,11 +151,52 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 			}
 
 			subpath := filepath.Join(charts, n)
-			_, _, err = download.For(ctx).Download(common.NewPrinter(octx.StdOut()), acc, subpath, osfs.New())
+			_, subpath, err = download.For(ctx).Download(common.NewPrinter(octx.StdOut()), acc, subpath, osfs.New())
 			if err != nil {
 				return errors.Wrapf(err, "downloading helm chart %s", r)
 			}
+
+			chartObj, err := loader.Load(subpath, fs)
+			if err != nil {
+				return errors.Wrapf(err, "cannot load subchart %q", subpath)
+			}
+			found := false
+			for _, dep := range deps {
+				m, ok := dep.(map[string]interface{})
+				if ok {
+					if m["alias"] == n {
+						out.Outf(octx, "    found dependency %q for subchart %q\n", n, chartObj.Name())
+						m["name"] = chartObj.Name()
+						found = true
+						break
+					}
+					if m["name"] == chartObj.Name() {
+						if m["alias"] == nil {
+							out.Outf(octx, "    setting alias %q for dependency for subchart %q\n", n, chartObj.Name())
+							m["alias"] = n
+							found = true
+						}
+					}
+				}
+			}
+			if !found {
+				out.Outf(octx, "    adding dependency %q for subchart %q\n", n, chartObj.Name())
+				m := map[string]interface{}{}
+				m["name"] = chartObj.Name()
+				m["alias"] = n
+				deps = append(deps, m)
+			}
 			finalize.Finalize()
+		}
+
+		chart["dependencies"] = deps
+		chartData, err = runtime.DefaultYAMLEncoding.Marshal(deps)
+		if err != nil {
+			return errors.Wrapf(err, "cannot marshal Chart.yaml")
+		}
+		err = vfs.WriteFile(fs, chartFile, chartData, 0o600)
+		if err != nil {
+			return errors.Wrapf(err, "cannot write Chart.yaml")
 		}
 	}
 
