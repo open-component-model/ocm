@@ -1,3 +1,20 @@
+definitions:
+  resourceRef:
+    type: object
+    description: resource reference for charts
+    properties:
+      resource:
+        type: object
+        additionalProperties:
+          type: string
+      referencePath:
+        type: array
+        items:
+          type: object
+          additionalProperties:
+            type: string
+
+
 actions:
   - install
   - uninstall
@@ -13,21 +30,12 @@ configScheme:
     - imageMapping
   properties:
     chart:
+      $ref: '#/definitions/resourceRef'
       additionalProperties: false
+    subcharts:
       type: object
-      required:
-      - resource
-      properties:
-        resource:
-          type: object
-          additionalProperties:
-            type: string
-        referencePath:
-          type: array
-          items:
-            type: object
-            additionalProperties:
-              type: string
+      additionalProperties:
+        $ref: '#/definitions/resourceRef'
 
     release:
       type: string
