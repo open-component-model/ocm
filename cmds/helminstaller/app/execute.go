@@ -109,7 +109,7 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 		if len(entries) != 1 {
 			return errors.Wrapf(err, "expected single charts folder in archive, but found %d folders", len(entries))
 		}
-		path = entries[0].Name()
+		path = filepath.Join(dir, entries[0].Name())
 
 		out.Outf(octx, "Loading %d sub charts into %s...\n", len(cfg.SubCharts), path)
 		var finalize utils2.Finalizer
