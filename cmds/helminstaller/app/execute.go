@@ -173,7 +173,9 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 					if m["name"] == chartObj.Name() {
 						if m["alias"] == nil {
 							out.Outf(octx, "    setting alias %q for dependency for subchart %q\n", n, chartObj.Name())
-							m["alias"] = n
+							if n != chartObj.Name() {
+								m["alias"] = n
+							}
 							found = true
 						}
 					}
@@ -183,14 +185,16 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 				out.Outf(octx, "    adding dependency %q for subchart %q\n", n, chartObj.Name())
 				m := map[string]interface{}{}
 				m["name"] = chartObj.Name()
-				m["alias"] = n
+				if n != chartObj.Name() {
+					m["alias"] = n
+				}
 				deps = append(deps, m)
 			}
 			finalize.Finalize()
 		}
 
 		chart["dependencies"] = deps
-		chartData, err = runtime.DefaultYAMLEncoding.Marshal(deps)
+		chartData, err = runtime.DefaultYAMLEncoding.Marshal(chart)
 		if err != nil {
 			return errors.Wrapf(err, "cannot marshal Chart.yaml")
 		}
