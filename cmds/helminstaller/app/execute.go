@@ -11,9 +11,12 @@ import (
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/projectionfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/cmds/helminstaller/app/driver"
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
@@ -45,7 +48,7 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 	}
 	values = Merge(cfgv, values)
 
-	fmt.Printf("Loading helm chart from resource %s@%s\n", cfg.Chart, common.VersionedElementKey(cv))
+	out.Outf(octx, "Loading helm chart from resource %s@%s\n", cfg.Chart, common.VersionedElementKey(cv))
 	acc, rcv, err := utils.ResolveResourceReference(cv, cfg.Chart, nil)
 	if err != nil {
 		return errors.ErrNotFoundWrap(err, "chart reference", cfg.Chart.String())
@@ -66,18 +69,58 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 	file.Close()
 	os.Remove(path)
 
-	_, path, err = download.For(ctx).Download(common.NewPrinter(octx.StdOut()), acc, path, osfs.New())
+	fs := osfs.New()
+	_, path, err = download.For(ctx).Download(common.NewPrinter(octx.StdOut()), acc, path, fs)
 	if err != nil {
 		return errors.Wrapf(err, "downloading helm chart")
 	}
 	defer os.Remove(path)
 
 	if len(cfg.SubCharts) > 0 {
-		fmt.Printf("Loading %d sub charts...\n", len(cfg.SubCharts))
+		out.Outf(octx, "  Unpacking chart archive...\n")
+		dir := path + ".dir"
+		err := os.Mkdir(dir, 0o700)
+		if err != nil {
+			return errors.Wrapf(err, "cannot mkdir %q", dir)
+		}
+		defer os.RemoveAll(dir)
+
+		r, err := fs.Open(path)
+		if err != nil {
+			return errors.Wrapf(err, "cannot read downloaded chart archive %q", path)
+		}
+		defer r.Close()
+		reader, _, err := compression.AutoDecompress(r)
+		if err != nil {
+			return errors.Wrapf(err, "cannot uncompress downloaded chart archive %q", path)
+		}
+		chartfs, err := projectionfs.New(fs, dir)
+		if err != nil {
+			return errors.Wrapf(err, "cannot create projection %q", path)
+		}
+		err = utils2.ExtractTarToFs(chartfs, reader)
+		if err != nil {
+			return errors.Wrapf(err, "cannot extract downloaded chart archive %q", path)
+		}
+		entries, err := vfs.ReadDir(fs, dir)
+		if err != nil {
+			return errors.Wrapf(err, "cannot find chart folder in", dir)
+		}
+		if len(entries) != 1 {
+			return errors.Wrapf(err, "expected single charts folder in archive, but found %d folders", len(entries))
+		}
+		path = entries[0].Name()
+
+		out.Outf(octx, "Loading %d sub charts into %s...\n", len(cfg.SubCharts), path)
 		var finalize utils2.Finalizer
 		defer finalize.Finalize()
+		charts := filepath.Join(path, "charts")
+		err = os.Mkdir(charts, 0o700)
+		if err != nil {
+			return errors.Wrapf(err, "cannot mkdir %q", charts)
+		}
 		for n, r := range cfg.SubCharts {
-			fmt.Printf("  Loading sub chart %q from resource %s@%s\n", n, r, common.VersionedElementKey(cv))
+			out.Outf(octx, "  Loading sub chart %q from resource %s@%s\n", n, r, common.VersionedElementKey(cv))
 			acc, rcv, err := utils.ResolveResourceReference(cv, r, nil)
 			if err != nil {
 				return errors.ErrNotFoundWrap(err, "chart reference", r.String())
@@ -88,7 +131,7 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 				return errors.Newf("%s: resource type %q required, but found %q", r, resourcetypes.HELM_CHART, acc.Meta().Type)
 			}
 
-			subpath := filepath.Join(path, "charts", n)
+			subpath := filepath.Join(charts, n)
 			_, _, err = download.For(ctx).Download(common.NewPrinter(octx.StdOut()), acc, subpath, osfs.New())
 			if err != nil {
 				return errors.Wrapf(err, "downloading helm chart %s", r)
@@ -97,7 +140,7 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 		}
 	}
 
-	fmt.Printf("Localizing helm chart...\n")
+	out.Outf(octx, "Localizing helm chart...\n")
 
 	for i, v := range cfg.ImageMapping {
 		acc, rcv, err := utils.ResolveResourceReference(cv, v.ResourceReference, nil)
@@ -138,7 +181,7 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 		}
 	}
 
-	fmt.Printf("Installing helm chart...\n")
+	out.Outf(octx, "Installing helm chart...\n")
 
 	ns := "default"
 	if cfg.Namespace != "" {
