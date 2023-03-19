@@ -6,11 +6,11 @@ package app
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
+	. "github.com/open-component-model/ocm/pkg/exception"
+
 	"github.com/mandelsoft/filepath/pkg/filepath"
-	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -18,13 +18,14 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm/loader"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/toi/support"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -39,21 +40,121 @@ func Merge(values ...map[string]interface{}) map[string]interface{} {
 	return result
 }
 
-func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, cv ocm.ComponentVersionAccess, cfg *Config, values map[string]interface{}, kubeconfig []byte) error {
-	if action != "install" && action != "uninstall" {
-		return errors.ErrNotSupported("action", action)
-	}
-	cfgv, err := cfg.GetValues()
-	if err != nil {
-		return err
-	}
-	values = Merge(cfgv, values)
+type Execution struct {
+	driver driver.Driver
+	*support.ExecutorOptions
+	path string
+	fs   vfs.FileSystem
+}
 
-	out.Outf(octx, "Loading helm chart from resource %s@%s\n", cfg.Chart, common.VersionedElementKey(cv))
-	acc, rcv, err := utils.ResolveResourceReference(cv, cfg.Chart, nil)
-	if err != nil {
-		return errors.ErrNotFoundWrap(err, "chart reference", cfg.Chart.String())
+func (e *Execution) outf(msg string, args ...interface{}) {
+	out.Outf(e.OutputContext, msg, args...)
+}
+
+func (e *Execution) unpackChart(dir string) {
+	e.outf("Unpacking chart archive to %s...\n", dir)
+
+	r := Must1f(R1(e.fs.Open(e.path)), "cannot read downloaded chart archive %q", e.path)
+	defer r.Close()
+
+	reader, _ := Must2f(R2(compression.AutoDecompress(r)), "cannot uncompress downloaded chart archive %q", e.path)
+	chartfs := Must1f(R1(projectionfs.New(e.fs, dir)), "cannot create projection %q", e.path)
+	Mustf(utils2.ExtractTarToFs(chartfs, reader), "cannot extract downloaded chart archive %q", e.path)
+	entries := Must1f(R1(vfs.ReadDir(e.fs, dir)), "cannot find chart folder in %q", dir)
+	if len(entries) != 1 {
+		Throw(fmt.Errorf("expected single chart folder in archive, but found %d folders", len(entries)))
 	}
+	e.path = filepath.Join(dir, entries[0].Name())
+}
+
+func (e *Execution) addSubCharts(subCharts map[string]v1.ResourceReference) {
+	dir := e.path + ".dir"
+	Mustf(e.fs.Mkdir(dir, 0o700), "cannot mkdir %q", dir)
+	defer e.fs.RemoveAll(dir)
+
+	e.unpackChart(dir)
+
+	// prepare dependencies
+	e.outf("Preparing dependencies...\n")
+	chartFile := filepath.Join(e.path, "Chart.yaml")
+	chartData := Must1f(R1(vfs.ReadFile(e.fs, chartFile)), "cannot read Chart.yaml")
+
+	var chart map[string]interface{}
+	Mustf(runtime.DefaultYAMLEncoding.Unmarshal(chartData, &chart), "cannot parse Chart.yaml")
+	deps := []interface{}{}
+	if d := chart["dependencies"]; d != nil {
+		if a, ok := d.([]interface{}); ok {
+			deps = a
+		}
+	}
+
+	var finalize utils2.Finalizer
+	defer finalize.Finalize()
+
+	charts := filepath.Join(e.path, "charts")
+	Mustf(e.fs.Mkdir(charts, 0o700), "cannot mkdir %q", charts)
+	e.outf("Loading %d sub charts into %s...\n", len(subCharts), charts)
+	for n, r := range subCharts {
+		e.outf("  Loading sub chart %q from resource %s@%s\n", n, r, common.VersionedElementKey(e.ComponentVersion))
+		acc, rcv := Must2f(R2(utils.ResolveResourceReference(e.ComponentVersion, r, nil)), "chart reference", r.String())
+		finalize.Close(rcv)
+
+		if acc.Meta().Type != resourcetypes.HELM_CHART {
+			Throw(errors.Newf("%s: resource type %q required, but found %q", r, resourcetypes.HELM_CHART, acc.Meta().Type))
+		}
+
+		_, subpath := Must2f(R2(download.For(e.Context).Download(common.NewPrinter(e.OutputContext.StdOut()), acc, filepath.Join(charts, n), e.fs)), "downloading helm chart %s", r)
+
+		chartObj := Must1f(R1(loader.Load(subpath, e.fs)), "cannot load subchart %q", subpath)
+		found := false
+		for _, dep := range deps {
+			m, ok := dep.(map[string]interface{})
+			if ok {
+				if m["alias"] == n {
+					e.outf("    found dependency %q for subchart %q\n", n, chartObj.Name())
+					m["name"] = chartObj.Name()
+					found = true
+					break
+				}
+				if m["name"] == chartObj.Name() {
+					if m["alias"] == nil {
+						e.outf("    setting alias %q for dependency for subchart %q\n", n, chartObj.Name())
+						if n != chartObj.Name() {
+							m["alias"] = n
+						}
+						found = true
+					}
+				}
+			}
+		}
+		if !found {
+			e.outf("    adding dependency %q for subchart %q\n", n, chartObj.Name())
+			m := map[string]interface{}{}
+			m["name"] = chartObj.Name()
+			if n != chartObj.Name() {
+				m["alias"] = n
+			}
+			deps = append(deps, m)
+		}
+		finalize.Finalize()
+	}
+
+	chart["dependencies"] = deps
+	chartData = Must1f(R1(runtime.DefaultYAMLEncoding.Marshal(chart)), "cannot marshal Chart.yaml")
+	Mustf(vfs.WriteFile(e.fs, chartFile, chartData, 0o600), "cannot write Chart.yaml")
+}
+
+func (e *Execution) Execute(cfg *Config, values map[string]interface{}, kubeconfig []byte) (err error) {
+	defer PropagateException(&err)
+
+	if e.Action != "install" && e.Action != "uninstall" {
+		return errors.ErrNotSupported("action", e.Action)
+	}
+
+	values = Merge(Must1(cfg.GetValues()), values)
+
+	e.outf("Loading helm chart from resource %s@%s\n", cfg.Chart, common.VersionedElementKey(e.ComponentVersion))
+	acc, rcv := Must2f(R2(utils.ResolveResourceReference(e.ComponentVersion, cfg.Chart, nil)), "chart reference", cfg.Chart.String())
 	defer rcv.Close()
 
 	if acc.Meta().Type != resourcetypes.HELM_CHART {
@@ -61,161 +162,24 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 	}
 
 	// have to use the OS filesystem here for using the helm library
-	file, err := os.CreateTemp("", "helm-*")
-	if err != nil {
-		return err
-	}
-
+	file := Must1(vfs.TempFile(e.fs, "", "helm-*"))
 	path := file.Name()
 	file.Close()
-	os.Remove(path)
+	e.fs.Remove(path)
 
-	fs := osfs.New()
-	_, path, err = download.For(ctx).Download(common.NewPrinter(octx.StdOut()), acc, path, fs)
-	if err != nil {
-		return errors.Wrapf(err, "downloading helm chart")
-	}
-	defer os.Remove(path)
+	_, e.path = Must2f(R2(download.For(e.Context).Download(common.NewPrinter(e.OutputContext.StdOut()), acc, path, e.fs)), "downloading helm chart")
+
+	defer e.fs.Remove(e.path)
 
 	if len(cfg.SubCharts) > 0 {
-		out.Outf(octx, "  Unpacking chart archive...\n")
-		dir := path + ".dir"
-		err := os.Mkdir(dir, 0o700)
-		if err != nil {
-			return errors.Wrapf(err, "cannot mkdir %q", dir)
-		}
-		defer os.RemoveAll(dir)
-
-		r, err := fs.Open(path)
-		if err != nil {
-			return errors.Wrapf(err, "cannot read downloaded chart archive %q", path)
-		}
-		defer r.Close()
-		reader, _, err := compression.AutoDecompress(r)
-		if err != nil {
-			return errors.Wrapf(err, "cannot uncompress downloaded chart archive %q", path)
-		}
-		chartfs, err := projectionfs.New(fs, dir)
-		if err != nil {
-			return errors.Wrapf(err, "cannot create projection %q", path)
-		}
-		err = utils2.ExtractTarToFs(chartfs, reader)
-		if err != nil {
-			return errors.Wrapf(err, "cannot extract downloaded chart archive %q", path)
-		}
-		entries, err := vfs.ReadDir(fs, dir)
-		if err != nil {
-			return errors.Wrapf(err, "cannot find chart folder in", dir)
-		}
-		if len(entries) != 1 {
-			return errors.Wrapf(err, "expected single charts folder in archive, but found %d folders", len(entries))
-		}
-		path = filepath.Join(dir, entries[0].Name())
-
-		// prepare dependencies
-		chartFile := filepath.Join(path, "Chart.yaml")
-		chartData, err := vfs.ReadFile(fs, chartFile)
-		if err != nil {
-			return errors.Wrapf(err, "cannot read Chart.yaml")
-		}
-		var chart map[string]interface{}
-		err = runtime.DefaultYAMLEncoding.Unmarshal(chartData, &chart)
-		if err != nil {
-			return errors.Wrapf(err, "cannot parse Chart.yaml")
-		}
-		deps := []interface{}{}
-		if d := chart["dependencies"]; d != nil {
-			if a, ok := d.([]interface{}); ok {
-				deps = a
-			}
-		}
-
-		out.Outf(octx, "Loading %d sub charts into %s...\n", len(cfg.SubCharts), path)
-		var finalize utils2.Finalizer
-		defer finalize.Finalize()
-		charts := filepath.Join(path, "charts")
-		err = os.Mkdir(charts, 0o700)
-		if err != nil {
-			return errors.Wrapf(err, "cannot mkdir %q", charts)
-		}
-		for n, r := range cfg.SubCharts {
-			out.Outf(octx, "  Loading sub chart %q from resource %s@%s\n", n, r, common.VersionedElementKey(cv))
-			acc, rcv, err := utils.ResolveResourceReference(cv, r, nil)
-			if err != nil {
-				return errors.ErrNotFoundWrap(err, "chart reference", r.String())
-			}
-			finalize.Close(rcv)
-
-			if acc.Meta().Type != resourcetypes.HELM_CHART {
-				return errors.Newf("%s: resource type %q required, but found %q", r, resourcetypes.HELM_CHART, acc.Meta().Type)
-			}
-
-			subpath := filepath.Join(charts, n)
-			_, subpath, err = download.For(ctx).Download(common.NewPrinter(octx.StdOut()), acc, subpath, osfs.New())
-			if err != nil {
-				return errors.Wrapf(err, "downloading helm chart %s", r)
-			}
-
-			chartObj, err := loader.Load(subpath, fs)
-			if err != nil {
-				return errors.Wrapf(err, "cannot load subchart %q", subpath)
-			}
-			found := false
-			for _, dep := range deps {
-				m, ok := dep.(map[string]interface{})
-				if ok {
-					if m["alias"] == n {
-						out.Outf(octx, "    found dependency %q for subchart %q\n", n, chartObj.Name())
-						m["name"] = chartObj.Name()
-						found = true
-						break
-					}
-					if m["name"] == chartObj.Name() {
-						if m["alias"] == nil {
-							out.Outf(octx, "    setting alias %q for dependency for subchart %q\n", n, chartObj.Name())
-							if n != chartObj.Name() {
-								m["alias"] = n
-							}
-							found = true
-						}
-					}
-				}
-			}
-			if !found {
-				out.Outf(octx, "    adding dependency %q for subchart %q\n", n, chartObj.Name())
-				m := map[string]interface{}{}
-				m["name"] = chartObj.Name()
-				if n != chartObj.Name() {
-					m["alias"] = n
-				}
-				deps = append(deps, m)
-			}
-			finalize.Finalize()
-		}
-
-		chart["dependencies"] = deps
-		chartData, err = runtime.DefaultYAMLEncoding.Marshal(chart)
-		if err != nil {
-			return errors.Wrapf(err, "cannot marshal Chart.yaml")
-		}
-		err = vfs.WriteFile(fs, chartFile, chartData, 0o600)
-		if err != nil {
-			return errors.Wrapf(err, "cannot write Chart.yaml")
-		}
+		e.addSubCharts(cfg.SubCharts)
 	}
 
-	out.Outf(octx, "Localizing helm chart...\n")
-
+	e.outf("Localizing helm chart...\n")
 	for i, v := range cfg.ImageMapping {
-		acc, rcv, err := utils.ResolveResourceReference(cv, v.ResourceReference, nil)
-		if err != nil {
-			return errors.ErrNotFoundWrap(err, "mapping", fmt.Sprintf("%d (%s)", i+1, &v.ResourceReference))
-		}
+		acc, rcv := Must2f(R2(utils.ResolveResourceReference(e.ComponentVersion, v.ResourceReference, nil)), "mapping", fmt.Sprintf("%d (%s)", i+1, &v.ResourceReference))
 		rcv.Close()
-		ref, err := utils.GetOCIArtifactRef(ctx, acc)
-		if err != nil {
-			return errors.Wrapf(err, "mapping %d: cannot resolve resource %s to an OCI Reference", i+1, v)
-		}
+		ref := Must1f(R1(utils.GetOCIArtifactRef(e.Context, acc)), "mapping %d: cannot resolve resource %s to an OCI Reference", i+1, v)
 		ix := strings.Index(ref, ":")
 		if ix < 0 {
 			ix = strings.Index(ref, "@")
@@ -226,26 +190,17 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 		repo := ref[:ix]
 		tag := ref[ix+1:]
 		if v.Repository != "" {
-			err = Set(values, v.Repository, repo)
-			if err != nil {
-				return errors.Wrapf(err, "mapping %d: assigning repositry to property %q", v.Repository)
-			}
+			Mustf(Set(values, v.Repository, repo), "mapping %d: assigning repositry to property %q", v.Repository)
 		}
 		if v.Tag != "" {
-			err = Set(values, v.Tag, tag)
-			if err != nil {
-				return errors.Wrapf(err, "mapping %d: assigning tag to property %q", v.Tag)
-			}
+			Mustf(Set(values, v.Tag, tag), "mapping %d: assigning tag to property %q", v.Tag)
 		}
 		if v.Image != "" {
-			err = Set(values, v.Image, ref)
-			if err != nil {
-				return errors.Wrapf(err, "mapping %d: assigning image to property %q", v.Image)
-			}
+			Mustf(Set(values, v.Image, ref), "mapping %d: assigning image to property %q", v.Image)
 		}
 	}
 
-	out.Outf(octx, "Installing helm chart...\n")
+	e.outf("Installing helm chart...\n")
 
 	ns := "default"
 	if cfg.Namespace != "" {
@@ -258,25 +213,22 @@ func Execute(d driver.Driver, action string, ctx ocm.Context, octx out.Context, 
 	if s, ok := values["release"].(string); ok && s != "" {
 		release = s
 	}
-	valuesdata, err := runtime.DefaultYAMLEncoding.Marshal(values)
-	if err != nil {
-		return errors.Wrapf(err, "marshal values")
-	}
+	valuesdata := Must1f(R1(runtime.DefaultYAMLEncoding.Marshal(values)), "marshal values")
 
 	dcfg := &driver.Config{
-		ChartPath:       path,
+		ChartPath:       e.path,
 		Release:         release,
 		Namespace:       ns,
 		CreateNamespace: cfg.CreateNamespace,
 		Values:          valuesdata,
 		Kubeconfig:      kubeconfig,
 	}
-	switch action {
+	switch e.Action {
 	case "install":
-		return d.Install(dcfg)
+		return e.driver.Install(dcfg)
 	case "uninstall":
-		return d.Uninstall(dcfg)
+		return e.driver.Uninstall(dcfg)
 	default:
-		return errors.ErrNotImplemented("action", action)
+		return errors.ErrNotImplemented("action", e.Action)
 	}
 }
