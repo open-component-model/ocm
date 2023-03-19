@@ -105,6 +105,17 @@ func Wrapf(err error, msg string, args ...interface{}) error {
 	}
 }
 
+func Wrap(err error, args ...interface{}) error {
+	if err == nil || len(args) == 0 {
+		return err
+	}
+	msg := fmt.Sprint(args...)
+	return &wrappedError{
+		wrapped: err,
+		msg:     msg,
+	}
+}
+
 func (e *wrappedError) Error() string {
 	return fmt.Sprintf("%s: %s", e.msg, e.wrapped)
 }
