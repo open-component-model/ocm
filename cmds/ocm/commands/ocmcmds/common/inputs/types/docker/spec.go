@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 )
 
 type Spec struct {
@@ -68,5 +69,5 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 	if err != nil {
 		return nil, "", err
 	}
-	return blob, ociimage.Hint(nv, locator, s.Repository, version), nil
+	return blob, ociartifact.Hint(nv, locator, s.Repository, version), nil
 }

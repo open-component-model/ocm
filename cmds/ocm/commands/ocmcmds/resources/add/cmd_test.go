@@ -10,6 +10,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
@@ -158,6 +159,7 @@ var _ = Describe("Add resources", func() {
 
 		acc, err := env.OCMContext().AccessSpecForSpec(r.Access)
 		Expect(err).To(Succeed())
+		Expect(acc.(*localblob.AccessSpec).ReferenceName).To(Equal("test.de/x/mandelsoft/testchart:0.1.0"))
 		// sha is always different for helm artifact
 		// Expect(acc.(*localblob.AccessSpec).LocalReference).To(Equal("sha256.817db2696ed23f7779a7f848927e2958d2236e5483ad40875274462d8fa8ef9a"))
 

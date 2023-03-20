@@ -5,8 +5,6 @@
 package helm
 
 import (
-	"fmt"
-
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
@@ -15,12 +13,14 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm/loader"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 )
 
 type Spec struct {
 	// PathSpec hold the path that points to the helm chart file
 	cpi.PathSpec `json:",inline"`
 	Version      string `json:"version,omitempty"`
+	Repository   string `json:"repository,omitempty"`
 }
 
 var _ inputs.InputSpec = (*Spec)(nil)
@@ -65,10 +65,6 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 	if err != nil {
 		return nil, "", err
 	}
-	name := chart.Name()
-	hint := fmt.Sprintf("%s/%s:%s", nv.GetName(), name, vers)
-	if name == "" {
-		hint = fmt.Sprintf("%s:%s", nv.GetName(), vers)
-	}
-	return blob, hint, err
+
+	return blob, ociartifact.Hint(nv, chart.Name(), s.Repository, vers), err
 }
