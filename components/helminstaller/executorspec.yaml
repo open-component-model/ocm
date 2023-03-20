@@ -1,19 +1,3 @@
-definitions:
-  resourceRef:
-    type: object
-    description: resource reference for charts
-    properties:
-      resource:
-        type: object
-        additionalProperties:
-          type: string
-      referencePath:
-        type: array
-        items:
-          type: object
-          additionalProperties:
-            type: string
-
 
 actions:
   - install
@@ -22,6 +6,21 @@ imageRef:
   resource:
     name: toiimage
 configScheme:
+  definitions:
+    resourceRef:
+      type: object
+      description: resource reference for charts
+      properties:
+        resource:
+          type: object
+          additionalProperties:
+            type: string
+        referencePath:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
   type: object
   additionalProperties: false
   required:
@@ -36,7 +35,6 @@ configScheme:
       type: object
       additionalProperties:
         $ref: '#/definitions/resourceRef'
-
     release:
       type: string
     createNamespace:
@@ -72,4 +70,3 @@ configScheme:
       type: object
     kubeConfigName:
       type: string
-
