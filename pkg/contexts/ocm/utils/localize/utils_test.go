@@ -34,6 +34,18 @@ func Substitutions(data string) localize.Substitutions {
 	return v
 }
 
+func ImageMappings(data string) localize.ImageMappings {
+	var v localize.ImageMappings
+	Expect(runtime.DefaultYAMLEncoding.Unmarshal([]byte(data), &v)).To(Succeed())
+	return v
+}
+
+func ValueMappings(data string) localize.ValueMappings {
+	var v localize.ValueMappings
+	Expect(runtime.DefaultYAMLEncoding.Unmarshal([]byte(data), &v)).To(Succeed())
+	return v
+}
+
 func InstRules(data string) *localize.InstantiationRules {
 	var v localize.InstantiationRules
 	Expect(runtime.DefaultYAMLEncoding.Unmarshal([]byte(data), &v)).To(Succeed())
