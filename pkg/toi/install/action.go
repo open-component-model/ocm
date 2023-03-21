@@ -24,6 +24,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -427,7 +428,11 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecifi
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot create repo for component version")
 		}
-		err = transfer.TransferVersion(nil, nil, cv, repo, nil)
+		handler, err := standard.New(standard.Recursive())
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot create transfer handler")
+		}
+		err = transfer.TransferVersion(nil, nil, cv, repo, handler)
 		repo.Close()
 		if err != nil {
 			return nil, errors.Wrapf(err, "component version transport failed")
