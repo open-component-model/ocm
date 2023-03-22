@@ -1,0 +1,56 @@
+name: ReleaseNotes
+
+on:
+  workflow_dispatch:
+
+jobs:
+  releasenotes:
+    name: Prepare Release Notes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      repository-projects: read
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Setup Go
+      uses: actions/setup-go@v3
+      with:
+        go-version-file: '${{ github.workspace }}/go.mod'
+
+    - name: Setup git config
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
+
+    - name: Set Version
+      run: |
+        RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/pkg/version/generate print-version)
+        echo "release version is $RELEASE_VERSION"
+        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
+
+    - name: Get Draft Release Notes
+      id: release-notes
+      uses: cardinalby/git-get-release-action@v1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        draft: true
+        releaseName: ${{ env.RELEASE_VERSION }}
+
+    - name: Update Release Notes File
+      env:
+        RELEASE_NOTES: ${{ steps.release-notes.outputs.body }}
+      run: |
+        set -e
+        echo "Release Notes:\n $RELEASE_NOTES'"
+        v="v$(go run $GITHUB_WORKSPACE/pkg/version/generate print-version)"
+        f="docs/releasenotes/$v.md"
+        echo "$RELEASE_NOTES" > "$f"
+        git add "$f"
+        git commit -m "ReleaseNotes for $RELEASE_VERSION"
+        git push origin ${GITHUB_REF#refs/heads/}

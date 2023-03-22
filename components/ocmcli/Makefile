@@ -8,7 +8,7 @@ PLATFORMS = linux/amd64 linux/arm64 darwin/arm64 darwin/amd64 windows/amd64
 
 REPO_ROOT                                      := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))../..
 GIT_TREE_STATE                                 = $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
-VERSION                                        = $(shell git describe --tags --exact-match 2>/dev/null|| echo "$$(cat $(REPO_ROOT)/VERSION)")
+VERSION                                        = $(shell go run ../../pkg/version/generate/release_generate.go print-rc-version $(CANDIDATE))
 COMMIT                                         = $(shell git rev-parse HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)+$(COMMIT)
 

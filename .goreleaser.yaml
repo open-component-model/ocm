@@ -68,14 +68,14 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
-brews:
-  - name: ocm
-    tap:
-      owner: open-component-model
-      name: homebrew-tap
-      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    folder: Formula
-    homepage: "https://ocm.software/"
-    description: "The OCM CLI makes it easy to create component versions and embed them in build processes."
-    test: |
-      system "#{bin}/ocm --version"
+#brews:
+#  - name: ocm
+#    tap:
+#      owner: open-component-model
+#      name: homebrew-tap
+#      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+#    folder: Formula
+#    homepage: "https://ocm.software/"
+#    description: "The OCM CLI makes it easy to create component versions and embed them in build processes."
+#    test: |
+#      system "#{bin}/ocm --version"

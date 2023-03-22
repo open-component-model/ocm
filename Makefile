@@ -4,9 +4,9 @@
 
 NAME                                           := ocm
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-VERSION                                        := $(shell go run pkg/version/generate/release_generate.go print-version)
 GITHUBORG                                      ?= open-component-model
 OCMREPO                                        ?= ghcr.io/$(GITHUBORG)/ocm
+VERSION                                        := $(shell go run pkg/version/generate/release_generate.go print-rc-version $(CANDIDATE))
 EFFECTIVE_VERSION                              := $(VERSION)+$(shell git rev-parse HEAD)
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 COMMIT                                         := $(shell git rev-parse --verify HEAD)
@@ -84,6 +84,14 @@ LOCALBIN ?= $(shell pwd)/bin
 $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 
+.PHONY: info
+info:
+	@if [ -n "$(CANDIDATE)" ]; then echo "CANDIDATE     = $(CANDIDATE)"; fi
+	@echo "VERSION       = $(VERSION)"
+	@echo "EFFECTIVE     = $(EFFECTIVE_VERSION)"
+	@echo "COMMIT        = $(COMMIT)"
+	@echo "GIT_TREE_STATE= $(GIT_TREE_STATE)"
+
 .PHONY: generate-license
 generate-license:
 	for f in $(shell find . -name "*.go" -o -name "*.sh"); do \
@@ -101,6 +109,7 @@ components: $(GEN)/.comps
 $(GEN)/.comps:
 	@echo Helminstaller; cd components/helminstaller; make ctf
 	@echo HelmDemo; cd components/helmdemo; make ctf
+	@echo ECRPlugin; cd components/ecrplugin; make ctf
 	@echo OCMCLI; cd components/ocmcli; make ctf
 	touch $@
 
@@ -111,6 +120,7 @@ $(GEN)/ctf: $(GEN)/.exists components
 	@rm -rf "$(GEN)"/ctf
 	$(OCM) transfer cv  --type tgz -V $(GEN)/helminstaller/ctf $(GEN)/ctf
 	$(OCM) transfer cv -V $(GEN)/helmdemo/ctf $(GEN)/ctf
+	$(OCM) transfer cv -V $(GEN)/ecrplugin/ctf $(GEN)/ctf
 	$(OCM) transfer cv -V $(GEN)/ocmcli/ctf $(GEN)/ctf
 	touch $@
 
@@ -126,5 +136,5 @@ plain-ctf: $(GEN)
 	@rm -rf "$(GEN)"/ctf
 	$(OCM) transfer cv -V $(GEN)/helminstaller/ctf $(GEN)/ctf
 	$(OCM) transfer cv -V $(GEN)/helmdemo/ctf $(GEN)/ctf
+	$(OCM) transfer cv -V $(GEN)/ecrplugin/ctf $(GEN)/ctf
 	$(OCM) transfer cv -V $(GEN)/ocmcli/ctf $(GEN)/ctf
-
