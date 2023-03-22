@@ -15,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/memory"
 	memorycfg "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/memory/config"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -60,18 +61,32 @@ func (s *CredentialsRequestSpec) Match(o *CredentialsRequestSpec) error {
 
 type Credentials struct {
 	Credentials map[string]CredentialSpec `json:"credentials,omitempty"`
+
+	// Forwarded may define a list of consumer ids, which should be taken from the
+	// local configuration and forwarded to the TOI executor in addition to the
+	// credentials explicitly requested by the installation package.
+	Forwarded []ForwardSpec `json:"forwardedConsumers,omitempty"`
 }
 
 type CredentialSpec struct {
-	// ConsumerId specifies the consumer id to look for the crentials
+	// ConsumerId specifies the consumer id to look for the credentials
 	ConsumerId credentials.ConsumerIdentity `json:"consumerId,omitempty"`
-	// Reference refers to credentials store in some othe repo
+	// ConsumerType is the optional type used for matching the credentials
+	ConsumerType string `json:"consumerType,omitempty"`
+	// Reference refers to credentials store in some other repo
 	Reference *cpi.GenericCredentialsSpec `json:"reference,omitempty"`
 	// Credentials are direct credentials (one of Reference or Credentials must be set)
 	Credentials common.Properties `json:"credentials,omitempty"`
 
-	// TargetConsumerId specifies the consumer id to feed with this crednetials
+	// TargetConsumerId specifies the consumer id to feed with these credentials
 	TargetConsumerId credentials.ConsumerIdentity `json:"targetConsumerId,omitempty"`
+}
+
+type ForwardSpec struct {
+	// ConsumerId specifies the consumer id to look for the credentials
+	ConsumerId credentials.ConsumerIdentity `json:"consumerId"`
+	// ConsumerType is the optional type used for matching the credentials
+	ConsumerType string `json:"consumerType,omitempty"`
 }
 
 func ParseCredentialSpecification(data []byte, desc string) (*Credentials, error) {
@@ -136,7 +151,7 @@ func GetCredentials(ctx credentials.Context, spec *Credentials, req map[string]C
 			mapped = mapping[n]
 		}
 		if mapped == "" {
-			return nil, errors.Newf("mapping missing crednetial %q", n)
+			return nil, errors.Newf("mapping missing credential %q", n)
 		}
 		err = mem.AddCredentials(mapped, creds)
 		if err != nil {
@@ -158,6 +173,26 @@ func GetCredentials(ctx credentials.Context, spec *Credentials, req map[string]C
 			}
 		}
 	}
+	for _, r := range spec.Forwarded {
+		match, _ := ctx.ConsumerIdentityMatchers().Get(r.ConsumerType)
+		if match == nil {
+			match = credentials.PartialMatch
+		}
+		src, err := ctx.GetCredentialsForConsumer(r.ConsumerId, match)
+		if err != nil || src == nil {
+			return nil, errors.ErrNotFoundWrap(err, "consumer", r.ConsumerId.String())
+		}
+		if src == nil {
+			return nil, errors.ErrNotFoundWrap(err, "consumer", r.ConsumerId.String())
+		}
+		creds, err := src.Credentials(ctx)
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot get credentials for %s", r.ConsumerId.String())
+		}
+		props := creds.Properties()
+		cfg.AddConsumer(r.ConsumerId, directcreds.NewCredentials(props))
+	}
+
 	list.Add(sub.Result())
 	main := globalconfig.New()
 	main.AddConfig(mem)
@@ -183,7 +218,7 @@ func evaluate(ctx credentials.Context, spec *CredentialSpec) (common.Properties,
 	}
 	if spec.ConsumerId != nil {
 		cnt++
-		match, _ := ctx.ConsumerIdentityMatchers().Get(credentials.ID_TYPE)
+		match, _ := ctx.ConsumerIdentityMatchers().Get(spec.ConsumerType)
 		if match == nil {
 			match = credentials.PartialMatch
 		}

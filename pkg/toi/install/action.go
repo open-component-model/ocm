@@ -18,7 +18,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/config/config"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
@@ -349,15 +348,14 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecifi
 	}
 
 	// prepare ocm config with credential settings
-	ccfg := config.New()
 	if len(credentials) > 0 {
 		if creds == nil {
 			return nil, errors.Newf("credential settings required")
 		}
-		ccfg, err = GetCredentials(octx.CredentialsContext(), creds, credentials, credmapping)
-		if err != nil {
-			return nil, errors.Wrapf(err, "credential evaluation failed")
-		}
+	}
+	ccfg, err := GetCredentials(octx.CredentialsContext(), creds, nil, credmapping)
+	if err != nil {
+		return nil, errors.Wrapf(err, "credential evaluation failed")
 	}
 
 	// prepare user config

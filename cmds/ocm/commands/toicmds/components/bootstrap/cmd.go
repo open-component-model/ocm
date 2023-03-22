@@ -75,7 +75,7 @@ The package resource must have the type <code>` + install.TypeTOIPackage + `</co
 This is a simple YAML file resource describing the bootstrapping of a dedicated kind
 of software. See also the topic <CMD>ocm toi toi-bootstrapping</CMD>.
 
-THis resource finally describes an executor image, which will be executed in a
+This resource finally describes an executor image, which will be executed in a
 container with the installation source and (instance specific) user settings.
 The container is just executed, the framework make no assumption about the
 meaning/outcome of the execution. Therefore, any kind of actions can be described and
@@ -93,6 +93,52 @@ file.
 If no credentials file name is provided (option -c) the file
 <code>` + DEFAULT_CREDENTIALS_FILE + `</code> is used, if present. If no parameter file name is
 provided (option -p) the file <code>` + DEFAULT_PARAMETER_FILE + `</code> is used, if present.
+
+Using the credentials file it is possible to configure credentials required by
+the installation package or executor. Additionally arbitrary consumer ids
+can be forwarded to executor, which might be required by accessing blobs
+described by external access methods.
+
+The credentials file uses the following yaml format:
+- <code>credentials</code> *map[string]CredentialsSpec*
+
+  The resolution of crednetials requested by the package (by name).
+
+- <code>forwardedConsumers</code> *[]ForwardSpec* (optional)
+
+  An optional list of consumer specifications to be forwarded to the OCM
+  configuration provided to the executor.
+
+The *CredentialsSpec* uses the following format:
+
+- <code>consumerId</code> *map[string]string*
+
+  The consumer id used to look up the credentials.
+
+- <code>consumerType</code> *string* (optional) (default: partial)
+
+  The type of the matcher used to match the consumer id.
+
+- <code>reference</code> *yaml*
+
+  A generic credential specification as used in the ocm config file.
+
+- <code>credentials</code> *map[string]string*
+
+  Direct credential fields.
+
+One of <code>consumerId</code>, <code>reference</code> or <code>credentials</code>
+must be configured.
+
+The *ForwardSpec* uses the following format:
+
+- <code>consumerId</code> *map[string]string*
+
+  The consumer id to be forwarded.
+
+- <code>consumerType</code> *string* (optional) (default: partial)
+
+  The type of the matcher used to match the consumer id.
 `,
 		Example: `
 $ ocm toi bootstrap componentversion ghcr.io/mandelsoft/ocmdemoinstaller:0.0.1-dev
