@@ -8,7 +8,7 @@ OCMREPO   ?= ghcr.io/$(GITHUBORG)/ocm
 HELMINSTCOMP = $(PROVIDER)/toi/installers/helminstaller
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
-VERSION                                        = $(shell git describe --tags --abbrev=0 2>/dev/null)
+VERSION                                        := $(shell go run $(REPO_ROOT)/pkg/version/generate/release_generate.go print-rc-version)
 COMMIT                                         = $(shell git rev-parse HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
 HELMINSTVERSION ?= $(VERSION)
