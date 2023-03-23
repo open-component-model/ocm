@@ -426,7 +426,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecifi
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot create repo for component version")
 		}
-		handler, err := standard.New(standard.Recursive())
+		handler, err := standard.New(standard.Recursive(), standard.KeepGlobalAccess())
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot create transfer handler")
 		}

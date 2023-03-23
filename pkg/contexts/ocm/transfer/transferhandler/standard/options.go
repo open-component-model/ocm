@@ -15,6 +15,7 @@ type Options struct {
 	recursive        bool
 	resourcesByValue bool
 	sourcesByValue   bool
+	keepGlobalAccess bool
 	overwrite        bool
 	resolver         ocm.ComponentVersionResolver
 }
@@ -24,6 +25,7 @@ var (
 	_ SourcesByValueOption   = (*Options)(nil)
 	_ RecursiveOption        = (*Options)(nil)
 	_ ResolverOption         = (*Options)(nil)
+	_ KeepGlobalAccessOption = (*Options)(nil)
 )
 
 func (o *Options) SetOverwrite(overwrite bool) {
@@ -40,6 +42,10 @@ func (o *Options) SetResourcesByValue(resourcesByValue bool) {
 
 func (o *Options) SetSourcesByValue(sourcesByValue bool) {
 	o.sourcesByValue = sourcesByValue
+}
+
+func (o *Options) SetKeepGlobalAccess(keepGlobalAccess bool) {
+	o.keepGlobalAccess = keepGlobalAccess
 }
 
 func (o *Options) SetResolver(resolver ocm.ComponentVersionResolver) {
@@ -60,6 +66,10 @@ func (o *Options) IsResourcesByValue() bool {
 
 func (o *Options) IsSourcesByValue() bool {
 	return o.sourcesByValue
+}
+
+func (o *Options) IsKeepGlobalAccess() bool {
+	return o.keepGlobalAccess
 }
 
 func (o *Options) GetResolver() ocm.ComponentVersionResolver {
@@ -193,5 +203,31 @@ func (o *resolverOption) ApplyTransferOption(to transferhandler.TransferOptions)
 func Resolver(resolver ocm.ComponentVersionResolver) transferhandler.TransferOption {
 	return &resolverOption{
 		resolver: resolver,
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+type KeepGlobalAccessOption interface {
+	SetKeepGlobalAccess(bool)
+	IsKeepGlobalAccess() bool
+}
+
+type keepGlobalOption struct {
+	flag bool
+}
+
+func (o *keepGlobalOption) ApplyTransferOption(to transferhandler.TransferOptions) error {
+	if eff, ok := to.(KeepGlobalAccessOption); ok {
+		eff.SetKeepGlobalAccess(o.flag)
+		return nil
+	} else {
+		return errors.ErrNotSupported("resolver")
+	}
+}
+
+func KeepGlobalAccess(args ...bool) transferhandler.TransferOption {
+	return &keepGlobalOption{
+		flag: utils.GetOptionFlag(args...),
 	}
 }

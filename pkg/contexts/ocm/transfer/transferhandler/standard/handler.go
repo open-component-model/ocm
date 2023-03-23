@@ -55,11 +55,19 @@ func (h *Handler) TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpe
 func (h *Handler) HandleTransferResource(r ocm.ResourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error {
 	blob := accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m)
 	defer blob.Close()
-	return t.SetResourceBlob(r.Meta(), blob, hint, nil)
+	return t.SetResourceBlob(r.Meta(), blob, hint, h.GlobalAccess(t.GetContext(), m))
 }
 
 func (h *Handler) HandleTransferSource(r ocm.SourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error {
 	blob := accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m)
 	defer blob.Close()
-	return t.SetSourceBlob(r.Meta(), blob, hint, nil)
+
+	return t.SetSourceBlob(r.Meta(), blob, hint, h.GlobalAccess(t.GetContext(), m))
+}
+
+func (h *Handler) GlobalAccess(ctx ocm.Context, m ocm.AccessMethod) ocm.AccessSpec {
+	if h.opts.IsKeepGlobalAccess() {
+		return m.AccessSpec().GlobalAccessSpec(ctx)
+	}
+	return nil
 }

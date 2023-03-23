@@ -10,7 +10,9 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
@@ -91,7 +93,7 @@ var _ = Describe("Transfer handler", func() {
 		env.Cleanup()
 	})
 
-	It("it should copy a resource by value to a ctf file", func() {
+	DescribeTable("it should copy a resource by value to a ctf file", func(acc string, topts ...transferhandler.TransferOption) {
 		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
 		Expect(err).To(Succeed())
 		cv, err := src.LookupComponentVersion(COMPONENT, VERSION)
@@ -101,6 +103,7 @@ var _ = Describe("Transfer handler", func() {
 		defer tgt.Close()
 		opts := &standard.Options{}
 		opts.SetResourcesByValue(true)
+		transferhandler.ApplyOptions(opts, topts...)
 		handler := standard.NewDefaultHandler(opts)
 		//handler, err := standard.New(standard.ResourcesByValue())
 		Expect(err).To(Succeed())
@@ -119,7 +122,7 @@ var _ = Describe("Transfer handler", func() {
 
 		fmt.Printf("%s\n", string(data))
 		hash := HashManifest1(artifactset.DefaultArtifactSetDescriptorFileName)
-		Expect(string(data)).To(StringEqualWithContext("{\"localReference\":\"" + hash + "\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"" + OCINAMESPACE + ":" + OCIVERSION + "\",\"type\":\"localBlob\"}"))
+		Expect(string(data)).To(StringEqualWithContext(fmt.Sprintf(acc, hash)))
 
 		r, err := comp.GetResourceByIndex(1)
 		Expect(err).To(Succeed())
@@ -138,7 +141,13 @@ var _ = Describe("Transfer handler", func() {
 		data, err = blob.Get()
 		Expect(err).To(Succeed())
 		Expect(string(data)).To(Equal("manifestlayer"))
-	})
+	},
+		Entry("without preserve global",
+			"{\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\""+OCINAMESPACE+":"+OCIVERSION+"\",\"type\":\"localBlob\"}"),
+		Entry("with preserve global",
+			"{\"globalAccess\":{\"imageReference\":\"alias.alias/ocm/value:v2.0\",\"type\":\"ociArtifact\"},\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/value:v2.0\",\"type\":\"localBlob\"}",
+			standard.KeepGlobalAccess()),
+	)
 
 	It("it should use additional resolver to resolve component ref", func() {
 		parentSrc, err := ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH2, 0, env)
