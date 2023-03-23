@@ -299,12 +299,8 @@ func (c *componentVersionAccessImpl) SetResource(meta *cpi.ResourceMeta, acc com
 	}
 
 	if res.Relation == metav1.LocalRelation {
-		switch res.Version {
-		case "":
+		if res.Version == "" {
 			res.Version = c.GetVersion()
-		case c.GetVersion():
-		default:
-			return errors.ErrInvalid("resource version", res.Version)
 		}
 	}
 
