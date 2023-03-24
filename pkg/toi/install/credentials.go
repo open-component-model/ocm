@@ -174,6 +174,9 @@ func GetCredentials(ctx credentials.Context, spec *Credentials, req map[string]C
 		}
 	}
 	for _, r := range spec.Forwarded {
+		if len(r.ConsumerId) == 0 {
+			return nil, errors.ErrInvalid("consumer", r.ConsumerId.String())
+		}
 		match, _ := ctx.ConsumerIdentityMatchers().Get(r.ConsumerType)
 		if match == nil {
 			match = credentials.PartialMatch

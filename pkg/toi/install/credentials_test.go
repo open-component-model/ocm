@@ -7,6 +7,11 @@ package install_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
@@ -17,6 +22,11 @@ import (
 )
 
 var _ = Describe("credential mapping", func() {
+	consumerid := credentials.NewConsumerIdentity("CT", identity.ID_HOSTNAME, "github.com", identity.ID_PATHPREFIX, "mandelsoft")
+	ccreds := common.Properties{
+		"user": "mandelsoft",
+		"pass": "mypass",
+	}
 	memspec := memory.NewRepositorySpec("default")
 	memcred := credentials.DirectCredentials{
 		"username": "mandelsoft",
@@ -42,11 +52,22 @@ configurations:
     identity:
       name: target
       type: KubernetesCLuster
+  - credentials:
+    - credentialsName: Credentials
+      properties:
+        pass: mypass
+        user: mandelsoft
+      type: Credentials
+    identity:
+      hostname: github.com
+      pathprefix: mandelsoft/testrepo
+      type: CT
   type: credentials.config.ocm.software
 type: generic.config.ocm.software
 `
 	It("creates config data", FlakeAttempts(50), func() {
 		ctx := credentials.New()
+		ctx.SetCredentialsForConsumer(consumerid, directcreds.NewCredentials(ccreds))
 		mem, err := ctx.RepositoryForSpec(memory.NewRepositorySpec("memory"))
 		Expect(err).To(Succeed())
 
@@ -75,6 +96,12 @@ credentials:
        credentialsName: configured
        type: Memory
        repoName: memory
+forwardedConsumers:
+- consumerId:
+    type: CT
+    hostname: github.com
+    pathprefix: mandelsoft/testrepo
+  consumerType: hostpath
 `
 		spec, err := install.ParseCredentialSpecification([]byte(input), "settings")
 		Expect(err).To(Succeed())
@@ -98,5 +125,10 @@ credentials:
 			"token": "XXX",
 		}))
 		Expect(mem.LookupCredentials("other")).To(Equal(memcred))
+
+		creq := consumerid.Copy()
+		creq[identity.ID_PATHPREFIX] = "mandelsoft/testrepo/bla"
+		props := Must(credentials.CredentialsForConsumer(ctx, creq, hostpath.Matcher))
+		Expect(props.Properties()).To(Equal(ccreds))
 	})
 })

@@ -353,7 +353,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecifi
 			return nil, errors.Newf("credential settings required")
 		}
 	}
-	ccfg, err := GetCredentials(octx.CredentialsContext(), creds, nil, credmapping)
+	ccfg, err := GetCredentials(octx.CredentialsContext(), creds, credentials, credmapping)
 	if err != nil {
 		return nil, errors.Wrapf(err, "credential evaluation failed")
 	}
