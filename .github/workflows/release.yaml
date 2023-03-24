@@ -209,11 +209,11 @@ jobs:
         git push origin ${GITHUB_REF#refs/heads/}
         echo "Next branch version is $v"
 
-#    - name: Publish Release Event
-#      if: inputs.release_candidate == false
-#      uses: peter-evans/repository-dispatch@v2
-#      with:
-#        token: ${{ secrets.EVENT_API }}
-#        repository: open-component-model/ocm-website
-#        event-type: ocm-cli-release
-#        client-payload: '{"tag": "${{ env.RELEASE_VERSION }}"}'
+    - name: Publish Release Event
+      if: inputs.release_candidate == false
+      uses: peter-evans/repository-dispatch@v2
+      with:
+        token: ${{ secrets.EVENT_API }}
+        repository: open-component-model/ocm-website
+        event-type: ocm-cli-release
+        client-payload: '{"tag": "${{ env.RELEASE_VERSION }}"}'
