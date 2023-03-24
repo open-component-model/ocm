@@ -87,62 +87,50 @@ func (a *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMetho
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type accessMethod struct {
-	accessio.BlobAccess
-
-	comp cpi.ComponentVersionAccess
-	spec *AccessSpec
-}
-
-var _ cpi.AccessMethod = (*accessMethod)(nil)
-
-func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, error) {
-	url := a.Registry + path.Join("/", a.Package, a.Version)
-	r, err := reader(url, vfsattr.Get(c.GetContext()))
-	if err != nil {
-		return nil, err
-	}
-	buf := &bytes.Buffer{}
-	_, err = io.Copy(buf, io.LimitReader(r, 200000))
-	if err != nil {
-		return nil, errors.Wrapf(err, "cannot get version metadata for %s", url)
-	}
-
-	var meta meta
-
-	err = json.Unmarshal(buf.Bytes(), &meta)
-	if err != nil {
-		return nil, errors.Wrapf(err, "cannot unmarshal version metadata for %s", url)
-	}
-
-	f := func() (io.ReadCloser, error) {
-		return reader(meta.Dist.Tarball, vfsattr.Get(c.GetContext()))
-	}
-	if meta.Dist.Shasum != "" {
-		tf := f
-		f = func() (io.ReadCloser, error) {
-			r, err := tf()
-			if err != nil {
-				return nil, err
-			}
-			return accessio.VerifyingReaderWithHash(r, crypto.SHA1, meta.Dist.Shasum), nil
+func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (cpi.AccessMethod, error) {
+	factory := func() (accessio.BlobAccess, error) {
+		url := a.Registry + path.Join("/", a.Package, a.Version)
+		r, err := reader(url, vfsattr.Get(c.GetContext()))
+		if err != nil {
+			return nil, err
 		}
+		buf := &bytes.Buffer{}
+		_, err = io.Copy(buf, io.LimitReader(r, 200000))
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot get version metadata for %s", url)
+		}
+
+		var meta meta
+
+		err = json.Unmarshal(buf.Bytes(), &meta)
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot unmarshal version metadata for %s", url)
+		}
+
+		f := func() (io.ReadCloser, error) {
+			return reader(meta.Dist.Tarball, vfsattr.Get(c.GetContext()))
+		}
+		if meta.Dist.Shasum != "" {
+			tf := f
+			f = func() (io.ReadCloser, error) {
+				r, err := tf()
+				if err != nil {
+					return nil, err
+				}
+				return accessio.VerifyingReaderWithHash(r, crypto.SHA1, meta.Dist.Shasum), nil
+			}
+		}
+		acc := accessio.DataAccessForReaderFunction(f, meta.Dist.Tarball)
+		return accessobj.CachedBlobAccessForWriter(c.GetContext(), mime.MIME_TGZ, accessio.NewDataAccessWriter(acc)), nil
 	}
-	acc := accessio.DataAccessForReaderFunction(f, meta.Dist.Tarball)
-	cacheBlobAccess := accessobj.CachedBlobAccessForWriter(c.GetContext(), mime.MIME_TGZ, accessio.NewDataAccessWriter(acc))
-	return &accessMethod{
-		spec:       a,
-		comp:       c,
-		BlobAccess: cacheBlobAccess,
-	}, nil
+	return cpi.NewDefaultMethod(c, a, mime.MIME_TGZ, factory), nil
 }
 
-func (m *accessMethod) GetKind() string {
-	return Type
-}
-
-func (m *accessMethod) AccessSpec() cpi.AccessSpec {
-	return m.spec
+type meta struct {
+	Dist struct {
+		Shasum  string `json:"shasum"`
+		Tarball string `json:"tarball"`
+	} `json:"dist"`
 }
 
 func reader(url string, fs vfs.FileSystem) (io.ReadCloser, error) {
@@ -171,11 +159,4 @@ func reader(url string, fs vfs.FileSystem) (io.ReadCloser, error) {
 		return nil, errors.Newf("version meta data request %s provides %s: %s", url, resp.Status, buf.String())
 	}
 	return resp.Body, nil
-}
-
-type meta struct {
-	Dist struct {
-		Shasum  string `json:"shasum"`
-		Tarball string `json:"tarball"`
-	} `json:"dist"`
 }

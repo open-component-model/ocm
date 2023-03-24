@@ -87,7 +87,8 @@ func ValidateRepository(fldPath *field.Path, allErrs field.ErrorList, repo strin
 	if strings.Contains(repo, grammar.DigestSeparator) || strings.Contains(repo, grammar.TagSeparator) {
 		return append(allErrs, field.Invalid(fldPath, repo, "unexpected digest or tag"))
 	}
-	if !grammar.AnchoredRepositoryRegexp.MatchString(repo) {
+
+	if !grammar.AnchoredRepositoryRegexp.MatchString(strings.TrimPrefix(repo, "/")) {
 		return append(allErrs, field.Invalid(fldPath, repo, "no repository name"))
 	}
 	return allErrs
