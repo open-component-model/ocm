@@ -7,7 +7,7 @@ package descriptor
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/logging"
+	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 )
 
 const (
@@ -18,4 +18,4 @@ const (
 	KIND_ACTION       = action.KIND_ACTION
 )
 
-var REALM = logging.SubRealm("plugins")
+var REALM = ocmlog.DefineSubRealm("OCM plugin handling", "plugins")

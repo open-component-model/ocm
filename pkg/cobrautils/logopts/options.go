@@ -20,13 +20,13 @@ import (
 )
 
 var Description = `
-The <code>--log</code>* options can be used to configure the logging behaviour.
+The <code>--log*</code> options can be used to configure the logging behaviour.
 There is a quick config option <code>--log-keys</code> to configure simple
 tag/realm based condition rules. The comma-separated names build an AND rule.
 Hereby, names starting with a slash (<code>/</code>) denote a realm (without the leading slash).
 A realm is a slash separated sequence of identifiers, which matches all logging realms
-with the given realms as path prefix. A tag directly matched the logging tags.
-Used tags and realms can be found in the source code. The ocm coding basically
+with the given realms as path prefix. A tag directly matches the logging tags.
+Used tags and realms can be found under topic <CMD>ocm logging</CMD>. The ocm coding basically
 uses the realm <code>ocm</code>.
 The default level to enable is <code>info</code>. Separated by an equal sign (<code>=</code>)
 optiobally a dedicated level can be specified. Log levels can be (<code>error</code>,
@@ -47,7 +47,7 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.LogLevel, "loglevel", "l", "", "set log level")
 	fs.StringVarP(&o.LogFileName, "logfile", "L", "", "set log file")
 	fs.StringVarP(&o.LogConfig, "logconfig", "", "", "log config")
-	fs.StringArrayVarP(&o.LogKeys, "log-keys", "", nil, "log tags/realms(.) to be enabled ([.]name{,[.]name}[=level])")
+	fs.StringArrayVarP(&o.LogKeys, "logkeys", "", nil, "log tags/realms(.) to be enabled ([.]name{,[.]name}[=level])")
 }
 
 func (o *Options) Close() error {

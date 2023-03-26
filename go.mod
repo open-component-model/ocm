@@ -45,7 +45,7 @@ require (
 	github.com/google/go-github/v45 v45.2.0
 	github.com/klauspost/compress v1.15.11
 	github.com/klauspost/pgzip v1.2.5
-	github.com/mandelsoft/logging v0.0.0-20230325214959-131c060883d4
+	github.com/mandelsoft/logging v0.0.0-20230326142042-d490c9985c67
 	github.com/mandelsoft/vfs v0.0.0-20220805210647-bf14a11bfe31
 	github.com/marstr/guid v1.1.0
 	github.com/mitchellh/copystructure v1.2.0

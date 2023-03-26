@@ -18,7 +18,7 @@ const CONTEXT_TYPE = internal.CONTEXT_TYPE
 
 const CommonTransportFormat = internal.CommonTransportFormat
 
-var TAG_BLOBHANDLER = logging.NewTag("blobhandler")
+var TAG_BLOBHANDLER = logging.DefineTag("blobhandler", "execution of blob handler used to upload resource blobs to an ocm repository.")
 
 func BlobHandlerLogger(ctx Context, messageContext ...logging.MessageContext) logging.Logger {
 	if len(messageContext) > 0 {

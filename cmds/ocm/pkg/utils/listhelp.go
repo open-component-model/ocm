@@ -21,6 +21,25 @@ func FormatList(def string, elems ...string) string {
 	return FormatListElements(def, StringElementList(elems))
 }
 
+type maplist[E any] struct {
+	desc func(E) string
+	keys []string
+	m    map[string]E
+}
+
+func (l *maplist[E]) Size() int                { return len(l.keys) }
+func (l *maplist[E]) Key(i int) string         { return l.keys[i] }
+func (l *maplist[E]) Description(i int) string { return l.desc(l.m[l.keys[i]]) }
+
+func FormatMapElements[E any](def string, m map[string]E, desc func(E) string) string {
+	keys := utils.StringMapKeys(m)
+	return FormatListElements(def, &maplist[E]{
+		desc: desc,
+		keys: keys,
+		m:    m,
+	})
+}
+
 type ListElements interface {
 	Size() int
 	Key(i int) string

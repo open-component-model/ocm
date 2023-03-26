@@ -11,7 +11,7 @@ import (
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 )
 
-var REALM = ocmlog.SubRealm("transfer")
+var REALM = ocmlog.DefineSubRealm("OCM transfer handling", "transfer")
 
 type ContextProvider interface {
 	GetContext() ocm.Context

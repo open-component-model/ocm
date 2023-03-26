@@ -10,7 +10,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
-
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"

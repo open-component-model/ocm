@@ -11,7 +11,7 @@ import (
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 )
 
-var REALM = ocmlog.SubRealm("accessmethod/ociartifact")
+var REALM = ocmlog.DefineSubRealm("access method ociArtifact", "accessmethod/ociartifact")
 
 type ContextProvider interface {
 	GetContext() cpi.Context

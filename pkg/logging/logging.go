@@ -18,7 +18,7 @@ import (
 // REALM is used to tag all logging done by this library with the ocm tag.
 // This is also used as message context to configure settings for all
 // log output provided by this library.
-var REALM = logging.NewRealm("ocm")
+var REALM = logging.DefineRealm("ocm", "general realm used for the ocm go library.")
 
 type StaticContext struct {
 	logging.Context
