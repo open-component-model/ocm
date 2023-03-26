@@ -5,10 +5,9 @@
 package descriptor
 
 import (
-	"github.com/mandelsoft/logging"
-
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/logging"
 )
 
 const (
@@ -19,4 +18,4 @@ const (
 	KIND_ACTION       = action.KIND_ACTION
 )
 
-var TAG = logging.NewTag("plugins")
+var REALM = logging.SubRealm("plugins")

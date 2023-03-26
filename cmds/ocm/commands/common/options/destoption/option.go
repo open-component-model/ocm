@@ -31,7 +31,7 @@ func (d *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&d.Destination, "outfile", "O", "", "output file or directory")
 }
 
-func (o *Option) Complete(ctx clictx.Context) error {
+func (o *Option) Configure(ctx clictx.Context) error {
 	o.PathFilesystem = ctx.FileSystem()
 	return nil
 }

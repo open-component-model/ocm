@@ -18,19 +18,19 @@ import (
 	"github.com/open-component-model/ocm/pkg/testutils"
 )
 
-var AddOne = func(log logging.Context) func(e interface{}) interface{} {
+var AddOne = func(logger logging.Logger) func(e interface{}) interface{} {
 	return func(e interface{}) interface{} {
-		log.Logger().Info("add one to number", "num", e.(int))
+		logger.Info("add one to number", "num", e.(int))
 		return e.(int) + 1
 	}
 }
 
-var Mul = func(log logging.Context) func(n, fac int) ExplodeFunction {
+var Mul = func(logger logging.Logger) func(n, fac int) ExplodeFunction {
 	return func(n, fac int) ExplodeFunction {
 		return func(e interface{}) []interface{} {
 			r := []interface{}{}
 			v := e.(int)
-			log.Logger().Info("explode", "num", e.(int))
+			logger.Info("explode", "num", e.(int))
 			for i := 1; i <= n; i++ {
 				r = append(r, v)
 				v = v * fac
@@ -42,19 +42,21 @@ var Mul = func(log logging.Context) func(n, fac int) ExplodeFunction {
 
 var _ = Describe("simple data processing", func() {
 	var (
-		log logging.Context
-		buf *bytes.Buffer
+		log    logging.Context
+		logger logging.Logger
+		buf    *bytes.Buffer
 	)
 
 	BeforeEach(func() {
 		log, buf = ocmlog.NewBufferedContext()
+		logger = log.Logger()
 	})
 
 	Context("sequential", func() {
 		It("map", func() {
 			By("*** sequential map")
 			data := data.IndexedSliceAccess([]interface{}{1, 2, 3})
-			result := Chain(log).Map(AddOne(log)).Process(data).AsSlice()
+			result := Chain(log).Map(AddOne(logger)).Process(data).AsSlice()
 			Expect([]interface{}(result)).To(Equal([]interface{}{2, 3, 4}))
 
 			Expect(buf.String()).To(testutils.StringEqualTrimmedWithContext(`
@@ -67,7 +69,7 @@ V[3] add one to number num 3
 		It("explode", func() {
 			By("*** sequential explode")
 			data := data.IndexedSliceAccess([]interface{}{1, 2, 3})
-			result := Chain(log).Map(AddOne(log)).Explode(Mul(log)(3, 2)).Map(Identity).Process(data).AsSlice()
+			result := Chain(log).Map(AddOne(logger)).Explode(Mul(logger)(3, 2)).Map(Identity).Process(data).AsSlice()
 			Expect([]interface{}(result)).To(Equal([]interface{}{
 				2, 4, 8,
 				3, 6, 12,
@@ -79,7 +81,7 @@ V[3] add one to number num 3
 		It("map", func() {
 			By("*** parallel map")
 			data := data.IndexedSliceAccess([]interface{}{1, 2, 3})
-			result := Chain(log).Map(Identity).Parallel(3).Map(AddOne(log)).Process(data).AsSlice()
+			result := Chain(log).Map(Identity).Parallel(3).Map(AddOne(logger)).Process(data).AsSlice()
 			Expect([]interface{}(result)).To(Equal([]interface{}{
 				2, 3, 4,
 			}))
@@ -88,7 +90,7 @@ V[3] add one to number num 3
 			By("*** parallel explode")
 
 			data := data.IndexedSliceAccess([]interface{}{1, 2, 3})
-			result := Chain(log).Parallel(3).Explode(Mul(log)(3, 2)).Process(data).AsSlice()
+			result := Chain(log).Parallel(3).Explode(Mul(logger)(3, 2)).Process(data).AsSlice()
 			Expect([]interface{}(result)).To(Equal([]interface{}{
 				1, 2, 4,
 				2, 4, 8,
@@ -99,7 +101,7 @@ V[3] add one to number num 3
 			By("*** parallel explode")
 
 			data := data.IndexedSliceAccess([]interface{}{1, 2, 3})
-			result := Chain(log).Parallel(3).Explode(Mul(log)(3, 2)).Map(AddOne(log)).Process(data).AsSlice()
+			result := Chain(log).Parallel(3).Explode(Mul(logger)(3, 2)).Map(AddOne(logger)).Process(data).AsSlice()
 			Expect([]interface{}(result)).To(Equal([]interface{}{
 				2, 3, 5,
 				3, 5, 9,
@@ -109,9 +111,9 @@ V[3] add one to number num 3
 	})
 	Context("compose", func() {
 		It("appends a chain", func() {
-			chain := Chain(log).Map(AddOne(log))
+			chain := Chain(log).Map(AddOne(logger))
 			slice := data.IndexedSliceAccess([]interface{}{1, 2, 3})
-			sub := Chain(log).Explode(Mul(log)(2, 2))
+			sub := Chain(log).Explode(Mul(logger)(2, 2))
 			r := chain.Append(sub).Process(slice).AsSlice()
 			Expect(r).To(Equal(data.IndexedSliceAccess([]interface{}{
 				2, 4, 3, 6, 4, 8,

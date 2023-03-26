@@ -20,7 +20,7 @@ func CompleteOptionsWithContext(ctx clictx.Context, session oci.Session) options
 			return c.CompleteWithSession(ctx.OCI(), session)
 		}
 		if c, ok := opt.(options.OptionWithCLIContextCompleter); ok {
-			return c.Complete(ctx)
+			return c.Configure(ctx)
 		}
 		if c, ok := opt.(options.SimpleOptionCompleter); ok {
 			return c.Complete()

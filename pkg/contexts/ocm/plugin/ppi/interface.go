@@ -30,7 +30,7 @@ type (
 	UploadTargetSpecInfo = internal.UploadTargetSpecInfo
 )
 
-var TAG = descriptor.TAG
+var REALM = descriptor.REALM
 
 type Plugin interface {
 	Name() string

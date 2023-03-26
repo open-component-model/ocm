@@ -2,10 +2,12 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package ocireg
+package processing
 
 import (
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 )
 
-var REALM = ocmlog.SubRealm("oci.ocireg")
+var REALM = ocmlog.SubRealm("processing")
+
+var logger = ocmlog.DynamicLogger()

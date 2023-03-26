@@ -86,3 +86,8 @@ func Logger(messageContext ...logging.MessageContext) logging.Logger {
 func Configure(config *logcfg.Config, extra ...string) error {
 	return logContext.Configure(config, extra...)
 }
+
+// DynamicLogger gets an unbound logger based on the default library logging context.
+func DynamicLogger(messageContext ...logging.MessageContext) logging.UnboundLogger {
+	return logging.DynamicLogger(Context(), messageContext...)
+}

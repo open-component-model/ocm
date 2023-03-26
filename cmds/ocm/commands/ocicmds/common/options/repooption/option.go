@@ -32,7 +32,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Spec, "repo", "", "", "repository name or spec")
 }
 
-func (o *Option) Complete(ctx clictx.Context) error {
+func (o *Option) Configure(ctx clictx.Context) error {
 	return nil
 }
 

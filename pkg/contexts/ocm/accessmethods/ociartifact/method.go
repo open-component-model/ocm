@@ -244,9 +244,10 @@ func (m *accessMethod) getBlob() (artifactset.ArtifactBlob, error) {
 	if err != nil {
 		return nil, err
 	}
-	m.comp.GetContext().Logger().Info("synthesize artifact blob", "ref", m.spec.ImageReference)
+	logger := Logger(m.comp)
+	logger.Info("synthesize artifact blob", "ref", m.spec.ImageReference)
 	m.blob, err = artifactset.SynthesizeArtifactBlobForArtifact(art, ref.Version())
-	m.comp.GetContext().Logger().Info("synthesize artifact blob done", "ref", m.spec.ImageReference, "error", logging.ErrorMessage(err))
+	logger.Info("synthesize artifact blob done", "ref", m.spec.ImageReference, "error", logging.ErrorMessage(err))
 	if err != nil {
 		return nil, err
 	}
