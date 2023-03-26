@@ -11,6 +11,7 @@ import (
 
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
+	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -269,7 +270,7 @@ func (o *CLIOptions) Complete() error {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
 
-	err := o.LogOpts.Configure(o.Context)
+	err := o.LogOpts.Configure(o.Context, ocmlog.Context())
 	if err != nil {
 		return err
 	}

@@ -18,6 +18,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/config"
+	globalconfig "github.com/open-component-model/ocm/pkg/contexts/config/config"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/logforward"
+	logcfg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config/logging"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
@@ -280,8 +285,12 @@ func ProcessConfig(name string, octx ocm.Context, cv ocm.ComponentVersionAccess,
 	return config, err
 }
 
+// ExecuteAction prepared the execution options and executes the action.
 func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecification, creds *Credentials, params []byte, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
 	var err error
+
+	var finalize utils2.Finalizer
+	defer finalize.Finalize()
 
 	var executor *Executor
 	for idx, e := range spec.Executors {
@@ -347,7 +356,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecifi
 		return nil, err
 	}
 
-	// prepare ocm config with credential settings
+	// prepare ocm config with credential settings and logging config forwarding
 	if len(credentials) > 0 {
 		if creds == nil {
 			return nil, errors.Newf("credential settings required")
@@ -356,6 +365,14 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecifi
 	ccfg, err := GetCredentials(octx.CredentialsContext(), creds, credentials, credmapping)
 	if err != nil {
 		return nil, errors.Wrapf(err, "credential evaluation failed")
+	}
+
+	if lc := logforward.Get(octx); lc != nil {
+		g, err := config.ToGenericConfig(logcfg.NewWithConfig(datacontext.CONTEXT_TYPE, lc))
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot create logging config forwarding")
+		}
+		ccfg.Configurations = append(ccfg.Configurations, g)
 	}
 
 	// prepare user config
@@ -392,6 +409,8 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecifi
 	}
 	sort.Strings(names)
 	p.Printf("using executor image %s[%s] with credentials %v\n", espec.Image.Ref, executor.ResourceRef.String(), names)
+
+	// setup executor operation
 	op := &Operation{
 		Action:      name,
 		Image:       *espec.Image,
@@ -402,11 +421,30 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecifi
 		Err:         nil,
 	}
 
+	// prepare file content to be passed to executor
+	err = setupFiles(octx, &finalize, op, ccfg, params, econfig, cv)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error setting up executor file set")
+	}
+
+	op.Outputs = executor.Outputs
+
+	// no config so far
+	err = d.SetConfig(map[string]string{})
+	if err != nil {
+		return nil, err
+	}
+	op.ComponentVersion = common.VersionedElementKey(cv).String()
+	return d.Exec(op)
+}
+
+func setupFiles(octx ocm.Context, finalize *utils2.Finalizer, op *Operation, ccfg *globalconfig.Config, params []byte, econfig []byte, cv ocm.ComponentVersionAccess) error {
+	// prepare file content to be passed to executor
 	op.Files = map[string]accessio.BlobAccess{}
 	if ccfg != nil {
 		data, err := runtime.DefaultYAMLEncoding.Marshal(ccfg)
 		if err != nil {
-			return nil, errors.Wrapf(err, "marshalling ocm config failed")
+			return errors.Wrapf(err, "marshalling ocm config failed")
 		}
 		op.Files[InputOCMConfig] = accessio.BlobAccessForData(mime.MIME_OCTET, data)
 	}
@@ -419,30 +457,23 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecifi
 	if cv != nil {
 		fs, err := osfs.NewTempFileSystem()
 		if err != nil {
-			return nil, errors.Wrapf(err, "cannot create temp file system")
+			return errors.Wrapf(err, "cannot create temp file system")
 		}
-		defer vfs.Cleanup(fs)
+		finalize.With(func() error { return vfs.Cleanup(fs) })
 		repo, err := ctf.Create(octx, accessobj.ACC_CREATE, "arch", 0o600, accessio.FormatTGZ, accessio.PathFileSystem(fs))
 		if err != nil {
-			return nil, errors.Wrapf(err, "cannot create repo for component version")
+			return errors.Wrapf(err, "cannot create repo for component version")
 		}
+		defer repo.Close()
 		handler, err := standard.New(standard.Recursive(), standard.KeepGlobalAccess())
 		if err != nil {
-			return nil, errors.Wrapf(err, "cannot create transfer handler")
+			return errors.Wrapf(err, "cannot create transfer handler")
 		}
 		err = transfer.TransferVersion(nil, nil, cv, repo, handler)
-		repo.Close()
 		if err != nil {
-			return nil, errors.Wrapf(err, "component version transport failed")
+			return errors.Wrapf(err, "component version transport failed")
 		}
 		op.Files[InputOCMRepo] = accessio.BlobAccessForFile(mime.MIME_OCTET, "arch", fs)
 	}
-	op.Outputs = executor.Outputs
-
-	err = d.SetConfig(map[string]string{})
-	if err != nil {
-		return nil, err
-	}
-	op.ComponentVersion = common.VersionedElementKey(cv).String()
-	return d.Exec(op)
+	return nil
 }

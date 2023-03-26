@@ -43,7 +43,7 @@ type Config struct {
 	ExtraId string `json:"extraId,omitempty"`
 }
 
-// NewConfigSpec creates a new memory ConfigSpec.
+// New creates a logging config specification.
 func New(ctxtype string, deflvl int) *Config {
 	return &Config{
 		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
@@ -52,6 +52,16 @@ func New(ctxtype string, deflvl int) *Config {
 			DefaultLevel: logging.LevelName(deflvl),
 			Rules:        []json.RawMessage{},
 		},
+	}
+}
+
+// NewWithConfig creates a logging config specification from a
+// logging config object.
+func NewWithConfig(ctxtype string, cfg *logcfg.Config) *Config {
+	return &Config{
+		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
+		ContextType:         ctxtype,
+		Settings:            *cfg,
 	}
 }
 

@@ -5,6 +5,7 @@
 package logopts
 
 import (
+	"encoding/json"
 	"strings"
 
 	"github.com/mandelsoft/logging"
@@ -15,8 +16,8 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/logforward"
 	"github.com/open-component-model/ocm/pkg/errors"
-	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 )
 
 var Description = `
@@ -40,7 +41,8 @@ type Options struct {
 	LogConfig   string
 	LogKeys     []string
 
-	LogFile vfs.File
+	LogFile    vfs.File
+	LogForward *config.Config
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
@@ -57,18 +59,23 @@ func (o *Options) Close() error {
 	return o.LogFile.Close()
 }
 
-func (o *Options) Configure(ctx clictx.Context) error {
+func (o *Options) Configure(ctx clictx.Context, logctx logging.Context) error {
 	var err error
+
+	if logctx == nil {
+		logctx = ctx.LoggingContext()
+	}
 
 	if o.LogLevel != "" {
 		l, err := logging.ParseLevel(o.LogLevel)
 		if err != nil {
 			return errors.Wrapf(err, "invalid log level %q", o.LogLevel)
 		}
-		ocmlog.Context().SetDefaultLevel(l)
+		logctx.SetDefaultLevel(l)
 	} else {
-		ocmlog.Context().SetDefaultLevel(logging.ErrorLevel)
+		logctx.SetDefaultLevel(logging.ErrorLevel)
 	}
+	logcfg := &config.Config{DefaultLevel: logging.LevelName(logctx.GetDefaultLevel())}
 
 	if o.LogFileName != "" {
 		o.LogFile, err = ctx.FileSystem().OpenFile(o.LogFileName, vfs.O_CREATE|vfs.O_WRONLY, 0o600)
@@ -78,7 +85,7 @@ func (o *Options) Configure(ctx clictx.Context) error {
 		log := logrus.New()
 		log.SetFormatter(&logrus.JSONFormatter{TimestampFormat: "2006-01-02 15:04:05"})
 		log.SetOutput(o.LogFile)
-		ocmlog.Context().SetBaseLogger(logrusr.New(log))
+		logctx.SetBaseLogger(logrusr.New(log))
 	}
 
 	if o.LogConfig != "" {
@@ -86,7 +93,7 @@ func (o *Options) Configure(ctx clictx.Context) error {
 		if err != nil {
 			return errors.Wrapf(err, "cannot read logging config %q", o.LogFile)
 		}
-		if err = config.ConfigureWithData(ocmlog.Context(), cfg); err != nil {
+		if err = config.ConfigureWithData(logctx, cfg); err != nil {
 			return errors.Wrapf(err, "invalid logging config: %q", o.LogFile)
 		}
 	}
@@ -102,17 +109,41 @@ func (o *Options) Configure(ctx clictx.Context) error {
 			t = t[:i]
 		}
 		var cond []logging.Condition
+		cfgcond := []json.RawMessage{}
+
 		for _, tag := range strings.Split(t, ",") {
 			tag = strings.TrimSpace(tag)
 			if strings.HasPrefix(tag, "/") {
 				cond = append(cond, logging.NewRealmPrefix(tag[1:]))
+				data, err := elem("realmprefix", tag[1:])
+				if err == nil {
+					cfgcond = append(cfgcond, data)
+				}
 			} else {
 				cond = append(cond, logging.NewTag(tag))
+				data, err := elem("tag", tag)
+				if err == nil {
+					cfgcond = append(cfgcond, data)
+				}
 			}
 		}
 		rule := logging.NewConditionRule(level, cond...)
-		ocmlog.Context().AddRule(rule)
+		cfgrule := config.ConditionalRule{
+			Level:      logging.LevelName(level),
+			Conditions: cfgcond,
+		}
+		data, err := elem("rule", cfgrule)
+		if err == nil {
+			logcfg.Rules = append(logcfg.Rules, data)
+		}
+		logctx.AddRule(rule)
 	}
+	o.LogForward = logcfg
+	logforward.Set(ctx.AttributesContext(), logcfg)
 
 	return nil
+}
+
+func elem(typ string, obj interface{}) (json.RawMessage, error) {
+	return json.Marshal(map[string]interface{}{typ: obj})
 }
