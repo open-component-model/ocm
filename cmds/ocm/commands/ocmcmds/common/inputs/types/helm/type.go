@@ -33,7 +33,13 @@ This blob type specification supports the following fields:
 - **<code>version</code>** *string*
 
   This OPTIONAL property can be set to configure an explicit version hint.
-  If not specified the versio from the chart will be used.
+  If not specified the version from the chart will be used.
   Basically, it is a good practice to use the component version for local resources
   This can be achieved by using templating for this attribute in the resource file.
+
+- **<code>repository</code>** *string*
+
+  This OPTIONAL property can be used to specify the repository hint for the
+  generated local artifact access. It is prefixed by the component name if
+  it does not start with slash "/".
 `

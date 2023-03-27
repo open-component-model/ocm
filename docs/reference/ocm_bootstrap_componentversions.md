@@ -41,7 +41,7 @@ printed to standard out. If the output file is a directory, for every output a
 dedicated file is created, otherwise the yaml representation is stored to the
 file.
 
-If no credentials file name is provided (option -c) the file 
+If no credentials file name is provided (option -c) the file
 <code>TOICredentials</code> is used, if present. If no parameter file name is
 provided (option -p) the file <code>TOIParameters</code> is used, if present.
 

@@ -5,7 +5,6 @@
 package ociimage
 
 import (
-	"fmt"
 	"strings"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -18,6 +17,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 )
 
 type Spec struct {
@@ -77,20 +77,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 	if err != nil {
 		return nil, "", err
 	}
-	return blob, Hint(nv, ref.Repository, s.Repository, version), nil
-}
-
-func Hint(nv common.NameVersion, locator, repo, version string) string {
-	fmt.Printf("locator: %s, repo: %s, version %s\n", locator, repo, version)
-	repository := fmt.Sprintf("%s/%s", nv.GetName(), locator)
-	if repo != "" {
-		if strings.HasPrefix(repo, grammar.RepositorySeparator) {
-			repository = repo[1:]
-		} else {
-			repository = fmt.Sprintf("%s/%s", nv.GetName(), repo)
-		}
-	}
-	return fmt.Sprintf("%s:%s", repository, version)
+	return blob, ociartifact.Hint(nv, ref.Repository, s.Repository, version), nil
 }
 
 func ValidateRepository(fldPath *field.Path, allErrs field.ErrorList, repo string) field.ErrorList {
@@ -100,7 +87,8 @@ func ValidateRepository(fldPath *field.Path, allErrs field.ErrorList, repo strin
 	if strings.Contains(repo, grammar.DigestSeparator) || strings.Contains(repo, grammar.TagSeparator) {
 		return append(allErrs, field.Invalid(fldPath, repo, "unexpected digest or tag"))
 	}
-	if !grammar.AnchoredRepositoryRegexp.MatchString(repo) {
+
+	if !grammar.AnchoredRepositoryRegexp.MatchString(strings.TrimPrefix(repo, "/")) {
 		return append(allErrs, field.Invalid(fldPath, repo, "no repository name"))
 	}
 	return allErrs

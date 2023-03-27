@@ -12,7 +12,7 @@ import (
 
 func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 	return cpi.NewMediaFileSpecOptionType(TYPE, AddConfig,
-		options.PathOption, options.VersionOption)
+		options.PathOption, options.VersionOption, options.HintOption)
 }
 
 func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
@@ -20,5 +20,6 @@ func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 		return err
 	}
 	flagsets.AddFieldByOptionP(opts, options.VersionOption, config, "version")
+	flagsets.AddFieldByOptionP(opts, options.HintOption, config, "repository")
 	return nil
 }

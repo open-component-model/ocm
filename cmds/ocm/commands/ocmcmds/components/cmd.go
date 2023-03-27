@@ -12,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/get"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/hash"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/sign"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/transfer"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components/verify"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -34,6 +35,7 @@ func AddCommands(ctx clictx.Context, cmd *cobra.Command) {
 	cmd.AddCommand(get.NewCommand(ctx, get.Verb))
 	cmd.AddCommand(hash.NewCommand(ctx, hash.Verb))
 	cmd.AddCommand(sign.NewCommand(ctx, sign.Verb))
+	cmd.AddCommand(transfer.NewCommand(ctx, transfer.Verb))
 	cmd.AddCommand(verify.NewCommand(ctx, verify.Verb))
 	cmd.AddCommand(download.NewCommand(ctx, download.Verb))
 }

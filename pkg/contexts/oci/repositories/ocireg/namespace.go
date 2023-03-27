@@ -83,7 +83,7 @@ func (n *NamespaceContainer) getPusher(vers string) (resolve.Pusher, error) {
 	if ok, _ := artdesc.IsDigest(vers); !ok {
 		var err error
 
-		resolver, err = n.repo.getResolver(ref)
+		resolver, err = n.repo.getResolver(n.namespace)
 
 		if err != nil {
 			return nil, fmt.Errorf("unable get resolver: %w", err)

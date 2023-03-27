@@ -1,27 +1,67 @@
-# This is an example .goreleaser.yml file with some sensible defaults.
-# Make sure to check the documentation at https://goreleaser.com
 before:
   hooks:
     - go mod tidy
 builds:
-  - main: ./cmds/ocm/main.go
-    env:
-      - CGO_ENABLED=0
+  - <<: &build_defaults
+      binary: ocm
+      main: ./cmds/ocm/main.go
+      ldflags:
+        - -s -w -X github.com/open-component-model/ocm/pkg/version.gitVersion={{.Version}} -X github.com/open-component-model/ocm/pkg/version.gitCommit={{.Commit}} -X github.com/open-component-model/ocm/pkg/version.buildDate={{.CommitDate}}
+      env:
+        - CGO_ENABLED=0
+    id: linux
     goos:
       - linux
-      - windows
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - 7
+  - <<: *build_defaults
+    id: darwin
+    goos:
       - darwin
+    goarch:
+      - amd64
+      - arm64
+  - <<: *build_defaults
+    id: windows
+    goos:
+      - windows
 archives:
-  - name_template: >-
-      {{ .ProjectName }}_
-      {{- title .Os }}_
-      {{- if eq .Arch "amd64" }}x86_64
-      {{- else if eq .Arch "386" }}i386
-      {{- else }}{{ .Arch }}{{ end }}
-checksum:
-  name_template: 'checksums.txt'
-snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  - name_template: "{{ .Binary }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    id: nix
+    builds: [linux, darwin]
+    format: tar.gz
+    files:
+      - none*
+  - name_template: "{{ .Binary }}-{{ .Version }}-{{ .Os }}-{{ .Arch }}"
+    id: windows
+    builds: [windows]
+    format: zip
+    files:
+      - none*
+source:
+  enabled: true
+  name_template: '{{ .ProjectName }}-{{ .Version }}-source_code'
+sboms:
+  - id: source
+    artifacts: source
+    documents:
+      - "{{ .ProjectName }}-{{ .Version }}-sbom.spdx.json"
+signs:
+  - cmd: cosign
+    env:
+      - COSIGN_EXPERIMENTAL=1
+    certificate: '${artifact}.pem'
+    args:
+      - sign-blob
+      - '--output-certificate=${certificate}'
+      - '--output-signature=${signature}'
+      - '${artifact}'
+    artifacts: checksum
+    output: true
 changelog:
   sort: asc
   filters:

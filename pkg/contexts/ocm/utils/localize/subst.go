@@ -49,6 +49,29 @@ func Substitute(subs Substitutions, fs vfs.FileSystem) error {
 	return nil
 }
 
+// SubstituteMappings substitutes value mappings for a dedicated substitution target.
+func SubstituteMappings(subs ValueMappings, target subst.SubstitutionTarget) error {
+	for i, s := range subs {
+		if err := target.SubstituteByData(s.ValuePath, s.Value); err != nil {
+			return errors.Wrapf(err, "entry %d: cannot substitute value", i+1)
+		}
+	}
+	return nil
+}
+
+// SubstituteMappingsForData substitutes value mappings for some data.
+func SubstituteMappingsForData(subs ValueMappings, data []byte) ([]byte, error) {
+	target, err := subst.Parse(data)
+	if err != nil {
+		return nil, err
+	}
+	err = SubstituteMappings(subs, target)
+	if err != nil {
+		return nil, err
+	}
+	return target.Content()
+}
+
 func Set(content *ast.File, path string, value *ast.File) error {
 	p, err := yaml.PathString("$." + path)
 	if err != nil {

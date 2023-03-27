@@ -4,6 +4,7 @@ type: helmChart
 input:
   type: helm
   path: testchart
+  repository: mandelsoft/testchart
 ---
 name: echoserver
 type: ociImage

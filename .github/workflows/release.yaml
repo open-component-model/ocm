@@ -21,16 +21,30 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write
       repository-projects: read
     steps:
     - name: Checkout
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
+
     - name: Setup Go
       uses: actions/setup-go@v3
       with:
         go-version-file: '${{ github.workspace }}/go.mod'
+
+    - name: Setup Syft
+      uses: anchore/sbom-action/download-syft@07978da4bdb4faa726e52dfc6b1bed63d4b56479 # v0.13.3
+
+    - name: Setup Cosign
+      uses: sigstore/cosign-installer@9becc617647dfa20ae7b1151972e9b3a2c338a2b # v2.8.1
+
+    - name: Setup git config
+      run: |
+        git config user.name "GitHub Actions Bot"
+        git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
+
     - name: Cache go-build and mod
       uses: actions/cache@v3
       with:
@@ -40,23 +54,32 @@ jobs:
         key: go-${{ hashFiles('go.sum') }}
         restore-keys: |
           go-
-    - name: Set release version
+
+    - name: Set Pre-Release Version
+      if: inputs.release_candidate == true
       run: |
-        if ${{ inputs.release_candidate }}; then
-          echo "RELEASE_VERSION=$(go run $GITHUB_WORKSPACE/pkg/version/generate/release_generate.go print-rc-version)" >> $GITHUB_ENV
-        else
-          echo "RELEASE_VERSION=$(go run $GITHUB_WORKSPACE/pkg/version/generate/release_generate.go print-version)" >> $GITHUB_ENV
-        fi
+        RELEASE_VERSION=$(go run $GITHUB_WORKSPACE/pkg/version/generate print-rc-version)
+        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
+
+    - name: Set Version
+      if: inputs.release_candidate == false
+      run: |
+        RELEASE_VERSION=$(go run $GITHUB_WORKSPACE/pkg/version/generate print-version)
+        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
+
     - name: Set release notes file
       run: |
-        echo "RELEASE_NOTES_FILE=docs/releasenotes/$(go run $GITHUB_WORKSPACE/pkg/version/generate/release_generate.go print-version).md" >> $GITHUB_ENV
+        RELEASE_NOTES_FILE=docs/releasenotes/$(go run $GITHUB_WORKSPACE/pkg/version/generate print-version).md
+        echo "RELEASE_NOTES_FILE=$RELEASE_NOTES_FILE" >> $GITHUB_ENV
+
     - name: Validate release notes
       run: |
         if [[ ! -f ${{ env.RELEASE_NOTES_FILE }} ]]; then
           >&2 echo "Must have release notes ${{ env.RELEASE_NOTES_FILE }}"
           exit 6
         fi
-    - name: Create and push branch
+
+    - name: Create or Push Release Branch
       env:
         RELEASE_BRANCH: release-${{ env.RELEASE_VERSION }}
       run: |
@@ -68,16 +91,14 @@ jobs:
             git checkout ${RELEASE_BRANCH}
             git pull --ff-only origin ${RELEASE_BRANCH}
         fi
-    - name: Setup git config
-      run: |
-        git config user.name "GitHub Actions Bot"
-        git config user.email "<41898282+github-actions[bot]@users.noreply.github.com>"
-    - name: Create and push tag
+
+    - name: Push Tag
       run: |
         msg="Release ${{ env.RELEASE_VERSION }}"
         git tag --annotate --message "${msg}" ${{ env.RELEASE_VERSION }}
         git push origin ${{ env.RELEASE_VERSION }}
-    - name: Run goreleaser
+
+    - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v4
       with:
         distribution: goreleaser
@@ -87,7 +108,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.EVENT_API }}
         GORELEASER_CURRENT_TAG: ${{ env.RELEASE_VERSION }}
-    - name: Repository Dispatch
+
+    - name: Publish Release Event
       if: inputs.release_candidate == false
       uses: peter-evans/repository-dispatch@v2
       with:

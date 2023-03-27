@@ -35,7 +35,7 @@ var CDExcludes = signing.MapExcludes{
 			},
 		},
 		"sources": nil,
-		"references": signing.ArrayExcludes{
+		"componentReferences": signing.ArrayExcludes{
 			signing.MapExcludes{
 				"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
 					ValueChecker: signing.IgnoreLabelsWithoutSignature,
