@@ -6,6 +6,7 @@ package cpi
 
 import (
 	"compress/gzip"
+	"fmt"
 
 	"github.com/opencontainers/go-digest"
 
@@ -13,7 +14,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 type ManifestImpl struct {
@@ -23,7 +23,6 @@ type ManifestImpl struct {
 var _ ManifestAccess = (*ManifestImpl)(nil)
 
 func NewManifest(access ArtifactSetContainer, defs ...*artdesc.Manifest) (*ManifestImpl, error) {
-	defer panics.HandlePanic()
 	var def *artdesc.Manifest
 	if len(defs) != 0 && defs[0] != nil {
 		def = defs[0]
@@ -34,7 +33,7 @@ func NewManifest(access ArtifactSetContainer, defs ...*artdesc.Manifest) (*Manif
 	}
 	state, err := accessobj.NewBlobStateForObject(mode, def, NewManifestStateHandler())
 	if err != nil {
-		panic("oops")
+		return nil, fmt.Errorf("failed to get blob state for object: %w", err)
 	}
 
 	p, err := access.NewArtifactProvider(state)

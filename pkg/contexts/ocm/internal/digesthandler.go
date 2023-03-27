@@ -12,7 +12,6 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 type DigesterType struct {
@@ -260,7 +259,6 @@ func (r *blobDigesterRegistry) DetermineDigests(restype string, preferred signin
 }
 
 func MustRegisterDigester(digester BlobDigester, arttypes ...string) {
-	defer panics.HandlePanic()
 	err := DefaultBlobDigesterRegistry.Register(digester, arttypes...)
 	if err != nil {
 		panic(err)

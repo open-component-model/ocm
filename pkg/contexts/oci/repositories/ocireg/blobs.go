@@ -16,7 +16,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 type BlobContainer interface {
@@ -80,7 +79,6 @@ func newBlobContainer(mime string, fetcher resolve.Fetcher, pusher resolve.Pushe
 }
 
 func NewBlobContainer(cache accessio.BlobCache, mime string, fetcher resolve.Fetcher, pusher resolve.Pusher) BlobContainer {
-	defer panics.HandlePanic()
 	c := newBlobContainer(mime, fetcher, pusher)
 
 	if cache == nil {
@@ -88,7 +86,8 @@ func NewBlobContainer(cache accessio.BlobCache, mime string, fetcher resolve.Fet
 	}
 	r, err := accessio.CachedAccess(c, c, cache)
 	if err != nil {
-		panic(err)
+		// The calling code chain handles this blob container being nil.
+		return nil
 	}
 	return r
 }

@@ -120,7 +120,11 @@ func (n *NamespaceContainer) GetBlobDescriptor(digest digest.Digest) *cpi.Descri
 
 func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
 	n.repo.ctx.Logger().Debug("getting blob", "digest", digest)
-	size, acc, err := n.blobs.Get("").GetBlobData(digest)
+	blob := n.blobs.Get("")
+	if blob == nil {
+		return -1, nil, fmt.Errorf("failed to retrieve blob data, blob data was nil")
+	}
+	size, acc, err := blob.GetBlobData(digest)
 	n.repo.ctx.Logger().Debug("getting blob done", "digest", digest, "size", size, "error", logging.ErrorMessage(err))
 	return size, acc, err
 }
@@ -128,7 +132,11 @@ func (n *NamespaceContainer) GetBlobData(digest digest.Digest) (int64, cpi.DataA
 func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
 	log := n.repo.ctx.Logger()
 	log.Debug("adding blob", "digest", blob.Digest())
-	if _, _, err := n.blobs.Get("").AddBlob(blob); err != nil {
+	blobData := n.blobs.Get("")
+	if blobData == nil {
+		return fmt.Errorf("failed to retrieve blob data, blob data was empty")
+	}
+	if _, _, err := blobData.AddBlob(blob); err != nil {
 		log.Debug("adding blob failed", "digest", blob.Digest(), "error", err.Error())
 		return fmt.Errorf("unable to add blob: %w", err)
 	}
@@ -151,7 +159,11 @@ func (n *NamespaceContainer) GetArtifact(vers string) (cpi.ArtifactAccess, error
 		}
 		return nil, err
 	}
-	_, acc, err := n.blobs.Get(desc.MediaType).GetBlobData(desc.Digest)
+	blobData := n.blobs.Get(desc.MediaType)
+	if blobData == nil {
+		return nil, fmt.Errorf("failed to retrieve blob data, blob data was empty")
+	}
+	_, acc, err := blobData.GetBlobData(desc.Digest)
 	if err != nil {
 		return nil, err
 	}
@@ -163,18 +175,25 @@ func (n *NamespaceContainer) AddArtifact(artifact cpi.Artifact, tags ...string) 
 	if err != nil {
 		return nil, err
 	}
+
 	if n.repo.info.Legacy {
 		blob = artdesc.MapArtifactBlobMimeType(blob, true)
 	}
+
 	n.repo.ctx.Logger().Debug("adding artifact", "digest", blob.Digest(), "mimetype", blob.MimeType())
-	_, _, err = n.blobs.Get(blob.MimeType()).AddBlob(blob)
+	blobData := n.blobs.Get(blob.MimeType())
+	if blobData == nil {
+		return nil, fmt.Errorf("failed to retrieve blob data, blob data was empty")
+	}
+
+	_, _, err = blobData.AddBlob(blob)
 	if err != nil {
 		return nil, err
 	}
+
 	if len(tags) > 0 {
 		for _, tag := range tags {
-			err := n.push(tag, blob)
-			if err != nil {
+			if err := n.push(tag, blob); err != nil {
 				return nil, err
 			}
 		}

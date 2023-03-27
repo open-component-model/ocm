@@ -34,6 +34,7 @@ func FormatLinkWithHandler(linkhandler func(string) string) func(string) string 
 }
 
 func SubstituteCommandLinks(desc string, linkformat func(string) string) ([]string, string) {
+	// This is acceptable as the call chain will just output empty.
 	defer panics.HandlePanic()
 	var links []string
 	for {

@@ -13,7 +13,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 type Entries []Entry
@@ -43,7 +42,6 @@ func (l Entries) ToString(gap string) string {
 }
 
 func toString(v interface{}, gap string) string {
-	defer panics.HandlePanic()
 	switch castIn := v.(type) {
 	case Entries:
 		return castIn.ToString(gap)

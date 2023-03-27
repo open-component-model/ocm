@@ -68,6 +68,8 @@ func KeyData(key interface{}) ([]byte, error) {
 }
 
 func PemBlockForKey(priv interface{}, gen ...bool) *pem.Block {
+	// Handling the panic here means that the above write will error and return that error which might be
+	// acceptable by the end user.
 	defer panics.HandlePanic()
 	switch k := priv.(type) {
 	case *rsa.PublicKey:

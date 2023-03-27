@@ -13,7 +13,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 type Builder struct {
@@ -184,14 +183,13 @@ type delegatingDecoder struct {
 var _ runtime.TypedObjectDecoder = (*delegatingDecoder)(nil)
 
 func (d *delegatingDecoder) Decode(data []byte, unmarshaler runtime.Unmarshaler) (runtime.TypedObject, error) {
-	defer panics.HandlePanic()
 	d.lock.Lock()
 	defer d.lock.Unlock()
 
 	if d.delegate == nil && ociimpl != nil {
 		def, err := ociimpl(d.oci)
 		if err != nil {
-			panic(fmt.Sprintf("cannot create oci default decoder: %s", err))
+			return nil, fmt.Errorf("cannot create oci default decoder: %w", err)
 		}
 		d.delegate = def
 	}

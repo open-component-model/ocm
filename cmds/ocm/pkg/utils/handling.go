@@ -46,6 +46,7 @@ func StringElemSpecs(args ...string) []ElemSpec {
 }
 
 func ElemSpecs(list interface{}) []ElemSpec {
+	// This is acceptable as the calling chain will just take a nil slice.
 	defer panics.HandlePanic()
 	if list == nil {
 		return nil

@@ -73,6 +73,8 @@ type ProcessingEntry struct {
 type SubEntries int
 
 func NewEntry(i Index, v interface{}, opts ...interface{}) ProcessingEntry {
+	// If this is caught the only upstream problem would be an empty entry.
+	// Which is fine if the user understands that it can happen.
 	defer panics.HandlePanic()
 	max := -1
 	sub := 0
@@ -367,6 +369,8 @@ func (ob *orderedBuffer) SetFrame(frame BufferFrame) {
 }
 
 func (ob *orderedBuffer) Add(e ProcessingEntry) bool {
+	// This handler here prevents the calling function's lock to be not released.
+	// The resulting state would return false, which is acceptable from the user's perspective.
 	defer panics.HandlePanic()
 	e.Index.Validate(e.MaxIndex)
 	ob.simple.Add(e)

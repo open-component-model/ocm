@@ -14,7 +14,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 // These objects deal with descriptor based state descriptions
@@ -222,7 +221,6 @@ func (s *state) Refresh() error {
 }
 
 func (s *state) GetOriginalState() interface{} {
-	defer panics.HandlePanic()
 	if s.originalBlob == nil {
 		return nil
 	}

@@ -6,8 +6,6 @@ package regex
 
 import (
 	"regexp"
-
-	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 var (
@@ -29,7 +27,6 @@ var Match = regexp.MustCompile
 // Literal compiles s into a literal regular expression, escaping any regexp
 // reserved characters.
 func Literal(s string) *regexp.Regexp {
-	defer panics.HandlePanic()
 	re := Match(regexp.QuoteMeta(s))
 
 	if _, complete := re.LiteralPrefix(); !complete {

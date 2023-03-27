@@ -14,7 +14,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 var ErrNoIndex = errors.New("manifest does not support access to subsequent artifacts")
@@ -68,7 +67,6 @@ func NewArtifactForBlob(access ArtifactSetContainer, blob accessio.BlobAccess) (
 }
 
 func NewArtifact(access ArtifactSetContainer, defs ...*artdesc.Artifact) (ArtifactAccess, error) {
-	defer panics.HandlePanic()
 	var def *artdesc.Artifact
 	if len(defs) != 0 && defs[0] != nil {
 		def = defs[0]
@@ -79,7 +77,7 @@ func NewArtifact(access ArtifactSetContainer, defs ...*artdesc.Artifact) (Artifa
 	}
 	state, err := accessobj.NewBlobStateForObject(mode, def, NewArtifactStateHandler())
 	if err != nil {
-		panic("oops: " + err.Error())
+		return nil, err
 	}
 
 	p, err := access.NewArtifactProvider(state)

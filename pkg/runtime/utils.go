@@ -10,11 +10,9 @@ import (
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 func MustProtoType(proto interface{}) reflect.Type {
-	defer panics.HandlePanic()
 	t, err := ProtoType(proto)
 	if err != nil {
 		panic(err.Error())
