@@ -63,7 +63,7 @@ func (s *StaticContext) Configure(config *logcfg.Config, extra ...string) error 
 
 var logContext = NewContext(nil)
 
-// SetContext sets a new precondigure context.
+// SetContext sets a new preconfigured context.
 // This function should be called prior to any configuration
 // to avoid loosing them.
 func SetContext(ctx logging.Context) {

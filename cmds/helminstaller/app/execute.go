@@ -53,17 +53,22 @@ func (e *Execution) outf(msg string, args ...interface{}) {
 
 func (e *Execution) unpackChart(dir string) {
 	e.outf("Unpacking chart archive to %s...\n", dir)
-
+	e.Logger.Debug("unpacking chart archive", "directory", dir)
 	r := Must1f(R1(e.fs.Open(e.path)), "cannot read downloaded chart archive %q", e.path)
 	defer r.Close()
 
+	e.Logger.Debug("auto decompress downloaded chart")
 	reader, _ := Must2f(R2(compression.AutoDecompress(r)), "cannot uncompress downloaded chart archive %q", e.path)
+	e.Logger.Debug("preparing chart filesystem")
 	chartfs := Must1f(R1(projectionfs.New(e.fs, dir)), "cannot create projection %q", e.path)
+	e.Logger.Debug("extracting chart archive", "archive", e.path)
 	Mustf(utils2.ExtractTarToFs(chartfs, reader), "cannot extract downloaded chart archive %q", e.path)
+	e.Logger.Debug("lookup chart folder")
 	entries := Must1f(R1(vfs.ReadDir(e.fs, dir)), "cannot find chart folder in %q", dir)
 	if len(entries) != 1 {
 		Throw(fmt.Errorf("expected single chart folder in archive, but found %d folders", len(entries)))
 	}
+	e.Logger.Debug("found chart folder", "folder", entries[0].Name())
 	e.path = filepath.Join(dir, entries[0].Name())
 }
 
@@ -176,6 +181,7 @@ func (e *Execution) Execute(cfg *Config, values map[string]interface{}, kubeconf
 	}
 
 	e.outf("Localizing helm chart...\n")
+	e.Logger.Debug("Localizing helm chart")
 	for i, v := range cfg.ImageMapping {
 		acc, rcv := Must2f(R2(utils.ResolveResourceReference(e.ComponentVersion, v.ResourceReference, nil)), "mapping", fmt.Sprintf("%d (%s)", i+1, &v.ResourceReference))
 		rcv.Close()
@@ -190,12 +196,15 @@ func (e *Execution) Execute(cfg *Config, values map[string]interface{}, kubeconf
 		repo := ref[:ix]
 		tag := ref[ix+1:]
 		if v.Repository != "" {
+			e.Logger.Debug("substitute image repository", "ref", ref, "target", v.Repository)
 			Mustf(Set(values, v.Repository, repo), "mapping %d: assigning repositry to property %q", v.Repository)
 		}
 		if v.Tag != "" {
+			e.Logger.Debug("substitute image tag", "ref", ref, "target", v.Tag)
 			Mustf(Set(values, v.Tag, tag), "mapping %d: assigning tag to property %q", v.Tag)
 		}
 		if v.Image != "" {
+			e.Logger.Debug("substitute image ref", "ref", ref, "target", v.Image)
 			Mustf(Set(values, v.Image, ref), "mapping %d: assigning image to property %q", v.Image)
 		}
 	}
@@ -213,6 +222,7 @@ func (e *Execution) Execute(cfg *Config, values map[string]interface{}, kubeconf
 	if s, ok := values["release"].(string); ok && s != "" {
 		release = s
 	}
+	e.Logger.Debug("executing helm deployment", "action", e.Action, "namespace", ns, "release", release)
 	valuesdata := Must1f(R1(runtime.DefaultYAMLEncoding.Marshal(values)), "marshal values")
 
 	dcfg := &driver.Config{

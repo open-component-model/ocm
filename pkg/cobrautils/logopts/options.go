@@ -15,8 +15,9 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/logforward"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -59,11 +60,15 @@ func (o *Options) Close() error {
 	return o.LogFile.Close()
 }
 
-func (o *Options) Configure(ctx clictx.Context, logctx logging.Context) error {
+func (o *Options) Configure(ctx ocm.Context, logctx logging.Context) error {
 	var err error
 
 	if logctx == nil {
+		// by default: always configure the root logging context used for the actual ocm context.
 		logctx = ctx.LoggingContext()
+		for logctx.Tree().GetBaseContext() != nil {
+			logctx = logctx.Tree().GetBaseContext()
+		}
 	}
 
 	if o.LogLevel != "" {
@@ -77,8 +82,9 @@ func (o *Options) Configure(ctx clictx.Context, logctx logging.Context) error {
 	}
 	logcfg := &config.Config{DefaultLevel: logging.LevelName(logctx.GetDefaultLevel())}
 
+	fs := vfsattr.Get(ctx)
 	if o.LogFileName != "" {
-		o.LogFile, err = ctx.FileSystem().OpenFile(o.LogFileName, vfs.O_CREATE|vfs.O_WRONLY, 0o600)
+		o.LogFile, err = fs.OpenFile(o.LogFileName, vfs.O_CREATE|vfs.O_WRONLY, 0o600)
 		if err != nil {
 			return errors.Wrapf(err, "cannot open log file %q", o.LogFile)
 		}
@@ -89,7 +95,7 @@ func (o *Options) Configure(ctx clictx.Context, logctx logging.Context) error {
 	}
 
 	if o.LogConfig != "" {
-		cfg, err := vfs.ReadFile(ctx.FileSystem(), o.LogConfig)
+		cfg, err := vfs.ReadFile(fs, o.LogConfig)
 		if err != nil {
 			return errors.Wrapf(err, "cannot read logging config %q", o.LogFile)
 		}

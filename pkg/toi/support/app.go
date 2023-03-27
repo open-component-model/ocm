@@ -16,18 +16,22 @@ import (
 
 	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/pkg/cobrautils"
+	"github.com/open-component-model/ocm/pkg/cobrautils/logopts"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	datactg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config/attrs"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/logging"
+	"github.com/open-component-model/ocm/pkg/toi"
 	"github.com/open-component-model/ocm/pkg/toi/install"
 	"github.com/open-component-model/ocm/pkg/version"
 )
 
 type BootstrapperCLIOptions struct {
 	ExecutorOptions
+	logopts.Options
 	CredentialSettings []string
 	Settings           []string
 }
@@ -75,6 +79,7 @@ func NewCLICommand(ctx ocm.Context, name string, exec func(options *ExecutorOpti
 }
 
 func (o *BootstrapperCLIOptions) AddFlags(fs *pflag.FlagSet) {
+	o.Options.AddFlags(fs)
 	fs.StringVarP(&o.OCMConfig, "ocmconfig", "", "", "ocm configuration file")
 	fs.StringArrayVarP(&o.CredentialSettings, "cred", "C", nil, "credential setting")
 	fs.StringArrayVarP(&o.Settings, "attribute", "X", nil, "attribute setting")
@@ -88,6 +93,7 @@ func (o *BootstrapperCLIOptions) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *BootstrapperCLIOptions) Complete() error {
+	o.Options.Configure(o.Context, logging.Context())
 	if err := o.ExecutorOptions.Complete(); err != nil {
 		return fmt.Errorf("unable to complete options: %w", err)
 	}
@@ -149,6 +155,7 @@ func (o *BootstrapperCLIOptions) Complete() error {
 		return fmt.Errorf("unable to parse labels: %w", err)
 	}
 
+	o.Logger = toi.Log
 	return nil
 }
 

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -26,6 +27,7 @@ import (
 
 type ExecutorOptions struct {
 	Context              ocm.Context
+	Logger               logging.Logger
 	OutputContext        out.Context
 	Action               string
 	ComponentVersionName string

@@ -9,13 +9,12 @@ package app
 import (
 	"strings"
 
-	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
-	ocmlog "github.com/open-component-model/ocm/pkg/logging"
-
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+
+	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
+	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/action"
@@ -270,7 +269,7 @@ func (o *CLIOptions) Complete() error {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
 
-	err := o.LogOpts.Configure(o.Context, ocmlog.Context())
+	err := o.LogOpts.Configure(o.Context.OCMContext(), nil)
 	if err != nil {
 		return err
 	}

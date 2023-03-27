@@ -29,7 +29,7 @@ var _ = Describe("log configuration", func() {
 			},
 		}
 
-		MustBeSuccessful(opts.Configure(ctx, ctx.LoggingContext()))
+		MustBeSuccessful(opts.Configure(ctx.OCMContext(), ctx.LoggingContext()))
 		Expect(opts.LogForward).NotTo(BeNil())
 
 		data := Must(yaml.Marshal(opts.LogForward))
