@@ -29,19 +29,85 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
+type Matcher func(err error) bool
+
 // PropagateException catches an exception provided by variations of
 // MustX functions and forwards the error to its argument.
 // It must be called by defer.
 // Cannot reuse PropagateExceptionf, because recover MUST be called
 // at TOP level defer function to recover the panic.
-func PropagateException(errp *error) {
+func PropagateException(errp *error, matchers ...Matcher) {
 	if r := recover(); r != nil {
-		if e, ok := r.(*exception); ok {
+		if e, ok := r.(*exception); ok && match(e.err, matchers...) {
 			*errp = e.err
 		} else {
 			panic(r)
 		}
 	}
+}
+
+func match(err error, matchers ...Matcher) bool {
+	if len(matchers) == 0 {
+		return true
+	}
+	for _, m := range matchers {
+		if m(err) {
+			return true
+		}
+	}
+	return false
+}
+
+var All = func(_ error) bool {
+	return true
+}
+
+var None = func(_ error) bool {
+	return false
+}
+
+func ByPrototypes(protos ...error) Matcher {
+	return func(err error) bool {
+		if len(protos) == 0 {
+			return true
+		}
+		for _, p := range protos {
+			if errors.IsA(err, p) {
+				return true
+			}
+		}
+		return false
+	}
+}
+
+func Or(matchers ...Matcher) Matcher {
+	return func(err error) bool {
+		for _, m := range matchers {
+			if m(err) {
+				return true
+			}
+		}
+		return false
+	}
+}
+
+func And(matchers ...Matcher) Matcher {
+	return func(err error) bool {
+		for _, m := range matchers {
+			if !m(err) {
+				return false
+			}
+		}
+		return true
+	}
+}
+
+// Exception provie the error object from an exception object.
+func Exception(r interface{}) error {
+	if e, ok := r.(*exception); ok {
+		return e.err
+	}
+	return nil
 }
 
 // PropagateExceptionf catches an exception provided by variations of
@@ -51,6 +117,20 @@ func PropagateException(errp *error) {
 func PropagateExceptionf(errp *error, msg string, args ...interface{}) {
 	if r := recover(); r != nil {
 		if e, ok := r.(*exception); ok {
+			if msg != "" {
+				*errp = errors.Wrapf(e.err, msg, args...)
+			} else {
+				*errp = e.err
+			}
+		} else {
+			panic(r)
+		}
+	}
+}
+
+func PropagateMatchedExceptionf(errp *error, m Matcher, msg string, args ...interface{}) {
+	if r := recover(); r != nil {
+		if e, ok := r.(*exception); ok && (m == nil || m(e.err)) {
 			if msg != "" {
 				*errp = errors.Wrapf(e.err, msg, args...)
 			} else {
@@ -79,6 +159,14 @@ func ForwardExceptionf(msg string, args ...interface{}) {
 
 type exception struct {
 	err error
+}
+
+func (e *exception) Unwrap() error {
+	return e.err
+}
+
+func (e *exception) Error() string {
+	return e.err.Error()
 }
 
 // Throw throws an exception if err !=nil.

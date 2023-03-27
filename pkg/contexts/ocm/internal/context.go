@@ -9,6 +9,8 @@ import (
 	"reflect"
 	"strings"
 
+	. "github.com/open-component-model/ocm/pkg/finalizer"
+
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -17,7 +19,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const CONTEXT_TYPE = "ocm" + datacontext.OCM_CONTEXT_SUFFIX
@@ -61,10 +62,10 @@ type Context interface {
 	// elements should be added to the finalzer, which can be reopened/created
 	// on-the fly whenever required.
 	Finalize() error
-	Finalizer() *utils.Finalizer
+	Finalizer() *Finalizer
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 var key = reflect.TypeOf(_context{})
 
@@ -86,7 +87,7 @@ func DefinedForContext(ctx context.Context) (Context, bool) {
 	return nil, ok
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 type _context struct {
 	datacontext.Context
@@ -103,7 +104,7 @@ type _context struct {
 	blobHandlers  BlobHandlerRegistry
 	blobDigesters BlobDigesterRegistry
 	aliases       map[string]RepositorySpec
-	finalizer     utils.Finalizer
+	finalizer     Finalizer
 }
 
 var _ Context = &_context{}
@@ -137,7 +138,7 @@ func (c *_context) Finalize() error {
 	return c.finalizer.Finalize()
 }
 
-func (c *_context) Finalizer() *utils.Finalizer {
+func (c *_context) Finalizer() *Finalizer {
 	return &c.finalizer
 }
 

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package exception
+package exception_test
 
 import (
 	"fmt"
@@ -11,6 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/exception"
 )
 
 var dump = fmt.Errorf("dump")
@@ -25,14 +26,14 @@ func callee(e error) (int, error) {
 
 func _caller(e error, args ...interface{}) {
 	if len(args) == 0 {
-		Must1(callee(e))
+		exception.Must1(callee(e))
 	} else {
-		Must1f(R1(callee(e)), args[0].(string), args[1:]...)
+		exception.Must1f(exception.R1(callee(e)), args[0].(string), args[1:]...)
 	}
 }
 
 func caller(e error, args ...interface{}) (err error) {
-	defer PropagateException(&err)
+	defer exception.PropagateException(&err)
 	_caller(e, args...)
 	return nil
 }
@@ -67,7 +68,7 @@ var _ = Describe("exceptions", func() {
 
 	It("propagates with outer context", func() {
 		caller := func(e error, args ...interface{}) (err error) {
-			defer PropagateExceptionf(&err, "outer")
+			defer exception.PropagateExceptionf(&err, "outer")
 			_caller(e, args...)
 			return nil
 		}
@@ -84,4 +85,35 @@ var _ = Describe("exceptions", func() {
 		Expect(errors.Unwrap(errors.Unwrap(prop))).To(Equal(err))
 		Expect(prop.Error()).To(Equal("outer: test: test error"))
 	})
+
+	Context("with matchers", func() {
+
+		caller := func(e error, args ...interface{}) (err error) {
+			defer exception.PropagateException(&err, exception.ByPrototypes(MyException{}))
+			_caller(e, args...)
+			return nil
+		}
+
+		It("catches matched exception", func() {
+			err := caller(MyException{})
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("MyException"))
+		})
+
+		It("passes unmatched exception", func() {
+			defer func() {
+				r := recover()
+				Expect(r).NotTo(BeNil())
+				Expect(fmt.Sprintf("%s", r)).To(Equal("test"))
+			}()
+			err := caller(fmt.Errorf("test"))
+			Expect(err).To(Succeed())
+		})
+	})
 })
+
+type MyException struct{}
+
+func (_ MyException) Error() string {
+	return "MyException"
+}

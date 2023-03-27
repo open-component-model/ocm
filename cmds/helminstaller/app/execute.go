@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	. "github.com/open-component-model/ocm/pkg/exception"
+	. "github.com/open-component-model/ocm/pkg/finalizer"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
@@ -72,10 +73,10 @@ func (e *Execution) unpackChart(dir string) {
 	e.path = filepath.Join(dir, entries[0].Name())
 }
 
-func (e *Execution) addSubCharts(subCharts map[string]v1.ResourceReference) {
+func (e *Execution) addSubCharts(finalize *Finalizer, subCharts map[string]v1.ResourceReference) {
 	dir := e.path + ".dir"
 	Mustf(e.fs.Mkdir(dir, 0o700), "cannot mkdir %q", dir)
-	defer e.fs.RemoveAll(dir)
+	finalize.With(Calling1(e.fs.RemoveAll, dir))
 
 	e.unpackChart(dir)
 
@@ -93,8 +94,8 @@ func (e *Execution) addSubCharts(subCharts map[string]v1.ResourceReference) {
 		}
 	}
 
-	var finalize utils2.Finalizer
-	defer finalize.Finalize()
+	var loop Finalizer
+	defer loop.Finalize()
 
 	charts := filepath.Join(e.path, "charts")
 	Mustf(e.fs.Mkdir(charts, 0o700), "cannot mkdir %q", charts)
@@ -102,7 +103,7 @@ func (e *Execution) addSubCharts(subCharts map[string]v1.ResourceReference) {
 	for n, r := range subCharts {
 		e.outf("  Loading sub chart %q from resource %s@%s\n", n, r, common.VersionedElementKey(e.ComponentVersion))
 		acc, rcv := Must2f(R2(utils.ResolveResourceReference(e.ComponentVersion, r, nil)), "chart reference", r.String())
-		finalize.Close(rcv)
+		loop.Close(rcv)
 
 		if acc.Meta().Type != resourcetypes.HELM_CHART {
 			Throw(errors.Newf("%s: resource type %q required, but found %q", r, resourcetypes.HELM_CHART, acc.Meta().Type))
@@ -141,7 +142,7 @@ func (e *Execution) addSubCharts(subCharts map[string]v1.ResourceReference) {
 			}
 			deps = append(deps, m)
 		}
-		finalize.Finalize()
+		loop.Finalize()
 	}
 
 	chart["dependencies"] = deps
@@ -150,7 +151,8 @@ func (e *Execution) addSubCharts(subCharts map[string]v1.ResourceReference) {
 }
 
 func (e *Execution) Execute(cfg *Config, values map[string]interface{}, kubeconfig []byte) (err error) {
-	defer PropagateException(&err)
+	var finalize Finalizer
+	defer finalize.CatchException().FinalizeWithErrorPropagation(&err)
 
 	if e.Action != "install" && e.Action != "uninstall" {
 		return errors.ErrNotSupported("action", e.Action)
@@ -160,7 +162,7 @@ func (e *Execution) Execute(cfg *Config, values map[string]interface{}, kubeconf
 
 	e.outf("Loading helm chart from resource %s@%s\n", cfg.Chart, common.VersionedElementKey(e.ComponentVersion))
 	acc, rcv := Must2f(R2(utils.ResolveResourceReference(e.ComponentVersion, cfg.Chart, nil)), "chart reference", cfg.Chart.String())
-	defer rcv.Close()
+	finalize.Close(rcv)
 
 	if acc.Meta().Type != resourcetypes.HELM_CHART {
 		return errors.Newf("resource type %q required, but found %q", resourcetypes.HELM_CHART, acc.Meta().Type)
@@ -174,10 +176,10 @@ func (e *Execution) Execute(cfg *Config, values map[string]interface{}, kubeconf
 
 	_, e.path = Must2f(R2(download.For(e.Context).Download(common.NewPrinter(e.OutputContext.StdOut()), acc, path, e.fs)), "downloading helm chart")
 
-	defer e.fs.Remove(e.path)
+	finalize.With(Calling1(e.fs.Remove, e.path))
 
 	if len(cfg.SubCharts) > 0 {
-		e.addSubCharts(cfg.SubCharts)
+		e.addSubCharts(&finalize, cfg.SubCharts)
 	}
 
 	e.outf("Localizing helm chart...\n")

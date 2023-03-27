@@ -7,6 +7,8 @@ package dockermulti
 import (
 	"fmt"
 
+	. "github.com/open-component-model/ocm/pkg/finalizer"
+
 	"github.com/opencontainers/go-digest"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
@@ -23,7 +25,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Spec struct {
@@ -68,7 +69,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) getVariant(ctx clictx.Context, finalize *utils.Finalizer, variant string) (oci.ArtifactAccess, error) {
+func (s *Spec) getVariant(ctx clictx.Context, finalize *Finalizer, variant string) (oci.ArtifactAccess, error) {
 	locator, version, err := docker.ParseGenericRef(variant)
 	if err != nil {
 		return nil, err
@@ -150,7 +151,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 		default:
 			// provide variant
 			ctx.Printf("image %d: %s\n", i, s.Variants[i])
-			var finalize utils.Finalizer
+			var finalize Finalizer
 
 			art, err = s.getVariant(ctx, &finalize, s.Variants[i])
 

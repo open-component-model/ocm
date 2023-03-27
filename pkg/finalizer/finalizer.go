@@ -2,13 +2,14 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package utils
+package finalizer
 
 import (
 	"io"
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/exception"
 )
 
 // Finalizer gathers finalization functions and calls
@@ -22,8 +23,20 @@ import (
 // a loop block.
 type Finalizer struct {
 	lock    sync.Mutex
+	catch   exception.Matcher
 	pending []func() error
 	nested  *Finalizer
+}
+
+// CatchException marks the finalizer to catch exceptions.
+// This must be combined with error propagating defers.
+func (f *Finalizer) CatchException(matchers ...exception.Matcher) *Finalizer {
+	if len(matchers) > 0 {
+		f.catch = exception.Or(matchers...)
+	} else {
+		f.catch = exception.All
+	}
+	return f
 }
 
 // Lock locks a given Locker and unlocks it again
@@ -36,7 +49,7 @@ func (f *Finalizer) Lock(locker sync.Locker) *Finalizer {
 // WithVoid registers a simple function to be
 // called on finalization.
 func (f *Finalizer) WithVoid(fi func()) *Finalizer {
-	return f.With(func() error { fi(); return nil })
+	return f.With(CallingV(fi))
 }
 
 func (f *Finalizer) With(fi func() error) *Finalizer {
@@ -47,6 +60,56 @@ func (f *Finalizer) With(fi func() error) *Finalizer {
 		f.pending = append(f.pending, fi)
 	}
 	return f
+}
+
+// Calling1 can be used with Finalizer.With, to call an error providing
+// function with one argument.
+func Calling1[T any](f func(arg T) error, arg T) func() error {
+	return func() error {
+		return f(arg)
+	}
+}
+
+func Calling2[T, U any](f func(arg1 T, arg2 U) error, arg1 T, arg2 U) func() error {
+	return func() error {
+		return f(arg1, arg2)
+	}
+}
+
+func Calling3[T, U, V any](f func(arg1 T, arg2 U, arg3 V) error, arg1 T, arg2 U, arg3 V) func() error {
+	return func() error {
+		return f(arg1, arg2, arg3)
+	}
+}
+
+func CallingV(f func()) func() error {
+	return func() error {
+		f()
+		return nil
+	}
+}
+
+// Calling1V can be used with Finalizer.With, to call a void
+// function with one argument.
+func Calling1V[T any](f func(arg T), arg T) func() error {
+	return func() error {
+		f(arg)
+		return nil
+	}
+}
+
+func Calling2V[T, U any](f func(arg1 T, arg2 U), arg1 T, arg2 U) func() error {
+	return func() error {
+		f(arg1, arg2)
+		return nil
+	}
+}
+
+func Calling3V[T, U, V any](f func(arg1 T, arg2 U, arg3 V), arg1 T, arg2 U, arg3 V) func() error {
+	return func() error {
+		f(arg1, arg2, arg3)
+		return nil
+	}
 }
 
 // Close will finalize the given object by calling
@@ -103,7 +166,20 @@ func (f *Finalizer) Length() int {
 // This is especially intended to be used in a deferred mode to adapt
 // the error code of a function to incorporate finalization errors.
 func (f *Finalizer) FinalizeWithErrorPropagation(efferr *error) {
-	errors.PropagateError(efferr, f.Finalize)
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
+	errors.PropagateError(efferr, f.finalize)
+	if f.catch == nil {
+		return
+	}
+	if r := recover(); r != nil {
+		if e := exception.Exception(r); e != nil {
+			*efferr = errors.ErrList().Add(e).Add(*efferr).Result()
+		} else {
+			panic(r)
+		}
+	}
 }
 
 // FinalizeWithErrorPropagationf calls all finalizations in the reverse order of
@@ -113,15 +189,43 @@ func (f *Finalizer) FinalizeWithErrorPropagation(efferr *error) {
 // the error code of a function to incorporate finalization errors.
 // The final error will be wrapped by the given common context.
 func (f *Finalizer) FinalizeWithErrorPropagationf(efferr *error, msg string, args ...interface{}) {
-	errors.PropagateErrorf(efferr, f.Finalize, msg, args...)
-}
-
-// Finalize calls all finalizations in the reverse order of
-// their registration.
-func (f *Finalizer) Finalize() error {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
+	errors.PropagateErrorf(efferr, f.finalize, msg, args...)
+	if f.catch == nil {
+		return
+	}
+	if r := recover(); r != nil {
+		if e := exception.Exception(r); e != nil {
+			*efferr = errors.ErrList().Add(e).Add(*efferr).Result()
+		} else {
+			panic(r)
+		}
+	}
+}
+
+// Finalize calls all finalizations in the reverse order of
+// their registration and incorporates catched exceptions.
+func (f *Finalizer) Finalize() (err error) {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
+	err = f.finalize()
+	if f.catch == nil {
+		return err
+	}
+	if r := recover(); r != nil {
+		if e := exception.Exception(r); e != nil {
+			err = errors.ErrList().Add(e).Add(err).Result()
+		} else {
+			panic(r)
+		}
+	}
+	return err
+}
+
+func (f *Finalizer) finalize() (err error) {
 	list := errors.ErrList()
 	l := len(f.pending)
 	for i := range f.pending {

@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"sort"
 
+	. "github.com/open-component-model/ocm/pkg/finalizer"
+
 	"github.com/ghodss/yaml"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -289,7 +291,7 @@ func ProcessConfig(name string, octx ocm.Context, cv ocm.ComponentVersionAccess,
 func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecification, creds *Credentials, params []byte, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
 	var err error
 
-	var finalize utils2.Finalizer
+	var finalize Finalizer
 	defer finalize.Finalize()
 
 	var executor *Executor
@@ -438,7 +440,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecifi
 	return d.Exec(op)
 }
 
-func setupFiles(octx ocm.Context, finalize *utils2.Finalizer, op *Operation, ccfg *globalconfig.Config, params []byte, econfig []byte, cv ocm.ComponentVersionAccess) error {
+func setupFiles(octx ocm.Context, finalize *Finalizer, op *Operation, ccfg *globalconfig.Config, params []byte, econfig []byte, cv ocm.ComponentVersionAccess) error {
 	// prepare file content to be passed to executor
 	op.Files = map[string]accessio.BlobAccess{}
 	if ccfg != nil {

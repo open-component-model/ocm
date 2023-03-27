@@ -10,6 +10,8 @@ import (
 	"strings"
 	"sync"
 
+	. "github.com/open-component-model/ocm/pkg/finalizer"
+
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -21,7 +23,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 // Type is the access type of a oci registry.
@@ -115,7 +116,7 @@ type accessMethod struct {
 	comp cpi.ComponentVersionAccess
 	spec *AccessSpec
 
-	finalizer utils.Finalizer
+	finalizer Finalizer
 	err       error
 	art       oci.ArtifactAccess
 	ref       *oci.RefSpec
@@ -164,7 +165,7 @@ func (m *accessMethod) eval() (oci.Repository, *oci.RefSpec, error) {
 	return repo, &ref, err
 }
 
-func (m *accessMethod) GetArtifact(finalizer *utils.Finalizer) (oci.ArtifactAccess, *oci.RefSpec, error) {
+func (m *accessMethod) GetArtifact(finalizer *Finalizer) (oci.ArtifactAccess, *oci.RefSpec, error) {
 	repo, ref, err := m.eval()
 	if err != nil {
 		return nil, nil, err

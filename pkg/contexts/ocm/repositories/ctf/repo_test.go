@@ -7,6 +7,8 @@ package ctf_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	. "github.com/open-component-model/ocm/pkg/finalizer"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
@@ -16,7 +18,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const COMPONENT = "github.com/mandelsoft/ocm"
@@ -31,7 +32,7 @@ var _ = Describe("access method", func() {
 	})
 
 	It("adds component  version", func() {
-		final := utils.Finalizer{}
+		final := Finalizer{}
 		defer Defer(final.Finalize)
 
 		a := Must(ctf.Create(ctx, accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, "ctf", 0o700, accessio.PathFileSystem(fs)))
@@ -53,7 +54,7 @@ var _ = Describe("access method", func() {
 	})
 
 	It("adds omits unadded new component version", func() {
-		final := utils.Finalizer{}
+		final := Finalizer{}
 		defer Defer(final.Finalize)
 
 		a := Must(ctf.Create(ctx, accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, "ctf", 0o700, accessio.PathFileSystem(fs)))
