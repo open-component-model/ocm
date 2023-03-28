@@ -29,6 +29,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/toi"
 	defaultd "github.com/open-component-model/ocm/pkg/toi/drivers/default"
 	"github.com/open-component-model/ocm/pkg/toi/install"
 )
@@ -39,7 +40,7 @@ const (
 )
 
 var (
-	Names = names.Components
+	Names = names.Package
 	Verb  = verbs.Bootstrap
 )
 
@@ -56,7 +57,7 @@ type Command struct {
 	Parameters      accessio.DataSource
 }
 
-// NewCommand creates a new ctf command.
+// NewCommand creates a new bootstrap component command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), lookupoption.New())}, utils.Names(Names, names...)...)
 }
@@ -71,7 +72,7 @@ Use the simple TOI bootstrap mechanism to execute actions for a TOI package reso
 based on the content of an OCM component version and some command input describing
 the dedicated installation target.
 
-The package resource must have the type <code>` + install.TypeTOIPackage + `</code>.
+The package resource must have the type <code>` + toi.TypeTOIPackage + `</code>.
 This is a simple YAML file resource describing the bootstrapping of a dedicated kind
 of software. See also the topic <CMD>ocm toi toi-bootstrapping</CMD>.
 
@@ -102,7 +103,7 @@ described by external access methods.
 The credentials file uses the following yaml format:
 - <code>credentials</code> *map[string]CredentialsSpec*
 
-  The resolution of crednetials requested by the package (by name).
+  The resolution of credentials requested by the package (by name).
 
 - <code>forwardedConsumers</code> *[]ForwardSpec* (optional)
 
@@ -139,19 +140,23 @@ The *ForwardSpec* uses the following format:
 - <code>consumerType</code> *string* (optional) (default: partial)
 
   The type of the matcher used to match the consumer id.
+
+If provided by the package it is possible to download template versions
+for the parameter and credentials file using the command <CMD>ocm bootstrap configuration</CMD>.
 `,
 		Example: `
-$ ocm toi bootstrap componentversion ghcr.io/mandelsoft/ocmdemoinstaller:0.0.1-dev
+$ ocm toi bootstrap package ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 `,
 	}
 	cmd.AddCommand(topicbootstrap.New(o.Context, "toi-bootstrapping"))
 	return cmd
 }
 
-func (o *Command) AddFlags(set *pflag.FlagSet) {
-	set.StringVarP(&o.CredentialsFile, "credentials", "c", "", "credentials file")
-	set.StringVarP(&o.ParameterFile, "parameters", "p", "", "parameter file")
-	set.StringVarP(&o.OutputFile, "outputs", "o", "", "output file/directory")
+func (o *Command) AddFlags(fs *pflag.FlagSet) {
+	o.BaseCommand.AddFlags(fs)
+	fs.StringVarP(&o.CredentialsFile, "credentials", "c", "", "credentials file")
+	fs.StringVarP(&o.ParameterFile, "parameters", "p", "", "parameter file")
+	fs.StringVarP(&o.OutputFile, "outputs", "o", "", "output file/directory")
 }
 
 func (o *Command) Complete(args []string) error {

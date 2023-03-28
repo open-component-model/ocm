@@ -21,3 +21,23 @@ version: "1.0"
 access:
   type: ociArtifact
   imageReference: gcr.io/google_containers/echoserver:1.10
+---
+name: config-example
+type: yaml
+labels:
+  - name: commit
+    value: ${COMMIT}
+input:
+  type: file
+  mediaType: application/vnd.toi.ocm.software.config.v1+yaml
+  path: examples/config.yaml
+---
+name: creds-example
+type: yaml
+labels:
+  - name: commit
+    value: ${COMMIT}
+input:
+  type: file
+  mediaType: application/vnd.toi.ocm.software.credentials.v1+yaml
+  path: examples/creds.yaml

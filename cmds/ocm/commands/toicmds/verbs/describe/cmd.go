@@ -2,26 +2,22 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package components
+package describe
 
 import (
 	"github.com/spf13/cobra"
 
-	ocmcomp "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
-	toicomp "github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/package"
+	_package "github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/package/describe"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 )
 
-var Names = names.Components
-
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "Commands acting on components",
-	}, Names...)
-	ocmcomp.AddCommands(ctx, cmd)
-	toicomp.AddCommands(ctx, cmd)
+		Short: "describe packages",
+	}, verbs.Describe)
+	cmd.AddCommand(_package.NewCommand(ctx))
 	return cmd
 }

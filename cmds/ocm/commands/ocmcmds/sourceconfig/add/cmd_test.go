@@ -70,7 +70,7 @@ access:
   repoUrl: github.com/open-component-model/ocm
   type: gitHub
 name: sources
-type: filesystem
+type: directoryTree
 `)
 		})
 

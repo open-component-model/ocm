@@ -28,6 +28,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/toi"
 	"github.com/open-component-model/ocm/pkg/toi/install"
 )
 
@@ -500,7 +501,7 @@ func (d *Driver) inspectImage(ctx context.Context, image string) (types.ImageIns
 
 // validateImageDigest validates the operation image digest, if exists, against
 // the supplied repoDigests.
-func (d *Driver) validateImageDigest(image install.Image, repoDigests []string) error {
+func (d *Driver) validateImageDigest(image toi.Image, repoDigests []string) error {
 	if image.Digest == "" {
 		return nil
 	}

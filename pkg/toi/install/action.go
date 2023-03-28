@@ -36,6 +36,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/spiff"
+	"github.com/open-component-model/ocm/pkg/toi"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -72,8 +73,8 @@ func ValidateByScheme(src []byte, schemedata []byte) error {
 }
 
 type ExecutorContext struct {
-	Spec  ExecutorSpecification
-	Image *Image
+	Spec  toi.ExecutorSpecification
+	Image *toi.Image
 	CV    ocm.ComponentVersionAccess
 }
 
@@ -90,7 +91,7 @@ func GetResource(res ocm.ResourceAccess, target interface{}) error {
 	return runtime.DefaultYAMLEncoding.Unmarshal(data, target)
 }
 
-func DetermineExecutor(executor *Executor, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*ExecutorContext, error) {
+func DetermineExecutor(executor *toi.Executor, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*ExecutorContext, error) {
 	espec := ExecutorContext{Image: executor.Image}
 
 	if espec.Image == nil {
@@ -111,7 +112,7 @@ func DetermineExecutor(executor *Executor, octx ocm.Context, cv ocm.ComponentVer
 		}()
 		switch res.Meta().Type {
 		case resourcetypes.OCI_IMAGE:
-		case TypeTOIExecutor:
+		case toi.TypeTOIExecutor:
 			err := GetResource(res, &espec.Spec)
 			if err != nil {
 				return nil, errors.ErrInvalidWrap(err, "toi executor")
@@ -142,7 +143,7 @@ func DetermineExecutor(executor *Executor, octx ocm.Context, cv ocm.ComponentVer
 		if err != nil {
 			return nil, errors.Wrapf(err, "image ref for executor resource %s not found", executor.ResourceRef.String())
 		}
-		espec.Image = &Image{
+		espec.Image = &toi.Image{
 			Ref: ref,
 		}
 		espec.CV, eff = eff, nil
@@ -163,7 +164,7 @@ func mappingKeyFor(value string, m map[string]string) string {
 }
 
 // CheckCredentialRequests determine required credentials for executor.
-func CheckCredentialRequests(executor *Executor, spec *PackageSpecification, espec *ExecutorSpecification) (map[string]CredentialsRequestSpec, map[string]string, error) {
+func CheckCredentialRequests(executor *toi.Executor, spec *toi.PackageSpecification, espec *toi.ExecutorSpecification) (map[string]CredentialsRequestSpec, map[string]string, error) {
 	credentials := spec.Credentials
 	credmapping := map[string]string{}
 
@@ -288,13 +289,13 @@ func ProcessConfig(name string, octx ocm.Context, cv ocm.ComponentVersionAccess,
 }
 
 // ExecuteAction prepared the execution options and executes the action.
-func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecification, creds *Credentials, params []byte, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
+func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpecification, creds *Credentials, params []byte, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
 	var err error
 
 	var finalize Finalizer
 	defer finalize.Finalize()
 
-	var executor *Executor
+	var executor *toi.Executor
 	for idx, e := range spec.Executors {
 		if e.Actions == nil {
 			executor = &spec.Executors[idx]

@@ -21,5 +21,6 @@ ocm bootstrap [<options>] <sub command> ...
 
 ##### Sub Commands
 
-* [ocm bootstrap <b>componentversions</b>](ocm_bootstrap_componentversions.md)	 &mdash; bootstrap component version
+* [ocm bootstrap <b>configuration</b>](ocm_bootstrap_configuration.md)	 &mdash; bootstrap TOI configuration files
+* [ocm bootstrap <b>package</b>](ocm_bootstrap_package.md)	 &mdash; bootstrap component version
 

@@ -10,6 +10,12 @@ command line options of the main command (see [ocm](ocm.md)).
 
 The following options are available in the currently used version of the
 OCM library:
+- <code>github.com/mandelsoft/logforward</code>: *logconfig* Logging config structure used for config forwarding
+
+  THis attribute is used to specify a logging configuration intended
+  to be forwarded to other tool.
+  (For example: TOI passes this config to the executor)
+
 - <code>github.com/mandelsoft/oci/cache</code> [<code>cache</code>]: *string*
 
   Filesystem folder to use for caching OCI blobs

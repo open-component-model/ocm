@@ -162,7 +162,7 @@ func (o *ExecutorOptions) Complete() error {
 	if o.CredentialRepo == nil {
 		c, err := o.Context.CredentialsContext().RepositoryForSpec(memory.NewRepositorySpec("default"))
 		if err != nil {
-			return errors.Wrapf(err, "cannot get default memory based crednetial repository")
+			return errors.Wrapf(err, "cannot get default memory based credential repository")
 		}
 		o.CredentialRepo = c
 	}

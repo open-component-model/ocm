@@ -21,7 +21,7 @@ CHARTSRCS=$(shell find echoserver -type f)
 ctf: $(GEN)/ctf
 
 $(GEN)/ctf: $(GEN)/ca
-	@rm -f $(GEN)/ctf
+	@rm -rf $(GEN)/ctf
 	$(OCM) transfer ca $(GEN)/ca $(GEN)/ctf
 	touch $(GEN)/ctf
 
@@ -32,7 +32,7 @@ version:
 .PHONY: ca
 ca: $(GEN)/ca
 
-$(GEN)/ca: $(GEN)/.exists sources.yaml resources.yaml references.yaml $(CHARTSRCS) packagespec.yaml helmconfig.yaml
+$(GEN)/ca: $(GEN)/.exists sources.yaml resources.yaml references.yaml $(CHARTSRCS) packagespec.yaml examples/* helmconfig.yaml
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider $(PROVIDER) --file $(GEN)/ca
 	$(OCM) add sources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" sources.yaml
 	$(OCM) add resources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" resources.yaml

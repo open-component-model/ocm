@@ -1,77 +1,16 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
-//
-// SPDX-License-Identifier: Apache-2.0
+## ocm describe package toi-bootstrapping &mdash; Tiny OCM Installer Based On Component Versions
 
-package bootstapping
+### Description
 
-import (
-	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/toi"
-)
-
-func New(ctx clictx.Context, name string) *cobra.Command {
-	return &cobra.Command{
-		Use:   name,
-		Short: "Tiny OCM Installer based on component versions",
-		Example: `
-description: |
-  This package is just an example.
-executors:
-  - actions:
-    - install
-    resourceRef:
-      resource:
-        name: installerimage
-    config:
-      level: info
-#   parameterMapping:  # optional spiff mapping of Package configuration to 
-#      ....            # executor parameters
-    outputs:
-       test: bla
-credentials:
-  target:
-    description: kubeconfig for target kubernetes cluster
-    consumerId:
-      type: Kubernetes
-      purpose: target
-configTemplate:
-  parameters:
-    username: admin
-    password: (( &merge ))
-configScheme:
-  type: object
-  required:
-    - parameters
-  additionalProperties: false
-  properties:
-    parameters:
-      type: object
-      required:
-      - password
-      additionalProperties: false
-      properties:
-        username:
-          type: string
-        password:
-          type: string
-additionalResources:
-  configFile:
-    resource:
-      name: config-file
-`,
-		Long: `
 TOI is a small toolset on top of the Open Component Model. It provides
 a possibility to run images taken from a component version with user
 configuration and feed them with the content of this component version.
 It is some basic mechanism which can be used to execute simple installation
 steps based on content described by the Open Component Model
-(see <CMD>ocm bootstrap componentversions</CMD>).
+(see [ocm bootstrap componentversions](ocm_bootstrap_componentversions.md)).
 
-Therefore, a dedicated resource type <code>` + toi.TypeTOIPackage + `</code> is defined.
+Therefore, a dedicated resource type <code>toiPackage</code> is defined.
 It is selected by a resource identity pattern. The first resource matching the pattern
 is used. A possible use case could be to provide different packages for
 different environments. The resource can use an identity attribute
@@ -87,8 +26,8 @@ the bootstrap command. Every action refers to an executor, which is executed
 to perform the action. Finally, an executor is an image following the TOI
 specification for passing information into the image execution and receiving
 results from the execution. Such an image is described in two ways:
-- it either describes a resource of type <code>` + resourcetypes.OCI_IMAGE + `</code> or
-- it describes a resource of type <code>` + toi.TypeTOIExecutor + `</code>, which defines
+- it either describes a resource of type <code>ociImage</code> or
+- it describes a resource of type <code>toiExecutor</code>, which defines
   the image to use and some default settings and further describes the features
   and requirements of the executor image.
 
@@ -102,14 +41,14 @@ The execution of the container may do the needful to achieve the goal of the
 requested action and provide some labeled output files, which will be passed
 to the caller.
 
-### The <code>` + toi.TypeTOIPackage + `</code> Resource
+### The <code>toiPackage</code> Resource
 
 This resource describes an installable software package, whose content is 
 contained in the component version, which contains the package resource.
 
-It is a plain yaml resource with the media types media type <code>` + mime.MIME_YAML + `</code>,
-<code>` + mime.MIME_YAML_ALT + `</code> or 
-<code>` + toi.PackageSpecificationMimeType + `</code>) containing
+It is a plain yaml resource with the media types media type <code>application/x-yaml</code>,
+<code>text/yaml</code> or 
+<code>application/vnd.toi.ocm.software.package.v1+yaml</code>) containing
 information required to control the instantiation of an executor.
 
 It has the following format:
@@ -152,7 +91,7 @@ It has the following format:
   - **<code>configFile</code>**: an example template for a parameter file
   - **<code>credentialsFile</code>**: an example template for a credentials file
 
-  Those templates can be downloaded with <CMD>ocm bootstrap config</CMD>.
+  Those templates can be downloaded with [ocm bootstrap config](ocm_bootstrap_config.md).
 
 #### *ExecutorSpecification*
 
@@ -236,13 +175,13 @@ It always has at least one identity attribute <code>name</code>, which
 is the resource name field of the desired resource. If this resource
 defines additional identity attributes, the complete set must be specified.
 
-### The <code>` + toi.TypeTOIExecutor + `</code> Resource
+### The <code>toiExecutor</code> Resource
 
 Instead of directly describing an image resource i the package file, it is
-possible to refer to a resource of type ` + toi.TypeTOIExecutor + `. This
-is a yaml file with the media type <code>` + mime.MIME_YAML + `</code>,
-<code>` + mime.MIME_YAML_ALT + `</code> or 
-<code>` + toi.PackageSpecificationMimeType + `</code>) containing
+possible to refer to a resource of type toiExecutor. This
+is a yaml file with the media type <code>application/x-yaml</code>,
+<code>text/yaml</code> or 
+<code>application/vnd.toi.ocm.software.package.v1+yaml</code>) containing
 common information about the executor executor. If used by the package,
 this information is used to validate settings in the package specification.
 
@@ -326,7 +265,7 @@ It uses the following fields:
   in the OCM support library, if used by the executor. At least the field
   <code>type</code> and one additional field must be set.
 
-Credentials are provided in an ocm config file (see <CMD>ocm configfile</CMD>).
+Credentials are provided in an ocm config file (see [ocm configfile](ocm_configfile.md)).
 It uses a memory credential repository with the name <code>default</code>
 to store the credentials under the given name. Additionally appropriate
 consumer ids will be propagated, if requested in the credentials request config.
@@ -375,6 +314,70 @@ files to logical outputs in the <code>outputs</code> section.
 Basically the output may contain any data, but is strongly recommended
 to use yaml or json files, only. This enables further formal processing
 by the TOI toolset.
-`,
-	}
-}
+
+
+### Examples
+
+```
+description: |
+  This package is just an example.
+executors:
+  - actions:
+    - install
+    resourceRef:
+      resource:
+        name: installerimage
+    config:
+      level: info
+#   parameterMapping:  # optional spiff mapping of Package configuration to 
+#      ....            # executor parameters
+    outputs:
+       test: bla
+credentials:
+  target:
+    description: kubeconfig for target kubernetes cluster
+    consumerId:
+      type: Kubernetes
+      purpose: target
+configTemplate:
+  parameters:
+    username: admin
+    password: (( &merge ))
+configScheme:
+  type: object
+  required:
+    - parameters
+  additionalProperties: false
+  properties:
+    parameters:
+      type: object
+      required:
+      - password
+      additionalProperties: false
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+additionalResources:
+  configFile:
+    resource:
+      name: config-file
+```
+
+### SEE ALSO
+
+##### Parents
+
+* [ocm describe package](ocm_describe_package.md)	 &mdash; describe TOI package
+* [ocm describe](ocm_describe.md)	 &mdash; Describe various elements by using appropriate sub commands.
+* [ocm](ocm.md)	 &mdash; Open Component Model command line client
+
+
+
+##### Additional Links
+
+* [<b>ocm bootstrap componentversions</b>](ocm_bootstrap_componentversions.md)
+* [<b>ocm bootstrap config</b>](ocm_bootstrap_config.md)
+* [<b>ocm configfile</b>](ocm_configfile.md)	 &mdash; configuration file
+

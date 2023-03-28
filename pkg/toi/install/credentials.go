@@ -5,8 +5,6 @@
 package install
 
 import (
-	"fmt"
-
 	"github.com/mandelsoft/spiff/features"
 	"github.com/mandelsoft/spiff/spiffing"
 
@@ -14,80 +12,21 @@ import (
 	globalconfig "github.com/open-component-model/ocm/pkg/contexts/config/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/memory"
 	memorycfg "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/memory/config"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/toi"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-type CredentialsRequest struct {
-	Credentials map[string]CredentialsRequestSpec `json:"credentials,omitempty"`
-}
-
-type CredentialsRequestSpec struct {
-	// ConsumerId specified to consumer id the credentials are used for
-	ConsumerId credentials.ConsumerIdentity `json:"consumerId,omitempty"`
-	// Description described the usecase the credentials will be used for
-	Description string `json:"description"`
-	// Properties describes the meaning of the used properties for this
-	// credential set.
-	Properties common.Properties `json:"properties"`
-	// Optional set to true make the request optional
-	Optional bool `json:"optional,omitempty"`
-}
-
-var ErrUndefined error = errors.New("nil reference")
-
-func (s *CredentialsRequestSpec) Match(o *CredentialsRequestSpec) error {
-	if o == nil {
-		return ErrUndefined
-	}
-	if !s.ConsumerId.Equals(o.ConsumerId) {
-		return fmt.Errorf("consumer id mismatch")
-	}
-	for k := range o.Properties {
-		if _, ok := s.Properties[k]; !ok {
-			return fmt.Errorf("property %q not declared", k)
-		}
-	}
-	if s.Optional && !o.Optional {
-		return fmt.Errorf("cannot be optional")
-	}
-	return nil
-}
-
-type Credentials struct {
-	Credentials map[string]CredentialSpec `json:"credentials,omitempty"`
-
-	// Forwarded may define a list of consumer ids, which should be taken from the
-	// local configuration and forwarded to the TOI executor in addition to the
-	// credentials explicitly requested by the installation package.
-	Forwarded []ForwardSpec `json:"forwardedConsumers,omitempty"`
-}
-
-type CredentialSpec struct {
-	// ConsumerId specifies the consumer id to look for the credentials
-	ConsumerId credentials.ConsumerIdentity `json:"consumerId,omitempty"`
-	// ConsumerType is the optional type used for matching the credentials
-	ConsumerType string `json:"consumerType,omitempty"`
-	// Reference refers to credentials store in some other repo
-	Reference *cpi.GenericCredentialsSpec `json:"reference,omitempty"`
-	// Credentials are direct credentials (one of Reference or Credentials must be set)
-	Credentials common.Properties `json:"credentials,omitempty"`
-
-	// TargetConsumerId specifies the consumer id to feed with these credentials
-	TargetConsumerId credentials.ConsumerIdentity `json:"targetConsumerId,omitempty"`
-}
-
-type ForwardSpec struct {
-	// ConsumerId specifies the consumer id to look for the credentials
-	ConsumerId credentials.ConsumerIdentity `json:"consumerId"`
-	// ConsumerType is the optional type used for matching the credentials
-	ConsumerType string `json:"consumerType,omitempty"`
-}
+type (
+	Credentials            = toi.Credentials
+	CredentialSpec         = toi.CredentialSpec
+	CredentialsRequest     = toi.CredentialsRequest
+	CredentialsRequestSpec = toi.CredentialsRequestSpec
+)
 
 func ParseCredentialSpecification(data []byte, desc string) (*Credentials, error) {
 	spiff := spiffing.New().WithFeatures(features.CONTROL, features.INTERPOLATION)

@@ -1,3 +1,6 @@
+description: |
+  This package describes the deployment of a simple echoserver
+  into a namespace of a Kubernetes cluster.
 executors:
   - resourceRef:
       resource:
@@ -20,3 +23,10 @@ configScheme:
       type: string
     namespace:
       type: string
+additionalResources:
+  configFile:
+    resource:
+      name: config-example
+  credentialsFile:
+    resource:
+      name: creds-example

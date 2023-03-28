@@ -9,12 +9,12 @@ package app
 import (
 	"strings"
 
+	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
+	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
-
-	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/action"
@@ -28,7 +28,6 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/add"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/bootstrap"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/clean"
@@ -208,7 +207,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(cmdutils.HideCommand(cachecmds.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(ocicmds.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(ocmcmds.NewCommand(opts.Context)))
-	cmd.AddCommand(cmdutils.HideCommand(toicmds.NewCommand(opts.Context)))
+	//cmd.AddCommand(cmdutils.HideCommand(toicmds.NewCommand(opts.Context)))
 
 	cmd.AddCommand(cmdutils.HideCommand(creds.NewCommand(opts.Context)))
 

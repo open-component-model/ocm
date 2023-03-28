@@ -2,26 +2,28 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package components
+package config
 
 import (
 	"github.com/spf13/cobra"
 
-	ocmcomp "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
-	toicomp "github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/package"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/config/bootstrap"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 )
 
-var Names = names.Components
+var Names = names.Configuration
 
 // NewCommand creates a new command.
 func NewCommand(ctx clictx.Context) *cobra.Command {
 	cmd := utils.MassageCommand(&cobra.Command{
-		Short: "Commands acting on components",
+		Short: "TOI Commands acting on config",
 	}, Names...)
-	ocmcomp.AddCommands(ctx, cmd)
-	toicomp.AddCommands(ctx, cmd)
+	AddCommands(ctx, cmd)
 	return cmd
+}
+
+func AddCommands(ctx clictx.Context, cmd *cobra.Command) {
+	cmd.AddCommand(bootstrap.NewCommand(ctx, bootstrap.Verb))
 }

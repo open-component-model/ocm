@@ -17,7 +17,7 @@ ocm [<options>] <sub command> ...
   -L, --logfile string          set log file
       --logkeys stringArray     log tags/realms(.) to be enabled ([.]name{,[.]name}[=level])
   -l, --loglevel string         set log level
-  -v, --verbose                 enable verbose logging
+  -v, --verbose                 deprecated: enable logrus verbose logging
       --version                 show version
 ```
 
@@ -88,6 +88,12 @@ The default level is <code>warn</code>.
 
 The value can be a simple type or a json string for complex values. The following
 attributes are supported:
+- <code>github.com/mandelsoft/logforward</code>: *logconfig* Logging config structure used for config forwarding
+
+  THis attribute is used to specify a logging configuration intended
+  to be forwarded to other tool.
+  (For example: TOI passes this config to the executor)
+
 - <code>github.com/mandelsoft/oci/cache</code> [<code>cache</code>]: *string*
 
   Filesystem folder to use for caching OCI blobs
