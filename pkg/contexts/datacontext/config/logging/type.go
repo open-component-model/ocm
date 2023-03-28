@@ -5,14 +5,11 @@
 package logging
 
 import (
-	"encoding/json"
-
 	"github.com/mandelsoft/logging"
 	logcfg "github.com/mandelsoft/logging/config"
 
 	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/errors"
 	local "github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -50,7 +47,6 @@ func New(ctxtype string, deflvl int) *Config {
 		ContextType:         ctxtype,
 		Settings: logcfg.Config{
 			DefaultLevel: logging.LevelName(deflvl),
-			Rules:        []json.RawMessage{},
 		},
 	}
 }
@@ -65,21 +61,8 @@ func NewWithConfig(ctxtype string, cfg *logcfg.Config) *Config {
 	}
 }
 
-func (c *Config) AddRuleSpec(spec interface{}) error {
-	var err error
-
-	data, ok := spec.([]byte)
-	if !ok {
-		data, err = json.Marshal(spec)
-		if err != nil {
-			errors.Wrapf(err, "invalid logging rule specification")
-		}
-	}
-	_, err = logcfg.DefaultRegistry().CreateRule(data)
-	if err != nil {
-		return errors.Wrapf(err, "invalid logging rule specification")
-	}
-	c.Settings.Rules = append(c.Settings.Rules, data)
+func (c *Config) AddRuleSpec(r logcfg.Rule) error {
+	c.Settings.Rules = append(c.Settings.Rules, r)
 	return nil
 }
 

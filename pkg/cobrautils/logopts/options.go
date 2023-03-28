@@ -5,7 +5,6 @@
 package logopts
 
 import (
-	"encoding/json"
 	"strings"
 
 	"github.com/mandelsoft/logging"
@@ -115,41 +114,24 @@ func (o *Options) Configure(ctx ocm.Context, logctx logging.Context) error {
 			t = t[:i]
 		}
 		var cond []logging.Condition
-		cfgcond := []json.RawMessage{}
+		var cfgcond []config.Condition
 
 		for _, tag := range strings.Split(t, ",") {
 			tag = strings.TrimSpace(tag)
 			if strings.HasPrefix(tag, "/") {
 				cond = append(cond, logging.NewRealmPrefix(tag[1:]))
-				data, err := elem("realmprefix", tag[1:])
-				if err == nil {
-					cfgcond = append(cfgcond, data)
-				}
+				cfgcond = append(cfgcond, config.RealmPrefix(tag[1:]))
 			} else {
 				cond = append(cond, logging.NewTag(tag))
-				data, err := elem("tag", tag)
-				if err == nil {
-					cfgcond = append(cfgcond, data)
-				}
+				cfgcond = append(cfgcond, config.Tag(tag))
 			}
 		}
 		rule := logging.NewConditionRule(level, cond...)
-		cfgrule := config.ConditionalRule{
-			Level:      logging.LevelName(level),
-			Conditions: cfgcond,
-		}
-		data, err := elem("rule", cfgrule)
-		if err == nil {
-			logcfg.Rules = append(logcfg.Rules, data)
-		}
+		logcfg.Rules = append(logcfg.Rules, config.ConditionalRule(logging.LevelName(level), cfgcond...))
 		logctx.AddRule(rule)
 	}
 	o.LogForward = logcfg
 	logforward.Set(ctx.AttributesContext(), logcfg)
 
 	return nil
-}
-
-func elem(typ string, obj interface{}) (json.RawMessage, error) {
-	return json.Marshal(map[string]interface{}{typ: obj})
 }
