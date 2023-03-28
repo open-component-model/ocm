@@ -9,8 +9,6 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-
-	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 func LinkForCmd(cmd *cobra.Command) string {
@@ -34,8 +32,6 @@ func FormatLinkWithHandler(linkhandler func(string) string) func(string) string 
 }
 
 func SubstituteCommandLinks(desc string, linkformat func(string) string) ([]string, string) {
-	// This is acceptable as the call chain will just output empty.
-	defer panics.HandlePanic()
 	var links []string
 	for {
 		link := strings.Index(desc, "<CMD>")
