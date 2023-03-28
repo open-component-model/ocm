@@ -11,7 +11,6 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 type ElemSpec interface {
@@ -45,22 +44,19 @@ func StringElemSpecs(args ...string) []ElemSpec {
 	return r
 }
 
-func ElemSpecs(list interface{}) []ElemSpec {
-	// This is acceptable as the calling chain will just take a nil slice.
-	defer panics.HandlePanic()
-
+func ElemSpecs(list interface{}) ([]ElemSpec, error) {
 	if list == nil {
-		return nil
+		return nil, nil
 	}
 	v := reflect.ValueOf(list)
 	if v.Kind() != reflect.Array && v.Kind() != reflect.Slice {
-		panic("no array")
+		return nil, fmt.Errorf("kind was not an array but: %s", v.Kind().String())
 	}
 	r := make([]ElemSpec, v.Len())
 	for i := 0; i < v.Len(); i++ {
 		r[i] = v.Index(i).Interface().(ElemSpec)
 	}
-	return r
+	return r, nil
 }
 
 func HandleArgs(opts *output.Options, handler TypeHandler, args ...string) error {

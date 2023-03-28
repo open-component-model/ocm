@@ -8,8 +8,9 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/open-component-model/ocm/pkg/logging"
 	"github.com/pkg/errors"
+
+	"github.com/open-component-model/ocm/pkg/logging"
 )
 
 var ReallyCrash = true
