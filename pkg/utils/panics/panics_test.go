@@ -39,7 +39,7 @@ goroutine [0-9]* \[running\]:
 panic.*$`))
 	})
 
-	FIt("propagates catched panic with handlers", func() {
+	It("propagates catched panic with handlers", func() {
 		defer func() {
 			Expect(recover()).To(BeNil())
 		}()
