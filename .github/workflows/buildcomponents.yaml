@@ -1,0 +1,46 @@
+name: BuildComponents
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+#  lint-and-test:
+#    uses: ./.github/workflows/lint_and_test.yaml
+#    permissions:
+#      contents: read
+#      pull-requests: read
+  components:
+#    needs: lint-and-test
+    name: Trigger component build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+      repository-projects: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: '${{ github.workspace }}/go.mod'
+
+      - name: Cache go-build and mod
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build/
+            ~/go/pkg/mod/
+          key: go-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            go-
+
+      - name: publish
+        env:
+          GITHUBORG: ${{ github.repository_owner }}
+        run: make push-components
+

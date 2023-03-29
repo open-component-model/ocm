@@ -12,8 +12,10 @@ VERSION                                        = $(shell git describe --tags --e
 COMMIT                                         = $(shell git rev-parse HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
 
+CREDS = $(shell $$REPO_ROOT/hack/githubcreds)
+
 GEN = $(REPO_ROOT)/gen/$(NAME)
-OCM = go run $(REPO_ROOT)/cmds/ocm
+OCM = go run $(REPO_ROOT)/cmds/ocm $$CREDS
 
 CHARTSRCS=$(shell find echoserver -type f)
 

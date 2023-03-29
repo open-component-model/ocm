@@ -84,3 +84,9 @@ generate-license:
 	for f in $(shell find . -name "*.go" -o -name "*.sh"); do \
 		reuse addheader -r --copyright="SAP SE or an SAP affiliate company and Open Component Model contributors." --license="Apache-2.0" $$f --skip-unrecognised; \
 	done
+
+.PHONY: push-components
+push-components:
+	@echo Helminstaller; cd components/helminstaller; make info push
+	@echo HelmDemo; cd components/helmdemo; make push
+	@echo OCMCLI; cd components/ocmcli; make push
