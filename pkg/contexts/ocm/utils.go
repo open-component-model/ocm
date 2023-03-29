@@ -35,7 +35,7 @@ func AssureTargetRepository(session Session, ctx Context, targetref string, opts
 		case string:
 			archive = v
 		default:
-			panic(fmt.Sprintf("invalid option type %T", o))
+			return nil, fmt.Errorf("invalid option type %T", o)
 		}
 	}
 
