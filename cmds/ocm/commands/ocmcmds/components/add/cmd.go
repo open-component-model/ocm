@@ -17,11 +17,11 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/comp"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/dryrunoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/fileoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/schemaoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/templateroption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	common2 "github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -41,8 +41,9 @@ var (
 type Command struct {
 	utils.BaseCommand
 
-	Force  bool
-	Create bool
+	Force   bool
+	Create  bool
+	Closure bool
 
 	Handler ctf.FormatHandler
 	Format  string
@@ -61,7 +62,8 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		fileoption.New("transport-archive"),
 		schemaoption.New(compdesc.DefaultSchemeVersion),
 		templateroption.New(""),
-		dryrunoption.New("evaluate and print component specifications", true)),
+		dryrunoption.New("evaluate and print component specifications", true),
+		lookupoption.New()),
 	}, utils.Names(Names, names...)...)
 }
 
@@ -129,19 +131,19 @@ func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	o.BaseCommand.AddFlags(fs)
 	fs.BoolVarP(&o.Force, "force", "f", false, "remove existing content")
 	fs.BoolVarP(&o.Create, "create", "c", false, "(re)create archive")
+	fs.BoolVarP(&o.Closure, "complete", "C", false, "include all references component version")
 	fs.StringArrayVarP(&o.Envs, "settings", "s", nil, "settings file with variable settings (yaml)")
 	fs.StringVarP(&o.Version, "version", "v", "", "default version for components")
 }
 
 func (o *Command) Complete(args []string) error {
-	err := o.OptionSet.ProcessOnOptions(options.CompleteOptionsWithCLIContext(o.Context))
-	if err != nil {
-		return err
+	if o.Closure && !lookupoption.From(o).IsGiven() {
+		return fmt.Errorf("lookup option required for option --complete")
 	}
 	o.Archive, args = fileoption.From(o).GetPath(args, o.Context.FileSystem())
 
 	t := templateroption.From(o)
-	err = t.ParseSettings(o.Context.FileSystem(), o.Envs...)
+	err := t.ParseSettings(o.Context.FileSystem(), o.Envs...)
 	if err != nil {
 		return err
 	}
@@ -165,6 +167,14 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
+	session := ocm.NewSession(nil)
+	defer session.Close()
+
+	err := o.OptionSet.ProcessOnOptions(common.CompleteOptionsWithSession(o.Context, session))
+	if err != nil {
+		return err
+	}
+
 	printer := common2.NewPrinter(o.Context.StdOut())
 	fs := o.Context.FileSystem()
 	h := comp.NewResourceSpecHandler(o.Version)
@@ -201,7 +211,7 @@ func (o *Command) Run() error {
 	}
 
 	if err == nil {
-		err = comp.ProcessComponents(o.Context, ictx, repo, h, elems)
+		err = comp.ProcessComponents(o.Context, ictx, repo, lookupoption.From(o).Resolver, h, elems)
 		cerr := repo.Close()
 		if err == nil {
 			err = cerr

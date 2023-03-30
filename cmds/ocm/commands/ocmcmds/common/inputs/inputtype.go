@@ -29,6 +29,7 @@ const KIND_INPUTTYPE = "input type"
 
 type Context interface {
 	clictx.Context
+	Printer() common.Printer
 	Printf(msg string, args ...interface{}) (int, error)
 	Variables() map[string]interface{}
 	Section(msg string, args ...interface{}) Context

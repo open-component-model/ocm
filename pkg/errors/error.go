@@ -92,6 +92,20 @@ type wrappedError struct {
 	msg     string
 }
 
+// NewEf provides an arror with an optional cause.
+func NewEf(cause error, msg string, args ...interface{}) error {
+	if cause == nil {
+		return Newf(msg, args...)
+	}
+	if len(args) > 0 {
+		msg = fmt.Sprintf(msg, args...)
+	}
+	return &wrappedError{
+		wrapped: cause,
+		msg:     msg,
+	}
+}
+
 func Wrapf(err error, msg string, args ...interface{}) error {
 	if err == nil {
 		return nil
