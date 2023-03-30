@@ -1,5 +1,5 @@
 ---
 name: installer
 componentName: ${HELMINSTCOMP}
-version: 0.1.0-dev
+version: ${VERSION}
 

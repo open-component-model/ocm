@@ -12,10 +12,10 @@ VERSION                                        = $(shell git describe --tags --e
 COMMIT                                         = $(shell git rev-parse HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
 
-CREDS = $(shell $$REPO_ROOT/hack/githubcreds)
+CREDS := $(shell $(REPO_ROOT)/hack/githubcreds.sh)
+OCM = go run $(REPO_ROOT)/cmds/ocm $(CREDS)
 
-GEN = $(REPO_ROOT)/gen/$(NAME)
-OCM = go run $(REPO_ROOT)/cmds/ocm $$CREDS
+GEN := $(REPO_ROOT)/gen/$(NAME)
 
 CHARTSRCS=$(shell find echoserver -type f)
 
@@ -71,15 +71,16 @@ $(GEN)/.exists:
 info:
 	@echo "ROOT:     $(REPO_ROOT)"
 	@echo "VERSION:  $(VERSION)"
-	@echo "COMMIT;   $(COMMIT)"
+	@echo "COMMIT:   $(COMMIT)"
+	@echo "CREDS:    $(CREDS)"
 
 .PHONY: describe
 describe: $(GEN)/ctf
-	ocm get resources --lookup $(OCMREPO) -c -o treewide $(GEN)/ctf
+	$(OCM) get resources --lookup $(OCMREPO) -c -o treewide $(GEN)/ctf
 
 .PHONY: descriptor
 descriptor: $(GEN)/ctf
-	ocm get component -S v3alpha1 -o yaml $(GEN)/ctf
+	$(OCM) get component -S v3alpha1 -o yaml $(GEN)/ctf
 
 .PHONY: clean
 clean:

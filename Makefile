@@ -2,14 +2,19 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+NAME                                           := ocm
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 VERSION                                        := $(shell go run pkg/version/generate/release_generate.go print-version)
+GITHUBORG                                      ?= open-component-model
+OCMREPO                                        ?= ghcr.io/$(GITHUBORG)/ocm
 EFFECTIVE_VERSION                              := $(VERSION)+$(shell git rev-parse HEAD)
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 COMMIT                                         := $(shell git rev-parse --verify HEAD)
 
-REGISTRY                                       := ghcr.io/mandelsoft/ocm
-COMPONENT_CLI_IMAGE_REPOSITORY                 := $(REGISTRY)/cli
+CREDS := $(shell $(REPO_ROOT)/hack/githubcreds.sh)
+OCM := go run $(REPO_ROOT)/cmds/ocm $(CREDS)
+
+GEN := $(REPO_ROOT)/gen
 
 SOURCES := $(shell go list -f '{{$$I:=.Dir}}{{range .GoFiles }}{{$$I}}/{{.}} {{end}}' ./... )
 GOPATH                                         := $(shell go env GOPATH)
@@ -85,8 +90,41 @@ generate-license:
 		reuse addheader -r --copyright="SAP SE or an SAP affiliate company and Open Component Model contributors." --license="Apache-2.0" $$f --skip-unrecognised; \
 	done
 
-.PHONY: push-components
-push-components:
-	@echo Helminstaller; cd components/helminstaller; make info push
-	@echo HelmDemo; cd components/helmdemo; make push
-	@echo OCMCLI; cd components/ocmcli; make push
+
+$(GEN)/.exists:
+	@mkdir -p $(GEN)
+	@touch $@
+
+.PHONY: components
+components: $(GEN)/.comps
+
+$(GEN)/.comps:
+	@echo Helminstaller; cd components/helminstaller; make ctf
+	@echo HelmDemo; cd components/helmdemo; make ctf
+	@echo OCMCLI; cd components/ocmcli; make ctf
+	touch $@
+
+.PHONY: ctf
+ctf: $(GEN)/ctf
+
+$(GEN)/ctf: $(GEN)/.exists components
+	@rm -rf "$(GEN)"/ctf
+	$(OCM) transfer cv -V $(GEN)/helminstaller/ctf $(GEN)/ctf
+	$(OCM) transfer cv -V $(GEN)/helmdemo/ctf $(GEN)/ctf
+	$(OCM) transfer cv -V $(GEN)/ocmcli/ctf $(GEN)/ctf
+	touch $@
+
+.PHONY: push
+push: $(GEN)/ctf $(GEN)/.push.$(NAME)
+
+$(GEN)/.push.$(NAME): $(GEN)/ctf
+	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
+	@touch $@
+
+.PHONY: plain-ctf
+plain-ctf: $(GEN)
+	@rm -rf "$(GEN)"/ctf
+	$(OCM) transfer cv -V $(GEN)/helminstaller/ctf $(GEN)/ctf
+	$(OCM) transfer cv -V $(GEN)/helmdemo/ctf $(GEN)/ctf
+	$(OCM) transfer cv -V $(GEN)/ocmcli/ctf $(GEN)/ctf
+

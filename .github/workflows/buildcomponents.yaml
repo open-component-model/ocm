@@ -1,7 +1,12 @@
 name: BuildComponents
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      ocm_push:
+        type: boolean
+        description: "Push to OCM Repository"
+        default: false
 
 jobs:
 #  lint-and-test:
@@ -39,8 +44,22 @@ jobs:
           restore-keys: |
             go-
 
-      - name: publish
+      - name: Push OCM Components
+        if: inputs.ocm_push == true
         env:
           GITHUBORG: ${{ github.repository_owner }}
-        run: make push-components
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+        run: make push
 
+      - name: Build OCM Components
+        if: inputs.ocm_push == false
+        env:
+          GITHUBORG: ${{ github.repository_owner }}
+        run: make ctf
+
+      - name: Upload OCM Archive
+        uses: actions/upload-artifact@v3
+        with:
+          name: ocm.ctf
+          path: gen/ctf

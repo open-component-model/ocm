@@ -15,10 +15,10 @@ EFFECTIVE_VERSION                              = $(VERSION)+$(COMMIT)
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(CMD) -type f) Makefile
 OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
 
-CREDS = $(shell $$REPO_ROOT/hack/githubcreds)
+CREDS := $(shell $(REPO_ROOT)/hack/githubcreds.sh)
+OCM = go run $(REPO_ROOT)/cmds/ocm $(CREDS)
 
 GEN = $(REPO_ROOT)/gen/$(shell basename $(realpath .))
-OCM = go run $(REPO_ROOT)/cmds/ocm $$CREDS
 
 NOW         := $(shell date -u +%FT%T%z)
 BUILD_FLAGS := "-s -w \
