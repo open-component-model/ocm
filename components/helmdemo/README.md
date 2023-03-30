@@ -17,6 +17,42 @@ The main targets are:
 
 You can find more information [here](../../cmds/helminstaller/README.md).
 
+# Using transported images (image mapping)
+
+When transferring a component version between registries or from a local common transport archive to an OCI registry often images are included. When installing the applications all images in a deployment need to be adjusted so that their url points to the new location. The toi installer can perform this mapping and will dynamically adjust the helm values. This needs to be configured in the `packagespec.yaml` file. The `packagespec.yaml` inserts the content of another file `helmconfig.yaml` where the image mapping is defined.
+
+```yaml
+imageMapping:
+  - tag: image.tag
+    repository: image.repository
+    resource:
+      name: image
+```
+
+This image mapping instructs the helm-installer to replace the tags
+
+```
+image:
+  repository: <add reference to image from component version here>
+  tag:        <add tag from component version here>
+```
+
+with the value it finds in the resource named "image" of the current component version:
+
+```yaml
+---
+name: image
+type: ociImage
+version: "1.0"
+access:
+  type: ociArtifact
+  imageReference: gcr.io/google_containers/echoserver:1.10
+```
+
+## Notes
+
+For a successful image mapping ensure that all you image resources have a globalAccess and relation external in their component descriptor. Only with global access Kubernetes is able to pull an image. Ensure that your components are transferred with the --copy-resources flag.
+
 # Installation
 
 You can use the `ocm bootstrap` command to install this component with the [toi installer](../../docs/reference/ocm_toi-bootstrapping.md) on a Kubernetes cluster.
