@@ -130,7 +130,7 @@ var _ = Describe("Test Environment", func() {
 		})
 
 		It("creates ctf and adds components", func() {
-			Expect(env.Execute("add", "c", "-fcC", "--lookup", LOOKUP, "--file", ARCH, "testdata/component.yaml")).To(Succeed())
+			Expect(env.Execute("add", "c", "-fcCV", "--lookup", LOOKUP, "--file", ARCH, "testdata/component.yaml")).To(Succeed())
 			Expect(env.DirExists(ARCH)).To(BeTrue())
 			Check(env, func(repo ocm.Repository) {
 				cv := MustWithOffset(2, R(repo.LookupComponentVersion(COMPONENT, VERSION)))

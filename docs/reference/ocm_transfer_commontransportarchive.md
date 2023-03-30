@@ -11,9 +11,12 @@ ocm transfer commontransportarchive [<options>] <ctf> <target>
 ```
   -V, --copy-resources            transfer referenced resources by-value
   -h, --help                      help for commontransportarchive
+      --lookup stringArray        repository name or spec for closure lookup fallback
   -f, --overwrite                 overwrite existing component versions
+  -r, --recursive                 follow component reference nesting
       --script string             config name of transfer handler script
   -s, --scriptFile string         filename of transfer handler script
+  -E, --stop-on-existing          stop on existing component version in target repository
   -t, --type string               archive format (directory, tar, tgz) (default "directory")
       --uploader <name>=<value>   repository uploader (<name>:<artifact type>[:<media type>]=<JSON target config) (default [])
 ```
@@ -22,6 +25,18 @@ ocm transfer commontransportarchive [<options>] <ctf> <target>
 
 
 Transfer content of a Common Transport Archive to the given target repository.
+
+With the option <code>--recursive</code> the complete reference tree of a component reference is traversed.
+
+If a component lookup for building a reference closure is required
+the <code>--lookup</code>  option can be used to specify a fallback
+lookup repository. 
+By default the component versions are searched in the repository
+holding the component version for which the closure is determined.
+For *Component Archives* this is never possible, because it only
+contains a single component version. Therefore, in this scenario
+this option must always be specified to be able to follow component
+references.
 
 The <code>--type</code> option accepts a file format for the
 target archive to use. The following formats are supported:
@@ -38,6 +53,11 @@ It the option <code>--copy-resources</code> is given, all referential
 resources will potentially be localized, mapped to component version local
 resources in the target repository.
 This behaviour can be further influenced by specifying a transfer script
+with the <code>script</code> option family.
+
+It the option <code>--stop-on-existing</code> is given together with the <code>--recursive</code>
+option, the recursion is stopped for component versions already existing in the 
+target repository. This behaviour can be further influenced by specifying a transfer script
 with the <code>script</code> option family.
 
 If the <code>--uploader</code> option is specified, appropriate uploaders

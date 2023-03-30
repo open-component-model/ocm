@@ -19,6 +19,7 @@ ocm transfer componentversions [<options>] {<component-reference>} <target>
       --repo string               repository name or spec
       --script string             config name of transfer handler script
   -s, --scriptFile string         filename of transfer handler script
+  -E, --stop-on-existing          stop on existing component version in target repository
   -t, --type string               archive format (directory, tar, tgz) (default "directory")
       --uploader <name>=<value>   repository uploader (<name>:<artifact type>[:<media type>]=<JSON target config) (default [])
 ```
@@ -106,6 +107,11 @@ It the option <code>--copy-resources</code> is given, all referential
 resources will potentially be localized, mapped to component version local
 resources in the target repository.
 This behaviour can be further influenced by specifying a transfer script
+with the <code>script</code> option family.
+
+It the option <code>--stop-on-existing</code> is given together with the <code>--recursive</code>
+option, the recursion is stopped for component versions already existing in the 
+target repository. This behaviour can be further influenced by specifying a transfer script
 with the <code>script</code> option family.
 
 If the <code>--uploader</code> option is specified, appropriate uploaders
