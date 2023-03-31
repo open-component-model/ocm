@@ -271,8 +271,20 @@ func (c *_context) Logger(messageContext ...logging.MessageContext) logging.Logg
 
 ////////////////////////////////////////////////////////////////////////////////
 
+var id int64
+var lock sync.Mutex
+
+func nextId() int64 {
+	lock.Lock()
+	defer lock.Unlock()
+
+	id++
+	return id
+}
+
 type _attributes struct {
 	sync.RWMutex
+	id         int64
 	ctx        Context
 	parent     Attributes
 	updater    *Updater
@@ -287,6 +299,7 @@ func NewAttributes(ctx Context, parent Attributes, updater *Updater) Attributes 
 
 func newAttributes(ctx Context, parent Attributes, updater *Updater) *_attributes {
 	return &_attributes{
+		id:         nextId(),
 		ctx:        ctx,
 		parent:     parent,
 		updater:    updater,

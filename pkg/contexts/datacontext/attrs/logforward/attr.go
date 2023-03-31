@@ -40,7 +40,7 @@ to be forwarded to other tool.
 }
 
 func (a AttributeType) Encode(v interface{}, marshaller runtime.Marshaler) ([]byte, error) {
-	if _, ok := v.(logcfg.Config); !ok {
+	if _, ok := v.(*logcfg.Config); !ok {
 		return nil, fmt.Errorf("logging config required")
 	}
 	return json.Marshal(v)

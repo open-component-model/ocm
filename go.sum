@@ -889,6 +889,8 @@ github.com/mandelsoft/logging v0.0.0-20230328101239-150fce59b495 h1:WmsLafaYjuxZ
 github.com/mandelsoft/logging v0.0.0-20230328101239-150fce59b495/go.mod h1:HjtBPH5tsJygvyYEu2r/ZwOOBGcu+oR2sKH73VEnHtg=
 github.com/mandelsoft/logging v0.0.0-20230328114449-3d7d8773f059 h1:0wlHM3kOWz/WzbGCqHR8golLW+HPf364+iFhEXC/hn4=
 github.com/mandelsoft/logging v0.0.0-20230328114449-3d7d8773f059/go.mod h1:HjtBPH5tsJygvyYEu2r/ZwOOBGcu+oR2sKH73VEnHtg=
+github.com/mandelsoft/logging v0.0.0-20230331123830-36542ef18f6f h1:ZoqAURpfhE54QFLpcRot25aZEA0dfLVcGh0DmG5qLm4=
+github.com/mandelsoft/logging v0.0.0-20230331123830-36542ef18f6f/go.mod h1:HjtBPH5tsJygvyYEu2r/ZwOOBGcu+oR2sKH73VEnHtg=
 github.com/mandelsoft/spiff v1.3.0-beta-7.0.20230328214234-980037cf1bd7 h1:0dHDK+SxCJHTCLIDuafGyeoo50BPYlfjQqihgUA8e6E=
 github.com/mandelsoft/spiff v1.3.0-beta-7.0.20230328214234-980037cf1bd7/go.mod h1:TwEeOPuRZxlzQBCLEyVTlHmBSruSGGNdiQ2fovVJ8ao=
 github.com/mandelsoft/spiff v1.7.0-beta-3 h1:AvZldpnctpyfQqtAA5uxokD5rlCK52mGAXxg7tnW5Ag=

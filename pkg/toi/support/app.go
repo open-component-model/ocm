@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
+	"github.com/open-component-model/ocm/pkg/out"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
@@ -64,7 +64,7 @@ func NewCLICommand(ctx ocm.Context, name string, exec func(options *ExecutorOpti
 			return opts.Complete()
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			logrus.Infof("This is %s (%s)", name, version.Get().String())
+			out.Outf(opts.OutputContext, "This is %s (%s)", name, version.Get().String())
 			e := &Executor{Completed: true, Options: &opts.ExecutorOptions, Run: exec}
 			return e.Execute()
 		},

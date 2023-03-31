@@ -14,7 +14,6 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/sirupsen/logrus"
 	"github.com/xeipuuv/gojsonschema"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -273,7 +272,7 @@ func ProcessConfig(name string, octx ocm.Context, cv ocm.ComponentVersionAccess,
 		}
 	}
 	if len(schemedata) > 0 {
-		logrus.Infof("validating %s by scheme...", name)
+		toi.Log.Info("validating by scheme", name)
 		err = ValidateByScheme(config, schemedata)
 		if err != nil {
 			return nil, errors.Wrapf(err, name+" validation failed")
@@ -351,7 +350,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 	if econfig == nil {
 		p.Printf("no executor config found\n")
 	} else {
-		p.Printf("using executor config %s\n", utils2.IndentLines(string(econfig), "  "))
+		p.Printf("using executor config:\n%s\n", utils2.IndentLines(string(econfig), "  "))
 	}
 	// handle credentials
 	credentials, credmapping, err := CheckCredentialRequests(executor, spec, &espec.Spec)
@@ -377,6 +376,10 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 		}
 		ccfg.Configurations = append(ccfg.Configurations, g)
 	}
+	{
+		data, _ := yaml.Marshal(ccfg)
+		p.Printf("using ocm config:\n:%s\n", utils2.IndentLines(string(data), "  "))
+	}
 
 	// prepare user config
 	params, err = ProcessConfig("parameter data", octx, cv, resolver, spec.Template, params, spec.Libraries, spec.Scheme)
@@ -386,7 +389,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 	if params == nil {
 		p.Printf("no parameter config found\n")
 	} else {
-		p.Printf("using package parameters %s\n", utils2.IndentLines(string(params), "  "))
+		p.Printf("using package parameters:\n:%s\n", utils2.IndentLines(string(params), "  "))
 	}
 
 	if executor.ParameterMapping != nil {
@@ -397,7 +400,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 
 		if err == nil {
 			if !bytes.Equal(orig, params) {
-				p.Printf("using executor parameters %s\n", utils2.IndentLines(string(params), "  "))
+				p.Printf("using executor parameters:\n%s\n", utils2.IndentLines(string(params), "  "))
 			}
 		}
 	}
