@@ -109,7 +109,7 @@ ctf: $(GEN)/ctf
 
 $(GEN)/ctf: $(GEN)/.exists components
 	@rm -rf "$(GEN)"/ctf
-	$(OCM) transfer cv -V $(GEN)/helminstaller/ctf $(GEN)/ctf
+	$(OCM) transfer cv  --type tgz -V $(GEN)/helminstaller/ctf $(GEN)/ctf
 	$(OCM) transfer cv -V $(GEN)/helmdemo/ctf $(GEN)/ctf
 	$(OCM) transfer cv -V $(GEN)/ocmcli/ctf $(GEN)/ctf
 	touch $@
