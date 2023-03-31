@@ -14,7 +14,6 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociimage"
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -97,7 +96,7 @@ func (s *Spec) getVariant(ctx clictx.Context, finalize *Finalizer, variant strin
 	return art, nil
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (accessio.TemporaryBlobAccess, string, error) {
 	index := artdesc.NewIndexArtifact()
 	i := 0
 
@@ -124,7 +123,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 		return nil
 	}
 
-	blob, err := artifactset.SynthesizeArtifactBlobFor(nv.GetVersion(), func() (fac artifactset.ArtifactFactory, main bool, err error) {
+	blob, err := artifactset.SynthesizeArtifactBlobFor(info.ComponentVersion.GetVersion(), func() (fac artifactset.ArtifactFactory, main bool, err error) {
 		var art cpi.ArtifactAccess
 		var blob accessio.BlobAccess
 
@@ -169,5 +168,5 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 	if err != nil {
 		return nil, "", err
 	}
-	return blob, ociartifact.Hint(nv, nv.GetName(), s.Repository, nv.GetVersion()), nil
+	return blob, ociartifact.Hint(info.ComponentVersion, info.ElementName, s.Repository, info.ComponentVersion.GetVersion()), nil
 }

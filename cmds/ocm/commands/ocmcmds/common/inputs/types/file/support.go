@@ -14,7 +14,6 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -36,9 +35,9 @@ func (s *FileProcessSpec) Validate(fldPath *field.Path, ctx inputs.Context, inpu
 	return allErrs
 }
 
-func (s *FileProcessSpec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (s *FileProcessSpec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (accessio.TemporaryBlobAccess, string, error) {
 	fs := ctx.FileSystem()
-	inputInfo, inputPath, err := inputs.FileInfo(ctx, s.Path, inputFilePath)
+	inputInfo, inputPath, err := inputs.FileInfo(ctx, s.Path, info.InputFilePath)
 	if err != nil {
 		return nil, "", err
 	}
@@ -60,7 +59,7 @@ func (s *FileProcessSpec) GetBlob(ctx inputs.Context, nv common.NameVersion, inp
 		if err != nil {
 			return nil, "", errors.Wrapf(err, "cannot read input file %s", inputPath)
 		}
-		dir, err := inputs.GetBaseDir(ctx.FileSystem(), inputFilePath)
+		dir, err := inputs.GetBaseDir(ctx.FileSystem(), info.InputFilePath)
 		if err != nil {
 			return nil, "", err
 		}
