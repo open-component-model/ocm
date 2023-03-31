@@ -61,7 +61,12 @@ func (s *StaticContext) Configure(config *logcfg.Config, extra ...string) error 
 	return logcfg.Configure(logContext, config)
 }
 
-var logContext = NewContext(nil)
+// global is a wrapper for the default global log content
+var global = NewContext(nil)
+
+// logContext is the global ocm log context.
+// It can be replaced by SetContext.
+var logContext = global
 
 // SetContext sets a new preconfigured context.
 // This function should be called prior to any configuration
@@ -85,6 +90,12 @@ func Logger(messageContext ...logging.MessageContext) logging.Logger {
 // provided by this package.
 func Configure(config *logcfg.Config, extra ...string) error {
 	return logContext.Configure(config, extra...)
+}
+
+// ConfigureGlobal applies configuration for the default global log context
+// provided by this package.
+func ConfigureGlobal(config *logcfg.Config, extra ...string) error {
+	return global.Configure(config, extra...)
 }
 
 // DynamicLogger gets an unbound logger based on the default library logging context.
