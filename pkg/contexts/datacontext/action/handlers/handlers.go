@@ -5,9 +5,11 @@
 package handlers
 
 import (
+	"sort"
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/api"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/runtime/scheme"
@@ -23,9 +25,16 @@ type ActionHandler interface {
 	Handle(api.ActionSpec, common.Properties) (api.ActionResult, error)
 }
 
+type ActionHandlerMatch struct {
+	Handler  ActionHandler
+	Version  string
+	Priority int
+}
+
 type Handlers interface {
 	Register(kind string, versions []string, h ActionHandler, selectors ...api.Selector) error
 	Execute(spec api.ActionSpec, creds common.Properties) (api.ActionResult, error)
+	Get(spec api.ActionSpec, possible ...string) []ActionHandlerMatch
 	AddTo(t Handlers)
 }
 
@@ -87,27 +96,58 @@ func (r *registry) Register(kind string, versions []string, h ActionHandler, sel
 }
 
 func (r *registry) Execute(spec api.ActionSpec, creds common.Properties) (api.ActionResult, error) {
+	result := r.Get(spec)
+	sort.SliceStable(result, func(a, b int) bool {
+		return result[a].Priority < result[b].Priority
+	})
+	if len(result) > 0 {
+		spec.SetType(runtime.TypeName(spec.GetKind(), result[0].Version))
+		return result[0].Handler.Handle(spec, creds)
+	}
+	return nil, nil
+}
+
+func (r *registry) Get(spec api.ActionSpec, possible ...string) []ActionHandlerMatch {
+	if len(possible) == 0 {
+		possible = api.SupportedActionVersions(spec.GetKind())
+	}
+
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	kinds := r.registrations[spec.GetKind()]
-	if kinds == nil {
-		return r.delegate(spec, creds)
+	var result []ActionHandlerMatch
+
+	if kinds := r.registrations[spec.GetKind()]; kinds != nil {
+		if reg := kinds[spec.Selector()]; reg != nil {
+			if len(reg.versions) != 0 {
+				if v := MatchVersion(action.SupportedActionVersions(spec.GetKind()), reg.versions); v != "" {
+					result = append(result, ActionHandlerMatch{Handler: reg.handler, Version: v, Priority: 0})
+				}
+			}
+		}
 	}
-	reg := kinds[spec.Selector()]
-	if reg == nil {
-		return r.delegate(spec, creds)
+
+	if r.base != nil {
+		result = append(result, r.base.Get(spec, possible...)...)
 	}
-	if len(reg.versions) == 0 {
-		return r.delegate(spec, creds)
-	}
-	spec.SetType(runtime.TypeName(spec.GetKind(), reg.versions[len(reg.versions)-1]))
-	return reg.handler.Handle(spec, creds)
+	return result
+
 }
 
-func (r *registry) delegate(spec api.ActionSpec, creds common.Properties) (api.ActionResult, error) {
-	if r.base == nil {
-		return nil, nil
+func MatchVersion(possible []string, avail []string) string {
+	p := append(possible[:0:0], possible...)
+	a := append(avail[:0:0], avail...)
+
+	scheme.SortVersions(p)
+	scheme.SortVersions(a)
+	f := ""
+	for _, v := range p {
+		for _, c := range a {
+			if v == c {
+				f = c
+				break
+			}
+		}
 	}
-	return r.base.Execute(spec, creds)
+	return f
 }
