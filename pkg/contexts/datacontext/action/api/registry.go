@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package cpi
+package api
 
 import (
 	"reflect"
@@ -88,6 +88,7 @@ func (r *actionRegistry) RegisterAction(name string, specproto ActionSpec, resul
 
 	ai = &action{
 		name:        name,
+		description: descriptopn,
 		specproto:   st,
 		resultproto: rt,
 	}

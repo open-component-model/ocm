@@ -18,6 +18,7 @@ var TAG = internal.TAG
 
 type (
 	Descriptor             = internal.Descriptor
+	ActionDescriptor       = internal.ActionDescriptor
 	AccessMethodDescriptor = internal.AccessMethodDescriptor
 	AccessSpecInfo         = internal.AccessSpecInfo
 	DownloaderDescriptor   = internal.DownloaderDescriptor

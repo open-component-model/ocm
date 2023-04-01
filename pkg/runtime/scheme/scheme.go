@@ -5,7 +5,6 @@
 package scheme
 
 import (
-	"sort"
 	"sync"
 
 	"github.com/Masterminds/semver/v3"
@@ -206,11 +205,7 @@ func (t *scheme[O, T]) KnownVersions(kind string) []string {
 		return nil
 	}
 	result := ki.versions.AsArray()
-	sort.Slice(result, func(a, b int) bool {
-		va, _ := semver.NewVersion(result[a])
-		vb, _ := semver.NewVersion(result[b])
-		return va.Compare(vb) < 0
-	})
+	SortVersions(result)
 	return result
 }
 

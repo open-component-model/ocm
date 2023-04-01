@@ -5,5 +5,5 @@
 package types
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/action/types/oci-repository-prepare"
+	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/action/types/oci-repository-prepare"
 )

@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
+	action2 "github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/config"
@@ -19,6 +20,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/compose"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/get"
 	accval "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/validate"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/action"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/action/execute"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload/put"
@@ -65,18 +68,27 @@ func (p *pluginImpl) SetConfig(config json.RawMessage) {
 	p.config = config
 }
 
-func (p *pluginImpl) Action(spec []byte) (*ppi.AccessSpecInfo, error) {
-	result, err := p.Exec(nil, nil, accessmethod.Name, accval.Name, string(spec))
+func (p *pluginImpl) Action(spec ppi.ActionSpec, creds json.RawMessage) (ppi.ActionResult, error) {
+	data, err := action2.EncodeActionSpec(spec)
+	if err != nil {
+		return nil, err
+	}
+
+	args := []string{action.Name, execute.Name, string(data)}
+	if creds != nil {
+		args = append(args, "--"+get.OptCreds, string(creds))
+	}
+
+	result, err := p.Exec(nil, nil, args...)
 	if err != nil {
 		return nil, errors.Wrapf(err, "plugin %s", p.Name())
 	}
 
-	var info ppi.AccessSpecInfo
-	err = json.Unmarshal(result, &info)
+	info, err := action2.DecodeActionResult(result)
 	if err != nil {
-		return nil, errors.Wrapf(err, "plugin %s: cannot unmarshal access spec info", p.Name())
+		return nil, errors.Wrapf(err, "plugin %s: cannot unmarshal action result", p.Name())
 	}
-	return &info, nil
+	return info, nil
 }
 
 func (p *pluginImpl) ValidateAccessMethod(spec []byte) (*ppi.AccessSpecInfo, error) {

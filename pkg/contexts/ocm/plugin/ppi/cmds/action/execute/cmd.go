@@ -10,13 +10,20 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/api"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/common"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const Name = "execute"
+const (
+	Name     = "execute"
+	OptCreds = common.OptCreds
+)
 
 func New(p ppi.Plugin) *cobra.Command {
 	opts := Options{}
@@ -27,16 +34,19 @@ func New(p ppi.Plugin) *cobra.Command {
 		Long: `
 This command executes an action.
 
-This metadata has to provide an execution result as JSON string on *stdout*. It has the 
+This action has to provide an execution result as JSON string on *stdout*. It has the 
 following fields: 
 
 - **<code>name</code>** *string*
 
-  The name of the action.
+  The name and version of the action result. It must match the value
+  from the action specification.
 
-- **<code>key</code>** *string*
+- **<code>error</code>** *string*
 
-  The
+  An error message.
+
+Additional fields depend on the kind of action.
 `,
 		Args: cobra.ExactArgs(1),
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
@@ -51,10 +61,13 @@ following fields:
 }
 
 type Options struct {
+	Credentials   credentials.DirectCredentials
 	Specification json.RawMessage
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
+	flag.YAMLVarP(fs, &o.Credentials, OptCreds, "c", nil, "credentials")
+	flag.StringToStringVarPFA(fs, &o.Credentials, "credential", "C", nil, "dedicated credential value")
 }
 
 func (o *Options) Complete(args []string) error {
@@ -64,29 +77,22 @@ func (o *Options) Complete(args []string) error {
 	return nil
 }
 
-type Result struct {
-	MediaType  string                       `json:"mediaType"`
-	Short      string                       `json:"description"`
-	Hint       string                       `json:"hint"`
-	ConsumerId credentials.ConsumerIdentity `json:"consumerId"`
-}
-
 func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
-	spec, err := p.DecodeAccessSpecification(opts.Specification)
+	spec, err := action.DecodeActionSpec(opts.Specification)
 	if err != nil {
-		return errors.Wrapf(err, "access specification")
+		return errors.Wrapf(err, "action specification")
 	}
 
-	m := p.GetAccessMethod(spec.GetKind(), spec.GetVersion())
-	if m == nil {
-		return errors.ErrUnknown(errors.KIND_ACCESSMETHOD, spec.GetType())
+	a := p.GetAction(spec.GetKind())
+	if a == nil {
+		return errors.ErrUnknown(api.KIND_ACTION, spec.GetKind())
 	}
-	info, err := m.ValidateSpecification(p, spec)
+	result, err := a.Execute(p, spec, opts.Credentials)
 	if err != nil {
 		return err
 	}
-	result := Result{MediaType: info.MediaType, ConsumerId: info.ConsumerId, Hint: info.Hint, Short: info.Short}
-	data, err := json.Marshal(result)
+	result.SetType(spec.GetType())
+	data, err := action.EncodeActionResult(result)
 	if err != nil {
 		return err
 	}

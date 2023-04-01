@@ -12,6 +12,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 )
@@ -39,6 +40,22 @@ var _ = Describe("Test Environment", func() {
 		Expect(env.CatchOutput(buf).Execute("-X", "plugindir="+path, "describe", "plugins")).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
+Plugin Name:      action
+Plugin Version:   v1
+Path:             ` + path + `/action
+Status:           valid
+Capabilities:     Actions
+Source:           manually installed
+Description: 
+      a test plugin with action oci.repository.prepare
+Actions:
+- Name: oci.repository.prepare
+    Prepare the usage of a repository in an OCI registry.
+  Info:
+    test action
+  Versions:
+  - v1 (best matching)
+----------------------
 Plugin Name:      test
 Plugin Version:   v1
 Path:             ` + path + `/test
@@ -51,7 +68,7 @@ Access Methods:
 - Name: test
   Versions:
   - Version: v1
-*** found 1 plugins
+*** found 2 plugins
 `))
 	})
 })

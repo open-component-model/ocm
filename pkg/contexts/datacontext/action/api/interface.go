@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package cpi
+package api
 
 import (
 	"reflect"
@@ -25,6 +25,7 @@ type Selector string
 
 type ActionSpec interface {
 	runtime.VersionedTypedObject
+	SetType(name string)
 	Selector() Selector
 }
 
@@ -35,17 +36,22 @@ type ActionSpecType scheme.Type[ActionSpec]
 
 type ActionResult interface {
 	runtime.VersionedTypedObject
-	Error() string
+	SetType(string)
+	GetMessage() string
 }
 
 // CommonResult is the minimal action result.
-type CommonResult struct { //nolint: errname // general return status
+type CommonResult struct {
 	runtime.ObjectVersionedType `json:",inline"`
-	ErrorMessage                string `json:"error,omitempty"`
+	Message                     string `json:"message,omitempty"`
 }
 
-func (r *CommonResult) Error() string {
-	return r.ErrorMessage
+func (r *CommonResult) GetMessage() string {
+	return r.Message
+}
+
+func (r *CommonResult) SetType(typ string) {
+	r.Type = typ
 }
 
 ////////////////////////////////////////////////////////////////////////////////

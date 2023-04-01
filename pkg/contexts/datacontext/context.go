@@ -14,6 +14,7 @@ import (
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/handlers"
 	"github.com/open-component-model/ocm/pkg/errors"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -97,6 +98,8 @@ type AttributesContext interface {
 	Context
 
 	BindTo(ctx context.Context) context.Context
+
+	Actions() handlers.Handlers
 }
 
 // AttributeFactory is used to atomicly create a new attribute for a context.
@@ -170,7 +173,7 @@ func (c *contextBase) BindTo(ctx context.Context) context.Context {
 }
 
 func (c *contextBase) AttributesContext() AttributesContext {
-	return c
+	return c.effective.AttributesContext()
 }
 
 func (c *contextBase) GetAttributes() Attributes {
@@ -189,6 +192,7 @@ func (c *contextBase) Logger(messageContext ...logging.MessageContext) logging.L
 
 type _context struct {
 	Context
+	actions handlers.Handlers
 	updater Updater
 }
 
@@ -196,8 +200,16 @@ var key = reflect.TypeOf(contextBase{})
 
 // New provides a root attribute context.
 func New(parentAttrs Attributes) AttributesContext {
-	c := &_context{}
+	return NewWithActions(parentAttrs, nil)
+}
 
+func NewWithActions(parentAttrs Attributes, actions handlers.Handlers) AttributesContext {
+	if actions == nil {
+		actions = handlers.NewHandlers(nil)
+	}
+	c := &_context{
+		actions: actions,
+	}
 	c.Context = &contextBase{
 		ctxtype:    CONTEXT_TYPE,
 		key:        key,
@@ -219,6 +231,13 @@ func AssureUpdater(attrs AttributesContext, u Updater) {
 	if c.updater == nil {
 		c.updater = u
 	}
+}
+
+func (c *_context) Actions() handlers.Handlers {
+	if c.updater != nil {
+		c.updater.Update()
+	}
+	return c.actions
 }
 
 func (c *_context) LoggingContext() logging.Context {

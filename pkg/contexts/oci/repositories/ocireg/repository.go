@@ -29,6 +29,15 @@ type RepositoryInfo struct {
 	Legacy  bool
 }
 
+func (r *RepositoryInfo) HostPort() string {
+	i := strings.Index(r.Locator, "/")
+	if i < 0 {
+		return r.Locator
+	} else {
+		return r.Locator[:i]
+	}
+}
+
 func (r *RepositoryInfo) HostInfo() (string, string, string) {
 	path := ""
 	h := ""

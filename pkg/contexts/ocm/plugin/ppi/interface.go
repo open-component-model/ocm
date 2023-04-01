@@ -9,6 +9,7 @@ import (
 	"io"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/internal"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -111,13 +112,13 @@ type Downloader interface {
 	Writer(p Plugin, arttype, mediatype string, filepath string) (io.WriteCloser, DownloadResultProvider, error)
 }
 
-type ActionSpec runtime.VersionedTypedObject
+type ActionSpec action.ActionSpec
 
-type ActionResult runtime.VersionedTypedObject
+type ActionResult action.ActionResult
 
 type Action interface {
 	Name() string
 	Description() string
 
-	Execute(p Plugin, spec ActionSpec) (result ActionResult, err error)
+	Execute(p Plugin, spec ActionSpec, creds credentials.DirectCredentials) (result ActionResult, err error)
 }

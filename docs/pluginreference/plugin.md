@@ -59,6 +59,7 @@ apabilities of the plugin.
 ##### Sub Commands
 
 * [plugin <b>accessmethod</b>](plugin_accessmethod.md)	 &mdash; access method operations
+* [plugin <b>action</b>](plugin_action.md)	 &mdash; action operations
 * [plugin <b>download</b>](plugin_download.md)	 &mdash; download blob into filesystem
 * [plugin <b>info</b>](plugin_info.md)	 &mdash; show plugin descriptor
 * [plugin <b>upload</b>](plugin_upload.md)	 &mdash; upload specific operations

@@ -11,6 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/types/oci-repository-prepare"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	access "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
@@ -19,6 +20,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
+	testutils "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var _ = Describe("setup plugin cache", func() {
@@ -36,6 +38,15 @@ var _ = Describe("setup plugin cache", func() {
 		p := registry.Get("test")
 		Expect(p).NotTo(BeNil())
 		Expect(p.GetDescriptor().Short).To(Equal("a test plugin"))
+	})
+
+	It("executes action", func() {
+		p := registry.Get("action")
+		Expect(p).NotTo(BeNil())
+		Expect(p.GetDescriptor().Short).To(Equal("a test plugin"))
+
+		r := testutils.Must(p.Action(oci_repository_prepare.Spec("ghcr.io", "mandelsoft"), nil))
+		Expect(r).To(Equal(oci_repository_prepare.Result("all good")))
 	})
 
 	It("scans only once", func() {

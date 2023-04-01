@@ -6,11 +6,16 @@ package common
 
 import (
 	"encoding/json"
+	"sort"
 	"strings"
 
+	"github.com/Masterminds/semver/v3"
+
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
+	"github.com/open-component-model/ocm/pkg/runtime/scheme"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -25,14 +30,18 @@ func DescribePlugin(p plugin.Plugin, out common.Printer) {
 	}
 	out.Printf("Status:           %s\n", "valid")
 	var caps []string
-	if len(p.GetDescriptor().AccessMethods) > 0 {
+	d := p.GetDescriptor()
+	if len(d.AccessMethods) > 0 {
 		caps = append(caps, "Access Methods")
 	}
-	if len(p.GetDescriptor().Uploaders) > 0 {
+	if len(d.Uploaders) > 0 {
 		caps = append(caps, "Repository Uploaders")
 	}
-	if len(p.GetDescriptor().Downloaders) > 0 {
+	if len(d.Downloaders) > 0 {
 		caps = append(caps, "Resource Downloaders")
+	}
+	if len(d.Actions) > 0 {
+		caps = append(caps, "Actions")
 	}
 	if len(caps) == 0 {
 		out.Printf("Capabilities:     none\n")
@@ -54,24 +63,29 @@ func DescribePlugin(p plugin.Plugin, out common.Printer) {
 	}
 	out.Printf("\n")
 	out.Printf("Description: \n")
-	if p.GetDescriptor().Long == "" {
+	if d.Long == "" {
 		out.Printf("%s\n", utils2.IndentLines(p.GetDescriptor().Short, "      "))
 	} else {
 		out.Printf("%s\n", utils2.IndentLines(p.GetDescriptor().Long, "      "))
 	}
-	if len(p.GetDescriptor().AccessMethods) > 0 {
+	if len(d.AccessMethods) > 0 {
 		out.Printf("\n")
 		out.Printf("Access Methods:\n")
 		DescribeAccessMethods(p, out)
 	}
-	if len(p.GetDescriptor().Uploaders) > 0 {
+	if len(d.Uploaders) > 0 {
 		out.Printf("\n")
 		// a working type inference would be really great
 		ListElements[plugin.UploaderDescriptor, plugin.UploaderKey]("Repository Uploaders", p.GetDescriptor().Uploaders, out)
 	}
-	if len(p.GetDescriptor().Downloaders) > 0 {
+	if len(d.Downloaders) > 0 {
 		out.Printf("\n")
 		ListElements[plugin.DownloaderDescriptor, plugin.DownloaderKey]("Resource Downloaders", p.GetDescriptor().Downloaders, out)
+	}
+	if len(d.Actions) > 0 {
+		out.Printf("\n")
+		out.Printf("Actions:\n")
+		DescribeActions(p, out)
 	}
 }
 
@@ -160,6 +174,90 @@ func DescribeAccessMethods(p plugin.Plugin, out common.Printer) {
 			if len(v.Options) > 0 {
 				out.Printf("Command Line Options:")
 				out.Printf("%s\n", utils2.FormatMap("", v.Options))
+			}
+		}
+	}
+}
+
+type ActionInfo struct {
+	ActionDesc    string
+	Versions      []string
+	Selectors     []string
+	Description   string
+	KnownVersions []string
+	BestVersion   string
+	Error         string
+}
+
+func GetActionInfo(actions []plugin.ActionDescriptor) map[string]*ActionInfo {
+	found := map[string]*ActionInfo{}
+	for _, a := range actions {
+		i := found[a.Name]
+		if i == nil {
+			i = &ActionInfo{
+				ActionDesc: a.Description,
+				Versions:   append(a.Versions[:0:0], a.Versions...),
+				Selectors:  append(a.DefaultSelectors[:0:0], a.DefaultSelectors...),
+			}
+			if err := scheme.SortVersions(i.Versions); err != nil {
+				sort.Strings(i.Versions)
+			}
+			sort.Strings(i.Selectors)
+			found[a.Name] = i
+		}
+		ad := action.GetAction(a.Name)
+		if ad == nil {
+			i.Error = " (action unknown)"
+		} else {
+			i.Description = ad.Description()
+			i.KnownVersions = action.SupportedActionVersions(a.Name)
+			for _, v := range i.KnownVersions {
+				for _, f := range a.Versions {
+					if v == f {
+						i.BestVersion = v
+						break
+					}
+				}
+			}
+		}
+	}
+	return found
+}
+
+func DescribeActions(p plugin.Plugin, out common.Printer) {
+	d := p.GetDescriptor()
+
+	actions := GetActionInfo(d.Actions)
+
+	for _, n := range utils2.StringMapKeys(actions) {
+		a := actions[n]
+		out.Printf("- Name: %s%s\n", n, a.Error)
+		if a.Description != "" {
+			out.Printf("%s\n", utils2.IndentLines(a.Description, "    "))
+		}
+		if a.ActionDesc != "" {
+			out.Printf("  Info:\n")
+			out.Printf("%s\n", utils2.IndentLines(a.ActionDesc, "    "))
+		}
+		out := out.AddGap("  ")
+		if a.BestVersion == "" {
+			out.Printf("No version matches actual ocm version!\n")
+		}
+		out.Printf("Versions:\n")
+		for _, vn := range a.Versions {
+			_, err := semver.NewVersion(vn)
+			if err != nil {
+				out.Printf("- %s (%s)\n", vn, err.Error())
+			} else if vn == a.BestVersion {
+				out.Printf("- %s (best matching)\n", vn)
+			} else {
+				msg := " (not supported)"
+				for _, v := range a.KnownVersions {
+					if v == vn {
+						msg = ""
+					}
+				}
+				out.Printf("- %s%s\n", vn, msg)
 			}
 		}
 	}

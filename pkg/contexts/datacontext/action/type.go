@@ -5,34 +5,40 @@
 package action
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/action/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/api"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-type ActionSpec = cpi.ActionSpec
+type Action = api.Action
 
-type ActionResult = cpi.ActionResult
+type ActionSpec = api.ActionSpec
 
-type ActionType cpi.ActionType
+type ActionResult = api.ActionResult
+
+type ActionType api.ActionType
 
 ////////////////////////////////////////////////////////////////////////////////
 
+func GetAction(kind string) Action {
+	return api.GetAction(kind)
+}
+
 func EncodeActionSpec(s ActionSpec) ([]byte, error) {
-	return cpi.EncodeActionSpec(s, runtime.DefaultJSONEncoding)
+	return api.EncodeActionSpec(s, runtime.DefaultJSONEncoding)
 }
 
 func DecodeActionSpec(data []byte) (ActionSpec, error) {
-	return cpi.DecodeActionSpec(data, runtime.DefaultYAMLEncoding)
+	return api.DecodeActionSpec(data, runtime.DefaultYAMLEncoding)
 }
 
 func EncodeActionResult(s ActionResult) ([]byte, error) {
-	return cpi.EncodeActionResult(s, runtime.DefaultJSONEncoding)
+	return api.EncodeActionResult(s, runtime.DefaultJSONEncoding)
 }
 
 func DecodeActionResult(data []byte) (ActionResult, error) {
-	return cpi.DecodeActionResult(data, runtime.DefaultYAMLEncoding)
+	return api.DecodeActionResult(data, runtime.DefaultYAMLEncoding)
 }
 
 func SupportedActionVersions(name string) []string {
-	return cpi.SupportedActionVersions(name)
+	return api.SupportedActionVersions(name)
 }

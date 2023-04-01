@@ -11,8 +11,10 @@ import (
 	"github.com/containerd/containerd/errdefs"
 	"github.com/opencontainers/go-digest"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	oci_repository_prepare "github.com/open-component-model/ocm/pkg/contexts/datacontext/action/types/oci-repository-prepare"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
@@ -185,6 +187,12 @@ func (n *NamespaceContainer) AddArtifact(artifact cpi.Artifact, tags ...string) 
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve blob data: %w", err)
 	}
+
+	var props common.Properties
+	if creds, err := n.repo.getCreds(n.namespace); err == nil && creds != nil {
+		props = creds.Properties()
+	}
+	oci_repository_prepare.Execute(n.repo.ctx.AttributesContext().Actions(), n.repo.info.HostPort(), n.namespace, props)
 
 	_, _, err = blobData.AddBlob(blob)
 	if err != nil {

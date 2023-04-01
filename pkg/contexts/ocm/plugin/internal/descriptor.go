@@ -73,10 +73,10 @@ type AccessMethodDescriptor struct {
 }
 
 type ActionDescriptor struct {
-	Name        string   `json:"name"`
-	Versions    []string `json:"versions,omitempty"`
-	Description string   `json:"description"`
-	DefaultKeys []string `json:"defaultKeys"`
+	Name             string   `json:"name"`
+	Versions         []string `json:"versions,omitempty"`
+	Description      string   `json:"description,omitempty"`
+	DefaultSelectors []string `json:"defaultSelectors,omitempty"`
 }
 
 type CLIOption struct {
