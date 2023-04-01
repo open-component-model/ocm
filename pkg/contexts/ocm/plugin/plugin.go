@@ -65,6 +65,20 @@ func (p *pluginImpl) SetConfig(config json.RawMessage) {
 	p.config = config
 }
 
+func (p *pluginImpl) Action(spec []byte) (*ppi.AccessSpecInfo, error) {
+	result, err := p.Exec(nil, nil, accessmethod.Name, accval.Name, string(spec))
+	if err != nil {
+		return nil, errors.Wrapf(err, "plugin %s", p.Name())
+	}
+
+	var info ppi.AccessSpecInfo
+	err = json.Unmarshal(result, &info)
+	if err != nil {
+		return nil, errors.Wrapf(err, "plugin %s: cannot unmarshal access spec info", p.Name())
+	}
+	return &info, nil
+}
+
 func (p *pluginImpl) ValidateAccessMethod(spec []byte) (*ppi.AccessSpecInfo, error) {
 	result, err := p.Exec(nil, nil, accessmethod.Name, accval.Name, string(spec))
 	if err != nil {

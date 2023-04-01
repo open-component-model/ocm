@@ -17,7 +17,7 @@ import (
 
 var TAG = logging.NewTag("plugins")
 
-// RegisterExtensions registers all the extension provided the found plugin
+// RegisterExtensions registers all the extension provided by the found plugin
 // at the given context. If no context is given, the cache context is used.
 func RegisterExtensions(ctx ocm.Context) error {
 	pi := plugincacheattr.Get(ctx)

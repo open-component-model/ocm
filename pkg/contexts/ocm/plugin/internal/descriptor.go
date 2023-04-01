@@ -13,6 +13,7 @@ type Descriptor struct {
 	Short         string `json:"shortDescription"`
 	Long          string `json:"description"`
 
+	Actions       []ActionDescriptor         `json:"actions,omitempty"`
 	AccessMethods []AccessMethodDescriptor   `json:"accessMethods,omitempty"`
 	Uploaders     List[UploaderDescriptor]   `json:"uploaders,omitempty"`
 	Downloaders   List[DownloaderDescriptor] `json:"downloaders,omitempty"`
@@ -69,6 +70,13 @@ type AccessMethodDescriptor struct {
 	Description string      `json:"description"`
 	Format      string      `json:"format"`
 	CLIOptions  []CLIOption `json:"options,omitempty"`
+}
+
+type ActionDescriptor struct {
+	Name        string   `json:"name"`
+	Versions    []string `json:"versions,omitempty"`
+	Description string   `json:"description"`
+	DefaultKeys []string `json:"defaultKeys"`
 }
 
 type CLIOption struct {

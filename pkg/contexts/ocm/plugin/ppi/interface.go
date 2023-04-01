@@ -16,6 +16,7 @@ import (
 
 type (
 	Descriptor             = internal.Descriptor
+	ActionSpecInfo         = internal.ActionSpecInfo
 	AccessSpecInfo         = internal.AccessSpecInfo
 	UploadTargetSpecInfo   = internal.UploadTargetSpecInfo
 	UploaderKey            = internal.UploaderKey
@@ -56,6 +57,10 @@ type Plugin interface {
 	RegisterAccessMethod(m AccessMethod) error
 	DecodeAccessSpecification(data []byte) (AccessSpec, error)
 	GetAccessMethod(name string, version string) AccessMethod
+
+	RegisterAction(a Action) error
+	DecodeAction(data []byte) (ActionSpec, error)
+	GetAction(name string) Action
 
 	GetOptions() *Options
 	GetConfig() (interface{}, error)
@@ -104,4 +109,15 @@ type Downloader interface {
 	Description() string
 
 	Writer(p Plugin, arttype, mediatype string, filepath string) (io.WriteCloser, DownloadResultProvider, error)
+}
+
+type ActionSpec runtime.VersionedTypedObject
+
+type ActionResult runtime.VersionedTypedObject
+
+type Action interface {
+	Name() string
+	Description() string
+
+	Execute(p Plugin, spec ActionSpec) (result ActionResult, err error)
 }

@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -30,6 +31,8 @@ type plugin struct {
 
 	methods      map[string]AccessMethod
 	accessScheme runtime.Scheme
+
+	actions map[string]Action
 
 	configParser func(message json.RawMessage) (interface{}, error)
 }
@@ -282,6 +285,33 @@ func (p *plugin) GetAccessMethod(name string, version string) AccessMethod {
 		n += "/" + version
 	}
 	return p.methods[n]
+}
+
+func (p *plugin) RegisterAction(a Action) error {
+	if p.GetAction(a.Name()) != nil {
+		return errors.ErrAlreadyExists("action", a.Name())
+	}
+	vers := action.SupportedActionVersions(a.Name())
+	if len(vers) == 0 {
+		return errors.ErrNotSupported("action", a.Name())
+	}
+
+	act := internal.ActionDescriptor{
+		Name:        a.Name(),
+		Versions:    vers,
+		Description: a.Description(),
+	}
+	p.descriptor.Actions = append(p.descriptor.Actions, act)
+	p.actions[a.Name()] = a
+	return nil
+}
+
+func (p *plugin) DecodeAction(data []byte) (ActionSpec, error) {
+	return action.DecodeActionSpec(data)
+}
+
+func (p *plugin) GetAction(name string) Action {
+	return p.actions[name]
 }
 
 func (p *plugin) GetConfig() (interface{}, error) {
