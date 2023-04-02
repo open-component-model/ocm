@@ -131,12 +131,11 @@ func (r *registry) Get(spec api.ActionSpec, possible ...string) []ActionHandlerM
 		result = append(result, r.base.Get(spec, possible...)...)
 	}
 	return result
-
 }
 
 func MatchVersion(possible []string, avail []string) string {
-	p := append(possible[:0:0], possible...)
-	a := append(avail[:0:0], avail...)
+	p := append(possible[:0:0], possible...) //nolint: gocritic // yes
+	a := append(avail[:0:0], avail...)       //nolint: gocritic // yes
 
 	scheme.SortVersions(p)
 	scheme.SortVersions(a)

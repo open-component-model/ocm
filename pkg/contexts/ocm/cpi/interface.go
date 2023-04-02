@@ -10,6 +10,7 @@ import (
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
+	"github.com/open-component-model/ocm/pkg/registrations"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -77,10 +78,10 @@ type (
 	DigestDescriptor     = internal.DigestDescriptor
 )
 
-type NamePath = internal.NamePath
+type NamePath = registrations.NamePath
 
 func NewNamePath(p string) NamePath {
-	return internal.NewNamePath(p)
+	return registrations.NewNamePath(p)
 }
 
 func NewBlobHandlerOptions(olist ...BlobHandlerOption) *BlobHandlerOptions {

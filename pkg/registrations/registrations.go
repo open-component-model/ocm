@@ -5,7 +5,7 @@
 // Package registrations provides a hierarchical namespace for
 // denoting any kind of handlers to be registered on some target.
 // Handlers are denoted by names evaluated by HandlerRegistrationHandler
-// Such a registration handler is reponsible vor a complete sub namespace
+// Such a registration handler is responsible vor a complete sub namespace
 // and may delegate the evaluation to nested handler mounted on a sub namespace.
 package registrations
 
