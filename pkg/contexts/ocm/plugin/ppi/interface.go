@@ -33,6 +33,7 @@ const (
 	KIND_DOWNLOADER   = internal.KIND_DOWNLOADER
 	KIND_UPLOADER     = internal.KIND_UPLOADER
 	KIND_ACCESSMETHOD = internal.KIND_ACCESSMETHOD
+	KIND_ACTION       = internal.KIND_ACTION
 )
 
 var TAG = internal.TAG

@@ -9,13 +9,15 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-type Action = api.Action
+const KIND_ACTION = api.KIND_ACTION
 
-type ActionSpec = api.ActionSpec
-
-type ActionResult = api.ActionResult
-
-type ActionType api.ActionType
+type (
+	Selector     = api.Selector
+	Action       = api.Action
+	ActionSpec   = api.ActionSpec
+	ActionResult = api.ActionResult
+	ActionType   = api.ActionType
+)
 
 ////////////////////////////////////////////////////////////////////////////////
 

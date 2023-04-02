@@ -9,7 +9,6 @@ import (
 	"io"
 	"reflect"
 
-	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -108,7 +107,7 @@ type _context struct {
 
 var _ Context = &_context{}
 
-func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context, outctx out.Context, fs vfs.FileSystem, logger logging.Context) Context {
+func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context, outctx out.Context, fs vfs.FileSystem, delegates datacontext.Delegates) Context {
 	if outctx == nil {
 		outctx = out.New()
 	}
@@ -121,7 +120,7 @@ func newContext(shared datacontext.AttributesContext, ocmctx ocm.Context, outctx
 		config:           ocmctx.CredentialsContext().ConfigContext(),
 		out:              outctx,
 	}
-	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, ocmctx.GetAttributes(), logger)
+	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, ocmctx.GetAttributes(), delegates)
 	c.updater = cfgcpi.NewUpdater(ocmctx.CredentialsContext().ConfigContext(), c)
 	c.oci = newOCI(c, ocmctx)
 	c.ocm = newOCM(c, ocmctx)

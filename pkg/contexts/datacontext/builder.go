@@ -13,7 +13,7 @@ import (
 type Builder struct {
 	ctx        context.Context
 	attributes Attributes
-	actions    handlers.Handlers
+	actions    handlers.Registry
 }
 
 func (b *Builder) getContext() context.Context {
@@ -33,7 +33,7 @@ func (b Builder) WithAttributes(paranetAttr Attributes) Builder {
 	return b
 }
 
-func (b Builder) WithActionHandlers(hdlrs handlers.Handlers) Builder {
+func (b Builder) WithActionHandlers(hdlrs handlers.Registry) Builder {
 	b.actions = hdlrs
 	return b
 }
@@ -49,16 +49,16 @@ func (b Builder) New(m ...BuilderMode) Context {
 	if b.actions == nil {
 		switch mode {
 		case MODE_INITIAL:
-			b.actions = handlers.NewHandlers(nil)
+			b.actions = handlers.NewRegistry(nil)
 		case MODE_CONFIGURED:
-			b.actions = handlers.NewHandlers(nil)
-			handlers.DefaultHandlers().AddTo(b.actions)
+			b.actions = handlers.NewRegistry(nil)
+			handlers.DefaultRegistry().AddTo(b.actions)
 		case MODE_EXTENDED:
-			b.actions = handlers.NewHandlers(handlers.DefaultHandlers())
+			b.actions = handlers.NewRegistry(handlers.DefaultRegistry())
 		case MODE_DEFAULTED:
 			fallthrough
 		case MODE_SHARED:
-			b.actions = handlers.DefaultHandlers()
+			b.actions = handlers.DefaultRegistry()
 		}
 	}
 

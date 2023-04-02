@@ -9,8 +9,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/mandelsoft/logging"
-
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -110,7 +108,7 @@ type _context struct {
 
 var _ Context = &_context{}
 
-func newContext(credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, specHandlers RepositorySpecHandlers, blobHandlers BlobHandlerRegistry, blobDigesters BlobDigesterRegistry, logger logging.Context) Context {
+func newContext(credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, specHandlers RepositorySpecHandlers, blobHandlers BlobHandlerRegistry, blobDigesters BlobDigesterRegistry, delegates datacontext.Delegates) Context {
 	c := &_context{
 		sharedattributes:     credctx.AttributesContext(),
 		credctx:              credctx,
@@ -122,7 +120,7 @@ func newContext(credctx credentials.Context, ocictx oci.Context, reposcheme Repo
 		knownRepositoryTypes: reposcheme,
 		aliases:              map[string]RepositorySpec{},
 	}
-	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, credctx.GetAttributes(), logger)
+	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, credctx.GetAttributes(), delegates)
 	c.updater = cfgcpi.NewUpdater(credctx.ConfigContext(), c)
 	return c
 }

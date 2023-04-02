@@ -108,7 +108,7 @@ func NewBlobHandlerOptions(olist ...BlobHandlerOption) *BlobHandlerOptions {
 	return &opts
 }
 
-func (o BlobHandlerOptions) ApplyBlobHandlerOptionTo(opts *BlobHandlerOptions) {
+func (o *BlobHandlerOptions) ApplyBlobHandlerOptionTo(opts *BlobHandlerOptions) {
 	if o.Priority > 0 {
 		opts.Priority = o.Priority
 	}
@@ -182,20 +182,20 @@ func ForArtifactType(artifacttype string) BlobHandlerOption {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type BlobHandlerConfig = registrations.HandlerConfig
+type (
+	BlobHandlerConfig               = registrations.HandlerConfig
+	BlobHandlerRegistrationHandler  = registrations.HandlerRegistrationHandler[Context, BlobHandlerOption]
+	BlobHandlerRegistrationRegistry = registrations.HandlerRegistrationRegistry[Context, BlobHandlerOption]
 
-type BlobHandlerRegistrationHandler = registrations.HandlerRegistrationHandler[Context, BlobHandlerOption]
-
-type BlobHandlerRegistrationRegistry = registrations.HandlerRegistrationRegistry[Context, BlobHandlerOption]
-
-type RegistrationHandlerInfo = registrations.RegistrationHandlerInfo[Context, BlobHandlerOption]
-
-func NewRegistrationHandlerInfo(path string, handler BlobHandlerRegistrationHandler) *RegistrationHandlerInfo {
-	return registrations.NewRegistrationHandlerInfo[Context, BlobHandlerOption](path, handler)
-}
+	RegistrationHandlerInfo = registrations.RegistrationHandlerInfo[Context, BlobHandlerOption]
+)
 
 func NewBlobHandlerRegistrationRegistry(base ...BlobHandlerRegistrationRegistry) BlobHandlerRegistrationRegistry {
 	return registrations.NewHandlerRegistrationRegistry[Context, BlobHandlerOption](base...)
+}
+
+func NewRegistrationHandlerInfo(path string, handler BlobHandlerRegistrationHandler) *RegistrationHandlerInfo {
+	return registrations.NewRegistrationHandlerInfo[Context, BlobHandlerOption](path, handler)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

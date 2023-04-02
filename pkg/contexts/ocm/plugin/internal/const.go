@@ -7,6 +7,7 @@ package internal
 import (
 	"github.com/mandelsoft/logging"
 
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -15,6 +16,7 @@ const (
 	KIND_DOWNLOADER   = "downloader"
 	KIND_UPLOADER     = "uploader"
 	KIND_ACCESSMETHOD = errors.KIND_ACCESSMETHOD
+	KIND_ACTION       = action.KIND_ACTION
 )
 
 var TAG = logging.NewTag("plugins")

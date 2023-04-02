@@ -69,6 +69,19 @@ func (p *pluginImpl) Error() string {
 	return p.error
 }
 
+func (p *pluginImpl) GetActionDescriptor(name string) *internal.ActionDescriptor {
+	if !p.IsValid() {
+		return nil
+	}
+
+	for _, a := range p.descriptor.Actions {
+		if a.Name == name {
+			return &a
+		}
+	}
+	return nil
+}
+
 func (p *pluginImpl) GetAccessMethodDescriptor(name, version string) *internal.AccessMethodDescriptor {
 	if !p.IsValid() {
 		return nil

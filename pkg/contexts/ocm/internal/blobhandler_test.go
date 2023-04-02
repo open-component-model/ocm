@@ -9,6 +9,8 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/open-component-model/ocm/pkg/registrations"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
@@ -45,7 +47,7 @@ func NewTestRegistrationHandler(name string) *TestRegistrationHandler {
 }
 
 func (t *TestRegistrationHandler) RegisterByName(handler string, ctx internal.Context, config internal.BlobHandlerConfig, opts ...internal.BlobHandlerOption) (bool, error) {
-	path := internal.NewNamePath(handler)
+	path := registrations.NewNamePath(handler)
 	if len(path) < 1 || path[0] != "match" {
 		return false, nil
 	}

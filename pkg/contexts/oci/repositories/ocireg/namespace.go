@@ -192,7 +192,7 @@ func (n *NamespaceContainer) AddArtifact(artifact cpi.Artifact, tags ...string) 
 	if creds, err := n.repo.getCreds(n.namespace); err == nil && creds != nil {
 		props = creds.Properties()
 	}
-	oci_repository_prepare.Execute(n.repo.ctx.AttributesContext().Actions(), n.repo.info.HostPort(), n.namespace, props)
+	oci_repository_prepare.Execute(n.repo.ctx.GetActions(), n.repo.info.HostPort(), n.namespace, props)
 
 	_, _, err = blobData.AddBlob(blob)
 	if err != nil {

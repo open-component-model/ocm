@@ -23,6 +23,10 @@ type Action interface {
 
 type Selector string
 
+func (s Selector) ApplyActionHandlerOptionTo(opts *Options) {
+	opts.Selectors = append(opts.Selectors, s)
+}
+
 type ActionSpec interface {
 	runtime.VersionedTypedObject
 	SetType(name string)
@@ -63,3 +67,19 @@ type ActionType interface {
 	SpecificationType() ActionSpecType
 	ResultType() ActionResultType
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Options Type
+
+type Option interface {
+	ApplyActionHandlerOptionTo(*Options)
+}
+
+type Options struct {
+	Action    string
+	Selectors []Selector
+	Priority  int
+	Versions  []string
+}
+
+var _ Option = (*Options)(nil)

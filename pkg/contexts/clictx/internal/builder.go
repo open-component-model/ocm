@@ -84,5 +84,5 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 	if b.shared == nil {
 		b.shared = b.ocm.AttributesContext()
 	}
-	return newContext(b.shared, b.ocm, out.NewFor(b.out), b.filesystem, b.shared.LoggingContext())
+	return newContext(b.shared, b.ocm, out.NewFor(b.out), b.filesystem, b.shared)
 }

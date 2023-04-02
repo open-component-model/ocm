@@ -9,7 +9,9 @@ plugin action execute <spec> [<options>]
 ### Options
 
 ```
-  -h, --help   help for execute
+  -C, --credential <name>=<value>   dedicated credential value (default [])
+  -c, --credentials YAML            credentials
+  -h, --help                        help for execute
 ```
 
 ### Description
@@ -29,7 +31,7 @@ following fields:
 
   An error message.
 
-Addtional fields depend on the kind of action.
+Additional fields depend on the kind of action.
 
 
 ### SEE ALSO
