@@ -20,6 +20,7 @@ type plugin struct {
 	name       string
 	version    string
 	descriptor internal.Descriptor
+	tweaker    func(descriptor internal.Descriptor) internal.Descriptor
 	options    Options
 
 	downloaders  map[string]Downloader
@@ -52,6 +53,9 @@ func NewPlugin(name string, version string) Plugin {
 
 		accessScheme:   runtime.MustNewDefaultScheme(&rt, &runtime.UnstructuredVersionedTypedObject{}, false, nil),
 		uploaderScheme: runtime.MustNewDefaultScheme(&rt, &runtime.UnstructuredVersionedTypedObject{}, false, nil),
+
+		actions: map[string]Action{},
+
 		descriptor: internal.Descriptor{
 			Version:       internal.VERSION,
 			PluginName:    name,
@@ -69,6 +73,9 @@ func (p *plugin) Version() string {
 }
 
 func (p *plugin) Descriptor() internal.Descriptor {
+	if p.tweaker != nil {
+		return p.tweaker(p.descriptor)
+	}
 	return p.descriptor
 }
 
@@ -82,6 +89,10 @@ func (p *plugin) SetLong(s string) {
 
 func (p *plugin) SetShort(s string) {
 	p.descriptor.Short = s
+}
+
+func (p *plugin) SetDescriptorTweaker(t func(descriptor internal.Descriptor) internal.Descriptor) {
+	p.tweaker = t
 }
 
 func (p *plugin) SetConfigParser(config func(raw json.RawMessage) (interface{}, error)) {
@@ -297,9 +308,10 @@ func (p *plugin) RegisterAction(a Action) error {
 	}
 
 	act := internal.ActionDescriptor{
-		Name:        a.Name(),
-		Versions:    vers,
-		Description: a.Description(),
+		Name:             a.Name(),
+		Versions:         vers,
+		Description:      a.Description(),
+		DefaultSelectors: a.DefaultSelectors(),
 	}
 	p.descriptor.Actions = append(p.descriptor.Actions, act)
 	p.actions[a.Name()] = a

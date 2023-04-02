@@ -24,6 +24,7 @@ import (
 	creds "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/credentials"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/action"
 	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/componentarchive"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/components"
@@ -39,6 +40,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/create"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/describe"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/download"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/execute"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/get"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/hash"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/install"
@@ -198,6 +200,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(bootstrap.NewCommand(opts.Context))
 	cmd.AddCommand(clean.NewCommand(opts.Context))
 	cmd.AddCommand(install.NewCommand(opts.Context))
+	cmd.AddCommand(execute.NewCommand(opts.Context))
 	cmd.AddCommand(controller.NewCommand(opts.Context))
 
 	cmd.AddCommand(cmdutils.HideCommand(componentarchive.NewCommand(opts.Context)))
@@ -206,6 +209,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(cmdutils.HideCommand(sources.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(components.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(plugins.NewCommand(opts.Context)))
+	cmd.AddCommand(cmdutils.HideCommand(action.NewCommand(opts.Context)))
 
 	cmd.AddCommand(cmdutils.HideCommand(cachecmds.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(ocicmds.NewCommand(opts.Context)))

@@ -43,6 +43,8 @@ type Plugin interface {
 	Version() string
 	Descriptor() internal.Descriptor
 
+	SetDescriptorTweaker(func(descriptor internal.Descriptor) internal.Descriptor)
+
 	SetShort(s string)
 	SetLong(s string)
 	SetConfigParser(config func(raw json.RawMessage) (interface{}, error))
@@ -120,6 +122,7 @@ type ActionResult action.ActionResult
 type Action interface {
 	Name() string
 	Description() string
+	DefaultSelectors() []string
 
 	Execute(p Plugin, spec ActionSpec, creds credentials.DirectCredentials) (result ActionResult, err error)
 }
