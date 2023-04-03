@@ -11,7 +11,6 @@ import (
 
 	. "github.com/open-component-model/ocm/pkg/exception"
 	. "github.com/open-component-model/ocm/pkg/finalizer"
-	"github.com/open-component-model/ocm/pkg/toi"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
@@ -28,6 +27,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/toi"
 	"github.com/open-component-model/ocm/pkg/toi/support"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
@@ -177,7 +177,10 @@ func (e *Execution) Execute(cfg *Config, values map[string]interface{}, kubeconf
 	e.fs.Remove(path)
 
 	spec := Must1f(R1(acc.Access()), "getting access specification")
-	data, _ := json.Marshal(spec)
+	data, err := json.Marshal(spec)
+	if err != nil {
+		return err
+	}
 	toi.Log.Info("starting download", "path", path, "access", string(data))
 
 	_, e.path = Must2f(R2(download.For(e.Context).Download(common.NewPrinter(e.OutputContext.StdOut()), acc, path, e.fs)), "downloading helm chart")

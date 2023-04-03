@@ -61,7 +61,7 @@ func (s *StaticContext) Configure(config *logcfg.Config, extra ...string) error 
 	return logcfg.Configure(logContext, config)
 }
 
-// global is a wrapper for the default global log content
+// global is a wrapper for the default global log content.
 var global = NewContext(nil)
 
 // logContext is the global ocm log context.
