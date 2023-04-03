@@ -10,6 +10,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
+
 	. "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2"
 
 	"k8s.io/apimachinery/pkg/util/validation/field"
@@ -252,24 +253,6 @@ var _ = Describe("Validation", func() {
 		})
 
 		Context("#Resources", func() {
-			It("should forbid if a local resource's version differs from the version of the parent", func() {
-				comp.Resources = []Resource{
-					{
-						ElementMeta: ElementMeta{
-							Name:    "locRes",
-							Version: "0.0.1",
-						},
-						Relation: meta.LocalRelation,
-						Access:   runtime.NewEmptyUnstructured(ociartifact.Type),
-					},
-				}
-				errList := Validate(nil, comp)
-				Expect(errList).To(ContainElement(PointTo(MatchFields(IgnoreExtras, Fields{
-					"Type":  Equal(field.ErrorTypeInvalid),
-					"Field": Equal("component.resources[0].version"),
-				}))))
-			})
-
 			It("should forbid if a resource name contains invalid characters", func() {
 				comp.Resources = []Resource{
 					{

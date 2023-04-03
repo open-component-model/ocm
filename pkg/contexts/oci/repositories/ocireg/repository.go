@@ -19,6 +19,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/docker"
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/logging"
 )
 
 type RepositoryInfo struct {
@@ -100,6 +101,9 @@ func (r *Repository) getResolver(comp string) (resolve.Resolver, error) {
 			return nil, err
 		}
 	}
+	if creds == nil {
+		logging.Logger(REALM).Trace("no credentials", "comp", comp, "base", r.spec.BaseURL)
+	}
 
 	opts := docker.ResolverOptions{
 		Hosts: docker.ConvertHosts(config.ConfigureHosts(context.Background(), config.HostOptions{
@@ -109,8 +113,14 @@ func (r *Repository) getResolver(comp string) (resolve.Resolver, error) {
 					if p == "" {
 						p = creds.GetProperty(credentials.ATTR_PASSWORD)
 					}
-					return creds.GetProperty(credentials.ATTR_USERNAME), p, err
+					pw := ""
+					if pw != "" {
+						pw = "***"
+					}
+					logging.Logger(REALM).Trace("query credentials", "host", host, "user", creds.GetProperty(credentials.ATTR_USERNAME), "pass", pw)
+					return creds.GetProperty(credentials.ATTR_USERNAME), p, nil
 				}
+				logging.Logger(REALM).Trace("no credentials", "host", host)
 				return "", "", nil
 			},
 			DefaultScheme: r.info.Scheme,

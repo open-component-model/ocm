@@ -12,6 +12,7 @@ import (
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
+	"github.com/open-component-model/ocm/pkg/utils/panics"
 )
 
 type Index = IndexArray
@@ -72,6 +73,10 @@ type ProcessingEntry struct {
 type SubEntries int
 
 func NewEntry(i Index, v interface{}, opts ...interface{}) ProcessingEntry {
+	// If this is caught the only upstream problem would be an empty entry.
+	// Which is fine if the user understands that it can happen.
+	defer panics.HandlePanic()
+
 	max := -1
 	sub := 0
 	valid := true

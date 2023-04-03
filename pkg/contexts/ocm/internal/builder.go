@@ -189,7 +189,7 @@ func (d *delegatingDecoder) Decode(data []byte, unmarshaler runtime.Unmarshaler)
 	if d.delegate == nil && ociimpl != nil {
 		def, err := ociimpl(d.oci)
 		if err != nil {
-			panic(fmt.Sprintf("cannot create oci default decoder: %s", err))
+			return nil, fmt.Errorf("cannot create oci default decoder: %w", err)
 		}
 		d.delegate = def
 	}
