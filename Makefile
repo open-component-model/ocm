@@ -26,6 +26,7 @@ build: ${SOURCES}
 	go build -ldflags $(BUILD_FLAGS) -o bin/ocm ./cmds/ocm
 	go build -ldflags $(BUILD_FLAGS) -o bin/helminstaller ./cmds/helminstaller
 	go build -ldflags $(BUILD_FLAGS) -o bin/demo ./cmds/demoplugin
+	go build -ldflags $(BUILD_FLAGS) -o bin/ecrplugin ./cmds/ecrplugin
 
 
 .PHONY: install-requirements
@@ -37,15 +38,15 @@ prepare: generate format build test check
 
 .PHONY: format
 format:
-	@$(REPO_ROOT)/hack/format.sh $(REPO_ROOT)/pkg $(REPO_ROOT)/cmds/ocm $(REPO_ROOT)/cmds/helminstaller
+	@$(REPO_ROOT)/hack/format.sh $(REPO_ROOT)/pkg $(REPO_ROOT)/cmds/ocm $(REPO_ROOT)/cmds/helminstaller $(REPO_ROOT)/cmds/ecrplugin $(REPO_ROOT)/cmds/demoplugin
 
 .PHONY: check
 check:
-	@$(REPO_ROOT)/hack/check.sh --golangci-lint-config=./.golangci.yaml $(REPO_ROOT)/cmds/ocm $(REPO_ROOT)/cmds/helminstaller/... $(REPO_ROOT)/pkg/...
+	@$(REPO_ROOT)/hack/check.sh --golangci-lint-config=./.golangci.yaml $(REPO_ROOT)/cmds/ocm $(REPO_ROOT)/cmds/helminstaller/... $(REPO_ROOT)/cmds/ecrplugin/... $(REPO_ROOT)/cmds/demoplugin/... $(REPO_ROOT)/pkg/...
 
 .PHONY: force-test
 force-test:
-	@go test --count=1 $(REPO_ROOT)/cmds/ocm $(REPO_ROOT)/cmds/helminstaller $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/pkg/...
+	@go test --count=1 $(REPO_ROOT)/cmds/ocm $(REPO_ROOT)/cmds/helminstaller $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/ecrplugin/... $(REPO_ROOT)/cmds/demoplugin/... $(REPO_ROOT)/pkg/...
 
 .PHONY: test
 test:

@@ -15,15 +15,16 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/common"
+	commonppi "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/common"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const (
 	Name     = "get"
-	OptCreds = common.OptCreds
+	OptCreds = commonppi.OptCreds
 )
 
 func New(p ppi.Plugin) *cobra.Command {
@@ -74,7 +75,7 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 
 	m := p.GetAccessMethod(spec.GetKind(), spec.GetVersion())
 	if m == nil {
-		return errors.ErrUnknown(ppi.KIND_ACCESSMETHOD, spec.GetType())
+		return errors.ErrUnknown(descriptor.KIND_ACCESSMETHOD, spec.GetType())
 	}
 	_, err = m.ValidateSpecification(p, spec)
 	if err != nil {

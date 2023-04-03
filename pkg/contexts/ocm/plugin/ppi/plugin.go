@@ -10,7 +10,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/internal"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -19,8 +19,8 @@ import (
 type plugin struct {
 	name       string
 	version    string
-	descriptor internal.Descriptor
-	tweaker    func(descriptor internal.Descriptor) internal.Descriptor
+	descriptor descriptor.Descriptor
+	tweaker    func(descriptor descriptor.Descriptor) descriptor.Descriptor
 	options    Options
 
 	downloaders  map[string]Downloader
@@ -56,8 +56,8 @@ func NewPlugin(name string, version string) Plugin {
 
 		actions: map[string]Action{},
 
-		descriptor: internal.Descriptor{
-			Version:       internal.VERSION,
+		descriptor: descriptor.Descriptor{
+			Version:       descriptor.VERSION,
 			PluginName:    name,
 			PluginVersion: version,
 		},
@@ -72,7 +72,7 @@ func (p *plugin) Version() string {
 	return p.version
 }
 
-func (p *plugin) Descriptor() internal.Descriptor {
+func (p *plugin) Descriptor() descriptor.Descriptor {
 	if p.tweaker != nil {
 		return p.tweaker(p.descriptor)
 	}
@@ -91,7 +91,7 @@ func (p *plugin) SetShort(s string) {
 	p.descriptor.Short = s
 }
 
-func (p *plugin) SetDescriptorTweaker(t func(descriptor internal.Descriptor) internal.Descriptor) {
+func (p *plugin) SetDescriptorTweaker(t func(descriptor descriptor.Descriptor) descriptor.Descriptor) {
 	p.tweaker = t
 }
 
@@ -259,7 +259,7 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 	}
 	vers := m.Version()
 	if vers == "" {
-		meth := internal.AccessMethodDescriptor{
+		meth := descriptor.AccessMethodDescriptor{
 			Name:        m.Name(),
 			Description: m.Description(),
 			Format:      m.Format(),
@@ -269,7 +269,7 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 		p.methods[m.Name()] = m
 		vers = "v1"
 	}
-	meth := internal.AccessMethodDescriptor{
+	meth := descriptor.AccessMethodDescriptor{
 		Name:        m.Name(),
 		Version:     vers,
 		Description: m.Description(),
@@ -307,7 +307,7 @@ func (p *plugin) RegisterAction(a Action) error {
 		return errors.ErrNotSupported("action", a.Name())
 	}
 
-	act := internal.ActionDescriptor{
+	act := descriptor.ActionDescriptor{
 		Name:             a.Name(),
 		Versions:         vers,
 		Description:      a.Description(),

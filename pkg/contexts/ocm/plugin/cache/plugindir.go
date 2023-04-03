@@ -13,7 +13,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/internal"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/info"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -55,7 +55,7 @@ func (c *pluginDirImpl) Get(name string) Plugin {
 	return nil
 }
 
-func (c *pluginDirImpl) add(name string, desc *internal.Descriptor, path string, errmsg string, list *errors.ErrorList) {
+func (c *pluginDirImpl) add(name string, desc *descriptor.Descriptor, path string, errmsg string, list *errors.ErrorList) {
 	c.plugins[name] = NewPlugin(name, path, desc, errmsg)
 	if path != "" {
 		src, _ := ReadPluginSource(filepath.Dir(path), filepath.Base(path))
@@ -93,14 +93,14 @@ func (c *pluginDirImpl) scan(path string) error {
 	return list.Result()
 }
 
-func GetPluginInfo(execpath string) (*internal.Descriptor, error) {
+func GetPluginInfo(execpath string) (*descriptor.Descriptor, error) {
 	result, err := Exec(execpath, nil, nil, nil, info.NAME)
 	if err != nil {
 		return nil, err
 	}
 
 	// TODO: Version handling by scheme
-	var desc internal.Descriptor
+	var desc descriptor.Descriptor
 	if err = json.Unmarshal(result, &desc); err != nil {
 		return nil, errors.Wrapf(err, "cannot unmarshal plugin descriptor: %s", err.Error())
 	}

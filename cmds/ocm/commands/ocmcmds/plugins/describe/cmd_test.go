@@ -55,6 +55,7 @@ Actions:
     test action
   Versions:
   - v1 (best matching)
+  Handler accepts standard credentials
 ----------------------
 Plugin Name:      test
 Plugin Version:   v1

@@ -13,13 +13,13 @@ import (
 
 	handler "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/pluginhdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/plugins/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/common"
 	"github.com/open-component-model/ocm/pkg/generics"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
@@ -88,7 +88,7 @@ var outputs = output.NewOutputs(getRegular, output.Outputs{
 }).AddManifestOutputs()
 
 func getRegular(opts *output.Options) output.Output {
-	return TableOutput(opts, mapGetRegularOutput, "FEATURES").New()
+	return TableOutput(opts, mapGetRegularOutput, "CAPABILITIES").New()
 }
 
 func getWide(opts *output.Options) output.Output {

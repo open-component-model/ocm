@@ -11,39 +11,33 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/internal"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 type (
-	Descriptor             = internal.Descriptor
-	ActionSpecInfo         = internal.ActionSpecInfo
-	AccessSpecInfo         = internal.AccessSpecInfo
-	UploadTargetSpecInfo   = internal.UploadTargetSpecInfo
-	UploaderKey            = internal.UploaderKey
-	UploaderDescriptor     = internal.UploaderDescriptor
-	DownloaderKey          = internal.DownloaderKey
-	DownloaderDescriptor   = internal.DownloaderDescriptor
-	AccessMethodDescriptor = internal.AccessMethodDescriptor
-	CLIOption              = internal.CLIOption
+	Descriptor             = descriptor.Descriptor
+	UploaderKey            = descriptor.UploaderKey
+	UploaderDescriptor     = descriptor.UploaderDescriptor
+	DownloaderKey          = descriptor.DownloaderKey
+	DownloaderDescriptor   = descriptor.DownloaderDescriptor
+	AccessMethodDescriptor = descriptor.AccessMethodDescriptor
+	CLIOption              = descriptor.CLIOption
+
+	ActionSpecInfo       = internal.ActionSpecInfo
+	AccessSpecInfo       = internal.AccessSpecInfo
+	UploadTargetSpecInfo = internal.UploadTargetSpecInfo
 )
 
-const (
-	KIND_PLUGIN       = internal.KIND_PLUGIN
-	KIND_DOWNLOADER   = internal.KIND_DOWNLOADER
-	KIND_UPLOADER     = internal.KIND_UPLOADER
-	KIND_ACCESSMETHOD = internal.KIND_ACCESSMETHOD
-	KIND_ACTION       = internal.KIND_ACTION
-)
-
-var TAG = internal.TAG
+var TAG = descriptor.TAG
 
 type Plugin interface {
 	Name() string
 	Version() string
-	Descriptor() internal.Descriptor
+	Descriptor() descriptor.Descriptor
 
-	SetDescriptorTweaker(func(descriptor internal.Descriptor) internal.Descriptor)
+	SetDescriptorTweaker(func(descriptor descriptor.Descriptor) descriptor.Descriptor)
 
 	SetShort(s string)
 	SetLong(s string)
