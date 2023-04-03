@@ -183,6 +183,8 @@ type ActionInfo struct {
 	ActionDesc    string
 	Versions      []string
 	Selectors     []string
+	ConsumerType  string
+	Attributes    []string
 	Description   string
 	KnownVersions []string
 	BestVersion   string
@@ -195,9 +197,10 @@ func GetActionInfo(actions []plugin.ActionDescriptor) map[string]*ActionInfo {
 		i := found[a.Name]
 		if i == nil {
 			i = &ActionInfo{
-				ActionDesc: a.Description,
-				Versions:   append(a.Versions[:0:0], a.Versions...),
-				Selectors:  append(a.DefaultSelectors[:0:0], a.DefaultSelectors...),
+				ActionDesc:   a.Description,
+				Versions:     append(a.Versions[:0:0], a.Versions...),
+				Selectors:    append(a.DefaultSelectors[:0:0], a.DefaultSelectors...),
+				ConsumerType: a.ConsumerType,
 			}
 			if err := scheme.SortVersions(i.Versions); err != nil {
 				sort.Strings(i.Versions)
@@ -211,6 +214,7 @@ func GetActionInfo(actions []plugin.ActionDescriptor) map[string]*ActionInfo {
 		} else {
 			i.Description = ad.Description()
 			i.KnownVersions = action.SupportedActionVersions(a.Name)
+			i.Attributes = ad.ConsumerAttributes()
 			for _, v := range i.KnownVersions {
 				for _, f := range a.Versions {
 					if v == f {
@@ -258,6 +262,15 @@ func DescribeActions(p plugin.Plugin, out common.Printer) {
 					}
 				}
 				out.Printf("- %s%s\n", vn, msg)
+			}
+		}
+		if a.ConsumerType == "" {
+			out.Printf("Handler accepts standard credentials\n")
+		} else {
+			out.Printf("Consumer type: %s (consumer attributes described by action type)\n", a.ConsumerType)
+			for _, p := range a.Attributes {
+				out.Printf("- %s\n", p)
+
 			}
 		}
 	}

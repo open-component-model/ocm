@@ -27,7 +27,7 @@ following fields:
   The name and version of the action result. It must match the value
   from the action specification.
 
-- **<code>error</code>** *string*
+- **<code>message</code>** *string*
 
   An error message.
 

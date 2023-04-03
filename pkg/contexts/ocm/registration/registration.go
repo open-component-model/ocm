@@ -36,7 +36,7 @@ func RegisterExtensions(ctx ocm.Context) error {
 				ctx.Logger(TAG).Error("cannot create action handler for plugin", "plugin", p.Name(), "handler", a.Name)
 			} else {
 				for _, s := range a.DefaultSelectors {
-					err := ctx.GetActions().Register(h, handlers.ForAction(a.Name), action.Selector(s))
+					err := ctx.AttributesContext().GetActions().Register(h, handlers.ForAction(a.Name), action.Selector(s))
 					if err != nil {
 						ctx.Logger(TAG).LogError(err, "cannot register action handler for plugin", "plugin", p.Name(), "handler", a.Name, "selector", s)
 					}

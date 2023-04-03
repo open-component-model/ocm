@@ -7,6 +7,7 @@ package actions
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -20,8 +21,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-const defaultRegion = "us-west-1"
-
 type Action struct{}
 
 var _ ppi.Action = (*Action)(nil)
@@ -34,15 +33,27 @@ func (a Action) Description() string {
 	return "Create ECR repository if it does not yet exist."
 }
 
+func (a Action) ConsumerType() string {
+	return "AWS"
+}
+
 func (a Action) Execute(p ppi.Plugin, spec ppi.ActionSpec, creds ocmcreds.DirectCredentials) (result ppi.ActionResult, err error) {
 	prepare, ok := spec.(*oci_repository_prepare.ActionSpec)
 	if !ok {
 		return nil, fmt.Errorf("invalid spec type %T", spec)
 	}
 
+	path := strings.Split(prepare.Hostname, ".")
+	if len(path) < 5 {
+		return nil, fmt.Errorf("unknown ecr host %q", prepare.Hostname)
+	}
+	if path[len(path)-4] != "ecr" {
+		return nil, fmt.Errorf("unknown ecr host %q", prepare.Hostname)
+	}
+	region := path[len(path)-3]
 	ctx := context.Background()
 	opts := []func(*config.LoadOptions) error{
-		config.WithRegion(defaultRegion),
+		config.WithRegion(region),
 	}
 
 	var awsCred aws.CredentialsProvider = aws.AnonymousCredentials{}
@@ -63,10 +74,10 @@ func (a Action) Execute(p ppi.Plugin, spec ppi.ActionSpec, creds ocmcreds.Direct
 	client := ecr.NewFromConfig(cfg, func(o *ecr.Options) {
 		// Pass in creds because of https://github.com/aws/aws-sdk-go-v2/issues/1797
 		o.Credentials = awsCred
-		o.Region = defaultRegion
+		o.Region = region
 	})
 
-	msg := fmt.Sprintf("repository %q already exists", prepare.Repository)
+	msg := fmt.Sprintf("repository %q already exists in region %s", prepare.Repository, region)
 	in := &ecr.DescribeRepositoriesInput{
 		RepositoryNames: []string{prepare.Repository},
 	}
@@ -91,7 +102,7 @@ func (a Action) Execute(p ppi.Plugin, spec ppi.ActionSpec, creds ocmcreds.Direct
 				}
 				return nil, err
 			}
-			return oci_repository_prepare.Result(fmt.Sprintf("repository %q created", prepare.Repository)), nil
+			return oci_repository_prepare.Result(fmt.Sprintf("repository %q created in region %s", prepare.Repository, region)), nil
 		}
 		return nil, err
 	}

@@ -123,6 +123,7 @@ type Action interface {
 	Name() string
 	Description() string
 	DefaultSelectors() []string
+	ConsumerType() string
 
 	Execute(p Plugin, spec ActionSpec, creds credentials.DirectCredentials) (result ActionResult, err error)
 }

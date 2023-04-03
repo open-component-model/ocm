@@ -7,6 +7,7 @@ package api
 import (
 	"reflect"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/runtime/scheme"
 )
@@ -14,6 +15,7 @@ import (
 type Action interface {
 	Name() string
 	Description() string
+	ConsumerAttributes() []string
 	SpecificationProto() reflect.Type
 	ResultProto() reflect.Type
 }
@@ -31,6 +33,7 @@ type ActionSpec interface {
 	runtime.VersionedTypedObject
 	SetType(name string)
 	Selector() Selector
+	GetConsumerAttributes() common.Properties
 }
 
 type ActionSpecType scheme.Type[ActionSpec]

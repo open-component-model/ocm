@@ -20,6 +20,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
+	"github.com/open-component-model/ocm/pkg/generics"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -87,11 +88,11 @@ var outputs = output.NewOutputs(getRegular, output.Outputs{
 }).AddManifestOutputs()
 
 func getRegular(opts *output.Options) output.Output {
-	return TableOutput(opts, mapGetRegularOutput).New()
+	return TableOutput(opts, mapGetRegularOutput, "FEATURES").New()
 }
 
 func getWide(opts *output.Options) output.Output {
-	return TableOutput(opts, mapGetWideOutput, "ACCESSMETHODS", "UPLOADERS", "DOWNLOADERS").New()
+	return TableOutput(opts, mapGetWideOutput, "ACCESSMETHODS", "UPLOADERS", "DOWNLOADERS", "ACTIONS").New()
 }
 
 func mapGetRegularOutput(e interface{}) interface{} {
@@ -101,7 +102,21 @@ func mapGetRegularOutput(e interface{}) interface{} {
 	if src != nil {
 		loc = src.Component + ":" + src.Version
 	}
-	return []string{p.Name(), p.Version(), loc, p.Message()}
+
+	var features []string
+	if len(p.GetDescriptor().AccessMethods) > 0 {
+		features = append(features, "accessmethods")
+	}
+	if len(p.GetDescriptor().Uploaders) > 0 {
+		features = append(features, "uploaders")
+	}
+	if len(p.GetDescriptor().Downloaders) > 0 {
+		features = append(features, "downloaders")
+	}
+	if len(p.GetDescriptor().Actions) > 0 {
+		features = append(features, "actions")
+	}
+	return []string{p.Name(), p.Version(), loc, p.Message(), strings.Join(features, ",")}
 }
 
 func mapGetWideOutput(e interface{}) interface{} {
@@ -118,20 +133,28 @@ func mapGetWideOutput(e interface{}) interface{} {
 		found[m.Name] = l
 	}
 
-	var list []string
+	var methods []string
 	for _, m := range utils2.StringMapKeys(found) {
 		l := found[m]
 		if len(l) == 0 {
-			list = append(list, m)
+			methods = append(methods, m)
 		} else {
 			sort.Strings(l)
-			list = append(list, fmt.Sprintf("%s[%s]", m, strings.Join(l, ",")))
+			methods = append(methods, fmt.Sprintf("%s[%s]", m, strings.Join(l, ",")))
 		}
 	}
+
+	actions := generics.Set[string]{}
+	for _, a := range d.Actions {
+		actions.Add(a.Name)
+	}
+	actionList := actions.AsArray()
+	sort.Strings(actionList)
 
 	// a working type inference would be really great
 	ups := common.DescribeElements[plugin.UploaderDescriptor, plugin.UploaderKey](d.Uploaders)
 	downs := common.DescribeElements[plugin.DownloaderDescriptor, plugin.DownloaderKey](d.Downloaders)
 
-	return output.Fields(mapGetRegularOutput(e), strings.Join(list, ","), ups, downs)
+	reg := output.Fields(mapGetRegularOutput(e))
+	return output.Fields(reg[:len(reg)-1], strings.Join(methods, ","), ups, downs, strings.Join(actionList, ","))
 }

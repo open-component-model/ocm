@@ -34,6 +34,7 @@ type NamespaceContainer struct {
 	fetcher   resolve.Fetcher
 	pusher    resolve.Pusher
 	blobs     *BlobContainers
+	checked   bool
 }
 
 var (
@@ -78,6 +79,11 @@ func (n *NamespaceContainer) Close() error {
 }
 
 func (n *NamespaceContainer) getPusher(vers string) (resolve.Pusher, error) {
+	err := n.assureCreated()
+	if err != nil {
+		return nil, err
+	}
+
 	ref := n.repo.getRef(n.namespace, vers)
 	resolver := n.resolver
 
@@ -138,6 +144,10 @@ func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
 	if err != nil {
 		return fmt.Errorf("failed to retrieve blob data: %w", err)
 	}
+	err = n.assureCreated()
+	if err != nil {
+		return err
+	}
 	if _, _, err := blobData.AddBlob(blob); err != nil {
 		log.Debug("adding blob failed", "digest", blob.Digest(), "error", err.Error())
 		return fmt.Errorf("unable to add blob: %w", err)
@@ -172,6 +182,25 @@ func (n *NamespaceContainer) GetArtifact(vers string) (cpi.ArtifactAccess, error
 	return cpi.NewArtifactForBlob(n, accessio.BlobAccessForDataAccess(desc.Digest, desc.Size, desc.MediaType, acc))
 }
 
+func (n *NamespaceContainer) assureCreated() error {
+	if n.checked {
+		return nil
+	}
+	var props common.Properties
+	if creds, err := n.repo.getCreds(n.namespace); err == nil && creds != nil {
+		props = creds.Properties()
+	}
+	r, err := oci_repository_prepare.Execute(n.repo.ctx.GetActions(), n.repo.info.HostPort(), n.namespace, props)
+	n.checked = true
+	if err != nil {
+		return err
+	}
+	if r != nil {
+		n.repo.ctx.Logger().Debug("prepare action executed", "message", r.Message)
+	}
+	return nil
+}
+
 func (n *NamespaceContainer) AddArtifact(artifact cpi.Artifact, tags ...string) (access accessio.BlobAccess, err error) {
 	blob, err := artifact.Blob()
 	if err != nil {
@@ -187,12 +216,6 @@ func (n *NamespaceContainer) AddArtifact(artifact cpi.Artifact, tags ...string) 
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve blob data: %w", err)
 	}
-
-	var props common.Properties
-	if creds, err := n.repo.getCreds(n.namespace); err == nil && creds != nil {
-		props = creds.Properties()
-	}
-	oci_repository_prepare.Execute(n.repo.ctx.GetActions(), n.repo.info.HostPort(), n.namespace, props)
 
 	_, _, err = blobData.AddBlob(blob)
 	if err != nil {

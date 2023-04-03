@@ -16,7 +16,7 @@ import (
 const KIND_ACTION = "action"
 
 type ActionTypeRegistry interface {
-	RegisterAction(name string, specproto ActionSpec, resultproto ActionResult, description string) error
+	RegisterAction(name string, specproto ActionSpec, resultproto ActionResult, description string, attrs ...string) error
 	RegisterActionType(name string, typ ActionType) error
 
 	DecodeActionSpec(data []byte, unmarshaler runtime.Unmarshaler) (ActionSpec, error)
@@ -32,6 +32,7 @@ type ActionTypeRegistry interface {
 type action struct {
 	name        string
 	description string
+	attributes  []string
 	specproto   reflect.Type
 	resultproto reflect.Type
 }
@@ -44,6 +45,10 @@ func (a *action) Name() string {
 
 func (a *action) Description() string {
 	return a.description
+}
+
+func (a *action) ConsumerAttributes() []string {
+	return a.attributes
 }
 
 func (a *action) SpecificationProto() reflect.Type {
@@ -69,7 +74,7 @@ func NewActionTypeRegistry() ActionTypeRegistry {
 	}
 }
 
-func (r *actionRegistry) RegisterAction(name string, specproto ActionSpec, resultproto ActionResult, descriptopn string) error {
+func (r *actionRegistry) RegisterAction(name string, specproto ActionSpec, resultproto ActionResult, description string, attrs ...string) error {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
@@ -88,7 +93,8 @@ func (r *actionRegistry) RegisterAction(name string, specproto ActionSpec, resul
 
 	ai = &action{
 		name:        name,
-		description: descriptopn,
+		description: description,
+		attributes:  append(attrs[:0:0], attrs...),
 		specproto:   st,
 		resultproto: rt,
 	}
@@ -147,8 +153,8 @@ func (r *actionRegistry) SupportedActionVersions(name string) []string {
 
 var registry = NewActionTypeRegistry()
 
-func RegisterAction(name string, specproto ActionSpec, resultproto ActionResult, description string) error {
-	return registry.RegisterAction(name, specproto, resultproto, description)
+func RegisterAction(name string, specproto ActionSpec, resultproto ActionResult, description string, attrs ...string) error {
+	return registry.RegisterAction(name, specproto, resultproto, description, attrs...)
 }
 
 func RegisterType(kind string, version string, typ ActionType) error {

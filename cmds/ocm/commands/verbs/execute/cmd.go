@@ -7,7 +7,7 @@ package execute
 import (
 	"github.com/spf13/cobra"
 
-	action "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/action/execute"
+	action "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/action/execute"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"

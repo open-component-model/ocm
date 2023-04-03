@@ -141,6 +141,7 @@ attributes are supported:
 * [ocm <b>create</b>](ocm_create.md)	 &mdash; Create transport or component archive
 * [ocm <b>describe</b>](ocm_describe.md)	 &mdash; Describe various elements by using appropriate sub commands.
 * [ocm <b>download</b>](ocm_download.md)	 &mdash; Download oci artifacts, resources or complete components
+* [ocm <b>execute</b>](ocm_execute.md)	 &mdash; Execute an element.
 * [ocm <b>get</b>](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm <b>hash</b>](ocm_hash.md)	 &mdash; Hash and normalization operations
 * [ocm <b>install</b>](ocm_install.md)	 &mdash; Install elements.

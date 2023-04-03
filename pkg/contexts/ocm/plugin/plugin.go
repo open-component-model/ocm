@@ -11,7 +11,10 @@ import (
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	action2 "github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/config"
@@ -69,6 +72,23 @@ func (p *pluginImpl) SetConfig(config json.RawMessage) {
 }
 
 func (p *pluginImpl) Action(spec ppi.ActionSpec, creds json.RawMessage) (ppi.ActionResult, error) {
+	desc := p.GetActionDescriptor(spec.GetKind())
+	if desc == nil {
+		return nil, errors.ErrNotSupported(KIND_ACTION, spec.GetKind(), KIND_PLUGIN, p.Name())
+	}
+	if desc.ConsumerType != "" {
+		cid := spec.GetConsumerAttributes()
+		cid[identity.ID_TYPE] = desc.ConsumerType
+		c, err := credentials.CredentialsForConsumer(p.Context(), credentials.ConsumerIdentity(cid), hostpath.Matcher)
+		if err != nil || c == nil {
+			return nil, errors.ErrNotFound(credentials.KIND_CREDENTIALS, cid.String())
+		}
+		creds, err = json.Marshal(c.Properties())
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot marshal credentials")
+		}
+	}
+
 	data, err := action2.EncodeActionSpec(spec)
 	if err != nil {
 		return nil, err

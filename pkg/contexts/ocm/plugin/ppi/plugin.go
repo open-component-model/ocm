@@ -312,6 +312,7 @@ func (p *plugin) RegisterAction(a Action) error {
 		Versions:         vers,
 		Description:      a.Description(),
 		DefaultSelectors: a.DefaultSelectors(),
+		ConsumerType:     a.ConsumerType(),
 	}
 	p.descriptor.Actions = append(p.descriptor.Actions, act)
 	p.actions[a.Name()] = a

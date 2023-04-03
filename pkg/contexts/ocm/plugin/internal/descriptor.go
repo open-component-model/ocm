@@ -76,6 +76,7 @@ type ActionDescriptor struct {
 	Name             string   `json:"name"`
 	Versions         []string `json:"versions,omitempty"`
 	Description      string   `json:"description,omitempty"`
+	ConsumerType     string   `json:"consumerType,omitempty"`
 	DefaultSelectors []string `json:"defaultSelectors,omitempty"`
 }
 

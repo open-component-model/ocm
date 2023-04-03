@@ -68,7 +68,7 @@ var _ = Describe("plugin action handler", func() {
 		Expect(result.Message).To(Equal("all good"))
 	})
 
-	FIt("uses default pattern registration", func() {
+	It("uses default pattern registration", func() {
 		registration.RegisterExtensions(ctx)
 		result := Must(oci_repository_prepare.Execute(ctx.GetActions(), "xyz.dkr.ecr.us-west-2.amazonaws.com", "mandelsoft", nil))
 		Expect(result).NotTo(BeNil())
@@ -89,46 +89,5 @@ var _ = Describe("plugin action handler", func() {
 		opts := handlers.NewOptions(handlers.ForAction(oci_repository_prepare.Type), handlers.ForAction(oci_repository_prepare.Type), handlers.ForSelectors("mandelsoft.org"))
 		ok := Must(ctx.GetActions().RegisterByName("plugin/action", ctx.OCIContext(), ctx, opts))
 		Expect(ok).To(BeTrue())
-
 	})
-	/*
-		It("uploads after abstract registration", func() {
-			repo := Must(ctf.Open(ctx, accessobj.ACC_READONLY, ARCH, 0, env))
-			defer Close(repo, "source repo")
-
-			cv := Must(repo.LookupComponentVersion(COMP, VERS))
-			defer Close(cv, "source version")
-
-			MustFailWithMessage(registration.RegisterBlobHandlerByName(ctx, "plugin/test", []byte("{}"), registration.ForArtifactType(RSCTYPE)),
-				//MustFailWithMessage(plugin.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", []byte("{}")),
-				"plugin uploader test/testuploader: path missing in repository spec",
-			)
-			repospec := Must(json.Marshal(repoSpec))
-			MustBeSuccessful(registration.RegisterBlobHandlerByName(ctx, "plugin/test", repospec))
-
-			tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
-			defer Close(tgt, "target repo")
-
-			MustBeSuccessful(transfer.TransferVersion(nil, nil, cv, tgt, Must(standard.New(standard.ResourcesByValue()))))
-			Expect(env.DirExists(OUT)).To(BeTrue())
-
-			Expect(vfs.FileExists(osfs.New(), filepath.Join(repodir, REPO, HINT))).To(BeTrue())
-
-			tcv := Must(tgt.LookupComponentVersion(COMP, VERS))
-			defer Close(tcv, "target version")
-
-			r := Must(tcv.GetResourceByIndex(0))
-			a := Must(r.Access())
-
-			var spec AccessSpec
-			MustBeSuccessful(json.Unmarshal(Must(json.Marshal(a)), &spec))
-			Expect(spec).To(Equal(*accessSpec))
-
-			m := Must(a.AccessMethod(tcv))
-			defer Close(m, "method")
-
-			Expect(string(Must(m.Get()))).To(Equal(CONTENT))
-		})
-
-	*/
 })

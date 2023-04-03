@@ -5,14 +5,20 @@
 package oci_repository_prepare
 
 import (
+	"path"
+
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/api"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const Type = "oci.repository.prepare"
 
 func init() {
-	api.RegisterAction(Type, &ActionSpec{}, &ActionResult{}, "Prepare the usage of a repository in an OCI registry.")
+	api.RegisterAction(Type, &ActionSpec{}, &ActionResult{}, "Prepare the usage of a repository in an OCI registry.",
+		identity.ID_HOSTNAME, identity.ID_PORT, identity.ID_PATHPREFIX)
 
 	api.RegisterType(Type, "v1", api.NewActionTypeByProtoTypes(&ActionSpecV1{}, nil, &ActionResultV1{}, nil))
 }
@@ -52,6 +58,16 @@ type ActionSpecV1 struct {
 
 func (s *ActionSpecV1) Selector() api.Selector {
 	return api.Selector(s.Hostname)
+}
+
+func (s *ActionSpecV1) GetConsumerAttributes() common.Properties {
+	host, port, base := utils.SplitLocator(s.Hostname)
+	return common.Properties{
+		identity.ID_TYPE:       identity.CONSUMER_TYPE,
+		identity.ID_HOSTNAME:   host,
+		identity.ID_PATHPREFIX: path.Join(base, s.Repository),
+		identity.ID_PORT:       port,
+	}
 }
 
 type ActionResultV1 struct {
