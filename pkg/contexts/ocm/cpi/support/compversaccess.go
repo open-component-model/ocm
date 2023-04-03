@@ -172,6 +172,25 @@ func (a *componentVersionAccessImpl) GetResourceByIndex(i int) (cpi.ResourceAcce
 	}, nil
 }
 
+func (a *componentVersionAccessImpl) GetResourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]cpi.ResourceAccess, error) {
+	resources, err := a.base.GetDescriptor().GetResourcesByName(name, selectors...)
+	if err != nil {
+		return nil, err
+	}
+
+	result := []cpi.ResourceAccess{}
+	for _, resource := range resources {
+		result = append(result, &ResourceAccess{
+			BaseAccess: &BaseAccess{
+				vers:   a,
+				access: resource.Access,
+			},
+			meta: resource.ResourceMeta,
+		})
+	}
+	return result, nil
+}
+
 func (a *componentVersionAccessImpl) GetResources() []cpi.ResourceAccess {
 	result := []cpi.ResourceAccess{}
 	for _, r := range a.GetDescriptor().Resources {
