@@ -32,6 +32,27 @@ jobs:
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
+
+    - name: Job Settings
+      run: |
+        echo "Release Job Arguments"
+        if ${{ github.event.inputs.release_candidate }}; then
+          v="v$(go run $GITHUB_WORKSPACE/pkg/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})"
+          if [ -n "${{ github.event.inputs.prerelease }}" ]; then
+            echo "Candidate: $v"
+          else 
+            echo "Candidate: $v (taken from source)"
+          fi
+        else
+          v="v$(go run $GITHUB_WORKSPACE/pkg/version/generate print-version)"
+          echo "Final Release: $v"
+          if ${{ github.event.inputs.create_branch }}; then
+            echo "with release branch creation"
+          else
+            echo "without release branch creation"
+          fi
+        fi
+
     - name: Set Base Version
       run: |
         BASE_VERSION=v$(go run $GITHUB_WORKSPACE/pkg/version/generate print-version)
