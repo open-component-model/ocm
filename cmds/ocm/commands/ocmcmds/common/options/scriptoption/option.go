@@ -38,7 +38,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.ScriptFile, "script", "", "", "config name of transfer handler script")
 }
 
-func (o *Option) Complete(ctx clictx.Context) error {
+func (o *Option) Configure(ctx clictx.Context) error {
 	o.FileSystem = ctx.FileSystem()
 	if o.ScriptFile != "" && o.Script != "" {
 		return errors.Newf("only one of --script or --scriptFile may be set")

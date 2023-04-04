@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/scriptoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/stoponexistingoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/uploaderoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/versionconstraintsoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
@@ -55,6 +56,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		lookupoption.New(),
 		overwriteoption.New(),
 		rscbyvalueoption.New(),
+		stoponexistingoption.New(),
 		uploaderoption.New(),
 		scriptoption.New(),
 	)}, utils.Names(Names, names...)...)
@@ -108,9 +110,10 @@ func (o *Command) Run() error {
 
 	thdlr, err := spiff.New(
 		closureoption.From(o),
+		lookupoption.From(o),
 		overwriteoption.From(o),
 		rscbyvalueoption.From(o),
-		lookupoption.From(o),
+		stoponexistingoption.From(o),
 		spiff.Script(scriptoption.From(o).ScriptData),
 		spiff.ScriptFilesystem(o.FileSystem()),
 	)

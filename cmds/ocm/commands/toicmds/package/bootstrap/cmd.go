@@ -29,6 +29,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/toi"
 	defaultd "github.com/open-component-model/ocm/pkg/toi/drivers/default"
 	"github.com/open-component-model/ocm/pkg/toi/install"
 )
@@ -39,7 +40,7 @@ const (
 )
 
 var (
-	Names = names.Components
+	Names = names.Package
 	Verb  = verbs.Bootstrap
 )
 
@@ -56,7 +57,7 @@ type Command struct {
 	Parameters      accessio.DataSource
 }
 
-// NewCommand creates a new ctf command.
+// NewCommand creates a new bootstrap component command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, repooption.New(), lookupoption.New())}, utils.Names(Names, names...)...)
 }
@@ -71,11 +72,11 @@ Use the simple TOI bootstrap mechanism to execute actions for a TOI package reso
 based on the content of an OCM component version and some command input describing
 the dedicated installation target.
 
-The package resource must have the type <code>` + install.TypeTOIPackage + `</code>.
+The package resource must have the type <code>` + toi.TypeTOIPackage + `</code>.
 This is a simple YAML file resource describing the bootstrapping of a dedicated kind
 of software. See also the topic <CMD>ocm toi toi-bootstrapping</CMD>.
 
-THis resource finally describes an executor image, which will be executed in a
+This resource finally describes an executor image, which will be executed in a
 container with the installation source and (instance specific) user settings.
 The container is just executed, the framework make no assumption about the
 meaning/outcome of the execution. Therefore, any kind of actions can be described and
@@ -93,19 +94,69 @@ file.
 If no credentials file name is provided (option -c) the file
 <code>` + DEFAULT_CREDENTIALS_FILE + `</code> is used, if present. If no parameter file name is
 provided (option -p) the file <code>` + DEFAULT_PARAMETER_FILE + `</code> is used, if present.
+
+Using the credentials file it is possible to configure credentials required by
+the installation package or executor. Additionally arbitrary consumer ids
+can be forwarded to executor, which might be required by accessing blobs
+described by external access methods.
+
+The credentials file uses the following yaml format:
+- <code>credentials</code> *map[string]CredentialsSpec*
+
+  The resolution of credentials requested by the package (by name).
+
+- <code>forwardedConsumers</code> *[]ForwardSpec* (optional)
+
+  An optional list of consumer specifications to be forwarded to the OCM
+  configuration provided to the executor.
+
+The *CredentialsSpec* uses the following format:
+
+- <code>consumerId</code> *map[string]string*
+
+  The consumer id used to look up the credentials.
+
+- <code>consumerType</code> *string* (optional) (default: partial)
+
+  The type of the matcher used to match the consumer id.
+
+- <code>reference</code> *yaml*
+
+  A generic credential specification as used in the ocm config file.
+
+- <code>credentials</code> *map[string]string*
+
+  Direct credential fields.
+
+One of <code>consumerId</code>, <code>reference</code> or <code>credentials</code>
+must be configured.
+
+The *ForwardSpec* uses the following format:
+
+- <code>consumerId</code> *map[string]string*
+
+  The consumer id to be forwarded.
+
+- <code>consumerType</code> *string* (optional) (default: partial)
+
+  The type of the matcher used to match the consumer id.
+
+If provided by the package it is possible to download template versions
+for the parameter and credentials file using the command <CMD>ocm bootstrap configuration</CMD>.
 `,
 		Example: `
-$ ocm toi bootstrap componentversion ghcr.io/mandelsoft/ocmdemoinstaller:0.0.1-dev
+$ ocm toi bootstrap package ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 `,
 	}
 	cmd.AddCommand(topicbootstrap.New(o.Context, "toi-bootstrapping"))
 	return cmd
 }
 
-func (o *Command) AddFlags(set *pflag.FlagSet) {
-	set.StringVarP(&o.CredentialsFile, "credentials", "c", "", "credentials file")
-	set.StringVarP(&o.ParameterFile, "parameters", "p", "", "parameter file")
-	set.StringVarP(&o.OutputFile, "outputs", "o", "", "output file/directory")
+func (o *Command) AddFlags(fs *pflag.FlagSet) {
+	o.BaseCommand.AddFlags(fs)
+	fs.StringVarP(&o.CredentialsFile, "credentials", "c", "", "credentials file")
+	fs.StringVarP(&o.ParameterFile, "parameters", "p", "", "parameter file")
+	fs.StringVarP(&o.OutputFile, "outputs", "o", "", "output file/directory")
 }
 
 func (o *Command) Complete(args []string) error {

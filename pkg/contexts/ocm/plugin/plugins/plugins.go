@@ -53,7 +53,7 @@ func (pi *pluginsImpl) GetContext() cpi.Context {
 func (pi *pluginsImpl) Update() {
 	err := pi.updater.Update()
 	if err != nil {
-		pi.ctx.Logger(descriptor.TAG).Error("config update failed", "error", err.Error())
+		pi.ctx.Logger(descriptor.REALM).Error("config update failed", "error", err.Error())
 	}
 }
 

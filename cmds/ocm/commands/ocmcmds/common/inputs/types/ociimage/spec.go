@@ -11,7 +11,6 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
@@ -48,7 +47,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (accessio.TemporaryBlobAccess, string, error) {
 	ctx.Printf("image %s\n", s.Path)
 	ref, err := oci.ParseRef(s.Path)
 	if err != nil {
@@ -71,13 +70,13 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 
 	version := ref.Version()
 	if version == "" || version == "latest" {
-		version = nv.GetVersion()
+		version = info.ComponentVersion.GetVersion()
 	}
 	blob, err := artifactset.SynthesizeArtifactBlob(ns, version)
 	if err != nil {
 		return nil, "", err
 	}
-	return blob, ociartifact.Hint(nv, ref.Repository, s.Repository, version), nil
+	return blob, ociartifact.Hint(info.ComponentVersion, info.ElementName, s.Repository, version), nil
 }
 
 func ValidateRepository(fldPath *field.Path, allErrs field.ErrorList, repo string) field.ErrorList {

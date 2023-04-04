@@ -11,6 +11,7 @@ import (
 
 	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/remotes/docker/config"
+	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
@@ -18,7 +19,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/docker"
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/logging"
+	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -43,18 +44,21 @@ func (r *RepositoryInfo) HostInfo() (string, string, string) {
 }
 
 type Repository struct {
-	ctx  cpi.Context
-	spec *RepositorySpec
-	info *RepositoryInfo
+	ctx    cpi.Context
+	logger logging.UnboundLogger
+	spec   *RepositorySpec
+	info   *RepositoryInfo
 }
 
 var _ cpi.Repository = &Repository{}
 
 func NewRepository(ctx cpi.Context, spec *RepositorySpec, info *RepositoryInfo) (*Repository, error) {
+	urs := spec.UniformRepositorySpec()
 	return &Repository{
-		ctx:  ctx,
-		spec: spec,
-		info: info,
+		ctx:    ctx,
+		logger: logging.DynamicLogger(ctx, REALM, logging.NewAttribute(ocmlog.ATTR_HOST, urs.Host)),
+		spec:   spec,
+		info:   info,
 	}, nil
 }
 
@@ -84,8 +88,9 @@ func (r *Repository) getResolver(comp string) (resolve.Resolver, error) {
 			return nil, err
 		}
 	}
+	logger := r.logger.BoundLogger().WithValues(ocmlog.ATTR_NAMESPACE, comp)
 	if creds == nil {
-		logging.Logger(REALM).Trace("no credentials", "comp", comp, "base", r.spec.BaseURL)
+		logger.Trace("no credentials")
 	}
 
 	opts := docker.ResolverOptions{
@@ -100,10 +105,10 @@ func (r *Repository) getResolver(comp string) (resolve.Resolver, error) {
 					if pw != "" {
 						pw = "***"
 					}
-					logging.Logger(REALM).Trace("query credentials", "host", host, "user", creds.GetProperty(credentials.ATTR_USERNAME), "pass", pw)
+					logger.Trace("query credentials", ocmlog.ATTR_USER, creds.GetProperty(credentials.ATTR_USERNAME), "pass", pw)
 					return creds.GetProperty(credentials.ATTR_USERNAME), p, nil
 				}
-				logging.Logger(REALM).Trace("no credentials", "host", host)
+				logger.Trace("no credentials")
 				return "", "", nil
 			},
 			DefaultScheme: r.info.Scheme,

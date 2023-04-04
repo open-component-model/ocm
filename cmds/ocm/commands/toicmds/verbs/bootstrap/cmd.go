@@ -7,7 +7,7 @@ package bootstrap
 import (
 	"github.com/spf13/cobra"
 
-	components "github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/components/bootstrap"
+	components "github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/package/bootstrap"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"

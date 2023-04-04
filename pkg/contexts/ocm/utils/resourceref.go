@@ -7,11 +7,12 @@ package utils
 import (
 	"fmt"
 
+	. "github.com/open-component-model/ocm/pkg/finalizer"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func ResolveReferencePath(cv ocm.ComponentVersionAccess, path []metav1.Identity, resolver ocm.ComponentVersionResolver) (ocm.ComponentVersionAccess, error) {
@@ -23,7 +24,7 @@ func ResolveReferencePath(cv ocm.ComponentVersionAccess, path []metav1.Identity,
 		return nil, errors.Wrapf(err, "component version already closed")
 	}
 
-	var final utils.Finalizer
+	var final Finalizer
 	defer final.Finalize()
 
 	for _, cr := range path {

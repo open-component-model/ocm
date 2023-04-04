@@ -12,10 +12,12 @@ VERSION                                        := $(shell git describe --tags --
 COMMIT                                         := $(shell git rev-parse --verify HEAD)
 EFFECTIVE_VERSION                              := $(VERSION)-$(COMMIT)
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
+PLATFORM                                       := $(shell go env GOOS)/$(shell go env GOARCH)
 
+CREDS := $(shell $(REPO_ROOT)/hack/githubcreds.sh)
+OCM = go run $(REPO_ROOT)/cmds/ocm $(CREDS)
 
 GEN = $(REPO_ROOT)/gen/$(NAME)
-OCM = go run $(REPO_ROOT)/cmds/ocm
 
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(NAME) -type f)
 OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
@@ -66,11 +68,15 @@ eval-resources:
 build: $(GEN)/image.$(NAME)
 
 $(GEN)/image.$(NAME): $(GEN)/.exists Dockerfile $(CMDSRCS) $(OCMSRCS)
-	docker build -t $(IMAGE):$(VERSION) --file Dockerfile $(REPO_ROOT) \
+	docker buildx build -t $(IMAGE):$(VERSION) --platform $(PLATFORM) --file Dockerfile $(REPO_ROOT) \
           --build-arg COMMIT=$(COMMIT) \
           --build-arg EFFECTIVE_VERSION=$(EFFECTIVE_VERSION) \
           --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE)
 	@touch $(GEN)/image.$(NAME)
+
+push-image:
+	docker tag $(IMAGE):$(VERSION) $(OCMREPO)/$(COMPONENT)/$(NAME):$(VERSION)
+	docker push $(OCMREPO)/$(COMPONENT)/$(NAME):$(VERSION)
 
 .PHONY: multi
 multi: $(GEN)/image.$(NAME).multi
@@ -110,9 +116,11 @@ $(GEN)/.exists:
 
 .PHONY: info
 info:
-	@echo "ROOT:     $(REPO_ROOT)"
-	@echo "VERSION:  $(VERSION)"
-	@echo "COMMIT;   $(COMMIT)"
+	@echo "ROOT:        $(REPO_ROOT)"
+	@echo "VERSION:     $(VERSION)"
+	@echo "COMMIT:      $(COMMIT)"
+	@echo "GITHUBORG:   $(GITHUBORG)"
+	@echo "PATFORM:     $(PLATFORM)"
 
 .PHONY: describe
 describe: $(GEN)/ctf

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package utils_test
+package finalizer_test
 
 import (
 	"fmt"
@@ -10,25 +10,44 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/exception"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 )
 
 type Order []string
 
 func F(n string, order *Order) func() error {
 	return func() error {
-		*order = append(*order, n)
-		return nil
+		return R(n, order)
 	}
 }
 
+func R(n string, order *Order) error {
+	*order = append(*order, n)
+	return nil
+}
+
 var _ = Describe("finalizer", func() {
-	It("finalize in revered order", func() {
-		var finalize utils.Finalizer
+	It("finalize with arbitrary method", func() {
+		var finalize finalizer.Finalizer
+		var order Order
+
+		finalize.With(finalizer.Calling2(R, "A", &order))
+		Expect(order).To(BeNil())
+
+		finalize.Finalize()
+
+		Expect(order).To(Equal(Order{"A"}))
+		Expect(finalize.Length()).To(Equal(0))
+	})
+
+	It("finalize in reversed order", func() {
+		var finalize finalizer.Finalizer
 		var order Order
 
 		finalize.With(F("A", &order))
 		finalize.With(F("B", &order))
+		Expect(order).To(BeNil())
 
 		finalize.Finalize()
 
@@ -37,7 +56,7 @@ var _ = Describe("finalizer", func() {
 	})
 
 	It("is reusable after calling Finalize", func() {
-		var finalize utils.Finalizer
+		var finalize finalizer.Finalizer
 		var order Order
 
 		finalize.With(F("A", &order))
@@ -56,7 +75,7 @@ var _ = Describe("finalizer", func() {
 	})
 
 	It("separately finalizes a Nested finalizer", func() {
-		var finalize utils.Finalizer
+		var finalize finalizer.Finalizer
 		var order Order
 
 		finalize.With(F("A", &order))
@@ -87,7 +106,7 @@ var _ = Describe("finalizer", func() {
 	})
 
 	It("separately finalizes new finalizers", func() {
-		var finalize utils.Finalizer
+		var finalize finalizer.Finalizer
 		var order Order
 
 		finalize.With(F("A", &order))
@@ -164,6 +183,25 @@ var _ = Describe("finalizer", func() {
 			})
 		})
 	})
+
+	Context("with exceptions", func() {
+		callee := func() {
+			exception.Throw(fmt.Errorf("exception"))
+		}
+		caller := func() (err error) {
+			var finalize finalizer.Finalizer
+
+			defer finalize.CatchException().FinalizeWithErrorPropagation(&err)
+			callee()
+			return nil
+		}
+
+		It("catches exception from exception package", func() {
+			err := caller()
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(Equal("exception"))
+		})
+	})
 })
 
 func errfunc(succeed bool) func() error {
@@ -174,7 +212,7 @@ func errfunc(succeed bool) func() error {
 }
 
 func testFunc(msg string, err error, succeed bool) (efferr error) {
-	var finalize utils.Finalizer
+	var finalize finalizer.Finalizer
 
 	defer finalize.FinalizeWithErrorPropagationf(&efferr, msg)
 	finalize.With(errfunc(succeed))

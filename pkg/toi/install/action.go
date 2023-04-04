@@ -9,26 +9,32 @@ import (
 	"fmt"
 	"sort"
 
+	. "github.com/open-component-model/ocm/pkg/finalizer"
+
 	"github.com/ghodss/yaml"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/sirupsen/logrus"
 	"github.com/xeipuuv/gojsonschema"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/config/config"
+	"github.com/open-component-model/ocm/pkg/contexts/config"
+	globalconfig "github.com/open-component-model/ocm/pkg/contexts/config/config"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/logforward"
+	logcfg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config/logging"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/spiff"
+	"github.com/open-component-model/ocm/pkg/toi"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -65,8 +71,8 @@ func ValidateByScheme(src []byte, schemedata []byte) error {
 }
 
 type ExecutorContext struct {
-	Spec  ExecutorSpecification
-	Image *Image
+	Spec  toi.ExecutorSpecification
+	Image *toi.Image
 	CV    ocm.ComponentVersionAccess
 }
 
@@ -83,7 +89,7 @@ func GetResource(res ocm.ResourceAccess, target interface{}) error {
 	return runtime.DefaultYAMLEncoding.Unmarshal(data, target)
 }
 
-func DetermineExecutor(executor *Executor, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*ExecutorContext, error) {
+func DetermineExecutor(executor *toi.Executor, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*ExecutorContext, error) {
 	espec := ExecutorContext{Image: executor.Image}
 
 	if espec.Image == nil {
@@ -104,7 +110,7 @@ func DetermineExecutor(executor *Executor, octx ocm.Context, cv ocm.ComponentVer
 		}()
 		switch res.Meta().Type {
 		case resourcetypes.OCI_IMAGE:
-		case TypeTOIExecutor:
+		case toi.TypeTOIExecutor:
 			err := GetResource(res, &espec.Spec)
 			if err != nil {
 				return nil, errors.ErrInvalidWrap(err, "toi executor")
@@ -135,7 +141,7 @@ func DetermineExecutor(executor *Executor, octx ocm.Context, cv ocm.ComponentVer
 		if err != nil {
 			return nil, errors.Wrapf(err, "image ref for executor resource %s not found", executor.ResourceRef.String())
 		}
-		espec.Image = &Image{
+		espec.Image = &toi.Image{
 			Ref: ref,
 		}
 		espec.CV, eff = eff, nil
@@ -156,7 +162,7 @@ func mappingKeyFor(value string, m map[string]string) string {
 }
 
 // CheckCredentialRequests determine required credentials for executor.
-func CheckCredentialRequests(executor *Executor, spec *PackageSpecification, espec *ExecutorSpecification) (map[string]CredentialsRequestSpec, map[string]string, error) {
+func CheckCredentialRequests(executor *toi.Executor, spec *toi.PackageSpecification, espec *toi.ExecutorSpecification) (map[string]CredentialsRequestSpec, map[string]string, error) {
 	credentials := spec.Credentials
 	credmapping := map[string]string{}
 
@@ -265,7 +271,7 @@ func ProcessConfig(name string, octx ocm.Context, cv ocm.ComponentVersionAccess,
 		}
 	}
 	if len(schemedata) > 0 {
-		logrus.Infof("validating %s by scheme...", name)
+		toi.Log.Info("validating by scheme", name)
 		err = ValidateByScheme(config, schemedata)
 		if err != nil {
 			return nil, errors.Wrapf(err, name+" validation failed")
@@ -280,10 +286,14 @@ func ProcessConfig(name string, octx ocm.Context, cv ocm.ComponentVersionAccess,
 	return config, err
 }
 
-func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecification, creds *Credentials, params []byte, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
+// ExecuteAction prepared the execution options and executes the action.
+func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpecification, creds *Credentials, params []byte, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
 	var err error
 
-	var executor *Executor
+	var finalize Finalizer
+	defer finalize.Finalize()
+
+	var executor *toi.Executor
 	for idx, e := range spec.Executors {
 		if e.Actions == nil {
 			executor = &spec.Executors[idx]
@@ -339,7 +349,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecifi
 	if econfig == nil {
 		p.Printf("no executor config found\n")
 	} else {
-		p.Printf("using executor config %s\n", utils2.IndentLines(string(econfig), "  "))
+		p.Printf("using executor config:\n%s\n", utils2.IndentLines(string(econfig), "  "))
 	}
 	// handle credentials
 	credentials, credmapping, err := CheckCredentialRequests(executor, spec, &espec.Spec)
@@ -347,16 +357,27 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecifi
 		return nil, err
 	}
 
-	// prepare ocm config with credential settings
-	ccfg := config.New()
+	// prepare ocm config with credential settings and logging config forwarding
 	if len(credentials) > 0 {
 		if creds == nil {
 			return nil, errors.Newf("credential settings required")
 		}
-		ccfg, err = GetCredentials(octx.CredentialsContext(), creds, credentials, credmapping)
+	}
+	ccfg, err := GetCredentials(octx.CredentialsContext(), creds, credentials, credmapping)
+	if err != nil {
+		return nil, errors.Wrapf(err, "credential evaluation failed")
+	}
+
+	if lc := logforward.Get(octx); lc != nil {
+		g, err := config.ToGenericConfig(logcfg.NewWithConfig("default", lc))
 		if err != nil {
-			return nil, errors.Wrapf(err, "credential evaluation failed")
+			return nil, errors.Wrapf(err, "cannot create logging config forwarding")
 		}
+		ccfg.Configurations = append(ccfg.Configurations, g)
+	}
+	{
+		data, _ := yaml.Marshal(ccfg)
+		p.Printf("using ocm config:\n%s\n", utils2.IndentLines(string(data), "  "))
 	}
 
 	// prepare user config
@@ -367,7 +388,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecifi
 	if params == nil {
 		p.Printf("no parameter config found\n")
 	} else {
-		p.Printf("using package parameters %s\n", utils2.IndentLines(string(params), "  "))
+		p.Printf("using package parameters:\n:%s\n", utils2.IndentLines(string(params), "  "))
 	}
 
 	if executor.ParameterMapping != nil {
@@ -378,7 +399,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecifi
 
 		if err == nil {
 			if !bytes.Equal(orig, params) {
-				p.Printf("using executor parameters %s\n", utils2.IndentLines(string(params), "  "))
+				p.Printf("using executor parameters:\n%s\n", utils2.IndentLines(string(params), "  "))
 			}
 		}
 	}
@@ -393,6 +414,8 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecifi
 	}
 	sort.Strings(names)
 	p.Printf("using executor image %s[%s] with credentials %v\n", espec.Image.Ref, executor.ResourceRef.String(), names)
+
+	// setup executor operation
 	op := &Operation{
 		Action:      name,
 		Image:       *espec.Image,
@@ -403,11 +426,30 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecifi
 		Err:         nil,
 	}
 
+	// prepare file content to be passed to executor
+	err = setupFiles(octx, &finalize, op, ccfg, params, econfig, cv)
+	if err != nil {
+		return nil, errors.Wrapf(err, "error setting up executor file set")
+	}
+
+	op.Outputs = executor.Outputs
+
+	// no config so far
+	err = d.SetConfig(map[string]string{})
+	if err != nil {
+		return nil, err
+	}
+	op.ComponentVersion = common.VersionedElementKey(cv).String()
+	return d.Exec(op)
+}
+
+func setupFiles(octx ocm.Context, finalize *Finalizer, op *Operation, ccfg *globalconfig.Config, params []byte, econfig []byte, cv ocm.ComponentVersionAccess) error {
+	// prepare file content to be passed to executor
 	op.Files = map[string]accessio.BlobAccess{}
 	if ccfg != nil {
 		data, err := runtime.DefaultYAMLEncoding.Marshal(ccfg)
 		if err != nil {
-			return nil, errors.Wrapf(err, "marshalling ocm config failed")
+			return errors.Wrapf(err, "marshalling ocm config failed")
 		}
 		op.Files[InputOCMConfig] = accessio.BlobAccessForData(mime.MIME_OCTET, data)
 	}
@@ -420,26 +462,23 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *PackageSpecifi
 	if cv != nil {
 		fs, err := osfs.NewTempFileSystem()
 		if err != nil {
-			return nil, errors.Wrapf(err, "cannot create temp file system")
+			return errors.Wrapf(err, "cannot create temp file system")
 		}
-		defer vfs.Cleanup(fs)
+		finalize.With(func() error { return vfs.Cleanup(fs) })
 		repo, err := ctf.Create(octx, accessobj.ACC_CREATE, "arch", 0o600, accessio.FormatTGZ, accessio.PathFileSystem(fs))
 		if err != nil {
-			return nil, errors.Wrapf(err, "cannot create repo for component version")
+			return errors.Wrapf(err, "cannot create repo for component version")
 		}
-		err = transfer.TransferVersion(nil, nil, cv, repo, nil)
-		repo.Close()
+		defer repo.Close()
+		handler, err := standard.New(standard.Recursive(), standard.KeepGlobalAccess())
 		if err != nil {
-			return nil, errors.Wrapf(err, "component version transport failed")
+			return errors.Wrapf(err, "cannot create transfer handler")
+		}
+		err = transfer.TransferVersion(nil, nil, cv, repo, handler)
+		if err != nil {
+			return errors.Wrapf(err, "component version transport failed")
 		}
 		op.Files[InputOCMRepo] = accessio.BlobAccessForFile(mime.MIME_OCTET, "arch", fs)
 	}
-	op.Outputs = executor.Outputs
-
-	err = d.SetConfig(map[string]string{})
-	if err != nil {
-		return nil, err
-	}
-	op.ComponentVersion = common.VersionedElementKey(cv).String()
-	return d.Exec(op)
+	return nil
 }

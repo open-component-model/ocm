@@ -30,7 +30,7 @@ var _ = Describe("uploader option", func() {
 
 	It("parsed n:a:m", func() {
 		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name:art:media={"name":"Name"}`}))
-		MustBeSuccessful(opt.Complete(ctx))
+		MustBeSuccessful(opt.Configure(ctx))
 
 		Expect(opt.Registrations).To(Equal([]*Registration{{
 			Name:         "plugin/name",
@@ -42,7 +42,7 @@ var _ = Describe("uploader option", func() {
 
 	It("parsed n:a", func() {
 		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name:art={"name":"Name"}`}))
-		MustBeSuccessful(opt.Complete(ctx))
+		MustBeSuccessful(opt.Configure(ctx))
 
 		Expect(opt.Registrations).To(Equal([]*Registration{{
 			Name:         "plugin/name",
@@ -54,7 +54,7 @@ var _ = Describe("uploader option", func() {
 
 	It("parsed n", func() {
 		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name={"name":"Name"}`}))
-		MustBeSuccessful(opt.Complete(ctx))
+		MustBeSuccessful(opt.Configure(ctx))
 
 		Expect(opt.Registrations).To(Equal([]*Registration{{
 			Name:         "plugin/name",
@@ -66,7 +66,7 @@ var _ = Describe("uploader option", func() {
 
 	It("parsed n::", func() {
 		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name::={"name":"Name"}`}))
-		MustBeSuccessful(opt.Complete(ctx))
+		MustBeSuccessful(opt.Configure(ctx))
 
 		Expect(opt.Registrations).To(Equal([]*Registration{{
 			Name:         "plugin/name",
@@ -78,7 +78,7 @@ var _ = Describe("uploader option", func() {
 
 	It("parsed flat spec", func() {
 		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name=Name`}))
-		MustBeSuccessful(opt.Complete(ctx))
+		MustBeSuccessful(opt.Configure(ctx))
 
 		Expect(opt.Registrations).To(Equal([]*Registration{{
 			Name:         "plugin/name",
@@ -90,6 +90,6 @@ var _ = Describe("uploader option", func() {
 
 	It("fails", func() {
 		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name:::=Name`}))
-		MustFailWithMessage(opt.Complete(ctx), "invalid uploader registration plugin/name::: must be of <name>[:<artifact type>[:<media type>]]")
+		MustFailWithMessage(opt.Configure(ctx), "invalid uploader registration plugin/name::: must be of <name>[:<artifact type>[:<media type>]]")
 	})
 })

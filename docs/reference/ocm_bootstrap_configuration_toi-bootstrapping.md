@@ -1,4 +1,4 @@
-## ocm bootstrap componentversions toi-bootstrapping &mdash; Tiny OCM Installer Based On Component Versions
+## ocm bootstrap configuration toi-bootstrapping &mdash; Tiny OCM Installer Based On Component Versions
 
 ### Description
 
@@ -53,11 +53,15 @@ information required to control the instantiation of an executor.
 
 It has the following format:
 
+- **<code>description</code>** (optional) *string*
+  
+  A short description of the installation package and some configuration hints.
+
 - **<code>executors</code>** *[]ExecutorSpecification*
 
 - **<code>configTemplate</code>** (optional) *yaml*
 
-  This a [spiff](https://github.com/mandelsoft/spiff) template used to generate
+  This is a [spiff](https://github.com/mandelsoft/spiff) template used to generate
   The user config that is finally passed to the executor. If no template
   is specified the user parameter input will be processed directly without template.
 
@@ -77,6 +81,17 @@ It has the following format:
   dedicated name/purpose and structure. If specified the bootstrap command
   requites the specification of a credentials file providing the information
   how to satisfy those credential requests.
+
+- **<code>additionalResources</code>** (optional) *map[string]ResourceReference*
+
+  A set of additional resources specified by OCM resource references.
+  The key describes the meaning of the resource. The following keys have
+  a special meaning:
+
+  - **<code>configFile</code>**: an example template for a parameter file
+  - **<code>credentialsFile</code>**: an example template for a credentials file
+
+  Those templates can be downloaded with [ocm bootstrap config](ocm_bootstrap_config.md).
 
 #### *ExecutorSpecification*
 
@@ -304,6 +319,8 @@ by the TOI toolset.
 ### Examples
 
 ```
+description: |
+  This package is just an example.
 executors:
   - actions:
     - install
@@ -342,13 +359,17 @@ configScheme:
           type: string
         password:
           type: string
+additionalResources:
+  configFile:
+    resource:
+      name: config-file
 ```
 
 ### SEE ALSO
 
 ##### Parents
 
-* [ocm bootstrap componentversions](ocm_bootstrap_componentversions.md)	 &mdash; bootstrap component version
+* [ocm bootstrap configuration](ocm_bootstrap_configuration.md)	 &mdash; bootstrap TOI configuration files
 * [ocm bootstrap](ocm_bootstrap.md)	 &mdash; bootstrap components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
@@ -356,5 +377,7 @@ configScheme:
 
 ##### Additional Links
 
+* [<b>ocm bootstrap componentversions</b>](ocm_bootstrap_componentversions.md)
+* [<b>ocm bootstrap config</b>](ocm_bootstrap_config.md)
 * [<b>ocm configfile</b>](ocm_configfile.md)	 &mdash; configuration file
 

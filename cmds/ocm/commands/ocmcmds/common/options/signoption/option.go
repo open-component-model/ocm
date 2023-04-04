@@ -80,7 +80,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringArrayVarP(&o.rootca, "ca-cert", "", o.rootca, "Additional root certificates")
 }
 
-func (o *Option) Complete(ctx clictx.Context) error {
+func (o *Option) Configure(ctx clictx.Context) error {
 	if len(o.SignatureNames) > 0 {
 		for i, n := range o.SignatureNames {
 			n = strings.TrimSpace(n)
@@ -96,7 +96,7 @@ func (o *Option) Complete(ctx clictx.Context) error {
 		o.Keys = signing.NewKeyRegistry()
 	}
 	if o.SignMode {
-		err := o.Hash.Complete(ctx)
+		err := o.Hash.Configure(ctx)
 		if err != nil {
 			return err
 		}

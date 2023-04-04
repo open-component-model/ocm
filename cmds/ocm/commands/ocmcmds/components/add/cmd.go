@@ -17,11 +17,12 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/comp"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/dryrunoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/fileoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/schemaoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/templateroption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	common2 "github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -30,6 +31,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -41,8 +43,9 @@ var (
 type Command struct {
 	utils.BaseCommand
 
-	Force  bool
-	Create bool
+	Force   bool
+	Create  bool
+	Closure bool
 
 	Handler ctf.FormatHandler
 	Format  string
@@ -61,7 +64,9 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		fileoption.New("transport-archive"),
 		schemaoption.New(compdesc.DefaultSchemeVersion),
 		templateroption.New(""),
-		dryrunoption.New("evaluate and print component specifications", true)),
+		dryrunoption.New("evaluate and print component specifications", true),
+		lookupoption.New(),
+		rscbyvalueoption.New()),
 	}, utils.Names(Names, names...)...)
 }
 
@@ -114,6 +119,12 @@ content or a tar/tgz file (see option --type).
 If option <code>--create</code> is given, the archive is created first. An
 additional option <code>--force</code> will recreate an empty archive if it already exists.
 
+If option <code>--complete</code> is given all component versions referenced by
+the added one, will be added, also. Therefore, the <code>--lookup</code> is required
+to specify an OCM repository to lookup the missing component versions. If 
+additionally the <code>-V</code> is given, the resources of those additional
+components will be added by value.
+
 The source, resource and reference list can be composed according the commands
 <CMD>ocm add sources</CMD>, <CMD>ocm add resources</CMD>, <CMD>ocm add references</CMD>, respectively.
 
@@ -129,19 +140,19 @@ func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	o.BaseCommand.AddFlags(fs)
 	fs.BoolVarP(&o.Force, "force", "f", false, "remove existing content")
 	fs.BoolVarP(&o.Create, "create", "c", false, "(re)create archive")
+	fs.BoolVarP(&o.Closure, "complete", "C", false, "include all referenced component version")
 	fs.StringArrayVarP(&o.Envs, "settings", "s", nil, "settings file with variable settings (yaml)")
 	fs.StringVarP(&o.Version, "version", "v", "", "default version for components")
 }
 
 func (o *Command) Complete(args []string) error {
-	err := o.OptionSet.ProcessOnOptions(options.CompleteOptionsWithCLIContext(o.Context))
-	if err != nil {
-		return err
+	if o.Closure && !lookupoption.From(o).IsGiven() {
+		return fmt.Errorf("lookup option required for option --complete")
 	}
 	o.Archive, args = fileoption.From(o).GetPath(args, o.Context.FileSystem())
 
 	t := templateroption.From(o)
-	err = t.ParseSettings(o.Context.FileSystem(), o.Envs...)
+	err := t.ParseSettings(o.Context.FileSystem(), o.Envs...)
 	if err != nil {
 		return err
 	}
@@ -165,6 +176,14 @@ func (o *Command) Complete(args []string) error {
 }
 
 func (o *Command) Run() error {
+	session := ocm.NewSession(nil)
+	defer session.Close()
+
+	err := o.OptionSet.ProcessOnOptions(common.CompleteOptionsWithSession(o.Context, session))
+	if err != nil {
+		return err
+	}
+
 	printer := common2.NewPrinter(o.Context.StdOut())
 	fs := o.Context.FileSystem()
 	h := comp.NewResourceSpecHandler(o.Version)
@@ -200,8 +219,13 @@ func (o *Command) Run() error {
 		repo, err = ctf.Open(o.Context.OCMContext(), accessobj.ACC_WRITABLE, fp, mode, fs)
 	}
 
+	thdlr, err := standard.New(standard.KeepGlobalAccess(), standard.Recursive(), rscbyvalueoption.From(o))
+	if err != nil {
+		return err
+	}
+
 	if err == nil {
-		err = comp.ProcessComponents(o.Context, ictx, repo, h, elems)
+		err = comp.ProcessComponents(o.Context, ictx, repo, lookupoption.From(o).Resolver, thdlr, h, elems)
 		cerr := repo.Close()
 		if err == nil {
 			err = cerr

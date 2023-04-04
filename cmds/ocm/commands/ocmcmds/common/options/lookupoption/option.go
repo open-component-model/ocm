@@ -74,6 +74,10 @@ references.
 	return s
 }
 
+func (o *Option) IsGiven() bool {
+	return len(o.RepoSpecs) > 0
+}
+
 func (o *Option) LookupComponentVersion(name string, vers string) (ocm.ComponentVersionAccess, error) {
 	if o == nil || o.Resolver == nil {
 		return nil, nil

@@ -16,7 +16,7 @@ const (
 	KIND_ACTION       = descriptor.KIND_ACTION
 )
 
-var TAG = descriptor.TAG
+var TAG = descriptor.REALM
 
 type (
 	Descriptor             = descriptor.Descriptor

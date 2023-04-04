@@ -96,7 +96,7 @@ or <code>input</code> fields of the description file format.
  Elements must follow the resource meta data
 description scheme of the component descriptor.
 
-If not specified anywhere the artifact type will be defaulted to <code>filesystem</code>.
+If not specified anywhere the artifact type will be defaulted to <code>directoryTree</code>.
 
 If expressions/templates are used in the specification file an appropriate
 templater and the required settings might be required to provide

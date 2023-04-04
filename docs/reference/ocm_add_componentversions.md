@@ -10,11 +10,14 @@ ocm add componentversions [<options>] [--version <version>] [<ctf archive>] {<co
 
 ```
       --addenv                 access environment for templating
+  -C, --complete               include all referenced component version
+  -V, --copy-resources         transfer referenced resources by-value
   -c, --create                 (re)create archive
       --dry-run                evaluate and print component specifications
   -F, --file string            target file/directory (default "transport-archive")
   -f, --force                  remove existing content
   -h, --help                   help for componentversions
+      --lookup stringArray     repository name or spec for closure lookup fallback
   -O, --output string          output file for dry-run
   -S, --scheme string          schema version (default "v2")
   -s, --settings stringArray   settings file with variable settings (yaml)
@@ -32,6 +35,12 @@ content or a tar/tgz file (see option --type).
 
 If option <code>--create</code> is given, the archive is created first. An
 additional option <code>--force</code> will recreate an empty archive if it already exists.
+
+If option <code>--complete</code> is given all component versions referenced by
+the added one, will be added, also. Therefore, the <code>--lookup</code> is required
+to specify an OCM repository to lookup the missing component versions. If 
+additionally the <code>-V</code> is given, the resources of those additional
+components will be added by value.
 
 The source, resource and reference list can be composed according the commands
 [ocm add sources](ocm_add_sources.md), [ocm add resources](ocm_add_resources.md), [ocm add references](ocm_add_references.md), respectively.
@@ -94,6 +103,22 @@ There are several templaters that can be selected by the <code>--templater</code
       subkey: "abc ${MY_VAL}"
   </pre>
   
+
+If a component lookup for building a reference closure is required
+the <code>--lookup</code>  option can be used to specify a fallback
+lookup repository. 
+By default the component versions are searched in the repository
+holding the component version for which the closure is determined.
+For *Component Archives* this is never possible, because it only
+contains a single component version. Therefore, in this scenario
+this option must always be specified to be able to follow component
+references.
+
+It the option <code>--copy-resources</code> is given, all referential 
+resources will potentially be localized, mapped to component version local
+resources in the target repository.
+This behaviour can be further influenced by specifying a transfer script
+with the <code>script</code> option family.
 
 
 ### Examples

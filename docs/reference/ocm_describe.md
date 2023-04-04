@@ -22,5 +22,6 @@ ocm describe [<options>] <sub command> ...
 ##### Sub Commands
 
 * [ocm describe <b>artifacts</b>](ocm_describe_artifacts.md)	 &mdash; describe artifact version
+* [ocm describe <b>package</b>](ocm_describe_package.md)	 &mdash; describe TOI package
 * [ocm describe <b>plugins</b>](ocm_describe_plugins.md)	 &mdash; get plugins
 

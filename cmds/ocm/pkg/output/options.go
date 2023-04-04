@@ -97,7 +97,7 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	o.OptionSet.AddFlags(fs)
 }
 
-func (o *Options) Complete(ctx clictx.Context) error {
+func (o *Options) Configure(ctx clictx.Context) error {
 	o.Context = ctx
 
 	// process sub options first, to assure that output options are available for output
@@ -138,7 +138,7 @@ func (o *Options) Complete(ctx clictx.Context) error {
 }
 
 func (o *Options) CompleteAll(ctx clictx.Context) error {
-	err := o.Complete(ctx)
+	err := o.Configure(ctx)
 	if err == nil {
 		err = o.OptionSet.ProcessOnOptions(options.CompleteOptionsWithCLIContext(ctx))
 	}

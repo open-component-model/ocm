@@ -10,7 +10,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/toi/install"
+	"github.com/open-component-model/ocm/pkg/toi"
 )
 
 func New(ctx clictx.Context, name string) *cobra.Command {
@@ -18,6 +18,8 @@ func New(ctx clictx.Context, name string) *cobra.Command {
 		Use:   name,
 		Short: "Tiny OCM Installer based on component versions",
 		Example: `
+description: |
+  This package is just an example.
 executors:
   - actions:
     - install
@@ -56,6 +58,10 @@ configScheme:
           type: string
         password:
           type: string
+additionalResources:
+  configFile:
+    resource:
+      name: config-file
 `,
 		Long: `
 TOI is a small toolset on top of the Open Component Model. It provides
@@ -65,7 +71,7 @@ It is some basic mechanism which can be used to execute simple installation
 steps based on content described by the Open Component Model
 (see <CMD>ocm bootstrap componentversions</CMD>).
 
-Therefore, a dedicated resource type <code>` + install.TypeTOIPackage + `</code> is defined.
+Therefore, a dedicated resource type <code>` + toi.TypeTOIPackage + `</code> is defined.
 It is selected by a resource identity pattern. The first resource matching the pattern
 is used. A possible use case could be to provide different packages for
 different environments. The resource can use an identity attribute
@@ -82,7 +88,7 @@ to perform the action. Finally, an executor is an image following the TOI
 specification for passing information into the image execution and receiving
 results from the execution. Such an image is described in two ways:
 - it either describes a resource of type <code>` + resourcetypes.OCI_IMAGE + `</code> or
-- it describes a resource of type <code>` + install.TypeTOIExecutor + `</code>, which defines
+- it describes a resource of type <code>` + toi.TypeTOIExecutor + `</code>, which defines
   the image to use and some default settings and further describes the features
   and requirements of the executor image.
 
@@ -96,23 +102,27 @@ The execution of the container may do the needful to achieve the goal of the
 requested action and provide some labeled output files, which will be passed
 to the caller.
 
-### The <code>` + install.TypeTOIPackage + `</code> Resource
+### The <code>` + toi.TypeTOIPackage + `</code> Resource
 
 This resource describes an installable software package, whose content is 
 contained in the component version, which contains the package resource.
 
 It is a plain yaml resource with the media types media type <code>` + mime.MIME_YAML + `</code>,
 <code>` + mime.MIME_YAML_ALT + `</code> or 
-<code>` + install.PackageSpecificationMimeType + `</code>) containing
+<code>` + toi.PackageSpecificationMimeType + `</code>) containing
 information required to control the instantiation of an executor.
 
 It has the following format:
+
+- **<code>description</code>** (optional) *string*
+  
+  A short description of the installation package and some configuration hints.
 
 - **<code>executors</code>** *[]ExecutorSpecification*
 
 - **<code>configTemplate</code>** (optional) *yaml*
 
-  This a [spiff](https://github.com/mandelsoft/spiff) template used to generate
+  This is a [spiff](https://github.com/mandelsoft/spiff) template used to generate
   The user config that is finally passed to the executor. If no template
   is specified the user parameter input will be processed directly without template.
 
@@ -132,6 +142,17 @@ It has the following format:
   dedicated name/purpose and structure. If specified the bootstrap command
   requites the specification of a credentials file providing the information
   how to satisfy those credential requests.
+
+- **<code>additionalResources</code>** (optional) *map[string]ResourceReference*
+
+  A set of additional resources specified by OCM resource references.
+  The key describes the meaning of the resource. The following keys have
+  a special meaning:
+
+  - **<code>configFile</code>**: an example template for a parameter file
+  - **<code>credentialsFile</code>**: an example template for a credentials file
+
+  Those templates can be downloaded with <CMD>ocm bootstrap config</CMD>.
 
 #### *ExecutorSpecification*
 
@@ -215,13 +236,13 @@ It always has at least one identity attribute <code>name</code>, which
 is the resource name field of the desired resource. If this resource
 defines additional identity attributes, the complete set must be specified.
 
-### The <code>` + install.TypeTOIExecutor + `</code> Resource
+### The <code>` + toi.TypeTOIExecutor + `</code> Resource
 
 Instead of directly describing an image resource i the package file, it is
-possible to refer to a resource of type ` + install.TypeTOIExecutor + `. This
+possible to refer to a resource of type ` + toi.TypeTOIExecutor + `. This
 is a yaml file with the media type <code>` + mime.MIME_YAML + `</code>,
 <code>` + mime.MIME_YAML_ALT + `</code> or 
-<code>` + install.PackageSpecificationMimeType + `</code>) containing
+<code>` + toi.PackageSpecificationMimeType + `</code>) containing
 common information about the executor executor. If used by the package,
 this information is used to validate settings in the package specification.
 

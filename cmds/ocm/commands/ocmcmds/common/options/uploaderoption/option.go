@@ -47,7 +47,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	flag.StringToStringVarP(fs, &o.spec, "uploader", "", nil, "repository uploader (<name>:<artifact type>[:<media type>]=<JSON target config)")
 }
 
-func (o *Option) Complete(ctx clictx.Context) error {
+func (o *Option) Configure(ctx clictx.Context) error {
 	desc := "<name>[:<artifact type>[:<media type>]]"
 	for n, v := range o.spec {
 		nam := n

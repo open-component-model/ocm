@@ -15,6 +15,8 @@ type Options struct {
 	recursive        bool
 	resourcesByValue bool
 	sourcesByValue   bool
+	keepGlobalAccess bool
+	stopOnExisting   bool
 	overwrite        bool
 	resolver         ocm.ComponentVersionResolver
 }
@@ -24,46 +26,63 @@ var (
 	_ SourcesByValueOption   = (*Options)(nil)
 	_ RecursiveOption        = (*Options)(nil)
 	_ ResolverOption         = (*Options)(nil)
+	_ KeepGlobalAccessOption = (*Options)(nil)
 )
 
 func (o *Options) SetOverwrite(overwrite bool) {
 	o.overwrite = overwrite
 }
 
-func (o *Options) SetRecursive(recursive bool) {
-	o.recursive = recursive
-}
-
-func (o *Options) SetResourcesByValue(resourcesByValue bool) {
-	o.resourcesByValue = resourcesByValue
-}
-
-func (o *Options) SetSourcesByValue(sourcesByValue bool) {
-	o.sourcesByValue = sourcesByValue
-}
-
-func (o *Options) SetResolver(resolver ocm.ComponentVersionResolver) {
-	o.resolver = resolver
-}
-
 func (o *Options) IsOverwrite() bool {
 	return o.overwrite
+}
+
+func (o *Options) SetRecursive(recursive bool) {
+	o.recursive = recursive
 }
 
 func (o *Options) IsRecursive() bool {
 	return o.recursive
 }
 
+func (o *Options) SetResourcesByValue(resourcesByValue bool) {
+	o.resourcesByValue = resourcesByValue
+}
+
 func (o *Options) IsResourcesByValue() bool {
 	return o.resourcesByValue
+}
+
+func (o *Options) SetSourcesByValue(sourcesByValue bool) {
+	o.sourcesByValue = sourcesByValue
 }
 
 func (o *Options) IsSourcesByValue() bool {
 	return o.sourcesByValue
 }
 
+func (o *Options) SetKeepGlobalAccess(keepGlobalAccess bool) {
+	o.keepGlobalAccess = keepGlobalAccess
+}
+
+func (o *Options) IsKeepGlobalAccess() bool {
+	return o.keepGlobalAccess
+}
+
+func (o *Options) SetResolver(resolver ocm.ComponentVersionResolver) {
+	o.resolver = resolver
+}
+
 func (o *Options) GetResolver() ocm.ComponentVersionResolver {
 	return o.resolver
+}
+
+func (o *Options) SetStopOnExistingVersion(stopOnExistingVersion bool) {
+	o.stopOnExisting = stopOnExistingVersion
+}
+
+func (o *Options) IsStopOnExistingVersion() bool {
+	return o.stopOnExisting
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -193,5 +212,57 @@ func (o *resolverOption) ApplyTransferOption(to transferhandler.TransferOptions)
 func Resolver(resolver ocm.ComponentVersionResolver) transferhandler.TransferOption {
 	return &resolverOption{
 		resolver: resolver,
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+type KeepGlobalAccessOption interface {
+	SetKeepGlobalAccess(bool)
+	IsKeepGlobalAccess() bool
+}
+
+type keepGlobalOption struct {
+	flag bool
+}
+
+func (o *keepGlobalOption) ApplyTransferOption(to transferhandler.TransferOptions) error {
+	if eff, ok := to.(KeepGlobalAccessOption); ok {
+		eff.SetKeepGlobalAccess(o.flag)
+		return nil
+	} else {
+		return errors.ErrNotSupported("resolver")
+	}
+}
+
+func KeepGlobalAccess(args ...bool) transferhandler.TransferOption {
+	return &keepGlobalOption{
+		flag: utils.GetOptionFlag(args...),
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+type StopOnExistingVersionOption interface {
+	SetStopOnExistingVersion(bool)
+	IsStopOnExistingVersion() bool
+}
+
+type stopOnExistingVersionOption struct {
+	flag bool
+}
+
+func (o *stopOnExistingVersionOption) ApplyTransferOption(to transferhandler.TransferOptions) error {
+	if eff, ok := to.(StopOnExistingVersionOption); ok {
+		eff.SetStopOnExistingVersion(o.flag)
+		return nil
+	} else {
+		return errors.ErrNotSupported("sources by-value")
+	}
+}
+
+func StopOnExistingVersion(args ...bool) transferhandler.TransferOption {
+	return &stopOnExistingVersionOption{
+		flag: utils.GetOptionFlag(args...),
 	}
 }

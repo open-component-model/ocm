@@ -173,6 +173,7 @@ type delegates = Delegates
 
 type contextBase struct {
 	ctxtype    string
+	id         int64
 	key        interface{}
 	effective  Context
 	attributes Attributes
@@ -227,6 +228,7 @@ func NewWithActions(parentAttrs Attributes, actions handlers.Registry) Attribute
 
 	c.Context = &contextBase{
 		ctxtype:    CONTEXT_TYPE,
+		id:         contextrange.NextId(),
 		key:        key,
 		effective:  c,
 		attributes: newAttributes(c, parentAttrs, &c.updater),
@@ -271,8 +273,26 @@ func (c *_context) Logger(messageContext ...logging.MessageContext) logging.Logg
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// NumberRange can be used as source for successive id numbers to tag
+// elements, since debuggers not always sow object addresses.
+type NumberRange struct {
+	id   int64
+	lock sync.Mutex
+}
+
+func (n *NumberRange) NextId() int64 {
+	n.lock.Lock()
+	defer n.lock.Unlock()
+
+	n.id++
+	return n.id
+}
+
+var contextrange, attrsrange = NumberRange{}, NumberRange{}
+
 type _attributes struct {
 	sync.RWMutex
+	id         int64
 	ctx        Context
 	parent     Attributes
 	updater    *Updater
@@ -287,6 +307,7 @@ func NewAttributes(ctx Context, parent Attributes, updater *Updater) Attributes 
 
 func newAttributes(ctx Context, parent Attributes, updater *Updater) *_attributes {
 	return &_attributes{
+		id:         attrsrange.NextId(),
 		ctx:        ctx,
 		parent:     parent,
 		updater:    updater,

@@ -11,6 +11,7 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/toi"
 )
 
 func Execute(p common.Printer, d Driver, name string, rid metav1.Identity, credsrc accessio.DataSource, paramsrc accessio.DataSource, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
@@ -35,16 +36,16 @@ func Execute(p common.Printer, d Driver, name string, rid metav1.Identity, creds
 		}
 	}
 
-	ires, _, err := utils.MatchResourceReference(cv, TypeTOIPackage, metav1.NewResourceRef(rid), nil)
+	ires, _, err := utils.MatchResourceReference(cv, toi.TypeTOIPackage, metav1.NewResourceRef(rid), nil)
 	if err != nil {
-		return nil, errors.Wrapf(err, "installer resource in %s", common.VersionedElementKey(cv).String())
+		return nil, errors.Wrapf(err, "package resource in %s", common.VersionedElementKey(cv).String())
 	}
 
-	var spec PackageSpecification
+	var spec toi.PackageSpecification
 
 	err = GetResource(ires, &spec)
 	if err != nil {
-		return nil, errors.ErrInvalidWrap(err, "installer spec")
+		return nil, errors.ErrInvalidWrap(err, "package spec")
 	}
 	return ExecuteAction(p, d, name, &spec, creds, params, octx, cv, resolver)
 }

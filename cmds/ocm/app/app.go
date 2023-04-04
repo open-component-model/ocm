@@ -9,19 +9,15 @@ package app
 import (
 	"strings"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/action"
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 
-	"github.com/mandelsoft/logging"
-	"github.com/mandelsoft/logging/config"
-	"github.com/mandelsoft/logging/logrusr"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/action"
 	creds "github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/credentials"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds"
@@ -32,7 +28,6 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/references"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/resources"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/sources"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/add"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/bootstrap"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/clean"
@@ -51,11 +46,13 @@ import (
 	cmdutils "github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/cmds/ocm/topics/common/attributes"
 	topicconfig "github.com/open-component-model/ocm/cmds/ocm/topics/common/config"
+	topiclogging "github.com/open-component-model/ocm/cmds/ocm/topics/common/logging"
 	topicocirefs "github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
 	topicocmaccessmethods "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/accessmethods"
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
 	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
 	"github.com/open-component-model/ocm/pkg/cobrautils"
+	"github.com/open-component-model/ocm/pkg/cobrautils/logopts"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -65,7 +62,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
-	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/version"
 )
@@ -77,12 +73,9 @@ type CLIOptions struct {
 	Context     clictx.Context
 	Settings    []string
 	Verbose     bool
-	LogLevel    string
-	LogFile     string
-	LogConfig   string
-	Version     bool
+	LogOpts     logopts.Options
 
-	logFile vfs.File
+	Version bool
 }
 
 var desc = `
@@ -134,7 +127,7 @@ form
 <center>
     <pre>-X &lt;attribute>=&lt;value></pre>
 </center>
-
+` + logopts.Description + `
 The value can be a simple type or a json string for complex values. The following
 attributes are supported:
 ` + attributes.Attributes()
@@ -214,7 +207,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(cmdutils.HideCommand(cachecmds.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(ocicmds.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(ocmcmds.NewCommand(opts.Context)))
-	cmd.AddCommand(cmdutils.HideCommand(toicmds.NewCommand(opts.Context)))
+	//cmd.AddCommand(cmdutils.HideCommand(toicmds.NewCommand(opts.Context)))
 
 	cmd.AddCommand(cmdutils.HideCommand(creds.NewCommand(opts.Context)))
 
@@ -229,6 +222,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	}
 	// help.Use="help <topic>"
 	help.DisableFlagsInUseLine = true
+	cmd.AddCommand(topiclogging.New(ctx))
 	cmd.AddCommand(topicconfig.New(ctx))
 	cmd.AddCommand(topicocirefs.New(ctx))
 	cmd.AddCommand(topicocmrefs.New(ctx))
@@ -254,18 +248,14 @@ func (o *CLIOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Config, "config", "", "", "configuration file")
 	fs.StringArrayVarP(&o.Credentials, "cred", "C", nil, "credential setting")
 	fs.StringArrayVarP(&o.Settings, "attribute", "X", nil, "attribute setting")
-	fs.BoolVarP(&o.Verbose, "verbose", "v", false, "enable verbose logging")
-	fs.StringVarP(&o.LogLevel, "loglevel", "l", "", "set log level")
-	fs.StringVarP(&o.LogFile, "logfile", "L", "", "set log file")
-	fs.StringVarP(&o.LogConfig, "logconfig", "", "", "log config")
+	fs.BoolVarP(&o.Verbose, "verbose", "v", false, "deprecated: enable logrus verbose logging")
 	fs.BoolVarP(&o.Version, "version", "", false, "show version") // otherwise it is implicitly added by cobra
+
+	o.LogOpts.AddFlags(fs)
 }
 
 func (o *CLIOptions) Close() error {
-	if o.logFile == nil {
-		return nil
-	}
-	return o.logFile.Close()
+	return o.LogOpts.Close()
 }
 
 func (o *CLIOptions) Complete() error {
@@ -274,42 +264,14 @@ func (o *CLIOptions) Complete() error {
 	}
 	o.Completed = true
 
-	var err error
 	if o.Verbose {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
 
-	if o.LogLevel != "" {
-		l, err := logging.ParseLevel(o.LogLevel)
-		if err != nil {
-			return errors.Wrapf(err, "invalid log level %q", o.LogLevel)
-		}
-		ocmlog.Context().SetDefaultLevel(l)
-	} else {
-		ocmlog.Context().SetDefaultLevel(logging.ErrorLevel)
+	err := o.LogOpts.Configure(o.Context.OCMContext(), nil)
+	if err != nil {
+		return err
 	}
-
-	if o.LogFile != "" {
-		o.logFile, err = o.Context.FileSystem().OpenFile(o.LogFile, vfs.O_CREATE|vfs.O_WRONLY, 0o600)
-		if err != nil {
-			return errors.Wrapf(err, "cannot open log file %q", o.LogFile)
-		}
-		log := logrus.New()
-		log.SetFormatter(&logrus.JSONFormatter{TimestampFormat: "2006-01-02 15:04:05"})
-		log.SetOutput(o.logFile)
-		ocmlog.Context().SetBaseLogger(logrusr.New(log))
-	}
-
-	if o.LogConfig != "" {
-		cfg, err := vfs.ReadFile(o.Context.FileSystem(), o.LogConfig)
-		if err != nil {
-			return errors.Wrapf(err, "cannot read logging config %q", o.LogFile)
-		}
-		if err = config.ConfigureWithData(ocmlog.Context(), cfg); err != nil {
-			return errors.Wrapf(err, "invalid logging config: %q", o.LogFile)
-		}
-	}
-
 	_, err = utils.Configure(o.Context.OCMContext(), o.Config, vfsattr.Get(o.Context))
 	if err != nil {
 		return err

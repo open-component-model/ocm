@@ -12,8 +12,10 @@ VERSION                                        = $(shell git describe --tags --e
 COMMIT                                         = $(shell git rev-parse HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
 
-GEN = $(REPO_ROOT)/gen/$(NAME)
-OCM = go run $(REPO_ROOT)/cmds/ocm
+CREDS := $(shell $(REPO_ROOT)/hack/githubcreds.sh)
+OCM = go run $(REPO_ROOT)/cmds/ocm $(CREDS)
+
+GEN := $(REPO_ROOT)/gen/$(NAME)
 
 CHARTSRCS=$(shell find echoserver -type f)
 
@@ -21,7 +23,7 @@ CHARTSRCS=$(shell find echoserver -type f)
 ctf: $(GEN)/ctf
 
 $(GEN)/ctf: $(GEN)/ca
-	@rm -f $(GEN)/ctf
+	@rm -rf $(GEN)/ctf
 	$(OCM) transfer ca $(GEN)/ca $(GEN)/ctf
 	touch $(GEN)/ctf
 
@@ -32,7 +34,7 @@ version:
 .PHONY: ca
 ca: $(GEN)/ca
 
-$(GEN)/ca: $(GEN)/.exists sources.yaml resources.yaml references.yaml $(CHARTSRCS) packagespec.yaml helmconfig.yaml
+$(GEN)/ca: $(GEN)/.exists sources.yaml resources.yaml references.yaml $(CHARTSRCS) packagespec.yaml examples/* helmconfig.yaml
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider $(PROVIDER) --file $(GEN)/ca
 	$(OCM) add sources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" sources.yaml
 	$(OCM) add resources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" resources.yaml
@@ -69,15 +71,16 @@ $(GEN)/.exists:
 info:
 	@echo "ROOT:     $(REPO_ROOT)"
 	@echo "VERSION:  $(VERSION)"
-	@echo "COMMIT;   $(COMMIT)"
+	@echo "COMMIT:   $(COMMIT)"
+	@echo "CREDS:    $(CREDS)"
 
 .PHONY: describe
 describe: $(GEN)/ctf
-	ocm get resources --lookup $(OCMREPO) -c -o treewide $(GEN)/ctf
+	$(OCM) get resources --lookup $(OCMREPO) -c -o treewide $(GEN)/ctf
 
 .PHONY: descriptor
 descriptor: $(GEN)/ctf
-	ocm get component -S v3alpha1 -o yaml $(GEN)/ctf
+	$(OCM) get component -S v3alpha1 -o yaml $(GEN)/ctf
 
 .PHONY: clean
 clean:

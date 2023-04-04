@@ -7,12 +7,13 @@ package dockermulti
 import (
 	"fmt"
 
+	. "github.com/open-component-model/ocm/pkg/finalizer"
+
 	"github.com/opencontainers/go-digest"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociimage"
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -23,7 +24,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Spec struct {
@@ -68,7 +68,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) getVariant(ctx clictx.Context, finalize *utils.Finalizer, variant string) (oci.ArtifactAccess, error) {
+func (s *Spec) getVariant(ctx clictx.Context, finalize *Finalizer, variant string) (oci.ArtifactAccess, error) {
 	locator, version, err := docker.ParseGenericRef(variant)
 	if err != nil {
 		return nil, err
@@ -96,7 +96,7 @@ func (s *Spec) getVariant(ctx clictx.Context, finalize *utils.Finalizer, variant
 	return art, nil
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (accessio.TemporaryBlobAccess, string, error) {
 	index := artdesc.NewIndexArtifact()
 	i := 0
 
@@ -123,7 +123,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 		return nil
 	}
 
-	blob, err := artifactset.SynthesizeArtifactBlobFor(nv.GetVersion(), func() (fac artifactset.ArtifactFactory, main bool, err error) {
+	blob, err := artifactset.SynthesizeArtifactBlobFor(info.ComponentVersion.GetVersion(), func() (fac artifactset.ArtifactFactory, main bool, err error) {
 		var art cpi.ArtifactAccess
 		var blob accessio.BlobAccess
 
@@ -150,7 +150,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 		default:
 			// provide variant
 			ctx.Printf("image %d: %s\n", i, s.Variants[i])
-			var finalize utils.Finalizer
+			var finalize Finalizer
 
 			art, err = s.getVariant(ctx, &finalize, s.Variants[i])
 
@@ -168,5 +168,5 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 	if err != nil {
 		return nil, "", err
 	}
-	return blob, ociartifact.Hint(nv, nv.GetName(), s.Repository, nv.GetVersion()), nil
+	return blob, ociartifact.Hint(info.ComponentVersion, info.ElementName, s.Repository, info.ComponentVersion.GetVersion()), nil
 }

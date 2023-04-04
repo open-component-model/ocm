@@ -1,49 +1,40 @@
-## ocm bootstrap componentversions &mdash; Bootstrap Component Version
+## ocm bootstrap configuration &mdash; Bootstrap TOI Configuration Files
 
 ### Synopsis
 
 ```
-ocm bootstrap componentversions [<options>] <action> {<component-reference>} {<resource id field>}
+ocm bootstrap configuration [<options>] {<component-reference>} {<resource id field>}
 ```
 
 ### Options
 
 ```
-  -c, --credentials string   credentials file
-  -h, --help                 help for componentversions
-  -o, --outputs string       output file/directory
-  -p, --parameters string    parameter file
+  -c, --credentials string   credentials file name (default "TOICredentials")
+  -h, --help                 help for configuration
+      --lookup stringArray   repository name or spec for closure lookup fallback
+  -p, --parameters string    parameter file name (default "TOIParameters")
+      --repo string          repository name or spec
 ```
 
 ### Description
 
 
-Use the simple TOI bootstrap mechanism to execute actions for a TOI package resource
-based on the content of an OCM component version and some command input describing
-the dedicated installation target.
+If a TOI package provides information for configuration file templates/prototypes
+this command extracts this data and provides appropriate files in the filesystem.
 
 The package resource must have the type <code>toiPackage</code>.
 This is a simple YAML file resource describing the bootstrapping of a dedicated kind
 of software. See also the topic [ocm toi toi-bootstrapping](ocm_toi_toi-bootstrapping.md).
 
-THis resource finally describes an executor image, which will be executed in a
-container with the installation source and (instance specific) user settings.
-The container is just executed, the framework make no assumption about the
-meaning/outcome of the execution. Therefore, any kind of actions can be described and
-issued this way, not on installation handling.
-
 The first matching resource of this type is selected. Optionally a set of
 identity attribute can be specified used to refine the match. This can be the
 resource name and/or other key/value pairs (<code>&lt;attr>=&lt;value></code>).
 
-If no output file is provided, the yaml representation of the outputs are
-printed to standard out. If the output file is a directory, for every output a
-dedicated file is created, otherwise the yaml representation is stored to the
-file.
-
 If no credentials file name is provided (option -c) the file
-<code>TOICredentials</code> is used, if present. If no parameter file name is
-provided (option -p) the file <code>TOIParameters</code> is used, if present.
+<code>TOICredentials</code> is used. If no parameter file name is
+provided (option -p) the file <code>TOIParameters</code> is used.
+
+For more details about those files see [ ocm bootstrap package](_ocm_bootstrap_package.md).
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
@@ -104,7 +95,7 @@ references.
 ### Examples
 
 ```
-$ ocm toi bootstrap componentversion ghcr.io/mandelsoft/ocmdemoinstaller:0.0.1-dev
+$ ocm toi bootstrap config ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 ```
 
 ### SEE ALSO
@@ -118,10 +109,11 @@ $ ocm toi bootstrap componentversion ghcr.io/mandelsoft/ocmdemoinstaller:0.0.1-d
 
 ##### Additional Help Topics
 
-* [ocm bootstrap componentversions <b>toi-bootstrapping</b>](ocm_bootstrap_componentversions_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions
+* [ocm bootstrap configuration <b>toi-bootstrapping</b>](ocm_bootstrap_configuration_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions
 
 
 ##### Additional Links
 
 * [<b>ocm toi toi-bootstrapping</b>](ocm_toi_toi-bootstrapping.md)
+* [<b> ocm bootstrap package</b>](_ocm_bootstrap_package.md)
 

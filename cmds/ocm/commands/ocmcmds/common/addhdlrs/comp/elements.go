@@ -7,6 +7,8 @@ package comp
 import (
 	"fmt"
 
+	. "github.com/open-component-model/ocm/pkg/finalizer"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/refs"
@@ -20,7 +22,6 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -62,7 +63,7 @@ func (*ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Element
 }
 
 func (*ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem addhdlrs.Element, repo ocm.Repository) (err error) {
-	var final utils.Finalizer
+	var final Finalizer
 	defer final.FinalizeWithErrorPropagation(&err)
 
 	r, ok := elem.Spec().(*ResourceSpec)

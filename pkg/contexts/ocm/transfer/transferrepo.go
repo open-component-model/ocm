@@ -50,7 +50,7 @@ func transferVersions(printer common.Printer, closure TransportClosure, list *er
 		if list.Addf(subp, err, "list versions for %s", c) == nil {
 			for _, v := range vers {
 				ref := compdesc.NewComponentReference("", c, v, nil)
-				sub, h, err := handler.TransferVersion(repo, nil, ref)
+				sub, h, err := handler.TransferVersion(repo, nil, ref, tgt)
 				if list.Addf(subp, err, "version %s", v) != nil {
 					continue
 				}
