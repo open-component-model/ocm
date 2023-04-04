@@ -54,7 +54,7 @@ information required to control the instantiation of an executor.
 It has the following format:
 
 - **<code>description</code>** (optional) *string*
-  
+
   A short description of the installation package and some configuration hints.
 
 - **<code>executors</code>** *[]ExecutorSpecification*
@@ -156,7 +156,7 @@ An OCM resource reference describes a resource of a component version. It is
 always evaluated relative to the component version providing the resource
 that contains the resource reference. It uses the following fields:
 
-- **<code>referencePath</code>** (optional) *[]Identity*
+- **<code>resourcePath</code>** (optional) *[]Identity*
 
   This is sequence of reference identities used to follow a chain of
   component version references starting with the actual component version.
@@ -292,11 +292,10 @@ execution and reading provided executor outputs after the execution.
 /
 └── toi
     ├── inputs
-    │   ├── config      (file) configuration from package specification
-    │   ├── ocmconfig   (file) credentials file
-    │   ├── ocmrepo     (dir) OCM filesystem repository containing the complete
-    │   │               component version of the package (ctf)
-    │   └── parameters  (file) merged complete parameter file
+    │   ├── config      configuration from package specification
+    │   ├── ocmrepo     OCM filesystem repository containing the complete
+    │   │               component version of the package
+    │   └── parameters  merged complete parameter file
     ├── outputs
     │   ├── &lt;out>       any number of arbitrary output data provided
     │   │               by executor
