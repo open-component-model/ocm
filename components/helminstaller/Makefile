@@ -8,7 +8,7 @@ MULTI     ?= true
 PLATFORMS = linux/amd64 linux/arm64
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
-VERSION                                        := $(shell git describe --tags --exact-match 2>/dev/null|| echo "$$(cat $(REPO_ROOT)/VERSION)")
+VERSION                                        := $(shell go run $(REPO_ROOT)/pkg/version/generate/release_generate.go print-rc-version)
 COMMIT                                         := $(shell git rev-parse --verify HEAD)
 EFFECTIVE_VERSION                              := $(VERSION)-$(COMMIT)
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
@@ -22,7 +22,7 @@ GEN = $(REPO_ROOT)/gen/$(NAME)
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(NAME) -type f)
 OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
 
-ATTRIBUTES = VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" PLATFORMS="$(PLATFORMS)" MULTI=$(MULTI) 
+ATTRIBUTES = VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" PLATFORMS="$(PLATFORMS)" MULTI=$(MULTI)
 
 ifeq ($(MULTI),true)
 FLAGSUF     = .multi
@@ -85,7 +85,7 @@ $(GEN)/image.$(NAME).multi: $(GEN)/.exists Dockerfile $(CMDSRCS) $(OCMSRCS)
 	for i in $(PLATFORMS); do \
 	tag=$$(echo $$i | sed -e s:/:-:g); \
         echo building platform $$i; \
-	docker buildx build -t $(IMAGE):$(VERSION)-$$tag --platform $$i --file Dockerfile $(REPO_ROOT) \
+	docker buildx build --load -t $(IMAGE):$(VERSION)-$$tag --platform $$i --file Dockerfile $(REPO_ROOT) \
           --build-arg COMMIT=$(COMMIT) \
           --build-arg EFFECTIVE_VERSION=$(EFFECTIVE_VERSION) \
           --build-arg GIT_TREE_STATE=$(GIT_TREE_STATE); \

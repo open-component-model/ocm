@@ -28,7 +28,7 @@ executors:
         name: installerimage
     config:
       level: info
-#   parameterMapping:  # optional spiff mapping of Package configuration to 
+#   parameterMapping:  # optional spiff mapping of Package configuration to
 #      ....            # executor parameters
     outputs:
        test: bla
@@ -104,18 +104,18 @@ to the caller.
 
 ### The <code>` + toi.TypeTOIPackage + `</code> Resource
 
-This resource describes an installable software package, whose content is 
+This resource describes an installable software package, whose content is
 contained in the component version, which contains the package resource.
 
 It is a plain yaml resource with the media types media type <code>` + mime.MIME_YAML + `</code>,
-<code>` + mime.MIME_YAML_ALT + `</code> or 
+<code>` + mime.MIME_YAML_ALT + `</code> or
 <code>` + toi.PackageSpecificationMimeType + `</code>) containing
 information required to control the instantiation of an executor.
 
 It has the following format:
 
 - **<code>description</code>** (optional) *string*
-  
+
   A short description of the installation package and some configuration hints.
 
 - **<code>executors</code>** *[]ExecutorSpecification*
@@ -241,7 +241,7 @@ defines additional identity attributes, the complete set must be specified.
 Instead of directly describing an image resource i the package file, it is
 possible to refer to a resource of type ` + toi.TypeTOIExecutor + `. This
 is a yaml file with the media type <code>` + mime.MIME_YAML + `</code>,
-<code>` + mime.MIME_YAML_ALT + `</code> or 
+<code>` + mime.MIME_YAML_ALT + `</code> or
 <code>` + toi.PackageSpecificationMimeType + `</code>) containing
 common information about the executor executor. If used by the package,
 this information is used to validate settings in the package specification.
@@ -274,7 +274,7 @@ It has the following format:
 
   Here the executor may request the provisioning of some credentials with a
   dedicated name/purpose and structure. If specified it will be propagated
-  to a using package. It this uses an own credentials section, this one 
+  to a using package. It this uses an own credentials section, this one
   will be filtered and checked for the actual executor.
 
 - **<code>outputs</code>** (optional) *map[string]OutputSpecification*
@@ -360,7 +360,7 @@ execution and reading provided executor outputs after the execution.
     ├── outputs
     │   ├── &lt;out>       any number of arbitrary output data provided
     │   │               by executor
-    │   └── ...         
+    │   └── ...
     └── run             good practice: typical location for the executed command
 </pre>
 
