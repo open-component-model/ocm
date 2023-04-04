@@ -8,6 +8,7 @@ import (
 	"io"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/toi"
 )
 
 const (
@@ -35,7 +36,7 @@ type Operation struct {
 	// ComponentVersion is the name of the root component/version to install
 	ComponentVersion string
 	// Image is the image to invoke
-	Image Image
+	Image toi.Image
 	// Environment contains environment variables that should be injected into the container execution
 	Environment map[string]string
 	// Files contains files that should be injected into the invocation image.

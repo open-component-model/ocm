@@ -25,6 +25,7 @@ following bindings:
     - `labels` *&lt;map[string]>*: labels of the component version (deep)
   - `element` *&lt;map>*:  the meta data of the resource and the field `type` containing the element type.
   - `access` *&lt;map>*:  the access specification of the resource
+  - `target` *&lt;map>*:  the respository specification of the target resource
 
 The result value (field `process`) must be a boolean describing whether the
 resource should be transported ny-value.

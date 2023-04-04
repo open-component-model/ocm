@@ -9,7 +9,6 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm/loader"
@@ -45,8 +44,8 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
-	_, inputPath, err := inputs.FileInfo(ctx, s.Path, inputFilePath)
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (accessio.TemporaryBlobAccess, string, error) {
+	_, inputPath, err := inputs.FileInfo(ctx, s.Path, info.InputFilePath)
 	if err != nil {
 		return nil, "", err
 	}
@@ -59,12 +58,12 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 		vers = s.Version
 	}
 	if vers == "" {
-		vers = nv.GetVersion()
+		vers = info.ComponentVersion.GetVersion()
 	}
 	blob, err := helm.SynthesizeArtifactBlob(inputPath, ctx.FileSystem())
 	if err != nil {
 		return nil, "", err
 	}
 
-	return blob, ociartifact.Hint(nv, chart.Name(), s.Repository, vers), err
+	return blob, ociartifact.Hint(info.ComponentVersion, chart.Name(), s.Repository, vers), err
 }

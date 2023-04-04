@@ -5,7 +5,7 @@
 package cache
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/internal"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
 	"github.com/open-component-model/ocm/pkg/generics"
 )
@@ -45,7 +45,7 @@ func (r *ConstraintRegistry[T, K]) LookupKeysFor(name string, key K) generics.Se
 	return m.LookupKeys(key)
 }
 
-func NewConstraintRegistry[T internal.Element[K], K registry.Key[K]](list []T) *ConstraintRegistry[T, K] {
+func NewConstraintRegistry[T descriptor.Element[K], K registry.Key[K]](list []T) *ConstraintRegistry[T, K] {
 	reg := registry.NewRegistry[*T, K]()
 	m := map[string]*registry.Registry[*T, K]{}
 

@@ -12,6 +12,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 )
@@ -39,8 +40,8 @@ var _ = Describe("Test Environment", func() {
 		Expect(env.CatchOutput(buf).Execute("-X", "plugindir="+path, "get", "plugins")).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
-PLUGIN VERSION SOURCE DESCRIPTION
-test   v1      local  a test plugin without function
+PLUGIN VERSION SOURCE DESCRIPTION                    CAPABILITIES
+test   v1      local  a test plugin without function accessmethods
 `))
 	})
 	It("get plugins with additional info", func() {
@@ -48,7 +49,7 @@ test   v1      local  a test plugin without function
 		Expect(env.CatchOutput(buf).Execute("-X", "plugindir="+path, "get", "plugins", "-o", "wide")).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(
 			`
-PLUGIN VERSION SOURCE DESCRIPTION                    ACCESSMETHODS UPLOADERS DOWNLOADERS
+PLUGIN VERSION SOURCE DESCRIPTION                    ACCESSMETHODS UPLOADERS DOWNLOADERS ACTIONS
 test   v1      local  a test plugin without function test[v1]
 `))
 	})

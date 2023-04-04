@@ -10,24 +10,27 @@ import (
 
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/pkg/cobrautils"
+	"github.com/open-component-model/ocm/pkg/cobrautils/logopts"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	datactg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config/attrs"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/out"
+	"github.com/open-component-model/ocm/pkg/toi"
 	"github.com/open-component-model/ocm/pkg/toi/install"
 	"github.com/open-component-model/ocm/pkg/version"
 )
 
 type BootstrapperCLIOptions struct {
 	ExecutorOptions
+	logopts.Options
 	CredentialSettings []string
 	Settings           []string
 }
@@ -60,7 +63,7 @@ func NewCLICommand(ctx ocm.Context, name string, exec func(options *ExecutorOpti
 			return opts.Complete()
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			logrus.Infof("This is %s (%s)", name, version.Get().String())
+			out.Outf(opts.OutputContext, "This is %s (%s)\n", name, version.Get().String())
 			e := &Executor{Completed: true, Options: &opts.ExecutorOptions, Run: exec}
 			return e.Execute()
 		},
@@ -75,6 +78,7 @@ func NewCLICommand(ctx ocm.Context, name string, exec func(options *ExecutorOpti
 }
 
 func (o *BootstrapperCLIOptions) AddFlags(fs *pflag.FlagSet) {
+	o.Options.AddFlags(fs)
 	fs.StringVarP(&o.OCMConfig, "ocmconfig", "", "", "ocm configuration file")
 	fs.StringArrayVarP(&o.CredentialSettings, "cred", "C", nil, "credential setting")
 	fs.StringArrayVarP(&o.Settings, "attribute", "X", nil, "attribute setting")
@@ -82,12 +86,13 @@ func (o *BootstrapperCLIOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Inputs, "inputs", "", "", "input path")
 	fs.StringVarP(&o.Outputs, "outputs", "", "", "output path")
 	fs.StringVarP(&o.Root, "bootstraproot", "", install.PathTOI, "bootstrapper contract root folder")
-	fs.StringVarP(&o.OCMConfig, "config", "", "", "bootstrapper configuration input file")
+	fs.StringVarP(&o.Config, "config", "", "", "bootstrapper configuration input file")
 	fs.StringVarP(&o.Parameters, "parameters", "", "", "bootstrapper parameter input file")
 	fs.StringVarP(&o.RepoPath, "ctf", "", "", "bootstrapper transport archive")
 }
 
 func (o *BootstrapperCLIOptions) Complete() error {
+	o.Options.Configure(o.Context, o.Context.LoggingContext())
 	if err := o.ExecutorOptions.Complete(); err != nil {
 		return fmt.Errorf("unable to complete options: %w", err)
 	}
@@ -149,6 +154,7 @@ func (o *BootstrapperCLIOptions) Complete() error {
 		return fmt.Errorf("unable to parse labels: %w", err)
 	}
 
+	o.Logger = toi.Log
 	return nil
 }
 

@@ -13,7 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/config"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/internal"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -53,7 +53,7 @@ func (pi *pluginsImpl) GetContext() cpi.Context {
 func (pi *pluginsImpl) Update() {
 	err := pi.updater.Update()
 	if err != nil {
-		pi.ctx.Logger(internal.TAG).Error("config update failed", "error", err.Error())
+		pi.ctx.Logger(descriptor.REALM).Error("config update failed", "error", err.Error())
 	}
 }
 

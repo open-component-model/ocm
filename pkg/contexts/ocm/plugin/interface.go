@@ -5,25 +5,29 @@
 package plugin
 
 import (
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/internal"
 )
 
 const (
-	KIND_PLUGIN       = internal.KIND_PLUGIN
-	KIND_UPLOADER     = internal.KIND_UPLOADER
-	KIND_ACCESSMETHOD = internal.KIND_ACCESSMETHOD
+	KIND_PLUGIN       = descriptor.KIND_PLUGIN
+	KIND_UPLOADER     = descriptor.KIND_UPLOADER
+	KIND_ACCESSMETHOD = descriptor.KIND_ACCESSMETHOD
+	KIND_ACTION       = descriptor.KIND_ACTION
 )
 
-var TAG = internal.TAG
+var TAG = descriptor.REALM
 
 type (
-	Descriptor             = internal.Descriptor
-	AccessMethodDescriptor = internal.AccessMethodDescriptor
-	AccessSpecInfo         = internal.AccessSpecInfo
-	DownloaderDescriptor   = internal.DownloaderDescriptor
-	DownloaderKey          = internal.DownloaderKey
-	UploaderDescriptor     = internal.UploaderDescriptor
-	UploaderKey            = internal.UploaderKey
-	UploaderKeySet         = internal.UploaderKeySet
-	UploadTargetSpecInfo   = internal.UploadTargetSpecInfo
+	Descriptor             = descriptor.Descriptor
+	ActionDescriptor       = descriptor.ActionDescriptor
+	AccessMethodDescriptor = descriptor.AccessMethodDescriptor
+	DownloaderDescriptor   = descriptor.DownloaderDescriptor
+	DownloaderKey          = descriptor.DownloaderKey
+	UploaderDescriptor     = descriptor.UploaderDescriptor
+	UploaderKey            = descriptor.UploaderKey
+	UploaderKeySet         = descriptor.UploaderKeySet
+
+	AccessSpecInfo       = internal.AccessSpecInfo
+	UploadTargetSpecInfo = internal.UploadTargetSpecInfo
 )

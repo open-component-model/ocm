@@ -57,7 +57,7 @@ func (o *Command) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *Command) Complete(args []string) error {
-	err := o.Format.Complete(o.Context)
+	err := o.Format.Configure(o.Context)
 	if err != nil {
 		return err
 	}

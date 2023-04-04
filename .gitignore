@@ -3,12 +3,14 @@
 .idea
 *.sw[pqo]
 main
+/ecrplugin
+/ocm
+/demoplugin
+/helminstaller
 /dist
 /tmp
 local
-/ocm
 .vscode
-/gen
 /cmds/test/generics
 /gen
 bin/

@@ -10,6 +10,8 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 func Close(c io.Closer, msg ...interface{}) {
@@ -35,9 +37,27 @@ func Must[T any](o T, err error) T {
 	return o
 }
 
-func MustWithOffset[T any](offset int, o T, err error) T {
-	ExpectWithOffset(offset+1, err).To(Succeed())
-	return o
+type result[T any] struct {
+	res T
+	err error
+}
+
+func (r result[T]) Must(offset ...int) T {
+	ExpectWithOffset(utils.Optional(offset...)+1, r.err).To(Succeed())
+	return r.res
+}
+
+func R[T any](o T, err error) result[T] {
+	return Calling(o, err)
+}
+
+func Calling[T any](o T, err error) result[T] {
+	return result[T]{o, err}
+}
+
+func MustWithOffset[T any](offset int, res result[T]) T {
+	ExpectWithOffset(offset+1, res.err).To(Succeed())
+	return res.res
 }
 
 func MustBeNonNil[T any](o T) T {

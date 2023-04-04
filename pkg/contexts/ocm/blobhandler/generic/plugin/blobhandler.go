@@ -12,7 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -29,7 +29,7 @@ func New(p plugin.Plugin, name string, target json.RawMessage) (cpi.BlobHandler,
 
 	ud := p.GetUploaderDescriptor(name)
 	if ud == nil {
-		return nil, errors.ErrUnknown(ppi.KIND_UPLOADER, name, p.Name())
+		return nil, errors.ErrUnknown(descriptor.KIND_UPLOADER, name, p.Name())
 	}
 
 	var info *plugin.UploadTargetSpecInfo

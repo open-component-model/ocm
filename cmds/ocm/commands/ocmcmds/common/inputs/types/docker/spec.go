@@ -10,7 +10,6 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/types/ociimage"
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/docker"
@@ -46,7 +45,7 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (accessio.TemporaryBlobAccess, string, error) {
 	ctx.Printf("image %s\n", s.Path)
 	locator, version, err := docker.ParseGenericRef(s.Path)
 	if err != nil {
@@ -63,11 +62,11 @@ func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath 
 	}
 
 	if version == "" || version == "latest" {
-		version = nv.GetVersion()
+		version = info.ComponentVersion.GetVersion()
 	}
 	blob, err := artifactset.SynthesizeArtifactBlob(ns, version)
 	if err != nil {
 		return nil, "", err
 	}
-	return blob, ociartifact.Hint(nv, locator, s.Repository, version), nil
+	return blob, ociartifact.Hint(info.ComponentVersion, locator, s.Repository, version), nil
 }

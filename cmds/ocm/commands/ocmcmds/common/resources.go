@@ -453,7 +453,12 @@ func ProcessElements(ictx inputs.Context, cv ocm.ComponentVersionAccess, elems [
 			if elem.Input().Input != nil {
 				var acc ocm.AccessSpec
 				// Local Blob
-				blob, hint, berr := elem.Input().Input.GetBlob(ictx, common.VersionedElementKey(cv), elem.Source().Origin())
+				info := inputs.InputResourceInfo{
+					ComponentVersion: common.VersionedElementKey(cv),
+					ElementName:      elem.Spec().GetName(),
+					InputFilePath:    elem.Source().Origin(),
+				}
+				blob, hint, berr := elem.Input().Input.GetBlob(ictx, info)
 				if berr != nil {
 					return errors.Wrapf(berr, "cannot get %s blob for %q(%s)", h.Key(), elem.Spec().GetName(), elem.Source())
 				}

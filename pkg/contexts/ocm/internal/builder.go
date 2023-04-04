@@ -171,7 +171,7 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 
 	b.reposcheme = NewRepositoryTypeScheme(&delegatingDecoder{oci: b.oci}, b.reposcheme)
 	return newContext(b.credentials, b.oci, b.reposcheme, b.accessscheme, b.spechandlers,
-		b.blobhandlers, b.blobdigesters, b.credentials.ConfigContext().LoggingContext())
+		b.blobhandlers, b.blobdigesters, b.credentials.ConfigContext())
 }
 
 type delegatingDecoder struct {

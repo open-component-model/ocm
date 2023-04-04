@@ -9,7 +9,6 @@ import (
 
 	handler "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/pluginhdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
-	common2 "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/plugins/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/cobrautils"
@@ -81,7 +80,7 @@ func (a *action) Add(e interface{}) error {
 	p := handler.Elem(e)
 
 	out, buf := common.NewBufferedPrinter()
-	common2.DescribePlugin(p, out)
+	DescribePlugin(p, out)
 	if a.Count > 1 {
 		a.Printer.Printf("----------------------\n")
 	}

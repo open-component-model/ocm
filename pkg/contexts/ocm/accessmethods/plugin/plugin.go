@@ -12,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -48,7 +49,7 @@ func (p *PluginHandler) Info(spec *AccessSpec) (*ppi.AccessSpecInfo, error) {
 func (p *PluginHandler) AccessMethod(spec *AccessSpec, cv cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
 	mspec := p.GetAccessMethodDescriptor(spec.GetKind(), spec.GetVersion())
 	if mspec == nil {
-		return nil, errors.ErrNotFound(errors.KIND_ACCESSMETHOD, spec.GetType(), ppi.KIND_PLUGIN, p.Name())
+		return nil, errors.ErrNotFound(errors.KIND_ACCESSMETHOD, spec.GetType(), descriptor.KIND_PLUGIN, p.Name())
 	}
 	info, err := p.Info(spec)
 	if err != nil {

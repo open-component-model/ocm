@@ -9,6 +9,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type Handler struct {
@@ -35,8 +36,13 @@ func (h *Handler) OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.Compo
 	return h.opts.IsOverwrite(), nil
 }
 
-func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ComponentReference) (ocm.ComponentVersionAccess, transferhandler.TransferHandler, error) {
+func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ComponentReference, tgt ocm.Repository) (ocm.ComponentVersionAccess, transferhandler.TransferHandler, error) {
 	if src == nil || h.opts.IsRecursive() {
+		if h.opts.IsStopOnExistingVersion() && tgt != nil {
+			if found, err := tgt.ExistsComponentVersion(meta.ComponentName, meta.Version); found || err != nil {
+				return nil, nil, errors.Wrapf(err, "failed looking up in target")
+			}
+		}
 		compoundResolver := ocm.NewCompoundResolver(repo, h.opts.GetResolver())
 		cv, err := compoundResolver.LookupComponentVersion(meta.GetComponentName(), meta.Version)
 		return cv, h, err
@@ -55,11 +61,19 @@ func (h *Handler) TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpe
 func (h *Handler) HandleTransferResource(r ocm.ResourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error {
 	blob := accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m)
 	defer blob.Close()
-	return t.SetResourceBlob(r.Meta(), blob, hint, nil)
+	return t.SetResourceBlob(r.Meta(), blob, hint, h.GlobalAccess(t.GetContext(), m))
 }
 
 func (h *Handler) HandleTransferSource(r ocm.SourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error {
 	blob := accessio.BlobAccessForDataAccess("", -1, m.MimeType(), m)
 	defer blob.Close()
-	return t.SetSourceBlob(r.Meta(), blob, hint, nil)
+
+	return t.SetSourceBlob(r.Meta(), blob, hint, h.GlobalAccess(t.GetContext(), m))
+}
+
+func (h *Handler) GlobalAccess(ctx ocm.Context, m ocm.AccessMethod) ocm.AccessSpec {
+	if h.opts.IsKeepGlobalAccess() {
+		return m.AccessSpec().GlobalAccessSpec(ctx)
+	}
+	return nil
 }

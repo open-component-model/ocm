@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package compdesc
+package v2
 
 import (
 	"k8s.io/apimachinery/pkg/util/validation/field"

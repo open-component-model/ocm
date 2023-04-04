@@ -29,6 +29,7 @@ const KIND_INPUTTYPE = "input type"
 
 type Context interface {
 	clictx.Context
+	Printer() common.Printer
 	Printf(msg string, args ...interface{}) (int, error)
 	Variables() map[string]interface{}
 	Section(msg string, args ...interface{}) Context
@@ -74,10 +75,19 @@ func (c *context) AddGap(gap string) Context {
 	}
 }
 
+type InputResourceInfo struct {
+	// ComponentVersion is the name of the component version to generate.
+	ComponentVersion common.NameVersion
+	// ElementName is the name of the element to create.
+	ElementName string
+	// The path of the file the inputs description has been taken from.
+	InputFilePath string
+}
+
 type InputSpec interface {
 	runtime.VersionedTypedObject
 	Validate(fldPath *field.Path, ctx Context, inputFilePath string) field.ErrorList
-	GetBlob(ctx Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error)
+	GetBlob(ctx Context, info InputResourceInfo) (accessio.TemporaryBlobAccess, string, error)
 }
 
 type InputType interface {
@@ -269,7 +279,7 @@ func (r *UnknownInputSpec) Validate(fldPath *field.Path, ctx Context, inputFileP
 	return field.ErrorList{field.Invalid(fldPath.Child("type"), r.GetType(), "unknown type")}
 }
 
-func (r *UnknownInputSpec) GetBlob(ctx Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (r *UnknownInputSpec) GetBlob(ctx Context, info InputResourceInfo) (accessio.TemporaryBlobAccess, string, error) {
 	return nil, "", errors.ErrUnknown("input type", r.GetType())
 }
 
@@ -322,7 +332,7 @@ func (s *GenericInputSpec) Validate(fldPath *field.Path, ctx Context, inputFileP
 	return s.effective.Validate(fldPath, ctx, inputFilePath)
 }
 
-func (s *GenericInputSpec) GetBlob(ctx Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (s *GenericInputSpec) GetBlob(ctx Context, info InputResourceInfo) (accessio.TemporaryBlobAccess, string, error) {
 	if s.effective == nil {
 		var err error
 		s.effective, err = s.Evaluate(For(ctx))
@@ -330,7 +340,7 @@ func (s *GenericInputSpec) GetBlob(ctx Context, nv common.NameVersion, inputFile
 			return nil, "", err
 		}
 	}
-	return s.effective.GetBlob(ctx, nv, inputFilePath)
+	return s.effective.GetBlob(ctx, info)
 }
 
 func (s *GenericInputSpec) Evaluate(scheme InputTypeScheme) (InputSpec, error) {

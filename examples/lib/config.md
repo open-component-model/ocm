@@ -73,7 +73,7 @@ context, which is used to apply the configuration object.
 After the object has been applied, the result can be observed on the
 intended target object. For a credential configuration this is the
 credential context. Here, the credentials for the configured consumer id can
-be queried. In the example this is a crednetials object valid for an
+be queried. In the example this is a credentials object valid for an
 OCI registry.
 
 ```go

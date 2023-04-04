@@ -41,6 +41,10 @@ func (_ *AccessSpec) IsLocal(cpi.Context) bool {
 	return false
 }
 
+func (s *AccessSpec) GlobalAccessSpec(cpi.Context) cpi.AccessSpec {
+	return s
+}
+
 func (s *AccessSpec) GetMimeType() string {
 	return s.handler.GetMimeType(s)
 }

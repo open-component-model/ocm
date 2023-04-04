@@ -73,6 +73,10 @@ func (_ *AccessSpec) IsLocal(cpi.Context) bool {
 	return false
 }
 
+func (a *AccessSpec) GlobalAccessSpec(ctx cpi.Context) cpi.AccessSpec {
+	return a
+}
+
 func (a *AccessSpec) GetReferenceHint(cv cpi.ComponentVersionAccess) string {
 	return a.Package + ":" + a.Version
 }

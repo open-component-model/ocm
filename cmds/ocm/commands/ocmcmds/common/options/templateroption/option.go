@@ -24,6 +24,6 @@ type Option struct {
 	template.Options
 }
 
-func (o *Option) Complete(ctx clictx.Context) error {
+func (o *Option) Configure(ctx clictx.Context) error {
 	return o.Options.Complete(ctx.FileSystem())
 }

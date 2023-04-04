@@ -7,11 +7,14 @@ package transfer
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/overwriteoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/scriptoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/stoponexistingoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/uploaderoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
@@ -42,9 +45,12 @@ type Command struct {
 // NewCommand creates a new ctf command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx,
+		closureoption.New("component reference"),
+		lookupoption.New(),
 		formatoption.New(),
 		overwriteoption.New(),
 		rscbyvalueoption.New(),
+		stoponexistingoption.New(),
 		uploaderoption.New(),
 		scriptoption.New(),
 	)}, utils.Names(Names, names...)...)
@@ -95,7 +101,10 @@ func (o *Command) Run() error {
 
 	thdlr, err := spiff.New(
 		spiff.Script(scriptoption.From(o).ScriptData),
+		closureoption.From(o),
+		lookupoption.From(o),
 		rscbyvalueoption.From(o),
+		stoponexistingoption.From(o),
 		overwriteoption.From(o),
 		spiff.ScriptFilesystem(o.FileSystem()),
 	)

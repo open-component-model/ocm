@@ -107,7 +107,7 @@ func (r *Repository) Read(force bool) error {
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
-	log := r.ctx.Logger()
+	log := r.ctx.Logger(REALM)
 	defaultStore := dockercred.DetectDefaultStore(cfg.CredentialsStore)
 	store := dockercred.NewNativeStore(cfg, defaultStore)
 	// get default native credential store

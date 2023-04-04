@@ -42,7 +42,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.hashAlgorithm, "hash", "H", sha256.Algorithm, "hash algorithm")
 }
 
-func (o *Option) Complete(ctx clictx.Context) error {
+func (o *Option) Configure(ctx clictx.Context) error {
 	if o.NormAlgorithm == "" {
 		o.NormAlgorithm = jsonv1.Algorithm
 	}
