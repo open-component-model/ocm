@@ -34,7 +34,8 @@ target archive to use. The following formats are supported:
 The default format is <code>directory</code>.
 
 If the option <code>--scheme</code> is given, the specified component descriptor format is used/generated.
-The following schema versions are supported:
+
+The following schema versions are supported for explicit conversions:
 
   - <code>ocm.software/v3alpha1</code>: 
   - <code>v2</code> (default): 

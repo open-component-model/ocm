@@ -14,6 +14,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
+const InternalSchemaVersion = "internal"
+
 var NotFound = errors.ErrNotFound()
 
 const KIND_REFERENCE = "component reference"
