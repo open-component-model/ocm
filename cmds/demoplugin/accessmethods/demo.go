@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
-	"github.com/open-component-model/ocm/cmds/demoplugin/common"
 
+	"github.com/open-component-model/ocm/cmds/demoplugin/common"
 	"github.com/open-component-model/ocm/cmds/demoplugin/config"
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -35,8 +35,10 @@ type AccessSpec struct {
 	MediaType string `json:"mediaType,omitempty"`
 }
 
-const OPT_PATH = "path"
-const OPT_MEDIA = "mediaType"
+const (
+	OPT_PATH  = "path"
+	OPT_MEDIA = "mediaType"
+)
 
 type AccessMethod struct {
 	ppi.AccessMethodBase

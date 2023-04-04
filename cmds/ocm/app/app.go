@@ -9,6 +9,7 @@ package app
 import (
 	"strings"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/action"
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 
@@ -39,6 +40,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/create"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/describe"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/download"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/execute"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/get"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/hash"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs/install"
@@ -198,6 +200,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(bootstrap.NewCommand(opts.Context))
 	cmd.AddCommand(clean.NewCommand(opts.Context))
 	cmd.AddCommand(install.NewCommand(opts.Context))
+	cmd.AddCommand(execute.NewCommand(opts.Context))
 	cmd.AddCommand(controller.NewCommand(opts.Context))
 
 	cmd.AddCommand(cmdutils.HideCommand(componentarchive.NewCommand(opts.Context)))
@@ -206,6 +209,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(cmdutils.HideCommand(sources.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(components.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(plugins.NewCommand(opts.Context)))
+	cmd.AddCommand(cmdutils.HideCommand(action.NewCommand(opts.Context)))
 
 	cmd.AddCommand(cmdutils.HideCommand(cachecmds.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(ocicmds.NewCommand(opts.Context)))

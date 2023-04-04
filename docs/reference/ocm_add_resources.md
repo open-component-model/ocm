@@ -24,6 +24,8 @@ ocm add resources [<options>] [<target>] {<resourcefile> | <var>=<value>}
 ```
       --access YAML                  blob access specification (YAML)
       --accessHostname string        hostname used for access
+      --accessPackage string         package name
+      --accessRegistry string        registry base URL
       --accessRepository string      repository URL
       --accessType string            type of blob access specification
       --accessVersion string         version for access specification
@@ -316,11 +318,17 @@ with the field <code>type</code> in the <code>input</code> field:
   - **<code>version</code>** *string*
   
     This OPTIONAL property can be set to configure an explicit version hint.
-    If not specified the versio from the chart will be used.
+    If not specified the version from the chart will be used.
     Basically, it is a good practice to use the component version for local resources
     This can be achieved by using templating for this attribute in the resource file.
   
-  Options used to configure fields: <code>--inputCompress</code>, <code>--inputPath</code>, <code>--inputVersion</code>, <code>--mediaType</code>
+  - **<code>repository</code>** *string*
+  
+    This OPTIONAL property can be used to specify the repository hint for the
+    generated local artifact access. It is prefixed by the component name if
+    it does not start with slash "/".
+  
+  Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputPath</code>, <code>--inputVersion</code>, <code>--mediaType</code>
 
 - Input type <code>ociImage</code>
 
@@ -491,6 +499,30 @@ shown below.
 
   dummy resource with no access
 
+
+- Access type <code>npm</code>
+
+  This method implements the access of an NPM package in an NPM registry.
+
+  The following versions are supported:
+  - Version <code>v1</code>
+  
+    The type specific specification fields are:
+    
+    - **<code>registry</code>** *string*
+    
+      Base URL of the NPM registry.
+    
+    - **<code>package</code>** *string*
+    
+      The name of the NPM package
+    
+    - **<code>version</code>** *string*
+    
+      The version name of the NPM package
+    
+    Options used to configure fields: <code>--accessPackage</code>, <code>--accessRegistry</code>, <code>--accessVersion</code>
+  
 
 - Access type <code>ociArtifact</code>
 

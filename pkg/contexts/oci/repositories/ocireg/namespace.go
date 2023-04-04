@@ -11,8 +11,10 @@ import (
 	"github.com/containerd/containerd/errdefs"
 	"github.com/opencontainers/go-digest"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	oci_repository_prepare "github.com/open-component-model/ocm/pkg/contexts/datacontext/action/types/oci-repository-prepare"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
@@ -32,6 +34,7 @@ type NamespaceContainer struct {
 	fetcher   resolve.Fetcher
 	pusher    resolve.Pusher
 	blobs     *BlobContainers
+	checked   bool
 }
 
 var (
@@ -76,6 +79,11 @@ func (n *NamespaceContainer) Close() error {
 }
 
 func (n *NamespaceContainer) getPusher(vers string) (resolve.Pusher, error) {
+	err := n.assureCreated()
+	if err != nil {
+		return nil, err
+	}
+
 	ref := n.repo.getRef(n.namespace, vers)
 	resolver := n.resolver
 
@@ -136,6 +144,10 @@ func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
 	if err != nil {
 		return fmt.Errorf("failed to retrieve blob data: %w", err)
 	}
+	err = n.assureCreated()
+	if err != nil {
+		return err
+	}
 	if _, _, err := blobData.AddBlob(blob); err != nil {
 		log.Debug("adding blob failed", "digest", blob.Digest(), "error", err.Error())
 		return fmt.Errorf("unable to add blob: %w", err)
@@ -168,6 +180,25 @@ func (n *NamespaceContainer) GetArtifact(vers string) (cpi.ArtifactAccess, error
 		return nil, err
 	}
 	return cpi.NewArtifactForBlob(n, accessio.BlobAccessForDataAccess(desc.Digest, desc.Size, desc.MediaType, acc))
+}
+
+func (n *NamespaceContainer) assureCreated() error {
+	if n.checked {
+		return nil
+	}
+	var props common.Properties
+	if creds, err := n.repo.getCreds(n.namespace); err == nil && creds != nil {
+		props = creds.Properties()
+	}
+	r, err := oci_repository_prepare.Execute(n.repo.ctx.GetActions(), n.repo.info.HostPort(), n.namespace, props)
+	n.checked = true
+	if err != nil {
+		return err
+	}
+	if r != nil {
+		n.repo.ctx.Logger().Debug("prepare action executed", "message", r.Message)
+	}
+	return nil
 }
 
 func (n *NamespaceContainer) AddArtifact(artifact cpi.Artifact, tags ...string) (access accessio.BlobAccess, err error) {

@@ -50,6 +50,13 @@ following fields:
   combination of artifact type and optional mime type (describing the actually
   used blob format).
 
+- **<code>actions</code>** *[]ActionDescriptor*
+
+  The list of supported actions. Actions are defined by the used OCM
+  library to externalize element or element type related tasks, which
+  require dedicated environment specific actions.
+  For example, the creation of OCI repositories before an artifact upload.
+
 #### Access Method Descriptor
 
 An access method descriptor describes a dedicated supported access method.
@@ -189,6 +196,43 @@ The descriptor for a downloader has the following fields:
   - **<code>mediaType</code>** *string* (optional)
 
     Restrict the usage to a dedicated media type of the artifact blob.
+
+#### Action Descriptor
+
+The descriptor for an action has the following fields:
+
+- **<code>name</code>** *string*
+
+  The name of the action (for example <code>oci.repository.prepare</code>).
+
+- **<code>versions</code>** *[]string*
+
+  A list of accepted specification versions of the action.
+  The used version is negotiated between the caller and the plugin
+  by selecting the latest version supported by both parties.
+
+- **<code>description</code>** *string* (optional)
+
+  A short description of the provided tasks done by this action.
+
+- **<code>defaultSelectors</code>** *[]string* (optional)
+
+  A list of selectors, for which this action implementation is automatically
+  be registered when the plugin is loaded. The selector syntax depends on
+  the action type. (For example, the hostname (pattern) for the action
+  <code>oci.repository.prepare</code>). The selectors are eiker directly matched
+  with action requests or used as regular expression.
+
+- **<code>consumerType</code>** *string* (optional)
+
+  By default the action gets access to the credentials provided for the
+  element the action should work on. But it might be, that other credentials
+  are required to fulfill its task. Therefore the action can request a dedicated
+  consumer type used to lookup the credentials. The consumer attributes are
+  derived from the the action specification and cannot be influenced by the
+  plugin.
+. 
+
 
 
 ### Examples

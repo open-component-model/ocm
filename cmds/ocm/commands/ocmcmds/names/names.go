@@ -15,4 +15,5 @@ var (
 	References             = []string{"references", "reference", "refs"}
 	Versions               = []string{"versions", "vers", "v"}
 	Plugins                = []string{"plugins", "plugin", "p"}
+	Action                 = []string{"action"}
 )

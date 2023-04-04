@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/common"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -78,7 +79,7 @@ type Result struct {
 func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	d := p.GetDownloader(opts.Name)
 	if d == nil {
-		return errors.ErrNotFound(ppi.KIND_DOWNLOADER, fmt.Sprintf("%s:%s", opts.ArtifactType, opts.MediaType))
+		return errors.ErrNotFound(descriptor.KIND_DOWNLOADER, fmt.Sprintf("%s:%s", opts.ArtifactType, opts.MediaType))
 	}
 	w, h, err := d.Writer(p, opts.ArtifactType, opts.MediaType, opts.Path)
 	if err != nil {

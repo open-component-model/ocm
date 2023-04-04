@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/common"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -88,7 +89,7 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 
 	m := p.GetUploader(opts.Name)
 	if m == nil {
-		return errors.ErrUnknown(ppi.KIND_UPLOADER, spec.GetType())
+		return errors.ErrUnknown(descriptor.KIND_UPLOADER, spec.GetType())
 	}
 	info, err := m.ValidateSpecification(p, spec)
 	if err != nil {

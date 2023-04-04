@@ -15,7 +15,8 @@ type (
 )
 
 func RegisterBlobHandlerByName(ctx internal.Context, name string, config BlobHandlerConfig, opts ...BlobHandlerOption) error {
-	_, err := ctx.BlobHandlers().RegisterByName(name, ctx, config, opts...)
+	hdlrs := ctx.BlobHandlers()
+	_, err := hdlrs.RegisterByName(name, ctx, config, opts...)
 	return err
 }
 

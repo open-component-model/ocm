@@ -15,11 +15,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/docker"
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/logging"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type RepositoryInfo struct {
@@ -29,22 +29,17 @@ type RepositoryInfo struct {
 	Legacy  bool
 }
 
-func (r *RepositoryInfo) HostInfo() (string, string, string) {
-	path := ""
-	h := ""
+func (r *RepositoryInfo) HostPort() string {
 	i := strings.Index(r.Locator, "/")
 	if i < 0 {
-		h = r.Locator
+		return r.Locator
 	} else {
-		h = r.Locator[:i]
-		path = r.Locator[i+1:]
+		return r.Locator[:i]
 	}
-	i = strings.Index(h, ":")
+}
 
-	if i < 0 {
-		return h, "", path
-	}
-	return h[:i], h[i+1:], path
+func (r *RepositoryInfo) HostInfo() (string, string, string) {
+	return utils.SplitLocator(r.Locator)
 }
 
 type Repository struct {
@@ -76,22 +71,10 @@ func (r *Repository) IsClosed() bool {
 }
 
 func (r *Repository) getCreds(comp string) (credentials.Credentials, error) {
-	var err error
-
-	host, port, base := r.info.HostInfo()
-	id := credentials.ConsumerIdentity{
-		identity.ID_TYPE:     identity.CONSUMER_TYPE,
-		identity.ID_HOSTNAME: host,
+	if r.info.Creds != nil {
+		return r.info.Creds, nil
 	}
-	if port != "" {
-		id[identity.ID_PORT] = port
-	}
-	id[identity.ID_PATHPREFIX] = path.Join(base, comp)
-	creds := r.info.Creds
-	if creds == nil {
-		creds, err = credentials.CredentialsForConsumer(r.ctx, id, identity.IdentityMatcher)
-	}
-	return creds, err
+	return GetCredentials(r.ctx, r.info.Locator, comp)
 }
 
 func (r *Repository) getResolver(comp string) (resolve.Resolver, error) {

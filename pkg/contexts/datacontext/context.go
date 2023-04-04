@@ -14,6 +14,7 @@ import (
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/handlers"
 	"github.com/open-component-model/ocm/pkg/errors"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -70,12 +71,42 @@ type ContextProvider interface {
 	AttributesContext() AttributesContext
 }
 
+// Delegates is the interface for common
+// Context features, which might be delegated
+// to aggregated contexts.
+type Delegates interface {
+	ocmlog.LogProvider
+	handlers.ActionsProvider
+}
+
+type _delegates struct {
+	logging logging.Context
+	actions handlers.Registry
+}
+
+func (d _delegates) LoggingContext() logging.Context {
+	return d.logging
+}
+
+func (d _delegates) Logger(messageContext ...logging.MessageContext) logging.Logger {
+	return d.logging.Logger(messageContext)
+}
+
+func (d _delegates) GetActions() handlers.Registry {
+	return d.actions
+}
+
+func ComposeDelegates(l logging.Context, a handlers.Registry) Delegates {
+	return _delegates{l, a}
+}
+
 // Context describes a common interface for a data context used for a dedicated
 // purpose.
 // Such has a type and always specific attribute store.
 // Every Context can be bound to a context.Context.
 type Context interface {
 	ContextProvider
+	Delegates
 
 	// GetType returns the context type
 	GetType() string
@@ -84,8 +115,6 @@ type Context interface {
 	// retrievable by a ForContext method
 	BindTo(ctx context.Context) context.Context
 	GetAttributes() Attributes
-
-	ocmlog.LogProvider
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -110,7 +139,7 @@ type Attributes interface {
 }
 
 // DefaultContext is the default context initialized by init functions.
-var DefaultContext = New(nil)
+var DefaultContext = NewWithActions(nil, handlers.DefaultRegistry())
 
 // ForContext returns the Context to use for context.Context.
 // This is either an explicit context or the default context.
@@ -140,23 +169,25 @@ func (u UpdateFunc) Update() error {
 	return u()
 }
 
+type delegates = Delegates
+
 type contextBase struct {
 	ctxtype    string
 	key        interface{}
 	effective  Context
 	attributes Attributes
-	logging    logging.Context
+	delegates
 }
 
 var _ Context = (*contextBase)(nil)
 
 // NewContextBase creates a context base implementation supporting
 // context attributes and the binding to a context.Context.
-func NewContextBase(eff Context, typ string, key interface{}, parentAttrs Attributes, parentLogging logging.Context) Context {
+func NewContextBase(eff Context, typ string, key interface{}, parentAttrs Attributes, delegates Delegates) Context {
 	updater, _ := eff.(Updater)
 	c := &contextBase{ctxtype: typ, key: key, effective: eff}
 	c.attributes = newAttributes(eff, parentAttrs, &updater)
-	c.logging = logging.NewWithBase(parentLogging)
+	c.delegates = ComposeDelegates(logging.NewWithBase(delegates.LoggingContext()), handlers.NewRegistry(delegates.GetActions()))
 	return c
 }
 
@@ -170,19 +201,11 @@ func (c *contextBase) BindTo(ctx context.Context) context.Context {
 }
 
 func (c *contextBase) AttributesContext() AttributesContext {
-	return c
+	return c.effective.AttributesContext()
 }
 
 func (c *contextBase) GetAttributes() Attributes {
 	return c.attributes
-}
-
-func (c *contextBase) LoggingContext() logging.Context {
-	return c.logging
-}
-
-func (c *contextBase) Logger(messageContext ...logging.MessageContext) logging.Logger {
-	return c.logging.Logger(messageContext...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -196,6 +219,10 @@ var key = reflect.TypeOf(contextBase{})
 
 // New provides a root attribute context.
 func New(parentAttrs Attributes) AttributesContext {
+	return NewWithActions(parentAttrs, handlers.NewRegistry(handlers.DefaultRegistry()))
+}
+
+func NewWithActions(parentAttrs Attributes, actions handlers.Registry) AttributesContext {
 	c := &_context{}
 
 	c.Context = &contextBase{
@@ -203,7 +230,7 @@ func New(parentAttrs Attributes) AttributesContext {
 		key:        key,
 		effective:  c,
 		attributes: newAttributes(c, parentAttrs, &c.updater),
-		logging:    logging.NewWithBase(ocmlog.Context()),
+		delegates:  ComposeDelegates(logging.NewWithBase(ocmlog.Context()), handlers.NewRegistry(actions)),
 	}
 	return c
 }
@@ -219,6 +246,13 @@ func AssureUpdater(attrs AttributesContext, u Updater) {
 	if c.updater == nil {
 		c.updater = u
 	}
+}
+
+func (c *_context) Actions() handlers.Registry {
+	if c.updater != nil {
+		c.updater.Update()
+	}
+	return c.Context.GetActions()
 }
 
 func (c *_context) LoggingContext() logging.Context {
