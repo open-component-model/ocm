@@ -11,7 +11,9 @@ Goal of this deployment is to install two different components having their own 
 executors:
   - ...
     config:
-      ...
+      chart:
+        resource:
+          name: subchartsapp-chart
       subcharts:
         podinfo:
           resource:
@@ -23,12 +25,16 @@ executors:
             name: echo-chart
           referencePath:
           - name: echoserver
+      ...
 ```
+
+For a full configuration see: [packagespec.yaml](packagespec.yaml)
+
 For echoserver a dependency is declared to a resource named `echo-chart` contained in the reference named `echoserver` of this component version (`referencePath`):
 
 ```yaml
 components:
-- name: .../subcharts
+- name: ocm.software/toi/demo/subcharts/subcharts
   version: ...
   ...
   componentReferences:
@@ -38,6 +44,8 @@ components:
     version: ...
   - ...
 ```
+
+For a full configuration see: [packagespec.yaml](packagespec.yaml)
 
 In the echoserver component version the resource `echo-chart` will be used:
 
@@ -66,7 +74,7 @@ Same mechanism for podinfo:
 
 ```yaml
 components:
-- name: .../subcharts
+- name: ocm.software/toi/demo/subcharts/subcharts
   version: ...
   ...
   componentReferences:
