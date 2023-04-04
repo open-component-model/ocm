@@ -573,6 +573,14 @@ func (o *ResourceMeta) Copy() *ResourceMeta {
 	return r
 }
 
+func NewResourceMeta(name string, typ string, relation metav1.ResourceRelation) *ResourceMeta {
+	return &ResourceMeta{
+		ElementMeta: ElementMeta{Name: name},
+		Type:        typ,
+		Relation:    relation,
+	}
+}
+
 type References []ComponentReference
 
 func (r References) Len() int {

@@ -27,10 +27,15 @@ import (
 	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci/ocirepo"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	ocmutils "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var DefaultContext = ocm.New()
@@ -202,4 +207,54 @@ var _ = Describe("component repository mapping", func() {
 		Expect(repo.(*genericocireg.Repository).Close()).To(Succeed())
 	})
 
+	It("removes old unused layers", func() {
+		var finalize finalizer.Finalizer
+
+		defer Defer(finalize.Finalize, "finalize open elements")
+
+		repo := Must(DefaultContext.RepositoryForSpec(spec))
+		finalize.Close(repo)
+		Expect(reflect.TypeOf(repo).String()).To(Equal("*genericocireg.Repository"))
+
+		nested := finalize.Nested()
+
+		comp := Must(repo.LookupComponent(COMPONENT))
+		nested.Close(comp)
+		vers := Must(comp.NewVersion("v1"))
+		nested.Close(vers)
+
+		m1 := compdesc.NewResourceMeta("rsc1", resourcetypes.PLAIN_TEXT, v1.LocalRelation)
+		blob := accessio.BlobAccessForString(mime.MIME_TEXT, "testdata")
+
+		MustBeSuccessful(vers.SetResourceBlob(m1, blob, "", nil))
+		MustBeSuccessful(comp.AddVersion(vers))
+
+		MustBeSuccessful(nested.Finalize())
+
+		// modify rsource in component
+		vers = Must(repo.LookupComponentVersion(COMPONENT, "v1"))
+		nested.Close(vers)
+		blob = accessio.BlobAccessForString(mime.MIME_TEXT, "otherdata")
+		MustBeSuccessful(vers.SetResourceBlob(m1, blob, "", nil))
+		MustBeSuccessful(nested.Finalize())
+
+		// check content
+		vers = Must(repo.LookupComponentVersion(COMPONENT, "v1"))
+		nested.Close(vers)
+		r := Must(vers.GetResource(v1.NewIdentity("rsc1")))
+		data := Must(ocmutils.GetResourceData(r))
+		Expect(string(data)).To(Equal("otherdata"))
+		MustBeSuccessful(nested.Finalize())
+
+		MustBeSuccessful(finalize.Finalize())
+
+		ocirepo := Must(DefaultContext.OCIContext().RepositoryForSpec(ocispec))
+		finalize.Close(ocirepo)
+
+		art := Must(ocirepo.LookupArtifact("component-descriptors/"+COMPONENT, "v1"))
+		finalize.Close(art)
+
+		Expect(art.GetDescriptor().IsManifest()).To(BeTrue())
+		Expect(len(art.GetDescriptor().Manifest().Layers)).To(Equal(2))
+	})
 })
