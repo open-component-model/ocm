@@ -149,13 +149,7 @@ func (a *componentVersionAccessImpl) GetResource(id metav1.Identity) (cpi.Resour
 	if err != nil {
 		return nil, err
 	}
-	return &ResourceAccess{
-		BaseAccess: &BaseAccess{
-			vers:   a,
-			access: r.Access,
-		},
-		meta: r.ResourceMeta,
-	}, nil
+	return newResourceAccess(a, r.Access, r.ResourceMeta), nil
 }
 
 func (a *componentVersionAccessImpl) GetResourceByIndex(i int) (cpi.ResourceAccess, error) {
@@ -163,13 +157,7 @@ func (a *componentVersionAccessImpl) GetResourceByIndex(i int) (cpi.ResourceAcce
 		return nil, errors.ErrInvalid("resource index", strconv.Itoa(i))
 	}
 	r := a.base.GetDescriptor().Resources[i]
-	return &ResourceAccess{
-		BaseAccess: &BaseAccess{
-			vers:   a,
-			access: r.Access,
-		},
-		meta: r.ResourceMeta,
-	}, nil
+	return newResourceAccess(a, r.Access, r.ResourceMeta), nil
 }
 
 func (a *componentVersionAccessImpl) GetResourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]cpi.ResourceAccess, error) {
@@ -180,13 +168,7 @@ func (a *componentVersionAccessImpl) GetResourcesByName(name string, selectors .
 
 	result := []cpi.ResourceAccess{}
 	for _, resource := range resources {
-		result = append(result, &ResourceAccess{
-			BaseAccess: &BaseAccess{
-				vers:   a,
-				access: resource.Access,
-			},
-			meta: resource.ResourceMeta,
-		})
+		result = append(result, newResourceAccess(a, resource.Access, resource.ResourceMeta))
 	}
 	return result, nil
 }
@@ -194,13 +176,7 @@ func (a *componentVersionAccessImpl) GetResourcesByName(name string, selectors .
 func (a *componentVersionAccessImpl) GetResources() []cpi.ResourceAccess {
 	result := []cpi.ResourceAccess{}
 	for _, r := range a.GetDescriptor().Resources {
-		result = append(result, &ResourceAccess{
-			BaseAccess: &BaseAccess{
-				vers:   a,
-				access: r.Access,
-			},
-			meta: r.ResourceMeta,
-		})
+		result = append(result, newResourceAccess(a, r.Access, r.ResourceMeta))
 	}
 	return result
 }
@@ -210,13 +186,7 @@ func (a *componentVersionAccessImpl) GetSource(id metav1.Identity) (cpi.SourceAc
 	if err != nil {
 		return nil, err
 	}
-	return &SourceAccess{
-		BaseAccess: &BaseAccess{
-			vers:   a,
-			access: r.Access,
-		},
-		meta: r.SourceMeta,
-	}, nil
+	return newSourceAccess(a, r.Access, r.SourceMeta), nil
 }
 
 func (a *componentVersionAccessImpl) GetSourceByIndex(i int) (cpi.SourceAccess, error) {
@@ -224,25 +194,13 @@ func (a *componentVersionAccessImpl) GetSourceByIndex(i int) (cpi.SourceAccess, 
 		return nil, errors.ErrInvalid("source index", strconv.Itoa(i))
 	}
 	r := a.base.GetDescriptor().Sources[i]
-	return &SourceAccess{
-		BaseAccess: &BaseAccess{
-			vers:   a,
-			access: r.Access,
-		},
-		meta: r.SourceMeta,
-	}, nil
+	return newSourceAccess(a, r.Access, r.SourceMeta), nil
 }
 
 func (a *componentVersionAccessImpl) GetSources() []cpi.SourceAccess {
 	result := []cpi.SourceAccess{}
 	for _, r := range a.GetDescriptor().Sources {
-		result = append(result, &SourceAccess{
-			BaseAccess: &BaseAccess{
-				vers:   a,
-				access: r.Access,
-			},
-			meta: r.SourceMeta,
-		})
+		result = append(result, newSourceAccess(a, r.Access, r.SourceMeta))
 	}
 	return result
 }
@@ -440,6 +398,16 @@ type ResourceAccess struct {
 
 var _ cpi.ResourceAccess = (*ResourceAccess)(nil)
 
+func newResourceAccess(componentVersion *componentVersionAccessImpl, accessSpec compdesc.AccessSpec, meta cpi.ResourceMeta) *ResourceAccess {
+	return &ResourceAccess{
+		BaseAccess: &BaseAccess{
+			vers:   componentVersion,
+			access: accessSpec,
+		},
+		meta: meta,
+	}
+}
+
 func (r ResourceAccess) Meta() *cpi.ResourceMeta {
 	return &r.meta
 }
@@ -452,6 +420,16 @@ type SourceAccess struct {
 }
 
 var _ cpi.SourceAccess = (*SourceAccess)(nil)
+
+func newSourceAccess(componentVersion *componentVersionAccessImpl, accessSpec compdesc.AccessSpec, meta cpi.SourceMeta) *SourceAccess {
+	return &SourceAccess{
+		BaseAccess: &BaseAccess{
+			vers:   componentVersion,
+			access: accessSpec,
+		},
+		meta: meta,
+	}
+}
 
 func (r SourceAccess) Meta() *cpi.SourceMeta {
 	return &r.meta
