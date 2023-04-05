@@ -36,6 +36,8 @@ type Option struct {
 	List    []string
 	Default accessio.FileFormat
 	Format  accessio.FileFormat
+
+	flag *pflag.Flag
 }
 
 func (o *Option) setDefault() {
@@ -50,6 +52,7 @@ func (o *Option) setDefault() {
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	o.setDefault()
 	fs.StringVarP(&o.format, "type", "t", string(o.Default), fmt.Sprintf("archive format (%s)", strings.Join(o.List, ", ")))
+	o.flag = fs.Lookup("type")
 }
 
 func (o *Option) Configure(ctx clictx.Context) error {
@@ -77,6 +80,18 @@ target archive to use. The following formats are supported:
 		s = s + "- " + k + "\n"
 	}
 	return s + "\nThe default format is <code>directory</code>.\n"
+}
+
+func (o *Option) IsChanged() bool {
+	return o.flag != nil && o.flag.Changed
+}
+
+func (o *Option) ChangedFormat() accessio.FileFormat {
+	if o.IsChanged() {
+		return o.Format
+	} else {
+		return ""
+	}
 }
 
 func (o *Option) Mode() vfs.FileMode {

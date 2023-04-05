@@ -103,7 +103,7 @@ func (o *Command) Run() error {
 		return err
 	}
 
-	target, err := ocm.AssureTargetRepository(session, o.Context.OCMContext(), o.TargetName, ocm.CommonTransportFormat, formatoption.From(o).Format, o.Context.FileSystem())
+	target, err := ocm.AssureTargetRepository(session, o.Context.OCMContext(), o.TargetName, ocm.CommonTransportFormat, formatoption.From(o).ChangedFormat(), o.Context.FileSystem())
 	if err != nil {
 		return err
 	}

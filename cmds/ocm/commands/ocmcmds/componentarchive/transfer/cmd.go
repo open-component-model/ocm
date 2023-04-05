@@ -68,8 +68,8 @@ func (o *Command) Run() error {
 	}
 	session.Closer(source)
 
-	format := formatoption.From(o)
-	target, err := ocm.AssureTargetRepository(session, o.Context.OCMContext(), o.TargetName, ocm.CommonTransportFormat, format.Format, o.Context.FileSystem())
+	format := formatoption.From(o).ChangedFormat()
+	target, err := ocm.AssureTargetRepository(session, o.Context.OCMContext(), o.TargetName, ocm.CommonTransportFormat, format, o.Context.FileSystem())
 	if err != nil {
 		return err
 	}
