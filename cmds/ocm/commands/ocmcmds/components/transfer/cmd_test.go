@@ -10,6 +10,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
@@ -176,6 +177,22 @@ transferring version "github.com/mandelsoft/test2:v1"...
 		Expect(tgt.ExistsComponentVersion(COMPONENT2, VERSION)).To(BeTrue())
 
 		CheckComponent(env, ldesc, tgt)
+	})
+
+	It("transfers ctf to tgz with type option", func() {
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).Execute("transfer", "components", "--copy-resources", "--type", accessio.FormatTGZ.String(), ARCH, ARCH, OUT)).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+transferring version "github.com/mandelsoft/test:v1"...
+...resource 0...
+...resource 1(ocm/value:v2.0)...
+...resource 2(ocm/ref:v2.0)...
+...adding component version...
+1 versions transferred
+`))
+
+		Expect(env.FileExists(OUT)).To(BeTrue())
+		Check(env, ldesc, OUT)
 	})
 
 	It("transfers ctf to tgz", func() {
