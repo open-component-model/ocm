@@ -12,7 +12,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -25,7 +25,7 @@ type pluginHandler struct {
 func New(p plugin.Plugin, name string) (download.Handler, error) {
 	dd := p.GetDownloaderDescriptor(name)
 	if dd == nil {
-		return nil, errors.ErrUnknown(ppi.KIND_DOWNLOADER, name, p.Name())
+		return nil, errors.ErrUnknown(descriptor.KIND_DOWNLOADER, name, p.Name())
 	}
 
 	return &pluginHandler{

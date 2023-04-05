@@ -7,20 +7,21 @@ package comp
 import (
 	"fmt"
 
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	. "github.com/open-component-model/ocm/pkg/finalizer"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/refs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/rscs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs/srcs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
-	utils2 "github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -29,12 +30,13 @@ const (
 
 type ResourceSpecHandler struct {
 	version string
+	schema  string
 }
 
 var _ common.ResourceSpecHandler = (*ResourceSpecHandler)(nil)
 
-func NewResourceSpecHandler(v string) *ResourceSpecHandler {
-	return &ResourceSpecHandler{v}
+func NewResourceSpecHandler(v string, schema string) *ResourceSpecHandler {
+	return &ResourceSpecHandler{version: v, schema: schema}
 }
 
 func (*ResourceSpecHandler) Key() string {
@@ -61,8 +63,8 @@ func (*ResourceSpecHandler) Set(v ocm.ComponentVersionAccess, r addhdlrs.Element
 	return fmt.Errorf("not supported for components")
 }
 
-func (*ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem addhdlrs.Element, repo ocm.Repository) (err error) {
-	var final utils.Finalizer
+func (h *ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem addhdlrs.Element, repo ocm.Repository) (err error) {
+	var final Finalizer
 	defer final.FinalizeWithErrorPropagation(&err)
 
 	r, ok := elem.Spec().(*ResourceSpec)
@@ -82,6 +84,17 @@ func (*ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem ad
 	final.Close(cv)
 
 	cd := cv.GetDescriptor()
+
+	schema := h.schema
+	if r.Meta.ConfiguredVersion != "" {
+		schema = r.Meta.ConfiguredVersion
+	}
+	if schema != "" {
+		if compdesc.DefaultSchemes[schema] == nil {
+			return errors.ErrUnknown(errors.KIND_SCHEMAVERSION, schema)
+		}
+		cd.Metadata.ConfiguredVersion = schema
+	}
 
 	cd.Labels = r.Labels
 	cd.Provider = r.Provider
@@ -103,7 +116,7 @@ func (*ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem ad
 }
 
 func handle[T addhdlrs.ElementSpec](ctx clictx.Context, ictx inputs.Context, si addhdlrs.SourceInfo, cv ocm.ComponentVersionAccess, specs []T, h common.ResourceSpecHandler) error {
-	key := utils2.Plural(h.Key(), 0)
+	key := utils.Plural(h.Key(), 0)
 	elems, err := addhdlrs.MapSpecsToElems(ctx, ictx, si.Sub(key), specs, h)
 	if err != nil {
 		return errors.Wrapf(err, key)
@@ -111,9 +124,12 @@ func handle[T addhdlrs.ElementSpec](ctx clictx.Context, ictx inputs.Context, si 
 	return common.ProcessElements(ictx, cv, elems, h)
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////////
 
 type ResourceSpec struct {
+	// Meta enabled to specify information for the serialization
+	Meta compdesc.Metadata `json:"meta"`
+
 	metav1.ObjectMeta `json:",inline"`
 	// Sources defines sources that produced the component
 	Sources []*srcs.ResourceSpec `json:"sources"`

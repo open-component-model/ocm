@@ -24,7 +24,7 @@ type OptionWithOutputContextCompleter interface {
 }
 
 type OptionWithCLIContextCompleter interface {
-	Complete(ctx clictx.Context) error
+	Configure(ctx clictx.Context) error
 }
 
 type Usage interface {
@@ -161,7 +161,7 @@ func CompleteOptions(opt Options) error {
 func CompleteOptionsWithCLIContext(ctx clictx.Context) OptionsProcessor {
 	return func(opt Options) error {
 		if c, ok := opt.(OptionWithCLIContextCompleter); ok {
-			return c.Complete(ctx)
+			return c.Configure(ctx)
 		}
 		if c, ok := opt.(OptionWithOutputContextCompleter); ok {
 			return c.Complete(ctx)

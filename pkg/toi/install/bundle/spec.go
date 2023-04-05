@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/toi"
 	"github.com/open-component-model/ocm/pkg/toi/install"
 )
 
@@ -23,7 +24,7 @@ type BundleSpecification struct {
 
 type InstallationSpecification struct {
 	ResourceRef *metav1.ResourceReference `json:"resourceRef,omitempty"`
-	Image       *install.Image            `json:"image,omitempty"`
+	Image       *toi.Image                `json:"image,omitempty"`
 
 	Actions  map[string]string `json:"actions,omitempty"`
 	Required map[string]string `json:"required,omitempty"`

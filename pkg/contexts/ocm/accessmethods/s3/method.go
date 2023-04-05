@@ -81,6 +81,10 @@ func (_ *AccessSpec) IsLocal(cpi.Context) bool {
 	return false
 }
 
+func (a *AccessSpec) GlobalAccessSpec(ctx cpi.Context) cpi.AccessSpec {
+	return a
+}
+
 func (_ *AccessSpec) GetType() string {
 	return Type
 }

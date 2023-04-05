@@ -49,12 +49,12 @@ func (h *Handler) OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.Compo
 	return h.Handler.OverwriteVersion(src, tgt)
 }
 
-func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ComponentReference) (ocm.ComponentVersionAccess, transferhandler.TransferHandler, error) {
+func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ComponentReference, tgt ocm.Repository) (ocm.ComponentVersionAccess, transferhandler.TransferHandler, error) {
 	if src == nil || h.opts.IsRecursive() {
 		if h.opts.GetScript() == nil {
-			return h.Handler.TransferVersion(repo, src, meta)
+			return h.Handler.TransferVersion(repo, src, meta, tgt)
 		}
-		binding := h.getBinding(src, nil, &meta.ElementMeta, nil)
+		binding := h.getBinding(src, nil, &meta.ElementMeta, nil, tgt)
 		result, r, s, err := h.EvalRecursion("componentversion", binding, "process")
 		if err != nil {
 			return nil, nil, err
@@ -67,11 +67,11 @@ func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionA
 				}
 			}
 			if s == nil {
-				return h.Handler.TransferVersion(repo, src, meta)
+				return h.Handler.TransferVersion(repo, src, meta, tgt)
 			}
 			opts := *h.opts
 			opts.script = s
-			cv, _, err := h.Handler.TransferVersion(repo, src, meta)
+			cv, _, err := h.Handler.TransferVersion(repo, src, meta, tgt)
 			return cv, &Handler{
 				Handler: h.Handler,
 				opts:    &opts,
@@ -88,7 +88,7 @@ func (h *Handler) TransferResource(src ocm.ComponentVersionAccess, a ocm.AccessS
 	if h.opts.GetScript() == nil {
 		return true, nil
 	}
-	binding := h.getBinding(src, a, &r.Meta().ElementMeta, &r.Meta().Type)
+	binding := h.getBinding(src, a, &r.Meta().ElementMeta, &r.Meta().Type, nil)
 	return h.EvalBool("resource", binding, "process")
 }
 
@@ -99,11 +99,11 @@ func (h *Handler) TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpe
 	if h.opts.GetScript() == nil {
 		return true, nil
 	}
-	binding := h.getBinding(src, a, &r.Meta().ElementMeta, &r.Meta().Type)
+	binding := h.getBinding(src, a, &r.Meta().ElementMeta, &r.Meta().Type, nil)
 	return h.EvalBool("source", binding, "process")
 }
 
-func (h *Handler) getBinding(src ocm.ComponentVersionAccess, a ocm.AccessSpec, m *compdesc.ElementMeta, typ *string) map[string]interface{} {
+func (h *Handler) getBinding(src ocm.ComponentVersionAccess, a ocm.AccessSpec, m *compdesc.ElementMeta, typ *string, tgt ocm.Repository) map[string]interface{} {
 	binding := map[string]interface{}{}
 	if src != nil {
 		binding["component"] = getCVAttrs(src)
@@ -115,6 +115,9 @@ func (h *Handler) getBinding(src ocm.ComponentVersionAccess, a ocm.AccessSpec, m
 	binding["element"] = getData(m)
 	if typ != nil {
 		binding["element"].(map[string]interface{})["type"] = *typ
+	}
+	if tgt != nil {
+		binding["target"] = getData(tgt.GetSpecification())
 	}
 	return binding
 }

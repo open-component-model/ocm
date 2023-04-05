@@ -1,0 +1,65 @@
+name: BuildComponents
+
+on:
+  workflow_dispatch:
+    inputs:
+      ocm_push:
+        type: boolean
+        description: "Push to OCM Repository"
+        default: false
+
+jobs:
+#  lint-and-test:
+#    uses: ./.github/workflows/lint_and_test.yaml
+#    permissions:
+#      contents: read
+#      pull-requests: read
+  components:
+#    needs: lint-and-test
+    name: Trigger component build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
+      repository-projects: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: '${{ github.workspace }}/go.mod'
+
+      - name: Cache go-build and mod
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build/
+            ~/go/pkg/mod/
+          key: go-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            go-
+
+      - name: Push OCM Components
+        if: inputs.ocm_push == true
+        env:
+          GITHUBORG: ${{ github.repository_owner }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+        run: make push
+
+      - name: Build OCM Components
+        if: inputs.ocm_push == false
+        env:
+          GITHUBORG: ${{ github.repository_owner }}
+        run: make ctf
+
+      - name: Upload OCM Archive
+        uses: actions/upload-artifact@v3
+        with:
+          name: ocm.ctf
+          path: gen/ctf

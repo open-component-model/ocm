@@ -12,7 +12,6 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
@@ -60,11 +59,11 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 	return allErrs
 }
 
-func (s *Spec) GetBlob(ctx inputs.Context, nv common.NameVersion, inputFilePath string) (accessio.TemporaryBlobAccess, string, error) {
+func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (accessio.TemporaryBlobAccess, string, error) {
 	fs := ctx.FileSystem()
-	inputInfo, inputPath, err := inputs.FileInfo(ctx, s.Path, inputFilePath)
+	inputInfo, inputPath, err := inputs.FileInfo(ctx, s.Path, info.InputFilePath)
 	if err != nil {
-		return nil, "", fmt.Errorf("resource dir %s: %w", inputFilePath, err)
+		return nil, "", fmt.Errorf("resource dir %s: %w", info.InputFilePath, err)
 	}
 	if !inputInfo.IsDir() {
 		return nil, "", fmt.Errorf("resource type is dir but a file was provided")

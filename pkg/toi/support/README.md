@@ -1,4 +1,4 @@
-### Suport for TOI Executors
+### Support for TOI Executors
 
 This package provides a generic command line tool support to provide
 TOI executor CLIs.

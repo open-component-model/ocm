@@ -12,8 +12,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -70,7 +70,7 @@ func (h *TypeHandler) Get(elemspec utils.ElemSpec) ([]output.Object, error) {
 	if p == nil {
 		objs := Lookup(elemspec.String(), cache)
 		if len(objs) == 0 {
-			return nil, errors.ErrNotFound(ppi.KIND_PLUGIN, elemspec.String())
+			return nil, errors.ErrNotFound(descriptor.KIND_PLUGIN, elemspec.String())
 		}
 		return objs, nil
 	}

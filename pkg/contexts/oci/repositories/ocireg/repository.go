@@ -11,15 +11,16 @@ import (
 
 	"github.com/containerd/containerd/errdefs"
 	"github.com/containerd/containerd/remotes/docker/config"
+	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/docker"
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/logging"
+	ocmlog "github.com/open-component-model/ocm/pkg/logging"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type RepositoryInfo struct {
@@ -29,37 +30,35 @@ type RepositoryInfo struct {
 	Legacy  bool
 }
 
-func (r *RepositoryInfo) HostInfo() (string, string, string) {
-	path := ""
-	h := ""
+func (r *RepositoryInfo) HostPort() string {
 	i := strings.Index(r.Locator, "/")
 	if i < 0 {
-		h = r.Locator
+		return r.Locator
 	} else {
-		h = r.Locator[:i]
-		path = r.Locator[i+1:]
+		return r.Locator[:i]
 	}
-	i = strings.Index(h, ":")
+}
 
-	if i < 0 {
-		return h, "", path
-	}
-	return h[:i], h[i+1:], path
+func (r *RepositoryInfo) HostInfo() (string, string, string) {
+	return utils.SplitLocator(r.Locator)
 }
 
 type Repository struct {
-	ctx  cpi.Context
-	spec *RepositorySpec
-	info *RepositoryInfo
+	ctx    cpi.Context
+	logger logging.UnboundLogger
+	spec   *RepositorySpec
+	info   *RepositoryInfo
 }
 
 var _ cpi.Repository = &Repository{}
 
 func NewRepository(ctx cpi.Context, spec *RepositorySpec, info *RepositoryInfo) (*Repository, error) {
+	urs := spec.UniformRepositorySpec()
 	return &Repository{
-		ctx:  ctx,
-		spec: spec,
-		info: info,
+		ctx:    ctx,
+		logger: logging.DynamicLogger(ctx, REALM, logging.NewAttribute(ocmlog.ATTR_HOST, urs.Host)),
+		spec:   spec,
+		info:   info,
 	}, nil
 }
 
@@ -76,22 +75,10 @@ func (r *Repository) IsClosed() bool {
 }
 
 func (r *Repository) getCreds(comp string) (credentials.Credentials, error) {
-	var err error
-
-	host, port, base := r.info.HostInfo()
-	id := credentials.ConsumerIdentity{
-		identity.ID_TYPE:     identity.CONSUMER_TYPE,
-		identity.ID_HOSTNAME: host,
+	if r.info.Creds != nil {
+		return r.info.Creds, nil
 	}
-	if port != "" {
-		id[identity.ID_PORT] = port
-	}
-	id[identity.ID_PATHPREFIX] = path.Join(base, comp)
-	creds := r.info.Creds
-	if creds == nil {
-		creds, err = credentials.CredentialsForConsumer(r.ctx, id, identity.IdentityMatcher)
-	}
-	return creds, err
+	return GetCredentials(r.ctx, r.info.Locator, comp)
 }
 
 func (r *Repository) getResolver(comp string) (resolve.Resolver, error) {
@@ -101,8 +88,9 @@ func (r *Repository) getResolver(comp string) (resolve.Resolver, error) {
 			return nil, err
 		}
 	}
+	logger := r.logger.BoundLogger().WithValues(ocmlog.ATTR_NAMESPACE, comp)
 	if creds == nil {
-		logging.Logger(REALM).Trace("no credentials", "comp", comp, "base", r.spec.BaseURL)
+		logger.Trace("no credentials")
 	}
 
 	opts := docker.ResolverOptions{
@@ -117,10 +105,10 @@ func (r *Repository) getResolver(comp string) (resolve.Resolver, error) {
 					if pw != "" {
 						pw = "***"
 					}
-					logging.Logger(REALM).Trace("query credentials", "host", host, "user", creds.GetProperty(credentials.ATTR_USERNAME), "pass", pw)
+					logger.Trace("query credentials", ocmlog.ATTR_USER, creds.GetProperty(credentials.ATTR_USERNAME), "pass", pw)
 					return creds.GetProperty(credentials.ATTR_USERNAME), p, nil
 				}
-				logging.Logger(REALM).Trace("no credentials", "host", host)
+				logger.Trace("no credentials")
 				return "", "", nil
 			},
 			DefaultScheme: r.info.Scheme,

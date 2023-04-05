@@ -8,8 +8,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/internal"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -18,7 +19,8 @@ import (
 type plugin struct {
 	name       string
 	version    string
-	descriptor internal.Descriptor
+	descriptor descriptor.Descriptor
+	tweaker    func(descriptor descriptor.Descriptor) descriptor.Descriptor
 	options    Options
 
 	downloaders  map[string]Downloader
@@ -30,6 +32,8 @@ type plugin struct {
 
 	methods      map[string]AccessMethod
 	accessScheme runtime.Scheme
+
+	actions map[string]Action
 
 	configParser func(message json.RawMessage) (interface{}, error)
 }
@@ -49,8 +53,11 @@ func NewPlugin(name string, version string) Plugin {
 
 		accessScheme:   runtime.MustNewDefaultScheme(&rt, &runtime.UnstructuredVersionedTypedObject{}, false, nil),
 		uploaderScheme: runtime.MustNewDefaultScheme(&rt, &runtime.UnstructuredVersionedTypedObject{}, false, nil),
-		descriptor: internal.Descriptor{
-			Version:       internal.VERSION,
+
+		actions: map[string]Action{},
+
+		descriptor: descriptor.Descriptor{
+			Version:       descriptor.VERSION,
 			PluginName:    name,
 			PluginVersion: version,
 		},
@@ -65,7 +72,10 @@ func (p *plugin) Version() string {
 	return p.version
 }
 
-func (p *plugin) Descriptor() internal.Descriptor {
+func (p *plugin) Descriptor() descriptor.Descriptor {
+	if p.tweaker != nil {
+		return p.tweaker(p.descriptor)
+	}
 	return p.descriptor
 }
 
@@ -79,6 +89,10 @@ func (p *plugin) SetLong(s string) {
 
 func (p *plugin) SetShort(s string) {
 	p.descriptor.Short = s
+}
+
+func (p *plugin) SetDescriptorTweaker(t func(descriptor descriptor.Descriptor) descriptor.Descriptor) {
+	p.tweaker = t
 }
 
 func (p *plugin) SetConfigParser(config func(raw json.RawMessage) (interface{}, error)) {
@@ -245,7 +259,7 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 	}
 	vers := m.Version()
 	if vers == "" {
-		meth := internal.AccessMethodDescriptor{
+		meth := descriptor.AccessMethodDescriptor{
 			Name:        m.Name(),
 			Description: m.Description(),
 			Format:      m.Format(),
@@ -255,7 +269,7 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 		p.methods[m.Name()] = m
 		vers = "v1"
 	}
-	meth := internal.AccessMethodDescriptor{
+	meth := descriptor.AccessMethodDescriptor{
 		Name:        m.Name(),
 		Version:     vers,
 		Description: m.Description(),
@@ -282,6 +296,35 @@ func (p *plugin) GetAccessMethod(name string, version string) AccessMethod {
 		n += "/" + version
 	}
 	return p.methods[n]
+}
+
+func (p *plugin) RegisterAction(a Action) error {
+	if p.GetAction(a.Name()) != nil {
+		return errors.ErrAlreadyExists("action", a.Name())
+	}
+	vers := action.SupportedActionVersions(a.Name())
+	if len(vers) == 0 {
+		return errors.ErrNotSupported("action", a.Name())
+	}
+
+	act := descriptor.ActionDescriptor{
+		Name:             a.Name(),
+		Versions:         vers,
+		Description:      a.Description(),
+		DefaultSelectors: a.DefaultSelectors(),
+		ConsumerType:     a.ConsumerType(),
+	}
+	p.descriptor.Actions = append(p.descriptor.Actions, act)
+	p.actions[a.Name()] = a
+	return nil
+}
+
+func (p *plugin) DecodeAction(data []byte) (ActionSpec, error) {
+	return action.DecodeActionSpec(data)
+}
+
+func (p *plugin) GetAction(name string) Action {
+	return p.actions[name]
 }
 
 func (p *plugin) GetConfig() (interface{}, error) {

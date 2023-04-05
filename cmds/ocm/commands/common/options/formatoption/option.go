@@ -52,7 +52,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.format, "type", "t", string(o.Default), fmt.Sprintf("archive format (%s)", strings.Join(o.List, ", ")))
 }
 
-func (o *Option) Complete(ctx clictx.Context) error {
+func (o *Option) Configure(ctx clictx.Context) error {
 	o.Format = accessio.FileFormat(o.format)
 	for _, f := range o.List {
 		if f == string(o.Format) {

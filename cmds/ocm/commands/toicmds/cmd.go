@@ -7,8 +7,10 @@ package toicmds
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/components"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/config"
+	_package "github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/package"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/verbs/bootstrap"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/verbs/describe"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
 	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
@@ -35,9 +37,11 @@ installation data by th generic command.
 `,
 	}, "toi")
 
-	cmd.AddCommand(components.NewCommand(ctx))
+	cmd.AddCommand(_package.NewCommand(ctx))
+	cmd.AddCommand(config.NewCommand(ctx))
 
 	cmd.AddCommand(bootstrap.NewCommand(ctx))
+	cmd.AddCommand(describe.NewCommand(ctx))
 
 	cmd.AddCommand(topicocmrefs.New(ctx))
 	cmd.AddCommand(topicbootstrap.New(ctx, "bootstrapping"))

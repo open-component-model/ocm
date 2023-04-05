@@ -43,21 +43,25 @@ to the caller.
 
 ### The <code>toiPackage</code> Resource
 
-This resource describes an installable software package, whose content is 
+This resource describes an installable software package, whose content is
 contained in the component version, which contains the package resource.
 
 It is a plain yaml resource with the media types media type <code>application/x-yaml</code>,
-<code>text/yaml</code> or 
+<code>text/yaml</code> or
 <code>application/vnd.toi.ocm.software.package.v1+yaml</code>) containing
 information required to control the instantiation of an executor.
 
 It has the following format:
 
+- **<code>description</code>** (optional) *string*
+
+  A short description of the installation package and some configuration hints.
+
 - **<code>executors</code>** *[]ExecutorSpecification*
 
 - **<code>configTemplate</code>** (optional) *yaml*
 
-  This a [spiff](https://github.com/mandelsoft/spiff) template used to generate
+  This is a [spiff](https://github.com/mandelsoft/spiff) template used to generate
   The user config that is finally passed to the executor. If no template
   is specified the user parameter input will be processed directly without template.
 
@@ -77,6 +81,17 @@ It has the following format:
   dedicated name/purpose and structure. If specified the bootstrap command
   requites the specification of a credentials file providing the information
   how to satisfy those credential requests.
+
+- **<code>additionalResources</code>** (optional) *map[string]ResourceReference*
+
+  A set of additional resources specified by OCM resource references.
+  The key describes the meaning of the resource. The following keys have
+  a special meaning:
+
+  - **<code>configFile</code>**: an example template for a parameter file
+  - **<code>credentialsFile</code>**: an example template for a credentials file
+
+  Those templates can be downloaded with [ocm bootstrap config](ocm_bootstrap_config.md).
 
 #### *ExecutorSpecification*
 
@@ -165,7 +180,7 @@ defines additional identity attributes, the complete set must be specified.
 Instead of directly describing an image resource i the package file, it is
 possible to refer to a resource of type toiExecutor. This
 is a yaml file with the media type <code>application/x-yaml</code>,
-<code>text/yaml</code> or 
+<code>text/yaml</code> or
 <code>application/vnd.toi.ocm.software.package.v1+yaml</code>) containing
 common information about the executor executor. If used by the package,
 this information is used to validate settings in the package specification.
@@ -198,7 +213,7 @@ It has the following format:
 
   Here the executor may request the provisioning of some credentials with a
   dedicated name/purpose and structure. If specified it will be propagated
-  to a using package. It this uses an own credentials section, this one 
+  to a using package. It this uses an own credentials section, this one
   will be filtered and checked for the actual executor.
 
 - **<code>outputs</code>** (optional) *map[string]OutputSpecification*
@@ -284,7 +299,7 @@ execution and reading provided executor outputs after the execution.
     ├── outputs
     │   ├── &lt;out>       any number of arbitrary output data provided
     │   │               by executor
-    │   └── ...         
+    │   └── ...
     └── run             good practice: typical location for the executed command
 </pre>
 
@@ -304,6 +319,8 @@ by the TOI toolset.
 ### Examples
 
 ```
+description: |
+  This package is just an example.
 executors:
   - actions:
     - install
@@ -312,7 +329,7 @@ executors:
         name: installerimage
     config:
       level: info
-#   parameterMapping:  # optional spiff mapping of Package configuration to 
+#   parameterMapping:  # optional spiff mapping of Package configuration to
 #      ....            # executor parameters
     outputs:
        test: bla
@@ -342,6 +359,10 @@ configScheme:
           type: string
         password:
           type: string
+additionalResources:
+  configFile:
+    resource:
+      name: config-file
 ```
 
 ### SEE ALSO
@@ -354,6 +375,7 @@ configScheme:
 
 ##### Additional Links
 
-* [<b>ocm bootstrap componentversions</b>](ocm_bootstrap_componentversions.md)	 &mdash; bootstrap component version
+* [<b>ocm bootstrap componentversions</b>](ocm_bootstrap_componentversions.md)
+* [<b>ocm bootstrap config</b>](ocm_bootstrap_config.md)
 * [<b>ocm configfile</b>](ocm_configfile.md)	 &mdash; configuration file
 

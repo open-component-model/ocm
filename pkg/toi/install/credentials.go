@@ -5,8 +5,6 @@
 package install
 
 import (
-	"fmt"
-
 	"github.com/mandelsoft/spiff/features"
 	"github.com/mandelsoft/spiff/spiffing"
 
@@ -14,65 +12,21 @@ import (
 	globalconfig "github.com/open-component-model/ocm/pkg/contexts/config/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/memory"
 	memorycfg "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/memory/config"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/toi"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-type CredentialsRequest struct {
-	Credentials map[string]CredentialsRequestSpec `json:"credentials,omitempty"`
-}
-
-type CredentialsRequestSpec struct {
-	// ConsumerId specified to consumer id the credentials are used for
-	ConsumerId credentials.ConsumerIdentity `json:"consumerId,omitempty"`
-	// Description described the usecase the credentials will be used for
-	Description string `json:"description"`
-	// Properties describes the meaning of the used properties for this
-	// credential set.
-	Properties common.Properties `json:"properties"`
-	// Optional set to true make the request optional
-	Optional bool `json:"optional,omitempty"`
-}
-
-var ErrUndefined error = errors.New("nil reference")
-
-func (s *CredentialsRequestSpec) Match(o *CredentialsRequestSpec) error {
-	if o == nil {
-		return ErrUndefined
-	}
-	if !s.ConsumerId.Equals(o.ConsumerId) {
-		return fmt.Errorf("consumer id mismatch")
-	}
-	for k := range o.Properties {
-		if _, ok := s.Properties[k]; !ok {
-			return fmt.Errorf("property %q not declared", k)
-		}
-	}
-	if s.Optional && !o.Optional {
-		return fmt.Errorf("cannot be optional")
-	}
-	return nil
-}
-
-type Credentials struct {
-	Credentials map[string]CredentialSpec `json:"credentials,omitempty"`
-}
-
-type CredentialSpec struct {
-	// ConsumerId specifies the consumer id to look for the crentials
-	ConsumerId credentials.ConsumerIdentity `json:"consumerId,omitempty"`
-	// Reference refers to credentials store in some othe repo
-	Reference *cpi.GenericCredentialsSpec `json:"reference,omitempty"`
-	// Credentials are direct credentials (one of Reference or Credentials must be set)
-	Credentials common.Properties `json:"credentials,omitempty"`
-
-	// TargetConsumerId specifies the consumer id to feed with this crednetials
-	TargetConsumerId credentials.ConsumerIdentity `json:"targetConsumerId,omitempty"`
-}
+type (
+	Credentials            = toi.Credentials
+	CredentialSpec         = toi.CredentialSpec
+	CredentialsRequest     = toi.CredentialsRequest
+	CredentialsRequestSpec = toi.CredentialsRequestSpec
+)
 
 func ParseCredentialSpecification(data []byte, desc string) (*Credentials, error) {
 	spiff := spiffing.New().WithFeatures(features.CONTROL, features.INTERPOLATION)
@@ -136,7 +90,7 @@ func GetCredentials(ctx credentials.Context, spec *Credentials, req map[string]C
 			mapped = mapping[n]
 		}
 		if mapped == "" {
-			return nil, errors.Newf("mapping missing crednetial %q", n)
+			return nil, errors.Newf("mapping missing credential %q", n)
 		}
 		err = mem.AddCredentials(mapped, creds)
 		if err != nil {
@@ -158,6 +112,29 @@ func GetCredentials(ctx credentials.Context, spec *Credentials, req map[string]C
 			}
 		}
 	}
+	for _, r := range spec.Forwarded {
+		if len(r.ConsumerId) == 0 {
+			return nil, errors.ErrInvalid("consumer", r.ConsumerId.String())
+		}
+		match, _ := ctx.ConsumerIdentityMatchers().Get(r.ConsumerType)
+		if match == nil {
+			match = credentials.PartialMatch
+		}
+		src, err := ctx.GetCredentialsForConsumer(r.ConsumerId, match)
+		if err != nil || src == nil {
+			return nil, errors.ErrNotFoundWrap(err, "consumer", r.ConsumerId.String())
+		}
+		if src == nil {
+			return nil, errors.ErrNotFoundWrap(err, "consumer", r.ConsumerId.String())
+		}
+		creds, err := src.Credentials(ctx)
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot get credentials for %s", r.ConsumerId.String())
+		}
+		props := creds.Properties()
+		cfg.AddConsumer(r.ConsumerId, directcreds.NewCredentials(props))
+	}
+
 	list.Add(sub.Result())
 	main := globalconfig.New()
 	main.AddConfig(mem)
@@ -183,7 +160,7 @@ func evaluate(ctx credentials.Context, spec *CredentialSpec) (common.Properties,
 	}
 	if spec.ConsumerId != nil {
 		cnt++
-		match, _ := ctx.ConsumerIdentityMatchers().Get(credentials.ID_TYPE)
+		match, _ := ctx.ConsumerIdentityMatchers().Get(spec.ConsumerType)
 		if match == nil {
 			match = credentials.PartialMatch
 		}

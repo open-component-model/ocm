@@ -25,6 +25,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	compdescv2 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2"
 )
 
 var (
@@ -44,7 +45,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		&Command{BaseCommand: utils.NewBaseCommand(ctx,
 			versionconstraintsoption.New(), repooption.New(),
 			output.OutputOptions(outputs, closureoption.New(
-				"component reference", output.Fields("IDENTITY"), options.Not(output.Selected("tree")), addIdentityField), lookupoption.New(), schemaoption.New(""),
+				"component reference", output.Fields("IDENTITY"), options.Not(output.Selected("tree")), addIdentityField), lookupoption.New(), schemaoption.New("", true),
 			))},
 		utils.Names(Names, names...)...,
 	)
@@ -106,11 +107,18 @@ func TableOutput(opts *output.Options, mapping processing.MappingFunction, wide 
 
 func Format(opts *output.Options) processing.ProcessChain {
 	o := schemaoption.From(opts)
-	if o.Schema == "" {
+	if o.Schema == compdesc.InternalSchemaVersion {
 		return nil
 	}
 	return processing.Map(func(in interface{}) interface{} {
 		desc := comphdlr.Elem(in).GetDescriptor()
+		schema := o.Schema
+		if schema == "" {
+			schema = desc.SchemaVersion()
+		}
+		if schema == "" {
+			schema = compdescv2.SchemaVersion
+		}
 		out, err := compdesc.Convert(desc, compdesc.SchemaVersion(o.Schema))
 		if err != nil {
 			return struct {

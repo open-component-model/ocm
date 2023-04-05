@@ -5,6 +5,8 @@
 package app
 
 import (
+	"github.com/mandelsoft/vfs/pkg/osfs"
+
 	"github.com/open-component-model/ocm/cmds/helminstaller/app/driver"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -39,5 +41,11 @@ func Executor(d driver.Driver, o *support.ExecutorOptions) error {
 	if v == "" {
 		return errors.Wrapf(err, "property KUBECONFIG missing in credential %q", cfg.KubeConfigName)
 	}
-	return Execute(d, o.Action, o.Context, o.OutputContext, o.ComponentVersion, &cfg, values, []byte(v))
+	exec := &Execution{
+		driver:          d,
+		ExecutorOptions: o,
+		path:            "",
+		fs:              osfs.New(),
+	}
+	return exec.Execute(&cfg, values, []byte(v))
 }

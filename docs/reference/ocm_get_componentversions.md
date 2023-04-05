@@ -87,8 +87,12 @@ contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
 
-If the option <code>--scheme</code> is given, the component descriptor is converted to specified format for output.
-The following schema versions are supported:
+If the option <code>--scheme</code> is given, the component descriptor
+is converted to the specified format for output. If no format is given
+the storage format of the actual descriptor is used or, for new ones v2
+is used.
+With <code>internal</code> the internal representation is shown.
+The following schema versions are supported for explicit conversions:
 
   - <code>ocm.software/v3alpha1</code>: 
   - <code>v2</code>: 

@@ -102,6 +102,30 @@ shown below.
   dummy resource with no access
 
 
+- Access type <code>npm</code>
+
+  This method implements the access of an NPM package in an NPM registry.
+
+  The following versions are supported:
+  - Version <code>v1</code>
+  
+    The type specific specification fields are:
+    
+    - **<code>registry</code>** *string*
+    
+      Base URL of the NPM registry.
+    
+    - **<code>package</code>** *string*
+    
+      The name of the NPM package
+    
+    - **<code>version</code>** *string*
+    
+      The version name of the NPM package
+    
+    Options used to configure fields: <code>--accessPackage</code>, <code>--accessRegistry</code>, <code>--accessVersion</code>
+  
+
 - Access type <code>ociArtifact</code>
 
   This method implements the access of an OCI artifact stored in an OCI registry.

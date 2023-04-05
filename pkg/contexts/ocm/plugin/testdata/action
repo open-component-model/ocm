@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+NAME="$(basename "$0")"
+
+Error() {
+  echo '{ "error": "'$1'" }' >&2
+  exit 1
+}
+
+Info() {
+  echo '{"version":"v1","pluginName":"'$NAME'","pluginVersion":"v1","shortDescription":"a test plugin","description":"a test plugin with action oci.repository.prepare","actions":[{"name":"oci.repository.prepare","defaultSelectors":["ghcr.io"],"description":"test action","versions":["v1"]}]}
+'
+}
+
+Execute() {
+  echo '{"type":"oci.repository.prepare/v1","message":"all good"}'
+}
+
+Action() {
+  case "$1" in
+    execute) Execute "${@:2}";;
+    *) Error "invalid accessmethod command $1";;
+  esac
+}
+
+case "$1" in
+  info) Info;;
+  action) Action "${@:2}";;
+  *) Error "invalid command $1";;
+esac

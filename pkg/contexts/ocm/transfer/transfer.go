@@ -86,7 +86,7 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 	list := errors.ErrListf("component references for %s", nv)
 	log.Info("  transferring references")
 	for _, r := range d.References {
-		cv, shdlr, err := handler.TransferVersion(src.Repository(), src, &r)
+		cv, shdlr, err := handler.TransferVersion(src.Repository(), src, &r, tgt)
 		if err != nil {
 			return errors.Wrapf(err, "%s: nested component %s[%s:%s]", state.History, r.GetName(), r.ComponentName, r.GetVersion())
 		}

@@ -6,7 +6,6 @@ package logging_test
 
 import (
 	"bytes"
-	"encoding/json"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -43,11 +42,9 @@ ERROR <nil> ocm error
 `))
 	})
 	It("just logs with config", func() {
-		data := `{ "rule": { "level": "Debug" } }`
+		r := logcfg.ConditionalRule("debug")
 		cfg := &logcfg.Config{
-			Rules: []json.RawMessage{
-				[]byte(data),
-			},
+			Rules: []logcfg.Rule{r},
 		}
 
 		Expect(local.Configure(cfg)).To(Succeed())

@@ -1,3 +1,4 @@
+
 actions:
   - install
   - uninstall
@@ -5,18 +6,10 @@ imageRef:
   resource:
     name: toiimage
 configScheme:
-  type: object
-  additionalProperties: false
-  required:
-    - chart
-    - kubeConfigName
-    - imageMapping
-  properties:
-    chart:
-      additionalProperties: false
+  definitions:
+    resourceRef:
       type: object
-      required:
-      - resource
+      description: resource reference for charts
       properties:
         resource:
           type: object
@@ -28,7 +21,20 @@ configScheme:
             type: object
             additionalProperties:
               type: string
-
+  type: object
+  additionalProperties: false
+  required:
+    - chart
+    - kubeConfigName
+    - imageMapping
+  properties:
+    chart:
+      $ref: '#/definitions/resourceRef'
+      additionalProperties: false
+    subcharts:
+      type: object
+      additionalProperties:
+        $ref: '#/definitions/resourceRef'
     release:
       type: string
     createNamespace:
@@ -64,4 +70,3 @@ configScheme:
       type: object
     kubeConfigName:
       type: string
-

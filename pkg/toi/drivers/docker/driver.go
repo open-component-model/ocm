@@ -24,10 +24,10 @@ import (
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/docker/registry"
 	"github.com/mitchellh/copystructure"
-	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/toi"
 	"github.com/open-component-model/ocm/pkg/toi/install"
 )
 
@@ -295,10 +295,10 @@ func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
 		}
 		if s.Error != nil {
 			opResult, fetchErr := d.fetchOutputs(ctx, resp.ID, op)
-			return opResult, containerError(fmt.Sprintf("container exit code: %d, message", s.StatusCode), err, fetchErr)
+			return opResult, containerError(fmt.Sprintf("container exit code: %d", s.StatusCode), err, fetchErr)
 		}
 		opResult, fetchErr := d.fetchOutputs(ctx, resp.ID, op)
-		return opResult, containerError(fmt.Sprintf("container exit code: %d, message", s.StatusCode), err, fetchErr)
+		return opResult, containerError(fmt.Sprintf("container exit code: %d", s.StatusCode), err, fetchErr)
 	}
 	opResult, fetchErr := d.fetchOutputs(ctx, resp.ID, op)
 	if fetchErr != nil {
@@ -357,9 +357,9 @@ func (d *Driver) setConfigurationOptions(op *install.Operation) error {
 
 func containerError(containerMessage string, containerErr, fetchErr error) error {
 	if fetchErr != nil {
-		return fmt.Errorf("%s: %v. fetching outputs failed: %w", containerMessage, containerErr, fetchErr)
+		return errors.NewEf(containerErr, "%s: %v. fetching outputs failed", containerMessage, fetchErr)
 	}
-	return fmt.Errorf("%s: %w", containerMessage, containerErr)
+	return errors.NewEf(containerErr, "%s", containerMessage)
 }
 
 // fetchOutputs takes a context and a container ID; it copies the PathOutputs directory from that container.
@@ -425,7 +425,7 @@ func generateTar(files map[string]accessio.BlobAccess, uid int) (io.ReadCloser, 
 	var err error
 	wg := sync.WaitGroup{}
 	wg.Add(1)
-	logrus.Infof("waiting for successful data transfer...\n")
+	toi.Log.Info("waiting for successful data transfer")
 	go func() {
 		defer wg.Done()
 		defer w.Close()
@@ -433,7 +433,7 @@ func generateTar(files map[string]accessio.BlobAccess, uid int) (io.ReadCloser, 
 		have := map[string]bool{}
 		for path, content := range files {
 			path = unix_path.Join(install.PathInputs, path)
-			logrus.Infof("transferring %s...\n", path)
+			toi.Log.Info("transferring", "path", path)
 			// Write a header for the parent directories so that newly created intermediate directories are accessible by the user
 			dir := path
 			for dir != "/" {
@@ -462,7 +462,7 @@ func generateTar(files map[string]accessio.BlobAccess, uid int) (io.ReadCloser, 
 			tw.WriteHeader(fildHdr)
 			reader, e := content.Reader()
 			if e != nil {
-				logrus.Infof("cannot transfer %s: %s\n", path, e)
+				toi.Log.LogError(err, "cannot transfer", "path", path)
 				err = e
 				return
 			}
@@ -500,7 +500,7 @@ func (d *Driver) inspectImage(ctx context.Context, image string) (types.ImageIns
 
 // validateImageDigest validates the operation image digest, if exists, against
 // the supplied repoDigests.
-func (d *Driver) validateImageDigest(image install.Image, repoDigests []string) error {
+func (d *Driver) validateImageDigest(image toi.Image, repoDigests []string) error {
 	if image.Digest == "" {
 		return nil
 	}
