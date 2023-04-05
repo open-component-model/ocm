@@ -2,7 +2,7 @@ module github.com/open-component-model/ocm
 
 go 1.19
 
-replace github.com/spf13/cobra => github.com/mandelsoft/cobra v1.5.1-0.20221030110806-c236cde1e2bd
+replace github.com/spf13/cobra => github.com/open-component-model/cobra v0.0.0-20230329075350-b1fd876abfb9
 
 require (
 	github.com/docker/cli v20.10.21+incompatible
@@ -135,7 +135,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/huandu/xstrings v1.3.3 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
-	github.com/inconshreveable/mousetrap v1.0.1 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/jmoiron/sqlx v1.3.5 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
