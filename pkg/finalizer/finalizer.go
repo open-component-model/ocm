@@ -112,13 +112,24 @@ func Calling3V[T, U, V any](f func(arg1 T, arg2 U, arg3 V), arg1 T, arg2 U, arg3
 	}
 }
 
-// Close will finalize the given object by calling
-// its Close function when the finalizer is finalized.
+// ClosingWith will finalize the given object by calling
+// its ClosingWith function when the finalizer is finalized.
 func (f *Finalizer) Close(c io.Closer) *Finalizer {
 	if c != nil {
 		f.With(c.Close)
 	}
 	return f
+}
+
+// ClosingWith can be used add a close request to
+// finalizer in a chained call.
+// Unfortunately it is not possible in Go
+// to define parameterized methods, therefore
+// we cannot directly add this function to the
+// Finalizer type.
+func ClosingWith[T io.Closer](f *Finalizer, o T) T {
+	f.Close(o)
+	return o
 }
 
 // Include includes the finalization of a given
