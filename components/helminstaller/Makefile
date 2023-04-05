@@ -1,18 +1,14 @@
-NAME      = helminstaller
+NAME      := helminstaller
 PROVIDER  ?= ocm.software
-GITHUBORG  ?= open-component-model
-IMAGE     = $(NAME)
-COMPONENT = $(PROVIDER)/toi/installers/$(NAME)
+GITHUBORG ?= open-component-model
+IMAGE     := $(NAME)
+COMPONENT := $(PROVIDER)/toi/installers/$(NAME)
 OCMREPO   ?= ghcr.io/$(GITHUBORG)/ocm
 MULTI     ?= true
-PLATFORMS = linux/amd64 linux/arm64
+PLATFORMS ?= linux/amd64 linux/arm64
 
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
-<<<<<<< HEAD
-VERSION                                        := $(shell go run $(REPO_ROOT)/pkg/version/generate/release_generate.go print-rc-version)
-=======
-VERSION                                        = $(shell go run ../../pkg/version/generate/release_generate.go print-rc-version $(CANDIDATE))
->>>>>>> 6e220c81 (tweak release process)
+VERSION                                        := $(shell go run ../../pkg/version/generate/release_generate.go print-rc-version $(CANDIDATE))
 COMMIT                                         := $(shell git rev-parse --verify HEAD)
 EFFECTIVE_VERSION                              := $(VERSION)-$(COMMIT)
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)

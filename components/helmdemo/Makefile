@@ -1,18 +1,16 @@
-NAME      = helmdemo
-PROVIDER  ?= ocm.software
-GITHUBORG  ?= open-component-model
-IMAGE     = $(NAME)
-COMPONENT = $(PROVIDER)/toi/demo/$(NAME)
-OCMREPO   ?= ghcr.io/$(GITHUBORG)/ocm
+NAME         = helmdemo
+PROVIDER    ?= ocm.software
+GITHUBORG   ?= open-component-model
+COMPONENT    = $(PROVIDER)/toi/demo/$(NAME)
+OCMREPO     ?= ghcr.io/$(GITHUBORG)/ocm
 
 HELMINSTCOMP = $(PROVIDER)/toi/installers/helminstaller
 
-REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
+REPO_ROOT                                     := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
 VERSION                                        = $(shell go run ../../pkg/version/generate/release_generate.go print-rc-version $(CANDIDATE))
 COMMIT                                         = $(shell git rev-parse HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
-HELMINSTVERSION ?= $(VERSION)
-CREDS                                          = $(shell $(REPO_ROOT)/hash/githubcreds.sh)
+HELMINSTVERSION                               ?= $(VERSION)
 
 CREDS := $(shell $(REPO_ROOT)/hack/githubcreds.sh)
 OCM = go run $(REPO_ROOT)/cmds/ocm $(CREDS)
@@ -38,14 +36,14 @@ ca: $(GEN)/ca
 
 $(GEN)/ca: $(GEN)/.exists sources.yaml resources.yaml references.yaml $(CHARTSRCS) packagespec.yaml examples/* helmconfig.yaml
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider $(PROVIDER) --file $(GEN)/ca
-	$(OCM) add sources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" sources.yaml
-	$(OCM) add resources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" resources.yaml
-	$(OCM) add references  $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" HELMINSTCOMP=$(HELMINSTCOMP) HELMINSTVERSION=$(HELMINSTVERSION) references.yaml
+	$(OCM) add sources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" sources.yaml
+	$(OCM) add resources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" resources.yaml
+	$(OCM) add references  $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" HELMINSTCOMP=$(HELMINSTCOMP) HELMINSTVERSION=$(HELMINSTVERSION) references.yaml
 	@touch $(GEN)/ca
 
 .PHONY: eval-resources
 eval-resources:
-	$(OCM) add resources --dry-run VERSION="$(VERSION)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" resources.yaml -O "$(GEN)/resources.yaml"
+	$(OCM) add resources --dry-run VERSION="$(VERSION)" COMMIT="$(COMMIT)" resources.yaml -O "$(GEN)/resources.yaml"
 
 .PHONY: push
 push: $(GEN)/ctf $(GEN)/push.$(NAME)

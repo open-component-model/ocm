@@ -26,6 +26,8 @@ BUILD_FLAGS := "-s -w \
  -X github.com/open-component-model/ocm/pkg/version.gitCommit=$(COMMIT) \
  -X github.com/open-component-model/ocm/pkg/version.buildDate=$(NOW)"
 
+COMPONENTS ?= ocmcli helminstaller demoplugin ecrplugin helmdemo subchartsdemo
+
 build: ${SOURCES}
 	mkdir -p bin
 	go build -ldflags $(BUILD_FLAGS) -o bin/ocm ./cmds/ocm
@@ -91,6 +93,7 @@ info:
 	@echo "EFFECTIVE     = $(EFFECTIVE_VERSION)"
 	@echo "COMMIT        = $(COMMIT)"
 	@echo "GIT_TREE_STATE= $(GIT_TREE_STATE)"
+	@echo "COMPONENTS    = $(COMPONENTS)"
 
 .PHONY: generate-license
 generate-license:
@@ -104,25 +107,23 @@ $(GEN)/.exists:
 	@touch $@
 
 .PHONY: components
-components: $(GEN)/.comps
-
-$(GEN)/.comps:
-	@echo Helminstaller; cd components/helminstaller; make ctf
-	@echo HelmDemo; cd components/helmdemo; make ctf
-	@echo ECRPlugin; cd components/ecrplugin; make ctf
-	@echo OCMCLI; cd components/ocmcli; make ctf
-	touch $@
+components: $(GEN)/.exists
+	@rm -rf "$(GEN)"/ctf
+	@for i in $(COMPONENTS); do \
+       echo "building component $$i..."; \
+       (cd components/$$i; make ctf;); \
+      done
 
 .PHONY: ctf
 ctf: $(GEN)/ctf
 
 $(GEN)/ctf: $(GEN)/.exists components
 	@rm -rf "$(GEN)"/ctf
-	$(OCM) transfer cv  --type tgz -V $(GEN)/helminstaller/ctf $(GEN)/ctf
-	$(OCM) transfer cv -V $(GEN)/helmdemo/ctf $(GEN)/ctf
-	$(OCM) transfer cv -V $(GEN)/ecrplugin/ctf $(GEN)/ctf
-	$(OCM) transfer cv -V $(GEN)/ocmcli/ctf $(GEN)/ctf
-	touch $@
+	@for i in $(COMPONENTS); do \
+      echo "transfering component $$i..."; \
+	  $(OCM) transfer cv  --type tgz -V $(GEN)/$$i/ctf $(GEN)/ctf; \
+	done
+	@touch $@
 
 .PHONY: push
 push: $(GEN)/ctf $(GEN)/.push.$(NAME)
