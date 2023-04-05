@@ -121,6 +121,7 @@ $(GEN)/ctf: $(GEN)/.exists components
 	@rm -rf "$(GEN)"/ctf
 	@for i in $(COMPONENTS); do \
       echo "transfering component $$i..."; \
+	  echo $(OCM) transfer cv  --type tgz -V $(GEN)/$$i/ctf $(GEN)/ctf; \
 	  $(OCM) transfer cv  --type tgz -V $(GEN)/$$i/ctf $(GEN)/ctf; \
 	done
 	@touch $@
@@ -132,10 +133,15 @@ $(GEN)/.push.$(NAME): $(GEN)/ctf
 	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
 	@touch $@
 
+.PHONY: plain-push
+plain-push: $(GEN)
+	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
+
 .PHONY: plain-ctf
 plain-ctf: $(GEN)
 	@rm -rf "$(GEN)"/ctf
-	$(OCM) transfer cv -V $(GEN)/helminstaller/ctf $(GEN)/ctf
-	$(OCM) transfer cv -V $(GEN)/helmdemo/ctf $(GEN)/ctf
-	$(OCM) transfer cv -V $(GEN)/ecrplugin/ctf $(GEN)/ctf
-	$(OCM) transfer cv -V $(GEN)/ocmcli/ctf $(GEN)/ctf
+	@for i in $(COMPONENTS); do \
+       echo "transfering component $$i..."; \
+       echo $(OCM) transfer cv  --type tgz -V $(GEN)/$$i/ctf $(GEN)/ctf; \
+       $(OCM) transfer cv  --type tgz -V $(GEN)/$$i/ctf $(GEN)/ctf; \
+     done

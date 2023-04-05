@@ -3,6 +3,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
+ROOT="$(dirname "${BASH_SOURCE[0]}")/.."
+
+GEN="$ROOT/gen"
+
 config() {
   cat <<EOF
 type: generic.config.ocm.software/v1
@@ -11,11 +15,12 @@ configurations:
     consumers:
       - identity:
           type: OCIRegistry
+          hostname: $repohost
         credentials:
           - type: Credentials
             properties:
-              hostname: $repohost
               username: $ocm_comprepouser
+              serverAddress: https://ghcr.io
               password: $ocm_comprepopassword
 EOF
 }
@@ -29,9 +34,9 @@ createAuth() {
     repohost="${comprepourl%%/*}"
     comprepourl="${ocm_comprepo%$comprepourl}${comprepourl%%/*}"
     #creds=(--cred :type=OCIRegistry --cred ":hostname=$repohost" --cred "username=$ocm_comprepouser" --cred "password=$ocm_comprepopassword")
-    mkdir -p gen
-    config > gen/.ocmconfig
-    creds=( --config gen/.ocmconfig )
+    mkdir -p "$GEN"
+    config > "$GEN/.ocmconfig"
+    creds=( --config "$GEN/.ocmconfig" )
     echo "${creds[@]}"
   fi
 }
