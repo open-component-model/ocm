@@ -219,11 +219,13 @@ func (o *Command) Run() error {
 		}
 	}
 
-	var repo ocm.Repository
+	openmode := accessobj.ACC_WRITABLE
 	if o.Create {
-		repo, err = ctf.Create(o.Context.OCMContext(), accessobj.ACC_CREATE, fp, mode, o.Handler, fs)
-	} else {
-		repo, err = ctf.Open(o.Context.OCMContext(), accessobj.ACC_WRITABLE, fp, mode, fs)
+		openmode |= accessobj.ACC_CREATE
+	}
+	repo, err := ctf.Open(o.Context.OCMContext(), openmode, fp, mode, o.Handler, fs)
+	if err != nil {
+		return err
 	}
 
 	thdlr, err := standard.New(standard.KeepGlobalAccess(), standard.Recursive(), rscbyvalueoption.From(o))
