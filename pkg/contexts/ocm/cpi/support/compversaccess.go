@@ -328,7 +328,7 @@ func (c *componentVersionAccessImpl) SetResourceBlob(meta *cpi.ResourceMeta, blo
 	Logger(c).Info("adding resource blob", "resource", meta.Name)
 	acc, err := c.AddBlob(blob, meta.Type, refName, global)
 	if err != nil {
-		return fmt.Errorf("unable to add blob: %w", err)
+		return fmt.Errorf("unable to add blob (component %s:%s resource %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)
 	}
 
 	if err := c.SetResource(meta, acc); err != nil {
@@ -342,7 +342,7 @@ func (c *componentVersionAccessImpl) SetSourceBlob(meta *cpi.SourceMeta, blob cp
 	Logger(c).Info("adding source blob", "source", meta.Name)
 	acc, err := c.AddBlob(blob, meta.Type, refName, global)
 	if err != nil {
-		return fmt.Errorf("unable to add blob: %w", err)
+		return fmt.Errorf("unable to add blob: (component %s:%s resource %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)
 	}
 
 	if err := c.SetSource(meta, acc); err != nil {
