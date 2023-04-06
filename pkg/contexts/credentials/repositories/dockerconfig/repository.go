@@ -13,12 +13,10 @@ import (
 
 	"github.com/docker/cli/cli/config"
 	"github.com/docker/cli/cli/config/configfile"
-	dockercred "github.com/docker/cli/cli/config/credentials"
 	"github.com/docker/cli/cli/config/types"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -107,48 +105,8 @@ func (r *Repository) Read(force bool) error {
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
-	log := r.ctx.Logger(REALM)
-	defaultStore := dockercred.DetectDefaultStore(cfg.CredentialsStore)
-	store := dockercred.NewNativeStore(cfg, defaultStore)
-	// get default native credential store
 	if r.propagate {
-		all := cfg.GetAuthConfigs()
-		for h, a := range all {
-			hostname := dockercred.ConvertToHostname(h)
-			if hostname == "index.docker.io" {
-				hostname = "docker.io"
-			}
-			id := cpi.ConsumerIdentity{
-				cpi.ATTR_TYPE:        identity.CONSUMER_TYPE,
-				identity.ID_HOSTNAME: hostname,
-			}
-
-			var creds cpi.Credentials
-			if IsEmptyAuthConfig(a) {
-				log.Debug("propagate id with default store", "id", id, "store", defaultStore)
-
-				creds = NewCredentials(r, h, store)
-			} else {
-				log.Debug("propagate id", "id", id)
-
-				creds = newCredentials(a)
-			}
-			r.ctx.SetCredentialsForConsumer(id, creds)
-		}
-		for h, helper := range cfg.CredentialHelpers {
-			hostname := dockercred.ConvertToHostname(h)
-			if hostname == "index.docker.io" {
-				hostname = "docker.io"
-			}
-			id := cpi.ConsumerIdentity{
-				cpi.ATTR_TYPE:        identity.CONSUMER_TYPE,
-				identity.ID_HOSTNAME: hostname,
-			}
-
-			log.Debug("propagate id with helper", "id", id, "helper", helper)
-
-			r.ctx.SetCredentialsForConsumer(id, NewCredentials(r, h, dockercred.NewNativeStore(cfg, helper)))
-		}
+		r.ctx.RegisterConsumerProvider(cpi.ProviderIdentity(PROVIDER+"//"+path), &ConsumerProvider{cfg})
 	}
 	r.config = cfg
 	return nil

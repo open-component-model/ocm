@@ -36,6 +36,7 @@ type (
 )
 
 type (
+	ProviderIdentity        = internal.ProviderIdentity
 	ConsumerIdentity        = internal.ConsumerIdentity
 	IdentityMatcher         = internal.IdentityMatcher
 	IdentityMatcherInfo     = internal.IdentityMatcherInfo
