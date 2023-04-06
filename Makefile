@@ -145,3 +145,7 @@ plain-ctf: $(GEN)
        echo $(OCM) transfer cv  --type tgz -V $(GEN)/$$i/ctf $(GEN)/ctf; \
        $(OCM) transfer cv  --type tgz -V $(GEN)/$$i/ctf $(GEN)/ctf; \
      done
+
+.PHONY: clean
+clean:
+	rm -rf "$(GEN)"

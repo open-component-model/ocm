@@ -23,7 +23,7 @@ CHARTSRCS=$(shell find echoserver -type f)
 ctf: $(GEN)/ctf
 
 $(GEN)/ctf: $(GEN)/ca
-	@rm -f $(GEN)/ctf
+	@rm -rf $(GEN)/ctf
 	$(OCM) -X keeplocalblob=true transfer ca $(GEN)/ca $(GEN)/ctf
 	touch $(GEN)/ctf
 
