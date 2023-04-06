@@ -5,11 +5,13 @@
 package internal
 
 import (
+	"sort"
 	"sync"
+
+	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 type _consumers struct {
-	sync.RWMutex
 	data map[string]*_consumer
 }
 
@@ -19,42 +21,169 @@ func newConsumers() *_consumers {
 	}
 }
 
-func (c *_consumers) Get(id ConsumerIdentity) *_consumer {
-	c.RLock()
-	defer c.RUnlock()
-	return c.data[string(id.Key())]
-}
-
-func (c *_consumers) Set(id ConsumerIdentity, creds CredentialsSource) {
-	c.Lock()
-	defer c.Unlock()
+func (c *_consumers) Set(id ConsumerIdentity, pid ProviderIdentity, creds CredentialsSource) {
 	c.data[string(id.Key())] = &_consumer{
+		providerId:  pid,
 		identity:    id,
 		credentials: creds,
 	}
 }
 
+func (p *_consumers) Unregister(pid ProviderIdentity) {
+	for n, c := range p.data {
+		if c.providerId == pid {
+			delete(p.data, n)
+		}
+	}
+}
+
+func (c *_consumers) Get(id ConsumerIdentity) (CredentialsSource, bool) {
+	cred, ok := c.data[string(id.Key())]
+	if cred != nil {
+		return cred.credentials, true
+	}
+	return nil, ok
+}
+
 // Match matches a given request (pattern) against configured
 // identities.
-func (c *_consumers) Match(pattern ConsumerIdentity, m IdentityMatcher) *_consumer {
-	c.RLock()
-	defer c.RUnlock()
+func (c *_consumers) Match(pattern ConsumerIdentity, cur ConsumerIdentity, m IdentityMatcher) (CredentialsSource, ConsumerIdentity) {
 	var found *_consumer
-	var cur ConsumerIdentity
 	for _, s := range c.data {
 		if m(pattern, cur, s.identity) {
 			found = s
 			cur = s.identity
 		}
 	}
-	return found
+	if found != nil {
+		return found.credentials, cur
+	}
+	return nil, cur
 }
 
 type _consumer struct {
+	providerId  ProviderIdentity
 	identity    ConsumerIdentity
 	credentials CredentialsSource
 }
 
 func (c *_consumer) GetCredentials() CredentialsSource {
 	return c.credentials
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type consumerPrio struct {
+	ConsumerProvider
+	priority int
+}
+
+func (c *consumerPrio) GetPriority() int {
+	return c.priority
+}
+
+func WithPriority(p ConsumerProvider, prio int) ConsumerProvider {
+	return &consumerPrio{
+		p,
+		prio,
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type PriorityProvider interface {
+	GetPriority() int
+}
+
+func priority(p interface{}) int {
+	if pp, ok := p.(PriorityProvider); ok {
+		return pp.GetPriority()
+	}
+	return 10
+}
+
+type consumerProviderRegistry struct {
+	lock      sync.RWMutex
+	explicit  *_consumers
+	providers map[ProviderIdentity]ConsumerProvider
+	ordered   []ConsumerProvider
+}
+
+func newConsumerProviderRegistry() *consumerProviderRegistry {
+	return &consumerProviderRegistry{
+		explicit:  newConsumers(),
+		providers: map[ProviderIdentity]ConsumerProvider{},
+		ordered:   nil,
+	}
+}
+
+var _ ConsumerProvider = (*consumerProviderRegistry)(nil)
+
+func (p *consumerProviderRegistry) Register(name ProviderIdentity, c ConsumerProvider) {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+
+	p.providers[name] = c
+	p.ordered = generics.MapValues(p.providers)
+	sort.Slice(p.ordered, func(a, b int) bool {
+		return priority(p.ordered[a]) < priority(p.ordered[b])
+	})
+}
+
+func (p *consumerProviderRegistry) Unregister(id ProviderIdentity) {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+
+	p.explicit.Unregister(id)
+	if _, ok := p.providers[id]; ok {
+		delete(p.providers, id)
+		p.ordered = generics.MapValues(p.providers)
+		sort.Slice(p.ordered, func(a, b int) bool {
+			return priority(p.ordered[a]) < priority(p.ordered[b])
+		})
+	} else {
+		for _, sub := range p.providers {
+			sub.Unregister(id)
+		}
+	}
+}
+
+func (p *consumerProviderRegistry) Get(id ConsumerIdentity) (CredentialsSource, bool) {
+	p.lock.RLock()
+	defer p.lock.RUnlock()
+
+	credsrc, ok := p.explicit.Get(id)
+	if ok {
+		return credsrc, ok
+	}
+	for _, sub := range p.providers {
+		credsrc, ok := sub.Get(id)
+		if ok {
+			return credsrc, ok
+		}
+	}
+	return nil, false
+
+}
+
+func (p *consumerProviderRegistry) Match(pattern ConsumerIdentity, cur ConsumerIdentity, m IdentityMatcher) (CredentialsSource, ConsumerIdentity) {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+
+	credsrc, cur := p.explicit.Match(pattern, cur, m)
+	for _, sub := range p.providers {
+		var f CredentialsSource
+		f, cur = sub.Match(pattern, cur, m)
+		if f != nil {
+			credsrc = f
+		}
+	}
+	return credsrc, cur
+}
+
+func (p *consumerProviderRegistry) Set(id ConsumerIdentity, pid ProviderIdentity, creds CredentialsSource) {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+
+	p.explicit.Set(id, pid, creds)
 }
