@@ -107,17 +107,20 @@ $(GEN)/.exists:
 	@touch $@
 
 .PHONY: components
-components: $(GEN)/.exists
+components: $(GEN)/.comps
+
+$(GEN)/.comps: $(GEN)/.exists
 	@rm -rf "$(GEN)"/ctf
 	@for i in $(COMPONENTS); do \
        echo "building component $$i..."; \
        (cd components/$$i; make ctf;); \
-      done
+    done
+	@touch $@
 
 .PHONY: ctf
 ctf: $(GEN)/ctf
 
-$(GEN)/ctf: $(GEN)/.exists components
+$(GEN)/ctf: $(GEN)/.exists $(GEN)/.comps
 	@rm -rf "$(GEN)"/ctf
 	@for i in $(COMPONENTS); do \
       echo "transfering component $$i..."; \
