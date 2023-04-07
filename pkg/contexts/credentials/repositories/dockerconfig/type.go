@@ -25,7 +25,7 @@ func init() {
 // RepositorySpec describes a docker config based credential repository interface.
 type RepositorySpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
-	DockerConfigFile            string          `json:"dockerConfigFile"`
+	DockerConfigFile            string          `json:"dockerConfigFile,omitempty"`
 	DockerConfig                json.RawMessage `json:"dockerConfig,omitempty"`
 	PropgateConsumerIdentity    bool            `json:"propagateConsumerIdentity,omitempty"`
 }
