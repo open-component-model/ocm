@@ -11,6 +11,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/pkg/signing/norm/entry"
 )
 
 // CDExcludes describes the fields relevant for Signing
@@ -51,7 +52,7 @@ func (cd *ComponentDescriptor) Normalize(normAlgo string) ([]byte, error) {
 	if normAlgo != compdesc.JsonNormalisationV1 {
 		return nil, fmt.Errorf("unsupported cd normalization %q", normAlgo)
 	}
-	data, err := signing.Normalize(cd, CDExcludes)
+	data, err := signing.Normalize(entry.Type, cd, CDExcludes)
 	logrus.Debugf("**** normalized:\n %s\n", string(data))
 	return data, err
 }

@@ -10,6 +10,9 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/open-component-model/ocm/pkg/signing/norm/entry"
+	"github.com/open-component-model/ocm/pkg/signing/norm/jcs"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
@@ -139,10 +142,10 @@ var _ = Describe("normalization", func() {
 
 	It("Normalizes struct without excludes", func() {
 
-		entries, err := signing.PrepareNormalization(cd, signing.NoExcludes{})
+		entries, err := signing.PrepareNormalization(entry.New(), cd, signing.NoExcludes{})
 		Expect(err).To(Succeed())
 
-		_, err = signing.Marshal("  ", entries)
+		_, err = entries.Marshal("  ")
 		Expect(err).To(Succeed())
 		Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
 {
@@ -243,7 +246,7 @@ var _ = Describe("normalization", func() {
 
 	It("Normalizes struct without repositoryContexts", func() {
 
-		entries, err := signing.PrepareNormalization(cd, signing.MapExcludes{
+		entries, err := signing.PrepareNormalization(entry.New(), cd, signing.MapExcludes{
 			"component": signing.MapExcludes{
 				"repositoryContexts": nil,
 			},
@@ -342,7 +345,7 @@ var _ = Describe("normalization", func() {
 
 	It("Normalizes struct without access", func() {
 
-		entries, err := signing.PrepareNormalization(cd, signing.MapExcludes{
+		entries, err := signing.PrepareNormalization(entry.New(), cd, signing.MapExcludes{
 			"component": signing.MapExcludes{
 				"resources": signing.ArrayExcludes{
 					signing.MapExcludes{
@@ -441,7 +444,7 @@ var _ = Describe("normalization", func() {
 
 	It("Normalizes struct without resources of type localBlob", func() {
 
-		entries, err := signing.PrepareNormalization(cd, signing.MapExcludes{
+		entries, err := signing.PrepareNormalization(entry.New(), cd, signing.MapExcludes{
 			"component": signing.MapExcludes{
 				"resources": signing.DynamicArrayExcludes{
 					ValueChecker: signing.IgnoreResourcesWithAccessType("localBlob"),
@@ -529,7 +532,7 @@ var _ = Describe("normalization", func() {
 		err = json.Unmarshal(d, &m)
 		Expect(err).To(Succeed())
 
-		entries, err := signing.PrepareNormalization(v, signing.ExcludeEmpty{})
+		entries, err := signing.PrepareNormalization(entry.New(), v, signing.ExcludeEmpty{})
 		Expect(err).To(Succeed())
 		Expect(entries.String()).To(Equal(`[]`))
 	})
@@ -540,7 +543,7 @@ var _ = Describe("normalization", func() {
 				"alice", "bob",
 			},
 		}
-		entries, err := signing.PrepareNormalization(v, signing.NoExcludes{})
+		entries, err := signing.PrepareNormalization(entry.New(), v, signing.NoExcludes{})
 		Expect(err).To(Succeed())
 		fmt.Printf("%s\n", entries.String())
 		Expect(entries.Formatted()).To(Equal(`[
@@ -564,7 +567,7 @@ var _ = Describe("normalization", func() {
 				},
 			},
 		}
-		entries, err := signing.PrepareNormalization(v, signing.NoExcludes{})
+		entries, err := signing.PrepareNormalization(entry.New(), v, signing.NoExcludes{})
 		Expect(err).To(Succeed())
 		fmt.Printf("%s\n", entries.String())
 		Expect(entries.Formatted()).To(Equal(`[
@@ -590,7 +593,7 @@ var _ = Describe("normalization", func() {
 			"bob":   26,
 			"alice": 25,
 		}
-		entries, err := signing.PrepareNormalization(v, signing.NoExcludes{})
+		entries, err := signing.PrepareNormalization(entry.New(), v, signing.NoExcludes{})
 		Expect(err).To(Succeed())
 		fmt.Printf("%s\n", entries.String())
 		Expect(entries.Formatted()).To(Equal(`[
@@ -610,7 +613,7 @@ var _ = Describe("normalization", func() {
 				"alice": 25,
 			},
 		}
-		entries, err := signing.PrepareNormalization(v, signing.NoExcludes{})
+		entries, err := signing.PrepareNormalization(entry.New(), v, signing.NoExcludes{})
 		Expect(err).To(Succeed())
 		fmt.Printf("%s\n", entries.String())
 		Expect(entries.Formatted()).To(Equal(`[
@@ -632,9 +635,9 @@ var _ = Describe("normalization", func() {
 			"bob",
 			"alice",
 		}
-		entries, err := signing.Prepare(v, signing.NoExcludes{})
+		entries, err := signing.Prepare(entry.New(), v, signing.NoExcludes{})
 		Expect(err).To(Succeed())
-		data, err := json.Marshal(entries)
+		data, err := entries.Marshal("")
 		Expect(err).To(Succeed())
 		fmt.Printf("%s\n", string(data))
 		Expect(string(data)).To(Equal(`["bob","alice"]`))
@@ -649,9 +652,9 @@ var _ = Describe("normalization", func() {
 				"alice": 25,
 			},
 		}
-		entries, err := signing.Prepare(v, signing.NoExcludes{})
+		entries, err := signing.Prepare(entry.New(), v, signing.NoExcludes{})
 		Expect(err).To(Succeed())
-		data, err := json.Marshal(entries)
+		data, err := entries.Marshal("")
 		Expect(err).To(Succeed())
 		fmt.Printf("%s\n", string(data))
 		Expect(string(data)).To(Equal(`[[{"bob":26}],[{"alice":25}]]`))
@@ -676,7 +679,7 @@ resources:
 		var v interface{}
 		err := runtime.DefaultYAMLEncoding.Unmarshal([]byte(in), &v)
 		Expect(err).To(Succeed())
-		entries, err := signing.PrepareNormalization(v, signing.NoExcludes{})
+		entries, err := signing.PrepareNormalization(entry.New(), v, signing.NoExcludes{})
 		Expect(err).To(Succeed())
 		fmt.Printf("%s\n", entries.Formatted())
 		Expect(entries.String()).To(Equal(`[{"resources":[[{"access":[{"localReference":"blob"},{"mediaType":"text/plain"},{"referenceName":"ref"},{"type":"localBlob"}]},{"extraIdentity":[{"additional":"value"},{"other":"othervalue"}]},{"name":"elem1"},{"relation":"local"},{"type":"elemtype"},{"version":1}]]}]`))
@@ -684,7 +687,7 @@ resources:
 
 	It("Normalizes struct without no-signing resource labels", func() {
 
-		entries, err := signing.PrepareNormalization(cd, signing.MapExcludes{
+		entries, err := signing.PrepareNormalization(entry.New(), cd, signing.MapExcludes{
 			"component": signing.MapExcludes{
 				"resources": signing.ArrayExcludes{
 					Continue: signing.MapExcludes{
@@ -774,7 +777,7 @@ resources:
 
 	It("Normalizes cd", func() {
 
-		entries, err := signing.PrepareNormalization(cd, CDExcludes)
+		entries, err := signing.PrepareNormalization(entry.New(), cd, CDExcludes)
 		Expect(err).To(Succeed())
 		Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
 {
@@ -830,7 +833,7 @@ resources:
 				"name": nil,
 			},
 		}
-		entries, err := signing.PrepareNormalization(cd, rules)
+		entries, err := signing.PrepareNormalization(entry.New(), cd, rules)
 		Expect(err).To(Succeed())
 		Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
 {
@@ -849,7 +852,7 @@ resources:
 				Name: "modified",
 			},
 		}
-		entries, err := signing.PrepareNormalization(cd, rules)
+		entries, err := signing.PrepareNormalization(entry.New(), cd, rules)
 		Expect(err).To(Succeed())
 		Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
 {
@@ -857,5 +860,41 @@ resources:
     name: test
   }
 }`))
+	})
+
+	Context("JCS", func() {
+		It("list of plain values", func() {
+			v := struct {
+				List    []string `json:"list"`
+				Empty   []string `json:"empty"`
+				Omitted []string `json:"omitted,omitempty"`
+			}{
+				Empty:   []string{},
+				Omitted: []string{},
+			}
+			d, err := json.Marshal(v)
+			Expect(err).To(Succeed())
+			var m map[string]interface{}
+
+			err = json.Unmarshal(d, &m)
+			Expect(err).To(Succeed())
+
+			entries, err := signing.PrepareNormalization(jcs.New(), v, signing.ExcludeEmpty{})
+			Expect(err).To(Succeed())
+			Expect(entries.String()).To(Equal(`{}`))
+
+			entries, err = signing.PrepareNormalization(jcs.New(), v, signing.NoExcludes{})
+			Expect(err).To(Succeed())
+			Expect(entries.String()).To(Equal(`{"empty":[],"list":null}`))
+		})
+
+		It("Normalizes cd", func() {
+
+			entries, err := signing.PrepareNormalization(jcs.New(), cd, CDExcludes)
+			Expect(err).To(Succeed())
+			Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
+ {"component":{"componentReferences":[],"labels":[{"name":"b","value":{"a1":"v1","a2":"v2"}},{"name":"a","value":{"a1":"v1","a2":"v2"}}],"name":"test","provider":{"name":"provider"},"resources":[{"labels":[{"name":"b","signing":true,"value":"signed"}],"name":"elem2","relation":"local","type":"elemtype","version":"1"}],"sources":[],"version":"1"},"meta":{"configuredSchemaVersion":"v2"}}
+`))
+		})
 	})
 })

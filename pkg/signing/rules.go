@@ -4,7 +4,26 @@
 
 package signing
 
-type Normalized interface{}
+type Normalization interface {
+	NewArray() Normalized
+	NewMap() Normalized
+	NewValue(v interface{}) Normalized
+
+	String() string
+}
+
+type Normalized interface {
+	Value() interface{}
+	IsEmpty() bool
+	Marshal(gap string) ([]byte, error)
+
+	ToString(gap string) string
+	String() string
+	Formatted() string
+
+	Append(Normalized)
+	SetField(name string, value Normalized)
+}
 
 // ExcludeRules defines the rules for normalization excludes.
 type ExcludeRules interface {
@@ -65,15 +84,8 @@ func (ExcludeEmpty) Filter(v Normalized) (Normalized, error) {
 	if v == nil {
 		return nil, nil
 	}
-	switch r := v.(type) {
-	case []Normalized:
-		if len(r) == 0 {
-			return nil, nil
-		}
-	case []Entry:
-		if len(r) == 0 {
-			return nil, nil
-		}
+	if v.IsEmpty() {
+		return nil, nil
 	}
 	return v, nil
 }
