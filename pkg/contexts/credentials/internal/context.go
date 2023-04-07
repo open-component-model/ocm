@@ -12,6 +12,7 @@ import (
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -22,7 +23,7 @@ const CONTEXT_TYPE = "credentials" + datacontext.OCM_CONTEXT_SUFFIX
 // for a configured consumer id. If non-empty it
 // must start with a DNSname identifying the origin of the
 // provider followed by a slash and a local arbitrary identity.
-type ProviderIdentity string
+type ProviderIdentity = finalizer.ObjectIdentity
 
 type ContextProvider interface {
 	CredentialsContext() Context
@@ -83,7 +84,7 @@ func DefinedForContext(ctx context.Context) (Context, bool) {
 }
 
 type _context struct {
-	datacontext.Context
+	datacontext.InternalContext
 
 	sharedattributes         datacontext.AttributesContext
 	updater                  cfgcpi.Updater
@@ -101,7 +102,7 @@ func newContext(configctx config.Context, reposcheme RepositoryTypeScheme, consu
 		consumerIdentityMatchers: consumerMatchers,
 		consumerProviders:        newConsumerProviderRegistry(),
 	}
-	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, configctx.GetAttributes(), delegates)
+	c.InternalContext = datacontext.NewContextBase(c, CONTEXT_TYPE, key, configctx.GetAttributes(), delegates)
 	c.updater = cfgcpi.NewUpdater(configctx, c)
 	return c
 }

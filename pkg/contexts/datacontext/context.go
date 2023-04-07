@@ -16,6 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/handlers"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -66,6 +67,8 @@ func Mode(m ...BuilderMode) BuilderMode {
 	return utils.OptionalDefaulted(MODE_EXTENDED, m...)
 }
 
+type ContextIdentity = finalizer.ObjectIdentity
+
 type ContextProvider interface {
 	// AttributesContext returns the shared attributes
 	AttributesContext() AttributesContext
@@ -110,11 +113,17 @@ type Context interface {
 
 	// GetType returns the context type
 	GetType() string
+	GetId() ContextIdentity
 
 	// BindTo binds the context to a context.Context and makes it
 	// retrievable by a ForContext method
 	BindTo(ctx context.Context) context.Context
 	GetAttributes() Attributes
+}
+
+type InternalContext interface {
+	Context
+	finalizer.RecorderProvider
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -173,27 +182,38 @@ type delegates = Delegates
 
 type contextBase struct {
 	ctxtype    string
-	id         int64
+	id         ContextIdentity
 	key        interface{}
 	effective  Context
 	attributes Attributes
 	delegates
+
+	ref      *finalizer.RuntimeFinalizer
+	recorder *finalizer.RuntimeFinalizationRecoder
 }
 
 var _ Context = (*contextBase)(nil)
 
 // NewContextBase creates a context base implementation supporting
 // context attributes and the binding to a context.Context.
-func NewContextBase(eff Context, typ string, key interface{}, parentAttrs Attributes, delegates Delegates) Context {
+func NewContextBase(eff Context, typ string, key interface{}, parentAttrs Attributes, delegates Delegates) InternalContext {
+	recorder := &finalizer.RuntimeFinalizationRecoder{}
+	id := ContextIdentity(fmt.Sprintf("%s/%d", typ, contextrange.NextId()))
 	updater, _ := eff.(Updater)
-	c := &contextBase{ctxtype: typ, key: key, effective: eff}
+	c := &contextBase{ctxtype: typ, id: id, key: key, effective: eff, recorder: recorder}
 	c.attributes = newAttributes(eff, parentAttrs, &updater)
 	c.delegates = ComposeDelegates(logging.NewWithBase(delegates.LoggingContext()), handlers.NewRegistry(delegates.GetActions()))
+	c.recorder = recorder
+	c.ref = finalizer.NewRuntimeFinalizer(id, recorder)
 	return c
 }
 
 func (c *contextBase) GetType() string {
 	return c.ctxtype
+}
+
+func (c *contextBase) GetId() ContextIdentity {
+	return c.id
 }
 
 // BindTo make the Context reachable via the resulting context.Context.
@@ -207,6 +227,10 @@ func (c *contextBase) AttributesContext() AttributesContext {
 
 func (c *contextBase) GetAttributes() Attributes {
 	return c.attributes
+}
+
+func (c *contextBase) GetRecorder() *finalizer.RuntimeFinalizationRecoder {
+	return c.recorder
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -226,13 +250,16 @@ func New(parentAttrs Attributes) AttributesContext {
 func NewWithActions(parentAttrs Attributes, actions handlers.Registry) AttributesContext {
 	c := &_context{}
 
+	recorder := &finalizer.RuntimeFinalizationRecoder{}
+	id := ContextIdentity(fmt.Sprintf("%s/%d", CONTEXT_TYPE, contextrange.NextId()))
 	c.Context = &contextBase{
 		ctxtype:    CONTEXT_TYPE,
-		id:         contextrange.NextId(),
-		key:        key,
+		id:         id,
+		recorder:   recorder,
 		effective:  c,
 		attributes: newAttributes(c, parentAttrs, &c.updater),
 		delegates:  ComposeDelegates(logging.NewWithBase(ocmlog.Context()), handlers.NewRegistry(actions)),
+		ref:        finalizer.NewRuntimeFinalizer(id, recorder),
 	}
 	return c
 }
@@ -273,26 +300,11 @@ func (c *_context) Logger(messageContext ...logging.MessageContext) logging.Logg
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// NumberRange can be used as source for successive id numbers to tag
-// elements, since debuggers not always sow object addresses.
-type NumberRange struct {
-	id   int64
-	lock sync.Mutex
-}
-
-func (n *NumberRange) NextId() int64 {
-	n.lock.Lock()
-	defer n.lock.Unlock()
-
-	n.id++
-	return n.id
-}
-
-var contextrange, attrsrange = NumberRange{}, NumberRange{}
+var contextrange, attrsrange = finalizer.NumberRange{}, finalizer.NumberRange{}
 
 type _attributes struct {
 	sync.RWMutex
-	id         int64
+	id         uint64
 	ctx        Context
 	parent     Attributes
 	updater    *Updater

@@ -119,11 +119,12 @@ func newConsumerProviderRegistry() *consumerProviderRegistry {
 
 var _ ConsumerProvider = (*consumerProviderRegistry)(nil)
 
-func (p *consumerProviderRegistry) Register(name ProviderIdentity, c ConsumerProvider) {
+func (p *consumerProviderRegistry) Register(id ProviderIdentity, c ConsumerProvider) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
-	p.providers[name] = c
+	p.unregister(id)
+	p.providers[id] = c
 	p.ordered = generics.MapValues(p.providers)
 	sort.Slice(p.ordered, func(a, b int) bool {
 		return priority(p.ordered[a]) < priority(p.ordered[b])
@@ -133,7 +134,10 @@ func (p *consumerProviderRegistry) Register(name ProviderIdentity, c ConsumerPro
 func (p *consumerProviderRegistry) Unregister(id ProviderIdentity) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
+	p.unregister(id)
+}
 
+func (p *consumerProviderRegistry) unregister(id ProviderIdentity) {
 	p.explicit.Unregister(id)
 	if _, ok := p.providers[id]; ok {
 		delete(p.providers, id)
@@ -163,7 +167,6 @@ func (p *consumerProviderRegistry) Get(id ConsumerIdentity) (CredentialsSource, 
 		}
 	}
 	return nil, false
-
 }
 
 func (p *consumerProviderRegistry) Match(pattern ConsumerIdentity, cur ConsumerIdentity, m IdentityMatcher) (CredentialsSource, ConsumerIdentity) {
