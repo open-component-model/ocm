@@ -9,12 +9,17 @@ import (
 	"strings"
 )
 
-var hashfuncs = map[string]crypto.Hash{
+var legacy = map[string]crypto.Hash{
 	"sha256": crypto.SHA256,
 	"sha512": crypto.SHA512,
 }
 
+var hashfuncs = map[string]crypto.Hash{}
+
 func init() {
+	for k, v := range legacy {
+		hashfuncs[k] = v
+	}
 	for h := crypto.Hash(1); h < 1000; h++ {
 		s := h.String()
 		if strings.HasPrefix(s, "unknown") {
@@ -30,4 +35,17 @@ func NormalizeHashAlgorithm(algo string) string {
 		return h.String()
 	}
 	return algo
+}
+
+func LegacyHashAlgorithm(algo string) string {
+	for k, v := range legacy {
+		if v.String() == algo {
+			return k
+		}
+	}
+	return algo
+}
+
+func IsLegacyHashAlgorithm(algo string) bool {
+	return legacy[algo] != 0
 }

@@ -91,7 +91,28 @@ ERROR <nil> ocm/test ctxerror
 
 	It("sets logging by config", func() {
 		buf := bytes.NewBuffer(nil)
-		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "--logconfig", "testdata/logcfg.yaml", "logtest")).To(Succeed())
+		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "--logconfig", "@testdata/logcfg.yaml", "logtest")).To(Succeed())
+		Expect(log.String()).To(StringEqualTrimmedWithContext(`
+V[4] ocm/test debug
+V[3] ocm/test info
+V[2] ocm/test warn
+ERROR <nil> ocm/test error
+V[4] ocm/test ctxdebug
+V[3] ocm/test ctxinfo
+V[2] ocm/test ctxwarn
+ERROR <nil> ocm/test ctxerror
+`))
+	})
+
+	It("sets logging by config", func() {
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).ExecuteModified(addTestCommands, "--logconfig", `
+defaultLevel: Warn
+rules:
+  - rule:
+      level: Debug
+      conditions:
+        - realm: test`, "logtest")).To(Succeed())
 		Expect(log.String()).To(StringEqualTrimmedWithContext(`
 V[4] ocm/test debug
 V[3] ocm/test info

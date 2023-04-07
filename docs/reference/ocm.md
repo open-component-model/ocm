@@ -13,7 +13,8 @@ ocm [<options>] <sub command> ...
       --config string           configuration file
   -C, --cred stringArray        credential setting
   -h, --help                    help for ocm
-      --logconfig string        log config
+      --logcond stringArray     log condition (combined to an OR condition rule)
+      --logconfig string        log config (with prefix @ taken from given file)
   -L, --logfile string          set log file
       --logkeys stringArray     log tags/realms(.) to be enabled ([.]name{,[.]name}[=level])
   -l, --loglevel string         set log level
@@ -166,7 +167,7 @@ attributes are supported:
 * [ocm <b>hash</b>](ocm_hash.md)	 &mdash; Hash and normalization operations
 * [ocm <b>install</b>](ocm_install.md)	 &mdash; Install elements.
 * [ocm <b>show</b>](ocm_show.md)	 &mdash; Show tags or versions
-* [ocm <b>sign</b>](ocm_sign.md)	 &mdash; Sign components
+* [ocm <b>sign</b>](ocm_sign.md)	 &mdash; Sign components or hashes
 * [ocm <b>transfer</b>](ocm_transfer.md)	 &mdash; Transfer artifacts or components
 * [ocm <b>verify</b>](ocm_verify.md)	 &mdash; Verify component version signatures
 * [ocm <b>version</b>](ocm_version.md)	 &mdash; displays the version

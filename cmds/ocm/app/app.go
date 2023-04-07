@@ -76,8 +76,7 @@ type CLIOptions struct {
 	Settings    []string
 	Verbose     bool
 	LogOpts     logopts.Options
-
-	Version bool
+	Version     bool
 }
 
 var desc = `
@@ -209,7 +208,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(cmdutils.HideCommand(cachecmds.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(ocicmds.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(ocmcmds.NewCommand(opts.Context)))
-	//cmd.AddCommand(cmdutils.HideCommand(toicmds.NewCommand(opts.Context)))
+	// cmd.AddCommand(cmdutils.HideCommand(toicmds.NewCommand(opts.Context)))
 
 	cmd.AddCommand(cmdutils.HideCommand(creds.NewCommand(opts.Context)))
 

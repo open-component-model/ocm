@@ -27,6 +27,9 @@ type ComponentDescriptor struct {
 	Spec ComponentVersionSpec `json:"spec"`
 	// Signatures contains a list of signatures for the ComponentDescriptor
 	Signatures metav1.Signatures `json:"signatures,omitempty"`
+	// NestedDigests described digest information of resources in aggregated
+	// omponent versions.
+	NestedDigests metav1.NestedDigests `json:"nestedDigests,omitempty"`
 }
 
 var _ compdesc.ComponentDescriptorVersion = (*ComponentDescriptor)(nil)

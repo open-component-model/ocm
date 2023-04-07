@@ -10,7 +10,6 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
@@ -38,7 +37,7 @@ const OUT = "/tmp/res"
 const OCIPATH = "/tmp/oci"
 const OCIHOST = "alias"
 
-func Check(env *TestEnv, ldesc *artdesc.Descriptor, out string) {
+func CheckComponentInArchive(env *TestEnv, ldesc *artdesc.Descriptor, out string) {
 	tgt, err := ctfocm.Open(env.OCMContext(), accessobj.ACC_READONLY, out, 0, accessio.PathFileSystem(env.FileSystem()))
 	Expect(err).To(Succeed())
 	defer Close(tgt, "ctf")
@@ -148,7 +147,7 @@ transferring version "github.com/mandelsoft/test:v1"...
 `))
 
 		Expect(env.DirExists(OUT)).To(BeTrue())
-		Check(env, ldesc, OUT)
+		CheckComponentInArchive(env, ldesc, OUT)
 	})
 
 	It("transfers ctf with --closure --lookup", func() {
@@ -192,7 +191,7 @@ transferring version "github.com/mandelsoft/test:v1"...
 `))
 
 		Expect(env.FileExists(OUT)).To(BeTrue())
-		Check(env, ldesc, OUT)
+		CheckComponentInArchive(env, ldesc, OUT)
 	})
 
 	It("transfers ctf to tgz", func() {
@@ -208,7 +207,7 @@ transferring version "github.com/mandelsoft/test:v1"...
 `))
 
 		Expect(env.FileExists(OUT)).To(BeTrue())
-		Check(env, ldesc, OUT)
+		CheckComponentInArchive(env, ldesc, OUT)
 	})
 
 	It("transfers ctf to ctf+tgz", func() {
@@ -224,6 +223,6 @@ transferring version "github.com/mandelsoft/test:v1"...
 `))
 
 		Expect(env.FileExists(OUT)).To(BeTrue())
-		Check(env, ldesc, OUT)
+		CheckComponentInArchive(env, ldesc, OUT)
 	})
 })

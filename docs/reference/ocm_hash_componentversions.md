@@ -21,6 +21,8 @@ ocm hash componentversions [<options>] {<component-reference>}
   -r, --recursive                 follow component reference nesting
       --repo string               repository name or spec
   -s, --sort stringArray          sort fields
+  -U, --update                    update digests in component version
+  -V, --verify                    verify digests found in component version
 ```
 
 ### Description

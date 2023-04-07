@@ -114,7 +114,7 @@ var _ = Describe("access method", func() {
 
 	It("sign component archive", func() {
 		buf := bytes.NewBuffer(nil)
-		digest := "1d5bcd317eb26299d8a3488e9b3d5c9c909479aecff55ed8b94ab8d9dbe45140"
+		digest := "5f416ec59629d6af91287e2ba13c6360339b6a0acf624af2abd2a810ce4aefce"
 
 		session := datacontext.NewSession()
 		defer session.Close()
@@ -145,12 +145,13 @@ var _ = Describe("access method", func() {
 		Expect(env.CatchOutput(buf).Execute("verify", "components", "-V", "-s", SIGNATURE, "-k", PUBKEY, "--repo", ARCH, COMPONENTB+":"+VERSION)).To(Succeed())
 
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
-applying to version "github.com/mandelsoft/ref:v1"...
-  applying to version "github.com/mandelsoft/test:v1"...
+applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]...
+  no digest found for "github.com/mandelsoft/test:v1"
+  applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/ref:v1]...
     resource 0:  "name"="testdata": digest SHA-256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50[genericBlobDigest/v1]
     resource 1:  "name"="value": digest SHA-256:0c4abdb72cf59cb4b77f4aacb4775f9f546ebc3face189b2224a966c8826ca9f[ociArtifactDigest/v1]
     resource 2:  "name"="ref": digest SHA-256:c2d2dca275c33c1270dea6168a002d67c0e98780d7a54960758139ae19984bd7[ociArtifactDigest/v1]
-  reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:cba96112dfb934d87a181deb3b053ec57810e29caa693337bf16ae69cddaab04[jsonNormalisation/v1]
+  reference 0:  github.com/mandelsoft/test:v1: digest SHA-256:01de99400030e8336020059a435cea4e7fe8f21aad4faf619da882134b85569d[jsonNormalisation/v1]
   resource 0:  "name"="otherdata": digest SHA-256:54b8007913ec5a907ca69001d59518acfd106f7b02f892eabf9cae3f8b2414b4[genericBlobDigest/v1]
 successfully verified github.com/mandelsoft/ref:v1 (digest SHA-256:` + digest + `)
 `))

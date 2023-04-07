@@ -19,15 +19,19 @@ func Close(c io.Closer, msg ...interface{}) {
 }
 
 func Defer(f func() error, msg ...interface{}) {
+	DeferWithOffset(0, f, msg...)
+}
+
+func DeferWithOffset(o int, f func() error, msg ...interface{}) {
 	err := f()
 	if err != nil {
 		switch len(msg) {
 		case 0:
-			ExpectWithOffset(1, err).To(Succeed())
+			ExpectWithOffset(1+o, err).To(Succeed())
 		case 1:
-			Fail(fmt.Sprintf("%s: %s", msg[0], err), 1)
+			Fail(fmt.Sprintf("%s: %s", msg[0], err), 1+o)
 		default:
-			Fail(fmt.Sprintf("%s: %s", fmt.Sprintf(msg[0].(string), msg[1:]...), err), 1)
+			Fail(fmt.Sprintf("%s: %s", fmt.Sprintf(msg[0].(string), msg[1:]...), err), 1+o)
 		}
 	}
 }

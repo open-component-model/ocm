@@ -27,6 +27,8 @@ var _ options.Options = (*Option)(nil)
 
 type Option struct {
 	Actual bool
+	Update bool
+	Verify bool
 
 	action  signingcmd.Action
 	outfile string
@@ -34,6 +36,8 @@ type Option struct {
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.BoolVarP(&o.Actual, "actual", "", false, "use actual component descriptor")
+	fs.BoolVarP(&o.Update, "update", "U", false, "update digests in component version")
+	fs.BoolVarP(&o.Verify, "verify", "V", false, "verify digests found in component version")
 	fs.StringVarP(&o.outfile, "outfile", "O", "norm.ncd", "Output file for normalized component descriptor")
 }
 
@@ -43,10 +47,10 @@ func (o *Option) Complete(cmd *Command) error {
 	}
 	repo := repooption.From(cmd).Repository
 	lookup := lookupoption.From(cmd)
-	sopts := signing.NewOptions(hashoption.From(cmd), signing.Resolver(repo, lookup.Resolver))
+	sopts := signing.NewOptions(hashoption.From(cmd), signing.Resolver(repo, lookup.Resolver), signing.Update(o.Update), signing.VerifyDigests(o.Verify))
 	err := sopts.Complete(signingattr.Get(cmd.Context.OCMContext()))
 	if err == nil {
-		o.action = signingcmd.NewAction([]string{"", ""}, common.NewPrinter(nil), sopts)
+		o.action = signingcmd.NewAction([]string{"", ""}, cmd.Context.OCMContext(), common.NewPrinter(nil), sopts)
 	}
 	return err
 }

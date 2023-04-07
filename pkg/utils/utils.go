@@ -252,6 +252,44 @@ func StringMapKeys[E any](m map[string]E) []string {
 	return keys
 }
 
+type Comparable[K any] interface {
+	Compare(o K) int
+}
+
+func Sort[K Comparable[K]](a []K) {
+	sort.Slice(a, func(i, j int) bool { return a[i].Compare(a[j]) < 0 })
+}
+
+func MapKeys[K comparable, E any](m map[K]E) []K {
+	if m == nil {
+		return nil
+	}
+
+	keys := []K{}
+	for k := range m {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
+type ComparableMapKey[K any] interface {
+	Comparable[K]
+	comparable
+}
+
+func SortedMapKeys[K ComparableMapKey[K], E any](m map[K]E) []K {
+	if m == nil {
+		return nil
+	}
+
+	keys := []K{}
+	for k := range m {
+		keys = append(keys, k)
+	}
+	Sort(keys)
+	return keys
+}
+
 // Optional returns the first optional non-zero element given as variadic argument,
 // if given, or the zero element as default.
 func Optional[T any](list ...T) T {

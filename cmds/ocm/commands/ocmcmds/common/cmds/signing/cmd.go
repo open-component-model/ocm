@@ -91,7 +91,7 @@ func (o *SignatureCommand) Run() error {
 	if err != nil {
 		return err
 	}
-	return utils.HandleOutput(NewAction(o.spec.terms, common.NewPrinter(o.Context.StdOut()), sopts), handler, utils.StringElemSpecs(o.Refs...)...)
+	return utils.HandleOutput(NewAction(o.spec.terms, o.Context.OCMContext(), common.NewPrinter(o.Context.StdOut()), sopts), handler, utils.StringElemSpecs(o.Refs...)...)
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -112,11 +112,11 @@ type action struct {
 
 var _ output.Output = (*action)(nil)
 
-func NewAction(desc []string, p common.Printer, sopts *signing.Options) Action {
+func NewAction(desc []string, ctx ocm.Context, p common.Printer, sopts *signing.Options) Action {
 	return &action{
 		desc:         desc,
 		printer:      p,
-		state:        signing.NewWalkingState(),
+		state:        signing.NewWalkingState(ctx.LoggingContext().WithContext(signing.REALM)),
 		baseresolver: sopts.Resolver,
 		sopts:        sopts,
 		errlist:      errors.ErrListf(desc[1]),
@@ -128,9 +128,10 @@ func (a *action) Digest(o *comphdlr.Object) (*metav1.DigestSpec, *compdesc.Compo
 	sopts.Resolver = ocm.NewCompoundResolver(o.Repository, a.sopts.Resolver)
 	d, err := signing.Apply(a.printer, &a.state, o.ComponentVersion, &sopts, true)
 	var cd *compdesc.ComponentDescriptor
-	vi := a.state.Get(common.VersionedElementKey(o.ComponentVersion))
+	nv := common.VersionedElementKey(o.ComponentVersion)
+	vi := a.state.Get(nv)
 	if vi != nil {
-		cd = vi.Descriptor
+		cd = vi.GetContext(nv).Descriptor
 	}
 	return d, cd, err
 }

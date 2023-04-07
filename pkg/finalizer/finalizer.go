@@ -12,6 +12,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/exception"
 )
 
+type Finalizable interface {
+	Finalize() error
+}
+
 // Finalizer gathers finalization functions and calls
 // them by calling the Finalize method(s).
 // Add and Finalize may be called in any sequence and number.
@@ -26,6 +30,7 @@ type Finalizer struct {
 	catch   exception.Matcher
 	pending []func() error
 	nested  *Finalizer
+	index   int
 }
 
 // CatchException marks the finalizer to catch exceptions.
@@ -158,10 +163,13 @@ func (f *Finalizer) Nested() *Finalizer {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
-	if f.nested == nil {
+	if f.nested == nil || f.nested.Length() > 0 {
 		f.nested = &Finalizer{}
-		f.pending = append(f.pending, f.nested.Finalize)
+	} else {
+		f.pending = append(f.pending[:f.index], f.pending[f.index+1:]...)
 	}
+	f.index = len(f.pending)
+	f.pending = append(f.pending, f.nested.Finalize)
 	return f.nested
 }
 

@@ -6,6 +6,7 @@ package v1
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/open-component-model/ocm/pkg/signing"
 )
@@ -112,4 +113,116 @@ func NewExcludeFromSignatureDigest() *DigestSpec {
 		NormalisationAlgorithm: ExcludeFromSignature,
 		Value:                  NoDigest,
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type NestedDigests []NestedComponentDigests
+
+func (d NestedDigests) String() string {
+	r := ""
+	sep := ""
+	for _, e := range d {
+		r = fmt.Sprintf("%s%s%s", r, sep, e.String())
+		sep = "\n"
+	}
+	return r
+}
+
+func (d NestedDigests) Copy() NestedDigests {
+	if d == nil {
+		return nil
+	}
+	r := make([]NestedComponentDigests, len(d))
+	for i, e := range d {
+		r[i] = *e.Copy()
+	}
+	return r
+}
+
+func (d NestedDigests) Lookup(name, version string) *NestedComponentDigests {
+	for _, e := range d {
+		if e.Name == name && e.Version == version {
+			return &e
+		}
+	}
+	return nil
+}
+
+type NestedComponentDigests struct {
+	Name      string          `json:"name"`
+	Version   string          `json:"version"`
+	Digest    *DigestSpec     `json:"digest,omitempty"`
+	Resources ArtefactDigests `json:"resourceDigests,omitempty"`
+}
+
+func (d *NestedComponentDigests) String() string {
+	r := []string{
+		fmt.Sprintf("%s:%s: %s", d.Name, d.Version, d.Digest.String()),
+	}
+	for _, a := range d.Resources {
+		r = append(r, "  "+a.String())
+	}
+	return strings.Join(r, "\n")
+}
+
+func (d *NestedComponentDigests) Lookup(name, version string, extra Identity) *ArtefactDigest {
+	if d == nil {
+		return nil
+	}
+	return d.Resources.Lookup(name, version, extra)
+}
+
+func (d *NestedComponentDigests) Copy() *NestedComponentDigests {
+	if d == nil {
+		return nil
+	}
+	r := *d
+	r.Digest = d.Digest.Copy()
+	r.Resources = make([]ArtefactDigest, len(d.Resources))
+	for i, e := range d.Resources {
+		r.Resources[i] = *e.Copy()
+	}
+	return &r
+}
+
+type ArtefactDigests []ArtefactDigest
+
+func (d ArtefactDigests) Lookup(name, version string, extra Identity) *ArtefactDigest {
+	for _, e := range d {
+		if e.Name == name && e.Version == version && e.ExtraIdentity.Equals(extra) {
+			return &e
+		}
+	}
+	return nil
+}
+
+func (d ArtefactDigests) Match(o ArtefactDigests) bool {
+	if len(d) != len(o) {
+		return false
+	}
+	for _, e := range d {
+		i := o.Lookup(e.Name, e.Version, e.ExtraIdentity)
+		if i == nil || i.Digest != e.Digest {
+			return false
+		}
+	}
+	return true
+}
+
+type ArtefactDigest struct {
+	Name          string     `json:"name"`
+	Version       string     `json:"version"`
+	ExtraIdentity Identity   `json:"extraIdentity,omitempty"`
+	Digest        DigestSpec `json:"digest"`
+}
+
+func (d *ArtefactDigest) Copy() *ArtefactDigest {
+	r := *d
+	r.ExtraIdentity = d.ExtraIdentity.Copy()
+	return &r
+}
+
+func (d *ArtefactDigest) String() string {
+	return fmt.Sprintf("%s:%s[%s]: %s", d.Name, d.Version, d.ExtraIdentity.String(), d.Digest.String())
 }

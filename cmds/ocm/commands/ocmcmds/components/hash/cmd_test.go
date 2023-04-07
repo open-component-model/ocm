@@ -62,8 +62,8 @@ test.de/x v1      37f7f500d87f4b0a8765649f7c047db382e272b73e042805131df57279991b
 			`
 COMPONENT      : test.de/x
 VERSION        : v1
-HASH           : 49145d28aee8dfebdde5432bdbe2cf8e365d56cbd17fbfa959770057d6127edc
-NORMALIZED FORM: [{"component":[{"componentReferences":[]},{"name":"test.de/x"},{"provider":"mandelsoft"},{"resources":[[{"digest":[{"hashAlgorithm":"SHA-256"},{"normalisationAlgorithm":"genericBlobDigest/v1"},{"value":"810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"}]},{"name":"test"},{"relation":"local"},{"type":"plainText"},{"version":"v1"}]]},{"version":"v1"}]},{"meta":[{"schemaVersion":"v2"}]}]
+HASH           : 9d8fc24cf27d1092f58098286d9f63c6824c2daf739c19789f64c062d1f30cc5
+NORMALIZED FORM: [{"component":[{"componentReferences":[]},{"name":"test.de/x"},{"provider":"mandelsoft"},{"resources":[[{"digest":[{"hashAlgorithm":"SHA-256"},{"normalisationAlgorithm":"genericBlobDigest/v1"},{"value":"810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"}]},{"extraIdentity":null},{"name":"test"},{"relation":"local"},{"type":"plainText"},{"version":"v1"}]]},{"version":"v1"}]},{"meta":[{"schemaVersion":"v2"}]}]
 ---`))
 	})
 
@@ -81,8 +81,8 @@ NORMALIZED FORM: [{"component":[{"componentReferences":[]},{"name":"test.de/x"},
 			`
 COMPONENT      : test.de/x
 VERSION        : v1
-HASH           : aa8fc0f82d47ae7dd30016e0d99a720081bf1018b72d0642cc16cab7d0f6673d
-NORMALIZED FORM: [{"component":[{"componentReferences":[]},{"name":"test.de/x"},{"provider":"mandelsoft"},{"resources":[[{"name":"test"},{"relation":"local"},{"type":"plainText"},{"version":"v1"}]]},{"version":"v1"}]},{"meta":[{"schemaVersion":"v2"}]}]
+HASH           : 84cef39d60d12863c3fec0c50e72df69dcc9ed4590dff04c562aa9ff871d66f6
+NORMALIZED FORM: [{"component":[{"componentReferences":[]},{"name":"test.de/x"},{"provider":"mandelsoft"},{"resources":[[{"extraIdentity":null},{"name":"test"},{"relation":"local"},{"type":"plainText"},{"version":"v1"}]]},{"version":"v1"}]},{"meta":[{"schemaVersion":"v2"}]}]
 ---`))
 	})
 })

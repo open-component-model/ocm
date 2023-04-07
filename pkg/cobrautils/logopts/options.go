@@ -22,7 +22,7 @@ import (
 
 var Description = `
 The <code>--log*</code> options can be used to configure the logging behaviour.
-There is a quick config option <code>--log-keys</code> to configure simple
+There is a quick config option <code>--logkeys</code> to configure simple
 tag/realm based condition rules. The comma-separated names build an AND rule.
 Hereby, names starting with a slash (<code>/</code>) denote a realm (without the leading slash).
 A realm is a slash separated sequence of identifiers, which matches all logging realms
@@ -30,9 +30,12 @@ with the given realms as path prefix. A tag directly matches the logging tags.
 Used tags and realms can be found under topic <CMD>ocm logging</CMD>. The ocm coding basically
 uses the realm <code>ocm</code>.
 The default level to enable is <code>info</code>. Separated by an equal sign (<code>=</code>)
-optiobally a dedicated level can be specified. Log levels can be (<code>error</code>,
+optionally a dedicated level can be specified. Log levels can be (<code>error</code>,
 <code>warn</code>, <code>info</code>, <code>debug</code> and <code>trace</code>.
 The default level is <code>warn</code>.
+The <code>--logconfig*</code> options can be used to configure a complete
+logging configuration (yaml/json) via command line. If the argument starts with
+an <code>@</code>, the logging configuration is taken from a file.
 `
 
 type Options struct {
@@ -94,9 +97,14 @@ func (o *Options) Configure(ctx ocm.Context, logctx logging.Context) error {
 	}
 
 	if o.LogConfig != "" {
-		cfg, err := vfs.ReadFile(fs, o.LogConfig)
-		if err != nil {
-			return errors.Wrapf(err, "cannot read logging config %q", o.LogFile)
+		var cfg []byte
+		if strings.HasPrefix(o.LogConfig, "@") {
+			cfg, err = vfs.ReadFile(fs, o.LogConfig[1:])
+			if err != nil {
+				return errors.Wrapf(err, "cannot read logging config file %q", o.LogConfig[1:])
+			}
+		} else {
+			cfg = []byte(o.LogConfig)
 		}
 		if err = config.ConfigureWithData(logctx, cfg); err != nil {
 			return errors.Wrapf(err, "invalid logging config: %q", o.LogFile)
