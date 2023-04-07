@@ -13,7 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 )
 
-const PROVIDER = "ocm.software/" + Type
+const PROVIDER = "ocm.software/credentialprovider/" + Type
 
 type ConsumerProvider struct {
 	cfg *configfile.ConfigFile

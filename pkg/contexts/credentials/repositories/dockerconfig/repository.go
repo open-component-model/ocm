@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 )
 
 type Repository struct {
@@ -85,6 +86,7 @@ func (r *Repository) Read(force bool) error {
 	var (
 		data []byte
 		err  error
+		id   finalizer.ObjectIdentity
 	)
 	if r.path != "" {
 		path := r.path
@@ -97,8 +99,10 @@ func (r *Repository) Read(force bool) error {
 		if err != nil {
 			return fmt.Errorf("failed to read file '%s': %w", path, err)
 		}
+		id = cpi.ProviderIdentity(PROVIDER + "/" + path)
 	} else if len(r.data) > 0 {
 		data = r.data
+		id = finalizer.NewObjectIdentity(PROVIDER)
 	}
 
 	cfg, err := config.LoadFromReader(bytes.NewBuffer(data))
@@ -106,7 +110,7 @@ func (r *Repository) Read(force bool) error {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
 	if r.propagate {
-		r.ctx.RegisterConsumerProvider(cpi.ProviderIdentity(PROVIDER+"//"+path), &ConsumerProvider{cfg})
+		r.ctx.RegisterConsumerProvider(id, &ConsumerProvider{cfg})
 	}
 	r.config = cfg
 	return nil

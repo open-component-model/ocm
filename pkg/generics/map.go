@@ -13,7 +13,7 @@ func MapKeys[K comparable, V any](m map[K]V) Set[K] {
 }
 
 func MapKeyArray[K comparable, V any](m map[K]V) []K {
-	a := make([]K, len(m), len(m))
+	a := make([]K, len(m))
 	i := 0
 	for k := range m {
 		a[i] = k
@@ -23,7 +23,7 @@ func MapKeyArray[K comparable, V any](m map[K]V) []K {
 }
 
 func MapValues[K comparable, V any](m map[K]V) []V {
-	a := make([]V, len(m), len(m))
+	a := make([]V, len(m))
 	i := 0
 	for _, v := range m {
 		a[i] = v
