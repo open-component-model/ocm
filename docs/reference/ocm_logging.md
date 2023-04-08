@@ -22,6 +22,7 @@ The following *realms* are used by the command line tool:
   - <code>ocm/accessmethod/ociartifact</code>: access method ociArtifact
   - <code>ocm/credentials/dockerconfig</code>: docker config handling as credential repository
   - <code>ocm/oci.ocireg</code>: OCI repository handling
+  - <code>ocm/ocimapping</code>: OCM to OCI Registry Mapping
   - <code>ocm/plugins</code>: OCM plugin handling
   - <code>ocm/processing</code>: output processing chains
   - <code>ocm/toi</code>: TOI logging

@@ -8,6 +8,11 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
+	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/overwriteoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/srcbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
@@ -17,6 +22,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 )
 
 var (
@@ -32,7 +38,7 @@ type Command struct {
 
 // NewCommand creates a new transfer command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, formatoption.New())}, utils.Names(Names, names...)...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, formatoption.New(), lookupoption.New(), overwriteoption.New(), rscbyvalueoption.New(), srcbyvalueoption.New())}, utils.Names(Names, names...)...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -62,6 +68,13 @@ func (o *Command) Complete(args []string) error {
 func (o *Command) Run() error {
 	session := ocm.NewSession(nil)
 	defer session.Close()
+	session.Finalize(o.OCMContext())
+
+	err := o.ProcessOnOptions(ocmcommon.CompleteOptionsWithSession(o, session))
+	if err != nil {
+		return err
+	}
+
 	source, err := comparch.Open(o.Context.OCMContext(), accessobj.ACC_READONLY, o.Path, 0, o.Context)
 	if err != nil {
 		return err
@@ -74,5 +87,14 @@ func (o *Command) Run() error {
 		return err
 	}
 
-	return transfer.TransferVersion(common.NewPrinter(o.Context.StdOut()), nil, source, target, nil)
+	thdlr, err := standard.New(
+		lookupoption.From(o),
+		overwriteoption.From(o),
+		rscbyvalueoption.From(o),
+		srcbyvalueoption.From(o),
+	)
+	if err != nil {
+		return err
+	}
+	return transfer.TransferVersion(common.NewPrinter(o.Context.StdOut()), nil, source, target, thdlr)
 }
