@@ -10,6 +10,42 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
+type null struct{}
+
+func (n *null) IsEmpty() bool {
+	return true
+}
+
+func (n *null) Marshal(gap string) ([]byte, error) {
+	return json.Marshal(nil)
+}
+
+func (n *null) ToString(gap string) string {
+	return n.String()
+}
+
+func (n *null) String() string {
+	return "null"
+}
+
+func (n *null) Formatted() string {
+	return n.String()
+}
+
+func (n *null) Append(normalized Normalized) {
+	panic("append on null")
+}
+
+func (n *null) Value() interface{} {
+	return nil
+}
+
+func (n *null) SetField(name string, value Normalized) {
+	panic("set field on null")
+}
+
+var Null Normalized = (*null)(nil)
+
 func PrepareNormalization(n Normalization, v interface{}, excludes ExcludeRules) (Normalized, error) {
 	data, err := json.Marshal(v)
 	if err != nil {
@@ -55,7 +91,11 @@ func prepareStruct(n Normalization, v map[string]interface{}, ex ExcludeRules) (
 				return nil, errors.Wrapf(err, "field %q", key)
 			}
 			if nested != nil {
-				entries.SetField(name, nested)
+				if nested == Null {
+					entries.SetField(name, nil)
+				} else {
+					entries.SetField(name, nested)
+				}
 			}
 		}
 	}

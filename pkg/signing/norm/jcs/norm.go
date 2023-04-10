@@ -7,6 +7,8 @@ package jcs
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"strconv"
 
 	"github.com/cyberphone/json-canonicalization/go/src/webpki.org/jsoncanonicalizer"
 
@@ -68,11 +70,7 @@ func (n *normalized) SetField(name string, value signing.Normalized) {
 }
 
 func (n *normalized) ToString(gap string) string {
-	data, err := n.Marshal(gap)
-	if err != nil {
-		panic(errors.Wrapf(err, "cannot encode standard data"))
-	}
-	return string(data)
+	return toString(n.value, gap)
 }
 
 func (l *normalized) String() string {
@@ -101,4 +99,40 @@ func (n *normalized) Marshal(gap string) ([]byte, error) {
 		return nil, errors.Wrapf(err, "cannot canonicalize json")
 	}
 	return data, nil
+}
+
+func toString(v interface{}, gap string) string {
+	if v == nil || v == signing.Null {
+		return "null"
+	}
+	switch castIn := v.(type) {
+	case map[string]interface{}:
+		ngap := gap + "  "
+		s := "{"
+		sep := ""
+		keys := utils.StringMapKeys(castIn)
+		for _, n := range keys {
+			v := castIn[n] //nolint: govet // yes
+			sep = "\n" + gap
+			s = fmt.Sprintf("%s%s  %s: %s", s, sep, n, toString(v, ngap))
+		}
+		s += sep + "}"
+		return s
+	case []interface{}:
+		ngap := gap + "  "
+		s := "["
+		sep := ""
+		for _, v := range castIn {
+			s = fmt.Sprintf("%s\n%s%s", s, ngap, toString(v, ngap))
+			sep = "\n" + gap
+		}
+		s += sep + "]"
+		return s
+	case string:
+		return castIn
+	case bool:
+		return strconv.FormatBool(castIn)
+	default:
+		panic(fmt.Sprintf("unknown type %T in toString. This should not happen", v))
+	}
 }

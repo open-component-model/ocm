@@ -165,6 +165,9 @@ func (l Entries) ToString(gap string) string {
 }
 
 func toString(v interface{}, gap string) string {
+	if v == nil || v == signing.Null {
+		return "null"
+	}
 	switch castIn := v.(type) {
 	case Entries:
 		return castIn.ToString(gap)
@@ -187,6 +190,6 @@ func toString(v interface{}, gap string) string {
 	case bool:
 		return strconv.FormatBool(castIn)
 	default:
-		panic(fmt.Sprintf("unknown type %T in sorting. This should not happen", v))
+		panic(fmt.Sprintf("unknown type %T in toString. This should not happen", v))
 	}
 }

@@ -11,8 +11,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-component-model/ocm/pkg/signing/norm/entry"
-	"github.com/open-component-model/ocm/pkg/signing/norm/jcs"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
@@ -22,22 +20,26 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/pkg/signing/norm/entry"
+	"github.com/open-component-model/ocm/pkg/signing/norm/jcs"
 )
 
 var CDExcludes = signing.MapExcludes{
 	"component": signing.MapExcludes{
 		"repositoryContexts": nil,
-		"resources": signing.DynamicArrayExcludes{
-			ValueChecker: signing.IgnoreResourcesWithAccessType("localBlob"),
-			Continue: signing.MapExcludes{
-				"access": nil,
-				"srcRef": nil,
-				"labels": signing.DynamicArrayExcludes{
-					ValueChecker: signing.IgnoreLabelsWithoutSignature,
-					Continue:     signing.NoExcludes{},
+		"resources": signing.DefaultedMapFields{
+			Next: signing.DynamicArrayExcludes{
+				ValueChecker: signing.IgnoreResourcesWithAccessType("localBlob"),
+				Continue: signing.MapExcludes{
+					"access": nil,
+					"srcRef": nil,
+					"labels": signing.DynamicArrayExcludes{
+						ValueChecker: signing.IgnoreLabelsWithoutSignature,
+						Continue:     signing.NoExcludes{},
+					},
 				},
 			},
-		},
+		}.EnforceNull("extraIdentity"),
 		"sources": signing.DynamicArrayExcludes{
 			ValueChecker: signing.IgnoreResourcesWithNoneAccess,
 			Continue: signing.MapExcludes{
@@ -805,6 +807,7 @@ resources:
     }
     resources: [
       {
+        extraIdentity: null
         labels: [
           {
             name: b
@@ -892,9 +895,377 @@ resources:
 
 			entries, err := signing.PrepareNormalization(jcs.New(), cd, CDExcludes)
 			Expect(err).To(Succeed())
-			Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
- {"component":{"componentReferences":[],"labels":[{"name":"b","value":{"a1":"v1","a2":"v2"}},{"name":"a","value":{"a1":"v1","a2":"v2"}}],"name":"test","provider":{"name":"provider"},"resources":[{"labels":[{"name":"b","signing":true,"value":"signed"}],"name":"elem2","relation":"local","type":"elemtype","version":"1"}],"sources":[],"version":"1"},"meta":{"configuredSchemaVersion":"v2"}}
+			Expect(entries.String()).To(StringEqualTrimmedWithContext(`
+ {"component":{"componentReferences":[],"labels":[{"name":"b","value":{"a1":"v1","a2":"v2"}},{"name":"a","value":{"a1":"v1","a2":"v2"}}],"name":"test","provider":{"name":"provider"},"resources":[{"extraIdentity":null,"labels":[{"name":"b","signing":true,"value":"signed"}],"name":"elem2","relation":"local","type":"elemtype","version":"1"}],"sources":[],"version":"1"},"meta":{"configuredSchemaVersion":"v2"}}
 `))
 		})
 	})
+
+	AssertBasics := func(desc string, n signing.Normalization) {
+		When(desc, func() {
+			data := map[string]interface{}{
+				"map1": map[string]interface{}{
+					"field1": "value1",
+					"field2": "value2",
+				},
+			}
+
+			It("injects fields", func() {
+				rules := signing.DefaultedMapFields{
+					Name: "map1",
+					Fields: map[string]interface{}{
+						"injectedfield": "injected",
+					},
+				}
+				entries, err := signing.PrepareNormalization(entry.Type, data, rules)
+				Expect(err).To(Succeed())
+				Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
+{
+  map1: {
+    field1: value1
+    field2: value2
+    injectedfield: injected
+  }
+}
+`))
+			})
+			It("injects fields and excludes other", func() {
+				rules := signing.DefaultedMapFields{
+					Name: "map1",
+					Fields: map[string]interface{}{
+						"injectedfield": "injected",
+					},
+					Continue: signing.MapExcludes{
+						"field1": nil,
+					},
+				}
+				entries, err := signing.PrepareNormalization(entry.Type, data, rules)
+				Expect(err).To(Succeed())
+				Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
+{
+  map1: {
+    field2: value2
+    injectedfield: injected
+  }
+}
+`))
+			})
+
+			It("injects empty map fields and excludes other", func() {
+				rules := signing.DefaultedMapFields{
+					Name: "map1",
+					Fields: map[string]interface{}{
+						"injectedfield": map[string]interface{}{},
+					},
+					Continue: signing.MapExcludes{
+						"field1": nil,
+					},
+				}
+				entries, err := signing.PrepareNormalization(n, data, rules)
+				Expect(err).To(Succeed())
+				Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
+{
+  map1: {
+    field2: value2
+    injectedfield: {}
+  }
+}
+`))
+			})
+
+			It("injects empty list fields and excludes other", func() {
+				rules := signing.DefaultedMapFields{
+					Name: "map1",
+					Fields: map[string]interface{}{
+						"injectedfield": []interface{}{},
+					},
+					Continue: signing.MapExcludes{
+						"field1": nil,
+					},
+				}
+				entries, err := signing.PrepareNormalization(n, data, rules)
+				Expect(err).To(Succeed())
+				Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
+{
+  map1: {
+    field2: value2
+    injectedfield: []
+  }
+}
+`))
+			})
+
+			It("injects nil field", func() {
+				rules := signing.DefaultedMapFields{
+					Name: "map1",
+					Fields: map[string]interface{}{
+						"injectedfield": signing.Null,
+					},
+				}
+				entries, err := signing.PrepareNormalization(n, data, rules)
+				Expect(err).To(Succeed())
+				Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
+{
+  map1: {
+    field1: value1
+    field2: value2
+    injectedfield: null
+  }
+}
+`))
+			})
+
+			It("injects nil field", func() {
+				rules := signing.DefaultedMapFields{
+					Name: "map1",
+					Fields: map[string]interface{}{
+						"injectedfield": nil,
+					},
+				}
+				entries, err := signing.PrepareNormalization(n, data, rules)
+				Expect(err).To(Succeed())
+				Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
+{
+  map1: {
+    field1: value1
+    field2: value2
+    injectedfield: null
+  }
+}
+`))
+			})
+
+			Context("conditional", func() {
+				data := map[string]interface{}{
+					"array": []interface{}{
+						map[string]interface{}{
+							"field1": "value11",
+							"field2": "value12",
+							"cond":   "value",
+						},
+						map[string]interface{}{
+							"field1": "value21",
+							"field2": "value22",
+						},
+					},
+					"one": []interface{}{
+						map[string]interface{}{
+							"field2": "valueOne",
+						},
+					},
+				}
+
+				Context("array", func() {
+					It("selects exclude rules", func() {
+						rules := signing.MapExcludes{
+							"array": signing.ConditionalArrayExcludes{
+								ValueChecker: func(v interface{}) bool {
+									return v.(map[string]interface{})["cond"] == "value"
+								},
+								ContinueTrue: signing.MapExcludes{
+									"field1": nil,
+								},
+								ContinueFalse: signing.MapExcludes{
+									"field2": nil,
+								},
+							},
+						}
+						entries, err := signing.PrepareNormalization(n, data, rules)
+						Expect(err).To(Succeed())
+						Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
+{
+  array: [
+    {
+      cond: value
+      field2: value12
+    }
+    {
+      field1: value21
+    }
+  ]
+  one: [
+    {
+      field2: valueOne
+    }
+  ]
+}
+`))
+					})
+				})
+
+				Context("map", func() {
+					It("selects exclude rules", func() {
+						rules := signing.ConditionalMapExcludes{
+							"array": &signing.ConditionalExclude{
+								ValueChecker: func(v interface{}) bool {
+									return len(v.([]interface{})) > 1
+								},
+								ContinueTrue: signing.ArrayExcludes{signing.MapExcludes{"field2": nil}},
+							},
+						}
+						entries, err := signing.PrepareNormalization(n, data, rules)
+						Expect(err).To(Succeed())
+						Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
+{
+  array: [
+    {
+      cond: value
+      field1: value11
+    }
+    {
+      field1: value21
+    }
+  ]
+  one: [
+    {
+      field2: valueOne
+    }
+  ]
+}
+`))
+					})
+				})
+			})
+
+			Context("array", func() {
+				data := map[string]interface{}{
+					"array": []interface{}{
+						map[string]interface{}{
+							"field1": "value1",
+							"field2": "value2",
+						},
+					},
+				}
+
+				It("injects field in map array", func() {
+					rules := signing.MapExcludes{
+						"array": signing.DefaultedMapFields{
+							Fields: map[string]interface{}{
+								"injectedfield": "injected",
+							},
+							Continue: signing.MapExcludes{
+								"field1": nil,
+							},
+						},
+					}
+					entries, err := signing.PrepareNormalization(n, data, rules)
+					Expect(err).To(Succeed())
+					Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
+{
+  array: [
+    {
+      field2: value2
+      injectedfield: injected
+    }
+  ]
+}
+`))
+				})
+
+				It("injects empty map field in map array", func() {
+					rules := signing.MapExcludes{
+						"array": signing.DefaultedMapFields{
+							Continue: signing.MapExcludes{
+								"field1": nil,
+							},
+						}.EnforceEmptyMap("injectedfield"),
+					}
+					entries, err := signing.PrepareNormalization(n, data, rules)
+					Expect(err).To(Succeed())
+					Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
+{
+  array: [
+    {
+      field2: value2
+      injectedfield: {}
+    }
+  ]
+}
+`))
+				})
+
+				It("injects empty array field in map array", func() {
+					rules := signing.MapExcludes{
+						"array": signing.DefaultedMapFields{
+							Continue: signing.MapExcludes{
+								"field1": nil,
+							},
+						}.EnforceEmptyList("injectedfield"),
+					}
+					entries, err := signing.PrepareNormalization(n, data, rules)
+					Expect(err).To(Succeed())
+					Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
+{
+  array: [
+    {
+      field2: value2
+      injectedfield: []
+    }
+  ]
+}
+`))
+				})
+
+				It("injects null field in map array", func() {
+					rules := signing.MapExcludes{
+						"array": signing.DefaultedMapFields{
+							Fields: map[string]interface{}{
+								"injectedfield": signing.Null,
+							},
+							Continue: signing.MapExcludes{
+								"field1": nil,
+							},
+						},
+					}
+					entries, err := signing.PrepareNormalization(n, data, rules)
+					Expect(err).To(Succeed())
+					Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
+{
+  array: [
+    {
+      field2: value2
+      injectedfield: null
+    }
+  ]
+}
+`))
+				})
+
+				It("injects empty map in array", func() {
+					rules := signing.MapExcludes{
+						"array": signing.DefaultedListEntries{
+							Default: map[string]interface{}{},
+							Continue: signing.MapExcludes{
+								"field1": nil,
+							},
+						},
+					}
+					data := map[string]interface{}{
+						"array": []interface{}{
+							nil,
+							map[string]interface{}{
+								"field1": "value1",
+								"field2": "value2",
+							},
+						},
+					}
+					entries, err := signing.PrepareNormalization(n, data, rules)
+					Expect(err).To(Succeed())
+					Expect(entries.ToString("")).To(StringEqualTrimmedWithContext(`
+{
+  array: [
+    {}
+    {
+      field2: value2
+    }
+  ]
+}
+`))
+				})
+			})
+		})
+	}
+
+	AssertBasics("entry normalization", entry.Type)
+	AssertBasics("JCS normalization", jcs.Type)
 })
