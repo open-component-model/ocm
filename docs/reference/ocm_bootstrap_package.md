@@ -105,6 +105,7 @@ The following options are possible:
   - <code>DOCKER_DRIVER_QUIET</code>: 
   - <code>NETWORK_MODE</code>: 
   - <code>PULL_POLICY</code>: 
+  - <code>USERNS_MODE</code>: 
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax

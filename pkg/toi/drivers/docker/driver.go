@@ -40,6 +40,7 @@ const (
 	PullPolicyNever        = "Never"
 	PullPolicyIfNotPresent = "IfNotPresent"
 	OptionNetworkMode      = "NETWORK_MODE"
+	OptionUsernsMode       = "USERNS_MODE"
 
 	trueAsString  = "true"
 	falseAsString = "false"
@@ -50,6 +51,7 @@ var Options = generics.NewSet[string](
 	OptionCleanup,
 	OptionPullPolicy,
 	OptionNetworkMode,
+	OptionUsernsMode,
 )
 
 // Driver is capable of running Docker invocation images using Docker itself.
@@ -122,7 +124,16 @@ func (d *Driver) SetConfig(settings map[string]string) error {
 
 	value, ok = settings[OptionNetworkMode]
 	if ok {
+		m := container.NetworkMode(value)
 		d.dockerConfigurationOptions = append(d.dockerConfigurationOptions, NetworkModeOpt(value))
+		if _, ok := settings[OptionUsernsMode]; m.IsHost() && !ok {
+			settings[OptionUsernsMode] = "host"
+		}
+	}
+
+	value, ok = settings[OptionUsernsMode]
+	if ok {
+		d.dockerConfigurationOptions = append(d.dockerConfigurationOptions, UsernsModeOpt(value))
 	}
 
 	d.config = settings

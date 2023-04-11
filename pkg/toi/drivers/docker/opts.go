@@ -14,3 +14,10 @@ func NetworkModeOpt(mode string) ConfigurationOption {
 		return nil
 	}
 }
+
+func UsernsModeOpt(mode string) ConfigurationOption {
+	return func(_ *container.Config, h *container.HostConfig) error {
+		h.UsernsMode = container.UsernsMode(mode)
+		return nil
+	}
+}
