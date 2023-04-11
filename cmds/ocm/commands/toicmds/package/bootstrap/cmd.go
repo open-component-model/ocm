@@ -31,7 +31,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/toi"
 	defaultd "github.com/open-component-model/ocm/pkg/toi/drivers/default"
+	"github.com/open-component-model/ocm/pkg/toi/drivers/docker"
 	"github.com/open-component-model/ocm/pkg/toi/install"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -55,6 +57,7 @@ type Command struct {
 	OutputFile      string
 	Credentials     accessio.DataSource
 	Parameters      accessio.DataSource
+	Config          map[string]string
 }
 
 // NewCommand creates a new bootstrap component command.
@@ -143,7 +146,11 @@ The *ForwardSpec* uses the following format:
 
 If provided by the package it is possible to download template versions
 for the parameter and credentials file using the command <CMD>ocm bootstrap configuration</CMD>.
-`,
+
+Using the option <code>--config</code> it is possible to configure options
+for the execution environment (so far only docker is supported).
+The following options are possible:
+` + utils.FormatListElements("", utils.StringElementList(utils2.StringMapKeys(docker.Options))),
 		Example: `
 $ ocm toi bootstrap package ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 `,
@@ -154,6 +161,7 @@ $ ocm toi bootstrap package ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	o.BaseCommand.AddFlags(fs)
+	fs.StringToStringVarP(&o.Config, "config", "", nil, "driver config")
 	fs.StringVarP(&o.CredentialsFile, "credentials", "c", "", "credentials file")
 	fs.StringVarP(&o.ParameterFile, "parameters", "p", "", "parameter file")
 	fs.StringVarP(&o.OutputFile, "outputs", "o", "", "output file/directory")
@@ -239,8 +247,17 @@ type Binary struct {
 }
 
 func (a *action) Out() error {
+	driver := defaultd.New()
+
+	if a.cmd.Config != nil {
+		err := driver.SetConfig(a.cmd.Config)
+		if err != nil {
+			return err
+		}
+	}
+
 	common.NewPrinter(a.cmd.StdOut())
-	result, err := install.Execute(common.NewPrinter(a.cmd.StdOut()), defaultd.New(), a.cmd.Action, a.cmd.Id, a.cmd.Credentials, a.cmd.Parameters, a.cmd.OCMContext(), a.data[0].ComponentVersion, lookupoption.From(a.cmd))
+	result, err := install.Execute(common.NewPrinter(a.cmd.StdOut()), driver, a.cmd.Action, a.cmd.Id, a.cmd.Credentials, a.cmd.Parameters, a.cmd.OCMContext(), a.data[0].ComponentVersion, lookupoption.From(a.cmd))
 	if err != nil {
 		return err
 	}

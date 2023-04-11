@@ -9,12 +9,13 @@ ocm bootstrap package [<options>] <action> {<component-reference>} {<resource id
 ### Options
 
 ```
-  -c, --credentials string   credentials file
-  -h, --help                 help for package
-      --lookup stringArray   repository name or spec for closure lookup fallback
-  -o, --outputs string       output file/directory
-  -p, --parameters string    parameter file
-      --repo string          repository name or spec
+      --config stringToString   driver config (default [])
+  -c, --credentials string      credentials file
+  -h, --help                    help for package
+      --lookup stringArray      repository name or spec for closure lookup fallback
+  -o, --outputs string          output file/directory
+  -p, --parameters string       parameter file
+      --repo string             repository name or spec
 ```
 
 ### Description
@@ -95,6 +96,15 @@ The *ForwardSpec* uses the following format:
 
 If provided by the package it is possible to download template versions
 for the parameter and credentials file using the command [ocm bootstrap configuration](ocm_bootstrap_configuration.md).
+
+Using the option <code>--config</code> it is possible to configure options
+for the execution environment (so far only docker is supported).
+The following options are possible:
+
+  - <code>CLEANUP_CONTAINERS</code>: 
+  - <code>DOCKER_DRIVER_QUIET</code>: 
+  - <code>NETWORK_MODE</code>: 
+  - <code>PULL_POLICY</code>: 
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax

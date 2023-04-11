@@ -27,6 +27,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/toi"
 	"github.com/open-component-model/ocm/pkg/toi/install"
 )
@@ -38,9 +39,17 @@ const (
 	PullPolicyAlways       = "Always"
 	PullPolicyNever        = "Never"
 	PullPolicyIfNotPresent = "IfNotPresent"
+	OptionNetworkMode      = "NETWORK_MODE"
 
 	trueAsString  = "true"
 	falseAsString = "false"
+)
+
+var Options = generics.NewSet[string](
+	OptionQuiet,
+	OptionCleanup,
+	OptionPullPolicy,
+	OptionNetworkMode,
 )
 
 // Driver is capable of running Docker invocation images using Docker itself.
@@ -110,6 +119,12 @@ func (d *Driver) SetConfig(settings map[string]string) error {
 			return fmt.Errorf("config variable %s has unexpected value %q. Supported values are '%s', '%s', '%s' , or unset", OptionPullPolicy, value, PullPolicyAlways, PullPolicyIfNotPresent, PullPolicyNever)
 		}
 	}
+
+	value, ok = settings[OptionNetworkMode]
+	if ok {
+		d.dockerConfigurationOptions = append(d.dockerConfigurationOptions, NetworkModeOpt(value))
+	}
+
 	d.config = settings
 	return nil
 }
@@ -169,6 +184,10 @@ func pullImage(ctx context.Context, cli command.Cli, image string) error {
 }
 
 func (d *Driver) initializeDockerCli() (command.Cli, error) {
+	if d.config == nil {
+		d.config = map[string]string{}
+	}
+
 	if d.dockerCli != nil {
 		return d.dockerCli, nil
 	}

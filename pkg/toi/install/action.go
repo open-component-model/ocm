@@ -434,11 +434,6 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 
 	op.Outputs = executor.Outputs
 
-	// no config so far
-	err = d.SetConfig(map[string]string{})
-	if err != nil {
-		return nil, err
-	}
 	op.ComponentVersion = common.VersionedElementKey(cv).String()
 	return d.Exec(op)
 }
