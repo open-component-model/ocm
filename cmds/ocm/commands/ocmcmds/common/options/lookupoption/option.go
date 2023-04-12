@@ -60,14 +60,13 @@ func (o *Option) getResolver(ctx clictx.OCM, session ocm.Session) (ocm.Component
 }
 
 func (o *Option) Usage() string {
-	s := `
+	s := `\
 If a component lookup for building a reference closure is required
 the <code>--lookup</code>  option can be used to specify a fallback
-lookup repository. 
-By default the component versions are searched in the repository
-holding the component version for which the closure is determined.
-For *Component Archives* this is never possible, because it only
-contains a single component version. Therefore, in this scenario
+lookup repository. By default the component versions are searched in
+the repository holding the component version for which the closure is
+determined. For *Component Archives* this is never possible, because
+it only contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
 `

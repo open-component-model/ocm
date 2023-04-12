@@ -20,6 +20,7 @@ ocm get plugins [<options>] {<plugin name>}
 Get lists information for all plugins specified, if no plugin is specified
 all registered ones are listed.
 
+
 With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:
  - JSON

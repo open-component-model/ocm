@@ -23,6 +23,7 @@ component archives.
 
 The files are named according to the component version name.
 
+
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
 
@@ -67,6 +68,7 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `OCIRegistry`
 - `oci`
 - `ociRegistry`
+
 
 The <code>--type</code> option accepts a file format for the
 target archive to use. The following formats are supported:

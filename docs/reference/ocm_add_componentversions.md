@@ -57,6 +57,7 @@ entry can be used to specify a dedicated serialization format to use for the
 component descriptor. If given it overrides the <code>--schema</code> option
 of the command. By default v2 is used.
 
+
 The <code>--type</code> option accepts a file format for the
 target archive to use. The following formats are supported:
 - directory
@@ -65,12 +66,14 @@ target archive to use. The following formats are supported:
 
 The default format is <code>directory</code>.
 
+
 If the option <code>--scheme</code> is given, the specified component descriptor format is used/generated.
 
 The following schema versions are supported for explicit conversions:
 
   - <code>ocm.software/v3alpha1</code>: 
   - <code>v2</code> (default): 
+
 
 All yaml/json defined resources can be templated.
 Variables are specified as regular arguments following the syntax <code>&lt;name>=&lt;value></code>.
@@ -112,15 +115,16 @@ There are several templaters that can be selected by the <code>--templater</code
   </pre>
   
 
+\
 If a component lookup for building a reference closure is required
 the <code>--lookup</code>  option can be used to specify a fallback
-lookup repository. 
-By default the component versions are searched in the repository
-holding the component version for which the closure is determined.
-For *Component Archives* this is never possible, because it only
-contains a single component version. Therefore, in this scenario
+lookup repository. By default the component versions are searched in
+the repository holding the component version for which the closure is
+determined. For *Component Archives* this is never possible, because
+it only contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
+
 
 It the option <code>--copy-resources</code> is given, all referential 
 resources will potentially be localized, mapped to component version local

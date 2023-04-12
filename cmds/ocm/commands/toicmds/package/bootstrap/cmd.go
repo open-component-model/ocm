@@ -131,8 +131,7 @@ The *CredentialsSpec* uses the following format:
 
   Direct credential fields.
 
-One of <code>consumerId</code>, <code>reference</code> or <code>credentials</code>
-must be configured.
+One of <code>consumerId</code>, <code>reference</code> or <code>credentials</code> must be configured.
 
 The *ForwardSpec* uses the following format:
 
@@ -150,7 +149,8 @@ for the parameter and credentials file using the command <CMD>ocm bootstrap conf
 Using the option <code>--config</code> it is possible to configure options
 for the execution environment (so far only docker is supported).
 The following options are possible:
-` + utils.FormatListElements("", utils.StringElementList(utils2.StringMapKeys(docker.Options))),
+` + utils.FormatListElements("", utils.StringElementList(utils2.StringMapKeys(docker.Options))) + `
+`,
 		Example: `
 $ ocm toi bootstrap package ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 `,

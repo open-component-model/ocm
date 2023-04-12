@@ -34,6 +34,7 @@ Sources may be specified as
 - repository (without version), which is resolved to all available tags
 - registry, if the specified registry implementation supports a namespace/repository lister,
   which is not the case for registries conforming to the OCI distribution specification.
+
 If the repository/registry option is specified, the given names are interpreted
 relative to the specified registry using the syntax
 

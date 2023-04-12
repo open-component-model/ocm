@@ -5,6 +5,8 @@
 package describe
 
 import (
+	"strings"
+
 	"github.com/spf13/cobra"
 
 	handler "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/pluginhdlr"
@@ -84,7 +86,11 @@ func (a *action) Add(e interface{}) error {
 	if a.Count > 1 {
 		a.Printer.Printf("----------------------\n")
 	}
-	a.Printer.Printf("%s\n", cobrautils.CleanMarkdown(buf.String()))
+	desc := cobrautils.CleanMarkdown(buf.String())
+	if !strings.HasSuffix(desc, "\n") {
+		desc += "\n"
+	}
+	a.Printer.Printf("%s", desc)
 	return nil
 }
 

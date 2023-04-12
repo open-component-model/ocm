@@ -24,6 +24,7 @@ is specified it will be created if it does not exist.
 Besides those explicitly known types a complete repository spec might be configured,
 either via inline argument or command configuration file and name.
 
+
 The <code>--type</code> option accepts a file format for the
 target archive to use. The following formats are supported:
 - directory

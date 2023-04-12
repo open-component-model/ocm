@@ -14,9 +14,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/open-component-model/ocm/pkg/cobrautils/groups"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+
+	"github.com/open-component-model/ocm/pkg/cobrautils/groups"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils"
 )
@@ -85,6 +86,7 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 	if len(cmd.Long) > 0 {
 		var desc string
 
+		desc = strings.ReplaceAll(desc, "\\\n", "\n")
 		links, desc = cobrautils.SubstituteCommandLinks(cmd.Long, cobrautils.FormatLinkWithHandler(linkHandler))
 		buf.WriteString("### Description\n\n")
 		buf.WriteString(desc + "\n\n")

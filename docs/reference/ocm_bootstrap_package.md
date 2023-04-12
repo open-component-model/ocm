@@ -81,8 +81,7 @@ The *CredentialsSpec* uses the following format:
 
   Direct credential fields.
 
-One of <code>consumerId</code>, <code>reference</code> or <code>credentials</code>
-must be configured.
+One of <code>consumerId</code>, <code>reference</code> or <code>credentials</code> must be configured.
 
 The *ForwardSpec* uses the following format:
 
@@ -106,6 +105,8 @@ The following options are possible:
   - <code>NETWORK_MODE</code>: 
   - <code>PULL_POLICY</code>: 
   - <code>USERNS_MODE</code>: 
+
+
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
@@ -152,13 +153,13 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `oci`
 - `ociRegistry`
 
+\
 If a component lookup for building a reference closure is required
 the <code>--lookup</code>  option can be used to specify a fallback
-lookup repository. 
-By default the component versions are searched in the repository
-holding the component version for which the closure is determined.
-For *Component Archives* this is never possible, because it only
-contains a single component version. Therefore, in this scenario
+lookup repository. By default the component versions are searched in
+the repository holding the component version for which the closure is
+determined. For *Component Archives* this is never possible, because
+it only contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
 

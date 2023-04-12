@@ -23,6 +23,7 @@ ocm get artifacts [<options>] {<artifact-reference>}
 Get lists all artifact versions specified, if only a repository is specified
 all tagged artifacts are listed.
 	
+
 If the repository/registry option is specified, the given names are interpreted
 relative to the specified registry using the syntax
 
@@ -55,6 +56,8 @@ linked library can be used:
 - `OCIRegistry`
 - `oci`
 - `ociRegistry`
+
+
 
 With the option <code>--recursive</code> the complete reference tree of a index is traversed.
 

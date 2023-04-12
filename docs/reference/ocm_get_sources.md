@@ -27,9 +27,11 @@ by identities. An identity consists of
 a name argument followed by optional <code>&lt;key>=&lt;value></code>
 arguments.
 
+
 If the option <code>--constraints</code> is given, and no version is specified for a component, only versions matching
 the given version constraints (semver https://github.com/Masterminds/semver) are selected. With <code>--latest</code> only
 the latest matching versions will be selected.
+
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
@@ -76,15 +78,17 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `oci`
 - `ociRegistry`
 
+
+
 With the option <code>--recursive</code> the complete reference tree of a component reference is traversed.
 
+\
 If a component lookup for building a reference closure is required
 the <code>--lookup</code>  option can be used to specify a fallback
-lookup repository. 
-By default the component versions are searched in the repository
-holding the component version for which the closure is determined.
-For *Component Archives* this is never possible, because it only
-contains a single component version. Therefore, in this scenario
+lookup repository. By default the component versions are searched in
+the repository holding the component version for which the closure is
+determined. For *Component Archives* this is never possible, because
+it only contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
 
