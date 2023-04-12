@@ -25,6 +25,7 @@ type Request struct {
 	Values     interface{}
 	Mode       int
 	FileSystem vfs.FileSystem
+	Functions  spiffing.Functions
 }
 
 func (r Request) GetValues() (map[string]interface{}, error) {
@@ -61,7 +62,7 @@ func (r Request) GetValues() (map[string]interface{}, error) {
 }
 
 func (r *Request) GetSpiff() (spiffing.Spiff, error) {
-	spiff := spiffing.New().WithFeatures(features.CONTROL, features.INTERPOLATION).WithFileSystem(accessio.FileSystem(r.FileSystem)).WithMode(r.Mode)
+	spiff := spiffing.New().WithFeatures(features.CONTROL, features.INTERPOLATION).WithFileSystem(accessio.FileSystem(r.FileSystem)).WithMode(r.Mode).WithFunctions(r.Functions)
 	values, err := r.GetValues()
 	if err != nil {
 		return nil, err

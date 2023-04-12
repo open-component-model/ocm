@@ -6,29 +6,26 @@ package mock
 
 import (
 	"github.com/open-component-model/ocm/pkg/toi/install"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-type Driver struct{}
+type Driver struct {
+	handler func(*install.Operation) (*install.OperationResult, error)
+}
 
 var _ install.Driver = (*Driver)(nil)
 
-func New() install.Driver {
-	return &Driver{}
+func New(handler ...func(*install.Operation) (*install.OperationResult, error)) install.Driver {
+	return &Driver{utils.Optional(handler...)}
 }
 
-func (d Driver) SetConfig(props map[string]string) error {
+func (d *Driver) SetConfig(props map[string]string) error {
 	return nil
 }
 
-func (d Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
-	if handler != nil {
-		return handler(op)
+func (d *Driver) Exec(op *install.Operation) (*install.OperationResult, error) {
+	if d.handler != nil {
+		return d.handler(op)
 	}
 	return &install.OperationResult{}, nil
-}
-
-var handler func(*install.Operation) (*install.OperationResult, error)
-
-func SetHandler(h func(*install.Operation) (*install.OperationResult, error)) {
-	handler = h
 }

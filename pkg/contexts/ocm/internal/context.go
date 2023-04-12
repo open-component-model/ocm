@@ -34,6 +34,7 @@ type Context interface {
 	config.ContextProvider
 	credentials.ContextProvider
 	oci.ContextProvider
+	ContextProvider
 
 	RepositoryTypes() RepositoryTypeScheme
 	AccessMethods() AccessTypeScheme

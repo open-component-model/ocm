@@ -7,6 +7,7 @@ package install_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -104,7 +105,7 @@ forwardedConsumers:
 `
 		spec, err := install.ParseCredentialSpecification([]byte(input), "settings")
 		Expect(err).To(Succeed())
-		c, err := install.GetCredentials(ctx, spec, req.Credentials, nil)
+		c, _, err := install.GetCredentials(ctx, spec, req.Credentials, nil)
 		Expect(err).To(Succeed())
 		output, err := runtime.DefaultYAMLEncoding.Marshal(c)
 		Expect(err).To(Succeed())

@@ -287,11 +287,13 @@ func ProcessConfig(name string, octx ocm.Context, cv ocm.ComponentVersionAccess,
 }
 
 // ExecuteAction prepared the execution options and executes the action.
-func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpecification, creds *Credentials, params []byte, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
+func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpecification, creds *Credentials, params []byte, octxp ocm.ContextProvider, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver) (*OperationResult, error) {
 	var err error
 
 	var finalize Finalizer
 	defer finalize.Finalize()
+
+	octx := octxp.OCMContext()
 
 	var executor *toi.Executor
 	for idx, e := range spec.Executors {
@@ -363,7 +365,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 			return nil, errors.Newf("credential settings required")
 		}
 	}
-	ccfg, err := GetCredentials(octx.CredentialsContext(), creds, credentials, credmapping)
+	ccfg, credvals, err := GetCredentials(octx.CredentialsContext(), creds, credentials, credmapping)
 	if err != nil {
 		return nil, errors.Wrapf(err, "credential evaluation failed")
 	}
@@ -394,6 +396,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 	if executor.ParameterMapping != nil {
 		orig := params
 		params, err = spiff.CascadeWith(
+			spiff.Functions(NewFunctions(octx, credvals)),
 			spiff.TemplateData("executor parameter mapping", executor.ParameterMapping),
 			spiff.StubData("package config", params))
 
@@ -413,7 +416,12 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 		names = append(names, n+"->"+m)
 	}
 	sort.Strings(names)
-	p.Printf("using executor image %s[%s] with credentials %v\n", espec.Image.Ref, executor.ResourceRef.String(), names)
+
+	src := ""
+	if executor.ResourceRef != nil {
+		src = fmt.Sprintf("[%s]", executor.ResourceRef.String())
+	}
+	p.Printf("using executor image %s[%s] with credentials %v\n", espec.Image.Ref, src, names)
 
 	// setup executor operation
 	op := &Operation{
