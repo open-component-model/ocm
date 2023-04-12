@@ -28,7 +28,7 @@ var utf8bom = []byte{0xEF, 0xBB, 0xBF}
 func LoadDir(fs vfs.FileSystem, dir string) (*chart.Chart, error) {
 	topdir, err := filepath.Abs(dir)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "cannot determine absolute directory path")
 	}
 
 	// Just used for errors.

@@ -10,6 +10,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
@@ -141,8 +142,8 @@ var _ = Describe("Add resources", func() {
 		CheckTextResource(env, cd, "testdata")
 	})
 
-	It("adds helm chart", func() {
-		Expect(env.Execute("add", "resources", "--file", ARCH, "/testdata/helm.yaml")).To(Succeed())
+	DescribeTable("adds helm chart", func(rsc string) {
+		Expect(env.Execute("add", "resources", "--file", ARCH, rsc)).To(Succeed())
 		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
 		Expect(err).To(Succeed())
 		cd, err := compdesc.Decode(data)
@@ -182,7 +183,10 @@ var _ = Describe("Add resources", func() {
 		defer reader.Close()
 		_, err = loader.LoadArchive(reader)
 		Expect(err).To(Succeed())
-	})
+	},
+		Entry("flat", "/testdata/helm.yaml"),
+		Entry("up", "/testdata/nested/helm.yaml"),
+	)
 
 	It("adds external image", func() {
 		Expect(env.Execute("add", "resources", "--file", ARCH, "/testdata/image.yaml")).To(Succeed())
