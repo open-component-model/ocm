@@ -10,13 +10,13 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path/filepath"
 
 	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 

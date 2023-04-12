@@ -54,6 +54,5 @@ func spiffHasCredentials(credvals CredentialValues) dynaml.Function {
 		}
 		creds := credvals[name]
 		return creds != nil, info, true
-
 	}
 }

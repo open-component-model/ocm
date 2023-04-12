@@ -6,9 +6,9 @@ package sympath
 
 import (
 	"os"
-	"path/filepath"
 	"testing"
 
+	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 )
 

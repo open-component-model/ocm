@@ -173,11 +173,9 @@ func NewEnvironment(opts ...Option) *Environment {
 	}
 	fs := composefs.New(basefs, "/tmp")
 	for _, o := range opts {
-		if m, ok := o.(Option); ok {
-			err := m.Mount(fs)
-			if err != nil {
-				panic(err)
-			}
+		err := o.Mount(fs)
+		if err != nil {
+			panic(err)
 		}
 	}
 	ctx := ocm.WithCredentials(credentials.WithConfigs(config.New()).New()).New()

@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -18,6 +17,7 @@ import (
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
+	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -111,7 +111,7 @@ var _ = Describe("setup plugin cache", func() {
 					env.Resource("testdata", VERS, RSCTYPE, metav1.LocalRelation, func() {
 						env.Hint(HINT)
 						env.BlobStringData(MEDIA, CONTENT)
-						//env.Access(NewAccessSpec(MEDIA, "given", "dummy"))
+						// env.Access(NewAccessSpec(MEDIA, "given", "dummy"))
 					})
 				})
 			})
@@ -172,7 +172,7 @@ var _ = Describe("setup plugin cache", func() {
 		defer Close(cv, "source version")
 
 		MustFailWithMessage(registration.RegisterBlobHandlerByName(ctx, "plugin/test", []byte("{}"), registration.ForArtifactType(RSCTYPE)),
-			//MustFailWithMessage(plugin.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", []byte("{}")),
+			// MustFailWithMessage(plugin.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", []byte("{}")),
 			"plugin uploader test/testuploader: path missing in repository spec",
 		)
 		repospec := Must(json.Marshal(repoSpec))

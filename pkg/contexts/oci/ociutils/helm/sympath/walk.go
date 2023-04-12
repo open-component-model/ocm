@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"sort"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -28,7 +27,7 @@ func Walk(fs vfs.FileSystem, root string, walkFn vfs.WalkFunc) error {
 		err = symwalk(fs, root, info, walkFn)
 	}
 
-	if err != nil && errors.Is(err, filepath.SkipDir) {
+	if err != nil && errors.Is(err, vfs.SkipDir) {
 		return fmt.Errorf("failed to walk fs: %w", err)
 	}
 
@@ -66,7 +65,7 @@ func symwalk(fs vfs.FileSystem, path string, info os.FileInfo, walkFn vfs.WalkFu
 			return fmt.Errorf("failed to fetch lstat: %w", err)
 		}
 
-		if err := symwalk(fs, path, info, walkFn); err != nil && errors.Is(err, filepath.SkipDir) {
+		if err := symwalk(fs, path, info, walkFn); err != nil && errors.Is(err, vfs.SkipDir) {
 			return fmt.Errorf("error walking on symlink: %w", err)
 		}
 
@@ -87,17 +86,17 @@ func symwalk(fs vfs.FileSystem, path string, info os.FileInfo, walkFn vfs.WalkFu
 	}
 
 	for _, name := range names {
-		filename := filepath.Join(path, name)
+		filename := vfs.Join(fs, path, name)
 
 		fileInfo, err := fs.Lstat(filename)
 		if err != nil {
-			if err := walkFn(filename, fileInfo, err); err != nil && errors.Is(err, filepath.SkipDir) {
+			if err := walkFn(filename, fileInfo, err); err != nil && errors.Is(err, vfs.SkipDir) {
 				return fmt.Errorf("failed to walk with function: %w", err)
 			}
 		} else {
 			err = symwalk(fs, filename, fileInfo, walkFn)
 			if err != nil {
-				if (!fileInfo.IsDir() && !IsSymlink(fileInfo)) || errors.Is(err, filepath.SkipDir) {
+				if (!fileInfo.IsDir() && !IsSymlink(fileInfo)) || errors.Is(err, vfs.SkipDir) {
 					return fmt.Errorf("error walking on symlink: %w", err)
 				}
 			}
