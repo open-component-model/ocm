@@ -1,6 +1,6 @@
 /cmds/test
 /pkg/test
-.idea
+/.idea
 *.sw[pqo]
 main
 /ecrplugin
