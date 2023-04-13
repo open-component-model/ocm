@@ -7,11 +7,11 @@ package helm
 import (
 	"time"
 
+	"github.com/mandelsoft/logging"
 	helmclient "github.com/mittwald/go-helm-client"
-	"github.com/sirupsen/logrus"
 )
 
-func Uninstall(path string, release string, namespace string, createNamespace bool, values []byte, kubeconfig []byte) error {
+func Uninstall(l logging.Logger, path string, release string, namespace string, createNamespace bool, values []byte, kubeconfig []byte) error {
 	opt := &helmclient.KubeConfClientOptions{
 		Options: &helmclient.Options{
 			Namespace:        namespace,
@@ -19,7 +19,7 @@ func Uninstall(path string, release string, namespace string, createNamespace bo
 			RepositoryConfig: "/tmp/.helmrepo",
 			Debug:            true,
 			Linting:          true,
-			DebugLog:         logrus.Debugf,
+			DebugLog:         DebugFunction(l),
 		},
 		KubeContext: "",
 		KubeConfig:  kubeconfig,
