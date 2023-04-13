@@ -52,7 +52,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (acces
 	}
 	chart, err := loader.Load(inputPath, ctx.FileSystem())
 	if err != nil {
-		return nil, "", errors.Wrapf(err, "cannot load char from %q", inputPath)
+		return nil, "", errors.Wrapf(err, "cannot load chart from %q", inputPath)
 	}
 	vers := chart.Metadata.Version
 	if s.Version != "" {
