@@ -10,6 +10,7 @@ ocm transfer componentversions [<options>] {<component-reference>} <target>
 
 ```
   -c, --constraints constraints   version constraint
+  -L, --copy-local-resources      transfer referenced local resources by-value
   -V, --copy-resources            transfer referenced resources by-value
   -h, --help                      help for componentversions
       --latest                    restrict component versions to latest
@@ -111,9 +112,10 @@ target repository will be overwritten, if they already exist.
 
 It the option <code>--copy-resources</code> is given, all referential 
 resources will potentially be localized, mapped to component version local
-resources in the target repository.
-This behaviour can be further influenced by specifying a transfer script
-with the <code>script</code> option family.
+resources in the target repository. It the option <code>--copy-local-resources</code> 
+is given, instead, only resources with the relation <code>local</code> will be
+transferred. This behaviour can be further influenced by specifying a transfer
+script with the <code>script</code> option family.
 
 
 It the option <code>--stop-on-existing</code> is given together with the <code>--recursive</code>

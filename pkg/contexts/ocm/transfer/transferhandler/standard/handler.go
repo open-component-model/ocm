@@ -8,6 +8,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -51,6 +52,11 @@ func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionA
 }
 
 func (h *Handler) TransferResource(src ocm.ComponentVersionAccess, a ocm.AccessSpec, r ocm.ResourceAccess) (bool, error) {
+	if h.opts.IsLocalResourcesByValue() {
+		if r.Meta().Relation == metav1.LocalRelation {
+			return true, nil
+		}
+	}
 	return h.opts.IsResourcesByValue(), nil
 }
 
