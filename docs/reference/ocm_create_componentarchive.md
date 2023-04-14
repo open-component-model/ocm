@@ -25,6 +25,7 @@ to host component version content or a tar/tgz file (see option --type).
 
 A provider must be specified, additional provider labels are optional.
 
+
 The <code>--type</code> option accepts a file format for the
 target archive to use. The following formats are supported:
 - directory
@@ -32,6 +33,7 @@ target archive to use. The following formats are supported:
 - tgz
 
 The default format is <code>directory</code>.
+
 
 If the option <code>--scheme</code> is given, the specified component descriptor format is used/generated.
 

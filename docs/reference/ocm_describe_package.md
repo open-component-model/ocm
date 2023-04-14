@@ -27,6 +27,7 @@ The first matching resource of this type is selected. Optionally a set of
 identity attribute can be specified used to refine the match. This can be the
 resource name and/or other key/value pairs (<code>&lt;attr>=&lt;value></code>).
 
+
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
 
@@ -72,13 +73,13 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `oci`
 - `ociRegistry`
 
+\
 If a component lookup for building a reference closure is required
 the <code>--lookup</code>  option can be used to specify a fallback
-lookup repository. 
-By default the component versions are searched in the repository
-holding the component version for which the closure is determined.
-For *Component Archives* this is never possible, because it only
-contains a single component version. Therefore, in this scenario
+lookup repository. By default the component versions are searched in
+the repository holding the component version for which the closure is
+determined. For *Component Archives* this is never possible, because
+it only contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
 

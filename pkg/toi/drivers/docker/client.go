@@ -7,13 +7,13 @@ package docker
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"strconv"
 
 	"github.com/docker/cli/cli/command"
 	cliconfig "github.com/docker/cli/cli/config"
 	cliflags "github.com/docker/cli/cli/flags"
 	"github.com/docker/go-connections/tlsconfig"
+	"github.com/mandelsoft/filepath/pkg/filepath"
 )
 
 const (

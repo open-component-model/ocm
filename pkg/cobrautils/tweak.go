@@ -64,7 +64,7 @@ func CleanMarkdownUsageFunc(cmd *cobra.Command) {
 	})
 }
 
-var center = regexp.MustCompile(" *</?(pre|center)> *\n?")
+var center = regexp.MustCompile(" *</?(pre|center)> *")
 
 func CleanMarkdown(s string) string {
 	if strings.HasPrefix(s, "##") {
@@ -84,7 +84,7 @@ func CleanMarkdown(s string) string {
 	s = string(center.ReplaceAll([]byte(s), nil))
 
 	var r []string
-	found := false
+	found := 0
 	mask := false
 	for _, l := range strings.Split(s, "\n") {
 		if strings.Contains(l, "<pre>") {
@@ -93,18 +93,25 @@ func CleanMarkdown(s string) string {
 		if strings.Contains(l, "</pre>") {
 			mask = false
 		}
-		if !mask {
+		if mask {
+			found = 0
+		} else {
 			if strings.HasSuffix(l, "\\") {
 				l = l[:len(l)-1]
-				found = true
+				found = 0
 			} else {
-				if strings.TrimSpace(l) == "" {
-					if !found {
-						found = true
-						continue
-					}
+				t := strings.TrimSpace(l)
+				if strings.HasPrefix(t, "- ") {
+					found = 1
 				} else {
-					found = false
+					if t == "" {
+						found++
+						if found > 1 {
+							continue
+						}
+					} else {
+						found = 0
+					}
 				}
 			}
 		}

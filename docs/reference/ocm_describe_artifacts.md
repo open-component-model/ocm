@@ -23,6 +23,7 @@ all tagged artifacts are listed.
 Per version a detailed, potentially recursive description is printed.
 
 
+
 If the repository/registry option is specified, the given names are interpreted
 relative to the specified registry using the syntax
 
@@ -55,6 +56,7 @@ linked library can be used:
 - `OCIRegistry`
 - `oci`
 - `ociRegistry`
+
 
 With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:

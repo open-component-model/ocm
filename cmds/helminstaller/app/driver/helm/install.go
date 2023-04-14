@@ -8,11 +8,11 @@ import (
 	"context"
 	"time"
 
+	"github.com/mandelsoft/logging"
 	helmclient "github.com/mittwald/go-helm-client"
-	"github.com/sirupsen/logrus"
 )
 
-func Install(path string, release string, namespace string, createNamespace bool, values []byte, kubeconfig []byte) error {
+func Install(l logging.Logger, path string, release string, namespace string, createNamespace bool, values []byte, kubeconfig []byte) error {
 	opt := &helmclient.KubeConfClientOptions{
 		Options: &helmclient.Options{
 			Namespace:        namespace,
@@ -20,7 +20,7 @@ func Install(path string, release string, namespace string, createNamespace bool
 			RepositoryConfig: "/tmp/.helmrepo",
 			Debug:            true,
 			Linting:          true,
-			DebugLog:         logrus.Debugf,
+			DebugLog:         DebugFunction(l),
 		},
 		KubeContext: "",
 		KubeConfig:  kubeconfig,

@@ -10,9 +10,9 @@ import (
 	"io"
 	"os"
 	pathutil "path"
-	"path/filepath"
 	"strings"
 
+	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 )
 

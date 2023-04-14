@@ -21,6 +21,7 @@ ocm show tags [<options>] <component> {<version pattern>}
 
 Match tags of an artifact against some patterns.
 
+
 If the repository/registry option is specified, the given names are interpreted
 relative to the specified registry using the syntax
 

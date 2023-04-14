@@ -28,6 +28,8 @@ type (
 	CredentialsRequestSpec = toi.CredentialsRequestSpec
 )
 
+type CredentialValues map[string]common.Properties
+
 func ParseCredentialSpecification(data []byte, desc string) (*Credentials, error) {
 	spiff := spiffing.New().WithFeatures(features.CONTROL, features.INTERPOLATION)
 
@@ -63,11 +65,13 @@ func ParseCredentialRequest(data []byte) (*CredentialsRequest, error) {
 	return &req, err
 }
 
-func GetCredentials(ctx credentials.Context, spec *Credentials, req map[string]CredentialsRequestSpec, mapping map[string]string) (*globalconfig.Config, error) {
+func GetCredentials(ctx credentials.Context, spec *Credentials, req map[string]CredentialsRequestSpec, mapping map[string]string) (*globalconfig.Config, CredentialValues, error) {
 	cfg := config.New()
 	mem := memorycfg.New("default")
 	memrepo := memory.NewRepositorySpec("default")
 	list := errors.ErrListf("providing requested credentials")
+
+	credvalues := CredentialValues{}
 	var sub *errors.ErrorList
 	for _, n := range utils.StringMapKeys(req) {
 		r := req[n]
@@ -90,8 +94,9 @@ func GetCredentials(ctx credentials.Context, spec *Credentials, req map[string]C
 			mapped = mapping[n]
 		}
 		if mapped == "" {
-			return nil, errors.Newf("mapping missing credential %q", n)
+			return nil, nil, errors.Newf("mapping missing credential %q", n)
 		}
+		credvalues[mapped] = creds
 		err = mem.AddCredentials(mapped, creds)
 		if err != nil {
 			sub.Add(errors.Wrapf(err, "failed to add credentials"))
@@ -114,7 +119,7 @@ func GetCredentials(ctx credentials.Context, spec *Credentials, req map[string]C
 	}
 	for _, r := range spec.Forwarded {
 		if len(r.ConsumerId) == 0 {
-			return nil, errors.ErrInvalid("consumer", r.ConsumerId.String())
+			return nil, nil, errors.ErrInvalid("consumer", r.ConsumerId.String())
 		}
 		match, _ := ctx.ConsumerIdentityMatchers().Get(r.ConsumerType)
 		if match == nil {
@@ -122,14 +127,14 @@ func GetCredentials(ctx credentials.Context, spec *Credentials, req map[string]C
 		}
 		src, err := ctx.GetCredentialsForConsumer(r.ConsumerId, match)
 		if err != nil || src == nil {
-			return nil, errors.ErrNotFoundWrap(err, "consumer", r.ConsumerId.String())
+			return nil, nil, errors.ErrNotFoundWrap(err, "consumer", r.ConsumerId.String())
 		}
 		if src == nil {
-			return nil, errors.ErrNotFoundWrap(err, "consumer", r.ConsumerId.String())
+			return nil, nil, errors.ErrNotFoundWrap(err, "consumer", r.ConsumerId.String())
 		}
 		creds, err := src.Credentials(ctx)
 		if err != nil {
-			return nil, errors.Wrapf(err, "cannot get credentials for %s", r.ConsumerId.String())
+			return nil, nil, errors.Wrapf(err, "cannot get credentials for %s", r.ConsumerId.String())
 		}
 		props := creds.Properties()
 		cfg.AddConsumer(r.ConsumerId, directcreds.NewCredentials(props))
@@ -139,7 +144,7 @@ func GetCredentials(ctx credentials.Context, spec *Credentials, req map[string]C
 	main := globalconfig.New()
 	main.AddConfig(mem)
 	main.AddConfig(cfg)
-	return main, list.Result()
+	return main, credvalues, list.Result()
 }
 
 func evaluate(ctx credentials.Context, spec *CredentialSpec) (common.Properties, credentials.ConsumerIdentity, error) {

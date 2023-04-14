@@ -20,6 +20,7 @@ ocm show versions [<options>] <component> {<version pattern>}
 
 Match versions of a component against some patterns.
 
+
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
 

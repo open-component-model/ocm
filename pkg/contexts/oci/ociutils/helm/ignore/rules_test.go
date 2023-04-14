@@ -7,8 +7,9 @@ package ignore
 import (
 	"bytes"
 	"os"
-	"path/filepath"
 	"testing"
+
+	"github.com/mandelsoft/filepath/pkg/filepath"
 )
 
 var testdata = "./testdata"

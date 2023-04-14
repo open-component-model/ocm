@@ -8,9 +8,9 @@ import (
 	"bytes"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
+	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/pkg/errors"
 	"helm.sh/helm/v3/pkg/chart"
@@ -26,16 +26,16 @@ var utf8bom = []byte{0xEF, 0xBB, 0xBF}
 //
 // This loads charts only from directories.
 func LoadDir(fs vfs.FileSystem, dir string) (*chart.Chart, error) {
-	topdir, err := filepath.Abs(dir)
+	topdir, err := vfs.Abs(fs, dir)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "cannot determine absolute directory path")
 	}
 
 	// Just used for errors.
 	c := &chart.Chart{}
 
 	rules := ignore.Empty()
-	ifile := filepath.Join(topdir, ignore.HelmIgnore)
+	ifile := vfs.Join(fs, topdir, ignore.HelmIgnore)
 	if _, err := fs.Stat(ifile); err == nil {
 		file, err := fs.Open(ifile)
 		if err != nil {
@@ -51,7 +51,7 @@ func LoadDir(fs vfs.FileSystem, dir string) (*chart.Chart, error) {
 	rules.AddDefaults()
 
 	files := []*loader.BufferedFile{}
-	topdir += string(filepath.Separator)
+	topdir += vfs.PathSeparatorString
 
 	walk := func(name string, fi os.FileInfo, err error) error {
 		n := strings.TrimPrefix(name, topdir)
@@ -72,7 +72,7 @@ func LoadDir(fs vfs.FileSystem, dir string) (*chart.Chart, error) {
 			// Directory-based ignore rules should involve skipping the entire
 			// contents of that directory.
 			if rules.Ignore(n, fi) {
-				return filepath.SkipDir
+				return vfs.SkipDir
 			}
 			return nil
 		}

@@ -27,9 +27,16 @@ import (
 
 type Option interface {
 	Mount(fs *composefs.ComposedFileSystem) error
+	GetFilesystem() vfs.FileSystem
 }
 
 type dummyOption struct{}
+
+var _ Option = (*dummyOption)(nil)
+
+func (o dummyOption) GetFilesystem() vfs.FileSystem {
+	return nil
+}
 
 func (dummyOption) Mount(*composefs.ComposedFileSystem) error {
 	return nil
@@ -48,7 +55,17 @@ func FileSystem(fs vfs.FileSystem, path string) fsOpt {
 	}
 }
 
+func (o fsOpt) GetFilesystem() vfs.FileSystem {
+	if o.path == "" {
+		return o.fs
+	}
+	return nil
+}
+
 func (o fsOpt) Mount(cfs *composefs.ComposedFileSystem) error {
+	if o.path == "" {
+		return nil
+	}
 	return cfs.Mount(o.path, o.fs)
 }
 
@@ -132,18 +149,29 @@ type Environment struct {
 }
 
 func NewEnvironment(opts ...Option) *Environment {
-	tmpfs, err := osfs.NewTempFileSystem()
+	var basefs vfs.FileSystem
+
+	for _, o := range opts {
+		fs := o.GetFilesystem()
+		if fs != nil {
+			basefs = fs
+		}
+	}
+	if basefs == nil {
+		tmpfs, err := osfs.NewTempFileSystem()
+		if err != nil {
+			panic(err)
+		}
+		basefs = tmpfs
+		defer func() {
+			vfs.Cleanup(basefs)
+		}()
+	}
+	err := basefs.Mkdir("/tmp", vfs.ModePerm)
 	if err != nil {
 		panic(err)
 	}
-	defer func() {
-		vfs.Cleanup(tmpfs)
-	}()
-	err = tmpfs.Mkdir("/tmp", vfs.ModePerm)
-	if err != nil {
-		panic(err)
-	}
-	fs := composefs.New(tmpfs, "/tmp")
+	fs := composefs.New(basefs, "/tmp")
 	for _, o := range opts {
 		err := o.Mount(fs)
 		if err != nil {
@@ -152,7 +180,7 @@ func NewEnvironment(opts ...Option) *Environment {
 	}
 	ctx := ocm.WithCredentials(credentials.WithConfigs(config.New()).New()).New()
 	vfsattr.Set(ctx.AttributesContext(), fs)
-	tmpfs = nil
+	basefs = nil
 	return &Environment{
 		VFS:        vfs.New(fs),
 		ctx:        ctx,

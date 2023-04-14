@@ -6,7 +6,8 @@ package uploaders
 
 import (
 	"os"
-	"path/filepath"
+
+	"github.com/mandelsoft/filepath/pkg/filepath"
 
 	"github.com/open-component-model/ocm/cmds/demoplugin/accessmethods"
 	"github.com/open-component-model/ocm/pkg/common"

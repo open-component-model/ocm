@@ -6,34 +6,42 @@
 TOI is a small toolset on top of the Open Component Model. It provides
 a possibility to run images taken from a component version with user
 configuration and feed them with the content of this component version.
-It is some basic mechanism which can be used to execute simple installation
+It is some basic mechanism, which can be used to execute simple installation
 steps based on content described by the Open Component Model
-(see [ocm bootstrap componentversions](ocm_bootstrap_componentversions.md)).
+(see [ocm bootstrap package](ocm_bootstrap_package.md)).
 
-Therefore, a dedicated resource type <code>toiPackage</code> is defined.
-It is selected by a resource identity pattern. The first resource matching the pattern
-is used. A possible use case could be to provide different packages for
+Therefore, a dedicated resource type <code>toiPackage</code> is defined,
+which describes an installation package to be handled by TOI.
+When calling the [ocm bootstrap package](ocm_bootstrap_package.md) command it is selected by a resource
+identity pattern. The first resource in given component version matching the
+pattern is used. A possible use case could be to provide different packages for
 different environments. The resource can use an identity attribute
 <code>platform=&lt;value></code>. By specifying just the platform attribute,
 the appropriate package will be chosen.
 
-The bootstrap command uses this resource to determine a TOI executor together
-executor configuration and additional client specific settings to describe
-a dedicated installation.
+The bootstrap command uses this package resource to determine a TOI executor
+together with executor configuration and additional client specific settings to
+describe a dedicated installation.
 
 To do this the package describes dedicated actions that can be executed by
-the bootstrap command. Every action refers to an executor, which is executed
-to perform the action. Finally, an executor is an image following the TOI
+the bootstrap command. Every action (for example <code>install</code>) refers to an
+executor, which is executed to perform the action.
+
+An executor is basically an image following the TOI
 specification for passing information into the image execution and receiving
-results from the execution. Such an image is described in two ways:
-- it either describes a resource of type <code>ociImage</code> or
+results from the execution. An executor specification can be described in two ways:
+- it either directly describes a resource of type <code>ociImage</code> or
 - it describes a resource of type <code>toiExecutor</code>, which defines
-  the image to use and some default settings and further describes the features
+  the image to use and some default settings. It furthermore describes the features
   and requirements of the executor image.
 
-The package described credentials requirements and required user configuration
-which must passed along with the bootstrap command. After validation of the
-input finally a container with the selected executor image is created, that
+The package describes configuration values for every configured executor as well
+as general credentials requirements and required user configuration
+which must be passed along with the bootstrap command. The executor specification
+may then optionally map this package global settings into executor specific views.
+
+After validation of the input and its mapping to an executor specific format,
+finally, a container with the selected executor image is created, that
 contains the content of the initial component version in form of a Common
 Transport Archive and all the specified configuration data.
 
@@ -117,13 +125,13 @@ to executors. It uses the following fields:
 
 - **<code>parameterMapping</code>** (optional) *spiff yaml*
 
-  This is an optional spiff template used to process the actual parameter set
-  passed by the caller to transform it to the requirements of the actual executor.
+  This is an optional spiff template used to process the actual package parameter
+  set passed by the caller to transform it to the requirements of the actual executor.
 
-  A package has global parameter setting, but possibly multiple different
-  executors for different action. They might have different requirements/formats
-  concerning the parameter input. There the executor specification allows to
-  map the provided user input, accordingly
+  A package has a global parameter setting, but possibly multiple different
+  executors for different actions. They might have different requirements/formats
+  concerning the parameter input. Therefore, the executor specification allows to
+  map the provided user input, accordingly.
 
 - **<code>credentialMapping</code>** (optional) *map[string]string*
 
@@ -175,14 +183,70 @@ It always has at least one identity attribute <code>name</code>, which
 is the resource name field of the desired resource. If this resource
 defines additional identity attributes, the complete set must be specified.
 
+#### Input Mapping for Executors
+
+An optional <code>parameterMapping</code> in the executor section
+can be used to process the global package user-specified parameters
+to provide specifc values expected by the executor.
+
+This is done by a _spiff_ template. Here special functions
+are provided to access specific content:
+
+- <code>hasCredentials(string) bool</code>
+
+  This function can be used to check whether dedicated credentials
+  are effectively provided for the actual installation.
+
+  The name is the name of the credentials as described in the credentials
+  request section optionally mapped to the name used for the executor
+  (field <code>credentialMapping</code>).
+
+- <code>getCredentials(string) map[string]string</code>
+
+  This functions provides the property set of the provided credentials. 
+
+#### User Config vs Executor Config
+
+An executor is typically able to handle a complete class of installations.
+It describes a dedicated installation mechanism, but not a dedicated
+installation source. Although, there might be specialized images
+for dedicated installation sources, in general the idea is to provide
+more general executors, for example an helmexecutor, which is able to
+handle any helm chart, not just a dedicated helm deployment.
+
+Because of this, there is a clear separation between an installation specific
+configuration, which is provided by the user calling the TOI commands, and
+the parameterization of the executor, which is completely specified in the
+package. 
+
+The task of the package is to represent a dedicated deployment source. As such
+it has to provide information to tell the executor what to install, while
+the user configuration is used to describe the instance specific settings.
+
+Back to the example of a helminstaller executor, the executor config contained
+in the package resource describes the helm chart, which should be installed
+and the way how the user input is mapped to chart values. Here, also the
+localizations are described in an executor specific way.
+
+Therefore, an executor expects a dedicated configuration format, which can be
+specified in the executor resource in form of a JSON scheme.
+
+The package then may provide a package specific scheme for the instance
+configuration. This value-set is dependent on the installation source (the helm
+chart in this example).
+
+For further details you have to refer to the dedicated executor and package
+definitions.
+
+
 ### The <code>toiExecutor</code> Resource
 
-Instead of directly describing an image resource i the package file, it is
+Instead of directly describing an image resource in the package file, it is
 possible to refer to a resource of type toiExecutor. This
 is a yaml file with the media type <code>application/x-yaml</code>,
 <code>text/yaml</code> or
 <code>application/vnd.toi.ocm.software.package.v1+yaml</code>) containing
-common information about the executor executor. If used by the package,
+common information about the executor. If this flavor is used by the package,
 this information is used to validate settings in the package specification.
 
 It has the following format:
@@ -375,7 +439,8 @@ additionalResources:
 
 ##### Additional Links
 
-* [<b>ocm bootstrap componentversions</b>](ocm_bootstrap_componentversions.md)
+* [<b>ocm bootstrap package</b>](ocm_bootstrap_package.md)	 &mdash; bootstrap component version
+* [<b>ocm bootstrap package</b>](ocm_bootstrap_package.md)	 &mdash; bootstrap component version
 * [<b>ocm bootstrap config</b>](ocm_bootstrap_config.md)
 * [<b>ocm configfile</b>](ocm_configfile.md)	 &mdash; configuration file
 
