@@ -14,6 +14,7 @@ import (
 type Options struct {
 	recursive        bool
 	resourcesByValue bool
+	localByValue     bool
 	sourcesByValue   bool
 	keepGlobalAccess bool
 	stopOnExisting   bool
@@ -22,11 +23,12 @@ type Options struct {
 }
 
 var (
-	_ ResourcesByValueOption = (*Options)(nil)
-	_ SourcesByValueOption   = (*Options)(nil)
-	_ RecursiveOption        = (*Options)(nil)
-	_ ResolverOption         = (*Options)(nil)
-	_ KeepGlobalAccessOption = (*Options)(nil)
+	_ ResourcesByValueOption      = (*Options)(nil)
+	_ LocalResourcesByValueOption = (*Options)(nil)
+	_ SourcesByValueOption        = (*Options)(nil)
+	_ RecursiveOption             = (*Options)(nil)
+	_ ResolverOption              = (*Options)(nil)
+	_ KeepGlobalAccessOption      = (*Options)(nil)
 )
 
 func (o *Options) SetOverwrite(overwrite bool) {
@@ -51,6 +53,14 @@ func (o *Options) SetResourcesByValue(resourcesByValue bool) {
 
 func (o *Options) IsResourcesByValue() bool {
 	return o.resourcesByValue
+}
+
+func (o *Options) SetLocalResourcesByValue(resourcesByValue bool) {
+	o.localByValue = resourcesByValue
+}
+
+func (o *Options) IsLocalResourcesByValue() bool {
+	return o.localByValue
 }
 
 func (o *Options) SetSourcesByValue(sourcesByValue bool) {
@@ -144,6 +154,11 @@ type ResourcesByValueOption interface {
 	IsResourcesByValue() bool
 }
 
+type LocalResourcesByValueOption interface {
+	SetLocalResourcesByValue(bool)
+	IsLocalResourcesByValue() bool
+}
+
 type resourcesByValueOption struct {
 	flag bool
 }
@@ -159,6 +174,25 @@ func (o *resourcesByValueOption) ApplyTransferOption(to transferhandler.Transfer
 
 func ResourcesByValue(args ...bool) transferhandler.TransferOption {
 	return &resourcesByValueOption{
+		flag: utils.GetOptionFlag(args...),
+	}
+}
+
+type intrscsByValueOption struct {
+	flag bool
+}
+
+func (o *intrscsByValueOption) ApplyTransferOption(to transferhandler.TransferOptions) error {
+	if eff, ok := to.(LocalResourcesByValueOption); ok {
+		eff.SetLocalResourcesByValue(o.flag)
+		return nil
+	} else {
+		return errors.ErrNotSupported("resources by-value")
+	}
+}
+
+func LocalResourcesByValue(args ...bool) transferhandler.TransferOption {
+	return &intrscsByValueOption{
 		flag: utils.GetOptionFlag(args...),
 	}
 }

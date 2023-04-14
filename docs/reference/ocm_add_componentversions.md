@@ -11,6 +11,7 @@ ocm add componentversions [<options>] [--version <version>] [<ctf archive>] {<co
 ```
       --addenv                 access environment for templating
   -C, --complete               include all referenced component version
+  -L, --copy-local-resources   transfer referenced local resources by-value
   -V, --copy-resources         transfer referenced resources by-value
   -c, --create                 (re)create archive
       --dry-run                evaluate and print component specifications
@@ -128,9 +129,10 @@ references.
 
 It the option <code>--copy-resources</code> is given, all referential 
 resources will potentially be localized, mapped to component version local
-resources in the target repository.
-This behaviour can be further influenced by specifying a transfer script
-with the <code>script</code> option family.
+resources in the target repository. It the option <code>--copy-local-resources</code> 
+is given, instead, only resources with the relation <code>local</code> will be
+transferred. This behaviour can be further influenced by specifying a transfer
+script with the <code>script</code> option family.
 
 
 ### Examples
