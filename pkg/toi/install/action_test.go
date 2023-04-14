@@ -7,23 +7,22 @@ package install_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
-	"github.com/open-component-model/ocm/pkg/mime"
 	. "github.com/open-component-model/ocm/pkg/testutils"
-	"github.com/open-component-model/ocm/pkg/toi/drivers/mock"
 
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
+	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
+	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/toi"
+	"github.com/open-component-model/ocm/pkg/toi/drivers/mock"
 	"github.com/open-component-model/ocm/pkg/toi/install"
 )
 
@@ -85,7 +84,7 @@ creds: (( hasCredentials("mycred") ? [getCredentials("mycred")]  :[]  ))
 		spec := &toi.PackageSpecification{
 			CredentialsRequest: toi.CredentialsRequest{
 				Credentials: map[string]toi.CredentialsRequestSpec{
-					"mycred": toi.CredentialsRequestSpec{
+					"mycred": {
 						ConsumerId:  cid1,
 						Description: "test",
 						Optional:    false,
@@ -93,7 +92,7 @@ creds: (( hasCredentials("mycred") ? [getCredentials("mycred")]  :[]  ))
 				},
 			},
 			Executors: []toi.Executor{
-				toi.Executor{
+				{
 					Actions: []string{"install"},
 					Image: &toi.Image{
 						Ref: "a/b:v1",
@@ -105,7 +104,7 @@ creds: (( hasCredentials("mycred") ? [getCredentials("mycred")]  :[]  ))
 
 		credspec := &toi.Credentials{
 			Credentials: map[string]toi.CredentialSpec{
-				"mycred": toi.CredentialSpec{
+				"mycred": {
 					ConsumerId: cid1,
 				},
 			},
@@ -143,7 +142,7 @@ creds: (( hasCredentials("mycred") ? getCredentials("mycred", "user")  :"" ))
 		spec := &toi.PackageSpecification{
 			CredentialsRequest: toi.CredentialsRequest{
 				Credentials: map[string]toi.CredentialsRequestSpec{
-					"mycred": toi.CredentialsRequestSpec{
+					"mycred": {
 						ConsumerId:  cid1,
 						Description: "test",
 						Optional:    false,
@@ -151,7 +150,7 @@ creds: (( hasCredentials("mycred") ? getCredentials("mycred", "user")  :"" ))
 				},
 			},
 			Executors: []toi.Executor{
-				toi.Executor{
+				{
 					Actions: []string{"install"},
 					Image: &toi.Image{
 						Ref: "a/b:v1",
@@ -163,7 +162,7 @@ creds: (( hasCredentials("mycred") ? getCredentials("mycred", "user")  :"" ))
 
 		credspec := &toi.Credentials{
 			Credentials: map[string]toi.CredentialSpec{
-				"mycred": toi.CredentialSpec{
+				"mycred": {
 					ConsumerId: cid1,
 				},
 			},
@@ -201,7 +200,7 @@ creds: (( hasCredentials("mycred") ? getCredentials("mycred", "*")  :"" ))
 		spec := &toi.PackageSpecification{
 			CredentialsRequest: toi.CredentialsRequest{
 				Credentials: map[string]toi.CredentialsRequestSpec{
-					"mycred": toi.CredentialsRequestSpec{
+					"mycred": {
 						ConsumerId:  cid1,
 						Description: "test",
 						Optional:    false,
@@ -209,7 +208,7 @@ creds: (( hasCredentials("mycred") ? getCredentials("mycred", "*")  :"" ))
 				},
 			},
 			Executors: []toi.Executor{
-				toi.Executor{
+				{
 					Actions: []string{"install"},
 					Image: &toi.Image{
 						Ref: "a/b:v1",
@@ -221,7 +220,7 @@ creds: (( hasCredentials("mycred") ? getCredentials("mycred", "*")  :"" ))
 
 		credspec := &toi.Credentials{
 			Credentials: map[string]toi.CredentialSpec{
-				"mycred": toi.CredentialSpec{
+				"mycred": {
 					ConsumerId: cid1,
 				},
 			},
@@ -257,7 +256,7 @@ creds: (( hasCredentials("mycred") ? [getCredentials("mycred")]  :[]  ))
 		spec := &toi.PackageSpecification{
 			CredentialsRequest: toi.CredentialsRequest{
 				Credentials: map[string]toi.CredentialsRequestSpec{
-					"mycred": toi.CredentialsRequestSpec{
+					"mycred": {
 						ConsumerId:  cid1,
 						Description: "test",
 						Optional:    true,
@@ -265,7 +264,7 @@ creds: (( hasCredentials("mycred") ? [getCredentials("mycred")]  :[]  ))
 				},
 			},
 			Executors: []toi.Executor{
-				toi.Executor{
+				{
 					Actions: []string{"install"},
 					Image: &toi.Image{
 						Ref: "a/b:v1",

@@ -91,9 +91,10 @@ It has the following format:
   requites the specification of a credentials file providing the information
   how to satisfy those credential requests.
 
-- **<code>additionalResources</code>** (optional) *map[string]ResourceReference*
+- **<code>additionalResources</code>** (optional) *map[string]AdditionalResource)*
 
-  A set of additional resources specified by OCM resource references.
+  A set of additional resources specified by an OCM resource reference or
+  direct data as byte, string or yaml.
   The key describes the meaning of the resource. The following keys have
   a special meaning:
 
@@ -175,6 +176,17 @@ that contains the resource reference. It uses the following fields:
 - **<code>resource</code>** *Identity*
 
   This is the identity of the resource in the selected component version.
+
+#### *AdditionalResource*
+
+This field has either the fields of a *ResourceReference* to refer to the
+content of an OCM resource or the field:
+
+- **<code>content</code>** *string|[]byte|YAML*
+  
+  Either a resource reference or the field <code>content</code> must be given.
+  The content field may contain a string or an inline YAML document.
+  For larger content the resource reference form should be preferred.
 
 #### *Identity*
 
