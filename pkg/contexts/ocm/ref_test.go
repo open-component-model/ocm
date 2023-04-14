@@ -10,8 +10,9 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 func Type(t string) string {
@@ -106,6 +107,16 @@ var _ = Describe("ref parsing", func() {
 			CheckRef("directory::file//bla.blob/comp", "directory", "", "", "bla.blob/comp", "", "file")
 			CheckRef("directory::./file.io//bla.blob/comp", "directory", "", "", "bla.blob/comp", "", "./file.io")
 			CheckRef("any::file.io//bla.blob/comp", "any", "file.io", "", "bla.blob/comp", "", "")
+		})
+	})
+
+	Context("map to spec", func() {
+		It("handles localhost", func() {
+			ctx := ocm.New()
+
+			ref := Must(ocm.ParseRef("OCIRegistry::localhost:80/test//github.vom/mandelsoft/test"))
+			spec := Must(ctx.MapUniformRepositorySpec(&ref.UniformRepositorySpec))
+			Expect(spec).To(Equal(ocireg.NewRepositorySpec("localhost:80", ocireg.NewComponentRepositoryMeta("test", ""))))
 		})
 	})
 })

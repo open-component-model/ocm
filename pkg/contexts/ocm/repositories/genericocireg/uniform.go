@@ -5,6 +5,7 @@
 package genericocireg
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
@@ -21,17 +22,35 @@ func init() {
 type repospechandler struct{}
 
 func (h *repospechandler) MapReference(ctx cpi.Context, u *cpi.UniformRepositorySpec) (cpi.RepositorySpec, error) {
-	if u.Info != "" || u.Host == "" {
-		return nil, nil
-	}
 	var meta *ComponentRepositoryMeta
-	if u.SubPath != "" {
-		meta = NewComponentRepositoryMeta(u.SubPath, "")
+	host := u.Host
+	subp := u.SubPath
+
+	if u.Type == Type {
+		if u.Info != "" && u.SubPath == "" {
+			idx := strings.Index(u.Info, grammar.RepositorySeparator)
+			if idx > 0 {
+				host = u.Info[:idx]
+				subp = u.Info[idx+1:]
+			} else {
+				host = u.Info
+			}
+		} else if u.Host == "" {
+			return nil, fmt.Errorf("host required for OCI based OCM reference")
+		}
+	} else {
+		if u.Type != "" || u.Info != "" || u.Host == "" {
+			return nil, nil
+		}
+		host = u.Host
+	}
+	if subp != "" {
+		meta = NewComponentRepositoryMeta(subp, "")
 	}
 	if compatattr.Get(ctx) {
-		return NewRepositorySpec(ocireg.NewLegacyRepositorySpec(u.Host), meta), nil
+		return NewRepositorySpec(ocireg.NewLegacyRepositorySpec(host), meta), nil
 	}
-	return NewRepositorySpec(ocireg.NewRepositorySpec(u.Host), meta), nil
+	return NewRepositorySpec(ocireg.NewRepositorySpec(host), meta), nil
 }
 
 func HandleRef(u *cpi.UniformRepositorySpec) error {
