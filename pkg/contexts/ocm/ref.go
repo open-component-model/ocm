@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/grammar"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -25,10 +26,10 @@ func ParseRepo(ref string) (UniformRepositorySpec, error) {
 		ref = ref[1:]
 	}
 	if strings.HasPrefix(ref, ".") || strings.HasPrefix(ref, "/") {
-		return UniformRepositorySpec{
+		return cpi.HandleRef(UniformRepositorySpec{
 			Info:            ref,
 			CreateIfMissing: create,
-		}, nil
+		})
 	}
 	match := grammar.AnchoredRepositoryRegexp.FindSubmatch([]byte(ref))
 	if match == nil {
@@ -36,18 +37,18 @@ func ParseRepo(ref string) (UniformRepositorySpec, error) {
 		if match == nil {
 			return UniformRepositorySpec{}, errors.ErrInvalid(KIND_OCM_REFERENCE, ref)
 		}
-		return UniformRepositorySpec{
+		return cpi.HandleRef(UniformRepositorySpec{
 			Type:            string(match[1]),
 			Info:            string(match[2]),
 			CreateIfMissing: create,
-		}, nil
+		})
 	}
-	return UniformRepositorySpec{
+	return cpi.HandleRef(UniformRepositorySpec{
 		Type:            string(match[1]),
 		Host:            string(match[2]),
 		SubPath:         string(match[3]),
 		CreateIfMissing: create,
-	}, nil
+	})
 }
 
 // RefSpec is a go internal representation of a oci reference.
@@ -102,7 +103,9 @@ func ParseRef(ref string) (RefSpec, error) {
 	if v != "" {
 		spec.Version = &v
 	}
-	return spec, nil
+	var err error
+	spec.UniformRepositorySpec, err = cpi.HandleRef(spec.UniformRepositorySpec)
+	return spec, err
 }
 
 func (r *RefSpec) Name() string {
