@@ -117,6 +117,7 @@ contained in the component version, which contains the package resource.
 
 It is a plain yaml resource with the media types media type <code>` + mime.MIME_YAML + `</code>,
 <code>` + mime.MIME_YAML_ALT + `</code> or
+
 <code>` + toi.PackageSpecificationMimeType + `</code>) containing
 information required to control the instantiation of an executor.
 
@@ -253,7 +254,7 @@ to provide specifc values expected by the executor.
 This is done by a _spiff_ template. Here special functions
 are provided to access specific content:
 
-- <code>hasCredentials(string) bool</code>
+- <code>hasCredentials(string[,string]) bool</code>
 
   This function can be used to check whether dedicated credentials
   are effectively provided for the actual installation.
@@ -262,9 +263,18 @@ are provided to access specific content:
   request section optionally mapped to the name used for the executor
   (field <code>credentialMapping</code>).
 
-- <code>getCredentials(string) map[string]string</code>
+  If the second argument is given, it checks for the named property
+  in the credential set.
 
-  This functions provides the property set of the provided credentials. 
+- <code>getCredentials(string[,string]) map[string]string | string</code>
+
+  This functions provides the property set of the provided credentials.
+
+  If the second argument is given, it returns the named property in the
+  selected credential set.
+
+  If the property name is an asterisks (<code>*</code>) a single property
+  is expected, whose value is returned.
 
 #### User Config vs Executor Config
 
@@ -301,7 +311,6 @@ definitions.
 
 
 ### The <code>` + toi.TypeTOIExecutor + `</code> Resource
-
 Instead of directly describing an image resource in the package file, it is
 possible to refer to a resource of type ` + toi.TypeTOIExecutor + `. This
 is a yaml file with the media type <code>` + mime.MIME_YAML + `</code>,

@@ -73,7 +73,7 @@ var _ = Describe("Transfer handler", func() {
 		Expect(c.Properties()).To(Equal(creds1.Properties()))
 	})
 
-	It("executes with crednetial substitution", func() {
+	It("executes with credential substitution", func() {
 		env.CredentialsContext().SetCredentialsForConsumer(cid1, creds1)
 
 		p, _ := common.NewBufferedPrinter()
@@ -130,6 +130,121 @@ creds:
 testparam: value
 `))
 	})
+
+	It("executes with credential property substitution", func() {
+		env.CredentialsContext().SetCredentialsForConsumer(cid1, creds1)
+
+		p, _ := common.NewBufferedPrinter()
+
+		mapping := `
+testparam: (( merge ))
+creds: (( hasCredentials("mycred") ? getCredentials("mycred", "user")  :"" ))
+`
+		spec := &toi.PackageSpecification{
+			CredentialsRequest: toi.CredentialsRequest{
+				Credentials: map[string]toi.CredentialsRequestSpec{
+					"mycred": toi.CredentialsRequestSpec{
+						ConsumerId:  cid1,
+						Description: "test",
+						Optional:    false,
+					},
+				},
+			},
+			Executors: []toi.Executor{
+				toi.Executor{
+					Actions: []string{"install"},
+					Image: &toi.Image{
+						Ref: "a/b:v1",
+					},
+					ParameterMapping: []byte(mapping),
+				},
+			},
+		}
+
+		credspec := &toi.Credentials{
+			Credentials: map[string]toi.CredentialSpec{
+				"mycred": toi.CredentialSpec{
+					ConsumerId: cid1,
+				},
+			},
+		}
+
+		params := `
+testparam: value
+`
+
+		repo := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, "/ctf", 0, env))
+		defer Close(repo)
+		cv := Must(repo.LookupComponentVersion(COMPONENT, VERSION))
+		defer Close(cv)
+
+		Must(install.ExecuteAction(p, driver, "install", spec, credspec, []byte(params), env, cv, nil))
+
+		effparams := Must(driver.Found.Files[install.InputParameters].Get())
+		Expect(string(effparams)).To(StringEqualTrimmedWithContext(`
+creds: test
+testparam: value
+`))
+	})
+
+	It("executes with single credential property substitution", func() {
+		creds1 := credentials.NewCredentials(common.Properties{"user": "test"})
+
+		env.CredentialsContext().SetCredentialsForConsumer(cid1, creds1)
+
+		p, _ := common.NewBufferedPrinter()
+
+		mapping := `
+testparam: (( merge ))
+creds: (( hasCredentials("mycred") ? getCredentials("mycred", "*")  :"" ))
+`
+		spec := &toi.PackageSpecification{
+			CredentialsRequest: toi.CredentialsRequest{
+				Credentials: map[string]toi.CredentialsRequestSpec{
+					"mycred": toi.CredentialsRequestSpec{
+						ConsumerId:  cid1,
+						Description: "test",
+						Optional:    false,
+					},
+				},
+			},
+			Executors: []toi.Executor{
+				toi.Executor{
+					Actions: []string{"install"},
+					Image: &toi.Image{
+						Ref: "a/b:v1",
+					},
+					ParameterMapping: []byte(mapping),
+				},
+			},
+		}
+
+		credspec := &toi.Credentials{
+			Credentials: map[string]toi.CredentialSpec{
+				"mycred": toi.CredentialSpec{
+					ConsumerId: cid1,
+				},
+			},
+		}
+
+		params := `
+testparam: value
+`
+
+		repo := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, "/ctf", 0, env))
+		defer Close(repo)
+		cv := Must(repo.LookupComponentVersion(COMPONENT, VERSION))
+		defer Close(cv)
+
+		Must(install.ExecuteAction(p, driver, "install", spec, credspec, []byte(params), env, cv, nil))
+
+		effparams := Must(driver.Found.Files[install.InputParameters].Get())
+		Expect(string(effparams)).To(StringEqualTrimmedWithContext(`
+creds: test
+testparam: value
+`))
+	})
+
 	It("executes with optional credential substitution without credentials", func() {
 		env.CredentialsContext().SetCredentialsForConsumer(cid1, creds1)
 
