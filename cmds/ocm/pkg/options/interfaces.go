@@ -79,7 +79,7 @@ func (s OptionSet) Usage() string {
 	u := ""
 	for _, n := range s {
 		if c, ok := n.(Usage); ok {
-			u += c.Usage()
+			u += "\n" + c.Usage()
 		}
 	}
 	return u

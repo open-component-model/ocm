@@ -9,12 +9,14 @@ ocm bootstrap package [<options>] <action> {<component-reference>} {<resource id
 ### Options
 
 ```
-  -c, --credentials string   credentials file
-  -h, --help                 help for package
-      --lookup stringArray   repository name or spec for closure lookup fallback
-  -o, --outputs string       output file/directory
-  -p, --parameters string    parameter file
-      --repo string          repository name or spec
+      --config stringToString   driver config (default [])
+  -C, --create-env string       create local filesystem contract to call executor command locally
+  -c, --credentials string      credentials file
+  -h, --help                    help for package
+      --lookup stringArray      repository name or spec for closure lookup fallback
+  -o, --outputs string          output file/directory
+  -p, --parameters string       parameter file
+      --repo string             repository name or spec
 ```
 
 ### Description
@@ -26,7 +28,7 @@ the dedicated installation target.
 
 The package resource must have the type <code>toiPackage</code>.
 This is a simple YAML file resource describing the bootstrapping of a dedicated kind
-of software. See also the topic [ocm toi toi-bootstrapping](ocm_toi_toi-bootstrapping.md).
+of software. See also the topic [ocm toi-bootstrapping](ocm_toi-bootstrapping.md).
 
 This resource finally describes an executor image, which will be executed in a
 container with the installation source and (instance specific) user settings.
@@ -80,8 +82,7 @@ The *CredentialsSpec* uses the following format:
 
   Direct credential fields.
 
-One of <code>consumerId</code>, <code>reference</code> or <code>credentials</code>
-must be configured.
+One of <code>consumerId</code>, <code>reference</code> or <code>credentials</code> must be configured.
 
 The *ForwardSpec* uses the following format:
 
@@ -95,6 +96,28 @@ The *ForwardSpec* uses the following format:
 
 If provided by the package it is possible to download template versions
 for the parameter and credentials file using the command [ocm bootstrap configuration](ocm_bootstrap_configuration.md).
+
+Using the option <code>--config</code> it is possible to configure options
+for the execution environment (so far only docker is supported).
+The following options are possible:
+
+  - <code>CLEANUP_CONTAINERS</code>: 
+  - <code>DOCKER_DRIVER_QUIET</code>: 
+  - <code>NETWORK_MODE</code>: 
+  - <code>PULL_POLICY</code>: 
+  - <code>USERNS_MODE</code>: 
+
+
+Using the option <code>--create-env  &lt;toi root folder></code> it is possible to
+create a local execution environment for an executor according to the executor
+image contract (see [ocm toi-bootstrapping](ocm_toi-bootstrapping.md)). If the executor executable is
+built based on the toi executor support package, the executor can then be called
+locally with
+
+<center>
+    <pre>&lt;executor> --bootstraproot &lt;given toi root folder></pre>
+</center>
+
 
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
@@ -141,13 +164,13 @@ OCI Repository types (using standard component repository to OCI mapping):
 - `oci`
 - `ociRegistry`
 
+\
 If a component lookup for building a reference closure is required
 the <code>--lookup</code>  option can be used to specify a fallback
-lookup repository. 
-By default the component versions are searched in the repository
-holding the component version for which the closure is determined.
-For *Component Archives* this is never possible, because it only
-contains a single component version. Therefore, in this scenario
+lookup repository. By default the component versions are searched in
+the repository holding the component version for which the closure is
+determined. For *Component Archives* this is never possible, because
+it only contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
 
@@ -174,6 +197,7 @@ $ ocm toi bootstrap package ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 
 ##### Additional Links
 
-* [<b>ocm toi toi-bootstrapping</b>](ocm_toi_toi-bootstrapping.md)
+* [<b>ocm toi-bootstrapping</b>](ocm_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions
 * [<b>ocm bootstrap configuration</b>](ocm_bootstrap_configuration.md)	 &mdash; bootstrap TOI configuration files
+* [<b>ocm toi-bootstrapping</b>](ocm_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions
 

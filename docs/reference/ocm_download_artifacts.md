@@ -23,6 +23,7 @@ artifact set format, without the repository part
 
 The files are named according to the artifact repository name.
 
+
 If the repository/registry option is specified, the given names are interpreted
 relative to the specified registry using the syntax
 
@@ -55,6 +56,8 @@ linked library can be used:
 - `OCIRegistry`
 - `oci`
 - `ociRegistry`
+
+
 
 The <code>--type</code> option accepts a file format for the
 target archive to use. The following formats are supported:

@@ -8,8 +8,9 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"strings"
+
+	"github.com/mandelsoft/filepath/pkg/filepath"
 
 	"github.com/open-component-model/ocm/cmds/demoplugin/accessmethods"
 	"github.com/open-component-model/ocm/cmds/demoplugin/common"

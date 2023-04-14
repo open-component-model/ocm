@@ -27,7 +27,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/toi"
 	"github.com/open-component-model/ocm/pkg/toi/support"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
@@ -181,7 +180,7 @@ func (e *Execution) Execute(cfg *Config, values map[string]interface{}, kubeconf
 	if err != nil {
 		return err
 	}
-	toi.Log.Info("starting download", "path", path, "access", string(data))
+	e.Logger.Info("starting download", "path", path, "access", string(data))
 
 	_, e.path = Must2f(R2(download.For(e.Context).Download(common.NewPrinter(e.OutputContext.StdOut()), acc, path, e.fs)), "downloading helm chart")
 
@@ -243,6 +242,8 @@ func (e *Execution) Execute(cfg *Config, values map[string]interface{}, kubeconf
 		CreateNamespace: cfg.CreateNamespace,
 		Values:          valuesdata,
 		Kubeconfig:      kubeconfig,
+		Output:          e.OutputContext.StdOut(),
+		Debug:           e.Logger,
 	}
 	switch e.Action {
 	case "install":

@@ -8,8 +8,8 @@ package get_test
 
 import (
 	"bytes"
-	"path/filepath"
 
+	"github.com/mandelsoft/filepath/pkg/filepath"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -26,6 +26,7 @@ var _ = Describe("Test Environment", func() {
 	BeforeEach(func() {
 		env = NewTestEnv(TestData())
 
+		// use os filesystem here
 		p, err := filepath.Abs("testdata")
 		Expect(err).To(Succeed())
 		path = p

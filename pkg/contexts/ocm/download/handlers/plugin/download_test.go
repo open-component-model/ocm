@@ -9,8 +9,8 @@ package plugin_test
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -113,7 +113,7 @@ var _ = Describe("setup plugin cache", func() {
 
 		racc := Must(cv.GetResourceByIndex(0))
 
-		file := filepath.Join(repodir, "download")
+		file := vfs.Join(env.FileSystem(), repodir, "download")
 
 		octx, buf := out.NewBuffered()
 		ok, eff, err := download.For(env.OCMContext()).Download(common.NewPrinter(octx.StdOut()), racc, file, nil)

@@ -1,0 +1,14 @@
+---
+name: chart
+type: helmChart
+input:
+  type: helm
+  path: ../testchart
+  repository: mandelsoft/testchart
+---
+name: echoserver
+type: ociImage
+version: "1.0"
+access:
+  type: ociArtifact
+  imageReference: gcr.io/google_containers/echoserver:1.0

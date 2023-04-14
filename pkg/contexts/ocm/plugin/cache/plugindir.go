@@ -7,9 +7,9 @@ package cache
 import (
 	"encoding/json"
 	"fmt"
-	"path/filepath"
 	"sync"
 
+	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 

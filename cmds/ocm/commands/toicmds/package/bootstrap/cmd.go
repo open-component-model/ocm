@@ -31,7 +31,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/toi"
 	defaultd "github.com/open-component-model/ocm/pkg/toi/drivers/default"
+	"github.com/open-component-model/ocm/pkg/toi/drivers/docker"
+	"github.com/open-component-model/ocm/pkg/toi/drivers/filesystem"
 	"github.com/open-component-model/ocm/pkg/toi/install"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
@@ -55,6 +58,8 @@ type Command struct {
 	OutputFile      string
 	Credentials     accessio.DataSource
 	Parameters      accessio.DataSource
+	Config          map[string]string
+	EnvDir          string
 }
 
 // NewCommand creates a new bootstrap component command.
@@ -74,7 +79,7 @@ the dedicated installation target.
 
 The package resource must have the type <code>` + toi.TypeTOIPackage + `</code>.
 This is a simple YAML file resource describing the bootstrapping of a dedicated kind
-of software. See also the topic <CMD>ocm toi toi-bootstrapping</CMD>.
+of software. See also the topic <CMD>ocm toi-bootstrapping</CMD>.
 
 This resource finally describes an executor image, which will be executed in a
 container with the installation source and (instance specific) user settings.
@@ -128,8 +133,7 @@ The *CredentialsSpec* uses the following format:
 
   Direct credential fields.
 
-One of <code>consumerId</code>, <code>reference</code> or <code>credentials</code>
-must be configured.
+One of <code>consumerId</code>, <code>reference</code> or <code>credentials</code> must be configured.
 
 The *ForwardSpec* uses the following format:
 
@@ -143,6 +147,21 @@ The *ForwardSpec* uses the following format:
 
 If provided by the package it is possible to download template versions
 for the parameter and credentials file using the command <CMD>ocm bootstrap configuration</CMD>.
+
+Using the option <code>--config</code> it is possible to configure options
+for the execution environment (so far only docker is supported).
+The following options are possible:
+` + utils.FormatListElements("", utils.StringElementList(utils2.StringMapKeys(docker.Options))) + `
+
+Using the option <code>--create-env  &lt;toi root folder></code> it is possible to
+create a local execution environment for an executor according to the executor
+image contract (see <CMD>ocm toi-bootstrapping</CMD>). If the executor executable is
+built based on the toi executor support package, the executor can then be called
+locally with
+
+<center>
+    <pre>&lt;executor> --bootstraproot &lt;given toi root folder></pre>
+</center>
 `,
 		Example: `
 $ ocm toi bootstrap package ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
@@ -154,9 +173,11 @@ $ ocm toi bootstrap package ghcr.io/mandelsoft/ocm//ocmdemoinstaller:0.0.1-dev
 
 func (o *Command) AddFlags(fs *pflag.FlagSet) {
 	o.BaseCommand.AddFlags(fs)
+	fs.StringToStringVarP(&o.Config, "config", "", nil, "driver config")
 	fs.StringVarP(&o.CredentialsFile, "credentials", "c", "", "credentials file")
 	fs.StringVarP(&o.ParameterFile, "parameters", "p", "", "parameter file")
 	fs.StringVarP(&o.OutputFile, "outputs", "o", "", "output file/directory")
+	fs.StringVarP(&o.EnvDir, "create-env", "C", "", "create local filesystem contract to call executor command locally")
 }
 
 func (o *Command) Complete(args []string) error {
@@ -239,8 +260,27 @@ type Binary struct {
 }
 
 func (a *action) Out() error {
+	driver := defaultd.New()
+
+	if a.cmd.EnvDir != "" {
+		driver = filesystem.New(a.cmd.FileSystem())
+		if a.cmd.Config == nil {
+			a.cmd.Config = map[string]string{}
+		}
+		if a.cmd.Config[filesystem.OptionTargetPath] == "" {
+			a.cmd.Config[filesystem.OptionTargetPath] = a.cmd.EnvDir
+		}
+	}
+
+	if a.cmd.Config != nil {
+		err := driver.SetConfig(a.cmd.Config)
+		if err != nil {
+			return err
+		}
+	}
+
 	common.NewPrinter(a.cmd.StdOut())
-	result, err := install.Execute(common.NewPrinter(a.cmd.StdOut()), defaultd.New(), a.cmd.Action, a.cmd.Id, a.cmd.Credentials, a.cmd.Parameters, a.cmd.OCMContext(), a.data[0].ComponentVersion, lookupoption.From(a.cmd))
+	result, err := install.Execute(common.NewPrinter(a.cmd.StdOut()), driver, a.cmd.Action, a.cmd.Id, a.cmd.Credentials, a.cmd.Parameters, a.cmd.OCMContext(), a.data[0].ComponentVersion, lookupoption.From(a.cmd))
 	if err != nil {
 		return err
 	}

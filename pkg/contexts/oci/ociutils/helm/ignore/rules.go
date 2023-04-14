@@ -11,9 +11,9 @@ import (
 	"io"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
 
+	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/pkg/errors"
 )

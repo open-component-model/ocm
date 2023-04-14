@@ -13,6 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm/loader"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 type Spec struct {
@@ -47,11 +48,11 @@ func (s *Spec) Validate(fldPath *field.Path, ctx inputs.Context, inputFilePath s
 func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (accessio.TemporaryBlobAccess, string, error) {
 	_, inputPath, err := inputs.FileInfo(ctx, s.Path, info.InputFilePath)
 	if err != nil {
-		return nil, "", err
+		return nil, "", errors.Wrapf(err, "cannot handle input path %q", s.Path)
 	}
 	chart, err := loader.Load(inputPath, ctx.FileSystem())
 	if err != nil {
-		return nil, "", err
+		return nil, "", errors.Wrapf(err, "cannot load chart from %q", inputPath)
 	}
 	vers := chart.Metadata.Version
 	if s.Version != "" {
@@ -62,7 +63,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (acces
 	}
 	blob, err := helm.SynthesizeArtifactBlob(inputPath, ctx.FileSystem())
 	if err != nil {
-		return nil, "", err
+		return nil, "", errors.Wrapf(err, "cannot synthesize artifact blob")
 	}
 
 	return blob, ociartifact.Hint(info.ComponentVersion, chart.Name(), s.Repository, vers), err

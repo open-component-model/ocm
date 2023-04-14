@@ -26,6 +26,7 @@ For the update mode only the plugin name is required.
 If no version is specified the latest version is chosen. If at least one
 version constraint is given, only the matching versions are considered.
 
+
 If the <code>--repo</code> option is specified, the given names are interpreted
 relative to the specified repository using the syntax
 

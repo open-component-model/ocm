@@ -75,6 +75,13 @@ func Values(values interface{}) OptionFunction {
 	}
 }
 
+func Functions(functions spiffing.Functions) OptionFunction {
+	return func(r *Request) error {
+		r.Functions = functions
+		return nil
+	}
+}
+
 func ValuesNode(values string) OptionFunction {
 	return func(r *Request) error {
 		r.ValuesNode = values

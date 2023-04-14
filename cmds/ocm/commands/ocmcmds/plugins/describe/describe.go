@@ -56,7 +56,6 @@ func DescribePlugin(p plugin.Plugin, out common.Printer) {
 	} else {
 		out.Printf("Source:           manually installed\n")
 	}
-	out.Printf("\n")
 	out.Printf("Description: \n")
 	if d.Long == "" {
 		out.Printf("%s\n", utils2.IndentLines(d.Short, "      "))
@@ -64,21 +63,17 @@ func DescribePlugin(p plugin.Plugin, out common.Printer) {
 		out.Printf("%s\n", utils2.IndentLines(d.Long, "      "))
 	}
 	if len(d.AccessMethods) > 0 {
-		out.Printf("\n")
 		out.Printf("Access Methods:\n")
 		plugincommon.DescribeAccessMethods(d, out)
 	}
 	if len(d.Uploaders) > 0 {
-		out.Printf("\n")
 		// a working type inference would be really great
 		plugincommon.ListElements[plugin.UploaderDescriptor, plugin.UploaderKey]("Repository Uploaders", d.Uploaders, out)
 	}
 	if len(d.Downloaders) > 0 {
-		out.Printf("\n")
 		plugincommon.ListElements[plugin.DownloaderDescriptor, plugin.DownloaderKey]("Resource Downloaders", d.Downloaders, out)
 	}
 	if len(d.Actions) > 0 {
-		out.Printf("\n")
 		out.Printf("Actions:\n")
 		plugincommon.DescribeActions(d, out)
 	}
