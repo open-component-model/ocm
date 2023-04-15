@@ -13,6 +13,10 @@ import (
 )
 
 func GetCredentials(ctx credentials.ContextProvider, locator, repo string) (credentials.Credentials, error) {
+	return credentials.CredentialsForConsumer(ctx.CredentialsContext(), GetConsumerId(locator, repo), identity.IdentityMatcher)
+}
+
+func GetConsumerId(locator, repo string) credentials.ConsumerIdentity {
 	host, port, base := utils.SplitLocator(locator)
 	id := credentials.ConsumerIdentity{
 		identity.ID_TYPE:     identity.CONSUMER_TYPE,
@@ -21,6 +25,10 @@ func GetCredentials(ctx credentials.ContextProvider, locator, repo string) (cred
 	if port != "" {
 		id[identity.ID_PORT] = port
 	}
-	id[identity.ID_PATHPREFIX] = path.Join(base, repo)
-	return credentials.CredentialsForConsumer(ctx.CredentialsContext(), id, identity.IdentityMatcher)
+	if repo == "" {
+		id[identity.ID_PATHPREFIX] = base
+	} else {
+		id[identity.ID_PATHPREFIX] = path.Join(base, repo)
+	}
+	return id
 }
