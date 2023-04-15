@@ -22,6 +22,7 @@ import (
 	hd "github.com/open-component-model/ocm/pkg/common/accessio/downloader/http"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	github2 "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/github"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -41,7 +42,7 @@ const (
 	LegacyTypeV1 = LegacyType + runtime.VersionSeparator + "v1"
 )
 
-const CONSUMER_TYPE = "Github"
+const CONSUMER_TYPE = github2.CONSUMER_TYPE
 
 const ShaLength = 40
 

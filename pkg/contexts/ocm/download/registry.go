@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const ALL = "*"
@@ -24,32 +25,44 @@ type Handler interface {
 
 type Registry interface {
 	Register(arttype, mediatype string, hdlr Handler)
+	LookupHandler(art, media string) []Handler
 	Handler
 	DownloadAsBlob(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error)
 }
 
 type _registry struct {
 	lock     sync.RWMutex
+	base     Registry
 	handlers *registry.Registry[Handler, registry.RegistrationKey]
 }
 
-func NewRegistry() Registry {
+func NewRegistry(base ...Registry) Registry {
 	return &_registry{
+		base:     utils.Optional(base...),
 		handlers: registry.NewRegistry[Handler, registry.RegistrationKey](),
 	}
+}
+
+func (r *_registry) LookupHandler(art, media string) []Handler {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+
+	return r.getHandlers(art, media)
 }
 
 func (r *_registry) Register(arttype, mediatype string, hdlr Handler) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-
 	r.handlers.Register(registry.RegistrationKey{arttype, mediatype}, hdlr)
 }
 
 func (r *_registry) getHandlers(arttype, mediatype string) []Handler {
-	r.lock.RLock()
-	defer r.lock.RUnlock()
-	return r.handlers.LookupHandler(registry.RegistrationKey{arttype, mediatype})
+	var base []Handler
+
+	if r.base != nil {
+		base = r.base.LookupHandler(arttype, mediatype)
+	}
+	return append(base, r.handlers.LookupHandler(registry.RegistrationKey{arttype, mediatype})...)
 }
 
 func (r *_registry) Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
@@ -60,14 +73,14 @@ func (r *_registry) Download(p common.Printer, racc cpi.ResourceAccess, path str
 	}
 	defer m.Close()
 	mime := m.MimeType()
-	if ok, p, err := r.download(r.getHandlers(art, mime), p, racc, path, fs); ok {
+	if ok, p, err := r.download(r.LookupHandler(art, mime), p, racc, path, fs); ok {
 		return ok, p, err
 	}
-	return r.download(r.getHandlers(ALL, ""), p, racc, path, fs)
+	return r.download(r.LookupHandler(ALL, ""), p, racc, path, fs)
 }
 
 func (r *_registry) DownloadAsBlob(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
-	return r.download(r.getHandlers(ALL, ""), p, racc, path, fs)
+	return r.download(r.LookupHandler(ALL, ""), p, racc, path, fs)
 }
 
 func (r *_registry) download(list []Handler, p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
@@ -100,7 +113,11 @@ func For(ctx datacontext.Context) Registry {
 	if ctx == nil {
 		return DefaultRegistry
 	}
-	return ctx.GetAttributes().GetAttribute(ATTR_DOWNLOADER_HANDLERS, DefaultRegistry).(Registry)
+	return ctx.GetAttributes().GetOrCreateAttribute(ATTR_DOWNLOADER_HANDLERS, create).(Registry)
+}
+
+func create(datacontext.Context) interface{} {
+	return NewRegistry(DefaultRegistry)
 }
 
 func SetFor(ctx datacontext.Context, registry Registry) {
