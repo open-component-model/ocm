@@ -97,6 +97,11 @@ var (
 		DomainRegexp,
 		Optional(Literal(`:`), Match(`[0-9]+`)))
 
+	// HostPortRegexp describes a non-DNS simple hostname like localhost.
+	HostPortRegexp = Sequence(
+		DomainComponentRegexp,
+		Optional(Literal(`:`), Match(`[0-9]+`)))
+
 	PathRegexp = Sequence(
 		Optional(Literal("/")),
 		Match(`[a-zA-Z0-9-_.]+(?:/[a-zA-Z0-9-_.]+)+`))

@@ -5,10 +5,14 @@
 package ocm_test
 
 import (
+	"strings"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 func Type(t string) string {
@@ -54,19 +58,29 @@ func CheckRef(ref, ut, h, us, c, uv, i string) {
 
 var _ = Describe("ref parsing", func() {
 	Context("complete refs", func() {
-		t := "OCIRepository"
+		t := ocireg.Type
 		s := "mandelsoft/cnudie"
 		v := "v1"
 
 		h := "ghcr.io"
 		c := "github.com/mandelsoft/ocm"
 
-		It("without info", func() {
-			for _, ut := range []string{"", t} {
-				for _, us := range []string{"", s} {
-					for _, uv := range []string{"", v} {
-						ref := Type(ut) + h + Sub(us) + "//" + c + Vers(uv)
-						CheckRef(ref, ut, h, us, c, uv, "")
+		Context("without info", func() {
+			for _, ut := range []string{t, ""} {
+				for _, uh := range []string{h, h + ":3030", "localhost", "localhost:3030"} {
+					for _, us := range []string{"", s} {
+						for _, uv := range []string{"", v} {
+							ref := Type(ut) + uh + Sub(us) + "//" + c + Vers(uv)
+							ut, uh, us, uv := ut, uh, us, uv
+
+							It("parses ref "+ref, func() {
+								if ut == "" && strings.HasPrefix(uh, "localhost") {
+									CheckRef(ref, ut, "", "", c, uv, uh+Sub(us))
+								} else {
+									CheckRef(ref, ut, uh, us, c, uv, "")
+								}
+							})
+						}
 					}
 				}
 			}
@@ -93,6 +107,16 @@ var _ = Describe("ref parsing", func() {
 			CheckRef("directory::file//bla.blob/comp", "directory", "", "", "bla.blob/comp", "", "file")
 			CheckRef("directory::./file.io//bla.blob/comp", "directory", "", "", "bla.blob/comp", "", "./file.io")
 			CheckRef("any::file.io//bla.blob/comp", "any", "file.io", "", "bla.blob/comp", "", "")
+		})
+	})
+
+	Context("map to spec", func() {
+		It("handles localhost", func() {
+			ctx := ocm.New()
+
+			ref := Must(ocm.ParseRef("OCIRegistry::localhost:80/test//github.vom/mandelsoft/test"))
+			spec := Must(ctx.MapUniformRepositorySpec(&ref.UniformRepositorySpec))
+			Expect(spec).To(Equal(ocireg.NewRepositorySpec("localhost:80", ocireg.NewComponentRepositoryMeta("test", ""))))
 		})
 	})
 })
