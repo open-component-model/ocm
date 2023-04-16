@@ -35,8 +35,12 @@ type (
 )
 
 type (
-	ConsumerIdentity = internal.ConsumerIdentity
-	IdentityMatcher  = internal.IdentityMatcher
+	ProviderIdentity        = internal.ProviderIdentity
+	ConsumerProvider        = internal.ConsumerProvider
+	ConsumerIdentity        = internal.ConsumerIdentity
+	IdentityMatcher         = internal.IdentityMatcher
+	IdentityMatcherInfo     = internal.IdentityMatcherInfo
+	IdentityMatcherRegistry = internal.IdentityMatcherRegistry
 )
 
 var DefaultContext = internal.DefaultContext

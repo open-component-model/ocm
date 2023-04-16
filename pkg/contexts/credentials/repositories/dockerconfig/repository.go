@@ -13,13 +13,12 @@ import (
 
 	"github.com/docker/cli/cli/config"
 	"github.com/docker/cli/cli/config/configfile"
-	dockercred "github.com/docker/cli/cli/config/credentials"
 	"github.com/docker/cli/cli/config/types"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 )
 
 type Repository struct {
@@ -87,6 +86,7 @@ func (r *Repository) Read(force bool) error {
 	var (
 		data []byte
 		err  error
+		id   finalizer.ObjectIdentity
 	)
 	if r.path != "" {
 		path := r.path
@@ -99,56 +99,18 @@ func (r *Repository) Read(force bool) error {
 		if err != nil {
 			return fmt.Errorf("failed to read file '%s': %w", path, err)
 		}
+		id = cpi.ProviderIdentity(PROVIDER + "/" + path)
 	} else if len(r.data) > 0 {
 		data = r.data
+		id = finalizer.NewObjectIdentity(PROVIDER)
 	}
 
 	cfg, err := config.LoadFromReader(bytes.NewBuffer(data))
 	if err != nil {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
-	log := r.ctx.Logger(REALM)
-	defaultStore := dockercred.DetectDefaultStore(cfg.CredentialsStore)
-	store := dockercred.NewNativeStore(cfg, defaultStore)
-	// get default native credential store
 	if r.propagate {
-		all := cfg.GetAuthConfigs()
-		for h, a := range all {
-			hostname := dockercred.ConvertToHostname(h)
-			if hostname == "index.docker.io" {
-				hostname = "docker.io"
-			}
-			id := cpi.ConsumerIdentity{
-				cpi.ATTR_TYPE:        identity.CONSUMER_TYPE,
-				identity.ID_HOSTNAME: hostname,
-			}
-
-			var creds cpi.Credentials
-			if IsEmptyAuthConfig(a) {
-				log.Debug("propagate id with default store", "id", id, "store", defaultStore)
-
-				creds = NewCredentials(r, h, store)
-			} else {
-				log.Debug("propagate id", "id", id)
-
-				creds = newCredentials(a)
-			}
-			r.ctx.SetCredentialsForConsumer(id, creds)
-		}
-		for h, helper := range cfg.CredentialHelpers {
-			hostname := dockercred.ConvertToHostname(h)
-			if hostname == "index.docker.io" {
-				hostname = "docker.io"
-			}
-			id := cpi.ConsumerIdentity{
-				cpi.ATTR_TYPE:        identity.CONSUMER_TYPE,
-				identity.ID_HOSTNAME: hostname,
-			}
-
-			log.Debug("propagate id with helper", "id", id, "helper", helper)
-
-			r.ctx.SetCredentialsForConsumer(id, NewCredentials(r, h, dockercred.NewNativeStore(cfg, helper)))
-		}
+		r.ctx.RegisterConsumerProvider(id, &ConsumerProvider{cfg})
 	}
 	r.config = cfg
 	return nil

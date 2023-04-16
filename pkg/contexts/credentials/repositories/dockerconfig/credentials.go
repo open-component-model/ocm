@@ -5,6 +5,7 @@
 package dockerconfig
 
 import (
+	"github.com/docker/cli/cli/config/configfile"
 	dockercred "github.com/docker/cli/cli/config/credentials"
 	"github.com/docker/cli/cli/config/types"
 
@@ -14,24 +15,24 @@ import (
 )
 
 type Credentials struct {
-	repo  *Repository
-	name  string
-	store dockercred.Store
+	config *configfile.ConfigFile
+	name   string
+	store  dockercred.Store
 }
 
 var _ cpi.Credentials = (*Credentials)(nil)
 
 // NewCredentials describes a default getter method for a authentication method.
-func NewCredentials(repo *Repository, name string, store dockercred.Store) cpi.Credentials {
+func NewCredentials(cfg *configfile.ConfigFile, name string, store dockercred.Store) cpi.Credentials {
 	return &Credentials{
-		repo:  repo,
-		name:  name,
-		store: store,
+		config: cfg,
+		name:   name,
+		store:  store,
 	}
 }
 
 func (c *Credentials) get() common.Properties {
-	auth, err := c.repo.config.GetAuthConfig(c.name)
+	auth, err := c.config.GetAuthConfig(c.name)
 	if err != nil {
 		return common.Properties{}
 	}
@@ -42,7 +43,7 @@ func (c *Credentials) Credentials(context cpi.Context, source ...cpi.Credentials
 	var auth types.AuthConfig
 	var err error
 	if c.store == nil {
-		auth, err = c.repo.config.GetAuthConfig(c.name)
+		auth, err = c.config.GetAuthConfig(c.name)
 	} else {
 		auth, err = c.store.Get(c.name)
 	}

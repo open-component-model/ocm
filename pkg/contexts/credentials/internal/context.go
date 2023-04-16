@@ -12,14 +12,27 @@ import (
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 // CONTEXT_TYPE is the global type for a credential context.
 const CONTEXT_TYPE = "credentials" + datacontext.OCM_CONTEXT_SUFFIX
 
+// ProviderIdentity is used to uniquely identify a provider
+// for a configured consumer id. If non-empty it
+// must start with a DNSname identifying the origin of the
+// provider followed by a slash and a local arbitrary identity.
+type ProviderIdentity = finalizer.ObjectIdentity
+
 type ContextProvider interface {
 	CredentialsContext() Context
+}
+
+type ConsumerProvider interface {
+	Unregister(id ProviderIdentity)
+	Get(id ConsumerIdentity) (CredentialsSource, bool)
+	Match(id ConsumerIdentity, cur ConsumerIdentity, matcher IdentityMatcher) (CredentialsSource, ConsumerIdentity)
 }
 
 type Context interface {
@@ -38,8 +51,12 @@ type Context interface {
 	CredentialsForSpec(spec CredentialsSpec, creds ...CredentialsSource) (Credentials, error)
 	CredentialsForConfig(data []byte, unmarshaler runtime.Unmarshaler, cred ...CredentialsSource) (Credentials, error)
 
+	RegisterConsumerProvider(id ProviderIdentity, provider ConsumerProvider)
+	UnregisterConsumerProvider(id ProviderIdentity)
+
 	GetCredentialsForConsumer(ConsumerIdentity, ...IdentityMatcher) (CredentialsSource, error)
 	SetCredentialsForConsumer(identity ConsumerIdentity, creds CredentialsSource)
+	SetCredentialsForConsumerWithProvider(pid ProviderIdentity, identity ConsumerIdentity, creds CredentialsSource)
 
 	SetAlias(name string, spec RepositorySpec, creds ...CredentialsSource) error
 
@@ -66,16 +83,14 @@ func DefinedForContext(ctx context.Context) (Context, bool) {
 	return nil, ok
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
 type _context struct {
-	datacontext.Context
+	datacontext.InternalContext
 
 	sharedattributes         datacontext.AttributesContext
 	updater                  cfgcpi.Updater
 	knownRepositoryTypes     RepositoryTypeScheme
 	consumerIdentityMatchers IdentityMatcherRegistry
-	consumers                *_consumers
+	consumerProviders        *consumerProviderRegistry
 }
 
 var _ Context = &_context{}
@@ -85,9 +100,9 @@ func newContext(configctx config.Context, reposcheme RepositoryTypeScheme, consu
 		sharedattributes:         configctx.AttributesContext(),
 		knownRepositoryTypes:     reposcheme,
 		consumerIdentityMatchers: consumerMatchers,
-		consumers:                newConsumers(),
+		consumerProviders:        newConsumerProviderRegistry(),
 	}
-	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, configctx.GetAttributes(), delegates)
+	c.InternalContext = datacontext.NewContextBase(c, CONTEXT_TYPE, key, configctx.GetAttributes(), delegates)
 	c.updater = cfgcpi.NewUpdater(configctx, c)
 	return c
 }
@@ -164,24 +179,29 @@ func (c *_context) GetCredentialsForConsumer(identity ConsumerIdentity, matchers
 	}
 
 	m := defaultMatcher(matchers...)
-	var consumer *_consumer
+	var credsrc CredentialsSource
 	if m == nil {
-		consumer = c.consumers.Get(identity)
+		credsrc, _ = c.consumerProviders.Get(identity)
 	} else {
-		consumer = c.consumers.Match(identity, m)
+		credsrc, _ = c.consumerProviders.Match(identity, nil, m)
 	}
-	if consumer == nil {
-		consumer = c.consumers.Get(emptyIdentity)
+	if credsrc == nil {
+		credsrc, _ = c.consumerProviders.Get(emptyIdentity)
 	}
-	if consumer == nil {
+	if credsrc == nil {
 		return nil, ErrUnknownConsumer(identity.String())
 	}
-	return consumer.GetCredentials(), nil
+	return credsrc, nil
 }
 
 func (c *_context) SetCredentialsForConsumer(identity ConsumerIdentity, creds CredentialsSource) {
 	c.Update()
-	c.consumers.Set(identity, creds)
+	c.consumerProviders.Set(identity, "", creds)
+}
+
+func (c *_context) SetCredentialsForConsumerWithProvider(pid ProviderIdentity, identity ConsumerIdentity, creds CredentialsSource) {
+	c.Update()
+	c.consumerProviders.Set(identity, pid, creds)
 }
 
 func (c *_context) ConsumerIdentityMatchers() IdentityMatcherRegistry {
@@ -198,4 +218,12 @@ func (c *_context) SetAlias(name string, spec RepositorySpec, creds ...Credentia
 		return a.SetAlias(c, name, spec, CredentialsChain(creds))
 	}
 	return errors.ErrNotImplemented("interface", "AliasRegistry", reflect.TypeOf(t).String())
+}
+
+func (c *_context) RegisterConsumerProvider(id ProviderIdentity, provider ConsumerProvider) {
+	c.consumerProviders.Register(id, provider)
+}
+
+func (c *_context) UnregisterConsumerProvider(id ProviderIdentity) {
+	c.consumerProviders.Unregister(id)
 }

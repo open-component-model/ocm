@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"os"
 	"reflect"
+	"runtime"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -17,6 +19,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	local "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
+	"github.com/open-component-model/ocm/pkg/finalizer"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var _ = Describe("docker config", func() {
@@ -45,51 +49,42 @@ var _ = Describe("docker config", func() {
 
 		It("serializes repo spec", func() {
 			spec := local.NewRepositorySpec("testdata/dockerconfig.json")
-			data, err := json.Marshal(spec)
-			Expect(err).To(Succeed())
+			data := Must(json.Marshal(spec))
 			Expect(data).To(Equal([]byte(specdata)))
 
 			spec = local.NewRepositorySpec("testdata/dockerconfig.json").WithConsumerPropagation(true)
-			data, err = json.Marshal(spec)
-			Expect(err).To(Succeed())
+			data = Must(json.Marshal(spec))
 			Expect(data).To(Equal([]byte(specdata2)))
 		})
 
 		It("deserializes repo spec", func() {
-			spec, err := DefaultContext.RepositorySpecForConfig([]byte(specdata), nil)
-			Expect(err).To(Succeed())
+			spec := Must(DefaultContext.RepositorySpecForConfig([]byte(specdata), nil))
 			Expect(reflect.TypeOf(spec).String()).To(Equal("*dockerconfig.RepositorySpec"))
 			Expect(spec.(*local.RepositorySpec).DockerConfigFile).To(Equal("testdata/dockerconfig.json"))
 		})
 
 		It("resolves repository", func() {
-			repo, err := DefaultContext.RepositoryForConfig([]byte(specdata), nil)
-			Expect(err).To(Succeed())
+			repo := Must(DefaultContext.RepositoryForConfig([]byte(specdata), nil))
 			Expect(reflect.TypeOf(repo).String()).To(Equal("*dockerconfig.Repository"))
 		})
 
 		It("retrieves credentials", func() {
-			repo, err := DefaultContext.RepositoryForConfig([]byte(specdata), nil)
-			Expect(err).To(Succeed())
+			repo := Must(DefaultContext.RepositoryForConfig([]byte(specdata), nil))
 
-			creds, err := repo.LookupCredentials("index.docker.io")
-			Expect(err).To(Succeed())
+			creds := Must(repo.LookupCredentials("index.docker.io"))
 			Expect(creds.Properties()).To(Equal(props))
 
-			creds, err = repo.LookupCredentials("ghcr.io")
-			Expect(err).To(Succeed())
+			creds = Must(repo.LookupCredentials("ghcr.io"))
 			Expect(creds.Properties()).To(Equal(props2))
 		})
 
 		It("propagates credentials to consumer identity", func() {
-			_, err := DefaultContext.RepositoryForConfig([]byte(specdata2), nil)
-			Expect(err).To(Succeed())
+			Must(DefaultContext.RepositoryForConfig([]byte(specdata2), nil))
 
-			creds, err := credentials.CredentialsForConsumer(DefaultContext, credentials.ConsumerIdentity{
+			creds := Must(credentials.CredentialsForConsumer(DefaultContext, credentials.ConsumerIdentity{
 				cpi.ATTR_TYPE:        identity.CONSUMER_TYPE,
 				identity.ID_HOSTNAME: "ghcr.io",
-			})
-			Expect(err).To(Succeed())
+			}))
 			Expect(creds.Properties()).To(Equal(props2))
 		})
 	})
@@ -98,11 +93,9 @@ var _ = Describe("docker config", func() {
 		specdata := "{\"type\":\"DockerConfig\",\"dockerConfig\":{\"auths\":{\"https://index.docker.io/v1/\":{\"auth\":\"bWFuZGVsc29mdDpwYXNzd29yZA==\"},\"https://ghcr.io\":{\"auth\":\"bWFuZGVsc29mdDp0b2tlbg==\"}},\"HttpHeaders\":{\"User-Agent\":\"Docker-Client/18.06.1-ce (linux)\"}},\"propagateConsumerIdentity\":true}"
 
 		It("serializes repo spec", func() {
-			configdata, err := os.ReadFile("testdata/dockerconfig.json")
-			Expect(err).To(Succeed())
+			configdata := Must(os.ReadFile("testdata/dockerconfig.json"))
 			spec := local.NewRepositorySpecForConfig(configdata).WithConsumerPropagation(true)
-			data, err := json.Marshal(spec)
-			Expect(err).To(Succeed())
+			data := Must(json.Marshal(spec))
 
 			var (
 				datajson map[string]interface{}
@@ -110,62 +103,73 @@ var _ = Describe("docker config", func() {
 			)
 			// Comparing the bytes might be problematic as the order of the JSON objects within the config file might change
 			// during Marshaling
-			err = json.Unmarshal([]byte(specdata), &specjson)
-			Expect(err).To(Succeed())
-			err = json.Unmarshal(data, &datajson)
-			Expect(err).To(Succeed())
+			MustBeSuccessful(json.Unmarshal([]byte(specdata), &specjson))
+			MustBeSuccessful(json.Unmarshal(data, &datajson))
 			Expect(datajson).To(Equal(specjson))
 		})
 
 		It("deserializes repo spec", func() {
-			spec, err := DefaultContext.RepositorySpecForConfig([]byte(specdata), nil)
-			Expect(err).To(Succeed())
+			spec := Must(DefaultContext.RepositorySpecForConfig([]byte(specdata), nil))
 			Expect(reflect.TypeOf(spec).String()).To(Equal("*dockerconfig.RepositorySpec"))
-			configdata, err := os.ReadFile("testdata/dockerconfig.json")
-			Expect(err).To(Succeed())
+			configdata := Must(os.ReadFile("testdata/dockerconfig.json"))
 			var (
 				configdatajson   map[string]interface{}
 				dockerconfigjson map[string]interface{}
 			)
 			// Comparing the bytes might be problematic as the order of the JSON objects within the config file might change
 			// during Marshaling
-			err = json.Unmarshal(configdata, &configdatajson)
-			Expect(err).To(Succeed())
-			err = json.Unmarshal(spec.(*local.RepositorySpec).DockerConfig, &dockerconfigjson)
-			Expect(err).To(Succeed())
+			MustBeSuccessful(json.Unmarshal(configdata, &configdatajson))
+			MustBeSuccessful(json.Unmarshal(spec.(*local.RepositorySpec).DockerConfig, &dockerconfigjson))
 			Expect(dockerconfigjson).To(Equal(configdatajson))
 		})
 
 		It("resolves repository", func() {
-			repo, err := DefaultContext.RepositoryForConfig([]byte(specdata), nil)
-			Expect(err).To(Succeed())
+			repo := Must(DefaultContext.RepositoryForConfig([]byte(specdata), nil))
 			Expect(reflect.TypeOf(repo).String()).To(Equal("*dockerconfig.Repository"))
 		})
 
 		It("retrieves credentials", func() {
-			repo, err := DefaultContext.RepositoryForConfig([]byte(specdata), nil)
-			Expect(err).To(Succeed())
+			repo := Must(DefaultContext.RepositoryForConfig([]byte(specdata), nil))
 
-			creds, err := repo.LookupCredentials("index.docker.io")
-			Expect(err).To(Succeed())
+			creds := Must(repo.LookupCredentials("index.docker.io"))
 			Expect(creds.Properties()).To(Equal(props))
 
-			creds, err = repo.LookupCredentials("ghcr.io")
-			Expect(err).To(Succeed())
+			creds = Must(repo.LookupCredentials("ghcr.io"))
 			Expect(creds.Properties()).To(Equal(props2))
-
 		})
 
 		It("propagates credentials to consumer identity", func() {
-			_, err := DefaultContext.RepositoryForConfig([]byte(specdata), nil)
-			Expect(err).To(Succeed())
+			Must(DefaultContext.RepositoryForConfig([]byte(specdata), nil))
 
-			creds, err := credentials.CredentialsForConsumer(DefaultContext, credentials.ConsumerIdentity{
+			creds := Must(credentials.CredentialsForConsumer(DefaultContext, credentials.ConsumerIdentity{
 				cpi.ATTR_TYPE:        identity.CONSUMER_TYPE,
 				identity.ID_HOSTNAME: "ghcr.io",
-			})
-			Expect(err).To(Succeed())
+			}))
 			Expect(creds.Properties()).To(Equal(props2))
+		})
+	})
+
+	Context("ref handling", func() {
+		specdata := "{\"type\":\"DockerConfig\",\"dockerConfigFile\":\"testdata/dockerconfig.json\",\"propagateConsumerIdentity\":true}"
+
+		It("can access the default context", func() {
+			ctx := credentials.New()
+
+			r := finalizer.GetRuntimeFinalizationRecorder(ctx)
+			Expect(r).NotTo(BeNil())
+
+			Must(ctx.RepositoryForConfig([]byte(specdata), nil))
+
+			runtime.GC()
+			time.Sleep(time.Second)
+			ctx.GetType()
+			Expect(r.Get()).To(BeNil())
+
+			ctx = nil
+			runtime.GC()
+			time.Sleep(time.Second)
+
+			Expect(r.Get()).To(ContainElement(ContainSubstring(credentials.CONTEXT_TYPE)))
 		})
 	})
 })
