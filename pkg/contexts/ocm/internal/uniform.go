@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -48,7 +47,7 @@ func (r *UniformRepositorySpec) CredHost() string {
 
 func (u *UniformRepositorySpec) String() string {
 	t := u.Type
-	if t != "" && !ocireg.IsKind(t) {
+	if t != "" {
 		t += "::"
 	}
 	if u.Info != "" {
