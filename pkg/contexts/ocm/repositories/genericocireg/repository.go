@@ -12,11 +12,13 @@ import (
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ocicpi "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type OCIBasedRepository interface {
@@ -45,7 +47,10 @@ type RepositoryImpl struct {
 	ocirepo oci.Repository
 }
 
-var _ OCIBasedRepository = (*Repository)(nil)
+var (
+	_ OCIBasedRepository                   = (*Repository)(nil)
+	_ credentials.ConsumerIdentityProvider = (*Repository)(nil)
+)
 
 func NewRepository(ctx cpi.Context, meta *ComponentRepositoryMeta, ocirepo oci.Repository) (cpi.Repository, error) {
 	repo := &RepositoryImpl{
@@ -63,6 +68,24 @@ func (r *RepositoryImpl) View(main ...bool) (*Repository, error) {
 		return nil, err
 	}
 	return &Repository{view: v, RepositoryImpl: r}, nil
+}
+
+func (r *RepositoryImpl) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
+	prefix := r.meta.SubPath
+	if c, ok := utils.Optional(uctx...).(credentials.StringUsageContext); ok {
+		prefix = path.Join(prefix, componentmapping.ComponentDescriptorNamespace, c.String())
+	}
+	if p, ok := r.ocirepo.(credentials.ConsumerIdentityProvider); ok {
+		return p.GetConsumerId(credentials.StringUsageContext(prefix))
+	}
+	return nil
+}
+
+func (r *RepositoryImpl) GetIdentityMatcher() string {
+	if p, ok := r.ocirepo.(credentials.ConsumerIdentityProvider); ok {
+		return p.GetIdentityMatcher()
+	}
+	return ""
 }
 
 func (r *RepositoryImpl) Close() error {

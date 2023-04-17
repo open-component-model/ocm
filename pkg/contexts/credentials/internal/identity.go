@@ -98,6 +98,11 @@ func orMatcher(list []IdentityMatcher) IdentityMatcher {
 // ConsumerIdentity describes the identity of a credential consumer.
 type ConsumerIdentity map[string]string
 
+// IsSet checks whether an identity is given.
+func (i ConsumerIdentity) IsSet() bool {
+	return len(i) != 0
+}
+
 // IdentityByURL return a simple url identity.
 func IdentityByURL(url string) ConsumerIdentity {
 	return ConsumerIdentity{"url": url}

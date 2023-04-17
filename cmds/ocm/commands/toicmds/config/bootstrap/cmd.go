@@ -5,6 +5,7 @@
 package bootstrap
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -32,6 +33,7 @@ import (
 	utils2 "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
+	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/toi"
 	"github.com/open-component-model/ocm/pkg/toi/install"
 	utils3 "github.com/open-component-model/ocm/pkg/utils"
@@ -197,24 +199,55 @@ func (a *action) Out() error {
 			out.Outf(a.cmd.Context, "%s: %d byte(s) written\n", schemeFile, len(spec.Scheme))
 		}
 	}
-	if a.download("configuration template", a.cmd.ParameterFile, cv, spec.AdditionalResources[toi.AdditionalResourceConfigFile], resolver) != nil {
-		err = fmt.Errorf("download failed")
-	}
 
-	if e := a.download("credentials template", a.cmd.CredentialsFile, cv, spec.AdditionalResources[toi.AdditionalResourceCredentialsFile], resolver); e != nil {
-		out.Errf(a.cmd.Context, "%s", e.Error())
-		err = fmt.Errorf("download failed")
-	}
+	list := errors.ErrList()
+	list.Add(a.handle("configuration template", a.cmd.ParameterFile, cv, spec.AdditionalResources[toi.AdditionalResourceConfigFile], resolver))
+	list.Add(a.handle("credentials template", a.cmd.CredentialsFile, cv, spec.AdditionalResources[toi.AdditionalResourceCredentialsFile], resolver))
+	return list.Result()
+}
 
-	return err
+func (a *action) handle(kind, path string, cv ocm.ComponentVersionAccess, spec *toi.AdditionalResource, resolver ocm.ComponentVersionResolver) error {
+	var err error
+	if spec != nil {
+		if spec.ResourceReference != nil && len(spec.ResourceReference.Resource) != 0 {
+			return a.download(kind, a.cmd.ParameterFile, cv, spec.ResourceReference, resolver)
+		} else {
+			var content interface{}
+			if len(spec.Content) > 0 {
+				if err = json.Unmarshal(spec.Content, &content); err != nil {
+					return errors.Wrapf(err, "cannot marshal %s content", kind)
+				}
+				l := 0
+				out.Outf(a.cmd.Context, "writing %s...\n", kind)
+				switch c := content.(type) {
+				case string:
+					l = len(c)
+					err = vfs.WriteFile(a.cmd.FileSystem(), path, []byte(c), 0o600)
+				case []byte:
+					l = len(c)
+					err = vfs.WriteFile(a.cmd.FileSystem(), path, c, 0o600)
+				default:
+					data, err := runtime.DefaultYAMLEncoding.Marshal(spec.Content)
+					if err != nil {
+						data = spec.Content
+					}
+					l = len(spec.Content)
+					err = vfs.WriteFile(a.cmd.FileSystem(), path, data, 0o600)
+				}
+				if err != nil {
+					return errors.Wrapf(err, "cannot write %s to %s", kind, path)
+				}
+				out.Outf(a.cmd.Context, "%s: %d byte(s) written\n", path, l)
+				return nil
+			}
+			return nil
+		}
+	}
+	out.Outf(a.cmd.Context, "no %s configured\n", kind)
+	return nil
 }
 
 func (a *action) download(kind, path string, cv ocm.ComponentVersionAccess, spec *metav1.ResourceReference, resolver ocm.ComponentVersionResolver) error {
-
-	if spec == nil {
-		out.Outf(a.cmd.Context, "no %s configured\n", kind)
-		return nil
-	}
 	res, _, err := utils2.MatchResourceReference(cv, toi.TypeYAML, *spec, resolver)
 	if err != nil {
 		return errors.Wrapf(err, "%s resource", kind)

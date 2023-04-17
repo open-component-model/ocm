@@ -33,12 +33,17 @@ const (
 
 type PackageSpecification struct {
 	CredentialsRequest  `json:",inline"`
-	Template            json.RawMessage                      `json:"configTemplate,omitempty"`
-	Libraries           []metav1.ResourceReference           `json:"templateLibraries,omitempty"`
-	Scheme              json.RawMessage                      `json:"configScheme,omitempty"`
-	Executors           []Executor                           `json:"executors"`
-	Description         string                               `json:"description"`
-	AdditionalResources map[string]*metav1.ResourceReference `json:"additionalResources,omitempty"`
+	Template            json.RawMessage                `json:"configTemplate,omitempty"`
+	Libraries           []metav1.ResourceReference     `json:"templateLibraries,omitempty"`
+	Scheme              json.RawMessage                `json:"configScheme,omitempty"`
+	Executors           []Executor                     `json:"executors"`
+	Description         string                         `json:"description"`
+	AdditionalResources map[string]*AdditionalResource `json:"additionalResources,omitempty"`
+}
+
+type AdditionalResource struct {
+	*metav1.ResourceReference `json:",inline"`
+	Content                   json.RawMessage `json:"content,omitempty"`
 }
 
 type Executor struct {

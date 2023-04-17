@@ -11,6 +11,36 @@ import (
 	"github.com/open-component-model/ocm/pkg/generics"
 )
 
+// UsageContext descibes a dediacetd type specific
+// sub usage kinds for an object requiring credentials.
+// For example, for an object providing a hierarchical
+// namespace this might be a namespace prefix for
+// included objects, for which credentials should be requested.
+type UsageContext interface {
+	String() string
+}
+
+type StringUsageContext string
+
+func (s StringUsageContext) String() string {
+	return string(s)
+}
+
+// ConsumerIdentityProvider is an interface for objects requiring
+// credentials, which want to expose the ConsumerId they are
+// using to request implicit credentials.
+type ConsumerIdentityProvider interface {
+	// GetConsumerId provides information about the consumer id
+	// used for the object implementing this interface.
+	// Optionally a sub context can be given to specify
+	// a dedicated type specific sub realm.
+	GetConsumerId(uctx ...UsageContext) ConsumerIdentity
+	// GetIdentityMatcher provides the identity macher type to use
+	// to match the consumer identities configured in a credentials
+	// context.
+	GetIdentityMatcher() string
+}
+
 type _consumers struct {
 	data map[string]*_consumer
 }

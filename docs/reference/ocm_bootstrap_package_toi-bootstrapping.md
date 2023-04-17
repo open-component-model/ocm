@@ -56,6 +56,7 @@ contained in the component version, which contains the package resource.
 
 It is a plain yaml resource with the media types media type <code>application/x-yaml</code>,
 <code>text/yaml</code> or
+
 <code>application/vnd.toi.ocm.software.package.v1+yaml</code>) containing
 information required to control the instantiation of an executor.
 
@@ -90,9 +91,10 @@ It has the following format:
   requites the specification of a credentials file providing the information
   how to satisfy those credential requests.
 
-- **<code>additionalResources</code>** (optional) *map[string]ResourceReference*
+- **<code>additionalResources</code>** (optional) *map[string]AdditionalResource)*
 
-  A set of additional resources specified by OCM resource references.
+  A set of additional resources specified by an OCM resource reference or
+  direct data as byte, string or yaml.
   The key describes the meaning of the resource. The following keys have
   a special meaning:
 
@@ -175,6 +177,17 @@ that contains the resource reference. It uses the following fields:
 
   This is the identity of the resource in the selected component version.
 
+#### *AdditionalResource*
+
+This field has either the fields of a *ResourceReference* to refer to the
+content of an OCM resource or the field:
+
+- **<code>content</code>** *string|[]byte|YAML*
+  
+  Either a resource reference or the field <code>content</code> must be given.
+  The content field may contain a string or an inline YAML document.
+  For larger content the resource reference form should be preferred.
+
 #### *Identity*
 
 An identity specification is a <code>map[string]string</code>. It describes
@@ -192,7 +205,7 @@ to provide specifc values expected by the executor.
 This is done by a _spiff_ template. Here special functions
 are provided to access specific content:
 
-- <code>hasCredentials(string) bool</code>
+- <code>hasCredentials(string[,string]) bool</code>
 
   This function can be used to check whether dedicated credentials
   are effectively provided for the actual installation.
@@ -201,9 +214,18 @@ are provided to access specific content:
   request section optionally mapped to the name used for the executor
   (field <code>credentialMapping</code>).
 
-- <code>getCredentials(string) map[string]string</code>
+  If the second argument is given, it checks for the named property
+  in the credential set.
 
-  This functions provides the property set of the provided credentials. 
+- <code>getCredentials(string[,string]) map[string]string | string</code>
+
+  This functions provides the property set of the provided credentials.
+
+  If the second argument is given, it returns the named property in the
+  selected credential set.
+
+  If the property name is an asterisks (<code>*</code>) a single property
+  is expected, whose value is returned.
 
 #### User Config vs Executor Config
 
@@ -240,7 +262,6 @@ definitions.
 
 
 ### The <code>toiExecutor</code> Resource
-
 Instead of directly describing an image resource in the package file, it is
 possible to refer to a resource of type toiExecutor. This
 is a yaml file with the media type <code>application/x-yaml</code>,
