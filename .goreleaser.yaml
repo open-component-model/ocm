@@ -1,7 +1,7 @@
 before:
   hooks:
     - go mod tidy
-    - make ctf
+    - make CTF_TYPE=directory ctf
 
 builds:
   - <<: &build_defaults
@@ -44,12 +44,12 @@ archives:
     format: zip
     files:
       - none*
-  - name_template: ctf
+  - name_template: "{{ .ProjectName }}-{{ .Version }}-ctf"
     format: tgz
     meta: true
     rlcp: true
     files:
-    - src: gen/helmdemo/ctf
+    - src: gen/ctf
       dst: .
 
 source:

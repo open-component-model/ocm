@@ -163,12 +163,14 @@ jobs:
       run: |
         RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/pkg/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
         echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
+        echo "release name is $RELEASE_VERSION"
 
     - name: Set Version
       if: inputs.release_candidate == false
       run: |
         RELEASE_VERSION=${{env.BASE_VERSION}}
         echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
+        echo "release name is $RELEASE_VERSION"
 
     - name: Get Draft Release Notes
       id: release-notes
@@ -218,7 +220,6 @@ jobs:
         args: release --rm-dist --timeout 60m --skip-validate --config=./.goreleaser.yaml --release-notes=${{ env.RELEASE_NOTES_FILE }}
       env:
         GITHUBORG: ${{ github.repository_owner }}
-        GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.EVENT_API }}
         GORELEASER_CURRENT_TAG: ${{ env.RELEASE_VERSION }}
@@ -227,7 +228,6 @@ jobs:
       env:
         GITHUBORG: ${{ github.repository_owner }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
       run: make plain-push
 
     - name: Create Release Branch

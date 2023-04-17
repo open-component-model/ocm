@@ -16,9 +16,8 @@ VERSION                                        = $(shell go run $(REPO_ROOT)/pkg
 COMMIT                                         = $(shell git rev-parse HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
 HELMINSTVERSION                               ?= $(VERSION)
-CREDS                                          = $(shell $(REPO_ROOT)/hash/githubcreds.sh)
 
-CREDS := $(shell $(REPO_ROOT)/hack/githubcreds.sh)
+CREDS ?=
 OCM = go run $(REPO_ROOT)/cmds/ocm $(CREDS)
 
 GEN = $(REPO_ROOT)/gen/subchartsdemo

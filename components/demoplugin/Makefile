@@ -14,7 +14,7 @@ GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(NAME) -type f)
 OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
 
-CREDS := $(shell $(REPO_ROOT)/hack/githubcreds.sh)
+CREDS ?=
 OCM = go run $(REPO_ROOT)/cmds/ocm $(CREDS)
 
 GEN = $(REPO_ROOT)/gen/$(NAME)

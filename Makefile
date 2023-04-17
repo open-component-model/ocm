@@ -11,8 +11,9 @@ EFFECTIVE_VERSION                              := $(VERSION)+$(shell git rev-par
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 COMMIT                                         := $(shell git rev-parse --verify HEAD)
 
-CREDS := $(shell $(REPO_ROOT)/hack/githubcreds.sh)
-OCM := go run $(REPO_ROOT)/cmds/ocm $(CREDS)
+CREDS    ?=
+OCM      := go run $(REPO_ROOT)/cmds/ocm $(CREDS)
+CTF_TYPE ?= tgz
 
 GEN := $(REPO_ROOT)/gen
 
@@ -124,8 +125,8 @@ $(GEN)/ctf: $(GEN)/.exists $(GEN)/.comps
 	@rm -rf "$(GEN)"/ctf
 	@for i in $(COMPONENTS); do \
       echo "transfering component $$i..."; \
-	  echo $(OCM) transfer cv  --type tgz -V $(GEN)/$$i/ctf $(GEN)/ctf; \
-	  $(OCM) transfer cv  --type tgz -V $(GEN)/$$i/ctf $(GEN)/ctf; \
+	  echo $(OCM) transfer cv  --type $(CTF_TYPE) -V $(GEN)/$$i/ctf $(GEN)/ctf; \
+	  $(OCM) transfer cv  --type $(CTF_TYPE) -V $(GEN)/$$i/ctf $(GEN)/ctf; \
 	done
 	@touch $@
 
@@ -145,8 +146,8 @@ plain-ctf: $(GEN)
 	@rm -rf "$(GEN)"/ctf
 	@for i in $(COMPONENTS); do \
        echo "transfering component $$i..."; \
-       echo $(OCM) transfer cv  --type tgz -V $(GEN)/$$i/ctf $(GEN)/ctf; \
-       $(OCM) transfer cv  --type tgz -V $(GEN)/$$i/ctf $(GEN)/ctf; \
+       echo $(OCM) transfer cv  --type $(CTF_TYPE) -V $(GEN)/$$i/ctf $(GEN)/ctf; \
+       $(OCM) transfer cv  --type $(CTF_TYPE) -V $(GEN)/$$i/ctf $(GEN)/ctf; \
      done
 
 .PHONY: clean

@@ -15,7 +15,7 @@ EFFECTIVE_VERSION                              = $(VERSION)+$(COMMIT)
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(CMD) -type f) Makefile
 OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
 
-CREDS := $(shell $(REPO_ROOT)/hack/githubcreds.sh)
+CREDS ?=
 OCM = go run $(REPO_ROOT)/cmds/ocm $(CREDS)
 
 GEN = $(REPO_ROOT)/gen/$(shell basename $(realpath .))

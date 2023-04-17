@@ -14,7 +14,7 @@ EFFECTIVE_VERSION                              := $(VERSION)-$(COMMIT)
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 PLATFORM                                       := $(shell go env GOOS)/$(shell go env GOARCH)
 
-CREDS := $(shell $(REPO_ROOT)/hack/githubcreds.sh)
+CREDS ?=
 OCM = go run $(REPO_ROOT)/cmds/ocm $(CREDS)
 
 GEN = $(REPO_ROOT)/gen/$(NAME)
