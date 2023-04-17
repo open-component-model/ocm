@@ -15,6 +15,7 @@ package jsonv2
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/pkg/signing/norm/jcs"
 )
 
 const Algorithm = compdesc.JsonNormalisationV2
@@ -26,7 +27,7 @@ func init() {
 type normalization struct{}
 
 func (m normalization) Normalize(cd *compdesc.ComponentDescriptor) ([]byte, error) {
-	data, err := signing.Normalize(cd, CDExcludes)
+	data, err := signing.Normalize(jcs.Type, cd, CDExcludes)
 	return data, err
 }
 
