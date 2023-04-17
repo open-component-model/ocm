@@ -186,6 +186,11 @@ func (m *accessMethod) getArtifact() (oci.ArtifactAccess, *oci.RefSpec, error) {
 }
 
 func (m *accessMethod) Digest() digest.Digest {
+	d, _ := m.GetDigest()
+	return d
+}
+
+func (m *accessMethod) GetDigest() (digest.Digest, error) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
@@ -194,11 +199,11 @@ func (m *accessMethod) Digest() digest.Digest {
 		m.art = art
 		blob, err := art.Blob()
 		if err == nil {
-			return blob.Digest()
+			return blob.Digest(), nil
 		}
 		m.finalizer.Close(blob)
 	}
-	return ""
+	return "", err
 }
 
 func (m *accessMethod) Get() ([]byte, error) {
