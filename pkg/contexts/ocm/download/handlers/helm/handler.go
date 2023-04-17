@@ -13,12 +13,14 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
+	registry "github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
@@ -27,15 +29,18 @@ const TYPE = resourcetypes.HELM_CHART
 type Handler struct{}
 
 func init() {
-	download.RegisterForArtifactType(TYPE, &Handler{})
+	registry.RegisterForArtifactType(TYPE, &Handler{})
 }
 
-func (h Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (bool, string, error) {
+func (h Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (_ bool, _ string, err error) {
+	var finalize finalizer.Finalizer
+	defer finalize.FinalizeWithErrorPropagationf(&err, "downloading helm chart")
+
 	meth, err := racc.AccessMethod()
 	if err != nil {
 		return false, "", err
 	}
-	defer meth.Close()
+	finalize.Close(meth)
 	if mime.BaseType(meth.MimeType()) != mime.BaseType(artdesc.MediaTypeImageManifest) {
 		return false, "", nil
 	}
@@ -43,58 +48,75 @@ func (h Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string
 	if err != nil {
 		return true, "", err
 	}
-	defer rd.Close()
+	finalize.Close(rd)
 	set, err := artifactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(rd))
 	if err != nil {
 		return true, "", err
 	}
+	finalize.Close(set)
 	art, err := set.GetArtifact(set.GetMain().String())
 	if err != nil {
 		return true, "", err
 	}
+	finalize.Close(art)
+	err = download(p, art, path, fs)
+	if err != nil {
+		return true, "", err
+	}
+	return true, "", nil
+}
+
+func download(p common.Printer, art oci.ArtifactAccess, path string, fs vfs.FileSystem) (err error) {
+	var finalize finalizer.Finalizer
+	defer finalize.FinalizeWithErrorPropagation(&err)
+
 	m := art.ManifestAccess()
 	if m == nil {
-		return true, "", errors.Newf("artifact is no image manifest")
+		return errors.Newf("artifact is no image manifest")
 	}
 	if len(m.GetDescriptor().Layers) < 1 {
-		return true, "", errors.Newf("no layers found")
+		return errors.Newf("no layers found")
 	}
 	if !strings.HasSuffix(path, ".tgz") {
 		path += ".tgz"
 	}
 	blob, err := m.GetBlob(m.GetDescriptor().Layers[0].Digest)
 	if err != nil {
-		return true, "", err
+		return err
 	}
-	err = h.write(p, blob, path, fs)
+	finalize.Close(blob)
+	err = write(p, blob, path, fs)
 	if err != nil {
-		return true, "", err
+		return err
 	}
 	if len(m.GetDescriptor().Layers) > 1 {
 		path = path[:len(path)-3] + "prov"
 		blob, err := m.GetBlob(m.GetDescriptor().Layers[1].Digest)
 		if err != nil {
-			return true, "", err
+			return err
 		}
-		err = h.write(p, blob, path, fs)
+		err = write(p, blob, path, fs)
 		if err != nil {
-			return true, "", err
+			return err
 		}
 	}
-	return true, path, nil
+	return nil
 }
 
-func (_ Handler) write(p common.Printer, blob accessio.BlobAccess, path string, fs vfs.FileSystem) error {
+func write(p common.Printer, blob accessio.BlobAccess, path string, fs vfs.FileSystem) (err error) {
+	var finalize finalizer.Finalizer
+	defer finalize.FinalizeWithErrorPropagation(&err)
+
 	cr, err := blob.Reader()
 	if err != nil {
 		return err
 	}
-	defer cr.Close()
+	finalize.Close(cr)
 	file, err := fs.OpenFile(path, vfs.O_TRUNC|vfs.O_CREATE|vfs.O_WRONLY, 0o660)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	finalize.Close(file)
 	n, err := io.Copy(file, cr)
 	if err == nil {
 		p.Printf("%s: %d byte(s) written\n", path, n)
