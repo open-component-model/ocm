@@ -16,6 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/docker"
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -50,7 +51,10 @@ type Repository struct {
 	info   *RepositoryInfo
 }
 
-var _ cpi.Repository = &Repository{}
+var (
+	_ cpi.Repository                       = &Repository{}
+	_ credentials.ConsumerIdentityProvider = &Repository{}
+)
 
 func NewRepository(ctx cpi.Context, spec *RepositorySpec, info *RepositoryInfo) (*Repository, error) {
 	urs := spec.UniformRepositorySpec()
@@ -60,6 +64,17 @@ func NewRepository(ctx cpi.Context, spec *RepositorySpec, info *RepositoryInfo) 
 		spec:   spec,
 		info:   info,
 	}, nil
+}
+
+func (r *Repository) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
+	if c, ok := utils.Optional(uctx...).(credentials.StringUsageContext); ok {
+		return GetConsumerId(r.info.Locator, c.String())
+	}
+	return GetConsumerId(r.info.Locator, "")
+}
+
+func (r *Repository) GetIdentityMatcher() string {
+	return identity.CONSUMER_TYPE
 }
 
 func (r *Repository) NamespaceLister() cpi.NamespaceLister {

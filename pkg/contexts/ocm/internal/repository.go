@@ -9,6 +9,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 )
@@ -29,6 +30,11 @@ type Repository interface {
 
 	Close() error
 }
+
+// ConsumerIdentityProvider is an interface for object requiring
+// credentials, which want to expose the ConsumerId they are
+// usingto request implicit credentials.
+type ConsumerIdentityProvider = credentials.ConsumerIdentityProvider
 
 type (
 	DataAccess = accessio.DataAccess

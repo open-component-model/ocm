@@ -8,6 +8,7 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 )
 
@@ -20,6 +21,10 @@ type Repository interface {
 	LookupNamespace(name string) (NamespaceAccess, error)
 	Close() error
 }
+
+// ConsumerIdentityProvider is an optional interface for repositories
+// to tell about their credential requests.
+type ConsumerIdentityProvider = credentials.ConsumerIdentityProvider
 
 type RepositorySource interface {
 	GetRepository() Repository

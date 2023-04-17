@@ -21,6 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	globalconfig "github.com/open-component-model/ocm/pkg/contexts/config/config"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/logforward"
 	logcfg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config/logging"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -163,7 +164,7 @@ func mappingKeyFor(value string, m map[string]string) string {
 
 // CheckCredentialRequests determine required credentials for executor.
 func CheckCredentialRequests(executor *toi.Executor, spec *toi.PackageSpecification, espec *toi.ExecutorSpecification) (map[string]CredentialsRequestSpec, map[string]string, error) {
-	credentials := spec.Credentials
+	credsspec := spec.Credentials
 	credmapping := map[string]string{}
 
 	if len(espec.Credentials) > 0 {
@@ -178,7 +179,7 @@ func CheckCredentialRequests(executor *toi.Executor, spec *toi.PackageSpecificat
 					if _, ok := espec.Credentials[ke]; ok {
 						credmapping[k] = ke
 					} else {
-						delete(credentials, k)
+						delete(credsspec, k)
 					}
 				}
 			}
@@ -189,10 +190,10 @@ func CheckCredentialRequests(executor *toi.Executor, spec *toi.PackageSpecificat
 				if ko == "" {
 					return nil, nil, errors.Newf("credential mapping missing for executor credential key %q", ke)
 				}
-				if o, ok := credentials[ko]; !ok {
+				if o, ok := credsspec[ko]; !ok {
 					if !e.Optional {
 						// implicit inheritance of executor spec setting
-						credentials[ko] = e
+						credsspec[ko] = e
 						credmapping[ko] = ke
 					}
 				} else {
@@ -203,27 +204,27 @@ func CheckCredentialRequests(executor *toi.Executor, spec *toi.PackageSpecificat
 			}
 		} else {
 			// no credential requests specified for package, use the one from the executor
-			credentials = espec.Credentials
+			credsspec = espec.Credentials
 		}
 	} else {
 		if len(executor.CredentialMapping) > 0 {
 			// determine subset of credentials required for executor
 			credmapping = executor.CredentialMapping
-			for k := range credentials {
+			for k := range credsspec {
 				if _, ok := credmapping[k]; !ok {
-					delete(credentials, k)
+					delete(credsspec, k)
 				} else {
 					credmapping[k] = k
 				}
 			}
 		} else {
 			// assume to require all as defined
-			for k := range credentials {
+			for k := range credsspec {
 				credmapping[k] = k
 			}
 		}
 	}
-	return credentials, credmapping, nil
+	return credsspec, credmapping, nil
 }
 
 func ProcessConfig(name string, octx ocm.Context, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver, template []byte, config []byte, libraries []metav1.ResourceReference, schemedata []byte) ([]byte, error) {
@@ -354,18 +355,31 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 		p.Printf("using executor config:\n%s\n", utils2.IndentLines(string(econfig), "  "))
 	}
 	// handle credentials
-	credentials, credmapping, err := CheckCredentialRequests(executor, spec, &espec.Spec)
+	credreqs, credmapping, err := CheckCredentialRequests(executor, spec, &espec.Spec)
 	if err != nil {
 		return nil, err
 	}
 
 	// prepare ocm config with credential settings and logging config forwarding
-	if len(credentials) > 0 {
+	if len(credreqs) > 0 {
 		if creds == nil {
 			return nil, errors.Newf("credential settings required")
 		}
 	}
-	ccfg, credvals, err := GetCredentials(octx.CredentialsContext(), creds, credentials, credmapping)
+
+	if p, ok := cv.Repository().(credentials.ConsumerIdentityProvider); ok {
+		cid := p.GetConsumerId()
+		if cid.IsSet() {
+			if creds == nil {
+				creds = &Credentials{}
+			}
+			creds.Forwarded = append(creds.Forwarded, toi.ForwardSpec{
+				ConsumerId:   cid,
+				ConsumerType: p.GetIdentityMatcher(),
+			})
+		}
+	}
+	ccfg, credvals, err := GetCredentials(octx.CredentialsContext(), creds, credreqs, credmapping)
 	if err != nil {
 		return nil, errors.Wrapf(err, "credential evaluation failed")
 	}
@@ -411,7 +425,7 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 	}
 
 	names := []string{}
-	for n := range credentials {
+	for n := range credreqs {
 		m := credmapping[n]
 		names = append(names, n+"->"+m)
 	}
