@@ -37,6 +37,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.27.11
 	github.com/containerd/containerd v1.6.18
 	github.com/containers/image/v5 v5.21.1
+	github.com/cyberphone/json-canonicalization v0.0.0-20220623050100-57a0ce2678a7
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/drone/envsubst v1.0.3
