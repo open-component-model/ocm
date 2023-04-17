@@ -1,6 +1,8 @@
 before:
   hooks:
     - go mod tidy
+    - make ctf
+
 builds:
   - <<: &build_defaults
       binary: ocm
@@ -42,6 +44,14 @@ archives:
     format: zip
     files:
       - none*
+  - name_template: ctf
+    format: tgz
+    meta: true
+    rlcp: true
+    files:
+    - src: gen/helmdemo/ctf
+      dst: .
+
 source:
   enabled: true
   name_template: '{{ .ProjectName }}-{{ .Version }}-source_code'

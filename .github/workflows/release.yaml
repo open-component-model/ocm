@@ -97,20 +97,30 @@ jobs:
         releaseName: ${{ env.BASE_VERSION }}
 
   lint-and-test:
+    name: Lint and Unit Tests
     uses: ./.github/workflows/lint_and_test.yaml
+    needs: check
+    permissions:
+      contents: read
+      pull-requests: read
+  components:
+    name: Component CTF Builds
+    uses: ./.github/workflows/components.yaml
     needs: check
     permissions:
       contents: read
       pull-requests: read
 
   release:
-    needs: lint-and-test
+    needs:
+    - lint-and-test
+    - components
     name: Release Build
     runs-on: ubuntu-latest
     permissions:
       contents: write
       id-token: write
-      repository-projects: read
+      packages: write
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -179,12 +189,16 @@ jobs:
         fi
         v="${{env.RELEASE_VERSION}}"
         f="docs/releasenotes/$v.md"
-        echo "Release ${{ env.RELEASE_VERSION }}" > "$f"
-        echo "$RELEASE_NOTES" | tail -n +2 >> "$f"
-        echo "RELEASE_NOTES_FILE=$f" >> $GITHUB_ENV
-        git add "$f"
-        git commit -m "ReleaseNotes for $RELEASE_VERSION"
-        git push origin ${GITHUB_REF#refs/heads/}
+        if [ ! -f "$f" ]; then
+          echo "Release ${{ env.RELEASE_VERSION }}" > "$f"
+          echo "$RELEASE_NOTES" | tail -n +2 >> "$f"
+          echo "RELEASE_NOTES_FILE=$f" >> $GITHUB_ENV
+          git add "$f"
+          git commit -m "ReleaseNotes for $RELEASE_VERSION"
+          git push origin ${GITHUB_REF#refs/heads/}
+        else
+          echo "Using release notes file $f from code base"
+        fi
 
     - name: Create and Push Release
       run: |
@@ -203,9 +217,18 @@ jobs:
         version: latest
         args: release --rm-dist --timeout 60m --skip-validate --config=./.goreleaser.yaml --release-notes=${{ env.RELEASE_NOTES_FILE }}
       env:
+        GITHUBORG: ${{ github.repository_owner }}
+        GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.EVENT_API }}
         GORELEASER_CURRENT_TAG: ${{ env.RELEASE_VERSION }}
+
+    - name: Push OCM Components
+      env:
+        GITHUBORG: ${{ github.repository_owner }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+      run: make plain-push
 
     - name: Create Release Branch
       if: inputs.release_candidate == false && inputs.create_branch
