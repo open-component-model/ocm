@@ -141,14 +141,30 @@ func (d *Digester) DetermineDigest(reftyp string, acc cpi.AccessMethod, preferre
 		// not reached (endless for)
 	}
 	if ociartifact.Is(acc.AccessSpec()) {
-		dig := acc.(accessio.DigestSource).Digest()
+		var (
+			dig digest.Digest
+			err error
+		)
+
+		// first: check for error providing interface
+		if s, ok := acc.(DigestSource); ok {
+			dig, err = s.GetDigest()
+		} else {
+			// second: fallback to standard digest interface
+			dig = acc.(accessio.DigestSource).Digest()
+		}
+
 		if dig != "" {
 			if d.GetType().HashAlgorithm != signing.NormalizeHashAlgorithm(dig.Algorithm().String()) {
 				return nil, nil
 			}
 			return cpi.NewDigestDescriptor(dig.Hex(), d.GetType()), nil
 		}
-		return nil, errors.Newf("cannot determine digest")
+		return nil, errors.NewEf(err, "cannot determine digest")
 	}
 	return nil, nil
+}
+
+type DigestSource interface {
+	GetDigest() (digest.Digest, error)
 }
