@@ -150,7 +150,7 @@ func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
 	}
 	if _, _, err := blobData.AddBlob(blob); err != nil {
 		log.Debug("adding blob failed", "digest", blob.Digest(), "error", err.Error())
-		return fmt.Errorf("unable to add blob: %w", err)
+		return fmt.Errorf("unable to add blob (OCI repository %s): %w", n.namespace, err)
 	}
 	log.Debug("adding blob done", "digest", blob.Digest())
 	return nil

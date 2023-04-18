@@ -1,6 +1,8 @@
 before:
   hooks:
     - go mod tidy
+    - make CTF_TYPE=directory ctf
+
 builds:
   - <<: &build_defaults
       binary: ocm
@@ -42,6 +44,14 @@ archives:
     format: zip
     files:
       - none*
+  - name_template: "{{ .ProjectName }}-{{ .Version }}-ctf"
+    format: tgz
+    meta: true
+    rlcp: true
+    files:
+    - src: gen/ctf
+      dst: .
+
 source:
   enabled: true
   name_template: '{{ .ProjectName }}-{{ .Version }}-source_code'

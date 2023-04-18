@@ -6,10 +6,12 @@ package app_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"strings"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
@@ -56,11 +58,12 @@ var _ = Describe("Test Environment", func() {
 		ocmlog.SetContext(oldlog)
 	})
 
-	It("get gets the version", func() {
+	It("version gets the version", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("version")).To(Succeed())
-		Expect(strings.HasPrefix(buf.String(), "version.Info{Major:")).To(BeTrue())
-
+		Expect(strings.HasPrefix(buf.String(), "{\"Major\":")).To(BeTrue())
+		var m map[string]interface{}
+		Expect(json.Unmarshal(buf.Bytes(), &m)).To(Succeed())
 	})
 	It("do logging", func() {
 		buf := bytes.NewBuffer(nil)

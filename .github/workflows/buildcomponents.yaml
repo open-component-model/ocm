@@ -49,14 +49,15 @@ jobs:
         env:
           GITHUBORG: ${{ github.repository_owner }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
-        run: make push
+        run: |
+          make push
 
       - name: Build OCM Components
         if: inputs.ocm_push == false
         env:
           GITHUBORG: ${{ github.repository_owner }}
-        run: make ctf
+        run: |
+          make ctf
 
       - name: Upload OCM Archive
         uses: actions/upload-artifact@v3

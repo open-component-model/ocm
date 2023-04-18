@@ -103,7 +103,6 @@ func pushData(ctx context.Context, p resolve.Pusher, desc artdesc.Descriptor, da
 
 			return nil
 		}
-
 		return fmt.Errorf("failed to push: %w", err)
 	}
 	return req.Commit(ctx, desc.Size, desc.Digest)
