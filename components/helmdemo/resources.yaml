@@ -20,7 +20,7 @@ type: ociImage
 version: "1.0"
 access:
   type: ociArtifact
-  imageReference: gcr.io/google_containers/echoserver:1.10
+  imageReference: gcr.io/google-containers/echoserver:1.10
 ---
 name: config-example
 type: yaml

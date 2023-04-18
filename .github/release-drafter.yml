@@ -1,10 +1,10 @@
-name-template: 'v$NEXT_MINOR_VERSION'
-tag-template: 'v$NEXT_MINOR_VERSION'
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
 version-template: '$COMPLETE'
 change-template: '- $TITLE (#$NUMBER)'
 change-title-escapes: '\<*_&#@`'
 template: |
-  # Release v$NEXT_MINOR_VERSION
+  # Release v$RESOLVED_VERSION
 
   $CHANGES
 exclude-labels:

@@ -1,26 +1,27 @@
-OCMREPO   ?= ghcr.io/$(GITHUBORG)/ocm
-q
-NAME= subcharts
-PROVIDER  ?= ocm.software
-GITHUBORG  ?= open-component-model
-COMPONENT_PREFIX = $(PROVIDER)/toi/demo/$(NAME)
+NAME             := subcharts
+PROVIDER         ?= ocm.software
+GITHUBORG        ?= open-component-model
+COMPONENT_PREFIX  = $(PROVIDER)/toi/demo/$(NAME)
+OCMREPO          ?= ghcr.io/$(GITHUBORG)/ocm
+
+HELMINSTCOMP      = ocm.software/toi/installers/helminstaller
+
 ECHO_VERSION = "1.10"
 ECHO_CHART_VERSION = 0.1.0
 PODINFO_VERSION = 6.3.5
 PODINFO_CHART_VERSION = 6.3.5
-HELMINSTCOMP = ocm.software/toi/installers/helminstaller
 
-REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
-VERSION                                        := $(shell go run $(REPO_ROOT)/pkg/version/generate/release_generate.go print-rc-version)
-# for release
-# VERSION                                        := $(shell go run $(REPO_ROOT)/pkg/version/generate/release_generate.go print-version)
+REPO_ROOT                                     := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/../..
+VERSION                                        = $(shell go run $(REPO_ROOT)/pkg/version/generate/release_generate.go print-rc-version $(CANDIDATE))
 COMMIT                                         = $(shell git rev-parse HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)-$(COMMIT)
-HELMINSTVERSION                                = $(VERSION)
+HELMINSTVERSION                               ?= $(VERSION)
 
-GEN = $(REPO_ROOT)/gen/$(NAME)
-# OCM = go run $(REPO_ROOT)/cmds/ocm
-OCM = ocm
+CREDS ?=
+OCM = go run $(REPO_ROOT)/cmds/ocm $(CREDS)
+
+GEN = $(REPO_ROOT)/gen/subchartsdemo
+
 ECHOCHARTSRCS=$(shell find echoserver -type f)
 
 .PHONY: ctf
@@ -56,6 +57,7 @@ info:
 	@echo "ROOT:     $(REPO_ROOT)"
 	@echo "VERSION:  $(VERSION)"
 	@echo "COMMIT:   $(COMMIT)"
+	@echo "CREDS:    $(CREDS)"
 
 .PHONY: describe
 describe: $(GEN)/ctf

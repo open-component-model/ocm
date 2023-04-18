@@ -7,7 +7,9 @@
 package app
 
 import (
+	"fmt"
 	"strings"
+	"unicode"
 
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
@@ -327,6 +329,27 @@ func (o *CLIOptions) Complete() error {
 	return registration.RegisterExtensions(o.Context.OCMContext())
 }
 
+func prepare(s string) string {
+	idx := 0
+	for {
+		i := strings.Index(s[idx:], ":\"")
+		if i < 0 {
+			break
+		}
+		idx += i
+		j := idx - 1
+		for unicode.IsNumber(rune(s[j])) || unicode.IsLetter(rune(s[j])) {
+			j--
+		}
+		if j != idx-1 {
+			s = s[:j+1] + "\"" + s[j+1:idx] + "\"" + s[idx:]
+			idx += 2
+		}
+		idx += 1
+	}
+	return s
+}
+
 func NewVersionCommand(ctx clictx.Context) *cobra.Command {
 	return &cobra.Command{
 		Use:     "version",
@@ -334,7 +357,8 @@ func NewVersionCommand(ctx clictx.Context) *cobra.Command {
 		Short:   "displays the version",
 		Run: func(_ *cobra.Command, _ []string) {
 			v := version.Get()
-			out.Outf(ctx, "%#v\n", v)
+			s := fmt.Sprintf("%#v", v)
+			out.Outf(ctx, "%s\n", prepare(s[strings.Index(s, "{"):]))
 		},
 	}
 }

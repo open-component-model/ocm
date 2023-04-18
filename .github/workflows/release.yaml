@@ -8,21 +8,119 @@ on:
         description: "Release Candidate"
         required: false
         default: false
+      create_branch:
+        type: boolean
+        description: "Create Release Branch"
+        required: false
+        default: false
+      prerelease:
+        type: string
+        description: "Release Candidate Name"
+        required: false
+        default: ""
 
 jobs:
-  lint-and-test:
-    uses: ./.github/workflows/lint_and_test.yaml
-    permissions:
-      contents: read
-      pull-requests: read
-  release:
-    needs: lint-and-test
-    name: Trigger release build
+  check:
+    name: Check Release Preconditions
     runs-on: ubuntu-latest
     permissions:
       contents: write
       id-token: write
       repository-projects: read
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Job Settings
+      run: |
+        echo "Release Job Arguments"
+        if ${{ github.event.inputs.release_candidate }}; then
+          v="v$(go run $GITHUB_WORKSPACE/pkg/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})"
+          if [ -n "${{ github.event.inputs.prerelease }}" ]; then
+            echo "Candidate: $v"
+          else 
+            echo "Candidate: $v (taken from source)"
+          fi
+        else
+          v="v$(go run $GITHUB_WORKSPACE/pkg/version/generate print-version)"
+          echo "Final Release: $v"
+          if ${{ github.event.inputs.create_branch }}; then
+            echo "with release branch creation"
+          else
+            echo "without release branch creation"
+          fi
+        fi
+
+    - name: Set Base Version
+      run: |
+        BASE_VERSION=v$(go run $GITHUB_WORKSPACE/pkg/version/generate print-version)
+        echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
+
+    - name: Set Pre-Release Version
+      if: inputs.release_candidate == true
+      run: |
+        RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/pkg/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
+        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
+
+    - name: Set Version
+      if: inputs.release_candidate == false
+      run: |
+        RELEASE_VERSION=${{env.BASE_VERSION}}
+        echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
+
+    - name: Check Tag
+      run: |
+        set -e
+        if git ls-remote --exit-code origin refs/tags/${{ env.RELEASE_VERSION }} ; then
+          >&2 echo "tag ${{ env.RELEASE_VERSION }} already exists"
+          exit 1
+        fi
+
+    - name: Check Branch
+      if: inputs.release_candidate == false && inputs.create_branch
+      run: |
+        set -e
+        if git ls-remote --exit-code origin refs/heads/releases/${{ env.RELEASE_VERSION }} ; then
+          >&2 echo "branch releases/${{ env.RELEASE_VERSION }} already exists"
+          exit 1
+        fi
+
+    - name: Get Draft Release Notes
+      id: release-notes
+      uses: cardinalby/git-get-release-action@v1
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        draft: true
+        releaseName: ${{ env.BASE_VERSION }}
+
+  lint-and-test:
+    name: Lint and Unit Tests
+    uses: ./.github/workflows/lint_and_test.yaml
+    needs: check
+    permissions:
+      contents: read
+      pull-requests: read
+  components:
+    name: Component CTF Builds
+    uses: ./.github/workflows/components.yaml
+    needs: check
+    permissions:
+      contents: read
+      pull-requests: read
+
+  release:
+    needs:
+    - lint-and-test
+    - components
+    name: Release Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      packages: write
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -55,45 +153,61 @@ jobs:
         restore-keys: |
           go-
 
+    - name: Set Base Version
+      run: |
+        BASE_VERSION=v$(go run $GITHUB_WORKSPACE/pkg/version/generate print-version)
+        echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
+
     - name: Set Pre-Release Version
       if: inputs.release_candidate == true
       run: |
-        RELEASE_VERSION=$(go run $GITHUB_WORKSPACE/pkg/version/generate print-rc-version)
+        RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/pkg/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
         echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
+        echo "release name is $RELEASE_VERSION"
 
     - name: Set Version
       if: inputs.release_candidate == false
       run: |
-        RELEASE_VERSION=$(go run $GITHUB_WORKSPACE/pkg/version/generate print-version)
+        RELEASE_VERSION=${{env.BASE_VERSION}}
         echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
+        echo "release name is $RELEASE_VERSION"
 
-    - name: Set release notes file
-      run: |
-        RELEASE_NOTES_FILE=docs/releasenotes/$(go run $GITHUB_WORKSPACE/pkg/version/generate print-version).md
-        echo "RELEASE_NOTES_FILE=$RELEASE_NOTES_FILE" >> $GITHUB_ENV
-
-    - name: Validate release notes
-      run: |
-        if [[ ! -f ${{ env.RELEASE_NOTES_FILE }} ]]; then
-          >&2 echo "Must have release notes ${{ env.RELEASE_NOTES_FILE }}"
-          exit 6
-        fi
-
-    - name: Create or Push Release Branch
+    - name: Get Draft Release Notes
+      id: release-notes
+      uses: cardinalby/git-get-release-action@v1
       env:
-        RELEASE_BRANCH: release-${{ env.RELEASE_VERSION }}
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        draft: true
+        releaseName: ${{ env.BASE_VERSION }}
+
+    - name: Update Release Notes File
+      env:
+        RELEASE_NOTES: ${{ steps.release-notes.outputs.body }}
       run: |
-        if ! git checkout ${RELEASE_BRANCH} >/dev/null; then
-            echo "Creating ${RELEASE_BRANCH} from $(git branch --show-current)"
-            git checkout -b ${RELEASE_BRANCH}
-            git push origin "$(git branch --show-current)"
+        if git ls-remote --exit-code origin refs/tags/${{ env.RELEASE_VERSION }}; then
+          >&2 echo "tag ${{ env.RELEASE_VERSION }} already exists"
+          exit 2
+        fi
+        v="${{env.RELEASE_VERSION}}"
+        f="docs/releasenotes/$v.md"
+        if [ ! -f "$f" ]; then
+          echo "Release ${{ env.RELEASE_VERSION }}" > "$f"
+          echo "$RELEASE_NOTES" | tail -n +2 >> "$f"
+          echo "RELEASE_NOTES_FILE=$f" >> $GITHUB_ENV
+          git add "$f"
+          git commit -m "ReleaseNotes for $RELEASE_VERSION"
+          git push origin ${GITHUB_REF#refs/heads/}
         else
-            git checkout ${RELEASE_BRANCH}
-            git pull --ff-only origin ${RELEASE_BRANCH}
+          echo "Using release notes file $f from code base"
         fi
 
-    - name: Push Tag
+    - name: Create and Push Release
       run: |
+        git checkout --detach HEAD
+        echo -n "${RELEASE_VERSION#v}" > VERSION
+        git add VERSION
+        git commit -m "Release $RELEASE_VERSION"
         msg="Release ${{ env.RELEASE_VERSION }}"
         git tag --annotate --message "${msg}" ${{ env.RELEASE_VERSION }}
         git push origin ${{ env.RELEASE_VERSION }}
@@ -105,9 +219,39 @@ jobs:
         version: latest
         args: release --rm-dist --timeout 60m --skip-validate --config=./.goreleaser.yaml --release-notes=${{ env.RELEASE_NOTES_FILE }}
       env:
+        GITHUBORG: ${{ github.repository_owner }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.EVENT_API }}
         GORELEASER_CURRENT_TAG: ${{ env.RELEASE_VERSION }}
+
+    - name: Push OCM Components
+      env:
+        GITHUBORG: ${{ github.repository_owner }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: make plain-push
+
+    - name: Create Release Branch
+      if: inputs.release_candidate == false && inputs.create_branch
+      run: |
+        n="releases/${{env.RELEASE_VERSION}}"
+        git checkout -b "$n"
+        v="$(go run ./pkg/version/generate bump-patch)"
+        echo "$v" > VERSION
+        git add VERSION
+        git commit -m "Prepare Development of v$v"
+        git push origin "$n"
+
+    - name: Bump Version File
+      if: inputs.release_candidate == false
+      run: |
+        set -e
+        git checkout ${GITHUB_REF#refs/heads/}
+        v="$(go run ./pkg/version/generate bump-version)"
+        echo "$v" > VERSION
+        git add VERSION
+        git commit -m "Update version file to $v"
+        git push origin ${GITHUB_REF#refs/heads/}
+        echo "Next branch version is $v"
 
     - name: Publish Release Event
       if: inputs.release_candidate == false

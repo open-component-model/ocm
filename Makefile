@@ -4,15 +4,16 @@
 
 NAME                                           := ocm
 REPO_ROOT                                      := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-VERSION                                        := $(shell go run pkg/version/generate/release_generate.go print-version)
 GITHUBORG                                      ?= open-component-model
 OCMREPO                                        ?= ghcr.io/$(GITHUBORG)/ocm
+VERSION                                        := $(shell go run pkg/version/generate/release_generate.go print-rc-version $(CANDIDATE))
 EFFECTIVE_VERSION                              := $(VERSION)+$(shell git rev-parse HEAD)
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 COMMIT                                         := $(shell git rev-parse --verify HEAD)
 
-CREDS := $(shell $(REPO_ROOT)/hack/githubcreds.sh)
-OCM := go run $(REPO_ROOT)/cmds/ocm $(CREDS)
+CREDS    ?=
+OCM      := go run $(REPO_ROOT)/cmds/ocm $(CREDS)
+CTF_TYPE ?= tgz
 
 GEN := $(REPO_ROOT)/gen
 
@@ -25,6 +26,8 @@ BUILD_FLAGS := "-s -w \
  -X github.com/open-component-model/ocm/pkg/version.gitTreeState=$(GIT_TREE_STATE) \
  -X github.com/open-component-model/ocm/pkg/version.gitCommit=$(COMMIT) \
  -X github.com/open-component-model/ocm/pkg/version.buildDate=$(NOW)"
+
+COMPONENTS ?= ocmcli helminstaller demoplugin ecrplugin helmdemo subchartsdemo
 
 build: ${SOURCES}
 	mkdir -p bin
@@ -84,6 +87,15 @@ LOCALBIN ?= $(shell pwd)/bin
 $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
 
+.PHONY: info
+info:
+	@if [ -n "$(CANDIDATE)" ]; then echo "CANDIDATE     = $(CANDIDATE)"; fi
+	@echo "VERSION       = $(VERSION)"
+	@echo "EFFECTIVE     = $(EFFECTIVE_VERSION)"
+	@echo "COMMIT        = $(COMMIT)"
+	@echo "GIT_TREE_STATE= $(GIT_TREE_STATE)"
+	@echo "COMPONENTS    = $(COMPONENTS)"
+
 .PHONY: generate-license
 generate-license:
 	for f in $(shell find . -name "*.go" -o -name "*.sh"); do \
@@ -98,21 +110,25 @@ $(GEN)/.exists:
 .PHONY: components
 components: $(GEN)/.comps
 
-$(GEN)/.comps:
-	@echo Helminstaller; cd components/helminstaller; make ctf
-	@echo HelmDemo; cd components/helmdemo; make ctf
-	@echo OCMCLI; cd components/ocmcli; make ctf
-	touch $@
+$(GEN)/.comps: $(GEN)/.exists
+	@rm -rf "$(GEN)"/ctf
+	@for i in $(COMPONENTS); do \
+       echo "building component $$i..."; \
+       (cd components/$$i; make ctf;); \
+    done
+	@touch $@
 
 .PHONY: ctf
 ctf: $(GEN)/ctf
 
-$(GEN)/ctf: $(GEN)/.exists components
+$(GEN)/ctf: $(GEN)/.exists $(GEN)/.comps
 	@rm -rf "$(GEN)"/ctf
-	$(OCM) transfer cv  --type tgz -V $(GEN)/helminstaller/ctf $(GEN)/ctf
-	$(OCM) transfer cv -V $(GEN)/helmdemo/ctf $(GEN)/ctf
-	$(OCM) transfer cv -V $(GEN)/ocmcli/ctf $(GEN)/ctf
-	touch $@
+	@for i in $(COMPONENTS); do \
+      echo "transfering component $$i..."; \
+	  echo $(OCM) transfer cv  --type $(CTF_TYPE) -V $(GEN)/$$i/ctf $(GEN)/ctf; \
+	  $(OCM) transfer cv  --type $(CTF_TYPE) -V $(GEN)/$$i/ctf $(GEN)/ctf; \
+	done
+	@touch $@
 
 .PHONY: push
 push: $(GEN)/ctf $(GEN)/.push.$(NAME)
@@ -121,10 +137,19 @@ $(GEN)/.push.$(NAME): $(GEN)/ctf
 	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
 	@touch $@
 
+.PHONY: plain-push
+plain-push: $(GEN)
+	$(OCM) transfer ctf -f $(GEN)/ctf $(OCMREPO)
+
 .PHONY: plain-ctf
 plain-ctf: $(GEN)
 	@rm -rf "$(GEN)"/ctf
-	$(OCM) transfer cv -V $(GEN)/helminstaller/ctf $(GEN)/ctf
-	$(OCM) transfer cv -V $(GEN)/helmdemo/ctf $(GEN)/ctf
-	$(OCM) transfer cv -V $(GEN)/ocmcli/ctf $(GEN)/ctf
+	@for i in $(COMPONENTS); do \
+       echo "transfering component $$i..."; \
+       echo $(OCM) transfer cv  --type $(CTF_TYPE) -V $(GEN)/$$i/ctf $(GEN)/ctf; \
+       $(OCM) transfer cv  --type $(CTF_TYPE) -V $(GEN)/$$i/ctf $(GEN)/ctf; \
+     done
 
+.PHONY: clean
+clean:
+	rm -rf "$(GEN)"
