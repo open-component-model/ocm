@@ -37,7 +37,10 @@ func (p *ConsumerProvider) get(req cpi.ConsumerIdentity, cur cpi.ConsumerIdentit
 	cfg := p.cfg
 	all := cfg.GetAuthConfigs()
 	defaultStore := dockercred.DetectDefaultStore(cfg.CredentialsStore)
-	store := dockercred.NewNativeStore(cfg, defaultStore)
+	var store dockercred.Store
+	if defaultStore != "" {
+		store = dockercred.NewNativeStore(cfg, defaultStore)
+	}
 
 	var creds cpi.CredentialsSource
 
@@ -52,6 +55,16 @@ func (p *ConsumerProvider) get(req cpi.ConsumerIdentity, cur cpi.ConsumerIdentit
 		}
 		if m(req, cur, id) {
 			if IsEmptyAuthConfig(a) {
+				store := store
+				for hh, helper := range cfg.CredentialHelpers {
+					if hh == h {
+						store = dockercred.NewNativeStore(cfg, helper)
+						break
+					}
+				}
+				if store == nil {
+					continue
+				}
 				creds = NewCredentials(cfg, h, store)
 			} else {
 				creds = newCredentials(a)
