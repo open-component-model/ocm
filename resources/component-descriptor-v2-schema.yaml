@@ -413,7 +413,7 @@ definitions:
       version:
         $ref: '#/definitions/relaxedSemver'
       creationTime:
-        type: string
+        type: ['string', 'null']
         format: date-time
       repositoryContexts:
         type: 'array'
