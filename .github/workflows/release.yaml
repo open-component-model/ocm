@@ -264,7 +264,7 @@ jobs:
       if: inputs.release_candidate == false
       uses: peter-evans/repository-dispatch@v2
       with:
-        token: ${{ secrets.EVENT_API }}
+        token: ${{ steps.generate_token.outputs.token }}
         repository: open-component-model/ocm-website
         event-type: ocm-cli-release
         client-payload: '{"tag": "${{ env.RELEASE_VERSION }}"}'
