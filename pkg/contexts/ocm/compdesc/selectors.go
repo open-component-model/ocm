@@ -5,7 +5,14 @@
 package compdesc
 
 import (
+	"encoding/json"
+	"reflect"
+	"runtime"
+
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/utils/selector"
 )
 
@@ -105,4 +112,187 @@ func (b *byName) MatchResource(obj Resource) (bool, error) {
 // ByName creates a new selector that matches a resource name.
 func ByName(name string) IdentityAndResourceSelector {
 	return &byName{name: name}
+}
+
+type withExtraId struct {
+	ids v1.Identity
+}
+
+var (
+	_ ResourceSelector = (*withExtraId)(nil)
+	_ IdentitySelector = (*withExtraId)(nil)
+)
+
+func (b *withExtraId) Match(obj map[string]string) (bool, error) {
+	if len(obj) == 0 {
+		return len(b.ids) == 0, nil
+	}
+	for id, v := range b.ids {
+		if obj[id] != v {
+			return false, nil
+		}
+	}
+	return true, nil
+}
+
+func (b *withExtraId) MatchResource(obj Resource) (bool, error) {
+	return b.Match(obj.ExtraIdentity)
+}
+
+// WithExtraIdentity creates a new resource and identity selector that
+// selects a resource based on extra identities.
+func WithExtraIdentity(args ...string) IdentityAndResourceSelector {
+	ids := v1.Identity{}
+	for i := 0; i < len(args); i += 2 {
+		if i+1 < len(args) {
+			ids[args[i]] = args[i+1]
+		}
+	}
+	return &withExtraId{ids: ids}
+}
+
+// ByAccessMethod creates a new selector that matches a resource access method type.
+func ByAccessMethod(name string) ResourceSelector {
+	return ResourceSelectorFunc(func(obj Resource) (bool, error) {
+		if obj.Access == nil {
+			return name == "", nil
+		}
+		return obj.Access.GetType() == name || obj.Access.GetKind() == name, nil
+	})
+}
+
+// ForExecutable creates a new selector that matches a resource for an executable.
+func ForExecutable(name string) ResourceSelector {
+	return ResourceSelectorFunc(func(obj Resource) (bool, error) {
+		return obj.Name == name && obj.Type == resourcetypes.EXECUTABLE && obj.ExtraIdentity != nil &&
+			obj.ExtraIdentity[consts.ExecutableOperatingSystem] == runtime.GOOS &&
+			obj.ExtraIdentity[consts.ExecutableArchitecture] == runtime.GOARCH, nil
+	})
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+// LabelSelector is used to match a label in a label set.
+type LabelSelector interface {
+	MatchLabel(l v1.Label) (bool, error)
+}
+
+type ResourceAndLabelSelector interface {
+	ResourceSelector
+	LabelSelector
+}
+
+// LabelSelectorFunc is a function used as LabelSelector.
+type LabelSelectorFunc func(l v1.Label) (bool, error)
+
+func (l LabelSelectorFunc) MatchLabel(label v1.Label) (bool, error) {
+	return l(label)
+}
+
+type byLabel struct {
+	selector LabelSelector
+}
+
+var (
+	_ ResourceSelector = (*byLabel)(nil)
+	_ LabelSelector    = (*byLabel)(nil)
+)
+
+func (b *byLabel) MatchResource(obj Resource) (bool, error) {
+	for _, l := range obj.Labels {
+		if ok, err := b.selector.MatchLabel(l); ok || err != nil {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+func (b *byLabel) MatchLabel(l v1.Label) (bool, error) {
+	return b.selector.MatchLabel(l)
+}
+
+// ByLabel matches a resource for a list of given label selectors
+// matching the same label.
+// If multiple label related selectors should be used, they should
+// be grouped into a single label selector to be applied in
+// combination. Otherwise, a resource might match if the label
+// selectors all match, but different labels.
+func ByLabel(sel ...LabelSelector) ResourceSelector {
+	return ResourceSelectorFunc(func(obj Resource) (bool, error) {
+		return MatchLabels(obj.Labels, sel...)
+	})
+}
+
+// ByLabelName matches a resource or label by a label name.
+func ByLabelName(name string) ResourceAndLabelSelector {
+	return &byLabel{selector: LabelSelectorFunc(func(l v1.Label) (bool, error) { return l.Name == name, nil })}
+}
+
+// ByLabelValue matches a resource or label by a label value.
+// This selector should typically be combined with ByLabelName.
+func ByLabelValue(value interface{}) ResourceAndLabelSelector {
+	return &byLabel{selector: LabelSelectorFunc(func(l v1.Label) (bool, error) {
+		var data interface{}
+		if err := json.Unmarshal(l.Value, &data); err != nil {
+			return false, err
+		}
+		return reflect.DeepEqual(data, value), nil
+	})}
+}
+
+// ByLabelVersion matches a resource or label by a label version.
+// This selector should typically be combined with ByLabelName.
+func ByLabelVersion(version string) ResourceAndLabelSelector {
+	return &byLabel{selector: LabelSelectorFunc(func(l v1.Label) (bool, error) { return l.Version == version, nil })}
+}
+
+// BySignedLabel matches a resource or label by a label indicated to be signed.
+// This selector should typically be combined with ByLabelName.
+func BySignedLabel(flags ...bool) ResourceAndLabelSelector {
+	flag := utils.OptionalDefaultedBool(true, flags...)
+	return &byLabel{selector: LabelSelectorFunc(func(l v1.Label) (bool, error) { return l.Signing == flag, nil })}
+}
+
+// MatchLabels checks whether a set of labels matches the given label selectors.
+func MatchLabels(labels v1.Labels, sel ...LabelSelector) (bool, error) {
+	if len(labels) == 0 && len(sel) == 0 {
+		return true, nil
+	}
+	found := false
+outer:
+	for _, l := range labels {
+		for _, s := range sel {
+			ok, err := s.MatchLabel(l)
+			if err != nil {
+				return false, err
+			}
+			if !ok {
+				continue outer
+			}
+		}
+		found = true
+		break
+	}
+
+	return found, nil
+}
+
+// SelectLabels returns labels matching the given label selectors.
+func SelectLabels(labels v1.Labels, sel ...LabelSelector) (v1.Labels, error) {
+	list := make(v1.Labels, 0)
+outer:
+	for _, l := range labels {
+		for _, s := range sel {
+			ok, err := s.MatchLabel(l)
+			if err != nil {
+				return nil, err
+			}
+			if !ok {
+				continue outer
+			}
+		}
+		list = append(list, l)
+	}
+
+	return list, nil
 }

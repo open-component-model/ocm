@@ -114,7 +114,7 @@ func (cd *ComponentDescriptor) GetResourcesBySelector(selectors ...IdentitySelec
 }
 
 // GetResourcesBySelectors returns resources that match the given selector.
-func (cd *ComponentDescriptor) GetResourceBySelectors(selectors []IdentitySelector, resourceSelectors []ResourceSelector) (Resources, error) {
+func (cd *ComponentDescriptor) GetResourcesBySelectors(selectors []IdentitySelector, resourceSelectors []ResourceSelector) (Resources, error) {
 	resources := make(Resources, 0)
 	for _, res := range cd.Resources {
 		ok, err := selector.MatchSelectors(res.GetIdentity(cd.Resources), selectors...)
@@ -141,7 +141,7 @@ func (cd *ComponentDescriptor) GetResourceBySelectors(selectors []IdentitySelect
 
 // GetExternalResources returns external resource with the given type, name and version.
 func (cd *ComponentDescriptor) GetExternalResources(rtype, name, version string) (Resources, error) {
-	return cd.GetResourceBySelectors(
+	return cd.GetResourcesBySelectors(
 		[]selector.Interface{
 			ByName(name),
 			ByVersion(version),
@@ -165,7 +165,7 @@ func (cd *ComponentDescriptor) GetExternalResource(rtype, name, version string) 
 
 // GetLocalResources returns all local resources with the given type, name and version.
 func (cd *ComponentDescriptor) GetLocalResources(rtype, name, version string) (Resources, error) {
-	return cd.GetResourceBySelectors(
+	return cd.GetResourcesBySelectors(
 		[]selector.Interface{
 			ByName(name),
 			ByVersion(version),
@@ -189,7 +189,7 @@ func (cd *ComponentDescriptor) GetLocalResource(rtype, name, version string) (Re
 
 // GetResourcesByType returns all resources that match the given type and selectors.
 func (cd *ComponentDescriptor) GetResourcesByType(rtype string, selectors ...IdentitySelector) (Resources, error) {
-	return cd.GetResourceBySelectors(
+	return cd.GetResourcesBySelectors(
 		selectors,
 		[]ResourceSelector{
 			ByResourceType(rtype),
@@ -198,7 +198,7 @@ func (cd *ComponentDescriptor) GetResourcesByType(rtype string, selectors ...Ide
 
 // GetResourcesByName returns all local and external resources with a name.
 func (cd *ComponentDescriptor) GetResourcesByName(name string, selectors ...IdentitySelector) (Resources, error) {
-	return cd.GetResourceBySelectors(
+	return cd.GetResourcesBySelectors(
 		append(selectors, ByName(name)),
 		nil)
 }
