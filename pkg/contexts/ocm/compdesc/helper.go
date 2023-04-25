@@ -74,7 +74,7 @@ func (cd *ComponentDescriptor) GetResourceByJSONScheme(src interface{}) (Resourc
 	if err != nil {
 		return nil, err
 	}
-	return cd.GetResourcesBySelector(sel)
+	return cd.GetResourcesByIdentitySelectors(sel)
 }
 
 // GetResourceByDefaultSelector returns resources that match the given selectors.
@@ -83,7 +83,7 @@ func (cd *ComponentDescriptor) GetResourceByDefaultSelector(sel interface{}) (Re
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse selector: %w", err)
 	}
-	return cd.GetResourcesBySelector(identitySelector)
+	return cd.GetResourcesByIdentitySelectors(identitySelector)
 }
 
 // GetResourceByRegexSelector returns resources that match the given selectors.
@@ -92,25 +92,17 @@ func (cd *ComponentDescriptor) GetResourceByRegexSelector(sel interface{}) (Reso
 	if err != nil {
 		return nil, fmt.Errorf("unable to parse selector: %w", err)
 	}
-	return cd.GetResourcesBySelector(identitySelector)
+	return cd.GetResourcesByIdentitySelectors(identitySelector)
 }
 
-// GetResourcesBySelector returns resources that match the given selector.
-func (cd *ComponentDescriptor) GetResourcesBySelector(selectors ...IdentitySelector) (Resources, error) {
-	resources := make(Resources, 0)
-	for _, res := range cd.Resources {
-		ok, err := selector.MatchSelectors(res.GetIdentity(cd.Resources), selectors...)
-		if err != nil {
-			return nil, fmt.Errorf("unable to match selector for resource %s: %w", res.Name, err)
-		}
-		if ok {
-			resources = append(resources, res)
-		}
-	}
-	if len(resources) == 0 {
-		return resources, NotFound
-	}
-	return resources, nil
+// GetResourcesByIdentitySelectors returns resources that match the given identity selectors.
+func (cd *ComponentDescriptor) GetResourcesByIdentitySelectors(selectors ...IdentitySelector) (Resources, error) {
+	return cd.GetResourcesBySelectors(selectors, nil)
+}
+
+// GetResourcesByResourceSelectors returns resources that match the given resource selectors.
+func (cd *ComponentDescriptor) GetResourcesByResourceSelectors(selectors ...ResourceSelector) (Resources, error) {
+	return cd.GetResourcesBySelectors(nil, selectors)
 }
 
 // GetResourcesBySelectors returns resources that match the given selector.
@@ -241,8 +233,8 @@ func (cd *ComponentDescriptor) GetSourceByIdentity(id v1.Identity) (Source, erro
 	return Source{}, NotFound
 }
 
-// GetSourcesBySelector returns references that match the given selector.
-func (cd *ComponentDescriptor) GetSourcesBySelector(selectors ...IdentitySelector) (Sources, error) {
+// GetSourcesByIdentitySelectors returns references that match the given selector.
+func (cd *ComponentDescriptor) GetSourcesByIdentitySelectors(selectors ...IdentitySelector) (Sources, error) {
 	srcs := make(Sources, 0)
 	for _, src := range cd.Sources {
 		ok, err := selector.MatchSelectors(src.GetIdentity(cd.Sources), selectors...)
@@ -293,22 +285,43 @@ func (cd *ComponentDescriptor) GetReferencesByName(name string) []ComponentRefer
 	return refs
 }
 
-// GetReferencesBySelector returns references that match the given selector.
-func (cd *ComponentDescriptor) GetReferencesBySelector(selectors ...IdentitySelector) ([]ComponentReference, error) {
-	refs := make([]ComponentReference, 0)
-	for _, ref := range cd.References {
-		ok, err := selector.MatchSelectors(ref.GetIdentity(cd.References), selectors...)
+// GetResourcesByIdentitySelectors returns resources that match the given identity selectors.
+func (cd *ComponentDescriptor) GetReferencesByIdentitySelectors(selectors ...IdentitySelector) (References, error) {
+	return cd.GetReferencesBySelectors(selectors, nil)
+}
+
+// GetResourcesByResourceSelectors returns resources that match the given resource selectors.
+func (cd *ComponentDescriptor) GetReferencesByReferenceSelectors(selectors ...ReferenceSelector) (References, error) {
+	return cd.GetReferencesBySelectors(nil, selectors)
+}
+
+// GetResourcesBySelectors returns resources that match the given selector.
+func (cd *ComponentDescriptor) GetReferencesBySelectors(selectors []IdentitySelector, referenceSelectors []ReferenceSelector) (References, error) {
+	references := make(References, 0)
+	for i := range cd.References {
+		selctx := NewReferenceSelectionContext(i, cd.References)
+		if len(selectors) > 0 {
+			ok, err := selector.MatchSelectors(selctx.Identity(), selectors...)
+			if err != nil {
+				return nil, fmt.Errorf("unable to match selector for resource %s: %w", selctx.Name, err)
+			}
+			if !ok {
+				continue
+			}
+		}
+		ok, err := MatchReferencesByReferenceSelector(selctx, referenceSelectors...)
 		if err != nil {
-			return nil, fmt.Errorf("unable to match selector for component reference %s: %w", ref.Name, err)
+			return nil, fmt.Errorf("unable to match selector for resource %s: %w", selctx.Name, err)
 		}
-		if ok {
-			refs = append(refs, ref)
+		if !ok {
+			continue
 		}
+		references = append(references, *selctx.ComponentReference)
 	}
-	if len(refs) == 0 {
-		return refs, NotFound
+	if len(references) == 0 {
+		return references, NotFound
 	}
-	return refs, nil
+	return references, nil
 }
 
 // GetReferenceIndex returns the index of a given source.

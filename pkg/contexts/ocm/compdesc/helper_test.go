@@ -32,7 +32,7 @@ var _ = Describe("helper", func() {
 		Expect(cd.RepositoryContexts).To(HaveLen(2))
 	})
 
-	Context("selection", func() {
+	Context("resource selection", func() {
 		cd := &compdesc.ComponentDescriptor{}
 
 		r1v1 := compdesc.Resource{
@@ -136,11 +136,11 @@ var _ = Describe("helper", func() {
 
 		Context("id selection", func() {
 			It("selects by name", func() {
-				res := Must(cd.GetResourcesBySelector(compdesc.ByName("r1")))
+				res := Must(cd.GetResourcesByIdentitySelectors(compdesc.ByName("r1")))
 				Expect(res).To(Equal(compdesc.Resources{r1v1, r1v2}))
 			})
 			It("selects by version", func() {
-				res := Must(cd.GetResourcesBySelector(compdesc.ByVersion("v1")))
+				res := Must(cd.GetResourcesByIdentitySelectors(compdesc.ByVersion("v1")))
 				Expect(res).To(Equal(compdesc.Resources{r1v1})) // no r2v1: version nor part of identity
 			})
 		})
@@ -280,6 +280,213 @@ var _ = Describe("helper", func() {
 			It("selects labels by negated selector", func() {
 				res := Must(compdesc.SelectLabels(r3v2.Labels, compdesc.NotL(compdesc.ByLabelValue("labelvalue"))))
 				Expect(res).To(Equal(v1.Labels{r3v2.Labels[0]}))
+			})
+		})
+	})
+
+	Context("reference selection", func() {
+		cd := &compdesc.ComponentDescriptor{}
+
+		r1v1 := compdesc.ComponentReference{
+			ElementMeta: compdesc.ElementMeta{
+				Name:    "r1",
+				Version: "v1",
+				Labels: v1.Labels{
+					v1.Label{
+						Name:    "l1",
+						Value:   []byte("\"labelvalue\""),
+						Version: "v1",
+						Signing: false,
+					},
+				},
+			},
+			ComponentName: "c1",
+		}
+		r1v2 := compdesc.ComponentReference{
+			ElementMeta: compdesc.ElementMeta{
+				Name:    "r1",
+				Version: "v2",
+			},
+			ComponentName: "c1",
+		}
+		r2v1 := compdesc.ComponentReference{
+			ElementMeta: compdesc.ElementMeta{
+				Name:    "r2",
+				Version: "v1",
+				Labels: v1.Labels{
+					v1.Label{
+						Name:    "l1",
+						Value:   []byte("\"othervalue\""),
+						Version: "v1",
+						Signing: false,
+					},
+				},
+			},
+			ComponentName: "c2",
+		}
+		r3v2 := compdesc.ComponentReference{
+			ElementMeta: compdesc.ElementMeta{
+				Name:    "r3",
+				Version: "v2",
+				Labels: v1.Labels{
+					v1.Label{
+						Name:    "l1",
+						Value:   []byte("\"dummy\""),
+						Version: "v2",
+						Signing: false,
+					},
+					v1.Label{
+						Name:    "l2",
+						Value:   []byte("\"labelvalue\""),
+						Version: "v2",
+						Signing: true,
+					},
+					v1.Label{
+						Name:    "l3",
+						Value:   []byte("\"labelvalue\""),
+						Version: "v3",
+					},
+				},
+			},
+			ComponentName: "c3",
+		}
+
+		r4v3 := compdesc.ComponentReference{
+			ElementMeta: compdesc.ElementMeta{
+				Name:    "r4",
+				Version: "v3",
+				ExtraIdentity: v1.Identity{
+					"extra": "value",
+					"other": "othervalue",
+				},
+			},
+			ComponentName: "c4",
+		}
+
+		cd.References = compdesc.References{
+			r1v1,
+			r1v2,
+			r2v1,
+			r3v2,
+			r4v3,
+		}
+
+		Context("id selection", func() {
+			It("selects by name", func() {
+				res := Must(cd.GetReferencesByIdentitySelectors(compdesc.ByName("r1")))
+				Expect(res).To(Equal(compdesc.References{r1v1, r1v2}))
+			})
+			It("selects by version", func() {
+				res := Must(cd.GetReferencesByIdentitySelectors(compdesc.ByVersion("v1")))
+				Expect(res).To(Equal(compdesc.References{r1v1})) // no r2v1: version nor part of identity
+			})
+		})
+
+		Context("attr selection", func() {
+			It("selects by name", func() {
+				res := Must(cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.ByName("r1")}))
+				Expect(res).To(Equal(compdesc.References{r1v1, r1v2}))
+			})
+			It("selects by version", func() {
+				res := Must(cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.ByVersion("v1")}))
+				Expect(res).To(Equal(compdesc.References{r1v1, r2v1}))
+			})
+			It("selects by component", func() {
+				res := Must(cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.ByComponent("c2")}))
+				Expect(res).To(Equal(compdesc.References{r2v1}))
+			})
+
+			It("selects by label name", func() {
+				res := Must(cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.ByLabelName("l1")}))
+				Expect(res).To(Equal(compdesc.References{r1v1, r2v1, r3v2}))
+			})
+			It("selects by label version", func() {
+				res := Must(cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.ByLabelVersion("v2")}))
+				Expect(res).To(Equal(compdesc.References{r3v2}))
+			})
+			It("selects by label value", func() {
+				res := Must(cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.ByLabelValue("labelvalue")}))
+				Expect(res).To(Equal(compdesc.References{r1v1, r3v2}))
+			})
+			It("selects unrelated by label name and value", func() {
+				res := Must(cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.ByLabelName("l1"), compdesc.ByLabelValue("labelvalue")}))
+				Expect(res).To(Equal(compdesc.References{r1v1, r3v2})) // unrelated checks at resource level
+			})
+			It("selects related by label name and value", func() {
+				res := Must(cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.ByLabel(compdesc.ByLabelName("l1"), compdesc.ByLabelValue("labelvalue"))}))
+				Expect(res).To(Equal(compdesc.References{r1v1})) // related checks at label level
+			})
+			It("selects by signed label", func() {
+				res := Must(cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.BySignedLabel()}))
+				Expect(res).To(Equal(compdesc.References{r3v2}))
+			})
+
+			It("selects with extra identity", func() {
+				res := Must(cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.WithExtraIdentity("extra", "value")}))
+				Expect(res).To(Equal(compdesc.References{r4v3}))
+				res = Must(cd.GetReferencesBySelectors([]compdesc.IdentitySelector{compdesc.WithExtraIdentity("extra", "value")}, nil))
+				Expect(res).To(Equal(compdesc.References{r4v3}))
+
+			})
+			It("selects none with wrong extra identity value", func() {
+				_, err := cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.WithExtraIdentity("extra", "other")})
+				Expect(err).To(MatchError(compdesc.NotFound))
+				_, err = cd.GetReferencesBySelectors([]compdesc.IdentitySelector{compdesc.WithExtraIdentity("extra", "other")}, nil)
+				Expect(err).To(MatchError(compdesc.NotFound))
+			})
+
+			It("selects none with wrong extra identity key", func() {
+				_, err := cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.WithExtraIdentity("extra2", "value")})
+				Expect(err).To(MatchError(compdesc.NotFound))
+				_, err = cd.GetReferencesBySelectors([]compdesc.IdentitySelector{compdesc.WithExtraIdentity("extra2", "value")}, nil)
+				Expect(err).To(MatchError(compdesc.NotFound))
+			})
+
+			It("selects by or", func() {
+				res := Must(cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.Or[compdesc.ReferenceSelector](compdesc.ByName("r3"), compdesc.ByVersion("v2"))}))
+				Expect(res).To(Equal(compdesc.References{r1v2, r3v2}))
+			})
+
+			It("selects by and", func() {
+				res := Must(cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.AndC(compdesc.ByName("r1"), compdesc.ByVersion("v1"))}))
+				Expect(res).To(Equal(compdesc.References{r1v1}))
+			})
+
+			It("selects by negated selector", func() {
+				res := Must(cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.NotC(compdesc.ByName("r1"))}))
+				Expect(res).To(Equal(compdesc.References{r2v1, r3v2, r4v3}))
+			})
+
+			It("selects by identity selector", func() {
+				res := Must(cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.ByIdentity("r4", "extra", "value", "other", "othervalue")}))
+				Expect(res).To(Equal(compdesc.References{r4v3}))
+				res = Must(cd.GetReferencesBySelectors([]compdesc.IdentitySelector{compdesc.ByIdentity("r4", "extra", "value", "other", "othervalue")}, nil))
+				Expect(res).To(Equal(compdesc.References{r4v3}))
+			})
+			It("selects none by identity selector with missing attribute", func() {
+				_, err := cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.ByIdentity("r4", "extra", "value")})
+				Expect(err).To(MatchError(compdesc.NotFound))
+				_, err = cd.GetReferencesBySelectors([]compdesc.IdentitySelector{compdesc.ByIdentity("r4", "extra", "value")}, nil)
+				Expect(err).To(MatchError(compdesc.NotFound))
+			})
+
+			It("selects by partial identity selector", func() {
+				res := Must(cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.ByPartialIdentity("r4", "extra", "value", "other", "othervalue")}))
+				Expect(res).To(Equal(compdesc.References{r4v3}))
+				res = Must(cd.GetReferencesBySelectors([]compdesc.IdentitySelector{compdesc.ByPartialIdentity("r4", "extra", "value", "other", "othervalue")}, nil))
+				Expect(res).To(Equal(compdesc.References{r4v3}))
+			})
+			It("selects by partial identity selector with partial attributes", func() {
+				res := Must(cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.ByPartialIdentity("r4", "extra", "value")}))
+				Expect(res).To(Equal(compdesc.References{r4v3}))
+				res = Must(cd.GetReferencesBySelectors([]compdesc.IdentitySelector{compdesc.ByPartialIdentity("r4", "extra", "value")}, nil))
+				Expect(res).To(Equal(compdesc.References{r4v3}))
+			})
+			It("selects none by partial identity selector with missing attribute", func() {
+				_, err := cd.GetReferencesBySelectors(nil, []compdesc.ReferenceSelector{compdesc.ByIdentity("r4", "extra", "value", "dummy", "dummy")})
+				Expect(err).To(MatchError(compdesc.NotFound))
+				_, err = cd.GetReferencesBySelectors([]compdesc.IdentitySelector{compdesc.ByIdentity("r4", "extra", "value", "dummy", "dummy")}, nil)
+				Expect(err).To(MatchError(compdesc.NotFound))
 			})
 		})
 	})
