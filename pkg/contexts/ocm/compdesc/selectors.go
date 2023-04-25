@@ -53,6 +53,43 @@ func MatchResourceByResourceSelector(obj Resource, resourceSelectors ...Resource
 	return true, nil
 }
 
+// AndR is an AND resource selector.
+func AndR(sel ...ResourceSelector) ResourceSelector {
+	return ResourceSelectorFunc(func(obj Resource) (bool, error) {
+		for _, s := range sel {
+			ok, err := s.MatchResource(obj)
+			if !ok || err != nil {
+				return ok, err
+			}
+		}
+		return true, nil
+	})
+}
+
+// OrR is an OR resource selector.
+func OrR(sel ...ResourceSelector) ResourceSelector {
+	return ResourceSelectorFunc(func(obj Resource) (bool, error) {
+		for _, s := range sel {
+			ok, err := s.MatchResource(obj)
+			if ok || err != nil {
+				return ok, err
+			}
+		}
+		return false, nil
+	})
+}
+
+// NotR is a negated resource selector.
+func NotR(sel ResourceSelector) ResourceSelector {
+	return ResourceSelectorFunc(func(obj Resource) (bool, error) {
+		ok, err := sel.MatchResource(obj)
+		if err != nil {
+			return false, err
+		}
+		return !ok, nil
+	})
+}
+
 // ByResourceType creates a new resource selector that
 // selects a resource based on its type.
 func ByResourceType(ttype string) ResourceSelector {
@@ -187,6 +224,43 @@ type LabelSelectorFunc func(l v1.Label) (bool, error)
 
 func (l LabelSelectorFunc) MatchLabel(label v1.Label) (bool, error) {
 	return l(label)
+}
+
+// AndL is an AND label selector.
+func AndL(sel ...LabelSelector) LabelSelector {
+	return LabelSelectorFunc(func(obj v1.Label) (bool, error) {
+		for _, s := range sel {
+			ok, err := s.MatchLabel(obj)
+			if !ok || err != nil {
+				return ok, err
+			}
+		}
+		return true, nil
+	})
+}
+
+// OrL is an OR label selector.
+func OrL(sel ...LabelSelector) LabelSelector {
+	return LabelSelectorFunc(func(obj v1.Label) (bool, error) {
+		for _, s := range sel {
+			ok, err := s.MatchLabel(obj)
+			if ok || err != nil {
+				return ok, err
+			}
+		}
+		return false, nil
+	})
+}
+
+// NotL is a negated label selector.
+func NotL(sel LabelSelector) LabelSelector {
+	return LabelSelectorFunc(func(obj v1.Label) (bool, error) {
+		ok, err := sel.MatchLabel(obj)
+		if err != nil {
+			return false, err
+		}
+		return !ok, nil
+	})
 }
 
 type byLabel struct {

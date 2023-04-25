@@ -99,6 +99,11 @@ var _ = Describe("helper", func() {
 							Version: "v2",
 							Signing: true,
 						},
+						v1.Label{
+							Name:    "l3",
+							Value:   []byte("\"labelvalue\""),
+							Version: "v3",
+						},
 					},
 				},
 				Type:     "t2",
@@ -199,6 +204,21 @@ var _ = Describe("helper", func() {
 				_, err = cd.GetResourcesBySelectors([]compdesc.IdentitySelector{compdesc.WithExtraIdentity("extra2", "value")}, nil)
 				Expect(err).To(MatchError(compdesc.NotFound))
 			})
+
+			It("selects by or", func() {
+				res := Must(cd.GetResourcesBySelectors(nil, []compdesc.ResourceSelector{compdesc.OrR(compdesc.ByName("r3"), compdesc.ByVersion("v2"))}))
+				Expect(res).To(Equal(compdesc.Resources{r1v2, r3v2}))
+			})
+
+			It("selects by and", func() {
+				res := Must(cd.GetResourcesBySelectors(nil, []compdesc.ResourceSelector{compdesc.AndR(compdesc.ByName("r1"), compdesc.ByVersion("v1"))}))
+				Expect(res).To(Equal(compdesc.Resources{r1v1}))
+			})
+
+			It("selects by negated selector", func() {
+				res := Must(cd.GetResourcesBySelectors(nil, []compdesc.ResourceSelector{compdesc.NotR(compdesc.ByName("r1"))}))
+				Expect(res).To(Equal(compdesc.Resources{r2v1, r3v2, r4v3}))
+			})
 		})
 
 		Context("select labels", func() {
@@ -213,6 +233,21 @@ var _ = Describe("helper", func() {
 			It("selects no signed labels", func() {
 				res := Must(compdesc.SelectLabels(r1v2.Labels, compdesc.BySignedLabel()))
 				Expect(res).To(Equal(v1.Labels{}))
+			})
+
+			It("selects labels by or", func() {
+				res := Must(compdesc.SelectLabels(r3v2.Labels, compdesc.OrL(compdesc.ByLabelName("l1"), compdesc.ByLabelVersion("v3"))))
+				Expect(res).To(Equal(v1.Labels{r3v2.Labels[0], r3v2.Labels[2]}))
+			})
+
+			It("selects labels by and", func() {
+				res := Must(compdesc.SelectLabels(r3v2.Labels, compdesc.AndL(compdesc.ByLabelValue("labelvalue"), compdesc.ByLabelVersion("v2"))))
+				Expect(res).To(Equal(v1.Labels{r3v2.Labels[1]}))
+			})
+
+			It("selects labels by negated selector", func() {
+				res := Must(compdesc.SelectLabels(r3v2.Labels, compdesc.NotL(compdesc.ByLabelValue("labelvalue"))))
+				Expect(res).To(Equal(v1.Labels{r3v2.Labels[0]}))
 			})
 		})
 	})
