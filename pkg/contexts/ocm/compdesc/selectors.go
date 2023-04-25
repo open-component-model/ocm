@@ -19,17 +19,43 @@ import (
 type IdentitySelector = selector.Interface
 
 // ResourceSelectorFunc defines a function to filter a resource.
-type ResourceSelectorFunc func(obj Resource) (bool, error)
+type ResourceSelectorFunc func(obj ResourceSelectionContext) (bool, error)
 
 var _ ResourceSelector = ResourceSelectorFunc(nil)
 
-func (s ResourceSelectorFunc) MatchResource(obj Resource) (bool, error) {
+func (s ResourceSelectorFunc) MatchResource(obj ResourceSelectionContext) (bool, error) {
 	return s(obj)
 }
 
-// ResourceSelector defines a selector bases on resource attributes.
+type resourceSelectionContext struct {
+	*Resource
+	identity  v1.Identity
+	resources Resources
+}
+
+func NewResourceSelectionContext(index int, rscs Resources) ResourceSelectionContext {
+	return &resourceSelectionContext{
+		Resource:  &rscs[index],
+		identity:  nil,
+		resources: rscs,
+	}
+}
+
+// ResourceSelectionContext describes the selction context for a resource
+// selector. It contains the resource and provides access to its
+// identity in the context of its component descriptor.
+type ResourceSelectionContext = *resourceSelectionContext
+
+func (c *resourceSelectionContext) Identity() v1.Identity {
+	if c.identity == nil {
+		c.identity = c.Resource.GetIdentity(c.resources)
+	}
+	return c.identity
+}
+
+// ResourceSelector defines a selector based on resource attributes.
 type ResourceSelector interface {
-	MatchResource(obj Resource) (bool, error)
+	MatchResource(obj ResourceSelectionContext) (bool, error)
 }
 
 // IdentityAndResourceSelector is selector, which can act as
@@ -40,7 +66,7 @@ type IdentityAndResourceSelector interface {
 }
 
 // MatchResourceByResourceSelector applies all resource selector against the given resource object.
-func MatchResourceByResourceSelector(obj Resource, resourceSelectors ...ResourceSelector) (bool, error) {
+func MatchResourceByResourceSelector(obj ResourceSelectionContext, resourceSelectors ...ResourceSelector) (bool, error) {
 	for _, sel := range resourceSelectors {
 		ok, err := sel.MatchResource(obj)
 		if err != nil {
@@ -55,7 +81,7 @@ func MatchResourceByResourceSelector(obj Resource, resourceSelectors ...Resource
 
 // AndR is an AND resource selector.
 func AndR(sel ...ResourceSelector) ResourceSelector {
-	return ResourceSelectorFunc(func(obj Resource) (bool, error) {
+	return ResourceSelectorFunc(func(obj ResourceSelectionContext) (bool, error) {
 		for _, s := range sel {
 			ok, err := s.MatchResource(obj)
 			if !ok || err != nil {
@@ -68,7 +94,7 @@ func AndR(sel ...ResourceSelector) ResourceSelector {
 
 // OrR is an OR resource selector.
 func OrR(sel ...ResourceSelector) ResourceSelector {
-	return ResourceSelectorFunc(func(obj Resource) (bool, error) {
+	return ResourceSelectorFunc(func(obj ResourceSelectionContext) (bool, error) {
 		for _, s := range sel {
 			ok, err := s.MatchResource(obj)
 			if ok || err != nil {
@@ -81,7 +107,7 @@ func OrR(sel ...ResourceSelector) ResourceSelector {
 
 // NotR is a negated resource selector.
 func NotR(sel ResourceSelector) ResourceSelector {
-	return ResourceSelectorFunc(func(obj Resource) (bool, error) {
+	return ResourceSelectorFunc(func(obj ResourceSelectionContext) (bool, error) {
 		ok, err := sel.MatchResource(obj)
 		if err != nil {
 			return false, err
@@ -93,7 +119,7 @@ func NotR(sel ResourceSelector) ResourceSelector {
 // ByResourceType creates a new resource selector that
 // selects a resource based on its type.
 func ByResourceType(ttype string) ResourceSelector {
-	return ResourceSelectorFunc(func(obj Resource) (bool, error) {
+	return ResourceSelectorFunc(func(obj ResourceSelectionContext) (bool, error) {
 		return ttype == "" || obj.GetType() == ttype, nil
 	})
 }
@@ -101,7 +127,7 @@ func ByResourceType(ttype string) ResourceSelector {
 // ByRelation creates a new resource selector that
 // selects a resource based on its relation type.
 func ByRelation(relation v1.ResourceRelation) ResourceSelectorFunc {
-	return ResourceSelectorFunc(func(obj Resource) (bool, error) {
+	return ResourceSelectorFunc(func(obj ResourceSelectionContext) (bool, error) {
 		return obj.Relation == relation, nil
 	})
 }
@@ -119,7 +145,7 @@ func (b *byVersion) Match(obj map[string]string) (bool, error) {
 	return obj[SystemIdentityVersion] == b.version, nil
 }
 
-func (b *byVersion) MatchResource(obj Resource) (bool, error) {
+func (b *byVersion) MatchResource(obj ResourceSelectionContext) (bool, error) {
 	return obj.GetVersion() == b.version, nil
 }
 
@@ -142,13 +168,56 @@ func (b *byName) Match(obj map[string]string) (bool, error) {
 	return obj[SystemIdentityName] == b.name, nil
 }
 
-func (b *byName) MatchResource(obj Resource) (bool, error) {
+func (b *byName) MatchResource(obj ResourceSelectionContext) (bool, error) {
 	return obj.GetName() == b.name, nil
 }
 
 // ByName creates a new selector that matches a resource name.
 func ByName(name string) IdentityAndResourceSelector {
 	return &byName{name: name}
+}
+
+type byIdentity struct {
+	id      v1.Identity
+	partial bool
+}
+
+var (
+	_ ResourceSelector = (*byIdentity)(nil)
+	_ IdentitySelector = (*byIdentity)(nil)
+)
+
+func (b *byIdentity) Match(obj map[string]string) (bool, error) {
+	if !b.partial && len(b.id) != len(obj) {
+		return false, nil
+	}
+	for k, v := range b.id {
+		e, ok := obj[k]
+		if !ok || e != v {
+			return false, nil
+		}
+	}
+	return true, nil
+}
+
+func (b *byIdentity) MatchResource(obj ResourceSelectionContext) (bool, error) {
+	return b.Match(obj.Identity())
+}
+
+// ByIdentity creates a new resource and identity selector that
+// selects a resource based on its identity.
+func ByIdentity(name string, extras ...string) IdentityAndResourceSelector {
+	id := v1.NewIdentity(name, extras...)
+	return &byIdentity{id: id}
+}
+
+// ByPartialIdentity creates a new resource and identity selector that
+// selects a resource based on its partial identity.
+// All given attributes must match, but potential additional attributes
+// of a resource identity are ignored.
+func ByPartialIdentity(name string, extras ...string) IdentityAndResourceSelector {
+	id := v1.NewIdentity(name, extras...)
+	return &byIdentity{id: id, partial: true}
 }
 
 type withExtraId struct {
@@ -172,7 +241,7 @@ func (b *withExtraId) Match(obj map[string]string) (bool, error) {
 	return true, nil
 }
 
-func (b *withExtraId) MatchResource(obj Resource) (bool, error) {
+func (b *withExtraId) MatchResource(obj ResourceSelectionContext) (bool, error) {
 	return b.Match(obj.ExtraIdentity)
 }
 
@@ -190,7 +259,7 @@ func WithExtraIdentity(args ...string) IdentityAndResourceSelector {
 
 // ByAccessMethod creates a new selector that matches a resource access method type.
 func ByAccessMethod(name string) ResourceSelector {
-	return ResourceSelectorFunc(func(obj Resource) (bool, error) {
+	return ResourceSelectorFunc(func(obj ResourceSelectionContext) (bool, error) {
 		if obj.Access == nil {
 			return name == "", nil
 		}
@@ -200,7 +269,7 @@ func ByAccessMethod(name string) ResourceSelector {
 
 // ForExecutable creates a new selector that matches a resource for an executable.
 func ForExecutable(name string) ResourceSelector {
-	return ResourceSelectorFunc(func(obj Resource) (bool, error) {
+	return ResourceSelectorFunc(func(obj ResourceSelectionContext) (bool, error) {
 		return obj.Name == name && obj.Type == resourcetypes.EXECUTABLE && obj.ExtraIdentity != nil &&
 			obj.ExtraIdentity[consts.ExecutableOperatingSystem] == runtime.GOOS &&
 			obj.ExtraIdentity[consts.ExecutableArchitecture] == runtime.GOARCH, nil
@@ -272,7 +341,7 @@ var (
 	_ LabelSelector    = (*byLabel)(nil)
 )
 
-func (b *byLabel) MatchResource(obj Resource) (bool, error) {
+func (b *byLabel) MatchResource(obj ResourceSelectionContext) (bool, error) {
 	for _, l := range obj.Labels {
 		if ok, err := b.selector.MatchLabel(l); ok || err != nil {
 			return true, nil
@@ -292,7 +361,7 @@ func (b *byLabel) MatchLabel(l v1.Label) (bool, error) {
 // combination. Otherwise, a resource might match if the label
 // selectors all match, but different labels.
 func ByLabel(sel ...LabelSelector) ResourceSelector {
-	return ResourceSelectorFunc(func(obj Resource) (bool, error) {
+	return ResourceSelectorFunc(func(obj ResourceSelectionContext) (bool, error) {
 		return MatchLabels(obj.Labels, sel...)
 	})
 }

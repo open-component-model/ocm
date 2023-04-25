@@ -219,6 +219,38 @@ var _ = Describe("helper", func() {
 				res := Must(cd.GetResourcesBySelectors(nil, []compdesc.ResourceSelector{compdesc.NotR(compdesc.ByName("r1"))}))
 				Expect(res).To(Equal(compdesc.Resources{r2v1, r3v2, r4v3}))
 			})
+
+			It("selects by identity selector", func() {
+				res := Must(cd.GetResourcesBySelectors(nil, []compdesc.ResourceSelector{compdesc.ByIdentity("r4", "extra", "value", "other", "othervalue")}))
+				Expect(res).To(Equal(compdesc.Resources{r4v3}))
+				res = Must(cd.GetResourcesBySelectors([]compdesc.IdentitySelector{compdesc.ByIdentity("r4", "extra", "value", "other", "othervalue")}, nil))
+				Expect(res).To(Equal(compdesc.Resources{r4v3}))
+			})
+			It("selects none by identity selector with missing attribute", func() {
+				_, err := cd.GetResourcesBySelectors(nil, []compdesc.ResourceSelector{compdesc.ByIdentity("r4", "extra", "value")})
+				Expect(err).To(MatchError(compdesc.NotFound))
+				_, err = cd.GetResourcesBySelectors([]compdesc.IdentitySelector{compdesc.ByIdentity("r4", "extra", "value")}, nil)
+				Expect(err).To(MatchError(compdesc.NotFound))
+			})
+
+			It("selects by partial identity selector", func() {
+				res := Must(cd.GetResourcesBySelectors(nil, []compdesc.ResourceSelector{compdesc.ByPartialIdentity("r4", "extra", "value", "other", "othervalue")}))
+				Expect(res).To(Equal(compdesc.Resources{r4v3}))
+				res = Must(cd.GetResourcesBySelectors([]compdesc.IdentitySelector{compdesc.ByPartialIdentity("r4", "extra", "value", "other", "othervalue")}, nil))
+				Expect(res).To(Equal(compdesc.Resources{r4v3}))
+			})
+			It("selects by partial identity selector with partial attributes", func() {
+				res := Must(cd.GetResourcesBySelectors(nil, []compdesc.ResourceSelector{compdesc.ByPartialIdentity("r4", "extra", "value")}))
+				Expect(res).To(Equal(compdesc.Resources{r4v3}))
+				res = Must(cd.GetResourcesBySelectors([]compdesc.IdentitySelector{compdesc.ByPartialIdentity("r4", "extra", "value")}, nil))
+				Expect(res).To(Equal(compdesc.Resources{r4v3}))
+			})
+			It("selects none by partial identity selector with missing attribute", func() {
+				_, err := cd.GetResourcesBySelectors(nil, []compdesc.ResourceSelector{compdesc.ByIdentity("r4", "extra", "value", "dummy", "dummy")})
+				Expect(err).To(MatchError(compdesc.NotFound))
+				_, err = cd.GetResourcesBySelectors([]compdesc.IdentitySelector{compdesc.ByIdentity("r4", "extra", "value", "dummy", "dummy")}, nil)
+				Expect(err).To(MatchError(compdesc.NotFound))
+			})
 		})
 
 		Context("select labels", func() {

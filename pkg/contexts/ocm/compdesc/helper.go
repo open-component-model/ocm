@@ -116,22 +116,25 @@ func (cd *ComponentDescriptor) GetResourcesBySelector(selectors ...IdentitySelec
 // GetResourcesBySelectors returns resources that match the given selector.
 func (cd *ComponentDescriptor) GetResourcesBySelectors(selectors []IdentitySelector, resourceSelectors []ResourceSelector) (Resources, error) {
 	resources := make(Resources, 0)
-	for _, res := range cd.Resources {
-		ok, err := selector.MatchSelectors(res.GetIdentity(cd.Resources), selectors...)
+	for i := range cd.Resources {
+		selctx := NewResourceSelectionContext(i, cd.Resources)
+		if len(selectors) > 0 {
+			ok, err := selector.MatchSelectors(selctx.Identity(), selectors...)
+			if err != nil {
+				return nil, fmt.Errorf("unable to match selector for resource %s: %w", selctx.Name, err)
+			}
+			if !ok {
+				continue
+			}
+		}
+		ok, err := MatchResourceByResourceSelector(selctx, resourceSelectors...)
 		if err != nil {
-			return nil, fmt.Errorf("unable to match selector for resource %s: %w", res.Name, err)
+			return nil, fmt.Errorf("unable to match selector for resource %s: %w", selctx.Name, err)
 		}
 		if !ok {
 			continue
 		}
-		ok, err = MatchResourceByResourceSelector(res, resourceSelectors...)
-		if err != nil {
-			return nil, fmt.Errorf("unable to match selector for resource %s: %w", res.Name, err)
-		}
-		if !ok {
-			continue
-		}
-		resources = append(resources, res)
+		resources = append(resources, *selctx.Resource)
 	}
 	if len(resources) == 0 {
 		return resources, NotFound
