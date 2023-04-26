@@ -275,27 +275,23 @@ func (cd *ComponentDescriptor) GetReferenceByIdentity(id v1.Identity) (Component
 }
 
 // GetReferencesByName returns references that match the given name.
-func (cd *ComponentDescriptor) GetReferencesByName(name string) []ComponentReference {
-	var refs []ComponentReference
-	for _, ref := range cd.References {
-		if ref.Name == name {
-			refs = append(refs, ref)
-		}
-	}
-	return refs
+func (cd *ComponentDescriptor) GetReferencesByName(name string, selectors ...IdentitySelector) (References, error) {
+	return cd.GetReferencesBySelectors(
+		append(selectors, ByName(name)),
+		nil)
 }
 
-// GetResourcesByIdentitySelectors returns resources that match the given identity selectors.
+// GetReferencesByIdentitySelectors returns resources that match the given identity selectors.
 func (cd *ComponentDescriptor) GetReferencesByIdentitySelectors(selectors ...IdentitySelector) (References, error) {
 	return cd.GetReferencesBySelectors(selectors, nil)
 }
 
-// GetResourcesByResourceSelectors returns resources that match the given resource selectors.
+// GetReferencesByReferenceSelectors returns resources that match the given resource selectors.
 func (cd *ComponentDescriptor) GetReferencesByReferenceSelectors(selectors ...ReferenceSelector) (References, error) {
 	return cd.GetReferencesBySelectors(nil, selectors)
 }
 
-// GetResourcesBySelectors returns resources that match the given selector.
+// GetReferencesBySelectors returns resources that match the given selector.
 func (cd *ComponentDescriptor) GetReferencesBySelectors(selectors []IdentitySelector, referenceSelectors []ReferenceSelector) (References, error) {
 	references := make(References, 0)
 	for i := range cd.References {

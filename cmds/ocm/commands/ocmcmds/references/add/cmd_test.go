@@ -22,7 +22,7 @@ const VERSION = "v1.1.1"
 const REF = "github.com/mandelsoft/ref"
 
 func CheckReference(env *TestEnv, cd *compdesc.ComponentDescriptor, name string, add ...func(compdesc.ComponentReference)) {
-	rs := cd.GetReferencesByName(name)
+	rs, _ := cd.GetReferencesByName(name)
 	if len(rs) != 1 {
 		Fail(fmt.Sprintf("%d reference(s) with name %s found", len(rs), name), 1)
 	}

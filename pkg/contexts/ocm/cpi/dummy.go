@@ -117,3 +117,23 @@ func (d *DummyComponentVersionAccess) Close() error {
 func (d *DummyComponentVersionAccess) Dup() (ComponentVersionAccess, error) {
 	return d, nil
 }
+
+func (d *DummyComponentVersionAccess) GetResourcesByIdentitySelectors(selectors ...compdesc.IdentitySelector) ([]internal.ResourceAccess, error) {
+	return nil, nil
+}
+
+func (d *DummyComponentVersionAccess) GetResourcesByResourceSelectors(selectors ...compdesc.ResourceSelector) ([]internal.ResourceAccess, error) {
+	return nil, nil
+}
+
+func (d *DummyComponentVersionAccess) GetReferencesByName(name string, selectors ...compdesc.IdentitySelector) (compdesc.References, error) {
+	return nil, nil
+}
+
+func (d *DummyComponentVersionAccess) GetReferencesByIdentitySelectors(selectors ...compdesc.IdentitySelector) (compdesc.References, error) {
+	return nil, nil
+}
+
+func (d *DummyComponentVersionAccess) GetReferencesByReferenceSelectors(selectors ...compdesc.ReferenceSelector) (compdesc.References, error) {
+	return nil, nil
+}

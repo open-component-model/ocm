@@ -9,6 +9,7 @@ package cpi
 import (
 	"github.com/mandelsoft/logging"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/registrations"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -57,6 +58,7 @@ type (
 	GenericRepositorySpec            = internal.GenericRepositorySpec
 	RepositoryType                   = internal.RepositoryType
 	ComponentReference               = internal.ComponentReference
+	References                       = compdesc.References
 )
 
 type (

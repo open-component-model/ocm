@@ -7,6 +7,7 @@ package ocm
 import (
 	"context"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -51,6 +52,7 @@ type (
 	RepositoryTypeScheme             = internal.RepositoryTypeScheme
 	AccessTypeScheme                 = internal.AccessTypeScheme
 	ComponentReference               = internal.ComponentReference
+	References                       = compdesc.References
 )
 
 type (
