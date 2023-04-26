@@ -23,6 +23,8 @@ The library currently supports the following [repository mappings](docs/ocm/inte
 - **Component Archive**: Compose the content of a component version on the
   filesystem.
 
+For the usage of the library to access OCM repositories, handle configuratio and credentials see the [examples section](examples/lib/README.md).
+
 Additionally, OCM provides a generic solution for how to:
 
 - Sign component versions in any supported OCM repository implementation.

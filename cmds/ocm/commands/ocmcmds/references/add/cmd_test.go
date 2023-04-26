@@ -9,6 +9,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -21,7 +22,7 @@ const VERSION = "v1.1.1"
 const REF = "github.com/mandelsoft/ref"
 
 func CheckReference(env *TestEnv, cd *compdesc.ComponentDescriptor, name string, add ...func(compdesc.ComponentReference)) {
-	rs := cd.GetComponentReferencesByName(name)
+	rs := cd.GetReferencesByName(name)
 	if len(rs) != 1 {
 		Fail(fmt.Sprintf("%d reference(s) with name %s found", len(rs), name), 1)
 	}
