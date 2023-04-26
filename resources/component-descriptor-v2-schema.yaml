@@ -168,7 +168,6 @@ definitions:
     type: 'object'
     required:
       - name
-      - digest
       - signature
     properties:
       name:
@@ -177,6 +176,37 @@ definitions:
         $ref: '#/definitions/digestSpec'
       signature:
         $ref: '#/definitions/signatureSpec'
+
+  nestedDigestSpec:
+    type: 'object'
+    required:
+      - name
+    properties:
+      name:
+        type: string
+      version:
+        type: string
+      extraIdentity:
+        $ref: '#/definitions/identityAttribute'
+      digest:
+        $ref: '#/definitions/digestSpec'
+
+  nestedComponentDigests:
+    type: 'object'
+    required:
+      - name
+      - version
+    properties:
+      name:
+        $ref: '#/definitions/componentName'
+      version:
+        $ref: '#/definitions/relaxedSemver'
+      digest:
+        $ref: '#/definitions/digestSpec'
+      resourceDigests:
+        type: 'array'
+        items:
+          $ref: '#/definitions/nestedDigestSpec'
 
   srcRef:
     type: 'object'
@@ -458,3 +488,7 @@ properties:
     type: 'array'
     items:
       $ref: '#/definitions/signature'
+  nestedDigests:
+    type: 'array'
+    items:
+      $ref: '#/definitions/nestedComponentDigests'

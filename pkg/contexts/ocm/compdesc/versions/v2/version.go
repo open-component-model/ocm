@@ -94,7 +94,8 @@ func (v *DescriptorVersion) ConvertTo(obj compdesc.ComponentDescriptorVersion) (
 			Resources:          convertResourcesTo(in.Resources),
 			References:         convertComponentReferencesTo(in.ComponentReferences),
 		},
-		Signatures: in.Signatures.Copy(),
+		Signatures:    in.Signatures.Copy(),
+		NestedDigests: in.NestedDigests.Copy(),
 	}
 	return out, nil
 }
@@ -223,7 +224,8 @@ func (v *DescriptorVersion) ConvertFrom(in *compdesc.ComponentDescriptor) (compd
 			Resources:           convertResourcesFrom(in.Resources),
 			ComponentReferences: convertComponentReferencesFrom(in.References),
 		},
-		Signatures: in.Signatures.Copy(),
+		Signatures:    in.Signatures.Copy(),
+		NestedDigests: in.NestedDigests.Copy(),
 	}
 	if err := out.Default(); err != nil {
 		return nil, err

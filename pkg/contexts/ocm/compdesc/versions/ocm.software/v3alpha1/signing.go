@@ -20,43 +20,30 @@ import (
 var CDExcludes = signing.MapExcludes{
 	"repositoryContexts": nil,
 	"metadata": signing.MapExcludes{
-		"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
-			ValueChecker: signing.IgnoreLabelsWithoutSignature,
-			Continue:     signing.NoExcludes{},
-		}},
+		"labels": signing.LabelExcludes,
 	},
 	"spec": signing.MapExcludes{
-		"resources": signing.DynamicArrayExcludes{
-			ValueChecker: signing.IgnoreResourcesWithNoneAccess,
+		"resources": signing.ArrayExcludes{
 			Continue: signing.MapExcludes{
 				"access": nil,
 				"srcRef": nil,
-				"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
-					ValueChecker: signing.IgnoreLabelsWithoutSignature,
-					Continue:     signing.NoExcludes{},
-				}},
+				"labels": signing.LabelExcludes,
 			},
 		},
-		"sources": signing.DynamicArrayExcludes{
-			ValueChecker: signing.IgnoreResourcesWithNoneAccess,
+		"sources": signing.ArrayExcludes{
 			Continue: signing.MapExcludes{
 				"access": nil,
-				"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
-					ValueChecker: signing.IgnoreLabelsWithoutSignature,
-					Continue:     signing.NoExcludes{},
-				}},
+				"labels": signing.LabelExcludes,
 			},
 		},
 		"references": signing.ArrayExcludes{
 			signing.MapExcludes{
-				"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
-					ValueChecker: signing.IgnoreLabelsWithoutSignature,
-					Continue:     signing.NoExcludes{},
-				}},
+				"labels": signing.LabelExcludes,
 			},
 		},
 	},
-	"signatures": nil,
+	"signatures":    nil,
+	"nestedDigests": nil,
 }
 
 func (cd *ComponentDescriptor) Normalize(normAlgo string) ([]byte, error) {

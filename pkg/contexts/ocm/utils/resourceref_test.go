@@ -33,7 +33,7 @@ const OCIHOST = "alias"
 const SIGNATURE = "test"
 const SIGN_ALGO = rsa.Algorithm
 
-func Check(cv ocm.ComponentVersionAccess, name string, path ...metav1.Identity) {
+func CheckResourceRef(cv ocm.ComponentVersionAccess, name string, path ...metav1.Identity) {
 	ref := metav1.NewNestedResourceRef(metav1.NewIdentity(name), path)
 	res, eff, err := utils.ResolveResourceReference(cv, ref, nil)
 	ExpectWithOffset(1, err).To(Succeed())
@@ -90,7 +90,7 @@ var _ = Describe("resolving local resource references", func() {
 		cv := Must(src.LookupComponentVersion(COMPONENT3, VERSION))
 		defer Close(cv)
 
-		Check(cv, "topdata")
+		CheckResourceRef(cv, "topdata")
 	})
 
 	It("resolves an indirect resource", func() {
@@ -99,7 +99,7 @@ var _ = Describe("resolving local resource references", func() {
 		cv := Must(src.LookupComponentVersion(COMPONENT3, VERSION))
 		defer Close(cv)
 
-		Check(cv, "otherdata", metav1.NewIdentity("nested"))
+		CheckResourceRef(cv, "otherdata", metav1.NewIdentity("nested"))
 	})
 
 	It("skips an intermediate component version", func() {
@@ -108,7 +108,7 @@ var _ = Describe("resolving local resource references", func() {
 		cv := Must(src.LookupComponentVersion(COMPONENT3, VERSION))
 		defer Close(cv)
 
-		Check(cv, "testdata", metav1.NewIdentity("nested"), metav1.NewIdentity("ref"))
+		CheckResourceRef(cv, "testdata", metav1.NewIdentity("nested"), metav1.NewIdentity("ref"))
 	})
 
 	It("multiple lookups", func() {
@@ -117,9 +117,9 @@ var _ = Describe("resolving local resource references", func() {
 		cv := Must(src.LookupComponentVersion(COMPONENT3, VERSION))
 		defer Close(cv)
 
-		Check(cv, "testdata", metav1.NewIdentity("nested"), metav1.NewIdentity("ref"))
-		Check(cv, "otherdata", metav1.NewIdentity("nested"))
-		Check(cv, "topdata")
+		CheckResourceRef(cv, "testdata", metav1.NewIdentity("nested"), metav1.NewIdentity("ref"))
+		CheckResourceRef(cv, "otherdata", metav1.NewIdentity("nested"))
+		CheckResourceRef(cv, "topdata")
 	})
 
 	It("access closed", func() {

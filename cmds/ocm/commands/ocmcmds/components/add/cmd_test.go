@@ -7,18 +7,18 @@ package add_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
+	. "github.com/open-component-model/ocm/pkg/testutils"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/mime"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -36,7 +36,7 @@ const COMPONENT = "github.com/mandelsoft/test"
 const COMPONENT2 = "github.com/mandelsoft/test2"
 const OUT = "/tmp/res"
 
-func Check(env *TestEnv, handler func(ocm.Repository)) {
+func CheckComponent(env *TestEnv, handler func(ocm.Repository)) {
 	repo := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env))
 	defer Close(repo)
 	cv := Must(repo.LookupComponentVersion("ocm.software/demo/test", "1.0.0"))
@@ -84,13 +84,13 @@ var _ = Describe("Test Environment", func() {
 	It("creates ctf and adds component", func() {
 		Expect(env.Execute("add", "c", "-fc", "--file", ARCH, "testdata/component.yaml")).To(Succeed())
 		Expect(env.DirExists(ARCH)).To(BeTrue())
-		Check(env, nil)
+		CheckComponent(env, nil)
 	})
 
 	It("creates ctf and adds components", func() {
 		Expect(env.Execute("add", "c", "-fc", "--file", ARCH, "--version", "1.0.0", "testdata/components.yaml")).To(Succeed())
 		Expect(env.DirExists(ARCH)).To(BeTrue())
-		Check(env, nil)
+		CheckComponent(env, nil)
 	})
 
 	Context("with completion", func() {
@@ -132,7 +132,7 @@ var _ = Describe("Test Environment", func() {
 		It("creates ctf and adds components", func() {
 			Expect(env.Execute("add", "c", "-fcCV", "--lookup", LOOKUP, "--file", ARCH, "testdata/component.yaml")).To(Succeed())
 			Expect(env.DirExists(ARCH)).To(BeTrue())
-			Check(env, func(repo ocm.Repository) {
+			CheckComponent(env, func(repo ocm.Repository) {
 				cv := MustWithOffset(2, R(repo.LookupComponentVersion(COMPONENT, VERSION)))
 				defer Close(cv)
 				res := MustWithOffset(2, R(cv.GetResource(metav1.Identity{"name": "image"})))

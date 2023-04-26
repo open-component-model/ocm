@@ -44,6 +44,11 @@ type ComponentDescriptor struct {
 	ComponentSpec `json:"component"`
 	// Signatures contains a list of signatures for the ComponentDescriptor
 	Signatures metav1.Signatures `json:"signatures,omitempty"`
+
+	// NestedDigets describe calculated resource digests for aggregated
+	// component versions, which might not be persisted, but incorporated
+	// into signatures of the actual component version
+	NestedDigests metav1.NestedDigests `json:"nestedDigests,omitempty"`
 }
 
 func New(name, version string) *ComponentDescriptor {
@@ -78,7 +83,8 @@ func (cd *ComponentDescriptor) Copy() *ComponentDescriptor {
 			References:         cd.References.Copy(),
 			Resources:          cd.Resources.Copy(),
 		},
-		Signatures: cd.Signatures.Copy(),
+		Signatures:    cd.Signatures.Copy(),
+		NestedDigests: cd.NestedDigests.Copy(),
 	}
 	return out
 }

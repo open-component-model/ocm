@@ -20,7 +20,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-type WalkingState = common.WalkingState[*struct{}]
+type WalkingState = common.WalkingState[*struct{}, interface{}]
 
 type TransportClosure = common.NameVersionInfo[*struct{}]
 

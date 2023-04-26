@@ -18,6 +18,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -98,7 +99,9 @@ func (h *ResourceSpecHandler) Add(ctx clictx.Context, ictx inputs.Context, elem 
 
 	cd.Labels = r.Labels
 	cd.Provider = r.Provider
-	cd.CreationTime = metav1.NewTimestampP()
+	if !compatattr.Get(ctx) {
+		cd.CreationTime = metav1.NewTimestampP()
+	}
 
 	err = handle(ctx, ictx, elem.Source(), cv, r.Sources, srcs.ResourceSpecHandler{})
 	if err != nil {

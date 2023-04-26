@@ -1,4 +1,4 @@
-## ocm sign &mdash; Sign Components
+## ocm sign &mdash; Sign Components Or Hashes
 
 ### Synopsis
 
@@ -22,4 +22,5 @@ ocm sign [<options>] <sub command> ...
 ##### Sub Commands
 
 * [ocm sign <b>componentversions</b>](ocm_sign_componentversions.md)	 &mdash; Sign component version
+* [ocm sign <b>hash</b>](ocm_sign_hash.md)	 &mdash; sign hash
 

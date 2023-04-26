@@ -10,6 +10,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 )
@@ -173,7 +174,7 @@ var _ = Describe("Normalization", func() {
 	It("hashes first", func() {
 		n, err := compdesc.Normalize(cd1, compdesc.JsonNormalisationV1)
 		Expect(err).To(Succeed())
-		Expect(string(n)).To(Equal("[{\"component\":[{\"componentReferences\":[]},{\"name\":\"github.com/vasu1124/introspect\"},{\"provider\":\"internal\"},{\"resources\":[[{\"digest\":[{\"hashAlgorithm\":\"SHA-256\"},{\"normalisationAlgorithm\":\"ociArtifactDigest/v1\"},{\"value\":\"6a1c7637a528ab5957ab60edf73b5298a0a03de02a96be0313ee89b22544840c\"}]},{\"labels\":[[{\"name\":\"label2\"},{\"signing\":true},{\"value\":\"bar\"}]]},{\"name\":\"introspect-image\"},{\"relation\":\"local\"},{\"type\":\"ociImage\"},{\"version\":\"1.0.0\"}],[{\"digest\":[{\"hashAlgorithm\":\"SHA-256\"},{\"normalisationAlgorithm\":\"genericBlobDigest/v1\"},{\"value\":\"d1187ac17793b2f5fa26175c21cabb6ce388871ae989e16ff9a38bd6b32507bf\"}]},{\"name\":\"introspect-blueprint\"},{\"relation\":\"local\"},{\"type\":\"landscaper.gardener.cloud/blueprint\"},{\"version\":\"1.0.0\"}],[{\"digest\":[{\"hashAlgorithm\":\"SHA-256\"},{\"normalisationAlgorithm\":\"ociArtifactDigest/v1\"},{\"value\":\"6229be2be7e328f74ba595d93b814b590b1aa262a1b85e49cc1492795a9e564c\"}]},{\"name\":\"introspect-helm\"},{\"relation\":\"external\"},{\"type\":\"helm\"},{\"version\":\"0.1.0\"}]]},{\"version\":\"1.0.0\"}]},{\"meta\":[{\"schemaVersion\":\"v2\"}]}]"))
+		Expect(string(n)).To(StringEqualTrimmedWithContext("[{\"component\":[{\"componentReferences\":[]},{\"name\":\"github.com/vasu1124/introspect\"},{\"provider\":\"internal\"},{\"resources\":[[{\"digest\":[{\"hashAlgorithm\":\"SHA-256\"},{\"normalisationAlgorithm\":\"ociArtifactDigest/v1\"},{\"value\":\"6a1c7637a528ab5957ab60edf73b5298a0a03de02a96be0313ee89b22544840c\"}]},{\"extraIdentity\":null},{\"labels\":[[{\"name\":\"label2\"},{\"signing\":true},{\"value\":\"bar\"}]]},{\"name\":\"introspect-image\"},{\"relation\":\"local\"},{\"type\":\"ociImage\"},{\"version\":\"1.0.0\"}],[{\"digest\":[{\"hashAlgorithm\":\"SHA-256\"},{\"normalisationAlgorithm\":\"genericBlobDigest/v1\"},{\"value\":\"d1187ac17793b2f5fa26175c21cabb6ce388871ae989e16ff9a38bd6b32507bf\"}]},{\"extraIdentity\":null},{\"name\":\"introspect-blueprint\"},{\"relation\":\"local\"},{\"type\":\"landscaper.gardener.cloud/blueprint\"},{\"version\":\"1.0.0\"}],[{\"digest\":[{\"hashAlgorithm\":\"SHA-256\"},{\"normalisationAlgorithm\":\"ociArtifactDigest/v1\"},{\"value\":\"6229be2be7e328f74ba595d93b814b590b1aa262a1b85e49cc1492795a9e564c\"}]},{\"extraIdentity\":null},{\"name\":\"introspect-helm\"},{\"relation\":\"external\"},{\"type\":\"helm\"},{\"version\":\"0.1.0\"}]]},{\"version\":\"1.0.0\"}]},{\"meta\":[{\"schemaVersion\":\"v2\"}]}]"))
 		o, err := compdesc.Normalize(cd2, compdesc.JsonNormalisationV1)
 		Expect(err).To(Succeed())
 		Expect(o).To(Equal(n))

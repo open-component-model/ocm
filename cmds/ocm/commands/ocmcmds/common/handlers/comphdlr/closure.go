@@ -31,7 +31,7 @@ func traverse(hist common.History, o *Object, octx out.Context, lookup ocm.Compo
 	*/
 	found := map[common.NameVersion]bool{}
 	for _, ref := range refs {
-		key := common.NewNameVersion(ref.ComponentName, ref.Version)
+		key := ocm.ComponentRefKey(&ref)
 		if found[key] {
 			continue // skip same ref wit different attributes for recursion
 		}

@@ -6,7 +6,6 @@ package internal
 
 import (
 	"fmt"
-	"io"
 	"sync"
 
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -32,6 +31,14 @@ func NewDigestDescriptor(digest, hashAlgo, normAlgo string) *DigestDescriptor {
 func (d DigesterType) Normalize() DigesterType {
 	d.HashAlgorithm = signing.NormalizeHashAlgorithm(d.HashAlgorithm)
 	return d
+}
+
+func (d DigesterType) String() string {
+	return fmt.Sprintf("%s[%s]", d.HashAlgorithm, d.NormalizationAlgorithm)
+}
+
+func (d DigesterType) IsInitial() bool {
+	return d.HashAlgorithm == "" && d.NormalizationAlgorithm == ""
 }
 
 // BlobDigester is the interface for digest providers
@@ -207,7 +214,7 @@ func (r *blobDigesterRegistry) DetermineDigests(restype string, preferred signin
 		if res != nil || err != nil {
 			return res, err
 		}
-		d, err := defaultDigester{}.DetermineDigest(restype, acc, preferred)
+		d, err := defaultDigester.DetermineDigest(restype, acc, preferred)
 		if err != nil {
 			return nil, err
 		}
@@ -279,37 +286,8 @@ outer:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const GenericBlobDigestV1 = "genericBlobDigest/v1"
+var defaultDigester BlobDigester
 
-func init() {
-	MustRegisterDigester(&defaultDigester{})
-}
-
-type defaultDigester struct{}
-
-var _ BlobDigester = (*defaultDigester)(nil)
-
-func (d defaultDigester) GetType() DigesterType {
-	return DigesterType{
-		HashAlgorithm:          "",
-		NormalizationAlgorithm: GenericBlobDigestV1,
-	}
-}
-
-func (d defaultDigester) DetermineDigest(typ string, acc AccessMethod, preferred signing.Hasher) (*DigestDescriptor, error) {
-	r, err := acc.Reader()
-	if err != nil {
-		return nil, err
-	}
-	hash := preferred.Create()
-
-	if _, err := io.Copy(hash, r); err != nil {
-		return nil, err
-	}
-
-	return &DigestDescriptor{
-		Value:                  fmt.Sprintf("%x", hash.Sum(nil)),
-		HashAlgorithm:          preferred.Algorithm(),
-		NormalisationAlgorithm: GenericBlobDigestV1,
-	}, nil
+func SetDefaultDigester(d BlobDigester) {
+	defaultDigester = d
 }

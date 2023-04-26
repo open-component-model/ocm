@@ -195,6 +195,41 @@ definitions:
       signature:
         $ref: '#/definitions/signatureSpec'
 
+  nestedDigestSpec:
+    type: 'object'
+    required:
+      - name
+      - digest
+    properties:
+      name:
+        type: string
+      version:
+        type: string
+      extraIdentity:
+        $ref: '#/definitions/identityAttribute'
+      digest:
+        $ref: '#/definitions/digestSpec'
+
+  nestedComponentDigests:
+    type: 'object'
+    required:
+      - name
+      - version
+      - digest
+      - resourceDigests
+    additionalProperties: false
+    properties:
+      name:
+        $ref: '#/definitions/componentName'
+      version:
+        $ref: '#/definitions/relaxedSemver'
+      digest:
+        $ref: '#/definitions/digestSpec'
+      resourceDigests:
+        type: 'array'
+        items:
+          $ref: '#/definitions/nestedDigestSpec'
+
   srcRef:
     type: 'object'
     description: 'a reference to a (component-local) source'
@@ -463,3 +498,7 @@ properties:
     type: 'array'
     items:
       $ref: '#/definitions/signature'
+  nestedDigests:
+    type: 'array'
+    items:
+      $ref: '#/definitions/nestedComponentDigests'

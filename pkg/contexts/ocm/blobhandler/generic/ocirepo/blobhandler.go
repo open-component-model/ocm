@@ -14,7 +14,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/ociuploadattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -121,5 +123,9 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 
 	ref := base.ComposeRef(namespace.GetNamespace() + version)
 	var acc cpi.AccessSpec = ociartifact.New(ref)
+	keep := keepblobattr.Get(ctx.GetContext())
+	if keep {
+		acc = localblob.New(blob.Digest().String(), hint, blob.MimeType(), acc)
+	}
 	return acc, nil
 }

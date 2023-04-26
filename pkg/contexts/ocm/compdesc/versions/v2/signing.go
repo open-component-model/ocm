@@ -19,33 +19,28 @@ import (
 // in the generic part, accordingly.
 var CDExcludes = signing.MapExcludes{
 	"component": signing.MapExcludes{
-		"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
-			ValueChecker: signing.IgnoreLabelsWithoutSignature,
-			Continue:     signing.NoExcludes{},
-		}},
+		"labels":             signing.LabelExcludes,
 		"repositoryContexts": nil,
-		"resources": signing.DynamicArrayExcludes{
-			ValueChecker: signing.IgnoreResourcesWithNoneAccess,
-			Continue: signing.MapExcludes{
-				"access": nil,
-				"srcRef": nil,
-				"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
-					ValueChecker: signing.IgnoreLabelsWithoutSignature,
-					Continue:     signing.NoExcludes{},
-				}},
+		"resources": signing.DefaultedMapFields{
+			Next: signing.ArrayExcludes{
+				signing.MapExcludes{
+					"access": nil,
+					"srcRef": nil,
+					"labels": signing.LabelExcludes,
+				},
 			},
-		},
+		}.EnforceNull("extraIdentity"),
 		"sources": nil,
-		"componentReferences": signing.ArrayExcludes{
-			signing.MapExcludes{
-				"labels": signing.ExcludeEmpty{signing.DynamicArrayExcludes{
-					ValueChecker: signing.IgnoreLabelsWithoutSignature,
-					Continue:     signing.NoExcludes{},
-				}},
+		"componentReferences": signing.DefaultedMapFields{
+			Next: signing.ArrayExcludes{
+				signing.MapExcludes{
+					"labels": signing.LabelExcludes,
+				},
 			},
-		},
+		}.EnforceNull("extraIdentity"),
 	},
-	"signatures": nil,
+	"signatures":    nil,
+	"nestedDigests": nil,
 }
 
 func (cd *ComponentDescriptor) Normalize(normAlgo string) ([]byte, error) {

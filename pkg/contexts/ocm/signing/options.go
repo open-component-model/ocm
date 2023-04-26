@@ -10,7 +10,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
 	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
@@ -19,6 +18,25 @@ import (
 
 type Option interface {
 	ApplySigningOption(o *Options)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type digestmode struct {
+	mode string
+}
+
+const (
+	DIGESTMODE_LOCAL = "local" // (default) store nested digests locally in component descriptor
+	DIGESTMODE_TOP   = "top"   // store aggregated nested digests in signed component version
+)
+
+func DigestMode(name string) Option {
+	return &digestmode{name}
+}
+
+func (o *digestmode) ApplySigningOption(opts *Options) {
+	opts.DigestMode = o.mode
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -80,6 +98,25 @@ func (o *signer) ApplySigningOption(opts *Options) {
 		opts.SignatureNames = append(append([]string{}, n), opts.SignatureNames...)
 	}
 	opts.Signer = o.signer
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type hasher struct {
+	hasher signing.Hasher
+}
+
+func Hash(h signing.Hasher) Option {
+	return &hasher{h}
+}
+
+func HashByAlgo(name string) Option {
+	h := signing.DefaultHandlerRegistry().GetHasher(name)
+	return Hash(h)
+}
+
+func (o *hasher) ApplySigningOption(opts *Options) {
+	opts.Hasher = o.hasher
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -162,6 +199,26 @@ func (o *registry) ApplySigningOption(opts *Options) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type signame struct {
+	name  string
+	reset bool
+}
+
+func SignatureName(name string, reset ...bool) Option {
+	return &signame{name, utils.Optional(reset...)}
+}
+
+func (o *signame) ApplySigningOption(opts *Options) {
+	if o.reset {
+		opts.SignatureNames = nil
+	}
+	if o.name != "" {
+		opts.SignatureNames = append(opts.SignatureNames, o.name)
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type issuer struct {
 	name string
 }
@@ -229,6 +286,7 @@ func (o *pubkey) ApplySigningOption(opts *Options) {
 type Options struct {
 	Update            bool
 	Recursively       bool
+	DigestMode        string
 	Verify            bool
 	Signer            signing.Signer
 	Issuer            string
@@ -259,6 +317,9 @@ func (opts *Options) Eval(list ...Option) *Options {
 func (o *Options) ApplySigningOption(opts *Options) {
 	if o.Signer != nil {
 		opts.Signer = o.Signer
+	}
+	if o.DigestMode != "" {
+		opts.DigestMode = o.DigestMode
 	}
 	if o.VerifySignature {
 		opts.VerifySignature = o.VerifySignature
@@ -311,6 +372,9 @@ func (o *Options) Complete(registry signing.Registry) error {
 		if o.PrivateKey() == nil {
 			return errors.ErrNotFound(compdesc.KIND_PRIVATE_KEY, o.SignatureNames[0])
 		}
+		if o.DigestMode == "" {
+			o.DigestMode = DIGESTMODE_LOCAL
+		}
 	}
 	if o.VerifySignature {
 		if len(o.SignatureNames) > 0 {
@@ -336,10 +400,8 @@ func (o *Options) Complete(registry signing.Registry) error {
 			}
 		}
 	}
-	if o.VerifySignature || o.Signer != nil {
-		if o.NormalizationAlgo == "" {
-			o.NormalizationAlgo = compdesc.JsonNormalisationV1
-		}
+	if o.NormalizationAlgo == "" {
+		o.NormalizationAlgo = compdesc.JsonNormalisationV1
 	}
 	if o.Hasher == nil {
 		o.Hasher = o.Registry.GetHasher(sha256.Algorithm)
@@ -360,11 +422,15 @@ func (o *Options) checkCert(data interface{}, name string) error {
 }
 
 func (o *Options) DoUpdate() bool {
-	return o.Update || o.Signer != nil
+	return o.Update || o.DoSign()
 }
 
 func (o *Options) DoSign() bool {
 	return o.Signer != nil && len(o.SignatureNames) > 0
+}
+
+func (o *Options) StoreLocally() bool {
+	return o.DigestMode == DIGESTMODE_LOCAL
 }
 
 func (o *Options) DoVerify() bool {
@@ -407,18 +473,34 @@ func (o *Options) PrivateKey() interface{} {
 	return o.Registry.GetPrivateKey(o.SignatureName())
 }
 
-func (o *Options) For(digest *metav1.DigestSpec) (*Options, error) {
+func (o *Options) Dup() *Options {
 	opts := *o
+	return &opts
+}
+
+func (o *Options) Nested() *Options {
+	opts := o.Dup()
 	opts.VerifySignature = false // TODO: may be we want a mode to verify signature if present
 	if !opts.Recursively {
+		opts.Update = opts.DoUpdate() && opts.DigestMode == DIGESTMODE_LOCAL
 		opts.Signer = nil
-		opts.Update = false
 	}
-	if digest != nil {
-		opts.Hasher = opts.Registry.GetHasher(digest.HashAlgorithm)
-		if opts.Hasher == nil {
-			return nil, errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, digest.HashAlgorithm)
-		}
+	return opts
+}
+
+func (o *Options) StopRecursion() *Options {
+	opts := *o
+	opts.Recursively = false
+	opts.Signer = nil
+	opts.Update = false
+	return &opts
+}
+
+func (o *Options) WithDigestMode(mode string) *Options {
+	if mode == "" || o.DigestMode == mode {
+		return o
 	}
-	return &opts, nil
+	opts := *o
+	opts.DigestMode = mode
+	return &opts
 }
