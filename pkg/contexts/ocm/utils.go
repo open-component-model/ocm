@@ -10,8 +10,10 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -95,4 +97,8 @@ func IsIntermediate(spec RepositorySpec) bool {
 		return s.IsIntermediate()
 	}
 	return false
+}
+
+func ComponentRefKey(ref *compdesc.ComponentReference) common.NameVersion {
+	return common.NewNameVersion(ref.GetComponentName(), ref.GetVersion())
 }

@@ -141,7 +141,7 @@ func (d *action) Save(o *comphdlr.Object, f string) (err error) {
 	}
 	defer errors.PropagateError(&err, set.Close)
 
-	nv := common.NewNameVersion(src.GetName(), src.GetVersion())
+	nv := common.VersionedElementKey(src)
 	hist := common.History{nv}
 
 	err = transfer.CopyVersion(nil, d.cmd.OCMContext().Logger().WithValues("download", f), hist, src, set, nil)

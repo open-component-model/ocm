@@ -72,5 +72,6 @@ var CDExcludes = signing.MapExcludes{
 			},
 		},
 	},
-	"signatures": nil,
+	"signatures":    nil,
+	"nestedDigests": nil,
 }

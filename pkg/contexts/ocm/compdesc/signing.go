@@ -57,6 +57,7 @@ func Hash(cd *ComponentDescriptor, normAlgo string, hash hash.Hash) (string, err
 	if err != nil {
 		return "", fmt.Errorf("failed normalising component descriptor %w", err)
 	}
+	// fmt.Printf("NORM %s:%s: %s\n", cd.Name, cd.Version, string(normalized))
 	hash.Reset()
 	if _, err = hash.Write(normalized); err != nil {
 		return "", fmt.Errorf("failed hashing the normalisedComponentDescriptorJson: %w", err)

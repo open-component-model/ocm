@@ -13,12 +13,14 @@ import (
 )
 
 // TODO: switch to context local setting.
-func (b *Builder) RSAKeyPair(name string) {
+func (b *Builder) RSAKeyPair(name ...string) {
 	priv, pub, err := rsa.Handler{}.CreateKeyPair()
 	b.failOn(err)
 	reg := signingattr.Get(b.OCMContext())
-	reg.RegisterPublicKey(name, pub)
-	reg.RegisterPrivateKey(name, priv)
+	for _, n := range name {
+		reg.RegisterPublicKey(n, pub)
+		reg.RegisterPrivateKey(n, priv)
+	}
 }
 
 func (b *Builder) ReadRSAKeyPair(name, path string) {

@@ -137,6 +137,6 @@ $ ocm sign componentversion --signature mandelsoft --private-key=mandelsoft.key 
 
 ##### Parents
 
-* [ocm sign](ocm_sign.md)	 &mdash; Sign components
+* [ocm sign](ocm_sign.md)	 &mdash; Sign components or hashes
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
 
