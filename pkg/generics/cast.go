@@ -19,3 +19,12 @@ func AsE[T any](o interface{}, err error) (T, error) {
 	}
 	return o.(T), err
 }
+
+func CastSlice[S, T any](in ...S) []T {
+	r := make([]T, len(in))
+	for i := range in {
+		var s any = in[i]
+		r[i] = s.(T)
+	}
+	return r
+}
