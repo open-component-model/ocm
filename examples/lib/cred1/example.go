@@ -26,7 +26,7 @@ func SimpleWriteWithCredentials() error {
 
 	octx := ocm.DefaultContext()
 
-	repoSpec := ocireg.NewRepositorySpec("ghcr.io/mandelsoft/ocm", nil)
+	repoSpec := ocireg.NewRepositorySpec(cfg.Repository, nil)
 
 	repo, err := octx.RepositoryForSpec(repoSpec, cfg.GetCredentials())
 	if err != nil {

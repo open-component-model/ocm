@@ -1,6 +1,6 @@
 # How to work with the library
 
-The complete library is arranged around area specific `Context` objects,
+The complete library is arranged around area specific [`Context` objects](contexts.md),
 which bundle all the settings and supported [extension points](../../docs/ocm/interoperability.md#support-library)
 of the Open Component Model.
 Extension points are implemented by handlers that can be registered at dedicated
@@ -8,64 +8,6 @@ context objects or at the default runtime environment.
 The context then provides all the methods required to access elements
 managed in the dedicated area.
 
-## Contexts
-
-A context object is the entry point for using a dedicated functional areas. It bundles all
-settings and extensions point implementations for this area.
-
-Therefore, it provides a root object of the type `Context`. This context
-object then provides methods to 
-- set configurations and to
-- get access to elements belonging to this area.
-
-There might be any number of such context objects at the same time and with
-different settings. Context objects are typically intended to have a short
-lifetime (for example to execute a dedicated request) and can be 
-garbage collected afterwards.
-
-The basic elements of most context types are *Specifications* and *Repositories*.
-A specification object provides serializable attributes used to describe
-dedicated elements in the functional area. Specifications are typed. There might
-be different types (with different attribute sets) used to describe instances provided
-by different implementations. The root element below the context object is typically
-a *Repository* object, which provides access to elements hosted by this repository.
-
-The context itself manages all the specification and element types and provides
-an entry point to deserialize specifications and to gain access to described
-effective root elements.
-
-For example, the OCI context manages repository specifications and types
-used to describe instances of various types of repositories hosting OCI Artifacts
-(one such specification/repository type is an *OCI Registry*, another one the docker daemon and a third one a filesystem representation for storing OCI artifacts). 
-The repository object provided for a repository specification then provides
-access to namespaces (in OCI speak *OCI repositories*), which again provide
-access to OCI artifacts (versions): manifests and indices.
-
-More complex contexts (especially the OCM context) may offer access to a more
-complex object ecosystem, for more kinds of specifications and object types.
-
-All functional areas supported by contexts can be found as sub packages of
-`github.com/open-component-model/ocm/pkg/contexts`. The following context
-types are provided:
-
-- `config`: configuration management of all parts of the OCM library.
-- `credentials`: credential management
-- `oci`: working with OCI registries
-- `ocm`: working withOCM repositories
-- `clictx`: command line interface 
-- `datacontext`: base context functionality used for all kinds of contexts.
-
-To just use the library without special configuration the standard settings will
-be available by accessing the default context for the area of question.
-Alternatively, context instances with specialized configurations can be 
-orchestrated by context builders.
-
-A context package contains the typical user API for the functional area.
-Elements required to provide own extension point implementations
-(for example new specification and repository types) can be found in the
-`cpi`(Context Progamming Interface) sub-package. Internal implementation
-utilities are located in the `internal` sub package. It is not intended to
-be used outside the context package.
 
 ## Working with OCM repositories
 

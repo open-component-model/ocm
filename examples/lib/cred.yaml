@@ -1,4 +1,5 @@
 username: mandelsoft
 password: ghp_*
 component: github.com/mandelsoft/examples/cred1
+repository: ghcr.io/mandelsoft/ocm
 version: 0.1.0
