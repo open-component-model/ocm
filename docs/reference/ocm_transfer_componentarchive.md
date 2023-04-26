@@ -38,18 +38,20 @@ target archive to use. The following formats are supported:
 
 The default format is <code>directory</code>.
 
+\
 If a component lookup for building a reference closure is required
 the <code>--lookup</code>  option can be used to specify a fallback
-lookup repository. 
-By default the component versions are searched in the repository
-holding the component version for which the closure is determined.
-For *Component Archives* this is never possible, because it only
-contains a single component version. Therefore, in this scenario
+lookup repository. By default the component versions are searched in
+the repository holding the component version for which the closure is
+determined. For *Component Archives* this is never possible, because
+it only contains a single component version. Therefore, in this scenario
 this option must always be specified to be able to follow component
 references.
 
+
 It the option <code>--overwrite</code> is given, component version in the
 target repository will be overwritten, if they already exist.
+
 
 It the option <code>--copy-resources</code> is given, all referential 
 resources will potentially be localized, mapped to component version local
@@ -57,6 +59,7 @@ resources in the target repository. It the option <code>--copy-local-resources</
 is given, instead, only resources with the relation <code>local</code> will be
 transferred. This behaviour can be further influenced by specifying a transfer
 script with the <code>script</code> option family.
+
 
 It the option <code>--copy-sources</code> is given, all referential 
 sources will potentially be localized, mapped to component version local
