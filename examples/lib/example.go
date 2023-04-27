@@ -14,15 +14,15 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-const componentName = "github.com/mandelsoft/ocmhelmdemo"
-const componentVersion = "0.1.0-dev"
+const componentName = "ocm.software/toi/demo/helmdemo"
+const componentVersion = "0.3.0-rc.2"
 
 const resourceName = "package"
 
 func MyFirstOCMApplication() error {
 	octx := ocm.DefaultContext()
 
-	repoSpec := ocireg.NewRepositorySpec("ghcr.io/mandelsoft/ocm", nil)
+	repoSpec := ocireg.NewRepositorySpec("ghcr.io/open-component-model/ocm", nil)
 
 	repo, err := octx.RepositoryForSpec(repoSpec)
 	if err != nil {

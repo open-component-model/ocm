@@ -13,10 +13,11 @@ import (
 )
 
 type Config struct {
-	Username  string `json:"username"`
-	Password  string `json:"password"`
-	Component string `json:"component"`
-	Version   string `json:"version"`
+	Username   string `json:"username"`
+	Password   string `json:"password"`
+	Component  string `json:"component"`
+	Repository string `json:"repository"`
+	Version    string `json:"version"`
 }
 
 func ReadConfig(path string) (*Config, error) {

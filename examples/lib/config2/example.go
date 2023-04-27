@@ -15,7 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const CFGFILE = "config.yaml"
+const CFGFILE = "examples/lib/config2/config.yaml"
 
 func UsingConfigs() error {
 	data, err := ioutil.ReadFile(CFGFILE)

@@ -14,7 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-const CFGFILE = "config.yaml"
+const CFGFILE = "examples/lib/config3/config.yaml"
 
 type Target struct {
 	updater cpi.Updater
