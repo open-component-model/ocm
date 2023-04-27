@@ -16,9 +16,9 @@ type BlobContainer interface {
 	GetBlobData(name string) (cpi.DataAccess, error)
 
 	// GetStorageContext creates a storage context for blobs
-	// that is used to feed blob handlers for specific blob starage methods.
+	// that is used to feed blob handlers for specific blob storage methods.
 	// If no handler accepts the blob, the AddBlobFor method will
-	// be ued toi store the blob
+	// be used to store the blob
 	GetStorageContext(cv cpi.ComponentVersionAccess) cpi.StorageContext
 
 	// AddBlobFor stores a local blob together with the component and

@@ -47,6 +47,8 @@ type Context interface {
 
 	RepositoryForSpec(spec RepositorySpec, creds ...credentials.CredentialsSource) (Repository, error)
 	RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...credentials.CredentialsSource) (Repository, error)
+	RepositorySpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error)
+
 	AccessSpecForSpec(spec compdesc.AccessSpec) (AccessSpec, error)
 	AccessSpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error)
 
@@ -193,6 +195,10 @@ func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarsha
 		return nil, err
 	}
 	return c.RepositoryForSpec(spec, creds...)
+}
+
+func (c *_context) RepositorySpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
+	return c.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
 }
 
 func (c *_context) AccessMethods() AccessTypeScheme {

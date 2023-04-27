@@ -93,6 +93,7 @@ func (t *repositoryTypeScheme) DecodeRepositorySpec(data []byte, unmarshaler run
 	if spec, ok := obj.(RepositorySpec); ok {
 		return spec, nil
 	}
+
 	return nil, fmt.Errorf("invalid access spec type: yield %T instead of RepositorySpec", obj)
 }
 
