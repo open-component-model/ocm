@@ -54,6 +54,7 @@ type ComponentAccess interface {
 	Close() error
 	Dup() (ComponentAccess, error)
 }
+
 type (
 	ResourceMeta       = compdesc.ResourceMeta
 	ComponentReference = compdesc.ComponentReference
@@ -89,6 +90,8 @@ type ComponentVersionAccess interface {
 	GetResource(meta metav1.Identity) (ResourceAccess, error)
 	GetResourceByIndex(i int) (ResourceAccess, error)
 	GetResourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]ResourceAccess, error)
+	GetResourcesByIdentitySelectors(selectors ...compdesc.IdentitySelector) ([]ResourceAccess, error)
+	GetResourcesByResourceSelectors(selectors ...compdesc.ResourceSelector) ([]ResourceAccess, error)
 
 	GetSources() []SourceAccess
 	GetSource(meta metav1.Identity) (SourceAccess, error)
@@ -96,6 +99,9 @@ type ComponentVersionAccess interface {
 
 	GetReference(meta metav1.Identity) (ComponentReference, error)
 	GetReferenceByIndex(i int) (ComponentReference, error)
+	GetReferencesByName(name string, selectors ...compdesc.IdentitySelector) (compdesc.References, error)
+	GetReferencesByIdentitySelectors(selectors ...compdesc.IdentitySelector) (compdesc.References, error)
+	GetReferencesByReferenceSelectors(selectors ...compdesc.ReferenceSelector) (compdesc.References, error)
 
 	// AccessMethod provides an access method implementation for
 	// an access spec. This might be a repository local implementation
@@ -108,7 +114,7 @@ type ComponentVersionAccess interface {
 	// not supported by the actual repository type.
 	AccessMethod(AccessSpec) (AccessMethod, error)
 
-	// AddBlob adds a local blob and returns an appropriate local access spec
+	// AddBlob adds a local blob and returns an appropriate local access spec.
 	AddBlob(blob BlobAccess, artType, refName string, global AccessSpec) (AccessSpec, error)
 
 	SetResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string, global AccessSpec) error
