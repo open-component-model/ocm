@@ -37,6 +37,7 @@ type (
 	ComponentAccess                  = internal.ComponentAccess
 	ComponentVersionAccess           = internal.ComponentVersionAccess
 	AccessSpec                       = internal.AccessSpec
+	GenericAccessSpec                = internal.GenericAccessSpec
 	HintProvider                     = internal.HintProvider
 	AccessMethod                     = internal.AccessMethod
 	AccessType                       = internal.AccessType
@@ -47,6 +48,7 @@ type (
 	ResourceAccess                   = internal.ResourceAccess
 	ResourceMeta                     = internal.ResourceMeta
 	RepositorySpec                   = internal.RepositorySpec
+	GenericRepositorySpec            = internal.GenericRepositorySpec
 	IntermediateRepositorySpecAspect = internal.IntermediateRepositorySpecAspect
 	RepositoryType                   = internal.RepositoryType
 	RepositoryTypeScheme             = internal.RepositoryTypeScheme

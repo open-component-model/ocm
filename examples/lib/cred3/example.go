@@ -35,7 +35,7 @@ func SimpleWriteWithCredentials() error {
 		return errors.Wrapf(err, "cannot access default docker config")
 	}
 
-	repoSpec := ocireg.NewRepositorySpec("ghcr.io/mandelsoft/ocm", nil)
+	repoSpec := ocireg.NewRepositorySpec(cfg.Repository, nil)
 	repo, err := octx.RepositoryForSpec(repoSpec)
 	if err != nil {
 		return err
