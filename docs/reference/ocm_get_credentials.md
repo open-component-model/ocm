@@ -19,16 +19,24 @@ ocm get credentials {<consumer property>=<value>}
 Try to resolve a given consumer specification against the configured credential
 settings and show the found credential attributes.
 
-For the following usage contexts with matchers and standard identity matchers exist:
+Matchers exist for the following usage contexts or consumer types:
 
   - <code>Buildcredentials.ocm.software</code>: Gardener config credential matcher
     
     It matches the <code>Buildcredentials.ocm.software</code> consumer type and additionally acts like
     the <code>hostpath</code> type.
+  - <code>Github</code>: GitHub credential matcher
+    
+    This matcher is a hostpath matcher.
+    
   - <code>OCIRegistry</code>: OCI registry credential matcher
     
     It matches the <code>OCIRegistry</code> consumer type and additionally acts like 
     the <code>hostpath</code> type.
+  - <code>S3</code>: S3 credential matcher
+
+The following standard identity matchers are supported:
+
   - <code>exact</code>: exact match of given pattern set
   - <code>hostpath</code>: Host and path based credential matcher
     
@@ -40,7 +48,7 @@ For the following usage contexts with matchers and standard identity matchers ex
     - *<code>pathprefix</code>* (optional): a path prefix to match. The 
       element with the most matching path components is selected (separator is <code>/</code>).
     
-  - <code>partial</code>: complete match of given pattern ignoring additional attributes
+  - <code>partial</code> (default): complete match of given pattern ignoring additional attributes
 
 The used matcher is derived from the consumer attribute <code>type</code>.
 For all other consumer types a matcher matching all attributes will be used.

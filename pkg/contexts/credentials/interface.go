@@ -43,6 +43,7 @@ type (
 	StringUsageContext       = internal.StringUsageContext
 	IdentityMatcher          = internal.IdentityMatcher
 	IdentityMatcherInfo      = internal.IdentityMatcherInfo
+	IdentityMatcherInfos     = internal.IdentityMatcherInfos
 	IdentityMatcherRegistry  = internal.IdentityMatcherRegistry
 )
 

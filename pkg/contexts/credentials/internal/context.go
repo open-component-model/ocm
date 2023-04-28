@@ -178,7 +178,7 @@ func (c *_context) GetCredentialsForConsumer(identity ConsumerIdentity, matchers
 		return nil, err
 	}
 
-	m := defaultMatcher(matchers...)
+	m := c.defaultMatcher(identity, matchers...)
 	var credsrc CredentialsSource
 	if m == nil {
 		credsrc, _ = c.consumerProviders.Get(identity)
@@ -192,6 +192,14 @@ func (c *_context) GetCredentialsForConsumer(identity ConsumerIdentity, matchers
 		return nil, ErrUnknownConsumer(identity.String())
 	}
 	return credsrc, nil
+}
+
+func (c *_context) defaultMatcher(id ConsumerIdentity, matchers ...IdentityMatcher) IdentityMatcher {
+	def, _ := c.consumerIdentityMatchers.Get(id.Type())
+	if def == nil {
+		def = PartialMatch
+	}
+	return mergeMatcher(def, andMatcher, matchers)
 }
 
 func (c *_context) SetCredentialsForConsumer(identity ConsumerIdentity, creds CredentialsSource) {
