@@ -9,7 +9,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -114,13 +113,5 @@ var (
 )
 
 func NewConsumerIdentity(typ string, attrs ...string) ConsumerIdentity {
-	r := map[string]string{}
-	r[identity.ID_TYPE] = typ
-
-	i := 0
-	for len(attrs) > i {
-		r[attrs[i]] = attrs[i+1]
-		i += 2
-	}
-	return r
+	return internal.NewConsumerIdentity(typ, attrs...)
 }

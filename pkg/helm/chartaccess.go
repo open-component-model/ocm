@@ -11,14 +11,15 @@ import (
 	"sync"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"helm.sh/helm/v3/pkg/registry"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 const (
-	ChartMediaType      = "vnd.cncf.helm.chart.content.v1.tar+gzip"
-	ProvenanceMediaType = "vnd.cncf.helm.chart.provenance.v1.prov"
+	ChartMediaType      = registry.ChartLayerMediaType
+	ProvenanceMediaType = registry.ProvLayerMediaType
 )
 
 type ChartAccess interface {
@@ -110,6 +111,9 @@ func (c *chartAccess) Prov() (accessio.BlobAccess, error) {
 
 	if c.closed {
 		return nil, accessio.ErrClosed
+	}
+	if c.prov == "" {
+		return nil, nil
 	}
 	return newFileAccess(c, c.prov, ProvenanceMediaType), nil
 }

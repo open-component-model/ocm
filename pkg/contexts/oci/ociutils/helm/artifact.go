@@ -10,7 +10,6 @@ import (
 	"os"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/registry"
@@ -18,14 +17,14 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm/loader"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/helm/loader"
 )
 
-func SynthesizeArtifactBlob(path string, fss ...vfs.FileSystem) (artifactset.ArtifactBlob, error) {
+func SynthesizeArtifactBlob(loader loader.Loader) (artifactset.ArtifactBlob, error) {
 	return artifactset.SythesizeArtifactSet(func(set *artifactset.ArtifactSet) (string, error) {
-		chart, blob, err := TransferAsArtifact(path, set, fss...)
+		chart, blob, err := TransferAsArtifact(loader, set)
 		if err != nil {
 			return "", fmt.Errorf("unable to transfer as artifact: %w", err)
 		}
@@ -43,42 +42,38 @@ func SynthesizeArtifactBlob(path string, fss ...vfs.FileSystem) (artifactset.Art
 	})
 }
 
-func TransferAsArtifact(path string, ns oci.NamespaceAccess, fss ...vfs.FileSystem) (*chart.Chart, *artdesc.Descriptor, error) {
-	fs := accessio.FileSystem(fss...)
-
-	fi, err := fs.Stat(path)
+func TransferAsArtifact(loader loader.Loader, ns oci.NamespaceAccess) (*chart.Chart, *artdesc.Descriptor, error) {
+	chart, err := loader.Chart()
 	if err != nil {
 		return nil, nil, err
 	}
-	chart, err := loader.Load(path, fs)
-	if err != nil {
-		return nil, nil, errors.Wrapf(err, "cannot load helm chart from %q", path)
-	}
 	err = chart.Validate()
 	if err != nil {
-		return nil, nil, errors.ErrInvalidWrap(err, "helm chart", path)
+		return nil, nil, errors.ErrInvalidWrap(err, "helm chart")
 	}
 
-	var provData []byte
-	provRef := fmt.Sprintf("%s.prov", path)
-	if _, err := fs.Stat(provRef); err == nil {
-		provData, err = vfs.ReadFile(fs, provRef)
-		if err != nil {
-			return nil, nil, errors.Wrapf(err, "cannot read provider metadata")
-		}
+	provData, err := loader.Provenance()
+	if err != nil {
+		return nil, nil, err
 	}
 
-	if fi.IsDir() {
+	blob, err := loader.ChartArchive()
+	if err != nil {
+		return nil, nil, err
+	}
+	if blob == nil {
 		dir, err := os.MkdirTemp("", "helmchart-")
 		if err != nil {
 			return chart, nil, errors.Wrapf(err, "cannot create temporary directory for helm chart")
 		}
 		defer os.RemoveAll(dir)
-		path, err = chartutil.Save(chart, dir)
+		path, err := chartutil.Save(chart, dir)
 		if err != nil {
 			return chart, nil, err
 		}
-		fs = osfs.New()
+		blob = accessio.BlobAccessForFile(registry.ChartLayerMediaType, path, osfs.New())
+	} else {
+		defer blob.Close()
 	}
 	meta := chart.Metadata
 
@@ -98,7 +93,7 @@ func TransferAsArtifact(path string, ns oci.NamespaceAccess, fss ...vfs.FileSyst
 	if err != nil {
 		return chart, nil, err
 	}
-	_, err = m.AddLayer(accessio.BlobAccessForFile(registry.ChartLayerMediaType, path, fs), nil)
+	_, err = m.AddLayer(blob, nil)
 	if err != nil {
 		return chart, nil, err
 	}
@@ -108,7 +103,7 @@ func TransferAsArtifact(path string, ns oci.NamespaceAccess, fss ...vfs.FileSyst
 			return chart, nil, err
 		}
 	}
-	blob, err := ns.AddArtifact(art)
+	blob, err = ns.AddArtifact(art)
 	if err != nil {
 		return chart, nil, err
 	}

@@ -41,6 +41,34 @@ shown below.
     Options used to configure fields: <code>--accessHostname</code>, <code>--accessRepository</code>, <code>--commit</code>
   
 
+- Access type <code>helm</code>
+
+  This method implements the access of a Helm chart stored in a Helm repository.
+
+  The following versions are supported:
+  - Version <code>v1</code>
+  
+    The type specific specification fields are:
+    
+    - **<code>helmRepository</code>** *string*
+    
+      Helm repository URL.
+    
+    - **<code>helmChart</code>** *string*
+    
+      The name of the Helm chart and its version separated by a colon.
+    
+    - **<code>caCert</code>** *string*
+    
+      An optional TLS root certificate.
+    
+    - **<code>keyring</code>** *string*
+    
+      An optional keyring used to verify the chart.
+    
+    Options used to configure fields: <code>--accessPackage</code>, <code>--accessRepository</code>
+  
+
 - Access type <code>localBlob</code>
 
   This method is used to store a resource blob along with the component descriptor

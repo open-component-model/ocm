@@ -14,8 +14,8 @@ import (
 )
 
 type Spec struct {
-	runtime.ObjectVersionedType `json:",inline"`
-	cpi.ProcessSpec             `json:",inline"`
+	inputs.InputSpecBase `json:",inline"`
+	cpi.ProcessSpec      `json:",inline"`
 
 	// Text is an utf8 string
 	Text string `json:"text,omitempty"`
@@ -25,8 +25,10 @@ var _ inputs.InputSpec = (*Spec)(nil)
 
 func New(text string, mediatype string, compress bool) *Spec {
 	return &Spec{
-		ObjectVersionedType: runtime.ObjectVersionedType{
-			Type: TYPE,
+		InputSpecBase: inputs.InputSpecBase{
+			ObjectVersionedType: runtime.ObjectVersionedType{
+				Type: TYPE,
+			},
 		},
 		ProcessSpec: cpi.NewProcessSpec(mediatype, compress),
 		Text:        text,

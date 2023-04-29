@@ -20,7 +20,7 @@ var DigestOption = RegisterOption(NewStringOptionType("digest", "blob digest"))
 var ReferenceOption = RegisterOption(NewStringOptionType("reference", "reference name"))
 
 // PackageOption.
-var PackageOption = RegisterOption(NewStringOptionType("accessPackage", "package name"))
+var PackageOption = RegisterOption(NewStringOptionType("accessPackage", "package or object name"))
 
 // RepositoryOption.
 var RepositoryOption = RegisterOption(NewStringOptionType("accessRepository", "repository URL"))

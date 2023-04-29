@@ -94,6 +94,18 @@ func orMatcher(list []IdentityMatcher) IdentityMatcher {
 // ConsumerIdentity describes the identity of a credential consumer.
 type ConsumerIdentity map[string]string
 
+func NewConsumerIdentity(typ string, attrs ...string) ConsumerIdentity {
+	r := map[string]string{}
+	r[ID_TYPE] = typ
+
+	i := 0
+	for len(attrs) > i {
+		r[attrs[i]] = attrs[i+1]
+		i += 2
+	}
+	return r
+}
+
 // IsSet checks whether an identity is given.
 func (i ConsumerIdentity) IsSet() bool {
 	return len(i) != 0

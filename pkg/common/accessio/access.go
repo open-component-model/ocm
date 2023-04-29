@@ -656,6 +656,9 @@ func ReferencingBlobAccess(b BlobAccess, closer func() error) BlobAccess {
 }
 
 func (r *referencingBlobAccess) Close() error {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+
 	if r.closed {
 		return ErrClosed
 	}
@@ -664,5 +667,6 @@ func (r *referencingBlobAccess) Close() error {
 			return err
 		}
 	}
+	r.closed = true
 	return r._blobAccess.Close()
 }

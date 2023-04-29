@@ -27,7 +27,7 @@ import (
 )
 
 type Spec struct {
-	runtime.ObjectVersionedType `json:",inline"`
+	inputs.InputSpecBase `json:",inline"`
 
 	// Repository is the repository hint for the index artifact
 	Repository string `json:"repository"`
@@ -40,8 +40,10 @@ var _ inputs.InputSpec = (*Spec)(nil)
 
 func New(pathtags ...string) *Spec {
 	return &Spec{
-		ObjectVersionedType: runtime.ObjectVersionedType{
-			Type: TYPE,
+		InputSpecBase: inputs.InputSpecBase{
+			ObjectVersionedType: runtime.ObjectVersionedType{
+				Type: TYPE,
+			},
 		},
 		Variants: pathtags,
 	}

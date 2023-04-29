@@ -52,6 +52,10 @@ func New(m ...datacontext.BuilderMode) Context {
 	return internal.Builder{}.New(m...)
 }
 
+func NewConsumerIdentity(typ string, attrs ...string) ConsumerIdentity {
+	return internal.NewConsumerIdentity(typ, attrs...)
+}
+
 func NewGenericCredentialsSpec(name string, repospec *GenericRepositorySpec) *GenericCredentialsSpec {
 	return internal.NewGenericCredentialsSpec(name, repospec)
 }

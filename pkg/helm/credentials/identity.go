@@ -2,9 +2,10 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package helm
+package credentials
 
 import (
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
@@ -43,8 +44,21 @@ func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
 
 // used crednetial attributes
 
-const ATTR_USERNAME = credentials.ATTR_USERNAME
+const (
+	ATTR_USERNAME    = credentials.ATTR_USERNAME
+	ATTR_PASSWORD    = credentials.ATTR_PASSWORD
+	ATTR_CERTIFICATE = credentials.ATTR_CERTIFICATE
+	ATTR_PRIVATE_KEY = credentials.ATTR_PRIVATE_KEY
+)
 
-const ATTR_PASSWORD = credentials.ATTR_PASSWORD
-
-const ATTR_CERTIFICATE = credentials.ATTR_CERTIFICATE
+func GetCredentials(ctx credentials.ContextProvider, repourl string) common.Properties {
+	id := hostpath.GetConsumerIdentity(CONSUMER_TYPE, repourl)
+	if id == nil {
+		return nil
+	}
+	creds, err := credentials.CredentialsForConsumer(ctx.CredentialsContext(), id, IdentityMatcher)
+	if creds == nil || err != nil {
+		return nil
+	}
+	return creds.Properties()
+}

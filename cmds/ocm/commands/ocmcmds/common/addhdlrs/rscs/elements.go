@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	ComponentVersionTag = "<componentversion>"
+	ComponentVersionTag = common.ComponentVersionTag
 )
 
 type ResourceSpecHandler struct{}

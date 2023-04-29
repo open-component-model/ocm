@@ -220,20 +220,7 @@ func (b *artifactHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, g
 	}
 
 	ref := path.Join(base, namespace.GetNamespace()) + version
-	var acc cpi.AccessSpec = ociartifact.New(ref)
-
-	if keep {
-		err := ocictx.Manifest.AddBlob(blob)
-		if err != nil {
-			return nil, wrap(err, errhint, "store local blob")
-		}
-		err = ocictx.AssureLayer(blob)
-		if err != nil {
-			return nil, wrap(err, errhint, "assure local blob layer")
-		}
-		acc = localblob.New(blob.Digest().String(), hint, blob.MimeType(), acc)
-	}
-	return acc, nil
+	return ociartifact.New(ref), nil
 }
 
 func wrap(err error, msg string, args ...interface{}) error {

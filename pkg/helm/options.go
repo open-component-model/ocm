@@ -6,6 +6,7 @@ package helm
 
 import (
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/helm/credentials"
 )
 
 type Option interface {
@@ -18,8 +19,10 @@ type credOption struct {
 	creds common.Properties
 }
 
-func (c credOption) apply(dl *chartDownloader) error {
-	dl.creds = c.creds
+func (c *credOption) apply(dl *chartDownloader) error {
+	if c.creds != nil {
+		dl.creds = c.creds
+	}
 	return nil
 }
 
@@ -33,12 +36,12 @@ type authOption struct {
 	user, password string
 }
 
-func (c authOption) apply(dl *chartDownloader) error {
+func (c *authOption) apply(dl *chartDownloader) error {
 	if dl.creds == nil {
 		dl.creds = common.Properties{}
 	}
-	dl.creds[ATTR_USERNAME] = c.user
-	dl.creds[ATTR_PASSWORD] = c.password
+	dl.creds[credentials.ATTR_USERNAME] = c.user
+	dl.creds[credentials.ATTR_PASSWORD] = c.password
 	return nil
 }
 
@@ -49,19 +52,23 @@ func WithBasicAuth(user, password string) Option {
 ////////////////////////////////////////////////////////////////////////////////
 
 type certOption struct {
-	data []byte
+	cert    []byte
+	privkey []byte
 }
 
-func (c certOption) apply(dl *chartDownloader) error {
-	if dl.creds == nil {
-		dl.creds = common.Properties{}
+func (c *certOption) apply(dl *chartDownloader) error {
+	if len(c.privkey) != 0 {
+		if dl.creds == nil {
+			dl.creds = common.Properties{}
+		}
+		dl.creds[credentials.ATTR_CERTIFICATE] = string(c.cert)
+		dl.creds[credentials.ATTR_PRIVATE_KEY] = string(c.privkey)
 	}
-	dl.creds[ATTR_CERTIFICATE] = string(c.data)
 	return nil
 }
 
-func WithCert(data []byte) Option {
-	return &certOption{data}
+func WithCert(cert []byte, privkey []byte) Option {
+	return &certOption{cert, privkey}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -70,8 +77,10 @@ type cacertOption struct {
 	data []byte
 }
 
-func (c cacertOption) apply(dl *chartDownloader) error {
-	dl.cacert = c.data
+func (c *cacertOption) apply(dl *chartDownloader) error {
+	if len(c.data) > 0 {
+		dl.cacert = c.data
+	}
 	return nil
 }
 
@@ -85,8 +94,10 @@ type keyringOption struct {
 	data []byte
 }
 
-func (c keyringOption) apply(dl *chartDownloader) error {
-	dl.keyring = c.data
+func (c *keyringOption) apply(dl *chartDownloader) error {
+	if len(c.data) > 0 {
+		dl.keyring = c.data
+	}
 	return nil
 }
 

@@ -14,8 +14,8 @@ import (
 )
 
 type Spec struct {
-	runtime.ObjectVersionedType `json:",inline"`
-	cpi.ProcessSpec             `json:",inline"`
+	inputs.InputSpecBase `json:",inline"`
+	cpi.ProcessSpec      `json:",inline"`
 
 	// Data is plain inline data as byte array
 	Data runtime.Binary `json:"data,omitempty"` // json rejects to unmarshal some !string into []byte
@@ -25,8 +25,10 @@ var _ inputs.InputSpec = (*Spec)(nil)
 
 func New(data []byte, mediatype string, compress bool) *Spec {
 	return &Spec{
-		ObjectVersionedType: runtime.ObjectVersionedType{
-			Type: TYPE,
+		InputSpecBase: inputs.InputSpecBase{
+			ObjectVersionedType: runtime.ObjectVersionedType{
+				Type: TYPE,
+			},
 		},
 		ProcessSpec: cpi.NewProcessSpec(mediatype, compress),
 		Data:        (data), // see above

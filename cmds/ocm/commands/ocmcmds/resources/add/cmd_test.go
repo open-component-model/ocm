@@ -6,6 +6,7 @@ package add_test
 
 import (
 	"fmt"
+	"net/http"
 	"reflect"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -140,6 +141,27 @@ var _ = Describe("Add resources", func() {
 		Expect(len(cd.Resources)).To(Equal(1))
 
 		CheckTextResource(env, cd, "testdata")
+	})
+
+	It("add helm chart from rpo", func() {
+		resp, err := http.Get("https://charts.helm.sh/stable")
+		if err == nil { // only if connected to internet
+			resp.Body.Close()
+			fmt.Fprintf(GinkgoWriter, "helm executed\n")
+			Expect(env.Execute("add", "resources", "--file", ARCH, "/testdata/helmref.yaml")).To(Succeed())
+			data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+			Expect(err).To(Succeed())
+			cd, err := compdesc.Decode(data)
+			Expect(err).To(Succeed())
+			Expect(len(cd.Resources)).To(Equal(1))
+
+			r, err := cd.GetResourceByIdentity(metav1.NewIdentity("chart"))
+			Expect(err).To(Succeed())
+			Expect(r.Type).To(Equal(resourcetypes.HELM_CHART))
+			Expect(r.Version).To(Equal("3.0.8"))
+		} else {
+			fmt.Fprintf(GinkgoWriter, "helm test skipped\n")
+		}
 	})
 
 	DescribeTable("adds helm chart", func(rsc string) {

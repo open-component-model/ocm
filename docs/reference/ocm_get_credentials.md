@@ -29,6 +29,10 @@ Matchers exist for the following usage contexts or consumer types:
     
     This matcher is a hostpath matcher.
     
+  - <code>HelmChartRepository</code>: Helm chart repository
+    
+    It matches the <code>HelmChartRepository</code> consumer type and additionally acts like 
+    the <code>hostpath</code> type.
   - <code>OCIRegistry</code>: OCI registry credential matcher
     
     It matches the <code>OCIRegistry</code> consumer type and additionally acts like 
