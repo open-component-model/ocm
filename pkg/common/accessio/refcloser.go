@@ -5,9 +5,10 @@
 package accessio
 
 import (
-	"fmt"
 	"io"
 	"sync"
+
+	"github.com/open-component-model/ocm/pkg/errors"
 )
 
 // ReferencableCloser manages closable views to a basic closer.
@@ -101,7 +102,7 @@ func (v *view) Finalize() error {
 	}
 
 	if err := v.ref.UnrefLast(); err != nil {
-		return fmt.Errorf("unable to unref last: %w", err)
+		return errors.ErrStillInUseWrap(errors.Wrapf(err, "unable to unref last: %w"))
 	}
 
 	v.closed = true
