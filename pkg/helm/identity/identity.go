@@ -2,13 +2,18 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package credentials
+package identity
 
 import (
+	"strings"
+
+	"helm.sh/helm/v3/pkg/registry"
+
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
+	ociidentity "github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 )
 
 // CONSUMER_TYPE is the Helm chart repository type.
@@ -51,12 +56,29 @@ const (
 	ATTR_PRIVATE_KEY = credentials.ATTR_PRIVATE_KEY
 )
 
-func GetCredentials(ctx credentials.ContextProvider, repourl string) common.Properties {
-	id := hostpath.GetConsumerIdentity(CONSUMER_TYPE, repourl)
+func OCIRepoURL(repourl string, chartname string) string {
+	repourl = strings.TrimSuffix(repourl, "/")[3+len(registry.OCIScheme):]
+	if chartname != "" {
+		repourl += "/" + chartname
+	}
+	return repourl
+}
+
+func GetConsumerId(repourl string, chartname string) cpi.ConsumerIdentity {
+	if registry.IsOCI(repourl) {
+		repourl = strings.TrimSuffix(repourl, "/")
+		return ociidentity.GetConsumerId(OCIRepoURL(repourl, ""), chartname)
+	} else {
+		return hostpath.GetConsumerIdentity(CONSUMER_TYPE, repourl)
+	}
+}
+
+func GetCredentials(ctx credentials.ContextProvider, repourl string, chartname string) common.Properties {
+	id := GetConsumerId(repourl, chartname)
 	if id == nil {
 		return nil
 	}
-	creds, err := credentials.CredentialsForConsumer(ctx.CredentialsContext(), id, IdentityMatcher)
+	creds, err := credentials.CredentialsForConsumer(ctx.CredentialsContext(), id, nil)
 	if creds == nil || err != nil {
 		return nil
 	}

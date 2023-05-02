@@ -73,6 +73,7 @@ linters:
 
 
     # Disabled with reason
+    - dogsled
     - exhaustruct      # Doesn't really make sense.
     - exhaustive       # Doesn't really make sense.
     - logrlint         # Doesn't really make sense.

@@ -24,8 +24,12 @@ func (l *accessLoader) Close() error {
 	return l.access.Close()
 }
 
-func (l *accessLoader) ChartArchive() (accessio.BlobAccess, error) {
+func (l *accessLoader) ChartArchive() (accessio.TemporaryBlobAccess, error) {
 	return l.access.Chart()
+}
+
+func (l *accessLoader) ChartArtefactSet() (accessio.TemporaryBlobAccess, error) {
+	return l.access.ArtefactSet()
 }
 
 func (l *accessLoader) Chart() (*chart.Chart, error) {

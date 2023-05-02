@@ -10,12 +10,13 @@ import (
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	ocihelm "github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/helm"
-	"github.com/open-component-model/ocm/pkg/helm/credentials"
+	"github.com/open-component-model/ocm/pkg/helm/identity"
 	"github.com/open-component-model/ocm/pkg/helm/loader"
 )
 
@@ -113,8 +114,8 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (acces
 			}
 		}
 
-		acc, err := helm.DownloadChart(ctx.StdOut(), s.Path, s.Version, s.HelmRepository,
-			helm.WithCredentials(credentials.GetCredentials(ctx, s.HelmRepository)),
+		acc, err := helm.DownloadChart(common.NewPrinter(ctx.StdOut()), ctx, s.Path, s.Version, s.HelmRepository,
+			helm.WithCredentials(identity.GetCredentials(ctx, s.HelmRepository, s.Path)),
 			helm.WithRootCert([]byte(cert)))
 		if err != nil {
 			return nil, "", errors.Wrapf(err, "cannot download chart %s:%s from %s", s.Path, s.Version, s.HelmRepository)
@@ -134,12 +135,18 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (acces
 	if vers == "" {
 		vers = info.ComponentVersion.GetVersion()
 	}
-	blob, err := ocihelm.SynthesizeArtifactBlob(chartLoader)
+
+	hint := ociartifact.Hint(info.ComponentVersion, chart.Name(), s.Repository, vers)
+	blob, err := chartLoader.ChartArtefactSet()
+	if err != nil || blob != nil {
+		return blob, hint, err
+	}
+	blob, err = ocihelm.SynthesizeArtifactBlob(chartLoader)
 	if err != nil {
 		return nil, "", errors.Wrapf(err, "cannot synthesize artifact blob")
 	}
 
-	return blob, ociartifact.Hint(info.ComponentVersion, chart.Name(), s.Repository, vers), err
+	return blob, hint, err
 }
 
 func (s *Spec) GetInputVersion(ctx inputs.Context) string {

@@ -15,7 +15,8 @@ import (
 )
 
 type Loader interface {
-	ChartArchive() (accessio.BlobAccess, error)
+	ChartArchive() (accessio.TemporaryBlobAccess, error)
+	ChartArtefactSet() (accessio.TemporaryBlobAccess, error)
 	Chart() (*chart.Chart, error)
 	Provenance() ([]byte, error)
 
@@ -37,11 +38,15 @@ func VFSLoader(path string, fss ...vfs.FileSystem) Loader {
 	}
 }
 
-func (l *vfsLoader) ChartArchive() (accessio.BlobAccess, error) {
+func (l *vfsLoader) ChartArchive() (accessio.TemporaryBlobAccess, error) {
 	if ok, err := vfs.IsFile(l.fs, l.path); !ok || err != nil {
 		return nil, err
 	}
-	return accessio.BlobAccessForFile(helm.ChartMediaType, l.path, l.fs), nil
+	return accessio.TemporaryBlobAccessForBlob(accessio.BlobAccessForFile(helm.ChartMediaType, l.path, l.fs)), nil
+}
+
+func (l *vfsLoader) ChartArtefactSet() (accessio.TemporaryBlobAccess, error) {
+	return nil, nil
 }
 
 func (l *vfsLoader) Chart() (*chart.Chart, error) {

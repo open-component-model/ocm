@@ -125,14 +125,22 @@ func GetConsumerIdentity(typ, _url string) cpi.ConsumerIdentity {
 		parts := strings.Split(u.Host, ":")
 		if len(parts) > 1 {
 			id[ID_PORT] = parts[1]
+		} else {
+			switch u.Scheme {
+			case "https":
+				id[ID_PORT] = "443"
+			case "http":
+				id[ID_PORT] = "80"
+			}
 		}
 		id[ID_HOSTNAME] = parts[0]
 	}
 	if u.Scheme != "" {
 		id[ID_SCHEME] = u.Scheme
 	}
-	if u.Path != "" {
-		id[ID_PATHPREFIX] = u.Path
+	path := strings.Trim(u.Path, "/")
+	if path != "" {
+		id[ID_PATHPREFIX] = path
 	}
 	return id
 }

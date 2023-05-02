@@ -93,6 +93,29 @@ type TemporaryBlobAccess interface {
 // _temporaryBlobAccess is to be used for private embedded fields.
 type _temporaryBlobAccess = TemporaryBlobAccess
 
+type temporaryBlob struct {
+	_blobAccess
+}
+
+// TemporaryBlobAccessForBlob returns a temporary blob for any blob, which gets
+// invalidated whenever closed.
+func TemporaryBlobAccessForBlob(blob BlobAccess) TemporaryBlobAccess {
+	return &temporaryBlob{blob}
+}
+
+func (b *temporaryBlob) IsValid() bool {
+	return b._blobAccess != nil
+}
+
+func (b *temporaryBlob) Close() error {
+	if b._blobAccess == nil {
+		return errors.ErrInvalid("blob access")
+	}
+	err := b._blobAccess.Close()
+	b._blobAccess = nil
+	return err
+}
+
 type DigestSource interface {
 	// Digest returns the blob digest
 	Digest() digest.Digest
@@ -523,7 +546,7 @@ type TemporaryFileSystemBlobAccess interface {
 	Path() string
 }
 
-type temporaryBlob struct {
+type temporaryFileBlob struct {
 	_blobAccess
 	lock       sync.Mutex
 	temp       vfs.File
@@ -531,20 +554,20 @@ type temporaryBlob struct {
 }
 
 func TempFileBlobAccess(mime string, fs vfs.FileSystem, temp vfs.File) TemporaryFileSystemBlobAccess {
-	return &temporaryBlob{
+	return &temporaryFileBlob{
 		_blobAccess: BlobAccessForFile(mime, temp.Name(), fs),
 		filesystem:  fs,
 		temp:        temp,
 	}
 }
 
-func (b *temporaryBlob) IsValid() bool {
+func (b *temporaryFileBlob) IsValid() bool {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 	return b.temp != nil
 }
 
-func (b *temporaryBlob) Close() error {
+func (b *temporaryFileBlob) Close() error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 	if b.temp != nil {
@@ -558,11 +581,11 @@ func (b *temporaryBlob) Close() error {
 	return nil
 }
 
-func (b *temporaryBlob) FileSystem() vfs.FileSystem {
+func (b *temporaryFileBlob) FileSystem() vfs.FileSystem {
 	return b.filesystem
 }
 
-func (b *temporaryBlob) Path() string {
+func (b *temporaryFileBlob) Path() string {
 	return b.temp.Name()
 }
 
@@ -651,8 +674,14 @@ type referencingBlobAccess struct {
 	_blobAccess
 }
 
-func ReferencingBlobAccess(b BlobAccess, closer func() error) BlobAccess {
+func ReferencingBlobAccess(b BlobAccess, closer func() error) TemporaryBlobAccess {
 	return &referencingBlobAccess{closer: closer, _blobAccess: b}
+}
+
+func (r *referencingBlobAccess) IsValid() bool {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	return !r.closed
 }
 
 func (r *referencingBlobAccess) Close() error {

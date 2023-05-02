@@ -6,7 +6,7 @@ package helm
 
 import (
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/helm/credentials"
+	"github.com/open-component-model/ocm/pkg/helm/identity"
 )
 
 type Option interface {
@@ -40,8 +40,8 @@ func (c *authOption) apply(dl *chartDownloader) error {
 	if dl.creds == nil {
 		dl.creds = common.Properties{}
 	}
-	dl.creds[credentials.ATTR_USERNAME] = c.user
-	dl.creds[credentials.ATTR_PASSWORD] = c.password
+	dl.creds[identity.ATTR_USERNAME] = c.user
+	dl.creds[identity.ATTR_PASSWORD] = c.password
 	return nil
 }
 
@@ -61,8 +61,8 @@ func (c *certOption) apply(dl *chartDownloader) error {
 		if dl.creds == nil {
 			dl.creds = common.Properties{}
 		}
-		dl.creds[credentials.ATTR_CERTIFICATE] = string(c.cert)
-		dl.creds[credentials.ATTR_PRIVATE_KEY] = string(c.privkey)
+		dl.creds[identity.ATTR_CERTIFICATE] = string(c.cert)
+		dl.creds[identity.ATTR_PRIVATE_KEY] = string(c.privkey)
 	}
 	return nil
 }

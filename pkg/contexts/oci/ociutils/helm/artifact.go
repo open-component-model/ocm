@@ -57,7 +57,8 @@ func TransferAsArtifact(loader loader.Loader, ns oci.NamespaceAccess) (*chart.Ch
 		return nil, nil, err
 	}
 
-	blob, err := loader.ChartArchive()
+	var blob accessio.BlobAccess
+	blob, err = loader.ChartArchive()
 	if err != nil {
 		return nil, nil, err
 	}
