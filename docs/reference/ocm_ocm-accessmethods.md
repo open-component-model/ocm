@@ -58,6 +58,10 @@ shown below.
     
       The name of the Helm chart and its version separated by a colon.
     
+    - **<code>version</code>** *string*
+    
+      The version of the Helm chart if not specified as part of the chart name.
+    
     - **<code>caCert</code>** *string*
     
       An optional TLS root certificate.
@@ -66,7 +70,16 @@ shown below.
     
       An optional keyring used to verify the chart.
     
-    Options used to configure fields: <code>--accessPackage</code>, <code>--accessRepository</code>
+    It uses the consumer identity type HelmChartRepository with the fields
+    for a hostpath identity matcher (see [ocm get credentials](ocm_get_credentials.md)).
+    
+    The following credential fields are evaluated:
+    - **<code>username</code>**: basic auth user name.
+    - **<code>password</code>**: basic auth password.
+    - **<code>certificate</code>**: TLS client certificate.
+    - **<code>privateKey</code>**: TLS private key.
+    
+    Options used to configure fields: <code>--accessPackage</code>, <code>--accessRepository</code>, <code>--accessVersion</code>
   
 
 - Access type <code>localBlob</code>
@@ -230,4 +243,10 @@ shown below.
 ##### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
+
+
+
+##### Additional Links
+
+* [<b>ocm get credentials</b>](ocm_get_credentials.md)	 &mdash; Get credentials for a dedicated consumer spec
 

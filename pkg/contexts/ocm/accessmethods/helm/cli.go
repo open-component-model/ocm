@@ -7,6 +7,7 @@ package helm
 import (
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
+	"github.com/open-component-model/ocm/pkg/helm/credentials"
 )
 
 func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
@@ -14,12 +15,14 @@ func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {
 		Type, AddConfig,
 		options.RepositoryOption,
 		options.PackageOption,
+		options.VersionOption,
 	)
 }
 
 func AddConfig(opts flagsets.ConfigOptions, config flagsets.Config) error {
 	flagsets.AddFieldByOptionP(opts, options.RepositoryOption, config, "helmRepository")
 	flagsets.AddFieldByOptionP(opts, options.PackageOption, config, "helmChart")
+	flagsets.AddFieldByOptionP(opts, options.VersionOption, config, "version")
 	return nil
 }
 
@@ -38,6 +41,10 @@ The type specific specification fields are:
 
   The name of the Helm chart and its version separated by a colon.
 
+- **<code>version</code>** *string*
+
+  The version of the Helm chart if not specified as part of the chart name.
+
 - **<code>caCert</code>** *string*
 
   An optional TLS root certificate.
@@ -45,4 +52,13 @@ The type specific specification fields are:
 - **<code>keyring</code>** *string*
 
   An optional keyring used to verify the chart.
+
+It uses the consumer identity type ` + credentials.CONSUMER_TYPE + ` with the fields
+for a hostpath identity matcher (see <CMD>ocm get credentials</CMD>).
+
+The following credential fields are evaluated:
+- **<code>` + credentials.ATTR_USERNAME + `</code>**: basic auth user name.
+- **<code>` + credentials.ATTR_PASSWORD + `</code>**: basic auth password.
+- **<code>` + credentials.ATTR_CERTIFICATE + `</code>**: TLS client certificate.
+- **<code>` + credentials.ATTR_PRIVATE_KEY + `</code>**: TLS private key.
 `

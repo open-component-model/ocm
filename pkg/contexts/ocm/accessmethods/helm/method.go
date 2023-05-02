@@ -49,6 +49,9 @@ type AccessSpec struct {
 	// HelmChart if the name of the helm chart and its version separated by a colon.
 	HelmChart string `json:"helmChart"`
 
+	// Version can either be specified as part of the chart name or separately.
+	Version string `json:"version,omitempty"`
+
 	// CACert is an optional root TLS certificate
 	CACert string `json:"caCert,omitempty"`
 
@@ -59,7 +62,7 @@ type AccessSpec struct {
 var _ cpi.AccessSpec = (*AccessSpec)(nil)
 
 func (a *AccessSpec) Describe(ctx cpi.Context) string {
-	return fmt.Sprintf("Helm chart %s in repository %s", a.HelmChart, a.HelmRepository)
+	return fmt.Sprintf("Helm chart %s:%s in repository %s", a.GetChartName(), a.GetVersion(), a.HelmRepository)
 }
 
 func (s *AccessSpec) IsLocal(context cpi.Context) bool {
@@ -76,6 +79,21 @@ func (s *AccessSpec) GetMimeType() string {
 
 func (s *AccessSpec) AccessMethod(access cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
 	return &accessMethod{comp: access, spec: s}, nil
+}
+
+///////////////////
+
+func (s *AccessSpec) GetVersion() string {
+	parts := strings.Split(s.HelmChart, ":")
+	if len(parts) > 1 {
+		return parts[1]
+	}
+	return s.Version
+}
+
+func (s *AccessSpec) GetChartName() string {
+	parts := strings.Split(s.HelmChart, ":")
+	return parts[0]
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -130,11 +148,24 @@ func (m *accessMethod) getBlob() (cpi.BlobAccess, error) {
 		return m.blob, nil
 	}
 
+	vers := m.spec.GetVersion()
+	name := m.spec.GetChartName()
+
 	parts := strings.Split(m.spec.HelmChart, ":")
-	if len(parts) != 2 {
-		return nil, errors.ErrInvalid("helm chart ref", m.spec.HelmRepository)
+	switch len(parts) {
+	case 1:
+		if vers == "" {
+			return nil, errors.ErrInvalid("helm chart", m.spec.HelmChart)
+		}
+	case 2:
+		if vers != parts[1] {
+			return nil, errors.ErrInvalid("helm chart", m.spec.HelmChart+"["+vers+"]")
+		}
+	default:
+		return nil, errors.ErrInvalid("helm chart", m.spec.HelmChart)
 	}
-	acc, err := helm.DownloadChart(os.Stdout, parts[0], parts[1], m.spec.HelmRepository,
+
+	acc, err := helm.DownloadChart(os.Stdout, name, vers, m.spec.HelmRepository,
 		helm.WithCredentials(credentials.GetCredentials(m.comp.GetContext(), m.spec.HelmRepository)),
 		helm.WithKeyring([]byte(m.spec.Keyring)),
 		helm.WithRootCert([]byte(m.spec.CACert)))
