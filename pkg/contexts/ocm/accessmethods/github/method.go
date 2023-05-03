@@ -23,6 +23,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	github2 "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/github"
+	credcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -46,11 +47,18 @@ const CONSUMER_TYPE = github2.CONSUMER_TYPE
 
 const ShaLength = 40
 
+var IdentityMatcher = hostpath.IdentityMatcher(CONSUMER_TYPE)
+
 func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}, cpi.WithDescription(usage)))
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}, cpi.WithFormatSpec(formatV1), cpi.WithConfigHandler(ConfigHandler())))
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyType, &AccessSpec{}))
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyTypeV1, &AccessSpec{}))
+
+	credcpi.RegisterStandardIdentityMatcher(CONSUMER_TYPE, IdentityMatcher, `GitHub credential matcher
+
+This matcher is a hostpath matcher.
+`)
 }
 
 func Is(spec cpi.AccessSpec) bool {
@@ -234,7 +242,7 @@ func getCreds(hostname, port, path string, cctx credentials.Context) (string, er
 		id[identity.ID_PORT] = port
 	}
 	id[identity.ID_PATHPREFIX] = path
-	creds, err := credentials.CredentialsForConsumer(cctx, id, hostpath.IdentityMatcher(CONSUMER_TYPE))
+	creds, err := credentials.CredentialsForConsumer(cctx, id, IdentityMatcher)
 	if creds == nil || err != nil {
 		return "", err
 	}

@@ -13,8 +13,7 @@ ocm [<options>] <sub command> ...
       --config string           configuration file
   -C, --cred stringArray        credential setting
   -h, --help                    help for ocm
-      --logcond stringArray     log condition (combined to an OR condition rule)
-      --logconfig string        log config (with prefix @ taken from given file)
+      --logconfig string        log config
   -L, --logfile string          set log file
       --logkeys stringArray     log tags/realms(.) to be enabled ([.]name{,[.]name}[=level])
   -l, --loglevel string         set log level
@@ -75,7 +74,7 @@ form
 </center>
 
 The <code>--log*</code> options can be used to configure the logging behaviour.
-There is a quick config option <code>--log-keys</code> to configure simple
+There is a quick config option <code>--logkeys</code> to configure simple
 tag/realm based condition rules. The comma-separated names build an AND rule.
 Hereby, names starting with a slash (<code>/</code>) denote a realm (without the leading slash).
 A realm is a slash separated sequence of identifiers, which matches all logging realms
@@ -83,9 +82,12 @@ with the given realms as path prefix. A tag directly matches the logging tags.
 Used tags and realms can be found under topic [ocm logging](ocm_logging.md). The ocm coding basically
 uses the realm <code>ocm</code>.
 The default level to enable is <code>info</code>. Separated by an equal sign (<code>=</code>)
-optiobally a dedicated level can be specified. Log levels can be (<code>error</code>,
+optionally a dedicated level can be specified. Log levels can be (<code>error</code>,
 <code>warn</code>, <code>info</code>, <code>debug</code> and <code>trace</code>.
 The default level is <code>warn</code>.
+The <code>--logconfig*</code> options can be used to configure a complete
+logging configuration (yaml/json) via command line. If the argument starts with
+an <code>@</code>, the logging configuration is taken from a file.
 
 The value can be a simple type or a json string for complex values. The following
 attributes are supported:

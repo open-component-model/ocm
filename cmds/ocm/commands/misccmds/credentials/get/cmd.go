@@ -7,6 +7,8 @@ package get
 import (
 	"sort"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -42,6 +44,21 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
+	var standard credentials.IdentityMatcherInfos
+	var context credentials.IdentityMatcherInfos
+	for _, e := range o.CredentialsContext().ConsumerIdentityMatchers().List() {
+		if e.Type != "" {
+			r, _ := utf8.DecodeRuneInString(e.Type)
+			if unicode.IsLower(r) {
+				standard = append(standard, e)
+			} else {
+				context = append(context, e)
+			}
+		} else {
+			context = append(context, e)
+		}
+	}
+
 	return &cobra.Command{
 		Use:   "{<consumer property>=<value>}",
 		Short: "Get credentials for a dedicated consumer spec",
@@ -49,8 +66,11 @@ func (o *Command) ForName(name string) *cobra.Command {
 Try to resolve a given consumer specification against the configured credential
 settings and show the found credential attributes.
 
-For the following usage contexts with matchers and standard identity matchers exist:
-` + utils.FormatListElements("", o.CredentialsContext().ConsumerIdentityMatchers().List()) +
+Matchers exist for the following usage contexts or consumer types:
+` + utils.FormatListElements("", context) +
+			`
+The following standard identity matchers are supported:
+` + utils.FormatListElements("partial", standard) +
 			`
 The used matcher is derived from the consumer attribute <code>type</code>.
 For all other consumer types a matcher matching all attributes will be used.
@@ -83,15 +103,6 @@ func (o *Command) Complete(args []string) error {
 			return errors.ErrInvalid("credential setting", s)
 		}
 		o.Consumer[name] = value
-	}
-	if t, ok := o.Consumer[credentials.ID_TYPE]; ok {
-		m, _ := o.CredentialsContext().ConsumerIdentityMatchers().Get(t)
-		if m != nil {
-			o.Matcher = m
-		}
-	}
-	if o.Matcher == nil {
-		o.Matcher = credentials.PartialMatch
 	}
 	return nil
 }
