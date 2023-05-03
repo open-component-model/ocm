@@ -13,6 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio/downloader/s3"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	credcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -30,11 +31,15 @@ const (
 	CONSUMER_TYPE = "S3"
 )
 
+var IdentityMatcher = hostpath.IdentityMatcher(CONSUMER_TYPE)
+
 func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}, cpi.WithDescription(usage)))
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}, cpi.WithFormatSpec(formatV1), cpi.WithConfigHandler(ConfigHandler())))
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyType, &AccessSpec{}))
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyTypeV1, &AccessSpec{}))
+
+	credcpi.RegisterStandardIdentityMatcher(CONSUMER_TYPE, IdentityMatcher, "S3 credential matcher")
 }
 
 // AccessSpec describes the access for a S3 registry.
@@ -152,11 +157,7 @@ func getCreds(a *AccessSpec, cctx credentials.Context) (credentials.Credentials,
 		id[identity.ID_PORT] = a.Version
 	}
 	id[identity.ID_PATHPREFIX] = path.Join(a.Bucket, a.Key, a.Version)
-	return credentials.CredentialsForConsumer(cctx,
-		credentials.ConsumerIdentity{
-			identity.ID_TYPE: CONSUMER_TYPE,
-		},
-		hostpath.IdentityMatcher(CONSUMER_TYPE))
+	return credentials.CredentialsForConsumer(cctx, id, IdentityMatcher)
 }
 
 func (m *accessMethod) GetKind() string {
