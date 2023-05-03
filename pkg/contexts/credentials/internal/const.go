@@ -5,18 +5,16 @@
 package internal
 
 const (
-	ID_TYPE = ATTR_TYPE
+	ID_TYPE = "type"
 
-	ATTR_TYPE                  = "type"
-	ATTR_USERNAME              = "username"
-	ATTR_PASSWORD              = "password"
-	ATTR_CERTIFICATE           = "certificate"
-	ATTR_PRIVATE_KEY           = "privateKey"
-	ATTR_SERVER_ADDRESS        = "serverAddress"
-	ATTR_IDENTITY_TOKEN        = "identityToken"
-	ATTR_REGISTRY_TOKEN        = "registryToken"
-	ATTR_TOKEN                 = "token"
-	ATTR_AWS_ACCESS_KEY_ID     = "awsAccessKeyID"
-	ATTR_AWS_SECRET_ACCESS_KEY = "awsSecretAccessKey"
-	ATTR_KEY                   = "key"
+	ATTR_TYPE           = "type"
+	ATTR_USERNAME       = "username"
+	ATTR_PASSWORD       = "password"
+	ATTR_CERTIFICATE    = "certificate"
+	ATTR_PRIVATE_KEY    = "privateKey"
+	ATTR_SERVER_ADDRESS = "serverAddress"
+	ATTR_IDENTITY_TOKEN = "identityToken"
+	ATTR_REGISTRY_TOKEN = "registryToken"
+	ATTR_TOKEN          = "token"
+	ATTR_KEY            = "key"
 )

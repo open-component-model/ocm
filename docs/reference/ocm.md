@@ -180,6 +180,7 @@ attributes are supported:
 
 * [ocm <b>attributes</b>](ocm_attributes.md)	 &mdash; configuration attributes used to control the behaviour
 * [ocm <b>configfile</b>](ocm_configfile.md)	 &mdash; configuration file
+* [ocm <b>credential-handling</b>](ocm_credential-handling.md)	 &mdash; Provisioning of credentials for credential consumers
 * [ocm <b>logging</b>](ocm_logging.md)	 &mdash; Configured logging keys
 * [ocm <b>oci-references</b>](ocm_oci-references.md)	 &mdash; notation for OCI references
 * [ocm <b>ocm-accessmethods</b>](ocm_ocm-accessmethods.md)	 &mdash; List of all supported access methods

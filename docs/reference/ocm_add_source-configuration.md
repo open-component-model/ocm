@@ -471,13 +471,6 @@ shown below.
     
     It uses the consumer identity type HelmChartRepository with the fields
     for a hostpath identity matcher (see [ocm get credentials](ocm_get_credentials.md)).
-    
-    The following credential fields are evaluated:
-    - **<code>username</code>**: basic auth user name.
-    - **<code>password</code>**: basic auth password.
-    - **<code>certificate</code>**: TLS client certificate.
-    - **<code>privateKey</code>**: TLS private key.
-    
     Options used to configure fields: <code>--accessPackage</code>, <code>--accessRepository</code>, <code>--accessVersion</code>
   
 

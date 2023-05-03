@@ -1,25 +1,29 @@
-## ocm get credentials &mdash; Get Credentials For A Dedicated Consumer Spec
-
-### Synopsis
-
-```
-ocm get credentials {<consumer property>=<value>}
-```
-
-### Options
-
-```
-  -h, --help             help for credentials
-  -m, --matcher string   matcher type override
-```
+## ocm credential-handling &mdash; Provisioning Of Credentials For Credential Consumers
 
 ### Description
 
 
-Try to resolve a given consumer specification against the configured credential
-settings and show the found credential attributes.
+Because of the dynamic nature of the OCM area there are several kinds of
+credential consumers with potentially completely different kinds of credentials.
+Therefore, a common uniform credential management is required, capable to serve
+all those use cases.
 
-Matchers exist for the following usage contexts or consumer types:
+This is achieved by establishing a credential request mechanism based on
+generic consumer identities and credential property sets.
+On the one hand every kind of credential consumer uses a dedicated consumer
+type (string). Additionally, it defines a set of properties further describing
+the target/context credentials are required for.
+
+On the other hand credentials can be defined for such sets of identities
+with partial sets of properties (see [ocm configfile](ocm_configfile.md)). A credential
+request is then matched again the available credential settings using matchers,
+which might by specific for dedicated kinds of requests. For example, a hostpath
+matcher matches a path prefix for a <code>pathprefix</code> property.
+
+The best matching set of credential properties is then returned to the
+credential consumer, which checks for the expected credential properties.
+
+The following credential consumer types are used:
   - <code>Buildcredentials.ocm.software</code>: Gardener config credential matcher
     
     It matches the <code>Buildcredentials.ocm.software</code> consumer type and additionally acts like
@@ -74,8 +78,10 @@ Matchers exist for the following usage contexts or consumer types:
       - <code>token</code>: AWS access token (alternatively)
     
 
-
-The following standard identity matchers are supported:
+\
+Those consumer types provide their own matchers, which are often based
+on some standard generic matches. Those generic matchers and their
+behaviours are described in the following list:
   - <code>exact</code>: exact match of given pattern set
   - <code>hostpath</code>: Host and path based credential matcher
     
@@ -88,17 +94,19 @@ The following standard identity matchers are supported:
       element with the most matching path components is selected (separator is <code>/</code>).
     
 
-  - <code>partial</code> (default): complete match of given pattern ignoring additional attributes
+  - <code>partial</code>: complete match of given pattern ignoring additional attributes
 
-The used matcher is derived from the consumer attribute <code>type</code>.
-For all other consumer types a matcher matching all attributes will be used.
-The usage of a dedicated matcher can be enforced by the option <code>--matcher</code>.
 
 
 ### SEE ALSO
 
 ##### Parents
 
-* [ocm get](ocm_get.md)	 &mdash; Get information about artifacts and components
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
+
+
+
+##### Additional Links
+
+* [<b>ocm configfile</b>](ocm_configfile.md)	 &mdash; configuration file
 

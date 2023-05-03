@@ -16,6 +16,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/demoplugin/common"
 	"github.com/open-component-model/ocm/cmds/demoplugin/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -68,7 +69,7 @@ func (a *Uploader) ValidateSpecification(p ppi.Plugin, spec ppi.UploadTargetSpec
 	}
 
 	info.ConsumerId = credentials.ConsumerIdentity{
-		identity.ID_TYPE:       common.CONSUMER_TYPE,
+		cpi.ID_TYPE:            common.CONSUMER_TYPE,
 		identity.ID_HOSTNAME:   "localhost",
 		identity.ID_PATHPREFIX: my.Path,
 	}

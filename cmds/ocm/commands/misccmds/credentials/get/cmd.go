@@ -7,14 +7,13 @@ package get
 import (
 	"sort"
 	"strings"
-	"unicode"
-	"unicode/utf8"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/misccmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
@@ -45,17 +44,12 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 
 func (o *Command) ForName(name string) *cobra.Command {
 	var standard credentials.IdentityMatcherInfos
-	var context credentials.IdentityMatcherInfos
+	var consumer credentials.IdentityMatcherInfos
 	for _, e := range o.CredentialsContext().ConsumerIdentityMatchers().List() {
-		if e.Type != "" {
-			r, _ := utf8.DecodeRuneInString(e.Type)
-			if unicode.IsLower(r) {
-				standard = append(standard, e)
-			} else {
-				context = append(context, e)
-			}
+		if e.IsConsumerType() {
+			consumer = append(consumer, e)
 		} else {
-			context = append(context, e)
+			standard = append(standard, e)
 		}
 	}
 
@@ -67,10 +61,10 @@ Try to resolve a given consumer specification against the configured credential
 settings and show the found credential attributes.
 
 Matchers exist for the following usage contexts or consumer types:
-` + utils.FormatListElements("", context) +
+` + listformat.FormatListElements("", consumer) +
 			`
 The following standard identity matchers are supported:
-` + utils.FormatListElements("partial", standard) +
+` + listformat.FormatListElements("partial", standard) +
 			`
 The used matcher is derived from the consumer attribute <code>type</code>.
 For all other consumer types a matcher matching all attributes will be used.

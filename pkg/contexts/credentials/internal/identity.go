@@ -208,7 +208,7 @@ func (l IdentityMatcherInfos) Description(i int) string {
 
 Credential consumers of the consumer type %s evaluate the following credential properties:
 
-`+l[i].CredentialAttributes)
+`, l[i].Type) + l[i].CredentialAttributes
 }
 
 type IdentityMatcherRegistry interface {

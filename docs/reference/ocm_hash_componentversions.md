@@ -56,16 +56,14 @@ references.
 
 
 The following normalization modes are supported with option <code>--normalization</code>:
-
-  - <code>jsonNormalisation/v1</code> (default): 
-  - <code>jsonNormalisation/v2</code>: 
+  - <code>jsonNormalisation/v1</code> (default)
+  - <code>jsonNormalisation/v2</code>
 
 
 The following hash modes are supported with option <code>--hash</code>:
-
-  - <code>NO-DIGEST</code>: 
-  - <code>SHA-256</code> (default): 
-  - <code>SHA-512</code>: 
+  - <code>NO-DIGEST</code>
+  - <code>SHA-256</code> (default)
+  - <code>SHA-512</code>
 
 
 If the <code>--repo</code> option is specified, the given names are interpreted
@@ -115,11 +113,12 @@ OCI Repository types (using standard component repository to OCI mapping):
 
 With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:
- - JSON
- - json
- - norm
- - wide
- - yaml
+  - <code></code> (default)
+  - <code>JSON</code>
+  - <code>json</code>
+  - <code>norm</code>
+  - <code>wide</code>
+  - <code>yaml</code>
 
 
 ### Examples

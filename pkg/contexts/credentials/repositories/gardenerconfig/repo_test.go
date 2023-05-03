@@ -20,11 +20,11 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	local "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig"
 	gardenercfgcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
+	ociidentity "github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -119,9 +119,9 @@ var _ = Describe("gardener config", func() {
 
 	It("propagates credentials with consumer ids in the context", func() {
 		expectedConsumerId := cpi.ConsumerIdentity{
-			cpi.ID_TYPE:            identity.CONSUMER_TYPE,
-			hostpath.ID_HOSTNAME:   "eu.gcr.io",
-			hostpath.ID_PATHPREFIX: "test-project",
+			cpi.ID_TYPE:               ociidentity.CONSUMER_TYPE,
+			ociidentity.ID_HOSTNAME:   "eu.gcr.io",
+			ociidentity.ID_PATHPREFIX: "test-project",
 		}
 
 		svr := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
@@ -137,7 +137,7 @@ var _ = Describe("gardener config", func() {
 		Expect(err).ToNot(HaveOccurred())
 		Expect(repo).ToNot(BeNil())
 
-		credentialsFromCtx, err := credentials.CredentialsForConsumer(defaultContext, expectedConsumerId, identity.IdentityMatcher)
+		credentialsFromCtx, err := credentials.CredentialsForConsumer(defaultContext, expectedConsumerId)
 		Expect(err).ToNot(HaveOccurred())
 		Expect(credentialsFromCtx).To(Equal(expectedCreds))
 	})
@@ -155,13 +155,11 @@ var _ = Describe("gardener config", func() {
 		parsedURL, err := utils.ParseURL(svr.URL)
 		Expect(err).ToNot(HaveOccurred())
 
-		id := cpi.ConsumerIdentity{
-			cpi.ID_TYPE: local.CONSUMER_TYPE,
-		}
-		id.SetNonEmptyValue(hostpath.ID_HOSTNAME, parsedURL.Host)
-		id.SetNonEmptyValue(hostpath.ID_SCHEME, parsedURL.Scheme)
-		id.SetNonEmptyValue(hostpath.ID_PATHPREFIX, strings.Trim(parsedURL.Path, "/"))
-		id.SetNonEmptyValue(hostpath.ID_PORT, parsedURL.Port())
+		id := cpi.NewConsumerIdentity(identity.CONSUMER_TYPE)
+		id.SetNonEmptyValue(identity.ID_HOSTNAME, parsedURL.Host)
+		id.SetNonEmptyValue(identity.ID_SCHEME, parsedURL.Scheme)
+		id.SetNonEmptyValue(identity.ID_PATHPREFIX, strings.Trim(parsedURL.Path, "/"))
+		id.SetNonEmptyValue(identity.ID_PORT, parsedURL.Port())
 
 		creds := credentials.DirectCredentials{
 			cpi.ATTR_KEY: encryptionKey,

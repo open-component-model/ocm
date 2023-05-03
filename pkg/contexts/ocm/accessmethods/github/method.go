@@ -22,10 +22,7 @@ import (
 	hd "github.com/open-component-model/ocm/pkg/common/accessio/downloader/http"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	github2 "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/github"
-	credcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/github/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -43,22 +40,13 @@ const (
 	LegacyTypeV1 = LegacyType + runtime.VersionSeparator + "v1"
 )
 
-const CONSUMER_TYPE = github2.CONSUMER_TYPE
-
 const ShaLength = 40
-
-var IdentityMatcher = hostpath.IdentityMatcher(CONSUMER_TYPE)
 
 func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}, cpi.WithDescription(usage)))
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}, cpi.WithFormatSpec(formatV1), cpi.WithConfigHandler(ConfigHandler())))
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyType, &AccessSpec{}))
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyTypeV1, &AccessSpec{}))
-
-	credcpi.RegisterStandardIdentityMatcher(CONSUMER_TYPE, IdentityMatcher, `GitHub credential matcher
-
-This matcher is a hostpath matcher.
-`)
 }
 
 func Is(spec cpi.AccessSpec) bool {
@@ -189,7 +177,7 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (cpi.AccessMethod, e
 		return nil, errors.ErrInvalid("repository path", path, a.RepoURL)
 	}
 
-	token, err := getCreds(u.Hostname(), u.Port(), path, c.GetContext().CredentialsContext())
+	token, err := getCreds(unparsed, path, c.GetContext().CredentialsContext())
 	if err != nil {
 		return nil, fmt.Errorf("failed to get creds: %w", err)
 	}
@@ -233,16 +221,8 @@ func validateCommit(commit string) error {
 	return nil
 }
 
-func getCreds(hostname, port, path string, cctx credentials.Context) (string, error) {
-	id := credentials.ConsumerIdentity{
-		identity.ID_TYPE:     CONSUMER_TYPE,
-		identity.ID_HOSTNAME: hostname,
-	}
-	if port != "" {
-		id[identity.ID_PORT] = port
-	}
-	id[identity.ID_PATHPREFIX] = path
-	creds, err := credentials.CredentialsForConsumer(cctx, id, IdentityMatcher)
+func getCreds(serverurl, path string, cctx credentials.Context) (string, error) {
+	creds, err := identity.GetCredentials(cctx, serverurl, path)
 	if creds == nil || err != nil {
 		return "", err
 	}

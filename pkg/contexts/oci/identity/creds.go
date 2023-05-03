@@ -12,15 +12,12 @@ import (
 )
 
 func GetCredentials(ctx cpi.ContextProvider, locator, repo string) (cpi.Credentials, error) {
-	return cpi.CredentialsForConsumer(ctx.CredentialsContext(), GetConsumerId(locator, repo), IdentityMatcher)
+	return cpi.CredentialsForConsumer(ctx.CredentialsContext(), GetConsumerId(locator, repo), identityMatcher)
 }
 
 func GetConsumerId(locator, repo string) cpi.ConsumerIdentity {
 	host, port, base := utils.SplitLocator(locator)
-	id := cpi.ConsumerIdentity{
-		ID_TYPE:     CONSUMER_TYPE,
-		ID_HOSTNAME: host,
-	}
+	id := cpi.NewConsumerIdentity(CONSUMER_TYPE, ID_HOSTNAME, host)
 	if port != "" {
 		id[ID_PORT] = port
 	}

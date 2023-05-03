@@ -82,7 +82,7 @@ func GetCredentials(ctx credentials.ContextProvider, repourl string, chartname s
 	if id == nil {
 		return nil
 	}
-	creds, err := credentials.CredentialsForConsumer(ctx.CredentialsContext(), id, nil)
+	creds, err := credentials.CredentialsForConsumer(ctx.CredentialsContext(), id, identityMatcher)
 	if creds == nil || err != nil {
 		return nil
 	}

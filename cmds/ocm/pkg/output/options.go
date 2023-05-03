@@ -12,6 +12,7 @@ import (
 	"github.com/mandelsoft/logging"
 	"github.com/spf13/pflag"
 
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -155,17 +156,7 @@ func (o *Options) Usage() string {
 		s += `
 With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:
-`
-		list := []string{}
-		for o := range o.Outputs {
-			list = append(list, o)
-		}
-		sort.Strings(list)
-		for _, m := range list {
-			if m != "" {
-				s += " - " + m + "\n"
-			}
-		}
+` + listformat.FormatList(o.OutputMode, utils.StringMapKeys(o.Outputs)...)
 	}
 	return s
 }

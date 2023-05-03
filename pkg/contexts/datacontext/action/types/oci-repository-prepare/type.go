@@ -8,6 +8,7 @@ import (
 	"path"
 
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/api"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -63,7 +64,7 @@ func (s *ActionSpecV1) Selector() api.Selector {
 func (s *ActionSpecV1) GetConsumerAttributes() common.Properties {
 	host, port, base := utils.SplitLocator(s.Hostname)
 	return common.Properties{
-		identity.ID_TYPE:       identity.CONSUMER_TYPE,
+		cpi.ID_TYPE:            identity.CONSUMER_TYPE,
 		identity.ID_HOSTNAME:   host,
 		identity.ID_PATHPREFIX: path.Join(base, s.Repository),
 		identity.ID_PORT:       port,

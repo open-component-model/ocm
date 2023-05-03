@@ -5,6 +5,7 @@
 package identity
 
 import (
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
@@ -12,7 +13,7 @@ import (
 
 const CONSUMER_TYPE = "Buildcredentials" + common.OCM_TYPE_GROUP_SUFFIX
 
-// used identity attributes
+// used identity attributes.
 const (
 	ID_SCHEME     = hostpath.ID_SCHEME
 	ID_HOSTNAME   = hostpath.ID_HOSTNAME
@@ -20,7 +21,7 @@ const (
 	ID_PATHPREFIX = hostpath.ID_PATHPREFIX
 )
 
-// used credential properties
+// used credential properties.
 const (
 	ATTR_KEY = cpi.ATTR_KEY
 )
@@ -32,9 +33,13 @@ func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
 }
 
 func init() {
+	attrs := listformat.FormatListElements("", listformat.StringElementDescriptionList{
+		ATTR_KEY, "secret key use to access the credential server",
+	})
+
 	cpi.RegisterStandardIdentity(CONSUMER_TYPE, IdentityMatcher, `Gardener config credential matcher
 
 It matches the <code>`+CONSUMER_TYPE+`</code> consumer type and additionally acts like
 the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`,
-		`- **<code>`+ATTR_KEY+`</code>** secret key use to access the credential server.`)
+		attrs)
 }
