@@ -54,11 +54,4 @@ The type specific specification fields are:
   An optional keyring used to verify the chart.
 
 It uses the consumer identity type ` + identity.CONSUMER_TYPE + ` with the fields
-for a hostpath identity matcher (see <CMD>ocm get credentials</CMD>).
-
-The following credential fields are evaluated:
-- **<code>` + identity.ATTR_USERNAME + `</code>**: basic auth user name.
-- **<code>` + identity.ATTR_PASSWORD + `</code>**: basic auth password.
-- **<code>` + identity.ATTR_CERTIFICATE + `</code>**: TLS client certificate.
-- **<code>` + identity.ATTR_PRIVATE_KEY + `</code>**: TLS private key.
-`
+for a hostpath identity matcher (see <CMD>ocm get credentials</CMD>).`

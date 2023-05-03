@@ -109,7 +109,7 @@ func (o *Command) Complete(args []string) error {
 	o.Spec, err = action.DecodeActionSpec(data)
 
 	if o.MatcherType != "" {
-		m, _ := o.CredentialsContext().ConsumerIdentityMatchers().Get(o.MatcherType)
+		m := o.CredentialsContext().ConsumerIdentityMatchers().Get(o.MatcherType)
 		if m == nil {
 			return errors.ErrUnknown("identity matcher", o.MatcherType)
 		}
@@ -129,7 +129,7 @@ func (o *Command) Complete(args []string) error {
 		o.Consumer[name] = value
 	}
 	if t, ok := o.Consumer[credentials.ID_TYPE]; ok {
-		m, _ := o.CredentialsContext().ConsumerIdentityMatchers().Get(t)
+		m := o.CredentialsContext().ConsumerIdentityMatchers().Get(t)
 		if m != nil {
 			o.Matcher = m
 		}

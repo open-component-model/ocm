@@ -27,11 +27,21 @@ const ID_PATHPREFIX = hostpath.ID_PATHPREFIX
 // ID_SCHEME is the scheme prefix.
 const ID_SCHEME = hostpath.ID_SCHEME
 
+// used crednetial properties
+const (
+	ATTR_USERNAME       = cpi.ATTR_USERNAME
+	ATTR_PASSWORD       = cpi.ATTR_PASSWORD
+	ATTR_IDENTITY_TOKEN = cpi.ATTR_IDENTITY_TOKEN
+)
+
 func init() {
-	cpi.RegisterStandardIdentityMatcher(CONSUMER_TYPE, IdentityMatcher, `OCI registry credential matcher
+	cpi.RegisterStandardIdentity(CONSUMER_TYPE, IdentityMatcher, `OCI registry credential matcher
 
 It matches the <code>`+CONSUMER_TYPE+`</code> consumer type and additionally acts like 
-the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`)
+the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`,
+		`- **<code>`+ATTR_USERNAME+`</code>** the basic auth user name
+- **<code>`+ATTR_PASSWORD+`</code>** the basic auth password
+- **<code>`+ATTR_IDENTITY_TOKEN+`</code>** the bearer token used for non-basic auth authorization`)
 }
 
 var identityMatcher = hostpath.IdentityMatcher(CONSUMER_TYPE)

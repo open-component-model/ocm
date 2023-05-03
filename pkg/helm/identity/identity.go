@@ -35,10 +35,14 @@ const ID_PORT = hostpath.ID_PORT
 const ID_PATHPREFIX = hostpath.ID_PATHPREFIX
 
 func init() {
-	cpi.RegisterStandardIdentityMatcher(CONSUMER_TYPE, IdentityMatcher, `Helm chart repository
+	cpi.RegisterStandardIdentity(CONSUMER_TYPE, IdentityMatcher, `Helm chart repository
 
 It matches the <code>`+CONSUMER_TYPE+`</code> consumer type and additionally acts like 
-the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`)
+the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`,
+		`- **<code>`+ATTR_USERNAME+`</code>**: basic auth user name.
+- **<code>`+ATTR_PASSWORD+`</code>**: basic auth password.
+- **<code>`+ATTR_CERTIFICATE+`</code>**: TLS client certificate.
+- **<code>`+ATTR_PRIVATE_KEY+`</code>**: TLS private key.`)
 }
 
 var identityMatcher = hostpath.IdentityMatcher(CONSUMER_TYPE)
@@ -47,7 +51,7 @@ func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
 	return identityMatcher(pattern, cur, id)
 }
 
-// used crednetial attributes
+// used credential attributes
 
 const (
 	ATTR_USERNAME    = credentials.ATTR_USERNAME

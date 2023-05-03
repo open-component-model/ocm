@@ -80,6 +80,10 @@ func RegisterStandardIdentityMatcher(typ string, matcher IdentityMatcher, desc s
 	internal.StandardIdentityMatchers.Register(typ, matcher, desc)
 }
 
+func RegisterStandardIdentity(typ string, matcher IdentityMatcher, desc string, attrs string) {
+	internal.StandardIdentityMatchers.Register(typ, matcher, desc, attrs)
+}
+
 func NewCredentials(props common.Properties) Credentials {
 	return internal.NewCredentials(props)
 }

@@ -85,7 +85,7 @@ func (o *Command) AddFlags(set *pflag.FlagSet) {
 
 func (o *Command) Complete(args []string) error {
 	if o.Type != "" {
-		m, _ := o.CredentialsContext().ConsumerIdentityMatchers().Get(o.Type)
+		m := o.CredentialsContext().ConsumerIdentityMatchers().Get(o.Type)
 		if m == nil {
 			return errors.ErrUnknown("identity matcher", o.Type)
 		}
@@ -103,6 +103,15 @@ func (o *Command) Complete(args []string) error {
 			return errors.ErrInvalid("credential setting", s)
 		}
 		o.Consumer[name] = value
+	}
+	if t, ok := o.Consumer[credentials.ID_TYPE]; ok {
+		m := o.CredentialsContext().ConsumerIdentityMatchers().Get(t)
+		if m != nil {
+			o.Matcher = m
+		}
+	}
+	if o.Matcher == nil {
+		o.Matcher = credentials.PartialMatch
 	}
 	return nil
 }
