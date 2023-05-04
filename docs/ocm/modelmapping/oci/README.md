@@ -48,6 +48,18 @@ access specification.
 
 </div>
 
+## Version Mapping
+
+The Open Component Model supports version names according to [semantic versioning](https://semver.org/).
+The tags used to represent versions in the OCI specification do not allow to directly use semantic version names as tags, becase the plus (`+`) character is not supported. Therefore, the open component model version names have to be mapped
+to OCI-compliant tag names.
+
+The followinmg mapping for version is used, here:
+- the optional plus `+` character used to attach build information in semantic versions is mapped to the sequence (`-.-`)
+
+Mapping tags back to versions uses the following mappings:
+- the character sequence (`-.-`) is mapped to a plus (`+`) character.
+
 ## Blob Mappings
 
 Local blobs with an OCI artifact media type will implicitly be mapped to a regular
