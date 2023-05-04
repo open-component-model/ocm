@@ -16,8 +16,8 @@ the target/context credentials are required for.
 
 On the other hand credentials can be defined for such sets of identities
 with partial sets of properties (see [ocm configfile](ocm_configfile.md)). A credential
-request is then matched again the available credential settings using matchers,
-which might by specific for dedicated kinds of requests. For example, a hostpath
+request is then matched against the available credential settings using matchers,
+which might be specific for dedicated kinds of requests. For example, a hostpath
 matcher matches a path prefix for a <code>pathprefix</code> property.
 
 The best matching set of credential properties is then returned to the
