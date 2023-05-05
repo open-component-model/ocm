@@ -7,8 +7,8 @@ package hashoption
 import (
 	"github.com/spf13/pflag"
 
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -63,12 +63,12 @@ func (o *Option) Configure(ctx clictx.Context) error {
 func (o *Option) Usage() string {
 	s := `
 The following normalization modes are supported with option <code>--normalization</code>:
-` + utils.FormatList(jsonv1.Algorithm, compdesc.Normalizations.Names()...)
+` + listformat.FormatList(jsonv1.Algorithm, compdesc.Normalizations.Names()...)
 
 	s += `
 
 The following hash modes are supported with option <code>--hash</code>:
-` + utils.FormatList(sha256.Algorithm, signing.DefaultRegistry().HasherNames()...)
+` + listformat.FormatList(sha256.Algorithm, signing.DefaultRegistry().HasherNames()...)
 
 	signing.DefaultRegistry().HasherNames()
 	return s

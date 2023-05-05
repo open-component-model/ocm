@@ -76,6 +76,8 @@ func (s *sourceInfo) Id() string {
 
 type ElementSpec interface {
 	GetName() string
+	GetVersion() string
+	SetVersion(string)
 	Info() string
 	Validate(ctx clictx.Context, input *ResourceInput) error
 }

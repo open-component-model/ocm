@@ -40,7 +40,7 @@ func (i *YAMLValue[T]) String() string {
 func (i *YAMLValue[T]) Set(s string) error {
 	err := yaml.Unmarshal([]byte(s), i.addr)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "failed to parse YAML: %q", s)
 	}
 	return nil
 }

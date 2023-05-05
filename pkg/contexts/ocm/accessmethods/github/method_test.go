@@ -21,6 +21,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/github/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/tmpcache"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
@@ -198,7 +199,7 @@ var _ = Describe("Method", func() {
 					credentials.ATTR_TOKEN: "test",
 				},
 			}
-			mcc.CredentialsContext().SetCredentialsForConsumer(credentials.ConsumerIdentity{credentials.ID_TYPE: me.CONSUMER_TYPE}, src)
+			mcc.CredentialsContext().SetCredentialsForConsumer(credentials.NewConsumerIdentity(identity.CONSUMER_TYPE), src)
 			m, err := accessSpec.AccessMethod(&mockComponentVersionAccess{
 				ocmContext: mcc,
 			})
@@ -217,7 +218,7 @@ var _ = Describe("Method", func() {
 				Context: mcc.CredentialsContext(),
 				err:     fmt.Errorf("danger will robinson"),
 			}
-			mcc.CredentialsContext().SetCredentialsForConsumer(credentials.ConsumerIdentity{credentials.ID_TYPE: me.CONSUMER_TYPE}, src)
+			mcc.CredentialsContext().SetCredentialsForConsumer(credentials.NewConsumerIdentity(identity.CONSUMER_TYPE), src)
 			_, err := accessSpec.AccessMethod(&mockComponentVersionAccess{
 				ocmContext: mcc,
 			})

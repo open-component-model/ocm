@@ -17,6 +17,7 @@ import (
 
 	ocmcreds "github.com/open-component-model/ocm/pkg/contexts/credentials"
 	oci_repository_prepare "github.com/open-component-model/ocm/pkg/contexts/datacontext/action/types/oci-repository-prepare"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
@@ -59,9 +60,9 @@ func (a Action) Execute(p ppi.Plugin, spec ppi.ActionSpec, creds ocmcreds.Direct
 	var awsCred aws.CredentialsProvider = aws.AnonymousCredentials{}
 
 	if creds != nil {
-		accessKeyID := creds.GetProperty(ocmcreds.ATTR_AWS_ACCESS_KEY_ID)
-		accessSecret := creds.GetProperty(ocmcreds.ATTR_AWS_SECRET_ACCESS_KEY)
-		accessToken := creds.GetProperty(ocmcreds.ATTR_TOKEN)
+		accessKeyID := creds.GetProperty(identity.ATTR_AWS_ACCESS_KEY_ID)
+		accessSecret := creds.GetProperty(identity.ATTR_AWS_SECRET_ACCESS_KEY)
+		accessToken := creds.GetProperty(identity.ATTR_TOKEN)
 		awsCred = credentials.NewStaticCredentialsProvider(accessKeyID, accessSecret, accessToken)
 	}
 

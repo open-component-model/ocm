@@ -23,10 +23,11 @@ all registered ones are listed.
 
 With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:
- - JSON
- - json
- - wide
- - yaml
+  - <code></code> (default)
+  - <code>JSON</code>
+  - <code>json</code>
+  - <code>wide</code>
+  - <code>yaml</code>
 
 
 ### Examples

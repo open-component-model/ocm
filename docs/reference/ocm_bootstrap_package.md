@@ -100,12 +100,11 @@ for the parameter and credentials file using the command [ocm bootstrap configur
 Using the option <code>--config</code> it is possible to configure options
 for the execution environment (so far only docker is supported).
 The following options are possible:
-
-  - <code>CLEANUP_CONTAINERS</code>: 
-  - <code>DOCKER_DRIVER_QUIET</code>: 
-  - <code>NETWORK_MODE</code>: 
-  - <code>PULL_POLICY</code>: 
-  - <code>USERNS_MODE</code>: 
+  - <code>CLEANUP_CONTAINERS</code>
+  - <code>DOCKER_DRIVER_QUIET</code>
+  - <code>NETWORK_MODE</code>
+  - <code>PULL_POLICY</code>
+  - <code>USERNS_MODE</code>
 
 
 Using the option <code>--create-env  &lt;toi root folder></code> it is possible to

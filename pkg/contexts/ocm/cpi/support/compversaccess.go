@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -238,7 +239,10 @@ func (a *componentVersionAccessImpl) AddBlob(cv cpi.ComponentVersionAccess, blob
 			return nil, err
 		}
 		if acc != nil {
-			return acc, nil
+			if !keepblobattr.Get(a.GetContext()) || acc.IsLocal(a.GetContext()) {
+				return acc, nil
+			}
+			global = acc
 		}
 	}
 	return a.base.AddBlobFor(storagectx, blob, refName, global)

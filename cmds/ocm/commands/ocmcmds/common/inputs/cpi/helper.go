@@ -24,7 +24,7 @@ import (
 )
 
 type PathSpec struct {
-	runtime.ObjectVersionedType `json:",inline"`
+	inputs.InputSpecBase `json:",inline"`
 
 	// Path is a file or repository path
 	Path string `json:"path"`
@@ -32,8 +32,10 @@ type PathSpec struct {
 
 func NewPathSpec(typ, path string) PathSpec {
 	return PathSpec{
-		ObjectVersionedType: runtime.ObjectVersionedType{
-			Type: typ,
+		InputSpecBase: inputs.InputSpecBase{
+			ObjectVersionedType: runtime.ObjectVersionedType{
+				Type: typ,
+			},
 		},
 		Path: path,
 	}

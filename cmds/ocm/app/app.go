@@ -48,6 +48,7 @@ import (
 	cmdutils "github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/cmds/ocm/topics/common/attributes"
 	topicconfig "github.com/open-component-model/ocm/cmds/ocm/topics/common/config"
+	topiccredentials "github.com/open-component-model/ocm/cmds/ocm/topics/common/credentials"
 	topiclogging "github.com/open-component-model/ocm/cmds/ocm/topics/common/logging"
 	topicocirefs "github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
 	topicocmaccessmethods "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/accessmethods"
@@ -223,8 +224,9 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	}
 	// help.Use="help <topic>"
 	help.DisableFlagsInUseLine = true
-	cmd.AddCommand(topiclogging.New(ctx))
 	cmd.AddCommand(topicconfig.New(ctx))
+	cmd.AddCommand(topiccredentials.New(ctx))
+	cmd.AddCommand(topiclogging.New(ctx))
 	cmd.AddCommand(topicocirefs.New(ctx))
 	cmd.AddCommand(topicocmrefs.New(ctx))
 	cmd.AddCommand(topicocmaccessmethods.New(ctx))
@@ -232,9 +234,12 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 
 	help.AddCommand(topicconfig.New(ctx))
+	help.AddCommand(topiccredentials.New(ctx))
+	help.AddCommand(topiclogging.New(ctx))
 	help.AddCommand(topicocirefs.New(ctx))
 	help.AddCommand(topicocmrefs.New(ctx))
 	help.AddCommand(topicocmaccessmethods.New(ctx))
+	help.AddCommand(attributes.New(ctx))
 	help.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 
 	for _, m := range mod {

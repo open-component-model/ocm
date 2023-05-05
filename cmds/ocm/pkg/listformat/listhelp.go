@@ -1,15 +1,22 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package utils
+package listformat
 
 import (
 	"fmt"
+	"strings"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
+
+type StringElementDescriptionList []string
+
+func (l StringElementDescriptionList) Size() int                { return len(l) / 2 }
+func (l StringElementDescriptionList) Key(i int) string         { return l[2*i] }
+func (l StringElementDescriptionList) Description(i int) string { return l[2*i+1] }
 
 type StringElementList []string
 
@@ -31,13 +38,20 @@ func (l *maplist[E]) Size() int                { return len(l.keys) }
 func (l *maplist[E]) Key(i int) string         { return l.keys[i] }
 func (l *maplist[E]) Description(i int) string { return l.desc(l.m[l.keys[i]]) }
 
-func FormatMapElements[E any](def string, m map[string]E, desc func(E) string) string {
+func FormatMapElements[E any](def string, m map[string]E, desc ...func(E) string) string {
+	if len(desc) == 0 || desc[0] == nil {
+		desc = []func(E) string{StringDescription[E]}
+	}
 	keys := utils.StringMapKeys(m)
 	return FormatListElements(def, &maplist[E]{
-		desc: desc,
+		desc: desc[0],
 		keys: keys,
 		m:    m,
 	})
+}
+
+func StringDescription[E any](e E) string {
+	return fmt.Sprintf("%s", any(e))
 }
 
 type ListElements interface {
@@ -52,17 +66,23 @@ func FormatListElements(def string, elems ListElements) string {
 
 	for i := 0; i < size; i++ {
 		key := elems.Key(i)
-		names = fmt.Sprintf("%s\n  - <code>%s</code>", names, key)
+		names = fmt.Sprintf("%s  - <code>%s</code>", names, key)
 		if key == def {
 			names += " (default)"
 		}
 		desc := elems.Description(i)
-		names += ": " + utils.IndentLines(desc, "    ", true)
+		if desc != "" {
+			names += ": " + utils.IndentLines(desc, "    ", true)
+			if strings.Contains(desc, "\n") {
+				names += "\n"
+			}
+		}
+		names += "\n"
 	}
-	return names + "\n"
+	return names
 }
 
-type IdentityMatcherList []credentials.IdentityMatcherInfo
+type IdentityMatcherList []cpi.IdentityMatcherInfo
 
 func (l IdentityMatcherList) Size() int                { return len(l) }
 func (l IdentityMatcherList) Key(i int) string         { return l[i].Type }

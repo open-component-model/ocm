@@ -16,7 +16,7 @@ func init() {
 
 const usage = `
 The path must denote an helm chart archive or directory
-relative to the resources file.
+relative to the resources file or a chart name in a helm chart repository.
 The denoted chart is packed as an OCI artifact set.
 Additional provider info is taken from a file with the same name
 and the suffix <code>.prov</code>.
@@ -42,4 +42,14 @@ This blob type specification supports the following fields:
   This OPTIONAL property can be used to specify the repository hint for the
   generated local artifact access. It is prefixed by the component name if
   it does not start with slash "/".
+
+- **<code>caCertFile</code>** *string*
+
+  This OPTIONAL property can be used to specify a relative filename for
+  the TLS root certificate used to access a helm repository.
+
+- **<code>caCert</code>** *string*
+
+  This OPTIONAL property can be used to specify a TLS root certificate used to
+  access a helm repository.
 `

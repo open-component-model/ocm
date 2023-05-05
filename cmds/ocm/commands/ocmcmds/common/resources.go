@@ -36,6 +36,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
+const ComponentVersionTag = "<componentversion>"
+
 type ResourceSpecHandler interface {
 	addhdlrs.ElementSpecHandler
 	Set(v ocm.ComponentVersionAccess, r addhdlrs.Element, acc compdesc.AccessSpec) error
@@ -444,6 +446,10 @@ func (o *ResourceAdderCommand) ProcessResourceDescriptions() error {
 	return ProcessElements(ictx, obj, elems, o.Handler)
 }
 
+func IsVersionSet(vers string) bool {
+	return vers != "" && vers != ComponentVersionTag
+}
+
 // ProcessElements add a list of evaluated elements to a component version.
 func ProcessElements(ictx inputs.Context, cv ocm.ComponentVersionAccess, elems []addhdlrs.Element, h ResourceSpecHandler) error {
 	var err error
@@ -461,6 +467,9 @@ func ProcessElements(ictx inputs.Context, cv ocm.ComponentVersionAccess, elems [
 				blob, hint, berr := elem.Input().Input.GetBlob(ictx, info)
 				if berr != nil {
 					return errors.Wrapf(berr, "cannot get %s blob for %q(%s)", h.Key(), elem.Spec().GetName(), elem.Source())
+				}
+				if iv := elem.Input().Input.GetInputVersion(ictx); iv != "" && !IsVersionSet(elem.Spec().GetVersion()) {
+					elem.Spec().SetVersion(iv)
 				}
 				acc, err = cv.AddBlob(blob, elem.Type(), hint, nil)
 				if err == nil {

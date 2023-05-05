@@ -6,16 +6,13 @@ package s3
 
 import (
 	"fmt"
-	"path"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessio/downloader"
 	"github.com/open-component-model/ocm/pkg/common/accessio/downloader/s3"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	credcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -26,20 +23,15 @@ const (
 	Type   = "s3"
 	TypeV1 = Type + runtime.VersionSeparator + "v1"
 
-	LegacyType    = "S3"
-	LegacyTypeV1  = LegacyType + runtime.VersionSeparator + "v1"
-	CONSUMER_TYPE = "S3"
+	LegacyType   = "S3"
+	LegacyTypeV1 = LegacyType + runtime.VersionSeparator + "v1"
 )
-
-var IdentityMatcher = hostpath.IdentityMatcher(CONSUMER_TYPE)
 
 func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}, cpi.WithDescription(usage)))
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}, cpi.WithFormatSpec(formatV1), cpi.WithConfigHandler(ConfigHandler())))
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyType, &AccessSpec{}))
 	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyTypeV1, &AccessSpec{}))
-
-	credcpi.RegisterStandardIdentityMatcher(CONSUMER_TYPE, IdentityMatcher, "S3 credential matcher")
 }
 
 // AccessSpec describes the access for a S3 registry.
@@ -120,8 +112,8 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, erro
 		accessSecret string
 	)
 	if creds != nil {
-		accessKeyID = creds.GetProperty(credentials.ATTR_AWS_ACCESS_KEY_ID)
-		accessSecret = creds.GetProperty(credentials.ATTR_AWS_SECRET_ACCESS_KEY)
+		accessKeyID = creds.GetProperty(identity.ATTR_AWS_ACCESS_KEY_ID)
+		accessSecret = creds.GetProperty(identity.ATTR_AWS_SECRET_ACCESS_KEY)
 	}
 	var awsCreds *s3.AWSCreds
 	if accessKeyID != "" {
@@ -149,15 +141,7 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, erro
 }
 
 func getCreds(a *AccessSpec, cctx credentials.Context) (credentials.Credentials, error) {
-	id := credentials.ConsumerIdentity{
-		identity.ID_TYPE:     CONSUMER_TYPE,
-		identity.ID_HOSTNAME: a.Bucket,
-	}
-	if a.Version != "" {
-		id[identity.ID_PORT] = a.Version
-	}
-	id[identity.ID_PATHPREFIX] = path.Join(a.Bucket, a.Key, a.Version)
-	return credentials.CredentialsForConsumer(cctx, id, IdentityMatcher)
+	return identity.GetCredentials(cctx, "", a.Bucket, a.Key, a.Version)
 }
 
 func (m *accessMethod) GetKind() string {

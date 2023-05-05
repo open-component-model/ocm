@@ -41,6 +41,40 @@ shown below.
     Options used to configure fields: <code>--accessHostname</code>, <code>--accessRepository</code>, <code>--commit</code>
   
 
+- Access type <code>helm</code>
+
+  This method implements the access of a Helm chart stored in a Helm repository.
+
+  The following versions are supported:
+  - Version <code>v1</code>
+  
+    The type specific specification fields are:
+    
+    - **<code>helmRepository</code>** *string*
+    
+      Helm repository URL.
+    
+    - **<code>helmChart</code>** *string*
+    
+      The name of the Helm chart and its version separated by a colon.
+    
+    - **<code>version</code>** *string*
+    
+      The version of the Helm chart if not specified as part of the chart name.
+    
+    - **<code>caCert</code>** *string*
+    
+      An optional TLS root certificate.
+    
+    - **<code>keyring</code>** *string*
+    
+      An optional keyring used to verify the chart.
+    
+    It uses the consumer identity type HelmChartRepository with the fields
+    for a hostpath identity matcher (see [ocm get credentials](ocm_get_credentials.md)).
+    Options used to configure fields: <code>--accessPackage</code>, <code>--accessRepository</code>, <code>--accessVersion</code>
+  
+
 - Access type <code>localBlob</code>
 
   This method is used to store a resource blob along with the component descriptor
@@ -202,4 +236,10 @@ shown below.
 ##### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
+
+
+
+##### Additional Links
+
+* [<b>ocm get credentials</b>](ocm_get_credentials.md)	 &mdash; Get credentials for a dedicated consumer spec
 

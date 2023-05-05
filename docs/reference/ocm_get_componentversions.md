@@ -98,17 +98,17 @@ the storage format of the actual descriptor is used or, for new ones v2
 is used.
 With <code>internal</code> the internal representation is shown.
 The following schema versions are supported for explicit conversions:
-
-  - <code>ocm.software/v3alpha1</code>: 
-  - <code>v2</code>: 
+  - <code>ocm.software/v3alpha1</code>
+  - <code>v2</code>
 
 With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:
- - JSON
- - json
- - tree
- - wide
- - yaml
+  - <code></code> (default)
+  - <code>JSON</code>
+  - <code>json</code>
+  - <code>tree</code>
+  - <code>wide</code>
+  - <code>yaml</code>
 
 
 ### Examples

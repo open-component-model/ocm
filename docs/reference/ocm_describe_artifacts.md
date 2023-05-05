@@ -60,9 +60,10 @@ linked library can be used:
 
 With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:
- - JSON
- - json
- - yaml
+  - <code></code> (default)
+  - <code>JSON</code>
+  - <code>json</code>
+  - <code>yaml</code>
 
 
 ### Examples

@@ -111,7 +111,7 @@ The following predefined option types can be used:
 
 
   - <code>accessHostname</code>: [*string*] hostname used for access
-  - <code>accessPackage</code>: [*string*] package name
+  - <code>accessPackage</code>: [*string*] package or object name
   - <code>accessRegistry</code>: [*string*] registry base URL
   - <code>accessRepository</code>: [*string*] repository URL
   - <code>accessVersion</code>: [*string*] version for access specification

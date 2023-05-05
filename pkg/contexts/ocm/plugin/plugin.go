@@ -12,9 +12,9 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	action2 "github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/config"
@@ -78,7 +78,7 @@ func (p *pluginImpl) Action(spec ppi.ActionSpec, creds json.RawMessage) (ppi.Act
 	}
 	if desc.ConsumerType != "" {
 		cid := spec.GetConsumerAttributes()
-		cid[identity.ID_TYPE] = desc.ConsumerType
+		cid[cpi.ID_TYPE] = desc.ConsumerType
 		c, err := credentials.CredentialsForConsumer(p.Context(), credentials.ConsumerIdentity(cid), hostpath.Matcher)
 		if err != nil || c == nil {
 			return nil, errors.ErrNotFound(credentials.KIND_CREDENTIALS, cid.String())

@@ -16,6 +16,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/demoplugin/config"
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
@@ -89,7 +90,7 @@ func (a *AccessMethod) ValidateSpecification(p ppi.Plugin, spec ppi.AccessSpec) 
 	}
 	info.MediaType = my.MediaType
 	info.ConsumerId = credentials.ConsumerIdentity{
-		identity.ID_TYPE:       common.CONSUMER_TYPE,
+		cpi.ID_TYPE:            common.CONSUMER_TYPE,
 		identity.ID_HOSTNAME:   "localhost",
 		identity.ID_PATHPREFIX: my.Path,
 	}
