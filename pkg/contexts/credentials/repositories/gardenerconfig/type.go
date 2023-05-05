@@ -8,10 +8,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	gardenercfgcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/identity"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -19,23 +18,11 @@ import (
 const (
 	RepositoryType   = "GardenerConfig"
 	RepositoryTypeV1 = RepositoryType + runtime.VersionSeparator + "v1"
-	CONSUMER_TYPE    = "Buildcredentials" + common.OCM_TYPE_GROUP_SUFFIX
 )
-
-var identityMatcher = hostpath.IdentityMatcher(CONSUMER_TYPE)
-
-func IdentityMatcher(pattern, cur, id cpi.ConsumerIdentity) bool {
-	return identityMatcher(pattern, cur, id)
-}
 
 func init() {
 	cpi.RegisterRepositoryType(RepositoryType, cpi.NewRepositoryType(RepositoryType, &RepositorySpec{}))
 	cpi.RegisterRepositoryType(RepositoryTypeV1, cpi.NewRepositoryType(RepositoryTypeV1, &RepositorySpec{}))
-
-	cpi.RegisterStandardIdentityMatcher(CONSUMER_TYPE, IdentityMatcher, `Gardener config credential matcher
-
-It matches the <code>`+CONSUMER_TYPE+`</code> consumer type and additionally acts like
-the <code>`+hostpath.IDENTITY_TYPE+`</code> type.`)
 }
 
 // RepositorySpec describes a secret server based credential repository interface.
@@ -83,22 +70,20 @@ func getKey(cctx cpi.Context, configURL string) ([]byte, error) {
 		return nil, fmt.Errorf("unable to parse url: %w", err)
 	}
 
-	id := cpi.ConsumerIdentity{
-		cpi.ID_TYPE: CONSUMER_TYPE,
-	}
-	id.SetNonEmptyValue(hostpath.ID_HOSTNAME, parsedURL.Host)
-	id.SetNonEmptyValue(hostpath.ID_SCHEME, parsedURL.Scheme)
-	id.SetNonEmptyValue(hostpath.ID_PATHPREFIX, strings.Trim(parsedURL.Path, "/"))
-	id.SetNonEmptyValue(hostpath.ID_PORT, parsedURL.Port())
+	id := cpi.NewConsumerIdentity(identity.CONSUMER_TYPE)
+	id.SetNonEmptyValue(identity.ID_HOSTNAME, parsedURL.Host)
+	id.SetNonEmptyValue(identity.ID_SCHEME, parsedURL.Scheme)
+	id.SetNonEmptyValue(identity.ID_PATHPREFIX, strings.Trim(parsedURL.Path, "/"))
+	id.SetNonEmptyValue(identity.ID_PORT, parsedURL.Port())
 
-	creds, err := cpi.CredentialsForConsumer(cctx, id, identityMatcher)
+	creds, err := cpi.CredentialsForConsumer(cctx, id)
 	if err != nil {
 		return nil, err
 	}
 
 	var key string
 	if creds != nil {
-		key = creds.GetProperty(cpi.ATTR_KEY)
+		key = creds.GetProperty(identity.ATTR_KEY)
 	}
 
 	return []byte(key), nil

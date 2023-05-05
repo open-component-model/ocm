@@ -26,6 +26,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3/identity"
 )
 
 type mockDownloader struct {
@@ -72,7 +73,7 @@ var _ = Describe("Method", func() {
 		vfsattr.Set(ctx, fs)
 		tmpcache.Set(ctx, &tmpcache.Attribute{Path: "/tmp"})
 		mcc = ocm.New(datacontext.MODE_INITIAL)
-		mcc.CredentialsContext().SetCredentialsForConsumer(credentials.ConsumerIdentity{credentials.ID_TYPE: s3.CONSUMER_TYPE}, credentials.DirectCredentials{
+		mcc.CredentialsContext().SetCredentialsForConsumer(credentials.ConsumerIdentity{credentials.ID_TYPE: identity.CONSUMER_TYPE}, credentials.DirectCredentials{
 			"accessKeyID":  "accessKeyID",
 			"accessSecret": "accessSecret",
 		})

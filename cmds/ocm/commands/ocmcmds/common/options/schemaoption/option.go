@@ -7,8 +7,8 @@ package schemaoption
 import (
 	"github.com/spf13/pflag"
 
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -75,6 +75,6 @@ With <code>internal</code> the internal representation is shown.`
 	}
 	s += `
 The following schema versions are supported for explicit conversions:
-` + utils.FormatList(o.Defaulted, compdesc.DefaultSchemes.Names()...)
+` + listformat.FormatList(o.Defaulted, compdesc.DefaultSchemes.Names()...)
 	return s
 }

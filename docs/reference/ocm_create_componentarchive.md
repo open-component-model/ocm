@@ -38,9 +38,8 @@ The default format is <code>directory</code>.
 If the option <code>--scheme</code> is given, the specified component descriptor format is used/generated.
 
 The following schema versions are supported for explicit conversions:
-
-  - <code>ocm.software/v3alpha1</code>: 
-  - <code>v2</code> (default): 
+  - <code>ocm.software/v3alpha1</code>
+  - <code>v2</code> (default)
 
 
 ### Examples

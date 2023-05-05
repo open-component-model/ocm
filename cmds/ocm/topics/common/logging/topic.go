@@ -11,7 +11,7 @@ import (
 	"github.com/mandelsoft/logging"
 	"github.com/spf13/cobra"
 
-	utils2 "github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	utils2 "github.com/open-component-model/ocm/cmds/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
 	logcfg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config/logging"

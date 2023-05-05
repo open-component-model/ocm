@@ -59,48 +59,49 @@ func (h Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string
 		return true, "", err
 	}
 	finalize.Close(art)
-	err = download(p, art, path, fs)
+	_, _, err = download(p, art, path, fs)
 	if err != nil {
 		return true, "", err
 	}
 	return true, "", nil
 }
 
-func download(p common.Printer, art oci.ArtifactAccess, path string, fs vfs.FileSystem) (err error) {
+func download(p common.Printer, art oci.ArtifactAccess, path string, fs vfs.FileSystem) (chart, prov string, err error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&err)
 
 	m := art.ManifestAccess()
 	if m == nil {
-		return errors.Newf("artifact is no image manifest")
+		return "", "", errors.Newf("artifact is no image manifest")
 	}
 	if len(m.GetDescriptor().Layers) < 1 {
-		return errors.Newf("no layers found")
+		return "", "", errors.Newf("no layers found")
 	}
-	if !strings.HasSuffix(path, ".tgz") {
-		path += ".tgz"
+	chart = path
+	if !strings.HasSuffix(chart, ".tgz") {
+		chart += ".tgz"
 	}
 	blob, err := m.GetBlob(m.GetDescriptor().Layers[0].Digest)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 	finalize.Close(blob)
-	err = write(p, blob, path, fs)
+	err = write(p, blob, chart, fs)
 	if err != nil {
-		return err
+		return "", "", err
 	}
 	if len(m.GetDescriptor().Layers) > 1 {
-		path = path[:len(path)-3] + "prov"
+		prov = chart[:len(chart)-3] + "prov"
 		blob, err := m.GetBlob(m.GetDescriptor().Layers[1].Digest)
 		if err != nil {
-			return err
+			return "", "", err
 		}
 		err = write(p, blob, path, fs)
 		if err != nil {
-			return err
+			return "", "", err
 		}
 	}
-	return nil
+	return chart, prov, err
 }
 
 func write(p common.Printer, blob accessio.BlobAccess, path string, fs vfs.FileSystem) (err error) {

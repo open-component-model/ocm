@@ -88,6 +88,15 @@ type InputSpec interface {
 	runtime.VersionedTypedObject
 	Validate(fldPath *field.Path, ctx Context, inputFilePath string) field.ErrorList
 	GetBlob(ctx Context, info InputResourceInfo) (accessio.TemporaryBlobAccess, string, error)
+	GetInputVersion(ctx Context) string
+}
+
+type InputSpecBase struct {
+	runtime.ObjectVersionedType `json:",inline"`
+}
+
+func (*InputSpecBase) GetInputVersion(ctx Context) string {
+	return ""
 }
 
 type InputType interface {
@@ -283,6 +292,10 @@ func (r *UnknownInputSpec) GetBlob(ctx Context, info InputResourceInfo) (accessi
 	return nil, "", errors.ErrUnknown("input type", r.GetType())
 }
 
+func (s *UnknownInputSpec) GetInputVersion(ctx Context) string {
+	return ""
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type GenericInputSpec struct {
@@ -341,6 +354,17 @@ func (s *GenericInputSpec) GetBlob(ctx Context, info InputResourceInfo) (accessi
 		}
 	}
 	return s.effective.GetBlob(ctx, info)
+}
+
+func (s *GenericInputSpec) GetInputVersion(ctx Context) string {
+	if s.effective == nil {
+		var err error
+		s.effective, err = s.Evaluate(For(ctx))
+		if err != nil {
+			return ""
+		}
+	}
+	return s.effective.GetInputVersion(ctx)
 }
 
 func (s *GenericInputSpec) Evaluate(scheme InputTypeScheme) (InputSpec, error) {

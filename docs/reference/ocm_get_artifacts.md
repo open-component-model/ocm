@@ -63,11 +63,12 @@ With the option <code>--recursive</code> the complete reference tree of a index 
 
 With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:
- - JSON
- - json
- - tree
- - wide
- - yaml
+  - <code></code> (default)
+  - <code>JSON</code>
+  - <code>json</code>
+  - <code>tree</code>
+  - <code>wide</code>
+  - <code>yaml</code>
 
 
 ### Examples

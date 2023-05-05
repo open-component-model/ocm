@@ -99,22 +99,19 @@ given signature name will be verified, instead of recreated.
 
 
 The following signing types are supported with option <code>--algorithm</code>:
-
-  - <code>RSASSA-PKCS1-V1_5</code> (default): 
-  - <code>rsa-signingservice</code>: 
+  - <code>RSASSA-PKCS1-V1_5</code> (default)
+  - <code>rsa-signingservice</code>
 
 
 The following normalization modes are supported with option <code>--normalization</code>:
-
-  - <code>jsonNormalisation/v1</code> (default): 
-  - <code>jsonNormalisation/v2</code>: 
+  - <code>jsonNormalisation/v1</code> (default)
+  - <code>jsonNormalisation/v2</code>
 
 
 The following hash modes are supported with option <code>--hash</code>:
-
-  - <code>NO-DIGEST</code>: 
-  - <code>SHA-256</code> (default): 
-  - <code>SHA-512</code>: 
+  - <code>NO-DIGEST</code>
+  - <code>SHA-256</code> (default)
+  - <code>SHA-512</code>
 
 \
 If a component lookup for building a reference closure is required

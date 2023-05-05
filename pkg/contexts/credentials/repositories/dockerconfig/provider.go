@@ -49,10 +49,7 @@ func (p *ConsumerProvider) get(req cpi.ConsumerIdentity, cur cpi.ConsumerIdentit
 		if hostname == "index.docker.io" {
 			hostname = "docker.io"
 		}
-		id := cpi.ConsumerIdentity{
-			cpi.ATTR_TYPE:        identity.CONSUMER_TYPE,
-			identity.ID_HOSTNAME: hostname,
-		}
+		id := cpi.NewConsumerIdentity(identity.CONSUMER_TYPE, identity.ID_HOSTNAME, hostname)
 		if m(req, cur, id) {
 			if IsEmptyAuthConfig(a) {
 				store := store

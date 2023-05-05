@@ -19,7 +19,7 @@ ocm add resource-configuration [<options>] <target> {<configfile> | <var>=<value
 ```
       --access YAML                  blob access specification (YAML)
       --accessHostname string        hostname used for access
-      --accessPackage string         package name
+      --accessPackage string         package or object name
       --accessRegistry string        registry base URL
       --accessRepository string      repository URL
       --accessType string            type of blob access specification
@@ -292,7 +292,7 @@ with the field <code>type</code> in the <code>input</code> field:
 - Input type <code>helm</code>
 
   The path must denote an helm chart archive or directory
-  relative to the resources file.
+  relative to the resources file or a chart name in a helm chart repository.
   The denoted chart is packed as an OCI artifact set.
   Additional provider info is taken from a file with the same name
   and the suffix <code>.prov</code>.
@@ -318,6 +318,16 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property can be used to specify the repository hint for the
     generated local artifact access. It is prefixed by the component name if
     it does not start with slash "/".
+  
+  - **<code>caCertFile</code>** *string*
+  
+    This OPTIONAL property can be used to specify a relative filename for
+    the TLS root certificate used to access a helm repository.
+  
+  - **<code>caCert</code>** *string*
+  
+    This OPTIONAL property can be used to specify a TLS root certificate used to
+    access a helm repository.
   
   Options used to configure fields: <code>--hint</code>, <code>--inputCompress</code>, <code>--inputPath</code>, <code>--inputVersion</code>, <code>--mediaType</code>
 
@@ -428,6 +438,40 @@ shown below.
       The sha/id of the git commit
     
     Options used to configure fields: <code>--accessHostname</code>, <code>--accessRepository</code>, <code>--commit</code>
+  
+
+- Access type <code>helm</code>
+
+  This method implements the access of a Helm chart stored in a Helm repository.
+
+  The following versions are supported:
+  - Version <code>v1</code>
+  
+    The type specific specification fields are:
+    
+    - **<code>helmRepository</code>** *string*
+    
+      Helm repository URL.
+    
+    - **<code>helmChart</code>** *string*
+    
+      The name of the Helm chart and its version separated by a colon.
+    
+    - **<code>version</code>** *string*
+    
+      The version of the Helm chart if not specified as part of the chart name.
+    
+    - **<code>caCert</code>** *string*
+    
+      An optional TLS root certificate.
+    
+    - **<code>keyring</code>** *string*
+    
+      An optional keyring used to verify the chart.
+    
+    It uses the consumer identity type HelmChartRepository with the fields
+    for a hostpath identity matcher (see [ocm get credentials](ocm_get_credentials.md)).
+    Options used to configure fields: <code>--accessPackage</code>, <code>--accessRepository</code>, <code>--accessVersion</code>
   
 
 - Access type <code>localBlob</code>
@@ -645,4 +689,5 @@ $ ocm add resource-config resources.yaml --name myresource --type PlainText --in
 ##### Additional Links
 
 * [<b>ocm add resources</b>](ocm_add_resources.md)	 &mdash; add resources to a component version
+* [<b>ocm get credentials</b>](ocm_get_credentials.md)	 &mdash; Get credentials for a dedicated consumer spec
 

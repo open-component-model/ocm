@@ -21,10 +21,7 @@ func init() {
 		if host == "" {
 			host = HOST
 		}
-		id := cpi.ConsumerIdentity{
-			identity.ID_TYPE:     identity.CONSUMER_TYPE,
-			identity.ID_HOSTNAME: host,
-		}
+		id := cpi.NewConsumerIdentity(identity.CONSUMER_TYPE, identity.ID_HOSTNAME, host)
 		user := os.Getenv("GITHUB_REPOSITORY_OWNER")
 
 		if src, err := cpi.DefaultContext.GetCredentialsForConsumer(id); err != nil || src == nil {

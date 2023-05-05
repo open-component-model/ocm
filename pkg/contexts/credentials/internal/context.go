@@ -195,7 +195,7 @@ func (c *_context) GetCredentialsForConsumer(identity ConsumerIdentity, matchers
 }
 
 func (c *_context) defaultMatcher(id ConsumerIdentity, matchers ...IdentityMatcher) IdentityMatcher {
-	def, _ := c.consumerIdentityMatchers.Get(id.Type())
+	def := c.consumerIdentityMatchers.Get(id.Type())
 	if def == nil {
 		def = PartialMatch
 	}

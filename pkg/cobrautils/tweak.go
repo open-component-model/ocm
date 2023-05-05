@@ -85,6 +85,8 @@ func CleanMarkdown(s string) string {
 
 	var r []string
 	found := 0
+	omitted := 0
+	lastIndex := -1
 	mask := false
 	for _, l := range strings.Split(s, "\n") {
 		if strings.Contains(l, "<pre>") {
@@ -102,11 +104,17 @@ func CleanMarkdown(s string) string {
 			} else {
 				t := strings.TrimSpace(l)
 				if strings.HasPrefix(t, "- ") {
+					index := strings.Index(l, "-")
+					if omitted > 0 && lastIndex >= 0 && lastIndex > index {
+						r = append(r, "")
+					}
+					lastIndex = index
 					found = 1
 				} else {
 					if t == "" {
 						found++
 						if found > 1 {
+							omitted++
 							continue
 						}
 					} else {
@@ -114,6 +122,10 @@ func CleanMarkdown(s string) string {
 					}
 				}
 			}
+		}
+		omitted = 0
+		if !strings.HasPrefix(strings.TrimSpace(l), "-") {
+			lastIndex = -1
 		}
 		r = append(r, l)
 	}

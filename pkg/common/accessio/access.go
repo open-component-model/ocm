@@ -80,11 +80,40 @@ type BlobAccess interface {
 	Size() int64
 }
 
+// _blobAccess is to be used for private embedded fields.
+type _blobAccess = BlobAccess
+
 // TemporaryBlobAccess describes a blob with temporary allocated external resources.
 // They will be releases, when the close method is called.
 type TemporaryBlobAccess interface {
-	BlobAccess
+	_blobAccess
 	IsValid() bool
+}
+
+// _temporaryBlobAccess is to be used for private embedded fields.
+type _temporaryBlobAccess = TemporaryBlobAccess
+
+type temporaryBlob struct {
+	_blobAccess
+}
+
+// TemporaryBlobAccessForBlob returns a temporary blob for any blob, which gets
+// invalidated whenever closed.
+func TemporaryBlobAccessForBlob(blob BlobAccess) TemporaryBlobAccess {
+	return &temporaryBlob{blob}
+}
+
+func (b *temporaryBlob) IsValid() bool {
+	return b._blobAccess != nil
+}
+
+func (b *temporaryBlob) Close() error {
+	if b._blobAccess == nil {
+		return errors.ErrInvalid("blob access")
+	}
+	err := b._blobAccess.Close()
+	b._blobAccess = nil
+	return err
 }
 
 type DigestSource interface {
@@ -96,6 +125,8 @@ type DigestSource interface {
 
 type NopCloser struct{}
 
+type _nopCloser = NopCloser
+
 func (NopCloser) Close() error {
 	return nil
 }
@@ -103,7 +134,7 @@ func (NopCloser) Close() error {
 ////////////////////////////////////////////////////////////////////////////////
 
 type readerAccess struct {
-	NopCloser
+	_nopCloser
 	reader func() (io.ReadCloser, error)
 	origin string
 }
@@ -144,7 +175,7 @@ func (a *readerAccess) Origin() string {
 ////////////////////////////////////////////////////////////////////////////////
 
 type dataAccess struct {
-	NopCloser
+	_nopCloser
 	fs   vfs.FileSystem
 	path string
 }
@@ -178,7 +209,7 @@ func (a *dataAccess) Origin() string {
 ////////////////////////////////////////////////////////////////////////////////
 
 type bytesAccess struct {
-	NopCloser
+	_nopCloser
 	data   []byte
 	origin string
 }
@@ -211,7 +242,7 @@ func (a *bytesAccess) Origin() string {
 
 // AnnotatedBlobAccess provides access to the original underlying data source.
 type AnnotatedBlobAccess[T DataAccess] interface {
-	BlobAccess
+	_blobAccess
 	Source() T
 }
 
@@ -331,7 +362,7 @@ func (b *blobAccess[T]) update() error {
 ////////////////////////////////////////////////////////////////////////////////
 
 type mimeBlob struct {
-	BlobAccess
+	_blobAccess
 	mimetype string
 }
 
@@ -392,7 +423,7 @@ func (f *fileBlobAccess) Digest() digest.Digest {
 ////////////////////////////////////////////////////////////////////////////////
 
 type blobNopCloser struct {
-	BlobAccess
+	_blobAccess
 }
 
 func BlobNopCloser(blob BlobAccess) BlobAccess {
@@ -493,7 +524,7 @@ func (b *blobAccessView) Size() (result int64) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type temporaryBlobAccess struct {
-	BlobAccess
+	_blobAccess
 }
 
 func TemporaryBlobAccessFor(blob BlobAccess) TemporaryBlobAccess {
@@ -510,33 +541,33 @@ func (b *temporaryBlobAccess) IsValid() bool {
 ////////////////////////////////////////////////////////////////////////////////
 
 type TemporaryFileSystemBlobAccess interface {
-	TemporaryBlobAccess
+	_temporaryBlobAccess
 	FileSystem() vfs.FileSystem
 	Path() string
 }
 
-type temporaryBlob struct {
-	BlobAccess
+type temporaryFileBlob struct {
+	_blobAccess
 	lock       sync.Mutex
 	temp       vfs.File
 	filesystem vfs.FileSystem
 }
 
 func TempFileBlobAccess(mime string, fs vfs.FileSystem, temp vfs.File) TemporaryFileSystemBlobAccess {
-	return &temporaryBlob{
-		BlobAccess: BlobAccessForFile(mime, temp.Name(), fs),
-		filesystem: fs,
-		temp:       temp,
+	return &temporaryFileBlob{
+		_blobAccess: BlobAccessForFile(mime, temp.Name(), fs),
+		filesystem:  fs,
+		temp:        temp,
 	}
 }
 
-func (b *temporaryBlob) IsValid() bool {
+func (b *temporaryFileBlob) IsValid() bool {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 	return b.temp != nil
 }
 
-func (b *temporaryBlob) Close() error {
+func (b *temporaryFileBlob) Close() error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 	if b.temp != nil {
@@ -544,17 +575,17 @@ func (b *temporaryBlob) Close() error {
 		list.Add(b.temp.Close())
 		list.Add(b.filesystem.Remove(b.temp.Name()))
 		b.temp = nil
-		b.BlobAccess = nil
+		b._blobAccess = nil
 		return list.Result()
 	}
 	return nil
 }
 
-func (b *temporaryBlob) FileSystem() vfs.FileSystem {
+func (b *temporaryFileBlob) FileSystem() vfs.FileSystem {
 	return b.filesystem
 }
 
-func (b *temporaryBlob) Path() string {
+func (b *temporaryFileBlob) Path() string {
 	return b.temp.Name()
 }
 
@@ -632,4 +663,39 @@ func (t *TempFile) Close() error {
 		return t.filesystem.Remove(name)
 	}
 	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type referencingBlobAccess struct {
+	lock   sync.Mutex
+	closed bool
+	closer func() error
+	_blobAccess
+}
+
+func ReferencingBlobAccess(b BlobAccess, closer func() error) TemporaryBlobAccess {
+	return &referencingBlobAccess{closer: closer, _blobAccess: b}
+}
+
+func (r *referencingBlobAccess) IsValid() bool {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	return !r.closed
+}
+
+func (r *referencingBlobAccess) Close() error {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+
+	if r.closed {
+		return ErrClosed
+	}
+	if r.closer != nil {
+		if err := r.closer(); err != nil {
+			return err
+		}
+	}
+	r.closed = true
+	return r._blobAccess.Close()
 }

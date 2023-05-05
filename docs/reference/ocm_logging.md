@@ -11,13 +11,11 @@ The command line also supports some quick-config options for enabling log levels
 for dedicated tags and realms (logging keys).
 
 The following *tags* are used by the command line tool:
-
   - <code>blobhandler</code>: execution of blob handler used to upload resource blobs to an ocm repository.
 
 
 
 The following *realms* are used by the command line tool:
-
   - <code>ocm</code>: general realm used for the ocm go library.
   - <code>ocm/accessmethod/ociartifact</code>: access method ociArtifact
   - <code>ocm/credentials/dockerconfig</code>: docker config handling as credential repository

@@ -94,12 +94,13 @@ references.
 
 With the option <code>--output</code> the output mode can be selected.
 The following modes are supported:
- - JSON
- - json
- - tree
- - treewide
- - wide
- - yaml
+  - <code></code> (default)
+  - <code>JSON</code>
+  - <code>json</code>
+  - <code>tree</code>
+  - <code>treewide</code>
+  - <code>wide</code>
+  - <code>yaml</code>
 
 
 ### SEE ALSO

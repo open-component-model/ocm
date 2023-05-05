@@ -17,6 +17,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
 	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
@@ -151,7 +152,7 @@ for the parameter and credentials file using the command <CMD>ocm bootstrap conf
 Using the option <code>--config</code> it is possible to configure options
 for the execution environment (so far only docker is supported).
 The following options are possible:
-` + utils.FormatListElements("", utils.StringElementList(utils2.StringMapKeys(docker.Options))) + `
+` + listformat.FormatListElements("", listformat.StringElementList(utils2.StringMapKeys(docker.Options))) + `
 
 Using the option <code>--create-env  &lt;toi root folder></code> it is possible to
 create a local execution environment for an executor according to the executor

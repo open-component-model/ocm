@@ -121,7 +121,7 @@ func GetCredentials(ctx credentials.Context, spec *Credentials, req map[string]C
 		if len(r.ConsumerId) == 0 {
 			return nil, nil, errors.ErrInvalid("consumer", r.ConsumerId.String())
 		}
-		match, _ := ctx.ConsumerIdentityMatchers().Get(r.ConsumerType)
+		match := ctx.ConsumerIdentityMatchers().Get(r.ConsumerType)
 		if match == nil {
 			match = credentials.PartialMatch
 		}
@@ -165,7 +165,7 @@ func evaluate(ctx credentials.Context, spec *CredentialSpec) (common.Properties,
 	}
 	if spec.ConsumerId != nil {
 		cnt++
-		match, _ := ctx.ConsumerIdentityMatchers().Get(spec.ConsumerType)
+		match := ctx.ConsumerIdentityMatchers().Get(spec.ConsumerType)
 		if match == nil {
 			match = credentials.PartialMatch
 		}

@@ -16,7 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
+	ociidentity "github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 	"github.com/open-component-model/ocm/pkg/docker"
 	"github.com/open-component-model/ocm/pkg/docker/resolve"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -68,13 +68,13 @@ func NewRepository(ctx cpi.Context, spec *RepositorySpec, info *RepositoryInfo) 
 
 func (r *Repository) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
 	if c, ok := utils.Optional(uctx...).(credentials.StringUsageContext); ok {
-		return GetConsumerId(r.info.Locator, c.String())
+		return ociidentity.GetConsumerId(r.info.Locator, c.String())
 	}
-	return GetConsumerId(r.info.Locator, "")
+	return ociidentity.GetConsumerId(r.info.Locator, "")
 }
 
 func (r *Repository) GetIdentityMatcher() string {
-	return identity.CONSUMER_TYPE
+	return ociidentity.CONSUMER_TYPE
 }
 
 func (r *Repository) NamespaceLister() cpi.NamespaceLister {
@@ -93,7 +93,7 @@ func (r *Repository) getCreds(comp string) (credentials.Credentials, error) {
 	if r.info.Creds != nil {
 		return r.info.Creds, nil
 	}
-	return GetCredentials(r.ctx, r.info.Locator, comp)
+	return ociidentity.GetCredentials(r.ctx, r.info.Locator, comp)
 }
 
 func (r *Repository) getResolver(comp string) (resolve.Resolver, error) {

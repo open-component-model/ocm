@@ -1,0 +1,8 @@
+---
+name: chart
+type: helmChart
+input:
+  type: helm
+  path: cockroachdb
+  version: 3.0.8
+  helmRepository: https://charts.helm.sh/stable
