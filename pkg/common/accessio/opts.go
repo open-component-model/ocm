@@ -30,8 +30,8 @@ type Options interface {
 	SetFile(vfs.File)
 	GetFile() vfs.File
 
-	SetReader(closer io.ReadCloser)
-	GetReader() io.ReadCloser
+	SetReader(closer io.Reader)
+	GetReader() io.Reader
 
 	ValidForPath(path string) error
 	WriterFor(path string, mode vfs.FileMode) (io.WriteCloser, error)
@@ -57,10 +57,11 @@ type StandardOptions struct {
 	// File is an opened file object to use instead of the path and path filesystem
 	// It should never be closed if given to support temporary files
 	File vfs.File `json:"-"`
-	// Reader provides a one time access to the content (archive xontent only)
-	// The resulting access is therefore temporarily and cannot be written back
+	// Reader provides a one time access to the content (archive content only)
+	// The resulting access is therefore temporary and cannot be written back
 	// to its origin, but to other destinations.
-	Reader io.ReadCloser `json:"-"`
+	// The reader must be closed by the provider.
+	Reader io.Reader `json:"-"`
 }
 
 var _ Options = (*StandardOptions)(nil)
@@ -97,11 +98,11 @@ func (o *StandardOptions) GetFile() vfs.File {
 	return o.File
 }
 
-func (o *StandardOptions) SetReader(r io.ReadCloser) {
+func (o *StandardOptions) SetReader(r io.Reader) {
 	o.Reader = r
 }
 
-func (o *StandardOptions) GetReader() io.ReadCloser {
+func (o *StandardOptions) GetReader() io.Reader {
 	return o.Reader
 }
 
@@ -149,7 +150,7 @@ func (o *StandardOptions) DefaultForPath(path string) error {
 		case o.Reader != nil:
 			r, _, err := compression.AutoDecompress(o.Reader)
 			if err == nil {
-				o.Reader = AddCloser(r, o.Reader)
+				o.Reader = r
 				f := FormatTar
 				fmt = &f
 			}

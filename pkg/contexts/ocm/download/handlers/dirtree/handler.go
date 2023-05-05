@@ -88,7 +88,7 @@ func (h *Handler) GetFilesystemForResource(racc cpi.ResourceAccess) (fs vfs.File
 	if err != nil {
 		return nil, err
 	}
-	finalize.WithVoid(func() { r.Close() }) // TODO: close handling for ReaderOption
+	finalize.Close(r)
 	set, err := artifactset.Open(accessobj.ACC_READONLY, "", 0, accessio.Reader(r))
 	if err != nil {
 		return nil, err
