@@ -7,9 +7,7 @@ package dockerconfig
 import (
 	"github.com/docker/cli/cli/config/configfile"
 	dockercred "github.com/docker/cli/cli/config/credentials"
-
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
 )
 
@@ -21,7 +19,7 @@ type ConsumerProvider struct {
 
 var _ cpi.ConsumerProvider = (*ConsumerProvider)(nil)
 
-func (p *ConsumerProvider) Unregister(id internal.ProviderIdentity) {
+func (p *ConsumerProvider) Unregister(id cpi.ProviderIdentity) {
 }
 
 func (p *ConsumerProvider) Match(req cpi.ConsumerIdentity, cur cpi.ConsumerIdentity, m cpi.IdentityMatcher) (cpi.CredentialsSource, cpi.ConsumerIdentity) {
