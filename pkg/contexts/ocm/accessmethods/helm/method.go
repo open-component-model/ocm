@@ -40,7 +40,7 @@ func New(chart string, repourl string) *AccessSpec {
 	}
 }
 
-// AccessSpec describes the access for a oci registry.
+// AccessSpec describes the access for a helm repository.
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 
