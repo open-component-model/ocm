@@ -19,6 +19,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
+const META_SEPARATOR = ".build-"
+
 type ComponentAccess struct {
 	view accessio.CloserView // handle close and refs
 	*componentAccessImpl
@@ -112,11 +114,22 @@ func toTag(v string) string {
 	if err != nil {
 		panic(errors.Wrapf(err, "%s is no semver version", v))
 	}
-	return strings.ReplaceAll(v, "+", "-.-")
+	return strings.ReplaceAll(v, "+", META_SEPARATOR)
 }
 
 func toVersion(t string) string {
-	return strings.ReplaceAll(t, "-.-", "+")
+	next := 0
+	for {
+		if idx := strings.Index(t[next:], META_SEPARATOR); idx >= 0 {
+			next += idx + len(META_SEPARATOR)
+		} else {
+			break
+		}
+	}
+	if next == 0 {
+		return t
+	}
+	return t[:next-len(META_SEPARATOR)] + "+" + t[next:]
 }
 
 func (c *componentAccessImpl) ListVersions() ([]string, error) {

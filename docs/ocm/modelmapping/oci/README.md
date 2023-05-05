@@ -55,10 +55,10 @@ The tags used to represent versions in the OCI specification do not allow to dir
 to OCI-compliant tag names.
 
 The followinmg mapping for version is used, here:
-- the optional plus `+` character used to attach build information in semantic versions is mapped to the sequence (`-.-`)
+- the optional plus `+` character used to attach build information in semantic versions is mapped to the sequence (`.build-`)
 
 Mapping tags back to versions uses the following mappings:
-- the character sequence (`-.-`) is mapped to a plus (`+`) character.
+- the last character sequence (`.build-`) is mapped to a plus (`+`) character.
 
 ## Blob Mappings
 
