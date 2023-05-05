@@ -5,14 +5,13 @@
 package registration
 
 import (
-	ocmcpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
-func RegisterDownloadHandler(ctx internal.Context, hdlr download.Handler, olist ...BlobHandlerOption) error {
-	opts := ocmcpi.NewBlobHandlerOptions(olist...)
+func RegisterDownloadHandler(ctx cpi.Context, hdlr download.Handler, olist ...cpi.BlobHandlerOption) error {
+	opts := cpi.NewBlobHandlerOptions(olist...)
 	if opts.Priority > 0 {
 		return errors.ErrInvalid("option", "priority")
 	}

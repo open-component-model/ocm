@@ -138,6 +138,10 @@ func MustRegisterDigester(digester BlobDigester, arttypes ...string) {
 	internal.MustRegisterDigester(digester, arttypes...)
 }
 
+func SetDefaultDigester(d BlobDigester) {
+	internal.SetDefaultDigester(d)
+}
+
 func RegisterRepositoryType(name string, atype RepositoryType) {
 	internal.DefaultRepositoryTypeScheme.Register(name, atype)
 }
