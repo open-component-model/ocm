@@ -8,20 +8,26 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 )
 
-func RegisterBlobHandlerByName(ctx cpi.Context, name string, config cpi.BlobHandlerConfig, opts ...cpi.BlobHandlerOption) error {
+type (
+	BlobHandlerOption  = cpi.BlobHandlerOption
+	BlobHandlerConfig  = cpi.BlobHandlerConfig
+	BlobHandlerOptions = cpi.BlobHandlerOptions
+)
+
+func RegisterBlobHandlerByName(ctx cpi.Context, name string, config BlobHandlerConfig, opts ...BlobHandlerOption) error {
 	hdlrs := ctx.BlobHandlers()
 	_, err := hdlrs.RegisterByName(name, ctx, config, opts...)
 	return err
 }
 
-func WithPrio(prio int) cpi.BlobHandlerOption {
+func WithPrio(prio int) BlobHandlerOption {
 	return cpi.WithPrio(prio)
 }
 
-func ForArtifactType(t string) cpi.BlobHandlerOption {
+func ForArtifactType(t string) BlobHandlerOption {
 	return cpi.ForArtifactType(t)
 }
 
-func ForMimeType(t string) cpi.BlobHandlerOption {
+func ForMimeType(t string) BlobHandlerOption {
 	return cpi.ForMimeType(t)
 }
