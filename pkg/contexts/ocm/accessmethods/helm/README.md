@@ -1,5 +1,5 @@
 
-# Access Method `ociBlob` - Helm Repository Access
+# Access Method `helm` - Helm Repository Access
 
 
 ### Synopsis
@@ -10,7 +10,7 @@ type: helm/v1
 Provided blobs use the following media type: attribute `application/vnd.cncf.helm.chart.content.v1.tar+gzip`
 
 ### Description
-This method implements the access of a Helm chart stored in Helm chart repository.
+This method implements the access of a Helm chart stored in a Helm chart repository.
 
 Supported specification version is `v1`
 
