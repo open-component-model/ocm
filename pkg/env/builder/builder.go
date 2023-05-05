@@ -61,6 +61,7 @@ type Builder struct {
 	oci_cleanuplayers bool
 	oci_tags          *[]string
 	oci_artfunc       func(oci.ArtifactAccess) error
+	oci_annofunc      func(name, value string)
 }
 
 func NewBuilder(t *env.Environment) *Builder {
@@ -87,9 +88,9 @@ func (b *Builder) set() {
 	b.oci_repo = nil
 	b.oci_nsacc = nil
 	b.oci_artacc = nil
-	b.oci_cleanuplayers = false
 	b.oci_tags = nil
 	b.oci_artfunc = nil
+	b.oci_annofunc = nil
 
 	if len(b.stack) > 0 {
 		b.peek().Set()
@@ -148,8 +149,10 @@ func (b *Builder) configure(e element, funcs []func(), skip ...int) interface{} 
 
 ////////////////////////////////////////////////////////////////////////////////
 
+const T_BLOBACCESS = "blob access"
+
 func (b *Builder) BlobStringData(mime string, data string) {
-	b.expect(b.blob, T_OCMACCESS)
+	b.expect(b.blob, T_BLOBACCESS)
 	if b.ocm_acc != nil && *b.ocm_acc != nil {
 		Fail("access already set", 1)
 	}
@@ -157,11 +160,19 @@ func (b *Builder) BlobStringData(mime string, data string) {
 }
 
 func (b *Builder) BlobData(mime string, data []byte) {
-	b.expect(b.blob, T_OCMACCESS)
+	b.expect(b.blob, T_BLOBACCESS)
 	if b.ocm_acc != nil && *b.ocm_acc != nil {
 		Fail("access already set", 1)
 	}
 	*(b.blob) = accessio.BlobAccessForData(mime, data)
+}
+
+func (b *Builder) BlobFromFile(mime string, path string) {
+	b.expect(b.blob, T_BLOBACCESS)
+	if b.ocm_acc != nil && *b.ocm_acc != nil {
+		Fail("access already set", 1)
+	}
+	*(b.blob) = accessio.BlobAccessForFile(mime, path, b.FileSystem())
 }
 
 func (b *Builder) Hint(hint string) {

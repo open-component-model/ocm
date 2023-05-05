@@ -16,7 +16,8 @@ const (
 	// BLOB describes any anonymous untyped blob data.
 	BLOB = "blob"
 	// FILESYSTEM describes a directory structure stored as archive (tar, tgz).
-	FILESYSTEM        = "directoryTree"
+	DIRECTORY_TREE    = "directoryTree"
+	FILESYSTEM        = DIRECTORY_TREE
 	FILESYSTEM_LEGACY = "filesystem"
 	// EXECUTABLE describes an OS executable.
 	EXECUTABLE = "executable"
