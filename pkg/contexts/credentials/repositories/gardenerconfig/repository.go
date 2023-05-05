@@ -18,7 +18,6 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
 	gardenercfgcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -116,7 +115,7 @@ func (r *Repository) read(force bool) error {
 		return fmt.Errorf("unable to parse config: %w", err)
 	}
 
-	r.creds = map[string]internal.Credentials{}
+	r.creds = map[string]cpi.Credentials{}
 	for _, cred := range creds {
 		credName := cred.Name()
 		if _, ok := r.creds[credName]; !ok {

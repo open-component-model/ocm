@@ -5,29 +5,29 @@
 package registration
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 )
 
 type (
-	BlobHandlerOption  = internal.BlobHandlerOption
-	BlobHandlerConfig  = internal.BlobHandlerConfig
-	BlobHandlerOptions = internal.BlobHandlerOptions
+	BlobHandlerOption  = cpi.BlobHandlerOption
+	BlobHandlerConfig  = cpi.BlobHandlerConfig
+	BlobHandlerOptions = cpi.BlobHandlerOptions
 )
 
-func RegisterBlobHandlerByName(ctx internal.Context, name string, config BlobHandlerConfig, opts ...BlobHandlerOption) error {
+func RegisterBlobHandlerByName(ctx cpi.Context, name string, config BlobHandlerConfig, opts ...BlobHandlerOption) error {
 	hdlrs := ctx.BlobHandlers()
 	_, err := hdlrs.RegisterByName(name, ctx, config, opts...)
 	return err
 }
 
 func WithPrio(prio int) BlobHandlerOption {
-	return internal.WithPrio(prio)
+	return cpi.WithPrio(prio)
 }
 
 func ForArtifactType(t string) BlobHandlerOption {
-	return internal.ForArtifactType(t)
+	return cpi.ForArtifactType(t)
 }
 
 func ForMimeType(t string) BlobHandlerOption {
-	return internal.ForMimeType(t)
+	return cpi.ForMimeType(t)
 }

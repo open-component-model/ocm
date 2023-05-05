@@ -9,7 +9,6 @@ import (
 	"io"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/signing"
 )
 
@@ -17,15 +16,15 @@ const GenericBlobDigestV1 = "genericBlobDigest/v1"
 
 func init() {
 	cpi.MustRegisterDigester(&defaultDigester{})
-	internal.SetDefaultDigester(&defaultDigester{})
+	cpi.SetDefaultDigester(&defaultDigester{})
 }
 
 type defaultDigester struct{}
 
 var _ cpi.BlobDigester = (*defaultDigester)(nil)
 
-func (d defaultDigester) GetType() internal.DigesterType {
-	return internal.DigesterType{
+func (d defaultDigester) GetType() cpi.DigesterType {
+	return cpi.DigesterType{
 		HashAlgorithm:          "",
 		NormalizationAlgorithm: GenericBlobDigestV1,
 	}
