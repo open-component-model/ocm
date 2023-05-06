@@ -5,6 +5,11 @@
 package resourcetypes
 
 const (
+	KIND_ARTIFACT_TYPE = "artifact type"
+	KIND_RESOURCE_TYPE = "resource type"
+)
+
+const (
 	// OCI_ARTIFACT describes a generic OCI artifact following the
 	//   [open containers image specification](https://github.com/opencontainers/image-spec/blob/main/spec.md).
 	OCI_ARTIFACT = "ociArtifact"

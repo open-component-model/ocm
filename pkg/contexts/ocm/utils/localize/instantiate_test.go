@@ -20,12 +20,16 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/dirtree"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/localize"
 	"github.com/open-component-model/ocm/pkg/env/builder"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
+
+const RESOURCE_TYPE = "GitOpsTemplate"
 
 var _ = Describe("image value mapping", func() {
 
@@ -56,6 +60,10 @@ var _ = Describe("image value mapping", func() {
 
 	BeforeEach(func() {
 		env = builder.NewBuilder(nil)
+
+		// register downloader for new archive type.
+		download.For(env.OCMContext()).Register(RESOURCE_TYPE, "", dirtree.New())
+
 		env.OCMCommonTransport(ARCHIVE, accessio.FormatDirectory, func() {
 			env.Component(COMPONENT, func() {
 				env.Version(VERSION, func() {
@@ -63,7 +71,7 @@ var _ = Describe("image value mapping", func() {
 					env.Resource(IMAGE, "", "Spiff", v1.LocalRelation, func() {
 						env.Access(ociartifact.New("ghcr.io/mandelsoft/test:v1"))
 					})
-					env.Resource(TEMPLATE, "", "GitOpsTemplate", v1.LocalRelation, func() {
+					env.Resource(TEMPLATE, "", RESOURCE_TYPE, v1.LocalRelation, func() {
 						env.BlobData(mime.MIME_TGZ, template.Bytes())
 					})
 				})
@@ -71,7 +79,7 @@ var _ = Describe("image value mapping", func() {
 		})
 
 		var err error
-		repo, err = ctf.Open(ocm.DefaultContext(), accessobj.ACC_READONLY, ARCHIVE, 0, env)
+		repo, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCHIVE, 0, env)
 		Expect(err).To(Succeed())
 
 		cv, err = repo.LookupComponentVersion(COMPONENT, VERSION)
@@ -118,7 +126,7 @@ values:
   value: mine
 `)
 		fs := memoryfs.New()
-		err := localize.Instantiate(rules, cv, nil, config, fs)
+		err := localize.Instantiate(rules, cv, nil, config, fs, RESOURCE_TYPE)
 		Expect(err).To(Succeed())
 		CheckFile("dir/manifest1.yaml", fs, `
 manifest:
