@@ -11,7 +11,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/errors"
-	utils2 "github.com/open-component-model/ocm/pkg/utils"
+	utils2 "github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
 func Instantiate(rules *InstantiationRules, cv ocm.ComponentVersionAccess, resolver ocm.ComponentVersionResolver, config []byte, fs vfs.FileSystem) error {

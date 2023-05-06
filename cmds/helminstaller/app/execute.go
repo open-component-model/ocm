@@ -28,7 +28,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/out"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/toi/support"
-	utils2 "github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
 func Merge(values ...map[string]interface{}) map[string]interface{} {
@@ -64,7 +64,7 @@ func (e *Execution) unpackChart(dir string) {
 	e.Logger.Debug("preparing chart filesystem")
 	chartfs := Must1f(R1(projectionfs.New(e.fs, dir)), "cannot create projection %q", e.path)
 	e.Logger.Debug("extracting chart archive", "archive", e.path)
-	Mustf(utils2.ExtractTarToFs(chartfs, reader), "cannot extract downloaded chart archive %q", e.path)
+	Mustf(tarutils.ExtractTarToFs(chartfs, reader), "cannot extract downloaded chart archive %q", e.path)
 	e.Logger.Debug("lookup chart folder")
 	entries := Must1f(R1(vfs.ReadDir(e.fs, dir)), "cannot find chart folder in %q", dir)
 	if len(entries) != 1 {

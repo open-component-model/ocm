@@ -47,7 +47,7 @@ var _ = Describe("image value mapping", func() {
 	func() {
 		template = bytes.NewBuffer(nil)
 		w := gzip.NewWriter(template)
-		err := tarutils.TarFileSystem(osfs.New(), "testdata", w, tarutils.TarFileSystemOptions{})
+		err := tarutils.PackFsIntoTar(osfs.New(), "testdata", w, tarutils.TarFileSystemOptions{})
 		w.Close()
 		if err != nil {
 			panic(err)

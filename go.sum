@@ -840,6 +840,8 @@ github.com/mandelsoft/vfs v0.0.0-20220805210647-bf14a11bfe31 h1:5gmUtnP0NYOODvS/
 github.com/mandelsoft/vfs v0.0.0-20220805210647-bf14a11bfe31/go.mod h1:74aV7kulg9C434HiI3zNALN79QHc9IZMN+SI4UdLn14=
 github.com/mandelsoft/vfs v0.0.0-20230505160735-cf987a013ba3 h1:qDwPYFHD3hFm/XFhZdVmhletrjl7QPOcoPkyse2L1Dw=
 github.com/mandelsoft/vfs v0.0.0-20230505160735-cf987a013ba3/go.mod h1:Z6caUgivS+P837kxRUaYPuzLKxNpOly4WlInNhrcWyc=
+github.com/mandelsoft/vfs v0.0.0-20230506183150-975954b82357 h1:BJKXJKeVAn9Z1Ke6N1p3G20SjMwOuJNBeSxT9two2FA=
+github.com/mandelsoft/vfs v0.0.0-20230506183150-975954b82357/go.mod h1:Z6caUgivS+P837kxRUaYPuzLKxNpOly4WlInNhrcWyc=
 github.com/manifoldco/promptui v0.9.0/go.mod h1:ka04sppxSGFAtxX0qhlYQjISsg9mR4GWtQEhdbn6Pgg=
 github.com/markbates/errx v1.1.0 h1:QDFeR+UP95dO12JgW+tgi2UVfo0V8YBHiUIOaeBPiEI=
 github.com/markbates/errx v1.1.0/go.mod h1:PLa46Oex9KNbVDZhKel8v1OT7hD5JZ2eI7AHhA0wswc=
