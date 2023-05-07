@@ -31,11 +31,10 @@ func UsingConfigs() error {
 		return errors.Wrapf(err, "cannot apply config data")
 	}
 
-	cid := credentials.ConsumerIdentity{
-		ociid.ID_TYPE:       ociid.CONSUMER_TYPE,
-		ociid.ID_HOSTNAME:   "ghcr.io",
-		ociid.ID_PATHPREFIX: "mandelsoft",
-	}
+	cid := credentials.NewConsumerIdentity(ociid.CONSUMER_TYPE,
+		ociid.ID_HOSTNAME, "ghcr.io",
+		ociid.ID_PATHPREFIX, "mandelsoft",
+	)
 
 	credctx := octx.CredentialsContext()
 
