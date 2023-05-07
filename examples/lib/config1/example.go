@@ -22,11 +22,10 @@ func UsingConfigs() error {
 		return err
 	}
 
-	cid := credentials.ConsumerIdentity{
-		ociid.ID_TYPE:       ociid.CONSUMER_TYPE,
-		ociid.ID_HOSTNAME:   "ghcr.io",
-		ociid.ID_PATHPREFIX: "mandelsoft",
-	}
+	cid := credentials.NewConsumerIdentity(ociid.CONSUMER_TYPE,
+		ociid.ID_HOSTNAME, "ghcr.io",
+		ociid.ID_PATHPREFIX, "mandelsoft",
+	)
 
 	octx := ocm.DefaultContext()
 	cctx := octx.ConfigContext()

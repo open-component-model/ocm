@@ -29,11 +29,10 @@ func SimpleWriteWithCredentials() error {
 	octx := ocm.DefaultContext()
 
 	octx.CredentialsContext().SetCredentialsForConsumer(
-		credentials.ConsumerIdentity{
-			identity.ID_TYPE:       identity.CONSUMER_TYPE,
-			identity.ID_HOSTNAME:   "ghcr.io",
-			identity.ID_PATHPREFIX: "mandelsoft",
-		},
+		credentials.NewConsumerIdentity(identity.CONSUMER_TYPE,
+			identity.ID_HOSTNAME, "ghcr.io",
+			identity.ID_PATHPREFIX, "mandelsoft",
+		),
 		cfg.GetCredentials(),
 	)
 	repoSpec := ocireg.NewRepositorySpec(cfg.Repository, nil)
