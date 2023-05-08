@@ -58,6 +58,12 @@ func NewRepositoryTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder, base
 	return &repositoryTypeScheme{scheme}
 }
 
+func NewStrictRepositoryTypeScheme(base ...RepositoryTypeScheme) RepositoryTypeScheme {
+	var rt RepositorySpec
+	scheme := runtime.MustNewDefaultScheme(&rt, nil, false, nil, utils.Optional(base...))
+	return &repositoryTypeScheme{scheme}
+}
+
 func (t *repositoryTypeScheme) BaseScheme() runtime.Scheme {
 	return t.SchemeBase.(runtime.BaseScheme).BaseScheme()
 }

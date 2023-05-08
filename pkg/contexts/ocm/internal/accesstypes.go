@@ -93,6 +93,13 @@ func NewAccessTypeScheme(base ...AccessTypeScheme) AccessTypeScheme {
 	return &accessTypeScheme{scheme, b, map[string]AccessType{}}
 }
 
+func NewStrictAccessTypeScheme(base ...AccessTypeScheme) AccessTypeScheme {
+	var at AccessSpec
+	b := utils.Optional(base...)
+	scheme := runtime.MustNewDefaultScheme(&at, nil, false, nil, b)
+	return &accessTypeScheme{scheme, b, map[string]AccessType{}}
+}
+
 func (t *accessTypeScheme) AddKnownTypes(s AccessTypeScheme) {
 	t.SchemeBase.AddKnownTypes(s)
 }

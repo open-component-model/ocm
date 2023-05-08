@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	. "github.com/open-component-model/ocm/pkg/exception"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -18,9 +19,15 @@ const (
 	TypeV1 = Type + runtime.VersionSeparator + "v1"
 )
 
+// this package shows how to implement access types with multiple serialization versions.
+// So far, only one is implemented, but it shows how to add other ones.
+
+var versions = cpi.NewAccessTypeVersionScheme(Type)
+
 func init() {
-	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(Type, LocalBlobV1, cpi.WithDescription(usage)))
-	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(TypeV1, LocalBlobV1, cpi.WithFormatSpec(formatV1), cpi.WithConfigHandler(ConfigHandler())))
+	Must(versions.Register(cpi.NewConvertedAccessSpecType(Type, LocalBlobV1, cpi.WithDescription(usage))))
+	Must(versions.Register(cpi.NewConvertedAccessSpecType(TypeV1, LocalBlobV1, cpi.WithFormatSpec(formatV1), cpi.WithConfigHandler(ConfigHandler()))))
+	cpi.RegisterAccessTypeVersions(versions)
 }
 
 func Is(spec cpi.AccessSpec) bool {
@@ -30,17 +37,25 @@ func Is(spec cpi.AccessSpec) bool {
 // New creates a new localFilesystemBlob accessor.
 func New(local, hint string, mediaType string, global cpi.AccessSpec) *AccessSpec {
 	return &AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
-		LocalReference:      local,
-		ReferenceName:       hint,
-		MediaType:           mediaType,
-		GlobalAccess:        cpi.NewAccessSpecRef(global),
+		InternalVersionedObjectType: runtime.NewInternalVersionedObjectType(versions, Type),
+		LocalReference:              local,
+		ReferenceName:               hint,
+		MediaType:                   mediaType,
+		GlobalAccess:                cpi.NewAccessSpecRef(global),
 	}
+}
+
+func Decode(data []byte) (*AccessSpec, error) {
+	spec, err := versions.Decode(data, runtime.DefaultYAMLEncoding)
+	if err != nil {
+		return nil, err
+	}
+	return spec.(*AccessSpec), nil
 }
 
 // AccessSpec describes the access for a local blob.
 type AccessSpec struct {
-	runtime.ObjectVersionedType
+	runtime.InternalVersionedObjectType
 	// LocalReference is the repository local identity of the blob.
 	// it is used by the repository implementation to get access
 	// to the blob and if therefore specific to a dedicated repository type.
@@ -68,7 +83,8 @@ var (
 )
 
 func (a AccessSpec) MarshalJSON() ([]byte, error) {
-	return cpi.MarshalConvertedAccessSpec(cpi.DefaultContext(), &a)
+	return runtime.MarshalObjectVersionedType(&a)
+	// return cpi.MarshalConvertedAccessSpec(cpi.DefaultContext(), &a)
 }
 
 func (a *AccessSpec) Describe(ctx cpi.Context) string {
@@ -143,10 +159,10 @@ func (_ converterV1) ConvertTo(object interface{}) (cpi.AccessSpec, error) {
 		return nil, fmt.Errorf("failed to assert type %T to AccessSpecV1", object)
 	}
 	return &AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
-		LocalReference:      in.LocalReference,
-		ReferenceName:       in.ReferenceName,
-		GlobalAccess:        in.GlobalAccess,
-		MediaType:           in.MediaType,
+		InternalVersionedObjectType: runtime.NewInternalVersionedObjectType(versions, in.Type),
+		LocalReference:              in.LocalReference,
+		ReferenceName:               in.ReferenceName,
+		GlobalAccess:                in.GlobalAccess,
+		MediaType:                   in.MediaType,
 	}, nil
 }

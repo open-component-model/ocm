@@ -408,8 +408,14 @@ type BaseAccess struct {
 	access compdesc.AccessSpec
 }
 
+type baseAccess = BaseAccess
+
 func NewBaseAccess(cv cpi.ComponentVersionAccess, acc compdesc.AccessSpec) *BaseAccess {
 	return &BaseAccess{vers: cv, access: acc}
+}
+
+func (r *BaseAccess) OCMContext() cpi.Context {
+	return r.vers.GetContext()
 }
 
 func (r *BaseAccess) Access() (cpi.AccessSpec, error) {
@@ -431,7 +437,7 @@ func (r *BaseAccess) AccessMethod() (cpi.AccessMethod, error) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type ResourceAccess struct {
-	*BaseAccess
+	*baseAccess
 	meta cpi.ResourceMeta
 }
 
@@ -439,7 +445,7 @@ var _ cpi.ResourceAccess = (*ResourceAccess)(nil)
 
 func newResourceAccess(componentVersion cpi.ComponentVersionAccess, accessSpec compdesc.AccessSpec, meta cpi.ResourceMeta) *ResourceAccess {
 	return &ResourceAccess{
-		BaseAccess: &BaseAccess{
+		baseAccess: &BaseAccess{
 			vers:   componentVersion,
 			access: accessSpec,
 		},
@@ -454,7 +460,7 @@ func (r ResourceAccess) Meta() *cpi.ResourceMeta {
 ////////////////////////////////////////////////////////////////////////////////
 
 type SourceAccess struct {
-	*BaseAccess
+	*baseAccess
 	meta cpi.SourceMeta
 }
 
@@ -462,7 +468,7 @@ var _ cpi.SourceAccess = (*SourceAccess)(nil)
 
 func newSourceAccess(componentVersion cpi.ComponentVersionAccess, accessSpec compdesc.AccessSpec, meta cpi.SourceMeta) *SourceAccess {
 	return &SourceAccess{
-		BaseAccess: &BaseAccess{
+		baseAccess: &BaseAccess{
 			vers:   componentVersion,
 			access: accessSpec,
 		},

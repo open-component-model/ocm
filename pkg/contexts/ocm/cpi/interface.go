@@ -47,6 +47,7 @@ type (
 	AccessMethod                     = internal.AccessMethod
 	AccessMethodSupport              = internal.AccessMethodSupport
 	AccessType                       = internal.AccessType
+	AccessTypeScheme                 = internal.AccessTypeScheme
 	DataAccess                       = internal.DataAccess
 	BlobAccess                       = internal.BlobAccess
 	SourceAccess                     = internal.SourceAccess
@@ -140,14 +141,6 @@ func MustRegisterDigester(digester BlobDigester, arttypes ...string) {
 
 func SetDefaultDigester(d BlobDigester) {
 	internal.SetDefaultDigester(d)
-}
-
-func RegisterRepositoryType(name string, atype RepositoryType) {
-	internal.DefaultRepositoryTypeScheme.Register(name, atype)
-}
-
-func RegisterAccessType(atype AccessType) {
-	internal.DefaultAccessTypeScheme.Register(atype.GetType(), atype)
 }
 
 func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {

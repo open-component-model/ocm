@@ -9,6 +9,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	. "github.com/open-component-model/ocm/pkg/exception"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -20,24 +21,39 @@ const (
 
 // Keep old access method and map generic one to this implementation for component archives
 
+// This method uses the localblob internal format and converts it to/from the
+// appropriate serialization version.
+// The attributes referenceName and globalAccess are NOT supported.
+
+var versions = cpi.NewAccessTypeVersionScheme(Type)
+
 func init() {
-	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(Type, LocalFilesystemBlobV1))
-	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(TypeV1, LocalFilesystemBlobV1))
+	Must(versions.Register(cpi.NewConvertedAccessSpecType(Type, LocalFilesystemBlobV1)))
+	Must(versions.Register(cpi.NewConvertedAccessSpecType(TypeV1, LocalFilesystemBlobV1)))
+	cpi.RegisterAccessTypeVersions(versions)
 }
 
 // New creates a new localFilesystemBlob accessor.
 func New(path string, media string) *localblob.AccessSpec {
 	return &localblob.AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
-		LocalReference:      path,
-		MediaType:           media,
+		InternalVersionedObjectType: runtime.NewInternalVersionedObjectType(versions, Type),
+		LocalReference:              path,
+		MediaType:                   media,
 	}
+}
+
+func Decode(data []byte) (*localblob.AccessSpec, error) {
+	spec, err := versions.Decode(data, runtime.DefaultYAMLEncoding)
+	if err != nil {
+		return nil, err
+	}
+	return spec.(*localblob.AccessSpec), nil
 }
 
 // AccessSpec describes the access for a blob on the filesystem.
 // Deprecated: use LocalBlob.
 type AccessSpec struct {
-	runtime.ObjectVersionedType `json:",inline"`
+	runtime.InternalVersionedObjectType `json:",inline"`
 	// FileName is the
 	Filename string `json:"fileName"`
 	// MediaType is the media type of the object represented by the blob
@@ -56,9 +72,9 @@ func (_ localfsblobConverterV1) ConvertFrom(object cpi.AccessSpec) (runtime.Type
 		return nil, fmt.Errorf("failed to assert type %T to localblob.AccessSpec", object)
 	}
 	return &AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
-		Filename:            in.LocalReference,
-		MediaType:           in.MediaType,
+		InternalVersionedObjectType: runtime.NewInternalVersionedObjectType(versions, in.Type),
+		Filename:                    in.LocalReference,
+		MediaType:                   in.MediaType,
 	}, nil
 }
 
@@ -68,8 +84,8 @@ func (_ localfsblobConverterV1) ConvertTo(object interface{}) (cpi.AccessSpec, e
 		return nil, fmt.Errorf("failed to assert type %T to localfsblob.AccessSpec", object)
 	}
 	return &localblob.AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
-		LocalReference:      in.Filename,
-		MediaType:           in.MediaType,
+		InternalVersionedObjectType: runtime.NewInternalVersionedObjectType(versions, in.Type),
+		LocalReference:              in.Filename,
+		MediaType:                   in.MediaType,
 	}, nil
 }

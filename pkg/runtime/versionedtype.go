@@ -6,6 +6,9 @@ package runtime
 
 import (
 	"strings"
+
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const VersionSeparator = "/"
@@ -92,6 +95,39 @@ func (v *ObjectVersionedType) SetVersion(version string) {
 			v.Type = t[:i]
 		}
 	}
+}
+
+type InternalVersionedObjectType struct {
+	ObjectVersionedType
+	encoder TypedObjectEncoder
+}
+
+var _ encoder = (*InternalVersionedObjectType)(nil)
+
+type encoder interface {
+	getEncoder() TypedObjectEncoder
+}
+
+func NewInternalVersionedObjectType(encoder TypedObjectEncoder, types ...string) InternalVersionedObjectType {
+	return InternalVersionedObjectType{
+		ObjectVersionedType: NewVersionedObjectType(types...),
+		encoder:             encoder,
+	}
+}
+
+func (o *InternalVersionedObjectType) getEncoder() TypedObjectEncoder {
+	return o.encoder
+}
+
+func MarshalObjectVersionedType(obj VersionedTypedObject, toe ...TypedObjectEncoder) ([]byte, error) {
+	if e, ok := obj.(encoder); ok && e.getEncoder() != nil {
+		return e.getEncoder().Encode(obj, DefaultJSONEncoding)
+	}
+	e := utils.Optional(toe...)
+	if e != nil {
+		return e.Encode(obj, DefaultJSONEncoding)
+	}
+	return nil, errors.ErrUnknown("object type", obj.GetType())
 }
 
 func KindVersion(t string) (string, string) {
