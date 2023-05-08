@@ -6,7 +6,6 @@ package accessio
 
 import (
 	"io"
-	"os"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -191,7 +190,7 @@ func (o *StandardOptions) WriterFor(path string, mode vfs.FileMode) (io.WriteClo
 	var writer io.WriteCloser
 	var err error
 	if o.File == nil {
-		writer, err = o.PathFileSystem.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode&0o666)
+		writer, err = o.PathFileSystem.OpenFile(path, vfs.O_WRONLY|vfs.O_CREATE|vfs.O_TRUNC, mode&0o666)
 	} else {
 		writer = NopWriteCloser(o.File)
 		err = o.File.Truncate(0)

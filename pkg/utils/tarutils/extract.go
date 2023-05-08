@@ -8,7 +8,6 @@ import (
 	"archive/tar"
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -56,7 +55,7 @@ func ExtractTarToFs(fs vfs.FileSystem, in io.Reader) error {
 			if err := fs.MkdirAll(dir, 0o766); err != nil {
 				return fmt.Errorf("unable to create directory %s: %w", dir, err)
 			}
-			file, err := fs.OpenFile(header.Name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, vfs.FileMode(header.Mode))
+			file, err := fs.OpenFile(header.Name, vfs.O_WRONLY|vfs.O_CREATE|vfs.O_TRUNC, vfs.FileMode(header.Mode))
 			if err != nil {
 				return fmt.Errorf("unable to open file %s: %w", header.Name, err)
 			}

@@ -8,7 +8,6 @@ import (
 	"archive/tar"
 	"fmt"
 	"io"
-	"os"
 	pathutil "path"
 	"strings"
 
@@ -129,7 +128,7 @@ func addFileToTar(fs vfs.FileSystem, tw *tar.Writer, path string, realPath strin
 				return fmt.Errorf("unable to write header for %q: %w", path, err)
 			}
 		}
-		err := vfs.Walk(fs, realPath, func(subFilePath string, info os.FileInfo, err error) error {
+		err := vfs.Walk(fs, realPath, func(subFilePath string, info vfs.FileInfo, err error) error {
 			if subFilePath == realPath {
 				return nil
 			}
@@ -154,7 +153,7 @@ func addFileToTar(fs vfs.FileSystem, tw *tar.Writer, path string, realPath strin
 		if err := tw.WriteHeader(header); err != nil {
 			return fmt.Errorf("unable to write header for %q: %w", path, err)
 		}
-		file, err := fs.OpenFile(realPath, os.O_RDONLY, os.ModePerm)
+		file, err := fs.OpenFile(realPath, vfs.O_RDONLY, vfs.ModePerm)
 		if err != nil {
 			return fmt.Errorf("unable to open file %q: %w", path, err)
 		}
