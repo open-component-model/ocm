@@ -161,11 +161,13 @@ func (o *Provider) Copy() *Provider {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// +k8s:deepcopy-gen=true
+// +k8s:openapi-gen=true
 type _time = time.Time
 
 // Timestamp is time rounded to seconds.
 type Timestamp struct {
-	_time
+	_time `json:",inline"`
 }
 
 func NewTimestamp() Timestamp {

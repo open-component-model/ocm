@@ -67,7 +67,7 @@ generate:
 
 .PHONY: generate-deepcopy
 generate-deepcopy:
-	controller-gen object:headerFile="hack/boilerplate.go.txt" paths=./pkg/contexts/ocm/compdesc/versions/...
+	controller-gen object:headerFile="hack/boilerplate.go.txt" paths=./pkg/contexts/ocm/compdesc/versions/... paths=./pkg/contexts/ocm/compdesc/meta/...
 
 .PHONY: verify
 verify: check
