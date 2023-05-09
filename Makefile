@@ -65,6 +65,10 @@ test:
 generate:
 	@$(REPO_ROOT)/hack/generate.sh $(REPO_ROOT)/pkg... $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/helminst/...
 
+.PHONY: generate-deepcopy
+generate-deepcopy:
+	controller-gen object:headerFile="hack/boilerplate.go.txt" paths=./pkg/contexts/ocm/compdesc/versions/...
+
 .PHONY: verify
 verify: check
 
