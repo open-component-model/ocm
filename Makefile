@@ -11,6 +11,9 @@ EFFECTIVE_VERSION                              := $(VERSION)+$(shell git rev-par
 GIT_TREE_STATE                                 := $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 COMMIT                                         := $(shell git rev-parse --verify HEAD)
 
+CONTROLLER_TOOLS_VERSION ?= v0.9.0
+CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
+
 CREDS    ?=
 OCM      := go run $(REPO_ROOT)/cmds/ocm $(CREDS)
 CTF_TYPE ?= tgz
@@ -66,8 +69,13 @@ generate:
 	@$(REPO_ROOT)/hack/generate.sh $(REPO_ROOT)/pkg... $(REPO_ROOT)/cmds/ocm/... $(REPO_ROOT)/cmds/helminst/...
 
 .PHONY: generate-deepcopy
-generate-deepcopy:
-	controller-gen object:headerFile="hack/boilerplate.go.txt" paths=./pkg/contexts/ocm/compdesc/versions/... paths=./pkg/contexts/ocm/compdesc/meta/...
+generate-deepcopy: controller-gen
+	$(CONTROLLER_GEN)  object:headerFile="hack/boilerplate.go.txt" paths=./pkg/contexts/ocm/compdesc/versions/... paths=./pkg/contexts/ocm/compdesc/meta/...
+
+.PHONY: controller-gen
+controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary.
+$(CONTROLLER_GEN): $(LOCALBIN)
+	GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_TOOLS_VERSION)
 
 .PHONY: verify
 verify: check
