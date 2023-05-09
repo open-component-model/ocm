@@ -20,8 +20,8 @@ const (
 )
 
 func init() {
-	cpi.RegisterRepositoryType(Type, cpi.NewRepositoryType(Type, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(TypeV1, cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType(Type, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
 }
 
 const (

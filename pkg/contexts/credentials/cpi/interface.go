@@ -24,6 +24,7 @@ type (
 	ContextProvider        = internal.ContextProvider
 	Repository             = internal.Repository
 	RepositoryType         = internal.RepositoryType
+	RepositoryTypeScheme   = internal.RepositoryTypeScheme
 	Credentials            = internal.Credentials
 	CredentialsSource      = internal.CredentialsSource
 	CredentialsChain       = internal.CredentialsChain
@@ -72,10 +73,6 @@ func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error
 	return internal.ToGenericRepositorySpec(spec)
 }
 
-func RegisterRepositoryType(name string, atype RepositoryType) {
-	internal.DefaultRepositoryTypeScheme.Register(name, atype)
-}
-
 func RegisterStandardIdentityMatcher(typ string, matcher IdentityMatcher, desc string) {
 	internal.StandardIdentityMatchers.Register(typ, matcher, desc)
 }
@@ -108,4 +105,10 @@ var (
 	CompleteMatch = internal.CompleteMatch
 	NoMatch       = internal.NoMatch
 	PartialMatch  = internal.PartialMatch
+)
+
+// provide context interface for other files to avoid diffs in imports.
+var (
+	newStrictRepositoryTypeScheme = internal.NewStrictRepositoryTypeScheme
+	defaultRepositoryTypeScheme   = internal.DefaultRepositoryTypeScheme
 )

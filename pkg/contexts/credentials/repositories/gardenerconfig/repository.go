@@ -88,7 +88,7 @@ func (r *Repository) LookupCredentials(name string) (cpi.Credentials, error) {
 }
 
 func (r *Repository) WriteCredentials(name string, creds cpi.Credentials) (cpi.Credentials, error) {
-	return nil, errors.ErrNotSupported("write", "credentials", RepositoryType)
+	return nil, errors.ErrNotSupported("write", "credentials", Type)
 }
 
 func (r *Repository) read(force bool) error {
@@ -189,7 +189,7 @@ func (r *Repository) getRawConfig() (io.ReadCloser, error) {
 	case Plaintext:
 		return reader, nil
 	default:
-		return nil, errors.ErrNotImplemented("cipher algorithm", string(r.cipher), RepositoryType)
+		return nil, errors.ErrNotImplemented("cipher algorithm", string(r.cipher), Type)
 	}
 }
 

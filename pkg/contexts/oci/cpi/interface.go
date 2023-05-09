@@ -27,6 +27,7 @@ type (
 	RepositorySpecHandler            = internal.RepositorySpecHandler
 	UniformRepositorySpec            = internal.UniformRepositorySpec
 	RepositoryType                   = internal.RepositoryType
+	RepositoryTypeScheme             = internal.RepositoryTypeScheme
 	RepositorySpec                   = internal.RepositorySpec
 	IntermediateRepositorySpecAspect = internal.IntermediateRepositorySpecAspect
 	GenericRepositorySpec            = internal.GenericRepositorySpec
@@ -51,10 +52,6 @@ var DefaultContext = internal.DefaultContext
 
 func New(m ...datacontext.BuilderMode) Context {
 	return internal.Builder{}.New(m...)
-}
-
-func RegisterRepositoryType(name string, atype RepositoryType) {
-	internal.DefaultRepositoryTypeScheme.Register(name, atype)
 }
 
 func RegisterRepositorySpecHandler(handler RepositorySpecHandler, types ...string) {
@@ -86,3 +83,9 @@ func ErrBlobNotFound(digest digest.Digest) error {
 func IsErrBlobNotFound(err error) bool {
 	return accessio.IsErrBlobNotFound(err)
 }
+
+// provide context interface for other files to avoid diffs in imports.
+var (
+	newStrictRepositoryTypeScheme = internal.NewStrictRepositoryTypeScheme
+	defaultRepositoryTypeScheme   = internal.DefaultRepositoryTypeScheme
+)

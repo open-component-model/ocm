@@ -4,10 +4,10 @@
 
 package cpi
 
-// this file is similar to contexts oci.
+// this file is identical for contexts oci and credentials and simillar for
+// ocm.
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -58,25 +58,8 @@ func RegisterRepositoryTypeVersions(s RepositoryTypeVersionScheme) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type repositoryType struct {
-	runtime.VersionedType
-	checker RepositoryAccessMethodChecker
-}
-
-type RepositoryAccessMethodChecker func(Context, compdesc.AccessSpec) bool
-
-func NewRepositoryType(name string, proto RepositorySpec, checker RepositoryAccessMethodChecker) RepositoryType {
-	return &repositoryType{
-		VersionedType: runtime.NewVersionedTypeByProto[RepositorySpec](name, proto),
-		checker:       checker,
-	}
-}
-
-func (t *repositoryType) LocalSupportForAccessSpec(ctx Context, a compdesc.AccessSpec) bool {
-	if t.checker != nil {
-		return t.checker(ctx, a)
-	}
-	return false
+func NewRepositoryType(name string, proto RepositorySpec) RepositoryType {
+	return runtime.NewVersionedTypeByProto(name, proto)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

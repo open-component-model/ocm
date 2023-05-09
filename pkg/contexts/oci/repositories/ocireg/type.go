@@ -26,11 +26,11 @@ const (
 )
 
 func init() {
-	cpi.RegisterRepositoryType(LegacyType, cpi.NewRepositoryType(LegacyType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(Type, cpi.NewRepositoryType(Type, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(TypeV1, cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(ShortType, cpi.NewRepositoryType(ShortType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(ShortTypeV1, cpi.NewRepositoryType(ShortTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType(LegacyType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType(Type, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType(ShortType, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType(ShortTypeV1, &RepositorySpec{}))
 }
 
 // Is checks the kind.

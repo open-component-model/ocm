@@ -17,8 +17,8 @@ const (
 )
 
 func init() {
-	cpi.RegisterRepositoryType(Type, cpi.NewAliasRegistry(cpi.NewRepositoryType(Type, &RepositorySpec{}), setAlias))
-	cpi.RegisterRepositoryType(TypeV1, cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(cpi.NewAliasRegistry(cpi.NewRepositoryType(Type, &RepositorySpec{}), setAlias))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
 }
 
 func setAlias(ctx cpi.Context, name string, spec cpi.RepositorySpec, creds cpi.CredentialsSource) error {

@@ -196,3 +196,12 @@ func ArtifactNameHint(spec AccessSpec, cv ComponentVersionAccess) string {
 	}
 	return ""
 }
+
+// provide context interface for other files to avoid diffs in imports.
+var (
+	newStrictRepositoryTypeScheme = internal.NewStrictRepositoryTypeScheme
+	defaultRepositoryTypeScheme   = internal.DefaultRepositoryTypeScheme
+
+	newStrictAccessTypeScheme = internal.NewStrictAccessTypeScheme
+	defaultAccessTypeScheme   = internal.DefaultAccessTypeScheme
+)

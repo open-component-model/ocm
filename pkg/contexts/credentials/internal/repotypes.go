@@ -17,8 +17,7 @@ import (
 )
 
 type RepositoryType interface {
-	runtime.TypedObjectDecoder
-	runtime.VersionedTypedObject
+	runtime.VersionedType
 }
 
 type RepositorySpec interface {
@@ -45,6 +44,12 @@ type repositoryTypeScheme struct {
 func NewRepositoryTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder, base ...RepositoryTypeScheme) RepositoryTypeScheme {
 	var rt RepositorySpec
 	scheme := runtime.MustNewDefaultScheme(&rt, &UnknownRepositorySpec{}, true, defaultRepoDecoder, utils.Optional(base...))
+	return &repositoryTypeScheme{scheme}
+}
+
+func NewStrictRepositoryTypeScheme(base ...RepositoryTypeScheme) RepositoryTypeScheme {
+	var rt RepositorySpec
+	scheme := runtime.MustNewDefaultScheme(&rt, nil, false, nil, utils.Optional(base...))
 	return &repositoryTypeScheme{scheme}
 }
 

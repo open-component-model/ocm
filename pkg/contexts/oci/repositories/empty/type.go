@@ -18,8 +18,8 @@ const (
 const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/empty"
 
 func init() {
-	cpi.RegisterRepositoryType(Type, cpi.NewRepositoryType(Type, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(TypeV1, cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType(Type, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
 }
 
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
