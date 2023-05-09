@@ -191,7 +191,14 @@ type UnknownAccessSpec struct {
 	runtime.UnstructuredVersionedTypedObject `json:",inline"`
 }
 
-var _ runtime.TypedObject = &UnknownAccessSpec{}
+var (
+	_ runtime.TypedObject = &UnknownAccessSpec{}
+	_ runtime.Unknown     = &UnknownAccessSpec{}
+)
+
+func (_ *UnknownAccessSpec) IsUnknown() bool {
+	return true
+}
 
 func (s *UnknownAccessSpec) AccessMethod(ComponentVersionAccess) (AccessMethod, error) {
 	return nil, errors.ErrUnknown(errors.KIND_ACCESSMETHOD, s.GetType())

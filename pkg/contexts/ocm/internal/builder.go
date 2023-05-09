@@ -6,8 +6,6 @@ package internal
 
 import (
 	"context"
-	"fmt"
-	"sync"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
@@ -20,6 +18,7 @@ type Builder struct {
 	credentials   credentials.Context
 	oci           oci.Context
 	reposcheme    RepositoryTypeScheme
+	repodel       RepositoryDelegationRegistry
 	accessscheme  AccessTypeScheme
 	spechandlers  RepositorySpecHandlers
 	blobhandlers  BlobHandlerRegistry
@@ -50,6 +49,11 @@ func (b Builder) WithOCIRepositories(ctx oci.Context) Builder {
 
 func (b Builder) WithRepositoyTypeScheme(scheme RepositoryTypeScheme) Builder {
 	b.reposcheme = scheme
+	return b
+}
+
+func (b Builder) WithRepositoryDelegation(reg RepositoryDelegationRegistry) Builder {
+	b.repodel = reg
 	return b
 }
 
@@ -140,6 +144,20 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 			b.spechandlers = DefaultRepositorySpecHandlers
 		}
 	}
+	if b.repodel == nil {
+		switch mode {
+		case datacontext.MODE_INITIAL:
+			b.repodel = nil
+		case datacontext.MODE_CONFIGURED:
+			b.repodel = DefaultRepositoryDelegationRegistry.Copy()
+		case datacontext.MODE_EXTENDED:
+			b.repodel = NewDelegationRegistry[Context, RepositorySpec](DefaultRepositoryDelegationRegistry)
+		case datacontext.MODE_DEFAULTED:
+			fallthrough
+		case datacontext.MODE_SHARED:
+			b.repodel = DefaultRepositoryDelegationRegistry
+		}
+	}
 	if b.blobhandlers == nil {
 		switch mode {
 		case datacontext.MODE_INITIAL:
@@ -169,32 +187,19 @@ func (b Builder) New(m ...datacontext.BuilderMode) Context {
 		}
 	}
 
-	b.reposcheme = NewRepositoryTypeScheme(&delegatingDecoder{oci: b.oci}, b.reposcheme)
-	return newContext(b.credentials, b.oci, b.reposcheme, b.accessscheme, b.spechandlers,
-		b.blobhandlers, b.blobdigesters, b.credentials.ConfigContext())
+	return newContext(b.credentials, b.oci, b.reposcheme, b.accessscheme, b.spechandlers, b.blobhandlers, b.blobdigesters, b.repodel, b.credentials.ConfigContext())
 }
 
 type delegatingDecoder struct {
-	lock     sync.Mutex
-	oci      oci.Context
-	delegate runtime.TypedObjectDecoder
+	ctx      Context
+	delegate RepositoryDelegationRegistry
 }
 
 var _ runtime.TypedObjectDecoder = (*delegatingDecoder)(nil)
 
 func (d *delegatingDecoder) Decode(data []byte, unmarshaler runtime.Unmarshaler) (runtime.TypedObject, error) {
-	d.lock.Lock()
-	defer d.lock.Unlock()
-
-	if d.delegate == nil && ociimpl != nil {
-		def, err := ociimpl(d.oci)
-		if err != nil {
-			return nil, fmt.Errorf("cannot create oci default decoder: %w", err)
-		}
-		d.delegate = def
-	}
 	if d.delegate != nil {
-		return d.delegate.Decode(data, unmarshaler)
+		return d.delegate.Decode(d.ctx, data, unmarshaler)
 	}
 	return nil, nil
 }

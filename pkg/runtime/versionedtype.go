@@ -98,6 +98,10 @@ func (v *ObjectVersionedType) SetVersion(version string) {
 	}
 }
 
+// InternalVersionedObjectType is the base type used
+// by *internal* representations of versioned specification
+// formats. It is used to convert from/to dedicated
+// format versions.
 type InternalVersionedObjectType struct {
 	ObjectVersionedType
 	encoder TypedObjectEncoder
@@ -106,7 +110,7 @@ type InternalVersionedObjectType struct {
 var _ encoder = (*InternalVersionedObjectType)(nil)
 
 type encoder interface {
-	getEncoder() TypedObjectEncoder
+	encode(obj VersionedTypedObject) ([]byte, error)
 }
 
 func NewInternalVersionedObjectType(encoder TypedObjectEncoder, types ...string) InternalVersionedObjectType {
@@ -116,13 +120,20 @@ func NewInternalVersionedObjectType(encoder TypedObjectEncoder, types ...string)
 	}
 }
 
-func (o *InternalVersionedObjectType) getEncoder() TypedObjectEncoder {
-	return o.encoder
+func (o *InternalVersionedObjectType) encode(obj VersionedTypedObject) ([]byte, error) {
+	return o.encoder.Encode(obj, DefaultJSONEncoding)
+}
+
+func GetEncoder(obj VersionedTypedObject) encoder {
+	if e, ok := obj.(encoder); ok {
+		return e
+	}
+	return nil
 }
 
 func MarshalObjectVersionedType(obj VersionedTypedObject, toe ...TypedObjectEncoder) ([]byte, error) {
-	if e, ok := obj.(encoder); ok && e.getEncoder() != nil {
-		return e.getEncoder().Encode(obj, DefaultJSONEncoding)
+	if e := GetEncoder(obj); e != nil {
+		return e.encode(obj)
 	}
 	e := utils.Optional(toe...)
 	if e != nil {

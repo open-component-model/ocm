@@ -9,6 +9,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/modern-go/reflect2"
+
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -21,7 +23,7 @@ func MustProtoType(proto interface{}) reflect.Type {
 }
 
 func ProtoType(proto interface{}) (reflect.Type, error) {
-	if proto == nil {
+	if reflect2.IsNil(proto) {
 		return nil, errors.New("prototype required")
 	}
 	t := reflect.TypeOf(proto)
@@ -38,7 +40,7 @@ func TypedObjectFactory(proto TypedObject) func() TypedObject {
 	return func() TypedObject { return reflect.New(MustProtoType(proto)).Interface().(TypedObject) }
 }
 
-func TypeNames(scheme Scheme) []string {
+func TypeNames[T TypedObject](scheme Scheme[T]) []string {
 	types := []string{}
 	for t := range scheme.KnownTypes() {
 		types = append(types, t)
@@ -47,7 +49,7 @@ func TypeNames(scheme Scheme) []string {
 	return types
 }
 
-func KindNames(scheme Scheme) []string {
+func KindNames[T TypedObject](scheme Scheme[T]) []string {
 	types := []string{}
 	for t := range scheme.KnownTypes() {
 		if !strings.Contains(t, VersionSeparator) {

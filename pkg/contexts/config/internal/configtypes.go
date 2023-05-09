@@ -123,6 +123,7 @@ type Evaluator interface {
 
 type GenericConfig struct {
 	runtime.UnstructuredVersionedTypedObject `json:",inline"`
+	unknown                                  bool
 }
 
 func IsGeneric(cfg Config) bool {
@@ -139,7 +140,7 @@ func NewGenericConfig(data []byte, unmarshaler runtime.Unmarshaler) (Config, err
 	if err != nil {
 		return nil, err
 	}
-	return &GenericConfig{*unstr}, nil
+	return &GenericConfig{*unstr, false}, nil
 }
 
 func ToGenericConfig(c Config) (*GenericConfig, error) {
@@ -153,7 +154,11 @@ func ToGenericConfig(c Config) (*GenericConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &GenericConfig{*u}, nil
+	return &GenericConfig{*u, false}, nil
+}
+
+func (s *GenericConfig) IsUnknown() bool {
+	return s.unknown
 }
 
 func (s *GenericConfig) Evaluate(ctx Context) (Config, error) {
@@ -166,6 +171,7 @@ func (s *GenericConfig) Evaluate(ctx Context) (Config, error) {
 		return nil, err
 	}
 	if IsGeneric(cfg) {
+		s.unknown = true
 		return nil, errors.ErrUnknown(KIND_CONFIGTYPE, s.GetType())
 	}
 	return cfg, nil

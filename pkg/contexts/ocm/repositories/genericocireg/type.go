@@ -12,8 +12,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -24,21 +22,57 @@ import (
 type ComponentNameMapping string
 
 const (
-	Type   = ocireg.Type
-	TypeV1 = ocireg.TypeV1
+	Type = ocireg.Type
 
 	OCIRegistryURLPathMapping ComponentNameMapping = "urlPath"
 	OCIRegistryDigestMapping  ComponentNameMapping = "sha256-digest"
 )
 
 func init() {
-	cpi.RegisterOCIImplementation(func(ctx oci.Context) (cpi.RepositoryType, error) {
-		return NewRepositoryType(ctx), nil
-	})
+	cpi.DefaultDelegationRegistry().Register("OCI", New(10))
+}
+
+// delegation tries to resolve an ocm repository specification
+// with an OCI repository specification supported by the OCI context
+// of the OCM context.
+type delegation struct {
+	prio int
+}
+
+func New(prio int) cpi.RepositoryPriorityDecoder {
+	return &delegation{prio}
+}
+
+var _ cpi.RepositoryPriorityDecoder = (*delegation)(nil)
+
+func (d *delegation) Decode(ctx cpi.Context, data []byte, unmarshal runtime.Unmarshaler) (cpi.RepositorySpec, error) {
+	if unmarshal == nil {
+		unmarshal = runtime.DefaultYAMLEncoding.Unmarshaler
+	}
+
+	ospec, err := ctx.OCIContext().RepositoryTypes().DecodeRepositorySpec(data, unmarshal)
+	if err != nil {
+		return nil, err
+	}
+	if oci.IsUnknown(ospec) {
+		return nil, nil
+	}
+
+	meta := &ComponentRepositoryMeta{}
+	err = unmarshal.Unmarshal(data, meta)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot unmarshal component repository meta information")
+	}
+	return NewRepositorySpec(ospec, meta), nil
+}
+
+func (d *delegation) Priority() int {
+	return d.prio
 }
 
 // ComponentRepositoryMeta describes config special for a mapping of
 // a component repository to an oci registry.
+// It is parsed in addition to an OCI based specification.
 type ComponentRepositoryMeta struct {
 	// ComponentNameMapping describes the method that is used to map the "Component Name", "Component Version"-tuples
 	// to OCI Image References.
@@ -53,43 +87,6 @@ func NewComponentRepositoryMeta(subPath string, mapping ComponentNameMapping) *C
 	}
 }
 
-type RepositoryType struct {
-	runtime.ObjectVersionedType
-	ocictx oci.Context
-}
-
-var _ cpi.RepositoryType = &RepositoryType{}
-
-// NewRepositoryType creates generic type for any OCI Repository Backend.
-func NewRepositoryType(ocictx oci.Context) *RepositoryType {
-	return &RepositoryType{
-		ObjectVersionedType: runtime.NewVersionedObjectType("genericOCIRepositoryBackend"),
-		ocictx:              ocictx,
-	}
-}
-
-func (t *RepositoryType) Decode(data []byte, unmarshal runtime.Unmarshaler) (runtime.TypedObject, error) {
-	ospec, err := t.ocictx.RepositoryTypes().DecodeRepositorySpec(data, unmarshal)
-	if err != nil {
-		return nil, err
-	}
-
-	meta := &ComponentRepositoryMeta{}
-	if unmarshal == nil {
-		unmarshal = runtime.DefaultYAMLEncoding.Unmarshaler
-	}
-	err = unmarshal.Unmarshal(data, meta)
-	if err != nil {
-		return nil, errors.Wrapf(err, "cannot unmarshal component repository meta information")
-	}
-	return NewRepositorySpec(ospec, meta), nil
-}
-
-func (t *RepositoryType) LocalSupportForAccessSpec(ctx cpi.Context, a compdesc.AccessSpec) bool {
-	name := a.GetKind()
-	return name == localblob.Type
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 type RepositorySpec struct {
@@ -101,6 +98,7 @@ var (
 	_ cpi.RepositorySpec                   = (*RepositorySpec)(nil)
 	_ cpi.PrefixProvider                   = (*RepositorySpec)(nil)
 	_ cpi.IntermediateRepositorySpecAspect = (*RepositorySpec)(nil)
+	_ json.Marshaler                       = (*RepositorySpec)(nil)
 )
 
 func NewRepositorySpec(spec oci.RepositorySpec, meta *ComponentRepositoryMeta) *RepositorySpec {
@@ -143,7 +141,10 @@ func (u *RepositorySpec) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// MarshalJSON implements a custom json unmarshal method for a unstructured type.
+// MarshalJSON implements a custom json unmarshal method for an unstructured type.
+// The oci.RepositorySpec object might already implement json.Marshaler,
+// which would be inherited and omit marshaling the addend attributes of a
+// cpi.RepositorySpec.
 func (u RepositorySpec) MarshalJSON() ([]byte, error) {
 	ocispec, err := runtime.ToUnstructuredTypedObject(u.RepositorySpec)
 	if err != nil {

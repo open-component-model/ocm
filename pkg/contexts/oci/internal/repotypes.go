@@ -128,7 +128,14 @@ type UnknownRepositorySpec struct {
 	runtime.UnstructuredVersionedTypedObject `json:",inline"`
 }
 
-var _ RepositorySpec = &UnknownRepositorySpec{}
+var (
+	_ RepositorySpec  = &UnknownRepositorySpec{}
+	_ runtime.Unknown = &UnknownRepositorySpec{}
+)
+
+func (r *UnknownRepositorySpec) IsUnknown() bool {
+	return true
+}
 
 func (r *UnknownRepositorySpec) Name() string {
 	return "unknown-" + r.GetKind()

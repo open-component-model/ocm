@@ -30,7 +30,7 @@ func NewRepositoryTypeVersionScheme(kind string) RepositoryTypeVersionScheme {
 
 func (s *repositoryTypeVersionScheme) Register(t RepositoryType) error {
 	if t.GetKind() != s.kind {
-		return errors.ErrInvalid("access spec type", t.GetType(), "kind", s.kind)
+		return errors.ErrInvalid("repository spec type", t.GetType(), "kind", s.kind)
 	}
 	s.scheme.Register(t.GetType(), t)
 	return nil

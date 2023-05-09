@@ -22,6 +22,31 @@ const (
 
 // this package shows how to implement access types with multiple serialization versions.
 // So far, only one is implemented, but it shows how to add other ones.
+//
+// Specifications using multiple format versions allways provide a single common
+// *internal* Go representation, intended to be used by library users. Only this
+// internal version should be used outside this package. Additionally, there
+// are Go types representing the various format versions, which will be used
+// for the de-/serialization process (here AccessSpecV1).
+//
+// The supported versions are gathered in a dedicated scheme object (variable versions),
+// which is then used to register all available versions at the default scheme (see
+// init method).
+// The *internal* specification Go type (here AccessSpec) must be based on
+// runtime.InternalVersionedObjectType.
+// It is initialized with the effective type/version name and the versions scheme
+// and represents the Go representation used by API users, the format versions
+// are never used outside this package.
+//
+// Additionally, this *internal* type must implement the MarshalJSON method, which
+// can be implemented by delegating to the runtime.MarshalObjectVersionedType
+// method, which evaluated the versions scheme to finds the applicable conversion
+// provided by the runtime.InternalVersionedObjectType.
+//
+// For every format version runtime.FormatVersion is required, which can be created
+// with cpi.NewAccessSpecVersion, which takes the prototype and a converter,
+// which converts between the internal go representation and the external formats,
+// given by a dedicated go Type with serialization annotations.
 
 var versions = cpi.NewAccessTypeVersionScheme(Type)
 

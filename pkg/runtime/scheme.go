@@ -32,7 +32,10 @@ type TypedObject interface {
 	TypeGetter
 }
 
-var typeTypedObject = reflect.TypeOf((*TypedObject)(nil)).Elem()
+var (
+	typeTypedObject = reflect.TypeOf((*TypedObject)(nil)).Elem()
+	typeUnknown     = reflect.TypeOf((*Unknown)(nil)).Elem()
+)
 
 // TypedObjectDecoder is able to provide an effective typed object for some
 // serilaized form. The technical deserialization is done by an Unmarshaler.
@@ -160,6 +163,23 @@ func (t KnownTypes) TypeNames() []string {
 	return types
 }
 
+// Unknown is the interface to be implemented by
+// representations on an unknown, but nevertheless decoded specification
+// of a typed object.
+type Unknown interface {
+	IsUnknown() bool
+}
+
+func IsUnknown(o TypedObject) bool {
+	if o == nil {
+		return true
+	}
+	if u, ok := o.(Unknown); ok {
+		return u.IsUnknown()
+	}
+	return false
+}
+
 // Scheme is the interface to describe a set of object types
 // that implement a dedicated interface.
 // As such it knows about the desired interface of the instances
@@ -231,6 +251,9 @@ func NewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnkn
 		}
 		if !reflect.PtrTo(ut).Implements(typeTypedObject) {
 			return nil, fmt.Errorf("unstructured type %T must implement TypedObject to be acceptale as unknown result", protoUnstr)
+		}
+		if !reflect.PtrTo(ut).Implements(typeUnknown) {
+			return nil, fmt.Errorf("unstructured type %T must implement Unknown to be acceptale as unknown result", protoUnstr)
 		}
 	}
 

@@ -16,6 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
 	ocmreg "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var DefaultOCIContext = oci.New()
@@ -33,10 +34,9 @@ var _ = Describe("access method", func() {
 	})
 
 	It("decodes generic spec", func() {
-		typ := genericocireg.NewRepositoryType(DefaultOCIContext)
+		del := genericocireg.New(10)
 
-		spec, err := typ.Decode([]byte(specData), runtime.DefaultJSONEncoding)
-		Expect(err).To(Succeed())
+		spec := Must(del.Decode(DefaultContext, []byte(specData), runtime.DefaultJSONEncoding))
 		Expect(reflect.TypeOf(spec).String()).To(Equal("*genericocireg.RepositorySpec"))
 
 		eff, ok := spec.(*genericocireg.RepositorySpec)
@@ -49,4 +49,21 @@ var _ = Describe("access method", func() {
 		Expect(ok).To(BeTrue())
 		Expect(effoci.BaseURL).To(Equal("X"))
 	})
+
+	It("decodes generic spec", func() {
+		spec := Must(DefaultContext.RepositorySpecForConfig([]byte(specData), nil))
+
+		Expect(reflect.TypeOf(spec).String()).To(Equal("*genericocireg.RepositorySpec"))
+
+		eff, ok := spec.(*genericocireg.RepositorySpec)
+		Expect(ok).To(BeTrue())
+		Expect(reflect.TypeOf(eff.RepositorySpec).String()).To(Equal("*ocireg.RepositorySpec"))
+		Expect(eff.ComponentNameMapping).To(Equal(ocmreg.OCIRegistryDigestMapping))
+
+		Expect(spec.GetType()).To(Equal(ocireg.Type))
+		effoci, ok := eff.RepositorySpec.(*ocireg.RepositorySpec)
+		Expect(ok).To(BeTrue())
+		Expect(effoci.BaseURL).To(Equal("X"))
+	})
+
 })

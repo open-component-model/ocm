@@ -13,7 +13,6 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
@@ -25,7 +24,7 @@ type RepositoryType interface {
 
 	// LocalSupportForAccessSpec checks whether a repository
 	// provides a local version for the access spec.
-	LocalSupportForAccessSpec(ctx Context, a compdesc.AccessSpec) bool
+	// LocalSupportForAccessSpec(ctx Context, a compdesc.AccessSpec) bool
 }
 
 type IntermediateRepositorySpecAspect = oci.IntermediateRepositorySpecAspect
@@ -128,7 +127,14 @@ type UnknownRepositorySpec struct {
 	runtime.UnstructuredVersionedTypedObject `json:",inline"`
 }
 
-var _ RepositorySpec = &UnknownRepositorySpec{}
+var (
+	_ RepositorySpec  = &UnknownRepositorySpec{}
+	_ runtime.Unknown = &UnknownRepositorySpec{}
+)
+
+func (_ *UnknownRepositorySpec) IsUnknown() bool {
+	return true
+}
 
 func (a *UnknownRepositorySpec) AsUniformSpec(Context) UniformRepositorySpec {
 	return UniformRepositorySpec{Type: a.GetKind()}

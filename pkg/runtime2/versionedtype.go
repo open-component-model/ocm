@@ -98,34 +98,44 @@ func (v *ObjectVersionedType) SetVersion(version string) {
 	}
 }
 
-type InternalVersionedObjectType struct {
+type InternalVersionedObjectType[T VersionedTypedObject] struct {
 	ObjectVersionedType
-	encoder TypedObjectEncoder
+	encoder TypedObjectEncoder[T]
 }
 
-var _ encoder = (*InternalVersionedObjectType)(nil)
+var _ encoder = (*InternalVersionedObjectType[VersionedTypedObject])(nil)
 
 type encoder interface {
-	getEncoder() TypedObjectEncoder
+	encode(obj VersionedTypedObject) ([]byte, error)
 }
 
-func NewInternalVersionedObjectType(encoder TypedObjectEncoder, types ...string) InternalVersionedObjectType {
-	return InternalVersionedObjectType{
+func NewInternalVersionedObjectType[T VersionedTypedObject](encoder TypedObjectEncoder[T], types ...string) InternalVersionedObjectType[T] {
+	return InternalVersionedObjectType[T]{
 		ObjectVersionedType: NewVersionedObjectType(types...),
 		encoder:             encoder,
 	}
 }
 
-func (o *InternalVersionedObjectType) getEncoder() TypedObjectEncoder {
-	return o.encoder
+func (o *InternalVersionedObjectType[T]) encode(obj VersionedTypedObject) ([]byte, error) {
+	// cannot type parameter here, because casts of paramerized objects are not supported in GO
+	return o.encoder.Encode(obj.(T), DefaultJSONEncoding)
 }
 
-func MarshalObjectVersionedType(obj VersionedTypedObject, toe ...TypedObjectEncoder) ([]byte, error) {
-	if e, ok := obj.(encoder); ok && e.getEncoder() != nil {
-		return e.getEncoder().Encode(obj, DefaultJSONEncoding)
+func GetEncoder[T VersionedTypedObject](obj T) encoder {
+	var i interface{} = obj
+	if e, ok := i.(encoder); ok {
+		return e
 	}
-	e := utils.Optional(toe...)
-	if e != nil {
+	return nil
+}
+
+func MarshalObjectVersionedType[T VersionedTypedObject](obj T, toe ...TypedObjectEncoder[T]) ([]byte, error) {
+	// if e, ok := obj.(encoder); ok && e.getEncoder() != nil {
+	if e := GetEncoder(obj); e != nil {
+		// here parameterized type casts using T would fail
+		return e.encode(obj)
+	}
+	if e := utils.Optional(toe...); e != nil {
 		return e.Encode(obj, DefaultJSONEncoding)
 	}
 	return nil, errors.ErrUnknown("object type", obj.GetType())
@@ -139,29 +149,29 @@ func KindVersion(t string) (string, string) {
 	return t, ""
 }
 
-type VersionedType interface {
+type VersionedType[T VersionedTypedObject] interface {
 	VersionedTypedObject
-	TypedObjectDecoder
+	TypedObjectDecoder[T]
 }
 
-type versionedType struct {
+type versionedType[T VersionedTypedObject] struct {
 	ObjectVersionedType
-	TypedObjectDecoder
+	TypedObjectDecoder[T]
 }
 
-func NewVersionedTypeByProto[T VersionedTypedObject](name string, proto T) VersionedType {
+func NewVersionedTypeByProto[T VersionedTypedObject](name string, proto T) VersionedType[T] {
 	t := reflect.TypeOf(proto)
 	for t.Kind() == reflect.Ptr {
 		t = t.Elem()
 	}
-	return &versionedType{
+	return &versionedType[T]{
 		ObjectVersionedType: NewVersionedObjectType(name),
 		TypedObjectDecoder:  MustNewDirectDecoder(proto),
 	}
 }
 
-func NewVersionedTypeByVersion[T VersionedTypedObject](name string, version FormatVersion[T]) VersionedType {
-	return &versionedType{
+func NewVersionedTypeByVersion[T VersionedTypedObject](name string, version FormatVersion[T]) VersionedType[T] {
+	return &versionedType[T]{
 		ObjectVersionedType: NewVersionedObjectType(name),
 		TypedObjectDecoder:  version,
 	}

@@ -36,6 +36,8 @@ type (
 	ComponentVersionResolver         = internal.ComponentVersionResolver
 	Repository                       = internal.Repository
 	RepositoryTypeScheme             = internal.RepositoryTypeScheme
+	RepositoryDelegationRegistry     = internal.RepositoryDelegationRegistry
+	RepositoryPriorityDecoder        = internal.PriorityDecoder[Context, RepositorySpec]
 	RepositorySpecHandlers           = internal.RepositorySpecHandlers
 	RepositorySpecHandler            = internal.RepositorySpecHandler
 	UniformRepositorySpec            = internal.UniformRepositorySpec
@@ -101,6 +103,10 @@ func NewDigestDescriptor(digest string, typ DigesterType) *DigestDescriptor {
 
 func DefaultBlobDigesterRegistry() BlobDigesterRegistry {
 	return internal.DefaultBlobDigesterRegistry
+}
+
+func DefaultDelegationRegistry() RepositoryDelegationRegistry {
+	return internal.DefaultRepositoryDelegationRegistry
 }
 
 func DefaultContext() internal.Context {

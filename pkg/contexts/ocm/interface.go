@@ -52,6 +52,7 @@ type (
 	IntermediateRepositorySpecAspect = internal.IntermediateRepositorySpecAspect
 	RepositoryType                   = internal.RepositoryType
 	RepositoryTypeScheme             = internal.RepositoryTypeScheme
+	RepositoryDelegationRegistry     = internal.RepositoryDelegationRegistry
 	AccessTypeScheme                 = internal.AccessTypeScheme
 	ComponentReference               = internal.ComponentReference
 	References                       = compdesc.References
@@ -78,8 +79,16 @@ func DefaultContext() internal.Context {
 	return internal.DefaultContext
 }
 
-func DefaultBlobHandlers() internal.BlobHandlerRegistry {
+func DefaultBlobHandlers() BlobHandlerRegistry {
 	return internal.DefaultBlobHandlerRegistry
+}
+
+func DefaultRepositoryDelegationRegistry() RepositoryDelegationRegistry {
+	return internal.DefaultRepositoryDelegationRegistry
+}
+
+func NewRepositoryDelegationRegistry(base ...RepositoryDelegationRegistry) RepositoryDelegationRegistry {
+	return internal.NewDelegationRegistry[Context, RepositorySpec](base...)
 }
 
 // ForContext returns the Context to use for context.Context.

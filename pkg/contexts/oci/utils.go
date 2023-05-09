@@ -9,6 +9,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
+	runtime "github.com/open-component-model/ocm/pkg/runtime2"
 )
 
 func AsTags(tag string) []string {
@@ -31,4 +32,8 @@ func IsIntermediate(spec RepositorySpec) bool {
 		return s.IsIntermediate()
 	}
 	return false
+}
+
+func IsUnknown(r RepositorySpec) bool {
+	return runtime.IsUnknown(r)
 }

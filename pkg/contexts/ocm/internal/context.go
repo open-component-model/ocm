@@ -112,7 +112,7 @@ type _context struct {
 
 var _ Context = &_context{}
 
-func newContext(credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, specHandlers RepositorySpecHandlers, blobHandlers BlobHandlerRegistry, blobDigesters BlobDigesterRegistry, delegates datacontext.Delegates) Context {
+func newContext(credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, specHandlers RepositorySpecHandlers, blobHandlers BlobHandlerRegistry, blobDigesters BlobDigesterRegistry, repodel RepositoryDelegationRegistry, delegates datacontext.Delegates) Context {
 	c := &_context{
 		sharedattributes:     credctx.AttributesContext(),
 		credctx:              credctx,
@@ -123,6 +123,10 @@ func newContext(credctx credentials.Context, ocictx oci.Context, reposcheme Repo
 		knownAccessTypes:     accessscheme,
 		knownRepositoryTypes: reposcheme,
 		aliases:              map[string]RepositorySpec{},
+	}
+
+	if repodel != nil {
+		c.knownRepositoryTypes = NewRepositoryTypeScheme(&delegatingDecoder{ctx: c, delegate: repodel}, reposcheme)
 	}
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, credctx.GetAttributes(), delegates)
 	c.updater = cfgcpi.NewUpdater(credctx.ConfigContext(), c)
