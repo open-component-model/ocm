@@ -117,6 +117,9 @@ func NewExcludeFromSignatureDigest() *DigestSpec {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// NestedDigests defines a list of nested components.
+// +k8s:deepcopy-gen=true
+// +k8s:openapi-gen=true
 type NestedDigests []NestedComponentDigests
 
 func (d NestedDigests) String() string {
@@ -149,6 +152,9 @@ func (d NestedDigests) Lookup(name, version string) *NestedComponentDigests {
 	return nil
 }
 
+// NestedComponentDigests defines nested components.
+// +k8s:deepcopy-gen=true
+// +k8s:openapi-gen=true
 type NestedComponentDigests struct {
 	Name      string          `json:"name"`
 	Version   string          `json:"version"`
@@ -186,6 +192,9 @@ func (d *NestedComponentDigests) Copy() *NestedComponentDigests {
 	return &r
 }
 
+// ArtefactDigests defines a list of artefact digest information.
+// +k8s:deepcopy-gen=true
+// +k8s:openapi-gen=true
 type ArtefactDigests []ArtefactDigest
 
 func (d ArtefactDigests) Lookup(name, version string, extra Identity) *ArtefactDigest {
@@ -210,6 +219,9 @@ func (d ArtefactDigests) Match(o ArtefactDigests) bool {
 	return true
 }
 
+// ArtefactDigest defines artefact digest information.
+// +k8s:deepcopy-gen=true
+// +k8s:openapi-gen=true
 type ArtefactDigest struct {
 	Name          string     `json:"name"`
 	Version       string     `json:"version"`

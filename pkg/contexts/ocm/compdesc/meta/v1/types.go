@@ -7,6 +7,7 @@ package v1
 import (
 	"time"
 
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -161,23 +162,30 @@ func (o *Provider) Copy() *Provider {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type _time = time.Time
+type _time = v1.Time
 
 // Timestamp is time rounded to seconds.
+// +k8s:deepcopy-gen=true
 type Timestamp struct {
-	_time
+	_time `json:",inline"`
 }
 
 func NewTimestamp() Timestamp {
-	return Timestamp{time.Now().Round(time.Second)}
+	return Timestamp{
+		_time: v1.NewTime(time.Now().Round(time.Second)),
+	}
 }
 
 func NewTimestampP() *Timestamp {
-	return &Timestamp{time.Now().Round(time.Second)}
+	return &Timestamp{
+		_time: v1.NewTime(time.Now().Round(time.Second)),
+	}
 }
 
 func NewTimestampFor(t time.Time) Timestamp {
-	return Timestamp{t.Round(time.Second)}
+	return Timestamp{
+		_time: v1.NewTime(t.Round(time.Second)),
+	}
 }
 
 // MarshalJSON implements the json.Marshaler interface.
@@ -210,11 +218,11 @@ func (t *Timestamp) UnmarshalJSON(data []byte) error {
 }
 
 func (t *Timestamp) Time() time.Time {
-	return t._time
+	return t._time.Time
 }
 
 func (t *Timestamp) Equal(o Timestamp) bool {
-	return t._time.Equal(o._time)
+	return t._time.Equal(&o._time)
 }
 
 func (t *Timestamp) UTC() Timestamp {
