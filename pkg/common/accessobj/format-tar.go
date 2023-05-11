@@ -15,7 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
 var FormatTAR = NewTarHandler()
@@ -207,7 +207,7 @@ func (h *TarHandler) NewFromReader(info AccessObjectInfo, acc AccessMode, in io.
 		in = reader
 	}
 	setup := func(fs vfs.FileSystem) error {
-		if err := utils.ExtractTarToFs(fs, in); err != nil {
+		if err := tarutils.ExtractTarToFs(fs, in); err != nil {
 			return fmt.Errorf("unable to extract tar: %w", err)
 		}
 		return nil

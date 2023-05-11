@@ -26,6 +26,8 @@ const (
 
 	MediaTypeDockerSchema2Manifest     = images.MediaTypeDockerSchema2Manifest
 	MediaTypeDockerSchema2ManifestList = images.MediaTypeDockerSchema2ManifestList
+
+	MediaTypeImageConfig = ociv1.MediaTypeImageConfig
 )
 
 var legacy = false

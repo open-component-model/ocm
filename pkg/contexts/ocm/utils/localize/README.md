@@ -47,7 +47,11 @@ resource and further helper parts, like json scheme validation for config files.
 Such a specification object can be applied by the function `Instantiate` 
 together with configuration values to
 a component version. As substitution result it returns a virtual filesystem
-with the snapshot according to the resolved substitutions.
+with the snapshot according to the resolved substitutions. To get access to the
+template resource containing the filesystem snapshot to be instantiated, the
+configured downloaders (package `pkg/context/ocm/download`) is used.
+Therefore, this method can be used together with any own resource type as long as 
+an appropriate downloader is configured.
 
 Additionally, there is a set of more basic types and methods, which can be used
 to describe end execute localizations for single data objects (see `ImageMappings`,

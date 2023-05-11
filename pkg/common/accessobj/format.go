@@ -126,7 +126,6 @@ func DefaultOpenOptsFileHandling(kind string, info AccessObjectInfo, acc AccessM
 	reader := opts.GetReader()
 	switch {
 	case reader != nil:
-		defer reader.Close()
 	case opts.GetFile() == nil:
 		// we expect that the path point to a tar
 		file, err = opts.GetPathFileSystem().Open(path)

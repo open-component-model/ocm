@@ -7,7 +7,6 @@ package accessobj
 import (
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
@@ -47,7 +46,7 @@ func (_ DirectoryHandler) Open(info AccessObjectInfo, acc AccessMode, path strin
 		return nil, fmt.Errorf("unable to create projected filesystem from path %s: %w", path, err)
 	}
 	opts.SetRepresentation(fs) // TODO: use of temporary copy
-	return NewAccessObject(info, acc, fs, nil, nil, os.ModePerm)
+	return NewAccessObject(info, acc, fs, nil, nil, vfs.ModePerm)
 }
 
 func (_ DirectoryHandler) Create(info AccessObjectInfo, path string, opts accessio.Options, mode vfs.FileMode) (*AccessObject, error) {
@@ -104,7 +103,7 @@ func (_ DirectoryHandler) Write(obj *AccessObject, path string, opts accessio.Op
 	// copy all content
 	fileInfos, err := vfs.ReadDir(obj.fs, obj.info.GetElementDirectoryName())
 	if err != nil {
-		if os.IsNotExist(err) {
+		if vfs.IsErrNotExist(err) {
 			return nil
 		}
 		return errors.Wrapf(err, "unable to read '%s'", obj.info.GetElementDirectoryName())
@@ -120,7 +119,7 @@ func (_ DirectoryHandler) Write(obj *AccessObject, path string, opts accessio.Op
 		if err != nil {
 			return errors.Wrapf(err, "unable to open input %s %q", obj.info.GetElementTypeName(), inpath)
 		}
-		out, err := opts.GetPathFileSystem().OpenFile(outpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode|0o666)
+		out, err := opts.GetPathFileSystem().OpenFile(outpath, vfs.O_WRONLY|vfs.O_CREATE|vfs.O_TRUNC, mode|0o666)
 		if err != nil {
 			return errors.Wrapf(err, "unable to open output %s %q", obj.info.GetElementTypeName(), outpath)
 		}

@@ -6,25 +6,41 @@ package finalizer_test
 
 import (
 	"fmt"
+	"io"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/pkg/exception"
 	"github.com/open-component-model/ocm/pkg/finalizer"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 type Order []string
 
 func F(n string, order *Order) func() error {
 	return func() error {
-		return R(n, order)
+		return A(n, order)
 	}
 }
 
-func R(n string, order *Order) error {
+func A(n string, order *Order) error {
 	*order = append(*order, n)
 	return nil
+}
+
+type closer struct {
+	io.ReadCloser
+	name  string
+	order *Order
+}
+
+func Closer(n string, order *Order) io.ReadCloser {
+	return &closer{nil, n, order}
+}
+
+func (c *closer) Close() error {
+	return A(c.name, c.order)
 }
 
 var _ = Describe("finalizer", func() {
@@ -32,7 +48,7 @@ var _ = Describe("finalizer", func() {
 		var finalize finalizer.Finalizer
 		var order Order
 
-		finalize.With(finalizer.Calling2(R, "A", &order))
+		finalize.With(finalizer.Calling2(A, "A", &order))
 		Expect(order).To(BeNil())
 
 		finalize.Finalize()
@@ -200,6 +216,46 @@ var _ = Describe("finalizer", func() {
 			err := caller()
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(Equal("exception"))
+		})
+	})
+
+	Context("transfering", func() {
+		It("transfers actions", func() {
+			var f finalizer.Finalizer
+			var order Order
+
+			f.With(F("first", &order))
+			c := Closer("closer", &order)
+
+			b := f.BindToReader(c, "bound")
+
+			f.With(F("second", &order))
+
+			MustBeSuccessful(f.Finalize())
+			MustBeSuccessful(b.Close())
+
+			Expect(order).To(Equal(Order{"second", "closer", "first"}))
+		})
+
+		It("transfers nested actions", func() {
+			var f finalizer.Finalizer
+			var order Order
+
+			f.With(F("first", &order))
+			n := f.Nested()
+			n.With(F("nested", &order))
+
+			c := Closer("closer", &order)
+
+			b := n.BindToReader(c, "bound")
+			n.With(F("next", &order))
+
+			f.With(F("second", &order))
+
+			MustBeSuccessful(f.Finalize())
+			MustBeSuccessful(b.Close())
+
+			Expect(order).To(Equal(Order{"second", "next", "first", "closer", "nested"}))
 		})
 	})
 })

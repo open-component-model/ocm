@@ -5,6 +5,11 @@
 package resourcetypes
 
 const (
+	KIND_ARTIFACT_TYPE = "artifact type"
+	KIND_RESOURCE_TYPE = "resource type"
+)
+
+const (
 	// OCI_ARTIFACT describes a generic OCI artifact following the
 	//   [open containers image specification](https://github.com/opencontainers/image-spec/blob/main/spec.md).
 	OCI_ARTIFACT = "ociArtifact"
@@ -16,7 +21,8 @@ const (
 	// BLOB describes any anonymous untyped blob data.
 	BLOB = "blob"
 	// FILESYSTEM describes a directory structure stored as archive (tar, tgz).
-	FILESYSTEM        = "directoryTree"
+	DIRECTORY_TREE    = "directoryTree"
+	FILESYSTEM        = DIRECTORY_TREE
 	FILESYSTEM_LEGACY = "filesystem"
 	// EXECUTABLE describes an OS executable.
 	EXECUTABLE = "executable"

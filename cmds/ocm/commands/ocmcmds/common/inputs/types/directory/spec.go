@@ -85,7 +85,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (acces
 	if s.Compress() {
 		s.SetMediaTypeIfNotDefined(mime.MIME_TGZ)
 		gw := gzip.NewWriter(temp.Writer())
-		if err := tarutils.TarFileSystem(fs, inputPath, gw, opts); err != nil {
+		if err := tarutils.PackFsIntoTar(fs, inputPath, gw, opts); err != nil {
 			return nil, "", fmt.Errorf("unable to tar input artifact: %w", err)
 		}
 		if err := gw.Close(); err != nil {
@@ -93,7 +93,7 @@ func (s *Spec) GetBlob(ctx inputs.Context, info inputs.InputResourceInfo) (acces
 		}
 	} else {
 		s.SetMediaTypeIfNotDefined(mime.MIME_TAR)
-		if err := tarutils.TarFileSystem(fs, inputPath, temp.Writer(), opts); err != nil {
+		if err := tarutils.PackFsIntoTar(fs, inputPath, temp.Writer(), opts); err != nil {
 			return nil, "", fmt.Errorf("unable to tar input artifact: %w", err)
 		}
 	}
