@@ -33,6 +33,23 @@ type Finalizer struct {
 	index   int
 }
 
+// BindToReader moves the pending finalizations to the close action of a reader closer.
+func (f *Finalizer) BindToReader(r io.ReadCloser, msg ...string) io.ReadCloser {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
+	if len(f.pending) == 0 {
+		addToCloser(r, nil, msg...)
+	}
+	n := &Finalizer{
+		pending: f.pending,
+	}
+	f.pending = nil
+	f.nested = nil
+	f.index = 0
+	return addToCloser(r, n, msg...)
+}
+
 // CatchException marks the finalizer to catch exceptions.
 // This must be combined with error propagating defers.
 func (f *Finalizer) CatchException(matchers ...exception.Matcher) *Finalizer {

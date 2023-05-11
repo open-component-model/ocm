@@ -23,7 +23,18 @@ type ociArtifact struct {
 	artfunc func(a oci.ArtifactAccess) error
 	ns      cpi.NamespaceAccess
 	cpi.ArtifactAccess
-	tags []string
+	tags  []string
+	annos *map[string]string
+}
+
+func (r *ociArtifact) setAnno(name, value string) {
+	if r.annos == nil {
+		return
+	}
+	if *r.annos == nil {
+		*r.annos = map[string]string{}
+	}
+	(*r.annos)[name] = value
 }
 
 func (r *ociArtifact) Type() string {
@@ -33,8 +44,8 @@ func (r *ociArtifact) Type() string {
 func (r *ociArtifact) Set() {
 	r.Builder.oci_nsacc = r.ns
 	r.Builder.oci_artacc = r.ArtifactAccess
-	r.Builder.oci_cleanuplayers = true
 	r.Builder.oci_tags = &r.tags
+	r.Builder.oci_annofunc = r.setAnno
 
 	if r.ns != nil {
 		r.Builder.oci_artfunc = r.addArtifact
@@ -63,8 +74,10 @@ func (r *ociArtifact) addArtifact(a oci.ArtifactAccess) error {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (b *Builder) artifact(tag string, ns cpi.NamespaceAccess, t func(access oci.ArtifactAccess) (string, error), f ...func()) *artdesc.Descriptor {
+func (b *Builder) artifact(tag string, ns cpi.NamespaceAccess, t func(access oci.ArtifactAccess) (string, *map[string]string, error), f ...func()) *artdesc.Descriptor {
 	var k string
+	var annos *map[string]string
+
 	b.expect(b.oci_nsacc, T_OCINAMESPACE)
 	v, err := b.oci_nsacc.GetArtifact(tag)
 	if err != nil {
@@ -74,18 +87,19 @@ func (b *Builder) artifact(tag string, ns cpi.NamespaceAccess, t func(access oci
 			}
 		}
 	}
+	b.oci_cleanuplayers = true
 	if v == nil {
 		v, err = b.oci_nsacc.NewArtifact()
 	}
 	if v != nil {
-		k, err = t(v)
+		k, annos, err = t(v)
 	}
 	b.failOn(err, 1)
 	tags := []string{}
 	if tag != "" {
 		tags = append(tags, tag)
 	}
-	r := b.configure(&ociArtifact{ArtifactAccess: v, kind: k, tags: tags, ns: ns, artfunc: b.oci_artfunc}, f, 1)
+	r := b.configure(&ociArtifact{ArtifactAccess: v, kind: k, tags: tags, ns: ns, artfunc: b.oci_artfunc, annos: annos}, f, 1)
 	if r == nil {
 		return nil
 	}
@@ -93,19 +107,19 @@ func (b *Builder) artifact(tag string, ns cpi.NamespaceAccess, t func(access oci
 }
 
 func (b *Builder) Index(tag string, f ...func()) *artdesc.Descriptor {
-	return b.artifact(tag, b.oci_nsacc, func(a oci.ArtifactAccess) (string, error) {
-		if a.IndexAccess() == nil {
-			return "", errors.Newf("artifact is manifest")
+	return b.artifact(tag, b.oci_nsacc, func(a oci.ArtifactAccess) (string, *map[string]string, error) {
+		if m := a.IndexAccess(); m != nil {
+			return T_OCIINDEX, &m.GetDescriptor().Annotations, nil
 		}
-		return T_OCIINDEX, nil
+		return "", nil, errors.Newf("artifact is manifest")
 	}, f...)
 }
 
 func (b *Builder) Manifest(tag string, f ...func()) *artdesc.Descriptor {
-	return b.artifact(tag, nil, func(a oci.ArtifactAccess) (string, error) {
-		if a.ManifestAccess() == nil {
-			return "", errors.Newf("artifact is index")
+	return b.artifact(tag, nil, func(a oci.ArtifactAccess) (string, *map[string]string, error) {
+		if m := a.ManifestAccess(); m != nil {
+			return T_OCIMANIFEST, &m.GetDescriptor().Annotations, nil
 		}
-		return T_OCIMANIFEST, nil
+		return "", nil, errors.Newf("artifact is index")
 	}, f...)
 }

@@ -14,6 +14,7 @@ type ociNamespace struct {
 	base
 	kind string
 	oci.NamespaceAccess
+	annofunc func(name, value string)
 }
 
 func (r *ociNamespace) Type() string {
@@ -25,6 +26,7 @@ func (r *ociNamespace) Type() string {
 
 func (r *ociNamespace) Set() {
 	r.Builder.oci_nsacc = r.NamespaceAccess
+	r.Builder.oci_annofunc = r.annofunc
 }
 
 ////////////////////////////////////////////////////////////////////////////////

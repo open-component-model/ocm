@@ -1,18 +1,37 @@
-// SPDX-FileCopyrightText: 2022 SAP SE or an SAP affiliate company and Open Component Model contributors.
+// SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package utils
+package tarutils
 
 import (
 	"archive/tar"
-	"errors"
 	"fmt"
 	"io"
-	"os"
 
+	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
+	"github.com/open-component-model/ocm/pkg/common/compression"
+	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
+
+// ExtractArchiveToFs wunpacks an archive to a filesystem.
+func ExtractArchiveToFs(fs vfs.FileSystem, path string, fss ...vfs.FileSystem) error {
+	sfs := utils.OptionalDefaulted(osfs.New(), fss...)
+
+	f, err := sfs.Open(path)
+	if err != nil {
+		return errors.Wrapf(err, "cannot open %s", path)
+	}
+	defer f.Close()
+	r, _, err := compression.AutoDecompress(f)
+	if err != nil {
+		return errors.Wrapf(err, "cannot determine compression for %s", path)
+	}
+	return ExtractTarToFs(fs, r)
+}
 
 // ExtractTarToFs writes a tar stream to a filesystem.
 func ExtractTarToFs(fs vfs.FileSystem, in io.Reader) error {
@@ -36,7 +55,7 @@ func ExtractTarToFs(fs vfs.FileSystem, in io.Reader) error {
 			if err := fs.MkdirAll(dir, 0o766); err != nil {
 				return fmt.Errorf("unable to create directory %s: %w", dir, err)
 			}
-			file, err := fs.OpenFile(header.Name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, vfs.FileMode(header.Mode))
+			file, err := fs.OpenFile(header.Name, vfs.O_WRONLY|vfs.O_CREATE|vfs.O_TRUNC, vfs.FileMode(header.Mode))
 			if err != nil {
 				return fmt.Errorf("unable to open file %s: %w", header.Name, err)
 			}

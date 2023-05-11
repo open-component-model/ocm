@@ -50,7 +50,11 @@ func SythesizeArtifactSet(producer Producer) (ArtifactBlob, error) {
 		return nil, err2
 	}
 
-	return temp.AsBlob(artdesc.ToContentMediaType(mime) + SynthesizedBlobFormat), nil
+	return temp.AsBlob(MediaType(mime)), nil
+}
+
+func MediaType(mime string) string {
+	return artdesc.ToContentMediaType(mime) + SynthesizedBlobFormat
 }
 
 func TransferArtifact(art cpi.ArtifactAccess, set cpi.ArtifactSink, tags ...string) error {

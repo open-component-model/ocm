@@ -8,13 +8,38 @@ import (
 	"archive/tar"
 	"fmt"
 	"io"
-	"os"
 	pathutil "path"
 	"strings"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+
+	"github.com/open-component-model/ocm/pkg/finalizer"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
+
+func CreateTarFromFs(fs vfs.FileSystem, path string, compress func(w io.Writer) io.WriteCloser, fss ...vfs.FileSystem) (err error) {
+	var finalize finalizer.Finalizer
+	defer finalize.FinalizeWithErrorPropagation(&err)
+
+	tfs := utils.OptionalDefaulted(osfs.New(), fss...)
+
+	f, err := tfs.OpenFile(path, vfs.O_CREATE|vfs.O_TRUNC|vfs.O_WRONLY, 0o600)
+	if err != nil {
+		return err
+	}
+	finalize.Close(f)
+	var w io.Writer
+	if compress != nil {
+		cw := compress(f)
+		finalize.Close(cw)
+		w = cw
+	} else {
+		w = f
+	}
+	return PackFsIntoTar(fs, "", w, TarFileSystemOptions{})
+}
 
 // TarFileSystemOptions describes additional options for tarring a filesystem.
 type TarFileSystemOptions struct {
@@ -62,8 +87,8 @@ func (opts *TarFileSystemOptions) Included(path string) (bool, error) {
 	return false, nil
 }
 
-// TarFileSystem creates a tar archive from a filesystem.
-func TarFileSystem(fs vfs.FileSystem, root string, writer io.Writer, opts TarFileSystemOptions) error {
+// PackFsIntoTar creates a tar archive from a filesystem.
+func PackFsIntoTar(fs vfs.FileSystem, root string, writer io.Writer, opts TarFileSystemOptions) error {
 	tw := tar.NewWriter(writer)
 	if opts.PreserveDir {
 		opts.root = pathutil.Base(root)
@@ -103,18 +128,18 @@ func addFileToTar(fs vfs.FileSystem, tw *tar.Writer, path string, realPath strin
 				return fmt.Errorf("unable to write header for %q: %w", path, err)
 			}
 		}
-		err := vfs.Walk(fs, realPath, func(subFilePath string, info os.FileInfo, err error) error {
+		err := vfs.Walk(fs, realPath, func(subFilePath string, info vfs.FileInfo, err error) error {
 			if subFilePath == realPath {
 				return nil
 			}
 			if err != nil {
 				return err
 			}
-			relPath, err := filepath.Rel(realPath, subFilePath)
+			relPath, err := vfs.Rel(fs, realPath, subFilePath)
 			if err != nil {
 				return fmt.Errorf("unable to calculate relative path for %s: %w", subFilePath, err)
 			}
-			err = addFileToTar(fs, tw, pathutil.Join(path, relPath), subFilePath, opts)
+			err = addFileToTar(fs, tw, vfs.Join(fs, path, relPath), subFilePath, opts)
 			if err != nil {
 				return fmt.Errorf("failed to tar the input from %q: %w", subFilePath, err)
 			}
@@ -128,7 +153,7 @@ func addFileToTar(fs vfs.FileSystem, tw *tar.Writer, path string, realPath strin
 		if err := tw.WriteHeader(header); err != nil {
 			return fmt.Errorf("unable to write header for %q: %w", path, err)
 		}
-		file, err := fs.OpenFile(realPath, os.O_RDONLY, os.ModePerm)
+		file, err := fs.OpenFile(realPath, vfs.O_RDONLY, vfs.ModePerm)
 		if err != nil {
 			return fmt.Errorf("unable to open file %q: %w", path, err)
 		}
