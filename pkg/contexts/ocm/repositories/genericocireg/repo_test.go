@@ -9,6 +9,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/opencontainers/go-digest"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
@@ -22,6 +23,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/testhelper"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localociblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociblob"
 	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci"
@@ -90,6 +92,44 @@ var _ = Describe("component repository mapping", func() {
 		MustBeSuccessful(finalize.Finalize())
 	})
 
+	It("handles legacylocalociblob  access method", func() {
+		var finalize finalizer.Finalizer
+		defer Defer(finalize.Finalize)
+
+		blob := accessio.BlobAccessForString(mime.MIME_OCTET, "anydata")
+
+		// create repository
+		repo := finalizer.ClosingWith(&finalize, Must(DefaultContext.RepositoryForSpec(spec)))
+		Expect(reflect.TypeOf(repo).String()).To(Equal("*genericocireg.Repository"))
+
+		comp := finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
+		vers := finalizer.ClosingWith(&finalize, Must(comp.NewVersion("v1")))
+		acc := Must(vers.AddBlob(blob, "", "", nil))
+
+		// check provided actual access to be local blob
+		Expect(acc.GetKind()).To(Equal(localblob.Type))
+		l, ok := acc.(*localblob.AccessSpec)
+		Expect(ok).To(BeTrue())
+		Expect(l.LocalReference).To(Equal(blob.Digest().String()))
+		Expect(l.GlobalAccess).To(BeNil())
+
+		acc = localociblob.New(digest.Digest(l.LocalReference))
+
+		MustBeSuccessful(vers.SetResource(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, v1.LocalRelation), acc))
+		MustBeSuccessful(comp.AddVersion(vers))
+
+		rs := Must(vers.GetResourceByIndex(0))
+
+		spec := Must(rs.Access())
+		Expect(spec.GetType()).To(Equal(localociblob.Type))
+
+		m := Must(rs.AccessMethod())
+		finalize.Close(m)
+		Expect(m.MimeType()).To(Equal("application/octet-stream"))
+		data := Must(m.Get())
+		Expect(string(data)).To(Equal("anydata"))
+	})
+
 	It("imports blobs", func() {
 		var finalize finalizer.Finalizer
 		defer Defer(finalize.Finalize)
@@ -121,6 +161,7 @@ var _ = Describe("component repository mapping", func() {
 		Expect(ok).To(BeTrue())
 		Expect(o.Digest).To(Equal(blob.Digest()))
 		Expect(o.Reference).To(Equal(TESTBASE + "/" + componentmapping.ComponentDescriptorNamespace + "/" + COMPONENT))
+		MustBeSuccessful(vers.SetResource(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, v1.LocalRelation), acc))
 		MustBeSuccessful(comp.AddVersion(vers))
 	})
 

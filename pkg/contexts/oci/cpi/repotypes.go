@@ -59,24 +59,13 @@ func RegisterRepositoryTypeVersions(s RepositoryTypeVersionScheme) {
 ////////////////////////////////////////////////////////////////////////////////
 
 func NewRepositoryType(name string, proto RepositorySpec) RepositoryType {
-	return runtime.NewVersionedTypeByProto(name, proto)
+	return runtime.NewVersionedTypedObjectTypeByProto(name, proto)
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-type (
-	RepositorySpecConverter = runtime.Converter[RepositorySpec]
-	RepositorySpecVersion   = runtime.FormatVersion[RepositorySpec]
-)
-
-func NewRepositorySpecVersion(proto runtime.VersionedTypedObject, converter RepositorySpecConverter) RepositorySpecVersion {
-	return runtime.NewProtoBasedVersion[RepositorySpec](proto, converter)
+func NewRepositoryTypeByConverter(name string, proto RepositorySpec, converter runtime.Converter[RepositorySpec]) RepositoryType {
+	return runtime.NewVersionedTypedObjectTypeByConverter(name, proto, converter)
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-type ConvertedRepositoryType = runtime.ObjectConvertedType[RepositorySpec]
-
-func NewConvertedRepositorySpecType(name string, v RepositorySpecVersion) *ConvertedRepositoryType {
-	return runtime.NewConvertedType[RepositorySpec](name, v)
+func NewRepositoryTypeByVersion(name string, version runtime.FormatVersion[RepositorySpec]) RepositoryType {
+	return runtime.NewVersionedTypedObjectTypeByVersion(name, version)
 }

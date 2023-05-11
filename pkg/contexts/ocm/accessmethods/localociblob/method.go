@@ -7,8 +7,11 @@ package localociblob
 import (
 	"fmt"
 
+	. "github.com/open-component-model/ocm/pkg/exception"
+
 	"github.com/opencontainers/go-digest"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -19,18 +22,29 @@ const (
 	TypeV1 = Type + runtime.VersionSeparator + "v1"
 )
 
+var versions = cpi.NewAccessTypeVersionScheme(Type)
+
 func init() {
-	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}))
-	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}))
+	Must(versions.Register(cpi.NewAccessSpecTypeByConverter(Type, &AccessSpec{}, &converterV1{})))
+	Must(versions.Register(cpi.NewAccessSpecTypeByConverter(TypeV1, &AccessSpec{}, &converterV1{})))
+	cpi.RegisterAccessTypeVersions(versions)
 }
 
 // New creates a new LocalOCIBlob accessor.
 // Deprecated: Use LocalBlob.
-func New(digest digest.Digest) *AccessSpec {
-	return &AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
-		Digest:              digest,
+func New(digest digest.Digest) *localblob.AccessSpec {
+	return &localblob.AccessSpec{
+		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject(versions, Type),
+		LocalReference:               digest.String(),
 	}
+}
+
+func Decode(data []byte) (*localblob.AccessSpec, error) {
+	spec, err := versions.Decode(data, runtime.DefaultYAMLEncoding)
+	if err != nil {
+		return nil, err
+	}
+	return spec.(*localblob.AccessSpec), nil
 }
 
 // AccessSpec describes the access for a oci registry.
@@ -42,24 +56,29 @@ type AccessSpec struct {
 	Digest digest.Digest `json:"digest"`
 }
 
-var _ cpi.AccessSpec = (*AccessSpec)(nil)
+////////////////////////////////////////////////////////////////////////////////
 
-func (a *AccessSpec) Describe(ctx cpi.Context) string {
-	return fmt.Sprintf("Local OCI blob %s", a.Digest)
+type converterV1 struct{}
+
+func (_ converterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, error) {
+	in, ok := object.(*localblob.AccessSpec)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert type %T to localblob.AccessSpec", object)
+	}
+	return &AccessSpec{
+		ObjectVersionedType: runtime.NewVersionedTypedObject(in.Type),
+		Digest:              digest.Digest(in.LocalReference),
+	}, nil
 }
 
-func (s AccessSpec) IsLocal(context cpi.Context) bool {
-	return true
-}
-
-func (a *AccessSpec) GlobalAccessSpec(ctx cpi.Context) cpi.AccessSpec {
-	return nil
-}
-
-func (s *AccessSpec) GetMimeType() string {
-	return ""
-}
-
-func (s *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
-	return c.AccessMethod(s)
+func (_ converterV1) ConvertTo(object interface{}) (cpi.AccessSpec, error) {
+	in, ok := object.(*AccessSpec)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert type %T to localfsblob.AccessSpec", object)
+	}
+	return &localblob.AccessSpec{
+		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject(versions, in.Type),
+		LocalReference:               in.Digest.String(),
+		MediaType:                    "",
+	}, nil
 }

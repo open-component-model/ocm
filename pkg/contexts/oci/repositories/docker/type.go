@@ -30,7 +30,7 @@ type RepositorySpec struct {
 // NewRepositorySpec creates a new RepositorySpec for an optional host.
 func NewRepositorySpec(host ...string) *RepositorySpec {
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		DockerHost:          utils.Optional(host...),
 	}
 }

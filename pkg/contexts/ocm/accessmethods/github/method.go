@@ -93,7 +93,7 @@ func WithDownloader(downloader downloader.Downloader) AccessSpecOptions {
 // New creates a new GitHub registry access spec version v1.
 func New(repoURL, apiHostname, commit string, opts ...AccessSpecOptions) *AccessSpec {
 	s := &AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		RepoURL:             repoURL,
 		APIHostname:         apiHostname,
 		Commit:              commit,

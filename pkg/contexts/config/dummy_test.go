@@ -30,7 +30,7 @@ type Config struct {
 // NewConfig creates a new memory Config
 func NewConfig(a, b string) *Config {
 	return &Config{
-		ObjectVersionedType: runtime.NewVersionedObjectType(DummyType),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(DummyType),
 		Alice:               a,
 		Bob:                 b,
 	}

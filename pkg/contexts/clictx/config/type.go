@@ -35,7 +35,7 @@ type Config struct {
 // New creates a new memory ConfigSpec.
 func New() *Config {
 	return &Config{
-		ObjectVersionedType: runtime.NewVersionedObjectType(OCMCmdConfigType),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(OCMCmdConfigType),
 	}
 }
 

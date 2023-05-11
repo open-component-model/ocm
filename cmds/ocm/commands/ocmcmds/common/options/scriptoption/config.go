@@ -40,7 +40,7 @@ type ScriptSpec struct {
 // NewConfig creates a new memory ConfigSpec.
 func NewConfig() *Config {
 	return &Config{
-		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(ConfigType),
 	}
 }
 

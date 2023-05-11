@@ -59,7 +59,7 @@ func RegisterRepositoryTypeVersions(s RepositoryTypeVersionScheme) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type repositoryType struct {
-	runtime.VersionedType
+	runtime.VersionedTypedObjectType
 	checker RepositoryAccessMethodChecker
 }
 
@@ -67,8 +67,22 @@ type RepositoryAccessMethodChecker func(Context, compdesc.AccessSpec) bool
 
 func NewRepositoryType(name string, proto RepositorySpec, checker RepositoryAccessMethodChecker) RepositoryType {
 	return &repositoryType{
-		VersionedType: runtime.NewVersionedTypeByProto[RepositorySpec](name, proto),
-		checker:       checker,
+		VersionedTypedObjectType: runtime.NewVersionedTypedObjectTypeByProto[RepositorySpec](name, proto),
+		checker:                  checker,
+	}
+}
+
+func NewRepositoryTypeByConverter(name string, proto runtime.VersionedTypedObject, converter runtime.Converter[RepositorySpec], checker RepositoryAccessMethodChecker) RepositoryType {
+	return &repositoryType{
+		VersionedTypedObjectType: runtime.NewVersionedTypedObjectTypeByConverter[RepositorySpec](name, proto, converter),
+		checker:                  checker,
+	}
+}
+
+func NewRepositoryTypeByVersion(name string, version runtime.FormatVersion[RepositorySpec], checker RepositoryAccessMethodChecker) RepositoryType {
+	return &repositoryType{
+		VersionedTypedObjectType: runtime.NewVersionedTypedObjectTypeByVersion[RepositorySpec](name, version),
+		checker:                  checker,
 	}
 }
 
@@ -77,23 +91,4 @@ func (t *repositoryType) LocalSupportForAccessSpec(ctx Context, a compdesc.Acces
 		return t.checker(ctx, a)
 	}
 	return false
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-type (
-	RepositorySpecConverter = runtime.Converter[RepositorySpec]
-	RepositorySpecVersion   = runtime.FormatVersion[RepositorySpec]
-)
-
-func NewRepositorySpecVersion(proto runtime.VersionedTypedObject, converter RepositorySpecConverter) RepositorySpecVersion {
-	return runtime.NewProtoBasedVersion[RepositorySpec](proto, converter)
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-type ConvertedRepositoryType = runtime.ObjectConvertedType[RepositorySpec]
-
-func NewConvertedRepositorySpecType(name string, v RepositorySpecVersion) *ConvertedRepositoryType {
-	return runtime.NewConvertedType[RepositorySpec](name, v)
 }

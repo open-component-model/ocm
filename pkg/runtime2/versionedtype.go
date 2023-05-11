@@ -5,7 +5,6 @@
 package runtime
 
 import (
-	"reflect"
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -23,10 +22,115 @@ type VersionedTypeInfo interface {
 
 // VersionedTypedObject in an instance of a VersionedType.
 type VersionedTypedObject interface {
+	TypedObject
 	VersionedTypeInfo
 }
 
-var _ TypedObject = (VersionedTypedObject)(nil)
+////////////////////////////////////////////////////////////////////////////////
+// Versioned Typed Objects
+
+// ObjectVersionedTypedObject is a minimal implementation of a VersionedTypedObject.
+type ObjectVersionedTypedObject = VersionedObjectType
+
+// ObjectVersionedType is a minimal implementation of a VersionedTypedObject.
+// For compatibility, we keep the old not aligned type name.
+type ObjectVersionedType = ObjectVersionedTypedObject
+
+// NewVersionedTypedObject creates an ObjectVersionedType value.
+func NewVersionedTypedObject(args ...string) ObjectVersionedTypedObject {
+	return ObjectVersionedTypedObject{Type: TypeName(args...)}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Object Types for Versioned Typed Objects
+
+// InternalVersionedTypedObject is the base type used
+// by *internal* representations of versioned specification
+// formats. It is used to convert from/to dedicated
+// format versions.
+type InternalVersionedTypedObject[T VersionedTypedObject] struct {
+	ObjectVersionedType
+	encoder TypedObjectEncoder[T]
+}
+
+var _ encoder = (*InternalVersionedTypedObject[VersionedTypedObject])(nil)
+
+type encoder interface {
+	encode(obj VersionedTypedObject) ([]byte, error)
+}
+
+func NewInternalVersionedTypedObject[T VersionedTypedObject](encoder TypedObjectEncoder[T], types ...string) InternalVersionedTypedObject[T] {
+	return InternalVersionedTypedObject[T]{
+		ObjectVersionedType: NewVersionedObjectType(types...),
+		encoder:             encoder,
+	}
+}
+
+func (o *InternalVersionedTypedObject[T]) encode(obj VersionedTypedObject) ([]byte, error) {
+	// cannot use type parameter here, because casts of paramerized objects are not supported in GO
+	return o.encoder.Encode(obj.(T), DefaultJSONEncoding)
+}
+
+func GetEncoder[T VersionedTypedObject](obj T) encoder {
+	var i interface{} = obj
+	if e, ok := i.(encoder); ok {
+		return e
+	}
+	return nil
+}
+
+func MarshalVersionedTypedObject[T VersionedTypedObject](obj T, toe ...TypedObjectEncoder[T]) ([]byte, error) {
+	if e := GetEncoder(obj); e != nil {
+		return e.encode(obj)
+	}
+	if e := utils.Optional(toe...); e != nil {
+		return e.Encode(obj, DefaultJSONEncoding)
+	}
+	return nil, errors.ErrUnknown("object type", obj.GetType())
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+// VersionedType is the interface of a type object for a versioned type.
+type VersionedTypedObjectType[T VersionedTypedObject] interface {
+	VersionedTypeInfo
+	TypedObjectDecoder[T]
+	TypedObjectEncoder[T]
+}
+
+type versionedTypedObjectType[T VersionedTypedObject] struct {
+	_VersionedObjectType
+	_FormatVersion[T]
+}
+
+var _ FormatVersion[VersionedTypedObject] = (*versionedTypedObjectType[VersionedTypedObject])(nil)
+
+func NewVersionedTypedObjectTypeByProto[T VersionedTypedObject](name string, proto T) VersionedTypedObjectType[T] {
+	return &versionedTypedObjectType[T]{
+		_VersionedObjectType: NewVersionedObjectType(name),
+		_FormatVersion:       NewProtoBasedVersion[T, T](proto, IdentityConverter[T]{}),
+	}
+}
+
+func NewVersionedTypedObjectTypeByConverter[T VersionedTypedObject, I VersionedTypedObject](name string, proto VersionedTypedObject, converter Converter[I]) VersionedTypedObjectType[T] {
+	return &versionedTypedObjectType[T]{
+		_VersionedObjectType: NewVersionedObjectType(name),
+		_FormatVersion:       NewProtoBasedVersion[T](proto, converter),
+	}
+}
+
+// NewVersionedTypedObjectTypeByVersion creates a new type object for versioned typed objects,
+// where T is the common *interface* of all types of the same type realm and I is the
+// *internal implementation* commonly used for the various version variants of a dedicated kind of type.
+// Therefore, I must be subtype of T, which cannot be expressed in Go.
+func NewVersionedTypedObjectTypeByVersion[T VersionedTypedObject, I VersionedTypedObject](name string, version FormatVersion[I]) VersionedTypedObjectType[T] {
+	return &versionedTypedObjectType[T]{
+		_VersionedObjectType: NewVersionedObjectType(name),
+		_FormatVersion:       &caster[T, I]{version},
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 func TypeName(args ...string) string {
 	if len(args) == 1 {
@@ -41,116 +145,6 @@ func TypeName(args ...string) string {
 	panic("invalid call to TypeName, one or two arguments required")
 }
 
-type ObjectVersionedType ObjectType
-
-// NewVersionedObjectType creates an ObjectVersionedType value.
-func NewVersionedObjectType(args ...string) ObjectVersionedType {
-	return ObjectVersionedType{Type: TypeName(args...)}
-}
-
-// GetType returns the type of the object.
-func (t ObjectVersionedType) GetType() string {
-	return t.Type
-}
-
-// SetType sets the type of the object.
-func (t *ObjectVersionedType) SetType(typ string) {
-	t.Type = typ
-}
-
-// GetKind returns the kind of the object.
-func (v ObjectVersionedType) GetKind() string {
-	t := v.GetType()
-	i := strings.LastIndex(t, VersionSeparator)
-	if i < 0 {
-		return t
-	}
-	return t[:i]
-}
-
-// SetKind sets the kind of the object.
-func (v *ObjectVersionedType) SetKind(kind string) {
-	t := v.GetType()
-	i := strings.LastIndex(t, VersionSeparator)
-	if i < 0 {
-		v.Type = kind
-	} else {
-		v.Type = kind + t[i:]
-	}
-}
-
-// GetVersion returns the version of the object.
-func (v ObjectVersionedType) GetVersion() string {
-	t := v.GetType()
-	i := strings.LastIndex(t, VersionSeparator)
-	if i < 0 {
-		return "v1"
-	}
-	return t[i+1:]
-}
-
-// SetVersion sets the version of the object.
-func (v *ObjectVersionedType) SetVersion(version string) {
-	t := v.GetType()
-	i := strings.LastIndex(t, VersionSeparator)
-	if i < 0 {
-		if version != "" {
-			v.Type = v.Type + VersionSeparator + version
-		}
-	} else {
-		if version != "" {
-			v.Type = t[:i] + VersionSeparator + version
-		} else {
-			v.Type = t[:i]
-		}
-	}
-}
-
-// InternalVersionedType is the base type used
-// by *internal* representations of versioned specification
-// formats. It is used to convert from/to dedicated
-// format versions.
-type InternalVersionedType[T VersionedTypedObject] struct {
-	ObjectVersionedType
-	encoder TypedObjectEncoder[T]
-}
-
-var _ encoder = (*InternalVersionedType[VersionedTypedObject])(nil)
-
-type encoder interface {
-	encode(obj VersionedTypedObject) ([]byte, error)
-}
-
-func NewInternalVersionedType[T VersionedTypedObject](encoder TypedObjectEncoder[T], types ...string) InternalVersionedType[T] {
-	return InternalVersionedType[T]{
-		ObjectVersionedType: NewVersionedObjectType(types...),
-		encoder:             encoder,
-	}
-}
-
-func (o *InternalVersionedType[T]) encode(obj VersionedTypedObject) ([]byte, error) {
-	// cannot type parameter here, because casts of paramerized objects are not supported in GO
-	return o.encoder.Encode(obj.(T), DefaultJSONEncoding)
-}
-
-func GetEncoder[T VersionedTypedObject](obj T) encoder {
-	var i interface{} = obj
-	if e, ok := i.(encoder); ok {
-		return e
-	}
-	return nil
-}
-
-func MarshalObjectVersionedType[T VersionedTypedObject](obj T, toe ...TypedObjectEncoder[T]) ([]byte, error) {
-	if e := GetEncoder(obj); e != nil {
-		return e.encode(obj)
-	}
-	if e := utils.Optional(toe...); e != nil {
-		return e.Encode(obj, DefaultJSONEncoding)
-	}
-	return nil, errors.ErrUnknown("object type", obj.GetType())
-}
-
 func KindVersion(t string) (string, string) {
 	i := strings.LastIndex(t, VersionSeparator)
 	if i > 0 {
@@ -159,31 +153,20 @@ func KindVersion(t string) (string, string) {
 	return t, ""
 }
 
-// VersionedType is the interface of a type object for a versioned type.
-type VersionedType[T VersionedTypedObject] interface {
-	VersionedTypeInfo
-	TypedObjectDecoder[T]
+func GetKind(v TypedObject) string {
+	t := v.GetType()
+	i := strings.LastIndex(t, VersionSeparator)
+	if i < 0 {
+		return t
+	}
+	return t[:i]
 }
 
-type versionedType[T VersionedTypedObject] struct {
-	ObjectVersionedType
-	TypedObjectDecoder[T]
-}
-
-func NewVersionedTypeByProto[T VersionedTypedObject](name string, proto T) VersionedType[T] {
-	t := reflect.TypeOf(proto)
-	for t.Kind() == reflect.Ptr {
-		t = t.Elem()
+func GetVersion(v TypedObject) string {
+	t := v.GetType()
+	i := strings.LastIndex(t, VersionSeparator)
+	if i < 0 {
+		return "v1"
 	}
-	return &versionedType[T]{
-		ObjectVersionedType: NewVersionedObjectType(name),
-		TypedObjectDecoder:  MustNewDirectDecoder(proto),
-	}
-}
-
-func NewVersionedTypeByVersion[T VersionedTypedObject](name string, version FormatVersion[T]) VersionedType[T] {
-	return &versionedType[T]{
-		ObjectVersionedType: NewVersionedObjectType(name),
-		TypedObjectDecoder:  version,
-	}
+	return t[i+1:]
 }

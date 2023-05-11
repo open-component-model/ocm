@@ -30,7 +30,7 @@ type RepositorySpec struct {
 // NewRepositorySpec creates a new RepositorySpec.
 func NewRepositorySpec() *RepositorySpec {
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 	}
 }
 

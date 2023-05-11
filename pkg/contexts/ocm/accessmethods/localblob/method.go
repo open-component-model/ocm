@@ -39,7 +39,7 @@ const (
 // are never used outside this package.
 //
 // Additionally, this *internal* type must implement the MarshalJSON method, which
-// can be implemented by delegating to the runtime.MarshalObjectVersionedType
+// can be implemented by delegating to the runtime.MarshalVersionedTypedObject
 // method, which evaluated the versions scheme to finds the applicable conversion
 // provided by the runtime.InternalVersionedObjectType.
 //
@@ -51,8 +51,8 @@ const (
 var versions = cpi.NewAccessTypeVersionScheme(Type)
 
 func init() {
-	Must(versions.Register(cpi.NewConvertedAccessSpecType(Type, LocalBlobV1, cpi.WithDescription(usage))))
-	Must(versions.Register(cpi.NewConvertedAccessSpecType(TypeV1, LocalBlobV1, cpi.WithFormatSpec(formatV1), cpi.WithConfigHandler(ConfigHandler()))))
+	Must(versions.Register(cpi.NewAccessSpecTypeByConverter(Type, &AccessSpecV1{}, &converterV1{}, cpi.WithDescription(usage))))
+	Must(versions.Register(cpi.NewAccessSpecTypeByConverter(TypeV1, &AccessSpecV1{}, &converterV1{}, cpi.WithFormatSpec(formatV1), cpi.WithConfigHandler(ConfigHandler()))))
 	cpi.RegisterAccessTypeVersions(versions)
 }
 
@@ -63,11 +63,11 @@ func Is(spec cpi.AccessSpec) bool {
 // New creates a new localFilesystemBlob accessor.
 func New(local, hint string, mediaType string, global cpi.AccessSpec) *AccessSpec {
 	return &AccessSpec{
-		InternalVersionedType: runtime.NewInternalVersionedType(versions, Type),
-		LocalReference:        local,
-		ReferenceName:         hint,
-		MediaType:             mediaType,
-		GlobalAccess:          cpi.NewAccessSpecRef(global),
+		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject(versions, Type),
+		LocalReference:               local,
+		ReferenceName:                hint,
+		MediaType:                    mediaType,
+		GlobalAccess:                 cpi.NewAccessSpecRef(global),
 	}
 }
 
@@ -81,7 +81,7 @@ func Decode(data []byte) (*AccessSpec, error) {
 
 // AccessSpec describes the access for a local blob.
 type AccessSpec struct {
-	runtime.InternalVersionedType
+	runtime.InternalVersionedTypedObject
 	// LocalReference is the repository local identity of the blob.
 	// it is used by the repository implementation to get access
 	// to the blob and if therefore specific to a dedicated repository type.
@@ -109,7 +109,7 @@ var (
 )
 
 func (a AccessSpec) MarshalJSON() ([]byte, error) {
-	return runtime.MarshalObjectVersionedType(&a)
+	return runtime.MarshalVersionedTypedObject(&a)
 	// return cpi.MarshalConvertedAccessSpec(cpi.DefaultContext(), &a)
 }
 
@@ -163,15 +163,13 @@ type AccessSpecV1 struct {
 
 type converterV1 struct{}
 
-var LocalBlobV1 = cpi.NewAccessSpecVersion(&AccessSpecV1{}, converterV1{})
-
 func (_ converterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, error) {
 	in, ok := object.(*AccessSpec)
 	if !ok {
 		return nil, fmt.Errorf("failed to assert type %T to AccessSpec", object)
 	}
 	return &AccessSpecV1{
-		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(in.Type),
 		LocalReference:      in.LocalReference,
 		ReferenceName:       in.ReferenceName,
 		GlobalAccess:        cpi.NewAccessSpecRef(in.GlobalAccess),
@@ -185,10 +183,10 @@ func (_ converterV1) ConvertTo(object interface{}) (cpi.AccessSpec, error) {
 		return nil, fmt.Errorf("failed to assert type %T to AccessSpecV1", object)
 	}
 	return &AccessSpec{
-		InternalVersionedType: runtime.NewInternalVersionedType(versions, in.Type),
-		LocalReference:        in.LocalReference,
-		ReferenceName:         in.ReferenceName,
-		GlobalAccess:          in.GlobalAccess,
-		MediaType:             in.MediaType,
+		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject(versions, in.Type),
+		LocalReference:               in.LocalReference,
+		ReferenceName:                in.ReferenceName,
+		GlobalAccess:                 in.GlobalAccess,
+		MediaType:                    in.MediaType,
 	}, nil
 }

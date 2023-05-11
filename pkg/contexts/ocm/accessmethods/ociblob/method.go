@@ -33,7 +33,7 @@ func init() {
 // New creates a new OCIBlob accessor.
 func New(repository string, digest digest.Digest, mediaType string, size int64) *AccessSpec {
 	return &AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		Reference:           repository,
 		MediaType:           mediaType,
 		Digest:              digest,

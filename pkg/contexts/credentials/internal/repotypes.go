@@ -17,7 +17,7 @@ import (
 )
 
 type RepositoryType interface {
-	runtime.VersionedType
+	runtime.VersionedTypedObjectType
 }
 
 type RepositorySpec interface {

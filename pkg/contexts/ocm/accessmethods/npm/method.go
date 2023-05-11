@@ -58,7 +58,7 @@ var _ cpi.AccessSpec = (*AccessSpec)(nil)
 // New creates a new NPM registry access spec version v1.
 func New(registry, pkg, version string) *AccessSpec {
 	return &AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		Registry:            registry,
 		Package:             pkg,
 		Version:             version,

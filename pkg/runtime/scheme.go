@@ -17,44 +17,28 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-// TypeGetter is the interface to be implemented for extracting a type.
-type TypeGetter interface {
-	// GetType returns the type of the access object.
-	GetType() string
-}
-
-// TypeSetter is the interface to be implemented for extracting a type.
-type TypeSetter interface {
-	// SetType sets the type of abstract element
-	SetType(typ string)
-}
-
-// TypeInfo defines the accessors for type information.
-type TypeInfo interface {
-	TypeGetter
-}
-
-// TypedObject defines the accessor for a typed object with additional data.
-type TypedObject interface {
-	TypeInfo
-}
-
 var (
 	typeTypedObject = reflect.TypeOf((*TypedObject)(nil)).Elem()
 	typeUnknown     = reflect.TypeOf((*Unknown)(nil)).Elem()
 )
 
-// TypedObjectDecoder is able to provide an effective typed object for some
-// serilaized form. The technical deserialization is done by an Unmarshaler.
-type TypedObjectDecoder interface {
-	Decode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
-}
+type (
+	// TypedObjectDecoder is able to provide an effective typed object for some
+	// serilaized form. The technical deserialization is done by an Unmarshaler.
+	TypedObjectDecoder interface {
+		Decode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
+	}
+	_TypedObjectDecoder = TypedObjectDecoder
+)
 
-// TypedObjectEncoder is able to provide a versioned representation of
-// an effective TypedObject.
-type TypedObjectEncoder interface {
-	Encode(TypedObject, Marshaler) ([]byte, error)
-}
+type (
+	// TypedObjectEncoder is able to provide a versioned representation of
+	// an effective TypedObject.
+	TypedObjectEncoder interface {
+		Encode(TypedObject, Marshaler) ([]byte, error)
+	}
+	_TypedObjectEncoder = TypedObjectEncoder
+)
 
 type DirectDecoder struct {
 	proto reflect.Type
@@ -161,7 +145,7 @@ type Scheme interface {
 }
 
 type SchemeBase interface {
-	AddKnownTypes(scheme Scheme)
+	AddKnownTypes(types KnownTypesProvider)
 	Scheme
 }
 type defaultScheme struct {
@@ -230,7 +214,11 @@ func (d *defaultScheme) BaseScheme() Scheme {
 	return d.base
 }
 
-func (d *defaultScheme) AddKnownTypes(s Scheme) {
+type KnownTypesProvider interface {
+	KnownTypes() KnownTypes
+}
+
+func (d *defaultScheme) AddKnownTypes(s KnownTypesProvider) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	for k, v := range s.KnownTypes() {

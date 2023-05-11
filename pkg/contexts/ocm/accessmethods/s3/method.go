@@ -60,7 +60,7 @@ var _ cpi.AccessSpec = (*AccessSpec)(nil)
 // New creates a new GitHub registry access spec version v1.
 func New(region, bucket, key, version, mediaType string, downloader downloader.Downloader) *AccessSpec {
 	return &AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		Region:              region,
 		Bucket:              bucket,
 		Key:                 key,

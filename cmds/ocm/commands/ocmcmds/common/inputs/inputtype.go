@@ -121,7 +121,7 @@ func NewInputType(name string, proto InputSpec, usage string, cfg flagsets.Confi
 		t = t.Elem()
 	}
 	return &DefaultInputType{
-		ObjectVersionedType: runtime.NewVersionedObjectType(name),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(name),
 		TypedObjectDecoder:  runtime.MustNewDirectDecoder(proto),
 		usage:               usage,
 		clihandler:          cfg,

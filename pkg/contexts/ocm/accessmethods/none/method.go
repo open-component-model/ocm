@@ -27,7 +27,7 @@ func init() {
 
 // New creates a new OCIBlob accessor.
 func New() *AccessSpec {
-	return &AccessSpec{ObjectVersionedType: runtime.NewVersionedObjectType(Type)}
+	return &AccessSpec{ObjectVersionedType: runtime.NewVersionedTypedObject(Type)}
 }
 
 func IsNone(kind string) bool {

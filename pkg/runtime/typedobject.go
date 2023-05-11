@@ -4,23 +4,42 @@
 
 package runtime
 
-// ObjectType describes the type of a object.
-type ObjectType struct {
-	// Type describes the type of the object.
-	Type string `json:"type"`
+// ObjectTypedObject is the minimal implementation of a typed object
+// managing the type information.
+type ObjectTypedObject = ObjectType
+
+func NewTypedObject(typ string) ObjectTypedObject {
+	return NewObjectType(typ)
 }
 
-// NewObjectType creates an ObjectType value.
-func NewObjectType(typ string) ObjectType {
-	return ObjectType{typ}
+// TypedObject defines the common interface for all kinds of typed objects.
+type TypedObject interface {
+	TypeInfo
 }
 
-// GetType returns the type of the object.
-func (t ObjectType) GetType() string {
-	return t.Type
+// TypedObjectType is the interface for a type object for an TypedObject.
+type TypedObjectType interface {
+	TypeInfo
+	TypedObjectDecoder
 }
 
-// SetType sets the type of the object.
-func (t *ObjectType) SetType(typ string) {
-	t.Type = typ
+type typeObject struct {
+	_ObjectType
+	_TypedObjectDecoder
+}
+
+var _ TypedObjectType = (*typeObject)(nil)
+
+func NewTypedObjectTypeByDecoder(name string, decoder TypedObjectDecoder) TypedObjectType {
+	return &typeObject{
+		_ObjectType:         NewObjectType(name),
+		_TypedObjectDecoder: decoder,
+	}
+}
+
+func NewTypedObjectTypeByProto(name string, proto TypedObject) TypedObjectType {
+	return &typeObject{
+		_ObjectType:         NewObjectType(name),
+		_TypedObjectDecoder: MustNewDirectDecoder(proto),
+	}
 }

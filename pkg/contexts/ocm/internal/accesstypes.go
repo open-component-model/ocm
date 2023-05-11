@@ -67,9 +67,14 @@ type AccessMethod interface {
 	Close() error
 }
 
+type KnownAccessTypes interface {
+	KnownAccessTypes() runtime.KnownTypes
+}
+
 type AccessTypeScheme interface {
 	runtime.Scheme
-	AddKnownTypes(s AccessTypeScheme)
+	AddKnownTypes(s KnownAccessTypes)
+	KnownAccessTypes() runtime.KnownTypes
 
 	GetAccessType(name string) AccessType
 	Register(name string, atype AccessType)
@@ -100,8 +105,20 @@ func NewStrictAccessTypeScheme(base ...AccessTypeScheme) AccessTypeScheme {
 	return &accessTypeScheme{scheme, b, map[string]AccessType{}}
 }
 
-func (t *accessTypeScheme) AddKnownTypes(s AccessTypeScheme) {
-	t.SchemeBase.AddKnownTypes(s)
+func (t *accessTypeScheme) KnownAccessTypes() runtime.KnownTypes {
+	return t.KnownTypes()
+}
+
+type accessTypesAdapter struct {
+	source KnownAccessTypes
+}
+
+func (a *accessTypesAdapter) KnownTypes() runtime.KnownTypes {
+	return a.source.KnownAccessTypes()
+}
+
+func (t *accessTypeScheme) AddKnownTypes(s KnownAccessTypes) {
+	t.SchemeBase.AddKnownTypes(&accessTypesAdapter{s})
 }
 
 func (t *accessTypeScheme) CreateConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider {

@@ -43,7 +43,7 @@ type CredentialsSpec struct {
 // New creates a new memory ConfigSpec.
 func New(repo string, credentials ...CredentialsSpec) *Config {
 	return &Config{
-		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(ConfigType),
 		RepoName:            repo,
 		Credentials:         credentials,
 	}

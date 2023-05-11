@@ -17,23 +17,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-// TypeGetter is the interface to be implemented for extracting a type.
-type TypeGetter interface {
-	// GetType returns the type of the access object.
-	GetType() string
-}
-
-// TypeSetter is the interface to be implemented for extracting a type.
-type TypeSetter interface {
-	// SetType sets the type of abstract element
-	SetType(typ string)
-}
-
-// TypeInfo defines the accessors for type information.
-type TypeInfo interface {
-	TypeGetter
-}
-
 // TypedObject defines the accessor for a typed object with additional data.
 type TypedObject interface {
 	TypeInfo

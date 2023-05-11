@@ -64,7 +64,7 @@ var (
 // New creates a new oci registry access spec version v1.
 func New(ref string) *AccessSpec {
 	return &AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		ImageReference:      ref,
 	}
 }

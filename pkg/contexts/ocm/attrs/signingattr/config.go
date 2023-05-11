@@ -87,7 +87,7 @@ func (k *KeySpec) Get() (interface{}, error) {
 // New creates a new memory ConfigSpec.
 func New() *Config {
 	return &Config{
-		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(ConfigType),
 	}
 }
 

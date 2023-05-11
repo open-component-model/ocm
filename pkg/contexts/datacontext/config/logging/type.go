@@ -43,7 +43,7 @@ type Config struct {
 // New creates a logging config specification.
 func New(ctxtype string, deflvl int) *Config {
 	return &Config{
-		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(ConfigType),
 		ContextType:         ctxtype,
 		Settings: logcfg.Config{
 			DefaultLevel: logging.LevelName(deflvl),
@@ -55,7 +55,7 @@ func New(ctxtype string, deflvl int) *Config {
 // logging config object.
 func NewWithConfig(ctxtype string, cfg *logcfg.Config) *Config {
 	return &Config{
-		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(ConfigType),
 		ContextType:         ctxtype,
 		Settings:            *cfg,
 	}

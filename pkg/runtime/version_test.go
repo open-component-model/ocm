@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	runtime "github.com/open-component-model/ocm/pkg/runtime2"
+	runtime "github.com/open-component-model/ocm/pkg/runtime"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
@@ -20,14 +20,14 @@ const (
 	TypeV1 = Type + "/v1"
 )
 
-var versions runtime.Scheme[TestSpec]
+var versions runtime.Scheme
 
 func init() {
 	var ts TestSpec
-	versions = runtime.MustNewDefaultScheme[TestSpec](&ts, nil, false, nil)
+	versions = runtime.MustNewDefaultScheme(&ts, nil, false, nil)
 
-	versions.RegisterByDecoder(Type, runtime.NewVersionedTypedObjectTypeByConverter[TestSpec, *TestSpec1](Type, &Spec1V1{}, &converterSpec1V1{}))
-	versions.RegisterByDecoder(TypeV1, runtime.NewVersionedTypedObjectTypeByConverter[TestSpec, *TestSpec1](TypeV1, &Spec1V1{}, &converterSpec1V1{}))
+	versions.RegisterByDecoder(Type, runtime.NewVersionedTypedObjectTypeByConverter[TestSpec](Type, &Spec1V1{}, &converterSpec1V1{}))
+	versions.RegisterByDecoder(TypeV1, runtime.NewVersionedTypedObjectTypeByConverter[TestSpec](TypeV1, &Spec1V1{}, &converterSpec1V1{}))
 }
 
 type TestSpec interface {
@@ -36,7 +36,7 @@ type TestSpec interface {
 }
 
 type TestSpec1 struct {
-	runtime.InternalVersionedTypedObject[TestSpec]
+	runtime.InternalVersionedTypedObject
 	Field string `json:"field"`
 }
 
@@ -48,7 +48,7 @@ func (a *TestSpec1) TestFunction() {}
 
 func NewTestSpec1(field string) *TestSpec1 {
 	return &TestSpec1{
-		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject[TestSpec](versions, Type),
+		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject(versions, Type),
 		Field:                        field,
 	}
 }
@@ -60,22 +60,26 @@ type Spec1V1 struct {
 
 type converterSpec1V1 struct{}
 
-var _ runtime.Converter[*TestSpec1] = (*converterSpec1V1)(nil)
+var _ runtime.Converter[TestSpec] = (*converterSpec1V1)(nil)
 
-func (_ converterSpec1V1) ConvertFrom(in *TestSpec1) (runtime.TypedObject, error) {
+func (_ converterSpec1V1) ConvertFrom(object TestSpec) (runtime.TypedObject, error) {
+	in, ok := object.(*TestSpec1)
+	if !ok {
+		return nil, fmt.Errorf("failed to assert type %T to Spec1V1", object)
+	}
 	return &Spec1V1{
 		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
 		OldField:            in.Field,
 	}, nil
 }
 
-func (_ converterSpec1V1) ConvertTo(object interface{}) (*TestSpec1, error) {
+func (_ converterSpec1V1) ConvertTo(object interface{}) (TestSpec, error) {
 	in, ok := object.(*Spec1V1)
 	if !ok {
 		return nil, fmt.Errorf("failed to assert type %T to Spec1V1", object)
 	}
 	return &TestSpec1{
-		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject[TestSpec](versions, in.Type),
+		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject(versions, in.Type),
 		Field:                        in.OldField,
 	}, nil
 }

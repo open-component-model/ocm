@@ -51,7 +51,7 @@ type RepositorySpec struct {
 // NewConfigSpec creates a new memory ConfigSpec.
 func New() *Config {
 	return &Config{
-		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(ConfigType),
 	}
 }
 

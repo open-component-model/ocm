@@ -55,7 +55,7 @@ func NewRepositorySpec(mode accessobj.AccessMode, filePath string, opts ...acces
 	}
 	o.Default()
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		FilePath:            filePath,
 		StandardOptions:     *o.(*accessio.StandardOptions),
 		AccessMode:          mode,

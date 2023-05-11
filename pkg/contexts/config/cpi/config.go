@@ -23,7 +23,7 @@ func NewConfigType(name string, proto Config, usages ...string) ConfigType {
 		t = t.Elem()
 	}
 	return &DefaultConfigType{
-		ObjectVersionedType: runtime.NewVersionedObjectType(name),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(name),
 		TypedObjectDecoder:  runtime.MustNewDirectDecoder(proto),
 		usage:               strings.Join(usages, "\n"),
 	}

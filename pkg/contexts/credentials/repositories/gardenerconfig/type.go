@@ -37,7 +37,7 @@ type RepositorySpec struct {
 // NewRepositorySpec creates a new memory RepositorySpec.
 func NewRepositorySpec(url string, configType gardenercfgcpi.ConfigType, cipher Cipher, propagateConsumerIdentity bool) *RepositorySpec {
 	return &RepositorySpec{
-		ObjectVersionedType:       runtime.NewVersionedObjectType(Type),
+		ObjectVersionedType:       runtime.NewVersionedTypedObject(Type),
 		URL:                       url,
 		ConfigType:                configType,
 		Cipher:                    cipher,

@@ -34,7 +34,7 @@ var (
 // NewRepositorySpec creates a new RepositorySpec.
 func NewRepositorySpec(credentials common.Properties) *RepositorySpec {
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		Properties:          credentials,
 	}
 }

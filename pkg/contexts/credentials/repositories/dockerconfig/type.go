@@ -42,7 +42,7 @@ func NewRepositorySpec(path string, prop ...bool) *RepositorySpec {
 		p = p || e
 	}
 	return &RepositorySpec{
-		ObjectVersionedType:      runtime.NewVersionedObjectType(Type),
+		ObjectVersionedType:      runtime.NewVersionedTypedObject(Type),
 		DockerConfigFile:         path,
 		PropgateConsumerIdentity: p,
 	}
@@ -54,7 +54,7 @@ func NewRepositorySpecForConfig(data []byte, prop ...bool) *RepositorySpec {
 		p = p || e
 	}
 	return &RepositorySpec{
-		ObjectVersionedType:      runtime.NewVersionedObjectType(Type),
+		ObjectVersionedType:      runtime.NewVersionedTypedObject(Type),
 		DockerConfig:             data,
 		PropgateConsumerIdentity: p,
 	}

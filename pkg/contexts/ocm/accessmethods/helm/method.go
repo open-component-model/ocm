@@ -34,7 +34,7 @@ func init() {
 // New creates a new Helm Chart accessor for helm repositories.
 func New(chart string, repourl string) *AccessSpec {
 	return &AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		HelmChart:           chart,
 		HelmRepository:      repourl,
 	}

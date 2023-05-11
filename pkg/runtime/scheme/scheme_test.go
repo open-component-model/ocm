@@ -78,17 +78,17 @@ type k1v2Converter struct{}
 
 var _ scheme.Converter[Object] = (*k1v2Converter)(nil)
 
-func (k k1v2Converter) ConvertTo(object scheme.Object) (Object, error) {
+func (k k1v2Converter) ConvertTo(object interface{}) (Object, error) {
 	in := object.(*k1v2)
 	r := &k1{
-		ObjectVersionedType: runtime.ObjectVersionedType{object.GetType()},
+		ObjectVersionedType: runtime.ObjectVersionedType{in.GetType()},
 		Key:                 in.Key,
 	}
 	r.Kind, r.Version = runtime.KindVersion(in.APIVersion)
 	return r, nil
 }
 
-func (k k1v2Converter) ConvertFrom(o Object) (scheme.Object, error) {
+func (k k1v2Converter) ConvertFrom(o Object) (runtime.TypedObject, error) {
 	in := o.(*k1)
 	r := &k1v2{
 		ObjectVersionedType: runtime.ObjectVersionedType{o.GetType()},

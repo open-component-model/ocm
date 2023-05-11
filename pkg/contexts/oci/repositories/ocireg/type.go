@@ -55,14 +55,14 @@ var _ cpi.RepositorySpec = (*RepositorySpec)(nil)
 // NewRepositorySpec creates a new RepositorySpec.
 func NewRepositorySpec(baseURL string) *RepositorySpec {
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		BaseURL:             baseURL,
 	}
 }
 
 func NewLegacyRepositorySpec(baseURL string) *RepositorySpec {
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(LegacyType),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(LegacyType),
 		BaseURL:             baseURL,
 	}
 }

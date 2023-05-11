@@ -65,7 +65,7 @@ var _ cpi.Config = (*Config)(nil)
 
 func NewConfig(v string) *Config {
 	return &Config{
-		ObjectVersionedType: runtime.NewVersionedObjectType(TYPE),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(TYPE),
 		Value:               v,
 	}
 }

@@ -49,20 +49,20 @@ var _ = Describe("*** basic types", func() {
 
 	Context("versioned object type", func() {
 		It("get type and version of unversioned type", func() {
-			t := runtime.NewVersionedObjectType("test", "")
+			t := runtime.NewVersionedTypedObject("test", "")
 			Expect(t.GetType()).To(Equal("test"))
 			Expect(t.GetKind()).To(Equal("test"))
 			Expect(t.GetVersion()).To(Equal("v1"))
 		})
 		It("get type and version of versioned type", func() {
-			t := runtime.NewVersionedObjectType("test", "v2")
+			t := runtime.NewVersionedTypedObject("test", "v2")
 			Expect(t.GetType()).To(Equal(runtime.TypeName("test", "v2")))
 			Expect(t.GetKind()).To(Equal("test"))
 			Expect(t.GetVersion()).To(Equal("v2"))
 		})
 
 		It("set type", func() {
-			t := runtime.NewVersionedObjectType("test", "v2")
+			t := runtime.NewVersionedTypedObject("test", "v2")
 			t.SetType(runtime.TypeName("other", "v3"))
 			Expect(t.GetType()).To(Equal(runtime.TypeName("other", "v3")))
 			Expect(t.GetKind()).To(Equal("other"))
@@ -70,14 +70,14 @@ var _ = Describe("*** basic types", func() {
 		})
 
 		It("set kind on unversioned", func() {
-			t := runtime.NewVersionedObjectType("test")
+			t := runtime.NewVersionedTypedObject("test")
 			t.SetKind(runtime.TypeName("other"))
 			Expect(t.GetType()).To(Equal(runtime.TypeName("other")))
 			Expect(t.GetKind()).To(Equal("other"))
 			Expect(t.GetVersion()).To(Equal("v1"))
 		})
 		It("set version on unversioned", func() {
-			t := runtime.NewVersionedObjectType("test")
+			t := runtime.NewVersionedTypedObject("test")
 			t.SetVersion(runtime.TypeName("v3"))
 			Expect(t.GetType()).To(Equal(runtime.TypeName("test", "v3")))
 			Expect(t.GetKind()).To(Equal("test"))
@@ -85,14 +85,14 @@ var _ = Describe("*** basic types", func() {
 		})
 
 		It("set kind on versioned", func() {
-			t := runtime.NewVersionedObjectType("test", "v2")
+			t := runtime.NewVersionedTypedObject("test", "v2")
 			t.SetKind(runtime.TypeName("other"))
 			Expect(t.GetType()).To(Equal(runtime.TypeName("other", "v2")))
 			Expect(t.GetKind()).To(Equal("other"))
 			Expect(t.GetVersion()).To(Equal("v2"))
 		})
 		It("set version on unversioned", func() {
-			t := runtime.NewVersionedObjectType("test", "v2")
+			t := runtime.NewVersionedTypedObject("test", "v2")
 			t.SetVersion(runtime.TypeName("v3"))
 			Expect(t.GetType()).To(Equal(runtime.TypeName("test", "v3")))
 			Expect(t.GetKind()).To(Equal("test"))
