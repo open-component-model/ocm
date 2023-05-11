@@ -29,7 +29,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
-const RESOURCE_TYPE = "GitOpsTemplate"
+const RESOURCE_TYPE = "gitOpsTemplate"
 
 var _ = Describe("image value mapping", func() {
 
