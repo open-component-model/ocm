@@ -14,11 +14,19 @@ import (
 
 const VersionSeparator = "/"
 
-type VersionedTypedObject interface {
-	TypedObject
+// VersionedTypeInfo in the accessor for versioned type information.
+type VersionedTypeInfo interface {
+	TypeInfo
 	GetKind() string
 	GetVersion() string
 }
+
+// VersionedTypedObject in an instance of a VersionedType.
+type VersionedTypedObject interface {
+	VersionedTypeInfo
+}
+
+var _ TypedObject = (VersionedTypedObject)(nil)
 
 func TypeName(args ...string) string {
 	if len(args) == 1 {
@@ -98,29 +106,29 @@ func (v *ObjectVersionedType) SetVersion(version string) {
 	}
 }
 
-// InternalVersionedObjectType is the base type used
+// InternalVersionedType is the base type used
 // by *internal* representations of versioned specification
 // formats. It is used to convert from/to dedicated
 // format versions.
-type InternalVersionedObjectType struct {
+type InternalVersionedType struct {
 	ObjectVersionedType
 	encoder TypedObjectEncoder
 }
 
-var _ encoder = (*InternalVersionedObjectType)(nil)
+var _ encoder = (*InternalVersionedType)(nil)
 
 type encoder interface {
 	encode(obj VersionedTypedObject) ([]byte, error)
 }
 
-func NewInternalVersionedObjectType(encoder TypedObjectEncoder, types ...string) InternalVersionedObjectType {
-	return InternalVersionedObjectType{
+func NewInternalVersionedType(encoder TypedObjectEncoder, types ...string) InternalVersionedType {
+	return InternalVersionedType{
 		ObjectVersionedType: NewVersionedObjectType(types...),
 		encoder:             encoder,
 	}
 }
 
-func (o *InternalVersionedObjectType) encode(obj VersionedTypedObject) ([]byte, error) {
+func (o *InternalVersionedType) encode(obj VersionedTypedObject) ([]byte, error) {
 	return o.encoder.Encode(obj, DefaultJSONEncoding)
 }
 
@@ -150,8 +158,9 @@ func KindVersion(t string) (string, string) {
 	return t, ""
 }
 
+// VersionedType is the interface of a type object for a versioned type.
 type VersionedType interface {
-	VersionedTypedObject
+	VersionedTypeInfo
 	TypedObjectDecoder
 }
 

@@ -75,7 +75,7 @@ func NewRepositorySpecVersion(proto runtime.VersionedTypedObject, converter Repo
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type ConvertedRepositoryType = runtime.ConvertedType[RepositorySpec]
+type ConvertedRepositoryType = runtime.ObjectConvertedType[RepositorySpec]
 
 func NewConvertedRepositorySpecType(name string, v RepositorySpecVersion) *ConvertedRepositoryType {
 	return runtime.NewConvertedType[RepositorySpec](name, v)

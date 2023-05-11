@@ -63,11 +63,11 @@ func Is(spec cpi.AccessSpec) bool {
 // New creates a new localFilesystemBlob accessor.
 func New(local, hint string, mediaType string, global cpi.AccessSpec) *AccessSpec {
 	return &AccessSpec{
-		InternalVersionedObjectType: runtime.NewInternalVersionedObjectType(versions, Type),
-		LocalReference:              local,
-		ReferenceName:               hint,
-		MediaType:                   mediaType,
-		GlobalAccess:                cpi.NewAccessSpecRef(global),
+		InternalVersionedType: runtime.NewInternalVersionedType(versions, Type),
+		LocalReference:        local,
+		ReferenceName:         hint,
+		MediaType:             mediaType,
+		GlobalAccess:          cpi.NewAccessSpecRef(global),
 	}
 }
 
@@ -81,7 +81,7 @@ func Decode(data []byte) (*AccessSpec, error) {
 
 // AccessSpec describes the access for a local blob.
 type AccessSpec struct {
-	runtime.InternalVersionedObjectType
+	runtime.InternalVersionedType
 	// LocalReference is the repository local identity of the blob.
 	// it is used by the repository implementation to get access
 	// to the blob and if therefore specific to a dedicated repository type.
@@ -185,10 +185,10 @@ func (_ converterV1) ConvertTo(object interface{}) (cpi.AccessSpec, error) {
 		return nil, fmt.Errorf("failed to assert type %T to AccessSpecV1", object)
 	}
 	return &AccessSpec{
-		InternalVersionedObjectType: runtime.NewInternalVersionedObjectType(versions, in.Type),
-		LocalReference:              in.LocalReference,
-		ReferenceName:               in.ReferenceName,
-		GlobalAccess:                in.GlobalAccess,
-		MediaType:                   in.MediaType,
+		InternalVersionedType: runtime.NewInternalVersionedType(versions, in.Type),
+		LocalReference:        in.LocalReference,
+		ReferenceName:         in.ReferenceName,
+		GlobalAccess:          in.GlobalAccess,
+		MediaType:             in.MediaType,
 	}, nil
 }

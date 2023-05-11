@@ -58,6 +58,12 @@ func RegisterAccessTypeVersions(s AccessTypeVersionScheme) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type additionalTypeInfo interface {
+	ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHandler
+	Description() string
+	Format(cli bool) string
+}
+
 type accessType struct {
 	runtime.VersionedType
 	description string
@@ -65,14 +71,20 @@ type accessType struct {
 	handler     flagsets.ConfigOptionTypeSetHandler
 }
 
-func NewAccessSpecType(name string, proto AccessSpec, opts ...AccessSpecTypeOption) AccessType {
+var _ additionalTypeInfo = (*accessType)(nil)
+
+func newAccessSpecType(vt runtime.VersionedType, opts []AccessSpecTypeOption) AccessType {
 	t := accessTypeTarget{&accessType{
-		VersionedType: runtime.NewVersionedTypeByProto[AccessSpec](name, proto),
+		VersionedType: vt,
 	}}
 	for _, o := range opts {
 		o.ApplyToAccessSpecOptionTarget(t)
 	}
 	return t.accessType
+}
+
+func NewAccessSpecType(name string, proto AccessSpec, opts ...AccessSpecTypeOption) AccessType {
+	return newAccessSpecType(runtime.NewVersionedTypeByProto[AccessSpec](name, proto), opts)
 }
 
 func (t *accessType) ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHandler {
@@ -111,6 +123,8 @@ func NewAccessSpecVersion(proto runtime.VersionedTypedObject, converter AccessSp
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// accessTypeTarget is used as target for option functions, it provides
+// setters for fields, which should nor be modifiable for a final type object.
 type accessTypeTarget struct {
 	*accessType
 }
@@ -129,10 +143,12 @@ func (t accessTypeTarget) SetConfigHandler(value flagsets.ConfigOptionTypeSetHan
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type convertedType = runtime.ConvertedType[AccessSpec]
+
 type ConvertedAccessType struct {
-	// AccessSpecVersion // does not work with Goland
-	*runtime.ConvertedType[AccessSpec]
-	accessType accessType
+	// convertedType // does not work with Goland, so this cannot be defined as private field
+	runtime.ConvertedType[AccessSpec]
+	additionalTypeInfo
 }
 
 var (
@@ -143,28 +159,9 @@ var (
 
 func NewConvertedAccessSpecType(name string, v AccessSpecVersion, opts ...AccessSpecTypeOption) *ConvertedAccessType {
 	ct := runtime.NewConvertedType(name, v)
-	t := &ConvertedAccessType{
-		ConvertedType: ct,
-		accessType: accessType{
-			VersionedType: ct.VersionedType,
-		},
+	at := newAccessSpecType(ct, opts)
+	return &ConvertedAccessType{
+		ConvertedType:      ct,
+		additionalTypeInfo: at,
 	}
-	for _, o := range opts {
-		o.ApplyToAccessSpecOptionTarget(accessTypeTarget{&t.accessType})
-	}
-	return t
-}
-
-// forward additional AccessType methods
-
-func (c *ConvertedAccessType) ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHandler {
-	return c.accessType.ConfigOptionTypeSetHandler()
-}
-
-func (c *ConvertedAccessType) Description() string {
-	return c.accessType.Description()
-}
-
-func (c *ConvertedAccessType) Format(cli bool) string {
-	return c.accessType.Format(cli)
 }

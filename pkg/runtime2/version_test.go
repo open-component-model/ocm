@@ -35,7 +35,7 @@ type TestSpec interface {
 }
 
 type TestSpec1 struct {
-	runtime.InternalVersionedObjectType[TestSpec]
+	runtime.InternalVersionedType[TestSpec]
 	Field string `json:"field"`
 }
 
@@ -45,8 +45,8 @@ func (a TestSpec1) MarshalJSON() ([]byte, error) {
 
 func NewTestSpec1(field string) *TestSpec1 {
 	return &TestSpec1{
-		InternalVersionedObjectType: runtime.NewInternalVersionedObjectType[TestSpec](versions, Type),
-		Field:                       field,
+		InternalVersionedType: runtime.NewInternalVersionedType[TestSpec](versions, Type),
+		Field:                 field,
 	}
 }
 
@@ -76,8 +76,8 @@ func (_ converterSpec1V1) ConvertTo(object interface{}) (TestSpec, error) {
 		return nil, fmt.Errorf("failed to assert type %T to AccessSpecV1", object)
 	}
 	return &TestSpec1{
-		InternalVersionedObjectType: runtime.NewInternalVersionedObjectType[TestSpec](versions, in.Type),
-		Field:                       in.OldField,
+		InternalVersionedType: runtime.NewInternalVersionedType[TestSpec](versions, in.Type),
+		Field:                 in.OldField,
 	}, nil
 }
 

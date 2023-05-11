@@ -37,9 +37,9 @@ func init() {
 // New creates a new localFilesystemBlob accessor.
 func New(path string, media string) *localblob.AccessSpec {
 	return &localblob.AccessSpec{
-		InternalVersionedObjectType: runtime.NewInternalVersionedObjectType(versions, Type),
-		LocalReference:              path,
-		MediaType:                   media,
+		InternalVersionedType: runtime.NewInternalVersionedType(versions, Type),
+		LocalReference:        path,
+		MediaType:             media,
 	}
 }
 
@@ -54,7 +54,7 @@ func Decode(data []byte) (*localblob.AccessSpec, error) {
 // AccessSpec describes the access for a blob on the filesystem.
 // Deprecated: use LocalBlob.
 type AccessSpec struct {
-	runtime.InternalVersionedObjectType `json:",inline"`
+	runtime.InternalVersionedType `json:",inline"`
 	// FileName is the
 	Filename string `json:"fileName"`
 	// MediaType is the media type of the object represented by the blob
@@ -73,9 +73,9 @@ func (_ localfsblobConverterV1) ConvertFrom(object cpi.AccessSpec) (runtime.Type
 		return nil, fmt.Errorf("failed to assert type %T to localblob.AccessSpec", object)
 	}
 	return &AccessSpec{
-		InternalVersionedObjectType: runtime.NewInternalVersionedObjectType(versions, in.Type),
-		Filename:                    in.LocalReference,
-		MediaType:                   in.MediaType,
+		InternalVersionedType: runtime.NewInternalVersionedType(versions, in.Type),
+		Filename:              in.LocalReference,
+		MediaType:             in.MediaType,
 	}, nil
 }
 
@@ -85,8 +85,8 @@ func (_ localfsblobConverterV1) ConvertTo(object interface{}) (cpi.AccessSpec, e
 		return nil, fmt.Errorf("failed to assert type %T to localfsblob.AccessSpec", object)
 	}
 	return &localblob.AccessSpec{
-		InternalVersionedObjectType: runtime.NewInternalVersionedObjectType(versions, in.Type),
-		LocalReference:              in.Filename,
-		MediaType:                   in.MediaType,
+		InternalVersionedType: runtime.NewInternalVersionedType(versions, in.Type),
+		LocalReference:        in.Filename,
+		MediaType:             in.MediaType,
 	}, nil
 }

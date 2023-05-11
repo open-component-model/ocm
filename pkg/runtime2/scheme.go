@@ -25,13 +25,18 @@ type TypeGetter interface {
 
 // TypeSetter is the interface to be implemented for extracting a type.
 type TypeSetter interface {
-	// SetType sets the type of an abstract element
+	// SetType sets the type of abstract element
 	SetType(typ string)
+}
+
+// TypeInfo defines the accessors for type information.
+type TypeInfo interface {
+	TypeGetter
 }
 
 // TypedObject defines the accessor for a typed object with additional data.
 type TypedObject interface {
-	TypeGetter
+	TypeInfo
 }
 
 var (
@@ -95,55 +100,6 @@ func (d *DirectDecoder[T]) Decode(data []byte, unmarshaler Unmarshaler) (T, erro
 
 func (d *DirectDecoder[T]) Encode(obj T, marshaler Marshaler) ([]byte, error) {
 	return marshaler.Marshal(obj)
-}
-
-// TypedObjectConverter converts a versioned representation into the
-// intended type required by the scheme.
-type TypedObjectConverter[T TypedObject] interface {
-	ConvertTo(in interface{}) (T, error)
-}
-
-// ConvertingDecoder uses a serialization form different from the
-// intended object type, that is converted to achieve the decode result.
-type ConvertingDecoder[T TypedObject] struct {
-	proto reflect.Type
-	TypedObjectConverter[T]
-}
-
-var _ TypedObjectDecoder[TypedObject] = &ConvertingDecoder[TypedObject]{}
-
-func MustNewConvertingDecoder[T TypedObject](proto interface{}, conv TypedObjectConverter[T]) *ConvertingDecoder[T] {
-	d, err := NewConvertingDecoder[T](proto, conv)
-	if err != nil {
-		panic(err)
-	}
-	return d
-}
-
-func NewConvertingDecoder[T TypedObject](proto interface{}, conv TypedObjectConverter[T]) (*ConvertingDecoder[T], error) {
-	t, err := ProtoType(proto)
-	if err != nil {
-		return nil, err
-	}
-	return &ConvertingDecoder[T]{
-		proto:                t,
-		TypedObjectConverter: conv,
-	}, nil
-}
-
-func (d *ConvertingDecoder[T]) Decode(data []byte, unmarshaler Unmarshaler) (T, error) {
-	var zero T
-
-	versioned := d.CreateData()
-	err := unmarshaler.Unmarshal(data, versioned)
-	if err != nil {
-		return zero, err
-	}
-	return d.ConvertTo(versioned)
-}
-
-func (d *ConvertingDecoder[T]) CreateData() interface{} {
-	return reflect.New(d.proto).Interface()
 }
 
 // KnownTypes is a set of known type names mapped to appropriate object decoders.
@@ -385,15 +341,10 @@ func (d *defaultScheme[T]) Decode(data []byte, unmarshal Unmarshaler) (T, error)
 	if err != nil {
 		return zero, errors.Wrapf(err, "cannot unmarshal unstructured")
 	}
-	if un.GetType() == "" {
-		/*
-			if d.acceptUnknown {
-				return un.(TypedObject), nil
-			}
-		*/
+	if to.GetType() == "" {
 		return zero, errors.Newf("no type found")
 	}
-	decoder := d.GetDecoder(un.GetType())
+	decoder := d.GetDecoder(to.GetType())
 	if decoder == nil {
 		if d.defaultdecoder != nil {
 			o, err := d.defaultdecoder.Decode(data, unmarshal)
@@ -408,7 +359,7 @@ func (d *defaultScheme[T]) Decode(data []byte, unmarshal Unmarshaler) (T, error)
 		if d.acceptUnknown {
 			return un, nil
 		}
-		return zero, errors.ErrUnknown(errors.KIND_OBJECTTYPE, un.GetType())
+		return zero, errors.ErrUnknown(errors.KIND_OBJECTTYPE, to.GetType())
 	}
 	return decoder.Decode(data, unmarshal)
 }

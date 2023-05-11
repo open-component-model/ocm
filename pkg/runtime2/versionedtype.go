@@ -14,11 +14,19 @@ import (
 
 const VersionSeparator = "/"
 
-type VersionedTypedObject interface {
-	TypedObject
+// VersionedTypeInfo in the accessor for versioned type information.
+type VersionedTypeInfo interface {
+	TypeInfo
 	GetKind() string
 	GetVersion() string
 }
+
+// VersionedTypedObject in an instance of a VersionedType.
+type VersionedTypedObject interface {
+	VersionedTypeInfo
+}
+
+var _ TypedObject = (VersionedTypedObject)(nil)
 
 func TypeName(args ...string) string {
 	if len(args) == 1 {
@@ -98,25 +106,29 @@ func (v *ObjectVersionedType) SetVersion(version string) {
 	}
 }
 
-type InternalVersionedObjectType[T VersionedTypedObject] struct {
+// InternalVersionedType is the base type used
+// by *internal* representations of versioned specification
+// formats. It is used to convert from/to dedicated
+// format versions.
+type InternalVersionedType[T VersionedTypedObject] struct {
 	ObjectVersionedType
 	encoder TypedObjectEncoder[T]
 }
 
-var _ encoder = (*InternalVersionedObjectType[VersionedTypedObject])(nil)
+var _ encoder = (*InternalVersionedType[VersionedTypedObject])(nil)
 
 type encoder interface {
 	encode(obj VersionedTypedObject) ([]byte, error)
 }
 
-func NewInternalVersionedObjectType[T VersionedTypedObject](encoder TypedObjectEncoder[T], types ...string) InternalVersionedObjectType[T] {
-	return InternalVersionedObjectType[T]{
+func NewInternalVersionedType[T VersionedTypedObject](encoder TypedObjectEncoder[T], types ...string) InternalVersionedType[T] {
+	return InternalVersionedType[T]{
 		ObjectVersionedType: NewVersionedObjectType(types...),
 		encoder:             encoder,
 	}
 }
 
-func (o *InternalVersionedObjectType[T]) encode(obj VersionedTypedObject) ([]byte, error) {
+func (o *InternalVersionedType[T]) encode(obj VersionedTypedObject) ([]byte, error) {
 	// cannot type parameter here, because casts of paramerized objects are not supported in GO
 	return o.encoder.Encode(obj.(T), DefaultJSONEncoding)
 }
@@ -130,9 +142,7 @@ func GetEncoder[T VersionedTypedObject](obj T) encoder {
 }
 
 func MarshalObjectVersionedType[T VersionedTypedObject](obj T, toe ...TypedObjectEncoder[T]) ([]byte, error) {
-	// if e, ok := obj.(encoder); ok && e.getEncoder() != nil {
 	if e := GetEncoder(obj); e != nil {
-		// here parameterized type casts using T would fail
 		return e.encode(obj)
 	}
 	if e := utils.Optional(toe...); e != nil {
@@ -149,8 +159,9 @@ func KindVersion(t string) (string, string) {
 	return t, ""
 }
 
+// VersionedType is the interface of a type object for a versioned type.
 type VersionedType[T VersionedTypedObject] interface {
-	VersionedTypedObject
+	VersionedTypeInfo
 	TypedObjectDecoder[T]
 }
 

@@ -11,6 +11,8 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/modern-go/reflect2"
+
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -23,13 +25,18 @@ type TypeGetter interface {
 
 // TypeSetter is the interface to be implemented for extracting a type.
 type TypeSetter interface {
-	// SetType sets the type of an abstract element
+	// SetType sets the type of abstract element
 	SetType(typ string)
+}
+
+// TypeInfo defines the accessors for type information.
+type TypeInfo interface {
+	TypeGetter
 }
 
 // TypedObject defines the accessor for a typed object with additional data.
 type TypedObject interface {
-	TypeGetter
+	TypeInfo
 }
 
 var (
@@ -94,53 +101,6 @@ func (d *DirectDecoder) Encode(obj TypedObject, marshaler Marshaler) ([]byte, er
 	return marshaler.Marshal(obj)
 }
 
-// TypedObjectConverter converts a versioned representation into the
-// intended type required by the scheme.
-type TypedObjectConverter interface {
-	ConvertTo(in interface{}) (TypedObject, error)
-}
-
-// ConvertingDecoder uses a serialization form different from the
-// intended object type, that is converted to achieve the decode result.
-type ConvertingDecoder struct {
-	proto reflect.Type
-	TypedObjectConverter
-}
-
-var _ TypedObjectDecoder = &ConvertingDecoder{}
-
-func MustNewConvertingDecoder(proto interface{}, conv TypedObjectConverter) *ConvertingDecoder {
-	d, err := NewConvertingDecoder(proto, conv)
-	if err != nil {
-		panic(err)
-	}
-	return d
-}
-
-func NewConvertingDecoder(proto interface{}, conv TypedObjectConverter) (*ConvertingDecoder, error) {
-	t, err := ProtoType(proto)
-	if err != nil {
-		return nil, err
-	}
-	return &ConvertingDecoder{
-		proto:                t,
-		TypedObjectConverter: conv,
-	}, nil
-}
-
-func (d *ConvertingDecoder) Decode(data []byte, unmarshaler Unmarshaler) (TypedObject, error) {
-	versioned := d.CreateData()
-	err := unmarshaler.Unmarshal(data, versioned)
-	if err != nil {
-		return nil, err
-	}
-	return d.ConvertTo(versioned)
-}
-
-func (d *ConvertingDecoder) CreateData() interface{} {
-	return reflect.New(d.proto).Interface()
-}
-
 // KnownTypes is a set of known type names mapped to appropriate object decoders.
 type KnownTypes map[string]TypedObjectDecoder
 
@@ -196,7 +156,6 @@ type Scheme interface {
 	GetDecoder(otype string) TypedObjectDecoder
 	Decode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
 	Encode(obj TypedObject, marshaler Marshaler) ([]byte, error)
-	EnforceDecode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
 	KnownTypes() KnownTypes
 	KnownTypeNames() []string
 }
@@ -346,7 +305,7 @@ func (d *defaultScheme) GetDecoder(typ string) TypedObjectDecoder {
 
 func (d *defaultScheme) CreateUnstructured() Unstructured {
 	if d.unstructured == nil {
-		return &UnstructuredTypedObject{}
+		return nil
 	}
 	return reflect.New(d.unstructured).Interface().(Unstructured)
 }
@@ -363,23 +322,24 @@ func (d *defaultScheme) Encode(obj TypedObject, marshaler Marshaler) ([]byte, er
 }
 
 func (d *defaultScheme) Decode(data []byte, unmarshal Unmarshaler) (TypedObject, error) {
+	var to TypedObject
 	un := d.CreateUnstructured()
+	if reflect2.IsNil(un) {
+		to = &UnstructuredTypedObject{}
+	} else {
+		to = un
+	}
 	if unmarshal == nil {
 		unmarshal = DefaultYAMLEncoding
 	}
-	err := unmarshal.Unmarshal(data, un)
+	err := unmarshal.Unmarshal(data, to)
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot unmarshal unstructured")
 	}
-	if un.GetType() == "" {
-		/*
-			if d.acceptUnknown {
-				return un.(TypedObject), nil
-			}
-		*/
+	if to.GetType() == "" {
 		return nil, errors.Newf("no type found")
 	}
-	decoder := d.GetDecoder(un.GetType())
+	decoder := d.GetDecoder(to.GetType())
 	if decoder == nil {
 		if d.defaultdecoder != nil {
 			o, err := d.defaultdecoder.Decode(data, unmarshal)
@@ -392,49 +352,11 @@ func (d *defaultScheme) Decode(data []byte, unmarshal Unmarshaler) (TypedObject,
 			}
 		}
 		if d.acceptUnknown {
-			return un.(TypedObject), nil
+			return un, nil
 		}
-		return nil, errors.ErrUnknown(errors.KIND_OBJECTTYPE, un.GetType())
+		return nil, errors.ErrUnknown(errors.KIND_OBJECTTYPE, to.GetType())
 	}
 	return decoder.Decode(data, unmarshal)
-}
-
-func (d *defaultScheme) EnforceDecode(data []byte, unmarshal Unmarshaler) (TypedObject, error) {
-	un := d.CreateUnstructured()
-	if unmarshal == nil {
-		unmarshal = DefaultYAMLEncoding.Unmarshaler
-	}
-	err := unmarshal.Unmarshal(data, un)
-	if err != nil {
-		return nil, errors.Wrapf(err, "cannot unmarshal unstructured")
-	}
-	if un.GetType() == "" {
-		if d.acceptUnknown {
-			return un.(TypedObject), nil
-		}
-		return un.(TypedObject), errors.Newf("no type found")
-	}
-	decoder := d.GetDecoder(un.GetType())
-	if decoder == nil {
-		if d.defaultdecoder != nil {
-			o, err := d.defaultdecoder.Decode(data, unmarshal)
-			if err == nil {
-				return o, nil
-			}
-			if !errors.IsErrUnknownKind(err, errors.KIND_OBJECTTYPE) {
-				return un.(TypedObject), err
-			}
-		}
-		if d.acceptUnknown {
-			return un.(TypedObject), nil
-		}
-		return un.(TypedObject), errors.ErrUnknown(errors.KIND_OBJECTTYPE, un.GetType())
-	}
-	o, err := decoder.Decode(data, unmarshal)
-	if err != nil {
-		return un.(TypedObject), err
-	}
-	return o, err
 }
 
 func (d *defaultScheme) Convert(o TypedObject) (TypedObject, error) {

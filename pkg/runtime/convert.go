@@ -4,12 +4,65 @@
 
 package runtime
 
+import (
+	"reflect"
+)
+
+// TypedObjectConverter converts a versioned representation into the
+// intended type required by the scheme.
+type TypedObjectConverter interface {
+	ConvertTo(in interface{}) (TypedObject, error)
+}
+
+// ConvertingDecoder uses a serialization form different from the
+// intended object type, that is converted to achieve the decode result.
+type ConvertingDecoder struct {
+	proto reflect.Type
+	TypedObjectConverter
+}
+
+var _ TypedObjectDecoder = &ConvertingDecoder{}
+
+func MustNewConvertingDecoder(proto interface{}, conv TypedObjectConverter) *ConvertingDecoder {
+	d, err := NewConvertingDecoder(proto, conv)
+	if err != nil {
+		panic(err)
+	}
+	return d
+}
+
+func NewConvertingDecoder(proto interface{}, conv TypedObjectConverter) (*ConvertingDecoder, error) {
+	t, err := ProtoType(proto)
+	if err != nil {
+		return nil, err
+	}
+	return &ConvertingDecoder{
+		proto:                t,
+		TypedObjectConverter: conv,
+	}, nil
+}
+
+func (d *ConvertingDecoder) Decode(data []byte, unmarshaler Unmarshaler) (TypedObject, error) {
+	versioned := d.CreateData()
+	err := unmarshaler.Unmarshal(data, versioned)
+	if err != nil {
+		return nil, err
+	}
+	return d.ConvertTo(versioned)
+}
+
+func (d *ConvertingDecoder) CreateData() interface{} {
+	return reflect.New(d.proto).Interface()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
 type Converter[T TypedObject] interface {
 	ConvertFrom(object T) (TypedObject, error)
 	ConvertTo(object interface{}) (T, error)
 }
 
-// ConvertWrapper wraps a typed converter into a generic
+// ConvertWrapper wraps a versioned typed converter into a generic
 // converter to fulfill the more generic interface.
 type ConvertWrapper[T TypedObject] struct {
 	converter Converter[T]
@@ -45,33 +98,33 @@ func NewProtoBasedVersion[T VersionedTypedObject](proto VersionedTypedObject, co
 	}
 }
 
-type ConvertedType[T VersionedTypedObject] struct {
+// ConvertedType if the interface of an object type for versioned objects with conversion.
+type ConvertedType[T VersionedTypedObject] interface {
 	FormatVersion[T]
-	VersionedType
+	VersionedTypeInfo
+	Encode(obj TypedObject, m Marshaler) ([]byte, error)
+}
+
+// ObjectConvertedType is a default implementation for a ConvertedType.
+type ObjectConvertedType[T VersionedTypedObject] struct {
+	FormatVersion[T]
+	VersionedTypeInfo
 }
 
 var (
-	_ FormatVersion[VersionedTypedObject] = &ConvertedType[VersionedTypedObject]{}
-	_ TypedObjectEncoder                  = &ConvertedType[VersionedTypedObject]{}
+	_ FormatVersion[VersionedTypedObject] = &ObjectConvertedType[VersionedTypedObject]{}
+	_ TypedObjectEncoder                  = &ObjectConvertedType[VersionedTypedObject]{}
 )
 
-func NewConvertedType[T VersionedTypedObject](name string, v FormatVersion[T]) *ConvertedType[T] {
-	t := &ConvertedType[T]{
-		VersionedType: versionedType{
-			ObjectVersionedType: NewVersionedObjectType(name),
-			TypedObjectDecoder:  v,
-		},
-		FormatVersion: v,
+func NewConvertedType[T VersionedTypedObject](name string, v FormatVersion[T]) *ObjectConvertedType[T] {
+	t := &ObjectConvertedType[T]{
+		VersionedTypeInfo: NewVersionedObjectType(name),
+		FormatVersion:     v,
 	}
 	return t
 }
 
-func (t *ConvertedType[T]) Decode(data []byte, unmarshaler Unmarshaler) (TypedObject, error) {
-	// resolve method resolution conflict, basically both candidates are identical.
-	return t.VersionedType.Decode(data, unmarshaler)
-}
-
-func (t *ConvertedType[T]) Encode(obj TypedObject, m Marshaler) ([]byte, error) {
+func (t *ObjectConvertedType[T]) Encode(obj TypedObject, m Marshaler) ([]byte, error) {
 	c, err := t.ConvertFrom(obj.(T))
 	if err != nil {
 		return nil, err
