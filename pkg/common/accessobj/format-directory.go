@@ -62,10 +62,15 @@ func (_ DirectoryHandler) Create(info AccessObjectInfo, path string, opts access
 	}
 	rep, err := projectionfs.New(opts.GetPathFileSystem(), path)
 	if err != nil {
+		opts.GetPathFileSystem().RemoveAll(path)
 		return nil, errors.Wrapf(err, "unable to create projected filesystem from path %s", path)
 	}
 	opts.SetRepresentation(rep)
-	return NewAccessObject(info, ACC_CREATE, rep, nil, nil, mode)
+	obj, err := NewAccessObject(info, ACC_CREATE, rep, nil, nil, mode)
+	if err != nil {
+		opts.GetPathFileSystem().RemoveAll(path)
+	}
+	return obj, err
 }
 
 // WriteToFilesystem writes the current object to a filesystem.
