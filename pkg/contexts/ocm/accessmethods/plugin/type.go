@@ -58,7 +58,7 @@ func NewType(name string, p plugin.Plugin, desc *plugin.AccessMethodDescriptor) 
 	return t
 }
 
-func (t *accessType) Decode(data []byte, unmarshaler runtime.Unmarshaler) (runtime.TypedObject, error) {
+func (t *accessType) Decode(data []byte, unmarshaler runtime.Unmarshaler) (cpi.AccessSpec, error) {
 	spec, err := t.AccessType.Decode(data, unmarshaler)
 	if err != nil {
 		return nil, err

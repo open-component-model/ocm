@@ -24,6 +24,7 @@ type (
 	ContextProvider        = internal.ContextProvider
 	Repository             = internal.Repository
 	RepositoryType         = internal.RepositoryType
+	RepositoryTypeProvider = internal.RepositoryTypeProvider
 	RepositoryTypeScheme   = internal.RepositoryTypeScheme
 	Credentials            = internal.Credentials
 	CredentialsSource      = internal.CredentialsSource

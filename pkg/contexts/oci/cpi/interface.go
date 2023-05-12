@@ -27,6 +27,7 @@ type (
 	RepositorySpecHandler            = internal.RepositorySpecHandler
 	UniformRepositorySpec            = internal.UniformRepositorySpec
 	RepositoryType                   = internal.RepositoryType
+	RepositoryTypeProvider           = internal.RepositoryTypeProvider
 	RepositoryTypeScheme             = internal.RepositoryTypeScheme
 	RepositorySpec                   = internal.RepositorySpec
 	IntermediateRepositorySpecAspect = internal.IntermediateRepositorySpecAspect

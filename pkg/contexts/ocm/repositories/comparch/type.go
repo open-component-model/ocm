@@ -66,12 +66,12 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 	return NewRepository(ctx, a)
 }
 
-func (a *RepositorySpec) AsUniformSpec(cpi.Context) cpi.UniformRepositorySpec {
+func (a *RepositorySpec) AsUniformSpec(cpi.Context) *cpi.UniformRepositorySpec {
 	opts := &accessio.StandardOptions{}
 	opts.Default()
 	p, err := vfs.Canonical(opts.GetPathFileSystem(), a.FilePath, false)
 	if err != nil {
-		return cpi.UniformRepositorySpec{Type: a.GetKind(), SubPath: a.FilePath}
+		return &cpi.UniformRepositorySpec{Type: a.GetKind(), SubPath: a.FilePath}
 	}
-	return cpi.UniformRepositorySpec{Type: a.GetKind(), SubPath: p}
+	return &cpi.UniformRepositorySpec{Type: a.GetKind(), SubPath: p}
 }

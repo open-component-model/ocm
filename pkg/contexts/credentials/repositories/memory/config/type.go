@@ -21,8 +21,8 @@ const (
 )
 
 func init() {
-	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &Config{}, usage))
-	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &Config{}, usage))
+	cfgcpi.RegisterConfigType(cfgcpi.NewConfigType(ConfigType, &Config{}, usage))
+	cfgcpi.RegisterConfigType(cfgcpi.NewConfigType(ConfigTypeV1, &Config{}, usage))
 }
 
 // Config describes a configuration for the config context.

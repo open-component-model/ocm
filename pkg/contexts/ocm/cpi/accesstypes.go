@@ -8,52 +8,21 @@ import (
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-type AccessTypeVersionScheme interface {
-	Register(t AccessType) error
-	AddToScheme(scheme AccessTypeScheme)
-	runtime.TypedObjectEncoder
-	runtime.TypedObjectDecoder
-}
-
-type accessTypeVersionScheme struct {
-	kind   string
-	scheme AccessTypeScheme
-}
+type AccessTypeVersionScheme = runtime.TypeVersionScheme[AccessSpec, AccessType]
 
 func NewAccessTypeVersionScheme(kind string) AccessTypeVersionScheme {
-	return &accessTypeVersionScheme{kind, newStrictAccessTypeScheme()}
-}
-
-func (s *accessTypeVersionScheme) Register(t AccessType) error {
-	if t.GetKind() != s.kind {
-		return errors.ErrInvalid("access spec type", t.GetType(), "kind", s.kind)
-	}
-	s.scheme.Register(t.GetType(), t)
-	return nil
-}
-
-func (s *accessTypeVersionScheme) AddToScheme(scheme AccessTypeScheme) {
-	scheme.AddKnownTypes(s.scheme)
-}
-
-func (s *accessTypeVersionScheme) Encode(obj runtime.TypedObject, m runtime.Marshaler) ([]byte, error) {
-	return s.scheme.Encode(obj, m)
-}
-
-func (s *accessTypeVersionScheme) Decode(data []byte, unmarshaler runtime.Unmarshaler) (runtime.TypedObject, error) {
-	return s.scheme.Decode(data, unmarshaler)
+	return runtime.NewTypeVersionScheme[AccessSpec, AccessType](kind, newStrictAccessTypeScheme())
 }
 
 func RegisterAccessType(atype AccessType) {
-	defaultAccessTypeScheme.Register(atype.GetType(), atype)
+	defaultAccessTypeScheme.Register(atype)
 }
 
 func RegisterAccessTypeVersions(s AccessTypeVersionScheme) {
-	s.AddToScheme(defaultAccessTypeScheme)
+	defaultAccessTypeScheme.AddKnownTypes(s)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -65,7 +34,7 @@ type additionalTypeInfo interface {
 }
 
 type accessType struct {
-	runtime.VersionedTypedObjectType
+	runtime.VersionedTypedObjectType[AccessSpec]
 	description string
 	format      string
 	handler     flagsets.ConfigOptionTypeSetHandler
@@ -73,7 +42,7 @@ type accessType struct {
 
 var _ additionalTypeInfo = (*accessType)(nil)
 
-func newAccessSpecType(vt runtime.VersionedTypedObjectType, opts []AccessSpecTypeOption) AccessType {
+func newAccessSpecType(vt runtime.VersionedTypedObjectType[AccessSpec], opts []AccessSpecTypeOption) AccessType {
 	t := accessTypeTarget{&accessType{
 		VersionedTypedObjectType: vt,
 	}}
@@ -87,12 +56,8 @@ func NewAccessSpecType(name string, proto AccessSpec, opts ...AccessSpecTypeOpti
 	return newAccessSpecType(runtime.NewVersionedTypedObjectTypeByProto[AccessSpec](name, proto), opts)
 }
 
-func NewAccessSpecTypeByConverter(name string, proto runtime.VersionedTypedObject, converter runtime.Converter[AccessSpec], opts ...AccessSpecTypeOption) AccessType {
-	return newAccessSpecType(runtime.NewVersionedTypedObjectTypeByConverter[AccessSpec](name, proto, converter), opts)
-}
-
-func NewAccessSpecTypeByVersion(name string, version runtime.FormatVersion[AccessSpec], opts ...AccessSpecTypeOption) AccessType {
-	return newAccessSpecType(runtime.NewVersionedTypedObjectTypeByVersion[AccessSpec](name, version), opts)
+func NewAccessSpecTypeByConverter(name string, proto runtime.VersionedTypedObject, converter runtime.Converter[AccessSpec, runtime.TypedObject], opts ...AccessSpecTypeOption) AccessType {
+	return newAccessSpecType(runtime.NewVersionedTypedObjectTypeByProtoConverter[AccessSpec](name, proto, converter), opts)
 }
 
 func (t *accessType) ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHandler {

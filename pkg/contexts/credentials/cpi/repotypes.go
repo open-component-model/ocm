@@ -8,64 +8,33 @@ package cpi
 // ocm.
 
 import (
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-type RepositoryTypeVersionScheme interface {
-	Register(t RepositoryType) error
-	AddToScheme(scheme RepositoryTypeScheme)
-	runtime.TypedObjectEncoder
-	runtime.TypedObjectDecoder
-}
+type RepositoryTypeVersionScheme = runtime.TypeVersionScheme[RepositorySpec, RepositoryType]
 
-type repositoryTypeVersionScheme struct {
-	kind   string
-	scheme RepositoryTypeScheme
-}
-
-func NewRepositoryTypeVersionScheme(kind string) RepositoryTypeVersionScheme {
-	return &repositoryTypeVersionScheme{kind, newStrictRepositoryTypeScheme()}
-}
-
-func (s *repositoryTypeVersionScheme) Register(t RepositoryType) error {
-	if t.GetKind() != s.kind {
-		return errors.ErrInvalid("repository spec type", t.GetType(), "kind", s.kind)
-	}
-	s.scheme.Register(t.GetType(), t)
-	return nil
-}
-
-func (s *repositoryTypeVersionScheme) AddToScheme(scheme RepositoryTypeScheme) {
-	scheme.AddKnownTypes(s.scheme)
-}
-
-func (s *repositoryTypeVersionScheme) Encode(obj runtime.TypedObject, m runtime.Marshaler) ([]byte, error) {
-	return s.scheme.Encode(obj, m)
-}
-
-func (s *repositoryTypeVersionScheme) Decode(data []byte, unmarshaler runtime.Unmarshaler) (runtime.TypedObject, error) {
-	return s.scheme.Decode(data, unmarshaler)
+func NewConfigTypeVersionScheme(kind string) RepositoryTypeVersionScheme {
+	return runtime.NewTypeVersionScheme[RepositorySpec, RepositoryType](kind, newStrictRepositoryTypeScheme())
 }
 
 func RegisterRepositoryType(rtype RepositoryType) {
-	defaultRepositoryTypeScheme.Register(rtype.GetType(), rtype)
+	defaultRepositoryTypeScheme.Register(rtype)
 }
 
 func RegisterRepositoryTypeVersions(s RepositoryTypeVersionScheme) {
-	s.AddToScheme(defaultRepositoryTypeScheme)
+	defaultRepositoryTypeScheme.AddKnownTypes(s)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func NewRepositoryType(name string, proto RepositorySpec) RepositoryType {
-	return runtime.NewVersionedTypedObjectTypeByProto(name, proto)
+func NewRepositoryType[I RepositorySpec](name string, proto I) RepositoryType {
+	return runtime.NewVersionedTypedObjectTypeByProto[RepositorySpec, I](name, proto)
 }
 
-func NewRepositoryTypeByConverter(name string, proto RepositorySpec, converter runtime.Converter[RepositorySpec]) RepositoryType {
-	return runtime.NewVersionedTypedObjectTypeByConverter(name, proto, converter)
+func NewRepositoryTypeByProtoConverter[I RepositorySpec](name string, proto runtime.TypedObject, converter runtime.Converter[I, runtime.TypedObject]) RepositoryType {
+	return runtime.NewVersionedTypedObjectTypeByProtoConverter[RepositorySpec, I](name, proto, converter)
 }
 
-func NewRepositoryTypeByVersion(name string, version runtime.FormatVersion[RepositorySpec]) RepositoryType {
-	return runtime.NewVersionedTypedObjectTypeByVersion(name, version)
+func NewRepositoryTypeByConverter[I RepositorySpec, V runtime.TypedObject](name string, converter runtime.Converter[I, V]) RepositoryType {
+	return runtime.NewVersionedTypedObjectTypeByConverter[RepositorySpec, I](name, converter)
 }

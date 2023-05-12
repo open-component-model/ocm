@@ -18,28 +18,28 @@ type TypedObject interface {
 }
 
 // TypedObjectType is the interface for a type object for an TypedObject.
-type TypedObjectType interface {
+type TypedObjectType[T TypedObject] interface {
 	TypeInfo
-	TypedObjectDecoder
+	TypedObjectDecoder[T]
 }
 
-type typeObject struct {
+type typeObject[T TypedObject] struct {
 	_ObjectType
-	_TypedObjectDecoder
+	_TypedObjectDecoder[T]
 }
 
-var _ TypedObjectType = (*typeObject)(nil)
+var _ TypedObjectType[TypedObject] = (*typeObject[TypedObject])(nil)
 
-func NewTypedObjectTypeByDecoder(name string, decoder TypedObjectDecoder) TypedObjectType {
-	return &typeObject{
+func NewTypedObjectTypeByDecoder[T TypedObject](name string, decoder TypedObjectDecoder[T]) TypedObjectType[T] {
+	return &typeObject[T]{
 		_ObjectType:         NewObjectType(name),
 		_TypedObjectDecoder: decoder,
 	}
 }
 
-func NewTypedObjectTypeByProto(name string, proto TypedObject) TypedObjectType {
-	return &typeObject{
+func NewTypedObjectTypeByProto[T TypedObject](name string, proto T) TypedObjectType[T] {
+	return &typeObject[T]{
 		_ObjectType:         NewObjectType(name),
-		_TypedObjectDecoder: MustNewDirectDecoder(proto),
+		_TypedObjectDecoder: MustNewDirectDecoder[T](proto),
 	}
 }

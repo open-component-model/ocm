@@ -93,7 +93,7 @@ linked library can be used:
 Dedicated OCM repository types:
 `
 
-	types := runtime.KindNames(ocm.DefaultContext().RepositoryTypes())
+	types := runtime.KindNames[ocm.RepositorySpec](ocm.DefaultContext().RepositoryTypes())
 	for _, t := range types {
 		s += "- `" + t + "`\n"
 	}
@@ -101,7 +101,7 @@ Dedicated OCM repository types:
 	s += `
 OCI Repository types (using standard component repository to OCI mapping):
 `
-	types = runtime.KindNames(oci.DefaultContext().RepositoryTypes())
+	types = runtime.KindNames[oci.RepositorySpec](oci.DefaultContext().RepositoryTypes())
 	for _, t := range types {
 		s += "- `" + t + "`\n"
 	}

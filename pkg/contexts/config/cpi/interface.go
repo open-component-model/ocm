@@ -28,10 +28,6 @@ type (
 
 var DefaultContext = internal.DefaultContext
 
-func RegisterConfigType(name string, atype ConfigType) {
-	internal.DefaultConfigTypeScheme.Register(name, atype)
-}
-
 func NewGenericConfig(data []byte, unmarshaler runtime.Unmarshaler) (Config, error) {
 	return internal.NewGenericConfig(data, unmarshaler)
 }

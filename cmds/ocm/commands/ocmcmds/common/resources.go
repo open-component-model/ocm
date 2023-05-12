@@ -479,7 +479,7 @@ func ProcessElements(ictx inputs.Context, cv ocm.ComponentVersionAccess, elems [
 					}
 				}
 			} else {
-				acc := compdesc.GenericAccessSpec(elem.Input().Access)
+				acc := elem.Input().Access
 				err = CheckHint(cv, acc)
 				if err == nil {
 					err = h.Set(cv, elem, acc)

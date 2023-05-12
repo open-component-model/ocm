@@ -14,6 +14,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
+type T interface {
+	runtime.TypedObject
+	TFunc()
+}
+
 type T1 struct {
 	runtime.ObjectTypedObject
 	T1 string
@@ -24,8 +29,11 @@ type T2 struct {
 	T2 string
 }
 
-var T1Decoder = runtime.MustNewDirectDecoder(&T1{})
-var T2Decoder = runtime.MustNewDirectDecoder(&T2{})
+func (t *T1) TFunc() {}
+func (t *T2) TFunc() {}
+
+var T1Decoder = runtime.MustNewDirectDecoder[T](&T1{})
+var T2Decoder = runtime.MustNewDirectDecoder[T](&T2{})
 
 var t1data = []byte(`{"type":"t1","t1":"v1"}`)
 var t2data = []byte(`{"type":"t2","t2":"v2"}`)
@@ -34,11 +42,10 @@ var t1 = &T1{runtime.ObjectTypedObject{"t1"}, "v1"}
 var t2 = &T2{runtime.ObjectTypedObject{"t2"}, "v2"}
 
 var _ = Describe("scheme", func() {
-	var scheme runtime.Scheme
+	var scheme runtime.Scheme[T]
 
 	BeforeEach(func() {
-		var rt runtime.TypedObject
-		scheme = Must(runtime.NewDefaultScheme(&rt, &runtime.UnstructuredTypedObject{}, false, nil))
+		scheme = Must(runtime.NewDefaultScheme[T](&runtime.UnstructuredTypedObject{}, false, nil))
 		MustBeSuccessful(scheme.RegisterByDecoder("t1", T1Decoder))
 	})
 
@@ -49,14 +56,12 @@ var _ = Describe("scheme", func() {
 	})
 
 	It("handles derived scheme", func() {
-		var rt runtime.TypedObject
-		derived := Must(runtime.NewDefaultScheme(&rt, &runtime.UnstructuredTypedObject{}, false, nil, scheme))
+		derived := Must(runtime.NewDefaultScheme[T](&runtime.UnstructuredTypedObject{}, false, nil, scheme))
 		Expect(Must(derived.Decode(t1data, nil))).To(Equal(t1))
 	})
 
 	It("extends derived scheme", func() {
-		var rt runtime.TypedObject
-		derived := Must(runtime.NewDefaultScheme(&rt, &runtime.UnstructuredTypedObject{}, false, nil, scheme))
+		derived := Must(runtime.NewDefaultScheme[T](&runtime.UnstructuredTypedObject{}, false, nil, scheme))
 		MustBeSuccessful(derived.RegisterByDecoder("t2", T2Decoder))
 		Expect(Must(derived.Decode(t2data, nil))).To(Equal(t2))
 

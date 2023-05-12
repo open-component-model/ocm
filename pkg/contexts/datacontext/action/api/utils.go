@@ -5,7 +5,6 @@
 package api
 
 import (
-	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/runtime/scheme"
 )
 
@@ -18,10 +17,10 @@ var _ ActionType = (*actionType)(nil)
 
 func NewActionTypeByProtoTypes(specproto ActionSpec, specconv scheme.Converter[ActionSpec], resultproto ActionResult, resconv scheme.Converter[ActionResult]) ActionType {
 	if specconv == nil {
-		specconv = runtime.IdentityConverter[ActionSpec]{}
+		specconv = scheme.IdentityConverter[ActionSpec]{}
 	}
 	if resconv == nil {
-		resconv = runtime.IdentityConverter[ActionResult]{}
+		resconv = scheme.IdentityConverter[ActionResult]{}
 	}
 	st := scheme.NewTypeByProtoType(specproto, specconv)
 	rt := scheme.NewTypeByProtoType(resultproto, resconv)

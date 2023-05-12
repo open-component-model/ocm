@@ -102,9 +102,6 @@ var _ = Describe("builder test", func() {
 	})
 })
 
-func BaseRepoTypes(r cpi.RepositoryTypeScheme) runtime.Scheme {
-	if m, ok := r.(runtime.BaseScheme); ok {
-		return m.BaseScheme()
-	}
-	return nil
+func BaseRepoTypes(r cpi.RepositoryTypeScheme) runtime.Scheme[local.RepositorySpec] {
+	return r.BaseScheme()
 }

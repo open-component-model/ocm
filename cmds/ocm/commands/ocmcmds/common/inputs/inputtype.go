@@ -99,9 +99,14 @@ func (*InputSpecBase) GetInputVersion(ctx Context) string {
 	return ""
 }
 
+type (
+	InputSpecDecoder  = runtime.TypedObjectDecoder[InputSpec]
+	_InputSpecDecoder = runtime.TypedObjectDecoder[InputSpec]
+)
+
 type InputType interface {
-	runtime.TypedObjectDecoder
-	runtime.VersionedTypedObject
+	runtime.VersionedTypeInfo
+	runtime.TypedObjectDecoder[InputSpec]
 
 	ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHandler
 
@@ -110,7 +115,7 @@ type InputType interface {
 
 type DefaultInputType struct {
 	runtime.ObjectVersionedType
-	runtime.TypedObjectDecoder
+	runtime.TypedObjectDecoder[InputSpec]
 	usage      string
 	clihandler flagsets.ConfigOptionTypeSetHandler
 }
@@ -122,7 +127,7 @@ func NewInputType(name string, proto InputSpec, usage string, cfg flagsets.Confi
 	}
 	return &DefaultInputType{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(name),
-		TypedObjectDecoder:  runtime.MustNewDirectDecoder(proto),
+		TypedObjectDecoder:  runtime.MustNewDirectDecoder[InputSpec](proto),
 		usage:               usage,
 		clihandler:          cfg,
 	}
@@ -155,33 +160,28 @@ func (t *DefaultInputType) ApplyConfig(opts flagsets.ConfigOptions, config flags
 }
 
 type InputTypeScheme interface {
-	runtime.Scheme
+	runtime.Scheme[InputSpec]
 
 	ConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider
 	flagsets.ConfigProvider
 
 	GetInputType(name string) InputType
-	Register(name string, atype InputType)
+	Register(atype InputType)
 
 	DecodeInputSpec(data []byte, unmarshaler runtime.Unmarshaler) (InputSpec, error)
 	CreateInputSpec(obj runtime.TypedObject) (InputSpec, error)
 }
 
 type inputTypeScheme struct {
-	runtime.SchemeBase
+	runtime.Scheme[InputSpec]
 	optionTypes flagsets.ConfigTypeOptionSetConfigProvider
 }
 
-func NewInputTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder) InputTypeScheme {
-	var rt InputSpec
-	scheme := runtime.MustNewDefaultScheme(&rt, &UnknownInputSpec{}, false, defaultRepoDecoder)
+func NewInputTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder[InputSpec]) InputTypeScheme {
+	scheme := runtime.MustNewDefaultScheme[InputSpec](&UnknownInputSpec{}, false, defaultRepoDecoder)
 	prov := flagsets.NewTypedConfigProvider("input", "blob input specification")
 	prov.AddGroups("Input Specification Options")
 	return &inputTypeScheme{scheme, prov}
-}
-
-func (t *inputTypeScheme) AddKnownTypes(s InputTypeScheme) {
-	t.SchemeBase.AddKnownTypes(s)
 }
 
 func (t *inputTypeScheme) ConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider {
@@ -204,37 +204,21 @@ func (t *inputTypeScheme) GetInputType(name string) InputType {
 	return d.(InputType)
 }
 
-func (t *inputTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedObjectDecoder) error {
-	i, ok := decoder.(InputType)
-	if !ok {
-		return errors.ErrInvalid("GO type", reflect.TypeOf(decoder).String())
-	}
-	t.Register(name, i)
-	return nil
-}
-
-func (t *inputTypeScheme) Register(name string, rtype InputType) {
+func (t *inputTypeScheme) Register(rtype InputType) {
 	if rtype == nil {
 		return
 	}
-	t.SchemeBase.RegisterByDecoder(name, rtype)
+	t.RegisterByDecoder(rtype.GetType(), rtype)
 	t.optionTypes.AddTypeSet(rtype.ConfigOptionTypeSetHandler())
 }
 
 func (t *inputTypeScheme) DecodeInputSpec(data []byte, unmarshaler runtime.Unmarshaler) (InputSpec, error) {
-	obj, err := t.Decode(data, unmarshaler)
-	if err != nil {
-		return nil, err
-	}
-	if spec, ok := obj.(InputSpec); ok {
-		return spec, nil
-	}
-	return nil, fmt.Errorf("invalid access spec type: yield %T instead of RepositorySpec", obj)
+	return t.Decode(data, unmarshaler)
 }
 
 func (t *inputTypeScheme) CreateInputSpec(obj runtime.TypedObject) (InputSpec, error) {
 	if s, ok := obj.(InputSpec); ok {
-		r, err := t.SchemeBase.Convert(s)
+		r, err := t.Convert(s)
 		if err != nil {
 			return nil, err
 		}
@@ -253,8 +237,8 @@ func (t *inputTypeScheme) CreateInputSpec(obj runtime.TypedObject) (InputSpec, e
 // DefaultInputTypeScheme contains all globally known access serializer.
 var DefaultInputTypeScheme = NewInputTypeScheme(nil)
 
-func RegisterInputType(name string, atype InputType) {
-	DefaultInputTypeScheme.Register(name, atype)
+func RegisterInputType(atype InputType) {
+	DefaultInputTypeScheme.Register(atype)
 }
 
 func CreateRepositorySpec(t runtime.TypedObject) (InputSpec, error) {

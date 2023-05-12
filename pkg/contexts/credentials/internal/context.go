@@ -218,7 +218,7 @@ func (c *_context) ConsumerIdentityMatchers() IdentityMatcherRegistry {
 
 func (c *_context) SetAlias(name string, spec RepositorySpec, creds ...CredentialsSource) error {
 	c.Update()
-	t := c.knownRepositoryTypes.GetRepositoryType(AliasRepositoryType)
+	t := c.knownRepositoryTypes.GetType(AliasRepositoryType)
 	if t == nil {
 		return errors.ErrNotSupported("aliases")
 	}

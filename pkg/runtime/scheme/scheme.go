@@ -83,13 +83,12 @@ func (k *kind) Description() string {
 
 type scheme[O Object, T Type[O]] struct {
 	lock   sync.Mutex
-	scheme runtime.Scheme
+	scheme runtime.Scheme[O]
 	kinds  map[string]*kindInfo
 }
 
 func NewScheme[O Object, T Type[O]]() Scheme[O, T] {
-	var obj O
-	s := runtime.MustNewDefaultScheme(&obj, nil, false, nil)
+	s := runtime.MustNewDefaultScheme[O](nil, false, nil)
 	return &scheme[O, T]{scheme: s, kinds: map[string]*kindInfo{}}
 }
 
@@ -99,7 +98,7 @@ func (t *scheme[O, T]) GetType(name string) T {
 	if d == nil {
 		return zero
 	}
-	return d.(runtimeEncodingAdapter[O, T]).typ
+	return d.(T)
 }
 
 func (t *scheme[O, T]) GetKind(kind string) Kind {
@@ -111,27 +110,6 @@ func (t *scheme[O, T]) GetKind(kind string) Kind {
 		return nil
 	}
 	return d.kind
-}
-
-type runtimeEncodingAdapter[O Object, T Type[O]] struct {
-	typ T
-}
-
-var (
-	_ runtime.TypedObjectDecoder = (*runtimeEncodingAdapter[Object, Type[Object]])(nil)
-	_ runtime.TypedObjectEncoder = (*runtimeEncodingAdapter[Object, Type[Object]])(nil)
-)
-
-func (r runtimeEncodingAdapter[O, T]) Encode(object runtime.TypedObject, marshaler runtime.Marshaler) ([]byte, error) {
-	return r.typ.Encode(object.(O), marshaler)
-}
-
-func (r runtimeEncodingAdapter[O, T]) Decode(data []byte, unmarshaler runtime.Unmarshaler) (runtime.TypedObject, error) {
-	o, err := r.typ.Decode(data, unmarshaler)
-	if err != nil {
-		return nil, err
-	}
-	return o, nil
 }
 
 func (t *scheme[O, T]) RegisterKind(k Kind) {
@@ -153,7 +131,6 @@ func (t *scheme[O, T]) RegisterType(name string, typ T) error {
 	defer t.lock.Unlock()
 
 	k, v := runtime.KindVersion(name)
-	wrap := runtimeEncodingAdapter[O, T]{typ}
 
 	if v != "" {
 		_, err := semver.NewVersion(v)
@@ -172,15 +149,15 @@ func (t *scheme[O, T]) RegisterType(name string, typ T) error {
 	}
 
 	if v == "v1" && t.scheme.GetDecoder(k) == nil {
-		t.scheme.RegisterByDecoder(k, wrap)
+		t.scheme.RegisterByDecoder(k, typ)
 	}
 	if v == "" {
-		t.scheme.RegisterByDecoder(runtime.TypeName(k, "v1"), wrap)
+		t.scheme.RegisterByDecoder(runtime.TypeName(k, "v1"), typ)
 		ki.versions.Add("v1")
 	} else {
 		ki.versions.Add(v)
 	}
-	return t.scheme.RegisterByDecoder(name, wrap)
+	return t.scheme.RegisterByDecoder(name, typ)
 }
 
 func (t *scheme[O, T]) Decode(data []byte, unmarshaler runtime.Unmarshaler) (O, error) {
@@ -189,7 +166,7 @@ func (t *scheme[O, T]) Decode(data []byte, unmarshaler runtime.Unmarshaler) (O, 
 	if err != nil {
 		return zero, err
 	}
-	return o.(O), nil
+	return o, nil
 }
 
 func (t *scheme[O, T]) Encode(obj O, marshaler runtime.Marshaler) ([]byte, error) {
@@ -216,7 +193,7 @@ func (t *scheme[O, T]) KnownTypes() KnownTypes[O, T] {
 	result := KnownTypes[O, T]{}
 
 	for k, v := range t.scheme.KnownTypes() {
-		result[k] = v.(runtimeEncodingAdapter[O, T]).typ
+		result[k] = v.(T)
 	}
 	return result
 }

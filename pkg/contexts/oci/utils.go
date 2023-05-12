@@ -9,7 +9,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
-	runtime "github.com/open-component-model/ocm/pkg/runtime2"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 func AsTags(tag string) []string {

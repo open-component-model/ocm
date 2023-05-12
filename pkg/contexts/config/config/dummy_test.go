@@ -16,8 +16,8 @@ const (
 )
 
 func RegisterAt(reg cpi.ConfigTypeScheme) {
-	reg.Register(DummyType, cpi.NewConfigType(DummyType, &Config{}))
-	reg.Register(DummyType, cpi.NewConfigType(DummyTypeV1, &Config{}))
+	reg.Register(cpi.NewConfigType(DummyType, &Config{}))
+	reg.Register(cpi.NewConfigType(DummyTypeV1, &Config{}))
 }
 
 // Config describes a a dummy config

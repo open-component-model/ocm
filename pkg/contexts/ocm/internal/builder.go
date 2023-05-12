@@ -195,9 +195,9 @@ type delegatingDecoder struct {
 	delegate RepositoryDelegationRegistry
 }
 
-var _ runtime.TypedObjectDecoder = (*delegatingDecoder)(nil)
+var _ RepositorySpecDecoder = (*delegatingDecoder)(nil)
 
-func (d *delegatingDecoder) Decode(data []byte, unmarshaler runtime.Unmarshaler) (runtime.TypedObject, error) {
+func (d *delegatingDecoder) Decode(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
 	if d.delegate != nil {
 		return d.delegate.Decode(d.ctx, data, unmarshaler)
 	}

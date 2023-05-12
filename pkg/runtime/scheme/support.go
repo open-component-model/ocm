@@ -9,15 +9,15 @@ import (
 )
 
 type Converter[O Object] interface {
-	runtime.Converter[O] // Go live, Converter[O] and runtime.Converter[O] are not type compatible!
+	runtime.Converter[O, runtime.TypedObject] // Go live, Converter[O] and runtime.Converter[O] are not type compatible!
 }
 
 type defaultType[O Object] struct {
-	runtime.VersionedTypedObjectType
+	runtime.VersionedTypedObjectType[O]
 }
 
 func NewTypeByProtoType[O Object](proto Object, converter Converter[O]) Type[O] {
-	return &defaultType[O]{runtime.NewVersionedTypedObjectTypeByConverter("", proto, runtime.Converter[O](converter))} // wow, I love Go
+	return &defaultType[O]{runtime.NewVersionedTypedObjectTypeByProtoConverter[O]("", proto, runtime.Converter[O, runtime.TypedObject](converter))} // wow, I love Go
 }
 
 func (d *defaultType[O]) Decode(data []byte, unmarshaler runtime.Unmarshaler) (O, error) {
@@ -26,7 +26,7 @@ func (d *defaultType[O]) Decode(data []byte, unmarshaler runtime.Unmarshaler) (O
 	if err != nil {
 		return zero, err
 	}
-	return o.(O), nil
+	return o, nil
 }
 
 func (d *defaultType[O]) Encode(o O, marshaler runtime.Marshaler) ([]byte, error) {
@@ -36,5 +36,15 @@ func (d *defaultType[O]) Encode(o O, marshaler runtime.Marshaler) ([]byte, error
 ////////////////////////////////////////////////////////////////////////////////
 
 func NewIdentityType[O Object](proto O) Type[O] {
-	return NewTypeByProtoType[O](proto, runtime.IdentityConverter[O]{})
+	return NewTypeByProtoType[O](proto, IdentityConverter[O]{})
+}
+
+type IdentityConverter[O Object] struct{}
+
+func (i IdentityConverter[O]) ConvertFrom(object O) (runtime.TypedObject, error) {
+	return runtime.Cast[O, runtime.TypedObject](object)
+}
+
+func (i IdentityConverter[O]) ConvertTo(object runtime.TypedObject) (O, error) {
+	return runtime.Cast[runtime.TypedObject, O](object)
 }

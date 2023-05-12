@@ -37,7 +37,7 @@ func init() {
 // New creates a new localFilesystemBlob accessor.
 func New(path string, media string) *localblob.AccessSpec {
 	return &localblob.AccessSpec{
-		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject(versions, Type),
+		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject[cpi.AccessSpec](versions, Type),
 		LocalReference:               path,
 		MediaType:                    media,
 	}
@@ -77,13 +77,13 @@ func (_ converterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, er
 	}, nil
 }
 
-func (_ converterV1) ConvertTo(object interface{}) (cpi.AccessSpec, error) {
+func (_ converterV1) ConvertTo(object runtime.TypedObject) (cpi.AccessSpec, error) {
 	in, ok := object.(*AccessSpec)
 	if !ok {
 		return nil, fmt.Errorf("failed to assert type %T to localfsblob.AccessSpec", object)
 	}
 	return &localblob.AccessSpec{
-		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject(versions, in.Type),
+		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject[cpi.AccessSpec](versions, in.Type),
 		LocalReference:               in.Filename,
 		MediaType:                    in.MediaType,
 	}, nil

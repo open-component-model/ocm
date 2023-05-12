@@ -35,6 +35,7 @@ type (
 	ContextProvider                  = internal.ContextProvider
 	ComponentVersionResolver         = internal.ComponentVersionResolver
 	Repository                       = internal.Repository
+	RepositoryTypeProvider           = internal.RepositoryTypeProvider
 	RepositoryTypeScheme             = internal.RepositoryTypeScheme
 	RepositoryDelegationRegistry     = internal.RepositoryDelegationRegistry
 	RepositoryPriorityDecoder        = internal.PriorityDecoder[Context, RepositorySpec]
@@ -45,10 +46,12 @@ type (
 	ComponentAccess                  = internal.ComponentAccess
 	ComponentVersionAccess           = internal.ComponentVersionAccess
 	AccessSpec                       = internal.AccessSpec
+	AccessSpecDecoder                = internal.AccessSpecDecoder
 	GenericAccessSpec                = internal.GenericAccessSpec
 	AccessMethod                     = internal.AccessMethod
 	AccessMethodSupport              = internal.AccessMethodSupport
 	AccessType                       = internal.AccessType
+	AccessTypeProvider               = internal.AccessTypeProvider
 	AccessTypeScheme                 = internal.AccessTypeScheme
 	DataAccess                       = internal.DataAccess
 	BlobAccess                       = internal.BlobAccess
@@ -57,6 +60,7 @@ type (
 	ResourceAccess                   = internal.ResourceAccess
 	ResourceMeta                     = internal.ResourceMeta
 	RepositorySpec                   = internal.RepositorySpec
+	RepositorySpecDecoder            = internal.RepositorySpecDecoder
 	IntermediateRepositorySpecAspect = internal.IntermediateRepositorySpecAspect
 	GenericRepositorySpec            = internal.GenericRepositorySpec
 	RepositoryType                   = internal.RepositoryType

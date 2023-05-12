@@ -8,9 +8,10 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	. "github.com/open-component-model/ocm/pkg/testutils"
+
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/runtime/scheme"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 type Object interface {
@@ -78,7 +79,7 @@ type k1v2Converter struct{}
 
 var _ scheme.Converter[Object] = (*k1v2Converter)(nil)
 
-func (k k1v2Converter) ConvertTo(object interface{}) (Object, error) {
+func (k k1v2Converter) ConvertTo(object runtime.TypedObject) (Object, error) {
 	in := object.(*k1v2)
 	r := &k1{
 		ObjectVersionedType: runtime.ObjectVersionedType{in.GetType()},

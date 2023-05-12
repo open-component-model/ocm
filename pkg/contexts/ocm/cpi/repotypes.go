@@ -8,58 +8,27 @@ package cpi
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-type RepositoryTypeVersionScheme interface {
-	Register(t RepositoryType) error
-	AddToScheme(scheme RepositoryTypeScheme)
-	runtime.TypedObjectEncoder
-	runtime.TypedObjectDecoder
-}
-
-type repositoryTypeVersionScheme struct {
-	kind   string
-	scheme RepositoryTypeScheme
-}
+type RepositoryTypeVersionScheme = runtime.TypeVersionScheme[RepositorySpec, RepositoryType]
 
 func NewRepositoryTypeVersionScheme(kind string) RepositoryTypeVersionScheme {
-	return &repositoryTypeVersionScheme{kind, newStrictRepositoryTypeScheme()}
-}
-
-func (s *repositoryTypeVersionScheme) Register(t RepositoryType) error {
-	if t.GetKind() != s.kind {
-		return errors.ErrInvalid("repository spec type", t.GetType(), "kind", s.kind)
-	}
-	s.scheme.Register(t.GetType(), t)
-	return nil
-}
-
-func (s *repositoryTypeVersionScheme) AddToScheme(scheme RepositoryTypeScheme) {
-	scheme.AddKnownTypes(s.scheme)
-}
-
-func (s *repositoryTypeVersionScheme) Encode(obj runtime.TypedObject, m runtime.Marshaler) ([]byte, error) {
-	return s.scheme.Encode(obj, m)
-}
-
-func (s *repositoryTypeVersionScheme) Decode(data []byte, unmarshaler runtime.Unmarshaler) (runtime.TypedObject, error) {
-	return s.scheme.Decode(data, unmarshaler)
+	return runtime.NewTypeVersionScheme[RepositorySpec, RepositoryType](kind, newStrictRepositoryTypeScheme())
 }
 
 func RegisterRepositoryType(rtype RepositoryType) {
-	defaultRepositoryTypeScheme.Register(rtype.GetType(), rtype)
+	defaultRepositoryTypeScheme.Register(rtype)
 }
 
 func RegisterRepositoryTypeVersions(s RepositoryTypeVersionScheme) {
-	s.AddToScheme(defaultRepositoryTypeScheme)
+	defaultRepositoryTypeScheme.AddKnownTypes(s)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type repositoryType struct {
-	runtime.VersionedTypedObjectType
+	runtime.VersionedTypedObjectType[RepositorySpec]
 	checker RepositoryAccessMethodChecker
 }
 
@@ -72,16 +41,9 @@ func NewRepositoryType(name string, proto RepositorySpec, checker RepositoryAcce
 	}
 }
 
-func NewRepositoryTypeByConverter(name string, proto runtime.VersionedTypedObject, converter runtime.Converter[RepositorySpec], checker RepositoryAccessMethodChecker) RepositoryType {
+func NewRepositoryTypeByConverter(name string, proto runtime.VersionedTypedObject, converter runtime.Converter[RepositorySpec, runtime.TypedObject], checker RepositoryAccessMethodChecker) RepositoryType {
 	return &repositoryType{
-		VersionedTypedObjectType: runtime.NewVersionedTypedObjectTypeByConverter[RepositorySpec](name, proto, converter),
-		checker:                  checker,
-	}
-}
-
-func NewRepositoryTypeByVersion(name string, version runtime.FormatVersion[RepositorySpec], checker RepositoryAccessMethodChecker) RepositoryType {
-	return &repositoryType{
-		VersionedTypedObjectType: runtime.NewVersionedTypedObjectTypeByVersion[RepositorySpec](name, version),
+		VersionedTypedObjectType: runtime.NewVersionedTypedObjectTypeByProtoConverter[RepositorySpec](name, proto, converter),
 		checker:                  checker,
 	}
 }

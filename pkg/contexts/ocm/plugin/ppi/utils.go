@@ -8,7 +8,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-type decoder runtime.TypedObjectDecoder
+type decoder runtime.TypedObjectDecoder[runtime.TypedObject]
 
 type AccessMethodBase struct {
 	decoder

@@ -102,7 +102,7 @@ func DefinedForContext(ctx context.Context) (Context, bool) {
 }
 
 func NewGenericAccessSpec(spec string) (AccessSpec, error) {
-	return internal.NewGenericAccessSpec(spec)
+	return internal.NewGenericAccessSpec([]byte(spec))
 }
 
 type AccessSpecRef = internal.AccessSpecRef

@@ -248,7 +248,7 @@ func Validate(r *ResourceInput, ctx inputs.Context, inputFilePath string) error 
 			if r.Access.GetType() == "" {
 				allErrs = append(allErrs, field.Required(fldPath.Child("access", "type"), "type of access required"))
 			} else {
-				acc, err := r.Access.Evaluate(ctx.OCMContext().AccessMethods())
+				acc, err := r.Access.Evaluate(ctx.OCMContext())
 				if err != nil {
 					if errors.IsErrUnknown(err) {
 						//nolint: errorlint // No way I can untagle this.

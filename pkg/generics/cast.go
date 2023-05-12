@@ -5,26 +5,33 @@
 package generics
 
 func As[T any](o interface{}) T {
-	var zero T
+	var _nil T
 	if o == nil {
-		return zero
+		return _nil
 	}
 	return o.(T)
 }
 
 func AsE[T any](o interface{}, err error) (T, error) {
-	var zero T
+	var _nil T
 	if o == nil {
-		return zero, err
+		return _nil, err
 	}
 	return o.(T), err
 }
 
-func CastSlice[S, T any](in ...S) []T {
-	r := make([]T, len(in))
-	for i := range in {
-		var s any = in[i]
-		r[i] = s.(T)
+// CastPointer casts a pointer/error result to an interface/error
+// result.
+// In Go this cannot be done directly, because returning a nil pinter
+// for an interface return type, would result is a typed nil value for
+// the interface, and not nil, if the pointer is nil.
+// Unfortunately, the relation of the pointer (even the fact, that a pointer is
+// expected)to the interface (even the fact, that an interface is expected)
+// cannot be expressed with Go generics.
+func CastPointer[T any](p any, err error) (T, error) {
+	var _nil T
+	if p == nil {
+		return _nil, err
 	}
-	return r
+	return p.(T), err
 }
