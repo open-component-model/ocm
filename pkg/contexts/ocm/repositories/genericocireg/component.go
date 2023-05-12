@@ -6,6 +6,9 @@ package genericocireg
 
 import (
 	"fmt"
+	"strings"
+
+	"github.com/Masterminds/semver/v3"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -15,6 +18,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
+
+const META_SEPARATOR = ".build-"
 
 type ComponentAccess struct {
 	view accessio.CloserView // handle close and refs
@@ -104,6 +109,29 @@ func (c *componentAccessImpl) GetContext() cpi.Context {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+func toTag(v string) string {
+	_, err := semver.NewVersion(v)
+	if err != nil {
+		panic(errors.Wrapf(err, "%s is no semver version", v))
+	}
+	return strings.ReplaceAll(v, "+", META_SEPARATOR)
+}
+
+func toVersion(t string) string {
+	next := 0
+	for {
+		if idx := strings.Index(t[next:], META_SEPARATOR); idx >= 0 {
+			next += idx + len(META_SEPARATOR)
+		} else {
+			break
+		}
+	}
+	if next == 0 {
+		return t
+	}
+	return t[:next-len(META_SEPARATOR)] + "+" + t[next:]
+}
+
 func (c *componentAccessImpl) ListVersions() ([]string, error) {
 	tags, err := c.namespace.ListTags()
 	if err != nil {
@@ -113,7 +141,7 @@ func (c *componentAccessImpl) ListVersions() ([]string, error) {
 	for _, t := range tags {
 		// omit reported digests (typically for ctf)
 		if ok, _ := artdesc.IsDigest(t); !ok {
-			result = append(result, t)
+			result = append(result, toVersion(t))
 		}
 	}
 	return result, err
@@ -125,7 +153,7 @@ func (c *componentAccessImpl) LookupVersion(version string) (cpi.ComponentVersio
 		return nil, err
 	}
 	defer v.Close()
-	acc, err := c.namespace.GetArtifact(version)
+	acc, err := c.namespace.GetArtifact(toTag(version))
 	if err != nil {
 		if errors.IsErrNotFound(err) {
 			return nil, cpi.ErrComponentVersionNotFoundWrap(err, c.name, version)
@@ -157,7 +185,7 @@ func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (cpi
 	defer v.Close()
 
 	override := utils.Optional(overrides...)
-	acc, err := c.namespace.GetArtifact(version)
+	acc, err := c.namespace.GetArtifact(toTag(version))
 	if err == nil {
 		if override {
 			return newComponentVersionAccess(accessobj.ACC_CREATE, c, version, acc, false)

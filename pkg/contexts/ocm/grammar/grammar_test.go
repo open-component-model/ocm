@@ -10,6 +10,8 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	gr "github.com/open-component-model/ocm/pkg/regex"
 )
 
 func TestConfig(t *testing.T) {
@@ -18,23 +20,27 @@ func TestConfig(t *testing.T) {
 }
 
 func CheckRef(ref string, parts ...string) {
-	Check(ref, AnchoredReferenceRegexp, parts...)
+	CheckWithOffset(1, ref, AnchoredReferenceRegexp, parts...)
 }
 
 func CheckVers(ref string, parts ...string) {
-	Check(ref, AnchoredComponentVersionRegexp, parts...)
+	CheckWithOffset(1, ref, AnchoredComponentVersionRegexp, parts...)
 }
 
 func Check(ref string, exp *regexp.Regexp, parts ...string) {
+	CheckWithOffset(1, ref, exp, parts...)
+}
+
+func CheckWithOffset(o int, ref string, exp *regexp.Regexp, parts ...string) {
 	spec := exp.FindSubmatch([]byte(ref))
 	if len(parts) == 0 {
-		Expect(spec).To(BeNil())
+		ExpectWithOffset(o+1, spec).To(BeNil())
 	} else {
 		result := make([]string, len(spec))
 		for i, v := range spec {
 			result[i] = string(v)
 		}
-		Expect(result).To(Equal(append([]string{ref}, parts...)))
+		ExpectWithOffset(o+1, result).To(Equal(append([]string{ref}, parts...)))
 	}
 }
 
@@ -58,6 +64,29 @@ func Vers(t string) string {
 }
 
 var _ = Describe("ref matching", func() {
+	Context("basic", func() {
+		It("matches", func() {
+			Expect(gr.Match("[a^-]").MatchString("a^--")).To(BeTrue())
+			Expect(gr.Match(`[a\-^]`).MatchString("a^-")).To(BeTrue())
+			Expect(gr.Match(`[\^a\-]`).MatchString("a^-")).To(BeTrue())
+			Expect(gr.Match("[^a^-]").MatchString("b")).To(BeTrue())
+			Expect(gr.Match("[^a^-]").MatchString("^")).To(BeFalse())
+		})
+	})
+
+	Context("versions", func() {
+		It("matches versions", func() {
+			Expect(VersionRegexp.MatchString("v1.1.1")).To(BeTrue())
+			Expect(VersionRegexp.MatchString("v1")).To(BeTrue())
+			Expect(VersionRegexp.MatchString("1.1.1")).To(BeTrue())
+		})
+
+		It("matches pre versions", func() {
+			Expect(VersionRegexp.MatchString("v1.1.1-rc.1")).To(BeTrue())
+			Expect(VersionRegexp.MatchString("v1-rc.1")).To(BeTrue())
+			Expect(VersionRegexp.MatchString("1.1.1-rc.1")).To(BeTrue())
+		})
+	})
 
 	Context("complete refs", func() {
 		t := "OCIRepository"
@@ -123,6 +152,11 @@ var _ = Describe("ref matching", func() {
 		It("succeeds", func() {
 			CheckVers("ghcr.io/test", "ghcr.io/test", "")
 			CheckVers("ghcr.io/test:v1", "ghcr.io/test", "v1")
+			CheckVers("ghcr.io/test:v1-rc1", "ghcr.io/test", "v1-rc1")
+			CheckVers("ghcr.io/test:v1+rc1", "ghcr.io/test", "v1+rc1")
+			CheckVers("ghcr.io/test:v1-rc1+build", "ghcr.io/test", "v1-rc1+build")
+			CheckVers("ghcr.io/test:v1.1.1-rc1+build", "ghcr.io/test", "v1.1.1-rc1+build")
+			CheckVers("ghcr.io/test:v1.1-rc1+build", "ghcr.io/test", "v1.1-rc1+build")
 		})
 		It("fails", func() {
 			CheckVers("ghcr/test")

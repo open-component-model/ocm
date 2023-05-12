@@ -22,6 +22,11 @@ var (
 	// TypeRegexp describes a type name for a repository.
 	TypeRegexp = grammar.TypeRegexp
 
+	VersionRegexp = Sequence(Optional(Literal("v")), Numeric, Repetition(0, 2, Literal("."), Numeric),
+		Optional(Literal("-"), Repeated(CharSet("0-9A-Za-z-")), OptionalRepeated(Literal("."), Repeated(CharSet("0-9A-Za-z-")))),
+		Optional(Literal("+"), Repeated(CharSet("0-9A-Za-z-"))),
+	)
+
 	// AnchoredRepositoryRegexp parses a uniform repository spec.
 	AnchoredRepositoryRegexp = Anchored(
 		Optional(Capture(TypeRegexp), Literal("::")),
@@ -34,14 +39,14 @@ var (
 		Capture(Match(".*")),
 	)
 
-	// ComponentRegexp describes the component name. It cosnsists
-	// of a domain ame followed by OCI repository name components.
+	// ComponentRegexp describes the component name. It consists
+	// of a domain name followed by OCI repository name components.
 	ComponentRegexp = Sequence(grammar.DomainRegexp, grammar.RepositorySeparatorRegexp, grammar.RepositoryRegexp)
 
 	// AnchoredComponentVersionRegexp parses a component with an optional version.
 	AnchoredComponentVersionRegexp = Anchored(
 		Capture(ComponentRegexp),
-		Optional(Literal(VersionSeparator), Capture(grammar.TagRegexp)),
+		Optional(Literal(VersionSeparator), Capture(VersionRegexp)),
 	)
 
 	// AnchoredReferenceRegexp parses a complete string representation for default component references including
@@ -51,7 +56,7 @@ var (
 		Optional(Capture(TypeRegexp), Literal("::")),
 		Capture(grammar.DomainPortRegexp), Optional(grammar.RepositorySeparatorRegexp, Capture(grammar.RepositoryRegexp)),
 		Literal("//"), Capture(ComponentRegexp),
-		Optional(Literal(VersionSeparator), Capture(grammar.TagRegexp)),
+		Optional(Literal(VersionSeparator), Capture(VersionRegexp)),
 	)
 
 	// AnchoredGenericReferenceRegexp parses a CTF file based string representation.
@@ -59,6 +64,6 @@ var (
 		Optional(Capture(TypeRegexp), Literal("::")),
 		Capture(Match(".*?")),
 		Optional(Literal("//"), Capture(ComponentRegexp),
-			Optional(Literal(VersionSeparator), Capture(grammar.TagRegexp))),
+			Optional(Literal(VersionSeparator), Capture(VersionRegexp))),
 	)
 )

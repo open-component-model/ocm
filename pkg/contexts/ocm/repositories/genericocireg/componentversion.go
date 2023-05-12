@@ -206,7 +206,7 @@ func (c *ComponentVersionContainer) Update() error {
 		}
 
 		logger.Debug("add oci artifact")
-		if _, err := c.comp.namespace.AddArtifact(c.manifest, c.version); err != nil {
+		if _, err := c.comp.namespace.AddArtifact(c.manifest, toTag(c.version)); err != nil {
 			return fmt.Errorf("unable to add artifact: %w", err)
 		}
 	}
