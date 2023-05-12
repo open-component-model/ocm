@@ -69,7 +69,7 @@ var _ = Describe("ref parsing", func() {
 			for _, ut := range []string{t, ""} {
 				for _, uh := range []string{h, h + ":3030", "localhost", "localhost:3030"} {
 					for _, us := range []string{"", s} {
-						for _, uv := range []string{"", v} {
+						for _, uv := range []string{"", v, v + ".1.1", v + "-rc.1", v + "+65", v + ".1.2-rc.1", v + ".1.2+65"} {
 							ref := Type(ut) + uh + Sub(us) + "//" + c + Vers(uv)
 							ut, uh, us, uv := ut, uh, us, uv
 
