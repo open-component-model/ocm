@@ -1,0 +1,4 @@
+# type is a special property which specifies the type of this serialized object.
+type: simplemessage
+
+text: This Type Registry Pattern is quite exhausting.
