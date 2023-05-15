@@ -170,13 +170,13 @@ Here, the different _Type Registries_ shown in the overview are explained.
 
 ### Section 3.2.1 - Repository Types Scheme
 
-A `RepositoryTypesScheme` is an object that maps a number of _repository types (= model type)_ to corresponding 
-_factories_ providing a repository object of a specific type or with a specific configuration for dealing with this 
-_repository type (= model type)_.
+A `RepositoryTypeScheme` is an object that maps a number of _repository types (= model type)_ to corresponding 
+_factories_ providing a repository spec object which is again a factory for providing an object of a specific type or 
+with a specific configuration for dealing with this _repository type (= model type)_.
 
-There exist multiple _Repository Spec Types_ Registries within the ocm-lib. There is a Repository Spec Type Registry
-for [**OCM** _repository types (= model types)_](../../pkg/contexts/ocm/repositories) and a Repository Spec Types
-Registry for [**OCI** _repository types (= model types_](../../pkg/contexts/oci/repositories).
+There exist multiple _Repository Type_ Registries within the ocm-lib. There is a Repository Type Registry
+for [**OCM** _repository types (= model types)_](../../pkg/contexts/ocm/repositories) and a Repository Types
+Registry for [**OCI** _repository types (= model types)_](../../pkg/contexts/oci/repositories).
 
 **OCI Repository Types:**  
 Having multiple _OCI Repository Types_ may initially sound confusing. Therefore, a short explanation on what
@@ -254,34 +254,39 @@ the one registered in the [`genericocireg`](../../pkg/contexts/ocm/repositories/
 uses the **oci** _repository types registry_ to perform the unmarshaling (thus, if I registered the type in the 
 oci repository types registry, it is automatically available for the ocm repository registry).
 
-### Section 3.2.2 - Access Methods
+### Section 3.2.2 - Access Type Scheme
 
-A AccessMethods object stores a number of types implementing a AccessMethod (thus, AccessMethod is the "certain
-functionality").
-In this case, one type is ociArtifact (storing the artifact in an oci Registry), thus, a dedicated technical procedure
-of how to access the artifact blob described by a Component Descriptor. Further types are localBlob (storing the
-artifact blob along with the component descriptor) or github (storing the artifact blob in a GitHub registry).
-To make it even more clear, an Access Method is anything that allows to access artifact blobs described by a Component
-Descriptor through the following interface (thus, describes the following functionality):
+An `AccessTypeScheme` is an object that maps a number of _access types (= model type)_ to corresponding
+_factories_ providing an access spec object which is again a factory for providing an object of a specific type or with 
+a specific configuration for dealing with this _access type (= model type)_.
 
-    type AccessMethod interface {
-        Get() ([]byte, error)
-        Reader() (io.ReadCloser, error)
-        
-        GetKind() string
-        AccessSpec() AccessSpec
-        MimeType() string
-        
-        Close() error
-    }
+From the perspective of the ocm-lib, any _go type_ that implements the following 
+[interface](../../pkg/contexts/ocm/internal/accesstypes.go) can be considered an _OCI Repository_:
+```
+type AccessMethod interface {
+	DataAccess
 
-CAREFUL - There are two conceptually relevant details here!
+	GetKind() string
+	AccessSpec() AccessSpec
+	MimeType
+	Close() error
+}
+```
 
-1) There are global and local AccessMethod types. Global types (such as ociArtifact or github) implement the procedure
-   to access the artifact blobs themselves. Local types, on the contrary, delegate the implementation of the procedure
-   to the respective component repository (as each type of component repository may handle the storage of artifact blobs
-   alongside the component descriptor differently).
-2) AccessMethods return the artifact blob as is. Thus, if a helm chart is stored as an .tar, the AccessMethod will
+Within ocm-lib, there are multiple implementations of this interface. Most prominently, an implementation for 
+[_OCI Artifacts_](../../pkg/contexts/ocm/accessmethods/ociartifact/method.go) (artifact blob is stored as an independent
+oci artifact in an OCI Registry), a dedicated technical procedure of how to access an artifact blob stored in an OCI 
+Registry. There are further implementations, e.g. for [_Local Blobs_](../../pkg/contexts/ocm/accessmethods/localblob) 
+(artifact blob is stored in the same oci artifact as its component descriptor), for  
+[_s3_](../../pkg/contexts/ocm/accessmethods/s3) or for [_gitHub_](../../pkg/contexts/ocm/accessmethods/github).
+
+**CAREFUL - There are two conceptually relevant details here!**
+
+1) There are **Global** and **Local** **Access Method types**. **Global types** (such as ociArtifact or github) 
+   implement the procedure to access the artifact blobs themselves. **Local types**, on the contrary, delegate the 
+   implementation of the procedure to the respective component repository (as each type of component repository may 
+   handle the storage of artifact blobs alongside the component descriptor differently).
+2) **AccessMethods return the artifact blob as is**. Thus, if a helm chart is stored as an .tar, the AccessMethod will
    return the bytes of the .tar. If, on the other hand, the helm chart is stored as an tar.gz , the AccessMethod will
    return the bytes of the .tar.gz. Therefore, for further processing, the MimeType() can be read (inspecting the
    MimeType and conversion to a target format can be done with downloaders - a convenience feature implemented by the
