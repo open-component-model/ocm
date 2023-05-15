@@ -20,14 +20,16 @@ const (
 	TypeV1 = Type + "/v1"
 )
 
-var versions runtime.Scheme[TestSpec]
+var versions runtime.Scheme[TestSpec, TestType]
 
 func init() {
-	versions = runtime.MustNewDefaultScheme[TestSpec](nil, false, nil)
+	versions = runtime.MustNewDefaultScheme[TestSpec, TestType](nil, false, nil)
 
 	versions.RegisterByDecoder(Type, runtime.NewVersionedTypedObjectTypeByConverter[TestSpec, *TestSpec1, *Spec1V1](Type, &converterSpec1V1{}))
 	versions.RegisterByDecoder(TypeV1, runtime.NewVersionedTypedObjectTypeByConverter[TestSpec, *TestSpec1, *Spec1V1](TypeV1, &converterSpec1V1{}))
 }
+
+type TestType runtime.TypedObjectDecoder[TestSpec]
 
 type TestSpec interface {
 	runtime.VersionedTypedObject

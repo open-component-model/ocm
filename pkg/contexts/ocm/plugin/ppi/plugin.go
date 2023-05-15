@@ -28,10 +28,10 @@ type plugin struct {
 
 	uploaders      map[string]Uploader
 	upmappings     *registry.Registry[Uploader, UploaderKey]
-	uploaderScheme runtime.Scheme[runtime.TypedObject]
+	uploaderScheme runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
 
 	methods      map[string]AccessMethod
-	accessScheme runtime.Scheme[runtime.TypedObject]
+	accessScheme runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
 
 	actions map[string]Action
 
@@ -50,8 +50,8 @@ func NewPlugin(name string, version string) Plugin {
 		uploaders:  map[string]Uploader{},
 		upmappings: registry.NewRegistry[Uploader, UploaderKey](),
 
-		accessScheme:   runtime.MustNewDefaultScheme[runtime.TypedObject](&runtime.UnstructuredVersionedTypedObject{}, false, nil),
-		uploaderScheme: runtime.MustNewDefaultScheme[runtime.TypedObject](&runtime.UnstructuredVersionedTypedObject{}, false, nil),
+		accessScheme:   runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil),
+		uploaderScheme: runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil),
 
 		actions: map[string]Action{},
 

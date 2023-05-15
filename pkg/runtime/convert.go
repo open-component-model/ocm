@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 type Converter[T VersionedTypedObject, V TypedObject] interface {
@@ -48,7 +49,7 @@ type formatVersion[T VersionedTypedObject, I VersionedTypedObject, V TypedObject
 }
 
 func (c *formatVersion[T, I, V]) Encode(object T, marshaler Marshaler) ([]byte, error) {
-	i, err := Cast[T, I](object)
+	i, err := generics.Cast[I](object)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +73,7 @@ func (c *formatVersion[T, I, V]) Decode(data []byte, unmarshaler Unmarshaler) (T
 	if err != nil {
 		return _nil, err
 	}
-	return Cast[I, T](i)
+	return generics.Cast[T](i)
 }
 
 // caster applies an implementation to interface upcast for a format version,
@@ -130,17 +131,4 @@ func NewConvertedVersion[T VersionedTypedObject, I VersionedTypedObject, V Typed
 		decoder:   MustNewDirectDecoder[V](proto),
 		converter: converter,
 	}
-}
-
-// Cast casts one type parameter to another type parameter,
-// which have a sub type relation.
-// This cannot be described by type parameter constraints in Go, because
-// constraints may not be type parameters again.
-func Cast[T, S any](o T) (S, error) {
-	var _nil S
-	var t any = o
-	if s, ok := t.(S); ok {
-		return s, nil
-	}
-	return _nil, errors.ErrInvalid("type", fmt.Sprintf("%T", o))
 }

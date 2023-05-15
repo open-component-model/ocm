@@ -38,7 +38,7 @@ func TypedObjectFactory(proto TypedObject) func() TypedObject {
 	return func() TypedObject { return reflect.New(MustProtoType(proto)).Interface().(TypedObject) }
 }
 
-func TypeNames[T TypedObject](scheme Scheme[T]) []string {
+func TypeNames[T TypedObject, R TypedObjectDecoder[T]](scheme Scheme[T, R]) []string {
 	types := []string{}
 	for t := range scheme.KnownTypes() {
 		types = append(types, t)
@@ -47,7 +47,7 @@ func TypeNames[T TypedObject](scheme Scheme[T]) []string {
 	return types
 }
 
-func KindNames[T TypedObject](scheme KnownTypesProvider[T]) []string {
+func KindNames[T TypedObject, R TypedObjectDecoder[T]](scheme KnownTypesProvider[T, R]) []string {
 	types := []string{}
 	for t := range scheme.KnownTypes() {
 		if !strings.Contains(t, VersionSeparator) {

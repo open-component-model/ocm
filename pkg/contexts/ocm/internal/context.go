@@ -194,7 +194,7 @@ func (c *_context) RepositoryForSpec(spec RepositorySpec, creds ...credentials.C
 }
 
 func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...credentials.CredentialsSource) (Repository, error) {
-	spec, err := c.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
+	spec, err := c.knownRepositoryTypes.Decode(data, unmarshaler)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +202,7 @@ func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarsha
 }
 
 func (c *_context) RepositorySpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
-	return c.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
+	return c.knownRepositoryTypes.Decode(data, unmarshaler)
 }
 
 func (c *_context) AccessMethods() AccessTypeScheme {
@@ -210,7 +210,7 @@ func (c *_context) AccessMethods() AccessTypeScheme {
 }
 
 func (c *_context) AccessSpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error) {
-	return c.knownAccessTypes.DecodeAccessSpec(data, unmarshaler)
+	return c.knownAccessTypes.Decode(data, unmarshaler)
 }
 
 // AccessSpecForSpec takes an anonymous access specification and tries to map
@@ -235,7 +235,7 @@ func (c *_context) AccessSpecForSpec(spec compdesc.AccessSpec) (AccessSpec, erro
 		return nil, err
 	}
 
-	return c.knownAccessTypes.DecodeAccessSpec(raw, runtime.DefaultJSONEncoding)
+	return c.knownAccessTypes.Decode(raw, runtime.DefaultJSONEncoding)
 }
 
 func (c *_context) Encode(spec AccessSpec, marshaler runtime.Marshaler) ([]byte, error) {

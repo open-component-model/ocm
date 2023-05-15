@@ -5,6 +5,7 @@
 package scheme
 
 import (
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -42,9 +43,9 @@ func NewIdentityType[O Object](proto O) Type[O] {
 type IdentityConverter[O Object] struct{}
 
 func (i IdentityConverter[O]) ConvertFrom(object O) (runtime.TypedObject, error) {
-	return runtime.Cast[O, runtime.TypedObject](object)
+	return generics.Cast[runtime.TypedObject](object)
 }
 
 func (i IdentityConverter[O]) ConvertTo(object runtime.TypedObject) (O, error) {
-	return runtime.Cast[runtime.TypedObject, O](object)
+	return generics.Cast[O](object)
 }

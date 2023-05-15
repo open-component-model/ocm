@@ -27,14 +27,11 @@ type RepositorySpec interface {
 
 type (
 	RepositorySpecDecoder  = runtime.TypedObjectDecoder[RepositorySpec]
-	RepositoryTypeProvider = runtime.KnownTypesProvider[RepositorySpec]
+	RepositoryTypeProvider = runtime.KnownTypesProvider[RepositorySpec, RepositoryType]
 )
 
 type RepositoryTypeScheme interface {
 	runtime.TypeScheme[RepositorySpec, RepositoryType]
-
-	DecodeRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error)
-	CreateRepositorySpec(obj runtime.TypedObject) (RepositorySpec, error)
 }
 
 type _Scheme = runtime.TypeScheme[RepositorySpec, RepositoryType]
@@ -53,16 +50,8 @@ func NewStrictRepositoryTypeScheme(base ...RepositoryTypeScheme) runtime.Version
 	return &repositoryTypeScheme{scheme}
 }
 
-func (t *repositoryTypeScheme) KnownTypes() runtime.KnownTypes[RepositorySpec] {
+func (t *repositoryTypeScheme) KnownTypes() runtime.KnownTypes[RepositorySpec, RepositoryType] {
 	return t._Scheme.KnownTypes()
-}
-
-func (t *repositoryTypeScheme) DecodeRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
-	return t._Scheme.Decode(data, unmarshaler) // Goland
-}
-
-func (t *repositoryTypeScheme) CreateRepositorySpec(obj runtime.TypedObject) (RepositorySpec, error) {
-	return t._Scheme.Convert(obj)
 }
 
 // DefaultRepositoryTypeScheme contains all globally known access serializer.
@@ -73,7 +62,7 @@ func RegisterRepositoryType(atype RepositoryType) {
 }
 
 func CreateRepositorySpec(t runtime.TypedObject) (RepositorySpec, error) {
-	return DefaultRepositoryTypeScheme.CreateRepositorySpec(t)
+	return DefaultRepositoryTypeScheme.Convert(t)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -138,7 +127,7 @@ func (s *GenericRepositorySpec) Evaluate(ctx Context) (RepositorySpec, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ctx.RepositoryTypes().DecodeRepositorySpec(raw, runtime.DefaultJSONEncoding)
+	return ctx.RepositoryTypes().Decode(raw, runtime.DefaultJSONEncoding)
 }
 
 func (s *GenericRepositorySpec) Repository(ctx Context, creds Credentials) (Repository, error) {

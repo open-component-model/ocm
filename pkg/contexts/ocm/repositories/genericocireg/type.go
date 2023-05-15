@@ -50,7 +50,7 @@ func (d *delegation) Decode(ctx cpi.Context, data []byte, unmarshal runtime.Unma
 		unmarshal = runtime.DefaultYAMLEncoding.Unmarshaler
 	}
 
-	ospec, err := ctx.OCIContext().RepositoryTypes().DecodeRepositorySpec(data, unmarshal)
+	ospec, err := ctx.OCIContext().RepositoryTypes().Decode(data, unmarshal)
 	if err != nil {
 		return nil, err
 	}

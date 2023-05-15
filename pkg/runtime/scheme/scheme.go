@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/Masterminds/semver/v3"
+	"github.com/modern-go/reflect2"
 
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -83,22 +84,17 @@ func (k *kind) Description() string {
 
 type scheme[O Object, T Type[O]] struct {
 	lock   sync.Mutex
-	scheme runtime.Scheme[O]
+	scheme runtime.Scheme[O, T]
 	kinds  map[string]*kindInfo
 }
 
 func NewScheme[O Object, T Type[O]]() Scheme[O, T] {
-	s := runtime.MustNewDefaultScheme[O](nil, false, nil)
+	s := runtime.MustNewDefaultScheme[O, T](nil, false, nil)
 	return &scheme[O, T]{scheme: s, kinds: map[string]*kindInfo{}}
 }
 
 func (t *scheme[O, T]) GetType(name string) T {
-	var zero T
-	d := t.scheme.GetDecoder(name)
-	if d == nil {
-		return zero
-	}
-	return d.(T)
+	return t.scheme.GetDecoder(name)
 }
 
 func (t *scheme[O, T]) GetKind(kind string) Kind {
@@ -148,7 +144,7 @@ func (t *scheme[O, T]) RegisterType(name string, typ T) error {
 		t.kinds[k] = ki
 	}
 
-	if v == "v1" && t.scheme.GetDecoder(k) == nil {
+	if v == "v1" && reflect2.IsNil(t.scheme.GetDecoder(k)) {
 		t.scheme.RegisterByDecoder(k, typ)
 	}
 	if v == "" {
@@ -193,7 +189,7 @@ func (t *scheme[O, T]) KnownTypes() KnownTypes[O, T] {
 	result := KnownTypes[O, T]{}
 
 	for k, v := range t.scheme.KnownTypes() {
-		result[k] = v.(T)
+		result[k] = v
 	}
 	return result
 }

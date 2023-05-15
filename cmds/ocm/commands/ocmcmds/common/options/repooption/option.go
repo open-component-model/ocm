@@ -12,7 +12,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 func From(o options.OptionSetProvider) *Option {
@@ -93,16 +92,15 @@ linked library can be used:
 Dedicated OCM repository types:
 `
 
-	types := runtime.KindNames[ocm.RepositorySpec](ocm.DefaultContext().RepositoryTypes())
-	for _, t := range types {
+	for _, t := range ocm.DefaultContext().RepositoryTypes().KnownTypeNames() {
 		s += "- `" + t + "`\n"
 	}
 
+	oci.DefaultContext().RepositoryTypes().KnownTypeNames()
 	s += `
 OCI Repository types (using standard component repository to OCI mapping):
 `
-	types = runtime.KindNames[oci.RepositorySpec](oci.DefaultContext().RepositoryTypes())
-	for _, t := range types {
+	for _, t := range oci.DefaultContext().RepositoryTypes().KnownTypeNames() {
 		s += "- `" + t + "`\n"
 	}
 	return s

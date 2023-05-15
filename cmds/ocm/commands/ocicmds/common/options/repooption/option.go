@@ -83,7 +83,7 @@ For the *Common Transport Format* the types <code>directory</code>,
 Using the JSON variant any repository type supported by the 
 linked library can be used:
 `
-	types := runtime.KindNames[oci.RepositorySpec](oci.DefaultContext().RepositoryTypes())
+	types := runtime.KindNames[oci.RepositorySpec, oci.RepositoryType](oci.DefaultContext().RepositoryTypes())
 	for _, t := range types {
 		s += "- `" + t + "`\n"
 	}

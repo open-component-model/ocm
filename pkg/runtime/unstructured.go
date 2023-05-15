@@ -184,7 +184,7 @@ func (u *UnstructuredTypedObject) setRaw(data []byte) error {
 
 // EvaluateUnstructured converts an unstructured object into a typed object.
 // Go does not support generic methods.
-func EvaluateUnstructured[T TypedObject](u *UnstructuredTypedObject, types Scheme[T]) (T, error) {
+func EvaluateUnstructured[T TypedObject, R TypedObjectDecoder[T]](u *UnstructuredTypedObject, types Scheme[T, R]) (T, error) {
 	var zero T
 
 	data, err := u.GetRaw()

@@ -47,7 +47,7 @@ type AccessSpec interface {
 
 type (
 	AccessSpecDecoder  = runtime.TypedObjectDecoder[AccessSpec]
-	AccessTypeProvider = runtime.KnownTypesProvider[AccessSpec]
+	AccessTypeProvider = runtime.KnownTypesProvider[AccessSpec, AccessType]
 )
 
 // HintProvider is used to provide a reference hint for local access method specs.
@@ -77,9 +77,6 @@ type AccessMethod interface {
 type AccessTypeScheme interface {
 	runtime.TypeScheme[AccessSpec, AccessType]
 
-	DecodeAccessSpec(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error)
-	CreateAccessSpec(obj runtime.TypedObject) (AccessSpec, error)
-
 	CreateConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider
 }
 
@@ -103,7 +100,7 @@ func (t *accessTypeScheme) CreateConfigTypeSetConfigProvider() flagsets.ConfigTy
 	prov := flagsets.NewTypedConfigProvider("access", "blob access specification")
 	prov.AddGroups("Access Specification Options")
 	for _, p := range t.KnownTypes() {
-		err := prov.AddTypeSet(p.(AccessType).ConfigOptionTypeSetHandler())
+		err := prov.AddTypeSet(p.ConfigOptionTypeSetHandler())
 		if err != nil {
 			logging.Logger().LogError(err, "cannot compose access type CLI options")
 		}
@@ -123,16 +120,8 @@ func (t *accessTypeScheme) CreateConfigTypeSetConfigProvider() flagsets.ConfigTy
 	return prov
 }
 
-func (t *accessTypeScheme) KnownTypes() runtime.KnownTypes[AccessSpec] {
-	return t._AccessScheme.KnownTypes()
-}
-
-func (t *accessTypeScheme) DecodeAccessSpec(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error) {
-	return t._AccessScheme.Decode(data, unmarshaler) // Goland
-}
-
-func (t *accessTypeScheme) CreateAccessSpec(obj runtime.TypedObject) (AccessSpec, error) {
-	return t._AccessScheme.Convert(obj)
+func (t *accessTypeScheme) KnownTypes() runtime.KnownTypes[AccessSpec, AccessType] {
+	return t._AccessScheme.KnownTypes() // Goland
 }
 
 // DefaultAccessTypeScheme contains all globally known access serializer.
@@ -143,7 +132,7 @@ func RegisterAccessType(atype AccessType) {
 }
 
 func CreateAccessSpec(t runtime.TypedObject) (AccessSpec, error) {
-	return DefaultAccessTypeScheme.CreateAccessSpec(t)
+	return DefaultAccessTypeScheme.Convert(t)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -235,7 +224,7 @@ func (s *GenericAccessSpec) Evaluate(ctx Context) (AccessSpec, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ctx.AccessMethods().DecodeAccessSpec(raw, runtime.DefaultJSONEncoding)
+	return ctx.AccessMethods().Decode(raw, runtime.DefaultJSONEncoding)
 }
 
 func (s *GenericAccessSpec) AccessMethod(acc ComponentVersionAccess) (AccessMethod, error) {

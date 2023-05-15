@@ -4,6 +4,12 @@
 
 package generics
 
+import (
+	"fmt"
+
+	"github.com/open-component-model/ocm/pkg/errors"
+)
+
 func As[T any](o interface{}) T {
 	var _nil T
 	if o == nil {
@@ -34,4 +40,27 @@ func CastPointer[T any](p any, err error) (T, error) {
 		return _nil, err
 	}
 	return p.(T), err
+}
+
+// Cast casts one type parameter to another type parameter,
+// which have a sub type relation.
+// This cannot be described by type parameter constraints in Go, because
+// constraints may not be type parameters again.
+func Cast[S any](o any) (S, error) {
+	var _nil S
+	var t any = o
+	if s, ok := t.(S); ok {
+		return s, nil
+	}
+	return _nil, errors.ErrInvalid("type", fmt.Sprintf("%T", o))
+}
+
+// TryCast tries a type cast usable for variable with a parametric type.
+func TryCast[T any](p any) (T, bool) {
+	var _nil T
+	if p == nil {
+		return _nil, false
+	}
+	t, ok := p.(T)
+	return t, ok
 }

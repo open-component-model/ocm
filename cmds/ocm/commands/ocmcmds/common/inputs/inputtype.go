@@ -160,7 +160,7 @@ func (t *DefaultInputType) ApplyConfig(opts flagsets.ConfigOptions, config flags
 }
 
 type InputTypeScheme interface {
-	runtime.Scheme[InputSpec]
+	runtime.Scheme[InputSpec, InputType]
 
 	ConfigTypeSetConfigProvider() flagsets.ConfigTypeOptionSetConfigProvider
 	flagsets.ConfigProvider
@@ -173,12 +173,12 @@ type InputTypeScheme interface {
 }
 
 type inputTypeScheme struct {
-	runtime.Scheme[InputSpec]
+	runtime.Scheme[InputSpec, InputType]
 	optionTypes flagsets.ConfigTypeOptionSetConfigProvider
 }
 
 func NewInputTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder[InputSpec]) InputTypeScheme {
-	scheme := runtime.MustNewDefaultScheme[InputSpec](&UnknownInputSpec{}, false, defaultRepoDecoder)
+	scheme := runtime.MustNewDefaultScheme[InputSpec, InputType](&UnknownInputSpec{}, false, defaultRepoDecoder)
 	prov := flagsets.NewTypedConfigProvider("input", "blob input specification")
 	prov.AddGroups("Input Specification Options")
 	return &inputTypeScheme{scheme, prov}

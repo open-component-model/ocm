@@ -88,7 +88,7 @@ type AccessSpec = runtime.TypedObject
 
 type AccessSpecProvider func() AccessSpec
 
-type UploadFormats runtime.KnownTypes[runtime.TypedObject]
+type UploadFormats runtime.KnownTypes[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
 
 type Uploader interface {
 	Decoders() UploadFormats

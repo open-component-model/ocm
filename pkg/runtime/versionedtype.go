@@ -143,7 +143,7 @@ func NewVersionedTypedObjectTypeByVersion[T VersionedTypedObject, I VersionedTyp
 type VersionedTypeRegistry[T VersionedTypedObject, R VersionedTypedObjectType[T]] interface {
 	Register(t R)
 
-	KnownTypesProvider[T]
+	KnownTypesProvider[T, R]
 	TypedObjectEncoder[T]
 	TypedObjectDecoder[T]
 }
@@ -153,7 +153,7 @@ type VersionedTypeRegistry[T VersionedTypedObject, R VersionedTypedObjectType[T]
 type TypeVersionScheme[T VersionedTypedObject, R VersionedTypedObjectType[T]] interface {
 	Register(t R) error
 
-	KnownTypesProvider[T]
+	KnownTypesProvider[T, R]
 	TypedObjectEncoder[T]
 	TypedObjectDecoder[T]
 }

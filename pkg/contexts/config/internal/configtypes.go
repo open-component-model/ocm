@@ -24,14 +24,11 @@ var _ runtime.VersionedTypedObjectType[Config] = (ConfigType)(nil)
 
 type (
 	ConfigDecoder      = runtime.TypedObjectDecoder[Config]
-	ConfigTypeProvider = runtime.KnownTypesProvider[Config]
+	ConfigTypeProvider = runtime.KnownTypesProvider[Config, ConfigType]
 )
 
 type ConfigTypeScheme interface {
 	runtime.TypeScheme[Config, ConfigType]
-
-	DecodeConfig(data []byte, unmarshaler runtime.Unmarshaler) (Config, error)
-	CreateConfig(obj runtime.TypedObject) (Config, error)
 
 	Usage() string
 }
@@ -48,7 +45,7 @@ func NewConfigTypeScheme(defaultDecoder ConfigDecoder, base ...ConfigTypeScheme)
 }
 
 // KnownTypes required just for Goland.
-func (s *configTypeScheme) KnownTypes() runtime.KnownTypes[Config] {
+func (s *configTypeScheme) KnownTypes() runtime.KnownTypes[Config, ConfigType] {
 	return s._Scheme.KnownTypes()
 }
 
@@ -65,8 +62,8 @@ func NewStrictConfigTypeScheme(base ...ConfigTypeScheme) runtime.VersionedTypeRe
 	return &versionRegistry{scheme}
 }
 
-func (s *versionRegistry) KnownTypes() runtime.KnownTypes[Config] {
-	return s._Scheme.KnownTypes()
+func (s *versionRegistry) KnownTypes() runtime.KnownTypes[Config, ConfigType] {
+	return s._Scheme.KnownTypes() // Goland
 }
 
 func (t *configTypeScheme) CreateConfig(obj runtime.TypedObject) (Config, error) {
@@ -146,7 +143,7 @@ func (s *GenericConfig) Evaluate(ctx Context) (Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	cfg, err := ctx.ConfigTypes().DecodeConfig(raw, runtime.DefaultJSONEncoding)
+	cfg, err := ctx.ConfigTypes().Decode(raw, runtime.DefaultJSONEncoding)
 	if err != nil {
 		return nil, err
 	}
