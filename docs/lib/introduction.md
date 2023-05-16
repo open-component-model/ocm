@@ -254,6 +254,18 @@ the one registered in the [`genericocireg`](../../pkg/contexts/ocm/repositories/
 uses the **oci** _repository types registry_ to perform the unmarshaling (thus, if I registered the type in the 
 oci repository types registry, it is automatically available for the ocm repository registry).
 
+**Other Repository Types:**
+Besides _OCM_ and _OCI Repository Types_, there currently also exist a number of 
+[_Credential Repository Types_](../../pkg/contexts/credentials/repositories) that have to implement the following
+[interface](../../pkg/contexts/credentials/internal/repository.go):
+```
+type Repository interface {
+	ExistsCredentials(name string) (bool, error)
+	LookupCredentials(name string) (Credentials, error)
+	WriteCredentials(name string, creds Credentials) (Credentials, error)
+}
+```
+
 ### Section 3.2.2 - Access Type Scheme
 
 An `AccessTypeScheme` is an object that maps a number of _access types (= model type)_ to corresponding
@@ -281,7 +293,6 @@ Registry. There are further implementations, e.g. for [_Local Blobs_](../../pkg/
 [_s3_](../../pkg/contexts/ocm/accessmethods/s3) or for [_gitHub_](../../pkg/contexts/ocm/accessmethods/github).
 
 **CAREFUL - There are two conceptually relevant details here!**
-
 1) There are **Global** and **Local** **Access Method types**. **Global types** (such as ociArtifact or github) 
    implement the procedure to access the artifact blobs themselves. **Local types**, on the contrary, delegate the 
    implementation of the procedure to the respective component repository (as each type of component repository may 
@@ -294,21 +305,27 @@ Registry. There are further implementations, e.g. for [_Local Blobs_](../../pkg/
 
 ### Section 3.2.3 - Repository Spec Handlers
 
-A RepositorySpecHandlers object stores a number of types implementing a RepositorySpecHandler (thus,
-RepositorySpecHandler is the "certain functionality").
+`RepositorySpecHandlers` is slightly different from the other Type Registries. Contrary to the other Type Registries, 
+its purpose is not decoding.  
+As it is rather cumbersome to enter JSON objects such as a RepositorySpec through the command line and as there may be
+multiple types of Repository Specs for certain Repository Types (e.g. legacy types), the ocm-cli allows to enter a 
+uniform string representation called `UniformRepositorySpec` of a Repository Spec. Be aware, there are again different
+UniformRepositorySpecs for [OCM Repositories](../../pkg/contexts/ocm/internal/uniform.go) and for 
+[OCI Repositories](../../pkg/contexts/oci/internal/uniform.go). Furthermore, _ocm_ and _oci references_, or rather 
+_reference strings_ (e.g. `eu.gcr.io/gardener-project/landscaper/examples/charts/hello-world:1.0.0`) are parsed into a
+[representation that is based on a `UniformRepositorySpec`](../../pkg/contexts/oci/ref.go). Thus, to get access to the 
+respective Repository through the ocm-lib, this `UniformRepositorySpec` first has to be converted into a corresponding
+`RepositorySpec`.  
+Therefore, a `RepositorySpecHandlers` is an object that maps a _repository type (= model type)_ to a number of
+corresponding `RepositorySpecHandler` objects that might be able to convert a `UniformRepositorySpec` into the 
+appropriate `RepositorySpec` for that Repository Type. Therefore, a RepositorySpecHandler has to implement the
+following [interface](../../pkg/contexts/ocm/internal/uniform.go):
+```
+type RepositorySpecHandler interface {
+	MapReference(ctx Context, u *UniformRepositorySpec) (RepositorySpec, error)
+}
+```
 
-It is rather cumbersome to enter JSON objects such as a RepositorySpec through the command line. Furthermore, there may
-be multiple types of RepositorySpecs for certain type of repository (e.g. legacy types).
-To deal with this issue, string representation of a repository spec (e.g.
-eu.gcr.io/gardener-project/landscaper/examples/charts/hello-world:1.0.0)  may be used and parsed into a
-UniformRepositorySpec. Based on the type attribute of the UniformRepositorySpec, a specific RepositorySpecHandler is
-chosen to map the UniformRepositorySpec to a specific RepositorySpec.
-To make it even more clear, a RepositorySpecHandler is anything that allows to map a UniformRepositorySpec to a
-RepositorySpec through the following interface:
-
-    type RepositorySpecHandler interface {
-        MapReference(ctx Context, u *UniformRepositorySpec) (RepositorySpec, error)
-    }
 
 ### Section 3.2.4 - Blob Handlers
 
