@@ -5,8 +5,6 @@
 package api
 
 import (
-	"reflect"
-
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/runtime/scheme"
@@ -16,8 +14,6 @@ type Action interface {
 	Name() string
 	Description() string
 	ConsumerAttributes() []string
-	SpecificationProto() reflect.Type
-	ResultProto() reflect.Type
 }
 
 ////////////////////////////////////////////////////////////////////////////////

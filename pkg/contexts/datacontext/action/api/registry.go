@@ -5,7 +5,6 @@
 package api
 
 import (
-	"reflect"
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -16,7 +15,7 @@ import (
 const KIND_ACTION = "action"
 
 type ActionTypeRegistry interface {
-	RegisterAction(name string, specproto ActionSpec, resultproto ActionResult, description string, attrs ...string) error
+	RegisterAction(name string, description string, attrs ...string) error
 	RegisterActionType(name string, typ ActionType) error
 
 	DecodeActionSpec(data []byte, unmarshaler runtime.Unmarshaler) (ActionSpec, error)
@@ -33,8 +32,6 @@ type action struct {
 	name        string
 	description string
 	attributes  []string
-	specproto   reflect.Type
-	resultproto reflect.Type
 }
 
 var _ Action = (*action)(nil)
@@ -49,14 +46,6 @@ func (a *action) Description() string {
 
 func (a *action) ConsumerAttributes() []string {
 	return a.attributes
-}
-
-func (a *action) SpecificationProto() reflect.Type {
-	return a.specproto
-}
-
-func (a *action) ResultProto() reflect.Type {
-	return a.resultproto
 }
 
 type actionRegistry struct {
@@ -74,7 +63,7 @@ func NewActionTypeRegistry() ActionTypeRegistry {
 	}
 }
 
-func (r *actionRegistry) RegisterAction(name string, specproto ActionSpec, resultproto ActionResult, description string, attrs ...string) error {
+func (r *actionRegistry) RegisterAction(name string, description string, attrs ...string) error {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
@@ -82,21 +71,11 @@ func (r *actionRegistry) RegisterAction(name string, specproto ActionSpec, resul
 	if ai != nil {
 		return errors.ErrAlreadyExists(KIND_ACTION, name)
 	}
-	st := reflect.TypeOf(specproto)
-	for st.Kind() == reflect.Ptr {
-		st = st.Elem()
-	}
-	rt := reflect.TypeOf(specproto)
-	for rt.Kind() == reflect.Ptr {
-		rt = rt.Elem()
-	}
 
 	ai = &action{
 		name:        name,
 		description: description,
 		attributes:  append(attrs[:0:0], attrs...),
-		specproto:   st,
-		resultproto: rt,
 	}
 	r.actions[name] = ai
 	return nil
@@ -153,8 +132,8 @@ func (r *actionRegistry) SupportedActionVersions(name string) []string {
 
 var registry = NewActionTypeRegistry()
 
-func RegisterAction(name string, specproto ActionSpec, resultproto ActionResult, description string, attrs ...string) error {
-	return registry.RegisterAction(name, specproto, resultproto, description, attrs...)
+func RegisterAction(name string, description string, attrs ...string) error {
+	return registry.RegisterAction(name, description, attrs...)
 }
 
 func RegisterType(kind string, version string, typ ActionType) error {

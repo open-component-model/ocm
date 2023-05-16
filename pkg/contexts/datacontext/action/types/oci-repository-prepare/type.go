@@ -18,7 +18,7 @@ import (
 const Type = "oci.repository.prepare"
 
 func init() {
-	api.RegisterAction(Type, &ActionSpec{}, &ActionResult{}, "Prepare the usage of a repository in an OCI registry.",
+	api.RegisterAction(Type, "Prepare the usage of a repository in an OCI registry.",
 		identity.ID_HOSTNAME, identity.ID_PORT, identity.ID_PATHPREFIX)
 
 	api.RegisterType(Type, "v1", api.NewActionTypeByProtoTypes(&ActionSpecV1{}, nil, &ActionResultV1{}, nil))
