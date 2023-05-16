@@ -7,12 +7,12 @@ package api
 import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/runtime/scheme"
 )
 
 type Action interface {
 	Name() string
 	Description() string
+	Usage() string
 	ConsumerAttributes() []string
 }
 
@@ -27,18 +27,19 @@ func (s Selector) ApplyActionHandlerOptionTo(opts *Options) {
 
 type ActionSpec interface {
 	runtime.VersionedTypedObject
-	SetType(name string)
+	SetVersion(string)
 	Selector() Selector
 	GetConsumerAttributes() common.Properties
 }
 
-type ActionSpecType scheme.Type[ActionSpec]
+type ActionSpecType runtime.VersionedTypedObjectType[ActionSpec]
 
 ////////////////////////////////////////////////////////////////////////////////
 // Action Result
 
 type ActionResult interface {
 	runtime.VersionedTypedObject
+	SetVersion(string)
 	SetType(string)
 	GetMessage() string
 }
@@ -60,9 +61,10 @@ func (r *CommonResult) SetType(typ string) {
 ////////////////////////////////////////////////////////////////////////////////
 // Action Type
 
-type ActionResultType scheme.Type[ActionResult]
+type ActionResultType runtime.VersionedTypedObjectType[ActionResult]
 
 type ActionType interface {
+	runtime.VersionedTypedObject
 	SpecificationType() ActionSpecType
 	ResultType() ActionResultType
 }

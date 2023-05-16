@@ -11,14 +11,14 @@ import (
 	"github.com/Masterminds/semver/v3"
 
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/api"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
-	"github.com/open-component-model/ocm/pkg/runtime/scheme"
+	"github.com/open-component-model/ocm/pkg/runtime"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
-func DescribePluginDescriptor(d *descriptor.Descriptor, out common.Printer) {
+func DescribePluginDescriptor(reg api.ActionTypeRegistry, d *descriptor.Descriptor, out common.Printer) {
 	out.Printf("Plugin Name:      %s\n", d.PluginName)
 	out.Printf("Plugin Version:   %s\n", d.PluginVersion)
 
@@ -63,7 +63,7 @@ func DescribePluginDescriptor(d *descriptor.Descriptor, out common.Printer) {
 	if len(d.Actions) > 0 {
 		out.Printf("\n")
 		out.Printf("Actions:\n")
-		DescribeActions(d, out)
+		DescribeActions(reg, d, out)
 	}
 }
 
@@ -162,12 +162,13 @@ type ActionInfo struct {
 	ConsumerType  string
 	Attributes    []string
 	Description   string
+	Usage         string
 	KnownVersions []string
 	BestVersion   string
 	Error         string
 }
 
-func GetActionInfo(actions []descriptor.ActionDescriptor) map[string]*ActionInfo {
+func GetActionInfo(reg api.ActionTypeRegistry, actions []descriptor.ActionDescriptor) map[string]*ActionInfo {
 	found := map[string]*ActionInfo{}
 	for _, a := range actions {
 		i := found[a.Name]
@@ -178,18 +179,19 @@ func GetActionInfo(actions []descriptor.ActionDescriptor) map[string]*ActionInfo
 				Selectors:    append(a.DefaultSelectors[:0:0], a.DefaultSelectors...),
 				ConsumerType: a.ConsumerType,
 			}
-			if err := scheme.SortVersions(i.Versions); err != nil {
+			if err := runtime.SortVersions(i.Versions); err != nil {
 				sort.Strings(i.Versions)
 			}
 			sort.Strings(i.Selectors)
 			found[a.Name] = i
 		}
-		ad := action.GetAction(a.Name)
+		ad := reg.GetAction(a.Name)
 		if ad == nil {
 			i.Error = " (action unknown)"
 		} else {
 			i.Description = ad.Description()
-			i.KnownVersions = action.SupportedActionVersions(a.Name)
+			i.Usage = ad.Usage()
+			i.KnownVersions = reg.SupportedActionVersions(a.Name)
 			i.Attributes = ad.ConsumerAttributes()
 			for _, v := range i.KnownVersions {
 				for _, f := range a.Versions {
@@ -204,14 +206,17 @@ func GetActionInfo(actions []descriptor.ActionDescriptor) map[string]*ActionInfo
 	return found
 }
 
-func DescribeActions(d *descriptor.Descriptor, out common.Printer) {
-	actions := GetActionInfo(d.Actions)
+func DescribeActions(reg api.ActionTypeRegistry, d *descriptor.Descriptor, out common.Printer) {
+	actions := GetActionInfo(reg, d.Actions)
 
 	for _, n := range utils2.StringMapKeys(actions) {
 		a := actions[n]
 		out.Printf("- Name: %s%s\n", n, a.Error)
 		if a.Description != "" {
 			out.Printf("%s\n", utils2.IndentLines(a.Description, "    "))
+		}
+		if a.Usage != "" {
+			out.Printf("%s\n", utils2.IndentLines(a.Usage, "    "))
 		}
 		if a.ActionDesc != "" {
 			out.Printf("  Info:\n")

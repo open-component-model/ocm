@@ -449,6 +449,11 @@ func MustNewDefaultTypeScheme[T TypedObject, R TypedObjectType[T]](protoUnstr Un
 	return utils.Must(NewDefaultTypeScheme[T, R](protoUnstr, acceptUnknown, defaultdecoder, base...))
 }
 
+func NewTypeScheme[T TypedObject, R TypedObjectType[T]](base ...TypeScheme[T, R]) TypeScheme[T, R] {
+	s, _ := NewDefaultTypeScheme[T](nil, false, nil, generics.ConvertSlice[TypeScheme[T, R], TypeScheme[T, R]](base...)...)
+	return s
+}
+
 func NewDefaultTypeScheme[T TypedObject, R TypedObjectType[T]](protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder[T], base ...TypeScheme[T, R]) (TypeScheme[T, R], error) {
 	s, err := NewDefaultScheme[T](protoUnstr, acceptUnknown, defaultdecoder, generics.ConvertSlice[TypeScheme[T, R], Scheme[T, R]](base...)...)
 	if err != nil {

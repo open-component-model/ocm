@@ -297,7 +297,7 @@ func (p *plugin) RegisterAction(a Action) error {
 	if p.GetAction(a.Name()) != nil {
 		return errors.ErrAlreadyExists("action", a.Name())
 	}
-	vers := action.SupportedActionVersions(a.Name())
+	vers := action.DefaultRegistry().SupportedActionVersions(a.Name())
 	if len(vers) == 0 {
 		return errors.ErrNotSupported("action", a.Name())
 	}
@@ -315,7 +315,7 @@ func (p *plugin) RegisterAction(a Action) error {
 }
 
 func (p *plugin) DecodeAction(data []byte) (ActionSpec, error) {
-	return action.DecodeActionSpec(data)
+	return action.DefaultRegistry().DecodeActionSpec(data, runtime.DefaultJSONEncoding)
 }
 
 func (p *plugin) GetAction(name string) Action {

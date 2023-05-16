@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package scheme_test
+package api_test
 
 import (
 	"testing"
@@ -13,5 +13,5 @@ import (
 
 func TestConfig(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Object Scheme Test Suite")
+	RunSpecs(t, "Action Test Suite")
 }

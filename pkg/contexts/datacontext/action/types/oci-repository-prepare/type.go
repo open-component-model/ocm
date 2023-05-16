@@ -18,11 +18,20 @@ import (
 const Type = "oci.repository.prepare"
 
 func init() {
-	api.RegisterAction(Type, "Prepare the usage of a repository in an OCI registry.",
-		identity.ID_HOSTNAME, identity.ID_PORT, identity.ID_PATHPREFIX)
+	api.RegisterAction(Type, "Prepare the usage of a repository in an OCI registry.", usage,
+		[]string{identity.ID_HOSTNAME, identity.ID_PORT, identity.ID_PATHPREFIX})
 
-	api.RegisterType(Type, "v1", api.NewActionTypeByProtoTypes(&ActionSpecV1{}, nil, &ActionResultV1{}, nil))
+	api.RegisterType(api.NewActionType[*ActionSpecV1, *ActionResultV1](Type, "v1"))
 }
+
+var usage = `
+The hostname of the target repository is used as selector. The action should
+assure, that the requested repository is available on the target OCI registry.
+
+Spec version v1 uses the following specification fields:
+- <code>hostname</code> *string*: The  hostname of the OCI registry.
+- <code>repository</code> *string*: The OCI repository name.
+`
 
 ////////////////////////////////////////////////////////////////////////////////
 // internal version
