@@ -117,7 +117,7 @@ func (r *Repository) getResolver(comp string) (resolve.Resolver, error) {
 						p = creds.GetProperty(credentials.ATTR_PASSWORD)
 					}
 					pw := ""
-					if pw != "" {
+					if p != "" {
 						pw = "***"
 					}
 					logger.Trace("query credentials", ocmlog.ATTR_USER, creds.GetProperty(credentials.ATTR_USERNAME), "pass", pw)
