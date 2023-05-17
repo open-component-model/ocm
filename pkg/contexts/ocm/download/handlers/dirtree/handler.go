@@ -34,6 +34,11 @@ var (
 	MimeOCIImageArtifact        = artdesc.ToContentMediaType(artdesc.MediaTypeImageManifest)
 )
 
+var (
+	supportedMimeTypes   = []string{MimeOCIImageArtifactArchive, mime.MIME_TGZ, mime.MIME_TGZ_ALT, mime.MIME_TAR}
+	defaultArtifactTypes = []string{resourcetypes.DIRECTORY_TREE, resourcetypes.FILESYSTEM_LEGACY}
+)
+
 type Handler struct {
 	configtypes generics.Set[string]
 	archive     bool
@@ -51,8 +56,8 @@ func New(mimetypes ...string) *Handler {
 var DefaultHandler = New()
 
 func init() {
-	for _, t := range []string{resourcetypes.DIRECTORY_TREE, resourcetypes.FILESYSTEM_LEGACY} {
-		for _, m := range []string{MimeOCIImageArtifactArchive, mime.MIME_TGZ, mime.MIME_TGZ_ALT, mime.MIME_TAR} {
+	for _, t := range defaultArtifactTypes {
+		for _, m := range supportedMimeTypes {
 			download.Register(t, m, DefaultHandler)
 		}
 	}

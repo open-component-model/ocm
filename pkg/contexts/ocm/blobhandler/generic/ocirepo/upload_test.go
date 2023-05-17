@@ -7,6 +7,7 @@ package ocirepo_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
@@ -136,7 +137,7 @@ var _ = Describe("upload", func() {
 		Expect(target.ExistsArtifact("copy/ocm/value", "v2.0")).To(BeTrue())
 	})
 
-	It("transfers oci artifact with named handler", func() {
+	It("transfers oci artifact with named handler and object config", func() {
 		ctx := env.OCMContext()
 
 		ctf := Must(ctfocm.Open(ctx, accessobj.ACC_READONLY, CTF, 0700, env))
@@ -171,7 +172,52 @@ var _ = Describe("upload", func() {
 		// TODO: the result is invalid for ctf: better handling for ctf refs
 		Expect(val.(*ociartifact.AccessSpec).ImageReference).To(Equal("/tmp/target//copy/ocm/value:v2.0"))
 
-		attr.Close()
+		// attr.Close()
+		env.OCMContext().Finalize()
+		target, err := ctfoci.Open(ctx.OCIContext(), accessobj.ACC_READONLY, TARGET, 0, env)
+		Expect(err).To(Succeed())
+		defer Close(target)
+		Expect(target.ExistsArtifact("copy/ocm/value", "v2.0")).To(BeTrue())
+	})
+
+	It("transfers oci artifact with named handler and string config", func() {
+		ctx := env.OCMContext()
+
+		ctf := Must(ctfocm.Open(ctx, accessobj.ACC_READONLY, CTF, 0700, env))
+		defer Close(ctf, "ctf")
+
+		cv := Must(ctf.LookupComponentVersion(COMP, VERS))
+		ocv := accessio.OnceCloser(cv)
+		defer Close(ocv)
+		ra := Must(cv.GetResourceByIndex(0))
+		acc := Must(ra.Access())
+		Expect(acc.GetKind()).To(Equal(localblob.Type))
+
+		// transfer component
+		copy := Must(ctfocm.Create(ctx, accessobj.ACC_CREATE, COPY, 0700, env))
+		ocopy := accessio.OnceCloser(copy)
+		defer Close(ocopy)
+
+		// prepare upload to target OCI repo
+		// attr := ociuploadattr.New(TARGET + grammar.RepositorySeparator + grammar.RepositorySeparator + "copy")
+		attr := TARGET + grammar.RepositorySeparator + grammar.RepositorySeparator + "copy"
+		MustBeSuccessful(registration.RegisterBlobHandlerByName(ctx, "ocm/ociArtifacts", attr))
+
+		MustBeSuccessful(transfer.TransferVersion(nil, nil, cv, copy, nil))
+
+		// check type
+		cv2 := Must(copy.LookupComponentVersion(COMP, VERS))
+		ocv2 := accessio.OnceCloser(cv2)
+		defer Close(ocv2)
+		ra = Must(cv2.GetResourceByIndex(0))
+		acc = Must(ra.Access())
+		Expect(acc.GetKind()).To(Equal(ociartifact.Type))
+		val := Must(ctx.AccessSpecForSpec(acc))
+		// TODO: the result is invalid for ctf: better handling for ctf refs
+		Expect(val.(*ociartifact.AccessSpec).ImageReference).To(Equal("/tmp/target//copy/ocm/value:v2.0"))
+
+		// attr.Close()
+		env.OCMContext().Finalize()
 		target, err := ctfoci.Open(ctx.OCIContext(), accessobj.ACC_READONLY, TARGET, 0, env)
 		Expect(err).To(Succeed())
 		defer Close(target)

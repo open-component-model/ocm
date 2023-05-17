@@ -5,14 +5,13 @@
 package ocirepo
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/ociuploadattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/registrations"
 )
 
 type Config = ociuploadattr.Attribute
@@ -32,31 +31,9 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 	if config == nil {
 		return true, fmt.Errorf("oci target specification required")
 	}
-	var attr *Config
-	var ok bool
-	switch a := config.(type) {
-	case *ociuploadattr.Attribute:
-		attr = a
-	case json.RawMessage:
-		r, err := ociuploadattr.AttributeType{}.Decode(a, runtime.DefaultYAMLEncoding)
-		if err != nil {
-			return true, errors.Wrapf(err, "cannot unmarshal blob handler target configuration")
-		}
-		attr, ok = r.(*ociuploadattr.Attribute)
-		if !ok {
-			return true, fmt.Errorf("failed to assert type %T to ociuploadattr.Attribute", r)
-		}
-	case []byte:
-		r, err := ociuploadattr.AttributeType{}.Decode(a, runtime.DefaultYAMLEncoding)
-		if err != nil {
-			return true, errors.Wrapf(err, "cannot unmarshal blob handler target configuration")
-		}
-		attr, ok = r.(*ociuploadattr.Attribute)
-		if !ok {
-			return true, fmt.Errorf("failed to assert type %T to ociuploadattr.Attribute", r)
-		}
-	default:
-		return true, fmt.Errorf("unexpected type %T for oci blob handler target", a)
+	attr, err := registrations.DecodeConfig[Config](config, ociuploadattr.AttributeType{}.Decode)
+	if err != nil {
+		return true, errors.Wrapf(err, "blob handler configuration")
 	}
 
 	var mimes []string
