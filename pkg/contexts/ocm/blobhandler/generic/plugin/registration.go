@@ -14,7 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/pkg/registrations"
 )
 
 type Config = json.RawMessage
@@ -40,29 +40,17 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 
 	opts := cpi.NewBlobHandlerOptions(olist...)
 
-	var attr Config
-	switch a := config.(type) {
-	case json.RawMessage:
-		attr = a
-	case []byte:
-		err := runtime.DefaultYAMLEncoding.Unmarshal(a, &attr)
-		if err != nil {
-			return true, errors.Wrapf(err, "invalid target specification")
-		}
-		attr = a
-	default:
-		data, err := json.Marshal(config)
-		if err != nil {
-			return true, errors.Wrapf(err, "invalid target specification")
-		}
-		attr = data
-	}
-
 	name := ""
 	if len(path) > 1 {
 		name = path[1]
 	}
-	_, _, err := RegisterBlobHandler(ctx, path[0], name, opts.ArtifactType, opts.MimeType, attr)
+
+	attr, err := registrations.DecodeAnyConfig(config)
+	if err != nil {
+		return true, errors.Wrapf(err, "plugin upload handler config for %s/%s", path[0], name)
+	}
+
+	_, _, err = RegisterBlobHandler(ctx, path[0], name, opts.ArtifactType, opts.MimeType, attr)
 	return true, err
 }
 

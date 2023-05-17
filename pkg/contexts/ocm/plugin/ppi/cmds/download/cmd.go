@@ -20,9 +20,10 @@ import (
 )
 
 const (
-	Name     = "download"
-	OptMedia = common.OptMedia
-	OptArt   = common.OptArt
+	Name      = "download"
+	OptMedia  = common.OptMedia
+	OptArt    = common.OptArt
+	OptConfig = common.OptConfig
 )
 
 func New(p ppi.Plugin) *cobra.Command {
@@ -58,11 +59,13 @@ type Options struct {
 
 	MediaType    string
 	ArtifactType string
+	Config       string
 }
 
 func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.MediaType, OptMedia, "m", "", "media type of input blob")
 	fs.StringVarP(&o.ArtifactType, OptArt, "a", "", "artifact type of input blob")
+	fs.StringVarP(&o.Config, OptConfig, "c", "", "registration config")
 }
 
 func (o *Options) Complete(args []string) error {
@@ -81,7 +84,11 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 	if d == nil {
 		return errors.ErrNotFound(descriptor.KIND_DOWNLOADER, fmt.Sprintf("%s:%s", opts.ArtifactType, opts.MediaType))
 	}
-	w, h, err := d.Writer(p, opts.ArtifactType, opts.MediaType, opts.Path)
+	var cfg []byte
+	if opts.Config != "" {
+		cfg = []byte(opts.Config)
+	}
+	w, h, err := d.Writer(p, opts.ArtifactType, opts.MediaType, opts.Path, cfg)
 	if err != nil {
 		return err
 	}

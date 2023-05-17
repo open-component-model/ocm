@@ -106,10 +106,10 @@ var _ = Describe("setup plugin cache", func() {
 		cv := Must(repo.LookupComponentVersion(COMP, VERS))
 		defer Close(cv, "source version")
 
-		MustFailWithMessage(plugin.RegisterDownloadHandler(env.OCMContext(), "test", "", "blah", ""),
+		MustFailWithMessage(plugin.RegisterDownloadHandler(env.OCMContext(), "test", "", "blah", "", nil),
 			"no downloader found for [art:\"blah\", media:\"\"]",
 		)
-		MustBeSuccessful(plugin.RegisterDownloadHandler(env.OCMContext(), "test", "", RSCTYPE, ""))
+		MustBeSuccessful(plugin.RegisterDownloadHandler(env.OCMContext(), "test", "", RSCTYPE, "", nil))
 
 		racc := Must(cv.GetResourceByIndex(0))
 

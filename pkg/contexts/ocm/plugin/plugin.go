@@ -209,14 +209,20 @@ func (p *pluginImpl) Put(name string, r io.Reader, artType, mimeType, hint strin
 	return p.ctx.AccessSpecForConfig(result, runtime.DefaultJSONEncoding)
 }
 
-func (p *pluginImpl) Download(name string, r io.Reader, artType, mimeType, target string) (bool, string, error) {
+func (p *pluginImpl) Download(name string, r io.Reader, artType, mimeType, target string, config json.RawMessage) (bool, string, error) {
 	args := []string{download.Name, name, target}
 
 	if mimeType != "" {
-		args = append(args, "--"+put.OptMedia, mimeType)
+		args = append(args, "--"+download.OptMedia, mimeType)
 	}
 	if artType != "" {
-		args = append(args, "--"+put.OptArt, artType)
+		args = append(args, "--"+download.OptArt, artType)
+	}
+
+	// new attribute can only be set for extended plugin format version
+	// so, omitting config if not set is compatible with former CLI.
+	if d := p.GetDescriptor().Downloaders.Get(name); len(config) > 0 && d != nil && d.ConfigScheme != "" {
+		args = append(args, "--"+download.OptConfig, string(config))
 	}
 	result, err := p.Exec(r, nil, args...)
 	if err != nil {

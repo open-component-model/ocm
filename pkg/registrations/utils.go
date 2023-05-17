@@ -62,3 +62,24 @@ func decodeConfig[T any](data []byte, dec ...Decoder) (*T, error) {
 	}
 	return &c, nil
 }
+
+func DecodeAnyConfig(config interface{}) (json.RawMessage, error) {
+	var attr json.RawMessage
+	switch a := config.(type) {
+	case json.RawMessage:
+		attr = a
+	case []byte:
+		err := runtime.DefaultYAMLEncoding.Unmarshal(a, &attr)
+		if err != nil {
+			return nil, errors.Wrapf(err, "invalid target specification")
+		}
+		attr = a
+	default:
+		data, err := json.Marshal(config)
+		if err != nil {
+			return nil, errors.Wrapf(err, "invalid target specification")
+		}
+		attr = data
+	}
+	return attr, nil
+}
