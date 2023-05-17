@@ -5,9 +5,6 @@
 package info
 
 import (
-	"sync"
-
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds/names"
@@ -25,14 +22,9 @@ var (
 	Verb  = verbs.Info
 )
 
-type Cache interface {
-	accessio.BlobCache
-	accessio.RootedCache
-}
-
 type Command struct {
 	utils.BaseCommand
-	cache Cache
+	cache accessio.BlobCache
 }
 
 // NewCommand creates a new artifact command.
@@ -55,38 +47,28 @@ $ ocm cache info
 }
 
 func (o *Command) Complete(args []string) error {
-	c := cacheattr.Get(o.Context)
-	if c == nil {
+	o.cache = cacheattr.Get(o.Context)
+	if o.cache == nil {
 		return errors.Newf("no blob cache configured")
 	}
-	r, ok := c.(Cache)
-	if !ok {
-		return errors.Newf("only filesystem based caches are supported")
-	}
-	o.cache = r
 	return nil
 }
 
 func (o *Command) Run() error {
-	var size int64
-	cnt := 0
-
-	if l, ok := o.cache.(sync.Locker); ok {
-		l.Lock()
-		defer l.Unlock()
-	}
-	path, fs := o.cache.Root()
-
-	entries, err := vfs.ReadDir(fs, path)
-	if err != nil {
-		return err
-	}
-	for _, e := range entries {
-		cnt++
-		size += e.Size()
+	if r, ok := o.cache.(accessio.RootedCache); ok {
+		path, fs := r.Root()
+		out.Outf(o.Context, "Used cache directory %s [%s]\n", path, fs.Name())
 	}
 
-	out.Outf(o.Context, "Used cache directory %s [%s]\n", path, fs.Name())
-	out.Outf(o.Context, "Total cache size %d entries [%.2f MB]\n", cnt, float64(size)/1024/1024)
+	if r, ok := o.cache.(accessio.CleanupCache); ok {
+		cnt, _, _, size, _, _, err := r.Cleanup(nil, nil, true)
+		if err != nil {
+			return err
+		}
+		out.Outf(o.Context, "Total cache size %d entries [%.3f MB]\n", cnt, float64(size)/1024/1024)
+	} else {
+		out.Outf(o.Context, "Cache does not support more info\n")
+	}
+
 	return nil
 }

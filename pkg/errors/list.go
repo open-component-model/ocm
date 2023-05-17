@@ -60,6 +60,10 @@ func (l *ErrorList) Len() int {
 	return len(l.errors)
 }
 
+func (l *ErrorList) Entries() []error {
+	return l.errors
+}
+
 func (l *ErrorList) Result() error {
 	if l == nil || len(l.errors) == 0 {
 		return nil

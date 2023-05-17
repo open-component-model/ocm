@@ -6,19 +6,21 @@ package clean
 
 import (
 	"fmt"
-	"sync"
+	"time"
 
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds/names"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/attrs/cacheattr"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
+	utils2 "github.com/open-component-model/ocm/pkg/utils"
 )
 
 var (
@@ -33,7 +35,11 @@ type Cache interface {
 
 type Command struct {
 	utils.BaseCommand
-	cache Cache
+	cache accessio.CleanupCache
+
+	duration string
+	before   time.Time
+	dryrun   bool
 }
 
 // NewCommand creates a new artifact command.
@@ -55,54 +61,65 @@ $ ocm clean cache
 	}
 }
 
+func (o *Command) AddFlags(fs *pflag.FlagSet) {
+	o.BaseCommand.AddFlags(fs)
+	fs.StringVarP(&o.duration, "before", "b", "", "time since last usage")
+	fs.BoolVarP(&o.dryrun, "dry-run", "s", false, "show size to be removed")
+}
+
 func (o *Command) Complete(args []string) error {
 	c := cacheattr.Get(o.Context)
 	if c == nil {
 		return errors.Newf("no blob cache configured")
 	}
-	r, ok := c.(Cache)
+	r, ok := c.(accessio.CleanupCache)
 	if !ok {
-		return errors.Newf("only filesystem based caches are supported")
+		return errors.Newf("cache implementation does not support cleanup")
 	}
 	o.cache = r
+	if o.duration != "" {
+		if t, err := utils2.ParseDeltaTime(o.duration, true); err == nil {
+			o.before = t
+		} else {
+			t, err := time.Parse(time.RFC3339, o.duration)
+			if err != nil {
+				t, err = time.Parse(o.duration, o.duration)
+			}
+			if err != nil {
+				return fmt.Errorf("invalid lifetime %q", o.duration)
+			}
+			o.before = t
+		}
+	}
 	return nil
 }
 
 func (o *Command) Run() error {
-	var size int64
-	var fsize int64
-	cnt := 0
-	errs := 0
 
-	if l, ok := o.cache.(sync.Locker); ok {
-		l.Lock()
-		defer l.Unlock()
-	}
-	path, fs := o.cache.Root()
+	cnt, ncnt, fcnt, size, nsize, fsize, err := o.cache.Cleanup(common.NewPrinter(o.Context.StdErr()), &o.before, o.dryrun)
 
-	entries, err := vfs.ReadDir(fs, path)
 	if err != nil {
 		return err
 	}
-	for _, e := range entries {
-		err := fs.RemoveAll(vfs.Join(fs, path, e.Name()))
-		if err != nil {
-			out.Errf(o.Context, "cannot delete %q: %s\n", e.Name(), err)
-			errs++
-			fsize += e.Size()
+	if !o.before.IsZero() {
+		if o.dryrun {
+			out.Outf(o.Context, "Matching %d/%d entries [%.3f/%.3f MB]\n", cnt, ncnt+cnt, float64(size)/1024/1024, float64(size+nsize)/1024/1024)
 		} else {
-			cnt++
-			size += e.Size()
+			out.Outf(o.Context, "Successfully deleted %d/%d entries [%.2f/%.3f MB]\n", cnt, ncnt+cnt, float64(size)/1024/1024, float64(size+nsize)/1024/1024)
+		}
+	} else {
+		if o.dryrun {
+			out.Outf(o.Context, "Would remove %d entries [%.3f MB]\n", cnt, float64(size)/1024/1024)
+		} else {
+			out.Outf(o.Context, "Successfully deleted %d entries [%.3f MB]\n", cnt, float64(size)/1024/1024)
 		}
 	}
-	if cnt == 0 && errs > 0 {
-		return fmt.Errorf("Failed to delete %d entries [%.2f MB]\n", cnt, float64(fsize)/1024/1024)
-	}
-	if errs == 0 {
-		out.Outf(o.Context, "Successfully deleted %d entries [%.2f MB]\n", cnt, float64(size)/1024/1024)
-	} else {
-		out.Outf(o.Context, "Deleted %d entries [%.2f MB]\n", cnt, float64(size)/1024/1024)
-		out.Outf(o.Context, "Failed to delete %d entries [%.2f MB]\n", cnt, float64(fsize)/1024/1024)
+	if fcnt > 0 {
+		if o.dryrun {
+			out.Outf(o.Context, "Failed to check %d entries [%.3f MB]\n", fcnt, float64(fsize)/1024/1024)
+		} else {
+			out.Outf(o.Context, "Failed to delete %d entries [%.3f MB]\n", fcnt, float64(fsize)/1024/1024)
+		}
 	}
 	return nil
 }
