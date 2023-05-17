@@ -35,6 +35,7 @@ type ActionTypeRegistry interface {
 }
 
 type action struct {
+	lock       sync.Mutex
 	name       string
 	shortdesc  string
 	usage      string
@@ -60,6 +61,16 @@ func (a *action) ConsumerAttributes() []string {
 	return a.attributes
 }
 
+func (a *action) GetVersion(v string) ActionType {
+	a.lock.Lock()
+	defer a.lock.Unlock()
+	return a.types[v]
+}
+
+func (a *action) SupportedVersions() []string {
+	return utils.StringMapKeys(a.types)
+}
+
 type actionRegistry struct {
 	lock        sync.Mutex
 	actions     map[string]*action
@@ -82,11 +93,18 @@ func (r *actionRegistry) Copy() ActionTypeRegistry {
 	actions := map[string]*action{}
 
 	for k, v := range r.actions {
-		a := *v
+		v.lock.Lock()
+		a := action{
+			name:       v.name,
+			shortdesc:  v.shortdesc,
+			usage:      v.usage,
+			attributes: v.attributes,
+		}
 		a.types = map[string]ActionType{}
 		for _, t := range v.types {
 			a.types[t.GetType()] = t
 		}
+		v.lock.Unlock()
 		actions[k] = &a
 	}
 	actionspecs := runtime.NewTypeScheme[ActionSpec, ActionSpecType]()
@@ -138,6 +156,8 @@ func (r *actionRegistry) RegisterActionType(typ ActionType) error {
 		return errors.ErrInvalidWrap(fmt.Errorf("kind mismatch in types: %s", typ.SpecificationType().GetType()), KIND_ACTIONTYPE, k)
 	}
 	ai.types[typ.GetVersion()] = typ
+	ai.lock.Lock()
+	defer ai.lock.Unlock()
 	r.actionspecs.Register(typ.SpecificationType())
 	r.resultspecs.Register(typ.ResultType())
 	return nil
@@ -173,7 +193,7 @@ func (r *actionRegistry) SupportedActionVersions(name string) []string {
 	if a == nil {
 		return nil
 	}
-	return utils.StringMapKeys(a.types)
+	return a.SupportedVersions()
 }
 
 ////////////////////////////////////////////////////////////////////////////////

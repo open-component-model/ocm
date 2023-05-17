@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/types/oci-repository-prepare"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/actions/oci-repository-prepare"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	access "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"

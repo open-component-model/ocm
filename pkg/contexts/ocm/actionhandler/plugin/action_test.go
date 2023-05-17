@@ -15,7 +15,7 @@ import (
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/handlers"
-	oci_repository_prepare "github.com/open-component-model/ocm/pkg/contexts/datacontext/action/types/oci-repository-prepare"
+	oci_repository_prepare "github.com/open-component-model/ocm/pkg/contexts/oci/actions/oci-repository-prepare"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/actionhandler/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"

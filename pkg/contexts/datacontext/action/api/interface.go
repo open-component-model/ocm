@@ -14,6 +14,8 @@ type Action interface {
 	Description() string
 	Usage() string
 	ConsumerAttributes() []string
+	GetVersion(string) ActionType
+	SupportedVersions() []string
 }
 
 ////////////////////////////////////////////////////////////////////////////////

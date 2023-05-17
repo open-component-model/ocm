@@ -216,7 +216,7 @@ func DescribeActions(reg api.ActionTypeRegistry, d *descriptor.Descriptor, out c
 			out.Printf("%s\n", utils2.IndentLines(a.Description, "    "))
 		}
 		if a.Usage != "" {
-			out.Printf("%s\n", utils2.IndentLines(a.Usage, "    "))
+			out.Printf("\n%s\n", utils2.IndentLines(a.Usage, "    "))
 		}
 		if a.ActionDesc != "" {
 			out.Printf("  Info:\n")
