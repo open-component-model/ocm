@@ -8,11 +8,13 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/handlers"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	access "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/plugin"
-	plugin2 "github.com/open-component-model/ocm/pkg/contexts/ocm/actionhandler/plugin"
+	pluginaccess "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/plugin"
+	pluginaction "github.com/open-component-model/ocm/pkg/contexts/ocm/actionhandler/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/generic/plugin"
+	pluginupload "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/generic/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
+	plugindownload "github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/plugin"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -27,7 +29,7 @@ func RegisterExtensions(ctx ocm.Context) error {
 			continue
 		}
 		for _, a := range p.GetDescriptor().Actions {
-			h, err := plugin2.New(p, a.Name)
+			h, err := pluginaction.New(p, a.Name)
 			if err != nil {
 				logger.Error("cannot create action handler for plugin", "plugin", p.Name(), "handler", a.Name)
 			} else {
@@ -47,21 +49,38 @@ func RegisterExtensions(ctx ocm.Context) error {
 			logger.Info("registering access method",
 				"plugin", p.Name(),
 				"type", name)
-			pi.GetContext().AccessMethods().Register(access.NewType(name, p, &m))
+			pi.GetContext().AccessMethods().Register(pluginaccess.NewType(name, p, &m))
 		}
 
 		for _, u := range p.GetDescriptor().Uploaders {
 			for _, c := range u.Constraints {
 				if c.ContextType != "" && c.RepositoryType != "" && c.MediaType != "" {
-					hdlr, err := plugin.New(p, u.Name, nil)
+					hdlr, err := pluginupload.New(p, u.Name, nil)
 					if err != nil {
-						logger.Error("cannot create blob handler fpr plugin", "plugin", p.Name(), "handler", u.Name)
+						logger.Error("cannot create blob handler for plugin", "plugin", p.Name(), "handler", u.Name)
 					} else {
 						logger.Info("registering repository blob handler",
 							"context", c.ContextType+":"+c.RepositoryType,
 							"plugin", p.Name(),
 							"handler", u.Name)
 						ctx.BlobHandlers().Register(hdlr, cpi.ForRepo(c.ContextType, c.RepositoryType), cpi.ForMimeType(c.MediaType))
+					}
+				}
+			}
+		}
+
+		for _, u := range p.GetDescriptor().Downloaders {
+			for _, c := range u.AutoRegistration {
+				if c.ArtifactType != "" || c.MediaType != "" {
+					hdlr, err := plugindownload.New(p, u.Name, nil)
+					if err != nil {
+						logger.Error("cannot create download handler for plugin", "plugin", p.Name(), "handler", u.Name)
+					} else {
+						logger.Info("registering download handler",
+							"context", c.ArtifactType+":"+c.MediaType,
+							"plugin", p.Name(),
+							"handler", u.Name)
+						download.For(ctx.OCMContext()).Register(c.ArtifactType, c.MediaType, hdlr)
 					}
 				}
 			}

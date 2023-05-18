@@ -29,10 +29,11 @@ func NewDownloaderKey(arttype, mediatype string) DownloaderKey {
 }
 
 type DownloaderDescriptor struct {
-	Name         string          `json:"name"`
-	Description  string          `json:"description"`
-	Constraints  []DownloaderKey `json:"constraints,omitempty"`
-	ConfigScheme string          `json:"configScheme,omitempty"`
+	Name             string          `json:"name"`
+	Description      string          `json:"description"`
+	Constraints      []DownloaderKey `json:"constraints,omitempty"`
+	ConfigScheme     string          `json:"configScheme,omitempty"`
+	AutoRegistration []DownloaderKey `json:"autoRegistration,omitempty"`
 }
 
 func (d DownloaderDescriptor) GetName() string {
