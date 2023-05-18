@@ -14,6 +14,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
@@ -171,12 +172,12 @@ var _ = Describe("setup plugin cache", func() {
 		cv := Must(repo.LookupComponentVersion(COMP, VERS))
 		defer Close(cv, "source version")
 
-		MustFailWithMessage(registration.RegisterBlobHandlerByName(ctx, "plugin/test", []byte("{}"), registration.ForArtifactType(RSCTYPE)),
+		MustFailWithMessage(blobhandler.RegisterHandlerByName(ctx, "plugin/test", []byte("{}"), blobhandler.ForArtifactType(RSCTYPE)),
 			// MustFailWithMessage(plugin.RegisterBlobHandler(env.OCMContext(), "test", "", RSCTYPE, "", []byte("{}")),
 			"plugin uploader test/testuploader: path missing in repository spec",
 		)
 		repospec := Must(json.Marshal(repoSpec))
-		MustBeSuccessful(registration.RegisterBlobHandlerByName(ctx, "plugin/test", repospec))
+		MustBeSuccessful(blobhandler.RegisterHandlerByName(ctx, "plugin/test", repospec))
 
 		tgt := Must(ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env))
 		defer Close(tgt, "target repo")

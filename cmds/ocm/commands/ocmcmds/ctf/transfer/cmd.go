@@ -85,7 +85,7 @@ func (o *Command) Run() error {
 		return err
 	}
 
-	err = uploaderoption.From(o).Register(o.Context)
+	err = uploaderoption.From(o).Register(o)
 	if err != nil {
 		return err
 	}

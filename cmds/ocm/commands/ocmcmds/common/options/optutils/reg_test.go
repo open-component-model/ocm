@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package uploaderoption
+package optutils_test
 
 import (
 	"encoding/json"
@@ -11,6 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/optutils"
+	"github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/spf13/pflag"
@@ -18,23 +19,26 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 )
 
-var _ = Describe("uploader option", func() {
+var _ = Describe("registration options", func() {
 	var flags *pflag.FlagSet
-	var opt *Option
+	var opt optutils.RegistrationOption
 	var ctx clictx.Context
 
 	BeforeEach(func() {
 		ctx = clictx.New()
 		flags = pflag.NewFlagSet("test", pflag.ContinueOnError)
-		opt = New()
+		opt = optutils.NewRegistrationOption("test", "t", "test registration", `
+- alice: some handler
+- bob: some other handler
+`)
 		opt.AddFlags(flags)
 	})
 
 	It("parsed n:a:m", func() {
-		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name:art:media={"name":"Name"}`}))
+		MustBeSuccessful(flags.Parse([]string{`--test`, `plugin/name:art:media={"name":"Name"}`}))
 		MustBeSuccessful(opt.Configure(ctx))
 
-		Expect(opt.Registrations).To(Equal([]*Registration{{
+		Expect(opt.Registrations).To(Equal([]*optutils.Registration{{
 			Name:         "plugin/name",
 			ArtifactType: "art",
 			MediaType:    "media",
@@ -43,10 +47,10 @@ var _ = Describe("uploader option", func() {
 	})
 
 	It("parsed n:a", func() {
-		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name:art={"name":"Name"}`}))
+		MustBeSuccessful(flags.Parse([]string{`--test`, `plugin/name:art={"name":"Name"}`}))
 		MustBeSuccessful(opt.Configure(ctx))
 
-		Expect(opt.Registrations).To(Equal([]*Registration{{
+		Expect(opt.Registrations).To(Equal([]*optutils.Registration{{
 			Name:         "plugin/name",
 			ArtifactType: "art",
 			MediaType:    "",
@@ -55,10 +59,10 @@ var _ = Describe("uploader option", func() {
 	})
 
 	It("parsed n", func() {
-		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name={"name":"Name"}`}))
+		MustBeSuccessful(flags.Parse([]string{`--test`, `plugin/name={"name":"Name"}`}))
 		MustBeSuccessful(opt.Configure(ctx))
 
-		Expect(opt.Registrations).To(Equal([]*Registration{{
+		Expect(opt.Registrations).To(Equal([]*optutils.Registration{{
 			Name:         "plugin/name",
 			ArtifactType: "",
 			MediaType:    "",
@@ -67,10 +71,10 @@ var _ = Describe("uploader option", func() {
 	})
 
 	It("parsed n::", func() {
-		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name::={"name":"Name"}`}))
+		MustBeSuccessful(flags.Parse([]string{`--test`, `plugin/name::={"name":"Name"}`}))
 		MustBeSuccessful(opt.Configure(ctx))
 
-		Expect(opt.Registrations).To(Equal([]*Registration{{
+		Expect(opt.Registrations).To(Equal([]*optutils.Registration{{
 			Name:         "plugin/name",
 			ArtifactType: "",
 			MediaType:    "",
@@ -79,10 +83,10 @@ var _ = Describe("uploader option", func() {
 	})
 
 	It("parsed flat spec", func() {
-		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name=Name`}))
+		MustBeSuccessful(flags.Parse([]string{`--test`, `plugin/name=Name`}))
 		MustBeSuccessful(opt.Configure(ctx))
 
-		Expect(opt.Registrations).To(Equal([]*Registration{{
+		Expect(opt.Registrations).To(Equal([]*optutils.Registration{{
 			Name:         "plugin/name",
 			ArtifactType: "",
 			MediaType:    "",
@@ -90,8 +94,24 @@ var _ = Describe("uploader option", func() {
 		}}))
 	})
 
+	It("parsed config from file", func() {
+		env := env.NewEnvironment(env.TestData())
+		defer env.Cleanup()
+		ctx := clictx.WithFileSystem(env).New()
+
+		MustBeSuccessful(flags.Parse([]string{`--test`, `plugin/name=@testdata/config`}))
+		MustBeSuccessful(opt.Configure(ctx))
+
+		Expect(opt.Registrations).To(Equal([]*optutils.Registration{{
+			Name:         "plugin/name",
+			ArtifactType: "",
+			MediaType:    "",
+			Config:       json.RawMessage(`{"name":"Name"}`),
+		}}))
+	})
+
 	It("fails", func() {
-		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name:::=Name`}))
-		MustFailWithMessage(opt.Configure(ctx), "invalid uploader registration plugin/name::: must be of "+optutils.RegistrationFormat)
+		MustBeSuccessful(flags.Parse([]string{`--test`, `plugin/name:::=Name`}))
+		MustFailWithMessage(opt.Configure(ctx), "invalid test registration plugin/name::: must be of "+optutils.RegistrationFormat)
 	})
 })

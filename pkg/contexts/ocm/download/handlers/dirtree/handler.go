@@ -12,6 +12,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -38,6 +39,10 @@ var (
 	supportedMimeTypes   = []string{MimeOCIImageArtifactArchive, mime.MIME_TGZ, mime.MIME_TGZ_ALT, mime.MIME_TAR}
 	defaultArtifactTypes = []string{resourcetypes.DIRECTORY_TREE, resourcetypes.FILESYSTEM_LEGACY}
 )
+
+func SupportedMimeTypes() []string {
+	return slices.Clone(supportedMimeTypes)
+}
 
 type Handler struct {
 	configtypes generics.Set[string]

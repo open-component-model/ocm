@@ -19,8 +19,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/ociuploadattr"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/registration"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
@@ -157,7 +157,7 @@ var _ = Describe("upload", func() {
 
 		// prepare upload to target OCI repo
 		attr := ociuploadattr.New(TARGET + grammar.RepositorySeparator + grammar.RepositorySeparator + "copy")
-		MustBeSuccessful(registration.RegisterBlobHandlerByName(ctx, "ocm/ociArtifacts", attr))
+		MustBeSuccessful(blobhandler.RegisterHandlerByName(ctx, "ocm/ociArtifacts", attr))
 
 		MustBeSuccessful(transfer.TransferVersion(nil, nil, cv, copy, nil))
 
@@ -201,7 +201,7 @@ var _ = Describe("upload", func() {
 		// prepare upload to target OCI repo
 		// attr := ociuploadattr.New(TARGET + grammar.RepositorySeparator + grammar.RepositorySeparator + "copy")
 		attr := TARGET + grammar.RepositorySeparator + grammar.RepositorySeparator + "copy"
-		MustBeSuccessful(registration.RegisterBlobHandlerByName(ctx, "ocm/ociArtifacts", attr))
+		MustBeSuccessful(blobhandler.RegisterHandlerByName(ctx, "ocm/ociArtifacts", attr))
 
 		MustBeSuccessful(transfer.TransferVersion(nil, nil, cv, copy, nil))
 

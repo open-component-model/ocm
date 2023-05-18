@@ -5,6 +5,8 @@
 package download
 
 import (
+	"fmt"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/registrations"
 )
@@ -92,4 +94,16 @@ func NewRegistrationHandlerInfo(path string, handler HandlerRegistrationHandler)
 
 func RegisterHandlerRegistrationHandler(path string, handler HandlerRegistrationHandler) {
 	DefaultRegistry.RegisterRegistrationHandler(path, handler)
+}
+
+func RegisterHandlerByName(ctx cpi.ContextProvider, name string, config HandlerConfig, opts ...HandlerOption) error {
+	hdlrs := For(ctx.OCMContext())
+	o, err := hdlrs.RegisterByName(name, ctx.OCMContext(), config, opts...)
+	if err != nil {
+		return err
+	}
+	if !o {
+		return fmt.Errorf("no matching handler found for %q", name)
+	}
+	return nil
 }
