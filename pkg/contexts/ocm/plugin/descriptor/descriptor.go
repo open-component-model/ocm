@@ -82,6 +82,14 @@ type ActionDescriptor struct {
 	DefaultSelectors []string `json:"defaultSelectors,omitempty"`
 }
 
+func (a ActionDescriptor) GetName() string {
+	return a.Name
+}
+
+func (a ActionDescriptor) GetDescription() string {
+	return a.Description
+}
+
 type CLIOption struct {
 	Name        string `json:"name"`
 	Type        string `json:"type,omitempty"`

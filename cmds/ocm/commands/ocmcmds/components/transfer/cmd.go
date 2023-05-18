@@ -57,7 +57,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		overwriteoption.New(),
 		rscbyvalueoption.New(),
 		stoponexistingoption.New(),
-		uploaderoption.New(),
+		uploaderoption.New(ctx.OCMContext()),
 		scriptoption.New(),
 	)}, utils.Names(Names, names...)...)
 }

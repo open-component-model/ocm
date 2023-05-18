@@ -11,7 +11,6 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/xeipuuv/gojsonschema"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
@@ -57,7 +56,7 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 	return true, err
 }
 
-func RegisterDownloadHandler(ctx ocm.Context, pname, name string, artType, mediaType string, config []byte) error {
+func RegisterDownloadHandler(ctx cpi.Context, pname, name string, artType, mediaType string, config []byte) error {
 	set := plugincacheattr.Get(ctx)
 	if set == nil {
 		return errors.ErrUnknown(plugin.KIND_PLUGIN, pname)
@@ -123,4 +122,25 @@ func ValidateConfig(schemadata, configdata []byte) error {
 		return errors.New(errMsg)
 	}
 	return nil
+}
+
+func (r *RegistrationHandler) GetHandlers(ctx cpi.Context) registrations.HandlerInfos {
+	infos := registrations.HandlerInfos{}
+
+	set := plugincacheattr.Get(ctx)
+	if set == nil {
+		return infos
+	}
+
+	for _, name := range set.PluginNames() {
+		for _, d := range set.Get(name).GetDescriptor().Downloaders {
+			i := registrations.HandlerInfo{
+				Name:        name + "/" + d.GetName(),
+				ShortDesc:   "",
+				Description: d.GetDescription(),
+			}
+			infos = append(infos, i)
+		}
+	}
+	return infos
 }

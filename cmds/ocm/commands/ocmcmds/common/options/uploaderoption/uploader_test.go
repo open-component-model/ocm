@@ -26,7 +26,7 @@ var _ = Describe("uploader option", func() {
 	BeforeEach(func() {
 		ctx = clictx.New()
 		flags = pflag.NewFlagSet("test", pflag.ContinueOnError)
-		opt = New()
+		opt = New(ctx.OCMContext())
 		opt.AddFlags(flags)
 	})
 

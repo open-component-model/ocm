@@ -9,6 +9,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler"
+	"github.com/open-component-model/ocm/pkg/listformat"
 )
 
 type Registration = optutils.Registration
@@ -19,8 +20,8 @@ func From(o options.OptionSetProvider) *Option {
 	return opt
 }
 
-func New() *Option {
-	return &Option{optutils.NewRegistrationOption("uploader", "", "repository uploader", usage)}
+func New(ctx ocm.Context) *Option {
+	return &Option{optutils.NewRegistrationOption("uploader", "", "repository uploader", Usage(ctx))}
 }
 
 type Option struct {
@@ -38,8 +39,7 @@ func (o *Option) Register(ctx ocm.ContextProvider) error {
 	return nil
 }
 
-const usage = `
-- <code>ocm/ociRegistry</code>: oci Registry upload for local OCI artifact blobs.
-  The media type is optional. If given ist must be an OCI artifact media type.
-- <code>plugin/<plugin name>[/<uploader name]</code>: uploader provided by plugin.
-`
+func Usage(ctx ocm.Context) string {
+	list := blobhandler.For(ctx).GetHandlers(ctx)
+	return listformat.FormatListElements("", list)
+}

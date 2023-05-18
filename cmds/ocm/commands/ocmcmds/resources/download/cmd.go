@@ -62,7 +62,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx,
 		versionconstraintsoption.New(),
 		repooption.New(),
-		downloaderoption.New(),
+		downloaderoption.New(ctx.OCMContext()),
 		output.OutputOptions(output.NewOutputs(f), NewOptions(), closureoption.New("component reference"), lookupoption.New(), destoption.New()),
 	)}, utils.Names(Names, names...)...)
 }

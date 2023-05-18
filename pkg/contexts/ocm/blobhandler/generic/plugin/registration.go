@@ -95,3 +95,25 @@ func RegisterBlobHandler(ctx ocm.Context, pname, name string, artType, mediaType
 	}
 	return d[0].Name, keys, nil
 }
+
+func (r *RegistrationHandler) GetHandlers(ctx cpi.Context) registrations.HandlerInfos {
+	infos := registrations.HandlerInfos{}
+
+	set := plugincacheattr.Get(ctx)
+	if set == nil {
+		return infos
+	}
+
+	set.PluginNames()
+	for _, name := range set.PluginNames() {
+		for _, u := range set.Get(name).GetDescriptor().Uploaders {
+			i := registrations.HandlerInfo{
+				Name:        name + "/" + u.GetName(),
+				ShortDesc:   "",
+				Description: u.GetDescription(),
+			}
+			infos = append(infos, i)
+		}
+	}
+	return infos
+}

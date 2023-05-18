@@ -5,13 +5,13 @@
 package downloaderoption
 
 import (
+	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers"
+
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/optutils"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/dirtree"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/pkg/listformat"
 )
 
 type Registration = optutils.Registration
@@ -22,8 +22,8 @@ func From(o options.OptionSetProvider) *Option {
 	return opt
 }
 
-func New() *Option {
-	return &Option{optutils.NewRegistrationOption("downloader", "", "artifact downloader", usage)}
+func New(ctx ocm.Context) *Option {
+	return &Option{optutils.NewRegistrationOption("downloader", "", "artifact downloader", Usage(ctx))}
 }
 
 type Option struct {
@@ -41,9 +41,7 @@ func (o *Option) Register(ctx ocm.ContextProvider) error {
 	return nil
 }
 
-var usage = `
-- <code>ocm/dirtree</code>: downloading directory tree like resources.
-  The following artifact media types are supported:
-` + utils.IndentLines(listformat.FormatList("", dirtree.SupportedMimeTypes()...), "  ") + `
-- <code>plugin/<plugin name>[/<downloader name]</code>: downloader provided by plugin.
-`
+func Usage(ctx ocm.Context) string {
+	list := download.For(ctx).GetHandlers(ctx)
+	return listformat.FormatListElements("", list)
+}

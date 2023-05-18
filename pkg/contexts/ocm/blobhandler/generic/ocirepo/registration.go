@@ -11,6 +11,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/ociuploadattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/pkg/registrations"
 )
 
@@ -61,4 +62,19 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 	}
 
 	return true, nil
+}
+
+func (r *RegistrationHandler) GetHandlers(ctx cpi.Context) registrations.HandlerInfos {
+	return registrations.NewLeafHandlerInfo("downloading OCI artifacts", `
+The <code>ociArtifacts</code> downloader is able to to download OCI artifacts
+as artifact archive according to the OCI distribution spec.
+The following artifact media types are supported:
+`+listformat.FormatList("", artdesc.ArchiveBlobTypes()...)+`
+By default it is registered for these mimetypes.
+
+It accepts a config with the following fields:
+`+listformat.FormatMapElements("", ociuploadattr.AttributeDescription())+`
+Alternatively, a single string value can be given representing an OCI repository
+reference.`,
+	)
 }

@@ -7,11 +7,14 @@ package dirtree
 import (
 	"fmt"
 
+	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 	"golang.org/x/exp/slices"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/pkg/registrations"
 )
 
@@ -22,6 +25,14 @@ func init() {
 type Config struct {
 	AsArchive   bool     `json:"asArchive"`
 	ConfigTypes []string `json:"configTypes"`
+}
+
+func AttributeDescription() map[string]string {
+	return map[string]string{
+		"asArchive": "flag to request an archive download",
+		"configTypes": "a list of accepted OCI config archive types\n" +
+			"defaulted by <code>" + ociv1.MediaTypeImageConfig + "/code>.",
+	}
 }
 
 type RegistrationHandler struct{}
@@ -60,4 +71,17 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx download.Target
 	}
 
 	return true, nil
+}
+
+func (r *RegistrationHandler) GetHandlers(ctx cpi.Context) registrations.HandlerInfos {
+	return registrations.NewLeafHandlerInfo("downloading directory tree-like resources", `
+The <code>dirtree</code> downloader is able to to download directory-tree like
+resources as directory stricture (default) or archive.
+The following artifact media types are supported:
+`+listformat.FormatList("", SupportedMimeTypes()...)+`
+By default it is registered for the following resource types:
+`+listformat.FormatList("", defaultArtifactTypes...)+`
+If accepts a config with the following fields:
+`+listformat.FormatMapElements("", AttributeDescription()),
+	)
 }

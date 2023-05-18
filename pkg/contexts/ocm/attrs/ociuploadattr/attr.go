@@ -76,7 +76,7 @@ func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (in
 type Attribute struct {
 	Ref             string                        `json:"ociRef,omitempty"`
 	Repository      *ocicpi.GenericRepositorySpec `json:"repository,omitempty"`
-	NamespacePrefix string                        `json:"namespacePefix,omitempty"`
+	NamespacePrefix string                        `json:"namespacePrefix,omitempty"`
 
 	lock sync.Mutex
 	ref  *oci.RefSpec
@@ -84,6 +84,14 @@ type Attribute struct {
 
 	repo   oci.Repository
 	prefix string
+}
+
+func AttributeDescription() map[string]string {
+	return map[string]string{
+		"ociRef":          "an OCI repository reference",
+		"repository":      "an OCI repository specification for the target OCI registry",
+		"namespacePrefix": "a namespace prefix used for the uploaded artifacts",
+	}
 }
 
 func New(ref string) *Attribute {
