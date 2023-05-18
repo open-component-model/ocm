@@ -14,6 +14,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/registrations"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
@@ -36,6 +37,7 @@ type Registry interface {
 type _registry struct {
 	registrations.HandlerRegistrationRegistry[Target, HandlerOption]
 
+	id       finalizer.ObjectIdentity
 	lock     sync.RWMutex
 	base     Registry
 	handlers *registry.Registry[Handler, registry.RegistrationKey]
@@ -44,6 +46,7 @@ type _registry struct {
 func NewRegistry(base ...Registry) Registry {
 	b := utils.Optional(base...)
 	return &_registry{
+		id:                          finalizer.NewObjectIdentity("downloaderRegistry"),
 		HandlerRegistrationRegistry: NewHandlerRegistrationRegistry(b),
 		base:                        b,
 		handlers:                    registry.NewRegistry[Handler, registry.RegistrationKey](),

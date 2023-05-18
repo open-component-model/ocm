@@ -57,7 +57,7 @@ type Command struct {
 // NewCommand creates a new resources command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	f := func(opts *output.Options) output.Output {
-		return &action{downloaders: download.For(ctx), opts: opts}
+		return &action{downloaders: download.For(ctx.OCMContext()), opts: opts}
 	}
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx,
 		versionconstraintsoption.New(),
@@ -147,13 +147,14 @@ func (o *Command) Run() error {
 		return err
 	}
 
-	err = downloaderoption.From(o).Register(o)
+	d := downloaderoption.From(o)
+	err = d.Register(o)
 	if err != nil {
 		return err
 	}
 
 	opts := output.From(o)
-	if o.Executable {
+	if d.HasRegistrations() || o.Executable {
 		From(opts).UseHandlers = true
 	}
 

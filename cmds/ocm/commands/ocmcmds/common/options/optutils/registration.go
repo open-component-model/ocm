@@ -44,6 +44,10 @@ func (o *RegistrationOption) AddFlags(fs *pflag.FlagSet) {
 	flag.StringToStringVarP(fs, &o.spec, o.name, o.short, nil, fmt.Sprintf("%s (%s)", o.desc, RegistrationFormat))
 }
 
+func (o *RegistrationOption) HasRegistrations() bool {
+	return len(o.spec) > 0 || len(o.Registrations) > 0
+}
+
 func (o *RegistrationOption) Configure(ctx clictx.Context) error {
 	for n, v := range o.spec {
 		nam := n

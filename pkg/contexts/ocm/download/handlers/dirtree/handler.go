@@ -7,6 +7,7 @@ package dirtree
 import (
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/mandelsoft/vfs/pkg/layerfs"
 	"github.com/mandelsoft/vfs/pkg/osfs"
@@ -27,6 +28,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/utils"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
@@ -50,7 +52,7 @@ type Handler struct {
 }
 
 func New(mimetypes ...string) *Handler {
-	if len(mimetypes) == 0 {
+	if len(mimetypes) == 0 || utils.Optional(mimetypes...) == "" {
 		mimetypes = []string{artdesc.MediaTypeImageConfig}
 	}
 	return &Handler{
@@ -78,18 +80,18 @@ func (h *Handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 	if err != nil || (lfs == nil && r == nil) {
 		return err != nil, "", err
 	}
-	return h.download(fs, path, lfs, r)
+	return h.download(p, fs, path, lfs, r)
 }
 
-func (h *Handler) DownloadFromArtifactSet(set *artifactset.ArtifactSet, path string, fs vfs.FileSystem) (bool, string, error) {
+func (h *Handler) DownloadFromArtifactSet(pr common.Printer, set *artifactset.ArtifactSet, path string, fs vfs.FileSystem) (bool, string, error) {
 	lfs, r, err := h.GetForArtifactSet(set)
 	if err != nil || (lfs == nil && r != nil) {
 		return err != nil, "", err
 	}
-	return h.download(fs, path, lfs, r)
+	return h.download(common.NewPrinter(nil), fs, path, lfs, r)
 }
 
-func (h *Handler) download(fs vfs.FileSystem, path string, lfs vfs.FileSystem, r io.ReadCloser) (ok bool, dest string, err error) {
+func (h *Handler) download(pr common.Printer, fs vfs.FileSystem, path string, lfs vfs.FileSystem, r io.ReadCloser) (ok bool, dest string, err error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagation(&err)
 
@@ -106,28 +108,41 @@ func (h *Handler) download(fs vfs.FileSystem, path string, lfs vfs.FileSystem, r
 		}
 		finalize.Close(w)
 		if r != nil {
-			_, err = io.Copy(w, r)
+			n, err := io.Copy(w, r)
 			if err != nil {
 				return true, "", errors.Wrapf(err, "cannot copy to archive %s", path)
 			}
+			pr.Printf("%s: %d byte(s) written\n", path, n)
 			return true, path, nil
 		} else {
-			return true, path, tarutils.PackFsIntoTar(lfs, "", w, tarutils.TarFileSystemOptions{})
+			cw := accessio.NewCountingWriter(w)
+			err := tarutils.PackFsIntoTar(lfs, "", cw, tarutils.TarFileSystemOptions{})
+			if err == nil {
+				pr.Printf("%s: %d byte(s) written\n", path, cw.Size())
+			}
+			return true, path, err
 		}
 	} else {
 		err := fs.MkdirAll(path, 0o700)
 		if err != nil {
 			return true, "", errors.Wrapf(err, "cannot create target directory")
 		}
+
+		var fcnt, size int64
 		if r != nil {
-			p, err := projectionfs.New(fs, path)
+			var p vfs.FileSystem
+			p, err = projectionfs.New(fs, path)
 			if err != nil {
 				return true, "", err
 			}
-			return true, path, tarutils.ExtractTarToFs(p, r)
+			fcnt, size, err = tarutils.ExtractTarToFsWithInfo(p, r)
 		} else {
-			return true, path, vfs.CopyDir(lfs, "/", fs, path)
+			fcnt, size, err = CopyDir(lfs, "/", fs, path)
 		}
+		if err == nil {
+			pr.Printf("%s: %d file(s) with %d byte(s) written\n", path, fcnt, size)
+		}
+		return true, path, err
 	}
 }
 
@@ -250,4 +265,77 @@ func (h *Handler) getForArtifactSet(finalize *finalizer.Finalizer, set *artifact
 	fs = cfs
 	cfs = nil // don't cleanup used filesystem
 	return fs, nil, nil
+}
+
+// TODO: to be moved to vfs
+
+// CopyDir recursively copies a directory tree, attempting to preserve permissions.
+// Source directory must exist, destination directory may exist.
+// Symlinks are ignored and skipped.
+func CopyDir(srcfs vfs.FileSystem, src string, dstfs vfs.FileSystem, dst string) (int64, int64, error) {
+	var fcnt, bcnt int64
+	var n, b int64
+
+	src = vfs.Trim(srcfs, src)
+	dst = vfs.Trim(dstfs, dst)
+
+	si, err := srcfs.Stat(src)
+	if err != nil {
+		return 0, 0, err
+	}
+	if !si.IsDir() {
+		return 0, 0, vfs.NewPathError("CopyDir", src, vfs.ErrNotDir)
+	}
+
+	di, err := dstfs.Stat(dst)
+	if err != nil && !os.IsNotExist(err) {
+		return 0, 0, err
+	}
+	if err == nil && !di.IsDir() {
+		return 0, 0, vfs.NewPathError("CopyDir", dst, vfs.ErrNotDir)
+	}
+
+	err = dstfs.MkdirAll(dst, si.Mode())
+	if err != nil {
+		return 0, 0, err
+	}
+
+	entries, err := vfs.ReadDir(srcfs, src)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	for _, entry := range entries {
+		srcPath := vfs.Join(srcfs, src, entry.Name())
+		dstPath := vfs.Join(dstfs, dst, entry.Name())
+
+		if entry.IsDir() {
+			n, b, err = CopyDir(srcfs, srcPath, dstfs, dstPath)
+			fcnt += n
+			bcnt += b
+		} else {
+			// Skip symlinks.
+			if entry.Mode()&os.ModeSymlink != 0 {
+				var old string
+				old, err = srcfs.Readlink(srcPath)
+				if err == nil {
+					err = dstfs.Symlink(old, dstPath)
+				}
+				if err == nil {
+					fcnt++
+					err = os.Chmod(dst, entry.Mode())
+				}
+			} else {
+				err = vfs.CopyFile(srcfs, srcPath, dstfs, dstPath)
+				if err == nil {
+					bcnt += entry.Size()
+					fcnt++
+				}
+			}
+		}
+		if err != nil {
+			return fcnt, bcnt, err
+		}
+	}
+	return fcnt, bcnt, nil
 }

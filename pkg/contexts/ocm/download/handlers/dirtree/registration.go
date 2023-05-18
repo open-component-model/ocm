@@ -20,7 +20,8 @@ func init() {
 }
 
 type Config struct {
-	AsArchive bool `json:"asArchive"`
+	AsArchive   bool     `json:"asArchive"`
+	ConfigTypes []string `json:"configTypes"`
 }
 
 type RegistrationHandler struct{}
@@ -47,8 +48,16 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx download.Target
 		return true, nil
 	}
 
-	h := generics.Conditional(opts.MimeType != "", New(opts.MimeType), New()).SetArchiveMode(attr.AsArchive)
-	download.For(ctx).Register(opts.ArtifactType, opts.MimeType, h)
+	h := New(attr.ConfigTypes...).SetArchiveMode(attr.AsArchive)
+	supported := generics.Conditional(len(attr.ConfigTypes) > 0, attr.ConfigTypes, supportedMimeTypes)
+	if opts.MimeType == "" {
+		for _, m := range supported {
+			opts.MimeType = m
+			download.For(ctx).Register(opts.ArtifactType, opts.MimeType, h)
+		}
+	} else {
+		download.For(ctx).Register(opts.ArtifactType, opts.MimeType, h)
+	}
 
 	return true, nil
 }

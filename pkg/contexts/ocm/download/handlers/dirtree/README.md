@@ -73,3 +73,10 @@ artifact with the distribution spec format. But. if you want to access the effec
 could explicitly use the `dirtree` downloader for an OCI image, which handles this for you. It would
 make less sense to use it on a helm chart OCI artifact, because here the layers have a different meaning
 than building a directory tree.
+
+## Registration Handler
+
+It provides a registration handler with the path `ocm/dirtree`. and a config
+object with the fields:
+- *`asArchive`* *bool*: download as archive (default is directory tree).
+- *`configtypes`* *[]string*: list of accepted OCI manifest config media types. Default is the OCI image config media type.

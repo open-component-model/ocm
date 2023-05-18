@@ -21,13 +21,12 @@ func NewOptions() *Option {
 }
 
 type Option struct {
-	UseHandlers   bool
-	Executable    bool
-	ResourceTypes []string
+	UseHandlers bool
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
 	fs.BoolVarP(&o.UseHandlers, "download-handlers", "d", false, "use download handler if possible")
+
 }
 
 func (o *Option) Usage() string {
