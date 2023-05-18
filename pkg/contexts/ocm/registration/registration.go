@@ -52,35 +52,37 @@ func RegisterExtensions(ctx ocm.Context) error {
 			pi.GetContext().AccessMethods().Register(pluginaccess.NewType(name, p, &m))
 		}
 
-		for _, u := range p.GetDescriptor().Uploaders {
-			for _, c := range u.Constraints {
-				if c.ContextType != "" && c.RepositoryType != "" && c.MediaType != "" {
-					hdlr, err := pluginupload.New(p, u.Name, nil)
-					if err != nil {
-						logger.Error("cannot create blob handler for plugin", "plugin", p.Name(), "handler", u.Name)
-					} else {
-						logger.Info("registering repository blob handler",
-							"context", c.ContextType+":"+c.RepositoryType,
-							"plugin", p.Name(),
-							"handler", u.Name)
-						ctx.BlobHandlers().Register(hdlr, cpi.ForRepo(c.ContextType, c.RepositoryType), cpi.ForMimeType(c.MediaType))
+		if p.IsAutoConfigurationEnabled() {
+			for _, u := range p.GetDescriptor().Uploaders {
+				for _, c := range u.Constraints {
+					if c.ContextType != "" && c.RepositoryType != "" && c.MediaType != "" {
+						hdlr, err := pluginupload.New(p, u.Name, nil)
+						if err != nil {
+							logger.Error("cannot create blob handler for plugin", "plugin", p.Name(), "handler", u.Name)
+						} else {
+							logger.Info("registering repository blob handler",
+								"context", c.ContextType+":"+c.RepositoryType,
+								"plugin", p.Name(),
+								"handler", u.Name)
+							ctx.BlobHandlers().Register(hdlr, cpi.ForRepo(c.ContextType, c.RepositoryType), cpi.ForMimeType(c.MediaType))
+						}
 					}
 				}
 			}
-		}
 
-		for _, u := range p.GetDescriptor().Downloaders {
-			for _, c := range u.AutoRegistration {
-				if c.ArtifactType != "" || c.MediaType != "" {
-					hdlr, err := plugindownload.New(p, u.Name, nil)
-					if err != nil {
-						logger.Error("cannot create download handler for plugin", "plugin", p.Name(), "handler", u.Name)
-					} else {
-						logger.Info("registering download handler",
-							"context", c.ArtifactType+":"+c.MediaType,
-							"plugin", p.Name(),
-							"handler", u.Name)
-						download.For(ctx.OCMContext()).Register(c.ArtifactType, c.MediaType, hdlr)
+			for _, u := range p.GetDescriptor().Downloaders {
+				for _, c := range u.AutoRegistration {
+					if c.ArtifactType != "" || c.MediaType != "" {
+						hdlr, err := plugindownload.New(p, u.Name, nil)
+						if err != nil {
+							logger.Error("cannot create download handler for plugin", "plugin", p.Name(), "handler", u.Name)
+						} else {
+							logger.Info("registering download handler",
+								"context", c.ArtifactType+":"+c.MediaType,
+								"plugin", p.Name(),
+								"handler", u.Name)
+							download.For(ctx.OCMContext()).Register(c.ArtifactType, c.MediaType, hdlr)
+						}
 					}
 				}
 			}

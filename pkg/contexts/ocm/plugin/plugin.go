@@ -16,7 +16,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/config"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod/compose"
@@ -34,8 +33,6 @@ import (
 
 type Plugin = *pluginImpl
 
-var _ config.Target = (*pluginImpl)(nil)
-
 type impl = cache.Plugin
 
 // //nolint: errname // is no error.
@@ -43,7 +40,8 @@ type pluginImpl struct {
 	lock sync.RWMutex
 	ctx  ocm.Context
 	impl
-	config json.RawMessage
+	config                   json.RawMessage
+	disableAutoConfiguration bool
 }
 
 func NewPlugin(ctx ocm.Context, impl cache.Plugin, config json.RawMessage) Plugin {
@@ -58,10 +56,12 @@ func (p *pluginImpl) Context() ocm.Context {
 	return p.ctx
 }
 
-func (p *pluginImpl) ConfigurePlugin(name string, data json.RawMessage) {
-	if name == p.Name() {
-		p.config = data
-	}
+func (p *pluginImpl) DisableAutoConfiguration(flag bool) {
+	p.disableAutoConfiguration = flag
+}
+
+func (p *pluginImpl) IsAutoConfigurationEnabled() bool {
+	return !p.disableAutoConfiguration
 }
 
 func (p *pluginImpl) SetConfig(config json.RawMessage) {

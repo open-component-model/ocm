@@ -22,11 +22,12 @@ func init() {
 	cfgcpi.RegisterConfigType(cfgcpi.NewConfigType[*Config](ConfigTypeV1, usage))
 }
 
-// Config describes a memory based config interface.
+// Config describes a memory based config interface for plugins.
 type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	Plugin                      string          `json:"plugin"`
-	Config                      json.RawMessage `json:"config"`
+	Config                      json.RawMessage `json:"config,omitempty"`
+	DisableAutoRegistration     bool            `json:"disableAutoRegistration,omitempty"`
 }
 
 // New creates a new memory ConfigSpec.
@@ -48,11 +49,13 @@ func (a *Config) ApplyTo(ctx config.Context, target interface{}) error {
 		return config.ErrNoContext(ConfigType)
 	}
 	t.ConfigurePlugin(a.Plugin, a.Config)
+	t.DisableAutoConfiguration(a.Plugin, a.DisableAutoRegistration)
 	return nil
 }
 
 type Target interface {
 	ConfigurePlugin(name string, config json.RawMessage)
+	DisableAutoConfiguration(name string, flag bool)
 }
 
 const usage = `
@@ -63,5 +66,6 @@ plugin.
     type: ` + ConfigType + `
     plugin: &lt;plugin name>
     config: &lt;arbitrary configuration structure>
+    disableAutoRegistration: &lt;boolean flag to disable auto registration for up- and download handlers>
 </pre>
 `

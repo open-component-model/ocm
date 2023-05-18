@@ -47,7 +47,7 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 
 	attr, err := registrations.DecodeAnyConfig(config)
 	if err != nil {
-		return true, errors.Wrapf(err, "plugin upload handler config for %s/%s", path[0], name)
+		return true, errors.Wrapf(err, "plugin upload handler target config for %s/%s", path[0], name)
 	}
 
 	_, _, err = RegisterBlobHandler(ctx, path[0], name, opts.ArtifactType, opts.MimeType, attr)

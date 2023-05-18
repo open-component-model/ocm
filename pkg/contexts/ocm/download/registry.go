@@ -46,7 +46,7 @@ type _registry struct {
 func NewRegistry(base ...Registry) Registry {
 	b := utils.Optional(base...)
 	return &_registry{
-		id:                          finalizer.NewObjectIdentity("downloaderRegistry"),
+		id:                          finalizer.NewObjectIdentity("downloader.registry.ocm.software"),
 		HandlerRegistrationRegistry: NewHandlerRegistrationRegistry(b),
 		base:                        b,
 		handlers:                    registry.NewRegistry[Handler, registry.RegistrationKey](),
