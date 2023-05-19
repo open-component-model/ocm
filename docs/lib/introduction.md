@@ -170,8 +170,8 @@ Here, the different _Type Registries_ shown in the overview are explained.
 
 ### Section 3.2.1 - Repository Types Scheme
 
-A `RepositoryTypeScheme` is an object that maps a number of _repository types (= model type)_ to corresponding 
-_factories_ providing a repository spec object which is again a factory for providing an object of a specific type or 
+A `RepositoryTypeScheme` is an object that maps a number of _repository types (= model type)_ to corresponding
+_factories_ providing a repository spec object which is again a factory for providing an object of a specific type or
 with a specific configuration for dealing with this _repository type (= model type)_.
 
 There exist multiple _Repository Type_ Registries within the ocm-lib. There is a Repository Type Registry
@@ -180,9 +180,9 @@ Registry for [**OCI** _repository types (= model types)_](../../pkg/contexts/oci
 
 **OCI Repository Types:**  
 Having multiple _OCI Repository Types_ may initially sound confusing. Therefore, a short explanation on what
-_OCI Repositories_ and _OCI Repository Types_ even are in the context of the ocm-lib. From the perspective of the 
-ocm-lib, any _go type_ that implements the following [interface](../../pkg/contexts/oci/internal/repository.go) can be 
-considered an _OCI Repository_:  
+_OCI Repositories_ and _OCI Repository Types_ even are in the context of the ocm-lib. From the perspective of the
+ocm-lib, any _go type_ that implements the following [interface](../../pkg/contexts/oci/internal/repository.go) can be
+considered an _OCI Repository_:
 
 ```
 type Repository interface {
@@ -198,21 +198,22 @@ type Repository interface {
 
 Within the ocm-lib, there are multiple implementations of this interface. Most prominently, an implementation for actual
 [_OCI Registries_](../../pkg/contexts/oci/repositories/ocireg). If you are familiar with _OCI Registries_, the
-terminology here may be counterintuitive. In the ocm-lib, the term _OCI Repository_ corresponds to what is commonly 
+terminology here may be counterintuitive. In the ocm-lib, the term _OCI Repository_ corresponds to what is commonly
 known as an _OCI Registry_, and a _Namespace_ corresponds to what is commonly known as an _OCI Repository_.  
-Another implementation is the so called _[Common Transport Format](../../pkg/contexts/oci/repositories/ctf)_. The 
-_[Common Transport Format specification](https://github.com/open-component-model/ocm-spec/blob/main/doc/appendix/A/CTF/README.md)_ 
-was developed in the context of the Open Component Model and describes a file system structure that can be used for the 
+Another implementation is the so called _[Common Transport Format](../../pkg/contexts/oci/repositories/ctf)_. The
+_[Common Transport Format specification](https://github.com/open-component-model/ocm-spec/blob/main/doc/appendix/A/CTF/README.md)_
+was developed in the context of the Open Component Model and describes a file system structure that can be used for the
 representation of content of an OCI Registry.  
 As one might notice within the [package](../../pkg/contexts/oci/repositories/), besides `OCIRegistry` and `Common
-Transport Format`, there are further _OCI Repository Types_, namely, `DockerDaemon` and `ArtifactSet`. These are not 
+Transport Format`, there are further _OCI Repository Types_, namely, `DockerDaemon` and `ArtifactSet`. These are not
 "equal" implementations compared to `OCIRegistry` and `CommonTransportFormat`. The _docker daemon_ is limited to
-handling _OCI Images_ and therefore cannot deal with _OCI Artifacts_. An _artifact set_ can only hold versions of the same
+handling _OCI Images_ and therefore cannot deal with _OCI Artifacts_. An _artifact set_ can only hold versions of the
+same
 artifact (thus, it corresponds to a Namespace or rather OCI Repository in that regard), but implements the _OCI
-Repository_ interface. 
+Repository_ interface.
 
 **OCM Repository Types:**
-So, corresponding to OCI Repositories and OCI Repository Types, any _go type_ that implements the following 
+So, corresponding to OCI Repositories and OCI Repository Types, any _go type_ that implements the following
 [interface](../../pkg/contexts/ocm/internal/repository.go) can be considered an _OCM Repository_:
 
 ```
@@ -231,33 +232,34 @@ type Repository interface {
 ```
 
 Again, within the ocm-lib, there are multiple implementations of this interface. But most importantly, the package
-[`genericocireg`](../../pkg/contexts/ocm/repositories/genericocireg) provides an implementation of the _OCM Repository 
+[`genericocireg`](../../pkg/contexts/ocm/repositories/genericocireg) provides an implementation of the _OCM Repository
 interface_ that is based on the _OCI Repository interface_. In other words, this package provides a mapping of the
-_OCM Repository_ functionility to the _OCI Repository_ functionality. The 
-[`ocireg`](../../pkg/contexts/ocm/repositories/ocireg) package and the [`ctf`](../../pkg/contexts/ocm/repositories/ctf) 
+_OCM Repository_ functionility to the _OCI Repository_ functionality. The
+[`ocireg`](../../pkg/contexts/ocm/repositories/ocireg) package and the [`ctf`](../../pkg/contexts/ocm/repositories/ctf)
 merely provide the functionality to convert, or rather wrap, their _OCI Repository Spec_ to an _OCM Repository Spec_
 (remember, spec types were pretty much serializable representations and factories for the actual type, as explained
 [here](introduction/context/registry/registry.go)).  
 For each _OCI Repository Type_, there also exists a corresponding _OCM Repository Type_.
-Thus, as there is an **oci** _repository type_ `OCIRegistry`, there is also an **ocm** _repository type_ `OCIRegistry`, 
-as there is an **oci** _repository type_ `CommonTransportFormat`, there is also an **ocm** _repository type_ 
-`CommonTransportFormat`. 
+Thus, as there is an **oci** _repository type_ `OCIRegistry`, there is also an **ocm** _repository type_ `OCIRegistry`,
+as there is an **oci** _repository type_ `CommonTransportFormat`, there is also an **ocm** _repository type_
+`CommonTransportFormat`.
 Within the ocm-lib this is implemented through an **addition to the factory-based type registry** concept. In case the
-does not find an entry for a certain type (within the Decode method), this 
-[implementation (defaultScheme)](../../pkg/runtime/scheme.go) of a factory-based type registry has a _fallback factory_ 
-(called `defaultdecoder`). For the OCM Repository Type Registry, this _fallback factory_ is usually 
-[initialized](../../pkg/contexts/ocm/builder.go) with a Type Registry itself, the 
-[`DefaultDelegationRegistry`](../../pkg/contexts/ocm/repositories/genericocireg/type.go) which is based on the 
-[`delegationRegistry`](../../pkg/contexts/ocm/internal/delegation.go). This Type Registry's iterates through all its 
+does not find an entry for a certain type (within the Decode method), this
+[implementation (defaultScheme)](../../pkg/runtime/scheme.go) of a factory-based type registry has a _fallback factory_
+(called `defaultdecoder`). For the OCM Repository Type Registry, this _fallback factory_ is usually
+[initialized](../../pkg/contexts/ocm/builder.go) with a Type Registry itself, the
+[`DefaultDelegationRegistry`](../../pkg/contexts/ocm/repositories/genericocireg/type.go) which is based on the
+[`delegationRegistry`](../../pkg/contexts/ocm/internal/delegation.go). This Type Registry's iterates through all its
 factories and checks whether they knew that type. Currently, the only factory known by this _fallback Type Registry_ is
 the one registered in the [`genericocireg`](../../pkg/contexts/ocm/repositories/genericocireg/type.go) package which
-uses the **oci** _repository types registry_ to perform the unmarshaling (thus, if I registered the type in the 
+uses the **oci** _repository types registry_ to perform the unmarshaling (thus, if I registered the type in the
 oci repository types registry, it is automatically available for the ocm repository registry).
 
 **Other Repository Types:**
-Besides _OCM_ and _OCI Repository Types_, there currently also exist a number of 
+Besides _OCM_ and _OCI Repository Types_, there currently also exist a number of
 [_Credential Repository Types_](../../pkg/contexts/credentials/repositories) that have to implement the following
 [interface](../../pkg/contexts/credentials/internal/repository.go):
+
 ```
 type Repository interface {
 	ExistsCredentials(name string) (bool, error)
@@ -269,11 +271,12 @@ type Repository interface {
 ### Section 3.2.2 - Access Type Scheme
 
 An `AccessTypeScheme` is an object that maps a number of _access types (= model type)_ to corresponding
-_factories_ providing an access spec object which is again a factory for providing an object of a specific type or with 
+_factories_ providing an access spec object which is again a _factory_ for providing an object of a specific type or with
 a specific configuration for dealing with this _access type (= model type)_.
 
-From the perspective of the ocm-lib, any _go type_ that implements the following 
+From the perspective of the ocm-lib, any _go type_ that implements the following
 [interface](../../pkg/contexts/ocm/internal/accesstypes.go) can be considered an _OCI Repository_:
+
 ```
 type AccessMethod interface {
 	DataAccess
@@ -285,17 +288,18 @@ type AccessMethod interface {
 }
 ```
 
-Within ocm-lib, there are multiple implementations of this interface. Most prominently, an implementation for 
+Within ocm-lib, there are multiple implementations of this interface. Most prominently, an implementation for
 [_OCI Artifacts_](../../pkg/contexts/ocm/accessmethods/ociartifact/method.go) (artifact blob is stored as an independent
-oci artifact in an OCI Registry), a dedicated technical procedure of how to access an artifact blob stored in an OCI 
-Registry. There are further implementations, e.g. for [_Local Blobs_](../../pkg/contexts/ocm/accessmethods/localblob) 
+oci artifact in an OCI Registry), a dedicated technical procedure of how to access an artifact blob stored in an OCI
+Registry. There are further implementations, e.g. for [_Local Blobs_](../../pkg/contexts/ocm/accessmethods/localblob)
 (artifact blob is stored in the same oci artifact as its component descriptor), for  
 [_s3_](../../pkg/contexts/ocm/accessmethods/s3) or for [_gitHub_](../../pkg/contexts/ocm/accessmethods/github).
 
 **CAREFUL - There are two conceptually relevant details here!**
-1) There are **Global** and **Local** **Access Method types**. **Global types** (such as ociArtifact or github) 
-   implement the procedure to access the artifact blobs themselves. **Local types**, on the contrary, delegate the 
-   implementation of the procedure to the respective component repository (as each type of component repository may 
+
+1) There are **Global** and **Local** **Access Method types**. **Global types** (such as ociArtifact or github)
+   implement the procedure to access the artifact blobs themselves. **Local types**, on the contrary, delegate the
+   implementation of the procedure to the respective component repository (as each type of component repository may
    handle the storage of artifact blobs alongside the component descriptor differently).
 2) **AccessMethods return the artifact blob as is**. Thus, if a helm chart is stored as an .tar, the AccessMethod will
    return the bytes of the .tar. If, on the other hand, the helm chart is stored as an tar.gz , the AccessMethod will
@@ -303,45 +307,137 @@ Registry. There are further implementations, e.g. for [_Local Blobs_](../../pkg/
    MimeType and conversion to a target format can be done with downloaders - a convenience feature implemented by the
    ocm library kind of as an add-on).
 
+### Section 3.3 - Constraint Registries aka. Handler Registries (and Handler-Registration Handler Registries)
+**Constraint Registries aka. Handler Registries**  
+So up to now, we were looking at _Type Registries_. These have the purpose of unmarshaling. Therefore, these
+_Type Registries_ typically map a _model type_ (e.g. a _repository type_ or an _access type_) to corresponding 
+_factories_ providing a _spec object_ which is again a _factory_ for providing an object of a specific type or with a 
+specific configuration for dealing with this model type (e.g. a _repository_ or an _access method_).
+
+From a technical perspective **Constraint Registries** work pretty much exactly the same. But their purpose is
+not unmarshaling. While an _object_, or rather a _factory_, within a _Type Registry_ is selected within the decoding 
+logic based on the specified _type_ (a respective _Decode Spec_ method is typically exposed by the Type Registry itself), 
+an _object_ within a _Constraint Registry_ is selected during some other event based on a number of constraints (a
+respective _Lookup Handler_ method is typically exposed by the Constraint Registry itself). So instead of a _type_, e.g.
+a _Blob Handler Registry_ (a _Blob Handler_ is a handler responsible for uploading blobs into a specific store) stores
+a triple of _RepositoryType_ (e.g. `OCIRegistry`, `CommonTransportFormat`, ...), _ArtifactType_ (e.g. `OCIArtifact`, 
+`ociImage`, ...) and _MimeType_ (e.g. `text/plain`, `application/gzip`, ...). The upload logic passes the current
+contextual information about the underlying _storage repository type_ and the _artifact_ and _mime type_ at hand to the
+_Lookup Handler_ method a _Constraint Registry_, which eventually returns a number of _Handlers_ fulfilling the 
+_Constraint_ formed by these arguments.  
+
+**Type Registry:** _model type (key)_ &rarr; _decoder / factory for a decoder (value)_  
+**Constraint Registry:** _constraint (key)_ &rarr; _handler (value)_
+
+**Handler-Registration Handler Registries**  
+Quite frequently, _Constraint Registries_ are themselves also **Handler-Registration Handler Registries**. A 
+**Handler-Registration Handler** is, as the name suggests, a **Handler**  that handles the registration of other
+Handlers (in other words, the **Handler-Registration**).  
+A **Handler-Registration Handler** has to implement the following [interface](../../pkg/registrations/registrations.go):
+```
+type HandlerRegistrationHandler[T any, O any] interface {
+	RegisterByName(handler string, target T, config HandlerConfig, opts ...O) (bool, error)
+}
+```
+
+And a Handler-Registration Handler Registry has to implement the following corresponding 
+[interface](../../pkg/registrations/registrations.go):
+```
+type HandlerRegistrationRegistry[T any, O any] interface {
+   HandlerRegistrationHandler[T, O]
+   RegisterRegistrationHandler(path string, handler HandlerRegistrationHandler[T, O])
+   GetRegistrationHandlers(name string) []*RegistrationHandlerInfo[T, O]
+}
+```
+Thus, a `HandlerRegistrationHandlerRegistry` also is itself also a  `HandlerRegistrationHandler`.  
+
+Without going into too much detail, the purpose of a _Handler-Registration Handler_ is to _register_ a _Handler_ 
+identified by the `handler string` parameter at a _Constraint Registry_.  
+Usually, directly within the library, such a functionality is not really necessary. If you want to add e.g. a new
+_type_ of `BlobHandler`, you implement the `BlobHandler` interface and register that implementation at a corresponding
+`BlobHandlerRegistry` by calling the BlobHandlerRegistry's _Register_ method (e.g. in an 
+[init](../../pkg/contexts/ocm/blobhandler/oci/ocirepo/blobhandler.go) function to register that implementation in a 
+DefaultRegistry). Thereby, you have to pass an object of that handler implementation to the _Register_ method.  
+But imagine you are working with the _ocm-cli_ and you want to register either a predefined `BlobHandler` (in other 
+words, a `BlobHandler` that is already implemented in the library). With the _ocm-cli_ you cannot pass an object of a
+specific handler implementation. Instead, you would like to be able to _Register_ a specific _BlobHandler_ by its 
+_Name_ (**RegisterByName**) which you can pass as a string. This can be done through the _Handler-Registration Handler 
+Registries_ and their registered _Handler-Registration Handlers_.  
+A _Handler-Registration Handler Registry_ maintains a _hierarchical namespace_, as indicated by the figure below.
+
+![image](introduction/handler-registration-handler-registry.png)
+
+Thus, the _Handler-Registration Handlers_ are registered under a _hierarchical name_, such as `Plugin/Test`. In the 
+example in the figure, either `Plugin` as well as `Plugin/Test` have a _Handler-Registration Handler_ registered. The
+_Handler-Registration Handlers_ maintain a namespace themselves.  
+For some method call such as `RegisterByName("Plugin/Test", ...)` at the `BlobHandlerRegistrationHandlerRegistry`, there
+would be two possible ways to resolve the `"Plugin/Test"` handler name.  
+1) The `BlobHandlerRegistrationHandlerRegistry` selects the `BlobHanderRegistrationHandler` at `"Plugin"` and registers 
+the corresponding `"Test"` BlobHandler at its corresponding Registry.
+2) The `BlobHandlerRegistrationHandlerRegistry` selects the `BlobHanderRegistrationHandler` at `"Plugin/Test"` and 
+registers the corresponding ("anonymous") BlobHandler at its corresponding Registry.
+
+The current standard implementation of the `HandlerRegistrationHandlerRegistry` uses variant 2), therefore, it always
+resolves the _handler name_ with the **longest matching path** within its hierarchical namespace.  
+
+As a `HandlerRegistrationHandlerRegistry` is a `HandlerRegistrationHandler` (see 
+[interface](../../pkg/registrations/registrations.go)), a `HandlerRegistrationHandlerRegistry` could theoretically also 
+contain other`HandlerRegistrationHandlerRegistries`.  
+
+This _register by name_ mechanism is especially also used to register _plugin implementations_ of _handlers_ at their 
+corresponding _registries_ ([here](../../pkg/contexts/ocm/blobhandler/generic/plugin/registration.go) is the 
+`HandlerRegistrationHandler` for _plugin implementations_ of `BlobHandler`).
+
 ### Section 3.2.3 - Repository Spec Handlers
 
-`RepositorySpecHandlers` is slightly different from the other Type Registries. Contrary to the other Type Registries, 
-its purpose is not decoding.  
+The `RepositorySpecHandlers` can be considered a _Constraint Registry_ providing _Handlers_ for converting the so 
+called _UniformRepositorySpecs_ (a uniform string representation for RepositorySpecs) into the repository type 
+specific _RepositorySpec_ representation. Therefore, its constraint merely consists of the _Repository Type_.  
 As it is rather cumbersome to enter JSON objects such as a RepositorySpec through the command line and as there may be
-multiple types of Repository Specs for certain Repository Types (e.g. legacy types), the ocm-cli allows to enter a 
+multiple types of Repository Specs for certain Repository Types (e.g. legacy types), the ocm-cli allows to enter a
 uniform string representation called `UniformRepositorySpec` of a Repository Spec. Be aware, there are again different
-UniformRepositorySpecs for [OCM Repositories](../../pkg/contexts/ocm/internal/uniform.go) and for 
-[OCI Repositories](../../pkg/contexts/oci/internal/uniform.go). Furthermore, _ocm_ and _oci references_, or rather 
+UniformRepositorySpecs for [OCM Repositories](../../pkg/contexts/ocm/internal/uniform.go) and for
+[OCI Repositories](../../pkg/contexts/oci/internal/uniform.go). Furthermore, _ocm_ and _oci references_, or rather
 _reference strings_ (e.g. `eu.gcr.io/gardener-project/landscaper/examples/charts/hello-world:1.0.0`) are parsed into a
-[representation that is based on a `UniformRepositorySpec`](../../pkg/contexts/oci/ref.go). Thus, to get access to the 
+[representation that is based on a `UniformRepositorySpec`](../../pkg/contexts/oci/ref.go). Thus, to get access to the
 respective Repository through the ocm-lib, this `UniformRepositorySpec` first has to be converted into a corresponding
 `RepositorySpec`.  
-Therefore, a `RepositorySpecHandlers` is an object that maps a _repository type (= model type)_ to a number of
-corresponding `RepositorySpecHandler` objects that might be able to convert a `UniformRepositorySpec` into the 
-appropriate `RepositorySpec` for that Repository Type. Therefore, a RepositorySpecHandler has to implement the
-following [interface](../../pkg/contexts/ocm/internal/uniform.go):
+In conclusion, a `RepositorySpecHandlers` _Constraint Registry_ is an object that maps a _repository type 
+(= constraint)_ to a number of corresponding `RepositorySpecHandler` objects that might be able to convert a 
+`UniformRepositorySpec` into the appropriate `RepositorySpec` for that _Repository Type_. Therefore, a 
+`RepositorySpecHandler` has to implement the following [interface](../../pkg/contexts/ocm/internal/uniform.go):
 ```
 type RepositorySpecHandler interface {
 	MapReference(ctx Context, u *UniformRepositorySpec) (RepositorySpec, error)
 }
 ```
 
+A `RepositorySpecHandlers` Registry **is not** also a `HandlerRegistrationHandlerRegistry`.
 
-### Section 3.2.4 - Blob Handlers
+### Section 3.2.4 - Blob Handler Registry
 
-A BlobHandlers object stores a number of types implementing a BlobHandler (thus, BlobHandler is the "certain
-functionality").
+A `BlobHandlerRegistry` essentially serves two different purposes. On the one hand, it is a **Registry for Blob 
+Handlers**, and on the other hand it also serves as a **Registry for Registration Handlers for Blob Handlers**. In the 
+following, we will examine those two purposes separately.
 
-When a Component Version, or rather, a Component Descriptor, is imported into an OCM Repository, a decision has to be
-made about how to deal with the artifacts, or rather, the artifact blobs (e.g. does it stay a local artifact stored
-alongside the Component Descriptor or is it uploaded into an OCI Registry as an independent OCI Artifact?).
-These decisions can be made within BlobHandlers. BlobHandlers therefore implement the following interface:
+**Registry for Blob Handlers:**  
+The `BlobHandlerRegistry` can be considered a _Constraint Registry_. To avoid confusions, let's first clarify that the name 
+_Blob Handler_ might be misleading as the only purpose of a _Blob Handler_ is the upload of blobs. This is also 
+immediately visible when looking at their [interface](../../pkg/contexts/ocm/internal/blobhandler.go):
+```
+type BlobHandler interface {
+   StoreBlob(blob BlobAccess, artType, hint string, global AccessSpec, ctx StorageContext) (AccessSpec, error)
+}
+```
+A much more suitable name would therefore be _Blob Uploader_.
 
-    type BlobHandler interface {
-        StoreBlob(blob BlobAccess, artType, hint string, global AccessSpec, ctx StorageContext)   (AccessSpec, error)
-    }
+When a _Component Version_, or rather, a _Component Descriptor_, is imported into an _OCM Repository_, a decision has 
+to be made about how to deal with the _artifacts_, or rather, the _artifact blobs_ (e.g. does it stay a local artifact 
+stored alongside the _Component Descriptor_ or is it uploaded into an _OCI Registry_ as an independent _OCI Artifact_?).
+These decisions can be made within BlobHandlers. The `StoreBlob` method has to return an `AccessSpec` that can then be 
+inserted into the corresponding new _Component Descriptor_.
 
-The function has to return an AccessSpec that can then be inserted into the respective new Component Descriptor.
+A `BlobHanderRegistry` **is** also a `BlobHandlerRegistrationHandlerRegistry`.
 
 ### Section 3.2.5 - Blob Digesters
 
