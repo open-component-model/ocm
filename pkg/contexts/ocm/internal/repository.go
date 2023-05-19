@@ -61,7 +61,7 @@ type (
 )
 
 type BaseAccess interface {
-	ContextProvider
+	ComponentVersion() ComponentVersionAccess
 	Access() (AccessSpec, error)
 	AccessMethod() (AccessMethod, error)
 }

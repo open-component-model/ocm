@@ -414,8 +414,8 @@ func NewBaseAccess(cv cpi.ComponentVersionAccess, acc compdesc.AccessSpec) *Base
 	return &BaseAccess{vers: cv, access: acc}
 }
 
-func (r *BaseAccess) OCMContext() cpi.Context {
-	return r.vers.GetContext()
+func (r *BaseAccess) ComponentVersion() cpi.ComponentVersionAccess {
+	return r.vers
 }
 
 func (r *BaseAccess) Access() (cpi.AccessSpec, error) {
