@@ -416,11 +416,6 @@ A `RepositorySpecHandlers` Registry **is not** also a `HandlerRegistrationHandle
 
 ### Section 3.2.4 - Blob Handler Registry
 
-A `BlobHandlerRegistry` essentially serves two different purposes. On the one hand, it is a **Registry for Blob 
-Handlers**, and on the other hand it also serves as a **Registry for Registration Handlers for Blob Handlers**. In the 
-following, we will examine those two purposes separately.
-
-**Registry for Blob Handlers:**  
 The `BlobHandlerRegistry` can be considered a _Constraint Registry_. To avoid confusions, let's first clarify that the name 
 _Blob Handler_ might be misleading as the only purpose of a _Blob Handler_ is the upload of blobs. This is also 
 immediately visible when looking at their [interface](../../pkg/contexts/ocm/internal/blobhandler.go):
