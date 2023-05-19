@@ -125,7 +125,8 @@ func ValidateConfig(schemadata, configdata []byte) error {
 }
 
 func (r *RegistrationHandler) GetHandlers(ctx cpi.Context) registrations.HandlerInfos {
-	infos := registrations.HandlerInfos{}
+	infos := registrations.NewNodeHandlerInfo("downloaders provided by plugins",
+		"sub namespace of the form <code>&lt;plugin name>/&lt;handler></code>")
 
 	set := plugincacheattr.Get(ctx)
 	if set == nil {

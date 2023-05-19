@@ -46,7 +46,7 @@ following fields:
   The list of supported downloaders. Downloaders will be used by the
   CLI download command to provide downloaded artifacts in a filesystem format
   applicable to the type specific tools, regatdless of the format it is stored
-  as blob in a component version. Therefore they can be registered for
+  as blob in a component version. Therefore, they can be registered for
   combination of artifact type and optional mime type (describing the actually
   used blob format).
 
@@ -225,9 +225,9 @@ The descriptor for an action has the following fields:
 
 - **<code>consumerType</code>** *string* (optional)
 
-  By default the action gets access to the credentials provided for the
+  By default, the action gets access to the credentials provided for the
   element the action should work on. But it might be, that other credentials
-  are required to fulfill its task. Therefore the action can request a dedicated
+  are required to fulfill its task. Therefore, the action can request a dedicated
   consumer type used to lookup the credentials. The consumer attributes are
   derived from the the action specification and cannot be influenced by the
   plugin.

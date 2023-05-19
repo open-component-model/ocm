@@ -52,7 +52,9 @@ import (
 	topiclogging "github.com/open-component-model/ocm/cmds/ocm/topics/common/logging"
 	topicocirefs "github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
 	topicocmaccessmethods "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/accessmethods"
+	topicocmdownloaders "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/downloadhandlers"
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
+	topicocmuploaders "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/uploadhandlers"
 	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
 	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/cobrautils/logopts"
@@ -134,6 +136,10 @@ The value can be a simple type or a json string for complex values. The followin
 attributes are supported:
 ` + attributes.Attributes()
 
+// NewCliCommandForArgs is the regular way to instantiate a new CLI command.
+// It observes settings provides by options for the main command.
+// This especially means, that help texts are configured according
+// to the config settings provided by options.
 func NewCliCommandForArgs(ctx clictx.Context, args []string, mod ...func(clictx.Context, *cobra.Command)) (*cobra.Command, error) {
 	opts, args, err := Prepare(ctx, args)
 	if err != nil {
@@ -144,6 +150,9 @@ func NewCliCommandForArgs(ctx clictx.Context, args []string, mod ...func(clictx.
 	return cmd, nil
 }
 
+// NewCliCommand creates a new command WITHOUT observing configuration options.
+// The result is a command configured by pure defaults. This is especially true
+// for plugin settings.
 func NewCliCommand(ctx clictx.Context, mod ...func(clictx.Context, *cobra.Command)) *cobra.Command {
 	if ctx == nil {
 		ctx = clictx.DefaultContext()
@@ -230,6 +239,8 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(topicocirefs.New(ctx))
 	cmd.AddCommand(topicocmrefs.New(ctx))
 	cmd.AddCommand(topicocmaccessmethods.New(ctx))
+	cmd.AddCommand(topicocmuploaders.New(ctx))
+	cmd.AddCommand(topicocmdownloaders.New(ctx))
 	cmd.AddCommand(attributes.New(ctx))
 	cmd.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 
@@ -239,6 +250,8 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	help.AddCommand(topicocirefs.New(ctx))
 	help.AddCommand(topicocmrefs.New(ctx))
 	help.AddCommand(topicocmaccessmethods.New(ctx))
+	help.AddCommand(topicocmuploaders.New(ctx))
+	help.AddCommand(topicocmdownloaders.New(ctx))
 	help.AddCommand(attributes.New(ctx))
 	help.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 

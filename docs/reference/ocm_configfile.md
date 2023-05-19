@@ -4,7 +4,7 @@
 
 
 The command line client supports configuring by a given configuration file.
-If existent by default the file <code>$HOME/.ocmconfig</code> will be read.
+If existent, by default, the file <code>$HOME/.ocmconfig</code> will be read.
 Using the option <code>--config</code> an alternative file can be specified.
 
 The file format is yaml. It uses the same type mechanism used for all
@@ -148,6 +148,7 @@ The following configuration types are supported:
       type: plugin.config.ocm.software
       plugin: &lt;plugin name>
       config: &lt;arbitrary configuration structure>
+      disableAutoRegistration: &lt;boolean flag to disable auto registration for up- and download handlers>
   </pre>
 - <code>scripts.ocm.config.ocm.software</code>
   The config type <code>scripts.ocm.config.ocm.software</code> can be used to define transfer scripts:

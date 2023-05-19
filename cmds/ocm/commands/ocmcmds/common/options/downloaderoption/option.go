@@ -43,5 +43,9 @@ func (o *Option) Register(ctx ocm.ContextProvider) error {
 
 func Usage(ctx ocm.Context) string {
 	list := download.For(ctx).GetHandlers(ctx)
-	return listformat.FormatListElements("", list)
+	return listformat.FormatListElements("", list) + `
+
+See <CMD>ocm ocm-downloadhandlers</CMD> for further details on using
+download handlers.
+`
 }

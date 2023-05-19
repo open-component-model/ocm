@@ -13,7 +13,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/pkg/registrations"
 )
@@ -31,7 +30,7 @@ func AttributeDescription() map[string]string {
 	return map[string]string{
 		"asArchive": "flag to request an archive download",
 		"configTypes": "a list of accepted OCI config archive types\n" +
-			"defaulted by <code>" + ociv1.MediaTypeImageConfig + "/code>.",
+			"defaulted by <code>" + ociv1.MediaTypeImageConfig + "</code>.",
 	}
 }
 
@@ -46,7 +45,7 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx download.Target
 		return true, fmt.Errorf("invalid dirtree handler %q", handler)
 	}
 
-	attr, err := registrations.DecodeConfig[Config](config)
+	attr, err := registrations.DecodeDefaultedConfig[Config](config)
 	if err != nil {
 		return true, errors.Wrapf(err, "cannot unmarshal download handler configuration")
 	}
@@ -60,9 +59,8 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx download.Target
 	}
 
 	h := New(attr.ConfigTypes...).SetArchiveMode(attr.AsArchive)
-	supported := generics.Conditional(len(attr.ConfigTypes) > 0, attr.ConfigTypes, supportedMimeTypes)
 	if opts.MimeType == "" {
-		for _, m := range supported {
+		for _, m := range supportedMimeTypes {
 			opts.MimeType = m
 			download.For(ctx).Register(opts.ArtifactType, opts.MimeType, h)
 		}
@@ -75,13 +73,13 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx download.Target
 
 func (r *RegistrationHandler) GetHandlers(ctx cpi.Context) registrations.HandlerInfos {
 	return registrations.NewLeafHandlerInfo("downloading directory tree-like resources", `
-The <code>dirtree</code> downloader is able to to download directory-tree like
-resources as directory stricture (default) or archive.
+The <code>dirtree</code> downloader is able to download directory-tree like
+resources as directory structure (default) or archive.
 The following artifact media types are supported:
 `+listformat.FormatList("", SupportedMimeTypes()...)+`
-By default it is registered for the following resource types:
+By default, it is registered for the following resource types:
 `+listformat.FormatList("", defaultArtifactTypes...)+`
-If accepts a config with the following fields:
+It accepts a config with the following fields:
 `+listformat.FormatMapElements("", AttributeDescription()),
 	)
 }

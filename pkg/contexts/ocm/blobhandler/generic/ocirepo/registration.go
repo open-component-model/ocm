@@ -70,7 +70,7 @@ The <code>ociArtifacts</code> downloader is able to to download OCI artifacts
 as artifact archive according to the OCI distribution spec.
 The following artifact media types are supported:
 `+listformat.FormatList("", artdesc.ArchiveBlobTypes()...)+`
-By default it is registered for these mimetypes.
+By default, it is registered for these mimetypes.
 
 It accepts a config with the following fields:
 `+listformat.FormatMapElements("", ociuploadattr.AttributeDescription())+`

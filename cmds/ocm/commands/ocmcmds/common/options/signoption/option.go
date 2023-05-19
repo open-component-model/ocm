@@ -183,7 +183,7 @@ func (o *Option) Usage() string {
 The <code>--public-key</code> and <code>--private-key</code> options can be
 used to define public and private keys on the command line. The options have an
 argument of the form <code>[&lt;name>=]&lt;filepath></code>. The optional name
-specifies the signature name the key should be used for. By default this is the
+specifies the signature name the key should be used for. By default, this is the
 signature name specified with the option <code>--signature</code>.
 
 Alternatively a key can be specified as base64 encoded string if the argument

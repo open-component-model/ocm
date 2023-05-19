@@ -103,6 +103,7 @@ func (o *RegistrationOption) Configure(ctx clictx.Context) error {
 
 func (o *RegistrationOption) Usage() string {
 	s := fmt.Sprintf(`
+
 If the <code>--%s</code> option is specified, appropriate %s handlers
 are configured for the operation. It has the following format
 

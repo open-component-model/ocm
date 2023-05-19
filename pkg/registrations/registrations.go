@@ -93,7 +93,7 @@ func (i *RegistrationHandlerInfo[T, O]) GetHandlers(target T) HandlerInfos {
 		prefix := i.prefix.String()
 		if prefix != "" {
 			for i := range infos {
-				infos[i].Name = prefix + "/" + infos[i].Name
+				infos[i].Name = prefix + generics.Conditional(infos[i].Name == "", "", "/"+infos[i].Name)
 			}
 		}
 	}
@@ -187,6 +187,7 @@ func (c *handlerRegistrationRegistry[T, O]) GetHandlers(target T) HandlerInfos {
 	for i < len(infos) {
 		if set.Contains(infos[i].Name) {
 			infos = append(infos[:i], infos[i+1:]...)
+			continue
 		}
 		set.Add(infos[i].Name)
 		i++

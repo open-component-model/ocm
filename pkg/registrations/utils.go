@@ -15,30 +15,38 @@ import (
 
 type Decoder func(data []byte, unmarshaller runtime.Unmarshaler) (interface{}, error)
 
+func DecodeDefaultedConfig[T any](config interface{}, d ...Decoder) (*T, error) {
+	if config == nil {
+		var cfg T
+		return &cfg, nil
+	}
+	return DecodeConfig[T](config, d...)
+}
+
 func DecodeConfig[T any](config interface{}, d ...Decoder) (*T, error) {
 	var err error
 
-	var obj T
-	cfg := &obj
+	if config == nil {
+		return nil, nil
+	}
 
-	if config != nil {
-		switch a := config.(type) {
-		case string:
-			cfg, err = decodeConfig[T]([]byte(a), d...)
-		case json.RawMessage:
-			cfg, err = decodeConfig[T](a, d...)
-		case []byte:
-			cfg, err = decodeConfig[T](a, d...)
-		case *T:
-			cfg = a
-		case T:
-			cfg = &a
-		default:
-			return nil, fmt.Errorf("unexpected type %T", a)
-		}
-		if err != nil {
-			return nil, errors.Wrapf(err, "cannot unmarshal config")
-		}
+	var cfg *T
+	switch a := config.(type) {
+	case string:
+		cfg, err = decodeConfig[T]([]byte(a), d...)
+	case json.RawMessage:
+		cfg, err = decodeConfig[T](a, d...)
+	case []byte:
+		cfg, err = decodeConfig[T](a, d...)
+	case *T:
+		cfg = a
+	case T:
+		cfg = &a
+	default:
+		return nil, fmt.Errorf("unexpected type %T", a)
+	}
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot unmarshal config")
 	}
 	return cfg, nil
 }
