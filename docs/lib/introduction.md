@@ -271,7 +271,8 @@ type Repository interface {
 ### Section 3.2.2 - Access Type Scheme
 
 An `AccessTypeScheme` is an object that maps a number of _access types (= model type)_ to corresponding
-_factories_ providing an access spec object which is again a _factory_ for providing an object of a specific type or with
+_factories_ providing an access spec object which is again a _factory_ for providing an object of a specific type or
+with
 a specific configuration for dealing with this _access type (= model type)_.
 
 From the perspective of the ocm-lib, any _go type_ that implements the following
@@ -308,40 +309,44 @@ Registry. There are further implementations, e.g. for [_Local Blobs_](../../pkg/
    ocm library kind of as an add-on).
 
 ### Section 3.3 - Constraint Registries aka. Handler Registries (and Handler-Registration Handler Registries)
+
 **Constraint Registries aka. Handler Registries**  
 So up to now, we were looking at _Type Registries_. These have the purpose of unmarshaling. Therefore, these
-_Type Registries_ typically map a _model type_ (e.g. a _repository type_ or an _access type_) to corresponding 
-_factories_ providing a _spec object_ which is again a _factory_ for providing an object of a specific type or with a 
+_Type Registries_ typically map a _model type_ (e.g. a _repository type_ or an _access type_) to corresponding
+_factories_ providing a _spec object_ which is again a _factory_ for providing an object of a specific type or with a
 specific configuration for dealing with this model type (e.g. a _repository_ or an _access method_).
 
 From a technical perspective **Constraint Registries** work pretty much exactly the same. But their purpose is
-not unmarshaling. While an _object_, or rather a _factory_, within a _Type Registry_ is selected within the decoding 
-logic based on the specified _type_ (a respective _Decode Spec_ method is typically exposed by the Type Registry itself), 
+not unmarshaling. While an _object_, or rather a _factory_, within a _Type Registry_ is selected within the decoding
+logic based on the specified _type_ (a respective _Decode Spec_ method is typically exposed by the Type Registry
+itself),
 an _object_ within a _Constraint Registry_ is selected during some other event based on a number of constraints (a
 respective _Lookup Handler_ method is typically exposed by the Constraint Registry itself). So instead of a _type_, e.g.
 a _Blob Handler Registry_ (a _Blob Handler_ is a handler responsible for uploading blobs into a specific store) stores
-a triple of _RepositoryType_ (e.g. `OCIRegistry`, `CommonTransportFormat`, ...), _ArtifactType_ (e.g. `OCIArtifact`, 
+a triple of _RepositoryType_ (e.g. `OCIRegistry`, `CommonTransportFormat`, ...), _ArtifactType_ (e.g. `OCIArtifact`,
 `ociImage`, ...) and _MimeType_ (e.g. `text/plain`, `application/gzip`, ...). The upload logic passes the current
 contextual information about the underlying _storage repository type_ and the _artifact_ and _mime type_ at hand to the
-_Lookup Handler_ method a _Constraint Registry_, which eventually returns a number of _Handlers_ fulfilling the 
-_Constraint_ formed by these arguments.  
+_Lookup Handler_ method a _Constraint Registry_, which eventually returns a number of _Handlers_ fulfilling the
+_Constraint_ formed by these arguments.
 
 **Type Registry:** _model type (key)_ &rarr; _decoder / factory for a decoder (value)_  
 **Constraint Registry:** _constraint (key)_ &rarr; _handler (value)_
 
 **Handler-Registration Handler Registries**  
-Quite frequently, _Constraint Registries_ are themselves also **Handler-Registration Handler Registries**. A 
+Quite frequently, _Constraint Registries_ are themselves also **Handler-Registration Handler Registries**. A
 **Handler-Registration Handler** is, as the name suggests, a **Handler**  that handles the registration of other
 Handlers (in other words, the **Handler-Registration**).  
 A **Handler-Registration Handler** has to implement the following [interface](../../pkg/registrations/registrations.go):
+
 ```
 type HandlerRegistrationHandler[T any, O any] interface {
 	RegisterByName(handler string, target T, config HandlerConfig, opts ...O) (bool, error)
 }
 ```
 
-And a Handler-Registration Handler Registry has to implement the following corresponding 
+And a Handler-Registration Handler Registry has to implement the following corresponding
 [interface](../../pkg/registrations/registrations.go):
+
 ```
 type HandlerRegistrationRegistry[T any, O any] interface {
    HandlerRegistrationHandler[T, O]
@@ -349,49 +354,51 @@ type HandlerRegistrationRegistry[T any, O any] interface {
    GetRegistrationHandlers(name string) []*RegistrationHandlerInfo[T, O]
 }
 ```
-Thus, a `HandlerRegistrationHandlerRegistry` also is itself also a  `HandlerRegistrationHandler`.  
 
-Without going into too much detail, the purpose of a _Handler-Registration Handler_ is to _register_ a _Handler_ 
+Thus, a `HandlerRegistrationHandlerRegistry` also is itself also a  `HandlerRegistrationHandler`.
+
+Without going into too much detail, the purpose of a _Handler-Registration Handler_ is to _register_ a _Handler_
 identified by the `handler string` parameter at a _Constraint Registry_.  
 Usually, directly within the library, such a functionality is not really necessary. If you want to add e.g. a new
 _type_ of `BlobHandler`, you implement the `BlobHandler` interface and register that implementation at a corresponding
-`BlobHandlerRegistry` by calling the BlobHandlerRegistry's _Register_ method (e.g. in an 
-[init](../../pkg/contexts/ocm/blobhandler/oci/ocirepo/blobhandler.go) function to register that implementation in a 
+`BlobHandlerRegistry` by calling the BlobHandlerRegistry's _Register_ method (e.g. in an
+[init](../../pkg/contexts/ocm/blobhandler/oci/ocirepo/blobhandler.go) function to register that implementation in a
 DefaultRegistry). Thereby, you have to pass an object of that handler implementation to the _Register_ method.  
-But imagine you are working with the _ocm-cli_ and you want to register either a predefined `BlobHandler` (in other 
+But imagine you are working with the _ocm-cli_ and you want to register either a predefined `BlobHandler` (in other
 words, a `BlobHandler` that is already implemented in the library). With the _ocm-cli_ you cannot pass an object of a
-specific handler implementation. Instead, you would like to be able to _Register_ a specific _BlobHandler_ by its 
-_Name_ (**RegisterByName**) which you can pass as a string. This can be done through the _Handler-Registration Handler 
+specific handler implementation. Instead, you would like to be able to _Register_ a specific _BlobHandler_ by its
+_Name_ (**RegisterByName**) which you can pass as a string. This can be done through the _Handler-Registration Handler
 Registries_ and their registered _Handler-Registration Handlers_.  
 A _Handler-Registration Handler Registry_ maintains a _hierarchical namespace_, as indicated by the figure below.
 
 ![image](introduction/handler-registration-handler-registry.png)
 
-Thus, the _Handler-Registration Handlers_ are registered under a _hierarchical name_, such as `Plugin/Test`. In the 
+Thus, the _Handler-Registration Handlers_ are registered under a _hierarchical name_, such as `Plugin/Test`. In the
 example in the figure, either `Plugin` as well as `Plugin/Test` have a _Handler-Registration Handler_ registered. The
 _Handler-Registration Handlers_ maintain a namespace themselves.  
 For some method call such as `RegisterByName("Plugin/Test", ...)` at the `BlobHandlerRegistrationHandlerRegistry`, there
-would be two possible ways to resolve the `"Plugin/Test"` handler name.  
-1) The `BlobHandlerRegistrationHandlerRegistry` selects the `BlobHanderRegistrationHandler` at `"Plugin"` and registers 
-the corresponding `"Test"` BlobHandler at its corresponding Registry.
-2) The `BlobHandlerRegistrationHandlerRegistry` selects the `BlobHanderRegistrationHandler` at `"Plugin/Test"` and 
-registers the corresponding ("anonymous") BlobHandler at its corresponding Registry.
+would be two possible ways to resolve the `"Plugin/Test"` handler name.
+
+1) The `BlobHandlerRegistrationHandlerRegistry` selects the `BlobHanderRegistrationHandler` at `"Plugin"` and registers
+   the corresponding `"Test"` BlobHandler at its corresponding Registry.
+2) The `BlobHandlerRegistrationHandlerRegistry` selects the `BlobHanderRegistrationHandler` at `"Plugin/Test"` and
+   registers the corresponding ("anonymous") BlobHandler at its corresponding Registry.
 
 The current standard implementation of the `HandlerRegistrationHandlerRegistry` uses variant 2), therefore, it always
-resolves the _handler name_ with the **longest matching path** within its hierarchical namespace.  
+resolves the _handler name_ with the **longest matching path** within its hierarchical namespace.
 
-As a `HandlerRegistrationHandlerRegistry` is a `HandlerRegistrationHandler` (see 
-[interface](../../pkg/registrations/registrations.go)), a `HandlerRegistrationHandlerRegistry` could theoretically also 
-contain other`HandlerRegistrationHandlerRegistries`.  
+As a `HandlerRegistrationHandlerRegistry` is a `HandlerRegistrationHandler` (see
+[interface](../../pkg/registrations/registrations.go)), a `HandlerRegistrationHandlerRegistry` could theoretically also
+contain other`HandlerRegistrationHandlerRegistries`.
 
-This _register by name_ mechanism is especially also used to register _plugin implementations_ of _handlers_ at their 
-corresponding _registries_ ([here](../../pkg/contexts/ocm/blobhandler/generic/plugin/registration.go) is the 
+This _register by name_ mechanism is especially also used to register _plugin implementations_ of _handlers_ at their
+corresponding _registries_ ([here](../../pkg/contexts/ocm/blobhandler/generic/plugin/registration.go) is the
 `HandlerRegistrationHandler` for _plugin implementations_ of `BlobHandler`).
 
 ### Section 3.2.3 - Repository Spec Handlers
 
-The `RepositorySpecHandlers` can be considered a _Constraint Registry_ providing _Handlers_ for converting the so 
-called _UniformRepositorySpecs_ (a uniform string representation for RepositorySpecs) into the repository type 
+The `RepositorySpecHandlers` can be considered a _Constraint Registry_ providing _Handlers_ for converting the so
+called _UniformRepositorySpecs_ (a uniform string representation for RepositorySpecs) into the repository type
 specific _RepositorySpec_ representation. Therefore, its constraint merely consists of the _Repository Type_.  
 As it is rather cumbersome to enter JSON objects such as a RepositorySpec through the command line and as there may be
 multiple types of Repository Specs for certain Repository Types (e.g. legacy types), the ocm-cli allows to enter a
@@ -402,10 +409,11 @@ _reference strings_ (e.g. `eu.gcr.io/gardener-project/landscaper/examples/charts
 [representation that is based on a `UniformRepositorySpec`](../../pkg/contexts/oci/ref.go). Thus, to get access to the
 respective Repository through the ocm-lib, this `UniformRepositorySpec` first has to be converted into a corresponding
 `RepositorySpec`.  
-In conclusion, a `RepositorySpecHandlers` _Constraint Registry_ is an object that maps a _repository type 
-(= constraint)_ to a number of corresponding `RepositorySpecHandler` objects that might be able to convert a 
-`UniformRepositorySpec` into the appropriate `RepositorySpec` for that _Repository Type_. Therefore, a 
+In conclusion, a `RepositorySpecHandlers` _Constraint Registry_ is an object that maps a _repository type
+(= constraint)_ to a number of corresponding `RepositorySpecHandler` objects that might be able to convert a
+`UniformRepositorySpec` into the appropriate `RepositorySpec` for that _Repository Type_. Therefore, a
 `RepositorySpecHandler` has to implement the following [interface](../../pkg/contexts/ocm/internal/uniform.go):
+
 ```
 type RepositorySpecHandler interface {
 	MapReference(ctx Context, u *UniformRepositorySpec) (RepositorySpec, error)
@@ -416,41 +424,47 @@ A `RepositorySpecHandlers` Registry **is not** also a `HandlerRegistrationHandle
 
 ### Section 3.2.4 - Blob Handler Registry
 
-The `BlobHandlerRegistry` can be considered a _Constraint Registry_. To avoid confusions, let's first clarify that the name 
-_Blob Handler_ might be misleading as the only purpose of a _Blob Handler_ is the upload of blobs. This is also 
+The `BlobHandlerRegistry` can be considered a _Constraint Registry_. To avoid confusions, let's first clarify that the
+name
+_Blob Handler_ might be misleading as the only purpose of a _Blob Handler_ is the upload of blobs. This is also
 immediately visible when looking at their [interface](../../pkg/contexts/ocm/internal/blobhandler.go):
+
 ```
 type BlobHandler interface {
    StoreBlob(blob BlobAccess, artType, hint string, global AccessSpec, ctx StorageContext) (AccessSpec, error)
 }
 ```
+
 A much more suitable name would therefore be _Blob Uploader_.
 
-When a _Component Version_, or rather, a _Component Descriptor_, is imported into an _OCM Repository_, a decision has 
-to be made about how to deal with the _artifacts_, or rather, the _artifact blobs_ (e.g. does it stay a local artifact 
+When a _Component Version_, or rather, a _Component Descriptor_, is imported into an _OCM Repository_, a decision has
+to be made about how to deal with the _artifacts_, or rather, the _artifact blobs_ (e.g. does it stay a local artifact
 stored alongside the _Component Descriptor_ or is it uploaded into an _OCI Registry_ as an independent _OCI Artifact_?).
-These decisions can be made within BlobHandlers. The `StoreBlob` method has to return an `AccessSpec` that can then be 
+These decisions can be made within BlobHandlers. The `StoreBlob` method has to return an `AccessSpec` that can then be
 inserted into the corresponding new _Component Descriptor_.
 
-A `BlobHanderRegistry` **is** also a `BlobHandlerRegistrationHandlerRegistry`.
+A `BlobHanderRegistry` **is** also a `HandlerRegistrationHandlerRegistry`.
 
-### Section 3.2.5 - Blob Digesters
+### Section 3.2.5 - Blob Digester Registry
 
-A BlobDigesters object stores a number of types implementing a BlobDigester (thus, BlobDigester is the "certain
-functionality").
-
-In theory, the digest could be calculated over the byte sequence of the blob. But e.g. for archives, the digest may
-change after through unpacking and repacking processes (dates may be added or changed, the order of specific elements
+The `BlobDigesterRegistry` can be considered a _Constraint Registry_ providing _Handlers_ for calculating the _digest_
+of a _blob_. In theory, the digest could be calculated over the byte sequence of the blob. But e.g. for archives, the
+digest may
+change through unpacking and repacking processes (dates may be added or changed, the order of specific elements
 may change). As a consequence, the same artifact could have different digests which would be a problem regarding
-signing. Therefore, there exist digesters for specific mime types e.g. an OCI artifact digester, that calculates the
+signing. Therefore, there exist _digesters_ for _specific mime types_ e.g. an OCI Artifact digester, that calculates the
 digest over the byte sequence of the OCI artifact representation which always has to be the same per specification.
-Generally, a BlobDigester is anything that allows to calculate the digest for blobs with specific mime types through the
-following interface:
+Generally, a `BlobDigester` is anything that allows to calculate the digest for blobs with specific mime types through
+the following [interface](../../pkg/contexts/ocm/internal/digesthandler.go):
 
-    type BlobDigester interface {
-        GetType() DigesterType
-        DetermineDigest(resType string, meth AccessMethod, preferred signing.Hasher)   (*DigestDescriptor, error)
-    }
+```
+ype BlobDigester interface {
+   GetType() DigesterType
+   DetermineDigest(resType string, meth AccessMethod, preferred signing.Hasher)   (*DigestDescriptor, error)
+}
+```
+
+A BlobDigesterRegistry currently **is not** also a `HandlerRegistrationHandlerRegistry`.
 
 ## Section 3.3 - Dictionaries
 
