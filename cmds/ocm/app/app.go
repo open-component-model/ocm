@@ -74,6 +74,7 @@ import (
 type CLIOptions struct {
 	Completed   bool
 	Config      string
+	ConfigSets  []string
 	Credentials []string
 	Context     clictx.Context
 	Settings    []string
@@ -265,6 +266,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 
 func (o *CLIOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Config, "config", "", "", "configuration file")
+	fs.StringSliceVarP(&o.ConfigSets, "config-set", "", nil, "apply configuration set")
 	fs.StringArrayVarP(&o.Credentials, "cred", "C", nil, "credential setting")
 	fs.StringArrayVarP(&o.Settings, "attribute", "X", nil, "attribute setting")
 	fs.BoolVarP(&o.Verbose, "verbose", "v", false, "deprecated: enable logrus verbose logging")
@@ -294,6 +296,13 @@ func (o *CLIOptions) Complete() error {
 	_, err = utils.Configure(o.Context.OCMContext(), o.Config, vfsattr.Get(o.Context))
 	if err != nil {
 		return err
+	}
+
+	for _, n := range o.ConfigSets {
+		err := o.Context.ConfigContext().ApplyConfigSet(n)
+		if err != nil {
+			return err
+		}
 	}
 
 	id := credentials.ConsumerIdentity{}

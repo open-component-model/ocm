@@ -15,8 +15,8 @@ import (
 )
 
 type ImplementationRepositoryType struct {
-	ContextType    string
-	RepositoryType string
+	ContextType    string `json:"contextType,omitempty"`
+	RepositoryType string `json:"repositoryType,omitempty"`
 }
 
 func (t ImplementationRepositoryType) String() string {
@@ -135,9 +135,9 @@ func (o prio) ApplyBlobHandlerOptionTo(opts *BlobHandlerOptions) {
 
 // BlobHandlerKey is the registration key for BlobHandlers.
 type BlobHandlerKey struct {
-	ImplementationRepositoryType
-	ArtifactType string
-	MimeType     string
+	ImplementationRepositoryType `json:",inline"`
+	ArtifactType                 string `json:"artifactType,omitempty"`
+	MimeType                     string `json:"mimeType,omitempty"`
 }
 
 var _ BlobHandlerOption = BlobHandlerKey{}

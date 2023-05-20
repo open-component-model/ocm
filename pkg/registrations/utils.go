@@ -6,7 +6,6 @@ package registrations
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -43,7 +42,12 @@ func DecodeConfig[T any](config interface{}, d ...Decoder) (*T, error) {
 	case T:
 		cfg = &a
 	default:
-		return nil, fmt.Errorf("unexpected type %T", a)
+		var data []byte
+		data, err = json.Marshal(a)
+		if err != nil {
+			return nil, err
+		}
+		cfg, err = decodeConfig[T](data, d...)
 	}
 	if err != nil {
 		return nil, errors.Wrapf(err, "cannot unmarshal config")

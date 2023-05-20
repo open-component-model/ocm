@@ -55,7 +55,7 @@ var _ = Describe("artifact management", func() {
 		})
 
 		It("downloads to dir", func() {
-			Expect(download.For(env.OCMContext()).RegisterByName("ocm/dirtree", env.OCMContext(), &dirtree.Config{AsArchive: false}, download.ForArtifactType(TEST_ARTIFACT))).To(BeTrue())
+			Expect(download.For(env).RegisterByName("ocm/dirtree", env.OCMContext(), &dirtree.Config{AsArchive: false}, download.ForArtifactType(TEST_ARTIFACT))).To(BeTrue())
 
 			repo := Must(ctf.Open(ocm.DefaultContext(), accessobj.ACC_READONLY, "ctf", 0, env))
 			defer Close(repo)
@@ -64,7 +64,7 @@ var _ = Describe("artifact management", func() {
 			res := Must(cv.GetResource(metav1.NewIdentity(RESOURCE)))
 
 			p, buf := common.NewBufferedPrinter()
-			accepted, path := Must2(download.For(env.OCMContext()).Download(p, res, "result", env))
+			accepted, path := Must2(download.For(env).Download(p, res, "result", env))
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("result"))
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
@@ -78,7 +78,7 @@ result: 2 file(s) with 25 byte(s) written
 		})
 
 		It("downloads archive to archive", func() {
-			Expect(download.For(env.OCMContext()).RegisterByName("ocm/dirtree", env.OCMContext(), &dirtree.Config{AsArchive: true}, download.ForArtifactType(TEST_ARTIFACT))).To(BeTrue())
+			Expect(download.For(env).RegisterByName("ocm/dirtree", env.OCMContext(), &dirtree.Config{AsArchive: true}, download.ForArtifactType(TEST_ARTIFACT))).To(BeTrue())
 
 			repo := Must(ctf.Open(ocm.DefaultContext(), accessobj.ACC_READONLY, "ctf", 0, env))
 			defer Close(repo)
@@ -87,7 +87,7 @@ result: 2 file(s) with 25 byte(s) written
 			res := Must(cv.GetResource(metav1.NewIdentity(RESOURCE)))
 
 			p, buf := common.NewBufferedPrinter()
-			accepted, path := Must2(download.For(env.OCMContext()).Download(p, res, "target", env))
+			accepted, path := Must2(download.For(env).Download(p, res, "target", env))
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("target"))
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`

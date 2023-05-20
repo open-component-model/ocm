@@ -10,18 +10,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 )
 
-type (
-	BlobHandlerOption   = cpi.BlobHandlerOption
-	BlobHandlerConfig   = cpi.BlobHandlerConfig
-	BlobHandlerOptions  = cpi.BlobHandlerOptions
-	BlobHandlerRegistry = cpi.BlobHandlerRegistry
-)
-
-func For(ctx cpi.ContextProvider) cpi.BlobHandlerRegistry {
-	return ctx.OCMContext().BlobHandlers()
-}
-
-func RegisterHandlerByName(ctx cpi.ContextProvider, name string, config BlobHandlerConfig, opts ...BlobHandlerOption) error {
+func RegisterHandlerByName(ctx cpi.ContextProvider, name string, config HandlerConfig, opts ...HandlerOption) error {
 	o, err := For(ctx).RegisterByName(name, ctx.OCMContext(), config, opts...)
 	if err != nil {
 		return err
@@ -32,14 +21,18 @@ func RegisterHandlerByName(ctx cpi.ContextProvider, name string, config BlobHand
 	return nil
 }
 
-func WithPrio(prio int) BlobHandlerOption {
+func WithPrio(prio int) HandlerOption {
 	return cpi.WithPrio(prio)
 }
 
-func ForArtifactType(t string) BlobHandlerOption {
+func ForArtifactType(t string) HandlerOption {
 	return cpi.ForArtifactType(t)
 }
 
-func ForMimeType(t string) BlobHandlerOption {
+func ForMimeType(t string) HandlerOption {
 	return cpi.ForMimeType(t)
+}
+
+func ForRepo(ctxtype string, repotype string) HandlerOption {
+	return cpi.ForRepo(ctxtype, repotype)
 }

@@ -80,6 +80,9 @@ func (h *Handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 	if err != nil || (lfs == nil && r == nil) {
 		return err != nil, "", err
 	}
+	if path == "" {
+		path = racc.Meta().GetName()
+	}
 	return h.download(p, fs, path, lfs, r)
 }
 
@@ -87,6 +90,9 @@ func (h *Handler) DownloadFromArtifactSet(pr common.Printer, set *artifactset.Ar
 	lfs, r, err := h.GetForArtifactSet(set)
 	if err != nil || (lfs == nil && r != nil) {
 		return err != nil, "", err
+	}
+	if path == "" {
+		path = set.GetMain().String()
 	}
 	return h.download(common.NewPrinter(nil), fs, path, lfs, r)
 }

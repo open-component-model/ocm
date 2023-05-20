@@ -7,6 +7,7 @@ package ociuploadattr
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
@@ -68,7 +69,7 @@ func (a AttributeType) Decode(data []byte, unmarshaller runtime.Unmarshaler) (in
 	if ref.Tag != nil || ref.Digest != nil {
 		return nil, errors.ErrInvalidWrap(err, oci.KIND_OCI_REFERENCE, string(data))
 	}
-	return &Attribute{Ref: string(data)}, nil
+	return &Attribute{Ref: strings.Trim(string(data), "\"")}, nil
 }
 
 ////////////////////////////////////////////////////////////////////////////////

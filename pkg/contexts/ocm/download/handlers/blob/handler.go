@@ -35,6 +35,9 @@ func (_ Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string
 		return true, "", wrapErr(err, racc)
 	}
 	defer rd.Close()
+	if path == "" {
+		path = racc.Meta().GetName()
+	}
 	file, err := fs.OpenFile(path, vfs.O_TRUNC|vfs.O_CREATE|vfs.O_WRONLY, 0o660)
 	if err != nil {
 		return true, "", wrapErr(errors.Wrapf(err, "creating target file %q", path), racc)

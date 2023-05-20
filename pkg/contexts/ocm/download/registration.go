@@ -42,10 +42,10 @@ type HandlerOption interface {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// HandlerKey is the registration key for BlobHandlers.
+// HandlerKey is the registration key for download handlers.
 type HandlerKey struct {
-	ArtifactType string
-	MimeType     string
+	ArtifactType string `json:"artifactType,omitempty"`
+	MimeType     string `json:"mimeType,omitempty"`
 }
 
 var _ HandlerOption = HandlerKey{}
@@ -97,7 +97,7 @@ func RegisterHandlerRegistrationHandler(path string, handler HandlerRegistration
 }
 
 func RegisterHandlerByName(ctx cpi.ContextProvider, name string, config HandlerConfig, opts ...HandlerOption) error {
-	hdlrs := For(ctx.OCMContext())
+	hdlrs := For(ctx)
 	o, err := hdlrs.RegisterByName(name, ctx.OCMContext(), config, opts...)
 	if err != nil {
 		return err

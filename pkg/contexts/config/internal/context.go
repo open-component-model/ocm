@@ -63,6 +63,9 @@ type Context interface {
 	GetConfigForName(generation int64, name string) (int64, []Config)
 	GetConfig(generation int64, selector ConfigSelector) (int64, []Config)
 
+	AddConfigSet(name string, set *ConfigSet)
+	ApplyConfigSet(name string) error
+
 	// Reset all configs applied so far, subsequent calls to ApplyTo will
 	// ony see configs allpied after the last reset.
 	Reset() int64
@@ -234,6 +237,23 @@ func (c *_context) ApplyTo(gen int64, target interface{}) (int64, error) {
 		}
 	}
 	return cur, list.Result()
+}
+
+func (c *_context) AddConfigSet(name string, set *ConfigSet) {
+	c.configs.AddSet(name, set)
+}
+
+func (c *_context) ApplyConfigSet(name string) error {
+	set := c.configs.GetSet(name)
+	if set == nil {
+		return errors.ErrUnknown(KIND_CONFIGSET, name)
+	}
+	desc := "config set " + name
+	list := errors.ErrListf("applying %s", desc)
+	for _, cfg := range set.Configurations {
+		list.Add(c.ApplyConfig(cfg, desc))
+	}
+	return list.Result()
 }
 
 func (c *_context) GetConfig(gen int64, selector ConfigSelector) (int64, []Config) {

@@ -57,7 +57,7 @@ type Command struct {
 // NewCommand creates a new resources command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	f := func(opts *output.Options) output.Output {
-		return &action{downloaders: download.For(ctx.OCMContext()), opts: opts}
+		return &action{downloaders: download.For(ctx), opts: opts}
 	}
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx,
 		versionconstraintsoption.New(),
@@ -184,6 +184,9 @@ func (d *action) Add(e interface{}) error {
 }
 
 func (d *action) Close() error {
+	if len(d.data) == 0 {
+		out.Outf(d.opts.Context, "no resources selected\n")
+	}
 	return nil
 }
 
@@ -235,7 +238,6 @@ func (d *action) Save(o *elemhdlr.Object, f string) error {
 	pathIn := true
 	r := common.Elem(o)
 	if f == "" {
-		f = r.GetName()
 		pathIn = false
 	}
 	var tmp vfs.File
@@ -256,9 +258,11 @@ func (d *action) Save(o *elemhdlr.Object, f string) error {
 		return err
 	}
 	dir := path.Dir(f)
-	err = dest.PathFilesystem.MkdirAll(dir, 0o770)
-	if err != nil {
-		return err
+	if dir != "" && dir != "." {
+		err = dest.PathFilesystem.MkdirAll(dir, 0o770)
+		if err != nil {
+			return err
+		}
 	}
 	var ok bool
 	var eff string

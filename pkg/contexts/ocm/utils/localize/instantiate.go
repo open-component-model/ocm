@@ -42,7 +42,7 @@ func Instantiate(rules *InstantiationRules, cv ocm.ComponentVersionAccess, resol
 		}
 	}
 
-	ok, _, err := download.For(cv.GetContext()).Download(common.NewPrinter(nil), template, "", fs)
+	ok, _, err := download.For(cv.GetContext()).Download(common.NewPrinter(nil), template, ".", fs)
 	if err != nil {
 		return errors.Wrapf(err, "cannot download resource %s", rules.Template)
 	}

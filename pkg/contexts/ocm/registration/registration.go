@@ -11,7 +11,7 @@ import (
 	pluginaccess "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/plugin"
 	pluginaction "github.com/open-component-model/ocm/pkg/contexts/ocm/actionhandler/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
-	pluginupload "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/generic/plugin"
+	pluginupload "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/generic/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	plugindownload "github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/plugin"
@@ -81,7 +81,7 @@ func RegisterExtensions(ctx ocm.Context) error {
 								"context", c.ArtifactType+":"+c.MediaType,
 								"plugin", p.Name(),
 								"handler", u.Name)
-							download.For(ctx.OCMContext()).Register(c.ArtifactType, c.MediaType, hdlr)
+							download.For(ctx).Register(c.ArtifactType, c.MediaType, hdlr)
 						}
 					}
 				}

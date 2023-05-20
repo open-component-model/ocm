@@ -85,6 +85,9 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 
 	if h.spec == nil {
 		log.Debug("no config set")
+		if path == "" {
+			return false, "", fmt.Errorf("path required as target repo specification")
+		}
 		ref, err := oci.ParseRef(path)
 		if err != nil {
 			return true, "", err
@@ -102,15 +105,18 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 		artspec = ref.ArtSpec
 	} else {
 		log.Debug("evaluating config")
-		artspec, err = oci.ParseArt(path)
+		if path != "" {
+			artspec, err = oci.ParseArt(path)
+			if err != nil {
+				return true, "", err
+			}
+		}
+		var us *oci.UniformRepositorySpec
+		repo, us, prefix, err = h.spec.GetInfo(h.ctx)
 		if err != nil {
 			return true, "", err
 		}
-		repo, _, prefix, err = h.spec.GetInfo(h.ctx)
-		if err != nil {
-			return true, "", err
-		}
-		result.UniformRepositorySpec = *repo.GetSpecification().UniformRepositorySpec()
+		result.UniformRepositorySpec = *us
 	}
 	log.Debug("using artifact spec", "spec", artspec.String())
 	if artspec.Digest != nil {
@@ -179,6 +185,7 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 		log.Debug("using direct transfer mode")
 	}
 
+	p.Printf("uploading resource %s to %s[%s:%s]...\n", racc.Meta().GetName(), repo.GetSpecification().UniformRepositorySpec(), namespace, version)
 	err = transfer.TransferArtifact(art, ns, oci.AsTags(version)...)
 	if err != nil {
 		return true, "", errors.Wrapf(err, "transfer artifact")

@@ -11,7 +11,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localfsblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
-	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/ocm"
+	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/errors"

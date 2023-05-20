@@ -59,6 +59,9 @@ func (h Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string
 		return true, "", err
 	}
 	finalize.Close(art)
+	if path == "" {
+		path = racc.Meta().GetName()
+	}
 	_, _, err = download(p, art, path, fs)
 	if err != nil {
 		return true, "", err

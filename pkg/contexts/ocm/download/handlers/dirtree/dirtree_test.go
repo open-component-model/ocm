@@ -123,7 +123,7 @@ target: 3584 byte(s) written
 			res := Must(cv.GetResource(metav1.NewIdentity(RESOURCE)))
 
 			p, buf := common.NewBufferedPrinter()
-			accepted, path, err := download.For(env.OCMContext()).Download(p, res, "result", env)
+			accepted, path, err := download.For(env).Download(p, res, "result", env)
 			Expect(err).To(Succeed())
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("result"))
@@ -221,7 +221,7 @@ target: 3584 byte(s) written
 			res := Must(cv.GetResource(metav1.NewIdentity(RESOURCE)))
 
 			p, buf := common.NewBufferedPrinter()
-			accepted, path := Must2(download.For(env.OCMContext()).Download(p, res, "result", env))
+			accepted, path := Must2(download.For(env).Download(p, res, "result", env))
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("result"))
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
@@ -321,7 +321,7 @@ target: 3584 byte(s) written
 			res := Must(cv.GetResource(metav1.NewIdentity(RESOURCE)))
 
 			p, buf := common.NewBufferedPrinter()
-			accepted, path := Must2(download.For(env.OCMContext()).Download(p, res, "result", env))
+			accepted, path := Must2(download.For(env).Download(p, res, "result", env))
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("result"))
 			Expect(buf.String()).To(StringEqualTrimmedWithContext(`

@@ -119,11 +119,11 @@ func Register(arttype, mediatype string, hdlr Handler) {
 
 const ATTR_DOWNLOADER_HANDLERS = "github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 
-func For(ctx datacontext.Context) Registry {
+func For(ctx cpi.ContextProvider) Registry {
 	if ctx == nil {
 		return DefaultRegistry
 	}
-	return ctx.GetAttributes().GetOrCreateAttribute(ATTR_DOWNLOADER_HANDLERS, create).(Registry)
+	return ctx.OCMContext().GetAttributes().GetOrCreateAttribute(ATTR_DOWNLOADER_HANDLERS, create).(Registry)
 }
 
 func create(datacontext.Context) interface{} {

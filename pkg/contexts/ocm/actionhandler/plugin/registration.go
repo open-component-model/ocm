@@ -7,7 +7,6 @@ package plugin
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/handlers"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
@@ -46,8 +45,6 @@ func (r *RegistrationHandler) RegisterByName(handler string, target handlers.Tar
 	return true, err
 }
 
-// TODO: adapt to new action handling after merge
-
 func RegisterActionHandler(target handlers.Target, pname string, ctx ocm.Context, opts *handlers.Options) error {
 	set := plugincacheattr.Get(ctx)
 	if set == nil {
@@ -82,7 +79,7 @@ func (r *RegistrationHandler) GetHandlers(target handlers.Target) registrations.
 	set.PluginNames()
 	for _, name := range set.PluginNames() {
 		for _, a := range set.Get(name).GetDescriptor().Actions {
-			d := action.GetAction(a.GetName())
+			d := target.GetActions().GetActionTypes().GetAction(a.GetName())
 			short := ""
 			if d != nil {
 				short = d.Description()

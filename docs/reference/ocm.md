@@ -11,6 +11,7 @@ ocm [<options>] <sub command> ...
 ```
   -X, --attribute stringArray   attribute setting
       --config string           configuration file
+      --config-set strings      apply configuration set
   -C, --cred stringArray        credential setting
   -h, --help                    help for ocm
       --logconfig string        log config

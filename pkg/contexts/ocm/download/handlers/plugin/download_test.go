@@ -116,7 +116,7 @@ var _ = Describe("setup plugin cache", func() {
 		file := vfs.Join(env.FileSystem(), repodir, "download")
 
 		octx, buf := out.NewBuffered()
-		ok, eff, err := download.For(env.OCMContext()).Download(common.NewPrinter(octx.StdOut()), racc, file, nil)
+		ok, eff, err := download.For(env).Download(common.NewPrinter(octx.StdOut()), racc, file, nil)
 
 		MustBeSuccessful(err)
 		Expect(buf.String()).To(Equal(""))

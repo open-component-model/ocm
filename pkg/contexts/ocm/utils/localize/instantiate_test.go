@@ -62,7 +62,7 @@ var _ = Describe("image value mapping", func() {
 		env = builder.NewBuilder(nil)
 
 		// register downloader for new archive type.
-		download.For(env.OCMContext()).Register(RESOURCE_TYPE, "", dirtree.New())
+		download.For(env).Register(RESOURCE_TYPE, "", dirtree.New())
 
 		env.OCMCommonTransport(ARCHIVE, accessio.FormatDirectory, func() {
 			env.Component(COMPONENT, func() {
