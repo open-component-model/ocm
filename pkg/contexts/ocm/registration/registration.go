@@ -80,8 +80,16 @@ func RegisterExtensions(ctx ocm.Context) error {
 							logger.Info("registering download handler",
 								"context", c.ArtifactType+":"+c.MediaType,
 								"plugin", p.Name(),
-								"handler", u.Name)
-							download.For(ctx).Register(c.ArtifactType, c.MediaType, hdlr)
+								"handler", u.Name,
+								"priority", c.Priority)
+							opts := &download.HandlerOptions{
+								HandlerKey: download.HandlerKey{
+									ArtifactType: c.ArtifactType,
+									MimeType:     c.MediaType,
+								},
+								Priority: c.Priority,
+							}
+							download.For(ctx).Register(hdlr, opts)
 						}
 					}
 				}

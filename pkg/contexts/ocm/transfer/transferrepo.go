@@ -17,9 +17,6 @@ func TransferComponents(printer common.Printer, closure TransportClosure, repo o
 	if closure == nil {
 		closure = TransportClosure{}
 	}
-	if printer == nil {
-		printer = common.NewPrinter(nil)
-	}
 
 	lister := repo.ComponentLister()
 	if lister == nil {
@@ -34,7 +31,7 @@ func TransferComponents(printer common.Printer, closure TransportClosure, repo o
 	}
 	list := errors.ErrListf("component transport")
 	for _, c := range comps {
-		transferVersions(printer, closure, list, handler, repo, c, tgt)
+		transferVersions(common.AssurePrinter(printer), closure, list, handler, repo, c, tgt)
 	}
 	return list.Result()
 }

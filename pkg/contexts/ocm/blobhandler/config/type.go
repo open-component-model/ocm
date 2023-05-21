@@ -33,10 +33,10 @@ type Config struct {
 }
 
 type Handler struct {
-	Name                   string `json:"name"`
-	Description            string `json:"description,omitempty"`
-	blobhandler.HandlerKey `json:",inline"`
-	Config                 blobhandler.HandlerConfig
+	Name                       string `json:"name"`
+	Description                string `json:"description,omitempty"`
+	blobhandler.HandlerOptions `json:",inline"`
+	Config                     blobhandler.HandlerConfig `json:"config,omitempty"`
 }
 
 // New creates a new memory ConfigSpec.
@@ -67,7 +67,7 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 	}
 	reg := blobhandler.For(t)
 	for _, h := range a.Handlers {
-		accepted, err := reg.RegisterByName(h.Name, t, h.Config, &h.HandlerKey)
+		accepted, err := reg.RegisterByName(h.Name, t, h.Config, &h.HandlerOptions)
 		if err != nil {
 			return errors.Wrapf(err, "registering upload handler %q[%s]", h.Name, h.Description)
 		}

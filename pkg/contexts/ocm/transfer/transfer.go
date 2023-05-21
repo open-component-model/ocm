@@ -28,11 +28,8 @@ func TransferVersion(printer common.Printer, closure TransportClosure, src ocmcp
 	if closure == nil {
 		closure = TransportClosure{}
 	}
-	if printer == nil {
-		printer = common.NewPrinter(nil)
-	}
 	state := WalkingState{Closure: closure}
-	return transferVersion(printer, Logger(src), state, src, tgt, handler)
+	return transferVersion(common.AssurePrinter(printer), Logger(src), state, src, tgt, handler)
 }
 
 func transferVersion(printer common.Printer, log logging.Logger, state WalkingState, src ocmcpi.ComponentVersionAccess, tgt ocmcpi.Repository, handler transferhandler.TransferHandler) error {

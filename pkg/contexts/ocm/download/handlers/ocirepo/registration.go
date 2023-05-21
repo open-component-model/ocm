@@ -61,10 +61,10 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx download.Target
 	if opts.MimeType == "" {
 		for _, m := range supportedMimeTypes {
 			opts.MimeType = m
-			download.For(ctx).Register(opts.ArtifactType, opts.MimeType, h)
+			download.For(ctx).Register(h, opts)
 		}
 	} else {
-		download.For(ctx).Register(opts.ArtifactType, opts.MimeType, h)
+		download.For(ctx).Register(h, opts)
 	}
 
 	return true, nil

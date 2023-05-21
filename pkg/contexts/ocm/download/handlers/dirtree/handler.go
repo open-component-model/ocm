@@ -65,7 +65,7 @@ var DefaultHandler = New()
 func init() {
 	for _, t := range defaultArtifactTypes {
 		for _, m := range supportedMimeTypes {
-			download.Register(t, m, DefaultHandler)
+			download.Register(DefaultHandler, download.ForCombi(t, m))
 		}
 	}
 }

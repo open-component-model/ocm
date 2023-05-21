@@ -96,8 +96,8 @@ func (m MultiBlobHandler) Swap(i, j int) {
 ////////////////////////////////////////////////////////////////////////////////
 
 type BlobHandlerOptions struct {
-	BlobHandlerKey
-	Priority int
+	BlobHandlerKey `json:",inline"`
+	Priority       int `json:"priority,omitempty"`
 }
 
 func NewBlobHandlerOptions(olist ...BlobHandlerOption) *BlobHandlerOptions {
@@ -420,7 +420,7 @@ func (r *blobHandlerRegistry) lookupHandler(key BlobHandlerKey) (BlobHandler, *h
 	if len(multi) == 0 {
 		return nil, r.cache
 	}
-	sort.Sort(multi)
+	sort.Stable(multi)
 	return multi, r.cache
 }
 

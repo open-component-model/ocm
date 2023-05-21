@@ -29,7 +29,7 @@ const TYPE = resourcetypes.HELM_CHART
 type Handler struct{}
 
 func init() {
-	registry.RegisterForArtifactType(TYPE, &Handler{})
+	registry.Register(&Handler{}, registry.ForArtifactType(TYPE))
 }
 
 func (h Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (_ bool, _ string, err error) {

@@ -17,6 +17,7 @@ type Target = cpi.Context
 
 type HandlerOptions struct {
 	HandlerKey `json:",inline"`
+	Priority   int `json:"priority,omitempty"`
 }
 
 func NewHandlerOptions(olist ...HandlerOption) *HandlerOptions {
@@ -28,12 +29,10 @@ func NewHandlerOptions(olist ...HandlerOption) *HandlerOptions {
 }
 
 func (o *HandlerOptions) ApplyHandlerOptionTo(opts *HandlerOptions) {
-	if o.ArtifactType != "" {
-		opts.ArtifactType = o.ArtifactType
+	if o.Priority > 0 {
+		opts.Priority = o.Priority
 	}
-	if o.MimeType != "" {
-		opts.MimeType = o.MimeType
-	}
+	o.HandlerKey.ApplyHandlerOptionTo(opts)
 }
 
 type HandlerOption interface {
@@ -66,12 +65,28 @@ func (k HandlerKey) ApplyHandlerOptionTo(opts *HandlerOptions) {
 	}
 }
 
+func ForCombi(artifacttype string, mimetype string) HandlerOption {
+	return HandlerKey{ArtifactType: artifacttype, MimeType: mimetype}
+}
+
 func ForMimeType(mimetype string) HandlerOption {
 	return HandlerKey{MimeType: mimetype}
 }
 
 func ForArtifactType(artifacttype string) HandlerOption {
 	return HandlerKey{ArtifactType: artifacttype}
+}
+
+type prio struct {
+	prio int
+}
+
+func WithPrio(p int) HandlerOption {
+	return prio{p}
+}
+
+func (o prio) ApplyHandlerOptionTo(opts *HandlerOptions) {
+	opts.Priority = o.prio
 }
 
 ////////////////////////////////////////////////////////////////////////////////

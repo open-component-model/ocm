@@ -52,11 +52,12 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx cpi.Context, co
 		return true, errors.Wrapf(err, "plugin download handler config for %s/%s", path[0], name)
 	}
 
-	err = RegisterDownloadHandler(ctx, path[0], name, opts.ArtifactType, opts.MimeType, attr)
+	err = RegisterDownloadHandler(ctx, path[0], name, attr, opts)
 	return true, err
 }
 
-func RegisterDownloadHandler(ctx cpi.Context, pname, name string, artType, mediaType string, config []byte) error {
+func RegisterDownloadHandler(ctx cpi.Context, pname, name string, config []byte, olist ...download.HandlerOption) error {
+	opts := download.NewHandlerOptions(olist...)
 	set := plugincacheattr.Get(ctx)
 	if set == nil {
 		return errors.ErrUnknown(plugin.KIND_PLUGIN, pname)
@@ -66,12 +67,12 @@ func RegisterDownloadHandler(ctx cpi.Context, pname, name string, artType, media
 	if p == nil {
 		return errors.ErrUnknown(plugin.KIND_PLUGIN, pname)
 	}
-	d := p.LookupDownloader(name, artType, mediaType)
+	d := p.LookupDownloader(name, opts.ArtifactType, opts.MimeType)
 	if len(d) == 0 {
 		if name == "" {
-			return fmt.Errorf("no downloader found for [art:%q, media:%q]", artType, mediaType)
+			return fmt.Errorf("no downloader found for [art:%q, media:%q]", opts.ArtifactType, opts.MimeType)
 		}
-		return fmt.Errorf("downloader %s not valid for [art:%q, media:%q]", name, artType, mediaType)
+		return fmt.Errorf("downloader %s not valid for [art:%q, media:%q]", name, opts.ArtifactType, opts.MimeType)
 	}
 	for _, e := range d {
 		if len(config) != 0 {
@@ -87,7 +88,7 @@ func RegisterDownloadHandler(ctx cpi.Context, pname, name string, artType, media
 		if err != nil {
 			return err
 		}
-		download.For(ctx).Register(artType, mediaType, h)
+		download.For(ctx).Register(h, opts)
 	}
 	return nil
 }

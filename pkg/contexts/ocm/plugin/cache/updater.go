@@ -48,12 +48,9 @@ type PluginUpdater struct {
 }
 
 func NewPluginUpdater(ctx ocm.ContextProvider, printer common.Printer) *PluginUpdater {
-	if printer == nil {
-		printer = common.NewPrinter(nil)
-	}
 	return &PluginUpdater{
 		Context: ctx.OCMContext(),
-		Printer: printer,
+		Printer: common.AssurePrinter(printer),
 	}
 }
 

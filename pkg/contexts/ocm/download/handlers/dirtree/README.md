@@ -32,7 +32,7 @@ The handler checks the mimetypes, only, but the default registration is done exc
 A context can be extended for other resource types with
 
 ```
-download.For(octx),Register(type, [mimetype], dirtree.New...(...))
+download.For(octx),Register(dirtree.New...(...), download.ForCombi(type, [mimetype]))
 ```
 
 The handler also provides additional methods, which can be used to execute more specific tasks, for example

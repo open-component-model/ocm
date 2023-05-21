@@ -91,7 +91,7 @@ var _ = Describe("upload", func() {
 		})
 
 		It("uploads local oci artifact blob", func() {
-			download.For(env).Register(resourcetypes.OCI_IMAGE, "", ocirepo.New(env.OCMContext()))
+			download.For(env).Register(ocirepo.New(env.OCMContext()), download.ForArtifactType(resourcetypes.OCI_IMAGE))
 
 			src := Must(ctfocm.Open(env, accessobj.ACC_READONLY, CTF, 0, env))
 			defer Close(src, "source ctf")
@@ -195,7 +195,7 @@ var _ = Describe("upload", func() {
 		})
 
 		It("uploads oci artifact ref", func() {
-			download.For(env).Register(resourcetypes.OCI_IMAGE, "", ocirepo.New(env.OCMContext()))
+			download.For(env).Register(ocirepo.New(env.OCMContext()), download.ForArtifactType(resourcetypes.OCI_IMAGE))
 
 			src := Must(ctfocm.Open(env.OCMContext(), accessobj.ACC_READONLY, CTF, 0, accessio.PathFileSystem(env)))
 			defer Close(src, "source ctf")
