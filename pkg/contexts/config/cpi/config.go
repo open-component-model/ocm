@@ -32,16 +32,9 @@ type configType struct {
 	usage string
 }
 
-func NewConfigType[I Config](name string, proto I, usages ...string) ConfigType {
+func NewConfigType[I Config](name string, usages ...string) ConfigType {
 	return &configType{
-		VersionedTypedObjectType: runtime.NewVersionedTypedObjectTypeByProto[Config, I](name, proto),
-		usage:                    strings.Join(usages, "\n"),
-	}
-}
-
-func NewRepositoryTypeByProtoConverter[I Config](name string, proto runtime.TypedObject, converter runtime.Converter[I, runtime.TypedObject], usages ...string) ConfigType {
-	return &configType{
-		VersionedTypedObjectType: runtime.NewVersionedTypedObjectTypeByProtoConverter[Config, I](name, proto, converter),
+		VersionedTypedObjectType: runtime.NewVersionedTypedObjectType[Config, I](name),
 		usage:                    strings.Join(usages, "\n"),
 	}
 }

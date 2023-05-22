@@ -18,8 +18,8 @@ const (
 )
 
 func init() {
-	cfgcpi.RegisterConfigType(cfgcpi.NewConfigType(ConfigType, &Config{}, usage))
-	cfgcpi.RegisterConfigType(cfgcpi.NewConfigType(ConfigTypeV1, &Config{}, usage))
+	cfgcpi.RegisterConfigType(cfgcpi.NewConfigType[*Config](ConfigType, usage))
+	cfgcpi.RegisterConfigType(cfgcpi.NewConfigType[*Config](ConfigTypeV1, usage))
 }
 
 // Config describes a memory based config interface.

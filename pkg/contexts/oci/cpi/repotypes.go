@@ -27,12 +27,8 @@ func RegisterRepositoryTypeVersions(s RepositoryTypeVersionScheme) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func NewRepositoryType[I RepositorySpec](name string, proto I) RepositoryType {
-	return runtime.NewVersionedTypedObjectTypeByProto[RepositorySpec, I](name, proto)
-}
-
-func NewRepositoryTypeByProtoConverter[I RepositorySpec](name string, proto runtime.TypedObject, converter runtime.Converter[I, runtime.TypedObject]) RepositoryType {
-	return runtime.NewVersionedTypedObjectTypeByProtoConverter[RepositorySpec, I](name, proto, converter)
+func NewRepositoryType[I RepositorySpec](name string) RepositoryType {
+	return runtime.NewVersionedTypedObjectType[RepositorySpec, I](name)
 }
 
 func NewRepositoryTypeByConverter[I RepositorySpec, V runtime.TypedObject](name string, converter runtime.Converter[I, V]) RepositoryType {

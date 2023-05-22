@@ -6,6 +6,7 @@ package runtime
 
 import (
 	"fmt"
+	"reflect"
 
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
@@ -109,10 +110,18 @@ type implementation struct {
 
 var _ FormatVersion[VersionedTypedObject] = (*caster[VersionedTypedObject, implementation])(nil)
 
-// NewProtoBasedVersion creates a new format version for versioned typed objects,
+// NewSimpleVersion creates a new format version for versioned typed objects,
 // where T is the common *interface* of all types of the same type realm.
 // It creates an external version identical to the internal representation (type I).
-func NewProtoBasedVersion[T VersionedTypedObject, I VersionedTypedObject](proto I) FormatVersion[T] {
+// This must be a struct pointer type.
+func NewSimpleVersion[T VersionedTypedObject, I VersionedTypedObject]() FormatVersion[T] {
+	var proto I // first time use of typed structure nil pointers
+
+	_, err := generics.Cast[T](proto)
+	if err != nil {
+		var t *T
+		panic(fmt.Errorf("invalid type %T: does not implement required interface %s", proto, reflect.TypeOf(t).Elem()))
+	}
 	return &formatVersion[T, I, I]{
 		decoder:   MustNewDirectDecoder[I](proto),
 		converter: &IdentityConverter[I]{},

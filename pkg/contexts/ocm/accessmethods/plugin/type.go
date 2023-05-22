@@ -54,7 +54,7 @@ func NewType(name string, p plugin.Plugin, desc *plugin.AccessMethodDescriptor) 
 		aopts = append(aopts, cpi.WithConfigHandler(cfghdlr))
 		t.cliopts = cfghdlr
 	}
-	t.AccessType = cpi.NewAccessSpecType(name, &AccessSpec{}, aopts...)
+	t.AccessType = cpi.NewAccessSpecType[*AccessSpec](name, aopts...)
 	return t
 }
 

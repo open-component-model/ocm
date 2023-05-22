@@ -34,16 +34,16 @@ type repositoryType struct {
 
 type RepositoryAccessMethodChecker func(Context, compdesc.AccessSpec) bool
 
-func NewRepositoryType(name string, proto RepositorySpec, checker RepositoryAccessMethodChecker) RepositoryType {
+func NewRepositoryType[I RepositorySpec](name string, checker RepositoryAccessMethodChecker) RepositoryType {
 	return &repositoryType{
-		VersionedTypedObjectType: runtime.NewVersionedTypedObjectTypeByProto[RepositorySpec](name, proto),
+		VersionedTypedObjectType: runtime.NewVersionedTypedObjectType[RepositorySpec, I](name),
 		checker:                  checker,
 	}
 }
 
-func NewRepositoryTypeByConverter(name string, proto runtime.VersionedTypedObject, converter runtime.Converter[RepositorySpec, runtime.TypedObject], checker RepositoryAccessMethodChecker) RepositoryType {
+func NewRepositoryTypeByConverter[I RepositorySpec, V runtime.VersionedTypedObject](name string, converter runtime.Converter[I, V], checker RepositoryAccessMethodChecker) RepositoryType {
 	return &repositoryType{
-		VersionedTypedObjectType: runtime.NewVersionedTypedObjectTypeByProtoConverter[RepositorySpec](name, proto, converter),
+		VersionedTypedObjectType: runtime.NewVersionedTypedObjectTypeByConverter[RepositorySpec, I, V](name, converter),
 		checker:                  checker,
 	}
 }

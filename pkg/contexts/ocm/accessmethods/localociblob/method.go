@@ -5,8 +5,6 @@
 package localociblob
 
 import (
-	"fmt"
-
 	. "github.com/open-component-model/ocm/pkg/exception"
 
 	"github.com/opencontainers/go-digest"
@@ -25,8 +23,8 @@ const (
 var versions = cpi.NewAccessTypeVersionScheme(Type)
 
 func init() {
-	Must(versions.Register(cpi.NewAccessSpecTypeByConverter(Type, &AccessSpec{}, &converterV1{})))
-	Must(versions.Register(cpi.NewAccessSpecTypeByConverter(TypeV1, &AccessSpec{}, &converterV1{})))
+	Must(versions.Register(cpi.NewAccessSpecTypeByConverter[*localblob.AccessSpec, *AccessSpec](Type, &converterV1{})))
+	Must(versions.Register(cpi.NewAccessSpecTypeByConverter[*localblob.AccessSpec, *AccessSpec](TypeV1, &converterV1{})))
 	cpi.RegisterAccessTypeVersions(versions)
 }
 
@@ -60,22 +58,14 @@ type AccessSpec struct {
 
 type converterV1 struct{}
 
-func (_ converterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, error) {
-	in, ok := object.(*localblob.AccessSpec)
-	if !ok {
-		return nil, fmt.Errorf("failed to assert type %T to localblob.AccessSpec", object)
-	}
+func (_ converterV1) ConvertFrom(in *localblob.AccessSpec) (*AccessSpec, error) {
 	return &AccessSpec{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(in.Type),
 		Digest:              digest.Digest(in.LocalReference),
 	}, nil
 }
 
-func (_ converterV1) ConvertTo(object runtime.TypedObject) (cpi.AccessSpec, error) {
-	in, ok := object.(*AccessSpec)
-	if !ok {
-		return nil, fmt.Errorf("failed to assert type %T to localfsblob.AccessSpec", object)
-	}
+func (_ converterV1) ConvertTo(in *AccessSpec) (*localblob.AccessSpec, error) {
 	return &localblob.AccessSpec{
 		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject[cpi.AccessSpec](versions, in.Type),
 		LocalReference:               in.Digest.String(),

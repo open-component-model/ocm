@@ -20,8 +20,8 @@ const (
 )
 
 func init() {
-	cpi.RegisterConfigType(cpi.NewConfigType(ConfigType, &Config{}, usage))
-	cpi.RegisterConfigType(cpi.NewConfigType(ConfigTypeV1, &Config{}, usage))
+	cpi.RegisterConfigType(cpi.NewConfigType[*Config](ConfigType, usage))
+	cpi.RegisterConfigType(cpi.NewConfigType[*Config](ConfigTypeV1, usage))
 }
 
 // Config describes logging settings for a dedicated context type.

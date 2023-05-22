@@ -52,12 +52,12 @@ func newAccessSpecType(vt runtime.VersionedTypedObjectType[AccessSpec], opts []A
 	return t.accessType
 }
 
-func NewAccessSpecType(name string, proto AccessSpec, opts ...AccessSpecTypeOption) AccessType {
-	return newAccessSpecType(runtime.NewVersionedTypedObjectTypeByProto[AccessSpec](name, proto), opts)
+func NewAccessSpecType[I AccessSpec](name string, opts ...AccessSpecTypeOption) AccessType {
+	return newAccessSpecType(runtime.NewVersionedTypedObjectType[AccessSpec, I](name), opts)
 }
 
-func NewAccessSpecTypeByConverter(name string, proto runtime.VersionedTypedObject, converter runtime.Converter[AccessSpec, runtime.TypedObject], opts ...AccessSpecTypeOption) AccessType {
-	return newAccessSpecType(runtime.NewVersionedTypedObjectTypeByProtoConverter[AccessSpec](name, proto, converter), opts)
+func NewAccessSpecTypeByConverter[I AccessSpec, V runtime.VersionedTypedObject](name string, converter runtime.Converter[I, V], opts ...AccessSpecTypeOption) AccessType {
+	return newAccessSpecType(runtime.NewVersionedTypedObjectTypeByConverter[AccessSpec, I, V](name, converter), opts)
 }
 
 func (t *accessType) ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHandler {

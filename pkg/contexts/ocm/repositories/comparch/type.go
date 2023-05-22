@@ -20,8 +20,8 @@ const (
 )
 
 func init() {
-	cpi.RegisterRepositoryType(cpi.NewRepositoryType(Type, &RepositorySpec{}, nil))
-	cpi.RegisterRepositoryType(cpi.NewRepositoryType(TypeV1, &RepositorySpec{}, nil))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](Type, nil))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](TypeV1, nil))
 }
 
 type RepositorySpec struct {

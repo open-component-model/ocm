@@ -20,9 +20,9 @@ const (
 )
 
 func init() {
-	cpi.RegisterAccessType(cpi.NewAccessSpecType(Type, &AccessSpec{}, cpi.WithDescription("dummy resource with no access")))
-	cpi.RegisterAccessType(cpi.NewAccessSpecType(TypeV1, &AccessSpec{}))
-	cpi.RegisterAccessType(cpi.NewAccessSpecType(LegacyType, &AccessSpec{}))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType[*AccessSpec](Type, cpi.WithDescription("dummy resource with no access")))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType[*AccessSpec](TypeV1))
+	cpi.RegisterAccessType(cpi.NewAccessSpecType[*AccessSpec](LegacyType))
 }
 
 // New creates a new OCIBlob accessor.

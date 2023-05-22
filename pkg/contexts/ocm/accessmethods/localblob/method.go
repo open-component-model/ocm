@@ -51,8 +51,8 @@ const (
 var versions = cpi.NewAccessTypeVersionScheme(Type)
 
 func init() {
-	Must(versions.Register(cpi.NewAccessSpecTypeByConverter(Type, &AccessSpecV1{}, &converterV1{}, cpi.WithDescription(usage))))
-	Must(versions.Register(cpi.NewAccessSpecTypeByConverter(TypeV1, &AccessSpecV1{}, &converterV1{}, cpi.WithFormatSpec(formatV1), cpi.WithConfigHandler(ConfigHandler()))))
+	Must(versions.Register(cpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV1](Type, &converterV1{}, cpi.WithDescription(usage))))
+	Must(versions.Register(cpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV1](TypeV1, &converterV1{}, cpi.WithFormatSpec(formatV1), cpi.WithConfigHandler(ConfigHandler()))))
 	cpi.RegisterAccessTypeVersions(versions)
 }
 
@@ -163,11 +163,7 @@ type AccessSpecV1 struct {
 
 type converterV1 struct{}
 
-func (_ converterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, error) {
-	in, ok := object.(*AccessSpec)
-	if !ok {
-		return nil, fmt.Errorf("failed to assert type %T to AccessSpec", object)
-	}
+func (_ converterV1) ConvertFrom(in *AccessSpec) (*AccessSpecV1, error) {
 	return &AccessSpecV1{
 		ObjectVersionedType: runtime.NewVersionedTypedObject(in.Type),
 		LocalReference:      in.LocalReference,
@@ -177,11 +173,7 @@ func (_ converterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, er
 	}, nil
 }
 
-func (_ converterV1) ConvertTo(object runtime.TypedObject) (cpi.AccessSpec, error) {
-	in, ok := object.(*AccessSpecV1)
-	if !ok {
-		return nil, fmt.Errorf("failed to assert type %T to AccessSpecV1", object)
-	}
+func (_ converterV1) ConvertTo(in *AccessSpecV1) (*AccessSpec, error) {
 	return &AccessSpec{
 		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject[cpi.AccessSpec](versions, in.Type),
 		LocalReference:               in.LocalReference,

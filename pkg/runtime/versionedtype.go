@@ -105,10 +105,10 @@ type versionedTypedObjectType[T VersionedTypedObject] struct {
 
 var _ FormatVersion[VersionedTypedObject] = (*versionedTypedObjectType[VersionedTypedObject])(nil)
 
-func NewVersionedTypedObjectTypeByProto[T VersionedTypedObject, I VersionedTypedObject](name string, proto I) VersionedTypedObjectType[T] {
+func NewVersionedTypedObjectType[T VersionedTypedObject, I VersionedTypedObject](name string) VersionedTypedObjectType[T] {
 	return &versionedTypedObjectType[T]{
 		_VersionedObjectType: NewVersionedObjectType(name),
-		_FormatVersion:       NewProtoBasedVersion[T, I](proto),
+		_FormatVersion:       NewSimpleVersion[T, I](),
 	}
 }
 
@@ -140,38 +140,40 @@ func NewVersionedTypedObjectTypeByVersion[T VersionedTypedObject, I VersionedTyp
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type VersionedTypeRegistry[T VersionedTypedObject, R VersionedTypedObjectType[T]] interface {
-	Register(t R)
-
+type versionedTypeRegistryBase[T VersionedTypedObject, R VersionedTypedObjectType[T]] interface {
 	KnownTypesProvider[T, R]
 	TypedObjectEncoder[T]
 	TypedObjectDecoder[T]
+}
+
+type VersionedTypeRegistry[T VersionedTypedObject, R VersionedTypedObjectType[T]] interface {
+	Register(t R)
+	versionedTypeRegistryBase[T, R]
 }
 
 // TypeVersionScheme is used to register different versions for the same internal
 // representation of a versioned typed object.
 type TypeVersionScheme[T VersionedTypedObject, R VersionedTypedObjectType[T]] interface {
 	Register(t R) error
-
-	KnownTypesProvider[T, R]
-	TypedObjectEncoder[T]
-	TypedObjectDecoder[T]
+	versionedTypeRegistryBase[T, R]
 }
 
 type typeVersionScheme[T VersionedTypedObject, R VersionedTypedObjectType[T]] struct {
-	kind string
-	VersionedTypeRegistry[T, R]
+	kind                            string
+	base                            VersionedTypeRegistry[T, R]
+	versionedTypeRegistryBase[T, R] // required for Goland, cannot handle overwrite of Register method with different signature
 }
 
 func NewTypeVersionScheme[T VersionedTypedObject, R VersionedTypedObjectType[T]](kind string, reg VersionedTypeRegistry[T, R]) TypeVersionScheme[T, R] {
-	return &typeVersionScheme[T, R]{kind, reg}
+	return &typeVersionScheme[T, R]{kind, reg, reg}
 }
 
 func (s *typeVersionScheme[T, R]) Register(t R) error {
 	if t.GetKind() != s.kind {
 		return errors.ErrInvalid("repository spec type", t.GetType(), "kind", s.kind)
 	}
-	s.VersionedTypeRegistry.Register(t)
+
+	s.base.Register(t)
 	return nil
 }
 

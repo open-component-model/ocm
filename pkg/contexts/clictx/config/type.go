@@ -21,8 +21,8 @@ const (
 )
 
 func init() {
-	cpi.RegisterConfigType(cpi.NewConfigType(OCMCmdConfigType, &Config{}, usage))
-	cpi.RegisterConfigType(cpi.NewConfigType(OCMCmdConfigTypeV1, &Config{}, usage))
+	cpi.RegisterConfigType(cpi.NewConfigType[*Config](OCMCmdConfigType, usage))
+	cpi.RegisterConfigType(cpi.NewConfigType[*Config](OCMCmdConfigTypeV1, usage))
 }
 
 // Config describes a memory based repository interface.
