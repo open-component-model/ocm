@@ -375,7 +375,7 @@ _Name_ (**RegisterByName**) which you can pass as a string. This can be done thr
 Registries_ and their registered _Handler-Registration Handlers_.  
 A _Handler-Registration Handler Registry_ maintains a _hierarchical namespace_, as indicated by the figure below.
 
-![image](introduction/handler-registration-handler-registry.png)
+<img src="introduction/handler-registration-handler-registry.png" width="50%" height="50%">
 
 Thus, the _Handler-Registration Handlers_ are registered under a _hierarchical name_, such as `Plugin/Test`. In the
 example in the figure, either `Plugin` as well as `Plugin/Test` have a _Handler-Registration Handler_ registered. The
