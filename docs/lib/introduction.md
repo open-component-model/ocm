@@ -64,40 +64,48 @@ a _Type Registry_ for types implementing the
 following [Message](introduction/prototype-based-typeregistry/registry/interface.go)
 interface.
 
-    type Message interface {
-        Print()
-    }
+```
+type Message interface {
+   Print()
+}
+```
 
 In _Prototype-Based-Type-Registries_, the Registry is essentially a map that stores the model type name (key) and a
 prototype object of a dedicated go type implementing the corresponding functionality (value). This prototype object is
 used to create new objects of that type  (leveraging the reflection library).
 
-    type MessageRegistry map[string]Message
+```
+type MessageRegistry map[string]Message
+```
 
 Typically, the [package defining the type registry](introduction/prototype-based-typeregistry/registry/registry.go) also
 declares and
 initializes a _DefaultRegistry_, a global variable that can be used by other packages to register their implementation
 of the respective type (here, Message).
 
-    var DefaultMessageRegistry = MessageRegistry{}
+```
+var DefaultMessageRegistry = MessageRegistry{}
+```
 
 To register themselves at the _DefaultRegistry_, these other packages implement their
 [init-function](https://go.dev/doc/effective_go#init) respectively (thereby, the type name should obviously be unique).
 
-    const TYPE = "simplemessage"
+```
+const TYPE = "simplemessage"
 
-    func init() {
-        registry.DefaultMessageRegistry[TYPE] = &Message{}
-    }
+func init() {
+   registry.DefaultMessageRegistry[TYPE] = &Message{}
+}
     
-    type Message struct {
-        Type string `json:"type"`
-        Text string `json:"text"`
-    }
+type Message struct {
+   Type string `json:"type"`
+   Text string `json:"text"`
+}
     
-    func (m *Message) Print() {
-        fmt.Println(m.Text)
-    }
+func (m *Message) Print() {
+   fmt.Println(m.Text)
+}
+```
 
 Keep in mind that although the
 [_simplemessage_](introduction/prototype-based-typeregistry/types/simplemessage/message.go) and
@@ -105,10 +113,12 @@ Keep in mind that although the
 directly used in other packages, they have to be imported for their side effects (in other words, to execute their
 init-functions). You may use empty imports to achieve this.
 
-    import (
-        _ "example/typeregistry/types/complexmessage"
-        _ "example/typeregistry/types/simplemessage"
-    )
+```
+import (
+   _ "example/typeregistry/types/complexmessage"
+   _ "example/typeregistry/types/simplemessage"
+)
+```
 
 Now, the prepared _DefaultRegistry_ can be used to dynamically unmarshal serializations of the types into their
 respective go types.
@@ -204,7 +214,7 @@ Within the ocm-lib, there are multiple implementations of this interface. Most p
 [_OCI Registries_](../../pkg/contexts/oci/repositories/ocireg). If you are familiar with _OCI Registries_, the
 terminology here may be counterintuitive. In the ocm-lib, the term _OCI Repository_ corresponds to what is commonly
 known as an _OCI Registry_, and a _Namespace_ corresponds to what is commonly known as an _OCI Repository_.  
-Another implementation is the so called _[Common Transport Format](../../pkg/contexts/oci/repositories/ctf)_. The
+Another implementation is the so-called _[Common Transport Format](../../pkg/contexts/oci/repositories/ctf)_. The
 _[Common Transport Format specification](https://github.com/open-component-model/ocm-spec/blob/main/doc/appendix/A/CTF/README.md)_
 was developed in the context of the Open Component Model and describes a file system structure that can be used for the
 representation of content of an OCI Registry.  
@@ -222,16 +232,16 @@ So, corresponding to OCI Repositories and OCI Repository Types, any _go type_ th
 
 ```
 type Repository interface {
-	GetContext() Context
+   GetContext() Context
 
-	GetSpecification() RepositorySpec
-	ComponentLister() ComponentLister
+   GetSpecification() RepositorySpec
+   ComponentLister() ComponentLister
 
-	ExistsComponentVersion(name string, version string) (bool, error)
-	LookupComponentVersion(name string, version string) (ComponentVersionAccess, error)
-	LookupComponent(name string) (ComponentAccess, error)
+   ExistsComponentVersion(name string, version string) (bool, error)
+   LookupComponentVersion(name string, version string) (ComponentVersionAccess, error)
+   LookupComponent(name string) (ComponentAccess, error)
 
-	Close() error
+   Close() error
 }
 ```
 
@@ -266,9 +276,9 @@ Besides _OCM_ and _OCI Repository Types_, there currently also exist a number of
 
 ```
 type Repository interface {
-	ExistsCredentials(name string) (bool, error)
-	LookupCredentials(name string) (Credentials, error)
-	WriteCredentials(name string, creds Credentials) (Credentials, error)
+   ExistsCredentials(name string) (bool, error)
+   LookupCredentials(name string) (Credentials, error)
+   WriteCredentials(name string, creds Credentials) (Credentials, error)
 }
 ```
 
@@ -284,12 +294,12 @@ From the perspective of the ocm-lib, any _go type_ that implements the following
 
 ```
 type AccessMethod interface {
-	DataAccess
+   DataAccess
 
-	GetKind() string
-	AccessSpec() AccessSpec
-	MimeType
-	Close() error
+   GetKind() string
+   AccessSpec() AccessSpec
+   MimeType
+   Close() error
 }
 ```
 
@@ -344,7 +354,7 @@ A **Handler-Registration Handler** has to implement the following [interface](..
 
 ```
 type HandlerRegistrationHandler[T any, O any] interface {
-	RegisterByName(handler string, target T, config HandlerConfig, opts ...O) (bool, error)
+   RegisterByName(handler string, target T, config HandlerConfig, opts ...O) (bool, error)
 }
 ```
 
@@ -420,7 +430,7 @@ In conclusion, a `RepositorySpecHandlers` _Constraint Registry_ is an object tha
 
 ```
 type RepositorySpecHandler interface {
-	MapReference(ctx Context, u *UniformRepositorySpec) (RepositorySpec, error)
+   MapReference(ctx Context, u *UniformRepositorySpec) (RepositorySpec, error)
 }
 ```
 
@@ -462,7 +472,7 @@ Generally, a `BlobDigester` is anything that allows to calculate the digest for 
 the following [interface](../../pkg/contexts/ocm/internal/digesthandler.go):
 
 ```
-ype BlobDigester interface {
+type BlobDigester interface {
    GetType() DigesterType
    DetermineDigest(resType string, meth AccessMethod, preferred signing.Hasher)   (*DigestDescriptor, error)
 }
@@ -693,7 +703,9 @@ _IdentityMatcher_.
 
 Essentially, an _IdentityMatcher_ is a function implementing the following interface:
 
-    type IdentityMatcher func(pattern, cur, id ConsumerIdentity) bool
+```
+type IdentityMatcher func(pattern, cur, id ConsumerIdentity) bool
+```
 
 A _ConsumerIdentity_ is essentially just a `map[string]interface{}`. There are 2 standard matchers, a _PartialMatcher_
 and a _CompleteMatcher_. The _CompleteMatcher_ returns true only if the _pattern_ and the _id_ are completely equal. The
@@ -707,12 +719,14 @@ which are essentially stores for _Consumers_.
 
 A _ConsumerProvider_ has to implement the following interface:
 
-    type ConsumerProvider interface {
-        Unregister(id ProviderIdentity)
-        Get(id ConsumerIdentity) (CredentialsSource, bool)
-        Match(id ConsumerIdentity, cur ConsumerIdentity, matcher IdentityMatcher
-            (CredentialsSource, ConsumerIdentity)
-    }
+```
+type ConsumerProvider interface {
+   Unregister(id ProviderIdentity)
+   Get(id ConsumerIdentity) (CredentialsSource, bool)
+   Match(id ConsumerIdentity, cur ConsumerIdentity, matcher IdentityMatcher
+      (CredentialsSource, ConsumerIdentity)
+}
+```
 
 A _Consumer_ is essentially the combination of an _Identity_ (the ConsumerIdentity) and a _CredentialSource_ (which is
 essentially something that can provide some sort of map containing the credentials).
