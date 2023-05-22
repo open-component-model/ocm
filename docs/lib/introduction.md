@@ -1,9 +1,10 @@
 # Introduction to the **ocm-lib**
 
-This document aims to provide an introduction to the **ocm-lib**. 
+This document aims to provide an introduction to the **ocm-lib**.
 
 ## Prerequisites
-A familiarity with the **Open Component Model (OCM)** is required. Good starting points are the corresponding 
+
+A familiarity with the **Open Component Model (OCM)** is required. Good starting points are the corresponding
 [website](https://ocm.software/) and the [specification](https://github.com/open-component-model/ocm-spec/).
 
 ## Section 1 - Complexity
@@ -469,35 +470,242 @@ ype BlobDigester interface {
 
 A BlobDigesterRegistry currently **is not** also a `HandlerRegistrationHandlerRegistry`.
 
-### Section 3.2.6 - Identity Matchers
+## Section 3.4 - Contexts
 
-An IdentityMatchers object stores a number of types (in this case functions) implementing an IdentityMatcher (thus,
-IdentityMatcher is the "certain functionality").
+Here, the different _Contexts_ shown in the overview are explained.
 
-Essentially, an IdentityMatcher is a function implementing the following interface:
+A context object is the _entry point_ for using dedicated functional areas. It bundles all _settings_ and
+_extensions point implementations_ for this area.
+
+This becomes more tangible if one looks at a concrete instance of such a functional area, e.g. ocm. The _OCM Context_
+contains several _registries_ which determine e.g. which _repository types_ or _access methods_ are known and thus, can
+be used. As explained in [section 2.2](#section-22---contexts), the implementation registered at those registries are
+considered to be _extension point implementations_.  
+A repository object might require credentials (e.g. username and password) to access its contents. As explained in
+[section 2.2](#section-22---contexts), these credentials are considered to be _settings_.
+
+A _Context_ may be seen as entry point as it provides access to a set of basic root element of its functional area. This
+is typically a repository object, which provides access to elements hosted by this repository.  
+An _ocm repository_ provides access to _Components_ and _ComponentVersions_. An _oci repository_ provides access
+primarily to so-called _Namespaces_. A _Namespace_ provides access to versions of an _oci artifact_.
+As you might have noticed in this description, the term _"Namespaces"_ is unusual here and is an oddity of this ocm-lib.
+What is referred to as _Namespace_ or rather _OCI Namespace_ in this library is usually referred to as _OCI Repository_
+and correspondingly, what is referred to as _OCI Repository_ in this library is usually referred to as _OCI Registry._
+To be even more concrete, the library has the following mapping of terms:
+
+```
+Name in OCM Library             Name used everywhere else
+OCI Repository          ->      OCI Registry
+OCI Namespace           ->      OCI Repository
+```
+
+### Section 3.4.1 - Data Context
+
+The _DataContext_ type is kind of the _base context of all Context types_. Therefore, every Context type
+(except the Data Context itself) contains a DataContext object.  
+Essentially, a _DataContext_ object contains the _type information_ of the Context object it is the base for (e.g.
+ocm.context.ocm.software in case of an OCM Context) and a _specific attribute store_ (and internally also a pointer to
+the Context object it is the base for).
+
+The _DataContext_ is an _AttributeContext_ itself and therefore, the attribute store of the DataContext works the same
+as explained in [AttributesContext](#section-342---attributes-context).
+
+### Section 3.4.2 - Attributes Context
+
+Every Context object - besides the DataContext, which is itself an AttributesContext - contains an AttributesContext
+object. An AttributesContext also contains a DataContext object and can contain other AttributesContexts.  
+Primarily, an _AttributesContext_ provides an _attribute store which can store arbitrary attributes_ (on a low level,
+this is implemented through a `map[string]interface{}`). These arbitrary attributes are typed (thus, the object has a
+unique type attribute specifying its own type, e.g.
+[`github.com/mandelsoft/ocm/ociuploadrepo`](../../pkg/contexts/ocm/attrs/ociuploadattr/attr.go)) and have to have a go
+type that enables marshaling and unmarshaling, so that the attributes can also be used through the ocm-cli. In other
+words, an _attribute type_ has to implement the following [interface](../../pkg/contexts/datacontext/attrs.go):
+
+```
+type AttributeType interface {
+   Name() string
+   Decode(data []byte, unmarshaler runtime.Unmarshaler) (interface{}, error)
+   Encode(v interface{}, marshaller runtime.Marshaler) ([]byte, error)
+   Description() string
+}
+```
+
+So, before an attribute is stored in an AttributesContext's attribute store, it is checked, whether its type is
+registered as AttributeType at a global registry object called `DefaultAttributeScheme` (this is another type registry
+that was not explicitly covered in the previous section).  
+As every type of Context object contains an AttributeContext object, functions on Context types can try to access
+attributes in the AttributesContext. For example, the `StoreBlob` method of a `BlobHandler` accesses an `ociuploadattr`
+on the DataContext. This attribute can specify an _oci registry_ where all the artifacts shall be uploaded to and
+thereby may overwrite the default behaviour of uploading the artifacts to the same _oci registry_ as their Component
+Descriptor.
+
+Attributes stored in the AttributesContext of a context overwrite corresponding attributes stored in the DataContext of
+the same context.
+
+### Section 3.4.3 - Config Context
+
+A _ConfigContext_ object configures other _configurable objects_ (e.g. Credential Context) using _typed configuration
+objects_ (thus, the object has a unique type attribute specifying its own type, e.g. `credentials.config.ocm.software`).
+
+**Conceptual Background - Config Objects**  
+_This is pretty much how it works, but for reasons that will become clear later on, the ApplyTo function interface has
+an additional parameter compared to how it's introduced here._
+
+Each _config object type_ has to have an `ApplyTo(target interface{})` method that knows what type of configurable
+object(s) it can configure (this "knowledge" is typically implemented through an if-statement based on a type-assertion
+on the target, [as shown here](../../pkg/contexts/credentials/config/type.go)). If the method receives a suitable
+configurable object as target (thus, the type-assertion on the target returns true), it calls corresponding functions on
+the target to apply its respective configuration (e.g. , a _credential config object_ calls the
+`credentialContext.SetCredentialsForConsumer` method passing in the respective arguments,
+[as shown here](../../pkg/contexts/credentials/config/type.go)).
+
+To conclude this, technically, in order to configure specific objets such as the credential context - let's call it
+`credctx` - one could use a _configuration object_ of the corresponding type, here a
+[credential configuration object](../../pkg/contexts/credentials/config/type.go) - let's call it `credcfg` - and call
+`credcfg.ApplyTo(credctx)`.
+
+Typically, each directory that contains _configurable objects_ (so pretty much each directory under
+[contexts](../../pkg/contexts/), as each context object is a configurable object) also has a corresponding _config
+package_ with a _type.go_ file, defining the _config object type_ and registering it at the
+[`DefaultConfigTypeScheme`](../../pkg/contexts/config/internal/configtypes.go).
+
+**Conceptual Background - ConfigContext**  
+_This is, where it might get confusing, but bear with me._
+
+A _ConfigContext_ object is a _configurable object_ itself. The _config object type_ to configure the _ConfigContext_ is
+`generic.config.ocm.software`. Such a `config object` is pretty much only a container for (other) `config objects`
+(thus, it simply contains a list of `arbitrarily typed config objects`). Calling the `ApplyTo(target interface{})`
+method of such an object with a _ConfigContext_ as target adds all the _config objects_ contained in this container
+_config object_ to a `ConfigStore` within the _ConfigContext_.
+
+**ConfigContext**   
+_This is how the library intends to work with config objects._
+
+The _config objects_ are usually not applied directly to one or multiple configurable objects (thus, calling the Config
+objects `ApplyTo(target interface{})` passing in each _configuration object_ as target). Instead, a _ConfigContext_
+provides an [`ApplyConfig(spec Config, description string)`](../../pkg/contexts/config/internal/context.go) method.  
+Essentially, this function does two things:
+
+1) Call `spec.ApplyTo(target interface{})`, passing in the _ConfigContext_ it is called upon as _target_
+2) Adding the spec (thus, the _config object_) to the `ConfigStore` of the _ConfigContext_
+
+**Here's an example to better grasp this behaviour:**  
+Let `cfgctx` be an object of type _ConfigContext_ and `credcfg` be a
+[_credential config object_](../../pkg/contexts/credentials/config/type.go) (`credentials.config.ocm.software`, the
+_config type_ to configure _CredentialContext_ objects).  
+Assume the following method call:
+
+```
+cfgctx.ApplyConfig(credcfg, "credential")
+```
+
+1) Now, as previously described, the function first calls `credcfg.ApplyTo(cfgctx)`. As the `credcfg` object's `ApplyTo`
+   method knows that it can only configure objects of type _CredentialContext_ and not of type _ConfigContext_, this
+   function call does not have any effect!
+2) After the `ApplyTo` method returns, regardless of the type of the config object, it is added to the `ConfigStore` of
+   the `cfgctx`.
+
+Now, let `cfgctx`, again, be an object of type _ConfigContext_ and, instead of `credcfg`, we now have a _config config
+object_ called `cfgcfg` (`generic.config.ocm.software`, the _config type_ to configure _ConfigContext_ objects).  
+Assume the following function call:
+
+```
+cfgctx.ApplyConfig(cfgcfg, "config")
+```
+
+1) Now again, the method first calls `cfgcfg.ApplyTo(cfgctx)`. As the `cfgcfg` object's `ApplyTo` method knows that it
+   can configure objects of type _ConfigContext_, this function call proceeds and adds all _configuration objects_
+   within the `cfgcfg` object (remember, it's a container for other configuration objects) to the _ConfigStore_ of the
+   `cfgctx`.
+2) After the `ApplyTo` method returns, the `cfgcfg` object itself (thus, the container) is added to the `cfgctx`
+   (if the `cfgcfg` object contained 3 different _credential config objects_, the _ConfigStore_ would now contain the 3
+   _credential config objects_ and also the `cfgcfg` object, thus, 4 objects in total).
+
+_"Cool, now I've got an ConfigContext object containing all my configuration objects, but what's the benefit? How are
+they applied to the actual objects they shall configure?"_
+
+**Updater**  
+_This is an internal implementation detail, a user of the library does not have to deal with the updater, but it is
+important if you want to understand, how the configuration objects within the ConfigStore of a ConfigContext are
+applied to the actual configurable objects._
+
+_Configurable objects_ (e.g. OCM Context, OCI Context, Credential Context) do not directly contain a _ConfigContext_
+object or rather a pointer to a _ConfigContext_ object. Instead, they contain an _Updater_ object which maintains a
+pointer to a _ConfigContext_. Essentially, the _Updater_ consists of the triple
+_(ConfigContext, Target, LastGeneration)_.  
+The **Target** is a _configurable object_, typically. the _configurable object_ that contains the respective _Updater_.
+The **LastGeneration** is an integer. The _ConfigContext_ also maintains a corresponding _Generation_ integer, which is
+increased by 1 each time a new _config object_ is added to the _ConfigStore_.
+Every method of a _configurable object_ that uses a potentially configurable part of the configurable object calls its
+Updaters `Update()` method before performing any other processing. This _Update()_ method compares the ConfigContext's
+_Generation_ with the _LastGeneration_ and calls the `ApplyTo` method of each _config object_ added since the
+_LastGeneration_, passing in the Updater's _Target_ object as target.  
+This mechanism allows the transparent configuration of objects through a uniform interface.
+
+**FAQ:**  
+Why does the ConfigContext store the Container Config object (generic.config.ocm.software) in its ConfigStore?  
+&rarr; The _ConfigContext_ does not know anything about this _container config object_ type. There could be further
+types of _config objects_ that configure the _ConfigContext_ (and eventually even other types of configurable objects
+too). These would have to be stored in the _ConfigStore_. Therefore, not storing the _container config objects_ would
+require special treatment, which is not necessary.
+
+Why do the ConfigObjects apply themselves to the configurable objects and not the other way around? In other words, why
+don't the configurable objects provide an apply method?  
+&rarr; As the _configurable objects_ do not have to know anything about their _config objects_, it is easy to create an
+additional _config object types_ (this type would only have to register itself to the respective _ConfigTypes Registry_,
+and it would be good to go!)
+
+### Section 3.4.4 - Credential Context
+
+A _CredentialContext_ object serves two purposes:
+
+1) it stores _Consumers_ (indirectly in form of _Consumer Providers_)
+2) it provides access to _Credential Repositories_ (just like the OCM Context provides access to OCM Repositories or the
+   OCI Context provides access to OCI Repositories)
+
+**Credential Management:**  
+There are several kinds of _credential consumers_ (e.g. GitHub, HelmChartRepositories, OCIRegistries) with potentially
+completely different kinds of credentials (e.g. `{key:<GitHubPersonalAccessToken>}` in case of
+[GitHub](../../pkg/contexts/credentials/builtin/github/identity/identity.go) or
+`{username:<basic auth name>, password:<basic auth password>, certificate:<TLS client certificate>,
+privateKey:<TLS private key>}` in case of [HelmChartRepositories](../../pkg/helm/identity/identity.go)).
+
+To account for these different kinds of _consumers_ and _credentials_, the credential management is based on **generic
+consumer identities** and **generic credential property sets**.  
+The **generic consumer identities** are composed of a _consumer type_ and a _set of properties_ further describing the
+context the credentials are required for. The _consumer type_ specifies a dedicated type of consumer (e.g. GitHub,
+HelmChartRepositories, OCIRegistries) and thereby also implicitly determines a standard _identity matcher_ (These
+standard identity matchers are typically registered at a globally variable called StandardIdentityMatchers
+(another registry not previously covered) during the initialization. When creating a _DefaultContext_, this variable is
+assigned to the _IdentityMatchers Registry_ of the _CredentialContext_). The _set of properties_ specifying the usage
+context usually depends on the _consumer type_. _consumer identities_ with the consumer type Github typically specify
+hostname, port and potentially a pathprefix.  
+The **generic credential property sets** generally also depend on the _consumer type_. But even for a concrete consumer
+type they may vary (e.g. OCIRegistry allows authentication with username and password, but also with an identity token).
+Therefore, after retrieving the _credentials_ through the ConsumerIdentity matching logic, the consumer implementation
+may have to check which kind of credentials it has (e.g. the OCIRegistry implementation tries to retrieve a property
+with the name identityToken and if this returns nothing, it tries to retrieve properties with the name username and
+password).
+
+**Identity Matcher Registry**  
+An _IdentityMatchers_ object is a registry that stores a number in this case functions implementing an
+_IdentityMatcher_.
+
+Essentially, an _IdentityMatcher_ is a function implementing the following interface:
 
     type IdentityMatcher func(pattern, cur, id ConsumerIdentity) bool
 
-A ConsumerIdentity is essentially just a `map[string]interface{}`. There are 2 standard matchers, a PartialMatcher and a
-CompleteMatcher. The CompleteMatcher returns true only if the pattern and the id are completely equal. The
-PartialMatcher returns true, if the id matches the pattern partially AND better, thus in more attributes, than curr.
-This allows to iterate over several available Consumers (these consist of an ConsumerIdentity and Credentials) and find
-the best match, and thereby, hopefully, the correct Credentials.
+A _ConsumerIdentity_ is essentially just a `map[string]interface{}`. There are 2 standard matchers, a _PartialMatcher_
+and a _CompleteMatcher_. The _CompleteMatcher_ returns true only if the _pattern_ and the _id_ are completely equal. The
+_PartialMatcher_ returns true, if the id matches the _pattern_ partially AND better, thus in more attributes, than
+`cur`. This allows to iterate over several available _Consumers_ (these consist of an _ConsumerIdentity_ and
+_Credentials_) and find the best match, and thereby, hopefully, the correct _Credentials_.
 
-## Section 3.3 - Dictionaries
+**Consumer Providers**
+A _ConsumerProviders_ object is essentially a dictionary that stores a number of objects called _ConsumerProviders_
+which are essentially stores for _Consumers_.
 
-As explained previously, _Type Registries_ are essentially maps that map a _model type_ (key) to a construct in your
-programming language that can properly deal with that _model type_ (value). _Dictionaries_, on the contrary, do not
-deal with _model types_ but rather arbitrary _IDs_ (e.g. ConsumerIdentities) to a corresponding construct in your
-respective programming language.
-
-### Section 3.3.1 - Consumer Providers
-
-A ConsumerProviders object stores a number of objects called ConsumerProviders which are essentially stores for
-Consumers (Thus, contrary to a lot of other registries that store types implementing a specific interface,
-ConsumerProviders stores actual instances of types, in other words objects, implementing a specific interface).
-
-A ConsumerProvider has to implement the following interface:
+A _ConsumerProvider_ has to implement the following interface:
 
     type ConsumerProvider interface {
         Unregister(id ProviderIdentity)
@@ -506,193 +714,14 @@ A ConsumerProvider has to implement the following interface:
             (CredentialsSource, ConsumerIdentity)
     }
 
-A Consumer is essentially the combination of an Identity (the ConsumerIdentity) and a CredentialSource (which is
+A _Consumer_ is essentially the combination of an _Identity_ (the ConsumerIdentity) and a _CredentialSource_ (which is
 essentially something that can provide some sort of map containing the credentials).
 
-The advantage of having ConsumerProviders instead of adding all credentials to a central store within the
-CredentialContext is that each CredentialRepository can simply bring its own specific ConsumerIdentity matcher.
-Furthermore, to in order to update the propagated credentials, the ConsumerProvider may simply be exchanged. If all
-Consumers would be stored centrally in the CredentialContext, the Consumers propagated by a specific repository would
-have to be identified and removed.
-
-## Section 3.4 - Contexts
-
-Here, the different contexts shown in the overview are explained.
-
-A context object is the entry point for using dedicated functional areas. It bundles all settings and extensions point
-implementations for this area.
-
-This becomes more tangible if one looks at a concrete instance of such a functional area, e.g. ocm. The OCM Context
-contains several registries which determine e.g. which repository types or access methods are known and thus, can be
-used. So this may be seen as settings.
-Furthermore, by implementing e.g. a new type of repository and registering at the repository types registry of the
-current context, one may extend the functionality of the library.
-
-A Context may be seen as entry point as it provides access to a set of basic root element of its functional area. This
-is typically a Repository object, which provides access to elements hosted by this repository. An OCMRepository provides
-access to Components and ComponentVersions. An OCIRepository provides access primarily to so called Namespaces. A
-Namespace provides access to versions of an OCI Artifact.
-As you might have noticed in this description, the term "Namespaces" is unusual here and is an oddity of this ocm-lib.
-What is referred to as Namespace or rather OCI Namespace in this library is usually referred to as OCI Repository and
-correspondingly, what is referred to as OCI Repository in this library is usually referred to as OCI Registry. To be
-even more concrete, the library has following mapping of terms:
-
-    Name in OCM Library             Name used everywhere else
-    OCI Repository          ->      OCI Registry
-    OCI Namespace           ->      OCI Repository
-
-### Section 3.4.1 - Data Context
-
-The DataContext type is kind of base context of all Context types. Therefore, every Context type (except the Data
-Context itself) contains a DataContext object.  
-Essentially, a DataContext object contains the type information of the Context object it is the base for (e.g.
-ocm.context.ocm.software in case of an OCM Context) and a specific attribute store (and internally also a pointer to the
-Context object it is the base for).
-(The data context is an AttributeContext itself and therefore, the attribute store of the DataContext works the same as
-explained in AttributesContext.)
-
-### Section 3.4.2 - Attributes Context
-
-Every Context object - besides the DataContext, which is itself an AttributesContext - contains an AttributesContext
-object. An AttributesContext also contains a DataContext object. Primarily, an AttributesContext provides an attribute
-store which can store arbitrary attributes (on a low level, it this is implemented through a map[string]interface{}).
-These arbitrary attributes are typed and the respective types have to enable marshaling and unmarshaling, so that the
-attributes can also be used on the cli. In other words, an attribute type has to implement the following interface:
-
-    type AttributeType interface {
-        Name() string
-        Decode(data []byte, unmarshaler runtime.Unmarshaler) (interface{}, error)
-        Encode(v interface{}, marshaller runtime.Marshaler) ([]byte, error)
-        Description() string
-    }
-
-So, before an attribute is stored in an AttributesContexts attribute store, it is checked, whether its type is
-registered as AttributeType at a global registry called DefaultAttributeScheme. As every type of Context object contains
-a AttributeContext object, functions on Context types can try to access attributes in the AttributesContext (e.g. The
-StoreBlob method of an BlobHandler accesses an ociuploadattr on the DataContext. This attribute can specify an OCI
-registry where all the artifacts shall be uploaded to and thereby may overwrite the default behaviour of uploading the
-artifacts to the same OCI registry as the Component Descriptor.)
-Attributes stored in the AttributesContext of a context overwrite corresponding attributes stored in the DataContext of
-the same context.
-
-### Section 3.4.3 - Config Context
-
-A ConfigContext object configures other configurable objects (e.g. Credential Context) using typed configuration
-objects (thus, the object has a unique type attribute specifying its own type, e.g. credentials.config.ocm.software).
-
-Conceptual Background - Config Objects (this is pretty much how it works, but for reasons that will become clear later
-on, the ApplyTo function interface has an additional parameter compared to how it's introduced here):
-Each Config object type has to have an ApplyTo(target interface{}) function that knows what type of configurable object(
-s) it can configure (this "knowledge" is typically implemented through an if-statement based on a type-assertion on the
-target). If the function receives a suitable configurable object as target (thus, the type-assertion returns true), it
-calls corresponding functions on the target to apply its respective configuration (e.g. , a Credential Config object
-calls the credentialContext.SetCredentialsForConsumer(...) function passing in the respective arguments).
-
-To conclude this, technically, in order to configure specific objets such as the credential context - let's call it
-credctx - one could use a ConfigObject of the corresponding type, here Credential Config - let's call it credcfg - and
-call credcfg.ApplyTo(credctx).
-
-[Typically, each directory that contains configurable objects also has a corresponding config package with a type.go file, defining the Config type and registering it at the default ConfigTypeScheme.]
-
-Conceptual Background - ConfigContext (this is, where it might get confusing, but bear with me):
-The ConfigContext object is a configurable object itself. The Config object type to configure the ConfigContext is
-generic.config.ocm.software. This Config object is pretty much only a container for Config objects (thus, it simply
-contains a list of arbitrarily typed Config objects). Calling the ApplyTo(target interface{}) function of such an object
-with a ConfigContext as target adds all the Config objects contained in this container Config object to a ConfigStore
-within the ConfigContext.
-
-ConfigContext (how the library intends to work with Config objects):
-The Config objects are usually not applied directly to one or multiple configurable objects (thus, calling the Config
-objects ApplyTo(target interface{}) passing in each configuration object as target).
-Instead, a ConfigContext provides an (c ConfigContext) ApplyConfig(spec Config, description string) function.
-Essentially, this function does two things:
-
-1) Call spec.ApplyTo(target interface{}), passing in the ConfigContext its called upon in as target
-2) Adding the spec (thus, the Config object) to the ConfigStore of the ConfigContext
-
-Here's an example to better grasp this behaviour:
-Let cfgctx be an object of type ConfigContext and credcfg be an object of type CredentialConfig object.
-Assume the following function call:
-cfgctx.ApplyConfig(credcfg, "credential")
-
-1) Now, as previously described, the function first calls credcfg.ApplyTo(cfgctx). As the credcfg object's ApplyTo
-   function knows that it can only configure objects of type CredentialContext and not of type ConfigContext, this
-   function call does not have any effect!
-2) After the ApplyTo function returns, regardless of the type of the Config object, it is added to the ConfigStore of
-   the cfgctx.
-
-Now, let cfgctx, again, be an object of type ConfigContext and, instead of credcfg, we now have a cfgcfg object of type
-ConfigConfig (generic.config.ocm.software, the Config object type to configure ConfigContext objects).
-Assume the following function call:
-cfgctx.ApplyConfig(cfgcfg, "config")
-
-1) Now again, the function first calls cfgcfg.ApplyTo(cfgctx). As the cfgcfg object's ApplyTo function knows that it can
-   configure objects of type ConfigConfig, this function call proceeds and adds all all configuration object within the
-   cfgcfg object (remember, it's a container for other configuration objects) to the ConfigStore of the cfgctx.
-2) After the ApplyTo function returns, the cfgcfg object itself (thus, the container) is added to the cfgctx.
-   (if the cfgcfg object contained 3 different Credential Config objects, the ConfigStore would now contain the 3
-   Credential Config objects and also the cfgcfg object, thus, 4 objects in total)
-
-"Cool, now I've got an ConfigContext object containing all my configuration objects, but what's the benefit? How are
-they applied to the actual objects they shall configure?"
-
-Updater (this is an internal detail, a user of the library does not have to deal with the updater, but it's important if
-you want to understand, how the configuration objects within the ConfigStore of a ConfigContext are applied to the
-actual configurable objects!):
-Configurable Objects (e.g. OCM Context, OCI Context, Credential Context) do not directly contain a ConfigContext object
-or rather a pointer to a ConfigContext object. Instead, they contain an Updater object which maintains a pointer to a
-ConfigContext. Essentially, the Updater consists of the triple (ConfigContext, Target, LastGeneration).
-The Target is a configurable object, typically the configurable object that contains the respective Updater.
-The LastGeneration is an integer. The ConfigContext also maintains a corresponding Generation integer, which is
-increased by 1 each time a new Config object is added to the ConfigStore.
-Every method of a configurable object that uses a potentially configurable part of the configurable object calls its
-Updaters Update() function before performing any other processing. This Update() function compares the ConfigContext's
-Generation with the LastGeneration and calls the ApplyTo method of each Config object added since the LastGeneration,
-passing in the Updaters target object as target.
-This mechanism allows the transparent configuration of objects through a uniform interface.
-
-**FAQ:**  
-Why does the ConfigContext store the Container Config object (generic.config.ocm.software) in its ConfigStore?  
--> The ConfigContext does not know anything about this Container Config object type. There could be further types of
-Config objects that configure the ConfigContext (and eventually even other types of configurable objects too). These
-would have to be stored in the ConfigStore. Therefore, not storing the Container Config objects would require special
-treatment, which is not necessary.
-
-Why do the ConfigObjects apply themselves to the configurable objects and not the other way around? In other words, why
-don't the configurable objects provide an apply method?  
--> As the configurable objects do not have to know anything about their configuration objects, it is easy to create an
-additional Config object (This type would only have to register itself to the respective ConfigTypes Registry and it
-would be good to go!)
-
-### Section 3.4.4 - Credential Context
-
-A CredentialContext object serves two purposes:
-
-1) it stores Consumers (indirectly in form of Consumer Providers)
-2) it provides access to Credential Repositories (just like the OCM Context provides access to OCM Repositories or the
-   OCI Context provides access to OCI Repositories)
-
-**Credential Management:**  
-There are several kinds of credential consumers (e.g. GitHub, HelmChartRepositories, OCIRegistries) with potentially
-completely different kinds of credentials (e.g. {key:<GitHubPersonalAccessToken>} in case of GitHub or
-{username:<basic auth name>, password:<basic auth password>, certificate:<TLS client certificate>,
-privateKey:<TLS private key>} in case of HelmChartRepositories).
-
-To account for these different kinds of consumers and credentials, the credential management is based on generic
-consumer identities and generic credential property sets.
-The generic consumer identities are composed of a consumer type and a set of properties further describing the context
-the credentials are required for. The consumer type specifies a dedicated type of consumer (e.g. GitHub,
-HelmChartRepositories, OCIRegistries) and thereby also implicitly determines a standard identity matcher (These standard
-identity matchers are typically registered at a globally variable called StandardIdentityMatchers during the
-initialisation. When creating a DefaultContext, this variable is assigned to the IdentityMatchers Registry of the
-CredentialContext.). The set of properties specifying the usage context usually depends on the consumer type. consumer
-identities with the consumer type Github typically specify hostname, port and potentially a pathprefix.
-The generic credential property sets generally also depend on the consumer type. But even for a concrete consumer type
-they may vary (e.g. OCIRegistry allows authentication with username and password, but also with an identity token).
-Therefore, after retrieving the Credentials through the ConsumerIdentity matching logic, the consumer implementation may
-have to check which kind of credentials it has (e.g. the OCIRegistry implementation tries to retrieve a property with
-the name identityToken and if this returns nothing, it tries to retrieve properties with the name username and
-password).
+The advantage of having _ConsumerProviders_ instead of adding all credentials to a central store within the
+_CredentialContext_ is that each _CredentialRepository_ can simply bring its own specific _ConsumerIdentity_ matcher.
+Furthermore, in order to update the propagated credentials, the _ConsumerProvider_ may simply be exchanged. If all
+Consumers would be stored centrally in the _CredentialContext_, the _Consumers_ propagated by a specific repository
+would have to be identified and removed.
 
 **Additional Notes:**  
 In theory, a Credential Repository could itself require credentials to log into (e.g. vault). That's what the Credential
@@ -700,39 +729,41 @@ Chain is intended for (currently not used)
 
 ### Section 3.4.5 - OCI Context
 
-The OCI Context provides access to OCI Repositories (or rather OCI Registries).
-The primary aspect to consider here, is that OCI Repository is just an interface, thus, an abstraction. In other words,
-any type that provides access to OCI Artifacts through the OCI Repository interface is considered an OCI Repository by
-this library.
+The _OCI Context_ provides access to _OCI Repositories_ (or rather OCI Registries).  
+The primary aspect to consider here, is that _OCI Repository_ is just an interface, thus, an abstraction. In other
+words, any type that provides access to OCI Artifacts through the OCI Repository interface is considered an OCI
+Repository by this library.
 
 Current Implementations (also called Storage Mappings) are:  
 **ocireg Package**  
-The ocireg package within pkg/contexts/oci/repositories implements the OCI Repository interface using OCI Registries
+The ocireg package within pkg/contexts/oci/repositories implements the OCI Repository interface using OCI Registries.
 
 **docker Package**  
-The docker package within pkg/contexts/oci/repositories implements the OCI Repository interface using docker daemons
+The docker package within pkg/contexts/oci/repositories implements the OCI Repository interface using docker daemons.
 
 **ctf Package**  
 The ctf package within pkg/contexts/oci/repositories implements the OCI Repository interface using file systems.
 
-**CAREFUL:** To prevent confusions, artifactset is not an equal implementations to those. An artifactset can only hold
-versions of the same artifact. Thus, it corresponds to a Namespace (or rather OCI Repository), but implements the OCI
-Repository interface. The artifactset type is the type in which local artifacts are stored alongside their Component
-Descriptor.
+**CAREFUL:**  
+To prevent confusions, _artifactset_ is not an equal implementation to those. An _artifactset_ can only
+hold versions of the same artifact. Thus, it corresponds to a _Namespace_ (or rather OCI Repository), but implements the
+OCI Repository interface. The _artifactset_ type is the type in which local artifacts are stored alongside their
+Component Descriptor.  
+_docker_ is not an equal implementation either, as it can only deal with _oci images_ and not with _oci artifacts_.
 
 ### Section 3.4.6 - OCM Context
 
-The OCM Context provides access to OCM Repositories.
+The _OCM Context_ provides access to _OCM Repositories_.  
 The primary aspect to consider here, is that the OCM Repository implementations are based on the OCI Repository
 interface. Consequently, it is possible to dynamically choose a different storage backend for the OCM Repository.
 
-The implementation of the mapping from OCM Repository (and respective nested functionalities) to OCI Repository is done
-by the genericocireg package in pkg/contexts/ocm/repositories.
-Therefore, there are also corresponding packages within pkg/contexts/ocm/repositories for each OCI Repository
-implementation that can be used as storage backend for an OCM Repository - to be more precise, these currently are the
-ocireg implementation and the ctf implementation (docker, or rather the docker daemon, cannot be used as storage backend
-due to the technical limitation that docker can only deal with OCI images and not OCI artifacts).
-These packages are rather trivial as each of them pretty much only provide a function to create a genericocireg
+The implementation of the mapping from _OCM Repository_ (and respective nested functionalities) to _OCI Repository_ is
+done by the [genericocireg package](../../pkg/contexts/ocm/repositories/genericocireg). Therefore, there are also
+corresponding packages within that package for each _OCI Repository_ implementation that can be used as
+_storage backend_ for an _OCM Repository_ - to be more precise, these currently are the `ocireg` implementation and the
+`ctf` implementation (docker, or rather the docker daemon, cannot be used as storage backend due to the technical
+limitation that docker can only deal with _oci images_ and not _oci artifacts_).  
+These packages are rather trivial as each of them pretty much only provides a function to create a genericocireg
 RepositorySpec (which implements the ocm RepositorySpec interface) from its own RepositorySpec (which only implements
 the oci RepositorySpec interface).
 
@@ -741,10 +772,4 @@ In the future, it is quite possible that there will be additional storage backen
 concrete, to be able to store OCM Repositories in a S3 bucket, it is currently considered whether an complete additional
 storage backend abstraction, potentially called BlobStore, should be added - parallel to OCI.
 Alternatively, it would also be possible to provide a concrete implementation of a OCM Repository for S3 buckets (
-without introducing a fully-fledged additional storage abstraction). 
-
-
-
-
-
-
+without introducing a fully-fledged additional storage abstraction).
