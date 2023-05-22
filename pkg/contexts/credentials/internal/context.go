@@ -44,6 +44,7 @@ type Context interface {
 	RepositoryTypes() RepositoryTypeScheme
 
 	RepositorySpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error)
+	RepositorySpecForSpec(s RepositorySpec) (RepositorySpec, error)
 
 	RepositoryForSpec(spec RepositorySpec, creds ...CredentialsSource) (Repository, error)
 	RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...CredentialsSource) (Repository, error)
@@ -135,6 +136,13 @@ func (c *_context) RepositorySpecForConfig(data []byte, unmarshaler runtime.Unma
 	return c.knownRepositoryTypes.Decode(data, unmarshaler)
 }
 
+func (c *_context) RepositorySpecForSpec(s RepositorySpec) (RepositorySpec, error) {
+	if g, ok := s.(*GenericRepositorySpec); ok {
+		return g.Evaluate(c)
+	}
+	return s, nil
+}
+
 func (c *_context) RepositoryForSpec(spec RepositorySpec, creds ...CredentialsSource) (Repository, error) {
 	cred, err := CredentialsChain(creds).Credentials(c)
 	if err != nil {
@@ -153,7 +161,10 @@ func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarsha
 }
 
 func (c *_context) CredentialsForSpec(spec CredentialsSpec, creds ...CredentialsSource) (Credentials, error) {
-	repospec := spec.GetRepositorySpec(c)
+	repospec, err := spec.GetRepositorySpec(c)
+	if err != nil {
+		return nil, err
+	}
 	repo, err := c.RepositoryForSpec(repospec, creds...)
 	if err != nil {
 		return nil, err

@@ -54,7 +54,7 @@ func Decode(data []byte) (*localblob.AccessSpec, error) {
 type AccessSpec struct {
 	runtime.ObjectVersionedType `json:",inline"`
 	// FileName is the
-	Filename string `json:"fileName"`
+	Filename string `json:"filename"`
 	// MediaType is the media type of the object represented by the blob
 	MediaType string `json:"mediaType"`
 }

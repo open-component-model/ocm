@@ -55,6 +55,6 @@ func (a *RepositorySpec) GetCredentialsName() string {
 	return ""
 }
 
-func (a *RepositorySpec) GetRepositorySpec(context cpi.Context) cpi.RepositorySpec {
-	return a
+func (a *RepositorySpec) GetRepositorySpec(context cpi.Context) (cpi.RepositorySpec, error) {
+	return a, nil
 }
