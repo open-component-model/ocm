@@ -1,7 +1,10 @@
 # Introduction to the **ocm-lib**
 
-As the **ocm-lib** is a large and complex library, it can be rather frustrating to get started. This document is
-supposed to support you in this process.
+This document aims to provide an introduction to the **ocm-lib**. 
+
+## Prerequisites
+A familiarity with the **Open Component Model (OCM)** is required. Good starting points are the corresponding 
+[website](https://ocm.software/) and the [specification](https://github.com/open-component-model/ocm-spec/).
 
 ## Section 1 - Complexity
 
@@ -9,14 +12,14 @@ As mentioned in the [specification](https://github.com/open-component-model/ocm-
 *OCM Repository* is an interpretation layer on top of existing storage technologies and is not itself a repository
 technology.  
 Therefore, the ocm-lib has to deal with multiple
-[storage technologies](https://github.com/open-component-model/ocm-spec#storage-technology) and their individuel
+[storage technologies](https://github.com/open-component-model/ocm-spec#storage-technology) and their individual
 authentication mechanisms. As it is impossible to forsee all potentially required storage technologies, the ocm-lib's
 architecture also has to enable convenient extensibility.  
-This leads to a substantial amount of inherent unavoidable complexity!
+These extensibility requirements inherently lead to a certain degree of complexity.
 
 ## Section 2 - Architectural Concepts
 
-Essentially, the ocm-lib revolves around a single architectural concept, called **Type Registries** in the context of
+Essentially, the ocm-lib revolves around a single architectural concept called **Registries** in the context of
 this document.
 
 ### Section 2.1 - (Model) Type Registries
@@ -35,7 +38,19 @@ in your programming language that can properly deal with that _model type_ (valu
 type for each model type (as in the prototype-based type registry), but this might just as well be objects of the same
 type with a dedicated configuration (as in the factory-based type registries).
 
-#### Section 2.1.1 - Prototype-Based Type Registry
+#### Section 2.1.1 - Purpose
+
+The concept and implementation of _Type Registries_ may initially seem unnecessary complex and cumbersome. But the power
+of this concept becomes really apparent in the context of the [ocm](https://github.com/open-component-model/ocm-spec),
+once one realizes that the whole standard revolves around
+[Component Descriptors](https://ocm.software/docs/component-descriptors/version-3/) that are essentially bundled lists
+of serialized typed (and versioned) objects.
+
+Furthermore, the concept is great for extensibility. To create a new type, you can theoretically just create a new
+self-contained package implementing this type and register it at the corresponding _DefaultRegistry_ and you are good to
+go (so the code perfectly abides to the _open-closed principle_).
+
+#### Section 2.1.2 - Prototype-Based Type Registry
 
 _This kind of Type Registry only works if there is a **dedicated go type** for each **model type**, and if it is
 sufficient to directly decode
@@ -100,7 +115,7 @@ respective go types.
 The [registry](introduction/prototype-based-typeregistry/registry/registry.go) has a function implementing the dynamic
 unmarshaling logic. To understand this, it's best to check out the well-documented method within the example.
 
-#### Section 2.1.2 - Factory-Based Type Registry
+#### Section 2.1.3 - Factory-Based Type Registry
 
 In _Factory-Based Type Registries_, the Registry is essentially a map that stores the model type name (key) and a
 factory object (thus, an object capable of producing Message objects). Thereby, it is possible to overcome the
@@ -112,22 +127,10 @@ Based on the knowledge about Prototype-Based Type Registry, it should be possibl
 
 #### Note
 
-The ocm-lib uses has several kinds of type registries (thus, corresponding to our example, not only a Message Registry
-but also for other types). There, it has a generic implementation of a registry which can be reused.  
-Furthermore, its implementation of the registry has to be thread safe and provides some convenience functionility.
+The ocm-lib has several kinds of type registries (thus, corresponding to our example, not only a Message Registry
+but also for other types). Therefore, it has a generic implementation of a registry which can be reused.  
+Furthermore, its implementation of the registry has to be thread safe and provides some convenience functionality.
 Therefore, it may be slightly more difficult to understand than our examples.
-
-#### Section 2.1.3 - Purpose
-
-The concept and implementation of _Type Registries_ may initially seem unnecessary complex and cumbersome. But the power
-of this concept becomes really apparent in the context of the [ocm](https://github.com/open-component-model/ocm-spec),
-once one realizes that the whole standard revolves around
-[Component Descriptors](https://ocm.software/docs/component-descriptors/version-3/) that are essentially bundled lists
-of serialized typed (and versioned) objects.
-
-Furthermore, the concept is great for extensibility. To create a new type, you can theoretically just create a new
-self-contained package implementing this type and register it at the corresponding _DefaultRegistry_ and you are good to
-go (so the code perfectly abides to the _open-closed principle_).
 
 ### Section 2.2 - Contexts
 
@@ -160,13 +163,13 @@ general idea of the directory structure.
 The picture below shows the basic structure of the ocm-lib's [ocm context package](../../pkg/contexts/ocm). As all
 context packages follow the same structure, the overview should be sufficient to navigate the other context packages.
 
-The elements within this overview (_Type Registries_ and _Contexts_) are explained below.
+The elements within this overview (_Registries_ and _Contexts_) are explained below.
 
 ![image](introduction/ocm-lib-structure.png)
 
-### Section 3.2 - Type Registries
+### Section 3.2 - Registries
 
-Here, the different _Type Registries_ shown in the overview are explained.
+Here, the different _Registries_ shown in the overview are explained.
 
 ### Section 3.2.1 - Repository Types Scheme
 
@@ -466,14 +469,7 @@ ype BlobDigester interface {
 
 A BlobDigesterRegistry currently **is not** also a `HandlerRegistrationHandlerRegistry`.
 
-## Section 3.3 - Dictionaries
-
-As explained previously, _Type Registries_ are essentially maps that map a _model type_ (key) to a construct in your
-programming language that can properly deal with that _model type_ (value). _Dictionaries_, on the contrary, do not
-deal with _model types_ but rather arbitrary _IDs_ (e.g. ConsumerIdentities) to a corresponding construct in your
-respective programming language.
-
-### Section 3.3.1 - Identity Matchers
+### Section 3.2.6 - Identity Matchers
 
 An IdentityMatchers object stores a number of types (in this case functions) implementing an IdentityMatcher (thus,
 IdentityMatcher is the "certain functionality").
@@ -488,7 +484,14 @@ PartialMatcher returns true, if the id matches the pattern partially AND better,
 This allows to iterate over several available Consumers (these consist of an ConsumerIdentity and Credentials) and find
 the best match, and thereby, hopefully, the correct Credentials.
 
-### Section 3.3.2 - Consumer Providers
+## Section 3.3 - Dictionaries
+
+As explained previously, _Type Registries_ are essentially maps that map a _model type_ (key) to a construct in your
+programming language that can properly deal with that _model type_ (value). _Dictionaries_, on the contrary, do not
+deal with _model types_ but rather arbitrary _IDs_ (e.g. ConsumerIdentities) to a corresponding construct in your
+respective programming language.
+
+### Section 3.3.1 - Consumer Providers
 
 A ConsumerProviders object stores a number of objects called ConsumerProviders which are essentially stores for
 Consumers (Thus, contrary to a lot of other registries that store types implementing a specific interface,
@@ -514,7 +517,7 @@ have to be identified and removed.
 
 ## Section 3.4 - Contexts
 
-Here, the different registries shown in the overview are explained.
+Here, the different contexts shown in the overview are explained.
 
 A context object is the entry point for using dedicated functional areas. It bundles all settings and extensions point
 implementations for this area.
