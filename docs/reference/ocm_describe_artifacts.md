@@ -47,15 +47,15 @@ The <code>--repo</code> option takes a repository/OCI registry specification:
 For the *Common Transport Format* the types <code>directory</code>,
 <code>tar</code> or <code>tgz</code> are possible.
 
-Using the JSON variant any repository type supported by the 
+Using the JSON variant any repository types supported by the 
 linked library can be used:
-- `ArtifactSet`
-- `CommonTransportFormat`
-- `DockerDaemon`
-- `Empty`
-- `OCIRegistry`
-- `oci`
-- `ociRegistry`
+  - <code>ArtifactSet</code>: v1
+  - <code>CommonTransportFormat</code>: v1
+  - <code>DockerDaemon</code>: v1
+  - <code>Empty</code>: v1
+  - <code>OCIRegistry</code>: v1
+  - <code>oci</code>: v1
+  - <code>ociRegistry</code>
 
 
 With the option <code>--output</code> the output mode can be selected.

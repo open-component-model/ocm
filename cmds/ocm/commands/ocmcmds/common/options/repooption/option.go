@@ -8,10 +8,12 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 func From(o options.OptionSetProvider) *Option {
@@ -86,22 +88,17 @@ The <code>--repo</code> option takes an OCM repository specification:
 For the *Common Transport Format* the types <code>directory</code>,
 <code>tar</code> or <code>tgz</code> is possible.
 
-Using the JSON variant any repository type supported by the 
+Using the JSON variant any repository types supported by the 
 linked library can be used:
 
 Dedicated OCM repository types:
 `
 
-	for _, t := range ocm.DefaultContext().RepositoryTypes().KnownTypeNames() {
-		s += "- `" + t + "`\n"
-	}
+	s += listformat.FormatMapElements("", runtime.KindToVersionList(ocm.DefaultContext().RepositoryTypes().KnownTypeNames()))
 
-	oci.DefaultContext().RepositoryTypes().KnownTypeNames()
 	s += `
 OCI Repository types (using standard component repository to OCI mapping):
 `
-	for _, t := range oci.DefaultContext().RepositoryTypes().KnownTypeNames() {
-		s += "- `" + t + "`\n"
-	}
+	s += listformat.FormatMapElements("", runtime.KindToVersionList(oci.DefaultContext().RepositoryTypes().KnownTypeNames()))
 	return s
 }

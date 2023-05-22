@@ -7,6 +7,7 @@ package repooption
 import (
 	"github.com/spf13/pflag"
 
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
@@ -80,12 +81,8 @@ The <code>--repo</code> option takes a repository/OCI registry specification:
 For the *Common Transport Format* the types <code>directory</code>,
 <code>tar</code> or <code>tgz</code> are possible.
 
-Using the JSON variant any repository type supported by the 
+Using the JSON variant any repository types supported by the 
 linked library can be used:
 `
-	types := runtime.KindNames[oci.RepositorySpec, oci.RepositoryType](oci.DefaultContext().RepositoryTypes())
-	for _, t := range types {
-		s += "- `" + t + "`\n"
-	}
-	return s
+	return s + listformat.FormatMapElements("", runtime.KindToVersionList(oci.DefaultContext().RepositoryTypes().KnownTypeNames()))
 }

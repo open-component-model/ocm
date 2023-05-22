@@ -58,6 +58,24 @@ func KindNames[T TypedObject, R TypedObjectDecoder[T]](scheme KnownTypesProvider
 	return types
 }
 
+func KindToVersionList(types []string) map[string]string {
+	tmp := map[string][]string{}
+	for _, t := range types {
+		k, v := KindVersion(t)
+		if _, ok := tmp[k]; !ok {
+			tmp[k] = []string{}
+		}
+		if v != "" {
+			tmp[k] = append(tmp[k], v)
+		}
+	}
+	result := map[string]string{}
+	for k, v := range tmp {
+		result[k] = strings.Join(v, ", ")
+	}
+	return result
+}
+
 func Nil[T any]() T {
 	var _nil T
 	return _nil
