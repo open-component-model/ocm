@@ -12,7 +12,7 @@ import (
 const TYPE = "binary"
 
 func init() {
-	inputs.DefaultInputTypeScheme.Register(TYPE, inputs.NewInputType(TYPE, &Spec{},
+	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(TYPE, &Spec{},
 		usage, ConfigHandler()))
 }
 

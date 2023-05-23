@@ -18,8 +18,8 @@ const (
 )
 
 func init() {
-	cpi.RegisterRepositoryType(Type, cpi.NewRepositoryType(Type, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(TypeV1, cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](Type))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](TypeV1))
 }
 
 // RepositorySpec describes a docker config based credential repository interface.
@@ -42,7 +42,7 @@ func NewRepositorySpec(path string, prop ...bool) *RepositorySpec {
 		p = p || e
 	}
 	return &RepositorySpec{
-		ObjectVersionedType:      runtime.NewVersionedObjectType(Type),
+		ObjectVersionedType:      runtime.NewVersionedTypedObject(Type),
 		DockerConfigFile:         path,
 		PropgateConsumerIdentity: p,
 	}
@@ -54,7 +54,7 @@ func NewRepositorySpecForConfig(data []byte, prop ...bool) *RepositorySpec {
 		p = p || e
 	}
 	return &RepositorySpec{
-		ObjectVersionedType:      runtime.NewVersionedObjectType(Type),
+		ObjectVersionedType:      runtime.NewVersionedTypedObject(Type),
 		DockerConfig:             data,
 		PropgateConsumerIdentity: p,
 	}

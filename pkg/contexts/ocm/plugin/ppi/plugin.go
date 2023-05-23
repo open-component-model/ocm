@@ -28,10 +28,10 @@ type plugin struct {
 
 	uploaders      map[string]Uploader
 	upmappings     *registry.Registry[Uploader, UploaderKey]
-	uploaderScheme runtime.Scheme
+	uploaderScheme runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
 
 	methods      map[string]AccessMethod
-	accessScheme runtime.Scheme
+	accessScheme runtime.Scheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
 
 	actions map[string]Action
 
@@ -39,7 +39,6 @@ type plugin struct {
 }
 
 func NewPlugin(name string, version string) Plugin {
-	var rt runtime.VersionedTypedObject
 	return &plugin{
 		name:    name,
 		version: version,
@@ -51,8 +50,8 @@ func NewPlugin(name string, version string) Plugin {
 		uploaders:  map[string]Uploader{},
 		upmappings: registry.NewRegistry[Uploader, UploaderKey](),
 
-		accessScheme:   runtime.MustNewDefaultScheme(&rt, &runtime.UnstructuredVersionedTypedObject{}, false, nil),
-		uploaderScheme: runtime.MustNewDefaultScheme(&rt, &runtime.UnstructuredVersionedTypedObject{}, false, nil),
+		accessScheme:   runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil),
+		uploaderScheme: runtime.MustNewDefaultScheme[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]](&runtime.UnstructuredVersionedTypedObject{}, false, nil),
 
 		actions: map[string]Action{},
 
@@ -227,7 +226,7 @@ func (p *plugin) DecodeUploadTargetSpecification(data []byte) (UploadTargetSpec,
 	if err != nil {
 		return nil, err
 	}
-	return o.(UploadTargetSpec), nil
+	return o, nil
 }
 
 func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
@@ -283,11 +282,7 @@ func (p *plugin) RegisterAccessMethod(m AccessMethod) error {
 }
 
 func (p *plugin) DecodeAccessSpecification(data []byte) (AccessSpec, error) {
-	o, err := p.accessScheme.Decode(data, nil)
-	if err != nil {
-		return nil, err
-	}
-	return o.(AccessSpec), nil
+	return p.accessScheme.Decode(data, nil)
 }
 
 func (p *plugin) GetAccessMethod(name string, version string) AccessMethod {
@@ -302,7 +297,7 @@ func (p *plugin) RegisterAction(a Action) error {
 	if p.GetAction(a.Name()) != nil {
 		return errors.ErrAlreadyExists("action", a.Name())
 	}
-	vers := action.SupportedActionVersions(a.Name())
+	vers := action.DefaultRegistry().SupportedActionVersions(a.Name())
 	if len(vers) == 0 {
 		return errors.ErrNotSupported("action", a.Name())
 	}
@@ -320,7 +315,7 @@ func (p *plugin) RegisterAction(a Action) error {
 }
 
 func (p *plugin) DecodeAction(data []byte) (ActionSpec, error) {
-	return action.DecodeActionSpec(data)
+	return action.DefaultRegistry().DecodeActionSpec(data, runtime.DefaultJSONEncoding)
 }
 
 func (p *plugin) GetAction(name string) Action {

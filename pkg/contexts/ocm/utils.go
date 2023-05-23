@@ -17,6 +17,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -109,4 +110,12 @@ func IsIntermediate(spec RepositorySpec) bool {
 
 func ComponentRefKey(ref *compdesc.ComponentReference) common.NameVersion {
 	return common.NewNameVersion(ref.GetComponentName(), ref.GetVersion())
+}
+
+func IsUnknownRepositorySpec(s RepositorySpec) bool {
+	return runtime.IsUnknown(s)
+}
+
+func IsUnknownAccessSpec(s AccessSpec) bool {
+	return runtime.IsUnknown(s)
 }

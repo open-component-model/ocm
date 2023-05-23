@@ -26,11 +26,11 @@ const (
 )
 
 func init() {
-	cpi.RegisterRepositoryType(LegacyType, cpi.NewRepositoryType(LegacyType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(Type, cpi.NewRepositoryType(Type, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(TypeV1, cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(ShortType, cpi.NewRepositoryType(ShortType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(ShortTypeV1, cpi.NewRepositoryType(ShortTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](LegacyType))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](Type))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](TypeV1))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](ShortType))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](ShortTypeV1))
 }
 
 // Is checks the kind.
@@ -55,14 +55,14 @@ var _ cpi.RepositorySpec = (*RepositorySpec)(nil)
 // NewRepositorySpec creates a new RepositorySpec.
 func NewRepositorySpec(baseURL string) *RepositorySpec {
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		BaseURL:             baseURL,
 	}
 }
 
 func NewLegacyRepositorySpec(baseURL string) *RepositorySpec {
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(LegacyType),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(LegacyType),
 		BaseURL:             baseURL,
 	}
 }

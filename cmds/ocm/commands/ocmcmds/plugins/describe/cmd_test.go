@@ -52,6 +52,13 @@ Description:
 Actions:
 - Name: oci.repository.prepare
     Prepare the usage of a repository in an OCI registry.
+
+    The hostname of the target repository is used as selector. The action should
+    assure, that the requested repository is available on the target OCI registry.
+    
+    Spec version v1 uses the following specification fields:
+    - «hostname» *string*: The  hostname of the OCI registry.
+    - «repository» *string*: The OCI repository name.
   Info:
     test action
   Versions:

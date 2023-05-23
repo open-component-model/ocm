@@ -30,6 +30,7 @@ type (
 	UniformRepositorySpec            = internal.UniformRepositorySpec
 	RepositoryTypeScheme             = internal.RepositoryTypeScheme
 	RepositorySpec                   = internal.RepositorySpec
+	RepositoryType                   = internal.RepositoryType
 	IntermediateRepositorySpecAspect = internal.IntermediateRepositorySpecAspect
 	GenericRepositorySpec            = internal.GenericRepositorySpec
 	ArtifactAccess                   = internal.ArtifactAccess

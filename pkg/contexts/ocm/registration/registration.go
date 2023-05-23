@@ -47,7 +47,7 @@ func RegisterExtensions(ctx ocm.Context) error {
 			logger.Info("registering access method",
 				"plugin", p.Name(),
 				"type", name)
-			pi.GetContext().AccessMethods().Register(name, access.NewType(name, p, &m))
+			pi.GetContext().AccessMethods().Register(access.NewType(name, p, &m))
 		}
 
 		for _, u := range p.GetDescriptor().Uploaders {

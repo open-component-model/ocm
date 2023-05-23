@@ -182,22 +182,25 @@ func (u *UnstructuredTypedObject) setRaw(data []byte) error {
 	return nil
 }
 
-// Evaluate converts a unstructured object into a typed object.
-func (u *UnstructuredTypedObject) Evaluate(types Scheme) (TypedObject, error) {
+// EvaluateUnstructured converts an unstructured object into a typed object.
+// Go does not support generic methods.
+func EvaluateUnstructured[T TypedObject, R TypedObjectDecoder[T]](u *UnstructuredTypedObject, types Scheme[T, R]) (T, error) {
+	var zero T
+
 	data, err := u.GetRaw()
 	if err != nil {
-		return nil, fmt.Errorf("unable to get data from unstructured object: %w", err)
+		return zero, fmt.Errorf("unable to get data from unstructured object: %w", err)
 	}
-	var decoder TypedObjectDecoder
+	var decoder TypedObjectDecoder[T]
 	if types != nil {
 		decoder = types.GetDecoder(u.GetType())
 	}
 	if decoder == nil {
-		return nil, errors.ErrUnknown(errors.KIND_OBJECTTYPE, u.GetType())
+		return zero, errors.ErrUnknown(errors.KIND_OBJECTTYPE, u.GetType())
 	}
 
 	if obj, err := decoder.Decode(data, DefaultJSONEncoding); err != nil {
-		return nil, fmt.Errorf("unable to decode object %q: %w", u.GetType(), err)
+		return zero, fmt.Errorf("unable to decode object %q: %w", u.GetType(), err)
 	} else {
 		return obj, nil
 	}

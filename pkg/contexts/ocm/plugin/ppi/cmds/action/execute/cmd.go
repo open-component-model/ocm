@@ -78,7 +78,7 @@ func (o *Options) Complete(args []string) error {
 }
 
 func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
-	spec, err := action.DecodeActionSpec(opts.Specification)
+	spec, err := action.DefaultRegistry().DecodeActionSpec(opts.Specification, runtime.DefaultJSONEncoding)
 	if err != nil {
 		return errors.Wrapf(err, "action specification")
 	}
@@ -92,7 +92,7 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 		return err
 	}
 	result.SetType(spec.GetType())
-	data, err := action.EncodeActionResult(result)
+	data, err := action.DefaultRegistry().EncodeActionResult(result, runtime.DefaultJSONEncoding)
 	if err != nil {
 		return err
 	}

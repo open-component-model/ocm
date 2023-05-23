@@ -15,6 +15,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociblob"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 const OCIPATH = "/tmp/oci"
@@ -38,20 +39,17 @@ type: localBlob
 
 	It("marshal/unmarshal simple", func() {
 		spec := localblob.New("path", "hint", mime.MIME_TEXT, nil)
-		data, err := json.Marshal(spec)
-		Expect(err).To(Succeed())
+		data := Must(json.Marshal(spec))
 		Expect(string(data)).To(Equal("{\"type\":\"localBlob\",\"localReference\":\"path\",\"mediaType\":\"text/plain\",\"referenceName\":\"hint\"}"))
-		var r localblob.AccessSpec
-		Expect(json.Unmarshal(data, &r)).To(Succeed())
-		Expect(&r).To(Equal(spec))
+		r := Must(localblob.Decode(data))
+		Expect(r).To(Equal(spec))
 	})
 
 	It("marshal/unmarshal with global", func() {
-		spec := &localblob.AccessSpec{}
+		spec := localblob.New("", "", "", nil)
 		Expect(runtime.DefaultYAMLEncoding.Unmarshal([]byte(data), spec)).To(Succeed())
 
-		r, err := runtime.DefaultYAMLEncoding.Marshal(spec)
-		Expect(err).To(Succeed())
+		r := Must(runtime.DefaultYAMLEncoding.Marshal(spec))
 		Expect(string(r)).To(Equal(data))
 
 		global := ociblob.New(
@@ -62,8 +60,7 @@ type: localBlob
 		)
 		Expect(spec.GlobalAccess.Evaluate(ocm.DefaultContext())).To(Equal(global))
 
-		r, err = runtime.DefaultYAMLEncoding.Marshal(spec)
-		Expect(err).To(Succeed())
+		r = Must(runtime.DefaultYAMLEncoding.Marshal(spec))
 		Expect(string(r)).To(Equal(data))
 	})
 

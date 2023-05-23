@@ -165,11 +165,11 @@ func (c *_context) ConfigTypes() ConfigTypeScheme {
 }
 
 func (c *_context) ConfigForData(data []byte, unmarshaler runtime.Unmarshaler) (Config, error) {
-	return c.knownConfigTypes.DecodeConfig(data, unmarshaler)
+	return c.knownConfigTypes.Decode(data, unmarshaler)
 }
 
 func (c *_context) GetConfigForData(data []byte, unmarshaler runtime.Unmarshaler) (Config, error) {
-	spec, err := c.knownConfigTypes.DecodeConfig(data, unmarshaler)
+	spec, err := c.knownConfigTypes.Decode(data, unmarshaler)
 	if err != nil {
 		return nil, err
 	}
@@ -194,7 +194,7 @@ func (c *_context) ApplyConfig(spec Config, desc string) error {
 }
 
 func (c *_context) ApplyData(data []byte, unmarshaler runtime.Unmarshaler, desc string) (Config, error) {
-	spec, err := c.knownConfigTypes.DecodeConfig(data, unmarshaler)
+	spec, err := c.knownConfigTypes.Decode(data, unmarshaler)
 	if err != nil {
 		return nil, err
 	}

@@ -11,6 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -66,11 +67,14 @@ var _ = Describe("Add with new access method", func() {
 		Expect(r.Relation).To(Equal(metav1.ResourceRelation("external")))
 
 		Expect(r.Access.GetType()).To(Equal("test"))
-
 		acc := Must(env.OCMContext().AccessSpecForSpec(r.Access))
 		var myacc AccessSpec
 
 		MustBeSuccessful(json.Unmarshal(Must(json.Marshal(acc)), &myacc))
 		Expect(myacc).To(Equal(AccessSpec{Type: "test", Path: "textfile", MediaType: "text/plain"}))
+
+		m := Must(acc.AccessMethod(&cpi.DummyComponentVersionAccess{env.OCMContext()}))
+		data = Must(m.Get())
+		Expect(string(data)).To(Equal("test content\n{\"mediaType\":\"text/plain\",\"path\":\"textfile\",\"type\":\"test\"}\n"))
 	})
 })

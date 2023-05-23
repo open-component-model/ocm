@@ -88,12 +88,12 @@ func (r *ResourceSpec) Validate(ctx clictx.Context, input *addhdlrs.ResourceInpu
 		if r.Access.GetType() == "" {
 			allErrs = append(allErrs, field.Required(fldPath.Child("access", "type"), "type of access required"))
 		} else {
-			acc, err := r.Access.Evaluate(ctx.OCMContext().AccessMethods())
+			acc, err := r.Access.Evaluate(ctx.OCMContext())
 			if err != nil {
 				raw, _ := r.Access.GetRaw()
 				allErrs = append(allErrs, field.Invalid(fldPath.Child("access"), string(raw), err.Error()))
 			} else if acc.(ocm.AccessSpec).IsLocal(ctx.OCMContext()) {
-				kind := runtime.ObjectVersionedType(r.Access.ObjectType).GetKind()
+				kind := runtime.GetKind(r.Access)
 				allErrs = append(allErrs, field.Invalid(fldPath.Child("access", "type"), kind, "local access no possible"))
 			}
 		}

@@ -11,6 +11,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	. "github.com/open-component-model/ocm/pkg/testutils"
+
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -22,7 +24,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/env"
 	"github.com/open-component-model/ocm/pkg/env/builder"
 	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
 const ARCHIVE = "archive"
@@ -45,22 +46,13 @@ var _ = Describe("blobhandler", func() {
 					b.BlobStringData(mime.MIME_TEXT, "testdata")
 				})
 			})
-			data, err := b.ReadFile(vfs.Join(b, ARCHIVE, compdesc.ComponentDescriptorFileName))
-			Expect(err).To(Succeed())
-			cd, err := compdesc.Decode(data)
-			Expect(err).To(Succeed())
+			data := Must(b.ReadFile(vfs.Join(b, ARCHIVE, compdesc.ComponentDescriptorFileName)))
+			cd := Must(compdesc.Decode(data))
 			Expect(cd.Resources[0].Access.GetType()).To(Equal(localblob.Type))
 
-			data, err = json.Marshal(cd.Resources[0].Access)
-			Expect(err).To(Succeed())
-			found := &localblob.AccessSpec{}
-			Expect(json.Unmarshal(data, found)).To(Succeed())
-
-			spec := &localblob.AccessSpec{
-				ObjectVersionedType: runtime.NewVersionedObjectType(localblob.Type),
-				MediaType:           mime.MIME_TEXT,
-				LocalReference:      "sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50",
-			}
+			data = Must(json.Marshal(cd.Resources[0].Access))
+			found := Must(localblob.Decode(data))
+			spec := localblob.New("sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50", "", mime.MIME_TEXT, nil)
 			Expect(found).To(Equal(spec))
 		})
 	})
@@ -79,22 +71,14 @@ var _ = Describe("blobhandler", func() {
 					b.BlobStringData(mime.MIME_TEXT, "testdata")
 				})
 			})
-			data, err := b.ReadFile(vfs.Join(b, ARCHIVE, compdesc.ComponentDescriptorFileName))
-			Expect(err).To(Succeed())
-			cd, err := compdesc.Decode(data)
-			Expect(err).To(Succeed())
+			data := Must(b.ReadFile(vfs.Join(b, ARCHIVE, compdesc.ComponentDescriptorFileName)))
+			cd := Must(compdesc.Decode(data))
 			Expect(cd.Resources[0].Access.GetType()).To(Equal(localfsblob.Type))
 
-			data, err = json.Marshal(cd.Resources[0].Access)
-			Expect(err).To(Succeed())
-			found := &localfsblob.AccessSpec{}
-			Expect(json.Unmarshal(data, found)).To(Succeed())
+			data = Must(json.Marshal(cd.Resources[0].Access))
+			found := Must(localfsblob.Decode(data))
 
-			spec := &localfsblob.AccessSpec{
-				ObjectVersionedType: runtime.NewVersionedObjectType(localfsblob.Type),
-				MediaType:           mime.MIME_TEXT,
-				Filename:            "sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50",
-			}
+			spec := localfsblob.New("sha256.810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50", mime.MIME_TEXT)
 			reflect.DeepEqual(found, spec)
 			Expect(found).To(Equal(spec))
 		})

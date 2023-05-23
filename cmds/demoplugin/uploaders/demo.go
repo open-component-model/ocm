@@ -34,14 +34,14 @@ type TargetSpec struct {
 	Path string `json:"path"`
 }
 
-var types map[string]runtime.TypedObjectDecoder
+var types ppi.UploadFormats
 
 func init() {
-	decoder, err := runtime.NewDirectDecoder(&TargetSpec{})
+	decoder, err := runtime.NewDirectDecoder[runtime.TypedObject](&TargetSpec{})
 	if err != nil {
 		panic(err)
 	}
-	types = map[string]runtime.TypedObjectDecoder{NAME + runtime.VersionSeparator + VERSION: decoder}
+	types = ppi.UploadFormats{NAME + runtime.VersionSeparator + VERSION: decoder}
 }
 
 type Uploader struct {
@@ -56,7 +56,7 @@ func New() ppi.Uploader {
 	}
 }
 
-func (a *Uploader) Decoders() map[string]runtime.TypedObjectDecoder {
+func (a *Uploader) Decoders() ppi.UploadFormats {
 	return types
 }
 

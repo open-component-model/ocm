@@ -54,7 +54,7 @@ func (w *Writer) Close() error {
 			}
 		}
 		w.spec = &accessmethods.AccessSpec{
-			ObjectVersionedType: runtime.NewVersionedObjectType(w.name, w.version),
+			ObjectVersionedType: runtime.NewVersionedTypedObject(w.name, w.version),
 			Path:                n,
 			MediaType:           w.media,
 		}

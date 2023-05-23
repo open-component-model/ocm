@@ -29,6 +29,10 @@ func WithRepositoyTypeScheme(scheme RepositoryTypeScheme) internal.Builder {
 	return internal.Builder{}.WithRepositoyTypeScheme(scheme)
 }
 
+func WithRepositoryDelegation(reg RepositoryDelegationRegistry) internal.Builder {
+	return internal.Builder{}.WithRepositoryDelegation(reg)
+}
+
 func WithAccessypeScheme(scheme AccessTypeScheme) internal.Builder {
 	return internal.Builder{}.WithAccessTypeScheme(scheme)
 }

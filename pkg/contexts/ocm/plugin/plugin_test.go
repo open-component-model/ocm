@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/types/oci-repository-prepare"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/actions/oci-repository-prepare"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	access "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/plugin"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
@@ -67,7 +67,7 @@ var _ = Describe("setup plugin cache", func() {
 		Expect(p).NotTo(BeNil())
 		Expect(len(p.GetDescriptor().AccessMethods)).To(Equal(2))
 		Expect(registration.RegisterExtensions(registry.GetContext())).To(Succeed())
-		t := ctx.AccessMethods().GetAccessType("test")
+		t := ctx.AccessMethods().GetType("test")
 		Expect(t).NotTo(BeNil())
 		raw := `
 type: test

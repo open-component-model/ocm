@@ -65,7 +65,7 @@ type Plugin interface {
 }
 
 type AccessMethod interface {
-	runtime.TypedObjectDecoder
+	runtime.TypedObjectDecoder[AccessSpec]
 
 	Name() string
 	Version() string
@@ -84,12 +84,14 @@ type AccessMethod interface {
 	ComposeAccessSpecification(p Plugin, opts Config, config Config) error
 }
 
-type AccessSpec runtime.VersionedTypedObject
+type AccessSpec = runtime.TypedObject
 
 type AccessSpecProvider func() AccessSpec
 
+type UploadFormats runtime.KnownTypes[runtime.TypedObject, runtime.TypedObjectDecoder[runtime.TypedObject]]
+
 type Uploader interface {
-	Decoders() map[string]runtime.TypedObjectDecoder
+	Decoders() UploadFormats
 
 	Name() string
 	Description() string
@@ -98,7 +100,7 @@ type Uploader interface {
 	Writer(p Plugin, arttype, mediatype string, hint string, spec UploadTargetSpec, creds credentials.Credentials) (io.WriteCloser, AccessSpecProvider, error)
 }
 
-type UploadTargetSpec runtime.VersionedTypedObject
+type UploadTargetSpec = runtime.TypedObject
 
 type DownloadResultProvider func() (string, error)
 
@@ -109,9 +111,9 @@ type Downloader interface {
 	Writer(p Plugin, arttype, mediatype string, filepath string) (io.WriteCloser, DownloadResultProvider, error)
 }
 
-type ActionSpec action.ActionSpec
+type ActionSpec = action.ActionSpec
 
-type ActionResult action.ActionResult
+type ActionResult = action.ActionResult
 
 type Action interface {
 	Name() string

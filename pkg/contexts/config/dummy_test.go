@@ -16,8 +16,8 @@ const (
 )
 
 func RegisterAt(reg cpi.ConfigTypeScheme) {
-	reg.Register(DummyType, cpi.NewConfigType(DummyType, &Config{}))
-	reg.Register(DummyType, cpi.NewConfigType(DummyTypeV1, &Config{}))
+	reg.Register(cpi.NewConfigType[*Config](DummyType))
+	reg.Register(cpi.NewConfigType[*Config](DummyTypeV1))
 }
 
 // Config describes a a dummy config
@@ -30,7 +30,7 @@ type Config struct {
 // NewConfig creates a new memory Config
 func NewConfig(a, b string) *Config {
 	return &Config{
-		ObjectVersionedType: runtime.NewVersionedObjectType(DummyType),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(DummyType),
 		Alice:               a,
 		Bob:                 b,
 	}
