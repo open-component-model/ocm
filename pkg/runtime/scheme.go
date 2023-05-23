@@ -11,56 +11,50 @@ import (
 	"sort"
 	"sync"
 
+	"github.com/modern-go/reflect2"
+
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-// TypeGetter is the interface to be implemented for extracting a type.
-type TypeGetter interface {
-	// GetType returns the type of the access object.
-	GetType() string
-}
+var (
+	typeTypedObject = reflect.TypeOf((*TypedObject)(nil)).Elem()
+	typeUnknown     = reflect.TypeOf((*Unknown)(nil)).Elem()
+)
 
-// TypeSetter is the interface to be implemented for extracting a type.
-type TypeSetter interface {
-	// SetType sets the type of an abstract element
-	SetType(typ string)
-}
-
-// TypedObject defines the accessor for a typed object with additional data.
-type TypedObject interface {
-	TypeGetter
-}
-
-var typeTypedObject = reflect.TypeOf((*TypedObject)(nil)).Elem()
-
-// TypedObjectDecoder is able to provide an effective typed object for some
-// serilaized form. The technical deserialization is done by an Unmarshaler.
-type TypedObjectDecoder interface {
-	Decode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
-}
+type (
+	// TypedObjectDecoder is able to provide an effective typed object for some
+	// serilaized form. The technical deserialization is done by an Unmarshaler.
+	TypedObjectDecoder[T TypedObject] interface {
+		Decode(data []byte, unmarshaler Unmarshaler) (T, error)
+	}
+	_TypedObjectDecoder[T TypedObject] interface {
+		TypedObjectDecoder[T]
+	}
+)
 
 // TypedObjectEncoder is able to provide a versioned representation of
 // an effective TypedObject.
-type TypedObjectEncoder interface {
-	Encode(TypedObject, Marshaler) ([]byte, error)
+type TypedObjectEncoder[T TypedObject] interface {
+	Encode(T, Marshaler) ([]byte, error)
 }
 
-type DirectDecoder struct {
+type DirectDecoder[T TypedObject] struct {
 	proto reflect.Type
 }
 
-var _ TypedObjectDecoder = &DirectDecoder{}
+var _ TypedObjectDecoder[TypedObject] = &DirectDecoder[TypedObject]{}
 
-func MustNewDirectDecoder(proto interface{}) *DirectDecoder {
-	d, err := NewDirectDecoder(proto)
+func MustNewDirectDecoder[T TypedObject](proto T) *DirectDecoder[T] {
+	d, err := NewDirectDecoder[T](proto)
 	if err != nil {
 		panic(err)
 	}
 	return d
 }
 
-func NewDirectDecoder(proto interface{}) (*DirectDecoder, error) {
+func NewDirectDecoder[T TypedObject](proto T) (*DirectDecoder[T], error) {
 	t := MustProtoType(proto)
 	if !reflect.PtrTo(t).Implements(typeTypedObject) {
 		return nil, errors.Newf("object interface %T: must implement TypedObject", proto)
@@ -68,82 +62,36 @@ func NewDirectDecoder(proto interface{}) (*DirectDecoder, error) {
 	if t.Kind() != reflect.Struct {
 		return nil, errors.Newf("prototype %q must be a struct", t)
 	}
-	return &DirectDecoder{
+	return &DirectDecoder[T]{
 		proto: t,
 	}, nil
 }
 
-func (d *DirectDecoder) CreateInstance() TypedObject {
-	return reflect.New(d.proto).Interface().(TypedObject)
+func (d *DirectDecoder[T]) CreateInstance() T {
+	return reflect.New(d.proto).Interface().(T)
 }
 
-func (d *DirectDecoder) Decode(data []byte, unmarshaler Unmarshaler) (TypedObject, error) {
+func (d *DirectDecoder[T]) Decode(data []byte, unmarshaler Unmarshaler) (T, error) {
+	var zero T
 	inst := d.CreateInstance()
 	err := unmarshaler.Unmarshal(data, inst)
 	if err != nil {
-		return nil, err
+		return zero, err
 	}
 
 	return inst, nil
 }
 
-func (d *DirectDecoder) Encode(obj TypedObject, marshaler Marshaler) ([]byte, error) {
+func (d *DirectDecoder[T]) Encode(obj T, marshaler Marshaler) ([]byte, error) {
 	return marshaler.Marshal(obj)
 }
 
-// TypedObjectConverter converts a versioned representation into the
-// intended type required by the scheme.
-type TypedObjectConverter interface {
-	ConvertTo(in interface{}) (TypedObject, error)
-}
-
-// ConvertingDecoder uses a serialization form different from the
-// intended object type, that is converted to achieve the decode result.
-type ConvertingDecoder struct {
-	proto reflect.Type
-	TypedObjectConverter
-}
-
-var _ TypedObjectDecoder = &ConvertingDecoder{}
-
-func MustNewConvertingDecoder(proto interface{}, conv TypedObjectConverter) *ConvertingDecoder {
-	d, err := NewConvertingDecoder(proto, conv)
-	if err != nil {
-		panic(err)
-	}
-	return d
-}
-
-func NewConvertingDecoder(proto interface{}, conv TypedObjectConverter) (*ConvertingDecoder, error) {
-	t, err := ProtoType(proto)
-	if err != nil {
-		return nil, err
-	}
-	return &ConvertingDecoder{
-		proto:                t,
-		TypedObjectConverter: conv,
-	}, nil
-}
-
-func (d *ConvertingDecoder) Decode(data []byte, unmarshaler Unmarshaler) (TypedObject, error) {
-	versioned := d.CreateData()
-	err := unmarshaler.Unmarshal(data, versioned)
-	if err != nil {
-		return nil, err
-	}
-	return d.ConvertTo(versioned)
-}
-
-func (d *ConvertingDecoder) CreateData() interface{} {
-	return reflect.New(d.proto).Interface()
-}
-
 // KnownTypes is a set of known type names mapped to appropriate object decoders.
-type KnownTypes map[string]TypedObjectDecoder
+type KnownTypes[T TypedObject, R TypedObjectDecoder[T]] map[string]R
 
 // Copy provides a copy of the actually known types.
-func (t KnownTypes) Copy() KnownTypes {
-	n := KnownTypes{}
+func (t KnownTypes[T, R]) Copy() KnownTypes[T, R] {
+	n := KnownTypes[T, R]{}
 	for k, v := range t {
 		n[k] = v
 	}
@@ -151,7 +99,7 @@ func (t KnownTypes) Copy() KnownTypes {
 }
 
 // TypeNames return a sorted list of known type names.
-func (t KnownTypes) TypeNames() []string {
+func (t KnownTypes[T, R]) TypeNames() []string {
 	types := make([]string, 0, len(t))
 	for t := range t {
 		types = append(types, t)
@@ -160,67 +108,89 @@ func (t KnownTypes) TypeNames() []string {
 	return types
 }
 
-// Scheme is the interface to describe a set of object types
-// that implement a dedicated interface.
-// As such it knows about the desired interface of the instances
-// and can validate it. Additionally, it provides an implementation
-// for generic unstructured objects that can be used to decode
-// any serialized from of object candidates and provide the
-// effective type.
-type Scheme interface {
-	RegisterByDecoder(typ string, decoder TypedObjectDecoder) error
+// Unknown is the interface to be implemented by
+// representations on an unknown, but nevertheless decoded specification
+// of a typed object.
+type Unknown interface {
+	IsUnknown() bool
+}
 
-	ValidateInterface(object TypedObject) error
-	CreateUnstructured() Unstructured
-	Convert(object TypedObject) (TypedObject, error)
-	GetDecoder(otype string) TypedObjectDecoder
-	Decode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
-	Encode(obj TypedObject, marshaler Marshaler) ([]byte, error)
-	EnforceDecode(data []byte, unmarshaler Unmarshaler) (TypedObject, error)
-	KnownTypes() KnownTypes
+func IsUnknown(o TypedObject) bool {
+	if reflect2.IsNil(o) {
+		return true
+	}
+	if u, ok := o.(Unknown); ok {
+		return u.IsUnknown()
+	}
+	return false
+}
+
+type (
+	// Scheme is the interface to describe a set of object types
+	// that implement a dedicated interface.
+	// As such it knows about the desired interface of the instances
+	// and can validate it. Additionally, it provides an implementation
+	// for generic unstructured objects that can be used to decode
+	// any serialized from of object candidates and provide the
+	// effective type.
+	Scheme[T TypedObject, R TypedObjectDecoder[T]] interface {
+		SchemeCommon
+		KnownTypesProvider[T, R]
+		TypedObjectEncoder[T]
+		TypedObjectDecoder[T]
+
+		BaseScheme() Scheme[T, R] // Go does not support an additional type parameter S Scheme[T,S] to return the correct type here
+
+		AddKnownTypes(scheme KnownTypesProvider[T, R])
+		RegisterByDecoder(typ string, decoder R) error
+
+		ValidateInterface(object T) error
+		CreateUnstructured() T
+		Convert(object TypedObject) (T, error)
+		GetDecoder(otype string) R
+		EnforceDecode(data []byte, unmarshaler Unmarshaler) (T, error)
+	}
+	_Scheme[T TypedObject, R TypedObjectDecoder[T]] interface { // cannot omit nesting, because Goland does not accept it
+		Scheme[T, R]
+	}
+)
+
+type KnownTypesProvider[T TypedObject, R TypedObjectDecoder[T]] interface {
+	KnownTypes() KnownTypes[T, R]
+}
+
+type SchemeCommon interface {
 	KnownTypeNames() []string
 }
 
-type SchemeBase interface {
-	AddKnownTypes(scheme Scheme)
-	Scheme
-}
-type defaultScheme struct {
+type defaultScheme[T TypedObject, R TypedObjectDecoder[T]] struct {
 	lock           sync.RWMutex
-	base           Scheme
+	base           Scheme[T, R]
 	instance       reflect.Type
 	unstructured   reflect.Type
-	defaultdecoder TypedObjectDecoder
+	defaultdecoder TypedObjectDecoder[T]
 	acceptUnknown  bool
-	types          KnownTypes
+	types          KnownTypes[T, R]
 }
 
-type BaseScheme interface {
-	BaseScheme() Scheme
+var _ Scheme[VersionedTypedObject, TypedObjectDecoder[VersionedTypedObject]] = (*defaultScheme[VersionedTypedObject, TypedObjectDecoder[VersionedTypedObject]])(nil)
+
+func MustNewDefaultScheme[T TypedObject, R TypedObjectDecoder[T]](protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder[T], base ...Scheme[T, R]) Scheme[T, R] {
+	return utils.Must(NewDefaultScheme[T](protoUnstr, acceptUnknown, defaultdecoder, base...))
 }
 
-var _ BaseScheme = (*defaultScheme)(nil)
-
-func MustNewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder, base ...Scheme) SchemeBase {
-	return utils.Must(NewDefaultScheme(protoIfce, protoUnstr, acceptUnknown, defaultdecoder, base...))
+func NewScheme[T TypedObject, R TypedObjectDecoder[T]](base ...Scheme[T, R]) Scheme[T, R] {
+	s, _ := NewDefaultScheme[T](nil, false, nil, base...)
+	return s
 }
 
-func NewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder, base ...Scheme) (SchemeBase, error) {
+func NewDefaultScheme[T TypedObject, R TypedObjectDecoder[T]](protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder[T], base ...Scheme[T, R]) (Scheme[T, R], error) {
 	var err error
 
-	if protoIfce == nil {
-		return nil, fmt.Errorf("object interface must be given by pointer to interacted (is nil)")
-	}
-	it := reflect.TypeOf(protoIfce)
-	if it.Kind() != reflect.Ptr {
-		return nil, fmt.Errorf("object interface %T: must be given by pointer to interacted (is not pointer)", protoIfce)
-	}
-	it = it.Elem()
-	if it.Kind() != reflect.Interface {
-		return nil, fmt.Errorf("object interface %T: must be given by pointer to interacted (does not point to interface)", protoIfce)
-	}
-	if !it.Implements(typeTypedObject) {
-		return nil, fmt.Errorf("object interface %T: must implement TypedObject", protoIfce)
+	var protoIfce T
+	it := reflect.TypeOf(&protoIfce)
+	for it.Kind() == reflect.Ptr {
+		it = it.Elem()
 	}
 
 	var ut reflect.Type
@@ -229,26 +199,29 @@ func NewDefaultScheme(protoIfce interface{}, protoUnstr Unstructured, acceptUnkn
 		if err != nil {
 			return nil, errors.Wrapf(err, "unstructured prototype %T", protoUnstr)
 		}
-		if !reflect.PtrTo(ut).Implements(typeTypedObject) {
-			return nil, fmt.Errorf("unstructured type %T must implement TypedObject to be acceptale as unknown result", protoUnstr)
+		if !reflect.PtrTo(ut).Implements(it) {
+			return nil, fmt.Errorf("unstructured type %T must implement %T to be acceptale as unknown result", protoUnstr, &protoIfce)
+		}
+		if !reflect.PtrTo(ut).Implements(typeUnknown) {
+			return nil, fmt.Errorf("unstructured type %T must implement Unknown to be acceptable as unknown result", protoUnstr)
 		}
 	}
 
-	return &defaultScheme{
+	return &defaultScheme[T, R]{
 		base:           utils.Optional(base...),
 		instance:       it,
 		unstructured:   ut,
 		defaultdecoder: defaultdecoder,
-		types:          KnownTypes{},
+		types:          KnownTypes[T, R]{},
 		acceptUnknown:  acceptUnknown,
 	}, nil
 }
 
-func (d *defaultScheme) BaseScheme() Scheme {
+func (d *defaultScheme[T, R]) BaseScheme() Scheme[T, R] {
 	return d.base
 }
 
-func (d *defaultScheme) AddKnownTypes(s Scheme) {
+func (d *defaultScheme[T, R]) AddKnownTypes(s KnownTypesProvider[T, R]) {
 	d.lock.Lock()
 	defer d.lock.Unlock()
 	for k, v := range s.KnownTypes() {
@@ -256,7 +229,7 @@ func (d *defaultScheme) AddKnownTypes(s Scheme) {
 	}
 }
 
-func (d *defaultScheme) KnownTypes() KnownTypes {
+func (d *defaultScheme[T, R]) KnownTypes() KnownTypes[T, R] {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
 	if d.base == nil {
@@ -270,7 +243,7 @@ func (d *defaultScheme) KnownTypes() KnownTypes {
 }
 
 // KnownTypeNames return a sorted list of known type names.
-func (d *defaultScheme) KnownTypeNames() []string {
+func (d *defaultScheme[T, R]) KnownTypeNames() []string {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
 
@@ -285,16 +258,8 @@ func (d *defaultScheme) KnownTypeNames() []string {
 	return types
 }
 
-func RegisterByType(s Scheme, typ string, proto TypedObject) error {
-	t, err := NewDirectDecoder(proto)
-	if err != nil {
-		return err
-	}
-	return s.RegisterByDecoder(typ, t)
-}
-
-func (d *defaultScheme) RegisterByDecoder(typ string, decoder TypedObjectDecoder) error {
-	if decoder == nil {
+func (d *defaultScheme[T, R]) RegisterByDecoder(typ string, decoder R) error {
+	if reflect2.IsNil(decoder) {
 		return errors.Newf("decoder must be given")
 	}
 	d.lock.Lock()
@@ -303,7 +268,7 @@ func (d *defaultScheme) RegisterByDecoder(typ string, decoder TypedObjectDecoder
 	return nil
 }
 
-func (d *defaultScheme) ValidateInterface(object TypedObject) error {
+func (d *defaultScheme[T, R]) ValidateInterface(object T) error {
 	t := reflect.TypeOf(object)
 	if !t.Implements(d.instance) {
 		return errors.Newf("object type %q does not implement required instance interface %q", t, d.instance)
@@ -311,136 +276,196 @@ func (d *defaultScheme) ValidateInterface(object TypedObject) error {
 	return nil
 }
 
-func (d *defaultScheme) GetDecoder(typ string) TypedObjectDecoder {
+func (d *defaultScheme[T, R]) GetDecoder(typ string) R {
 	d.lock.RLock()
 	defer d.lock.RUnlock()
 	decoder := d.types[typ]
-	if decoder == nil && d.base != nil {
+	if reflect2.IsNil(decoder) && d.base != nil {
 		decoder = d.base.GetDecoder(typ)
 	}
 	return decoder
 }
 
-func (d *defaultScheme) CreateUnstructured() Unstructured {
+func (d *defaultScheme[T, R]) CreateUnstructured() T {
+	var _nil T
 	if d.unstructured == nil {
-		return &UnstructuredTypedObject{}
+		return _nil
 	}
-	return reflect.New(d.unstructured).Interface().(Unstructured)
+	return reflect.New(d.unstructured).Interface().(T)
 }
 
-func (d *defaultScheme) Encode(obj TypedObject, marshaler Marshaler) ([]byte, error) {
+func (d *defaultScheme[T, R]) Encode(obj T, marshaler Marshaler) ([]byte, error) {
 	if marshaler == nil {
 		marshaler = DefaultYAMLEncoding
 	}
 	decoder := d.GetDecoder(obj.GetType())
-	if encoder, ok := decoder.(TypedObjectEncoder); ok {
+	if encoder, ok := generics.TryCast[TypedObjectEncoder[T]](decoder); ok {
 		return encoder.Encode(obj, marshaler)
 	}
 	return marshaler.Marshal(obj)
 }
 
-func (d *defaultScheme) Decode(data []byte, unmarshal Unmarshaler) (TypedObject, error) {
+func (d *defaultScheme[T, R]) Decode(data []byte, unmarshal Unmarshaler) (T, error) {
+	var _nil T
+
+	var to TypedObject
 	un := d.CreateUnstructured()
+	if reflect2.IsNil(un) {
+		to = &UnstructuredTypedObject{}
+	} else {
+		to = un
+	}
 	if unmarshal == nil {
 		unmarshal = DefaultYAMLEncoding
 	}
-	err := unmarshal.Unmarshal(data, un)
+	err := unmarshal.Unmarshal(data, to)
 	if err != nil {
-		return nil, errors.Wrapf(err, "cannot unmarshal unstructured")
+		return _nil, errors.Wrapf(err, "cannot unmarshal unstructured")
 	}
-	if un.GetType() == "" {
-		/*
-			if d.acceptUnknown {
-				return un.(TypedObject), nil
-			}
-		*/
-		return nil, errors.Newf("no type found")
+	if to.GetType() == "" {
+		return _nil, errors.Newf("no type found")
 	}
-	decoder := d.GetDecoder(un.GetType())
-	if decoder == nil {
+	decoder := d.GetDecoder(to.GetType())
+	if reflect2.IsNil(decoder) {
 		if d.defaultdecoder != nil {
 			o, err := d.defaultdecoder.Decode(data, unmarshal)
 			if err == nil {
-				if o != nil {
+				if !reflect2.IsNil(o) {
 					return o, nil
 				}
 			} else if !errors.IsErrUnknownKind(err, errors.KIND_OBJECTTYPE) {
-				return nil, err
+				return _nil, err
 			}
 		}
 		if d.acceptUnknown {
-			return un.(TypedObject), nil
+			return un, nil
 		}
-		return nil, errors.ErrUnknown(errors.KIND_OBJECTTYPE, un.GetType())
+		return _nil, errors.ErrUnknown(errors.KIND_OBJECTTYPE, to.GetType())
 	}
 	return decoder.Decode(data, unmarshal)
 }
 
-func (d *defaultScheme) EnforceDecode(data []byte, unmarshal Unmarshaler) (TypedObject, error) {
+func (d *defaultScheme[T, R]) EnforceDecode(data []byte, unmarshal Unmarshaler) (T, error) {
+	var _nil T
+
 	un := d.CreateUnstructured()
 	if unmarshal == nil {
 		unmarshal = DefaultYAMLEncoding.Unmarshaler
 	}
 	err := unmarshal.Unmarshal(data, un)
 	if err != nil {
-		return nil, errors.Wrapf(err, "cannot unmarshal unstructured")
+		return _nil, errors.Wrapf(err, "cannot unmarshal unstructured")
 	}
 	if un.GetType() == "" {
 		if d.acceptUnknown {
-			return un.(TypedObject), nil
+			return un, nil
 		}
-		return un.(TypedObject), errors.Newf("no type found")
+		return un, errors.Newf("no type found")
 	}
 	decoder := d.GetDecoder(un.GetType())
-	if decoder == nil {
+	if reflect2.IsNil(decoder) {
 		if d.defaultdecoder != nil {
 			o, err := d.defaultdecoder.Decode(data, unmarshal)
 			if err == nil {
 				return o, nil
 			}
 			if !errors.IsErrUnknownKind(err, errors.KIND_OBJECTTYPE) {
-				return un.(TypedObject), err
+				return un, err
 			}
 		}
 		if d.acceptUnknown {
-			return un.(TypedObject), nil
+			return un, nil
 		}
-		return un.(TypedObject), errors.ErrUnknown(errors.KIND_OBJECTTYPE, un.GetType())
+		return un, errors.ErrUnknown(errors.KIND_OBJECTTYPE, un.GetType())
 	}
 	o, err := decoder.Decode(data, unmarshal)
 	if err != nil {
-		return un.(TypedObject), err
+		return un, err
 	}
 	return o, err
 }
 
-func (d *defaultScheme) Convert(o TypedObject) (TypedObject, error) {
+func (d *defaultScheme[T, R]) Convert(o TypedObject) (T, error) {
+	var _nil T
+
 	if o.GetType() == "" {
-		return nil, errors.Newf("no type found")
+		return _nil, errors.Newf("no type found")
 	}
+
+	if u, ok := o.(T); ok {
+		return u, nil
+	}
+
+	if u, ok := o.(Unstructured); ok {
+		raw, err := u.GetRaw()
+		if err != nil {
+			return _nil, err
+		}
+		return d.Decode(raw, DefaultJSONEncoding)
+	}
+
 	data, err := json.Marshal(o)
 	if err != nil {
-		return nil, err
+		return _nil, err
 	}
 	decoder := d.GetDecoder(o.GetType())
-	if decoder == nil {
+	if reflect2.IsNil(decoder) {
 		if d.defaultdecoder != nil {
 			object, err := d.defaultdecoder.Decode(data, DefaultJSONEncoding)
 			if err == nil {
 				return object, nil
 			}
 			if !errors.IsErrUnknownKind(err, errors.KIND_OBJECTTYPE) {
-				return nil, err
+				return _nil, err
 			}
 		}
-		return nil, errors.ErrUnknown(errors.KIND_OBJECTTYPE, o.GetType())
+		return _nil, errors.ErrUnknown(errors.KIND_OBJECTTYPE, o.GetType())
 	}
 	r, err := decoder.Decode(data, DefaultJSONEncoding)
 	if err != nil {
-		return nil, err
+		return _nil, err
 	}
 	if reflect.TypeOf(r) == reflect.TypeOf(o) {
-		return o, nil
+		return o.(T), nil
 	}
 	return r, nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+// TypeScheme is a scheme based on Types instead of decoders.
+type TypeScheme[T TypedObject, R TypedObjectType[T]] interface {
+	Scheme[T, R]
+
+	Register(typ R)
+	GetType(name string) R
+}
+
+type defaultTypeScheme[T TypedObject, R TypedObjectType[T]] struct {
+	_Scheme[T, R]
+}
+
+func MustNewDefaultTypeScheme[T TypedObject, R TypedObjectType[T]](protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder[T], base ...TypeScheme[T, R]) TypeScheme[T, R] {
+	return utils.Must(NewDefaultTypeScheme[T, R](protoUnstr, acceptUnknown, defaultdecoder, base...))
+}
+
+func NewTypeScheme[T TypedObject, R TypedObjectType[T]](base ...TypeScheme[T, R]) TypeScheme[T, R] {
+	s, _ := NewDefaultTypeScheme[T](nil, false, nil, generics.ConvertSlice[TypeScheme[T, R], TypeScheme[T, R]](base...)...)
+	return s
+}
+
+func NewDefaultTypeScheme[T TypedObject, R TypedObjectType[T]](protoUnstr Unstructured, acceptUnknown bool, defaultdecoder TypedObjectDecoder[T], base ...TypeScheme[T, R]) (TypeScheme[T, R], error) {
+	s, err := NewDefaultScheme[T](protoUnstr, acceptUnknown, defaultdecoder, generics.ConvertSlice[TypeScheme[T, R], Scheme[T, R]](base...)...)
+	if err != nil {
+		return nil, err
+	}
+	return &defaultTypeScheme[T, R]{s}, nil
+}
+
+func (s *defaultTypeScheme[T, R]) Register(t R) {
+	s.RegisterByDecoder(t.GetType(), t)
+}
+
+func (s *defaultTypeScheme[T, R]) GetType(name string) R {
+	return generics.As[R](s.GetDecoder(name))
 }

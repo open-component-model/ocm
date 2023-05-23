@@ -132,7 +132,7 @@ func (c *_context) RepositoryTypes() RepositoryTypeScheme {
 }
 
 func (c *_context) RepositorySpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
-	return c.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
+	return c.knownRepositoryTypes.Decode(data, unmarshaler)
 }
 
 func (c *_context) RepositoryForSpec(spec RepositorySpec, creds ...CredentialsSource) (Repository, error) {
@@ -145,7 +145,7 @@ func (c *_context) RepositoryForSpec(spec RepositorySpec, creds ...CredentialsSo
 }
 
 func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...CredentialsSource) (Repository, error) {
-	spec, err := c.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
+	spec, err := c.knownRepositoryTypes.Decode(data, unmarshaler)
 	if err != nil {
 		return nil, err
 	}
@@ -218,7 +218,7 @@ func (c *_context) ConsumerIdentityMatchers() IdentityMatcherRegistry {
 
 func (c *_context) SetAlias(name string, spec RepositorySpec, creds ...CredentialsSource) error {
 	c.Update()
-	t := c.knownRepositoryTypes.GetRepositoryType(AliasRepositoryType)
+	t := c.knownRepositoryTypes.GetType(AliasRepositoryType)
 	if t == nil {
 		return errors.ErrNotSupported("aliases")
 	}

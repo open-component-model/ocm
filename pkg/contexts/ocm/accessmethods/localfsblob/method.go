@@ -5,7 +5,7 @@
 package localfsblob
 
 import (
-	"fmt"
+	. "github.com/open-component-model/ocm/pkg/exception"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -20,18 +20,33 @@ const (
 
 // Keep old access method and map generic one to this implementation for component archives
 
+// This method uses the localblob internal format and converts it to/from the
+// appropriate serialization version.
+// The attributes referenceName and globalAccess are NOT supported.
+
+var versions = cpi.NewAccessTypeVersionScheme(Type)
+
 func init() {
-	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(Type, LocalFilesystemBlobV1))
-	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(TypeV1, LocalFilesystemBlobV1))
+	Must(versions.Register(cpi.NewAccessSpecTypeByConverter[*localblob.AccessSpec, *AccessSpec](Type, &converterV1{})))
+	Must(versions.Register(cpi.NewAccessSpecTypeByConverter[*localblob.AccessSpec, *AccessSpec](TypeV1, &converterV1{})))
+	cpi.RegisterAccessTypeVersions(versions)
 }
 
 // New creates a new localFilesystemBlob accessor.
 func New(path string, media string) *localblob.AccessSpec {
 	return &localblob.AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
-		LocalReference:      path,
-		MediaType:           media,
+		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject[cpi.AccessSpec](versions, Type),
+		LocalReference:               path,
+		MediaType:                    media,
 	}
+}
+
+func Decode(data []byte) (*localblob.AccessSpec, error) {
+	spec, err := versions.Decode(data, runtime.DefaultYAMLEncoding)
+	if err != nil {
+		return nil, err
+	}
+	return spec.(*localblob.AccessSpec), nil
 }
 
 // AccessSpec describes the access for a blob on the filesystem.
@@ -46,30 +61,20 @@ type AccessSpec struct {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type localfsblobConverterV1 struct{}
+type converterV1 struct{}
 
-var LocalFilesystemBlobV1 = cpi.NewAccessSpecVersion(&AccessSpec{}, localfsblobConverterV1{})
-
-func (_ localfsblobConverterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, error) {
-	in, ok := object.(*localblob.AccessSpec)
-	if !ok {
-		return nil, fmt.Errorf("failed to assert type %T to localblob.AccessSpec", object)
-	}
+func (_ converterV1) ConvertFrom(in *localblob.AccessSpec) (*AccessSpec, error) {
 	return &AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(in.Type),
 		Filename:            in.LocalReference,
 		MediaType:           in.MediaType,
 	}, nil
 }
 
-func (_ localfsblobConverterV1) ConvertTo(object interface{}) (cpi.AccessSpec, error) {
-	in, ok := object.(*AccessSpec)
-	if !ok {
-		return nil, fmt.Errorf("failed to assert type %T to localfsblob.AccessSpec", object)
-	}
+func (_ converterV1) ConvertTo(in *AccessSpec) (*localblob.AccessSpec, error) {
 	return &localblob.AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
-		LocalReference:      in.Filename,
-		MediaType:           in.MediaType,
+		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject[cpi.AccessSpec](versions, in.Type),
+		LocalReference:               in.Filename,
+		MediaType:                    in.MediaType,
 	}, nil
 }

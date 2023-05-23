@@ -123,7 +123,7 @@ func (c *_context) MapUniformRepositorySpec(u *UniformRepositorySpec) (Repositor
 }
 
 func (c *_context) RepositorySpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
-	return c.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
+	return c.knownRepositoryTypes.Decode(data, unmarshaler)
 }
 
 func (c *_context) RepositoryForSpec(spec RepositorySpec, creds ...credentials.CredentialsSource) (Repository, error) {
@@ -135,7 +135,7 @@ func (c *_context) RepositoryForSpec(spec RepositorySpec, creds ...credentials.C
 }
 
 func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...credentials.CredentialsSource) (Repository, error) {
-	spec, err := c.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
+	spec, err := c.knownRepositoryTypes.Decode(data, unmarshaler)
 	if err != nil {
 		return nil, err
 	}

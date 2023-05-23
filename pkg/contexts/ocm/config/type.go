@@ -17,8 +17,8 @@ const (
 )
 
 func init() {
-	cfgcpi.RegisterConfigType(ConfigType, cfgcpi.NewConfigType(ConfigType, &Config{}))
-	cfgcpi.RegisterConfigType(ConfigTypeV1, cfgcpi.NewConfigType(ConfigTypeV1, &Config{}))
+	cfgcpi.RegisterConfigType(cfgcpi.NewConfigType[*Config](ConfigType))
+	cfgcpi.RegisterConfigType(cfgcpi.NewConfigType[*Config](ConfigTypeV1))
 }
 
 // Config describes a memory based config interface.
@@ -30,7 +30,7 @@ type Config struct {
 // New creates a new memory ConfigSpec.
 func New() *Config {
 	return &Config{
-		ObjectVersionedType: runtime.NewVersionedObjectType(ConfigType),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(ConfigType),
 	}
 }
 

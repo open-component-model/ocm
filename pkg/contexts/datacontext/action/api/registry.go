@@ -5,19 +5,22 @@
 package api
 
 import (
-	"reflect"
+	"fmt"
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/runtime/scheme"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-const KIND_ACTION = "action"
+const (
+	KIND_ACTION     = "action"
+	KIND_ACTIONTYPE = "action type"
+)
 
 type ActionTypeRegistry interface {
-	RegisterAction(name string, specproto ActionSpec, resultproto ActionResult, description string, attrs ...string) error
-	RegisterActionType(name string, typ ActionType) error
+	RegisterAction(name string, description string, usage string, attrs []string) error
+	RegisterActionType(typ ActionType) error
 
 	DecodeActionSpec(data []byte, unmarshaler runtime.Unmarshaler) (ActionSpec, error)
 	EncodeActionSpec(spec ActionSpec, marshaler runtime.Marshaler) ([]byte, error)
@@ -27,14 +30,17 @@ type ActionTypeRegistry interface {
 
 	GetAction(name string) Action
 	SupportedActionVersions(name string) []string
+
+	Copy() ActionTypeRegistry
 }
 
 type action struct {
-	name        string
-	description string
-	attributes  []string
-	specproto   reflect.Type
-	resultproto reflect.Type
+	lock       sync.Mutex
+	name       string
+	shortdesc  string
+	usage      string
+	attributes []string
+	types      map[string]ActionType
 }
 
 var _ Action = (*action)(nil)
@@ -44,37 +50,75 @@ func (a *action) Name() string {
 }
 
 func (a *action) Description() string {
-	return a.description
+	return a.shortdesc
+}
+
+func (a *action) Usage() string {
+	return a.usage
 }
 
 func (a *action) ConsumerAttributes() []string {
 	return a.attributes
 }
 
-func (a *action) SpecificationProto() reflect.Type {
-	return a.specproto
+func (a *action) GetVersion(v string) ActionType {
+	a.lock.Lock()
+	defer a.lock.Unlock()
+	return a.types[v]
 }
 
-func (a *action) ResultProto() reflect.Type {
-	return a.resultproto
+func (a *action) SupportedVersions() []string {
+	return utils.StringMapKeys(a.types)
 }
 
 type actionRegistry struct {
 	lock        sync.Mutex
 	actions     map[string]*action
-	actionspecs scheme.Scheme[ActionSpec, ActionSpecType]
-	resultspecs scheme.Scheme[ActionResult, ActionResultType]
+	actionspecs runtime.TypeScheme[ActionSpec, ActionSpecType]
+	resultspecs runtime.TypeScheme[ActionResult, ActionResultType]
 }
 
 func NewActionTypeRegistry() ActionTypeRegistry {
 	return &actionRegistry{
 		actions:     map[string]*action{},
-		actionspecs: scheme.NewScheme[ActionSpec, ActionSpecType](),
-		resultspecs: scheme.NewScheme[ActionResult, ActionResultType](),
+		actionspecs: runtime.NewTypeScheme[ActionSpec, ActionSpecType](),
+		resultspecs: runtime.NewTypeScheme[ActionResult, ActionResultType](),
 	}
 }
 
-func (r *actionRegistry) RegisterAction(name string, specproto ActionSpec, resultproto ActionResult, description string, attrs ...string) error {
+func (r *actionRegistry) Copy() ActionTypeRegistry {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+
+	actions := map[string]*action{}
+
+	for k, v := range r.actions {
+		v.lock.Lock()
+		a := action{
+			name:       v.name,
+			shortdesc:  v.shortdesc,
+			usage:      v.usage,
+			attributes: v.attributes,
+		}
+		a.types = map[string]ActionType{}
+		for _, t := range v.types {
+			a.types[t.GetType()] = t
+		}
+		v.lock.Unlock()
+		actions[k] = &a
+	}
+	actionspecs := runtime.NewTypeScheme[ActionSpec, ActionSpecType]()
+	actionspecs.AddKnownTypes(r.actionspecs)
+	resultspecs := runtime.NewTypeScheme[ActionResult, ActionResultType]()
+	resultspecs.AddKnownTypes(r.resultspecs)
+	return &actionRegistry{
+		actions:     actions,
+		actionspecs: actionspecs,
+		resultspecs: resultspecs,
+	}
+}
+
+func (r *actionRegistry) RegisterAction(name string, description string, usage string, attrs []string) error {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
@@ -82,44 +126,41 @@ func (r *actionRegistry) RegisterAction(name string, specproto ActionSpec, resul
 	if ai != nil {
 		return errors.ErrAlreadyExists(KIND_ACTION, name)
 	}
-	st := reflect.TypeOf(specproto)
-	for st.Kind() == reflect.Ptr {
-		st = st.Elem()
-	}
-	rt := reflect.TypeOf(specproto)
-	for rt.Kind() == reflect.Ptr {
-		rt = rt.Elem()
-	}
 
 	ai = &action{
-		name:        name,
-		description: description,
-		attributes:  append(attrs[:0:0], attrs...),
-		specproto:   st,
-		resultproto: rt,
+		name:       name,
+		shortdesc:  description,
+		usage:      usage,
+		attributes: append(attrs[:0:0], attrs...),
+		types:      map[string]ActionType{},
 	}
 	r.actions[name] = ai
 	return nil
 }
 
-func (r *actionRegistry) RegisterActionType(name string, typ ActionType) error {
+func (r *actionRegistry) RegisterActionType(typ ActionType) error {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 
-	k, _ := runtime.KindVersion(name)
+	k := typ.GetKind()
 
 	ai := r.actions[k]
 	if ai == nil {
 		return errors.ErrNotFound(KIND_ACTION, k)
 	}
 
-	err := r.actionspecs.RegisterType(name, typ.SpecificationType())
-	if err != nil {
-		return err
+	if typ.SpecificationType().GetType() != typ.ResultType().GetType() {
+		return errors.ErrInvalidWrap(fmt.Errorf("version mismatch: request[%s]!=result[%s]", typ.SpecificationType().GetType(), typ.ResultType().GetType()), KIND_ACTIONTYPE, k)
 	}
-
-	err = r.resultspecs.RegisterType(name, typ.ResultType())
-	return err
+	if typ.SpecificationType().GetKind() != k {
+		return errors.ErrInvalidWrap(fmt.Errorf("kind mismatch in types: %s", typ.SpecificationType().GetType()), KIND_ACTIONTYPE, k)
+	}
+	ai.types[typ.GetVersion()] = typ
+	ai.lock.Lock()
+	defer ai.lock.Unlock()
+	r.actionspecs.Register(typ.SpecificationType())
+	r.resultspecs.Register(typ.ResultType())
+	return nil
 }
 
 func (r *actionRegistry) GetAction(name string) Action {
@@ -146,19 +187,29 @@ func (r *actionRegistry) EncodeActionResult(spec ActionResult, marshaler runtime
 }
 
 func (r *actionRegistry) SupportedActionVersions(name string) []string {
-	return r.actionspecs.KnownVersions(name)
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	a := r.actions[name]
+	if a == nil {
+		return nil
+	}
+	return a.SupportedVersions()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 var registry = NewActionTypeRegistry()
 
-func RegisterAction(name string, specproto ActionSpec, resultproto ActionResult, description string, attrs ...string) error {
-	return registry.RegisterAction(name, specproto, resultproto, description, attrs...)
+func DefaultRegistry() ActionTypeRegistry {
+	return registry
 }
 
-func RegisterType(kind string, version string, typ ActionType) error {
-	return registry.RegisterActionType(runtime.TypeName(kind, version), typ)
+func RegisterAction(name string, description string, usage string, attrs []string) error {
+	return registry.RegisterAction(name, description, usage, attrs)
+}
+
+func RegisterType(typ ActionType) error {
+	return registry.RegisterActionType(typ)
 }
 
 func GetAction(name string) Action {

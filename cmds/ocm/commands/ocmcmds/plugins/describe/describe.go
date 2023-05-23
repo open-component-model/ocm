@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/api"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	plugincommon "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/common"
 	utils2 "github.com/open-component-model/ocm/pkg/utils"
@@ -75,11 +76,11 @@ func DescribePlugin(p plugin.Plugin, out common.Printer) {
 	}
 	if len(d.Actions) > 0 {
 		out.Printf("Actions:\n")
-		plugincommon.DescribeActions(d, out)
+		plugincommon.DescribeActions(p.Context().GetActions().GetActionTypes(), d, out)
 	}
 }
 
-func DescribePluginDescriptor(d *plugin.Descriptor, out common.Printer) {
+func DescribePluginDescriptor(reg api.ActionTypeRegistry, d *plugin.Descriptor, out common.Printer) {
 	out.Printf("Plugin Name:      %s\n", d.PluginName)
 	out.Printf("Plugin Version:   %s\n", d.PluginVersion)
 
@@ -124,6 +125,6 @@ func DescribePluginDescriptor(d *plugin.Descriptor, out common.Printer) {
 	if len(d.Actions) > 0 {
 		out.Printf("\n")
 		out.Printf("Actions:\n")
-		plugincommon.DescribeActions(d, out)
+		plugincommon.DescribeActions(reg, d, out)
 	}
 }

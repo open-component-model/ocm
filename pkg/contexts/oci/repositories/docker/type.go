@@ -17,8 +17,8 @@ const (
 )
 
 func init() {
-	cpi.RegisterRepositoryType(Type, cpi.NewRepositoryType(Type, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(TypeV1, cpi.NewRepositoryType(TypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](Type))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](TypeV1))
 }
 
 // RepositorySpec describes an OCI registry interface backed by an oci registry.
@@ -30,7 +30,7 @@ type RepositorySpec struct {
 // NewRepositorySpec creates a new RepositorySpec for an optional host.
 func NewRepositorySpec(host ...string) *RepositorySpec {
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		DockerHost:          utils.Optional(host...),
 	}
 }

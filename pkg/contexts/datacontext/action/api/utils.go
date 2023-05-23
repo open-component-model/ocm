@@ -5,26 +5,29 @@
 package api
 
 import (
-	"github.com/open-component-model/ocm/pkg/runtime/scheme"
+	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
+type _Object = runtime.ObjectVersionedTypedObject
+
 type actionType struct {
+	_Object
 	spectype ActionSpecType
 	restype  ActionResultType
 }
 
 var _ ActionType = (*actionType)(nil)
 
-func NewActionTypeByProtoTypes(specproto scheme.Object, specconv scheme.Converter[ActionSpec], resultproto scheme.Object, resconv scheme.Converter[ActionResult]) ActionType {
-	if specconv == nil {
-		specconv = scheme.IdentityConverter[ActionSpec]{}
-	}
-	if resconv == nil {
-		resconv = scheme.IdentityConverter[ActionResult]{}
-	}
-	st := scheme.NewTypeByProtoType(specproto, specconv)
-	rt := scheme.NewTypeByProtoType(resultproto, resconv)
+func NewActionType[IS ActionSpec, IR ActionResult](kind, version string) ActionType {
+	return NewActionTypeByConverter[IS, IS, IR, IR](kind, version, runtime.IdentityConverter[IS]{}, runtime.IdentityConverter[IR]{})
+}
+
+func NewActionTypeByConverter[IS ActionSpec, VS runtime.TypedObject, IR ActionResult, VR runtime.TypedObject](kind, version string, specconv runtime.Converter[IS, VS], resconv runtime.Converter[IR, VR]) ActionType {
+	name := runtime.TypeName(kind, version)
+	st := runtime.NewVersionedTypedObjectTypeByConverter[ActionSpec, IS, VS](name, specconv)
+	rt := runtime.NewVersionedTypedObjectTypeByConverter[ActionResult, IR, VR](name, resconv)
 	return &actionType{
+		_Object:  runtime.NewVersionedTypedObject(kind, version),
 		spectype: st,
 		restype:  rt,
 	}

@@ -202,7 +202,7 @@ func NewContextBase(eff Context, typ string, key interface{}, parentAttrs Attrib
 	updater, _ := eff.(Updater)
 	c := &contextBase{ctxtype: typ, id: id, key: key, effective: eff, recorder: recorder}
 	c.attributes = newAttributes(eff, parentAttrs, &updater)
-	c.delegates = ComposeDelegates(logging.NewWithBase(delegates.LoggingContext()), handlers.NewRegistry(delegates.GetActions()))
+	c.delegates = ComposeDelegates(logging.NewWithBase(delegates.LoggingContext()), handlers.NewRegistry(nil, delegates.GetActions()))
 	c.recorder = recorder
 	c.ref = finalizer.NewRuntimeFinalizer(id, recorder)
 	return c
@@ -244,7 +244,7 @@ var key = reflect.TypeOf(contextBase{})
 
 // New provides a root attribute context.
 func New(parentAttrs Attributes) AttributesContext {
-	return NewWithActions(parentAttrs, handlers.NewRegistry(handlers.DefaultRegistry()))
+	return NewWithActions(parentAttrs, handlers.NewRegistry(nil, handlers.DefaultRegistry()))
 }
 
 func NewWithActions(parentAttrs Attributes, actions handlers.Registry) AttributesContext {
@@ -258,7 +258,7 @@ func NewWithActions(parentAttrs Attributes, actions handlers.Registry) Attribute
 		recorder:   recorder,
 		effective:  c,
 		attributes: newAttributes(c, parentAttrs, &c.updater),
-		delegates:  ComposeDelegates(logging.NewWithBase(ocmlog.Context()), handlers.NewRegistry(actions)),
+		delegates:  ComposeDelegates(logging.NewWithBase(ocmlog.Context()), handlers.NewRegistry(nil, actions)),
 		ref:        finalizer.NewRuntimeFinalizer(id, recorder),
 	}
 	return c

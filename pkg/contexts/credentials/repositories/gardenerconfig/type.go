@@ -16,13 +16,13 @@ import (
 )
 
 const (
-	RepositoryType   = "GardenerConfig"
-	RepositoryTypeV1 = RepositoryType + runtime.VersionSeparator + "v1"
+	Type   = "GardenerConfig"
+	TypeV1 = Type + runtime.VersionSeparator + "v1"
 )
 
 func init() {
-	cpi.RegisterRepositoryType(RepositoryType, cpi.NewRepositoryType(RepositoryType, &RepositorySpec{}))
-	cpi.RegisterRepositoryType(RepositoryTypeV1, cpi.NewRepositoryType(RepositoryTypeV1, &RepositorySpec{}))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](Type))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](TypeV1))
 }
 
 // RepositorySpec describes a secret server based credential repository interface.
@@ -37,7 +37,7 @@ type RepositorySpec struct {
 // NewRepositorySpec creates a new memory RepositorySpec.
 func NewRepositorySpec(url string, configType gardenercfgcpi.ConfigType, cipher Cipher, propagateConsumerIdentity bool) *RepositorySpec {
 	return &RepositorySpec{
-		ObjectVersionedType:       runtime.NewVersionedObjectType(RepositoryType),
+		ObjectVersionedType:       runtime.NewVersionedTypedObject(Type),
 		URL:                       url,
 		ConfigType:                configType,
 		Cipher:                    cipher,
@@ -46,7 +46,7 @@ func NewRepositorySpec(url string, configType gardenercfgcpi.ConfigType, cipher 
 }
 
 func (a *RepositorySpec) GetType() string {
-	return RepositoryType
+	return Type
 }
 
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds cpi.Credentials) (cpi.Repository, error) {

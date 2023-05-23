@@ -6,26 +6,23 @@ package internal
 
 import (
 	"encoding/json"
-	"fmt"
-	"reflect"
 
 	"github.com/modern-go/reflect2"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type RepositoryType interface {
-	runtime.TypedObjectDecoder
-	runtime.VersionedTypedObject
+	runtime.VersionedTypedObjectType[RepositorySpec]
 
 	// LocalSupportForAccessSpec checks whether a repository
 	// provides a local version for the access spec.
-	LocalSupportForAccessSpec(ctx Context, a compdesc.AccessSpec) bool
+	// LocalSupportForAccessSpec(ctx Context, a compdesc.AccessSpec) bool
 }
 
 type IntermediateRepositorySpecAspect = oci.IntermediateRepositorySpecAspect
@@ -33,99 +30,67 @@ type IntermediateRepositorySpecAspect = oci.IntermediateRepositorySpecAspect
 type RepositorySpec interface {
 	runtime.VersionedTypedObject
 
-	AsUniformSpec(Context) UniformRepositorySpec
+	AsUniformSpec(Context) *UniformRepositorySpec
 	Repository(Context, credentials.Credentials) (Repository, error)
 }
 
+type (
+	RepositorySpecDecoder  = runtime.TypedObjectDecoder[RepositorySpec]
+	RepositoryTypeProvider = runtime.KnownTypesProvider[RepositorySpec, RepositoryType]
+)
+
 type RepositoryTypeScheme interface {
-	runtime.Scheme
-	AddKnownTypes(s RepositoryTypeScheme)
-
-	GetRepositoryType(name string) RepositoryType
-	Register(name string, atype RepositoryType)
-
-	DecodeRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error)
-	CreateRepositorySpec(obj runtime.TypedObject) (RepositorySpec, error)
+	runtime.TypeScheme[RepositorySpec, RepositoryType]
 }
+
+type _Scheme = runtime.TypeScheme[RepositorySpec, RepositoryType]
 
 type repositoryTypeScheme struct {
-	runtime.SchemeBase
+	_Scheme
 }
 
-func NewRepositoryTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder, base ...RepositoryTypeScheme) RepositoryTypeScheme {
-	var rt RepositorySpec
-	scheme := runtime.MustNewDefaultScheme(&rt, &UnknownRepositorySpec{}, true, defaultRepoDecoder, utils.Optional(base...))
+func NewRepositoryTypeScheme(defaultDecoder RepositorySpecDecoder, base ...RepositoryTypeScheme) RepositoryTypeScheme {
+	scheme := runtime.MustNewDefaultTypeScheme[RepositorySpec, RepositoryType](&UnknownRepositorySpec{}, true, defaultDecoder, utils.Optional(base...))
 	return &repositoryTypeScheme{scheme}
 }
 
-func (t *repositoryTypeScheme) BaseScheme() runtime.Scheme {
-	return t.SchemeBase.(runtime.BaseScheme).BaseScheme()
+func NewStrictRepositoryTypeScheme(base ...RepositoryTypeScheme) RepositoryTypeScheme {
+	scheme := runtime.MustNewDefaultTypeScheme[RepositorySpec, RepositoryType](nil, false, nil, utils.Optional(base...))
+	return &repositoryTypeScheme{scheme}
 }
 
-func (t *repositoryTypeScheme) AddKnownTypes(s RepositoryTypeScheme) {
-	t.SchemeBase.AddKnownTypes(s)
-}
-
-func (t *repositoryTypeScheme) GetRepositoryType(name string) RepositoryType {
-	d := t.GetDecoder(name)
-	if d == nil {
-		return nil
-	}
-	return d.(RepositoryType)
-}
-
-func (t *repositoryTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedObjectDecoder) error {
-	if _, ok := decoder.(RepositoryType); !ok {
-		return errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
-	}
-	return t.SchemeBase.RegisterByDecoder(name, decoder)
-}
-
-func (t *repositoryTypeScheme) Register(name string, rtype RepositoryType) {
-	t.SchemeBase.RegisterByDecoder(name, rtype)
-}
-
-func (t *repositoryTypeScheme) DecodeRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
-	obj, err := t.Decode(data, unmarshaler)
-	if err != nil {
-		return nil, err
-	}
-	if spec, ok := obj.(RepositorySpec); ok {
-		return spec, nil
-	}
-
-	return nil, fmt.Errorf("invalid access spec type: yield %T instead of RepositorySpec", obj)
-}
-
-func (t *repositoryTypeScheme) CreateRepositorySpec(obj runtime.TypedObject) (RepositorySpec, error) {
-	if s, ok := obj.(RepositorySpec); ok {
-		return s, nil
-	}
-	if u, ok := obj.(*runtime.UnstructuredTypedObject); ok {
-		raw, err := u.GetRaw()
-		if err != nil {
-			return nil, err
-		}
-		return t.DecodeRepositorySpec(raw, runtime.DefaultJSONEncoding)
-	}
-	return nil, fmt.Errorf("invalid object type %T for repository specs", obj)
+func (t *repositoryTypeScheme) KnownTypes() runtime.KnownTypes[RepositorySpec, RepositoryType] {
+	return t._Scheme.KnownTypes() // Goland
 }
 
 // DefaultRepositoryTypeScheme contains all globally known access serializer.
 var DefaultRepositoryTypeScheme = NewRepositoryTypeScheme(nil)
 
-func CreateRepositorySpec(t runtime.TypedObject) (RepositorySpec, error) {
-	return DefaultRepositoryTypeScheme.CreateRepositorySpec(t)
+func RegisterRepositoryType(atype RepositoryType) {
+	DefaultRepositoryTypeScheme.Register(atype)
 }
+
+func CreateRepositorySpec(t runtime.TypedObject) (RepositorySpec, error) {
+	return DefaultRepositoryTypeScheme.Convert(t)
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 type UnknownRepositorySpec struct {
 	runtime.UnstructuredVersionedTypedObject `json:",inline"`
 }
 
-var _ RepositorySpec = &UnknownRepositorySpec{}
+var (
+	_ RepositorySpec  = &UnknownRepositorySpec{}
+	_ runtime.Unknown = &UnknownRepositorySpec{}
+)
 
-func (a *UnknownRepositorySpec) AsUniformSpec(Context) UniformRepositorySpec {
-	return UniformRepositorySpec{Type: a.GetKind()}
+func (_ *UnknownRepositorySpec) IsUnknown() bool {
+	return true
+}
+
+func (r *UnknownRepositorySpec) AsUniformSpec(Context) *UniformRepositorySpec {
+	return UniformRepositorySpecForUnstructured(&r.UnstructuredVersionedTypedObject)
 }
 
 func (r *UnknownRepositorySpec) Repository(Context, credentials.Credentials) (Repository, error) {
@@ -136,32 +101,6 @@ func (r *UnknownRepositorySpec) Repository(Context, credentials.Credentials) (Re
 
 type GenericRepositorySpec struct {
 	runtime.UnstructuredVersionedTypedObject `json:",inline"`
-}
-
-var _ RepositorySpec = &GenericRepositorySpec{}
-
-func (s *GenericRepositorySpec) AsUniformSpec(ctx Context) UniformRepositorySpec {
-	eff, err := s.Evaluate(ctx)
-	if err != nil {
-		return UniformRepositorySpec{Type: s.GetKind()}
-	}
-	return eff.AsUniformSpec(ctx)
-}
-
-func (s *GenericRepositorySpec) Evaluate(ctx Context) (RepositorySpec, error) {
-	raw, err := s.GetRaw()
-	if err != nil {
-		return nil, err
-	}
-	return ctx.RepositoryTypes().DecodeRepositorySpec(raw, runtime.DefaultJSONEncoding)
-}
-
-func (s *GenericRepositorySpec) Repository(ctx Context, creds credentials.Credentials) (Repository, error) {
-	spec, err := s.Evaluate(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return spec.Repository(ctx, creds)
 }
 
 var _ RepositorySpec = &GenericRepositorySpec{}
@@ -181,11 +120,7 @@ func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error
 }
 
 func NewGenericRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
-	s, err := newGenericRepositorySpec(data, unmarshaler)
-	if err != nil {
-		return nil, err // GO is great
-	}
-	return s, nil
+	return generics.AsE[RepositorySpec](newGenericRepositorySpec(data, unmarshaler))
 }
 
 func newGenericRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (*GenericRepositorySpec, error) {
@@ -199,3 +134,29 @@ func newGenericRepositorySpec(data []byte, unmarshaler runtime.Unmarshaler) (*Ge
 	}
 	return &GenericRepositorySpec{*unstr}, nil
 }
+
+func (s *GenericRepositorySpec) AsUniformSpec(ctx Context) *UniformRepositorySpec {
+	eff, err := s.Evaluate(ctx)
+	if err != nil {
+		return &UniformRepositorySpec{Type: s.GetKind()}
+	}
+	return eff.AsUniformSpec(ctx)
+}
+
+func (s *GenericRepositorySpec) Evaluate(ctx Context) (RepositorySpec, error) {
+	raw, err := s.GetRaw()
+	if err != nil {
+		return nil, err
+	}
+	return ctx.RepositoryTypes().Decode(raw, runtime.DefaultJSONEncoding)
+}
+
+func (s *GenericRepositorySpec) Repository(ctx Context, creds credentials.Credentials) (Repository, error) {
+	spec, err := s.Evaluate(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return spec.Repository(ctx, creds)
+}
+
+////////////////////////////////////////////////////////////////////////////////

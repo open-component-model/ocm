@@ -11,6 +11,6 @@ import (
 const TYPE = "file"
 
 func init() {
-	inputs.DefaultInputTypeScheme.Register(TYPE, inputs.NewInputType(TYPE, &Spec{},
+	inputs.DefaultInputTypeScheme.Register(inputs.NewInputType(TYPE, &Spec{},
 		Usage("The path must denote a file relative the resources file. "), ConfigHandler()))
 }

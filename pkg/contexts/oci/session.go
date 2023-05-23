@@ -67,7 +67,7 @@ func (s *session) Close() error {
 }
 
 func (s *session) LookupRepository(ctx Context, spec RepositorySpec) (Repository, error) {
-	spec, err := ctx.RepositoryTypes().CreateRepositorySpec(spec)
+	spec, err := ctx.RepositoryTypes().Convert(spec)
 	if err != nil {
 		return nil, err
 	}

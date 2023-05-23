@@ -106,7 +106,7 @@ func (o *Command) Complete(args []string) error {
 	if err != nil {
 		return errors.Wrapf(err, "cannot marshal final spec")
 	}
-	o.Spec, err = action.DecodeActionSpec(data)
+	o.Spec, err = o.GetActions().GetActionTypes().DecodeActionSpec(data, runtime.DefaultYAMLEncoding)
 
 	if o.MatcherType != "" {
 		m := o.CredentialsContext().ConsumerIdentityMatchers().Get(o.MatcherType)

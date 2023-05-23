@@ -20,8 +20,8 @@ const (
 )
 
 func init() {
-	cpi.RegisterRepositoryType(Type, cpi.NewRepositoryType(Type, &RepositorySpec{}, nil))
-	cpi.RegisterRepositoryType(TypeV1, cpi.NewRepositoryType(TypeV1, &RepositorySpec{}, nil))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](Type, nil))
+	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](TypeV1, nil))
 }
 
 type RepositorySpec struct {
@@ -47,7 +47,7 @@ func NewRepositorySpec(acc accessobj.AccessMode, filePath string, opts ...access
 		return nil, err
 	}
 	return &RepositorySpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
 		FilePath:            filePath,
 		Options:             o,
 		AccessMode:          acc,
@@ -66,12 +66,12 @@ func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentia
 	return NewRepository(ctx, a)
 }
 
-func (a *RepositorySpec) AsUniformSpec(cpi.Context) cpi.UniformRepositorySpec {
+func (a *RepositorySpec) AsUniformSpec(cpi.Context) *cpi.UniformRepositorySpec {
 	opts := &accessio.StandardOptions{}
 	opts.Default()
 	p, err := vfs.Canonical(opts.GetPathFileSystem(), a.FilePath, false)
 	if err != nil {
-		return cpi.UniformRepositorySpec{Type: a.GetKind(), SubPath: a.FilePath}
+		return &cpi.UniformRepositorySpec{Type: a.GetKind(), SubPath: a.FilePath}
 	}
-	return cpi.UniformRepositorySpec{Type: a.GetKind(), SubPath: p}
+	return &cpi.UniformRepositorySpec{Type: a.GetKind(), SubPath: p}
 }
