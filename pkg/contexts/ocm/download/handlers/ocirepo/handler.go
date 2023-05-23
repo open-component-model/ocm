@@ -62,12 +62,10 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 	var version string = "latest"
 
 	aspec := m.AccessSpec()
-	if l, ok := aspec.(*localblob.AccessSpec); ok {
-		namespace = l.ReferenceName
-	}
 	if hp, ok := aspec.(cpi.HintProvider); ok {
-		_ = hp
-		// namespace = hp.GetReferenceHint(nil) // TODO: use cv from racc
+		namespace = hp.GetReferenceHint(racc.ComponentVersion())
+	} else if l, ok := aspec.(*localblob.AccessSpec); ok {
+		namespace = l.ReferenceName
 	}
 
 	i := strings.LastIndex(namespace, ":")
