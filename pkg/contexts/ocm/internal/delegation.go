@@ -12,6 +12,16 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
+// RepositoryDelegationRegistry is used to register handlers able to dynamically
+// enrich the set of available OCM repository types, which are supported without
+// explicit registration at the OCM repository type registry. The definition of
+// such types is *delegated* to the delegation handler.
+// For example, it is used to fade in all the OCI repositories types provided by an
+// OCI context and mapped by the genericocireg repository mapping.
+// It is used as default decoder for the OCM repository type scheme.
+// The encoding is done by the spec objects on their own behalf. Therefore,
+// multi version spec types MUST correctly implement the MarshalJSOM method
+// on the internal version.
 type RepositoryDelegationRegistry = DelegationRegistry[Context, RepositorySpec]
 
 var DefaultRepositoryDelegationRegistry = NewDelegationRegistry[Context, RepositorySpec]()
