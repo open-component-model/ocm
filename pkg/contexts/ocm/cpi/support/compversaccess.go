@@ -369,7 +369,7 @@ func (c *componentVersionAccessImpl) SetSourceBlob(cv cpi.ComponentVersionAccess
 	Logger(c).Info("adding source blob", "source", meta.Name)
 	acc, err := c.AddBlob(cv, blob, meta.Type, refName, global)
 	if err != nil {
-		return fmt.Errorf("unable to add blob: (component %s:%s resource %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)
+		return fmt.Errorf("unable to add blob: (component %s:%s source %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)
 	}
 
 	if err := c.SetSource(cv, meta, acc); err != nil {

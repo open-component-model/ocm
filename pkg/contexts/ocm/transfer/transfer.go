@@ -129,7 +129,7 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 				defer m.Close()
 				ok := a.IsLocal(src.GetContext())
 				if !ok {
-					if a.GetKind() != none.Type {
+					if !none.IsNone(a.GetKind()) {
 						ok, err = handler.TransferResource(src, a, r)
 					}
 				}
@@ -158,7 +158,7 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 				defer m.Close()
 				ok := a.IsLocal(src.GetContext())
 				if !ok {
-					if a.GetKind() != none.Type {
+					if !none.IsNone(a.GetKind()) {
 						ok, err = handler.TransferSource(src, a, r)
 					}
 				}
