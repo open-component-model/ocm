@@ -33,7 +33,6 @@ import (
 const COMP = "github.com/compa"
 const VERS = "1.0.0"
 const CTF = "ctf"
-const COPY = "ctf.copy"
 
 const HINT = "ocm.software/test"
 const UPLOAD = "ocm.software/upload"
@@ -91,7 +90,7 @@ var _ = Describe("upload", func() {
 		})
 
 		It("uploads local oci artifact blob", func() {
-			download.For(env).Register(ocirepo.New(env.OCMContext()), download.ForArtifactType(resourcetypes.OCI_IMAGE))
+			download.For(env).Register(ocirepo.New(), download.ForArtifactType(resourcetypes.OCI_IMAGE))
 
 			src := Must(ctfocm.Open(env, accessobj.ACC_READONLY, CTF, 0, env))
 			defer Close(src, "source ctf")
@@ -195,7 +194,7 @@ var _ = Describe("upload", func() {
 		})
 
 		It("uploads oci artifact ref", func() {
-			download.For(env).Register(ocirepo.New(env.OCMContext()), download.ForArtifactType(resourcetypes.OCI_IMAGE))
+			download.For(env).Register(ocirepo.New(), download.ForArtifactType(resourcetypes.OCI_IMAGE))
 
 			src := Must(ctfocm.Open(env.OCMContext(), accessobj.ACC_READONLY, CTF, 0, accessio.PathFileSystem(env)))
 			defer Close(src, "source ctf")

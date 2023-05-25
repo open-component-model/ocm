@@ -79,4 +79,4 @@ than building a directory tree.
 It provides a registration handler with the path `ocm/dirtree`. and a config
 object with the fields:
 - *`asArchive`* *bool*: download as archive (default is directory tree).
-- *`configtypes`* *[]string*: list of accepted OCI manifest config media types. Default is the OCI image config media type.
+- *`ociConfigtypes`* *[]string*: list of accepted OCI manifest config media types. Default is the OCI image config media type.

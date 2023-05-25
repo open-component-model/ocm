@@ -72,7 +72,7 @@ The following handler names are possible:
     
     It accepts a config with the following fields:
       - <code>asArchive</code>: flag to request an archive download
-      - <code>configTypes</code>: a list of accepted OCI config archive types
+      - <code>ociConfigTypes</code>: a list of accepted OCI config archive mime types
         defaulted by <code>application/vnd.oci.image.config.v1+json</code>.
 
 

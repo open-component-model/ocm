@@ -29,10 +29,10 @@ func init() {
 // Config describes a memory based config interface.
 type Config struct {
 	runtime.ObjectVersionedType `json:",inline"`
-	Handlers                    []Handler `json:"handlers,omitempty"`
+	Registrations               []Registration `json:"registrations,omitempty"`
 }
 
-type Handler struct {
+type Registration struct {
 	Name                       string `json:"name"`
 	Description                string `json:"description,omitempty"`
 	blobhandler.HandlerOptions `json:",inline"`
@@ -50,13 +50,13 @@ func (a *Config) GetType() string {
 	return ConfigType
 }
 
-func (a *Config) AddConfig(hdlrs ...Handler) error {
+func (a *Config) AddRegistration(hdlrs ...Registration) error {
 	for i, h := range hdlrs {
 		if h.Name == "" {
-			return fmt.Errorf("handler %d requires a name", i)
+			return fmt.Errorf("handler registration %d requires a name", i)
 		}
 	}
-	a.Handlers = append(a.Handlers, hdlrs...)
+	a.Registrations = append(a.Registrations, hdlrs...)
 	return nil
 }
 
@@ -66,7 +66,7 @@ func (a *Config) ApplyTo(ctx cfgcpi.Context, target interface{}) error {
 		return config.ErrNoContext(ConfigType)
 	}
 	reg := blobhandler.For(t)
-	for _, h := range a.Handlers {
+	for _, h := range a.Registrations {
 		accepted, err := reg.RegisterByName(h.Name, t, h.Config, &h.HandlerOptions)
 		if err != nil {
 			return errors.Wrapf(err, "registering upload handler %q[%s]", h.Name, h.Description)

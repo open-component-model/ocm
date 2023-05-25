@@ -231,8 +231,6 @@ The descriptor for an action has the following fields:
   consumer type used to lookup the credentials. The consumer attributes are
   derived from the the action specification and cannot be influenced by the
   plugin.
-. 
-
 
 
 ### Examples

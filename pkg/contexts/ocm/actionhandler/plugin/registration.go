@@ -76,7 +76,6 @@ func (r *RegistrationHandler) GetHandlers(target handlers.Target) registrations.
 		return infos
 	}
 
-	set.PluginNames()
 	for _, name := range set.PluginNames() {
 		for _, a := range set.Get(name).GetDescriptor().Actions {
 			d := target.GetActions().GetActionTypes().GetAction(a.GetName())

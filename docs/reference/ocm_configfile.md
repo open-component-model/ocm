@@ -187,6 +187,20 @@ The following configuration types are supported:
         &lt;other name>:
           script: &lt;>nested script as yaml>
   </pre>
+- <code>uploader.ocm.config.ocm.software</code>
+  The config type <code>uploader.ocm.config.ocm.software</code> can be used to define a list
+  of pre-configured download handler registrations (see [ocm ocm-downloadhandlers](ocm_ocm-downloadhandlers.md)):
+  
+  <pre>
+      type: uploader.ocm.config.ocm.software
+      descrition: "my standard download handler configuration"
+      handlers:
+        - name: oci/artifact
+          artifactType: ociImage
+          mimeType:
+          config: ...
+        ...
+  </pre>
 
 
 ### Examples
@@ -220,5 +234,6 @@ configurations:
 
 ##### Additional Links
 
+* [<b>ocm ocm-downloadhandlers</b>](ocm_ocm-downloadhandlers.md)	 &mdash; List of all available download handlers
 * [<b>ocm ocm-downloadhandlers</b>](ocm_ocm-downloadhandlers.md)	 &mdash; List of all available download handlers
 

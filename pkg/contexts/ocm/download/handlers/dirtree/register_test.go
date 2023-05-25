@@ -103,5 +103,40 @@ target: 3584 byte(s) written
 			data = Must(vfs.ReadFile(env, "result/dir/nestedfile"))
 			Expect(string(data)).To(StringEqualWithContext("other test data\n"))
 		})
+
+		It("downloads archive to archive using config", func() {
+			spec := `
+type: downloader.ocm.config.ocm.software
+registrations:
+- name: ocm/dirtree
+  artifactType: ` + TEST_ARTIFACT + `
+  config:
+    asArchive: true
+`
+			env.ConfigContext().ApplyData([]byte(spec), nil, "manual")
+
+			repo := Must(ctf.Open(ocm.DefaultContext(), accessobj.ACC_READONLY, "ctf", 0, env))
+			defer Close(repo)
+			cv := Must(repo.LookupComponentVersion(COMPONENT, VERSION))
+			defer Close(cv)
+			res := Must(cv.GetResource(metav1.NewIdentity(RESOURCE)))
+
+			p, buf := common.NewBufferedPrinter()
+			accepted, path := Must2(download.For(env).Download(p, res, "target", env))
+			Expect(accepted).To(BeTrue())
+			Expect(path).To(Equal("target"))
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+target: 3584 byte(s) written
+`))
+
+			MustBeSuccessful(env.MkdirAll("result", 0o700))
+			resultfs := Must(projectionfs.New(env, "result"))
+			MustBeSuccessful(tarutils.ExtractArchiveToFs(resultfs, "target", env))
+
+			data := Must(vfs.ReadFile(env, "result/testfile"))
+			Expect(string(data)).To(StringEqualWithContext("testdata\n"))
+			data = Must(vfs.ReadFile(env, "result/dir/nestedfile"))
+			Expect(string(data)).To(StringEqualWithContext("other test data\n"))
+		})
 	})
 })

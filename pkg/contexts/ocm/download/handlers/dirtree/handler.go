@@ -47,8 +47,8 @@ func SupportedMimeTypes() []string {
 }
 
 type Handler struct {
-	configtypes generics.Set[string]
-	archive     bool
+	ociConfigtypes generics.Set[string]
+	archive        bool
 }
 
 func New(mimetypes ...string) *Handler {
@@ -56,7 +56,7 @@ func New(mimetypes ...string) *Handler {
 		mimetypes = []string{artdesc.MediaTypeImageConfig}
 	}
 	return &Handler{
-		configtypes: generics.NewSet[string](mimetypes...),
+		ociConfigtypes: generics.NewSet[string](mimetypes...),
 	}
 }
 
@@ -213,7 +213,7 @@ func (h *Handler) getForArtifactSet(finalize *finalizer.Finalizer, set *artifact
 	}
 	finalize.Close(m)
 	macc := m.ManifestAccess()
-	if !h.configtypes.Contains(macc.GetDescriptor().Config.MediaType) {
+	if !h.ociConfigtypes.Contains(macc.GetDescriptor().Config.MediaType) {
 		return nil, nil, nil
 	}
 

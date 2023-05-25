@@ -33,7 +33,7 @@ the target OCM repository is based on an OCI registry. Hereby, the
 <code>referenceName</code> attribute will be used to calculate a
 meaningful OCI repository name based on the repository prefix
 of the OCM repository (parallel to <code>component-descriptors</code> prefix
-used to store the component descriptor artifacts.
+used to store the component descriptor artifacts).
 
 ### Handler Registration 
 

@@ -57,7 +57,7 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx download.Target
 		return true, errors.Wrapf(err, "mime type %s not supported", opts.MimeType)
 	}
 
-	h := New(ctx, attr)
+	h := New(attr)
 	if opts.MimeType == "" {
 		for _, m := range supportedMimeTypes {
 			opts.MimeType = m

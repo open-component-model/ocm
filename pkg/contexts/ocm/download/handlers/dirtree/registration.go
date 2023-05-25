@@ -22,14 +22,14 @@ func init() {
 }
 
 type Config struct {
-	AsArchive   bool     `json:"asArchive"`
-	ConfigTypes []string `json:"configTypes"`
+	AsArchive      bool     `json:"asArchive"`
+	OCIConfigTypes []string `json:"ociConfigTypes"`
 }
 
 func AttributeDescription() map[string]string {
 	return map[string]string{
 		"asArchive": "flag to request an archive download",
-		"configTypes": "a list of accepted OCI config archive types\n" +
+		"ociConfigTypes": "a list of accepted OCI config archive mime types\n" +
 			"defaulted by <code>" + ociv1.MediaTypeImageConfig + "</code>.",
 	}
 }
@@ -58,7 +58,7 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx download.Target
 		return true, nil
 	}
 
-	h := New(attr.ConfigTypes...).SetArchiveMode(attr.AsArchive)
+	h := New(attr.OCIConfigTypes...).SetArchiveMode(attr.AsArchive)
 	if opts.MimeType == "" {
 		for _, m := range supportedMimeTypes {
 			opts.MimeType = m

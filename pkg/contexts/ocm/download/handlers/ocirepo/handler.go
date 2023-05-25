@@ -31,17 +31,17 @@ import (
 
 type handler struct {
 	spec *ociuploadattr.Attribute
-	ctx  cpi.Context // TODO: remove this static setting as soon as possible and replace it dynamically by the resource access context
 }
 
-func New(ctx cpi.Context, repospec ...*ociuploadattr.Attribute) download.Handler {
-	return &handler{ctx: ctx, spec: utils.Optional(repospec...)}
+func New(repospec ...*ociuploadattr.Attribute) download.Handler {
+	return &handler{spec: utils.Optional(repospec...)}
 }
 
 func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (accepted bool, target string, err error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagationf(&err, "upload to OCI registry")
 
+	ctx := racc.ComponentVersion().GetContext()
 	m, err := racc.AccessMethod()
 	if err != nil {
 		return false, "", err
@@ -54,7 +54,7 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 		return false, "", nil
 	}
 
-	log := download.Logger(h.ctx).WithName("ocireg")
+	log := download.Logger(ctx).WithName("ocireg")
 
 	var repo oci.Repository
 
@@ -75,7 +75,7 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 		namespace = namespace[:i]
 	}
 
-	ocictx := h.ctx.OCIContext()
+	ocictx := ctx.OCIContext()
 
 	var artspec oci.ArtSpec
 	var prefix string
@@ -110,7 +110,7 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 			}
 		}
 		var us *oci.UniformRepositorySpec
-		repo, us, prefix, err = h.spec.GetInfo(h.ctx)
+		repo, us, prefix, err = h.spec.GetInfo(ctx)
 		if err != nil {
 			return true, "", err
 		}
@@ -144,7 +144,7 @@ func (h *handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 	cand := m
 	if local, ok := aspec.(*localblob.AccessSpec); ok {
 		if local.GlobalAccess != nil {
-			s, err := h.ctx.AccessSpecForSpec(local.GlobalAccess)
+			s, err := ctx.AccessSpecForSpec(local.GlobalAccess)
 			if err == nil {
 				_ = s
 				// c, err := s.AccessMethod()  // TODO: try global access for direct artifact access
