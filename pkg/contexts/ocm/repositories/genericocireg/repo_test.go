@@ -5,6 +5,7 @@
 package genericocireg_test
 
 import (
+	"path"
 	"reflect"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -26,6 +27,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localociblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
 	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci/ocirepo"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -256,5 +258,69 @@ var _ = Describe("component repository mapping", func() {
 
 		Expect(art.GetDescriptor().IsManifest()).To(BeTrue())
 		Expect(len(art.GetDescriptor().Manifest().Layers)).To(Equal(2))
+	})
+
+	Context("legacy mode", func() {
+		It("creates a legacy dummy component", func() {
+			ctx := ocm.New()
+			compatattr.Set(ctx, true)
+
+			var finalize finalizer.Finalizer
+			defer Defer(finalize.Finalize)
+
+			repo := finalizer.ClosingWith(&finalize, Must(ctx.RepositoryForSpec(spec)))
+			comp := finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
+			vers := finalizer.ClosingWith(&finalize, Must(comp.NewVersion("v1")))
+			MustBeSuccessful(comp.AddVersion(vers))
+			MustBeSuccessful(finalize.Finalize())
+
+			// access as OCI repository
+
+			ocirepo := finalizer.ClosingWith(&finalize, Must(oci.DefaultContext().RepositoryForSpec(ocispec)))
+			ns := finalizer.ClosingWith(&finalize, Must(ocirepo.LookupNamespace(path.Join(componentmapping.ComponentDescriptorNamespace, COMPONENT))))
+			art := finalizer.ClosingWith(&finalize, Must(ns.GetArtifact("v1")))
+			m := art.GetDescriptor().Manifest()
+			Expect(m.Config.MediaType).To(Equal(componentmapping.LegacyComponentDescriptorConfigMimeType))
+			Expect(len(m.Layers)).To(Equal(1))
+			Expect(m.Layers[0].MediaType).To(Equal(componentmapping.LegacyComponentDescriptorTarMimeType))
+		})
+
+		It("updates a legacy dummy component", func() {
+			ctx := ocm.New()
+			compatattr.Set(ctx, true)
+
+			var finalize finalizer.Finalizer
+			defer Defer(finalize.Finalize)
+
+			repo := finalizer.ClosingWith(&finalize, Must(ctx.RepositoryForSpec(spec)))
+			comp := finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
+			vers := finalizer.ClosingWith(&finalize, Must(comp.NewVersion("v1")))
+			MustBeSuccessful(comp.AddVersion(vers))
+			MustBeSuccessful(finalize.Finalize())
+
+			// update component in non-legacy context
+
+			repo = finalizer.ClosingWith(&finalize, Must(DefaultContext.RepositoryForSpec(spec)))
+			comp = finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
+			vers = finalizer.ClosingWith(&finalize, Must(comp.LookupVersion("v1")))
+			vers.GetDescriptor().Provider.Name = "acme.org"
+			MustBeSuccessful(comp.AddVersion(vers))
+			MustBeSuccessful(finalize.Finalize())
+
+			// access as OCI repository
+
+			ocirepo := finalizer.ClosingWith(&finalize, Must(oci.DefaultContext().RepositoryForSpec(ocispec)))
+			ns := finalizer.ClosingWith(&finalize, Must(ocirepo.LookupNamespace(path.Join(componentmapping.ComponentDescriptorNamespace, COMPONENT))))
+			art := finalizer.ClosingWith(&finalize, Must(ns.GetArtifact("v1")))
+			m := art.GetDescriptor().Manifest()
+			Expect(m.Config.MediaType).To(Equal(componentmapping.LegacyComponentDescriptorConfigMimeType))
+			Expect(len(m.Layers)).To(Equal(1))
+			Expect(m.Layers[0].MediaType).To(Equal(componentmapping.LegacyComponentDescriptorTarMimeType))
+			MustBeSuccessful(finalize.Finalize())
+
+			repo = finalizer.ClosingWith(&finalize, Must(DefaultContext.RepositoryForSpec(spec)))
+			vers = finalizer.ClosingWith(&finalize, Must(repo.LookupComponentVersion(COMPONENT, "v1")))
+			Expect(string(vers.GetDescriptor().Provider.Name)).To(Equal("acme.org"))
+		})
 	})
 })
