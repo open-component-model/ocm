@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	. "github.com/open-component-model/ocm/pkg/exception"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -18,9 +20,40 @@ const (
 	TypeV1 = Type + runtime.VersionSeparator + "v1"
 )
 
+// this package shows how to implement access types with multiple serialization versions.
+// So far, only one is implemented, but it shows how to add other ones.
+//
+// Specifications using multiple format versions allways provide a single common
+// *internal* Go representation, intended to be used by library users. Only this
+// internal version should be used outside this package. Additionally, there
+// are Go types representing the various format versions, which will be used
+// for the de-/serialization process (here AccessSpecV1).
+//
+// The supported versions are gathered in a dedicated scheme object (variable versions),
+// which is then used to register all available versions at the default scheme (see
+// init method).
+// The *internal* specification Go type (here AccessSpec) must be based on
+// runtime.InternalVersionedObjectType.
+// It is initialized with the effective type/version name and the versions scheme
+// and represents the Go representation used by API users, the format versions
+// are never used outside this package.
+//
+// Additionally, this *internal* type must implement the MarshalJSON method, which
+// can be implemented by delegating to the runtime.MarshalVersionedTypedObject
+// method, which evaluated the versions scheme to finds the applicable conversion
+// provided by the runtime.InternalVersionedObjectType.
+//
+// For every format version runtime.FormatVersion is required, which can be created
+// with cpi.NewAccessSpecVersion, which takes the prototype and a converter,
+// which converts between the internal go representation and the external formats,
+// given by a dedicated go Type with serialization annotations.
+
+var versions = cpi.NewAccessTypeVersionScheme(Type)
+
 func init() {
-	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(Type, LocalBlobV1, cpi.WithDescription(usage)))
-	cpi.RegisterAccessType(cpi.NewConvertedAccessSpecType(TypeV1, LocalBlobV1, cpi.WithFormatSpec(formatV1), cpi.WithConfigHandler(ConfigHandler())))
+	Must(versions.Register(cpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV1](Type, &converterV1{}, cpi.WithDescription(usage))))
+	Must(versions.Register(cpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV1](TypeV1, &converterV1{}, cpi.WithFormatSpec(formatV1), cpi.WithConfigHandler(ConfigHandler()))))
+	cpi.RegisterAccessTypeVersions(versions)
 }
 
 func Is(spec cpi.AccessSpec) bool {
@@ -30,17 +63,25 @@ func Is(spec cpi.AccessSpec) bool {
 // New creates a new localFilesystemBlob accessor.
 func New(local, hint string, mediaType string, global cpi.AccessSpec) *AccessSpec {
 	return &AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(Type),
-		LocalReference:      local,
-		ReferenceName:       hint,
-		MediaType:           mediaType,
-		GlobalAccess:        cpi.NewAccessSpecRef(global),
+		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject[cpi.AccessSpec](versions, Type),
+		LocalReference:               local,
+		ReferenceName:                hint,
+		MediaType:                    mediaType,
+		GlobalAccess:                 cpi.NewAccessSpecRef(global),
 	}
+}
+
+func Decode(data []byte) (*AccessSpec, error) {
+	spec, err := versions.Decode(data, runtime.DefaultYAMLEncoding)
+	if err != nil {
+		return nil, err
+	}
+	return spec.(*AccessSpec), nil
 }
 
 // AccessSpec describes the access for a local blob.
 type AccessSpec struct {
-	runtime.ObjectVersionedType
+	runtime.InternalVersionedTypedObject[cpi.AccessSpec]
 	// LocalReference is the repository local identity of the blob.
 	// it is used by the repository implementation to get access
 	// to the blob and if therefore specific to a dedicated repository type.
@@ -68,7 +109,8 @@ var (
 )
 
 func (a AccessSpec) MarshalJSON() ([]byte, error) {
-	return cpi.MarshalConvertedAccessSpec(cpi.DefaultContext(), &a)
+	return runtime.MarshalVersionedTypedObject(&a)
+	// return cpi.MarshalConvertedAccessSpec(cpi.DefaultContext(), &a)
 }
 
 func (a *AccessSpec) Describe(ctx cpi.Context) string {
@@ -121,15 +163,9 @@ type AccessSpecV1 struct {
 
 type converterV1 struct{}
 
-var LocalBlobV1 = cpi.NewAccessSpecVersion(&AccessSpecV1{}, converterV1{})
-
-func (_ converterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, error) {
-	in, ok := object.(*AccessSpec)
-	if !ok {
-		return nil, fmt.Errorf("failed to assert type %T to AccessSpec", object)
-	}
+func (_ converterV1) ConvertFrom(in *AccessSpec) (*AccessSpecV1, error) {
 	return &AccessSpecV1{
-		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(in.Type),
 		LocalReference:      in.LocalReference,
 		ReferenceName:       in.ReferenceName,
 		GlobalAccess:        cpi.NewAccessSpecRef(in.GlobalAccess),
@@ -137,16 +173,12 @@ func (_ converterV1) ConvertFrom(object cpi.AccessSpec) (runtime.TypedObject, er
 	}, nil
 }
 
-func (_ converterV1) ConvertTo(object interface{}) (cpi.AccessSpec, error) {
-	in, ok := object.(*AccessSpecV1)
-	if !ok {
-		return nil, fmt.Errorf("failed to assert type %T to AccessSpecV1", object)
-	}
+func (_ converterV1) ConvertTo(in *AccessSpecV1) (*AccessSpec, error) {
 	return &AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
-		LocalReference:      in.LocalReference,
-		ReferenceName:       in.ReferenceName,
-		GlobalAccess:        in.GlobalAccess,
-		MediaType:           in.MediaType,
+		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject[cpi.AccessSpec](versions, in.Type),
+		LocalReference:               in.LocalReference,
+		ReferenceName:                in.ReferenceName,
+		GlobalAccess:                 in.GlobalAccess,
+		MediaType:                    in.MediaType,
 	}, nil
 }

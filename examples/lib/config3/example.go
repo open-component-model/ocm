@@ -41,7 +41,7 @@ func (t *Target) GetValue() string {
 const TYPE = "mytype.config.mandelsoft.org"
 
 func init() {
-	cpi.RegisterConfigType(TYPE, cpi.NewConfigType(TYPE, &Config{}, "just provide a value for Target objects"))
+	cpi.RegisterConfigType(cpi.NewConfigType[*Config](TYPE, "just provide a value for Target objects"))
 }
 
 type Config struct {
@@ -65,7 +65,7 @@ var _ cpi.Config = (*Config)(nil)
 
 func NewConfig(v string) *Config {
 	return &Config{
-		ObjectVersionedType: runtime.NewVersionedObjectType(TYPE),
+		ObjectVersionedType: runtime.NewVersionedTypedObject(TYPE),
 		Value:               v,
 	}
 }

@@ -35,7 +35,10 @@ type (
 	ContextProvider                  = internal.ContextProvider
 	ComponentVersionResolver         = internal.ComponentVersionResolver
 	Repository                       = internal.Repository
+	RepositoryTypeProvider           = internal.RepositoryTypeProvider
 	RepositoryTypeScheme             = internal.RepositoryTypeScheme
+	RepositoryDelegationRegistry     = internal.RepositoryDelegationRegistry
+	RepositoryPriorityDecoder        = internal.PriorityDecoder[Context, RepositorySpec]
 	RepositorySpecHandlers           = internal.RepositorySpecHandlers
 	RepositorySpecHandler            = internal.RepositorySpecHandler
 	UniformRepositorySpec            = internal.UniformRepositorySpec
@@ -43,10 +46,13 @@ type (
 	ComponentAccess                  = internal.ComponentAccess
 	ComponentVersionAccess           = internal.ComponentVersionAccess
 	AccessSpec                       = internal.AccessSpec
+	AccessSpecDecoder                = internal.AccessSpecDecoder
 	GenericAccessSpec                = internal.GenericAccessSpec
 	AccessMethod                     = internal.AccessMethod
 	AccessMethodSupport              = internal.AccessMethodSupport
 	AccessType                       = internal.AccessType
+	AccessTypeProvider               = internal.AccessTypeProvider
+	AccessTypeScheme                 = internal.AccessTypeScheme
 	DataAccess                       = internal.DataAccess
 	BlobAccess                       = internal.BlobAccess
 	SourceAccess                     = internal.SourceAccess
@@ -54,6 +60,7 @@ type (
 	ResourceAccess                   = internal.ResourceAccess
 	ResourceMeta                     = internal.ResourceMeta
 	RepositorySpec                   = internal.RepositorySpec
+	RepositorySpecDecoder            = internal.RepositorySpecDecoder
 	IntermediateRepositorySpecAspect = internal.IntermediateRepositorySpecAspect
 	GenericRepositorySpec            = internal.GenericRepositorySpec
 	RepositoryType                   = internal.RepositoryType
@@ -102,6 +109,10 @@ func DefaultBlobDigesterRegistry() BlobDigesterRegistry {
 	return internal.DefaultBlobDigesterRegistry
 }
 
+func DefaultDelegationRegistry() RepositoryDelegationRegistry {
+	return internal.DefaultRepositoryDelegationRegistry
+}
+
 func DefaultContext() internal.Context {
 	return internal.DefaultContext
 }
@@ -140,14 +151,6 @@ func MustRegisterDigester(digester BlobDigester, arttypes ...string) {
 
 func SetDefaultDigester(d BlobDigester) {
 	internal.SetDefaultDigester(d)
-}
-
-func RegisterRepositoryType(name string, atype RepositoryType) {
-	internal.DefaultRepositoryTypeScheme.Register(name, atype)
-}
-
-func RegisterAccessType(atype AccessType) {
-	internal.DefaultAccessTypeScheme.Register(atype.GetType(), atype)
 }
 
 func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {
@@ -203,3 +206,12 @@ func ArtifactNameHint(spec AccessSpec, cv ComponentVersionAccess) string {
 	}
 	return ""
 }
+
+// provide context interface for other files to avoid diffs in imports.
+var (
+	newStrictRepositoryTypeScheme = internal.NewStrictRepositoryTypeScheme
+	defaultRepositoryTypeScheme   = internal.DefaultRepositoryTypeScheme
+
+	newStrictAccessTypeScheme = internal.NewStrictAccessTypeScheme
+	defaultAccessTypeScheme   = internal.DefaultAccessTypeScheme
+)

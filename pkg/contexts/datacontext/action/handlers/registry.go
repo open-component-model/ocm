@@ -12,17 +12,15 @@ import (
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/api"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/registrations"
 	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/runtime/scheme"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
-var defaultHandlers = NewRegistry()
+var defaultHandlers = NewRegistry(api.DefaultRegistry())
 
 func DefaultRegistry() Registry {
 	return defaultHandlers
@@ -58,6 +56,8 @@ func NewHandlerRegistrationRegistry(base ...HandlerRegistrationRegistry) Handler
 type Registry interface {
 	registrations.HandlerRegistrationRegistry[Target, Option]
 
+	GetActionTypes() api.ActionTypeRegistry
+
 	Register(h ActionHandler, opts ...Option) error
 	Execute(spec api.ActionSpec, creds common.Properties) (api.ActionResult, error)
 	Get(spec api.ActionSpec, possible ...string) []ActionHandlerMatch
@@ -78,6 +78,7 @@ func (r *registration) ApplyActionHandlerOptionTo(opts *api.Options) {
 
 type registry struct {
 	registrations.HandlerRegistrationRegistry[Target, Option]
+	types api.ActionTypeRegistry
 
 	lock          sync.Mutex
 	base          Registry
@@ -86,14 +87,26 @@ type registry struct {
 
 var _ Registry = (*registry)(nil)
 
-func NewRegistry(base ...Registry) Registry {
+func NewRegistry(types api.ActionTypeRegistry, base ...Registry) Registry {
 	b := utils.Optional(base...)
+	if types == nil {
+		if b == nil {
+			types = api.DefaultRegistry()
+		} else {
+			types = b.GetActionTypes()
+		}
+	}
 	r := &registry{
 		base:                        b,
+		types:                       types,
 		registrations:               map[string]map[api.Selector]*registration{},
 		HandlerRegistrationRegistry: NewHandlerRegistrationRegistry(b),
 	}
 	return r
+}
+
+func (r *registry) GetActionTypes() api.ActionTypeRegistry {
+	return r.types
 }
 
 func (r *registry) AddTo(t Registry) {
@@ -127,10 +140,10 @@ func (r *registry) Register(h ActionHandler, olist ...Option) error {
 
 	versions := opts.Versions
 	if versions == nil {
-		versions = action.SupportedActionVersions(opts.Action)
+		versions = r.types.SupportedActionVersions(opts.Action)
 	}
 	versions = append(versions[:0:0], versions...)
-	if err := scheme.SortVersions(versions); err != nil {
+	if err := runtime.SortVersions(versions); err != nil {
 		return errors.Wrapf(err, "invalid version set")
 	}
 	reg := &registration{
@@ -151,7 +164,7 @@ func (r *registry) Execute(spec api.ActionSpec, creds common.Properties) (api.Ac
 		return result[a].Priority < result[b].Priority
 	})
 	if len(result) > 0 {
-		spec.SetType(runtime.TypeName(spec.GetKind(), result[0].Version))
+		spec.SetVersion(result[0].Version)
 		return result[0].Handler.Handle(spec, creds)
 	}
 	return nil, nil
@@ -159,7 +172,7 @@ func (r *registry) Execute(spec api.ActionSpec, creds common.Properties) (api.Ac
 
 func (r *registry) Get(spec api.ActionSpec, possible ...string) []ActionHandlerMatch {
 	if len(possible) == 0 {
-		possible = api.SupportedActionVersions(spec.GetKind())
+		possible = r.GetActionTypes().SupportedActionVersions(spec.GetKind())
 	}
 
 	r.lock.Lock()
@@ -171,7 +184,7 @@ func (r *registry) Get(spec api.ActionSpec, possible ...string) []ActionHandlerM
 		// first, check direct selctor match
 		if reg := kinds[spec.Selector()]; reg != nil {
 			if len(reg.versions) != 0 {
-				if v := MatchVersion(action.SupportedActionVersions(spec.GetKind()), reg.versions); v != "" {
+				if v := MatchVersion(r.types.SupportedActionVersions(spec.GetKind()), reg.versions); v != "" {
 					result = append(result, ActionHandlerMatch{Handler: reg.handler, Version: v, Priority: reg.priority})
 				}
 			}
@@ -188,7 +201,7 @@ func (r *registry) Get(spec api.ActionSpec, possible ...string) []ActionHandlerM
 				}
 				if err == nil {
 					if e.MatchString(string(spec.Selector())) {
-						if v := MatchVersion(action.SupportedActionVersions(spec.GetKind()), reg.versions); v != "" {
+						if v := MatchVersion(r.types.SupportedActionVersions(spec.GetKind()), reg.versions); v != "" {
 							result = append(result, ActionHandlerMatch{Handler: reg.handler, Version: v, Priority: reg.priority})
 						}
 					}
@@ -207,8 +220,8 @@ func MatchVersion(possible []string, avail []string) string {
 	p := append(possible[:0:0], possible...) //nolint: gocritic // yes
 	a := append(avail[:0:0], avail...)       //nolint: gocritic // yes
 
-	scheme.SortVersions(p)
-	scheme.SortVersions(a)
+	runtime.SortVersions(p)
+	runtime.SortVersions(a)
 	f := ""
 	for _, v := range p {
 		for _, c := range a {

@@ -112,7 +112,7 @@ type _context struct {
 
 var _ Context = &_context{}
 
-func newContext(credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, specHandlers RepositorySpecHandlers, blobHandlers BlobHandlerRegistry, blobDigesters BlobDigesterRegistry, delegates datacontext.Delegates) Context {
+func newContext(credctx credentials.Context, ocictx oci.Context, reposcheme RepositoryTypeScheme, accessscheme AccessTypeScheme, specHandlers RepositorySpecHandlers, blobHandlers BlobHandlerRegistry, blobDigesters BlobDigesterRegistry, repodel RepositoryDelegationRegistry, delegates datacontext.Delegates) Context {
 	c := &_context{
 		sharedattributes:     credctx.AttributesContext(),
 		credctx:              credctx,
@@ -123,6 +123,10 @@ func newContext(credctx credentials.Context, ocictx oci.Context, reposcheme Repo
 		knownAccessTypes:     accessscheme,
 		knownRepositoryTypes: reposcheme,
 		aliases:              map[string]RepositorySpec{},
+	}
+
+	if repodel != nil {
+		c.knownRepositoryTypes = NewRepositoryTypeScheme(&delegatingDecoder{ctx: c, delegate: repodel}, reposcheme)
 	}
 	c.Context = datacontext.NewContextBase(c, CONTEXT_TYPE, key, credctx.GetAttributes(), delegates)
 	c.updater = cfgcpi.NewUpdater(credctx.ConfigContext(), c)
@@ -190,7 +194,7 @@ func (c *_context) RepositoryForSpec(spec RepositorySpec, creds ...credentials.C
 }
 
 func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarshaler, creds ...credentials.CredentialsSource) (Repository, error) {
-	spec, err := c.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
+	spec, err := c.knownRepositoryTypes.Decode(data, unmarshaler)
 	if err != nil {
 		return nil, err
 	}
@@ -198,7 +202,7 @@ func (c *_context) RepositoryForConfig(data []byte, unmarshaler runtime.Unmarsha
 }
 
 func (c *_context) RepositorySpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (RepositorySpec, error) {
-	return c.knownRepositoryTypes.DecodeRepositorySpec(data, unmarshaler)
+	return c.knownRepositoryTypes.Decode(data, unmarshaler)
 }
 
 func (c *_context) AccessMethods() AccessTypeScheme {
@@ -206,7 +210,7 @@ func (c *_context) AccessMethods() AccessTypeScheme {
 }
 
 func (c *_context) AccessSpecForConfig(data []byte, unmarshaler runtime.Unmarshaler) (AccessSpec, error) {
-	return c.knownAccessTypes.DecodeAccessSpec(data, unmarshaler)
+	return c.knownAccessTypes.Decode(data, unmarshaler)
 }
 
 // AccessSpecForSpec takes an anonymous access specification and tries to map
@@ -231,7 +235,7 @@ func (c *_context) AccessSpecForSpec(spec compdesc.AccessSpec) (AccessSpec, erro
 		return nil, err
 	}
 
-	return c.knownAccessTypes.DecodeAccessSpec(raw, runtime.DefaultJSONEncoding)
+	return c.knownAccessTypes.Decode(raw, runtime.DefaultJSONEncoding)
 }
 
 func (c *_context) Encode(spec AccessSpec, marshaler runtime.Marshaler) ([]byte, error) {

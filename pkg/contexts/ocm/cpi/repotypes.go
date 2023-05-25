@@ -4,35 +4,51 @@
 
 package cpi
 
-import (
-	"reflect"
+// this file is similar to contexts oci.
 
+import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
-type DefaultRepositoryType struct {
-	runtime.ObjectVersionedType
-	runtime.TypedObjectDecoder
+type RepositoryTypeVersionScheme = runtime.TypeVersionScheme[RepositorySpec, RepositoryType]
+
+func NewRepositoryTypeVersionScheme(kind string) RepositoryTypeVersionScheme {
+	return runtime.NewTypeVersionScheme[RepositorySpec, RepositoryType](kind, newStrictRepositoryTypeScheme())
+}
+
+func RegisterRepositoryType(rtype RepositoryType) {
+	defaultRepositoryTypeScheme.Register(rtype)
+}
+
+func RegisterRepositoryTypeVersions(s RepositoryTypeVersionScheme) {
+	defaultRepositoryTypeScheme.AddKnownTypes(s)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type repositoryType struct {
+	runtime.VersionedTypedObjectType[RepositorySpec]
 	checker RepositoryAccessMethodChecker
 }
 
-type RepositoryAccessMethodChecker func(internal.Context, compdesc.AccessSpec) bool
+type RepositoryAccessMethodChecker func(Context, compdesc.AccessSpec) bool
 
-func NewRepositoryType(name string, proto internal.RepositorySpec, checker RepositoryAccessMethodChecker) internal.RepositoryType {
-	t := reflect.TypeOf(proto)
-	for t.Kind() == reflect.Ptr {
-		t = t.Elem()
-	}
-	return &DefaultRepositoryType{
-		ObjectVersionedType: runtime.NewVersionedObjectType(name),
-		TypedObjectDecoder:  runtime.MustNewDirectDecoder(proto),
-		checker:             checker,
+func NewRepositoryType[I RepositorySpec](name string, checker RepositoryAccessMethodChecker) RepositoryType {
+	return &repositoryType{
+		VersionedTypedObjectType: runtime.NewVersionedTypedObjectType[RepositorySpec, I](name),
+		checker:                  checker,
 	}
 }
 
-func (t *DefaultRepositoryType) LocalSupportForAccessSpec(ctx internal.Context, a compdesc.AccessSpec) bool {
+func NewRepositoryTypeByConverter[I RepositorySpec, V runtime.VersionedTypedObject](name string, converter runtime.Converter[I, V], checker RepositoryAccessMethodChecker) RepositoryType {
+	return &repositoryType{
+		VersionedTypedObjectType: runtime.NewVersionedTypedObjectTypeByConverter[RepositorySpec, I, V](name, converter),
+		checker:                  checker,
+	}
+}
+
+func (t *repositoryType) LocalSupportForAccessSpec(ctx Context, a compdesc.AccessSpec) bool {
 	if t.checker != nil {
 		return t.checker(ctx, a)
 	}

@@ -6,7 +6,6 @@ package internal
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
 
 	"github.com/modern-go/reflect2"
@@ -17,80 +16,58 @@ import (
 )
 
 type ConfigType interface {
-	runtime.TypedObjectDecoder
-	runtime.VersionedTypedObject
+	runtime.VersionedTypedObjectType[Config]
 	Usage() string
 }
+
+var _ runtime.VersionedTypedObjectType[Config] = (ConfigType)(nil)
+
+type (
+	ConfigDecoder      = runtime.TypedObjectDecoder[Config]
+	ConfigTypeProvider = runtime.KnownTypesProvider[Config, ConfigType]
+)
 
 type ConfigTypeScheme interface {
-	runtime.Scheme
-	AddKnownTypes(s ConfigTypeScheme)
-
-	GetConfigType(name string) ConfigType
-	Register(name string, atype ConfigType)
-
-	DecodeConfig(data []byte, unmarshaler runtime.Unmarshaler) (Config, error)
-	CreateConfig(obj runtime.TypedObject) (Config, error)
+	runtime.TypeScheme[Config, ConfigType]
 
 	Usage() string
 }
 
+type _Scheme = runtime.TypeScheme[Config, ConfigType]
+
 type configTypeScheme struct {
-	runtime.SchemeBase
+	_Scheme
 }
 
-func NewConfigTypeScheme(defaultRepoDecoder runtime.TypedObjectDecoder, base ...ConfigTypeScheme) ConfigTypeScheme {
-	var rt Config
-	scheme := runtime.MustNewDefaultScheme(&rt, &GenericConfig{}, true, defaultRepoDecoder, utils.Optional(base...))
+func NewConfigTypeScheme(defaultDecoder ConfigDecoder, base ...ConfigTypeScheme) ConfigTypeScheme {
+	scheme := runtime.MustNewDefaultTypeScheme[Config, ConfigType](&GenericConfig{}, true, defaultDecoder, utils.Optional(base...))
 	return &configTypeScheme{scheme}
 }
 
-func (t *configTypeScheme) AddKnownTypes(s ConfigTypeScheme) {
-	t.SchemeBase.AddKnownTypes(s)
-}
-
-func (t *configTypeScheme) GetConfigType(name string) ConfigType {
-	d := t.GetDecoder(name)
-	if d == nil {
-		return nil
-	}
-	return d.(ConfigType)
-}
-
-func (t *configTypeScheme) RegisterByDecoder(name string, decoder runtime.TypedObjectDecoder) error {
-	if _, ok := decoder.(ConfigType); !ok {
-		return errors.ErrInvalid("type", reflect.TypeOf(decoder).String())
-	}
-	return t.SchemeBase.RegisterByDecoder(name, decoder)
-}
-
-func (t *configTypeScheme) Register(name string, rtype ConfigType) {
-	t.SchemeBase.RegisterByDecoder(name, rtype)
+// KnownTypes required just for Goland.
+func (s *configTypeScheme) KnownTypes() runtime.KnownTypes[Config, ConfigType] {
+	return s._Scheme.KnownTypes()
 }
 
 func (t *configTypeScheme) DecodeConfig(data []byte, unmarshaler runtime.Unmarshaler) (Config, error) {
-	obj, err := t.Decode(data, unmarshaler)
-	if err != nil {
-		return nil, err
-	}
-	if spec, ok := obj.(Config); ok {
-		return spec, nil
-	}
-	return nil, fmt.Errorf("invalid object type: yield %T instead of Config", obj)
+	return t._Scheme.Decode(data, unmarshaler) // Goland
+}
+
+type versionRegistry struct {
+	_Scheme
+}
+
+func NewStrictConfigTypeScheme(base ...ConfigTypeScheme) runtime.VersionedTypeRegistry[Config, ConfigType] {
+	scheme := runtime.MustNewDefaultTypeScheme[Config, ConfigType](nil, false, nil, utils.Optional(base...))
+	return &versionRegistry{scheme}
+}
+
+func (s *versionRegistry) KnownTypes() runtime.KnownTypes[Config, ConfigType] {
+	return s._Scheme.KnownTypes() // Goland
 }
 
 func (t *configTypeScheme) CreateConfig(obj runtime.TypedObject) (Config, error) {
-	if s, ok := obj.(Config); ok {
-		return s, nil
-	}
-	if u, ok := obj.(*runtime.UnstructuredTypedObject); ok {
-		raw, err := u.GetRaw()
-		if err != nil {
-			return nil, err
-		}
-		return t.DecodeConfig(raw, runtime.DefaultJSONEncoding)
-	}
-	return nil, fmt.Errorf("invalid object type %T for repository specs", obj)
+	return t._Scheme.Convert(obj)
 }
 
 func (t *configTypeScheme) Usage() string {
@@ -98,7 +75,7 @@ func (t *configTypeScheme) Usage() string {
 
 	s := "\nThe following configuration types are supported:\n"
 	for _, n := range t.KnownTypeNames() {
-		ct := t.GetConfigType(n)
+		ct := t.GetType(n)
 		u := ct.Usage()
 		if strings.TrimSpace(u) == "" || found[u] {
 			continue
@@ -123,6 +100,7 @@ type Evaluator interface {
 
 type GenericConfig struct {
 	runtime.UnstructuredVersionedTypedObject `json:",inline"`
+	unknown                                  bool
 }
 
 func IsGeneric(cfg Config) bool {
@@ -139,7 +117,7 @@ func NewGenericConfig(data []byte, unmarshaler runtime.Unmarshaler) (Config, err
 	if err != nil {
 		return nil, err
 	}
-	return &GenericConfig{*unstr}, nil
+	return &GenericConfig{*unstr, false}, nil
 }
 
 func ToGenericConfig(c Config) (*GenericConfig, error) {
@@ -153,7 +131,11 @@ func ToGenericConfig(c Config) (*GenericConfig, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &GenericConfig{*u}, nil
+	return &GenericConfig{*u, false}, nil
+}
+
+func (s *GenericConfig) IsUnknown() bool {
+	return s.unknown
 }
 
 func (s *GenericConfig) Evaluate(ctx Context) (Config, error) {
@@ -161,11 +143,12 @@ func (s *GenericConfig) Evaluate(ctx Context) (Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	cfg, err := ctx.ConfigTypes().DecodeConfig(raw, runtime.DefaultJSONEncoding)
+	cfg, err := ctx.ConfigTypes().Decode(raw, runtime.DefaultJSONEncoding)
 	if err != nil {
 		return nil, err
 	}
 	if IsGeneric(cfg) {
+		s.unknown = true
 		return nil, errors.ErrUnknown(KIND_CONFIGTYPE, s.GetType())
 	}
 	return cfg, nil

@@ -148,20 +148,20 @@ The <code>--repo</code> option takes an OCM repository specification:
 For the *Common Transport Format* the types <code>directory</code>,
 <code>tar</code> or <code>tgz</code> is possible.
 
-Using the JSON variant any repository type supported by the 
+Using the JSON variant any repository types supported by the 
 linked library can be used:
 
 Dedicated OCM repository types:
-- `ComponentArchive`
+  - <code>ComponentArchive</code>: v1
 
 OCI Repository types (using standard component repository to OCI mapping):
-- `ArtifactSet`
-- `CommonTransportFormat`
-- `DockerDaemon`
-- `Empty`
-- `OCIRegistry`
-- `oci`
-- `ociRegistry`
+  - <code>ArtifactSet</code>: v1
+  - <code>CommonTransportFormat</code>: v1
+  - <code>DockerDaemon</code>: v1
+  - <code>Empty</code>: v1
+  - <code>OCIRegistry</code>: v1
+  - <code>oci</code>: v1
+  - <code>ociRegistry</code>
 
 \
 If a component lookup for building a reference closure is required

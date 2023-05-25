@@ -141,14 +141,14 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMe
 		if err != nil {
 			return nil, err
 		}
-		return newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.comp.namespace, c.comp.GetContext())
+		return newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.comp.namespace, c.access), nil
 	}
 	if a.GetKind() == localociblob.Type {
 		accessSpec, err := c.comp.GetContext().AccessSpecForSpec(a)
 		if err != nil {
 			return nil, err
 		}
-		return newLocalOCIBlobAccessMethod(accessSpec.(*localociblob.AccessSpec), c.comp.namespace)
+		return newLocalOCIBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.comp.namespace, c.access), nil
 	}
 	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "oci registry")
 }
@@ -206,7 +206,7 @@ func (c *ComponentVersionContainer) Update() error {
 		}
 
 		logger.Debug("add oci artifact")
-		if _, err := c.comp.namespace.AddArtifact(c.manifest, c.version); err != nil {
+		if _, err := c.comp.namespace.AddArtifact(c.manifest, toTag(c.version)); err != nil {
 			return fmt.Errorf("unable to add artifact: %w", err)
 		}
 	}
@@ -227,11 +227,11 @@ func (c *ComponentVersionContainer) evalLayer(s compdesc.AccessSpec) (compdesc.A
 		}
 		d = &artdesc.Descriptor{Digest: digest.Digest(a.LocalReference), MediaType: a.GetMimeType()}
 	}
-	if a, ok := spec.(*localociblob.AccessSpec); ok {
-		if ok, _ := artdesc.IsDigest(a.Digest.String()); !ok {
-			return s, 0, errors.ErrInvalid("digest", a.Digest.String())
+	if a, ok := spec.(*localblob.AccessSpec); ok {
+		if ok, _ := artdesc.IsDigest(a.LocalReference); !ok {
+			return s, 0, errors.ErrInvalid("digest", a.LocalReference)
 		}
-		d = &artdesc.Descriptor{Digest: a.Digest, MediaType: a.GetMimeType()}
+		d = &artdesc.Descriptor{Digest: digest.Digest(a.LocalReference), MediaType: a.GetMimeType()}
 	}
 	if d != nil {
 		// find layer

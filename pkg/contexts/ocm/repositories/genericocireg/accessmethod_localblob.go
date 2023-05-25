@@ -19,25 +19,25 @@ import (
 )
 
 type localBlobAccessMethod struct {
-	lock   sync.Mutex
-	data   accessio.DataAccess
-	ctx    cpi.Context
-	spec   *localblob.AccessSpec
-	access oci.NamespaceAccess
+	lock      sync.Mutex
+	data      accessio.DataAccess
+	spec      *localblob.AccessSpec
+	namespace oci.NamespaceAccess
+	artifact  oci.ArtifactAccess
 }
 
 var _ cpi.AccessMethod = (*localBlobAccessMethod)(nil)
 
-func newLocalBlobAccessMethod(a *localblob.AccessSpec, access oci.NamespaceAccess, ctx cpi.Context) (cpi.AccessMethod, error) {
+func newLocalBlobAccessMethod(a *localblob.AccessSpec, ns oci.NamespaceAccess, art oci.ArtifactAccess) *localBlobAccessMethod {
 	return &localBlobAccessMethod{
-		ctx:    ctx,
-		spec:   a,
-		access: access,
-	}, nil
+		spec:      a,
+		namespace: ns,
+		artifact:  art,
+	}
 }
 
 func (m *localBlobAccessMethod) GetKind() string {
-	return localblob.Type
+	return m.spec.GetKind()
 }
 
 func (m *localBlobAccessMethod) AccessSpec() cpi.AccessSpec {
@@ -72,7 +72,7 @@ func (m *localBlobAccessMethod) getBlob() (cpi.DataAccess, error) {
 			return nil, errors.ErrNotImplemented("artifact blob synthesis")
 		}
 	}
-	_, data, err := m.access.GetBlobData(digest.Digest(m.spec.LocalReference))
+	_, data, err := m.namespace.GetBlobData(digest.Digest(m.spec.LocalReference))
 	if err != nil {
 		return nil, err
 	}

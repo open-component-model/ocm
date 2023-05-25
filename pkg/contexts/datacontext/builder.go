@@ -7,6 +7,7 @@ package datacontext
 import (
 	"context"
 
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/api"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/handlers"
 )
 
@@ -49,12 +50,12 @@ func (b Builder) New(m ...BuilderMode) Context {
 	if b.actions == nil {
 		switch mode {
 		case MODE_INITIAL:
-			b.actions = handlers.NewRegistry(nil)
+			b.actions = handlers.NewRegistry(api.NewActionTypeRegistry())
 		case MODE_CONFIGURED:
-			b.actions = handlers.NewRegistry(nil)
+			b.actions = handlers.NewRegistry(api.DefaultRegistry().Copy())
 			handlers.DefaultRegistry().AddTo(b.actions)
 		case MODE_EXTENDED:
-			b.actions = handlers.NewRegistry(handlers.DefaultRegistry())
+			b.actions = handlers.NewRegistry(api.DefaultRegistry(), handlers.DefaultRegistry())
 		case MODE_DEFAULTED:
 			fallthrough
 		case MODE_SHARED:

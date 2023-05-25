@@ -73,7 +73,7 @@ func Command(p ppi.Plugin, cmd *cobra.Command, opts *Options) error {
 		return errors.Wrapf(err, "access specification")
 	}
 
-	m := p.GetAccessMethod(spec.GetKind(), spec.GetVersion())
+	m := p.GetAccessMethod(runtime.KindVersion(spec.GetType()))
 	if m == nil {
 		return errors.ErrUnknown(descriptor.KIND_ACCESSMETHOD, spec.GetType())
 	}

@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 
 	common2 "github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 )
@@ -24,7 +25,7 @@ func New(p ppi.Plugin) *cobra.Command {
 		Args:  cobra.MaximumNArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			d := p.Descriptor()
-			common.DescribePluginDescriptor(&d, common2.NewPrinter(os.Stdout))
+			common.DescribePluginDescriptor(action.DefaultRegistry(), &d, common2.NewPrinter(os.Stdout))
 			return nil
 		},
 	}

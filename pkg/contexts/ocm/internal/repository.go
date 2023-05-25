@@ -61,6 +61,7 @@ type (
 )
 
 type BaseAccess interface {
+	ComponentVersion() ComponentVersionAccess
 	Access() (AccessSpec, error)
 	AccessMethod() (AccessMethod, error)
 }

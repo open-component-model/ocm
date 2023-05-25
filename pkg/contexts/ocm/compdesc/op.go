@@ -17,13 +17,13 @@ import (
 func And[T any](sel ...any) T {
 	var r T
 	h := selhandler[reflect.TypeOf(r)].(handler[T])
-	return h.And(generics.CastSlice[any, T](sel...)...)
+	return h.And(generics.ConvertSlice[any, T](sel...)...)
 }
 
 func Or[T any](sel ...any) T {
 	var r T
 	h := selhandler[reflect.TypeOf(r)].(handler[T])
-	return h.Or(generics.CastSlice[any, T](sel...)...)
+	return h.Or(generics.ConvertSlice[any, T](sel...)...)
 }
 
 func Not[T any](sel any) T {

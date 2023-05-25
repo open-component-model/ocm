@@ -14,7 +14,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
-	action2 "github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/config"
@@ -89,7 +88,7 @@ func (p *pluginImpl) Action(spec ppi.ActionSpec, creds json.RawMessage) (ppi.Act
 		}
 	}
 
-	data, err := action2.EncodeActionSpec(spec)
+	data, err := p.ctx.GetActions().GetActionTypes().EncodeActionSpec(spec, runtime.DefaultJSONEncoding)
 	if err != nil {
 		return nil, err
 	}
@@ -104,7 +103,7 @@ func (p *pluginImpl) Action(spec ppi.ActionSpec, creds json.RawMessage) (ppi.Act
 		return nil, errors.Wrapf(err, "plugin %s", p.Name())
 	}
 
-	info, err := action2.DecodeActionResult(result)
+	info, err := p.ctx.GetActions().GetActionTypes().DecodeActionResult(result, runtime.DefaultJSONEncoding)
 	if err != nil {
 		return nil, errors.Wrapf(err, "plugin %s: cannot unmarshal action result", p.Name())
 	}

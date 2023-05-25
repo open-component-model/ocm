@@ -54,11 +54,11 @@ func NewType(name string, p plugin.Plugin, desc *plugin.AccessMethodDescriptor) 
 		aopts = append(aopts, cpi.WithConfigHandler(cfghdlr))
 		t.cliopts = cfghdlr
 	}
-	t.AccessType = cpi.NewAccessSpecType(name, &AccessSpec{}, aopts...)
+	t.AccessType = cpi.NewAccessSpecType[*AccessSpec](name, aopts...)
 	return t
 }
 
-func (t *accessType) Decode(data []byte, unmarshaler runtime.Unmarshaler) (runtime.TypedObject, error) {
+func (t *accessType) Decode(data []byte, unmarshaler runtime.Unmarshaler) (cpi.AccessSpec, error) {
 	spec, err := t.AccessType.Decode(data, unmarshaler)
 	if err != nil {
 		return nil, err

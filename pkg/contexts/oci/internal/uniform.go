@@ -199,7 +199,7 @@ func (s *specHandlers) MapUniformRepositorySpec(ctx Context, u *UniformRepositor
 			if spec.GetKind() != u.Type {
 				return nil, errors.ErrInvalid()
 			}
-			return ctx.RepositoryTypes().CreateRepositorySpec(spec)
+			return ctx.RepositoryTypes().Convert(spec)
 		}
 	}
 	for _, h := range s.handlers["*"] {

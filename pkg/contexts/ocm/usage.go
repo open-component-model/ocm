@@ -43,7 +43,7 @@ shown below.
 			set[vers] = ""
 		}
 
-		t := scheme.GetAccessType(n)
+		t := scheme.GetType(n)
 
 		desc := t.Description()
 		if desc != "" {

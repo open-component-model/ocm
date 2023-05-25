@@ -16,7 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ecr/types"
 
 	ocmcreds "github.com/open-component-model/ocm/pkg/contexts/credentials"
-	oci_repository_prepare "github.com/open-component-model/ocm/pkg/contexts/datacontext/action/types/oci-repository-prepare"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/actions/oci-repository-prepare"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3/identity"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
 	"github.com/open-component-model/ocm/pkg/errors"

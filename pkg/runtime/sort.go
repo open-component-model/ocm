@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package scheme
+package runtime
 
 import (
 	"sort"

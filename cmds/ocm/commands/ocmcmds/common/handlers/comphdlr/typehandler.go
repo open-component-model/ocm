@@ -181,7 +181,7 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 		if err != nil {
 			return nil, errors.Wrapf(err, "reference %q", name)
 		}
-		spec.UniformRepositorySpec = repo.GetSpecification().AsUniformSpec(h.octx.Context())
+		spec.UniformRepositorySpec = *repo.GetSpecification().AsUniformSpec(h.octx.Context())
 		spec.Component = comp.Component
 		spec.Version = comp.Version
 	}

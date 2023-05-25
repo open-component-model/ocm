@@ -5,8 +5,11 @@
 package internal
 
 import (
+	"encoding/json"
 	"fmt"
 	"sync"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -59,6 +62,18 @@ func (u *UniformRepositorySpec) String() string {
 		}
 		return fmt.Sprintf("%s%s%s", t, u.Host, s)
 	}
+}
+
+func UniformRepositorySpecForUnstructured(un *runtime.UnstructuredVersionedTypedObject) *UniformRepositorySpec {
+	m := un.Object.FlatCopy()
+	delete(m, runtime.ATTR_TYPE)
+
+	d, err := json.Marshal(m)
+	if err != nil {
+		logrus.Error(err)
+	}
+
+	return &UniformRepositorySpec{Type: un.Type, Info: string(d)}
 }
 
 type RepositorySpecHandler interface {
@@ -168,7 +183,7 @@ func (s *specHandlers) MapUniformRepositorySpec(ctx Context, u *UniformRepositor
 			if spec.GetKind() != u.Type {
 				return nil, errors.ErrInvalid()
 			}
-			return ctx.RepositoryTypes().CreateRepositorySpec(spec)
+			return ctx.RepositoryTypes().Convert(spec)
 		}
 	}
 

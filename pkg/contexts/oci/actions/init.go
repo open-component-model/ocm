@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package types
+package actions
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/action/types/oci-repository-prepare"
+	_ "github.com/open-component-model/ocm/pkg/contexts/oci/actions/oci-repository-prepare"
 )

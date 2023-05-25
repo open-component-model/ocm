@@ -132,7 +132,6 @@ func (o *Command) Run() error {
 	}
 	obj, err := comparch.Create(o.Context.OCMContext(), accessobj.ACC_CREATE, fp, mode, o.Handler, fs)
 	if err != nil {
-		fs.RemoveAll(fp)
 		return err
 	}
 	desc := obj.GetDescriptor()

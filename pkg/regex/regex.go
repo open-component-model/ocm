@@ -5,13 +5,19 @@
 package regex
 
 import (
+	"fmt"
 	"regexp"
+	"strings"
 )
 
 var (
 	// Alpha defines the alpha atom.
 	// This only allows upper and lower case characters.
 	Alpha = Match(`[A-Za-z]+`)
+
+	// Numeric defines the alpha atom.
+	// This only allows a non-empty sequence of digits.
+	Numeric = Match(`[0-9]+`)
 
 	// AlphaNumeric defines the alpha numeric atom, typically a
 	// component of names. This only allows upper and lower case characters and digits.
@@ -36,6 +42,24 @@ func Literal(s string) *regexp.Regexp {
 	return re
 }
 
+const classBytes = `]\`
+
+func quoteCharClass(s string) string {
+	res := ""
+	for _, r := range s {
+		if strings.Contains(classBytes, string(r)) {
+			res += "\\"
+		}
+		res += string(r)
+	}
+	return res
+}
+
+// CharSet compiles a set of matching charaters.
+func CharSet(s string) *regexp.Regexp {
+	return Match("[" + quoteCharClass(s) + "]")
+}
+
 // Sequence defines a full expression, where each regular expression must
 // follow the previous.
 func Sequence(res ...*regexp.Regexp) *regexp.Regexp {
@@ -50,13 +74,25 @@ func Sequence(res ...*regexp.Regexp) *regexp.Regexp {
 // Optional wraps the expression in a non-capturing group and makes the
 // production optional.
 func Optional(res ...*regexp.Regexp) *regexp.Regexp {
-	return Match(Group(Sequence(res...)).String() + `?`)
+	return Match(Group(res...).String() + `?`)
+}
+
+// Repetition wraps the regexp in a non-capturing group to get a range of
+// matches.
+func Repetition(min, max int, res ...*regexp.Regexp) *regexp.Regexp {
+	return Match(Group(res...).String() + fmt.Sprintf(`{%d,%d}`, min, max))
 }
 
 // Repeated wraps the regexp in a non-capturing group to get one or more
 // matches.
 func Repeated(res ...*regexp.Regexp) *regexp.Regexp {
-	return Match(Group(Sequence(res...)).String() + `+`)
+	return Match(Group(res...).String() + `+`)
+}
+
+// OptionalRepeated wraps the regexp in a non-capturing group to get any
+// number of matches.
+func OptionalRepeated(res ...*regexp.Regexp) *regexp.Regexp {
+	return Match(Group(res...).String() + `*`)
 }
 
 // Group wraps the regexp in a non-capturing group.
