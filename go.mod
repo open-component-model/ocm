@@ -11,7 +11,7 @@ require (
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-logr/logr v1.2.3
 	github.com/mandelsoft/filepath v0.0.0-20230412200429-36b1eb66bd27
-	github.com/mandelsoft/spiff v1.3.0-beta-7.0.20230414131619-0bc30bac11fc
+	github.com/mandelsoft/spiff v1.7.0-beta-5
 	github.com/modern-go/reflect2 v1.0.2
 	github.com/onsi/gomega v1.26.0
 	github.com/opencontainers/go-digest v1.0.0

@@ -20,6 +20,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localociblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
 	ocihdlr "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -69,7 +70,7 @@ func newComponentVersionContainer(mode accessobj.AccessMode, comp *componentAcce
 	if m == nil {
 		return nil, errors.ErrInvalid("artifact type")
 	}
-	state, err := NewState(mode, comp.name, version, m)
+	state, err := NewState(mode, comp.name, version, m, compatattr.Get(comp.GetContext()))
 	if err != nil {
 		access.Close()
 		return nil, err

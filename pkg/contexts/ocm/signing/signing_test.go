@@ -1074,7 +1074,7 @@ func CheckResourceDigests(cd *compdesc.ComponentDescriptor, digests map[string]*
 	}
 	for i, r := range cd.Resources {
 		By(fmt.Sprintf("resource %d", i), func() {
-			if r.Access.GetType() == none.Type {
+			if none.IsNone(r.Access.GetKind()) {
 				ExpectWithOffset(o, r.Digest).To(BeNil())
 			} else {
 				ExpectWithOffset(o, r.Digest).NotTo(BeNil())
