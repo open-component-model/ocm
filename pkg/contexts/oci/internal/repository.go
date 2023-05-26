@@ -5,6 +5,8 @@
 package internal
 
 import (
+	"io"
+
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -54,16 +56,19 @@ type ArtifactSource interface {
 	GetBlobData(digest digest.Digest) (int64, DataAccess, error)
 }
 
-type NamespaceAccess interface {
+type NamespaceInt interface {
 	ArtifactSource
 	ArtifactSink
-
 	GetNamespace() string
 	ListTags() ([]string, error)
 
 	NewArtifact(...*artdesc.Artifact) (ArtifactAccess, error)
+}
 
-	Close() error
+type NamespaceAccess interface {
+	NamespaceInt
+
+	io.Closer
 }
 
 type Artifact interface {
