@@ -29,6 +29,22 @@ type ContextProvider interface {
 	OCMContext() Context
 }
 
+type LocalContextProvider interface {
+	GetContext() Context
+}
+
+type localContextProvider struct {
+	LocalContextProvider
+}
+
+func (l *localContextProvider) OCMContext() Context {
+	return l.GetContext()
+}
+
+func WrapContextProvider(ctx LocalContextProvider) ContextProvider {
+	return &localContextProvider{ctx}
+}
+
 type Context interface {
 	datacontext.Context
 	config.ContextProvider

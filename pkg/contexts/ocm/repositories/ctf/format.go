@@ -37,7 +37,7 @@ func GetFormat(name accessio.FileFormat) FormatHandler {
 ////////////////////////////////////////////////////////////////////////////////
 
 func Open(ctx cpi.ContextProvider, acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessio.Option) (cpi.Repository, error) {
-	r, err := ctf.Open(ctx.OCMContext().OCIContext(), acc, path, mode, opts...)
+	r, err := ctf.Open(ctx.OCMContext(), acc, path, mode, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func Open(ctx cpi.ContextProvider, acc accessobj.AccessMode, path string, mode v
 }
 
 func Create(ctx cpi.ContextProvider, acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessio.Option) (cpi.Repository, error) {
-	r, err := ctf.Create(ctx.OCMContext().OCIContext(), acc, path, mode, opts...)
+	r, err := ctf.Create(ctx.OCMContext(), acc, path, mode, opts...)
 	if err != nil {
 		return nil, err
 	}

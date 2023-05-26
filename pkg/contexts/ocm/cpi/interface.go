@@ -33,6 +33,7 @@ func BlobHandlerLogger(ctx Context, messageContext ...logging.MessageContext) lo
 type (
 	Context                          = internal.Context
 	ContextProvider                  = internal.ContextProvider
+	LocalContextProvider             = internal.LocalContextProvider
 	ComponentVersionResolver         = internal.ComponentVersionResolver
 	Repository                       = internal.Repository
 	RepositoryTypeProvider           = internal.RepositoryTypeProvider
@@ -216,3 +217,7 @@ var (
 	newStrictAccessTypeScheme = internal.NewStrictAccessTypeScheme
 	defaultAccessTypeScheme   = internal.DefaultAccessTypeScheme
 )
+
+func WrapContextProvider(ctx LocalContextProvider) ContextProvider {
+	return internal.WrapContextProvider(ctx)
+}

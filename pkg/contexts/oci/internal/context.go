@@ -28,6 +28,7 @@ type Context interface {
 	datacontext.Context
 	config.ContextProvider
 	credentials.ContextProvider
+	ContextProvider
 
 	RepositorySpecHandlers() RepositorySpecHandlers
 	MapUniformRepositorySpec(u *UniformRepositorySpec) (RepositorySpec, error)
