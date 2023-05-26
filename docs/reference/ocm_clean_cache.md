@@ -9,7 +9,9 @@ ocm clean cache [<options>]
 ### Options
 
 ```
-  -h, --help   help for cache
+  -b, --before string   time since last usage
+  -s, --dry-run         show size to be removed
+  -h, --help            help for cache
 ```
 
 ### Description

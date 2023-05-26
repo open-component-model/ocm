@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
@@ -132,6 +134,15 @@ type RootedCache interface {
 	Root() (string, vfs.FileSystem)
 }
 
+type CleanupCache interface {
+	// Cleanup can be implemented to offer a cache reorg.
+	// It returns the number and size of
+	//	- handled entries (cnt, size)
+	//	- not handled entries (ncnt, nsize)
+	//	- failing entries (fcnt, fsize)
+	Cleanup(p common.Printer, before *time.Time, dryrun bool) (cnt int, ncnt int, fcnt int, size int64, nsize int64, fsize int64, err error)
+}
+
 type BlobCache interface {
 	BlobSource
 	BlobSink
@@ -148,6 +159,12 @@ var (
 	_ sync.Locker = (*blobCache)(nil)
 	_ RootedCache = (*blobCache)(nil)
 )
+
+// ACCESS_SUFFIX is the suffix of an additional blob related
+// file used to track the last access time by its modification time,
+// because Go does not support a platform independent way to access the
+// last access time attribute of a filesystem.
+const ACCESS_SUFFIX = ".acc"
 
 func NewDefaultBlobCache(fss ...vfs.FileSystem) (BlobCache, error) {
 	var err error
@@ -190,6 +207,61 @@ func (c *blobCache) Unlock() {
 	c.lock.Unlock()
 }
 
+func (c *blobCache) Cleanup(p common.Printer, before *time.Time, dryrun bool) (cnt int, ncnt int, fcnt int, size int64, nsize int64, fsize int64, err error) {
+	c.Lock()
+	defer c.Unlock()
+
+	if p == nil {
+		p = common.NewPrinter(nil)
+	}
+	path, fs := c.Root()
+
+	entries, err := vfs.ReadDir(fs, path)
+	if err != nil {
+		return 0, 0, 0, 0, 0, 0, err
+	}
+	for _, e := range entries {
+		if strings.HasSuffix(e.Name(), ACCESS_SUFFIX) {
+			continue
+		}
+		base := vfs.Join(fs, path, e.Name())
+		if before != nil && !before.IsZero() {
+			fi, err := fs.Stat(base + ACCESS_SUFFIX)
+			if err != nil {
+				if !vfs.IsErrNotExist(err) {
+					if p != nil {
+						p.Printf("cannot stat %q: %s", e.Name(), err)
+					}
+					fcnt++
+					fsize += e.Size()
+					continue
+				}
+			} else {
+				if fi.ModTime().After(*before) {
+					ncnt++
+					nsize += e.Size()
+					continue
+				}
+			}
+		}
+		if !dryrun {
+			err := fs.RemoveAll(base)
+			if err != nil {
+				if p != nil {
+					p.Printf("cannot delete %q: %s", e.Name(), err)
+				}
+				fcnt++
+				fsize += e.Size()
+				continue
+			}
+			fs.RemoveAll(base + ACCESS_SUFFIX)
+		}
+		cnt++
+		size += e.Size()
+	}
+	return cnt, ncnt, fcnt, size, nsize, fsize, nil
+}
+
 func (c *blobCache) cleanup() error {
 	return vfs.Cleanup(c.cache)
 }
@@ -204,6 +276,9 @@ func (c *blobCache) GetBlobData(digest digest.Digest) (int64, DataAccess, error)
 		path := common.DigestToFileName(digest)
 		fi, err := c.cache.Stat(path)
 		if err == nil {
+			vfs.WriteFile(c.cache, path+ACCESS_SUFFIX, []byte{}, 0o600)
+			// now := time.Now()
+			// c.cache.Chtimes(path+ACCESS_SUFFIX, now, now)
 			return fi.Size(), DataAccessForFile(c.cache, path), nil
 		}
 		if os.IsNotExist(err) {
@@ -272,6 +347,7 @@ func (c *blobCache) AddBlob(blob BlobAccess) (int64, digest.Digest, error) {
 		err = c.cache.Rename(tmp, target)
 	}
 	c.cache.Remove(tmp)
+	vfs.WriteFile(c.cache, target+ACCESS_SUFFIX, []byte{}, 0o600)
 	return size, digest, err
 }
 
