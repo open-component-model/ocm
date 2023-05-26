@@ -12,6 +12,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/generics"
 )
 
+// ParseDeltaTime parses a time diff relative to the actual
+// time and returns the resulting time.
 func ParseDeltaTime(s string, past bool) (time.Time, error) {
 	var t time.Time
 
