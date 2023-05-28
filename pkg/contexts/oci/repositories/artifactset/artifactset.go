@@ -38,37 +38,62 @@ func RetrieveType(m map[string]string) string {
 	return m[TYPE_ANNOTATION]
 }
 
-// ArtifactSet provides an artifact set view on the artifact set implementation.
-// Every ArtifactSet is separated closable. If the last view is closed
-// the implementation is released.
-type ArtifactSet struct {
-	*artifactSetImpl // provide the artifact set interface
-}
-
-// implemented by view
-// the rest is directly taken from the artifact set implementation
-
-func (s *ArtifactSet) Close() error {
-	return s.view.Close()
-}
-
-func (s *ArtifactSet) IsClosed() bool {
-	return s.view.IsClosed()
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
-type artifactSetImpl struct {
-	view support.ArtifactSetContainer
-	impl support.ArtifactSetContainerImpl
-	base *FileSystemBlobAccess
-	*support.ArtifactSetAccess
+type ArtifactSet struct {
+	cpi.NamespaceAccess
+	container *artifactSetContainer
 }
 
-var (
-	_ cpi.ArtifactSink    = (*ArtifactSet)(nil)
-	_ cpi.NamespaceAccess = (*ArtifactSet)(nil)
-)
+func (a *ArtifactSet) Close() error { // why???
+	return a.NamespaceAccess.Close()
+}
+
+func (a *ArtifactSet) Annotate(name string, value string) {
+	a.container.Annotate(name, value)
+}
+
+func (a *ArtifactSet) GetIndex() *artdesc.Index {
+	return a.container.GetIndex()
+}
+
+func (a *ArtifactSet) GetMain() digest.Digest {
+	return a.container.GetMain()
+}
+
+func (a *ArtifactSet) GetAnnotation(name string) string {
+	return a.container.GetAnnotation(name)
+}
+
+func (a *ArtifactSet) HasAnnotation(name string) bool {
+	return a.container.HasAnnotation(name)
+}
+
+func AsArtifactSet(ns cpi.NamespaceAccess) (*ArtifactSet, error) {
+	i, err := cpi.GetNamespaceAccessImplementation(ns)
+	if err != nil {
+		return nil, errors.ErrInvalid()
+	}
+	c, err := support.GetArtifactSetContainer(i)
+	if err != nil {
+		return nil, errors.ErrInvalid()
+	}
+	if a, ok := c.(*artifactSetContainer); ok {
+		n, err := ns.Dup()
+		if err != nil {
+			return nil, err
+		}
+		return &ArtifactSet{
+			NamespaceAccess: n,
+			container:       a,
+		}, nil
+	}
+	return nil, errors.ErrInvalid()
+}
+
+type artifactSetContainer struct {
+	base *FileSystemBlobAccess
+}
 
 // New returns a new representation based element.
 func New(acc accessobj.AccessMode, fs vfs.FileSystem, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode, formatVersion string) (*ArtifactSet, error) {
@@ -79,19 +104,18 @@ func _Wrap(obj *accessobj.AccessObject, err error) (*ArtifactSet, error) {
 	if err != nil {
 		return nil, err
 	}
-	s := &artifactSetImpl{
+	c := &artifactSetContainer{
 		base: NewFileSystemBlobAccess(obj),
 	}
-	s.ArtifactSetAccess = support.NewArtifactSetAccess(s)
-	s.view, s.impl = support.NewArtifactSetContainer(s)
-	return &ArtifactSet{s}, nil
+	i := support.NewArtifactSet(c, "artifactset namespace")
+	return &ArtifactSet{i, c}, nil
 }
 
-func (a *artifactSetImpl) GetNamespace() string {
+func (a *artifactSetContainer) GetNamespace() string {
 	return ""
 }
 
-func (a *artifactSetImpl) Annotate(name string, value string) {
+func (a *artifactSetContainer) Annotate(name string, value string) {
 	a.base.Lock()
 	defer a.base.Unlock()
 
@@ -102,10 +126,33 @@ func (a *artifactSetImpl) Annotate(name string, value string) {
 	d.Annotations[name] = value
 }
 
+func (a *artifactSetContainer) GetAnnotation(name string) string {
+	a.base.Lock()
+	defer a.base.Unlock()
+
+	d := a.GetIndex()
+	if d.Annotations == nil {
+		return ""
+	}
+	return d.Annotations[name]
+}
+
+func (a *artifactSetContainer) HasAnnotation(name string) bool {
+	a.base.Lock()
+	defer a.base.Unlock()
+
+	d := a.GetIndex()
+	if d.Annotations == nil {
+		return false
+	}
+	_, ok := d.Annotations[name]
+	return ok
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // sink
 
-func (a *artifactSetImpl) AddTags(digest digest.Digest, tags ...string) error {
+func (a *artifactSetContainer) AddTags(digest digest.Digest, tags ...string) error {
 	if a.IsClosed() {
 		return accessio.ErrClosed
 	}
@@ -142,23 +189,23 @@ func (a *artifactSetImpl) AddTags(digest digest.Digest, tags ...string) error {
 ////////////////////////////////////////////////////////////////////////////////
 // forward
 
-func (a *artifactSetImpl) IsReadOnly() bool {
+func (a *artifactSetContainer) IsReadOnly() bool {
 	return a.base.IsReadOnly()
 }
 
-func (a *artifactSetImpl) Write(path string, mode vfs.FileMode, opts ...accessio.Option) error {
+func (a *artifactSetContainer) Write(path string, mode vfs.FileMode, opts ...accessio.Option) error {
 	return a.base.Write(path, mode, opts...)
 }
 
-func (a *artifactSetImpl) Update() error {
+func (a *artifactSetContainer) Update() error {
 	return a.base.Update()
 }
 
-func (a *artifactSetImpl) Close() error {
+func (a *artifactSetContainer) Close() error {
 	return a.base.Close()
 }
 
-func (a *artifactSetImpl) IsClosed() bool {
+func (a *artifactSetContainer) IsClosed() bool {
 	return a.base.IsClosed()
 }
 
@@ -167,7 +214,7 @@ func (a *artifactSetImpl) IsClosed() bool {
 // The manifst entries may describe dedicated tags
 // to use for the dedicated artifact as annotation
 // with the key TAGS_ANNOTATION.
-func (a *artifactSetImpl) GetIndex() *artdesc.Index {
+func (a *artifactSetContainer) GetIndex() *artdesc.Index {
 	if a.IsReadOnly() {
 		return a.base.GetState().GetOriginalState().(*artdesc.Index)
 	}
@@ -177,7 +224,7 @@ func (a *artifactSetImpl) GetIndex() *artdesc.Index {
 // GetMain returns the digest of the main artifact
 // described by this artifact set.
 // There might be more, if the main artifact is an index.
-func (a *artifactSetImpl) GetMain() digest.Digest {
+func (a *artifactSetContainer) GetMain() digest.Digest {
 	idx := a.GetIndex()
 	if idx.Annotations == nil {
 		return ""
@@ -185,15 +232,15 @@ func (a *artifactSetImpl) GetMain() digest.Digest {
 	return digest.Digest(RetrieveMainArtifact(idx.Annotations))
 }
 
-func (a *artifactSetImpl) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
+func (a *artifactSetContainer) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 	return a.GetIndex().GetBlobDescriptor(digest)
 }
 
-func (a *artifactSetImpl) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
+func (a *artifactSetContainer) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
 	return a.base.GetBlobData(digest)
 }
 
-func (a *artifactSetImpl) AddBlob(blob cpi.BlobAccess) error {
+func (a *artifactSetContainer) AddBlob(blob cpi.BlobAccess) error {
 	if a.IsClosed() {
 		return accessio.ErrClosed
 	}
@@ -208,7 +255,7 @@ func (a *artifactSetImpl) AddBlob(blob cpi.BlobAccess) error {
 	return a.base.AddBlob(blob)
 }
 
-func (a *artifactSetImpl) ListTags() ([]string, error) {
+func (a *artifactSetContainer) ListTags() ([]string, error) {
 	result := []string{}
 	for _, a := range a.GetIndex().Manifests {
 		if a.Annotations != nil {
@@ -220,7 +267,7 @@ func (a *artifactSetImpl) ListTags() ([]string, error) {
 	return result, nil
 }
 
-func (a *artifactSetImpl) GetTags(digest digest.Digest) ([]string, error) {
+func (a *artifactSetContainer) GetTags(digest digest.Digest) ([]string, error) {
 	result := []string{}
 	for _, a := range a.GetIndex().Manifests {
 		if a.Digest == digest && a.Annotations != nil {
@@ -232,7 +279,7 @@ func (a *artifactSetImpl) GetTags(digest digest.Digest) ([]string, error) {
 	return result, nil
 }
 
-func (a *artifactSetImpl) HasArtifact(ref string) (bool, error) {
+func (a *artifactSetContainer) HasArtifact(ref string) (bool, error) {
 	if a.IsClosed() {
 		return false, accessio.ErrClosed
 	}
@@ -241,16 +288,16 @@ func (a *artifactSetImpl) HasArtifact(ref string) (bool, error) {
 	return a.hasArtifact(ref)
 }
 
-func (a *artifactSetImpl) GetArtifact(ref string) (cpi.ArtifactAccess, error) {
+func (a *artifactSetContainer) GetArtifact(i support.ArtifactSetContainerImpl, ref string) (cpi.ArtifactAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
 	a.base.Lock()
 	defer a.base.Unlock()
-	return a.getArtifact(ref)
+	return a.getArtifact(i, ref)
 }
 
-func (a *artifactSetImpl) matcher(ref string) func(d *artdesc.Descriptor) bool {
+func (a *artifactSetContainer) matcher(ref string) func(d *artdesc.Descriptor) bool {
 	if ok, digest := artdesc.IsDigest(ref); ok {
 		return func(desc *artdesc.Descriptor) bool {
 			return desc.Digest == digest
@@ -269,7 +316,7 @@ func (a *artifactSetImpl) matcher(ref string) func(d *artdesc.Descriptor) bool {
 	}
 }
 
-func (a *artifactSetImpl) hasArtifact(ref string) (bool, error) {
+func (a *artifactSetContainer) hasArtifact(ref string) (bool, error) {
 	idx := a.GetIndex()
 	match := a.matcher(ref)
 	for i := range idx.Manifests {
@@ -280,18 +327,18 @@ func (a *artifactSetImpl) hasArtifact(ref string) (bool, error) {
 	return false, nil
 }
 
-func (a *artifactSetImpl) getArtifact(ref string) (cpi.ArtifactAccess, error) {
+func (a *artifactSetContainer) getArtifact(impl support.ArtifactSetContainerImpl, ref string) (cpi.ArtifactAccess, error) {
 	idx := a.GetIndex()
 	match := a.matcher(ref)
 	for i, e := range idx.Manifests {
 		if match(&idx.Manifests[i]) {
-			return a.base.GetArtifact(a.impl, e.Digest)
+			return a.base.GetArtifact(impl, e.Digest)
 		}
 	}
 	return nil, errors.ErrUnknown(cpi.KIND_OCIARTIFACT, ref)
 }
 
-func (a *artifactSetImpl) AnnotateArtifact(digest digest.Digest, name, value string) error {
+func (a *artifactSetContainer) AnnotateArtifact(digest digest.Digest, name, value string) error {
 	if a.IsClosed() {
 		return accessio.ErrClosed
 	}
@@ -315,7 +362,7 @@ func (a *artifactSetImpl) AnnotateArtifact(digest digest.Digest, name, value str
 	return errors.ErrUnknown(cpi.KIND_OCIARTIFACT, digest.String())
 }
 
-func (a *artifactSetImpl) AddArtifact(artifact cpi.Artifact, tags ...string) (access accessio.BlobAccess, err error) {
+func (a *artifactSetContainer) AddArtifact(artifact cpi.Artifact, tags ...string) (access accessio.BlobAccess, err error) {
 	blob, err := a.AddPlatformArtifact(artifact, nil)
 	if err != nil {
 		return nil, err
@@ -323,7 +370,7 @@ func (a *artifactSetImpl) AddArtifact(artifact cpi.Artifact, tags ...string) (ac
 	return blob, a.AddTags(blob.Digest(), tags...)
 }
 
-func (a *artifactSetImpl) AddPlatformArtifact(artifact cpi.Artifact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
+func (a *artifactSetContainer) AddPlatformArtifact(artifact cpi.Artifact, platform *artdesc.Platform) (access accessio.BlobAccess, err error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
@@ -349,12 +396,12 @@ func (a *artifactSetImpl) AddPlatformArtifact(artifact cpi.Artifact, platform *a
 	return blob, nil
 }
 
-func (a *artifactSetImpl) NewArtifact(artifact ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+func (a *artifactSetContainer) NewArtifact(i support.ArtifactSetContainerImpl, artifact ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
 	if a.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	return support.NewArtifact(a.impl, artifact...)
+	return support.NewArtifact(i, artifact...)
 }

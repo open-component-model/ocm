@@ -50,5 +50,5 @@ func (a *RepositorySpec) UniformRepositorySpec() *cpi.UniformRepositorySpec {
 }
 
 func (a *RepositorySpec) Repository(ctx cpi.Context, creds credentials.Credentials) (cpi.Repository, error) {
-	return ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, newRepository).(*Repository), nil
+	return ctx.GetAttributes().GetOrCreateAttribute(ATTR_REPOS, NewRepository).(*Repository), nil
 }

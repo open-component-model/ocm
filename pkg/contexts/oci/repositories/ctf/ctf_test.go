@@ -171,7 +171,7 @@ var _ = Describe("ctf management", func() {
 			CheckArtifact(art)
 			art, err = n.GetArtifact(TAG)
 			Expect(err).To(Succeed())
-			b, err := art.Artifact().ToBlobAccess()
+			b, err := art.GetDescriptor().ToBlobAccess()
 			Expect(err).To(Succeed())
 			Expect(b.Digest()).To(Equal(digest.Digest("sha256:" + DIGEST_MANIFEST)))
 

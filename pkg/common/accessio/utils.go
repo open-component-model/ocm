@@ -131,9 +131,10 @@ func (c *once) Close() error {
 	return nil
 }
 
-func Close(c io.Closer) error {
-	if c == nil {
-		return nil
+func Close(closer ...io.Closer) error {
+	list := errors.ErrList()
+	for _, c := range closer {
+		list.Add(c.Close())
 	}
-	return c.Close()
+	return list.Result()
 }

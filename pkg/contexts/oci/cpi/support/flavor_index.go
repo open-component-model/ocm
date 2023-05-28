@@ -73,10 +73,12 @@ func (i *IndexImpl) GetDescriptor() *artdesc.Index {
 
 func (i *IndexImpl) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 	d := i.GetDescriptor().GetBlobDescriptor(digest)
-	if d != nil {
-		return d
-	}
-	return i.container.GetBlobDescriptor(digest)
+	/*
+		if d == nil {
+			d = i.container.GetBlobDescriptor(digest)
+		}
+	*/
+	return d
 }
 
 func (i *IndexImpl) GetBlob(digest digest.Digest) (internal.BlobAccess, error) {

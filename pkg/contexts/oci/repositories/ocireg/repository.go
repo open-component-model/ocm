@@ -44,59 +44,72 @@ func (r *RepositoryInfo) HostInfo() (string, string, string) {
 	return utils.SplitLocator(r.Locator)
 }
 
-type Repository struct {
-	ctx    cpi.Context
+type RepositoryImpl struct {
+	cpi.ImplementationBase[cpi.Repository]
 	logger logging.UnboundLogger
 	spec   *RepositorySpec
 	info   *RepositoryInfo
 }
 
 var (
-	_ cpi.Repository                       = &Repository{}
-	_ credentials.ConsumerIdentityProvider = &Repository{}
+	_ cpi.RepositoryImpl                   = (*RepositoryImpl)(nil)
+	_ credentials.ConsumerIdentityProvider = &RepositoryImpl{}
 )
 
-func NewRepository(ctx cpi.Context, spec *RepositorySpec, info *RepositoryInfo) (*Repository, error) {
+func NewRepository(ctx cpi.Context, spec *RepositorySpec, info *RepositoryInfo) (cpi.Repository, error) {
 	urs := spec.UniformRepositorySpec()
-	return &Repository{
-		ctx:    ctx,
-		logger: logging.DynamicLogger(ctx, REALM, logging.NewAttribute(ocmlog.ATTR_HOST, urs.Host)),
-		spec:   spec,
-		info:   info,
-	}, nil
+	i := &RepositoryImpl{
+		ImplementationBase: cpi.NewImplementationBase[cpi.Repository](ctx),
+		logger:             logging.DynamicLogger(ctx, REALM, logging.NewAttribute(ocmlog.ATTR_HOST, urs.Host)),
+		spec:               spec,
+		info:               info,
+	}
+	return cpi.NewRepository(i), nil
 }
 
-func (r *Repository) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
+func GetRepositoryImplementation(r cpi.Repository) (*RepositoryImpl, error) {
+	i, err := cpi.GetRepositoryImplementation(r)
+	if err != nil {
+		return nil, err
+	}
+	return i.(*RepositoryImpl), nil
+}
+
+func (r *RepositoryImpl) GetSpecification() cpi.RepositorySpec {
+	return r.spec
+}
+
+func (r *RepositoryImpl) Close() error {
+	return nil
+}
+
+func (r *RepositoryImpl) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
 	if c, ok := utils.Optional(uctx...).(credentials.StringUsageContext); ok {
 		return ociidentity.GetConsumerId(r.info.Locator, c.String())
 	}
 	return ociidentity.GetConsumerId(r.info.Locator, "")
 }
 
-func (r *Repository) GetIdentityMatcher() string {
+func (r *RepositoryImpl) GetIdentityMatcher() string {
 	return ociidentity.CONSUMER_TYPE
 }
 
-func (r *Repository) NamespaceLister() cpi.NamespaceLister {
+func (r *RepositoryImpl) NamespaceLister() cpi.NamespaceLister {
 	return nil
 }
 
-func (r *Repository) IsReadOnly() bool {
+func (r *RepositoryImpl) IsReadOnly() bool {
 	return false
 }
 
-func (r *Repository) IsClosed() bool {
-	return false
-}
-
-func (r *Repository) getCreds(comp string) (credentials.Credentials, error) {
+func (r *RepositoryImpl) getCreds(comp string) (credentials.Credentials, error) {
 	if r.info.Creds != nil {
 		return r.info.Creds, nil
 	}
-	return ociidentity.GetCredentials(r.ctx, r.info.Locator, comp)
+	return ociidentity.GetCredentials(r.GetContext(), r.info.Locator, comp)
 }
 
-func (r *Repository) getResolver(comp string) (resolve.Resolver, error) {
+func (r *RepositoryImpl) getResolver(comp string) (resolve.Resolver, error) {
 	creds, err := r.getCreds(comp)
 	if err != nil {
 		if !errors.IsErrUnknownKind(err, credentials.KIND_CONSUMER) {
@@ -133,7 +146,7 @@ func (r *Repository) getResolver(comp string) (resolve.Resolver, error) {
 	return docker.NewResolver(opts), nil
 }
 
-func (r *Repository) getRef(comp, vers string) string {
+func (r *RepositoryImpl) getRef(comp, vers string) string {
 	base := path.Join(r.info.Locator, comp)
 	if vers == "" {
 		return base
@@ -144,15 +157,11 @@ func (r *Repository) getRef(comp, vers string) string {
 	return base + ":" + vers
 }
 
-func (r *Repository) GetSpecification() cpi.RepositorySpec {
-	return r.spec
-}
-
-func (r *Repository) GetBaseURL() string {
+func (r *RepositoryImpl) GetBaseURL() string {
 	return r.spec.BaseURL
 }
 
-func (r *Repository) ExistsArtifact(name string, version string) (bool, error) {
+func (r *RepositoryImpl) ExistsArtifact(name string, version string) (bool, error) {
 	res, err := r.getResolver(name)
 	if err != nil {
 		return false, err
@@ -169,7 +178,7 @@ func (r *Repository) ExistsArtifact(name string, version string) (bool, error) {
 	return true, nil
 }
 
-func (r *Repository) LookupArtifact(name string, version string) (cpi.ArtifactAccess, error) {
+func (r *RepositoryImpl) LookupArtifact(name string, version string) (cpi.ArtifactAccess, error) {
 	n, err := r.LookupNamespace(name)
 	if err != nil {
 		return nil, err
@@ -177,10 +186,6 @@ func (r *Repository) LookupArtifact(name string, version string) (cpi.ArtifactAc
 	return n.GetArtifact(version)
 }
 
-func (r *Repository) LookupNamespace(name string) (cpi.NamespaceAccess, error) {
+func (r *RepositoryImpl) LookupNamespace(name string) (cpi.NamespaceAccess, error) {
 	return NewNamespace(r, name)
-}
-
-func (r *Repository) Close() error {
-	return nil
 }

@@ -14,10 +14,14 @@ import (
 // ReferencableCloser manages closable views to a basic closer.
 // If the last view is closed, the basic closer is finally closed.
 type ReferencableCloser interface {
-	RefMgmt
+	Allocatable
+	UnrefLast() error
+	IsClosed() bool
 
 	Closer() io.Closer
 	View(main ...bool) (CloserView, error)
+
+	WithName(name string) ReferencableCloser
 }
 
 type referencableCloser struct {
@@ -27,6 +31,11 @@ type referencableCloser struct {
 
 func NewRefCloser(closer io.Closer, unused ...bool) ReferencableCloser {
 	return &referencableCloser{RefMgmt: NewAllocatable(closer.Close, unused...), closer: closer}
+}
+
+func (r *referencableCloser) WithName(name string) ReferencableCloser {
+	r.RefMgmt.WithName(name)
+	return r
 }
 
 func (r *referencableCloser) Closer() io.Closer {
@@ -102,7 +111,7 @@ func (v *view) Finalize() error {
 	}
 
 	if err := v.ref.UnrefLast(); err != nil {
-		return errors.ErrStillInUseWrap(errors.Wrapf(err, "unable to unref last: %w"))
+		return errors.ErrStillInUseWrap(err)
 	}
 
 	v.closed = true

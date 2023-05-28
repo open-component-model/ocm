@@ -20,7 +20,12 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/logging"
 )
+
+var ALLOC_REALM = logging.DefineSubRealm("reference counting", "refcnt")
+
+var allocLog = logging.DynamicLogger(ALLOC_REALM)
 
 type Allocatable interface {
 	Ref() error
@@ -30,6 +35,9 @@ type Allocatable interface {
 type RefMgmt interface {
 	Allocatable
 	UnrefLast() error
+	IsClosed() bool
+
+	WithName(name string) RefMgmt
 }
 
 type refMgmt struct {
@@ -37,6 +45,7 @@ type refMgmt struct {
 	refcount int
 	closed   bool
 	cleanup  func() error
+	name     string
 }
 
 func NewAllocatable(cleanup func() error, unused ...bool) RefMgmt {
@@ -46,7 +55,18 @@ func NewAllocatable(cleanup func() error, unused ...bool) RefMgmt {
 			n = 0
 		}
 	}
-	return &refMgmt{refcount: n, cleanup: cleanup}
+	return &refMgmt{refcount: n, cleanup: cleanup, name: "object"}
+}
+
+func (c *refMgmt) WithName(name string) RefMgmt {
+	c.name = name
+	return c
+}
+
+func (c *refMgmt) IsClosed() bool {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+	return c.closed
 }
 
 func (c *refMgmt) Ref() error {
@@ -56,6 +76,7 @@ func (c *refMgmt) Ref() error {
 		return ErrClosed
 	}
 	c.refcount++
+	allocLog.Debug("ref", "name", c.name, "refcnt", c.refcount)
 	return nil
 }
 
@@ -69,6 +90,7 @@ func (c *refMgmt) Unref() error {
 	var err error
 
 	c.refcount--
+	allocLog.Debug("unref", "name", c.name, "refcnt", c.refcount)
 	if c.refcount <= 0 {
 		if c.cleanup != nil {
 			err = c.cleanup()
@@ -78,7 +100,7 @@ func (c *refMgmt) Unref() error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("unable to unref: %w", err)
+		return fmt.Errorf("unable to unref %s: %w", c.name, err)
 	}
 
 	return nil
@@ -92,12 +114,13 @@ func (c *refMgmt) UnrefLast() error {
 	}
 
 	if c.refcount > 1 {
-		return errors.Newf("object still in use: %d reference(s) pending", c.refcount)
+		return errors.Newf("%s still in use: %d reference(s) pending", c.name, c.refcount)
 	}
 
 	var err error
 
 	c.refcount--
+	allocLog.Debug("unref last", "name", c.name, "refcnt", c.refcount)
 	if c.refcount <= 0 {
 		if c.cleanup != nil {
 			err = c.cleanup()
@@ -107,7 +130,7 @@ func (c *refMgmt) UnrefLast() error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("unable to unref last: %w", err)
+		return fmt.Errorf("unable to unref last %s ref: %w", c.name, err)
 	}
 
 	return nil

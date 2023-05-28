@@ -27,36 +27,29 @@ import (
    Digests used as filename will replace the ":" by a "."
 */
 
-// Repository is a closable view on a repository implementation.
 type Repository struct {
-	view accessio.CloserView
-	*RepositoryImpl
+	cpi.Repository
+	impl *RepositoryImpl
 }
 
-func (r *Repository) IsClosed() bool {
-	return r.view.IsClosed()
-}
-
-func (r *Repository) Close() error {
-	return r.view.Close()
-}
-
-func (r *Repository) LookupArtifact(name string, ref string) (cpi.ArtifactAccess, error) {
-	return r.RepositoryImpl.LookupArtifact(name, ref)
+func (r *Repository) Write(path string, mode vfs.FileMode, opts ...accessio.Option) error {
+	if r.IsClosed() {
+		return cpi.ErrClosed
+	}
+	return r.impl.Write(path, mode, opts...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 // RepositoryImpl is closed, if all views are released.
 type RepositoryImpl struct {
-	refs accessio.ReferencableCloser
+	cpi.ImplementationBase[cpi.Repository]
 
-	ctx  cpi.Context
 	spec *RepositorySpec
 	base *artifactset.FileSystemBlobAccess
 }
 
-var _ cpi.Repository = (*Repository)(nil)
+var _ cpi.RepositoryImpl = (*RepositoryImpl)(nil)
 
 // New returns a new representation based repository.
 func New(ctx cpi.Context, spec *RepositorySpec, setup accessobj.Setup, closer accessobj.Closer, mode vfs.FileMode) (*Repository, error) {
@@ -71,21 +64,13 @@ func _Wrap(ctx cpi.ContextProvider, spec *RepositorySpec, obj *accessobj.AccessO
 	if err != nil {
 		return nil, err
 	}
-	r := &RepositoryImpl{
-		ctx:  cpi.FromProvider(ctx),
-		spec: spec,
-		base: artifactset.NewFileSystemBlobAccess(obj),
+	impl := &RepositoryImpl{
+		ImplementationBase: cpi.NewImplementationBase[cpi.Repository](cpi.FromProvider(ctx)),
+		spec:               spec,
+		base:               artifactset.NewFileSystemBlobAccess(obj),
 	}
-	r.refs = accessio.NewRefCloser(r, true)
-	return r.View(true)
-}
-
-func (r *RepositoryImpl) View(main ...bool) (*Repository, error) {
-	v, err := r.refs.View(main...)
-	if err != nil {
-		return nil, err
-	}
-	return &Repository{view: v, RepositoryImpl: r}, nil
+	r := cpi.NewRepository(impl, "OCI CTF")
+	return &Repository{r, impl}, nil
 }
 
 func (r *RepositoryImpl) GetSpecification() cpi.RepositorySpec {
@@ -109,10 +94,6 @@ func (r *RepositoryImpl) GetNamespaces(prefix string, closure bool) ([]string, e
 
 func (r *RepositoryImpl) IsReadOnly() bool {
 	return r.base.IsReadOnly()
-}
-
-func (r *RepositoryImpl) IsClosed() bool {
-	return r.base.IsClosed()
 }
 
 func (r *RepositoryImpl) Write(path string, mode vfs.FileMode, opts ...accessio.Option) error {
@@ -142,24 +123,18 @@ func (r *RepositoryImpl) ExistsArtifact(name string, tag string) (bool, error) {
 }
 
 func (r *RepositoryImpl) LookupArtifact(name string, ref string) (cpi.ArtifactAccess, error) {
-	v, err := r.View()
-	if err != nil {
-		return nil, err
-	}
-	defer v.Close()
-	a := r.getIndex().GetArtifactInfo(name, ref)
-	if a == nil {
-		return nil, cpi.ErrUnknownArtifact(name, ref)
-	}
-
-	ns, err := newNamespace(r, name, false) // share repo view.namespace not exposed
+	ns, err := NewNamespace(r, name, false) // share repo view.namespace not exposed
 	if err != nil {
 		return nil, err
 	}
 	defer ns.Close()
+	a := r.getIndex().GetArtifactInfo(name, ref)
+	if a == nil {
+		return nil, cpi.ErrUnknownArtifact(name, ref)
+	}
 	return ns.GetArtifact(ref)
 }
 
 func (r *RepositoryImpl) LookupNamespace(name string) (cpi.NamespaceAccess, error) {
-	return newNamespace(r, name, true)
+	return NewNamespace(r, name, true)
 }

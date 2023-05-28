@@ -17,7 +17,7 @@ import (
 )
 
 type ManifestImpl struct {
-	*artifactBase
+	artifactBase
 }
 
 var _ cpi.ManifestAccess = (*ManifestImpl)(nil)
@@ -67,10 +67,12 @@ func (m *ManifestImpl) GetDescriptor() *artdesc.Manifest {
 
 func (m *ManifestImpl) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 	d := m.GetDescriptor().GetBlobDescriptor(digest)
-	if d != nil {
-		return d
-	}
-	return m.container.GetBlobDescriptor(digest)
+	/*
+		if d != nil {
+			d = m.container.GetBlobDescriptor(digest)
+		}
+	*/
+	return d
 }
 
 func (m *ManifestImpl) GetConfigBlob() (cpi.BlobAccess, error) {

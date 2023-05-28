@@ -19,7 +19,7 @@ func Close(c io.Closer, msg ...interface{}) {
 }
 
 func Defer(f func() error, msg ...interface{}) {
-	DeferWithOffset(0, f, msg...)
+	DeferWithOffset(1, f, msg...)
 }
 
 func DeferWithOffset(o int, f func() error, msg ...interface{}) {

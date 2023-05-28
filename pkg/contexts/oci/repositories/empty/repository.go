@@ -12,10 +12,18 @@ import (
 
 type Repository struct{}
 
-var _ cpi.Repository = &Repository{}
+var _ cpi.Repository = (*Repository)(nil)
 
-func newRepository(ctx datacontext.Context) interface{} {
+func NewRepository(ctx datacontext.Context) interface{} {
 	return &Repository{}
+}
+
+func (r *Repository) IsClosed() bool {
+	return false
+}
+
+func (r Repository) Dup() (cpi.Repository, error) {
+	return &Repository{}, nil
 }
 
 func (r Repository) GetSpecification() cpi.RepositorySpec {

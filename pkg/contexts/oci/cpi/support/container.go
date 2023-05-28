@@ -8,71 +8,103 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/errors"
 )
+
+// BlobProvider manages the technical access to blobs.
+type BlobProvider interface {
+	accessio.Allocatable
+	cpi.BlobSource
+	cpi.BlobSink
+}
 
 // ArtifactSetContainer is the interface used by subsequent access objects
 // to access the base implementation.
 type ArtifactSetContainer interface {
+	GetNamespace() string
+
 	IsReadOnly() bool
-	IsClosed() bool
+	// IsClosed() bool
+
+	cpi.BlobSource
+	cpi.BlobSink
 
 	Close() error
 
-	GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor
-	GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error)
-	AddBlob(blob cpi.BlobAccess) error
+	// GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor
 
-	GetArtifact(vers string) (cpi.ArtifactAccess, error)
+	GetArtifact(i ArtifactSetContainerImpl, vers string) (cpi.ArtifactAccess, error)
+	NewArtifact(i ArtifactSetContainerImpl, arts ...*artdesc.Artifact) (cpi.ArtifactAccess, error)
+
 	AddArtifact(artifact cpi.Artifact, tags ...string) (access accessio.BlobAccess, err error)
+
+	AddTags(digest digest.Digest, tags ...string) error
+	ListTags() ([]string, error)
+	HasArtifact(vers string) (bool, error)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-
-// ArtifactSetContainerInt is the implementation interface for a provider.
-type ArtifactSetContainerInt ArtifactSetContainer
-
-type artifactSetContainerImpl struct {
-	refs accessio.ReferencableCloser
-	ArtifactSetContainerInt
-}
 
 type ArtifactSetContainerImpl interface {
-	ArtifactSetContainer
-	View(main ...bool) (ArtifactSetContainer, error)
+	cpi.NamespaceAccessImpl
+
+	View(main ...bool) (cpi.NamespaceAccess, error)
+
+	// GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor
+	IsReadOnly() bool
+
+	WithContainer(container ArtifactSetContainer) ArtifactSetContainerImpl
 }
 
-func NewArtifactSetContainer(c ArtifactSetContainerInt) (ArtifactSetContainer, ArtifactSetContainerImpl) {
-	i := &artifactSetContainerImpl{
-		refs:                    accessio.NewRefCloser(c, true),
-		ArtifactSetContainerInt: c,
+type artifactSetContainerImpl struct {
+	refs                 cpi.NamespaceAccessViewManager
+	ArtifactSetContainer // inherit as many as possible methods for cpi.NamespaceAccessImpl
+}
+
+var _ ArtifactSetContainerImpl = (*artifactSetContainerImpl)(nil)
+
+func NewArtifactSetContainerImpl(c ArtifactSetContainer) ArtifactSetContainerImpl {
+	return &artifactSetContainerImpl{
+		ArtifactSetContainer: c,
 	}
-	v, _ := i.View(true)
-	return v, i
 }
 
-func (i *artifactSetContainerImpl) View(main ...bool) (ArtifactSetContainer, error) {
-	v, err := i.refs.View(main...)
-	if err != nil {
-		return nil, err
+func NewArtifactSet(c ArtifactSetContainer, kind ...string) cpi.NamespaceAccess {
+	return cpi.NewNamespaceAccess(NewArtifactSetContainerImpl(c), kind...)
+}
+
+func GetArtifactSetContainer(i cpi.NamespaceAccessImpl) (ArtifactSetContainer, error) {
+	if c, ok := i.(*artifactSetContainerImpl); ok {
+		return c.ArtifactSetContainer, nil
 	}
-	return &artifactSetContainerView{
-		view:                     v,
-		ArtifactSetContainerImpl: i,
-	}, nil
+	return nil, errors.ErrNotSupported()
 }
 
-////////////////////////////////////////////////////////////////////////////////
-
-type artifactSetContainerView struct {
-	view accessio.CloserView
-	ArtifactSetContainerImpl
+func (i *artifactSetContainerImpl) SetViewManager(m cpi.NamespaceAccessViewManager) {
+	i.refs = m
 }
 
-func (v *artifactSetContainerView) IsClosed() bool {
-	return v.view.IsClosed()
+func (i *artifactSetContainerImpl) WithContainer(c ArtifactSetContainer) ArtifactSetContainerImpl {
+	return &artifactSetContainerImpl{
+		refs:                 i.refs,
+		ArtifactSetContainer: c,
+	}
 }
 
-func (v *artifactSetContainerView) Close() error {
-	return v.view.Close()
+func (i *artifactSetContainerImpl) View(main ...bool) (cpi.NamespaceAccess, error) {
+	return i.refs.View(main...)
+}
+
+func (i *artifactSetContainerImpl) GetArtifact(vers string) (cpi.ArtifactAccess, error) {
+	return i.ArtifactSetContainer.GetArtifact(i, vers)
+}
+
+func (i *artifactSetContainerImpl) AddArtifact(artifact cpi.Artifact, tags ...string) (access accessio.BlobAccess, err error) {
+	return i.ArtifactSetContainer.AddArtifact(artifact, tags...)
+}
+
+func (i *artifactSetContainerImpl) NewArtifact(arts ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+	return i.ArtifactSetContainer.NewArtifact(i, arts...)
 }

@@ -21,6 +21,7 @@ type Resource interface {
 	resource.ResourceView[Resource]
 
 	Name() string
+	Operation(err error) error
 }
 
 type (
@@ -32,8 +33,17 @@ type (
 	_resourceImpl = *ResourceImpl
 )
 
+var _ resource.ResourceImplementation[Resource] = (*ResourceImpl)(nil)
+
+func (r *ResourceImpl) SetViewManager(m resource.ViewManager[Resource]) {
+}
+
 func (r *ResourceImpl) Name() string {
 	return r.name
+}
+
+func (r *ResourceImpl) Operation(err error) error {
+	return err
 }
 
 // Close is called for the last closed view and
@@ -46,7 +56,7 @@ func (r *ResourceImpl) Close() error {
 	return nil
 }
 
-type _resourceView = resource.ResourceView[Resource]
+type _resourceView = resource.ResourceViewInt[Resource]
 
 // resourceView implementation the mapping of a ResourceImpl
 // to a fully-fledged Resource implementation including
@@ -56,13 +66,19 @@ type resourceView struct {
 	_resourceImpl
 }
 
+var _ Resource = (*resourceView)(nil)
+
 // Close must be implemented to resolve the two provided Close
 // methods to the one of the view-related part.
 func (r *resourceView) Close() error {
 	return r._resourceView.Close()
 }
 
-func resourceViewCreator(impl *ResourceImpl, v resource.CloserView, d resource.Dup[Resource]) Resource {
+func (r *resourceView) Operation(err error) error {
+	return r.Execute(func() error { return r._resourceImpl.Operation(err) })
+}
+
+func resourceViewCreator(impl *ResourceImpl, v resource.CloserView, d resource.ViewManager[Resource]) Resource {
 	return &resourceView{
 		_resourceView: resource.NewView(v, d),
 		_resourceImpl: impl,
@@ -75,8 +91,7 @@ func resourceViewCreator(impl *ResourceImpl, v resource.CloserView, d resource.D
 // the first view.
 func New(name string) Resource {
 	i := &ResourceImpl{name}
-	_, r := resource.NewResource(i, resourceViewCreator)
-	return r
+	return resource.NewResource(i, resourceViewCreator)
 }
 
 var _ = Describe("ref test", func() {
@@ -110,6 +125,15 @@ var _ = Describe("ref test", func() {
 		Expect(v.IsClosed()).To(BeTrue())
 		Expect(v.Close()).To(Equal(resource.ErrClosed))
 		Expect(v.Name()).To(Equal(""))
+	})
 
+	It("executes operation", func() {
+		r := New("alice")
+		Expect(r.IsClosed()).To(BeFalse())
+
+		Expect(r.Operation(nil)).To(Succeed())
+		Expect(r.Operation(fmt.Errorf("fail"))).To(MatchError("fail"))
+		MustBeSuccessful(r.Close())
+		Expect(r.Operation(nil)).To(Equal(resource.ErrClosed))
 	})
 })

@@ -6,6 +6,7 @@ package support
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/opencontainers/go-digest"
 
@@ -20,12 +21,13 @@ import (
 var ErrNoIndex = errors.New("manifest does not support access to subsequent artifacts")
 
 type ArtifactImpl struct {
-	*artifactBase
+	artifactBase
+	closer []io.Closer
 }
 
 var _ cpi.ArtifactAccess = (*ArtifactImpl)(nil)
 
-func NewArtifactForBlob(container ArtifactSetContainerImpl, blob accessio.BlobAccess) (cpi.ArtifactAccess, error) {
+func NewArtifactForBlob(container ArtifactSetContainerImpl, blob accessio.BlobAccess, closer ...io.Closer) (cpi.ArtifactAccess, error) {
 	mode := accessobj.ACC_WRITABLE
 	if container.IsReadOnly() {
 		mode = accessobj.ACC_READONLY
@@ -35,7 +37,7 @@ func NewArtifactForBlob(container ArtifactSetContainerImpl, blob accessio.BlobAc
 		return nil, err
 	}
 
-	return newArtifactImpl(container, state)
+	return newArtifactImpl(container, state, closer...)
 }
 
 func NewArtifact(container ArtifactSetContainerImpl, defs ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
@@ -54,19 +56,24 @@ func NewArtifact(container ArtifactSetContainerImpl, defs ...*artdesc.Artifact) 
 	return newArtifactImpl(container, state)
 }
 
-func newArtifactImpl(container ArtifactSetContainerImpl, state accessobj.State) (cpi.ArtifactAccess, error) {
+func newArtifactImpl(container ArtifactSetContainerImpl, state accessobj.State, closer ...io.Closer) (cpi.ArtifactAccess, error) {
 	v, err := container.View()
 	if err != nil {
 		return nil, err
 	}
 	a := &ArtifactImpl{
 		artifactBase: newArtifactBase(v, container, state),
+		closer:       closer,
 	}
 	return a, nil
 }
 
 func (a *ArtifactImpl) Close() error {
-	return a.view.Close()
+	return accessio.Close(append(append(a.closer[:0:0], a.view), a.closer...)...)
+}
+
+func (a *ArtifactImpl) Dup() (cpi.ArtifactAccess, error) {
+	return newArtifactImpl(a.container, a.state)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -102,10 +109,12 @@ func (a *ArtifactImpl) GetDescriptor() *artdesc.Artifact {
 
 func (a *ArtifactImpl) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 	d := a.GetDescriptor().GetBlobDescriptor(digest)
-	if d != nil {
-		return d
-	}
-	return a.container.GetBlobDescriptor(digest)
+	/*
+		if d == nil {
+			d = a.container.GetBlobDescriptor(digest)
+		}
+	*/
+	return d
 }
 
 func (a *ArtifactImpl) Index() (*artdesc.Index, error) {

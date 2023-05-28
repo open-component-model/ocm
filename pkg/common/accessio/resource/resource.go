@@ -26,7 +26,7 @@
 // The resource.ResourceView interface offers the view-related
 // methods.
 //
-// With NewResource a new reference management and a first
+// With NewResource a new view management and a first
 // view is created for this object. This method is typically
 // wrapped by a dedicated resource creator function:
 //
@@ -34,9 +34,18 @@
 //	   i := MyResourceImpl{
 //	          ...
 //	        }
-//	   _, r := resource.NewResource(i, myViewCreator)
-//	   return r
+//	   return resource.NewResource(i, myViewCreator)
 //	}
+//
+// The interface ResourceImplementation describes the minimal
+// interface an implementation object has to implement to
+// work with this view management package.
+// It gets access to the ViewManager to be able to
+// create new views/references for potential sub objects
+// provided by the implementation, which need access to
+// the implementation. In such a case those sub objects
+// require a Close method again, are may even use an
+// own view management.
 //
 // The management as well as the view can be used to create
 // additional views.
@@ -92,40 +101,58 @@ type ResourceView[T resourceViewInterface[T]] interface {
 	resourceViewInterface[T]
 }
 
+// ResourceViewInt can be used to execute an operation on a non-closed
+// view.
+type ResourceViewInt[T resourceViewInterface[T]] interface {
+	resourceViewInterface[T]
+	// Execute call a synchronized function on a non-closed view
+	Execute(func() error) error
+}
+
 type Dup[T any] interface {
 	Dup() (T, error)
+}
+
+// ViewManager is the interface of the reference manager, which
+// can be used to gain new views to a managed resource.
+type ViewManager[T any] interface {
+	View(main ...bool) (T, error)
 }
 
 // ResourceViewCreator is a function which must be provided by the resource provider
 // to map an implementation to the resource interface T.
 // It must use NewView to create the view related part of a resource.
-type ResourceViewCreator[T any, I io.Closer] func(I, CloserView, Dup[T]) T
+type ResourceViewCreator[T any, I io.Closer] func(I, CloserView, ViewManager[T]) T
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type resourceInt[T any, I io.Closer] struct {
+type viewManager[T any, I io.Closer] struct {
 	refs    accessio.ReferencableCloser
 	creator ResourceViewCreator[T, I]
 	impl    I
 }
 
+// ResourceImplementation is the minimal interface for an implementation
+// a resource with managed views.
+type ResourceImplementation[T any] interface {
+	io.Closer
+	SetViewManager(m ViewManager[T])
+}
+
 // NewResource creates a resource based on an implementation and a ResourceViewCreator.
 // function.
-func NewResource[T any, I io.Closer](impl I, c ResourceViewCreator[T, I], main ...bool) (Dup[T], T) {
-	i := &resourceInt[T, I]{
-		refs:    accessio.NewRefCloser(impl, true),
+func NewResource[T any, I ResourceImplementation[T]](impl I, c ResourceViewCreator[T, I], name string, main ...bool) T {
+	i := &viewManager[T, I]{
+		refs:    accessio.NewRefCloser(impl, true).WithName(name),
 		creator: c,
 		impl:    impl,
 	}
+	impl.SetViewManager(i)
 	t, _ := i.View(main...)
-	return i, t
+	return t
 }
 
-func (i *resourceInt[T, I]) Dup() (T, error) {
-	return i.View()
-}
-
-func (i *resourceInt[T, I]) View(main ...bool) (T, error) {
+func (i *viewManager[T, I]) View(main ...bool) (T, error) {
 	var _nil T
 
 	v, err := i.refs.View(main...)
@@ -139,7 +166,7 @@ func (i *resourceInt[T, I]) View(main ...bool) (T, error) {
 
 type resourceView[T any] struct {
 	view CloserView
-	res  Dup[T]
+	res  ViewManager[T]
 }
 
 // NewView is to be called by a resource view creator to map
@@ -147,7 +174,7 @@ type resourceView[T any] struct {
 // It should, create an object with two local embedded fields:
 //   - the returned ResourceView and the
 //   - given resource implementation.
-func NewView[T resourceViewInterface[T]](v CloserView, d Dup[T]) ResourceView[T] {
+func NewView[T resourceViewInterface[T]](v CloserView, d ViewManager[T]) ResourceViewInt[T] {
 	return &resourceView[T]{v, d}
 }
 
@@ -159,6 +186,24 @@ func (v *resourceView[T]) Close() error {
 	return v.view.Close()
 }
 
+func (v *resourceView[T]) Execute(f func() error) error {
+	return v.view.Execute(f)
+}
+
 func (v *resourceView[T]) Dup() (T, error) {
-	return v.res.Dup()
+	return v.res.View()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type ResourceImplBase[T any] struct {
+	refs ViewManager[T]
+}
+
+func (b *ResourceImplBase[T]) SetViewManager(m ViewManager[T]) {
+	b.refs = m
+}
+
+func (b *ResourceImplBase[T]) View(main ...bool) (T, error) {
+	return b.refs.View(main...)
 }

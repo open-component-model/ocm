@@ -19,13 +19,13 @@ import (
 
 type artifactBase struct {
 	lock      sync.RWMutex
-	view      ArtifactSetContainer
-	container ArtifactSetContainerImpl
+	view      cpi.NamespaceAccess      // this is the actual view used to access the artifact
+	container ArtifactSetContainerImpl // this is the underlying container implementation
 	state     accessobj.State
 }
 
-func newArtifactBase(view ArtifactSetContainer, container ArtifactSetContainerImpl, state accessobj.State) *artifactBase {
-	return &artifactBase{
+func newArtifactBase(view cpi.NamespaceAccess, container ArtifactSetContainerImpl, state accessobj.State) artifactBase {
+	return artifactBase{
 		view:      view,
 		container: container,
 		state:     state,
