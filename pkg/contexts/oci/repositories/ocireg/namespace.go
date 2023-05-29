@@ -23,17 +23,17 @@ import (
 )
 
 type NamespaceContainer struct {
-	repo      *RepositoryImpl
-	namespace string
-	resolver  resolve.Resolver
-	lister    resolve.Lister
-	fetcher   resolve.Fetcher
-	pusher    resolve.Pusher
-	blobs     *BlobContainers
-	checked   bool
+	impl     support.NamespaceAccessImpl
+	repo     *RepositoryImpl
+	resolver resolve.Resolver
+	lister   resolve.Lister
+	fetcher  resolve.Fetcher
+	pusher   resolve.Pusher
+	blobs    *BlobContainers
+	checked  bool
 }
 
-var _ support.ArtifactSetContainer = (*NamespaceContainer)(nil)
+var _ support.NamespaceContainer = (*NamespaceContainer)(nil)
 
 func NewNamespace(repo *RepositoryImpl, name string) (cpi.NamespaceAccess, error) {
 	ref := repo.getRef(name, "")
@@ -54,24 +54,23 @@ func NewNamespace(repo *RepositoryImpl, name string) (cpi.NamespaceAccess, error
 		return nil, err
 	}
 	c := &NamespaceContainer{
-		repo:      repo,
-		namespace: name,
-		resolver:  resolver,
-		lister:    lister,
-		fetcher:   fetcher,
-		pusher:    pusher,
-		blobs:     NewBlobContainers(repo.GetContext(), fetcher, pusher),
+		repo:     repo,
+		resolver: resolver,
+		lister:   lister,
+		fetcher:  fetcher,
+		pusher:   pusher,
+		blobs:    NewBlobContainers(repo.GetContext(), fetcher, pusher),
 	}
 
-	return support.NewArtifactSet(c), nil
+	return support.NewNamespaceAccess(name, c, repo)
 }
 
 func (n *NamespaceContainer) Close() error {
 	return n.blobs.Release()
 }
 
-func (n *NamespaceContainer) GetNamespace() string {
-	return n.namespace
+func (n *NamespaceContainer) SetImplementation(impl support.NamespaceAccessImpl) {
+	n.impl = impl
 }
 
 func (n *NamespaceContainer) getPusher(vers string) (resolve.Pusher, error) {
@@ -80,14 +79,14 @@ func (n *NamespaceContainer) getPusher(vers string) (resolve.Pusher, error) {
 		return nil, err
 	}
 
-	ref := n.repo.getRef(n.namespace, vers)
+	ref := n.repo.getRef(n.impl.GetNamespace(), vers)
 	resolver := n.resolver
 
 	n.repo.GetContext().Logger().Trace("get pusher", "ref", ref)
 	if ok, _ := artdesc.IsDigest(vers); !ok {
 		var err error
 
-		resolver, err = n.repo.getResolver(n.namespace)
+		resolver, err = n.repo.getResolver(n.impl.GetNamespace())
 
 		if err != nil {
 			return nil, fmt.Errorf("unable get resolver: %w", err)
@@ -104,10 +103,6 @@ func (n *NamespaceContainer) push(vers string, blob cpi.BlobAccess) error {
 	}
 	n.repo.GetContext().Logger().Trace("pushing", "version", vers)
 	return push(dummyContext, p, blob)
-}
-
-func (n *NamespaceContainer) GetNamepace() string {
-	return n.namespace
 }
 
 func (n *NamespaceContainer) IsReadOnly() bool {
@@ -142,7 +137,7 @@ func (n *NamespaceContainer) AddBlob(blob cpi.BlobAccess) error {
 	}
 	if _, _, err := blobData.AddBlob(blob); err != nil {
 		log.Debug("adding blob failed", "digest", blob.Digest(), "error", err.Error())
-		return fmt.Errorf("unable to add blob (OCI repository %s): %w", n.namespace, err)
+		return fmt.Errorf("unable to add blob (OCI repository %s): %w", n.impl.GetNamespace(), err)
 	}
 	log.Debug("adding blob done", "digest", blob.Digest())
 	return nil
@@ -152,14 +147,14 @@ func (n *NamespaceContainer) ListTags() ([]string, error) {
 	return n.lister.List(dummyContext)
 }
 
-func (n *NamespaceContainer) GetArtifact(i support.ArtifactSetImpl, vers string) (cpi.ArtifactAccess, error) {
-	ref := n.repo.getRef(n.namespace, vers)
+func (n *NamespaceContainer) GetArtifact(i support.NamespaceAccessImpl, vers string) (cpi.ArtifactAccess, error) {
+	ref := n.repo.getRef(n.impl.GetNamespace(), vers)
 	n.repo.GetContext().Logger().Debug("get artifact", "ref", ref)
 	_, desc, err := n.resolver.Resolve(context.Background(), ref)
 	n.repo.GetContext().Logger().Debug("done", "digest", desc.Digest, "size", desc.Size, "mimetype", desc.MediaType, "error", logging.ErrorMessage(err))
 	if err != nil {
 		if errdefs.IsNotFound(err) {
-			return nil, errors.ErrNotFound(cpi.KIND_OCIARTIFACT, ref, n.namespace)
+			return nil, errors.ErrNotFound(cpi.KIND_OCIARTIFACT, ref, n.impl.GetNamespace())
 		}
 		return nil, err
 	}
@@ -175,7 +170,7 @@ func (n *NamespaceContainer) GetArtifact(i support.ArtifactSetImpl, vers string)
 }
 
 func (n *NamespaceContainer) HasArtifact(vers string) (bool, error) {
-	ref := n.repo.getRef(n.namespace, vers)
+	ref := n.repo.getRef(n.impl.GetNamespace(), vers)
 	n.repo.GetContext().Logger().Debug("check artifact", "ref", ref)
 	_, desc, err := n.resolver.Resolve(context.Background(), ref)
 	n.repo.GetContext().Logger().Debug("done", "digest", desc.Digest, "size", desc.Size, "mimetype", desc.MediaType, "error", logging.ErrorMessage(err))
@@ -193,10 +188,10 @@ func (n *NamespaceContainer) assureCreated() error {
 		return nil
 	}
 	var props common.Properties
-	if creds, err := n.repo.getCreds(n.namespace); err == nil && creds != nil {
+	if creds, err := n.repo.getCreds(n.impl.GetNamespace()); err == nil && creds != nil {
 		props = creds.Properties()
 	}
-	r, err := oci_repository_prepare.Execute(n.repo.GetContext().GetActions(), n.repo.info.HostPort(), n.namespace, props)
+	r, err := oci_repository_prepare.Execute(n.repo.GetContext().GetActions(), n.repo.info.HostPort(), n.impl.GetNamespace(), props)
 	n.checked = true
 	if err != nil {
 		return err
@@ -240,7 +235,7 @@ func (n *NamespaceContainer) AddArtifact(artifact cpi.Artifact, tags ...string) 
 }
 
 func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error {
-	_, desc, err := n.resolver.Resolve(context.Background(), n.repo.getRef(n.namespace, digest.String()))
+	_, desc, err := n.resolver.Resolve(context.Background(), n.repo.getRef(n.impl.GetNamespace(), digest.String()))
 	if err != nil {
 		return fmt.Errorf("unable to resolve: %w", err)
 	}
@@ -261,7 +256,7 @@ func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	return nil
 }
 
-func (n *NamespaceContainer) NewArtifact(i support.ArtifactSetImpl, art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+func (n *NamespaceContainer) NewArtifact(i support.NamespaceAccessImpl, art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
 	if n.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}

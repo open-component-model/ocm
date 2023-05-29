@@ -40,12 +40,15 @@ func (b blobHandler) AddBlob(access internal.BlobAccess) error {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// namespaceContainer delegates functionality but blob access to an underlying
+// handler.
+// blob access is handled locally.
 type namespaceContainer struct {
 	*namespaceHandler
 	blobs support.BlobProvider
 }
 
-var _ support.ArtifactSetContainer = (*namespaceContainer)(nil)
+var _ support.NamespaceContainer = (*namespaceContainer)(nil)
 
 func newNamespaceContainer(handler *namespaceHandler, blobs support.BlobProvider) *namespaceContainer {
 	return &namespaceContainer{
@@ -55,14 +58,14 @@ func newNamespaceContainer(handler *namespaceHandler, blobs support.BlobProvider
 }
 
 func NewNamespace(repo *RepositoryImpl, name string) (cpi.NamespaceAccess, error) {
-	h, err := newNamespaceHandler(repo, name)
+	h, err := newNamespaceHandler(repo)
 	if err != nil {
 		return nil, err
 	}
 	// initial container wrapper releases base cache with close of namespace
 	// container on last namespace ref.
 	// base cache has initial user count of 1.
-	return support.NewArtifactSet(newNamespaceContainer(h, h.blobs), "docker namespace"), nil
+	return support.NewNamespaceAccess(name, newNamespaceContainer(h, h.blobs), repo, "docker namespace")
 }
 
 func (n *namespaceContainer) Close() error {
@@ -94,34 +97,28 @@ func (n *namespaceContainer) AddBlob(blob cpi.BlobAccess) error {
 ////////////////////////////////////////////////////////////////////////////////
 
 type namespaceHandler struct {
-	lock      sync.RWMutex
-	refs      cpi.NamespaceAccessViewManager
-	repo      *RepositoryImpl
-	namespace string
-	blobs     support.BlobProvider
-	log       logging.Logger
+	impl  support.NamespaceAccessImpl
+	lock  sync.RWMutex
+	repo  *RepositoryImpl
+	blobs support.BlobProvider
+	log   logging.Logger
 }
 
-func newNamespaceHandler(repo *RepositoryImpl, name string) (*namespaceHandler, error) {
+func newNamespaceHandler(repo *RepositoryImpl) (*namespaceHandler, error) {
 	cache, err := accessio.NewCascadedBlobCache(nil)
 	if err != nil {
 		return nil, err
 	}
 
 	return &namespaceHandler{
-		repo:      repo,
-		namespace: name,
-		blobs:     newBlobHandler(cache),
-		log:       repo.GetContext().Logger(),
+		repo:  repo,
+		blobs: newBlobHandler(cache),
+		log:   repo.GetContext().Logger(),
 	}, nil
 }
 
-func (n *namespaceHandler) SetViewManager(m cpi.NamespaceAccessViewManager) {
-	n.refs = m
-}
-
-func (n *namespaceHandler) GetNamespace() string {
-	return n.namespace
+func (n *namespaceHandler) SetImplementation(impl support.NamespaceAccessImpl) {
+	n.impl = impl
 }
 
 func (n *namespaceHandler) IsReadOnly() bool {
@@ -139,7 +136,7 @@ func (n *namespaceHandler) ListTags() ([]string, error) {
 		return nil, err
 	}
 	var result []string
-	if n.namespace == "" {
+	if n.impl.GetNamespace() == "" {
 		for _, e := range list {
 			// ID is always the config digest
 			// filter images without a repo tag for empty namespace
@@ -151,7 +148,7 @@ func (n *namespaceHandler) ListTags() ([]string, error) {
 			}
 		}
 	} else {
-		prefix := n.namespace + ":"
+		prefix := n.impl.GetNamespace() + ":"
 		for _, e := range list {
 			for _, t := range e.RepoTags {
 				if strings.HasPrefix(t, prefix) {
@@ -163,8 +160,8 @@ func (n *namespaceHandler) ListTags() ([]string, error) {
 	return result, nil
 }
 
-func (n *namespaceHandler) GetArtifact(i support.ArtifactSetImpl, vers string) (cpi.ArtifactAccess, error) {
-	ref, err := ParseRef(n.namespace, vers)
+func (n *namespaceHandler) GetArtifact(i support.NamespaceAccessImpl, vers string) (cpi.ArtifactAccess, error) {
+	ref, err := ParseRef(n.impl.GetNamespace(), vers)
 	if err != nil {
 		return nil, err
 	}
@@ -223,7 +220,7 @@ func (n *namespaceContainer) AddArtifact(artifact cpi.Artifact, tags ...string) 
 	if len(tags) > 0 {
 		tag = tags[0]
 	}
-	ref, err := ParseRef(n.namespace, tag)
+	ref, err := ParseRef(n.impl.GetNamespace(), tag)
 	if err != nil {
 		return nil, err
 	}
@@ -250,7 +247,7 @@ func (n *namespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 		return errors.ErrNotSupported("image access by digest")
 	}
 
-	src := n.namespace + ":" + digest.String()
+	src := n.impl.GetNamespace() + ":" + digest.String()
 
 	if pattern.MatchString(digest.String()) {
 		// this definitely no digest, but the library expects it this way
@@ -258,7 +255,7 @@ func (n *namespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	}
 
 	for _, tag := range tags {
-		err := n.repo.client.ImageTag(dummyContext, src, n.namespace+":"+tag)
+		err := n.repo.client.ImageTag(dummyContext, src, n.impl.GetNamespace()+":"+tag)
 		if err != nil {
 			return fmt.Errorf("failed to add image tag: %w", err)
 		}
@@ -267,7 +264,7 @@ func (n *namespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	return nil
 }
 
-func (n *namespaceContainer) NewArtifact(i support.ArtifactSetImpl, art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+func (n *namespaceContainer) NewArtifact(i support.NamespaceAccessImpl, art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
 	if n.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}

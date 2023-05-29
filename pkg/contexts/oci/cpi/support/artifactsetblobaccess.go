@@ -17,13 +17,13 @@ import (
 ////////////////////////////////////////////////////////////////////////////////
 
 type ArtifactSetBlobAccess struct {
-	base ArtifactSetImpl
+	base NamespaceAccessImpl
 
 	lock      sync.RWMutex
 	blobinfos map[digest.Digest]*cpi.Descriptor
 }
 
-func NewArtifactSetBlobAccess(container ArtifactSetImpl) *ArtifactSetBlobAccess {
+func NewArtifactSetBlobAccess(container NamespaceAccessImpl) *ArtifactSetBlobAccess {
 	s := &ArtifactSetBlobAccess{
 		base:      container,
 		blobinfos: map[digest.Digest]*cpi.Descriptor{},

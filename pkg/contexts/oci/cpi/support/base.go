@@ -19,11 +19,11 @@ import (
 
 type artifactBase struct {
 	lock      sync.RWMutex
-	container ArtifactSetImpl // this is the underlying container implementation
+	container NamespaceAccessImpl // this is the underlying container implementation
 	state     accessobj.State
 }
 
-func newArtifactBase(container ArtifactSetImpl, state accessobj.State) artifactBase {
+func newArtifactBase(container NamespaceAccessImpl, state accessobj.State) artifactBase {
 	return artifactBase{
 		container: container,
 		state:     state,

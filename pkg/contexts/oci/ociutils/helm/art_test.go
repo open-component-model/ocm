@@ -60,7 +60,7 @@ func norm(chart *chart.Chart) *chart.Chart {
 	return chart
 }
 
-func get(blob accessio.BlobAccess, expected []byte) []byte {
+func get(blob accessio.DataAccess, expected []byte) []byte {
 	data, err := blob.Get()
 	ExpectWithOffset(1, err).To(Succeed())
 	if expected != nil {
@@ -90,21 +90,27 @@ var _ = Describe("art parsing", func() {
 		art, err := set.GetArtifact(set.GetMain().String())
 		Expect(err).To(Succeed())
 		defer Close(art)
-		m := art.ManifestAccess().GetDescriptor()
+
+		ma := art.ManifestAccess()
+		m := ma.GetDescriptor()
 		Expect(len(m.Layers)).To(Equal(2))
 
 		config, err := art.ManifestAccess().GetConfigBlob()
 		Expect(err).To(Succeed())
 		get(config, meta)
 
-		blob, err := set.GetBlob(m.Layers[1].Digest)
+		_, data, err := set.GetBlobData(m.Layers[1].Digest)
+		Expect(err).To(Succeed())
+		get(data, prov)
+
+		_, data, err = set.GetBlobData(m.Layers[0].Digest)
+		Expect(err).To(Succeed())
+		r, err := data.Reader()
+		Expect(err).To(Succeed())
+
+		blob, err := ma.GetBlob(m.Layers[1].Digest)
 		Expect(err).To(Succeed())
 		get(blob, prov)
-
-		blob, err = set.GetBlob(m.Layers[0].Digest)
-		Expect(err).To(Succeed())
-		r, err := blob.Reader()
-		Expect(err).To(Succeed())
 
 		// unfortunately charts are not directly comparable, because of the order in the arrays AND the modified Chart.yaml
 		found, err := loader.LoadArchive(r)

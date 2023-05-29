@@ -6,6 +6,7 @@ package cpi
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/opencontainers/go-digest"
 
@@ -119,24 +120,30 @@ type NamespaceAccessViewManager = resource.ViewManager[NamespaceAccess] // here 
 type NamespaceAccessImpl interface {
 	internal.NamespaceAccessImpl
 	SetViewManager(m NamespaceAccessViewManager)
+
+	GetNamespace() string
 }
 
 type _NamespaceAccessImplBase = resource.ResourceImplBase[NamespaceAccess]
 
 type NamespaceAccessImplBase struct {
-	_NamespaceAccessImplBase
+	*_NamespaceAccessImplBase
 	namespace string
+}
+
+func NewNamespaceAccessImplBase(namespace string, repo RepositoryViewManager, closer ...io.Closer) (*NamespaceAccessImplBase, error) {
+	base, err := resource.NewResourceImplBase[NamespaceAccess](repo, closer...)
+	if err != nil {
+		return nil, err
+	}
+	return &NamespaceAccessImplBase{
+		_NamespaceAccessImplBase: base,
+		namespace:                namespace,
+	}, nil
 }
 
 func (b *NamespaceAccessImplBase) GetNamespace() string {
 	return b.namespace
-}
-
-func NewNamespaceAccessImplBase(namespace string) NamespaceAccessImplBase {
-	return NamespaceAccessImplBase{
-		_NamespaceAccessImplBase: resource.ResourceImplBase[NamespaceAccess]{},
-		namespace:                namespace,
-	}
 }
 
 type namespaceAccessView struct {
@@ -247,25 +254,10 @@ type ArtifactAccessImpl interface {
 	SetViewManager(m resource.ViewManager[ArtifactAccess])
 }
 
-type _ArtifactAccessImplBase = resource.ResourceImplBase[ArtifactAccess]
+type ArtifactAccessImplBase = resource.ResourceImplBase[ArtifactAccess]
 
-type ArtifactAccessImplBase struct {
-	_ArtifactAccessImplBase
-	ref NamespaceAccess
-}
-
-func NewArtifactAccessImplBase(ns NamespaceAccessViewManager) (*ArtifactAccessImplBase, error) {
-	ref, err := ns.View()
-	if err != nil {
-		return nil, err
-	}
-	return &ArtifactAccessImplBase{
-		ref: ref,
-	}, nil
-}
-
-func (b *ArtifactAccessImplBase) Close() error {
-	return b.ref.Close()
+func NewArtifactAccessImplBase(ns NamespaceAccessViewManager, closer ...io.Closer) (*ArtifactAccessImplBase, error) {
+	return resource.NewResourceImplBase[ArtifactAccess](ns, closer...)
 }
 
 type artifactAccessView struct {

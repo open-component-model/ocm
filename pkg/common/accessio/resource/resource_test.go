@@ -91,7 +91,7 @@ func resourceViewCreator(impl *ResourceImpl, v resource.CloserView, d resource.V
 // the first view.
 func New(name string) Resource {
 	i := &ResourceImpl{name}
-	return resource.NewResource(i, resourceViewCreator)
+	return resource.NewResource(i, resourceViewCreator, name)
 }
 
 var _ = Describe("ref test", func() {

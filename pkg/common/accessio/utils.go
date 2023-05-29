@@ -132,9 +132,20 @@ func (c *once) Close() error {
 }
 
 func Close(closer ...io.Closer) error {
+	if len(closer) == 0 {
+		return nil
+	}
 	list := errors.ErrList()
 	for _, c := range closer {
-		list.Add(c.Close())
+		if c != nil {
+			list.Add(c.Close())
+		}
 	}
 	return list.Result()
+}
+
+type Closer func() error
+
+func (c Closer) CLose() error {
+	return c()
 }

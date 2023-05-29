@@ -71,6 +71,7 @@ type CloserView interface {
 
 	Closer() io.Closer
 
+	Lazy()
 	Execute(f func() error) error
 }
 
@@ -82,6 +83,33 @@ type view struct {
 }
 
 var _ CloserView = (*view)(nil)
+
+type LazyMode interface {
+	Lazy()
+}
+
+func Lazy(o interface{}) bool {
+	if l, ok := o.(LazyMode); ok {
+		l.Lazy()
+		return true
+	}
+	return false
+}
+
+func CloseTemporary(c io.Closer) error {
+	if !Lazy(c) {
+		return errors.ErrNotSupported("lazy mode")
+	}
+	return c.Close()
+}
+
+func PropagateCloseTemporary(errp *error, c io.Closer) {
+	errors.PropagateError(errp, func() error { return CloseTemporary(c) })
+}
+
+func (v *view) Lazy() {
+	v.main = false
+}
 
 func (v *view) Execute(f func() error) error {
 	v.lock.Lock()

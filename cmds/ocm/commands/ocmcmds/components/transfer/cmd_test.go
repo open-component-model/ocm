@@ -10,17 +10,17 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/spf13/cobra"
 
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/config/config"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	. "github.com/open-component-model/ocm/pkg/testutils"
+
+	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/config/config"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
@@ -29,6 +29,7 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	handlercfg "github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/config"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
@@ -79,7 +80,7 @@ func CheckComponent(env *TestEnv, ldesc *artdesc.Descriptor, tgt ocm.Repository)
 	Expect(err).To(Succeed())
 	defer set.Close()
 
-	blob, err := set.GetBlob(ldesc.Digest)
+	_, blob, err := set.GetBlobData(ldesc.Digest)
 	Expect(err).To(Succeed())
 	defer Close(blob, "blob")
 	data, err = blob.Get()

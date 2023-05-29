@@ -24,12 +24,11 @@ var ErrNoIndex = errors.New("manifest does not support access to subsequent arti
 type ArtifactAccessImpl struct {
 	cpi.ArtifactAccessImplBase
 	artifactBase
-	closer []io.Closer
 }
 
 var _ cpi.ArtifactAccessImpl = (*ArtifactAccessImpl)(nil)
 
-func NewArtifactForBlob(container ArtifactSetImpl, blob accessio.BlobAccess, closer ...io.Closer) (cpi.ArtifactAccess, error) {
+func NewArtifactForBlob(container NamespaceAccessImpl, blob accessio.BlobAccess, closer ...io.Closer) (cpi.ArtifactAccess, error) {
 	mode := accessobj.ACC_WRITABLE
 	if container.IsReadOnly() {
 		mode = accessobj.ACC_READONLY
@@ -42,7 +41,7 @@ func NewArtifactForBlob(container ArtifactSetImpl, blob accessio.BlobAccess, clo
 	return newArtifact(container, state, closer...)
 }
 
-func NewArtifact(container ArtifactSetImpl, defs ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+func NewArtifact(container NamespaceAccessImpl, defs ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
 	var def *artdesc.Artifact
 	if len(defs) != 0 && defs[0] != nil {
 		def = defs[0]
@@ -58,21 +57,16 @@ func NewArtifact(container ArtifactSetImpl, defs ...*artdesc.Artifact) (cpi.Arti
 	return newArtifact(container, state)
 }
 
-func newArtifact(container ArtifactSetImpl, state accessobj.State, closer ...io.Closer) (cpi.ArtifactAccess, error) {
-	base, err := cpi.NewArtifactAccessImplBase(container)
+func newArtifact(container NamespaceAccessImpl, state accessobj.State, closer ...io.Closer) (cpi.ArtifactAccess, error) {
+	base, err := cpi.NewArtifactAccessImplBase(container, closer...)
 	if err != nil {
 		return nil, err
 	}
 	impl := &ArtifactAccessImpl{
 		ArtifactAccessImplBase: *base,
 		artifactBase:           newArtifactBase(container, state),
-		closer:                 closer,
 	}
 	return cpi.NewArtifactAccess(impl), nil
-}
-
-func (a *ArtifactAccessImpl) Close() error {
-	return accessio.Close(append(append(a.closer[:0:0], &a.ArtifactAccessImplBase), a.closer...)...)
 }
 
 func (a *ArtifactAccessImpl) AddBlob(access cpi.BlobAccess) error {

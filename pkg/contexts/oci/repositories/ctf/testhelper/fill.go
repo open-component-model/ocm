@@ -13,7 +13,9 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/testutils"
 )
 
 const (
@@ -24,19 +26,19 @@ const (
 )
 
 func DefaultManifestFill(n cpi.NamespaceAccess) {
-	art := NewArtifact(n)
-	blob, err := n.AddArtifact(art)
-	Expect(err).To(Succeed())
+	var finalize finalizer.Finalizer
+	defer testutils.Defer(finalize.Finalize)
+
+	art := NewArtifact(n, &finalize)
+	blob := testutils.Must(n.AddArtifact(art))
 	n.AddTags(blob.Digest(), TAG)
-	art.Close()
 }
 
-func NewArtifact(n cpi.NamespaceAccess) cpi.ArtifactAccess {
-	art, err := n.NewArtifact()
-	Expect(err).To(Succeed())
+func NewArtifact(n cpi.NamespaceAccess, finalize *finalizer.Finalizer) cpi.ArtifactAccess {
+	art := testutils.Must(n.NewArtifact())
+	finalize.Close(art)
 	Expect(art.AddLayer(accessio.BlobAccessForString(mime.MIME_OCTET, "testdata"), nil)).To(Equal(0))
-	desc, err := art.Manifest()
-	Expect(err).To(Succeed())
+	desc := testutils.Must(art.Manifest())
 	Expect(desc).NotTo(BeNil())
 
 	Expect(desc.Layers[0].Digest).To(Equal(digest.FromString("testdata")))
@@ -44,19 +46,17 @@ func NewArtifact(n cpi.NamespaceAccess) cpi.ArtifactAccess {
 	Expect(desc.Layers[0].Size).To(Equal(int64(8)))
 
 	config := accessio.BlobAccessForData(mime.MIME_OCTET, []byte("{}"))
-	Expect(n.AddBlob(config)).To(Succeed())
+	testutils.MustBeSuccessful(n.AddBlob(config))
 	desc.Config = *artdesc.DefaultBlobDescriptor(config)
 	return art
 }
 
 func CheckArtifact(art oci.ArtifactAccess) {
 	Expect(art.IsManifest()).To(BeTrue())
-	blob, err := art.GetBlob("sha256:" + DIGEST_LAYER)
-	Expect(err).To(Succeed())
+	blob := testutils.Must(art.GetBlob("sha256:" + DIGEST_LAYER))
 	Expect(blob.Get()).To(Equal([]byte("testdata")))
 	Expect(blob.MimeType()).To(Equal(mime.MIME_OCTET))
-	blob, err = art.GetBlob("sha256:" + DIGEST_CONFIG)
-	Expect(err).To(Succeed())
+	blob = testutils.Must(art.GetBlob("sha256:" + DIGEST_CONFIG))
 	Expect(blob.Get()).To(Equal([]byte("{}")))
 	Expect(blob.MimeType()).To(Equal(mime.MIME_OCTET))
 }

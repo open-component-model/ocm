@@ -39,6 +39,10 @@ func (r *Repository) Write(path string, mode vfs.FileMode, opts ...accessio.Opti
 	return r.impl.Write(path, mode, opts...)
 }
 
+func (r *Repository) Close() error { // why ???
+	return r.Repository.Close()
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // RepositoryImpl is closed, if all views are released.
@@ -122,12 +126,14 @@ func (r *RepositoryImpl) ExistsArtifact(name string, tag string) (bool, error) {
 	return r.getIndex().HasArtifact(name, tag), nil
 }
 
-func (r *RepositoryImpl) LookupArtifact(name string, ref string) (cpi.ArtifactAccess, error) {
-	ns, err := NewNamespace(r, name, false) // share repo view.namespace not exposed
+func (r *RepositoryImpl) LookupArtifact(name string, ref string) (acc cpi.ArtifactAccess, err error) {
+	ns, err := NewNamespace(r, name)
 	if err != nil {
 		return nil, err
 	}
-	defer ns.Close()
+
+	defer accessio.PropagateCloseTemporary(&err, ns) // temporary namespace object not exposed.
+
 	a := r.getIndex().GetArtifactInfo(name, ref)
 	if a == nil {
 		return nil, cpi.ErrUnknownArtifact(name, ref)
@@ -136,5 +142,5 @@ func (r *RepositoryImpl) LookupArtifact(name string, ref string) (cpi.ArtifactAc
 }
 
 func (r *RepositoryImpl) LookupNamespace(name string) (cpi.NamespaceAccess, error) {
-	return NewNamespace(r, name, true)
+	return NewNamespace(r, name)
 }

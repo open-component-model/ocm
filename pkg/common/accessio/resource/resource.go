@@ -74,6 +74,20 @@
 //	           impl,
 //	         }
 //	}
+//
+// A default resource base implementation is provided by ResourceImplBase.
+// It implements the minimal implementation interface and offers with
+// the method View a way to create additional views. It can just be
+// instantiated for the base usage.
+// Using the creator NewResourceImplBase is is possible to support
+//   - nested use-cases, where an implementations hold a reference
+//     on a parent object
+//   - additional closers are required.
+//
+// Therefore, it provides a default Close method. If your implementation
+// required an additional cleanup, you have to reimplement the Close
+// method and call at least the base implementation method. Or you
+// configure the optional closer for the base implementation.
 package resource
 
 import (
@@ -107,6 +121,7 @@ type ResourceViewInt[T resourceViewInterface[T]] interface {
 	resourceViewInterface[T]
 	// Execute call a synchronized function on a non-closed view
 	Execute(func() error) error
+	Lazy()
 }
 
 type Dup[T any] interface {
@@ -126,7 +141,7 @@ type ResourceViewCreator[T any, I io.Closer] func(I, CloserView, ViewManager[T])
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type viewManager[T any, I io.Closer] struct {
+type viewManager[T any, I ResourceImplementation[T]] struct {
 	refs    accessio.ReferencableCloser
 	creator ResourceViewCreator[T, I]
 	impl    I
@@ -166,7 +181,7 @@ func (i *viewManager[T, I]) View(main ...bool) (T, error) {
 
 type resourceView[T any] struct {
 	view CloserView
-	res  ViewManager[T]
+	mgr  ViewManager[T]
 }
 
 // NewView is to be called by a resource view creator to map
@@ -191,13 +206,33 @@ func (v *resourceView[T]) Execute(f func() error) error {
 }
 
 func (v *resourceView[T]) Dup() (T, error) {
-	return v.res.View()
+	return v.mgr.View()
+}
+
+func (v *resourceView[T]) Lazy() {
+	v.view.Lazy()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
 type ResourceImplBase[T any] struct {
-	refs ViewManager[T]
+	refs   ViewManager[T]
+	closer []io.Closer
+}
+
+// NewResourceImplBase creates an implementation base for a resource T
+// referencing another resource M.
+func NewResourceImplBase[T any, M io.Closer](m ViewManager[M], closer ...io.Closer) (*ResourceImplBase[T], error) {
+	if m != nil {
+		ref, err := m.View()
+		if err != nil {
+			return nil, err
+		}
+		closer = append(closer, ref)
+	}
+	return &ResourceImplBase[T]{
+		closer: closer,
+	}, nil
 }
 
 func (b *ResourceImplBase[T]) SetViewManager(m ViewManager[T]) {
@@ -206,4 +241,8 @@ func (b *ResourceImplBase[T]) SetViewManager(m ViewManager[T]) {
 
 func (b *ResourceImplBase[T]) View(main ...bool) (T, error) {
 	return b.refs.View(main...)
+}
+
+func (b *ResourceImplBase[T]) Close() error {
+	return accessio.Close(b.closer...)
 }

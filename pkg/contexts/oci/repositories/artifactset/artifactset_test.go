@@ -11,8 +11,10 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset/testhelper"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/testhelper"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
@@ -25,10 +27,11 @@ import (
 )
 
 func defaultManifestFill(a *artifactset.ArtifactSet) {
-	art := NewArtifact(a)
-	_, err := a.AddArtifact(art)
-	ExpectWithOffset(1, err).To(Succeed())
-	art.Close()
+	var finalize finalizer.Finalizer
+	defer Defer(finalize.Finalize)
+
+	art := NewArtifact(a, &finalize)
+	MustWithOffset(1, Calling(a.AddArtifact(art)))
 }
 
 var _ = Describe("artifact management", func() {
