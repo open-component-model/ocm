@@ -5,6 +5,7 @@
 package support
 
 import (
+	"compress/gzip"
 	"fmt"
 	"io"
 
@@ -20,14 +21,15 @@ import (
 
 var ErrNoIndex = errors.New("manifest does not support access to subsequent artifacts")
 
-type ArtifactImpl struct {
+type ArtifactAccessImpl struct {
+	cpi.ArtifactAccessImplBase
 	artifactBase
 	closer []io.Closer
 }
 
-var _ cpi.ArtifactAccess = (*ArtifactImpl)(nil)
+var _ cpi.ArtifactAccessImpl = (*ArtifactAccessImpl)(nil)
 
-func NewArtifactForBlob(container ArtifactSetContainerImpl, blob accessio.BlobAccess, closer ...io.Closer) (cpi.ArtifactAccess, error) {
+func NewArtifactForBlob(container ArtifactSetImpl, blob accessio.BlobAccess, closer ...io.Closer) (cpi.ArtifactAccess, error) {
 	mode := accessobj.ACC_WRITABLE
 	if container.IsReadOnly() {
 		mode = accessobj.ACC_READONLY
@@ -37,10 +39,10 @@ func NewArtifactForBlob(container ArtifactSetContainerImpl, blob accessio.BlobAc
 		return nil, err
 	}
 
-	return newArtifactImpl(container, state, closer...)
+	return newArtifact(container, state, closer...)
 }
 
-func NewArtifact(container ArtifactSetContainerImpl, defs ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+func NewArtifact(container ArtifactSetImpl, defs ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
 	var def *artdesc.Artifact
 	if len(defs) != 0 && defs[0] != nil {
 		def = defs[0]
@@ -53,50 +55,47 @@ func NewArtifact(container ArtifactSetContainerImpl, defs ...*artdesc.Artifact) 
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch new blob state: %w", err)
 	}
-	return newArtifactImpl(container, state)
+	return newArtifact(container, state)
 }
 
-func newArtifactImpl(container ArtifactSetContainerImpl, state accessobj.State, closer ...io.Closer) (cpi.ArtifactAccess, error) {
-	v, err := container.View()
+func newArtifact(container ArtifactSetImpl, state accessobj.State, closer ...io.Closer) (cpi.ArtifactAccess, error) {
+	base, err := cpi.NewArtifactAccessImplBase(container)
 	if err != nil {
 		return nil, err
 	}
-	a := &ArtifactImpl{
-		artifactBase: newArtifactBase(v, container, state),
-		closer:       closer,
+	impl := &ArtifactAccessImpl{
+		ArtifactAccessImplBase: *base,
+		artifactBase:           newArtifactBase(container, state),
+		closer:                 closer,
 	}
-	return a, nil
+	return cpi.NewArtifactAccess(impl), nil
 }
 
-func (a *ArtifactImpl) Close() error {
-	return accessio.Close(append(append(a.closer[:0:0], a.view), a.closer...)...)
+func (a *ArtifactAccessImpl) Close() error {
+	return accessio.Close(append(append(a.closer[:0:0], &a.ArtifactAccessImplBase), a.closer...)...)
 }
 
-func (a *ArtifactImpl) Dup() (cpi.ArtifactAccess, error) {
-	return newArtifactImpl(a.container, a.state)
+func (a *ArtifactAccessImpl) AddBlob(access cpi.BlobAccess) error {
+	return a.container.AddBlob(access)
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// forward
-
-func (a *ArtifactImpl) AddBlob(access cpi.BlobAccess) error {
-	return a.addBlob(access)
-}
-
-func (a *ArtifactImpl) NewArtifact(art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+func (a *ArtifactAccessImpl) NewArtifact(art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
 	if !a.IsIndex() {
 		return nil, ErrNoIndex
 	}
-	return a.newArtifact(art...)
+	if a.IsReadOnly() {
+		return nil, accessio.ErrReadOnly
+	}
+	return NewArtifact(a.container, art...)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-func (a *ArtifactImpl) Artifact() *artdesc.Artifact {
+func (a *ArtifactAccessImpl) Artifact() *artdesc.Artifact {
 	return a.GetDescriptor()
 }
 
-func (a *ArtifactImpl) GetDescriptor() *artdesc.Artifact {
+func (a *ArtifactAccessImpl) GetDescriptor() *artdesc.Artifact {
 	d := a.state.GetState().(*artdesc.Artifact)
 	if d.IsValid() {
 		return d
@@ -107,7 +106,7 @@ func (a *ArtifactImpl) GetDescriptor() *artdesc.Artifact {
 ////////////////////////////////////////////////////////////////////////////////
 // from artdesc.Artifact
 
-func (a *ArtifactImpl) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
+func (a *ArtifactAccessImpl) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 	d := a.GetDescriptor().GetBlobDescriptor(digest)
 	/*
 		if d == nil {
@@ -117,7 +116,7 @@ func (a *ArtifactImpl) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 	return d
 }
 
-func (a *ArtifactImpl) Index() (*artdesc.Index, error) {
+func (a *ArtifactAccessImpl) Index() (*artdesc.Index, error) {
 	a.lock.Lock()
 	defer a.lock.Unlock()
 	d, ok := a.state.GetState().(*artdesc.Artifact)
@@ -134,7 +133,7 @@ func (a *ArtifactImpl) Index() (*artdesc.Index, error) {
 	return idx, nil
 }
 
-func (a *ArtifactImpl) Manifest() (*artdesc.Manifest, error) {
+func (a *ArtifactAccessImpl) Manifest() (*artdesc.Manifest, error) {
 	a.lock.Lock()
 	defer a.lock.Unlock()
 	d := a.state.GetState().(*artdesc.Artifact)
@@ -148,7 +147,7 @@ func (a *ArtifactImpl) Manifest() (*artdesc.Manifest, error) {
 	return m, nil
 }
 
-func (a *ArtifactImpl) ManifestAccess() internal.ManifestAccess {
+func (a *ArtifactAccessImpl) ManifestAccess(v cpi.ArtifactAccess) internal.ManifestAccess {
 	a.lock.Lock()
 	defer a.lock.Unlock()
 	d := a.state.GetState().(*artdesc.Artifact)
@@ -159,10 +158,10 @@ func (a *ArtifactImpl) ManifestAccess() internal.ManifestAccess {
 			return nil
 		}
 	}
-	return NewManifestForArtifact(a)
+	return NewManifestForArtifact(v, a)
 }
 
-func (a *ArtifactImpl) IndexAccess() internal.IndexAccess {
+func (a *ArtifactAccessImpl) IndexAccess(v cpi.ArtifactAccess) internal.IndexAccess {
 	a.lock.Lock()
 	defer a.lock.Unlock()
 	d := a.state.GetState().(*artdesc.Artifact)
@@ -173,21 +172,21 @@ func (a *ArtifactImpl) IndexAccess() internal.IndexAccess {
 			return nil
 		}
 	}
-	return NewIndexForArtifact(a)
+	return NewIndexForArtifact(v, a)
 }
 
-func (a *ArtifactImpl) GetArtifact(digest digest.Digest) (cpi.ArtifactAccess, error) {
+func (a *ArtifactAccessImpl) GetArtifact(digest digest.Digest) (cpi.ArtifactAccess, error) {
 	if !a.IsIndex() {
 		return nil, ErrNoIndex
 	}
 	return a.container.GetArtifact("@" + digest.String())
 }
 
-func (a *ArtifactImpl) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
+func (a *ArtifactAccessImpl) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
 	return a.container.GetBlobData(digest)
 }
 
-func (a *ArtifactImpl) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
+func (a *ArtifactAccessImpl) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
 	d := a.GetBlobDescriptor(digest)
 	if d != nil {
 		size, data, err := a.container.GetBlobData(digest)
@@ -203,32 +202,75 @@ func (a *ArtifactImpl) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
 	return nil, cpi.ErrBlobNotFound(digest)
 }
 
-func (a *ArtifactImpl) AddArtifact(art cpi.Artifact, platform *artdesc.Platform) (cpi.BlobAccess, error) {
-	if a.IsClosed() {
-		return nil, accessio.ErrClosed
-	}
+func (a *ArtifactAccessImpl) AddArtifact(art cpi.Artifact, platform *artdesc.Platform) (cpi.BlobAccess, error) {
 	if a.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}
-	_, err := a.Index()
+	d, err := a.Index()
 	if err != nil {
 		return nil, err
 	}
-	return NewIndexForArtifact(a).AddArtifact(art, platform)
+
+	a.lock.Lock()
+	defer a.lock.Unlock()
+
+	blob, err := a.container.AddArtifact(art)
+	if err != nil {
+		return nil, err
+	}
+	d.Manifests = append(d.Manifests, cpi.Descriptor{
+		MediaType:   blob.MimeType(),
+		Digest:      blob.Digest(),
+		Size:        blob.Size(),
+		URLs:        nil,
+		Annotations: nil,
+		Platform:    platform,
+	})
+	return blob, nil
 }
 
-func (a *ArtifactImpl) AddLayer(blob cpi.BlobAccess, d *cpi.Descriptor) (int, error) {
-	if a.IsClosed() {
-		return -1, accessio.ErrClosed
-	}
+func (a *ArtifactAccessImpl) AddLayer(blob cpi.BlobAccess, d *cpi.Descriptor) (int, error) {
 	if a.IsReadOnly() {
 		return -1, accessio.ErrReadOnly
 	}
-	_, err := a.Manifest()
+	m, err := a.Manifest()
 	if err != nil {
 		return -1, err
 	}
-	return NewManifestForArtifact(a).AddLayer(blob, d)
+
+	a.lock.Lock()
+	defer a.lock.Unlock()
+	if d == nil {
+		d = &artdesc.Descriptor{}
+	}
+	d.Digest = blob.Digest()
+	d.Size = blob.Size()
+	if d.MediaType == "" {
+		d.MediaType = blob.MimeType()
+		if d.MediaType == "" {
+			d.MediaType = artdesc.MediaTypeImageLayer
+			r, err := blob.Reader()
+			if err != nil {
+				return -1, err
+			}
+			defer r.Close()
+			zr, err := gzip.NewReader(r)
+			if err == nil {
+				err = zr.Close()
+				if err == nil {
+					d.MediaType = artdesc.MediaTypeImageLayerGzip
+				}
+			}
+		}
+	}
+
+	err = a.container.AddBlob(blob)
+	if err != nil {
+		return -1, err
+	}
+
+	m.Layers = append(m.Layers, *d)
+	return len(m.Layers) - 1, nil
 }
 
 func AdjustSize(d *artdesc.Descriptor, size int64) error {

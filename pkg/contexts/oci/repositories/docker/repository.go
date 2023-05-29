@@ -15,7 +15,7 @@ import (
 )
 
 type RepositoryImpl struct {
-	cpi.ImplementationBase[cpi.Repository]
+	cpi.RepositoryImplBase
 	spec   *RepositorySpec
 	sysctx *types.SystemContext
 	client *client.Client
@@ -34,7 +34,7 @@ func NewRepository(ctx cpi.Context, spec *RepositorySpec) (cpi.Repository, error
 	}
 
 	i := &RepositoryImpl{
-		ImplementationBase: cpi.NewImplementationBase[cpi.Repository](ctx),
+		RepositoryImplBase: cpi.NewRepositoryImplBase(ctx),
 		spec:               spec,
 		sysctx:             sysctx,
 		client:             client,

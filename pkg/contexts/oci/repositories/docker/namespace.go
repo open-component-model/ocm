@@ -163,7 +163,7 @@ func (n *namespaceHandler) ListTags() ([]string, error) {
 	return result, nil
 }
 
-func (n *namespaceHandler) GetArtifact(i support.ArtifactSetContainerImpl, vers string) (cpi.ArtifactAccess, error) {
+func (n *namespaceHandler) GetArtifact(i support.ArtifactSetImpl, vers string) (cpi.ArtifactAccess, error) {
 	ref, err := ParseRef(n.namespace, vers)
 	if err != nil {
 		return nil, err
@@ -267,7 +267,7 @@ func (n *namespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	return nil
 }
 
-func (n *namespaceContainer) NewArtifact(i support.ArtifactSetContainerImpl, art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+func (n *namespaceContainer) NewArtifact(i support.ArtifactSetImpl, art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
 	if n.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}

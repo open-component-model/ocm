@@ -35,8 +35,8 @@ type ArtifactSetContainer interface {
 
 	// GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor
 
-	GetArtifact(i ArtifactSetContainerImpl, vers string) (cpi.ArtifactAccess, error)
-	NewArtifact(i ArtifactSetContainerImpl, arts ...*artdesc.Artifact) (cpi.ArtifactAccess, error)
+	GetArtifact(i ArtifactSetImpl, vers string) (cpi.ArtifactAccess, error)
+	NewArtifact(i ArtifactSetImpl, arts ...*artdesc.Artifact) (cpi.ArtifactAccess, error)
 
 	AddArtifact(artifact cpi.Artifact, tags ...string) (access accessio.BlobAccess, err error)
 
@@ -47,7 +47,7 @@ type ArtifactSetContainer interface {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type ArtifactSetContainerImpl interface {
+type ArtifactSetImpl interface {
 	cpi.NamespaceAccessImpl
 
 	View(main ...bool) (cpi.NamespaceAccess, error)
@@ -55,18 +55,18 @@ type ArtifactSetContainerImpl interface {
 	// GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor
 	IsReadOnly() bool
 
-	WithContainer(container ArtifactSetContainer) ArtifactSetContainerImpl
+	WithContainer(container ArtifactSetContainer) ArtifactSetImpl
 }
 
-type artifactSetContainerImpl struct {
+type artifactSetImpl struct {
 	refs                 cpi.NamespaceAccessViewManager
 	ArtifactSetContainer // inherit as many as possible methods for cpi.NamespaceAccessImpl
 }
 
-var _ ArtifactSetContainerImpl = (*artifactSetContainerImpl)(nil)
+var _ ArtifactSetImpl = (*artifactSetImpl)(nil)
 
-func NewArtifactSetContainerImpl(c ArtifactSetContainer) ArtifactSetContainerImpl {
-	return &artifactSetContainerImpl{
+func NewArtifactSetContainerImpl(c ArtifactSetContainer) ArtifactSetImpl {
+	return &artifactSetImpl{
 		ArtifactSetContainer: c,
 	}
 }
@@ -76,35 +76,35 @@ func NewArtifactSet(c ArtifactSetContainer, kind ...string) cpi.NamespaceAccess 
 }
 
 func GetArtifactSetContainer(i cpi.NamespaceAccessImpl) (ArtifactSetContainer, error) {
-	if c, ok := i.(*artifactSetContainerImpl); ok {
+	if c, ok := i.(*artifactSetImpl); ok {
 		return c.ArtifactSetContainer, nil
 	}
 	return nil, errors.ErrNotSupported()
 }
 
-func (i *artifactSetContainerImpl) SetViewManager(m cpi.NamespaceAccessViewManager) {
+func (i *artifactSetImpl) SetViewManager(m cpi.NamespaceAccessViewManager) {
 	i.refs = m
 }
 
-func (i *artifactSetContainerImpl) WithContainer(c ArtifactSetContainer) ArtifactSetContainerImpl {
-	return &artifactSetContainerImpl{
+func (i *artifactSetImpl) WithContainer(c ArtifactSetContainer) ArtifactSetImpl {
+	return &artifactSetImpl{
 		refs:                 i.refs,
 		ArtifactSetContainer: c,
 	}
 }
 
-func (i *artifactSetContainerImpl) View(main ...bool) (cpi.NamespaceAccess, error) {
+func (i *artifactSetImpl) View(main ...bool) (cpi.NamespaceAccess, error) {
 	return i.refs.View(main...)
 }
 
-func (i *artifactSetContainerImpl) GetArtifact(vers string) (cpi.ArtifactAccess, error) {
+func (i *artifactSetImpl) GetArtifact(vers string) (cpi.ArtifactAccess, error) {
 	return i.ArtifactSetContainer.GetArtifact(i, vers)
 }
 
-func (i *artifactSetContainerImpl) AddArtifact(artifact cpi.Artifact, tags ...string) (access accessio.BlobAccess, err error) {
+func (i *artifactSetImpl) AddArtifact(artifact cpi.Artifact, tags ...string) (access accessio.BlobAccess, err error) {
 	return i.ArtifactSetContainer.AddArtifact(artifact, tags...)
 }
 
-func (i *artifactSetContainerImpl) NewArtifact(arts ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+func (i *artifactSetImpl) NewArtifact(arts ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
 	return i.ArtifactSetContainer.NewArtifact(i, arts...)
 }

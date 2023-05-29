@@ -12,7 +12,7 @@ import (
 )
 
 type RepositoryImpl struct {
-	cpi.ImplementationBase[cpi.Repository]
+	cpi.RepositoryImplBase
 	spec *RepositorySpec
 	arch *ArtifactSet
 }
@@ -24,7 +24,7 @@ func NewRepository(ctx cpi.Context, s *RepositorySpec) (cpi.Repository, error) {
 		s.PathFileSystem = vfsattr.Get(ctx)
 	}
 	r := &RepositoryImpl{
-		ImplementationBase: cpi.NewImplementationBase[cpi.Repository](ctx),
+		RepositoryImplBase: cpi.NewRepositoryImplBase(ctx),
 		spec:               s,
 	}
 	_, err := r.open()

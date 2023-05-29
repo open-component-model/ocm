@@ -152,7 +152,7 @@ func (n *NamespaceContainer) ListTags() ([]string, error) {
 	return n.lister.List(dummyContext)
 }
 
-func (n *NamespaceContainer) GetArtifact(i support.ArtifactSetContainerImpl, vers string) (cpi.ArtifactAccess, error) {
+func (n *NamespaceContainer) GetArtifact(i support.ArtifactSetImpl, vers string) (cpi.ArtifactAccess, error) {
 	ref := n.repo.getRef(n.namespace, vers)
 	n.repo.GetContext().Logger().Debug("get artifact", "ref", ref)
 	_, desc, err := n.resolver.Resolve(context.Background(), ref)
@@ -261,7 +261,7 @@ func (n *NamespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	return nil
 }
 
-func (n *NamespaceContainer) NewArtifact(i support.ArtifactSetContainerImpl, art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+func (n *NamespaceContainer) NewArtifact(i support.ArtifactSetImpl, art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
 	if n.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}

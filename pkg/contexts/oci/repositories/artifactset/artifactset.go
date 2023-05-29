@@ -288,7 +288,7 @@ func (a *artifactSetContainer) HasArtifact(ref string) (bool, error) {
 	return a.hasArtifact(ref)
 }
 
-func (a *artifactSetContainer) GetArtifact(i support.ArtifactSetContainerImpl, ref string) (cpi.ArtifactAccess, error) {
+func (a *artifactSetContainer) GetArtifact(i support.ArtifactSetImpl, ref string) (cpi.ArtifactAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
@@ -327,7 +327,7 @@ func (a *artifactSetContainer) hasArtifact(ref string) (bool, error) {
 	return false, nil
 }
 
-func (a *artifactSetContainer) getArtifact(impl support.ArtifactSetContainerImpl, ref string) (cpi.ArtifactAccess, error) {
+func (a *artifactSetContainer) getArtifact(impl support.ArtifactSetImpl, ref string) (cpi.ArtifactAccess, error) {
 	idx := a.GetIndex()
 	match := a.matcher(ref)
 	for i, e := range idx.Manifests {
@@ -396,7 +396,7 @@ func (a *artifactSetContainer) AddPlatformArtifact(artifact cpi.Artifact, platfo
 	return blob, nil
 }
 
-func (a *artifactSetContainer) NewArtifact(i support.ArtifactSetContainerImpl, artifact ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+func (a *artifactSetContainer) NewArtifact(i support.ArtifactSetImpl, artifact ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}

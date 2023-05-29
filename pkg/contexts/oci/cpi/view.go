@@ -18,22 +18,6 @@ import (
 
 var ErrClosed = resource.ErrClosed
 
-type ImplementationBase[T any] struct {
-	resource.ResourceImplBase[T]
-	ctx Context
-}
-
-func (b *ImplementationBase[T]) GetContext() Context {
-	return b.ctx
-}
-
-func NewImplementationBase[T any](ctx Context) ImplementationBase[T] {
-	return ImplementationBase[T]{
-		ResourceImplBase: resource.ResourceImplBase[T]{},
-		ctx:              ctx,
-	}
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 type _RepositoryView interface {
@@ -47,7 +31,23 @@ type RepositoryImpl interface {
 	SetViewManager(m RepositoryViewManager)
 }
 
-type RepositoryImplBase = resource.ViewManager[Repository]
+type _RepositoryImplBase = resource.ResourceImplBase[Repository]
+
+type RepositoryImplBase struct {
+	_RepositoryImplBase
+	ctx Context
+}
+
+func (b *RepositoryImplBase) GetContext() Context {
+	return b.ctx
+}
+
+func NewRepositoryImplBase(ctx Context) RepositoryImplBase {
+	return RepositoryImplBase{
+		_RepositoryImplBase: resource.ResourceImplBase[Repository]{},
+		ctx:                 ctx,
+	}
+}
 
 type repositoryView struct {
 	_RepositoryView
@@ -121,7 +121,23 @@ type NamespaceAccessImpl interface {
 	SetViewManager(m NamespaceAccessViewManager)
 }
 
-type NamespaceAccessImplBase = resource.ResourceImplBase[Repository]
+type _NamespaceAccessImplBase = resource.ResourceImplBase[NamespaceAccess]
+
+type NamespaceAccessImplBase struct {
+	_NamespaceAccessImplBase
+	namespace string
+}
+
+func (b *NamespaceAccessImplBase) GetNamespace() string {
+	return b.namespace
+}
+
+func NewNamespaceAccessImplBase(namespace string) NamespaceAccessImplBase {
+	return NamespaceAccessImplBase{
+		_NamespaceAccessImplBase: resource.ResourceImplBase[NamespaceAccess]{},
+		namespace:                namespace,
+	}
+}
 
 type namespaceAccessView struct {
 	_NamespaceAccessView
@@ -218,12 +234,39 @@ type _ArtifactAccessView interface {
 	resource.ResourceViewInt[ArtifactAccess]
 }
 
+type ArtifactAccessViewManager = resource.ViewManager[ArtifactAccess]
+
 type ArtifactAccessImpl interface {
-	internal.ArtifactAccess
+	internal.ArtifactAccessImpl
+
+	// creation of slave objects require the original view they are created for.
+
+	ManifestAccess(ArtifactAccess) ManifestAccess
+	IndexAccess(ArtifactAccess) IndexAccess
+
 	SetViewManager(m resource.ViewManager[ArtifactAccess])
 }
 
-type ArtifactAccessImplBase = resource.ViewManager[ArtifactAccess]
+type _ArtifactAccessImplBase = resource.ResourceImplBase[ArtifactAccess]
+
+type ArtifactAccessImplBase struct {
+	_ArtifactAccessImplBase
+	ref NamespaceAccess
+}
+
+func NewArtifactAccessImplBase(ns NamespaceAccessViewManager) (*ArtifactAccessImplBase, error) {
+	ref, err := ns.View()
+	if err != nil {
+		return nil, err
+	}
+	return &ArtifactAccessImplBase{
+		ref: ref,
+	}, nil
+}
+
+func (b *ArtifactAccessImplBase) Close() error {
+	return b.ref.Close()
+}
 
 type artifactAccessView struct {
 	_ArtifactAccessView
@@ -271,19 +314,20 @@ func (a *artifactAccessView) Manifest() (*artdesc.Manifest, error) {
 	return a.impl.Manifest()
 }
 
-func (a artifactAccessView) ManifestAccess() internal.ManifestAccess {
-	return a.impl.ManifestAccess()
+func (a *artifactAccessView) ManifestAccess() internal.ManifestAccess {
+	return a.impl.ManifestAccess(a)
 }
 
 func (a *artifactAccessView) Index() (*artdesc.Index, error) {
 	return a.impl.Index()
 }
 
-func (a artifactAccessView) IndexAccess() internal.IndexAccess {
-	return a.impl.IndexAccess()
+func (a *artifactAccessView) IndexAccess() internal.IndexAccess {
+	return a.impl.IndexAccess(a)
 }
 
 func (a *artifactAccessView) GetBlobData(digest digest.Digest) (size int64, acc internal.DataAccess, err error) {
+	size = -1
 	err = a.Execute(func() error {
 		size, acc, err = a.impl.GetBlobData(digest)
 		return err
@@ -321,7 +365,16 @@ func (a *artifactAccessView) AddArtifact(artifact internal.Artifact, platform *a
 	return acc, err
 }
 
+func (a *artifactAccessView) NewArtifact(art ...*artdesc.Artifact) (acc ArtifactAccess, err error) {
+	err = a.Execute(func() error {
+		acc, err = a.impl.NewArtifact(art...)
+		return err
+	})
+	return acc, err
+}
+
 func (a *artifactAccessView) AddLayer(access internal.BlobAccess, descriptor *artdesc.Descriptor) (index int, err error) {
+	index = -1
 	err = a.Execute(func() error {
 		index, err = a.impl.AddLayer(access, descriptor)
 		return err

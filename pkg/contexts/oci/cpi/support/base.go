@@ -19,21 +19,15 @@ import (
 
 type artifactBase struct {
 	lock      sync.RWMutex
-	view      cpi.NamespaceAccess      // this is the actual view used to access the artifact
-	container ArtifactSetContainerImpl // this is the underlying container implementation
+	container ArtifactSetImpl // this is the underlying container implementation
 	state     accessobj.State
 }
 
-func newArtifactBase(view cpi.NamespaceAccess, container ArtifactSetContainerImpl, state accessobj.State) artifactBase {
+func newArtifactBase(container ArtifactSetImpl, state accessobj.State) artifactBase {
 	return artifactBase{
-		view:      view,
 		container: container,
 		state:     state,
 	}
-}
-
-func (a *artifactBase) IsClosed() bool {
-	return a.view.IsClosed()
 }
 
 func (a *artifactBase) IsReadOnly() bool {
@@ -52,20 +46,6 @@ func (a *artifactBase) IsManifest() bool {
 
 func (a *artifactBase) blob() (cpi.BlobAccess, error) {
 	return a.state.GetBlob()
-}
-
-func (a *artifactBase) addBlob(access cpi.BlobAccess) error {
-	return a.container.AddBlob(access)
-}
-
-func (a *artifactBase) newArtifact(art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
-	if a.IsClosed() {
-		return nil, accessio.ErrClosed
-	}
-	if a.IsReadOnly() {
-		return nil, accessio.ErrReadOnly
-	}
-	return NewArtifact(a.container, art...)
 }
 
 func (a *artifactBase) Blob() (accessio.BlobAccess, error) {

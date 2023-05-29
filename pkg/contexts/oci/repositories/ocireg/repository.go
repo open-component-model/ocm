@@ -45,7 +45,7 @@ func (r *RepositoryInfo) HostInfo() (string, string, string) {
 }
 
 type RepositoryImpl struct {
-	cpi.ImplementationBase[cpi.Repository]
+	cpi.RepositoryImplBase
 	logger logging.UnboundLogger
 	spec   *RepositorySpec
 	info   *RepositoryInfo
@@ -59,7 +59,7 @@ var (
 func NewRepository(ctx cpi.Context, spec *RepositorySpec, info *RepositoryInfo) (cpi.Repository, error) {
 	urs := spec.UniformRepositorySpec()
 	i := &RepositoryImpl{
-		ImplementationBase: cpi.NewImplementationBase[cpi.Repository](ctx),
+		RepositoryImplBase: cpi.NewRepositoryImplBase(ctx),
 		logger:             logging.DynamicLogger(ctx, REALM, logging.NewAttribute(ocmlog.ATTR_HOST, urs.Host)),
 		spec:               spec,
 		info:               info,

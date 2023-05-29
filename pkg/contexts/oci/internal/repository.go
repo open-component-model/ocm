@@ -99,8 +99,6 @@ type ArtifactAccessImpl interface {
 	BlobSink
 
 	GetDescriptor() *artdesc.Artifact
-	ManifestAccess() ManifestAccess
-	IndexAccess() IndexAccess
 	GetBlob(digest digest.Digest) (BlobAccess, error)
 
 	GetArtifact(digest digest.Digest) (ArtifactAccess, error)
@@ -109,13 +107,21 @@ type ArtifactAccessImpl interface {
 	AddArtifact(Artifact, *artdesc.Platform) (BlobAccess, error)
 	AddLayer(BlobAccess, *artdesc.Descriptor) (int, error)
 
+	NewArtifact(...*artdesc.Artifact) (ArtifactAccess, error)
+
 	io.Closer
+}
+
+type ArtifactAccessSlaves interface {
+	ManifestAccess() ManifestAccess
+	IndexAccess() IndexAccess
 }
 
 type ArtifactAccess interface {
 	resource.ResourceView[ArtifactAccess]
 
 	ArtifactAccessImpl
+	ArtifactAccessSlaves
 }
 
 type ManifestAccess interface {

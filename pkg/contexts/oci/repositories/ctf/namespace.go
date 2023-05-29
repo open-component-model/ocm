@@ -77,7 +77,7 @@ func (n *namespaceContainer) AddBlob(blob cpi.BlobAccess) error {
 	return n.repo.base.AddBlob(blob)
 }
 
-func (n *namespaceContainer) GetArtifact(i support.ArtifactSetContainerImpl, vers string) (cpi.ArtifactAccess, error) {
+func (n *namespaceContainer) GetArtifact(i support.ArtifactSetImpl, vers string) (cpi.ArtifactAccess, error) {
 	meta := n.repo.getIndex().GetArtifactInfo(n.namespace, vers)
 	if meta == nil {
 		return nil, errors.ErrNotFound(cpi.KIND_OCIARTIFACT, vers, n.namespace)
@@ -110,7 +110,7 @@ func (n *namespaceContainer) AddTags(digest digest.Digest, tags ...string) error
 	return n.repo.getIndex().AddTagsFor(n.namespace, digest, tags...)
 }
 
-func (n *namespaceContainer) NewArtifact(i support.ArtifactSetContainerImpl, art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
+func (n *namespaceContainer) NewArtifact(i support.ArtifactSetImpl, art ...*artdesc.Artifact) (cpi.ArtifactAccess, error) {
 	if n.IsReadOnly() {
 		return nil, accessio.ErrReadOnly
 	}

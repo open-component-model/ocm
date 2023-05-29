@@ -43,7 +43,7 @@ func (r *Repository) Write(path string, mode vfs.FileMode, opts ...accessio.Opti
 
 // RepositoryImpl is closed, if all views are released.
 type RepositoryImpl struct {
-	cpi.ImplementationBase[cpi.Repository]
+	cpi.RepositoryImplBase
 
 	spec *RepositorySpec
 	base *artifactset.FileSystemBlobAccess
@@ -65,7 +65,7 @@ func _Wrap(ctx cpi.ContextProvider, spec *RepositorySpec, obj *accessobj.AccessO
 		return nil, err
 	}
 	impl := &RepositoryImpl{
-		ImplementationBase: cpi.NewImplementationBase[cpi.Repository](cpi.FromProvider(ctx)),
+		RepositoryImplBase: cpi.NewRepositoryImplBase(cpi.FromProvider(ctx)),
 		spec:               spec,
 		base:               artifactset.NewFileSystemBlobAccess(obj),
 	}

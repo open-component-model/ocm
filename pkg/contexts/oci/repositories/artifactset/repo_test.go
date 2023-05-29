@@ -31,7 +31,7 @@ var _ = Describe("", func() {
 		env.Cleanup()
 	})
 
-	FIt("maps artifact set to repo", func() {
+	It("maps artifact set to repo", func() {
 		env.ArtifactSet("/tmp/set", accessio.FormatDirectory, func() {
 			env.Manifest("v1", func() {
 				env.Config(func() {
