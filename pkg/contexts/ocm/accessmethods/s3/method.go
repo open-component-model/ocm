@@ -7,6 +7,9 @@ package s3
 import (
 	"fmt"
 
+	. "github.com/open-component-model/ocm/pkg/exception"
+	"github.com/open-component-model/ocm/pkg/utils"
+
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessio/downloader"
 	"github.com/open-component-model/ocm/pkg/common/accessio/downloader/s3"
@@ -20,54 +23,60 @@ import (
 
 // Type is the access type of S3 registry.
 const (
-	Type   = "s3"
-	TypeV1 = Type + runtime.VersionSeparator + "v1"
+	Type = "s3"
 
 	LegacyType   = "S3"
 	LegacyTypeV1 = LegacyType + runtime.VersionSeparator + "v1"
 )
 
+var versions = cpi.NewAccessTypeVersionScheme(Type).WithKindAliases(LegacyType)
+
 func init() {
-	cpi.RegisterAccessType(cpi.NewAccessSpecType[*AccessSpec](Type, cpi.WithDescription(usage)))
-	cpi.RegisterAccessType(cpi.NewAccessSpecType[*AccessSpec](TypeV1, cpi.WithFormatSpec(formatV1), cpi.WithConfigHandler(ConfigHandler())))
-	cpi.RegisterAccessType(cpi.NewAccessSpecType[*AccessSpec](LegacyType))
-	cpi.RegisterAccessType(cpi.NewAccessSpecType[*AccessSpec](LegacyTypeV1))
+	Must(versions.Register(cpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV2](Type, &converterV2{}, cpi.WithDescription(usage))))
+	Must(versions.Register(cpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV1](LegacyType, &converterV1{}, cpi.WithDescription(usage))))
+	initV1()
+	initV2()
+	cpi.RegisterAccessTypeVersions(versions)
 }
 
 // AccessSpec describes the access for a S3 registry.
 type AccessSpec struct {
-	runtime.ObjectVersionedType `json:",inline"`
+	runtime.InternalVersionedTypedObject[cpi.AccessSpec]
 
 	// Region needs to be set even though buckets are global.
 	// We can't assume that there is a default region setting sitting somewhere.
 	// +optional
-	Region string `json:"region,omitempty"`
+	Region string
 	// Bucket where the s3 object is located.
-	Bucket string `json:"bucket"`
+	Bucket string
 	// Key of the object to look for. This value will be used together with Bucket and Version to form an identity.
-	Key string `json:"key"`
+	Key string
 	// Version of the object.
 	// +optional
-	Version string `json:"version,omitempty"`
+	Version string
 	// MediaType defines the mime type of the object to download.
 	// +optional
-	MediaType  string `json:"mediaType,omitempty"`
+	MediaType  string
 	downloader downloader.Downloader
 }
 
 var _ cpi.AccessSpec = (*AccessSpec)(nil)
 
 // New creates a new GitHub registry access spec version v1.
-func New(region, bucket, key, version, mediaType string, downloader downloader.Downloader) *AccessSpec {
+func New(region, bucket, key, version, mediaType string, downloader ...downloader.Downloader) *AccessSpec {
 	return &AccessSpec{
-		ObjectVersionedType: runtime.NewVersionedTypedObject(Type),
-		Region:              region,
-		Bucket:              bucket,
-		Key:                 key,
-		Version:             version,
-		MediaType:           mediaType,
-		downloader:          downloader,
+		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject[cpi.AccessSpec](versions, Type),
+		Region:                       region,
+		Bucket:                       bucket,
+		Key:                          key,
+		Version:                      version,
+		MediaType:                    mediaType,
+		downloader:                   utils.Optional(downloader...),
 	}
+}
+
+func (a AccessSpec) MarshalJSON() ([]byte, error) {
+	return runtime.MarshalVersionedTypedObject(&a)
 }
 
 func (a *AccessSpec) Describe(ctx cpi.Context) string {
@@ -80,10 +89,6 @@ func (_ *AccessSpec) IsLocal(cpi.Context) bool {
 
 func (a *AccessSpec) GlobalAccessSpec(ctx cpi.Context) cpi.AccessSpec {
 	return a
-}
-
-func (_ *AccessSpec) GetType() string {
-	return Type
 }
 
 func (a *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
@@ -122,9 +127,9 @@ func newMethod(c cpi.ComponentVersionAccess, a *AccessSpec) (*accessMethod, erro
 			AccessSecret: accessSecret,
 		}
 	}
-	var d downloader.Downloader = s3.NewDownloader(a.Region, a.Bucket, a.Key, a.Version, awsCreds)
-	if a.downloader != nil {
-		d = a.downloader
+	d := a.downloader
+	if d == nil {
+		d = s3.NewDownloader(a.Region, a.Bucket, a.Key, a.Version, awsCreds)
 	}
 	w := accessio.NewWriteAtWriter(d.Download)
 	// don't change the spec, leave it empty.

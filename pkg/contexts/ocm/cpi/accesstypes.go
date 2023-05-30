@@ -42,7 +42,7 @@ type accessType struct {
 
 var _ additionalTypeInfo = (*accessType)(nil)
 
-func newAccessSpecType(vt runtime.VersionedTypedObjectType[AccessSpec], opts []AccessSpecTypeOption) AccessType {
+func NewAccessSpecTypeByBaseType(vt runtime.VersionedTypedObjectType[AccessSpec], opts ...AccessSpecTypeOption) AccessType {
 	t := accessTypeTarget{&accessType{
 		VersionedTypedObjectType: vt,
 	}}
@@ -53,11 +53,11 @@ func newAccessSpecType(vt runtime.VersionedTypedObjectType[AccessSpec], opts []A
 }
 
 func NewAccessSpecType[I AccessSpec](name string, opts ...AccessSpecTypeOption) AccessType {
-	return newAccessSpecType(runtime.NewVersionedTypedObjectType[AccessSpec, I](name), opts)
+	return NewAccessSpecTypeByBaseType(runtime.NewVersionedTypedObjectType[AccessSpec, I](name), opts...)
 }
 
 func NewAccessSpecTypeByConverter[I AccessSpec, V runtime.VersionedTypedObject](name string, converter runtime.Converter[I, V], opts ...AccessSpecTypeOption) AccessType {
-	return newAccessSpecType(runtime.NewVersionedTypedObjectTypeByConverter[AccessSpec, I, V](name, converter), opts)
+	return NewAccessSpecTypeByBaseType(runtime.NewVersionedTypedObjectTypeByConverter[AccessSpec, I, V](name, converter), opts...)
 }
 
 func (t *accessType) ConfigOptionTypeSetHandler() flagsets.ConfigOptionTypeSetHandler {

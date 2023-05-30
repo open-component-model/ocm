@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	. "github.com/open-component-model/ocm/pkg/exception"
+	"github.com/open-component-model/ocm/pkg/mime"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -126,6 +127,9 @@ func (a *AccessSpec) GlobalAccessSpec(ctx cpi.Context) cpi.AccessSpec {
 }
 
 func (a *AccessSpec) GetMimeType() string {
+	if a.MediaType == "" {
+		return mime.MIME_OCTET
+	}
 	return a.MediaType
 }
 

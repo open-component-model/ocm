@@ -5,15 +5,19 @@
 package s3_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
+	"reflect"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
+	"github.com/open-component-model/ocm/pkg/generics"
+	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/osfs"
@@ -41,59 +45,60 @@ func (m *mockDownloader) Download(w io.WriterAt) error {
 	return m.err
 }
 
+func checkMarshal(spec *s3.AccessSpec, typ string, fmt string) {
+	if typ != "" {
+		spec.SetType(typ)
+	}
+	data := Must(json.Marshal(spec))
+	ExpectWithOffset(1, string(data)).To(Equal(fmt))
+
+	n := MustWithOffset(1, Calling(ocm.DefaultContext().AccessSpecForConfig(data, nil)))
+	Expect(reflect.TypeOf(n)).To(Equal(reflect.TypeOf(spec)))
+	Expect(n.GetType()).To(Equal(generics.Conditional(typ == "", s3.Type, typ)))
+	data2 := Must(json.Marshal(n))
+	ExpectWithOffset(1, string(data2)).To(StringEqualWithContext(string(data)))
+}
+
 var _ = Describe("Method", func() {
-	var (
-		env             *Builder
-		accessSpec      *s3.AccessSpec
-		downloader      downloader.Downloader
-		expectedContent []byte
-		err             error
-		mcc             ocm.Context
-		fs              vfs.FileSystem
-		ctx             datacontext.Context
-	)
-	BeforeEach(func() {
-		expectedContent, err = os.ReadFile(filepath.Join("testdata", "repo.tar.gz"))
-		Expect(err).ToNot(HaveOccurred())
-		env = NewBuilder(NewEnvironment())
-		downloader = &mockDownloader{
-			expected: expectedContent,
-		}
-		accessSpec = s3.New(
-			"region",
-			"bucket",
-			"key",
-			"version",
-			"tar/gz",
-			downloader,
-		)
-		fs, err = osfs.NewTempFileSystem()
-		Expect(err).To(Succeed())
-		ctx = datacontext.New(nil)
-		vfsattr.Set(ctx, fs)
-		tmpcache.Set(ctx, &tmpcache.Attribute{Path: "/tmp"})
-		mcc = ocm.New(datacontext.MODE_INITIAL)
-		mcc.CredentialsContext().SetCredentialsForConsumer(credentials.ConsumerIdentity{credentials.ID_TYPE: identity.CONSUMER_TYPE}, credentials.DirectCredentials{
-			"accessKeyID":  "accessKeyID",
-			"accessSecret": "accessSecret",
+	Context("specification", func() {
+		var spec *s3.AccessSpec
+
+		BeforeEach(func() {
+			spec = s3.New(
+				"region",
+				"bucket",
+				"key",
+				"version",
+				"tar/gz",
+			)
+		})
+
+		It("serializes", func() {
+			checkMarshal(spec, "", "{\"type\":\"s3\",\"region\":\"region\",\"bucketName\":\"bucket\",\"objectKey\":\"key\",\"version\":\"version\",\"mediaType\":\"tar/gz\"}")
+			checkMarshal(spec, s3.TypeV1, "{\"type\":\"s3/v1\",\"region\":\"region\",\"bucket\":\"bucket\",\"key\":\"key\",\"version\":\"version\",\"mediaType\":\"tar/gz\"}")
+			checkMarshal(spec, s3.TypeV2, "{\"type\":\"s3/v2\",\"region\":\"region\",\"bucketName\":\"bucket\",\"objectKey\":\"key\",\"version\":\"version\",\"mediaType\":\"tar/gz\"}")
+			checkMarshal(spec, s3.LegacyType, "{\"type\":\"S3\",\"region\":\"region\",\"bucket\":\"bucket\",\"key\":\"key\",\"version\":\"version\",\"mediaType\":\"tar/gz\"}")
+			checkMarshal(spec, s3.LegacyTypeV1, "{\"type\":\"S3/v1\",\"region\":\"region\",\"bucket\":\"bucket\",\"key\":\"key\",\"version\":\"version\",\"mediaType\":\"tar/gz\"}")
 		})
 	})
 
-	AfterEach(func() {
-		env.Cleanup()
-		vfs.Cleanup(fs)
-	})
-	It("downloads s3 objects", func() {
-		m, err := accessSpec.AccessMethod(&mockComponentVersionAccess{context: mcc})
-		Expect(err).ToNot(HaveOccurred())
-		blob, err := m.Get()
-		Expect(err).ToNot(HaveOccurred())
-		Expect(blob).To(Equal(expectedContent))
-	})
-	When("the downloader fails to download the bucket object", func() {
+	Context("accessmethod", func() {
+		var (
+			env             *Builder
+			accessSpec      *s3.AccessSpec
+			downloader      downloader.Downloader
+			expectedContent []byte
+			err             error
+			mcc             ocm.Context
+			fs              vfs.FileSystem
+			ctx             datacontext.Context
+		)
 		BeforeEach(func() {
+			expectedContent, err = os.ReadFile(filepath.Join("testdata", "repo.tar.gz"))
+			Expect(err).ToNot(HaveOccurred())
+			env = NewBuilder(NewEnvironment())
 			downloader = &mockDownloader{
-				err: fmt.Errorf("object not found"),
+				expected: expectedContent,
 			}
 			accessSpec = s3.New(
 				"region",
@@ -103,12 +108,49 @@ var _ = Describe("Method", func() {
 				"tar/gz",
 				downloader,
 			)
+			fs, err = osfs.NewTempFileSystem()
+			Expect(err).To(Succeed())
+			ctx = datacontext.New(nil)
+			vfsattr.Set(ctx, fs)
+			tmpcache.Set(ctx, &tmpcache.Attribute{Path: "/tmp"})
+			mcc = ocm.New(datacontext.MODE_INITIAL)
+			mcc.CredentialsContext().SetCredentialsForConsumer(credentials.ConsumerIdentity{credentials.ID_TYPE: identity.CONSUMER_TYPE}, credentials.DirectCredentials{
+				"accessKeyID":  "accessKeyID",
+				"accessSecret": "accessSecret",
+			})
 		})
-		It("errors", func() {
+
+		AfterEach(func() {
+			env.Cleanup()
+			vfs.Cleanup(fs)
+		})
+		It("downloads s3 objects", func() {
 			m, err := accessSpec.AccessMethod(&mockComponentVersionAccess{context: mcc})
 			Expect(err).ToNot(HaveOccurred())
-			_, err = m.Get()
-			Expect(err).To(MatchError(ContainSubstring("object not found")))
+			blob, err := m.Get()
+			Expect(err).ToNot(HaveOccurred())
+			Expect(blob).To(Equal(expectedContent))
+		})
+		When("the downloader fails to download the bucket object", func() {
+			BeforeEach(func() {
+				downloader = &mockDownloader{
+					err: fmt.Errorf("object not found"),
+				}
+				accessSpec = s3.New(
+					"region",
+					"bucket",
+					"key",
+					"version",
+					"tar/gz",
+					downloader,
+				)
+			})
+			It("errors", func() {
+				m, err := accessSpec.AccessMethod(&mockComponentVersionAccess{context: mcc})
+				Expect(err).ToNot(HaveOccurred())
+				_, err = m.Get()
+				Expect(err).To(MatchError(ContainSubstring("object not found")))
+			})
 		})
 	})
 })
