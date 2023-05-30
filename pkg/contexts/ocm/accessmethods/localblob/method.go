@@ -9,9 +9,9 @@ import (
 	"fmt"
 
 	. "github.com/open-component-model/ocm/pkg/exception"
-	"github.com/open-component-model/ocm/pkg/mime"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
