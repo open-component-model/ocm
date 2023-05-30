@@ -38,8 +38,8 @@ type FormatHandler interface {
 
 	Format() accessio.FileFormat
 
-	Open(ctx cpi.Context, acc accessobj.AccessMode, path string, opts accessio.Options) (*Object, error)
-	Create(ctx cpi.Context, path string, opts accessio.Options, mode vfs.FileMode) (*Object, error)
+	Open(ctx cpi.ContextProvider, acc accessobj.AccessMode, path string, opts accessio.Options) (*Object, error)
+	Create(ctx cpi.ContextProvider, path string, opts accessio.Options, mode vfs.FileMode) (*Object, error)
 	Write(obj *Object, path string, opts accessio.Options, mode vfs.FileMode) error
 }
 
@@ -126,9 +126,9 @@ func Open(ctx cpi.ContextProvider, acc accessobj.AccessMode, path string, mode v
 		return nil, errors.ErrUnknown(accessobj.KIND_FILEFORMAT, o.GetFileFormat().String())
 	}
 	if create {
-		return h.Create(ctx.OCIContext(), path, o, mode)
+		return h.Create(cpi.FromProvider(ctx), path, o, mode)
 	}
-	return h.Open(ctx.OCIContext(), acc, path, o)
+	return h.Open(cpi.FromProvider(ctx), acc, path, o)
 }
 
 func Create(ctx cpi.ContextProvider, acc accessobj.AccessMode, path string, mode vfs.FileMode, opts ...accessio.Option) (*Object, error) {
@@ -144,7 +144,7 @@ func Create(ctx cpi.ContextProvider, acc accessobj.AccessMode, path string, mode
 	return h.Create(ctx.OCIContext(), path, o, mode)
 }
 
-func (h *formatHandler) Open(ctx cpi.Context, acc accessobj.AccessMode, path string, opts accessio.Options) (*Object, error) {
+func (h *formatHandler) Open(ctx cpi.ContextProvider, acc accessobj.AccessMode, path string, opts accessio.Options) (*Object, error) {
 	obj, err := h.FormatHandler.Open(accessObjectInfo, acc, path, opts)
 	if err != nil {
 		return nil, err
@@ -153,7 +153,7 @@ func (h *formatHandler) Open(ctx cpi.Context, acc accessobj.AccessMode, path str
 	return _Wrap(ctx, spec, obj, err)
 }
 
-func (h *formatHandler) Create(ctx cpi.Context, path string, opts accessio.Options, mode vfs.FileMode) (*Object, error) {
+func (h *formatHandler) Create(ctx cpi.ContextProvider, path string, opts accessio.Options, mode vfs.FileMode) (*Object, error) {
 	obj, err := h.FormatHandler.Create(accessObjectInfo, path, opts, mode)
 	if err != nil {
 		return nil, err

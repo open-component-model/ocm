@@ -54,6 +54,13 @@ func ForContext(ctx context.Context) Context {
 	return c.(Context)
 }
 
+func FromProvider(p ContextProvider) Context {
+	if p == nil {
+		return nil
+	}
+	return p.OCIContext()
+}
+
 func DefinedForContext(ctx context.Context) (Context, bool) {
 	c, ok := datacontext.ForContextByKey(ctx, key, DefaultContext)
 	if c != nil {

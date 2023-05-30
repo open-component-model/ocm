@@ -95,6 +95,10 @@ func NewNamePath(p string) NamePath {
 	return registrations.NewNamePath(p)
 }
 
+func FromProvider(p ContextProvider) Context {
+	return internal.FromProvider(p)
+}
+
 func NewBlobHandlerOptions(olist ...BlobHandlerOption) *BlobHandlerOptions {
 	return internal.NewBlobHandlerOptions(olist...)
 }
