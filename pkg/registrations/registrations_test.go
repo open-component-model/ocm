@@ -8,8 +8,10 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-component-model/ocm/pkg/registrations"
 	. "github.com/open-component-model/ocm/pkg/testutils"
+	"github.com/open-component-model/ocm/pkg/utils"
+
+	"github.com/open-component-model/ocm/pkg/registrations"
 )
 
 type Target interface {
@@ -62,6 +64,15 @@ func (t *TestRegistrationHandler) RegisterByName(handler string, target Target, 
 	}
 	t.registered[handler] = nil
 	return true, nil
+}
+
+func (t *TestRegistrationHandler) GetHandlers(target Target) registrations.HandlerInfos {
+	infos := registrations.HandlerInfos{}
+
+	for _, n := range utils.StringMapKeys(t.registered) {
+		infos = append(infos, registrations.NewLeafHandlerInfo(n, "")...)
+	}
+	return infos
 }
 
 var _ = Describe("handler registry test", func() {

@@ -11,6 +11,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/dirtree"
 	"github.com/open-component-model/ocm/pkg/mime"
@@ -72,10 +73,13 @@ var _ = Describe("artifact management", func() {
 
 			h := dirtree.New(ociv1.MediaTypeImageConfig)
 
-			accepted, path, err := h.Download(nil, res, "result", env)
-			Expect(err).To(Succeed())
+			p, buf := common.NewBufferedPrinter()
+			accepted, path := Must2(h.Download(p, res, "result", env))
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("result"))
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+result: 2 file(s) with 25 byte(s) written
+`))
 
 			data := Must(vfs.ReadFile(env, "result/testfile"))
 			Expect(string(data)).To(StringEqualWithContext("testdata\n"))
@@ -92,10 +96,14 @@ var _ = Describe("artifact management", func() {
 
 			h := dirtree.New(ociv1.MediaTypeImageConfig).SetArchiveMode(true)
 
-			accepted, path, err := h.Download(nil, res, "target", env)
+			p, buf := common.NewBufferedPrinter()
+			accepted, path, err := h.Download(p, res, "target", env)
 			Expect(err).To(Succeed())
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("target"))
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+target: 3584 byte(s) written
+`))
 
 			MustBeSuccessful(env.MkdirAll("result", 0o700))
 			resultfs := Must(projectionfs.New(env, "result"))
@@ -114,10 +122,14 @@ var _ = Describe("artifact management", func() {
 			defer Close(cv)
 			res := Must(cv.GetResource(metav1.NewIdentity(RESOURCE)))
 
-			accepted, path, err := download.For(env.OCMContext()).Download(nil, res, "result", env)
+			p, buf := common.NewBufferedPrinter()
+			accepted, path, err := download.For(env).Download(p, res, "result", env)
 			Expect(err).To(Succeed())
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("result"))
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+result: 2 file(s) with 25 byte(s) written
+`))
 
 			data := Must(vfs.ReadFile(env, "result/testfile"))
 			Expect(string(data)).To(StringEqualWithContext("testdata\n"))
@@ -160,10 +172,13 @@ var _ = Describe("artifact management", func() {
 
 			h := dirtree.New(ociv1.MediaTypeImageConfig)
 
-			accepted, path, err := h.Download(nil, res, "result", env)
-			Expect(err).To(Succeed())
+			p, buf := common.NewBufferedPrinter()
+			accepted, path := Must2(h.Download(p, res, "result", env))
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("result"))
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+result: 2 file(s) with 25 byte(s) written
+`))
 
 			data := Must(vfs.ReadFile(env, "result/testfile"))
 			Expect(string(data)).To(StringEqualWithContext("testdata\n"))
@@ -180,10 +195,13 @@ var _ = Describe("artifact management", func() {
 
 			h := dirtree.New(ociv1.MediaTypeImageConfig).SetArchiveMode(true)
 
-			accepted, path, err := h.Download(nil, res, "target", env)
-			Expect(err).To(Succeed())
+			p, buf := common.NewBufferedPrinter()
+			accepted, path := Must2(h.Download(p, res, "target", env))
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("target"))
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+target: 3584 byte(s) written
+`))
 
 			MustBeSuccessful(env.MkdirAll("result", 0o700))
 			resultfs := Must(projectionfs.New(env, "result"))
@@ -202,10 +220,13 @@ var _ = Describe("artifact management", func() {
 			defer Close(cv)
 			res := Must(cv.GetResource(metav1.NewIdentity(RESOURCE)))
 
-			accepted, path, err := download.For(env.OCMContext()).Download(nil, res, "result", env)
-			Expect(err).To(Succeed())
+			p, buf := common.NewBufferedPrinter()
+			accepted, path := Must2(download.For(env).Download(p, res, "result", env))
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("result"))
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+result: 2 file(s) with 25 byte(s) written
+`))
 
 			data := Must(vfs.ReadFile(env, "result/testfile"))
 			Expect(string(data)).To(StringEqualWithContext("testdata\n"))
@@ -251,10 +272,13 @@ var _ = Describe("artifact management", func() {
 
 			h := dirtree.New(ociv1.MediaTypeImageConfig)
 
-			accepted, path, err := h.Download(nil, res, "result", env)
-			Expect(err).To(Succeed())
+			p, buf := common.NewBufferedPrinter()
+			accepted, path := Must2(h.Download(p, res, "result", env))
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("result"))
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+result: 2 file(s) with 25 byte(s) written
+`))
 
 			data := Must(vfs.ReadFile(env, "result/testfile"))
 			Expect(string(data)).To(StringEqualWithContext("testdata\n"))
@@ -271,10 +295,13 @@ var _ = Describe("artifact management", func() {
 
 			h := dirtree.New(ociv1.MediaTypeImageConfig).SetArchiveMode(true)
 
-			accepted, path, err := h.Download(nil, res, "target", env)
-			Expect(err).To(Succeed())
+			p, buf := common.NewBufferedPrinter()
+			accepted, path := Must2(h.Download(p, res, "target", env))
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("target"))
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+target: 3584 byte(s) written
+`))
 
 			MustBeSuccessful(env.MkdirAll("result", 0o700))
 			resultfs := Must(projectionfs.New(env, "result"))
@@ -293,10 +320,13 @@ var _ = Describe("artifact management", func() {
 			defer Close(cv)
 			res := Must(cv.GetResource(metav1.NewIdentity(RESOURCE)))
 
-			accepted, path, err := download.For(env.OCMContext()).Download(nil, res, "result", env)
-			Expect(err).To(Succeed())
+			p, buf := common.NewBufferedPrinter()
+			accepted, path := Must2(download.For(env).Download(p, res, "result", env))
 			Expect(accepted).To(BeTrue())
 			Expect(path).To(Equal("result"))
+			Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+result: 2 file(s) with 25 byte(s) written
+`))
 
 			data := Must(vfs.ReadFile(env, "result/testfile"))
 			Expect(string(data)).To(StringEqualWithContext("testdata\n"))

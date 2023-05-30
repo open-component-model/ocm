@@ -95,14 +95,11 @@ func (s *WalkingState) GetContext(nv common.NameVersion, ctxkey common.NameVersi
 }
 
 func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionAccess, opts *Options, closecv ...bool) (*metav1.DigestSpec, error) {
-	if printer == nil {
-		printer = common.NewPrinter(nil)
-	}
 	if state == nil {
 		s := NewWalkingState(cv.GetContext().LoggingContext().WithContext(REALM))
 		state = &s
 	}
-	dc, err := apply(printer, *state, cv, opts, utils.Optional(closecv...))
+	dc, err := apply(common.AssurePrinter(printer), *state, cv, opts, utils.Optional(closecv...))
 	if err != nil {
 		return nil, err
 	}

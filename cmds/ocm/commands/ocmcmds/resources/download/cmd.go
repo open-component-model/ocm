@@ -19,6 +19,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/destoption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/elemhdlr"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/downloaderoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/versionconstraintsoption"
@@ -58,7 +59,12 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	f := func(opts *output.Options) output.Output {
 		return &action{downloaders: download.For(ctx), opts: opts}
 	}
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx, versionconstraintsoption.New(), repooption.New(), output.OutputOptions(output.NewOutputs(f), NewOptions(), closureoption.New("component reference"), lookupoption.New(), destoption.New()))}, utils.Names(Names, names...)...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx,
+		versionconstraintsoption.New(),
+		repooption.New(),
+		downloaderoption.New(ctx.OCMContext()),
+		output.OutputOptions(output.NewOutputs(f), NewOptions(), closureoption.New("component reference"), lookupoption.New(), destoption.New()),
+	)}, utils.Names(Names, names...)...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {
@@ -141,8 +147,14 @@ func (o *Command) Run() error {
 		return err
 	}
 
+	d := downloaderoption.From(o)
+	err = d.Register(o)
+	if err != nil {
+		return err
+	}
+
 	opts := output.From(o)
-	if o.Executable {
+	if d.HasRegistrations() || o.Executable {
 		From(opts).UseHandlers = true
 	}
 
@@ -172,6 +184,9 @@ func (d *action) Add(e interface{}) error {
 }
 
 func (d *action) Close() error {
+	if len(d.data) == 0 {
+		out.Outf(d.opts.Context, "no resources selected\n")
+	}
 	return nil
 }
 
@@ -223,7 +238,6 @@ func (d *action) Save(o *elemhdlr.Object, f string) error {
 	pathIn := true
 	r := common.Elem(o)
 	if f == "" {
-		f = r.GetName()
 		pathIn = false
 	}
 	var tmp vfs.File
@@ -244,9 +258,11 @@ func (d *action) Save(o *elemhdlr.Object, f string) error {
 		return err
 	}
 	dir := path.Dir(f)
-	err = dest.PathFilesystem.MkdirAll(dir, 0o770)
-	if err != nil {
-		return err
+	if dir != "" && dir != "." {
+		err = dest.PathFilesystem.MkdirAll(dir, 0o770)
+		if err != nil {
+			return err
+		}
 	}
 	var ok bool
 	var eff string

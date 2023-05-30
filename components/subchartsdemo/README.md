@@ -204,7 +204,7 @@ Values for subcharts are located under a parent tag identifying the sub-chart. S
 
 # Building
 
-You can use `make` to build this component. You will have to adjust the variables at the top of the [makefile](Makefile) to your environment (at least `OCMREPO`). By default all artifacts are built in the `gen` folder of this project.
+You can use `make` to build this component. You will have to adjust the variables at the top of the [makefile](Makefile) to your environment (at least `OCMREPO`). By default, all artifacts are built in the `gen` folder of this project.
 
 The main targets are:
 

@@ -72,6 +72,7 @@ type (
 	BlobHandler                  = internal.BlobHandler
 	BlobHandlerOption            = internal.BlobHandlerOption
 	BlobHandlerOptions           = internal.BlobHandlerOptions
+	BlobHandlerKey               = internal.BlobHandlerKey
 	BlobHandlerRegistry          = internal.BlobHandlerRegistry
 	StorageContext               = internal.StorageContext
 	ImplementationRepositoryType = internal.ImplementationRepositoryType

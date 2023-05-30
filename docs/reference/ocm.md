@@ -11,6 +11,7 @@ ocm [<options>] <sub command> ...
 ```
   -X, --attribute stringArray   attribute setting
       --config string           configuration file
+      --config-set strings      apply configuration set
   -C, --cred stringArray        credential setting
   -h, --help                    help for ocm
       --logconfig string        log config
@@ -108,7 +109,7 @@ attributes are supported:
 - <code>github.com/mandelsoft/ocm/keeplocalblob</code> [<code>keeplocalblob</code>]: *bool*
 
   Keep local blobs when importing OCI artifacts to OCI registries from <code>localBlob</code>
-  access methods. By default they will be expanded to OCI artifacts with the
+  access methods. By default, they will be expanded to OCI artifacts with the
   access method <code>ociRegistry</code>. If this option is set to true, they will be stored
   as local blobs, also. The access method will still be <code>localBlob</code> but with a nested
   <code>ociRegistry</code> access method for describing the global access.
@@ -184,5 +185,7 @@ attributes are supported:
 * [ocm <b>logging</b>](ocm_logging.md)	 &mdash; Configured logging keys
 * [ocm <b>oci-references</b>](ocm_oci-references.md)	 &mdash; notation for OCI references
 * [ocm <b>ocm-accessmethods</b>](ocm_ocm-accessmethods.md)	 &mdash; List of all supported access methods
+* [ocm <b>ocm-downloadhandlers</b>](ocm_ocm-downloadhandlers.md)	 &mdash; List of all available download handlers
 * [ocm <b>ocm-references</b>](ocm_ocm-references.md)	 &mdash; notation for OCM references
+* [ocm <b>ocm-uploadhandlers</b>](ocm_ocm-uploadhandlers.md)	 &mdash; List of all available upload handlers
 * [ocm <b>toi-bootstrapping</b>](ocm_toi-bootstrapping.md)	 &mdash; Tiny OCM Installer based on component versions

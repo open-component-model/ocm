@@ -57,7 +57,7 @@ Several transfer scenarios are supported:
 - copy artifacts from multiple repositories into another registry
 - copy artifacts from multiple repositories into another registry with a given repository prefix (option -R)
 
-By default the target is seen as a single repository if a repository is specified.
+By default, the target is seen as a single repository if a repository is specified.
 If a complete registry is specified as target, option -R is implied, but the source
 must provide a repository. THis combination does not allow an artifact set as source, which
 specifies no repository for the artifacts.

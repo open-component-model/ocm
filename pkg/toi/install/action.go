@@ -19,7 +19,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/config"
 	globalconfig "github.com/open-component-model/ocm/pkg/contexts/config/config"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/logforward"
@@ -385,11 +384,9 @@ func ExecuteAction(p common.Printer, d Driver, name string, spec *toi.PackageSpe
 	}
 
 	if lc := logforward.Get(octx); lc != nil {
-		g, err := config.ToGenericConfig(logcfg.NewWithConfig("default", lc))
-		if err != nil {
+		if err := ccfg.AddConfig(logcfg.NewWithConfig("default", lc)); err != nil {
 			return nil, errors.Wrapf(err, "cannot create logging config forwarding")
 		}
-		ccfg.Configurations = append(ccfg.Configurations, g)
 	}
 	{
 		data, _ := yaml.Marshal(ccfg)

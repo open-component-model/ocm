@@ -41,6 +41,11 @@ func Must[T any](o T, err error) T {
 	return o
 }
 
+func Must2[T any, V any](a T, b V, err error) (T, V) {
+	ExpectWithOffset(1, err).To(Succeed())
+	return a, b
+}
+
 type result[T any] struct {
 	res T
 	err error

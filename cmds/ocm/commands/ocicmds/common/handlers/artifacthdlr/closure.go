@@ -43,8 +43,10 @@ func traverse(hist common.History, o *Object, octx out.Context) []output.Object 
 				Key:     Key(nested),
 				Spec: oci.RefSpec{
 					UniformRepositorySpec: o.Spec.UniformRepositorySpec,
-					Repository:            o.Spec.Repository,
-					Digest:                &ref.Digest,
+					ArtSpec: oci.ArtSpec{
+						Repository: o.Spec.Repository,
+						Digest:     &ref.Digest,
+					},
 				},
 				Namespace: o.Namespace,
 				Artifact:  nested,

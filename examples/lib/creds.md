@@ -155,7 +155,7 @@ as follows:
   )
 ```
 
-The given pattern does not specify all the possible attributes, therefore it 
+The given pattern does not specify all the possible attributes, therefore, it 
 matches, for example, for all ports.
 
 After the credentials have been configured for the used credentials context,

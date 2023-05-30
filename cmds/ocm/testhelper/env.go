@@ -34,14 +34,18 @@ func NewCLI(ctx clictx.Context) *CLI {
 }
 
 func (c *CLI) Execute(args ...string) error {
-	cmd := app.NewCliCommand(c)
-	cmd.SetArgs(args)
+	cmd, err := app.NewCliCommandForArgs(c, args)
+	if err != nil {
+		return err
+	}
 	return cmd.Execute()
 }
 
 func (c *CLI) ExecuteModified(mod func(ctx clictx.Context, cmd *cobra.Command), args ...string) error {
-	cmd := app.NewCliCommand(c, mod)
-	cmd.SetArgs(args)
+	cmd, err := app.NewCliCommandForArgs(c, args, mod)
+	if err != nil {
+		return err
+	}
 	return cmd.Execute()
 }
 

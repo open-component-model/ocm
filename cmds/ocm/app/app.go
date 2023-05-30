@@ -52,7 +52,9 @@ import (
 	topiclogging "github.com/open-component-model/ocm/cmds/ocm/topics/common/logging"
 	topicocirefs "github.com/open-component-model/ocm/cmds/ocm/topics/oci/refs"
 	topicocmaccessmethods "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/accessmethods"
+	topicocmdownloaders "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/downloadhandlers"
 	topicocmrefs "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/refs"
+	topicocmuploaders "github.com/open-component-model/ocm/cmds/ocm/topics/ocm/uploadhandlers"
 	topicbootstrap "github.com/open-component-model/ocm/cmds/ocm/topics/toi/bootstrapping"
 	"github.com/open-component-model/ocm/pkg/cobrautils"
 	"github.com/open-component-model/ocm/pkg/cobrautils/logopts"
@@ -72,6 +74,7 @@ import (
 type CLIOptions struct {
 	Completed   bool
 	Config      string
+	ConfigSets  []string
 	Credentials []string
 	Context     clictx.Context
 	Settings    []string
@@ -134,6 +137,10 @@ The value can be a simple type or a json string for complex values. The followin
 attributes are supported:
 ` + attributes.Attributes()
 
+// NewCliCommandForArgs is the regular way to instantiate a new CLI command.
+// It observes settings provides by options for the main command.
+// This especially means, that help texts are configured according
+// to the config settings provided by options.
 func NewCliCommandForArgs(ctx clictx.Context, args []string, mod ...func(clictx.Context, *cobra.Command)) (*cobra.Command, error) {
 	opts, args, err := Prepare(ctx, args)
 	if err != nil {
@@ -144,6 +151,9 @@ func NewCliCommandForArgs(ctx clictx.Context, args []string, mod ...func(clictx.
 	return cmd, nil
 }
 
+// NewCliCommand creates a new command WITHOUT observing configuration options.
+// The result is a command configured by pure defaults. This is especially true
+// for plugin settings.
 func NewCliCommand(ctx clictx.Context, mod ...func(clictx.Context, *cobra.Command)) *cobra.Command {
 	if ctx == nil {
 		ctx = clictx.DefaultContext()
@@ -230,6 +240,8 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(topicocirefs.New(ctx))
 	cmd.AddCommand(topicocmrefs.New(ctx))
 	cmd.AddCommand(topicocmaccessmethods.New(ctx))
+	cmd.AddCommand(topicocmuploaders.New(ctx))
+	cmd.AddCommand(topicocmdownloaders.New(ctx))
 	cmd.AddCommand(attributes.New(ctx))
 	cmd.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 
@@ -239,6 +251,8 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	help.AddCommand(topicocirefs.New(ctx))
 	help.AddCommand(topicocmrefs.New(ctx))
 	help.AddCommand(topicocmaccessmethods.New(ctx))
+	help.AddCommand(topicocmuploaders.New(ctx))
+	help.AddCommand(topicocmdownloaders.New(ctx))
 	help.AddCommand(attributes.New(ctx))
 	help.AddCommand(topicbootstrap.New(ctx, "toi-bootstrapping"))
 
@@ -252,6 +266,7 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 
 func (o *CLIOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Config, "config", "", "", "configuration file")
+	fs.StringSliceVarP(&o.ConfigSets, "config-set", "", nil, "apply configuration set")
 	fs.StringArrayVarP(&o.Credentials, "cred", "C", nil, "credential setting")
 	fs.StringArrayVarP(&o.Settings, "attribute", "X", nil, "attribute setting")
 	fs.BoolVarP(&o.Verbose, "verbose", "v", false, "deprecated: enable logrus verbose logging")
@@ -281,6 +296,13 @@ func (o *CLIOptions) Complete() error {
 	_, err = utils.Configure(o.Context.OCMContext(), o.Config, vfsattr.Get(o.Context))
 	if err != nil {
 		return err
+	}
+
+	for _, n := range o.ConfigSets {
+		err := o.Context.ConfigContext().ApplyConfigSet(n)
+		if err != nil {
+			return err
+		}
 	}
 
 	id := credentials.ConsumerIdentity{}

@@ -19,6 +19,7 @@ The following *realms* are used by the command line tool:
   - <code>ocm</code>: general realm used for the ocm go library.
   - <code>ocm/accessmethod/ociartifact</code>: access method ociArtifact
   - <code>ocm/credentials/dockerconfig</code>: docker config handling as credential repository
+  - <code>ocm/downloader</code>: Downloaders
   - <code>ocm/oci.ocireg</code>: OCI repository handling
   - <code>ocm/ocimapping</code>: OCM to OCI Registry Mapping
   - <code>ocm/plugins</code>: OCM plugin handling

@@ -29,9 +29,11 @@ func NewDownloaderKey(arttype, mediatype string) DownloaderKey {
 }
 
 type DownloaderDescriptor struct {
-	Name        string          `json:"name"`
-	Description string          `json:"description"`
-	Constraints []DownloaderKey `json:"constraints,omitempty"`
+	Name             string                   `json:"name"`
+	Description      string                   `json:"description"`
+	Constraints      []DownloaderKey          `json:"constraints,omitempty"`
+	ConfigScheme     string                   `json:"configScheme,omitempty"`
+	AutoRegistration []DownloaderRegistration `json:"autoRegistration,omitempty"`
 }
 
 func (d DownloaderDescriptor) GetName() string {
@@ -44,6 +46,11 @@ func (d DownloaderDescriptor) GetDescription() string {
 
 func (d DownloaderDescriptor) GetConstraints() []DownloaderKey {
 	return d.Constraints
+}
+
+type DownloaderRegistration struct {
+	DownloaderKey `json:",inline"`
+	Priority      int `json:"priority,omitempty"`
 }
 
 type UploaderDescriptor struct {
@@ -78,6 +85,14 @@ type ActionDescriptor struct {
 	Description      string   `json:"description,omitempty"`
 	ConsumerType     string   `json:"consumerType,omitempty"`
 	DefaultSelectors []string `json:"defaultSelectors,omitempty"`
+}
+
+func (a ActionDescriptor) GetName() string {
+	return a.Name
+}
+
+func (a ActionDescriptor) GetDescription() string {
+	return a.Description
 }
 
 type CLIOption struct {
