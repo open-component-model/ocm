@@ -52,6 +52,9 @@ func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionA
 }
 
 func (h *Handler) TransferResource(src ocm.ComponentVersionAccess, a ocm.AccessSpec, r ocm.ResourceAccess) (bool, error) {
+	if h.opts.IsAccessTypeOmitted(a.GetType()) {
+		return false, nil
+	}
 	if h.opts.IsLocalResourcesByValue() {
 		if r.Meta().Relation == metav1.LocalRelation {
 			return true, nil
@@ -61,6 +64,9 @@ func (h *Handler) TransferResource(src ocm.ComponentVersionAccess, a ocm.AccessS
 }
 
 func (h *Handler) TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpec, r ocm.SourceAccess) (bool, error) {
+	if h.opts.IsAccessTypeOmitted(a.GetType()) {
+		return false, nil
+	}
 	return h.opts.IsSourcesByValue(), nil
 }
 
