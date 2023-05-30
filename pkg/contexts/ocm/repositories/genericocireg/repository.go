@@ -52,9 +52,9 @@ var (
 	_ credentials.ConsumerIdentityProvider = (*Repository)(nil)
 )
 
-func NewRepository(ctx cpi.Context, meta *ComponentRepositoryMeta, ocirepo oci.Repository) (cpi.Repository, error) {
+func NewRepository(ctx cpi.ContextProvider, meta *ComponentRepositoryMeta, ocirepo oci.Repository) (cpi.Repository, error) {
 	repo := &RepositoryImpl{
-		ctx:     ctx,
+		ctx:     ctx.OCMContext(),
 		meta:    *DefaultComponentRepositoryMeta(meta),
 		ocirepo: ocirepo,
 	}

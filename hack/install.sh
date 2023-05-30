@@ -8,7 +8,7 @@ set -e
 
 CURRENT_DIR=$(dirname $0)
 PROJECT_ROOT="${CURRENT_DIR}"/..
-GIT_TREE_STATE="$([ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)"
+GIT_TREE_STATE="$([ -z "$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)"
 
 if [[ $EFFECTIVE_VERSION == "" ]]; then
   EFFECTIVE_VERSION=$(cat $PROJECT_ROOT/VERSION)

@@ -111,10 +111,15 @@ func (p *plugin) RegisterDownloader(arttype, mediatype string, hdlr Downloader) 
 
 	var desc *DownloaderDescriptor
 	if old == nil {
+		schema := ""
+		if len(hdlr.ConfigSchema()) > 0 {
+			schema = string(hdlr.ConfigSchema())
+		}
 		desc = &DownloaderDescriptor{
-			Name:        hdlr.Name(),
-			Description: hdlr.Description(),
-			Constraints: []DownloaderKey{},
+			Name:         hdlr.Name(),
+			Description:  hdlr.Description(),
+			Constraints:  []DownloaderKey{},
+			ConfigScheme: schema,
 		}
 		p.descriptor.Downloaders = append(p.descriptor.Downloaders, *desc)
 		desc = &p.descriptor.Downloaders[len(p.descriptor.Downloaders)-1]

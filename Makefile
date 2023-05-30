@@ -34,10 +34,10 @@ COMPONENTS ?= ocmcli helminstaller demoplugin ecrplugin helmdemo subchartsdemo
 
 build: ${SOURCES}
 	mkdir -p bin
-	go build -ldflags $(BUILD_FLAGS) -o bin/ocm ./cmds/ocm
-	go build -ldflags $(BUILD_FLAGS) -o bin/helminstaller ./cmds/helminstaller
-	go build -ldflags $(BUILD_FLAGS) -o bin/demo ./cmds/demoplugin
-	go build -ldflags $(BUILD_FLAGS) -o bin/ecrplugin ./cmds/ecrplugin
+	CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o bin/ocm ./cmds/ocm
+	CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o bin/helminstaller ./cmds/helminstaller
+	CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o bin/demo ./cmds/demoplugin
+	CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o bin/ecrplugin ./cmds/ecrplugin
 
 
 .PHONY: install-requirements

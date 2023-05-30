@@ -81,7 +81,7 @@ OCI Repository types (using standard component repository to OCI mapping):
 The <code>--public-key</code> and <code>--private-key</code> options can be
 used to define public and private keys on the command line. The options have an
 argument of the form <code>[&lt;name>=]&lt;filepath></code>. The optional name
-specifies the signature name the key should be used for. By default this is the
+specifies the signature name the key should be used for. By default, this is the
 signature name specified with the option <code>--signature</code>.
 
 Alternatively a key can be specified as base64 encoded string if the argument
@@ -91,7 +91,7 @@ start with the prefix <code>!</code> or as direct string with the prefix
 \
 If a component lookup for building a reference closure is required
 the <code>--lookup</code>  option can be used to specify a fallback
-lookup repository. By default the component versions are searched in
+lookup repository. By default, the component versions are searched in
 the repository holding the component version for which the closure is
 determined. For *Component Archives* this is never possible, because
 it only contains a single component version. Therefore, in this scenario

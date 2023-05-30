@@ -85,4 +85,4 @@ The constants of the mapping are defined [here](../../../../pkg/contexts/ocm/rep
 
 The reference implementation of the mapping is contained in package [github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg](../../../../pkg/contexts/ocm/repositories/genericocireg).
 
-The blob handler for the described blob mappings can be found [here](../../../../pkg/contexts/ocm/blobhandler/oci/ocirepo).
+The blob handler for the described blob mappings can be found [here](../../../../pkg/contexts/ocm/blobhandler/handlers/oci/ocirepo).

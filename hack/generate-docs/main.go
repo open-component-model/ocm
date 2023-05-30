@@ -11,6 +11,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/app"
 	"github.com/open-component-model/ocm/hack/generate-docs/cobradoc"
 	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
 )
 
 func main() {
@@ -22,7 +23,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	cmd := app.NewCliCommand(clictx.DefaultContext())
+	ctx := clictx.DefaultContext()
+	plugindirattr.Set(ctx.AttributesContext(), "")
+	cmd := app.NewCliCommand(ctx)
 	cmd.DisableAutoGenTag = true
 	cobradoc.Generate("OCM CLI", cmd, os.Args[1], true)
 }

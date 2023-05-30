@@ -34,7 +34,7 @@ configurations:
 `,
 		Long: `
 The command line client supports configuring by a given configuration file.
-If existent by default the file <code>$HOME/.ocmconfig</code> will be read.
+If existent, by default, the file <code>$HOME/.ocmconfig</code> will be read.
 Using the option <code>--config</code> an alternative file can be specified.
 
 The file format is yaml. It uses the same type mechanism used for all

@@ -338,7 +338,7 @@ established, it does not matter, whether the object is created before or
 after applying a configuration to the configuration context.
 Therefore, a configuration can be applied long before real targets are created.
 
-The configuration context does never refer to potential targets, therefore 
+The configuration context does never refer to potential targets, therefore, 
 the garbage collection of target objects is not blocked by the existence
 of a configuration context for those objects.
 

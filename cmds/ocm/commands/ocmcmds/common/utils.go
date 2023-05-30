@@ -78,6 +78,12 @@ func CompleteOptionsWithSession(ctx clictx.Context, session ocm.Session) options
 		if c, ok := opt.(OptionWithSessionCompleter); ok {
 			return c.CompleteWithSession(ctx.OCM(), session)
 		}
+		if c, ok := opt.(options.OptionWithCLIContextCompleter); ok {
+			return c.Configure(ctx)
+		}
+		if c, ok := opt.(options.SimpleOptionCompleter); ok {
+			return c.Complete()
+		}
 		return nil
 	}
 }

@@ -4,7 +4,7 @@
 
 
 The command line client supports configuring by a given configuration file.
-If existent by default the file <code>$HOME/.ocmconfig</code> will be read.
+If existent, by default, the file <code>$HOME/.ocmconfig</code> will be read.
 Using the option <code>--config</code> an alternative file can be specified.
 
 The file format is yaml. It uses the same type mechanism used for all
@@ -50,9 +50,23 @@ The following configuration types are supported:
             - &lt;credential specification>
             ... credential chain
   </pre>
+- <code>downloader.ocm.config.ocm.software</code>
+  The config type <code>downloader.ocm.config.ocm.software</code> can be used to define a list
+  of pre-configured download handler registrations (see [ocm ocm-downloadhandlers](ocm_ocm-downloadhandlers.md)):
+  
+  <pre>
+      type: downloader.ocm.config.ocm.software
+      descrition: "my standard download handler configuration"
+      handlers:
+        - name: oci/artifact
+          artifactType: ociImage
+          mimeType:
+          config: ...
+        ...
+  </pre>
 - <code>generic.config.ocm.software</code>
   The config type <code>generic.config.ocm.software</code> can be used to define a list
-  of arbitrary configuration specifications:
+  of arbitrary configuration specifications and named configuration sets:
   
   <pre>
       type: generic.config.ocm.software
@@ -60,7 +74,19 @@ The following configuration types are supported:
         - type: &lt;any config type>
           ...
         ...
+      sets:
+         standard:
+            description: my selectable standard config
+            configurations:
+              - type: ...
+                ...
+              ...
   </pre>
+  
+  Configurations are directly applied. Configuration sets are
+  just stored in the configuration context and can be applied
+  on-demand. On the CLI, this can be done using the main command option
+  <code>--config-set &lt;name></code>.
 - <code>keys.config.ocm.software</code>
   The config type <code>keys.config.ocm.software</code> can be used to define
   public and private keys. A key value might be given by one of the fields:
@@ -148,6 +174,7 @@ The following configuration types are supported:
       type: plugin.config.ocm.software
       plugin: &lt;plugin name>
       config: &lt;arbitrary configuration structure>
+      disableAutoRegistration: &lt;boolean flag to disable auto registration for up- and download handlers>
   </pre>
 - <code>scripts.ocm.config.ocm.software</code>
   The config type <code>scripts.ocm.config.ocm.software</code> can be used to define transfer scripts:
@@ -159,6 +186,20 @@ The following configuration types are supported:
           path: &lt;>file path>
         &lt;other name>:
           script: &lt;>nested script as yaml>
+  </pre>
+- <code>uploader.ocm.config.ocm.software</code>
+  The config type <code>uploader.ocm.config.ocm.software</code> can be used to define a list
+  of pre-configured download handler registrations (see [ocm ocm-downloadhandlers](ocm_ocm-downloadhandlers.md)):
+  
+  <pre>
+      type: uploader.ocm.config.ocm.software
+      descrition: "my standard download handler configuration"
+      handlers:
+        - name: oci/artifact
+          artifactType: ociImage
+          mimeType:
+          config: ...
+        ...
   </pre>
 
 
@@ -188,4 +229,11 @@ configurations:
 ##### Parents
 
 * [ocm](ocm.md)	 &mdash; Open Component Model command line client
+
+
+
+##### Additional Links
+
+* [<b>ocm ocm-downloadhandlers</b>](ocm_ocm-downloadhandlers.md)	 &mdash; List of all available download handlers
+* [<b>ocm ocm-downloadhandlers</b>](ocm_ocm-downloadhandlers.md)	 &mdash; List of all available download handlers
 

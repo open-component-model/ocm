@@ -9,6 +9,8 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/optutils"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/spf13/pflag"
@@ -24,7 +26,7 @@ var _ = Describe("uploader option", func() {
 	BeforeEach(func() {
 		ctx = clictx.New()
 		flags = pflag.NewFlagSet("test", pflag.ContinueOnError)
-		opt = &Option{}
+		opt = New(ctx.OCMContext())
 		opt.AddFlags(flags)
 	})
 
@@ -90,6 +92,6 @@ var _ = Describe("uploader option", func() {
 
 	It("fails", func() {
 		MustBeSuccessful(flags.Parse([]string{`--uploader`, `plugin/name:::=Name`}))
-		MustFailWithMessage(opt.Configure(ctx), "invalid uploader registration plugin/name::: must be of <name>[:<artifact type>[:<media type>]]")
+		MustFailWithMessage(opt.Configure(ctx), "invalid uploader registration plugin/name::: must be of "+optutils.RegistrationFormat)
 	})
 })

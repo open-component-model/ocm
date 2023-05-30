@@ -13,6 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/registrations"
 )
 
 func init() {
@@ -32,7 +33,7 @@ func (r *RegistrationHandler) RegisterByName(handler string, target handlers.Tar
 
 	ctx, ok := config.(cpi.Context)
 	if !ok {
-		return true, fmt.Errorf("expected ocm.Context as config bout found: %T", config)
+		return true, fmt.Errorf("expected ocm.Context as config but found: %T", config)
 	}
 	if len(path) != 1 {
 		return true, fmt.Errorf("plugin handler must be of the form <plugin>")
@@ -60,4 +61,35 @@ func RegisterActionHandler(target handlers.Target, pname string, ctx ocm.Context
 		return err
 	}
 	return target.GetActions().Register(h, opts)
+}
+
+func (r *RegistrationHandler) GetHandlers(target handlers.Target) registrations.HandlerInfos {
+	infos := registrations.HandlerInfos{}
+
+	ctx := ocm.DefaultContext()
+	if c, ok := target.(ocm.ContextProvider); ok {
+		ctx = c.OCMContext()
+	}
+
+	set := plugincacheattr.Get(ctx)
+	if set == nil {
+		return infos
+	}
+
+	for _, name := range set.PluginNames() {
+		for _, a := range set.Get(name).GetDescriptor().Actions {
+			d := target.GetActions().GetActionTypes().GetAction(a.GetName())
+			short := ""
+			if d != nil {
+				short = d.Description()
+			}
+			i := registrations.HandlerInfo{
+				Name:        name + "/" + a.GetName(),
+				ShortDesc:   short,
+				Description: a.GetDescription(),
+			}
+			infos = append(infos, i)
+		}
+	}
+	return infos
 }

@@ -45,21 +45,21 @@ var _ = Describe("ref parsing", func() {
 	})
 	It("succeeds", func() {
 
-		CheckRef("ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "library/ubuntu"})
-		CheckRef("ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "library/ubuntu", Tag: &tag})
-		CheckRef("test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "test/ubuntu"})
-		CheckRef("test_test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "test_test/ubuntu"})
-		CheckRef("test__test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "test__test/ubuntu"})
-		CheckRef("test-test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "test-test/ubuntu"})
-		CheckRef("test--test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "test--test/ubuntu"})
-		CheckRef("test-----test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "test-----test/ubuntu"})
-		CheckRef("test/ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: docker, Repository: "test/ubuntu", Tag: &tag})
-		CheckRef("ghcr.io/test/ubuntu", &oci.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu"})
-		CheckRef("ghcr.io/test", &oci.RefSpec{UniformRepositorySpec: ghcr, Repository: "test"})
-		CheckRef("ghcr.io:8080/test/ubuntu", &oci.RefSpec{UniformRepositorySpec: oci.UniformRepositorySpec{Host: "ghcr.io:8080"}, Repository: "test/ubuntu"})
-		CheckRef("ghcr.io/test/ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu", Tag: &tag})
-		CheckRef("ghcr.io/test/ubuntu@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", &oci.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu", Digest: &digest})
-		CheckRef("ghcr.io/test/ubuntu:v1@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", &oci.RefSpec{UniformRepositorySpec: ghcr, Repository: "test/ubuntu", Tag: &tag, Digest: &digest})
+		CheckRef("ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "library/ubuntu"}})
+		CheckRef("ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "library/ubuntu", Tag: &tag}})
+		CheckRef("test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "test/ubuntu"}})
+		CheckRef("test_test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "test_test/ubuntu"}})
+		CheckRef("test__test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "test__test/ubuntu"}})
+		CheckRef("test-test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "test-test/ubuntu"}})
+		CheckRef("test--test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "test--test/ubuntu"}})
+		CheckRef("test-----test/ubuntu", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "test-----test/ubuntu"}})
+		CheckRef("test/ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: docker, ArtSpec: oci.ArtSpec{Repository: "test/ubuntu", Tag: &tag}})
+		CheckRef("ghcr.io/test/ubuntu", &oci.RefSpec{UniformRepositorySpec: ghcr, ArtSpec: oci.ArtSpec{Repository: "test/ubuntu"}})
+		CheckRef("ghcr.io/test", &oci.RefSpec{UniformRepositorySpec: ghcr, ArtSpec: oci.ArtSpec{Repository: "test"}})
+		CheckRef("ghcr.io:8080/test/ubuntu", &oci.RefSpec{UniformRepositorySpec: oci.UniformRepositorySpec{Host: "ghcr.io:8080"}, ArtSpec: oci.ArtSpec{Repository: "test/ubuntu"}})
+		CheckRef("ghcr.io/test/ubuntu:v1", &oci.RefSpec{UniformRepositorySpec: ghcr, ArtSpec: oci.ArtSpec{Repository: "test/ubuntu", Tag: &tag}})
+		CheckRef("ghcr.io/test/ubuntu@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", &oci.RefSpec{UniformRepositorySpec: ghcr, ArtSpec: oci.ArtSpec{Repository: "test/ubuntu", Digest: &digest}})
+		CheckRef("ghcr.io/test/ubuntu:v1@sha256:3d05e105e350edf5be64fe356f4906dd3f9bf442a279e4142db9879bba8e677a", &oci.RefSpec{UniformRepositorySpec: ghcr, ArtSpec: oci.ArtSpec{Repository: "test/ubuntu", Tag: &tag, Digest: &digest}})
 		CheckRef("test___test/ubuntu", &oci.RefSpec{
 			UniformRepositorySpec: oci.UniformRepositorySpec{
 				Info: "test___test/ubuntu",
@@ -72,9 +72,11 @@ var _ = Describe("ref parsing", func() {
 				Host:   "ghcr.io",
 				Info:   "",
 			},
-			Repository: "repo/repo",
-			Tag:        &tag,
-			Digest:     &digest,
+			ArtSpec: oci.ArtSpec{
+				Repository: "repo/repo",
+				Tag:        &tag,
+				Digest:     &digest,
+			},
 		})
 		CheckRef("directory::a/b", &oci.RefSpec{
 			UniformRepositorySpec: oci.UniformRepositorySpec{
@@ -83,7 +85,9 @@ var _ = Describe("ref parsing", func() {
 				Host:   "",
 				Info:   "a/b",
 			},
-			Repository: "",
+			ArtSpec: oci.ArtSpec{
+				Repository: "",
+			},
 		})
 		CheckRef("ctf+directory::a/b", &oci.RefSpec{
 			UniformRepositorySpec: oci.UniformRepositorySpec{
@@ -92,7 +96,9 @@ var _ = Describe("ref parsing", func() {
 				Host:   "",
 				Info:   "a/b",
 			},
-			Repository: "",
+			ArtSpec: oci.ArtSpec{
+				Repository: "",
+			},
 		})
 		CheckRef("+ctf+directory::a/b", &oci.RefSpec{
 			UniformRepositorySpec: oci.UniformRepositorySpec{
@@ -102,7 +108,9 @@ var _ = Describe("ref parsing", func() {
 				Info:            "a/b",
 				CreateIfMissing: true,
 			},
-			Repository: "",
+			ArtSpec: oci.ArtSpec{
+				Repository: "",
+			},
 		})
 
 		CheckRef("a/b//", &oci.RefSpec{
@@ -112,7 +120,9 @@ var _ = Describe("ref parsing", func() {
 				Host:   "",
 				Info:   "a/b",
 			},
-			Repository: "",
+			ArtSpec: oci.ArtSpec{
+				Repository: "",
+			},
 		})
 
 		CheckRef("directory::a/b//c/d", &oci.RefSpec{
@@ -122,7 +132,9 @@ var _ = Describe("ref parsing", func() {
 				Host:   "",
 				Info:   "a/b",
 			},
-			Repository: "c/d",
+			ArtSpec: oci.ArtSpec{
+				Repository: "c/d",
+			},
 		})
 
 		CheckRef("oci::ghcr.io", &oci.RefSpec{
@@ -132,7 +144,9 @@ var _ = Describe("ref parsing", func() {
 				Host:   "ghcr.io",
 				Info:   "",
 			},
-			Repository: "",
+			ArtSpec: oci.ArtSpec{
+				Repository: "",
+			},
 		})
 		CheckRef("/tmp/ctf//mandelsoft/test:v1", &oci.RefSpec{
 			UniformRepositorySpec: oci.UniformRepositorySpec{
@@ -141,8 +155,10 @@ var _ = Describe("ref parsing", func() {
 				Host:   "",
 				Info:   "/tmp/ctf",
 			},
-			Repository: "mandelsoft/test",
-			Tag:        &tag,
+			ArtSpec: oci.ArtSpec{
+				Repository: "mandelsoft/test",
+				Tag:        &tag,
+			},
 		})
 		CheckRef("/tmp/ctf", &oci.RefSpec{
 			UniformRepositorySpec: oci.UniformRepositorySpec{

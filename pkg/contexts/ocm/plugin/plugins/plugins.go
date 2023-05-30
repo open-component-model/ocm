@@ -19,13 +19,17 @@ import (
 
 type Set = *pluginsImpl
 
+type pluginSettings struct {
+	config                  json.RawMessage
+	disableAutoRegistration bool
+}
 type pluginsImpl struct {
 	lock sync.RWMutex
 
 	updater cfgcpi.Updater
 	ctx     cpi.Context
 	base    cache.PluginDir
-	configs map[string]json.RawMessage
+	configs map[string]*pluginSettings
 	plugins map[string]plugin.Plugin
 }
 
@@ -34,14 +38,21 @@ var _ config.Target = (*pluginsImpl)(nil)
 func New(ctx cpi.Context, path string) Set {
 	pi := &pluginsImpl{
 		ctx:     ctx,
-		configs: map[string]json.RawMessage{},
+		configs: map[string]*pluginSettings{},
 		plugins: map[string]plugin.Plugin{},
 	}
 	pi.updater = cfgcpi.NewUpdater(ctx.ConfigContext(), pi)
 	pi.Update()
 	pi.base = cache.Get(path)
 	for _, n := range pi.base.PluginNames() {
-		pi.plugins[n] = plugin.NewPlugin(ctx, pi.base.Get(n), pi.configs[n])
+		cfg := pi.configs[n]
+		if cfg == nil {
+			pi.plugins[n] = plugin.NewPlugin(ctx, pi.base.Get(n), nil)
+		} else {
+			p := plugin.NewPlugin(ctx, pi.base.Get(n), cfg.config)
+			p.DisableAutoConfiguration(cfg.disableAutoRegistration)
+			pi.plugins[n] = p
+		}
 	}
 	return pi
 }
@@ -57,11 +68,30 @@ func (pi *pluginsImpl) Update() {
 	}
 }
 
+func (pi *pluginsImpl) getSettings(name string) *pluginSettings {
+	cfg := pi.configs[name]
+	if cfg == nil {
+		cfg = &pluginSettings{}
+		pi.configs[name] = cfg
+	}
+	return cfg
+}
+
+func (pi *pluginsImpl) DisableAutoConfiguration(name string, flag bool) {
+	pi.lock.Lock()
+	defer pi.lock.Unlock()
+
+	pi.getSettings(name).disableAutoRegistration = flag
+	if pi.plugins[name] != nil {
+		pi.plugins[name].DisableAutoConfiguration(flag)
+	}
+}
+
 func (pi *pluginsImpl) ConfigurePlugin(name string, config json.RawMessage) {
 	pi.lock.Lock()
 	defer pi.lock.Unlock()
 
-	pi.configs[name] = config
+	pi.getSettings(name).config = config
 	if pi.plugins[name] != nil {
 		pi.plugins[name].SetConfig(config)
 	}

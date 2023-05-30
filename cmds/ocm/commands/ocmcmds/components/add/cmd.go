@@ -138,7 +138,7 @@ The description file might contain:
 The optional field <code>meta.configuredSchemaVersion</code> for a component
 entry can be used to specify a dedicated serialization format to use for the
 component descriptor. If given it overrides the <code>--schema</code> option
-of the command. By default v2 is used.
+of the command. By default, v2 is used.
 `,
 	}
 }

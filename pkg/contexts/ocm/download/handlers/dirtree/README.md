@@ -32,7 +32,7 @@ The handler checks the mimetypes, only, but the default registration is done exc
 A context can be extended for other resource types with
 
 ```
-download.For(octx),Register(type, [mimetype], dirtree.New...(...))
+download.For(octx),Register(dirtree.New...(...), download.ForCombi(type, [mimetype]))
 ```
 
 The handler also provides additional methods, which can be used to execute more specific tasks, for example
@@ -73,3 +73,10 @@ artifact with the distribution spec format. But. if you want to access the effec
 could explicitly use the `dirtree` downloader for an OCI image, which handles this for you. It would
 make less sense to use it on a helm chart OCI artifact, because here the layers have a different meaning
 than building a directory tree.
+
+## Registration Handler
+
+It provides a registration handler with the path `ocm/dirtree`. and a config
+object with the fields:
+- *`asArchive`* *bool*: download as archive (default is directory tree).
+- *`ociConfigtypes`* *[]string*: list of accepted OCI manifest config media types. Default is the OCI image config media type.

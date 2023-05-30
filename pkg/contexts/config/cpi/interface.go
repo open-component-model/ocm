@@ -24,6 +24,9 @@ type (
 	ConfigType       = internal.ConfigType
 	ConfigTypeScheme = internal.ConfigTypeScheme
 	GenericConfig    = internal.GenericConfig
+
+	ConfigSet         = internal.ConfigSet
+	ConfigurationList = internal.ConfigurationList
 )
 
 var DefaultContext = internal.DefaultContext

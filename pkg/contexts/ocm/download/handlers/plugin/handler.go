@@ -20,9 +20,10 @@ import (
 type pluginHandler struct {
 	plugin plugin.Plugin
 	name   string
+	config []byte
 }
 
-func New(p plugin.Plugin, name string) (download.Handler, error) {
+func New(p plugin.Plugin, name string, config []byte) (download.Handler, error) {
 	dd := p.GetDownloaderDescriptor(name)
 	if dd == nil {
 		return nil, errors.ErrUnknown(descriptor.KIND_DOWNLOADER, name, p.Name())
@@ -31,6 +32,7 @@ func New(p plugin.Plugin, name string) (download.Handler, error) {
 	return &pluginHandler{
 		plugin: p,
 		name:   name,
+		config: config,
 	}, nil
 }
 
@@ -43,5 +45,5 @@ func (b *pluginHandler) Download(_ common.Printer, racc cpi.ResourceAccess, path
 	r := accessio.NewOndemandReader(m)
 	defer errors.PropagateError(&err, r.Close)
 
-	return b.plugin.Download(b.name, r, racc.Meta().Type, m.MimeType(), path)
+	return b.plugin.Download(b.name, r, racc.Meta().Type, m.MimeType(), path, b.config)
 }

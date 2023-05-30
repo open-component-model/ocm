@@ -55,6 +55,10 @@ func (t *TestRegistrationHandler) RegisterByName(handler string, ctx internal.Co
 	return true, nil
 }
 
+func (t *TestRegistrationHandler) GetHandlers(ctx internal.Context) registrations.HandlerInfos {
+	return nil
+}
+
 var _ = Describe("blob handler registry test", func() {
 	Context("registration registry", func() {
 		var reg internal.BlobHandlerRegistrationRegistry

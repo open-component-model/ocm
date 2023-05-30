@@ -38,7 +38,7 @@ If possible, predefined standard options should be used. In such a case only the
 <code>name</code> field should be defined for an option. If required, new options can be
 defined by additionally specifying a type and a description. New options should
 be used very carefully. The chosen names MUST not conflict with names provided
-by other plugins. Therefore it is highly recommended to use use names prefixed
+by other plugins. Therefore, it is highly recommended to use use names prefixed
 by the plugin name.
 
 ` + options.DefaultRegistry.Usage(),

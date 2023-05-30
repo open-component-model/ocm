@@ -10,6 +10,7 @@ plugin download [<flags>] <name> <filepath> [<options>]
 
 ```
   -a, --artifactType string   artifact type of input blob
+  -c, --config string         registration config
   -h, --help                  help for download
   -m, --mediaType string      media type of input blob
 ```

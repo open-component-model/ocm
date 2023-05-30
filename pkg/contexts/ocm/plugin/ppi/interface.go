@@ -107,8 +107,9 @@ type DownloadResultProvider func() (string, error)
 type Downloader interface {
 	Name() string
 	Description() string
+	ConfigSchema() []byte
 
-	Writer(p Plugin, arttype, mediatype string, filepath string) (io.WriteCloser, DownloadResultProvider, error)
+	Writer(p Plugin, arttype, mediatype string, filepath string, config []byte) (io.WriteCloser, DownloadResultProvider, error)
 }
 
 type ActionSpec = action.ActionSpec
