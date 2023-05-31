@@ -49,12 +49,25 @@ func checkMarshal(spec *s3.AccessSpec, typ string, fmt string) {
 	if typ != "" {
 		spec.SetType(typ)
 	}
-	data := Must(json.Marshal(spec))
+	data := MustWithOffset(1, Calling(json.Marshal(spec)))
 	ExpectWithOffset(1, string(data)).To(Equal(fmt))
 
 	n := MustWithOffset(1, Calling(ocm.DefaultContext().AccessSpecForConfig(data, nil)))
 	Expect(reflect.TypeOf(n)).To(Equal(reflect.TypeOf(spec)))
 	Expect(n.GetType()).To(Equal(generics.Conditional(typ == "", s3.Type, typ)))
+	data2 := Must(json.Marshal(n))
+	ExpectWithOffset(1, string(data2)).To(StringEqualWithContext(string(data)))
+}
+
+func checkDecode(spec *s3.AccessSpec, typ string, fmt string) {
+	if typ != "" {
+		spec.SetType(typ)
+	}
+	data := MustWithOffset(1, Calling(json.Marshal(spec)))
+
+	n := MustWithOffset(1, Calling(s3.Versions().Decode([]byte(fmt), nil)))
+	Expect(reflect.TypeOf(n)).To(Equal(reflect.TypeOf(spec)))
+
 	data2 := Must(json.Marshal(n))
 	ExpectWithOffset(1, string(data2)).To(StringEqualWithContext(string(data)))
 }
@@ -74,11 +87,27 @@ var _ = Describe("Method", func() {
 		})
 
 		It("serializes", func() {
-			checkMarshal(spec, "", "{\"type\":\"s3\",\"region\":\"region\",\"bucketName\":\"bucket\",\"objectKey\":\"key\",\"version\":\"version\",\"mediaType\":\"tar/gz\"}")
+			checkMarshal(spec, "", "{\"type\":\"s3\",\"region\":\"region\",\"bucket\":\"bucket\",\"key\":\"key\",\"version\":\"version\",\"mediaType\":\"tar/gz\"}")
 			checkMarshal(spec, s3.TypeV1, "{\"type\":\"s3/v1\",\"region\":\"region\",\"bucket\":\"bucket\",\"key\":\"key\",\"version\":\"version\",\"mediaType\":\"tar/gz\"}")
 			checkMarshal(spec, s3.TypeV2, "{\"type\":\"s3/v2\",\"region\":\"region\",\"bucketName\":\"bucket\",\"objectKey\":\"key\",\"version\":\"version\",\"mediaType\":\"tar/gz\"}")
 			checkMarshal(spec, s3.LegacyType, "{\"type\":\"S3\",\"region\":\"region\",\"bucket\":\"bucket\",\"key\":\"key\",\"version\":\"version\",\"mediaType\":\"tar/gz\"}")
 			checkMarshal(spec, s3.LegacyTypeV1, "{\"type\":\"S3/v1\",\"region\":\"region\",\"bucket\":\"bucket\",\"key\":\"key\",\"version\":\"version\",\"mediaType\":\"tar/gz\"}")
+		})
+
+		It("deserializes versioned", func() {
+			checkDecode(spec, s3.TypeV1, "{\"type\":\"s3/v1\",\"region\":\"region\",\"bucket\":\"bucket\",\"key\":\"key\",\"version\":\"version\",\"mediaType\":\"tar/gz\"}")
+			checkDecode(spec, s3.TypeV2, "{\"type\":\"s3/v2\",\"region\":\"region\",\"bucketName\":\"bucket\",\"objectKey\":\"key\",\"version\":\"version\",\"mediaType\":\"tar/gz\"}")
+
+			checkDecode(spec, s3.LegacyTypeV1, "{\"type\":\"S3/v1\",\"region\":\"region\",\"bucket\":\"bucket\",\"key\":\"key\",\"version\":\"version\",\"mediaType\":\"tar/gz\"}")
+			checkDecode(spec, s3.LegacyTypeV2, "{\"type\":\"S3/v2\",\"region\":\"region\",\"bucketName\":\"bucket\",\"objectKey\":\"key\",\"version\":\"version\",\"mediaType\":\"tar/gz\"}")
+		})
+
+		It("deserializes anonymous", func() {
+			checkDecode(spec, s3.Type, "{\"type\":\"s3\",\"region\":\"region\",\"bucket\":\"bucket\",\"key\":\"key\",\"version\":\"version\",\"mediaType\":\"tar/gz\"}")
+			checkDecode(spec, s3.Type, "{\"type\":\"s3\",\"region\":\"region\",\"bucketName\":\"bucket\",\"objectKey\":\"key\",\"version\":\"version\",\"mediaType\":\"tar/gz\"}")
+
+			checkDecode(spec, s3.LegacyType, "{\"type\":\"S3\",\"region\":\"region\",\"bucket\":\"bucket\",\"key\":\"key\",\"version\":\"version\",\"mediaType\":\"tar/gz\"}")
+			checkDecode(spec, s3.LegacyType, "{\"type\":\"S3\",\"region\":\"region\",\"bucketName\":\"bucket\",\"objectKey\":\"key\",\"version\":\"version\",\"mediaType\":\"tar/gz\"}")
 		})
 	})
 

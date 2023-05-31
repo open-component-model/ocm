@@ -24,7 +24,7 @@ var _ = Describe("multi version type", func() {
 	versions.Register(runtime.NewVersionedTypedObjectTypeByConverter[TestSpecRealm, *TestSpec1, *Spec1V1](Type1V1, &converterSpec1V1{}))
 	versions.Register(runtime.NewVersionedTypedObjectTypeByConverter[TestSpecRealm, *TestSpec1, *Spec1V2](Type1V2, &converterSpec1V2{}))
 
-	multi := runtime.NewMultiVersionedType[TestSpecRealm, TestSpecType](Type1, versions)
+	multi := Must(runtime.NewMultiFormatVersionedType[TestSpecRealm, TestSpecType](Type1, versions))
 
 	It("decodes plain version wth v2", func() {
 		s := `

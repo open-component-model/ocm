@@ -114,7 +114,7 @@ func matchValue(a, b interface{}) bool {
 			return reflect.DeepEqual(a, b)
 		}
 	}
-	// check initial
+	// check initial (b==nil)
 	switch v := a.(type) {
 	case []interface{}:
 		return len(v) == 0

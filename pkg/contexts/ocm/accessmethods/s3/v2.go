@@ -13,8 +13,14 @@ import (
 
 const TypeV2 = Type + runtime.VersionSeparator + "v2"
 
+const LegacyTypeV2 = LegacyType + runtime.VersionSeparator + "v2"
+
 func initV2() {
-	Must(versions.Register(cpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV2](TypeV2, &converterV2{}, cpi.WithFormatSpec(formatV2), cpi.WithConfigHandler(ConfigHandler()))))
+	Must(versions.Register(cpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV2](TypeV2, &converterV2{}, cpi.WithFormatSpec(formatV2))))
+	Must(versions.Register(cpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV2](LegacyTypeV2, &converterV2{}, cpi.WithFormatSpec(formatV2))))
+
+	formats.Register(TypeV2, runtime.NewConvertedVersion[cpi.AccessSpec, *AccessSpec, *AccessSpecV2](&converterV2{}))
+	formats.Register(LegacyTypeV2, runtime.NewConvertedVersion[cpi.AccessSpec, *AccessSpec, *AccessSpecV2](&converterV2{}))
 }
 
 // AccessSpecV2 describes the v2 format.

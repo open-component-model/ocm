@@ -117,15 +117,21 @@ func NewVersionedTypedObjectType[T VersionedTypedObject, I VersionedTypedObject]
 func NewVersionedTypedObjectTypeByProtoConverter[T VersionedTypedObject, I VersionedTypedObject](name string, proto TypedObject, converter Converter[I, TypedObject]) VersionedTypedObjectType[T] {
 	return &versionedTypedObjectType[T]{
 		_VersionedObjectType: NewVersionedObjectType(name),
-		_FormatVersion:       NewConvertedVersion[T, I](proto, converter),
+		_FormatVersion:       NewConvertedVersionByProto[T, I](proto, converter),
 	}
 }
 
 func NewVersionedTypedObjectTypeByConverter[T VersionedTypedObject, I VersionedTypedObject, V TypedObject](name string, converter Converter[I, V]) VersionedTypedObjectType[T] {
-	var proto V
 	return &versionedTypedObjectType[T]{
 		_VersionedObjectType: NewVersionedObjectType(name),
-		_FormatVersion:       NewConvertedVersion[T, I, V](proto, converter),
+		_FormatVersion:       NewConvertedVersion[T, I, V](converter),
+	}
+}
+
+func NewVersionedTypedObjectTypeByFormatVersion[T VersionedTypedObject](name string, fmt FormatVersion[T]) VersionedTypedObjectType[T] {
+	return &versionedTypedObjectType[T]{
+		_VersionedObjectType: NewVersionedObjectType(name),
+		_FormatVersion:       fmt,
 	}
 }
 
@@ -184,92 +190,6 @@ func (s *typeVersionScheme[T, R]) Register(t R) error {
 
 	s.base.Register(t)
 	return nil
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-type multiTypeVersionType[T VersionedTypedObject, R VersionedTypedObjectType[T]] struct {
-	kind     string
-	aliases  utils.StringSet
-	versions TypeVersionScheme[T, R]
-}
-
-func NewMultiVersionedType[T VersionedTypedObject, R VersionedTypedObjectType[T]](kind string, versions TypeVersionScheme[T, R]) VersionedTypedObjectType[T] {
-	aliases := utils.StringSet{}
-	for _, t := range versions.KnownTypes() {
-		aliases.Add(t.GetKind())
-	}
-	aliases.Add(kind)
-	return &multiTypeVersionType[T, R]{kind, aliases, versions}
-}
-
-func (m *multiTypeVersionType[T, R]) GetType() string {
-	return m.kind
-}
-
-func (m *multiTypeVersionType[T, R]) GetKind() string {
-	return m.kind
-}
-
-func (m *multiTypeVersionType[T, R]) GetVersion() string {
-	return ""
-}
-
-func (m *multiTypeVersionType[T, R]) Encode(t T, marshaler Marshaler) ([]byte, error) {
-	return m.versions.Encode(t, marshaler)
-}
-
-func (m *multiTypeVersionType[T, R]) Decode(data []byte, unmarshaler Unmarshaler) (T, error) {
-	var u UnstructuredVersionedTypedObject
-
-	if unmarshaler == nil {
-		unmarshaler = DefaultYAMLEncoding
-	}
-
-	var _nil T
-	err := unmarshaler.Unmarshal(data, &u)
-	if err != nil {
-		return _nil, err
-	}
-
-	if !m.aliases.Contains(u.GetType()) {
-		return _nil, errors.ErrUnknown(errors.KIND_OBJECTTYPE, u.GetType())
-	}
-
-	var def T
-	found := false
-	var defErr error
-
-	for _, t := range m.versions.KnownTypes() {
-		if t.GetKind() == u.GetType() {
-			e, err := t.Decode(data, unmarshaler)
-			if err != nil {
-				continue
-			}
-			if t.GetType() == u.GetType() {
-				found = true
-				def = e
-				defErr = err
-			}
-			d, err := t.Encode(e, DefaultJSONEncoding)
-			if err != nil {
-				continue
-			}
-
-			var uc UnstructuredMap
-			err = DefaultJSONEncoding.Unmarshal(d, &uc)
-			if err != nil {
-				continue
-			}
-			if u.Object.Match(uc) {
-				return e, nil
-			}
-		}
-	}
-	if found {
-		return def, defErr
-	}
-	return _nil, errors.ErrUnknown(errors.KIND_OBJECTTYPE, u.GetType())
 }
 
 ////////////////////////////////////////////////////////////////////////////////

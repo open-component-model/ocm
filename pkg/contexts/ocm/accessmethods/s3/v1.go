@@ -16,6 +16,9 @@ const TypeV1 = Type + runtime.VersionSeparator + "v1"
 func initV1() {
 	Must(versions.Register(cpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV1](TypeV1, &converterV1{}, cpi.WithFormatSpec(formatV1))))
 	Must(versions.Register(cpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV1](LegacyTypeV1, &converterV1{}, cpi.WithFormatSpec(formatV1))))
+
+	formats.Register(TypeV1, runtime.NewConvertedVersion[cpi.AccessSpec, *AccessSpec, *AccessSpecV1](&converterV1{}))
+	formats.Register(LegacyTypeV1, runtime.NewConvertedVersion[cpi.AccessSpec, *AccessSpec, *AccessSpecV1](&converterV1{}))
 }
 
 // AccessSpecV1 describes the v1 format.

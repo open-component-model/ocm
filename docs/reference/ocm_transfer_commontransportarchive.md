@@ -9,17 +9,19 @@ ocm transfer commontransportarchive [<options>] <ctf> <target>
 ### Options
 
 ```
-  -L, --copy-local-resources      transfer referenced local resources by-value
-  -V, --copy-resources            transfer referenced resources by-value
-  -h, --help                      help for commontransportarchive
-      --lookup stringArray        repository name or spec for closure lookup fallback
-  -f, --overwrite                 overwrite existing component versions
-  -r, --recursive                 follow component reference nesting
-      --script string             config name of transfer handler script
-  -s, --scriptFile string         filename of transfer handler script
-  -E, --stop-on-existing          stop on existing component version in target repository
-  -t, --type string               archive format (directory, tar, tgz) (default "directory")
-      --uploader <name>=<value>   repository uploader (<name>[:<artifact type>[:<media type>]]=<JSON target config) (default [])
+  -L, --copy-local-resources        transfer referenced local resources by-value
+  -V, --copy-resources              transfer referenced resources by-value
+      --copy-sources                transfer referenced sources by-value
+  -h, --help                        help for commontransportarchive
+      --lookup stringArray          repository name or spec for closure lookup fallback
+  -N, --omit-access-types strings   omit by-value transfer for resource types
+  -f, --overwrite                   overwrite existing component versions
+  -r, --recursive                   follow component reference nesting
+      --script string               config name of transfer handler script
+  -s, --scriptFile string           filename of transfer handler script
+  -E, --stop-on-existing            stop on existing component version in target repository
+  -t, --type string                 archive format (directory, tar, tgz) (default "directory")
+      --uploader <name>=<value>     repository uploader (<name>[:<artifact type>[:<media type>]]=<JSON target config) (default [])
 ```
 
 ### Description
@@ -60,6 +62,17 @@ resources in the target repository. It the option <code>--copy-local-resources</
 is given, instead, only resources with the relation <code>local</code> will be
 transferred. This behaviour can be further influenced by specifying a transfer
 script with the <code>script</code> option family.
+
+
+It the option <code>--copy-sources</code> is given, all referential 
+sources will potentially be localized, mapped to component version local
+resources in the target repository.
+This behaviour can be further influenced by specifying a transfer script
+with the <code>script</code> option family.
+
+
+It the option <code>--omit-access-types</code> is given, by-value transfer
+is omitted completely for the given resource types.
 
 
 It the option <code>--stop-on-existing</code> is given together with the <code>--recursive</code>

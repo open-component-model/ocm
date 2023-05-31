@@ -31,11 +31,18 @@ const (
 
 var versions = cpi.NewAccessTypeVersionScheme(Type).WithKindAliases(LegacyType)
 
+var formats = cpi.NewAccessSpecFormatVersionRegistry()
+
 func init() {
-	Must(versions.Register(cpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV2](Type, &converterV2{}, cpi.WithDescription(usage))))
-	Must(versions.Register(cpi.NewAccessSpecTypeByConverter[*AccessSpec, *AccessSpecV1](LegacyType, &converterV1{}, cpi.WithDescription(usage))))
+	formats.Register(Type, runtime.NewConvertedVersion[cpi.AccessSpec, *AccessSpec, *AccessSpecV1](&converterV1{}))
+	formats.Register(LegacyType, runtime.NewConvertedVersion[cpi.AccessSpec, *AccessSpec, *AccessSpecV1](&converterV1{}))
+
 	initV1()
 	initV2()
+
+	anon := cpi.MustNewAccessSpecMultiFormatVersion(Type, formats)
+	Must(versions.Register(cpi.NewAccessSpecTypeByFormatVersion(Type, anon, cpi.WithDescription(usage), cpi.WithConfigHandler(ConfigHandler()))))
+	Must(versions.Register(cpi.NewAccessSpecTypeByFormatVersion(LegacyType, anon, cpi.WithDescription(usage))))
 	cpi.RegisterAccessTypeVersions(versions)
 }
 
