@@ -41,5 +41,8 @@ is omitted completely for the given resource types.
 }
 
 func (o *Option) ApplyTransferOption(opts transferhandler.TransferOptions) error {
-	return standard.OmitAccessTypes(o.Types...).ApplyTransferOption(opts)
+	if len(o.Types) > 0 {
+		return standard.OmitAccessTypes(o.Types...).ApplyTransferOption(opts)
+	}
+	return nil
 }

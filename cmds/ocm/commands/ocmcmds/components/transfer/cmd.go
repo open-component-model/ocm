@@ -112,17 +112,22 @@ func (o *Command) Run() error {
 		return err
 	}
 
-	thdlr, err := spiff.New(
-		closureoption.From(o),
+	transferopts := &spiff.Options{}
+	transferhandler.From(o.ConfigContext(), transferopts)
+	transferhandler.ApplyOptions(transferopts,
 		lookupoption.From(o),
+
+		closureoption.From(o),
 		overwriteoption.From(o),
 		rscbyvalueoption.From(o),
 		srcbyvalueoption.From(o),
-		omitaccesstypeoption.From(o),
 		stoponexistingoption.From(o),
+		omitaccesstypeoption.From(o),
 		spiff.Script(scriptoption.From(o).ScriptData),
 		spiff.ScriptFilesystem(o.FileSystem()),
 	)
+	thdlr, err := spiff.New(transferopts)
+
 	if err != nil {
 		return err
 	}

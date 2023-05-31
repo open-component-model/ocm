@@ -10,6 +10,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
@@ -104,7 +105,7 @@ var _ = Describe("Transfer handler", func() {
 		opts.SetResourcesByValue(true)
 		transferhandler.ApplyOptions(opts, topts...)
 		handler := standard.NewDefaultHandler(opts)
-		//handler, err := standard.New(standard.ResourcesByValue())
+		// handler, err := standard.New(standard.ResourcesByValue())
 		Expect(err).To(Succeed())
 		err = transfer.TransferVersion(nil, nil, cv, tgt, handler)
 		Expect(err).To(Succeed())
@@ -147,6 +148,42 @@ var _ = Describe("Transfer handler", func() {
 			"{\"globalAccess\":{\"imageReference\":\"alias.alias/ocm/value:v2.0\",\"type\":\"ociArtifact\"},\"localReference\":\"%s\",\"mediaType\":\"application/vnd.oci.image.manifest.v1+tar+gzip\",\"referenceName\":\"ocm/value:v2.0\",\"type\":\"localBlob\"}",
 			standard.KeepGlobalAccess()),
 	)
+
+	It("disable value transport of oci access", func() {
+		src, err := ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
+		Expect(err).To(Succeed())
+		cv, err := src.LookupComponentVersion(COMPONENT, VERSION)
+		Expect(err).To(Succeed())
+		tgt, err := ctf.Create(env.OCMContext(), accessobj.ACC_WRITABLE|accessobj.ACC_CREATE, OUT, 0700, accessio.FormatDirectory, env)
+		Expect(err).To(Succeed())
+		defer tgt.Close()
+
+		opts := &standard.Options{}
+		Expect(opts.Apply(standard.ResourcesByValue(), standard.OmitAccessTypes(ociartifact.Type))).To(Succeed())
+		Expect(opts.IsResourcesByValue()).To(BeTrue())
+		Expect(opts.IsAccessTypeOmitted(ociartifact.Type)).To(BeTrue())
+		Expect(opts.IsAccessTypeOmitted(ociartifact.LegacyType)).To(BeFalse())
+
+		handler := standard.NewDefaultHandler(opts)
+		Expect(err).To(Succeed())
+		err = transfer.TransferVersion(nil, nil, cv, tgt, handler)
+		Expect(err).To(Succeed())
+		Expect(env.DirExists(OUT)).To(BeTrue())
+
+		list, err := tgt.ComponentLister().GetComponents("", true)
+		Expect(err).To(Succeed())
+		Expect(list).To(Equal([]string{COMPONENT}))
+		comp, err := tgt.LookupComponentVersion(COMPONENT, VERSION)
+		Expect(err).To(Succeed())
+		Expect(len(comp.GetDescriptor().Resources)).To(Equal(2))
+
+		r, err := comp.GetResourceByIndex(1)
+		Expect(err).To(Succeed())
+
+		a, err := r.Access()
+		Expect(err).To(Succeed())
+		Expect(a.GetType()).To(Equal(ociartifact.Type))
+	})
 
 	It("it should use additional resolver to resolve component ref", func() {
 		parentSrc, err := ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH2, 0, env)

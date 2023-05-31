@@ -150,7 +150,7 @@ func Encode(obj *ComponentDescriptor, opts ...EncodeOption) ([]byte, error) {
 	return o.Codec.Encode(v)
 }
 
-// Convert concerts a component descriptor into ta a dedicated scheme version.
+// Convert converts a component descriptor into a dedicated scheme version.
 // If the serialization version is left blank, the schema version configured in the
 // component descriptor will be used.
 func Convert(obj *ComponentDescriptor, opts ...EncodeOption) (ComponentDescriptorVersion, error) {

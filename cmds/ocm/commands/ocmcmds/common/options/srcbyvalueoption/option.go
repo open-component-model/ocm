@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 )
@@ -23,13 +24,14 @@ func New() *Option {
 }
 
 type Option struct {
+	flag           *pflag.Flag
 	SourcesByValue bool
 }
 
 var _ transferhandler.TransferOption = (*Option)(nil)
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	fs.BoolVarP(&o.SourcesByValue, "copy-sources", "", false, "transfer referenced sources by-value")
+	o.flag = flag.BoolVarPF(fs, &o.SourcesByValue, "copy-sources", "", false, "transfer referenced sources by-value")
 }
 
 func (o *Option) Usage() string {
@@ -44,5 +46,8 @@ with the <code>script</code> option family.
 }
 
 func (o *Option) ApplyTransferOption(opts transferhandler.TransferOptions) error {
-	return standard.SourcesByValue(o.SourcesByValue).ApplyTransferOption(opts)
+	if (o.flag != nil && o.flag.Changed) || o.SourcesByValue {
+		return standard.SourcesByValue(o.SourcesByValue).ApplyTransferOption(opts)
+	}
+	return nil
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 )
@@ -23,6 +24,8 @@ func New() *Option {
 }
 
 type Option struct {
+	rflag            *pflag.Flag
+	lflag            *pflag.Flag
 	ResourcesByValue bool
 	LocalByValue     bool
 }
@@ -30,8 +33,8 @@ type Option struct {
 var _ transferhandler.TransferOption = (*Option)(nil)
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	fs.BoolVarP(&o.ResourcesByValue, "copy-resources", "V", false, "transfer referenced resources by-value")
-	fs.BoolVarP(&o.LocalByValue, "copy-local-resources", "L", false, "transfer referenced local resources by-value")
+	o.rflag = flag.BoolVarPF(fs, &o.ResourcesByValue, "copy-resources", "V", false, "transfer referenced resources by-value")
+	o.lflag = flag.BoolVarPF(fs, &o.LocalByValue, "copy-local-resources", "L", false, "transfer referenced local resources by-value")
 }
 
 func (o *Option) Usage() string {
@@ -47,9 +50,14 @@ script with the <code>script</code> option family.
 }
 
 func (o *Option) ApplyTransferOption(opts transferhandler.TransferOptions) error {
-	err := standard.ResourcesByValue(o.ResourcesByValue).ApplyTransferOption(opts)
+	var err error
+	if (o.rflag != nil && o.rflag.Changed) || o.ResourcesByValue {
+		err = standard.ResourcesByValue(o.ResourcesByValue).ApplyTransferOption(opts)
+	}
 	if err == nil {
-		err = standard.LocalResourcesByValue(o.LocalByValue).ApplyTransferOption(opts)
+		if (o.lflag != nil && o.lflag.Changed) || o.LocalByValue {
+			err = standard.LocalResourcesByValue(o.LocalByValue).ApplyTransferOption(opts)
+		}
 	}
 	return err
 }

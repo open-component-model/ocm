@@ -28,15 +28,17 @@ import (
 var realm = logging.NewRealm("test")
 
 func addTestCommands(ctx clictx.Context, cmd *cobra.Command) {
-	c := &cobra.Command{
-		Use:   "logtest",
-		Short: "test log output",
-		Run: func(cmd *cobra.Command, args []string) {
-			testhelper.LoggerTest(ocmlog.Context().Logger(realm))
-			testhelper.LoggerTest(ctx.LoggingContext().Logger(realm), "ctx")
-		},
+	if cmd != nil {
+		c := &cobra.Command{
+			Use:   "logtest",
+			Short: "test log output",
+			Run: func(cmd *cobra.Command, args []string) {
+				testhelper.LoggerTest(ocmlog.Context().Logger(realm))
+				testhelper.LoggerTest(ctx.LoggingContext().Logger(realm), "ctx")
+			},
+		}
+		cmd.AddCommand(c)
 	}
-	cmd.AddCommand(c)
 }
 
 var _ = Describe("Test Environment", func() {
