@@ -45,6 +45,7 @@ type (
 	BlobAccess                       = internal.BlobAccess
 	DataAccess                       = internal.DataAccess
 	RepositorySource                 = internal.RepositorySource
+	ConsumerIdentityProvider         = internal.ConsumerIdentityProvider
 )
 
 type Descriptor = ociv1.Descriptor

@@ -76,7 +76,7 @@ func (c *refMgmt) Ref() error {
 		return ErrClosed
 	}
 	c.refcount++
-	allocLog.Debug("ref", "name", c.name, "refcnt", c.refcount)
+	allocLog.Trace("ref", "name", c.name, "refcnt", c.refcount)
 	return nil
 }
 
@@ -90,7 +90,7 @@ func (c *refMgmt) Unref() error {
 	var err error
 
 	c.refcount--
-	allocLog.Debug("unref", "name", c.name, "refcnt", c.refcount)
+	allocLog.Trace("unref", "name", c.name, "refcnt", c.refcount)
 	if c.refcount <= 0 {
 		if c.cleanup != nil {
 			err = c.cleanup()
@@ -120,7 +120,7 @@ func (c *refMgmt) UnrefLast() error {
 	var err error
 
 	c.refcount--
-	allocLog.Debug("unref last", "name", c.name, "refcnt", c.refcount)
+	allocLog.Trace("unref last", "name", c.name, "refcnt", c.refcount)
 	if c.refcount <= 0 {
 		if c.cleanup != nil {
 			err = c.cleanup()

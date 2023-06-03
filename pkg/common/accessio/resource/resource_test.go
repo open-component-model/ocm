@@ -28,15 +28,13 @@ type (
 	// ResourceImpl implements io.Closer to finally release allocated resources
 	// and the additional non-view-related part of the resource interface.
 	ResourceImpl struct {
+		resource.ResourceImplBase[Resource]
 		name string
 	}
 	_resourceImpl = *ResourceImpl
 )
 
 var _ resource.ResourceImplementation[Resource] = (*ResourceImpl)(nil)
-
-func (r *ResourceImpl) SetViewManager(m resource.ViewManager[Resource]) {
-}
 
 func (r *ResourceImpl) Name() string {
 	return r.name
@@ -90,7 +88,7 @@ func resourceViewCreator(impl *ResourceImpl, v resource.CloserView, d resource.V
 // which internally will call the resourceViewCreator function to create
 // the first view.
 func New(name string) Resource {
-	i := &ResourceImpl{name}
+	i := &ResourceImpl{name: name}
 	return resource.NewResource(i, resourceViewCreator, name)
 }
 

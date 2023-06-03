@@ -152,6 +152,7 @@ type viewManager[T any, I ResourceImplementation[T]] struct {
 type ResourceImplementation[T any] interface {
 	io.Closer
 	SetViewManager(m ViewManager[T])
+	ViewManager[T]
 }
 
 // NewResource creates a resource based on an implementation and a ResourceViewCreator.
@@ -205,8 +206,12 @@ func (v *resourceView[T]) Execute(f func() error) error {
 	return v.view.Execute(f)
 }
 
-func (v *resourceView[T]) Dup() (T, error) {
-	return v.mgr.View()
+func (v *resourceView[T]) Dup() (t T, err error) {
+	err = v.Execute(func() error {
+		t, err = v.mgr.View()
+		return err
+	})
+	return t, err
 }
 
 func (v *resourceView[T]) Lazy() {

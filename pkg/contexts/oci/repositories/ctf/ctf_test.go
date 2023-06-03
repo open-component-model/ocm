@@ -36,7 +36,7 @@ var _ = Describe("ctf management", func() {
 
 	var spec *ctf.RepositorySpec
 
-	ocmlog.Context().AddRule(logging.NewConditionRule(logging.DebugLevel, accessio.ALLOC_REALM))
+	ocmlog.Context().AddRule(logging.NewConditionRule(logging.TraceLevel, accessio.ALLOC_REALM))
 
 	BeforeEach(func() {
 		t, err := osfs.NewTempFileSystem()

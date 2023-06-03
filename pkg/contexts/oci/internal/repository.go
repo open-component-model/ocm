@@ -17,6 +17,7 @@ import (
 
 type RepositoryImpl interface {
 	GetSpecification() RepositorySpec
+	GetContext() Context
 
 	NamespaceLister() NamespaceLister
 	ExistsArtifact(name string, ref string) (bool, error)

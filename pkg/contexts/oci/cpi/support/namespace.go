@@ -50,8 +50,6 @@ type NamespaceContainer interface {
 type NamespaceAccessImpl interface {
 	cpi.NamespaceAccessImpl
 
-	View(main ...bool) (cpi.NamespaceAccess, error)
-
 	// GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor
 	IsReadOnly() bool
 

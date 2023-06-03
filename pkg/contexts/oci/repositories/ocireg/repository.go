@@ -13,6 +13,7 @@ import (
 	"github.com/containerd/containerd/remotes/docker/config"
 	"github.com/mandelsoft/logging"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
@@ -178,12 +179,14 @@ func (r *RepositoryImpl) ExistsArtifact(name string, version string) (bool, erro
 	return true, nil
 }
 
-func (r *RepositoryImpl) LookupArtifact(name string, version string) (cpi.ArtifactAccess, error) {
-	n, err := r.LookupNamespace(name)
+func (r *RepositoryImpl) LookupArtifact(name string, version string) (acc cpi.ArtifactAccess, err error) {
+	ns, err := NewNamespace(r, name)
 	if err != nil {
 		return nil, err
 	}
-	return n.GetArtifact(version)
+	defer accessio.PropagateCloseTemporary(&err, ns) // temporary namespace object not exposed.
+
+	return ns.GetArtifact(version)
 }
 
 func (r *RepositoryImpl) LookupNamespace(name string) (cpi.NamespaceAccess, error) {

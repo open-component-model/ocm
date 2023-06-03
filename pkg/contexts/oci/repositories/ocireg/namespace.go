@@ -61,7 +61,6 @@ func NewNamespace(repo *RepositoryImpl, name string) (cpi.NamespaceAccess, error
 		pusher:   pusher,
 		blobs:    NewBlobContainers(repo.GetContext(), fetcher, pusher),
 	}
-
 	return support.NewNamespaceAccess(name, c, repo)
 }
 

@@ -11,6 +11,7 @@ import (
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio/resource"
+	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/internal"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -29,7 +30,7 @@ type RepositoryViewManager = resource.ViewManager[Repository] // here you have t
 
 type RepositoryImpl interface {
 	internal.RepositoryImpl
-	SetViewManager(m RepositoryViewManager)
+	resource.ResourceImplementation[Repository]
 }
 
 type _RepositoryImplBase = resource.ResourceImplBase[Repository]
@@ -55,13 +56,16 @@ type repositoryView struct {
 	impl RepositoryImpl
 }
 
-var _ Repository = (*repositoryView)(nil)
+var (
+	_ Repository                        = (*repositoryView)(nil)
+	_ internal.ConsumerIdentityProvider = (*repositoryView)(nil)
+)
 
 func GetRepositoryImplementation(n Repository) (RepositoryImpl, error) {
 	if v, ok := n.(*repositoryView); ok {
 		return v.impl, nil
 	}
-	return nil, errors.ErrNotSupported("namespace implementation type", fmt.Sprintf("%T", n))
+	return nil, errors.ErrNotSupported("repository implementation type", fmt.Sprintf("%T", n))
 }
 
 func repositoryViewCreator(i RepositoryImpl, v resource.CloserView, d RepositoryViewManager) Repository {
@@ -75,10 +79,20 @@ func NewRepository(impl RepositoryImpl, name ...string) Repository {
 	return resource.NewResource[Repository](impl, repositoryViewCreator, utils.OptionalDefaulted("OCI repo", name...), true)
 }
 
-var _ Repository = (*repositoryView)(nil)
+func (r *repositoryView) GetConsumerId(uctx ...credentials.UsageContext) credentials.ConsumerIdentity {
+	return credentials.GetProvidedConsumerId(r.impl, uctx...)
+}
+
+func (r *repositoryView) GetIdentityMatcher() string {
+	return credentials.GetProvidedIdentityMatcher(r.impl)
+}
 
 func (r *repositoryView) GetSpecification() internal.RepositorySpec {
 	return r.impl.GetSpecification()
+}
+
+func (r *repositoryView) GetContext() Context {
+	return r.impl.GetContext()
 }
 
 func (r *repositoryView) NamespaceLister() (lister internal.NamespaceLister) {
@@ -93,7 +107,7 @@ func (r *repositoryView) ExistsArtifact(name string, ref string) (ok bool, err e
 	return ok, err
 }
 
-func (r *repositoryView) LookupArtifact(name string, ref string) (acc internal.ArtifactAccess, err error) {
+func (r *repositoryView) LookupArtifact(name string, ref string) (acc ArtifactAccess, err error) {
 	err = r.Execute(func() error {
 		acc, err = r.impl.LookupArtifact(name, ref)
 		return err
@@ -101,7 +115,7 @@ func (r *repositoryView) LookupArtifact(name string, ref string) (acc internal.A
 	return acc, err
 }
 
-func (r *repositoryView) LookupNamespace(name string) (acc internal.NamespaceAccess, err error) {
+func (r *repositoryView) LookupNamespace(name string) (acc NamespaceAccess, err error) {
 	err = r.Execute(func() error {
 		acc, err = r.impl.LookupNamespace(name)
 		return err
@@ -119,7 +133,8 @@ type NamespaceAccessViewManager = resource.ViewManager[NamespaceAccess] // here 
 
 type NamespaceAccessImpl interface {
 	internal.NamespaceAccessImpl
-	SetViewManager(m NamespaceAccessViewManager)
+
+	resource.ResourceImplementation[NamespaceAccess]
 
 	GetNamespace() string
 }
@@ -246,12 +261,12 @@ type ArtifactAccessViewManager = resource.ViewManager[ArtifactAccess]
 type ArtifactAccessImpl interface {
 	internal.ArtifactAccessImpl
 
+	resource.ResourceImplementation[ArtifactAccess]
+
 	// creation of slave objects require the original view they are created for.
 
 	ManifestAccess(ArtifactAccess) ManifestAccess
 	IndexAccess(ArtifactAccess) IndexAccess
-
-	SetViewManager(m resource.ViewManager[ArtifactAccess])
 }
 
 type ArtifactAccessImplBase = resource.ResourceImplBase[ArtifactAccess]
@@ -294,7 +309,7 @@ func (a *artifactAccessView) Blob() (internal.BlobAccess, error) {
 	return a.impl.Blob()
 }
 
-func (a artifactAccessView) GetDescriptor() *artdesc.Artifact {
+func (a *artifactAccessView) GetDescriptor() *artdesc.Artifact {
 	return a.impl.GetDescriptor()
 }
 
