@@ -105,7 +105,7 @@ func (c *ComponentVersionContainer) Check() error {
 }
 
 func (c *ComponentVersionContainer) Repository() cpi.Repository {
-	return c.comp.repo.main
+	return c.comp.repo.nonref
 }
 
 func (c *ComponentVersionContainer) GetContext() cpi.Context {

@@ -45,6 +45,7 @@ var _ = Describe("Method", func() {
 
 			m := Must(spec.AccessMethod(&cpi.DummyComponentVersionAccess{env.OCMContext()}))
 			Expect(m.MimeType()).To(Equal(helm2.ChartMediaType))
+			defer Close(m)
 			blob := Must(m.Reader())
 			defer Close(blob)
 

@@ -82,7 +82,17 @@ var _ = Describe("component repository mapping", func() {
 		vers := finalizer.ClosingWith(&finalize, Must(comp.NewVersion("v1")))
 		MustBeSuccessful(comp.AddVersion(vers))
 
+		noref := vers.Repository()
+		Expect(noref).NotTo(BeNil())
+		Expect(noref.IsClosed()).To(BeFalse())
+		Expect(noref.Close()).To(Succeed())
+		Expect(noref.IsClosed()).To(BeFalse())
+
 		MustBeSuccessful(finalize.Finalize())
+
+		Expect(noref.IsClosed()).To(BeTrue())
+		Expect(noref.Close()).To(MatchError("closed"))
+		ExpectError(noref.LookupComponent("dummy")).To(MatchError("closed"))
 
 		// access it again
 		repo = finalizer.ClosingWith(&finalize, Must(DefaultContext.RepositoryForSpec(spec)))

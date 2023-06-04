@@ -79,6 +79,15 @@ func repositoryViewCreator(i RepositoryImpl, v resource.CloserView, d Repository
 	}
 }
 
+// NewNoneRefRepositoryView provides a repository reflecting the state of the
+// view manager without holding an additional reference.
+func NewNoneRefRepositoryView(i RepositoryImpl) Repository {
+	return &repositoryView{
+		_RepositoryView: resource.NewView[Repository](resource.NewNonRefView[Repository](i), i),
+		impl:            i,
+	}
+}
+
 func NewRepository(impl RepositoryImpl, name ...string) Repository {
 	return resource.NewResource[Repository](impl, repositoryViewCreator, utils.OptionalDefaulted("OCM repo", name...), true)
 }

@@ -96,7 +96,14 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 )
 
-type CloserView = accessio.CloserView
+type CloserView interface {
+	Close() error
+	IsClosed() bool
+	Execute(func() error) error
+	Lazy()
+}
+
+var _ CloserView = accessio.CloserView(nil)
 
 var ErrClosed = accessio.ErrClosed
 
@@ -132,6 +139,7 @@ type Dup[T any] interface {
 // can be used to gain new views to a managed resource.
 type ViewManager[T any] interface {
 	View(main ...bool) (T, error)
+	IsClosed() bool
 }
 
 // ResourceViewCreator is a function which must be provided by the resource provider
@@ -178,6 +186,41 @@ func (i *viewManager[T, I]) View(main ...bool) (T, error) {
 	return i.creator(i.impl, v, i), nil
 }
 
+func (i *viewManager[T, I]) IsClosed() bool {
+	return i.refs.IsClosed()
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type noneRefCloser[T io.Closer] struct {
+	mgr ViewManager[T]
+}
+
+var _ CloserView = (*noneRefCloser[io.Closer])(nil)
+
+func (n *noneRefCloser[T]) Close() error {
+	if n.mgr.IsClosed() {
+		return ErrClosed
+	}
+	return nil
+}
+
+func (n *noneRefCloser[T]) IsClosed() bool {
+	return n.mgr.IsClosed()
+}
+
+func (n *noneRefCloser[T]) Execute(f func() error) error {
+	v, err := n.mgr.View()
+	if err != nil {
+		return err
+	}
+	defer v.Close()
+	return f()
+}
+
+func (n *noneRefCloser[T]) Lazy() {
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type resourceView[T any] struct {
@@ -192,6 +235,17 @@ type resourceView[T any] struct {
 //   - given resource implementation.
 func NewView[T resourceViewInterface[T]](v CloserView, d ViewManager[T]) ResourceViewInt[T] {
 	return &resourceView[T]{v, d}
+}
+
+// NewNonRefView provides a reference-less view directly for the reference manager.
+// It is valid as long as the reference manger is not closed with the last regular
+// reference.
+func NewNonRefView[T resourceViewInterface[T]](d ViewManager[T]) ResourceViewInt[T] {
+	return &resourceView[T]{&noneRefCloser[T]{d}, d}
+}
+
+func NoneRefCloserView[T io.Closer](d ViewManager[T]) CloserView {
+	return &noneRefCloser[T]{d}
 }
 
 func (v *resourceView[T]) IsClosed() bool {
@@ -246,6 +300,10 @@ func (b *ResourceImplBase[T]) SetViewManager(m ViewManager[T]) {
 
 func (b *ResourceImplBase[T]) View(main ...bool) (T, error) {
 	return b.refs.View(main...)
+}
+
+func (b *ResourceImplBase[T]) IsClosed() bool {
+	return b.refs.IsClosed()
 }
 
 func (b *ResourceImplBase[T]) Close() error {

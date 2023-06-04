@@ -60,30 +60,6 @@ func (r *referencableCloser) View(main ...bool) (CloserView, error) {
 	return v, nil
 }
 
-type CloserView interface {
-	io.Closer
-	IsClosed() bool
-
-	View() (CloserView, error)
-
-	Release() error
-	Finalize() error
-
-	Closer() io.Closer
-
-	Lazy()
-	Execute(f func() error) error
-}
-
-type view struct {
-	lock   sync.Mutex
-	ref    ReferencableCloser
-	main   bool
-	closed bool
-}
-
-var _ CloserView = (*view)(nil)
-
 type LazyMode interface {
 	Lazy()
 }
@@ -106,6 +82,31 @@ func CloseTemporary(c io.Closer) error {
 func PropagateCloseTemporary(errp *error, c io.Closer) {
 	errors.PropagateError(errp, func() error { return CloseTemporary(c) })
 }
+
+type CloserView interface {
+	io.Closer
+	LazyMode
+
+	IsClosed() bool
+
+	View() (CloserView, error)
+
+	Release() error
+	Finalize() error
+
+	Closer() io.Closer
+
+	Execute(f func() error) error
+}
+
+type view struct {
+	lock   sync.Mutex
+	ref    ReferencableCloser
+	main   bool
+	closed bool
+}
+
+var _ CloserView = (*view)(nil)
 
 func (v *view) Lazy() {
 	v.main = false

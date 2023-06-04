@@ -11,6 +11,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	"github.com/onsi/gomega/types"
+
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -85,4 +87,8 @@ func MustBeSuccessfulWithOffset(offset int, err error) {
 func MustFailWithMessage(err error, msg string) {
 	ExpectWithOffset(1, err).NotTo(BeNil())
 	ExpectWithOffset(1, err.Error()).To(Equal(msg))
+}
+
+func ExpectError(values ...interface{}) types.Assertion {
+	return Expect(values[len(values)-1])
 }

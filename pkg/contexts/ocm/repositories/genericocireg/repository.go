@@ -43,8 +43,8 @@ type _RepositoryImplBase = cpi.RepositoryImplBase
 
 type RepositoryImpl struct {
 	_RepositoryImplBase
-	main    cpi.Repository
 	meta    ComponentRepositoryMeta
+	nonref  cpi.Repository
 	ocirepo oci.Repository
 }
 
@@ -53,14 +53,14 @@ var (
 	_ credentials.ConsumerIdentityProvider = (*RepositoryImpl)(nil)
 )
 
-func NewRepository(ctx cpi.ContextProvider, meta *ComponentRepositoryMeta, ocirepo oci.Repository) (cpi.Repository, error) {
-	repo := &RepositoryImpl{
+func NewRepository(ctx cpi.Context, meta *ComponentRepositoryMeta, ocirepo oci.Repository) (cpi.Repository, error) {
+	impl := &RepositoryImpl{
 		_RepositoryImplBase: *cpi.NewRepositoryImplBase(ctx.OCMContext()),
 		meta:                *DefaultComponentRepositoryMeta(meta),
 		ocirepo:             ocirepo,
 	}
-	r := cpi.NewRepository(repo, "OCM repo[OCI]")
-	repo.main = r
+	impl.nonref = cpi.NewNoneRefRepositoryView(impl)
+	r := cpi.NewRepository(impl, "OCM repo[OCI]")
 	return r, nil
 }
 

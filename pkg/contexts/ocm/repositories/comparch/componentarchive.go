@@ -5,7 +5,7 @@
 package comparch
 
 import (
-	"sync"
+	"io"
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
@@ -24,11 +24,10 @@ import (
 
 // ComponentArchive is the go representation for a component artifact.
 type ComponentArchive struct {
-	lock sync.Mutex
-
 	spec      *RepositorySpec
 	container *componentArchiveContainer
-	repo      cpi.Repository
+	main      io.Closer
+	nonref    cpi.Repository
 	cpi.ComponentVersionAccess
 }
 
@@ -60,8 +59,8 @@ func _Wrap(ctx cpi.ContextProvider, obj *accessobj.AccessObject, spec *Repositor
 		container: s,
 	}
 	arch.ComponentVersionAccess = cpi.NewComponentVersionAccess(impl)
-	s.repo, _ = newRepository(arch)
-	arch.repo = s.repo
+	arch.main, arch.nonref = newRepository(arch)
+	s.repo = arch.nonref
 	return arch, nil
 }
 
@@ -70,17 +69,11 @@ func _Wrap(ctx cpi.ContextProvider, obj *accessobj.AccessObject, spec *Repositor
 var _ cpi.ComponentVersionAccess = &ComponentArchive{}
 
 func (c *ComponentArchive) Close() error {
-	return c.repo.Close()
+	return c.main.Close()
 }
 
 func (c *ComponentArchive) Repository() cpi.Repository {
-	c.lock.Lock()
-	defer c.lock.Unlock()
-
-	if c.repo == nil {
-		c.repo, _ = newRepository(c)
-	}
-	return c.repo
+	return c.nonref
 }
 
 func (c *ComponentArchive) SetName(n string) {
