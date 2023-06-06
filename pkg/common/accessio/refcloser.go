@@ -140,7 +140,7 @@ func (v *view) Finalize() error {
 	}
 
 	if err := v.ref.UnrefLast(); err != nil {
-		return errors.ErrStillInUseWrap(err)
+		return err
 	}
 
 	v.closed = true

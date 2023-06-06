@@ -114,7 +114,7 @@ func (c *refMgmt) UnrefLast() error {
 	}
 
 	if c.refcount > 1 {
-		return errors.Newf("%s still in use: %d reference(s) pending", c.name, c.refcount)
+		return errors.ErrStillInUseWrap(errors.Newf("%d reference(s) pending", c.refcount), c.name)
 	}
 
 	var err error
@@ -130,7 +130,7 @@ func (c *refMgmt) UnrefLast() error {
 	}
 
 	if err != nil {
-		return fmt.Errorf("unable to unref last %s ref: %w", c.name, err)
+		return errors.Wrapf(err, "unable to unref last %s ref", c.name)
 	}
 
 	return nil
