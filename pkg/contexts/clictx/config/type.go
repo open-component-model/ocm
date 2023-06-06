@@ -95,10 +95,10 @@ OCI registries.
 <pre>
    type: ` + OCMCmdConfigType + `
    ocmRepositories:
-   &lt;name>: &lt;specification of OCM repository>
+       &lt;name>: &lt;specification of OCM repository>
    ...
    ociRepositories:
-   &lt;name>: &lt;specification of OCI registry>
+       &lt;name>: &lt;specification of OCI registry>
    ...
 </pre>
 `

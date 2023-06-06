@@ -57,7 +57,7 @@ type RefSpec struct {
 	CompSpec
 }
 
-// ParseRef parses a standard ocm reference into a internal representation.
+// ParseRef parses a standard ocm reference into an internal representation.
 func ParseRef(ref string) (RefSpec, error) {
 	create := false
 	if strings.HasPrefix(ref, "+") {
