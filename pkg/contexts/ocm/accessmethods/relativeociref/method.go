@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -22,6 +23,8 @@ func init() {
 	cpi.RegisterAccessType(cpi.NewAccessSpecType[*AccessSpec](Type))
 	cpi.RegisterAccessType(cpi.NewAccessSpecType[*AccessSpec](TypeV1))
 }
+
+var _ cpi.HintProvider = (*AccessSpec)(nil)
 
 // New creates a new localFilesystemBlob accessor.
 func New(ref string) *AccessSpec {
@@ -53,4 +56,8 @@ func (a *AccessSpec) GlobalAccessSpec(context cpi.Context) cpi.AccessSpec {
 
 func (a *AccessSpec) AccessMethod(access cpi.ComponentVersionAccess) (cpi.AccessMethod, error) {
 	return access.AccessMethod(a)
+}
+
+func (a *AccessSpec) GetReferenceHint(cv internal.ComponentVersionAccess) string {
+	return a.Reference
 }
