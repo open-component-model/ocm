@@ -57,5 +57,4 @@ Subcharts are configured as usual with the values for the parent chart (see http
 
 The key of the subchart is used as top-level values key to add settings for the subchart.
 Similar to the parent chart, images used by subcharts must be localized via [image mappings](#image-mappings), also. The subchart values must accept tag, repository and/or image value
-fields for used images. They are set ny preceeding the name of the value field by the key 
-of the subchart. 
+fields for used images. They are set by concatenating the key of the subchart with the name of the value field.
