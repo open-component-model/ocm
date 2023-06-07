@@ -5,15 +5,16 @@ package blueprint
 
 import (
 	"fmt"
-	"github.com/open-component-model/ocm/pkg/utils"
-	"golang.org/x/exp/slices"
 	"strings"
+
+	"golang.org/x/exp/slices"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/listformat"
 	"github.com/open-component-model/ocm/pkg/registrations"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const PATH = "landscaper/blueprint"
@@ -62,7 +63,7 @@ func (r *RegistrationHandler) RegisterByName(handler string, ctx download.Target
 
 	h := New(attr.OCIConfigTypes...)
 	if opts.MimeType == "" {
-		for m, _ := range mimeTypeExtractorRegistry {
+		for m := range mimeTypeExtractorRegistry {
 			opts.MimeType = m
 			download.For(ctx).Register(h, opts)
 		}

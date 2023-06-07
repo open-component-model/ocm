@@ -6,17 +6,17 @@ package blueprint
 
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/generics"
-	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/utils"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	registry "github.com/open-component-model/ocm/pkg/contexts/ocm/download"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/finalizer"
+	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const (
