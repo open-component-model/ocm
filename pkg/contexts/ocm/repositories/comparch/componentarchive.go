@@ -39,7 +39,7 @@ func New(ctx cpi.Context, acc accessobj.AccessMode, fs vfs.FileSystem, setup acc
 	return _Wrap(ctx, obj, spec, err)
 }
 
-func _Wrap(ctx cpi.Context, obj *accessobj.AccessObject, spec *RepositorySpec, err error) (*ComponentArchive, error) {
+func _Wrap(ctx cpi.ContextProvider, obj *accessobj.AccessObject, spec *RepositorySpec, err error) (*ComponentArchive, error) {
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func _Wrap(ctx cpi.Context, obj *accessobj.AccessObject, spec *RepositorySpec, e
 		base: accessobj.NewFileSystemBlobAccess(obj),
 	}
 	s.comp = &ComponentAccess{&Repository{
-		ctx:  ctx,
+		ctx:  cpi.FromProvider(ctx),
 		spec: spec,
 		arch: s,
 	}}

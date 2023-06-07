@@ -5,6 +5,7 @@
 package transferhandler
 
 import (
+	"github.com/open-component-model/ocm/pkg/contexts/config"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -33,4 +34,17 @@ func ApplyOptions(set TransferOptions, opts ...TransferOption) error {
 		list.Add(o.ApplyTransferOption(set))
 	}
 	return list.Result()
+}
+
+func From(ctx config.ContextProvider, opts TransferOptions) error {
+	_, err := ctx.ConfigContext().ApplyTo(-1, opts)
+	return err
+}
+
+func BoolP(b bool) *bool {
+	return &b
+}
+
+func AsBool(b *bool) bool {
+	return b != nil && *b
 }

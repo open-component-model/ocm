@@ -10,8 +10,13 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/spf13/cobra"
+
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/pkg/contexts/config/config"
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -24,6 +29,7 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	ctfocm "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	handlercfg "github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/config"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
@@ -213,6 +219,59 @@ transferring version "github.com/mandelsoft/test:v1"...
 	It("transfers ctf to ctf+tgz", func() {
 		buf := bytes.NewBuffer(nil)
 		Expect(env.CatchOutput(buf).Execute("transfer", "components", "--copy-resources", ARCH, ARCH, "ctf+"+accessio.FormatTGZ.String()+"::"+OUT)).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+transferring version "github.com/mandelsoft/test:v1"...
+...resource 0...
+...resource 1(ocm/value:v2.0)...
+...resource 2(ocm/ref:v2.0)...
+...adding component version...
+1 versions transferred
+`))
+
+		Expect(env.FileExists(OUT)).To(BeTrue())
+		CheckComponentInArchive(env, ldesc, OUT)
+	})
+
+	It("transfers ctf to ctf+tgz with config option", func() {
+
+		cfg := handlercfg.NewConfig()
+		cfg.ResourcesByValue = transferhandler.BoolP(true)
+
+		mod := func(ctx clictx.Context, cmd *cobra.Command) {
+			if cmd == nil {
+				MustBeSuccessful(ctx.ConfigContext().ApplyConfig(cfg, "explicit"))
+			}
+		}
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).ExecuteModified(mod, "transfer", "components", ARCH, ARCH, "ctf+"+accessio.FormatTGZ.String()+"::"+OUT)).To(Succeed())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
+transferring version "github.com/mandelsoft/test:v1"...
+...resource 0...
+...resource 1(ocm/value:v2.0)...
+...resource 2(ocm/ref:v2.0)...
+...adding component version...
+1 versions transferred
+`))
+
+		Expect(env.FileExists(OUT)).To(BeTrue())
+		CheckComponentInArchive(env, ldesc, OUT)
+	})
+
+	It("transfers ctf to ctf+tgz with config set", func() {
+		cfg := handlercfg.NewConfig()
+		cfg.ResourcesByValue = transferhandler.BoolP(true)
+
+		cfgcfg := config.New()
+		cfgcfg.AddSet("transfer", "standard transfer options to use")
+		cfgcfg.AddConfigToSet("transfer", cfg)
+
+		mod := func(ctx clictx.Context, cmd *cobra.Command) {
+			if cmd == nil {
+				MustBeSuccessful(ctx.ConfigContext().ApplyConfig(cfgcfg, "explicit"))
+			}
+		}
+		buf := bytes.NewBuffer(nil)
+		Expect(env.CatchOutput(buf).ExecuteModified(mod, "--config-set", "transfer", "transfer", "components", ARCH, ARCH, "ctf+"+accessio.FormatTGZ.String()+"::"+OUT)).To(Succeed())
 		Expect(buf.String()).To(StringEqualTrimmedWithContext(`
 transferring version "github.com/mandelsoft/test:v1"...
 ...resource 0...

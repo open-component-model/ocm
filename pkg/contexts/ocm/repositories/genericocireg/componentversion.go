@@ -20,6 +20,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localociblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/relativeociref"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
 	ocihdlr "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
@@ -137,20 +138,20 @@ func (c *ComponentVersionContainer) IsClosed() bool {
 }
 
 func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMethod, error) {
-	if a.GetKind() == localblob.Type {
-		accessSpec, err := c.comp.GetContext().AccessSpecForSpec(a)
-		if err != nil {
-			return nil, err
-		}
+	accessSpec, err := c.comp.GetContext().AccessSpecForSpec(a)
+	if err != nil {
+		return nil, err
+	}
+
+	switch a.GetKind() {
+	case localblob.Type:
 		return newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.comp.namespace, c.access), nil
-	}
-	if a.GetKind() == localociblob.Type {
-		accessSpec, err := c.comp.GetContext().AccessSpecForSpec(a)
-		if err != nil {
-			return nil, err
-		}
+	case localociblob.Type:
 		return newLocalOCIBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.comp.namespace, c.access), nil
+	case relativeociref.Type:
+		return ociartifact.NewMethod(c.GetContext(), a, accessSpec.(*relativeociref.AccessSpec).Reference, view(c.comp.repo.ocirepo))
 	}
+
 	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "oci registry")
 }
 

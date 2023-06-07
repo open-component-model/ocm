@@ -33,6 +33,7 @@ func BlobHandlerLogger(ctx Context, messageContext ...logging.MessageContext) lo
 type (
 	Context                          = internal.Context
 	ContextProvider                  = internal.ContextProvider
+	LocalContextProvider             = internal.LocalContextProvider
 	ComponentVersionResolver         = internal.ComponentVersionResolver
 	Repository                       = internal.Repository
 	RepositoryTypeProvider           = internal.RepositoryTypeProvider
@@ -92,6 +93,10 @@ type NamePath = registrations.NamePath
 
 func NewNamePath(p string) NamePath {
 	return registrations.NewNamePath(p)
+}
+
+func FromProvider(p ContextProvider) Context {
+	return internal.FromProvider(p)
 }
 
 func NewBlobHandlerOptions(olist ...BlobHandlerOption) *BlobHandlerOptions {
@@ -216,3 +221,7 @@ var (
 	newStrictAccessTypeScheme = internal.NewStrictAccessTypeScheme
 	defaultAccessTypeScheme   = internal.DefaultAccessTypeScheme
 )
+
+func WrapContextProvider(ctx LocalContextProvider) ContextProvider {
+	return internal.WrapContextProvider(ctx)
+}

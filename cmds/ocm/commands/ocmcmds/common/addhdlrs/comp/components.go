@@ -18,7 +18,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/out"
 )
 
-func ProcessComponents(ctx clictx.Context, ictx inputs.Context, repo ocm.Repository, complete ocm.ComponentVersionResolver, thdlr transferhandler.TransferHandler, h *ResourceSpecHandler, elems []addhdlrs.Element) error {
+func ProcessComponents(ctx clictx.Context, ictx inputs.Context, repo ocm.Repository, complete ocm.ComponentVersionResolver, thdlr transferhandler.TransferHandler, h *ResourceSpecHandler, elems []addhdlrs.Element) (err error) {
 	index := generics.Set[common.NameVersion]{}
 	for _, elem := range elems {
 		if r, ok := elem.Spec().(*ResourceSpec); ok {
@@ -27,7 +27,7 @@ func ProcessComponents(ctx clictx.Context, ictx inputs.Context, repo ocm.Reposit
 	}
 
 	var finalize finalizer.Finalizer
-	defer finalize.Finalize()
+	defer finalize.FinalizeWithErrorPropagation(&err)
 
 	for _, elem := range elems {
 		loop := finalize.Nested()

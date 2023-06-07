@@ -5,78 +5,138 @@
 package standard
 
 import (
+	"golang.org/x/exp/slices"
+
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 type Options struct {
-	recursive        bool
-	resourcesByValue bool
-	localByValue     bool
-	sourcesByValue   bool
-	keepGlobalAccess bool
-	stopOnExisting   bool
-	overwrite        bool
+	recursive        *bool
+	resourcesByValue *bool
+	localByValue     *bool
+	sourcesByValue   *bool
+	keepGlobalAccess *bool
+	stopOnExisting   *bool
+	overwrite        *bool
+	omitAccessTypes  utils.StringSet
 	resolver         ocm.ComponentVersionResolver
 }
 
 var (
+	_ transferhandler.TransferOption = (*Options)(nil)
+
 	_ ResourcesByValueOption      = (*Options)(nil)
 	_ LocalResourcesByValueOption = (*Options)(nil)
 	_ SourcesByValueOption        = (*Options)(nil)
 	_ RecursiveOption             = (*Options)(nil)
 	_ ResolverOption              = (*Options)(nil)
 	_ KeepGlobalAccessOption      = (*Options)(nil)
+	_ OmitAccessTypesOption       = (*Options)(nil)
 )
 
+func (o *Options) ApplyTransferOption(target transferhandler.TransferOptions) error {
+	if o.recursive != nil {
+		if opts, ok := target.(RecursiveOption); ok {
+			opts.SetRecursive(*o.recursive)
+		}
+	}
+	if o.resourcesByValue != nil {
+		if opts, ok := target.(ResourcesByValueOption); ok {
+			opts.SetResourcesByValue(*o.resourcesByValue)
+		}
+	}
+	if o.localByValue != nil {
+		if opts, ok := target.(LocalResourcesByValueOption); ok {
+			opts.SetLocalResourcesByValue(*o.localByValue)
+		}
+	}
+	if o.sourcesByValue != nil {
+		if opts, ok := target.(SourcesByValueOption); ok {
+			opts.SetSourcesByValue(*o.sourcesByValue)
+		}
+	}
+	if o.keepGlobalAccess != nil {
+		if opts, ok := target.(KeepGlobalAccessOption); ok {
+			opts.SetKeepGlobalAccess(*o.keepGlobalAccess)
+		}
+	}
+	if o.stopOnExisting != nil {
+		if opts, ok := target.(StopOnExistingVersionOption); ok {
+			opts.SetStopOnExistingVersion(*o.stopOnExisting)
+		}
+	}
+	if o.overwrite != nil {
+		if opts, ok := target.(OverwriteOption); ok {
+			opts.SetOverwrite(*o.overwrite)
+		}
+	}
+	if o.omitAccessTypes != nil {
+		if opts, ok := target.(OmitAccessTypesOption); ok {
+			opts.SetOmittedAccessTypes(utils.StringMapKeys(o.omitAccessTypes)...)
+		}
+	}
+	if o.resolver != nil {
+		if opts, ok := target.(ResolverOption); ok {
+			opts.SetResolver(o.resolver)
+		}
+	}
+	return nil
+}
+
+func (o *Options) Apply(opts ...transferhandler.TransferOption) error {
+	return transferhandler.ApplyOptions(o, opts...)
+}
+
 func (o *Options) SetOverwrite(overwrite bool) {
-	o.overwrite = overwrite
+	o.overwrite = &overwrite
 }
 
 func (o *Options) IsOverwrite() bool {
-	return o.overwrite
+	return transferhandler.AsBool(o.overwrite)
 }
 
 func (o *Options) SetRecursive(recursive bool) {
-	o.recursive = recursive
+	o.recursive = &recursive
 }
 
 func (o *Options) IsRecursive() bool {
-	return o.recursive
+	return transferhandler.AsBool(o.recursive)
 }
 
 func (o *Options) SetResourcesByValue(resourcesByValue bool) {
-	o.resourcesByValue = resourcesByValue
+	o.resourcesByValue = &resourcesByValue
 }
 
 func (o *Options) IsResourcesByValue() bool {
-	return o.resourcesByValue
+	return transferhandler.AsBool(o.resourcesByValue)
 }
 
 func (o *Options) SetLocalResourcesByValue(resourcesByValue bool) {
-	o.localByValue = resourcesByValue
+	o.localByValue = &resourcesByValue
 }
 
 func (o *Options) IsLocalResourcesByValue() bool {
-	return o.localByValue
+	return transferhandler.AsBool(o.localByValue)
 }
 
 func (o *Options) SetSourcesByValue(sourcesByValue bool) {
-	o.sourcesByValue = sourcesByValue
+	o.sourcesByValue = &sourcesByValue
 }
 
 func (o *Options) IsSourcesByValue() bool {
-	return o.sourcesByValue
+	return transferhandler.AsBool(o.sourcesByValue)
 }
 
 func (o *Options) SetKeepGlobalAccess(keepGlobalAccess bool) {
-	o.keepGlobalAccess = keepGlobalAccess
+	o.keepGlobalAccess = &keepGlobalAccess
 }
 
 func (o *Options) IsKeepGlobalAccess() bool {
-	return o.keepGlobalAccess
+	return transferhandler.AsBool(o.keepGlobalAccess)
 }
 
 func (o *Options) SetResolver(resolver ocm.ComponentVersionResolver) {
@@ -88,11 +148,36 @@ func (o *Options) GetResolver() ocm.ComponentVersionResolver {
 }
 
 func (o *Options) SetStopOnExistingVersion(stopOnExistingVersion bool) {
-	o.stopOnExisting = stopOnExistingVersion
+	o.stopOnExisting = &stopOnExistingVersion
 }
 
 func (o *Options) IsStopOnExistingVersion() bool {
-	return o.stopOnExisting
+	return transferhandler.AsBool(o.stopOnExisting)
+}
+
+func (o *Options) SetOmittedAccessTypes(list ...string) {
+	o.omitAccessTypes = utils.StringSet{}
+	for _, t := range list {
+		o.omitAccessTypes.Add(t)
+	}
+}
+
+func (o *Options) GetOmittedAccessTypes() []string {
+	if o.omitAccessTypes == nil {
+		return nil
+	}
+	return utils.StringMapKeys(o.omitAccessTypes)
+}
+
+func (o *Options) IsAccessTypeOmitted(t string) bool {
+	if o.omitAccessTypes == nil {
+		return false
+	}
+	if o.omitAccessTypes.Contains(t) {
+		return true
+	}
+	k, _ := runtime.KindVersion(t)
+	return o.omitAccessTypes.Contains(k)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -265,7 +350,7 @@ func (o *keepGlobalOption) ApplyTransferOption(to transferhandler.TransferOption
 		eff.SetKeepGlobalAccess(o.flag)
 		return nil
 	} else {
-		return errors.ErrNotSupported("resolver")
+		return errors.ErrNotSupported("keep-global-access")
 	}
 }
 
@@ -291,12 +376,50 @@ func (o *stopOnExistingVersionOption) ApplyTransferOption(to transferhandler.Tra
 		eff.SetStopOnExistingVersion(o.flag)
 		return nil
 	} else {
-		return errors.ErrNotSupported("sources by-value")
+		return errors.ErrNotSupported("stop-on-existing")
 	}
 }
 
 func StopOnExistingVersion(args ...bool) transferhandler.TransferOption {
 	return &stopOnExistingVersionOption{
 		flag: utils.GetOptionFlag(args...),
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+type OmitAccessTypesOption interface {
+	SetOmittedAccessTypes(...string)
+	GetOmittedAccessTypes() []string
+}
+
+type omitAccessTypesOption struct {
+	add  bool
+	list []string
+}
+
+func (o *omitAccessTypesOption) ApplyTransferOption(to transferhandler.TransferOptions) error {
+	if eff, ok := to.(OmitAccessTypesOption); ok {
+		if o.add {
+			eff.SetOmittedAccessTypes(append(eff.GetOmittedAccessTypes(), o.list...)...)
+		} else {
+			eff.SetOmittedAccessTypes(o.list...)
+		}
+		return nil
+	} else {
+		return errors.ErrNotSupported("omit-access-types")
+	}
+}
+
+func OmitAccessTypes(list ...string) transferhandler.TransferOption {
+	return &omitAccessTypesOption{
+		list: slices.Clone(list),
+	}
+}
+
+func AddOmittedAccessTypes(list ...string) transferhandler.TransferOption {
+	return &omitAccessTypesOption{
+		add:  true,
+		list: slices.Clone(list),
 	}
 }

@@ -7,6 +7,8 @@ package transfer
 import (
 	"fmt"
 
+	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/config"
+
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/common"
@@ -128,6 +130,9 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 				if !ok {
 					if !none.IsNone(a.GetKind()) {
 						ok, err = handler.TransferResource(src, a, r)
+						if !ok {
+							log.Info("transport omitted", "resource", r.Meta().Name, "index", i, "access", a.GetType())
+						}
 					}
 				}
 				if ok {
@@ -157,6 +162,9 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 				if !ok {
 					if !none.IsNone(a.GetKind()) {
 						ok, err = handler.TransferSource(src, a, r)
+						if !ok {
+							log.Info("transport omitted", "source", r.Meta().Name, "index", i, "access", a.GetType())
+						}
 					}
 				}
 				if ok {

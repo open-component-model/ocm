@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 )
@@ -23,13 +24,14 @@ func New() *Option {
 }
 
 type Option struct {
+	flag                  *pflag.Flag
 	StopOnExistingVersion bool
 }
 
 var _ transferhandler.TransferOption = (*Option)(nil)
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	fs.BoolVarP(&o.StopOnExistingVersion, "stop-on-existing", "E", false, "stop on existing component version in target repository")
+	o.flag = flag.BoolVarPF(fs, &o.StopOnExistingVersion, "stop-on-existing", "E", false, "stop on existing component version in target repository")
 }
 
 func (o *Option) Usage() string {
@@ -43,5 +45,8 @@ with the <code>script</code> option family.
 }
 
 func (o *Option) ApplyTransferOption(opts transferhandler.TransferOptions) error {
-	return standard.StopOnExistingVersion(o.StopOnExistingVersion).ApplyTransferOption(opts)
+	if (o.flag != nil && o.flag.Changed) || o.StopOnExistingVersion {
+		return standard.StopOnExistingVersion(o.StopOnExistingVersion).ApplyTransferOption(opts)
+	}
+	return nil
 }

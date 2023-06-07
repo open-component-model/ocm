@@ -142,6 +142,9 @@ attributes are supported:
 // This especially means, that help texts are configured according
 // to the config settings provided by options.
 func NewCliCommandForArgs(ctx clictx.Context, args []string, mod ...func(clictx.Context, *cobra.Command)) (*cobra.Command, error) {
+	for _, m := range mod {
+		m(ctx, nil)
+	}
 	opts, args, err := Prepare(ctx, args)
 	if err != nil {
 		return nil, err

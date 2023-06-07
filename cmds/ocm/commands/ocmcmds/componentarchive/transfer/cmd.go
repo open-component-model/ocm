@@ -22,6 +22,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 )
 
@@ -87,12 +88,15 @@ func (o *Command) Run() error {
 		return err
 	}
 
-	thdlr, err := standard.New(
+	transferopts := &standard.Options{}
+	transferhandler.From(o.ConfigContext(), transferopts)
+	transferhandler.ApplyOptions(transferopts,
 		lookupoption.From(o),
 		overwriteoption.From(o),
 		rscbyvalueoption.From(o),
 		srcbyvalueoption.From(o),
 	)
+	thdlr, err := standard.New(transferopts)
 	if err != nil {
 		return err
 	}

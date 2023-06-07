@@ -9,6 +9,22 @@ import (
 	"io"
 )
 
+// Join combines any number of errors to a single error.
+// If no or only nil errors are given nil is returned.
+func Join(errs ...error) error {
+	var list []error
+
+	for _, e := range errs {
+		if e != nil {
+			list = append(list, e)
+		}
+	}
+	if len(list) == 0 {
+		return nil
+	}
+	return &ErrorList{errors: list}
+}
+
 // ErrorList is an error type with erros in it.
 type ErrorList struct { //nolint: errname // Intentional naming.
 	msg    string

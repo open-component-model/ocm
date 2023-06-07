@@ -187,6 +187,21 @@ The following configuration types are supported:
         &lt;other name>:
           script: &lt;>nested script as yaml>
   </pre>
+- <code>transport.ocm.config.ocm.software</code>
+  The config type <code>transport.ocm.config.ocm.software</code> can be used to define transfer scripts:
+  
+  <pre>
+      type: transport.ocm.config.ocm.software
+      recursive: true
+      overwrite: true
+      localResourcesByValue: false
+      resourcesByValue: true
+      sourcesByValue: false
+      keepGlobalAccess: false
+      stopOnExistingVersion: false
+      omitAccessTypes:
+      - s3
+  </pre>
 - <code>uploader.ocm.config.ocm.software</code>
   The config type <code>uploader.ocm.config.ocm.software</code> can be used to define a list
   of pre-configured download handler registrations (see [ocm ocm-downloadhandlers](ocm_ocm-downloadhandlers.md)):

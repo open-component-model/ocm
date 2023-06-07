@@ -14,10 +14,12 @@ import (
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/omitaccesstypeoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/overwriteoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/scriptoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/srcbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/stoponexistingoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/uploaderoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/versionconstraintsoption"
@@ -56,6 +58,8 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		lookupoption.New(),
 		overwriteoption.New(),
 		rscbyvalueoption.New(),
+		srcbyvalueoption.New(),
+		omitaccesstypeoption.New(),
 		stoponexistingoption.New(),
 		uploaderoption.New(ctx.OCMContext()),
 		scriptoption.New(),
@@ -108,15 +112,22 @@ func (o *Command) Run() error {
 		return err
 	}
 
-	thdlr, err := spiff.New(
-		closureoption.From(o),
+	transferopts := &spiff.Options{}
+	transferhandler.From(o.ConfigContext(), transferopts)
+	transferhandler.ApplyOptions(transferopts,
 		lookupoption.From(o),
+
+		closureoption.From(o),
 		overwriteoption.From(o),
 		rscbyvalueoption.From(o),
+		srcbyvalueoption.From(o),
 		stoponexistingoption.From(o),
+		omitaccesstypeoption.From(o),
 		spiff.Script(scriptoption.From(o).ScriptData),
 		spiff.ScriptFilesystem(o.FileSystem()),
 	)
+	thdlr, err := spiff.New(transferopts)
+
 	if err != nil {
 		return err
 	}
