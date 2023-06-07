@@ -11,9 +11,11 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/formatoption"
 	ocmcommon "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/omitaccesstypeoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/overwriteoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/scriptoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/srcbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/stoponexistingoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/uploaderoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
@@ -50,6 +52,8 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		formatoption.New(),
 		overwriteoption.New(),
 		rscbyvalueoption.New(),
+		srcbyvalueoption.New(),
+		omitaccesstypeoption.New(),
 		stoponexistingoption.New(),
 		uploaderoption.New(ctx.OCMContext()),
 		scriptoption.New(),
@@ -100,12 +104,14 @@ func (o *Command) Run() error {
 	}
 
 	thdlr, err := spiff.New(
-		spiff.Script(scriptoption.From(o).ScriptData),
 		closureoption.From(o),
 		lookupoption.From(o),
 		rscbyvalueoption.From(o),
+		srcbyvalueoption.From(o),
+		omitaccesstypeoption.From(o),
 		stoponexistingoption.From(o),
 		overwriteoption.From(o),
+		spiff.Script(scriptoption.From(o).ScriptData),
 		spiff.ScriptFilesystem(o.FileSystem()),
 	)
 	if err != nil {

@@ -67,12 +67,12 @@ func New(ctx cpi.Context, spec *RepositorySpec, setup accessobj.Setup, closer ac
 	return _Wrap(ctx, spec, base, err)
 }
 
-func _Wrap(ctx cpi.Context, spec *RepositorySpec, obj *accessobj.AccessObject, err error) (*Repository, error) {
+func _Wrap(ctx cpi.ContextProvider, spec *RepositorySpec, obj *accessobj.AccessObject, err error) (*Repository, error) {
 	if err != nil {
 		return nil, err
 	}
 	r := &RepositoryImpl{
-		ctx:  ctx,
+		ctx:  cpi.FromProvider(ctx),
 		spec: spec,
 		base: artifactset.NewFileSystemBlobAccess(obj),
 	}

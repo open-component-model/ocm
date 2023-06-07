@@ -12,6 +12,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
@@ -25,6 +26,8 @@ func From(o options.OptionSetProvider) *Option {
 }
 
 type Option struct {
+	flag *pflag.Flag
+
 	ElementName      string
 	Closure          bool
 	ClosureField     string
@@ -60,11 +63,14 @@ func (o *Option) IsTrue() bool {
 }
 
 func (o *Option) ApplyTransferOption(opts transferhandler.TransferOptions) error {
-	return standard.Recursive(o.Closure).ApplyTransferOption(opts)
+	if (o.flag != nil && o.flag.Changed) || o.Closure {
+		return standard.Recursive(o.Closure).ApplyTransferOption(opts)
+	}
+	return nil
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	fs.BoolVarP(&o.Closure, "recursive", "r", false, fmt.Sprintf("follow %s nesting", o.ElementName))
+	o.flag = flag.BoolVarPF(fs, &o.Closure, "recursive", "r", false, fmt.Sprintf("follow %s nesting", o.ElementName))
 }
 
 func (o *Option) Usage() string {

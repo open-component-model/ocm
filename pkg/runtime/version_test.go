@@ -18,6 +18,7 @@ import (
 const (
 	Type1   = "testType1"
 	Type1V1 = Type1 + "/v1"
+	Type1V2 = Type1 + "/v2"
 
 	Type2   = "testType2"
 	Type2V1 = Type2 + "/v1"
@@ -87,6 +88,30 @@ func (_ converterSpec1V1) ConvertTo(in *Spec1V1) (*TestSpec1, error) {
 	}, nil
 }
 
+// Spec1V2 is an old v1 version of a TestSpec1.
+type Spec1V2 struct {
+	runtime.ObjectVersionedType
+	Field string `json:"field"`
+}
+
+type converterSpec1V2 struct{}
+
+var _ runtime.Converter[*TestSpec1, *Spec1V2] = (*converterSpec1V2)(nil)
+
+func (_ converterSpec1V2) ConvertFrom(in *TestSpec1) (*Spec1V2, error) {
+	return &Spec1V2{
+		ObjectVersionedType: runtime.NewVersionedObjectType(in.Type),
+		Field:               in.Field,
+	}, nil
+}
+
+func (_ converterSpec1V2) ConvertTo(in *Spec1V2) (*TestSpec1, error) {
+	return &TestSpec1{
+		InternalVersionedTypedObject: runtime.NewInternalVersionedTypedObject[TestSpecRealm](versions, in.Type),
+		Field:                        in.Field,
+	}, nil
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // TestSpec2 is a second implementation of the realm TestSpec.
@@ -119,6 +144,17 @@ func (_ *object) getEncoder() int {
 }
 
 var _ = Describe("versioned types", func() {
+
+	var versions runtime.Scheme[TestSpecRealm, TestType]
+
+	versions = runtime.MustNewDefaultScheme[TestSpecRealm, TestType](nil, false, nil)
+
+	versions.RegisterByDecoder(Type1, runtime.NewVersionedTypedObjectTypeByConverter[TestSpecRealm, *TestSpec1, *Spec1V1](Type1, &converterSpec1V1{}))
+	versions.RegisterByDecoder(Type1V1, runtime.NewVersionedTypedObjectTypeByConverter[TestSpecRealm, *TestSpec1, *Spec1V1](Type1V1, &converterSpec1V1{}))
+
+	versions.RegisterByDecoder(Type2, runtime.NewVersionedTypedObjectType[TestSpecRealm, *TestSpec2](Type2))
+	versions.RegisterByDecoder(Type2V1, runtime.NewVersionedTypedObjectType[TestSpecRealm, *TestSpec2](Type2V1))
+
 	It("marshals version for TestSpec1", func() {
 		s1 := NewTestSpec1("value")
 

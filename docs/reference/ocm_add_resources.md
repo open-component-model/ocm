@@ -423,7 +423,61 @@ Typically there is special support for the CLI artifact add commands.
 The access method specification can be put below the <code>access</code> field.
 If always requires the field <code>type</code> describing the kind and version
 shown below.
+  
+- Access type <code>S3</code>
 
+  This method implements the access of a blob stored in an S3 bucket.
+
+  The following versions are supported:
+  - Version <code>v1</code>
+  
+    The type specific specification fields are:
+    
+    - **<code>region</code>** (optional) *string*
+    
+      OCI repository reference (this artifact name used to store the blob).
+    
+    - **<code>bucket</code>** *string*
+    
+      The name of the S3 bucket containing the blob
+    
+    - **<code>key</code>** *string*
+    
+      The key of the desired blob
+    
+    - **<code>version</code>** (optional) *string*
+    
+      The key of the desired blob
+    
+    - **<code>mediaType</code>** (optional) *string*
+    
+      The media type of the content
+  
+  - Version <code>v2</code>
+  
+    The type specific specification fields are:
+    
+    - **<code>region</code>** (optional) *string*
+    
+      OCI repository reference (this artifact name used to store the blob).
+    
+    - **<code>bucketName</code>** *string*
+    
+      The name of the S3 bucket containing the blob
+    
+    - **<code>objectKey</code>** *string*
+    
+      The key of the desired blob
+    
+    - **<code>version</code>** (optional) *string*
+    
+      The key of the desired blob
+    
+    - **<code>mediaType</code>** (optional) *string*
+    
+      The media type of the content
+  
+  
 - Access type <code>gitHub</code>
 
   This method implements the access of the content of a git commit stored in a
@@ -445,10 +499,9 @@ shown below.
     - **<code>commit</code>** *string*
     
       The sha/id of the git commit
-    
-    Options used to configure fields: <code>--accessHostname</code>, <code>--accessRepository</code>, <code>--commit</code>
   
-
+  Options used to configure fields: <code>--accessHostname</code>, <code>--accessRepository</code>, <code>--commit</code>
+    
 - Access type <code>helm</code>
 
   This method implements the access of a Helm chart stored in a Helm repository.
@@ -480,9 +533,9 @@ shown below.
     
     It uses the consumer identity type HelmChartRepository with the fields
     for a hostpath identity matcher (see [ocm get credentials](ocm_get_credentials.md)).
-    Options used to configure fields: <code>--accessPackage</code>, <code>--accessRepository</code>, <code>--accessVersion</code>
   
-
+  Options used to configure fields: <code>--accessPackage</code>, <code>--accessRepository</code>, <code>--accessVersion</code>
+  
 - Access type <code>localBlob</code>
 
   This method is used to store a resource blob along with the component descriptor
@@ -535,15 +588,14 @@ shown below.
     
       This additional external access information can be added using
       a second external access method specification.
-    
-    Options used to configure fields: <code>--globalAccess</code>, <code>--hint</code>, <code>--mediaType</code>, <code>--reference</code>
   
-
+  Options used to configure fields: <code>--globalAccess</code>, <code>--hint</code>, <code>--mediaType</code>, <code>--reference</code>
+      
 - Access type <code>none</code>
 
   dummy resource with no access
 
-
+  
 - Access type <code>npm</code>
 
   This method implements the access of an NPM package in an NPM registry.
@@ -564,10 +616,9 @@ shown below.
     - **<code>version</code>** *string*
     
       The version name of the NPM package
-    
-    Options used to configure fields: <code>--accessPackage</code>, <code>--accessRegistry</code>, <code>--accessVersion</code>
   
-
+  Options used to configure fields: <code>--accessPackage</code>, <code>--accessRegistry</code>, <code>--accessVersion</code>
+  
 - Access type <code>ociArtifact</code>
 
   This method implements the access of an OCI artifact stored in an OCI registry.
@@ -582,10 +633,9 @@ shown below.
       OCI image/artifact reference following the possible docker schemes:
       - <code>&lt;repo>/&lt;artifact>:&lt;digest>@&lt;tag></code>
       - <code><host>[&lt;port>]/&lt;repo path>/&lt;artifact>:&lt;version>@&lt;tag></code>
-    
-    Options used to configure fields: <code>--reference</code>
   
-
+  Options used to configure fields: <code>--reference</code>
+  
 - Access type <code>ociBlob</code>
 
   This method implements the access of an OCI blob stored in an OCI repository.
@@ -610,10 +660,9 @@ shown below.
     - **<code>size</code>** *integer*
     
       The size of the blob
-    
-    Options used to configure fields: <code>--digest</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--size</code>
   
-
+  Options used to configure fields: <code>--digest</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--size</code>
+      
 - Access type <code>s3</code>
 
   This method implements the access of a blob stored in an S3 bucket.
@@ -635,9 +684,40 @@ shown below.
     
       The key of the desired blob
     
-    Options used to configure fields: <code>--accessVersion</code>, <code>--bucket</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--region</code>
+    - **<code>version</code>** (optional) *string*
+    
+      The key of the desired blob
+    
+    - **<code>mediaType</code>** (optional) *string*
+    
+      The media type of the content
   
-
+  - Version <code>v2</code>
+  
+    The type specific specification fields are:
+    
+    - **<code>region</code>** (optional) *string*
+    
+      OCI repository reference (this artifact name used to store the blob).
+    
+    - **<code>bucketName</code>** *string*
+    
+      The name of the S3 bucket containing the blob
+    
+    - **<code>objectKey</code>** *string*
+    
+      The key of the desired blob
+    
+    - **<code>version</code>** (optional) *string*
+    
+      The key of the desired blob
+    
+    - **<code>mediaType</code>** (optional) *string*
+    
+      The media type of the content
+  
+  Options used to configure fields: <code>--accessVersion</code>, <code>--bucket</code>, <code>--mediaType</code>, <code>--reference</code>, <code>--region</code>
+  
 
 All yaml/json defined resources can be templated.
 Variables are specified as regular arguments following the syntax <code>&lt;name>=&lt;value></code>.

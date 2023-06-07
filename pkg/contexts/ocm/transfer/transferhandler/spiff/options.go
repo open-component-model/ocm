@@ -21,9 +21,25 @@ type Options struct {
 }
 
 var (
+	_ transferhandler.TransferOption = (*Options)(nil)
+
 	_ ScriptOption           = (*Options)(nil)
 	_ ScriptFilesystemOption = (*Options)(nil)
 )
+
+func (o *Options) ApplyTransferOption(target transferhandler.TransferOptions) error {
+	if len(o.script) > 0 {
+		if opts, ok := target.(ScriptOption); ok {
+			opts.SetScript(o.script)
+		}
+	}
+	if o.fs != nil {
+		if opts, ok := target.(ScriptFilesystemOption); ok {
+			opts.SetScriptFilesystem(o.fs)
+		}
+	}
+	return o.Options.ApplyTransferOption(target)
+}
 
 func (o *Options) SetScript(data []byte) {
 	o.script = data

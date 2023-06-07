@@ -65,6 +65,10 @@ The following method types are centrally defined and available in the OCM toolse
   
   Access of an OCI artifact stored in any OCI registry.
 
+- [`relativeOciReference`](../../../pkg/contexts/ocm/accessmethods/relativeociref/README.md) *local* *deprecated*
+
+  Access of an OCI artifact stored in any OCI registry.
+
 - [`ociBlob`](../../../pkg/contexts/ocm/accessmethods/ociblob/README.md) *external*
 
   Access of an OCI artifact stored in any OCI registry.

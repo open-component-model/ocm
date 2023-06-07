@@ -55,6 +55,10 @@ func New(m ...datacontext.BuilderMode) Context {
 	return internal.Builder{}.New(m...)
 }
 
+func FromProvider(p ContextProvider) Context {
+	return internal.FromProvider(p)
+}
+
 func RegisterRepositorySpecHandler(handler RepositorySpecHandler, types ...string) {
 	internal.RegisterRepositorySpecHandler(handler, types...)
 }

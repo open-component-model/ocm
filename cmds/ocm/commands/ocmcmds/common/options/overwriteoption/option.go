@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/pflag"
 
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 )
@@ -23,13 +24,14 @@ func New() *Option {
 }
 
 type Option struct {
+	flag      *pflag.Flag
 	Overwrite bool
 }
 
 var _ transferhandler.TransferOption = (*Option)(nil)
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	fs.BoolVarP(&o.Overwrite, "overwrite", "f", false, "overwrite existing component versions")
+	o.flag = flag.BoolVarPF(fs, &o.Overwrite, "overwrite", "f", false, "overwrite existing component versions")
 }
 
 func (o *Option) Usage() string {
@@ -41,5 +43,8 @@ target repository will be overwritten, if they already exist.
 }
 
 func (o *Option) ApplyTransferOption(opts transferhandler.TransferOptions) error {
-	return standard.Overwrite(o.Overwrite).ApplyTransferOption(opts)
+	if (o.flag != nil && o.flag.Changed) || o.Overwrite {
+		return standard.Overwrite(o.Overwrite).ApplyTransferOption(opts)
+	}
+	return nil
 }
