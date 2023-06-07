@@ -25,7 +25,7 @@ const (
 	CONFIG_MIME_TYPE = "application/vnd.gardener.landscaper.blueprint.config.v1"
 )
 
-type Extractor func(handler *Handler, access accessio.DataAccess, path string, fs vfs.FileSystem) (bool, error)
+type Extractor func(pr common.Printer, handler *Handler, access accessio.DataAccess, path string, fs vfs.FileSystem) (bool, error)
 
 var (
 	supportedArtifactTypes []string
@@ -64,7 +64,7 @@ func New(configmimetypes ...string) *Handler {
 	}
 }
 
-func (h *Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (_ bool, _ string, err error) {
+func (h *Handler) Download(pr common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (_ bool, _ string, err error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagationf(&err, "downloading blueprint")
 
@@ -79,7 +79,7 @@ func (h *Handler) Download(p common.Printer, racc cpi.ResourceAccess, path strin
 		return false, "", nil
 	}
 
-	ok, err := ex(h, meth, path, fs)
+	ok, err := ex(pr, h, meth, path, fs)
 	if err != nil || !ok {
 		return ok, "", err
 	}

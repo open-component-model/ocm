@@ -7,6 +7,7 @@ package blueprint
 import (
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/common/compression"
@@ -18,7 +19,7 @@ import (
 const BLUEPRINT_MIMETYPE_LEGACY = "application/vnd.gardener.landscaper.blueprint.layer.v1.tar"
 const BLUEPRINT_MIMETYPE = "application/vnd.gardener.landscaper.blueprint.v1+tar+gzip"
 
-func ExtractArchive(_ *Handler, access accessio.DataAccess, path string, fs vfs.FileSystem) (_ bool, rerr error) {
+func ExtractArchive(pr common.Printer, _ *Handler, access accessio.DataAccess, path string, fs vfs.FileSystem) (_ bool, rerr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagationf(&rerr, "extracting archived (and compressed) blueprint")
 
@@ -43,14 +44,15 @@ func ExtractArchive(_ *Handler, access accessio.DataAccess, path string, fs vfs.
 	if err != nil {
 		return true, err
 	}
-	err = tarutils.ExtractTarToFs(pfs, reader)
+	fcnt, bcnt, err := tarutils.ExtractTarToFsWithInfo(pfs, reader)
 	if err != nil {
 		return true, err
 	}
+	pr.Printf("%s: %d file(s) with %d byte(s) written\n", path, fcnt, bcnt)
 	return true, nil
 }
 
-func ExtractArtifact(handler *Handler, access accessio.DataAccess, path string, fs vfs.FileSystem) (_ bool, rerr error) {
+func ExtractArtifact(pr common.Printer, handler *Handler, access accessio.DataAccess, path string, fs vfs.FileSystem) (_ bool, rerr error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagationf(&rerr, "extracting oci artifact containing a blueprint")
 
@@ -83,5 +85,5 @@ func ExtractArtifact(handler *Handler, access accessio.DataAccess, path string, 
 	if err != nil {
 		return true, err
 	}
-	return ExtractArchive(handler, blob, path, fs)
+	return ExtractArchive(pr, handler, blob, path, fs)
 }

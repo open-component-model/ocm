@@ -4,6 +4,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/common"
 	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
 	. "github.com/open-component-model/ocm/pkg/testutils"
@@ -65,10 +66,12 @@ var _ = Describe("blueprint downloader registration", func() {
 		defer Close(cv)
 		racc := Must(cv.GetResourceByIndex(0))
 
-		ok, path := Must2(download.For(env).Download(nil, racc, DOWNLOAD_PATH, env))
+		p, buf := common.NewBufferedPrinter()
+		ok, path := Must2(download.For(env).Download(p, racc, DOWNLOAD_PATH, env))
 		Expect(ok).To(BeTrue())
 		Expect(path).To(Equal(DOWNLOAD_PATH))
 		Expect(env.FileExists(DOWNLOAD_PATH + "/blueprint.yaml")).To(BeTrue())
 		Expect(env.FileExists(DOWNLOAD_PATH + "/test/README.md")).To(BeTrue())
+		Expect(buf.String()).To(StringEqualTrimmedWithContext(DOWNLOAD_PATH + ": 2 file(s) with 390 byte(s) written"))
 	})
 })
