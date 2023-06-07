@@ -11,18 +11,19 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
+	. "github.com/open-component-model/ocm/pkg/env"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
+	. "github.com/open-component-model/ocm/pkg/testutils"
+
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	ocictf "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
-	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/relativeociref"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
 	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/oci/ocirepo"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	. "github.com/open-component-model/ocm/pkg/env"
-	. "github.com/open-component-model/ocm/pkg/env/builder"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
@@ -110,7 +111,7 @@ var _ = Describe("Transfer handler", func() {
 		Expect(err).To(Succeed())
 		defer set.Close()
 
-		blob, err := set.GetBlob(ldesc.Digest)
+		_, blob, err := set.GetBlobData(ldesc.Digest)
 		Expect(err).To(Succeed())
 		data, err = blob.Get()
 		Expect(err).To(Succeed())
