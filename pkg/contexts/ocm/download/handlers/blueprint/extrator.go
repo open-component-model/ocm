@@ -16,8 +16,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
-const BLUEPRINT_MIMETYPE_LEGACY = "application/vnd.gardener.landscaper.blueprint.layer.v1.tar"
-const BLUEPRINT_MIMETYPE = "application/vnd.gardener.landscaper.blueprint.v1+tar+gzip"
+const (
+	BLUEPRINT_MIMETYPE_LEGACY = "application/vnd.gardener.landscaper.blueprint.layer.v1.tar"
+	BLUEPRINT_MIMETYPE        = "application/vnd.gardener.landscaper.blueprint.v1+tar+gzip"
+)
 
 func ExtractArchive(pr common.Printer, _ *Handler, access accessio.DataAccess, path string, fs vfs.FileSystem) (_ bool, rerr error) {
 	var finalize finalizer.Finalizer

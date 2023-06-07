@@ -28,10 +28,9 @@ const (
 type Extractor func(pr common.Printer, handler *Handler, access accessio.DataAccess, path string, fs vfs.FileSystem) (bool, error)
 
 var (
-	supportedArtifactTypes []string
+	supportedArtifactTypes    []string
+	mimeTypeExtractorRegistry map[string]Extractor
 )
-
-var mimeTypeExtractorRegistry map[string]Extractor
 
 type Handler struct {
 	ociConfigMimeTypes generics.Set[string]
