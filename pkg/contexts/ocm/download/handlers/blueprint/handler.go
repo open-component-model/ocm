@@ -7,7 +7,9 @@ package blueprint
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/utils"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -17,30 +19,52 @@ import (
 	"github.com/open-component-model/ocm/pkg/finalizer"
 )
 
-const TYPE = resourcetypes.BLUEPRINT
-const LEGACY_TYPE = resourcetypes.BLUEPRINT_LEGACY
+const (
+	TYPE             = resourcetypes.BLUEPRINT
+	LEGACY_TYPE      = resourcetypes.BLUEPRINT_LEGACY
+	CONFIG_MIME_TYPE = "application/vnd.gardener.landscaper.blueprint.config.v1"
+)
 
-type Extractor func(access accessio.DataAccess, path string, fs vfs.FileSystem) error
+type Extractor func(handler *Handler, access accessio.DataAccess, path string, fs vfs.FileSystem) (bool, error)
 
-var mediaTypeSet map[string]Extractor
+var (
+	supportedArtifactTypes []string
+)
 
-type Handler struct{}
+var mimeTypeExtractorRegistry map[string]Extractor
 
-func init() {
-	mediaTypeSet = map[string]Extractor{
-		mime.MIME_TAR:     ExtractArchive,
-		mime.MIME_TGZ:     ExtractArchive,
-		mime.MIME_TGZ_ALT: ExtractArchive,
-	}
-	for _, t := range append(artdesc.ToArchiveMediaTypes(artdesc.MediaTypeImageManifest), artdesc.ToArchiveMediaTypes(artdesc.MediaTypeDockerSchema2Manifest)...) {
-		mediaTypeSet[t] = ExtractArtifact
-	}
-
-	registry.Register(&Handler{}, registry.ForArtifactType(TYPE))
-	registry.Register(&Handler{}, registry.ForArtifactType(LEGACY_TYPE))
+type Handler struct {
+	ociConfigMimeTypes generics.Set[string]
 }
 
-func (h Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (_ bool, _ string, err error) {
+func init() {
+	supportedArtifactTypes = []string{TYPE, LEGACY_TYPE}
+	mimeTypeExtractorRegistry = map[string]Extractor{
+		mime.MIME_TAR:      ExtractArchive,
+		mime.MIME_TGZ:      ExtractArchive,
+		mime.MIME_TGZ_ALT:  ExtractArchive,
+		BLUEPRINT_MIMETYPE: ExtractArchive,
+	}
+	for _, t := range append(artdesc.ToArchiveMediaTypes(artdesc.MediaTypeImageManifest), artdesc.ToArchiveMediaTypes(artdesc.MediaTypeDockerSchema2Manifest)...) {
+		mimeTypeExtractorRegistry[t] = ExtractArtifact
+	}
+
+	h := New()
+
+	registry.Register(h, registry.ForArtifactType(TYPE))
+	registry.Register(h, registry.ForArtifactType(LEGACY_TYPE))
+}
+
+func New(configmimetypes ...string) *Handler {
+	if len(configmimetypes) == 0 || utils.Optional(configmimetypes...) == "" {
+		configmimetypes = []string{CONFIG_MIME_TYPE}
+	}
+	return &Handler{
+		ociConfigMimeTypes: generics.NewSet[string](configmimetypes...),
+	}
+}
+
+func (h *Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string, fs vfs.FileSystem) (_ bool, _ string, err error) {
 	var finalize finalizer.Finalizer
 	defer finalize.FinalizeWithErrorPropagationf(&err, "downloading blueprint")
 
@@ -50,14 +74,14 @@ func (h Handler) Download(p common.Printer, racc cpi.ResourceAccess, path string
 	}
 	finalize.Close(meth)
 
-	ex := mediaTypeSet[meth.MimeType()]
+	ex := mimeTypeExtractorRegistry[meth.MimeType()]
 	if ex == nil {
 		return false, "", nil
 	}
 
-	err = ex(meth, path, fs)
-	if err != nil {
-		return false, "", err
+	ok, err := ex(h, meth, path, fs)
+	if err != nil || !ok {
+		return ok, "", err
 	}
 	return true, path, nil
 }
