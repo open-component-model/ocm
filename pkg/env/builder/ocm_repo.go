@@ -6,6 +6,7 @@ package builder
 
 import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
 )
 
 const T_OCMREPOSITORY = "ocm repository"
@@ -25,4 +26,5 @@ func (r *ocmRepository) Type() string {
 
 func (r *ocmRepository) Set() {
 	r.Builder.ocm_repo = r.Repository
+	r.Builder.oci_repo = genericocireg.GetOCIRepository(r.Repository)
 }
