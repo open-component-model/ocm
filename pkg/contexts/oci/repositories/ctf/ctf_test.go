@@ -9,10 +9,13 @@ import (
 	"compress/gzip"
 	"io"
 
+	"github.com/mandelsoft/logging"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/testhelper"
+	"github.com/open-component-model/ocm/pkg/finalizer"
+	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
@@ -33,6 +36,8 @@ var _ = Describe("ctf management", func() {
 
 	var spec *ctf.RepositorySpec
 
+	ocmlog.Context().AddRule(logging.NewConditionRule(logging.TraceLevel, accessio.ALLOC_REALM))
+
 	BeforeEach(func() {
 		t, err := osfs.NewTempFileSystem()
 		Expect(err).To(Succeed())
@@ -47,22 +52,26 @@ var _ = Describe("ctf management", func() {
 	})
 
 	It("instantiate filesystem ctf", func() {
-		r, err := ctf.FormatDirectory.Create(oci.DefaultContext(), "test", &spec.StandardOptions, 0700)
-		Expect(err).To(Succeed())
+		var finalize finalizer.Finalizer
+		defer Defer(finalize.Finalize)
+
+		r := Must(ctf.FormatDirectory.Create(oci.DefaultContext(), "test", &spec.StandardOptions, 0700))
+		finalize.Close(r)
 		Expect(vfs.DirExists(tempfs, "test/"+ctf.BlobsDirectoryName)).To(BeTrue())
 
-		n, err := r.LookupNamespace("mandelsoft/test")
-		Expect(err).To(Succeed())
+		sub := finalize.Nested()
+		n := Must(r.LookupNamespace("mandelsoft/test"))
+		sub.Close(n)
 		DefaultManifestFill(n)
-		Expect(n.Close()).To(Succeed())
+		Expect(sub.Finalize()).To(Succeed())
 
 		Expect(r.ExistsArtifact("mandelsoft/test", TAG)).To(BeTrue())
 
-		art, err := r.LookupArtifact("mandelsoft/test", TAG)
-		Expect(err).To(Succeed())
+		art := Must(r.LookupArtifact("mandelsoft/test", TAG))
 		Close(art, "art")
 
-		Expect(r.Close()).To(Succeed())
+		Expect(finalize.Finalize()).To(Succeed())
+
 		Expect(vfs.FileExists(tempfs, "test/"+ctf.ArtifactIndexFileName)).To(BeTrue())
 
 		infos, err := vfs.ReadDir(tempfs, "test/"+artifactset.BlobsDirectoryName)
@@ -171,7 +180,7 @@ var _ = Describe("ctf management", func() {
 			CheckArtifact(art)
 			art, err = n.GetArtifact(TAG)
 			Expect(err).To(Succeed())
-			b, err := art.Artifact().ToBlobAccess()
+			b, err := art.GetDescriptor().ToBlobAccess()
 			Expect(err).To(Succeed())
 			Expect(b.Digest()).To(Equal(digest.Digest("sha256:" + DIGEST_MANIFEST)))
 

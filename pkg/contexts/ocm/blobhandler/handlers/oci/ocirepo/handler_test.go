@@ -110,7 +110,8 @@ var _ = Describe("oci artifact transfer", func() {
 
 		fmt.Printf("%s\n", string(data))
 		Expect(string(data)).To(StringEqualWithContext(`{"globalAccess":{"imageReference":"baseurl.io/ocm/value:v2.0","type":"ociArtifact"},"localReference":"sha256:b0692bcec00e0a875b6b280f3209d6776f3eca128adcb7e81e82fd32127c0c62","mediaType":"application/vnd.oci.image.manifest.v1+tar+gzip","referenceName":"ocm/value:v2.0","type":"localBlob"}`))
-		ocirepo := tgt.(genericocireg.OCIBasedRepository).OCIRepository()
+		ocirepo := genericocireg.GetOCIRepository(tgt)
+		Expect(ocirepo).NotTo(BeNil())
 
 		art := Must(ocirepo.LookupArtifact(OCINAMESPACE, OCIVERSION))
 		defer Close(art, "artifact")
@@ -149,8 +150,7 @@ var _ = Describe("oci artifact transfer", func() {
 		fmt.Printf("%s\n", string(data))
 		Expect(string(data)).To(StringEqualWithContext("{\"imageReference\":\"baseurl.io/ocm/value:v2.0\",\"type\":\"ociArtifact\"}"))
 
-		ocirepo := tgt.(genericocireg.OCIBasedRepository).OCIRepository()
-
+		ocirepo := genericocireg.GetOCIRepository(tgt)
 		art := Must(ocirepo.LookupArtifact(OCINAMESPACE, OCIVERSION))
 		defer Close(art, "artifact")
 

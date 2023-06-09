@@ -50,7 +50,11 @@ func init() {
 type BaseFunction func(ctx *storagecontext.StorageContext) string
 
 func OCIRegBaseFunction(ctx *storagecontext.StorageContext) string {
-	return ctx.Repository.(*ocireg.Repository).GetBaseURL()
+	i, err := ocireg.GetRepositoryImplementation(ctx.Repository)
+	if err != nil {
+		panic("ocireg implementation mismatch")
+	}
+	return i.GetBaseURL()
 }
 
 // blobHandler is the default handling to store local blobs as local blobs but with an additional

@@ -136,7 +136,7 @@ var _ = Describe("Transfer handler", func() {
 		Expect(err).To(Succeed())
 		defer set.Close()
 
-		blob, err := set.GetBlob(ldesc.Digest)
+		_, blob, err := set.GetBlobData(ldesc.Digest)
 		Expect(err).To(Succeed())
 		data, err = blob.Get()
 		Expect(err).To(Succeed())

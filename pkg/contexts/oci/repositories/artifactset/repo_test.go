@@ -7,6 +7,7 @@ package artifactset_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
@@ -23,6 +24,7 @@ var _ = Describe("", func() {
 
 	BeforeEach(func() {
 		env = builder.NewBuilder(testenv.NewEnvironment())
+		// ocmlog.Context().AddRule(logging.NewConditionRule(logging.DebugLevel, accessio.ALLOC_REALM))
 	})
 
 	AfterEach(func() {
@@ -49,11 +51,13 @@ var _ = Describe("", func() {
 		defer Close(r)
 		ns, err := r.LookupNamespace("")
 		Expect(err).To(Succeed())
+		defer Close(ns)
 
 		Expect(ns.ListTags()).To(Equal([]string{"v1"}))
 
 		a, err := ns.GetArtifact("v1")
 		Expect(err).To(Succeed())
+		defer Close(a)
 
 		Expect(a.IsManifest()).To(BeTrue())
 		m := a.ManifestAccess()

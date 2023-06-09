@@ -27,10 +27,10 @@ type StorageContext struct {
 
 var _ ocmcpi.StorageContext = (*StorageContext)(nil)
 
-func New(comprepo ocmcpi.Repository, vers ocmcpi.ComponentVersionAccess, impltyp string, ocirepo oci.Repository, namespace oci.NamespaceAccess, manifest oci.ManifestAccess) *StorageContext {
+func New(vers ocmcpi.ComponentVersionAccess, impltyp string, ocirepo oci.Repository, namespace oci.NamespaceAccess, manifest oci.ManifestAccess) *StorageContext {
 	return &StorageContext{
 		DefaultStorageContext: *ocmcpi.NewDefaultStorageContext(
-			comprepo,
+			vers.Repository(),
 			vers,
 			ocmcpi.ImplementationRepositoryType{
 				ContextType:    cpi.CONTEXT_TYPE,

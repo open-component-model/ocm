@@ -197,10 +197,10 @@ var _ = Describe("Add resources", func() {
 		m := art.ManifestAccess().GetDescriptor()
 		Expect(len(m.Layers)).To(Equal(1))
 
-		blob, err = set.GetBlob(m.Layers[0].Digest)
+		_, blobd, err := set.GetBlobData(m.Layers[0].Digest)
 		Expect(err).To(Succeed())
-		defer Close(blob, "blob")
-		reader, err := blob.Reader()
+		defer Close(blobd, "blob")
+		reader, err := blobd.Reader()
 		Expect(err).To(Succeed())
 		defer reader.Close()
 		_, err = loader.LoadArchive(reader)
