@@ -146,6 +146,6 @@ func Close(closer ...io.Closer) error {
 
 type Closer func() error
 
-func (c Closer) CLose() error {
+func (c Closer) Close() error {
 	return c()
 }
