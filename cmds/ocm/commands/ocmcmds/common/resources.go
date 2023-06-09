@@ -472,6 +472,7 @@ func ProcessElements(ictx inputs.Context, cv ocm.ComponentVersionAccess, elems [
 					elem.Spec().SetVersion(iv)
 				}
 				acc, err = cv.AddBlob(blob, elem.Type(), hint, nil)
+				blob.Close()
 				if err == nil {
 					err = CheckHint(cv, acc)
 					if err == nil {

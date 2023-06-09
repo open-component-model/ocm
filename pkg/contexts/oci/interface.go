@@ -40,6 +40,7 @@ type (
 	IndexAccess                      = internal.IndexAccess
 	BlobAccess                       = internal.BlobAccess
 	DataAccess                       = internal.DataAccess
+	ConsumerIdentityProvider         = internal.ConsumerIdentityProvider
 )
 
 func DefaultContext() internal.Context {

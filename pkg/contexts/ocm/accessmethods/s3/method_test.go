@@ -16,7 +16,6 @@ import (
 
 	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
-	"github.com/open-component-model/ocm/pkg/generics"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
@@ -31,6 +30,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3/identity"
+	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 type mockDownloader struct {
@@ -122,6 +122,7 @@ var _ = Describe("Method", func() {
 			fs              vfs.FileSystem
 			ctx             datacontext.Context
 		)
+
 		BeforeEach(func() {
 			expectedContent, err = os.ReadFile(filepath.Join("testdata", "repo.tar.gz"))
 			Expect(err).ToNot(HaveOccurred())
@@ -153,6 +154,7 @@ var _ = Describe("Method", func() {
 			env.Cleanup()
 			vfs.Cleanup(fs)
 		})
+
 		It("downloads s3 objects", func() {
 			m, err := accessSpec.AccessMethod(&mockComponentVersionAccess{context: mcc})
 			Expect(err).ToNot(HaveOccurred())
@@ -160,6 +162,7 @@ var _ = Describe("Method", func() {
 			Expect(err).ToNot(HaveOccurred())
 			Expect(blob).To(Equal(expectedContent))
 		})
+
 		When("the downloader fails to download the bucket object", func() {
 			BeforeEach(func() {
 				downloader = &mockDownloader{

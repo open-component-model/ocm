@@ -2,18 +2,16 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package support
+package cpi
 
 import (
 	"github.com/mandelsoft/logging"
-
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 )
 
-type ContextProvider interface {
-	GetContext() cpi.Context
+type OCMContextProvider interface {
+	GetContext() Context
 }
 
-func Logger(c ContextProvider, keyValuePairs ...interface{}) logging.Logger {
+func Logger(c OCMContextProvider, keyValuePairs ...interface{}) logging.Logger {
 	return c.GetContext().Logger().WithValues(keyValuePairs...)
 }

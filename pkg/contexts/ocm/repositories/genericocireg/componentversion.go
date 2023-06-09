@@ -30,34 +30,26 @@ import (
 	"github.com/open-component-model/ocm/pkg/generics"
 )
 
-type ComponentVersion struct {
-	container *ComponentVersionContainer
-	*support.ComponentVersionAccess
-}
-
-var _ cpi.ComponentVersionAccess = (*ComponentVersion)(nil)
-
 // newComponentVersionAccess creates an component access for the artifact access, if this fails the artifact acess is closed.
-func newComponentVersionAccess(mode accessobj.AccessMode, comp *componentAccessImpl, version string, access oci.ArtifactAccess, persistent bool) (*ComponentVersion, error) {
+func newComponentVersionAccess(mode accessobj.AccessMode, comp *componentAccessImpl, version string, access oci.ArtifactAccess, persistent bool) (cpi.ComponentVersionAccess, error) {
 	c, err := newComponentVersionContainer(mode, comp, version, access)
 	if err != nil {
 		return nil, err
 	}
-	acc, err := support.NewComponentVersionAccess(c, true, persistent)
+	impl, err := support.NewComponentVersionAccessImpl(comp.GetName(), version, c, true, persistent)
 	if err != nil {
 		c.Close()
 		return nil, err
 	}
-	return &ComponentVersion{
-		container:              c,
-		ComponentVersionAccess: acc,
-	}, nil
+	return cpi.NewComponentVersionAccess(impl), nil
 }
 
 // //////////////////////////////////////////////////////////////////////////////
 
 type ComponentVersionContainer struct {
-	comp     *ComponentAccess
+	impl support.ComponentVersionAccessImpl
+
+	comp     *componentAccessImpl
 	version  string
 	access   oci.ArtifactAccess
 	manifest oci.ManifestAccess
@@ -76,13 +68,9 @@ func newComponentVersionContainer(mode accessobj.AccessMode, comp *componentAcce
 		access.Close()
 		return nil, err
 	}
-	v, err := comp.View(false)
-	if err != nil {
-		access.Close()
-		return nil, err
-	}
+
 	return &ComponentVersionContainer{
-		comp:     v,
+		comp:     comp,
 		version:  version,
 		access:   access,
 		manifest: m,
@@ -90,25 +78,20 @@ func newComponentVersionContainer(mode accessobj.AccessMode, comp *componentAcce
 	}, nil
 }
 
-func (c *ComponentVersionContainer) Repository() cpi.Repository {
-	return c.comp.repo
+func (c *ComponentVersionContainer) SetImplementation(impl support.ComponentVersionAccessImpl) {
+	c.impl = impl
+}
+
+func (c *ComponentVersionContainer) GetParentViewManager() cpi.ComponentAccessViewManager {
+	return c.comp
 }
 
 func (c *ComponentVersionContainer) Close() error {
 	if c.manifest == nil {
 		return accessio.ErrClosed
 	}
-
 	c.manifest = nil
-
-	err := c.access.Close()
-	if err != nil {
-		c.comp.Close()
-
-		return fmt.Errorf("failed to close access artifact access: %w", err)
-	}
-
-	return c.comp.Close()
+	return c.access.Close()
 }
 
 func (c *ComponentVersionContainer) Check() error {
@@ -121,12 +104,12 @@ func (c *ComponentVersionContainer) Check() error {
 	return nil
 }
 
-func (c *ComponentVersionContainer) GetContext() cpi.Context {
-	return c.comp.GetContext()
+func (c *ComponentVersionContainer) Repository() cpi.Repository {
+	return c.comp.repo.nonref
 }
 
-func (c *ComponentVersionContainer) ComponentAccess() cpi.ComponentAccess {
-	return c.comp
+func (c *ComponentVersionContainer) GetContext() cpi.Context {
+	return c.comp.GetContext()
 }
 
 func (c *ComponentVersionContainer) IsReadOnly() bool {
@@ -255,11 +238,11 @@ func (c *ComponentVersionContainer) GetDescriptor() *compdesc.ComponentDescripto
 }
 
 func (c *ComponentVersionContainer) GetBlobData(name string) (cpi.DataAccess, error) {
-	return c.manifest.GetBlob(digest.Digest((name)))
+	return c.manifest.GetBlob(digest.Digest(name))
 }
 
 func (c *ComponentVersionContainer) GetStorageContext(cv cpi.ComponentVersionAccess) cpi.StorageContext {
-	return ocihdlr.New(c.comp.repo, cv, c.comp.repo.ocirepo.GetSpecification().GetKind(), c.comp.repo.ocirepo, c.comp.namespace, c.manifest)
+	return ocihdlr.New(cv, c.comp.repo.ocirepo.GetSpecification().GetKind(), c.comp.repo.ocirepo, c.comp.namespace, c.manifest)
 }
 
 func (c *ComponentVersionContainer) AddBlobFor(storagectx cpi.StorageContext, blob cpi.BlobAccess, refName string, global cpi.AccessSpec) (cpi.AccessSpec, error) {

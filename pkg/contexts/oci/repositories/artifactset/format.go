@@ -268,5 +268,5 @@ func (h *formatHandler) Create(path string, opts accessio.Options, mode vfs.File
 
 // WriteToFilesystem writes the current object to a filesystem.
 func (h *formatHandler) Write(obj *Object, path string, opts accessio.Options, mode vfs.FileMode) error {
-	return h.FormatHandler.Write(obj.base.Access(), path, opts, mode)
+	return h.FormatHandler.Write(obj.container.base.Access(), path, opts, mode)
 }

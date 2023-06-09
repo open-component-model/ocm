@@ -58,6 +58,8 @@ var _ = Describe("component repository mapping", func() {
 		Expect(err).To(Succeed())
 		tempfs = t
 
+		// ocmlog.Context().AddRule(logging.NewConditionRule(logging.TraceLevel, accessio.ALLOC_REALM))
+
 		ocispec, err = ctf.NewRepositorySpec(accessobj.ACC_CREATE, "test", accessio.PathFileSystem(tempfs), accessobj.FormatDirectory)
 		Expect(err).To(Succeed())
 		spec = genericocireg.NewRepositorySpec(ocispec, nil)
@@ -73,13 +75,24 @@ var _ = Describe("component repository mapping", func() {
 		defer Defer(finalize.Finalize)
 
 		repo := finalizer.ClosingWith(&finalize, Must(DefaultContext.RepositoryForSpec(spec)))
-		Expect(reflect.TypeOf(repo).String()).To(Equal("*genericocireg.Repository"))
+		impl := Must(cpi.GetRepositoryImplementation(repo))
+		Expect(reflect.TypeOf(impl).String()).To(Equal("*genericocireg.RepositoryImpl"))
 
 		comp := finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
 		vers := finalizer.ClosingWith(&finalize, Must(comp.NewVersion("v1")))
 		MustBeSuccessful(comp.AddVersion(vers))
 
+		noref := vers.Repository()
+		Expect(noref).NotTo(BeNil())
+		Expect(noref.IsClosed()).To(BeFalse())
+		Expect(noref.Close()).To(Succeed())
+		Expect(noref.IsClosed()).To(BeFalse())
+
 		MustBeSuccessful(finalize.Finalize())
+
+		Expect(noref.IsClosed()).To(BeTrue())
+		Expect(noref.Close()).To(MatchError("closed"))
+		ExpectError(noref.LookupComponent("dummy")).To(MatchError("closed"))
 
 		// access it again
 		repo = finalizer.ClosingWith(&finalize, Must(DefaultContext.RepositoryForSpec(spec)))
@@ -102,7 +115,8 @@ var _ = Describe("component repository mapping", func() {
 
 		// create repository
 		repo := finalizer.ClosingWith(&finalize, Must(DefaultContext.RepositoryForSpec(spec)))
-		Expect(reflect.TypeOf(repo).String()).To(Equal("*genericocireg.Repository"))
+		impl := Must(cpi.GetRepositoryImplementation(repo))
+		Expect(reflect.TypeOf(impl).String()).To(Equal("*genericocireg.RepositoryImpl"))
 
 		comp := finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
 		vers := finalizer.ClosingWith(&finalize, Must(comp.NewVersion("v1")))
@@ -144,7 +158,8 @@ var _ = Describe("component repository mapping", func() {
 
 		// create repository
 		repo := finalizer.ClosingWith(&finalize, Must(ctx.RepositoryForSpec(spec)))
-		Expect(reflect.TypeOf(repo).String()).To(Equal("*genericocireg.Repository"))
+		impl := Must(cpi.GetRepositoryImplementation(repo))
+		Expect(reflect.TypeOf(impl).String()).To(Equal("*genericocireg.RepositoryImpl"))
 
 		comp := finalizer.ClosingWith(&finalize, Must(repo.LookupComponent(COMPONENT)))
 		vers := finalizer.ClosingWith(&finalize, Must(comp.NewVersion("v1")))
@@ -186,8 +201,10 @@ var _ = Describe("component repository mapping", func() {
 
 		// create repository
 		repo := finalizer.ClosingWith(&finalize, Must(ctx.RepositoryForSpec(spec)))
-		ocirepo := repo.(*genericocireg.Repository).GetOCIRepository()
-		Expect(reflect.TypeOf(repo).String()).To(Equal("*genericocireg.Repository"))
+		impl := Must(cpi.GetRepositoryImplementation(repo))
+		Expect(reflect.TypeOf(impl).String()).To(Equal("*genericocireg.RepositoryImpl"))
+		ocirepo := genericocireg.GetOCIRepository(repo)
+		Expect(ocirepo).NotTo(BeNil())
 
 		nested := finalize.Nested()
 		comp := finalizer.ClosingWith(nested, Must(repo.LookupComponent(COMPONENT)))
@@ -220,7 +237,8 @@ var _ = Describe("component repository mapping", func() {
 		defer Defer(finalize.Finalize, "finalize open elements")
 
 		repo := finalizer.ClosingWith(&finalize, Must(DefaultContext.RepositoryForSpec(spec)))
-		Expect(reflect.TypeOf(repo).String()).To(Equal("*genericocireg.Repository"))
+		impl := Must(cpi.GetRepositoryImplementation(repo))
+		Expect(reflect.TypeOf(impl).String()).To(Equal("*genericocireg.RepositoryImpl"))
 
 		nested := finalize.Nested()
 

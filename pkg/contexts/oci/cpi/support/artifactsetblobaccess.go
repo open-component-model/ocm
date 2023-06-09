@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package cpi
+package support
 
 import (
 	"sync"
@@ -11,44 +11,38 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
 
-type ArtifactSetAccess struct {
-	base ArtifactSetContainer
+type ArtifactSetBlobAccess struct {
+	base NamespaceAccessImpl
 
 	lock      sync.RWMutex
-	blobinfos map[digest.Digest]*Descriptor
+	blobinfos map[digest.Digest]*cpi.Descriptor
 }
 
-func NewArtifactSetAccess(container ArtifactSetContainer) *ArtifactSetAccess {
-	s := &ArtifactSetAccess{
+func NewArtifactSetBlobAccess(container NamespaceAccessImpl) *ArtifactSetBlobAccess {
+	s := &ArtifactSetBlobAccess{
 		base:      container,
-		blobinfos: map[digest.Digest]*Descriptor{},
+		blobinfos: map[digest.Digest]*cpi.Descriptor{},
 	}
 	return s
 }
 
-func (a *ArtifactSetAccess) IsReadOnly() bool {
+func (a *ArtifactSetBlobAccess) IsReadOnly() bool {
 	return a.base.IsReadOnly()
-}
-
-func (a *ArtifactSetAccess) IsClosed() bool {
-	return a.base.IsClosed()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // methods for BlobHandler
 
-func (a *ArtifactSetAccess) GetBlobData(digest digest.Digest) (int64, DataAccess, error) {
+func (a *ArtifactSetBlobAccess) GetBlobData(digest digest.Digest) (int64, cpi.DataAccess, error) {
 	return a.base.GetBlobData(digest)
 }
 
-func (a *ArtifactSetAccess) GetBlob(digest digest.Digest) (BlobAccess, error) {
-	if a.IsClosed() {
-		return nil, accessio.ErrClosed
-	}
+func (a *ArtifactSetBlobAccess) GetBlob(digest digest.Digest) (cpi.BlobAccess, error) {
 	size, data, err := a.GetBlobData(digest)
 	if err != nil {
 		return nil, err
@@ -64,22 +58,24 @@ func (a *ArtifactSetAccess) GetBlob(digest digest.Digest) (BlobAccess, error) {
 	return accessio.BlobAccessForDataAccess(digest, size, "", data), nil
 }
 
-func (a *ArtifactSetAccess) GetBlobDescriptor(digest digest.Digest) *Descriptor {
+func (a *ArtifactSetBlobAccess) GetBlobDescriptor(digest digest.Digest) *cpi.Descriptor {
 	a.lock.RLock()
 	defer a.lock.RUnlock()
 
 	d := a.blobinfos[digest]
-	if d == nil {
-		d = a.base.GetBlobDescriptor(digest)
-	}
+	/*
+		if d == nil {
+			d = a.base.GetBlobDescriptor(digest)
+		}
+	*/
 	return d
 }
 
-func (a *ArtifactSetAccess) AddArtifact(artifact Artifact, tags ...string) (access accessio.BlobAccess, err error) {
+func (a *ArtifactSetBlobAccess) AddArtifact(artifact cpi.Artifact, tags ...string) (access accessio.BlobAccess, err error) {
 	return a.base.AddArtifact(artifact, tags...)
 }
 
-func (a *ArtifactSetAccess) AddBlob(blob BlobAccess) error {
+func (a *ArtifactSetBlobAccess) AddBlob(blob cpi.BlobAccess) error {
 	a.lock.RLock()
 	defer a.lock.RUnlock()
 	err := a.base.AddBlob(blob)
