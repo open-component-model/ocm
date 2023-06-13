@@ -394,13 +394,11 @@ func (o *Options) Complete(registry signing.Registry) error {
 	}
 	if !o.VerifySignature && !o.Keyless {
 		if o.Signer != nil {
-			pub := o.PublicKey(o.SignatureName())
-			if pub == nil {
-				return errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, o.SignatureName())
-			}
-			o.VerifySignature = true
-			if err := o.checkCert(pub, o.SignatureName()); err != nil {
-				return fmt.Errorf("public key not valid: %w", err)
+			if pub := o.PublicKey(o.SignatureName()); pub != nil {
+				o.VerifySignature = true
+				if err := o.checkCert(pub, o.SignatureName()); err != nil {
+					return fmt.Errorf("public key not valid: %w", err)
+				}
 			}
 		}
 	}
@@ -416,7 +414,7 @@ func (o *Options) Complete(registry signing.Registry) error {
 func (o *Options) checkCert(data interface{}, name string) error {
 	cert, err := signing.GetCertificate(data)
 	if err != nil {
-		return err
+		return nil
 	}
 	err = signing.VerifyCert(nil, o.RootCerts, "", cert)
 	if err != nil {

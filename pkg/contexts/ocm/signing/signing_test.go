@@ -466,7 +466,7 @@ applying to version "github.com/mandelsoft/ref:v1"[github.com/mandelsoft/ref:v1]
 
 			_, err = Apply(nil, nil, cv, opts)
 			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(StringEqualWithContext("github.com/mandelsoft/test:v1: no signature found"))
+			Expect(err.Error()).To(StringEqualWithContext("github.com/mandelsoft/test:v1: failed to determine signature info: no signature found"))
 		},
 			Entry(DIGESTMODE_TOP, DIGESTMODE_TOP),
 			Entry(DIGESTMODE_LOCAL, DIGESTMODE_LOCAL),
