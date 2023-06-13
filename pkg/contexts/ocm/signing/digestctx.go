@@ -175,11 +175,16 @@ func (dc *DigestContext) ValidFor(ctx *DigestContext) bool {
 func (dc *DigestContext) determineSignatureInfo(printer common.Printer, state WalkingState, opts *Options) (*Options, error) {
 	if opts.SignatureName() != "" {
 		// determine digester type
+		var found bool
 		for _, sig := range dc.Descriptor.Signatures {
 			if sig.Name == opts.SignatureName() {
 				dc.DigestType = DigesterType(&sig.Digest)
+				found = true
 				break
 			}
+		}
+		if !found {
+			return nil, errors.ErrNotFound(compdesc.KIND_SIGNATURE, opts.SignatureName())
 		}
 	}
 
@@ -190,7 +195,14 @@ func (dc *DigestContext) determineSignatureInfo(printer common.Printer, state Wa
 	for _, sig := range dc.Descriptor.Signatures {
 		st := DigesterType(&sig.Digest)
 		//nolint: gocritic //yes
-		if opts.PublicKey(sig.Name) != nil {
+		if opts.Keyless {
+			if dc.DigestType.IsInitial() {
+				dc.DigestType = st
+			}
+			if dc.DigestType == st {
+				signatures = append(signatures, sig.Name)
+			}
+		} else if opts.PublicKey(sig.Name) != nil {
 			if dc.DigestType.IsInitial() {
 				dc.DigestType = st
 			}

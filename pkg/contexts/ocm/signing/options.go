@@ -6,6 +6,7 @@ package signing
 
 import (
 	"crypto/x509"
+	"fmt"
 	"strings"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
@@ -299,6 +300,7 @@ type Options struct {
 	SkipAccessTypes   map[string]bool
 	SignatureNames    []string
 	NormalizationAlgo string
+	Keyless           bool
 }
 
 var _ Option = (*Options)(nil)
@@ -350,6 +352,7 @@ func (o *Options) ApplySigningOption(opts *Options) {
 	opts.Recursively = o.Recursively
 	opts.Update = o.Update
 	opts.Verify = o.Verify
+	opts.Keyless = o.Keyless
 	if o.NormalizationAlgo != "" {
 		opts.NormalizationAlgo = o.NormalizationAlgo
 	}
@@ -369,34 +372,35 @@ func (o *Options) Complete(registry signing.Registry) error {
 		if len(o.SignatureNames) == 0 {
 			return errors.Newf("signature name required for signing")
 		}
-		if o.PrivateKey() == nil {
+		if o.PrivateKey() == nil && !o.Keyless {
 			return errors.ErrNotFound(compdesc.KIND_PRIVATE_KEY, o.SignatureNames[0])
 		}
 		if o.DigestMode == "" {
 			o.DigestMode = DIGESTMODE_LOCAL
 		}
 	}
-	if o.VerifySignature {
+	if o.VerifySignature && !o.Keyless {
 		if len(o.SignatureNames) > 0 {
 			for _, n := range o.SignatureNames {
-				if pub := o.PublicKey(n); pub == nil {
+				pub := o.PublicKey(n)
+				if pub == nil {
 					return errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, n)
-				} else {
-					err := o.checkCert(pub, n)
-					if err != nil {
-						return err
-					}
+				}
+				if err := o.checkCert(pub, n); err != nil {
+					return fmt.Errorf("public key not valid: %w", err)
 				}
 			}
 		}
-	} else {
+	}
+	if !o.VerifySignature && !o.Keyless {
 		if o.Signer != nil {
-			if pub := o.PublicKey(o.SignatureName()); pub != nil {
-				o.VerifySignature = true
-				err := o.checkCert(pub, o.SignatureName())
-				if err != nil {
-					return err
-				}
+			pub := o.PublicKey(o.SignatureName())
+			if pub == nil {
+				return errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, o.SignatureName())
+			}
+			o.VerifySignature = true
+			if err := o.checkCert(pub, o.SignatureName()); err != nil {
+				return fmt.Errorf("public key not valid: %w", err)
 			}
 		}
 	}
@@ -412,7 +416,7 @@ func (o *Options) Complete(registry signing.Registry) error {
 func (o *Options) checkCert(data interface{}, name string) error {
 	cert, err := signing.GetCertificate(data)
 	if err != nil {
-		return nil
+		return err
 	}
 	err = signing.VerifyCert(nil, o.RootCerts, "", cert)
 	if err != nil {
