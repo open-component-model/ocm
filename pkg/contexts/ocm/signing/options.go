@@ -379,24 +379,21 @@ func (o *Options) Complete(registry signing.Registry) error {
 			o.DigestMode = DIGESTMODE_LOCAL
 		}
 	}
-	if o.VerifySignature && !o.Keyless {
-		if len(o.SignatureNames) > 0 {
+	if !o.Keyless {
+		if o.Signer != nil && !o.VerifySignature {
+			if pub := o.PublicKey(o.SignatureName()); pub != nil {
+				o.VerifySignature = true
+				if err := o.checkCert(pub, o.SignatureName()); err != nil {
+					return fmt.Errorf("public key not valid: %w", err)
+				}
+			}
+		} else if o.VerifySignature {
 			for _, n := range o.SignatureNames {
 				pub := o.PublicKey(n)
 				if pub == nil {
 					return errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, n)
 				}
 				if err := o.checkCert(pub, n); err != nil {
-					return fmt.Errorf("public key not valid: %w", err)
-				}
-			}
-		}
-	}
-	if !o.VerifySignature && !o.Keyless {
-		if o.Signer != nil {
-			if pub := o.PublicKey(o.SignatureName()); pub != nil {
-				o.VerifySignature = true
-				if err := o.checkCert(pub, o.SignatureName()); err != nil {
 					return fmt.Errorf("public key not valid: %w", err)
 				}
 			}
