@@ -49,7 +49,7 @@ func init() {
 }
 
 // Handler is a signatures.Signer compatible struct to sign using sigstore
-// and a signatures.Verifier compatible struct to verify using sigstore
+// and a signatures.Verifier compatible struct to verify using sigstore.
 type Handler struct{}
 
 func (h Handler) Algorithm() string {
@@ -198,7 +198,7 @@ func (h Handler) Verify(digest string, hash crypto.Hash, sig *signing.Signature,
 			return fmt.Errorf("failed to decode rekor public key: %w", err)
 		}
 
-		block, _ := pem.Decode([]byte(rekorPublicKeyRaw))
+		block, _ := pem.Decode(rekorPublicKeyRaw)
 		if block == nil {
 			return fmt.Errorf("failed to decode public key: %w", err)
 		}
@@ -209,7 +209,7 @@ func (h Handler) Verify(digest string, hash crypto.Hash, sig *signing.Signature,
 		}
 
 		// verify signature
-		if err := ecdsa.VerifyASN1(rekorPublicKey.(*ecdsa.PublicKey), hashedDigest, rekorSignature); err != true {
+		if err := ecdsa.VerifyASN1(rekorPublicKey.(*ecdsa.PublicKey), hashedDigest, rekorSignature); !err {
 			return errors.New("could not verify signature using public key")
 		}
 

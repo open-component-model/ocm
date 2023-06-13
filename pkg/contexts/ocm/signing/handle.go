@@ -247,7 +247,6 @@ func _apply(printer common.Printer, state WalkingState, nv common.NameVersion, c
 	}
 
 	if opts.DoVerify() {
-		//nolint: gocritic // yes
 		dig, err := doVerify(printer, cd, state, signatureNames, opts)
 		if err != nil {
 			return nil, err
