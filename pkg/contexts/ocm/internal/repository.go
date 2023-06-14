@@ -151,6 +151,12 @@ type ComponentVersionAccess interface {
 	// providing a local implementation or return nil if this is
 	// not supported by the actual repository type.
 	AccessMethod(AccessSpec) (AccessMethod, error)
+
+	// GetInexpensiveContentVersionIdentity implements a method that attempts to provide an inexpensive identity for
+	// the specified artifact. Therefore, an identity that can be provided without requiring the entire object (e.g.
+	// calculating the digest from the bytes), which would defeat the purpose of caching.
+	// It follows the same contract as AccessMethod.
+	GetInexpensiveContentVersionIdentity(spec AccessSpec) string
 }
 
 // ComponentLister provides the optional repository list functionality of
