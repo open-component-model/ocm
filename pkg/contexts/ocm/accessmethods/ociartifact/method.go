@@ -108,6 +108,18 @@ func (a *AccessSpec) AccessMethod(c cpi.ComponentVersionAccess) (cpi.AccessMetho
 	return NewMethod(c.GetContext(), a, a.ImageReference)
 }
 
+func (a *AccessSpec) GetInexpensiveContentVersionIdentity(cv cpi.ComponentVersionAccess) string {
+	ref, err := oci.ParseRef(a.ImageReference)
+	if err != nil {
+		return ""
+	}
+	if ref.Digest != nil {
+		return ref.Digest.String()
+	}
+	// TODO: optimize for oci registries
+	return ""
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 type AccessMethod = *accessMethod

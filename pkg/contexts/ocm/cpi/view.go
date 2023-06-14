@@ -267,6 +267,8 @@ type ComponentVersionAccessImpl interface {
 
 	AccessMethod(ComponentVersionAccess, AccessSpec) (AccessMethod, error)
 
+	GetInexpensiveContentVersionIdentity(ComponentVersionAccess, AccessSpec) string
+
 	// GetStorageContext creates a storage context for blobs
 	// that is used to feed blob handlers for specific blob storage methods.
 	// If no handler accepts the blob, the AddBlobFor method will
@@ -361,7 +363,7 @@ func (c *componentVersionAccessView) GetDescriptor() *compdesc.ComponentDescript
 	return c.impl.GetDescriptor()
 }
 
-func (c *componentVersionAccessView) AccessMethod(spec internal.AccessSpec) (meth AccessMethod, err error) {
+func (c *componentVersionAccessView) AccessMethod(spec AccessSpec) (meth AccessMethod, err error) {
 	err = c.Execute(func() error {
 		if !spec.IsLocal(c.GetContext()) {
 			// fall back to original version
@@ -372,6 +374,20 @@ func (c *componentVersionAccessView) AccessMethod(spec internal.AccessSpec) (met
 		return err
 	})
 	return meth, err
+}
+
+func (c *componentVersionAccessView) GetInexpensiveContentVersionIdentity(spec AccessSpec) string {
+	var id string
+	_ = c.Execute(func() error {
+		if !spec.IsLocal(c.GetContext()) {
+			// fall back to original version
+			id = spec.GetInexpensiveContentVersionIdentity(c)
+		} else {
+			id = c.impl.GetInexpensiveContentVersionIdentity(c, spec)
+		}
+		return nil
+	})
+	return id
 }
 
 func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refName string, global AccessSpec) (AccessSpec, error) {
