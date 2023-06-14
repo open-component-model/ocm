@@ -5,8 +5,11 @@
 package ocireg
 
 import (
+	"strings"
+
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 // ComponentNameMapping describes the method that is used to map the "Component Name", "Component Version"-tuples
@@ -29,10 +32,20 @@ type ComponentRepositoryMeta = genericocireg.ComponentRepositoryMeta
 type RepositorySpec = genericocireg.RepositorySpec
 
 // NewRepositorySpec creates a new RepositorySpec.
-func NewRepositorySpec(baseURL string, meta *ComponentRepositoryMeta) *RepositorySpec {
+// If no ocm meta is given, the subPath part is extracted from the base URL.
+// Otherwise, the given URL is used as OCI registry URL as it is.
+func NewRepositorySpec(baseURL string, metas ...*ComponentRepositoryMeta) *RepositorySpec {
+	meta := utils.Optional(metas...)
+	if meta == nil {
+		if idx := strings.Index(baseURL, "/"); idx > 0 {
+			meta = NewComponentRepositoryMeta(baseURL[idx+1:])
+			baseURL = baseURL[:idx]
+		}
+	}
+
 	return genericocireg.NewRepositorySpec(ocireg.NewRepositorySpec(baseURL), meta)
 }
 
-func NewComponentRepositoryMeta(subPath string, mapping ComponentNameMapping) *ComponentRepositoryMeta {
-	return genericocireg.NewComponentRepositoryMeta(subPath, mapping)
+func NewComponentRepositoryMeta(subPath string, mapping ...ComponentNameMapping) *ComponentRepositoryMeta {
+	return genericocireg.NewComponentRepositoryMeta(subPath, utils.OptionalDefaulted(OCIRegistryURLPathMapping, mapping...))
 }

@@ -22,7 +22,7 @@ const resourceName = "package"
 func MyFirstOCMApplication() error {
 	octx := ocm.DefaultContext()
 
-	repoSpec := ocireg.NewRepositorySpec("ghcr.io/open-component-model/ocm", nil)
+	repoSpec := ocireg.NewRepositorySpec("ghcr.io/open-component-model/ocm")
 
 	repo, err := octx.RepositoryForSpec(repoSpec)
 	if err != nil {
