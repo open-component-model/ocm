@@ -138,6 +138,25 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMe
 	return nil, errors.ErrNotSupported(errors.KIND_ACCESSMETHOD, a.GetType(), "oci registry")
 }
 
+func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.AccessSpec) string {
+	accessSpec, err := c.comp.GetContext().AccessSpecForSpec(a)
+	if err != nil {
+		return ""
+	}
+
+	switch a.GetKind() {
+	case localblob.Type:
+		return accessSpec.(*localblob.AccessSpec).LocalReference
+	case localociblob.Type:
+		return accessSpec.(*localblob.AccessSpec).LocalReference
+	case relativeociref.Type:
+		d, _ := accessSpec.(*relativeociref.AccessSpec).GetDigest()
+		return d
+	}
+
+	return ""
+}
+
 func (c *ComponentVersionContainer) Update() error {
 	logger := Logger(c.GetContext()).WithValues("cv", common.NewNameVersion(c.comp.name, c.version))
 	err := c.Check()

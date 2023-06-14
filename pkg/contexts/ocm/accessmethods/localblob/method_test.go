@@ -6,6 +6,11 @@ package localblob_test
 
 import (
 	"encoding/json"
+	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	tenv "github.com/open-component-model/ocm/pkg/env"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -14,6 +19,8 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
+	. "github.com/open-component-model/ocm/pkg/env/builder"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
@@ -22,6 +29,12 @@ const OCIPATH = "/tmp/oci"
 const OCINAMESPACE = "ocm/test"
 const OCIVERSION = "v2.0"
 const OCIHOST = "alias"
+
+const CTF = "ctf"
+const COMPONENT = "fabianburth.org/component"
+const VERSION = "v1.0"
+const ARTIFACT_NAME = "artifact"
+const ARTIFACT_VERSION = "v1.0"
 
 var _ = Describe("Method", func() {
 
@@ -64,4 +77,27 @@ type: localBlob
 		Expect(string(r)).To(Equal(data))
 	})
 
+	It("check get inexpensive content version identity method", func() {
+		var env *Builder
+
+		env = NewBuilder(tenv.NewEnvironment())
+		defer env.Cleanup()
+
+		env.OCMCommonTransport(CTF, accessio.FormatDirectory, func() {
+			env.ComponentVersion(COMPONENT, VERSION, func() {
+				env.Resource(ARTIFACT_NAME, ARTIFACT_VERSION, resourcetypes.BLOB, metav1.LocalRelation, func() {
+					env.BlobData(mime.MIME_TEXT, []byte("testdata"))
+				})
+			})
+		})
+
+		repo := Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, CTF, 0, env))
+		defer Close(repo)
+		cv := Must(repo.LookupComponentVersion(COMPONENT, VERSION))
+		defer Close(cv)
+		access := cv.GetDescriptor().Resources[0].Access
+		spec := Must(env.OCMContext().AccessSpecForSpec(access))
+		id := spec.GetInexpensiveContentVersionIdentity(cv)
+		Expect(id).To(Equal("sha256:810ff2fb242a5dee4220f2cb0e6a519891fb67f2f828a6cab4ef8894633b1f50"))
+	})
 })

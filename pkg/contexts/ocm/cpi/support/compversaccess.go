@@ -75,10 +75,14 @@ func (a *componentVersionAccessImpl) IsReadOnly() bool {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// with access to actualk view
+// with access to actual view
 
 func (a *componentVersionAccessImpl) AccessMethod(cv cpi.ComponentVersionAccess, acc cpi.AccessSpec) (cpi.AccessMethod, error) {
 	return a.base.AccessMethod(acc)
+}
+
+func (a *componentVersionAccessImpl) GetInexpensiveContentVersionIdentity(cv cpi.ComponentVersionAccess, acc cpi.AccessSpec) string {
+	return a.base.GetInexpensiveContentVersionIdentity(acc)
 }
 
 func (a *componentVersionAccessImpl) GetDescriptor() *compdesc.ComponentDescriptor {

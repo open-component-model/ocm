@@ -9,6 +9,7 @@ package plugin_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/actions/oci-repository-prepare"
@@ -88,5 +89,37 @@ someattr: value
 				"hostname": "localhost",
 			},
 		}))
+	})
+
+	It("inexpensive identity method compatibility test", func() {
+		cv := &cpi.DummyComponentVersionAccess{Context: ctx}
+		p := registry.Get("test")
+		Expect(p).NotTo(BeNil())
+		Expect(len(p.GetDescriptor().AccessMethods)).To(Equal(2))
+		Expect(registration.RegisterExtensions(registry.GetContext())).To(Succeed())
+		t := ctx.AccessMethods().GetType("test")
+		Expect(t).NotTo(BeNil())
+
+		raw := `type: test`
+		s, err := ctx.AccessSpecForConfig([]byte(raw), nil)
+		Expect(err).To(Succeed())
+		spec := s.(*access.AccessSpec)
+		Expect(spec.GetInexpensiveContentVersionIdentity(cv)).To(Equal(""))
+	})
+
+	It("check inexpensive identity method", func() {
+		cv := &cpi.DummyComponentVersionAccess{Context: ctx}
+		p := registry.Get("identity")
+		Expect(p).NotTo(BeNil())
+		Expect(len(p.GetDescriptor().AccessMethods)).To(Equal(1))
+		Expect(registration.RegisterExtensions(registry.GetContext())).To(Succeed())
+		t := ctx.AccessMethods().GetType("identity")
+		Expect(t).NotTo(BeNil())
+
+		raw := `type: identity`
+		s, err := ctx.AccessSpecForConfig([]byte(raw), nil)
+		Expect(err).To(Succeed())
+		spec := s.(*access.AccessSpec)
+		Expect(spec.GetInexpensiveContentVersionIdentity(cv)).To(Equal("testidentity"))
 	})
 })

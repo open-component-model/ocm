@@ -84,6 +84,13 @@ type AccessMethod interface {
 	ComposeAccessSpecification(p Plugin, opts Config, config Config) error
 }
 
+// ContentVersionIdentityProvider is an optional interface an AccessMethod may additionally implement to provide an
+// inexpensive content version identity which might be derived from the access specification with cheap operations on
+// the storage backend.
+type ContentVersionIdentityProvider interface {
+	GetInexpensiveContentVersionIdentity(p Plugin, spec AccessSpec, creds credentials.Credentials) (string, error)
+}
+
 type AccessSpec = runtime.TypedObject
 
 type AccessSpecProvider func() AccessSpec

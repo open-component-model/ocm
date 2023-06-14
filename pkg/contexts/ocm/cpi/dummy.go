@@ -95,6 +95,10 @@ func (d *DummyComponentVersionAccess) AccessMethod(spec AccessSpec) (AccessMetho
 	panic("implement me")
 }
 
+func (d *DummyComponentVersionAccess) GetInexpensiveContentVersionIdentity(spec AccessSpec) string {
+	panic("implement me")
+}
+
 func (d *DummyComponentVersionAccess) AddBlob(blob BlobAccess, arttype, refName string, global AccessSpec) (AccessSpec, error) {
 	panic("implement me")
 }

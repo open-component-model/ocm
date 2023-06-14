@@ -72,11 +72,12 @@ func (d UploaderDescriptor) GetConstraints() []UploaderKey {
 }
 
 type AccessMethodDescriptor struct {
-	Name        string      `json:"name"`
-	Version     string      `json:"version,omitempty"`
-	Description string      `json:"description"`
-	Format      string      `json:"format"`
-	CLIOptions  []CLIOption `json:"options,omitempty"`
+	Name                   string      `json:"name"`
+	Version                string      `json:"version,omitempty"`
+	Description            string      `json:"description"`
+	Format                 string      `json:"format"`
+	SupportContentIdentity bool        `json:"supportContentIdentity,omitempty"`
+	CLIOptions             []CLIOption `json:"options,omitempty"`
 }
 
 type ActionDescriptor struct {

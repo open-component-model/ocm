@@ -33,6 +33,10 @@ func (s *AccessSpec) AccessMethod(cv cpi.ComponentVersionAccess) (cpi.AccessMeth
 	return s.handler.AccessMethod(s, cv)
 }
 
+func (s *AccessSpec) GetInexpensiveContentVersionIdentity(cv cpi.ComponentVersionAccess) string {
+	return s.handler.GetInexpensiveContentVersionIdentity(s, cv)
+}
+
 func (s *AccessSpec) Describe(ctx cpi.Context) string {
 	return s.handler.Describe(s, ctx)
 }
