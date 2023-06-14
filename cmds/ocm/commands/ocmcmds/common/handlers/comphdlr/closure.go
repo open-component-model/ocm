@@ -51,7 +51,7 @@ func traverse(hist common.History, o *Object, octx out.Context, lookup ocm.Compo
 			continue
 		}
 		obj := &Object{
-			History:  hist,
+			History:  hist.Copy(),
 			Identity: ref.GetIdentity(refs),
 			Spec: ocm.RefSpec{
 				UniformRepositorySpec: o.Spec.UniformRepositorySpec,
