@@ -23,5 +23,20 @@ gci diff --skip-generated "${GCIFMT[@]}"  $@ </dev/null \
 log "Format done"
 
 log "Format with gofmt"
-gofmt -s -w $@
+# Specify the pattern or criteria to identify generated files
+GENERATED_FILES_PATTERN="*_generated*.go"
+
+# Find all Go files excluding the generated files
+directories=("$@")
+files=()
+
+# Loop through each directory
+for dir in "${directories[@]}"; do
+  # Search for files in the directory that do not contain the GENERATED_FILES_PATTERN
+  files+=( $(find "$dir" -type f -name "*.go" ! -name "$GENERATED_FILES_PATTERN") )
+done
+
+# Format the files using gofmt with xargs
+printf '%s\0' "${files[@]}" | xargs -0 gofmt -s -w
+
 log "Format done"

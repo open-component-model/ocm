@@ -45,7 +45,7 @@ install-requirements:
 	@make -C hack $@
 
 .PHONY: prepare
-prepare: generate generate-deepcopy format build test check
+prepare: generate format generate-deepcopy build test check
 
 .PHONY: format
 format:
