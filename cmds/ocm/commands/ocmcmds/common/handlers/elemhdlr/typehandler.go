@@ -32,6 +32,10 @@ type Object struct {
 	Element compdesc.ElementMetaAccessor
 }
 
+func (o *Object) String() string {
+	return fmt.Sprintf("history: %s, id: %s, location: %s", o.History, o.Id, common.VersionedElementKey(o.Version))
+}
+
 var (
 	_ common.HistorySource = (*Object)(nil)
 	_ tree.Object          = (*Object)(nil)
