@@ -35,9 +35,9 @@ import (
 const ARCH = "/tmp/ca"
 const VERSION = "v1"
 
-func CheckTextResource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string) {
+func CheckTextResource(env *TestEnv, cd *compdesc.ComponentDescriptor, name string, ff ...func(r compdesc.Resource)) {
 	rblob := accessio.BlobAccessForFile("text/plain", "/testdata/testcontent", env)
-	CheckTextResourceBlob(env, cd, name, rblob)
+	CheckTextResourceBlob(env, cd, name, rblob, ff...)
 }
 
 func CheckTextResourceWith(env *TestEnv, cd *compdesc.ComponentDescriptor, name, txt string) {
@@ -45,7 +45,7 @@ func CheckTextResourceWith(env *TestEnv, cd *compdesc.ComponentDescriptor, name,
 	CheckTextResourceBlob(env, cd, name, rblob)
 }
 
-func CheckTextResourceBlob(env *TestEnv, cd *compdesc.ComponentDescriptor, name string, rblob accessio.BlobAccess) {
+func CheckTextResourceBlob(env *TestEnv, cd *compdesc.ComponentDescriptor, name string, rblob accessio.BlobAccess, ff ...func(r compdesc.Resource)) {
 	dig := rblob.Digest()
 	data, err := rblob.Get()
 	Expect(err).To(Succeed())
@@ -67,8 +67,14 @@ func CheckTextResourceBlob(env *TestEnv, cd *compdesc.ComponentDescriptor, name 
 
 	r, err := cd.GetResourceByIdentity(metav1.NewIdentity(name))
 	Expect(err).To(Succeed())
-	Expect(r.Version).To(Equal(VERSION))
-	Expect(r.Type).To(Equal("PlainText"))
+	if len(ff) > 0 {
+		for _, f := range ff {
+			f(r)
+		}
+	} else {
+		Expect(r.Version).To(Equal(VERSION))
+		Expect(r.Type).To(Equal("PlainText"))
+	}
 
 	spec, err := env.OCMContext().AccessSpecForSpec(cd.Resources[0].Access)
 	Expect(err).To(Succeed())
@@ -107,6 +113,21 @@ var _ = Describe("Add resources", func() {
 		Expect(len(cd.Resources)).To(Equal(1))
 
 		CheckTextResource(env, cd, "testdata")
+	})
+
+	It("adds simple text blob with explicit version info", func() {
+		Expect(env.Execute("add", "resources", "--file", ARCH, "/testdata/resources2.yaml")).To(Succeed())
+		data, err := env.ReadFile(env.Join(ARCH, comparch.ComponentDescriptorFileName))
+		Expect(err).To(Succeed())
+		cd, err := compdesc.Decode(data)
+		Expect(err).To(Succeed())
+		Expect(len(cd.Resources)).To(Equal(1))
+
+		CheckTextResource(env, cd, "testdata", func(r compdesc.Resource) {
+			Expect(r.Relation).To(Equal(metav1.LocalRelation))
+			Expect(r.Version).To(Equal("3.3.3"))
+			Expect(r.Type).To(Equal("PlainText"))
+		})
 	})
 
 	It("adds simple text blob with direct archive file", func() {
