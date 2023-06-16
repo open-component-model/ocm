@@ -1,6 +1,6 @@
 ARG ALPINE_VERSION=latest
-ARG OCM_VERSION=v0.2.0
-ARG OCM_PLATFORM=Linux_x86_64
+ARG OCM_VERSION=v0.3.0
+ARG OCM_PLATFORM=linux-amd64
 
 FROM alpine:${ALPINE_VERSION}
 ARG ALPINE_VERSION
@@ -8,7 +8,7 @@ ARG OCM_VERSION
 ARG OCM_PLATFORM
 WORKDIR /tmp
 RUN echo OCM_VERSION: ${OCM_VERSION}, OCM_PLATFORM: ${OCM_PLATFORM}
-RUN wget https://github.com/open-component-model/ocm/releases/download/${OCM_VERSION}/ocm_${OCM_PLATFORM}.tar.gz
+RUN wget https://github.com/open-component-model/ocm/releases/download/${OCM_VERSION}/ocm-${OCM_PLATFORM}.tar.gz
 RUN tar xzf ocm_${OCM_PLATFORM}.tar.gz
 
 FROM alpine:${ALPINE_VERSION}
