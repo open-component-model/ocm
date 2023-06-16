@@ -67,6 +67,9 @@ func setupComponents(repo ocm.Repository) (rerr error) {
 }
 
 func TransferApplication() (rerr error) {
+	// setup error propagation for deferred cleanup/close methods.
+	var finalize finalizer.Finalizer
+	defer finalize.FinalizeWithErrorPropagation(&rerr)
 
 	cfg, err := helper.ReadConfig(CFG)
 	if err != nil {
@@ -77,9 +80,6 @@ func TransferApplication() (rerr error) {
 	if rerr != nil {
 		return err
 	}
-
-	var finalize finalizer.Finalizer
-	defer finalize.FinalizeWithErrorPropagation(&rerr)
 
 	octx := ocm.DefaultContext()
 
@@ -96,7 +96,7 @@ func TransferApplication() (rerr error) {
 	// a memory filesystem instead
 	// tmpfs:=memoryfs.New()
 
-	repo, err := ctf.Open(octx, accessobj.ACC_CREATE, "ctf", 0o700, accessio.PathFileSystem(tmpfs))
+	repo, err := ctf.Open(octx, accessobj.ACC_CREATE, "ctf", 0o700, accessio.PathFileSystem(tmpfs), accessio.FormatDirectory)
 	if err != nil {
 		return errors.Wrapf(err, "cannot create CTF")
 	}
@@ -175,7 +175,12 @@ func TransferApplication() (rerr error) {
 				return errors.Wrapf(err, "cannot get version %s for component %s", vname, cname)
 			}
 			loop.Close(cv)
+
 			err = transfer.TransferVersion(printer, closure, cv, target, transferHandler)
+			if err != nil {
+				return errors.Wrapf(err, "cannot transfer version %s for component %s", vname, cname)
+			}
+
 			if err := loop.Finalize(); err != nil {
 				return err
 			}
