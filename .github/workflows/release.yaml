@@ -21,7 +21,7 @@ on:
 env:
   OCI_URL: ghcr.io/jensh007
 jobs:
-  relase:
+  release:
     name: Release Build
     runs-on: ubuntu-latest
     permissions:
