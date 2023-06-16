@@ -105,9 +105,9 @@ jobs:
         if: inputs.release_candidate == false
         run: |
           RELEASE_VERSION=${{env.BASE_VERSION}}
+          RELEASE_VERSION2="${RELEASE_VERSION:1}"
           echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
-          echo "release name is $RELEASE_VERSION"
-          echo "release name is ${{ env.RELEASE_VERSION }}"
+          echo "RELEASE_VERSION2=$RELEASE_VERSION2" >> $GITHUB_ENV
       - name: Build amd64
         id: build_amd64
         uses: docker/build-push-action@v3
@@ -117,7 +117,7 @@ jobs:
           platforms: linux/amd64
           tags: ${{ env.OCI_URL }}/ocm-cli:${{ env.RELEASE_VERSION }}-linux-amd64
           build-args: |
-            OCM_VERSION=${{ env.RELEASE_VERSION }}
+            OCM_VERSION=${{ env.RELEASE_VERSION2 }}
             OCM_PLATFORM=linux-amd64
       - name: Build arm64
         id: build_arm64
@@ -128,7 +128,7 @@ jobs:
           platforms: linux/arm64
           tags: ${{ env.OCI_URL }}/ocm-cli:${{ env.RELEASE_VERSION }}-linux-arm64
           build-args: |
-            OCM_VERSION=${{ env.RELEASE_VERSION }}
+            OCM_VERSION=${{ env.RELEASE_VERSION2 }}
             OCM_PLATFORM=linux-arm64
       - name: Create multi-platform image
         run: |

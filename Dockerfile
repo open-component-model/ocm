@@ -8,7 +8,7 @@ ARG OCM_VERSION
 ARG OCM_PLATFORM
 WORKDIR /tmp
 RUN echo OCM_VERSION: ${OCM_VERSION}, OCM_PLATFORM: ${OCM_PLATFORM}
-RUN wget https://github.com/open-component-model/ocm/releases/download/${OCM_VERSION}/ocm-${OCM_VERSION}-${OCM_PLATFORM}.tar.gz
+RUN wget https://github.com/open-component-model/ocm/releases/download/v${OCM_VERSION}/ocm-${OCM_VERSION}-${OCM_PLATFORM}.tar.gz
 RUN tar xzf ocm_${OCM_PLATFORM}.tar.gz
 
 FROM alpine:${ALPINE_VERSION}
