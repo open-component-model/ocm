@@ -190,6 +190,19 @@ target repository (`transferHandler, err := standard.New(standard.Overwrite())`.
   }
 ```
 
+With ` closure := transfer.TransportClosure{}` a shared transport store is
+created, which remembers already transported component versions. It is
+used for all calls of `TransferVersion` to avpid duplicate transfers.
+THis is especially relevant, if the transitive transfer option is set.
+In this example this all content of the CTF is transferred without the
+transitive option, so it is not necessarily required.
+
+But if your setup creates component versions with references to component
+versions not contained in the CTF, the transitive option might be useful
+to assure the completeness of your component versions in the target repository.
+To resolve those external references a resolver must be specified for the
+transfer handler.
+
 ## Defer in loops
 
 One common problem in Go is the finalization of elements in loops.
