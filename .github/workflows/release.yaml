@@ -114,9 +114,9 @@ jobs:
           push: true
           load: false
           platforms: linux/amd64
-          tags: ${{ env.OCI_URL }}/ocm-cli:${{ env.VERSION }}-linux-amd64
+          tags: ${{ env.OCI_URL }}/ocm-cli:${{ env.RELEASE_VERSION }}-linux-amd64
           build-args: |
-            OCM_VERSION=${{ env.VERSION }}
+            OCM_VERSION=${{ env.RELEASE_VERSION }}
             OCM_PLATFORM=Linux_x86_64
       - name: Build arm64
         id: build_arm64
@@ -125,13 +125,13 @@ jobs:
           push: true
           load: false
           platforms: linux/arm64
-          tags: ${{ env.OCI_URL }}/ocm-cli:${{ env.VERSION }}-linux-arm64
+          tags: ${{ env.OCI_URL }}/ocm-cli:${{ env.RELEASE_VERSION }}-linux-arm64
           build-args: |
-            OCM_VERSION=${{ env.VERSION }}
+            OCM_VERSION=${{ env.RELEASE_VERSION }}
             OCM_PLATFORM=Linux_arm64
       - name: Create multi-platform image
         run: |
-          docker buildx imagetools create ${{ env.OCI_URL }}/ocm-cli:${{ env.VERSION }}-linux-amd64 ${{ env.OCI_URL }}/ocm-cli:${{ env.VERSION }}-linux-arm64 -t ${{ env.OCI_URL }}/ocm-cli:${{ env.VERSION }}
+          docker buildx imagetools create ${{ env.OCI_URL }}/ocm-cli:${{ env.RELEASE_VERSION }}-linux-amd64 ${{ env.OCI_URL }}/ocm-cli:${{ env.RELEASE_VERSION }}-linux-arm64 -t ${{ env.OCI_URL }}/ocm-cli:${{ env.RELEASE_VERSION }}
       - name: Inspect image
         run: |
-          docker buildx imagetools inspect ${{ env.OCI_URL }}/ocm-cli:${{ env.VERSION }}
+          docker buildx imagetools inspect ${{ env.OCI_URL }}/ocm-cli:${{ env.RELEASE_VERSION }}
