@@ -148,8 +148,18 @@ func TransferApplication() (rerr error) {
 	}
 
 	printer := common.NewPrinter(os.Stdout)
+	// gather transferred component versions
+	// especially for transitive transports this should be
+	// shared among multiple calls to TransferVersion to avoid
+	// duplicate transfers.
 	closure := transfer.TransportClosure{}
 	transferHandler, err := standard.New(standard.Overwrite())
+	// standard.Resolver(...) and standard.Recursive() will
+	// be required if your setup creates component versions
+	// with references to external component versions not put into the CTF
+	// and you want a self-contained set of component versions in the
+	// target repository.
+
 	if rerr != nil {
 		return err
 	}
@@ -168,7 +178,7 @@ func TransferApplication() (rerr error) {
 		}
 
 		for _, vname := range vnames {
-			loop := finalize.Nested()
+			loop := loop.Nested()
 
 			cv, err := c.LookupVersion(vname)
 			if err != nil {
