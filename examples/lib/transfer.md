@@ -167,7 +167,7 @@ target repository (`transferHandler, err := standard.New(standard.Overwrite())`.
 	  }
 
 	  for _, vname := range vnames {
-		  loop := finalize.Nested()
+		  loop := loop.Nested()
 
 		  cv, err := c.LookupVersion(vname)
 		  if err != nil {
