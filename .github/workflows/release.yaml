@@ -35,6 +35,14 @@ jobs:
     #   with:
     #     app_id: ${{ secrets.OCMBOT_APP_ID }}
     #     private_key: ${{ secrets.OCMBOT_PRIV_KEY }}
+    #
+    # only jensh007!
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     - name: Checkout
       uses: actions/checkout@v3
       with:
@@ -85,15 +93,10 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Pretest
-        run: |
-          echo "BASE VERSION: ${{env.BASE_VERSION}}"
-          echo "RELEASE_VERSION: ${{env.RELEASE_VERSION}}"
       - name: Set Base Version
         run: |
           BASE_VERSION=v$(go run $GITHUB_WORKSPACE/pkg/version/generate print-version)
           echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
-
       - name: Set Pre-Release Version
         if: inputs.release_candidate == true
         run: |
