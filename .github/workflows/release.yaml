@@ -87,12 +87,6 @@ jobs:
         uses: docker/setup-buildx-action@v2
         with:
           version: latest
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Set Base Version
         run: |
           BASE_VERSION=v$(go run $GITHUB_WORKSPACE/pkg/version/generate print-version)
@@ -113,6 +107,12 @@ jobs:
           RELEASE_VERSION2="${RELEASE_VERSION:1}"
           echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
           echo "RELEASE_VERSION2=$RELEASE_VERSION2" >> $GITHUB_ENV
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build amd64
         id: build_amd64
         uses: docker/build-push-action@v3
@@ -120,7 +120,6 @@ jobs:
           push: true
           load: false
           platforms: linux/amd64
-          # tags: ${{ env.OCI_URL }}/ocm-cli:${{ env.RELEASE_VERSION }}-linux-amd64
           tags: ${{ env.OCI_URL }}/ocm-cli:v0.2.0--linux-amd64
           build-args: |
             OCM_VERSION=${{ env.RELEASE_VERSION2 }}
