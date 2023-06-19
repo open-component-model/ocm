@@ -120,7 +120,8 @@ jobs:
           push: true
           load: false
           platforms: linux/amd64
-          tags: ${{ env.OCI_URL }}/ocm-cli:${{ env.RELEASE_VERSION }}-linux-amd64
+          # tags: ${{ env.OCI_URL }}/ocm-cli:${{ env.RELEASE_VERSION }}-linux-amd64
+          tags: ${{ env.OCI_URL }}/ocm-cli:v0.2.0--linux-amd64
           build-args: |
             OCM_VERSION=${{ env.RELEASE_VERSION2 }}
             OCM_PLATFORM=linux-amd64
