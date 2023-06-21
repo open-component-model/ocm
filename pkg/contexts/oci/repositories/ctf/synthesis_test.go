@@ -7,7 +7,6 @@ package ctf_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/testhelper"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 

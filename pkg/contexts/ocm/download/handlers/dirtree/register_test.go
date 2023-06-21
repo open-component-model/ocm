@@ -5,27 +5,26 @@
 package dirtree_test
 
 import (
-	"github.com/mandelsoft/vfs/pkg/vfs"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/dirtree"
-	"github.com/open-component-model/ocm/pkg/mime"
 	. "github.com/open-component-model/ocm/pkg/testutils"
-	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 
 	"github.com/mandelsoft/vfs/pkg/projectionfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/dirtree"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	env2 "github.com/open-component-model/ocm/pkg/env"
 	"github.com/open-component-model/ocm/pkg/env/builder"
+	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
 const TEST_ARTIFACT = "testArtifact"

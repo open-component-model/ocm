@@ -24,6 +24,7 @@ The following *realms* are used by the command line tool:
   - <code>ocm/ocimapping</code>: OCM to OCI Registry Mapping
   - <code>ocm/plugins</code>: OCM plugin handling
   - <code>ocm/processing</code>: output processing chains
+  - <code>ocm/refcnt</code>: reference counting
   - <code>ocm/toi</code>: TOI logging
   - <code>ocm/transfer</code>: OCM transfer handling
 
