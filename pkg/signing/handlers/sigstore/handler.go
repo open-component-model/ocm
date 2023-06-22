@@ -31,6 +31,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/pkg/signing/handlers/sigstore/attr"
 )
 
 // Algorithm defines the type for the RSA PKCS #1 v1.5 signature algorithm.
@@ -50,10 +51,12 @@ func init() {
 // and a signatures.Verifier compatible struct to verify using sigstore.
 type Handler struct{}
 
+// Algorithm specifies the name of the signing algorithm
 func (h Handler) Algorithm() string {
 	return Algorithm
 }
 
+// Sign implements the signing functionality
 func (h Handler) Sign(cctx credentials.Context, digest string, hash crypto.Hash, issuer string, key interface{}) (*signing.Signature, error) {
 	// exit immediately if hash alg is not SHA-256, rekor doesn't currently support other hash functions
 	if hash != crypto.SHA256 {
@@ -74,11 +77,14 @@ func (h Handler) Sign(cctx credentials.Context, digest string, hash crypto.Hash,
 		return nil, fmt.Errorf("error loading sigstore signer: %w", err)
 	}
 
+	// get the attributes for the sigstore signer
+	cfg := attr.Get(cctx)
+
 	// create a fulcio signing client
 	fs, err := fulcio.NewSigner(ctx, options.KeyOpts{
-		FulcioURL:        "https://v1.fulcio.sigstore.dev",
-		OIDCIssuer:       "https://oauth2.sigstore.dev/auth",
-		OIDCClientID:     "sigstore",
+		FulcioURL:        cfg.FulcioURL,
+		OIDCIssuer:       cfg.OIDCIssuer,
+		OIDCClientID:     cfg.OIDCClientID,
 		SkipConfirmation: true,
 	}, signer)
 	if err != nil {
@@ -129,7 +135,7 @@ func (h Handler) Sign(cctx credentials.Context, digest string, hash crypto.Hash,
 	})
 
 	// init the rekor client
-	rekorClient, err := client.GetRekorClient("https://rekor.sigstore.dev")
+	rekorClient, err := client.GetRekorClient(cfg.RekorURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create rekor client: %w", err)
 	}
