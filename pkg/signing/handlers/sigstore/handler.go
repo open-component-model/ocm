@@ -8,26 +8,25 @@ import (
 	"context"
 	"crypto"
 	"crypto/ecdsa"
-	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
-	"strings"
 
+	"github.com/go-openapi/strfmt"
+	"github.com/go-openapi/swag"
 	"github.com/sigstore/cosign/v2/cmd/cosign/cli/fulcio"
 	"github.com/sigstore/cosign/v2/cmd/cosign/cli/options"
 	"github.com/sigstore/cosign/v2/pkg/cosign"
 	"github.com/sigstore/rekor/pkg/client"
 	"github.com/sigstore/rekor/pkg/generated/client/entries"
 	"github.com/sigstore/rekor/pkg/generated/models"
-	"github.com/sigstore/rekor/pkg/types"
-	"github.com/sigstore/rekor/pkg/types/rekord"
-	rekorv001 "github.com/sigstore/rekor/pkg/types/rekord/v0.0.1"
+	hashedrekord_v001 "github.com/sigstore/rekor/pkg/types/hashedrekord/v0.0.1"
 	"github.com/sigstore/rekor/pkg/verify"
 	"github.com/sigstore/sigstore/pkg/signature"
+	signatureoptions "github.com/sigstore/sigstore/pkg/signature/options"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -56,18 +55,26 @@ func (h Handler) Algorithm() string {
 }
 
 func (h Handler) Sign(cctx credentials.Context, digest string, hash crypto.Hash, issuer string, key interface{}) (*signing.Signature, error) {
+	// exit immediately if hash alg is not SHA-256, rekor doesn't currently support other hash functions
+	if hash != crypto.SHA256 {
+		return nil, fmt.Errorf("cannot sign using sigstore. rekor only supports SHA-256 digests: %s provided", hash.String())
+	}
+
 	ctx := context.Background()
 
+	// generate a private key
 	priv, err := cosign.GeneratePrivateKey()
 	if err != nil {
 		return nil, fmt.Errorf("error generating keypair: %w", err)
 	}
 
+	// create an ECDSA signer
 	signer, err := signature.LoadECDSASignerVerifier(priv, hash)
 	if err != nil {
 		return nil, fmt.Errorf("error loading sigstore signer: %w", err)
 	}
 
+	// create a fulcio signing client
 	fs, err := fulcio.NewSigner(ctx, options.KeyOpts{
 		FulcioURL:        "https://v1.fulcio.sigstore.dev",
 		OIDCIssuer:       "https://oauth2.sigstore.dev/auth",
@@ -75,67 +82,90 @@ func (h Handler) Sign(cctx credentials.Context, digest string, hash crypto.Hash,
 		SkipConfirmation: true,
 	}, signer)
 	if err != nil {
-		return nil, errors.Wrap(err, "new signer")
+		return nil, fmt.Errorf("failed to create signer: %w", err)
 	}
 
-	sig, err := fs.SignMessage(strings.NewReader(digest))
+	// decode the digest string
+	rawDigest, err := hex.DecodeString(digest)
 	if err != nil {
-		return nil, fmt.Errorf("failed signing hash, %w", err)
+		return nil, fmt.Errorf("failed to decode digest: %w", err)
 	}
 
+	// sign the existing digest
+	sig, err := fs.SignMessage(nil,
+		signatureoptions.WithDigest(rawDigest),
+		signatureoptions.WithContext(ctx))
+	if err != nil {
+		return nil, fmt.Errorf("failed to sign: %w", err)
+	}
+
+	// get the public key for certificate transparency log
 	pubKeys, err := cosign.GetCTLogPubs(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get cosign CT Log Public Keys: %w", err)
 	}
 
+	// verify the signed certificate timestamp
 	if err := cosign.VerifySCT(ctx, fs.Cert, fs.Chain, fs.SCT, pubKeys); err != nil {
 		return nil, fmt.Errorf("failed to verify signed certifcate timestamp: %w", err)
 	}
 
-	publicKey, err := fs.PublicKey()
+	// get the public key from the signing key pair
+	pub, err := fs.PublicKey()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get public key for signing: %w", err)
 	}
 
-	publicKeyBytes, err := x509.MarshalPKIXPublicKey(publicKey)
+	// marshal the public key bytes
+	publicKeyBytes, err := x509.MarshalPKIXPublicKey(pub)
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal public key for signing: %w", err)
 	}
 
-	publicKeyPEM := pem.EncodeToMemory(&pem.Block{
-		Type:  "PUBLIC KEY",
+	// encode the public key to pem format
+	publicKey := pem.EncodeToMemory(&pem.Block{
 		Bytes: publicKeyBytes,
+		Type:  "PUBLIC KEY",
 	})
 
+	// init the rekor client
 	rekorClient, err := client.GetRekorClient("https://rekor.sigstore.dev")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create rekor client: %w", err)
 	}
 
-	rek := rekord.New()
+	// create a rekor hashed entry
+	hashedEntry := prepareRekorEntry(digest, sig, publicKey)
 
-	entry, err := rek.CreateProposedEntry(context.Background(), rekorv001.APIVERSION, types.ArtifactProperties{
-		ArtifactBytes:  []byte(digest),
-		SignatureBytes: sig,
-		PublicKeyBytes: [][]byte{publicKeyPEM},
-		PKIFormat:      "x509",
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to prepare rekor entry: %w", err)
+	// valiate the rekor entry before submission
+	if _, err := hashedEntry.Canonicalize(ctx); err != nil {
+		return nil, fmt.Errorf("rekor entry is not valid: %w", err)
 	}
 
-	req := entries.NewCreateLogEntryParams().WithProposedEntry(entry)
+	// prepare the entry for submission
+	entry := &models.Hashedrekord{
+		APIVersion: swag.String(hashedEntry.APIVersion()),
+		Spec:       hashedEntry.HashedRekordObj,
+	}
 
-	resp, err := rekorClient.Entries.CreateLogEntry(req)
+	// prepare the create entry request parameteres
+	params := entries.NewCreateLogEntryParams().
+		WithContext(ctx).
+		WithProposedEntry(entry)
+
+	// submit the create entry request
+	resp, err := rekorClient.Entries.CreateLogEntry(params)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create rekor entry: %w", err)
 	}
 
+	// extract the payload from the rekor response
 	data, err := json.Marshal(resp.GetPayload())
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal rekor response: %w", err)
 	}
 
+	// store the rekor response in the signature value
 	return &signing.Signature{
 		Value:     base64.StdEncoding.EncodeToString(data),
 		MediaType: MediaType,
@@ -158,6 +188,11 @@ func (h Handler) Verify(digest string, hash crypto.Hash, sig *signing.Signature,
 		return fmt.Errorf("failed to unmarshal rekor log entry from signature: %w", err)
 	}
 
+	rawDigest, err := hex.DecodeString(digest)
+	if err != nil {
+		return fmt.Errorf("failed to decode digest: %w", err)
+	}
+
 	for _, entry := range entries {
 		verifier, err := loadVerifier(ctx)
 		if err != nil {
@@ -169,17 +204,20 @@ func (h Handler) Verify(digest string, hash crypto.Hash, sig *signing.Signature,
 			return fmt.Errorf("failed to decode rekor entry body: %w", err)
 		}
 
-		rekorEntry := &models.Rekord{}
+		rekorEntry := &models.Hashedrekord{}
 		if err := json.Unmarshal(body, rekorEntry); err != nil {
 			return fmt.Errorf("failed to unmarshal rekor entry body: %w", err)
+		}
+
+		if err := rekorEntry.Validate(strfmt.Default); err != nil {
+			return fmt.Errorf("failed to validate rekor entry: %w", err)
 		}
 
 		rekorEntrySpec := rekorEntry.Spec.(map[string]any)
 		rekorHashValue := rekorEntrySpec["data"].(map[string]any)["hash"].(map[string]any)["value"]
 
 		// ensure digest matches
-		hashedDigest := hasher([]byte(digest))
-		if rekorHashValue != hex.EncodeToString(hashedDigest) {
+		if rekorHashValue != digest {
 			return errors.New("rekor hash doesn't match provided digest")
 		}
 
@@ -208,7 +246,7 @@ func (h Handler) Verify(digest string, hash crypto.Hash, sig *signing.Signature,
 		}
 
 		// verify signature
-		if err := ecdsa.VerifyASN1(rekorPublicKey.(*ecdsa.PublicKey), hashedDigest, rekorSignature); !err {
+		if err := ecdsa.VerifyASN1(rekorPublicKey.(*ecdsa.PublicKey), rawDigest, rekorSignature); !err {
 			return errors.New("could not verify signature using public key")
 		}
 
@@ -233,10 +271,24 @@ func loadVerifier(ctx context.Context) (signature.Verifier, error) {
 	return nil, nil
 }
 
-func hasher(data []byte) []byte {
-	hash := sha256.New()
-	if _, err := hash.Write(data); err != nil {
-		panic(err)
+// based on: https://github.com/sigstore/cosign/blob/ff648d5fb4ed6d0d1c16eaaceff970411fa969e3/pkg/cosign/tlog.go#L233
+func prepareRekorEntry(digest string, sig, publicKey []byte) hashedrekord_v001.V001Entry {
+	// TODO: this should match the provided hash digest algorithm but
+	// rekor only supports SHA256 right now
+	return hashedrekord_v001.V001Entry{
+		HashedRekordObj: models.HashedrekordV001Schema{
+			Data: &models.HashedrekordV001SchemaData{
+				Hash: &models.HashedrekordV001SchemaDataHash{
+					Algorithm: swag.String(models.HashedrekordV001SchemaDataHashAlgorithmSha256),
+					Value:     swag.String(digest),
+				},
+			},
+			Signature: &models.HashedrekordV001SchemaSignature{
+				Content: strfmt.Base64(sig),
+				PublicKey: &models.HashedrekordV001SchemaSignaturePublicKey{
+					Content: strfmt.Base64(publicKey),
+				},
+			},
+		},
 	}
-	return hash.Sum(nil)
 }
