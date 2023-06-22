@@ -40,7 +40,7 @@ jobs:
           v="v$(go run $GITHUB_WORKSPACE/pkg/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})"
           if [ -n "${{ github.event.inputs.prerelease }}" ]; then
             echo "Candidate: $v"
-          else 
+          else
             echo "Candidate: $v (taken from source)"
           fi
         else
@@ -268,3 +268,113 @@ jobs:
         repository: open-component-model/ocm-website
         event-type: ocm-cli-release
         client-payload: '{"tag": "${{ env.RELEASE_VERSION }}"}'
+  build-image:
+    name: Build OCI Image for OCM
+    runs-on: ubuntu-latest
+    needs:
+    - release
+    permissions:
+      id-token: write
+      repository-projects: read
+      packages: write
+    env:
+      OCI_URL: ghcr.io/open-component-model
+      CD_REPO: ghcr.io/open-component-model/ocm
+      IMAGE_NAME: ocm-cli
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Context for Buildx
+        id: buildx-context
+        run: |
+          docker context create builders
+      - name: Set up Docker Buildx
+        timeout-minutes: 10
+        uses: docker/setup-buildx-action@v2
+        with:
+          version: latest
+      - name: setup OCM
+        uses: open-component-model/ocm-setup-action@main
+      - name: Check Alpine labels
+        run: |
+          ALPINE_LATEST_VER=`curl -s https://registry.hub.docker.com/v2/repositories/library/alpine/tags | jq '.results[].name' | xargs -n1 | sort -r | xargs | cut -d " " -f2- | awk '{print $1}'`
+          echo "Buildig OCM image with ${ALPINE_LATEST_VER}"
+          echo "ALPINE_LATEST_VER=$ALPINE_LATEST_VER" >> $GITHUB_ENV
+          echo "Buildig OCM image with ${{ env.ALPINE_LATEST_VER }}"
+      - name: Set Base Version
+        run: |
+          BASE_VERSION=v$(go run $GITHUB_WORKSPACE/pkg/version/generate print-version)
+          echo "BASE_VERSION=$BASE_VERSION" >> $GITHUB_ENV
+      - name: Set Pre-Release Version
+        if: inputs.release_candidate == true
+        run: |
+          RELEASE_VERSION=v$(go run $GITHUB_WORKSPACE/pkg/version/generate --no-dev print-rc-version ${{ github.event.inputs.prerelease }})
+          RELEASE_VERSION2="${RELEASE_VERSION:1}"
+          echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
+          echo "RELEASE_VERSION2=$RELEASE_VERSION2" >> $GITHUB_ENV
+          echo "release name is ${{env.RELEASE_VERSION}}"
+          echo "release name2 is ${{env.RELEASE_VERSION2}}"
+      - name: Set Version
+        if: inputs.release_candidate == false
+        run: |
+          RELEASE_VERSION=${{env.BASE_VERSION}}
+          RELEASE_VERSION2="${RELEASE_VERSION:1}"
+          echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
+          echo "RELEASE_VERSION2=$RELEASE_VERSION2" >> $GITHUB_ENV
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build amd64
+        id: build_amd64
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          load: false
+          platforms: linux/amd64
+          tags: ${{ env.OCI_URL }}/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}-linux-amd64
+          build-args: |
+            OCM_VERSION=${{ env.RELEASE_VERSION2 }}
+            OCM_PLATFORM=linux-amd64
+            ALPINE_VERSION=${{ env.ALPINE_LATEST_VER }}
+      - name: Build arm64
+        id: build_arm64
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          load: false
+          platforms: linux/arm64
+          tags: ${{ env.OCI_URL }}/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}-linux-arm64
+          build-args: |
+            OCM_VERSION=${{ env.RELEASE_VERSION2 }}
+            OCM_PLATFORM=linux-amd64
+            ALPINE_VERSION=${{ env.ALPINE_LATEST_VER }}
+      - name: Create multi-platform image
+        run: |
+          docker buildx imagetools create ${{ env.OCI_URL }}/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}-linux-amd64 ${{ env.OCI_URL }}/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}-linux-arm64 -t ${{ env.OCI_URL }}/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ${{ env.OCI_URL }}/${{ env.IMAGE_NAME }}:${{ env.RELEASE_VERSION }}
+      - name: create OCM component version
+        uses: open-component-model/ocm-action@main
+        with:
+          action: add_component
+          components: components.yaml
+          directory: .
+          version: ${{ env.RELEASE_VERSION}}
+          var_values: |
+            VERSION: ${{ env.RELEASE_VERSION2}}
+            REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+            COMMIT: ${{ github.sha }}
+            IMAGE_PREFIX: ${{ env.OCI_URL }}
+            IMAGE_NAME: ${{ env.IMAGE_NAME }}
+      - name: push CTF
+        uses: open-component-model/ocm-action@main
+        with:
+          action: push_ctf
+          comprepo_url: ${{ env.CD_REPO}}
+          comprepo_password: ${{ secrets.GITHUB_TOKEN }}

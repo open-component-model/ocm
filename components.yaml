@@ -1,0 +1,20 @@
+components:
+- name: ocm.software/ocmcli-image
+  version: ${VERSION}
+  provider:
+    name: ocm.software
+  sources:
+  - name: source
+    type: filesystem
+    version: ${VERSION}
+    access:
+      type: gitHub
+      repoUrl: ${REPO_URL}
+      commit: ${COMMIT}
+  resources:
+  - name: ocm-image
+    type: ociImage
+    version: ${VERSION}
+    access:
+      type: ociArtifact
+      imageReference: ${IMAGE_PREFIX}/${IMAGE_NAME}:v${VERSION}
