@@ -24,10 +24,10 @@ func init() {
 	datacontext.RegisterAttributeType(ATTR_KEY, AttributeType{}, ATTR_SHORT)
 }
 
-// AttributeType represents the attribute functionality
+// AttributeType represents the attribute functionality.
 type AttributeType struct{}
 
-// Attribute represents the attribute data
+// Attribute represents the attribute data.
 type Attribute struct {
 	FulcioURL    string `json:"fulcioURL"`
 	RekorURL     string `json:"rekorURL"`
@@ -35,12 +35,12 @@ type Attribute struct {
 	OIDCClientID string `json:"OIDCClientID"`
 }
 
-// Name returns the attribute name
+// Name returns the attribute name.
 func (a AttributeType) Name() string {
 	return ATTR_KEY
 }
 
-// Description returns a description of the attribute
+// Description returns a description of the attribute.
 func (a AttributeType) Description() string {
 	return `
 *sigstore config* Configuration to use for sigstore based signing.
@@ -52,7 +52,7 @@ The following fields are used.
 `
 }
 
-// Encode marshals an attribute
+// Encode marshals an attribute.
 func (AttributeType) Encode(v interface{}, marshaler runtime.Marshaler) ([]byte, error) {
 	if marshaler == nil {
 		marshaler = runtime.DefaultJSONEncoding
@@ -66,7 +66,7 @@ func (AttributeType) Encode(v interface{}, marshaler runtime.Marshaler) ([]byte,
 	return marshaler.Marshal(result)
 }
 
-// Decode unmarshals an attribute
+// Decode unmarshals an attribute.
 func (a AttributeType) Decode(data []byte, unmarshaler runtime.Unmarshaler) (interface{}, error) {
 	if unmarshaler == nil {
 		unmarshaler = runtime.DefaultJSONEncoding
@@ -81,7 +81,7 @@ func (a AttributeType) Decode(data []byte, unmarshaler runtime.Unmarshaler) (int
 	return attr, nil
 }
 
-// Get returns the attributes
+// Get returns the attributes.
 func Get(ctx datacontext.Context) *Attribute {
 	v := ctx.GetAttributes().GetAttribute(ATTR_KEY)
 	if v == nil {
@@ -94,7 +94,7 @@ func Get(ctx datacontext.Context) *Attribute {
 	return a
 }
 
-// Set sets the attributes
+// Set sets the attributes.
 func Set(ctx datacontext.Context, a *Attribute) error {
 	attrs := ctx.GetAttributes()
 	return attrs.SetAttribute(ATTR_KEY, a)
