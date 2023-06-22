@@ -51,12 +51,12 @@ func init() {
 // and a signatures.Verifier compatible struct to verify using sigstore.
 type Handler struct{}
 
-// Algorithm specifies the name of the signing algorithm
+// Algorithm specifies the name of the signing algorithm.
 func (h Handler) Algorithm() string {
 	return Algorithm
 }
 
-// Sign implements the signing functionality
+// Sign implements the signing functionality.
 func (h Handler) Sign(cctx credentials.Context, digest string, hash crypto.Hash, issuer string, key interface{}) (*signing.Signature, error) {
 	// exit immediately if hash alg is not SHA-256, rekor doesn't currently support other hash functions
 	if hash != crypto.SHA256 {
