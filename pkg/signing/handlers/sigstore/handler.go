@@ -148,7 +148,7 @@ func (h Handler) Sign(cctx credentials.Context, digest string, hash crypto.Hash,
 		Spec:       hashedEntry.HashedRekordObj,
 	}
 
-	// prepare the create entry request parameteres
+	// prepare the create entry request parameters
 	params := entries.NewCreateLogEntryParams().
 		WithContext(ctx).
 		WithProposedEntry(entry)
