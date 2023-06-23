@@ -21,6 +21,12 @@ import (
 )
 
 func Configure(path string) error {
+	return ConfigureContext(config.DefaultContext(), path)
+}
+
+func ConfigureContext(ctxp config.ContextProvider, path string) error {
+	ctx := config.FromProvider(ctxp)
+
 	h := os.Getenv("HOME")
 	if path == "" {
 		if h != "" {
@@ -48,11 +54,11 @@ func Configure(path string) error {
 		if err != nil {
 			return errors.Wrapf(err, "processing ocm config %q", path)
 		}
-		cfg, err := config.DefaultContext().GetConfigForData(data, nil)
+		cfg, err := ctx.GetConfigForData(data, nil)
 		if err != nil {
 			return errors.Wrapf(err, "invalid ocm config file %q", path)
 		}
-		err = config.DefaultContext().ApplyConfig(cfg, path)
+		err = ctx.ApplyConfig(cfg, path)
 		if err != nil {
 			return errors.Wrapf(err, "cannot apply ocm config %q", path)
 		}
