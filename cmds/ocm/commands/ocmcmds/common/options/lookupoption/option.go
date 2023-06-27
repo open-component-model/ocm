@@ -34,7 +34,7 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *Option) CompleteWithSession(octx clictx.OCM, session ocm.Session) error {
-	if len(o.RepoSpecs) != 0 && o.Resolver == nil {
+	if o.Resolver == nil {
 		r, err := o.getResolver(octx, session)
 		if err != nil {
 			return err
@@ -54,9 +54,9 @@ func (o *Option) getResolver(ctx clictx.OCM, session ocm.Session) (ocm.Component
 			}
 			resolvers = append(resolvers, r)
 		}
-		return ocm.NewCompoundResolver(resolvers...), nil
+		return ocm.NewCompoundResolver(append(resolvers, ctx.Context().GetResolver())...), nil
 	}
-	return nil, nil
+	return ctx.Context().GetResolver(), nil
 }
 
 func (o *Option) Usage() string {

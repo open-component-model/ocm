@@ -8,8 +8,10 @@ import (
 	"github.com/Masterminds/semver/v3"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/comphdlr"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/versionconstraintsoption"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 )
 
 type Option interface {
@@ -32,6 +34,9 @@ func OptionsFor(o options.OptionSetProvider) Options {
 	}
 	if constr.Latest {
 		hopts = append(hopts, LatestOnly())
+	}
+	if lookup := lookupoption.From(o); lookup != nil {
+		hopts = append(hopts, Resolver(lookup))
 	}
 	return hopts
 }
@@ -81,4 +86,8 @@ func WithVersionConstraints(c []*semver.Constraints) Option {
 
 func LatestOnly(b ...bool) Option {
 	return compoptionwrapper{comphdlr.LatestOnly(b...)}
+}
+
+func Resolver(r ocm.ComponentVersionResolver) Option {
+	return compoptionwrapper{comphdlr.Resolver(r)}
 }
