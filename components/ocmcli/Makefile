@@ -1,19 +1,28 @@
 NAME      = ocmcli
 CMD       = ocm
 PROVIDER  ?= ocm.software
+IMAGE     := $(NAME)-image
 GITHUBORG  ?= open-component-model
 COMPONENT = $(PROVIDER)/$(NAME)
 OCMREPO   ?= ghcr.io/$(GITHUBORG)/ocm
-PLATFORMS = linux/amd64 linux/arm64 darwin/arm64 darwin/amd64 windows/amd64
+MULTI     ?= true
+PLATFORMS ?= linux/amd64 linux/arm64 darwin/arm64 darwin/amd64 windows/amd64
 
 REPO_ROOT                                      := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))../..
 GIT_TREE_STATE                                 = $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
 VERSION                                        = $(shell go run ../../pkg/version/generate/release_generate.go print-rc-version $(CANDIDATE))
 COMMIT                                         = $(shell git rev-parse HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)+$(COMMIT)
+PLATFORM                                       := $(shell go env GOOS)/$(shell go env GOARCH)
 
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(CMD) -type f) Makefile
 OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
+
+ATTRIBUTES = VERSION="$(VERSION)" NAME="$(NAME)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" PLATFORMS="$(PLATFORMS)" GEN="$(GEN)" MULTI=$(MULTI)
+
+ifeq ($(MULTI),true)
+FLAGSUF     = .multi
+endif
 
 CREDS ?=
 OCM = go run $(REPO_ROOT)/cmds/ocm $(CREDS)
@@ -31,7 +40,7 @@ BUILD_FLAGS := "-s -w \
 .PHONY: build
 build: $(GEN)/build
 
-$(GEN)/build: $(CMDSRCS) $(OCMSRCS)
+$(GEN)/build: $(GEN)/.exists $(CMDSRCS) $(OCMSRCS)
 	@for i in $(PLATFORMS); do \
     tag=$$(echo $$i | sed -e s:/:-:g); \
     echo GOARCH=$$(basename $$i) GOOS=$$(dirname $$i) CGO_ENABLED=0 go build -ldflags $(BUILD_FLAGS) -o $(GEN)/$(NAME).$$tag ../../cmds/$(CMD); \
@@ -39,6 +48,24 @@ $(GEN)/build: $(CMDSRCS) $(OCMSRCS)
     done
 	@touch $(GEN)/build
 
+.PHONY: image
+image: $(GEN)/image
+
+$(GEN)/image: $(GEN)/.exists Dockerfile $(GEN)/build
+	docker buildx build -t $(IMAGE):$(VERSION) --platform $(PLATFORM) --file Dockerfile $(REPO_ROOT) \
+          --build-arg OCM_VERSION=$(EFFECTIVE_VERSION) \
+          --build-arg SUFFIX=$$(echo $(PLATFORM) | sed -e s:/:-:g)
+	@touch $(GEN)/image
+
+$(GEN)/image.multi: Dockerfile $(GEN)/build
+	for i in $(PLATFORMS); do \
+	tag=$$(echo $$i | sed -e s:/:-:g); \
+        echo building platform $$i; \
+	docker buildx build --load -t $(IMAGE):$(VERSION)-$$tag --platform $$i --file Dockerfile $(REPO_ROOT) \
+          --build-arg OCM_VERSION=$(EFFECTIVE_VERSION) \
+          --build-arg SUFFIX=$$tag; \
+	done
+	@touch $(GEN)/image.multi
 
 .PHONY: ctf
 ctf: $(GEN)/ctf
@@ -55,9 +82,9 @@ version:
 .PHONY: ca
 ca: $(GEN)/ca.done
 
-$(GEN)/ca.done: $(GEN)/.exists $(GEN)/build resources.yaml $(CHARTSRCS) Makefile
+$(GEN)/ca.done: $(GEN)/.exists $(GEN)/build $(GEN)/image$(FLAGSUF) resources.yaml $(CHARTSRCS) Makefile
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider $(PROVIDER) --file $(GEN)/ca
-	$(OCM) add resources --templater=spiff --file $(GEN)/ca VERSION="$(VERSION)" NAME="$(NAME)" COMMIT="$(COMMIT)" GEN="$(GEN)" PLATFORMS="$(PLATFORMS)" resources.yaml
+	$(OCM) add resources --templater=spiff --file $(GEN)/ca $(ATTRIBUTES) resources.yaml
 	@touch $(GEN)/ca.done
 
 .PHONY: push
