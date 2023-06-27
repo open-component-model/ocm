@@ -1,0 +1,8 @@
+type: generic.config.ocm.software/v1
+configurations:
+  - type: Dummy
+    alice: alice
+  - type: generic.config.ocm.software/v1
+    configurations:
+    - type: Dummy
+      bob: bob
