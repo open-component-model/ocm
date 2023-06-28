@@ -27,7 +27,6 @@ var _ = Describe("Test Environment", func() {
 	})
 
 	It("creates default comp arch", func() {
-
 		plabels := metav1.Labels{}
 		plabels.Set("email", "info@mandelsoft.de")
 		Expect(env.Execute("create", "ca", "-ft", "directory", "test.de/x", "v1", "--provider", "mandelsoft",
