@@ -7,8 +7,10 @@ package comphdlr
 import (
 	"github.com/Masterminds/semver/v3"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/versionconstraintsoption"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
@@ -33,6 +35,9 @@ func OptionsFor(o options.OptionSetProvider) Options {
 		if constr.Latest {
 			hopts = append(hopts, LatestOnly())
 		}
+	}
+	if lookup := lookupoption.From(o); lookup != nil {
+		hopts = append(hopts, Resolver(lookup))
 	}
 	return hopts
 }
@@ -63,4 +68,32 @@ func (o latestonly) ApplyToCompHandler(handler *TypeHandler) {
 
 func LatestOnly(b ...bool) Option {
 	return latestonly{utils.OptionalDefaultedBool(true, b...)}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type resolver struct {
+	resolver ocm.ComponentVersionResolver
+}
+
+func (o resolver) ApplyToCompHandler(handler *TypeHandler) {
+	handler.resolver = o.resolver
+}
+
+func Resolver(r ocm.ComponentVersionResolver) Option {
+	return resolver{r}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type repository struct {
+	repository ocm.Repository
+}
+
+func (o repository) ApplyToCompHandler(handler *TypeHandler) {
+	handler.repobase = o.repository
+}
+
+func Repository(r ocm.Repository) Option {
+	return repository{r}
 }
