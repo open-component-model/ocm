@@ -79,6 +79,7 @@ type TypeHandler struct {
 	octx        clictx.OCM
 	session     ocm.Session
 	repobase    ocm.Repository
+	resolver    ocm.ComponentVersionResolver
 	constraints []*semver.Constraints
 	latest      bool
 }
@@ -155,7 +156,29 @@ func (h *TypeHandler) get(repo ocm.Repository, elemspec utils.ElemSpec) ([]outpu
 	if repo == nil {
 		evaluated, err := h.session.EvaluateComponentRef(h.octx.Context(), name)
 		if err != nil {
-			return nil, errors.Wrapf(err, "%s: invalid component version reference", name)
+			if h.resolver != nil {
+				comp, err := ocm.ParseComp(name)
+				if err != nil {
+					return nil, errors.Wrapf(err, "invalid component version reference %q", name)
+				}
+				if comp.IsVersion() {
+					cv, err := h.resolver.LookupComponentVersion(comp.Component, *comp.Version)
+					if err != nil {
+						return nil, err
+					}
+					if cv != nil {
+						evaluated = &ocm.EvaluationResult{}
+						evaluated.Ref.UniformRepositorySpec = *cv.Repository().GetSpecification().AsUniformSpec(h.octx.Context())
+						evaluated.Ref.CompSpec = comp
+						evaluated.Version = cv
+						evaluated.Repository = cv.Repository()
+						h.session.Closer(cv)
+					}
+				}
+			}
+			if evaluated == nil {
+				return nil, errors.Wrapf(err, "%s: invalid component version reference", name)
+			}
 		}
 		if evaluated.Version != nil {
 			result = append(result, &Object{
