@@ -26,7 +26,6 @@ var _ = Describe("normalization", func() {
 	})
 
 	It("Normalizes struct without excludes", func() {
-
 		hasher := registry.GetHasher(sha256.Algorithm)
 		hash, _ := signing.Hash(hasher.Create(), []byte("test"))
 
