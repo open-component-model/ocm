@@ -115,7 +115,7 @@ attributes are supported:
   
   If a boolean is given the short hash or none mode is enabled.
   The YAML flavor uses the following fields:
-  - *<code>mode</code>* *string*: <code>hash</code>, <code>shartHash</code>, <code>prefixMapping</code>
+  - *<code>mode</code>* *string*: <code>hash</code>, <code>shortHash</code>, <code>prefixMapping</code>
     or <code>none</code>.
   - *<code>prefixMapping</code>*: *map[string]string* repository path prefix mapping.
 
