@@ -15,6 +15,7 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	local "github.com/open-component-model/ocm/pkg/contexts/config/config"
+	"github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var _ = Describe("generic config handling", func() {
@@ -24,6 +25,8 @@ var _ = Describe("generic config handling", func() {
 
 	testdataconfig, _ := os.ReadFile("testdata/config.yaml")
 	testdatajson, _ := yaml.YAMLToJSON(testdataconfig)
+
+	nesteddataconfig, _ := os.ReadFile("testdata/nested.yaml")
 
 	_ = testdatajson
 
@@ -56,14 +59,30 @@ var _ = Describe("generic config handling", func() {
 		Expect(d.getApplied()).To(Equal([]*Config{NewConfig("alice", ""), NewConfig("", "bob")}))
 	})
 
-	It("it applies to existing context", func() {
+	It("it applies nested to existing context", func() {
+		RegisterAt(scheme)
+		d := newDummy(cfgctx)
+
+		cfg, err := cfgctx.GetConfigForData(nesteddataconfig, nil)
+		Expect(err).To(Succeed())
+
+		err = cfgctx.ApplyConfig(cfg, "testconfig")
+		Expect(err).To(Succeed())
+		gen, cfgs := cfgctx.GetConfig(config.AllGenerations, nil)
+		Expect(gen).To(Equal(int64(4)))
+		Expect(len(cfgs)).To(Equal(4))
+
+		Expect(d.getApplied()).To(Equal([]*Config{NewConfig("alice", ""), NewConfig("", "bob")}))
+	})
+
+	It("it applies unknown type to existing context", func() {
 
 		cfg, err := cfgctx.GetConfigForData(testdataconfig, nil)
 		Expect(err).To(Succeed())
 
 		err = cfgctx.ApplyConfig(cfg, "testconfig")
 		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).To(Equal("testconfig: applying generic config list: {config entry 0--testconfig: config type \"Dummy\" is unknown, config entry 1--testconfig: config type \"Dummy\" is unknown}"))
+		Expect(err.Error()).To(testutils.StringEqualWithContext("testconfig: config apply errors: {config entry 0--testconfig: config type \"Dummy\" is unknown, config entry 1--testconfig: config type \"Dummy\" is unknown}"))
 		gen, cfgs := cfgctx.GetConfig(config.AllGenerations, nil)
 		Expect(gen).To(Equal(int64(3)))
 		Expect(len(cfgs)).To(Equal(3))
