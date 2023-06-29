@@ -19,11 +19,11 @@ component:
   componentReferences: []
 
   resources:
-  - name: root-a
-    type: blueprint
+  - name: test
+    type: PlainText
     version: 1.0.0
     relation: local
     access:
       type: localFilesystemBlob
-      mediaType: application/vnd.gardener.landscaper.blueprint.layer.v1.tar+gzip
+      mediaType: text/plain
       filename: root

@@ -90,11 +90,7 @@ func (a *FileSystemBlobAccess) GetBlobDataByName(name string) (accessio.DataAcce
 	}
 
 	path := a.BlobPath(name)
-	ok, err := vfs.IsDir(a.base.GetFileSystem(), path)
-	if err != nil {
-		return nil, err
-	}
-	if ok {
+	if ok, err := vfs.IsDir(a.base.GetFileSystem(), path); ok {
 		tempfile, err := accessio.NewTempFile(osfs.New(), os.TempDir(), "COMPARCH")
 		if err != nil {
 			return nil, err
@@ -104,15 +100,19 @@ func (a *FileSystemBlobAccess) GetBlobDataByName(name string) (accessio.DataAcce
 			return nil, err
 		}
 		return tempfile.AsBlob(mime.MIME_TAR), nil
-	}
-
-	if ok, err := vfs.FileExists(a.base.GetFileSystem(), path); ok {
-		return accessio.DataAccessForFile(a.base.GetFileSystem(), path), nil
 	} else {
 		if err != nil {
 			return nil, err
 		}
-		return nil, accessio.ErrBlobNotFound(digest.Digest(name))
+
+		if ok, err := vfs.FileExists(a.base.GetFileSystem(), path); ok {
+			return accessio.DataAccessForFile(a.base.GetFileSystem(), path), nil
+		} else {
+			if err != nil {
+				return nil, err
+			}
+			return nil, accessio.ErrBlobNotFound(digest.Digest(name))
+		}
 	}
 }
 

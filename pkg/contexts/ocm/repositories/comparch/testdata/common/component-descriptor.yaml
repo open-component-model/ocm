@@ -18,11 +18,11 @@ component:
   sources: []
 
   resources:
-  - name: root-a
+  - name: test
     relation: local
-    type: blueprint
+    type: PlainText
     version: 1.0.0
     access:
-      fileName: sha256.aeb2b713150dc9baa889184a406297990259f3919d7dd644cbfe49cd352a2a44
-      mediaType: application/vnd.gardener.landscaper.blueprint.layer.v1.tar+gzip
+      fileName: sha256.3ed99e50092c619823e2c07941c175ea2452f1455f570c55510586b387ec2ff2
+      mediaType: text/plain
       type: localFilesystemBlob

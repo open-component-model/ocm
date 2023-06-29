@@ -6,6 +6,7 @@ package comparch
 
 import (
 	"io"
+	"sync"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
@@ -16,7 +17,7 @@ import (
 ////////////////////////////////////////////////////////////////////////////////
 
 type localFilesystemBlobAccessMethod struct {
-	accessio.NopCloser
+	sync.RWMutex
 	spec       *localblob.AccessSpec
 	base       support.ComponentVersionContainer
 	blobAccess accessio.DataAccess
@@ -40,6 +41,9 @@ func (m *localFilesystemBlobAccessMethod) GetKind() string {
 }
 
 func (m *localFilesystemBlobAccessMethod) Reader() (io.ReadCloser, error) {
+	m.Lock()
+	defer m.Unlock()
+
 	if m.blobAccess == nil {
 		var err error
 		m.blobAccess, err = m.base.GetBlobData(m.spec.LocalReference)
@@ -51,6 +55,9 @@ func (m *localFilesystemBlobAccessMethod) Reader() (io.ReadCloser, error) {
 }
 
 func (m *localFilesystemBlobAccessMethod) Get() ([]byte, error) {
+	m.Lock()
+	defer m.Unlock()
+
 	if m.blobAccess == nil {
 		var err error
 		m.blobAccess, err = m.base.GetBlobData(m.spec.LocalReference)
@@ -66,5 +73,11 @@ func (m *localFilesystemBlobAccessMethod) MimeType() string {
 }
 
 func (m *localFilesystemBlobAccessMethod) Close() error {
-	return m.blobAccess.Close()
+	m.Lock()
+	defer m.Unlock()
+
+	if m.blobAccess != nil {
+		return m.blobAccess.Close()
+	}
+	return nil
 }

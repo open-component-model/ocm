@@ -24,9 +24,12 @@ import (
 )
 
 const (
-	TEST_FILEPATH = "testfilepath"
-	TAR_COMPARCH  = "testdata/common"
-	DIR_COMPARCH  = "testdata/directory"
+	TEST_FILEPATH     = "testfilepath"
+	TAR_COMPARCH      = "testdata/common"
+	DIR_COMPARCH      = "testdata/directory"
+	RESOURCE_NAME     = "test"
+	COMPONENT_NAME    = "example.com/root"
+	COMPONENT_VERSION = "1.0.0"
 )
 
 var _ = Describe("Repository", func() {
@@ -45,21 +48,23 @@ var _ = Describe("Repository", func() {
 		octx := ocm.DefaultContext()
 		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_WRITABLE, TAR_COMPARCH))
 		repo := Must(spec.Repository(octx, nil))
-		cv := Must(repo.LookupComponentVersion("example.com/root", "1.0.0"))
-		res := Must(cv.GetResourcesByName("root-a"))
+		defer Close(repo)
+		cv := Must(repo.LookupComponentVersion(COMPONENT_NAME, COMPONENT_VERSION))
+		defer Close(cv)
+		res := Must(cv.GetResourcesByName(RESOURCE_NAME))
 		acc := Must(res[0].AccessMethod())
-		defer acc.Close()
+		defer Close(acc)
 		data := Must(acc.Reader())
-		defer data.Close()
+		defer Close(data)
 
 		mfs := memoryfs.New()
 		data, _ = Must2(compression.AutoDecompress(data))
 		_, _ = Must2(tarutils.ExtractTarToFsWithInfo(mfs, data))
 		bytesA := []byte{}
-		_ = Must(Must(mfs.Open("blueprint.yaml")).Read(bytesA))
+		_ = Must(Must(mfs.Open("testfile")).Read(bytesA))
 
 		bytesB := []byte{}
-		_ = Must(Must(osfs.New().Open(TAR_COMPARCH + "/blobs/sha256.aeb2b713150dc9baa889184a406297990259f3919d7dd644cbfe49cd352a2a44")).Read(bytesB))
+		_ = Must(Must(osfs.New().Open(TAR_COMPARCH + "/blobs/sha256.3ed99e50092c619823e2c07941c175ea2452f1455f570c55510586b387ec2ff2")).Read(bytesB))
 		bufferB := bytes.NewBuffer(bytesB)
 		r, _ := Must2(compression.AutoDecompress(bufferB))
 		_, _ = Must2(tarutils.ExtractTarToFsWithInfo(mfs, r))
@@ -70,20 +75,34 @@ var _ = Describe("Repository", func() {
 		octx := ocm.DefaultContext()
 		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_WRITABLE, DIR_COMPARCH))
 		repo := Must(spec.Repository(octx, nil))
-		cv := Must(repo.LookupComponentVersion("example.com/root", "1.0.0"))
-		res := Must(cv.GetResourcesByName("root-a"))
+		defer Close(repo)
+		cv := Must(repo.LookupComponentVersion(COMPONENT_NAME, COMPONENT_VERSION))
+		defer Close(cv)
+		res := Must(cv.GetResourcesByName(RESOURCE_NAME))
 		acc := Must(res[0].AccessMethod())
-		defer acc.Close()
+		defer Close(acc)
 		data := Must(acc.Reader())
-		defer data.Close()
+		defer Close(data)
 
 		mfs := memoryfs.New()
 		_, _, err := tarutils.ExtractTarToFsWithInfo(mfs, data)
 		Expect(err).ToNot(HaveOccurred())
 		bufferA := []byte{}
 		bufferB := []byte{}
-		_ = Must(Must(mfs.Open("blueprint.yaml")).Read(bufferA))
-		_ = Must(Must(osfs.New().Open(DIR_COMPARCH + "/blobs/root/blueprint.yaml")).Read(bufferB))
+		_ = Must(Must(mfs.Open("testfile")).Read(bufferA))
+		_ = Must(Must(osfs.New().Open(DIR_COMPARCH + "/blobs/root/testfile")).Read(bufferB))
 		Expect(bufferA).To(Equal(bufferB))
+	})
+
+	It("closing a resource before actually reading it", func() {
+		octx := ocm.DefaultContext()
+		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_WRITABLE, TAR_COMPARCH))
+		repo := Must(spec.Repository(octx, nil))
+		defer Close(repo)
+		cv := Must(repo.LookupComponentVersion(COMPONENT_NAME, COMPONENT_VERSION))
+		defer Close(cv)
+		res := Must(cv.GetResourcesByName(RESOURCE_NAME))
+		acc := Must(res[0].AccessMethod())
+		defer Close(acc)
 	})
 })
