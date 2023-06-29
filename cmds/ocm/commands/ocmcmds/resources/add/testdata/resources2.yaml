@@ -1,0 +1,8 @@
+---
+name: testdata
+version: 3.3.3
+type: PlainText
+input:
+  type: file
+  path: testcontent
+  mediaType: text/plain
