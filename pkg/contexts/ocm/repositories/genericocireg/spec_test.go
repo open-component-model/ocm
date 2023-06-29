@@ -66,4 +66,14 @@ var _ = Describe("access method", func() {
 		Expect(effoci.BaseURL).To(Equal("X"))
 	})
 
+	It("creates spec", func() {
+		spec := ocmreg.NewRepositorySpec("http://127.0.0.1:5000/ocm")
+		Expect(spec).To(Equal(&ocmreg.RepositorySpec{
+			RepositorySpec: ocireg.NewRepositorySpec("http://127.0.0.1:5000"),
+			ComponentRepositoryMeta: genericocireg.ComponentRepositoryMeta{
+				SubPath:              "ocm",
+				ComponentNameMapping: genericocireg.OCIRegistryURLPathMapping,
+			},
+		}))
+	})
 })
