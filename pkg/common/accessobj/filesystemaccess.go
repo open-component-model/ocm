@@ -6,18 +6,18 @@ package accessobj
 
 import (
 	"fmt"
-	"github.com/mandelsoft/vfs/pkg/osfs"
-	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 	"io"
 	"os"
 	"sync"
 
+	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/opencontainers/go-digest"
 
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
 
 type FileSystemBlobAccess struct {

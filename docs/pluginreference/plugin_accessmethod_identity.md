@@ -1,9 +1,9 @@
-## plugin accessmethod get &mdash; Get Blob
+## plugin accessmethod identity &mdash; Get Blob Identity
 
 ### Synopsis
 
 ```
-plugin accessmethod get [<flags>] <access spec> [<options>]
+plugin accessmethod identity [<flags>] <access spec> [<options>]
 ```
 
 ### Options
@@ -11,13 +11,13 @@ plugin accessmethod get [<flags>] <access spec> [<options>]
 ```
   -C, --credential <name>=<value>   dedicated credential value (default [])
   -c, --credentials YAML            credentials
-  -h, --help                        help for get
+  -h, --help                        help for identity
 ```
 
 ### Description
 
 
-Evaluate the given access specification and return the described blob on
+Evaluate the given access specification and return a inexpensive identity of the blob content if possible on
 *stdout*.
 
 ### SEE ALSO
