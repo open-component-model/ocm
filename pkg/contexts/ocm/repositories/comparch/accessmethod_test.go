@@ -46,7 +46,7 @@ var _ = Describe("access method", func() {
 
 	Context("component archive", func() {
 		It("instantiate local blob access method for component archive", func() {
-			data, err := os.ReadFile("testdata/component-descriptor.yaml")
+			data, err := os.ReadFile("testdata/descriptor/component-descriptor.yaml")
 			Expect(err).To(Succeed())
 			cd, err := compdesc.Decode(data)
 			Expect(err).To(Succeed())

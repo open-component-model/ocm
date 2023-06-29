@@ -17,8 +17,9 @@ import (
 
 type localFilesystemBlobAccessMethod struct {
 	accessio.NopCloser
-	spec *localblob.AccessSpec
-	base support.ComponentVersionContainer
+	spec       *localblob.AccessSpec
+	base       support.ComponentVersionContainer
+	blobAccess accessio.DataAccess
 }
 
 var _ cpi.AccessMethod = (*localFilesystemBlobAccessMethod)(nil)
@@ -39,13 +40,31 @@ func (m *localFilesystemBlobAccessMethod) GetKind() string {
 }
 
 func (m *localFilesystemBlobAccessMethod) Reader() (io.ReadCloser, error) {
-	return accessio.BlobReader(m.base.GetBlobData(m.spec.LocalReference))
+	if m.blobAccess == nil {
+		var err error
+		m.blobAccess, err = m.base.GetBlobData(m.spec.LocalReference)
+		if err != nil {
+			return accessio.BlobReader(m.blobAccess, err)
+		}
+	}
+	return accessio.BlobReader(m.blobAccess, nil)
 }
 
 func (m *localFilesystemBlobAccessMethod) Get() ([]byte, error) {
-	return accessio.BlobData(m.base.GetBlobData(m.spec.LocalReference))
+	if m.blobAccess == nil {
+		var err error
+		m.blobAccess, err = m.base.GetBlobData(m.spec.LocalReference)
+		if err != nil {
+			return accessio.BlobData(m.blobAccess, err)
+		}
+	}
+	return accessio.BlobData(m.blobAccess, nil)
 }
 
 func (m *localFilesystemBlobAccessMethod) MimeType() string {
 	return m.spec.MediaType
+}
+
+func (m *localFilesystemBlobAccessMethod) Close() error {
+	return m.blobAccess.Close()
 }

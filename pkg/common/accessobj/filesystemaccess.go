@@ -6,6 +6,9 @@ package accessobj
 
 import (
 	"fmt"
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 	"io"
 	"os"
 	"sync"
@@ -85,7 +88,24 @@ func (a *FileSystemBlobAccess) GetBlobDataByName(name string) (accessio.DataAcce
 	if a.IsClosed() {
 		return nil, accessio.ErrClosed
 	}
+
 	path := a.BlobPath(name)
+	ok, err := vfs.IsDir(a.base.GetFileSystem(), path)
+	if err != nil {
+		return nil, err
+	}
+	if ok {
+		tempfile, err := accessio.NewTempFile(osfs.New(), os.TempDir(), "COMPARCH")
+		if err != nil {
+			return nil, err
+		}
+		err = tarutils.PackFsIntoTar(a.base.GetFileSystem(), path, tempfile.Writer(), tarutils.TarFileSystemOptions{})
+		if err != nil {
+			return nil, err
+		}
+		return tempfile.AsBlob(mime.MIME_TAR), nil
+	}
+
 	if ok, err := vfs.FileExists(a.base.GetFileSystem(), path); ok {
 		return accessio.DataAccessForFile(a.base.GetFileSystem(), path), nil
 	} else {
