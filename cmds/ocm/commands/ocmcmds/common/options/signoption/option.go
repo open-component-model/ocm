@@ -61,6 +61,8 @@ type Option struct {
 	Keys           signing.KeyRegistry
 
 	Hash hashoption.Option
+
+	Keyless bool
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
@@ -77,7 +79,8 @@ func (o *Option) AddFlags(fs *pflag.FlagSet) {
 		fs.BoolVarP(&o.local, "local", "L", false, "verification based on information found in component versions, only")
 	}
 	fs.BoolVarP(&o.Verify, "verify", "V", o.SignMode, "verify existing digests")
-	fs.StringArrayVarP(&o.rootca, "ca-cert", "", o.rootca, "Additional root certificates")
+	fs.StringArrayVarP(&o.rootca, "ca-cert", "", o.rootca, "additional root certificates")
+	fs.BoolVar(&o.Keyless, "keyless", false, "use keyless signing")
 }
 
 func (o *Option) Configure(ctx clictx.Context) error {
@@ -234,7 +237,12 @@ func (o *Option) ApplySigningOption(opts *ocmsign.Options) {
 		opts.RootCerts = o.RootCerts
 	}
 	if len(o.SignatureNames) > 0 {
-		opts.VerifySignature = o.Keys.GetPublicKey(o.SignatureNames[0]) != nil
+		if o.Keyless {
+			opts.VerifySignature = true
+		} else {
+			opts.VerifySignature = o.Keys.GetPublicKey(o.SignatureNames[0]) != nil
+		}
 	}
 	opts.Update = o.Update
+	opts.Keyless = o.Keyless
 }

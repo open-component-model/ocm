@@ -44,8 +44,10 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(
 		&Command{BaseCommand: utils.NewBaseCommand(ctx,
 			versionconstraintsoption.New(), repooption.New(),
-			output.OutputOptions(outputs, closureoption.New(
-				"component reference", output.Fields("IDENTITY"), options.Not(output.Selected("tree")), addIdentityField), lookupoption.New(), schemaoption.New("", true),
+			output.OutputOptions(outputs,
+				closureoption.New("component reference", output.Fields("IDENTITY"), options.Not(output.Selected("tree")), addIdentityField),
+				lookupoption.New(),
+				schemaoption.New("", true),
 			))},
 		utils.Names(Names, names...)...,
 	)

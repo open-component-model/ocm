@@ -24,6 +24,19 @@ OCM library:
 
   Compatibility mode: Avoid generic local access methods and prefer type specific ones.
 
+- <code>github.com/mandelsoft/ocm/hashocirepo</code> [<code>hashocirepo</code>]: *bool|YAML*
+
+  When uploading an OCI artifact blob to an OCI based OCM repository and the
+  artifact is uploaded as OCI artifact, the repository path part is shortened,
+  either by hashing all but the last repository name part or by executing 
+  some prefix based name mappings.
+  
+  If a boolean is given the short hash or none mode is enabled.
+  The YAML flavor uses the following fields:
+  - *<code>mode</code>* *string*: <code>hash</code>, <code>shartHash</code>, <code>prefixMapping</code>
+    or <code>none</code>.
+  - *<code>prefixMapping</code>*: *map[string]string* repository path prefix mapping.
+
 - <code>github.com/mandelsoft/ocm/keeplocalblob</code> [<code>keeplocalblob</code>]: *bool*
 
   Keep local blobs when importing OCI artifacts to OCI registries from <code>localBlob</code>

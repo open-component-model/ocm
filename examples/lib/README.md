@@ -131,3 +131,4 @@ Besides this simple example, there are more usage scenarios, which
 typicaly require more configuration:
 - [creating content and credential handling](creds.md)
 - [dealing with configuration](config.md)
+- [creating OCM content in temporary CTFs and publishing it](transfer.md)

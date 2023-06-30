@@ -78,6 +78,19 @@ var _ = Describe("ref parsing", func() {
 				Digest:     &digest,
 			},
 		})
+		CheckRef("http://127.0.0.1:443/repo/repo:v1@"+digest.String(), &oci.RefSpec{
+			UniformRepositorySpec: oci.UniformRepositorySpec{
+				Type:   "",
+				Scheme: "http",
+				Host:   "127.0.0.1:443",
+				Info:   "",
+			},
+			ArtSpec: oci.ArtSpec{
+				Repository: "repo/repo",
+				Tag:        &tag,
+				Digest:     &digest,
+			},
+		})
 		CheckRef("directory::a/b", &oci.RefSpec{
 			UniformRepositorySpec: oci.UniformRepositorySpec{
 				Type:   "directory",
