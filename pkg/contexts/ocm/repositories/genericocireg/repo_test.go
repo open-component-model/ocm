@@ -10,6 +10,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
@@ -20,6 +21,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	ocicpi "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/testhelper"
@@ -36,6 +38,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
+	ocmreg "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	ocmutils "github.com/open-component-model/ocm/pkg/contexts/ocm/utils"
 	"github.com/open-component-model/ocm/pkg/finalizer"
@@ -339,6 +342,25 @@ var _ = Describe("component repository mapping", func() {
 			repo = finalizer.ClosingWith(&finalize, Must(DefaultContext.RepositoryForSpec(spec)))
 			vers = finalizer.ClosingWith(&finalize, Must(repo.LookupComponentVersion(COMPONENT, "v1")))
 			Expect(string(vers.GetDescriptor().Provider.Name)).To(Equal("acme.org"))
+		})
+	})
+
+	Context("repo urls", func() {
+		It("creates scheme based repo", func() {
+			ctx := ocm.New()
+
+			spec := ocmreg.NewRepositorySpec("http://127.0.0.1:5000/ocm")
+			repo := Must(ctx.RepositoryForSpec(spec))
+			defer Close(repo, "repo")
+
+			ocirepo := genericocireg.GetOCIRepository(repo)
+			Expect(ocirepo).NotTo(BeNil())
+			impl := Must(ocicpi.GetRepositoryImplementation(ocirepo))
+
+			Expect(impl).NotTo(BeNil())
+
+			Expect(impl.(*ocireg.RepositoryImpl).GetBaseURL()).To(Equal("http://127.0.0.1:5000"))
+			Expect(impl.(*ocireg.RepositoryImpl).GetRef("repo/path", "1.0.0")).To(Equal("127.0.0.1:5000/repo/path:1.0.0"))
 		})
 	})
 })

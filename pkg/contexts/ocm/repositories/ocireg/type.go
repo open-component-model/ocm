@@ -37,9 +37,14 @@ type RepositorySpec = genericocireg.RepositorySpec
 func NewRepositorySpec(baseURL string, metas ...*ComponentRepositoryMeta) *RepositorySpec {
 	meta := utils.Optional(metas...)
 	if meta == nil {
+		scheme := ""
+		if idx := strings.Index(baseURL, "://"); idx > 0 {
+			scheme = baseURL[:idx+3]
+			baseURL = baseURL[idx+3:]
+		}
 		if idx := strings.Index(baseURL, "/"); idx > 0 {
 			meta = NewComponentRepositoryMeta(baseURL[idx+1:])
-			baseURL = baseURL[:idx]
+			baseURL = scheme + baseURL[:idx]
 		}
 	}
 
