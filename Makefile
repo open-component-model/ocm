@@ -30,7 +30,8 @@ BUILD_FLAGS := "-s -w \
  -X github.com/open-component-model/ocm/pkg/version.gitCommit=$(COMMIT) \
  -X github.com/open-component-model/ocm/pkg/version.buildDate=$(NOW)"
 
-COMPONENTS ?= ocmcli helminstaller demoplugin ecrplugin helmdemo subchartsdemo
+# COMPONENTS ?= ocmcli helminstaller demoplugin ecrplugin helmdemo subchartsdemo
+COMPONENTS ?= ocmcli
 
 build: ${SOURCES}
 	mkdir -p bin
