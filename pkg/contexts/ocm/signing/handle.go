@@ -103,6 +103,7 @@ func Apply(printer common.Printer, state *WalkingState, cv ocm.ComponentVersionA
 	if err != nil {
 		return nil, err
 	}
+
 	return dc.Digest, nil
 }
 
@@ -154,7 +155,7 @@ func _apply(printer common.Printer, state WalkingState, nv common.NameVersion, c
 			var err error
 			opts, err = ctx.determineSignatureInfo(printer, state, opts)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("failed to determine signature info: %w", err)
 			}
 		}
 		ctx.Hasher = opts.Registry.GetHasher(ctx.DigestType.HashAlgorithm)
@@ -200,6 +201,9 @@ func _apply(printer common.Printer, state WalkingState, nv common.NameVersion, c
 	printer.Printf("%sapplying to version %q[%s]...\n", prefix, nv, ctx.CtxKey)
 
 	signatureNames := opts.SignatureNames
+	if len(signatureNames) == 0 && opts.Keyless {
+		return nil, errors.New("signature not provided")
+	}
 	if opts.DoVerify() && !opts.DoSign() {
 		for _, n := range signatureNames {
 			f := cd.GetSignatureIndex(n)
@@ -243,13 +247,12 @@ func _apply(printer common.Printer, state WalkingState, nv common.NameVersion, c
 	}
 
 	if opts.DoVerify() {
-		//nolint: gocritic // yes
-		if dig, err := doVerify(printer, cd, state, signatureNames, opts); err != nil {
+		dig, err := doVerify(printer, cd, state, signatureNames, opts)
+		if err != nil {
 			return nil, err
-		} else {
-			if dig != nil {
-				spec = dig
-			}
+		}
+		if dig != nil {
+			spec = dig
 		}
 	}
 	err := ctx.Propagate(spec)
@@ -342,13 +345,16 @@ func doVerify(printer common.Printer, cd *compdesc.ComponentDescriptor, state Wa
 		if f < 0 {
 			continue
 		}
-		pub := opts.PublicKey(n)
-		if pub == nil {
-			if opts.SignatureConfigured(n) {
-				return nil, errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, n)
+		var pub any
+		if !opts.Keyless {
+			pub = opts.PublicKey(n)
+			if pub == nil {
+				if opts.SignatureConfigured(n) {
+					return nil, errors.ErrNotFound(compdesc.KIND_PUBLIC_KEY, n)
+				}
+				printer.Printf("Warning: no public key for signature %q in %s\n", n, state.History)
+				continue
 			}
-			printer.Printf("Warning: no public key for signature %q in %s\n", n, state.History)
-			continue
 		}
 		sig := &cd.Signatures[f]
 		verifier := opts.Registry.GetVerifier(sig.Signature.Algorithm)

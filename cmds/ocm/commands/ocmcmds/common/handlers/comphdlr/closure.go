@@ -9,6 +9,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/out"
 )
 
@@ -44,7 +45,11 @@ func traverse(hist common.History, o *Object, octx out.Context, lookup ocm.Compo
 		if nested == nil && lookup != nil {
 			nested, err = lookup.LookupComponentVersion(ref.ComponentName, vers)
 			if err != nil {
-				out.Errf(octx, "Warning: fallback lookup nested component version \"%s:%s\" [%s]: %s\n", ref.ComponentName, vers, hist, err)
+				if !errors.IsErrNotFound(err) {
+					out.Errf(octx, "Warning: fallback lookup nested component version \"%s:%s\" [%s]: %s\n", ref.ComponentName, vers, hist, err)
+				} else {
+					err = nil
+				}
 			}
 		}
 		if err != nil {

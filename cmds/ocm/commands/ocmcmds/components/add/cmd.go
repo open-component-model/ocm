@@ -33,6 +33,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/generics"
 )
 
 var (
@@ -153,7 +154,7 @@ func (o *Command) AddFlags(fs *pflag.FlagSet) {
 }
 
 func (o *Command) Complete(args []string) error {
-	if o.Closure && !lookupoption.From(o).IsGiven() {
+	if o.Closure && !lookupoption.From(o).IsGiven() && o.OCMContext().GetResolver() == nil {
 		return fmt.Errorf("lookup option required for option --complete")
 	}
 	o.Archive, args = fileoption.From(o).GetPath(args, o.Context.FileSystem())
@@ -234,7 +235,7 @@ func (o *Command) Run() error {
 	}
 
 	if err == nil {
-		err = comp.ProcessComponents(o.Context, ictx, repo, lookupoption.From(o).Resolver, thdlr, h, elems)
+		err = comp.ProcessComponents(o.Context, ictx, repo, generics.Conditional(o.Closure, lookupoption.From(o).Resolver, nil), thdlr, h, elems)
 		cerr := repo.Close()
 		if err == nil {
 			err = cerr
