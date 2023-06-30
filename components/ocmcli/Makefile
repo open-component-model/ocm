@@ -6,7 +6,8 @@ GITHUBORG  ?= open-component-model
 COMPONENT = $(PROVIDER)/$(NAME)
 OCMREPO   ?= ghcr.io/$(GITHUBORG)/ocm
 MULTI     ?= true
-PLATFORMS ?= linux/amd64 linux/arm64 darwin/arm64 darwin/amd64 windows/amd64
+CONTAINER_PLATFORMS ?= linux/amd64 linux/arm64
+PLATFORMS = $(CONTAINER_PLATFORMS) darwin/arm64 darwin/amd64 windows/amd64
 
 REPO_ROOT                                      := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))../..
 GIT_TREE_STATE                                 = $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
@@ -18,7 +19,7 @@ PLATFORM                                       := $(shell go env GOOS)/$(shell g
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(CMD) -type f) Makefile
 OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
 
-ATTRIBUTES = VERSION="$(VERSION)" NAME="$(NAME)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" PLATFORMS="$(PLATFORMS)" GEN="$(GEN)" MULTI=$(MULTI)
+ATTRIBUTES = VERSION="$(VERSION)" NAME="$(NAME)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" PLATFORMS="$(CONTAINER_PLATFORMS)" GEN="$(GEN)" MULTI=$(MULTI)
 
 ifeq ($(MULTI),true)
 FLAGSUF     = .multi
@@ -36,6 +37,7 @@ BUILD_FLAGS := "-s -w \
  -X github.com/open-component-model/ocm/pkg/version.gitCommit=$(COMMIT) \
  -X github.com/open-component-model/ocm/pkg/version.buildDate=$(NOW)"
 
+ALPINE_LATEST_VER=$(shell curl -s https://registry.hub.docker.com/v2/repositories/library/alpine/tags | jq '.results[1].name' | xargs)
 
 .PHONY: build
 build: $(GEN)/build
@@ -54,15 +56,18 @@ image: $(GEN)/image
 $(GEN)/image: $(GEN)/.exists Dockerfile $(GEN)/build
 	docker buildx build -t $(IMAGE):$(VERSION) --platform $(PLATFORM) --file Dockerfile $(REPO_ROOT) \
           --build-arg OCM_VERSION=$(EFFECTIVE_VERSION) \
+		  --build-arg ALPINE_VERSION=$(ALPINE_LATEST_VER) \
           --build-arg SUFFIX=$$(echo $(PLATFORM) | sed -e s:/:-:g)
 	@touch $(GEN)/image
 
 $(GEN)/image.multi: Dockerfile $(GEN)/build
-	for i in $(PLATFORMS); do \
+	echo "Building with Alpine version: ${ALPINE_LATEST_VER}"
+	for i in $(CONTAINER_PLATFORMS); do \
 	tag=$$(echo $$i | sed -e s:/:-:g); \
         echo building platform $$i; \
 	docker buildx build --load -t $(IMAGE):$(VERSION)-$$tag --platform $$i --file Dockerfile $(REPO_ROOT) \
           --build-arg OCM_VERSION=$(EFFECTIVE_VERSION) \
+		  --build-arg ALPINE_VERSION=$(ALPINE_LATEST_VER) \
           --build-arg SUFFIX=$$tag; \
 	done
 	@touch $(GEN)/image.multi
@@ -85,6 +90,7 @@ ca: $(GEN)/ca.done
 $(GEN)/ca.done: $(GEN)/.exists $(GEN)/build $(GEN)/image$(FLAGSUF) resources.yaml $(CHARTSRCS) Makefile
 	$(OCM) create ca -f $(COMPONENT) "$(VERSION)" --provider $(PROVIDER) --file $(GEN)/ca
 	$(OCM) add resources --templater=spiff --file $(GEN)/ca $(ATTRIBUTES) resources.yaml
+	$(OCM) add sources $(GEN)/ca VERSION="$(VERSION)" COMMIT="$(COMMIT)" sources.yaml
 	@touch $(GEN)/ca.done
 
 .PHONY: push
