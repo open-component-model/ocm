@@ -39,6 +39,7 @@ const ATTR_TYPE = "type"
 type Unstructured interface {
 	TypeGetter
 	GetRaw() ([]byte, error)
+	GetObject() UnstructuredMap
 }
 
 type Object interface{}
@@ -230,6 +231,10 @@ func (u *UnstructuredTypedObject) DeepCopy() *UnstructuredTypedObject {
 
 func (u UnstructuredTypedObject) GetRaw() ([]byte, error) {
 	return json.Marshal(u.Object)
+}
+
+func (u UnstructuredTypedObject) GetObject() UnstructuredMap {
+	return u.Object
 }
 
 func (u *UnstructuredTypedObject) setRaw(data []byte) error {

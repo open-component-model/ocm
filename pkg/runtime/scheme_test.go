@@ -22,12 +22,12 @@ type T interface {
 
 type T1 struct {
 	runtime.ObjectTypedObject
-	T1 string
+	T1 string `json:"t1,omitempty"`
 }
 
 type T2 struct {
 	runtime.ObjectTypedObject
-	T2 string
+	T2 string `json:"t2,omitempty"`
 }
 
 func (t *T1) TFunc() {}

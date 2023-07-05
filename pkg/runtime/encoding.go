@@ -4,21 +4,15 @@
 
 package runtime
 
-// github.com/ghodss/yaml
-
 import (
-	"encoding/json"
-
-	"sigs.k8s.io/yaml"
+	"github.com/open-component-model/ocm/pkg/runtime/encoding"
 )
 
-type Marshaler interface {
-	Marshal(obj interface{}) ([]byte, error)
-}
+// github.com/ghodss/yaml
 
-type Unmarshaler interface {
-	Unmarshal(data []byte, obj interface{}) error
-}
+type Marshaler = encoding.Marshaler
+
+type Unmarshaler encoding.Unmarshaler
 
 type MarshalFunction func(obj interface{}) ([]byte, error)
 
@@ -28,22 +22,10 @@ type UnmarshalFunction func(data []byte, obj interface{}) error
 
 func (f UnmarshalFunction) Unmarshal(data []byte, obj interface{}) error { return f(data, obj) }
 
-type Encoding interface {
-	Unmarshaler
-	Marshaler
-}
+type Encoding = encoding.Encoding
 
-type EncodingWrapper struct {
-	Unmarshaler
-	Marshaler
-}
+type EncodingWrapper = encoding.EncodingWrapper
 
-var DefaultJSONEncoding = &EncodingWrapper{
-	Marshaler:   MarshalFunction(json.Marshal),
-	Unmarshaler: UnmarshalFunction(json.Unmarshal),
-}
+var DefaultJSONEncoding = encoding.DefaultJSONEncoding
 
-var DefaultYAMLEncoding = &EncodingWrapper{
-	Marshaler:   MarshalFunction(yaml.Marshal),
-	Unmarshaler: UnmarshalFunction(func(data []byte, obj interface{}) error { return yaml.Unmarshal(data, obj) }),
-}
+var DefaultYAMLEncoding = encoding.DefaultYAMLEncoding

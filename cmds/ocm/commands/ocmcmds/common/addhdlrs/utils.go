@@ -199,7 +199,7 @@ func DecodeInput(data []byte, ctx clictx.Context) (*ResourceInput, error) {
 	}
 	_, err = input.Input.Evaluate(inputs.For(ctx))
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "input")
 	}
 
 	var plainOrig map[string]interface{}
@@ -207,9 +207,8 @@ func DecodeInput(data []byte, ctx clictx.Context) (*ResourceInput, error) {
 	if err != nil {
 		return nil, err
 	}
-	var fldPath *field.Path
-	err = CheckForUnknown(fldPath.Child("input"), plainOrig["input"], input.Input)
-	return &input, err
+	err = CheckForUnknown(nil, plainOrig["input"], input.Input)
+	return &input, errors.Wrapf(err, "input")
 }
 
 func CheckForUnknownForData(fldPath *field.Path, orig []byte, accepted interface{}) error {
