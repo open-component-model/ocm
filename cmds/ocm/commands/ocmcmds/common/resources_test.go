@@ -45,7 +45,7 @@ input:
   bla: blub
 `
 		_, err := addhdlrs.DecodeInput([]byte(in), nil)
-		Expect(err.Error()).To(Equal("input.bla: Forbidden: unknown field"))
+		Expect(err.Error()).To(Equal("input: bla: Forbidden: unknown field"))
 	})
 
 	It("does not complains about additional dir field", func() {
@@ -76,6 +76,6 @@ input:
 `
 		_, err := addhdlrs.DecodeInput([]byte(in), nil)
 		Expect(err).To(HaveOccurred())
-		Expect(err.Error()).To(Equal("input.excludeFiles: Forbidden: unknown field"))
+		Expect(err.Error()).To(Equal("input: excludeFiles: Forbidden: unknown field"))
 	})
 })

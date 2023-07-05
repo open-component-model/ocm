@@ -13,6 +13,7 @@ import (
 
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
+	"github.com/open-component-model/ocm/pkg/runtime"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -81,6 +82,7 @@ type CLIOptions struct {
 	Verbose     bool
 	LogOpts     logopts.Options
 	Version     bool
+	Sloppy      bool
 }
 
 var desc = `
@@ -273,7 +275,8 @@ func (o *CLIOptions) AddFlags(fs *pflag.FlagSet) {
 	fs.StringArrayVarP(&o.Credentials, "cred", "C", nil, "credential setting")
 	fs.StringArrayVarP(&o.Settings, "attribute", "X", nil, "attribute setting")
 	fs.BoolVarP(&o.Verbose, "verbose", "v", false, "deprecated: enable logrus verbose logging")
-	fs.BoolVarP(&o.Version, "version", "", false, "show version") // otherwise it is implicitly added by cobra
+	fs.BoolVarP(&o.Version, "version", "", false, "show version")                                                       // otherwise it is implicitly added by cobra
+	fs.BoolVarP(&o.Sloppy, "sloppy", "", false, "silently ignore unknown fields in dynamic component descriptor parts") // otherwise it is implicitly added by cobra
 
 	o.LogOpts.AddFlags(fs)
 }
@@ -287,6 +290,8 @@ func (o *CLIOptions) Complete() error {
 		return nil
 	}
 	o.Completed = true
+
+	runtime.StrictMode = !o.Sloppy
 
 	if o.Verbose {
 		logrus.SetLevel(logrus.DebugLevel)
