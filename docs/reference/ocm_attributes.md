@@ -44,6 +44,7 @@ OCM library:
   - *<code>mode</code>* *string*: <code>hash</code>, <code>shartHash</code>, <code>prefixMapping</code>
     or <code>none</code>.
   - *<code>prefixMapping</code>*: *map[string]string* repository path prefix mapping.
+  - *<code>prefix</code>*: *string* repository prefix to use (replaces potential sub path of OCM repo).
 
 - <code>github.com/mandelsoft/ocm/ociuploadrepo</code> [<code>ociuploadrepo</code>]: *oci base repository ref*
 
