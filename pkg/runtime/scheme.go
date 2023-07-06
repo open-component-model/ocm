@@ -15,18 +15,17 @@ import (
 
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/generics"
-	"github.com/open-component-model/ocm/pkg/runtime/validation"
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 var (
-	typeUnknown     = reflect.TypeOf((*Unknown)(nil)).Elem()
 	typeTypedObject = reflect.TypeOf((*TypedObject)(nil)).Elem()
+	typeUnknown     = reflect.TypeOf((*Unknown)(nil)).Elem()
 )
 
 type (
 	// TypedObjectDecoder is able to provide an effective typed object for some
-	// serialized form. The technical deserialization is done by an Unmarshaler.
+	// serilaized form. The technical deserialization is done by an Unmarshaler.
 	TypedObjectDecoder[T TypedObject] interface {
 		Decode(data []byte, unmarshaler Unmarshaler) (T, error)
 	}
@@ -34,9 +33,6 @@ type (
 		TypedObjectDecoder[T]
 	}
 )
-
-// StrictMode enables the checking for unexpected fields in object unmarshalling.
-var StrictMode = true
 
 // TypedObjectEncoder is able to provide a versioned representation of
 // an effective TypedObject.
@@ -78,13 +74,7 @@ func (d *DirectDecoder[T]) CreateInstance() T {
 func (d *DirectDecoder[T]) Decode(data []byte, unmarshaler Unmarshaler) (T, error) {
 	var zero T
 	inst := d.CreateInstance()
-
-	var err error
-	if StrictMode {
-		err = validation.UnmarshalProtoWithValidation(data, inst, unmarshaler)
-	} else {
-		err = unmarshaler.Unmarshal(data, inst)
-	}
+	err := unmarshaler.Unmarshal(data, inst)
 	if err != nil {
 		return zero, err
 	}

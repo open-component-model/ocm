@@ -17,15 +17,13 @@ import (
 type CredentialsSpec interface {
 	CredentialsSource
 	GetCredentialsName() string
-	GetRepositorySpec(Context) (RepositorySpec, error)
+	GetRepositorySpec(Context) RepositorySpec
 }
 
 type DefaultCredentialsSpec struct {
 	RepositorySpec  RepositorySpec
 	CredentialsName string
 }
-
-const CREDNAME_ATTRIBUTE = "credentialsName"
 
 func NewCredentialsSpec(name string, repospec RepositorySpec) CredentialsSpec {
 	return &DefaultCredentialsSpec{
@@ -38,8 +36,8 @@ func (s *DefaultCredentialsSpec) GetCredentialsName() string {
 	return s.CredentialsName
 }
 
-func (s *DefaultCredentialsSpec) GetRepositorySpec(ctx Context) (RepositorySpec, error) {
-	return ctx.RepositorySpecForSpec(s.RepositorySpec)
+func (s *DefaultCredentialsSpec) GetRepositorySpec(Context) RepositorySpec {
+	return s.RepositorySpec
 }
 
 func (s *DefaultCredentialsSpec) Credentials(ctx Context, creds ...CredentialsSource) (Credentials, error) {
@@ -48,34 +46,37 @@ func (s *DefaultCredentialsSpec) Credentials(ctx Context, creds ...CredentialsSo
 
 // MarshalJSON implements a custom json unmarshal method.
 func (s DefaultCredentialsSpec) MarshalJSON() ([]byte, error) {
-	specdata, err := runtime.ToUnstructuredTypedObject(s.RepositorySpec)
+	ocispec, err := runtime.ToUnstructuredTypedObject(s.RepositorySpec)
 	if err != nil {
 		return nil, err
 	}
-	specdata.Object[CREDNAME_ATTRIBUTE] = s.CredentialsName
-	return json.Marshal(specdata)
+	specdata, err := runtime.ToUnstructuredObject(struct {
+		Name string `json:"credentialsName,omitempty"`
+	}{Name: s.CredentialsName})
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(specdata.FlatMerge(ocispec.Object))
 }
 
 // UnmarshalJSON implements a custom default json unmarshal method.
 // It should not be used because it always used the default context.
 func (s *DefaultCredentialsSpec) UnmarshalJSON(data []byte) error {
-	spec := &GenericRepositorySpec{}
-	err := json.Unmarshal(data, spec)
+	repo, err := DefaultContext.RepositoryTypes().Decode(data, runtime.DefaultJSONEncoding)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to decode data: %w", err)
 	}
 
-	// check for additional property of a credentials spec.
-	s.CredentialsName = ""
-	if name, ok := spec.Object[CREDNAME_ATTRIBUTE]; ok {
-		if n, ok := name.(string); ok {
-			s.CredentialsName = n
-		}
+	specdata := &struct {
+		Name string `json:"credentialsName,omitempty"`
+	}{}
+	err = json.Unmarshal(data, specdata)
+	if err != nil {
+		return fmt.Errorf("failed ot unmarshal spec data: %w", err)
 	}
-	// remove additional property from generic repository spec.
-	delete(spec.Object, CREDNAME_ATTRIBUTE)
 
-	s.RepositorySpec = spec
+	s.RepositorySpec = repo
+	s.CredentialsName = specdata.Name
 	return nil
 }
 
@@ -123,8 +124,8 @@ func (s *GenericCredentialsSpec) GetCredentialsName() string {
 	return s.CredentialsName
 }
 
-func (s *GenericCredentialsSpec) GetRepositorySpec(ctx Context) (RepositorySpec, error) {
-	return ctx.RepositorySpecForSpec(s.RepositorySpec)
+func (s *GenericCredentialsSpec) GetRepositorySpec(context Context) RepositorySpec {
+	return s.RepositorySpec
 }
 
 func (s *GenericCredentialsSpec) Credentials(ctx Context, creds ...CredentialsSource) (Credentials, error) {
@@ -152,13 +153,14 @@ func (s *GenericCredentialsSpec) UnmarshalJSON(data []byte) error {
 	}
 
 	s.CredentialsName = ""
+
 	if name, ok := spec.Object["credentialsName"]; ok {
 		if n, ok := name.(string); ok {
 			s.CredentialsName = n
 		}
 	}
-	delete(spec.Object, "credentialsName")
 
+	delete(spec.Object, "credentialName")
 	s.RepositorySpec = spec
 	return nil
 }
