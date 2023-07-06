@@ -15,7 +15,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/memory"
-	. "github.com/open-component-model/ocm/pkg/testutils"
 )
 
 var DefaultContext = credentials.New()
@@ -42,10 +41,9 @@ var _ = Describe("generic credentials", func() {
 		err = json.Unmarshal(data, credspec)
 		Expect(err).To(Succeed())
 		s := credspec.(*internal.DefaultCredentialsSpec)
-		rspec := Must(s.GetRepositorySpec(DefaultContext))
-		Expect(reflect.TypeOf(rspec).String()).To(Equal("*memory.RepositorySpec"))
+		Expect(reflect.TypeOf(s.RepositorySpec).String()).To(Equal("*memory.RepositorySpec"))
 		Expect(s.CredentialsName).To(Equal("cred"))
-		Expect(rspec.(*memory.RepositorySpec).RepositoryName).To(Equal("test"))
+		Expect(s.RepositorySpec.(*memory.RepositorySpec).RepositoryName).To(Equal("test"))
 	})
 
 	It("de/serializes generic credentials spec", func() {

@@ -26,7 +26,7 @@ var DefaultContext = ocm.New()
 
 var _ = Describe("access method", func() {
 
-	legacy := "{\"type\":\"localFilesystemBlob\",\"filename\":\"anydigest\",\"mediaType\":\"application/json\"}"
+	legacy := "{\"type\":\"localFilesystemBlob\",\"fileName\":\"anydigest\",\"mediaType\":\"application/json\"}"
 
 	Context("local access method", func() {
 		It("decodes legacy methood", func() {

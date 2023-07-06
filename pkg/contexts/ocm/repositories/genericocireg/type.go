@@ -13,6 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
 )
 
@@ -49,15 +50,7 @@ func (d *delegation) Decode(ctx cpi.Context, data []byte, unmarshal runtime.Unma
 		unmarshal = runtime.DefaultYAMLEncoding.Unmarshaler
 	}
 
-	ocispec := &oci.GenericRepositorySpec{}
-	compmeta := &ComponentRepositoryMeta{}
-
-	err := runtime.UnmarshalAdditional(data, ocispec, unmarshal, compmeta)
-	if err != nil {
-		return nil, err
-	}
-
-	ospec, err := ocispec.Evaluate(ctx.OCIContext())
+	ospec, err := ctx.OCIContext().RepositoryTypes().Decode(data, unmarshal)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +58,12 @@ func (d *delegation) Decode(ctx cpi.Context, data []byte, unmarshal runtime.Unma
 		return nil, nil
 	}
 
-	return NewRepositorySpec(ospec, compmeta), nil
+	meta := &ComponentRepositoryMeta{}
+	err = unmarshal.Unmarshal(data, meta)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot unmarshal component repository meta information")
+	}
+	return NewRepositorySpec(ospec, meta), nil
 }
 
 func (d *delegation) Priority() int {
@@ -130,12 +128,14 @@ func (a *RepositorySpec) AsUniformSpec(cpi.Context) *cpi.UniformRepositorySpec {
 func (u *RepositorySpec) UnmarshalJSON(data []byte) error {
 	logrus.Debugf("unmarshal generic ocireg spec %s\n", string(data))
 	ocispec := &oci.GenericRepositorySpec{}
-	compmeta := &ComponentRepositoryMeta{}
-
-	err := runtime.UnmarshalAdditional(data, ocispec, runtime.DefaultYAMLEncoding, compmeta)
-	if err != nil {
+	if err := json.Unmarshal(data, ocispec); err != nil {
 		return err
 	}
+	compmeta := &ComponentRepositoryMeta{}
+	if err := json.Unmarshal(data, ocispec); err != nil {
+		return err
+	}
+
 	u.RepositorySpec = ocispec
 	u.ComponentRepositoryMeta = *compmeta
 	return nil
