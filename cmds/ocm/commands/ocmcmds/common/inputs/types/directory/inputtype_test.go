@@ -6,7 +6,6 @@ package directory
 
 import (
 	. "github.com/onsi/ginkgo/v2"
-
 	. "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/testutils"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
@@ -45,4 +44,5 @@ var _ = Describe("Input Type", func() {
 			FollowSymlinks: &True,
 		})
 	})
+
 })
