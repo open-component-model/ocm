@@ -210,7 +210,7 @@ func (f *Finalizer) FinalizeWithErrorPropagation(efferr *error) {
 		return
 	}
 	if r := recover(); r != nil {
-		if e := exception.Exception(r); e != nil {
+		if e := exception.Exception(r); e != nil && f.catch(e) {
 			*efferr = errors.ErrList().Add(e).Add(*efferr).Result()
 		} else {
 			panic(r)
@@ -233,7 +233,7 @@ func (f *Finalizer) FinalizeWithErrorPropagationf(efferr *error, msg string, arg
 		return
 	}
 	if r := recover(); r != nil {
-		if e := exception.Exception(r); e != nil {
+		if e := exception.Exception(r); e != nil && f.catch(e) {
 			*efferr = errors.ErrList().Add(e).Add(*efferr).Result()
 		} else {
 			panic(r)
@@ -252,13 +252,35 @@ func (f *Finalizer) Finalize() (err error) {
 		return err
 	}
 	if r := recover(); r != nil {
-		if e := exception.Exception(r); e != nil {
+		if e := exception.Exception(r); e != nil && f.catch(e) {
 			err = errors.ErrList().Add(e).Add(err).Result()
 		} else {
 			panic(r)
 		}
 	}
 	return err
+}
+
+// ThrowFinalize executes the finalization and in case
+// of an error it throws the error to be catched by an outer
+// finalize or other error handling with the exception package.
+// It is explicitly useful fo finalize nested finalizers in loops.
+func (f *Finalizer) ThrowFinalize() {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
+	err := f.finalize()
+	if f.catch == nil {
+		throwFinalizationError(err)
+	}
+	if r := recover(); r != nil {
+		if e := exception.Exception(r); e != nil && f.catch(e) {
+			err = errors.ErrList().Add(e).Add(err).Result()
+		} else {
+			panic(r)
+		}
+	}
+	throwFinalizationError(err)
 }
 
 func (f *Finalizer) finalize() (err error) {
@@ -272,4 +294,28 @@ func (f *Finalizer) finalize() (err error) {
 	// Adding entries after the parent has been finalized is not supported, because there is no valid determinable order.
 	f.nested = nil
 	return list.Result()
+}
+
+type FinalizationError struct {
+	error
+}
+
+func (e FinalizationError) Unwrap() error {
+	return e.error
+}
+
+// FinalizeException is an exception matcher for nested finalization exceptions.
+func FinalizeException(err error) bool {
+	if err == nil {
+		return false
+	}
+	_, ok := err.(FinalizationError) //nolint:errorlint // only for unwrapped error intended
+	return ok
+}
+
+func throwFinalizationError(err error) {
+	if err == nil {
+		return
+	}
+	exception.Throw(FinalizationError{err})
 }
