@@ -6,8 +6,8 @@ GITHUBORG  ?= open-component-model
 COMPONENT = $(PROVIDER)/$(NAME)
 OCMREPO   ?= ghcr.io/$(GITHUBORG)/ocm
 MULTI     ?= true
-CONTAINER_PLATFORMS ?= linux/amd64 linux/arm64
-PLATFORMS = $(CONTAINER_PLATFORMS) darwin/arm64 darwin/amd64 windows/amd64
+IMAGE_PLATFORMS ?= linux/amd64 linux/arm64
+PLATFORMS = $(IMAGE_PLATFORMS) darwin/arm64 darwin/amd64 windows/amd64
 
 REPO_ROOT                                      := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))../..
 GIT_TREE_STATE                                 = $(shell [ -z "$$(git status --porcelain 2>/dev/null)" ] && echo clean || echo dirty)
@@ -20,7 +20,7 @@ PLATFORM_ARCH                                  := $(shell go env GOARCH)
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(CMD) -type f) Makefile
 OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
 
-ATTRIBUTES = VERSION="$(VERSION)" NAME="$(NAME)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" PLATFORMS="$(CONTAINER_PLATFORMS)" GEN="$(GEN)" MULTI=$(MULTI)
+ATTRIBUTES = VERSION="$(VERSION)" NAME="$(NAME)" COMMIT="$(COMMIT)" IMAGE="$(IMAGE):$(VERSION)" PLATFORMS="$(IMAGE_PLATFORMS)" GEN="$(GEN)" MULTI=$(MULTI)
 
 ifeq ($(MULTI),true)
 FLAGSUF     = .multi
@@ -71,9 +71,12 @@ $(GEN)/image: $(GEN)/.exists Dockerfile $(GEN)/build
 	fi
 	@touch $(GEN)/image
 
+.PHONY: image.multi
+image.multi: $(GEN)/image.multi
+
 $(GEN)/image.multi: Dockerfile $(GEN)/build
 	echo "Building with Alpine version: ${ALPINE_LATEST_VER}"
-	for i in $(CONTAINER_PLATFORMS); do \
+	for i in $(IMAGE_PLATFORMS); do \
 	tag=$$(echo $$i | sed -e s:/:-:g); \
         echo building platform $$i; \
 	docker buildx build --load -t $(IMAGE):$(VERSION)-$$tag --platform $$i --file Dockerfile $(REPO_ROOT) \
