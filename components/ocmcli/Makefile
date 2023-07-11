@@ -14,7 +14,8 @@ GIT_TREE_STATE                                 = $(shell [ -z "$$(git status --p
 VERSION                                        = $(shell go run ../../pkg/version/generate/release_generate.go print-rc-version $(CANDIDATE))
 COMMIT                                         = $(shell git rev-parse HEAD)
 EFFECTIVE_VERSION                              = $(VERSION)+$(COMMIT)
-PLATFORM                                       := $(shell go env GOOS)/$(shell go env GOARCH)
+PLATFORM_OS                                    := $(shell go env GOOS)
+PLATFORM_ARCH                                  := $(shell go env GOARCH)
 
 CMDSRCS=$(shell find $(REPO_ROOT)/cmds/$(CMD) -type f) Makefile
 OCMSRCS=$(shell find $(REPO_ROOT)/pkg -type f) $(REPO_ROOT)/go.*
@@ -54,10 +55,20 @@ $(GEN)/build: $(GEN)/.exists $(CMDSRCS) $(OCMSRCS)
 image: $(GEN)/image
 
 $(GEN)/image: $(GEN)/.exists Dockerfile $(GEN)/build
-	docker buildx build -t $(IMAGE):$(VERSION) --platform $(PLATFORM) --file Dockerfile $(REPO_ROOT) \
-          --build-arg OCM_VERSION=$(EFFECTIVE_VERSION) \
-		  --build-arg ALPINE_VERSION=$(ALPINE_LATEST_VER) \
-          --build-arg SUFFIX=$$(echo $(PLATFORM) | sed -e s:/:-:g)
+	@PLATFORM_OS_OVERRIDE=$(PLATFORM_OS); \
+	if [ $$PLATFORM_OS_OVERRIDE == darwin ]; then \
+		echo; echo "Building linux instead of darwin as there's no native Docker platform for darwin"; echo; \
+		docker buildx build -t $(IMAGE):$(VERSION) --platform linux/$(PLATFORM_ARCH) --file Dockerfile $(REPO_ROOT) \
+			--build-arg OCM_VERSION=$(EFFECTIVE_VERSION) \
+			--build-arg ALPINE_VERSION=$(ALPINE_LATEST_VER) \
+			--build-arg SUFFIX=$$(echo linux/$(PLATFORM_ARCH) | sed -e s:/:-:g); \
+	else \
+		echo; echo "Building for $(PLATFORM_OS)/$(ARCH)"; echo; \
+		docker buildx build -t $(IMAGE):$(VERSION) --platform $(PLATFORM_OS)/$(PLATFORM_ARCH) --file Dockerfile $(REPO_ROOT) \
+			--build-arg OCM_VERSION=$(EFFECTIVE_VERSION) \
+			--build-arg ALPINE_VERSION=$(ALPINE_LATEST_VER) \
+			--build-arg SUFFIX=$$(echo $(PLATFORM_OS)/$(PLATFORM_ARCH) | sed -e s:/:-:g); \
+	fi
 	@touch $(GEN)/image
 
 $(GEN)/image.multi: Dockerfile $(GEN)/build
