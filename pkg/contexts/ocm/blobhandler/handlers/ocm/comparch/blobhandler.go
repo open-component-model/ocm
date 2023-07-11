@@ -41,11 +41,11 @@ func (b *blobHandler) StoreBlob(blob cpi.BlobAccess, artType, hint string, globa
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
-	err := ocmctx.AddBlob(blob)
+	ref, err := ocmctx.AddBlob(blob)
 	if err != nil {
 		return nil, err
 	}
-	path := common.DigestToFileName(blob.Digest())
+	path := common.DigestToFileName(digest.Digest(ref))
 	if compatattr.Get(ctx.GetContext()) {
 		return localfsblob.New(path, blob.MimeType()), nil
 	} else {

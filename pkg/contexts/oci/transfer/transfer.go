@@ -63,6 +63,7 @@ func TransferManifest(art cpi.ManifestAccess, set cpi.ArtifactSink, tags ...stri
 		return errors.Wrapf(err, "getting config blob")
 	}
 	err = set.AddBlob(blob)
+	blob.Close()
 	if err != nil {
 		return errors.Wrapf(err, "transferring config blob")
 	}
@@ -73,10 +74,10 @@ func TransferManifest(art cpi.ManifestAccess, set cpi.ArtifactSink, tags ...stri
 			return errors.Wrapf(err, "getting layer blob %s", l.Digest)
 		}
 		err = set.AddBlob(blob)
+		blob.Close()
 		if err != nil {
 			return errors.Wrapf(err, "transferring layer blob %s", l.Digest)
 		}
-		blob.Close()
 	}
 	blob, err = set.AddArtifact(art, tags...)
 	if err != nil {
