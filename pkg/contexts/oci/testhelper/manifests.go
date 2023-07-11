@@ -91,7 +91,7 @@ var DS_OCIMANIFEST2 = &metav1.DigestSpec{
 }
 
 func OCIManifest2(env *builder.Builder) *artdesc.Descriptor {
-	_, ldesc := OCIManifest2For(env, OCINAMESPACE2, OCINAMESPACE)
+	_, ldesc := OCIManifest2For(env, OCINAMESPACE2, OCIVERSION)
 	return ldesc
 }
 

@@ -90,6 +90,11 @@ func (b *Builder) artifact(tag string, ns cpi.NamespaceAccess, t func(access oci
 					err = nil
 				}
 			}
+			if errors.IsErrUnknown(err) {
+				if b, _ := artdesc.IsDigest(tag); !b {
+					err = nil
+				}
+			}
 		}
 		b.failOn(err, 1)
 	}
