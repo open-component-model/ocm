@@ -15,7 +15,17 @@ helper:
     input:
       type: file
       path: (( values.GEN "/" values.NAME "." replace(p,"/","-") ))
+  image:
+    <<<: (( &template ))
+    name: ocmcli-image
+    type: ociImage
+    version: (( values.VERSION ))
+    input:
+      type: (( values.MULTI ? "dockermulti" :"docker" ))
+      repository: (( index(values.IMAGE, ":") >= 0 ? substr(values.IMAGE,0,index(values.IMAGE,":")) :values.IMAGE ))
+      variants: (( values.MULTI ? map[split(" ", values.PLATFORMS)|v|-> values.IMAGE "-" replace(v,"/","-")] :~~ ))
+      path: (( !values.MULTI ? values.IMAGE :~~ ))
 
 
-resources: (( map[split(" ", values.PLATFORMS)|p|-> *helper.executable] ))
+resources: (( map[split(" ", values.PLATFORMS)|p|-> *helper.executable] *helper.image ))
 
