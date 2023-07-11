@@ -6,6 +6,7 @@ package finalizer
 
 import (
 	"io"
+	"strings"
 	"sync"
 
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -63,22 +64,32 @@ func (f *Finalizer) CatchException(matchers ...exception.Matcher) *Finalizer {
 
 // Lock locks a given Locker and unlocks it again
 // during finalization.
-func (f *Finalizer) Lock(locker sync.Locker) *Finalizer {
+func (f *Finalizer) Lock(locker sync.Locker, msg ...string) *Finalizer {
 	locker.Lock()
-	return f.WithVoid(locker.Unlock)
+	return f.WithVoid(locker.Unlock, msg...)
 }
 
 // WithVoid registers a simple function to be
 // called on finalization.
-func (f *Finalizer) WithVoid(fi func()) *Finalizer {
-	return f.With(CallingV(fi))
+func (f *Finalizer) WithVoid(fi func(), msg ...string) *Finalizer {
+	return f.With(CallingV(fi), msg...)
 }
 
-func (f *Finalizer) With(fi func() error) *Finalizer {
+func (f *Finalizer) With(fi func() error, msg ...string) *Finalizer {
 	if fi != nil {
 		f.lock.Lock()
 		defer f.lock.Unlock()
 
+		if len(msg) > 0 {
+			ofi := fi
+			fi = func() error {
+				err := ofi()
+				if err == nil {
+					return nil
+				}
+				return errors.Wrapf(err, "%s", strings.Join(msg, " "))
+			}
+		}
 		f.pending = append(f.pending, fi)
 	}
 	return f
@@ -134,11 +145,11 @@ func Calling3V[T, U, V any](f func(arg1 T, arg2 U, arg3 V), arg1 T, arg2 U, arg3
 	}
 }
 
-// ClosingWith will finalize the given object by calling
-// its ClosingWith function when the finalizer is finalized.
-func (f *Finalizer) Close(c io.Closer) *Finalizer {
+// Close will finalize the given object by calling
+// its Close function when the finalizer is finalized.
+func (f *Finalizer) Close(c io.Closer, msg ...string) *Finalizer {
 	if c != nil {
-		f.With(c.Close)
+		f.With(c.Close, msg...)
 	}
 	return f
 }

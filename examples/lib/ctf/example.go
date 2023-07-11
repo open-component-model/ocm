@@ -7,19 +7,16 @@ package main
 import (
 	"fmt"
 
-	"github.com/mandelsoft/logging"
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/finalizer"
-	ocmlog "github.com/open-component-model/ocm/pkg/logging"
 	"github.com/open-component-model/ocm/pkg/mime"
 )
 
@@ -29,7 +26,7 @@ const VERS = "1.0.0"
 func CTFExample() (rerr error) {
 	var finalize finalizer.Finalizer
 
-	ocmlog.Context().AddRule(logging.NewConditionRule(logging.TraceLevel, accessio.ALLOC_REALM))
+	// ocmlog.Context().AddRule(logging.NewConditionRule(logging.TraceLevel, accessio.ALLOC_REALM))
 
 	defer finalize.FinalizeWithErrorPropagation(&rerr)
 
@@ -62,28 +59,17 @@ func CTFExample() (rerr error) {
 		compvers.GetDescriptor().Provider = metav1.Provider{Name: "acme.org"}
 
 		// add a new resource artifact with the local identity `name="test"`.
-		/*
-			err = compvers.SetResourceBlob(
-				&compdesc.ResourceMeta{
-					ElementMeta: compdesc.ElementMeta{
-						Name: "test",
-					},
-					Type:     resourcetypes.BLOB,
-					Relation: metav1.LocalRelation,
+		err = compvers.SetResourceBlob(
+			&compdesc.ResourceMeta{
+				ElementMeta: compdesc.ElementMeta{
+					Name: "test",
 				},
-				accessio.BlobAccessForString(mime.MIME_TEXT, "testdata"),
-				"", nil,
-			)
-		*/
-
-		err = compvers.SetResource(&compdesc.ResourceMeta{
-			ElementMeta: compdesc.ElementMeta{
-				Name: "ref",
+				Type:     resourcetypes.BLOB,
+				Relation: metav1.LocalRelation,
 			},
-			Type:     resourcetypes.BLOB,
-			Relation: metav1.LocalRelation,
-		}, localblob.New("bla", "", mime.MIME_TEXT, nil))
-		// }, ociartifact.New("bla"))
+			accessio.BlobAccessForString(mime.MIME_TEXT, "testdata"),
+			"", nil,
+		)
 
 		if err != nil {
 			return errors.Wrapf(err, "cannot add resource")
