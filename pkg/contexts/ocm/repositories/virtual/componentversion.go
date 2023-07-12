@@ -64,8 +64,9 @@ func (c *ComponentVersionContainer) Close() error {
 	if c.access == nil {
 		return accessio.ErrClosed
 	}
+	a := c.access
 	c.access = nil
-	return nil
+	return a.Close()
 }
 
 func (c *ComponentVersionContainer) Check() error {

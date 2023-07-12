@@ -7,7 +7,6 @@ package virtual
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi/support"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -84,14 +83,14 @@ func (c *componentAccessImpl) NewVersion(version string, overrides ...bool) (cpi
 	defer v.Close()
 
 	override := utils.Optional(overrides...)
-	_, err = c.HasVersion(version)
-	if err == nil {
+	ok, err := c.HasVersion(version)
+	if err == nil && ok {
 		if override {
 			return newComponentVersionAccess(c, version, false)
 		}
 		return nil, errors.ErrAlreadyExists(cpi.KIND_COMPONENTVERSION, c.name+"/"+version)
 	}
-	if !errors.IsErrNotFoundKind(err, oci.KIND_OCIARTIFACT) {
+	if err != nil && !errors.IsErrNotFoundKind(err, cpi.KIND_COMPONENTVERSION) {
 		return nil, err
 	}
 	return newComponentVersionAccess(c, version, false)
