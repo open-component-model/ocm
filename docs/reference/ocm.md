@@ -64,7 +64,7 @@ default credential, always used if no dedicated match is found.
 For example:
 
 <center>
-    <pre>--cred :type=ociRegistry --cred :hostname=ghcr.io --cred usename=mandelsoft --cred password=xyz</pre>
+    <pre>--cred :type=ociRegistry --cred :hostname=ghcr.io --cred username=mandelsoft --cred password=xyz</pre>
 </center>
 
 With the option <code>-X</code> it is possible to pass global settings of the 
@@ -90,8 +90,8 @@ The <code>--logconfig*</code> options can be used to configure a complete
 logging configuration (yaml/json) via command line. If the argument starts with
 an <code>@</code>, the logging configuration is taken from a file.
 
-The value can be a simple type or a json string for complex values. The following
-attributes are supported:
+The value can be a simple type or a JSON/YAML string for complex values
+(see [ocm attributes](ocm_attributes.md). The following attributes are supported:
 - <code>github.com/mandelsoft/logforward</code>: *logconfig* Logging config structure used for config forwarding
 
   THis attribute is used to specify a logging configuration intended
@@ -124,8 +124,8 @@ attributes are supported:
   If a boolean is given the short hash or none mode is enabled.
   The YAML flavor uses the following fields:
   - *<code>mode</code>* *string*: <code>hash</code>, <code>shortHash</code>, <code>prefixMapping</code>
-    or <code>none</code>.
-  - *<code>prefixMapping</code>*: *map[string]string* repository path prefix mapping.
+    or <code>none</code>. If unset, no mapping is done.
+  - *<code>prefixMappings</code>*: *map[string]string* repository path prefix mapping.
   - *<code>prefix</code>*: *string* repository prefix to use (replaces potential sub path of OCM repo).
 
 - <code>github.com/mandelsoft/ocm/ociuploadrepo</code> [<code>ociuploadrepo</code>]: *oci base repository ref*
@@ -173,6 +173,24 @@ attributes are supported:
   - *<code>rekorURL</code>* *string*  default is https://rekor.sigstore.dev
   - *<code>OIDCIssuer</code>* *string*  default is https://oauth2.sigstore.dev/auth
   - *<code>OIDCClientID</code>* *string*  default is sigstore
+
+For several options (like <code>-X</code>) it is possible to pass complex values
+using JSON or YAML syntax. To pass those arguments the escaping of the used shell
+must be used to pass quotes, commas, curly brackets or newlines. for the *bash*
+the easiest way to achieve this is to put the complete value into single quotes.
+
+<center>
+<code>-X 'mapocirepo={"mode": "shortHash"}'</code>.
+</center>
+
+Alternatively, quotes and opening curly brackets can be escaped by using a
+backslash (<code>&bsol;</code>).
+Often a tagged value can also be substituted from a file with the syntax
+
+<center>
+<code>&lt;attr>=@&lt;filepath></code>
+</center>
+
 
 ### SEE ALSO
 

@@ -108,6 +108,26 @@ var _ = Describe("ref parsing", func() {
 			CheckRef("directory::./file.io//bla.blob/comp", "directory", "", "", "bla.blob/comp", "", "./file.io")
 			CheckRef("any::file.io//bla.blob/comp", "any", "file.io", "", "bla.blob/comp", "", "")
 		})
+
+		It("dedicated test case", func() {
+			ref := Must(ocm.ParseRef("OCIRegistry::73555000100900003892.dev.dockersrv.repositories.sapcloud.cn/dev/v1//github.wdf.sap.corp/kubernetes/landscape-setup-dependencies:0.3797.0"))
+
+			v := "0.3797.0"
+			Expect(ref).To(Equal(ocm.RefSpec{
+				UniformRepositorySpec: ocm.UniformRepositorySpec{
+					Type:            "OCIRegistry",
+					Host:            "73555000100900003892.dev.dockersrv.repositories.sapcloud.cn",
+					SubPath:         "dev/v1",
+					Info:            "",
+					CreateIfMissing: false,
+					TypeHint:        "",
+				},
+				CompSpec: ocm.CompSpec{
+					Component: "github.wdf.sap.corp/kubernetes/landscape-setup-dependencies",
+					Version:   &v,
+				},
+			}))
+		})
 	})
 
 	Context("map to spec", func() {

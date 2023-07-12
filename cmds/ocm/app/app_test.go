@@ -12,6 +12,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	. "github.com/open-component-model/ocm/cmds/ocm/testhelper"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/mapocirepoattr"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/logging"
@@ -134,6 +135,15 @@ ERROR <nil> ocm/test ctxerror
 		Expect(err).To(Succeed())
 
 		Expect(len(string(data))).To(Equal(191))
+	})
+
+	It("sets attr from file", func() {
+		buf := bytes.NewBuffer(nil)
+		attr := mapocirepoattr.Get(env.Context)
+		Expect(attr.Mode).To(Equal(mapocirepoattr.NoneMode))
+		Expect(env.CatchOutput(buf).Execute("-X", "mapocirepo=@testdata/attr.yaml", "version")).To(Succeed())
+		attr = mapocirepoattr.Get(env.Context)
+		Expect(attr.Mode).To(Equal(mapocirepoattr.ShortHashMode))
 	})
 
 })
