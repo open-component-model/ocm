@@ -106,7 +106,15 @@ attributes are supported:
 
   Compatibility mode: Avoid generic local access methods and prefer type specific ones.
 
-- <code>github.com/mandelsoft/ocm/hashocirepo</code> [<code>hashocirepo</code>]: *bool|YAML*
+- <code>github.com/mandelsoft/ocm/keeplocalblob</code> [<code>keeplocalblob</code>]: *bool*
+
+  Keep local blobs when importing OCI artifacts to OCI registries from <code>localBlob</code>
+  access methods. By default, they will be expanded to OCI artifacts with the
+  access method <code>ociRegistry</code>. If this option is set to true, they will be stored
+  as local blobs, also. The access method will still be <code>localBlob</code> but with a nested
+  <code>ociRegistry</code> access method for describing the global access.
+
+- <code>github.com/mandelsoft/ocm/mapocirepo</code> [<code>mapocirepo</code>]: *bool|YAML*
 
   When uploading an OCI artifact blob to an OCI based OCM repository and the
   artifact is uploaded as OCI artifact, the repository path part is shortened,
@@ -115,17 +123,9 @@ attributes are supported:
   
   If a boolean is given the short hash or none mode is enabled.
   The YAML flavor uses the following fields:
-  - *<code>mode</code>* *string*: <code>hash</code>, <code>shortHash</code>, <code>prefixMapping</code>
+  - *<code>mode</code>* *string*: <code>hash</code>, <code>shartHash</code>, <code>prefixMapping</code>
     or <code>none</code>.
   - *<code>prefixMapping</code>*: *map[string]string* repository path prefix mapping.
-
-- <code>github.com/mandelsoft/ocm/keeplocalblob</code> [<code>keeplocalblob</code>]: *bool*
-
-  Keep local blobs when importing OCI artifacts to OCI registries from <code>localBlob</code>
-  access methods. By default, they will be expanded to OCI artifacts with the
-  access method <code>ociRegistry</code>. If this option is set to true, they will be stored
-  as local blobs, also. The access method will still be <code>localBlob</code> but with a nested
-  <code>ociRegistry</code> access method for describing the global access.
 
 - <code>github.com/mandelsoft/ocm/ociuploadrepo</code> [<code>ociuploadrepo</code>]: *oci base repository ref*
 
@@ -164,6 +164,14 @@ attributes are supported:
   The temporary blob cache is used to accessing large blobs from remote sytems.
   The are temporarily stored in the filesystem, instead of the memory, to avoid
   blowing up the memory consumption.
+
+- <code>ocm.software/signing/sigstore</code> [<code>sigstore</code>]: *sigstore config* Configuration to use for sigstore based signing.
+
+  The following fields are used.
+  - *<code>fulcioURL</code>* *string*  default is https://v1.fulcio.sigstore.dev
+  - *<code>rekorURL</code>* *string*  default is https://rekor.sigstore.dev
+  - *<code>OIDCIssuer</code>* *string*  default is https://oauth2.sigstore.dev/auth
+  - *<code>OIDCClientID</code>* *string*  default is sigstore
 
 ### SEE ALSO
 
