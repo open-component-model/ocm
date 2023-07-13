@@ -268,6 +268,62 @@ var _ = Describe("finalizer", func() {
 			Expect(order).To(Equal(Order{"second", "next", "first", "closer", "nested"}))
 		})
 	})
+
+	Context("finalize ordering of parent and nested finalizers", func() {
+		It("handles empty", func() {
+			var f finalizer.Finalizer
+			f.Nested()
+			f.Nested()
+			f.Nested()
+		})
+		It("handles mixed nested and finalize", func() {
+			var f finalizer.Finalizer
+			var order Order
+
+			f.With(F("A", &order))
+			n := f.Nested()
+			n.With(F("B", &order))
+			f.Finalize()
+			f.With(F("C", &order))
+
+			// this should never be done, because it would cause a strange
+			// execution order, but it should basically not crash.
+			n.With(F("D", &order))
+
+			n2 := f.Nested()
+			n2.With(F("E", &order))
+			f.With(F("F", &order))
+			f.Finalize()
+			Expect(order).To(Equal(Order{"B", "A", "F", "E", "C"}))
+		})
+		It("handles nested in order", func() {
+			var f finalizer.Finalizer
+			var order Order
+
+			f.With(F("A", &order))
+			n := f.Nested()
+			n.With(F("B", &order))
+			f.With(F("C", &order))
+
+			f.Finalize()
+			Expect(order).To(Equal(Order{"C", "B", "A"}))
+		})
+		It("handles omitted nested in order", func() {
+			var f finalizer.Finalizer
+			var order Order
+
+			f.With(F("A", &order))
+			n := f.Nested()
+			n.With(F("B", &order))
+			f.With(F("C", &order))
+			n2 := f.Nested()
+			n2.With(F("D", &order))
+			f.With(F("E", &order))
+
+			f.Finalize()
+			Expect(order).To(Equal(Order{"E", "D", "C", "B", "A"}))
+		})
+	})
 })
 
 func errfunc(succeed bool) func() error {
