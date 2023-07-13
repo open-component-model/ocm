@@ -9,9 +9,10 @@ ocm verify componentversions [<options>] {<component-reference>}
 ### Options
 
 ```
-      --ca-cert stringArray       Additional root certificates
+      --ca-cert stringArray       additional root certificates
   -c, --constraints constraints   version constraint
   -h, --help                      help for componentversions
+      --keyless                   use keyless signing
       --latest                    restrict component versions to latest
   -L, --local                     verification based on information found in component versions, only
       --lookup stringArray        repository name or spec for closure lookup fallback
