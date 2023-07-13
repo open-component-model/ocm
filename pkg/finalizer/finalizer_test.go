@@ -121,6 +121,16 @@ var _ = Describe("finalizer", func() {
 		Expect(finalize.Length()).To(Equal(0))
 	})
 
+	It("nested finalizers are handled correctly when Finalizing", func() {
+		var nested finalizer.Finalizer
+		var order Order
+		nested.Nested().New().Nested().With(F("A", &order))
+		nested.Finalize()
+		nested.Nested()
+		Expect(order).To(Equal(Order{"A"}))
+		Expect(nested.Length()).To(Equal(1))
+	})
+
 	It("separately finalizes new finalizers", func() {
 		var finalize finalizer.Finalizer
 		var order Order

@@ -180,7 +180,7 @@ func (f *Finalizer) Nested() *Finalizer {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
-	if f.nested == nil || f.nested.Length() > 0 {
+	if f.nested == nil || f.nested.Length() == 0 {
 		f.nested = &Finalizer{}
 	} else {
 		f.pending = append(f.pending[:f.index], f.pending[f.index+1:]...)
