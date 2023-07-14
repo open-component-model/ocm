@@ -22,6 +22,7 @@ on:
 jobs:
   check:
     name: Check Release Preconditions
+    group: release
     runs-on:
       labels: Releaser
     permissions:
@@ -117,6 +118,7 @@ jobs:
     - lint-and-test
     - components
     name: Release Build
+    group: release
     runs-on:
       labels: Releaser
     permissions:
