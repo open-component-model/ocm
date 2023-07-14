@@ -22,7 +22,7 @@ on:
 jobs:
   check:
     name: Check Release Preconditions
-    runs-on: Release
+    runs-on: Releaser
     permissions:
       contents: write
       id-token: write
