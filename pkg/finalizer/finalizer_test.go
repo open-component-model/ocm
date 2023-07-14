@@ -324,6 +324,14 @@ var _ = Describe("finalizer", func() {
 			Expect(order).To(Equal(Order{"E", "D", "C", "B", "A"}))
 		})
 	})
+
+	Context("loops", func() {
+		It("handles exceptions", func() {
+			err := loopFunc()
+			Expect(err).NotTo(BeNil())
+			Expect(err.Error()).To(Equal("finalizing nested failed"))
+		})
+	})
 })
 
 func errfunc(succeed bool) func() error {
@@ -339,4 +347,22 @@ func testFunc(msg string, err error, succeed bool) (efferr error) {
 	defer finalize.FinalizeWithErrorPropagationf(&efferr, msg)
 	finalize.With(errfunc(succeed))
 	return err
+}
+
+func loopFunc() (err error) {
+	var finalize finalizer.Finalizer
+	finalize.CatchException(finalizer.FinalizeException)
+
+	defer finalize.FinalizeWithErrorPropagation(&err)
+
+	for i := 0; i < 3; i++ {
+		loop := finalize.Nested()
+		if i == 1 {
+			loop.With(func() error { return fmt.Errorf("finalizing nested failed") })
+		} else {
+			loop.With(func() error { return nil })
+		}
+		loop.ThrowFinalize()
+	}
+	return nil
 }

@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/mandelsoft/vfs/pkg/osfs"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 	"sigs.k8s.io/yaml"
 
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -23,19 +25,34 @@ func gkind(kind ...string) string {
 	return "label"
 }
 
-func ParseLabel(a string, kind ...string) (*metav1.Label, error) {
+func ParseLabel(fs vfs.FileSystem, a string, kind ...string) (*metav1.Label, error) {
+	var err error
+
+	if fs == nil {
+		fs = osfs.New()
+	}
 	i := strings.Index(a, "=")
 	if i < 0 {
 		return nil, errors.ErrInvalid(gkind(kind...), a)
 	}
 	label := a[:i]
 
+	var data []byte
+	if strings.HasPrefix(a[i+1:], "@") {
+		data, err = vfs.ReadFile(fs, a[i+2:])
+		if err != nil {
+			return nil, errors.Wrapf(err, "cannot read file %q", a[i+2:])
+		}
+	} else {
+		data = []byte(a[i+1:])
+	}
+
 	var value interface{}
-	err := yaml.Unmarshal([]byte(a[i+1:]), &value)
+	err = yaml.Unmarshal(data, &value)
 	if err != nil {
 		return nil, errors.Wrapf(errors.ErrInvalid(gkind(kind...), a), "no yaml or json")
 	}
-	data, err := json.Marshal(value)
+	data, err = json.Marshal(value)
 	if err != nil {
 		return nil, errors.Wrapf(errors.ErrInvalid(gkind(kind...), a), err.Error())
 	}
@@ -45,8 +62,8 @@ func ParseLabel(a string, kind ...string) (*metav1.Label, error) {
 	}, nil
 }
 
-func AddParsedLabel(labels metav1.Labels, a string, kind ...string) (metav1.Labels, error) {
-	l, err := ParseLabel(a, kind...)
+func AddParsedLabel(fs vfs.FileSystem, labels metav1.Labels, a string, kind ...string) (metav1.Labels, error) {
+	l, err := ParseLabel(fs, a, kind...)
 	if err != nil {
 		return nil, err
 	}
@@ -58,11 +75,11 @@ func AddParsedLabel(labels metav1.Labels, a string, kind ...string) (metav1.Labe
 	return append(labels, *l), nil
 }
 
-func ParseLabels(labels []string, kind ...string) (metav1.Labels, error) {
+func ParseLabels(fs vfs.FileSystem, labels []string, kind ...string) (metav1.Labels, error) {
 	var err error
 	result := metav1.Labels{}
 	for _, l := range labels {
-		result, err = AddParsedLabel(result, l, kind...)
+		result, err = AddParsedLabel(fs, result, l, kind...)
 		if err != nil {
 			return nil, err
 		}
@@ -70,8 +87,8 @@ func ParseLabels(labels []string, kind ...string) (metav1.Labels, error) {
 	return result, err
 }
 
-func SetParsedLabel(labels metav1.Labels, a string, kind ...string) (metav1.Labels, error) {
-	l, err := ParseLabel(a, kind...)
+func SetParsedLabel(fs vfs.FileSystem, labels metav1.Labels, a string, kind ...string) (metav1.Labels, error) {
+	l, err := ParseLabel(fs, a, kind...)
 	if err != nil {
 		return nil, err
 	}

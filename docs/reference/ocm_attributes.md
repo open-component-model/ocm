@@ -3,8 +3,8 @@
 ### Description
 
 
-The OCM library supports are set of attributes, which can be used to influence
-the bahaviour of various functions. The CLI also supports setting of those
+The OCM library supports a set of attributes, which can be used to influence
+the behaviour of various functions. The CLI also supports setting of those
 attributes using the config file (see [ocm configfile](ocm_configfile.md)) or by
 command line options of the main command (see [ocm](ocm.md)).
 
@@ -41,9 +41,10 @@ OCM library:
   
   If a boolean is given the short hash or none mode is enabled.
   The YAML flavor uses the following fields:
-  - *<code>mode</code>* *string*: <code>hash</code>, <code>shartHash</code>, <code>prefixMapping</code>
-    or <code>none</code>.
-  - *<code>prefixMapping</code>*: *map[string]string* repository path prefix mapping.
+  - *<code>mode</code>* *string*: <code>hash</code>, <code>shortHash</code>, <code>prefixMapping</code>
+    or <code>none</code>. If unset, no mapping is done.
+  - *<code>prefixMappings</code>*: *map[string]string* repository path prefix mapping.
+  - *<code>prefix</code>*: *string* repository prefix to use (replaces potential sub path of OCM repo).
 
 - <code>github.com/mandelsoft/ocm/ociuploadrepo</code> [<code>ociuploadrepo</code>]: *oci base repository ref*
 
