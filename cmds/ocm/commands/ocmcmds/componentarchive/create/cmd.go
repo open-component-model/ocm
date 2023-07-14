@@ -91,7 +91,7 @@ func (o *Command) Complete(args []string) error {
 	o.Version = args[1]
 
 	for _, a := range args[2:] {
-		o.Labels, err = common.AddParsedLabel(o.Labels, a)
+		o.Labels, err = common.AddParsedLabel(o.FileSystem(), o.Labels, a)
 		if err != nil {
 			return err
 		}
@@ -104,7 +104,7 @@ func (o *Command) Complete(args []string) error {
 			o.Provider = a
 			continue
 		}
-		o.ProviderLabels, err = common.AddParsedLabel(o.ProviderLabels, a)
+		o.ProviderLabels, err = common.AddParsedLabel(o.FileSystem(), o.ProviderLabels, a)
 		if err != nil {
 			return err
 		}

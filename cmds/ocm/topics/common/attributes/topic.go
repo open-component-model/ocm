@@ -19,8 +19,8 @@ func New(ctx clictx.Context) *cobra.Command {
 		Use:   "attributes",
 		Short: "configuration attributes used to control the behaviour",
 		Long: `
-The OCM library supports are set of attributes, which can be used to influence
-the bahaviour of various functions. The CLI also supports setting of those
+The OCM library supports a set of attributes, which can be used to influence
+the behaviour of various functions. The CLI also supports setting of those
 attributes using the config file (see <CMD>ocm configfile</CMD>) or by
 command line options of the main command (see <CMD>ocm</CMD>).
 

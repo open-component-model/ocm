@@ -77,15 +77,26 @@ func (r *ociArtifact) addArtifact(a oci.ArtifactAccess) error {
 func (b *Builder) artifact(tag string, ns cpi.NamespaceAccess, t func(access oci.ArtifactAccess) (string, *map[string]string, error), f ...func()) *artdesc.Descriptor {
 	var k string
 	var annos *map[string]string
+	var err error
+	var v oci.ArtifactAccess
 
 	b.expect(b.oci_nsacc, T_OCINAMESPACE)
-	v, err := b.oci_nsacc.GetArtifact(tag)
-	if err != nil {
-		if errors.IsErrNotFound(err) {
-			if b, _ := artdesc.IsDigest(tag); !b {
-				err = nil
+
+	if tag != "" {
+		v, err = b.oci_nsacc.GetArtifact(tag)
+		if err != nil {
+			if errors.IsErrNotFound(err) {
+				if b, _ := artdesc.IsDigest(tag); !b {
+					err = nil
+				}
+			}
+			if errors.IsErrUnknown(err) {
+				if b, _ := artdesc.IsDigest(tag); !b {
+					err = nil
+				}
 			}
 		}
+		b.failOn(err, 1)
 	}
 	b.oci_cleanuplayers = true
 	if v == nil {
@@ -122,4 +133,11 @@ func (b *Builder) Manifest(tag string, f ...func()) *artdesc.Descriptor {
 		}
 		return "", nil, errors.Newf("artifact is index")
 	}, f...)
+}
+
+func (b *Builder) Artifact(desc *artdesc.Descriptor) {
+	b.expect(b.oci_artacc, T_OCIINDEX, func() bool { return b.oci_artacc.IsIndex() })
+
+	m := b.oci_artacc.IndexAccess().GetDescriptor()
+	m.Manifests = append(m.Manifests, *desc)
 }
