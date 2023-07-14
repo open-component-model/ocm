@@ -15,7 +15,7 @@ permissions:
 jobs:
   build-cli:
     name: Build CLI
-    runs-on: ubuntu-latest
+    runs-on: large_runner
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -41,7 +41,7 @@ jobs:
           PATH=$PATH:$(go env GOPATH)/bin make ctf
   build-helminstaller:
     name: Build HelmInstaller
-    runs-on: ubuntu-latest
+    runs-on: large_runner
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -67,7 +67,7 @@ jobs:
           PATH=$PATH:$(go env GOPATH)/bin make ctf
   build-helmdemo:
     name: Build HelmDemo
-    runs-on: ubuntu-latest
+    runs-on: large_runner
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -93,7 +93,7 @@ jobs:
           PATH=$PATH:$(go env GOPATH)/bin make ctf
   build-subchartsdemo:
     name: Build Helm SubChartsDemo
-    runs-on: ubuntu-latest
+    runs-on: large_runner
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -119,7 +119,7 @@ jobs:
           PATH=$PATH:$(go env GOPATH)/bin make ctf
   build-ecrplugin:
     name: Build ECR Plugin
-    runs-on: ubuntu-latest
+    runs-on: large_runner
     steps:
       - name: Checkout
         uses: actions/checkout@v3
