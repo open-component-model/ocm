@@ -22,7 +22,8 @@ on:
 jobs:
   check:
     name: Check Release Preconditions
-    runs-on: Releaser
+    runs-on:
+      labels: Releaser
     permissions:
       contents: write
       id-token: write
@@ -116,7 +117,8 @@ jobs:
     - lint-and-test
     - components
     name: Release Build
-    runs-on: Releaser
+    runs-on:
+      labels: Releaser
     permissions:
       contents: write
       id-token: write
