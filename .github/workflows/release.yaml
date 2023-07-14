@@ -199,7 +199,7 @@ jobs:
         v="${{env.RELEASE_VERSION}}"
         f="docs/releasenotes/$v.md"
         if [ ! -f "$f" ]; then
-          echo "Release ${{ env.RELEASE_VERSION }}" > "$f"
+          echo "# Release ${{ env.RELEASE_VERSION }}" > "$f"
           echo "$RELEASE_NOTES" | tail -n +2 >> "$f"
           echo "RELEASE_NOTES_FILE=$f" >> $GITHUB_ENV
           git add "$f"
@@ -218,6 +218,22 @@ jobs:
         msg="Release ${{ env.RELEASE_VERSION }}"
         git tag --annotate --message "${msg}" ${{ env.RELEASE_VERSION }}
         git push origin ${{ env.RELEASE_VERSION }}
+
+    - name: Free Disk Space (Ubuntu)
+      uses: jlumbroso/free-disk-space@main
+      with:
+        # this might remove tools that are actually needed,
+        # if set to "true" but frees about 6 GB
+        tool-cache: false
+        
+        # all of these default to true, but feel free to set to
+        # "false" if necessary for your workflow
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: true
+        docker-images: true
+        swap-storage: true
 
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v4
