@@ -22,7 +22,7 @@ on:
 jobs:
   check:
     name: Check Release Preconditions
-    runs-on: ubuntu-latest
+    runs-on: Releaser
     permissions:
       contents: write
       id-token: write
@@ -98,6 +98,7 @@ jobs:
 
   lint-and-test:
     name: Lint and Unit Tests
+    runs-on: Releaser
     uses: ./.github/workflows/lint_and_test.yaml
     needs: check
     permissions:
@@ -105,6 +106,7 @@ jobs:
       pull-requests: read
   components:
     name: Component CTF Builds
+    runs-on: Releaser
     uses: ./.github/workflows/components.yaml
     needs: check
     permissions:
@@ -116,7 +118,7 @@ jobs:
     - lint-and-test
     - components
     name: Release Build
-    runs-on: ubuntu-latest
+    runs-on: Releaser
     permissions:
       contents: write
       id-token: write
