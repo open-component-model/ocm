@@ -22,7 +22,6 @@ on:
 jobs:
   check:
     name: Check Release Preconditions
-    group: release
     runs-on:
       labels: Releaser
     permissions:
@@ -100,13 +99,18 @@ jobs:
 
   lint-and-test:
     name: Lint and Unit Tests
+    runs-on:
+      labels: Releaser
     uses: ./.github/workflows/lint_and_test.yaml
     needs: check
     permissions:
       contents: read
       pull-requests: read
+
   components:
     name: Component CTF Builds
+    runs-on:
+      labels: Releaser
     uses: ./.github/workflows/components.yaml
     needs: check
     permissions:
@@ -118,7 +122,6 @@ jobs:
     - lint-and-test
     - components
     name: Release Build
-    group: release
     runs-on:
       labels: Releaser
     permissions:
@@ -222,22 +225,6 @@ jobs:
         msg="Release ${{ env.RELEASE_VERSION }}"
         git tag --annotate --message "${msg}" ${{ env.RELEASE_VERSION }}
         git push origin ${{ env.RELEASE_VERSION }}
-
-    - name: Free Disk Space (Ubuntu)
-      uses: jlumbroso/free-disk-space@main
-      with:
-        # this might remove tools that are actually needed,
-        # if set to "true" but frees about 6 GB
-        tool-cache: false
-        
-        # all of these default to true, but feel free to set to
-        # "false" if necessary for your workflow
-        android: true
-        dotnet: true
-        haskell: true
-        large-packages: true
-        docker-images: true
-        swap-storage: true
 
     - name: Run GoReleaser
       uses: goreleaser/goreleaser-action@v4
