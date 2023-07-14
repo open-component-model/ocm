@@ -58,8 +58,10 @@ func FilterChildren(closure bool, prefix string, list []string) []string {
 		}
 	}
 	result := make([]string, 0, len(set))
-	for n := range set {
-		result = append(result, n)
+	for _, n := range list {
+		if set[n] {
+			result = append(result, n)
+		}
 	}
 	return result
 }
