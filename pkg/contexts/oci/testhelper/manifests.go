@@ -32,10 +32,16 @@ var OCIDigests = common.Properties{
 }
 
 func OCIManifest1(env *builder.Builder) *artdesc.Descriptor {
-	var ldesc *artdesc.Descriptor
+	_, ldesc := OCIManifest1For(env, OCINAMESPACE, OCIVERSION)
+	return ldesc
+}
 
-	env.Namespace(OCINAMESPACE, func() {
-		env.Manifest(OCIVERSION, func() {
+func OCIManifest1For(env *builder.Builder, ns, tag string) (*artdesc.Descriptor, *artdesc.Descriptor) {
+	var ldesc *artdesc.Descriptor
+	var mdesc *artdesc.Descriptor
+
+	env.Namespace(ns, func() {
+		mdesc = env.Manifest(tag, func() {
 			env.Config(func() {
 				env.BlobStringData(mime.MIME_JSON, "{}")
 			})
@@ -44,7 +50,7 @@ func OCIManifest1(env *builder.Builder) *artdesc.Descriptor {
 			})
 		})
 	})
-	return ldesc
+	return mdesc, ldesc
 }
 
 const (
@@ -85,10 +91,16 @@ var DS_OCIMANIFEST2 = &metav1.DigestSpec{
 }
 
 func OCIManifest2(env *builder.Builder) *artdesc.Descriptor {
-	var ldesc *artdesc.Descriptor
+	_, ldesc := OCIManifest2For(env, OCINAMESPACE2, OCIVERSION)
+	return ldesc
+}
 
-	env.Namespace(OCINAMESPACE2, func() {
-		env.Manifest(OCIVERSION, func() {
+func OCIManifest2For(env *builder.Builder, ns, tag string) (*artdesc.Descriptor, *artdesc.Descriptor) {
+	var ldesc *artdesc.Descriptor
+	var mdesc *artdesc.Descriptor
+
+	env.Namespace(ns, func() {
+		mdesc = env.Manifest(tag, func() {
 			env.Config(func() {
 				env.BlobStringData(mime.MIME_JSON, "{}")
 			})
@@ -97,7 +109,7 @@ func OCIManifest2(env *builder.Builder) *artdesc.Descriptor {
 			})
 		})
 	})
-	return ldesc
+	return mdesc, ldesc
 }
 
 const (
@@ -115,4 +127,26 @@ func HashManifest2(fmt string) string {
 		hash = "sha256:" + H_OCIARCHMANIFEST2
 	}
 	return hash
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+const (
+	OCIINDEXVERSION = "v2.0-index"
+	OCINAMESPACE3   = "ocm/index"
+)
+
+func OCIIndex1(env *builder.Builder) *artdesc.Descriptor {
+	var idesc *artdesc.Descriptor
+
+	a1, _ := OCIManifest1For(env, OCINAMESPACE3, "")
+	a2, _ := OCIManifest2For(env, OCINAMESPACE3, "")
+
+	env.Namespace(OCINAMESPACE3, func() {
+		idesc = env.Index(OCIINDEXVERSION, func() {
+			env.Artifact(a1)
+			env.Artifact(a2)
+		})
+	})
+	return idesc
 }

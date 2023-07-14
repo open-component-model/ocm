@@ -71,6 +71,10 @@ func ProcessComponents(ctx clictx.Context, ictx inputs.Context, repo ocm.Reposit
 					}
 				}
 			}
+			err = loop.Finalize()
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil

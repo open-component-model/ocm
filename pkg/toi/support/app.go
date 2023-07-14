@@ -19,6 +19,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
 	datactg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config/attrs"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -132,7 +133,7 @@ func (o *BootstrapperCLIOptions) Complete() error {
 		return errors.Newf("empty credential attribute set for %s", id.String())
 	}
 
-	set, err := common2.ParseLabels(o.Settings, "attribute setting")
+	set, err := common2.ParseLabels(vfsattr.Get(o.Context), o.Settings, "attribute setting")
 	if err == nil && len(set) > 0 {
 		ctx := o.Context.ConfigContext()
 		spec := datactg.New()

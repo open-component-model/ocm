@@ -123,7 +123,7 @@ default credential, always used if no dedicated match is found.
 For example:
 
 <center>
-    <pre>--cred :type=ociRegistry --cred :hostname=ghcr.io --cred usename=mandelsoft --cred password=xyz</pre>
+    <pre>--cred :type=ociRegistry --cred :hostname=ghcr.io --cred username=mandelsoft --cred password=xyz</pre>
 </center>
 
 With the option <code>-X</code> it is possible to pass global settings of the 
@@ -133,9 +133,27 @@ form
     <pre>-X &lt;attribute>=&lt;value></pre>
 </center>
 ` + logopts.Description + `
-The value can be a simple type or a json string for complex values. The following
-attributes are supported:
-` + attributes.Attributes()
+The value can be a simple type or a JSON/YAML string for complex values
+(see <CMD>ocm attributes</CMD>. The following attributes are supported:
+` + attributes.Attributes() + `
+
+For several options (like <code>-X</code>) it is possible to pass complex values
+using JSON or YAML syntax. To pass those arguments the escaping of the used shell
+must be used to pass quotes, commas, curly brackets or newlines. for the *bash*
+the easiest way to achieve this is to put the complete value into single quotes.
+
+<center>
+<code>-X 'mapocirepo={"mode": "shortHash"}'</code>.
+</center>
+
+Alternatively, quotes and opening curly brackets can be escaped by using a
+backslash (<code>&bsol;</code>).
+Often a tagged value can also be substituted from a file with the syntax
+
+<center>
+<code>&lt;attr>=@&lt;filepath></code>
+</center>
+`
 
 // NewCliCommandForArgs is the regular way to instantiate a new CLI command.
 // It observes settings provides by options for the main command.
@@ -338,8 +356,11 @@ func (o *CLIOptions) Complete() error {
 		return errors.Newf("empty credential attribute set for %s", id.String())
 	}
 
-	set, err := common2.ParseLabels(o.Settings, "attribute setting")
-	if err == nil && len(set) > 0 {
+	set, err := common2.ParseLabels(o.Context.FileSystem(), o.Settings, "attribute setting")
+	if err != nil {
+		return errors.Wrapf(err, "invalid attribute setting")
+	}
+	if len(set) > 0 {
 		ctx := o.Context.ConfigContext()
 		spec := datacfg.New()
 		for _, s := range set {
