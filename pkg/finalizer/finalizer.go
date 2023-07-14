@@ -268,5 +268,8 @@ func (f *Finalizer) finalize() (err error) {
 		list.Add(f.pending[l-i-1]())
 	}
 	f.pending = nil
+	// just forget nested ones. They are finalized here, but are then invalid.
+	// Adding entries after the parent has been finalized is not supported, because there is no valid determinable order.
+	f.nested = nil
 	return list.Result()
 }
