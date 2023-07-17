@@ -10,15 +10,14 @@ import (
 	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
 	. "github.com/open-component-model/ocm/pkg/env"
 	. "github.com/open-component-model/ocm/pkg/env/builder"
-	"github.com/open-component-model/ocm/pkg/finalizer"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/transfer"
-
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/finalizer"
 )
 
 const OUT = "/tmp/res"

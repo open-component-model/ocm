@@ -33,7 +33,7 @@ files=()
 # Loop through each directory
 for dir in "${directories[@]}"; do
   # Search for files in the directory that do not contain the GENERATED_FILES_PATTERN
-  files+=( $(find "$dir" -type f -name "*.go" ! -name "$GENERATED_FILES_PATTERN") )
+  files+=( $(find "$dir" -type f -name "*.go" ! -name "$GENERATED_FILES_PATTERN" ! -name bindata.go) )
 done
 
 # Format the files using gofmt with xargs
