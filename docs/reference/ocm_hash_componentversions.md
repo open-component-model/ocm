@@ -125,7 +125,7 @@ The following modes are supported:
 
 ```
 $ ocm hash componentversion ghcr.io/mandelsoft/kubelink
-$ ocm hash componentversion --repo OCIRegistry:ghcr.io mandelsoft/kubelink
+$ ocm hash componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 ```
 
 ### SEE ALSO

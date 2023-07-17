@@ -75,7 +75,7 @@ The following modes are supported:
 
 ```
 $ ocm get artifact ghcr.io/mandelsoft/kubelink
-$ ocm get artifact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
+$ ocm get artifact --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 ```
 
 ### SEE ALSO
