@@ -5,8 +5,9 @@
 package comparch_test
 
 import (
-	"bytes"
 	"encoding/json"
+	"github.com/mandelsoft/filepath/pkg/filepath"
+	"github.com/mandelsoft/vfs/pkg/vfs"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -16,7 +17,6 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/common/compression"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -54,21 +54,10 @@ var _ = Describe("Repository", func() {
 		res := Must(cv.GetResourcesByName(RESOURCE_NAME))
 		acc := Must(res[0].AccessMethod())
 		defer Close(acc)
-		data := Must(acc.Reader())
-		defer Close(data)
+		bytesA := Must(acc.Get())
 
-		mfs := memoryfs.New()
-		data, _ = Must2(compression.AutoDecompress(data))
-		_, _ = Must2(tarutils.ExtractTarToFsWithInfo(mfs, data))
-		bytesA := []byte{}
-		_ = Must(Must(mfs.Open("testfile")).Read(bytesA))
-
-		bytesB := []byte{}
-		_ = Must(Must(osfs.New().Open(TAR_COMPARCH + "/blobs/sha256.3ed99e50092c619823e2c07941c175ea2452f1455f570c55510586b387ec2ff2")).Read(bytesB))
-		bufferB := bytes.NewBuffer(bytesB)
-		r, _ := Must2(compression.AutoDecompress(bufferB))
-		_, _ = Must2(tarutils.ExtractTarToFsWithInfo(mfs, r))
-		Expect(bytesA).To(Equal(bufferB.Bytes()))
+		bytesB := Must(vfs.ReadFile(osfs.New(), filepath.Join(TAR_COMPARCH, "blobs", "sha256.3ed99e50092c619823e2c07941c175ea2452f1455f570c55510586b387ec2ff2")))
+		Expect(bytesA).To(Equal(bytesB))
 	})
 
 	It("component archive with a resource stored in a directory", func() {
@@ -87,10 +76,8 @@ var _ = Describe("Repository", func() {
 		mfs := memoryfs.New()
 		_, _, err := tarutils.ExtractTarToFsWithInfo(mfs, data)
 		Expect(err).ToNot(HaveOccurred())
-		bufferA := []byte{}
-		bufferB := []byte{}
-		_ = Must(Must(mfs.Open("testfile")).Read(bufferA))
-		_ = Must(Must(osfs.New().Open(DIR_COMPARCH + "/blobs/root/testfile")).Read(bufferB))
+		bufferA := Must(vfs.ReadFile(mfs, "testfile"))
+		bufferB := Must(vfs.ReadFile(osfs.New(), filepath.Join(DIR_COMPARCH, "blobs", "root", "testfile")))
 		Expect(bufferA).To(Equal(bufferB))
 	})
 
