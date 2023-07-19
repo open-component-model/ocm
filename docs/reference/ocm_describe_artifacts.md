@@ -70,7 +70,7 @@ The following modes are supported:
 
 ```
 $ ocm describe artifact ghcr.io/mandelsoft/kubelink
-$ ocm describe artifact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
+$ ocm describe artifact --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 ```
 
 ### SEE ALSO

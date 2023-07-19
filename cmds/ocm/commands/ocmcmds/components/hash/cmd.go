@@ -63,7 +63,7 @@ all versions are listed.
 `,
 		Example: `
 $ ocm hash componentversion ghcr.io/mandelsoft/kubelink
-$ ocm hash componentversion --repo OCIRegistry:ghcr.io mandelsoft/kubelink
+$ ocm hash componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 `,
 	}
 }
