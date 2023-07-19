@@ -8,7 +8,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localfsblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localociblob"
 	ocmhdlr "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
@@ -106,8 +105,6 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMe
 	switch a.GetKind() { //nolint:gocritic // to be extended
 	case localfsblob.Type:
 		fallthrough
-	case localociblob.Type:
-		fallthrough
 	case localblob.Type:
 		return newLocalBlobAccessMethod(accessSpec.(*localblob.AccessSpec), c.access), nil
 	}
@@ -122,6 +119,8 @@ func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.A
 	}
 
 	switch a.GetKind() { //nolint:gocritic // to be extended
+	case localfsblob.Type:
+		fallthrough
 	case localblob.Type:
 		return c.access.GetInexpensiveContentVersionIdentity(accessSpec)
 	}
