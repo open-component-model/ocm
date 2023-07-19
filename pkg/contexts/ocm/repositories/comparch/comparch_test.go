@@ -36,9 +36,9 @@ var _ = Describe("Repository", func() {
 
 	It("marshal/unmarshal simple", func() {
 		octx := ocm.DefaultContext()
-		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_WRITABLE, TEST_FILEPATH))
+		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_READONLY, TEST_FILEPATH))
 		data := Must(json.Marshal(spec))
-		Expect(string(data)).To(Equal("{\"type\":\"" + comparch.Type + "\",\"filePath\":\"" + TEST_FILEPATH + "\"}"))
+		Expect(string(data)).To(Equal("{\"type\":\"ComponentArchive\",\"filePath\":\"testfilepath\",\"accessMode\":1}"))
 		_ = Must(octx.RepositorySpecForConfig(data, runtime.DefaultJSONEncoding)).(*comparch.RepositorySpec)
 		// spec will not equal r as the filesystem cannot be serialized
 	})
@@ -46,7 +46,7 @@ var _ = Describe("Repository", func() {
 	It("component archive with resource stored as tar", func() {
 		// this is the typical use case
 		octx := ocm.DefaultContext()
-		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_WRITABLE, TAR_COMPARCH))
+		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_READONLY, TAR_COMPARCH))
 		repo := Must(spec.Repository(octx, nil))
 		defer Close(repo)
 		cv := Must(repo.LookupComponentVersion(COMPONENT_NAME, COMPONENT_VERSION))
@@ -62,7 +62,7 @@ var _ = Describe("Repository", func() {
 
 	It("component archive with a resource stored in a directory", func() {
 		octx := ocm.DefaultContext()
-		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_WRITABLE, DIR_COMPARCH))
+		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_READONLY, DIR_COMPARCH))
 		repo := Must(spec.Repository(octx, nil))
 		defer Close(repo)
 		cv := Must(repo.LookupComponentVersion(COMPONENT_NAME, COMPONENT_VERSION))
@@ -83,7 +83,7 @@ var _ = Describe("Repository", func() {
 
 	It("closing a resource before actually reading it", func() {
 		octx := ocm.DefaultContext()
-		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_WRITABLE, TAR_COMPARCH))
+		spec := Must(comparch.NewRepositorySpec(accessobj.ACC_READONLY, TAR_COMPARCH))
 		repo := Must(spec.Repository(octx, nil))
 		defer Close(repo)
 		cv := Must(repo.LookupComponentVersion(COMPONENT_NAME, COMPONENT_VERSION))
