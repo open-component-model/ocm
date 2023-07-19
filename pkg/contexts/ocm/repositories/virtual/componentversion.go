@@ -102,7 +102,7 @@ func (c *ComponentVersionContainer) AccessMethod(a cpi.AccessSpec) (cpi.AccessMe
 		return nil, err
 	}
 
-	switch a.GetKind() { //nolint:gocritic // to be extended
+	switch a.GetKind() { // to be extended
 	case localfsblob.Type:
 		fallthrough
 	case localblob.Type:
@@ -118,7 +118,7 @@ func (c *ComponentVersionContainer) GetInexpensiveContentVersionIdentity(a cpi.A
 		return ""
 	}
 
-	switch a.GetKind() { //nolint:gocritic // to be extended
+	switch a.GetKind() { // to be extended
 	case localfsblob.Type:
 		fallthrough
 	case localblob.Type:
