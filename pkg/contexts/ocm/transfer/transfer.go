@@ -66,11 +66,15 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 			defer accessio.Close(t)
 		}
 	} else {
-		var ok bool
-		ok, err = handler.OverwriteVersion(src, t)
-		if !ok {
+		if d.Equal(t.GetDescriptor()) {
 			printer.Printf("  version %q already present -> skip transport\n", nv)
-			return nil
+		} else {
+			var ok bool
+			ok, err = handler.OverwriteVersion(src, t)
+			if !ok {
+				printer.Printf("  version %q already present, but differs\n", nv)
+				return errors.ErrAlreadyExists(ocm.KIND_COMPONENTVERSION, nv.String())
+			}
 		}
 	}
 	if err != nil {
