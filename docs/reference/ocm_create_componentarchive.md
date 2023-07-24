@@ -6,6 +6,12 @@
 ocm create componentarchive [<options>] <component> <version> --provider <provider-name> {--provider <label>=<value>} {<label>=<value>}
 ```
 
+##### Aliases
+
+```
+componentarchive, comparch, ca
+```
+
 ### Options
 
 ```

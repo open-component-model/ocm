@@ -6,6 +6,12 @@
 ocm add sources [<options>] [<target>] {<resourcefile> | <var>=<value>}
 ```
 
+##### Aliases
+
+```
+sources, source, src, s
+```
+
 ### Options
 
 ```

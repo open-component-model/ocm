@@ -17,7 +17,6 @@ const (
 	Sign      = "sign"
 	Verify    = "verify"
 	Clean     = "clean"
-	Info      = "info"
 	Install   = "install"
 	Execute   = "execute"
 )

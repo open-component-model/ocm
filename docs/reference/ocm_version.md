@@ -6,6 +6,12 @@
 ocm version [<options>]
 ```
 
+##### Aliases
+
+```
+version, v
+```
+
 ### Options
 
 ```

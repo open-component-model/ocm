@@ -106,6 +106,14 @@ func HideCommand(cmd *cobra.Command) *cobra.Command {
 	return cmd
 }
 
+func OverviewCommand(cmd *cobra.Command) *cobra.Command {
+	if cmd.Annotations == nil {
+		cmd.Annotations = map[string]string{}
+	}
+	cmd.Annotations["overview"] = ""
+	return cmd
+}
+
 func MassageCommand(cmd *cobra.Command, names ...string) *cobra.Command {
 	cmd.Use = addCommand(names, cmd.Use)
 	if len(names) > 1 {

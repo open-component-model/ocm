@@ -7,6 +7,7 @@ package describe
 import (
 	"github.com/spf13/cobra"
 
+	cache "github.com/open-component-model/ocm/cmds/ocm/commands/cachecmds/describe"
 	resources "github.com/open-component-model/ocm/cmds/ocm/commands/ocicmds/artifacts/describe"
 	plugins "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/plugins/describe"
 	_package "github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/package/describe"
@@ -22,6 +23,7 @@ func NewCommand(ctx clictx.Context) *cobra.Command {
 	}, verbs.Describe)
 	cmd.AddCommand(resources.NewCommand(ctx))
 	cmd.AddCommand(plugins.NewCommand(ctx))
+	cmd.AddCommand(cache.NewCommand(ctx))
 	cmd.AddCommand(_package.NewCommand(ctx))
 	return cmd
 }

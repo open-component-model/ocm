@@ -6,6 +6,12 @@
 ocm create transportarchive [<options>] <path>
 ```
 
+##### Aliases
+
+```
+transportarchive, ctf
+```
+
 ### Options
 
 ```

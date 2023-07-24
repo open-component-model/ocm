@@ -6,6 +6,12 @@
 ocm get references [<options>]  <component> {<name> { <key>=<value> }}
 ```
 
+##### Aliases
+
+```
+references, reference, refs
+```
+
 ### Options
 
 ```

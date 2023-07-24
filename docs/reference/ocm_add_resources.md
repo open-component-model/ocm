@@ -6,6 +6,12 @@
 ocm add resources [<options>] [<target>] {<resourcefile> | <var>=<value>}
 ```
 
+##### Aliases
+
+```
+resources, resource, res, r
+```
+
 ### Options
 
 ```

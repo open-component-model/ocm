@@ -6,6 +6,12 @@
 ocm get resources [<options>]  <component> {<name> { <key>=<value> }}
 ```
 
+##### Aliases
+
+```
+resources, resource, res, r
+```
+
 ### Options
 
 ```

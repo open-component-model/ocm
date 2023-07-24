@@ -6,6 +6,12 @@
 ocm get credentials {<consumer property>=<value>}
 ```
 
+##### Aliases
+
+```
+credentials, creds, cred
+```
+
 ### Options
 
 ```

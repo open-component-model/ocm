@@ -6,6 +6,12 @@
 ocm show versions [<options>] <component> {<version pattern>}
 ```
 
+##### Aliases
+
+```
+versions, vers, v
+```
+
 ### Options
 
 ```

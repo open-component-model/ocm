@@ -6,6 +6,12 @@
 ocm get sources [<options>]  <component> {<name> { <key>=<value> }}
 ```
 
+##### Aliases
+
+```
+sources, source, src, s
+```
+
 ### Options
 
 ```

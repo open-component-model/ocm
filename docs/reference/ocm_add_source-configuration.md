@@ -6,6 +6,12 @@
 ocm add source-configuration [<options>] <target> {<configfile> | <var>=<value>}
 ```
 
+##### Aliases
+
+```
+source-configuration, sourceconfig, srccfg, scfg
+```
+
 ### Options
 
 ```
