@@ -41,4 +41,4 @@ var DataOption = flagsets.NewBytesOptionType("inputData", "data (string, !!strin
 
 var TextOption = flagsets.NewStringOptionType("inputText", "utf8 text")
 
-var HelmReposiroryOption = flagsets.NewStringOptionType("inputHelmRepository", "helm repository base URL")
+var HelmRepositoryOption = flagsets.NewStringOptionType("inputHelmRepository", "helm repository base URL")
