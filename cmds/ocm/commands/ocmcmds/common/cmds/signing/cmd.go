@@ -142,8 +142,17 @@ func (a *action) Digest(o *comphdlr.Object) (*metav1.DigestSpec, *compdesc.Compo
 	sopts := *a.sopts
 	sopts.Resolver = ocm.NewCompoundResolver(o.Repository, a.sopts.Resolver)
 
-	signer := &api.ComponentSigner{}
-	d, err := signer.Sign(o.ComponentVersion.GetContext(), o.ComponentVersion, api.WithSignerOptions(&sopts), api.WithPrinter(a.printer))
+	var (
+		d   *metav1.DigestSpec
+		err error
+	)
+
+	csv := &api.ComponentSigningVerifier{}
+	if sopts.Verify {
+		d, err = csv.Verify(o.ComponentVersion.GetContext(), o.ComponentVersion, api.WithSignerOptions(&sopts), api.WithPrinter(a.printer))
+	} else {
+		d, err = csv.Sign(o.ComponentVersion.GetContext(), o.ComponentVersion, api.WithSignerOptions(&sopts), api.WithPrinter(a.printer))
+	}
 
 	var cd *compdesc.ComponentDescriptor
 	nv := common.VersionedElementKey(o.ComponentVersion)
