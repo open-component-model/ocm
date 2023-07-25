@@ -10,12 +10,12 @@ import (
 	"io"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
-	gardenercfgcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/identity/hostpath"
+	gardenercfgcpi "github.com/open-component-model/ocm/v2/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/identity"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 func init() {

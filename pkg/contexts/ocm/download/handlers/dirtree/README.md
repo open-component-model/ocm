@@ -9,7 +9,7 @@ In this case the final filesystem content provided by the image is downloaded by
 
 The default behaviour can just be  used with
 <pre>
-import "github.com/open-component-model/ocm/pkg/contexts/ocm/download"
+import "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/download"
 download.For(octx).Download(printer,resourceAccess,targetdir,vfs)
 </pre>
 
@@ -20,7 +20,7 @@ As usual, the target is always a virtual filesystem.
 Like all download handlers. the dirtree download handler can also explicitly be used with
 
 <pre>
-import "github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/dirtree"
+import "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/download/handlers/dirtree"
 dirtree.New().Download(...)
 </pre>
 

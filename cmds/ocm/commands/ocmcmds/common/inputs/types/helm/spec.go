@@ -8,16 +8,16 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	ocihelm "github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/helm"
-	"github.com/open-component-model/ocm/pkg/helm/identity"
-	"github.com/open-component-model/ocm/pkg/helm/loader"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/commands/ocmcmds/common/inputs"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/commands/ocmcmds/common/inputs/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
+	ocihelm "github.com/open-component-model/ocm/v2/pkg/contexts/oci/ociutils/helm"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/accessmethods/ociartifact"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/helm"
+	"github.com/open-component-model/ocm/v2/pkg/helm/identity"
+	"github.com/open-component-model/ocm/v2/pkg/helm/loader"
 )
 
 type Spec struct {

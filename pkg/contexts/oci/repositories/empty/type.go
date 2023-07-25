@@ -5,10 +5,10 @@
 package empty
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 const (
@@ -16,7 +16,7 @@ const (
 	TypeV1 = Type + runtime.VersionSeparator + "v1"
 )
 
-const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/contexts/oci/repositories/empty"
+const ATTR_REPOS = "github.com/open-component-model/ocm/v2/pkg/contexts/oci/repositories/empty"
 
 func init() {
 	cpi.RegisterRepositoryType(cpi.NewRepositoryType[*RepositorySpec](Type))

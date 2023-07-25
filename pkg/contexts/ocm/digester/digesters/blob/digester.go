@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/signing"
 )
 
 const GenericBlobDigestV1 = "genericBlobDigest/v1"

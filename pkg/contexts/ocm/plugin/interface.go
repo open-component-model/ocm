@@ -5,8 +5,8 @@
 package plugin
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/internal"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/descriptor"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/internal"
 )
 
 const (

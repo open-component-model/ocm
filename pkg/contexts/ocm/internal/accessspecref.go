@@ -10,7 +10,7 @@ import (
 
 	"github.com/modern-go/reflect2"
 
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 type AccessSpecRef struct {

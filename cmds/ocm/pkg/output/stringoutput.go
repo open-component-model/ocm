@@ -7,11 +7,11 @@ package output
 import (
 	"strings"
 
-	. "github.com/open-component-model/ocm/pkg/out"
+	. "github.com/open-component-model/ocm/v2/pkg/out"
 
 	"github.com/mandelsoft/logging"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/processing"
 )
 
 type StringOutput struct {

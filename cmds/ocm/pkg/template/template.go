@@ -16,8 +16,8 @@ import (
 	"github.com/spf13/pflag"
 	"gopkg.in/yaml.v3"
 
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 type Values map[string]interface{}

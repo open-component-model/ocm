@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 // VersionedElement describes an element that has a name and a version.

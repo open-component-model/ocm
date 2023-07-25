@@ -7,9 +7,9 @@ package ocireg
 import (
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/repositories/ocireg"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/repositories/genericocireg"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 // ComponentNameMapping describes the method that is used to map the "Component Name", "Component Version"-tuples

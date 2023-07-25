@@ -5,11 +5,11 @@
 package plugin
 
 import (
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/cobrautils/flagsets"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/accessmethods/options"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 type accessType struct {

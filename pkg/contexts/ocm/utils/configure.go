@@ -16,12 +16,12 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/config"
-	credcfg "github.com/open-component-model/ocm/pkg/contexts/credentials/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/config"
+	credcfg "github.com/open-component-model/ocm/v2/pkg/contexts/credentials/config"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/repositories/dockerconfig"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 const DEFAULT_OCM_CONFIG = ".ocmconfig"

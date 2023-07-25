@@ -9,8 +9,8 @@
 package jsonv1
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 const Algorithm = compdesc.JsonNormalisationV1

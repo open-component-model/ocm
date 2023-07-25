@@ -9,7 +9,7 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
+	"github.com/open-component-model/ocm/v2/pkg/cobrautils/flag"
 )
 
 type Options struct {

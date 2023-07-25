@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/cobrautils/flagsets"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 func AccessUsage(scheme AccessTypeScheme, cli bool) string {

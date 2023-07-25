@@ -7,17 +7,17 @@ package main
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/examples/lib/helper"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/v2/examples/lib/helper"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/identity"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/repositories/ocireg"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/resourcetypes"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/mime"
 )
 
 func SimpleWriteWithCredentials() error {

@@ -8,13 +8,13 @@ import (
 	"encoding/json"
 	"sync"
 
-	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/config"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
-	"github.com/open-component-model/ocm/pkg/utils"
+	cfgcpi "github.com/open-component-model/ocm/v2/pkg/contexts/config/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/cache"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/config"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/descriptor"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 type Set = *pluginsImpl

@@ -9,11 +9,11 @@ import (
 	"reflect"
 	"runtime"
 
-	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/consts"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
-	"github.com/open-component-model/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/utils/selector"
+	v1 "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/consts"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/resourcetypes"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/utils/selector"
 )
 
 type IdentityBasedSelector interface {

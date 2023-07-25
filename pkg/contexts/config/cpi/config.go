@@ -7,8 +7,8 @@ package cpi
 import (
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/contexts/config/internal"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/config/internal"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 type ConfigTypeVersionScheme = runtime.TypeVersionScheme[Config, ConfigType]

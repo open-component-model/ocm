@@ -5,6 +5,6 @@
 package digesters
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/artifact"
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/blob"
+	_ "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/digester/digesters/artifact"
+	_ "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/digester/digesters/blob"
 )

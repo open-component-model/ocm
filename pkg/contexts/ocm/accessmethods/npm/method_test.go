@@ -9,15 +9,15 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/env"
-	. "github.com/open-component-model/ocm/pkg/env/builder"
-	. "github.com/open-component-model/ocm/pkg/testutils"
+	. "github.com/open-component-model/ocm/v2/pkg/env"
+	. "github.com/open-component-model/ocm/v2/pkg/env/builder"
+	. "github.com/open-component-model/ocm/v2/pkg/testutils"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/npm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/mime"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/accessmethods/npm"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/mime"
 )
 
 const NPMPATH = "/testdata/registry"

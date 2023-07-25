@@ -7,14 +7,14 @@ package hash
 import (
 	"github.com/spf13/pflag"
 
-	signingcmd "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/cmds/signing"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/hashoption"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
+	signingcmd "github.com/open-component-model/ocm/v2/cmds/ocm/commands/ocmcmds/common/cmds/signing"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/commands/ocmcmds/common/options/hashoption"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/commands/ocmcmds/common/options/lookupoption"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/commands/ocmcmds/common/options/repooption"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/attrs/signingattr"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/signing"
 )
 
 func From(o options.OptionSetProvider) *Option {

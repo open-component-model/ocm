@@ -5,8 +5,8 @@
 package ociblob
 
 import (
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
+	"github.com/open-component-model/ocm/v2/pkg/cobrautils/flagsets"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/accessmethods/options"
 )
 
 func ConfigHandler() flagsets.ConfigOptionTypeSetHandler {

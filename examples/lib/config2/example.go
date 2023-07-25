@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	ociid "github.com/open-component-model/ocm/pkg/contexts/oci/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials"
+	ociid "github.com/open-component-model/ocm/v2/pkg/contexts/oci/identity"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 const CFGFILE = "examples/lib/config2/config.yaml"

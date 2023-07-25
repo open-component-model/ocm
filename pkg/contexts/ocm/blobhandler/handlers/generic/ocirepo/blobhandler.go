@@ -9,16 +9,16 @@ import (
 	"path"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/ociuploadattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/repositories/artifactset"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/accessmethods/ociartifact"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/attrs/ociuploadattr"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 func init() {

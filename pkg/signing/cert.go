@@ -17,8 +17,8 @@ import (
 	parse "github.com/mandelsoft/spiff/dynaml/x509"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 func GetCertificate(data interface{}) (*x509.Certificate, error) {

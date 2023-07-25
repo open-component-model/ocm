@@ -16,16 +16,16 @@ import (
 	"github.com/opencontainers/go-digest"
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf/format"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/repositories/ctf/format"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 func NewState(mode accessobj.AccessMode, name, version string, access oci.ManifestAccess, compat ...bool) (accessobj.State, error) {

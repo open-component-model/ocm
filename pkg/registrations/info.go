@@ -7,8 +7,8 @@ package registrations
 import (
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/generics"
-	"github.com/open-component-model/ocm/pkg/listformat"
+	"github.com/open-component-model/ocm/v2/pkg/generics"
+	"github.com/open-component-model/ocm/v2/pkg/listformat"
 )
 
 type HandlerInfos []HandlerInfo

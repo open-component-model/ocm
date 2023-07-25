@@ -8,11 +8,11 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/api"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
-	plugincommon "github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/common"
-	utils2 "github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext/action/api"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin"
+	plugincommon "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/common"
+	utils2 "github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 func DescribePlugin(p plugin.Plugin, out common.Printer) {

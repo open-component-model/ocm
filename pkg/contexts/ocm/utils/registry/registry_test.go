@@ -8,8 +8,8 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/utils/registry"
+	"github.com/open-component-model/ocm/v2/pkg/generics"
 )
 
 var aKey = registry.RegistrationKey{}.SetArtifact("a", "")

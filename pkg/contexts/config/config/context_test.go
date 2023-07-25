@@ -13,9 +13,9 @@ import (
 
 	"sigs.k8s.io/yaml"
 
-	"github.com/open-component-model/ocm/pkg/contexts/config"
-	local "github.com/open-component-model/ocm/pkg/contexts/config/config"
-	"github.com/open-component-model/ocm/pkg/testutils"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/config"
+	local "github.com/open-component-model/ocm/v2/pkg/contexts/config/config"
+	"github.com/open-component-model/ocm/v2/pkg/testutils"
 )
 
 var _ = Describe("generic config handling", func() {

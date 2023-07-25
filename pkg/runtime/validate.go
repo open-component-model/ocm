@@ -5,7 +5,7 @@
 package runtime
 
 import (
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 type Validater interface {

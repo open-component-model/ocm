@@ -9,14 +9,14 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
-	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/output"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/processing"
+	"github.com/open-component-model/ocm/v2/pkg/cobrautils/flag"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/transfer/transferhandler"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/transfer/transferhandler/standard"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 func From(o options.OptionSetProvider) *Option {

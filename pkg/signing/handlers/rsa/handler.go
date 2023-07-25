@@ -12,9 +12,9 @@ import (
 	"encoding/pem"
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/signing"
 )
 
 // Algorithm defines the type for the RSA PKCS #1 v1.5 signature algorithm.

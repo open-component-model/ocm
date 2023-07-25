@@ -5,7 +5,7 @@
 package cpi
 
 import (
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
+	"github.com/open-component-model/ocm/v2/pkg/cobrautils/flagsets"
 )
 
 ////////////////////////////////////////////////////////////////////////////////

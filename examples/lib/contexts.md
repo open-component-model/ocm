@@ -75,7 +75,7 @@ can be orchestrated by context builders.
 ## Package organization
 
 All functional areas supported by contexts can be found as sub packages of
-`github.com/open-component-model/ocm/pkg/contexts`.
+`github.com/open-component-model/ocm/v2/pkg/contexts`.
 
 A context package directly contains the typical user API for the functional
 area. The most important interface is the interface `Context`. It acts as main entry point to access the functionality of the functional area.

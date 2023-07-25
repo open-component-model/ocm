@@ -5,9 +5,9 @@
 package oci_repository_prepare
 
 import (
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/handlers"
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext/action/handlers"
+	"github.com/open-component-model/ocm/v2/pkg/generics"
 )
 
 func Execute(hdlrs handlers.Registry, host, repo string, creds common.Properties) (*ActionResult, error) {

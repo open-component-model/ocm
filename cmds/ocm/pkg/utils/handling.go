@@ -9,8 +9,8 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/output"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 type ElemSpec interface {

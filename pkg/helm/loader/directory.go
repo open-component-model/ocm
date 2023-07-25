@@ -16,8 +16,8 @@ import (
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm/ignore"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils/helm/sympath"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/ociutils/helm/ignore"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/ociutils/helm/sympath"
 )
 
 var utf8bom = []byte{0xEF, 0xBB, 0xBF}

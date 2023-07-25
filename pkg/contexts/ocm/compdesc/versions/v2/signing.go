@@ -9,9 +9,9 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/signing"
-	"github.com/open-component-model/ocm/pkg/signing/norm/entry"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc"
+	"github.com/open-component-model/ocm/v2/pkg/signing"
+	"github.com/open-component-model/ocm/v2/pkg/signing/norm/entry"
 )
 
 // CDExcludes describes the fields relevant for Signing

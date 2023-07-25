@@ -8,10 +8,10 @@ import (
 	"bytes"
 	"fmt"
 
-	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils/selector"
+	v1 "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/utils/selector"
 )
 
 // GetEffectiveRepositoryContext returns the currently active repository context.

@@ -7,7 +7,7 @@ package download
 import (
 	"github.com/mandelsoft/logging"
 
-	ocmlog "github.com/open-component-model/ocm/pkg/logging"
+	ocmlog "github.com/open-component-model/ocm/v2/pkg/logging"
 )
 
 var REALM = ocmlog.DefineSubRealm("Downloaders", "downloader")

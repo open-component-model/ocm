@@ -12,8 +12,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 func GetPublicKey(key interface{}) (*rsa.PublicKey, []string, error) {

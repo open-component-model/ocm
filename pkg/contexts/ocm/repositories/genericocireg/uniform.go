@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/grammar"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/repositories/ocireg"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/attrs/compatattr"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/cpi"
 )
 
 func init() {

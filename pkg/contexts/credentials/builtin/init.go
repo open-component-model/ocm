@@ -4,4 +4,4 @@
 
 package builtin
 
-import _ "github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/github"
+import _ "github.com/open-component-model/ocm/v2/pkg/contexts/credentials/builtin/github"

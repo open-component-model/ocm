@@ -7,9 +7,9 @@ package github
 import (
 	"os"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/builtin/github/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/builtin/github/identity"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/cpi"
 )
 
 func init() {

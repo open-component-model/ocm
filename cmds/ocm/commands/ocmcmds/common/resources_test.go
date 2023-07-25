@@ -8,7 +8,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/addhdlrs"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/commands/ocmcmds/common/addhdlrs"
 )
 
 var _ = Describe("Blob Inputs", func() {

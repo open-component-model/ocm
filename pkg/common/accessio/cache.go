@@ -18,9 +18,9 @@ import (
 	"github.com/marstr/guid"
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/logging"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/logging"
 )
 
 var ALLOC_REALM = logging.DefineSubRealm("reference counting", "refcnt")

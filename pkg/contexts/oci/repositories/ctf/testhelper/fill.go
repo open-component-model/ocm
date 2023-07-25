@@ -9,13 +9,13 @@ import (
 
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/open-component-model/ocm/pkg/finalizer"
-	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/testutils"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/finalizer"
+	"github.com/open-component-model/ocm/v2/pkg/mime"
+	"github.com/open-component-model/ocm/v2/pkg/testutils"
 )
 
 const (

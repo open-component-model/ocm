@@ -10,11 +10,11 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/empty"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
-	ocmreg "github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ocireg"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/repositories/empty"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/repositories/genericocireg"
+	ocmreg "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/repositories/ocireg"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 var DefaultContext = ocm.New()

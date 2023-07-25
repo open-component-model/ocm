@@ -7,11 +7,11 @@ package genericocireg_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/testutils"
+	. "github.com/open-component-model/ocm/v2/pkg/testutils"
 
 	"github.com/Masterminds/semver/v3"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/repositories/genericocireg"
 )
 
 const META_SEPARATOR = genericocireg.META_SEPARATOR

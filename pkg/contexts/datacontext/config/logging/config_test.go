@@ -9,16 +9,16 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/logging/testhelper"
-	. "github.com/open-component-model/ocm/pkg/testutils"
+	. "github.com/open-component-model/ocm/v2/pkg/logging/testhelper"
+	. "github.com/open-component-model/ocm/v2/pkg/testutils"
 
 	"github.com/mandelsoft/logging"
 	"github.com/tonglil/buflogr"
 
-	"github.com/open-component-model/ocm/pkg/contexts/config"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	logcfg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config/logging"
-	log "github.com/open-component-model/ocm/pkg/logging"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/config"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext"
+	logcfg "github.com/open-component-model/ocm/v2/pkg/contexts/datacontext/config/logging"
+	log "github.com/open-component-model/ocm/v2/pkg/logging"
 )
 
 var _ = Describe("logging configuration", func() {

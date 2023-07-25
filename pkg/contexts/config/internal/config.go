@@ -7,7 +7,7 @@ package internal
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 const KIND_CONFIGSET = "config set"

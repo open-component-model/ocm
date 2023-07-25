@@ -9,9 +9,9 @@ import (
 
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
-	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/output"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/processing"
+	"github.com/open-component-model/ocm/v2/pkg/common"
 )
 
 func Attachment(d digest.Digest, suffix string) string {

@@ -7,8 +7,8 @@ package download
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/registrations"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/registrations"
 )
 
 type Target = cpi.Context

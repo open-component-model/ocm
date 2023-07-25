@@ -7,7 +7,7 @@ package descriptor
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/v2/pkg/generics"
 )
 
 type RepositoryContext struct {

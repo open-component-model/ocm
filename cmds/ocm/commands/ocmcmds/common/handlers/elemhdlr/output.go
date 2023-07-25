@@ -7,11 +7,11 @@ package elemhdlr
 import (
 	"encoding/json"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/output"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/tree"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 var MetaOutput = []string{"NAME", "VERSION", "IDENTITY"}

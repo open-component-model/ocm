@@ -7,11 +7,11 @@ package main
 import (
 	"os"
 
-	"github.com/open-component-model/ocm/cmds/ecrplugin/actions"
-	"github.com/open-component-model/ocm/cmds/ecrplugin/config"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds"
-	"github.com/open-component-model/ocm/pkg/version"
+	"github.com/open-component-model/ocm/v2/cmds/ecrplugin/actions"
+	"github.com/open-component-model/ocm/v2/cmds/ecrplugin/config"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/ppi/cmds"
+	"github.com/open-component-model/ocm/v2/pkg/version"
 )
 
 func main() {

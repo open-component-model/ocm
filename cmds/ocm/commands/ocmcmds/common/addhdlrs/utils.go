@@ -14,16 +14,16 @@ import (
 	"gopkg.in/yaml.v3"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	common2 "github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	utils2 "github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/commands/ocmcmds/common/inputs"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/template"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/utils"
+	common2 "github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
+	utils2 "github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 func ProcessDescriptions(ctx clictx.Context, printer common2.Printer, templ template.Options, h ElementSpecHandler, sources []ElementSource) ([]Element, inputs.Context, error) {

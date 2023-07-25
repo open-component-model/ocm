@@ -11,10 +11,10 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/memory"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/internal"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/repositories/memory"
 )
 
 var DefaultContext = credentials.New()

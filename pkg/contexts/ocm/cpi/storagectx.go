@@ -5,7 +5,7 @@
 package cpi
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/internal"
 )
 
 type DefaultStorageContext struct {

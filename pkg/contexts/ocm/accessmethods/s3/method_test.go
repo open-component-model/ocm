@@ -13,23 +13,23 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/env"
-	. "github.com/open-component-model/ocm/pkg/env/builder"
-	. "github.com/open-component-model/ocm/pkg/testutils"
+	. "github.com/open-component-model/ocm/v2/pkg/env"
+	. "github.com/open-component-model/ocm/v2/pkg/env/builder"
+	. "github.com/open-component-model/ocm/v2/pkg/testutils"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio/downloader"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/tmpcache"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/s3/identity"
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio/downloader"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext/attrs/tmpcache"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext/attrs/vfsattr"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/accessmethods/s3"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/accessmethods/s3/identity"
+	"github.com/open-component-model/ocm/v2/pkg/generics"
 )
 
 type mockDownloader struct {

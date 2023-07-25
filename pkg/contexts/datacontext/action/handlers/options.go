@@ -5,7 +5,7 @@
 package handlers
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/api"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext/action/api"
 )
 
 type (

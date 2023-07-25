@@ -5,10 +5,10 @@
 package config
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/config"
-	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/config"
+	cfgcpi "github.com/open-component-model/ocm/v2/pkg/contexts/config/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 const (

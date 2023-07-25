@@ -11,13 +11,13 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/api"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/generics"
-	"github.com/open-component-model/ocm/pkg/registrations"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext/action/api"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/generics"
+	"github.com/open-component-model/ocm/v2/pkg/registrations"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 var defaultHandlers = NewRegistry(api.DefaultRegistry())

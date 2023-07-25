@@ -10,7 +10,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-component-model/ocm/pkg/utils/panics"
+	"github.com/open-component-model/ocm/v2/pkg/utils/panics"
 )
 
 func caller(topanic interface{}, outerr error, handlers ...panics.PanicHandler) (err error) {

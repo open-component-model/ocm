@@ -8,9 +8,9 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-component-model/ocm/pkg/contexts/config"
-	local "github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/config"
+	local "github.com/open-component-model/ocm/v2/pkg/contexts/credentials/internal"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext"
 )
 
 var _ = Describe("builder test", func() {

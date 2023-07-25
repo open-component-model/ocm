@@ -7,8 +7,8 @@ package ociutils
 import (
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/cpi"
 )
 
 type InfoHandler interface {

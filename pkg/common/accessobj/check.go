@@ -11,8 +11,8 @@ import (
 	"github.com/mandelsoft/filepath/pkg/filepath"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/common/compression"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/common/compression"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 func mapErr(forced bool, err error) (bool, bool, error) {

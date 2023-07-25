@@ -5,10 +5,10 @@
 package docker
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 const (

@@ -8,8 +8,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/clictx"
 )
 
 func From(o options.OptionSetProvider) *Option {

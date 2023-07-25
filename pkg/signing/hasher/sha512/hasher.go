@@ -9,7 +9,7 @@ import (
 	"crypto/sha512"
 	"hash"
 
-	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/v2/pkg/signing"
 )
 
 var Algorithm = crypto.SHA512.String()

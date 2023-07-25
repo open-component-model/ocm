@@ -5,10 +5,10 @@
 package s3
 
 import (
-	. "github.com/open-component-model/ocm/pkg/exception"
+	. "github.com/open-component-model/ocm/v2/pkg/exception"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 const TypeV1 = Type + runtime.VersionSeparator + "v1"

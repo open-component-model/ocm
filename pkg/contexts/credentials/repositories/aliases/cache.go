@@ -7,11 +7,11 @@ package aliases
 import (
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext"
 )
 
-const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/aliases"
+const ATTR_REPOS = "github.com/open-component-model/ocm/v2/pkg/contexts/credentials/repositories/aliases"
 
 type Repositories struct {
 	sync.RWMutex

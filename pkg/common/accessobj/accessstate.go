@@ -12,8 +12,8 @@ import (
 	"github.com/modern-go/reflect2"
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 // These objects deal with descriptor based state descriptions

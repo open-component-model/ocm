@@ -7,8 +7,8 @@ package topicocmaccessmethods
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/downloaderoption"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/commands/ocmcmds/common/options/downloaderoption"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/clictx"
 )
 
 func New(ctx clictx.Context) *cobra.Command {

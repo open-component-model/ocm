@@ -5,9 +5,9 @@
 package scriptoption
 
 import (
-	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	cfgcpi "github.com/open-component-model/ocm/v2/pkg/contexts/config/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/transfer/transferhandler/standard"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 const (

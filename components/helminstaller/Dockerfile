@@ -11,10 +11,10 @@ COPY hack/generate-docs hack/generate-docs
 RUN --mount=type=cache,target=/root/.cache/go-build go get -d ./...
 RUN --mount=type=cache,target=/root/.cache/go-build CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
         go build -o /main -ldflags "-s -w \
-	-X github.com/open-component-model/ocm/pkg/version.gitVersion=$EFFECTIVE_VERSION \
-	-X github.com/open-component-model/ocm/pkg/version.gitTreeState=$GIT_TREE_STATE \
-	-X github.com/open-component-model/ocm/pkg/version.gitCommit=$COMMIT \
-	-X github.com/open-component-model/ocm/pkg/version.buildDate=$(date -u +%FT%T%z)" \
+	-X github.com/open-component-model/ocm/v2/pkg/version.gitVersion=$EFFECTIVE_VERSION \
+	-X github.com/open-component-model/ocm/v2/pkg/version.gitTreeState=$GIT_TREE_STATE \
+	-X github.com/open-component-model/ocm/v2/pkg/version.gitCommit=$COMMIT \
+	-X github.com/open-component-model/ocm/v2/pkg/version.buildDate=$(date -u +%FT%T%z)" \
 	./cmds/helminstaller
 
 ###################################################################################

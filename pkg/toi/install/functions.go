@@ -9,7 +9,7 @@ import (
 	"github.com/mandelsoft/spiff/spiffing"
 	"github.com/mandelsoft/spiff/yaml"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm"
 )
 
 func NewFunctions(ctx ocm.Context, credvals CredentialValues) spiffing.Functions {

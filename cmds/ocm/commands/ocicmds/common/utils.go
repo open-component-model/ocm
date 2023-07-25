@@ -5,9 +5,9 @@
 package common
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci"
 )
 
 type OptionCompleter interface {

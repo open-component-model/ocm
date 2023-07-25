@@ -8,7 +8,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/cpi"
 )
 
 type ConfigType string

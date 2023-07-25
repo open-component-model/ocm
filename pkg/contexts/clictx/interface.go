@@ -5,7 +5,7 @@
 package clictx
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/clictx/internal"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/clictx/internal"
 )
 
 type (

@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/open-component-model/ocm/cmds/ocm/app"
-	"github.com/open-component-model/ocm/hack/generate-docs/cobradoc"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/app"
+	"github.com/open-component-model/ocm/v2/hack/generate-docs/cobradoc"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/attrs/plugindirattr"
 )
 
 func main() {

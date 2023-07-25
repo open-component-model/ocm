@@ -9,8 +9,8 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
-	"github.com/open-component-model/ocm/pkg/cobrautils/groups"
+	"github.com/open-component-model/ocm/v2/pkg/cobrautils/flag"
+	"github.com/open-component-model/ocm/v2/pkg/cobrautils/groups"
 )
 
 type TypeOptionBase struct {

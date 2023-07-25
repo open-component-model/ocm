@@ -7,12 +7,12 @@ package genericocireg
 import (
 	"encoding/json"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/ociutils"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/ociutils"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/repositories/genericocireg/componentmapping"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 func init() {

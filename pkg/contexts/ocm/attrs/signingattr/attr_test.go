@@ -10,9 +10,9 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-component-model/ocm/pkg/contexts/config"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/signingattr"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/config"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/attrs/signingattr"
 )
 
 const NAME = "test"

@@ -9,13 +9,13 @@ import (
 
 	"github.com/spf13/cobra"
 
-	handler "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/pluginhdlr"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/cobrautils"
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	handler "github.com/open-component-model/ocm/v2/cmds/ocm/commands/ocmcmds/common/handlers/pluginhdlr"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/commands/ocmcmds/names"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/commands/verbs"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/cobrautils"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/clictx"
 )
 
 var (

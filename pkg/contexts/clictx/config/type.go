@@ -7,12 +7,12 @@ package config
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx/internal"
-	"github.com/open-component-model/ocm/pkg/contexts/config"
-	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
-	ocicpi "github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	ocmcpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/clictx/internal"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/config"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/config/cpi"
+	ocicpi "github.com/open-component-model/ocm/v2/pkg/contexts/oci/cpi"
+	ocmcpi "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 const (

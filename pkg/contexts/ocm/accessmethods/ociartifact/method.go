@@ -10,20 +10,20 @@ import (
 	"strings"
 	"sync"
 
-	. "github.com/open-component-model/ocm/pkg/finalizer"
+	. "github.com/open-component-model/ocm/v2/pkg/finalizer"
 
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ocireg"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/logging"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/grammar"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/repositories/artifactset"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/repositories/ocireg"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/logging"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 // Type is the access type of a oci registry.

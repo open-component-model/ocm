@@ -9,16 +9,16 @@ import (
 	"reflect"
 	"strings"
 
-	. "github.com/open-component-model/ocm/pkg/finalizer"
+	. "github.com/open-component-model/ocm/v2/pkg/finalizer"
 
-	"github.com/open-component-model/ocm/pkg/contexts/config"
-	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/config"
+	cfgcpi "github.com/open-component-model/ocm/v2/pkg/contexts/config/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/repositories/ctf"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 const CONTEXT_TYPE = "ocm" + datacontext.OCM_CONTEXT_SUFFIX

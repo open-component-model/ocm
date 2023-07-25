@@ -15,8 +15,8 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/finalizer"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/finalizer"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 func CreateTarFromFs(fs vfs.FileSystem, path string, compress func(w io.Writer) io.WriteCloser, fss ...vfs.FileSystem) (err error) {

@@ -7,12 +7,12 @@ package main
 import (
 	"os"
 
-	"github.com/open-component-model/ocm/cmds/demoplugin/accessmethods"
-	"github.com/open-component-model/ocm/cmds/demoplugin/config"
-	"github.com/open-component-model/ocm/cmds/demoplugin/uploaders"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds"
-	"github.com/open-component-model/ocm/pkg/version"
+	"github.com/open-component-model/ocm/v2/cmds/demoplugin/accessmethods"
+	"github.com/open-component-model/ocm/v2/cmds/demoplugin/config"
+	"github.com/open-component-model/ocm/v2/cmds/demoplugin/uploaders"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/ppi/cmds"
+	"github.com/open-component-model/ocm/v2/pkg/version"
 )
 
 func main() {

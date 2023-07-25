@@ -8,8 +8,8 @@ import (
 	"crypto"
 	"hash"
 
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/signing"
+	metav1 "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/v2/pkg/signing"
 )
 
 const Algorithm = metav1.NoDigest

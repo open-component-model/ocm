@@ -10,17 +10,17 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/testutils"
+	. "github.com/open-component-model/ocm/v2/pkg/testutils"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/signing"
-	"github.com/open-component-model/ocm/pkg/signing/norm/entry"
-	"github.com/open-component-model/ocm/pkg/signing/norm/jcs"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/accessmethods/ociartifact"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/v2/pkg/mime"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/signing"
+	"github.com/open-component-model/ocm/v2/pkg/signing/norm/entry"
+	"github.com/open-component-model/ocm/v2/pkg/signing/norm/jcs"
 )
 
 var CDExcludes = signing.MapExcludes{

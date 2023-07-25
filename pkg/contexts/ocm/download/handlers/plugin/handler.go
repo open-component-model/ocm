@@ -7,13 +7,13 @@ package plugin
 import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/download"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/descriptor"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 // pluginHandler delegates download format of artifacts to a plugin based handler.

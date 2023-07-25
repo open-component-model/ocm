@@ -7,7 +7,7 @@ package descriptor
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/accessmethods/options"
 )
 
 func New() *cobra.Command {

@@ -12,16 +12,16 @@ import (
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 
-	"github.com/open-component-model/ocm/cmds/demoplugin/common"
-	"github.com/open-component-model/ocm/cmds/demoplugin/config"
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/cmds/demoplugin/common"
+	"github.com/open-component-model/ocm/v2/cmds/demoplugin/config"
+	"github.com/open-component-model/ocm/v2/pkg/cobrautils/flagsets"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/identity"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/accessmethods/options"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 const (

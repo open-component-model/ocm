@@ -12,7 +12,7 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/osfs"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/template"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/template"
 )
 
 func TestConfig(t *testing.T) {

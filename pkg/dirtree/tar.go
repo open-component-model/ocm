@@ -12,7 +12,7 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 func NewTarDirNode(ctx Context, tr *tar.Reader) (*DirNode, error) {

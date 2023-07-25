@@ -5,7 +5,7 @@
 package blobhandler
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/cpi"
 )
 
 type (

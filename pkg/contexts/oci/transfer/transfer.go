@@ -5,10 +5,10 @@
 package transfer
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
-	"github.com/open-component-model/ocm/pkg/logging"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/finalizer"
+	"github.com/open-component-model/ocm/v2/pkg/logging"
 )
 
 func TransferArtifact(art cpi.ArtifactAccess, set cpi.ArtifactSink, tags ...string) error {

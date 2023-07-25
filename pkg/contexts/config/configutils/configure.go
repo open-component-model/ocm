@@ -9,15 +9,15 @@ import (
 	"os"
 	"strings"
 
-	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
+	_ "github.com/open-component-model/ocm/v2/pkg/contexts/datacontext/config"
 
 	"github.com/mandelsoft/spiff/features"
 	"github.com/mandelsoft/spiff/spiffing"
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/contexts/config"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/config"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 func Configure(path string) error {

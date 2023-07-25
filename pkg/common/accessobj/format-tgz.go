@@ -5,8 +5,8 @@
 package accessobj
 
 import (
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/compression"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
+	"github.com/open-component-model/ocm/v2/pkg/common/compression"
 )
 
 var FormatTGZ = NewTarHandlerWithCompression(accessio.FormatTGZ, compression.Gzip)

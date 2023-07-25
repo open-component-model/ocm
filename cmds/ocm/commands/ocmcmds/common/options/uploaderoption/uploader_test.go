@@ -9,12 +9,12 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/testutils"
+	. "github.com/open-component-model/ocm/v2/pkg/testutils"
 
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/optutils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/commands/ocmcmds/common/options/optutils"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/clictx"
 )
 
 var _ = Describe("uploader option", func() {

@@ -7,7 +7,7 @@ package descriptor
 import (
 	"sort"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/utils/registry"
 )
 
 type Named interface {

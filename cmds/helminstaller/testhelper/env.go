@@ -9,17 +9,17 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/cmds/helminstaller/app"
-	"github.com/open-component-model/ocm/cmds/helminstaller/app/driver"
-	"github.com/open-component-model/ocm/cmds/helminstaller/app/driver/helm"
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/env"
-	"github.com/open-component-model/ocm/pkg/env/builder"
+	"github.com/open-component-model/ocm/v2/cmds/helminstaller/app"
+	"github.com/open-component-model/ocm/v2/cmds/helminstaller/app/driver"
+	"github.com/open-component-model/ocm/v2/cmds/helminstaller/app/driver/helm"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/config"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/v2/pkg/env"
+	"github.com/open-component-model/ocm/v2/pkg/env/builder"
 )
 
 type CLI struct {

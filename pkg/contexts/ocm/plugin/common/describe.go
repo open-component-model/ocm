@@ -10,12 +10,12 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/api"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/options"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	utils2 "github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext/action/api"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/accessmethods/options"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/descriptor"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
+	utils2 "github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 func DescribePluginDescriptor(reg api.ActionTypeRegistry, d *descriptor.Descriptor, out common.Printer) {

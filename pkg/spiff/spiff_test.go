@@ -7,11 +7,11 @@ package spiff_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/testutils"
+	. "github.com/open-component-model/ocm/v2/pkg/testutils"
 
 	"github.com/mandelsoft/spiff/spiffing"
 
-	"github.com/open-component-model/ocm/pkg/spiff"
+	"github.com/open-component-model/ocm/v2/pkg/spiff"
 )
 
 var _ = Describe("spiff", func() {

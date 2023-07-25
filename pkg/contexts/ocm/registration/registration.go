@@ -5,17 +5,17 @@
 package registration
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/handlers"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	pluginaccess "github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/plugin"
-	pluginaction "github.com/open-component-model/ocm/pkg/contexts/ocm/actionhandler/plugin"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugincacheattr"
-	pluginupload "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/generic/plugin"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/download"
-	plugindownload "github.com/open-component-model/ocm/pkg/contexts/ocm/download/handlers/plugin"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext/action"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext/action/handlers"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm"
+	pluginaccess "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/accessmethods/plugin"
+	pluginaction "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/actionhandler/plugin"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/attrs/plugincacheattr"
+	pluginupload "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/blobhandler/handlers/generic/plugin"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/download"
+	plugindownload "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/download/handlers/plugin"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 // RegisterExtensions registers all the extension provided by the found plugin.

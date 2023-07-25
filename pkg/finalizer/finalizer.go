@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/exception"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/exception"
 )
 
 type Finalizable interface {

@@ -5,7 +5,7 @@
 package genericocireg
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/oci"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci"
 )
 
 // TODO: add view concept to OCI context

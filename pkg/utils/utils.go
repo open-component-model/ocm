@@ -27,7 +27,7 @@ import (
 	"github.com/spf13/cobra"
 	"sigs.k8s.io/yaml"
 
-	ocmlog "github.com/open-component-model/ocm/pkg/logging"
+	ocmlog "github.com/open-component-model/ocm/v2/pkg/logging"
 )
 
 // PrintPrettyYaml prints the given objects as yaml if enabled.

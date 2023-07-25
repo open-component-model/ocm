@@ -7,10 +7,10 @@ package app
 import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 
-	"github.com/open-component-model/ocm/cmds/helminstaller/app/driver"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/toi/support"
+	"github.com/open-component-model/ocm/v2/cmds/helminstaller/app/driver"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/toi/support"
 )
 
 func New(d driver.Driver) func(o *support.ExecutorOptions) error {

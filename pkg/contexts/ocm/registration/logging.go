@@ -7,7 +7,7 @@ package registration
 import (
 	"github.com/mandelsoft/logging"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/descriptor"
 )
 
 func Logger(c logging.ContextProvider, keyValuePairs ...interface{}) logging.Logger {

@@ -5,10 +5,10 @@
 package ctf
 
 import (
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/ctf"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/repositories/ctf"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/repositories/genericocireg"
 )
 
 func NewRepositorySpec(acc accessobj.AccessMode, path string, opts ...accessio.Option) (*genericocireg.RepositorySpec, error) {

@@ -18,8 +18,8 @@ import (
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
 
-	"github.com/open-component-model/ocm/pkg/cobrautils"
-	"github.com/open-component-model/ocm/pkg/cobrautils/groups"
+	"github.com/open-component-model/ocm/v2/pkg/cobrautils"
+	"github.com/open-component-model/ocm/v2/pkg/cobrautils/groups"
 )
 
 func printOptionGroups(buf *bytes.Buffer, title string, flags *pflag.FlagSet) {

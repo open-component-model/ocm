@@ -10,7 +10,7 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/cobrautils/flagsets"
+	"github.com/open-component-model/ocm/v2/pkg/cobrautils/flagsets"
 )
 
 var _ = Describe("type set", func() {

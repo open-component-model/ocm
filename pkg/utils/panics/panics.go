@@ -9,8 +9,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/logging"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/logging"
 )
 
 var ReallyCrash = true

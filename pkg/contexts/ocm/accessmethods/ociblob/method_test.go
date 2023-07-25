@@ -7,15 +7,15 @@ package ociblob_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/contexts/oci/testhelper"
-	. "github.com/open-component-model/ocm/pkg/env"
-	. "github.com/open-component-model/ocm/pkg/env/builder"
+	. "github.com/open-component-model/ocm/v2/pkg/contexts/oci/testhelper"
+	. "github.com/open-component-model/ocm/v2/pkg/env"
+	. "github.com/open-component-model/ocm/v2/pkg/env/builder"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/grammar"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/accessmethods/ociblob"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/cpi"
 )
 
 const OCIPATH = "/tmp/oci"

@@ -7,7 +7,7 @@ package get
 import (
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/options"
 )
 
 func AttachedFrom(o options.OptionSetProvider) *Attached {

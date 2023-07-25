@@ -7,8 +7,8 @@ package config
 import (
 	"context"
 
-	"github.com/open-component-model/ocm/pkg/contexts/config/internal"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/config/internal"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext"
 )
 
 func WithContext(ctx context.Context) internal.Builder {

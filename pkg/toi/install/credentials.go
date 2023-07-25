@@ -8,17 +8,17 @@ import (
 	"github.com/mandelsoft/spiff/features"
 	"github.com/mandelsoft/spiff/spiffing"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	globalconfig "github.com/open-component-model/ocm/pkg/contexts/config/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/memory"
-	memorycfg "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/memory/config"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/toi"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	globalconfig "github.com/open-component-model/ocm/v2/pkg/contexts/config/config"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/config"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/repositories/directcreds"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/repositories/memory"
+	memorycfg "github.com/open-component-model/ocm/v2/pkg/contexts/credentials/repositories/memory/config"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/toi"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 type (

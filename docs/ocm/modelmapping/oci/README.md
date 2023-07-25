@@ -83,6 +83,6 @@ Additional blob transformations can be added by registering appropriate blob han
 
 The constants of the mapping are defined [here](../../../../pkg/contexts/ocm/repositories/genericocireg/componentmapping/constants.go).
 
-The reference implementation of the mapping is contained in package [github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/genericocireg](../../../../pkg/contexts/ocm/repositories/genericocireg).
+The reference implementation of the mapping is contained in package [github.com/open-component-model/ocm/v2/pkg/contexts/ocm/repositories/genericocireg](../../../../pkg/contexts/ocm/repositories/genericocireg).
 
 The blob handler for the described blob mappings can be found [here](../../../../pkg/contexts/ocm/blobhandler/handlers/oci/ocirepo).

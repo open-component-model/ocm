@@ -5,14 +5,14 @@
 package testhelper
 
 import (
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/repositories/artifactset"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/artifact"
-	"github.com/open-component-model/ocm/pkg/env/builder"
-	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/repositories/artifactset"
+	metav1 "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/digester/digesters/artifact"
+	"github.com/open-component-model/ocm/v2/pkg/env/builder"
+	"github.com/open-component-model/ocm/v2/pkg/mime"
+	"github.com/open-component-model/ocm/v2/pkg/signing/hasher/sha256"
 )
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -12,15 +12,15 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/pkg/cobrautils"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/action"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/describe"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/download"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/info"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/topics/descriptor"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds/upload"
+	"github.com/open-component-model/ocm/v2/pkg/cobrautils"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/ppi/cmds/accessmethod"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/ppi/cmds/action"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/ppi/cmds/describe"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/ppi/cmds/download"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/ppi/cmds/info"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/ppi/cmds/topics/descriptor"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/ppi/cmds/upload"
 )
 
 type PluginCommand struct {

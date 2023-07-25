@@ -7,7 +7,7 @@ package cpi
 import (
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/grammar"
 )
 
 type StringList []string

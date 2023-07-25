@@ -7,8 +7,8 @@ package transfer
 import (
 	"github.com/mandelsoft/logging"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	ocmlog "github.com/open-component-model/ocm/pkg/logging"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm"
+	ocmlog "github.com/open-component-model/ocm/v2/pkg/logging"
 )
 
 var REALM = ocmlog.DefineSubRealm("OCM transfer handling", "transfer")

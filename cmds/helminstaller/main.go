@@ -7,8 +7,8 @@ package main
 import (
 	"os"
 
-	"github.com/open-component-model/ocm/cmds/helminstaller/app"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/v2/cmds/helminstaller/app"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/clictx"
 )
 
 func main() {

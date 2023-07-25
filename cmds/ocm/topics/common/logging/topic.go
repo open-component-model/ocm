@@ -11,10 +11,10 @@ import (
 	"github.com/mandelsoft/logging"
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	logcfg "github.com/open-component-model/ocm/pkg/contexts/datacontext/config/logging"
-	utils2 "github.com/open-component-model/ocm/pkg/listformat"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext"
+	logcfg "github.com/open-component-model/ocm/v2/pkg/contexts/datacontext/config/logging"
+	utils2 "github.com/open-component-model/ocm/v2/pkg/listformat"
 )
 
 func New(ctx clictx.Context) *cobra.Command {

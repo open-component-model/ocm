@@ -11,9 +11,9 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	local "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/aliases"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials"
+	local "github.com/open-component-model/ocm/v2/pkg/contexts/credentials/repositories/aliases"
 )
 
 var DefaultContext = credentials.New()

@@ -5,9 +5,9 @@
 package cache
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/descriptor"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/utils/registry"
+	"github.com/open-component-model/ocm/v2/pkg/generics"
 )
 
 type ConstraintRegistry[T any, K registry.Key[K]] struct {

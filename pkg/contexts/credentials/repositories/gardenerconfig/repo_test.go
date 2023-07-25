@@ -18,14 +18,14 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/memoryfs"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	local "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig"
-	gardenercfgcpi "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/identity"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/attrs/vfsattr"
-	ociidentity "github.com/open-component-model/ocm/pkg/contexts/oci/identity"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/cpi"
+	local "github.com/open-component-model/ocm/v2/pkg/contexts/credentials/repositories/gardenerconfig"
+	gardenercfgcpi "github.com/open-component-model/ocm/v2/pkg/contexts/credentials/repositories/gardenerconfig/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/repositories/gardenerconfig/identity"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext/attrs/vfsattr"
+	ociidentity "github.com/open-component-model/ocm/v2/pkg/contexts/oci/identity"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 var _ = Describe("gardener config", func() {

@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/open-component-model/ocm/hack/generate-docs/cobradoc"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi/cmds"
-	"github.com/open-component-model/ocm/pkg/version"
+	"github.com/open-component-model/ocm/v2/hack/generate-docs/cobradoc"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/ppi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/ppi/cmds"
+	"github.com/open-component-model/ocm/v2/pkg/version"
 )
 
 func main() {

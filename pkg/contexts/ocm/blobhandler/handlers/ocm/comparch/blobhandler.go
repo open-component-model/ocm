@@ -9,14 +9,14 @@ import (
 
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localfsblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/compatattr"
-	storagecontext "github.com/open-component-model/ocm/pkg/contexts/ocm/blobhandler/handlers/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/accessmethods/localfsblob"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/attrs/compatattr"
+	storagecontext "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/blobhandler/handlers/ocm"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/repositories/comparch"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 func init() {

@@ -7,9 +7,9 @@ package credentials
 import (
 	"context"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/internal"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 const (

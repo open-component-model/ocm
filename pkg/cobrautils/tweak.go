@@ -8,11 +8,11 @@ import (
 	"regexp"
 	"strings"
 
-	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
+	_ "github.com/open-component-model/ocm/v2/pkg/contexts/clictx/config"
 
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/pkg/out"
+	"github.com/open-component-model/ocm/v2/pkg/out"
 )
 
 func TweakCommand(cmd *cobra.Command, ctx out.Context) {

@@ -8,7 +8,7 @@ import (
 	"encoding/hex"
 	"hash"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 func Hash(hash hash.Hash, data []byte) (string, error) {

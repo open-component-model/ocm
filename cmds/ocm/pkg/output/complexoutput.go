@@ -7,14 +7,11 @@ package output
 import (
 	"fmt"
 
-	. "github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
-	. "github.com/open-component-model/ocm/pkg/out"
-
 	"github.com/mandelsoft/logging"
 	"sigs.k8s.io/yaml"
 
-	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 type ComplexProcessingOutput struct {

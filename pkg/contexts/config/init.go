@@ -5,6 +5,6 @@
 package config
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/contexts/config/config"
-	_ "github.com/open-component-model/ocm/pkg/contexts/datacontext/config"
+	_ "github.com/open-component-model/ocm/v2/pkg/contexts/config/config"
+	_ "github.com/open-component-model/ocm/v2/pkg/contexts/datacontext/config"
 )

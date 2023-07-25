@@ -8,10 +8,10 @@ import (
 	"github.com/mandelsoft/logging"
 	logcfg "github.com/mandelsoft/logging/config"
 
-	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	local "github.com/open-component-model/ocm/pkg/logging"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/config/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext"
+	local "github.com/open-component-model/ocm/v2/pkg/logging"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 const (

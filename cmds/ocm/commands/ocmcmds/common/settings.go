@@ -7,7 +7,7 @@ package common
 import (
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 func ParseSettings(args []string, kinds ...string) (map[string]string, error) {

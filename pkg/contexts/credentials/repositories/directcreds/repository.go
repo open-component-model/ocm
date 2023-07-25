@@ -5,8 +5,8 @@
 package directcreds
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 type Repository struct {

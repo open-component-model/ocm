@@ -13,7 +13,7 @@ import (
 
 	"github.com/onsi/gomega/types"
 
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 func Close(c io.Closer, msg ...interface{}) {

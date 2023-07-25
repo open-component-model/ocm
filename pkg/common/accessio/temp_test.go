@@ -11,7 +11,7 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
 )
 
 var _ = Describe("artifact management", func() {

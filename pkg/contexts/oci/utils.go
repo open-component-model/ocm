@@ -7,9 +7,9 @@ package oci
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/grammar"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/grammar"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 func AsTags(tag string) []string {

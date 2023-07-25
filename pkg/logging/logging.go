@@ -12,7 +12,7 @@ import (
 	logcfg "github.com/mandelsoft/logging/config"
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 // REALM is used to tag all logging done by this library with the ocm tag.

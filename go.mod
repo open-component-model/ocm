@@ -1,4 +1,4 @@
-module github.com/open-component-model/ocm
+module github.com/open-component-model/ocm/v2
 
 go 1.19
 

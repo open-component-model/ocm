@@ -7,8 +7,8 @@ package cpi
 import (
 	"reflect"
 
-	"github.com/open-component-model/ocm/pkg/common/accessobj"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessobj"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/artdesc"
 )
 
 type ManifestStateHandler struct{}

@@ -13,7 +13,7 @@ import (
 	"github.com/modern-go/reflect2"
 	"github.com/sirupsen/logrus"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 const ATTR_TYPE = "type"

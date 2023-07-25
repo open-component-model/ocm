@@ -11,9 +11,9 @@ import (
 	"github.com/mandelsoft/vfs/pkg/vfs"
 	"sigs.k8s.io/yaml"
 
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
-	"github.com/open-component-model/ocm/pkg/toi/install"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/finalizer"
+	"github.com/open-component-model/ocm/v2/pkg/toi/install"
 )
 
 const OptionTargetPath = "TARGET_PATH"

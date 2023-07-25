@@ -5,7 +5,7 @@
 package cpi
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/internal"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/internal"
 )
 
 const AliasRepositoryType = internal.AliasRepositoryType

@@ -5,7 +5,7 @@
 package utils
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm"
 )
 
 func GetResourceData(acc ocm.ResourceAccess) ([]byte, error) {

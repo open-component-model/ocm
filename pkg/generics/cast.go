@@ -7,7 +7,7 @@ package generics
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 func As[T any](o interface{}) T {

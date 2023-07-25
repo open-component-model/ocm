@@ -5,5 +5,5 @@
 package gardenerconfig
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/gardenerconfig/handler/container_registry"
+	_ "github.com/open-component-model/ocm/v2/pkg/contexts/credentials/repositories/gardenerconfig/handler/container_registry"
 )

@@ -5,10 +5,10 @@
 package utils
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/accessmethods/ociartifact"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 func GetOCIArtifactRef(ctx ocm.Context, r ocm.ResourceAccess) (string, error) {

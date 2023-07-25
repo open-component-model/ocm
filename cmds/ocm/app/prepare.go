@@ -9,7 +9,7 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/clictx"
 )
 
 // Prepare pre-prepares CLI options by evaluation the main options

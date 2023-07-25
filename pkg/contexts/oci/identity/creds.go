@@ -7,8 +7,8 @@ package identity
 import (
 	"path"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 func GetCredentials(ctx cpi.ContextProvider, locator, repo string) (cpi.Credentials, error) {

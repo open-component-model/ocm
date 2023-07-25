@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"sort"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 ////////////////////////////////////////////////////////////////////////////////

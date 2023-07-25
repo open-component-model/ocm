@@ -7,9 +7,9 @@ package bundle
 import (
 	"encoding/json"
 
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/toi"
-	"github.com/open-component-model/ocm/pkg/toi/install"
+	metav1 "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/v2/pkg/toi"
+	"github.com/open-component-model/ocm/v2/pkg/toi/install"
 )
 
 type BundleSpecification struct {

@@ -8,7 +8,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/v2/pkg/generics"
 )
 
 // UsageContext descibes a dediacetd type specific

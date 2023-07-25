@@ -11,17 +11,17 @@ import (
 
 	"github.com/spf13/cobra"
 
-	handler "github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/handlers/pluginhdlr"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/verbs"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/common"
-	"github.com/open-component-model/ocm/pkg/generics"
-	utils2 "github.com/open-component-model/ocm/pkg/utils"
+	handler "github.com/open-component-model/ocm/v2/cmds/ocm/commands/ocmcmds/common/handlers/pluginhdlr"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/commands/ocmcmds/names"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/commands/verbs"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/output"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/processing"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/common"
+	"github.com/open-component-model/ocm/v2/pkg/generics"
+	utils2 "github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 var (

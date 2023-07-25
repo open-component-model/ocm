@@ -10,7 +10,7 @@ import (
 
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/pkg/testutils"
+	"github.com/open-component-model/ocm/v2/pkg/testutils"
 )
 
 var _ = Describe("value map", func() {

@@ -7,10 +7,10 @@ package _package
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/names"
-	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds/package/bootstrap"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/utils"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/commands/toicmds/names"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/commands/toicmds/package/bootstrap"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/clictx"
 )
 
 var Names = names.Package

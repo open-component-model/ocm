@@ -5,7 +5,7 @@
 package dockermulti
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/inputs"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/commands/ocmcmds/common/inputs"
 )
 
 const TYPE = "dockermulti"

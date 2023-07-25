@@ -11,7 +11,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	tool "github.com/open-component-model/ocm/pkg/regex"
+	tool "github.com/open-component-model/ocm/v2/pkg/regex"
 )
 
 func TestConfig(t *testing.T) {

@@ -7,11 +7,11 @@ package dockerconfig
 import (
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext"
 )
 
-const ATTR_REPOS = "github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/dockerconfig"
+const ATTR_REPOS = "github.com/open-component-model/ocm/v2/pkg/contexts/credentials/repositories/dockerconfig"
 
 type Repositories struct {
 	lock  sync.Mutex

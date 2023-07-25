@@ -9,10 +9,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	common2 "github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/common"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/ppi"
+	common2 "github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext/action"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/ppi"
 )
 
 const NAME = "describe"

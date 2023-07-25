@@ -5,11 +5,11 @@
 package api_test
 
 import (
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action/api"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/identity/hostpath"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext/action/api"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 const NAME = "testAction"

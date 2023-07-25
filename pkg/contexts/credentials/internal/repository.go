@@ -5,8 +5,8 @@
 package internal
 
 import (
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/generics"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/generics"
 )
 
 type Repository interface {

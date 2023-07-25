@@ -7,7 +7,7 @@ package signing
 import (
 	"encoding/json"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 type null struct{}

@@ -5,12 +5,12 @@
 package testhelper
 
 import (
-	"github.com/open-component-model/ocm/pkg/common"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/blob"
-	"github.com/open-component-model/ocm/pkg/env/builder"
-	"github.com/open-component-model/ocm/pkg/mime"
-	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	metav1 "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/digester/digesters/blob"
+	"github.com/open-component-model/ocm/v2/pkg/env/builder"
+	"github.com/open-component-model/ocm/v2/pkg/mime"
+	"github.com/open-component-model/ocm/v2/pkg/signing/hasher/sha256"
 )
 
 func TextResourceDigestSpec(d string) *metav1.DigestSpec {

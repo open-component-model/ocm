@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/v2/pkg/signing"
 )
 
 const (

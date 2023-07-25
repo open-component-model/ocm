@@ -11,8 +11,8 @@ import (
 	"github.com/containerd/containerd/pkg/atomic"
 	"github.com/mandelsoft/logging"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
-	"github.com/open-component-model/ocm/pkg/utils/panics"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/data"
+	"github.com/open-component-model/ocm/v2/pkg/utils/panics"
 )
 
 type Index = IndexArray

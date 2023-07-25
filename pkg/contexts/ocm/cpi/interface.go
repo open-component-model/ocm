@@ -9,10 +9,10 @@ package cpi
 import (
 	"github.com/mandelsoft/logging"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
-	"github.com/open-component-model/ocm/pkg/registrations"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/internal"
+	"github.com/open-component-model/ocm/v2/pkg/registrations"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 const CONTEXT_TYPE = internal.CONTEXT_TYPE

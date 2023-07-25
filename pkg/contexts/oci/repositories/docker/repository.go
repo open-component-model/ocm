@@ -11,7 +11,7 @@ import (
 	dockertypes "github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 
-	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/cpi"
 )
 
 type RepositoryImpl struct {

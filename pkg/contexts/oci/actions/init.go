@@ -5,5 +5,5 @@
 package actions
 
 import (
-	_ "github.com/open-component-model/ocm/pkg/contexts/oci/actions/oci-repository-prepare"
+	_ "github.com/open-component-model/ocm/v2/pkg/contexts/oci/actions/oci-repository-prepare"
 )

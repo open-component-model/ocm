@@ -7,9 +7,9 @@ package comppathopt
 import (
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/commands/ocmcmds/common"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/output"
+	metav1 "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc/meta/v1"
 )
 
 func From(o *output.Options) *Option {

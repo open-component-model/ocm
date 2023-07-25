@@ -9,8 +9,8 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 type multiFormatVersion[T VersionedTypedObject] struct {

@@ -13,9 +13,9 @@ import (
 
 	"github.com/mandelsoft/logging"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
-	ocmlog "github.com/open-component-model/ocm/pkg/logging"
-	"github.com/open-component-model/ocm/pkg/testutils"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/data"
+	ocmlog "github.com/open-component-model/ocm/v2/pkg/logging"
+	"github.com/open-component-model/ocm/v2/pkg/testutils"
 )
 
 var AddOne = func(logger logging.Logger) func(e interface{}) interface{} {

@@ -5,7 +5,7 @@
 package empty
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/cpi"
 )
 
 func init() {

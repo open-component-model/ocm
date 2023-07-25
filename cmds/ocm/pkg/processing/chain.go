@@ -7,8 +7,8 @@ package processing
 import (
 	"github.com/mandelsoft/logging"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/data"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/options"
 )
 
 // ProcessChain is a data structure holding a chain definition, which is

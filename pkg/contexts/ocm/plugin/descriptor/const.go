@@ -5,9 +5,9 @@
 package descriptor
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext/action"
-	"github.com/open-component-model/ocm/pkg/errors"
-	ocmlog "github.com/open-component-model/ocm/pkg/logging"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext/action"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	ocmlog "github.com/open-component-model/ocm/v2/pkg/logging"
 )
 
 const (

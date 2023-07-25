@@ -10,8 +10,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/registrations"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/registrations"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 type ImplementationRepositoryType struct {

@@ -9,14 +9,14 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/logging/testhelper"
-	. "github.com/open-component-model/ocm/pkg/testutils"
+	. "github.com/open-component-model/ocm/v2/pkg/logging/testhelper"
+	. "github.com/open-component-model/ocm/v2/pkg/testutils"
 
 	"github.com/mandelsoft/logging"
 	logcfg "github.com/mandelsoft/logging/config"
 	"github.com/tonglil/buflogr"
 
-	local "github.com/open-component-model/ocm/pkg/logging"
+	local "github.com/open-component-model/ocm/v2/pkg/logging"
 )
 
 ////////////////////////////////////////////////////////////////////////////////

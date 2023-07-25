@@ -7,7 +7,7 @@ package download
 import (
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/output"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/output"
 )
 
 func From(o *output.Options) *Option {

@@ -7,8 +7,8 @@ package finalizer
 import (
 	"io"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 type readcloser = io.ReadCloser

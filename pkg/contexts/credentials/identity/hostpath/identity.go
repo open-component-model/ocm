@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/cpi"
 )
 
 // IDENTITY_TYPE is the identity of this matcher.

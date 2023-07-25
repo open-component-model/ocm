@@ -10,14 +10,14 @@ import (
 
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/registry"
-	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/finalizer"
-	"github.com/open-component-model/ocm/pkg/registrations"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/utils/registry"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/finalizer"
+	"github.com/open-component-model/ocm/v2/pkg/registrations"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 const ALL = "*"
@@ -156,7 +156,7 @@ func Register(hdlr Handler, olist ...HandlerOption) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-const ATTR_DOWNLOADER_HANDLERS = "github.com/open-component-model/ocm/pkg/contexts/ocm/download"
+const ATTR_DOWNLOADER_HANDLERS = "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/download"
 
 func For(ctx cpi.ContextProvider) Registry {
 	if ctx == nil {

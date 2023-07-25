@@ -7,9 +7,9 @@ package app
 import (
 	"encoding/json"
 
-	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/utils/localize"
-	"github.com/open-component-model/ocm/pkg/errors"
+	v1 "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/utils/localize"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 type Config struct {

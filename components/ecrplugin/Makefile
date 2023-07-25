@@ -22,10 +22,10 @@ GEN = $(REPO_ROOT)/gen/$(NAME)
 
 NOW         := $(shell date -u +%FT%T%z)
 BUILD_FLAGS := "-s -w \
- -X github.com/open-component-model/ocm/pkg/version.gitVersion=$(EFFECTIVE_VERSION) \
- -X github.com/open-component-model/ocm/pkg/version.gitTreeState=$(GIT_TREE_STATE) \
- -X github.com/open-component-model/ocm/pkg/version.gitCommit=$(COMMIT) \
- -X github.com/open-component-model/ocm/pkg/version.buildDate=$(NOW)"
+ -X github.com/open-component-model/ocm/v2/pkg/version.gitVersion=$(EFFECTIVE_VERSION) \
+ -X github.com/open-component-model/ocm/v2/pkg/version.gitTreeState=$(GIT_TREE_STATE) \
+ -X github.com/open-component-model/ocm/v2/pkg/version.gitCommit=$(COMMIT) \
+ -X github.com/open-component-model/ocm/v2/pkg/version.buildDate=$(NOW)"
 
 
 .PHONY: build

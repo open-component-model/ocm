@@ -8,7 +8,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 // ReferencableCloser manages closable views to a basic closer.

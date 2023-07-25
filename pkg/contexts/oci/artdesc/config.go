@@ -9,7 +9,7 @@ import (
 
 	ociv1 "github.com/opencontainers/image-spec/specs-go/v1"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
 )
 
 type ImageConfig = ociv1.Image

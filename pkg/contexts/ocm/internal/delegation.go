@@ -8,8 +8,8 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 // RepositoryDelegationRegistry is used to register handlers able to dynamically

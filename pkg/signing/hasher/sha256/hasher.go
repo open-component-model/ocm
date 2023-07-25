@@ -9,7 +9,7 @@ import (
 	"crypto/sha256"
 	"hash"
 
-	"github.com/open-component-model/ocm/pkg/signing"
+	"github.com/open-component-model/ocm/v2/pkg/signing"
 )
 
 var Algorithm = crypto.SHA256.String()

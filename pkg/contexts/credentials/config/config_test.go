@@ -11,15 +11,15 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	localconfig "github.com/open-component-model/ocm/pkg/contexts/credentials/config"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/aliases"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/directcreds"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/repositories/memory"
-	"github.com/open-component-model/ocm/pkg/runtime"
-	"github.com/open-component-model/ocm/pkg/testutils"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/config"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials"
+	localconfig "github.com/open-component-model/ocm/v2/pkg/contexts/credentials/config"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/repositories/aliases"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/repositories/directcreds"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/repositories/memory"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/testutils"
 )
 
 var DefaultContext = credentials.New()

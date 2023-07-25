@@ -13,16 +13,16 @@ import (
 	"github.com/containerd/containerd/remotes/docker/config"
 	"github.com/mandelsoft/logging"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
-	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	ociidentity "github.com/open-component-model/ocm/pkg/contexts/oci/identity"
-	"github.com/open-component-model/ocm/pkg/docker"
-	"github.com/open-component-model/ocm/pkg/docker/resolve"
-	"github.com/open-component-model/ocm/pkg/errors"
-	ocmlog "github.com/open-component-model/ocm/pkg/logging"
-	"github.com/open-component-model/ocm/pkg/utils"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/oci/cpi"
+	ociidentity "github.com/open-component-model/ocm/v2/pkg/contexts/oci/identity"
+	"github.com/open-component-model/ocm/v2/pkg/docker"
+	"github.com/open-component-model/ocm/v2/pkg/docker/resolve"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
+	ocmlog "github.com/open-component-model/ocm/v2/pkg/logging"
+	"github.com/open-component-model/ocm/v2/pkg/utils"
 )
 
 type RepositoryInfo struct {

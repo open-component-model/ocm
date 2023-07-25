@@ -8,9 +8,9 @@ import (
 	"path"
 	"strings"
 
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/credentials/identity/hostpath"
-	"github.com/open-component-model/ocm/pkg/listformat"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/credentials/identity/hostpath"
+	"github.com/open-component-model/ocm/v2/pkg/listformat"
 )
 
 const CONSUMER_TYPE = "S3"

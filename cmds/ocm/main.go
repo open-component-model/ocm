@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/open-component-model/ocm/cmds/ocm/app"
-	"github.com/open-component-model/ocm/pkg/contexts/clictx"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/app"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/clictx"
 )
 
 func main() {

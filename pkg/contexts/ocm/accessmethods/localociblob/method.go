@@ -5,13 +5,13 @@
 package localociblob
 
 import (
-	. "github.com/open-component-model/ocm/pkg/exception"
+	. "github.com/open-component-model/ocm/v2/pkg/exception"
 
 	"github.com/opencontainers/go-digest"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 // Type is the access type for a component version local blob in an OCI repository.

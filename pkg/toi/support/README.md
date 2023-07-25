@@ -31,7 +31,7 @@ func(options *ExecutorOptions) error
      import (
         "os"
 
-        "github.com/open-component-model/ocm/pkg/contexts/clictx"
+        "github.com/open-component-model/ocm/v2/pkg/contexts/clictx"
 
         "yourpackage"
      )

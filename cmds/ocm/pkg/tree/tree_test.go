@@ -10,8 +10,8 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
-	"github.com/open-component-model/ocm/pkg/common"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/tree"
+	"github.com/open-component-model/ocm/v2/pkg/common"
 )
 
 type Elem struct {

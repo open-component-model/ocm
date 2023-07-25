@@ -5,11 +5,11 @@
 package plugincacheattr
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/datacontext"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/plugindirattr"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/cache"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/plugins"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/datacontext"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/attrs/plugindirattr"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/cache"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/plugins"
 )
 
 const (

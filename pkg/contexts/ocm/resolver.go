@@ -7,9 +7,9 @@ package ocm
 import (
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/common"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/common"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/internal"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 type CompoundResolver struct {

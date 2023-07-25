@@ -9,9 +9,9 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/open-component-model/ocm/pkg/testutils"
+	. "github.com/open-component-model/ocm/v2/pkg/testutils"
 
-	"github.com/open-component-model/ocm/pkg/common/accessio/resource"
+	"github.com/open-component-model/ocm/v2/pkg/common/accessio/resource"
 )
 
 // Resource is the intended resource interface.

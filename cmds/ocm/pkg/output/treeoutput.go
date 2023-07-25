@@ -5,9 +5,9 @@
 package output
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/data"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/processing"
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/tree"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/data"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/processing"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/tree"
 )
 
 type TreeOutputOption interface {

@@ -7,9 +7,9 @@ package config
 import (
 	"context"
 
-	"github.com/open-component-model/ocm/pkg/contexts/config/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/config/internal"
-	"github.com/open-component-model/ocm/pkg/runtime"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/config/cpi"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/config/internal"
+	"github.com/open-component-model/ocm/v2/pkg/runtime"
 )
 
 const KIND_CONFIGTYPE = internal.KIND_CONFIGTYPE

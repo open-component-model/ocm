@@ -8,7 +8,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/v2/pkg/errors"
 )
 
 // NormalisationAlgorithm types and versions the algorithm used for digest generation.

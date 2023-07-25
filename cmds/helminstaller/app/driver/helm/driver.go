@@ -9,7 +9,7 @@ import (
 
 	"github.com/mandelsoft/logging"
 
-	"github.com/open-component-model/ocm/cmds/helminstaller/app/driver"
+	"github.com/open-component-model/ocm/v2/cmds/helminstaller/app/driver"
 )
 
 type Driver struct{}

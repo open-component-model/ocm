@@ -5,7 +5,7 @@
 package names
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/names"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/commands/ocmcmds/names"
 )
 
 var Package = []string{"package", "pkg", "componentversion", "cv", "component", "comp", "c"}

@@ -5,7 +5,7 @@
 package cache
 
 import (
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/plugin/descriptor"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/plugin/descriptor"
 )
 
 type Plugin = *pluginImpl

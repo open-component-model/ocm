@@ -8,8 +8,8 @@ import (
 	"github.com/Masterminds/semver/v3"
 	"github.com/spf13/pflag"
 
-	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
-	"github.com/open-component-model/ocm/pkg/cobrautils/flag"
+	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/options"
+	"github.com/open-component-model/ocm/v2/pkg/cobrautils/flag"
 )
 
 func From(o options.OptionSetProvider) *Option {
