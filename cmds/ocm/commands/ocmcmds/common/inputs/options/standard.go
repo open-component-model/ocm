@@ -40,3 +40,5 @@ var ValuesOption = flagsets.NewValueMapYAMLOptionType("inputValues", "YAML based
 var DataOption = flagsets.NewBytesOptionType("inputData", "data (string, !!string or !<base64>")
 
 var TextOption = flagsets.NewStringOptionType("inputText", "utf8 text")
+
+var HelmReposiroryOption = flagsets.NewStringOptionType("inputHelmRepository", "helm repository base URL")
