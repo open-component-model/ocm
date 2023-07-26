@@ -9,11 +9,11 @@ import (
 
 // Signer can sign objects using specific algorithm or sensible defaults.
 type Signer interface {
-	Sign(ctx ocm.Context, componentVersion ocm.ComponentVersionAccess, opts ...SignOptionFunc) (*metav1.DigestSpec, error)
+	Sign(componentVersion ocm.ComponentVersionAccess, opts ...OptionFunc) (*metav1.DigestSpec, error)
 }
 
 type Verifier interface {
-	Verify(ctx ocm.Context, componentVersion ocm.ComponentVersionAccess, opts ...SignOptionFunc) (*metav1.DigestSpec, error)
+	Verify(componentVersion ocm.ComponentVersionAccess, opts ...OptionFunc) (*metav1.DigestSpec, error)
 }
 
 type SigningVerifier interface {
@@ -21,33 +21,33 @@ type SigningVerifier interface {
 	Verifier
 }
 
-// SignOptions defines high level options that can be configured for signing a component.
-type SignOptions struct {
-	state         signing.WalkingState
-	printer       common.Printer
-	signerOptions *signing.Options
+// Options defines high level options that can be configured for signing a component.
+type Options struct {
+	state          signing.WalkingState
+	printer        common.Printer
+	signingOptions *signing.Options
 }
 
-type SignOptionFunc func(opts *SignOptions)
+type OptionFunc func(opts *Options)
 
 // WithPrinter allows for passing in a printer option.
-func WithPrinter(printer common.Printer) SignOptionFunc {
-	return func(opts *SignOptions) {
+func WithPrinter(printer common.Printer) OptionFunc {
+	return func(opts *Options) {
 		opts.printer = printer
 	}
 }
 
 // WithState allows fine-tuning the walking state. In reality, the default is sufficient in most cases.
-func WithState(state signing.WalkingState) SignOptionFunc {
-	return func(opts *SignOptions) {
+func WithState(state signing.WalkingState) OptionFunc {
+	return func(opts *Options) {
 		opts.state = state
 	}
 }
 
 // WithSignerOptions allows for fine-tuning the signing options.
-func WithSignerOptions(sopts *signing.Options) SignOptionFunc {
-	return func(opts *SignOptions) {
-		opts.signerOptions = sopts
+func WithSignerOptions(sopts *signing.Options) OptionFunc {
+	return func(opts *Options) {
+		opts.signingOptions = sopts
 	}
 }
 
@@ -55,8 +55,9 @@ func WithSignerOptions(sopts *signing.Options) SignOptionFunc {
 type ComponentSigningVerifier struct{}
 
 // Sign takes a context and a component and sign it using some default values and various options passed in.
-func (c *ComponentSigningVerifier) Sign(ctx ocm.Context, componentVersion ocm.ComponentVersionAccess, opts ...SignOptionFunc) (*metav1.DigestSpec, error) {
-	defaults := &SignOptions{
+func (c *ComponentSigningVerifier) Sign(componentVersion ocm.ComponentVersionAccess, opts ...OptionFunc) (*metav1.DigestSpec, error) {
+	ctx := componentVersion.GetContext()
+	defaults := &Options{
 		// these are more of less constant
 		state:   signing.NewWalkingState(ctx.LoggingContext().WithContext(signing.REALM)),
 		printer: common.NewPrinter(nil),
@@ -66,12 +67,13 @@ func (c *ComponentSigningVerifier) Sign(ctx ocm.Context, componentVersion ocm.Co
 		o(defaults)
 	}
 
-	return signing.Apply(defaults.printer, &defaults.state, componentVersion, defaults.signerOptions, true)
+	return signing.Apply(defaults.printer, &defaults.state, componentVersion, defaults.signingOptions, true)
 }
 
 // Verify takes a context and a component and verifies its signature.
-func (c *ComponentSigningVerifier) Verify(ctx ocm.Context, componentVersion ocm.ComponentVersionAccess, opts ...SignOptionFunc) (*metav1.DigestSpec, error) {
-	defaults := &SignOptions{
+func (c *ComponentSigningVerifier) Verify(componentVersion ocm.ComponentVersionAccess, opts ...OptionFunc) (*metav1.DigestSpec, error) {
+	ctx := componentVersion.GetContext()
+	defaults := &Options{
 		// these are more of less constant
 		state:   signing.NewWalkingState(ctx.LoggingContext().WithContext(signing.REALM)),
 		printer: common.NewPrinter(nil),
@@ -81,5 +83,5 @@ func (c *ComponentSigningVerifier) Verify(ctx ocm.Context, componentVersion ocm.
 		o(defaults)
 	}
 
-	return signing.Apply(defaults.printer, &defaults.state, componentVersion, defaults.signerOptions, true)
+	return signing.Apply(defaults.printer, &defaults.state, componentVersion, defaults.signingOptions, true)
 }

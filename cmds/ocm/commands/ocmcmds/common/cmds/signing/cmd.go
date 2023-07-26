@@ -149,9 +149,9 @@ func (a *action) Digest(o *comphdlr.Object) (*metav1.DigestSpec, *compdesc.Compo
 
 	csv := &api.ComponentSigningVerifier{}
 	if sopts.Verify {
-		d, err = csv.Verify(o.ComponentVersion.GetContext(), o.ComponentVersion, api.WithSignerOptions(&sopts), api.WithPrinter(a.printer))
+		d, err = csv.Verify(o.ComponentVersion, api.WithSignerOptions(&sopts), api.WithPrinter(a.printer))
 	} else {
-		d, err = csv.Sign(o.ComponentVersion.GetContext(), o.ComponentVersion, api.WithSignerOptions(&sopts), api.WithPrinter(a.printer))
+		d, err = csv.Sign(o.ComponentVersion, api.WithSignerOptions(&sopts), api.WithPrinter(a.printer))
 	}
 
 	var cd *compdesc.ComponentDescriptor
