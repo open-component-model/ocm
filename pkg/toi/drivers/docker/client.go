@@ -56,11 +56,11 @@ func buildDockerClientOptions() *cliflags.ClientOptions {
 	// (but don't check the certs).
 	tlsVerify, tlsConfigured := os.LookupEnv(DockerTLSVerifyEnvVar)
 	if tlsConfigured && tlsVerify != "" {
-		cliOpts.Common.TLS = true
+		cliOpts.TLS = true
 
 		// Check if we should verify certs or allow self-signed certs (insecure)
 		verify, _ := strconv.ParseBool(tlsVerify)
-		cliOpts.Common.TLSVerify = verify
+		cliOpts.TLSVerify = verify
 
 		// Check if the TLS certs have been overridden
 		var certPath string
@@ -70,7 +70,7 @@ func buildDockerClientOptions() *cliflags.ClientOptions {
 			certPath = cliOpts.ConfigDir
 		}
 
-		cliOpts.Common.TLSOptions = &tlsconfig.Options{
+		cliOpts.TLSOptions = &tlsconfig.Options{
 			CAFile:   filepath.Join(certPath, cliflags.DefaultCaFile),
 			CertFile: filepath.Join(certPath, cliflags.DefaultCertFile),
 			KeyFile:  filepath.Join(certPath, cliflags.DefaultKeyFile),
