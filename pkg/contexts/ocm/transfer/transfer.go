@@ -116,6 +116,21 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 	return list.Add(comp.AddVersion(t)).Result()
 }
 
+type runContext struct {
+	err error
+}
+
+func run[T any](c *runContext, f func() (T, error)) T {
+	var result T
+	if c.err != nil {
+		return result
+	}
+
+	result, c.err = f()
+
+	return result
+}
+
 func CopyVersion(printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler transferhandler.TransferHandler) error {
 	if handler == nil {
 		handler = standard.NewDefaultHandler(nil)
@@ -124,65 +139,93 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 	*t.GetDescriptor() = *src.GetDescriptor().Copy()
 	log.Info("  transferring resources")
 	for i, r := range src.GetResources() {
-		var m ocm.AccessMethod
-		a, err := r.Access()
-		if err == nil {
-			m, err = r.AccessMethod()
-			if err == nil {
-				defer m.Close()
-				ok := a.IsLocal(src.GetContext())
-				if !ok {
-					if !none.IsNone(a.GetKind()) {
-						ok, err = handler.TransferResource(src, a, r)
-						if !ok {
-							log.Info("transport omitted", "resource", r.Meta().Name, "index", i, "access", a.GetType())
-						}
+		c := &runContext{}
+
+		// gather the access and the access method
+		a := run(c, r.Access)
+		m := run(c, r.AccessMethod)
+
+		if c.err == nil {
+			// so far so good, let's perform the next set of actions
+			ok := a.IsLocal(src.GetContext())
+			if !ok {
+				if !none.IsNone(a.GetKind()) {
+					ok = run(c, func() (bool, error) {
+						return handler.TransferResource(src, a, r)
+					})
+					if !ok {
+						log.Info("transport omitted", "resource", r.Meta().Name, "index", i, "access", a.GetType())
 					}
 				}
-				if ok {
-					hint := ocmcpi.ArtifactNameHint(a, src)
-					printArtifactInfo(printer, log, "resource", i, hint)
-					err = handler.HandleTransferResource(r, m, hint, t)
-				}
 			}
+			if ok {
+				hint := ocmcpi.ArtifactNameHint(a, src)
+				printArtifactInfo(printer, log, "resource", i, hint)
+				run(c, func() (any, error) {
+					return nil, handler.HandleTransferResource(r, m, hint, t)
+				})
+			}
+
 		}
-		if err != nil {
-			if !errors.IsErrUnknownKind(err, errors.KIND_ACCESSMETHOD) {
-				return errors.Wrapf(err, "%s: transferring resource %d", hist, i)
+
+		// if method was successfully fetched, it's safe to close here now.
+		if m != nil {
+			m.Close()
+		}
+
+		// lastly, handle the error if there was any.
+		if c.err != nil {
+			if !errors.IsErrUnknownKind(c.err, errors.KIND_ACCESSMETHOD) {
+				return errors.Wrapf(c.err, "%s: transferring resource %d", hist, i)
 			}
-			printer.Printf("WARN: %s: transferring resource %d: %s (enforce transport by reference)\n", hist, i, err)
+
+			printer.Printf("WARN: %s: transferring resource %d: %s (enforce transport by reference)\n", hist, i, c.err)
 		}
 	}
 
 	log.Info("  transferring sources")
 	for i, r := range src.GetSources() {
-		var m ocm.AccessMethod
-		a, err := r.Access()
-		if err == nil {
-			m, err = r.AccessMethod()
-			if err == nil {
-				defer m.Close()
-				ok := a.IsLocal(src.GetContext())
-				if !ok {
-					if !none.IsNone(a.GetKind()) {
-						ok, err = handler.TransferSource(src, a, r)
-						if !ok {
-							log.Info("transport omitted", "source", r.Meta().Name, "index", i, "access", a.GetType())
-						}
+		c := &runContext{}
+
+		// gather the access and the access method
+		a := run(c, r.Access)
+		m := run(c, r.AccessMethod)
+
+		if c.err == nil {
+			// so far so good, let's perform the next set of actions
+			ok := a.IsLocal(src.GetContext())
+			if !ok {
+				if !none.IsNone(a.GetKind()) {
+					ok = run(c, func() (bool, error) {
+						return handler.TransferSource(src, a, r)
+					})
+					if !ok {
+						log.Info("transport omitted", "source", r.Meta().Name, "index", i, "access", a.GetType())
 					}
 				}
-				if ok {
-					hint := ocmcpi.ArtifactNameHint(a, src)
-					printArtifactInfo(printer, log, "source", i, hint)
-					err = handler.HandleTransferSource(r, m, hint, t)
-				}
 			}
+			if ok {
+				hint := ocmcpi.ArtifactNameHint(a, src)
+				printArtifactInfo(printer, log, "source", i, hint)
+				run(c, func() (any, error) {
+					return nil, handler.HandleTransferSource(r, m, hint, t)
+				})
+			}
+
 		}
-		if err != nil {
-			if !errors.IsErrUnknownKind(err, errors.KIND_ACCESSMETHOD) {
-				return errors.Wrapf(err, "%s: transferring source %d", hist, i)
+
+		// if method was successfully fetched, it's safe to close here now.
+		if m != nil {
+			m.Close()
+		}
+
+		// lastly, handle the error if there was any.
+		if c.err != nil {
+			if !errors.IsErrUnknownKind(c.err, errors.KIND_ACCESSMETHOD) {
+				return errors.Wrapf(c.err, "%s: transferring source %d", hist, i)
 			}
-			printer.Printf("WARN: %s: transferring source %d: %s (enforce transport by reference)\n", hist, i, err)
+
+			printer.Printf("WARN: %s: transferring source %d: %s (enforce transport by reference)\n", hist, i, c.err)
 		}
 	}
 	return nil
@@ -195,10 +238,11 @@ func printArtifactInfo(printer common.Printer, log logging.Logger, kind string, 
 		} else {
 			printer.Printf("...%s %d...\n", kind, index)
 		}
-	}
-	if hint != "" {
-		log.Debug(fmt.Sprintf("handle %s", kind), kind, fmt.Sprintf("%d(%s)", index, hint))
 	} else {
-		log.Debug(fmt.Sprintf("handle %s", kind), kind, fmt.Sprintf("%d", index))
+		if hint != "" {
+			log.Debug(fmt.Sprintf("handle %s", kind), kind, fmt.Sprintf("%d(%s)", index, hint))
+		} else {
+			log.Debug(fmt.Sprintf("handle %s", kind), kind, fmt.Sprintf("%d", index))
+		}
 	}
 }
