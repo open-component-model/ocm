@@ -10,6 +10,8 @@ import (
 	"github.com/mandelsoft/logging"
 	"sigs.k8s.io/yaml"
 
+	. "github.com/open-component-model/ocm/v2/cmds/ocm/pkg/processing"
+	. "github.com/open-component-model/ocm/v2/pkg/out"
 	"github.com/open-component-model/ocm/v2/pkg/runtime"
 	"github.com/open-component-model/ocm/v2/pkg/utils"
 )

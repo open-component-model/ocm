@@ -7,6 +7,7 @@ package output
 import (
 	. "github.com/open-component-model/ocm/v2/cmds/ocm/pkg/processing"
 	"github.com/open-component-model/ocm/v2/pkg/errors"
+	. "github.com/open-component-model/ocm/v2/pkg/out"
 )
 
 type AttrProcessingOutput struct {

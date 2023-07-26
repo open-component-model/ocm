@@ -5,8 +5,10 @@
 package output
 
 import (
-	"github.com/mandelsoft/logging"
 	. "github.com/open-component-model/ocm/v2/cmds/ocm/pkg/processing"
+	. "github.com/open-component-model/ocm/v2/pkg/out"
+
+	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/v2/cmds/ocm/pkg/data"
 )
