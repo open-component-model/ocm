@@ -21,7 +21,6 @@ import (
 	"github.com/open-component-model/ocm/v2/pkg/common"
 	"github.com/open-component-model/ocm/v2/pkg/contexts/clictx"
 	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm"
-	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/attrs/signingattr"
 	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/signing"
@@ -97,10 +96,7 @@ func (o *SignatureCommand) Run() error {
 	lookup := lookupoption.From(o)
 	handler := comphdlr.NewTypeHandler(o.Context.OCM(), session, repo, comphdlr.OptionsFor(o))
 	sopts := signing.NewOptions(sign, signing.Resolver(repo, lookup.Resolver))
-	err = sopts.Complete(signingattr.Get(o.Context.OCMContext()))
-	if err != nil {
-		return err
-	}
+
 	return utils.HandleOutput(NewAction(
 		o.spec.terms,
 		o.Context.OCMContext(),
@@ -145,13 +141,13 @@ func (a *action) Digest(o *comphdlr.Object) (*metav1.DigestSpec, *compdesc.Compo
 	var (
 		d   *metav1.DigestSpec
 		err error
+		csv = &api.ComponentSigningVerifier{}
 	)
 
-	csv := &api.ComponentSigningVerifier{}
 	if sopts.Verify {
-		d, err = csv.Verify(o.ComponentVersion, api.WithSignerOptions(&sopts), api.WithPrinter(a.printer))
+		d, err = csv.Verify(o.ComponentVersion, api.WithSignerOptions(o.ComponentVersion.GetContext(), &sopts), api.WithPrinter(a.printer))
 	} else {
-		d, err = csv.Sign(o.ComponentVersion, api.WithSignerOptions(&sopts), api.WithPrinter(a.printer))
+		d, err = csv.Sign(o.ComponentVersion, api.WithSignerOptions(o.ComponentVersion.GetContext(), &sopts), api.WithPrinter(a.printer))
 	}
 
 	var cd *compdesc.ComponentDescriptor

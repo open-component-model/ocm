@@ -1,8 +1,11 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/open-component-model/ocm/v2/pkg/common"
 	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/attrs/signingattr"
 	metav1 "github.com/open-component-model/ocm/v2/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/v2/pkg/contexts/ocm/signing"
 )
@@ -28,26 +31,37 @@ type Options struct {
 	signingOptions *signing.Options
 }
 
-type OptionFunc func(opts *Options)
+type OptionFunc func(opts *Options) error
 
 // WithPrinter allows for passing in a printer option.
 func WithPrinter(printer common.Printer) OptionFunc {
-	return func(opts *Options) {
+	return func(opts *Options) error {
 		opts.printer = printer
+
+		return nil
 	}
 }
 
 // WithState allows fine-tuning the walking state. In reality, the default is sufficient in most cases.
 func WithState(state signing.WalkingState) OptionFunc {
-	return func(opts *Options) {
+	return func(opts *Options) error {
 		opts.state = state
+
+		return nil
 	}
 }
 
 // WithSignerOptions allows for fine-tuning the signing options.
-func WithSignerOptions(sopts *signing.Options) OptionFunc {
-	return func(opts *Options) {
+func WithSignerOptions(ctx ocm.Context, sopts *signing.Options) OptionFunc {
+	return func(opts *Options) error {
+		attr := signingattr.Get(ctx.OCMContext())
+		if err := sopts.Complete(attr); err != nil {
+			return fmt.Errorf("failed to complete signing options: %w", err)
+		}
+
 		opts.signingOptions = sopts
+
+		return nil
 	}
 }
 
@@ -64,7 +78,9 @@ func (c *ComponentSigningVerifier) Sign(componentVersion ocm.ComponentVersionAcc
 	}
 
 	for _, o := range opts {
-		o(defaults)
+		if err := o(defaults); err != nil {
+			return nil, fmt.Errorf("failed to apply option: %w", err)
+		}
 	}
 
 	return signing.Apply(defaults.printer, &defaults.state, componentVersion, defaults.signingOptions, true)
@@ -80,7 +96,9 @@ func (c *ComponentSigningVerifier) Verify(componentVersion ocm.ComponentVersionA
 	}
 
 	for _, o := range opts {
-		o(defaults)
+		if err := o(defaults); err != nil {
+			return nil, fmt.Errorf("failed to apply option: %w", err)
+		}
 	}
 
 	return signing.Apply(defaults.printer, &defaults.state, componentVersion, defaults.signingOptions, true)
