@@ -2,7 +2,7 @@
 name: User Story
 about: User Story
 labels: 
-title: [User Story] - Title
+title: <User Story> - Title
 
 
 ---
