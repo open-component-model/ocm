@@ -16,6 +16,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
 	ocmcpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -129,21 +130,7 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 		if err == nil {
 			m, err = r.AccessMethod()
 			if err == nil {
-				defer m.Close()
-				ok := a.IsLocal(src.GetContext())
-				if !ok {
-					if !none.IsNone(a.GetKind()) {
-						ok, err = handler.TransferResource(src, a, r)
-						if !ok {
-							log.Info("transport omitted", "resource", r.Meta().Name, "index", i, "access", a.GetType())
-						}
-					}
-				}
-				if ok {
-					hint := ocmcpi.ArtifactNameHint(a, src)
-					printArtifactInfo(printer, log, "resource", i, hint)
-					err = handler.HandleTransferResource(r, m, hint, t)
-				}
+				err = attemptResourceTransport(printer, log, a, m, r, handler, src, t, i)
 			}
 		}
 		if err != nil {
@@ -161,21 +148,7 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 		if err == nil {
 			m, err = r.AccessMethod()
 			if err == nil {
-				defer m.Close()
-				ok := a.IsLocal(src.GetContext())
-				if !ok {
-					if !none.IsNone(a.GetKind()) {
-						ok, err = handler.TransferSource(src, a, r)
-						if !ok {
-							log.Info("transport omitted", "source", r.Meta().Name, "index", i, "access", a.GetType())
-						}
-					}
-				}
-				if ok {
-					hint := ocmcpi.ArtifactNameHint(a, src)
-					printArtifactInfo(printer, log, "source", i, hint)
-					err = handler.HandleTransferSource(r, m, hint, t)
-				}
+				err = attemptSourceTransport(printer, log, a, m, r, handler, src, t, i)
 			}
 		}
 		if err != nil {
@@ -186,6 +159,68 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 		}
 	}
 	return nil
+}
+
+func attemptResourceTransport(
+	printer common.Printer,
+	log logging.Logger,
+	a internal.AccessSpec,
+	m ocm.AccessMethod,
+	r internal.ResourceAccess,
+	handler transferhandler.TransferHandler,
+	src ocm.ComponentVersionAccess,
+	t ocm.ComponentVersionAccess,
+	i int,
+) error {
+	var err error
+	defer m.Close()
+	ok := a.IsLocal(src.GetContext())
+	if !ok {
+		if !none.IsNone(a.GetKind()) {
+			ok, err = handler.TransferResource(src, a, r)
+			if !ok {
+				log.Info("transport omitted", "resource", r.Meta().Name, "index", i, "access", a.GetType())
+			}
+		}
+	}
+	if ok {
+		hint := ocmcpi.ArtifactNameHint(a, src)
+		printArtifactInfo(printer, log, "resource", i, hint)
+		err = handler.HandleTransferResource(r, m, hint, t)
+	}
+
+	return err
+}
+
+func attemptSourceTransport(
+	printer common.Printer,
+	log logging.Logger,
+	a internal.AccessSpec,
+	m ocm.AccessMethod,
+	r internal.SourceAccess,
+	handler transferhandler.TransferHandler,
+	src ocm.ComponentVersionAccess,
+	t ocm.ComponentVersionAccess,
+	i int,
+) error {
+	var err error
+	defer m.Close()
+	ok := a.IsLocal(src.GetContext())
+	if !ok {
+		if !none.IsNone(a.GetKind()) {
+			ok, err = handler.TransferSource(src, a, r)
+			if !ok {
+				log.Info("transport omitted", "source", r.Meta().Name, "index", i, "access", a.GetType())
+			}
+		}
+	}
+	if ok {
+		hint := ocmcpi.ArtifactNameHint(a, src)
+		printArtifactInfo(printer, log, "source", i, hint)
+		err = handler.HandleTransferSource(r, m, hint, t)
+	}
+
+	return err
 }
 
 func printArtifactInfo(printer common.Printer, log logging.Logger, kind string, index int, hint string) {
