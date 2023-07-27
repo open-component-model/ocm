@@ -50,6 +50,15 @@ type chartAccess struct {
 
 var _ ChartAccess = (*chartAccess)(nil)
 
+func newChartAccess(path string, fss ...vfs.FileSystem) (*chartAccess, error) {
+	fs := accessio.FileSystem(fss...)
+
+	return &chartAccess{
+		fs:   fs,
+		root: path,
+	}, nil
+}
+
 func newTempChartAccess(fss ...vfs.FileSystem) (*chartAccess, error) {
 	fs := accessio.FileSystem(fss...)
 
@@ -57,10 +66,7 @@ func newTempChartAccess(fss ...vfs.FileSystem) (*chartAccess, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &chartAccess{
-		fs:   fs,
-		root: temp,
-	}, nil
+	return newChartAccess(temp, fs)
 }
 
 func NewChartAccessByFiles(chart, prov string, fss ...vfs.FileSystem) ChartAccess {
