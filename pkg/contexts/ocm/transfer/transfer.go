@@ -135,7 +135,7 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 			if !ok {
 				if !none.IsNone(a.GetKind()) {
 					ok, err = handler.TransferResource(src, a, r)
-					if !ok {
+					if err == nil && !ok {
 						log.Info("transport omitted", "resource", r.Meta().Name, "index", i, "access", a.GetType())
 					}
 				}
@@ -143,9 +143,9 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 			if ok {
 				hint := ocmcpi.ArtifactNameHint(a, src)
 				printArtifactInfo(printer, log, "resource", i, hint)
-				err = handler.HandleTransferResource(r, m, hint, t)
+				err = errors.Join(err, handler.HandleTransferResource(r, m, hint, t))
 			} else {
-				err = m.Close()
+				err = errors.Join(err, m.Close())
 			}
 		}
 		if err != nil {
@@ -169,7 +169,7 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 			if !ok {
 				if !none.IsNone(a.GetKind()) {
 					ok, err = handler.TransferSource(src, a, r)
-					if !ok {
+					if err == nil && !ok {
 						log.Info("transport omitted", "source", r.Meta().Name, "index", i, "access", a.GetType())
 					}
 				}
@@ -177,9 +177,9 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 			if ok {
 				hint := ocmcpi.ArtifactNameHint(a, src)
 				printArtifactInfo(printer, log, "source", i, hint)
-				err = handler.HandleTransferSource(r, m, hint, t)
+				err = errors.Join(err, handler.HandleTransferSource(r, m, hint, t))
 			} else {
-				err = m.Close()
+				err = errors.Join(err, m.Close())
 			}
 		}
 		if err != nil {
