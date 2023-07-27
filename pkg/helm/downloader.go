@@ -139,7 +139,7 @@ func (d *chartDownloader) complete(ctx oci.ContextProvider, ref, repourl string)
 	}
 
 	if len(creds[identity.ATTR_CERTIFICATE_AUTHORITY]) != 0 {
-		err = d.writeFile("ca", config, &entry.CAFile, []byte(creds[identity.ATTR_CERTIFICATE_AUTHORITY]), "CA file")
+		err = d.writeFile("cacert", config, &entry.CAFile, []byte(creds[identity.ATTR_CERTIFICATE_AUTHORITY]), "CA file")
 		if err != nil {
 			return err
 		}
