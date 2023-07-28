@@ -47,7 +47,7 @@ func Configure(ctx ocm.Context, path string, fss ...vfs.FileSystem) (ocm.Context
 			}
 		}
 	}
-	if path != "" {
+	if path != "" && path != "None" {
 		if strings.HasPrefix(path, "~"+string(os.PathSeparator)) {
 			if len(h) == 0 {
 				return nil, fmt.Errorf("no home directory found for resolving path of ocm config file %q", path)
