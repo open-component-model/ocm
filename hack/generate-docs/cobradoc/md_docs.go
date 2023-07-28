@@ -74,6 +74,11 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 	if cmd.Runnable() || cmd.HasAvailableSubCommands() {
 		buf.WriteString("### Synopsis\n\n")
 		buf.WriteString(fmt.Sprintf("```\n%s\n```\n\n", UseLine(cmd)))
+		if len(cmd.Aliases) > 0 {
+			buf.WriteString("##### Aliases\n\n")
+			cmd.NameAndAliases()
+			buf.WriteString(fmt.Sprintf("```\n%s\n```\n\n", cmd.NameAndAliases()))
+		}
 	}
 
 	if cmd.IsAvailableCommand() {
@@ -139,7 +144,7 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 
 		subheader := false
 		for _, child := range children {
-			if !child.IsAvailableCommand() || child.IsAdditionalHelpTopicCommand() {
+			if OverviewOnly(child) || !child.IsAvailableCommand() || child.IsAdditionalHelpTopicCommand() {
 				continue
 			}
 			if header && !subheader {
@@ -147,11 +152,31 @@ func GenMarkdownCustom(cmd *cobra.Command, w io.Writer, linkHandler func(string)
 				subheader = true
 			}
 			path := child.CommandPath()
+			cname := name + " " + "<b>" + child.Name() + "</b>"
+
+			if OverviewOnly(cmd) {
+				buf.WriteString(fmt.Sprintf("* %s\t &mdash; %s\n", cname, child.Short))
+			} else {
+				shown_links = append(shown_links, path)
+				buf.WriteString(fmt.Sprintf("* [%s](%s)\t &mdash; %s\n", cname, linkHandler(path), child.Short))
+			}
+		}
+		buf.WriteString("\n")
+
+		subheader = false
+		for _, child := range children {
+			if !OverviewOnly(child) {
+				continue
+			}
+			if header && !subheader {
+				buf.WriteString("\n\n##### Area Overview\n\n")
+				subheader = true
+			}
+			path := child.CommandPath()
 			shown_links = append(shown_links, path)
 			cname := name + " " + "<b>" + child.Name() + "</b>"
 			buf.WriteString(fmt.Sprintf("* [%s](%s)\t &mdash; %s\n", cname, linkHandler(path), child.Short))
 		}
-		buf.WriteString("\n")
 
 		subheader = false
 		for _, child := range children {
@@ -229,20 +254,30 @@ func GenMarkdownTree(cmd *cobra.Command, dir string) error {
 	return GenMarkdownTreeCustom(cmd, dir, emptyStr, identity)
 }
 
+func OverviewOnly(cmd *cobra.Command) bool {
+	if cmd.Annotations == nil {
+		return false
+	}
+	_, ok := cmd.Annotations["overview"]
+	return ok
+}
+
 // GenMarkdownTreeCustom is the the same as GenMarkdownTree, but
 // with custom filePrepender and linkHandler.
 func GenMarkdownTreeCustom(cmd *cobra.Command, dir string, filePrepender, linkHandler func(string) string) error {
-	for _, c := range cmd.Commands() {
-		if c.Name() == "configfile" {
-			// I have no idea what this supposed to do.
-			// TrimSpace is a pure function but its return value is ignored.
-			strings.TrimSpace(c.Name())
-		}
-		if !c.IsAvailableCommand() && !c.IsAdditionalHelpTopicCommand() {
-			continue
-		}
-		if err := GenMarkdownTreeCustom(c, dir, filePrepender, linkHandler); err != nil {
-			return err
+	if !OverviewOnly(cmd) {
+		for _, c := range cmd.Commands() {
+			if c.Name() == "configfile" {
+				// I have no idea what this supposed to do.
+				// TrimSpace is a pure function but its return value is ignored.
+				strings.TrimSpace(c.Name())
+			}
+			if !c.IsAvailableCommand() && !c.IsAdditionalHelpTopicCommand() {
+				continue
+			}
+			if err := GenMarkdownTreeCustom(c, dir, filePrepender, linkHandler); err != nil {
+				return err
+			}
 		}
 	}
 

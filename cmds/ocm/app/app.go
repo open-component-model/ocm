@@ -11,6 +11,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/toicmds"
 	_ "github.com/open-component-model/ocm/pkg/contexts/clictx/config"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/attrs"
 
@@ -237,12 +238,11 @@ func newCliCommand(opts *CLIOptions, mod ...func(clictx.Context, *cobra.Command)
 	cmd.AddCommand(cmdutils.HideCommand(plugins.NewCommand(opts.Context)))
 	cmd.AddCommand(cmdutils.HideCommand(action.NewCommand(opts.Context)))
 
-	cmd.AddCommand(cmdutils.HideCommand(cachecmds.NewCommand(opts.Context)))
-	cmd.AddCommand(cmdutils.HideCommand(ocicmds.NewCommand(opts.Context)))
-	cmd.AddCommand(cmdutils.HideCommand(ocmcmds.NewCommand(opts.Context)))
-	// cmd.AddCommand(cmdutils.HideCommand(toicmds.NewCommand(opts.Context)))
-
-	cmd.AddCommand(cmdutils.HideCommand(creds.NewCommand(opts.Context)))
+	cmd.AddCommand(cmdutils.OverviewCommand(cachecmds.NewCommand(opts.Context)))
+	cmd.AddCommand(cmdutils.OverviewCommand(ocicmds.NewCommand(opts.Context)))
+	cmd.AddCommand(cmdutils.OverviewCommand(ocmcmds.NewCommand(opts.Context)))
+	cmd.AddCommand(cmdutils.OverviewCommand(toicmds.NewCommand(opts.Context)))
+	cmd.AddCommand(cmdutils.OverviewCommand(creds.NewCommand(opts.Context)))
 
 	opts.AddFlags(cmd.Flags())
 	cmd.InitDefaultHelpCmd()

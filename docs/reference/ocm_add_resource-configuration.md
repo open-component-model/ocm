@@ -6,6 +6,12 @@
 ocm add resource-configuration [<options>] <target> {<configfile> | <var>=<value>}
 ```
 
+##### Aliases
+
+```
+resource-configuration, resourceconfig, rsccfg, rcfg
+```
+
 ### Options
 
 ```

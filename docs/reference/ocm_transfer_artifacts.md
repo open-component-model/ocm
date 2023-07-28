@@ -6,6 +6,12 @@
 ocm transfer artifacts [<options>] {<artifact-reference>} <target>
 ```
 
+##### Aliases
+
+```
+artifacts, artifact, art, a
+```
+
 ### Options
 
 ```

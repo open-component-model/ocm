@@ -6,6 +6,12 @@
 ocm install plugins [<options>] <component version ref> [<name>] | <name>
 ```
 
+##### Aliases
+
+```
+plugins, plugin, p
+```
+
 ### Options
 
 ```

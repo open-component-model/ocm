@@ -6,6 +6,12 @@
 ocm create rsakeypair [<private key file> [<public key file>]] {<subject-attribute>=<value>}
 ```
 
+##### Aliases
+
+```
+rsakeypair, rsa
+```
+
 ### Options
 
 ```

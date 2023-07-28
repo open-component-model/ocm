@@ -6,6 +6,12 @@
 ocm describe plugins [<options>] {<plugin name>}
 ```
 
+##### Aliases
+
+```
+plugins, plugin, p
+```
+
 ### Options
 
 ```

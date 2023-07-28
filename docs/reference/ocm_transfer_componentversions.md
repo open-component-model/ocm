@@ -6,6 +6,12 @@
 ocm transfer componentversions [<options>] {<component-reference>} <target>
 ```
 
+##### Aliases
+
+```
+componentversions, componentversion, cv, components, component, comps, comp, c
+```
+
 ### Options
 
 ```
