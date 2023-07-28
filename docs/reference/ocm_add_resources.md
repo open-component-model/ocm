@@ -328,7 +328,8 @@ with the field <code>type</code> in the <code>input</code> field:
     This OPTIONAL property can be set, if the helm chart should be loaded from 
     a helm repository instead of the local filesystem. It describes
     the base URL of the chart repository. If specified, the <code>path</code> field
-    must describe the name of the chart in the chart repository.
+    must describe the name of the chart in the chart repository, and <code>version</code>
+    must describe the version of the chart imported from the chart repository
   
   - **<code>repository</code>** *string*
   
