@@ -6,6 +6,12 @@
 ocm describe artifacts [<options>] {<artifact-reference>}
 ```
 
+##### Aliases
+
+```
+artifacts, artifact, art, a
+```
+
 ### Options
 
 ```

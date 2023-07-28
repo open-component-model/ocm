@@ -6,6 +6,12 @@
 ocm get componentversions [<options>] {<component-reference>}
 ```
 
+##### Aliases
+
+```
+componentversions, componentversion, cv, components, component, comps, comp, c
+```
+
 ### Options
 
 ```

@@ -6,6 +6,12 @@
 ocm transfer componentarchive [<options>]  <source> <target>
 ```
 
+##### Aliases
+
+```
+componentarchive, comparch, ca
+```
+
 ### Options
 
 ```

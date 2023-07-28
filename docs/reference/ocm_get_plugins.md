@@ -6,6 +6,12 @@
 ocm get plugins [<options>] {<plugin name>}
 ```
 
+##### Aliases
+
+```
+plugins, plugin, p
+```
+
 ### Options
 
 ```
