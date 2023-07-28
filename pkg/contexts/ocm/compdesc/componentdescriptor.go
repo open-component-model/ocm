@@ -286,7 +286,7 @@ type ObjectMetaAccessor interface {
 // ElementMetaAccessor provides generic access an elements meta information.
 type ElementMetaAccessor interface {
 	GetMeta() *ElementMeta
-	IsEquivalent(ElementMetaAccessor) bool
+	IsEquivalent(ElementMetaAccessor) (equal bool, detectable bool)
 }
 
 // ElementAccessor provides generic access to list of elements.
@@ -372,17 +372,20 @@ func (s *Source) GetMeta() *ElementMeta {
 	return &s.ElementMeta
 }
 
-func (r *Source) IsEquivalent(e ElementMetaAccessor) bool {
+func (r *Source) IsEquivalent(e ElementMetaAccessor) (equal bool, detectable bool) {
 	if o, ok := e.(*Source); !ok {
-		return false
+		return false, true
 	} else {
 		if !reflect.DeepEqual(&r.ElementMeta, &o.ElementMeta) {
-			return false
+			return false, true
 		}
-		if !reflect.DeepEqual(&r.Access, &o.Access) {
-			return false
+		if r.Type != o.Type {
+			return false, true
 		}
-		return r.Type == o.Type
+
+		// no digest, therefore identity cannot be checked if transported by value.
+		b := reflect.DeepEqual(r.Access, o.Access)
+		return b, b
 	}
 }
 
@@ -497,6 +500,15 @@ func (r Resources) Copy() Resources {
 	return out
 }
 
+func (r Resources) HaveDigests() bool {
+	for _, e := range r {
+		if e.Digest == nil {
+			return false
+		}
+	}
+	return true
+}
+
 // Resource describes a resource dependency of a component.
 // +k8s:deepcopy-gen=true
 // +k8s:openapi-gen=true
@@ -511,19 +523,23 @@ func (r *Resource) GetMeta() *ElementMeta {
 	return &r.ElementMeta
 }
 
-func (r *Resource) IsEquivalent(e ElementMetaAccessor) bool {
+func (r *Resource) IsEquivalent(e ElementMetaAccessor) (equal bool, detectable bool) {
 	if o, ok := e.(*Resource); !ok {
-		return false
+		return false, true
 	} else {
 		if !reflect.DeepEqual(&r.ElementMeta, &o.ElementMeta) {
-			return false
+			return false, true
 		}
-		if !reflect.DeepEqual(&r.Access, &o.Access) {
-			return false
+		if r.Type != o.Type ||
+			r.Relation != o.Relation ||
+			!reflect.DeepEqual(r.SourceRef, o.SourceRef) {
+			return false, true
 		}
-		return r.Type == o.Type &&
-			r.Relation == o.Relation &&
-			reflect.DeepEqual(r.SourceRef, o.SourceRef)
+		if r.Digest == nil || o.Digest == nil {
+			b := reflect.DeepEqual(r.Access, o.Access)
+			return b, b
+		}
+		return reflect.DeepEqual(r.Digest, o.Digest), true
 	}
 }
 
@@ -682,14 +698,14 @@ func (r *ComponentReference) GetMeta() *ElementMeta {
 	return &r.ElementMeta
 }
 
-func (r *ComponentReference) IsEquivalent(e ElementMetaAccessor) bool {
+func (r *ComponentReference) IsEquivalent(e ElementMetaAccessor) (equal bool, detectable bool) {
 	if o, ok := e.(*ComponentReference); !ok {
-		return false
+		return false, true
 	} else {
 		if !reflect.DeepEqual(&r.ElementMeta, &o.ElementMeta) {
-			return false
+			return false, true
 		}
-		return r.ComponentName == o.ComponentName
+		return r.ComponentName == o.ComponentName, true
 	}
 }
 

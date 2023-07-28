@@ -63,8 +63,11 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 			defer accessio.Close(t)
 		}
 	} else {
-		if d.Equal(t.GetDescriptor()) {
+		if ok, detect := d.Equivalent(t.GetDescriptor()); ok && detect {
 			printer.Printf("  version %q already present -> skip transport\n", nv)
+			// TODO
+			// join signatures???
+			return nil
 		} else {
 			var ok bool
 			ok, err = handler.OverwriteVersion(src, t)

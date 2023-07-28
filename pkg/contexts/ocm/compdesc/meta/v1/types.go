@@ -5,6 +5,7 @@
 package v1
 
 import (
+	"reflect"
 	"time"
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -83,8 +84,21 @@ type ObjectMeta struct {
 	CreationTime *Timestamp `json:"creationTime,omitempty"`
 }
 
+func (o *ObjectMeta) Equal(obj interface{}) bool {
+	if e, ok := obj.(*ObjectMeta); ok {
+		if o.Name == e.Name &&
+			o.Version == e.Version &&
+			reflect.DeepEqual(o.Provider, e.Provider) &&
+			reflect.DeepEqual(o.Labels, e.Labels) {
+			return true
+		}
+		// check Creation time ?
+	}
+	return false
+}
+
 // GetName returns the name of the object.
-func (o ObjectMeta) GetName() string {
+func (o *ObjectMeta) GetName() string {
 	return o.Name
 }
 

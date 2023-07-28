@@ -8,40 +8,57 @@ import (
 	"reflect"
 )
 
-func (cd *ComponentDescriptor) Equal(o *ComponentDescriptor) bool {
-	o = o.Copy()
-	o.Metadata.ConfiguredVersion = cd.Metadata.ConfiguredVersion
-	o.RepositoryContexts = cd.RepositoryContexts
-
-	return reflect.DeepEqual(cd, o)
+func (cd *ComponentDescriptor) Equal(obj interface{}) bool {
+	if o, ok := obj.(*ComponentDescriptor); ok {
+		if !cd.ObjectMeta.Equal(&o.ObjectMeta) {
+			return false
+		}
+		if !reflect.DeepEqual(cd.Sources, o.Sources) {
+			return false
+		}
+		if !reflect.DeepEqual(cd.Resources, o.Resources) {
+			return false
+		}
+		if !reflect.DeepEqual(cd.References, o.References) {
+			return false
+		}
+		if !reflect.DeepEqual(cd.Signatures, o.Signatures) {
+			return false
+		}
+		if !reflect.DeepEqual(cd.NestedDigests, o.NestedDigests) {
+			return false
+		}
+		return true
+	}
+	return false
 }
 
-func (cd *ComponentDescriptor) Equivalent(o *ComponentDescriptor) bool {
-	if !reflect.DeepEqual(&cd.ObjectMeta, &o.ObjectMeta) {
-		return false
+func (cd *ComponentDescriptor) Equivalent(o *ComponentDescriptor) (equal bool, detectable bool) {
+	if !cd.ObjectMeta.Equal(&o.ObjectMeta) {
+		return false, true
 	}
 
-	if !equivalentElems(cd.Resources, o.Resources) {
-		return false
+	if e, d := equivalentElems(cd.Resources, o.Resources); !e {
+		return e, d
 	}
-	if !equivalentElems(cd.Sources, o.Sources) {
-		return false
+	if e, d := equivalentElems(cd.Sources, o.Sources); !e {
+		return e, d
 	}
-	if !equivalentElems(cd.References, o.References) {
-		return false
+	if e, d := equivalentElems(cd.References, o.References); !e {
+		return e, d
 	}
-	return true
+	return true, true
 }
 
-func equivalentElems(a ElementAccessor, b ElementAccessor) bool {
+func equivalentElems(a ElementAccessor, b ElementAccessor) (equal bool, detectable bool) {
 	if a.Len() != b.Len() {
-		return false
+		return false, true
 	}
 
 	for i := 0; i < a.Len(); i++ {
-		if !a.Get(i).IsEquivalent(b.Get(i)) {
-			return false
+		if e, d := a.Get(i).IsEquivalent(b.Get(i)); !e {
+			return e, d
 		}
 	}
-	return true
+	return true, true
 }

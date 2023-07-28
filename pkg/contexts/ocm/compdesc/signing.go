@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"hash"
+	"reflect"
 
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -162,4 +163,40 @@ func (cd *ComponentDescriptor) SelectSignatureByName(signatureName string) *meta
 		}
 	}
 	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+func (cd *ComponentDescriptor) HasResourceDigests() bool {
+	return cd.Resources.HaveDigests()
+}
+
+// UpdateFrom updates digests and signature from the given CD.
+func (cd *ComponentDescriptor) UpdateFrom(o *ComponentDescriptor) (bool, error) {
+	updated := false
+	for _, r := range o.Resources {
+		if r.Digest == nil {
+			continue
+		}
+		id := r.GetIdentity(o.Resources)
+		l, err := cd.GetReferenceByIdentity(id)
+		if err != nil {
+			return updated, err
+		}
+		if l.Digest == nil {
+			l.Digest = r.Digest
+			updated = true
+		} else {
+			if !reflect.DeepEqual(r.Digest, l.Digest) {
+				return updated, fmt.Errorf("digest mismatch for resource %s", id)
+			}
+		}
+	}
+	for _, s := range o.Signatures {
+		if cd.GetSignatureIndex(s.Name) < 0 {
+			cd.Signatures = append(cd.Signatures, *s.Copy())
+			updated = true
+		}
+	}
+	return updated, nil
 }
