@@ -18,11 +18,11 @@ const usage = `
 The path must denote an helm chart archive or directory
 relative to the resources file or a chart name in a helm chart repository.
 The denoted chart is packed as an OCI artifact set.
-Additional provider info is taken from a file with the same name
-and the suffix <code>.prov</code>.
+For the filesystem version additional provider info is taken from a file with
+the same name and the suffix <code>.prov</code>.
 
-If the chart should just be stored as archive, please use the 
-type <code>file</code> or <code>dir</code>.
+If the chart should just be stored as plain archive, please use the 
+type <code>file</code> or <code>dir</code>, instead.
 
 This blob type specification supports the following fields: 
 - **<code>path</code>** *string*
@@ -36,6 +36,14 @@ This blob type specification supports the following fields:
   If not specified the version from the chart will be used.
   Basically, it is a good practice to use the component version for local resources
   This can be achieved by using templating for this attribute in the resource file.
+
+- **<code>helmRepository</code>** *string*
+
+  This OPTIONAL property can be set, if the helm chart should be loaded from 
+  a helm repository instead of the local filesystem. It describes
+  the base URL of the chart repository. If specified, the <code>path</code> field
+  must describe the name of the chart in the chart repository, and <code>version</code>
+  must describe the version of the chart imported from the chart repository
 
 - **<code>repository</code>** *string*
 
