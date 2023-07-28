@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2023 SAP SE or an SAP affiliate company and Open Component Model contributors.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+meta:
+  schemaVersion: 'v2'
+
+component:
+  name: acme.org/component
+  version: v1.0.0
+
+  provider: acme.org
+
+  sources: []
+  resources:
+    - name: text
+      version: v1.0.0
+      type: plainText
+      relation: local
+      access:
+        type: localBlob
+        localReference: blob1
+  componentReferences: []
+  repositoryContexts: []
