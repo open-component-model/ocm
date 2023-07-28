@@ -24,7 +24,11 @@ type TransferHandler interface {
 	TransferResource(src ocm.ComponentVersionAccess, a ocm.AccessSpec, r ocm.ResourceAccess) (bool, error)
 	TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpec, r ocm.SourceAccess) (bool, error)
 
+	// HandleTransferResource technically transfers a resource.
+	// The access method must be closed by this method.
 	HandleTransferResource(r ocm.ResourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error
+	// HandleTransferSource technically transfers a source.
+	// The access method must be closed by this method.
 	HandleTransferSource(r ocm.SourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error
 }
 
