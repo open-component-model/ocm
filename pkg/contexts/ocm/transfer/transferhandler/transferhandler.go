@@ -17,6 +17,13 @@ type TransferOption interface {
 	ApplyTransferOption(TransferOptions) error
 }
 
+// TransferHandler controls the transfer of component versions.
+// It can be used to control the value transport of sources and resources
+// on artifact level and the way how nested component version are transported.
+// There are two implementations delivered as part of the OCM library:
+//   - package transferhandler.standard: able to select recursive transfer
+//     general value artifact transport.
+//   - package transferhandler.spiff: controls transfer using a spiff script.
 type TransferHandler interface {
 	OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error)
 

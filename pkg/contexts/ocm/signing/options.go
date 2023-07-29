@@ -93,6 +93,15 @@ func Sign(h signing.Signer, name string) Option {
 	return &signer{h, name}
 }
 
+func Signer(h signing.Signer) Option {
+	return &signer{h, ""}
+}
+
+func SignerByName(n string) Option {
+	h := signing.DefaultHandlerRegistry().GetSigner(n)
+	return &signer{h, ""}
+}
+
 func (o *signer) ApplySigningOption(opts *Options) {
 	n := strings.TrimSpace(o.name)
 	if n != "" {
@@ -258,10 +267,12 @@ func PrivateKey(name string, key interface{}) Option {
 }
 
 func (o *privkey) ApplySigningOption(opts *Options) {
-	if opts.Keys == nil {
-		opts.Keys = signing.NewKeyRegistry()
+	if o.key != nil {
+		if opts.Keys == nil {
+			opts.Keys = signing.NewKeyRegistry()
+		}
+		opts.Keys.RegisterPrivateKey(o.name, o.key)
 	}
-	opts.Keys.RegisterPrivateKey(o.name, o.key)
 }
 
 ////////////////////////////////////////////////////////////////////////////////

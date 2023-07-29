@@ -128,36 +128,25 @@ var _ = Describe("access method", func() {
 			session := datacontext.NewSession()
 			defer session.Close()
 
-			src, err := ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env)
-			Expect(err).To(Succeed())
+			src := Must(ctf.Open(env.OCMContext(), accessobj.ACC_WRITABLE, ARCH, 0, env))
 			archcloser := session.AddCloser(src)
 			resolver := ocm.NewCompoundResolver(src)
 
-			cv, err := resolver.LookupComponentVersion(COMPONENTA, VERSION)
-			Expect(err).To(Succeed())
+			cv := Must(resolver.LookupComponentVersion(COMPONENTA, VERSION))
 			closer := session.AddCloser(cv)
 
-			opts := NewOptions(
-				DigestMode(mode),
-				Sign(signing.DefaultHandlerRegistry().GetSigner(SIGN_ALGO), SIGNATURE),
-				Resolver(resolver),
-				Update(), VerifyDigests(),
-			)
-			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
 			digest := "123d48879559d16965a54eba9a3e845709770f4f0be984ec8db2f507aa78f338"
 
 			pr, buf := common.NewBufferedPrinter()
-			dig, err := Apply(pr, nil, cv, opts)
-			Expect(err).To(Succeed())
+			// key taken from signing attr
+			dig := Must(SignComponentVersion(pr, cv, SIGNATURE, nil, SignerByName(SIGN_ALGO), Resolver(resolver), DigestMode(mode)))
 			Expect(closer.Close()).To(Succeed())
 			Expect(archcloser.Close()).To(Succeed())
 			Expect(dig.Value).To(StringEqualWithContext(digest))
 
-			src, err = ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env)
-			Expect(err).To(Succeed())
+			src = Must(ctf.Open(env.OCMContext(), accessobj.ACC_READONLY, ARCH, 0, env))
 			session.AddCloser(src)
-			cv, err = src.LookupComponentVersion(COMPONENTA, VERSION)
-			Expect(err).To(Succeed())
+			cv = Must(src.LookupComponentVersion(COMPONENTA, VERSION))
 			session.AddCloser(cv)
 			Expect(cv.GetDescriptor().Signatures[0].Digest.Value).To(Equal(digest))
 
@@ -171,15 +160,7 @@ applying to version "github.com/mandelsoft/test:v1"[github.com/mandelsoft/test:v
 			})
 			////////
 
-			opts = NewOptions(
-				VerifySignature(SIGNATURE),
-				Resolver(resolver),
-				Update(), VerifyDigests(),
-			)
-			Expect(opts.Complete(signingattr.Get(DefaultContext))).To(Succeed())
-
-			dig, err = Apply(nil, nil, cv, opts)
-			Expect(err).To(Succeed())
+			dig = Must(VerifyComponentVersion(pr, cv, SIGNATURE, nil, Resolver(resolver)))
 			Expect(dig.Value).To(Equal(digest))
 		},
 			Entry(DIGESTMODE_TOP, DIGESTMODE_TOP),
