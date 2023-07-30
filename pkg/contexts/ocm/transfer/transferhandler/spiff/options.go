@@ -14,6 +14,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
+func init() {
+	transferhandler.RegisterHandler(100, &TransferOptionsCreator{})
+}
+
 type Options struct {
 	standard.Options
 	script []byte
@@ -26,6 +30,16 @@ var (
 	_ ScriptOption           = (*Options)(nil)
 	_ ScriptFilesystemOption = (*Options)(nil)
 )
+
+type TransferOptionsCreator = transferhandler.SpecilizedOptionsCreator[*Options, Options]
+
+func (o *Options) NewOptions() transferhandler.TransferOptions {
+	return &Options{}
+}
+
+func (o *Options) NewTransferHandler() (transferhandler.TransferHandler, error) {
+	return New(o)
+}
 
 func (o *Options) ApplyTransferOption(target transferhandler.TransferOptions) error {
 	if len(o.script) > 0 {
@@ -65,6 +79,7 @@ type ScriptOption interface {
 }
 
 type scriptOption struct {
+	TransferOptionsCreator
 	source string
 	script func() ([]byte, error)
 }
@@ -86,7 +101,7 @@ func (o *scriptOption) ApplyTransferOption(to transferhandler.TransferOptions) e
 		eff.SetScript(script)
 		return nil
 	} else {
-		return errors.ErrNotSupported("script")
+		return errors.ErrNotSupported(transferhandler.KIND_TRANSFEROPTION, "script")
 	}
 }
 
@@ -117,6 +132,7 @@ type ScriptFilesystemOption interface {
 }
 
 type filesystemOption struct {
+	TransferOptionsCreator
 	fs vfs.FileSystem
 }
 
@@ -125,7 +141,7 @@ func (o *filesystemOption) ApplyTransferOption(to transferhandler.TransferOption
 		eff.SetScriptFilesystem(o.fs)
 		return nil
 	} else {
-		return errors.ErrNotSupported("script filesystem")
+		return errors.ErrNotSupported(transferhandler.KIND_TRANSFEROPTION, "script filesystem")
 	}
 }
 

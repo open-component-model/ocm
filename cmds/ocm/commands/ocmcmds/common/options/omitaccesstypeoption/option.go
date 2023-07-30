@@ -23,6 +23,7 @@ func New() *Option {
 }
 
 type Option struct {
+	standard.TransferOptionsCreator
 	Types []string
 }
 

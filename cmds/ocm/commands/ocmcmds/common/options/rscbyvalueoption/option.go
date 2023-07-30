@@ -24,6 +24,7 @@ func New() *Option {
 }
 
 type Option struct {
+	standard.TransferOptionsCreator
 	rflag            *pflag.Flag
 	lflag            *pflag.Flag
 	ResourcesByValue bool

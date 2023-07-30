@@ -7,8 +7,6 @@ package transfer
 import (
 	"fmt"
 
-	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/config"
-
 	"github.com/mandelsoft/logging"
 
 	"github.com/open-component-model/ocm/pkg/common"

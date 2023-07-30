@@ -14,6 +14,10 @@ import (
 	"github.com/open-component-model/ocm/pkg/utils"
 )
 
+func init() {
+	transferhandler.RegisterHandler(1000, &TransferOptionsCreator{})
+}
+
 type Options struct {
 	recursive        *bool
 	resourcesByValue *bool
@@ -37,6 +41,16 @@ var (
 	_ KeepGlobalAccessOption      = (*Options)(nil)
 	_ OmitAccessTypesOption       = (*Options)(nil)
 )
+
+type TransferOptionsCreator = transferhandler.SpecilizedOptionsCreator[*Options, Options]
+
+func (o *Options) NewOptions() transferhandler.TransferOptions {
+	return &Options{}
+}
+
+func (o *Options) NewTransferHandler() (transferhandler.TransferHandler, error) {
+	return New(o)
+}
 
 func (o *Options) ApplyTransferOption(target transferhandler.TransferOptions) error {
 	if o.recursive != nil {
@@ -188,6 +202,7 @@ type OverwriteOption interface {
 }
 
 type overwriteOption struct {
+	TransferOptionsCreator
 	overwrite bool
 }
 
@@ -196,7 +211,7 @@ func (o *overwriteOption) ApplyTransferOption(to transferhandler.TransferOptions
 		eff.SetOverwrite(o.overwrite)
 		return nil
 	} else {
-		return errors.ErrNotSupported("overwrite")
+		return errors.ErrNotSupported(transferhandler.KIND_TRANSFEROPTION, "overwrite")
 	}
 }
 
@@ -214,6 +229,7 @@ type RecursiveOption interface {
 }
 
 type recursiveOption struct {
+	TransferOptionsCreator
 	recursive bool
 }
 
@@ -222,7 +238,7 @@ func (o *recursiveOption) ApplyTransferOption(to transferhandler.TransferOptions
 		eff.SetRecursive(o.recursive)
 		return nil
 	} else {
-		return errors.ErrNotSupported("recursive")
+		return errors.ErrNotSupported(transferhandler.KIND_TRANSFEROPTION, "recursive")
 	}
 }
 
@@ -239,12 +255,8 @@ type ResourcesByValueOption interface {
 	IsResourcesByValue() bool
 }
 
-type LocalResourcesByValueOption interface {
-	SetLocalResourcesByValue(bool)
-	IsLocalResourcesByValue() bool
-}
-
 type resourcesByValueOption struct {
+	TransferOptionsCreator
 	flag bool
 }
 
@@ -253,7 +265,7 @@ func (o *resourcesByValueOption) ApplyTransferOption(to transferhandler.Transfer
 		eff.SetResourcesByValue(o.flag)
 		return nil
 	} else {
-		return errors.ErrNotSupported("resources by-value")
+		return errors.ErrNotSupported(transferhandler.KIND_TRANSFEROPTION, "resources-by-value")
 	}
 }
 
@@ -263,7 +275,15 @@ func ResourcesByValue(args ...bool) transferhandler.TransferOption {
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+type LocalResourcesByValueOption interface {
+	SetLocalResourcesByValue(bool)
+	IsLocalResourcesByValue() bool
+}
+
 type intrscsByValueOption struct {
+	TransferOptionsCreator
 	flag bool
 }
 
@@ -272,7 +292,7 @@ func (o *intrscsByValueOption) ApplyTransferOption(to transferhandler.TransferOp
 		eff.SetLocalResourcesByValue(o.flag)
 		return nil
 	} else {
-		return errors.ErrNotSupported("resources by-value")
+		return errors.ErrNotSupported(transferhandler.KIND_TRANSFEROPTION, "local-resources by-value")
 	}
 }
 
@@ -290,6 +310,7 @@ type SourcesByValueOption interface {
 }
 
 type sourcesByValueOption struct {
+	TransferOptionsCreator
 	flag bool
 }
 
@@ -298,7 +319,7 @@ func (o *sourcesByValueOption) ApplyTransferOption(to transferhandler.TransferOp
 		eff.SetSourcesByValue(o.flag)
 		return nil
 	} else {
-		return errors.ErrNotSupported("sources by-value")
+		return errors.ErrNotSupported(transferhandler.KIND_TRANSFEROPTION, "sources by-value")
 	}
 }
 
@@ -316,6 +337,7 @@ type ResolverOption interface {
 }
 
 type resolverOption struct {
+	TransferOptionsCreator
 	resolver ocm.ComponentVersionResolver
 }
 
@@ -324,7 +346,7 @@ func (o *resolverOption) ApplyTransferOption(to transferhandler.TransferOptions)
 		eff.SetResolver(o.resolver)
 		return nil
 	} else {
-		return errors.ErrNotSupported("resolver")
+		return errors.ErrNotSupported(transferhandler.KIND_TRANSFEROPTION, "resolver")
 	}
 }
 
@@ -342,6 +364,7 @@ type KeepGlobalAccessOption interface {
 }
 
 type keepGlobalOption struct {
+	TransferOptionsCreator
 	flag bool
 }
 
@@ -350,7 +373,7 @@ func (o *keepGlobalOption) ApplyTransferOption(to transferhandler.TransferOption
 		eff.SetKeepGlobalAccess(o.flag)
 		return nil
 	} else {
-		return errors.ErrNotSupported("keep-global-access")
+		return errors.ErrNotSupported(transferhandler.KIND_TRANSFEROPTION, "keep-global-access")
 	}
 }
 
@@ -368,6 +391,7 @@ type StopOnExistingVersionOption interface {
 }
 
 type stopOnExistingVersionOption struct {
+	TransferOptionsCreator
 	flag bool
 }
 
@@ -376,7 +400,7 @@ func (o *stopOnExistingVersionOption) ApplyTransferOption(to transferhandler.Tra
 		eff.SetStopOnExistingVersion(o.flag)
 		return nil
 	} else {
-		return errors.ErrNotSupported("stop-on-existing")
+		return errors.ErrNotSupported(transferhandler.KIND_TRANSFEROPTION, "stop-on-existing")
 	}
 }
 
@@ -394,6 +418,7 @@ type OmitAccessTypesOption interface {
 }
 
 type omitAccessTypesOption struct {
+	TransferOptionsCreator
 	add  bool
 	list []string
 }
@@ -407,7 +432,7 @@ func (o *omitAccessTypesOption) ApplyTransferOption(to transferhandler.TransferO
 		}
 		return nil
 	} else {
-		return errors.ErrNotSupported("omit-access-types")
+		return errors.ErrNotSupported(transferhandler.KIND_TRANSFEROPTION, "omit-access-types")
 	}
 }
 

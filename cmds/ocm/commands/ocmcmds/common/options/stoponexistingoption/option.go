@@ -24,6 +24,7 @@ func New() *Option {
 }
 
 type Option struct {
+	standard.TransferOptionsCreator
 	flag                  *pflag.Flag
 	StopOnExistingVersion bool
 }

@@ -28,7 +28,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	ocmsign "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing"
