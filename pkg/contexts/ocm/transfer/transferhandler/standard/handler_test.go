@@ -28,6 +28,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
 	ocmsign "github.com/open-component-model/ocm/pkg/contexts/ocm/signing"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/signing"
@@ -45,6 +46,19 @@ const OCIPATH = "/tmp/oci"
 const OCIHOST = "alias"
 const SIGNATURE = "test"
 const SIGN_ALGO = rsa.Algorithm
+
+type optionsChecker struct {
+	standard.TransferOptionsCreator
+}
+
+var _ transferhandler.TransferOption = (*optionsChecker)(nil)
+
+func (o *optionsChecker) ApplyTransferOption(options transferhandler.TransferOptions) error {
+	if _, ok := options.(*standard.Options); !ok {
+		return fmt.Errorf("unexpected options type %T", options)
+	}
+	return nil
+}
 
 var _ = Describe("Transfer handler", func() {
 	var env *Builder
@@ -100,7 +114,7 @@ var _ = Describe("Transfer handler", func() {
 		Expect(err).To(Succeed())
 		defer tgt.Close()
 
-		err = transfer.StandardTransferComponentVersion(nil, cv, tgt, append(topts, standard.ResourcesByValue())...)
+		err = transfer.TransferComponentVersion(nil, cv, tgt, append(topts, standard.ResourcesByValue(), &optionsChecker{})...)
 		Expect(err).To(Succeed())
 		Expect(env.DirExists(OUT)).To(BeTrue())
 
