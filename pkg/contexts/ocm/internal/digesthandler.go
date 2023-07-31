@@ -50,7 +50,7 @@ func (d DigesterType) IsInitial() bool {
 // of the blob.
 type BlobDigester interface {
 	GetType() DigesterType
-	DetermineDigest(resType string, meth AccessMethod, preferred signing.Hasher) (*DigestDescriptor, error)
+	DetermineDigest(resType string, meth AccessMethod, preferred Hasher) (*DigestDescriptor, error)
 }
 
 // BlobDigesterRegistry registers blob handlers to use in a dedicated ocm context.
@@ -63,7 +63,7 @@ type BlobDigesterRegistry interface {
 	GetDigester(typ DigesterType) BlobDigester
 
 	GetDigesterForType(t string) []BlobDigester
-	DetermineDigests(typ string, preferred signing.Hasher, registry signing.Registry, acc AccessMethod, typs ...DigesterType) ([]DigestDescriptor, error)
+	DetermineDigests(typ string, preferred signing.Hasher, registry HasherProvider, acc AccessMethod, typs ...DigesterType) ([]DigestDescriptor, error)
 
 	Copy() BlobDigesterRegistry
 }
@@ -195,7 +195,7 @@ func (r *blobDigesterRegistry) handle(list []BlobDigester, typ string, acc Acces
 	return nil, nil
 }
 
-func (r *blobDigesterRegistry) DetermineDigests(restype string, preferred signing.Hasher, registry signing.Registry, acc AccessMethod, pref ...DigesterType) ([]DigestDescriptor, error) {
+func (r *blobDigesterRegistry) DetermineDigests(restype string, preferred signing.Hasher, registry HasherProvider, acc AccessMethod, pref ...DigesterType) ([]DigestDescriptor, error) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 

@@ -69,6 +69,26 @@ func NewLabel(name string, value interface{}, opts ...LabelOption) (*Label, erro
 // +k8s:openapi-gen=true
 type Labels []Label
 
+// GetIndex returns the index of the given label or -1 if not found.
+func (l Labels) GetIndex(name string) int {
+	for i, label := range l {
+		if label.Name == name {
+			return i
+		}
+	}
+	return -1
+}
+
+// GetDef returns the label definition of the given label.
+func (l Labels) GetDef(name string) *Label {
+	for i, label := range l {
+		if label.Name == name {
+			return &l[i]
+		}
+	}
+	return nil
+}
+
 // Get returns the label value with the given name as json string.
 func (l Labels) Get(name string) ([]byte, bool) {
 	for _, label := range l {

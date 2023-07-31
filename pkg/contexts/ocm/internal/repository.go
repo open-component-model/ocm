@@ -95,16 +95,9 @@ type ComponentVersionAccessImpl interface {
 	common.VersionedElement
 
 	Repository() Repository
-
 	GetContext() Context
-
 	GetDescriptor() *compdesc.ComponentDescriptor
-
-	SetResource(*ResourceMeta, compdesc.AccessSpec) error
-	SetSource(*SourceMeta, compdesc.AccessSpec) error
-
 	SetReference(ref *ComponentReference) error
-
 	DiscardChanges()
 
 	io.Closer
@@ -121,10 +114,12 @@ type ComponentVersionAccess interface {
 	GetResourcesByName(name string, selectors ...compdesc.IdentitySelector) ([]ResourceAccess, error)
 	GetResourcesByIdentitySelectors(selectors ...compdesc.IdentitySelector) ([]ResourceAccess, error)
 	GetResourcesByResourceSelectors(selectors ...compdesc.ResourceSelector) ([]ResourceAccess, error)
+	SetResource(*ResourceMeta, compdesc.AccessSpec, ...ModificationOption) error
 
 	GetSources() []SourceAccess
 	GetSource(meta metav1.Identity) (SourceAccess, error)
 	GetSourceByIndex(i int) (SourceAccess, error)
+	SetSource(*SourceMeta, compdesc.AccessSpec) error
 
 	GetReference(meta metav1.Identity) (ComponentReference, error)
 	GetReferenceByIndex(i int) (ComponentReference, error)
@@ -136,7 +131,7 @@ type ComponentVersionAccess interface {
 	AddBlob(blob BlobAccess, artType, refName string, global AccessSpec) (AccessSpec, error)
 
 	// AdjustResourceAccess is used to modify the access spec. The old and new one MUST refer to the same content.
-	AdjustResourceAccess(meta *ResourceMeta, acc compdesc.AccessSpec) error
+	AdjustResourceAccess(meta *ResourceMeta, acc compdesc.AccessSpec, opts ...ModificationOption) error
 	SetResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string, global AccessSpec) error
 	AdjustSourceAccess(meta *SourceMeta, acc compdesc.AccessSpec) error
 	SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec) error

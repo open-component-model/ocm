@@ -47,6 +47,8 @@ type (
 	ComponentLister                  = internal.ComponentLister
 	ComponentAccess                  = internal.ComponentAccess
 	ComponentVersionAccess           = internal.ComponentVersionAccess
+	ModificationOption               = internal.ModificationOption
+	ModificationOptions              = internal.ModificationOptions
 	AccessSpec                       = internal.AccessSpec
 	AccessSpecDecoder                = internal.AccessSpecDecoder
 	GenericAccessSpec                = internal.GenericAccessSpec
@@ -88,6 +90,8 @@ type (
 	BlobDigester         = internal.BlobDigester
 	BlobDigesterRegistry = internal.BlobDigesterRegistry
 	DigestDescriptor     = internal.DigestDescriptor
+	HasherProvider       = internal.HasherProvider
+	Hasher               = internal.Hasher
 )
 
 type NamePath = registrations.NamePath
@@ -172,6 +176,10 @@ func NewAccessSpecRef(spec AccessSpec) *AccessSpecRef {
 
 func NewRawAccessSpecRef(data []byte, unmarshaler runtime.Unmarshaler) (*AccessSpecRef, error) {
 	return internal.NewRawAccessSpecRef(data, unmarshaler)
+}
+
+func EvalModificationOptions(list ...ModificationOption) ModificationOptions {
+	return internal.EvalModificationOptions(list...)
 }
 
 const (

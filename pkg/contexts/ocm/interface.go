@@ -38,6 +38,7 @@ type (
 	ComponentLister                  = internal.ComponentLister
 	ComponentAccess                  = internal.ComponentAccess
 	ComponentVersionAccess           = internal.ComponentVersionAccess
+	ModificationOption               = internal.ModificationOption
 	AccessSpec                       = internal.AccessSpec
 	GenericAccessSpec                = internal.GenericAccessSpec
 	HintProvider                     = internal.HintProvider
@@ -65,6 +66,8 @@ type (
 	BlobDigester         = internal.BlobDigester
 	BlobDigesterRegistry = internal.BlobDigesterRegistry
 	DigestDescriptor     = internal.DigestDescriptor
+	HasherProvider       = internal.HasherProvider
+	Hasher               = internal.Hasher
 )
 
 type (

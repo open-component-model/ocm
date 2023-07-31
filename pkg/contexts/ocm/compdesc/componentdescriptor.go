@@ -577,7 +577,6 @@ type ResourceMeta struct {
 }
 
 // HashEqual indicates whether the digest hash would be equal.
-// Excluded: Labels
 // Adapt together with version specific hash excludes.
 func (o *ResourceMeta) HashEqual(r *ResourceMeta) bool {
 	if o.Type != r.Type {
@@ -592,11 +591,29 @@ func (o *ResourceMeta) HashEqual(r *ResourceMeta) bool {
 	if o.ElementMeta.Version != r.ElementMeta.Version {
 		return false
 	}
-	if o.Digest != nil && !reflect.DeepEqual(o.Digest, r.Digest) {
+	if o.Digest != r.Digest && (o.Digest == nil || r.Digest == nil || (o.Digest != nil && !reflect.DeepEqual(o.Digest, r.Digest))) {
 		return false
 	}
 	if !reflect.DeepEqual(o.ElementMeta.ExtraIdentity, r.ElementMeta.ExtraIdentity) {
 		return false
+	}
+	for _, l := range o.Labels {
+		rl := r.Labels.GetDef(l.Name)
+		if l.Signing {
+			if rl == nil || !reflect.DeepEqual(&l, rl) {
+				return false
+			}
+		} else {
+			if rl != nil && rl.Signing {
+				return false
+			}
+		}
+	}
+	for _, rl := range r.Labels {
+		l := o.Labels.GetDef(rl.Name)
+		if l == nil && rl.Signing {
+			return false
+		}
 	}
 	return true
 }

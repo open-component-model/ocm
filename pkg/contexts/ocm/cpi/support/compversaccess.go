@@ -97,12 +97,7 @@ func (a *componentVersionAccessImpl) AddBlobFor(storagectx cpi.StorageContext, b
 	return a.base.AddBlobFor(storagectx, blob, refName, global)
 }
 
-func (a *componentVersionAccessImpl) SetResource(meta *cpi.ResourceMeta, acc compdesc.AccessSpec) error {
-	res := &compdesc.Resource{
-		ResourceMeta: *meta.Copy(),
-		Access:       acc,
-	}
-
+func (a *componentVersionAccessImpl) SetResource(res *compdesc.Resource) error {
 	if res.Relation == metav1.LocalRelation {
 		if res.Version == "" {
 			res.Version = a.GetVersion()
@@ -110,29 +105,22 @@ func (a *componentVersionAccessImpl) SetResource(meta *cpi.ResourceMeta, acc com
 	}
 
 	cd := a.GetDescriptor()
-	if idx := cd.GetResourceIndex(meta); idx == -1 {
+
+	if idx := cd.GetResourceIndex(&res.ResourceMeta); idx == -1 {
+		idx = len(cd.Resources)
 		cd.Resources = append(cd.Resources, *res)
-		cd.Signatures = nil
 	} else {
-		if !cd.Resources[idx].ResourceMeta.HashEqual(&res.ResourceMeta) {
-			cd.Signatures = nil
-		}
 		cd.Resources[idx] = *res
 	}
 	return a.Update(false)
 }
 
-func (a *componentVersionAccessImpl) SetSource(meta *cpi.SourceMeta, acc compdesc.AccessSpec) error {
-	res := &compdesc.Source{
-		SourceMeta: *meta.Copy(),
-		Access:     acc,
-	}
-
+func (a *componentVersionAccessImpl) SetSource(res *compdesc.Source) error {
 	if res.Version == "" {
 		res.Version = a.GetVersion()
 	}
 
-	if idx := a.GetDescriptor().GetSourceIndex(meta); idx == -1 {
+	if idx := a.GetDescriptor().GetSourceIndex(&res.SourceMeta); idx == -1 {
 		a.GetDescriptor().Sources = append(a.GetDescriptor().Sources, *res)
 	} else {
 		a.GetDescriptor().Sources[idx] = *res

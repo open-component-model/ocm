@@ -14,9 +14,9 @@ import (
 
 // Type is the access type for no blob.
 const (
-	Type       = "none"
+	Type       = cpi.NoneType
 	TypeV1     = Type + runtime.VersionSeparator + "v1"
-	LegacyType = "None"
+	LegacyType = cpi.NoneLegacyType
 )
 
 func init() {
@@ -31,7 +31,7 @@ func New() *AccessSpec {
 }
 
 func IsNone(kind string) bool {
-	return kind == Type || kind == LegacyType
+	return cpi.IsNoneAccess(kind)
 }
 
 // AccessSpec describes the access for a oci registry.

@@ -186,10 +186,8 @@ func (cd *ComponentDescriptor) UpdateFrom(o *ComponentDescriptor) (bool, error) 
 		if l.Digest == nil {
 			l.Digest = r.Digest
 			updated = true
-		} else {
-			if !reflect.DeepEqual(r.Digest, l.Digest) {
-				return updated, fmt.Errorf("digest mismatch for resource %s", id)
-			}
+		} else if !reflect.DeepEqual(r.Digest, l.Digest) {
+			return updated, fmt.Errorf("digest mismatch for resource %s", id)
 		}
 	}
 	for _, s := range o.Signatures {

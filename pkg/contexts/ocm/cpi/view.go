@@ -7,11 +7,13 @@ package cpi
 import (
 	"fmt"
 	"io"
+	"reflect"
 	"strconv"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio/resource"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/hashattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -282,6 +284,9 @@ type ComponentVersionAccessImpl interface {
 	// an access method specification usable in a component descriptor.
 	// This is the direct technical storage, without caring about any handler.
 	AddBlobFor(storagectx StorageContext, blob BlobAccess, refName string, global AccessSpec) (AccessSpec, error)
+
+	SetResource(*compdesc.Resource) error
+	SetSource(*compdesc.Source) error
 }
 
 type _ComponentVersionAccessImplBase = resource.ResourceImplBase[ComponentVersionAccess]
@@ -415,12 +420,12 @@ func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refNa
 	return c.impl.AddBlobFor(storagectx, blob, refName, global)
 }
 
-func (c *componentVersionAccessView) AdjustResourceAccess(meta *ResourceMeta, acc compdesc.AccessSpec) error {
+func (c *componentVersionAccessView) AdjustResourceAccess(meta *ResourceMeta, acc compdesc.AccessSpec, opts ...ModificationOption) error {
 	cd := c.GetDescriptor()
 	if idx := cd.GetResourceIndex(meta); idx == -1 {
 		return errors.ErrUnknown(KIND_RESOURCE, meta.GetIdentity(cd.Resources).String())
 	}
-	return c.SetResource(meta, acc)
+	return c.SetResource(meta, acc, opts...)
 }
 
 // SetResourceBlob adds a blob resource to the component version.
@@ -460,15 +465,89 @@ func (c *componentVersionAccessView) SetSourceBlob(meta *SourceMeta, blob BlobAc
 	return nil
 }
 
-func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, acc compdesc.AccessSpec) error {
+func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, acc compdesc.AccessSpec, modopts ...ModificationOption) error {
+	res := &compdesc.Resource{
+		ResourceMeta: *meta.Copy(),
+		Access:       acc,
+	}
+
+	opts := EvalModificationOptions(modopts...)
+
+	spec, err := c.GetContext().AccessSpecForSpec(acc)
+	if err != nil {
+		return err
+	}
+	meth, err := c.AccessMethod(spec)
+	if err != nil {
+		return err
+	}
+	defer meth.Close()
+
+	ctx := c.impl.GetContext()
 	return c.Execute(func() error {
-		return c.impl.SetResource(meta, acc)
+		var old *compdesc.Resource
+
+		if res.Relation == metav1.LocalRelation {
+			if res.Version == "" {
+				res.Version = c.GetVersion()
+			}
+		}
+
+		cd := c.impl.GetDescriptor()
+		idx := cd.GetResourceIndex(&res.ResourceMeta)
+		if idx >= 0 {
+			old = &cd.Resources[idx]
+		}
+
+		if old == nil {
+			if !opts.ModifyResource {
+				return fmt.Errorf("new resource would invalidate signature")
+			}
+		}
+
+		if res.Digest == nil && old != nil && (opts.AcceptExistentDigests || reflect.DeepEqual(old.Access, res.Access)) {
+			res.Digest = old.Digest
+		}
+
+		if IsNoneAccess(res.Access.GetKind()) {
+			res.Digest = metav1.NewExcludeFromSignatureDigest()
+		}
+
+		if res.Digest == nil {
+			attr := hashattr.Get(ctx)
+			var digester DigesterType
+
+			if old.Digest != nil {
+				digester = DigesterType{
+					HashAlgorithm:          old.Digest.HashAlgorithm,
+					NormalizationAlgorithm: old.Digest.NormalisationAlgorithm,
+				}
+			}
+			dig, err := ctx.BlobDigesters().DetermineDigests(res.Type, attr.GetHasher(), attr.Provider, meth, digester)
+			if err != nil {
+				return err
+			}
+			if len(dig) == 0 {
+				return fmt.Errorf("%s: no digester accepts resource", res.Name)
+			}
+			res.Digest = &dig[0]
+		}
+
+		if !res.ResourceMeta.HashEqual(&old.ResourceMeta) {
+			cd.Signatures = nil
+		}
+
+		return c.impl.SetResource(res)
 	})
 }
 
-func (c *componentVersionAccessView) SetSource(meta *internal.SourceMeta, spec compdesc.AccessSpec) error {
+func (c *componentVersionAccessView) SetSource(meta *internal.SourceMeta, acc compdesc.AccessSpec) error {
+	res := &compdesc.Source{
+		SourceMeta: *meta.Copy(),
+		Access:     acc,
+	}
 	return c.Execute(func() error {
-		return c.impl.SetSource(meta, spec)
+		return c.impl.SetSource(res)
 	})
 }
 

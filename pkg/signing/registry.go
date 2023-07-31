@@ -14,17 +14,29 @@ type Registry interface {
 	KeyRegistry
 }
 
-type HandlerRegistry interface {
+type HasherProvider interface {
+	GetHasher(name string) Hasher
+}
+
+type HasherRegistry interface {
+	HasherProvider
+
+	RegisterHasher(hasher Hasher)
+	HasherNames() []string
+}
+
+type SignerRegistry interface {
 	RegisterSignatureHandler(handler SignatureHandler)
 	RegisterSigner(algo string, signer Signer)
 	RegisterVerifier(algo string, verifier Verifier)
 	GetSigner(name string) Signer
 	GetVerifier(name string) Verifier
 	SignerNames() []string
+}
 
-	RegisterHasher(hasher Hasher)
-	GetHasher(name string) Hasher
-	HasherNames() []string
+type HandlerRegistry interface {
+	SignerRegistry
+	HasherRegistry
 }
 
 type KeyRegistry interface {
@@ -36,31 +48,50 @@ type KeyRegistry interface {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+type (
+	_hasherRegistry = HasherRegistry
+	_signerRegistry = SignerRegistry
+)
+
 type handlerRegistry struct {
-	lock     sync.RWMutex
-	signers  map[string]Signer
-	verifier map[string]Verifier
-	hasher   map[string]Hasher
+	_hasherRegistry
+	_signerRegistry
 }
 
 var _ HandlerRegistry = (*handlerRegistry)(nil)
 
 func NewHandlerRegistry() HandlerRegistry {
 	return &handlerRegistry{
-		signers:  map[string]Signer{},
-		verifier: map[string]Verifier{},
-		hasher:   map[string]Hasher{},
+		_hasherRegistry: NewHasherRegistry(),
+		_signerRegistry: NewSignerRegistry(),
 	}
 }
 
-func (r *handlerRegistry) RegisterSignatureHandler(handler SignatureHandler) {
+////////////////////////////////////////////////////////////////////////////////
+
+type signerRegistry struct {
+	lock     sync.RWMutex
+	signers  map[string]Signer
+	verifier map[string]Verifier
+}
+
+var _ SignerRegistry = (*signerRegistry)(nil)
+
+func NewSignerRegistry() SignerRegistry {
+	return &signerRegistry{
+		signers:  map[string]Signer{},
+		verifier: map[string]Verifier{},
+	}
+}
+
+func (r *signerRegistry) RegisterSignatureHandler(handler SignatureHandler) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	r.signers[handler.Algorithm()] = handler
 	r.verifier[handler.Algorithm()] = handler
 }
 
-func (r *handlerRegistry) RegisterSigner(algo string, signer Signer) {
+func (r *signerRegistry) RegisterSigner(algo string, signer Signer) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	r.signers[algo] = signer
@@ -69,7 +100,7 @@ func (r *handlerRegistry) RegisterSigner(algo string, signer Signer) {
 	}
 }
 
-func (r *handlerRegistry) SignerNames() []string {
+func (r *signerRegistry) SignerNames() []string {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	names := []string{}
@@ -80,7 +111,7 @@ func (r *handlerRegistry) SignerNames() []string {
 	return names
 }
 
-func (r *handlerRegistry) RegisterVerifier(algo string, verifier Verifier) {
+func (r *signerRegistry) RegisterVerifier(algo string, verifier Verifier) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	r.verifier[algo] = verifier
@@ -89,13 +120,40 @@ func (r *handlerRegistry) RegisterVerifier(algo string, verifier Verifier) {
 	}
 }
 
-func (r *handlerRegistry) RegisterHasher(hasher Hasher) {
+func (r *signerRegistry) GetSigner(name string) Signer {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+	return r.signers[name]
+}
+
+func (r *signerRegistry) GetVerifier(name string) Verifier {
+	r.lock.RLock()
+	defer r.lock.RUnlock()
+	return r.verifier[name]
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type hasherRegistry struct {
+	lock   sync.RWMutex
+	hasher map[string]Hasher
+}
+
+var _ HasherRegistry = (*hasherRegistry)(nil)
+
+func NewHasherRegistry() HasherRegistry {
+	return &hasherRegistry{
+		hasher: map[string]Hasher{},
+	}
+}
+
+func (r *hasherRegistry) RegisterHasher(hasher Hasher) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	r.hasher[hasher.Algorithm()] = hasher
 }
 
-func (r *handlerRegistry) HasherNames() []string {
+func (r *hasherRegistry) HasherNames() []string {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	names := []string{}
@@ -106,19 +164,7 @@ func (r *handlerRegistry) HasherNames() []string {
 	return names
 }
 
-func (r *handlerRegistry) GetSigner(name string) Signer {
-	r.lock.RLock()
-	defer r.lock.RUnlock()
-	return r.signers[name]
-}
-
-func (r *handlerRegistry) GetVerifier(name string) Verifier {
-	r.lock.RLock()
-	defer r.lock.RUnlock()
-	return r.verifier[name]
-}
-
-func (r *handlerRegistry) GetHasher(name string) Hasher {
+func (r *hasherRegistry) GetHasher(name string) Hasher {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 	return r.hasher[NormalizeHashAlgorithm(name)]
