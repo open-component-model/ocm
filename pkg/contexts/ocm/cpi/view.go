@@ -10,6 +10,7 @@ import (
 	"reflect"
 	"strconv"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessio/resource"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
@@ -150,6 +151,7 @@ type ComponentAccessImpl interface {
 	resource.ResourceImplementation[ComponentAccess]
 	internal.ComponentAccessImpl
 
+	IsReadOnly() bool
 	GetName() string
 }
 
@@ -241,6 +243,9 @@ func (c *componentAccessView) AddVersion(acc ComponentVersionAccess) error {
 
 func (c *componentAccessView) NewVersion(version string, overrides ...bool) (acc ComponentVersionAccess, err error) {
 	err = c.Execute(func() error {
+		if c.impl.IsReadOnly() {
+			return accessio.ErrReadOnly
+		}
 		acc, err = c.impl.NewVersion(version, overrides...)
 		return err
 	})
@@ -285,8 +290,8 @@ type ComponentVersionAccessImpl interface {
 	// This is the direct technical storage, without caring about any handler.
 	AddBlobFor(storagectx StorageContext, blob BlobAccess, refName string, global AccessSpec) (AccessSpec, error)
 
-	SetResource(*compdesc.Resource) error
-	SetSource(*compdesc.Source) error
+	IsReadOnly() bool
+	Update(final bool) error
 }
 
 type _ComponentVersionAccessImplBase = resource.ResourceImplBase[ComponentVersionAccess]
@@ -403,6 +408,9 @@ func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refNa
 	if blob == nil {
 		return nil, errors.New("a resource has to be defined")
 	}
+	if c.impl.IsReadOnly() {
+		return nil, accessio.ErrReadOnly
+	}
 	storagectx := c.impl.GetStorageContext(c)
 	h := c.GetContext().BlobHandlers().LookupHandler(storagectx.GetImplementationRepositoryType(), artType, blob.MimeType())
 	if h != nil {
@@ -436,7 +444,7 @@ func (c *componentVersionAccessView) SetResourceBlob(meta *ResourceMeta, blob cp
 		return fmt.Errorf("unable to add blob (component %s:%s resource %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)
 	}
 
-	if err := c.SetResource(meta, acc); err != nil {
+	if err := c.SetResource(meta, acc, ModifyResource()); err != nil {
 		return fmt.Errorf("unable to set resource: %w", err)
 	}
 
@@ -466,6 +474,10 @@ func (c *componentVersionAccessView) SetSourceBlob(meta *SourceMeta, blob BlobAc
 }
 
 func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, acc compdesc.AccessSpec, modopts ...ModificationOption) error {
+	if c.impl.IsReadOnly() {
+		return accessio.ErrReadOnly
+	}
+
 	res := &compdesc.Resource{
 		ResourceMeta: *meta.Copy(),
 		Access:       acc,
@@ -500,7 +512,7 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 		}
 
 		if old == nil {
-			if !opts.ModifyResource {
+			if !opts.ModifyResource && c.impl.IsPersistent() {
 				return fmt.Errorf("new resource would invalidate signature")
 			}
 		}
@@ -513,17 +525,31 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 			res.Digest = metav1.NewExcludeFromSignatureDigest()
 		}
 
-		if res.Digest == nil {
+		if res.Digest == nil || res.Digest.Value == "" {
 			attr := hashattr.Get(ctx)
-			var digester DigesterType
+			hasherAlgo := attr.DefaultHasher
 
-			if old.Digest != nil {
-				digester = DigesterType{
-					HashAlgorithm:          old.Digest.HashAlgorithm,
-					NormalizationAlgorithm: old.Digest.NormalisationAlgorithm,
+			var digester DigesterType
+			if res.Digest != nil {
+				if res.Digest.HashAlgorithm != "" {
+					hasherAlgo = res.Digest.HashAlgorithm
+					digester.HashAlgorithm = res.Digest.HashAlgorithm
+				}
+				if res.Digest.NormalisationAlgorithm != "" {
+					digester.NormalizationAlgorithm = res.Digest.NormalisationAlgorithm
 				}
 			}
-			dig, err := ctx.BlobDigesters().DetermineDigests(res.Type, attr.GetHasher(), attr.Provider, meth, digester)
+
+			hasher := attr.GetHasher(hasherAlgo)
+			if hasher == nil {
+				return errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, hasherAlgo)
+			}
+			if old != nil && old.Digest != nil {
+				if digester.HashAlgorithm == "" {
+					digester.HashAlgorithm = old.Digest.HashAlgorithm
+				}
+			}
+			dig, err := ctx.BlobDigesters().DetermineDigests(res.Type, hasher, attr.Provider, meth, digester)
 			if err != nil {
 				return err
 			}
@@ -533,32 +559,63 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 			res.Digest = &dig[0]
 		}
 
-		if !res.ResourceMeta.HashEqual(&old.ResourceMeta) {
+		if old != nil && !res.ResourceMeta.HashEqual(&old.ResourceMeta) {
+			if !opts.ModifyResource && c.impl.IsPersistent() {
+				return fmt.Errorf("resource would invalidate signature")
+			}
 			cd.Signatures = nil
 		}
 
-		return c.impl.SetResource(res)
+		if old == nil {
+			cd.Resources = append(cd.Resources, *res)
+		} else {
+			cd.Resources[idx] = *res
+		}
+		return c.impl.Update(false)
 	})
 }
 
 func (c *componentVersionAccessView) SetSource(meta *internal.SourceMeta, acc compdesc.AccessSpec) error {
+	if c.impl.IsReadOnly() {
+		return accessio.ErrReadOnly
+	}
+
 	res := &compdesc.Source{
 		SourceMeta: *meta.Copy(),
 		Access:     acc,
 	}
 	return c.Execute(func() error {
-		return c.impl.SetSource(res)
+		if res.Version == "" {
+			res.Version = c.impl.GetVersion()
+		}
+		cd := c.impl.GetDescriptor()
+		if idx := cd.GetSourceIndex(&res.SourceMeta); idx == -1 {
+			cd.Sources = append(cd.Sources, *res)
+		} else {
+			cd.Sources[idx] = *res
+		}
+		return c.impl.Update(false)
 	})
 }
 
 func (c *componentVersionAccessView) SetReference(ref *internal.ComponentReference) error {
 	return c.Execute(func() error {
-		return c.impl.SetReference(ref)
+		cd := c.impl.GetDescriptor()
+		if idx := cd.GetComponentReferenceIndex(*ref); idx == -1 {
+			cd.References = append(cd.References, *ref)
+		} else {
+			cd.References[idx] = *ref
+		}
+		return c.impl.Update(false)
 	})
 }
 
 func (c *componentVersionAccessView) DiscardChanges() {
 	c.impl.DiscardChanges()
+}
+
+func (c *componentVersionAccessView) IsPersistent() bool {
+	return c.impl.IsPersistent()
 }
 
 ////////////////////////////////////////////////////////////////////////////////

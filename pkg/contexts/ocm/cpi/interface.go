@@ -8,6 +8,7 @@ package cpi
 
 import (
 	"github.com/mandelsoft/logging"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
@@ -110,6 +111,10 @@ func NewBlobHandlerOptions(olist ...BlobHandlerOption) *BlobHandlerOptions {
 
 func New() Context {
 	return internal.Builder{}.New()
+}
+
+func NewResourceMeta(name string, typ string, relation metav1.ResourceRelation) *ResourceMeta {
+	return compdesc.NewResourceMeta(name, typ, relation)
 }
 
 func NewDigestDescriptor(digest string, typ DigesterType) *DigestDescriptor {
@@ -233,4 +238,14 @@ var (
 
 func WrapContextProvider(ctx LocalContextProvider) ContextProvider {
 	return internal.WrapContextProvider(ctx)
+}
+
+///////////////////////////////////////////////////////
+
+func ModifyResource(flag ...bool) ModificationOption {
+	return internal.ModifyResource(flag...)
+}
+
+func AcceptExistentDigests(flag ...bool) ModificationOption {
+	return internal.AcceptExistentDigests(flag...)
 }

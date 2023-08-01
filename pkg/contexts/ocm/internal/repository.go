@@ -97,8 +97,8 @@ type ComponentVersionAccessImpl interface {
 	Repository() Repository
 	GetContext() Context
 	GetDescriptor() *compdesc.ComponentDescriptor
-	SetReference(ref *ComponentReference) error
 	DiscardChanges()
+	IsPersistent() bool
 
 	io.Closer
 }
@@ -126,6 +126,7 @@ type ComponentVersionAccess interface {
 	GetReferencesByName(name string, selectors ...compdesc.IdentitySelector) (compdesc.References, error)
 	GetReferencesByIdentitySelectors(selectors ...compdesc.IdentitySelector) (compdesc.References, error)
 	GetReferencesByReferenceSelectors(selectors ...compdesc.ReferenceSelector) (compdesc.References, error)
+	SetReference(ref *ComponentReference) error
 
 	// AddBlob adds a local blob and returns an appropriate local access spec.
 	AddBlob(blob BlobAccess, artType, refName string, global AccessSpec) (AccessSpec, error)

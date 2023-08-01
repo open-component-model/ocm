@@ -130,6 +130,10 @@ func (d *DummyComponentVersionAccess) SetReference(ref *ComponentReference) erro
 func (d *DummyComponentVersionAccess) DiscardChanges() {
 }
 
+func (d *DummyComponentVersionAccess) IsPersistent() bool {
+	return false
+}
+
 func (d *DummyComponentVersionAccess) GetResourcesByIdentitySelectors(selectors ...compdesc.IdentitySelector) ([]internal.ResourceAccess, error) {
 	return nil, nil
 }

@@ -8,6 +8,7 @@ import (
 	"context"
 
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -122,4 +123,18 @@ func NewAccessSpecRef(spec cpi.AccessSpec) *AccessSpecRef {
 
 func NewRawAccessSpecRef(data []byte, unmarshaler runtime.Unmarshaler) (*AccessSpecRef, error) {
 	return internal.NewRawAccessSpecRef(data, unmarshaler)
+}
+
+func NewResourceMeta(name string, typ string, relation metav1.ResourceRelation) *ResourceMeta {
+	return compdesc.NewResourceMeta(name, typ, relation)
+}
+
+///////////////////////////////////////////////////////
+
+func ModifyResource(flag ...bool) ModificationOption {
+	return internal.ModifyResource(flag...)
+}
+
+func AcceptExistentDigests(flag ...bool) ModificationOption {
+	return internal.AcceptExistentDigests(flag...)
 }

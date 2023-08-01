@@ -44,8 +44,8 @@ func (m modifyresource) ApplyModificationOption(opts *ModificationOptions) {
 	opts.ModifyResource = bool(m)
 }
 
-func ChangeResource(flag ...bool) ModificationOption {
-	return modifyresource(utils.Optional(flag...))
+func ModifyResource(flag ...bool) ModificationOption {
+	return modifyresource(utils.OptionalDefaultedBool(true, flag...))
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -57,5 +57,5 @@ func (m acceptdigests) ApplyModificationOption(opts *ModificationOptions) {
 }
 
 func AcceptExistentDigests(flag ...bool) ModificationOption {
-	return modifyresource(utils.Optional(flag...))
+	return modifyresource(utils.OptionalDefaultedBool(true, flag...))
 }

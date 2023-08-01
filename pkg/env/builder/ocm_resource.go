@@ -6,6 +6,7 @@ package builder
 
 import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -37,7 +38,7 @@ func (r *ocmResource) Set() {
 func (r *ocmResource) Close() error {
 	switch {
 	case r.access != nil:
-		return r.Builder.ocm_vers.SetResource(&r.meta, r.access)
+		return r.Builder.ocm_vers.SetResource(&r.meta, r.access, ocm.ModifyResource())
 	case r.blob != nil:
 		return r.Builder.ocm_vers.SetResourceBlob(&r.meta, r.blob, r.hint, nil)
 	}

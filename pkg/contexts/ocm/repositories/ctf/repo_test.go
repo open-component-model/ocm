@@ -30,7 +30,7 @@ var _ = Describe("access method", func() {
 		fs = memoryfs.New()
 	})
 
-	It("adds component  version", func() {
+	It("adds component version", func() {
 		final := Finalizer{}
 		defer Defer(final.Finalize)
 
