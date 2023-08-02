@@ -20,6 +20,12 @@ type ModificationOptions struct {
 	// AcceptExistentDigests don't validate/recalculate the content digest
 	// of resources.
 	AcceptExistentDigests bool
+
+	// DefaultHashAlgorithm is the hash algorithm to use if no specific setting os found
+	DefaultHashAlgorithm string
+
+	// HasherProvider is the factory for hash algorithms to use.
+	HasherProvider HasherProvider
 }
 
 func (m *ModificationOptions) Eval(list ...ModificationOption) {
@@ -28,6 +34,10 @@ func (m *ModificationOptions) Eval(list ...ModificationOption) {
 			o.ApplyModificationOption(m)
 		}
 	}
+}
+
+func (m *ModificationOptions) GetHasher(algo ...string) Hasher {
+	return m.HasherProvider.GetHasher(utils.OptionalDefaulted(m.DefaultHashAlgorithm, algo...))
 }
 
 func EvalModificationOptions(list ...ModificationOption) ModificationOptions {
@@ -57,5 +67,31 @@ func (m acceptdigests) ApplyModificationOption(opts *ModificationOptions) {
 }
 
 func AcceptExistentDigests(flag ...bool) ModificationOption {
-	return modifyresource(utils.OptionalDefaultedBool(true, flag...))
+	return acceptdigests(utils.OptionalDefaultedBool(true, flag...))
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type hashalgo string
+
+func (m hashalgo) ApplyModificationOption(opts *ModificationOptions) {
+	opts.DefaultHashAlgorithm = string(m)
+}
+
+func WithDefaultHashAlgorithm(algo ...string) ModificationOption {
+	return hashalgo(utils.Optional(algo...))
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type hashprovider struct {
+	prov HasherProvider
+}
+
+func (m *hashprovider) ApplyModificationOption(opts *ModificationOptions) {
+	opts.HasherProvider = m.prov
+}
+
+func WithHasherProvider(prov HasherProvider) ModificationOption {
+	return &hashprovider{prov}
 }

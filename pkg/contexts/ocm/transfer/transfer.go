@@ -63,10 +63,13 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 			defer accessio.Close(t)
 		}
 	} else {
-		if ok, detect := d.Equivalent(t.GetDescriptor()); ok && detect {
-			printer.Printf("  version %q already present -> skip transport\n", nv)
+		if eq := d.Equivalent(t.GetDescriptor()); eq.IsHashEqual() {
+			if eq.IsEquivalent() {
+				printer.Printf("  version %q already present -> skip transport\n", nv)
+				return nil
+			}
+			printer.Printf("  version %q requires update of volatile data (not yet implemented)\n", nv)
 			// TODO
-			// join signatures???
 			return nil
 		} else {
 			var ok bool

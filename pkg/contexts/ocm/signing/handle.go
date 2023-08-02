@@ -219,17 +219,13 @@ func _apply(state WalkingState, nv common.NameVersion, cv ocm.ComponentVersionAc
 		}
 	}
 
-	if nv.GetName() == "github.com/mandelsoft/test" {
-		a := 0
-		_ = a
-	}
 	var spec *metav1.DigestSpec
 	legacy := signing.IsLegacyHashAlgorithm(ctx.RootContextInfo.DigestType.HashAlgorithm) && !opts.DoSign()
 	if ctx.Digest == nil {
 		if err := calculateReferenceDigests(state, opts, legacy); err != nil {
 			return nil, err
 		}
-		if err := calculareResourceDigests(state, cv, cd, opts, legacy, ctx.GetPreset(ctx.Key)); err != nil {
+		if err := calculateResourceDigests(state, cv, cd, opts, legacy, ctx.GetPreset(ctx.Key)); err != nil {
 			return nil, err
 		}
 		dt := ctx.DigestType
@@ -461,7 +457,7 @@ func calculateReferenceDigests(state WalkingState, opts *Options, legacy bool) e
 	return nil
 }
 
-func calculareResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess, cd *compdesc.ComponentDescriptor, opts *Options, legacy bool, preset *metav1.NestedComponentDigests) error {
+func calculateResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess, cd *compdesc.ComponentDescriptor, opts *Options, legacy bool, preset *metav1.NestedComponentDigests) error {
 	octx := cv.GetContext()
 	blobdigesters := octx.BlobDigesters()
 	for i, res := range cv.GetResources() {
@@ -482,7 +478,7 @@ func calculareResourceDigests(state WalkingState, cv ocm.ComponentVersionAccess,
 			continue
 		}
 		// special digest notation indicates to not digest the content
-		if cd.Resources[i].Digest != nil && reflect.DeepEqual(cd.Resources[i].Digest, metav1.NewExcludeFromSignatureDigest()) {
+		if cd.Resources[i].Digest.IsExcluded() {
 			continue
 		}
 

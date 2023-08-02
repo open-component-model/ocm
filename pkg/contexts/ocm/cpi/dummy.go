@@ -107,11 +107,11 @@ func (d *DummyComponentVersionAccess) SetResourceBlob(meta *ResourceMeta, blob B
 	panic("implement me")
 }
 
-func (d *DummyComponentVersionAccess) AdjustResourceAccess(meta *internal.ResourceMeta, acc compdesc.AccessSpec, opts ...ModificationOption) error {
+func (d *DummyComponentVersionAccess) AdjustResourceAccess(meta *internal.ResourceMeta, acc compdesc.AccessSpec, opts ...internal.ModificationOption) error {
 	panic("implement me")
 }
 
-func (d *DummyComponentVersionAccess) SetResource(meta *ResourceMeta, spec compdesc.AccessSpec, opts ...ModificationOption) error {
+func (d *DummyComponentVersionAccess) SetResource(meta *ResourceMeta, spec compdesc.AccessSpec, opts ...internal.ModificationOption) error {
 	panic("implement me")
 }
 

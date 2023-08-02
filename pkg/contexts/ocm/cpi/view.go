@@ -7,14 +7,12 @@ package cpi
 import (
 	"fmt"
 	"io"
-	"reflect"
 	"strconv"
 
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessio/resource"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
 	"github.com/open-component-model/ocm/pkg/contexts/oci/cpi"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/hashattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/attrs/keepblobattr"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
@@ -428,7 +426,7 @@ func (c *componentVersionAccessView) AddBlob(blob cpi.BlobAccess, artType, refNa
 	return c.impl.AddBlobFor(storagectx, blob, refName, global)
 }
 
-func (c *componentVersionAccessView) AdjustResourceAccess(meta *ResourceMeta, acc compdesc.AccessSpec, opts ...ModificationOption) error {
+func (c *componentVersionAccessView) AdjustResourceAccess(meta *ResourceMeta, acc compdesc.AccessSpec, opts ...internal.ModificationOption) error {
 	cd := c.GetDescriptor()
 	if idx := cd.GetResourceIndex(meta); idx == -1 {
 		return errors.ErrUnknown(KIND_RESOURCE, meta.GetIdentity(cd.Resources).String())
@@ -444,7 +442,7 @@ func (c *componentVersionAccessView) SetResourceBlob(meta *ResourceMeta, blob cp
 		return fmt.Errorf("unable to add blob (component %s:%s resource %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)
 	}
 
-	if err := c.SetResource(meta, acc, ModifyResource()); err != nil {
+	if err := c.SetResource(meta, acc, internal.ModifyResource()); err != nil {
 		return fmt.Errorf("unable to set resource: %w", err)
 	}
 
@@ -473,7 +471,7 @@ func (c *componentVersionAccessView) SetSourceBlob(meta *SourceMeta, blob BlobAc
 	return nil
 }
 
-func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, acc compdesc.AccessSpec, modopts ...ModificationOption) error {
+func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, acc compdesc.AccessSpec, modopts ...internal.ModificationOption) error {
 	if c.impl.IsReadOnly() {
 		return accessio.ErrReadOnly
 	}
@@ -483,9 +481,11 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 		Access:       acc,
 	}
 
-	opts := EvalModificationOptions(modopts...)
+	ctx := c.impl.GetContext()
+	opts := internal.EvalModificationOptions(modopts...)
+	CompleteModificationOptions(ctx, &opts)
 
-	spec, err := c.GetContext().AccessSpecForSpec(acc)
+	spec, err := ctx.AccessSpecForSpec(acc)
 	if err != nil {
 		return err
 	}
@@ -495,7 +495,6 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 	}
 	defer meth.Close()
 
-	ctx := c.impl.GetContext()
 	return c.Execute(func() error {
 		var old *compdesc.Resource
 
@@ -517,39 +516,19 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 			}
 		}
 
-		if res.Digest == nil && old != nil && (opts.AcceptExistentDigests || reflect.DeepEqual(old.Access, res.Access)) {
-			res.Digest = old.Digest
+		// evaluate given digesting constraints and settings
+		hashAlgo, digester := c.evaluateResourceDigest(res, old, opts)
+		hasher := opts.GetHasher(hashAlgo)
+		if digester.HashAlgorithm == "" && hasher == nil {
+			return errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, hashAlgo)
 		}
 
-		if IsNoneAccess(res.Access.GetKind()) {
+		if compdesc.IsNoneAccessKind(res.Access.GetKind()) {
 			res.Digest = metav1.NewExcludeFromSignatureDigest()
 		}
 
-		if res.Digest == nil || res.Digest.Value == "" {
-			attr := hashattr.Get(ctx)
-			hasherAlgo := attr.DefaultHasher
-
-			var digester DigesterType
-			if res.Digest != nil {
-				if res.Digest.HashAlgorithm != "" {
-					hasherAlgo = res.Digest.HashAlgorithm
-					digester.HashAlgorithm = res.Digest.HashAlgorithm
-				}
-				if res.Digest.NormalisationAlgorithm != "" {
-					digester.NormalizationAlgorithm = res.Digest.NormalisationAlgorithm
-				}
-			}
-
-			hasher := attr.GetHasher(hasherAlgo)
-			if hasher == nil {
-				return errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, hasherAlgo)
-			}
-			if old != nil && old.Digest != nil {
-				if digester.HashAlgorithm == "" {
-					digester.HashAlgorithm = old.Digest.HashAlgorithm
-				}
-			}
-			dig, err := ctx.BlobDigesters().DetermineDigests(res.Type, hasher, attr.Provider, meth, digester)
+		if res.Digest == nil {
+			dig, err := ctx.BlobDigesters().DetermineDigests(res.Type, hasher, opts.HasherProvider, meth, digester)
 			if err != nil {
 				return err
 			}
@@ -559,8 +538,9 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 			res.Digest = &dig[0]
 		}
 
-		if old != nil && !res.ResourceMeta.HashEqual(&old.ResourceMeta) {
-			if !opts.ModifyResource && c.impl.IsPersistent() {
+		if old != nil {
+			eq := res.Equivalent(old)
+			if !eq.IsLocalHashEqual() && !opts.ModifyResource && c.impl.IsPersistent() {
 				return fmt.Errorf("resource would invalidate signature")
 			}
 			cd.Signatures = nil
@@ -573,6 +553,40 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 		}
 		return c.impl.Update(false)
 	})
+}
+
+// evaluateResourceDigest evaluate given potentially partly set digest to determine defaults
+func (c *componentVersionAccessView) evaluateResourceDigest(res, old *compdesc.Resource, opts internal.ModificationOptions) (string, DigesterType) {
+	var digester DigesterType
+
+	hashAlgo := opts.DefaultHashAlgorithm
+	if !res.Digest.IsNone() {
+		if !res.Digest.IsComplete() {
+			if res.Digest.HashAlgorithm != "" && res.Digest.NormalisationAlgorithm == "" {
+				hashAlgo = res.Digest.HashAlgorithm
+			} else {
+				digester = DigesterType{
+					HashAlgorithm:          res.Digest.HashAlgorithm,
+					NormalizationAlgorithm: res.Digest.NormalisationAlgorithm,
+				}
+			}
+			res.Digest = nil
+		}
+	} else {
+		res.Digest = nil
+	}
+
+	// keep potential old digest settings
+	if old != nil && old.Type == res.Type {
+		if !old.Digest.IsNone() {
+			digester.HashAlgorithm = old.Digest.HashAlgorithm
+			digester.NormalizationAlgorithm = old.Digest.NormalisationAlgorithm
+			if opts.AcceptExistentDigests && !opts.ModifyResource && c.impl.IsPersistent() {
+				res.Digest = old.Digest
+			}
+		}
+	}
+	return hashAlgo, digester
 }
 
 func (c *componentVersionAccessView) SetSource(meta *internal.SourceMeta, acc compdesc.AccessSpec) error {

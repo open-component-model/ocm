@@ -336,10 +336,5 @@ func (cd *ComponentDescriptor) GetReferenceIndex(src *ElementMeta) int {
 // GetSignatureIndex returns the index of the signature with the given name
 // If the index is not found -1 is returned.
 func (cd *ComponentDescriptor) GetSignatureIndex(name string) int {
-	for i, cur := range cd.Signatures {
-		if cur.Name == name {
-			return i
-		}
-	}
-	return -1
+	return cd.Signatures.GetIndex(name)
 }

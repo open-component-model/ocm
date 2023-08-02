@@ -6,8 +6,10 @@ package v1
 
 import (
 	"encoding/json"
+	"reflect"
 	"regexp"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/equivalent"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -171,6 +173,40 @@ func (l *Labels) Remove(name string) bool {
 		}
 	}
 	return false
+}
+
+func (l Labels) Equivalent(o Labels) equivalent.EqualState {
+	state := equivalent.StateEquivalent()
+
+	for _, ol := range o {
+		ll := l.GetDef(ol.Name)
+		if ol.Signing {
+			if ll == nil || !reflect.DeepEqual(&ol, ll) {
+				state = state.NotLocalHashEqual()
+			}
+		} else {
+			if ll != nil {
+				if ll.Signing {
+					state = state.NotLocalHashEqual()
+				}
+				if !reflect.DeepEqual(&ol, ll) {
+					state = state.NotEquivalent()
+				}
+			} else {
+				state = state.NotEquivalent()
+			}
+		}
+	}
+	for _, rl := range l {
+		l := o.GetDef(rl.Name)
+		if l == nil {
+			if rl.Signing {
+				state = state.NotLocalHashEqual()
+			}
+			state = state.NotEquivalent()
+		}
+	}
+	return state
 }
 
 // AsMap return an unmarshalled map representation.

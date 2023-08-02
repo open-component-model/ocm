@@ -8,9 +8,8 @@ package cpi
 
 import (
 	"github.com/mandelsoft/logging"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/internal"
 	"github.com/open-component-model/ocm/pkg/generics"
 	"github.com/open-component-model/ocm/pkg/registrations"
@@ -48,8 +47,6 @@ type (
 	ComponentLister                  = internal.ComponentLister
 	ComponentAccess                  = internal.ComponentAccess
 	ComponentVersionAccess           = internal.ComponentVersionAccess
-	ModificationOption               = internal.ModificationOption
-	ModificationOptions              = internal.ModificationOptions
 	AccessSpec                       = internal.AccessSpec
 	AccessSpecDecoder                = internal.AccessSpecDecoder
 	GenericAccessSpec                = internal.GenericAccessSpec
@@ -70,7 +67,6 @@ type (
 	GenericRepositorySpec            = internal.GenericRepositorySpec
 	RepositoryType                   = internal.RepositoryType
 	ComponentReference               = internal.ComponentReference
-	References                       = compdesc.References
 )
 
 type (
@@ -183,10 +179,6 @@ func NewRawAccessSpecRef(data []byte, unmarshaler runtime.Unmarshaler) (*AccessS
 	return internal.NewRawAccessSpecRef(data, unmarshaler)
 }
 
-func EvalModificationOptions(list ...ModificationOption) ModificationOptions {
-	return internal.EvalModificationOptions(list...)
-}
-
 const (
 	KIND_COMPONENTVERSION = internal.KIND_COMPONENTVERSION
 	KIND_RESOURCE         = internal.KIND_RESOURCE
@@ -238,14 +230,4 @@ var (
 
 func WrapContextProvider(ctx LocalContextProvider) ContextProvider {
 	return internal.WrapContextProvider(ctx)
-}
-
-///////////////////////////////////////////////////////
-
-func ModifyResource(flag ...bool) ModificationOption {
-	return internal.ModifyResource(flag...)
-}
-
-func AcceptExistentDigests(flag ...bool) ModificationOption {
-	return internal.AcceptExistentDigests(flag...)
 }

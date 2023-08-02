@@ -7,6 +7,8 @@ package transfer
 import (
 	"fmt"
 
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/updateoption"
+	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/spf13/cobra"
 
 	"github.com/open-component-model/ocm/cmds/ocm/commands/common/options/closureoption"
@@ -57,6 +59,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		closureoption.New("component reference"),
 		lookupoption.New(),
 		overwriteoption.New(),
+		updateoption.New(),
 		rscbyvalueoption.New(),
 		srcbyvalueoption.New(),
 		omitaccesstypeoption.New(),
@@ -114,18 +117,10 @@ func (o *Command) Run() error {
 
 	transferopts := &spiff.Options{}
 	transferhandler.From(o.ConfigContext(), transferopts)
-	transferhandler.ApplyOptions(transferopts,
-		lookupoption.From(o),
-
-		closureoption.From(o),
-		overwriteoption.From(o),
-		rscbyvalueoption.From(o),
-		srcbyvalueoption.From(o),
-		stoponexistingoption.From(o),
-		omitaccesstypeoption.From(o),
+	transferhandler.ApplyOptions(transferopts, append(options.FindOptions[transferhandler.TransferOption](o),
 		spiff.Script(scriptoption.From(o).ScriptData),
 		spiff.ScriptFilesystem(o.FileSystem()),
-	)
+	)...)
 	thdlr, err := spiff.New(transferopts)
 
 	if err != nil {

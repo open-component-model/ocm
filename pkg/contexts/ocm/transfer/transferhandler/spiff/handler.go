@@ -45,8 +45,28 @@ func New(opts ...transferhandler.TransferOption) (transferhandler.TransferHandle
 	}, nil
 }
 
+// TODO: handle update and overwrite per script
+
+func (h *Handler) UpdateVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error) {
+	if ok, err := h.Handler.UpdateVersion(src, tgt); ok || err != nil {
+		return ok, nil
+	}
+	if h.opts.GetScript() == nil {
+		return false, nil
+	}
+	binding := h.getBinding(src, nil, nil, nil, nil)
+	return h.EvalBool("update", binding, "process")
+}
+
 func (h *Handler) OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error) {
-	return h.Handler.OverwriteVersion(src, tgt)
+	if ok, err := h.Handler.OverwriteVersion(src, tgt); ok || err != nil {
+		return ok, nil
+	}
+	if h.opts.GetScript() == nil {
+		return false, nil
+	}
+	binding := h.getBinding(src, nil, nil, nil, nil)
+	return h.EvalBool("overwrite", binding, "process")
 }
 
 func (h *Handler) TransferVersion(repo ocm.Repository, src ocm.ComponentVersionAccess, meta *compdesc.ComponentReference, tgt ocm.Repository) (ocm.ComponentVersionAccess, transferhandler.TransferHandler, error) {
@@ -112,7 +132,9 @@ func (h *Handler) getBinding(src ocm.ComponentVersionAccess, a ocm.AccessSpec, m
 	if a != nil {
 		binding["access"] = getData(a)
 	}
-	binding["element"] = getData(m)
+	if m != nil {
+		binding["element"] = getData(m)
+	}
 	if typ != nil {
 		binding["element"].(map[string]interface{})["type"] = *typ
 	}

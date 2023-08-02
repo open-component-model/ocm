@@ -33,6 +33,10 @@ func New(opts ...transferhandler.TransferOption) (transferhandler.TransferHandle
 	return NewDefaultHandler(defaultOpts), nil
 }
 
+func (h *Handler) UpdateVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error) {
+	return h.opts.IsUpdate(), nil
+}
+
 func (h *Handler) OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error) {
 	return h.opts.IsOverwrite(), nil
 }

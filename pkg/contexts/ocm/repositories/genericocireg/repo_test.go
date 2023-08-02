@@ -259,7 +259,7 @@ var _ = Describe("component repository mapping", func() {
 		MustBeSuccessful(finalize.Finalize())
 	})
 
-	FIt("removes old unused layers", func() {
+	It("removes old unused layers", func() {
 		var finalize finalizer.Finalizer
 		defer Defer(finalize.Finalize, "finalize open elements")
 

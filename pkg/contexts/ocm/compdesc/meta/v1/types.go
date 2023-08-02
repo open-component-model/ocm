@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/equivalent"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
@@ -97,6 +98,14 @@ func (o *ObjectMeta) Equal(obj interface{}) bool {
 	return false
 }
 
+func (o ObjectMeta) Equivalent(a ObjectMeta) equivalent.EqualState {
+	state := equivalent.StateLocalHashEqual(o.Name == a.Name && o.Version == a.Version)
+	return state.Apply(
+		o.Provider.Equivalent(a.Provider),
+		o.Labels.Equivalent(a.Labels),
+	)
+}
+
 // GetName returns the name of the object.
 func (o *ObjectMeta) GetName() string {
 	return o.Name
@@ -172,6 +181,15 @@ func (o *Provider) Copy() *Provider {
 		Name:   o.Name,
 		Labels: o.Labels.Copy(),
 	}
+}
+
+func (o Provider) Equivalent(a Provider) equivalent.EqualState {
+	state := equivalent.StateEquivalent()
+
+	if o.Name != a.Name {
+		state.NotLocalHashEqual()
+	}
+	return state.Apply(o.Labels.Equivalent(a.Labels))
 }
 
 ////////////////////////////////////////////////////////////////////////////////

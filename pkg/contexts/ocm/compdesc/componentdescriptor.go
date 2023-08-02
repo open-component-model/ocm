@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/equivalent"
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -252,6 +253,21 @@ func (o *ElementMeta) Copy() *ElementMeta {
 	}
 }
 
+func (o *ElementMeta) Equivalent(a *ElementMeta) equivalent.EqualState {
+	if o == a {
+		return equivalent.StateEquivalent()
+	}
+	if o == nil {
+		o, a = a, o
+	}
+	if a == nil {
+		return o.Labels.Equivalent(nil)
+	}
+
+	state := equivalent.StateLocalHashEqual(a.Name == o.Name && a.Version == o.Version && reflect.DeepEqual(a.ExtraIdentity, o.ExtraIdentity))
+	return state.Apply(o.Labels.Equivalent(a.Labels))
+}
+
 // NameAccessor describes a accessor for a named object.
 type NameAccessor interface {
 	// GetName returns the name of the object.
@@ -286,7 +302,18 @@ type ObjectMetaAccessor interface {
 // ElementMetaAccessor provides generic access an elements meta information.
 type ElementMetaAccessor interface {
 	GetMeta() *ElementMeta
-	IsEquivalent(ElementMetaAccessor) (equal bool, detectable bool)
+	Equivalent(ElementMetaAccessor) equivalent.EqualState
+}
+
+func GetByIdentity(a ElementAccessor, id metav1.Identity) ElementMetaAccessor {
+	l := a.Len()
+	for i := 0; i < l; i++ {
+		e := a.Get(i)
+		if e.GetMeta().GetIdentity(a).Equals(id) {
+			return e
+		}
+	}
+	return nil
 }
 
 // ElementAccessor provides generic access to list of elements.
@@ -372,20 +399,14 @@ func (s *Source) GetMeta() *ElementMeta {
 	return &s.ElementMeta
 }
 
-func (r *Source) IsEquivalent(e ElementMetaAccessor) (equal bool, detectable bool) {
+func (r *Source) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
 	if o, ok := e.(*Source); !ok {
-		return false, true
+		return r.Labels.Equivalent(nil)
 	} else {
-		if !reflect.DeepEqual(&r.ElementMeta, &o.ElementMeta) {
-			return false, true
-		}
-		if r.Type != o.Type {
-			return false, true
-		}
-
-		// no digest, therefore identity cannot be checked if transported by value.
-		b := reflect.DeepEqual(r.Access, o.Access)
-		return b, b
+		state := equivalent.StateLocalHashEqual(r.Type == o.Type)
+		return state.Apply(
+			r.ElementMeta.Equivalent(&o.ElementMeta),
+		)
 	}
 }
 
@@ -523,23 +544,16 @@ func (r *Resource) GetMeta() *ElementMeta {
 	return &r.ElementMeta
 }
 
-func (r *Resource) IsEquivalent(e ElementMetaAccessor) (equal bool, detectable bool) {
+func (r *Resource) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
 	if o, ok := e.(*Resource); !ok {
-		return false, true
+		return r.Labels.Equivalent(nil)
 	} else {
-		if !reflect.DeepEqual(&r.ElementMeta, &o.ElementMeta) {
-			return false, true
+		state := equivalent.StateLocalHashEqual(r.Type == o.Type && r.Relation == o.Relation && reflect.DeepEqual(r.SourceRef, o.SourceRef))
+
+		if !IsNoneAccess(r.Access) || IsNoneAccess(o.Access) {
+			state = state.Apply(r.Digest.Equivalent(o.Digest))
 		}
-		if r.Type != o.Type ||
-			r.Relation != o.Relation ||
-			!reflect.DeepEqual(r.SourceRef, o.SourceRef) {
-			return false, true
-		}
-		if r.Digest == nil || o.Digest == nil {
-			b := reflect.DeepEqual(r.Access, o.Access)
-			return b, b
-		}
-		return reflect.DeepEqual(r.Digest, o.Digest), true
+		return state.Apply(r.ElementMeta.Equivalent(&o.ElementMeta))
 	}
 }
 
@@ -574,48 +588,6 @@ type ResourceMeta struct {
 	// Digest is the optional digest of the referenced resource.
 	// +optional
 	Digest *metav1.DigestSpec `json:"digest,omitempty"`
-}
-
-// HashEqual indicates whether the digest hash would be equal.
-// Adapt together with version specific hash excludes.
-func (o *ResourceMeta) HashEqual(r *ResourceMeta) bool {
-	if o.Type != r.Type {
-		return false
-	}
-	if o.Relation != r.Relation {
-		return false
-	}
-	if o.ElementMeta.Name != r.ElementMeta.Name {
-		return false
-	}
-	if o.ElementMeta.Version != r.ElementMeta.Version {
-		return false
-	}
-	if o.Digest != r.Digest && (o.Digest == nil || r.Digest == nil || (o.Digest != nil && !reflect.DeepEqual(o.Digest, r.Digest))) {
-		return false
-	}
-	if !reflect.DeepEqual(o.ElementMeta.ExtraIdentity, r.ElementMeta.ExtraIdentity) {
-		return false
-	}
-	for _, l := range o.Labels {
-		rl := r.Labels.GetDef(l.Name)
-		if l.Signing {
-			if rl == nil || !reflect.DeepEqual(&l, rl) {
-				return false
-			}
-		} else {
-			if rl != nil && rl.Signing {
-				return false
-			}
-		}
-	}
-	for _, rl := range r.Labels {
-		l := o.Labels.GetDef(rl.Name)
-		if l == nil && rl.Signing {
-			return false
-		}
-	}
-	return true
 }
 
 // GetType returns the type of the object.
@@ -715,14 +687,18 @@ func (r *ComponentReference) GetMeta() *ElementMeta {
 	return &r.ElementMeta
 }
 
-func (r *ComponentReference) IsEquivalent(e ElementMetaAccessor) (equal bool, detectable bool) {
+func (r *ComponentReference) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
 	if o, ok := e.(*ComponentReference); !ok {
-		return false, true
+		return r.Labels.Equivalent(nil)
 	} else {
-		if !reflect.DeepEqual(&r.ElementMeta, &o.ElementMeta) {
-			return false, true
+		state := equivalent.StateLocalHashEqual(r.Name == o.Name && r.Version == o.Version && r.ComponentName == o.ComponentName)
+		// TODO: how to handle digests
+		if r.Digest != nil && o.Digest != nil { // hmm, digest described more than the local component, should we use it at all?
+			state = state.Apply(r.Digest.Equivalent(o.Digest))
 		}
-		return r.ComponentName == o.ComponentName, true
+		return state.Apply(
+			r.ElementMeta.Equivalent(&o.ElementMeta),
+		)
 	}
 }
 

@@ -7,6 +7,7 @@ package none
 import (
 	"io"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/errors"
 	"github.com/open-component-model/ocm/pkg/runtime"
@@ -14,9 +15,9 @@ import (
 
 // Type is the access type for no blob.
 const (
-	Type       = cpi.NoneType
+	Type       = compdesc.NoneType
 	TypeV1     = Type + runtime.VersionSeparator + "v1"
-	LegacyType = cpi.NoneLegacyType
+	LegacyType = compdesc.NoneLegacyType
 )
 
 func init() {
@@ -31,7 +32,7 @@ func New() *AccessSpec {
 }
 
 func IsNone(kind string) bool {
-	return cpi.IsNoneAccess(kind)
+	return compdesc.IsNoneAccessKind(kind)
 }
 
 // AccessSpec describes the access for a oci registry.

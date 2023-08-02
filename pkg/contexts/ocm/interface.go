@@ -39,7 +39,6 @@ type (
 	ComponentLister                  = internal.ComponentLister
 	ComponentAccess                  = internal.ComponentAccess
 	ComponentVersionAccess           = internal.ComponentVersionAccess
-	ModificationOption               = internal.ModificationOption
 	AccessSpec                       = internal.AccessSpec
 	GenericAccessSpec                = internal.GenericAccessSpec
 	HintProvider                     = internal.HintProvider
@@ -59,7 +58,6 @@ type (
 	RepositoryDelegationRegistry     = internal.RepositoryDelegationRegistry
 	AccessTypeScheme                 = internal.AccessTypeScheme
 	ComponentReference               = internal.ComponentReference
-	References                       = compdesc.References
 )
 
 type (
@@ -115,6 +113,14 @@ func NewGenericAccessSpec(spec string) (AccessSpec, error) {
 	return internal.NewGenericAccessSpec([]byte(spec))
 }
 
+func IsNoneAccess(a compdesc.AccessSpec) bool {
+	return compdesc.IsNoneAccess(a)
+}
+
+func IsNoneAccessKind(k string) bool {
+	return compdesc.IsNoneAccessKind(k)
+}
+
 type AccessSpecRef = internal.AccessSpecRef
 
 func NewAccessSpecRef(spec cpi.AccessSpec) *AccessSpecRef {
@@ -131,10 +137,27 @@ func NewResourceMeta(name string, typ string, relation metav1.ResourceRelation) 
 
 ///////////////////////////////////////////////////////
 
+type (
+	ModificationOption  = internal.ModificationOption
+	ModificationOptions = internal.ModificationOptions
+)
+
+func EvalModificationOptions(list ...ModificationOption) ModificationOptions {
+	return internal.EvalModificationOptions(list...)
+}
+
 func ModifyResource(flag ...bool) ModificationOption {
 	return internal.ModifyResource(flag...)
 }
 
 func AcceptExistentDigests(flag ...bool) ModificationOption {
 	return internal.AcceptExistentDigests(flag...)
+}
+
+func WithDefaultHashAlgorithm(algo ...string) ModificationOption {
+	return internal.WithDefaultHashAlgorithm(algo...)
+}
+
+func WithHasherProvider(prov HasherProvider) ModificationOption {
+	return internal.WithHasherProvider(prov)
 }
