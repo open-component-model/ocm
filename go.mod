@@ -25,6 +25,7 @@ require (
 
 require (
 	github.com/Masterminds/semver/v3 v3.2.1
+	github.com/aws/aws-sdk-go v1.44.288
 	github.com/aws/aws-sdk-go-v2 v1.18.1
 	github.com/aws/aws-sdk-go-v2/config v1.18.27
 	github.com/aws/aws-sdk-go-v2/credentials v1.13.26
@@ -43,6 +44,7 @@ require (
 	github.com/gertd/go-pluralize v0.2.1
 	github.com/go-openapi/strfmt v0.21.7
 	github.com/go-openapi/swag v0.22.4
+	github.com/go-test/deep v1.1.0
 	github.com/goccy/go-yaml v1.9.5
 	github.com/golang/mock v1.6.0
 	github.com/google/go-github/v45 v45.2.0

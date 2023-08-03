@@ -555,7 +555,7 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 	})
 }
 
-// evaluateResourceDigest evaluate given potentially partly set digest to determine defaults
+// evaluateResourceDigest evaluate given potentially partly set digest to determine defaults.
 func (c *componentVersionAccessView) evaluateResourceDigest(res, old *compdesc.Resource, opts internal.ModificationOptions) (string, DigesterType) {
 	var digester DigesterType
 

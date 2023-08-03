@@ -35,8 +35,8 @@ func (o *Option) IsTrue() bool {
 }
 
 func (o *Option) ApplyTransferOption(opts transferhandler.TransferOptions) error {
-	if (o.flag != nil && o.flag.Changed) || o.Update {
-		return standard.Update(o.Update).ApplyTransferOption(opts)
+	if o.flag != nil && o.flag.Changed {
+		return standard.Update(!o.Update).ApplyTransferOption(opts)
 	}
 	return nil
 }

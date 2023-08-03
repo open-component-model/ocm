@@ -13,6 +13,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/none"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	ocmcpi "github.com/open-component-model/ocm/pkg/contexts/ocm/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer/transferhandler/standard"
 	"github.com/open-component-model/ocm/pkg/errors"
@@ -47,6 +48,8 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 		}
 	}
 
+	doMerge := false
+	doCopy := true
 	d := src.GetDescriptor()
 
 	comp, err := tgt.LookupComponent(src.GetName())
@@ -68,14 +71,45 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 				printer.Printf("  version %q already present -> skip transport\n", nv)
 				return nil
 			}
-			printer.Printf("  version %q requires update of volatile data (not yet implemented)\n", nv)
-			// TODO
-			return nil
+			if ok, err := handler.UpdateVersion(src, t); !ok || err != nil {
+				if err != nil {
+					return err
+				}
+				if !ok {
+					printer.Printf("  version %q requires update of volatile data, but skipped\n", nv)
+					return nil
+				}
+				printer.Printf("  updating volatile properties of %q\n", nv)
+			}
+			doMerge = true
+			doCopy = false
 		} else {
+			msg := "  version %q already present"
+			if eq.IsLocalHashEqual() {
+				if eq.IsArtifactDetectable() {
+					doMerge = true
+					msg += ", but differs, because some artifact digests are changed"
+				} else {
+					msg += "might differ, because not all artifact digests are known"
+					// TODO: option to handle unknown digests like identical digests (copy=false, merge=true)
+				}
+			} else {
+				if eq.IsArtifactDetectable() {
+					if eq.IsArtifactEqual() {
+						msg += "differs, because signature relevant properties have been changed"
+					} else {
+						msg += "differs, because some artifacts and signature relevant properties have been changed"
+					}
+				} else {
+					msg += "differs, because signature relevant properties have been changed (and not all artifact digests are known)"
+				}
+			}
 			var ok bool
 			ok, err = handler.OverwriteVersion(src, t)
-			if !ok {
-				printer.Printf("  version %q already present, but differs\n", nv)
+			if ok {
+				printer.Printf("warning: "+msg+" (transport enforced by overwrite option)\n", nv)
+			} else {
+				printer.Printf(msg+" -> transport aborted (use option overwrite option to enforce transport)\n", nv)
 				return errors.ErrAlreadyExists(ocm.KIND_COMPONENTVERSION, nv.String())
 			}
 		}
@@ -84,10 +118,6 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 		return errors.Wrapf(err, "%s: creating target version", state.History)
 	}
 
-	err = CopyVersion(printer, log, state.History, src, t, handler)
-	if err != nil {
-		return err
-	}
 	subp := printer.AddGap("  ")
 	list := errors.ErrListf("component references for %s", nv)
 	log.Info("  transferring references")
@@ -102,6 +132,16 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 		}
 	}
 
+	var n *compdesc.ComponentDescriptor
+	if doMerge {
+		n, err = PrepareDescriptor(src.GetDescriptor(), t.GetDescriptor())
+		if err != nil {
+			return err
+		}
+	} else {
+		n = src.GetDescriptor().Copy()
+	}
+
 	var unstr *runtime.UnstructuredTypedObject
 	if !ocm.IsIntermediate(tgt.GetSpecification()) {
 		unstr, err = runtime.ToUnstructuredTypedObject(tgt.GetSpecification())
@@ -109,22 +149,35 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 			unstr = nil
 		}
 	}
-	cd := t.GetDescriptor()
 	if unstr != nil {
-		cd.RepositoryContexts = append(cd.RepositoryContexts, unstr)
+		n.RepositoryContexts = append(n.RepositoryContexts, unstr)
 	}
-	cd.Signatures = src.GetDescriptor().Signatures.Copy()
+
+	if doCopy {
+		err = copyVersion(printer, log, state.History, src, t, n, handler)
+		if err != nil {
+			return err
+		}
+	}
+
 	printer.Printf("...adding component version...\n")
 	log.Info("  adding component version")
 	return list.Add(comp.AddVersion(t)).Result()
 }
 
 func CopyVersion(printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler TransferHandler) (rerr error) {
+	return copyVersion(printer, log, hist, src, t, src.GetDescriptor().Copy(), handler)
+}
+
+// copyVersion (purely internal) expects an already prepared target comp desc for t given as prep.
+func copyVersion(printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, prep *compdesc.ComponentDescriptor, handler TransferHandler) (rerr error) {
 	if handler == nil {
 		handler = standard.NewDefaultHandler(nil)
 	}
 
-	*t.GetDescriptor() = *src.GetDescriptor().Copy()
+	srccd := src.GetDescriptor()
+	cur := *t.GetDescriptor()
+	*t.GetDescriptor() = *prep
 	log.Info("  transferring resources")
 	for i, r := range src.GetResources() {
 		var m ocm.AccessMethod
@@ -144,9 +197,16 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 				}
 			}
 			if ok {
+				var old compdesc.Resource
+
 				hint := ocmcpi.ArtifactNameHint(a, src)
-				printArtifactInfo(printer, log, "resource", i, hint)
-				err = errors.Join(err, handler.HandleTransferResource(r, m, hint, t))
+				old, err = cur.GetResourceByIdentity(r.Meta().GetIdentity(srccd.Resources))
+				if err != nil || !old.Digest.Equal(r.Meta().Digest) {
+					printArtifactInfo(printer, log, "resource", i, hint, "...")
+					err = errors.Join(err, handler.HandleTransferResource(r, m, hint, t))
+				} else {
+					printArtifactInfo(printer, log, "resource", i, hint, "already present")
+				}
 			} else {
 				err = errors.Join(err, m.Close())
 			}
@@ -178,6 +238,7 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 				}
 			}
 			if ok {
+				// sources do not have digests fo far, so they have to copied, always.
 				hint := ocmcpi.ArtifactNameHint(a, src)
 				printArtifactInfo(printer, log, "source", i, hint)
 				err = errors.Join(err, handler.HandleTransferSource(r, m, hint, t))
@@ -195,17 +256,27 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 	return nil
 }
 
-func printArtifactInfo(printer common.Printer, log logging.Logger, kind string, index int, hint string) {
+func printArtifactInfo(printer common.Printer, log logging.Logger, kind string, index int, hint string, msgs ...interface{}) {
+	msg := "copying"
+	cmsg := "..."
+	if len(msgs) > 0 {
+		if m, ok := msgs[0].(string); ok {
+			msg = fmt.Sprintf(m, msgs[1:]...)
+		} else {
+			msg = fmt.Sprint(msgs...)
+		}
+		cmsg = " (" + msg + ")"
+	}
 	if printer != nil {
 		if hint != "" {
-			printer.Printf("...%s %d(%s)...\n", kind, index, hint)
+			printer.Printf("...%s %d(%s)%s\n", kind, index, hint, cmsg)
 		} else {
-			printer.Printf("...%s %d...\n", kind, index)
+			printer.Printf("...%s %d%s\n", kind, index, cmsg)
 		}
 	}
 	if hint != "" {
-		log.Debug(fmt.Sprintf("handle %s", kind), kind, fmt.Sprintf("%d(%s)", index, hint))
+		log.Debug(fmt.Sprintf("handle %s", kind), kind, fmt.Sprintf("%d(%s)", index, hint), "message", msg)
 	} else {
-		log.Debug(fmt.Sprintf("handle %s", kind), kind, fmt.Sprintf("%d", index))
+		log.Debug(fmt.Sprintf("handle %s", kind), kind, fmt.Sprintf("%d", index), "message", msg)
 	}
 }

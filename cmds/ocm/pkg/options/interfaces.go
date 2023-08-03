@@ -104,9 +104,8 @@ func (s OptionSet) Options(proto Options) interface{} {
 
 func FindOptions[T any](s OptionSetProvider) []T {
 	var found []T
-	var ifce T
 
-	t := reflect.TypeOf(&ifce).Elem()
+	t := generics.TypeOf[T]()
 	for _, o := range s.AsOptionSet() {
 		if reflect.TypeOf(o).AssignableTo(t) {
 			found = append(found, generics.As[T](o))

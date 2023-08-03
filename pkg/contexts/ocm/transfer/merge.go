@@ -9,12 +9,15 @@ import (
 	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 )
 
-func MergeDescriptor(s *compdesc.ComponentDescriptor, t *compdesc.ComponentDescriptor) error {
+func PrepareDescriptor(s *compdesc.ComponentDescriptor, t *compdesc.ComponentDescriptor) (*compdesc.ComponentDescriptor, error) {
 	n := s.Copy()
 
 	err := MergeSignatures(t.Signatures, &n.Signatures)
 	if err == nil {
-		err = MergeLabels(t.Provider.Labels, &n.Labels)
+		err = MergeLabels(t.Labels, &n.Labels)
+	}
+	if err == nil {
+		err = MergeLabels(t.Provider.Labels, &n.Provider.Labels)
 	}
 	if err == nil {
 		err = MergeElementLabels(t.Sources, n.Sources)
@@ -27,10 +30,9 @@ func MergeDescriptor(s *compdesc.ComponentDescriptor, t *compdesc.ComponentDescr
 	}
 
 	if err != nil {
-		return err
+		return nil, err
 	}
-	*t = *n
-	return nil
+	return n, nil
 }
 
 func MergeElementLabels(s compdesc.ElementAccessor, t compdesc.ElementAccessor) error {

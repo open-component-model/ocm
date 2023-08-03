@@ -32,7 +32,7 @@ func (m normalization) Normalize(cd *compdesc.ComponentDescriptor) ([]byte, erro
 }
 
 // CDExcludes describes the fields relevant for Signing
-// ATTENTION: if changed, please adapt the HashEqual Functions
+// ATTENTION: if changed, please adapt the Equivalent Functions
 // in the generic part, accordingly.
 var CDExcludes = signing.MapExcludes{
 	"meta": nil,

@@ -9,9 +9,9 @@ import (
 	"reflect"
 	"regexp"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/equivalent"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/equivalent"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -91,6 +91,17 @@ func (l Labels) GetDef(name string) *Label {
 	return nil
 }
 
+// SetDef ets a label definition.
+func (l *Labels) SetDef(name string, value *Label) {
+	for i, label := range *l {
+		if label.Name == name {
+			(*l)[i] = *value
+			return
+		}
+	}
+	*l = append(*l, *value)
+}
+
 // Get returns the label value with the given name as json string.
 func (l Labels) Get(name string) ([]byte, bool) {
 	for _, label := range l {
@@ -99,27 +110,6 @@ func (l Labels) Get(name string) ([]byte, bool) {
 		}
 	}
 	return nil, false
-}
-
-// GetIndex returns the index of the label with the given name,
-// or -1 if not found.
-func (l Labels) GetIndex(name string) int {
-	for i, label := range l {
-		if label.Name == name {
-			return i
-		}
-	}
-	return -1
-}
-
-// GetDef returns the label object with the given name.
-func (l Labels) GetDef(name string) *Label {
-	for _, label := range l {
-		if label.Name == name {
-			return &label
-		}
-	}
-	return nil
 }
 
 // GetValue returns the label value with the given name as parsed object.
@@ -148,7 +138,7 @@ func (l *Labels) Set(name string, value interface{}, opts ...LabelOption) error 
 	return nil
 }
 
-// SetValue sets or modifies the value of a label, the label meta data
+// SetValue sets or modifies the value of a label, the label metadata
 // is not touched.
 func (l *Labels) SetValue(name string, value interface{}) error {
 	newLabel, err := NewLabel(name, value)
@@ -175,13 +165,17 @@ func (l *Labels) Remove(name string) bool {
 	return false
 }
 
+func (l *Labels) Clear() {
+	*l = nil
+}
+
 func (l Labels) Equivalent(o Labels) equivalent.EqualState {
 	state := equivalent.StateEquivalent()
 
 	for _, ol := range o {
 		ll := l.GetDef(ol.Name)
 		if ol.Signing {
-			if ll == nil || !reflect.DeepEqual(&ol, ll) {
+			if ll == nil || !reflect.DeepEqual(&ol, ll) || ol.Version != ll.Version {
 				state = state.NotLocalHashEqual()
 			}
 		} else {
@@ -189,7 +183,7 @@ func (l Labels) Equivalent(o Labels) equivalent.EqualState {
 				if ll.Signing {
 					state = state.NotLocalHashEqual()
 				}
-				if !reflect.DeepEqual(&ol, ll) {
+				if !reflect.DeepEqual(&ol, ll) || ol.Version != ll.Version {
 					state = state.NotEquivalent()
 				}
 			} else {

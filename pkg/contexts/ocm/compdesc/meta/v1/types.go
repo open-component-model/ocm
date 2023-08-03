@@ -8,10 +8,10 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/equivalent"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/equivalent"
 	"github.com/open-component-model/ocm/pkg/errors"
 )
 
@@ -184,11 +184,7 @@ func (o *Provider) Copy() *Provider {
 }
 
 func (o Provider) Equivalent(a Provider) equivalent.EqualState {
-	state := equivalent.StateEquivalent()
-
-	if o.Name != a.Name {
-		state.NotLocalHashEqual()
-	}
+	state := equivalent.StateLocalHashEqual(o.Name == a.Name)
 	return state.Apply(o.Labels.Equivalent(a.Labels))
 }
 
@@ -216,6 +212,12 @@ func NewTimestampP() *Timestamp {
 
 func NewTimestampFor(t time.Time) Timestamp {
 	return Timestamp{
+		_time: v1.NewTime(t.Round(time.Second)),
+	}
+}
+
+func NewTimestampPFor(t time.Time) *Timestamp {
+	return &Timestamp{
 		_time: v1.NewTime(t.Round(time.Second)),
 	}
 }

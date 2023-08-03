@@ -7,10 +7,29 @@ package transfer_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
-	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 	. "github.com/open-component-model/ocm/pkg/testutils"
+
+	"github.com/go-test/deep"
+
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/v2"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/transfer"
 )
+
+func TouchLabels(s, d, e *metav1.Labels) {
+	// overwrite old one
+	s.SetValue("volatile", "modified")
+
+	// keep local one
+	d.Set("local-volatile", "local")
+
+	// add new one
+	s.Set("new-volatile", "new")
+
+	*e = s.Copy()
+	e.SetDef("local-volatile", d.GetDef("local-volatile"))
+}
 
 var _ = Describe("basic merge operations for transport", func() {
 	Context("merging labels", func() {
@@ -91,6 +110,205 @@ var _ = Describe("basic merge operations for transport", func() {
 
 	////////////////////////////////////////////////////////////////////////////
 	Context("merging component descriptors", func() {
+		var src *compdesc.ComponentDescriptor
+		var dst *compdesc.ComponentDescriptor
 
+		BeforeEach(func() {
+			labels := metav1.Labels{}
+			labels.Set("volatile", "value1", metav1.WithVersion("v1"))
+			labels.Set("non-volatile", "value2", metav1.WithVersion("v1"), metav1.WithSigning())
+
+			src = &compdesc.ComponentDescriptor{
+				Metadata: compdesc.Metadata{
+					ConfiguredVersion: v2.SchemaVersion,
+				},
+				ComponentSpec: compdesc.ComponentSpec{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:    "acme.org/test",
+						Version: "v1.0.0",
+						Labels:  labels.Copy(),
+						Provider: metav1.Provider{
+							Name:   "acme.org",
+							Labels: labels.Copy(),
+						},
+						CreationTime: metav1.NewTimestampP(),
+					},
+					Sources: compdesc.Sources{
+						compdesc.Source{
+							SourceMeta: compdesc.SourceMeta{
+								ElementMeta: compdesc.ElementMeta{
+									Name:    "src1",
+									Version: "v1.0.0",
+									Labels:  labels.Copy(),
+								},
+								Type: "",
+							},
+							Access: nil,
+						},
+						compdesc.Source{
+							SourceMeta: compdesc.SourceMeta{
+								ElementMeta: compdesc.ElementMeta{
+									Name:    "src2",
+									Version: "v1.0.0",
+									Labels:  labels.Copy(),
+								},
+								Type: "",
+							},
+							Access: nil,
+						},
+					},
+					References: compdesc.References{},
+					Resources: compdesc.Resources{
+						compdesc.Resource{
+							ResourceMeta: compdesc.ResourceMeta{
+								ElementMeta: compdesc.ElementMeta{
+									Name:    "rsc1",
+									Version: "v1.0.0",
+									Labels:  labels.Copy(),
+								},
+								Type: "",
+							},
+						},
+						compdesc.Resource{
+							ResourceMeta: compdesc.ResourceMeta{
+								ElementMeta: compdesc.ElementMeta{
+									Name:    "rsc2",
+									Version: "v1.0.0",
+									Labels:  labels.Copy(),
+								},
+								Type: "",
+							},
+						},
+					},
+				},
+				Signatures: metav1.Signatures{
+					metav1.Signature{
+						Name: "acme.org",
+						Digest: metav1.DigestSpec{
+							HashAlgorithm:          "alg",
+							NormalisationAlgorithm: "norm",
+							Value:                  "digest",
+						},
+						Signature: metav1.SignatureSpec{
+							Algorithm: "alg",
+							Value:     "signature",
+							MediaType: "bla",
+							Issuer:    "acme.org",
+						},
+					},
+				},
+			}
+			dst = src.Copy()
+		})
+
+		It("merges equal", func() {
+			n := Must(transfer.PrepareDescriptor(src, dst))
+			diff := deep.Equal(n, dst)
+			Expect(diff).To(BeEmpty())
+		})
+
+		It("merges signatures", func() {
+			s := src.Copy()
+			d := dst.Copy()
+
+			// overwrite old one
+			s.Signatures[0] = metav1.Signature{
+				Name: "acme.org",
+				Digest: metav1.DigestSpec{
+					HashAlgorithm:          "alg",
+					NormalisationAlgorithm: "norm",
+					Value:                  "digest",
+				},
+				Signature: metav1.SignatureSpec{
+					Algorithm: "algmod",
+					Value:     "signaturemod",
+					MediaType: "bla",
+					Issuer:    "acme.org",
+				},
+			}
+
+			// keep local one
+			d.Signatures = append(d.Signatures,
+				metav1.Signature{
+					Name: "local",
+					Digest: metav1.DigestSpec{
+						HashAlgorithm:          "alglocal",
+						NormalisationAlgorithm: "normlocal",
+						Value:                  "digestlocal",
+					},
+					Signature: metav1.SignatureSpec{
+						Algorithm: "alglocal",
+						Value:     "signaturelocal",
+						MediaType: "bla",
+						Issuer:    "local",
+					},
+				},
+			)
+
+			// add new one
+			s.Signatures = append(s.Signatures,
+				metav1.Signature{
+					Name: "new",
+					Digest: metav1.DigestSpec{
+						HashAlgorithm:          "algnew",
+						NormalisationAlgorithm: "normnew",
+						Value:                  "digestnew",
+					},
+					Signature: metav1.SignatureSpec{
+						Algorithm: "algnew",
+						Value:     "signaturenew",
+						MediaType: "bla",
+						Issuer:    "new",
+					},
+				},
+			)
+
+			e := d.Copy()
+			e.Signatures[0] = s.Signatures[0]
+			e.Signatures = append(s.Signatures.Copy(), d.Signatures[1])
+
+			n := Must(transfer.PrepareDescriptor(s, d))
+			Expect(n).To(DeepEqual(e))
+		})
+
+		It("merges provider", func() {
+			s := src.Copy()
+			d := dst.Copy()
+			e := d.Copy()
+			TouchLabels(&s.Provider.Labels, &d.Provider.Labels, &e.Provider.Labels)
+
+			n := Must(transfer.PrepareDescriptor(s, d))
+			Expect(n).To(DeepEqual(e))
+		})
+
+		It("merges component labels", func() {
+			s := src.Copy()
+			d := dst.Copy()
+			e := d.Copy()
+			TouchLabels(&s.Labels, &d.Labels, &e.Labels)
+
+			n := Must(transfer.PrepareDescriptor(s, d))
+			Expect(n).To(DeepEqual(e))
+		})
+
+		It("merges resources", func() {
+			s := src.Copy()
+			d := dst.Copy()
+			e := d.Copy()
+			TouchLabels(&s.Resources[0].Labels, &d.Resources[0].Labels, &e.Resources[0].Labels)
+
+			n := Must(transfer.PrepareDescriptor(s, d))
+			Expect(n).To(DeepEqual(e))
+		})
+
+		It("merges sources", func() {
+			s := src.Copy()
+			d := dst.Copy()
+			e := d.Copy()
+			TouchLabels(&s.Sources[0].Labels, &d.Sources[0].Labels, &e.Sources[0].Labels)
+
+			n := Must(transfer.PrepareDescriptor(s, d))
+			Expect(n).To(DeepEqual(e))
+		})
 	})
 })

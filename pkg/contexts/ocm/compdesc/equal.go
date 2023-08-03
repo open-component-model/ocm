@@ -37,7 +37,6 @@ func (cd *ComponentDescriptor) Equal(obj interface{}) bool {
 }
 
 func (cd *ComponentDescriptor) Equivalent(o *ComponentDescriptor) equivalent.EqualState {
-
 	return equivalent.StateEquivalent().Apply(
 		cd.ObjectMeta.Equivalent(o.ObjectMeta),
 		equivalentElems(cd.Resources, o.Resources),
@@ -57,7 +56,6 @@ outer:
 			if reflect.DeepEqual(s, *o) {
 				continue outer
 			}
-
 		}
 		return equivalent.StateNotLocalHashEqual()
 	}

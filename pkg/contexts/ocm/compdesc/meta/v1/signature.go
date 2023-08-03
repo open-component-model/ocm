@@ -49,11 +49,9 @@ func (s Signatures) Copy() Signatures {
 }
 
 func (s Signatures) GetIndex(name string) int {
-	if s != nil {
-		for i, v := range s {
-			if v.Name == name {
-				return i
-			}
+	for i, v := range s {
+		if v.Name == name {
+			return i
 		}
 	}
 	return -1
@@ -106,6 +104,13 @@ func (d *DigestSpec) Copy() *DigestSpec {
 	}
 	r := *d
 	return &r
+}
+
+func (d *DigestSpec) Equal(o *DigestSpec) bool {
+	if d == nil || o == nil {
+		return false
+	}
+	return *d == *o
 }
 
 func (d *DigestSpec) Equivalent(o *DigestSpec) equivalent.EqualState {
