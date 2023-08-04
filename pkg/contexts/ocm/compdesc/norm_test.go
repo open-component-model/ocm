@@ -5,8 +5,10 @@
 package compdesc_test
 
 import (
+	v1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/normalizations"
 	_ "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/versions/ocm.software/v3alpha1"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -185,5 +187,60 @@ var _ = Describe("Normalization", func() {
 		Expect(err).To(Succeed())
 		// Expect(string(n)).To(Equal("[{\"component\":[{\"componentReferences\":[]},{\"name\":\"github.com/vasu1124/introspect\"},{\"provider\":[{\"name\":\"internal\"}]},{\"resources\":[[{\"digest\":[{\"hashAlgorithm\":\"SHA-256\"},{\"normalisationAlgorithm\":\"ociArtifactDigest/v1\"},{\"value\":\"6a1c7637a528ab5957ab60edf73b5298a0a03de02a96be0313ee89b22544840c\"}]},{\"labels\":[[{\"name\":\"label2\"},{\"signing\":true},{\"value\":\"bar\"}]]},{\"name\":\"introspect-image\"},{\"relation\":\"local\"},{\"type\":\"ociImage\"},{\"version\":\"1.0.0\"}],[{\"digest\":[{\"hashAlgorithm\":\"SHA-256\"},{\"normalisationAlgorithm\":\"genericBlobDigest/v1\"},{\"value\":\"d1187ac17793b2f5fa26175c21cabb6ce388871ae989e16ff9a38bd6b32507bf\"}]},{\"name\":\"introspect-blueprint\"},{\"relation\":\"local\"},{\"type\":\"landscaper.gardener.cloud/blueprint\"},{\"version\":\"1.0.0\"}],[{\"digest\":[{\"hashAlgorithm\":\"SHA-256\"},{\"normalisationAlgorithm\":\"ociArtifactDigest/v1\"},{\"value\":\"6229be2be7e328f74ba595d93b814b590b1aa262a1b85e49cc1492795a9e564c\"}]},{\"name\":\"introspect-helm\"},{\"relation\":\"external\"},{\"type\":\"helm\"},{\"version\":\"0.1.0\"}]]},{\"sources\":[[{\"name\":\"introspect\"},{\"type\":\"git\"},{\"version\":\"1.0.0\"}]]},{\"version\":\"1.0.0\"}]}]"))
 		Expect(string(n)).To(Equal(`{"component":{"componentReferences":[],"name":"github.com/vasu1124/introspect","provider":{"name":"internal"},"resources":[{"digest":{"hashAlgorithm":"SHA-256","normalisationAlgorithm":"ociArtifactDigest/v1","value":"6a1c7637a528ab5957ab60edf73b5298a0a03de02a96be0313ee89b22544840c"},"labels":[{"name":"label2","signing":true,"value":"bar"}],"name":"introspect-image","relation":"local","type":"ociImage","version":"1.0.0"},{"digest":{"hashAlgorithm":"SHA-256","normalisationAlgorithm":"genericBlobDigest/v1","value":"d1187ac17793b2f5fa26175c21cabb6ce388871ae989e16ff9a38bd6b32507bf"},"name":"introspect-blueprint","relation":"local","type":"landscaper.gardener.cloud/blueprint","version":"1.0.0"},{"digest":{"hashAlgorithm":"SHA-256","normalisationAlgorithm":"ociArtifactDigest/v1","value":"6229be2be7e328f74ba595d93b814b590b1aa262a1b85e49cc1492795a9e564c"},"name":"introspect-helm","relation":"external","type":"helm","version":"0.1.0"}],"sources":[{"name":"introspect","type":"git","version":"1.0.0"}],"version":"1.0.0"}}`))
+	})
+
+	It("hashes v2 with complex provider", func() {
+		cd := cd1.Copy()
+		cd.References = nil
+		cd.Resources = nil
+		cd.Sources = nil
+
+		cd.Labels.Set("volatile", "comp-value1")
+		cd.Labels.Set("non-volatile", "comp-value2", v1.WithSigning())
+
+		cd.Provider.Labels.Set("volatile", "prov-value1")
+		cd.Provider.Labels.Set("non-volatile", "prov-value2", v1.WithSigning())
+
+		n, err := compdesc.Normalize(cd, compdesc.JsonNormalisationV2)
+		Expect(err).To(Succeed())
+
+		Expect(string(n)).To(Equal(`{"component":{"componentReferences":[],"labels":[{"name":"non-volatile","signing":true,"value":"comp-value2"}],"name":"github.com/vasu1124/introspect","provider":{"labels":[{"name":"non-volatile","signing":true,"value":"prov-value2"}],"name":"internal"},"resources":[],"sources":[],"version":"1.0.0"}}`))
+	})
+
+	It("hashes v1 with complex provider for CD/v2", func() {
+		cd := cd1.Copy()
+		cd.References = nil
+		cd.Resources = nil
+		cd.Sources = nil
+
+		cd.Labels.Set("volatile", "comp-value1")
+		cd.Labels.Set("non-volatile", "comp-value2", v1.WithSigning())
+
+		cd.Provider.Labels.Set("volatile", "prov-value1")
+		cd.Provider.Labels.Set("non-volatile", "prov-value2", v1.WithSigning())
+
+		n, err := compdesc.Normalize(cd, compdesc.JsonNormalisationV1)
+		Expect(err).To(Succeed())
+
+		Expect(string(n)).To(StringEqualWithContext(`[{"component":[{"componentReferences":[]},{"labels":[[{"name":"non-volatile"},{"signing":true},{"value":"comp-value2"}]]},{"name":"github.com/vasu1124/introspect"},{"provider":[{"labels":[[{"name":"non-volatile"},{"signing":true},{"value":"prov-value2"}]]},{"name":"internal"}]},{"resources":[]},{"version":"1.0.0"}]},{"meta":[{"schemaVersion":"v2"}]}]`))
+	})
+
+	It("hashes v1 with complex provider for CD/v3", func() {
+		cd := cd1.Copy()
+		cd.Metadata.ConfiguredVersion = v3alpha1.GroupVersion
+		cd.References = nil
+		cd.Resources = nil
+		cd.Sources = nil
+
+		cd.Labels.Set("volatile", "comp-value1")
+		cd.Labels.Set("non-volatile", "comp-value2", v1.WithSigning())
+
+		cd.Provider.Labels.Set("volatile", "prov-value1")
+		cd.Provider.Labels.Set("non-volatile", "prov-value2", v1.WithSigning())
+
+		n, err := compdesc.Normalize(cd, compdesc.JsonNormalisationV1)
+		Expect(err).To(Succeed())
+
+		Expect(string(n)).To(StringEqualWithContext(`[{"apiVersion":"ocm.software/v3alpha1"},{"kind":"ComponentVersion"},{"metadata":[{"labels":[[{"name":"non-volatile"},{"signing":true},{"value":"comp-value2"}]]},{"name":"github.com/vasu1124/introspect"},{"provider":[{"labels":[[{"name":"volatile"},{"value":"prov-value1"}],[{"name":"non-volatile"},{"signing":true},{"value":"prov-value2"}]]},{"name":"internal"}]},{"version":"1.0.0"}]},{"spec":[]}]`))
 	})
 })
