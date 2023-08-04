@@ -6,6 +6,12 @@
 ocm bootstrap configuration [<options>] {<component-reference>} {<resource id field>}
 ```
 
+##### Aliases
+
+```
+configuration, config, cfg
+```
+
 ### Options
 
 ```

@@ -6,6 +6,12 @@
 ocm hash componentversions [<options>] {<component-reference>}
 ```
 
+##### Aliases
+
+```
+componentversions, componentversion, cv, components, component, comps, comp, c
+```
+
 ### Options
 
 ```
@@ -125,7 +131,7 @@ The following modes are supported:
 
 ```
 $ ocm hash componentversion ghcr.io/mandelsoft/kubelink
-$ ocm hash componentversion --repo OCIRegistry:ghcr.io mandelsoft/kubelink
+$ ocm hash componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 ```
 
 ### SEE ALSO

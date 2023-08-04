@@ -6,6 +6,12 @@
 ocm download componentversions [<options>] {<components>} 
 ```
 
+##### Aliases
+
+```
+componentversions, componentversion, cv, components, component, comps, comp, c
+```
+
 ### Options
 
 ```

@@ -15,7 +15,7 @@ permissions:
 jobs:
   test:
     name: Run tests
-    runs-on: ubuntu-latest
+    runs-on: large_runner
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -41,7 +41,7 @@ jobs:
           PATH=$PATH:$(go env GOPATH)/bin make test
   lint:
     name: Lint
-    runs-on: ubuntu-latest
+    runs-on: large_runner
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -72,7 +72,7 @@ jobs:
           PATH=$PATH:$(go env GOPATH)/bin make check
   generate:
     name: DeepCopy verification
-    runs-on: ubuntu-latest
+    runs-on: large_runner
     steps:
       - name: Checkout
         uses: actions/checkout@v3

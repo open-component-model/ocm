@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package info
+package describe
 
 import (
 	"github.com/spf13/cobra"
@@ -19,7 +19,7 @@ import (
 
 var (
 	Names = names.Cache
-	Verb  = verbs.Info
+	Verb  = verbs.Describe
 )
 
 type Command struct {
@@ -29,7 +29,7 @@ type Command struct {
 
 // NewCommand creates a new artifact command.
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
-	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx)}, names...)
+	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx)}, utils.Names(Names, names...)...)
 }
 
 func (o *Command) ForName(name string) *cobra.Command {

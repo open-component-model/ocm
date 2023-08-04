@@ -6,6 +6,12 @@
 ocm describe package [<options>] {<component-reference>} {<resource id field>}
 ```
 
+##### Aliases
+
+```
+package, pkg, componentversion, cv, component, comp, c
+```
+
 ### Options
 
 ```

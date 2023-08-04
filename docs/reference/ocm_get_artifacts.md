@@ -6,6 +6,12 @@
 ocm get artifacts [<options>] {<artifact-reference>}
 ```
 
+##### Aliases
+
+```
+artifacts, artifact, art, a
+```
+
 ### Options
 
 ```
@@ -75,7 +81,7 @@ The following modes are supported:
 
 ```
 $ ocm get artifact ghcr.io/mandelsoft/kubelink
-$ ocm get artifact --repo OCIRegistry:ghcr.io mandelsoft/kubelink
+$ ocm get artifact --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 ```
 
 ### SEE ALSO

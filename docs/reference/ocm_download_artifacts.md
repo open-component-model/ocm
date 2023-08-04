@@ -6,6 +6,12 @@
 ocm download artifacts [<options>]  {<artifact>} 
 ```
 
+##### Aliases
+
+```
+artifacts, artifact, art, a
+```
+
 ### Options
 
 ```

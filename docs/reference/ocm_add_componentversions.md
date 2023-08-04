@@ -6,6 +6,12 @@
 ocm add componentversions [<options>] [--version <version>] [<ctf archive>] {<components.yaml>}
 ```
 
+##### Aliases
+
+```
+componentversions, componentversion, cv, components, component, comps, comp, c
+```
+
 ### Options
 
 ```

@@ -6,6 +6,12 @@
 ocm get componentversions [<options>] {<component-reference>}
 ```
 
+##### Aliases
+
+```
+componentversions, componentversion, cv, components, component, comps, comp, c
+```
+
 ### Options
 
 ```
@@ -115,7 +121,7 @@ The following modes are supported:
 
 ```
 $ ocm get componentversion ghcr.io/mandelsoft/kubelink
-$ ocm get componentversion --repo OCIRegistry:ghcr.io mandelsoft/kubelink
+$ ocm get componentversion --repo OCIRegistry::ghcr.io mandelsoft/kubelink
 ```
 
 ### SEE ALSO

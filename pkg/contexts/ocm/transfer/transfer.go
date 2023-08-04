@@ -66,11 +66,15 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 			defer accessio.Close(t)
 		}
 	} else {
-		var ok bool
-		ok, err = handler.OverwriteVersion(src, t)
-		if !ok {
+		if d.Equal(t.GetDescriptor()) {
 			printer.Printf("  version %q already present -> skip transport\n", nv)
-			return nil
+		} else {
+			var ok bool
+			ok, err = handler.OverwriteVersion(src, t)
+			if !ok {
+				printer.Printf("  version %q already present, but differs\n", nv)
+				return errors.ErrAlreadyExists(ocm.KIND_COMPONENTVERSION, nv.String())
+			}
 		}
 	}
 	if err != nil {
@@ -112,7 +116,7 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 	return list.Add(comp.AddVersion(t)).Result()
 }
 
-func CopyVersion(printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler transferhandler.TransferHandler) error {
+func CopyVersion(printer common.Printer, log logging.Logger, hist common.History, src ocm.ComponentVersionAccess, t ocm.ComponentVersionAccess, handler transferhandler.TransferHandler) (rerr error) {
 	if handler == nil {
 		handler = standard.NewDefaultHandler(nil)
 	}
@@ -121,25 +125,27 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 	log.Info("  transferring resources")
 	for i, r := range src.GetResources() {
 		var m ocm.AccessMethod
+
 		a, err := r.Access()
 		if err == nil {
 			m, err = r.AccessMethod()
-			if err == nil {
-				defer m.Close()
-				ok := a.IsLocal(src.GetContext())
-				if !ok {
-					if !none.IsNone(a.GetKind()) {
-						ok, err = handler.TransferResource(src, a, r)
-						if !ok {
-							log.Info("transport omitted", "resource", r.Meta().Name, "index", i, "access", a.GetType())
-						}
+		}
+		if err == nil {
+			ok := a.IsLocal(src.GetContext())
+			if !ok {
+				if !none.IsNone(a.GetKind()) {
+					ok, err = handler.TransferResource(src, a, r)
+					if err == nil && !ok {
+						log.Info("transport omitted", "resource", r.Meta().Name, "index", i, "access", a.GetType())
 					}
 				}
-				if ok {
-					hint := ocmcpi.ArtifactNameHint(a, src)
-					printArtifactInfo(printer, log, "resource", i, hint)
-					err = handler.HandleTransferResource(r, m, hint, t)
-				}
+			}
+			if ok {
+				hint := ocmcpi.ArtifactNameHint(a, src)
+				printArtifactInfo(printer, log, "resource", i, hint)
+				err = errors.Join(err, handler.HandleTransferResource(r, m, hint, t))
+			} else {
+				err = errors.Join(err, m.Close())
 			}
 		}
 		if err != nil {
@@ -153,25 +159,27 @@ func CopyVersion(printer common.Printer, log logging.Logger, hist common.History
 	log.Info("  transferring sources")
 	for i, r := range src.GetSources() {
 		var m ocm.AccessMethod
+
 		a, err := r.Access()
 		if err == nil {
 			m, err = r.AccessMethod()
-			if err == nil {
-				defer m.Close()
-				ok := a.IsLocal(src.GetContext())
-				if !ok {
-					if !none.IsNone(a.GetKind()) {
-						ok, err = handler.TransferSource(src, a, r)
-						if !ok {
-							log.Info("transport omitted", "source", r.Meta().Name, "index", i, "access", a.GetType())
-						}
+		}
+		if err == nil {
+			ok := a.IsLocal(src.GetContext())
+			if !ok {
+				if !none.IsNone(a.GetKind()) {
+					ok, err = handler.TransferSource(src, a, r)
+					if err == nil && !ok {
+						log.Info("transport omitted", "source", r.Meta().Name, "index", i, "access", a.GetType())
 					}
 				}
-				if ok {
-					hint := ocmcpi.ArtifactNameHint(a, src)
-					printArtifactInfo(printer, log, "source", i, hint)
-					err = handler.HandleTransferSource(r, m, hint, t)
-				}
+			}
+			if ok {
+				hint := ocmcpi.ArtifactNameHint(a, src)
+				printArtifactInfo(printer, log, "source", i, hint)
+				err = errors.Join(err, handler.HandleTransferSource(r, m, hint, t))
+			} else {
+				err = errors.Join(err, m.Close())
 			}
 		}
 		if err != nil {

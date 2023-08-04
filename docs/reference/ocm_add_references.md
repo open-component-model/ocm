@@ -6,6 +6,12 @@
 ocm add references [<options>] [<target>] {<referencefile> | <var>=<value>}
 ```
 
+##### Aliases
+
+```
+references, reference, refs
+```
+
 ### Options
 
 ```

@@ -6,6 +6,12 @@
 ocm transfer commontransportarchive [<options>] <ctf> <target>
 ```
 
+##### Aliases
+
+```
+commontransportarchive, ctf
+```
+
 ### Options
 
 ```
