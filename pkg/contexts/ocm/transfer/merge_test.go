@@ -7,6 +7,9 @@ package transfer_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/contexts/oci/artdesc"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/localblob"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/accessmethods/ociartifact"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/go-test/deep"
@@ -157,7 +160,16 @@ var _ = Describe("basic merge operations for transport", func() {
 							Access: nil,
 						},
 					},
-					References: compdesc.References{},
+					References: compdesc.References{
+						compdesc.ComponentReference{
+							ElementMeta: compdesc.ElementMeta{
+								Name:    "ref1",
+								Version: "v1.0.0",
+								Labels:  labels.Copy(),
+							},
+							ComponentName: "acme.org/ref",
+						},
+					},
 					Resources: compdesc.Resources{
 						compdesc.Resource{
 							ResourceMeta: compdesc.ResourceMeta{
@@ -167,7 +179,13 @@ var _ = Describe("basic merge operations for transport", func() {
 									Labels:  labels.Copy(),
 								},
 								Type: "",
+								Digest: &metav1.DigestSpec{
+									HashAlgorithm:          "alg",
+									NormalisationAlgorithm: "norm",
+									Value:                  "digest1",
+								},
 							},
+							Access: ociartifact.New("ghcr.io/acme/test1"),
 						},
 						compdesc.Resource{
 							ResourceMeta: compdesc.ResourceMeta{
@@ -177,7 +195,13 @@ var _ = Describe("basic merge operations for transport", func() {
 									Labels:  labels.Copy(),
 								},
 								Type: "",
+								Digest: &metav1.DigestSpec{
+									HashAlgorithm:          "alg",
+									NormalisationAlgorithm: "norm",
+									Value:                  "digest2",
+								},
 							},
+							Access: ociartifact.New("ghcr.io/acme/test2"),
 						},
 					},
 				},
@@ -294,6 +318,7 @@ var _ = Describe("basic merge operations for transport", func() {
 		It("merges resources", func() {
 			s := src.Copy()
 			d := dst.Copy()
+			d.Resources[1].Access = localblob.New("local1", "", artdesc.MediaTypeImageManifest, nil)
 			e := d.Copy()
 			TouchLabels(&s.Resources[0].Labels, &d.Resources[0].Labels, &e.Resources[0].Labels)
 
@@ -306,6 +331,16 @@ var _ = Describe("basic merge operations for transport", func() {
 			d := dst.Copy()
 			e := d.Copy()
 			TouchLabels(&s.Sources[0].Labels, &d.Sources[0].Labels, &e.Sources[0].Labels)
+
+			n := Must(transfer.PrepareDescriptor(s, d))
+			Expect(n).To(DeepEqual(e))
+		})
+
+		It("merges references", func() {
+			s := src.Copy()
+			d := dst.Copy()
+			e := d.Copy()
+			TouchLabels(&s.References[0].Labels, &d.References[0].Labels, &e.References[0].Labels)
 
 			n := Must(transfer.PrepareDescriptor(s, d))
 			Expect(n).To(DeepEqual(e))

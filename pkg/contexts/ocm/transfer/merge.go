@@ -20,13 +20,13 @@ func PrepareDescriptor(s *compdesc.ComponentDescriptor, t *compdesc.ComponentDes
 		err = MergeLabels(t.Provider.Labels, &n.Provider.Labels)
 	}
 	if err == nil {
-		err = MergeElementLabels(t.Sources, n.Sources)
+		err = MergeElements(t.Sources, n.Sources)
 	}
 	if err == nil {
-		err = MergeElementLabels(t.Resources, n.Resources)
+		err = MergeElements(t.Resources, n.Resources)
 	}
 	if err == nil {
-		err = MergeElementLabels(t.References, n.Resources)
+		err = MergeElements(t.References, n.References)
 	}
 
 	if err != nil {
@@ -35,7 +35,7 @@ func PrepareDescriptor(s *compdesc.ComponentDescriptor, t *compdesc.ComponentDes
 	return n, nil
 }
 
-func MergeElementLabels(s compdesc.ElementAccessor, t compdesc.ElementAccessor) error {
+func MergeElements(s compdesc.ElementAccessor, t compdesc.ElementAccessor) error {
 	for i := 0; i < s.Len(); i++ {
 		es := s.Get(i)
 		id := es.GetMeta().GetIdentity(s)
@@ -43,6 +43,15 @@ func MergeElementLabels(s compdesc.ElementAccessor, t compdesc.ElementAccessor) 
 		if et != nil {
 			if err := MergeLabels(es.GetMeta().Labels, &et.GetMeta().Labels); err != nil {
 				return err
+			}
+
+			// keep access for same digest
+			if aes, ok := es.(compdesc.ElementArtifactAccessor); ok {
+				if des, ok := es.(compdesc.ElementDigestAccessor); ok {
+					if des.GetDigest().Equal(et.(compdesc.ElementDigestAccessor).GetDigest()) {
+						et.(compdesc.ElementArtifactAccessor).SetAccess(aes.GetAccess())
+					}
+				}
 			}
 		}
 	}

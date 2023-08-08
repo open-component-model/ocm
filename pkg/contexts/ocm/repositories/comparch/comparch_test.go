@@ -9,6 +9,9 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/digester/digesters/blob"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
+	"github.com/open-component-model/ocm/pkg/signing/hasher/sha256"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
 	"github.com/mandelsoft/filepath/pkg/filepath"
@@ -16,9 +19,14 @@ import (
 	"github.com/mandelsoft/vfs/pkg/osfs"
 	"github.com/mandelsoft/vfs/pkg/vfs"
 
+	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/comparch"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	"github.com/open-component-model/ocm/pkg/mime"
 	"github.com/open-component-model/ocm/pkg/runtime"
 	"github.com/open-component-model/ocm/pkg/utils/tarutils"
 )
@@ -79,6 +87,27 @@ var _ = Describe("Repository", func() {
 		bufferA := Must(vfs.ReadFile(mfs, "testfile"))
 		bufferB := Must(vfs.ReadFile(osfs.New(), filepath.Join(DIR_COMPARCH, "blobs", "root", "testfile")))
 		Expect(bufferA).To(Equal(bufferB))
+	})
+
+	It("creates component archive", func() {
+		octx := ocm.DefaultContext()
+		memfs := memoryfs.New()
+
+		arch := Must(comparch.Create(octx, accessobj.ACC_WRITABLE, "test", 0o0700, accessio.PathFileSystem(memfs)))
+		defer Close(arch, "comparch)")
+
+		arch.SetName("acme.org/test")
+		arch.SetVersion("v1.0.1")
+
+		MustBeSuccessful(arch.SetResourceBlob(compdesc.NewResourceMeta("blob", resourcetypes.PLAIN_TEXT, metav1.LocalRelation),
+			accessio.BlobAccessForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
+
+		res := Must(arch.GetResourcesByName("blob"))
+		Expect(res[0].Meta().Digest).To(DeepEqual(&metav1.DigestSpec{
+			HashAlgorithm:          sha256.Algorithm,
+			NormalisationAlgorithm: blob.GenericBlobDigestV1,
+			Value:                  D_TESTDATA,
+		}))
 	})
 
 	It("closing a resource before actually reading it", func() {

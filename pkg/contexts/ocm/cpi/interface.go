@@ -166,6 +166,10 @@ func SetDefaultDigester(d BlobDigester) {
 	internal.SetDefaultDigester(d)
 }
 
+func ToGenericAccessSpec(spec AccessSpec) (*GenericAccessSpec, error) {
+	return internal.ToGenericAccessSpec(spec)
+}
+
 func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {
 	return internal.ToGenericRepositorySpec(spec)
 }

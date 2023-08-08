@@ -161,7 +161,7 @@ var _ = Describe("component repository mapping", func() {
 			return TESTBASE
 		}
 		ctx := ocm.WithBlobHandlers(ocm.DefaultBlobHandlers().Copy().Register(handler.NewBlobHandler(base))).New()
-		blob := accessio.BlobAccessForString(mime.MIME_OCTET, ocmtesthelper.B_TESTDATA)
+		blob := accessio.BlobAccessForString(mime.MIME_OCTET, ocmtesthelper.S_TESTDATA)
 
 		// create repository
 		repo := finalizer.ClosingWith(&finalize, Must(ctx.RepositoryForSpec(spec)))
@@ -273,7 +273,7 @@ var _ = Describe("component repository mapping", func() {
 		vers := finalizer.ClosingWith(nested, Must(comp.NewVersion("v1")))
 
 		m1 := compdesc.NewResourceMeta("rsc1", resourcetypes.PLAIN_TEXT, metav1.LocalRelation)
-		blob := accessio.BlobAccessForString(mime.MIME_TEXT, ocmtesthelper.B_TESTDATA)
+		blob := accessio.BlobAccessForString(mime.MIME_TEXT, ocmtesthelper.S_TESTDATA)
 
 		MustBeSuccessful(vers.SetResourceBlob(m1, blob, "", nil))
 		MustBeSuccessful(comp.AddVersion(vers))

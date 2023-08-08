@@ -9,6 +9,7 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
+	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const KIND_TRANSFEROPTION = "transfer option"
@@ -98,10 +99,8 @@ type TransferHandler interface {
 	TransferSource(src ocm.ComponentVersionAccess, a ocm.AccessSpec, r ocm.SourceAccess) (bool, error)
 
 	// HandleTransferResource technically transfers a resource.
-	// The access method must be closed by this method.
 	HandleTransferResource(r ocm.ResourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error
 	// HandleTransferSource technically transfers a source.
-	// The access method must be closed by this method.
 	HandleTransferSource(r ocm.SourceAccess, m ocm.AccessMethod, hint string, t ocm.ComponentVersionAccess) error
 }
 
@@ -122,6 +121,9 @@ func BoolP(b bool) *bool {
 	return &b
 }
 
-func AsBool(b *bool) bool {
+func AsBool(b *bool, def ...bool) bool {
+	if b == nil && len(def) > 0 {
+		return utils.Optional(def...)
+	}
 	return b != nil && *b
 }

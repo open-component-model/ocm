@@ -134,7 +134,7 @@ func (o *Options) SetUpdate(update bool) {
 }
 
 func (o *Options) IsUpdate() bool {
-	return transferhandler.AsBool(o.update)
+	return transferhandler.AsBool(o.update, true)
 }
 
 func (o *Options) SetRecursive(recursive bool) {

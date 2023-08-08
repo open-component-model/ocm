@@ -11,6 +11,8 @@ import (
 
 	. "github.com/open-component-model/ocm/pkg/finalizer"
 
+	"github.com/modern-go/reflect2"
+
 	"github.com/open-component-model/ocm/pkg/contexts/config"
 	cfgcpi "github.com/open-component-model/ocm/pkg/contexts/config/cpi"
 	"github.com/open-component-model/ocm/pkg/contexts/credentials"
@@ -248,7 +250,7 @@ func (c *_context) AccessSpecForConfig(data []byte, unmarshaler runtime.Unmarsha
 // AccessSpecForSpec takes an anonymous access specification and tries to map
 // it to an effective implementation.
 func (c *_context) AccessSpecForSpec(spec compdesc.AccessSpec) (AccessSpec, error) {
-	if spec == nil {
+	if reflect2.IsNil(spec) {
 		return nil, nil
 	}
 	if n, ok := spec.(AccessSpec); ok {

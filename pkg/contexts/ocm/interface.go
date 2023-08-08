@@ -113,6 +113,14 @@ func NewGenericAccessSpec(spec string) (AccessSpec, error) {
 	return internal.NewGenericAccessSpec([]byte(spec))
 }
 
+func ToGenericAccessSpec(spec AccessSpec) (*GenericAccessSpec, error) {
+	return internal.ToGenericAccessSpec(spec)
+}
+
+func ToGenericRepositorySpec(spec RepositorySpec) (*GenericRepositorySpec, error) {
+	return internal.ToGenericRepositorySpec(spec)
+}
+
 func IsNoneAccess(a compdesc.AccessSpec) bool {
 	return compdesc.IsNoneAccess(a)
 }

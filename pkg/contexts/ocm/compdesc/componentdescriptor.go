@@ -326,12 +326,18 @@ type ElementAccessor interface {
 type ElementArtifactAccessor interface {
 	ElementMetaAccessor
 	GetAccess() AccessSpec
+	SetAccess(a AccessSpec)
+}
+
+type ElementDigestAccessor interface {
+	GetDigest() *metav1.DigestSpec
+	SetDigest(*metav1.DigestSpec)
 }
 
 // ArtifactAccessor provides generic access to list of artifacts.
 // There are resources or sources.
 type ArtifactAccessor interface {
-	Len() int
+	ElementAccessor
 	GetArtifact(i int) ElementArtifactAccessor
 }
 
@@ -399,6 +405,14 @@ func (s *Source) GetMeta() *ElementMeta {
 	return &s.ElementMeta
 }
 
+func (s *Source) GetAccess() AccessSpec {
+	return s.Access
+}
+
+func (r *Source) SetAccess(a AccessSpec) {
+	r.Access = a
+}
+
 func (r *Source) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
 	if o, ok := e.(*Source); !ok {
 		return r.Labels.Equivalent(nil)
@@ -408,10 +422,6 @@ func (r *Source) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
 			r.ElementMeta.Equivalent(&o.ElementMeta),
 		)
 	}
-}
-
-func (s *Source) GetAccess() AccessSpec {
-	return s.Access
 }
 
 func (s *Source) Copy() *Source {
@@ -544,6 +554,22 @@ func (r *Resource) GetMeta() *ElementMeta {
 	return &r.ElementMeta
 }
 
+func (r *Resource) GetAccess() AccessSpec {
+	return r.Access
+}
+
+func (r *Resource) SetAccess(a AccessSpec) {
+	r.Access = a
+}
+
+func (r *Resource) GetDigest() *metav1.DigestSpec {
+	return r.Digest
+}
+
+func (r *Resource) SetDigest(d *metav1.DigestSpec) {
+	r.Digest = d
+}
+
 func (r *Resource) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
 	if o, ok := e.(*Resource); !ok {
 		return r.Labels.Equivalent(nil)
@@ -555,10 +581,6 @@ func (r *Resource) Equivalent(e ElementMetaAccessor) equivalent.EqualState {
 		}
 		return state.Apply(r.ElementMeta.Equivalent(&o.ElementMeta))
 	}
-}
-
-func (r *Resource) GetAccess() AccessSpec {
-	return r.Access
 }
 
 func (r *Resource) Copy() *Resource {
@@ -588,6 +610,13 @@ type ResourceMeta struct {
 	// Digest is the optional digest of the referenced resource.
 	// +optional
 	Digest *metav1.DigestSpec `json:"digest,omitempty"`
+}
+
+// Fresh returns a digest-free copy.
+func (o *ResourceMeta) Fresh() *ResourceMeta {
+	n := o.Copy()
+	n.Digest = nil
+	return n
 }
 
 // GetType returns the type of the object.
@@ -683,8 +712,23 @@ func (r ComponentReference) String() string {
 	return fmt.Sprintf("%s[%s:%s]", r.Name, r.ComponentName, r.Version)
 }
 
+// Fresh returns a digest-free copy.
+func (o *ComponentReference) Fresh() *ComponentReference {
+	n := o.Copy()
+	n.Digest = nil
+	return n
+}
+
 func (r *ComponentReference) GetMeta() *ElementMeta {
 	return &r.ElementMeta
+}
+
+func (r *ComponentReference) GetDigest() *metav1.DigestSpec {
+	return r.Digest
+}
+
+func (r *ComponentReference) SetDigest(d *metav1.DigestSpec) {
+	r.Digest = d
 }
 
 func (r *ComponentReference) Equivalent(e ElementMetaAccessor) equivalent.EqualState {

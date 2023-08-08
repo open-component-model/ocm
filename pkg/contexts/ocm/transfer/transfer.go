@@ -71,16 +71,15 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 				printer.Printf("  version %q already present -> skip transport\n", nv)
 				return nil
 			}
-			if ok, err := handler.UpdateVersion(src, t); !ok || err != nil {
-				if err != nil {
-					return err
-				}
-				if !ok {
-					printer.Printf("  version %q requires update of volatile data, but skipped\n", nv)
-					return nil
-				}
-				printer.Printf("  updating volatile properties of %q\n", nv)
+			ok, err := handler.UpdateVersion(src, t)
+			if err != nil {
+				return err
 			}
+			if !ok {
+				printer.Printf("  version %q requires update of volatile data, but skipped\n", nv)
+				return nil
+			}
+			printer.Printf("  updating volatile properties of %q\n", nv)
 			doMerge = true
 			doCopy = false
 		} else {
@@ -158,6 +157,8 @@ func transferVersion(printer common.Printer, log logging.Logger, state WalkingSt
 		if err != nil {
 			return err
 		}
+	} else {
+		*t.GetDescriptor() = *n
 	}
 
 	printer.Printf("...adding component version...\n")
@@ -202,14 +203,20 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 				hint := ocmcpi.ArtifactNameHint(a, src)
 				old, err = cur.GetResourceByIdentity(r.Meta().GetIdentity(srccd.Resources))
 				if err != nil || !old.Digest.Equal(r.Meta().Digest) {
-					printArtifactInfo(printer, log, "resource", i, hint, "...")
-					err = errors.Join(err, handler.HandleTransferResource(r, m, hint, t))
+					var msgs []interface{}
+					if !errors.IsErrNotFound(err) {
+						if err != nil {
+							return err
+						}
+						msgs = []interface{}{"overwrite"}
+					}
+					notifyArtifactInfo(printer, log, "resource", i, hint, msgs...)
+					err = handler.HandleTransferResource(r, m, hint, t)
 				} else {
-					printArtifactInfo(printer, log, "resource", i, hint, "already present")
+					notifyArtifactInfo(printer, log, "resource", i, hint, "already present")
 				}
-			} else {
-				err = errors.Join(err, m.Close())
 			}
+			err = errors.Join(err, m.Close())
 		}
 		if err != nil {
 			if !errors.IsErrUnknownKind(err, errors.KIND_ACCESSMETHOD) {
@@ -240,11 +247,10 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 			if ok {
 				// sources do not have digests fo far, so they have to copied, always.
 				hint := ocmcpi.ArtifactNameHint(a, src)
-				printArtifactInfo(printer, log, "source", i, hint)
+				notifyArtifactInfo(printer, log, "source", i, hint)
 				err = errors.Join(err, handler.HandleTransferSource(r, m, hint, t))
-			} else {
-				err = errors.Join(err, m.Close())
 			}
+			err = errors.Join(err, m.Close())
 		}
 		if err != nil {
 			if !errors.IsErrUnknownKind(err, errors.KIND_ACCESSMETHOD) {
@@ -256,7 +262,7 @@ func copyVersion(printer common.Printer, log logging.Logger, hist common.History
 	return nil
 }
 
-func printArtifactInfo(printer common.Printer, log logging.Logger, kind string, index int, hint string, msgs ...interface{}) {
+func notifyArtifactInfo(printer common.Printer, log logging.Logger, kind string, index int, hint string, msgs ...interface{}) {
 	msg := "copying"
 	cmsg := "..."
 	if len(msgs) > 0 {
