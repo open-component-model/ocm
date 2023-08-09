@@ -9,7 +9,6 @@ import (
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
 	"github.com/open-component-model/ocm/pkg/errors"
-	"github.com/open-component-model/ocm/pkg/utils"
 )
 
 const KIND_TRANSFEROPTION = "transfer option"
@@ -115,15 +114,4 @@ func ApplyOptions(set TransferOptions, opts ...TransferOption) error {
 func From(ctx config.ContextProvider, opts TransferOptions) error {
 	_, err := ctx.ConfigContext().ApplyTo(-1, opts)
 	return err
-}
-
-func BoolP(b bool) *bool {
-	return &b
-}
-
-func AsBool(b *bool, def ...bool) bool {
-	if b == nil && len(def) > 0 {
-		return utils.Optional(def...)
-	}
-	return b != nil && *b
 }

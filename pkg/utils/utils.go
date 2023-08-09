@@ -342,3 +342,15 @@ func Must[T any](o T, err error) T {
 
 func IgnoreError(_ error) {
 }
+
+func BoolP[T ~bool](b T) *bool {
+	v := bool(b)
+	return &v
+}
+
+func AsBool(b *bool, def ...bool) bool {
+	if b == nil && len(def) > 0 {
+		return Optional(def...)
+	}
+	return b != nil && *b
+}

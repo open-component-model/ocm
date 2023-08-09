@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package updateoption
+package skipupdateoption
 
 import (
 	"fmt"
@@ -22,8 +22,8 @@ func From(o options.OptionSetProvider) *Option {
 }
 
 type Option struct {
-	flag   *pflag.Flag
-	Update bool
+	flag       *pflag.Flag
+	SkipUpdate bool
 }
 
 func New() *Option {
@@ -31,18 +31,18 @@ func New() *Option {
 }
 
 func (o *Option) IsTrue() bool {
-	return o.Update
+	return o.SkipUpdate
 }
 
 func (o *Option) ApplyTransferOption(opts transferhandler.TransferOptions) error {
 	if o.flag != nil && o.flag.Changed {
-		return standard.Update(!o.Update).ApplyTransferOption(opts)
+		return standard.SkipUpdate(o.SkipUpdate).ApplyTransferOption(opts)
 	}
 	return nil
 }
 
 func (o *Option) AddFlags(fs *pflag.FlagSet) {
-	o.flag = flag.BoolVarPF(fs, &o.Update, "no-update", "", false, "don't touch existing versions in target")
+	o.flag = flag.BoolVarPF(fs, &o.SkipUpdate, "no-update", "", false, "don't touch existing versions in target")
 }
 
 func (o *Option) Usage() string {

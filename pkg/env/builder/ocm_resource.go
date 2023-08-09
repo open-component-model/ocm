@@ -18,6 +18,7 @@ type ocmResource struct {
 	meta   compdesc.ResourceMeta
 	access compdesc.AccessSpec
 	blob   accessio.BlobAccess
+	opts   ocm.ModificationOptions
 	hint   string
 }
 
@@ -31,6 +32,7 @@ func (r *ocmResource) Set() {
 	r.Builder.ocm_rsc = &r.meta
 	r.Builder.ocm_acc = &r.access
 	r.Builder.ocm_meta = &r.meta.ElementMeta
+	r.Builder.ocm_modopts = &r.opts
 	r.Builder.blob = &r.blob
 	r.Builder.hint = &r.hint
 }
@@ -38,9 +40,9 @@ func (r *ocmResource) Set() {
 func (r *ocmResource) Close() error {
 	switch {
 	case r.access != nil:
-		return r.Builder.ocm_vers.SetResource(&r.meta, r.access, ocm.ModifyResource())
+		return r.Builder.ocm_vers.SetResource(&r.meta, r.access, r.opts)
 	case r.blob != nil:
-		return r.Builder.ocm_vers.SetResourceBlob(&r.meta, r.blob, r.hint, nil)
+		return r.Builder.ocm_vers.SetResourceBlob(&r.meta, r.blob, r.hint, nil, r.opts)
 	}
 	return errors.New("access or blob required")
 }
@@ -55,4 +57,20 @@ func (b *Builder) Resource(name, vers, typ string, relation metav1.ResourceRelat
 	r.meta.Type = typ
 	r.meta.Relation = relation
 	b.configure(r, f)
+}
+
+func (b *Builder) Digest(value, algo, norm string) {
+	b.expect(b.ocm_rsc, T_OCMRESOURCE)
+	b.ocm_rsc.Digest = &metav1.DigestSpec{
+		HashAlgorithm:          algo,
+		NormalisationAlgorithm: norm,
+		Value:                  value,
+	}
+}
+
+func (b *Builder) ModificationOptions(opts ...ocm.ModificationOption) {
+	b.expect(b.ocm_modopts, "rsource or source")
+	for _, o := range opts {
+		o.ApplyModificationOption(b.ocm_modopts)
+	}
 }

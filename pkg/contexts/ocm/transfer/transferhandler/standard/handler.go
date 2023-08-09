@@ -34,7 +34,7 @@ func New(opts ...transferhandler.TransferOption) (transferhandler.TransferHandle
 }
 
 func (h *Handler) UpdateVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error) {
-	return h.opts.IsUpdate(), nil
+	return !h.opts.IsSkipUpdate(), nil
 }
 
 func (h *Handler) OverwriteVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error) {

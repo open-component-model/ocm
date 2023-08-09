@@ -435,14 +435,14 @@ func (c *componentVersionAccessView) AdjustResourceAccess(meta *ResourceMeta, ac
 }
 
 // SetResourceBlob adds a blob resource to the component version.
-func (c *componentVersionAccessView) SetResourceBlob(meta *ResourceMeta, blob cpi.BlobAccess, refName string, global AccessSpec) error {
+func (c *componentVersionAccessView) SetResourceBlob(meta *ResourceMeta, blob cpi.BlobAccess, refName string, global AccessSpec, opts ...internal.ModificationOption) error {
 	Logger(c).Info("adding resource blob", "resource", meta.Name)
 	acc, err := c.AddBlob(blob, meta.Type, refName, global)
 	if err != nil {
 		return fmt.Errorf("unable to add blob (component %s:%s resource %s): %w", c.GetName(), c.GetVersion(), meta.GetName(), err)
 	}
 
-	if err := c.SetResource(meta, acc, internal.ModifyResource()); err != nil {
+	if err := c.SetResource(meta, acc, append(opts, internal.ModifyResource())...); err != nil {
 		return fmt.Errorf("unable to set resource: %w", err)
 	}
 
@@ -511,13 +511,13 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 		}
 
 		if old == nil {
-			if !opts.ModifyResource && c.impl.IsPersistent() {
+			if !utils.AsBool(opts.ModifyResource) && c.impl.IsPersistent() {
 				return fmt.Errorf("new resource would invalidate signature")
 			}
 		}
 
 		// evaluate given digesting constraints and settings
-		hashAlgo, digester := c.evaluateResourceDigest(res, old, opts)
+		hashAlgo, digester, digest := c.evaluateResourceDigest(res, old, opts)
 		hasher := opts.GetHasher(hashAlgo)
 		if digester.HashAlgorithm == "" && hasher == nil {
 			return errors.ErrUnknown(compdesc.KIND_HASH_ALGORITHM, hashAlgo)
@@ -528,19 +528,36 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 		}
 
 		if res.Digest == nil {
-			dig, err := ctx.BlobDigesters().DetermineDigests(res.Type, hasher, opts.HasherProvider, meth, digester)
-			if err != nil {
-				return err
+			if !utils.AsBool(opts.SkipDigest) && !utils.AsBool(opts.SkipVerify) {
+				dig, err := ctx.BlobDigesters().DetermineDigests(res.Type, hasher, opts.HasherProvider, meth, digester)
+				if err != nil {
+					return err
+				}
+				if len(dig) == 0 {
+					return fmt.Errorf("%s: no digester accepts resource", res.Name)
+				}
+				if digest != "" && !utils.AsBool(opts.SkipVerify) {
+					if digest != dig[0].Value {
+						return fmt.Errorf("digest mismatch: %s != %s", dig[0].Value, digest)
+					}
+				}
+				res.Digest = &dig[0]
+			} else {
+				if digest != "" && !digester.IsInitial() {
+					res.Digest = &metav1.DigestSpec{
+						HashAlgorithm:          digester.HashAlgorithm,
+						NormalisationAlgorithm: digester.NormalizationAlgorithm,
+						Value:                  digest,
+					}
+				} else { //nolint:staticcheck // better readable
+					// legacy mode: no digest
+				}
 			}
-			if len(dig) == 0 {
-				return fmt.Errorf("%s: no digester accepts resource", res.Name)
-			}
-			res.Digest = &dig[0]
 		}
 
 		if old != nil {
 			eq := res.Equivalent(old)
-			if !eq.IsLocalHashEqual() && !opts.ModifyResource && c.impl.IsPersistent() {
+			if !eq.IsLocalHashEqual() && !utils.AsBool(opts.ModifyResource) && c.impl.IsPersistent() {
 				return fmt.Errorf("resource would invalidate signature")
 			}
 			cd.Signatures = nil
@@ -556,37 +573,38 @@ func (c *componentVersionAccessView) SetResource(meta *internal.ResourceMeta, ac
 }
 
 // evaluateResourceDigest evaluate given potentially partly set digest to determine defaults.
-func (c *componentVersionAccessView) evaluateResourceDigest(res, old *compdesc.Resource, opts internal.ModificationOptions) (string, DigesterType) {
+func (c *componentVersionAccessView) evaluateResourceDigest(res, old *compdesc.Resource, opts internal.ModificationOptions) (string, DigesterType, string) {
 	var digester DigesterType
 
 	hashAlgo := opts.DefaultHashAlgorithm
+	value := ""
 	if !res.Digest.IsNone() {
+		value = res.Digest.Value
 		if !res.Digest.IsComplete() {
-			if res.Digest.HashAlgorithm != "" && res.Digest.NormalisationAlgorithm == "" {
+			if res.Digest.HashAlgorithm != "" {
 				hashAlgo = res.Digest.HashAlgorithm
-			} else {
-				digester = DigesterType{
-					HashAlgorithm:          res.Digest.HashAlgorithm,
-					NormalizationAlgorithm: res.Digest.NormalisationAlgorithm,
+				if res.Digest.NormalisationAlgorithm != "" {
+					digester = DigesterType{
+						HashAlgorithm:          res.Digest.HashAlgorithm,
+						NormalizationAlgorithm: res.Digest.NormalisationAlgorithm,
+					}
 				}
 			}
-			res.Digest = nil
 		}
-	} else {
-		res.Digest = nil
 	}
+	res.Digest = nil
 
 	// keep potential old digest settings
 	if old != nil && old.Type == res.Type {
 		if !old.Digest.IsNone() {
 			digester.HashAlgorithm = old.Digest.HashAlgorithm
 			digester.NormalizationAlgorithm = old.Digest.NormalisationAlgorithm
-			if opts.AcceptExistentDigests && !opts.ModifyResource && c.impl.IsPersistent() {
+			if utils.AsBool(opts.AcceptExistentDigests) && !utils.AsBool(opts.ModifyResource) && c.impl.IsPersistent() {
 				res.Digest = old.Digest
 			}
 		}
 	}
-	return hashAlgo, digester
+	return hashAlgo, digester, value
 }
 
 func (c *componentVersionAccessView) SetSource(meta *internal.SourceMeta, acc compdesc.AccessSpec) error {

@@ -15,17 +15,23 @@ type ModificationOption interface {
 type ModificationOptions struct {
 	// ModifyResource disables the modification of signature releveant
 	// resource parts.
-	ModifyResource bool
+	ModifyResource *bool
 
 	// AcceptExistentDigests don't validate/recalculate the content digest
 	// of resources.
-	AcceptExistentDigests bool
+	AcceptExistentDigests *bool
 
 	// DefaultHashAlgorithm is the hash algorithm to use if no specific setting os found
 	DefaultHashAlgorithm string
 
 	// HasherProvider is the factory for hash algorithms to use.
 	HasherProvider HasherProvider
+
+	// SkipVerify disabled the verification of given digests
+	SkipVerify *bool
+
+	// SkipDigest disabled digest creation (for legacy code, only!)
+	SkipDigest *bool
 }
 
 func (m *ModificationOptions) Eval(list ...ModificationOption) {
@@ -33,6 +39,25 @@ func (m *ModificationOptions) Eval(list ...ModificationOption) {
 		if o != nil {
 			o.ApplyModificationOption(m)
 		}
+	}
+}
+
+func (m ModificationOptions) ApplyModificationOption(opts *ModificationOptions) {
+	applyBool(m.ModifyResource, &opts.ModifyResource)
+	applyBool(m.AcceptExistentDigests, &opts.AcceptExistentDigests)
+	applyBool(m.SkipDigest, &opts.SkipDigest)
+	applyBool(m.SkipVerify, &opts.SkipVerify)
+	if m.HasherProvider != nil {
+		opts.HasherProvider = m.HasherProvider
+	}
+	if m.DefaultHashAlgorithm != "" {
+		opts.DefaultHashAlgorithm = m.DefaultHashAlgorithm
+	}
+}
+
+func applyBool(m *bool, t **bool) {
+	if m != nil {
+		*t = utils.BoolP(*m)
 	}
 }
 
@@ -51,7 +76,7 @@ func EvalModificationOptions(list ...ModificationOption) ModificationOptions {
 type modifyresource bool
 
 func (m modifyresource) ApplyModificationOption(opts *ModificationOptions) {
-	opts.ModifyResource = bool(m)
+	opts.ModifyResource = utils.BoolP(m)
 }
 
 func ModifyResource(flag ...bool) ModificationOption {
@@ -63,7 +88,7 @@ func ModifyResource(flag ...bool) ModificationOption {
 type acceptdigests bool
 
 func (m acceptdigests) ApplyModificationOption(opts *ModificationOptions) {
-	opts.AcceptExistentDigests = bool(m)
+	opts.AcceptExistentDigests = utils.BoolP(m)
 }
 
 func AcceptExistentDigests(flag ...bool) ModificationOption {
@@ -94,4 +119,31 @@ func (m *hashprovider) ApplyModificationOption(opts *ModificationOptions) {
 
 func WithHasherProvider(prov HasherProvider) ModificationOption {
 	return &hashprovider{prov}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type skipverify bool
+
+func (m skipverify) ApplyModificationOption(opts *ModificationOptions) {
+	opts.SkipVerify = utils.BoolP(m)
+}
+
+func SkipVerify(flag ...bool) ModificationOption {
+	return skipverify(utils.OptionalDefaultedBool(true, flag...))
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+type skipdigest bool
+
+func (m skipdigest) ApplyModificationOption(opts *ModificationOptions) {
+	opts.ModifyResource = utils.BoolP(m)
+}
+
+// SkipDigest disables digest creation if enabled.
+//
+// Deprecated: for legacy code, only.
+func SkipDigest(flag ...bool) ModificationOption {
+	return skipdigest(utils.OptionalDefaultedBool(true, flag...))
 }

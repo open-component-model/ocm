@@ -169,3 +169,14 @@ func WithDefaultHashAlgorithm(algo ...string) ModificationOption {
 func WithHasherProvider(prov HasherProvider) ModificationOption {
 	return internal.WithHasherProvider(prov)
 }
+
+func SkipVerify(flag ...bool) ModificationOption {
+	return internal.SkipVerify(flag...)
+}
+
+// SkipDigest disables digest creation if enabled.
+//
+// Deprecated: for legacy code, only.
+func SkipDigest(flag ...bool) ModificationOption {
+	return internal.SkipDigest(flag...)
+}

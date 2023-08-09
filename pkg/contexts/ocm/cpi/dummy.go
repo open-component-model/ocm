@@ -103,7 +103,7 @@ func (d *DummyComponentVersionAccess) AddBlob(blob BlobAccess, arttype, refName 
 	panic("implement me")
 }
 
-func (d *DummyComponentVersionAccess) SetResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string, global AccessSpec) error {
+func (d *DummyComponentVersionAccess) SetResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...internal.ModificationOption) error {
 	panic("implement me")
 }
 

@@ -133,7 +133,7 @@ type ComponentVersionAccess interface {
 
 	// AdjustResourceAccess is used to modify the access spec. The old and new one MUST refer to the same content.
 	AdjustResourceAccess(meta *ResourceMeta, acc compdesc.AccessSpec, opts ...ModificationOption) error
-	SetResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string, global AccessSpec) error
+	SetResourceBlob(meta *ResourceMeta, blob BlobAccess, refname string, global AccessSpec, opts ...ModificationOption) error
 	AdjustSourceAccess(meta *SourceMeta, acc compdesc.AccessSpec) error
 	SetSourceBlob(meta *SourceMeta, blob BlobAccess, refname string, global AccessSpec) error
 

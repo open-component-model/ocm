@@ -7,6 +7,7 @@ package ctf_test
 import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/open-component-model/ocm/pkg/contexts/ocm/testhelper"
 	. "github.com/open-component-model/ocm/pkg/finalizer"
 	. "github.com/open-component-model/ocm/pkg/testutils"
 
@@ -16,7 +17,11 @@ import (
 	"github.com/open-component-model/ocm/pkg/common/accessio"
 	"github.com/open-component-model/ocm/pkg/common/accessobj"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc"
+	metav1 "github.com/open-component-model/ocm/pkg/contexts/ocm/compdesc/meta/v1"
 	"github.com/open-component-model/ocm/pkg/contexts/ocm/repositories/ctf"
+	"github.com/open-component-model/ocm/pkg/contexts/ocm/resourcetypes"
+	"github.com/open-component-model/ocm/pkg/mime"
 )
 
 const COMPONENT = "github.com/mandelsoft/ocm"
@@ -41,6 +46,17 @@ var _ = Describe("access method", func() {
 
 		cv := Must(c.NewVersion(VERSION))
 		final.Close(cv)
+
+		// add resource
+		MustBeSuccessful(cv.SetResourceBlob(compdesc.NewResourceMeta("text1", resourcetypes.PLAIN_TEXT, metav1.LocalRelation), accessio.BlobAccessForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
+		Expect(Must(cv.GetResource(compdesc.NewIdentity("text1"))).Meta().Digest).To(Equal(DS_TESTDATA))
+
+		// add resource with digest
+		MustBeSuccessful(cv.SetResourceBlob(compdesc.NewResourceMeta("text2", resourcetypes.PLAIN_TEXT, metav1.LocalRelation).SetDigest(DS_TESTDATA), accessio.BlobAccessForString(mime.MIME_TEXT, S_TESTDATA), "", nil))
+		Expect(Must(cv.GetResource(compdesc.NewIdentity("text2"))).Meta().Digest).To(Equal(DS_TESTDATA))
+
+		// reject resource with wrong digest
+		Expect(cv.SetResourceBlob(compdesc.NewResourceMeta("text3", resourcetypes.PLAIN_TEXT, metav1.LocalRelation).SetDigest(TextResourceDigestSpec("fake")), accessio.BlobAccessForString(mime.MIME_TEXT, S_TESTDATA), "", nil)).To(MatchError("unable to set resource: digest mismatch: " + D_TESTDATA + " != fake"))
 
 		MustBeSuccessful(c.AddVersion(cv))
 		MustBeSuccessful(final.Finalize())

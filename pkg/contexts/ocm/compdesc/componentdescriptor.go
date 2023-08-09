@@ -21,11 +21,6 @@ var NotFound = errors.ErrNotFound()
 
 const KIND_REFERENCE = "component reference"
 
-type (
-	ObjectMeta = metav1.ObjectMeta
-	Provider   = metav1.Provider
-)
-
 const ComponentDescriptorFileName = "component-descriptor.yaml"
 
 // Metadata defines the configured metadata of the component descriptor.
@@ -625,8 +620,22 @@ func (o *ResourceMeta) GetType() string {
 }
 
 // SetType sets the type of the object.
-func (o *ResourceMeta) SetType(ttype string) {
+func (o *ResourceMeta) SetType(ttype string) *ResourceMeta {
 	o.Type = ttype
+	return o
+}
+
+// SetDigest sets the digest of the object.
+func (o *ResourceMeta) SetDigest(d *metav1.DigestSpec) *ResourceMeta {
+	o.Digest = d
+	return o
+}
+
+// SetLabel sets a label of the object.
+func (o *ResourceMeta) SetLabel(name string, value interface{}, opts ...metav1.LabelOption) *ResourceMeta {
+	// assure chainability
+	_ = o.Labels.Set(name, value, opts...)
+	return o
 }
 
 // Copy copies a resource meta.

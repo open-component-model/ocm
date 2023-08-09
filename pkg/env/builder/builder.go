@@ -40,17 +40,15 @@ func (e *base) Result() interface{} {
 	return e.result
 }
 
-type Builder struct {
-	*env.Environment
-	stack []element
-
-	ocm_repo ocm.Repository
-	ocm_comp ocm.ComponentAccess
-	ocm_vers ocm.ComponentVersionAccess
-	ocm_rsc  *compdesc.ResourceMeta
-	ocm_src  *compdesc.SourceMeta
-	ocm_meta *compdesc.ElementMeta
-	ocm_acc  *compdesc.AccessSpec
+type state struct {
+	ocm_repo    ocm.Repository
+	ocm_comp    ocm.ComponentAccess
+	ocm_vers    ocm.ComponentVersionAccess
+	ocm_rsc     *compdesc.ResourceMeta
+	ocm_src     *compdesc.SourceMeta
+	ocm_meta    *compdesc.ElementMeta
+	ocm_acc     *compdesc.AccessSpec
+	ocm_modopts *ocm.ModificationOptions
 
 	blob *accessio.BlobAccess
 	hint *string
@@ -64,6 +62,12 @@ type Builder struct {
 	oci_annofunc      func(name, value string)
 }
 
+type Builder struct {
+	*env.Environment
+	stack []element
+	state
+}
+
 func NewBuilder(t *env.Environment) *Builder {
 	if t == nil {
 		t = env.NewEnvironment()
@@ -74,23 +78,7 @@ func NewBuilder(t *env.Environment) *Builder {
 var _ accessio.Option = (*Builder)(nil)
 
 func (b *Builder) set() {
-	b.ocm_repo = nil
-	b.ocm_comp = nil
-	b.ocm_vers = nil
-	b.ocm_rsc = nil
-	b.ocm_src = nil
-	b.ocm_meta = nil
-	b.ocm_acc = nil
-
-	b.blob = nil
-	b.hint = nil
-
-	b.oci_repo = nil
-	b.oci_nsacc = nil
-	b.oci_artacc = nil
-	b.oci_tags = nil
-	b.oci_artfunc = nil
-	b.oci_annofunc = nil
+	b.state = state{}
 
 	if len(b.stack) > 0 {
 		b.peek().Set()

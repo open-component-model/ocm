@@ -48,7 +48,7 @@ func New(opts ...transferhandler.TransferOption) (transferhandler.TransferHandle
 // TODO: handle update and overwrite per script
 
 func (h *Handler) UpdateVersion(src ocm.ComponentVersionAccess, tgt ocm.ComponentVersionAccess) (bool, error) {
-	if ok, err := h.Handler.UpdateVersion(src, tgt); ok || err != nil {
+	if ok, err := h.Handler.UpdateVersion(src, tgt); !ok || err != nil {
 		return ok, nil
 	}
 	if h.opts.GetScript() == nil {

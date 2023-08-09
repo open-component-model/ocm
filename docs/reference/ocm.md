@@ -112,6 +112,14 @@ The value can be a simple type or a JSON/YAML string for complex values
 
   Compatibility mode: Avoid generic local access methods and prefer type specific ones.
 
+- <code>github.com/mandelsoft/ocm/hasher</code>: *JSON*
+
+  Preferred hash algorithm to calculate resource digests. The following
+  digesters are supported:
+    - <code>NO-DIGEST</code>
+    - <code>SHA-256</code> (default)
+    - <code>SHA-512</code>
+
 - <code>github.com/mandelsoft/ocm/keeplocalblob</code> [<code>keeplocalblob</code>]: *bool*
 
   Keep local blobs when importing OCI artifacts to OCI registries from <code>localBlob</code>

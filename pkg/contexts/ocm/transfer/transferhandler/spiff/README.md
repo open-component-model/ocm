@@ -11,8 +11,7 @@ The following modes are used:
 
 ## Update Mode
 
-This mode is used to decide on the update option for a component version. This controls whether an update on volatile (non-signature relevant) information should be done. It gets the
-following bindings:
+This mode is used to decide on the update option for a component version. This controls whether an update on volatile (non-signature relevant) information should be done. It gets the following bindings:
 
 - `mode` *&lt;string>*: `update`
 - `values` *&lt;map>*:

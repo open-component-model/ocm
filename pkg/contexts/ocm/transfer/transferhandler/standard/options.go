@@ -27,7 +27,7 @@ type Options struct {
 	keepGlobalAccess  *bool
 	stopOnExisting    *bool
 	overwrite         *bool
-	update            *bool
+	skipUpdate        *bool
 	omitAccessTypes   utils.StringSet
 	omitArtifactTypes utils.StringSet
 	resolver          ocm.ComponentVersionResolver
@@ -39,7 +39,7 @@ var (
 	_ ResourcesByValueOption      = (*Options)(nil)
 	_ LocalResourcesByValueOption = (*Options)(nil)
 	_ OverwriteOption             = (*Options)(nil)
-	_ UpdateOption                = (*Options)(nil)
+	_ SkipUpdateOption            = (*Options)(nil)
 	_ SourcesByValueOption        = (*Options)(nil)
 	_ RecursiveOption             = (*Options)(nil)
 	_ ResolverOption              = (*Options)(nil)
@@ -64,9 +64,9 @@ func (o *Options) ApplyTransferOption(target transferhandler.TransferOptions) er
 			opts.SetRecursive(*o.recursive)
 		}
 	}
-	if o.update != nil {
-		if opts, ok := target.(UpdateOption); ok {
-			opts.SetUpdate(*o.update)
+	if o.skipUpdate != nil {
+		if opts, ok := target.(SkipUpdateOption); ok {
+			opts.SetSkipUpdate(*o.skipUpdate)
 		}
 	}
 	if o.resourcesByValue != nil {
@@ -126,15 +126,15 @@ func (o *Options) SetOverwrite(overwrite bool) {
 }
 
 func (o *Options) IsOverwrite() bool {
-	return transferhandler.AsBool(o.overwrite)
+	return utils.AsBool(o.overwrite)
 }
 
-func (o *Options) SetUpdate(update bool) {
-	o.update = &update
+func (o *Options) SetSkipUpdate(skipupdate bool) {
+	o.skipUpdate = &skipupdate
 }
 
-func (o *Options) IsUpdate() bool {
-	return transferhandler.AsBool(o.update, true)
+func (o *Options) IsSkipUpdate() bool {
+	return utils.AsBool(o.skipUpdate)
 }
 
 func (o *Options) SetRecursive(recursive bool) {
@@ -142,7 +142,7 @@ func (o *Options) SetRecursive(recursive bool) {
 }
 
 func (o *Options) IsRecursive() bool {
-	return transferhandler.AsBool(o.recursive)
+	return utils.AsBool(o.recursive)
 }
 
 func (o *Options) SetResourcesByValue(resourcesByValue bool) {
@@ -150,7 +150,7 @@ func (o *Options) SetResourcesByValue(resourcesByValue bool) {
 }
 
 func (o *Options) IsResourcesByValue() bool {
-	return transferhandler.AsBool(o.resourcesByValue)
+	return utils.AsBool(o.resourcesByValue)
 }
 
 func (o *Options) SetLocalResourcesByValue(resourcesByValue bool) {
@@ -158,7 +158,7 @@ func (o *Options) SetLocalResourcesByValue(resourcesByValue bool) {
 }
 
 func (o *Options) IsLocalResourcesByValue() bool {
-	return transferhandler.AsBool(o.localByValue)
+	return utils.AsBool(o.localByValue)
 }
 
 func (o *Options) SetSourcesByValue(sourcesByValue bool) {
@@ -166,7 +166,7 @@ func (o *Options) SetSourcesByValue(sourcesByValue bool) {
 }
 
 func (o *Options) IsSourcesByValue() bool {
-	return transferhandler.AsBool(o.sourcesByValue)
+	return utils.AsBool(o.sourcesByValue)
 }
 
 func (o *Options) SetKeepGlobalAccess(keepGlobalAccess bool) {
@@ -174,7 +174,7 @@ func (o *Options) SetKeepGlobalAccess(keepGlobalAccess bool) {
 }
 
 func (o *Options) IsKeepGlobalAccess() bool {
-	return transferhandler.AsBool(o.keepGlobalAccess)
+	return utils.AsBool(o.keepGlobalAccess)
 }
 
 func (o *Options) SetResolver(resolver ocm.ComponentVersionResolver) {
@@ -190,7 +190,7 @@ func (o *Options) SetStopOnExistingVersion(stopOnExistingVersion bool) {
 }
 
 func (o *Options) IsStopOnExistingVersion() bool {
-	return transferhandler.AsBool(o.stopOnExisting)
+	return utils.AsBool(o.stopOnExisting)
 }
 
 func (o *Options) SetOmittedAccessTypes(list ...string) {
@@ -290,25 +290,25 @@ func Overwrite(args ...bool) transferhandler.TransferOption {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-type UpdateOption interface {
-	SetUpdate(bool)
-	IsUpdate() bool
+type SkipUpdateOption interface {
+	SetSkipUpdate(bool)
+	IsSkipUpdate() bool
 }
 
-type updateOption bool
+type skipUpdateOption bool
 
-func (o updateOption) ApplyTransferOption(to transferhandler.TransferOptions) error {
-	if eff, ok := to.(UpdateOption); ok {
-		eff.SetUpdate(bool(o))
+func (o skipUpdateOption) ApplyTransferOption(to transferhandler.TransferOptions) error {
+	if eff, ok := to.(SkipUpdateOption); ok {
+		eff.SetSkipUpdate(bool(o))
 		return nil
 	} else {
-		return errors.ErrNotSupported("update")
+		return errors.ErrNotSupported("skip-update")
 	}
 }
 
-// Update enables the modification of non-digest (volatile) relevant information in a component version.
-func Update(args ...bool) transferhandler.TransferOption {
-	return updateOption(utils.GetOptionFlag(args...))
+// SkipUpdate enables the modification of non-digest (volatile) relevant information in a component version.
+func SkipUpdate(args ...bool) transferhandler.TransferOption {
+	return skipUpdateOption(utils.GetOptionFlag(args...))
 }
 
 ///////////////////////////////////////////////////////////////////////////////

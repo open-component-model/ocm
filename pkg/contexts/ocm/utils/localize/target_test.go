@@ -44,6 +44,8 @@ var _ = Describe("value substitution in single target", func() {
 					env.Version(VERSION, func() {
 						env.Provider("mandelsoft")
 						env.Resource(IMAGE, "", "Spiff", v1.LocalRelation, func() {
+							env.ModificationOptions(ocm.SkipVerify())
+							env.Digest("fake", "sha256", "fake")
 							env.Access(ociartifact.New("ghcr.io/mandelsoft/test:v1"))
 						})
 					})

@@ -20,6 +20,7 @@ commontransportarchive, ctf
       --copy-sources                transfer referenced sources by-value
   -h, --help                        help for commontransportarchive
       --lookup stringArray          repository name or spec for closure lookup fallback
+      --no-update                   don't touch existing versions in target
   -N, --omit-access-types strings   omit by-value transfer for resource types
   -f, --overwrite                   overwrite existing component versions
   -r, --recursive                   follow component reference nesting
@@ -37,6 +38,18 @@ Transfer content of a Common Transport Archive to the given target repository.
 
 
 With the option <code>--recursive</code> the complete reference tree of a component reference is traversed.
+
+
+With the option <code>--no-update</code> existing versions in the target
+repository will not be touched at all. An additional specification of the
+option <code>--overwrite</code> is ignored. By default, updates of
+volative (non-signature-relevant) information is enabled, but the
+modification of non-volatile data is prohibited unless the overwrite
+option is given.
+
+
+It the option <code>--overwrite</code> is given, component version in the
+target repository will be overwritten, if they already exist.
 
 \
 If a component lookup for building a reference closure is required
@@ -56,10 +69,6 @@ target archive to use. The following formats are supported:
 - tgz
 
 The default format is <code>directory</code>.
-
-
-It the option <code>--overwrite</code> is given, component version in the
-target repository will be overwritten, if they already exist.
 
 
 It the option <code>--copy-resources</code> is given, all referential

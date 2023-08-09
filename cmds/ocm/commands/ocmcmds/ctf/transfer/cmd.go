@@ -5,7 +5,6 @@
 package transfer
 
 import (
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/updateoption"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/spf13/cobra"
 
@@ -17,6 +16,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/overwriteoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/scriptoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/skipupdateoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/srcbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/stoponexistingoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/uploaderoption"
@@ -50,7 +50,7 @@ type Command struct {
 func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 	return utils.SetupCommand(&Command{BaseCommand: utils.NewBaseCommand(ctx,
 		closureoption.New("component reference"),
-		updateoption.New(),
+		skipupdateoption.New(),
 		overwriteoption.New(),
 		lookupoption.New(),
 		formatoption.New(),

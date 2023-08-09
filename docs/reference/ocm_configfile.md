@@ -87,6 +87,14 @@ The following configuration types are supported:
   just stored in the configuration context and can be applied
   on-demand. On the CLI, this can be done using the main command option
   <code>--config-set &lt;name></code>.
+- <code>hasher.config.ocm.software</code>
+  The config type <code>hasher.config.ocm.software</code> can be used to define
+  the default hash algorithm used to calculate digests for resources.
+  It supports the field <code>hashAlgorithm</code>, with one of the following
+  values:
+    - <code>NO-DIGEST</code>
+    - <code>SHA-256</code> (default)
+    - <code>SHA-512</code>
 - <code>keys.config.ocm.software</code>
   The config type <code>keys.config.ocm.software</code> can be used to define
   public and private keys. A key value might be given by one of the fields:

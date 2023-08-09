@@ -7,7 +7,6 @@ package transfer
 import (
 	"fmt"
 
-	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/updateoption"
 	"github.com/open-component-model/ocm/cmds/ocm/pkg/options"
 	"github.com/spf13/cobra"
 
@@ -21,6 +20,7 @@ import (
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/repooption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/rscbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/scriptoption"
+	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/skipupdateoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/srcbyvalueoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/stoponexistingoption"
 	"github.com/open-component-model/ocm/cmds/ocm/commands/ocmcmds/common/options/uploaderoption"
@@ -59,7 +59,7 @@ func NewCommand(ctx clictx.Context, names ...string) *cobra.Command {
 		closureoption.New("component reference"),
 		lookupoption.New(),
 		overwriteoption.New(),
-		updateoption.New(),
+		skipupdateoption.New(),
 		rscbyvalueoption.New(),
 		srcbyvalueoption.New(),
 		omitaccesstypeoption.New(),
