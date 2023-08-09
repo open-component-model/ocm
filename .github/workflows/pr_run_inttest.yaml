@@ -15,7 +15,7 @@ jobs:
     - name: Repository Dispatch
       uses: myrotvorets/trigger-repository-dispatch-action@1.0.0
       with:
-        token: ${{ secrets.TRIGGER_EVENT }}
+        token: ${{ secrets.OCMBOT_APP_ID }} # metadata:read and contents:read&write
         repo: open-component-model/ocm-integrationtest
         type: ocm_pr
         payload: '{ "ref": "${{ github.ref }}", "sha": "${{ github.sha }}", "pr": "${{ env.PR_NUMBER }}" }'
