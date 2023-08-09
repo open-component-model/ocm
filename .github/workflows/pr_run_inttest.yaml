@@ -1,0 +1,21 @@
+name: pr_run_inttest
+on:
+  pull_request:
+permissions:
+  pull-requests: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get PR issue_number
+      run: |
+        PR_NUMBER="${{ github.event.pull_request.number || github.event.issue.number }}"
+        echo "PR number is: ${PR_NUMBER}"
+        echo "PR_NUMBER=${PR_NUMBER}" >> $GITHUB_ENV
+    - name: Repository Dispatch
+      uses: myrotvorets/trigger-repository-dispatch-action@1.0.0
+      with:
+        token: ${{ secrets.TRIGGER_EVENT }}
+        repo: open-component-model/ocm-integrationtest
+        type: ocm_pr
+        payload: '{ "ref": "${{ github.ref }}", "sha": "${{ github.sha }}", "pr": "${{ env.PR_NUMBER }}" }'
